@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "fa80f949_cfbad26e",
+        "filename": "res/values/attrs.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 940
+      },
+      "writtenOn": "2013-12-03T20:06:02Z",
+      "side": 1,
+      "message": "Well derp, it is in attrs.xml -.-\n\nIgnore.",
+      "parentUuid": "fa80f949_cfa3b24e",
+      "revId": "bc31b9f6c30f25e068d497ed7bbc354ed49e2ddc",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa80f949_0f9a1a15",
         "filename": "res/xml/preferences.xml",
         "patchSetId": 3
