@@ -71,6 +71,57 @@
     },
     {
       "key": {
+        "uuid": "fa80f949_8fadaa33",
+        "filename": "res/xml/preferences.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 940
+      },
+      "writtenOn": "2013-12-03T20:19:28Z",
+      "side": 1,
+      "message": "Might be worth-while looking at com.cyanogenmod.trebuchet.preference.DoubleNumberPickerPreference",
+      "revId": "bc31b9f6c30f25e068d497ed7bbc354ed49e2ddc",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa80f949_2faa7e1a",
+        "filename": "res/xml/preferences.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 940
+      },
+      "writtenOn": "2013-12-03T20:19:28Z",
+      "side": 1,
+      "message": "Can\u0027t hard-code this. Needs to be an overlay resource or dynamic.\n\nWhich makes me wonder if we need row/col configuration to begin with now that we have dynamic grid.",
+      "revId": "bc31b9f6c30f25e068d497ed7bbc354ed49e2ddc",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa80f949_ef623616",
+        "filename": "res/xml/preferences.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 940
+      },
+      "writtenOn": "2013-12-03T20:19:28Z",
+      "side": 1,
+      "message": "Can\u0027t hard code this, needs to be dynamic based on current number of homescreens.",
+      "revId": "bc31b9f6c30f25e068d497ed7bbc354ed49e2ddc",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa80f949_2ffcbe3d",
         "filename": "src/com/android/launcher3/DynamicGrid.java",
         "patchSetId": 3
@@ -116,6 +167,23 @@
       "writtenOn": "2013-12-03T20:04:28Z",
       "side": 1,
       "message": "Kill it with fire.",
+      "revId": "bc31b9f6c30f25e068d497ed7bbc354ed49e2ddc",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa80f949_4fa7c24f",
+        "filename": "src/com/android/launcher3/Workspace.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 325,
+      "author": {
+        "id": 940
+      },
+      "writtenOn": "2013-12-03T20:19:28Z",
+      "side": 1,
+      "message": "Why did the default for the attribute change from 1 -\u003e 0 ?",
       "revId": "bc31b9f6c30f25e068d497ed7bbc354ed49e2ddc",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
       "unresolved": false
