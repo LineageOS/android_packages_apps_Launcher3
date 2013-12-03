@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa80f949_2f935efc",
+        "filename": "AndroidManifest.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 940
+      },
+      "writtenOn": "2013-12-03T20:04:28Z",
+      "side": 1,
+      "message": "Attributes go on newline, and perhaps add a android:exported\u003d\"false\"\nsince nothing other than the launcher will invoke it.",
+      "revId": "bc31b9f6c30f25e068d497ed7bbc354ed49e2ddc",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa80f949_cfa3b24e",
+        "filename": "res/values/attrs.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 940
+      },
+      "writtenOn": "2013-12-03T20:04:28Z",
+      "side": 1,
+      "message": "Should go in attrs.xml\n\nAlso you can just do the end tag inline :\n\n\u003cattr name\u003d\"min\" format\u003d\"integer\" /\u003e",
+      "revId": "bc31b9f6c30f25e068d497ed7bbc354ed49e2ddc",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa80f949_0f9a1a15",
+        "filename": "res/xml/preferences.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 940
+      },
+      "writtenOn": "2013-12-03T20:04:28Z",
+      "side": 1,
+      "message": "Nuke tabs",
+      "revId": "bc31b9f6c30f25e068d497ed7bbc354ed49e2ddc",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa80f949_2ffcbe3d",
+        "filename": "src/com/android/launcher3/DynamicGrid.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 268,
+      "author": {
+        "id": 940
+      },
+      "writtenOn": "2013-12-03T20:04:28Z",
+      "side": 1,
+      "message": "} else {\n\nTo keep it inline with the rest of the file format.",
+      "revId": "bc31b9f6c30f25e068d497ed7bbc354ed49e2ddc",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa80f949_ef9476e9",
+        "filename": "src/com/android/launcher3/DynamicGrid.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 421,
+      "author": {
+        "id": 940
+      },
+      "writtenOn": "2013-12-03T20:04:28Z",
+      "side": 1,
+      "message": "Wrap these in a DEBUG statement and use the classname as a TAG.",
+      "revId": "bc31b9f6c30f25e068d497ed7bbc354ed49e2ddc",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa80f949_efbb1674",
+        "filename": "src/com/android/launcher3/NumberPreference.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 940
+      },
+      "writtenOn": "2013-12-03T20:04:28Z",
+      "side": 1,
+      "message": "Kill it with fire.",
+      "revId": "bc31b9f6c30f25e068d497ed7bbc354ed49e2ddc",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
