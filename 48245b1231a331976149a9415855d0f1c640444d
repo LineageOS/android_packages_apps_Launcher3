@@ -16,6 +16,24 @@
       "revId": "48245b1231a331976149a9415855d0f1c640444d",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a7e1126_151a3618",
+        "filename": "res/values-de/cm_strings.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1053
+      },
+      "writtenOn": "2013-12-21T05:27:36Z",
+      "side": 1,
+      "message": "Ich habe das von Trebuchet von cM10.2 übernommen.\nWenn wir es hier ändern sollten wir es auch dort ändern.",
+      "parentUuid": "3a7e1126_f5ed2a26",
+      "revId": "48245b1231a331976149a9415855d0f1c640444d",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
     }
   ]
 }
