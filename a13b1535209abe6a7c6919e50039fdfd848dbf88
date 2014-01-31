@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fade3982_e5b4d0d2",
+        "filename": "res/values-es/cm_translations.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 2134
+      },
+      "writtenOn": "2014-01-31T04:32:00Z",
+      "side": 1,
+      "message": "Replaces by \"Ajustes\" in Transifex.",
+      "revId": "a13b1535209abe6a7c6919e50039fdfd848dbf88",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
