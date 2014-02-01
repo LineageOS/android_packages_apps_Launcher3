@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fade3982_cbcf1db2",
+        "filename": "src/com/android/launcher3/Launcher.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 496,
+      "author": {
+        "id": 1063
+      },
+      "writtenOn": "2014-02-01T03:36:09Z",
+      "side": 1,
+      "message": "return globalSearchActivity !\u003d null;",
+      "revId": "5cb60b02e36cf8dd534b1adf45d8d5500db9c981",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fade3982_2bda0979",
+        "filename": "src/com/android/launcher3/Workspace.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1063
+      },
+      "writtenOn": "2014-02-01T03:36:09Z",
+      "side": 1,
+      "message": "No need: http://developer.android.com/reference/android/content/Intent.html#ACTION_ASSIST",
+      "revId": "5cb60b02e36cf8dd534b1adf45d8d5500db9c981",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fade3982_8be7d53f",
+        "filename": "src/com/android/launcher3/Workspace.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1063
+      },
+      "writtenOn": "2014-02-01T03:36:09Z",
+      "side": 1,
+      "message": "Please make me a resource :)",
+      "revId": "5cb60b02e36cf8dd534b1adf45d8d5500db9c981",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
