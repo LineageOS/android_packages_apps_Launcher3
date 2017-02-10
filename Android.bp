@@ -599,6 +599,7 @@ android_app {
         shrink_resources: true,
     },
 
+    certificate: "platform",
     platform_apis: true,
     min_sdk_version: "current",
     target_sdk_version: "current",
