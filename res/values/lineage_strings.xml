@@ -60,4 +60,8 @@
     <!-- App suggestions -->
     <string name="pref_suggestions_title">Suggestions</string>
     <string name="pref_suggestions_summary">For app drawer &amp; home screen suggestions</string>
+
+    <!-- DT2S -->
+    <string name="pref_sleep_gesture_title">Tap to sleep</string>
+    <string name="pref_sleep_gesture_summary">Double-tap an empty area in the home screen to turn off the display</string>
 </resources>
