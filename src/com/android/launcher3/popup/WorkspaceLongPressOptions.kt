@@ -62,7 +62,7 @@ object WorkspaceLongPressOptions {
                 startWallpaperPicker(ac, v)
             }
         )
-        if (BuildConfig.WIDGETS_ENABLED) {
+        if (BuildConfig.WIDGETS_ENABLED && Utilities.isWorkspaceEditAllowed(ctx)) {
             add(
                 PopupData(
                     R.drawable.ic_widget,

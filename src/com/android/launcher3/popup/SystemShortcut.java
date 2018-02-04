@@ -177,6 +177,10 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
 
         @Override
         public void onClick(View view) {
+            if (!Utilities.isWorkspaceEditAllowed((Context) mTarget)) {
+                return;
+            }
+
             AbstractFloatingView.closeAllOpenViews(mTarget);
             Context context = view.getContext();
             Intent intent = new Intent(Intent.ACTION_PICK);
