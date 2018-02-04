@@ -1061,4 +1061,8 @@ public final class Utilities {
             return deviceProperties.isLandscape();
         }
     }
+
+    public static boolean isWorkspaceEditAllowed(Context context) {
+        return !LauncherPrefs.WORKSPACE_LOCK.get(context);
+    }
 }
