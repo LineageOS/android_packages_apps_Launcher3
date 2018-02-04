@@ -30,6 +30,7 @@ import android.app.ActivityOptions;
 import android.app.Person;
 import android.app.WallpaperManager;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
@@ -974,5 +975,9 @@ public final class Utilities {
         if (BuildConfig.IS_DEBUG_DEVICE) {
             Log.d(tag, message);
         }
+	}
+    public static boolean isWorkspaceEditAllowed(Context context) {
+        SharedPreferences prefs = LauncherPrefs.getPrefs(context.getApplicationContext());
+        return !prefs.getBoolean(InvariantDeviceProfile.KEY_WORKSPACE_LOCK, false);
     }
 }
