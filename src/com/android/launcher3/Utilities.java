@@ -1008,4 +1008,8 @@ public final class Utilities {
         return enableMouseInteractionChanges() && context.getResources().getBoolean(
                 R.bool.desktop_form_factor);
     }
+
+    public static boolean isWorkspaceEditAllowed(Context context) {
+        return !LauncherPrefs.WORKSPACE_LOCK.get(context);
+    }
 }
