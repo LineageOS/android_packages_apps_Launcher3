@@ -276,6 +276,13 @@ java_library {
     min_sdk_version: min_launcher3_sdk_version,
 }
 
+java_import {
+    name: "libGoogleFeed",
+    jars: [
+        "libs/libGoogleFeed.jar",
+    ],
+}
+
 // Library with all the dependencies for building Launcher3
 android_library {
     name: "Launcher3ResLib",
@@ -320,6 +327,7 @@ android_library {
         "widget_picker_component",
         "workspace-functions",
         "org.lineageos.platform",
+        "libGoogleFeed",
         // Compose dependencies
         "androidx.compose.runtime_runtime",
         "androidx.compose.material3_material3",
