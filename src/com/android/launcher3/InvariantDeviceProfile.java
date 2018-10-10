@@ -35,6 +35,8 @@ import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
@@ -116,6 +118,8 @@ public class InvariantDeviceProfile {
 
     private static final float ICON_SIZE_DEFINED_IN_APP_DP = 48;
 
+    public static final String KEY_SHOW_DESKTOP_LABELS = "pref_desktop_show_labels";
+    public static final String KEY_SHOW_DRAWER_LABELS = "pref_drawer_show_labels";
     public static final String KEY_WORKSPACE_LOCK = "pref_workspace_lock";
 
     // Constants that affects the interpolation curve between statically defined device profile
@@ -260,6 +264,8 @@ public class InvariantDeviceProfile {
 
     public Point defaultWallpaperSize;
 
+    private Context mContext;
+
     private final List<OnIDPChangeListener> mChangeListeners = new CopyOnWriteArrayList<>();
 
     @Inject
@@ -270,6 +276,7 @@ public class InvariantDeviceProfile {
             WindowManagerProxy wmProxy,
             ThemeManager themeManager,
             DaggerSingletonTracker lifeCycle) {
+        mContext = context;
         mDisplayController = dc;
         mWMProxy = wmProxy;
         mPrefs = prefs;
