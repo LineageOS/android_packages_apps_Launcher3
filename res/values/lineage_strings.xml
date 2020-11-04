@@ -35,6 +35,10 @@
     <string name="teardrop_shape_title">Teardrop</string>
     <string name="rounded_rect_shape_title">Rounded rect</string>
 
+    <!-- App suggestions -->
+    <string name="pref_suggestions_title">Suggestions</string>
+    <string name="pref_suggestions_summary">For app drawer &amp; home screen suggestions</string>
+
     <!-- Edit workspace -->
     <string name="settings_lock_layout_title">Lock layout</string>
     <string name="settings_lock_layout_summary_on">Icons and widgets can\'t be added, removed and moved on the homescreen</string>
