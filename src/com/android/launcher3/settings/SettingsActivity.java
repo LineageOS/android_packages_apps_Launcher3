@@ -89,6 +89,9 @@ public class SettingsActivity extends FragmentActivity
     private static final String KEY_MINUS_ONE = "pref_enable_minus_one";
     private static final String SEARCH_PACKAGE = "com.google.android.googlequicksearchbox";
 
+    private static final String KEY_SUGGESTIONS = "pref_suggestions";
+    private static final String SUGGESTIONS_PACKAGE = "com.google.android.as";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -342,6 +345,9 @@ public class SettingsActivity extends FragmentActivity
                 case KEY_MINUS_ONE:
                     return launcherApps != null &&
                             launcherApps.isPackageEnabled(SEARCH_PACKAGE, myUserHandle());
+                case KEY_SUGGESTIONS:
+                    return launcherApps != null &&
+                            launcherApps.isPackageEnabled(SUGGESTIONS_PACKAGE, myUserHandle());
             }
             return true;
         }
