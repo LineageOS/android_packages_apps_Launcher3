@@ -639,17 +639,16 @@ public abstract class AbsSwipeUpHandler<
             HashMap<Integer, ThumbnailData> snapshots =
                     mGestureState.consumeRecentsAnimationCanceledSnapshot();
             if (snapshots != null) {
-                mRecentsView.switchToScreenshot(snapshots, () -> {
-                    if (mRecentsAnimationController != null) {
-                        mRecentsAnimationController.finish(
-                                /* toHome= */ true,
-                                /* onFinishComplete= */ () -> {},
-                                new ActiveGestureLog.CompoundString(
-                                        "AbsSwipeUpHandler.onActivityInit: switch to screenshot on "
-                                                + "recents animation canceled"));
-                    }
-                    mRecentsView.onRecentsAnimationComplete();
-                });
+                mRecentsView.switchToScreenshot(snapshots, () -> {});
+                if (mRecentsAnimationController != null) {
+                    mRecentsAnimationController.finish(
+                            /* toHome= */ true,
+                            /* onFinishComplete= */ () -> {},
+                            new ActiveGestureLog.CompoundString(
+                                    "AbsSwipeUpHandler.onActivityInit: switch to screenshot on "
+                                            + "recents animation canceled"));
+                }
+                mRecentsView.onRecentsAnimationComplete();
             }
         });
 
