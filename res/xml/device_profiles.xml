@@ -100,71 +100,32 @@
         launcher:numFolderRows="3"
         launcher:numFolderColumns="3"
         launcher:numHotseatIcons="4"
+        launcher:numAllAppsColumns="4"
+        launcher:numExtendedAllAppsColumns="6"
         launcher:numExtendedHotseatIcons="6"
         launcher:dbFile="launcher_4_by_5.db"
+        launcher:isScalable="true"
+        launcher:folderStyle="@style/Folder4x5Style"
         launcher:inlineNavButtonsEndSpacing="@dimen/taskbar_button_margin_split"
         launcher:defaultLayoutId="@xml/default_workspace_4x5"
         launcher:deviceCategory="phone|multi_display" >
 
         <display-option
-            launcher:name="Short Stubby"
-            launcher:minWidthDps="275"
-            launcher:minHeightDps="420"
-            launcher:iconImageSize="65"
-            launcher:iconTextSize="13.0"
             launcher:allAppsBorderSpace="16"
             launcher:allAppsCellHeight="104"
+            launcher:borderSpace="16"
+            launcher:canBeDefault="true"
+            launcher:horizontalMargin="22"
+            launcher:iconImageSize="66"
+            launcher:iconSizeLandscape="54"
+            launcher:iconTextSize="14"
+            launcher:minCellHeight="104"
+            launcher:minCellWidth="80"
+            launcher:minHeightDps="838"
+            launcher:minWidthDps="367"
+            launcher:name="Pixel 2021"
             launcher:startAlignTaskbar="true"
-            launcher:startAlignTaskbarLandscape="true"
-            launcher:canBeDefault="true" />
-
-        <display-option
-            launcher:name="Stubby"
-            launcher:minWidthDps="255"
-            launcher:minHeightDps="450"
-            launcher:iconImageSize="65"
-            launcher:iconTextSize="13.0"
-            launcher:allAppsBorderSpace="16"
-            launcher:allAppsCellHeight="104"
-            launcher:startAlignTaskbar="true"
-            launcher:startAlignTaskbarLandscape="true"
-            launcher:canBeDefault="true" />
-
-        <display-option
-            launcher:name="Nexus S"
-            launcher:minWidthDps="296"
-            launcher:minHeightDps="491.33"
-            launcher:iconImageSize="65"
-            launcher:iconTextSize="13.0"
-            launcher:allAppsBorderSpace="16"
-            launcher:allAppsCellHeight="104"
-            launcher:startAlignTaskbar="true"
-            launcher:startAlignTaskbarLandscape="true"
-            launcher:canBeDefault="true" />
-
-        <display-option
-            launcher:name="Nexus 4"
-            launcher:minWidthDps="359"
-            launcher:minHeightDps="567"
-            launcher:iconImageSize="65"
-            launcher:iconTextSize="13.0"
-            launcher:allAppsBorderSpace="16"
-            launcher:allAppsCellHeight="104"
-            launcher:startAlignTaskbar="true"
-            launcher:startAlignTaskbarLandscape="true"
-            launcher:canBeDefault="true" />
-
-        <display-option
-            launcher:name="Nexus 5"
-            launcher:minWidthDps="335"
-            launcher:minHeightDps="567"
-            launcher:iconImageSize="65"
-            launcher:iconTextSize="13.0"
-            launcher:allAppsBorderSpace="16"
-            launcher:allAppsCellHeight="104"
-            launcher:startAlignTaskbar="true"
-            launcher:startAlignTaskbarLandscape="true"
-            launcher:canBeDefault="true" />
+            launcher:startAlignTaskbarLandscape="true" />
 
     </grid-option>
 
