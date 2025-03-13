@@ -200,7 +200,7 @@ public class TaskbarNavButtonController implements TaskbarControllers.LoggableTa
         switch (buttonType) {
             case BUTTON_HOME:
                 logEvent(LAUNCHER_TASKBAR_HOME_BUTTON_LONGPRESS);
-                onLongPressHome();
+                mSystemUiProxy.injectLongPress(KeyEvent.KEYCODE_HOME);
                 view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS,
                         HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
                 return true;
@@ -215,6 +215,8 @@ public class TaskbarNavButtonController implements TaskbarControllers.LoggableTa
                 if (backRecentsLongpress(buttonType)) {
                     view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS,
                             HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+                } else {
+                    mSystemUiProxy.injectLongPress(KeyEvent.KEYCODE_BACK);
                 }
                 return true;
             case BUTTON_RECENTS:
@@ -222,6 +224,8 @@ public class TaskbarNavButtonController implements TaskbarControllers.LoggableTa
                 if (backRecentsLongpress(buttonType)) {
                     view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS,
                             HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+                } else {
+                    mSystemUiProxy.injectLongPress(KeyEvent.KEYCODE_APP_SWITCH);
                 }
                 return true;
             case BUTTON_IME_SWITCH:
