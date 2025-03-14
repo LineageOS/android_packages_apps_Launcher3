@@ -182,6 +182,16 @@ public class TaskbarNavButtonController implements TaskbarControllers.LoggableTa
         }
     }
 
+    public void onButtonDoubleClick(@TaskbarButton int buttonType, View view) {
+        // Provide the same haptic feedback that the system offers for virtual keys.
+        view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+        switch (buttonType) {
+            case BUTTON_HOME:
+                mSystemUiProxy.injectDoublePress(KeyEvent.KEYCODE_HOME);
+                break;
+        }
+    }
+
     /**
      * Handles long clicks and plays haptics for user visible actions.
      */
