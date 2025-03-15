@@ -457,6 +457,7 @@ android_library {
         "launcher-executor-qualifiers",
         "launcher-executors-module",
         "libGoogleFeed",
+        "org.lineageos.platform",
     ],
     manifest: "AndroidManifest-common.xml",
     sdk_version: "current",
