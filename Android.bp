@@ -422,6 +422,12 @@ android_library {
     name: "Launcher3ResLib",
     srcs: [],
     resource_dirs: ["res"],
+    libs: [
+        "org.lineageos.platform.stubs",
+    ],
+    optional_uses_libs: [
+        "org.lineageos.platform.impl",
+    ],
     static_libs: [
         "LauncherPluginLib",
         "launcher_quickstep_log_protos_lite",
@@ -457,7 +463,6 @@ android_library {
         "launcher-executor-qualifiers",
         "launcher-executors-module",
         "libGoogleFeed",
-        "org.lineageos.platform",
     ],
     manifest: "AndroidManifest-common.xml",
     sdk_version: "current",
