@@ -25,8 +25,8 @@
     <string name="pref_themed_icons_summary">Usar os mesmos ícones com tema da tela inicial</string>
     <string name="desktop_show_labels">Mostrar legendas na tela inicial</string>
     <string name="drawer_show_labels">Mostrar legendas na gaveta de apps</string>
-    <string name="drawer_open_keyboard_title">Deslize para iniciar a pesquisa</string>
-    <string name="drawer_open_keyboard_summary">Abrir teclado sempre que a gaveta de apps se tornar visível</string>
+    <string name="drawer_open_keyboard_title">Deslizar para iniciar pesquisa</string>
+    <string name="drawer_open_keyboard_summary">Abrir o teclado sempre que a gaveta de apps se tornar visível</string>
     <string name="trust_apps_manager_name">Apps ocultos e protegidos</string>
     <string name="trust_apps_auth_manager">Desbloqueie para gerenciar apps ocultos e protegidos</string>
     <string name="trust_apps_auth_open_app">Autentique-se para abrir %1$s</string>

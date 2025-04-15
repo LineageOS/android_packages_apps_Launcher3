@@ -21,6 +21,8 @@
     <string name="title_show_google_app">Покажи Google апликацията</string>
     <string name="msg_minus_one_on_left">Когато плъзнете надясно от главното меню</string>
     <string name="msg_minus_one_on_right">Когато плъзнете наляво от главното меню</string>
+    <string name="pref_themed_icons_title">Използвай тематични икони</string>
+    <string name="pref_themed_icons_summary">Следвай тематичните икони използвани на началния екран</string>
     <string name="desktop_show_labels">Покажи етикетите на иконите на работния плот</string>
     <string name="drawer_show_labels">Покажи етикетите на иконите</string>
     <string name="drawer_open_keyboard_title">Плъзни настрани, за да започнеш търсене</string>
@@ -33,4 +35,6 @@
     <string name="trust_apps_help">Помощ</string>
     <string name="trust_apps_info_hidden">Скритите приложения и техните приспособления са скрити от менюто</string>
     <string name="trust_apps_info_protected">Защитените приложения изискват парола, за да бъдат отворени от главното меню</string>
+    <string name="pref_suggestions_title">Предложения</string>
+    <string name="pref_suggestions_summary">За всички приложения и предложения на началния екран</string>
 </resources>
