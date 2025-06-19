@@ -172,9 +172,6 @@ internal constructor(
             if (!contextualSearchStateManager.isInvocationAllowedOnKeyguard) {
                 Log.i(TAG, "Contextual Search invocation failed: keyguard not allowed")
                 return false
-            } else if (!contextualSearchStateManager.supportsShowWhenLocked()) {
-                Log.i(TAG, "Contextual Search invocation failed: AGA doesn't support keyguard")
-                return false
             }
         }
         if (isInSplitscreen()) {

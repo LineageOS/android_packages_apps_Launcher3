@@ -160,13 +160,28 @@ public class ContextualSearchInvokerTest {
     }
 
     @Test
-    public void runContextualSearchInvocationChecksAndLogFailures_keyguardIsShowing() {
+    public void runContextualSearchInvocationChecksAndLogFailures_keyguardIsShowing_disallowed() {
         when(mMockSystemUiProxy.getLastSystemUiStateFlags()).thenReturn(
                 KEYGUARD_SHOWING_SYSUI_FLAGS);
+        when(mMockStateManager.isInvocationAllowedOnKeyguard()).thenReturn(false);
 
         assertFalse("Expected invocation checks to fail when keyguard is showing",
                 mContextualSearchInvoker.runContextualSearchInvocationChecksAndLogFailures());
 
+        // Attempt is logged regardless.
+        verify(mMockStatsLogger).log(LAUNCHER_LAUNCH_OMNI_ATTEMPTED_OVER_KEYGUARD);
+    }
+
+    @Test
+    public void runContextualSearchInvocationChecksAndLogFailures_keyguardIsShowing_allowed() {
+        when(mMockSystemUiProxy.getLastSystemUiStateFlags()).thenReturn(
+                KEYGUARD_SHOWING_SYSUI_FLAGS);
+        when(mMockStateManager.isInvocationAllowedOnKeyguard()).thenReturn(true);
+
+        assertTrue("Expected invocation checks to succeed when keyguard is showing but allowed",
+                mContextualSearchInvoker.runContextualSearchInvocationChecksAndLogFailures());
+
+        // Attempt is logged regardless.
         verify(mMockStatsLogger).log(LAUNCHER_LAUNCH_OMNI_ATTEMPTED_OVER_KEYGUARD);
     }
 

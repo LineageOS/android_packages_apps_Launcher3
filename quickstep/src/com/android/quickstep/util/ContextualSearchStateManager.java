@@ -142,11 +142,6 @@ public class ContextualSearchStateManager  {
         return mIsContextualSearchSettingEnabled;
     }
 
-    /** Whether search supports showing on the lockscreen. */
-    protected boolean supportsShowWhenLocked() {
-        return false;
-    }
-
     /** Whether ContextualSearchService invocation path is available. */
     @VisibleForTesting
     protected final boolean isContextualSearchIntentAvailable() {
@@ -197,10 +192,12 @@ public class ContextualSearchStateManager  {
         return Optional.empty();
     }
 
+    /** Whether Contextual Search is allowed to be invoked while the device is locked. */
     protected boolean isInvocationAllowedOnKeyguard() {
         return false;
     }
 
+    /** Whether Contextual Search is allowed to be invoked over split screen apps. */
     protected boolean isInvocationAllowedInSplitscreen() {
         return true;
     }
