@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "336646b3_44c68e24",
+        "filename": "src/com/android/launcher3/Launcher.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1289,
+      "author": {
+        "id": 31655
+      },
+      "writtenOn": "2025-06-22T16:21:41Z",
+      "side": 1,
+      "message": "missing closing bracket:\npackages/apps/Launcher3/src/com/android/launcher3/Launcher.java:1290: error: \u0027)\u0027 expected\n        } else if (ALL_APPS.equals(state) \u0026\u0026 DRAWER_OPEN_KEYBOARD.get(this) {\n                                                                           ^\n1 error",
+      "range": {
+        "startLine": 1289,
+        "startChar": 0,
+        "endLine": 1289,
+        "endChar": 2
+      },
+      "revId": "8d90e41576bdaefcf2c779589f5346352a613b2c",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
