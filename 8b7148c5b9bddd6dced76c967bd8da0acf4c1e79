@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2d322642_086a7b4e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 34512
+      },
+      "writtenOn": "2025-06-22T16:12:27Z",
+      "side": 1,
+      "message": "there was a reason why I dropped these commits:\n\npackages/apps/Launcher3/quickstep/src/com/android/quickstep/SystemUiProxy.kt:213:44: error: argument type mismatch: actual type is \u0027android.view.KeyEvent?\u0027, but \u0027kotlin.Int\u0027 was expected.\n            systemUiProxy?.injectLongPress(keyCode)\n                                           ^^^^^^^\npackages/apps/Launcher3/quickstep/src/com/android/quickstep/SystemUiProxy.kt:218:40: error: argument type mismatch: actual type is \u0027android.view.KeyEvent?\u0027, but \u0027kotlin.Int\u0027 was expected.\n            systemUiProxy?.injectPress(keyCode)\n                                       ^^^^^^^",
+      "revId": "8b7148c5b9bddd6dced76c967bd8da0acf4c1e79",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
