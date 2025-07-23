@@ -42,6 +42,7 @@ import com.android.systemui.shared.recents.model.Task
 import com.android.wm.shell.shared.split.SplitBounds
 import com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_50_50
 import java.util.function.Consumer
+import java.util.function.Predicate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -52,6 +53,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.any
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -132,7 +134,7 @@ class SplitSelectStateControllerTest {
                         false /* findExactPairMatch */,
                         taskConsumer,
                     )
-                    verify(recentsModel).getTasks(capture())
+                    verify(recentsModel).getTasks(any(), capture())
                 }
                 .lastValue
 
@@ -189,12 +191,32 @@ class SplitSelectStateControllerTest {
                         false /* findExactPairMatch */,
                         taskConsumer,
                     )
-                    verify(recentsModel).getTasks(capture())
+                    verify(recentsModel).getTasks(any(), capture())
                 }
                 .lastValue
 
         // Send our mocked tasks
         consumer.accept(tasks)
+    }
+
+    @Test
+    fun activeTasks_passesFilterToRecentsModel() {
+        val matchingPackage = "hotdog"
+        val matchingClass = "juice"
+        val matchingResolvedTargetInfo =
+            ResolvedTargetInfo(
+                null,
+                ComponentName(matchingPackage, matchingClass),
+                primaryUserHandle,
+            )
+        // Capture callback from recentsModel#getTasks()
+        val filter = Predicate<GroupTask> { task -> true }
+        splitSelectStateController.findLastActiveTasksAndRunCallback(
+            filter,
+            listOf(matchingResolvedTargetInfo),
+            false, /* findExactPairMatch */
+        ) {}
+        verify(recentsModel).getTasks(eq(filter), any())
     }
 
     @Test
@@ -234,7 +256,7 @@ class SplitSelectStateControllerTest {
                         false /* findExactPairMatch */,
                         taskConsumer,
                     )
-                    verify(recentsModel).getTasks(capture())
+                    verify(recentsModel).getTasks(any(), capture())
                 }
                 .lastValue
 
@@ -294,7 +316,7 @@ class SplitSelectStateControllerTest {
                         false /* findExactPairMatch */,
                         taskConsumer,
                     )
-                    verify(recentsModel).getTasks(capture())
+                    verify(recentsModel).getTasks(any(), capture())
                 }
                 .lastValue
 
@@ -351,7 +373,7 @@ class SplitSelectStateControllerTest {
                         false /* findExactPairMatch */,
                         taskConsumer,
                     )
-                    verify(recentsModel).getTasks(capture())
+                    verify(recentsModel).getTasks(any(), capture())
                 }
                 .lastValue
 
@@ -410,7 +432,7 @@ class SplitSelectStateControllerTest {
                         false /* findExactPairMatch */,
                         taskConsumer,
                     )
-                    verify(recentsModel).getTasks(capture())
+                    verify(recentsModel).getTasks(any(), capture())
                 }
                 .lastValue
 
@@ -467,7 +489,7 @@ class SplitSelectStateControllerTest {
                         false /* findExactPairMatch */,
                         taskConsumer,
                     )
-                    verify(recentsModel).getTasks(capture())
+                    verify(recentsModel).getTasks(any(), capture())
                 }
                 .lastValue
 
@@ -537,7 +559,7 @@ class SplitSelectStateControllerTest {
                         false /* findExactPairMatch */,
                         taskConsumer,
                     )
-                    verify(recentsModel).getTasks(capture())
+                    verify(recentsModel).getTasks(any(), capture())
                 }
                 .lastValue
 
@@ -598,7 +620,7 @@ class SplitSelectStateControllerTest {
                         true /* findExactPairMatch */,
                         taskConsumer,
                     )
-                    verify(recentsModel).getTasks(capture())
+                    verify(recentsModel).getTasks(any(), capture())
                 }
                 .lastValue
 
