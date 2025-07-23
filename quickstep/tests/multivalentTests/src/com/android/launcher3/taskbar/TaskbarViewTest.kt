@@ -16,6 +16,7 @@
 
 package com.android.launcher3.taskbar
 
+import android.animation.AnimatorTestRule
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.view.View
@@ -44,6 +45,7 @@ import com.android.launcher3.util.LauncherMultivalentJUnit.EmulatedDevices
 import com.android.window.flags.Flags.FLAG_ENABLE_OVERFLOW_BUTTON_FOR_TASKBAR_PINNED_ITEMS
 import com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_OVERFLOW
 import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Rule
@@ -56,9 +58,10 @@ import org.mockito.kotlin.whenever
 @EnableFlags(FLAG_ENABLE_TASKBAR_OVERFLOW)
 class TaskbarViewTest {
 
-    @get:Rule(order = 0) val setFlagsRule = SetFlagsRule()
-    @get:Rule(order = 1) val context = TaskbarWindowSandboxContext.create()
-    @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
+    @get:Rule(order = 0) val animatorTestRule = AnimatorTestRule(this)
+    @get:Rule(order = 1) val setFlagsRule = SetFlagsRule()
+    @get:Rule(order = 2) val context = TaskbarWindowSandboxContext.create()
+    @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
 
     @InjectController lateinit var viewController: TaskbarViewController
     private lateinit var taskbarView: TaskbarView
@@ -693,6 +696,54 @@ class TaskbarViewTest {
                 *HOTSEAT * (maxShownHotseat - 1),
                 ALL_APPS,
             )
+    }
+
+    @Test
+    fun testAnimateToOverflowOnOverlay_triggersAnimationAndResetsState() {
+        runOnMainSync {
+            taskbarView.updateItems(emptyArray(), createRecents(maxShownRecents), emptyList())
+            // Add one more recent app to trigger the overflow animation.
+            taskbarView.updateItems(emptyArray(), createRecents(maxShownRecents + 1), emptyList())
+        }
+
+        runOnMainSync {
+            animatorTestRule.advanceTimeBy(TaskbarOverflowView.ITEM_ICON_SIZE_ANIMATION_DURATION)
+        }
+        assertThat(taskbarView.isRecentsOverflowViewFirstItemHiddenForAnimation).isFalse()
+    }
+
+    @Test
+    fun testAnimateFromOverflowOnOverlay_triggersAnimationAndResetsState() {
+        val initialRecents = createRecents(maxShownRecents + 1)
+        runOnMainSync { taskbarView.updateItems(emptyArray(), initialRecents, emptyList()) }
+
+        val taskThatWillAnimateIn = initialRecents[1]
+        var iconToAnimate = taskbarView.iconViews.find { it.tag == taskThatWillAnimateIn }
+        assertThat(iconToAnimate).isNull()
+
+        val fewerRecents = initialRecents.dropLast(1)
+        runOnMainSync { taskbarView.updateItems(emptyArray(), fewerRecents, emptyList()) }
+
+        iconToAnimate = taskbarView.iconViews.find { it.tag == taskThatWillAnimateIn }
+        assertThat(iconToAnimate).isNotNull()
+        runOnMainSync {
+            taskbarView.measure(
+                View.MeasureSpec.makeMeasureSpec(taskbarView.width, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(taskbarView.height, View.MeasureSpec.EXACTLY),
+            )
+            taskbarView.layout(
+                taskbarView.left,
+                taskbarView.top,
+                taskbarView.right,
+                taskbarView.bottom,
+            )
+        }
+        assertThat(iconToAnimate?.alpha).isEqualTo(0)
+
+        runOnMainSync {
+            animatorTestRule.advanceTimeBy(TaskbarOverflowView.ITEM_ICON_SIZE_ANIMATION_DURATION)
+        }
+        assertThat(iconToAnimate?.alpha).isEqualTo(1f)
     }
 
     /** Returns the number of expected recents outside of the overflow based on [hotseatSize]. */

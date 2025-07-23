@@ -22,16 +22,21 @@ import static com.android.launcher3.Flags.enableLauncherIconShapes;
 import static com.android.launcher3.Flags.enableRecentsInTaskbar;
 import static com.android.launcher3.Flags.enableTaskbarRecentsThemedIcons;
 import static com.android.launcher3.Flags.refactorTaskbarUiState;
+import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_PAIR;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FOLDER;
 import static com.android.launcher3.config.FeatureFlags.enableTaskbarPinning;
 import static com.android.launcher3.icons.BitmapInfo.FLAG_THEMED;
 import static com.android.launcher3.icons.IconNormalizer.ICON_VISIBLE_AREA_FACTOR;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
 import android.animation.LayoutTransition;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.ArraySet;
@@ -42,18 +47,22 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
+import com.android.app.animation.Interpolators;
 import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.Flags;
 import com.android.launcher3.Insettable;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
+import com.android.launcher3.anim.AnimatorListeners;
 import com.android.launcher3.apppairs.AppPairIcon;
 import com.android.launcher3.celllayout.CellInfo;
 import com.android.launcher3.deviceprofile.TaskbarProfile;
@@ -133,6 +142,9 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
 
     // Only non-null when device supports having a Taskbar Overflow button for recent tasks.
     @Nullable private TaskbarOverflowView mTaskbarRecentsOverflowView;
+
+    // Only non-null when there is an ongoing task icon in animation.
+    @Nullable private Animator mOngoingRecentIconAnimation;
 
     private int mMaxNumIconsLimitForTest = -1;
 
@@ -891,6 +903,9 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                         // Remove view corresponding to removed task so that it animates out.
                         || !recentTasksSet.contains(tag)
                         || overflownRecentsSet.contains(tag)) {
+                    if (overflownRecentsSet.contains(tag)) {
+                        animateToOverflowOnOverlay(recentIcon);
+                    }
                     removeAndRecycle(recentIcon);
                     recentIcon = null;
                 } else {
@@ -899,6 +914,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                 }
             }
 
+            boolean isFromOverflow = false;
             if (recentIcon == null) {
                 if (task instanceof SingleTask) {
                     recentIcon = inflate(expectedLayoutResId);
@@ -911,11 +927,17 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                 LayoutParams lp = new TaskbarLayoutParams(mIconTouchSize, mIconTouchSize);
                 recentIcon.setPadding(mItemPadding, mItemPadding, mItemPadding, mItemPadding);
                 addView(recentIcon, mNextViewIndex, lp);
+                if (mPrevOverflowTasks.contains(task)) {
+                    isFromOverflow = true;
+                }
             } else if (recentIcon instanceof AppPairIcon api && task instanceof SplitTask st) {
                 api.updateInfo(st.toAppPairInfo());
             }
 
             if (recentIcon instanceof BubbleTextView btv) {
+                if (isFromOverflow) {
+                    animateFromOverflowOnOverlay(recentIcon, (SingleTask) task);
+                }
                 applyGroupTaskToBubbleTextView(btv, task);
             }
             setClickAndLongClickListenersForIcon(recentIcon);
@@ -972,6 +994,132 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         }
 
         bubbleTextView.setTag(handoffSuggestion);
+    }
+
+    private void animateToOverflowOnOverlay(View icon) {
+        if (mTaskbarRecentsOverflowView == null) {
+            removeAndRecycle(icon);
+            return;
+        }
+
+        if (mOngoingRecentIconAnimation != null && mOngoingRecentIconAnimation.isRunning()) {
+            mOngoingRecentIconAnimation.end();
+        }
+
+        BubbleTextView ghostIcon = createGhostIcon(
+                (GroupTask) icon.getTag(), icon.getX(), icon.getY(), 1.0f);
+
+        // Add a PreDrawListener to the target view to ensure the animation will not run
+        // until the overflow view layout is ready.
+        mTaskbarRecentsOverflowView.getViewTreeObserver().addOnPreDrawListener(
+                new ViewTreeObserver.OnPreDrawListener() {
+                    @Override
+                    public boolean onPreDraw() {
+                        mTaskbarRecentsOverflowView.getViewTreeObserver()
+                                .removeOnPreDrawListener(this);
+                        mTaskbarRecentsOverflowView.setFirstItemHiddenForAnimation(true);
+
+                        float endX = mTaskbarRecentsOverflowView.getX();
+                        float endY = mTaskbarRecentsOverflowView.getY();
+                        PointF overlayOffsets =
+                                mTaskbarRecentsOverflowView.getOverlayOffsetsForFirstItem(
+                                        /* isMovingAway= */ false);
+                        Animator scaleAnim = ObjectAnimator.ofFloat(ghostIcon, SCALE_PROPERTY, 1f,
+                                TaskbarOverflowView.TWO_ITEM_ICONS_BOX_ASPECT_RATIO);
+                        Runnable onEnd = () ->
+                                mTaskbarRecentsOverflowView.setFirstItemHiddenForAnimation(false);
+
+                        startGhostIconAnimation(
+                                ghostIcon, endX + overlayOffsets.x, endY + overlayOffsets.y,
+                                scaleAnim, onEnd);
+
+                        return true;
+                    }
+                });
+    }
+
+    @VisibleForTesting
+    boolean isRecentsOverflowViewFirstItemHiddenForAnimation() {
+        return mTaskbarRecentsOverflowView != null
+                && mTaskbarRecentsOverflowView.isFirstItemHiddenForAnimation();
+    }
+
+    private void animateFromOverflowOnOverlay(View actualIcon, SingleTask task) {
+        if (mTaskbarRecentsOverflowView == null) {
+            return;
+        }
+
+        if (mOngoingRecentIconAnimation != null && mOngoingRecentIconAnimation.isRunning()) {
+            mOngoingRecentIconAnimation.end();
+        }
+
+        // Add the icon back to Taskbar, but make it invisible while the overlay animates.
+        actualIcon.getViewTreeObserver().addOnPreDrawListener(
+                new ViewTreeObserver.OnPreDrawListener() {
+                    @Override
+                    public boolean onPreDraw() {
+                        actualIcon.getViewTreeObserver().removeOnPreDrawListener(this);
+                        actualIcon.setAlpha(0f);
+
+                        PointF overlayOffsets =
+                                mTaskbarRecentsOverflowView.getOverlayOffsetsForFirstItem(
+                                        /* isMovingAway= */ true);
+                        float startX = mTaskbarRecentsOverflowView.getX() + overlayOffsets.x;
+                        float startY = mTaskbarRecentsOverflowView.getY() + overlayOffsets.y;
+
+                        BubbleTextView ghostIcon = createGhostIcon(
+                                task, startX, startY,
+                                TaskbarOverflowView.TWO_ITEM_ICONS_BOX_ASPECT_RATIO);
+
+                        // Animate the overlay icon to the final position.
+                        Animator scaleAnim = ObjectAnimator.ofFloat(ghostIcon, SCALE_PROPERTY,
+                                TaskbarOverflowView.TWO_ITEM_ICONS_BOX_ASPECT_RATIO, 1f);
+                        Runnable onEnd = () -> actualIcon.setAlpha(1f);
+                        startGhostIconAnimation(ghostIcon, actualIcon.getX(), actualIcon.getY(),
+                                scaleAnim, onEnd);
+                        return true;
+                    }
+                });
+    }
+
+    private BubbleTextView createGhostIcon(GroupTask task, float x, float y, float scale) {
+        BubbleTextView ghostIcon = (BubbleTextView) inflate(R.layout.taskbar_app_icon);
+        ghostIcon.setPadding(mItemPadding, mItemPadding, mItemPadding, mItemPadding);
+        applyGroupTaskToBubbleTextView(ghostIcon, task);
+        ghostIcon.measure(
+                MeasureSpec.makeMeasureSpec(mIconTouchSize, MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(mIconTouchSize, MeasureSpec.EXACTLY));
+        ghostIcon.layout(0, 0, mIconTouchSize, mIconTouchSize);
+        ghostIcon.setX(x);
+        ghostIcon.setY(y);
+        ghostIcon.setScaleX(scale);
+        ghostIcon.setScaleY(scale);
+
+        getOverlay().add(ghostIcon);
+        return ghostIcon;
+    }
+
+    private void startGhostIconAnimation(BubbleTextView ghostIcon, float endX, float endY,
+            Animator scaleAnimator, Runnable onEndAction) {
+        AnimatorSet anim = new AnimatorSet();
+        anim.playTogether(
+                ObjectAnimator.ofFloat(ghostIcon, View.X, endX),
+                ObjectAnimator.ofFloat(ghostIcon, View.Y, endY),
+                scaleAnimator);
+
+        anim.setDuration(TaskbarOverflowView.ITEM_ICON_SIZE_ANIMATION_DURATION);
+        anim.setInterpolator(Interpolators.EMPHASIZED);
+
+        anim.addListener(AnimatorListeners.forEndCallback(() -> {
+            getOverlay().remove(ghostIcon);
+            if (onEndAction != null) {
+                onEndAction.run();
+            }
+            mOngoingRecentIconAnimation = null;
+        }));
+
+        mOngoingRecentIconAnimation = anim;
+        anim.start();
     }
 
     private boolean isNextViewInSection(Class<?> tagClass) {
