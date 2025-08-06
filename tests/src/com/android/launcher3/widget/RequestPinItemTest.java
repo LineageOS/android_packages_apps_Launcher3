@@ -151,7 +151,7 @@ public class RequestPinItemTest extends BaseLauncherActivityTest<Launcher> {
         BlockingBroadcastReceiver openMonitor = new BlockingBroadcastReceiver(
                 RequestPinItemActivity.class.getName());
         Context testContext = getInstrumentation().getContext();
-        startAppFast(
+        getLauncherTestInteractions().startAppFast(
                 testContext.getPackageName(),
                 new Intent(testContext, RequestPinItemActivity.class));
         assertNotNull(openMonitor.blockingGetExtraIntent());

@@ -36,7 +36,7 @@ public class KeyboardFocusTest extends BaseLauncherActivityTest<Launcher> {
     public void testAllAppsFocusApp() {
         loadLauncherSync();
         getLauncherActivity().goToState(LauncherState.ALL_APPS);
-        freezeAllApps();
+        getLauncherTestInteractions().freezeAllApps();
 
         getLauncherActivity().injectKeyEvent(KeyEvent.KEYCODE_DPAD_DOWN, true);
         getLauncherActivity().injectKeyEvent(KeyEvent.KEYCODE_DPAD_DOWN, false);
@@ -49,7 +49,7 @@ public class KeyboardFocusTest extends BaseLauncherActivityTest<Launcher> {
     public void testAllAppsExitSearchAndFocusApp() {
         loadLauncherSync();
         getLauncherActivity().goToState(LauncherState.ALL_APPS);
-        freezeAllApps();
+        getLauncherTestInteractions().freezeAllApps();
 
         getLauncherActivity().executeOnLauncher(
                 launcher -> launcher.getAppsView().getSearchView().requestFocus());
@@ -67,7 +67,7 @@ public class KeyboardFocusTest extends BaseLauncherActivityTest<Launcher> {
     public void testAllAppsExitSearchAndFocusSearchResults() {
         loadLauncherSync();
         getLauncherActivity().goToState(LauncherState.ALL_APPS);
-        freezeAllApps();
+        getLauncherTestInteractions().freezeAllApps();
 
         getLauncherActivity().executeOnLauncher(
                 launcher -> launcher.getAppsView().getSearchView().requestFocus());
