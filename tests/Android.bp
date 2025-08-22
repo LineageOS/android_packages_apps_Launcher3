@@ -95,6 +95,7 @@ android_library {
         "systemui-helper",
         "systemui-tapl",
         "Launcher3TestResources",
+        "android.security.flags-aconfig-java",
     ],
     package_name: "com.android.launcher3.tests",
     platform_apis: true,

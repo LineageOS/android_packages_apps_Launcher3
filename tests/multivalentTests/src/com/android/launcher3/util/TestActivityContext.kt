@@ -17,6 +17,7 @@
 package com.android.launcher3.util
 
 import android.R
+import android.app.PendingIntent
 import android.content.Context
 import android.graphics.Point
 import android.view.View
@@ -29,6 +30,7 @@ import com.android.launcher3.MultipageCellLayout
 import com.android.launcher3.allapps.ActivityAllAppsContainerView
 import com.android.launcher3.dragndrop.DragController
 import com.android.launcher3.dragndrop.SimpleDragLayer
+import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.views.BaseDragLayer
 import com.android.launcher3.widget.picker.model.WidgetPickerDataProvider
@@ -137,5 +139,16 @@ constructor(
                     TestUtil.runOnExecutorSync(MAIN_EXECUTOR) { onViewDestroyed() }
             }
             .apply(statement, description)
+    }
+
+    // Overriding is required since Mockito does not correctly spy default interface methods,
+    // causing the real method to be called instead of the mock. This ensures the method is part of
+    // the class, and can be reliably spied upon.
+    override fun sendPendingIntentWithAnimation(
+        v: View,
+        intent: PendingIntent,
+        item: ItemInfo?,
+    ): RunnableList? {
+        return super.sendPendingIntentWithAnimation(v, intent, item)
     }
 }

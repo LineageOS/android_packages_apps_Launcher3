@@ -28,6 +28,7 @@ java_defaults {
         "android.multiuser.flags-aconfig-java",
         "android.appwidget.flags-aconfig-java",
         "com.android.window.flags.window-aconfig-java",
+        "android.security.flags-aconfig-java",
     ],
 }
 
@@ -332,6 +333,7 @@ android_library {
     },
     flags_packages: [
         "com_android_launcher3_flags",
+        "android.security.flags-aconfig",
     ],
 }
 
