@@ -684,3 +684,10 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "app_launch_blur"
+  namespace: "launcher"
+  description: "Enable background blur at app launch"
+  bug: "379905951"
+}
