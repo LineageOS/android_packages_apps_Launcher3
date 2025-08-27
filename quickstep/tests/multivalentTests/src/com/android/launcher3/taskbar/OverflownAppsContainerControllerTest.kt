@@ -15,7 +15,12 @@
  */
 package com.android.launcher3.taskbar
 
+import android.view.MotionEvent
+import android.view.ViewGroup
+import androidx.core.view.children
 import com.android.launcher3.AbstractFloatingView
+import com.android.launcher3.R
+import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatItems
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
@@ -41,6 +46,9 @@ class OverflownAppsContainerControllerTest {
     private val taskbarActivityContext: TaskbarActivityContext
         get() = taskbarUnitTestRule.activityContext
 
+    private val numShownHotseatIcons
+        get() = taskbarActivityContext.taskbarSpecsEvaluator.numShownHotseatIcons
+
     @Before
     fun setUp() {
         overflownController = viewController.overflownAppsContainerController
@@ -49,11 +57,7 @@ class OverflownAppsContainerControllerTest {
 
     @Test
     fun testToggleOverflownAppsView_showsContainer() {
-        val apps =
-            createHotseatItems(
-                    taskbarActivityContext.taskbarSpecsEvaluator.numShownHotseatIcons + 3
-                )
-                .toList()
+        val apps = createHotseatItems(numShownHotseatIcons + 3).toList()
 
         assertThat(
                 AbstractFloatingView.hasOpenView(
@@ -64,10 +68,8 @@ class OverflownAppsContainerControllerTest {
             .isFalse()
 
         // Toggle the OverflownAppsView should open the container view.
-        runOnMainSync { overflownController.toggleOverflownAppsView(overflowIcon, apps) {} }
-        // Run an empty frame so that the taskbar drag layer can resize and show the overflown
-        // container.
-        runOnMainSync {}
+        toggleOverflownAppsView(apps)
+
         assertThat(
                 AbstractFloatingView.hasOpenView(
                     taskbarActivityContext,
@@ -79,15 +81,11 @@ class OverflownAppsContainerControllerTest {
 
     @Test
     fun testToggleOverflownAppsView_closesContainer() {
-        val apps =
-            createHotseatItems(
-                    taskbarActivityContext.taskbarSpecsEvaluator.numShownHotseatIcons + 3
-                )
-                .toList()
-        runOnMainSync { overflownController.toggleOverflownAppsView(overflowIcon, apps) {} }
-        // Run an empty frame so that the taskbar drag layer can resize and show the overflown
-        // container.
-        runOnMainSync {}
+        val apps = createHotseatItems(numShownHotseatIcons + 3).toList()
+
+        // Toggle the OverflownAppsView should open the container view.
+        toggleOverflownAppsView(apps)
+
         assertThat(
                 AbstractFloatingView.hasOpenView(
                     taskbarActivityContext,
@@ -97,7 +95,8 @@ class OverflownAppsContainerControllerTest {
             .isTrue()
 
         // Toggle the OverflownAppsView again should close the container view.
-        runOnMainSync { overflownController.toggleOverflownAppsView(overflowIcon, apps) {} }
+        toggleOverflownAppsView(apps)
+
         assertThat(
                 AbstractFloatingView.hasOpenView(
                     taskbarActivityContext,
@@ -105,5 +104,58 @@ class OverflownAppsContainerControllerTest {
                 )
             )
             .isFalse()
+    }
+
+    @Test
+    fun testOverflownAppsContainer_closesOnOutsideClick() {
+        val apps = createHotseatItems(numShownHotseatIcons + 1).toList()
+
+        toggleOverflownAppsView(apps)
+
+        assertThat(
+                AbstractFloatingView.hasOpenView(
+                    taskbarActivityContext,
+                    AbstractFloatingView.TYPE_TASKBAR_OVERFLOW,
+                )
+            )
+            .isTrue()
+
+        // Simulate a click on the drag layer to close the container.
+        runOnMainSync {
+            taskbarActivityContext.dragLayer.dispatchTouchEvent(
+                MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
+            )
+            taskbarActivityContext.dragLayer.dispatchTouchEvent(
+                MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 0f, 0f, 0)
+            )
+        }
+        assertThat(
+                AbstractFloatingView.hasOpenView(
+                    taskbarActivityContext,
+                    AbstractFloatingView.TYPE_TASKBAR_OVERFLOW,
+                )
+            )
+            .isFalse()
+    }
+
+    @Test
+    fun testOverflownAppsContainer_showsCorrectApps() {
+        val numOverflownApps = 3
+        val apps = createHotseatItems(numOverflownApps).toList()
+
+        toggleOverflownAppsView(apps)
+
+        val overflownContent: ViewGroup =
+            taskbarActivityContext.dragLayer.findViewById(R.id.overflown_content)
+
+        assertThat(overflownContent.children.map { it.tag }.toList())
+            .containsExactlyElementsIn(apps)
+    }
+
+    private fun toggleOverflownAppsView(apps: List<ItemInfo>) {
+        runOnMainSync { overflownController.toggleOverflownAppsView(overflowIcon, apps) {} }
+        // Run an empty frame so that the taskbar drag layer can resize and show the overflown
+        // container.
+        runOnMainSync {}
     }
 }

@@ -15,14 +15,17 @@
  */
 package com.android.launcher3.taskbar
 
+import com.android.launcher3.BubbleTextView
 import com.android.launcher3.R
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.model.data.TaskItemInfo
 
 /**
  * Handles initialization of the [OverflownAppsContainerView] and supplies it with the list of apps.
  */
 class OverflownAppsViewController(
     private val activityContext: TaskbarActivityContext,
+    private val runningAppStateAnimationController: TaskbarRunningAppStateAnimationController,
     viewCallbacks: TaskbarViewCallbacks,
     overflowIcon: TaskbarOverflowView,
     onClose: Runnable,
@@ -33,6 +36,8 @@ class OverflownAppsViewController(
             activityContext.dragLayer,
             /* attachToRoot= */ false,
         ) as OverflownAppsContainerView<*>
+    val overflownApps: List<BubbleTextView>
+        get() = overflownAppsContainerView.overflownAppIcons
 
     init {
         overflownAppsContainerView.init(overflowIcon, viewCallbacks)
@@ -43,9 +48,21 @@ class OverflownAppsViewController(
         activityContext.isTaskbarWindowFullscreen = true
         activityContext.dragLayer.post {
             overflownAppsContainerView.setOverflownApps(overflownApps)
+            updateRunningAppState()
             overflownAppsContainerView.show()
         }
     }
 
     fun close(animate: Boolean) = overflownAppsContainerView.close(animate)
+
+    private fun updateRunningAppState() {
+        for (btv in overflownApps) {
+            val state =
+                (btv.tag as? TaskItemInfo)?.taskId?.let {
+                    activityContext.controllers.taskbarRecentAppsController.getRunningAppState(it)
+                } ?: BubbleTextView.RunningAppState.NOT_RUNNING
+
+            runningAppStateAnimationController.updateRunningState(btv, state, animate = false)
+        }
+    }
 }

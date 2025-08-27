@@ -21,6 +21,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.widget.LinearLayout
+import androidx.core.view.children
 import androidx.core.view.updatePadding
 import com.android.launcher3.BubbleTextView
 import com.android.launcher3.R
@@ -37,8 +38,16 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     private lateinit var viewCallbacks: TaskbarViewCallbacks
     private lateinit var content: LinearLayout
     private var overflownApps = emptyList<ItemInfo>()
+
+    private val runningAppIndicatorHeight =
+        resources.getDimensionPixelSize(R.dimen.taskbar_running_app_indicator_height)
+    private val runningAppIndicatorMargin =
+        resources.getDimensionPixelSize(R.dimen.taskbar_running_app_indicator_top_margin)
     private val spacing: Int =
         resources.getDimensionPixelSize(R.dimen.overflown_apps_container_spacing)
+
+    val overflownAppIcons: List<BubbleTextView>
+        get() = content.children.filterIsInstance<BubbleTextView>().toList()
 
     fun init(icon: TaskbarOverflowView, callbacks: TaskbarViewCallbacks) {
         overflowIcon = icon
@@ -50,7 +59,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
             left = spacing / 2,
             top = spacing,
             right = spacing / 2,
-            bottom = spacing,
+            bottom = spacing - runningAppIndicatorMargin - runningAppIndicatorHeight,
         )
     }
 
@@ -72,14 +81,19 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 
             if (icon is BubbleTextView && item is WorkspaceItemInfo) {
                 icon.applyFromWorkspaceItem(item)
+                icon.setTextVisibility(false)
                 icon.setOnClickListener(viewCallbacks.iconOnClickListener)
                 icon.setOnLongClickListener(viewCallbacks.iconOnLongClickListener)
 
                 val lp =
-                    LayoutParams(iconSize, iconSize).apply {
-                        marginStart = iconSpacing
-                        marginEnd = iconSpacing
-                    }
+                    LayoutParams(
+                            iconSize,
+                            iconSize + runningAppIndicatorHeight + runningAppIndicatorMargin,
+                        )
+                        .apply {
+                            marginStart = iconSpacing
+                            marginEnd = iconSpacing
+                        }
                 content.addView(icon, lp)
             }
         }
