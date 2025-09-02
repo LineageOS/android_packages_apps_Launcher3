@@ -51,6 +51,7 @@ import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCH
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_SPLIT_SELECTION_EXIT_HOME;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_SPLIT_SELECTION_EXIT_INTERRUPTED;
 import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_NOT_PINNABLE;
+import static com.android.launcher3.popup.PinToTaskbarShortcut.getPinShortcutFactoryFromLauncher;
 import static com.android.launcher3.popup.QuickstepSystemShortcut.getSplitSelectShortcutByPosition;
 import static com.android.launcher3.popup.SystemShortcut.ADD_TO_HOME_SCREEN;
 import static com.android.launcher3.popup.SystemShortcut.APP_INFO;
@@ -64,7 +65,6 @@ import static com.android.launcher3.popup.SystemShortcut.WIDGETS;
 import static com.android.launcher3.taskbar.LauncherTaskbarUIController.ALL_APPS_PAGE_PROGRESS_INDEX;
 import static com.android.launcher3.taskbar.LauncherTaskbarUIController.MINUS_ONE_PAGE_PROGRESS_INDEX;
 import static com.android.launcher3.taskbar.LauncherTaskbarUIController.WIDGETS_PAGE_PROGRESS_INDEX;
-import static com.android.launcher3.taskbar.PinToTaskbarShortcut.PIN_ITEM_FROM_LAUNCHER;
 import static com.android.launcher3.testing.shared.TestProtocol.HINT_STATE_ORDINAL;
 import static com.android.launcher3.testing.shared.TestProtocol.HINT_STATE_TWO_BUTTON_ORDINAL;
 import static com.android.launcher3.testing.shared.TestProtocol.OVERVIEW_STATE_ORDINAL;
@@ -541,7 +541,9 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
                 && DisplayController.showDesktopTaskbarForFreeformDisplay(this)
                 && (container == CONTAINER_ALL_APPS
                 || container == CONTAINER_ALL_APPS_PREDICTION)) {
-            shortcuts.add(0, PIN_ITEM_FROM_LAUNCHER);
+            int maxPinnableCount =
+                    mTaskbarInteractor != null ? mTaskbarInteractor.getMaxPinnableCount() : -1;
+            shortcuts.add(0, getPinShortcutFactoryFromLauncher(maxPinnableCount));
         }
 
         shortcuts.addAll(getSplitShortcuts());
@@ -660,7 +662,9 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         }
     }
 
+    @Override
     public void onItemPinnedFromContextMenu() {
+        super.onItemPinnedFromContextMenu();
         mHotseatPredictionController.onItemPinnedFromContextMenu();
     }
 

@@ -2456,6 +2456,9 @@ public class Launcher extends StatefulActivity<LauncherState>
     /** Called to updated any prediction info by the {@link #mModelCallbacks} */
     public void bindPredictedContainerInfo(PredictedContainerInfo info) { }
 
+    /** Called after an item is pinned using the context menu. */
+    public void onItemPinnedFromContextMenu() {}
+
     /**
      * @param packageUser if null, refreshes all widgets and shortcuts, otherwise only
      *                    refreshes the widgets and shortcuts associated with the given package/user

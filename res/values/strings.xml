@@ -245,6 +245,10 @@
     <string name="pin_to_taskbar">Pin to Taskbar</string>
     <!-- Label for unpinning an item from the taskbar. [CHAR_LIMIT=20] -->
     <string name="unpin_from_taskbar">Unpin from Taskbar</string>
+    <!-- Accessibility confirmation for item pinned to taskbar. [CHAR_LIMIT=NONE] -->
+    <string name="app_added_to_taskbar">App added to Taskbar</string>
+    <!-- Accessibility confirmation for item unpinned from taskbar. [CHAR_LIMIT=NONE] -->
+    <string name="app_removed_from_taskbar">App removed from Taskbar</string>
 
     <!-- Permissions: -->
     <skip />

@@ -45,6 +45,7 @@ import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
+import com.android.launcher3.popup.PinToTaskbarShortcut;
 import com.android.launcher3.popup.Popup;
 import com.android.launcher3.popup.PopupContainer;
 import com.android.launcher3.popup.PopupContainerWithArrow;
@@ -168,9 +169,11 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
         if (itemInfo.container == CONTAINER_HOTSEAT_PREDICTION) {
             return null;
         }
+
+        int maxPinnableCount = mContext.getTaskbarSpecsEvaluator().getMaxPinnableCount();
         if (itemInfo.container == CONTAINER_HOTSEAT) {
             return new PinToTaskbarShortcut<>(target, itemInfo, originalView, false,
-                    mTaskbarInfoList);
+                    maxPinnableCount, mTaskbarInfoList);
         }
 
         if (itemInfo.isInAllApps()) {
@@ -179,7 +182,7 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
                 if (Objects.equals(mTaskbarInfoList.valueAt(i).getComponentKey(),
                         itemInfo.getComponentKey())) {
                     return new PinToTaskbarShortcut<>(target, itemInfo, originalView, false,
-                            mTaskbarInfoList);
+                            maxPinnableCount, mTaskbarInfoList);
                 }
             }
         }
@@ -187,7 +190,7 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
         if (mTaskbarInfoList.size()
                 < mContext.getTaskbarSpecsEvaluator().getMaxPinnableCount()) {
             return new PinToTaskbarShortcut<>(target, itemInfo, originalView, true,
-                    mTaskbarInfoList);
+                    maxPinnableCount, mTaskbarInfoList);
         }
 
         return null;

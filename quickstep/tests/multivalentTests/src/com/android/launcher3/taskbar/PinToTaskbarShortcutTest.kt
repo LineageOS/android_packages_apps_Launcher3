@@ -28,6 +28,7 @@ import androidx.core.util.size
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
+import com.android.launcher3.popup.PinToTaskbarShortcut
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
 import com.android.launcher3.taskbar.customization.TASKBAR_OVERFLOW_PIN_LIMIT
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
@@ -59,6 +60,9 @@ class PinToTaskbarShortcutTest {
 
     private val taskbarActivityContext: TaskbarActivityContext
         get() = taskbarUnitTestRule.activityContext
+
+    private val maxPinnableCount
+        get() = taskbarActivityContext.taskbarSpecsEvaluator.maxPinnableCount
 
     private val pinnedInfoList = SparseArray<ItemInfo?>()
     private lateinit var view: View
@@ -161,7 +165,16 @@ class PinToTaskbarShortcutTest {
         itemInfo: ItemInfo,
     ): PinToTaskbarShortcut<TaskbarActivityContext> {
         return getOnUiThread {
-            spy(PinToTaskbarShortcut(taskbarActivityContext, itemInfo, view, isPin, pinnedInfoList))
+            spy(
+                PinToTaskbarShortcut(
+                    taskbarActivityContext,
+                    itemInfo,
+                    view,
+                    isPin,
+                    maxPinnableCount,
+                    pinnedInfoList,
+                )
+            )
         }
     }
 
