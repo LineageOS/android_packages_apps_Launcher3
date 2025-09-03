@@ -47,6 +47,7 @@ import com.android.launcher3.statehandlers.DesktopVisibilityController.Companion
 import com.android.launcher3.statemanager.BaseState
 import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.IntArray
+import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.window.WindowManagerProxy.DesktopVisibilityListener
 import com.android.quickstep.GestureState
 import com.android.quickstep.RemoteTargetGluer.RemoteTargetHandle
@@ -866,6 +867,25 @@ class RecentsViewUtils(private val recentsView: RecentsView<*, *>) : DesktopVisi
         }
         return INVALID_PAGE
     }
+
+    /**
+     * Launch task view if it is instance of DesktopTaskView. Prioritize launching running task
+     * view, then current page task view, and finally the last desktop task view.
+     *
+     * @return provides runnable list to attach runnable at end of Desktop Mode launch
+     */
+    fun launchDesktopTaskView(): RunnableList? =
+        with(recentsView) {
+            val desktopTaskView =
+                (runningTaskView as? DesktopTaskView)
+                    ?: currentPageTaskView as? DesktopTaskView
+                    ?: lastDesktopTaskView
+                    ?: return null
+            if (!isTaskViewVisible(desktopTaskView)) {
+                snapToPageImmediately(indexOfChild(desktopTaskView))
+            }
+            return desktopTaskView.launchWithAnimation()
+        }
 
     companion object {
         class RecentsViewFloatProperty(

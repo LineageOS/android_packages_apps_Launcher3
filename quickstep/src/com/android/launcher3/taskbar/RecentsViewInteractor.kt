@@ -54,8 +54,8 @@ class RecentsViewInteractor(private val recentsView: RecentsView<*, *>) {
     fun hasSameRecentsView(recentsView: RecentsView<*, *>) = this.recentsView === recentsView
 
     @AnyThread
-    fun launchRunningDesktopTaskView(taskToRun: Runnable, callbackExecutor: Executor) {
-        CompletableFuture.supplyAsync({ recentsView.launchRunningDesktopTaskView() }, mainExecutor)
+    fun launchDesktopTaskView(taskToRun: Runnable, callbackExecutor: Executor) {
+        CompletableFuture.supplyAsync({ recentsView.launchDesktopTaskView() }, mainExecutor)
             .thenApplyAsync(
                 { runnableList ->
                     {
