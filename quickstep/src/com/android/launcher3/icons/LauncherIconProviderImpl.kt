@@ -107,9 +107,9 @@ constructor(
     }
 
     override fun onPluginLoaded(
-        plugin: IconProcessorPlugin?,
-        pluginContext: Context?,
-        manager: PluginLifecycleManager<IconProcessorPlugin>?,
+        plugin: IconProcessorPlugin,
+        pluginContext: Context,
+        manager: PluginLifecycleManager<IconProcessorPlugin>,
     ) {
         plugin?.setIconChangeNotifier { pkg, userHandle ->
             iconChangeTracker.notifyIconChanged(pkg, userHandle)
@@ -123,8 +123,8 @@ constructor(
     }
 
     override fun onPluginUnloaded(
-        plugin: IconProcessorPlugin?,
-        manager: PluginLifecycleManager<IconProcessorPlugin>?,
+        plugin: IconProcessorPlugin,
+        manager: PluginLifecycleManager<IconProcessorPlugin>,
     ) {
         processor = null
         Log.d(TAG, "Plugin disconnected")
