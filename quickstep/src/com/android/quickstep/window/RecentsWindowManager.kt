@@ -291,8 +291,10 @@ constructor(
 
     fun createWindowView() {
         if (windowView != null) {
+            createSurfaceControlViewHost()
             return
         }
+        surfaceControlViewHost?.let { cleanUpSurfaceControlViewHost() }
 
         theme.applyStyle(overviewBlurStyleResId, true)
         windowView = layoutInflater.inflate(R.layout.fallback_recents_activity, null)
@@ -326,29 +328,9 @@ constructor(
                     View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
                     View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
 
-            surfaceControlViewHost = SurfaceControlViewHost(this, display, null as IBinder?)
             windowRootView.addView(it)
-            surfaceControlViewHost?.let { scvh ->
-                scvh.setView(windowRootView, getWindowLayoutParams())
-                scvh.surfacePackage?.let { surfacePackage ->
-                    getOverviewOverlay()?.let { overviewOverlay ->
-                        Transaction()
-                            .reparent(surfacePackage.surfaceControl, overviewOverlay)
-                            .show(surfacePackage.surfaceControl)
-                            .apply(true)
-                    }
-                        ?: run {
-                            Log.e(
-                                TAG,
-                                "OverviewOverlay is null, can't reparent surface",
-                                Exception(),
-                            )
-                        }
-                }
-                    ?: run {
-                        Log.e(TAG, "SurfaceControlViewHost.SurfacePackage is null", Exception())
-                    }
-            }
+
+            createSurfaceControlViewHost()
 
             it.findOnBackInvokedDispatcher()
                 ?.registerSystemOnBackInvokedCallback(onBackInvokedCallback)
@@ -385,6 +367,43 @@ constructor(
             recentsView = null
             windowView = null
         }
+    }
+
+    private fun createSurfaceControlViewHost() {
+        if (surfaceControlViewHost != null) return
+        surfaceControlViewHost = SurfaceControlViewHost(this, display, null as IBinder?)
+        surfaceControlViewHost?.let { scvh ->
+            scvh.setView(windowRootView, getWindowLayoutParams())
+            scvh.surfacePackage?.let { surfacePackage ->
+                getOverviewOverlay()?.let { overviewOverlay ->
+                    Transaction()
+                        .reparent(surfacePackage.surfaceControl, overviewOverlay)
+                        .show(surfacePackage.surfaceControl)
+                        .apply(true)
+                }
+                    ?: run {
+                        Log.e(TAG, "OverviewOverlay is null, can't reparent surface", Exception())
+                    }
+            } ?: run { Log.e(TAG, "SurfaceControlViewHost.SurfacePackage is null", Exception()) }
+        }
+    }
+
+    private fun cleanUpSurfaceControlViewHost() {
+        surfaceControlViewHost?.let {
+            it.surfacePackage?.let { surfacePackage ->
+                Transaction().hide(surfacePackage.surfaceControl).apply(true)
+                surfacePackage.release()
+            }
+            it.release()
+        }
+        overviewOverlay = null
+        surfaceControlViewHost = null
+    }
+
+    fun onOverviewTargetChanged() {
+        hideRecentsWindow()
+
+        cleanUpSurfaceControlViewHost()
     }
 
     override fun handleConfigurationChanged(newConfiguration: Configuration?) {
