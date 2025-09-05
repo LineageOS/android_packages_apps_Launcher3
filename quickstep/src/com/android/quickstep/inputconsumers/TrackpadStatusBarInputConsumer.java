@@ -21,9 +21,9 @@ import static android.view.MotionEvent.ACTION_MOVE;
 import android.content.Context;
 import android.graphics.PointF;
 import android.view.MotionEvent;
-import android.view.ViewConfiguration;
 
 import com.android.quickstep.InputConsumer;
+import com.android.quickstep.RecentsAnimationDeviceState;
 import com.android.quickstep.SystemUiProxy;
 import com.android.systemui.shared.system.InputMonitorCompat;
 
@@ -39,11 +39,12 @@ public class TrackpadStatusBarInputConsumer extends DelegateInputConsumer {
             Context context,
             int displayId,
             InputConsumer delegate,
-            InputMonitorCompat inputMonitor) {
+            InputMonitorCompat inputMonitor,
+            RecentsAnimationDeviceState deviceState) {
         super(displayId, delegate, inputMonitor);
 
         mSystemUiProxy = SystemUiProxy.INSTANCE.get(context);
-        mTouchSlop = 2 * ViewConfiguration.get(context).getScaledTouchSlop();
+        mTouchSlop = deviceState.getTouchSlop();
     }
 
     @Override
@@ -54,8 +55,6 @@ public class TrackpadStatusBarInputConsumer extends DelegateInputConsumer {
     @Override
     public void onMotionEvent(MotionEvent ev) {
         if (mState != STATE_ACTIVE) {
-            mDelegate.onMotionEvent(ev);
-
             switch (ev.getActionMasked()) {
                 case ACTION_DOWN -> {
                     mDown.set(ev.getX(), ev.getY());
@@ -74,6 +73,11 @@ public class TrackpadStatusBarInputConsumer extends DelegateInputConsumer {
                         }
                     }
                 }
+            }
+
+            // Don't forward the event to the delegate if we just became active above.
+            if (mState != STATE_ACTIVE) {
+                mDelegate.onMotionEvent(ev);
             }
         } else {
             dispatchTouchEvent(ev);

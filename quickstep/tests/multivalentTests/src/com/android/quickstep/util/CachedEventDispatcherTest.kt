@@ -88,15 +88,26 @@ class CachedEventDispatcherTest {
     }
 
     @Test
-    fun clearConsumer_notDispatchToConsumer() {
+    fun clearConsumerAndCache_notDispatchToConsumer() {
         underTest.setConsumer(consumer)
         underTest.dispatchEvent(motionEvent)
         reset(consumer)
 
-        underTest.clearConsumer()
+        underTest.clearConsumerAndCache()
 
         assertFalse(underTest.hasConsumer())
         underTest.dispatchEvent(motionEvent)
+        verifyNoMoreInteractions(consumer)
+    }
+
+    @Test
+    fun dispatchEvents_followedBy_clearConsumerAndCache_notDispatchToConsumer() {
+        // When we dispatch events followed by clearing them
+        underTest.dispatchEvent(motionEvent)
+        underTest.clearConsumerAndCache()
+
+        // Then a newly set consumer should get no events
+        underTest.setConsumer(consumer)
         verifyNoMoreInteractions(consumer)
     }
 

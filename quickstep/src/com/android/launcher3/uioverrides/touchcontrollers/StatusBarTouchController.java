@@ -21,7 +21,7 @@ import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
 import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
 
-import static com.android.launcher3.MotionEventsUtils.isTrackpadScroll;
+import static com.android.launcher3.MotionEventsUtils.isTrackpadMultiFingerSwipe;
 import static com.android.launcher3.Utilities.shouldEnableMouseInteractionChanges;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_SWIPE_DOWN_WORKSPACE_NOTISHADE_OPEN;
 
@@ -155,18 +155,25 @@ public class StatusBarTouchController implements TouchController {
     }
 
     private boolean canInterceptTouch(MotionEvent ev) {
-        if (isTrackpadScroll(ev) || !mIsEnabledCheck.get()
-                || AbstractFloatingView.getTopOpenViewWithType(mLauncher,
-                AbstractFloatingView.TYPE_STATUS_BAR_SWIPE_DOWN_DISALLOW) != null || (
-                shouldEnableMouseInteractionChanges(mLauncher.asContext())
-                        && ev.getSource() == InputDevice.SOURCE_MOUSE)) {
+        if (isTrackpadMultiFingerSwipe(ev)) {
+            // Trackpad events are handled separately, see e.g. TrackpadStatusBarInputConsumer.
             return false;
-        } else {
-            // For NORMAL state, only listen if the event originated above the navbar height
-            DeviceProfile dp = mLauncher.getDeviceProfile();
-            if (ev.getY() > (mLauncher.getDragLayer().getHeight() - dp.getInsets().bottom)) {
-                return false;
-            }
+        }
+        if (!mIsEnabledCheck.get()) {
+            return false;
+        }
+        if (AbstractFloatingView.getTopOpenViewWithType(mLauncher,
+                AbstractFloatingView.TYPE_STATUS_BAR_SWIPE_DOWN_DISALLOW) != null) {
+            return false;
+        }
+        if (shouldEnableMouseInteractionChanges(mLauncher.asContext())
+                && ev.getSource() == InputDevice.SOURCE_MOUSE) {
+            return false;
+        }
+        // For NORMAL state, only listen if the event originated above the navbar height
+        DeviceProfile dp = mLauncher.getDeviceProfile();
+        if (ev.getY() > (mLauncher.getDragLayer().getHeight() - dp.getInsets().bottom)) {
+            return false;
         }
         return SystemUiProxy.INSTANCE.get(mLauncher).isActive();
     }
