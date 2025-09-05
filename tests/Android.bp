@@ -95,6 +95,8 @@ android_library {
         "platform-parametric-runner-lib",
         "kotlin-reflect",
         "kotlin-test",
+        "systemui-helper",
+        "systemui-tapl",
     ],
     manifest: "AndroidManifest-common.xml",
     platform_apis: true,
