@@ -661,9 +661,7 @@ class WorkspaceItemProcessor(
             item.id = modelDbController.generateNewItemId()
             item.title = file.displayName
             item.container = Favorites.CONTAINER_DESKTOP
-            item.itemType =
-                if (file.isDirectory) Favorites.ITEM_TYPE_FILE_SYSTEM_FOLDER
-                else Favorites.ITEM_TYPE_FILE_SYSTEM_FILE
+            item.itemType = HomeScreenFilesUtils.buildItemType(file)
             item.intent = HomeScreenFilesUtils.buildLaunchIntent(uri, file)
 
             // TODO(b/424466144, b/424466406): add MIME-type-based icons or thumbnails.

@@ -22,8 +22,6 @@ import android.net.Uri
 import android.os.UserHandle
 import com.android.launcher3.LauncherModel
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
-import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FILE
-import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FOLDER
 import com.android.launcher3.icons.IconCache
 import com.android.launcher3.model.AllAppsList
 import com.android.launcher3.model.BgDataModel
@@ -55,9 +53,16 @@ constructor(
         if (isInsert && file != null) {
             processInsert(fileChange.uri, file, taskController)
         } else if (isUpdate && file != null) {
-            processUpdate(fileChange.uri, file, fileChange.user, taskController, dataModel)
+            processUpdate(
+                fileChange.uri,
+                fileChange.uriAlias,
+                file,
+                fileChange.user,
+                taskController,
+                dataModel,
+            )
         } else {
-            processDelete(fileChange.uri, taskController)
+            processDelete(fileChange.uri, fileChange.uriAlias, taskController)
         }
     }
 
@@ -65,9 +70,7 @@ constructor(
         val item =
             WorkspaceItemInfo().apply {
                 title = file.displayName
-                itemType =
-                    if (file.isDirectory) ITEM_TYPE_FILE_SYSTEM_FOLDER
-                    else ITEM_TYPE_FILE_SYSTEM_FILE
+                itemType = HomeScreenFilesUtils.buildItemType(file)
                 intent = HomeScreenFilesUtils.buildLaunchIntent(uri, file)
                 bitmap = iconCache.getDefaultIcon(user)
             }
@@ -81,6 +84,7 @@ constructor(
 
     private fun processUpdate(
         uri: Uri,
+        uriAlias: Uri?,
         file: HomeScreenFile,
         user: UserHandle,
         taskController: ModelTaskController,
@@ -90,7 +94,10 @@ constructor(
             dataModel.updateAndCollectWorkspaceItemInfos(
                 user,
                 {
-                    if (it.intent?.data == uri) {
+                    val data = it.intent?.data
+                    if (data == uri || (uriAlias != null && data == uriAlias)) {
+                        it.intent = HomeScreenFilesUtils.buildLaunchIntent(uri, file)
+                        it.itemType = HomeScreenFilesUtils.buildItemType(file)
                         it.title = file.displayName
                         true
                     } else {
@@ -105,9 +112,12 @@ constructor(
         }
     }
 
-    private fun processDelete(uri: Uri, taskController: ModelTaskController) {
+    private fun processDelete(uri: Uri, uriAlias: Uri?, taskController: ModelTaskController) {
         taskController.deleteAndBindComponentsRemoved(
-            { it?.intent?.data == uri },
+            {
+                val data = it?.intent?.data
+                data == uri || (uriAlias != null && data == uriAlias)
+            },
             "The file system item no longer exists",
         )
     }

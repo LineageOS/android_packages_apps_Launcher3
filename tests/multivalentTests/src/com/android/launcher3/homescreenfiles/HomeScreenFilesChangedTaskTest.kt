@@ -60,7 +60,7 @@ class HomeScreenFilesChangedTaskTest {
     @Mock private lateinit var iconCache: IconCache
     @Mock private lateinit var workspaceItemSpaceFinder: WorkspaceItemSpaceFinder
 
-    private val testUri = Uri.parse("content://media/external/file/1")
+    private val testUri = Uri.parse("content://media/external_primary/file/1")
     private val testFile = HomeScreenFile("file.png", "image/png", false)
     private val wsData = MutableWorkspaceData()
 
@@ -84,6 +84,7 @@ class HomeScreenFilesChangedTaskTest {
                     NOTIFY_INSERT,
                     CompletableFuture.completedFuture(testFile),
                     Process.myUserHandle(),
+                    /*uriAlias=*/ null,
                 ),
                 iconCache,
                 workspaceItemSpaceFinder,
@@ -118,6 +119,7 @@ class HomeScreenFilesChangedTaskTest {
                     NOTIFY_UPDATE,
                     CompletableFuture.completedFuture(testFile),
                     Process.myUserHandle(),
+                    /*uriAlias=*/ null,
                 ),
                 iconCache,
                 workspaceItemSpaceFinder,
@@ -128,6 +130,50 @@ class HomeScreenFilesChangedTaskTest {
         verify(modelWriter, times(1))
             .addItemToDatabase(itemCaptor.capture(), eq(CONTAINER_DESKTOP), eq(2), eq(3), eq(4))
         with(itemCaptor.firstValue) {
+            assertThat(title).isEqualTo("file.png")
+            assertThat(itemType).isEqualTo(ITEM_TYPE_FILE_SYSTEM_FILE)
+            assertThat(intent).isNotNull()
+            assertThat(intent!!.action).isEqualTo(Intent.ACTION_VIEW)
+            assertThat(intent!!.flags)
+                .isEqualTo(
+                    Intent.FLAG_ACTIVITY_NEW_TASK or
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                )
+            assertThat(intent!!.data).isEqualTo(testUri)
+            assertThat(intent!!.type).isEqualTo("image/png")
+        }
+    }
+
+    @Test
+    fun updatesWorkspaceItemForMovedFile() {
+        val uriAlias = Uri.parse("content://test/path/id")
+        wsData.modifyItems {
+            val item =
+                WorkspaceItemInfo().apply {
+                    title = ""
+                    intent = HomeScreenFilesUtils.buildLaunchIntent(uriAlias)
+                }
+            put(item.id, item)
+        }
+        val task =
+            HomeScreenFilesChangedTask(
+                HomeScreenFilesProvider.FileChange(
+                    testUri,
+                    NOTIFY_UPDATE,
+                    CompletableFuture.completedFuture(testFile),
+                    Process.myUserHandle(),
+                    uriAlias,
+                ),
+                iconCache,
+                workspaceItemSpaceFinder,
+            )
+        task.execute(modelTaskController, bgDataModel, allAppsList)
+
+        val itemsCaptor = argumentCaptor<List<ItemInfo>>()
+        verify(modelTaskController, times(1)).bindUpdatedWorkspaceItems(itemsCaptor.capture())
+        assertThat(itemsCaptor.firstValue.size).isEqualTo(1)
+        with(itemsCaptor.firstValue[0]) {
             assertThat(title).isEqualTo("file.png")
             assertThat(itemType).isEqualTo(ITEM_TYPE_FILE_SYSTEM_FILE)
             assertThat(intent).isNotNull()
@@ -160,6 +206,7 @@ class HomeScreenFilesChangedTaskTest {
                     NOTIFY_UPDATE,
                     CompletableFuture.completedFuture(testFile),
                     Process.myUserHandle(),
+                    /*uriAlias=*/ null,
                 ),
                 iconCache,
                 workspaceItemSpaceFinder,
@@ -181,6 +228,7 @@ class HomeScreenFilesChangedTaskTest {
                     NOTIFY_DELETE,
                     CompletableFuture.completedFuture(null),
                     Process.myUserHandle(),
+                    /*uriAlias=*/ null,
                 ),
                 iconCache,
                 workspaceItemSpaceFinder,
