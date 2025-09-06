@@ -16,7 +16,6 @@
 
 package com.android.launcher3.taskbar
 
-import android.animation.Animator
 import android.animation.AnimatorSet
 import android.view.MotionEvent
 import android.view.View
@@ -219,14 +218,12 @@ class TaskbarInteractor(private val taskbarUIController: TaskbarUIController) {
         }
     }
 
-    // TODO(b/404636836): start this animation within taskbar.
-    @MainThread
+    @AnyThread
     fun getParallelAnimationToGestureEndTarget(
         endTarget: GestureState.GestureEndTarget,
         duration: Long,
         callbacks: RecentsAnimationCallbacks,
-    ): Animator? =
-        taskbarUIController.getParallelAnimationToGestureEndTarget(endTarget, duration, callbacks)
+    ) = taskbarUIController.getParallelAnimationToGestureEndTarget(endTarget, duration, callbacks)
 
     @Deprecated(
         "Should be removed once we turned on [refactorTaskbarUiState()] flag",

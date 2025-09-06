@@ -21,7 +21,6 @@ import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION;
 import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_APP;
 
-import android.animation.Animator;
 import android.content.Intent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -39,6 +38,7 @@ import com.android.launcher3.popup.SystemShortcut;
 import com.android.launcher3.taskbar.bubbles.BubbleBarController;
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator;
 import com.android.launcher3.taskbar.customization.TaskbarSpecsEvaluator;
+import com.android.launcher3.util.ThreadedAnimator;
 import com.android.launcher3.util.SplitConfigurationOptions;
 import com.android.quickstep.GestureState;
 import com.android.quickstep.RecentsAnimationCallbacks;
@@ -527,7 +527,7 @@ public class TaskbarUIController implements BubbleBarController.BubbleBarLocatio
      *                 automatically reset once the recents animation finishes
      * @return An optional Animator to play in parallel with the default gesture end animation.
      */
-    public @Nullable Animator getParallelAnimationToGestureEndTarget(
+    public @Nullable ThreadedAnimator getParallelAnimationToGestureEndTarget(
             GestureState.GestureEndTarget endTarget,
             long duration,
             RecentsAnimationCallbacks callbacks) {

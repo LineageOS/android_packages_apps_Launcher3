@@ -15,9 +15,12 @@
  */
 package com.android.launcher3.taskbar;
 
+import static com.android.launcher3.Flags.enableTaskbarUiThread;
 import static com.android.launcher3.Utilities.isRunningInTestHarness;
+import static com.android.launcher3.taskbar.TaskbarManagerImpl.TASKBAR_UI_THREAD;
 import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_APP;
 import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_STASHED_LAUNCHER_STATE;
+import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 
 import android.animation.Animator;
 
@@ -26,6 +29,9 @@ import androidx.annotation.Nullable;
 import com.android.launcher3.popup.SystemShortcut;
 import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.statemanager.StatefulContainer;
+import com.android.launcher3.util.ImmediateAnimator;
+import com.android.launcher3.util.TaskbarAsyncAnimator;
+import com.android.launcher3.util.ThreadedAnimator;
 import com.android.quickstep.FallbackActivityInterface;
 import com.android.quickstep.GestureState;
 import com.android.quickstep.RecentsAnimationCallbacks;
@@ -94,10 +100,24 @@ public class FallbackTaskbarUIController
 
     @Nullable
     @Override
-    public Animator getParallelAnimationToGestureEndTarget(GestureState.GestureEndTarget endTarget,
-            long duration, RecentsAnimationCallbacks callbacks) {
-        return createAnimToRecentsState(
-                FallbackActivityInterface.INSTANCE.stateFromGestureEndTarget(endTarget), duration);
+    public ThreadedAnimator getParallelAnimationToGestureEndTarget(
+            GestureState.GestureEndTarget endTarget,
+            long duration,
+            RecentsAnimationCallbacks callbacks) {
+        if (mControllers.taskbarActivityContext.isPhoneMode()) {
+            return null;
+        }
+        if (enableTaskbarUiThread()) {
+            return new TaskbarAsyncAnimator(TASKBAR_UI_THREAD, MAIN_EXECUTOR,
+                    () -> createAnimToRecentsState(
+                            FallbackActivityInterface.INSTANCE.stateFromGestureEndTarget(endTarget),
+                            duration));
+        } else {
+            Animator animator = createAnimToRecentsState(
+                    FallbackActivityInterface.INSTANCE.stateFromGestureEndTarget(endTarget),
+                    duration);
+            return animator != null ? new ImmediateAnimator(animator) : null;
+        }
     }
 
     /**
