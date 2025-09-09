@@ -111,7 +111,7 @@ class RecentsViewUtils(private val recentsView: RecentsView<*, *>) : DesktopVisi
         return otherTasks + externalDisplayTasks
     }
 
-    class TaskViewsIterable(val recentsView: RecentsView<*, *>) : Iterable<TaskView> {
+    open class TaskViewsIterable(val recentsView: RecentsView<*, *>) : Iterable<TaskView> {
         /** Iterates TaskViews when its index inside the RecentsView is needed. */
         fun forEachWithIndexInParent(consumer: BiConsumer<Int, TaskView>) {
             recentsView.children.forEachIndexed { index, child ->
