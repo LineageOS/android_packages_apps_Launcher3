@@ -36,6 +36,7 @@ import com.android.launcher3.AppFilter;
 import com.android.launcher3.compat.AlphabeticIndexCompat;
 import com.android.launcher3.dagger.LauncherAppSingleton;
 import com.android.launcher3.icons.IconCache;
+import com.android.launcher3.lineage.trust.HiddenAppsFilter;
 import com.android.launcher3.model.BgDataModel.Callbacks;
 import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.ItemInfo;
@@ -76,7 +77,7 @@ public class AllAppsList {
     private final IconCache mIconCache;
 
     @NonNull
-    private final AppFilter mAppFilter;
+    private final HiddenAppsFilter mAppFilter;
 
     private boolean mDataChanged = false;
     private Consumer<AppInfo> mRemoveListener = NO_OP_CONSUMER;
@@ -96,7 +97,7 @@ public class AllAppsList {
      * Boring constructor.
      */
     @Inject
-    public AllAppsList(IconCache iconCache, AppFilter appFilter) {
+    public AllAppsList(IconCache iconCache, HiddenAppsFilter appFilter) {
         mIconCache = iconCache;
         mAppFilter = appFilter;
         mIndex = new AlphabeticIndexCompat(LocaleList.getDefault());
