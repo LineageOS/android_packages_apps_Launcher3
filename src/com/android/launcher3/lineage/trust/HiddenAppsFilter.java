@@ -18,14 +18,19 @@ package com.android.launcher3.lineage.trust;
 import android.content.ComponentName;
 import android.content.Context;
 
+import com.android.launcher3.dagger.ApplicationContext;
+
 import com.android.launcher3.AppFilter;
 import com.android.launcher3.lineage.trust.db.TrustDatabaseHelper;
+
+import javax.inject.Inject;
 
 @SuppressWarnings("unused")
 public class HiddenAppsFilter extends AppFilter {
     private TrustDatabaseHelper mDbHelper;
 
-    public HiddenAppsFilter(Context context) {
+    @Inject
+    public HiddenAppsFilter(@ApplicationContext Context context) {
         super(context);
 
         mDbHelper = TrustDatabaseHelper.getInstance(context);
