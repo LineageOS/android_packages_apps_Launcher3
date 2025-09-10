@@ -24,7 +24,6 @@ import android.view.Display.DEFAULT_DISPLAY
 import androidx.test.filters.SmallTest
 import com.android.app.displaylib.DisplayRepository
 import com.android.app.displaylib.fakes.FakePerDisplayRepository
-import com.android.launcher3.Flags
 import com.android.launcher3.LauncherState
 import com.android.launcher3.statemanager.StateManager
 import com.android.launcher3.statemanager.StatefulActivity
@@ -516,16 +515,6 @@ class OverviewCommandHelperTest {
         }
 
     @Test
-    @DisableFlags(Flags.FLAG_HOME_BUTTON_USES_KEYCODE_HOME)
-    fun whenHomeCommandIsAdded_executeHomeAction_withKeycodeHomeDisabled() =
-        testScope.runTest {
-            val command = sut.addCommand(CommandType.HOME)!!
-            runCurrent()
-            verify(touchInteractionService).startActivity(any())
-            assertThat(command.status).isEqualTo(CommandStatus.COMPLETED)
-        }
-
-    @Test
     @EnableFlags(WindowFlags.FLAG_ENABLE_REJECT_HOME_TRANSITION)
     fun whenHomeCommandIsAdded_executeRejectHomeActionOnExternalDisplay() =
         testScope.runTest {
@@ -579,7 +568,6 @@ class OverviewCommandHelperTest {
         }
 
     @Test
-    @EnableFlags(Flags.FLAG_HOME_BUTTON_USES_KEYCODE_HOME)
     fun whenHomeCommandIsAdded_executeHomeAction_withKeycodeHomeEnabled() =
         testScope.runTest {
             sut.addCommand(CommandType.HOME)

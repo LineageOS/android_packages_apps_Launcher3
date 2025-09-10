@@ -34,7 +34,6 @@ import com.android.app.displaylib.PerDisplayRepository
 import com.android.app.tracing.traceSection
 import com.android.internal.jank.Cuj
 import com.android.launcher3.DeviceProfile
-import com.android.launcher3.Flags
 import com.android.launcher3.logger.LauncherAtom
 import com.android.launcher3.logging.StatsLogManager
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_OVERVIEW_SHOW_OVERVIEW_FROM_3_BUTTON
@@ -464,18 +463,12 @@ constructor(
 
             HOME -> {
                 if (displaySupportsHomeGesture(command.displayId)) {
-                    if (Flags.homeButtonUsesKeycodeHome()) {
-                        systemUiProxy.onKeyEvent(KeyEvent.KEYCODE_HOME, command.displayId)
-                    } else {
-                        // Although IActivityTaskManager$Stub$Proxy.startActivity is a slow binder
-                        // call, we should still call it on main thread because launcher is waiting
-                        // for ActivityTaskManager to resume it. Also calling startActivity() on bg
-                        // thread could potentially delay resuming launcher. See b/348668521 for
-                        // more details.
-                        touchInteractionService.startActivity(
-                            overviewComponentObserver.getHomeIntent(command.displayId)
-                        )
-                    }
+                    // Although IActivityTaskManager$Stub$Proxy.startActivity is a slow binder
+                    // call, we should still call it on main thread because launcher is waiting
+                    // for ActivityTaskManager to resume it. Also calling startActivity() on bg
+                    // thread could potentially delay resuming launcher. See b/348668521 for
+                    // more details.
+                    systemUiProxy.onKeyEvent(KeyEvent.KEYCODE_HOME, command.displayId)
                     return true
                 } else {
                     // Initiate a recents animation that is immediately rejected, which will
