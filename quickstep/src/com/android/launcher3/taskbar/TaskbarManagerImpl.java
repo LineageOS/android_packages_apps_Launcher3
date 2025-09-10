@@ -744,8 +744,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
             // primary display ID and only one of them is primary at a given time, the other one is
             // inactive or has limited functionality (has different display ID in that case).
             return new LauncherTaskbarUIController(
-                    new LauncherInteractor(quickstepLauncher,
-                            enableTaskbarUiThread()? MAIN_EXECUTOR : Runnable::run),
+                    new LauncherInteractor(quickstepLauncher),
                     quickstepLauncher.getLauncherUiState(),
                     SystemUiProxy.INSTANCE.get(quickstepLauncher).getHomeVisibilityState());
         }

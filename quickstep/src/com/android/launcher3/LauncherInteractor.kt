@@ -22,6 +22,7 @@ import android.window.RemoteTransition
 import androidx.annotation.AnyThread
 import androidx.annotation.MainThread
 import com.android.app.animation.Interpolators
+import com.android.launcher3.Flags.enableTaskbarUiThread
 import com.android.launcher3.Hotseat.ALPHA_CHANNEL_TASKBAR_ALIGNMENT
 import com.android.launcher3.logging.InstanceId
 import com.android.launcher3.logging.StatsLogManager
@@ -30,6 +31,8 @@ import com.android.launcher3.statemanager.StateManager.StateListener
 import com.android.launcher3.taskbar.TaskbarInteractor
 import com.android.launcher3.taskbar.bubbles.BubbleBarView
 import com.android.launcher3.uioverrides.QuickstepLauncher
+import com.android.launcher3.util.Executors.IMMEDIATE_EXECUTOR
+import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.SafeCloseable
 import com.android.quickstep.util.ScalingWorkspaceRevealAnim
 import com.android.quickstep.util.SplitTask
@@ -41,7 +44,9 @@ import javax.annotation.concurrent.ThreadSafe
 
 /** Expose [QuickstepLauncher] APIs to taskbar rendered on per-window UI thread. */
 @ThreadSafe
-class LauncherInteractor(private val launcher: QuickstepLauncher, val executor: Executor) {
+class LauncherInteractor(private val launcher: QuickstepLauncher) {
+
+    val executor: Executor = if (enableTaskbarUiThread()) MAIN_EXECUTOR else IMMEDIATE_EXECUTOR
 
     private var hotseatTranslationXAnimation: AnimatorSet? = null
 
@@ -124,15 +129,18 @@ class LauncherInteractor(private val launcher: QuickstepLauncher, val executor: 
     }
 
     @AnyThread
-    fun addStateListener(listener: StateListener<LauncherState>): SafeCloseable {
+    fun addStateListener(
+        listener: StateListener<LauncherState>,
+        runListenerExecutor: Executor,
+    ): SafeCloseable {
         val wrapperListener =
             object : StateListener<LauncherState>, SafeCloseable {
                 override fun onStateTransitionStart(toState: LauncherState?) {
-                    executor.execute { listener.onStateTransitionStart(toState) }
+                    runListenerExecutor.execute { listener.onStateTransitionStart(toState) }
                 }
 
                 override fun onStateTransitionComplete(finalState: LauncherState?) {
-                    executor.execute { listener.onStateTransitionComplete(finalState) }
+                    runListenerExecutor.execute { listener.onStateTransitionComplete(finalState) }
                 }
 
                 override fun close() {

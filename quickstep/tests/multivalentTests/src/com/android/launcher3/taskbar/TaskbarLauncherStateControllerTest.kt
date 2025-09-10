@@ -34,7 +34,7 @@ import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.uioverrides.QuickstepLauncher
-import com.android.launcher3.util.Executors.MAIN_EXECUTOR
+import com.android.launcher3.util.Executors.IMMEDIATE_EXECUTOR
 import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.LauncherMultivalentJUnit.EmulatedDevices
 import com.android.launcher3.util.MutableListenableRef
@@ -147,15 +147,12 @@ class TaskbarLauncherStateControllerTest {
                 on { launcherUiState } doReturn mockedLauncherUiState
             }
         val controllers = taskbarUnitTestRule.activityContext.controllers
-        val immediateExecutor = Executor { r -> r.run() }
-        val launcherExecutor: Executor =
-            if (enableTaskbarUiThread()) MAIN_EXECUTOR else immediateExecutor
         val taskbarExecutor: Executor =
-            if (enableTaskbarUiThread()) TASKBAR_UI_THREAD else immediateExecutor
+            if (enableTaskbarUiThread()) TASKBAR_UI_THREAD else IMMEDIATE_EXECUTOR
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             taskbarLauncherStateController.init(
                 controllers,
-                LauncherInteractor(quickstepLauncher, launcherExecutor),
+                LauncherInteractor(quickstepLauncher),
                 mockedLauncherUiState,
                 sysUiStateFlags,
                 taskbarExecutor,

@@ -23,6 +23,7 @@ import android.os.Process;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -75,6 +76,8 @@ public class Executors {
      */
     public static final LooperExecutor MAIN_EXECUTOR =
             new LooperExecutor(Looper.getMainLooper(), THREAD_PRIORITY_FOREGROUND);
+
+    public static final Executor IMMEDIATE_EXECUTOR = Runnable::run;
 
     /**
      * A background executor for using time sensitive actions where user is waiting for response.
