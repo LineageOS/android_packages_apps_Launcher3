@@ -82,7 +82,11 @@ class TaskContentView @JvmOverloads constructor(context: Context, attrs: Attribu
     private var onSizeChanged: ((width: Int, height: Int) -> Unit)? = null
 
     private val borderWidthPx: Int by lazy {
-        context.resources.getDimensionPixelSize(R.dimen.keyboard_quick_switch_border_width)
+        context.resources.getDimensionPixelSize(R.dimen.task_hover_focus_border_width)
+    }
+
+    private val borderOffsetPx: Int by lazy {
+        context.resources.getDimensionPixelSize(R.dimen.task_hover_focus_offset_size)
     }
 
     private var activeFocusAnimator: Animator? = null
@@ -131,9 +135,12 @@ class TaskContentView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     private val focusBorderAnimator: BorderAnimator by lazy {
         createSimpleBorderAnimator(
-            borderRadiusPx = taskCornerRadius.toInt(),
+            borderRadiusPx = taskCornerRadius.toInt() + borderOffsetPx,
             borderWidthPx = borderWidthPx,
-            boundsBuilder = { it.set(0, 0, width, height) },
+            boundsBuilder = {
+                it.set(0, 0, width, height)
+                it.inset(-borderOffsetPx, -borderOffsetPx)
+            },
             targetView = this,
             borderColor = focusBorderColor,
         )
@@ -141,9 +148,12 @@ class TaskContentView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     private val hoverBorderAnimator: BorderAnimator by lazy {
         createSimpleBorderAnimator(
-            borderRadiusPx = taskCornerRadius.toInt(),
+            borderRadiusPx = taskCornerRadius.toInt() + borderOffsetPx,
             borderWidthPx = borderWidthPx,
-            boundsBuilder = { it.set(0, 0, width, height) },
+            boundsBuilder = {
+                it.set(0, 0, width, height)
+                it.inset(-borderOffsetPx, -borderOffsetPx)
+            },
             targetView = this,
             borderColor = hoverBorderColor,
         )

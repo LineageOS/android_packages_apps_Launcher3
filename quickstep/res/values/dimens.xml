@@ -97,7 +97,8 @@
     <dimen name="task_thumbnail_header_icon_size">18dp</dimen>
     <dimen name="task_header_close_button_size">20dp</dimen>
     <dimen name="task_thumbnail_header_close_button_hit_rect_size">48dp</dimen>
-    <dimen name="task_thumbnail_header_round_corner_radius">16dp</dimen>
+    <dimen name="task_thumbnail_header_round_corner_radius">
+        @dimen/desktop_windowing_freeform_rounded_corner_radius</dimen>
     <!-- The size for non-overlapping layout in desktop tile -->
     <dimen name="desktop_vertical_padding_between_tasks">24dp</dimen>
     <dimen name="desktop_horizontal_padding_between_tasks">24dp</dimen>
@@ -107,6 +108,8 @@
     <dimen name="desktop_bottom_margin_multi_rows">24dp</dimen>
     <dimen name="desktop_left_right_margin_multi_rows">24dp</dimen>
     <dimen name="desktop_min_task_width">72dp</dimen>
+    <dimen name="task_hover_focus_border_width">3dp</dimen>
+    <dimen name="task_hover_focus_offset_size">2dp</dimen>
     <integer name="desktop_layout_max_rows">5</integer>
     <!-- The length of the fading edge (gradient) of the task header title -->
     <dimen name="task_header_title_fading_edge_length">28dp</dimen>
