@@ -40,6 +40,7 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.window.TransitionInfo;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 
 import com.android.launcher3.R;
@@ -48,6 +49,7 @@ import com.android.launcher3.statehandlers.DesktopVisibilityController;
 import com.android.launcher3.testing.TestLogging;
 import com.android.launcher3.testing.shared.TestProtocol;
 import com.android.launcher3.util.Preconditions;
+import com.android.launcher3.util.SafeCloseable;
 import com.android.launcher3.util.TraceHelper;
 import com.android.quickstep.AbsSwipeUpHandler;
 import com.android.quickstep.AbsSwipeUpHandler.Factory;
@@ -101,7 +103,9 @@ public class OtherActivityInputConsumer extends ContextWrapper implements InputC
     private VelocityTracker mVelocityTracker;
 
     private AbsSwipeUpHandler mInteractionHandler;
+    private @Nullable SafeCloseable mRemoveInteractionHandlerClosable;
     private final FinishImmediatelyHandler mCleanupHandler = new FinishImmediatelyHandler();
+    private @Nullable SafeCloseable mRemoveCleanUpHandlerClosable;
 
     private final boolean mIsDeferredDownTarget;
     private final boolean mIsDeferredDownDevice;
@@ -460,8 +464,11 @@ public class OtherActivityInputConsumer extends ContextWrapper implements InputC
         }
         if (mTaskAnimationManager.isRecentsAnimationRunning()) {
             mActiveCallbacks = mTaskAnimationManager.continueRecentsAnimation(mGestureState);
-            mActiveCallbacks.removeListener(mCleanupHandler);
-            mActiveCallbacks.addListener(mInteractionHandler);
+            if (mRemoveCleanUpHandlerClosable != null) {
+                mRemoveCleanUpHandlerClosable.close();
+                mRemoveCleanUpHandlerClosable = null;
+            }
+            mRemoveInteractionHandlerClosable = mActiveCallbacks.addListener(mInteractionHandler);
             mTaskAnimationManager.notifyRecentsAnimationState(mInteractionHandler);
             notifyGestureStarted(true /*isLikelyToStartNewTask*/);
         } else {
@@ -537,7 +544,7 @@ public class OtherActivityInputConsumer extends ContextWrapper implements InputC
                 } else {
                     // The animation hasn't started yet, so insert a replacement handler into the
                     // callbacks which immediately finishes the animation after it starts.
-                    mActiveCallbacks.addListener(mCleanupHandler);
+                    mRemoveCleanUpHandlerClosable = mActiveCallbacks.addListener(mCleanupHandler);
                 }
             }
             onConsumerAboutToBeSwitched();
@@ -583,8 +590,9 @@ public class OtherActivityInputConsumer extends ContextWrapper implements InputC
     }
 
     private void removeListener() {
-        if (mActiveCallbacks != null && mInteractionHandler != null) {
-            mActiveCallbacks.removeListener(mInteractionHandler);
+        if (mRemoveInteractionHandlerClosable != null) {
+            mRemoveInteractionHandlerClosable.close();
+            mRemoveInteractionHandlerClosable = null;
         }
     }
 
