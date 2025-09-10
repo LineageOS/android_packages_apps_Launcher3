@@ -4535,7 +4535,7 @@ public abstract class RecentsView<
         return anim;
     }
 
-    private boolean snapToPageRelative(int delta, boolean cycle,
+    protected boolean snapToPageRelative(int delta, boolean cycle,
             TaskGridNavHelper.TaskNavDirection direction) {
         // Set next page if scroll animation is still running, otherwise cannot snap to the
         // next page on successive key presses. Setting the current page aborts the scroll.
@@ -4554,6 +4554,16 @@ public abstract class RecentsView<
         snapToPage(newPage);
         View child = getChildAt(newPage);
         if (child != null) {
+            // TAB focuses first focusable (or last if direction reversed), including task itself.
+            if (direction == TaskGridNavHelper.TaskNavDirection.TAB) {
+                List<View> visibleFocusables = mUtils.getVisibleFocusables(child,
+                        delta > 0 ? FOCUS_FORWARD : FOCUS_BACKWARD);
+                if (!visibleFocusables.isEmpty()) {
+                    (delta > 0 ? visibleFocusables.getFirst()
+                            : visibleFocusables.getLast()).requestFocus();
+                    return true;
+                }
+            }
             child.requestFocus();
         }
         return true;
@@ -4681,22 +4691,7 @@ public abstract class RecentsView<
 
         switch (event.getKeyCode()) {
             case KeyEvent.KEYCODE_TAB: {
-                // When alt + tabbing on phones (KQS will handle on large screens) go to the next
-                // task.
-                if (event.isAltPressed()) {
-                    return snapToPageRelative(event.isShiftPressed() ? -1 : 1, true /* cycle */,
-                            TaskGridNavHelper.TaskNavDirection.TAB);
-                }
-                // If not alt + tabbing, tab cycles through the available views in a single task
-                // e.g. chip menu.
-                View currentFocus = findFocus();
-                if (currentFocus == null) return super.dispatchKeyEvent(event);
-
-                View nextFocus = focusSearch(currentFocus,
-                        event.isShiftPressed() ? FOCUS_BACKWARD : FOCUS_FORWARD);
-                if (nextFocus != null) {
-                    return nextFocus.requestFocus();
-                }
+                return mUtils.handleTabKeyEvent(event, super::dispatchKeyEvent);
             }
             case KeyEvent.KEYCODE_DPAD_RIGHT:
                 return snapToPageRelative(mIsRtl ? -1 : 1, true /* cycle */,
