@@ -28,6 +28,7 @@ import com.android.launcher3.Flags
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.InvariantDeviceProfile.OnIDPChangeListener
 import com.android.launcher3.LauncherModel
+import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.Utilities
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.graphics.ThemeManager
@@ -40,9 +41,12 @@ import com.android.launcher3.icons.LauncherIcons.IconPool
 import com.android.launcher3.logging.FileLog
 import com.android.launcher3.model.tasks.PackageUpdatedTask
 import com.android.launcher3.model.tasks.ShortcutsChangedTask
+import com.android.launcher3.model.tasks.UserAvailabilityChangedTask
+import com.android.launcher3.model.tasks.UserLockStateChangedTask
 import com.android.launcher3.notification.NotificationListener
 import com.android.launcher3.pm.InstallSessionHelper
 import com.android.launcher3.pm.UserCache
+import com.android.launcher3.pm.UserCache.UserChangeEvent
 import com.android.launcher3.shortcuts.ShortcutRequest
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
@@ -74,7 +78,11 @@ constructor(
     private val lifeCycle: DaggerSingletonTracker,
     private val homeScreenFilesChangedTask: HomeScreenFilesChangedTask.Factory,
     private val iconChangeTracker: IconChangeTracker,
+    private val prefs: LauncherPrefs,
 ) {
+
+    // only allow this once per reboot to reload work apps
+    private var mShouldReloadWorkProfile = true
 
     fun initialize(model: LauncherModel) {
         initializeDisplayEvents(model)
@@ -121,7 +129,9 @@ constructor(
         }
 
         // User changes
-        lifeCycle.addCloseable(userCache.addUserEventListener(model::onUserEvent))
+        lifeCycle.addCloseable(
+            userCache.userChanges.forEach(MODEL_EXECUTOR) { handleUserEvent(model, it) }
+        )
 
         // Private space settings changes
         val psSettingsListener = SettingsCache.OnChangeListener { model.forceReload() }
@@ -206,6 +216,49 @@ constructor(
                     )
                 }
             }
+    }
+
+    private fun handleUserEvent(model: LauncherModel, event: UserChangeEvent) {
+        val oldUser = event.oldUser
+        val newUser = event.newUser
+
+        when {
+            // User removed
+            oldUser != null && newUser == null -> {
+                if (oldUser.iconInfo.isWork) prefs.put(LauncherPrefs.WORK_EDU_STEP, 0)
+                model.forceReload()
+            }
+
+            // User added
+            oldUser == null && newUser != null -> model.forceReload()
+
+            // User changed
+            oldUser != null && newUser != null -> {
+                var handled = false
+                if (newUser.isQuietModeEnabled != oldUser.isQuietModeEnabled) {
+                    val isWork = newUser.iconInfo.isWork
+                    if (isWork && mShouldReloadWorkProfile && !newUser.isQuietModeEnabled) {
+                        // Force reload the first time work profile's quiet mode is disabled
+                        model.forceReload()
+                    } else {
+                        if (isWork) mShouldReloadWorkProfile = false
+                        model.enqueueModelUpdateTask(
+                            UserAvailabilityChangedTask(newUser.iconInfo.user)
+                        )
+                    }
+                    handled = true
+                }
+                if (newUser.isUnlocked != oldUser.isUnlocked) {
+                    model.enqueueModelUpdateTask(
+                        UserLockStateChangedTask(newUser.iconInfo.user, newUser.isUnlocked)
+                    )
+                    handled = true
+                }
+
+                // We don't know what changed, just reload to be safe
+                if (!handled) model.forceReload()
+            }
+        }
     }
 
     companion object {

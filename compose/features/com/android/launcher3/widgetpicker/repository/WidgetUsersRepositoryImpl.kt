@@ -18,6 +18,7 @@ package com.android.launcher3.widgetpicker.repository
 
 import android.content.Context
 import android.os.UserHandle
+import com.android.launcher3.concurrent.annotations.Background
 import com.android.launcher3.concurrent.annotations.BackgroundContext
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.model.StringCache
@@ -27,6 +28,7 @@ import com.android.launcher3.widgetpicker.data.repository.WidgetUsersRepository
 import com.android.launcher3.widgetpicker.shared.model.WidgetUserProfile
 import com.android.launcher3.widgetpicker.shared.model.WidgetUserProfileType
 import com.android.launcher3.widgetpicker.shared.model.WidgetUserProfiles
+import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineName
@@ -50,6 +52,7 @@ constructor(
     @ApplicationContext private val appContext: Context,
     private val userCache: UserCache,
     @BackgroundContext private val backgroundContext: CoroutineContext,
+    @Background private val backgroundExecutor: Executor,
 ) : WidgetUsersRepository {
     private var stringCache: StringCache = StringCache.EMPTY
     private var closableUseChangeListener: SafeCloseable? = null
@@ -69,7 +72,11 @@ constructor(
 
             closableUseChangeListener?.close()
             closableUseChangeListener =
-                userCache.addUserEventListener { userHandle, _ -> maybeUpdate(userHandle) }
+                userCache.userChanges.forEach(backgroundExecutor) {
+                    maybeUpdate(
+                        changedUser = it.newUser?.iconInfo?.user ?: it.oldUser?.iconInfo?.user
+                    )
+                }
         }
     }
 

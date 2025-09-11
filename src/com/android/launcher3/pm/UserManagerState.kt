@@ -68,4 +68,6 @@ class UserManagerState(private val userMap: Map<UserHandle, CachedUserInfo>) {
                 isUnlocked = true,
                 isQuietModeEnabled = false,
             )
+
+    fun getCachedInfoOrNull(user: UserHandle): CachedUserInfo? = userMap[user]
 }
