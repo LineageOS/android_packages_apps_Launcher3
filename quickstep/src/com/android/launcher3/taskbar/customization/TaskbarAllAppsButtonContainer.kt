@@ -72,15 +72,12 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
                 getAllAppsButton(activityContext.taskbarFeatureEvaluator.isTransient)
             )
         backgroundTintList = ColorStateList.valueOf(TRANSPARENT)
+        // TODO(b/445195034): refactor as part of the icon size change
+        val padding = activityContext.taskbarSpecsEvaluator.taskbarIconPadding
+        setPadding(padding)
         setIconDrawable(drawable)
-        if (!activityContext.isTransientTaskbar) {
-            setPadding(
-                dpToPx(
-                    (activityContext.taskbarSpecsEvaluator.taskbarIconPadding).toFloat(),
-                    activityContext,
-                )
-            )
-        }
+        width = spaceNeeded
+        height = spaceNeeded
         setForegroundTint(activityContext.getColor(R.color.all_apps_button_color))
     }
 

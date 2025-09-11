@@ -16,6 +16,7 @@
 
 package com.android.launcher3.taskbar.customization
 
+import com.android.launcher3.Utilities.dpToPx
 import com.android.launcher3.taskbar.TaskbarActivityContext
 import com.android.launcher3.taskbar.TaskbarPopupController
 
@@ -45,11 +46,10 @@ class TaskbarSpecsEvaluator(
     private var taskbarContainer: List<TaskbarContainer> = emptyList()
 
     val taskbarIconPadding: Int =
-        if (
-            TaskbarIconSpecs.transientOrPinnedTaskbarIconPaddingSize.size > taskbarIconSize.size &&
-                taskbarFeatureEvaluator.supportsTransitionToTransientTaskbar
-        ) {
-            (TaskbarIconSpecs.iconSize52dp.size - taskbarIconSize.size) / 2
+        if (taskbarActivityContext.isPinnedTaskbar) {
+            val sizeDifference =
+                (TaskbarIconSpecs.iconSize52dp.size - TaskbarIconSpecs.iconSize44dp.size).toFloat()
+            dpToPx(sizeDifference, taskbarActivityContext) / 2
         } else {
             0
         }
@@ -62,7 +62,7 @@ class TaskbarSpecsEvaluator(
         }
 
     fun getIconSizeByGrid(columns: Int, rows: Int): TaskbarIconSize {
-        return if (taskbarFeatureEvaluator.isTransient) {
+        return if (!taskbarFeatureEvaluator.hasNavButtons) {
             TaskbarIconSpecs.transientTaskbarIconSizeByGridSize.getOrDefault(
                 TransientTaskbarIconSizeKey(
                     columns,
