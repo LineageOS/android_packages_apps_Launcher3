@@ -705,3 +705,10 @@ flag {
   description: "Enables indicator for active app automation in Launcher"
   bug: "440353845"
 }
+
+flag {
+    name: "enable_swipe_up_magnetic_detach"
+    namespace: "launcher"
+    description: "Enables the magnetic detach effect to the swipe up from app gestures"
+    bug: "455552698"
+}
