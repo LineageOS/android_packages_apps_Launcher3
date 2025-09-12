@@ -66,7 +66,6 @@ class HomeScreenFilesMediaStoreProvider(
                                 uri,
                                 flags,
                                 query(uri),
-                                Process.myUserHandle(),
                                 inProgressMoveToHomeScreenUriAliases.remove(uri),
                             )
                         )
@@ -138,14 +137,19 @@ class HomeScreenFilesMediaStoreProvider(
                     val mimeTypeColumnIndex =
                         it.getColumnIndex(MediaStore.Files.FileColumns.MIME_TYPE)
                     val dataColumnIndex = it.getColumnIndex(MediaStore.Files.FileColumns.DATA)
+                    val user = Process.myUserHandle()
 
                     while (it.moveToNext()) {
                         val id = it.getLong(idColumnIndex)
                         val uri = MediaStore.Files.getContentUri(VOLUME_EXTERNAL_PRIMARY, id)
-                        val displayName = it.getString(displayNameColumnIndex)
-                        val mimeType = it.getStringOrNull(mimeTypeColumnIndex)
-                        val isDirectory = File(it.getString(dataColumnIndex)).isDirectory
-                        result[uri] = HomeScreenFile(displayName, mimeType, isDirectory)
+                        result[uri] =
+                            HomeScreenFile(
+                                uri = uri,
+                                displayName = it.getString(displayNameColumnIndex),
+                                mimeType = it.getStringOrNull(mimeTypeColumnIndex),
+                                isDirectory = File(it.getString(dataColumnIndex)).isDirectory,
+                                user = user,
+                            )
                     }
                 }
             return@Callable result
@@ -178,9 +182,11 @@ class HomeScreenFilesMediaStoreProvider(
                             it.getColumnIndex(MediaStore.Files.FileColumns.MIME_TYPE)
                         val dataColumnIndex = it.getColumnIndex(MediaStore.Files.FileColumns.DATA)
                         HomeScreenFile(
-                            it.getString(displayNameColumnIndex),
-                            it.getStringOrNull(mimeTypeColumnIndex),
-                            File(it.getString(dataColumnIndex)).isDirectory,
+                            uri = uri,
+                            displayName = it.getString(displayNameColumnIndex),
+                            mimeType = it.getStringOrNull(mimeTypeColumnIndex),
+                            isDirectory = File(it.getString(dataColumnIndex)).isDirectory,
+                            user = Process.myUserHandle(),
                         )
                     } else {
                         null

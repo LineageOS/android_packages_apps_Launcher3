@@ -24,7 +24,6 @@ import android.database.ContentObserver
 import android.database.MatrixCursor
 import android.net.Uri
 import android.os.Bundle
-import android.os.Process
 import android.provider.DocumentsContract
 import android.provider.DocumentsContract.EXTERNAL_STORAGE_PROVIDER_AUTHORITY
 import android.provider.DocumentsContract.EXTRA_URI
@@ -212,11 +211,13 @@ class HomeScreenFilesProviderTest {
 
         val uri1 = Uri.parse("content://media/external_primary/file/1")
         assertThat(result.containsKey(uri1)).isTrue()
+        assertThat(result[uri1]!!.uri).isEqualTo(uri1)
         assertThat(result[uri1]!!.displayName).isEqualTo("test.png")
         assertThat(result[uri1]!!.mimeType).isEqualTo("image/png")
 
         val uri2 = Uri.parse("content://media/external_primary/file/2")
         assertThat(result.containsKey(uri2)).isTrue()
+        assertThat(result[uri2]!!.uri).isEqualTo(uri2)
         assertThat(result[uri2]!!.displayName).isEqualTo("subfolder")
         assertThat(result[uri2]!!.mimeType).isNull()
 
@@ -281,10 +282,11 @@ class HomeScreenFilesProviderTest {
         val fileChange = fileChangeCaptor.firstValue
         assertThat(fileChange.uri).isEqualTo(Uri.parse("content://media/external_primary/file/1"))
         assertThat(fileChange.flags).isEqualTo(ContentResolver.NOTIFY_INSERT)
+        assertThat(fileChange.file.get()!!.uri)
+            .isEqualTo(Uri.parse("content://media/external_primary/file/1"))
         assertThat(fileChange.file.get()!!.displayName).isEqualTo("NEW_test.png")
         assertThat(fileChange.file.get()!!.mimeType).isEqualTo("image/png")
         assertThat(fileChange.file.get()!!.isDirectory).isFalse()
-        assertThat(fileChange.user).isEqualTo(Process.myUserHandle())
 
         lifeCycleTracker.close()
         verify(contentResolver, times(1))

@@ -17,6 +17,8 @@
 package com.android.launcher3.icons;
 
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT;
+import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FILE;
+import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FOLDER;
 import static com.android.launcher3.icons.cache.CacheLookupFlag.DEFAULT_LOOKUP_FLAG;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
@@ -53,6 +55,9 @@ import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.dagger.LauncherAppSingleton;
+import com.android.launcher3.homescreenfiles.HomeScreenFile;
+import com.android.launcher3.homescreenfiles.HomeScreenFilesCachingLogic;
+import com.android.launcher3.homescreenfiles.HomeScreenFilesUtilsKt;
 import com.android.launcher3.icons.cache.BaseIconCache;
 import com.android.launcher3.icons.cache.CacheLookupFlag;
 import com.android.launcher3.icons.cache.CachedObject;
@@ -342,9 +347,24 @@ public class IconCache extends BaseIconCache {
     public synchronized void getTitleAndIcon(
             @NonNull ItemInfoWithIcon info,
             @NonNull CacheLookupFlag lookupFlag) {
-        // null info means not installed, but if we have a component from the intent then
-        // we should still look in the cache for restored app icons.
-        if (info.getTargetComponent() == null) {
+        if ((info.itemType == ITEM_TYPE_FILE_SYSTEM_FILE
+                || info.itemType == ITEM_TYPE_FILE_SYSTEM_FOLDER)) {
+            HomeScreenFile hsf = HomeScreenFilesUtilsKt.getHomeScreenFile(info);
+            if (hsf == null) {
+                info.bitmap = getDefaultIcon(info.user);
+            } else {
+                CacheEntry entry = cacheLocked(
+                        HomeScreenFilesCachingLogic.INSTANCE.getComponent(hsf),
+                        info.user,
+                        () -> hsf,
+                        HomeScreenFilesCachingLogic.INSTANCE,
+                        lookupFlag
+                );
+                applyCacheEntry(entry, info);
+            }
+        } else if (info.getTargetComponent() == null) {
+            // null info means not installed, but if we have a component from the intent then
+            // we should still look in the cache for restored app icons.
             info.bitmap = getDefaultIcon(info.user);
             info.title = "";
             info.contentDescription = "";

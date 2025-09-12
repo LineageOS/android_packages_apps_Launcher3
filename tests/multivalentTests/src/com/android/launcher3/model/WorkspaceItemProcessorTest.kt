@@ -832,13 +832,27 @@ class WorkspaceItemProcessorTest {
     @Test
     fun addsRemainingFileSystemItemsThatWereNotPartOfRestore() {
         // Given
+        val uri1 = Uri.parse("content://media/external_primary/file/1")
+        val uri2 = Uri.parse("content://media/external_primary/file/2")
         val homeScreenFiles =
             lazyOf(
                 mapOf(
-                    Uri.parse("content://media/external_primary/file/1") to
-                        HomeScreenFile("file.png", "image/png", false),
-                    Uri.parse("content://media/external_primary/file/2") to
-                        HomeScreenFile("folder_a", null, true),
+                    uri1 to
+                        HomeScreenFile(
+                            uri = uri1,
+                            displayName = "file.png",
+                            mimeType = "image/png",
+                            isDirectory = false,
+                            user = Process.myUserHandle(),
+                        ),
+                    uri2 to
+                        HomeScreenFile(
+                            uri = uri2,
+                            displayName = "folder_a",
+                            mimeType = null,
+                            isDirectory = true,
+                            user = Process.myUserHandle(),
+                        ),
                 )
             )
         val maybeReservesSpaceForQsb: (ArrayList<WorkspaceItemInfo>) -> Boolean = { addItemsFinal ->
@@ -890,8 +904,7 @@ class WorkspaceItemProcessorTest {
                     Intent.FLAG_GRANT_READ_URI_PERMISSION or
                     Intent.FLAG_GRANT_WRITE_URI_PERMISSION
             )
-        assertThat(items.get(0).intent!!.data)
-            .isEqualTo(Uri.parse("content://media/external_primary/file/1"))
+        assertThat(items.get(0).intent!!.data).isEqualTo(uri1)
         assertThat(items.get(0).intent!!.type).isEqualTo("image/png")
 
         assertThat(items.get(1).id).isEqualTo(1)
@@ -910,8 +923,7 @@ class WorkspaceItemProcessorTest {
                     Intent.FLAG_GRANT_READ_URI_PERMISSION or
                     Intent.FLAG_GRANT_WRITE_URI_PERMISSION
             )
-        assertThat(items.get(1).intent!!.data)
-            .isEqualTo(Uri.parse("content://media/external_primary/file/2"))
+        assertThat(items.get(1).intent!!.data).isEqualTo(uri2)
         assertThat(items.get(1).intent!!.type).isEqualTo(DocumentsContract.Document.MIME_TYPE_DIR)
     }
 }

@@ -19,6 +19,8 @@ import static android.os.Process.myUserHandle;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FILE;
+import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FOLDER;
 import static com.android.launcher3.icons.IconCache.EXTRA_SHORTCUT_BADGE_OVERRIDE_PACKAGE;
 import static com.android.launcher3.icons.IconCacheUpdateHandlerTestKt.waitForUpdateHandlerToFinish;
 import static com.android.launcher3.icons.cache.CacheLookupFlag.DEFAULT_LOOKUP_FLAG;
@@ -49,6 +51,7 @@ import android.content.pm.ShortcutInfo.Builder;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.drawable.Icon;
+import android.net.Uri;
 import android.os.PersistableBundle;
 import android.os.UserHandle;
 import android.platform.test.annotations.DisableFlags;
@@ -61,6 +64,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.launcher3.LauncherAppState;
+import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils;
+import com.android.launcher3.icons.cache.BaseIconCache;
 import com.android.launcher3.icons.cache.CachingLogic;
 import com.android.launcher3.icons.cache.IconCacheUpdateHandler;
 import com.android.launcher3.icons.cache.LauncherActivityCachingLogic;
@@ -335,6 +340,35 @@ public class IconCacheTest {
             mIconCache.getTitleAndIcon(info, () -> lai, DEFAULT_LOOKUP_FLAG);
         });
         assertTrue(info.bitmap.getMatchingLookupFlag().hasThemeIcon());
+    }
+
+    @Test
+    public void fileSystemFileItemIconCachedInMemory() {
+        testFileSystemItemIconCachedInMemory("abc.pdf", ITEM_TYPE_FILE_SYSTEM_FILE);
+    }
+
+    @Test
+    public void fileSystemFolderItemIconCachedInMemory() {
+        testFileSystemItemIconCachedInMemory("folder_abc", ITEM_TYPE_FILE_SYSTEM_FOLDER);
+    }
+
+    private void testFileSystemItemIconCachedInMemory(String title, int itemType) {
+        String uri = "content://media/external_primary/file/1";
+        ComponentKey cacheKey = new ComponentKey(
+                new ComponentName("com.android.launcher3.homescreenfiles", uri), myUserHandle());
+
+        WorkspaceItemInfo info = new WorkspaceItemInfo();
+        info.title = title;
+        info.itemType = itemType;
+        info.intent = HomeScreenFilesUtils.Companion.buildLaunchIntent(Uri.parse(uri));
+        runOnExecutorSync(MODEL_EXECUTOR,
+                () -> mIconCache.getTitleAndIcon(info, DEFAULT_LOOKUP_FLAG));
+
+        runOnExecutorSync(MODEL_EXECUTOR, () -> {
+            BaseIconCache.CacheEntry entry = mIconCache.getInMemoryEntryLocked(cacheKey);
+            assertNotNull(entry);
+            assertEquals(title, entry.title.toString());
+        });
     }
 
     /**
