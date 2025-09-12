@@ -824,6 +824,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         boolean supportsOverflow = ENABLE_TASKBAR_OVERFLOW.isTrue() && recentTasks.size() > 1;
         int overflowSize = 0;
         boolean hasOverflow = false;
+        int indexOfIconInOverfow = 0;
         if (supportsOverflow && mTaskbarRecentsOverflowView != null) {
             // Need to account for All Apps and the divider. If we need to have an overflow, we will
             // have a divider for recents.
@@ -836,6 +837,10 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
             // then be to the right of them.
             if (hasOverflow && !mIsRtl) {
                 if (mPrevOverflowTasks.isEmpty()) {
+                    // If the icon moving to overflow icon is the first one within the icon, it
+                    // should be targeting index 1 instead of index 0.
+                    // Same logic applies to the last icon moving out of the overflow icon.
+                    indexOfIconInOverfow = 1;
                     addView(mTaskbarRecentsOverflowView, mNextViewIndex);
                 }
                 // NOTE: If overflow already existed, assume the overflow view is already
@@ -843,6 +848,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                 mNextViewIndex++;
             } else if (!hasOverflow && !mPrevOverflowTasks.isEmpty()) {
                 removeView(mTaskbarRecentsOverflowView);
+                indexOfIconInOverfow = 1;
                 mTaskbarRecentsOverflowView.clearItems();
             }
         } else if (mTaskbarRecentsOverflowView != null && !mPrevOverflowTasks.isEmpty()) {
@@ -904,7 +910,8 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                         || !recentTasksSet.contains(tag)
                         || overflownRecentsSet.contains(tag)) {
                     if (overflownRecentsSet.contains(tag)) {
-                        animateToOverflowOnOverlay(recentIcon);
+                        animateToOverflowOnOverlay(recentIcon, indexOfIconInOverfow);
+                        indexOfIconInOverfow = 0;
                     }
                     removeAndRecycle(recentIcon);
                     recentIcon = null;
@@ -936,7 +943,9 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
 
             if (recentIcon instanceof BubbleTextView btv) {
                 if (isFromOverflow) {
-                    animateFromOverflowOnOverlay(recentIcon, (SingleTask) task);
+                    animateFromOverflowOnOverlay(
+                            recentIcon, (SingleTask) task, indexOfIconInOverfow);
+                    indexOfIconInOverfow = 0;
                 }
                 applyGroupTaskToBubbleTextView(btv, task);
             }
@@ -996,7 +1005,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         bubbleTextView.setTag(handoffSuggestion);
     }
 
-    private void animateToOverflowOnOverlay(View icon) {
+    private void animateToOverflowOnOverlay(View icon, int indexOfIconInOverfow) {
         if (mTaskbarRecentsOverflowView == null) {
             removeAndRecycle(icon);
             return;
@@ -1023,7 +1032,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                         float endY = mTaskbarRecentsOverflowView.getY();
                         PointF overlayOffsets =
                                 mTaskbarRecentsOverflowView.getOverlayOffsetsForFirstItem(
-                                        /* isMovingAway= */ false);
+                                        /* isMovingAway= */ false, indexOfIconInOverfow);
                         Animator scaleAnim = ObjectAnimator.ofFloat(ghostIcon, SCALE_PROPERTY, 1f,
                                 TaskbarOverflowView.TWO_ITEM_ICONS_BOX_ASPECT_RATIO);
                         Runnable onEnd = () ->
@@ -1044,7 +1053,8 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                 && mTaskbarRecentsOverflowView.isFirstItemHiddenForAnimation();
     }
 
-    private void animateFromOverflowOnOverlay(View actualIcon, SingleTask task) {
+    private void animateFromOverflowOnOverlay(View actualIcon, SingleTask task,
+            int indexOfIconInOverfow) {
         if (mTaskbarRecentsOverflowView == null) {
             return;
         }
@@ -1063,7 +1073,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
 
                         PointF overlayOffsets =
                                 mTaskbarRecentsOverflowView.getOverlayOffsetsForFirstItem(
-                                        /* isMovingAway= */ true);
+                                        /* isMovingAway= */ true, indexOfIconInOverfow);
                         float startX = mTaskbarRecentsOverflowView.getX() + overlayOffsets.x;
                         float startY = mTaskbarRecentsOverflowView.getY() + overlayOffsets.y;
 

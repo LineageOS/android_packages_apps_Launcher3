@@ -545,13 +545,14 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
     /**
      * Calculate the x and y offsets of the first item.
      */
-    public PointF getOverlayOffsetsForFirstItem(boolean isMovingAway) {
+    public PointF getOverlayOffsetsForFirstItem(boolean isMovingAway, int indexOfItem) {
         int itemsToShow = Math.min(mItems.size(), MAX_ITEMS_IN_PREVIEW);
         int totalItems = isMovingAway && itemsToShow < MAX_ITEMS_IN_PREVIEW
                 ? itemsToShow + 1 : itemsToShow;
 
-        float xOffset = getItemXOffset(mItemIconCenterOffset, mIsRtlLayout, 0, totalItems);
-        float yOffset = getItemYOffset(mItemIconCenterOffset, 0, totalItems);
+        float xOffset = getItemXOffset(
+                mItemIconCenterOffset, mIsRtlLayout, indexOfItem, totalItems);
+        float yOffset = getItemYOffset(mItemIconCenterOffset, indexOfItem, totalItems);
 
         return new PointF(xOffset, yOffset);
     }
