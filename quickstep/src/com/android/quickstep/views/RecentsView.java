@@ -1235,7 +1235,8 @@ public abstract class RecentsView<
     }
 
     public void init(OverviewActionsView actionsView, SplitSelectStateController splitController,
-            @Nullable DesktopRecentsTransitionController desktopRecentsTransitionController) {
+            @Nullable DesktopRecentsTransitionController desktopRecentsTransitionController,
+            SurfaceTransactionApplier surfaceTransactionApplier) {
         mIs3PLauncher = !OverviewComponentObserver.INSTANCE.get(mContext).isHomeAndOverviewSame();
         mActionsView = actionsView;
         mActionsView.updateHiddenFlags(HIDDEN_NO_TASKS, !hasTaskViews());
@@ -1243,6 +1244,9 @@ public abstract class RecentsView<
         mActionsView.updateFor3pLauncher(mIs3PLauncher);
         mSplitSelectStateController = splitController;
         mDesktopRecentsTransitionController = desktopRecentsTransitionController;
+        // Set in launcher to be in sync with the other Surface transactions e.g. in
+        // BaseDepthController for applying blur.
+        mSyncTransactionApplier = surfaceTransactionApplier;
     }
 
     public SplitSelectStateController getSplitSelectController() {
@@ -1269,7 +1273,6 @@ public abstract class RecentsView<
         updateTaskStackListenerState();
         mModel.getThumbnailCache().getHighResLoadingState().addCallback(this);
         TaskStackChangeListeners.getInstance().registerTaskStackListener(mTaskStackListener);
-        mSyncTransactionApplier = new SurfaceTransactionApplier(this);
         runActionOnRemoteHandles(remoteTargetHandle -> remoteTargetHandle.getTransformParams()
                 .setSyncTransactionApplier(mSyncTransactionApplier));
         RecentsModel.INSTANCE.get(mContext).addThumbnailChangeListener(this);
@@ -3086,6 +3089,10 @@ public abstract class RecentsView<
         setEnableFreeScroll(true);
         setEnableDrawingLiveTile(mCurrentGestureEndTarget == GestureState.GestureEndTarget.RECENTS);
         Log.d(TAG, "onGestureAnimationEnd - mEnableDrawingLiveTile: " + mEnableDrawingLiveTile);
+        if (mEnableDrawingLiveTile) {
+            mBlurUtils.setDrawLiveTileBelowRecents(true);
+            redrawLiveTile();
+        }
         setRunningTaskHidden(false);
         startIconFadeInOnGestureComplete();
         setTaskIconVisible(true);

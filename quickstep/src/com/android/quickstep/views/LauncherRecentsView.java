@@ -46,6 +46,7 @@ import com.android.launcher3.util.SplitConfigurationOptions.SplitSelectSource;
 import com.android.quickstep.GestureState;
 import com.android.quickstep.SystemUiProxy;
 import com.android.quickstep.util.SplitSelectStateController;
+import com.android.quickstep.util.SurfaceTransactionApplier;
 import com.android.wm.shell.shared.GroupedTaskInfo;
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
 
@@ -74,8 +75,10 @@ public class LauncherRecentsView extends RecentsView<QuickstepLauncher, Launcher
     @Override
     public void init(OverviewActionsView actionsView,
             SplitSelectStateController splitPlaceholderView,
-            @Nullable DesktopRecentsTransitionController desktopRecentsTransitionController) {
-        super.init(actionsView, splitPlaceholderView, desktopRecentsTransitionController);
+            @Nullable DesktopRecentsTransitionController desktopRecentsTransitionController,
+            SurfaceTransactionApplier surfaceTransactionApplier) {
+        super.init(actionsView, splitPlaceholderView, desktopRecentsTransitionController,
+                surfaceTransactionApplier);
         setContentAlpha(0);
     }
 
@@ -180,9 +183,6 @@ public class LauncherRecentsView extends RecentsView<QuickstepLauncher, Launcher
 
         if (finalState.isRecentsViewVisible && finalState != OVERVIEW_MODAL_TASK) {
             setTaskBorderEnabled(true);
-        }
-        if (isOverlayEnabled) {
-            mBlurUtils.setDrawLiveTileBelowRecents(true);
         }
     }
 

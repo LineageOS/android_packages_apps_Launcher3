@@ -30,7 +30,6 @@ import android.util.FloatProperty;
 import android.util.Log;
 import android.view.CrossWindowBlurListeners;
 import android.view.SurfaceControl;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -150,10 +149,12 @@ public class BaseDepthController {
     /**
      * Sets the applier to use for syncing surface transactions to the RenderThread.
      *
-     * @param rootView The root view of the surface to apply the surface transactions to.
+     * @param surfaceTransactionApplier created in launcher to be in sync with the other Surface
+     *                                  transactions e.g. in RecentsView.
      */
-    public void setSurfaceTransactionApplier(View rootView) {
-        mSurfaceTransactionApplier = new SurfaceTransactionApplier(rootView);
+    public void setSurfaceTransactionApplier(
+            @Nullable SurfaceTransactionApplier surfaceTransactionApplier) {
+        mSurfaceTransactionApplier = surfaceTransactionApplier;
     }
 
     /**

@@ -85,6 +85,7 @@ import com.android.quickstep.fallback.RecentsDragLayer;
 import com.android.quickstep.fallback.RecentsState;
 import com.android.quickstep.util.RecentsAtomicAnimationFactory;
 import com.android.quickstep.util.SplitSelectStateController;
+import com.android.quickstep.util.SurfaceTransactionApplier;
 import com.android.quickstep.util.TISBindHelper;
 import com.android.quickstep.views.OverviewActionsView;
 import com.android.quickstep.views.RecentsView;
@@ -157,7 +158,7 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
             );
         }
         mFallbackRecentsView.init(mActionsView, mSplitSelectStateController,
-                mDesktopRecentsTransitionController);
+                mDesktopRecentsTransitionController, new SurfaceTransactionApplier(getRootView()));
 
         setContentView(rootView);
         rootView.getSysUiScrim().getSysUIProgress().updateValue(0);
