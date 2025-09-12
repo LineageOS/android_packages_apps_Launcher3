@@ -26,9 +26,8 @@ import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_180;
-import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_CHANGE;
+import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
@@ -93,9 +92,6 @@ import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.RemoteException;
-import android.view.IRemoteAnimationRunner;
-import android.window.IRemoteTransitionFinishedCallback;
-import android.window.TransitionInfo;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -116,9 +112,11 @@ import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 import android.window.DesktopModeFlags;
 import android.window.IRemoteTransition;
-import android.window.RemoteTransitionStub;
+import android.window.IRemoteTransitionFinishedCallback;
 import android.window.RemoteTransition;
+import android.window.RemoteTransitionStub;
 import android.window.TransitionFilter;
+import android.window.TransitionInfo;
 import android.window.WindowAnimationState;
 
 import androidx.annotation.NonNull;
@@ -187,7 +185,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.function.Function;
 
 /**
  * Manages the opening and closing app transitions from Launcher
@@ -883,29 +880,24 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                 : 0f;
         final float finalShadowRadius = appTargetsAreTranslucent ? 0 : mMaxShadowRadius;
 
-        MultiValueUpdateListener listener = new MultiValueUpdateListener() {
+        MultiValueUpdateListener listener = new MultiValueUpdateListener(mOpeningInterpolator) {
             FloatProp mDx = new FloatProp(0, prop.dX, mOpeningXInterpolator);
-            FloatProp mDy = new FloatProp(0, prop.dY, mOpeningInterpolator);
+            FloatProp mDy = new FloatProp(0, prop.dY);
 
             FloatProp mIconScaleToFitScreen = new FloatProp(prop.initialAppIconScale,
-                    prop.finalAppIconScale, mOpeningInterpolator);
+                    prop.finalAppIconScale);
             FloatProp mIconAlpha = new FloatProp(prop.iconAlphaStart, 0f,
                     clampToDuration(LINEAR, APP_LAUNCH_ALPHA_START_DELAY, APP_LAUNCH_ALPHA_DURATION,
                             APP_LAUNCH_DURATION));
 
-            FloatProp mWindowRadius = new FloatProp(initialWindowRadius,
-                    getWindowCornerRadius(mLauncher), mOpeningInterpolator);
-            FloatProp mShadowRadius = new FloatProp(0, finalShadowRadius,
-                    mOpeningInterpolator);
+            FloatProp mWindowRadius =
+                    new FloatProp(initialWindowRadius, getWindowCornerRadius(mLauncher));
+            FloatProp mShadowRadius = new FloatProp(0, finalShadowRadius);
 
-            FloatProp mCropRectCenterX = new FloatProp(prop.cropCenterXStart, prop.cropCenterXEnd,
-                    mOpeningInterpolator);
-            FloatProp mCropRectCenterY = new FloatProp(prop.cropCenterYStart, prop.cropCenterYEnd,
-                    mOpeningInterpolator);
-            FloatProp mCropRectWidth = new FloatProp(prop.cropWidthStart, prop.cropWidthEnd,
-                    mOpeningInterpolator);
-            FloatProp mCropRectHeight = new FloatProp(prop.cropHeightStart, prop.cropHeightEnd,
-                    mOpeningInterpolator);
+            FloatProp mCropRectCenterX = new FloatProp(prop.cropCenterXStart, prop.cropCenterXEnd);
+            FloatProp mCropRectCenterY = new FloatProp(prop.cropCenterYStart, prop.cropCenterYEnd);
+            FloatProp mCropRectWidth = new FloatProp(prop.cropWidthStart, prop.cropWidthEnd);
+            FloatProp mCropRectHeight = new FloatProp(prop.cropHeightStart, prop.cropHeightEnd);
 
             FloatProp mNavFadeOut = new FloatProp(1f, 0f, clampToDuration(
                     NAV_FADE_OUT_INTERPOLATOR, 0, ANIMATION_NAV_FADE_OUT_DURATION,
@@ -926,20 +918,17 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                     // Animate to above the taskbar.
                     int bottomLevel = Math.min(bottomInsetPos[0], bounds.bottom);
                     windowTargetBounds.bottom = bottomLevel;
-                    final int endHeight = bottomLevel - bounds.top;
 
                     AnimOpenProperties prop = new AnimOpenProperties(mLauncher.getResources(),
                             mDeviceProfile, windowTargetBounds, launcherIconBounds, v,
                             dragLayerBounds[0], dragLayerBounds[1], hasSplashScreen,
                             floatingView.isDifferentFromAppIcon());
-                    mCropRectCenterY = new FloatProp(prop.cropCenterYStart, prop.cropCenterYEnd,
-                            mOpeningInterpolator);
-                    mCropRectHeight = new FloatProp(prop.cropHeightStart, prop.cropHeightEnd,
-                            mOpeningInterpolator);
-                    mDy = new FloatProp(0, prop.dY, mOpeningInterpolator);
+                    mCropRectCenterY = new FloatProp(prop.cropCenterYStart, prop.cropCenterYEnd);
+                    mCropRectHeight = new FloatProp(prop.cropHeightStart, prop.cropHeightEnd);
+                    mDy = new FloatProp(0, prop.dY);
                     mIconScaleToFitScreen = new FloatProp(prop.initialAppIconScale,
-                            prop.finalAppIconScale, mOpeningInterpolator);
-                    float interpolatedPercent = mOpeningInterpolator.getInterpolation(percent);
+                            prop.finalAppIconScale);
+                    float interpolatedPercent = getDefaultInterpolator().getInterpolation(percent);
                     mCropRectHeight.value = Utilities.mapRange(interpolatedPercent,
                             prop.cropHeightStart, prop.cropHeightEnd);
                     mCropRectCenterY.value = Utilities.mapRange(interpolatedPercent,
@@ -1139,7 +1128,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         });
         floatingView.setFastFinishRunnable(animatorSet::end);
 
-        appAnimator.addUpdateListener(new MultiValueUpdateListener() {
+        appAnimator.addUpdateListener(new MultiValueUpdateListener(mOpeningInterpolator) {
             float mAppWindowScale = 1;
             final FloatProp mWidgetForegroundAlpha = new FloatProp(1, 0, clampToDuration(
                     LINEAR, 0, WIDGET_CROSSFADE_DURATION_MILLIS / 2, APP_LAUNCH_DURATION));
@@ -1151,19 +1140,18 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                     WIDGET_CROSSFADE_DURATION_MILLIS / 2 /* delay */,
                     WIDGET_CROSSFADE_DURATION_MILLIS / 2 /* duration */,
                     APP_LAUNCH_DURATION));
-            final FloatProp mWindowRadius = new FloatProp(initialWindowRadius, finalWindowRadius,
-                    mOpeningInterpolator);
-            final FloatProp mCornerRadiusProgress = new FloatProp(0, 1, mOpeningInterpolator);
+            final FloatProp mWindowRadius = new FloatProp(initialWindowRadius, finalWindowRadius);
+            final FloatProp mCornerRadiusProgress = new FloatProp(0, 1);
 
             // Window & widget background positioning bounds
             final FloatProp mDx = new FloatProp(widgetBackgroundBounds.centerX(),
                     windowTargetBounds.centerX(), mOpeningXInterpolator);
             final FloatProp mDy = new FloatProp(widgetBackgroundBounds.centerY(),
-                    windowTargetBounds.centerY(), mOpeningInterpolator);
+                    windowTargetBounds.centerY());
             final FloatProp mWidth = new FloatProp(widgetBackgroundBounds.width(),
-                    windowTargetBounds.width(), mOpeningInterpolator);
+                    windowTargetBounds.width());
             final FloatProp mHeight = new FloatProp(widgetBackgroundBounds.height(),
-                    windowTargetBounds.height(), mOpeningInterpolator);
+                    windowTargetBounds.height());
 
             final FloatProp mNavFadeOut = new FloatProp(1f, 0f, clampToDuration(
                     NAV_FADE_OUT_INTERPOLATOR, 0, ANIMATION_NAV_FADE_OUT_DURATION,

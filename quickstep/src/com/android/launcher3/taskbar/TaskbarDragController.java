@@ -801,10 +801,10 @@ public class TaskbarDragController extends DragController<BaseTaskbarContext> im
         }
         float toScale = iconSize / mDragIconSize;
         float toAlpha = (target == originalView) ? 1f : 0f;
-        MultiValueUpdateListener listener = new MultiValueUpdateListener() {
-            final FloatProp mDx = new FloatProp(fromX, toPosition[0], FAST_OUT_SLOW_IN);
-            final FloatProp mDy = new FloatProp(fromY, toPosition[1], FAST_OUT_SLOW_IN);
-            final FloatProp mScale = new FloatProp(1f, toScale, FAST_OUT_SLOW_IN);
+        MultiValueUpdateListener listener = new MultiValueUpdateListener(FAST_OUT_SLOW_IN) {
+            final FloatProp mDx = new FloatProp(fromX, toPosition[0]);
+            final FloatProp mDy = new FloatProp(fromY, toPosition[1]);
+            final FloatProp mScale = new FloatProp(1f, toScale);
             final FloatProp mAlpha = new FloatProp(1f, toAlpha, Interpolators.ACCELERATE_2);
             @Override
             public void onUpdate(float percent, boolean initOnly) {
