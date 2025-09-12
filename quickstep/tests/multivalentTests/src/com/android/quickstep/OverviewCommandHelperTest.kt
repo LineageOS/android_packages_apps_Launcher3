@@ -468,6 +468,7 @@ class OverviewCommandHelperTest {
     fun toggleWithFocus_recentViewVisible_windowTaskFocused_launchFocusedTask() =
         testScope.runTest {
             val mockFocusedTask = mock<TaskView>()
+            val callbackList = RunnableList()
 
             whenever(containerInterface.getVisibleRecentsView<RecentsView<*, *>>())
                 .thenReturn(recentView)
@@ -479,15 +480,25 @@ class OverviewCommandHelperTest {
                             listOf(mockFocusedTask).iterator()
                     }
                 )
-            sut.addCommand(CommandType.TOGGLE_WITH_FOCUS)!!
+            whenever(mockFocusedTask.launchWithAnimation()).thenReturn(callbackList)
+
+            val command = sut.addCommand(CommandType.TOGGLE_WITH_FOCUS)!!
             runCurrent()
+
             verify(mockFocusedTask).launchWithAnimation()
+            assertThat(command.status).isEqualTo(CommandStatus.PROCESSING)
+
+            callbackList.executeAllAndDestroy()
+            runCurrent()
+
+            assertThat(command.status).isEqualTo(CommandStatus.COMPLETED)
         }
 
     @Test
     fun toggleWithFocus_recentViewVisible_windowTaskHovered_launchHoveredTask() =
         testScope.runTest {
             val mockFocusedTask = mock<TaskView>()
+            val callbackList = RunnableList()
 
             whenever(containerInterface.getVisibleRecentsView<RecentsView<*, *>>())
                 .thenReturn(recentView)
@@ -500,15 +511,25 @@ class OverviewCommandHelperTest {
                             listOf(mockFocusedTask).iterator()
                     }
                 )
-            sut.addCommand(CommandType.TOGGLE_WITH_FOCUS)!!
+            whenever(mockFocusedTask.launchWithAnimation()).thenReturn(callbackList)
+
+            val command = sut.addCommand(CommandType.TOGGLE_WITH_FOCUS)!!
             runCurrent()
+
             verify(mockFocusedTask).launchWithAnimation()
+            assertThat(command.status).isEqualTo(CommandStatus.PROCESSING)
+
+            callbackList.executeAllAndDestroy()
+            runCurrent()
+
+            assertThat(command.status).isEqualTo(CommandStatus.COMPLETED)
         }
 
     @Test
     fun toggleWithFocus_recentViewVisible_desktopTaskFocused_launchFocusedTaskOnTop() =
         testScope.runTest {
             val mockDesktopTask = mock<DesktopTaskView>()
+            val callbackList = RunnableList()
 
             whenever(containerInterface.getVisibleRecentsView<RecentsView<*, *>>())
                 .thenReturn(recentView)
@@ -522,9 +543,13 @@ class OverviewCommandHelperTest {
                             listOf(mockDesktopTask).iterator()
                     }
                 )
-            sut.addCommand(CommandType.TOGGLE_WITH_FOCUS)!!
+            whenever(mockDesktopTask.launchWithAnimation()).thenReturn(callbackList)
+
+            val command = sut.addCommand(CommandType.TOGGLE_WITH_FOCUS)!!
             runCurrent()
+
             verify(mockDesktopTask).launchTaskWithDesktopController(true, TASK_ID)
+            assertThat(command.status).isEqualTo(CommandStatus.COMPLETED)
         }
 
     @Test
@@ -532,15 +557,25 @@ class OverviewCommandHelperTest {
         testScope.runTest {
             val mockTask = mock<TaskView>()
             val mockTaskViewsIterable = mock<RecentsViewUtils.TaskViewsIterable>()
+            val callbackList = RunnableList()
 
             whenever(containerInterface.getVisibleRecentsView<RecentsView<*, *>>())
                 .thenReturn(recentView)
             whenever(mockTaskViewsIterable.iterator()).thenReturn(emptyList<TaskView>().iterator())
             whenever(recentView.taskViews).thenReturn(mockTaskViewsIterable)
             whenever(recentView.currentPageTaskView).thenReturn(mockTask)
-            sut.addCommand(CommandType.TOGGLE_WITH_FOCUS)!!
+            whenever(mockTask.launchWithAnimation()).thenReturn(callbackList)
+
+            val command = sut.addCommand(CommandType.TOGGLE_WITH_FOCUS)!!
             runCurrent()
+
             verify(mockTask).launchWithAnimation()
+            assertThat(command.status).isEqualTo(CommandStatus.PROCESSING)
+
+            callbackList.executeAllAndDestroy()
+            runCurrent()
+
+            assertThat(command.status).isEqualTo(CommandStatus.COMPLETED)
         }
 
     @Test
