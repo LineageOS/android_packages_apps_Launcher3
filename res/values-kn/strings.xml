@@ -35,6 +35,8 @@
     <string name="close_task_accessibility" msgid="4765872229211282647">"%1$s ಮುಚ್ಚಿರಿ"</string>
     <string name="new_window_option_taskbar" msgid="6448780542727767211">"ಹೊಸ ವಿಂಡೋ"</string>
     <string name="manage_windows_option_taskbar" msgid="2294109489960654212">"ವಿಂಡೋಗಳನ್ನು ನಿರ್ವಹಿಸಿ"</string>
+    <!-- no translation found for close_app_taskbar (3238979263877091273) -->
+    <skip />
     <string name="save_app_pair" msgid="5647523853662686243">"ಆ್ಯಪ್ ಪೇರ್ ಸೇವ್ ಮಾಡಿ"</string>
     <string name="app_pair_default_title" msgid="4045241727446873529">"<xliff:g id="APP1">%1$s</xliff:g> | <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="app_pair_unlaunchable_at_screen_size" msgid="3446551575502685376">"ಈ ಆ್ಯಪ್ ಜೋಡಿಯು ಈ ಸಾಧನದಲ್ಲಿ ಬೆಂಬಲಿತವಾಗಿಲ್ಲ"</string>
@@ -133,11 +135,9 @@
     <string name="folder_closed" msgid="4100806530910930934">"ಫೋಲ್ಡರ್ ಮುಚ್ಚಿದೆ"</string>
     <string name="folder_renamed" msgid="1794088362165669656">"ಫೋಲ್ಡರ್‌ ಅನ್ನು <xliff:g id="NAME">%1$s</xliff:g> ಗೆ ಮರುಹೆಸರಿಸಲಾಗಿದೆ"</string>
     <string name="folder_name_format_exact" msgid="8626242716117004803">"ಫೋಲ್ಡರ್: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> ಐಟಂಗಳು"</string>
-    <!-- no translation found for folder_name_format_exact_with_dot (30828041991324911) -->
-    <skip />
+    <string name="folder_name_format_exact_with_dot" msgid="30828041991324911">"ಫೋಲ್ಡರ್: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> ಐಟಂಗಳು, ನೋಟಿಫಿಕೇಶನ್‌ಗಳನ್ನು ಹೊಂದಿವೆ"</string>
     <string name="folder_name_format_overflow" msgid="4270108890534995199">"ಫೋಲ್ಡರ್: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> ಅಥವಾ ಹೆಚ್ಚಿನ ಐಟಂಗಳು"</string>
-    <!-- no translation found for folder_name_format_overflow_with_dot (9174809519194154156) -->
-    <skip />
+    <string name="folder_name_format_overflow_with_dot" msgid="9174809519194154156">"ಫೋಲ್ಡರ್: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> ಅಥವಾ ಹೆಚ್ಚಿನ ಐಟಂಗಳು, ನೋಟಿಫಿಕೇಶನ್‌ಗಳನ್ನು ಹೊಂದಿವೆ"</string>
     <string name="unnamed_folder" msgid="2420192029474044442">"ಹೆಸರಿಲ್ಲದ ಫೋಲ್ಡರ್"</string>
     <string name="app_pair_name_format" msgid="8134106404716224054">"ಆ್ಯಪ್ ಜೋಡಿ: <xliff:g id="APP1">%1$s</xliff:g> ಮತ್ತು <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="styles_wallpaper_button_text" msgid="8216961355289236794">"ವಾಲ್‌ಪೇಪರ್ ಮತ್ತು ಶೈಲಿ"</string>
