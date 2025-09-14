@@ -49,7 +49,7 @@
     <string name="hotsaet_tip_prediction_disabled" msgid="1506426298884658491">"ಆ್ಯಪ್ ಸಲಹೆಗಳನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="gesture_tutorial_title" msgid="2750751261768388354">"ಜೆಸ್ಚರ್ ನ್ಯಾವಿಗೇಶನ್ ಟುಟೋರಿಯಲ್"</string>
     <string name="gesture_tutorial_rotation_prompt_title" msgid="7537946781362766964">"ನಿಮ್ಮ ಸಾಧನವನ್ನು ತಿರುಗಿಸಿ"</string>
-    <string name="gesture_tutorial_rotation_prompt" msgid="1664493449851960691">"ಗೆಸ್ಚರ್ ನ್ಯಾವಿಗೇಶನ್ ಟುಟೋರಿಯಲ್ ಅನ್ನು ಪೂರ್ಣಗೊಳಿಸಲು, ನಿಮ್ಮ ಸಾಧನವನ್ನು ತಿರುಗಿಸಿ"</string>
+    <string name="gesture_tutorial_rotation_prompt" msgid="1664493449851960691">"ಜೆಸ್ಚರ್ ನ್ಯಾವಿಗೇಶನ್ ಟುಟೋರಿಯಲ್ ಅನ್ನು ಪೂರ್ಣಗೊಳಿಸಲು, ನಿಮ್ಮ ಸಾಧನವನ್ನು ತಿರುಗಿಸಿ"</string>
     <string name="back_gesture_feedback_swipe_too_far_from_edge" msgid="4175100312909721217">"ನೀವು ಬಲಕೊನೆಯ ಅಂಚಿನಿಂದ ಅಥವಾ ಎಡಕೊನೆಯ ಅಂಚಿನಿಂದ ಸ್ವೈಪ್ ಮಾಡುತ್ತಿದ್ದೀರಿ ಎಂದು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ"</string>
     <string name="back_gesture_feedback_cancelled" msgid="762621530959111290">"ನೀವು ಬಲ ಅಥವಾ ಎಡ ಅಂಚಿನಿಂದ ಸ್ಕ್ರೀನ್‌ನ ಮಧ್ಯಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡುತ್ತಿದ್ದೀರಿ ಎಂದು ಖಚಿತಪಡಿಸಿಕೊಂಡು ಬಿಟ್ಟುಬಿಡಿ"</string>
     <string name="back_gesture_feedback_complete_with_overview_follow_up" msgid="9176400654037014471">"ಹಿಂದೆ ಹೋಗಲು ಬಲದಿಂದ ಸ್ವೈಪ್ ಮಾಡುವುದು ಹೇಗೆಂದು ಕಲಿತಿರಿ. ಮುಂದೆ, ಆ್ಯಪ್‌ಗಳನ್ನು ಬದಲಿಸುವುದು ಹೇಗೆಂದು ತಿಳಿಯಿರಿ."</string>
@@ -64,8 +64,8 @@
     <string name="home_gesture_feedback_swipe_too_far_from_edge" msgid="4816365433160895458">"ಸ್ಕ್ರೀನ್‌ನ ಕೆಳಗಿನ ಅಂಚಿನಿಂದ ನೀವು ಸ್ವೈಪ್ ಮಾಡುತ್ತಿದ್ದೀರಿ ಎಂದು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ"</string>
     <string name="home_gesture_feedback_overview_detected" msgid="5177627157303895077">"ವಿರಾಮಗೊಳಿಸದೆ ನಿಮ್ಮ ಬೆರಳನ್ನು ಸ್ಕ್ರೀನ್‌ನಿಂದ ಮೇಲೆತ್ತಿ"</string>
     <string name="home_gesture_feedback_wrong_swipe_direction" msgid="8328465201424027148">"ನೀವು ನೇರವಾಗಿ ಸ್ವೈಪ್ ಮಾಡುತ್ತಿದ್ದೀರಿ ಎಂದು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ"</string>
-    <string name="home_gesture_feedback_complete_with_follow_up" msgid="8766981412895888417">"ನೀವು ಹೋಮ್‌ಗೆ ಹೋಗಿ ಗೆಸ್ಚರ್ ಅನ್ನು ಪೂರ್ಣಗೊಳಿಸಿದ್ದೀರಿ. ಮುಂದೆ, ಹಿಂದಕ್ಕೆ ಹೋಗುವುದು ಹೇಗೆ ಎಂದು ತಿಳಿಯಿರಿ."</string>
-    <string name="home_gesture_feedback_complete_without_follow_up" msgid="2978063221383413443">"ನೀವು ಹೋಮ್‌ಗೆ ಹೋಗಿ ಗೆಸ್ಚರ್ ಅನ್ನು ಪೂರ್ಣಗೊಳಿಸಿದ್ದೀರಿ"</string>
+    <string name="home_gesture_feedback_complete_with_follow_up" msgid="8766981412895888417">"ನೀವು ಹೋಮ್‌ಗೆ ಹೋಗಿ ಜೆಸ್ಚರ್ ಅನ್ನು ಪೂರ್ಣಗೊಳಿಸಿದ್ದೀರಿ. ಮುಂದೆ, ಹಿಂದಕ್ಕೆ ಹೋಗುವುದು ಹೇಗೆ ಎಂದು ತಿಳಿಯಿರಿ."</string>
+    <string name="home_gesture_feedback_complete_without_follow_up" msgid="2978063221383413443">"ನೀವು ಹೋಮ್‌ಗೆ ಹೋಗಿ ಜೆಸ್ಚರ್ ಅನ್ನು ಪೂರ್ಣಗೊಳಿಸಿದ್ದೀರಿ"</string>
     <string name="home_gesture_intro_title" msgid="836590312858441830">"ಹೋಮ್ ಸ್ಕ್ರೀನ್‌ಗೆ ಹಿಂತಿರುಗಲು ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="home_gesture_intro_subtitle" msgid="2632238748497975326">"ಸ್ಕ್ರೀನ್‌ನ ಕೆಳಗಿನಿಂದ ಮೇಲೆ ಸ್ವೈಪ್ ಮಾಡಿ. ಈ ಗೆಸ್ಚರ್ ಯಾವಾಗಲೂ ನಿಮ್ಮನ್ನು ಹೋಮ್‌ ಸ್ಕ್ರೀನ್‌ಗೆ ಕರೆದೊಯ್ಯುತ್ತದೆ."</string>
     <string name="home_gesture_tutorial_title" msgid="3126834347496917376">"ಹೋಮ್‌ಗೆ ಹೋಗಿ"</string>
@@ -75,7 +75,7 @@
     <string name="overview_gesture_feedback_home_detected" msgid="663432226180397138">"ಬೆರಳನ್ನು ಮೇಲೆತ್ತುವ ಮೊದಲು ವಿಂಡೋವನ್ನು ಹೆಚ್ಚು ಸಮಯ ಹಿಡಿದಿಡಲು ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="overview_gesture_feedback_wrong_swipe_direction" msgid="1191055451018584958">"ನೀವು ನೇರವಾಗಿ ಸ್ವೈಪ್ ಮಾಡಿದ್ದೀರಿ ಎಂದು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ, ನಂತರ ವಿರಾಮಗೊಳಿಸಿ"</string>
     <string name="overview_gesture_feedback_complete_with_follow_up" msgid="3544611727467765026">"ಜೆಶ್ಚರ್‌ಗಳನ್ನು ಬಳಸುವುದು ಹೇಗೆಂದು ನೀವು ತಿಳಿದುಕೊಂಡಿರುವಿರಿ. ಜೆಶ್ಚರ್‌ಗಳನ್ನು ಆಫ್ ಮಾಡಲು, ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಹೋಗಿ."</string>
-    <string name="overview_gesture_feedback_complete_without_follow_up" msgid="2903050864432331629">"ನೀವು ಆ್ಯಪ್‌ಗಳನ್ನು ಬದಲಾಯಿಸುವ ಗೆಸ್ಚರ್ ಅನ್ನು ಪೂರ್ಣಗೊಳಿಸಿದ್ದೀರಿ"</string>
+    <string name="overview_gesture_feedback_complete_without_follow_up" msgid="2903050864432331629">"ನೀವು ಆ್ಯಪ್‌ಗಳನ್ನು ಬದಲಾಯಿಸುವ ಜೆಸ್ಚರ್ ಅನ್ನು ಪೂರ್ಣಗೊಳಿಸಿದ್ದೀರಿ"</string>
     <string name="overview_gesture_intro_title" msgid="2902054412868489378">"ಆ್ಯಪ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಲು ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="overview_gesture_intro_subtitle" msgid="4968091015637850859">"ಆ್ಯಪ್‌ಗಳ ನಡುವೆ ಬದಲಿಸಲು, ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ನ ಕೆಳಭಾಗದಿಂದ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ, ಹಿಡಿದಿಟ್ಟುಕೊಳ್ಳಿ, ನಂತರ ಬಿಟ್ಟುಬಿಡಿ."</string>
     <string name="overview_gesture_tutorial_title" msgid="4125835002668708720">"ಆ್ಯಪ್‌ಗಳನ್ನು ಬದಲಿಸಿ"</string>
