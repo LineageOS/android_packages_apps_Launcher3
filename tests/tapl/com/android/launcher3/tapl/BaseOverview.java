@@ -571,7 +571,7 @@ public class BaseOverview extends LauncherInstrumentation.VisibleContainer {
             return false;
         }
         boolean isTablet = mLauncher.isTablet();
-        if (isTablet && mLauncher.isGridOnlyOverviewEnabled()) {
+        if (isTablet) {
             testLogD(TAG, "Not expecting an actions bar: device is tablet with grid-only Overview");
             return false;
         }

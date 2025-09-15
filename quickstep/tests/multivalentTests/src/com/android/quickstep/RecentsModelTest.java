@@ -34,13 +34,11 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
-import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.launcher3.Flags;
 import com.android.launcher3.R;
 import com.android.launcher3.graphics.ThemeManager;
 import com.android.launcher3.icons.IconChangeTracker;
@@ -100,12 +98,8 @@ public class RecentsModelTest {
 
     @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
-    @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
-
     @Before
     public void setup() throws NoSuchFieldException {
-        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_GRID_ONLY_OVERVIEW);
         mTaskResult = getTaskResult();
         doAnswer(invocation-> {
             Consumer<ArrayList<GroupTask>> callback = invocation.getArgument(1);

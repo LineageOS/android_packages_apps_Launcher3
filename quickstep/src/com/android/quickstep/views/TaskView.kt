@@ -67,7 +67,6 @@ import com.android.launcher3.util.KFloatProperty
 import com.android.launcher3.util.MultiPropertyDelegate
 import com.android.launcher3.util.MultiPropertyFactory
 import com.android.launcher3.util.MultiValueAlpha
-import com.android.launcher3.util.OverviewReleaseFlags.enableGridOnlyOverview
 import com.android.launcher3.util.OverviewReleaseFlags.enableOverviewIconMenu
 import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.SplitConfigurationOptions
@@ -179,8 +178,7 @@ constructor(
 
     val isLargeTile: Boolean
         get() =
-            this == recentsView?.focusedTaskView ||
-                type == TaskViewType.DESKTOP ||
+            type == TaskViewType.DESKTOP ||
                 (isExternalDisplay && !enableOverviewOnConnectedDisplays())
 
     val recentsView: RecentsView<*, *>?
@@ -1767,19 +1765,9 @@ constructor(
                 if (
                     recentsView.isOnGridBottomRow(menuContainer.taskView) &&
                         container.deviceProfile.deviceProperties.isLandscape
-                ) {
-                    if (enableGridOnlyOverview()) {
-                        // With no focused task, there is less available space below the tasks, so
-                        // align the arrow to the third option in the menu.
-                        2
-                    } else {
-                        // Bottom row of landscape grid aligns arrow to second option to avoid
-                        // clipping
-                        1
-                    }
-                } else {
-                    0
-                }
+                )
+                    2
+                else 0
 
             TaskMenuViewWithArrow.showForTask(menuContainer, alignedOptionIndex) {
                 recentsView.setTaskBorderEnabled(true)
@@ -2027,10 +2015,8 @@ constructor(
                 it.digitalWellBeingToast?.bannerOffsetPercentage = modalness
             }
         }
-        if (enableGridOnlyOverview()) {
-            modalAlpha = if (isSelectedTask) 1f else (1f - modalness)
-            applyScale()
-        }
+        modalAlpha = if (isSelectedTask) 1f else (1f - modalness)
+        applyScale()
     }
 
     fun resetPersistentViewTransforms() {

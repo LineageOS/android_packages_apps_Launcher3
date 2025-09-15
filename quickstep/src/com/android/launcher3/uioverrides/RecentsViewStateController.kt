@@ -35,7 +35,6 @@ import com.android.launcher3.states.StateAnimationConfig.ANIM_OVERVIEW_SCALE
 import com.android.launcher3.states.StateAnimationConfig.ANIM_OVERVIEW_TRANSLATE_X
 import com.android.launcher3.states.StateAnimationConfig.ANIM_OVERVIEW_TRANSLATE_Y
 import com.android.launcher3.states.StateAnimationConfig.SKIP_OVERVIEW
-import com.android.launcher3.util.OverviewReleaseFlags.enableGridOnlyOverview
 import com.android.quickstep.util.AnimUtils
 import com.android.quickstep.views.AddDesktopButton
 import com.android.quickstep.views.ClearAllButton
@@ -143,8 +142,7 @@ class RecentsViewStateController(private val launcher: QuickstepLauncher) :
             toState.overviewModalness,
             config.getInterpolator(
                 ANIM_OVERVIEW_MODAL,
-                if (enableGridOnlyOverview() && !toState.isRecentsViewVisible) FINAL_FRAME
-                else LINEAR,
+                if (!toState.isRecentsViewVisible) FINAL_FRAME else LINEAR,
             ),
         )
 

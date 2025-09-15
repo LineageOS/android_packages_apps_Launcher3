@@ -21,13 +21,11 @@ import androidx.annotation.WorkerThread
 import com.android.launcher3.R
 import com.android.launcher3.util.CancellableTask
 import com.android.launcher3.util.Executors
-import com.android.launcher3.util.OverviewReleaseFlags.enableGridOnlyOverview
 import com.android.launcher3.util.Preconditions
 import com.android.launcher3.util.coroutines.DispatcherProvider
 import com.android.quickstep.task.thumbnail.data.TaskThumbnailDataSource
 import com.android.quickstep.util.TaskKeyByLastActiveTimeCache
 import com.android.quickstep.util.TaskKeyCache
-import com.android.quickstep.util.TaskKeyLruCache
 import com.android.systemui.shared.recents.model.Task
 import com.android.systemui.shared.recents.model.Task.TaskKey
 import com.android.systemui.shared.recents.model.ThumbnailData
@@ -54,13 +52,7 @@ internal constructor(
         bgExecutor: Executor,
         cacheSize: Int = context.resources.getInteger(R.integer.recentsThumbnailCacheSize),
         dispatcherProvider: DispatcherProvider,
-    ) : this(
-        context,
-        bgExecutor,
-        if (enableGridOnlyOverview()) TaskKeyByLastActiveTimeCache(cacheSize)
-        else TaskKeyLruCache(cacheSize),
-        dispatcherProvider,
-    )
+    ) : this(context, bgExecutor, TaskKeyByLastActiveTimeCache(cacheSize), dispatcherProvider)
 
     /**
      * Synchronously fetches the thumbnail for the given task at the specified resolution level, and
@@ -116,11 +108,7 @@ internal constructor(
 
             // Avoid an async timing issue that a low res entry replaces an existing high
             // res entry in high res enabled state, so we check before putting it to cache
-            if (
-                enableGridOnlyOverview() &&
-                    thumbnailData.reducedResolution &&
-                    highResLoadingState.isEnabled
-            ) {
+            if (thumbnailData.reducedResolution && highResLoadingState.isEnabled) {
                 val newCachedThumbnail = cache.getAndInvalidateIfModified(task.key)
                 if (
                     newCachedThumbnail?.thumbnail != null && !newCachedThumbnail.reducedResolution
@@ -205,11 +193,7 @@ internal constructor(
                 Consumer { result: ThumbnailData ->
                     // Avoid an async timing issue that a low res entry replaces an existing high
                     // res entry in high res enabled state, so we check before putting it to cache
-                    if (
-                        enableGridOnlyOverview() &&
-                            result.reducedResolution &&
-                            highResLoadingState.isEnabled
-                    ) {
+                    if (result.reducedResolution && highResLoadingState.isEnabled) {
                         val newCachedThumbnail = cache.getAndInvalidateIfModified(key)
                         if (
                             newCachedThumbnail?.thumbnail != null &&

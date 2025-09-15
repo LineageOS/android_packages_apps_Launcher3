@@ -21,7 +21,6 @@ import static com.android.launcher3.LauncherState.CLEAR_ALL_BUTTON;
 import static com.android.launcher3.LauncherState.OVERVIEW;
 import static com.android.launcher3.LauncherState.OVERVIEW_MODAL_TASK;
 import static com.android.launcher3.LauncherState.OVERVIEW_SPLIT_SELECT;
-import static com.android.launcher3.util.OverviewReleaseFlags.enableGridOnlyOverview;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -131,13 +130,8 @@ public class LauncherRecentsView extends RecentsView<QuickstepLauncher, Launcher
     public void onStateTransitionStart(LauncherState toState) {
         setOverviewStateEnabled(toState.isRecentsViewVisible);
 
-        if (enableGridOnlyOverview()) {
-            if (toState.displayOverviewTasksAsGrid(mContainer.getDeviceProfile())) {
-                setOverviewGridEnabled(true);
-            }
-        } else {
-            setOverviewGridEnabled(
-                    toState.displayOverviewTasksAsGrid(mContainer.getDeviceProfile()));
+        if (toState.displayOverviewTasksAsGrid(mContainer.getDeviceProfile())) {
+            setOverviewGridEnabled(true);
         }
         setOverviewFullscreenEnabled(toState.getOverviewFullscreenProgress() == 1);
         if (toState == OVERVIEW_MODAL_TASK) {
@@ -161,10 +155,8 @@ public class LauncherRecentsView extends RecentsView<QuickstepLauncher, Launcher
     public void onStateTransitionComplete(LauncherState finalState) {
         DesktopVisibilityController.INSTANCE.get(mContainer).onLauncherStateChanged(
                 mContainer.getDisplayId(), finalState);
-        if (enableGridOnlyOverview()) {
-            if (!finalState.displayOverviewTasksAsGrid(mContainer.getDeviceProfile())) {
-                setOverviewGridEnabled(false);
-            }
+        if (!finalState.displayOverviewTasksAsGrid(mContainer.getDeviceProfile())) {
+            setOverviewGridEnabled(false);
         }
 
         if (!finalState.isRecentsViewVisible) {

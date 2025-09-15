@@ -24,7 +24,6 @@ import static com.android.launcher3.config.FeatureFlags.FOLDABLE_SINGLE_PAGE;
 import static com.android.launcher3.testing.shared.TestProtocol.TEST_INFO_RESPONSE_FIELD;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
-import static com.android.launcher3.util.OverviewReleaseFlags.enableGridOnlyOverview;
 
 import android.app.Activity;
 import android.app.Application;
@@ -354,12 +353,6 @@ public class TestInformationHandler {
                         l -> l.getAppsView().getBottom()
                                 - l.getAppsView().getActiveRecyclerView().getBottom()
                                 + l.getAppsView().getActiveRecyclerView().getPaddingBottom());
-            }
-
-            case TestProtocol.REQUEST_FLAG_ENABLE_GRID_ONLY_OVERVIEW: {
-                response.putBoolean(TestProtocol.TEST_INFO_RESPONSE_FIELD,
-                        enableGridOnlyOverview());
-                return response;
             }
 
             case TestProtocol.REQUEST_IS_RECENTS_WINDOW_ENABLED: {

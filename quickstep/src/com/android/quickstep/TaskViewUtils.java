@@ -39,7 +39,6 @@ import static com.android.launcher3.QuickstepTransitionManager.SPLIT_DIVIDER_ANI
 import static com.android.launcher3.QuickstepTransitionManager.SPLIT_LAUNCH_DURATION;
 import static com.android.launcher3.Utilities.getDescendantCoordRelativeToAncestor;
 import static com.android.launcher3.util.MultiPropertyFactory.MULTI_PROPERTY_VALUE;
-import static com.android.launcher3.util.OverviewReleaseFlags.enableGridOnlyOverview;
 import static com.android.quickstep.BaseContainerInterface.getTaskDimension;
 import static com.android.quickstep.util.AnimUtils.clampToDuration;
 import static com.android.wm.shell.shared.TransitionUtil.TYPE_SPLIT_SCREEN_DIM_LAYER;
@@ -286,10 +285,6 @@ public final class TaskViewUtils {
             out.setFloat(tvsLocal.recentsViewScale,
                     AnimatedFloat.VALUE, tvsLocal.getFullScreenScale(),
                     TOUCH_RESPONSE);
-            if (!enableGridOnlyOverview()) {
-                out.setFloat(tvsLocal.recentsViewScroll, AnimatedFloat.VALUE, 0,
-                        TOUCH_RESPONSE);
-            }
 
             out.addListener(new AnimatorListenerAdapter() {
                 @Override
@@ -301,17 +296,15 @@ public final class TaskViewUtils {
                     }
                     applier.scheduleApply(showTransaction);
 
-                    if (enableGridOnlyOverview()) {
-                        taskView.getThumbnailBounds(TEMP_THUMBNAIL_BOUNDS, /*relativeToDragLayer=*/
-                                true);
-                        getTaskDimension(container.getDeviceProfile(),
-                                TEMP_TASK_DIMENSION);
-                        TEMP_FULLSCREEN_BOUNDS.set(0, 0, (int) TEMP_TASK_DIMENSION.x,
-                                (int) TEMP_TASK_DIMENSION.y);
-                        Utilities.getPivotsForScalingRectToRect(TEMP_THUMBNAIL_BOUNDS,
-                                TEMP_FULLSCREEN_BOUNDS, TEMP_PIVOT);
-                        tvsLocal.setPivotOverride(TEMP_PIVOT);
-                    }
+                    taskView.getThumbnailBounds(TEMP_THUMBNAIL_BOUNDS, /*relativeToDragLayer=*/
+                            true);
+                    getTaskDimension(container.getDeviceProfile(),
+                            TEMP_TASK_DIMENSION);
+                    TEMP_FULLSCREEN_BOUNDS.set(0, 0, (int) TEMP_TASK_DIMENSION.x,
+                            (int) TEMP_TASK_DIMENSION.y);
+                    Utilities.getPivotsForScalingRectToRect(TEMP_THUMBNAIL_BOUNDS,
+                            TEMP_FULLSCREEN_BOUNDS, TEMP_PIVOT);
+                    tvsLocal.setPivotOverride(TEMP_PIVOT);
                 }
             });
             out.addOnFrameCallback(() -> {
@@ -933,9 +926,6 @@ public final class TaskViewUtils {
 
             tvsLocal.fullScreenProgress.value = 0;
             tvsLocal.recentsViewScale.value = 1;
-            if (!enableGridOnlyOverview()) {
-                tvsLocal.setIsGridTask(taskView.isGridTask());
-            }
             tvsLocal.recentsViewScroll.value = scrollOffset;
             tvsLocal.taskSecondaryTranslation.value = gridTranslationY;
 

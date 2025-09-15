@@ -21,7 +21,6 @@ import static com.android.app.animation.Interpolators.LINEAR;
 import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.LauncherAnimUtils.SCRIM_COLORS;
 import static com.android.launcher3.MotionEventsUtils.isTrackpadMultiFingerSwipe;
-import static com.android.launcher3.util.OverviewReleaseFlags.enableGridOnlyOverview;
 import static com.android.quickstep.AbsSwipeUpHandler.RECENTS_ATTACH_DURATION;
 import static com.android.quickstep.GestureState.GestureEndTarget.HOME;
 import static com.android.quickstep.GestureState.GestureEndTarget.LAST_TASK;
@@ -526,9 +525,8 @@ public abstract class BaseContainerInterface<STATE_TYPE extends BaseState<STATE_
     public final void calculateModalTaskSize(Context context, DeviceProfile dp, Rect outRect,
             RecentsPagedOrientationHandler orientationHandler) {
         calculateTaskSize(context, dp, outRect, orientationHandler);
-        boolean isGridOnlyOverview = dp.getDeviceProperties().isTablet() && enableGridOnlyOverview();
         int minimumHorizontalPadding = 0;
-        if (!isGridOnlyOverview) {
+        if (!dp.getDeviceProperties().isTablet()) {
             float maxScale = context.getResources().getFloat(R.dimen.overview_modal_max_scale);
             minimumHorizontalPadding =
                     Math.round((dp.getDeviceProperties().getAvailableWidthPx() - outRect.width() * maxScale) / 2);
@@ -537,7 +535,7 @@ public abstract class BaseContainerInterface<STATE_TYPE extends BaseState<STATE_
                 context,
                 dp,
                 dp.getOverviewProfile().getTaskMarginPx(),
-                getModalClaimedSpaceBelow(dp, outRect, isGridOnlyOverview),
+                getModalClaimedSpaceBelow(dp, outRect, dp.getDeviceProperties().isTablet()),
                 minimumHorizontalPadding,
                 1f /*maxScale*/,
                 Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM,
