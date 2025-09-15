@@ -16,11 +16,12 @@
 
 package com.android.quickstep.views
 
+import android.animation.AnimatorSet
 import android.app.ActivityTaskManager.INVALID_TASK_ID
 import android.view.View
+import androidx.core.animation.addListener
 import androidx.core.graphics.toRectF
 import androidx.core.view.children
-import androidx.core.view.contains
 import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.FloatValueHolder
 import androidx.dynamicanimation.animation.SpringAnimation
@@ -188,8 +189,15 @@ constructor(
                 // Only reflow, as there is no dismissed task to animate.
                 springSet = reflowSpringSet
             } else if (reflowSpringSet != null) {
+                // Recents scale should only matter when dismissing the home task in 3p launchers,
+                // as recents scales during swipe up while the home task is dismissed. Otherwise,
+                // when dismissing we should be at the default recents scale.
+                val driverThreshold =
+                    dismissedTaskSecondaryDimension *
+                        verticalFactor *
+                        RECENTS_SCALE_PROPERTY.get(recentsView)
                 springSet.playAfterThreshold(
-                    driverThreshold = dismissedTaskSecondaryDimension * verticalFactor,
+                    driverThreshold = driverThreshold,
                     triggeredSpringSet = reflowSpringSet,
                 )
             }
@@ -232,7 +240,7 @@ constructor(
             endRunnable()
             return null
         }
-        return springSet.addEndListener(endRunnable).start()
+        return springSet.addEndListener(endRunnable)
     }
 
     /** Default dismissed task view spring animation. */
@@ -1238,6 +1246,7 @@ constructor(
         private val endListenerSet = mutableSetOf<() -> Unit>()
         private var hasStarted = false
         private var hasEnded = false
+        private var isEnding = false
 
         init {
             trackSpring(driverSpring, driverSpringThreshold)
@@ -1258,7 +1267,7 @@ constructor(
         }
 
         private fun onEnd() {
-            if (hasEnded) {
+            if (hasEnded || isEnding) {
                 return
             }
             hasEnded = true
@@ -1269,6 +1278,20 @@ constructor(
             driverSpring.cancel()
             trackedSprings.forEach { it.cancel() }
             trackedSpringSets.forEach { it.cancel() }
+            onEnd()
+            return this
+        }
+
+        fun end(): SpringSet {
+            if (hasEnded || isEnding) return this
+            // Ensure all springs pause before skipping to end, to ensure the correct ending order.
+            isEnding = true // Prevent cancel from running the onEnd callbacks prematurely.
+            trackedSprings.forEach { it.cancel() }
+            trackedSpringSets.forEach { it.end() }
+            trackedSprings.forEach { it.skipToEnd() }
+
+            // Finally, call the onEnd callbacks for each SpringSet.
+            isEnding = false
             onEnd()
             return this
         }
@@ -1376,6 +1399,14 @@ constructor(
             }
             return this
         }
+    }
+
+    fun AnimatorSet.play(springSet: SpringSet) {
+        addListener(
+            onStart = { springSet.start() },
+            onCancel = { springSet.cancel() },
+            onEnd = { springSet.end() },
+        )
     }
 
     data class GridEndData(
