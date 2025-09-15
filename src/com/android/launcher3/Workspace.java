@@ -37,6 +37,7 @@ import static com.android.launcher3.LauncherState.SPRING_LOADED;
 import static com.android.launcher3.MotionEventsUtils.isTrackpadMotionEvent;
 import static com.android.launcher3.MotionEventsUtils.isTrackpadMultiFingerSwipe;
 import static com.android.launcher3.Utilities.qsbOnFirstScreen;
+import static com.android.launcher3.Utilities.shouldEnableCursorDrivenWorkflows;
 import static com.android.launcher3.Utilities.shouldEnableMouseInteractionChanges;
 import static com.android.launcher3.anim.AnimatorListeners.forSuccessCallback;
 import static com.android.launcher3.config.FeatureFlags.FOLDABLE_SINGLE_PAGE;
@@ -129,6 +130,7 @@ import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.statemanager.StateManager.StateHandler;
 import com.android.launcher3.statemanager.StateManager.StateListener;
 import com.android.launcher3.states.StateAnimationConfig;
+import com.android.launcher3.testing.shared.ResourceUtils;
 import com.android.launcher3.touch.WorkspaceTouchListener;
 import com.android.launcher3.util.EdgeEffectCompat;
 import com.android.launcher3.util.Executors;
@@ -313,6 +315,8 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     private final List<LauncherOverlayCallbacks> mOverlayCallbacks = new ArrayList<>();
 
     private boolean mForceDrawAdjacentPages = false;
+
+    private boolean mZoomDuringSpringLoaded = true;
 
     // Handles workspace state transitions
     private final WorkspaceStateTransitionAnimation mStateTransitionAnimation;
@@ -546,6 +550,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             mAccessibilityDragListener.onDragStart(dragObject, options);
         }
         if (!mLauncher.isInState(EDIT_MODE)) {
+            mZoomDuringSpringLoaded = !shouldEnableCursorDrivenWorkflows(getContext());
             mLauncher.getStateManager().goToState(SPRING_LOADED);
         }
         mStatsLogManager.logger().withItemInfo(dragObject.dragInfo)
@@ -561,8 +566,16 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         mDeferRemoveExtraEmptyScreen = true;
     }
 
+    /**
+     * Indicates whether zoom effect should be applied for SPRING_LOADED state.
+     */
+    public boolean shouldZoomDuringSpringLoaded() {
+        return mZoomDuringSpringLoaded;
+    }
+
     @Override
     public void onDragEnd() {
+        mZoomDuringSpringLoaded = !shouldEnableMouseInteractionChanges(getContext());
         if (ENFORCE_DRAG_EVENT_ORDER) {
             enforceDragParity("onDragEnd", 0, 0);
         }
@@ -2540,6 +2553,8 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     }
 
     public void onDragOver(DragObject d) {
+        handleSpringLoadedStateZoom(d);
+
         // Skip drag over events while we are dragging over side pages
         if (!transitionStateShouldAllowDrop()) return;
 
@@ -2602,6 +2617,24 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                     mDragTargetLayout.revertTempState();
                 }
             }
+        }
+    }
+
+    private void handleSpringLoadedStateZoom(DragObject d) {
+        boolean useDesktopEdit = shouldEnableCursorDrivenWorkflows(getContext());
+        if (useDesktopEdit && mLauncher.isInState(SPRING_LOADED)) {
+            int screenWidth = getMeasuredWidth();
+            int edgeMargin =  ResourceUtils.pxFromDp(40,
+                    mLauncher.getResources().getDisplayMetrics());
+            boolean isNearEdge = d.x - getScrollX() < edgeMargin
+                    || d.x - getScrollX() > screenWidth - edgeMargin;
+            if (mZoomDuringSpringLoaded != isNearEdge) {
+                // Only updates UI and reanimates when needed.
+                mZoomDuringSpringLoaded = isNearEdge;
+                mLauncher.getStateManager().reapplyAnimation();
+            }
+        } else {
+            mZoomDuringSpringLoaded = true;
         }
     }
 
