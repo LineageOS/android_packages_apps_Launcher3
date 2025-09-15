@@ -491,6 +491,13 @@ flag {
 }
 
 flag {
+  name: "enable_folder_refactor"
+  namespace: "launcher"
+  description: "Enables significant refactoring for Launcher folders"
+  bug: "387543793"
+}
+
+flag {
   name: "model_repository"
   namespace: "launcher"
   description: "Adds various data repositories for the model"
