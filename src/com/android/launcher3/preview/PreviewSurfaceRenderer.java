@@ -58,7 +58,6 @@ import com.android.launcher3.preview.PreviewContext.PreviewAppComponent;
 import com.android.launcher3.util.RunnableList;
 import com.android.launcher3.util.Themes;
 import com.android.launcher3.widget.LocalColorExtractor;
-import com.android.systemui.shared.Flags;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -122,9 +121,8 @@ public class PreviewSurfaceRenderer {
         mLifeCycleTracker = lifecycleTracker;
 
         mWallpaperColors = bundle.getParcelable(KEY_COLORS);
-        if (Flags.newCustomizationPickerUi()) {
-            updateColorOverrides(bundle);
-        }
+        updateColorOverrides(bundle);
+
         mHideQsb = bundle.getBoolean(GridCustomizationsProxy.KEY_HIDE_BOTTOM_ROW);
 
         mHostToken = bundle.getBinder(KEY_HOST_TOKEN);
@@ -313,7 +311,7 @@ public class PreviewSurfaceRenderer {
         final SparseIntArray wallpaperColorResources;
 
         LocalColorExtractor localColorExtractor = mAppComponent.getLocalColorExtractor();
-        if (Flags.newCustomizationPickerUi() && mPreviewColorOverride != null) {
+        if (mPreviewColorOverride != null) {
             localColorExtractor
                     .applyColorsOverride(context, mPreviewColorOverride);
             wallpaperColorResources = mPreviewColorOverride;
@@ -352,20 +350,6 @@ public class PreviewSurfaceRenderer {
                 mHeight / (float) view.getMeasuredHeight());
         view.setScaleX(scale);
         view.setScaleY(scale);
-
-        if (!Flags.newCustomizationPickerUi()) {
-            view.setAlpha(mSkipAnimations ? 1 : 0);
-            view.animate().alpha(1)
-                    .setInterpolator(new AccelerateDecelerateInterpolator())
-                    .setDuration(FADE_IN_ANIMATION_DURATION)
-                    .start();
-            mSurfaceControlViewHost.setView(
-                    view,
-                    view.getMeasuredWidth(),
-                    view.getMeasuredHeight()
-            );
-            return;
-        }
 
         LayoutParams lp = new LayoutParams(view.getMeasuredWidth(), view.getMeasuredHeight());
         lp.gravity = Gravity.CENTER;
