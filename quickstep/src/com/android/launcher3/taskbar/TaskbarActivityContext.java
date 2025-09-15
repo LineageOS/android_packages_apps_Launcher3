@@ -180,7 +180,6 @@ import com.android.quickstep.util.SingleTask;
 import com.android.quickstep.util.SlideInRemoteTransition;
 import com.android.quickstep.util.SplitTask;
 import com.android.quickstep.views.DesktopTaskView;
-import com.android.quickstep.views.RecentsView;
 import com.android.quickstep.views.TaskView;
 import com.android.systemui.animation.ViewRootSync;
 import com.android.systemui.rotation.impl.RotationPolicyWrapperImpl;
@@ -1632,7 +1631,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     // schedules the provided runnable.
     // Returns whether the runnable has been posted.
     private boolean runAfterLaunchingDesktopTaskIfInOverview(
-            RecentsView recents,
+            RecentsViewInteractor recents,
             Runnable runnableToRun) {
         if (recents == null || !isTaskbarShowingDesktopTasks()
                 || !mControllers.uiController.isInOverviewUi()
@@ -1653,7 +1652,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
 
     protected void onTaskbarIconClicked(View view) {
         TaskbarUIController taskbarUIController = mControllers.uiController;
-        RecentsView recents = taskbarUIController.getRecentsView();
+        RecentsViewInteractor recents = taskbarUIController.getRecentsViewInteractor();
         boolean shouldCloseAllOpenViews = true;
         Object tag = view.getTag();
 
@@ -1840,7 +1839,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
 
         if (task instanceof SingleTask singleTask) {
             TaskbarUIController taskbarUIController = mControllers.uiController;
-            RecentsView recents = taskbarUIController.getRecentsView();
+            RecentsViewInteractor recents = taskbarUIController.getRecentsViewInteractor();
 
             if (DesktopExperienceFlags.ENABLE_TASKBAR_RUNNING_TASKS_IN_SPLITSCREEN_SELECT_BUGFIX
                     .isTrue() && recents != null && recents.isSplitSelectionActive()) {
@@ -1898,7 +1897,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
      * Runs when the user taps a Taskbar icon in TaskbarActivityContext (Overview or inside an app),
      * and calls the appropriate method to animate and launch.
      */
-    private void launchFromTaskbar(@Nullable RecentsView recents, @Nullable View launchingIconView,
+    private void launchFromTaskbar(
+            @Nullable RecentsViewInteractor recents, @Nullable View launchingIconView,
             List<? extends ItemInfo> itemInfos) {
         if (isInApp()) {
             launchFromInAppTaskbar(recents, launchingIconView, itemInfos);
@@ -1910,7 +1910,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     /**
      * Runs when the user taps a Taskbar icon while inside an app.
      */
-    private void launchFromInAppTaskbar(@Nullable RecentsView recents,
+    private void launchFromInAppTaskbar(@Nullable RecentsViewInteractor recents,
             @Nullable View launchingIconView, List<? extends ItemInfo> itemInfos) {
         boolean launchedFromExternalDisplay =
                 DesktopExperienceFlags.ENABLE_TASKBAR_CONNECTED_DISPLAYS.isTrue()
@@ -1925,11 +1925,9 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             // If the icon is an app pair, the logic gets a bit complicated because we play
             // different animations depending on which app (or app pair) is currently running on
             // screen, so delegate logic to appPairsController.
-            if (recents != null && recents.getSplitSelectController() != null
-                    && launchingIconView != null) {
+            if (recents != null && launchingIconView != null) {
                 // TODO: b/441341469 - Split screen should be handled correctly on CD.
-                recents.getSplitSelectController().getAppPairsController()
-                        .handleAppPairLaunchInApp((AppPairIcon) launchingIconView, itemInfos);
+                recents.handleAppPairLaunchInApp((AppPairIcon) launchingIconView, itemInfos);
             }
         } else {
             // Tapped a single app, nothing complicated here.
@@ -1943,7 +1941,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
      * as if the user tapped on it (preserving the split pair). Otherwise, launch it normally
      * (potentially breaking a split pair).
      */
-    private void launchFromOverviewTaskbar(@Nullable RecentsView recents,
+    private void launchFromOverviewTaskbar(@Nullable RecentsViewInteractor recents,
             @Nullable View launchingIconView, List<? extends ItemInfo> itemInfos) {
         if (recents == null) {
             return;
@@ -1953,7 +1951,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         // Convert the list of ItemInfo instances to a list of ComponentKeys
         List<ResolvedTargetInfo> resolvedTargetInfo =
                 itemInfos.stream().map(ItemInfo::getResolvedTargetInfo).toList();
-        recents.getSplitSelectController().findLastActiveTasksAndRunCallback(
+        recents.findLastActiveTasksAndRunCallback(
                 resolvedTargetInfo,
                 isLaunchingAppPair,
                 foundTasks -> {
@@ -1977,10 +1975,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                         recents.switchToScreenshot(() ->
                                 recents.finishRecentsAnimation(true /*toHome*/,
                                         false /*shouldPip*/,
-                                        () -> recents
-                                                .getSplitSelectController()
-                                                .getAppPairsController()
-                                                .launchAppPair((AppPairIcon) launchingIconView,
+                                        () -> recents.launchAppPair((AppPairIcon) launchingIconView,
                                                         -1 /*cuj*/)));
                     } else {
                         Runnable launchTask =
@@ -2018,7 +2013,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                 // Re launch instance from recents
                 if (ActivityManagerWrapper.getInstance()
                         .startActivityFromRecents(taskInRecents.key, opts.options)) {
-                    mControllers.uiController.getRecentsView()
+                    mControllers.uiController.getRecentsViewInteractor()
                             .addSideTaskLaunchCallback(opts.onEndCallback);
                     return;
                 }

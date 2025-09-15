@@ -38,12 +38,11 @@ import com.android.launcher3.popup.SystemShortcut;
 import com.android.launcher3.taskbar.bubbles.BubbleBarController;
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator;
 import com.android.launcher3.taskbar.customization.TaskbarSpecsEvaluator;
-import com.android.launcher3.util.ThreadedAnimator;
 import com.android.launcher3.util.SplitConfigurationOptions;
+import com.android.launcher3.util.ThreadedAnimator;
 import com.android.quickstep.GestureState;
 import com.android.quickstep.RecentsAnimationCallbacks;
 import com.android.quickstep.util.SplitTask;
-import com.android.quickstep.views.RecentsView;
 import com.android.quickstep.views.TaskContainer;
 import com.android.quickstep.views.TaskView;
 import com.android.systemui.shared.recents.model.Task;
@@ -74,7 +73,7 @@ public class TaskbarUIController implements BubbleBarController.BubbleBarLocatio
     @CallSuper
     protected void onDestroy() {
         mControllers = null;
-        RecentsView recentsView = getRecentsView();
+        RecentsViewInteractor recentsView = getRecentsViewInteractor();
         if (recentsView != null) {
             recentsView.setTaskLaunchListener(null);
             recentsView.setTaskLaunchCancelledRunnable(null);
@@ -258,21 +257,21 @@ public class TaskbarUIController implements BubbleBarController.BubbleBarLocatio
     }
 
     /**
-     * Returns RecentsView. Overwritten in LauncherTaskbarUIController and
+     * Returns RecentsViewInteractor. Overwritten in LauncherTaskbarUIController and
      * FallbackTaskbarUIController with Launcher-specific implementations. Returns null for other
      * UI controllers (like DesktopTaskbarUIController) that don't have a RecentsView.
      */
-    public @Nullable RecentsView getRecentsView() {
+    public @Nullable RecentsViewInteractor getRecentsViewInteractor() {
         return null;
     }
 
     public void startSplitSelection(SplitConfigurationOptions.SplitSelectSource splitSelectSource) {
-        RecentsView recentsView = getRecentsView();
+        RecentsViewInteractor recentsView = getRecentsViewInteractor();
         if (recentsView == null) {
             return;
         }
 
-        recentsView.getSplitSelectController().findLastActiveTasksAndRunCallback(
+        recentsView.findLastActiveTasksAndRunCallback(
                 Collections.singletonList(splitSelectSource.getItemInfo().getResolvedTargetInfo()),
                 false /* findExactPairMatch */,
                 foundTasks -> {
@@ -298,7 +297,7 @@ public class TaskbarUIController implements BubbleBarController.BubbleBarLocatio
             mControllers.taskbarStashController.applyState();
         }
 
-        getRecentsView().confirmSplitSelect(
+        getRecentsViewInteractor().confirmSplitSelect(
                 null /* containerTaskView */,
                 task /* task */,
                 task.icon,
@@ -320,8 +319,8 @@ public class TaskbarUIController implements BubbleBarController.BubbleBarLocatio
             mControllers.taskbarStashController.applyState();
         }
 
-        RecentsView recents = getRecentsView();
-        recents.getSplitSelectController().findLastActiveTasksAndRunCallback(
+        RecentsViewInteractor recents = getRecentsViewInteractor();
+        recents.findLastActiveTasksAndRunCallback(
                 Collections.singletonList(info.getResolvedTargetInfo()),
                 false /* findExactPairMatch */,
                 foundTasks -> {

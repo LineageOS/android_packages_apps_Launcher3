@@ -178,6 +178,7 @@ import com.android.launcher3.util.CancellableTask;
 import com.android.launcher3.util.DynamicResource;
 import com.android.launcher3.util.IntArray;
 import com.android.launcher3.util.IntSet;
+import com.android.launcher3.util.Preconditions;
 import com.android.launcher3.util.RunnableList;
 import com.android.launcher3.util.SplitConfigurationOptions.SplitSelectSource;
 import com.android.launcher3.util.SplitConfigurationOptions.StagePosition;
@@ -5217,9 +5218,10 @@ public abstract class RecentsView<
      * @return true if waiting for confirmation of second app or if split animations are running,
      * false otherwise
      */
-    public boolean confirmSplitSelect(TaskView containerTaskView, Task task, Drawable drawable,
-            View secondView, @Nullable Bitmap thumbnail, Intent intent, UserHandle user,
-            ItemInfo itemInfo) {
+    public boolean confirmSplitSelect(
+            @Nullable TaskView containerTaskView, @Nullable Task task, Drawable drawable,
+            View secondView, @Nullable Bitmap thumbnail, @Nullable Intent intent,
+            @Nullable UserHandle user, ItemInfo itemInfo) {
         if (canLaunchFullscreenTask()) {
             return false;
         }
@@ -5240,6 +5242,9 @@ public abstract class RecentsView<
             }
             mSplitSelectStateController.setSecondTask(task, itemInfo);
         } else {
+            // Param intent and user cannot be null if task is null.
+            Preconditions.assertNotNull(intent);
+            Preconditions.assertNotNull(user);
             mSplitSelectStateController.setSecondTask(intent, user, itemInfo);
         }
 

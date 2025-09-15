@@ -56,13 +56,13 @@ import com.android.launcher3.logging.InstanceIdSequence;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.taskbar.bubbles.BubbleBarController;
 import com.android.launcher3.taskbar.bubbles.BubbleControllers;
-import com.android.launcher3.util.ThreadedAnimator;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.ImmediateAnimator;
 import com.android.launcher3.util.MultiPropertyFactory;
 import com.android.launcher3.util.OnboardingPrefs;
 import com.android.launcher3.util.SafeCloseable;
 import com.android.launcher3.util.TaskbarAsyncAnimator;
+import com.android.launcher3.util.ThreadedAnimator;
 import com.android.quickstep.BaseContainerInterface;
 import com.android.quickstep.GestureState;
 import com.android.quickstep.HomeVisibilityState;
@@ -127,6 +127,7 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
             mTaskbarLauncherStateController = new TaskbarLauncherStateController();
     // When overview-in-a-window is enabled, that window is the container, else it is mLauncher.
     private RecentsViewContainer mRecentsViewContainer;
+    private @Nullable RecentsViewInteractor mRecentsViewInteractor;
 
     public LauncherTaskbarUIController(
             LauncherInteractor launcher,
@@ -605,8 +606,19 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
     }
 
     @Override
-    public RecentsView getRecentsView() {
-        return mRecentsViewContainer.getOverviewPanel();
+    public RecentsViewInteractor getRecentsViewInteractor() {
+        RecentsView recentsView = mRecentsViewContainer.getOverviewPanel();
+        if (recentsView == null) {
+            mRecentsViewInteractor = null;
+            return null;
+        }
+
+        if (mRecentsViewInteractor == null
+                || !mRecentsViewInteractor.hasSameRecentsView(recentsView)) {
+            mRecentsViewInteractor = new RecentsViewInteractor(recentsView);
+        }
+
+        return mRecentsViewInteractor;
     }
 
     @Override

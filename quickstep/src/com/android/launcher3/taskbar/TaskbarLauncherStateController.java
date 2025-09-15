@@ -72,7 +72,6 @@ import com.android.quickstep.RecentsAnimationController;
 import com.android.quickstep.fallback.RecentsState;
 import com.android.quickstep.util.ScalingWorkspaceRevealAnim;
 import com.android.quickstep.util.SystemUiFlagUtils;
-import com.android.quickstep.views.RecentsView;
 import com.android.quickstep.window.RecentsWindowManager;
 import com.android.systemui.shared.recents.model.ThumbnailData;
 import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
@@ -405,8 +404,7 @@ public class TaskbarLauncherStateController {
         mRemoveTaskBarRecentsAnimationListenerClosable =
                 callbacks.addListener(mTaskBarRecentsAnimationListener,
                         enableTaskbarUiThread() ? TASKBAR_UI_THREAD : IMMEDIATE_EXECUTOR);
-        // TODO(b/404636836) Avoid accessing RecentsView from taskbar.
-        RecentsView recentsView = mControllers.uiController.getRecentsView();
+        RecentsViewInteractor recentsView = mControllers.uiController.getRecentsViewInteractor();
         if (recentsView != null) {
             recentsView.setTaskLaunchListener(() -> mTaskBarRecentsAnimationListener
                     .endGestureStateOverride(/* finishedToApp= */ true, /* canceled= */ false));
@@ -1187,7 +1185,8 @@ public class TaskbarLauncherStateController {
                 mRemoveTaskBarRecentsAnimationListenerClosable = null;
             }
             mTaskBarRecentsAnimationListener = null;
-            RecentsView recentsView = mControllers.uiController.getRecentsView();
+            RecentsViewInteractor recentsView =
+                    mControllers.uiController.getRecentsViewInteractor();
             if (recentsView != null) {
                 recentsView.setTaskLaunchListener(null);
                 recentsView.setTaskLaunchCancelledRunnable(null);
