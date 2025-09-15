@@ -26,39 +26,75 @@ import androidx.recyclerview.widget.RecyclerView.RecycledViewPool
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.android.launcher3.BubbleTextView
 import com.android.launcher3.BuildConfig
+import com.android.launcher3.allapps.AllAppsStore
 import com.android.launcher3.allapps.BaseAllAppsAdapter
+import com.android.launcher3.dagger.ActivityContextSingleton
+import com.android.launcher3.pm.UserCache
 import com.android.launcher3.util.AsyncObjectAllocator
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.SafeCloseable
 import com.android.launcher3.util.Themes
 import com.android.launcher3.views.ActivityContext
-
-const val PREINFLATE_ICONS_ROW_COUNT = 4
-const val EXTRA_ICONS_COUNT = 2
+import javax.inject.Inject
+import javax.inject.Named
 
 /**
  * An [RecycledViewPool] that preinflates app icons ([ViewHolder] of [BubbleTextView]) of all apps
  * [RecyclerView]. The view inflation will happen on background thread and inflated [ViewHolder]s
  * will be added to [RecycledViewPool] on main thread.
  */
-class AllAppsRecyclerViewPool(private val activityContext: ActivityContext) : RecycledViewPool() {
+@ActivityContextSingleton
+class AllAppsRecyclerViewPool
+@Inject
+constructor(
+    private val activityContext: ActivityContext,
+    private val allAppsStore: AllAppsStore,
+    @Named(PRELOAD_ALL_APPS_DAGGER_KEY) private val preInflateAllApps: Boolean,
+    private val userCache: UserCache,
+) : RecycledViewPool() {
 
-    var hasWorkProfile = false
+    // Initialized to RecycledViewPool.DEFAULT_MAX_SCRAP
+    private var targetPoolSize: Int = 0
+
     @VisibleForTesting(otherwise = PROTECTED) var mCancellableTask: SafeCloseable? = null
 
-    companion object {
-        private const val TAG = "AllAppsRecyclerViewPool"
-        private const val NULL_LAYOUT_MANAGER_ERROR_STRING =
-            "activeRv's layoutManager should not be null"
+    init {
+        // This class is a activity level singleton, so no need to remove the listener
+        activityContext.addOnDeviceProfileChangeListener { updatePoolSize() }
+        // Update pool size, in-case the work-profile availability changes
+        allAppsStore.addUpdateListener { updatePoolSize() }
+        updatePoolSize()
+    }
+
+    /**
+     * After testing on phone, foldable and tablet, we found [PREINFLATE_ICONS_ROW_COUNT] rows of
+     * app icons plus [EXTRA_ICONS_COUNT] is the magic minimal count of app icons to preinflate to
+     * suffice fast scrolling.
+     */
+    private fun updatePoolSize() {
+        val grid = activityContext.deviceProfile
+        var targetCount =
+            EXTRA_ICONS_COUNT +
+                (PREINFLATE_ICONS_ROW_COUNT + grid.maxAllAppsRowCount) * grid.numShownAllAppsColumns
+
+        // Double the count if there is a work tab
+        if (allAppsStore.apps.any { userCache.getUserInfo(it.user).isWork }) {
+            targetCount *= 2
+        }
+        targetPoolSize = targetCount
+        setMaxRecycledViews(BaseAllAppsAdapter.VIEW_TYPE_ICON, targetPoolSize)
+        if (preInflateAllApps) {
+            schedulePreInflation()
+        }
     }
 
     /**
      * Preinflate app icons. If all apps RV cannot be scrolled down, we don't need to preinflate.
      */
-    fun preInflateAllAppsViewHolders() {
+    private fun schedulePreInflation() {
         val appsView = activityContext.appsView ?: return
         val activeRv: RecyclerView = appsView.activeRecyclerView ?: return
-        val preInflateCount = getPreinflateCount()
+        val preInflateCount = getPreInflateCount()
         if (preInflateCount <= 0) return
 
         if (activeRv.layoutManager == null) {
@@ -88,9 +124,7 @@ class AllAppsRecyclerViewPool(private val activityContext: ActivityContext) : Re
             object :
                 BaseAllAppsAdapter(
                     activityContext,
-                    activityContext.appsView.layoutInflater.cloneInContext(
-                        allAppsPreInflationContext
-                    ),
+                    appsView.layoutInflater.cloneInContext(allAppsPreInflationContext),
                     null,
                     null,
                 ) {
@@ -105,7 +139,7 @@ class AllAppsRecyclerViewPool(private val activityContext: ActivityContext) : Re
             activeRv,
             preInflateCount,
         ) {
-            getPreinflateCount()
+            getPreInflateCount()
         }
     }
 
@@ -147,21 +181,18 @@ class AllAppsRecyclerViewPool(private val activityContext: ActivityContext) : Re
         mCancellableTask?.close()
     }
 
-    /**
-     * After testing on phone, foldable and tablet, we found [PREINFLATE_ICONS_ROW_COUNT] rows of
-     * app icons plus [EXTRA_ICONS_COUNT] is the magic minimal count of app icons to preinflate to
-     * suffice fast scrolling.
-     */
-    fun getPreinflateCount(): Int {
-        val grid = activityContext.deviceProfile
-        var targetPreinflateCount =
-            PREINFLATE_ICONS_ROW_COUNT * activityContext.deviceProfile.numShownAllAppsColumns +
-                EXTRA_ICONS_COUNT
-        targetPreinflateCount += grid.maxAllAppsRowCount * grid.numShownAllAppsColumns
-        if (hasWorkProfile) {
-            targetPreinflateCount *= 2
-        }
-        val existingPreinflateCount = getRecycledViewCount(BaseAllAppsAdapter.VIEW_TYPE_ICON)
-        return targetPreinflateCount - existingPreinflateCount
+    private fun getPreInflateCount(): Int =
+        targetPoolSize - getRecycledViewCount(BaseAllAppsAdapter.VIEW_TYPE_ICON)
+
+    companion object {
+
+        private const val TAG = "AllAppsRecyclerViewPool"
+        private const val NULL_LAYOUT_MANAGER_ERROR_STRING =
+            "activeRv's layoutManager should not be null"
+
+        private const val PREINFLATE_ICONS_ROW_COUNT = 4
+        private const val EXTRA_ICONS_COUNT = 2
+
+        const val PRELOAD_ALL_APPS_DAGGER_KEY = "PRELOAD_ALL_APPS"
     }
 }

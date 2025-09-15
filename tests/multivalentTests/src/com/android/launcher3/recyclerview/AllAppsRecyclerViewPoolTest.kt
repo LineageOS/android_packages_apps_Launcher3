@@ -27,6 +27,7 @@ import androidx.test.filters.SmallTest
 import com.android.launcher3.util.AsyncObjectAllocator
 import com.android.launcher3.util.AsyncObjectAllocator.JobDescription
 import com.android.launcher3.util.Executors
+import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestActivityContext
 import com.android.launcher3.util.TestUtil
 import com.google.common.truth.Truth.assertThat
@@ -48,7 +49,8 @@ import org.mockito.junit.MockitoJUnit
 class AllAppsRecyclerViewPoolTest {
 
     @get:Rule val mockitoRule = MockitoJUnit.rule()
-    @get:Rule val activityContext = TestActivityContext()
+    @get:Rule val app = SandboxApplication()
+    @get:Rule val activityContext = TestActivityContext(app)
 
     private lateinit var underTest: AllAppsRecyclerViewPool
     private lateinit var adapter: RecyclerView.Adapter<*>
@@ -59,7 +61,7 @@ class AllAppsRecyclerViewPoolTest {
 
     @Before
     fun setUp() {
-        underTest = spy(AllAppsRecyclerViewPool(activityContext))
+        underTest = spy(activityContext.activityComponent.sharedAppsPool)
         adapter =
             object : RecyclerView.Adapter<ViewHolder>() {
                 override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =

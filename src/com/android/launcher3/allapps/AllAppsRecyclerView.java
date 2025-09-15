@@ -26,8 +26,6 @@ import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCH
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_ALLAPPS_VERTICAL_SWIPE_END;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_WORK_FAB_BUTTON_COLLAPSE;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_WORK_FAB_BUTTON_EXTEND;
-import static com.android.launcher3.recyclerview.AllAppsRecyclerViewPoolKt.EXTRA_ICONS_COUNT;
-import static com.android.launcher3.recyclerview.AllAppsRecyclerViewPoolKt.PREINFLATE_ICONS_ROW_COUNT;
 import static com.android.launcher3.util.LogConfig.SEARCH_LOGGING;
 
 import android.content.Context;
@@ -45,7 +43,6 @@ import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.util.Consumer;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.ExtendedEditText;
 import com.android.launcher3.FastScrollRecyclerView;
 import com.android.launcher3.Flags;
@@ -106,29 +103,9 @@ public class AllAppsRecyclerView extends FastScrollRecyclerView {
     }
 
     protected void updatePoolSize() {
-        updatePoolSize(false);
-    }
-
-    void updatePoolSize(boolean hasWorkProfile) {
-        DeviceProfile grid = ActivityContext.lookupContext(getContext()).getDeviceProfile();
         RecyclerView.RecycledViewPool pool = getRecycledViewPool();
         pool.setMaxRecycledViews(AllAppsGridAdapter.VIEW_TYPE_EMPTY_SEARCH, 1);
         pool.setMaxRecycledViews(AllAppsGridAdapter.VIEW_TYPE_ALL_APPS_DIVIDER, 1);
-
-        // By default the max num of pool size for app icons is num of app icons in one page of
-        // all apps.
-        int maxPoolSizeForAppIcons = grid.getMaxAllAppsRowCount()
-                * grid.numShownAllAppsColumns;
-        // If we set all apps' hidden visibility to GONE and enable pre-inflation, we want to
-        // preinflate one page of all apps icons plus [PREINFLATE_ICONS_ROW_COUNT] rows +
-        // [EXTRA_ICONS_COUNT]. Thus we need to bump the max pool size of app icons accordingly.
-        maxPoolSizeForAppIcons +=
-                PREINFLATE_ICONS_ROW_COUNT * grid.numShownAllAppsColumns + EXTRA_ICONS_COUNT;
-        if (hasWorkProfile) {
-            maxPoolSizeForAppIcons *= 2;
-        }
-        pool.setMaxRecycledViews(
-                AllAppsGridAdapter.VIEW_TYPE_ICON, maxPoolSizeForAppIcons);
     }
 
     @Override
