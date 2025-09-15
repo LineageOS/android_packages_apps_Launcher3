@@ -90,10 +90,6 @@ class TaskbarDesktopModeController(
         }
     }
 
-    val getActiveDeskId: Int
-        get() =
-            desktopVisibilityController.getActiveDeskId(taskbarActivityContext.displayId)
-
     fun onDestroy() {
         desktopVisibilityController.unregisterTaskbarDesktopModeListener(this)
         if (refactorTaskbarUiState()) {
