@@ -42,6 +42,7 @@ android_test {
     name: "WidgetPickerScreenshotTests",
     manifest: "AndroidManifest.xml",
     srcs: [
+        "multivalentScreenshotTests/src/com/android/launcher3/widgetpicker/dagger/ScreenshotTestComponent.kt",
         "multivalentScreenshotTests/src/com/android/launcher3/widgetpicker/goldenpathmanager/WidgetPickerGoldenPathManager.kt",
         "multivalentScreenshotTests/src/com/android/launcher3/widgetpicker/ui/components/FloatingToolbarScreenshotTest.kt",
         "multivalentScreenshotTests/src/com/android/launcher3/widgetpicker/ui/components/WidgetsGridScreenshotTest.kt",

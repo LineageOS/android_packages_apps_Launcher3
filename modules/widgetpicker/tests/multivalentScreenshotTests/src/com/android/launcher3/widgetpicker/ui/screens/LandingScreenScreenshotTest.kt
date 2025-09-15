@@ -20,6 +20,7 @@ import android.platform.test.rule.DisableAnimationsRule
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performClick
 import com.android.launcher3.widgetpicker.WidgetPickerComponent
+import com.android.launcher3.widgetpicker.dagger.DaggerScreenshotTestComponent
 import com.android.launcher3.widgetpicker.goldenpathmanager.WidgetPickerGoldenPathManager
 import com.android.launcher3.widgetpicker.shared.model.CloseBehavior
 import com.android.launcher3.widgetpicker.shared.model.WidgetHostInfo
@@ -31,9 +32,6 @@ import com.android.launcher3.widgetpicker.ui.testdata.ScreenshotTestWidgetAppIco
 import com.android.launcher3.widgetpicker.ui.testdata.ScreenshotTestWidgetUsersRepository
 import com.android.launcher3.widgetpicker.ui.testdata.ScreenshotTestWidgetsRepository
 import com.android.launcher3.widgetpicker.ui.theme.WidgetPickerTheme
-import dagger.Component
-import dagger.Module
-import javax.inject.Singleton
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -45,6 +43,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
+import platform.test.screenshot.DesktopMinimal
 import platform.test.screenshot.DeviceEmulationSpec
 import platform.test.screenshot.Displays
 import platform.test.screenshot.getEmulatedDevicePathConfig
@@ -76,16 +75,21 @@ class LandingScreenScreenshotTest(emulationSpec: DeviceEmulationSpec) {
 
     private val testComponent by lazy { DaggerScreenshotTestComponent.create() }
 
-    private fun createWidgetPickerComponent(
-        widgetHostInfo: WidgetHostInfo = WidgetHostInfo(title = "Widgets")
-    ): WidgetPickerComponent {
+    private val isDesktop = emulationSpec.display == Displays.Desktop
+
+    private fun createWidgetPickerComponent(): WidgetPickerComponent {
         return testComponent
             .widgetPickerComponentFactory()
             .build(
                 widgetUsersRepository = usersRepository,
                 widgetAppIconsRepository = widgetAppIconsRepository,
                 widgetsRepository = widgetsRepository,
-                widgetHostInfo = widgetHostInfo,
+                widgetHostInfo =
+                    if (isDesktop) {
+                        TestWidgetHostInfo.copy(closeBehavior = CloseBehavior.CLOSE_BUTTON)
+                    } else {
+                        TestWidgetHostInfo
+                    },
                 backgroundContext = testDispatcher,
             )
     }
@@ -154,36 +158,6 @@ class LandingScreenScreenshotTest(emulationSpec: DeviceEmulationSpec) {
             }
         }
 
-    @Test
-    fun enforceMaxSizes_landingScreen() =
-        testScope.runTest {
-            val widgetPickerComponent =
-                createWidgetPickerComponent(
-                    widgetHostInfo =
-                        WidgetHostInfo(
-                            title = "Widgets",
-                            closeBehavior = CloseBehavior.CLOSE_BUTTON,
-                        )
-                )
-
-            screenshotRule.screenshotTest(
-                goldenIdentifier = "enforceMaxSizes_landingScreen",
-                beforeScreenshot = {
-                    advanceUntilIdle()
-                    runCurrent()
-                },
-            ) {
-                WidgetPickerTheme {
-                    widgetPickerComponent
-                        .getFullWidgetsCatalog()
-                        .Content(
-                            eventListeners = NoOpEventListener,
-                            cuiReporter = NoOpWidgetPickerCuiReporter(),
-                        )
-                }
-            }
-        }
-
     companion object {
         private const val BROWSE_TAB_LABEL = "Browse"
         private val NoOpEventListener =
@@ -193,6 +167,8 @@ class LandingScreenScreenshotTest(emulationSpec: DeviceEmulationSpec) {
                 override fun onWidgetInteraction(widgetInteractionInfo: WidgetInteractionInfo) {}
             }
 
+        private val TestWidgetHostInfo = WidgetHostInfo(title = "Widgets")
+
         @Parameters(name = "{0}")
         @JvmStatic
         fun getTestSpecs(): List<DeviceEmulationSpec> {
@@ -201,16 +177,7 @@ class LandingScreenScreenshotTest(emulationSpec: DeviceEmulationSpec) {
                 Displays.FoldableInner,
                 Displays.Tablet,
                 isDarkTheme = false,
-            )
+            ) + DeviceEmulationSpec.DesktopMinimal
         }
     }
 }
-
-@Singleton
-@Component(modules = [ScreenshotTestSubcomponentModule::class])
-interface ScreenshotTestComponent {
-    // This function allows us to get the factory for the subcomponent.
-    fun widgetPickerComponentFactory(): WidgetPickerComponent.Factory
-}
-
-@Module(subcomponents = [WidgetPickerComponent::class]) class ScreenshotTestSubcomponentModule

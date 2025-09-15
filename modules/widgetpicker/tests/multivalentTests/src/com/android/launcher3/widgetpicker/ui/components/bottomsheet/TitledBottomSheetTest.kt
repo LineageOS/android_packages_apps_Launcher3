@@ -156,7 +156,12 @@ class TitledBottomSheetTest {
                         title = SHEET_TITLE,
                         description = null,
                         modifier = Modifier,
-                        heightStyle = ModalBottomSheetHeightStyle.FILL_HEIGHT,
+                        sheetSize =
+                            if (closeBehavior == CloseBehavior.CLOSE_BUTTON) {
+                                SheetSize.WINDOW
+                            } else {
+                                SheetSize.FULL
+                            },
                         closeBehavior = closeBehavior,
                         onSheetOpen = {},
                         onDismissSheet = { isClosed = true },

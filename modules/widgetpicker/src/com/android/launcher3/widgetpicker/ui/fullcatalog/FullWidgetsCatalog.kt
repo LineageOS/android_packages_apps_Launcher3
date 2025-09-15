@@ -26,13 +26,14 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
+import com.android.launcher3.widgetpicker.shared.model.CloseBehavior
 import com.android.launcher3.widgetpicker.ui.LocalWidgetPickerCuiReporter
 import com.android.launcher3.widgetpicker.ui.WidgetPickerCui
 import com.android.launcher3.widgetpicker.ui.WidgetPickerCuiReporter
 import com.android.launcher3.widgetpicker.ui.WidgetPickerEventListeners
 import com.android.launcher3.widgetpicker.ui.components.accessibility.LocalAccessibilityState
 import com.android.launcher3.widgetpicker.ui.components.accessibility.produceAccessibilityState
-import com.android.launcher3.widgetpicker.ui.components.bottomsheet.ModalBottomSheetHeightStyle
+import com.android.launcher3.widgetpicker.ui.components.bottomsheet.SheetSize
 import com.android.launcher3.widgetpicker.ui.components.bottomsheet.TitledBottomSheet
 import com.android.launcher3.widgetpicker.ui.components.widgetPickerTestTag
 import com.android.launcher3.widgetpicker.ui.components.widgetPickerTestTagContainer
@@ -93,14 +94,18 @@ constructor(private val viewModelFactory: FullWidgetsCatalogViewModel.Factory) {
         LaunchedEffect(Unit) { cuiReporter.report(WidgetPickerCui.OPEN_ANIMATION_BEGIN, localView) }
 
         TitledBottomSheet(
-            title = viewModel.title.takeIf { !isCompactHeight },
             modifier =
                 Modifier.widgetPickerTestTagContainer()
                     .widgetPickerTestTag(WIDGET_CATALOG_TEST_TAG),
+            sheetSize =
+                if (viewModel.closeBehavior == CloseBehavior.CLOSE_BUTTON) {
+                    SheetSize.WINDOW
+                } else {
+                    SheetSize.FULL
+                },
+            title = viewModel.title.takeIf { !isCompactHeight },
             description = viewModel.description,
-            heightStyle = ModalBottomSheetHeightStyle.FILL_HEIGHT,
             closeBehavior = viewModel.closeBehavior,
-            enforceStaticMaxSizes = viewModel.enforceStaticMaxSizes,
             enableSwipeUpToDismiss = viewModel.enableSwipeUpToClose,
             onDismissSheet = {
                 // Report end of cui in case user tried to close picker while it was opening.

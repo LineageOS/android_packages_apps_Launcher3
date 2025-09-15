@@ -15,7 +15,11 @@
 -->
 
 <resources>
-    <dimen name="bottom_sheet_max_width">1040dp</dimen>
-    <dimen name="bottom_sheet_max_height">800dp</dimen>
+    <!-- Window like sheet that is closed with a close button (e.g. desktop) -->
+    <dimen name="window_bottom_sheet_max_width">1040dp</dimen>
+    <dimen name="window_bottom_sheet_max_height">800dp</dimen>
+
+    <!-- For sheets that show compact info e.g. single app picker / pin sheet. -->
+    <dimen name="compact_bottom_sheet_max_width">720dp</dimen>
 </resources>
 
