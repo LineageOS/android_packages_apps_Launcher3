@@ -20,6 +20,7 @@ import com.android.launcher3.widgetpicker.data.repository.WidgetAppIconsReposito
 import com.android.launcher3.widgetpicker.data.repository.WidgetUsersRepository
 import com.android.launcher3.widgetpicker.data.repository.WidgetsRepository
 import com.android.launcher3.widgetpicker.shared.model.WidgetHostInfo
+import com.android.launcher3.widgetpicker.ui.appcatalog.SingleAppWidgetsCatalog
 import com.android.launcher3.widgetpicker.ui.fullcatalog.FullWidgetsCatalog
 import dagger.BindsInstance
 import dagger.Subcomponent
@@ -57,19 +58,19 @@ interface WidgetPickerComponent {
     @Subcomponent.Factory
     interface Factory {
         fun build(
-            @WidgetPickerRepository @BindsInstance
-            widgetsRepository: WidgetsRepository,
-            @WidgetPickerRepository @BindsInstance
-            widgetUsersRepository: WidgetUsersRepository,
-            @WidgetPickerRepository @BindsInstance
+            @WidgetPickerRepository @BindsInstance widgetsRepository: WidgetsRepository,
+            @WidgetPickerRepository @BindsInstance widgetUsersRepository: WidgetUsersRepository,
+            @WidgetPickerRepository
+            @BindsInstance
             widgetAppIconsRepository: WidgetAppIconsRepository,
-            @WidgetPickerHostInfo @BindsInstance
-            widgetHostInfo: WidgetHostInfo,
-            @WidgetPickerBackground @BindsInstance
-            backgroundContext: CoroutineContext
+            @WidgetPickerHostInfo @BindsInstance widgetHostInfo: WidgetHostInfo,
+            @WidgetPickerBackground @BindsInstance backgroundContext: CoroutineContext,
         ): WidgetPickerComponent
     }
 
     /** Provides UI for the catalog of all widgets on device. */
     fun getFullWidgetsCatalog(): FullWidgetsCatalog
+
+    /** Provides UI for the catalog of widgets hosted by a single app. */
+    fun getSingleAppWidgetsCatalog(): SingleAppWidgetsCatalog
 }

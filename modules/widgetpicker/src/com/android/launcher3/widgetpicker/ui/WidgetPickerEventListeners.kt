@@ -81,4 +81,7 @@ enum class WidgetInteractionSource {
 
     /** The section that displays widgets or their apps that match the user query in search bar. */
     SEARCH,
+
+    /** Picker UI opened for a specific app. */
+    APP_SPECIFIC_PICKER,
 }

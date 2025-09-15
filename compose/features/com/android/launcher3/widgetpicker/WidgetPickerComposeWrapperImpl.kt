@@ -272,6 +272,8 @@ constructor(
                 WidgetInteractionSource.FEATURED -> Favorites.CONTAINER_WIDGETS_PREDICTION
                 WidgetInteractionSource.SEARCH,
                 WidgetInteractionSource.BROWSE -> Favorites.CONTAINER_WIDGETS_TRAY
+                WidgetInteractionSource.APP_SPECIFIC_PICKER ->
+                    Favorites.CONTAINER_BOTTOM_WIDGETS_TRAY
             }
     }
 }

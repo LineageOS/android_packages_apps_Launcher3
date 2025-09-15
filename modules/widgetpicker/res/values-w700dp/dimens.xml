@@ -17,6 +17,6 @@
 
 <resources>
     <!-- For sheets that show compact info e.g. single app picker / pin sheet. -->
-    <dimen name="compact_bottom_sheet_max_width">594dp</dimen>
+    <dimen name="compact_bottom_sheet_max_width">549dp</dimen>
 </resources>
 
