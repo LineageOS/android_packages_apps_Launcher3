@@ -494,9 +494,7 @@ class RecentsViewUtils(private val recentsView: RecentsView<*, *>) : DesktopVisi
             // We need to distinguish between desk removals that are triggered from outside of
             // overview vs. the ones that were initiated from overview by dismissing the
             // corresponding desktop task view.
-            getDesktopTaskViewForDeskId(deskId)?.let {
-                dismissTaskView(it, /* animateTaskView= */ true, /* removeTask= */ true)
-            }
+            getDesktopTaskViewForDeskId(deskId)?.let { dismissTaskView(it, /* removeTask= */ true) }
         }
     }
 

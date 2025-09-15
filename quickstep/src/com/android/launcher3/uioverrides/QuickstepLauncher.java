@@ -23,7 +23,6 @@ import static android.view.accessibility.AccessibilityEvent.TYPE_VIEW_FOCUSED;
 
 import static com.android.app.animation.Interpolators.EMPHASIZED;
 import static com.android.internal.jank.Cuj.CUJ_LAUNCHER_LAUNCH_APP_PAIR_FROM_WORKSPACE;
-import static com.android.launcher3.Flags.enableExpressiveDismissTaskMotion;
 import static com.android.launcher3.Flags.enableUnfoldStateAnimation;
 import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.LauncherConstants.SavedInstanceKeys.PENDING_SPLIT_SELECT_INFO;
@@ -170,7 +169,6 @@ import com.android.launcher3.uioverrides.touchcontrollers.StatusBarTouchControll
 import com.android.launcher3.uioverrides.touchcontrollers.TaskViewDismissTouchController;
 import com.android.launcher3.uioverrides.touchcontrollers.TaskViewLaunchTouchController;
 import com.android.launcher3.uioverrides.touchcontrollers.TaskViewRecentsTouchContext;
-import com.android.launcher3.uioverrides.touchcontrollers.TaskViewTouchControllerDeprecated;
 import com.android.launcher3.uioverrides.touchcontrollers.TransposedQuickSwitchTouchController;
 import com.android.launcher3.uioverrides.touchcontrollers.TwoButtonNavbarTouchController;
 import com.android.launcher3.util.ActivityOptionsWrapper;
@@ -793,15 +791,9 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
                 list.add(new PortraitStatesTouchController(this));
                 break;
         }
-
         list.add(new StatusBarTouchController(this, () -> this.isInState(LauncherState.NORMAL)));
-
-        if (enableExpressiveDismissTaskMotion()) {
-            list.add(new TaskViewLaunchTouchController<>(this, mTaskViewRecentsTouchContext));
-            list.add(new TaskViewDismissTouchController<>(this, mTaskViewRecentsTouchContext));
-        } else {
-            list.add(new TaskViewTouchControllerDeprecated<>(this, mTaskViewRecentsTouchContext));
-        }
+        list.add(new TaskViewLaunchTouchController<>(this, mTaskViewRecentsTouchContext));
+        list.add(new TaskViewDismissTouchController<>(this, mTaskViewRecentsTouchContext));
         return list.toArray(new TouchController[list.size()]);
     }
 

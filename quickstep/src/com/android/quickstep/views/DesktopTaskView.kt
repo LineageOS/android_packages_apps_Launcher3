@@ -643,7 +643,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
 
         // Dismiss the current DesktopTaskView if all its windows are closed.
         if (taskContainers.isEmpty()) {
-            recentsView?.dismissTaskView(this, animate, /* removeTask= */ true)
+            recentsView?.dismissTaskView(this, /* removeTask= */ true)
         } else {
             // If this task has a live window, then hide it.
             // TODO(b/413120214) The dismissed view should fade out.
