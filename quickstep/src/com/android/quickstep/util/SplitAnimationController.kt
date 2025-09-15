@@ -47,7 +47,6 @@ import androidx.core.util.component1
 import androidx.core.util.component2
 import com.android.app.animation.Interpolators
 import com.android.launcher3.DeviceProfile
-import com.android.launcher3.Flags.enableRefactorTaskThumbnail
 import com.android.launcher3.InsettableFrameLayout
 import com.android.launcher3.QuickstepTransitionManager
 import com.android.launcher3.R
@@ -75,7 +74,6 @@ import com.android.quickstep.views.RecentsView
 import com.android.quickstep.views.RecentsViewContainer
 import com.android.quickstep.views.SplitInstructionsView
 import com.android.quickstep.views.TaskContainer
-import com.android.quickstep.views.TaskThumbnailViewDeprecated
 import com.android.quickstep.views.TaskView
 import com.android.quickstep.views.TaskViewIcon
 import com.android.wm.shell.shared.TransitionUtil
@@ -195,22 +193,9 @@ class SplitAnimationController(val splitSelectStateController: SplitSelectStateC
     ) {
         val taskContentView = taskContainer.taskContentView
         val iconView: View = taskContainer.iconView.asView()
-        if (enableRefactorTaskThumbnail()) {
-            builder.add(
-                AnimatedFloat { v -> taskContainer.taskView.splitSplashAlpha = v }
-                    .animateToValue(1f)
-            )
-        } else {
-            val thumbnailViewDeprecated = taskContainer.thumbnailViewDeprecated
-            builder.add(
-                ObjectAnimator.ofFloat(
-                    thumbnailViewDeprecated,
-                    TaskThumbnailViewDeprecated.SPLASH_ALPHA,
-                    1f,
-                )
-            )
-            thumbnailViewDeprecated.setShowSplashForSplitSelection(true)
-        }
+        builder.add(
+            AnimatedFloat { v -> taskContainer.taskView.splitSplashAlpha = v }.animateToValue(1f)
+        )
         // With the new `IconAppChipView`, we always want to keep the chip pinned to the
         // top left of the task / thumbnail.
         if (enableOverviewIconMenu()) {

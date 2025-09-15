@@ -21,13 +21,11 @@ import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.launcher3.util.OverviewReleaseFlags.enableGridOnlyOverview;
-import static com.android.launcher3.Flags.enableRefactorTaskThumbnail;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_SYSTEM_SHORTCUT_FREE_FORM_TAP;
 import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_BOTTOM_OR_RIGHT;
 
 import android.app.ActivityOptions;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
@@ -235,16 +233,7 @@ public interface TaskShortcutFactory {
                         position[0] + width, position[1] + height);
 
                 // Take the thumbnail of the task without a scrim and apply it back after
-                Bitmap thumbnail;
-                if (enableRefactorTaskThumbnail()) {
-                    thumbnail = mTaskContainer.getThumbnail();
-                } else {
-                    float alpha = mTaskContainer.getThumbnailViewDeprecated().getDimAlpha();
-                    mTaskContainer.getThumbnailViewDeprecated().setDimAlpha(0);
-                    thumbnail = RecentsTransition.drawViewIntoHardwareBitmap(
-                            taskBounds.width(), taskBounds.height(), snapShotView, 1f, Color.BLACK);
-                    mTaskContainer.getThumbnailViewDeprecated().setDimAlpha(alpha);
-                }
+                Bitmap thumbnail = mTaskContainer.getThumbnail();
 
                 AppTransitionAnimationSpecsFuture future =
                         new AppTransitionAnimationSpecsFuture(mHandler) {

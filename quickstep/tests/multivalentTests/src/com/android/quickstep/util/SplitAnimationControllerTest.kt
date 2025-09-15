@@ -32,6 +32,7 @@ import com.android.launcher3.statehandlers.DepthController
 import com.android.launcher3.statemanager.StateManager
 import com.android.launcher3.taskbar.TaskbarActivityContext
 import com.android.launcher3.util.SplitConfigurationOptions
+import com.android.quickstep.task.thumbnail.TaskThumbnailView
 import com.android.quickstep.views.GroupedTaskView
 import com.android.quickstep.views.IconView
 import com.android.quickstep.views.TaskContainer
@@ -59,7 +60,7 @@ class SplitAnimationControllerTest {
     private val mockSplitSelectStateController: SplitSelectStateController = mock()
     // TaskView
     private val mockTaskView: TaskView = mock()
-    private val mockSnapshotView: View = mock()
+    private val mockSnapshotView: TaskThumbnailView = mock()
     private val mockBitmap: Bitmap = mock()
     private val mockIconView: IconView = mock()
     private val mockTaskViewDrawable: Drawable = mock()

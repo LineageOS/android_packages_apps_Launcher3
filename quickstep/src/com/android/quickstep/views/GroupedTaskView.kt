@@ -25,7 +25,6 @@ import android.view.ViewStub
 import com.android.internal.jank.Cuj
 import com.android.launcher3.Flags.enableRefactorDigitalWellbeingToast
 import com.android.launcher3.Flags.enableRefactorTaskContentView
-import com.android.launcher3.Flags.enableRefactorTaskThumbnail
 import com.android.launcher3.Flags.showCloseButtonOnTaskviewHover
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
@@ -110,11 +109,8 @@ class GroupedTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
                     if (enableRefactorTaskContentView()) R.id.bottomright_task_content_view
                     else R.id.bottomright_snapshot
                 layoutResource =
-                    when {
-                        enableRefactorTaskContentView() -> R.layout.task_content_view
-                        enableRefactorTaskThumbnail() -> R.layout.task_thumbnail
-                        else -> R.layout.task_thumbnail_deprecated
-                    }
+                    if (enableRefactorTaskContentView()) R.layout.task_content_view
+                    else R.layout.task_thumbnail
             }
             ?.inflate()
         findViewById<ViewStub>(R.id.bottomRight_icon)

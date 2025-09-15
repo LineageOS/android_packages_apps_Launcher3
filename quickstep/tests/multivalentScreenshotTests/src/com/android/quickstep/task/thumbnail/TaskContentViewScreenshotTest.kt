@@ -45,7 +45,6 @@ class TaskContentViewScreenshotTest(emulationSpec: DeviceEmulationSpec) :
     fun setUp() {
         setFlagsRule.setFlags(
             true,
-            Flags.FLAG_ENABLE_REFACTOR_TASK_THUMBNAIL,
             Flags.FLAG_ENABLE_REFACTOR_TASK_CONTENT_VIEW,
             Flags.FLAG_ENABLE_REFACTOR_DIGITAL_WELLBEING_TOAST,
         )

@@ -2549,8 +2549,6 @@ public abstract class AbsSwipeUpHandler<
             // ensure it's taken in the correct orientation, but no need to update the thumbnail.
             return;
         }
-
-        mRecentsView.updateThumbnail(mTaskSnapshotCache);
     }
 
     private void setScreenshotCapturedState() {
