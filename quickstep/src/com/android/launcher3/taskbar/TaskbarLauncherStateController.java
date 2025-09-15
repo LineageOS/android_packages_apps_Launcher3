@@ -1150,8 +1150,7 @@ public class TaskbarLauncherStateController {
 
         @Override
         public void onRecentsAnimationCanceled(HashMap<Integer, ThumbnailData> thumbnailDatas) {
-            boolean isInOverview = isStateManagerInState(LauncherState.OVERVIEW);
-            endGestureStateOverride(!isInOverview, /* canceled= */ true);
+            endGestureStateOverride(!isInLauncher(), /* canceled= */ true);
         }
 
         @Override
