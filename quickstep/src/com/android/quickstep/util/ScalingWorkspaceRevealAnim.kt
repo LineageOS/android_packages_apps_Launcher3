@@ -314,6 +314,9 @@ class ScalingWorkspaceRevealAnim(
     }
 
     private fun addBlurLayer() {
+        if (!Flags.blurredHomeAnimation()) {
+            return
+        }
         val parent = launcher.dragLayer.viewRootImpl?.surfaceControl ?: return
         if (!parent.isValid) {
             Log.e(TAG, "Parent surface is not ready at the moment. Can't apply blur.")
