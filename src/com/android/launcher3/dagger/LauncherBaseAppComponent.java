@@ -34,6 +34,7 @@ import com.android.launcher3.graphics.GridCustomizationsProxy;
 import com.android.launcher3.graphics.ThemeManager;
 import com.android.launcher3.graphics.theme.ThemePreference;
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider;
+import com.android.launcher3.icons.IconChangeTracker;
 import com.android.launcher3.icons.LauncherIcons.IconPool;
 import com.android.launcher3.logging.DumpManager;
 import com.android.launcher3.logging.StatsLogManager;
@@ -142,8 +143,11 @@ public interface LauncherBaseAppComponent {
     NotificationRepository getNotificationRepository();
     HomeScreenFilesProvider getHomeScreenFilesProvider();
 
-    /** Prefenreces for icon theme */
+    /** Preferences for icon theme */
     ThemePreference getThemePreference();
+
+    /** Tracker for any app icon changes */
+    IconChangeTracker getIconChangeTracker();
 
     /** Builder for LauncherBaseAppComponent. */
     interface Builder {
