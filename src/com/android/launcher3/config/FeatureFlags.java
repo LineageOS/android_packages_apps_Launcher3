@@ -18,9 +18,6 @@ package com.android.launcher3.config;
 
 import static com.android.launcher3.config.FeatureFlags.BooleanFlag.DISABLED;
 import static com.android.launcher3.config.FeatureFlags.BooleanFlag.ENABLED;
-import static com.android.wm.shell.Flags.enableTaskbarOnPhones;
-
-import android.content.res.Resources;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -118,11 +115,6 @@ public final class FeatureFlags {
     // TODO(Block 21): Clean up flags
     public static final BooleanFlag ENABLE_APP_ICON_FOR_INLINE_SHORTCUTS = getDebugFlag(270395087,
             "ENABLE_APP_ICON_IN_INLINE_SHORTCUTS", DISABLED, "Show app icon for inline shortcut");
-
-    // TODO(Block 22): Clean up flags
-    public static final BooleanFlag ENABLE_WIDGET_TRANSITION_FOR_RESIZING = getDebugFlag(268553314,
-            "ENABLE_WIDGET_TRANSITION_FOR_RESIZING", DISABLED,
-            "Enable widget transition animation when resizing the widgets");
 
     // TODO(Block 27): Clean up flags
     public static final BooleanFlag ENABLE_OVERLAY_CONNECTION_OPTIM = getDebugFlag(270392629,
