@@ -29,12 +29,14 @@
     <string name="home_screen" msgid="5629429142036709174">"Startskjerm"</string>
     <string name="set_default_home_app" msgid="5808906607627586381">"Angi <xliff:g id="LAUNCHER_NAME">%1$s</xliff:g> som standard startsideapp i innstillingene"</string>
     <string name="recent_task_option_split_screen" msgid="6690461455618725183">"Delt skjerm"</string>
-    <string name="recent_task_option_aspect_ratio" msgid="7008605516391096989">"Endre høyde/bredde-forholdet"</string>
+    <string name="recent_task_option_aspect_ratio" msgid="7008605516391096989">"Høyde/bredde-forhold"</string>
     <string name="split_app_info_accessibility" msgid="5475288491241414932">"Appinformasjon for %1$s"</string>
     <string name="split_app_usage_settings" msgid="7214375263347964093">"Bruksinnstillinger for %1$s"</string>
     <string name="close_task_accessibility" msgid="4765872229211282647">"Lukk %1$s"</string>
     <string name="new_window_option_taskbar" msgid="6448780542727767211">"Nytt vindu"</string>
-    <string name="manage_windows_option_taskbar" msgid="2294109489960654212">"Administrer vinduene"</string>
+    <string name="manage_windows_option_taskbar" msgid="2294109489960654212">"Administrer vinduer"</string>
+    <!-- no translation found for close_app_taskbar (3238979263877091273) -->
+    <skip />
     <string name="save_app_pair" msgid="5647523853662686243">"Lagre app-paret"</string>
     <string name="app_pair_default_title" msgid="4045241727446873529">"<xliff:g id="APP1">%1$s</xliff:g> | <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="app_pair_unlaunchable_at_screen_size" msgid="3446551575502685376">"Denne apptilkoblingen støttes ikke på denne enheten"</string>
@@ -133,11 +135,9 @@
     <string name="folder_closed" msgid="4100806530910930934">"Mappen ble lukket"</string>
     <string name="folder_renamed" msgid="1794088362165669656">"Mappen heter nå <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="folder_name_format_exact" msgid="8626242716117004803">"Mappe: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> elementer"</string>
-    <!-- no translation found for folder_name_format_exact_with_dot (30828041991324911) -->
-    <skip />
+    <string name="folder_name_format_exact_with_dot" msgid="30828041991324911">"Mappe: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> elementer, har varsler"</string>
     <string name="folder_name_format_overflow" msgid="4270108890534995199">"Mappe: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> eller flere elementer"</string>
-    <!-- no translation found for folder_name_format_overflow_with_dot (9174809519194154156) -->
-    <skip />
+    <string name="folder_name_format_overflow_with_dot" msgid="9174809519194154156">"Mappe: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> eller flere elementer, har varsler"</string>
     <string name="unnamed_folder" msgid="2420192029474044442">"Mappe uten navn"</string>
     <string name="app_pair_name_format" msgid="8134106404716224054">"Apptilkobling: <xliff:g id="APP1">%1$s</xliff:g> og <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="styles_wallpaper_button_text" msgid="8216961355289236794">"Bakgrunn og stil"</string>

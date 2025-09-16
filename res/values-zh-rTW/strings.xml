@@ -35,6 +35,8 @@
     <string name="close_task_accessibility" msgid="4765872229211282647">"關閉「%1$s」"</string>
     <string name="new_window_option_taskbar" msgid="6448780542727767211">"新視窗"</string>
     <string name="manage_windows_option_taskbar" msgid="2294109489960654212">"管理視窗"</string>
+    <!-- no translation found for close_app_taskbar (3238979263877091273) -->
+    <skip />
     <string name="save_app_pair" msgid="5647523853662686243">"儲存應用程式配對"</string>
     <string name="app_pair_default_title" msgid="4045241727446873529">"<xliff:g id="APP1">%1$s</xliff:g> | <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="app_pair_unlaunchable_at_screen_size" msgid="3446551575502685376">"這部裝置不支援這組應用程式配對"</string>
@@ -133,11 +135,9 @@
     <string name="folder_closed" msgid="4100806530910930934">"資料夾已關閉"</string>
     <string name="folder_renamed" msgid="1794088362165669656">"已將資料夾重新命名為「<xliff:g id="NAME">%1$s</xliff:g>」"</string>
     <string name="folder_name_format_exact" msgid="8626242716117004803">"資料夾：<xliff:g id="NAME">%1$s</xliff:g>，<xliff:g id="SIZE">%2$d</xliff:g> 個項目"</string>
-    <!-- no translation found for folder_name_format_exact_with_dot (30828041991324911) -->
-    <skip />
+    <string name="folder_name_format_exact_with_dot" msgid="30828041991324911">"資料夾：<xliff:g id="NAME">%1$s</xliff:g>，內含 <xliff:g id="SIZE">%2$d</xliff:g> 個項目，有通知"</string>
     <string name="folder_name_format_overflow" msgid="4270108890534995199">"資料夾：<xliff:g id="NAME">%1$s</xliff:g>，<xliff:g id="SIZE">%2$d</xliff:g> 個以上的項目"</string>
-    <!-- no translation found for folder_name_format_overflow_with_dot (9174809519194154156) -->
-    <skip />
+    <string name="folder_name_format_overflow_with_dot" msgid="9174809519194154156">"資料夾：<xliff:g id="NAME">%1$s</xliff:g>，內含至少 <xliff:g id="SIZE">%2$d</xliff:g> 個項目，有通知"</string>
     <string name="unnamed_folder" msgid="2420192029474044442">"未命名的資料夾"</string>
     <string name="app_pair_name_format" msgid="8134106404716224054">"應用程式配對：「<xliff:g id="APP1">%1$s</xliff:g>」與「<xliff:g id="APP2">%2$s</xliff:g>」"</string>
     <string name="styles_wallpaper_button_text" msgid="8216961355289236794">"桌布和樣式"</string>

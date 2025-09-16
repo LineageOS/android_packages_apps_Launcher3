@@ -35,6 +35,8 @@
     <string name="close_task_accessibility" msgid="4765872229211282647">"Փակել «%1$s» առաջադրանքը"</string>
     <string name="new_window_option_taskbar" msgid="6448780542727767211">"Նոր պատուհան"</string>
     <string name="manage_windows_option_taskbar" msgid="2294109489960654212">"Կառավարել պատուհանները"</string>
+    <!-- no translation found for close_app_taskbar (3238979263877091273) -->
+    <skip />
     <string name="save_app_pair" msgid="5647523853662686243">"Պահել հավելվ. զույգը"</string>
     <string name="app_pair_default_title" msgid="4045241727446873529">"<xliff:g id="APP1">%1$s</xliff:g> | <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="app_pair_unlaunchable_at_screen_size" msgid="3446551575502685376">"Հավելվածների զույգը չի աջակցվում այս սարքում"</string>
@@ -133,11 +135,9 @@
     <string name="folder_closed" msgid="4100806530910930934">"Պանակը փակ է"</string>
     <string name="folder_renamed" msgid="1794088362165669656">"Պանակը վերանվանվեց <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="folder_name_format_exact" msgid="8626242716117004803">"Պանակ՝ <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> տարր"</string>
-    <!-- no translation found for folder_name_format_exact_with_dot (30828041991324911) -->
-    <skip />
+    <string name="folder_name_format_exact_with_dot" msgid="30828041991324911">"Պանակ՝ <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> տարր, կան ծանուցումներ"</string>
     <string name="folder_name_format_overflow" msgid="4270108890534995199">"Պանակ՝ <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> կամ ավելի տարրեր"</string>
-    <!-- no translation found for folder_name_format_overflow_with_dot (9174809519194154156) -->
-    <skip />
+    <string name="folder_name_format_overflow_with_dot" msgid="9174809519194154156">"Պանակ՝ <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> կամ ավելի տարր, կան ծանուցումներ"</string>
     <string name="unnamed_folder" msgid="2420192029474044442">"Անանուն պանակ"</string>
     <string name="app_pair_name_format" msgid="8134106404716224054">"Հավելվածների զույգ՝ <xliff:g id="APP1">%1$s</xliff:g> և <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="styles_wallpaper_button_text" msgid="8216961355289236794">"Պաստառ և ոճ"</string>

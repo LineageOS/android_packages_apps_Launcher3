@@ -35,6 +35,8 @@
     <string name="close_task_accessibility" msgid="4765872229211282647">"Chiudi %1$s"</string>
     <string name="new_window_option_taskbar" msgid="6448780542727767211">"Nuova finestra"</string>
     <string name="manage_windows_option_taskbar" msgid="2294109489960654212">"Gestisci finestre"</string>
+    <!-- no translation found for close_app_taskbar (3238979263877091273) -->
+    <skip />
     <string name="save_app_pair" msgid="5647523853662686243">"Salva coppia di app"</string>
     <string name="app_pair_default_title" msgid="4045241727446873529">"<xliff:g id="APP1">%1$s</xliff:g> | <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="app_pair_unlaunchable_at_screen_size" msgid="3446551575502685376">"Questa coppia di app non è supportata su questo dispositivo"</string>
@@ -105,7 +107,7 @@
     <string name="bubble" msgid="3072951361014076670">"Fumetto"</string>
     <string name="widget_settings" msgid="5280157748464495511">"Impostazioni"</string>
     <string name="pin_to_taskbar" msgid="5914002252642242332">"Fissa alla barra delle app"</string>
-    <string name="unpin_from_taskbar" msgid="1025883383457627426">"Sblocca dalla barra delle app"</string>
+    <string name="unpin_from_taskbar" msgid="1025883383457627426">"Stacca da barra app"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"Aggiunta di scorciatoie"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"Consente a un\'app di aggiungere scorciatoie automaticamente."</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"leggere le impostazioni e le scorciatoie nella schermata Home"</string>
@@ -133,11 +135,9 @@
     <string name="folder_closed" msgid="4100806530910930934">"Cartella chiusa"</string>
     <string name="folder_renamed" msgid="1794088362165669656">"Nome della cartella sostituito con <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="folder_name_format_exact" msgid="8626242716117004803">"Cartella: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> elementi"</string>
-    <!-- no translation found for folder_name_format_exact_with_dot (30828041991324911) -->
-    <skip />
+    <string name="folder_name_format_exact_with_dot" msgid="30828041991324911">"Cartella: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> elemento/i, ha notifiche"</string>
     <string name="folder_name_format_overflow" msgid="4270108890534995199">"Cartella: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> o più elementi"</string>
-    <!-- no translation found for folder_name_format_overflow_with_dot (9174809519194154156) -->
-    <skip />
+    <string name="folder_name_format_overflow_with_dot" msgid="9174809519194154156">"Cartella: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> o più elementi, ha notifiche"</string>
     <string name="unnamed_folder" msgid="2420192029474044442">"Cartella senza nome"</string>
     <string name="app_pair_name_format" msgid="8134106404716224054">"Coppia di app: <xliff:g id="APP1">%1$s</xliff:g> and <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="styles_wallpaper_button_text" msgid="8216961355289236794">"Sfondo e stile"</string>

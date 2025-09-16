@@ -35,6 +35,8 @@
     <string name="close_task_accessibility" msgid="4765872229211282647">"Vala %1$s"</string>
     <string name="new_window_option_taskbar" msgid="6448780542727767211">"Iwindi Elisha"</string>
     <string name="manage_windows_option_taskbar" msgid="2294109489960654212">"Phatha Amawindi"</string>
+    <!-- no translation found for close_app_taskbar (3238979263877091273) -->
+    <skip />
     <string name="save_app_pair" msgid="5647523853662686243">"Londoloza i-app ebhangqiwe"</string>
     <string name="app_pair_default_title" msgid="4045241727446873529">"<xliff:g id="APP1">%1$s</xliff:g> | <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="app_pair_unlaunchable_at_screen_size" msgid="3446551575502685376">"Lokhu kubhanqwa kwe-app akusekelwa kule divayisi"</string>
@@ -133,11 +135,9 @@
     <string name="folder_closed" msgid="4100806530910930934">"Ifolda ivaliwe"</string>
     <string name="folder_renamed" msgid="1794088362165669656">"Ifolda iqanjwe kabusha ngo-<xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="folder_name_format_exact" msgid="8626242716117004803">"Ifolda: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> izinto"</string>
-    <!-- no translation found for folder_name_format_exact_with_dot (30828041991324911) -->
-    <skip />
+    <string name="folder_name_format_exact_with_dot" msgid="30828041991324911">"Ifolda: <xliff:g id="NAME">%1$s</xliff:g>, izinto ezingu-<xliff:g id="SIZE">%2$d</xliff:g>, inezaziso"</string>
     <string name="folder_name_format_overflow" msgid="4270108890534995199">"Ifolda: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> noma izinto eziningi"</string>
-    <!-- no translation found for folder_name_format_overflow_with_dot (9174809519194154156) -->
-    <skip />
+    <string name="folder_name_format_overflow_with_dot" msgid="9174809519194154156">"Ifolda: <xliff:g id="NAME">%1$s</xliff:g>, izinto ezingu-<xliff:g id="SIZE">%2$d</xliff:g> noma ngaphezulu, inezaziso"</string>
     <string name="unnamed_folder" msgid="2420192029474044442">"Ifolda engenagama"</string>
     <string name="app_pair_name_format" msgid="8134106404716224054">"Ama-app abhangqwayo: I-<xliff:g id="APP1">%1$s</xliff:g> ne-<xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="styles_wallpaper_button_text" msgid="8216961355289236794">"Isithombe sangemuva nesitayela"</string>
