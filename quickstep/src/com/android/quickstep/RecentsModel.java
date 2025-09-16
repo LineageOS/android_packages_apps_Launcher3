@@ -65,7 +65,6 @@ import com.android.systemui.shared.system.TaskStackChangeListeners;
 import dagger.Lazy;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
@@ -96,14 +95,6 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
             new ConcurrentLinkedQueue<>();
     private final ConcurrentLinkedQueue<RecentTasksChangedListener> mRecentTasksChangedListeners =
             new ConcurrentLinkedQueue<>();
-    private final RecentTasksChangedListener mRecentTasksListObserver =
-            new RecentTasksChangedListener() {
-                @Override
-                public void onRecentTasksChanged() {
-                    mRecentTasksChangedListeners.forEach(
-                            RecentTasksChangedListener::onRecentTasksChanged);
-                }
-            };
 
     private final Context mContext;
     private final RecentTasksList mTaskList;
@@ -157,7 +148,8 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
                 lockedUserState,
                 themeManagerLazy,
                 tracker,
-                uiExecutor, iconChangeTracker);
+                uiExecutor,
+                iconChangeTracker);
     }
 
     @VisibleForTesting
@@ -173,7 +165,10 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
             IconChangeTracker iconChangeTracker) {
         mContext = context;
         mTaskList = taskList;
-        mTaskList.registerRecentTasksChangedListener(mRecentTasksListObserver);
+        RecentTasksChangedListener recentTasksListObserver =
+                () -> mRecentTasksChangedListeners.forEach(
+                        RecentTasksChangedListener::onRecentTasksChanged);
+        mTaskList.registerRecentTasksChangedListener(recentTasksListObserver);
         mIconCache = iconCache;
         mIconCache.registerTaskVisualsChangeListener(this);
         mThumbnailCache = thumbnailCache;
@@ -410,22 +405,6 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
     }
 
     /**
-     * Registers a listener for running tasks
-     * TODO(b/343292503): Should we remove RunningTasksListener entirely if it's not needed?
-     *  (Note that Desktop mode gets the running tasks by checking {@link DesktopTask#tasks}
-     */
-    public void registerRunningTasksListener(RunningTasksListener listener) {
-        mTaskList.registerRunningTasksListener(listener);
-    }
-
-    /**
-     * Removes the previously registered running tasks listener
-     */
-    public void unregisterRunningTasksListener() {
-        mTaskList.unregisterRunningTasksListener();
-    }
-
-    /**
      * Registers a listener for recent tasks
      */
     public void registerRecentTasksChangedListener(RecentTasksChangedListener listener) {
@@ -437,13 +416,6 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
      */
     public void unregisterRecentTasksChangedListener(RecentTasksChangedListener listener) {
         mRecentTasksChangedListeners.remove(listener);
-    }
-
-    /**
-     * Gets the set of running tasks.
-     */
-    public ArrayList<ActivityManager.RunningTaskInfo> getRunningTasks() {
-        return mTaskList.getRunningTasks();
     }
 
     /**
@@ -476,16 +448,6 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
         if (mThumbnailCache.updateCacheSizeAndRemoveExcess()) {
             preloadCacheIfNeeded();
         }
-    }
-
-    /**
-     * Listener for receiving running tasks changes
-     */
-    public interface RunningTasksListener {
-        /**
-         * Called when there's a change to running tasks
-         */
-        void onRunningTasksChanged();
     }
 
     /**
