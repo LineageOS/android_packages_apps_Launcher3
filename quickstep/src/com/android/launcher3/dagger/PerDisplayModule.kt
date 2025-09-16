@@ -26,6 +26,7 @@ import android.view.WindowManagerGlobal
 import com.android.app.displaylib.DefaultDisplayOnlyInstanceRepositoryImpl
 import com.android.app.displaylib.DisplayLibBackground
 import com.android.app.displaylib.DisplayLibComponent
+import com.android.app.displaylib.DisplayLibHandlerThreadBackground
 import com.android.app.displaylib.DisplayRepository
 import com.android.app.displaylib.DisplaysWithDecorationsRepository
 import com.android.app.displaylib.DisplaysWithDecorationsRepositoryCompat
@@ -33,6 +34,7 @@ import com.android.app.displaylib.PerDisplayInstanceRepositoryImpl
 import com.android.app.displaylib.PerDisplayRepository
 import com.android.app.displaylib.SingleInstanceRepositoryImpl
 import com.android.app.displaylib.createDisplayLibComponent
+import com.android.launcher3.concurrent.annotations.BackgroundContext
 import com.android.launcher3.util.coroutines.DispatcherProvider
 import com.android.quickstep.FallbackWindowInterface
 import com.android.quickstep.RecentsAnimationDeviceState
@@ -45,6 +47,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 
 @Module(includes = [BasePerDisplayModule::class, PerDisplayRepositoriesModule::class])
@@ -54,7 +57,13 @@ interface PerDisplayModule
 interface BasePerDisplayModule {
     @Binds
     @DisplayLibBackground
-    abstract fun bindDisplayLibBackground(@Background bgScope: CoroutineScope): CoroutineScope
+    fun bindDisplayLibBackground(@Background bgScope: CoroutineScope): CoroutineScope
+
+    @Binds
+    @DisplayLibHandlerThreadBackground
+    fun bindDisplayLibHandlerThreadBackground(
+        @BackgroundContext bgContext: CoroutineContext
+    ): CoroutineContext
 }
 
 @Module
