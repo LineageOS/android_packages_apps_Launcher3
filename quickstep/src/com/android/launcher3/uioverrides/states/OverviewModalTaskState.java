@@ -15,7 +15,6 @@
  */
 package com.android.launcher3.uioverrides.states;
 
-import static com.android.launcher3.util.OverviewReleaseFlags.enableGridOnlyOverview;
 import static com.android.launcher3.logging.StatsLogManager.LAUNCHER_STATE_OVERVIEW;
 
 import com.android.launcher3.DeviceProfile;
@@ -60,9 +59,6 @@ public class OverviewModalTaskState extends OverviewState {
 
     @Override
     public boolean isTaskbarStashed(DeviceProfile deviceProfile) {
-        if (enableGridOnlyOverview()) {
-            return true;
-        }
-        return super.isTaskbarStashed(deviceProfile);
+        return true;
     }
 }

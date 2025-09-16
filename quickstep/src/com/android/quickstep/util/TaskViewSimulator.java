@@ -20,7 +20,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import static com.android.launcher3.states.RotationHelper.deltaRotation;
 import static com.android.launcher3.touch.PagedOrientationHandler.MATRIX_POST_TRANSLATE;
-import static com.android.launcher3.util.OverviewReleaseFlags.enableGridOnlyOverview;
 import static com.android.quickstep.util.RecentsOrientedState.postDisplayRotation;
 import static com.android.quickstep.util.RecentsOrientedState.preDisplayRotation;
 import static com.android.wm.shell.Flags.enableFlexibleTwoAppSplit;
@@ -156,9 +155,7 @@ public class TaskViewSimulator implements TransformParams.BuilderProxy {
         mDp = dp;
         mLayoutValid = false;
         mOrientationState.setDeviceProfile(dp);
-        if (enableGridOnlyOverview()) {
-            mIsGridTask = dp.getDeviceProperties().isTablet() && !mIsDesktopTask;
-        }
+        mIsGridTask = dp.getDeviceProperties().isTablet() && !mIsDesktopTask;
         calculateTaskSize();
     }
 
@@ -173,16 +170,12 @@ public class TaskViewSimulator implements TransformParams.BuilderProxy {
         if (mIsGridTask) {
             mSizeStrategy.calculateGridTaskSize(mContext, mDp, mFullTaskSize,
                     mOrientationState.getOrientationHandler());
-            if (enableGridOnlyOverview()) {
-                mSizeStrategy.calculateTaskSize(mContext, mDp, mCarouselTaskSize,
-                        mOrientationState.getOrientationHandler());
-            }
+            mSizeStrategy.calculateTaskSize(mContext, mDp, mCarouselTaskSize,
+                    mOrientationState.getOrientationHandler());
         } else {
             mSizeStrategy.calculateTaskSize(mContext, mDp, mFullTaskSize,
                     mOrientationState.getOrientationHandler());
-            if (enableGridOnlyOverview()) {
-                mCarouselTaskSize.set(mFullTaskSize);
-            }
+            mCarouselTaskSize.set(mFullTaskSize);
         }
 
         if (mSplitBounds != null) {
@@ -325,7 +318,7 @@ public class TaskViewSimulator implements TransformParams.BuilderProxy {
     public void addAppToCarouselAnim(PendingAnimation pa, Interpolator interpolator,
             boolean isHandlingAtomicEvent) {
         pa.addFloat(fullScreenProgress, AnimatedFloat.VALUE, 1, 0, interpolator);
-        if (enableGridOnlyOverview() && mDp.getDeviceProperties().isTablet() && !isHandlingAtomicEvent) {
+        if (mDp.getDeviceProperties().isTablet() && !isHandlingAtomicEvent) {
             mIsAnimatingToCarousel = true;
             carouselScale.value = mCarouselTaskSize.width() / (float) mFullTaskSize.width();
         }

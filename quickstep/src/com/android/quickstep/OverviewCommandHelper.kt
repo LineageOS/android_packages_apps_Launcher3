@@ -43,7 +43,6 @@ import com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_OVER
 import com.android.launcher3.taskbar.TaskbarInteractor
 import com.android.launcher3.taskbar.TaskbarManager
 import com.android.launcher3.util.OverviewCommandHelperProtoLogProxy
-import com.android.launcher3.util.OverviewReleaseFlags.enableGridOnlyOverview
 import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.coroutines.DispatcherProvider
 import com.android.quickstep.GestureState.GestureEndTarget
@@ -280,7 +279,7 @@ constructor(
                     getNextToggledTaskView(recentsView, command.displayId),
                     command,
                 ) {
-                    if (enableGridOnlyOverview() && runningTaskId != null) {
+                    if (runningTaskId != null) {
                         lastToggleInfo[command.displayId] =
                             ToggleInfo(command.createTime, runningTaskId)
                     }
@@ -335,18 +334,13 @@ constructor(
         val lastToggleInfo = lastToggleInfo[displayId]
         val lastToggleTaskView =
             if (
-                enableGridOnlyOverview() &&
-                    lastToggleInfo != null &&
+                lastToggleInfo != null &&
                     elapsedRealtime() - lastToggleInfo.createTime < TOGGLE_PREVIOUS_TIMEOUT_MS
             ) {
                 recentsView.getTaskViewByTaskIds(lastToggleInfo.taskIds.toIntArray())
             } else null
         val runningTaskView = recentsView.runningTaskView
         return when {
-            runningTaskView == null && !enableGridOnlyOverview() ->
-                // When running task view is null we return last large taskView - typically
-                // focusView or last desktop task view.
-                recentsView.lastLargeTaskView ?: recentsView.firstTaskView
             runningTaskView == null ->
                 recentsView.firstNonDesktopTaskView ?: recentsView.lastDesktopTaskView
             lastToggleTaskView != null && lastToggleTaskView != runningTaskView ->

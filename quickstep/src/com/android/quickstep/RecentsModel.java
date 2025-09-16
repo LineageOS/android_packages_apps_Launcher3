@@ -447,8 +447,7 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
     }
 
     /**
-     * Preloads cache if enableGridOnlyOverview is true, preloading is enabled and
-     * highResLoadingState is enabled
+     * Preloads cache if reloading is enabled and highResLoadingState is enabled.
      */
     public void preloadCacheIfNeeded() {
         if (!mThumbnailCache.isPreloadingEnabled()) {

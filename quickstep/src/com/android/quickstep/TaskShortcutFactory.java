@@ -20,7 +20,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static com.android.launcher3.util.OverviewReleaseFlags.enableGridOnlyOverview;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_SYSTEM_SHORTCUT_FREE_FORM_TAP;
 import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_BOTTOM_OR_RIGHT;
 
@@ -485,19 +484,6 @@ public interface TaskShortcutFactory {
         public List<SystemShortcut> getShortcuts(RecentsViewContainer container,
                 TaskContainer taskContainer) {
             if (!taskContainer.getOverlay().isRealSnapshot()) {
-                return null;
-            }
-
-            // Modal only works with grid size tiles with enableGridOnlyOverview enabled on
-            // tablets / foldables. With enableGridOnlyOverview off, for large tiles it works,
-            // but the tile needs to be in the center of Recents / Overview.
-            boolean isTablet = container.getDeviceProfile().getDeviceProperties().isTablet();
-            RecentsView recentsView = container.getOverviewPanel();
-            boolean isLargeTileInCenterOfOverview = taskContainer.getTaskView().isLargeTile()
-                    && recentsView.isFocusedTaskInExpectedScrollPosition();
-            if (isTablet
-                    && !isLargeTileInCenterOfOverview
-                    && !enableGridOnlyOverview()) {
                 return null;
             }
 

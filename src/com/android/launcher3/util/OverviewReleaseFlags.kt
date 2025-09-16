@@ -19,10 +19,5 @@ package com.android.launcher3.util
 import com.android.launcher3.Flags
 
 object OverviewReleaseFlags {
-    private fun enableOverviewNewLayout() =
-        Flags.enableOverviewIconMenu() && Flags.enableGridOnlyOverview()
-
-    @JvmStatic fun enableOverviewIconMenu() = enableOverviewNewLayout()
-
-    @JvmStatic fun enableGridOnlyOverview() = enableOverviewNewLayout()
+    @JvmStatic fun enableOverviewIconMenu() = Flags.enableOverviewIconMenu()
 }

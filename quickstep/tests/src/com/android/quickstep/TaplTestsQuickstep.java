@@ -29,7 +29,6 @@ import static org.junit.Assume.assumeTrue;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.platform.test.annotations.DisableFlags;
-import android.platform.test.annotations.EnableFlags;
 
 import androidx.annotation.NonNull;
 import androidx.test.filters.LargeTest;
@@ -167,8 +166,7 @@ public class TaplTestsQuickstep extends AbstractQuickStepTest {
     @NavigationModeSwitch
     @PortraitLandscape
     public void testOverviewActions() throws Exception {
-        assumeFalse("Skipping Overview Actions tests for grid only overview",
-                mLauncher.isTablet() && mLauncher.isGridOnlyOverviewEnabled());
+        assumeFalse("Skipping Overview Actions tests for tablet", mLauncher.isTablet());
         startTestAppsWithCheck();
         OverviewActions actionsView =
                 mLauncher.goHome().switchToOverview().getOverviewActions();
@@ -192,7 +190,7 @@ public class TaplTestsQuickstep extends AbstractQuickStepTest {
 
         final SelectModeButtons selectModeButtons;
 
-        if (mLauncher.isTablet() && mLauncher.isGridOnlyOverviewEnabled()) {
+        if (mLauncher.isTablet()) {
             selectModeButtons = overview.getCurrentTask().tapMenu().tapSelectMenuItem();
         } else {
             selectModeButtons = overview.getOverviewActions().clickSelect();
@@ -484,7 +482,6 @@ public class TaplTestsQuickstep extends AbstractQuickStepTest {
 
     @Test
     @PortraitLandscape
-    @EnableFlags(value = Flags.FLAG_ENABLE_GRID_ONLY_OVERVIEW)
     @ScreenRecordRule.ScreenRecord // TODO(b/415092715)
     public void testDismissBottomRow() throws Exception {
         assumeTrue("Ignoring test because device is not a tablet",
@@ -507,7 +504,6 @@ public class TaplTestsQuickstep extends AbstractQuickStepTest {
 
     @Test
     @PortraitLandscape
-    @EnableFlags(value = Flags.FLAG_ENABLE_GRID_ONLY_OVERVIEW)
     public void testDismissLastGridRow() throws Exception {
         assumeTrue("Ignoring test because device is not a tablet",
             mLauncher.isTablet());
@@ -544,7 +540,6 @@ public class TaplTestsQuickstep extends AbstractQuickStepTest {
 
     @Test
     @PortraitLandscape
-    @EnableFlags(value = Flags.FLAG_ENABLE_GRID_ONLY_OVERVIEW)
     // When dismissing multiple apps, the apps off screen should "re-balance" i.e. re-arrange
     // themselves evenly across both top and bottom rows.
     public void gridRebalancesOffScreenAfterDismissingMultipleApps() throws Exception {
@@ -575,7 +570,6 @@ public class TaplTestsQuickstep extends AbstractQuickStepTest {
 
     @Test
     @PortraitLandscape
-    @EnableFlags(value = Flags.FLAG_ENABLE_GRID_ONLY_OVERVIEW)
     // When dismissing multiple apps, the apps on screen should not "re-balance" i.e. dismissing
     // 2 apps from the top row, will move the top row along 2 and so it will not be balanced
     // across the bottom row.

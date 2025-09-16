@@ -16,8 +16,6 @@
 
 package com.android.quickstep.views;
 
-import static com.android.launcher3.util.OverviewReleaseFlags.enableGridOnlyOverview;
-
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -414,7 +412,7 @@ public class OverviewActionsView<T extends OverlayUICallbacks> extends FrameLayo
             return 0;
         }
 
-        if (mDp.getDeviceProperties().isTablet() && enableGridOnlyOverview()) {
+        if (mDp.getDeviceProperties().isTablet()) {
             int modalTaskbarHeight = mDp.getTaskbarProfile().isTransientTaskbar()
                     ? mDp.getTaskbarProfile().getStashedTaskbarHeight()
                     : mDp.getTaskbarProfile().getHeight();

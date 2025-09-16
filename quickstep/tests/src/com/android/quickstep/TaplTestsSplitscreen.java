@@ -97,12 +97,10 @@ public class TaplTestsSplitscreen extends AbstractQuickStepTest {
     public void testSaveAppPairMenuItemOrActionExistsOnSplitPair() {
         Overview overview = SplitScreenTestUtils.createAndLaunchASplitPairInOverview(mLauncher);
 
-        if (mLauncher.isGridOnlyOverviewEnabled() || !mLauncher.isTablet()) {
-            assertTrue("Save app pair menu item is missing",
-                    overview.getCurrentTask()
-                            .tapMenu()
-                            .hasMenuItem("Save app pair"));
-        }
+        assertTrue("Save app pair menu item is missing",
+                overview.getCurrentTask()
+                        .tapMenu()
+                        .hasMenuItem("Save app pair"));
     }
 
     @Test
@@ -127,11 +125,7 @@ public class TaplTestsSplitscreen extends AbstractQuickStepTest {
         startAppFast(getAppPackageName());
 
         Overview overview = mLauncher.goHome().switchToOverview();
-        if (mLauncher.isGridOnlyOverviewEnabled()) {
-            overview.getCurrentTask().tapMenu().tapSplitMenuItem();
-        } else {
-            overview.getOverviewActions().clickSplit();
-        }
+        overview.getCurrentTask().tapMenu().tapSplitMenuItem();
 
         Taskbar taskbar = overview.getTaskbar();
         String firstAppName = taskbar.getIconNames().get(0);

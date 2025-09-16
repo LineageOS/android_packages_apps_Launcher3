@@ -33,7 +33,6 @@ import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriorit
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent
 import com.android.launcher3.util.DynamicResource
 import com.android.launcher3.util.MSDLPlayerWrapper
-import com.android.launcher3.util.OverviewReleaseFlags.enableGridOnlyOverview
 import com.android.launcher3.views.ActivityContext
 import com.android.quickstep.SystemUiProxy
 import com.android.quickstep.util.TaskGridNavHelper
@@ -772,11 +771,6 @@ constructor(
     fun getGridEndData(
         dismissedTaskView: TaskView?,
         isExpressiveDismiss: Boolean = true,
-        isFocusedTaskDismissed: Boolean = false,
-        nextFocusedTaskView: TaskView? = null,
-        isStagingFocusedTask: Boolean = false,
-        nextFocusedTaskFromTop: Boolean = false,
-        nextFocusedTaskWidth: Float = 0f,
     ): GridEndData {
         var gridEndOffset = 0f
         var snapToLastTask = false
@@ -796,18 +790,14 @@ constructor(
                 dismissedTaskView != null && mTopRowIdSet.contains(dismissedTaskView.taskViewId)
             val dismissedFromBottom =
                 dismissedTaskView != null && !dismissedFromTop && !dismissedTaskView.isLargeTile
-            if (dismissedFromTop || (isFocusedTaskDismissed && nextFocusedTaskFromTop)) {
+            if (dismissedFromTop) {
                 topGridRowCount--
             }
-            if (dismissedFromBottom || (isFocusedTaskDismissed && !nextFocusedTaskFromTop)) {
+            if (dismissedFromBottom) {
                 bottomGridRowCount--
             }
             newClearAllShortTotalWidthTranslation =
-                getNewClearAllShortTotalWidthTranslation(
-                    topGridRowCount,
-                    bottomGridRowCount,
-                    isStagingFocusedTask,
-                )
+                getNewClearAllShortTotalWidthTranslation(topGridRowCount, bottomGridRowCount)
             val isLastGridTaskViewVisibleForDismiss =
                 when {
                     lastGridTaskView == null -> false
@@ -827,14 +817,9 @@ constructor(
                 if (dismissedTaskView == null) 0f
                 else (dismissedTaskView.layoutParams.width + pageSpacing).toFloat()
             val gapWidth =
-                when {
-                    (topRowLonger && dismissedFromTop) ||
-                        (bottomRowLonger && dismissedFromBottom) -> dismissedTaskWidth
-                    nextFocusedTaskView != null &&
-                        ((topRowLonger && nextFocusedTaskFromTop) ||
-                            (bottomRowLonger && !nextFocusedTaskFromTop)) -> nextFocusedTaskWidth
-                    else -> 0f
-                }
+                if ((topRowLonger && dismissedFromTop) || (bottomRowLonger && dismissedFromBottom))
+                    dismissedTaskWidth
+                else 0f
             if (gapWidth > 0) {
                 if (clearAllShortTotalWidthTranslation == 0) {
                     val gapCompensation = gapWidth - newClearAllShortTotalWidthTranslation
@@ -848,7 +833,7 @@ constructor(
             val isLeftRightSplit =
                 (mContainer as ActivityContext).getDeviceProfile().isLeftRightSplit &&
                     isSplitSelectionActive
-            if (isLeftRightSplit && !isStagingFocusedTask) {
+            if (isLeftRightSplit) {
                 // LastTask's scroll is the minimum scroll in split select, if current scroll is
                 // beyond that, we'll need to snap to last task instead.
                 getLastGridTaskView()?.let { lastTask ->
@@ -901,7 +886,6 @@ constructor(
     private fun getNewClearAllShortTotalWidthTranslation(
         topGridRowCount: Int,
         bottomGridRowCount: Int,
-        isStagingFocusedTask: Boolean,
     ): Float {
         with(recentsView) {
             if (clearAllShortTotalWidthTranslation != 0) {
@@ -909,12 +893,9 @@ constructor(
             }
             // If first task is not in the expected position (mLastComputedTaskSize) and too
             // close to ClearAllButton, then apply extra translation to ClearAllButton.
-            var longRowWidth =
+            val longRowWidth =
                 max(topGridRowCount, bottomGridRowCount) *
                     (mLastComputedGridTaskSize.width() + pageSpacing)
-            if (!enableGridOnlyOverview() && !isStagingFocusedTask) {
-                longRowWidth += mLastComputedTaskSize.width() + pageSpacing
-            }
             val firstTaskStart = mLastComputedGridSize.left + longRowWidth
             val expectedFirstTaskStart = mLastComputedTaskSize.right
             // Compensate the removed gap if we don't already have shortTotalCompensation,
@@ -1038,7 +1019,7 @@ constructor(
                 } else if (taskViewCount > 2) {
                     pageToSnapTo = indexOfChild(clearAllButton)
                 } else if (isClearAllHidden) {
-                    // Snap to focused task if clear all is hidden.
+                    // Snap to first task if clear all is hidden.
                     pageToSnapTo = firstTaskViewIndex
                 }
             } else {
@@ -1138,7 +1119,6 @@ constructor(
                 pageBeginTransition()
                 currentPage = pageToSnapTo
                 dispatchScrollChanged()
-                updateActionsViewFocusedScroll()
                 if (
                     isClearAllHidden &&
                         !(mContainer as ActivityContext)

@@ -33,11 +33,7 @@ object SplitScreenTestUtils {
         AbstractLauncherUiTest.startTestActivity(3)
 
         val overView = launcher.goHome().switchToOverview()
-        if (launcher.isTablet && !launcher.isGridOnlyOverviewEnabled) {
-            overView.overviewActions.clickSplit().getTestActivityTask(2).open()
-        } else {
-            overView.currentTask.tapMenu().tapSplitMenuItem().currentTask.open()
-        }
+        overView.currentTask.tapMenu().tapSplitMenuItem().currentTask.open()
 
         val overviewWithSplitPair = launcher.goHome().switchToOverview()
         val currentTask = overviewWithSplitPair.currentTask

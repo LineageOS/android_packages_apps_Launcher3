@@ -41,15 +41,9 @@ class SeascapePagedViewHandlerTest {
 
     private fun enableGridOnlyOverview(isEnabled: Boolean) {
         if (isEnabled) {
-            setFlagsRule.enableFlags(
-                Flags.FLAG_ENABLE_GRID_ONLY_OVERVIEW,
-                Flags.FLAG_ENABLE_OVERVIEW_ICON_MENU,
-            )
+            setFlagsRule.enableFlags(Flags.FLAG_ENABLE_OVERVIEW_ICON_MENU)
         } else {
-            setFlagsRule.disableFlags(
-                Flags.FLAG_ENABLE_GRID_ONLY_OVERVIEW,
-                Flags.FLAG_ENABLE_OVERVIEW_ICON_MENU,
-            )
+            setFlagsRule.disableFlags(Flags.FLAG_ENABLE_OVERVIEW_ICON_MENU)
         }
     }
 
