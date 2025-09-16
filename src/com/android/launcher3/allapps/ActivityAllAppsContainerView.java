@@ -654,7 +654,7 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
         setUpCustomRecyclerViewPool(
                 mainRecyclerView,
                 workRecyclerView,
-                mAllAppsStore.getRecyclerViewPool());
+                mActivityContext.getActivityComponent().getSharedAppsPool());
         setupHeader();
 
         if (isSearchBarFloating()) {
@@ -683,13 +683,11 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
             @NonNull AllAppsRecyclerView mainRecyclerView,
             @Nullable AllAppsRecyclerView workRecyclerView,
             @NonNull AllAppsRecyclerViewPool recycledViewPool) {
-        final boolean hasWorkProfile = workRecyclerView != null;
-        recycledViewPool.setHasWorkProfile(hasWorkProfile);
         mainRecyclerView.setRecycledViewPool(recycledViewPool);
         if (workRecyclerView != null) {
             workRecyclerView.setRecycledViewPool(recycledViewPool);
         }
-        mainRecyclerView.updatePoolSize(hasWorkProfile);
+        mainRecyclerView.updatePoolSize();
     }
 
     private void replaceAppsRVContainer(boolean showTabs) {
