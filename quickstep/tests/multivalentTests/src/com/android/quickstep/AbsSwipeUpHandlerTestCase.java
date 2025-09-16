@@ -78,8 +78,10 @@ import com.android.launcher3.dragndrop.DragLayer;
 import com.android.launcher3.statemanager.BaseState;
 import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.statemanager.StatefulContainer;
+import com.android.launcher3.util.ThreadedAnimator;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.Executors;
+import com.android.launcher3.util.ImmediateAnimator;
 import com.android.launcher3.util.MSDLPlayerWrapper;
 import com.android.launcher3.util.SandboxApplication;
 import com.android.launcher3.util.SystemUiController;
@@ -481,9 +483,10 @@ public abstract class AbsSwipeUpHandlerTestCase<
     @Test
     public void testHomeGesture_invalidatesHandlerAfterParallelAnim() {
         ValueAnimator parallelAnim = new ValueAnimator();
+        ThreadedAnimator threadedAnimator = new ImmediateAnimator(parallelAnim);
         parallelAnim.setRepeatCount(ValueAnimator.INFINITE);
         when(mActivityInterface.getParallelAnimationToGestureEndTarget(any(), anyLong(), any()))
-                .thenReturn(parallelAnim);
+                .thenReturn(threadedAnimator);
         SWIPE_HANDLER handler = createSwipeUpHandlerForGesture(GestureState.GestureEndTarget.HOME);
         runOnMainSync(() -> {
             parallelAnim.start();

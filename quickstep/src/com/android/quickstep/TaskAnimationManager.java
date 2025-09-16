@@ -49,6 +49,7 @@ import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.taskbar.TaskbarInteractor;
 import com.android.launcher3.util.DaggerSingletonObject;
 import com.android.launcher3.util.DisplayController;
+import com.android.launcher3.util.SafeCloseable;
 import com.android.quickstep.dagger.QuickstepBaseAppComponent;
 import com.android.quickstep.util.ActiveGestureLog;
 import com.android.quickstep.util.ActiveGestureProtoLogProxy;
@@ -84,6 +85,9 @@ public class TaskAnimationManager implements RecentsAnimationCallbacks.RecentsAn
     private final DisplayController mDisplayController;
     private RecentsAnimationController mController;
     private RecentsAnimationCallbacks mCallbacks;
+
+    private @Nullable SafeCloseable mRemoveGestureStateListenerClosable;
+
     private RecentsAnimationTargets mTargets;
     private TransitionInfo mTransitionInfo;
 
@@ -418,7 +422,7 @@ public class TaskAnimationManager implements RecentsAnimationCallbacks.RecentsAn
             }
         });
         final long eventTime = gestureState.getSwipeUpStartTimeMs();
-        mCallbacks.addListener(gestureState);
+        mRemoveGestureStateListenerClosable = mCallbacks.addListener(gestureState);
         mCallbacks.addListener(listener);
 
         final ActivityOptions options = ActivityOptions.makeBasic();
@@ -474,9 +478,12 @@ public class TaskAnimationManager implements RecentsAnimationCallbacks.RecentsAn
      */
     public RecentsAnimationCallbacks continueRecentsAnimation(GestureState gestureState) {
         ActiveGestureProtoLogProxy.logContinueRecentsAnimation();
-        mCallbacks.removeListener(mLastGestureState);
+        if (mRemoveGestureStateListenerClosable != null) {
+            mRemoveGestureStateListenerClosable.close();
+            mRemoveGestureStateListenerClosable = null;
+        }
         mLastGestureState = gestureState;
-        mCallbacks.addListener(gestureState);
+        mRemoveGestureStateListenerClosable = mCallbacks.addListener(gestureState);
         gestureState.setState(STATE_RECENTS_ANIMATION_INITIALIZED
                 | STATE_RECENTS_ANIMATION_STARTED);
         gestureState.updateLastAppearedTaskTargets(mLastAppearedTaskTargets);

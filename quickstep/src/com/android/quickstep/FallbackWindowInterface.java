@@ -21,7 +21,6 @@ import static com.android.quickstep.fallback.RecentsState.DEFAULT;
 import static com.android.quickstep.fallback.RecentsState.HOME;
 
 import android.animation.Animator;
-import android.animation.AnimatorSet;
 import android.content.Context;
 import android.graphics.Rect;
 import android.view.RemoteAnimationTarget;
@@ -34,8 +33,10 @@ import com.android.app.displaylib.PerDisplayRepository;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.taskbar.TaskbarInteractor;
+import com.android.launcher3.util.ThreadedAnimator;
 import com.android.launcher3.util.DaggerSingletonObject;
 import com.android.launcher3.util.DisplayController;
+import com.android.launcher3.util.JoinedAnimator;
 import com.android.launcher3.views.ScrimColors;
 import com.android.quickstep.GestureState.GestureEndTarget;
 import com.android.quickstep.dagger.QuickstepBaseAppComponent;
@@ -223,24 +224,23 @@ public final class FallbackWindowInterface extends BaseWindowInterface {
     }
 
     @Override
-    public @Nullable Animator getParallelAnimationToGestureEndTarget(GestureEndTarget endTarget,
-            long duration, RecentsAnimationCallbacks callbacks) {
+    public @Nullable ThreadedAnimator getParallelAnimationToGestureEndTarget(
+            GestureEndTarget endTarget, long duration, RecentsAnimationCallbacks callbacks) {
         TaskbarInteractor taskbarInteractor = getTaskbarInteractor();
-        Animator superAnimator = super.getParallelAnimationToGestureEndTarget(
+        ThreadedAnimator superAnimator = super.getParallelAnimationToGestureEndTarget(
                 endTarget, duration, callbacks);
         if (taskbarInteractor == null) {
             return superAnimator;
         }
-        Animator taskbarAnimator = taskbarInteractor.getParallelAnimationToGestureEndTarget(
-                endTarget, duration, callbacks);
+        ThreadedAnimator taskbarAnimator =
+                taskbarInteractor.getParallelAnimationToGestureEndTarget(
+                        endTarget, duration, callbacks);
         if (taskbarAnimator == null) {
             return superAnimator;
         }
         if (superAnimator == null) {
             return taskbarAnimator;
         }
-        AnimatorSet animatorSet = new AnimatorSet();
-        animatorSet.playTogether(superAnimator, taskbarAnimator);
-        return animatorSet;
+        return new JoinedAnimator(superAnimator, taskbarAnimator);
     }
 }

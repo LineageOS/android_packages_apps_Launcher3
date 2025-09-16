@@ -57,7 +57,9 @@ import com.android.launcher3.statemanager.StatefulContainer;
 import com.android.launcher3.taskbar.TaskbarInteractor;
 import com.android.launcher3.taskbar.TaskbarUiState;
 import com.android.launcher3.taskbar.TaskbarUiStateMonitor;
+import com.android.launcher3.util.ThreadedAnimator;
 import com.android.launcher3.util.DisplayController;
+import com.android.launcher3.util.ImmediateAnimator;
 import com.android.launcher3.util.WindowBounds;
 import com.android.launcher3.views.ScrimColors;
 import com.android.launcher3.views.ScrimColorsEvaluator;
@@ -301,7 +303,7 @@ public abstract class BaseContainerInterface<STATE_TYPE extends BaseState<STATE_
      * Called when the gesture ends and the animation starts towards the given target. Used to add
      * an optional additional animation with the same duration.
      */
-    public @Nullable Animator getParallelAnimationToGestureEndTarget(
+    public @Nullable ThreadedAnimator getParallelAnimationToGestureEndTarget(
             GestureState.GestureEndTarget endTarget, long duration,
             RecentsAnimationCallbacks callbacks) {
         if (endTarget == RECENTS) {
@@ -319,7 +321,7 @@ public abstract class BaseContainerInterface<STATE_TYPE extends BaseState<STATE_
                     recentsView == null || !recentsView.isKeyboardTaskFocusPending()
                             ? LINEAR : INSTANT);
 
-            return animScrim;
+            return new ImmediateAnimator(animScrim);
         }
         return null;
     }

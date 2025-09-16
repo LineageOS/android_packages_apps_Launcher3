@@ -18,17 +18,20 @@ package com.android.launcher3.taskbar;
 import static com.android.app.animation.Interpolators.EMPHASIZED;
 import static com.android.app.animation.Interpolators.FINAL_FRAME;
 import static com.android.app.animation.Interpolators.INSTANT;
+import static com.android.launcher3.Flags.enableTaskbarUiThread;
 import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.Hotseat.ALPHA_CHANNEL_TASKBAR_ALIGNMENT;
 import static com.android.launcher3.Hotseat.ALPHA_CHANNEL_TASKBAR_STASH;
 import static com.android.launcher3.LauncherState.HOTSEAT_ICONS;
 import static com.android.launcher3.Utilities.isRtl;
+import static com.android.launcher3.taskbar.TaskbarManagerImpl.TASKBAR_UI_THREAD;
 import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_APP;
 import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_OVERVIEW;
 import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_STASHED_LAUNCHER_STATE;
 import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_STASHED_FOR_BUBBLES;
 import static com.android.launcher3.taskbar.TaskbarStashController.UNLOCK_TRANSITION_MEMOIZATION_MS;
 import static com.android.launcher3.taskbar.TaskbarViewController.ALPHA_INDEX_HOME;
+import static com.android.launcher3.util.Executors.IMMEDIATE_EXECUTOR;
 import static com.android.launcher3.util.FlagDebugUtils.appendFlag;
 import static com.android.launcher3.util.FlagDebugUtils.formatFlagChange;
 import static com.android.quickstep.fallback.RecentsStateUtilsKt.toLauncherState;
@@ -76,14 +79,14 @@ import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
 import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper;
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
 
+import kotlin.Unit;
+
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.StringJoiner;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
-import kotlin.Unit;
 
 /**
  * Track LauncherState, RecentsAnimation, resumed state for task bar in one place here and animate
@@ -187,6 +190,7 @@ public class TaskbarLauncherStateController {
     private long mLastUnlockTransitionTimeout;
 
     private @Nullable TaskBarRecentsAnimationListener mTaskBarRecentsAnimationListener;
+    private @Nullable SafeCloseable mRemoveTaskBarRecentsAnimationListenerClosable;
 
     private boolean mIsAnimatingToLauncher;
 
@@ -317,7 +321,9 @@ public class TaskbarLauncherStateController {
         resetIconAlignment();
 
         if (!mControllers.taskbarActivityContext.isPhoneMode()) {
-            mStateListenerClosable = mLauncher.addStateListener(mStateListener);
+            mStateListenerClosable = mLauncher.addStateListener(
+                    mStateListener,
+                    enableTaskbarUiThread() ? TASKBAR_UI_THREAD : IMMEDIATE_EXECUTOR);
             runForRecentsWindowManager(recentsWindowManager ->
                     recentsWindowManager.getStateManager().addStateListener(mRecentsStateListener));
         }
@@ -341,8 +347,11 @@ public class TaskbarLauncherStateController {
         mIsDestroyed = true;
         mCanSyncViews = false;
 
+        if (mRemoveTaskBarRecentsAnimationListenerClosable != null) {
+            mRemoveTaskBarRecentsAnimationListenerClosable.close();
+            mRemoveTaskBarRecentsAnimationListenerClosable = null;
+        }
         if (mRecentsAnimationCallbacks != null) {
-            mRecentsAnimationCallbacks.removeListener(mTaskBarRecentsAnimationListener);
             mRecentsAnimationCallbacks = null;
         }
 
@@ -393,7 +402,10 @@ public class TaskbarLauncherStateController {
                     !isStateManagerInState(LauncherState.OVERVIEW), /* canceled= */ false);
         }
         mTaskBarRecentsAnimationListener = new TaskBarRecentsAnimationListener(callbacks);
-        callbacks.addListener(mTaskBarRecentsAnimationListener);
+        mRemoveTaskBarRecentsAnimationListenerClosable =
+                callbacks.addListener(mTaskBarRecentsAnimationListener,
+                        enableTaskbarUiThread() ? TASKBAR_UI_THREAD : IMMEDIATE_EXECUTOR);
+        // TODO(b/404636836) Avoid accessing RecentsView from taskbar.
         RecentsView recentsView = mControllers.uiController.getRecentsView();
         if (recentsView != null) {
             recentsView.setTaskLaunchListener(() -> mTaskBarRecentsAnimationListener
@@ -1171,7 +1183,10 @@ public class TaskbarLauncherStateController {
          *                      to completion
          */
         private void endGestureStateOverride(boolean finishedToApp, boolean canceled) {
-            mCallbacks.removeListener(this);
+            if (mRemoveTaskBarRecentsAnimationListenerClosable != null) {
+                mRemoveTaskBarRecentsAnimationListenerClosable.close();
+                mRemoveTaskBarRecentsAnimationListenerClosable = null;
+            }
             mTaskBarRecentsAnimationListener = null;
             RecentsView recentsView = mControllers.uiController.getRecentsView();
             if (recentsView != null) {
