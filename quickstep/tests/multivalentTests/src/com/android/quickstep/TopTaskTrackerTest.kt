@@ -54,6 +54,8 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
+private const val SECONDARY_DISPLAY_ID = 1
+
 /** Test for [TopTaskTracker] */
 @RunWith(AndroidJUnit4::class)
 class TopTaskTrackerTest {
@@ -245,6 +247,7 @@ class TopTaskTrackerTest {
     }
 
     @Test
+    @DisableFlags(FLAG_ENABLE_SHELL_TOP_TASK_TRACKING)
     fun getAllTasks_tasksMoreThanHistorySize_onlyFreeFormTasksNotRemoved() {
         val freeformTaskCount = HISTORY_SIZE * 2
         val fullScreenTaskCount = HISTORY_SIZE + 2
@@ -268,6 +271,88 @@ class TopTaskTrackerTest {
 
         val expectedTasks = freeformTasks + fullScreenTasks.takeLast(HISTORY_SIZE)
         assertThat(tasks).containsExactlyElementsIn(expectedTasks)
+    }
+
+    @Test
+    @DisableFlags(
+        FLAG_ENABLE_SHELL_TOP_TASK_TRACKING,
+        "com.android.launcher3.enable_overview_on_connected_displays"
+    )
+    fun handleTaskMovedToFront_nonDefaultDisplayTask_flagDisabled_keepsDefaultDisplayTaskOnTop() {
+        // Arrange: Add a task on the default display.
+        val taskOnDefaultDisplay = createTaskInfo(taskId = 1, displayId = DEFAULT_DISPLAY)
+        topTaskTracker.handleTaskMovedToFront(taskOnDefaultDisplay)
+
+        // Add a task on a secondary display.
+        val taskOnSecondaryDisplay = createTaskInfo(taskId = 2, displayId = SECONDARY_DISPLAY_ID)
+
+        // Act: Move the task on the secondary display to the front.
+        topTaskTracker.handleTaskMovedToFront(taskOnSecondaryDisplay)
+
+        // Assert: The task on the default display should be moved back to the top of the list
+        // because the flag is disabled.
+        val cachedInfo =
+            topTaskTracker.getCachedTopTask(/* filterOnlyVisibleRecents= */ false, DEFAULT_DISPLAY)
+        val tasks = cachedInfo.mAllCachedTasks!!
+        assertThat(tasks).hasSize(2)
+        assertThat(tasks[0].taskId).isEqualTo(taskOnDefaultDisplay.taskId)
+        assertThat(tasks[1].taskId).isEqualTo(taskOnSecondaryDisplay.taskId)
+    }
+
+    @Test
+    @DisableFlags(FLAG_ENABLE_SHELL_TOP_TASK_TRACKING)
+    @EnableFlags("com.android.launcher3.enable_overview_on_connected_displays")
+    fun handleTaskMovedToFront_nonDefaultDisplayTask_flagEnabled_doesNotReorder() {
+        // Arrange: Add a task on the default display.
+        val taskOnDefaultDisplay = createTaskInfo(taskId = 1, displayId = DEFAULT_DISPLAY)
+        topTaskTracker.handleTaskMovedToFront(taskOnDefaultDisplay)
+
+        // Add a task on a secondary display.
+        val taskOnSecondaryDisplay = createTaskInfo(taskId = 2, displayId = SECONDARY_DISPLAY_ID)
+
+        // Act: Move the task on the secondary display to the front.
+        topTaskTracker.handleTaskMovedToFront(taskOnSecondaryDisplay)
+
+        // Assert: With the flag enabled, each display maintains its own top task. The task on the
+        // secondary display should be the top task for that display.
+        val topTaskSecondary =
+            topTaskTracker
+                .getCachedTopTask(/* filterOnlyVisibleRecents= */ false, SECONDARY_DISPLAY_ID)
+                .getLegacyBaseTask()
+        assertThat(topTaskSecondary?.taskId).isEqualTo(taskOnSecondaryDisplay.taskId)
+
+        // And the task on the default display should remain the top task for the default display.
+        val topTaskDefault =
+            topTaskTracker
+                .getCachedTopTask(/* filterOnlyVisibleRecents= */ false, DEFAULT_DISPLAY)
+                .getLegacyBaseTask()
+        assertThat(topTaskDefault?.taskId).isEqualTo(taskOnDefaultDisplay.taskId)
+    }
+
+    @Test
+    @DisableFlags(
+        FLAG_ENABLE_SHELL_TOP_TASK_TRACKING,
+        "com.android.launcher3.enable_overview_on_connected_displays"
+    )
+    fun handleTaskMovedToFront_defaultDisplayTask_flagDisabled_noReorder() {
+        // Arrange: Add a task on a secondary display.
+        val taskOnSecondaryDisplay = createTaskInfo(taskId = 1, displayId = SECONDARY_DISPLAY_ID)
+        topTaskTracker.handleTaskMovedToFront(taskOnSecondaryDisplay)
+
+        // Add a task on the default display.
+        val taskOnDefaultDisplay = createTaskInfo(taskId = 2, displayId = DEFAULT_DISPLAY)
+
+        // Act: Move the task on the default display to the front.
+        topTaskTracker.handleTaskMovedToFront(taskOnDefaultDisplay)
+
+        // Assert: The task on the default display should be at the top, and no special reordering
+        // should occur as the top task is already on the default display.
+        val cachedInfo =
+            topTaskTracker.getCachedTopTask(/* filterOnlyVisibleRecents= */ false, DEFAULT_DISPLAY)
+        val tasks = cachedInfo.mAllCachedTasks!!
+        assertThat(tasks).hasSize(2)
+        assertThat(tasks[0].taskId).isEqualTo(taskOnDefaultDisplay.taskId)
+        assertThat(tasks[1].taskId).isEqualTo(taskOnSecondaryDisplay.taskId)
     }
 
     private fun createTaskInfo(
