@@ -146,8 +146,8 @@
     <string name="change_navigation_mode" msgid="9088393078736808968">"تغییر حالت پیمایش"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"جداکننده نوار وظیفه"</string>
     <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"سایر برنامه‌های اخیر"</string>
-    <string name="app_added_to_taskbar" msgid="1160433791917609063">"‏برنامه به Taskbar اضافه شد"</string>
-    <string name="app_removed_from_taskbar" msgid="7887298201562912487">"‏برنامه از Taskbar حذف شد"</string>
+    <string name="app_added_to_taskbar" msgid="1160433791917609063">"برنامه به نوار ابزار اضافه شد"</string>
+    <string name="app_removed_from_taskbar" msgid="7887298201562912487">"برنامه از نوار ابزار برداشته شد"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"انتقال به بالا/ چپ"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"انتقال به پایین/ راست"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"باز کردن برنامه به‌صورت حبابک"</string>
