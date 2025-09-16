@@ -956,7 +956,8 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
             mSplitSelectStateController
                     .logExitReason(LAUNCHER_SPLIT_SELECTION_EXIT_INTERRUPTED);
             mSplitSelectStateController.getSplitAnimationController()
-                    .playPlaceholderDismissAnim(this, LAUNCHER_SPLIT_SELECTION_EXIT_INTERRUPTED);
+                    .playPlaceholderDismissAnim(this, LAUNCHER_SPLIT_SELECTION_EXIT_INTERRUPTED,
+                            () -> getStateManager().moveToRestState());
         }
 
         if (mTaskbarInteractor != null && FeatureFlags.enableHomeTransitionListener()) {
