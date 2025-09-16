@@ -41,6 +41,7 @@ import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.dagger.LauncherAppSingleton;
 import com.android.launcher3.graphics.ThemeManager;
 import com.android.launcher3.graphics.ThemeManager.ThemeChangeListener;
+import com.android.launcher3.icons.IconChangeTracker;
 import com.android.launcher3.icons.IconProvider;
 import com.android.launcher3.util.DaggerSingletonObject;
 import com.android.launcher3.util.DaggerSingletonTracker;
@@ -111,7 +112,7 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
     private final LooperExecutor mUiExecutor;
 
     @Inject
-     public RecentsModel(@ApplicationContext Context context,
+    public RecentsModel(@ApplicationContext Context context,
             SystemUiProxy systemUiProxy,
             TopTaskTracker topTaskTracker,
             DisplayController displayController,
@@ -119,13 +120,14 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
             Lazy<ThemeManager> themeManagerLazy,
             DaggerSingletonTracker tracker,
             DispatcherProvider dispatcherProvider,
-            @Ui LooperExecutor uiExecutor
+            @Ui LooperExecutor uiExecutor,
+            IconChangeTracker iconChangeTracker
             ) {
         // Lazily inject the ThemeManager and access themeManager once the device is
         // unlocked. See b/393248495 for details.
         this(context, new IconProvider(context), systemUiProxy, topTaskTracker,
                 displayController, lockedUserState, themeManagerLazy, tracker, dispatcherProvider,
-                uiExecutor);
+                uiExecutor, iconChangeTracker);
     }
 
     @SuppressLint("VisibleForTests")
@@ -138,7 +140,8 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
             Lazy<ThemeManager> themeManagerLazy,
             DaggerSingletonTracker tracker,
             DispatcherProvider dispatcherProvider,
-            @Ui LooperExecutor uiExecutor) {
+            @Ui LooperExecutor uiExecutor,
+            IconChangeTracker iconChangeTracker) {
         this(context,
                 new RecentTasksList(
                         context,
@@ -150,12 +153,11 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
                 new TaskIconCache(context, RECENTS_MODEL_EXECUTOR, iconProvider, displayController,
                         dispatcherProvider),
                 new TaskThumbnailCache(context, RECENTS_MODEL_EXECUTOR, dispatcherProvider),
-                iconProvider,
                 TaskStackChangeListeners.getInstance(),
                 lockedUserState,
                 themeManagerLazy,
                 tracker,
-                uiExecutor);
+                uiExecutor, iconChangeTracker);
     }
 
     @VisibleForTesting
@@ -163,12 +165,12 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
             RecentTasksList taskList,
             TaskIconCache iconCache,
             TaskThumbnailCache thumbnailCache,
-            IconProvider iconProvider,
             TaskStackChangeListeners taskStackChangeListeners,
             LockedUserState lockedUserState,
             Lazy<ThemeManager> themeManagerLazy,
             DaggerSingletonTracker tracker,
-            @Ui LooperExecutor uiExecutor) {
+            @Ui LooperExecutor uiExecutor,
+            IconChangeTracker iconChangeTracker) {
         mContext = context;
         mTaskList = taskList;
         mTaskList.registerRecentTasksChangedListener(mRecentTasksListObserver);
@@ -190,8 +192,11 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
         tracker.addCloseable(() -> context.unregisterComponentCallbacks(componentCallbacks));
 
         taskStackChangeListeners.registerTaskStackListener(this);
-        SafeCloseable iconChangeCloseable = iconProvider.registerIconChangeListener(
-                this::onAppIconChanged, mUiExecutor.getHandler());
+        SafeCloseable iconChangeCloseable = iconChangeTracker.getChanges().forEach(
+                mUiExecutor, it -> {
+                    onAppIconChanged(it.mPackageName, it.mUser);
+                    return null;
+                });
 
         Runnable unlockCallback = () -> themeManagerLazy.get().addChangeListener(this);
         lockedUserState.runOnUserUnlocked(unlockCallback);

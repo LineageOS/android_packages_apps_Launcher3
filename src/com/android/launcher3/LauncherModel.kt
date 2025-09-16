@@ -19,7 +19,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ShortcutInfo
 import android.os.UserHandle
-import androidx.annotation.WorkerThread
 import com.android.launcher3.celllayout.CellPosMapper
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.LauncherAppSingleton
@@ -40,12 +39,9 @@ import com.android.launcher3.model.ModelTaskController
 import com.android.launcher3.model.ModelWriter
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.model.tasks.CacheDataUpdatedTask
-import com.android.launcher3.model.tasks.PackageUpdatedTask
-import com.android.launcher3.model.tasks.ShortcutsChangedTask
 import com.android.launcher3.model.tasks.UserAvailabilityChangedTask
 import com.android.launcher3.model.tasks.UserLockStateChangedTask
 import com.android.launcher3.pm.UserCache
-import com.android.launcher3.shortcuts.ShortcutRequest
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import com.android.launcher3.util.PackageUserKey
@@ -132,18 +128,6 @@ constructor(
         cellPosMapper: CellPosMapper?,
         owner: BgDataModel.Callbacks?,
     ) = ModelWriter(context, this, mBgDataModel, verifyChanges, cellPosMapper, owner)
-
-    /** Called when the icon for an app changes, outside of package event */
-    @WorkerThread
-    fun onAppIconChanged(packageName: String, user: UserHandle) {
-        // Update the icon for the calendar package
-        enqueueModelUpdateTask(PackageUpdatedTask(PackageUpdatedTask.OP_UPDATE, user, packageName))
-        ShortcutRequest(context, user).forPackage(packageName).query(ShortcutRequest.PINNED).let {
-            if (it.isNotEmpty()) {
-                enqueueModelUpdateTask(ShortcutsChangedTask(packageName, it, user, false))
-            }
-        }
-    }
 
     /** Called when the workspace items have drastically changed */
     fun onWorkspaceUiChanged() {

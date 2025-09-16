@@ -21,6 +21,8 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.pm.LauncherApps
 import android.content.pm.LauncherApps.ArchiveCompatibilityParams
+import android.util.Log
+import androidx.annotation.WorkerThread
 import com.android.launcher3.BuildConfig
 import com.android.launcher3.Flags
 import com.android.launcher3.InvariantDeviceProfile
@@ -33,16 +35,20 @@ import com.android.launcher3.graphics.ThemeManager.ThemeChangeListener
 import com.android.launcher3.homescreenfiles.HomeScreenFilesChangedTask
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider
 import com.android.launcher3.icons.IconCache
-import com.android.launcher3.icons.LauncherIconProvider
+import com.android.launcher3.icons.IconChangeTracker
 import com.android.launcher3.icons.LauncherIcons.IconPool
 import com.android.launcher3.logging.FileLog
+import com.android.launcher3.model.tasks.PackageUpdatedTask
+import com.android.launcher3.model.tasks.ShortcutsChangedTask
 import com.android.launcher3.notification.NotificationListener
 import com.android.launcher3.pm.InstallSessionHelper
 import com.android.launcher3.pm.UserCache
+import com.android.launcher3.shortcuts.ShortcutRequest
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
+import com.android.launcher3.util.PackageUserKey
 import com.android.launcher3.util.SettingsCache
 import com.android.launcher3.util.SettingsCache.NOTIFICATION_BADGING_URI
 import com.android.launcher3.util.SettingsCache.PRIVATE_SPACE_HIDE_WHEN_LOCKED_URI
@@ -62,12 +68,12 @@ constructor(
     private val themeManager: ThemeManager,
     private val userCache: UserCache,
     private val settingsCache: SettingsCache,
-    private val iconProvider: LauncherIconProvider,
     private val customWidgetManager: CustomWidgetManager,
     private val installSessionHelper: InstallSessionHelper,
     private val homeScreenFilesProvider: HomeScreenFilesProvider,
     private val lifeCycle: DaggerSingletonTracker,
     private val homeScreenFilesChangedTask: HomeScreenFilesChangedTask.Factory,
+    private val iconChangeTracker: IconChangeTracker,
 ) {
 
     fun initialize(model: LauncherModel) {
@@ -178,8 +184,28 @@ constructor(
 
         // Icon changes
         lifeCycle.addCloseable(
-            iconProvider.registerIconChangeListener(model::onAppIconChanged, MODEL_EXECUTOR.handler)
+            iconChangeTracker.changes.forEach(MODEL_EXECUTOR) { onAppIconChanged(model, it) }
         )
+    }
+
+    /** Called when the icon for an app changes, outside of package event */
+    @WorkerThread
+    private fun onAppIconChanged(model: LauncherModel, event: PackageUserKey) {
+        // Update the icon for the calendar package
+        Log.d(TAG, "onAppIconChanged: ${event.mPackageName}")
+        model.enqueueModelUpdateTask(
+            PackageUpdatedTask(PackageUpdatedTask.OP_UPDATE, event.mUser, event.mPackageName)
+        )
+        ShortcutRequest(context, event.mUser)
+            .forPackage(event.mPackageName)
+            .query(ShortcutRequest.PINNED)
+            .let {
+                if (it.isNotEmpty()) {
+                    model.enqueueModelUpdateTask(
+                        ShortcutsChangedTask(event.mPackageName, it, event.mUser, false)
+                    )
+                }
+            }
     }
 
     companion object {
