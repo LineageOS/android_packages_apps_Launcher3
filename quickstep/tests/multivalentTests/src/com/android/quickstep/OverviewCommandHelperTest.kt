@@ -39,6 +39,7 @@ import com.android.quickstep.OverviewCommandHelper.CommandInfo
 import com.android.quickstep.OverviewCommandHelper.CommandInfo.CommandStatus
 import com.android.quickstep.OverviewCommandHelper.CommandType
 import com.android.quickstep.OverviewCommandHelper.Companion.TOGGLE_PREVIOUS_TIMEOUT_MS
+import com.android.quickstep.views.DesktopTaskView
 import com.android.quickstep.views.KeyboardFocusTask
 import com.android.quickstep.views.RecentsView
 import com.android.quickstep.views.RecentsViewUtils
@@ -463,19 +464,21 @@ class OverviewCommandHelperTest {
             verify(containerInterface).switchToRecentsIfVisible(any())
         }
 
-    // TODO(b/385128447): add tests for when a TaskContentView is focused.
     @Test
     fun toggleWithFocus_recentViewVisible_windowTaskFocused_launchFocusedTask() =
         testScope.runTest {
             val mockFocusedTask = mock<TaskView>()
-            val mockTaskViewsIterable = mock<RecentsViewUtils.TaskViewsIterable>()
 
             whenever(containerInterface.getVisibleRecentsView<RecentsView<*, *>>())
                 .thenReturn(recentView)
             whenever(mockFocusedTask.isFocused).thenReturn(true)
-            whenever(mockTaskViewsIterable.iterator())
-                .thenReturn(listOf(mockFocusedTask).iterator())
-            whenever(recentView.taskViews).thenReturn(mockTaskViewsIterable)
+            whenever(recentView.taskViews)
+                .thenReturn(
+                    object : RecentsViewUtils.TaskViewsIterable(recentView) {
+                        override fun iterator(): Iterator<TaskView> =
+                            listOf(mockFocusedTask).iterator()
+                    }
+                )
             sut.addCommand(CommandType.TOGGLE_WITH_FOCUS)!!
             runCurrent()
             verify(mockFocusedTask).launchWithAnimation()
@@ -485,18 +488,43 @@ class OverviewCommandHelperTest {
     fun toggleWithFocus_recentViewVisible_windowTaskHovered_launchHoveredTask() =
         testScope.runTest {
             val mockFocusedTask = mock<TaskView>()
-            val mockTaskViewsIterable = mock<RecentsViewUtils.TaskViewsIterable>()
 
             whenever(containerInterface.getVisibleRecentsView<RecentsView<*, *>>())
                 .thenReturn(recentView)
             whenever(mockFocusedTask.isFocused).thenReturn(false)
             whenever(mockFocusedTask.isHovered).thenReturn(true)
-            whenever(mockTaskViewsIterable.iterator())
-                .thenReturn(listOf(mockFocusedTask).iterator())
-            whenever(recentView.taskViews).thenReturn(mockTaskViewsIterable)
+            whenever(recentView.taskViews)
+                .thenReturn(
+                    object : RecentsViewUtils.TaskViewsIterable(recentView) {
+                        override fun iterator(): Iterator<TaskView> =
+                            listOf(mockFocusedTask).iterator()
+                    }
+                )
             sut.addCommand(CommandType.TOGGLE_WITH_FOCUS)!!
             runCurrent()
             verify(mockFocusedTask).launchWithAnimation()
+        }
+
+    @Test
+    fun toggleWithFocus_recentViewVisible_desktopTaskFocused_launchFocusedTaskOnTop() =
+        testScope.runTest {
+            val mockDesktopTask = mock<DesktopTaskView>()
+
+            whenever(containerInterface.getVisibleRecentsView<RecentsView<*, *>>())
+                .thenReturn(recentView)
+            whenever(mockDesktopTask.isFocused).thenReturn(false)
+            whenever(mockDesktopTask.isHovered).thenReturn(false)
+            whenever(mockDesktopTask.selectedTaskId).thenReturn(TASK_ID)
+            whenever(recentView.taskViews)
+                .thenReturn(
+                    object : RecentsViewUtils.TaskViewsIterable(recentView) {
+                        override fun iterator(): Iterator<TaskView> =
+                            listOf(mockDesktopTask).iterator()
+                    }
+                )
+            sut.addCommand(CommandType.TOGGLE_WITH_FOCUS)!!
+            runCurrent()
+            verify(mockDesktopTask).launchTaskWithDesktopController(true, TASK_ID)
         }
 
     @Test
