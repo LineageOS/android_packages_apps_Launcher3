@@ -23,9 +23,11 @@ import android.graphics.Rect
 import android.util.FloatProperty
 import android.util.Log
 import android.util.Property
+import android.view.KeyEvent
 import android.view.View
 import android.view.View.LAYOUT_DIRECTION_LTR
 import android.view.View.LAYOUT_DIRECTION_RTL
+import androidx.core.view.ancestors
 import androidx.core.view.children
 import androidx.core.view.isEmpty
 import androidx.core.view.isInvisible
@@ -53,6 +55,7 @@ import com.android.quickstep.RemoteTargetGluer.RemoteTargetHandle
 import com.android.quickstep.util.DesksUtils.Companion.areMultiDesksFlagsEnabled
 import com.android.quickstep.util.DesktopTask
 import com.android.quickstep.util.GroupTask
+import com.android.quickstep.util.TaskGridNavHelper
 import com.android.quickstep.util.isExternalDisplay
 import com.android.quickstep.views.RecentsView.DESKTOP_CAROUSEL_DETACH_PROGRESS
 import com.android.quickstep.views.RecentsView.RECENTS_GRID_PROGRESS
@@ -225,6 +228,58 @@ class RecentsViewUtils(private val recentsView: RecentsView<*, *>) : DesktopVisi
                     (enableOverviewOnConnectedDisplays() || !it.isExternalDisplay)
             }
             ?: taskViews.lastOrNull()
+
+    fun handleTabKeyEvent(event: KeyEvent, superCall: (KeyEvent) -> Boolean): Boolean {
+        val isShiftPressed = event.isShiftPressed
+        val cycleTaskViews = {
+            recentsView.snapToPageRelative(
+                if (isShiftPressed) -1 else 1,
+                /* cycle= */ true,
+                TaskGridNavHelper.TaskNavDirection.TAB,
+            )
+        }
+
+        // When alt + tabbing on phones (KQS handles on large screens) go to the next task.
+        if (event.isAltPressed) {
+            return cycleTaskViews()
+        }
+
+        // If not alt + tabbing, cycle through the available views in a single task (e.g. chip menu)
+        val currentFocus: View = recentsView.findFocus() ?: return superCall(event)
+
+        // If already at the last focusable element within the TaskView (or if cycling in reverse
+        // order and on first element), snap to the next page.
+        val direction = if (isShiftPressed) View.FOCUS_BACKWARD else View.FOCUS_FORWARD
+        findParentTaskView(currentFocus)?.getVisibleFocusables(direction)?.let { focusables ->
+            if (
+                focusables.isNotEmpty() &&
+                    ((!isShiftPressed && currentFocus == focusables.last()) ||
+                        (isShiftPressed && currentFocus == focusables.first()))
+            ) {
+                return cycleTaskViews()
+            }
+        }
+
+        // Snap to next page if a single item is focusable, like the clear all button. Skip any
+        // invisible views for focusing.
+        val nextFocus: View? = recentsView.focusSearch(currentFocus, direction)
+        if (nextFocus == null || !nextFocus.isVisibleToUser) {
+            return cycleTaskViews()
+        }
+
+        return nextFocus.requestFocus()
+    }
+
+    /** Finds the first parent of this View that is an instance of TaskView, including itself. */
+    private fun findParentTaskView(view: View): TaskView? {
+        if (view is TaskView) {
+            return view
+        }
+        return view.ancestors.filterIsInstance<TaskView>().firstOrNull()
+    }
+
+    fun View.getVisibleFocusables(direction: Int): List<View> =
+        getFocusables(direction)?.filter { it.isVisibleToUser } ?: emptyList()
 
     private fun getDeviceProfile() = (recentsView.mContainer as RecentsViewContainer).deviceProfile
 
