@@ -28,6 +28,7 @@ import static org.junit.Assume.assumeTrue;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.platform.systemui_tapl.ui.Root;
 import android.platform.test.annotations.DisableFlags;
 
 import androidx.annotation.NonNull;
@@ -612,6 +613,13 @@ public class TaplTestsQuickstep extends AbstractQuickStepTest {
                     appsInEachRowCount,
                     recentsView.getBottomRowTaskCountForTablet());
         });
+    }
+
+    @Test
+    @NavigationModeSwitch
+    @PortraitLandscape
+    public void testNotificationsFromHome() {
+        Root.get().openNotificationShadeViaSwipe();
     }
 
     private void startTestAppsWithCheck() throws Exception {

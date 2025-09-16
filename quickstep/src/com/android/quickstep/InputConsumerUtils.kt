@@ -355,6 +355,7 @@ object InputConsumerUtils {
                         gestureState.displayId,
                         base,
                         inputMonitorCompat,
+                        deviceState,
                     )
             }
 
