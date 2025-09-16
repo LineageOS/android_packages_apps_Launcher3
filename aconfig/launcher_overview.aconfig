@@ -106,11 +106,8 @@ flag {
 }
 
 flag {
-    name: "enable_prevent_overview_mouse_drag"
+    name: "enable_overview_pagination"
     namespace: "launcher_overview"
-    description: "Prevents the user from scrolling overview with a mouse via click and drag"
-    bug: "433705336"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
+    description: "Allows the user to scroll overview with a mouse click."
+    bug: "443252794"
 }
