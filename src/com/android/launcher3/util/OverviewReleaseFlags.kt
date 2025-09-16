@@ -20,9 +20,7 @@ import com.android.launcher3.Flags
 
 object OverviewReleaseFlags {
     private fun enableOverviewNewLayout() =
-        Flags.enableRefactorTaskThumbnail() &&
-            Flags.enableOverviewIconMenu() &&
-            Flags.enableGridOnlyOverview()
+        Flags.enableOverviewIconMenu() && Flags.enableGridOnlyOverview()
 
     @JvmStatic fun enableOverviewIconMenu() = enableOverviewNewLayout()
 

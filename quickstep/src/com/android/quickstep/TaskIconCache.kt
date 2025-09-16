@@ -23,7 +23,6 @@ import android.os.UserHandle
 import android.util.SparseArray
 import androidx.annotation.WorkerThread
 import androidx.core.graphics.drawable.toDrawable
-import com.android.launcher3.Flags.enableRefactorTaskThumbnail
 import com.android.launcher3.Flags.enableTaskbarRecentsThemedIcons
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
@@ -72,8 +71,7 @@ class TaskIconCache(
     private val iconFactory: BaseIconFactory
         get() =
             if (enableTaskbarRecentsThemedIcons()) LauncherIcons.obtain(context)
-            else if (enableRefactorTaskThumbnail()) createIconFactory()
-            else _iconFactory ?: createIconFactory().also { _iconFactory = it }
+            else createIconFactory()
 
     var taskVisualsChangeListener: TaskVisualsChangeListener? = null
 

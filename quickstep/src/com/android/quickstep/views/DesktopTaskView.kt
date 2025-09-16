@@ -41,7 +41,6 @@ import com.android.internal.hidden_from_bootclasspath.com.android.window.flags.F
 import com.android.launcher3.Flags.enableDesktopExplodedView
 import com.android.launcher3.Flags.enableOverviewDesktopTileWallpaperBackground
 import com.android.launcher3.Flags.enableRefactorTaskContentView
-import com.android.launcher3.Flags.enableRefactorTaskThumbnail
 import com.android.launcher3.R
 import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.testing.TestLogging
@@ -107,27 +106,14 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     private val contentViewFullscreenParams = FullscreenDrawParams(context)
 
-    private val taskThumbnailViewDeprecatedPool =
-        if (!enableRefactorTaskThumbnail()) {
-            ViewPool<TaskThumbnailViewDeprecated>(
-                context,
-                this,
-                R.layout.task_thumbnail_deprecated,
-                VIEW_POOL_MAX_SIZE,
-                VIEW_POOL_INITIAL_SIZE,
-            )
-        } else null
-
     private val taskThumbnailViewPool =
-        if (enableRefactorTaskThumbnail()) {
-            ViewPool<TaskThumbnailView>(
-                context,
-                this,
-                R.layout.task_thumbnail,
-                VIEW_POOL_MAX_SIZE,
-                VIEW_POOL_INITIAL_SIZE,
-            )
-        } else null
+        ViewPool<TaskThumbnailView>(
+            context,
+            this,
+            R.layout.task_thumbnail,
+            VIEW_POOL_MAX_SIZE,
+            VIEW_POOL_INITIAL_SIZE,
+        )
 
     private val taskContentViewPool =
         if (enableRefactorTaskContentView()) {
@@ -409,7 +395,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
                 }
             }
 
-            if (enableDesktopRecentsTransitionsCornersBugfix() && enableRefactorTaskThumbnail()) {
+            if (enableDesktopRecentsTransitionsCornersBugfix()) {
                 // When exploded view is disabled, these scale factors will be 1.0. This secondary
                 // scale factor is needed because a scale transform is applied to the thumbnail.
                 val thumbnailScaleWidth =
@@ -435,7 +421,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
                     (taskContainer.taskContentView as TaskContentView).outlineBounds =
                         contentOutlineBounds
                 } else {
-                    taskContainer.thumbnailView.outlineBounds = contentOutlineBounds
+                    taskContainer.snapshotView.outlineBounds = contentOutlineBounds
                 }
             }
 
@@ -498,18 +484,10 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
         taskContainers =
             tasks.map { task ->
                 val taskContentView =
-                    when {
-                        enableRefactorTaskContentView() -> taskContentViewPool!!.view
-                        enableRefactorTaskThumbnail() -> taskThumbnailViewPool!!.view
-                        else -> taskThumbnailViewDeprecatedPool!!.view
-                    }
+                    if (enableRefactorTaskContentView()) taskContentViewPool!!.view
+                    else taskThumbnailViewPool.view
                 contentView.addView(taskContentView, backgroundViewIndex + 1)
-                val snapshotView =
-                    if (enableRefactorTaskContentView()) {
-                        taskContentView.findViewById<TaskThumbnailView>(R.id.snapshot)
-                    } else {
-                        taskContentView
-                    }
+                val snapshotView = findViewById<TaskThumbnailView>(R.id.snapshot)
                 if (enableDesktopExplodedView()) {
                     taskContentView.setOnClickListener {
                         launchTaskWithDesktopController(animated = true, task.key.id)
@@ -540,10 +518,8 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     override fun onBind(orientedState: RecentsOrientedState) {
         super.onBind(orientedState)
-        if (enableRefactorTaskThumbnail()) {
-            if (enableOverviewDesktopTileWallpaperBackground()) {
-                setWallpaperBackground(false)
-            }
+        if (enableOverviewDesktopTileWallpaperBackground()) {
+            setWallpaperBackground(false)
         }
     }
 
@@ -664,9 +640,6 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     override fun getContainerForIconView(iconView: TaskViewIcon) = null
 
-    // TODO(b/330685808) support overlay for Screenshot action
-    override fun setOverlayEnabled(overlayEnabled: Boolean) {}
-
     override fun onFullscreenProgressChanged(fullscreenProgress: Float) {
         backgroundView.alpha = 1 - fullscreenProgress
         updateSettledProgressFullscreen(fullscreenProgress)
@@ -735,14 +708,10 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     private fun removeAndRecycleThumbnailView(taskContainer: TaskContainer) {
         contentView.removeView(taskContainer.taskContentView)
-        when {
-            enableRefactorTaskContentView() ->
-                taskContentViewPool!!.recycle(taskContainer.taskContentView as TaskContentView)
-
-            enableRefactorTaskThumbnail() ->
-                taskThumbnailViewPool!!.recycle(taskContainer.taskContentView as TaskThumbnailView)
-
-            else -> taskThumbnailViewDeprecatedPool!!.recycle(taskContainer.thumbnailViewDeprecated)
+        if (enableRefactorTaskContentView()) {
+            taskContentViewPool!!.recycle(taskContainer.taskContentView as TaskContentView)
+        } else {
+            taskThumbnailViewPool!!.recycle(taskContainer.taskContentView as TaskThumbnailView)
         }
     }
 

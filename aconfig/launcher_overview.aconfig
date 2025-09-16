@@ -16,13 +16,6 @@ flag {
 }
 
 flag {
-    name: "enable_refactor_task_thumbnail"
-    namespace: "launcher_overview"
-    description: "Enables rewritten version of TaskThumbnailViews in Overview"
-    bug: "331754864"
-}
-
-flag {
     name: "enable_later_is_locked_check"
     namespace: "launcher_overview"
     description: "Checks if users associated with tasks are locked later in the data flow to prevent stale data"

@@ -37,7 +37,6 @@ import androidx.core.content.res.ResourcesCompat
 import com.android.app.animation.Interpolators
 import com.android.app.animation.Interpolators.clampToProgress
 import com.android.launcher3.AbstractFloatingView
-import com.android.launcher3.Flags.enableRefactorTaskThumbnail
 import com.android.launcher3.R
 import com.android.launcher3.anim.AnimationSuccessListener
 import com.android.launcher3.anim.RoundedRectRevealOutlineProvider
@@ -321,13 +320,10 @@ constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int = 0) :
                         if (enableOverviewIconMenu()) Interpolators.EMPHASIZED
                         else Interpolators.DECELERATE
 
-                    if (enableRefactorTaskThumbnail()) {
-                        addUpdateListener { animation: ValueAnimator ->
-                            val animatedFraction = animation.animatedFraction
-                            val openProgress =
-                                if (closing) (1 - animatedFraction) else animatedFraction
-                            taskContainer?.updateMenuOpenProgress(openProgress)
-                        }
+                    addUpdateListener { animation: ValueAnimator ->
+                        val animatedFraction = animation.animatedFraction
+                        val openProgress = if (closing) (1 - animatedFraction) else animatedFraction
+                        taskContainer?.updateMenuOpenProgress(openProgress)
                     }
                 }
         openCloseAnimator =
@@ -360,18 +356,6 @@ constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int = 0) :
                         animatorBuilder.with(
                             ObjectAnimator.ofFloat(this, ALPHA, (if (closing) 0 else 1).toFloat())
                         )
-                    }
-
-                    if (!enableRefactorTaskThumbnail()) {
-                        taskContainer?.let {
-                            animatorBuilder.with(
-                                ObjectAnimator.ofFloat(
-                                    it.thumbnailViewDeprecated,
-                                    TaskThumbnailViewDeprecated.DIM_ALPHA,
-                                    if (closing) 0f else TaskView.MAX_PAGE_SCRIM_ALPHA,
-                                )
-                            )
-                        }
                     }
 
                     animator.start()

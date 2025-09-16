@@ -17,8 +17,6 @@ package com.android.quickstep;
 
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 
-import static com.android.launcher3.Flags.enableRefactorTaskThumbnail;
-import static com.android.launcher3.util.OverviewReleaseFlags.enableGridOnlyOverview;
 import static com.android.quickstep.TaskUtils.checkCurrentOrManagedUserId;
 
 import android.annotation.SuppressLint;
@@ -38,6 +36,7 @@ import android.os.UserHandle;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.launcher3.concurrent.annotations.Ui;
 import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.dagger.LauncherAppSingleton;
 import com.android.launcher3.graphics.ThemeManager;
@@ -46,16 +45,14 @@ import com.android.launcher3.icons.IconProvider;
 import com.android.launcher3.util.DaggerSingletonObject;
 import com.android.launcher3.util.DaggerSingletonTracker;
 import com.android.launcher3.util.DisplayController;
-import com.android.launcher3.concurrent.annotations.Ui;
 import com.android.launcher3.util.Executors.SimpleThreadFactory;
 import com.android.launcher3.util.LockedUserState;
-import com.android.launcher3.util.SafeCloseable;
 import com.android.launcher3.util.LooperExecutor;
+import com.android.launcher3.util.SafeCloseable;
 import com.android.launcher3.util.coroutines.DispatcherProvider;
 import com.android.quickstep.dagger.QuickstepBaseAppComponent;
 import com.android.quickstep.recents.data.RecentTasksDataSource;
 import com.android.quickstep.recents.data.TaskVisualsChangeNotifier;
-import com.android.quickstep.util.DesktopTask;
 import com.android.quickstep.util.GroupTask;
 import com.android.quickstep.util.TaskVisualsChangeListener;
 import com.android.systemui.shared.recents.model.Task;
@@ -179,20 +176,18 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
         mIconCache.registerTaskVisualsChangeListener(this);
         mThumbnailCache = thumbnailCache;
         mUiExecutor = uiExecutor;
-        if (isCachePreloadingEnabled()) {
-            ComponentCallbacks componentCallbacks = new ComponentCallbacks() {
-                @Override
-                public void onConfigurationChanged(Configuration configuration) {
-                    updateCacheSizeAndPreloadIfNeeded();
-                }
+        ComponentCallbacks componentCallbacks = new ComponentCallbacks() {
+            @Override
+            public void onConfigurationChanged(Configuration configuration) {
+                updateCacheSizeAndPreloadIfNeeded();
+            }
 
-                @Override
-                public void onLowMemory() {
-                }
-            };
-            context.registerComponentCallbacks(componentCallbacks);
-            tracker.addCloseable(() -> context.unregisterComponentCallbacks(componentCallbacks));
-        }
+            @Override
+            public void onLowMemory() {
+            }
+        };
+        context.registerComponentCallbacks(componentCallbacks);
+        tracker.addCloseable(() -> context.unregisterComponentCallbacks(componentCallbacks));
 
         taskStackChangeListeners.registerTaskStackListener(this);
         SafeCloseable iconChangeCloseable = iconProvider.registerIconChangeListener(
@@ -451,10 +446,6 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
      * highResLoadingState is enabled
      */
     public void preloadCacheIfNeeded() {
-        if (!isCachePreloadingEnabled()) {
-            return;
-        }
-
         if (!mThumbnailCache.isPreloadingEnabled()) {
             // Skip if we aren't preloading.
             return;
@@ -477,18 +468,10 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
      * Updates cache size and preloads more tasks if cache size increases
      */
     public void updateCacheSizeAndPreloadIfNeeded() {
-        if (!isCachePreloadingEnabled()) {
-            return;
-        }
-
         // If new size is larger than original size, preload more cache to fill the gap
         if (mThumbnailCache.updateCacheSizeAndRemoveExcess()) {
             preloadCacheIfNeeded();
         }
-    }
-
-    private boolean isCachePreloadingEnabled() {
-        return enableGridOnlyOverview() || enableRefactorTaskThumbnail();
     }
 
     /**

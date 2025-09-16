@@ -20,7 +20,6 @@ import android.content.ComponentName
 import android.content.Intent
 import android.os.Process
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.launcher3.Flags.enableRefactorTaskThumbnail
 import com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_NOT_PINNABLE
 import com.android.launcher3.model.data.TaskViewItemInfo.Companion.createTaskViewAtom
 import com.android.launcher3.util.SandboxApplication
@@ -37,7 +36,6 @@ import com.android.quickstep.task.thumbnail.TaskContentView
 import com.android.quickstep.task.thumbnail.TaskThumbnailView
 import com.android.quickstep.views.RecentsView
 import com.android.quickstep.views.TaskContainer
-import com.android.quickstep.views.TaskThumbnailViewDeprecated
 import com.android.quickstep.views.TaskView
 import com.android.quickstep.views.TaskViewIcon
 import com.android.quickstep.views.TaskViewType
@@ -195,8 +193,7 @@ class TaskViewItemInfoTest {
             taskView,
             task,
             mock<TaskContentView>(),
-            if (enableRefactorTaskThumbnail()) mock<TaskThumbnailView>()
-            else mock<TaskThumbnailViewDeprecated>(),
+            mock<TaskThumbnailView>(),
             mock<TaskViewIcon>(),
             mock<TransformingTouchDelegate>(),
             SplitConfigurationOptions.STAGE_POSITION_UNDEFINED,

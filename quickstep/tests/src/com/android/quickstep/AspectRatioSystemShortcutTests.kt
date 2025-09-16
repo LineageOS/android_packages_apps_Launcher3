@@ -35,7 +35,6 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.AbstractFloatingViewHelper
 import com.android.launcher3.Flags.enableRefactorTaskContentView
-import com.android.launcher3.Flags.enableRefactorTaskThumbnail
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.R
 import com.android.launcher3.logging.StatsLogManager
@@ -59,7 +58,6 @@ import com.android.quickstep.util.SingleTask
 import com.android.quickstep.views.LauncherRecentsView
 import com.android.quickstep.views.RecentsViewContainer
 import com.android.quickstep.views.TaskContainer
-import com.android.quickstep.views.TaskThumbnailViewDeprecated
 import com.android.quickstep.views.TaskView
 import com.android.quickstep.views.TaskViewIcon
 import com.android.systemui.shared.recents.model.Task
@@ -139,12 +137,10 @@ class AspectRatioSystemShortcutTests {
 
         whenever(orientedState.orientationHandler).thenReturn(LandscapePagedViewHandler())
 
-        if (enableRefactorTaskThumbnail()) {
-            applicationContext.initDaggerComponent(
-                DaggerTaskViewTestComponent.builder().bindRecentsModel(mockRecentsModel())
-            )
-            initializeRecentsDependencies(launcher)
-        }
+        applicationContext.initDaggerComponent(
+            DaggerTaskViewTestComponent.builder().bindRecentsModel(mockRecentsModel())
+        )
+        initializeRecentsDependencies(launcher)
         taskView =
             LayoutInflater.from(context).cloneInContext(launcher).inflate(R.layout.task, null)
                 as TaskView
@@ -153,9 +149,7 @@ class AspectRatioSystemShortcutTests {
 
     @After
     fun tearDown() {
-        if (enableRefactorTaskThumbnail()) {
-            RecentsDependencies.destroy(launcher)
-        }
+        RecentsDependencies.destroy(launcher)
     }
 
     /**
@@ -274,11 +268,9 @@ class AspectRatioSystemShortcutTests {
             task,
             when {
                 enableRefactorTaskContentView() -> mock<TaskContentView>()
-                enableRefactorTaskThumbnail() -> mock<TaskThumbnailView>()
-                else -> mock<TaskThumbnailViewDeprecated>()
+                else -> mock<TaskThumbnailView>()
             },
-            if (enableRefactorTaskThumbnail()) mock<TaskThumbnailView>()
-            else mock<TaskThumbnailViewDeprecated>(),
+            mock<TaskThumbnailView>(),
             mock<TaskViewIcon>(),
             mock<TransformingTouchDelegate>(),
             SplitConfigurationOptions.STAGE_POSITION_UNDEFINED,
