@@ -550,6 +550,12 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
         int totalItems = isMovingAway && itemsToShow < MAX_ITEMS_IN_PREVIEW
                 ? itemsToShow + 1 : itemsToShow;
 
+        // Reverse the overlay offset item index for the special case of overflow icon removing
+        // from view in RTL layout,
+        if (mIsRtlLayout && itemsToShow == 0 && isMovingAway) {
+            indexOfItem = indexOfItem == 0 ? 1 : 0;
+        }
+
         float xOffset = getItemXOffset(
                 mItemIconCenterOffset, mIsRtlLayout, indexOfItem, totalItems);
         float yOffset = getItemYOffset(mItemIconCenterOffset, indexOfItem, totalItems);

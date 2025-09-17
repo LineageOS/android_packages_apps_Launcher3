@@ -713,11 +713,62 @@ class TaskbarViewTest {
     }
 
     @Test
+    @ForceRtl
+    fun testAnimateToOverflowOnOverlay_rtl_triggersAnimationAndResetsState() {
+        runOnMainSync {
+            taskbarView.updateItems(emptyArray(), createRecents(maxShownRecents), emptyList())
+            // Add one more recent app to trigger the overflow animation.
+            taskbarView.updateItems(emptyArray(), createRecents(maxShownRecents + 1), emptyList())
+        }
+
+        runOnMainSync {
+            animatorTestRule.advanceTimeBy(TaskbarOverflowView.ITEM_ICON_SIZE_ANIMATION_DURATION)
+        }
+        assertThat(taskbarView.isRecentsOverflowViewFirstItemHiddenForAnimation).isFalse()
+    }
+
+    @Test
     fun testAnimateFromOverflowOnOverlay_triggersAnimationAndResetsState() {
         val initialRecents = createRecents(maxShownRecents + 1)
         runOnMainSync { taskbarView.updateItems(emptyArray(), initialRecents, emptyList()) }
 
         val taskThatWillAnimateIn = initialRecents[1]
+        var iconToAnimate = taskbarView.iconViews.find { it.tag == taskThatWillAnimateIn }
+        assertThat(iconToAnimate).isNull()
+
+        val fewerRecents = initialRecents.dropLast(1)
+        runOnMainSync { taskbarView.updateItems(emptyArray(), fewerRecents, emptyList()) }
+
+        iconToAnimate = taskbarView.iconViews.find { it.tag == taskThatWillAnimateIn }
+        assertThat(iconToAnimate).isNotNull()
+        runOnMainSync {
+            taskbarView.measure(
+                View.MeasureSpec.makeMeasureSpec(taskbarView.width, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(taskbarView.height, View.MeasureSpec.EXACTLY),
+            )
+            taskbarView.layout(
+                taskbarView.left,
+                taskbarView.top,
+                taskbarView.right,
+                taskbarView.bottom,
+            )
+        }
+        assertThat(iconToAnimate?.alpha).isEqualTo(0)
+
+        runOnMainSync {
+            animatorTestRule.advanceTimeBy(TaskbarOverflowView.ITEM_ICON_SIZE_ANIMATION_DURATION)
+        }
+        assertThat(iconToAnimate?.alpha).isEqualTo(1f)
+    }
+
+    @Test
+    @ForceRtl
+    fun testAnimateFromOverflowOnOverlay_rtl_triggersAnimationAndResetsState() {
+        val initialRecents = createRecents(maxShownRecents + 1)
+        runOnMainSync { taskbarView.updateItems(emptyArray(), initialRecents, emptyList()) }
+
+        val taskThatWillAnimateIn = initialRecents[1]
+
         var iconToAnimate = taskbarView.iconViews.find { it.tag == taskThatWillAnimateIn }
         assertThat(iconToAnimate).isNull()
 

@@ -92,6 +92,7 @@ import com.android.quickstep.views.TaskViewType;
 import com.android.systemui.shared.recents.model.Task;
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -866,7 +867,9 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         if (hasOverflow && mTaskbarRecentsOverflowView != null) {
             final int startIndex = mIsRtl ? recentTasks.size() - itemsToAddToOverflow : 0;
             final int endIndex = mIsRtl ? recentTasks.size() : itemsToAddToOverflow;
-            final List<GroupTask> overflownRecents = recentTasks.subList(startIndex, endIndex);
+            List<GroupTask> overflownRecents = new ArrayList<>(
+                    recentTasks.subList(startIndex, endIndex));
+            if (mIsRtl) Collections.reverse(overflownRecents);
             mTaskbarRecentsOverflowView.setItems(
                     overflownRecents.stream().map(
                             t -> new TaskWrapper(mActivityContext, ((SingleTask) t))).toList());
@@ -955,7 +958,13 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         }
 
         while (isNextViewInSection(GroupTask.class)) {
-            removeAndRecycle(getChildAt(mNextViewIndex));
+            View recentIconToRemove = getChildAt(mNextViewIndex);
+            GroupTask taskTag = (GroupTask) recentIconToRemove.getTag();
+            if (mIsRtl && overflownRecentsSet.contains(taskTag)) {
+                animateToOverflowOnOverlay(recentIconToRemove, indexOfIconInOverfow);
+                indexOfIconInOverfow = mPrevOverflowTasks.isEmpty() ? 1 : 0;
+            }
+            removeAndRecycle(recentIconToRemove);
         }
 
         if (mIsRtl && hasOverflow) {
