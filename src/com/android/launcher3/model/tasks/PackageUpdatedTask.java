@@ -15,12 +15,11 @@
  */
 package com.android.launcher3.model.tasks;
 
+import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT;
 import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_ARCHIVED;
 import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_DISABLED_NOT_AVAILABLE;
 import static com.android.launcher3.model.data.LauncherAppWidgetInfo.FLAG_PROVIDER_NOT_READY;
-import static com.android.launcher3.model.data.WorkspaceItemInfo.FLAG_AUTOINSTALL_ICON;
-import static com.android.launcher3.model.data.WorkspaceItemInfo.FLAG_RESTORED_ICON;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -35,7 +34,6 @@ import androidx.annotation.NonNull;
 
 import com.android.launcher3.Flags;
 import com.android.launcher3.LauncherModel.ModelUpdateTask;
-import com.android.launcher3.LauncherSettings.Favorites;
 import com.android.launcher3.icons.IconCache;
 import com.android.launcher3.logging.FileLog;
 import com.android.launcher3.model.AllAppsList;
@@ -118,56 +116,52 @@ public class PackageUpdatedTask implements ModelUpdateTask {
                     String packageName = cn.getPackageName();
                     if (!mPackages.contains(packageName)) return false;
 
-                    boolean infoUpdated = false;
-                    boolean shortcutUpdated = false;
+                    if (itemInfo.itemType != ITEM_TYPE_APPLICATION
+                            && itemInfo.itemType != ITEM_TYPE_DEEP_SHORTCUT) {
+                        FileLog.d(TAG, "Ignoring unknown item-type: " + itemInfo);
+                        // Should it be deleted?
+                        return false;
+                    }
+
+                    if (itemInfo.itemType == ITEM_TYPE_DEEP_SHORTCUT) {
+                        // Deep shortcuts are handled via shortcut update task. Just handle promise
+                        // shortcuts for now as they may not be registered in the system yet.
+                        if (!itemInfo.isPromise()) return false;
+
+                        // Avoid race condition where shortcut service has no record of
+                        // unarchived shortcut being pinned after restore.
+                        // Launcher should be source-of-truth for if shortcut is pinned.
+                        List<ShortcutInfo> shortcut =
+                                new ShortcutRequest(context, mUser)
+                                        .forPackage(cn.getPackageName(),
+                                                itemInfo.getDeepShortcutId())
+                                        .query(ShortcutRequest.ALL);
+                        if (!shortcut.isEmpty()) {
+                            // Restore the shortcut and notify update
+                            itemInfo.updateFromDeepShortcutInfo(shortcut.get(0), context);
+                            itemInfo.status = WorkspaceItemInfo.DEFAULT;
+                            taskController.getModelWriter().updateItemInDatabase(itemInfo);
+                            return true;
+                        } else if (!itemInfo.isArchived()) {
+                            FileLog.e(TAG, "Removing unrestored shortcut: " + itemInfo);
+                            removedShortcuts.add(itemInfo.id);
+                        }
+                        return false;
+                    }
 
                     if (itemInfo.hasStatusFlag(WorkspaceItemInfo.FLAG_SUPPORTS_WEB_UI)) {
                         forceKeepShortcuts.add(itemInfo.id);
                     }
 
                     if (itemInfo.isPromise()) {
-                        boolean isTargetValid = !cn.getClassName().equals(
-                                IconCache.EMPTY_CLASS_NAME);
-                        if (itemInfo.itemType == ITEM_TYPE_DEEP_SHORTCUT) {
-                            int requestQuery = ShortcutRequest.PINNED;
-                            if (Flags.restoreArchivedShortcuts()) {
-                                // Avoid race condition where shortcut service has no record of
-                                // unarchived shortcut being pinned after restore.
-                                // Launcher should be source-of-truth for if shortcut is pinned.
-                                requestQuery = ShortcutRequest.ALL;
-                            }
-                            List<ShortcutInfo> shortcut =
-                                    new ShortcutRequest(context, mUser)
-                                            .forPackage(cn.getPackageName(),
-                                                    itemInfo.getDeepShortcutId())
-                                            .query(requestQuery);
-                            if (shortcut.isEmpty()) {
-                                isTargetValid = false;
-                                if (DEBUG) {
-                                    Log.i(TAG, "Shortcut not found for updated"
-                                            + " package=" + itemInfo.getTargetPackage()
-                                            + ", isArchived=" + itemInfo.isArchived());
-                                }
-                            } else {
-                                if (DEBUG) {
-                                    Log.i(TAG, "Found shortcut for updated"
-                                            + " package=" + itemInfo.getTargetPackage()
-                                            + ", isTargetValid=" + isTargetValid
-                                            + ", isArchived=" + itemInfo.isArchived());
-                                }
-                                itemInfo.updateFromDeepShortcutInfo(shortcut.get(0), context);
-                                infoUpdated = true;
-                            }
-                        } else if (isTargetValid) {
-                            isTargetValid = context.getSystemService(LauncherApps.class)
-                                    .isActivityEnabled(cn, mUser);
-                        }
+                        boolean isTargetValid =
+                                !cn.getClassName().equals(IconCache.EMPTY_CLASS_NAME)
+                                        && context.getSystemService(LauncherApps.class)
+                                                .isActivityEnabled(cn, mUser);
 
-                        if (!isTargetValid && (itemInfo.hasStatusFlag(
-                                FLAG_RESTORED_ICON | FLAG_AUTOINSTALL_ICON)
-                                || itemInfo.isArchived())) {
+                        if (!isTargetValid) {
                             if (updateWorkspaceItemIntent(context, itemInfo, packageName)) {
-                                infoUpdated = true;
+
                             } else if (shouldRemoveRestoredShortcut(itemInfo)) {
                                 removedShortcuts.add(itemInfo.id);
                                 if (DEBUG) {
@@ -180,24 +174,11 @@ public class PackageUpdatedTask implements ModelUpdateTask {
                                 }
                                 return false;
                             }
-                        } else if (!isTargetValid) {
-                            removedShortcuts.add(itemInfo.id);
-                            if (DEBUG) {
-                                FileLog.w(TAG, "Removing shortcut that no longer points to"
-                                        + " valid component."
-                                        + " id=" + itemInfo.id
-                                        + " package=" + itemInfo.getTargetPackage()
-                                        + " status=" + itemInfo.status);
-                            }
-                            return false;
                         } else {
                             itemInfo.status = WorkspaceItemInfo.DEFAULT;
-                            infoUpdated = true;
                         }
                     } else if (removedComponents.contains(cn)) {
-                        if (updateWorkspaceItemIntent(context, itemInfo, packageName)) {
-                            infoUpdated = true;
-                        }
+                        updateWorkspaceItemIntent(context, itemInfo, packageName);
                     }
 
                     List<LauncherActivityInfo> activities = activitiesLists.get(packageName);
@@ -216,29 +197,21 @@ public class PackageUpdatedTask implements ModelUpdateTask {
                                 .getActivityInfo().isArchived;
                         if (newArchivalState != itemInfo.isArchived()) {
                             itemInfo.runtimeStatusFlags ^= FLAG_ARCHIVED;
-                            infoUpdated = true;
                         }
                     }
-                    if (itemInfo.itemType == Favorites.ITEM_TYPE_APPLICATION) {
-                        if (activities != null && !activities.isEmpty()) {
-                            itemInfo.setNonResizeable(ApiWrapper.INSTANCE.get(context)
-                                    .isNonResizeableActivity(activities.get(0)));
-                        }
-                        iconCache.getTitleAndIcon(
-                                itemInfo, itemInfo.getMatchingLookupFlag());
-                        infoUpdated = true;
+                    if (activities != null && !activities.isEmpty()) {
+                        itemInfo.setNonResizeable(ApiWrapper.INSTANCE.get(context)
+                                .isNonResizeableActivity(activities.get(0)));
                     }
+                    iconCache.getTitleAndIcon(
+                            itemInfo, itemInfo.getMatchingLookupFlag());
 
-                    int oldRuntimeFlags = itemInfo.runtimeStatusFlags;
                     itemInfo.runtimeStatusFlags = flagOp.apply(itemInfo.runtimeStatusFlags);
-                    if (itemInfo.runtimeStatusFlags != oldRuntimeFlags) {
-                        shortcutUpdated = true;
-                    }
 
-                    if (infoUpdated && itemInfo.id != ItemInfo.NO_ID) {
+                    if (itemInfo.id != ItemInfo.NO_ID) {
                         taskController.getModelWriter().updateItemInDatabase(itemInfo);
                     }
-                    return infoUpdated || shortcutUpdated;
+                    return true;
                 }, widget -> {
                     if (widget.hasRestoreFlag(FLAG_PROVIDER_NOT_READY)
                             && mPackages.contains(widget.providerName.getPackageName())) {
@@ -314,11 +287,6 @@ public class PackageUpdatedTask implements ModelUpdateTask {
      */
     private boolean updateWorkspaceItemIntent(Context context,
             WorkspaceItemInfo si, String packageName) {
-        if (si.itemType == ITEM_TYPE_DEEP_SHORTCUT) {
-            // Do not update intent for deep shortcuts as they contain additional information
-            // about the shortcut.
-            return false;
-        }
         // Try to find the best match activity.
         Intent intent = PackageManagerHelper.INSTANCE.get(context)
                 .getAppLaunchIntent(packageName, mUser);
@@ -334,8 +302,6 @@ public class PackageUpdatedTask implements ModelUpdateTask {
         if (itemInfo.hasPromiseIconUi() && !Flags.restoreArchivedShortcuts()) {
             return true;
         }
-        return Flags.restoreArchivedShortcuts()
-                && !itemInfo.isArchived()
-                && itemInfo.itemType == ITEM_TYPE_DEEP_SHORTCUT;
+        return Flags.restoreArchivedShortcuts() && !itemInfo.isArchived();
     }
 }
