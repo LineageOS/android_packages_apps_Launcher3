@@ -161,14 +161,14 @@ class OseWidgetViewTest {
     fun when_view_longClicked_noOptionItems_returnsFalse() {
         doReturn(emptyList<OptionItem>()).whenever(oseWidgetOptionsProvider).getOptionItems()
         doNothing().whenever(mVut).showOptionsPopup(any(), any())
-        assertFalse { mVut.onLongClick(mVut) }
+        assertFalse { mVut.onWidgetLongClick(mVut) }
     }
 
     @Test
     fun when_view_longClicked_optionItemsExist_returnsTrue() {
         doReturn(listOf(optionItem)).whenever(oseWidgetOptionsProvider).getOptionItems()
         doNothing().whenever(mVut).showOptionsPopup(any(), any())
-        assertTrue { mVut.onLongClick(mVut) }
+        assertTrue { mVut.onWidgetLongClick(mVut) }
     }
 
     @LauncherAppSingleton

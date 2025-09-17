@@ -55,6 +55,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 
     init {
         activityContext.appWidgetHolder?.onViewCreationCallback?.accept(this)
+        setOnLongClickListener { onWidgetLongClick(it) }
     }
 
     override fun onAttachedToWindow() {
@@ -135,7 +136,8 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         activityContext.startActivitySafely(view, browserIntent, /* item= */ null)
     }
 
-    override fun onLongClick(view: View?): Boolean {
+    @VisibleForTesting
+    fun onWidgetLongClick(view: View): Boolean {
         val oseWidgetOptionsProvider =
             activityContext.activityComponent.getOseWidgetOptionsProvider()
         val optionItems = oseWidgetOptionsProvider.getOptionItems()
