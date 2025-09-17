@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.widgetpicker.ui.screens
+package com.android.launcher3.widgetpicker.ui.appcatalog
 
 import android.platform.test.rule.DisableAnimationsRule
-import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.performClick
 import com.android.launcher3.widgetpicker.WidgetPickerComponent
 import com.android.launcher3.widgetpicker.dagger.DaggerScreenshotTestComponent
 import com.android.launcher3.widgetpicker.goldenpathmanager.WidgetPickerGoldenPathManager
@@ -51,7 +49,7 @@ import platform.test.screenshot.utils.compose.ComposeScreenshotTestRule
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(ParameterizedAndroidJunit4::class)
-class LandingScreenScreenshotTest(emulationSpec: DeviceEmulationSpec) {
+class SingleAppWidgetsCatalogScreenshotTest(emulationSpec: DeviceEmulationSpec) {
     @get:Rule(order = 0) val disableAnimationsRule = DisableAnimationsRule()
 
     @get:Rule(order = 1)
@@ -86,20 +84,21 @@ class LandingScreenScreenshotTest(emulationSpec: DeviceEmulationSpec) {
                 widgetsRepository = widgetsRepository,
                 widgetHostInfo =
                     if (isDesktop) {
-                        TestWidgetHostInfo.copy(closeBehavior = CloseBehavior.CLOSE_BUTTON)
+                        WidgetHostInfo().copy(closeBehavior = CloseBehavior.CLOSE_BUTTON)
                     } else {
-                        TestWidgetHostInfo
+                        WidgetHostInfo()
                     },
                 backgroundContext = testDispatcher,
             )
     }
 
     @Test
-    fun fullCatalog_landingScreen_featuredSection() =
+    fun singleAppCatalog() =
         testScope.runTest {
+            val testAppId = testData.widgetApps()[0].id
             val widgetPickerComponent = createWidgetPickerComponent()
             screenshotRule.screenshotTest(
-                goldenIdentifier = "fullCatalog_landingScreen_featuredSection",
+                goldenIdentifier = "singleAppCatalog",
                 beforeScreenshot = {
                     advanceUntilIdle()
                     runCurrent()
@@ -107,50 +106,9 @@ class LandingScreenScreenshotTest(emulationSpec: DeviceEmulationSpec) {
             ) {
                 WidgetPickerTheme {
                     widgetPickerComponent
-                        .getFullWidgetsCatalog()
+                        .getSingleAppWidgetsCatalog()
                         .Content(
-                            eventListeners = NoOpEventListener,
-                            cuiReporter = NoOpWidgetPickerCuiReporter(),
-                        )
-                }
-            }
-        }
-
-    @Test
-    fun fullCatalog_landingScreen_browseSection() =
-        testScope.runTest {
-            val widgetPickerComponent = createWidgetPickerComponent()
-            screenshotRule.screenshotTest(
-                goldenIdentifier = "fullCatalog_landingScreen_browseSection",
-                beforeScreenshot = {
-                    advanceUntilIdle()
-                    runCurrent()
-
-                    val isSinglePane =
-                        screenshotRule.composeRule
-                            .onAllNodes(hasText(BROWSE_TAB_LABEL))
-                            .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                            .isNotEmpty()
-
-                    if (isSinglePane) {
-                        screenshotRule.composeRule
-                            .onNode(hasText(BROWSE_TAB_LABEL))
-                            .assertExists()
-                            .performClick()
-                        advanceUntilIdle()
-                        runCurrent()
-                    }
-
-                    screenshotRule.composeRule
-                        .onNode(hasText("App 2"))
-                        .assertExists()
-                        .performClick()
-                },
-            ) {
-                WidgetPickerTheme {
-                    widgetPickerComponent
-                        .getFullWidgetsCatalog()
-                        .Content(
+                            widgetAppId = testAppId,
                             eventListeners = NoOpEventListener,
                             cuiReporter = NoOpWidgetPickerCuiReporter(),
                         )
@@ -159,15 +117,12 @@ class LandingScreenScreenshotTest(emulationSpec: DeviceEmulationSpec) {
         }
 
     companion object {
-        private const val BROWSE_TAB_LABEL = "Browse"
         private val NoOpEventListener =
             object : WidgetPickerEventListeners {
                 override fun onClose() {}
 
                 override fun onWidgetInteraction(widgetInteractionInfo: WidgetInteractionInfo) {}
             }
-
-        private val TestWidgetHostInfo = WidgetHostInfo(title = "Widgets")
 
         @Parameters(name = "{0}")
         @JvmStatic

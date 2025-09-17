@@ -51,7 +51,6 @@ constructor(
     val showDragShadow: Boolean = hostInfo.showDragShadow
     val enableSwipeUpToClose: Boolean = hostInfo.enableSwipeUpToDismiss
     val closeBehavior: CloseBehavior = hostInfo.closeBehavior
-    val enforceStaticMaxSizes: Boolean = closeBehavior == CloseBehavior.CLOSE_BUTTON
     var activeScreen by mutableStateOf(Screen.LANDING)
         private set
 
