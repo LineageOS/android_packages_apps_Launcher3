@@ -347,12 +347,6 @@
     <string name="allow_rotation_title">Allow home screen rotation</string>
     <!-- Text explaining when the home screen will get rotated. [CHAR LIMIT=100] -->
     <string name="allow_rotation_desc">When phone is rotated</string>
-    <!-- Title for Compose settings  [CHAR LIMIT=50] -->
-    <string name="compose_developer_options_section">Jetpack Compose</string>
-    <!-- Title for Enable Composition Tracing. [CHAR LIMIT=50] -->
-    <string name="enable_composition_tracing_title">Enable composition tracing</string>
-    <!-- Text explaining composition tracing preference switch. [CHAR LIMIT=100] -->
-    <string name="enable_composition_tracing_desc">Enable composition tracing when taking perfetto trace in overview</string>
 
     <!-- Title for Landscape Mode setting. [CHAR LIMIT=50] -->
     <string name="landscape_mode_title">Landscape mode</string>
