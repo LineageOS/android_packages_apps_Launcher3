@@ -18,7 +18,6 @@ package com.android.quickstep
 
 import android.platform.test.annotations.RequiresFlagsEnabled
 import android.platform.test.flag.junit.DeviceFlagsValueProvider
-import android.platform.test.rule.ScreenRecordRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.android.launcher3.util.LauncherLayoutBuilder
@@ -31,8 +30,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-// TODO(b/418015387) remove once issues like b/418015387 disappear completely
-@ScreenRecordRule.ScreenRecord
 @LargeTest
 @RunWith(AndroidJUnit4::class)
 @RequiresFlagsEnabled(Flags.FLAG_ENABLE_CREATE_ANY_BUBBLE)
