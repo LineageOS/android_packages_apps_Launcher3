@@ -82,20 +82,30 @@ class SystemDragControllerImplTest {
 
     @Test
     fun testAcceptDropWhenUriListIsEmpty() {
+        whenever(mockItemInfo.permissions).thenReturn(mock())
         whenever(mockItemInfo.uriList).thenReturn(emptyList())
         assertFalse(controller.acceptDrop(mockItemInfo))
     }
 
     @Test
     fun testAcceptDropWhenUriListIsNull() {
+        whenever(mockItemInfo.permissions).thenReturn(mock())
         whenever(mockItemInfo.uriList).thenReturn(null)
         assertFalse(controller.acceptDrop(mockItemInfo))
     }
 
     @Test
     fun testAcceptDropWhenUriListIsPopulated() {
+        whenever(mockItemInfo.permissions).thenReturn(mock())
         whenever(mockItemInfo.uriList).thenReturn(listOf(mockUri))
         assertTrue(controller.acceptDrop(mockItemInfo))
+    }
+
+    @Test
+    fun testAcceptDropWhenUriListIsPopulatedButPermissionsAreNotObtained() {
+        whenever(mockItemInfo.permissions).thenReturn(null)
+        whenever(mockItemInfo.uriList).thenReturn(listOf(mockUri))
+        assertFalse(controller.acceptDrop(mockItemInfo))
     }
 
     @Test

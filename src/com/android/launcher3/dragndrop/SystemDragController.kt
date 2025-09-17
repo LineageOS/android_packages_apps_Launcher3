@@ -67,7 +67,10 @@ class SystemDragControllerImpl(private val systemDragListenerFactory: SystemDrag
     private var launcher: Launcher? = null
     private var systemDragListener: SystemDragListener? = null
 
-    override fun acceptDrop(itemInfo: SystemDragItemInfo) = itemInfo.uriList?.isEmpty() == false
+    // NOTE: Permissions must be obtained in order to accept a system-level drop. If permissions are
+    // not checked, a bad actor could piggy-back on the permissions that Launcher already has.
+    override fun acceptDrop(itemInfo: SystemDragItemInfo) =
+        itemInfo.permissions != null && itemInfo.uriList?.isEmpty() == false
 
     override fun onDrag(event: DragEvent): Boolean =
         continueDrag(event) ?: startDrag(event) ?: false

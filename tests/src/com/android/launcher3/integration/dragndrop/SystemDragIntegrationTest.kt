@@ -26,20 +26,26 @@ import android.graphics.PointF
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Environment
+import android.os.SystemClock
 import android.provider.MediaStore
 import android.provider.MediaStore.Files.FileColumns.DISPLAY_NAME
 import android.provider.MediaStore.Files.FileColumns.MIME_TYPE
 import android.provider.MediaStore.Files.FileColumns.RELATIVE_PATH
 import android.provider.MediaStore.Files.FileColumns._ID
 import android.util.Log
-import android.view.DragEvent
-import android.view.DragEvent.ACTION_DRAG_LOCATION
-import android.view.DragEvent.ACTION_DRAG_STARTED
-import android.view.DragEvent.ACTION_DROP
+import android.view.MotionEvent
+import android.view.MotionEvent.ACTION_DOWN
+import android.view.MotionEvent.ACTION_MOVE
+import android.view.MotionEvent.ACTION_UP
 import android.view.View
+import android.view.View.DRAG_FLAG_GLOBAL
+import android.view.View.DRAG_FLAG_GLOBAL_URI_READ
+import android.view.View.DRAG_FLAG_GLOBAL_URI_WRITE
+import android.view.ViewGroup.LayoutParams
 import androidx.core.net.toUri
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FILE
 import com.android.launcher3.dragndrop.SystemDragController
@@ -48,7 +54,6 @@ import com.android.launcher3.homescreenfiles.HomeScreenFilesNoOpProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider.Companion.HOME_SCREEN_FOLDER_RELATIVE_PATH
 import com.android.launcher3.util.BaseLauncherActivityTest
-import com.android.launcher3.util.ReflectionHelpers
 import com.android.launcher3.util.Wait.atMost
 import com.android.launcher3.util.workspace.FavoriteItemsTransaction
 import org.junit.After
@@ -58,8 +63,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 
 /** Integration tests for system-level drag-and-drop. */
 @LargeTest
@@ -67,16 +70,35 @@ import org.mockito.kotlin.whenever
 class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
 
     private val context: Context = targetContext()
+    private lateinit var draggableView: View
 
     @Before
     fun setUp() {
+        // Initialize file system and workspace.
         deleteAllHomeScreenFiles()
         FavoriteItemsTransaction(context).commit()
         loadLauncherSync()
+
+        // Initialize draggable view.
+        launcherActivity.executeOnLauncher { launcher ->
+            launcher.dragLayer.addView(
+                View(context).also { draggableView = it },
+                LayoutParams(DRAGGABLE_VIEW_SIZE, DRAGGABLE_VIEW_SIZE),
+            )
+        }
+
+        // Wait for draggable view to finish initializing.
+        atMost("Draggable view not laid out", { draggableView.isLaidOut })
     }
 
     @After
     fun tearDown() {
+        // Clean up draggable view.
+        launcherActivity.executeOnLauncher { launcher ->
+            launcher.dragLayer.removeView(draggableView)
+        }
+
+        // Clean up workspace and file system.
         FavoriteItemsTransaction(context).commit()
         deleteAllHomeScreenFiles()
     }
@@ -128,6 +150,10 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
     }
 
     private fun testDragAndDrop(description: ClipDescription, itemList: List<ClipData.Item>) {
+        // Perform a system-level drag-and-drop sequence.
+        val endPoint = launcherActivity.getFromLauncher { it.dragLayer.getExactCenterOnScreen() }!!
+        draggableView.performDragAndDropSequenceTo(endPoint, description, itemList)
+
         // Expect a workspace item to be created on system-level drag-and-drop if and only if:
         // (a) the home screen files provider is implemented,
         // (b) the system-level drag controller is implemented, and
@@ -137,15 +163,9 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
                 SystemDragController.INSTANCE[context] is SystemDragControllerImpl &&
                 itemList.map(ClipData.Item::getUri).all(this::isMediaStoreUri)
 
+        // Verify workspace item creation (or lack thereof).
         val workspaceItemView =
-            launcherActivity.getFromLauncher { launcher ->
-                // Simulate a system-level drag-and-drop sequence.
-                val bounds = Rect().apply(launcher.dragLayer::getBoundsOnScreen)
-                val start = PointF(bounds.left.toFloat(), bounds.right.toFloat())
-                val end = PointF(bounds.exactCenterX(), bounds.exactCenterY())
-                launcher.dragLayer.dispatchDragAndDropSequence(start, end, description, itemList)
-
-                // Expect workspace item creation (or lack thereof).
+            launcherActivity.getFromLauncher {
                 assertThrowsIf(
                     "Workspace item created",
                     {
@@ -157,8 +177,6 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
                     !expectWorkspaceItemCreated,
                 )
             }
-
-        // Verify workspace item creation (or lack thereof).
         val workspaceItemCreated = workspaceItemView != null
         assertEquals(expectWorkspaceItemCreated, workspaceItemCreated)
 
@@ -230,50 +248,54 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
     private fun isRemovedFromLayout(view: View?) =
         launcherActivity.getFromLauncher { view?.parent } == null
 
-    private fun obtainDragEvent(
-        action: Int,
-        point: PointF,
-        description: ClipDescription,
-        items: List<ClipData.Item>? = null,
-    ): DragEvent {
-        val mockDragEvent = mock<DragEvent>()
-
-        // NOTE: Reflection is necessary because `ViewGroup` inspects the `DragEvent.mAction` field
-        // during event dispatching rather than using the mockable `DragEvent.getAction()` method.
-        ReflectionHelpers.setField(mockDragEvent, "mAction", action)
-
-        whenever(mockDragEvent.action).thenReturn(action)
-        whenever(mockDragEvent.clipDescription).thenReturn(description)
-        whenever(mockDragEvent.x).thenReturn(point.x)
-        whenever(mockDragEvent.y).thenReturn(point.y)
-
-        // NOTE: In production, clip data is only available during `ACTION_DROP` events.
-        // See https://developer.android.com/reference/android/view/DragEvent.
-        if (action == ACTION_DROP) {
-            val item = items?.firstIfNotEmpty()
-            val data = ClipData(description, item).apply { items?.drop(1)?.forEach(this::addItem) }
-            whenever(mockDragEvent.clipData).thenReturn(data)
-        }
-
-        return mockDragEvent
-    }
+    private fun obtainMotionEvent(action: Int, point: PointF, downTime: Long): MotionEvent =
+        MotionEvent.obtain(
+            downTime,
+            /*eventTime=*/ SystemClock.uptimeMillis(),
+            action,
+            point.x,
+            point.y,
+            /*metaState=*/ 0,
+        )
 
     private fun <T> List<T>?.firstIfNotEmpty(): T? =
         if (this?.isNotEmpty() == true) first() else null
 
-    private fun View.dispatchDragAndDropSequence(
-        start: PointF,
-        end: PointF,
+    private fun PointF.getMidPointTo(endPoint: PointF): PointF =
+        PointF((this.x + endPoint.x) / 2.0f, (this.y + endPoint.y) / 2.0f)
+
+    private fun View.getExactCenterOnScreen(): PointF =
+        Rect().apply(this::getBoundsOnScreen).let { PointF(it.exactCenterX(), it.exactCenterY()) }
+
+    private fun View.performDragAndDropSequenceTo(
+        endPt: PointF,
         description: ClipDescription,
         items: List<ClipData.Item>,
     ) {
-        val midpoint = PointF((start.x + end.x) / 2.0f, (start.y + end.y) / 2.0f)
-        dispatchDragEvent(obtainDragEvent(ACTION_DRAG_STARTED, start, description))
-        dispatchDragEvent(obtainDragEvent(ACTION_DRAG_LOCATION, midpoint, description))
-        dispatchDragEvent(obtainDragEvent(ACTION_DROP, end, description, items))
+        InstrumentationRegistry.getInstrumentation().run {
+            val downTime = SystemClock.uptimeMillis()
+            val startPt = getExactCenterOnScreen()
+            val midPt = startPt.getMidPointTo(endPt)
+            val sync = true
+            uiAutomation.injectInputEvent(obtainMotionEvent(ACTION_DOWN, startPt, downTime), sync)
+            runOnMainSync {
+                startDragAndDrop(
+                    ClipData(description, items.firstIfNotEmpty()).apply {
+                        items.drop(1).forEach(this::addItem)
+                    },
+                    View.DragShadowBuilder(this@performDragAndDropSequenceTo),
+                    /*localState=*/ null,
+                    DRAG_FLAG_GLOBAL or DRAG_FLAG_GLOBAL_URI_READ or DRAG_FLAG_GLOBAL_URI_WRITE,
+                )
+            }
+            uiAutomation.injectInputEvent(obtainMotionEvent(ACTION_MOVE, midPt, downTime), sync)
+            uiAutomation.injectInputEvent(obtainMotionEvent(ACTION_MOVE, endPt, downTime), sync)
+            uiAutomation.injectInputEvent(obtainMotionEvent(ACTION_UP, endPt, downTime), sync)
+        }
     }
 
     companion object {
         private const val TAG = "SystemDragIntegrationTest"
+        private const val DRAGGABLE_VIEW_SIZE = 24
     }
 }
