@@ -66,7 +66,7 @@ public class ThemeIconsTest extends BaseLauncherActivityTest<Launcher> {
         scrollToAppIcon(APP_NAME);
         BubbleTextView btv = getLauncherActivity().getFromLauncher(
                 l -> verifyIconTheme(APP_NAME, l.getAppsView(), false));
-        addToWorkspace(btv);
+        getLauncherTestInteractions().addToWorkspace(btv);
         getLauncherActivity().executeOnLauncher(
                 l -> verifyIconTheme(APP_NAME, l.getWorkspace(), false)
         );
@@ -90,7 +90,7 @@ public class ThemeIconsTest extends BaseLauncherActivityTest<Launcher> {
                                 instanceof ArrowPopup ap)
                         ? findBtv(SHORTCUT_NAME, ap) : null
         );
-        addToWorkspace(menuItem);
+        getLauncherTestInteractions().addToWorkspace(menuItem);
         getLauncherActivity().executeOnLauncher(
                 l -> verifyIconTheme(SHORTCUT_NAME, l.getWorkspace(), false));
     }
@@ -107,7 +107,7 @@ public class ThemeIconsTest extends BaseLauncherActivityTest<Launcher> {
                 l -> verifyIconTheme(APP_NAME, l.getAppsView(), false)
         );
 
-        addToWorkspace(btv);
+        getLauncherTestInteractions().addToWorkspace(btv);
         getLauncherActivity().executeOnLauncher(
                 l -> verifyIconTheme(APP_NAME, l.getWorkspace(), true));
     }
@@ -129,7 +129,7 @@ public class ThemeIconsTest extends BaseLauncherActivityTest<Launcher> {
                                 instanceof ArrowPopup ap)
                         ? findBtv(SHORTCUT_NAME, ap) : null
         );
-        addToWorkspace(menuItem);
+        getLauncherTestInteractions().addToWorkspace(menuItem);
         getLauncherActivity().executeOnLauncher(
                 l -> verifyIconTheme(SHORTCUT_NAME, l.getWorkspace(), true));
     }
@@ -171,7 +171,7 @@ public class ThemeIconsTest extends BaseLauncherActivityTest<Launcher> {
 
     private void switchToAllApps() {
         getLauncherActivity().goToState(LauncherState.ALL_APPS);
-        freezeAllApps();
+        getLauncherTestInteractions().freezeAllApps();
     }
 
     private void scrollToAppIcon(String appName) {

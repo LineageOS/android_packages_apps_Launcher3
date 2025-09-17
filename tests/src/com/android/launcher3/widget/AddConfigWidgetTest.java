@@ -132,7 +132,7 @@ public class AddConfigWidgetTest extends BaseLauncherActivityTest<Launcher> {
                                         && mWidgetInfo.provider.equals(pawi.componentName)
                         )
         );
-        addWidgetToWorkspace(widgetView);
+        getLauncherTestInteractions().addWidgetToWorkspace(widgetView);
 
         // Widget id for which the config activity was opened
         mWidgetId = monitor.getWidgetId();
