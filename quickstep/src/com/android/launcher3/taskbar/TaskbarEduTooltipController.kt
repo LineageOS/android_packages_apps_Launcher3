@@ -338,6 +338,47 @@ constructor(
         }
     }
 
+    /** Shows standalone Bubble EDU tooltip */
+    private fun showBubbleEdu() {
+        inflateTooltip(R.layout.taskbar_edu_bubbles)
+
+        tooltip?.run {
+            allowTouchDismissal = true
+            TypefaceUtils.setTypeface(
+                requireViewById(R.id.taskbar_edu_title),
+                FontFamily.GSF_HEADLINE_SMALL_EMPHASIZED,
+            )
+            TypefaceUtils.setTypeface(
+                requireViewById(R.id.bubbles_text),
+                FontFamily.GSF_BODY_MEDIUM,
+            )
+
+            val bubblesAnim =
+                requireViewById<LottieAnimationView>(R.id.standalone_bubbles_animation)
+            bubblesAnim.contentDescription =
+                context.getString(R.string.taskbar_edu_bubbles_animation_description)
+            val animationRes =
+                if (activityContext.isTransientTaskbar) {
+                    R.raw.taskbar_edu_bubbles_transient
+                } else {
+                    R.raw.taskbar_edu_bubbles_persistent
+                }
+            bubblesAnim.setAnimation(animationRes)
+            bubblesAnim.supportLightTheme()
+            handleEduAnimations(listOf(bubblesAnim))
+            updateLayoutParams<BaseDragLayer.LayoutParams> {
+                if (activityContext.isTransientTaskbar) {
+                    bottomMargin += activityContext.deviceProfile.taskbarProfile.height
+                }
+                width =
+                    resources.getDimensionPixelSize(
+                        R.dimen.taskbar_edu_features_tooltip_width_with_one_feature
+                    )
+            }
+            show()
+        }
+    }
+
     /**
      * Shows standalone Search EDU tooltip if this EDU has not been seen.
      *
