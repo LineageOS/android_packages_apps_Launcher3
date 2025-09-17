@@ -17,13 +17,13 @@ package com.android.launcher3.model.tasks;
 
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT;
-import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_ARCHIVED;
 import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_DISABLED_NOT_AVAILABLE;
 import static com.android.launcher3.model.data.LauncherAppWidgetInfo.FLAG_PROVIDER_NOT_READY;
 
+import static java.util.Collections.emptyList;
+
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
@@ -32,7 +32,6 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.android.launcher3.Flags;
 import com.android.launcher3.LauncherModel.ModelUpdateTask;
 import com.android.launcher3.icons.IconCache;
 import com.android.launcher3.logging.FileLog;
@@ -40,13 +39,13 @@ import com.android.launcher3.model.AllAppsList;
 import com.android.launcher3.model.BgDataModel;
 import com.android.launcher3.model.ItemInstallQueue;
 import com.android.launcher3.model.ModelTaskController;
+import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.LauncherAppWidgetInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
-import com.android.launcher3.pm.PackageInstallInfo;
+import com.android.launcher3.pm.UserCache;
 import com.android.launcher3.shortcuts.ShortcutRequest;
 import com.android.launcher3.util.ApiWrapper;
-import com.android.launcher3.util.FlagOp;
 import com.android.launcher3.util.IntSet;
 import com.android.launcher3.util.ItemInfoMatcher;
 import com.android.launcher3.util.PackageManagerHelper;
@@ -92,7 +91,6 @@ public class PackageUpdatedTask implements ModelUpdateTask {
         final Context context = taskController.getContext();
         final IconCache iconCache = taskController.getIconCache();
 
-        final FlagOp flagOp = FlagOp.NO_OP.removeFlag(FLAG_DISABLED_NOT_AVAILABLE);
         final HashSet<ComponentName> removedComponents = new HashSet<>();
         final HashMap<String, List<LauncherActivityInfo>> activitiesLists = new HashMap<>();
         for (String packageName : mPackages) {
@@ -133,13 +131,13 @@ public class PackageUpdatedTask implements ModelUpdateTask {
                         // Launcher should be source-of-truth for if shortcut is pinned.
                         List<ShortcutInfo> shortcut =
                                 new ShortcutRequest(context, mUser)
-                                        .forPackage(cn.getPackageName(),
-                                                itemInfo.getDeepShortcutId())
+                                        .forPackage(packageName, itemInfo.getDeepShortcutId())
                                         .query(ShortcutRequest.ALL);
                         if (!shortcut.isEmpty()) {
                             // Restore the shortcut and notify update
                             itemInfo.updateFromDeepShortcutInfo(shortcut.get(0), context);
                             itemInfo.status = WorkspaceItemInfo.DEFAULT;
+                            itemInfo.runtimeStatusFlags &= ~FLAG_DISABLED_NOT_AVAILABLE;
                             taskController.getModelWriter().updateItemInDatabase(itemInfo);
                             return true;
                         } else if (!itemInfo.isArchived()) {
@@ -153,60 +151,37 @@ public class PackageUpdatedTask implements ModelUpdateTask {
                         forceKeepShortcuts.add(itemInfo.id);
                     }
 
-                    if (itemInfo.isPromise()) {
-                        boolean isTargetValid =
-                                !cn.getClassName().equals(IconCache.EMPTY_CLASS_NAME)
-                                        && context.getSystemService(LauncherApps.class)
-                                                .isActivityEnabled(cn, mUser);
+                    List<LauncherActivityInfo> activityList =
+                            activitiesLists.getOrDefault(packageName, emptyList());
 
-                        if (!isTargetValid) {
-                            if (updateWorkspaceItemIntent(context, itemInfo, packageName)) {
+                    LauncherActivityInfo activityInfo = activityList.stream()
+                            .filter(it -> it.getComponentName().equals(cn))
+                            .findFirst()
+                            .orElse(null);
 
-                            } else if (shouldRemoveRestoredShortcut(itemInfo)) {
-                                removedShortcuts.add(itemInfo.id);
-                                if (DEBUG) {
-                                    FileLog.w(TAG, "Removing restored shortcut promise icon"
-                                            + " that no longer points to valid component."
-                                            + " id=" + itemInfo.id
-                                            + ", package=" + itemInfo.getTargetPackage()
-                                            + ", status=" + itemInfo.status
-                                            + ", isArchived=" + itemInfo.isArchived());
-                                }
-                                return false;
-                            }
+                    if (activityInfo == null) {
+                        if (!activityList.isEmpty()) {
+                            // First activity is considered the default activity,
+                            // similar to PackageManagerHelper.getAppLaunchInfo
+                            activityInfo = activityList.get(0);
+                            itemInfo.intent = AppInfo.makeLaunchIntent(activityInfo);
                         } else {
-                            itemInfo.status = WorkspaceItemInfo.DEFAULT;
-                        }
-                    } else if (removedComponents.contains(cn)) {
-                        updateWorkspaceItemIntent(context, itemInfo, packageName);
-                    }
-
-                    List<LauncherActivityInfo> activities = activitiesLists.get(packageName);
-                    // TODO: See if we can migrate this to
-                    //  AppInfo#updateRuntimeFlagsForActivityTarget
-                    itemInfo.setProgressLevel(
-                            activities == null || activities.isEmpty()
-                                    ? 100
-                                    : PackageManagerHelper.getLoadingProgress(
-                                            activities.get(0)),
-                            PackageInstallInfo.STATUS_INSTALLED_DOWNLOADING);
-                    // In case an app is archived, we need to make sure that archived state
-                    // in WorkspaceItemInfo is refreshed.
-                    if (Flags.enableSupportForArchiving() && !activities.isEmpty()) {
-                        boolean newArchivalState = activities.get(0)
-                                .getActivityInfo().isArchived;
-                        if (newArchivalState != itemInfo.isArchived()) {
-                            itemInfo.runtimeStatusFlags ^= FLAG_ARCHIVED;
+                            FileLog.e(TAG, "Removing shortcut with invalid target component."
+                                    + itemInfo);
+                            removedShortcuts.add(itemInfo.id);
+                            return false;
                         }
                     }
-                    if (activities != null && !activities.isEmpty()) {
-                        itemInfo.setNonResizeable(ApiWrapper.INSTANCE.get(context)
-                                .isNonResizeableActivity(activities.get(0)));
-                    }
-                    iconCache.getTitleAndIcon(
-                            itemInfo, itemInfo.getMatchingLookupFlag());
 
-                    itemInfo.runtimeStatusFlags = flagOp.apply(itemInfo.runtimeStatusFlags);
+                    // Restore if it's a promise icon
+                    itemInfo.status = WorkspaceItemInfo.DEFAULT;
+                    itemInfo.runtimeStatusFlags &= ~FLAG_DISABLED_NOT_AVAILABLE;
+                    AppInfo.updateRuntimeFlagsForActivityTarget(
+                            itemInfo, activityInfo,
+                            UserCache.INSTANCE.get(context).getUserInfo(mUser),
+                            ApiWrapper.INSTANCE.get(context),
+                            PackageManagerHelper.INSTANCE.get(context));
+                    iconCache.getTitleAndIcon(itemInfo, itemInfo.getMatchingLookupFlag());
 
                     if (itemInfo.id != ItemInfo.NO_ID) {
                         taskController.getModelWriter().updateItemInDatabase(itemInfo);
@@ -279,29 +254,5 @@ public class PackageUpdatedTask implements ModelUpdateTask {
             }
             taskController.bindUpdatedWidgets(dataModel);
         }
-    }
-
-    /**
-     * Updates {@param si}'s intent to point to a new ComponentName.
-     * @return Whether the shortcut intent was changed.
-     */
-    private boolean updateWorkspaceItemIntent(Context context,
-            WorkspaceItemInfo si, String packageName) {
-        // Try to find the best match activity.
-        Intent intent = PackageManagerHelper.INSTANCE.get(context)
-                .getAppLaunchIntent(packageName, mUser);
-        if (intent != null) {
-            si.intent = intent;
-            si.status = WorkspaceItemInfo.DEFAULT;
-            return true;
-        }
-        return false;
-    }
-
-    private boolean shouldRemoveRestoredShortcut(WorkspaceItemInfo itemInfo) {
-        if (itemInfo.hasPromiseIconUi() && !Flags.restoreArchivedShortcuts()) {
-            return true;
-        }
-        return Flags.restoreArchivedShortcuts() && !itemInfo.isArchived();
     }
 }
