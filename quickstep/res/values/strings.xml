@@ -277,6 +277,8 @@
     <string name="taskbar_edu_swipe_animation_description">Animation showing how the taskbar comes into view from the bottom of the screen, and automatically hides when not in use</string>
     <!-- Text description to describe Taskbar education animation for Taskbar pinning functionality. [CHAR_LIMIT=NONE] -->
     <string name="taskbar_edu_pinning_animation_description">Animation showing how to pin your taskbar using a toggle, so the taskbar remains permanently visible at the bottom of the screen</string>
+    <!-- Text description to describe Taskbar education animation for Taskbar bubbles functionality. [CHAR_LIMIT=NONE] -->
+    <string name="taskbar_edu_bubbles_animation_description">Animation showing how to create a bubble from the taskbar using a drag gesture</string>
     <!-- Text description to describe Taskbar education animation for split screen functionality. [CHAR_LIMIT=NONE] -->
     <string name="taskbar_edu_split_screen_animation_description">Animation showing how to create a split screen, by dragging and dropping an app from the taskbar above an open app</string>
     <!-- Text description to describe Taskbar education animation for app suggestion functionality. [CHAR_LIMIT=NONE] -->
@@ -299,6 +301,8 @@
     <string name="taskbar_edu_pinning_title">Always show the Taskbar</string>
     <!-- Text in dialog that shows a user how to pin the Taskbar. [CHAR_LIMIT 150] -->
     <string name="taskbar_edu_pinning_standalone">To always show the Taskbar on the bottom of your screen, touch &amp; hold the divider</string>
+    <!-- Text in dialog that shows a user how to create a bubble from the Taskbar icon. [CHAR_LIMIT 150] -->
+    <string name="taskbar_edu_bubbles_standalone">Drag an app to the corner to make it float</string>
     <!-- Title in dialog that shows a user how to invoke the Search feature. [CHAR_LIMIT 150] -->
     <string name="taskbar_search_edu_title">Touch &amp; hold the action key to search what\'s on your screen</string>
     <!-- Message showed to user to disclose privacy information they need to accept in order to access the app. [CHAR LIMIT=200]-->
