@@ -128,6 +128,7 @@ class HomeScreenFilesProviderTest {
                         ) {
                             espUri -> mediaStoreUriResolvedFromEsp
                             mediaStoreUri -> mediaStoreUri
+                            mediaStoreUriResolvedFromEsp -> mediaStoreUriResolvedFromEsp
                             else -> null
                         },
                     )
@@ -160,21 +161,23 @@ class HomeScreenFilesProviderTest {
             }
 
         // Attempt to move URIs to home screen.
+        // NOTE: Overlapping move attempts for a given URI are disallowed.
         assertEquals(
             listOf(
                 /*expectedEspUriResult=*/ true,
                 /*expectedMediaStoreUriResult=*/ true,
+                /*expectedMediaStoreUriResult=*/ false,
                 /*expectedTestUriResult=*/ false,
             ),
             provider
-                .moveToHomeScreen(listOf(espUri, mediaStoreUri, testUri))
+                .moveToHomeScreen(listOf(espUri, mediaStoreUri, mediaStoreUri, testUri))
                 .map(CompletableFuture<Boolean>::get),
         )
     }
 
     @Test
     fun testQueriesMediaStore() {
-        val expectedUri = Uri.parse("content://media/external/file")
+        val expectedUri = Uri.parse("content://media/external_primary/file")
         val expectedProjection =
             arrayOf(
                 MediaStore.Files.FileColumns._ID,
@@ -207,12 +210,12 @@ class HomeScreenFilesProviderTest {
         val result = provider.query().value
         assertThat(result.size).isEqualTo(2)
 
-        val uri1 = Uri.parse("content://media/external/file/1")
+        val uri1 = Uri.parse("content://media/external_primary/file/1")
         assertThat(result.containsKey(uri1)).isTrue()
         assertThat(result[uri1]!!.displayName).isEqualTo("test.png")
         assertThat(result[uri1]!!.mimeType).isEqualTo("image/png")
 
-        val uri2 = Uri.parse("content://media/external/file/2")
+        val uri2 = Uri.parse("content://media/external_primary/file/2")
         assertThat(result.containsKey(uri2)).isTrue()
         assertThat(result[uri2]!!.displayName).isEqualTo("subfolder")
         assertThat(result[uri2]!!.mimeType).isNull()
@@ -232,7 +235,7 @@ class HomeScreenFilesProviderTest {
     fun testRegistersChangeCallback() {
         whenever(
                 contentResolver.query(
-                    eq(Uri.parse("content://media/external/file/1")),
+                    eq(Uri.parse("content://media/external_primary/file/1")),
                     any(),
                     any(),
                     any(),
@@ -262,21 +265,21 @@ class HomeScreenFilesProviderTest {
         val underlyingContentObserverCaptor = argumentCaptor<ContentObserver>()
         verify(contentResolver, times(1))
             .registerContentObserver(
-                eq(Uri.parse("content://media/external/file")),
+                eq(Uri.parse("content://media/external_primary/file")),
                 eq(true),
                 underlyingContentObserverCaptor.capture(),
             )
 
         underlyingContentObserverCaptor.firstValue.dispatchChange(
             false,
-            Uri.parse("content://media/external/file/1"),
+            Uri.parse("content://media/external_primary/file/1"),
             ContentResolver.NOTIFY_INSERT,
         )
 
         val fileChangeCaptor = argumentCaptor<HomeScreenFilesProvider.FileChange>()
         verify(callback, times(1))(fileChangeCaptor.capture())
         val fileChange = fileChangeCaptor.firstValue
-        assertThat(fileChange.uri).isEqualTo(Uri.parse("content://media/external/file/1"))
+        assertThat(fileChange.uri).isEqualTo(Uri.parse("content://media/external_primary/file/1"))
         assertThat(fileChange.flags).isEqualTo(ContentResolver.NOTIFY_INSERT)
         assertThat(fileChange.file.get()!!.displayName).isEqualTo("NEW_test.png")
         assertThat(fileChange.file.get()!!.mimeType).isEqualTo("image/png")

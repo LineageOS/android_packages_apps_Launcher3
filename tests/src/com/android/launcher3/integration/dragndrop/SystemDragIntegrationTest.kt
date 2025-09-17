@@ -47,7 +47,6 @@ import com.android.launcher3.dragndrop.SystemDragControllerImpl
 import com.android.launcher3.homescreenfiles.HomeScreenFilesNoOpProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider.Companion.HOME_SCREEN_FOLDER_RELATIVE_PATH
-import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.util.BaseLauncherActivityTest
 import com.android.launcher3.util.ReflectionHelpers
 import com.android.launcher3.util.Wait.atMost
@@ -98,7 +97,7 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
             listOf("$uniqueDisplayName (1).txt", "$uniqueDisplayName (2).txt").map { displayName ->
                 context.contentResolver
                     .insert(
-                        MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL),
+                        MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
                         ContentValues().apply {
                             put(DISPLAY_NAME, displayName)
                             put(MIME_TYPE, MIMETYPE_TEXT_PLAIN)
@@ -149,7 +148,12 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
                 // Expect workspace item creation (or lack thereof).
                 assertThrowsIf(
                     "Workspace item created",
-                    { findWorkspaceItem("Workspace item not created") },
+                    {
+                        findWorkspaceItem(
+                            "Workspace item not created",
+                            itemList.firstIfNotEmpty()?.uri,
+                        )
+                    },
                     !expectWorkspaceItemCreated,
                 )
             }
@@ -202,7 +206,7 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
     private fun deleteAllHomeScreenFiles() {
         try {
             context.contentResolver.delete(
-                MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL),
+                MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
                 "$RELATIVE_PATH = ?",
                 arrayOf(HOME_SCREEN_FOLDER_RELATIVE_PATH),
             )
@@ -211,13 +215,14 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
         }
     }
 
-    private fun findWorkspaceItem(message: String) =
+    private fun findWorkspaceItem(message: String, uri: Uri?) =
         launcherActivity.getOnceNotNull(message) { launcher ->
-            launcher.workspace.mapOverItems { itemInfo, _ -> isFileSystemFile(itemInfo) }
+            launcher.workspace.mapOverItems { itemInfo, _ ->
+                itemInfo?.let {
+                    it.itemType == ITEM_TYPE_FILE_SYSTEM_FILE && it.intent?.data == uri
+                } == true
+            }
         }
-
-    private fun isFileSystemFile(itemInfo: ItemInfo?) =
-        itemInfo?.itemType == ITEM_TYPE_FILE_SYSTEM_FILE
 
     private fun isMediaStoreUri(uri: Uri?) =
         uri?.scheme == ContentResolver.SCHEME_CONTENT && uri.authority == MediaStore.AUTHORITY
@@ -245,13 +250,16 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
         // NOTE: In production, clip data is only available during `ACTION_DROP` events.
         // See https://developer.android.com/reference/android/view/DragEvent.
         if (action == ACTION_DROP) {
-            val item = if (items?.isEmpty() == false) items.first() else null
+            val item = items?.firstIfNotEmpty()
             val data = ClipData(description, item).apply { items?.drop(1)?.forEach(this::addItem) }
             whenever(mockDragEvent.clipData).thenReturn(data)
         }
 
         return mockDragEvent
     }
+
+    private fun <T> List<T>?.firstIfNotEmpty(): T? =
+        if (this?.isNotEmpty() == true) first() else null
 
     private fun View.dispatchDragAndDropSequence(
         start: PointF,

@@ -111,6 +111,7 @@ import com.android.launcher3.folder.FolderIcon;
 import com.android.launcher3.folder.PreviewBackground;
 import com.android.launcher3.graphics.DragPreviewProvider;
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider;
+import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils;
 import com.android.launcher3.icons.BitmapRenderer;
 import com.android.launcher3.icons.FastBitmapDrawable;
 import com.android.launcher3.logger.LauncherAtom;
@@ -2888,9 +2889,12 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         } else if (d.dragInfo instanceof SystemDragItemInfo dragInfo) {
             systemDragItemInfo = Optional.of(dragInfo);
 
-            // TODO(b/440195101): Populate more fully and differentiate files from folders.
+            // TODO(b/440195101): Differentiate files from folders.
             final WorkspaceItemInfo info = new WorkspaceItemInfo();
             info.itemType = ITEM_TYPE_FILE_SYSTEM_FILE;
+            info.intent = HomeScreenFilesUtils.Companion.buildLaunchIntent(
+                    requireNonNull(dragInfo.getUriList()).getFirst());
+
             d.dragInfo = info;
         }
 

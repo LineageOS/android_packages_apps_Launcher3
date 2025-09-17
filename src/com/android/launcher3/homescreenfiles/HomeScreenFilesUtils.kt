@@ -21,6 +21,8 @@ import android.net.Uri
 import android.os.Environment
 import android.provider.DocumentsContract.Document.MIME_TYPE_DIR
 import com.android.launcher3.Flags.showFilesOnHomeScreen
+import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FILE
+import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FOLDER
 
 /** Other utility methods related to managing files on the home screen. */
 class HomeScreenFilesUtils {
@@ -30,10 +32,19 @@ class HomeScreenFilesUtils {
             showFilesOnHomeScreen() && Environment.isExternalStorageManager()
         }
 
+        /** Returns the appropriate item type for the given [homeScreenFile]. */
+        fun buildItemType(homeScreenFile: HomeScreenFile) =
+            if (homeScreenFile.isDirectory) {
+                ITEM_TYPE_FILE_SYSTEM_FOLDER
+            } else {
+                ITEM_TYPE_FILE_SYSTEM_FILE
+            }
+
         /**
          * Creates an [Intent] to open [homeScreenFile] in the app associated with its MIME type.
          */
-        fun buildLaunchIntent(uri: Uri, homeScreenFile: HomeScreenFile) =
+        @JvmOverloads
+        fun buildLaunchIntent(uri: Uri, homeScreenFile: HomeScreenFile? = null) =
             Intent(Intent.ACTION_VIEW).apply {
                 addFlags(
                     Intent.FLAG_ACTIVITY_NEW_TASK or
@@ -42,7 +53,8 @@ class HomeScreenFilesUtils {
                 )
                 setDataAndType(
                     uri,
-                    if (homeScreenFile.isDirectory) MIME_TYPE_DIR else homeScreenFile.mimeType,
+                    if (homeScreenFile?.isDirectory == true) MIME_TYPE_DIR
+                    else homeScreenFile?.mimeType,
                 )
             }
     }

@@ -56,17 +56,21 @@ interface HomeScreenFilesProvider {
     /**
      * Information about a change to a file item shown on the home screen.
      *
-     * @param uri The URI of the item that was changed and
+     * @param uri The URI of the item that was changed.
      * @param flags The bitmask describing the type of the file change (one of [NOTIFY_INSERT],
      *   [NOTIFY_UPDATE], [NOTIFY_DELETE]).
      * @param file Complete information about the file that is being changed.
      * @param user The user associated with this change event.
+     * @param uriAlias An alias for the URI of the item that was changed, possibly in a different
+     *   content provider authority. Note that an alias will only be available if the URI was moved
+     *   via call to [#moveToHomeScreen()].
      */
     data class FileChange(
         val uri: Uri,
         val flags: Int,
         val file: Future<HomeScreenFile?>,
         val user: UserHandle,
+        val uriAlias: Uri?,
     )
 
     /** A stream of changes to file items shown on the home screen. */

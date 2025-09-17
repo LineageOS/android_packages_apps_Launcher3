@@ -835,9 +835,9 @@ class WorkspaceItemProcessorTest {
         val homeScreenFiles =
             lazyOf(
                 mapOf(
-                    Uri.parse("content://media/external/file/1") to
+                    Uri.parse("content://media/external_primary/file/1") to
                         HomeScreenFile("file.png", "image/png", false),
-                    Uri.parse("content://media/external/file/2") to
+                    Uri.parse("content://media/external_primary/file/2") to
                         HomeScreenFile("folder_a", null, true),
                 )
             )
@@ -891,7 +891,7 @@ class WorkspaceItemProcessorTest {
                     Intent.FLAG_GRANT_WRITE_URI_PERMISSION
             )
         assertThat(items.get(0).intent!!.data)
-            .isEqualTo(Uri.parse("content://media/external/file/1"))
+            .isEqualTo(Uri.parse("content://media/external_primary/file/1"))
         assertThat(items.get(0).intent!!.type).isEqualTo("image/png")
 
         assertThat(items.get(1).id).isEqualTo(1)
@@ -911,7 +911,7 @@ class WorkspaceItemProcessorTest {
                     Intent.FLAG_GRANT_WRITE_URI_PERMISSION
             )
         assertThat(items.get(1).intent!!.data)
-            .isEqualTo(Uri.parse("content://media/external/file/2"))
+            .isEqualTo(Uri.parse("content://media/external_primary/file/2"))
         assertThat(items.get(1).intent!!.type).isEqualTo(DocumentsContract.Document.MIME_TYPE_DIR)
     }
 }

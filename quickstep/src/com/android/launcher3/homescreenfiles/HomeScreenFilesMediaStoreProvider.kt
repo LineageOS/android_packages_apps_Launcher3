@@ -26,6 +26,7 @@ import android.os.Process
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.provider.MediaStore.Files.FileColumns.RELATIVE_PATH
+import android.provider.MediaStore.VOLUME_EXTERNAL_PRIMARY
 import android.util.Log
 import androidx.annotation.WorkerThread
 import androidx.core.database.getStringOrNull
@@ -37,6 +38,7 @@ import java.io.File
 import java.util.concurrent.Callable
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.supplyAsync
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Future
 
@@ -48,20 +50,30 @@ class HomeScreenFilesMediaStoreProvider(
 ) : HomeScreenFilesProvider {
     override val fileChanges = MutableListenableStream<FileChange>()
 
+    // Tracks URI movements originating from calls to [#moveToHomeScreen()]. This allows us to:
+    // (1) Disallow overlapping attempts to move a given URI, and
+    // (2) Reconcile media store URIs with URI aliases from other content provider authorities.
+    private val inProgressMoveToHomeScreenUriAliases = ConcurrentHashMap<Uri, Uri>()
+
     init {
-        val uri = MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL)
+        val uri = MediaStore.Files.getContentUri(VOLUME_EXTERNAL_PRIMARY)
         val observer =
             object : ContentObserver(null) {
                 override fun onChange(selfChange: Boolean, uri: Uri?, flags: Int) {
                     if (!selfChange && uri != null && uri.hasIdSegment()) {
                         fileChanges.dispatchValue(
-                            FileChange(uri, flags, query(uri), Process.myUserHandle())
+                            FileChange(
+                                uri,
+                                flags,
+                                query(uri),
+                                Process.myUserHandle(),
+                                inProgressMoveToHomeScreenUriAliases.remove(uri),
+                            )
                         )
                     }
                 }
             }
         context.contentResolver.registerContentObserver(uri, true, observer)
-
         lifecycle.addCloseable { context.contentResolver.unregisterContentObserver(observer) }
     }
 
@@ -77,19 +89,33 @@ class HomeScreenFilesMediaStoreProvider(
 
     @WorkerThread
     private fun moveToHomeScreen(uri: Uri): Boolean {
+        var attemptMove = false
+        var mediaUri: Uri? = null
+        var success = false
         try {
-            // NOTE: The selection criteria below prevents moving a URI to a path it already
-            // occupies. The media provider has additional protections to prevent recursive moves.
-            return context.contentResolver.update(
-                if (isMediaStoreUri(uri)) uri else MediaStore.getMediaUri(context, uri)!!,
-                ContentValues().apply { put(RELATIVE_PATH, HOME_SCREEN_FOLDER_RELATIVE_PATH) },
-                /*where=*/ "$RELATIVE_PATH != ?",
-                /*selectionArgs=*/ arrayOf(HOME_SCREEN_FOLDER_RELATIVE_PATH),
-            ) == 1
+            // NOTE: Overlapping move attempts for a given URI are disallowed. Also note that the
+            // selection criteria below prevents moving a URI to a path it already occupies; the
+            // media provider itself has additional protections to prevent recursive moves.
+            mediaUri = if (isMediaStoreUri(uri)) uri else MediaStore.getMediaUri(context, uri)!!
+            attemptMove = inProgressMoveToHomeScreenUriAliases.putIfAbsent(mediaUri, uri) == null
+            success =
+                attemptMove &&
+                    (context.contentResolver.update(
+                        /*uri=*/ mediaUri,
+                        /*contentValues=*/ ContentValues().apply {
+                            put(RELATIVE_PATH, HOME_SCREEN_FOLDER_RELATIVE_PATH)
+                        },
+                        /*where=*/ "$RELATIVE_PATH != ?",
+                        /*selectionArgs=*/ arrayOf(HOME_SCREEN_FOLDER_RELATIVE_PATH),
+                    ) == 1)
         } catch (e: RuntimeException) {
             Log.e(TAG, "Unable to move URI to '$HOME_SCREEN_FOLDER_RELATIVE_PATH'", e)
-            return false
+        } finally {
+            if (attemptMove && !success) {
+                inProgressMoveToHomeScreenUriAliases.remove(mediaUri)
+            }
         }
+        return success
     }
 
     /** Returns all file items presented in [HOME_SCREEN_FOLDER_RELATIVE_PATH]. */
@@ -98,7 +124,7 @@ class HomeScreenFilesMediaStoreProvider(
             val result = mutableMapOf<Uri, HomeScreenFile>()
             context.contentResolver
                 .query(
-                    MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL),
+                    MediaStore.Files.getContentUri(VOLUME_EXTERNAL_PRIMARY),
                     arrayOf(MediaStore.Files.FileColumns._ID).plus(QUERY_DEFAULT_PROJECTION),
                     QUERY_DEFAULT_SELECTION,
                     QUERY_DEFAULT_SELECTION_ARGS,
@@ -115,7 +141,7 @@ class HomeScreenFilesMediaStoreProvider(
 
                     while (it.moveToNext()) {
                         val id = it.getLong(idColumnIndex)
-                        val uri = MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL, id)
+                        val uri = MediaStore.Files.getContentUri(VOLUME_EXTERNAL_PRIMARY, id)
                         val displayName = it.getString(displayNameColumnIndex)
                         val mimeType = it.getStringOrNull(mimeTypeColumnIndex)
                         val isDirectory = File(it.getString(dataColumnIndex)).isDirectory
