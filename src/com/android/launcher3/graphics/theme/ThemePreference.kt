@@ -18,14 +18,12 @@ package com.android.launcher3.graphics.theme
 
 import androidx.annotation.VisibleForTesting
 import com.android.launcher3.ConstantItem
-import com.android.launcher3.LauncherPrefChangeListener
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.backedUpItem
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.graphics.theme.MonoIconThemeFactory.MONO_FACTORY_ID
 import com.android.launcher3.graphics.theme.MonoIconThemeFactory.MONO_THEME_CONTROLLER
 import com.android.launcher3.graphics.theme.ThemePreference.ThemeValue
-import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.ListenableRef
 import com.android.launcher3.util.MutableListenableRef
 import javax.inject.Inject
@@ -43,15 +41,13 @@ private constructor(
     private val prefs: LauncherPrefs,
     legacyThemeKeys: Map<String, ConstantItem<String>>,
     private val themePref: MutableListenableRef<ThemeValue?>,
-    lifecycle: DaggerSingletonTracker,
 ) : ListenableRef<ThemeValue?> by themePref {
 
     @Inject
     constructor(
         prefs: LauncherPrefs,
         @Named(THEME_OVERRIDES_DAGGER_KEY) legacyThemeKeys: Map<String, ConstantItem<String>>,
-        lifecycle: DaggerSingletonTracker,
-    ) : this(prefs, legacyThemeKeys, MutableListenableRef(null), lifecycle)
+    ) : this(prefs, legacyThemeKeys, MutableListenableRef(null))
 
     init {
         // Migrate old preferences
@@ -75,17 +71,21 @@ private constructor(
         if (oldValue != null)
             prefs.remove(*(legacyThemeKeys.values + LEGACY_MONO_THEME_ICON).toTypedArray())
         themePref.dispatchValue(currentValue)
-
-        val prefListener = LauncherPrefChangeListener {
-            val newValue = parsePrefValue(prefs.get(THEME_ID))
-            if (newValue != themePref.value) themePref.dispatchValue(newValue)
-        }
-        prefs.addListener(prefListener, THEME_ID)
-        lifecycle.addCloseable { prefs.removeListener(prefListener, THEME_ID) }
     }
 
-    /** Updates the launcher theme id */
-    fun setValue(value: ThemeValue?) = prefs.put(THEME_ID, value?.toString() ?: "")
+    /**
+     * Updates the launcher theme id atomically, if the [predicate] returns true for the current
+     * value
+     */
+    @JvmOverloads
+    fun setValue(value: ThemeValue?, predicate: (ThemeValue?) -> Boolean = { it != value }) {
+        synchronized(themePref) {
+            if (predicate.invoke(themePref.value)) {
+                prefs.put(THEME_ID, value?.toString() ?: "")
+                themePref.dispatchValue(value)
+            }
+        }
+    }
 
     data class ThemeValue(val factoryId: String, val themeId: String) {
 

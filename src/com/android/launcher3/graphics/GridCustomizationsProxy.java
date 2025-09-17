@@ -320,8 +320,8 @@ public class GridCustomizationsProxy implements ProxyProvider {
             case SET_ICON_THEMED: {
                 if (values.getAsBoolean(BOOLEAN_VALUE)) {
                     mThemePreference.setValue(MONO_THEME_VALUE);
-                } else if (MONO_THEME_VALUE.equals(mThemePreference.getValue())) {
-                    mThemePreference.setValue(null);
+                } else {
+                    mThemePreference.setValue(null, MONO_THEME_VALUE::equals);
                 }
                 return UPDATE_SETTING_SUCCESS;
             }

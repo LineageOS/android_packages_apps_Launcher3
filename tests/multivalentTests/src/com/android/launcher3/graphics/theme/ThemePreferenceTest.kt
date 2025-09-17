@@ -42,7 +42,7 @@ class ThemePreferenceTest {
     private val prefs = InMemoryLauncherPrefs(context)
 
     private fun getThemePref(legacyThemeKeys: Map<String, ConstantItem<String>> = emptyMap()) =
-        ThemePreference(prefs, legacyThemeKeys, context.appComponent.daggerSingletonTracker)
+        ThemePreference(prefs, legacyThemeKeys)
 
     @Test
     fun themeValue_correctly_parsed() {
