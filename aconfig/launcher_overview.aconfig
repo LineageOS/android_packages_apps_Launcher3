@@ -83,3 +83,10 @@ flag {
     description: "Allows the user to scroll overview with a mouse click."
     bug: "443252794"
 }
+
+flag {
+    name: "enable_replace_share_target_with_sharesheet"
+    namespace: "launcher_overview"
+    description: "Replaces overview share target with share sheet."
+    bug: "437084247"
+}
