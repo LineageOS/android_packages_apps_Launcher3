@@ -168,6 +168,8 @@ android_library {
         "src/com/android/launcher3/widgetpicker/ui/components/bottomsheet/BottomSheetDismissState.kt",
         "src/com/android/launcher3/widgetpicker/ui/components/bottomsheet/BottomSheetNestedScrollConnection.kt",
         "src/com/android/launcher3/widgetpicker/ui/components/bottomsheet/TitledBottomSheet.kt",
+        "src/com/android/launcher3/widgetpicker/ui/components/floatingsheet/TitledFloatingSheet.kt",
+        "src/com/android/launcher3/widgetpicker/ui/components/SheetHeader.kt",
         "src/com/android/launcher3/widgetpicker/ui/components/Animations.kt",
         "src/com/android/launcher3/widgetpicker/ui/components/BorderOnFocus.kt",
         "src/com/android/launcher3/widgetpicker/ui/components/accessibility/AccessibilityState.kt",

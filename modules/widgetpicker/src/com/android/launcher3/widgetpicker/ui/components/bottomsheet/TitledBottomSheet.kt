@@ -39,14 +39,9 @@ import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -65,13 +60,12 @@ import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import com.android.launcher3.widgetpicker.R
 import com.android.launcher3.widgetpicker.shared.model.CloseBehavior
+import com.android.launcher3.widgetpicker.ui.components.SheetHeader
 import com.android.launcher3.widgetpicker.ui.components.accessibility.LocalAccessibilityState
 import com.android.launcher3.widgetpicker.ui.components.bottomsheet.TitledBottomSheetDimens.SHEET_HEIGHT_CAP_RATIO
 import com.android.launcher3.widgetpicker.ui.components.bottomsheet.TitledBottomSheetDimens.SheetHeightCapBreakpoint
@@ -187,11 +181,11 @@ fun TitledBottomSheet(
                             )
                         }
                         title?.let {
-                            Header(
+                            SheetHeader(
                                 title = title,
                                 description = description,
-                                closeBehavior = closeBehavior,
-                                onDismissSheet = onDismissSheet,
+                                shouldShowCloseButton = closeBehavior == CloseBehavior.CLOSE_BUTTON,
+                                onCloseButtonClick = onDismissSheet,
                             )
                         }
                         content()
@@ -254,54 +248,6 @@ private fun SwipeUpToDismissHandler(
                     }
                 }
     )
-}
-
-@Composable
-private fun Header(
-    title: String,
-    description: String?,
-    closeBehavior: CloseBehavior,
-    onDismissSheet: () -> Unit,
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(bottom = headerBottomMargin).fillMaxWidth(),
-    ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Text(
-                modifier = Modifier.align(Alignment.Center),
-                maxLines = 1,
-                text = title,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center,
-                style = WidgetPickerTheme.typography.sheetTitle,
-                color = WidgetPickerTheme.colors.sheetTitle,
-            )
-            if (closeBehavior == CloseBehavior.CLOSE_BUTTON) {
-                IconButton(
-                    onClick = onDismissSheet,
-                    modifier = Modifier.align(Alignment.CenterEnd),
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Close,
-                        contentDescription =
-                            stringResource(R.string.widget_picker_collapse_sheet_label),
-                        tint = WidgetPickerTheme.colors.sheetTitle,
-                    )
-                }
-            }
-        }
-        description?.let {
-            Text(
-                text = it,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center,
-                style = WidgetPickerTheme.typography.sheetDescription,
-                color = WidgetPickerTheme.colors.sheetDescription,
-            )
-        }
-    }
 }
 
 @Composable

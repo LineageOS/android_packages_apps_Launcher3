@@ -22,7 +22,7 @@ import androidx.compose.ui.test.performClick
 import com.android.launcher3.widgetpicker.WidgetPickerComponent
 import com.android.launcher3.widgetpicker.dagger.DaggerScreenshotTestComponent
 import com.android.launcher3.widgetpicker.goldenpathmanager.WidgetPickerGoldenPathManager
-import com.android.launcher3.widgetpicker.shared.model.CloseBehavior
+import com.android.launcher3.widgetpicker.shared.model.SheetStyle
 import com.android.launcher3.widgetpicker.shared.model.WidgetHostInfo
 import com.android.launcher3.widgetpicker.ui.NoOpWidgetPickerCuiReporter
 import com.android.launcher3.widgetpicker.ui.WidgetInteractionInfo
@@ -86,7 +86,7 @@ class LandingScreenScreenshotTest(emulationSpec: DeviceEmulationSpec) {
                 widgetsRepository = widgetsRepository,
                 widgetHostInfo =
                     if (isDesktop) {
-                        TestWidgetHostInfo.copy(closeBehavior = CloseBehavior.CLOSE_BUTTON)
+                        TestWidgetHostInfo.copy(sheetStyle = SheetStyle.FLOATING_SHEET)
                     } else {
                         TestWidgetHostInfo
                     },
