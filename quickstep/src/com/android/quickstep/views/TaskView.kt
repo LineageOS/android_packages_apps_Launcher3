@@ -67,7 +67,6 @@ import com.android.launcher3.util.KFloatProperty
 import com.android.launcher3.util.MultiPropertyDelegate
 import com.android.launcher3.util.MultiPropertyFactory
 import com.android.launcher3.util.MultiValueAlpha
-import com.android.launcher3.util.OverviewReleaseFlags.enableOverviewIconMenu
 import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.SplitConfigurationOptions
 import com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_UNDEFINED
@@ -78,7 +77,6 @@ import com.android.launcher3.util.ViewPool
 import com.android.launcher3.util.coroutines.DispatcherProvider
 import com.android.launcher3.util.rects.set
 import com.android.quickstep.FullscreenDrawParams
-import com.android.quickstep.RecentsModel
 import com.android.quickstep.RemoteAnimationTargets
 import com.android.quickstep.RemoteTargetGluer.RemoteTargetHandle
 import com.android.quickstep.TaskOverlayFactory
@@ -332,7 +330,7 @@ constructor(
     // progress: 0 = show icon and no insets; 1 = don't show icon and show full insets.
     protected var fullscreenProgress = 0f
         set(value) {
-            if (value == field && enableOverviewIconMenu()) return
+            if (value == field) return
             field = Utilities.boundToRange(value, 0f, 1f)
             onFullscreenProgressChanged(field)
         }
@@ -527,7 +525,7 @@ constructor(
     // 1 = The TaskView is settled and no longer transitioning
     private var settledProgress = 1f
         set(value) {
-            if (value == field && enableOverviewIconMenu()) return
+            if (value == field) return
             field = value
             onSettledProgressUpdated(field)
         }
@@ -567,7 +565,7 @@ constructor(
      * Returns a sequence of [Pair]s, where each pair contains a [TaskViewIcon] and its
      * corresponding [TransformingTouchDelegate].
      */
-    open fun getTaskIcons(): Sequence<Pair<TaskViewIcon, TransformingTouchDelegate>> =
+    open fun getTaskIcons(): Sequence<Pair<IconAppChipView, TransformingTouchDelegate>> =
         taskContainers.asSequence().map() { it.iconView to it.iconTouchDelegate }
 
     /**
@@ -709,12 +707,8 @@ constructor(
 
     override fun setLayoutDirection(layoutDirection: Int) {
         super.setLayoutDirection(layoutDirection)
-        if (enableOverviewIconMenu()) {
-            val deviceLayoutDirection = resources.configuration.layoutDirection
-            getTaskIcons().forEach { (icon, _) ->
-                (icon as IconAppChipView).layoutDirection = deviceLayoutDirection
-            }
-        }
+        val deviceLayoutDirection = resources.configuration.layoutDirection
+        getTaskIcons().forEach { (icon, _) -> icon.layoutDirection = deviceLayoutDirection }
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
@@ -733,15 +727,13 @@ constructor(
             pivotX = modalPivot.x
             pivotY = modalPivot.y
         } else {
-            val thumbnailTopMargin =
-                container.deviceProfile.overviewProfile.taskThumbnailTopMarginPx
-            if (container.deviceProfile.getDeviceProperties().isTablet) {
+            if (container.deviceProfile.deviceProperties.isTablet) {
                 pivotX =
                     (if (layoutDirection == LAYOUT_DIRECTION_RTL) 0 else right - left).toFloat()
-                pivotY = thumbnailTopMargin.toFloat()
+                pivotY = 0f
             } else {
                 pivotX = (right - left) * 0.5f
-                pivotY = thumbnailTopMargin + (height - thumbnailTopMargin) * 0.5f
+                pivotY = height * 0.5f
             }
         }
     }
@@ -769,9 +761,7 @@ constructor(
         // TODO(b/390583187): Clean the components UI State when TaskView is recycled.
         taskContainers.forEach { it.destroy() }
 
-        if (enableOverviewIconMenu()) {
-            getTaskIcons().forEach { (icon, _) -> (icon as IconAppChipView).reset() }
-        }
+        getTaskIcons().forEach { (icon, _) -> icon.reset() }
         recycleTaskDismissButton()
     }
 
@@ -880,14 +870,6 @@ constructor(
             }
             ?.inflate()
 
-        findViewById<ViewStub>(R.id.icon)
-            ?.apply {
-                layoutResource =
-                    if (enableOverviewIconMenu()) R.layout.icon_app_chip_view
-                    else R.layout.icon_view
-            }
-            ?.inflate()
-
         if (!enableRefactorDigitalWellbeingToast()) {
             findViewById<ViewStub>(R.id.digital_wellbeing_toast)
                 ?.apply { layoutResource = R.layout.digital_wellbeing_toast }
@@ -958,15 +940,13 @@ constructor(
                     }
                 }
 
-                if (enableOverviewIconMenu()) {
-                    setIconState(container, containerState)
-                    if (
-                        containerState is TaskData &&
-                            container.digitalWellBeingToast?.isDestroyed == false &&
-                            container.task.titleDescription != null
-                    ) {
-                        container.digitalWellBeingToast.initialize()
-                    }
+                setIconState(container, containerState)
+                if (
+                    containerState is TaskData &&
+                        container.digitalWellBeingToast?.isDestroyed == false &&
+                        container.task.titleDescription != null
+                ) {
+                    container.digitalWellBeingToast.initialize()
                 }
 
                 val dismissTaskViewOnClick: (View) -> Unit = {
@@ -1076,7 +1056,7 @@ constructor(
             // Do not set icon to null if we are actively in split selection. The task
             // appears to have been offloaded as we remove it during split, but we still
             // need the icon to show over the split task.
-            if (enableOverviewIconMenu() && recentsView?.isSplitSelectionActive == false) {
+            if (recentsView?.isSplitSelectionActive == false) {
                 setIconState(it, null)
             }
         }
@@ -1168,7 +1148,7 @@ constructor(
         taskOverlayFactory: TaskOverlayFactory,
     ): TaskContainer =
         traceSection("TaskView.createTaskContainer") {
-            val iconView = findViewById<View>(iconViewId) as TaskViewIcon
+            val iconView = findViewById<IconAppChipView>(iconViewId)
             val taskContentView =
                 if (enableRefactorTaskContentView()) findViewById<View>(taskContentViewId)
                 else findViewById(thumbnailViewId)
@@ -1231,14 +1211,13 @@ constructor(
      * ensuring TaskView fits into screen in fullscreen.
      */
     open fun updateTaskSize(lastComputedTaskSize: Rect, lastComputedGridTaskSize: Rect) {
-        val thumbnailPadding = container.deviceProfile.overviewProfile.taskThumbnailTopMarginPx
         val taskWidth = lastComputedTaskSize.width()
         val taskHeight = lastComputedTaskSize.height()
         val nonGridScale: Float
         val boxTranslationY: Float
         val expectedWidth: Int
         val expectedHeight: Int
-        if (container.deviceProfile.getDeviceProperties().isTablet) {
+        if (container.deviceProfile.deviceProperties.isTablet) {
             val boxWidth: Int
             val boxHeight: Int
 
@@ -1255,18 +1234,18 @@ constructor(
 
             // Bound width/height to the box size.
             expectedWidth = boxWidth
-            expectedHeight = boxHeight + thumbnailPadding
+            expectedHeight = boxHeight
 
             // Scale to to fit task Rect.
             nonGridScale = taskWidth / boxWidth.toFloat()
 
             // Align to top of task Rect.
-            boxTranslationY = (expectedHeight - thumbnailPadding - taskHeight) / 2.0f
+            boxTranslationY = (expectedHeight - taskHeight) / 2.0f
         } else {
             nonGridScale = 1f
             boxTranslationY = 0f
             expectedWidth = taskWidth
-            expectedHeight = taskHeight + thumbnailPadding
+            expectedHeight = taskHeight
         }
         this.nonGridScale = nonGridScale
         this.boxTranslationY = boxTranslationY
@@ -1278,11 +1257,6 @@ constructor(
     }
 
     protected open fun updateThumbnailSize() {
-        // TODO(b/271468547), we should default to setting translations only on the snapshot instead
-        //  of a hybrid of both margins and translations
-        firstTaskContainer?.taskContentView?.updateLayoutParams<LayoutParams> {
-            topMargin = container.deviceProfile.overviewProfile.taskThumbnailTopMarginPx
-        }
         taskContainers.forEach { it.digitalWellBeingToast?.setupLayout() }
     }
 
@@ -1318,27 +1292,11 @@ constructor(
      *
      * @param visible If this task view will be visible to the user in overview or hidden
      */
+    // TODO does this still need to be called?
     open fun onTaskListVisibilityChanged(visible: Boolean, @TaskDataChanges changes: Int) {
         cancelPendingLoadTasks()
-        val recentsModel = RecentsModel.INSTANCE.get(context)
         // These calls are no-ops if the data is already loaded, try and load the high
         // resolution thumbnail if the state permits
-        if (needsUpdate(changes, FLAG_UPDATE_ICON) && !enableOverviewIconMenu()) {
-            taskContainers.forEach {
-                if (visible) {
-                    recentsModel.iconCache
-                        .getIconInBackground(it.task) { icon, contentDescription, title ->
-                            it.task.icon = icon
-                            it.task.titleDescription = contentDescription
-                            it.task.title = title
-                            onIconLoaded(it)
-                        }
-                        ?.also { request -> pendingIconLoadRequests.add(request) }
-                } else {
-                    onIconUnloaded(it)
-                }
-            }
-        }
         if (needsUpdate(changes, FLAG_UPDATE_CORNER_RADIUS)) {
             thumbnailFullscreenParams.updateCornerRadius(context)
         }
@@ -1357,30 +1315,24 @@ constructor(
 
     protected open fun setIconState(container: TaskContainer, state: TaskData?) =
         traceSection("TaskView.setIconState") {
-            if (enableOverviewIconMenu()) {
-                if (state is TaskData.Data) {
-                    setIcon(container.iconView, state.icon)
-                    container.iconView.setText(state.title)
-                } else {
-                    setIcon(container.iconView, null)
-                    container.iconView.setText(null)
-                }
+            if (state is TaskData.Data) {
+                setIcon(container.iconView, state.icon)
+                container.iconView.setText(state.title)
+            } else {
+                setIcon(container.iconView, null)
+                container.iconView.setText(null)
             }
         }
 
     protected open fun onIconLoaded(taskContainer: TaskContainer) {
         setIcon(taskContainer.iconView, taskContainer.task.icon)
-        if (enableOverviewIconMenu()) {
-            taskContainer.iconView.setText(taskContainer.task.title)
-        }
+        taskContainer.iconView.setText(taskContainer.task.title)
         taskContainer.digitalWellBeingToast?.initialize()
     }
 
     protected open fun onIconUnloaded(taskContainer: TaskContainer) {
         setIcon(taskContainer.iconView, null)
-        if (enableOverviewIconMenu()) {
-            taskContainer.iconView.setText(null)
-        }
+        taskContainer.iconView.setText(null)
     }
 
     protected fun setIcon(iconView: TaskViewIcon, icon: Drawable?) {
@@ -1712,9 +1664,7 @@ constructor(
             // Don't show menu when selecting second split screen app
             return true
         }
-        if (
-            !container.deviceProfile.getDeviceProperties().isTablet && !recentsView.isClearAllHidden
-        ) {
+        if (!container.deviceProfile.deviceProperties.isTablet && !recentsView.isClearAllHidden) {
             recentsView.snapToPage(recentsView.indexOfChild(this))
             return false
         }
@@ -1747,31 +1697,8 @@ constructor(
         recentsView.setTaskBorderEnabled(false)
         val iconView = menuContainer?.iconView ?: getTaskIcons().elementAt(0).first
 
-        return if (enableOverviewIconMenu() && iconView is IconAppChipView) {
-            if (iconView.status == AppChipStatus.Expanded) {
-                closeTaskMenu()
-            } else {
-                val onShowAction = { recentsView.setTaskBorderEnabled(true) }
-                val taskTarget =
-                    if (menuContainer != null) {
-                        TaskMenuView.TaskTarget.FromTaskContainer(menuContainer)
-                    } else {
-                        TaskMenuView.TaskTarget.FromTaskView(this)
-                    }
-                TaskMenuView.showForTask(taskTarget, onShowAction)
-            }
-        } else if (container.deviceProfile.deviceProperties.isTablet && menuContainer != null) {
-            val alignedOptionIndex =
-                if (
-                    recentsView.isOnGridBottomRow(menuContainer.taskView) &&
-                        container.deviceProfile.deviceProperties.isLandscape
-                )
-                    2
-                else 0
-
-            TaskMenuViewWithArrow.showForTask(menuContainer, alignedOptionIndex) {
-                recentsView.setTaskBorderEnabled(true)
-            }
+        return if (iconView.status == AppChipStatus.Expanded) {
+            closeTaskMenu()
         } else {
             val onShowAction = { recentsView.setTaskBorderEnabled(true) }
             val taskTarget =
@@ -1973,11 +1900,6 @@ constructor(
     }
 
     protected open fun onFullscreenProgressChanged(fullscreenProgress: Float) {
-        if (!enableOverviewIconMenu()) {
-            getTaskIcons().forEach { (icon, _) ->
-                icon.asView().visibility = if (fullscreenProgress < 1) VISIBLE else INVISIBLE
-            }
-        }
         taskContainers.forEach { it.overlay.setFullscreenProgress(fullscreenProgress) }
         updateSettledProgressFullscreen(fullscreenProgress)
         updateFullscreenParams()

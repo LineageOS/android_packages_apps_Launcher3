@@ -160,7 +160,6 @@ class IconView : View, TaskViewIcon {
             iconParams = layoutParams as FrameLayout.LayoutParams,
             taskIconMargin = deviceProfile.overviewProfile.taskMarginPx,
             taskIconHeight = deviceProfile.overviewProfile.taskIconSizePx,
-            thumbnailTopMargin = deviceProfile.overviewProfile.taskThumbnailTopMarginPx,
             isRtl = layoutDirection == LAYOUT_DIRECTION_RTL,
         )
         updateLayoutParams<FrameLayout.LayoutParams> {

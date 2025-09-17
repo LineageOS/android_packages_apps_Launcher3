@@ -47,7 +47,6 @@ import com.android.launcher3.statehandlers.DesktopVisibilityController.Companion
 import com.android.launcher3.statemanager.BaseState
 import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.IntArray
-import com.android.launcher3.util.OverviewReleaseFlags.enableOverviewIconMenu
 import com.android.launcher3.util.window.WindowManagerProxy.DesktopVisibilityListener
 import com.android.quickstep.GestureState
 import com.android.quickstep.RemoteTargetGluer.RemoteTargetHandle
@@ -599,20 +598,13 @@ class RecentsViewUtils(private val recentsView: RecentsView<*, *>) : DesktopVisi
     private fun getTaskMenu(): TaskMenuView? =
         getTopOpenViewWithType(recentsView.mContainer, TYPE_TASK_MENU) as? TaskMenuView
 
-    fun taskMenuIsOpen(): Boolean {
-        if (enableOverviewIconMenu()) {
-            return getTaskMenu()?.isOpen == true
-        }
-        return false
-    }
+    fun taskMenuIsOpen() = getTaskMenu()?.isOpen == true
 
     fun updateChildTaskOrientations() {
         with(recentsView) {
             taskViews.forEach { it.setOrientationState(mOrientationState) }
-            if (enableOverviewIconMenu()) {
-                children.forEach {
-                    it.layoutDirection = if (isRtl) LAYOUT_DIRECTION_LTR else LAYOUT_DIRECTION_RTL
-                }
+            children.forEach {
+                it.layoutDirection = if (isRtl) LAYOUT_DIRECTION_LTR else LAYOUT_DIRECTION_RTL
             }
 
             // Return when it's not fake landscape

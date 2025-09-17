@@ -40,11 +40,11 @@ import com.android.launcher3.util.TransformingTouchDelegate
 import com.android.quickstep.TaskOverlayFactory.TaskOverlay
 import com.android.quickstep.task.thumbnail.TaskContentView
 import com.android.quickstep.task.thumbnail.TaskThumbnailView
+import com.android.quickstep.views.IconAppChipView
 import com.android.quickstep.views.LauncherRecentsView
 import com.android.quickstep.views.RecentsViewContainer
 import com.android.quickstep.views.TaskContainer
 import com.android.quickstep.views.TaskView
-import com.android.quickstep.views.TaskViewIcon
 import com.android.systemui.shared.recents.model.Task
 import com.android.systemui.shared.recents.model.Task.TaskKey
 import com.android.window.flags.Flags
@@ -320,7 +320,7 @@ class ExternalDisplaySystemShortcutTest {
             if (enableRefactorTaskContentView()) mock<TaskContentView>()
             else mock<TaskThumbnailView>(),
             mock<TaskThumbnailView>(),
-            mock<TaskViewIcon>(),
+            mock<IconAppChipView>(),
             mock<TransformingTouchDelegate>(),
             SplitConfigurationOptions.STAGE_POSITION_UNDEFINED,
             digitalWellBeingToast = null,

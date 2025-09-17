@@ -2326,18 +2326,16 @@ public abstract class RecentsView<
         mTaskWidth = mLastComputedTaskSize.width();
         mTaskHeight = mLastComputedTaskSize.height();
         setPadding(mLastComputedTaskSize.left - mInsets.left,
-                mLastComputedTaskSize.top - dp.getOverviewProfile().getTaskThumbnailTopMarginPx()
-                        - mInsets.top,
+                mLastComputedTaskSize.top - mInsets.top,
                 dp.getDeviceProperties().getWidthPx() - mInsets.right - mLastComputedTaskSize.right,
                 dp.getDeviceProperties().getHeightPx() - mInsets.bottom - mLastComputedTaskSize.bottom);
 
-        mContainerInterface.calculateGridSize(dp, mContainer, mLastComputedGridSize);
+        mContainerInterface.calculateGridSize(dp, mLastComputedGridSize);
         mContainerInterface.calculateGridTaskSize(mContainer, dp, mLastComputedGridTaskSize,
                 getPagedOrientationHandler());
 
         mTaskGridVerticalDiff = mLastComputedGridTaskSize.top - mLastComputedTaskSize.top;
         mTopBottomRowHeightDiff = mLastComputedGridTaskSize.height()
-                + dp.getOverviewProfile().getTaskThumbnailTopMarginPx()
                 + dp.getOverviewProfile().getRowSpacing();
 
         // Force TaskView to update size from thumbnail
@@ -2414,7 +2412,7 @@ public abstract class RecentsView<
         if (deviceProfile.getDeviceProperties().isTablet()) {
             return deviceProfile.getOverviewProfile().getRowSpacing();
         }
-        return deviceProfile.getOverviewProfile().getTaskThumbnailTopMarginPx() / 2.0f;
+        return 0f;
     }
 
     protected Rect getTaskBounds(TaskView taskView) {
@@ -3172,7 +3170,6 @@ public abstract class RecentsView<
         }
 
         DeviceProfile deviceProfile = mContainer.getDeviceProfile();
-        int taskTopMargin = deviceProfile.getOverviewProfile().getTaskThumbnailTopMarginPx();
 
         int topRowWidth = 0;
         int bottomRowWidth = 0;
@@ -3239,7 +3236,7 @@ public abstract class RecentsView<
                 gridTranslation += mIsRtl ? taskWidthAndSpacing : -taskWidthAndSpacing;
 
                 // Center view vertically in case it's from different orientation.
-                taskView.setGridTranslationY((mLastComputedTaskSize.height() + taskTopMargin
+                taskView.setGridTranslationY((mLastComputedTaskSize.height()
                         - taskView.getLayoutParams().height) / 2f);
 
                 largeTaskWidthAndSpacing = taskWidthAndSpacing;
@@ -4854,10 +4851,6 @@ public abstract class RecentsView<
         if (child instanceof TaskView taskView) {
             outRect.offset(taskView.getPersistentTranslationX(),
                     taskView.getPersistentTranslationY());
-            outRect.top += mContainer
-                    .getDeviceProfile()
-                    .getOverviewProfile()
-                    .getTaskThumbnailTopMarginPx();
 
             mTempMatrix.reset();
             float persistentScale = taskView.getPersistentScale();

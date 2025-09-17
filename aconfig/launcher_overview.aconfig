@@ -2,13 +2,6 @@ package: "com.android.launcher3"
 container: "system_ext"
 
 flag {
-    name: "enable_overview_icon_menu"
-    namespace: "launcher_overview"
-    description: "Enable updated overview icon and menu within task."
-    bug: "360205084"
-}
-
-flag {
     name: "enable_later_is_locked_check"
     namespace: "launcher_overview"
     description: "Checks if users associated with tasks are locked later in the data flow to prevent stale data"
