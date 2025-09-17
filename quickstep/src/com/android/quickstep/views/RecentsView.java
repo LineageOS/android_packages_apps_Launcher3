@@ -138,6 +138,7 @@ import android.window.DesktopModeFlags;
 import android.window.PictureInPictureSurfaceTransaction;
 import android.window.TransitionInfo;
 
+import androidx.annotation.AnyThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
@@ -1185,6 +1186,7 @@ public abstract class RecentsView<
         return mSplitSelectStateController;
     }
 
+    @AnyThread
     public boolean isSplitSelectionActive() {
         return mSplitSelectStateController != null
                 && mSplitSelectStateController.isSplitSelectActive();

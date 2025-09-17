@@ -337,7 +337,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
                 new SplitSelectStateController(this, getStateManager(),
                         getDepthController(), getStatsLogManager(),
                         systemUiProxy, RecentsModel.INSTANCE.get(this),
-                        () -> onStateBack());
+                        () -> onStateBack(), mLauncherUiState.getSplitScreenUiState());
         if (DesktopModeStatus.canEnterDesktopMode(this)) {
             mDesktopRecentsTransitionController = new DesktopRecentsTransitionController(
                     getStateManager(), systemUiProxy, getIApplicationThread(),
@@ -360,9 +360,6 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
 
         if (DesktopModeStatus.canEnterDesktopModeOrShowAppHandle(this)) {
             mSplitSelectStateController.initSplitFromDesktopController(this);
-        }
-        if (refactorTaskbarUiState()) {
-            mSplitSelectStateController.setLauncherUiState(mLauncherUiState);
         }
         mHotseatPredictionController = new HotseatPredictionController(this);
 

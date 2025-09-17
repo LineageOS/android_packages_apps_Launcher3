@@ -59,6 +59,7 @@ import com.android.launcher3.QuickstepTransitionManager.RECENTS_LAUNCH_DURATION
 import com.android.launcher3.QuickstepTransitionManager.STATUS_BAR_TRANSITION_DURATION
 import com.android.launcher3.QuickstepTransitionManager.STATUS_BAR_TRANSITION_PRE_DELAY
 import com.android.launcher3.R
+import com.android.launcher3.SplitScreenUiState
 import com.android.launcher3.anim.PendingAnimation
 import com.android.launcher3.compat.AccessibilityManagerCompat
 import com.android.launcher3.concurrent.annotations.Ui
@@ -196,6 +197,7 @@ constructor(
             systemUiProxy,
             recentsModel,
             /* activityBackCallback= */ null,
+            SplitScreenUiState(),
         )
 
     // Callback array that corresponds to events defined in @ActivityEvent

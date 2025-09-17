@@ -467,9 +467,7 @@ public class TaskbarLauncherStateController {
      * @param launcherState The current state launcher is in
      */
     private void updateOverviewDragState(LauncherState launcherState) {
-        boolean disallowLongClick =
-                LauncherUiStateUtil.isSplitSelectActive(mLauncher, mLauncherUiState)
-                        || mIsAnimatingToLauncher;
+        boolean disallowLongClick = mLauncher.isSplitSelectActive() || mIsAnimatingToLauncher;
         com.android.launcher3.taskbar.Utilities.setOverviewDragState(
                 mControllers, launcherState.disallowTaskbarGlobalDrag(),
                 disallowLongClick, launcherState.allowTaskbarInitialSplitSelection());

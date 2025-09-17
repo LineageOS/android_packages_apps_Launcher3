@@ -25,7 +25,7 @@ import android.content.Intent
 import android.os.Process
 import android.os.UserHandle
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.launcher3.LauncherUiState
+import com.android.launcher3.SplitScreenUiState
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.shortcuts.ShortcutKey
 import com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT
@@ -65,11 +65,11 @@ class SplitSelectDataHolderTest {
     private val sampleItemInfo2 = ItemInfo()
     private val samplePackage =
         AbstractLauncherUiTest.resolveSystemApp(Intent.CATEGORY_APP_CALCULATOR)
-    private val launcherUiState = LauncherUiState()
+    private val splitScreenUiState = SplitScreenUiState()
 
     @Before
     fun setup() {
-        splitSelectDataHolder = SplitSelectDataHolder(context)
+        splitSelectDataHolder = SplitSelectDataHolder(context, splitScreenUiState)
 
         sampleTaskInfo.taskId = sampleTaskId
         sampleItemInfo.user = sampleUser
@@ -79,7 +79,6 @@ class SplitSelectDataHolderTest {
         sampleShortcut2.setPackage(samplePackage)
         sampleShortcut.putExtra(ShortcutKey.EXTRA_SHORTCUT_ID, "sampleShortcut")
         sampleShortcut2.putExtra(ShortcutKey.EXTRA_SHORTCUT_ID, "sampleShortcut2")
-        splitSelectDataHolder.setLauncherUiState(launcherUiState)
     }
 
     @Test
@@ -91,7 +90,6 @@ class SplitSelectDataHolderTest {
             null,
         )
         assertTrue(splitSelectDataHolder.isSplitSelectActive())
-        assertTrue(launcherUiState.isSplitSelectActiveRef.value)
     }
 
     @Test
@@ -104,7 +102,6 @@ class SplitSelectDataHolderTest {
             INVALID_TASK_ID,
         )
         assertTrue(splitSelectDataHolder.isSplitSelectActive())
-        assertTrue(launcherUiState.isSplitSelectActiveRef.value)
     }
 
     @Test
@@ -117,7 +114,6 @@ class SplitSelectDataHolderTest {
             sampleTaskId,
         )
         assertTrue(splitSelectDataHolder.isSplitSelectActive())
-        assertTrue(launcherUiState.isSplitSelectActiveRef.value)
     }
 
     @Test
@@ -130,7 +126,6 @@ class SplitSelectDataHolderTest {
             INVALID_TASK_ID,
         )
         assertTrue(splitSelectDataHolder.isSplitSelectActive())
-        assertTrue(launcherUiState.isSplitSelectActiveRef.value)
     }
 
     @Test
@@ -400,7 +395,6 @@ class SplitSelectDataHolderTest {
         splitSelectDataHolder.setSecondTask(sampleIntent, sampleUser, sampleItemInfo2)
         splitSelectDataHolder.resetState()
         assertFalse(splitSelectDataHolder.isSplitSelectActive())
-        assertFalse(launcherUiState.isSplitSelectActiveRef.value)
     }
 
     @Test
@@ -415,6 +409,5 @@ class SplitSelectDataHolderTest {
         splitSelectDataHolder.setSecondTask(sampleIntent, sampleUser, sampleItemInfo2)
         splitSelectDataHolder.resetState()
         assertFalse(splitSelectDataHolder.isSplitSelectActive())
-        assertFalse(launcherUiState.isSplitSelectActiveRef.value)
     }
 }

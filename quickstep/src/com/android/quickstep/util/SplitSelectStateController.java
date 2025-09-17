@@ -74,12 +74,13 @@ import android.window.RemoteTransitionStub;
 import android.window.TransitionInfo;
 import android.window.WindowContainerTransaction;
 
+import androidx.annotation.AnyThread;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.InstanceId;
-import com.android.launcher3.LauncherUiState;
 import com.android.launcher3.R;
+import com.android.launcher3.SplitScreenUiState;
 import com.android.launcher3.anim.PendingAnimation;
 import com.android.launcher3.apppairs.AppPairIcon;
 import com.android.launcher3.icons.IconProvider;
@@ -204,7 +205,7 @@ public class SplitSelectStateController {
     public SplitSelectStateController(RecentsViewContainer container,
             StateManager stateManager, DepthController depthController,
             StatsLogManager statsLogManager, SystemUiProxy systemUiProxy, RecentsModel recentsModel,
-            Runnable activityBackCallback) {
+            Runnable activityBackCallback, SplitScreenUiState splitScreenUiState) {
         mContainer = container;
         mStatsLogManager = statsLogManager;
         mSystemUiProxy = systemUiProxy;
@@ -214,7 +215,8 @@ public class SplitSelectStateController {
         mActivityBackCallback = activityBackCallback;
         mSplitAnimationController = new SplitAnimationController(this);
         mAppPairsController = new AppPairsController(mContainer, this, statsLogManager);
-        mSplitSelectDataHolder = new SplitSelectDataHolder(mContainer.asContext());
+        mSplitSelectDataHolder = new SplitSelectDataHolder(
+                mContainer.asContext(), splitScreenUiState);
     }
 
     public void onDestroy() {
@@ -644,10 +646,6 @@ public class SplitSelectStateController {
         initSplitFromDesktopController(new SplitFromDesktopController(recentsViewContainer));
     }
 
-    public void setLauncherUiState(LauncherUiState launcherUiState) {
-        mSplitSelectDataHolder.setLauncherUiState(launcherUiState);
-    }
-
     @VisibleForTesting
     void initSplitFromDesktopController(SplitFromDesktopController controller) {
         mSplitFromDesktopController = controller;
@@ -838,6 +836,7 @@ public class SplitSelectStateController {
      * @return {@code true} if first task has been selected and waiting for the second task to be
      *         chosen
      */
+    @AnyThread
     public boolean isSplitSelectActive() {
         return mSplitSelectDataHolder.isSplitSelectActive();
     }

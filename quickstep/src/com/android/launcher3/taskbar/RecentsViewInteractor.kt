@@ -21,6 +21,7 @@ import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.os.UserHandle
 import android.view.View
+import androidx.annotation.AnyThread
 import com.android.launcher3.Flags.enableTaskbarUiThread
 import com.android.launcher3.apppairs.AppPairIcon
 import com.android.launcher3.model.data.ItemInfo
@@ -35,20 +36,24 @@ import com.android.systemui.shared.recents.model.Task
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executor
 import java.util.function.Consumer
+import javax.annotation.concurrent.ThreadSafe
 
 /**
  * Wraps [RecentsView] and allow taskbar to post action on mainExecutor since recents is rendered on
  * main thread.
  */
+@ThreadSafe
 class RecentsViewInteractor(private val recentsView: RecentsView<*, *>) {
-
-    fun hasSameRecentsView(recentsView: RecentsView<*, *>) = this.recentsView === recentsView
 
     // We can use IMMEDIATE_EXECUTOR if enableTaskbarUiThread() is not turned on because caller
     // is already on main thread.
     private val mainExecutor: Executor =
         if (enableTaskbarUiThread()) MAIN_EXECUTOR else IMMEDIATE_EXECUTOR
 
+    @AnyThread
+    fun hasSameRecentsView(recentsView: RecentsView<*, *>) = this.recentsView === recentsView
+
+    @AnyThread
     fun launchRunningDesktopTaskView(taskToRun: Runnable, callbackExecutor: Executor) {
         CompletableFuture.supplyAsync({ recentsView.launchRunningDesktopTaskView() }, mainExecutor)
             .thenApplyAsync(
@@ -66,16 +71,19 @@ class RecentsViewInteractor(private val recentsView: RecentsView<*, *>) {
     }
 
     // TODO(b/404636836): pass callback executor param and return SafeClosable
+    @AnyThread
     fun addSideTaskLaunchCallback(callback: RunnableList?) {
         mainExecutor.execute { recentsView.addSideTaskLaunchCallback(callback) }
     }
 
     // TODO(b/404636836): pass callback executor param and return SafeClosable
+    @AnyThread
     fun setTaskLaunchListener(taskLaunchListener: RecentsView.TaskLaunchListener?) {
         mainExecutor.execute { recentsView.setTaskLaunchListener(taskLaunchListener) }
     }
 
     // TODO(b/404636836): pass callback executor param and return SafeClosable
+    @AnyThread
     fun setTaskLaunchCancelledRunnable(onTaskLaunchCancelledRunnable: Runnable?) {
         mainExecutor.execute {
             recentsView.setTaskLaunchCancelledRunnable(onTaskLaunchCancelledRunnable)
@@ -85,6 +93,7 @@ class RecentsViewInteractor(private val recentsView: RecentsView<*, *>) {
     // TODO(b/404636836): Pass Consumer<View> to post actions on found task view to main thread.
     fun getTaskViewByTaskId(taskId: Int) = recentsView.getTaskViewByTaskId(taskId)
 
+    @AnyThread
     fun handleAppPairLaunchInApp(launchingIconView: AppPairIcon, itemInfos: List<ItemInfo>) {
         mainExecutor.execute {
             recentsView.splitSelectController
@@ -93,6 +102,7 @@ class RecentsViewInteractor(private val recentsView: RecentsView<*, *>) {
         }
     }
 
+    @AnyThread
     fun findLastActiveTasksAndRunCallback(
         resolvedTargetInfos: List<ResolvedTargetInfo>?,
         findExactPairMatch: Boolean,
@@ -107,10 +117,12 @@ class RecentsViewInteractor(private val recentsView: RecentsView<*, *>) {
         }
     }
 
+    @AnyThread
     fun initiateSplitSelect(taskContainer: SplitConfigurationOptions.SplitSelectSource) {
         mainExecutor.execute { recentsView.initiateSplitSelect(taskContainer) }
     }
 
+    @AnyThread
     fun confirmSplitSelect(
         containerTaskView: TaskView?,
         task: Task?,
@@ -135,25 +147,24 @@ class RecentsViewInteractor(private val recentsView: RecentsView<*, *>) {
         }
     }
 
+    @AnyThread
     fun switchToScreenshot(onFinishRunnable: Runnable) {
         mainExecutor.execute { recentsView.switchToScreenshot(onFinishRunnable) }
     }
 
+    @AnyThread
     fun finishRecentsAnimation(toHome: Boolean, shouldPip: Boolean, onFinishComplete: Runnable?) {
         mainExecutor.execute {
             recentsView.finishRecentsAnimation(toHome, shouldPip, onFinishComplete)
         }
     }
 
+    @AnyThread
     fun launchAppPair(appPairIcon: AppPairIcon, cuj: Int) {
         mainExecutor.execute {
             recentsView.splitSelectController?.appPairsController?.launchAppPair(appPairIcon, cuj)
         }
     }
 
-    @Deprecated(
-        "Should be removed once we turned on [refactorTaskbarUiState()] flag",
-        ReplaceWith("RecentsUiState.isSplitSelectionActiveRef.value()"),
-    )
-    fun isSplitSelectionActive() = recentsView.isSplitSelectionActive
+    @AnyThread fun isSplitSelectionActive() = recentsView.isSplitSelectionActive
 }

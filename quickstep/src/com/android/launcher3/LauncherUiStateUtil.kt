@@ -37,21 +37,6 @@ object LauncherUiStateUtil {
         }
 
     @JvmStatic
-    fun isSplitSelectActive(
-        launcher: LauncherInteractor,
-        launcherUiState: LauncherUiState,
-    ): Boolean =
-        if (refactorTaskbarUiState()) {
-            val ret: Boolean = launcherUiState.isSplitSelectActiveRef.value
-            if (BuildConfig.IS_STUDIO_BUILD && ret != launcher.isSplitSelectActive()) {
-                throw IllegalStateException("isSplitSelectionActive() doesn't match")
-            }
-            ret
-        } else {
-            launcher.isSplitSelectActive()
-        }
-
-    @JvmStatic
     fun getLauncherState(
         launcher: LauncherInteractor,
         launcherUiState: LauncherUiState,

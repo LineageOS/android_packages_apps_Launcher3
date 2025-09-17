@@ -25,13 +25,13 @@ class LauncherUiState {
     private val _launcherStateRef = MutableListenableRef(LauncherState.NORMAL)
     private val _deviceProfileRef = MutableListenableRef(DEFAULT_DEVICE_PROFILE)
     private val _activityFlagsRef = MutableListenableRef(0)
-    private val _isSplitSelectActiveRef = MutableListenableRef(false)
     private val _isOverlayShown = MutableListenableRef(false)
     private val _taskbarAlignmentChannelAlphaRef = MutableListenableRef(0f)
     private val _isTopResumedActivityRef = MutableListenableRef(false)
 
+    val splitScreenUiState = SplitScreenUiState()
+
     val deviceProfileRef = _deviceProfileRef.asListenable()
-    val isSplitSelectActiveRef = _isSplitSelectActiveRef.asListenable()
     val launcherStateRef = _launcherStateRef.asListenable()
     val taskbarAlignmentChannelAlpha = _taskbarAlignmentChannelAlphaRef.asListenable()
     val isTopResumedActivityRef = _isTopResumedActivityRef.asListenable()
@@ -43,10 +43,6 @@ class LauncherUiState {
         get() = _deviceProfileRef.value !== DEFAULT_DEVICE_PROFILE
 
     val isOverlayShownRef = _isOverlayShown.asListenable()
-
-    // Split select state
-    private var _initialTask = SplitSelectTask()
-    private var _secondTask = SplitSelectTask()
 
     fun setLauncherState(launcherState: LauncherState) {
         _launcherStateRef.diffAndDispatch(launcherState)
@@ -60,16 +56,6 @@ class LauncherUiState {
         _activityFlagsRef.diffAndDispatch(flags)
     }
 
-    fun setSplitSelectInitialTask(initialTask: SplitSelectTask) {
-        _initialTask = initialTask
-        updateIsSplitSelectActiveRef()
-    }
-
-    fun setSplitSelectSecondTask(secondTask: SplitSelectTask) {
-        _secondTask = secondTask
-        updateIsSplitSelectActiveRef()
-    }
-
     fun setIsOverlayShown(isOverlayShown: Boolean) {
         _isOverlayShown.diffAndDispatch(isOverlayShown)
     }
@@ -80,12 +66,6 @@ class LauncherUiState {
 
     fun setIsTopResumedActivity(isTopResumedActivity: Boolean) {
         _isTopResumedActivityRef.diffAndDispatch(isTopResumedActivity)
-    }
-
-    private fun updateIsSplitSelectActiveRef() {
-        _isSplitSelectActiveRef.diffAndDispatch(
-            _initialTask.isIntentSet && !_secondTask.isIntentSet
-        )
     }
 
     private fun <T> MutableListenableRef<T>.diffAndDispatch(newValue: T) {
