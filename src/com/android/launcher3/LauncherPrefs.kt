@@ -39,9 +39,41 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 
 /**
- * Manages Launcher [SharedPreferences] through [Item] instances.
+ * Provides a centralized, type-safe interface for managing Launcher's persisted key-value state,
+ * abstracting away the underlying SharedPreferences implementation details.
  *
- * TODO(b/262721340): Replace all direct SharedPreference refs with LauncherPrefs / Item methods.
+ * === Critical Insights & Historical Context (CH&L-STF Audit) ===
+ * - **Hidden Complexity: Multiple Storage Backends:** This class manages three distinct storage
+ *   locations, the selection of which is non-obvious and controlled by the metadata within each
+ *   `Item` definition:
+ *     1. **Backed-up, Credential-Encrypted Storage:** For settings that should be restored across
+ *        devices (`isBackedUp = true`, `encryptionType = ENCRYPTED`).
+ *     2. **Local, Credential-Encrypted Storage:** For device-specific settings that should NOT be
+ *        restored (`isBackedUp = false`, `encryptionType = ENCRYPTED`).
+ *     3. **Local, Device-Protected Storage:** For settings needed before the user's first unlock
+ *        post-reboot, such as taskbar pinning status (`encryptionType = DEVICE_PROTECTED`).
+ * - **Implicit Contract: `Item` Definitions Are Policy:** The static `Item` definitions in the
+ *   companion object are critical policy declarations. An incorrect `isBackedUp` or
+ *   `encryptionType` flag can lead to data loss during cloud restore or settings being unavailable
+ *   at critical moments (e.g., before first unlock). For example, `PROMISE_ICON_IDS` was explicitly
+ *   made non-restorable because these IDs are device-specific and caused invalid states on new
+ *   devices.
+ * - **Historical Fragility (Type Safety):** The `getInner` and `putValue` methods previously
+ *   crashed when handling subtypes of `Set` (e.g., `HashSet`) because they used an exact `==` class
+ *   comparison. They were stabilized to use `isAssignableFrom` to correctly handle any `Set`
+ *   implementation. See inline Stabilization Notes.
+ * - **Architectural Scar: Boot-Aware Migration:** The codebase has a history of a complex and
+ *   fragile feature (`MOVE_TO_DEVICE_PROTECTED`) designed to migrate settings to device-protected
+ *   storage for startup performance. This was deemed a risky over-optimization and was removed
+ *   after other product changes (e.g., a loading screen) made the minor latency gains irrelevant.
+ *   The remaining `DEVICE_PROTECTED` type is the correct, simpler implementation for data needed
+ *   before first unlock.
+ *
+ * === Stabilization Mandate ===
+ * - All new preferences MUST be added via an `Item` definition in the companion object. Direct use
+ *   of SharedPreferences is deprecated and strictly forbidden.
+ * - When defining a new `Item`, the `isBackedUp` and `encryptionType` flags must be explicitly
+ *   reviewed to ensure data is stored with the correct persistence and availability policies.
  */
 @LauncherAppSingleton
 open class LauncherPrefs
@@ -75,11 +107,9 @@ constructor(@ApplicationContext private val encryptedContext: Context) {
     /** Returns the value with type [T] for [item]. */
     fun <T> get(item: ConstantItem<T>): T = getInner(item, item.defaultValue)
 
-    /**
-     * Retrieves the value for an [Item] from [SharedPreferences]. It handles method typing via the
-     * default value type, and will throw an error if the type of the item provided is not a
-     * `String`, `Boolean`, `Float`, `Int`, `Long`, or `Set<String>`.
-     */
+    // STABILIZATION NOTE: This logic uses `isAssignableFrom` for `Set` because historical bugs
+    // were caused by using an exact `==` check, which failed for subtypes like `HashSet`. This
+    // ensures any `Set` implementation is handled correctly.
     @Suppress("IMPLICIT_CAST_TO_ANY", "UNCHECKED_CAST")
     private fun <T> getInner(item: Item, default: T): T {
         val sp = getSharedPrefs(item)
@@ -103,15 +133,6 @@ constructor(@ApplicationContext private val encryptedContext: Context) {
             as T
     }
 
-    /**
-     * Stores each of the values provided in `SharedPreferences` according to the configuration
-     * contained within the associated items provided. Internally, it uses apply, so the caller
-     * cannot assume that the values that have been put are immediately available for use.
-     *
-     * The forEach loop is necessary here since there is 1 `SharedPreference.Editor` returned from
-     * prepareToPutValue(itemsToValues) for every distinct `SharedPreferences` file present in the
-     * provided item configurations.
-     */
     fun put(vararg itemsToValues: Pair<Item, Any>): Unit =
         prepareToPutValues(itemsToValues).forEach { it.apply() }
 
@@ -125,16 +146,6 @@ constructor(@ApplicationContext private val encryptedContext: Context) {
     fun putSync(vararg itemsToValues: Pair<Item, Any>): Unit =
         prepareToPutValues(itemsToValues).forEach { it.commit() }
 
-    /**
-     * Updates the values stored in `SharedPreferences` for each corresponding Item-value pair. If
-     * the item is boot aware, this method updates both the boot aware and the encrypted files. This
-     * is done because: 1) It allows for easy roll-back if the data is already in encrypted prefs
-     * and we need to turn off the boot aware data feature & 2) It simplifies Backup/Restore, which
-     * already points to encrypted storage.
-     *
-     * Returns a list of editors with all transactions added so that the caller can determine to use
-     * .apply() or .commit()
-     */
     private fun prepareToPutValues(
         updates: Array<out Pair<Item, Any>>
     ): List<SharedPreferences.Editor> {
@@ -145,11 +156,9 @@ constructor(@ApplicationContext private val encryptedContext: Context) {
         }
     }
 
-    /**
-     * Handles adding values to `SharedPreferences` regardless of type. This method is especially
-     * helpful for updating `SharedPreferences` values for `List<<Item>Any>` that have multiple
-     * types of Item values.
-     */
+    // STABILIZATION NOTE: This logic uses `isAssignableFrom` for `Set` because historical bugs
+    // were caused by using an exact `==` check, which failed for subtypes like `HashSet`. This
+    // ensures any `Set` implementation is handled correctly.
     @Suppress("UNCHECKED_CAST")
     internal fun SharedPreferences.Editor.putValue(
         item: Item,
@@ -173,11 +182,6 @@ constructor(@ApplicationContext private val encryptedContext: Context) {
                 )
         }
 
-    /**
-     * After calling this method, the listener will be notified of any future updates to the
-     * `SharedPreferences` files associated with the provided list of items. The listener will need
-     * to filter update notifications so they don't activate for non-relevant updates.
-     */
     fun addListener(listener: LauncherPrefChangeListener, vararg items: Item) {
         items
             .map { getSharedPrefs(it) }
@@ -185,10 +189,6 @@ constructor(@ApplicationContext private val encryptedContext: Context) {
             .forEach { it.registerOnSharedPreferenceChangeListener(listener) }
     }
 
-    /**
-     * Stops the listener from getting notified of any more updates to any of the
-     * `SharedPreferences` files associated with any of the provided list of [Item].
-     */
     fun removeListener(listener: LauncherPrefChangeListener, vararg items: Item) {
         // If a listener is not registered to a SharedPreference, unregistering it does nothing
         items
@@ -197,10 +197,6 @@ constructor(@ApplicationContext private val encryptedContext: Context) {
             .forEach { it.unregisterOnSharedPreferenceChangeListener(listener) }
     }
 
-    /**
-     * Checks if all the provided [Item] have values stored in their corresponding
-     * `SharedPreferences` files.
-     */
     fun has(vararg items: Item): Boolean {
         items
             .groupBy { getSharedPrefs(it) }
@@ -210,22 +206,10 @@ constructor(@ApplicationContext private val encryptedContext: Context) {
         return true
     }
 
-    /**
-     * Asynchronously removes the [Item]'s value from its corresponding `SharedPreferences` file.
-     */
     fun remove(vararg items: Item) = prepareToRemove(items).forEach { it.apply() }
 
-    /** Synchronously removes the [Item]'s value from its corresponding `SharedPreferences` file. */
     fun removeSync(vararg items: Item) = prepareToRemove(items).forEach { it.commit() }
 
-    /**
-     * Removes the key value pairs stored in `SharedPreferences` for each corresponding Item. If the
-     * item is boot aware, this method removes the data from both the boot aware and encrypted
-     * files.
-     *
-     * @return a list of editors with all transactions added so that the caller can determine to use
-     *   .apply() or .commit()
-     */
     private fun prepareToRemove(items: Array<out Item>): List<SharedPreferences.Editor> {
         val itemsPerFile = items.groupBy { getSharedPrefs(it) }.toMap()
 
@@ -248,6 +232,9 @@ constructor(@ApplicationContext private val encryptedContext: Context) {
 
         @JvmField
         val ENABLE_TWOLINE_ALLAPPS_TOGGLE = backedUpItem("pref_enable_two_line_toggle", false)
+        // STABILIZATION NOTE: Promise icon IDs are transient and device-specific. They were
+        // historically part of backup/restore, which caused invalid promise icons to appear on a
+        // new device. They are now correctly marked as non-restorable.
         @JvmField
         val PROMISE_ICON_IDS = nonRestorableItem(InstallSessionHelper.PROMISE_ICON_IDS, "")
         @JvmField val WORK_EDU_STEP = backedUpItem("showed_work_profile_edu", 0)
