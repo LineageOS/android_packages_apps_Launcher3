@@ -126,7 +126,6 @@ class GroupedTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
         taskOverlayFactory: TaskOverlayFactory,
     ) {
         this.groupTask = splitTask
-        cancelPendingLoadTasks()
         taskContainers =
             listOf(
                 createTaskContainer(

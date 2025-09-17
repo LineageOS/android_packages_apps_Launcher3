@@ -24,6 +24,7 @@ import android.app.ActivityOptions
 import android.app.ActivityTaskManager.INVALID_TASK_ID
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Canvas
 import android.graphics.PointF
 import android.graphics.Rect
@@ -41,7 +42,6 @@ import android.view.ViewStub
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.FrameLayout
 import android.widget.Toast
-import androidx.annotation.IntDef
 import androidx.annotation.VisibleForTesting
 import androidx.core.animation.doOnCancel
 import androidx.core.view.isGone
@@ -55,13 +55,11 @@ import com.android.launcher3.Flags.enableRefactorDigitalWellbeingToast
 import com.android.launcher3.Flags.enableRefactorTaskContentView
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
-import com.android.launcher3.anim.AnimatedFloat
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.TaskViewItemInfo
 import com.android.launcher3.testing.TestLogging
 import com.android.launcher3.testing.shared.TestProtocol
-import com.android.launcher3.util.CancellableTask
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.KFloatProperty
 import com.android.launcher3.util.MultiPropertyDelegate
@@ -134,14 +132,6 @@ constructor(
     val type: TaskViewType = TaskViewType.SINGLE,
     protected val thumbnailFullscreenParams: FullscreenDrawParams = FullscreenDrawParams(context),
 ) : FrameLayout(context, attrs), ViewPool.Reusable {
-    /**
-     * Used in conjunction with [onTaskListVisibilityChanged], providing more granularity on which
-     * components of this task require an update
-     */
-    @Retention(AnnotationRetention.SOURCE)
-    @IntDef(FLAG_UPDATE_ALL, FLAG_UPDATE_ICON, FLAG_UPDATE_THUMBNAIL, FLAG_UPDATE_CORNER_RADIUS)
-    annotation class TaskDataChanges
-
     var groupTask: GroupTask? = null
 
     val taskIds: IntArray
@@ -566,39 +556,20 @@ constructor(
      * corresponding [TransformingTouchDelegate].
      */
     open fun getTaskIcons(): Sequence<Pair<IconAppChipView, TransformingTouchDelegate>> =
-        taskContainers.asSequence().map() { it.iconView to it.iconTouchDelegate }
-
-    /**
-     * Returns an animator of [settledProgressDismiss] that transition in with a built-in
-     * interpolator.
-     */
-    fun getDismissIconFadeInAnimator(): ObjectAnimator =
-        ObjectAnimator.ofFloat(this, SETTLED_PROGRESS_DISMISS, 1f).apply {
-            duration = FADE_IN_ICON_DURATION
-            interpolator = FADE_IN_ICON_INTERPOLATOR
-        }
-
-    /**
-     * Returns an animator of [settledProgressDismiss] that transition out with a built-in
-     * interpolator. [AnimatedFloat] is used to apply another level of interpolation, on top of
-     * interpolator set to the [Animator] by the caller.
-     */
-    fun getDismissIconFadeOutAnimator(): ObjectAnimator =
-        AnimatedFloat { v ->
-                settledProgressDismiss = SETTLED_PROGRESS_FAST_OUT_INTERPOLATOR.getInterpolation(v)
-            }
-            .animateToValue(1f, 0f)
+        taskContainers.asSequence().map { it.iconView to it.iconTouchDelegate }
 
     private var iconFadeInOnGestureCompleteAnimator: ObjectAnimator? = null
-    // The current background requests to load the task thumbnail and icon
-    private val pendingThumbnailLoadRequests = mutableListOf<CancellableTask<*>>()
-    private val pendingIconLoadRequests = mutableListOf<CancellableTask<*>>()
     private var isClickableAsLiveTile = true
 
     init {
         setOnClickListener { _ -> onClick() }
 
         setWillNotDraw(false)
+    }
+
+    override fun onConfigurationChanged(p0: Configuration?) {
+        super.onConfigurationChanged(p0)
+        thumbnailFullscreenParams.updateCornerRadius(context)
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
@@ -744,7 +715,7 @@ constructor(
         resetPersistentViewTransforms()
 
         groupTask = null
-        viewModel?.unbind()
+        viewModel.unbind()
         attachAlpha = 1f
         splitAlpha = 1f
         splitSplashAlpha = 0f
@@ -752,9 +723,6 @@ constructor(
         modalScale = 1f
         modalPivot = null
         taskThumbnailSplashAlpha = 0f
-        // Clear any references to the thumbnail (it will be re-read either from the cache or the
-        // system on next bind)
-        onTaskListVisibilityChanged(false)
         borderEnabled = false
         hoverBorderVisible = false
         taskViewId = UNBOUND_TASK_VIEW_ID
@@ -1075,7 +1043,6 @@ constructor(
         taskOverlayFactory: TaskOverlayFactory,
     ) {
         this.groupTask = singleTask
-        cancelPendingLoadTasks()
         this.orientedState = orientedState // Needed for dependencies
         taskContainers =
             listOf(
@@ -1278,41 +1245,6 @@ constructor(
         }
     }
 
-    /**
-     * See [TaskDataChanges]
-     *
-     * @param visible If this task view will be visible to the user in overview or hidden
-     */
-    fun onTaskListVisibilityChanged(visible: Boolean) {
-        onTaskListVisibilityChanged(visible, FLAG_UPDATE_ALL)
-    }
-
-    /**
-     * See [TaskDataChanges]
-     *
-     * @param visible If this task view will be visible to the user in overview or hidden
-     */
-    // TODO does this still need to be called?
-    open fun onTaskListVisibilityChanged(visible: Boolean, @TaskDataChanges changes: Int) {
-        cancelPendingLoadTasks()
-        // These calls are no-ops if the data is already loaded, try and load the high
-        // resolution thumbnail if the state permits
-        if (needsUpdate(changes, FLAG_UPDATE_CORNER_RADIUS)) {
-            thumbnailFullscreenParams.updateCornerRadius(context)
-        }
-    }
-
-    protected open fun needsUpdate(@TaskDataChanges dataChange: Int, @TaskDataChanges flag: Int) =
-        (dataChange and flag) == flag
-
-    protected open fun cancelPendingLoadTasks() =
-        traceSection("TaskView.cancelPendingLoadTasks") {
-            pendingThumbnailLoadRequests.forEach { it.cancel() }
-            pendingThumbnailLoadRequests.clear()
-            pendingIconLoadRequests.forEach { it.cancel() }
-            pendingIconLoadRequests.clear()
-        }
-
     protected open fun setIconState(container: TaskContainer, state: TaskData?) =
         traceSection("TaskView.setIconState") {
             if (state is TaskData.Data) {
@@ -1323,17 +1255,6 @@ constructor(
                 container.iconView.setText(null)
             }
         }
-
-    protected open fun onIconLoaded(taskContainer: TaskContainer) {
-        setIcon(taskContainer.iconView, taskContainer.task.icon)
-        taskContainer.iconView.setText(taskContainer.task.title)
-        taskContainer.digitalWellBeingToast?.initialize()
-    }
-
-    protected open fun onIconUnloaded(taskContainer: TaskContainer) {
-        setIcon(taskContainer.iconView, null)
-        taskContainer.iconView.setText(null)
-    }
 
     protected fun setIcon(iconView: TaskViewIcon, icon: Drawable?) {
         with(iconView) {
@@ -2013,14 +1934,6 @@ constructor(
             Dismiss,
         }
 
-        const val FLAG_UPDATE_ICON = 1
-        const val FLAG_UPDATE_THUMBNAIL = FLAG_UPDATE_ICON shl 1
-        const val FLAG_UPDATE_CORNER_RADIUS = FLAG_UPDATE_THUMBNAIL shl 1
-        const val FLAG_UPDATE_ALL =
-            (FLAG_UPDATE_ICON or FLAG_UPDATE_THUMBNAIL or FLAG_UPDATE_CORNER_RADIUS)
-
-        /** The maximum amount that a task view can be scrimmed, dimmed or tinted. */
-        const val MAX_PAGE_SCRIM_ALPHA = 0.4f
         const val FADE_IN_ICON_DURATION: Long = 120
         private const val DIM_ANIM_DURATION: Long = 700
         private const val SETTLE_TRANSITION_THRESHOLD =
@@ -2031,16 +1944,12 @@ constructor(
                 1f - SETTLE_TRANSITION_THRESHOLD,
                 1f,
             )!!
-        private val FADE_IN_ICON_INTERPOLATOR = Interpolators.LINEAR
 
         private val SETTLED_PROGRESS: FloatProperty<TaskView> =
             KFloatProperty(TaskView::settledProgress)
 
         private val SETTLED_PROGRESS_GESTURE: FloatProperty<TaskView> =
             KFloatProperty(TaskView::settledProgressGesture)
-
-        private val SETTLED_PROGRESS_DISMISS: FloatProperty<TaskView> =
-            KFloatProperty(TaskView::settledProgressDismiss)
 
         private val SPLIT_SELECT_TRANSLATION_X: FloatProperty<TaskView> =
             KFloatProperty(TaskView::splitSelectTranslationX)

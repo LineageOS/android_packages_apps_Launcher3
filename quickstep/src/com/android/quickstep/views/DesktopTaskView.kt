@@ -464,7 +464,6 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
             }
         iconTouchDelegate = TransformingTouchDelegate(iconView.asView())
 
-        cancelPendingLoadTasks()
         val backgroundViewIndex = contentView.indexOfChild(backgroundView)
         taskContainers =
             tasks.map { task ->
@@ -528,24 +527,9 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
         updateTaskPositions()
     }
 
-    override fun onTaskListVisibilityChanged(visible: Boolean, changes: Int) {
-        super.onTaskListVisibilityChanged(visible, changes)
-        if (needsUpdate(changes, FLAG_UPDATE_CORNER_RADIUS)) {
-            contentViewFullscreenParams.updateCornerRadius(context)
-        }
-    }
-
-    override fun onIconLoaded(taskContainer: TaskContainer) {
-        // Update contentDescription of snapshotView only, individual task icon is unused.
-        taskContainer.snapshotView.contentDescription = taskContainer.task.titleDescription
-    }
-
     override fun setIconState(container: TaskContainer, state: TaskData?) {
         container.snapshotView.contentDescription = (state as? TaskData.Data)?.titleDescription
     }
-
-    // Ignoring [onIconUnloaded] as all tasks shares the same Desktop icon
-    override fun onIconUnloaded(taskContainer: TaskContainer) {}
 
     // thumbnailView is laid out differently and is handled in onMeasure
     override fun updateThumbnailSize() {}
@@ -774,6 +758,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
             cancelFetchWallpaperBackgroundJobs()
             setWallpaperBackground(true)
         }
+        contentViewFullscreenParams.updateCornerRadius(context)
     }
 
     private fun setWallpaperBackground(forceRefresh: Boolean) {

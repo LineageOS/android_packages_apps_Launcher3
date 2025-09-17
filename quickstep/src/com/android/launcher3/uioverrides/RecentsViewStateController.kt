@@ -51,7 +51,6 @@ import com.android.quickstep.views.RecentsView.TASK_SECONDARY_SPLIT_TRANSLATION
 import com.android.quickstep.views.RecentsView.TASK_SECONDARY_TRANSLATION
 import com.android.quickstep.views.RecentsView.TASK_THUMBNAIL_SPLASH_ALPHA
 import com.android.quickstep.views.RecentsViewUtils.Companion.DESK_EXPLODE_PROGRESS
-import com.android.quickstep.views.TaskView.Companion.FLAG_UPDATE_ALL
 
 /**
  * State handler for handling UI changes for [com.android.quickstep.views.LauncherRecentsView]. In
@@ -179,7 +178,7 @@ class RecentsViewStateController(private val launcher: QuickstepLauncher) :
 
         if (toState.isRecentsViewVisible) {
             // While animating into recents, update the visible task data as needed
-            builder.addOnFrameCallback { recentsView.loadVisibleTaskData(FLAG_UPDATE_ALL) }
+            builder.addOnFrameCallback { recentsView.loadVisibleTaskData() }
             recentsView.updateEmptyMessage()
         } else {
             builder.addListener(forSuccessCallback { recentsView.resetTaskVisuals() })
