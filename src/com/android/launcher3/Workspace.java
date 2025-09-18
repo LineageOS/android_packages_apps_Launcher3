@@ -1813,6 +1813,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             if (Flags.homeScreenEditImprovements()
                     && ((ItemInfo) child.getTag()).itemType == ITEM_TYPE_APPWIDGET
                     && mDragController instanceof LauncherDragController launcherDragController) {
+                dragOptions.deferDragToPreDragEnd = true;
                 dragOptions.preDragEndScale = (contentView.getMeasuredWidth()
                         + launcherDragController.getWidgetDragScalePx(
                                 null, contentView, dragObject))

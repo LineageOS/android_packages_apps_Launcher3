@@ -503,7 +503,9 @@ public abstract class DragController<T extends ActivityContext>
     }
 
     protected void handleMoveEvent(int x, int y) {
-        mDragObject.dragView.move(x, y);
+        if (!mOptions.deferDragToPreDragEnd || !mIsInPreDrag) {
+            mDragObject.dragView.move(x, y);
+        }
 
         // Check if we are hovering over the scroll areas
         mDistanceSinceScroll += Math.hypot(mLastTouch.x - x, mLastTouch.y - y);
