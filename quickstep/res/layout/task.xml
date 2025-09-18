@@ -45,11 +45,9 @@
         android:importantForAccessibility="no"
         android:src="@drawable/ic_select_windows" />
 
-    <ViewStub
+    <include
         android:id="@+id/icon"
-        android:inflatedId="@id/icon"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content" />
+        layout="@layout/icon_app_chip_view" />
 
     <include layout="@layout/task_dismiss_button" />
 

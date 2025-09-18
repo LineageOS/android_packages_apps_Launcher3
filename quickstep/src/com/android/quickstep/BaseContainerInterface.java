@@ -57,9 +57,9 @@ import com.android.launcher3.statemanager.StatefulContainer;
 import com.android.launcher3.taskbar.TaskbarInteractor;
 import com.android.launcher3.taskbar.TaskbarUiState;
 import com.android.launcher3.taskbar.TaskbarUiStateMonitor;
-import com.android.launcher3.util.ThreadedAnimator;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.ImmediateAnimator;
+import com.android.launcher3.util.ThreadedAnimator;
 import com.android.launcher3.util.WindowBounds;
 import com.android.launcher3.views.ScrimColors;
 import com.android.launcher3.views.ScrimColorsEvaluator;
@@ -391,7 +391,7 @@ public abstract class BaseContainerInterface<STATE_TYPE extends BaseState<STATE_
             calculateTaskSizeInternal(
                     context,
                     dp,
-                    dp.getOverviewProfile().getTaskThumbnailTopMarginPx(),
+                    /* claimedSpaceAbove= */0,
                     overviewActionsClaimedSpace,
                     res.getDimensionPixelSize(R.dimen.overview_minimum_next_prev_size) + taskMargin,
                     maxScale,
@@ -405,7 +405,7 @@ public abstract class BaseContainerInterface<STATE_TYPE extends BaseState<STATE_
         Resources res = context.getResources();
         float maxScale = res.getFloat(R.dimen.overview_max_scale);
         Rect gridRect = new Rect();
-        calculateGridSize(dp, context, gridRect);
+        calculateGridSize(dp, gridRect);
         calculateTaskSizeInternal(dp, gridRect, maxScale, Gravity.CENTER, outRect);
     }
 
@@ -486,14 +486,13 @@ public abstract class BaseContainerInterface<STATE_TYPE extends BaseState<STATE_
     /**
      * Calculates the overview grid size for the provided device configuration.
      */
-    public final void calculateGridSize(DeviceProfile dp, Context context, Rect outRect) {
+    public final void calculateGridSize(DeviceProfile dp, Rect outRect) {
         Rect insets = dp.getInsets();
-        int topMargin = dp.getOverviewProfile().getTaskThumbnailTopMarginPx();
         int bottomMargin = dp.getOverviewActionsClaimedSpace();
         int sideMargin = dp.getOverviewProfile().getGridSideMargin();
 
         outRect.set(0, 0, dp.getDeviceProperties().getWidthPx(), dp.getDeviceProperties().getHeightPx());
-        outRect.inset(Math.max(insets.left, sideMargin), insets.top + topMargin,
+        outRect.inset(Math.max(insets.left, sideMargin), insets.top,
                 Math.max(insets.right, sideMargin), Math.max(insets.bottom, bottomMargin));
     }
 
@@ -507,12 +506,10 @@ public abstract class BaseContainerInterface<STATE_TYPE extends BaseState<STATE_
         calculateLargeTileSize(context, dp, potentialTaskRect);
 
         float rowHeight = (potentialTaskRect.height()
-                + dp.getOverviewProfile().getTaskThumbnailTopMarginPx()
                 - dp.getOverviewProfile().getRowSpacing()) / 2f;
 
         PointF taskDimension = getTaskDimension(dp);
-        float scale = (rowHeight - dp.getOverviewProfile().getTaskThumbnailTopMarginPx())
-                / taskDimension.y;
+        float scale = rowHeight / taskDimension.y;
         int outWidth = Math.round(scale * taskDimension.x);
         int outHeight = Math.round(scale * taskDimension.y);
 

@@ -217,7 +217,6 @@ public class DeviceProfile {
                 0,
                 0,
                 0,
-                0,
                 0
         );
         hotseatProfile = new HotseatProfile(false, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -1711,8 +1710,6 @@ public class DeviceProfile {
                 getOverviewProfile().getTaskIconDrawableSizePx()));
         writer.println(prefix + pxToDpStr("overviewTaskIconDrawableSizeGridPx",
                 getOverviewProfile().getTaskIconDrawableSizeGridPx()));
-        writer.println(prefix + pxToDpStr("overviewTaskThumbnailTopMarginPx",
-                getOverviewProfile().getTaskThumbnailTopMarginPx()));
         writer.println(prefix + pxToDpStr("overviewActionsTopMarginPx",
                 getOverviewProfile().getActionsTopMarginPx()));
         writer.println(prefix + pxToDpStr("overviewActionsHeight",

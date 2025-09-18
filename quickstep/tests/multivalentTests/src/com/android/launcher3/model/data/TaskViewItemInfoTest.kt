@@ -34,10 +34,10 @@ import com.android.quickstep.TaskOverlayFactory.TaskOverlay
 import com.android.quickstep.recents.di.RecentsDependencies
 import com.android.quickstep.task.thumbnail.TaskContentView
 import com.android.quickstep.task.thumbnail.TaskThumbnailView
+import com.android.quickstep.views.IconAppChipView
 import com.android.quickstep.views.RecentsView
 import com.android.quickstep.views.TaskContainer
 import com.android.quickstep.views.TaskView
-import com.android.quickstep.views.TaskViewIcon
 import com.android.quickstep.views.TaskViewType
 import com.android.systemui.shared.recents.model.Task
 import com.android.systemui.shared.recents.model.Task.TaskKey
@@ -194,7 +194,7 @@ class TaskViewItemInfoTest {
             task,
             mock<TaskContentView>(),
             mock<TaskThumbnailView>(),
-            mock<TaskViewIcon>(),
+            mock<IconAppChipView>(),
             mock<TransformingTouchDelegate>(),
             SplitConfigurationOptions.STAGE_POSITION_UNDEFINED,
             digitalWellBeingToast = null,

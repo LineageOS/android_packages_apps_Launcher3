@@ -44,7 +44,7 @@ class TaskContainer(
     // TODO(b/409248525): Upon flag cleanup, use the `TaskContentView` type
     val taskContentView: View,
     val snapshotView: TaskThumbnailView,
-    val iconView: TaskViewIcon,
+    val iconView: IconAppChipView,
     /**
      * This technically can be a vanilla [android.view.TouchDelegate] class, however that class
      * requires setting the touch bounds at construction, so we'd repeatedly be created many

@@ -268,9 +268,7 @@ constructor(
         val splitBounds = splitBounds
         if (splitBounds == null) {
             snapshotWidth = taskView.layoutParams.width
-            snapshotHeight =
-                taskView.layoutParams.height -
-                    recentsViewContainer.deviceProfile.overviewProfile.taskThumbnailTopMarginPx
+            snapshotHeight = taskView.layoutParams.height
         } else {
             val groupedTaskSize =
                 taskView.pagedOrientationHandler.getGroupedTaskViewSizes(
@@ -305,7 +303,6 @@ constructor(
                 taskView.layoutParams.height,
                 splitBounds,
                 recentsViewContainer.deviceProfile,
-                taskView.taskContentViews,
                 task.key.id,
                 this,
             )

@@ -16,8 +16,4 @@
 
 package com.android.launcher3.util
 
-import com.android.launcher3.Flags
-
-object OverviewReleaseFlags {
-    @JvmStatic fun enableOverviewIconMenu() = Flags.enableOverviewIconMenu()
-}
+object OverviewReleaseFlags
