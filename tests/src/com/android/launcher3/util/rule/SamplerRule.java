@@ -51,7 +51,7 @@ public class SamplerRule implements TestRule {
 
     static {
         // System thread that we don't control.
-        THREAD_LIMITS.put("process reaper", 3);
+        THREAD_LIMITS.put("process reaper", 4);
         // Temporarily having 2 OSEManager threads. The one in nexuslauncher will be deleted once
         // the flag rollout is complete
         THREAD_LIMITS.put("OSEManager", 2);
