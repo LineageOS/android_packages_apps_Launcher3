@@ -1172,16 +1172,19 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                 int qsbTop = (bottom - top - deviceProfile.getHotseatProfile().getQsbHeight()) / 2;
                 int qsbBottom = qsbTop + deviceProfile.getHotseatProfile().getQsbHeight();
                 child.layout(qsbStart, qsbTop, qsbEnd, qsbBottom);
+            } else if (child == mAllAppsButtonContainer) {
+                iconEnd -= mItemMarginLeftRight;
+                int iconStart = iconEnd - mAllAppsButtonContainer.getSpaceNeeded();
+                child.layout(iconStart, mIconLayoutBounds.top, iconEnd, mIconLayoutBounds.bottom);
+                iconEnd = iconStart - mItemMarginLeftRight;
             } else if (child == mTaskbarDividerContainer) {
                 iconEnd += mItemMarginLeftRight;
-                int iconStart = iconEnd - mIconTouchSize;
+                int iconStart = iconEnd - mTaskbarDividerContainer.getSpaceNeeded();
                 child.layout(iconStart, mIconLayoutBounds.top, iconEnd, mIconLayoutBounds.bottom);
                 iconEnd = iconStart + mItemMarginLeftRight;
             } else if (child instanceof TaskbarIconsContainer tic) {
                 iconEnd -= mItemMarginLeftRight;
-                int numItems = tic.getChildCount();
-                int iconStart = iconEnd - (mIconTouchSize * numItems)
-                        - (2 * (mItemMarginLeftRight * (numItems - 1)));
+                int iconStart = iconEnd - tic.getSpaceNeeded();
                 child.layout(iconStart, mIconLayoutBounds.top, iconEnd, mIconLayoutBounds.bottom);
                 iconEnd = iconStart - mItemMarginLeftRight;
             } else {

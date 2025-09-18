@@ -30,6 +30,7 @@ import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
 import static com.android.launcher3.LauncherAnimUtils.VIEW_ALPHA;
 import static com.android.launcher3.LauncherAnimUtils.VIEW_TRANSLATE_X;
 import static com.android.launcher3.LauncherAnimUtils.VIEW_TRANSLATE_Y;
+import static com.android.launcher3.Utilities.dpToPx;
 import static com.android.launcher3.Utilities.mapRange;
 import static com.android.launcher3.anim.AnimatedFloat.VALUE;
 import static com.android.launcher3.anim.AnimatorListeners.forEndCallback;
@@ -87,6 +88,7 @@ import com.android.launcher3.taskbar.bubbles.BubbleBarController;
 import com.android.launcher3.taskbar.bubbles.BubbleControllers;
 import com.android.launcher3.taskbar.customization.TaskbarAllAppsButtonContainer;
 import com.android.launcher3.taskbar.customization.TaskbarDividerContainer;
+import com.android.launcher3.taskbar.customization.TaskbarIconSpecs;
 import com.android.launcher3.taskbar.customization.TaskbarIconsContainer;
 import com.android.launcher3.taskbar.handoff.HandoffSuggestion;
 import com.android.launcher3.util.ItemInfoMatcher;
@@ -647,7 +649,11 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         float left = iconViews[0].getX();
 
         int rightIndex = iconViews.length - 1;
-        float right = iconViews[rightIndex].getRight() + iconViews[rightIndex].getTranslationX();
+        int[] location = new int[2];
+        iconViews[rightIndex].getLocationOnScreen(location);
+        int width = iconViews[rightIndex].getWidth();
+        int absoluteRight = location[0] + width;
+        float right = absoluteRight + iconViews[rightIndex].getTranslationX();
 
         return right - left + (2 * mTaskbarLeftRightMargin);
     }
@@ -722,6 +728,8 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         float scale = mTaskbarIconTranslationYForPinning.value;
         float taskbarIconTranslationYForPinningValue;
 
+        int transientIconSize = dpToPx(TaskbarIconSpecs.INSTANCE.getIconSize52dp().getSize());
+
         // transY is calculated here by adding/subtracting the taskbar bottom margin
         // aligning the icon bound to be at bottom of current taskbar view and then
         // finally placing the icon in the middle of new taskbar background height.
@@ -730,14 +738,14 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
                     + (mTransientTaskbarProfile.getHeight()
                         - mTaskbarView.getTransientTaskbarIconLayoutBounds().bottom)
                             - (mPersistentTaskbarProfile.getHeight()
-                            - mTransientTaskbarProfile.getIconSize()) / 2f;
+                            - transientIconSize) / 2f;
             taskbarIconTranslationYForPinningValue = mapRange(scale, 0f, transY);
         } else {
             float transY = -mTransientTaskbarProfile.getBottomMargin()
                     + (mPersistentTaskbarProfile.getHeight()
                         - mTaskbarView.getTransientTaskbarIconLayoutBounds().bottom)
                             - (mTransientTaskbarProfile.getHeight()
-                            - mTransientTaskbarProfile.getIconSize())
+                            - transientIconSize)
                             / 2f;
             taskbarIconTranslationYForPinningValue = mapRange(scale, transY, 0f);
         }
