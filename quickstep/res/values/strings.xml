@@ -289,6 +289,8 @@
     <string name="taskbar_edu_a11y_title">Taskbar education</string>
     <!-- Text in dialog that lets a user know how they can use the Taskbar to use multiple apps at once on their device. [CHAR_LIMIT=60] -->
     <string name="taskbar_edu_splitscreen">Drag an app to the side to use 2 apps at once</string>
+    <!-- Text in dialog that lets a user know how they can use the Taskbar to create application bubble. [CHAR_LIMIT=60] -->
+    <string name="taskbar_edu_bubbles">Drag to the bottom corners to make it float</string>
     <!-- Text in dialog that lets a user know how they can show the Taskbar on their device. [CHAR_LIMIT=60] -->
     <string name="taskbar_edu_stashing">Slow-swipe up to show the Taskbar</string>
     <!-- Text in dialog that lets a user know how the Taskbar suggests apps based on their usage. [CHAR_LIMIT=60] -->
