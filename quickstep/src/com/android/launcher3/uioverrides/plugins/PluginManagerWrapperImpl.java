@@ -58,20 +58,20 @@ public class PluginManagerWrapperImpl extends PluginManagerWrapper {
     public PluginManagerWrapperImpl(@ApplicationContext Context c, LauncherPrefs launcherPrefs) {
         mContext = c;
         mPluginEnabler = new PluginEnablerImpl(launcherPrefs);
+        PluginPrefs pluginPrefs = new PluginPrefs(c);
         PluginManager.Config pluginConfig = new PluginManager.Config(Collections.emptyList());
         PluginInstance.Factory instanceFactory = new PluginInstance.Factory(
-                new VersionCheckerImpl(), getClass().getClassLoader(),
-                pluginConfig);
+                new VersionCheckerImpl(), getClass().getClassLoader(), pluginConfig);
         PluginActionManager.Factory instanceManagerFactory = new PluginActionManager.Factory(
                 c, c.getPackageManager(), c.getMainExecutor(), MODEL_EXECUTOR,
                 c.getSystemService(NotificationManager.class), mPluginEnabler,
-                pluginConfig, instanceFactory);
+                pluginConfig, instanceFactory, pluginPrefs);
 
         // Use null preHandlerManager, as the handler is never unregistered which can cause leaks
         // when using multiple dagger graphs.
         mPluginManager = new PluginManagerImpl(c, instanceManagerFactory,
                 null /* preHandlerManager */, mPluginEnabler,
-                new PluginPrefs(c), pluginConfig);
+                pluginPrefs, pluginConfig);
     }
 
     public PluginEnablerImpl getPluginEnabler() {
