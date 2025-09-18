@@ -64,7 +64,6 @@ import com.android.launcher3.util.DaggerSingletonTracker;
 import com.android.launcher3.util.Executors;
 import com.android.launcher3.util.Preconditions;
 import com.android.launcher3.util.RunnableList;
-import com.android.systemui.shared.Flags;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
@@ -184,42 +183,36 @@ public class GridCustomizationsProxy implements ProxyProvider {
 
         switch (path) {
             case KEY_SHAPE_OPTIONS: {
-                if (Flags.newCustomizationPickerUi()) {
-                    MatrixCursor cursor = new MatrixCursor(new String[]{
-                            KEY_SHAPE_KEY, KEY_SHAPE_TITLE, KEY_PATH, KEY_IS_DEFAULT});
-                    final String currentShape = mPrefs.get(PREF_ICON_SHAPE);
-                    IconShapeModel[] availableShapes = ShapesProvider.INSTANCE.getIconShapes();
+                MatrixCursor cursor = new MatrixCursor(new String[]{
+                        KEY_SHAPE_KEY, KEY_SHAPE_TITLE, KEY_PATH, KEY_IS_DEFAULT});
+                final String currentShape = mPrefs.get(PREF_ICON_SHAPE);
+                IconShapeModel[] availableShapes = ShapesProvider.INSTANCE.getIconShapes();
 
-                    if (availableShapes.length == 0) {
-                        // This is unexpected as we should always provide at least 1 default shape.
-                        Log.e(TAG, "query: No icon shape options are available"
-                                + ", returning null.");
-                        return null;
-                    } else {
-                        Log.d(TAG, "query: Found " + availableShapes.length
-                                + " available shape options");
-                    }
-
-                    // Assign first available shape as default if current shape doesn't exist.
-                    boolean doesCurrentShapeExist = Arrays.stream(availableShapes)
-                            .anyMatch(shape -> shape.getKey().equals(currentShape));
-                    String selectedShape = !TextUtils.isEmpty(currentShape) && doesCurrentShapeExist
-                            ? currentShape
-                            : availableShapes[0].getKey();
-
-                    for (IconShapeModel shape : availableShapes) {
-                        cursor.newRow()
-                                .add(KEY_SHAPE_KEY, shape.getKey())
-                                .add(KEY_SHAPE_TITLE, mContext.getString(shape.getTitleId()))
-                                .add(KEY_PATH, shape.getPathString())
-                                .add(KEY_IS_DEFAULT, shape.getKey().equals(selectedShape));
-                    }
-                    return cursor;
-                } else  {
-                    Log.w(TAG, "query: Shape options queried outside of flag"
+                if (availableShapes.length == 0) {
+                    // This is unexpected as we should always provide at least 1 default shape.
+                    Log.e(TAG, "query: No icon shape options are available"
                             + ", returning null.");
                     return null;
+                } else {
+                    Log.d(TAG, "query: Found " + availableShapes.length
+                            + " available shape options");
                 }
+
+                // Assign first available shape as default if current shape doesn't exist.
+                boolean doesCurrentShapeExist = Arrays.stream(availableShapes)
+                        .anyMatch(shape -> shape.getKey().equals(currentShape));
+                String selectedShape = !TextUtils.isEmpty(currentShape) && doesCurrentShapeExist
+                        ? currentShape
+                        : availableShapes[0].getKey();
+
+                for (IconShapeModel shape : availableShapes) {
+                    cursor.newRow()
+                            .add(KEY_SHAPE_KEY, shape.getKey())
+                            .add(KEY_SHAPE_TITLE, mContext.getString(shape.getTitleId()))
+                            .add(KEY_PATH, shape.getPathString())
+                            .add(KEY_IS_DEFAULT, shape.getKey().equals(selectedShape));
+                }
+                return cursor;
             }
             case KEY_LIST_OPTIONS: {
                 MatrixCursor cursor = new MatrixCursor(new String[]{
@@ -300,7 +293,7 @@ public class GridCustomizationsProxy implements ProxyProvider {
                 mIdp.setCurrentGrid(gridName);
 
                 LauncherModel launcherModel = LauncherAppState.getInstance(mContext).getModel();
-                if (Flags.newCustomizationPickerUi() && launcherModel.isActive()) {
+                if (launcherModel.isActive()) {
                     try {
                         // Wait for device profile to be fully reloaded and applied to the launcher
                         loadModelSync(launcherModel);
@@ -311,10 +304,8 @@ public class GridCustomizationsProxy implements ProxyProvider {
                 return 1;
             }
             case SET_SHAPE:
-                if (Flags.newCustomizationPickerUi()) {
-                    mPrefs.put(PREF_ICON_SHAPE,
-                            requireNonNullElse(values.getAsString(KEY_SHAPE_KEY), ""));
-                }
+                mPrefs.put(PREF_ICON_SHAPE,
+                        requireNonNullElse(values.getAsString(KEY_SHAPE_KEY), ""));
                 return UPDATE_SETTING_SUCCESS;
             case ICON_THEMED:
             case SET_ICON_THEMED: {
