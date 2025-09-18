@@ -820,7 +820,8 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         when (action) {
             MotionEvent.ACTION_DOWN -> return handleTouchDown(ev)
             MotionEvent.ACTION_MOVE -> {
-                closePopupIfOpen()
+                // We want to close any open popups when resizing a widget.
+                getOpen(launcher)?.close(/* animate= */ true)
                 visualizeResizeForDelta(deltaX = x - xDown, deltaY = y - yDown)
             }
 
@@ -849,15 +850,18 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
             if (shouldIgnoreTouch()) {
                 return false
             }
-            // We want to close any open popup if we're not dragging and the touch event is outside
-            // this frame.
-            closePopupIfOpen()
+            // We want to close any open popup and close the resize frame if we're not dragging and
+            // the touch event is outside this frame. We want to make sure we consume the event.
+            val popup = getOpen(launcher)
+            if (popup != null) {
+                popup.close(true)
+                close(/* animate= */ false)
+                return true
+            }
         }
         close(/* animate= */ false)
         return false
     }
-
-    private fun closePopupIfOpen() = getOpen(launcher)?.close(/* animate= */ true)
 
     // When dragging we should ignore touch.
     private fun shouldIgnoreTouch(): Boolean = launcher.dragController.isDragging
