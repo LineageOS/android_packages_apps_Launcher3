@@ -103,10 +103,12 @@ import com.android.systemui.shared.recents.model.Task;
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 /**
  * Handles properties/data collection, then passes the results to TaskbarView to render.
@@ -255,7 +257,8 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         mTaskbarLeftRightMargin = mActivity.getResources().getDimensionPixelSize(
                 R.dimen.transient_taskbar_padding);
         mRunningStateController = new TaskbarRunningAppStateAnimationController(mActivity);
-        mOverflownAppsContainerController = new OverflownAppsContainerController(mActivity);
+        mOverflownAppsContainerController = new OverflownAppsContainerController(mActivity,
+                mRunningStateController);
     }
 
     /**
@@ -796,13 +799,12 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
      * and minimized tasks.
      */
     public void updateIconViewsRunningStates() {
-        for (View iconView : getIconViews()) {
-            if (iconView instanceof BubbleTextView btv) {
-                updateRunningState(btv);
-                if (shouldUpdateIconContentDescription(btv)) {
-                    btv.setContentDescription(
-                            btv.getContentDescription() + " " + btv.getIconStateDescription());
-                }
+        for (BubbleTextView iconView : getAllAppIcons()) {
+            updateRunningState(iconView);
+            if (shouldUpdateIconContentDescription(iconView)) {
+                iconView.setContentDescription(
+                        iconView.getContentDescription() + " "
+                                + iconView.getIconStateDescription());
             }
         }
     }
@@ -826,16 +828,27 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         }
 
         Set<Integer> shownTasks = new HashSet<>();
-        for (View iconView : getIconViews()) {
-            if (iconView instanceof BubbleTextView btv) {
-                if (btv.getTag() instanceof TaskItemInfo itemInfo) {
-                    shownTasks.add(itemInfo.getTaskId());
-                } else if (btv.getTag() instanceof SingleTask task) {
-                    shownTasks.add(task.getTask().getKey().id);
-                }
+        for (BubbleTextView iconView : getAllAppIcons()) {
+            if (iconView.getTag() instanceof TaskItemInfo itemInfo) {
+                shownTasks.add(itemInfo.getTaskId());
+            } else if (iconView.getTag() instanceof SingleTask task) {
+                shownTasks.add(task.getTask().getKey().id);
             }
         }
         return shownTasks;
+    }
+
+    /**
+     * Returns all app icons that are currently in the taskbar, including the icons in TaskbarView
+     * and the icons in overflown container if it is opened.
+     */
+    private BubbleTextView[] getAllAppIcons() {
+        Stream<BubbleTextView> taskbarIcons = Arrays.stream(mTaskbarView.getIconViews()).filter(
+                v -> v instanceof BubbleTextView).map(v -> (BubbleTextView) v);
+        Stream<BubbleTextView> overflownIcons =
+                mOverflownAppsContainerController.getOverflownApps().stream();
+
+        return Stream.concat(taskbarIcons, overflownIcons).toArray(BubbleTextView[]::new);
     }
 
     private void updateRunningState(BubbleTextView btv) {

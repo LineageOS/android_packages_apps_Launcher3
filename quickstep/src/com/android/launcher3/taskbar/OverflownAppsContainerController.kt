@@ -16,15 +16,21 @@
  */
 package com.android.launcher3.taskbar
 
+import com.android.launcher3.BubbleTextView
 import com.android.launcher3.model.data.ItemInfo
 
 /**
  * Controller of the container that contains the overflown pinned apps which don't fit in the main
  * taskbar. This is activated by toggling the overflow icon on the taskbar.
  */
-class OverflownAppsContainerController(private val activityContext: TaskbarActivityContext) {
+class OverflownAppsContainerController(
+    private val activityContext: TaskbarActivityContext,
+    private val runningAppStateController: TaskbarRunningAppStateAnimationController,
+) {
     private var overflownAppsViewController: OverflownAppsViewController? = null
     private lateinit var viewCallbacks: TaskbarViewCallbacks
+    val overflownApps: List<BubbleTextView>
+        get() = overflownAppsViewController?.overflownApps ?: emptyList()
 
     fun init(callbacks: TaskbarViewCallbacks) {
         viewCallbacks = callbacks
@@ -40,7 +46,12 @@ class OverflownAppsContainerController(private val activityContext: TaskbarActiv
         }
 
         overflownAppsViewController =
-            OverflownAppsViewController(activityContext, viewCallbacks, overflowIcon) {
+            OverflownAppsViewController(
+                activityContext,
+                runningAppStateController,
+                viewCallbacks,
+                overflowIcon,
+            ) {
                 overflownAppsViewController = null
                 onClosed.run()
             }
