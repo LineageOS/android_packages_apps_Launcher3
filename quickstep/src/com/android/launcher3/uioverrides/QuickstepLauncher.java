@@ -538,7 +538,11 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
                 || container == CONTAINER_ALL_APPS_PREDICTION)) {
             int maxPinnableCount =
                     mTaskbarInteractor != null ? mTaskbarInteractor.getMaxPinnableCount() : -1;
-            shortcuts.add(0, getPinShortcutFactoryFromLauncher(maxPinnableCount));
+            boolean supportPinAppsOverflow =
+                    mTaskbarInteractor != null
+                            && mTaskbarInteractor.getSupportsPinnedAppsOverflow();
+            shortcuts.add(
+                    0, getPinShortcutFactoryFromLauncher(maxPinnableCount, supportPinAppsOverflow));
         }
 
         shortcuts.addAll(getSplitShortcuts());

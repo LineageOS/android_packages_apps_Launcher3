@@ -179,7 +179,7 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
             }
         }
 
-        if (mTaskbarInfoList.size()
+        if (canPinAppsOverflow() || mTaskbarInfoList.size()
                 < mContext.getTaskbarSpecsEvaluator().getMaxPinnableCount()) {
             return new PinToTaskbarShortcut<>(target, itemInfo, originalView, true,
                     maxPinnableCount, mTaskbarInfoList);
