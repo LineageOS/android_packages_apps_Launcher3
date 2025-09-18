@@ -254,7 +254,7 @@ public class SplitSelectStateController {
 
     /**
      * Given a list of task keys, searches through active Tasks in RecentsModel to find the last
-     * active instances of these tasks. Returns an empty array if there is no such running task.
+     * active instances of these tasks.
      *
      * @param resolvedTargetInfos The list of the target Activity if one is
      *                                             explicitly set. Otherwise, the ComponentKey of
@@ -454,7 +454,8 @@ public class SplitSelectStateController {
      * @param intent The second intent that will be launched.
      * @param user The user of that intent.
      */
-    public void setSecondTask(Intent intent, UserHandle user, ItemInfo itemInfo) {
+    public void setSecondTask(
+            @NonNull Intent intent, @NonNull UserHandle user, @NonNull ItemInfo itemInfo) {
         mSplitSelectDataHolder.setSecondTask(intent, user, itemInfo);
     }
 

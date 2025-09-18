@@ -53,18 +53,20 @@ public class FallbackTaskbarUIController
 
     private final T mRecentsContainer;
 
+    private @Nullable RecentsViewInteractor mRecentsViewInteractor;
+
     private final StateManager.StateListener<RecentsState> mStateListener =
             new StateManager.StateListener<RecentsState>() {
                 @Override
                 public void onStateTransitionStart(RecentsState toState) {
                     animateToRecentsState(toState);
 
-                    RecentsView recentsView = getRecentsView();
-                    if (recentsView == null) {
+                    RecentsViewInteractor recentsViewInteractor = getRecentsViewInteractor();
+                    if (recentsViewInteractor == null) {
                         return;
                     }
                     // Handle tapping on live tile.
-                    recentsView.setTaskLaunchListener(toState == RecentsState.DEFAULT
+                    recentsViewInteractor.setTaskLaunchListener(toState == RecentsState.DEFAULT
                             ? (() -> animateToRecentsState(RecentsState.BACKGROUND_APP)) : null);
                 }
 
@@ -149,8 +151,19 @@ public class FallbackTaskbarUIController
     }
 
     @Override
-    public @Nullable RecentsView getRecentsView() {
-        return mRecentsContainer.getOverviewPanel();
+    public @Nullable RecentsViewInteractor getRecentsViewInteractor() {
+        RecentsView recentsView = mRecentsContainer.getOverviewPanel();
+        if (recentsView == null) {
+            mRecentsViewInteractor = null;
+            return null;
+        }
+
+        if (mRecentsViewInteractor == null
+                || !mRecentsViewInteractor.hasSameRecentsView(recentsView)) {
+            mRecentsViewInteractor = new RecentsViewInteractor(recentsView);
+        }
+
+        return mRecentsViewInteractor;
     }
 
     @Override
