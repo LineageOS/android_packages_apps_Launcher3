@@ -93,7 +93,7 @@ class SplitAnimationControllerTest {
         whenever(mockTaskContainer.thumbnail).thenReturn(mockBitmap)
         whenever(mockTaskContainer.iconView).thenReturn(mockIconView)
         whenever(mockTaskContainer.task).thenReturn(mockTask)
-        whenever(mockIconView.drawable).thenReturn(mockTaskViewDrawable)
+        whenever(mockIconView.getDrawable()).thenReturn(mockTaskViewDrawable)
         whenever(mockTaskView.taskContainers).thenReturn(List(1) { mockTaskContainer })
         whenever(mockTaskView.firstTaskContainer).thenReturn(mockTaskContainer)
 
@@ -105,13 +105,13 @@ class SplitAnimationControllerTest {
     }
 
     @Test
-    fun getFirstAnimInitViews_nullTaskViewIcon_useSplitSourceIcon() {
+    fun getFirstAnimInitViews_nullAppChip_useSplitSourceIcon() {
         // Hit fullscreen task dismissal state
         whenever(mockSplitSelectStateController.isAnimateCurrentTaskDismissal).thenReturn(true)
         whenever(mockSplitSelectStateController.isDismissingFromSplitPair).thenReturn(false)
 
         // Missing taskView icon
-        whenever(mockIconView.drawable).thenReturn(null)
+        whenever(mockIconView.getDrawable()).thenReturn(null)
 
         val splitAnimInitProps: SplitAnimationController.Companion.SplitAnimInitProps =
             splitAnimationController.getFirstAnimInitViews({ mockTaskView }, { splitSelectSource })
@@ -124,7 +124,7 @@ class SplitAnimationControllerTest {
     }
 
     @Test
-    fun getFirstAnimInitViews_validTaskViewIcon_useTaskViewIcon() {
+    fun getFirstAnimInitViews_validAppChip_useAppChip() {
         // Hit fullscreen task dismissal state
         whenever(mockSplitSelectStateController.isAnimateCurrentTaskDismissal).thenReturn(true)
         whenever(mockSplitSelectStateController.isDismissingFromSplitPair).thenReturn(false)
@@ -140,7 +140,7 @@ class SplitAnimationControllerTest {
     }
 
     @Test
-    fun getFirstAnimInitViews_validTaskViewNullSplitSource_useTaskViewIcon() {
+    fun getFirstAnimInitViews_validTaskViewNullSplitSource_useAppChip() {
         // Hit fullscreen task dismissal state
         whenever(mockSplitSelectStateController.isAnimateCurrentTaskDismissal).thenReturn(true)
         whenever(mockSplitSelectStateController.isDismissingFromSplitPair).thenReturn(false)
@@ -181,7 +181,7 @@ class SplitAnimationControllerTest {
         whenever(mockSplitSelectStateController.isDismissingFromSplitPair).thenReturn(true)
 
         // Remove icon view from GroupedTaskView
-        whenever(mockIconView.drawable).thenReturn(null)
+        whenever(mockIconView.getDrawable()).thenReturn(null)
 
         whenever(mockTaskContainer.task).thenReturn(mockTask)
         whenever(mockTaskContainer.iconView).thenReturn(mockIconView)

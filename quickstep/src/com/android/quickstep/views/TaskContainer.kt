@@ -124,7 +124,7 @@ class TaskContainer(
         }
 
     fun addChildForAccessibility(outChildren: ArrayList<View>) {
-        addAccessibleChildToList(iconView.asView(), outChildren)
+        addAccessibleChildToList(iconView, outChildren)
         addAccessibleChildToList(
             if (enableRefactorTaskContentView()) taskContentView else snapshotView,
             outChildren,

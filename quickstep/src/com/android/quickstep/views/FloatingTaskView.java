@@ -324,7 +324,7 @@ public class FloatingTaskView extends FrameLayout {
 
             // Fade in the placeholder view during Normal > OverviewSplitSelect
             if (mSplitPlaceholderView.getAlpha() == 0) {
-                mSplitPlaceholderView.getIconView().setContentAlpha(0);
+                mSplitPlaceholderView.getIconView().setAlpha(0);
                 fadeInSplitPlaceholder(animation, timings);
             }
 
