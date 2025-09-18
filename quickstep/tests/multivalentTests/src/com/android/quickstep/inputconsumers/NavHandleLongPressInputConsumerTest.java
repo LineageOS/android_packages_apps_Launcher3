@@ -37,8 +37,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -72,10 +72,12 @@ import dagger.Component;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -92,6 +94,9 @@ public class NavHandleLongPressInputConsumerTest {
     private SandboxContext mContext;
     private float mScreenWidth;
     private long mDownTimeMs;
+
+    @Rule
+    public MockitoRule mockitoRule = MockitoJUnit.rule();
     @Mock InputConsumer mDelegate;
     @Mock InputMonitorCompat mInputMonitor;
     @Mock RecentsAnimationDeviceState mDeviceState;
@@ -106,7 +111,6 @@ public class NavHandleLongPressInputConsumerTest {
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
         when(mTopTaskTracker.getCachedTopTask(anyBoolean(), anyInt())).thenReturn(mTaskInfo);
         when(mDeviceState.getSquaredTouchSlop()).thenReturn(SQUARED_TOUCH_SLOP);
         when(mDelegate.allowInterceptByParent()).thenReturn(true);
