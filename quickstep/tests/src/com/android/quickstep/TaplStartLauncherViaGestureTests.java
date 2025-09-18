@@ -21,7 +21,6 @@ import android.util.Log;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.launcher3.util.rule.ScreenRecordRule;
 import com.android.quickstep.NavigationModeSwitchRule.NavigationModeSwitch;
 
 import org.junit.Before;
@@ -69,7 +68,6 @@ public class TaplStartLauncherViaGestureTests extends AbstractQuickStepTest {
 
     @Test
     @NavigationModeSwitch(mode = NavigationModeSwitchRule.Mode.ZERO_BUTTON)
-    @ScreenRecordRule.ScreenRecord // b/417727096
     public void testStressSwipeToOverview() {
         runTest(TestCase.TO_OVERVIEW);
     }
