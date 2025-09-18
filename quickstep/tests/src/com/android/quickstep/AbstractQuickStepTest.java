@@ -30,7 +30,6 @@ import com.android.launcher3.tapl.LaunchedAppState;
 import com.android.launcher3.tapl.TestHelpers;
 import com.android.launcher3.uioverrides.QuickstepLauncher;
 import com.android.launcher3.util.TestUtil;
-import com.android.launcher3.util.Wait;
 import com.android.launcher3.util.ui.AbstractLauncherUiTest;
 import com.android.quickstep.views.RecentsView;
 import com.android.quickstep.window.RecentsWindowFlags;
@@ -90,7 +89,7 @@ public abstract class AbstractQuickStepTest
             String message, Function<RecentsWindowManager, Boolean> condition, long timeout) {
         verifyKeyguardInvisible();
         if (!TestHelpers.isInLauncherProcess()) return;
-        Wait.atMost(message, () -> getFromRecentsWindow(condition), mLauncher, timeout);
+        mLauncher.waitForCondition(message, timeout, () -> getFromRecentsWindow(condition));
     }
 
     protected <T> T getFromRecentsWindowIfPresent(Function<RecentsWindowManager, T> f) {

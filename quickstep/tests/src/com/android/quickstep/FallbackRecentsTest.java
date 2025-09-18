@@ -58,7 +58,6 @@ import com.android.launcher3.tapl.OverviewTask;
 import com.android.launcher3.tapl.TestHelpers;
 import com.android.launcher3.testcomponent.TestCommandReceiver;
 import com.android.launcher3.util.TestUtil;
-import com.android.launcher3.util.Wait;
 import com.android.launcher3.util.rule.FailureWatcher;
 import com.android.launcher3.util.rule.SamplerRule;
 import com.android.launcher3.util.rule.ScreenRecordRule;
@@ -224,17 +223,20 @@ public class FallbackRecentsTest {
     protected <T> T getFromRecents(Function<RecentsViewContainer, T> f) {
         if (!TestHelpers.isInLauncherProcess()) return null;
         Object[] result = new Object[1];
-        Wait.atMost("Failed to get from recents", () -> MAIN_EXECUTOR.submit(() -> {
-            RecentsViewContainer recentsViewContainer =
-                    RecentsWindowFlags.enableFallbackOverviewInWindow.isTrue()
-                            ? getRecentsWindowManager()
-                            : RecentsActivity.ACTIVITY_TRACKER.getCreatedContext();
-            if (recentsViewContainer == null) {
-                return false;
-            }
-            result[0] = f.apply(recentsViewContainer);
-            return true;
-        }).get(), mLauncher);
+        mLauncher.waitForCondition(
+                "Failed to get from recents",
+                TestUtil.DEFAULT_UI_TIMEOUT,
+                () -> MAIN_EXECUTOR.submit(() -> {
+                    RecentsViewContainer recentsViewContainer =
+                            RecentsWindowFlags.enableFallbackOverviewInWindow.isTrue()
+                                    ? getRecentsWindowManager()
+                                    : RecentsActivity.ACTIVITY_TRACKER.getCreatedContext();
+                    if (recentsViewContainer == null) {
+                        return false;
+                    }
+                    result[0] = f.apply(recentsViewContainer);
+                    return true;
+                }).get());
         return (T) result[0];
     }
 
@@ -268,9 +270,8 @@ public class FallbackRecentsTest {
             throw new RuntimeException(e);
         }
 
-        Wait.atMost("Recents view container didn't close",
-                () -> getFromRecents(recents -> !recents.isStarted()),
-                mLauncher);
+        mLauncher.waitForCondition("Recents view container didn't close",
+                TestUtil.DEFAULT_UI_TIMEOUT, () -> getFromRecents(recents -> !recents.isStarted()));
     }
 
     @Test
@@ -279,9 +280,8 @@ public class FallbackRecentsTest {
         startAppFast(resolveSystemApp(Intent.CATEGORY_APP_CALCULATOR));
         startTestActivity(2);
         waitForRecentsClosed();
-        Wait.atMost("Expected three apps in the task list",
-                () -> mLauncher.getRecentTasks().size() >= 3,
-                mLauncher);
+        mLauncher.waitForCondition("Expected three apps in the task list",
+                TestUtil.DEFAULT_UI_TIMEOUT, () -> mLauncher.getRecentTasks().size() >= 3);
 
         checkTestLauncher();
         BaseOverview overview = mLauncher.getLaunchedAppState().switchToOverview();

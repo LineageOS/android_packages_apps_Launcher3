@@ -34,7 +34,7 @@ import androidx.test.uiautomator.UiDevice;
 import com.android.launcher3.tapl.LauncherInstrumentation;
 import com.android.launcher3.tapl.TestHelpers;
 import com.android.launcher3.util.DisplayController;
-import com.android.launcher3.util.Wait;
+import com.android.launcher3.util.TestUtil;
 import com.android.launcher3.util.rule.FailureWatcher;
 import com.android.launcher3.util.ui.AbstractLauncherUiTest;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -179,14 +179,13 @@ public class NavigationModeSwitchRule implements TestRule {
 
         }
 
-        Wait.atMost("Couldn't switch to " + overlayPackage,
-                () -> launcher.getNavigationModel() == expectedMode,
-                launcher);
+        launcher.waitForCondition("Couldn't switch to " + overlayPackage,
+                TestUtil.DEFAULT_UI_TIMEOUT, () -> launcher.getNavigationModel() == expectedMode);
 
-        Wait.atMost(() -> "Switching nav mode: "
-                        + launcher.getNavigationModeMismatchError(false),
-                () -> launcher.getNavigationModeMismatchError(false) == null,
-                launcher);
+        launcher.waitForCondition(
+                () -> "Switching nav mode: " + launcher.getNavigationModeMismatchError(false),
+                TestUtil.DEFAULT_UI_TIMEOUT,
+                () -> launcher.getNavigationModeMismatchError(false) == null);
         AbstractLauncherUiTest.checkDetectedLeaks(launcher);
         return true;
     }

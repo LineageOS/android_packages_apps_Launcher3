@@ -56,7 +56,6 @@ import com.android.launcher3.tapl.HomeAppIcon;
 import com.android.launcher3.tapl.LauncherInstrumentation;
 import com.android.launcher3.tapl.TestHelpers;
 import com.android.launcher3.util.TestUtil;
-import com.android.launcher3.util.Wait;
 import com.android.launcher3.util.rule.FailureWatcher;
 import com.android.launcher3.util.rule.SamplerRule;
 import com.android.launcher3.util.rule.ScreenRecordRule;
@@ -122,12 +121,12 @@ public abstract class BaseLauncherTaplTest {
         if (sUiSurfaceLeakReported) return;
 
         // Check whether activity leak detector has found leaked activities.
-        Wait.atMost(() -> getUiSurfaceLeakErrorMessage(launcher),
-                () -> {
+        launcher.waitForCondition(() -> getUiSurfaceLeakErrorMessage(launcher),
+                DEFAULT_UI_TIMEOUT, () -> {
                     launcher.forceGc();
                     return MAIN_EXECUTOR.submit(
                             () -> launcher.noLeakedUiSurfaces()).get();
-                }, launcher, DEFAULT_UI_TIMEOUT);
+                });
     }
 
     public static String getAppPackageName() {
@@ -463,9 +462,10 @@ public abstract class BaseLauncherTaplTest {
 
         // Wait for the Launcher to stop.
         final LauncherInstrumentation launcherInstrumentation = new LauncherInstrumentation();
-        Wait.atMost("Launcher activity didn't stop",
-                () -> !launcherInstrumentation.isLauncherActivityStarted(),
-                launcherInstrumentation, DEFAULT_ACTIVITY_TIMEOUT);
+        launcherInstrumentation.waitForCondition(
+                "Launcher activity didn't stop",
+                DEFAULT_ACTIVITY_TIMEOUT,
+                () -> !launcherInstrumentation.isLauncherActivityStarted());
     }
 
     public static ActivityInfo resolveSystemAppInfo(String category) {
