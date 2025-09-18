@@ -36,8 +36,8 @@ object FloatingIconViewHelper {
     fun getFloatingIconView(
         launcher: QuickstepLauncher,
         originalView: View,
-        visibilitySyncView: AsyncView?,
-        fadeOutView: AsyncView?,
+        visibilitySyncView: AsyncView<View>?,
+        fadeOutView: AsyncView<View>?,
         hideOriginal: Boolean,
         positionOut: RectF,
         isOpening: Boolean,

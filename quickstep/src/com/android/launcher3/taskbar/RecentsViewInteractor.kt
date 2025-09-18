@@ -26,6 +26,7 @@ import com.android.launcher3.Flags.enableTaskbarUiThread
 import com.android.launcher3.apppairs.AppPairIcon
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.ResolvedTargetInfo
+import com.android.launcher3.util.AsyncView
 import com.android.launcher3.util.Executors.IMMEDIATE_EXECUTOR
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.RunnableList
@@ -90,8 +91,11 @@ class RecentsViewInteractor(private val recentsView: RecentsView<*, *>) {
         }
     }
 
-    // TODO(b/404636836): Pass Consumer<View> to post actions on found task view to main thread.
-    fun getTaskViewByTaskId(taskId: Int) = recentsView.getTaskViewByTaskId(taskId)
+    @AnyThread
+    fun getTaskViewByTaskId(taskId: Int): AsyncView<TaskView> {
+        // TaskView should be found on main thread which renders it for recents.
+        return AsyncView(mainExecutor) { recentsView.getTaskViewByTaskId(taskId) }
+    }
 
     @AnyThread
     fun handleAppPairLaunchInApp(launchingIconView: AppPairIcon, itemInfos: List<ItemInfo>) {
