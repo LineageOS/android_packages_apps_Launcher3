@@ -57,9 +57,8 @@ interface PopupController<T> where T : Context, T : ActivityContext {
          *
          * @return a new PopupController.
          */
-        fun <T> createPopupController(): PopupController<T> where
-        T : Context,
-        T : ActivityContext? {
+        fun <T> createPopupController(): PopupController<T>
+            where T : Context, T : ActivityContext? {
             return PopupControllerForAppIcon()
         }
     }

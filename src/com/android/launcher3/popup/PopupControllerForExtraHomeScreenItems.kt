@@ -39,12 +39,12 @@ class PopupControllerForExtraHomeScreenItems<T>(
 ) : PopupController<T> where T : Context, T : ActivityContext {
     override fun show(view: View): Popup {
         val container: PopupContainer<T>
+        val activityContext: T = ActivityContext.lookupContext(view.context) as T
+        val itemInfo = view.tag as ItemInfo
         try {
             Trace.beginSection("showPopupMenu")
-            val itemInfo = view.tag as ItemInfo
-            val activityContext: ActivityContext = ActivityContext.lookupContext<T>(view.context)
             container =
-                PopupContainer.create<T>(
+                PopupContainer.create(
                     context = view.context,
                     originalView = view,
                     itemInfo = itemInfo,
@@ -54,6 +54,7 @@ class PopupControllerForExtraHomeScreenItems<T>(
             container.show()
             showResizeFrameIfNeeded(activityContext, itemInfo, view)
         } finally {
+            logEvent(activityContext.statsLogManager, itemInfo.itemType, PopupEvent.OPEN)
             Trace.endSection()
         }
         return container
@@ -100,7 +101,5 @@ class PopupControllerForExtraHomeScreenItems<T>(
         }
     }
 
-    override fun dismiss() {
-        TODO("Not yet implemented")
-    }
+    override fun dismiss() {}
 }

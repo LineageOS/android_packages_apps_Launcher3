@@ -32,52 +32,54 @@ import java.util.stream.Collectors
  * popups. This is used for icons and shortcuts in the workspace, hotseat, and all apps.
  */
 class PopupControllerForAppIcon<T> : PopupController<T> where T : Context, T : ActivityContext {
+
     override fun show(view: View): Popup? {
         val container: PopupContainer<T>
+        val icon = view as BubbleTextView
+        val activityContext: T = ActivityContext.lookupContext(icon.context) as T
+        val item = icon.tag as ItemInfo
         try {
             Trace.beginSection("showPopupMenu")
-            val icon = view as BubbleTextView
-            val launcher = Launcher.getLauncher(icon.context)
-            if (PopupContainer.getOpen(launcher) != null) {
+            if (PopupContainer.getOpen(activityContext) != null) {
                 // There is already an items container open, so don't open this one.
                 icon.clearFocus()
                 return null
             }
-            val item = icon.tag as ItemInfo
             if (!ShortcutUtil.supportsShortcuts(item)) {
                 return null
             }
-            val popupDataProvider = launcher.activityComponent.popupDataProvider
+            val popupDataProvider = activityContext.activityComponent.popupDataProvider
             val deepShortcutCount = popupDataProvider.getShortcutCountForItem(item)
             val systemShortcuts =
-                launcher
+                activityContext
                     .getSupportedShortcuts(item)
-                    .map<SystemShortcut<Launcher>> { s ->
-                        s.getShortcut(launcher, item, icon) as SystemShortcut<Launcher>?
+                    .map<SystemShortcut<T>> { s ->
+                        s.getShortcut(activityContext, item, icon) as SystemShortcut<T>?
                     }
                     .filter { it != null }
                     .collect(Collectors.toList())
 
             container =
                 PopupContainerWithArrow.create(
-                    context = launcher,
+                    context = activityContext,
                     originalView = icon,
                     itemInfo = item,
                 )
-            container.configureForLauncher(launcher, item)
+            if (activityContext is Launcher) {
+                container.configureForLauncher(activityContext, item)
+            }
             container.populateAndShowRows(
                 deepShortcutCount,
                 if (view.showingMinimalPopup) emptyList() else systemShortcuts,
             )
-            launcher.refreshAndBindWidgetsForPackageUser(PackageUserKey.fromItemInfo(item))
+            activityContext.refreshAndBindWidgetsForPackageUser(PackageUserKey.fromItemInfo(item))
             container.requestFocus()
         } finally {
+            logEvent(activityContext.statsLogManager, item.itemType, PopupEvent.OPEN)
             Trace.endSection()
         }
         return container
     }
 
-    override fun dismiss() {
-        TODO("Not yet implemented")
-    }
+    override fun dismiss() {}
 }
