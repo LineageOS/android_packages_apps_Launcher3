@@ -1309,10 +1309,14 @@ public abstract class RecentsView<
     }
 
     public void addSideTaskLaunchCallback(RunnableList callback) {
+        addSideTaskLaunchCallback(callback::executeAllAndDestroy);
+    }
+
+    public void addSideTaskLaunchCallback(Runnable runnable) {
         if (mSideTaskLaunchCallback == null) {
             mSideTaskLaunchCallback = new RunnableList();
         }
-        mSideTaskLaunchCallback.add(callback::executeAllAndDestroy);
+        mSideTaskLaunchCallback.add(runnable);
     }
 
     /**
