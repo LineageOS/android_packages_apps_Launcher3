@@ -50,6 +50,7 @@ import androidx.annotation.XmlRes;
 
 import com.android.launcher3.LauncherSettings.Favorites;
 import com.android.launcher3.model.data.AppInfo;
+import com.android.launcher3.model.data.AppPairInfo;
 import com.android.launcher3.model.data.LauncherAppWidgetInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.pm.UserCache;
@@ -681,12 +682,12 @@ public class AutoInstallsLayout {
 
     protected class AppPairParser extends FolderParser {
         public AppPairParser() {
-            super(getAppPairElementsMap(), Favorites.ITEM_TYPE_APP_PAIR);
+            super(getAppPairElementsMap(), Favorites.ITEM_TYPE_APP_GROUP);
         }
 
         @Override
         public boolean isInvalidSize(int size) {
-            return size != 2;
+            return !AppPairInfo.hasValidItemCount(size);
         }
     }
 

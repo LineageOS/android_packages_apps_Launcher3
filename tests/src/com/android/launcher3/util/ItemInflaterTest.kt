@@ -26,7 +26,7 @@ import android.widget.FrameLayout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.launcher3.BubbleTextView
-import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_PAIR
+import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_GROUP
 import com.android.launcher3.apppairs.AppPairIcon
 import com.android.launcher3.folder.FolderIcon
 import com.android.launcher3.model.ModelWriter
@@ -151,7 +151,7 @@ class ItemInflaterTest {
     @Test
     fun test_app_pair_inflated_on_UI() {
         val itemInfo = AppPairInfo()
-        itemInfo.itemType = ITEM_TYPE_APP_PAIR
+        itemInfo.itemType = ITEM_TYPE_APP_GROUP
         itemInfo.add(workspaceItemInfo())
         itemInfo.add(workspaceItemInfo())
 
@@ -164,7 +164,7 @@ class ItemInflaterTest {
     @Test
     fun test_app_pair_inflated_on_BG() {
         val itemInfo = AppPairInfo()
-        itemInfo.itemType = ITEM_TYPE_APP_PAIR
+        itemInfo.itemType = ITEM_TYPE_APP_GROUP
         itemInfo.add(workspaceItemInfo())
         itemInfo.add(workspaceItemInfo())
 

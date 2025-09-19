@@ -122,7 +122,7 @@ class WorkspaceItemProcessor(
                 Favorites.ITEM_TYPE_APPLICATION,
                 Favorites.ITEM_TYPE_DEEP_SHORTCUT -> processAppOrDeepShortcut()
                 Favorites.ITEM_TYPE_FOLDER,
-                Favorites.ITEM_TYPE_APP_PAIR -> processFolderOrAppPair()
+                Favorites.ITEM_TYPE_APP_GROUP -> processFolderOrAppPair()
                 Favorites.ITEM_TYPE_APPWIDGET,
                 Favorites.ITEM_TYPE_CUSTOM_APPWIDGET -> processWidget()
                 Favorites.ITEM_TYPE_FILE_SYSTEM_FILE,
@@ -454,7 +454,7 @@ class WorkspaceItemProcessor(
         var collection = c.findOrMakeFolder(c.id, loadedItems)
         // If we generated a placeholder Folder before this point, it may need to be replaced with
         // an app pair.
-        if (c.itemType == Favorites.ITEM_TYPE_APP_PAIR && collection is FolderInfo) {
+        if (c.itemType == Favorites.ITEM_TYPE_APP_GROUP && collection is FolderInfo) {
             val newAppPair = AppPairInfo()
             // Move the placeholder's contents over to the new app pair.
             collection.getContents().forEach(newAppPair::add)

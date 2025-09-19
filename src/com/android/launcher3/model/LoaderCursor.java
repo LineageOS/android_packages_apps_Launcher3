@@ -20,7 +20,7 @@ import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT;
 import static com.android.launcher3.LauncherSettings.Favorites.DESKTOP_ICON_FLAG;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION;
-import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_PAIR;
+import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_GROUP;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT;
 import static com.android.launcher3.Utilities.qsbOnFirstScreen;
 import static com.android.launcher3.icons.cache.CacheLookupFlag.DEFAULT_LOOKUP_FLAG;
@@ -572,7 +572,7 @@ public class LoaderCursor extends CursorWrapper {
                         /* stackTrace= */ null);
             }
             loadedItems.put(info.id, info);
-            if ((info.itemType == ITEM_TYPE_APP_PAIR
+            if ((info.itemType == ITEM_TYPE_APP_GROUP
                     || info.itemType == ITEM_TYPE_DEEP_SHORTCUT
                     || info.itemType == ITEM_TYPE_APPLICATION)
                     && info.container != CONTAINER_DESKTOP

@@ -73,7 +73,7 @@ class PopupControllerTest {
 
     private val appPairItemInfo =
         ItemInfo().apply {
-            itemType = Favorites.ITEM_TYPE_APP_PAIR
+            itemType = Favorites.ITEM_TYPE_APP_GROUP
             container = Favorites.CONTAINER_DESKTOP
             user = userHandle
         }

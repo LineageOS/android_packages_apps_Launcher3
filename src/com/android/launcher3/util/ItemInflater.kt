@@ -88,7 +88,7 @@ class ItemInflater<T>(
                     )
                     .apply { onFocusChangeListener = focusListener }
 
-            Favorites.ITEM_TYPE_APP_PAIR ->
+            Favorites.ITEM_TYPE_APP_GROUP ->
                 AppPairIcon.inflateIcon(
                     R.layout.app_pair_icon,
                     context,

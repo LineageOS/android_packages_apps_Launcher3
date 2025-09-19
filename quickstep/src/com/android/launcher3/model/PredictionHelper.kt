@@ -208,7 +208,7 @@ object PredictionHelper {
             info.itemType == Favorites.ITEM_TYPE_FOLDER ->
                 AppTarget.Builder(AppTargetId("folder:" + info.id), context.packageName, info.user)
                     .build()
-            info.itemType == Favorites.ITEM_TYPE_APP_PAIR ->
+            info.itemType == Favorites.ITEM_TYPE_APP_GROUP ->
                 AppTarget.Builder(
                         AppTargetId("app_pair:" + info.id),
                         context.packageName,
