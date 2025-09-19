@@ -996,6 +996,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
             recentIcon.setPadding(mItemPadding, mItemPadding, mItemPadding, mItemPadding);
             addView(recentIcon, mNextViewIndex++, lp);
             applyHandoffSuggestionToBubbleTextView((BubbleTextView) recentIcon, handoffSuggestion);
+            setClickAndLongClickListenersForIcon(recentIcon);
         }
     }
 

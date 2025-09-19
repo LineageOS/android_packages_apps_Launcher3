@@ -193,7 +193,7 @@ public class TaskbarControllers {
         taskbarPinningController.init(this, mSharedState);
         taskbarDesktopModeController.init(this, mSharedState, taskbarUiState);
         nudgeController.init(this);
-        taskbarHandoffController.init();
+        taskbarHandoffController.init(this);
 
         mControllersToLog = new LoggableTaskbarController[] {
                 taskbarDragController, navButtonController, navbarButtonsViewController,
