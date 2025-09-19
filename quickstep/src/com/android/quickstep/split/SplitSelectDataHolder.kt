@@ -136,9 +136,9 @@ class SplitSelectDataHolder(var context: Context?, val splitScreenUiState: Split
         alreadyRunningTask: Int,
     ) {
         if (alreadyRunningTask != INVALID_TASK_ID) {
-            initialTask = initialTask.copy(taskId = alreadyRunningTask)
+            initialTask = SplitSelectTask(taskId = alreadyRunningTask)
         } else {
-            initialTask = initialTask.copy(intent = intent!!)
+            initialTask = SplitSelectTask(intent = intent!!)
             initialUser = itemInfo!!.user
         }
         setInitialData(stagePosition, splitEvent, itemInfo)
@@ -154,7 +154,7 @@ class SplitSelectDataHolder(var context: Context?, val splitScreenUiState: Split
         itemInfo: ItemInfo?,
         splitEvent: EventEnum?,
     ) {
-        initialTask = initialTask.copy(taskId = info.taskId)
+        initialTask = SplitSelectTask(taskId = info.taskId)
         setInitialData(stagePosition, splitEvent, itemInfo)
     }
 
@@ -174,7 +174,7 @@ class SplitSelectDataHolder(var context: Context?, val splitScreenUiState: Split
      * @param taskId The second task that will be launched.
      */
     fun setSecondTask(taskId: Int, itemInfo: ItemInfo) {
-        secondTask = secondTask.copy(taskId = taskId)
+        secondTask = SplitSelectTask(taskId = taskId)
         secondItemInfo = itemInfo
     }
 
@@ -185,7 +185,7 @@ class SplitSelectDataHolder(var context: Context?, val splitScreenUiState: Split
      * @param user The user of that intent.
      */
     fun setSecondTask(intent: Intent, user: UserHandle, itemInfo: ItemInfo) {
-        secondTask = secondTask.copy(intent = intent)
+        secondTask = SplitSelectTask(intent = intent)
         secondUser = user
         secondItemInfo = itemInfo
     }
@@ -197,7 +197,7 @@ class SplitSelectDataHolder(var context: Context?, val splitScreenUiState: Split
      * @param pendingIntent The second PendingIntent that will be launched.
      */
     fun setSecondTask(pendingIntent: PendingIntent, itemInfo: ItemInfo) {
-        secondTask = secondTask.copy(pendingIntent = pendingIntent)
+        secondTask = SplitSelectTask(pendingIntent = pendingIntent)
         secondUser = pendingIntent.creatorUserHandle
         secondItemInfo = itemInfo
     }
