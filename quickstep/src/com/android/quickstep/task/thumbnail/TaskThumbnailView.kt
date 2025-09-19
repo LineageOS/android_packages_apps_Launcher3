@@ -73,6 +73,9 @@ class TaskThumbnailView : FrameLayout, ViewPool.Reusable {
             invalidateOutline()
         }
 
+    private var parentScaleX = 1f
+    private var parentScaleY = 1f
+
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
@@ -85,9 +88,6 @@ class TaskThumbnailView : FrameLayout, ViewPool.Reusable {
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        if (enableRefactorTaskContentView()) {
-            return
-        }
         clipToOutline = true
         outlineProvider =
             object : ViewOutlineProvider() {
@@ -100,8 +100,8 @@ class TaskThumbnailView : FrameLayout, ViewPool.Reusable {
                             outlineRect.top.toFloat(),
                             outlineRect.right.toFloat(),
                             outlineRect.bottom.toFloat(),
-                            cornerRadius / scaleX,
-                            cornerRadius / scaleY,
+                            cornerRadius / scaleX / parentScaleX,
+                            cornerRadius / scaleY / parentScaleY,
                             Path.Direction.CW,
                         )
                     }
@@ -112,9 +112,9 @@ class TaskThumbnailView : FrameLayout, ViewPool.Reusable {
 
     override fun onRecycle() {
         uiState = Uninitialized
+        outlineBounds = null
         if (!enableRefactorTaskContentView()) {
             onSizeChanged = null
-            outlineBounds = null
         }
         resetViews()
     }
@@ -159,9 +159,6 @@ class TaskThumbnailView : FrameLayout, ViewPool.Reusable {
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        if (enableRefactorTaskContentView()) {
-            return
-        }
         super.onSizeChanged(w, h, oldw, oldh)
         onSizeChanged?.invoke(width, height)
         bounds.set(0, 0, w, h)
@@ -187,11 +184,13 @@ class TaskThumbnailView : FrameLayout, ViewPool.Reusable {
     }
 
     fun parentScaleXUpdated(scaleX: Float) {
+        parentScaleX = scaleX
         // Splash icon should ignore scale on TTV
         splashIcon.scaleX = 1 / scaleX
     }
 
     fun parentScaleYUpdated(scaleY: Float) {
+        parentScaleY = scaleY
         // Splash icon should ignore scale on TTV
         splashIcon.scaleY = 1 / scaleY
     }

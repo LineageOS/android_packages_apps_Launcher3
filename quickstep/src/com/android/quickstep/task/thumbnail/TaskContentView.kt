@@ -16,23 +16,18 @@
 
 package com.android.quickstep.task.thumbnail
 
-import android.animation.AnimatorSet
-import android.animation.ObjectAnimator
+import android.animation.Animator
 import android.content.Context
 import android.content.Intent
 import android.graphics.Canvas
-import android.graphics.Outline
-import android.graphics.Path
 import android.graphics.Rect
 import android.os.Bundle
 import android.provider.Settings
 import android.util.AttributeSet
-import android.util.FloatProperty
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-import android.view.ViewOutlineProvider
 import android.view.ViewStub
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction
@@ -44,11 +39,7 @@ import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import com.android.launcher3.Flags.enableRefactorDigitalWellbeingToast
 import com.android.launcher3.R
-import com.android.launcher3.util.KFloatProperty
-import com.android.launcher3.util.MultiPropertyDelegate
-import com.android.launcher3.util.MultiPropertyFactory
 import com.android.launcher3.util.ViewPool
-import com.android.quickstep.DesktopFullscreenDrawParams.Companion.computeCornerRadius
 import com.android.quickstep.compose.QuickstepComposeFacade
 import com.android.quickstep.task.apptimer.TaskAppTimerUiState
 import com.android.quickstep.task.apptimer.TaskAppTimerUiState.Uninitialized
@@ -56,11 +47,9 @@ import com.android.quickstep.task.apptimer.TaskAppTimerViewModel
 import com.android.quickstep.task.apptimer.TimerTextHelper
 import com.android.quickstep.util.BorderAnimator
 import com.android.quickstep.util.BorderAnimator.Companion.DEFAULT_BORDER_COLOR
-import com.android.quickstep.util.BorderAnimator.Companion.DEFAULT_INTERPOLATOR
 import com.android.quickstep.util.BorderAnimator.Companion.createSimpleBorderAnimator
 import com.android.quickstep.util.setActivityStarterClickListener
 import com.android.quickstep.views.TaskHeaderView
-import kotlin.math.max
 
 /**
  * TaskContentView is a wrapper around the TaskHeaderView, TaskThumbnailView and Digital wellbeing
@@ -91,37 +80,16 @@ class TaskContentView @JvmOverloads constructor(context: Context, attrs: Attribu
         context.resources.getDimensionPixelSize(R.dimen.digital_wellbeing_toast_height)
 
     private var onSizeChanged: ((width: Int, height: Int) -> Unit)? = null
-    private val outlinePath = Path()
 
     private val borderWidthPx: Int by lazy {
         context.resources.getDimensionPixelSize(R.dimen.keyboard_quick_switch_border_width)
     }
 
-    private var activeFocusAnimator: AnimatorSet? = null
-    private var activeHoverAnimator: AnimatorSet? = null
+    private var activeFocusAnimator: Animator? = null
+    private var activeHoverAnimator: Animator? = null
 
     private val focusBorderColor: Int
     private val hoverBorderColor: Int
-
-    private val focusBorderAnimator: BorderAnimator by lazy {
-        createSimpleBorderAnimator(
-            borderRadiusPx = computeCornerRadius(context).toInt(),
-            borderWidthPx = borderWidthPx,
-            boundsBuilder = { it.set(0, 0, width, height) },
-            targetView = this,
-            borderColor = focusBorderColor,
-        )
-    }
-
-    private val hoverBorderAnimator: BorderAnimator by lazy {
-        createSimpleBorderAnimator(
-            borderRadiusPx = computeCornerRadius(context).toInt(),
-            borderWidthPx = borderWidthPx,
-            boundsBuilder = { it.set(0, 0, width, height) },
-            targetView = this,
-            borderColor = hoverBorderColor,
-        )
-    }
 
     private var hoverBorderVisible = false
         set(value) {
@@ -132,44 +100,24 @@ class TaskContentView @JvmOverloads constructor(context: Context, attrs: Attribu
             field = value
 
             activeHoverAnimator?.cancel()
-            activeHoverAnimator = animateBorder(OUTLINE_EXPANSION_HOVER, hoverBorderAnimator, value)
+            activeHoverAnimator = animateBorder(hoverBorderAnimator, value)
         }
 
-    /**
-     * Sets the outline bounds of the view. Default to use view's bound as outline when set to null.
-     */
-    var outlineBounds: Rect? = null
-        set(value) {
-            field = value
-            invalidateOutline()
-        }
-
-    private val bounds = Rect()
+    var isHoverable: Boolean = false
 
     var cornerRadius: Float = 0f
         set(value) {
             field = value
-            invalidateOutline()
+            taskThumbnailView?.cornerRadius = value
         }
 
-    private var outlineExpansion = 0.0f
+    var taskCornerRadius: Float = 0f
+
+    var outlineBounds: Rect? = null
         set(value) {
             field = value
-            invalidateOutline()
+            taskThumbnailView?.outlineBounds = value
         }
-
-    private val outlineExpansionFactory: MultiPropertyFactory<TaskContentView> =
-        MultiPropertyFactory(this, OUTLINE_EXPANSION, OutlineExpansion.entries.size) {
-            a: Float,
-            b: Float ->
-            max(a, b)
-        }
-    private var outlineExpansionFocus by
-        MultiPropertyDelegate(outlineExpansionFactory, OutlineExpansion.FOCUS)
-    private var outlineExpansionHover by
-        MultiPropertyDelegate(outlineExpansionFactory, OutlineExpansion.HOVER)
-
-    var isHoverable: Boolean = false
 
     init {
         setWillNotDraw(false)
@@ -179,6 +127,26 @@ class TaskContentView @JvmOverloads constructor(context: Context, attrs: Attribu
             hoverBorderColor =
                 it.getColor(R.styleable.TaskContentView_hoverBorderColor, DEFAULT_BORDER_COLOR)
         }
+    }
+
+    private val focusBorderAnimator: BorderAnimator by lazy {
+        createSimpleBorderAnimator(
+            borderRadiusPx = taskCornerRadius.toInt(),
+            borderWidthPx = borderWidthPx,
+            boundsBuilder = { it.set(0, 0, width, height) },
+            targetView = this,
+            borderColor = focusBorderColor,
+        )
+    }
+
+    private val hoverBorderAnimator: BorderAnimator by lazy {
+        createSimpleBorderAnimator(
+            borderRadiusPx = taskCornerRadius.toInt(),
+            borderWidthPx = borderWidthPx,
+            boundsBuilder = { it.set(0, 0, width, height) },
+            targetView = this,
+            borderColor = hoverBorderColor,
+        )
     }
 
     override fun onFinishInflate() {
@@ -196,36 +164,10 @@ class TaskContentView @JvmOverloads constructor(context: Context, attrs: Attribu
         taskThumbnailView?.parentScaleYUpdated(scaleY)
     }
 
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-        clipToOutline = true
-        outlineProvider =
-            object : ViewOutlineProvider() {
-                override fun getOutline(view: View, outline: Outline) {
-                    val outlineRect = outlineBounds ?: bounds
-                    val expansion = outlineExpansion.toInt()
-                    outlinePath.apply {
-                        rewind()
-                        addRoundRect(
-                            outlineRect.left.toFloat() - expansion,
-                            outlineRect.top.toFloat() - expansion,
-                            outlineRect.right.toFloat() + expansion,
-                            outlineRect.bottom.toFloat() + expansion,
-                            (cornerRadius + expansion) / scaleX,
-                            (cornerRadius + expansion) / scaleY,
-                            Path.Direction.CW,
-                        )
-                    }
-                    outline.setPath(outlinePath)
-                }
-            }
-    }
-
     override fun onRecycle() {
         taskHeaderView?.isInvisible = true
         taskHeaderView?.alpha = 1.0f
         onSizeChanged = null
-        outlineBounds = null
         alpha = 1.0f
         taskThumbnailView?.onRecycle()
         taskAppTimerToast?.isInvisible = true
@@ -233,8 +175,6 @@ class TaskContentView @JvmOverloads constructor(context: Context, attrs: Attribu
         taskAppTimerViewModel.setState(Uninitialized)
         timerTextHelper = null
         timerUsageAccessibilityAction = null
-        outlineExpansionHover = 0f
-        outlineExpansionFocus = 0f
         hoverBorderVisible = false
         importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
     }
@@ -246,14 +186,12 @@ class TaskContentView @JvmOverloads constructor(context: Context, attrs: Attribu
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         onSizeChanged?.invoke(width, height)
-        bounds.set(0, 0, w, h)
         updateTimerText(w)
-        invalidateOutline()
     }
 
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
-        if (isFocusable()) {
+        if (isFocusable) {
             focusBorderAnimator.drawBorder(canvas)
         }
         if (isHoverable) {
@@ -269,7 +207,7 @@ class TaskContentView @JvmOverloads constructor(context: Context, attrs: Attribu
         super.onFocusChanged(gainFocus, direction, previouslyFocusedRect)
 
         activeFocusAnimator?.cancel()
-        activeFocusAnimator = animateBorder(OUTLINE_EXPANSION_FOCUS, focusBorderAnimator, gainFocus)
+        activeFocusAnimator = animateBorder(focusBorderAnimator, gainFocus)
     }
 
     override fun onHoverEvent(event: MotionEvent): Boolean {
@@ -454,22 +392,8 @@ class TaskContentView @JvmOverloads constructor(context: Context, attrs: Attribu
         }
     }
 
-    private fun animateBorder(
-        outlineProperty: FloatProperty<TaskContentView>,
-        borderAnimator: BorderAnimator,
-        show: Boolean,
-    ): AnimatorSet? {
-        val targetOutlineExpansion = if (show) borderWidthPx.toFloat() else 0f
-        val outlineExpansionAnimator =
-            ObjectAnimator.ofFloat(this, outlineProperty, targetOutlineExpansion)
-        val borderEffectAnimator = borderAnimator.buildAnimator(show)
-        return AnimatorSet().apply {
-            playTogether(outlineExpansionAnimator, borderEffectAnimator)
-            duration = borderEffectAnimator.duration
-            interpolator = DEFAULT_INTERPOLATOR
-            start()
-        }
-    }
+    private fun animateBorder(borderAnimator: BorderAnimator, show: Boolean) =
+        borderAnimator.buildAnimator(show).apply { start() }
 
     companion object {
         const val TAG = "TaskContentView"
@@ -488,17 +412,5 @@ class TaskContentView @JvmOverloads constructor(context: Context, attrs: Attribu
                 actionId,
                 context.getString(R.string.split_app_usage_settings, taskDescription),
             )
-
-        private enum class OutlineExpansion {
-            FOCUS,
-            HOVER,
-        }
-
-        private val OUTLINE_EXPANSION: FloatProperty<TaskContentView> =
-            KFloatProperty(TaskContentView::outlineExpansion)
-        private val OUTLINE_EXPANSION_FOCUS: FloatProperty<TaskContentView> =
-            KFloatProperty(TaskContentView::outlineExpansionFocus)
-        private val OUTLINE_EXPANSION_HOVER: FloatProperty<TaskContentView> =
-            KFloatProperty(TaskContentView::outlineExpansionHover)
     }
 }

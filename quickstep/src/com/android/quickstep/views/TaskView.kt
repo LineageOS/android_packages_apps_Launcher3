@@ -1103,12 +1103,14 @@ constructor(
             taskContainers.forEach { container ->
                 container.bind()
                 if (enableRefactorTaskContentView()) {
-                    (container.taskContentView as TaskContentView).cornerRadius =
-                        thumbnailFullscreenParams.currentCornerRadius
-                    container.taskContentView.doOnSizeChange { width, height ->
-                        updateThumbnailValidity(container)
-                        val thumbnailPosition = updateThumbnailMatrix(container, width, height)
-                        container.refreshOverlay(thumbnailPosition)
+                    (container.taskContentView as TaskContentView).apply {
+                        cornerRadius = thumbnailFullscreenParams.currentCornerRadius
+                        taskCornerRadius = thumbnailFullscreenParams.taskCornerRadius
+                        doOnSizeChange { width, height ->
+                            updateThumbnailValidity(container)
+                            val thumbnailPosition = updateThumbnailMatrix(container, width, height)
+                            container.refreshOverlay(thumbnailPosition)
+                        }
                     }
                 } else {
                     container.snapshotView.cornerRadius =
