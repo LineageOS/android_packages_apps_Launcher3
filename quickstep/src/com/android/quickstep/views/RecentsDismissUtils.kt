@@ -919,7 +919,7 @@ constructor(
                 return@with
             }
             updateCurveProperties()
-            loadVisibleTaskData(TaskView.FLAG_UPDATE_ALL)
+            loadVisibleTaskData()
 
             // Page snapping and relayout to run after all animations have completed.
             val onFinishComplete = {

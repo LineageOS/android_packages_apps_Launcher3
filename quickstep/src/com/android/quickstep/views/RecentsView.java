@@ -117,7 +117,6 @@ import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.Log;
 import android.util.Pair;
-import android.util.SparseBooleanArray;
 import android.view.HapticFeedbackConstants;
 import android.view.InputDevice;
 import android.view.KeyEvent;
@@ -275,7 +274,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * A list of recent tasks.
@@ -585,9 +583,6 @@ public abstract class RecentsView<
      * [GroupedTaskInfo] is running. If a gesture is not in progress, this will be null.
      */
     private @Nullable GroupedTaskInfo mActiveGestureGroupedTaskInfo;
-
-    // Keeps track of the previously known visible tasks for purposes of loading/unloading task data
-    private final SparseBooleanArray mHasVisibleTaskData = new SparseBooleanArray();
 
     /**
      * Getting views should be done via {@link #getTaskViewFromPool(int)}
@@ -1150,21 +1145,6 @@ public abstract class RecentsView<
     }
 
     @Override
-    public void onTaskIconChanged(@NonNull String pkg, @NonNull UserHandle user) {
-        for (TaskView taskView : getTaskViews()) {
-            Task firstTask = taskView.getFirstTask();
-            if (firstTask != null && pkg.equals(firstTask.key.getPackageName())
-                    && firstTask.key.userId == user.getIdentifier()) {
-                firstTask.icon = null;
-                if (taskView.getTaskContainers().stream().anyMatch(
-                        container -> container.getIconView().getDrawable() != null)) {
-                    taskView.onTaskListVisibilityChanged(true /* visible */);
-                }
-            }
-        }
-    }
-
-    @Override
     protected void onWindowVisibilityChanged(int visibility) {
         super.onWindowVisibilityChanged(visibility);
         updateTaskStackListenerState();
@@ -1278,9 +1258,6 @@ public abstract class RecentsView<
     }
 
     private void clearAndRecycleTaskView(TaskView taskView) {
-        for (int i : taskView.getTaskIds()) {
-            mHasVisibleTaskData.delete(i);
-        }
         if (taskView instanceof GroupedTaskView) {
             mGroupedTaskViewPool.recycle((GroupedTaskView) taskView);
         } else if (taskView instanceof DesktopTaskView) {
@@ -1950,9 +1927,6 @@ public abstract class RecentsView<
             currentTaskIds = currentTaskView.getTaskIds();
         }
 
-        // Unload existing visible task data
-        unloadVisibleTaskData(TaskView.FLAG_UPDATE_ALL);
-
         TaskView ignoreResetTaskView =
                 mIgnoreResetTaskId == INVALID_TASK_ID
                         ? null : getTaskViewByTaskId(mIgnoreResetTaskId);
@@ -2214,7 +2188,7 @@ public abstract class RecentsView<
 
         updateCurveProperties();
         // Update the set of visible task's data
-        loadVisibleTaskData(TaskView.FLAG_UPDATE_ALL);
+        loadVisibleTaskData();
         setTaskModalness(0);
         setColorTint(0);
     }
@@ -2456,7 +2430,7 @@ public abstract class RecentsView<
             }
 
             // After scrolling, update the visible task's data
-            loadVisibleTaskData(TaskView.FLAG_UPDATE_ALL);
+            loadVisibleTaskData();
 
             recalculateTaskViewScreenEdgeIntersections();
         }
@@ -2551,112 +2525,21 @@ public abstract class RecentsView<
      * Iterates through all the tasks, and loads the associated task data for newly visible tasks,
      * and unloads the associated task data for tasks that are no longer visible.
      */
-    public void loadVisibleTaskData(@TaskView.TaskDataChanges int dataChanges) {
+    public void loadVisibleTaskData() {
         boolean hasLeftOverview = !mOverviewStateEnabled && mScroller.isFinished();
         if (hasLeftOverview || mAppliedTaskListChangeId == -1) {
             // Skip loading visible task data if we've already left the overview state, or if the
             // task list hasn't been loaded yet (the task views will not reflect the task list)
             return;
         }
-
-        int lowerIndex, upperIndex, visibleStart, visibleEnd;
-        if (showAsGrid()) {
-            int screenStart = getPagedOrientationHandler().getPrimaryScroll(this);
-            int pageOrientedSize = getPagedOrientationHandler().getMeasuredSize(this);
-            // Use +/- 1 task column as visible area for preloading.
-            int extraWidth = getLastComputedGridTaskSize().width() + getPageSpacing();
-            lowerIndex = upperIndex = 0;
-            visibleStart = screenStart - extraWidth;
-            visibleEnd = screenStart + pageOrientedSize + extraWidth;
-        } else {
-            int centerPageIndex = getPageNearestToCenterOfScreen();
-            int numChildren = getChildCount();
-            lowerIndex = Math.max(0, centerPageIndex - 2);
-            upperIndex = Math.min(centerPageIndex + 2, numChildren - 1);
-            visibleStart = visibleEnd = 0;
-        }
-
-        List<Integer> visibleTaskIds = new ArrayList<>();
-        // Update the task data for the in/visible children
-        getTaskViews().forEachWithIndexInParent((index, taskView) -> {
-            List<TaskContainer> containers = taskView.getTaskContainers();
-            if (containers.isEmpty()) {
-                return;
-            }
-            boolean visible;
-            if (showAsGrid()) {
-                visible = isTaskViewWithinBounds(taskView, visibleStart, visibleEnd,
-                        mTaskViewsDismissPrimaryTranslations.getOrDefault(taskView, 0));
-            } else {
-                visible = index >= lowerIndex && index <= upperIndex;
-            }
-            if (visible) {
-                // Default update all non-null tasks, then remove running ones
-                List<Task> tasksToUpdate = containers.stream()
-                        .map(TaskContainer::getTask)
-                        .collect(Collectors.toCollection(ArrayList::new));
-                visibleTaskIds.addAll(tasksToUpdate.stream().map((task) -> task.key.id).toList());
-                if (tasksToUpdate.isEmpty()) {
-                    return;
-                }
-                int visibilityChanges = 0;
-                for (Task task : tasksToUpdate) {
-                    if (!mHasVisibleTaskData.get(task.key.id)) {
-                        // Ignore thumbnail update if it's current running task during the gesture
-                        // We snapshot at end of gesture, it will update then
-                        int changes = dataChanges;
-                        if (taskView == getRunningTaskView() && isGestureActive()) {
-                            changes &= ~TaskView.FLAG_UPDATE_THUMBNAIL;
-                        }
-                        visibilityChanges |= changes;
-                    }
-                    mHasVisibleTaskData.put(task.key.id, true);
-                }
-                if (visibilityChanges != 0) {
-                    taskView.onTaskListVisibilityChanged(true /* visible */, visibilityChanges);
-                }
-            } else {
-                int visibilityChanges = 0;
-                for (TaskContainer container : containers) {
-                    if (container == null) {
-                        continue;
-                    }
-
-                    if (mHasVisibleTaskData.get(container.getTask().key.id)) {
-                        visibilityChanges = dataChanges;
-                    }
-                    mHasVisibleTaskData.delete(container.getTask().key.id);
-                }
-                if (visibilityChanges != 0) {
-                    taskView.onTaskListVisibilityChanged(false /* visible */, visibilityChanges);
-                }
-            }
-        });
-        mRecentsViewModel.updateVisibleTasks(visibleTaskIds);
-    }
-
-    /**
-     * Unloads any associated data from the currently visible tasks
-     */
-    private void unloadVisibleTaskData(@TaskView.TaskDataChanges int dataChanges) {
-        for (int i = 0; i < mHasVisibleTaskData.size(); i++) {
-            if (mHasVisibleTaskData.valueAt(i)) {
-                TaskView taskView = getTaskViewByTaskId(mHasVisibleTaskData.keyAt(i));
-                if (taskView != null) {
-                    taskView.onTaskListVisibilityChanged(false /* visible */, dataChanges);
-                }
-            }
-        }
-        mHasVisibleTaskData.clear();
+        mRecentsViewModel.updateVisibleTasks(mUtils.getVisibleTaskIds());
     }
 
     @Override
     public void onHighResLoadingStateChanged(boolean enabled) {
-        // Preload cache when no overview task is visible (e.g. not in overview page), so when
-        // user goes to overview next time, the task thumbnails would show up without delay
-        if (mHasVisibleTaskData.size() == 0) {
-            mModel.preloadCacheIfNeeded();
-        }
+        // TODO(b/446013310) move this call to the RecentsView constructor
+        // Preload cache so when user goes to overview, the task thumbnails appear without delay
+        mModel.preloadCacheIfNeeded();
     }
 
     public void startHome() {
@@ -2725,7 +2608,6 @@ public abstract class RecentsView<
     }
 
     private void onReset() {
-        unloadVisibleTaskData(TaskView.FLAG_UPDATE_ALL);
         setCurrentPage(0);
         LayoutUtils.setViewEnabled(mActionsView, true);
         if (mOrientationState.setGestureActive(false)) {
@@ -2733,6 +2615,7 @@ public abstract class RecentsView<
         }
         mRecentsViewModel.onReset();
         executeSideTaskLaunchCallback();
+        mModel.preloadCacheIfNeeded();
     }
 
     public int getRunningTaskViewId() {
@@ -3853,7 +3736,7 @@ public abstract class RecentsView<
         if (animateTaskView && dismissedTaskView != null) {
             dismissedTaskView.setTranslationZ(0.1f);
         }
-        loadVisibleTaskData(TaskView.FLAG_UPDATE_ALL);
+        loadVisibleTaskData();
         if (!dismissingForSplitSelection) {
             anim.addStartListener(() -> InteractionJankMonitorWrapper.begin(this,
                     Cuj.CUJ_LAUNCHER_OVERVIEW_TASK_DISMISS));
@@ -5706,7 +5589,7 @@ public abstract class RecentsView<
     protected void notifyPageSwitchListener(int prevPage) {
         super.notifyPageSwitchListener(prevPage);
         updateCurrentTaskActionsVisibility();
-        loadVisibleTaskData(TaskView.FLAG_UPDATE_ALL);
+        loadVisibleTaskData();
         updateEnabledOverlays();
         mUtils.updateCentralTask();
     }

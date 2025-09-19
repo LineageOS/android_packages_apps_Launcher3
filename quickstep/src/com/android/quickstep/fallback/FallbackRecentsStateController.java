@@ -37,7 +37,6 @@ import static com.android.quickstep.views.RecentsView.TASK_SECONDARY_SPLIT_TRANS
 import static com.android.quickstep.views.RecentsView.TASK_SECONDARY_TRANSLATION;
 import static com.android.quickstep.views.RecentsView.TASK_THUMBNAIL_SPLASH_ALPHA;
 import static com.android.quickstep.views.RecentsViewUtils.DESK_EXPLODE_PROGRESS;
-import static com.android.quickstep.views.TaskView.FLAG_UPDATE_ALL;
 
 import android.util.FloatProperty;
 import android.util.Pair;
@@ -83,7 +82,7 @@ public class FallbackRecentsStateController implements StateHandler<RecentsState
             return;
         }
         // While animating into recents, update the visible task data as needed
-        setter.addOnFrameCallback(() -> mRecentsView.loadVisibleTaskData(FLAG_UPDATE_ALL));
+        setter.addOnFrameCallback(() -> mRecentsView.loadVisibleTaskData());
         setter.addEndListener(success -> {
             if (!success && !toState.isRecentsViewVisible()) {
                 mRecentsView.reset();
