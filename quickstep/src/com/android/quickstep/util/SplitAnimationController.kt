@@ -69,12 +69,12 @@ import com.android.quickstep.util.SplitScreenUtils.Companion.extractTopParentAnd
 import com.android.quickstep.views.FloatingAppPairView
 import com.android.quickstep.views.FloatingTaskView
 import com.android.quickstep.views.GroupedTaskView
+import com.android.quickstep.views.IconAppChipView
 import com.android.quickstep.views.RecentsView
 import com.android.quickstep.views.RecentsViewContainer
 import com.android.quickstep.views.SplitInstructionsView
 import com.android.quickstep.views.TaskContainer
 import com.android.quickstep.views.TaskView
-import com.android.quickstep.views.TaskViewIcon
 import com.android.wm.shell.shared.TransitionUtil
 import java.util.Optional
 import java.util.function.Supplier
@@ -129,7 +129,7 @@ class SplitAnimationController(val splitSelectStateController: SplitSelectStateC
                         drawable,
                         fadeWithThumbnail = true,
                         isStagedTask = true,
-                        iconView = container.iconView.asView(),
+                        iconView = container.iconView,
                         container.task.titleDescription,
                     )
                 }
@@ -149,7 +149,7 @@ class SplitAnimationController(val splitSelectStateController: SplitSelectStateC
                     drawable,
                     fadeWithThumbnail = true,
                     isStagedTask = true,
-                    iconView = it.iconView.asView(),
+                    iconView = it.iconView,
                     it.task.titleDescription,
                 )
             }
@@ -163,10 +163,13 @@ class SplitAnimationController(val splitSelectStateController: SplitSelectStateC
      *
      * @return the [Drawable] icon, or a translucent drawable if none was found
      */
-    fun getDrawable(iconView: TaskViewIcon, splitSelectSource: SplitSelectSource?): Drawable {
+    fun getDrawable(iconView: IconAppChipView, splitSelectSource: SplitSelectSource?): Drawable {
         val drawable =
-            if (iconView.drawable == null && splitSelectSource != null) splitSelectSource.drawable
-            else iconView.drawable
+            if (iconView.getDrawable() == null && splitSelectSource != null) {
+                splitSelectSource.drawable
+            } else {
+                iconView.getDrawable()
+            }
         return drawable ?: ColorDrawable(Color.TRANSPARENT)
     }
 

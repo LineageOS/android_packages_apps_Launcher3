@@ -173,11 +173,11 @@ open class LandscapePagedViewHandler : RecentsPagedOrientationHandler {
         deviceProfile: DeviceProfile,
     ): Int = if (stagePosition == STAGE_POSITION_BOTTOM_OR_RIGHT) -1 else 1
 
-    override fun getTaskMenuX(x: Float, taskViewIcon: IconAppChipView): Float =
-        x + taskViewIcon.menuToCollapsedChipGap
+    override fun getTaskMenuX(x: Float, appChip: IconAppChipView): Float =
+        x + appChip.menuToCollapsedChipGap
 
-    override fun getTaskMenuY(y: Float, taskMenuView: View, taskViewIcon: IconAppChipView): Float {
-        val marginStart = taskViewIcon.backgroundMarginTopStart
+    override fun getTaskMenuY(y: Float, taskMenuView: View, appChip: IconAppChipView): Float {
+        val marginStart = appChip.backgroundMarginTopStart
         return if (taskMenuView.isLayoutRtl) y - marginStart else y + marginStart
     }
 

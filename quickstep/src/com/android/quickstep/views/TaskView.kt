@@ -552,7 +552,7 @@ constructor(
     private var taskDismissButtonEnabled: Boolean = false
 
     /**
-     * Returns a sequence of [Pair]s, where each pair contains a [TaskViewIcon] and its
+     * Returns a sequence of [Pair]s, where each pair contains a [IconAppChipView] and its
      * corresponding [TransformingTouchDelegate].
      */
     open fun getTaskIcons(): Sequence<Pair<IconAppChipView, TransformingTouchDelegate>> =
@@ -1140,7 +1140,7 @@ constructor(
                 taskContentView,
                 snapshotView,
                 iconView,
-                TransformingTouchDelegate(iconView.asView()),
+                TransformingTouchDelegate(iconView),
                 stagePosition,
                 digitalWellBeingToast,
                 findViewById(showWindowViewId)!!,
@@ -1162,9 +1162,7 @@ constructor(
     open fun setOrientationState(orientationState: RecentsOrientedState) =
         traceSection("TaskView.setOrientationState") {
             this.orientedState = orientationState
-            getTaskIcons().forEach { (icon, _) ->
-                icon.setIconOrientation(orientationState, isGridTask)
-            }
+            getTaskIcons().forEach { (icon, _) -> icon.setIconOrientation(orientationState) }
             setThumbnailOrientation(orientationState)
         }
 
@@ -1258,23 +1256,23 @@ constructor(
             }
         }
 
-    protected fun setIcon(iconView: TaskViewIcon, icon: Drawable?) {
+    protected fun setIcon(iconView: IconAppChipView, icon: Drawable?) {
         with(iconView) {
             if (icon != null) {
                 setDrawable(icon)
-                asView().setOnClickListener {
+                setOnClickListener {
                     if (!confirmSecondSplitSelectApp()) {
                         showTaskMenu(this)
                     }
                 }
-                asView().setOnLongClickListener {
+                setOnLongClickListener {
                     requestDisallowInterceptTouchEvent(true)
                     showTaskMenu(this)
                 }
             } else {
                 setDrawable(null)
-                asView().setOnClickListener(null)
-                asView().setOnLongClickListener(null)
+                setOnClickListener(null)
+                setOnLongClickListener(null)
             }
         }
     }
@@ -1565,7 +1563,7 @@ constructor(
         return recentsView.confirmSplitSelect(
             this,
             container.task,
-            container.iconView.drawable,
+            container.iconView.getDrawable(),
             container.snapshotView,
             container.thumbnail,
             /* intent */ null,
@@ -1581,7 +1579,7 @@ constructor(
      */
     protected open fun getLastSelectedChildTaskIndex() = 0
 
-    private fun showTaskMenu(iconView: TaskViewIcon): Boolean {
+    private fun showTaskMenu(iconView: IconAppChipView): Boolean {
         val recentsView = recentsView ?: return false
         if (!recentsView.canLaunchFullscreenTask()) {
             // Don't show menu when selecting second split screen app
@@ -1651,14 +1649,14 @@ constructor(
     }
 
     private fun computeAndSetIconTouchDelegate(
-        view: TaskViewIcon,
+        view: IconAppChipView,
         tempCenterCoordinates: FloatArray,
         transformingTouchDelegate: TransformingTouchDelegate,
     ) {
-        val viewHalfWidth = view.asView().width / 2f
-        val viewHalfHeight = view.asView().height / 2f
+        val viewHalfWidth = view.width / 2f
+        val viewHalfHeight = view.height / 2f
         Utilities.getDescendantCoordRelativeToAncestor(
-            view.asView(),
+            view,
             container.dragLayer,
             tempCenterCoordinates.apply {
                 this[0] = viewHalfWidth
@@ -1748,7 +1746,7 @@ constructor(
 
     /** Set a color tint on the snapshot and supporting views. */
     open fun setColorTint(amount: Float, tintColor: Int) {
-        getTaskIcons().forEach { (icon, _) -> icon.setIconColorTint(tintColor, amount) }
+        getTaskIcons().forEach { (icon, _) -> icon.setIconColorTint(amount) }
         taskContainers.forEach {
             it.updateTintAmount(amount)
             it.digitalWellBeingToast?.setColorTint(tintColor, amount)
@@ -1917,8 +1915,8 @@ constructor(
         }
     }
 
-    protected open fun getContainerForIconView(iconView: TaskViewIcon) =
-        taskContainers.firstOrNull { it.iconView === iconView }
+    protected open fun getContainerForIconView(appChip: IconAppChipView) =
+        taskContainers.firstOrNull { it.iconView === appChip }
 
     companion object {
         private const val TAG = "TaskView"

@@ -20,11 +20,11 @@ import android.view.View
 import com.android.quickstep.recents.ui.viewmodel.TaskViewModel
 import com.android.quickstep.task.apptimer.TaskAppTimerUiState
 import com.android.quickstep.task.apptimer.ViewModel
-import com.android.quickstep.views.TaskViewIcon
+import com.android.quickstep.views.IconAppChipView
 
 interface QuickstepComposeFeatures {
     fun startIconAppChip(
-        composeView: TaskViewIcon,
+        composeView: IconAppChipView,
         viewModel: TaskViewModel,
         taskId: Int,
         onClick: () -> Unit = {},

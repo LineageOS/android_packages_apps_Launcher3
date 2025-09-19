@@ -246,9 +246,9 @@ interface RecentsPagedOrientationHandler : PagedOrientationHandler {
      * taskMenu width is the same size as the thumbnail width (what got set below in
      * getTaskMenuWidth()), so we directly use that in the calculations.
      */
-    fun getTaskMenuX(x: Float, taskViewIcon: IconAppChipView): Float
+    fun getTaskMenuX(x: Float, appChip: IconAppChipView): Float
 
-    fun getTaskMenuY(y: Float, taskMenuView: View, taskViewIcon: IconAppChipView): Float
+    fun getTaskMenuY(y: Float, taskMenuView: View, appChip: IconAppChipView): Float
 
     fun getAppChipMenuMarginX(appChipView: IconAppChipView, isRtl: Boolean): Int
 

@@ -128,10 +128,10 @@ class PortraitPagedViewHandler : DefaultPagedViewHandler(), RecentsPagedOrientat
             1
         }
 
-    override fun getTaskMenuX(x: Float, taskViewIcon: IconAppChipView): Float = x
+    override fun getTaskMenuX(x: Float, appChip: IconAppChipView): Float = x
 
-    override fun getTaskMenuY(y: Float, taskMenuView: View, taskViewIcon: IconAppChipView): Float =
-        y - taskViewIcon.menuToCollapsedChipGap
+    override fun getTaskMenuY(y: Float, taskMenuView: View, appChip: IconAppChipView): Float =
+        y - appChip.menuToCollapsedChipGap
 
     override fun getAppChipMenuMarginX(appChipView: IconAppChipView, isRtl: Boolean): Int =
         if (isRtl) -appChipView.backgroundMarginTopStart else appChipView.backgroundMarginTopStart

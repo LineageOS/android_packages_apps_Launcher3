@@ -333,7 +333,7 @@ class GroupedTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
 
         // Check which of the two apps was selected
         if (
-            rightBottomTaskContainer.iconView.asView().containsPoint(lastTouchDownPosition) ||
+            rightBottomTaskContainer.iconView.containsPoint(lastTouchDownPosition) ||
                 rightBottomTaskContainer.snapshotView.containsPoint(lastTouchDownPosition)
         ) {
             return 1

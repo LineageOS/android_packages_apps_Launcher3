@@ -24,7 +24,6 @@ import com.android.quickstep.compose.core.QuickstepComposeFeatures
 import com.android.quickstep.recents.ui.viewmodel.TaskViewModel
 import com.android.quickstep.task.apptimer.TaskAppTimerUiState
 import com.android.quickstep.task.apptimer.ViewModel
-import com.android.quickstep.views.TaskViewIcon
 
 object QuickstepComposeFacade : BaseComposeFacade, QuickstepComposeFeatures {
 
@@ -35,7 +34,7 @@ object QuickstepComposeFacade : BaseComposeFacade, QuickstepComposeFeatures {
     override fun disposeComposition(view: View) = ComposeFacade.disposeComposition(view)
 
     override fun startIconAppChip(
-        composeView: TaskViewIcon,
+        composeView: IconAppChipView,
         viewModel: TaskViewModel,
         taskId: Int,
         onClick: () -> Unit,

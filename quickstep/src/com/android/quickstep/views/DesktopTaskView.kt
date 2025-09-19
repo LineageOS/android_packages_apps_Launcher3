@@ -462,7 +462,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
                 )
                 setText(resources.getText(R.string.recent_task_desktop))
             }
-        iconTouchDelegate = TransformingTouchDelegate(iconView.asView())
+        iconTouchDelegate = TransformingTouchDelegate(iconView)
 
         val backgroundViewIndex = contentView.indexOfChild(backgroundView)
         taskContainers =
@@ -607,7 +607,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
     override fun getTaskIcons(): Sequence<Pair<IconAppChipView, TransformingTouchDelegate>> =
         sequenceOf(iconView to iconTouchDelegate)
 
-    override fun getContainerForIconView(iconView: TaskViewIcon) = null
+    override fun getContainerForIconView(appChip: IconAppChipView) = null
 
     override fun onFullscreenProgressChanged(fullscreenProgress: Float) {
         backgroundView.alpha = 1 - fullscreenProgress
@@ -622,7 +622,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     override fun addChildrenForAccessibility(outChildren: ArrayList<View>) {
         super.addChildrenForAccessibility(outChildren)
-        addAccessibleChildToList(iconView.asView(), outChildren)
+        addAccessibleChildToList(iconView, outChildren)
         addAccessibleChildToList(backgroundView, outChildren)
     }
 

@@ -37,17 +37,20 @@ import android.widget.TextView
 import androidx.core.animation.addListener
 import androidx.core.view.updateLayoutParams
 import com.android.app.animation.Interpolators
+import com.android.launcher3.Flags
 import com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY
 import com.android.launcher3.LauncherAnimUtils.VIEW_TRANSLATE_X
 import com.android.launcher3.LauncherAnimUtils.VIEW_TRANSLATE_Y
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
+import com.android.launcher3.util.MSDLPlayerWrapper
 import com.android.launcher3.util.MultiPropertyFactory
 import com.android.launcher3.util.MultiPropertyFactory.FloatBiFunction
 import com.android.launcher3.util.MultiValueAlpha
 import com.android.quickstep.util.BorderAnimator
 import com.android.quickstep.util.BorderAnimator.Companion.createSimpleBorderAnimator
 import com.android.quickstep.util.RecentsOrientedState
+import com.google.android.msdl.data.model.MSDLToken
 import kotlin.math.max
 import kotlin.math.min
 
@@ -59,7 +62,7 @@ constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
     defStyleRes: Int = 0,
-) : FrameLayout(context, attrs, defStyleAttr, defStyleRes), TaskViewIcon {
+) : FrameLayout(context, attrs, defStyleAttr, defStyleRes) {
 
     private var iconView: IconView? = null
     private var iconArrowView: ImageView? = null
@@ -150,6 +153,8 @@ constructor(
             getCollapsedBackgroundLtrBounds().bottom -
             menuToChipGap
 
+    val msdlPlayerWrapper: MSDLPlayerWrapper = MSDLPlayerWrapper.INSTANCE.get(context)
+
     private val focusBorderAnimator: BorderAnimator =
         createSimpleBorderAnimator(
             borderRadiusPx = cornerRadius,
@@ -158,7 +163,7 @@ constructor(
                 bounds.set(backgroundRelativeLtrLocation)
                 if (status == AppChipStatus.Expanded) {
                     // Draws the border inside the chip to avoid overlap with the task menu.
-                    var inset = focusBorderWidth - 1
+                    val inset = focusBorderWidth - 1
                     bounds.inset(inset, inset)
                 }
             },
@@ -173,6 +178,10 @@ constructor(
         )
 
     private var focusAnimator: AnimatorSet? = null
+
+    init {
+        isHapticFeedbackEnabled = !Flags.msdlFeedback()
+    }
 
     private fun animateFocusBorder(isAppearing: Boolean) {
         focusAnimator?.cancel()
@@ -231,28 +240,24 @@ constructor(
         menuAnchorView = findViewById(R.id.icon_view_menu_anchor)
     }
 
-    override fun setText(text: CharSequence?) {
+    fun setText(text: CharSequence?) {
         if (text == appTitle?.text) return
         appTitle?.text = text
     }
 
-    override fun getDrawable(): Drawable? = iconView?.drawable
+    fun getDrawable(): Drawable? = iconView?.drawable
 
     private var currentIconDrawableHash: Int = 0
 
-    override fun setDrawable(icon: Drawable?) {
+    fun setDrawable(icon: Drawable?) {
         if (icon.hashCode() == currentIconDrawableHash) return
-        iconView?.drawable = icon
+        iconView?.setDrawable(icon)
         currentIconDrawableHash = icon.hashCode()
-    }
-
-    override fun setDrawableSize(iconWidth: Int, iconHeight: Int) {
-        iconView?.setDrawableSize(iconWidth, iconHeight)
     }
 
     override fun getMinimumWidth(): Int = min(maxWidth, collapsedMenuDefaultWidth)
 
-    override fun setIconOrientation(orientationState: RecentsOrientedState, isGridTask: Boolean) {
+    fun setIconOrientation(orientationState: RecentsOrientedState) {
         val orientationHandler = orientationState.orientationHandler
         isLayoutNaturalToLauncher = orientationHandler.isLayoutNaturalToLauncher
         // Layout params for anchor view
@@ -375,27 +380,23 @@ constructor(
             appNameHorizontalMarginExpanded -
             arrowMarginEnd
 
-    override fun setIconColorTint(color: Int, amount: Float) {
+    fun setIconColorTint(amount: Float) {
         // RecentsView's COLOR_TINT animates between 0 and 0.5f, we want to hide the app chip menu.
         val colorTintAlpha = Utilities.mapToRange(amount, 0f, 0.5f, 1f, 0f, Interpolators.LINEAR)
         multiValueAlpha[INDEX_COLOR_FILTER_ALPHA].value = colorTintAlpha
     }
 
-    override fun setContentAlpha(alpha: Float) {
+    fun setContentAlpha(alpha: Float) {
         multiValueAlpha[INDEX_CONTENT_ALPHA].value = alpha
     }
 
-    override fun setModalAlpha(alpha: Float) {
+    fun setModalAlpha(alpha: Float) {
         multiValueAlpha[INDEX_MODAL_ALPHA].value = alpha
     }
 
-    override fun setFlexSplitAlpha(alpha: Float) {
+    fun setFlexSplitAlpha(alpha: Float) {
         multiValueAlpha[INDEX_MINIMUM_RATIO_ALPHA].value = alpha
     }
-
-    override fun getDrawableWidth(): Int = iconView?.drawableWidth ?: 0
-
-    override fun getDrawableHeight(): Int = iconView?.drawableHeight ?: 0
 
     /** Gets the view split x-axis translation */
     fun getSplitTranslationX(): MultiPropertyFactory<View>.MultiProperty =
@@ -489,9 +490,7 @@ constructor(
                     initialBackground,
                     collapsedBackgroundBounds,
                 )
-            backgroundAnimator.addUpdateListener { valueAnimator: ValueAnimator? ->
-                invalidateOutline()
-            }
+            backgroundAnimator.addUpdateListener { invalidateOutline() }
 
             animator!!.playTogether(
                 expandedTextClipAnim,
@@ -647,16 +646,28 @@ constructor(
         return nextFocus?.requestFocus() ?: super.dispatchKeyEvent(event)
     }
 
-    fun reset() {
-        setText(null)
-        drawable = null
+    override fun setOnLongClickListener(l: OnLongClickListener?) {
+        super.setOnLongClickListener(l?.withFeedback())
     }
 
-    override fun asView(): View = this
+    fun reset() {
+        setText(null)
+        setDrawable(null)
+    }
 
     enum class AppChipStatus {
         Expanded,
         Collapsed,
+    }
+
+    private fun OnLongClickListener.withFeedback(): OnLongClickListener {
+        val delegate = this
+        return OnLongClickListener { v: View ->
+            if (Flags.msdlFeedback()) {
+                msdlPlayerWrapper.playToken(MSDLToken.LONG_PRESS)
+            }
+            delegate.onLongClick(v)
+        }
     }
 
     private companion object {
