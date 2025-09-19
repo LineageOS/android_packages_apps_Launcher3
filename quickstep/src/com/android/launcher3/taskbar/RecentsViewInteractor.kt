@@ -32,6 +32,7 @@ import com.android.launcher3.util.SplitConfigurationOptions
 import com.android.quickstep.views.RecentsView
 import com.android.quickstep.views.TaskView
 import com.android.systemui.shared.recents.model.Task
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executor
 import java.util.function.Consumer
 
@@ -48,9 +49,21 @@ class RecentsViewInteractor(private val recentsView: RecentsView<*, *>) {
     private val mainExecutor: Executor =
         if (enableTaskbarUiThread()) MAIN_EXECUTOR else IMMEDIATE_EXECUTOR
 
-    // TODO(b/404636836): return FutureRunnableList to allow caller add Runnable to be executed
-    // when recentsView.launchRunningDesktopTaskView() returns a RunnableList
-    fun launchRunningDesktopTaskView() = recentsView.launchRunningDesktopTaskView()
+    fun launchRunningDesktopTaskView(taskToRun: Runnable, callbackExecutor: Executor) {
+        CompletableFuture.supplyAsync({ recentsView.launchRunningDesktopTaskView() }, mainExecutor)
+            .thenApplyAsync(
+                { runnableList ->
+                    {
+                        if (runnableList != null) {
+                            runnableList.add { callbackExecutor.execute(taskToRun) }
+                        } else {
+                            callbackExecutor.execute(taskToRun)
+                        }
+                    }
+                },
+                mainExecutor,
+            )
+    }
 
     // TODO(b/404636836): pass callback executor param and return SafeClosable
     fun addSideTaskLaunchCallback(callback: RunnableList?) {
