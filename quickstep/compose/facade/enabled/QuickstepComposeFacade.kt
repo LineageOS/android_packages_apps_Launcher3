@@ -17,8 +17,12 @@
 package com.android.quickstep.compose
 
 import android.content.Context
+import android.os.Trace
 import android.view.View
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composer
+import androidx.compose.runtime.CompositionTracer
+import androidx.compose.runtime.InternalComposeTracingApi
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import com.android.compose.theme.PlatformTheme
@@ -60,5 +64,25 @@ object QuickstepComposeFacade : BaseComposeFacade, QuickstepComposeFeatures {
                 PlatformTheme { AppTimerToast(timerUiState, viewModel) }
             }
         }
+    }
+
+    @OptIn(InternalComposeTracingApi::class)
+    override fun enableCompositionTracing() {
+        Composer.setTracer(
+            object : CompositionTracer {
+                override fun traceEventStart(key: Int, dirty1: Int, dirty2: Int, info: String) {
+                    Trace.traceBegin(Trace.TRACE_TAG_APP, info)
+                }
+
+                override fun traceEventEnd() = Trace.traceEnd(Trace.TRACE_TAG_APP)
+
+                override fun isTraceInProgress(): Boolean = Trace.isEnabled()
+            }
+        )
+    }
+
+    @OptIn(InternalComposeTracingApi::class)
+    override fun disableCompositionTracing() {
+        Composer.setTracer(null)
     }
 }

@@ -56,4 +56,18 @@ object QuickstepComposeFacade : BaseComposeFacade, QuickstepComposeFeatures {
                 " other function on ComposeFacade."
         )
     }
+
+    override fun disableCompositionTracing() {
+        error(
+            "Compose is not available. Make sure to check isComposeAvailable() before calling any" +
+                " other function on ComposeFacade."
+        )
+    }
+
+    override fun enableCompositionTracing() {
+        error(
+            "Compose is not available. Make sure to check isComposeAvailable() before calling any" +
+                " other function on ComposeFacade."
+        )
+    }
 }

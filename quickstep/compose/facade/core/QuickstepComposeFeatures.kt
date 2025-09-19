@@ -32,4 +32,8 @@ interface QuickstepComposeFeatures {
     ): View
 
     fun startTaskAppTimerToast(view: View, viewModel: ViewModel<TaskAppTimerUiState>): View
+
+    fun enableCompositionTracing()
+
+    fun disableCompositionTracing()
 }
