@@ -32,6 +32,7 @@ import android.view.View.OnLayoutChangeListener
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
+import androidx.annotation.VisibleForTesting
 import androidx.core.view.children
 import com.android.launcher3.AppWidgetResizeFrame.Companion.DragHandles.Companion.HANDLE_COUNT
 import com.android.launcher3.DropTarget.DragObject
@@ -856,7 +857,8 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     }
 
     /** A mutable class for describing the range of two int values. */
-    private class IntRange {
+    @VisibleForTesting
+    class IntRange {
         var start: Int = 0
         var end: Int = 0
 
@@ -915,8 +917,8 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
             outputRange: IntRange,
         ): Int {
             applyDelta(moveStart, moveEnd, delta, outputRange)
-            outputRange.start.coerceAtLeast(0)
-            outputRange.end.coerceAtMost(maxEnd)
+            outputRange.start = outputRange.start.coerceAtLeast(0)
+            outputRange.end = outputRange.end.coerceAtMost(maxEnd)
 
             if (outputRange.size() < minSize) {
                 if (moveStart) {
