@@ -46,6 +46,11 @@ public class DragOptions {
      */
     public float preDragEndScale;
 
+    /**
+     * If true, the drag view will not be moved during pre-drag.
+     */
+    public boolean deferDragToPreDragEnd;
+
     /** Scale of the icons over the workspace icon size. */
     public float intrinsicIconScaleFactor = 1f;
 
