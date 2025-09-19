@@ -16,6 +16,7 @@
 package com.android.launcher3.workspace;
 
 import static com.android.launcher3.AbstractFloatingView.TYPE_ACTION_POPUP;
+import static com.android.launcher3.Utilities.findViewByPredicate;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.TestConstants.AppNames.TEST_APP_NAME;
 
@@ -142,7 +143,7 @@ public class ThemeIconsTest extends BaseLauncherActivityTest<Launcher> {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return (BubbleTextView) searchView(parent, v ->
+        return findViewByPredicate(parent, v ->
                 v instanceof BubbleTextView btv
                         && btv.getContentDescription() != null
                         && title.equals(btv.getContentDescription().toString()));

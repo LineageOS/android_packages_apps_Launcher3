@@ -51,7 +51,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class PopupAddDeepShortcutTest {
     private val targetContext: Context = getInstrumentation().targetContext
-    private val launcherActivity = LauncherActivityScenarioRule<Launcher>(targetContext)
+    private val launcherActivity = LauncherActivityScenarioRule<Launcher>()
     private val userHandle = myUserHandle()
     private val appPackage = "appPackage"
     private val appClassName = "class"

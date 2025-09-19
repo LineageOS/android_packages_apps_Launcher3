@@ -16,78 +16,56 @@
 
 package com.android.launcher3.integration.util
 
-import android.content.Context
+import android.content.Intent
 import android.os.SystemClock
 import android.view.InputDevice
 import android.view.KeyCharacterMap
 import android.view.KeyEvent
 import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
-import androidx.core.view.children
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ActivityScenario.ActivityAction
-import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherState
-import com.android.launcher3.debug.TestEventEmitter.TestEvent
-import com.android.launcher3.integration.events.EventWaiter
 import com.android.launcher3.integration.util.events.ActivityTestEvents.createStateWaiter
-import com.android.launcher3.tapl.TestHelpers
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.TestUtil
 import com.android.launcher3.util.Wait.atMost
-import java.util.ArrayDeque
-import java.util.Queue
 import java.util.concurrent.atomic.AtomicReference
 import java.util.function.Function
 import java.util.function.Supplier
-import org.junit.rules.TestRule
-import org.junit.runner.Description
-import org.junit.runners.model.Statement
+import org.junit.rules.ExternalResource
 
-open class LauncherActivityScenarioRule<LAUNCHER_TYPE : Launcher>(
-    val context: Context,
-    val initializeOnStart: Boolean = true,
-) : TestRule {
+open class LauncherActivityScenarioRule<LAUNCHER_TYPE : Launcher> : ExternalResource() {
+
+    private val uiDevice = UiDevice.getInstance(getInstrumentation())
 
     private var currentScenario: ActivityScenario<LAUNCHER_TYPE>? = null
-
-    @JvmField val uiDevice = UiDevice.getInstance(getInstrumentation())
 
     val activity: ActivityScenario<LAUNCHER_TYPE>
         get() =
             currentScenario
                 ?: ActivityScenario.launch<LAUNCHER_TYPE>(
-                        TestHelpers.getHomeIntentInPackage(context),
+                        Intent(Intent.ACTION_MAIN)
+                            .addCategory(Intent.CATEGORY_HOME)
+                            .setPackage(getInstrumentation().targetContext.packageName)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                         null,
                     )
                     .also { currentScenario = it }
 
     fun initializeActivity() {
-        val onLauncherCreateWaiter = EventWaiter(TestEvent.LAUNCHER_ON_CREATE)
-        activity.onActivity { onLauncherCreateWaiter.terminate() }
-        activity.recreate()
+        currentScenario?.recreate()
         activity.moveToState(Lifecycle.State.RESUMED)
-        onLauncherCreateWaiter.waitForSignal()
         TestUtil.runOnExecutorSync(Executors.MODEL_EXECUTOR) {}
         TestUtil.runOnExecutorSync(Executors.UI_HELPER_EXECUTOR) {}
-        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+        getInstrumentation().waitForIdleSync()
     }
 
-    override fun apply(base: Statement, description: Description?): Statement {
-        return object : Statement() {
-            override fun evaluate() {
-                if (initializeOnStart) {
-                    initializeActivity()
-                }
-                base.evaluate()
-                activity.close()
-            }
-        }
+    override fun after() {
+        close()
     }
 
     fun close() {
@@ -145,19 +123,4 @@ open class LauncherActivityScenarioRule<LAUNCHER_TYPE : Launcher>(
 
     fun isInState(state: Supplier<LauncherState>): Boolean =
         getFromLauncher { it.stateManager.state == state.get() }!!
-
-    /**
-     * For the given view, it iterates over all of the child views in a preorder traversal returning
-     * the first match to the filter
-     */
-    fun ViewGroup.searchView(filter: (view: View) -> Boolean): View? {
-        val viewQueue: Queue<View> = ArrayDeque()
-        viewQueue.add(this)
-        while (!viewQueue.isEmpty()) {
-            val view = viewQueue.poll()
-            if (filter(view)) return view
-            if (view is ViewGroup) viewQueue.addAll(view.children)
-        }
-        return null
-    }
 }

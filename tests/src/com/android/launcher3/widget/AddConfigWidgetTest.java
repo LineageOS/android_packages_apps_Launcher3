@@ -17,6 +17,7 @@ package com.android.launcher3.widget;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.launcher3.Utilities.findViewByPredicate;
 import static com.android.launcher3.util.LauncherBindableItemsContainer.ItemOperator;
 
 import static org.junit.Assert.assertEquals;
@@ -125,7 +126,7 @@ public class AddConfigWidgetTest extends BaseLauncherActivityTest<Launcher> {
 
         View widgetView = getLauncherActivity()
                 .getOnceNotNull("Widget not found",
-                        l -> searchView(
+                        l -> findViewByPredicate(
                                 l.getDragLayer(),
                                 v -> v instanceof WidgetCell
                                         && v.getTag() instanceof PendingAddWidgetInfo pawi

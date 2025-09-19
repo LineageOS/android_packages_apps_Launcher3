@@ -81,7 +81,7 @@ class IntegrationReorderWidgetsTest {
 
     @get:Rule var grantWidgetRule: ShellCommandRule = ShellCommandRule.grantWidgetBind()
 
-    @get:Rule var launcherActivity = LauncherActivityScenarioRule<Launcher>(targetContext, false)
+    @get:Rule var launcherActivity = LauncherActivityScenarioRule<Launcher>()
 
     private var workspaceBuilder: TestWorkspaceBuilder? = null
 

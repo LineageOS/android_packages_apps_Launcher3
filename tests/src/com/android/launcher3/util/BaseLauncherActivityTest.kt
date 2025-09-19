@@ -16,9 +16,6 @@
 package com.android.launcher3.util
 
 import android.content.Context
-import android.view.View
-import android.view.ViewGroup
-import androidx.core.view.children
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.Launcher
@@ -26,7 +23,6 @@ import com.android.launcher3.LauncherAppState
 import com.android.launcher3.integration.util.LauncherActivityScenarioRule
 import com.android.launcher3.util.ModelTestExtensions.loadModelSync
 import com.android.launcher3.util.Wait.atMost
-import java.util.function.Predicate
 import org.junit.Rule
 
 @Deprecated("Use LauncherActivityScenarioRule instead")
@@ -37,9 +33,7 @@ import org.junit.Rule
  */
 open class BaseLauncherActivityTest<LAUNCHER_TYPE : Launcher> {
 
-    @get:Rule
-    var launcherActivity =
-        LauncherActivityScenarioRule<LAUNCHER_TYPE>(getInstrumentation().targetContext)
+    @get:Rule val launcherActivity = LauncherActivityScenarioRule<LAUNCHER_TYPE>()
 
     var launcherTestInteractions = LauncherTestInteractions(launcherActivity)
 
@@ -60,16 +54,4 @@ open class BaseLauncherActivityTest<LAUNCHER_TYPE : Launcher> {
         condition: (LAUNCHER_TYPE) -> Boolean,
         timeout: Long,
     ) = atMost(message, timeout) { launcherActivity.getFromLauncher(condition)!! }
-
-    fun ViewGroup.searchView(filter: Predicate<View>): View? {
-        if (filter.test(this)) return this
-        for (child in children) {
-            if (filter.test(child)) return child
-            if (child is ViewGroup)
-                child.searchView(filter)?.let {
-                    return it
-                }
-        }
-        return null
-    }
 }
