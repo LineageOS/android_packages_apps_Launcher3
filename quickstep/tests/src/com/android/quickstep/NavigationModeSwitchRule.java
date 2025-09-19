@@ -32,8 +32,6 @@ import android.util.Log;
 import androidx.test.uiautomator.UiDevice;
 
 import com.android.launcher3.tapl.LauncherInstrumentation;
-import com.android.launcher3.tapl.TestHelpers;
-import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.TestUtil;
 import com.android.launcher3.util.rule.FailureWatcher;
 import com.android.launcher3.util.ui.AbstractLauncherUiTest;
@@ -47,8 +45,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Test rule that allows executing a test with Quickstep on and then Quickstep off.
@@ -71,77 +67,64 @@ public class NavigationModeSwitchRule implements TestRule {
 
     private final LauncherInstrumentation mLauncher;
 
-    static final DisplayController DISPLAY_CONTROLLER =
-            DisplayController.INSTANCE.get(getInstrumentation().getTargetContext());
-
     public NavigationModeSwitchRule(LauncherInstrumentation launcher) {
         mLauncher = launcher;
     }
 
     @Override
     public Statement apply(Statement base, Description description) {
-        if (TestHelpers.isInLauncherProcess() &&
-                description.getAnnotation(NavigationModeSwitch.class) != null) {
-            Mode mode = description.getAnnotation(NavigationModeSwitch.class).mode();
-            return new Statement() {
-                @Override
-                public void evaluate() throws Throwable {
-                    mLauncher.enableDebugTracing();
-                    final Context context = getInstrumentation().getContext();
-                    final int currentInteractionMode =
-                            LauncherInstrumentation.getCurrentInteractionMode(context);
-                    final String prevOverlayPkg = getCurrentOverlayPackage(currentInteractionMode);
-                    final LauncherInstrumentation.NavigationModel originalMode =
-                            mLauncher.getNavigationModel();
-                    try {
-                        if (mode == ZERO_BUTTON || mode == ALL) {
-                            evaluateWithZeroButtons();
-                        }
-                        if (mode == THREE_BUTTON || mode == ALL) {
-                            evaluateWithThreeButtons();
-                        }
-                    } catch (Throwable e) {
-                        Log.e(TAG, "Error", e);
-                        throw e;
-                    } finally {
-                        Log.d(TAG, "In Finally block");
-                        assertTrue(mLauncher, "Couldn't set overlay",
-                                setActiveOverlay(mLauncher, prevOverlayPkg, originalMode,
-                                        description), description);
-                    }
-                }
-
-                private void evaluateWithThreeButtons() throws Throwable {
-                    if (setActiveOverlay(mLauncher, NAV_BAR_MODE_3BUTTON_OVERLAY,
-                            LauncherInstrumentation.NavigationModel.THREE_BUTTON, description)) {
-                        base.evaluate();
-                    }
-                }
-
-                private void evaluateWithZeroButtons() throws Throwable {
-                    if (setActiveOverlay(mLauncher, NAV_BAR_MODE_GESTURAL_OVERLAY,
-                            LauncherInstrumentation.NavigationModel.ZERO_BUTTON, description)) {
-                        base.evaluate();
-                    }
-                }
-            };
-        } else {
+        if (description.getAnnotation(NavigationModeSwitch.class) == null) {
             return base;
         }
+        Mode mode = description.getAnnotation(NavigationModeSwitch.class).mode();
+        return new Statement() {
+            @Override
+            public void evaluate() throws Throwable {
+                mLauncher.enableDebugTracing();
+                final Context context = getInstrumentation().getContext();
+                final int currentInteractionMode =
+                        LauncherInstrumentation.getCurrentInteractionMode(context);
+                final String prevOverlayPkg = getCurrentOverlayPackage(currentInteractionMode);
+                final LauncherInstrumentation.NavigationModel originalMode =
+                        mLauncher.getNavigationModel();
+                try {
+                    if (mode == ZERO_BUTTON || mode == ALL) {
+                        evaluateWithZeroButtons();
+                    }
+                    if (mode == THREE_BUTTON || mode == ALL) {
+                        evaluateWithThreeButtons();
+                    }
+                } catch (Throwable e) {
+                    Log.e(TAG, "Error", e);
+                    throw e;
+                } finally {
+                    Log.d(TAG, "In Finally block");
+                    assertTrue(mLauncher, "Couldn't set overlay",
+                            setActiveOverlay(mLauncher, prevOverlayPkg, originalMode,
+                                    description), description);
+                }
+            }
+
+            private void evaluateWithThreeButtons() throws Throwable {
+                if (setActiveOverlay(mLauncher, NAV_BAR_MODE_3BUTTON_OVERLAY,
+                        LauncherInstrumentation.NavigationModel.THREE_BUTTON, description)) {
+                    base.evaluate();
+                }
+            }
+
+            private void evaluateWithZeroButtons() throws Throwable {
+                if (setActiveOverlay(mLauncher, NAV_BAR_MODE_GESTURAL_OVERLAY,
+                        LauncherInstrumentation.NavigationModel.ZERO_BUTTON, description)) {
+                    base.evaluate();
+                }
+            }
+        };
     }
 
     public static String getCurrentOverlayPackage(int currentInteractionMode) {
         return QuickStepContract.isGesturalMode(currentInteractionMode)
                 ? NAV_BAR_MODE_GESTURAL_OVERLAY
                 : NAV_BAR_MODE_3BUTTON_OVERLAY;
-    }
-
-    private static LauncherInstrumentation.NavigationModel currentSysUiNavigationMode() {
-        return LauncherInstrumentation.getNavigationModel(
-                DisplayController.getNavigationMode(
-                        getInstrumentation().
-                                getTargetContext()).
-                        resValue);
     }
 
     public static boolean setActiveOverlay(LauncherInstrumentation launcher, String overlayPackage,
@@ -157,27 +140,6 @@ public class NavigationModeSwitchRule implements TestRule {
                 String.format("cmd overlay enable-exclusive --user %d --category %s",
                         Process.myUserHandle().getIdentifier(),
                         overlayPackage));
-
-        if (currentSysUiNavigationMode() != expectedMode) {
-            final CountDownLatch latch = new CountDownLatch(1);
-            final Context targetContext = getInstrumentation().getTargetContext();
-            final DisplayController.DisplayInfoChangeListener listener =
-                    (context, info, flags) -> {
-                        if (LauncherInstrumentation.getNavigationModel(
-                                info.getNavigationMode().resValue) == expectedMode) {
-                            latch.countDown();
-                        }
-                    };
-            targetContext.getMainExecutor().execute(() ->
-                    DISPLAY_CONTROLLER.addChangeListener(listener));
-            latch.await(60, TimeUnit.SECONDS);
-            targetContext.getMainExecutor().execute(() ->
-                    DISPLAY_CONTROLLER.removeChangeListener(listener));
-
-            assertTrue(launcher, "Navigation mode didn't change to " + expectedMode,
-                    currentSysUiNavigationMode() == expectedMode, description);
-
-        }
 
         launcher.waitForCondition("Couldn't switch to " + overlayPackage,
                 TestUtil.DEFAULT_UI_TIMEOUT, () -> launcher.getNavigationModel() == expectedMode);
