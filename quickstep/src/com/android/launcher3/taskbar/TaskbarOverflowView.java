@@ -26,6 +26,7 @@ import android.graphics.BlendMode;
 import android.graphics.BlendModeColorFilter;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.PointF;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
@@ -59,6 +60,17 @@ import java.util.List;
  * each other in counter clockwise manner (icons of tasks partially overlapping with each other).
  */
 public class TaskbarOverflowView extends FrameLayout implements Reorderable {
+
+    /**
+     * The height divided by the width of the horizontal box containing two overlapping app icons.
+     * According to the spec, this ratio is constant for different sizes of taskbar app icons.
+     * Assuming the width of this box = taskbar app icon size - 2 paddings - 2 stroke widths, and
+     * the height = width * 0.61, which is also equal to the height of a single item in the
+     * preview.
+     */
+    public static final float TWO_ITEM_ICONS_BOX_ASPECT_RATIO = 0.61f;
+    public static final long ITEM_ICON_SIZE_ANIMATION_DURATION = 500L;
+
     private static final int ALPHA_TRANSPARENT = 0;
     private static final int ALPHA_OPAQUE = 255;
     private static final long ANIMATION_DURATION_APPS_TO_LEAVE_BEHIND = 300L;
@@ -66,19 +78,12 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
     private static final long ANIMATION_SET_DURATION = 1000L;
     private static final long ITEM_ICON_CENTER_OFFSET_ANIMATION_DURATION = 500L;
     private static final long ITEM_ICON_COLOR_FILTER_OPACITY_ANIMATION_DURATION = 600L;
-    private static final long ITEM_ICON_SIZE_ANIMATION_DURATION = 500L;
     private static final long ITEM_ICON_STROKE_WIDTH_ANIMATION_DURATION = 500L;
     private static final long LEAVE_BEHIND_ANIMATIONS_DELAY = 500L;
     private static final long LEAVE_BEHIND_OPACITY_ANIMATION_DURATION = 100L;
     private static final long LEAVE_BEHIND_SIZE_ANIMATION_DURATION = 500L;
     private static final float LEAVE_BEHIND_SIZE_SCALE_DOWN_MULTIPLIER = 0.83f;
     private static final int MAX_ITEMS_IN_PREVIEW = 4;
-
-    // The height divided by the width of the horizontal box containing two overlapping app icons.
-    // According to the spec, this ratio is constant for different sizes of taskbar app icons.
-    // Assuming the width of this box = taskbar app icon size - 2 paddings - 2 stroke widths, and
-    // the height = width * 0.61, which is also equal to the height of a single item in the preview.
-    private static final float TWO_ITEM_ICONS_BOX_ASPECT_RATIO = 0.61f;
 
     private static final FloatProperty<TaskbarOverflowView> ITEM_ICON_CENTER_OFFSET =
             new FloatProperty<>("itemIconCenterOffset") {
@@ -190,6 +195,7 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
     private float mLeaveBehindSizeScaledDown;
     private float mLeaveBehindSizeDefault;
     private float mLeaveBehindSize;  // [mLeaveBehindSizeScaledDown..mLeaveBehindSizeDefault]
+    private boolean mIsFirstItemHiddenForAnimation;
 
     public TaskbarOverflowView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -271,6 +277,10 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
                 continue;
             }
 
+            if (i == 0 && mIsFirstItemHiddenForAnimation) {
+                continue;
+            }
+
             float itemCenterX = getItemXOffset(mItemIconCenterOffset, mIsRtlLayout, i, itemsToShow);
             float itemCenterY = getItemYOffset(mItemIconCenterOffset, i, itemsToShow);
 
@@ -325,6 +335,26 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
 
     List<ItemInfo> getOverflowInfoList() {
         return mItems.stream().map(item -> ((ItemInfoWrapper) item).getItemInfo()).toList();
+    }
+
+    /**
+     * Updates the first item in the preview to be hidden to allow another icon to animate into
+     * its place.
+     * @param isHidden The hidden state for the first item in the preview is hidden.
+     */
+    public void setFirstItemHiddenForAnimation(boolean isHidden) {
+        if (mIsFirstItemHiddenForAnimation != isHidden) {
+            mIsFirstItemHiddenForAnimation = isHidden;
+            invalidate();
+        }
+    }
+
+    /**
+     * Returns {@code true} if the first item in the preview is hidden to allow another icon
+     * to animate into its place.
+     */
+    public boolean isFirstItemHiddenForAnimation() {
+        return mIsFirstItemHiddenForAnimation;
     }
 
     /**
@@ -510,5 +540,26 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
         }
         // First half of items is on top, later half is on bottom.
         return (itemIndex + 1 <= itemCount / 2 ? -1 : 1) * baseOffset;
+    }
+
+    /**
+     * Calculate the x and y offsets of the first item.
+     */
+    public PointF getOverlayOffsetsForFirstItem(boolean isMovingAway, int indexOfItem) {
+        int itemsToShow = Math.min(mItems.size(), MAX_ITEMS_IN_PREVIEW);
+        int totalItems = isMovingAway && itemsToShow < MAX_ITEMS_IN_PREVIEW
+                ? itemsToShow + 1 : itemsToShow;
+
+        // Reverse the overlay offset item index for the special case of overflow icon removing
+        // from view in RTL layout,
+        if (mIsRtlLayout && itemsToShow == 0 && isMovingAway) {
+            indexOfItem = indexOfItem == 0 ? 1 : 0;
+        }
+
+        float xOffset = getItemXOffset(
+                mItemIconCenterOffset, mIsRtlLayout, indexOfItem, totalItems);
+        float yOffset = getItemYOffset(mItemIconCenterOffset, indexOfItem, totalItems);
+
+        return new PointF(xOffset, yOffset);
     }
 }
