@@ -37,7 +37,7 @@
     <string name="manage_windows_option_taskbar" msgid="2294109489960654212">"ფანჯრების მართვა"</string>
     <!-- no translation found for close_app_taskbar (3238979263877091273) -->
     <skip />
-    <string name="save_app_pair" msgid="5647523853662686243">"აპთა წყვილის შენახვა"</string>
+    <string name="save_app_pair" msgid="5647523853662686243">"წყვილის შენახვა"</string>
     <string name="app_pair_default_title" msgid="4045241727446873529">"<xliff:g id="APP1">%1$s</xliff:g> | <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="app_pair_unlaunchable_at_screen_size" msgid="3446551575502685376">"ამ მოწყობილობაზე აღნიშნული აპთა წყვილი არ არის მხარდაჭერილი"</string>
     <string name="app_pair_needs_unfold" msgid="4588897528143807002">"გაშალეთ მოწყობილობა ამ აპთა წყვილის გამოსაყენებლად"</string>

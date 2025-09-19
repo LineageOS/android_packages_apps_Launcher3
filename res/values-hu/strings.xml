@@ -35,8 +35,7 @@
     <string name="close_task_accessibility" msgid="4765872229211282647">"%1$s bezárása"</string>
     <string name="new_window_option_taskbar" msgid="6448780542727767211">"Új ablak"</string>
     <string name="manage_windows_option_taskbar" msgid="2294109489960654212">"Ablakok kezelése"</string>
-    <!-- no translation found for close_app_taskbar (3238979263877091273) -->
-    <skip />
+    <string name="close_app_taskbar" msgid="3238979263877091273">"Bezárás"</string>
     <string name="save_app_pair" msgid="5647523853662686243">"App-pár mentése"</string>
     <string name="app_pair_default_title" msgid="4045241727446873529">"<xliff:g id="APP1">%1$s</xliff:g> | <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="app_pair_unlaunchable_at_screen_size" msgid="3446551575502685376">"Ezt az alkalmazáspárt nem támogatja az eszköz"</string>

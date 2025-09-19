@@ -107,7 +107,7 @@
     <string name="bubble" msgid="3072951361014076670">"Бөмбөлөг"</string>
     <string name="widget_settings" msgid="5280157748464495511">"Тохиргоо"</string>
     <string name="pin_to_taskbar" msgid="5914002252642242332">"Ажлын хэсэгт бэхлэх"</string>
-    <string name="unpin_from_taskbar" msgid="1025883383457627426">"Ажлын хэсэгт бэхэлснийг болиулах"</string>
+    <string name="unpin_from_taskbar" msgid="1025883383457627426">"Бэхэлснийг болиулах"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"товчлол суулгах"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"Апп нь хэрэглэгчийн оролцоогүйгээр товчлолыг нэмэж чадна"</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"нүүрний тохиргоо болон товчлолыг унших"</string>
@@ -137,7 +137,7 @@
     <string name="folder_name_format_exact" msgid="8626242716117004803">"Фолдер: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> зүйл"</string>
     <string name="folder_name_format_exact_with_dot" msgid="30828041991324911">"Фолдер: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> зүйл, мэдэгдэлтэй байна"</string>
     <string name="folder_name_format_overflow" msgid="4270108890534995199">"Фолдер: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> эсвэл үүнээс олон зүйл"</string>
-    <string name="folder_name_format_overflow_with_dot" msgid="9174809519194154156">"Фолдер: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> эсвэл бусад зүйл, мэдэгдэлтэй байна"</string>
+    <string name="folder_name_format_overflow_with_dot" msgid="9174809519194154156">"Фолдер: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> буюу үүнээс олон зүйл, мэдэгдэлтэй байна"</string>
     <string name="unnamed_folder" msgid="2420192029474044442">"Нэргүй фолдер"</string>
     <string name="app_pair_name_format" msgid="8134106404716224054">"Апп хослуулалт: <xliff:g id="APP1">%1$s</xliff:g> болон <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="styles_wallpaper_button_text" msgid="8216961355289236794">"Дэлгэцийн зураг, загвар"</string>
