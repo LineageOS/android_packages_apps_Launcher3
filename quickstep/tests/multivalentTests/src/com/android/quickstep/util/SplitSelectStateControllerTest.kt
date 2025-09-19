@@ -25,6 +25,7 @@ import android.graphics.Rect
 import android.os.UserHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.LauncherState
+import com.android.launcher3.SplitScreenUiState
 import com.android.launcher3.logging.StatsLogManager
 import com.android.launcher3.logging.StatsLogManager.StatsLogger
 import com.android.launcher3.model.data.ItemInfo
@@ -69,6 +70,7 @@ class SplitSelectStateControllerTest {
     private val pendingIntent: PendingIntent = mock()
     private val splitFromDesktopController: SplitFromDesktopController = mock()
     private val recentsView: RecentsView<*, *> = mock()
+    private val splitScreenUiState: SplitScreenUiState = SplitScreenUiState()
 
     private lateinit var splitSelectStateController: SplitSelectStateController
 
@@ -95,6 +97,7 @@ class SplitSelectStateControllerTest {
                 systemUiProxy,
                 recentsModel,
                 null, /*activityBackCallback*/
+                splitScreenUiState,
             )
     }
 

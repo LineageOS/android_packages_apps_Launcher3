@@ -26,6 +26,7 @@ import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherInteractor
 import com.android.launcher3.LauncherState
 import com.android.launcher3.LauncherUiState
+import com.android.launcher3.SplitScreenUiState
 import com.android.launcher3.statemanager.StateManager
 import com.android.launcher3.taskbar.TaskbarManagerImpl.TASKBAR_UI_THREAD
 import com.android.launcher3.taskbar.bubbles.BubbleControllers
@@ -132,10 +133,14 @@ class TaskbarLauncherStateControllerTest {
                 on { state } doReturn mock<LauncherState>()
             }
         val dp = taskbarUnitTestRule.activityContext.deviceProfile
+        val mockedSplitScreenUiState =
+            mock<SplitScreenUiState> {
+                on { isSplitSelectActiveRef } doReturn MutableListenableRef(false)
+            }
         val mockedLauncherUiState =
             mock<LauncherUiState> {
                 on { deviceProfileRef } doReturn MutableListenableRef(dp)
-                on { isSplitSelectActiveRef } doReturn MutableListenableRef(false)
+                on { splitScreenUiState } doReturn mockedSplitScreenUiState
                 on { launcherStateRef } doReturn MutableListenableRef(LauncherState.NORMAL)
                 on { taskbarAlignmentChannelAlpha } doReturn MutableListenableRef(0f)
             }

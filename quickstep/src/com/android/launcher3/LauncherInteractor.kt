@@ -204,6 +204,8 @@ class LauncherInteractor(private val launcher: QuickstepLauncher) {
         }
     }
 
+    @AnyThread fun isSplitSelectActive() = launcher.isSplitSelectionActive
+
     @Deprecated(
         "Should be removed once we turned on [refactorTaskbarUiState()] flag",
         ReplaceWith("LauncherUiState.isResumed()"),
@@ -231,13 +233,6 @@ class LauncherInteractor(private val launcher: QuickstepLauncher) {
     )
     @MainThread
     fun getDeviceProfile(): DeviceProfile = launcher.deviceProfile
-
-    @Deprecated(
-        "Should be removed once we turned on [refactorTaskbarUiState()] flag",
-        ReplaceWith("LauncherUiState.isSplitSelectionActiveRef.value()"),
-    )
-    @MainThread
-    fun isSplitSelectActive() = launcher.isSplitSelectionActive
 
     @Deprecated(
         "Should be removed once we turned on [refactorTaskbarUiState()] flag",

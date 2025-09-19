@@ -61,6 +61,7 @@ import com.android.launcher3.LauncherAnimationRunner.AnimationResult;
 import com.android.launcher3.LauncherAnimationRunner.RemoteAnimationFactory;
 import com.android.launcher3.LauncherRootView;
 import com.android.launcher3.R;
+import com.android.launcher3.SplitScreenUiState;
 import com.android.launcher3.anim.AnimatorPlaybackController;
 import com.android.launcher3.anim.PendingAnimation;
 import com.android.launcher3.compat.AccessibilityManagerCompat;
@@ -141,7 +142,7 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
                 new SplitSelectStateController(this, getStateManager(),
                         null /* depthController */, getStatsLogManager(),
                         systemUiProxy, RecentsModel.INSTANCE.get(this),
-                        null /*activityBackCallback*/);
+                        null /*activityBackCallback*/, new SplitScreenUiState());
         // Setup root and child views
         inflateRootView(R.layout.fallback_recents_activity);
         LauncherRootView rootView = getRootView();

@@ -27,8 +27,11 @@ import android.content.pm.PackageManager
 import android.content.pm.ShortcutInfo
 import android.os.UserHandle
 import android.util.Log
+import androidx.annotation.AnyThread
 import com.android.internal.annotations.VisibleForTesting
-import com.android.launcher3.LauncherUiState
+import com.android.launcher3.BuildConfig
+import com.android.launcher3.Flags.refactorTaskbarUiState
+import com.android.launcher3.SplitScreenUiState
 import com.android.launcher3.SplitSelectTask
 import com.android.launcher3.logging.StatsLogManager.EventEnum
 import com.android.launcher3.model.data.ItemInfo
@@ -54,7 +57,7 @@ import java.io.PrintWriter
  * [SplitLaunchType] indicates the type of tasks/apps/intents being launched given the provided
  * state
  */
-class SplitSelectDataHolder(var context: Context?) {
+class SplitSelectDataHolder(var context: Context?, val splitScreenUiState: SplitScreenUiState) {
     val TAG = SplitSelectDataHolder::class.simpleName
 
     /**
@@ -95,18 +98,20 @@ class SplitSelectDataHolder(var context: Context?) {
     private var secondItemInfo: ItemInfo? = null
     private var splitEvent: EventEnum? = null
 
-    private var launcherUiState: LauncherUiState? = null
-
     private var initialTask = SplitSelectTask()
         set(value) {
             field = value
-            launcherUiState?.setSplitSelectInitialTask(value)
+            if (refactorTaskbarUiState()) {
+                splitScreenUiState.setSplitSelectInitialTask(value)
+            }
         }
 
     private var secondTask = SplitSelectTask()
         set(value) {
             field = value
-            launcherUiState?.setSplitSelectSecondTask(value)
+            if (refactorTaskbarUiState()) {
+                splitScreenUiState.setSplitSelectSecondTask(value)
+            }
         }
 
     private var widgetSecondIntent: Intent? = null
@@ -117,10 +122,6 @@ class SplitSelectDataHolder(var context: Context?) {
 
     fun onDestroy() {
         context = null
-    }
-
-    fun setLauncherUiState(launcherUiState: LauncherUiState) {
-        this.launcherUiState = launcherUiState
     }
 
     /**
@@ -411,9 +412,21 @@ class SplitSelectDataHolder(var context: Context?) {
     /**
      * @return `true` if first task has been selected and waiting for the second task to be chosen
      */
+    @AnyThread
     fun isSplitSelectActive(): Boolean {
-        return initialTask.isIntentSet && !secondTask.isIntentSet
+        return if (refactorTaskbarUiState()) {
+            val ret = splitScreenUiState.isSplitSelectActiveRef.value
+            if (BuildConfig.IS_STUDIO_BUILD && ret != legacyIsSplitSelectActive()) {
+                throw IllegalStateException("isSplitSelectActive doesn't match")
+            }
+            ret
+        } else {
+            legacyIsSplitSelectActive()
+        }
     }
+
+    @Deprecated("To be removed after turning on refactorTaskbarUiState()")
+    private fun legacyIsSplitSelectActive() = initialTask.isIntentSet && !secondTask.isIntentSet
 
     /**
      * @return `true` if the first and second task have been chosen and split is waiting to be
