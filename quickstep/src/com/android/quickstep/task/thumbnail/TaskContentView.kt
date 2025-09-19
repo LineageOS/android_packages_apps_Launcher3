@@ -156,12 +156,12 @@ class TaskContentView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     override fun setScaleX(scaleX: Float) {
         super.setScaleX(scaleX)
-        taskThumbnailView?.parentScaleXUpdated(scaleX)
+        taskThumbnailView?.parentScaleX = scaleX
     }
 
     override fun setScaleY(scaleY: Float) {
         super.setScaleY(scaleY)
-        taskThumbnailView?.parentScaleYUpdated(scaleY)
+        taskThumbnailView?.parentScaleY = scaleY
     }
 
     override fun onRecycle() {
