@@ -20,13 +20,17 @@ import android.content.ContentResolver.NOTIFY_INSERT
 import android.content.ContentResolver.NOTIFY_UPDATE
 import android.net.Uri
 import android.os.UserHandle
+import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherModel
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
+import com.android.launcher3.Utilities.qsbOnFirstScreen
+import com.android.launcher3.WorkspaceLayoutManager
 import com.android.launcher3.icons.IconCache
 import com.android.launcher3.model.AllAppsList
 import com.android.launcher3.model.BgDataModel
 import com.android.launcher3.model.ModelTaskController
 import com.android.launcher3.model.WorkspaceItemSpaceFinder
+import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.util.IntSet
 import dagger.assisted.Assisted
@@ -39,6 +43,7 @@ class HomeScreenFilesChangedTask
 constructor(
     @Assisted private val fileChange: HomeScreenFilesProvider.FileChange,
     private val iconCache: IconCache,
+    private val idp: InvariantDeviceProfile,
     private val workspaceItemSpaceFinder: WorkspaceItemSpaceFinder,
 ) : LauncherModel.ModelUpdateTask {
     override fun execute(
@@ -75,7 +80,28 @@ constructor(
                 bitmap = iconCache.getDefaultIcon(user)
             }
         val coords =
-            workspaceItemSpaceFinder.findSpaceForItem(ArrayList(), item.spanX, item.spanY, IntSet())
+            workspaceItemSpaceFinder.findSpaceForItem(
+                ArrayList<ItemInfo>().apply {
+                    if (qsbOnFirstScreen()) {
+                        // Reserve layout space for the search container. Note that this is not
+                        // required when [Flags.FLAG_INJECTABLE_MODEL_ITEMS] is enabled as injected
+                        // items will already be accounted for in the [BgDataModel].
+                        add(
+                            WorkspaceItemInfo().apply {
+                                cellX = 0
+                                cellY = 0
+                                container = CONTAINER_DESKTOP
+                                screenId = WorkspaceLayoutManager.FIRST_SCREEN_ID
+                                spanX = idp.numSearchContainerColumns
+                                spanY = 1
+                            }
+                        )
+                    }
+                },
+                item.spanX,
+                item.spanY,
+                IntSet(),
+            )
         taskController
             .getModelWriter()
             .addItemToDatabase(item, CONTAINER_DESKTOP, coords.screenId, coords.cellX, coords.cellY)

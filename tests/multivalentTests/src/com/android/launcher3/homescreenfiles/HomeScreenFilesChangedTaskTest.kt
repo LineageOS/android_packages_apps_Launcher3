@@ -23,8 +23,11 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Process
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FILE
+import com.android.launcher3.Utilities.qsbOnFirstScreen
+import com.android.launcher3.WorkspaceLayoutManager
 import com.android.launcher3.icons.IconCache
 import com.android.launcher3.model.AllAppsList
 import com.android.launcher3.model.BgDataModel
@@ -39,11 +42,13 @@ import com.android.launcher3.util.ReflectionHelpers
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.CompletableFuture
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.MockitoAnnotations
+import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
@@ -53,11 +58,15 @@ import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class HomeScreenFilesChangedTaskTest {
+
+    @get:Rule val mockitoRule = MockitoJUnit.rule()
+
     @Mock private lateinit var modelTaskController: ModelTaskController
     @Mock private lateinit var modelWriter: ModelWriter
     @Mock private lateinit var bgDataModel: BgDataModel
     @Mock private lateinit var allAppsList: AllAppsList
     @Mock private lateinit var iconCache: IconCache
+    @Mock private lateinit var idp: InvariantDeviceProfile
     @Mock private lateinit var workspaceItemSpaceFinder: WorkspaceItemSpaceFinder
 
     private val testUri = Uri.parse("content://media/external_primary/file/1")
@@ -66,11 +75,31 @@ class HomeScreenFilesChangedTaskTest {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.openMocks(this)
+        idp.numSearchContainerColumns = 3
         whenever(modelTaskController.getModelWriter()).thenReturn(modelWriter)
         whenever(bgDataModel.updateAndCollectWorkspaceItemInfos(any(), any(), isNull()))
             .thenCallRealMethod()
-        whenever(workspaceItemSpaceFinder.findSpaceForItem(any(), any(), any(), any()))
+        val maybeReservesSpaceForQsb: (ArrayList<WorkspaceItemInfo>) -> Boolean = { addItemsFinal ->
+            !qsbOnFirstScreen() ||
+                addItemsFinal.any {
+                    with(it) {
+                        cellX == 0 &&
+                            cellY == 0 &&
+                            container == CONTAINER_DESKTOP &&
+                            screenId == WorkspaceLayoutManager.FIRST_SCREEN_ID &&
+                            spanX == idp.numSearchContainerColumns &&
+                            spanY == 1
+                    }
+                }
+        }
+        whenever(
+                workspaceItemSpaceFinder.findSpaceForItem(
+                    argThat(maybeReservesSpaceForQsb),
+                    any(),
+                    any(),
+                    any(),
+                )
+            )
             .thenReturn(WorkspaceItemCoordinates(2, 3, 4))
         ReflectionHelpers.setField(bgDataModel, "itemsIdMap", wsData)
     }
@@ -87,6 +116,7 @@ class HomeScreenFilesChangedTaskTest {
                     /*uriAlias=*/ null,
                 ),
                 iconCache,
+                idp,
                 workspaceItemSpaceFinder,
             )
         task.execute(modelTaskController, bgDataModel, allAppsList)
@@ -122,6 +152,7 @@ class HomeScreenFilesChangedTaskTest {
                     /*uriAlias=*/ null,
                 ),
                 iconCache,
+                idp,
                 workspaceItemSpaceFinder,
             )
         task.execute(modelTaskController, bgDataModel, allAppsList)
@@ -166,6 +197,7 @@ class HomeScreenFilesChangedTaskTest {
                     uriAlias,
                 ),
                 iconCache,
+                idp,
                 workspaceItemSpaceFinder,
             )
         task.execute(modelTaskController, bgDataModel, allAppsList)
@@ -209,6 +241,7 @@ class HomeScreenFilesChangedTaskTest {
                     /*uriAlias=*/ null,
                 ),
                 iconCache,
+                idp,
                 workspaceItemSpaceFinder,
             )
         task.execute(modelTaskController, bgDataModel, allAppsList)
@@ -231,6 +264,7 @@ class HomeScreenFilesChangedTaskTest {
                     /*uriAlias=*/ null,
                 ),
                 iconCache,
+                idp,
                 workspaceItemSpaceFinder,
             )
         task.execute(modelTaskController, bgDataModel, allAppsList)
