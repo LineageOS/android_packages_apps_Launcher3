@@ -16,7 +16,6 @@
 
 package com.android.launcher3.model
 
-import android.content.ComponentName
 import android.content.pm.LauncherApps
 import android.os.Process
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -48,7 +47,7 @@ class AllAppsListTest {
             assertFalse(appsList.getAndResetChangeFlag())
             assertTrue(appsList.data.isEmpty())
 
-            appsList.updatePackage(context, TEST_PACKAGE, user, HashSet())
+            appsList.updatePackage(context, TEST_PACKAGE, user)
             assertTrue(appsList.getAndResetChangeFlag())
             assertFalse(appsList.data.isEmpty())
         }
@@ -57,7 +56,7 @@ class AllAppsListTest {
     @Test
     fun removePackage_removed_data() {
         TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {
-            appsList.updatePackage(context, TEST_PACKAGE, user, HashSet())
+            appsList.updatePackage(context, TEST_PACKAGE, user)
             appsList.getAndResetChangeFlag()
             assertFalse(appsList.data.isEmpty())
 
@@ -73,18 +72,16 @@ class AllAppsListTest {
             val launcherApps = context.spyService(LauncherApps::class.java)
             val allApps = launcherApps.getActivityList(TEST_PACKAGE, user)
 
-            appsList.updatePackage(context, TEST_PACKAGE, user, HashSet())
+            appsList.updatePackage(context, TEST_PACKAGE, user)
             appsList.getAndResetChangeFlag()
             assertFalse(appsList.data.isEmpty())
 
             doReturn(listOf(allApps[0], allApps[1]))
                 .whenever(launcherApps)
                 .getActivityList(TEST_PACKAGE, user)
-            val outRemovedComponents = HashSet<ComponentName>()
-            appsList.updatePackage(context, TEST_PACKAGE, user, outRemovedComponents)
+            appsList.updatePackage(context, TEST_PACKAGE, user)
             assertTrue(appsList.getAndResetChangeFlag())
             assertEquals(2, appsList.data.size)
-            assertEquals(allApps.size - 2, outRemovedComponents.size)
         }
     }
 }
