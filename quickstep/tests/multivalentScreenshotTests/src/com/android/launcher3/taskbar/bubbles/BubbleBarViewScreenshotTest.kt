@@ -20,7 +20,6 @@ import android.content.Context
 import android.graphics.Color
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
-import android.platform.test.rule.ScreenRecordRule
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.FrameLayout.LayoutParams.MATCH_PARENT
@@ -38,7 +37,6 @@ import platform.test.screenshot.Displays
 
 /** Screenshot tests for [BubbleBarView]. */
 @RunWith(ParameterizedAndroidJunit4::class)
-@ScreenRecordRule.ScreenRecord
 class BubbleBarViewScreenshotTest(emulationSpec: DeviceEmulationSpec) :
     ViewBasedImageTest(emulationSpec) {
 
