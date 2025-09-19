@@ -16,7 +16,6 @@
 package com.android.launcher3
 
 import android.content.Context
-import android.content.Intent
 import android.content.pm.ShortcutInfo
 import android.os.UserHandle
 import com.android.launcher3.celllayout.CellPosMapper
@@ -39,8 +38,6 @@ import com.android.launcher3.model.ModelTaskController
 import com.android.launcher3.model.ModelWriter
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.model.tasks.CacheDataUpdatedTask
-import com.android.launcher3.model.tasks.UserAvailabilityChangedTask
-import com.android.launcher3.model.tasks.UserLockStateChangedTask
 import com.android.launcher3.pm.UserCache
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
@@ -64,7 +61,6 @@ constructor(
     @ApplicationContext private val context: Context,
     private val taskControllerProvider: Provider<ModelTaskController>,
     private val iconCache: IconCache,
-    private val prefs: LauncherPrefs,
     private val installQueue: ItemInstallQueue,
     @Named("ICONS_DB") dbFileName: String?,
     initializer: ModelInitializer,
@@ -84,9 +80,6 @@ constructor(
 
     private var mLoaderTask: LoaderTask? = null
     private var mIsLoaderTaskRunning = false
-
-    // only allow this once per reboot to reload work apps
-    private var mShouldReloadWorkProfile = true
 
     // Indicates whether the current model data is valid or not.
     // We start off with everything not loaded. After that, we assume that
@@ -138,46 +131,6 @@ constructor(
     fun destroy() {
         mModelDestroyed = true
         MODEL_EXECUTOR.execute { modelDelegate.destroy() }
-    }
-
-    /**
-     * Called then there use a user event
-     *
-     * @see UserCache.addUserEventListener
-     */
-    fun onUserEvent(user: UserHandle, action: String) {
-        when (action) {
-            Intent.ACTION_MANAGED_PROFILE_AVAILABLE -> {
-                if (mShouldReloadWorkProfile) {
-                    forceReload()
-                } else {
-                    enqueueModelUpdateTask(UserAvailabilityChangedTask(user))
-                }
-                mShouldReloadWorkProfile = false
-            }
-            Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE -> {
-                mShouldReloadWorkProfile = false
-                enqueueModelUpdateTask(UserAvailabilityChangedTask(user))
-            }
-            UserCache.ACTION_PROFILE_LOCKED ->
-                enqueueModelUpdateTask(UserLockStateChangedTask(user, false))
-            UserCache.ACTION_PROFILE_UNLOCKED ->
-                enqueueModelUpdateTask(UserLockStateChangedTask(user, true))
-            Intent.ACTION_MANAGED_PROFILE_REMOVED -> {
-                prefs.put(LauncherPrefs.WORK_EDU_STEP, 0)
-                forceReload()
-            }
-            UserCache.ACTION_PROFILE_ADDED,
-            UserCache.ACTION_PROFILE_REMOVED -> forceReload()
-            UserCache.ACTION_PROFILE_AVAILABLE,
-            UserCache.ACTION_PROFILE_UNAVAILABLE -> {
-                // This broadcast is only available when android.os.Flags.allowPrivateProfile() is
-                // set. For Work-profile this broadcast will be sent in addition to
-                // ACTION_MANAGED_PROFILE_AVAILABLE/UNAVAILABLE. So effectively, this if block only
-                // handles the non-work profile case.
-                enqueueModelUpdateTask(UserAvailabilityChangedTask(user))
-            }
-        }
     }
 
     /**
