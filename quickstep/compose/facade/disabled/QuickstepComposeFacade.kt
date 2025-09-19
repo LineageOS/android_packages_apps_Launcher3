@@ -24,6 +24,7 @@ import com.android.quickstep.compose.core.QuickstepComposeFeatures
 import com.android.quickstep.recents.ui.viewmodel.TaskViewModel
 import com.android.quickstep.task.apptimer.TaskAppTimerUiState
 import com.android.quickstep.task.apptimer.ViewModel
+import com.android.quickstep.views.IconAppChipView
 
 object QuickstepComposeFacade : BaseComposeFacade, QuickstepComposeFeatures {
 
