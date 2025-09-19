@@ -148,6 +148,7 @@ import com.android.launcher3.taskbar.bubbles.stashing.TransientBubbleStashContro
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator;
 import com.android.launcher3.taskbar.customization.TaskbarSpecsEvaluator;
 import com.android.launcher3.taskbar.growth.NudgeController;
+import com.android.launcher3.taskbar.handoff.HandoffSuggestion;
 import com.android.launcher3.taskbar.handoff.TaskbarHandoffController;
 import com.android.launcher3.taskbar.navbutton.NearestTouchFrame;
 import com.android.launcher3.taskbar.overlay.TaskbarOverlayContext;
@@ -1802,6 +1803,14 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             mControllers.taskbarStashController.updateAndAnimateTransientTaskbar(true);
         } else if (tag instanceof ItemClickProxy) {
             ((ItemClickProxy) tag).onItemClicked(view);
+        } else if (tag instanceof HandoffSuggestion handoffSuggestion) {
+            if (android.companion.Flags.enableTaskContinuity()) {
+                mControllers.taskbarHandoffController.launch(handoffSuggestion);
+            } else {
+                Log.w(
+                    TAG,
+                    "Click on HandoffSuggestion ignored because Handoff feature flag is disabled.");
+            }
         } else {
             Log.e(TAG, "Unknown type clicked: " + tag);
         }

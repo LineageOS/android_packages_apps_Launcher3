@@ -21,6 +21,7 @@ import android.companion.datatransfer.continuity.TaskContinuityManager
 import android.os.Handler
 import android.util.Log
 import com.android.launcher3.taskbar.TaskbarActivityContext
+import com.android.launcher3.taskbar.TaskbarControllers
 import com.android.launcher3.taskbar.TaskbarControllers.LoggableTaskbarController
 import java.io.PrintWriter
 
@@ -40,30 +41,35 @@ class TaskbarHandoffController(val taskbarActivityContext: TaskbarActivityContex
             taskbarActivityContext,
             Handler(taskbarActivityContext.mainLooper),
         )
+    private lateinit var taskbarControllers: TaskbarControllers
+    private var handoffSuggestionLauncher: HandoffSuggestionLauncher? = null
 
     /** A list of currently active Handoff suggestions. */
-    public val suggestions: List<HandoffSuggestion>
+    val suggestions: List<HandoffSuggestion>
         get() {
             return suggestionList.suggestions
         }
 
     /** Starts the controller. */
-    public fun init() {
+    fun init(taskbarControllers: TaskbarControllers) {
+        this.taskbarControllers = taskbarControllers
         if (android.companion.Flags.enableTaskContinuity()) {
             taskContinuityManager =
                 taskbarActivityContext.applicationContext.getSystemService(
                     TaskContinuityManager::class.java
                 )
 
-            taskContinuityManager?.registerRemoteTaskListener(
-                taskbarActivityContext.mainExecutor,
-                this,
-            )
+            taskContinuityManager?.let {
+                it.registerRemoteTaskListener(taskbarActivityContext.mainExecutor, this)
+
+                handoffSuggestionLauncher =
+                    HandoffSuggestionLauncher(it, taskbarActivityContext.mainExecutor)
+            }
         }
     }
 
     /** Stops the controller. */
-    public fun onDestroy() {
+    fun onDestroy() {
         if (DEBUG) {
             Log.d(TAG, "Stopping controller.")
         }
@@ -73,20 +79,28 @@ class TaskbarHandoffController(val taskbarActivityContext: TaskbarActivityContex
         taskContinuityManager?.unregisterRemoteTaskListener(this)
     }
 
-    public override fun onRemoteTasksChanged(remoteTasks: List<RemoteTask>) {
+    override fun onRemoteTasksChanged(remoteTasks: List<RemoteTask>) {
         if (DEBUG) {
             Log.d(TAG, "onRemoteTasksChanged: updating suggestions.")
         }
 
-        suggestionList.updateSuggestions(remoteTasks)
+        if (suggestionList.updateSuggestions(remoteTasks)) {
+            taskbarControllers.taskbarViewController.commitHandoffSuggestionsToUI()
+        }
+
         suggestionMetadataLoader.loadMetadata(suggestionList.suggestions) { suggestion ->
             if (DEBUG) {
                 Log.d(
                     TAG,
-                    "HandoffSuggestion metadata updated for deviceId ${suggestion.deviceId}.")
+                    "HandoffSuggestion metadata updated for deviceId ${suggestion.deviceId}.",
+                )
             }
-            // TODO: joeantonetti - Update the suggestion in the UI.
+            taskbarControllers.taskbarViewController.onHandoffSuggestionUpdated(suggestion)
         }
+    }
+
+    fun launch(suggestion: HandoffSuggestion) {
+        handoffSuggestionLauncher?.launch(suggestion)
     }
 
     override fun dumpLogs(prefix: String, pw: PrintWriter) {
