@@ -168,6 +168,7 @@ public final class TestProtocol {
             "get-overview-first-taskview-index";
     public static final String REQUEST_GET_SPLIT_SELECTION_ACTIVE = "get-split-selection-active";
     public static final String REQUEST_ENABLE_ROTATION = "enable_rotation";
+    public static final String REQUEST_ENABLE_FIXED_LANDSCAPE = "enable_fixed_landscape";
     public static final String REQUEST_MODEL_QUEUE_CLEARED = "model-queue-cleared";
 
     public static boolean sDebugTracing = false;
