@@ -41,7 +41,6 @@ import com.android.launcher3.tapl.TestHelpers;
 import com.android.launcher3.testcomponent.TestCommandReceiver;
 import com.android.launcher3.util.LooperExecutor;
 import com.android.launcher3.util.TestUtil;
-import com.android.launcher3.util.Wait;
 import com.android.launcher3.util.rule.FailureWatcher;
 import com.android.launcher3.util.rule.ShellCommandRule;
 import com.android.launcher3.util.rule.TestIsolationRule;
@@ -218,7 +217,7 @@ public abstract class AbstractLauncherUiTest<LAUNCHER_TYPE extends Launcher,
             String message, Function<LAUNCHER_TYPE, Boolean> condition, long timeout) {
         verifyKeyguardInvisible();
         if (!TestHelpers.isInLauncherProcess()) return;
-        Wait.atMost(message, () -> getFromLauncher(condition), mLauncher, timeout);
+        mLauncher.waitForCondition(message, timeout, () -> getFromLauncher(condition));
     }
 
     // Cannot be used in TaplTests after injecting any gesture using Tapl because this can hide
@@ -227,11 +226,11 @@ public abstract class AbstractLauncherUiTest<LAUNCHER_TYPE extends Launcher,
         if (!TestHelpers.isInLauncherProcess()) return null;
 
         final Object[] output = new Object[1];
-        Wait.atMost(message, () -> {
+        mLauncher.waitForCondition(message, TestUtil.DEFAULT_UI_TIMEOUT, () -> {
             final Object fromLauncher = getFromLauncher(f);
             output[0] = fromLauncher;
             return fromLauncher != null;
-        }, mLauncher);
+        });
         return (T) output[0];
     }
 
@@ -242,10 +241,10 @@ public abstract class AbstractLauncherUiTest<LAUNCHER_TYPE extends Launcher,
             Runnable testThreadAction, Function<LAUNCHER_TYPE, Boolean> condition,
             long timeout) {
         if (!TestHelpers.isInLauncherProcess()) return;
-        Wait.atMost(message, () -> {
+        mLauncher.waitForCondition(message, timeout, () -> {
             testThreadAction.run();
             return getFromLauncher(condition);
-        }, mLauncher, timeout);
+        });
     }
 
     public static void startAppFast(String packageName) {
@@ -306,9 +305,10 @@ public abstract class AbstractLauncherUiTest<LAUNCHER_TYPE extends Launcher,
         final LauncherInstrumentation launcherInstrumentation = new LauncherInstrumentation();
         if (!launcherInstrumentation.shouldShowHomeBehindDesktop()) {
             // Wait for the Launcher to stop.
-            Wait.atMost("Launcher activity didn't stop",
-                    () -> !launcherInstrumentation.isLauncherActivityStarted(),
-                    launcherInstrumentation);
+            launcherInstrumentation.waitForCondition(
+                    "Launcher activity didn't stop",
+                    TestUtil.DEFAULT_UI_TIMEOUT,
+                    () -> !launcherInstrumentation.isLauncherActivityStarted());
         } else {
             assertTrue("Launcher activity not started when it should be",
                     launcherInstrumentation.isLauncherActivityStarted());

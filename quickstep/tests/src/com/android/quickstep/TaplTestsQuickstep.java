@@ -49,7 +49,6 @@ import com.android.launcher3.tapl.OverviewTask;
 import com.android.launcher3.tapl.SelectModeButtons;
 import com.android.launcher3.tapl.Workspace;
 import com.android.launcher3.util.TestUtil;
-import com.android.launcher3.util.Wait;
 import com.android.launcher3.util.rule.ScreenRecordRule;
 import com.android.launcher3.util.ui.PortraitLandscapeRunner.PortraitLandscape;
 import com.android.quickstep.NavigationModeSwitchRule.NavigationModeSwitch;
@@ -436,8 +435,8 @@ public class TaplTestsQuickstep extends AbstractQuickStepTest {
             mLauncher.setEnableRotation(false);
             mLauncher.getDevice().setOrientationLeft();
             startTestActivity(7);
-            Wait.atMost("Device should not be in natural orientation",
-                    () -> !mDevice.isNaturalOrientation(), mLauncher);
+            mLauncher.waitForCondition("Device should not be in natural orientation",
+                    TestUtil.DEFAULT_UI_TIMEOUT, () -> !mDevice.isNaturalOrientation());
             mLauncher.goHome();
         } finally {
             mLauncher.setExpectedRotationCheckEnabled(true);

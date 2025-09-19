@@ -53,13 +53,13 @@ open class BaseLauncherActivityTest<LAUNCHER_TYPE : Launcher> {
     protected fun targetContext(): Context = getInstrumentation().targetContext
 
     protected fun waitForLauncherCondition(message: String, condition: (LAUNCHER_TYPE) -> Boolean) =
-        atMost(message, { launcherActivity.getFromLauncher(condition)!! })
+        atMost(message) { launcherActivity.getFromLauncher(condition)!! }
 
     protected fun waitForLauncherCondition(
         message: String,
         condition: (LAUNCHER_TYPE) -> Boolean,
         timeout: Long,
-    ) = atMost(message, { launcherActivity.getFromLauncher(condition)!! }, null, timeout)
+    ) = atMost(message, timeout) { launcherActivity.getFromLauncher(condition)!! }
 
     fun ViewGroup.searchView(filter: Predicate<View>): View? {
         if (filter.test(this)) return this
