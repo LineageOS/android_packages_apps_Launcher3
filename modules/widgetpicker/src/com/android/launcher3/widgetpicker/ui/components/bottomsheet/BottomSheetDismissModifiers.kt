@@ -167,9 +167,9 @@ fun Modifier.dismissibleBottomSheet(
     }
 
     return@composed draggableModifier.graphicsLayer {
-        val sheetOffset = sheetState.anchoredDraggableState.requireOffset()
+        val sheetOffset = sheetState.anchoredDraggableState.offset
 
-        if (maxHeight != 0f) {
+        if (maxHeight != 0f && !sheetOffset.isNaN()) {
             scaleX = calculatePredictiveBackScaleX(sheetState.backProgress.value)
             scaleY = calculatePredictiveBackScaleY(sheetState.backProgress.value)
             transformOrigin =
