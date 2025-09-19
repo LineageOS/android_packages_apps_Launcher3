@@ -39,6 +39,7 @@ import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICA
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT;
 import static com.android.launcher3.LauncherState.ALL_APPS;
 import static com.android.launcher3.LauncherState.FLAG_SKIP_STATE_ANNOUNCEMENT;
+import static com.android.launcher3.LauncherState.HOTSEAT_ICONS;
 import static com.android.launcher3.LauncherState.NORMAL;
 import static com.android.launcher3.LauncherState.NO_OFFSET;
 import static com.android.launcher3.LauncherState.OVERVIEW;
@@ -622,15 +623,14 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     private void onStateOrResumeChanging(boolean inTransition) {
         LauncherState state = getStateManager().getState();
         boolean started = ((getActivityFlags() & ACTIVITY_STATE_STARTED)) != 0;
-        if (started) {
-            DeviceProfile profile = getDeviceProfile();
-            boolean visible = (state == NORMAL || state == OVERVIEW)
-                    && isUserActive()
-                    && !profile.isVerticalBarLayout()
-                    && !mIsOverlayVisible;
-            SystemUiProxy.INSTANCE.get(this)
-                    .setLauncherKeepClearAreaHeight(visible, profile.hotseatBarSizePx);
-        }
+        DeviceProfile profile = getDeviceProfile();
+        boolean visible = state.areElementsVisible(getLauncherUiState(), HOTSEAT_ICONS)
+                && started
+                && isUserActive()
+                && !profile.isVerticalBarLayout()
+                && !mIsOverlayVisible;
+        SystemUiProxy.INSTANCE.get(this)
+                .setLauncherKeepClearAreaHeight(visible, profile.hotseatBarSizePx);
         if (state == NORMAL && !inTransition) {
             ((RecentsView) getOverviewPanel()).setSwipeDownShouldLaunchApp(false);
         }
