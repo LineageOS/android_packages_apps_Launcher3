@@ -45,7 +45,7 @@ class FixedLandscapeIntegrationTest {
 
     private val eventsRule = EventsRule(targetContext)
 
-    private val launcherActivity = LauncherActivityScenarioRule<Launcher>(targetContext, false)
+    private val launcherActivity = LauncherActivityScenarioRule<Launcher>()
 
     private val idp = InvariantDeviceProfile.INSTANCE.get(targetContext)
 

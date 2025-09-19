@@ -40,7 +40,7 @@ class OptionsPopupTest {
 
     var targetContext: Context = getInstrumentation().targetContext
 
-    var launcherActivity = LauncherActivityScenarioRule<Launcher>(targetContext)
+    var launcherActivity = LauncherActivityScenarioRule<Launcher>()
 
     @Test
     fun `test long press Apps option`() {

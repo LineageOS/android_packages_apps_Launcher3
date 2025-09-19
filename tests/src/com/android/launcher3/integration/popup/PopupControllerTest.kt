@@ -54,7 +54,7 @@ class PopupControllerTest {
 
     private val targetContext: Context = getInstrumentation().targetContext
 
-    private val launcherActivity = LauncherActivityScenarioRule<Launcher>(targetContext)
+    private val launcherActivity = LauncherActivityScenarioRule<Launcher>()
 
     private val popupDataRepository = FakePopupDataRepository()
 
