@@ -215,6 +215,9 @@ constructor(
             val splitscreenAnim = requireViewById<LottieAnimationView>(R.id.splitscreen_animation)
             splitscreenAnim.contentDescription =
                 context.getString(R.string.taskbar_edu_split_screen_animation_description)
+            val bubblesAnim = requireViewById<LottieAnimationView>(R.id.bubbles_animation)
+            bubblesAnim.contentDescription =
+                context.getString(R.string.taskbar_edu_bubbles_animation_description)
             val suggestionsAnim = requireViewById<LottieAnimationView>(R.id.suggestions_animation)
             suggestionsAnim.contentDescription =
                 context.getString(R.string.taskbar_edu_suggested_app_animation_description)
@@ -222,16 +225,22 @@ constructor(
             pinningAnim.contentDescription =
                 context.getString(R.string.taskbar_edu_pinning_animation_description)
             val pinningEdu = requireViewById<View>(R.id.pinning_edu)
+            val bubblesEdu = requireViewById<View>(R.id.bubbles_edu)
             splitscreenAnim.supportLightTheme()
+            bubblesAnim.supportLightTheme()
             suggestionsAnim.supportLightTheme()
             pinningAnim.supportLightTheme()
-            handleEduAnimations(listOf(splitscreenAnim, suggestionsAnim, pinningAnim))
+            // TODO(b/444693509) implement logic to show
+            bubblesEdu.visibility = GONE
+            handleEduAnimations(listOf(splitscreenAnim, bubblesAnim, suggestionsAnim, pinningAnim))
             if (activityContext.isTransientTaskbar) {
                 splitscreenAnim.setAnimation(R.raw.taskbar_edu_splitscreen_transient)
+                bubblesAnim.setAnimation(R.raw.taskbar_edu_bubbles_transient)
                 suggestionsAnim.setAnimation(R.raw.taskbar_edu_suggestions_transient)
                 pinningEdu.visibility = if (enableTaskbarPinning()) VISIBLE else GONE
             } else {
                 splitscreenAnim.setAnimation(R.raw.taskbar_edu_splitscreen_persistent)
+                bubblesAnim.setAnimation(R.raw.taskbar_edu_bubbles_persistent)
                 suggestionsAnim.setAnimation(R.raw.taskbar_edu_suggestions_persistent)
                 pinningEdu.visibility = GONE
             }
@@ -242,6 +251,10 @@ constructor(
             )
             TypefaceUtils.setTypeface(
                 requireViewById(R.id.splitscreen_text),
+                FontFamily.GSF_BODY_MEDIUM,
+            )
+            TypefaceUtils.setTypeface(
+                requireViewById(R.id.bubbles_text),
                 FontFamily.GSF_BODY_MEDIUM,
             )
             TypefaceUtils.setTypeface(
@@ -573,6 +586,7 @@ constructor(
  */
 private val DARK_TO_LIGHT_COLORS =
     mapOf(
+        // TODO(b/444692922) remove these mappings after update of animation files
         ".blue100" to R.color.lottie_blue400,
         ".blue400" to R.color.lottie_blue600,
         ".green100" to R.color.lottie_green400,
@@ -583,6 +597,14 @@ private val DARK_TO_LIGHT_COLORS =
         ".red400" to R.color.lottie_red600,
         ".yellow100" to R.color.lottie_yellow400,
         ".yellow400" to R.color.lottie_yellow600,
+        // end of TODO
+        ".primary" to R.color.materialColorPrimary,
+        ".secondary" to R.color.materialColorSecondary,
+        ".onSurface" to R.color.materialColorOnSurface,
+        ".onSurfaceVariant" to R.color.materialColorOnSurfaceVariant,
+        ".onTertiary" to R.color.materialColorSurfaceContainer, // b/394336837#comment19
+        ".outline" to R.color.materialColorOutline,
+        ".outlineVariant" to R.color.materialColorOutlineVariant,
     )
 
 private fun LottieAnimationView.supportLightTheme() {
