@@ -18,9 +18,9 @@ package com.android.quickstep
 
 import android.view.View
 import com.android.internal.jank.Cuj
-import com.android.internal.policy.DesktopModeCompatPolicy
 import com.android.launcher3.AbstractFloatingViewHelper
 import com.android.launcher3.R
+import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent
 import com.android.launcher3.popup.SystemShortcut
 import com.android.quickstep.views.RecentsView
@@ -74,7 +74,7 @@ class DesktopSystemShortcut(
                 ): List<DesktopSystemShortcut>? {
                     val context = container.asContext()
                     val taskKey = taskContainer.task.key
-                    val desktopModeCompatPolicy = DesktopModeCompatPolicy(context)
+                    val desktopModeCompatPolicy = context.appComponent.desktopModeCompatPolicy
 
                     return when {
                         !DesktopModeStatus.isDesktopModeSupportedOnDisplay(

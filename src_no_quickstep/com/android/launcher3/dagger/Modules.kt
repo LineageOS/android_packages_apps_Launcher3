@@ -73,3 +73,5 @@ object HomeScreenFilesModule {
     @LauncherAppSingleton
     fun provideHomeScreenFilesProvider(): HomeScreenFilesProvider = HomeScreenFilesNoOpProvider()
 }
+
+@Module object DesktopModule {}

@@ -21,6 +21,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.SystemClock
 import com.android.internal.R
+import com.android.internal.policy.DesktopModeCompatPolicy
 import com.android.launcher3.Flags.enableSystemDrag
 import com.android.launcher3.backuprestore.LauncherRestoreEventLogger
 import com.android.launcher3.concurrent.annotations.ThreadPool
@@ -144,11 +145,6 @@ object StaticObjectModule {
         if (ctx.resources.getBoolean(R.bool.config_searchAllEntrypointsEnabledDefault)) {
             setOf(ContextualSearchStateManager.SEARCH_ALL_ENTRYPOINTS_ENABLED_URI)
         } else emptySet()
-
-    @Provides
-    @JvmStatic
-    fun provideDesktopState(@ApplicationContext context: Context): DesktopState =
-        DesktopState.getInstance(context)
 }
 
 @Module
@@ -189,4 +185,17 @@ object HomeScreenFilesModule {
             HomeScreenFilesNoOpProvider()
         }
     }
+}
+
+@Module
+object DesktopModule {
+    @Provides
+    @LauncherAppSingleton
+    fun provideDesktopModeCompatPolicy(@ApplicationContext context: Context) =
+        DesktopModeCompatPolicy(context)
+
+    @Provides
+    @JvmStatic
+    fun provideDesktopState(@ApplicationContext context: Context): DesktopState =
+        DesktopState.getInstance(context)
 }

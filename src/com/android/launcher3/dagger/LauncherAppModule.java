@@ -39,6 +39,7 @@ import dagger.Module;
             SettingsModule.class,
             SystemDragModule.class,
             HomeScreenFilesModule.class,
+            DesktopModule.class,
         },
         subcomponents = ActivityContextComponent.class)
 public class LauncherAppModule { }
