@@ -19,6 +19,8 @@ import static androidx.lifecycle.Lifecycle.State.DESTROYED;
 
 import static com.android.launcher3.Flags.enableFallbackOverviewInWindow;
 import static com.android.launcher3.Flags.enableLauncherOverviewInWindow;
+import static com.android.launcher3.InvariantDeviceProfile.TYPE_PHONE;
+import static com.android.launcher3.LauncherPrefs.FIXED_LANDSCAPE_MODE;
 import static com.android.launcher3.allapps.AllAppsStore.DEFER_UPDATES_TEST;
 import static com.android.launcher3.config.FeatureFlags.FOLDABLE_SINGLE_PAGE;
 import static com.android.launcher3.testing.shared.TestProtocol.TEST_INFO_RESPONSE_FIELD;
@@ -46,11 +48,13 @@ import androidx.lifecycle.LifecycleOwner;
 import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.CellLayout;
 import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.Flags;
 import com.android.launcher3.Hotseat;
 import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherAppState;
 import com.android.launcher3.LauncherModel;
+import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.LauncherState;
 import com.android.launcher3.R;
 import com.android.launcher3.ShortcutAndWidgetContainer;
@@ -289,6 +293,14 @@ public class TestInformationHandler {
                                 .forceAllowRotationForTesting(Boolean.parseBoolean(arg)));
                 return response;
 
+            case TestProtocol.REQUEST_ENABLE_FIXED_LANDSCAPE: {
+                boolean enable = Flags.oneGridSpecs()
+                        && Boolean.parseBoolean(arg)
+                        && DisplayController.INSTANCE.get(mContext).getInfo()
+                                .getDeviceType() == TYPE_PHONE;
+                LauncherPrefs.INSTANCE.get(mContext).put(FIXED_LANDSCAPE_MODE, enable);
+                return response;
+            }
             case TestProtocol.REQUEST_WORKSPACE_CELL_LAYOUT_SIZE:
                 return getLauncherUIProperty(Bundle::putIntArray, launcher -> {
                     final Workspace<?> workspace = launcher.getWorkspace();

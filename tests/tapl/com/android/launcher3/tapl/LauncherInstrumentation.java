@@ -556,6 +556,11 @@ public final class LauncherInstrumentation {
         getTestInfo(TestProtocol.REQUEST_ENABLE_ROTATION, Boolean.toString(on));
     }
 
+    /** Enables fixed landscape mode if supported on device */
+    public void setFixedLandscape(boolean on) {
+        getTestInfo(TestProtocol.REQUEST_ENABLE_FIXED_LANDSCAPE, Boolean.toString(on));
+    }
+
     public boolean hadNontestEvents() {
         return getTestInfo(TestProtocol.REQUEST_GET_HAD_NONTEST_EVENTS)
                 .getBoolean(TestProtocol.TEST_INFO_RESPONSE_FIELD);

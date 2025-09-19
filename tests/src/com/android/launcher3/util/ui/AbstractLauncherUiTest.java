@@ -104,7 +104,7 @@ public abstract class AbstractLauncherUiTest<LAUNCHER_TYPE extends Launcher,
     @Override
     protected TestRule getRulesInsideActivityMonitor() {
         final RuleChain inner = RuleChain
-                .outerRule(new PortraitLandscapeRunner<>(this))
+                .outerRule(new PortraitLandscapeRunner(this))
                 .around(new FailureWatcher(mLauncher))
                 .around(new TestIsolationRule(mLauncher, true));
 
