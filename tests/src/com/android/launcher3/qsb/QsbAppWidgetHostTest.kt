@@ -23,8 +23,8 @@ import android.widget.RemoteViews
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.launcher3.util.SandboxApplication
+import com.android.launcher3.util.WidgetUtils
 import com.android.launcher3.util.rule.ShellCommandRule
-import com.android.launcher3.util.ui.TestViewHelpers
 import com.android.launcher3.widget.LauncherWidgetHolder
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.assertContentEquals
@@ -67,7 +67,7 @@ class QsbAppWidgetHostTest {
 
     @Test
     fun setActiveWidget_sends_updates() {
-        val widgetInfo = TestViewHelpers.findWidgetProvider(false)
+        val widgetInfo = WidgetUtils.findWidgetProvider(false)
         val widgetId = host.allocateAppWidgetId()
         assertTrue(
             AppWidgetManager.getInstance(context)
@@ -98,7 +98,7 @@ class QsbAppWidgetHostTest {
 
     @Test
     fun setActiveWidget_multiple_times_has_no_effect() {
-        val widgetInfo = TestViewHelpers.findWidgetProvider(false)
+        val widgetInfo = WidgetUtils.findWidgetProvider(false)
         val widgetId = host.allocateAppWidgetId()
         assertTrue(
             AppWidgetManager.getInstance(context)
@@ -130,7 +130,7 @@ class QsbAppWidgetHostTest {
 
     @Test
     fun setActiveWidget_deletes_old_active_widget() {
-        val widgetInfo = TestViewHelpers.findWidgetProvider(false)
+        val widgetInfo = WidgetUtils.findWidgetProvider(false)
         val widgetId1 = host.allocateAppWidgetId()
         assertTrue(
             AppWidgetManager.getInstance(context)

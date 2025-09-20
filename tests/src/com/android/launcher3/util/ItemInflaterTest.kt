@@ -41,7 +41,6 @@ import com.android.launcher3.util.AsyncObjectAllocator.allocationExecutor
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
 import com.android.launcher3.util.rule.ShellCommandRule
-import com.android.launcher3.util.ui.TestViewHelpers
 import com.android.launcher3.widget.LauncherAppWidgetHostView
 import com.android.launcher3.widget.LauncherWidgetHolder
 import com.android.launcher3.widget.PendingAppWidgetHostView
@@ -235,7 +234,7 @@ class ItemInflaterTest {
 
     @Test
     fun test_normal_widget_inflated_UI() {
-        val providerInfo = TestViewHelpers.findWidgetProvider(false)
+        val providerInfo = WidgetUtils.findWidgetProvider(false)
         val id = widgetHolder.allocateAppWidgetId()
         assertTrue(
             WidgetManagerHelper(uiContext).bindAppWidgetIdIfAllowed(id, providerInfo, Bundle())
@@ -264,7 +263,7 @@ class ItemInflaterTest {
             .makeWorkspaceItem(uiContext)
 
     private fun widgetItemInfo(hasConfig: Boolean) =
-        LauncherAppWidgetInfo(0, TestViewHelpers.findWidgetProvider(hasConfig).component).apply {
+        LauncherAppWidgetInfo(0, WidgetUtils.findWidgetProvider(hasConfig).component).apply {
             spanX = 2
             spanY = 2
             restoreStatus = FLAG_ID_NOT_VALID or FLAG_UI_NOT_READY

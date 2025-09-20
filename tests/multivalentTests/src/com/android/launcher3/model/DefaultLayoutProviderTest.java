@@ -37,8 +37,8 @@ import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.icons.BitmapInfo;
 import com.android.launcher3.model.data.FolderInfo;
 import com.android.launcher3.model.data.ItemInfo;
+import com.android.launcher3.testutil.rule.LayoutResource;
 import com.android.launcher3.util.LauncherLayoutBuilder;
-import com.android.launcher3.util.LayoutResource;
 import com.android.launcher3.util.ModelTestExtensions;
 import com.android.launcher3.util.SandboxApplication;
 

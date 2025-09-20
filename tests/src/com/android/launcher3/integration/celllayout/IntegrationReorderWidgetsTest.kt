@@ -48,12 +48,12 @@ import com.android.launcher3.integration.util.TestUtils.getWidgetAtCell
 import com.android.launcher3.integration.util.TestUtils.searchChildren
 import com.android.launcher3.integration.util.events.ActivityTestEvents.createResizeFrameShownWaiter
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.testutil.FavoriteItemsTransaction
 import com.android.launcher3.util.CellAndSpan
 import com.android.launcher3.util.ModelTestExtensions.clearModelDb
 import com.android.launcher3.util.rule.ScreenRecordRule
 import com.android.launcher3.util.rule.ScreenRecordRule.ScreenRecord
 import com.android.launcher3.util.rule.ShellCommandRule
-import com.android.launcher3.util.workspace.FavoriteItemsTransaction
 import com.android.launcher3.widget.LauncherAppWidgetHostView
 import kotlin.math.abs
 import kotlin.math.roundToInt

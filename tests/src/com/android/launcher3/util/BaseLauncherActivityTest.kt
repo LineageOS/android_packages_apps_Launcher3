@@ -21,8 +21,8 @@ import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherAppState
 import com.android.launcher3.integration.util.LauncherActivityScenarioRule
+import com.android.launcher3.testutil.Wait.atMost
 import com.android.launcher3.util.ModelTestExtensions.loadModelSync
-import com.android.launcher3.util.Wait.atMost
 import org.junit.Rule
 
 @Deprecated("Use LauncherActivityScenarioRule instead")

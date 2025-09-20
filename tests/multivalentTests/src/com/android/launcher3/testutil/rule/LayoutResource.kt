@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.util
+package com.android.launcher3.testutil.rule
 
 import android.content.Context
 import android.database.sqlite.SQLiteReadOnlyDatabaseException
@@ -24,6 +24,8 @@ import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.model.BgDataModel
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
+import com.android.launcher3.util.LauncherLayoutBuilder
+import com.android.launcher3.util.TestUtil
 import org.junit.rules.ExternalResource
 
 /**
@@ -37,13 +39,7 @@ class LayoutResource(private val ctx: Context) : ExternalResource() {
     private val model: LauncherModel
         get() = ctx.appComponent.testableModelState.model
 
-    override fun before() {
-        // Internally LayoutExportImportHelper uses a secure setting to set the launcher's layout
-        TestUtil.grantWriteSecurePermission()
-    }
-
     override fun after() {
-        set("")
         callbacks?.let { model.removeCallbacks(it) }
     }
 
@@ -57,7 +53,7 @@ class LayoutResource(private val ctx: Context) : ExternalResource() {
     fun set(builder: LauncherLayoutBuilder) = set(builder.build())
 
     private fun set(xmlRepresentation: String) {
-        callbacks ?: withCallbacks(NO_OP_CALLBACKS)
+        callbacks ?: withCallbacks(object : BgDataModel.Callbacks {})
         ctx.appComponent.layoutParserFactory.overrideXmlLayout(xmlRepresentation).use {
             TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {
                 try {
@@ -78,6 +74,5 @@ class LayoutResource(private val ctx: Context) : ExternalResource() {
 
     companion object {
         private const val TAG = "LayoutResource"
-        @JvmStatic val NO_OP_CALLBACKS = object : BgDataModel.Callbacks {}
     }
 }

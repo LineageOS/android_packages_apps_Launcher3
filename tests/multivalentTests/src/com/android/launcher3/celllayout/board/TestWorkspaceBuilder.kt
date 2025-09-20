@@ -29,9 +29,8 @@ import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
+import com.android.launcher3.testutil.FavoriteItemsTransaction
 import com.android.launcher3.util.WidgetUtils
-import com.android.launcher3.util.ui.TestViewHelpers
-import com.android.launcher3.util.workspace.FavoriteItemsTransaction
 import java.util.function.Supplier
 
 class TestWorkspaceBuilder(private val mContext: Context) {
@@ -128,7 +127,7 @@ class TestWorkspaceBuilder(private val mContext: Context) {
         // Create the widget lazily since the appWidgetId can get lost during setup
         return Supplier<ItemInfo> {
             WidgetUtils.createWidgetInfo(
-                    TestViewHelpers.findWidgetProvider(false),
+                    WidgetUtils.findWidgetProvider(false),
                     ApplicationProvider.getApplicationContext(),
                     true,
                 )

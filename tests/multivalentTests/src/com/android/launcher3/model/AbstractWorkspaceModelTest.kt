@@ -20,13 +20,13 @@ import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherAppState
 import com.android.launcher3.LauncherModel
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.testutil.rule.LayoutResource
 import com.android.launcher3.util.GridOccupancy
 import com.android.launcher3.util.IntArray
 import com.android.launcher3.util.IntSparseArrayMap
 import com.android.launcher3.util.LauncherLayoutBuilder
 import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY
 import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
-import com.android.launcher3.util.LayoutResource
 import com.android.launcher3.util.SandboxApplication
 import org.junit.Rule
 

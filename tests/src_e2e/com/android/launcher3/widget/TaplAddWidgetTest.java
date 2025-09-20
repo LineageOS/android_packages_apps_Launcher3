@@ -29,12 +29,12 @@ import com.android.launcher3.Flags;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.tapl.Widget;
 import com.android.launcher3.tapl.WidgetResizeFrame;
+import com.android.launcher3.testutil.FavoriteItemsTransaction;
 import com.android.launcher3.util.TestUtil;
+import com.android.launcher3.util.WidgetUtils;
 import com.android.launcher3.util.rule.ShellCommandRule;
 import com.android.launcher3.util.ui.AbstractLauncherUiTest;
 import com.android.launcher3.util.ui.PortraitLandscapeRunner.PortraitLandscape;
-import com.android.launcher3.util.ui.TestViewHelpers;
-import com.android.launcher3.util.workspace.FavoriteItemsTransaction;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -62,7 +62,7 @@ public class TaplAddWidgetTest extends AbstractLauncherUiTest<Launcher, View> {
         waitForLauncherCondition("Workspace didn't finish loading", l -> !l.isWorkspaceLoading());
 
         final LauncherAppWidgetProviderInfo widgetInfo =
-                TestViewHelpers.findWidgetProvider(false /* hasConfigureScreen */);
+                WidgetUtils.findWidgetProvider(false /* hasConfigureScreen */);
 
         WidgetResizeFrame resizeFrame = mLauncher
                 .getWorkspace()
@@ -112,7 +112,7 @@ public class TaplAddWidgetTest extends AbstractLauncherUiTest<Launcher, View> {
         waitForLauncherCondition("Workspace didn't finish loading", l -> !l.isWorkspaceLoading());
 
         final LauncherAppWidgetProviderInfo widgetInfo =
-                TestViewHelpers.findWidgetProvider(false /* hasConfigureScreen */);
+                WidgetUtils.findWidgetProvider(false /* hasConfigureScreen */);
 
         WidgetResizeFrame resizeFrame = mLauncher
                 .getWorkspace()

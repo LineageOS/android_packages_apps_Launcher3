@@ -16,11 +16,13 @@
 
 package com.android.launcher3.model
 
+import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.launcher3.Flags
 import com.android.launcher3.GridType.Companion.GRID_TYPE_ANY
 import com.android.launcher3.InvariantDeviceProfile.TYPE_PHONE
@@ -29,8 +31,8 @@ import com.android.launcher3.celllayout.board.CellLayoutBoard
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.TestUtil
-import com.android.launcher3.util.rule.TestToPhoneFileCopier
-import com.android.launcher3.util.rule.setFlags
+import java.io.File
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -77,6 +79,7 @@ class GridMigrationData(dbFileName: String?, val gridState: DeviceGridState) {
  */
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@EnableFlags(Flags.FLAG_ONE_GRID_SPECS)
 class GridMigrationTest {
     private val DB_FILE = "test_launcher.db"
 
@@ -84,11 +87,36 @@ class GridMigrationTest {
     @Rule
     val setFlagsRule = SetFlagsRule(SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT)
 
+    private val filesToCleanup = mutableListOf<File>()
+
     val modelDelegate = mock<ModelDelegate>()
 
     @Before
     fun setup() {
-        setFlagsRule.setFlags(true, Flags.FLAG_ONE_GRID_SPECS)
+        copyAssetToFile(src = "databases/GridMigrationTest/$DB_FILE", dest = "databases/$DB_FILE")
+        copyAssetToFile(
+            src = "databases/GridMigrationTest/result5x5to3x3.db",
+            dest = "databases/result5x5to3x3.db",
+        )
+        copyAssetToFile(
+            src = "databases/GridMigrationTest/result5x5to4x7.db",
+            dest = "databases/result5x5to4x7.db",
+        )
+        copyAssetToFile(
+            src = "databases/GridMigrationTest/result5x5to5x8.db",
+            dest = "databases/result5x5to5x8.db",
+        )
+    }
+
+    private fun copyAssetToFile(src: String, dest: String) {
+        val dstFile = File(getInstrumentation().targetContext.dataDir, dest)
+        dstFile.writeBytes(getInstrumentation().context.assets.open(src).use { it.readBytes() })
+        filesToCleanup.add(dstFile)
+    }
+
+    @After
+    fun cleanup() {
+        filesToCleanup.forEach { it.delete() }
     }
 
     private fun migrate(src: GridMigrationData, dst: GridMigrationData) {
@@ -156,25 +184,6 @@ class GridMigrationTest {
         }
     }
 
-    // Copying the src db for all tests.
-    @JvmField
-    @Rule
-    val fileCopier =
-        TestToPhoneFileCopier(
-            src = "databases/GridMigrationTest/$DB_FILE",
-            dest = "databases/$DB_FILE",
-            removeOnFinish = true,
-        )
-
-    @JvmField
-    @Rule
-    val result5x5to3x3 =
-        TestToPhoneFileCopier(
-            src = "databases/GridMigrationTest/result5x5to3x3.db",
-            dest = "databases/result5x5to3x3.db",
-            removeOnFinish = true,
-        )
-
     @Test
     fun `5x5 to 3x3`() =
         runTest(
@@ -196,15 +205,6 @@ class GridMigrationTest {
                 ),
         )
 
-    @JvmField
-    @Rule
-    val result5x5to4x7 =
-        TestToPhoneFileCopier(
-            src = "databases/GridMigrationTest/result5x5to4x7.db",
-            dest = "databases/result5x5to4x7.db",
-            removeOnFinish = true,
-        )
-
     @Test
     fun `5x5 to 4x7`() =
         runTest(
@@ -224,15 +224,6 @@ class GridMigrationTest {
                     "result5x5to4x7.db",
                     DeviceGridState(4, 7, 4, TYPE_PHONE, "", GRID_TYPE_ANY),
                 ),
-        )
-
-    @JvmField
-    @Rule
-    val result5x5to5x8 =
-        TestToPhoneFileCopier(
-            src = "databases/GridMigrationTest/result5x5to5x8.db",
-            dest = "databases/result5x5to5x8.db",
-            removeOnFinish = true,
         )
 
     @Test

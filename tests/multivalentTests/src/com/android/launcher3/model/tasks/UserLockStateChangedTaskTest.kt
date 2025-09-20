@@ -29,12 +29,12 @@ import com.android.launcher3.model.TestableModelState
 import com.android.launcher3.model.tasks.ModelRepoTestEx.trackUpdateAndChanges
 import com.android.launcher3.model.tasks.ModelRepoTestEx.verifyAndGetItemsUpdated
 import com.android.launcher3.model.tasks.ModelRepoTestEx.verifyDelete
+import com.android.launcher3.testutil.rule.LayoutResource
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import com.android.launcher3.util.LauncherLayoutBuilder
 import com.android.launcher3.util.LauncherModelHelper.SHORTCUT_ID
 import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY
 import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
-import com.android.launcher3.util.LayoutResource
 import com.android.launcher3.util.ModelTestExtensions.countPersistedModelItems
 import com.android.launcher3.util.RoboApiWrapper
 import com.android.launcher3.util.SandboxApplication

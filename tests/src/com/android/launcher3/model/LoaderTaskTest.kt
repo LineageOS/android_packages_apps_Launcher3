@@ -46,9 +46,9 @@ import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.SettingsCache
 import com.android.launcher3.util.TestUtil
 import com.android.launcher3.util.UserIconInfo
+import com.android.launcher3.util.WidgetUtils
 import com.android.launcher3.util.rule.MockUsersRule
 import com.android.launcher3.util.rule.MockUsersRule.MockUser
-import com.android.launcher3.util.ui.TestViewHelpers
 import com.google.common.truth.Truth.assertThat
 import dagger.BindsInstance
 import dagger.Component
@@ -123,7 +123,7 @@ class LoaderTaskTest {
     @Before
     fun setup() {
         val allWidgetManager = context.spyService(AppWidgetManager::class.java)
-        doReturn(TestViewHelpers.findWidgetProvider(false))
+        doReturn(WidgetUtils.findWidgetProvider(false))
             .whenever(allWidgetManager)
             .getAppWidgetInfo(any())
 

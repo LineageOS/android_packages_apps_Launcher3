@@ -24,7 +24,7 @@ import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.MutableListenableRef
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestActivityContext
-import com.android.launcher3.util.ui.TestViewHelpers
+import com.android.launcher3.util.WidgetUtils
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -46,7 +46,7 @@ class OseWidgetOptionsProviderTest {
 
     private lateinit var underTest: OseWidgetOptionsProvider
 
-    val infoWithoutConfig = TestViewHelpers.findWidgetProvider(false).apply { configure = null }
+    val infoWithoutConfig = WidgetUtils.findWidgetProvider(false).apply { configure = null }
     private val testProviderInfo = MutableListenableRef<AppWidgetProviderInfo>(infoWithoutConfig)
 
     @Before
@@ -74,7 +74,7 @@ class OseWidgetOptionsProviderTest {
     @Test
     fun `appWidgetSupportsReconfigure returns false when not reconfigurable`() {
         val infoNotReconfigurableConfig =
-            TestViewHelpers.findWidgetProvider(true).apply {
+            WidgetUtils.findWidgetProvider(true).apply {
                 configure = ComponentName("test", "test")
                 widgetFeatures = 0 // Not reconfigurable
             }
@@ -86,7 +86,7 @@ class OseWidgetOptionsProviderTest {
     @Test
     fun `appWidgetSupportsReconfigure returns true when reconfigurable and configure is not null`() {
         val infoWithReconfigurableConfig =
-            TestViewHelpers.findWidgetProvider(true).apply {
+            WidgetUtils.findWidgetProvider(true).apply {
                 configure = ComponentName("test", "test")
                 widgetFeatures = WIDGET_FEATURE_RECONFIGURABLE
             }
@@ -98,7 +98,7 @@ class OseWidgetOptionsProviderTest {
     @Test
     fun `appWidgetSupportsReconfigure handles other widget features correctly`() {
         val infoWithoutReconfigurableConfig =
-            TestViewHelpers.findWidgetProvider(true).apply {
+            WidgetUtils.findWidgetProvider(true).apply {
                 configure = ComponentName("test", "test")
                 // Other features present, but not reconfigurable
                 widgetFeatures = 2 // Some other feature flag

@@ -28,7 +28,7 @@ import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.MutableListenableRef
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestActivityContext
-import com.android.launcher3.util.ui.TestViewHelpers
+import com.android.launcher3.util.WidgetUtils
 import com.android.launcher3.views.OptionsPopupView.OptionItem
 import dagger.BindsInstance
 import dagger.Component
@@ -61,7 +61,7 @@ class OseWidgetViewTest {
 
     private lateinit var mVut: OseWidgetView
 
-    private val widgetInfo = TestViewHelpers.findWidgetProvider(false)
+    private val widgetInfo = WidgetUtils.findWidgetProvider(false)
     private val remoteView = RemoteViews(widgetInfo.provider.packageName, 0)
     private val mockProviderInfo = MutableListenableRef<AppWidgetProviderInfo>(widgetInfo)
     private val mockRemoteViews = MutableListenableRef(remoteView)
@@ -99,7 +99,7 @@ class OseWidgetViewTest {
         mVut.attachedToWindow()
         verify(mVut).setAppWidget(INVALID_APPWIDGET_ID, widgetInfo)
 
-        val newWidgetInfo = TestViewHelpers.findWidgetProvider(false)
+        val newWidgetInfo = WidgetUtils.findWidgetProvider(false)
         mockProviderInfo.dispatchValue(newWidgetInfo)
 
         verify(mVut).setAppWidget(INVALID_APPWIDGET_ID, newWidgetInfo)
@@ -111,7 +111,7 @@ class OseWidgetViewTest {
         mVut.attachedToWindow()
         verify(mVut).updateAppWidget(remoteView)
 
-        val newWidgetInfo = TestViewHelpers.findWidgetProvider(false)
+        val newWidgetInfo = WidgetUtils.findWidgetProvider(false)
         val newRemoteView = RemoteViews(newWidgetInfo.provider.packageName, 0)
         mockRemoteViews.dispatchValue(newRemoteView)
 
@@ -126,12 +126,12 @@ class OseWidgetViewTest {
         mVut.detachedFromWindow()
         verify(mVut.closeActions, times(2)).executeAllAndClear()
 
-        val newWidgetInfo = TestViewHelpers.findWidgetProvider(false)
+        val newWidgetInfo = WidgetUtils.findWidgetProvider(false)
         mockProviderInfo.dispatchValue(newWidgetInfo)
         // setAppWidget is not called since view is detached even though providerInfo changes
         verify(mVut, times(1)).setAppWidget(any(), any())
 
-        val anotherWidgetInfo = TestViewHelpers.findWidgetProvider(false)
+        val anotherWidgetInfo = WidgetUtils.findWidgetProvider(false)
         mockProviderInfo.dispatchValue(anotherWidgetInfo)
         // setAppWidget is not called since view is detached even though providerInfo changes
         verify(mVut, times(1)).setAppWidget(any(), any())
@@ -144,13 +144,13 @@ class OseWidgetViewTest {
         mVut.detachedFromWindow()
         verify(mVut.closeActions, times(2)).executeAllAndClear()
 
-        val newWidgetInfo = TestViewHelpers.findWidgetProvider(false)
+        val newWidgetInfo = WidgetUtils.findWidgetProvider(false)
         val newRemoteView = RemoteViews(newWidgetInfo.provider.packageName, 0)
         mockRemoteViews.dispatchValue(newRemoteView)
         // updateAppWidget is not called since view is detached even though remoteView changes
         verify(mVut, times(1)).updateAppWidget(any())
 
-        val anotherWidgetInfo = TestViewHelpers.findWidgetProvider(false)
+        val anotherWidgetInfo = WidgetUtils.findWidgetProvider(false)
         val anotherRemoteView = RemoteViews(anotherWidgetInfo.provider.packageName, 0)
         mockRemoteViews.dispatchValue(anotherRemoteView)
         // updateAppWidget is not called since view is detached even though remoteView changes
