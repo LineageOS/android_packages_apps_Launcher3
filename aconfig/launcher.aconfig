@@ -615,6 +615,13 @@ flag {
 }
 
 flag {
+    name: "enable_system_drag_to_other_apps"
+    namespace: "launcher"
+    description: "Enables system-level drag-and-drop to other apps"
+    bug: "402183121"
+}
+
+flag {
   name: "force_monochrome_app_icons_adapt_colors"
   namespace: "launcher"
   description: "Adapt colors for monochromatic icons, only valid if force_monochrome_app_icons is enabled"
