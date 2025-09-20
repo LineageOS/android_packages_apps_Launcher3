@@ -2759,6 +2759,22 @@ public class Launcher extends StatefulActivity<LauncherState>
         return false; // Base launcher does not show behind desktop mode.
     }
 
+    /**
+     * Returns a sparse array of all the pinned items in the hotseat.
+     * The key of the sparse array is the index of the item, which is saved as the screenId.
+     */
+    public SparseArray<ItemInfo> getPinnedItems() {
+        SparseArray<ItemInfo> items = new SparseArray<>();
+        mapOverCellLayouts(new CellLayout[]{getHotseat()}, (info, view) -> {
+            // Always return false to make sure all items in the hotseat are checked.
+            if (info == null) return false;
+            if (info.isPredictedItem()) return false;
+            items.put(info.screenId, info);
+            return false;
+        });
+        return items;
+    }
+
     // Getters and Setters
 
     public boolean isWorkspaceLocked() {
