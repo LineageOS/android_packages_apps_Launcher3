@@ -73,13 +73,17 @@ class DbReader(val mDb: SQLiteDatabase, val mTableName: String, val mContext: Co
 
                     LauncherSettings.Favorites.ITEM_TYPE_FOLDER -> {
                         val total = getFolderItemsCount(entry)
-                        if (total == 0) {
-                            throw Exception("Folder is empty")
+                        // If the folder contains fewer than 2 items, it is likely that the
+                        // folder was created by mistake and should be removed.
+                        if (total < 2) {
+                            throw Exception("Folder contains fewer than 2 items")
                         }
                     }
 
                     LauncherSettings.Favorites.ITEM_TYPE_APP_PAIR -> {
                         val total = getFolderItemsCount(entry)
+                        // If the app pair contains fewer or more than 2 items, it is likely that
+                        // the app pair was created by mistake and should be removed.
                         if (total != 2) {
                             throw Exception("App pair contains fewer or more than 2 items")
                         }
@@ -178,10 +182,12 @@ class DbReader(val mDb: SQLiteDatabase, val mTableName: String, val mContext: Co
                     }
 
                     LauncherSettings.Favorites.ITEM_TYPE_FOLDER ->
-                        check(getFolderItemsCount(entry) > 0) { "Folder is empty" }
+                        // Ensure that the folder has at least 2 items.
+                        check(getFolderItemsCount(entry) > 1) { "Folder has too few items" }
 
                     LauncherSettings.Favorites.ITEM_TYPE_APP_PAIR -> {
-                        check(getFolderItemsCount(entry) != 2) {
+                        // Ensure that the app pair has exactly 2 items.
+                        check(getFolderItemsCount(entry) == 2) {
                             "App pair contains fewer or more than 2 items"
                         }
                     }
