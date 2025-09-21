@@ -118,17 +118,23 @@
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Экранды буруу"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Тапшырмалар панели экрандын ылдый жагында пайда болуп, колдонулбаганда автоматтык түрдө жашырылганын көрсөткөн анимация"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Которгучтун жардамы менен тапшырмалар панелин экрандын ылдый жагына кадап коюуну көрсөткөн анимация"</string>
+    <!-- no translation found for taskbar_edu_bubbles_animation_description (421866726938396813) -->
+    <skip />
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"Тапшырмалар панелиндеги колдонмону ачылып турган колдонмонун үстүнө сүйрөп барып, экранды бөлүүнү көрсөткөн анимация"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"Түзмөктөгү сунушталган колдонмолорго кантип кирүүнү көрсөткөн анимация"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"Аракет баскычын басып туруп, нерсе турган аймакты тандоо менен экрандагы нерсени издөөнү көрсөткөн анимация"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Тапшырмалар тактасы жөнүндө маалымат"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"2 колдонмону бир убакта пайдалануу үчүн капталга сүйрөйсүз"</string>
+    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
+    <skip />
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Тапшырмалар тактасын көрүү үчүн экранды жай өйдө сүрүңүз"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Аракеттериңизге негизделген сунуштарды алып турасыз"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Тапшырмалар тактасын кадап коюу үчүн бөлгүчтү коё бербей басып турасыз"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Тапшырмалар тактасы менен көбүрөөк иш бүтүрөсүз"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"Тапшырмалар панелин ар дайым көрсөтүү"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"Тапшырмалар панелин экрандын ылдый жагында ар дайым көрсөтүү үчүн бөлгүчтү коё бербей басыңыз"</string>
+    <!-- no translation found for taskbar_edu_bubbles_standalone (4182824636656528043) -->
+    <skip />
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"Экрандагы нерсени издөө үчүн аракет баскычын коё бербей кармап туруңуз"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Бул кызмат издөө үчүн экранда тандалган бөлүктү колдонот. Google\'дун <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>Купуялык эрежелери<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> жана <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>Тейлөө шарттары<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> колдонулат."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Жабуу"</string>
@@ -146,8 +152,6 @@
     <string name="change_navigation_mode" msgid="9088393078736808968">"Өтүү режимин өзгөртүү"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Тапшырмалар панелин бөлгүч"</string>
     <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"Акыркы жолу ачылган башка колдонмолор"</string>
-    <string name="app_added_to_taskbar" msgid="1160433791917609063">"Колдонмо тапшырмалар тактасына кошулду"</string>
-    <string name="app_removed_from_taskbar" msgid="7887298201562912487">"Колдонмо тапшырмалар тактасынан алынып салынды"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Жогорку/сол бурчка жылдыруу"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Төмөнкү/оң бурчка жылдыруу"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"Колдонмону көбүкчө катары ачуу"</string>

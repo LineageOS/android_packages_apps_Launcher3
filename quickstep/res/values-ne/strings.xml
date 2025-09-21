@@ -118,17 +118,23 @@
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"स्क्रिन घुमाउनुहोस्"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"टास्कबार कसरी स्क्रिनको फेदबाट माथितिर निस्कन्छ र प्रयोग नगरिएका बेलामा कसरी स्वतः लुक्छ भन्ने कुरा देखाइएको एनिमेसन"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"टास्कबार स्क्रिनको फेदमा स्थायी रूपमा देखियोस् भन्नाका लागि टगल प्रयोग गरी आफ्नो टास्कबार पिन गर्ने तरिका देखाइएको एनिमेसन"</string>
+    <!-- no translation found for taskbar_edu_bubbles_animation_description (421866726938396813) -->
+    <skip />
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"टास्कबारमा भएको कुनै एप खुला रहेको अर्को एपमाथि ड्र्याग एन्ड ड्रप गरेर स्प्लिट स्क्रिन बनाउने तरिका देखाइएको एनिमेसन"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"आफ्नो डिभाइसमा सिफारिस गरिएका एपहरू एक्सेस गर्ने तरिका देखाइएको एनिमेसन"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"एक्सन की टच गरिराखेर र सामग्री रहेको क्षेत्र चयन गरेर स्क्रिनमा भएको कुनै सामग्री खोज्ने तरिका देखाइएको एनिमेसन"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"टास्कबार एजुकेसन"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"एपलाई छेउतिर ड्र्याग गरेर एकै पटक २ वटा एप चलाउनुहोस्"</string>
+    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
+    <skip />
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"टास्कबार देखाउन माथितिर बिस्तारै स्वाइप गर्नुहोस्"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"आफ्नो रुटिनका आधारमा एपसम्बन्धी सुझावहरू प्राप्त गर्नुहोस्"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"टास्कबार पिन गर्न डिभाइडरमा केही बेरसम्म थिच्नुहोस्"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"टास्कबार प्रयोग गरेर अझ धेरै कार्य गर्नुहोस्"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"टास्कबार सधैँ देखाउनुहोस्"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"आफ्नो स्क्रिनको पुछारमा टास्कबार सधैँ देखाइराख्न डिभाइडर टच एन्ड होल्ड गर्नुहोस्"</string>
+    <!-- no translation found for taskbar_edu_bubbles_standalone (4182824636656528043) -->
+    <skip />
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"आफ्नो स्क्रिनमा भएका कुराहरू खोज्न एक्सन कीमा टच एन्ड होल्ड गर्नुहोस्"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"यो उत्पादनले तपाईंले चयन गर्नुभएको स्क्रिनको भाग प्रयोग गरेर खोजी गर्छ। Google को <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>गोपनीयता नीति<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> र <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>सेवाका सर्तहरू<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> लागू हुन्छन्।"</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"बन्द गर्नुहोस्"</string>
@@ -146,8 +152,6 @@
     <string name="change_navigation_mode" msgid="9088393078736808968">"नेभिगेसन मोड बदल्नुहोस्"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"टास्कबार डिभाइडर"</string>
     <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"हालसालै खोलिएका अन्य एपहरू"</string>
-    <string name="app_added_to_taskbar" msgid="1160433791917609063">"टास्कबारमा एप हालिएको छ"</string>
-    <string name="app_removed_from_taskbar" msgid="7887298201562912487">"टास्कबारबाट एप हटाइएको छ"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"सिरान/बायाँतिर सार्नुहोस्"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"फेद/दायाँतिर सार्नुहोस्"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"एपलाई बबलका रूपमा खोल्नुहोस्"</string>

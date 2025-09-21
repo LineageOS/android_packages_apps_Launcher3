@@ -118,17 +118,23 @@
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"چرخاندن صفحه"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"پویانمایی‌ای که نحوه نمایان شدن نوار وظیفه از پایین صفحه و پنهان شدن خودکار آن را وقتی استفاده نمی‌شود نشان می‌دهد"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"پویانمایی‌ای که نحوه سنجاق کردن نوار وظیفه را بااستفاده از کلید نشان می‌دهد تا نوار وظیفه همیشه در پایین صفحه نمایان باشد"</string>
+    <!-- no translation found for taskbar_edu_bubbles_animation_description (421866726938396813) -->
+    <skip />
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"پویانمایی‌ای که نحوه ایجاد صفحه دونیمه را ازطریق کشیدن و رها کردن برنامه از نوار وظیفه بالای یک برنامه باز نشان می‌دهد"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"پویانمایی‌ای که نحوه دسترسی به برنامه‌های پیشنهادی در دستگاه را نشان می‌دهد"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"پویانمایی‌ای که نحوه جستجو کردن یک مورد در صفحه را بااستفاده از لمس کردن و نگه داشتن دکمه کنش و انتخاب کردن ناحیه‌ای که مورد در آن است نشان می‌دهد"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"آموزش نوار وظیفه"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"برای استفاده هم‌زمان از ۲ برنامه، یک برنامه را به‌کنار بکشید"</string>
+    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
+    <skip />
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"برای نمایش «نوار وظیفه»، انگشتتان را آهسته به‌بالا بکشید"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"براساس روال‌هایتان، پیشنهاد برنامه دریافت کنید"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"جداکننده را چند ثانیه فشار دهید تا «نوار وظیفه» سنجاق شود"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"با «نوار وظیفه» می‌توانید کارهای بیشتر انجام دهید"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"همیشه نشان داده شدن «نوار وظیفه»"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"برای اینکه «نوار وظیفه» همیشه در پایین صفحه نشان داده شود، تقسیم‌کننده را لمس کنید و نگه دارید"</string>
+    <!-- no translation found for taskbar_edu_bubbles_standalone (4182824636656528043) -->
+    <skip />
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"برای جستجوی محتوای صفحه‌نمایش، دکمه کنش را لمس کنید و نگه دارید"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"‏این محصول از قسمت انتخاب‌شده صفحه‌نمایش شما برای جستجو استفاده می‌کند. <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>خط‌مشی رازداری<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> و <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>شرایط خدمات<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> Google اعمال می‌شود."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"بستن"</string>
@@ -146,8 +152,6 @@
     <string name="change_navigation_mode" msgid="9088393078736808968">"تغییر حالت پیمایش"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"جداکننده نوار وظیفه"</string>
     <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"سایر برنامه‌های اخیر"</string>
-    <string name="app_added_to_taskbar" msgid="1160433791917609063">"برنامه به نوار ابزار اضافه شد"</string>
-    <string name="app_removed_from_taskbar" msgid="7887298201562912487">"برنامه از نوار ابزار برداشته شد"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"انتقال به بالا/ چپ"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"انتقال به پایین/ راست"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"باز کردن برنامه به‌صورت حبابک"</string>

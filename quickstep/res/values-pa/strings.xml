@@ -118,17 +118,23 @@
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"ਸਕ੍ਰੀਨ ਘੁਮਾਓ"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"ਟਾਸਕਬਾਰ ਦੇ ਸਕ੍ਰੀਨ ਦੇ ਹੇਠਾਂ ਤੋਂ ਦ੍ਰਿਸ਼ ਵਿੱਚ ਆਉਣ ਅਤੇ ਵਰਤੋਂ ਵਿੱਚ ਨਾ ਹੋਣ \'ਤੇ ਆਪਣੇ ਆਪ ਲੁਕ ਜਾਣ ਦਾ ਤਰੀਕਾ ਦਿਖਾਉਣ ਵਾਲਾ ਐਨੀਮੇਸ਼ਨ"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"ਟੌਗਲ ਦੀ ਵਰਤੋਂ ਕਰ ਕੇ ਤੁਹਾਡੇ ਟਾਸਕਬਾਰ ਨੂੰ ਪਿੰਨ ਕਰਨ ਦਾ ਤਰੀਕਾ ਦਿਖਾਉਣ ਵਾਲਾ ਐਨੀਮੇਸ਼ਨ, ਤਾਂ ਜੋ ਟਾਸਕਬਾਰ ਪੱਕੇ ਤੌਰ \'ਤੇ ਸਕ੍ਰੀਨ ਦੇ ਹੇਠਾਂ ਦਿਖਣਯੋਗ ਰਹੇ"</string>
+    <!-- no translation found for taskbar_edu_bubbles_animation_description (421866726938396813) -->
+    <skip />
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"ਕਿਸੇ ਖੁੱਲ੍ਹੀ ਐਪ ਉੱਪਰ ਟਾਸਕਬਾਰ ਤੋਂ ਘਸੀਟ ਅਤੇ ਛੱਡ ਕੇ, ਸਪਲਿਟ ਸਕ੍ਰੀਨ ਬਣਾਉਣ ਦਾ ਤਰੀਕਾ ਦਿਖਾਉਣ ਵਾਲਾ ਐਨੀਮੇਸ਼ਨ"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"ਤੁਹਾਡੇ ਡੀਵਾਈਸ \'ਤੇ ਸੁਝਾਈਆਂ ਗਈਆਂ ਐਪਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦਾ ਤਰੀਕਾ ਦਿਖਾਉਣ ਵਾਲਾ ਐਨੀਮੇਸ਼ਨ"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"ਕਾਰਵਾਈ ਕੁੰਜੀ ਨੂੰ ਸਪਰਸ਼ ਕਰ ਕੇ ਰੱਖਦੇ ਹੋਏ ਅਤੇ ਆਈਟਮ ਜਿਸ ਖੇਤਰ ਵਿੱਚ ਹੈ ਉਸਨੂੰ ਚੁਣਦੇ ਹੋਏ, ਸਕ੍ਰੀਨ \'ਤੇ ਦਿੱਤੀ ਆਈਟਮ ਨੂੰ ਖੋਜਣ ਦਾ ਤਰੀਕਾ ਦਿਖਾਉਣ ਵਾਲਾ ਐਨੀਮੇਸ਼ਨ"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"ਟਾਸਕਬਾਰ ਸਿੱਖਿਆ"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"ਇੱਕੋ ਵੇਲੇ 2 ਐਪਾਂ ਵਰਤਣ ਲਈ, ਕਿਸੇ ਐਪ ਨੂੰ ਸਾਈਡ \'ਤੇ ਘਸੀਟੋ"</string>
+    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
+    <skip />
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"ਟਾਸਕਬਾਰ ਦਿਖਾਉਣ ਲਈ ਹੌਲੀ ਜਿਹੀ ਉੱਤੇ ਵੱਲ ਸਵਾਈਪ ਕਰੋ"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"ਤੁਹਾਡੇ ਨਿਯਮਬੱਧ ਕੰਮ ਦੇ ਆਧਾਰ \'ਤੇ ਐਪ ਸੁਝਾਅ ਪ੍ਰਾਪਤ ਕਰੋ"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"ਟਾਸਕਬਾਰ \'ਤੇ ਪਿੰਨ ਕਰਨ ਲਈ ਵਿਭਾਜਕ \'ਤੇ ਦਬਾਈ ਰੱਖੋ"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"ਟਾਸਕਬਾਰ ਦਾ ਹੋਰ ਲਾਹਾ ਲਓ"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"ਹਮੇਸ਼ਾਂ ਟਾਸਕਬਾਰ ਦਿਖਾਉਣਾ"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"ਆਪਣੀ ਸਕ੍ਰੀਨ ਦੇ ਹੇਠਾਂ ਹਮੇਸ਼ਾਂ ਟਾਸਕਬਾਰ ਦਿਖਾਉਣ ਲਈ, ਵਿਭਾਜਕ ਨੂੰ ਸਪਰਸ਼ ਕਰ ਕੇ ਰੱਖੋ"</string>
+    <!-- no translation found for taskbar_edu_bubbles_standalone (4182824636656528043) -->
+    <skip />
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ \'ਤੇ ਮੌਜੂਦ ਸਮੱਗਰੀ ਨੂੰ ਖੋਜਣ ਲਈ, ਕਾਰਵਾਈ ਕੁੰਜੀ ਨੂੰ ਸਪਰਸ਼ ਕਰ ਕੇ ਰੱਖੋ"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"ਇਹ ਉਤਪਾਦ ਖੋਜ ਕਰਨ ਲਈ ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ ਦੇ ਚੁਣੇ ਹੋਏ ਹਿੱਸੇ ਦੀ ਵਰਤੋਂ ਕਰਦਾ ਹੈ। Google ਦੀ <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>ਪਰਦੇਦਾਰੀ ਨੀਤੀ<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> ਅਤੇ <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>ਸੇਵਾ ਦੇ ਨਿਯਮ<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> ਲਾਗੂ ਹੁੰਦੇ ਹਨ।"</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"ਬੰਦ ਕਰੋ"</string>
@@ -146,8 +152,6 @@
     <string name="change_navigation_mode" msgid="9088393078736808968">"ਨੈਵੀਗੇਸ਼ਨ ਮੋਡ ਬਦਲੋ"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"ਟਾਸਕਬਾਰ ਵਿਭਾਜਕ"</string>
     <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"ਹੋਰ ਹਾਲੀਆ ਐਪਾਂ"</string>
-    <string name="app_added_to_taskbar" msgid="1160433791917609063">"ਐਪ ਨੂੰ ਟਾਸਕਬਾਰ ਵਿੱਚ ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ"</string>
-    <string name="app_removed_from_taskbar" msgid="7887298201562912487">"ਐਪ ਨੂੰ ਟਾਸਕਬਾਰ ਵਿੱਚੋਂ ਹਟਾਇਆ ਗਿਆ"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"ਸਿਖਰਲੇ/ਖੱਬੇ ਪਾਸੇ ਲੈ ਕੇ ਜਾਓ"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"ਹੇਠਾਂ/ਸੱਜੇ ਪਾਸੇ ਲੈ ਕੇ ਜਾਓ"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"ਐਪ ਨੂੰ ਬਬਲ ਵਜੋਂ ਖੋਲ੍ਹੋ"</string>

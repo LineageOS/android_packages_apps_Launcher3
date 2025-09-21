@@ -118,17 +118,23 @@
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Obróć ekran"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Animacja pokazująca, jak pasek aplikacji pojawia się u dołu ekranu i automatycznie znika, gdy nie jest używany"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Animacja pokazująca, jak za pomocą przełącznika przypiąć pasek aplikacji, aby był on stale widoczny u dołu ekranu"</string>
+    <!-- no translation found for taskbar_edu_bubbles_animation_description (421866726938396813) -->
+    <skip />
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"Animacja pokazująca, jak utworzyć podzielony ekran, przeciągając i upuszczając aplikację z paska aplikacji nad aktualnie otwartą"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"Animacja pokazująca, jak uzyskać dostęp do sugerowanych aplikacji na urządzeniu"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"Animacja pokazująca, jak wyszukać element na ekranie, naciskając i przytrzymując klawisz działania oraz wybierając obszar, w którym jest dany element"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Informacje o pasku aplikacji"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Przeciągnij aplikację na bok, aby używać 2 aplikacji naraz"</string>
+    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
+    <skip />
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Aby wyświetlić pasek aplikacji, wolno przesuń palcem w górę"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Otrzymuj sugestie aplikacji na podstawie typowych działań"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Przytrzymaj separator, aby przypiąć pasek aplikacji"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Wykorzystaj potencjał paska aplikacji"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"Zawsze wyświetlaj pasek aplikacji"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"Aby zawsze wyświetlać pasek aplikacji u dołu ekranu, naciśnij i przytrzymaj linię dzielenia ekranu"</string>
+    <!-- no translation found for taskbar_edu_bubbles_standalone (4182824636656528043) -->
+    <skip />
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"Aby rozpocząć wyszukiwanie na podstawie zawartości ekranu, naciśnij i przytrzymaj klawisz działania"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Usługa przy wyszukiwaniu używa zaznaczonego fragmentu ekranu. Obowiązują zapisy <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>Polityki prywatności<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> i <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>Warunków korzystania z usług<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> Google."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Zamknij"</string>
@@ -146,8 +152,6 @@
     <string name="change_navigation_mode" msgid="9088393078736808968">"Zmień tryb nawigacji"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Linia dzielenia paska aplikacji"</string>
     <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"Inne ostatnio używane aplikacje"</string>
-    <string name="app_added_to_taskbar" msgid="1160433791917609063">"Aplikacja została dodana do paska aplikacji"</string>
-    <string name="app_removed_from_taskbar" msgid="7887298201562912487">"Aplikacja została usunięta z paska aplikacji"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Przesuń w górny lewy róg"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Przesuń w dolny prawy róg"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"Otwórz aplikację jako dymek"</string>

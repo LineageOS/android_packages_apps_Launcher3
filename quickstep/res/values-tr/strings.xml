@@ -118,17 +118,23 @@
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Ekranı döndür"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Görev çubuğunun ekranın altından nasıl göründüğünü ve kullanılmadığında otomatik olarak nasıl gizlendiğini gösteren animasyon"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Görev çubuğunun, ekranın alt kısmında sürekli görünür olması için açma/kapatma düğmesini kullanarak görev çubuğunuzu nasıl sabitleyeceğinizi gösteren animasyon"</string>
+    <!-- no translation found for taskbar_edu_bubbles_animation_description (421866726938396813) -->
+    <skip />
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"Görev çubuğundaki bir uygulamayı, açık bir uygulamanın üzerine sürükleyip bırakarak nasıl bölünmüş ekran oluşturacağınızı gösteren animasyon"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"Cihazınızda önerilen uygulamalara nasıl erişeceğinizi gösteren animasyon"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"Eylem tuşuna dokunup basılı tutarak ve öğenin bulunduğu alanı seçerek ekranda nasıl öğe aranacağını gösteren animasyon"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Görev çubuğu eğitimi"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Aynı anda iki uygulama kullanmak için birini yana sürükleyin"</string>
+    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
+    <skip />
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Görev çubuğunun görünmesi için yukarı doğru yavaşça kaydırın"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Rutininize göre uygulama önerileri alın"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Görev çubuğunu sabitlemek için ayırıcıya uzun basın"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Görev çubuğuyla daha fazla şey yapın"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"Görev çubuğunu sabitleyin"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"Ayırıcıya dokunup basılı tuttuğunuzda görev çubuğu ekranın alt kısmına sabitlenir"</string>
+    <!-- no translation found for taskbar_edu_bubbles_standalone (4182824636656528043) -->
+    <skip />
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"Ekranınızda bulunan içerikleri aramak için eylem tuşuna dokunup basılı tutun"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Bu ürün, ekranınızın seçilen bölümünü kullanarak arama yapar. Google\'ın <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>Gizlilik Politikası<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> ve <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>Hizmet Şartları<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> geçerlidir."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Kapat"</string>
@@ -146,8 +152,6 @@
     <string name="change_navigation_mode" msgid="9088393078736808968">"Gezinme modunu değiştir"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Görev Çubuğu Ayırıcısı"</string>
     <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"Diğer son uygulamalar"</string>
-    <string name="app_added_to_taskbar" msgid="1160433791917609063">"Uygulama, görev çubuğuna eklendi"</string>
-    <string name="app_removed_from_taskbar" msgid="7887298201562912487">"Uygulama, görev çubuğundan kaldırıldı"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Sol üste taşı"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Sağ alta taşı"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"Uygulamayı balon olarak aç"</string>

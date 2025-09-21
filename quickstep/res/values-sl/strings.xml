@@ -118,17 +118,23 @@
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Sukanje zaslona"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Animacija, ki prikazuje, kako se opravilna vrstica prikaže na dnu zaslona in se samodejno skrije, ko je ne uporabljate"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Animacija, ki prikazuje, kako s preklopnikom pripnete opravilno vrstico, da bo vedno vidna na dnu zaslona"</string>
+    <!-- no translation found for taskbar_edu_bubbles_animation_description (421866726938396813) -->
+    <skip />
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"Animacija, ki prikazuje, kako ustvarite razdeljen zaslon tako, da aplikacijo iz opravilne vrstice povlečete in spustite na odprto aplikacijo"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"Animacija, ki prikazuje, kako dostopate do predlaganih aplikacij v napravi"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"Animacija, ki prikazuje, kako na zaslonu poiščete element tako, da se dotaknete in pridržite tipko za dejanja ter izberete območje, kjer je element"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Poučni nasveti o opravilni vrstici"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Povlecite aplikacijo na stran za uporabo 2 aplikacij hkrati."</string>
+    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
+    <skip />
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Počasi povlecite navzgor za prikaz opravilne vrstice"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Prejemajte predloge aplikacij na podlagi svojih navad."</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Pridržite razdelilno črto, da pripnete opravilno vrstico."</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Naredite več z opravilno vrstico"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"Stalni prikaz opravilne vrstice"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"Če želite, da je opravilna vrstica vedno prikazana na dnu zaslona, pridržite razdelilno črto."</string>
+    <!-- no translation found for taskbar_edu_bubbles_standalone (4182824636656528043) -->
+    <skip />
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"Za iskanje vsebine zaslona pridržite tipko za dejanja"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Ta izdelek za iskanje uporablja izbrani del zaslona. Veljajo Googlov <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>pravilnik o zasebnosti<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> in <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>pogoji storitve<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g>."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Zapri"</string>
@@ -146,8 +152,6 @@
     <string name="change_navigation_mode" msgid="9088393078736808968">"Spreminjanje načina navigacije"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Razdelilnik opravilne vrstice"</string>
     <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"Druge nedavne aplikacije"</string>
-    <string name="app_added_to_taskbar" msgid="1160433791917609063">"Aplikacija je dodana v opravilno vrstico"</string>
-    <string name="app_removed_from_taskbar" msgid="7887298201562912487">"Aplikacija je odstranjena iz opravilne vrstice"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Premakni na vrh/levo"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Premakni na dno/desno"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"Odpri aplikacijo kot oblaček"</string>

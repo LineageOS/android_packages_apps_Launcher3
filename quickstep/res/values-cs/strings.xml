@@ -118,17 +118,23 @@
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Otočit obrazovku"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Animace ukazující, jak se z dolní části obrazovky zobrazuje panel aplikací a jak se automaticky skrývá, když se nepoužívá"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Animace ukazující, jak pomocí přepínače připnout panel aplikací, aby byl trvale viditelný v dolní části obrazovky"</string>
+    <!-- no translation found for taskbar_edu_bubbles_animation_description (421866726938396813) -->
+    <skip />
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"Animace ukazující, jak přetažením aplikace z panelu aplikací nad otevřenou aplikaci vytvořit rozdělenou obrazovku"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"Animace ukazující, jak na zařízení získat přístup k navrhovaným aplikacím"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"Animace ukazující, jak vyhledat položku na obrazovce podržením akční klávesy a výběrem oblasti, ve které se daná položka nachází"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Informace o panelu aplikací"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Přetáhněte aplikaci na stranu a používejte tak dvě najednou"</string>
+    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
+    <skip />
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Panel aplikací zobrazíte pomalým přejetím prstem nahoru"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Dostávejte návrhy aplikací podle toho, jaké používáte"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Dlouhým stisknutím oddělovače panel aplikací připnete"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Více možností s panelem aplikací"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"Stálé zobrazení panelu aplikací"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"Pokud chcete, aby se panel aplikací vždy zobrazoval ve spodní části obrazovky, podržte oddělovač."</string>
+    <!-- no translation found for taskbar_edu_bubbles_standalone (4182824636656528043) -->
+    <skip />
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"Podržením akční klávesy můžete vyhledat obsah na obrazovce"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Tato služba používá k vyhledávání vybranou část obrazovky. Platí <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>zásady ochrany soukromí<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> a <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>smluvní podmínky<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> společnosti Google."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Zavřít"</string>
@@ -146,8 +152,6 @@
     <string name="change_navigation_mode" msgid="9088393078736808968">"Změnit navigační režim"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Rozdělovač panelu aplikací"</string>
     <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"Další nedávné aplikace"</string>
-    <string name="app_added_to_taskbar" msgid="1160433791917609063">"Aplikace byla přidána na panel aplikací"</string>
-    <string name="app_removed_from_taskbar" msgid="7887298201562912487">"Aplikace byla odstraněna z panelu aplikací"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Přesunout doleva nahoru"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Přesunout doprava dolů"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"Otevřít aplikaci jako bublinu"</string>

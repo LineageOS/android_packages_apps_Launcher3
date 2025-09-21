@@ -118,17 +118,23 @@
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Gira la pantalla"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Animació que mostra com apareix la barra de tasques des de la part inferior de la pantalla i com s\'amaga automàticament quan no s\'utilitza"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Animació que mostra com es pot fixar la barra de tasques mitjançant un commutador perquè es mantingui visible permanentment a la part inferior de la pantalla"</string>
+    <!-- no translation found for taskbar_edu_bubbles_animation_description (421866726938396813) -->
+    <skip />
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"Animació que mostra com es pot crear una pantalla dividida arrossegant i deixant anar una aplicació des de la barra de tasques sobre una aplicació oberta"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"Animació que mostra com es pot accedir a les aplicacions suggerides al dispositiu"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"Animació que mostra com es pot cercar un element a la pantalla mantenint premuda la tecla d\'acció i seleccionant l\'àrea on es troba l\'element"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Informació sobre Barra de tasques"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Arrossega una aplicació al costat per utilitzar-ne dues alhora"</string>
+    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
+    <skip />
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Llisca lentament cap amunt per mostrar la Barra de tasques"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Obtén suggeriments d\'aplicacions basats en la teva rutina"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Mantén premut el separador per fixar la Barra de tasques"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Treu més partit de la Barra de tasques"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"Mostra sempre la Barra de tasques"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"Perquè es mostri sempre la Barra de tasques a la part inferior de la pantalla, mantén premut el separador"</string>
+    <!-- no translation found for taskbar_edu_bubbles_standalone (4182824636656528043) -->
+    <skip />
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"Mantén premuda la tecla d\'acció per cercar què es mostra a la pantalla"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Aquest producte utilitza la part seleccionada de la pantalla per fer cerques. S\'apliquen la <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>política de privadesa<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> i les <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>condicions del servei<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> de Google."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Tanca"</string>
@@ -146,8 +152,6 @@
     <string name="change_navigation_mode" msgid="9088393078736808968">"Canvia el mode de navegació"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Separador de la Barra de tasques"</string>
     <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"Altres aplicacions recents"</string>
-    <string name="app_added_to_taskbar" msgid="1160433791917609063">"L\'aplicació s\'ha afegit a la Barra de tasques"</string>
-    <string name="app_removed_from_taskbar" msgid="7887298201562912487">"L\'aplicació s\'ha suprimit de la Barra de tasques"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Mou a la part superior o a l\'esquerra"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Mou a la part inferior o a la dreta"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"Obre l\'aplicació com a bombolla"</string>

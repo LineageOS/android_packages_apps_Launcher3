@@ -118,17 +118,23 @@
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Xira a pantalla"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Animación que mostra como aparece a barra de tarefas desde a parte inferior da pantalla e como se oculta automaticamente cando non se utiliza"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Animación que mostra como fixar a barra de tarefas mediante un interruptor para que a barra estea sempre visible na parte inferior da pantalla"</string>
+    <!-- no translation found for taskbar_edu_bubbles_animation_description (421866726938396813) -->
+    <skip />
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"Animación que mostra como crear unha pantalla dividida arrastrando e soltando unha aplicación desde a barra de tarefas sobre unha aplicación aberta"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"Animación que mostra como acceder ás aplicacións suxeridas no teu dispositivo"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"Animación que mostra como buscar un elemento na pantalla mantendo premida a tecla de acción e seleccionando a área na que está o elemento"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Información sobre a función Barra de tarefas"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Arrastra unha aplicación cara a un lado para usar dúas á vez"</string>
+    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
+    <skip />
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Pasa o dedo amodo cara arriba para ver a barra de tarefas"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Obtén suxestións de aplicacións en función da túa rutina"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Mantén premida a liña divisoria para fixar a barra de tarefas"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Tira máis proveito da barra de tarefas"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"Mostrar sempre a barra de tarefas"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"Para fixar a barra de tarefas na parte inferior, mantén premida a liña divisoria"</string>
+    <!-- no translation found for taskbar_edu_bubbles_standalone (4182824636656528043) -->
+    <skip />
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"Mantén premida a tecla de acción para buscar o que hai na pantalla"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Este produto utiliza a parte seleccionada da pantalla para facer buscas. Aplícanse as <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>Condicións de servizo<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> e a <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>Política de privacidade<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> de Google."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Pechar"</string>
@@ -146,8 +152,6 @@
     <string name="change_navigation_mode" msgid="9088393078736808968">"Cambiar modo de navegación"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Divisor da Barra de tarefas"</string>
     <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"Outras aplicacións recentes"</string>
-    <string name="app_added_to_taskbar" msgid="1160433791917609063">"Aplicación engadida á Barra de tarefas"</string>
-    <string name="app_removed_from_taskbar" msgid="7887298201562912487">"Aplicación quitada da Barra de tarefas"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Mover á parte superior ou á esquerda"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Mover á parte inferior ou á dereita"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"Abrir aplicación como unha burbulla"</string>

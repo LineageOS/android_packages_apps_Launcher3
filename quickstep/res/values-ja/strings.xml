@@ -118,17 +118,23 @@
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"画面を回転"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"タスクバーが画面下部に表示され、使用していないときは自動的に非表示になる様子を紹介するアニメーション"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"切り替えを使用してタスクバーを固定し、画面下部に表示したままにする方法を紹介するアニメーション"</string>
+    <!-- no translation found for taskbar_edu_bubbles_animation_description (421866726938396813) -->
+    <skip />
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"タスクバーにあるアプリをドラッグし、開いているアプリの上にドロップして分割画面を作成する方法を紹介するアニメーション"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"デバイスでおすすめのアプリにアクセスする方法を紹介するアニメーション"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"アクションキーを長押しして、アイテムがある領域を選択し、画面上のアイテムを検索する方法を紹介するアニメーション"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"タスクバーの説明"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"アプリを横にドラッグすると 2 個のアプリを同時に使用できます"</string>
+    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
+    <skip />
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"タスクバーを表示するには、上にゆっくりとスワイプします"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"毎日の使用状況に基づいてアプリの候補が表示されます"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"分割線を長押ししてタスクバーを固定します"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"タスクバーの各種機能"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"タスクバーを常に表示"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"タスクバーを画面下部に常に表示するには分割線を長押しします"</string>
+    <!-- no translation found for taskbar_edu_bubbles_standalone (4182824636656528043) -->
+    <skip />
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"画面上の内容を検索するには、アクションキーを長押しします"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"このサービスは、画面上で選択された箇所を使用して検索します。Google の<xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>プライバシー ポリシー<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g>と<xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>利用規約<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g>が適用されます。"</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"閉じる"</string>
@@ -146,8 +152,6 @@
     <string name="change_navigation_mode" msgid="9088393078736808968">"ナビゲーション モードを変更"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"タスクバーの区切り"</string>
     <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"その他の最近使ったアプリ"</string>
-    <string name="app_added_to_taskbar" msgid="1160433791917609063">"タスクバーにアプリを追加しました"</string>
-    <string name="app_removed_from_taskbar" msgid="7887298201562912487">"タスクバーからアプリを削除しました"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"上 / 左に移動"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"下 / 右に移動"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"アプリをバブルとして開く"</string>
