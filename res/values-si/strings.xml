@@ -35,8 +35,7 @@
     <string name="close_task_accessibility" msgid="4765872229211282647">"%1$s වසන්න"</string>
     <string name="new_window_option_taskbar" msgid="6448780542727767211">"නව කවුළුව"</string>
     <string name="manage_windows_option_taskbar" msgid="2294109489960654212">"කවුළු කළමනාකරණය කරන්න"</string>
-    <!-- no translation found for close_app_taskbar (3238979263877091273) -->
-    <skip />
+    <string name="close_app_taskbar" msgid="3238979263877091273">"වසන්න"</string>
     <string name="save_app_pair" msgid="5647523853662686243">"යෙදුම් යුගල සුරකින්න"</string>
     <string name="app_pair_default_title" msgid="4045241727446873529">"<xliff:g id="APP1">%1$s</xliff:g> | <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="app_pair_unlaunchable_at_screen_size" msgid="3446551575502685376">"මෙම යෙදුම් යුගලය මෙම උපාංගයෙහි සහාය නොදක්වයි"</string>
@@ -108,6 +107,10 @@
     <string name="widget_settings" msgid="5280157748464495511">"සැකසීම්"</string>
     <string name="pin_to_taskbar" msgid="5914002252642242332">"කාර්ය තීරුවට අමුණන්න"</string>
     <string name="unpin_from_taskbar" msgid="1025883383457627426">"කාර්ය තීරුවෙන් ඉවත් කරන්න"</string>
+    <!-- no translation found for app_added_to_taskbar (6348755169793615171) -->
+    <skip />
+    <!-- no translation found for app_removed_from_taskbar (3471754847898675396) -->
+    <skip />
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"කෙටිමං ස්ථාපනය කරන්න"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"පරිශීලක මැදිහත්වීමෙන් තොරව කෙටිමං එක් කිරීමට යෙදුමකට අවසර දෙයි."</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"මුල් පිටු සැකසීම් සහ කෙටි මං කියවන්න"</string>
@@ -146,6 +149,12 @@
     <string name="msg_disabled_by_admin" msgid="6898038085516271325">"ඔබගේ පරිපාලක විසින් අබල කරන ලදී"</string>
     <string name="allow_rotation_title" msgid="7222049633713050106">"මුල් තිරය කරකැවීමට ඉඩ දෙන්න"</string>
     <string name="allow_rotation_desc" msgid="8662546029078692509">"දුරකථනය කරකවන විට"</string>
+    <!-- no translation found for compose_developer_options_section (8211460486549952595) -->
+    <skip />
+    <!-- no translation found for enable_composition_tracing_title (8989606591739368424) -->
+    <skip />
+    <!-- no translation found for enable_composition_tracing_desc (7187566039216492405) -->
+    <skip />
     <string name="landscape_mode_title" msgid="5138814555934843926">"භූ දර්ශන ආකාරය"</string>
     <string name="landscape_mode_desc" msgid="3085236452297838664">"මුල් තිරය භූ දර්ශන ප්‍රකාරයට සකසන්න"</string>
     <string name="notification_dots_title" msgid="9062440428204120317">"දැනුම්දීම් තිත්"</string>
