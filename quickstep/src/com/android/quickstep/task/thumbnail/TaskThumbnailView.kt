@@ -73,8 +73,21 @@ class TaskThumbnailView : FrameLayout, ViewPool.Reusable {
             invalidateOutline()
         }
 
-    private var parentScaleX = 1f
-    private var parentScaleY = 1f
+    var parentScaleX = 1f
+        set(value) {
+            field = value
+            // Splash icon should ignore scale on TTV
+            splashIcon.scaleX = 1 / value
+            invalidateOutline()
+        }
+
+    var parentScaleY = 1f
+        set(value) {
+            field = value
+            // Splash icon should ignore scale on TTV
+            splashIcon.scaleY = 1 / value
+            invalidateOutline()
+        }
 
     constructor(context: Context) : super(context)
 
@@ -179,18 +192,6 @@ class TaskThumbnailView : FrameLayout, ViewPool.Reusable {
             return
         }
         super.setScaleY(scaleY)
-        // Splash icon should ignore scale on TTV
-        splashIcon.scaleY = 1 / scaleY
-    }
-
-    fun parentScaleXUpdated(scaleX: Float) {
-        parentScaleX = scaleX
-        // Splash icon should ignore scale on TTV
-        splashIcon.scaleX = 1 / scaleX
-    }
-
-    fun parentScaleYUpdated(scaleY: Float) {
-        parentScaleY = scaleY
         // Splash icon should ignore scale on TTV
         splashIcon.scaleY = 1 / scaleY
     }
