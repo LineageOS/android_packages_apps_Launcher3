@@ -78,14 +78,14 @@ import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
 import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper;
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
 
-import kotlin.Unit;
-
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.StringJoiner;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import kotlin.Unit;
 
 /**
  * Track LauncherState, RecentsAnimation, resumed state for task bar in one place here and animate
@@ -189,7 +189,6 @@ public class TaskbarLauncherStateController {
     private long mLastUnlockTransitionTimeout;
 
     private @Nullable TaskBarRecentsAnimationListener mTaskBarRecentsAnimationListener;
-    private @Nullable SafeCloseable mRemoveTaskBarRecentsAnimationListenerClosable;
 
     private boolean mIsAnimatingToLauncher;
 
@@ -346,11 +345,8 @@ public class TaskbarLauncherStateController {
         mIsDestroyed = true;
         mCanSyncViews = false;
 
-        if (mRemoveTaskBarRecentsAnimationListenerClosable != null) {
-            mRemoveTaskBarRecentsAnimationListenerClosable.close();
-            mRemoveTaskBarRecentsAnimationListenerClosable = null;
-        }
         if (mRecentsAnimationCallbacks != null) {
+            mRecentsAnimationCallbacks.removeListener(mTaskBarRecentsAnimationListener);
             mRecentsAnimationCallbacks = null;
         }
 
@@ -401,9 +397,7 @@ public class TaskbarLauncherStateController {
                     !isStateManagerInState(LauncherState.OVERVIEW), /* canceled= */ false);
         }
         mTaskBarRecentsAnimationListener = new TaskBarRecentsAnimationListener(callbacks);
-        mRemoveTaskBarRecentsAnimationListenerClosable =
-                callbacks.addListener(mTaskBarRecentsAnimationListener,
-                        enableTaskbarUiThread() ? TASKBAR_UI_THREAD : IMMEDIATE_EXECUTOR);
+        callbacks.addListener(mTaskBarRecentsAnimationListener);
         RecentsViewInteractor recentsView = mControllers.uiController.getRecentsViewInteractor();
         if (recentsView != null) {
             recentsView.setTaskLaunchListener(() -> mTaskBarRecentsAnimationListener
@@ -1180,10 +1174,7 @@ public class TaskbarLauncherStateController {
          *                      to completion
          */
         private void endGestureStateOverride(boolean finishedToApp, boolean canceled) {
-            if (mRemoveTaskBarRecentsAnimationListenerClosable != null) {
-                mRemoveTaskBarRecentsAnimationListenerClosable.close();
-                mRemoveTaskBarRecentsAnimationListenerClosable = null;
-            }
+            mCallbacks.removeListener(this);
             mTaskBarRecentsAnimationListener = null;
             RecentsViewInteractor recentsView =
                     mControllers.uiController.getRecentsViewInteractor();
