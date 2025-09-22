@@ -49,7 +49,7 @@ public class SpringLoadedState extends LauncherState {
     public ScaleAndTranslation getWorkspaceScaleAndTranslation(Launcher launcher) {
         DeviceProfile grid = launcher.getDeviceProfile();
         Workspace<?> ws = launcher.getWorkspace();
-        if (ws.getChildCount() == 0) {
+        if (ws.getChildCount() == 0 || !ws.shouldZoomDuringSpringLoaded()) {
             return super.getWorkspaceScaleAndTranslation(launcher);
         }
 

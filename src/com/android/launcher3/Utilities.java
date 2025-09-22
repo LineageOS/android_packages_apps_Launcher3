@@ -16,6 +16,7 @@
 
 package com.android.launcher3;
 
+import static com.android.launcher3.Flags.enableCursorDrivenWorkflows;
 import static com.android.launcher3.Flags.enableMouseInteractionChanges;
 import static com.android.launcher3.Flags.injectableModelItems;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_PRIVATESPACE;
@@ -1024,6 +1025,15 @@ public final class Utilities {
      */
     public static boolean shouldEnableMouseInteractionChanges(Context context) {
         return enableMouseInteractionChanges() && context.getResources().getBoolean(
+                R.bool.desktop_form_factor);
+    }
+
+    /**
+     * Returns whether cursor-driven workflows intended for the desktop form factor should be
+     * enabled.
+     */
+    public static boolean shouldEnableCursorDrivenWorkflows(Context context) {
+        return enableCursorDrivenWorkflows() && context.getResources().getBoolean(
                 R.bool.desktop_form_factor);
     }
 
