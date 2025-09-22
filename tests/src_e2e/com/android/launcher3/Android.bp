@@ -10,7 +10,6 @@ filegroup {
         "tapl/TaplUtilityTest.java",
         "ui/TaplTestsLauncher3Test.java",
         "widget/TaplAddWidgetTest.java",
-        "workspace/TaplWorkspaceTest.java",
     ],
 }
 
@@ -24,6 +23,5 @@ filegroup {
         "dragging/TaplDragTest.java",
         "dragging/TaplUninstallRemoveTest.java",
         "ui/TaplTestsLauncher3Test.java",
-        "workspace/TaplWorkspaceTest.java",
     ],
 }

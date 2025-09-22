@@ -40,15 +40,25 @@ class WorkspaceDragHelper(private val launcherRule: LauncherActivityScenarioRule
 
     fun flingBackward() = snapToPage { panelCount: Int -> -panelCount }
 
-    fun getWorkspaceAppIcon(className: String) = ItemOperator { info, _ ->
-        info?.container == CONTAINER_DESKTOP && info.className() == className
+    fun getWorkspaceAppIcon(className: String) = getAppIcon(CONTAINER_DESKTOP, className)
+
+    fun getHotseatAppIcon(className: String) = getAppIcon(CONTAINER_HOTSEAT, className)
+
+    fun getAppIcon(container: Int, className: String) = ItemOperator { info, _ ->
+        info?.container == container && info.className() == className
     }
 
-    fun getHotseatAppIcon(className: String) = ItemOperator { info, _ ->
-        info?.container == CONTAINER_HOTSEAT && info.className() == className
-    }
+    fun appIconExists(container: Int, className: String): Boolean =
+        launcherRule.getFromLauncher() {
+            it.workspace.mapOverItems(getAppIcon(container, className)) != null
+        }!!
 
-    fun dragIcon(icon: ItemOperator, pageDelta: Int) {
+    @JvmOverloads
+    fun dragIcon(
+        icon: ItemOperator,
+        pageDelta: Int,
+        containerDestination: Int = CONTAINER_DESKTOP,
+    ) {
         launcherRule.executeOnLauncher { launcher ->
             val view = launcher.workspace.mapOverItems(icon)!!
             launcher.accessibilityDelegate.performAccessibilityAction(view, R.id.action_move, null)
@@ -57,16 +67,23 @@ class WorkspaceDragHelper(private val launcherRule: LauncherActivityScenarioRule
         val targetPage = snapToPage { pageDelta }
 
         launcherRule.executeOnLauncher { launcher ->
-            val layout = launcher.workspace.getPageAt(targetPage) as CellLayout
+            val layout =
+                if (containerDestination == CONTAINER_DESKTOP) {
+                    launcher.workspace.getPageAt(targetPage) as CellLayout
+                } else {
+                    launcher.workspace.hotseat as CellLayout
+                }
             val dragDelegate =
                 ViewCompat.getAccessibilityDelegate(layout) as DragAndDropAccessibilityDelegate
 
             val virtualViews = mutableListOf<Int>()
             dragDelegate.getVisibleVirtualViews(virtualViews)
-            // Find an empty spot and drop the icon there
+            // Find an empty spot and drop the icon there, this check is needed to avoid valid drop
+            // targets like folders that would create a virtual view, getChildAt already accounts
+            // for widget spans.
             val virtualViewId =
                 virtualViews.find { id ->
-                    !layout.isOccupied(id % layout.countX, id / layout.countX)
+                    layout.getChildAt(id % layout.countX, id / layout.countX) == null
                 }!!
             dragDelegate.onPerformActionForVirtualView(
                 virtualViewId,
