@@ -154,8 +154,9 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
             shortcuts.addAll(getMultiInstanceMenuOptions().toList());
         }
 
-        if (mControllers.taskbarDesktopModeController
-                .isInDesktopModeAndNotInOverview(mContext.getDisplayId())) {
+        if (!mControllers.taskbarStashController.isInOverview()
+                && mControllers.taskbarDesktopModeController.shouldShowDesktopTasksInTaskbar(
+                        mContext.getDisplayId())) {
             shortcuts.add(createCloseAppTaskbarShortcutFactory());
         }
         return shortcuts.stream();
@@ -408,9 +409,16 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
      * is in Desktop Mode.
      * @return A factory function to be used in populating the long-press menu.
      */
-    private SystemShortcut.Factory<BaseTaskbarContext> createCloseAppTaskbarShortcutFactory() {
-        return (context, itemInfo, originalView) -> new CloseAppTaskbarShortcut<>(
-                context, itemInfo, originalView, mControllers);
+    @Nullable
+    @VisibleForTesting
+    SystemShortcut.Factory<BaseTaskbarContext> createCloseAppTaskbarShortcutFactory() {
+        return (context, itemInfo, originalView) -> {
+            if (mControllers.taskbarRecentAppsController.getDesktopItemState(
+                    itemInfo).getRunningAppState() == BubbleTextView.RunningAppState.NOT_RUNNING) {
+                return null;
+            }
+            return new CloseAppTaskbarShortcut<>(context, itemInfo, originalView, mControllers);
+        };
     }
 
     /**
