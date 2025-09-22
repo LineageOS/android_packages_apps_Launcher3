@@ -2541,7 +2541,9 @@ public abstract class RecentsView<
     public void onHighResLoadingStateChanged(boolean enabled) {
         // TODO(b/446013310) move this call to the RecentsView constructor
         // Preload cache so when user goes to overview, the task thumbnails appear without delay
-        mModel.preloadCacheIfNeeded();
+        if (mRecentsViewModel.getVisibleTaskIds().isEmpty()) {
+            mModel.preloadCacheIfNeeded();
+        }
     }
 
     public void startHome() {
@@ -2617,7 +2619,6 @@ public abstract class RecentsView<
         }
         mRecentsViewModel.onReset();
         executeSideTaskLaunchCallback();
-        mModel.preloadCacheIfNeeded();
     }
 
     public int getRunningTaskViewId() {
