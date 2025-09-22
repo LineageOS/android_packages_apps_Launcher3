@@ -30,8 +30,8 @@ import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.MutableListenableRef
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestUtil
+import com.android.launcher3.util.WidgetUtils
 import com.android.launcher3.util.rule.ShellCommandRule
-import com.android.launcher3.util.ui.TestViewHelpers
 import com.android.launcher3.widget.util.WidgetSizeHandler
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -74,8 +74,8 @@ class OseWidgetManagerTest {
 
     @Test
     fun findSearchWidgetForPackage_returns_non_config_widget() {
-        val infoWithoutConfig = TestViewHelpers.findWidgetProvider(false)
-        val infoWithConfig = TestViewHelpers.findWidgetProvider(true)
+        val infoWithoutConfig = WidgetUtils.findWidgetProvider(false)
+        val infoWithConfig = WidgetUtils.findWidgetProvider(true)
 
         doReturn(listOf(infoWithConfig, infoWithoutConfig))
             .whenever(widgetManager)
@@ -89,10 +89,10 @@ class OseWidgetManagerTest {
 
     @Test
     fun findSearchWidgetForPackage_prefers_search_widget() {
-        val infoWithoutConfig = TestViewHelpers.findWidgetProvider(false)
-        val infoWithConfig = TestViewHelpers.findWidgetProvider(true)
+        val infoWithoutConfig = WidgetUtils.findWidgetProvider(false)
+        val infoWithConfig = WidgetUtils.findWidgetProvider(true)
         val infoSearch =
-            TestViewHelpers.findWidgetProvider(false).apply {
+            WidgetUtils.findWidgetProvider(false).apply {
                 provider = ComponentName("s", "d")
                 widgetCategory = WIDGET_CATEGORY_SEARCHBOX
             }
@@ -108,7 +108,7 @@ class OseWidgetManagerTest {
 
     @Test
     fun no_update_when_current_widget_is_same() {
-        val widgetInfo = TestViewHelpers.findWidgetProvider(false)
+        val widgetInfo = WidgetUtils.findWidgetProvider(false)
         val currentWidgetId = 1
 
         doReturn(listOf(widgetInfo))
@@ -124,7 +124,7 @@ class OseWidgetManagerTest {
 
     @Test
     fun binds_widget_when_nothing_bound() {
-        val widgetInfo = TestViewHelpers.findWidgetProvider(false)
+        val widgetInfo = WidgetUtils.findWidgetProvider(false)
         doReturn(listOf(widgetInfo))
             .whenever(widgetManager)
             .getInstalledProvidersForPackage(eq(TEST_PKG), any())
@@ -153,7 +153,7 @@ class OseWidgetManagerTest {
 
     @Test
     fun recreates_widget_when_ose_changes() {
-        val widgetInfo = TestViewHelpers.findWidgetProvider(false)
+        val widgetInfo = WidgetUtils.findWidgetProvider(false)
         val currentWidgetId = 1
 
         doReturn(listOf(widgetInfo))
@@ -169,7 +169,7 @@ class OseWidgetManagerTest {
         val newWidgetId = 2
         val newPackage = "something_new"
         val newWidgetInfo =
-            TestViewHelpers.findWidgetProvider(true).apply {
+            WidgetUtils.findWidgetProvider(true).apply {
                 widgetFeatures = WIDGET_FEATURE_CONFIGURATION_OPTIONAL
             }
         assertNotEquals(newWidgetInfo, widgetInfo)
@@ -185,7 +185,7 @@ class OseWidgetManagerTest {
 
     @Test
     fun nothing_active_when_ose_changes_binding_fails() {
-        val widgetInfo = TestViewHelpers.findWidgetProvider(false)
+        val widgetInfo = WidgetUtils.findWidgetProvider(false)
         val currentWidgetId = 1
 
         doReturn(listOf(widgetInfo))
@@ -201,7 +201,7 @@ class OseWidgetManagerTest {
         val newWidgetId = 2
         val newPackage = "something_new"
         val newWidgetInfo =
-            TestViewHelpers.findWidgetProvider(true).apply {
+            WidgetUtils.findWidgetProvider(true).apply {
                 widgetFeatures = WIDGET_FEATURE_CONFIGURATION_OPTIONAL
             }
         assertNotEquals(newWidgetInfo, widgetInfo)

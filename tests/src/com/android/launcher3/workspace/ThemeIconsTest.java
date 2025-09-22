@@ -39,10 +39,10 @@ import com.android.launcher3.allapps.AllAppsRecyclerView;
 import com.android.launcher3.dagger.LauncherComponentProvider;
 import com.android.launcher3.icons.mono.ThemedIconDelegate;
 import com.android.launcher3.popup.ArrowPopup;
+import com.android.launcher3.testutil.FavoriteItemsTransaction;
 import com.android.launcher3.util.BaseLauncherActivityTest;
 import com.android.launcher3.util.Executors;
 import com.android.launcher3.util.TestUtil;
-import com.android.launcher3.util.workspace.FavoriteItemsTransaction;
 
 import org.junit.Test;
 

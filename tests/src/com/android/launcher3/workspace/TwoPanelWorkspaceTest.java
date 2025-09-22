@@ -32,10 +32,10 @@ import com.android.launcher3.CellLayout;
 import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.model.data.ItemInfo;
+import com.android.launcher3.testutil.rule.LayoutResource;
 import com.android.launcher3.util.BaseLauncherActivityTest;
 import com.android.launcher3.util.LauncherLayoutBuilder;
 import com.android.launcher3.util.LauncherModelHelper;
-import com.android.launcher3.util.LayoutResource;
 import com.android.launcher3.util.ModelTestExtensions;
 import com.android.launcher3.util.WorkspaceDragHelper;
 

@@ -27,11 +27,11 @@ import com.android.launcher3.icons.BitmapInfo.Companion.fromBitmap
 import com.android.launcher3.model.TestableModelState
 import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
+import com.android.launcher3.testutil.rule.LayoutResource
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.IntSet
 import com.android.launcher3.util.LauncherLayoutBuilder
 import com.android.launcher3.util.LauncherModelHelper
-import com.android.launcher3.util.LayoutResource
 import com.android.launcher3.util.ModelTestExtensions.countPersistedModelItems
 import com.android.launcher3.util.PackageUserKey
 import com.android.launcher3.util.SandboxApplication

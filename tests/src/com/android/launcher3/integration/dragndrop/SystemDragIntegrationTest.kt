@@ -53,9 +53,9 @@ import com.android.launcher3.dragndrop.SystemDragControllerImpl
 import com.android.launcher3.homescreenfiles.HomeScreenFilesNoOpProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider.Companion.HOME_SCREEN_FOLDER_RELATIVE_PATH
+import com.android.launcher3.testutil.FavoriteItemsTransaction
+import com.android.launcher3.testutil.Wait.atMost
 import com.android.launcher3.util.BaseLauncherActivityTest
-import com.android.launcher3.util.Wait.atMost
-import com.android.launcher3.util.workspace.FavoriteItemsTransaction
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows

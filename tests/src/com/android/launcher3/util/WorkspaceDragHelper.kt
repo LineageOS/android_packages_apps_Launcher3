@@ -29,8 +29,8 @@ import com.android.launcher3.R
 import com.android.launcher3.accessibility.DragAndDropAccessibilityDelegate
 import com.android.launcher3.integration.util.LauncherActivityScenarioRule
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.testutil.Wait.atMost
 import com.android.launcher3.util.LauncherBindableItemsContainer.ItemOperator
-import com.android.launcher3.util.Wait.atMost
 import java.util.function.IntFunction
 
 /** Utility class to help with workspace interaction */

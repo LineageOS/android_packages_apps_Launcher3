@@ -20,9 +20,9 @@ import static com.android.launcher3.model.data.LauncherAppWidgetInfo.FLAG_ID_NOT
 import static com.android.launcher3.model.data.LauncherAppWidgetInfo.FLAG_PROVIDER_NOT_READY;
 import static com.android.launcher3.model.data.LauncherAppWidgetInfo.FLAG_RESTORE_STARTED;
 import static com.android.launcher3.provider.LauncherDbUtils.itemIdMatch;
+import static com.android.launcher3.testutil.Wait.atMost;
 import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
 import static com.android.launcher3.util.TestUtil.getOnUiThread;
-import static com.android.launcher3.util.Wait.atMost;
 import static com.android.launcher3.util.WidgetUtils.createWidgetInfo;
 
 import static org.junit.Assert.assertEquals;
@@ -48,10 +48,10 @@ import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.R;
 import com.android.launcher3.model.data.LauncherAppWidgetInfo;
 import com.android.launcher3.pm.InstallSessionHelper;
+import com.android.launcher3.testutil.FavoriteItemsTransaction;
 import com.android.launcher3.util.BaseLauncherActivityTest;
+import com.android.launcher3.util.WidgetUtils;
 import com.android.launcher3.util.rule.ShellCommandRule;
-import com.android.launcher3.util.ui.TestViewHelpers;
-import com.android.launcher3.util.workspace.FavoriteItemsTransaction;
 
 import org.junit.After;
 import org.junit.Before;
@@ -264,7 +264,7 @@ public class BindWidgetTest extends BaseLauncherActivityTest<Launcher> {
 
     private LauncherAppWidgetProviderInfo addWidgetToScreen(boolean hasConfigureScreen,
             boolean bindWidget, Consumer<LauncherAppWidgetInfo> itemOverride) {
-        LauncherAppWidgetProviderInfo info = TestViewHelpers.findWidgetProvider(hasConfigureScreen);
+        LauncherAppWidgetProviderInfo info = WidgetUtils.findWidgetProvider(hasConfigureScreen);
         new FavoriteItemsTransaction(targetContext())
                 .addItem(() -> {
                     LauncherAppWidgetInfo item =
