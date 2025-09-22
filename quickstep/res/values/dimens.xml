@@ -44,8 +44,6 @@
     <dimen name="task_thumbnail_icon_drawable_size">44dp</dimen>
     <!--  The splash icon size on in Overview when a task is settled in the list -->
     <dimen name="task_thumbnail_splash_icon_size">52dp</dimen>
-    <!--  The border width shown when task is hovered  -->
-    <dimen name="task_hover_border_width">4dp</dimen>
     <!--  The space under the focused task icon  -->
     <dimen name="overview_task_margin">16dp</dimen>
     <!--  The horizontal space between tasks  -->
