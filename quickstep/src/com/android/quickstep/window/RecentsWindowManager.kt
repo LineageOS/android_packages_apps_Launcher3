@@ -80,7 +80,6 @@ import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.LooperExecutor
 import com.android.launcher3.util.RunnableList
-import com.android.launcher3.util.SafeCloseable
 import com.android.launcher3.util.ScreenOnTracker
 import com.android.launcher3.util.ScreenOnTracker.ScreenOnListener
 import com.android.launcher3.util.SystemUiController
@@ -263,7 +262,6 @@ constructor(
                 recentAnimationStopped()
             }
         }
-    private var removeRecentsAnimationListenerClosable: SafeCloseable? = null
 
     private val screenChangedListener = ScreenOnListener { isOn ->
         if (!isOn) {
@@ -375,7 +373,7 @@ constructor(
             windowView
                 ?.findOnBackInvokedDispatcher()
                 ?.unregisterOnBackInvokedCallback(onBackInvokedCallback)
-            removeRecentsAnimationListenerClosable?.close()
+            callbacks?.removeListener(recentsAnimationListener)
             if (displayId == DEFAULT_DISPLAY) {
                 homeVisibilityState.removeListener(homeVisibilityListener)
             }
@@ -439,7 +437,7 @@ constructor(
         windowRootView.visibility = View.VISIBLE
 
         this.callbacks = callbacks
-        removeRecentsAnimationListenerClosable = callbacks?.addListener(recentsAnimationListener)
+        callbacks?.addListener(recentsAnimationListener)
         screenOnTracker.addListener(screenChangedListener)
     }
 
@@ -656,8 +654,7 @@ constructor(
             )
         }
         stateManager.moveToRestState()
-        removeRecentsAnimationListenerClosable?.close()
-        removeRecentsAnimationListenerClosable = null
+        callbacks?.removeListener(recentsAnimationListener)
         callbacks = null
         screenOnTracker.removeListener(screenChangedListener)
     }

@@ -44,7 +44,6 @@ import com.android.launcher3.taskbar.TaskbarInteractor
 import com.android.launcher3.taskbar.TaskbarManager
 import com.android.launcher3.util.OverviewCommandHelperProtoLogProxy
 import com.android.launcher3.util.RunnableList
-import com.android.launcher3.util.SafeCloseable
 import com.android.launcher3.util.coroutines.DispatcherProvider
 import com.android.quickstep.GestureState.GestureEndTarget
 import com.android.quickstep.GestureState.displaySupportsHomeGesture
@@ -586,7 +585,7 @@ constructor(
             return true
         }
         interactionHandler.setGestureAnimationEndCallback {
-            onTransitionComplete(command, onCallbackResult)
+            onTransitionComplete(command, interactionHandler, onCallbackResult)
         }
         interactionHandler.initWhenReady("OverviewCommandHelper: command.type=${command.type}")
 
@@ -619,7 +618,7 @@ constructor(
                             /* horizontalTouchSlopPassed= */ false,
                         )
                     }
-                    command.removeListener()
+                    command.removeListener(this)
                 }
 
                 override fun onRecentsAnimationCanceled(
@@ -627,7 +626,7 @@ constructor(
                 ) {
                     OverviewCommandHelperProtoLogProxy.logRecentsAnimCanceled(command)
                     interactionHandler.onGestureCancelled()
-                    command.removeListener()
+                    command.removeListener(this)
 
                     containerInterface.getCreatedContainer() ?: return
                     recentsView?.onRecentsAnimationComplete()
@@ -665,9 +664,13 @@ constructor(
             // For small screen devices, it's only shown on connected displays.
             displayId != DEFAULT_DISPLAY
 
-    private fun onTransitionComplete(command: CommandInfo, onCommandResult: () -> Unit) {
+    private fun onTransitionComplete(
+        command: CommandInfo,
+        handler: AbsSwipeUpHandler<*, *, *>,
+        onCommandResult: () -> Unit,
+    ) {
         OverviewCommandHelperProtoLogProxy.logSwitchingViaRecentsAnimComplete(command)
-        command.removeListener()
+        command.removeListener(handler)
         Trace.endAsyncSection(TRANSITION_NAME, 0)
         onRecentsViewFocusUpdated(command)
         onCommandResult()
@@ -783,19 +786,16 @@ constructor(
         val displayId: Int = DEFAULT_DISPLAY,
         val isLastOfBatch: Boolean = true,
     ) {
-        private var removeListenerClosable: SafeCloseable? = null
-
         fun setAnimationCallbacks(recentsAnimationCallbacks: RecentsAnimationCallbacks) {
             this.animationCallbacks = recentsAnimationCallbacks
         }
 
         fun addListener(listener: RecentsAnimationCallbacks.RecentsAnimationListener) {
-            removeListenerClosable = animationCallbacks?.addListener(listener)
+            animationCallbacks?.addListener(listener)
         }
 
-        fun removeListener() {
-            removeListenerClosable?.close()
-            removeListenerClosable = null
+        fun removeListener(listener: RecentsAnimationCallbacks.RecentsAnimationListener?) {
+            animationCallbacks?.removeListener(listener)
         }
 
         enum class CommandStatus {
