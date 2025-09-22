@@ -34,7 +34,6 @@ import com.android.launcher3.tapl.HomeAllApps;
 import com.android.launcher3.tapl.LauncherInstrumentation;
 import com.android.launcher3.tapl.PrivateSpaceContainer;
 import com.android.launcher3.util.TestUtil;
-import com.android.launcher3.util.rule.ScreenRecordRule;
 
 import org.junit.After;
 import org.junit.Test;
@@ -49,6 +48,9 @@ public class TaplPrivateSpaceTest extends AbstractQuickStepTest {
 
     private int mProfileUserId;
 
+    public static final String PS_TILE_SUBTITLE = "Tap to set up or open";
+    public static final String PS_TILE_QUERY = "private space";
+    public static final String PS_TILE_TITLE = "Private space";
     private static final String PRIVATE_PROFILE_NAME = "LauncherPrivateProfile";
     private static final String INSTALLED_APP_NAME = "Aardwolf";
     private static final int MAX_STATE_TOGGLE_TRIES = 2;
