@@ -118,17 +118,23 @@
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"સ્ક્રીન ફેરવો"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"ઍનિમેશન બતાવે છે કે કેવી રીતે ટાસ્કબાર સ્ક્રીનના તળિયેથી દૃશ્યમાં આવે છે અને ઉપયોગમાં ન હોય ત્યારે ઑટોમૅટિક રીતે છુપાઇ જાય છે"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"ઍનિમેશન બતાવે છે કે કેવી રીતે ટૉગલ કરો બટનનો ઉપયોગ કરીને તમારા ટાસ્કબારને પિન કરવું, જેથી કરીને સ્ક્રીનના તળિયે ટાસ્કબાર કાયમી રીતે દેખાતું રહે"</string>
+    <!-- no translation found for taskbar_edu_bubbles_animation_description (421866726938396813) -->
+    <skip />
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"ઍનિમેશન બતાવે છે કે કેવી રીતે કોઈ ખુલ્લી ઍપની ઉપર ટાસ્કબારમાંથી ઍપને ખેંચી અને છોડીને વિભાજીત સ્ક્રીન બનાવવી"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"ઍનિમેશન બતાવે છે કે તમારા ડિવાઇસ પર સૂચવેલી ઍપને કેવી રીતે ઍક્સેસ કરવી"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"ઍનિમેશન બતાવે છે કે ઍક્શન કીને ટચ કરીને થોડીવાર દબાવી રાખીને અને આઇટમ જે ક્ષેત્રમાં છે તેને પસંદ કરીને, સ્ક્રીન પરની કોઈ આઇટમ માટે કેવી રીતે શોધ કરવી"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"ટાસ્કબાર વિશે શિક્ષણ"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"એક સાથે 2 ઍપનો ઉપયોગ કરવા માટે, ઍપને ખેંચીને બાજુ પર લઈ જાઓ"</string>
+    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
+    <skip />
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"ટાસ્કબાર બતાવવા માટે ઉપરની તરફ ધીમેથી સ્વાઇપ કરો"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"તમારા રૂટિનના આધારે ઍપના સુઝાવો મેળવો"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"ટાસ્કબારને પિન કરવા માટે, વિભાજકને થોડીવાર દબાવી રાખો"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"ટાસ્કબાર વડે બીજું ઘણું કરો"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"ટાસ્કબાર હંમેશાં બતાવો"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"ટાસ્કબાર હંમેશાં તમારી સ્ક્રીનમાં સૌથી નીચે દેખાય તે માટે વિભાજકને ટચ કરીને થોડીવાર દબાવી રાખો"</string>
+    <!-- no translation found for taskbar_edu_bubbles_standalone (4182824636656528043) -->
+    <skip />
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"તમારી સ્ક્રીન પર જે હોય તે શોધવા માટે, ઍક્શન કી ટચ કરીને દબાવી રાખો"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"શોધવા માટે, આ પ્રોડક્ટ તમારી સ્ક્રીનના પસંદ કરેલા ભાગનો ઉપયોગ કરે છે. Googleની <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>પ્રાઇવસી પૉલિસી<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> અને <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>સેવાની શરતો<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> લાગુ થાય છે."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"બંધ કરો"</string>
@@ -146,8 +152,6 @@
     <string name="change_navigation_mode" msgid="9088393078736808968">"નૅવિગેશન મોડ બદલો"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"ટાસ્કબાર વિભાજક"</string>
     <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"તાજેતરની અન્ય ઍપ"</string>
-    <string name="app_added_to_taskbar" msgid="1160433791917609063">"ટાસ્કબારમાં ઍપ ઉમેરી"</string>
-    <string name="app_removed_from_taskbar" msgid="7887298201562912487">"ટાસ્કબારમાંથી ઍપ કાઢી નાખી"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"સૌથી ઉપર ડાબી બાજુએ ખસેડો"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"સૌથી નીચે જમણી બાજુએ ખસેડો"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"બબલ તરીકે ઍપ ખોલો"</string>

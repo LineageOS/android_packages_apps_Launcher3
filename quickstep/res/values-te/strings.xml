@@ -118,17 +118,23 @@
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"స్క్రీన్‌ను తిప్పండి"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"టాస్క్‌బార్ స్క్రీన్ దిగువ నుండి ఎలా కనిపిస్తుందో, ఉపయోగంలో లేనప్పుడు ఆటోమేటిక్‌గా ఎలా దాచబడుతుందో చూపించే యానిమేషన్"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"టోగుల్ ఉపయోగించి మీ టాస్క్‌బార్‌ను ఎలా పిన్ చేయాలో చూపించే యానిమేషన్, తద్వారా టాస్క్‌బార్ స్క్రీన్ దిగువున శాశ్వతంగా కనిపిస్తుంది"</string>
+    <!-- no translation found for taskbar_edu_bubbles_animation_description (421866726938396813) -->
+    <skip />
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"తెరిచి ఉన్న యాప్ పైన టాస్క్‌బార్ నుండి యాప్‌ను లాగి, వదలడం ద్వారా స్ప్లిట్ స్క్రీన్‌ను ఎలా క్రియేట్ చేయాలో చూపించే యానిమేషన్"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"మీ పరికరంలో సూచించబడిన యాప్‌లను ఎలా యాక్సెస్ చేయాలో చూపించే యానిమేషన్"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"యాక్షన్ కీని నొక్కి పట్టుకుని, ఆ ఐటెమ్ ఉన్న ప్రాంతాన్ని ఎంచుకోవడం ద్వారా స్క్రీన్‌పై ఐటెమ్ కోసం ఎలా సెర్చ్ చేయాలో చూపించే యానిమేషన్"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"టాస్క్‌బార్ ఎడ్యుకేషన్"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"ఒకేసారి 2 యాప్‌లను ఉపయోగించడానికి యాప్‌ను పక్కకు లాగండి"</string>
+    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
+    <skip />
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"టాస్క్‌బార్‌ను చూపడానికి నెమ్మదిగా పైకి స్వైప్ చేయండి"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"మీ రొటీన్ ఆధారంగా యాప్ సూచనలను పొందండి"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"టాస్క్‌బార్‌ను పిన్ చేయడానికి డివైడర్‌ను ఎక్కువసేపు నొక్కండి"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"టాస్క్‌బార్‌తో మరిన్ని చేయండి"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"టాస్క్‌బార్‌ను నిరంతరం చూపండి"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"మీ స్క్రీన్ దిగువున టాస్క్‌బార్‌ను నిరంతరం చూపడానికి, డివైడర్‌ను తాకి, నొక్కి ఉంచండి"</string>
+    <!-- no translation found for taskbar_edu_bubbles_standalone (4182824636656528043) -->
+    <skip />
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"మీ స్క్రీన్‌లో ఏం ఉందో సెర్చ్ చేయడానికి యాక్షన్ కీని తాకి ఉంచండి"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"ఈ ప్రోడక్ట్, సెర్చ్ చేయడానికి మీ స్క్రీన్‌లో ఎంచుకున్న భాగాన్ని ఉపయోగిస్తుంది. Google <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>గోప్యతా పాలసీ<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g>, <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>సర్వీస్ నియమాలు<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> వర్తిస్తాయి."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"మూసివేయండి"</string>
@@ -146,8 +152,6 @@
     <string name="change_navigation_mode" msgid="9088393078736808968">"నావిగేషన్ మోడ్‌ను మార్చండి"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"టాస్క్‌బార్ డివైడర్"</string>
     <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"ఇతర ఇటీవలి యాప్‌లు"</string>
-    <string name="app_added_to_taskbar" msgid="1160433791917609063">"టాస్క్‌బార్‌కు యాప్ జోడించబడింది"</string>
-    <string name="app_removed_from_taskbar" msgid="7887298201562912487">"టాస్క్‌బార్ నుండి యాప్ తీసివేయబడింది"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"ఎగువ/ఎడమ వైపునకు తరలించండి"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"దిగువ/కుడి వైపునకు తరలించండి"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"యాప్‌ను బబుల్‌లాగా తెరవండి"</string>

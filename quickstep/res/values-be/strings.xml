@@ -118,17 +118,23 @@
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Павярнуць экран"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Анімацыя, якая паказвае, як панэль задач становіцца бачнай у ніжняй частцы экрана і аўтаматычна хаваецца, калі не выкарыстоўваецца"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Анімацыя, якая паказвае, як замацаваць панэль задач з дапамогай пераключальніка, каб яна заставалася бачнай у ніжняй частцы экрана"</string>
+    <!-- no translation found for taskbar_edu_bubbles_animation_description (421866726938396813) -->
+    <skip />
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"Анімацыя, якая паказвае, як стварыць падзелены экран перацягваннем праграмы з панэлі задач паверх адкрытай праграмы"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"Анімацыя, якая паказвае, як перайсці да прапанаваных праграм на прыладзе"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"Анімацыя, якая паказвае, як знайсці элемент на экране, націснуўшы і ўтрымліваючы клавішу дзеяння і вылучыўшы вобласць, у якой знаходзіцца элемент"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Інфармацыя пра панэль задач"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Каб карыстацца 2 праграмамі, перацягніце адну з іх убок"</string>
+    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
+    <skip />
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Каб паказаць панэль задач, павольна правядзіце пальцам уверх"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Атрымлівайце прапановы праграм з улікам вашых дзеянняў"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Замацуйце панэль задач доўгім націсканнем на раздзяляльнік"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Выкарыстоўвайце магчымасці панэлі задач"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"Замацуйце панэль задач унізе экрана"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"Для гэтага націсніце на раздзяляльнік і ўтрымлівайце яго"</string>
+    <!-- no translation found for taskbar_edu_bubbles_standalone (4182824636656528043) -->
+    <skip />
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"Для пошуку па змесціве экрана націсніце і ўтрымлівайце клавішу дзеяння"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Гэты прадукт выконвае пошук па змесціве выбранай часткі экрана. Прымяняюцца <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>Умовы выкарыстання<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> і <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>Палітыка прыватнасці<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> Google."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Закрыць"</string>
@@ -146,8 +152,6 @@
     <string name="change_navigation_mode" msgid="9088393078736808968">"Змяніць рэжым навігацыі"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Раздзяляльнік панэлі задач"</string>
     <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"Іншыя нядаўнія праграмы"</string>
-    <string name="app_added_to_taskbar" msgid="1160433791917609063">"Праграма дададзена на панэль задач"</string>
-    <string name="app_removed_from_taskbar" msgid="7887298201562912487">"Праграма выдалена з панэлі задач"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Перамясціць уверх/улева"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Перамясціць уніз/управа"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"Адкрыць праграму ва ўсплывальным акне"</string>

@@ -118,17 +118,23 @@
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"旋轉螢幕"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"這個動畫說明如何讓螢幕底部顯示工作列，並在閒置時自動隱藏"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"這個動畫說明如何使用切換鈕固定工作列，讓工作列永久顯示在螢幕底部"</string>
+    <!-- no translation found for taskbar_edu_bubbles_animation_description (421866726938396813) -->
+    <skip />
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"這個動畫說明如何建立分割畫面，方法是從工作列拖曳應用程式，並放在已開啟應用程式的上方"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"這個動畫說明如何在裝置上存取建議的應用程式"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"這個動畫說明如何在畫面上搜尋項目，方法是按住快捷操作鍵，並選取項目所在區域"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"工作列教學課程"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"將應用程式拖曳到一邊即可同時使用 2 個應用程式"</string>
+    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
+    <skip />
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"緩慢向上滑動讓工作列顯示在畫面上"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"系統會根據你的日常安排，提供建議的應用程式。"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"長按分隔線即可固定工作列"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"充分發揮工作列的功用"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"一律顯示工作列"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"如要一律在畫面底部顯示工作列，請按住分隔線"</string>
+    <!-- no translation found for taskbar_edu_bubbles_standalone (4182824636656528043) -->
+    <skip />
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"按住快捷操作鍵即可搜尋畫面上的內容"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"這項產品會搜尋你在畫面上選取的內容 (適用 Google 的《<xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>隱私權政策<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g>》和《<xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>服務條款<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g>》)。"</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"關閉"</string>
@@ -146,8 +152,6 @@
     <string name="change_navigation_mode" msgid="9088393078736808968">"變更操作模式"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"工作列分隔線"</string>
     <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"最近曾使用的其他應用程式"</string>
-    <string name="app_added_to_taskbar" msgid="1160433791917609063">"已將應用程式新增到工作列"</string>
-    <string name="app_removed_from_taskbar" msgid="7887298201562912487">"已將應用程式從工作列中移除"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"移到上方/左側"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"移到底部/右側"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"以泡泡形式開啟應用程式"</string>

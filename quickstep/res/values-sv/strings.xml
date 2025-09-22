@@ -118,17 +118,23 @@
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Rotera skärmen"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Animation som visar hur aktivitetsfältet dyker upp längst ned på skärmen och automatiskt döljs när det inte används"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Animation som visar hur du fäster aktivitetsfältet med ett reglage så att det alltid är synligt längst ned på skärmen"</string>
+    <!-- no translation found for taskbar_edu_bubbles_animation_description (421866726938396813) -->
+    <skip />
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"Animation som visar hur du skapar en delad skärm genom att dra och släppa en app från aktivitetsfältet ovanför en öppen app"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"Animation som visar hur du kommer åt föreslagna appar på enheten"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"Animation som visar hur du söker efter ett objekt på skärmen genom att trycka länge på åtgärdstangenten och välja området där objektet finns"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Aktivitetsfältsutbildning"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Dra en app till sidan om du vill använda två appar samtidigt"</string>
+    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
+    <skip />
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Svep långsamt uppåt för att visa aktivitetsfältet"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Få appförslag utifrån dina rutiner"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Tryck länge på avskiljaren om du vill fästa aktivitetsfältet"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Gör mer med aktivitetsfältet"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"Visa alltid aktivitetsfältet"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"Tryck länge på avgränsaren för att alltid visa aktivitetsfältet längst ned på skärmen"</string>
+    <!-- no translation found for taskbar_edu_bubbles_standalone (4182824636656528043) -->
+    <skip />
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"Tryck länge på åtgärdstangenten för att söka efter det som finns på skärmen"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Den här produkten använder den valda delen av skärmen för att söka. Googles <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>integritetspolicy<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> och <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>användarvillkor<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> gäller."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Stäng"</string>
@@ -146,8 +152,6 @@
     <string name="change_navigation_mode" msgid="9088393078736808968">"Ändra navigeringsläge"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Avdelare för aktivitetsfältet"</string>
     <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"Andra appar som använts nyligen"</string>
-    <string name="app_added_to_taskbar" msgid="1160433791917609063">"Appen har lagts till i aktivitetsfältet"</string>
-    <string name="app_removed_from_taskbar" msgid="7887298201562912487">"Appen har tagits bort från aktivitetsfältet"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Flytta högst upp/till vänster"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Flytta längst ned/till höger"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"Öppna appen som en bubbla"</string>

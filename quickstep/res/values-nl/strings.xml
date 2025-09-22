@@ -118,17 +118,23 @@
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Scherm draaien"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Animatie die toont hoe de taakbalk onderaan het scherm verschijnt en automatisch wordt verborgen als deze niet wordt gebruikt"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Animatie die toont hoe je de taakbalk vastzet met een schakelaar, zodat de taakbalk altijd zichtbaar blijft onderaan het scherm"</string>
+    <!-- no translation found for taskbar_edu_bubbles_animation_description (421866726938396813) -->
+    <skip />
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"Animatie die toont hoe je een gesplitst scherm maakt door een app van de taakbalk naar een geopende app te slepen"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"Animatie die toont hoe je toegang krijgt tot voorgestelde apps op je apparaat"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"Animatie die toont hoe je een item op het scherm kunt zoeken door de actietoets ingedrukt te houden en het gebied te selecteren waarin het item zich bevindt"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Taakbalk Onderwijs"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Sleep een app naar de zijkant om 2 apps tegelijk te gebruiken"</string>
+    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
+    <skip />
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Swipe langzaam omhoog om de taakbalk te tonen"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Krijg app-suggesties op basis van je routine"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Houd je vinger op de scheiding om de taakbalk vast te zetten"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Doe meer met de taakbalk"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"De taakbalk altijd tonen"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"Houd de scheidingslijn ingedrukt als je de taakbalk altijd onderaan je scherm wilt tonen"</string>
+    <!-- no translation found for taskbar_edu_bubbles_standalone (4182824636656528043) -->
+    <skip />
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"Houd je vinger op de actietoets om te zoeken naar wat er op je scherm staat"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Dit product gebruikt het geselecteerde gedeelte van je scherm om te zoeken. Het <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>Privacybeleid<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> en de <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>Servicevoorwaarden<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> van Google zijn van toepassing."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Sluiten"</string>
@@ -146,8 +152,6 @@
     <string name="change_navigation_mode" msgid="9088393078736808968">"Navigatiemodus wijzigen"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Scheiding voor Taakbalk"</string>
     <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"Andere recente apps"</string>
-    <string name="app_added_to_taskbar" msgid="1160433791917609063">"App toegevoegd aan taakbalk"</string>
-    <string name="app_removed_from_taskbar" msgid="7887298201562912487">"App verwijderd van taakbalk"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Naar boven/links verplaatsen"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Naar beneden/rechts verplaatsen"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"App openen als ballon"</string>

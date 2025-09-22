@@ -118,17 +118,23 @@
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Pagriezt ekrānu"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Animācija, kurā redzams, kā uzdevumu josla tiek parādīta ekrāna apakšdaļā un automātiski tiek paslēpta, kad netiek izmantota"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Animācija, kurā redzams, kā, izmantojot slēdzi, piespraust uzdevumu joslu, lai tā vienmēr tiktu rādīta ekrāna apakšdaļā"</string>
+    <!-- no translation found for taskbar_edu_bubbles_animation_description (421866726938396813) -->
+    <skip />
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"Animācija, kurā redzams, kā izveidot sadalītu ekrānu, velkot un nometot kādu lietotni no uzdevumu joslas virs atvērtas lietotnes"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"Animācija, kurā redzams, kā piekļūt ieteiktajām lietotnēm savā ierīcē"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"Animācija, kurā redzams, kā meklēt ekrānā redzamo vienumu, pieskaroties darbību taustiņam un turot to, kā arī atlasot apgabalu, kurā atrodas vienums"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Informācija par uzdevumu joslu"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Velciet lietotni sānis, lai izmantotu 2 lietotnes vienlaikus"</string>
+    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
+    <skip />
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Lai skatītu uzdevumu joslu, lēni velciet augšup"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Skatiet ieteiktās lietotnes, balstoties uz jūsu ieradumiem"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Nospiediet/turiet atdalītāju, lai piespraustu uzdevumu joslu"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Plašākas iespējas, izmantojot uzdevumu joslu"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"Vienmēr rādīt uzdevumu joslu"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"Lai uzdevumu joslu rādītu apakšdaļā, pieskarieties atdalītājam un turiet"</string>
+    <!-- no translation found for taskbar_edu_bubbles_standalone (4182824636656528043) -->
+    <skip />
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"Pieskarieties darbību taustiņam un turiet to, lai meklētu ekrānā redzamo saturu"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Šajā produktā atlasītā ekrāna daļa tiek izmantota meklēšanai. Ir spēkā Google <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>konfidencialitātes politika<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> un <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>pakalpojumu sniegšanas noteikumi<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g>."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Aizvērt"</string>
@@ -146,8 +152,6 @@
     <string name="change_navigation_mode" msgid="9088393078736808968">"Mainīt navigācijas režīmu"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Uzdevumu joslas atdalītājs"</string>
     <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"Citas nesen izmantotās lietotnes"</string>
-    <string name="app_added_to_taskbar" msgid="1160433791917609063">"Lietotne ir pievienota uzdevumu joslai"</string>
-    <string name="app_removed_from_taskbar" msgid="7887298201562912487">"Lietotne ir noņemta no uzdevumu joslas"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Pārvietot uz augšējo/kreiso stūri"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Pārvietot uz apakšējo/labo stūri"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"Atvērt lietotni kā burbuli"</string>

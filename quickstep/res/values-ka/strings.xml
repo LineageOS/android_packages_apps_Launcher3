@@ -118,17 +118,23 @@
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"ეკრანის შეტრიალება"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"ანიმაცია, რომელიც აჩვენებს, როგორ ჩნდება ამოცანათა ზოლი ეკრანის ქვედა ნაწილში და ავტომატურად ქრება, როდესაც არ იყენებთ"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"ანიმაცია, რომელიც აჩვენებს, როგორ ჩაამაგროთ თქვენი ამოცანათა ზოლი გადართვის გამოყენებით, რომ ამოცანათა ზოლი მუდმივად ხილული დარჩეს ეკრანის ქვედა ნაწილში"</string>
+    <!-- no translation found for taskbar_edu_bubbles_animation_description (421866726938396813) -->
+    <skip />
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"ანიმაცია, რომელიც აჩვენებს, როგორ შექმნათ გაყოფილი ეკრანი ამოცანათა ზოლიდან აპის ჩავლებით გადატანითა და გადათრევით გახსნილი აპის ზემოთ"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"ანიმაცია, რომელიც აჩვენებს, როგორ მიიღოთ წვდომა შემოთავაზებულ აპებზე თქვენს მოწყობილობაზე"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"ანიმაცია, რომელიც აჩვენებს, როგორ მოიძიოთ ერთეული ეკრანზე მოქმედების კლავიშზე ხანგრძლივად შეხებით და იმ ადგილის არჩევით, რომელშიც არის ერთეული"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"ამოცანათა ზოლი: განათლება"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"2 აპის ერთდროულად გამოსაყენებლად გადაათრიეთ აპი კიდეზე"</string>
+    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
+    <skip />
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"მოკლედ გადაფურცლეთ ზემოთ, რომ ამოცანათა ზოლი გამოაჩინოთ"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"მიიღეთ აპის შეთავაზებები თქვენი რუტინის მიხედვით"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"ხანგრძლივად დააჭირეთ გამყოფს ამოცანათა ზოლის ჩასამაგრებლად"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"გააკეთეთ მეტი ამოცანათა ზოლის მეშვეობით"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"ამოცანათა ზოლის მუდმივად ჩვენება"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"თქვენი ეკრანის ქვედა ნაწილში ამოცანათა ზოლის მუდმივად საჩვენებლად, ხანგრძლივად შეეხეთ გამყოფს"</string>
+    <!-- no translation found for taskbar_edu_bubbles_standalone (4182824636656528043) -->
+    <skip />
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"შეეხეთ და გეჭიროთ მოქმედების ღილაკი, რათა მოძებნოთ ის, რაც თქვენს ეკრანზეა"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"ეს პროდუქტი ძიებისთვის იყენებს თქვენი ეკრანის არჩეულ ნაწილს. მოქმედებს Google-ის <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>კონფიდენციალურობის დებულება<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> და <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>მომსახურებს პირობები<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g>."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"დახურვა"</string>
@@ -146,8 +152,6 @@
     <string name="change_navigation_mode" msgid="9088393078736808968">"შეცვალეთ ნავიგაციის რეჟიმი"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"ამოცანათა ზოლის გამყოფი"</string>
     <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"სხვა ბოლოდროინდელი აპები"</string>
-    <string name="app_added_to_taskbar" msgid="1160433791917609063">"აპი დაემატა ამოცანათა ზოლს"</string>
-    <string name="app_removed_from_taskbar" msgid="7887298201562912487">"აპი ამოიშალა ამოცანათა ზოლიდან"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"ზემოთ/მარცხნივ გადატანა"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"ქვემოთ/მარჯვნივ გადატანა"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"აპის გახსნა ბუშტის სახით"</string>

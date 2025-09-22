@@ -118,17 +118,23 @@
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Zungusha skrini"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Uhuishaji unaoonyesha jinsi upauzana huonekana kutokea sehemu ya chini ya skrini na kufichwa kiotomatiki wakati hautumiki"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Uhuishaji unaoonyesha jinsi ya kubandika upauzana wako kwa kutumia kipengele cha kuwasha/kuzima, ili upauzana uendelee kuonekana sehemu ya chini kabisa ya skrini"</string>
+    <!-- no translation found for taskbar_edu_bubbles_animation_description (421866726938396813) -->
+    <skip />
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"Uhuishaji unaoonyesha jinsi ya kuweka skrini iliyogawanywa, kwa kuburuta na kudondosha programu kutoka kwenye upauzana ulio juu ya programu iliyofunguliwa"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"Uhuishaji unaoonyesha jinsi ya kufikia programu zinazopendekezwa kwenye kifaa chako"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"Uhuishaji unaoonyesha jinsi ya kutafuta bidhaa kwenye skrini, kwa kugusa na kushikilia kitufe cha vitendo kisha kuchagua eneo liliko bidhaa"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Elimu ya Upauzana"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Buruta programu pembeni ili utumie programu 2 kwa wakati mmoja"</string>
+    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
+    <skip />
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Telezesha kidole juu taratibu ili ufungue Upauzana"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Pata mapendekezo ya programu kulingana na ratiba yako"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Bonyeza kwa muda mrefu kigawaji ili ubandike Upauzana"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Kamilisha mengi kwa kutumia Upauzana huu"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"Onyesha Upauzana kila wakati"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"Ili uonyeshe Upauzana kila wakati chini ya skrini yako, gusa na ushikilie kitenganishi"</string>
+    <!-- no translation found for taskbar_edu_bubbles_standalone (4182824636656528043) -->
+    <skip />
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"Gusa na ushikilie kitufe cha vitendo ili utafute kilicho kwenye skrini yako"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Bidhaa hii hutumia sehemu uliyochagua kwenye skrini yako kutafuta. <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>Sera ya Faragha<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> na <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>Sheria na Masharti<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> ya Google yatatumika."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Funga"</string>
@@ -146,8 +152,6 @@
     <string name="change_navigation_mode" msgid="9088393078736808968">"Badilisha hali ya usogezaji"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Kitenganishi cha Upauzana"</string>
     <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"Programu nyingine za hivi majuzi"</string>
-    <string name="app_added_to_taskbar" msgid="1160433791917609063">"Programu imewekwa kwenye Upauzana"</string>
-    <string name="app_removed_from_taskbar" msgid="7887298201562912487">"Programu imeondolewa kwenye Upauzana"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Sogeza juu/kushoto"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Sogeza chini/kulia"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"Fungua programu kama kiputo"</string>

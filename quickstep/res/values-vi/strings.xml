@@ -118,17 +118,23 @@
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Xoay màn hình"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Ảnh động minh hoạ cách thanh tác vụ xuất hiện từ cuối màn hình và tự động ẩn khi người dùng không sử dụng"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Ảnh động minh hoạ cách ghim thanh tác vụ bằng nút bật/tắt để thanh tác vụ luôn hiển thị ở cuối màn hình"</string>
+    <!-- no translation found for taskbar_edu_bubbles_animation_description (421866726938396813) -->
+    <skip />
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"Ảnh động minh hoạ cách tạo chế độ chia đôi màn hình bằng cách kéo và thả một ứng dụng từ thanh tác vụ lên trên một ứng dụng đang mở"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"Ảnh động minh hoạ cách truy cập vào các ứng dụng được đề xuất trên thiết bị của bạn"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"Ảnh động minh hoạ cách tìm một mục trên màn hình bằng cách chạm và giữ phím hành động rồi chọn khu vực có mục đó"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Cách sử dụng thanh tác vụ"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Kéo một ứng dụng sang bên để dùng 2 ứng dụng cùng lúc"</string>
+    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
+    <skip />
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Từ từ vuốt lên để Thanh tác vụ xuất hiện"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Nhận ứng dụng đề xuất dựa trên thói quen của bạn"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Nhấn và giữ trên đường phân chia để ghim Thanh tác vụ"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Tăng năng suất qua Thanh tác vụ"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"Luôn hiện Taskbar"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"Để luôn hiện Taskbar ở cuối màn hình, hãy nhấn và giữ đường phân chia"</string>
+    <!-- no translation found for taskbar_edu_bubbles_standalone (4182824636656528043) -->
+    <skip />
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"Chạm và giữ phím hành động để tìm nội dung trên màn hình của bạn"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Sản phẩm này dùng phần được chọn trên màn hình để tìm kiếm. Có áp dụng <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>Chính sách quyền riêng tư<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> và <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>Điều khoản dịch vụ<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> của Google."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Đóng"</string>
@@ -146,8 +152,6 @@
     <string name="change_navigation_mode" msgid="9088393078736808968">"Thay đổi chế độ điều hướng"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Đường phân chia Taskbar"</string>
     <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"Các ứng dụng khác gần đây"</string>
-    <string name="app_added_to_taskbar" msgid="1160433791917609063">"Đã thêm ứng dụng vào Thanh tác vụ"</string>
-    <string name="app_removed_from_taskbar" msgid="7887298201562912487">"Đã xoá ứng dụng khỏi Thanh tác vụ"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Chuyển lên trên cùng/sang bên trái"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Chuyển xuống dưới cùng/sang bên phải"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"Mở ứng dụng dưới dạng bong bóng"</string>

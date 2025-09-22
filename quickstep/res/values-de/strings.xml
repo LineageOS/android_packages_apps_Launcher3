@@ -118,17 +118,23 @@
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Bildschirm drehen"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Animation, die zeigt, wie die Taskleiste vom unteren Bildschirmrand aus eingeblendet und dann automatisch wieder ausgeblendet wird, wenn sie nicht verwendet wird"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Animation, die zeigt, wie du die Taskleiste mit einem Schalter anpinnst, damit sie immer unten auf dem Bildschirm sichtbar ist"</string>
+    <!-- no translation found for taskbar_edu_bubbles_animation_description (421866726938396813) -->
+    <skip />
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"Animation, die zeigt, wie du einen Splitscreen erstellst, indem du eine App per Drag-and-drop aus der Taskleiste ziehst und auf einer geöffneten App ablegst"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"Animation, die zeigt, wie du auf deinem Gerät auf vorgeschlagene Apps zugreifst"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"Animation, die zeigt, wie du auf dem Bildschirm nach einem Element suchst, indem du die Aktionstaste gedrückt hältst und den Bereich auswählst, in dem sich das Element befindet"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Informationen zur Taskleiste"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"App zur Seite ziehen, um zwei Apps gleichzeitig zu nutzen"</string>
+    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
+    <skip />
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Langsam nach oben wischen, um die Taskleiste zu sehen"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"App-Vorschläge auf Grundlage deiner Nutzung erhalten"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Bildschirmteiler lange drücken, um die Taskleiste anzupinnen"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Mehr Möglichkeiten mit der Taskleiste"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"Taskleiste immer anzeigen"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"Damit die Taskleiste immer unten angezeigt wird, halte den Teiler gedrückt"</string>
+    <!-- no translation found for taskbar_edu_bubbles_standalone (4182824636656528043) -->
+    <skip />
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"Aktionstaste gedrückt halten, um nach Inhalten auf deinem Display zu suchen"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Dieses Produkt sucht dann anhand des ausgewählten Teils deines Displays nach weiteren Informationen. Es gelten die <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>Datenschutzerklärung<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> und die <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>Nutzungsbedingungen<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> von Google."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Schließen"</string>
@@ -146,8 +152,6 @@
     <string name="change_navigation_mode" msgid="9088393078736808968">"Navigationsmodus ändern"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Taskleisten-Teiler"</string>
     <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"Andere kürzlich verwendete Apps"</string>
-    <string name="app_added_to_taskbar" msgid="1160433791917609063">"App zur Taskleiste hinzugefügt"</string>
-    <string name="app_removed_from_taskbar" msgid="7887298201562912487">"App von Taskleiste entfernt"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Nach oben / Nach links verschieben"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Nach unten / Nach rechts verschieben"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"App als Bubble öffnen"</string>

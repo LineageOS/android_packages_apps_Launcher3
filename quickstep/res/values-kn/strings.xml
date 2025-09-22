@@ -118,17 +118,23 @@
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"ಸ್ಕ್ರೀನ್ ತಿರುಗಿಸಿ"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"ಸ್ಕ್ರೀನ್ ಕೆಳಗಿನಿಂದ ಟಾಸ್ಕ್ ಬಾರ್ ಹೇಗೆ ಕಾಣಿಸಿಕೊಳ್ಳುತ್ತದೆ ಮತ್ತು ಬಳಕೆಯಲ್ಲಿಲ್ಲದಿದ್ದಾಗ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಹೇಗೆ ಮರೆಮಾಡುತ್ತದೆ ಎಂಬುದನ್ನು ತೋರಿಸುವ ಆ್ಯನಿಮೇಶನ್"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"ಟಾಗಲ್ ಬಳಸಿ ನಿಮ್ಮ ಟಾಸ್ಕ್ ಬಾರ್ ಅನ್ನು ಹೇಗೆ ಪಿನ್ ಮಾಡುವುದು ಎಂಬುದನ್ನು ತೋರಿಸುವ ಆ್ಯನಿಮೇಶನ್, ಇದರಿಂದ ಟಾಸ್ಕ್ ಬಾರ್ ಸ್ಕ್ರೀನ್‌ನ ಕೆಳಭಾಗದಲ್ಲಿ ಶಾಶ್ವತವಾಗಿ ಗೋಚರಿಸುತ್ತದೆ"</string>
+    <!-- no translation found for taskbar_edu_bubbles_animation_description (421866726938396813) -->
+    <skip />
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"ತೆರೆದಿರುವ ಆ್ಯಪ್‌ನ ಮೇಲಿರುವ ಟಾಸ್ಕ್ ಬಾರ್‌ನಿಂದ ಆ್ಯಪ್ ಅನ್ನು ಡ್ರ್ಯಾಗ್ ಅಂಡ್ ಡ್ರಾಪ್ ಮಾಡುವ ಮೂಲಕ ಸ್ಪ್ಲಿಟ್ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಹೇಗೆ ರಚಿಸುವುದು ಎಂಬುದನ್ನು ತೋರಿಸುವ ಆ್ಯನಿಮೇಶನ್"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಸೂಚಿಸಲಾದ ಆ್ಯಪ್‌ಗಳನ್ನು ಹೇಗೆ ಆ್ಯಕ್ಸೆಸ್ ಮಾಡುವುದು ಎಂಬುದನ್ನು ತೋರಿಸುವ ಆ್ಯನಿಮೇಶನ್"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"ಸ್ಕ್ರೀನ್ ಮೇಲೆ ಐಟಂ ಅನ್ನು ಹೇಗೆ ಹುಡುಕುವುದು ಎಂಬುದನ್ನು ತೋರಿಸುವ ಆ್ಯನಿಮೇಶನ್, ಆಕ್ಷನ್ ಕೀಯನ್ನು ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಒತ್ತಿ ಹಿಡಿಯುವ ಮೂಲಕ ಮತ್ತು ಐಟಂ ಇರುವ ಪ್ರದೇಶವನ್ನು ಆಯ್ಕೆ ಮಾಡಿ"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"ಟಾಸ್ಕ್‌ಬಾರ್ ಶಿಕ್ಷಣ"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"ಒಂದೇ ಬಾರಿಗೆ 2 ಆ್ಯಪ್‌ಗಳನ್ನು ಬಳಸಲು ಆ್ಯಪ್ ಅನ್ನು ಬದಿಗೆ ಎಳೆಯಿರಿ"</string>
+    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
+    <skip />
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"ಟಾಸ್ಕ್‌ಬಾರ್ ಕಾಣುವಂತೆ ಮಾಡಲು ನಿಧಾನವಾಗಿ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"ನಿಮ್ಮ ದಿನಚರಿಯ ಆಧಾರದ ಮೇಲೆ ಆ್ಯಪ್ ಸಲಹೆಗಳನ್ನು ಪಡೆಯಿರಿ"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"ಟಾಸ್ಕ್‌‌ಬಾರ್ ಅನ್ನು ಪಿನ್ ಮಾಡಲು ಡಿವೈಡರ್ ಮೇಲೆ ದೀರ್ಘಕಾಲ ಒತ್ತಿರಿ"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"ಟಾಸ್ಕ್‌ಬಾರ್ ಮೂಲಕ ಹೆಚ್ಚಿನದನ್ನು ಮಾಡಿ"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"ಯಾವಾಗಲೂ ಟಾಸ್ಕ್‌ಬಾರ್ ಅನ್ನು ತೋರಿಸಿ"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"ಯಾವಾಗಲೂ ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ನ ಕೆಳಭಾಗದಲ್ಲಿ ಟಾಸ್ಕ್ ಬಾರ್ ಅನ್ನು ತೋರಿಸಲು, ಡಿವೈಡರ್ ಅನ್ನು ಸ್ಪರ್ಶಿಸಿ ಹಿಡಿದಿಟ್ಟುಕೊಳ್ಳಿ"</string>
+    <!-- no translation found for taskbar_edu_bubbles_standalone (4182824636656528043) -->
+    <skip />
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ನ ಮೇಲೆ ಏನಿದೆ ಎಂಬುದನ್ನು ಹುಡುಕಲು ಆ್ಯಕ್ಷನ್ ಕೀಯನ್ನು ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಒತ್ತಿ ಹಿಡಿದುಕೊಳ್ಳಿ"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"ಈ ಉತ್ಪನ್ನವು ಹುಡುಕಲು ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ನ ಆಯ್ದ ಭಾಗವನ್ನು ಬಳಸುತ್ತದೆ. Google ನ <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>ಗೌಪ್ಯತೆ ನೀತಿ<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> ಮತ್ತು <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>ಸೇವಾ ನಿಯಮಗಳು<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> ಅನ್ವಯಿಸುತ್ತವೆ."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"ಮುಚ್ಚಿರಿ"</string>
@@ -146,8 +152,6 @@
     <string name="change_navigation_mode" msgid="9088393078736808968">"ನ್ಯಾವಿಗೇಶನ್ ಮೋಡ್ ಬದಲಾಯಿಸಿ"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"ಟಾಸ್ಕ್‌ಬಾರ್ ಡಿವೈಡರ್"</string>
     <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"ಇತರ ಇತ್ತೀಚಿನ ಆ್ಯಪ್‌ಗಳು"</string>
-    <string name="app_added_to_taskbar" msgid="1160433791917609063">"ಆ್ಯಪ್ ಅನ್ನು ಟಾಸ್ಕ್‌ಬಾರ್‌ಗೆ ಸೇರಿಸಲಾಗಿದೆ"</string>
-    <string name="app_removed_from_taskbar" msgid="7887298201562912487">"ಆ್ಯಪ್ ಅನ್ನು ಟಾಸ್ಕ್‌ಬಾರ್‌ನಿಂದ ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"ಮೇಲಿನ/ಎಡಭಾಗಕ್ಕೆ ಸರಿಸಿ"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"ಕೆಳಗಿನ/ಬಲಭಾಗಕ್ಕೆ ಸರಿಸಿ"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"ಆ್ಯಪ್ ಅನ್ನು ಬಬಲ್ ಆಗಿ ತೆರೆಯಿರಿ"</string>
