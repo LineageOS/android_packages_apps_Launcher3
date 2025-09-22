@@ -19,7 +19,6 @@ package com.android.launcher3.homescreenfiles
 import android.content.ContentProviderClient
 import android.content.ContentResolver
 import android.content.ContentValues
-import android.content.Context
 import android.database.ContentObserver
 import android.database.MatrixCursor
 import android.net.Uri
@@ -32,8 +31,9 @@ import android.provider.MediaStore.Files.FileColumns.RELATIVE_PATH
 import androidx.core.net.toUri
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider.Companion.HOME_SCREEN_FOLDER_RELATIVE_PATH
-import com.android.launcher3.util.DaggerSingletonTracker
-import com.android.launcher3.util.SafeCloseable
+import com.android.launcher3.util.Executors.MAIN_EXECUTOR
+import com.android.launcher3.util.SandboxApplication
+import com.android.launcher3.util.TestUtil
 import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors
 import java.util.concurrent.CompletableFuture
@@ -46,12 +46,13 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.spy
 import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
@@ -63,34 +64,21 @@ import org.mockito.kotlin.whenever
 class HomeScreenFilesProviderTest {
 
     @get:Rule val mockito = MockitoJUnit.rule()
+    @get:Rule val context = spy(SandboxApplication())
 
-    @Mock private lateinit var context: Context
     @Mock private lateinit var contentResolver: ContentResolver
     @Mock private lateinit var contentProviderClient: ContentProviderClient
 
-    private val lifeCycleTracker: DaggerSingletonTracker =
-        mock() {
-            on { addCloseable(any()) } doAnswer
-                {
-                    lifecycleCloseables.add(it.getArgument<SafeCloseable>(0))
-                    Unit
-                }
-
-            on { close() } doAnswer { lifecycleCloseables.forEach { it.close() } }
-        }
-
     private lateinit var provider: HomeScreenFilesProvider
-
-    private val lifecycleCloseables = mutableListOf<SafeCloseable>()
 
     @Before
     fun setUp() {
-        whenever(context.contentResolver).thenReturn(contentResolver)
+        doReturn(contentResolver).whenever(context).contentResolver
         provider =
             HomeScreenFilesMediaStoreProvider(
                 context,
                 MoreExecutors.newDirectExecutorService(),
-                lifeCycleTracker,
+                context.appComponent.daggerSingletonTracker,
             )
     }
 
@@ -288,7 +276,8 @@ class HomeScreenFilesProviderTest {
         assertThat(fileChange.file.get()!!.mimeType).isEqualTo("image/png")
         assertThat(fileChange.file.get()!!.isDirectory).isFalse()
 
-        lifeCycleTracker.close()
+        context.appComponent.daggerSingletonTracker.close()
+        TestUtil.runOnExecutorSync(MAIN_EXECUTOR) {}
         verify(contentResolver, times(1))
             .unregisterContentObserver(eq(underlyingContentObserverCaptor.firstValue))
 
