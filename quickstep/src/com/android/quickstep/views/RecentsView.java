@@ -4259,8 +4259,12 @@ public abstract class RecentsView<
     /** Dismisses the entire [taskView]. */
     public void dismissTaskView(TaskView taskView, boolean animateTaskView, boolean removeTask) {
         if (enableExpressiveDismissTaskMotion()) {
-            mDismissUtils.createTaskDismissSpringAnimation(taskView, removeTask,
-                    false /* isSplitSelection */);
+            RecentsDismissUtils.SpringSet dismissSpringSet =
+                    mDismissUtils.createTaskDismissSpringAnimation(taskView, removeTask,
+                            false /* isSplitSelection */);
+            if (dismissSpringSet != null) {
+                dismissSpringSet.start();
+            }
         } else {
             PendingAnimation pa = new PendingAnimation(DISMISS_TASK_DURATION);
             createTaskDismissAnimation(pa, taskView, animateTaskView, removeTask,
@@ -5065,9 +5069,12 @@ public abstract class RecentsView<
                             mContainer.getDeviceProfile().getDeviceProperties().isTablet());
             if (animator.getAnimatedFraction() > splitTimings.getGridSlideStartOffset()
                     && !hasRunDismiss.get()) {
-                mDismissUtils.createTaskDismissSpringAnimation(
-                        taskView, false /* shouldRemoveTaskView */,
-                        true /* isSplitSelection */);
+                RecentsDismissUtils.SpringSet dismissSpringSet =
+                        mDismissUtils.createTaskDismissSpringAnimation(taskView,
+                                false /* shouldRemoveTaskView */, true /* isSplitSelection */);
+                if (dismissSpringSet != null) {
+                    dismissSpringSet.start();
+                }
                 hasRunDismiss.set(true);
             }
         });
@@ -6691,8 +6698,13 @@ public abstract class RecentsView<
             TaskView draggedTaskView, boolean isDismissing,
             RecentsDismissUtils.DismissedTaskData dismissedTaskData, boolean shouldRemoveTaskView,
             boolean isSplitSelection) {
-        return mDismissUtils.createTaskDismissSpringAnimation(draggedTaskView, isDismissing,
-                dismissedTaskData, shouldRemoveTaskView, isSplitSelection);
+        RecentsDismissUtils.SpringSet dismissSpringSet =
+                mDismissUtils.createTaskDismissSpringAnimation(draggedTaskView, isDismissing,
+                        dismissedTaskData, shouldRemoveTaskView, isSplitSelection);
+        if (dismissSpringSet != null) {
+            dismissSpringSet.start();
+        }
+        return dismissSpringSet;
     }
 
     /**

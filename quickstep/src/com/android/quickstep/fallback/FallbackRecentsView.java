@@ -29,8 +29,6 @@ import android.view.MotionEvent;
 
 import androidx.annotation.Nullable;
 
-import com.android.launcher3.anim.AnimatorPlaybackController;
-import com.android.launcher3.anim.PendingAnimation;
 import com.android.launcher3.desktop.DesktopRecentsTransitionController;
 import com.android.launcher3.logging.StatsLogManager;
 import com.android.launcher3.statehandlers.DesktopVisibilityController;
@@ -45,6 +43,7 @@ import com.android.quickstep.util.GroupTask;
 import com.android.quickstep.util.SingleTask;
 import com.android.quickstep.util.SplitSelectStateController;
 import com.android.quickstep.views.OverviewActionsView;
+import com.android.quickstep.views.RecentsDismissUtils;
 import com.android.quickstep.views.RecentsView;
 import com.android.quickstep.views.RecentsViewContainer;
 import com.android.quickstep.views.TaskContainer;
@@ -53,6 +52,8 @@ import com.android.quickstep.window.RecentsWindowManager;
 import com.android.systemui.shared.recents.model.Task;
 import com.android.wm.shell.shared.GroupedTaskInfo;
 
+import kotlin.Unit;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -60,8 +61,6 @@ import java.util.List;
 public class FallbackRecentsView<CONTAINER_TYPE extends Context & RecentsViewContainer
         & StatefulContainer<RecentsState>> extends RecentsView<CONTAINER_TYPE, RecentsState>
         implements StateListener<RecentsState> {
-
-    private static final int TASK_DISMISS_DURATION = 150;
 
     @Nullable
     private Task mHomeTask;
@@ -125,14 +124,16 @@ public class FallbackRecentsView<CONTAINER_TYPE extends Context & RecentsViewCon
         if (mHomeTask != null && endTarget == RECENTS) {
             TaskView homeTaskView = getTaskViewByTaskId(mHomeTask.key.id);
             if (homeTaskView != null) {
-                PendingAnimation pendingAnimation = new PendingAnimation(TASK_DISMISS_DURATION);
-                createTaskDismissAnimation(pendingAnimation, homeTaskView, true, false,
-                        TASK_DISMISS_DURATION, false /* dismissingForSplitSelection*/,
-                        null /* gridEndData */);
-                pendingAnimation.addEndListener(e -> setCurrentTask(-1));
-                AnimatorPlaybackController controller = pendingAnimation.createPlaybackController();
-                controller.dispatchOnStart();
-                animatorSet.play(controller.getAnimationPlayer());
+                RecentsDismissUtils.SpringSet dismissSpringSet =
+                        mDismissUtils.createTaskDismissSpringAnimation(homeTaskView,
+                                false /* removeTask */, false /* isSplitSelection */);
+                if (dismissSpringSet != null) {
+                    dismissSpringSet.addEndListener(() -> {
+                        setCurrentTask(-1);
+                        return Unit.INSTANCE;
+                    });
+                    mDismissUtils.play(animatorSet, dismissSpringSet);
+                }
             }
         }
     }
