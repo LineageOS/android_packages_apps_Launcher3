@@ -24,7 +24,6 @@ import static android.view.accessibility.AccessibilityEvent.TYPE_VIEW_FOCUSED;
 import static com.android.app.animation.Interpolators.EMPHASIZED;
 import static com.android.internal.jank.Cuj.CUJ_LAUNCHER_LAUNCH_APP_PAIR_FROM_WORKSPACE;
 import static com.android.launcher3.Flags.enableExpressiveDismissTaskMotion;
-import static com.android.launcher3.Flags.enableOverviewBackgroundWallpaperBlur;
 import static com.android.launcher3.Flags.enableUnfoldStateAnimation;
 import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.LauncherConstants.SavedInstanceKeys.PENDING_SPLIT_SELECT_INFO;
@@ -496,20 +495,13 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
 
     @Override
     public boolean isOverviewBackgroundBlurEnabled() {
-        return mDepthController != null && mDepthController.isCrossWindowBlursEnabled()
-                && enableOverviewBackgroundWallpaperBlur();
+        return mDepthController != null && mDepthController.isCrossWindowBlursEnabled();
     }
 
     /** Apply the blur or blur fallback style to the current theme. */
     public void updateBlurStyle() {
-        if (enableOverviewBackgroundWallpaperBlur()) {
-            if (isOverviewBackgroundBlurEnabled() != mOverviewBlurEnabled) {
-                mWallpaperThemeManager.recreateToUpdateTheme();
-            }
-        } else if (Flags.allAppsBlur()) {
-            // For all apps, we only need to update the scrim, which draws the panel. But if the
-            // activity was recreated above, this is unnecessary.
-            getAppsView().invalidateHeader();
+        if (isOverviewBackgroundBlurEnabled() != mOverviewBlurEnabled) {
+            mWallpaperThemeManager.recreateToUpdateTheme();
         }
     }
 
