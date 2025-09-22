@@ -94,7 +94,6 @@ import com.android.launcher3.testing.TestLogging;
 import com.android.launcher3.testing.shared.TestProtocol;
 import com.android.launcher3.uioverrides.QuickstepLauncher;
 import com.android.launcher3.util.BackPressHandler;
-import com.android.launcher3.util.ComponentKey;
 import com.android.launcher3.util.SplitConfigurationOptions.StagePosition;
 import com.android.quickstep.OverviewComponentObserver;
 import com.android.quickstep.RecentsAnimationCallbacks;
@@ -283,19 +282,12 @@ public class SplitSelectStateController {
                     return;
                 }
 
-                ComponentKey key1 = resolvedTargetInfos.get(0).getTargetComponentKey();
-                ComponentKey key2 = resolvedTargetInfos.get(1).getTargetComponentKey();
-                if (key1 == null || key2 == null) {
-                    Log.e(TAG, "findLastActiveTasksAndRunCallback ComponentKey are null key1= "
-                            + key1 + " key2= " + key2);
-                    callback.accept(new Task[]{});
-                    return;
-                }
-
+                final ResolvedTargetInfo resolvedTargetInfo1 = resolvedTargetInfos.get(0);
+                final ResolvedTargetInfo resolvedTargetInfo2 = resolvedTargetInfos.get(1);
                 // Loop through tasks in reverse, since they are ordered with most-recent tasks last
                 for (int i = taskGroups.size() - 1; i >= 0; i--) {
                     GroupTask groupTask = taskGroups.get(i);
-                    if (isInstanceOfAppPair(groupTask, key1, key2)) {
+                    if (isInstanceOfAppPair(groupTask, resolvedTargetInfo1, resolvedTargetInfo2)) {
                         lastActiveTasks[0] = ((SplitTask) groupTask).getTopLeftTask();
                         break;
                     }
@@ -304,19 +296,14 @@ public class SplitSelectStateController {
                 // For each key we are looking for, add to lastActiveTasks with the corresponding
                 // Task (or do nothing if not found).
                 for (int i = 0; i < resolvedTargetInfos.size(); i++) {
-                    ComponentKey key = resolvedTargetInfos.get(i).getTargetComponentKey();
-                    if (key == null) {
-                        Log.e(TAG, "findLastActiveTasksAndRunCallback ComponentKey is null");
-                        callback.accept(new Task[]{});
-                        return;
-                    }
+                    final ResolvedTargetInfo resolvedTargetInfo = resolvedTargetInfos.get(i);
                     Task lastActiveTask = null;
                     // Loop through tasks in reverse, since they are ordered with recent tasks last
                     for (int j = taskGroups.size() - 1; j >= 0; j--) {
                         GroupTask groupTask = taskGroups.get(j);
                         // Account for desktop cases where there can be N tasks in the group
                         for (Task task : groupTask.getTasks()) {
-                            if (isInstanceOfComponent(task, key)
+                            if (isInstanceOfComponent(task, resolvedTargetInfo)
                                     && !Arrays.asList(lastActiveTasks).contains(task)) {
                                 lastActiveTask = task;
                                 break;
@@ -339,33 +326,31 @@ public class SplitSelectStateController {
      * Checks if a given Task is the most recently-active Task of type componentName. Used for
      * selecting already-running Tasks for splitscreen.
      */
-    public boolean isInstanceOfComponent(@Nullable Task task, @NonNull ComponentKey componentKey) {
+    public boolean isInstanceOfComponent(@Nullable Task task,
+            @NonNull ResolvedTargetInfo resolvedTargetInfo) {
         // Exclude the task that is already staged
         if (task == null || task.key.id == mSplitSelectDataHolder.getInitialTaskId()) {
             return false;
         }
-        if (task.key.baseIntent.getComponent() == null) {
-            Log.w(TAG, "Task has null component.");
-            return false;
-        }
 
-        return task.key.baseIntent.getComponent().equals(componentKey.componentName)
-                && task.key.userId == componentKey.user.getIdentifier();
+        return resolvedTargetInfo.matchTaskKey(task.key.baseActivity, task.key.baseIntent,
+                UserHandle.of(task.key.userId));
     }
 
     /**
      * Checks if a given GroupTask is a pair of apps that matches two given ComponentKeys. We check
      * both permutations because task order is not guaranteed in GroupTasks.
      */
-    public boolean isInstanceOfAppPair(GroupTask groupTask, @NonNull ComponentKey componentKey1,
-            @NonNull ComponentKey componentKey2) {
+    public boolean isInstanceOfAppPair(GroupTask groupTask,
+            @NonNull ResolvedTargetInfo resolvedTargetInfo1,
+            @NonNull ResolvedTargetInfo resolvedTargetInfo2) {
         if (groupTask instanceof SplitTask splitTask) {
-            return ((isInstanceOfComponent(splitTask.getTopLeftTask(), componentKey1)
-                    && isInstanceOfComponent(splitTask.getBottomRightTask(), componentKey2))
+            return ((isInstanceOfComponent(splitTask.getTopLeftTask(), resolvedTargetInfo1)
+                    && isInstanceOfComponent(splitTask.getBottomRightTask(), resolvedTargetInfo2))
                     ||
-                    (isInstanceOfComponent(splitTask.getTopLeftTask(), componentKey2)
+                    (isInstanceOfComponent(splitTask.getTopLeftTask(), resolvedTargetInfo2)
                             && isInstanceOfComponent(splitTask.getBottomRightTask(),
-                            componentKey1)));
+                            resolvedTargetInfo1)));
         }
         return false;
     }
