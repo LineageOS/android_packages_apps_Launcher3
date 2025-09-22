@@ -674,3 +674,13 @@ flag {
   description: "Enables mouse based workflows for interacting with launcher"
   bug: "388897603"
 }
+
+flag {
+  name: "migrate_browser_icon_on_setup"
+  namespace: "launcher"
+  description: "Migrates browser icon to user choice during user setup"
+  bug: "446663428"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
