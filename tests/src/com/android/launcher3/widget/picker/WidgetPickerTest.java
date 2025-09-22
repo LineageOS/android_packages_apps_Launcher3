@@ -15,11 +15,11 @@
  */
 package com.android.launcher3.widget.picker;
 
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
@@ -34,7 +34,6 @@ import com.android.launcher3.Launcher;
 import com.android.launcher3.util.BaseLauncherActivityTest;
 import com.android.launcher3.util.rule.ScreenRecordRule;
 import com.android.launcher3.util.rule.ScreenRecordRule.ScreenRecord;
-import com.android.launcher3.util.ui.PortraitLandscapeRunner.PortraitLandscape;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -67,7 +66,6 @@ public class WidgetPickerTest extends BaseLauncherActivityTest<Launcher> {
      */
     @Test
     @ScreenRecord
-    @PortraitLandscape
     @DisableFlags(Flags.FLAG_ENABLE_WIDGET_PICKER_REFACTOR)
     public void testWidgets() {
         loadLauncherSync();
