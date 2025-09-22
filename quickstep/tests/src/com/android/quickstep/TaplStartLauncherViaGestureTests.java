@@ -16,6 +16,7 @@
 
 package com.android.quickstep;
 
+import com.android.launcher3.util.rule.TestStabilityRule;
 import static com.android.launcher3.util.rule.TestStabilityRule.LOCAL;
 import static com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT;
 import static com.android.launcher3.util.rule.TestStabilityRule.Stability;
@@ -28,7 +29,9 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.quickstep.NavigationModeSwitchRule.NavigationModeSwitch;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 
 @LargeTest
@@ -42,6 +45,8 @@ public class TaplStartLauncherViaGestureTests extends AbstractQuickStepTest {
     private enum TestCase {
         TO_HOME, TO_OVERVIEW,
     }
+
+    @Rule public TestRule testStabilityRule = new TestStabilityRule();
 
     @Override
     @Before
