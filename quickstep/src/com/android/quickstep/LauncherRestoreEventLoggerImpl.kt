@@ -147,7 +147,7 @@ constructor(@ApplicationContext private val context: Context) : LauncherRestoreE
             Favorites.ITEM_TYPE_APPWIDGET -> DATA_TYPE_APPWIDGET
             Favorites.ITEM_TYPE_CUSTOM_APPWIDGET -> DATA_TYPE_CUSTOM_APPWIDGET
             Favorites.ITEM_TYPE_DEEP_SHORTCUT -> DATA_TYPE_DEEP_SHORTCUT
-            Favorites.ITEM_TYPE_APP_PAIR -> DATA_TYPE_APP_PAIR
+            Favorites.ITEM_TYPE_APP_GROUP -> DATA_TYPE_APP_PAIR
             else -> DATA_TYPE_LAUNCHER_ITEM
         }
 }

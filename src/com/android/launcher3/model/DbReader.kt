@@ -24,6 +24,7 @@ import android.util.ArrayMap
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.android.launcher3.LauncherSettings
+import com.android.launcher3.model.data.AppPairInfo
 import com.android.launcher3.util.IntArray
 import com.android.launcher3.widget.WidgetManagerHelper
 import kotlin.math.max
@@ -80,12 +81,12 @@ class DbReader(val mDb: SQLiteDatabase, val mTableName: String, val mContext: Co
                         }
                     }
 
-                    LauncherSettings.Favorites.ITEM_TYPE_APP_PAIR -> {
+                    LauncherSettings.Favorites.ITEM_TYPE_APP_GROUP -> {
                         val total = getFolderItemsCount(entry)
-                        // If the app pair contains fewer or more than 2 items, it is likely that
-                        // the app pair was created by mistake and should be removed.
-                        if (total != 2) {
-                            throw Exception("App pair contains fewer or more than 2 items")
+                        // If the app group contains an unsupported number of items, it is likely
+                        // that the app pair was created by mistake and should be removed.
+                        if (!AppPairInfo.hasValidItemCount(total)) {
+                            throw Exception("App group contains an unsupported number of items")
                         }
                     }
 
@@ -185,10 +186,10 @@ class DbReader(val mDb: SQLiteDatabase, val mTableName: String, val mContext: Co
                         // Ensure that the folder has at least 2 items.
                         check(getFolderItemsCount(entry) > 1) { "Folder has too few items" }
 
-                    LauncherSettings.Favorites.ITEM_TYPE_APP_PAIR -> {
-                        // Ensure that the app pair has exactly 2 items.
-                        check(getFolderItemsCount(entry) == 2) {
-                            "App pair contains fewer or more than 2 items"
+                    LauncherSettings.Favorites.ITEM_TYPE_APP_GROUP -> {
+                        // Ensure that the app group has a supported number of items.
+                        check(AppPairInfo.hasValidItemCount(getFolderItemsCount(entry))) {
+                            "App group contains an unsupported number of items"
                         }
                     }
 

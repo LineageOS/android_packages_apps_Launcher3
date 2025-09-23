@@ -82,7 +82,7 @@ class ValidGridMigrationUnitTest {
                 .groupingBy {
                     when (it.type) {
                         Favorites.ITEM_TYPE_FOLDER,
-                        Favorites.ITEM_TYPE_APP_PAIR -> throw Exception("Not implemented")
+                        Favorites.ITEM_TYPE_APP_GROUP -> throw Exception("Not implemented")
                         Favorites.ITEM_TYPE_APPWIDGET -> it.appWidgetProvider
                         Favorites.ITEM_TYPE_APPLICATION -> it.intent
                         else -> it.title

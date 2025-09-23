@@ -29,7 +29,7 @@ import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET
-import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_PAIR
+import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_GROUP
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FOLDER
 import com.android.launcher3.icons.BitmapInfo
@@ -207,7 +207,7 @@ class LayoutImportExportHelperTest {
                 .build()
         ) {
             1 == workspaceItems.size &&
-                ITEM_TYPE_APP_PAIR == workspaceItems[0].itemType &&
+                ITEM_TYPE_APP_GROUP == workspaceItems[0].itemType &&
                 2 == (workspaceItems[0] as AppPairInfo).getContents().size &&
                 "CustomAppPair" == workspaceItems[0].title
         }
@@ -230,7 +230,7 @@ class LayoutImportExportHelperTest {
             val folderInfo = workspaceItems[0] as FolderInfo
             val appPairInfo = folderInfo.getContents()[1] as AppPairInfo
 
-            ITEM_TYPE_APP_PAIR == appPairInfo.itemType &&
+            ITEM_TYPE_APP_GROUP == appPairInfo.itemType &&
                 2 == appPairInfo.getContents().size &&
                 "CustomAppPair" == appPairInfo.title
         }

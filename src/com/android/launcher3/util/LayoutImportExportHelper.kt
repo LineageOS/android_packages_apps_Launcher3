@@ -30,7 +30,7 @@ import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET
-import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_PAIR
+import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_GROUP
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FOLDER
 import com.android.launcher3.LauncherSettings.Settings.LAYOUT_DIGEST_LABEL
@@ -176,7 +176,7 @@ constructor(
                     info.spanY,
                     userType,
                 )
-            ITEM_TYPE_APP_PAIR ->
+            ITEM_TYPE_APP_GROUP ->
                 (info as AppPairInfo).let { appPairInfo ->
                     putAppPair(appPairInfo.title?.toString() ?: "").also { appPairBuilder ->
                         appPairInfo.getContents().forEach { appPairContent ->

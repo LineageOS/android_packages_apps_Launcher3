@@ -94,7 +94,7 @@ public class ItemInfo {
      * One of {@link Favorites#ITEM_TYPE_APPLICATION},
      * {@link Favorites#ITEM_TYPE_DEEP_SHORTCUT}
      * {@link Favorites#ITEM_TYPE_FOLDER},
-     * {@link Favorites#ITEM_TYPE_APP_PAIR},
+     * {@link Favorites#ITEM_TYPE_APP_GROUP},
      * {@link Favorites#ITEM_TYPE_APPWIDGET} or
      * {@link Favorites#ITEM_TYPE_CUSTOM_APPWIDGET}.
      * {@link Favorites#ITEM_TYPE_TASK}.

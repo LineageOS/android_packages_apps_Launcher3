@@ -23,7 +23,7 @@ import static com.android.launcher3.Flags.enableRecentsInTaskbar;
 import static com.android.launcher3.Flags.enableTaskbarRecentsThemedIcons;
 import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
-import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_PAIR;
+import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_GROUP;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FOLDER;
 import static com.android.launcher3.config.FeatureFlags.enableTaskbarPinning;
 import static com.android.launcher3.icons.BitmapInfo.FLAG_THEMED;
@@ -682,7 +682,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
             if (hotseatItemInfo.isPredictedItem()) {
                 expectedLayoutResId = R.layout.taskbar_predicted_app_icon;
             } else if (hotseatItemInfo instanceof CollectionInfo ci) {
-                expectedLayoutResId = ci.itemType == ITEM_TYPE_APP_PAIR
+                expectedLayoutResId = ci.itemType == ITEM_TYPE_APP_GROUP
                         ? R.layout.app_pair_icon
                         : R.layout.folder_icon;
                 isCollection = true;
@@ -725,7 +725,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                                     (FolderInfo) collectionInfo);
                             ((FolderIcon) hotseatView).setTextVisible(false);
                             break;
-                        case ITEM_TYPE_APP_PAIR:
+                        case ITEM_TYPE_APP_GROUP:
                             hotseatView = AppPairIcon.inflateIcon(
                                     expectedLayoutResId, mActivityContext, this,
                                     (AppPairInfo) collectionInfo, DISPLAY_TASKBAR);

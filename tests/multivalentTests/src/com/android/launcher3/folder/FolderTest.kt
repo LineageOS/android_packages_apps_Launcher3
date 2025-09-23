@@ -30,7 +30,7 @@ import com.android.launcher3.DropTarget.DragObject
 import com.android.launcher3.LauncherAppState
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET
-import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_PAIR
+import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_GROUP
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FOLDER
 import com.android.launcher3.OnAlarmListener
@@ -147,9 +147,9 @@ class FolderTest {
     }
 
     @Test
-    fun `Test that we accept valid item type ITEM_TYPE_APP_PAIR`() {
+    fun `Test that we accept valid item type ITEM_TYPE_APP_GROUP`() {
         val itemInfo = Mockito.mock(ItemInfo::class.java)
-        itemInfo.itemType = ITEM_TYPE_APP_PAIR
+        itemInfo.itemType = ITEM_TYPE_APP_GROUP
 
         val willAcceptResult = Folder.willAccept(itemInfo)
 
@@ -657,7 +657,7 @@ class FolderTest {
     fun `acceptDrop should return true with the correct item type as a parameter`() {
         val dragObject = Mockito.mock(DragObject::class.java)
         val itemInfo = Mockito.mock(ItemInfo::class.java)
-        itemInfo.itemType = ITEM_TYPE_APP_PAIR
+        itemInfo.itemType = ITEM_TYPE_APP_GROUP
         dragObject.dragInfo = itemInfo
 
         val result = folder.acceptDrop(dragObject)
