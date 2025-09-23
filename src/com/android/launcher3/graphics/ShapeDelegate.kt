@@ -44,6 +44,9 @@ import androidx.graphics.shapes.toPath
 import androidx.graphics.shapes.transformed
 import com.android.launcher3.Flags
 import com.android.launcher3.anim.SpringAnimationBuilder
+import com.android.launcher3.folder.Folder
+import com.android.launcher3.folder.FolderIcon
+import com.android.launcher3.folder.FolderPagedView
 import com.android.launcher3.icons.RoundRectEstimator.estimateRadius
 import com.android.launcher3.views.ClipPathView
 
@@ -141,9 +144,7 @@ interface ShapeDelegate {
                     Path.Direction.CW,
                 )
             }
-            val shouldUseSpringAnimation =
-                Flags.enableLauncherIconShapes() && Flags.enableExpressiveFolderExpansion()
-            return if (shouldUseSpringAnimation) {
+            return if (useFolderSpringAnimation(target)) {
                 ClipSpringAnimBuilder(target, pathProvider).toAnim(isReversed)
             } else {
                 ClipAnimBuilder(target, pathProvider).toAnim(isReversed)
@@ -230,9 +231,7 @@ interface ShapeDelegate {
                             cornerR = endRadius,
                         ),
                 )
-            val shouldUseSpringAnimation =
-                Flags.enableLauncherIconShapes() && Flags.enableExpressiveFolderExpansion()
-            return if (shouldUseSpringAnimation) {
+            return if (useFolderSpringAnimation(target)) {
                 ClipSpringAnimBuilder(target, morph::toPath).toAnim(isReversed)
             } else {
                 ClipAnimBuilder(target, morph::toPath).toAnim(isReversed)
@@ -385,5 +384,11 @@ interface ShapeDelegate {
                 centerY = (bottom - top) / 2,
                 rounding = CornerRounding(cornerR),
             )
+    }
+
+    fun <T> useFolderSpringAnimation(target: T): Boolean {
+        return (target is Folder || target is FolderPagedView)
+            && Flags.enableLauncherIconShapes()
+            && Flags.enableExpressiveFolderExpansion()
     }
 }
