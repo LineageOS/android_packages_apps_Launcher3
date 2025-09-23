@@ -27,7 +27,8 @@ class RecentsViewModel(
     private val recentsViewData: RecentsViewData,
     private val displayId: Int,
 ) {
-    private var visibleTaskIds = emptySet<Int>()
+    var visibleTaskIds = emptySet<Int>()
+        private set
 
     fun refreshAllTaskData() {
         recentsTasksRepository.getAllTaskData(displayId, true)
