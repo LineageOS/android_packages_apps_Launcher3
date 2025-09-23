@@ -26,6 +26,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.window.RemoteTransition;
 
+import androidx.annotation.AnyThread;
 import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -167,6 +168,7 @@ public class TaskbarUIController implements BubbleBarController.BubbleBarLocatio
     /**
      * @return if we should allow taskbar to auto stash
      */
+    @AnyThread
     public boolean shouldAllowTaskbarToAutoStash() {
         return mControllers.taskbarActivityContext.shouldAllowTaskbarToAutoStash();
     }

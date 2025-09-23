@@ -55,6 +55,7 @@ import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Interpolator;
 
+import androidx.annotation.AnyThread;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -62,6 +63,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.launcher3.Alarm;
+import com.android.launcher3.BuildConfig;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.R;
@@ -736,10 +738,53 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
                 /* shouldBubblesFollow= */ !bubbleBarExpanded);
     }
 
+    @AnyThread
+    public boolean shouldAllowTaskbarToAutoStash() {
+        if (refactorTaskbarUiState()) {
+            final boolean ret = newShouldAllowTaskbarToAutoStash();
+            if (BuildConfig.IS_STUDIO_BUILD && ret != legacyShouldAllowTaskbarToAutoStash()) {
+                throw new IllegalStateException("shouldAllowTaskbarToAutoStash doesn't match");
+            }
+            return ret;
+        } else {
+            return legacyShouldAllowTaskbarToAutoStash();
+        }
+    }
+
+    /** @return if we should allow taskbar to auto stash. */
+    @AnyThread
+    private boolean newShouldAllowTaskbarToAutoStash() {
+        final boolean isPrimaryDisplay = mTaskbarUiState.isPrimaryDisplayRef().getValue();
+        if (mTaskbarUiState.isThreeButtonNav() && isPrimaryDisplay) {
+            return false;
+        }
+
+        if (mTaskbarUiState.isTransientTaskbar()) {
+            return true;
+        }
+        if (!isPrimaryDisplay) {
+            return enableAutoStashConnectedDisplayTaskbar.isTrue();
+        }
+
+        final boolean isTaskbarPinningOnInDesktopMode =
+                LauncherPrefs.TASKBAR_PINNING_IN_DESKTOP_MODE.get(mActivity);
+        final boolean isTaskbarShowingDesktopTasks = DesktopVisibilityController.INSTANCE
+                .get(mActivity).isInDesktopMode(mActivity.getDisplayId())
+                        || mTaskbarUiState.getShowDesktopTaskbarForFreeformDisplayRef().getValue()
+                        || (mTaskbarUiState.getShowLockedTaskbarOnHome().getValue()
+                        && mTaskbarUiState.isTaskbarOnHomeRef().getValue());
+        return !isTaskbarPinningOnInDesktopMode && isTaskbarShowingDesktopTasks;
+    }
+
     /**
+     * This is the legacy pull model to query is we should allow taskbar to auto stash, we will be
+     * moving to {@link #newShouldAllowTaskbarToAutoStash()} after turning on flag
+     * {@link refactorTaskbarUiState()}
+     *
      * @return if we should allow taskbar to auto stash
      */
-    public boolean shouldAllowTaskbarToAutoStash() {
+    @Deprecated
+    private boolean legacyShouldAllowTaskbarToAutoStash() {
         if (mActivity.isThreeButtonNav() && mActivity.isPrimaryDisplay()) {
             return false;
         }
