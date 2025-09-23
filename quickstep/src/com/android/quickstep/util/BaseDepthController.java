@@ -17,8 +17,6 @@ package com.android.quickstep.util;
 
 import static android.os.Trace.TRACE_TAG_APP;
 
-import static com.android.launcher3.Flags.enableOverviewBackgroundWallpaperBlur;
-
 import android.app.WallpaperManager;
 import android.graphics.RenderEffect;
 import android.graphics.Shader;
@@ -129,14 +127,10 @@ public class BaseDepthController {
 
     public BaseDepthController(QuickstepLauncher activity) {
         mLauncher = activity;
-        if (Flags.allAppsBlur() || enableOverviewBackgroundWallpaperBlur()) {
-            mCrossWindowBlursEnabled =
-                    CrossWindowBlurListeners.getInstance().isCrossWindowBlurEnabled();
-            mMaxBlurRadius = activity.getResources().getDimensionPixelSize(
-                    R.dimen.max_depth_blur_radius_enhanced);
-        } else {
-            mMaxBlurRadius = activity.getResources().getInteger(R.integer.max_depth_blur_radius);
-        }
+        mCrossWindowBlursEnabled =
+                CrossWindowBlurListeners.getInstance().isCrossWindowBlurEnabled();
+        mMaxBlurRadius = activity.getResources().getDimensionPixelSize(
+                R.dimen.max_depth_blur_radius_enhanced);
         mWallpaperManager = activity.getSystemService(WallpaperManager.class);
 
         MultiPropertyFactory<BaseDepthController> depthProperty =
@@ -224,9 +218,7 @@ public class BaseDepthController {
         boolean isSurfaceOpaque = !mHasContentBehindLauncher && hasOpaqueBg && !mPauseBlurs;
 
         float blurAmount = mapDepthToBlur(depth);
-        SurfaceControl blurSurface =
-                enableOverviewBackgroundWallpaperBlur() && mBlurSurface != null ? mBlurSurface
-                        : mBaseSurface;
+        SurfaceControl blurSurface = mBlurSurface != null ? mBlurSurface : mBaseSurface;
 
         int previousBlur = mCurrentBlur;
         int newBlur = mCrossWindowBlursEnabled && !hasOpaqueBg && !mPauseBlurs ? (int) (blurAmount
@@ -406,10 +398,7 @@ public class BaseDepthController {
             mBaseSurface = baseSurface;
             Log.d(TAG, "setSurface:\n\tmWaitingOnSurfaceValidity: " + mWaitingOnSurfaceValidity
                     + "\n\tmBaseSurface: " + mBaseSurface);
-            SurfaceTransaction transaction = null;
-            if (enableOverviewBackgroundWallpaperBlur()) {
-                transaction = setupBlurSurface();
-            }
+            SurfaceTransaction transaction = setupBlurSurface();
             applyDepthAndBlur(transaction, /* applyImmediately */ false,
                     /* skipSimilarBlur */ false);
         }

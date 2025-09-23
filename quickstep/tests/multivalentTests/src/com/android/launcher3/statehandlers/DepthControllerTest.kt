@@ -24,7 +24,6 @@ import androidx.test.filters.SmallTest
 import com.android.launcher3.Flags
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherState
-import com.android.launcher3.R
 import com.android.launcher3.dragndrop.DragLayer
 import com.android.launcher3.statemanager.StateManager
 import com.android.launcher3.uioverrides.QuickstepLauncher
@@ -58,7 +57,6 @@ class DepthControllerTest {
     @Before
     fun setUp() {
         `when`(launcher.resources).thenReturn(resource)
-        `when`(resource.getInteger(R.integer.max_depth_blur_radius)).thenReturn(30)
         `when`(launcher.dragLayer).thenReturn(dragLayer)
         `when`(dragLayer.viewTreeObserver).thenReturn(viewTreeObserver)
         `when`(launcher.stateManager).thenReturn(stateManager)
