@@ -244,10 +244,7 @@ class RecentsViewStateController(private val launcher: QuickstepLauncher) :
             )
         if (!goingToOverviewFromWorkspaceContextual) {
             // This animation is already done for the contextual case, don't redo it
-            recentsView.createSplitSelectInitAnimation(
-                builder,
-                toState.getTransitionDuration(launcher, true),
-            )
+            recentsView.createSplitSelectInitAnimation(builder)
         }
         // Shift tasks vertically downward to get out of placeholder view
         builder.setFloat(

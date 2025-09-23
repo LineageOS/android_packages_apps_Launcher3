@@ -918,11 +918,7 @@ constructor(
                 }
 
                 val dismissTaskViewOnClick: (View) -> Unit = {
-                    recentsView?.dismissTaskView(
-                        container.taskView,
-                        /* animateTaskView = */ true,
-                        /* removeTask= */ true,
-                    )
+                    recentsView?.dismissTaskView(container.taskView, /* removeTask= */ true)
                 }
                 setTaskDismissButtonState(
                     TaskUiStateMapper.toTaskDismissButtonState(

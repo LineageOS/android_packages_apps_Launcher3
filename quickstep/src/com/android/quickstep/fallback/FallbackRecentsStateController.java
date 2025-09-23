@@ -140,7 +140,7 @@ public class FallbackRecentsStateController implements StateHandler<RecentsState
             int duration = state.getTransitionDuration(mRecentsViewContainer, true);
             // TODO (b/246851887): Pass in setter as a NO_ANIM PendingAnimation instead
             PendingAnimation pa = new PendingAnimation(duration);
-            mRecentsView.createSplitSelectInitAnimation(pa, duration);
+            mRecentsView.createSplitSelectInitAnimation(pa);
             setter.add(pa.buildAnim());
         }
 
