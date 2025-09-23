@@ -70,7 +70,6 @@ import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
 
 /** Test for [DesktopSystemShortcut] */
-// TODO(b/403558856): Improve test coverage for DesktopModeCompatPolicy integration.
 class DesktopSystemShortcutTest {
 
     @get:Rule val setFlagsRule = SetFlagsRule(SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT)
