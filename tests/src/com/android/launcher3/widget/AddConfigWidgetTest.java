@@ -48,7 +48,6 @@ import com.android.launcher3.util.BlockingBroadcastReceiver;
 import com.android.launcher3.util.PackageUserKey;
 import com.android.launcher3.util.WidgetUtils;
 import com.android.launcher3.util.rule.ShellCommandRule;
-import com.android.launcher3.util.ui.PortraitLandscapeRunner.PortraitLandscape;
 import com.android.launcher3.widget.picker.WidgetsFullSheet;
 import com.android.launcher3.widget.picker.WidgetsListAdapter;
 import com.android.launcher3.widget.picker.WidgetsRecyclerView;
@@ -83,14 +82,12 @@ public class AddConfigWidgetTest extends BaseLauncherActivityTest<Launcher> {
     }
 
     @Test
-    @PortraitLandscape
     @DisableFlags(Flags.FLAG_ENABLE_WIDGET_PICKER_REFACTOR)
     public void testWidgetConfig() throws Throwable {
         runTest(true);
     }
 
     @Test
-    @PortraitLandscape
     @DisableFlags(Flags.FLAG_ENABLE_WIDGET_PICKER_REFACTOR)
     public void testConfigCancelled() throws Throwable {
         runTest(false);

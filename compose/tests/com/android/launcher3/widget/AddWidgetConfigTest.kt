@@ -33,7 +33,6 @@ import com.android.launcher3.util.BlockingBroadcastReceiver
 import com.android.launcher3.util.LauncherBindableItemsContainer.ItemOperator
 import com.android.launcher3.util.WidgetUtils
 import com.android.launcher3.util.rule.ShellCommandRule
-import com.android.launcher3.util.ui.PortraitLandscapeRunner.PortraitLandscape
 import com.android.launcher3.widgetpicker.listeners.WidgetPickerAddItemListener
 import com.android.launcher3.widgetpicker.shared.model.WidgetInfo
 import com.google.common.truth.Truth.assertThat
@@ -64,14 +63,12 @@ class AddWidgetConfigTest : BaseLauncherActivityTest<Launcher>() {
     }
 
     @Test
-    @PortraitLandscape
     @Throws(Throwable::class)
     fun testWidgetConfig() {
         runTest(acceptConfig = true)
     }
 
     @Test
-    @PortraitLandscape
     @Throws(Throwable::class)
     fun testConfigCancelled() {
         runTest(acceptConfig = false)
