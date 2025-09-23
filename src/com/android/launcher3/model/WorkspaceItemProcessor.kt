@@ -619,14 +619,22 @@ class WorkspaceItemProcessor(
 
     /** Restores file system items coming from the DB ([LoaderCursor]). */
     private fun processFileSystemItem() {
-        // TODO(b/424466810): restore items coming from the db.
-        // `c.markDeleted` is a temporary call to recreate all items from scratch and avoid
-        // merging/migration after adding new fields (icon, intent, etc.) at the cost of not saving
-        // the grid position between reboots.
-        c.markDeleted(
-            "File system item ${c.title} no longer exists",
-            RestoreError.FILE_SYSTEM_ITEM_NO_LONGER_EXISTS,
-        )
+        val item =
+            WorkspaceItemInfo().apply {
+                c.applyCommonProperties(this)
+                itemType = c.itemType
+                title = c.title
+                intent = c.parseIntent()
+            }
+        if (homeScreenFiles.value.containsKey(item.intent.data)) {
+            c.markRestored()
+            c.checkAndAddItem(item, loadedItems, memoryLogger)
+        } else {
+            c.markDeleted(
+                "File system item ${c.title} no longer exists",
+                RestoreError.FILE_SYSTEM_ITEM_NO_LONGER_EXISTS,
+            )
+        }
     }
 
     /**
@@ -636,6 +644,14 @@ class WorkspaceItemProcessor(
     private fun addRemainingFileSystemItems(modelDbController: ModelDbController) {
         val knownDesktopContainerItems =
             ArrayList(loadedItems.filter { it.container == Favorites.CONTAINER_DESKTOP })
+        val alreadyRestoredFileSystemItems =
+            knownDesktopContainerItems
+                .filter {
+                    it.itemType == Favorites.ITEM_TYPE_FILE_SYSTEM_FILE ||
+                        it.itemType == Favorites.ITEM_TYPE_FILE_SYSTEM_FOLDER
+                }
+                .map { requireNotNull(it.intent).data }
+                .toSet()
         val excludedScreens = IntSet()
 
         if (qsbOnFirstScreen()) {
@@ -655,7 +671,9 @@ class WorkspaceItemProcessor(
         }
 
         for ((uri, file) in homeScreenFiles.value) {
-            // TODO(b/424466810): ignore normally restored items.
+            if (alreadyRestoredFileSystemItems.contains(uri)) {
+                continue
+            }
 
             val item = WorkspaceItemInfo()
             item.id = modelDbController.generateNewItemId()
