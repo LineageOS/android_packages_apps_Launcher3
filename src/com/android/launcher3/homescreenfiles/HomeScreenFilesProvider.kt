@@ -29,7 +29,13 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Future
 
 /** Represents a single file or folder item queried by [HomeScreenFilesProvider]. */
-data class HomeScreenFile(val displayName: String, val mimeType: String?, val isDirectory: Boolean)
+data class HomeScreenFile(
+    val uri: Uri,
+    val displayName: String,
+    val mimeType: String?,
+    val isDirectory: Boolean,
+    val user: UserHandle,
+)
 
 /** An interface for managing file items to be shown on the home screen. */
 interface HomeScreenFilesProvider {
@@ -60,7 +66,6 @@ interface HomeScreenFilesProvider {
      * @param flags The bitmask describing the type of the file change (one of [NOTIFY_INSERT],
      *   [NOTIFY_UPDATE], [NOTIFY_DELETE]).
      * @param file Complete information about the file that is being changed.
-     * @param user The user associated with this change event.
      * @param uriAlias An alias for the URI of the item that was changed, possibly in a different
      *   content provider authority. Note that an alias will only be available if the URI was moved
      *   via call to [#moveToHomeScreen()].
@@ -69,7 +74,6 @@ interface HomeScreenFilesProvider {
         val uri: Uri,
         val flags: Int,
         val file: Future<HomeScreenFile?>,
-        val user: UserHandle,
         val uriAlias: Uri?,
     )
 

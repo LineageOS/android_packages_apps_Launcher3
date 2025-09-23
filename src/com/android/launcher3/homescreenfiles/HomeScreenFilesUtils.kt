@@ -23,6 +23,7 @@ import android.provider.DocumentsContract.Document.MIME_TYPE_DIR
 import com.android.launcher3.Flags.showFilesOnHomeScreen
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FILE
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FOLDER
+import com.android.launcher3.model.data.ItemInfo
 
 /** Other utility methods related to managing files on the home screen. */
 class HomeScreenFilesUtils {
@@ -59,3 +60,19 @@ class HomeScreenFilesUtils {
             }
     }
 }
+
+/** Creates a [HomeScreenFile] from [ItemInfo]. */
+val ItemInfo.homeScreenFile: HomeScreenFile?
+    get() {
+        if (itemType != ITEM_TYPE_FILE_SYSTEM_FILE && itemType != ITEM_TYPE_FILE_SYSTEM_FOLDER) {
+            return null
+        }
+
+        return HomeScreenFile(
+            uri = requireNotNull(requireNotNull(intent).data),
+            displayName = title?.toString() ?: "",
+            mimeType = requireNotNull(intent).type,
+            isDirectory = itemType == ITEM_TYPE_FILE_SYSTEM_FOLDER,
+            user = user,
+        )
+    }

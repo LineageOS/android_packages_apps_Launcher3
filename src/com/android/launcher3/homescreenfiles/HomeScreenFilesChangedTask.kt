@@ -19,13 +19,11 @@ package com.android.launcher3.homescreenfiles
 import android.content.ContentResolver.NOTIFY_INSERT
 import android.content.ContentResolver.NOTIFY_UPDATE
 import android.net.Uri
-import android.os.UserHandle
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherModel
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
 import com.android.launcher3.Utilities.qsbOnFirstScreen
 import com.android.launcher3.WorkspaceLayoutManager
-import com.android.launcher3.icons.IconCache
 import com.android.launcher3.model.AllAppsList
 import com.android.launcher3.model.BgDataModel
 import com.android.launcher3.model.ModelTaskController
@@ -42,7 +40,6 @@ class HomeScreenFilesChangedTask
 @AssistedInject
 constructor(
     @Assisted private val fileChange: HomeScreenFilesProvider.FileChange,
-    private val iconCache: IconCache,
     private val idp: InvariantDeviceProfile,
     private val workspaceItemSpaceFinder: WorkspaceItemSpaceFinder,
 ) : LauncherModel.ModelUpdateTask {
@@ -58,14 +55,7 @@ constructor(
         if (isInsert && file != null) {
             processInsert(fileChange.uri, file, taskController)
         } else if (isUpdate && file != null) {
-            processUpdate(
-                fileChange.uri,
-                fileChange.uriAlias,
-                file,
-                fileChange.user,
-                taskController,
-                dataModel,
-            )
+            processUpdate(fileChange.uri, fileChange.uriAlias, file, taskController, dataModel)
         } else {
             processDelete(fileChange.uri, fileChange.uriAlias, taskController)
         }
@@ -77,7 +67,6 @@ constructor(
                 title = file.displayName
                 itemType = HomeScreenFilesUtils.buildItemType(file)
                 intent = HomeScreenFilesUtils.buildLaunchIntent(uri, file)
-                bitmap = iconCache.getDefaultIcon(user)
             }
         val coords =
             workspaceItemSpaceFinder.findSpaceForItem(
@@ -112,13 +101,12 @@ constructor(
         uri: Uri,
         uriAlias: Uri?,
         file: HomeScreenFile,
-        user: UserHandle,
         taskController: ModelTaskController,
         dataModel: BgDataModel,
     ) {
         val updatedItems =
             dataModel.updateAndCollectWorkspaceItemInfos(
-                user,
+                file.user,
                 {
                     val data = it.intent?.data
                     if (data == uri || (uriAlias != null && data == uriAlias)) {

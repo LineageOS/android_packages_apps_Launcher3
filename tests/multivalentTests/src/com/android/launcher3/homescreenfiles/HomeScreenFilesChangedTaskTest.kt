@@ -28,7 +28,6 @@ import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FILE
 import com.android.launcher3.Utilities.qsbOnFirstScreen
 import com.android.launcher3.WorkspaceLayoutManager
-import com.android.launcher3.icons.IconCache
 import com.android.launcher3.model.AllAppsList
 import com.android.launcher3.model.BgDataModel
 import com.android.launcher3.model.ModelTaskController
@@ -65,12 +64,18 @@ class HomeScreenFilesChangedTaskTest {
     @Mock private lateinit var modelWriter: ModelWriter
     @Mock private lateinit var bgDataModel: BgDataModel
     @Mock private lateinit var allAppsList: AllAppsList
-    @Mock private lateinit var iconCache: IconCache
     @Mock private lateinit var idp: InvariantDeviceProfile
     @Mock private lateinit var workspaceItemSpaceFinder: WorkspaceItemSpaceFinder
 
     private val testUri = Uri.parse("content://media/external_primary/file/1")
-    private val testFile = HomeScreenFile("file.png", "image/png", false)
+    private val testFile =
+        HomeScreenFile(
+            uri = testUri,
+            displayName = "file.png",
+            mimeType = "image/png",
+            isDirectory = false,
+            user = Process.myUserHandle(),
+        )
     private val wsData = MutableWorkspaceData()
 
     @Before
@@ -112,10 +117,8 @@ class HomeScreenFilesChangedTaskTest {
                     testUri,
                     NOTIFY_INSERT,
                     CompletableFuture.completedFuture(testFile),
-                    Process.myUserHandle(),
                     /*uriAlias=*/ null,
                 ),
-                iconCache,
                 idp,
                 workspaceItemSpaceFinder,
             )
@@ -148,10 +151,8 @@ class HomeScreenFilesChangedTaskTest {
                     testUri,
                     NOTIFY_UPDATE,
                     CompletableFuture.completedFuture(testFile),
-                    Process.myUserHandle(),
                     /*uriAlias=*/ null,
                 ),
-                iconCache,
                 idp,
                 workspaceItemSpaceFinder,
             )
@@ -193,10 +194,8 @@ class HomeScreenFilesChangedTaskTest {
                     testUri,
                     NOTIFY_UPDATE,
                     CompletableFuture.completedFuture(testFile),
-                    Process.myUserHandle(),
                     uriAlias,
                 ),
-                iconCache,
                 idp,
                 workspaceItemSpaceFinder,
             )
@@ -237,10 +236,8 @@ class HomeScreenFilesChangedTaskTest {
                     testUri,
                     NOTIFY_UPDATE,
                     CompletableFuture.completedFuture(testFile),
-                    Process.myUserHandle(),
                     /*uriAlias=*/ null,
                 ),
-                iconCache,
                 idp,
                 workspaceItemSpaceFinder,
             )
@@ -260,10 +257,8 @@ class HomeScreenFilesChangedTaskTest {
                     testUri,
                     NOTIFY_DELETE,
                     CompletableFuture.completedFuture(null),
-                    Process.myUserHandle(),
                     /*uriAlias=*/ null,
                 ),
-                iconCache,
                 idp,
                 workspaceItemSpaceFinder,
             )

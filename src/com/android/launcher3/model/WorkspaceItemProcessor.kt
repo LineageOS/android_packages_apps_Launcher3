@@ -664,9 +664,6 @@ class WorkspaceItemProcessor(
             item.itemType = HomeScreenFilesUtils.buildItemType(file)
             item.intent = HomeScreenFilesUtils.buildLaunchIntent(uri, file)
 
-            // TODO(b/424466144, b/424466406): add MIME-type-based icons or thumbnails.
-            item.bitmap = iconCache.getDefaultIcon(item.user)
-
             val coords =
                 workspaceItemSpaceFinder.findSpaceForItem(
                     knownDesktopContainerItems,
