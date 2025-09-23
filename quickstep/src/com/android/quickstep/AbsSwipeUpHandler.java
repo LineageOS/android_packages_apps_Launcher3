@@ -106,6 +106,7 @@ import android.window.TransitionInfo;
 import android.window.WindowAnimationState;
 
 import androidx.annotation.CallSuper;
+import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
@@ -137,11 +138,11 @@ import com.android.launcher3.taskbar.TaskbarUiState;
 import com.android.launcher3.taskbar.TaskbarUiStateMonitor;
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator;
 import com.android.launcher3.uioverrides.QuickstepLauncher;
-import com.android.launcher3.util.ThreadedAnimator;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.MSDLPlayerWrapper;
 import com.android.launcher3.util.NavigationMode;
 import com.android.launcher3.util.SafeCloseable;
+import com.android.launcher3.util.ThreadedAnimator;
 import com.android.launcher3.util.TraceHelper;
 import com.android.launcher3.util.VibratorWrapper;
 import com.android.quickstep.GestureState.GestureEndTarget;
@@ -187,6 +188,8 @@ import com.google.android.msdl.data.model.MSDLToken;
 
 import kotlin.Unit;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -321,6 +324,19 @@ public abstract class AbsSwipeUpHandler<
 
     private static final int REJECT_HOME_ANIM_DURATION_MS = 200;
     private static final float REJECT_HOME_ANIM_MINIMUM_SHIFT = 0.1f;
+
+    // Flags to defer tracking lifecycle on destroy.
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({HANDLER_VALID, LAUNCH_WITHOUT_ANIMATION_CALLBACK_PENDING})
+    private @interface DeferLifecycleOnDestroyFlag {}
+
+    @VisibleForTesting
+    protected static final int HANDLER_VALID = 1 << 0;
+    @VisibleForTesting
+    protected static final int LAUNCH_WITHOUT_ANIMATION_CALLBACK_PENDING = 1 << 1;
+
+    @VisibleForTesting
+    protected int mDeferLifecycleOnDestroyFlags = HANDLER_VALID;
 
     protected TaskAnimationManager mTaskAnimationManager;
     // Either RectFSpringAnim (if animating home) or ObjectAnimator (from mCurrentShift) otherwise
@@ -2437,9 +2453,20 @@ public abstract class AbsSwipeUpHandler<
                 mActivityRestartListener);
         mTaskSnapshotCache.clear();
 
-        for (LifecycleTracker tracker:
-                LauncherComponentProvider.get(mContext).getLifecycleTrackers()) {
-            tracker.trackLifecycleOnDestroy(this, 1000L);
+        updateDeferStateForFlag(HANDLER_VALID, false);
+    }
+
+    private void updateDeferStateForFlag(@DeferLifecycleOnDestroyFlag int flag, boolean enabled) {
+        if (enabled) {
+            mDeferLifecycleOnDestroyFlags |= flag;
+        } else {
+            mDeferLifecycleOnDestroyFlags &= ~flag;
+        }
+        if (mDeferLifecycleOnDestroyFlags == 0) {
+            for (LifecycleTracker tracker:
+                    LauncherComponentProvider.get(mContext).getLifecycleTrackers()) {
+                tracker.trackLifecycleOnDestroy(this, 1000L);
+            }
         }
     }
 
@@ -2757,6 +2784,7 @@ public abstract class AbsSwipeUpHandler<
             ActiveGestureLog.INSTANCE.trackEvent(EXPECTING_TASK_APPEARED);
         }
         ActiveGestureProtoLogProxy.logStartNewTask(nextTaskLog);
+        updateDeferStateForFlag(LAUNCH_WITHOUT_ANIMATION_CALLBACK_PENDING, true);
         taskToLaunch.launchWithoutAnimation(true, success -> {
             resultCallback.accept(success);
             if (success) {
@@ -2774,6 +2802,7 @@ public abstract class AbsSwipeUpHandler<
                                             + "launchWithoutAnimation failed"));
                 }
             }
+            updateDeferStateForFlag(LAUNCH_WITHOUT_ANIMATION_CALLBACK_PENDING, false);
             return Unit.INSTANCE;
         }  /* freezeTaskList */);
         mCanceled = false;
