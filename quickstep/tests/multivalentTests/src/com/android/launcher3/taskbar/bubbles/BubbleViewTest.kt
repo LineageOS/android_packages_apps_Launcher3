@@ -27,6 +27,7 @@ import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.R
 import com.android.launcher3.icons.BitmapInfo
+import com.android.launcher3.taskbar.bubbles.model.BubbleIcon
 import com.android.wm.shell.shared.bubbles.BubbleInfo
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -77,6 +78,7 @@ class BubbleViewTest {
                     false,
                     true,
                     null,
+                    false,
                 )
             bubbleView = inflater.inflate(R.layout.bubblebar_item_view, null, false) as BubbleView
             bubble =
@@ -84,7 +86,7 @@ class BubbleViewTest {
                     bubbleInfo,
                     bubbleView,
                     BitmapInfo.of(bitmap, Color.WHITE),
-                    bitmap,
+                    BubbleIcon.Custom(bitmap),
                     Color.WHITE,
                     "",
                     null,

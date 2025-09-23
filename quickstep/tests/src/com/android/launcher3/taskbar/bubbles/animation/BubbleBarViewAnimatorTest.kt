@@ -50,6 +50,7 @@ import com.android.launcher3.taskbar.bubbles.flyout.BubbleBarFlyoutMessage
 import com.android.launcher3.taskbar.bubbles.flyout.BubbleBarFlyoutPositioner
 import com.android.launcher3.taskbar.bubbles.flyout.FlyoutCallbacks
 import com.android.launcher3.taskbar.bubbles.flyout.FlyoutScheduler
+import com.android.launcher3.taskbar.bubbles.model.BubbleIcon
 import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController
 import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController.BubbleLauncherState
 import com.android.wm.shell.shared.animation.PhysicsAnimator
@@ -1575,6 +1576,7 @@ class BubbleBarViewAnimatorTest {
                     false,
                     true,
                     null,
+                    false,
                 )
             bubbleView =
                 inflater.inflate(R.layout.bubblebar_item_view, bubbleBarView, false) as BubbleView
@@ -1583,7 +1585,7 @@ class BubbleBarViewAnimatorTest {
                     bubbleInfo,
                     bubbleView,
                     BitmapInfo.of(bitmap, Color.WHITE),
-                    bitmap,
+                    BubbleIcon.Custom(bitmap),
                     Color.WHITE,
                     "",
                     BubbleBarFlyoutMessage(icon = null, title = "title", message = "message"),

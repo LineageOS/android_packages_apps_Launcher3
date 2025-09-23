@@ -49,6 +49,7 @@ import com.android.launcher3.icons.BitmapInfo;
 import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.launcher3.shortcuts.ShortcutRequest;
 import com.android.launcher3.taskbar.bubbles.flyout.BubbleBarFlyoutMessage;
+import com.android.launcher3.taskbar.bubbles.model.BubbleIcon;
 import com.android.wm.shell.shared.bubbles.BubbleInfo;
 import com.android.wm.shell.shared.bubbles.ParcelableFlyoutMessage;
 
@@ -117,8 +118,7 @@ public class BubbleCreator {
     @Nullable
     @VisibleForTesting
     public BubbleBarBubble populateBubble(Context context, BubbleInfo info,
-            Drawable appIcon, String appName,
-            ViewGroup barView,
+            Drawable appIcon, String appName, ViewGroup barView,
             @Nullable BubbleBarBubble existingBubble) {
         boolean isImportantConvo = info.isImportantConversation();
         ShortcutRequest.QueryResult result = new ShortcutRequest(context,
@@ -135,15 +135,9 @@ public class BubbleCreator {
         }
 
         // Badged bubble image
-        Drawable bubbleDrawable = mIconFactory.getBubbleDrawable(
-                context, shortcutInfo, info.getIcon());
-        if (bubbleDrawable == null) {
-            // Default to app icon
-            bubbleDrawable = appIcon;
-        }
+        BubbleIcon bubbleIcon = getBubbleIcon(context, info, appIcon, shortcutInfo, mIconFactory);
         BitmapInfo badgeBitmapInfo = mIconFactory.getBadgeBitmap(
                 appIcon, new UserHandle(info.getUserId()), isImportantConvo);
-        Bitmap bubbleBitmap = mIconFactory.getBubbleBitmap(bubbleDrawable);
 
         int dotColor = ColorUtils.blendARGB(badgeBitmapInfo.color,
                 Color.WHITE, WHITE_SCRIM_ALPHA / 255f);
@@ -157,19 +151,35 @@ public class BubbleCreator {
                     R.layout.bubblebar_item_view, barView, false /* attachToRoot */);
 
             BubbleBarBubble bubble = new BubbleBarBubble(info, bubbleView,
-                    badgeBitmapInfo, bubbleBitmap, dotColor, appName, flyoutMessage);
+                    badgeBitmapInfo, bubbleIcon, dotColor, appName, flyoutMessage);
             bubbleView.setBubble(bubble);
             return bubble;
         } else {
             // If we already have a bubble (so it already has an inflated view), update it.
             existingBubble.setInfo(info);
             existingBubble.setBadge(badgeBitmapInfo);
-            existingBubble.setIcon(bubbleBitmap);
+            existingBubble.setIcon(bubbleIcon);
             existingBubble.setDotColor(dotColor);
             existingBubble.setAppName(appName);
             existingBubble.setFlyoutMessage(flyoutMessage);
             return existingBubble;
         }
+    }
+
+    private static BubbleIcon getBubbleIcon(Context context, BubbleInfo info, Drawable appIcon,
+            ShortcutInfo shortcutInfo, BubbleIconFactory iconFactory) {
+        if (info.isApp()) {
+            return new BubbleIcon.AppIcon(
+                    iconFactory.getAppBubbleBitmapInfo(appIcon, UserHandle.of(info.getUserId())));
+        }
+
+        Drawable bubbleDrawable =
+                iconFactory.getBubbleDrawable(context, shortcutInfo, info.getIcon());
+        if (bubbleDrawable == null) {
+            // Default to app icon
+            bubbleDrawable = appIcon;
+        }
+        return new BubbleIcon.Custom(iconFactory.getBubbleBitmap(bubbleDrawable));
     }
 
     @Nullable
