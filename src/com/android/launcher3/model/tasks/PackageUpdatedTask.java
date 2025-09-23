@@ -28,7 +28,6 @@ import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
 import android.os.UserHandle;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -37,7 +36,6 @@ import com.android.launcher3.icons.IconCache;
 import com.android.launcher3.logging.FileLog;
 import com.android.launcher3.model.AllAppsList;
 import com.android.launcher3.model.BgDataModel;
-import com.android.launcher3.model.ItemInstallQueue;
 import com.android.launcher3.model.ModelTaskController;
 import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.ItemInfo;
@@ -51,21 +49,17 @@ import com.android.launcher3.util.ItemInfoMatcher;
 import com.android.launcher3.util.PackageManagerHelper;
 import com.android.launcher3.util.PackageUserKey;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /** Handles model changes due to installation or update of an app */
 @SuppressWarnings("NewApi")
 public class PackageUpdatedTask implements ModelUpdateTask {
 
-    // TODO(b/290090023): Set to false after root causing is done.
     private static final String TAG = "PackageUpdatedTask";
-    private static final boolean DEBUG = true;
 
     public static final boolean OP_ADD = false;
     public static final boolean OP_UPDATE = true;
@@ -82,7 +76,7 @@ public class PackageUpdatedTask implements ModelUpdateTask {
             @NonNull final String... packages) {
         mIsUpdate = isUpdate;
         mUser = user;
-        mPackages = Set.of(packages);
+        mPackages = new HashSet<>(Arrays.asList(packages));
     }
 
     @Override
@@ -91,13 +85,22 @@ public class PackageUpdatedTask implements ModelUpdateTask {
         final Context context = taskController.getContext();
         final IconCache iconCache = taskController.getIconCache();
 
-        final HashSet<ComponentName> removedComponents = new HashSet<>();
+        if (mIsUpdate) {
+            // Mark disabled packages in the broadcast to be removed
+            LauncherApps launcherApps = context.getSystemService(LauncherApps.class);
+            List<String> disabledPackages = mPackages.stream()
+                    .filter(pkg -> !launcherApps.isPackageEnabled(pkg, mUser)).toList();
+            if (!disabledPackages.isEmpty()) {
+                disabledPackages.forEach(mPackages::remove);
+                PackageTaskFactory.INSTANCE.appsRemoved(mUser, new HashSet<>(disabledPackages))
+                        .execute(taskController, dataModel, appsList);
+            }
+        }
+
         final HashMap<String, List<LauncherActivityInfo>> activitiesLists = new HashMap<>();
         for (String packageName : mPackages) {
             iconCache.updateIconsForPkg(packageName, mUser);
-            activitiesLists.put(
-                    packageName,
-                    appsList.updatePackage(context, packageName, mUser, removedComponents));
+            activitiesLists.put(packageName, appsList.updatePackage(context, packageName, mUser));
         }
 
         taskController.bindApplicationsIfNeeded();
@@ -211,39 +214,6 @@ public class PackageUpdatedTask implements ModelUpdateTask {
                     ItemInfoMatcher.ofItemIds(removedShortcuts),
                     "removing shortcuts with invalid target components."
                             + " ids=" + removedShortcuts);
-        }
-
-        final HashSet<String> removedPackages = new HashSet<>();
-        if (mIsUpdate) {
-            // Mark disabled packages in the broadcast to be removed
-            final LauncherApps launcherApps = context.getSystemService(LauncherApps.class);
-            for (String packageName : mPackages) {
-                if (!launcherApps.isPackageEnabled(packageName, mUser)) {
-                    if (DEBUG) {
-                        Log.i(TAG, "OP_UPDATE:"
-                                + " package " + packageName + " is disabled, removing package.");
-                    }
-                    removedPackages.add(packageName);
-                }
-            }
-        }
-
-        if (!removedPackages.isEmpty() || !removedComponents.isEmpty()) {
-            Predicate<ItemInfo> removeMatch =
-                    ItemInfoMatcher.ofPackages(removedPackages, mUser)
-                            .or(ItemInfoMatcher.ofComponents(removedComponents, mUser))
-                            .and(ItemInfoMatcher.ofItemIds(forceKeepShortcuts).negate());
-            taskController.deleteAndBindComponentsRemoved(removeMatch,
-                    "removed because the corresponding package or component is removed. "
-                            + "mIsUpdate=" + mIsUpdate + " removedPackages="
-                            + removedPackages.stream().collect(Collectors.joining(",", "[", "]"))
-                            + " removedComponents=" + removedComponents.stream()
-                            .filter(Objects::nonNull).map(ComponentName::toShortString)
-                            .collect(Collectors.joining(",", "[", "]")));
-
-            // Remove any queued items from the install queue
-            ItemInstallQueue.INSTANCE.get(context)
-                    .removeFromInstallQueue(removedPackages, mUser);
         }
 
         if (!mIsUpdate) {
