@@ -16,18 +16,13 @@
 
 package com.android.quickstep;
 
-import static androidx.test.InstrumentationRegistry.getInstrumentation;
-
 import static com.android.quickstep.TaskbarModeSwitchRule.Mode.ALL;
 import static com.android.quickstep.TaskbarModeSwitchRule.Mode.PERSISTENT;
 import static com.android.quickstep.TaskbarModeSwitchRule.Mode.TRANSIENT;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.android.launcher3.tapl.LauncherInstrumentation;
-import com.android.launcher3.tapl.TestHelpers;
-import com.android.launcher3.util.TaskbarModeUtil;
 import com.android.launcher3.util.rule.FailureWatcher;
 import com.android.launcher3.util.ui.AbstractLauncherUiTest;
 
@@ -70,59 +65,60 @@ public class TaskbarModeSwitchRule implements TestRule {
 
     @Override
     public Statement apply(Statement base, Description description) {
-        if (TestHelpers.isInLauncherProcess()
-                && description.getAnnotation(TaskbarModeSwitch.class) != null) {
-            Mode mode = description.getAnnotation(TaskbarModeSwitch.class).mode();
-            return new Statement() {
-                @Override
-                public void evaluate() throws Throwable {
-                    mLauncher.enableDebugTracing();
-                    final boolean wasTransientTaskbarMode =
-                            isTaskbarTransientMode(getInstrumentation().getTargetContext());
-                    try {
-                        if (mode == TRANSIENT || mode == ALL) {
-                            evaluateWithTransientTaskbar();
-                        }
-                        if (mode == PERSISTENT || mode == ALL) {
-                            evaluateWithPersistentTaskbar();
-                        }
-                    } catch (Throwable e) {
-                        Log.e(TAG, "Error", e);
-                        throw e;
-                    } finally {
-                        Log.d(TAG, "In Finally block");
-                        setTaskbarMode(mLauncher, wasTransientTaskbarMode, description);
-                    }
-                }
-
-                private void evaluateWithPersistentTaskbar() throws Throwable {
-                    setTaskbarMode(mLauncher, false, description);
-                    base.evaluate();
-                }
-
-                private void evaluateWithTransientTaskbar() throws Throwable {
-                    setTaskbarMode(mLauncher, true, description);
-                    base.evaluate();
-                }
-            };
-        } else {
+        if (description.getAnnotation(TaskbarModeSwitch.class) == null) {
             return base;
         }
+        Mode mode = description.getAnnotation(TaskbarModeSwitch.class).mode();
+        return new Statement() {
+            @Override
+            public void evaluate() throws Throwable {
+                mLauncher.enableDebugTracing();
+
+                final boolean wasTransientTaskbarMode = mLauncher.isTransientTaskbar();
+                try {
+                    if (mode == TRANSIENT || mode == ALL) {
+                        evaluateWithTransientTaskbar();
+                    }
+                    if (mode == PERSISTENT || mode == ALL) {
+                        evaluateWithPersistentTaskbar();
+                    }
+                } catch (Throwable e) {
+                    Log.e(TAG, "Error", e);
+                    throw e;
+                } finally {
+                    Log.d(TAG, "In Finally block");
+                    setTaskbarMode(mLauncher, wasTransientTaskbarMode, description);
+                }
+            }
+
+            private void evaluateWithPersistentTaskbar() throws Throwable {
+                setTaskbarMode(mLauncher, false, description);
+                base.evaluate();
+            }
+
+            private void evaluateWithTransientTaskbar() throws Throwable {
+                setTaskbarMode(mLauncher, true, description);
+                base.evaluate();
+            }
+        };
     }
 
-    private static boolean isTaskbarTransientMode(Context context) {
-        return TaskbarModeUtil.INSTANCE.get(context).isTransient();
-    }
-
-    public static void setTaskbarMode(LauncherInstrumentation launcher,
-            boolean expectTransientTaskbar, Description description) throws Exception {
+    /**
+     * Forces the taskbar to behave in a different mode.
+     */
+    public static void setTaskbarMode(
+            LauncherInstrumentation launcher,
+            boolean expectTransientTaskbar,
+            Description description
+    ) {
         launcher.enableTransientTaskbar(expectTransientTaskbar);
         launcher.recreateTaskbar();
-
-        Context context = getInstrumentation().getTargetContext();
-        assertTrue(launcher, "Couldn't set taskbar=" + expectTransientTaskbar,
-                isTaskbarTransientMode(context) == expectTransientTaskbar, description);
-
+        assertTrue(
+                launcher,
+                "Couldn't set taskbar=" + expectTransientTaskbar,
+                launcher.isTransientTaskbar() == expectTransientTaskbar,
+                description
+        );
         AbstractLauncherUiTest.checkDetectedLeaks(launcher);
     }
 
