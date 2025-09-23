@@ -24,6 +24,7 @@ import com.android.launcher3.compose.widgetpicker.LauncherWidgetPickerModule
 import com.android.launcher3.concurrent.ExecutorsModule
 import com.android.launcher3.dagger.ApiWrapperModule
 import com.android.launcher3.dagger.AppModule
+import com.android.launcher3.dagger.DesktopModule
 import com.android.launcher3.dagger.HomeScreenFilesModule
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
@@ -87,6 +88,7 @@ class TaskbarBootAppContext(base: Context) : SandboxContext(base) {
             LauncherWidgetPickerModule::class,
             LauncherModelModule::class,
             HomeScreenFilesModule::class,
+            DesktopModule::class,
             SettingsModule::class,
             SystemDragModule::class,
         ]

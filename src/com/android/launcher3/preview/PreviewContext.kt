@@ -28,6 +28,7 @@ import com.android.launcher3.concurrent.ExecutorsModule
 import com.android.launcher3.dagger.ApiWrapperModule
 import com.android.launcher3.dagger.AppModule
 import com.android.launcher3.dagger.ApplicationContext
+import com.android.launcher3.dagger.DesktopModule
 import com.android.launcher3.dagger.HomeScreenFilesModule
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
@@ -193,6 +194,7 @@ constructor(
                 LauncherModelModule::class,
                 PreviewModule::class,
                 HomeScreenFilesModule::class,
+                DesktopModule::class,
                 SettingsModule::class,
                 SystemDragModule::class,
             ]

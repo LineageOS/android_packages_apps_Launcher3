@@ -21,7 +21,6 @@ import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.view.Display.DEFAULT_DISPLAY
@@ -53,6 +52,7 @@ import com.android.window.flags.Flags.FLAG_ENABLE_DREAM_ACTIVITY_WINDOWING_EXCLU
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource
 import com.google.common.truth.Truth.assertThat
+import java.util.ArrayList
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import org.junit.After
@@ -193,10 +193,8 @@ class DesktopSystemShortcutTest {
     @Test
     @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
     fun createDesktopTaskShortcutFactory_defaultHomeTask() {
-        val packageManager: PackageManager = mock()
-        whenever(context.packageManager).thenReturn(packageManager)
-        val homeActivities = ComponentName("defaultHomePackage", /* class */ "")
-        whenever(packageManager.getHomeActivities(any())).thenReturn(homeActivities)
+        val homeActivity = context.packageManager.getHomeActivities(ArrayList())
+        val homeActivities = ComponentName(homeActivity?.packageName.toString(), /* class */ "")
         val taskKey =
             TaskKey(
                 /* id */ 1,

@@ -21,7 +21,6 @@ import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.view.Display.DEFAULT_DISPLAY
@@ -45,12 +44,14 @@ import com.android.quickstep.views.LauncherRecentsView
 import com.android.quickstep.views.RecentsViewContainer
 import com.android.quickstep.views.TaskContainer
 import com.android.quickstep.views.TaskView
+import com.android.quickstep.views.TaskViewType
 import com.android.systemui.shared.recents.model.Task
 import com.android.systemui.shared.recents.model.Task.TaskKey
 import com.android.window.flags.Flags
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource
 import com.google.common.truth.Truth.assertThat
+import java.util.ArrayList
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -74,12 +75,12 @@ class ExternalDisplaySystemShortcutTest {
     private val statsLogManager: StatsLogManager = mock()
     private val statsLogger: StatsLogManager.StatsLogger = mock()
     private val recentsView: LauncherRecentsView = mock()
-    private val taskView: TaskView = mock()
     private val abstractFloatingViewHelper: AbstractFloatingViewHelper = mock()
     private val overlayFactory: TaskOverlayFactory = mock()
     private val factory: TaskShortcutFactory =
         ExternalDisplaySystemShortcut.createFactory(abstractFloatingViewHelper)
     private val context: Context = spy(InstrumentationRegistry.getInstrumentation().targetContext)
+    private val taskView: TaskView = createTaskViewMock()
 
     private lateinit var mockitoSession: StaticMockitoSession
 
@@ -202,10 +203,8 @@ class ExternalDisplaySystemShortcutTest {
         Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY,
     )
     fun createExternalDisplayTaskShortcut_defaultHomeTask() {
-        val packageManager: PackageManager = mock()
-        val homeActivities = ComponentName("defaultHomePackage", /* class */ "")
-        whenever(context.packageManager).thenReturn(packageManager)
-        whenever(packageManager.getHomeActivities(any())).thenReturn(homeActivities)
+        val homeActivity = context.packageManager.getHomeActivities(ArrayList())
+        val homeActivities = ComponentName(homeActivity?.packageName.toString(), /* class */ "")
         val taskKey =
             TaskKey(
                 /* id */ 1,
@@ -327,4 +326,11 @@ class ExternalDisplaySystemShortcutTest {
             showWindowsView = null,
             overlayFactory,
         )
+
+    private fun createTaskViewMock(): TaskView {
+        val taskView: TaskView = mock()
+        whenever(taskView.type).thenReturn(TaskViewType.SINGLE)
+        whenever(taskView.context).thenReturn(context)
+        return taskView
+    }
 }
