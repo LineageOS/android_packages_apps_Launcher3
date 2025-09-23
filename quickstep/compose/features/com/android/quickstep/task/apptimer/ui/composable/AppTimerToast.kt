@@ -17,9 +17,6 @@
 package com.android.quickstep.task.apptimer.ui.composable
 
 import android.app.ActivityOptions
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
@@ -30,7 +27,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Placeable
@@ -52,16 +48,10 @@ fun AppTimerToast(
     viewModel: ViewModel<TaskAppTimerUiState>,
     modifier: Modifier = Modifier,
 ) {
-    AnimatedVisibility(
-        visible = appTimerUiState is TaskAppTimerUiState.Timer,
-        enter = slideInVertically { it },
-        exit = slideOutVertically { it },
-    ) {
-        when (appTimerUiState) {
-            is TaskAppTimerUiState.Timer -> ActiveTimerToast(viewModel, appTimerUiState, modifier)
-            else -> {
-                /* Do nothing */
-            }
+    when (appTimerUiState) {
+        is TaskAppTimerUiState.Timer -> ActiveTimerToast(viewModel, appTimerUiState, modifier)
+        else -> {
+            /* Do nothing */
         }
     }
 }
