@@ -15,6 +15,7 @@
  */
 package com.android.launcher3.hybridhotseat;
 
+import static com.android.launcher3.Flags.migrateBrowserIconOnSetup;
 import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
 import static com.android.launcher3.LauncherState.NORMAL;
 import static com.android.launcher3.anim.AnimatorListeners.forSuccessCallback;
@@ -115,6 +116,7 @@ public class HotseatPredictionController implements
      * Shows appropriate hotseat education based on prediction enabled and migration states.
      */
     public void showEdu() {
+        if (!migrateBrowserIconOnSetup()) return;
         mLauncher.getStateManager().goToState(NORMAL, true, forSuccessCallback(() -> {
             HotseatEduController eduController = new HotseatEduController(mLauncher);
             eduController.setPredictedApps(mHotseatOrganizer.getPredictedItems().stream()
@@ -136,7 +138,7 @@ public class HotseatPredictionController implements
      */
     public void setPredictedItems(PredictedContainerInfo items) {
         mHotseatOrganizer.setPredictedItems(items.getContents());
-        if (items.getContents().isEmpty()) {
+        if (!migrateBrowserIconOnSetup() && items.getContents().isEmpty()) {
             HotseatRestoreHelper.restoreBackup(mLauncher);
         }
     }
