@@ -586,18 +586,6 @@ constructor(
  */
 private val DARK_TO_LIGHT_COLORS =
     mapOf(
-        // TODO(b/444692922) remove these mappings after update of animation files
-        ".blue100" to R.color.lottie_blue400,
-        ".blue400" to R.color.lottie_blue600,
-        ".green100" to R.color.lottie_green400,
-        ".green400" to R.color.lottie_green600,
-        ".grey300" to R.color.lottie_grey600,
-        ".grey400" to R.color.lottie_grey700,
-        ".grey800" to R.color.lottie_grey200,
-        ".red400" to R.color.lottie_red600,
-        ".yellow100" to R.color.lottie_yellow400,
-        ".yellow400" to R.color.lottie_yellow600,
-        // end of TODO
         ".primary" to R.color.materialColorPrimary,
         ".secondary" to R.color.materialColorSecondary,
         ".onSurface" to R.color.materialColorOnSurface,
