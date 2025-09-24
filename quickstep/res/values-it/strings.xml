@@ -118,8 +118,7 @@
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Ruota lo schermo"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Animazione che mostra come la barra delle app appaia dalla parte inferiore dello schermo e si nasconda automaticamente quando non in uso"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Animazione che mostra come fissare la barra delle app utilizzando un\'opzione di attivazione/disattivazione, in modo che rimanga visibile in modo permanente nella parte inferiore dello schermo"</string>
-    <!-- no translation found for taskbar_edu_bubbles_animation_description (421866726938396813) -->
-    <skip />
+    <string name="taskbar_edu_bubbles_animation_description" msgid="421866726938396813">"Animazione che mostra come creare una bolla dalla barra delle app utilizzando un gesto di trascinamento"</string>
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"Animazione che mostra come creare uno schermo diviso trascinando un\'app dalla barra delle app sopra un\'app aperta"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"Animazione che mostra come accedere alle app suggerite sul dispositivo"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"Animazione che mostra come cercare un elemento sullo schermo toccando e tenendo premuto il tasto azione e selezionando l\'area in cui si trova l\'elemento"</string>
@@ -133,8 +132,7 @@
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Fai di più con la barra delle app"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"Mostra sempre la barra delle app"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"Per mostrare sempre la barra delle app in basso, tocca e tieni premuto il divisore"</string>
-    <!-- no translation found for taskbar_edu_bubbles_standalone (4182824636656528043) -->
-    <skip />
+    <string name="taskbar_edu_bubbles_standalone" msgid="4182824636656528043">"Trascina un\'app nell\'angolo per farla fluttuare"</string>
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"Tocca e tieni premuto il tasto azione per cercare ciò che vedi sullo schermo"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Il prodotto usa la parte selezionata dello schermo per cercare. Si applicano le <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>Norme sulla privacy<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> e i <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>Termini di servizio<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> di Google."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Chiudi"</string>
@@ -151,7 +149,10 @@
     <string name="always_show_taskbar" msgid="3608801276107751229">"Mostra sempre barra app"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"Cambia modalità di navigazione"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Divisore barra delle app"</string>
-    <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"Altre app recenti"</string>
+    <!-- no translation found for taskbar_recents_overflow_a11y_title (8005941062446304304) -->
+    <skip />
+    <!-- no translation found for taskbar_pinned_overflow_a11y_title (3427283798522326470) -->
+    <skip />
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Sposta in alto/a sinistra"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Sposta in basso/a destra"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"Apri l\'app come fumetto"</string>
