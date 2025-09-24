@@ -58,12 +58,10 @@ class RecentsViewInteractor(private val recentsView: RecentsView<*, *>) {
         CompletableFuture.supplyAsync({ recentsView.launchRunningDesktopTaskView() }, mainExecutor)
             .thenApplyAsync(
                 { runnableList ->
-                    {
-                        if (runnableList != null) {
-                            runnableList.add { callbackExecutor.execute(taskToRun) }
-                        } else {
-                            callbackExecutor.execute(taskToRun)
-                        }
+                    if (runnableList != null) {
+                        runnableList.add { callbackExecutor.execute(taskToRun) }
+                    } else {
+                        callbackExecutor.execute(taskToRun)
                     }
                 },
                 mainExecutor,
