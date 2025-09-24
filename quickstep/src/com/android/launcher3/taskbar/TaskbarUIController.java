@@ -38,6 +38,7 @@ import com.android.launcher3.popup.SystemShortcut;
 import com.android.launcher3.taskbar.bubbles.BubbleBarController;
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator;
 import com.android.launcher3.taskbar.customization.TaskbarSpecsEvaluator;
+import com.android.launcher3.util.AsyncView;
 import com.android.launcher3.util.SplitConfigurationOptions;
 import com.android.launcher3.util.ThreadedAnimator;
 import com.android.quickstep.GestureState;
@@ -326,13 +327,14 @@ public class TaskbarUIController implements BubbleBarController.BubbleBarLocatio
                 foundTasks -> {
                     @Nullable Task foundTask = foundTasks[0];
                     if (foundTask != null) {
-                        TaskView foundTaskView = recents.getTaskViewByTaskId(foundTask.key.id);
+                        AsyncView<TaskView> asyncTaskView =
+                                recents.getTaskViewByTaskId(foundTask.key.id);
                         // TODO (b/266482558): This additional null check is needed because there
                         // are times when our Tasks list doesn't match our TaskViews list (like when
                         // a tile is removed during {@link RecentsView#applyLoadPlan()}. A clearer
                         // state management system is in the works so that we don't need to rely on
                         // null checks as much. See comments at ag/21152798.
-                        if (foundTaskView != null) {
+                        asyncTaskView.postCallback((foundTaskView) -> {
                             // There is already a running app of this type, use that as second app.
                             // Get index of task (0 or 1), in case it's a GroupedTaskView
                             TaskContainer taskContainer =
@@ -346,8 +348,7 @@ public class TaskbarUIController implements BubbleBarController.BubbleBarLocatio
                                     null /* intent */,
                                     null /* user */,
                                     info);
-                            return;
-                        }
+                        });
                     }
 
                     // No running app of that type, create a new instance as second app.

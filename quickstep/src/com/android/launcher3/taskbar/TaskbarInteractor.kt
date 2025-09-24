@@ -212,7 +212,7 @@ class TaskbarInteractor(private val taskbarUIController: TaskbarUIController) {
         }
 
     @AnyThread
-    fun findMatchingAsyncView(v: View): AsyncView {
+    fun findMatchingAsyncView(v: View): AsyncView<View> {
         return AsyncView(if (enableTaskbarUiThread()) TASKBAR_UI_THREAD else MAIN_EXECUTOR) {
             taskbarUIController.findMatchingView(v)
         }
