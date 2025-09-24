@@ -75,6 +75,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     private val launcher: Launcher = Launcher.getLauncher(context)
     private var stateAnnouncer: DragViewStateAnnouncer?
     private val firstFrameAnimatorHelper: FirstFrameAnimatorHelper
+    private val popupTouchHandler = PopupTouchHandler()
     private var systemGestureExclusionRectsHolder: List<Rect>
 
     private lateinit var dragHandles: DragHandles
@@ -771,14 +772,13 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
             if (shouldIgnoreTouch()) {
                 return false
             }
-            // We want to close any open popup and close the resize frame if we're not dragging and
-            // the touch event is outside this frame. We want to make sure we consume the event.
+
+            // We close the app widget resize frame if touch is not on it.
+            close(/* animate= */ false)
+
             val popup = getOpen(launcher)
-            if (popup != null) {
-                popup.close(true)
-                close(/* animate= */ false)
-                return true
-            }
+            // If the touch is on the popup menu, we want to make sure we consume the event.
+            return popupTouchHandler.handleTouchEvent(popup, ev)
         }
         close(/* animate= */ false)
         return false
