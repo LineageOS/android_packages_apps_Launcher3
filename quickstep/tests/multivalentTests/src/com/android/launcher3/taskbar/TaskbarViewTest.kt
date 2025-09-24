@@ -47,7 +47,6 @@ import com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_OVERFLOW
 import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -415,7 +414,6 @@ class TaskbarViewTest {
     }
 
     @Test
-    @Ignore("b/435259563")
     fun testUpdateItems_desktopMode_hotseatItem_noDividerAfterDesktopModeChange() {
         whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(false)
         runOnMainSync { taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList()) }
