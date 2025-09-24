@@ -17,6 +17,7 @@ package com.android.quickstep.util;
 
 import static com.android.launcher3.AbstractFloatingView.TYPE_ALL_APPS_EDU;
 import static com.android.launcher3.AbstractFloatingView.getOpenView;
+import static com.android.launcher3.Flags.migrateBrowserIconOnSetup;
 import static com.android.launcher3.LauncherState.ALL_APPS;
 import static com.android.launcher3.LauncherState.HINT_STATE;
 import static com.android.launcher3.LauncherState.NORMAL;
@@ -68,7 +69,7 @@ public class QuickstepOnboardingPrefs {
             });
         }
 
-        if (!Utilities.isRunningInTestHarness()
+        if (!migrateBrowserIconOnSetup() && !Utilities.isRunningInTestHarness()
                 && !HOTSEAT_DISCOVERY_TIP_COUNT.hasReachedMax(launcher)) {
             stateManager.addStateListener(new StateListener<LauncherState>() {
                 boolean mFromAllApps = false;
