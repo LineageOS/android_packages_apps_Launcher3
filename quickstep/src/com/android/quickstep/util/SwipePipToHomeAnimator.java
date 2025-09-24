@@ -64,6 +64,7 @@ public class SwipePipToHomeAnimator extends RectFSpringAnim {
     private final Rect mCurrentBounds = new Rect();
     private final Rect mDestinationBounds = new Rect();
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
+    private final boolean mFadeOut;
 
     /**
      * For calculating transform in
@@ -123,7 +124,8 @@ public class SwipePipToHomeAnimator extends RectFSpringAnim {
             @RecentsOrientedState.SurfaceRotation int fromRotation,
             @NonNull Rect destinationBoundsTransformed,
             @NonNull View view,
-            PipResources pipRes) {
+            PipResources pipRes,
+            boolean fadeOut) {
         super(new DefaultSpringConfig(context, null, startBounds,
                 new RectF(destinationBoundsTransformed)));
         mTaskId = taskId;
@@ -136,6 +138,7 @@ public class SwipePipToHomeAnimator extends RectFSpringAnim {
         mFromRotation = fromRotation;
         mDestinationBoundsTransformed.set(destinationBoundsTransformed);
         mSurfaceTransactionHelper = new PipSurfaceTransactionHelper(pipRes);
+        mFadeOut = fadeOut;
 
         final Rational aspectRatio = new Rational(
                 destinationBounds.width(), destinationBounds.height());
@@ -252,6 +255,9 @@ public class SwipePipToHomeAnimator extends RectFSpringAnim {
         if (mPipContentOverlay != null) {
             mPipContentOverlay.onAnimationUpdate(tx, mCurrentBounds, progress);
         }
+        if (mFadeOut) {
+            tx.setAlpha(mLeash, 1 - progress);
+        }
         return onAnimationScaleAndCrop(progress, tx, mCurrentBounds);
     }
 
@@ -357,6 +363,7 @@ public class SwipePipToHomeAnimator extends RectFSpringAnim {
         private Rect mDestinationBounds;
         private PipResources mPipRes;
         private View mAttachedView;
+        private boolean mFadeOut = false;
         private @RecentsOrientedState.SurfaceRotation int mFromRotation = Surface.ROTATION_0;
         private final Rect mDestinationBoundsTransformed = new Rect();
 
@@ -451,6 +458,11 @@ public class SwipePipToHomeAnimator extends RectFSpringAnim {
             return this;
         }
 
+        public Builder setFadeOut(boolean fadeOut) {
+            mFadeOut = fadeOut;
+            return this;
+        }
+
         public SwipePipToHomeAnimator build() {
             if (mDestinationBoundsTransformed.isEmpty()) {
                 mDestinationBoundsTransformed.set(mDestinationBounds);
@@ -471,7 +483,7 @@ public class SwipePipToHomeAnimator extends RectFSpringAnim {
                     mLeash, mSourceRectHint, mAppBounds,
                     mHomeToWindowPositionMap, mStartBounds, mDestinationBounds,
                     mFromRotation, mDestinationBoundsTransformed,
-                    mAttachedView, mPipRes);
+                    mAttachedView, mPipRes, mFadeOut);
         }
     }
 
