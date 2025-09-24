@@ -464,6 +464,8 @@
     <dimen name="taskbar_minimized_app_indicator_width">0dp</dimen>
     <dimen name="taskbar_line_indicator_width_spring">0dp</dimen>
     <dimen name="taskbar_app_translate_y_spring">0dp</dimen>
+    <dimen name="persistent_taskbar_icon_size">0dp</dimen>
+    <dimen name="transient_taskbar_icon_size">0dp</dimen>
 
     <!-- Transient taskbar (placeholders to compile in Launcher3 without Quickstep) -->
     <dimen name="transient_taskbar_padding">0dp</dimen>

@@ -28,6 +28,7 @@ import android.window.RemoteTransition
 import androidx.test.core.app.ApplicationProvider
 import com.android.launcher3.BubbleTextView
 import com.android.launcher3.Flags.FLAG_ENABLE_MULTI_INSTANCE_MENU_TASKBAR
+import com.android.launcher3.Flags.FLAG_ENABLE_TASKBAR_ICON_CONTAINER
 import com.android.launcher3.R
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
@@ -220,6 +221,8 @@ class TaskbarOverflowTest {
 
     @Test
     @TaskbarMode(PINNED)
+    @DisableFlags(FLAG_ENABLE_TASKBAR_ICON_CONTAINER)
+    // TODO: b/448650325 - update/remove test to adapt to overflow icon in pinned apps section.
     fun testOverflownTaskbarWithNoSpaceForRecentApps_pinned() {
         val initialIconCount = currentNumberOfTaskbarIcons.coerceAtLeast(2)
 
@@ -245,6 +248,8 @@ class TaskbarOverflowTest {
 
     @Test
     @TaskbarMode(PINNED)
+    @DisableFlags(FLAG_ENABLE_TASKBAR_ICON_CONTAINER)
+    // TODO: b/448650325 - update/remove test to adapt to overflow icon in pinned apps section.
     fun testOverflownTaskbarWithNoSpaceForRecentApps_singleRecent_pinned() {
         val initialIconCount = currentNumberOfTaskbarIcons.coerceAtLeast(2)
 

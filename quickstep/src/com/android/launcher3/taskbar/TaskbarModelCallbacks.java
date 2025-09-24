@@ -19,14 +19,17 @@ import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_ALL_APP
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION;
 import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
+import static com.android.launcher3.taskbar.customization.TaskbarIconsContainer.TaskbarIconContainerLayoutParams;
 
 import android.util.SparseArray;
 import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.AnyThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.launcher3.Flags;
 import com.android.launcher3.LauncherSettings.Favorites;
 import com.android.launcher3.celllayout.CellInfo;
 import com.android.launcher3.model.BgDataModel;
@@ -147,7 +150,16 @@ public class TaskbarModelCallbacks implements
         // This method is passed as ItemOperator to mapOverItems(), which is already run on taskbar
         // ui thread.
         Preconditions.assertTaskbarUiThread();
-        return view.getLayoutParams() instanceof TaskbarLayoutParams tlp ? tlp.bindInfo : null;
+        ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+        if (Flags.enableTaskbarIconContainer()) {
+            return layoutParams instanceof TaskbarIconContainerLayoutParams tlp
+                    ? tlp.getBindInfo()
+                    : null;
+
+        }
+        return layoutParams instanceof TaskbarLayoutParams tlp
+                ? tlp.bindInfo
+                : null;
     }
 
     @AnyThread

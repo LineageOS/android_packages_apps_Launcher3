@@ -18,9 +18,12 @@ package com.android.launcher3.taskbar
 
 import android.animation.AnimatorTestRule
 import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.FlagsParameterization
+import android.platform.test.flag.junit.FlagsParameterization.allCombinationsOf
 import android.platform.test.flag.junit.SetFlagsRule
 import android.view.View
 import androidx.core.view.children
+import com.android.launcher3.Flags.FLAG_ENABLE_TASKBAR_ICON_CONTAINER
 import com.android.launcher3.R
 import com.android.launcher3.apppairs.AppPairIcon
 import com.android.launcher3.statehandlers.DesktopVisibilityController
@@ -40,7 +43,7 @@ import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.ForceRtl
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
-import com.android.launcher3.util.LauncherMultivalentJUnit
+import com.android.launcher3.util.LauncherMultivalentJUnit.Companion.isRunningInRobolectric
 import com.android.launcher3.util.LauncherMultivalentJUnit.EmulatedDevices
 import com.android.window.flags.Flags.FLAG_ENABLE_OVERFLOW_BUTTON_FOR_TASKBAR_PINNED_ITEMS
 import com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_OVERFLOW
@@ -51,11 +54,28 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.whenever
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
-@RunWith(LauncherMultivalentJUnit::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 @EmulatedDevices(["pixelFoldable2023", "pixelTablet2023"])
 @EnableFlags(FLAG_ENABLE_TASKBAR_OVERFLOW)
-class TaskbarViewTest {
+class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0},{1}")
+        fun getParams(): List<Array<Any>> {
+            val devices =
+                if (isRunningInRobolectric) {
+                    listOf("pixelFoldable2023", "pixelTablet2023")
+                } else {
+                    listOf("onDevice") // Unused.
+                }
+            val flags = allCombinationsOf(FLAG_ENABLE_TASKBAR_ICON_CONTAINER)
+            return devices.flatMap { d -> flags.map { f -> arrayOf(d, f) } } // Cartesian product.
+        }
+    }
 
     @get:Rule(order = 0) val animatorTestRule = AnimatorTestRule(this)
     @get:Rule(order = 1) val setFlagsRule = SetFlagsRule()
