@@ -382,7 +382,7 @@ public class LauncherBackAnimationController {
         mScrimLayer = new SurfaceControl.Builder()
                 .setName("Back to launcher background scrim")
                 .setCallsite("LauncherBackAnimationController")
-                .setColorLayer()
+                .setEffectLayer()
                 .setParent(parent)
                 .setOpaque(false)
                 .setHidden(false)
