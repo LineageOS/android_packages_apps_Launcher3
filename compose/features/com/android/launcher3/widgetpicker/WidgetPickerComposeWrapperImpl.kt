@@ -42,6 +42,7 @@ import com.android.launcher3.widgetpicker.listeners.WidgetPickerDragItemListener
 import com.android.launcher3.widgetpicker.logging.LauncherWidgetPickerCuiReporter
 import com.android.launcher3.widgetpicker.shared.model.CloseBehavior
 import com.android.launcher3.widgetpicker.shared.model.HostConstraint
+import com.android.launcher3.widgetpicker.shared.model.SheetStyle
 import com.android.launcher3.widgetpicker.shared.model.WidgetHostInfo
 import com.android.launcher3.widgetpicker.shared.model.isAppWidget
 import com.android.launcher3.widgetpicker.theme.LauncherWidgetPickerTheme
@@ -124,6 +125,10 @@ constructor(
                         closeBehavior =
                             if (widgetPickerConfig.isDesktopFormFactor) CloseBehavior.CLOSE_BUTTON
                             else CloseBehavior.DRAG_HANDLE,
+                        sheetStyle =
+                            if (widgetPickerConfig.enableCursorDrivenWorkflows)
+                                SheetStyle.FLOATING_SHEET
+                            else SheetStyle.BOTTOM_SHEET,
                     ),
                 backgroundContext = backgroundContext,
             )

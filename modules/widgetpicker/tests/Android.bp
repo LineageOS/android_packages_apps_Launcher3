@@ -113,6 +113,7 @@ filegroup {
         "multivalentTests/src/com/android/launcher3/widgetpicker/ui/components/WidgetInteractionsTest.kt",
         "multivalentTests/src/com/android/launcher3/widgetpicker/ui/components/WidgetsListHeaderTest.kt",
         "multivalentTests/src/com/android/launcher3/widgetpicker/ui/components/bottomsheet/TitledBottomSheetTest.kt",
+        "multivalentTests/src/com/android/launcher3/widgetpicker/ui/components/floatingsheet/TitledFloatingSheetTest.kt",
     ],
 }
 

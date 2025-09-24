@@ -40,6 +40,7 @@ data class WidgetHostInfo(
     val showDragShadow: Boolean = true,
     val enableSwipeUpToDismiss: Boolean = false,
     val closeBehavior: CloseBehavior = CloseBehavior.DRAG_HANDLE,
+    val sheetStyle: SheetStyle = SheetStyle.BOTTOM_SHEET,
 )
 
 /** Various constraints for the widget host. */
@@ -81,4 +82,12 @@ enum class CloseBehavior {
 
     /** Adds the close button on the top of the sheet that users can click on. */
     CLOSE_BUTTON,
+}
+
+enum class SheetStyle {
+    /** The sheet style that is anchored to the bottom of the screen. */
+    BOTTOM_SHEET,
+
+    /** The sheet style that appears detached from the screen edges. */
+    FLOATING_SHEET,
 }

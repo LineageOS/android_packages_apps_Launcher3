@@ -22,6 +22,7 @@ import androidx.compose.runtime.setValue
 import com.android.launcher3.widgetpicker.WidgetPickerHostInfo
 import com.android.launcher3.widgetpicker.WidgetPickerSingleton
 import com.android.launcher3.widgetpicker.shared.model.CloseBehavior
+import com.android.launcher3.widgetpicker.shared.model.SheetStyle
 import com.android.launcher3.widgetpicker.shared.model.WidgetHostInfo
 import com.android.launcher3.widgetpicker.ui.ViewModel
 import com.android.launcher3.widgetpicker.ui.fullcatalog.screens.landing.LandingScreenViewModel
@@ -51,6 +52,7 @@ constructor(
     val showDragShadow: Boolean = hostInfo.showDragShadow
     val enableSwipeUpToClose: Boolean = hostInfo.enableSwipeUpToDismiss
     val closeBehavior: CloseBehavior = hostInfo.closeBehavior
+    val sheetStyle: SheetStyle = hostInfo.sheetStyle
     var activeScreen by mutableStateOf(Screen.LANDING)
         private set
 
