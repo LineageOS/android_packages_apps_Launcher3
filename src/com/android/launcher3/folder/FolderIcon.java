@@ -53,6 +53,7 @@ import com.android.launcher3.CellLayout;
 import com.android.launcher3.CheckLongPressHelper;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.DropTarget.DragObject;
+import com.android.launcher3.Flags;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.OnAlarmListener;
@@ -504,6 +505,10 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
     }
 
     public ClippedFolderIconLayoutRule getLayoutRule() {
+        if (Flags.enableExpressiveFolderExpansion() && mPreviewLayoutRule.getIconSize() == 0) {
+            // Make sure the layout rule is initialized
+            mPreviewItemManager.recomputePreviewDrawingParams();
+        }
         return mPreviewLayoutRule;
     }
 
