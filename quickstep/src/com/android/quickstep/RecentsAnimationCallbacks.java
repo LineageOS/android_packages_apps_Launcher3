@@ -20,12 +20,14 @@ import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 
+import static com.android.launcher3.Flags.enableTaskbarUiThread;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.wm.shell.shared.TransitionUtil.TYPE_SPLIT_SCREEN_DIM_LAYER;
 
 import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.util.ArraySet;
 import android.view.RemoteAnimationTarget;
 import android.window.TransitionInfo;
 
@@ -35,6 +37,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.UiThread;
 
 import com.android.launcher3.Utilities;
+import com.android.launcher3.util.Preconditions;
 import com.android.quickstep.util.ActiveGestureLog;
 import com.android.quickstep.util.ActiveGestureProtoLogProxy;
 import com.android.quickstep.views.RecentsViewContainer;
@@ -55,7 +58,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class RecentsAnimationCallbacks implements
         com.android.systemui.shared.system.RecentsAnimationListener {
-    private final Set<RecentsAnimationListener> mListeners = ConcurrentHashMap.newKeySet();
+    private final Set<RecentsAnimationListener> mListeners = enableTaskbarUiThread()
+            ? ConcurrentHashMap.newKeySet() : new ArraySet<>();
     private final boolean mIsContainerRecentsWindowManager;
 
     // TODO(141886704): Remove these references when they are no longer needed
@@ -69,16 +73,23 @@ public class RecentsAnimationCallbacks implements
 
     @AnyThread
     public void addListener(RecentsAnimationListener listener) {
+        if (!enableTaskbarUiThread()) {
+            Preconditions.assertUIThread();
+        }
         mListeners.add(listener);
     }
 
     @AnyThread
     public void removeListener(RecentsAnimationListener listener) {
+        if (!enableTaskbarUiThread()) {
+            Preconditions.assertUIThread();
+        }
         mListeners.remove(listener);
     }
 
     @UiThread
     public void removeAllListeners() {
+        Preconditions.assertUIThread();
         mListeners.clear();
     }
 
@@ -133,7 +144,7 @@ public class RecentsAnimationCallbacks implements
 
             Utilities.postAsyncCallback(MAIN_EXECUTOR.getHandler(), () -> {
                 ActiveGestureProtoLogProxy.logOnRecentsAnimationStart(targets.apps.length);
-                for (RecentsAnimationListener listener : mListeners) {
+                for (RecentsAnimationListener listener : getListeners()) {
                     listener.onRecentsAnimationStart(mController, targets, transitionInfo);
                 }
             });
@@ -145,7 +156,7 @@ public class RecentsAnimationCallbacks implements
     public final void onAnimationCanceled(HashMap<Integer, ThumbnailData> thumbnailDatas) {
         Utilities.postAsyncCallback(MAIN_EXECUTOR.getHandler(), () -> {
             ActiveGestureProtoLogProxy.logRecentsAnimationCallbacksOnAnimationCancelled();
-            for (RecentsAnimationListener listener : mListeners) {
+            for (RecentsAnimationListener listener : getListeners()) {
                 listener.onRecentsAnimationCanceled(thumbnailDatas);
             }
         });
@@ -157,7 +168,7 @@ public class RecentsAnimationCallbacks implements
             RemoteAnimationTarget[] apps, @Nullable TransitionInfo transitionInfo) {
         Utilities.postAsyncCallback(MAIN_EXECUTOR.getHandler(), () -> {
             ActiveGestureProtoLogProxy.logRecentsAnimationCallbacksOnTasksAppeared();
-            for (RecentsAnimationListener listener : mListeners) {
+            for (RecentsAnimationListener listener : getListeners()) {
                 listener.onTasksAppeared(apps, transitionInfo);
             }
         });
@@ -166,7 +177,7 @@ public class RecentsAnimationCallbacks implements
     private void onAnimationFinished(RecentsAnimationController controller) {
         Utilities.postAsyncCallback(MAIN_EXECUTOR.getHandler(), () -> {
             ActiveGestureProtoLogProxy.logAbsSwipeUpHandlerOnRecentsAnimationFinished();
-            for (RecentsAnimationListener listener : mListeners) {
+            for (RecentsAnimationListener listener : getListeners()) {
                 listener.onRecentsAnimationFinished(controller);
             }
         });
@@ -189,6 +200,10 @@ public class RecentsAnimationCallbacks implements
         pw.println(prefix + "RecentsAnimationCallbacks:");
 
         pw.println(prefix + "\tmCancelled=" + mCancelled);
+    }
+
+    private Iterable<RecentsAnimationListener> getListeners() {
+        return enableTaskbarUiThread() ? mListeners : new ArrayList<>(mListeners);
     }
 
     /**
