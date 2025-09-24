@@ -38,6 +38,7 @@ import android.util.ArrayMap
 import android.view.Display
 import androidx.test.core.app.ApplicationProvider
 import com.android.launcher3.dagger.LauncherBaseAppComponent.Builder
+import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import java.io.File
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
@@ -126,6 +127,8 @@ class SandboxApplication private constructor(private val base: SandboxApplicatio
         }
         super.cleanUpObjects()
         modelRelease.countDown()
+        // Wait for all cleanup tasks to complete
+        TestUtil.runOnExecutorSync(MAIN_EXECUTOR) {}
     }
 
     private fun deleteContents(dir: File): Boolean {
