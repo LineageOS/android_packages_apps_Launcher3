@@ -17,6 +17,7 @@
 package com.android.launcher3;
 
 import static com.android.launcher3.ButtonDropTarget.TOOLTIP_DEFAULT;
+import static com.android.launcher3.Utilities.shouldEnableCursorDrivenWorkflows;
 import static com.android.launcher3.anim.AlphaUpdateListener.updateVisibility;
 
 import android.animation.TimeInterpolator;
@@ -132,6 +133,11 @@ public class DropTargetBar extends FrameLayout
     }
 
     public void setup(DragController dragController) {
+        if (shouldEnableCursorDrivenWorkflows(mLauncher)) {
+            setVisibility(View.GONE);
+            return;
+        }
+
         dragController.addDragListener(this);
         for (int i = 0; i < mDropTargets.length; i++) {
             dragController.addDragListener(mDropTargets[i]);

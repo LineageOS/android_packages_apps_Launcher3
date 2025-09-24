@@ -237,14 +237,6 @@ public class StateManager<S extends BaseState<S>, T extends StatefulContainer<S>
         }
     }
 
-    /**
-     * Reapplies the animation for the current state.
-     */
-    public void reapplyAnimation() {
-        AnimatorSet animation = createAnimationToNewWorkspaceInternal(mState).buildAnim();
-        mUiHandler.post(new StartAnimRunnable(animation));
-    }
-
     /** Handles back started in predictive back gesture by passing it to state handlers. */
     public void onBackStarted(S toState) {
         for (StateHandler<S> handler : getStateHandlers()) {

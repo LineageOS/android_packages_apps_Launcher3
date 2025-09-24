@@ -28,8 +28,10 @@ import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FILE;
 import static com.android.launcher3.LauncherState.ALL_APPS;
+import static com.android.launcher3.LauncherState.DESKTOP_DRAG_MODE;
 import static com.android.launcher3.LauncherState.EDIT_MODE;
 import static com.android.launcher3.LauncherState.FLAG_MULTI_PAGE;
+import static com.android.launcher3.LauncherState.FLAG_WORKSPACE_ICONS_BEING_DRAGGED;
 import static com.android.launcher3.LauncherState.FLAG_WORKSPACE_ICONS_CAN_BE_DRAGGED;
 import static com.android.launcher3.LauncherState.FLAG_WORKSPACE_INACCESSIBLE;
 import static com.android.launcher3.LauncherState.HINT_STATE;
@@ -315,8 +317,6 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
     private boolean mForceDrawAdjacentPages = false;
 
-    private boolean mZoomDuringSpringLoaded = true;
-
     // Handles workspace state transitions
     private final WorkspaceStateTransitionAnimation mStateTransitionAnimation;
 
@@ -549,8 +549,8 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             mAccessibilityDragListener.onDragStart(dragObject, options);
         }
         if (!mLauncher.isInState(EDIT_MODE)) {
-            mZoomDuringSpringLoaded = !shouldEnableCursorDrivenWorkflows(getContext());
-            mLauncher.getStateManager().goToState(SPRING_LOADED);
+            mLauncher.getStateManager().goToState(shouldEnableCursorDrivenWorkflows(getContext())
+                    ? DESKTOP_DRAG_MODE : SPRING_LOADED);
         }
         mStatsLogManager.logger().withItemInfo(dragObject.dragInfo)
                 .withInstanceId(dragObject.logInstanceId)
@@ -565,16 +565,8 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         mDeferRemoveExtraEmptyScreen = true;
     }
 
-    /**
-     * Indicates whether zoom effect should be applied for SPRING_LOADED state.
-     */
-    public boolean shouldZoomDuringSpringLoaded() {
-        return mZoomDuringSpringLoaded;
-    }
-
     @Override
     public void onDragEnd() {
-        mZoomDuringSpringLoaded = !shouldEnableMouseInteractionChanges(getContext());
         if (ENFORCE_DRAG_EVENT_ORDER) {
             enforceDragParity("onDragEnd", 0, 0);
         }
@@ -1577,7 +1569,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     }
 
     private boolean workspaceInScrollableState() {
-        return mLauncher.isInState(SPRING_LOADED) || mLauncher.isInState(EDIT_MODE)
+        return mLauncher.getStateManager().getState().hasFlag(FLAG_WORKSPACE_ICONS_BEING_DRAGGED)
                 || !workspaceInModalState();
     }
 
@@ -2583,7 +2575,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     }
 
     public void onDragOver(DragObject d) {
-        handleSpringLoadedStateZoom(d);
+        handleLauncherStateForDrag(d);
 
         // Skip drag over events while we are dragging over side pages
         if (!transitionStateShouldAllowDrop()) return;
@@ -2650,22 +2642,19 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         }
     }
 
-    private void handleSpringLoadedStateZoom(DragObject d) {
-        boolean useDesktopEdit = shouldEnableCursorDrivenWorkflows(getContext());
-        if (useDesktopEdit && mLauncher.isInState(SPRING_LOADED)) {
-            int screenWidth = getMeasuredWidth();
-            int edgeMargin =  ResourceUtils.pxFromDp(40,
-                    mLauncher.getResources().getDisplayMetrics());
-            boolean isNearEdge = d.x - getScrollX() < edgeMargin
-                    || d.x - getScrollX() > screenWidth - edgeMargin;
-            if (mZoomDuringSpringLoaded != isNearEdge) {
-                // Only updates UI and reanimates when needed.
-                mZoomDuringSpringLoaded = isNearEdge;
-                mLauncher.getStateManager().reapplyAnimation();
-            }
-        } else {
-            mZoomDuringSpringLoaded = true;
+    private void handleLauncherStateForDrag(DragObject d) {
+        if (!shouldEnableCursorDrivenWorkflows(getContext())) {
+            return;
         }
+        if (!mLauncher.isInState(SPRING_LOADED) && !mLauncher.isInState(DESKTOP_DRAG_MODE)) {
+            return;
+        }
+        int screenWidth = getMeasuredWidth();
+        int edgeMargin =  ResourceUtils.pxFromDp(40,
+                mLauncher.getResources().getDisplayMetrics());
+        boolean isNearEdge = d.x - getScrollX() < edgeMargin
+                || d.x - getScrollX() > screenWidth - edgeMargin;
+        mLauncher.getStateManager().goToState(isNearEdge ? SPRING_LOADED : DESKTOP_DRAG_MODE);
     }
 
     protected void manageReorderOnDragOver(DragObject d, float targetCellDistance,
@@ -2970,8 +2959,8 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         final int screenId = getCellLayoutId(cellLayout);
         if (!mLauncher.isHotseatLayout(cellLayout)
                 && screenId != getScreenIdForPageIndex(mCurrentPage)
-                && !mLauncher.isInState(SPRING_LOADED)
-                && !mLauncher.isInState(EDIT_MODE)) {
+                && !mLauncher.getStateManager().getState().hasFlag(
+                        FLAG_WORKSPACE_ICONS_BEING_DRAGGED)) {
             snapToPage(getPageIndexForScreenId(screenId));
         }
 
