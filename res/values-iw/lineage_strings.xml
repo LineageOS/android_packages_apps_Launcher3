@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2018-2019 The LineageOS Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources>
+    <string name="settings_lock_layout_title">נעילת פריסת התצוגה</string>
+    <string name="settings_lock_layout_summary_on">לא ניתן להוסיף, להסיר ולהזיז סמלים ויישומונים על מסך הבית</string>
+    <string name="settings_lock_layout_summary_off">ניתן להוסיף, להסיר ולהזיז סמלים ויישומונים על מסך הבית</string>
+    <string name="settings_edit_widgets_error">אין אפשרות להוסיף יישומונים למסך הבית</string>
+    <string name="title_show_google_app">הצגת יישום Google</string>
+    <string name="msg_minus_one_on_left">בעת החלקה ימינה ממסך הבית</string>
+    <string name="msg_minus_one_on_right">בעת החלקה שמאלה ממסך הבית</string>
+    <string name="pref_themed_icons_title">סמלילי המגירה תואמים לעיצוב</string>
+    <string name="pref_themed_icons_summary">סמלילי המגירה תואמים לעיצוב במסך הבית</string>
+    <string name="desktop_show_labels">הצגת שמות היישומים במסך הבית</string>
+    <string name="drawer_show_labels">הצגת שמות היישומים במגירת היישומים</string>
+    <string name="drawer_open_keyboard_title">החלקה לתחילת חיפוש</string>
+    <string name="drawer_open_keyboard_summary">הפעל מקלדת, כשמגירת האפליקציה מוצגת</string>
+    <string name="trust_apps_manager_name">יישומים מוסתרים ומוגנים</string>
+    <string name="trust_apps_auth_manager">יש לפתוח נעילה כדי לנהל את היישומים המוסתרים והמוגנים</string>
+    <string name="trust_apps_auth_open_app">ביצוע אימות כדי לפתוח %1$s</string>
+    <string name="trust_apps_loading">טוען\u2026</string>
+    <string name="trust_apps_no_lock_error">נא להגדיר מסך נעילה מאובטח כדי להגביל את הגישה ליישומים</string>
+    <string name="trust_apps_help">עזרה</string>
+    <string name="trust_apps_info_hidden">יישומים מוסתרים וווידג\'טים שלהם אינם מוצגים במגירה</string>
+    <string name="trust_apps_info_protected">יישומים מוגנים דורשים אימות על מנת לפתוח אותם מהמשגר</string>
+    <string name="pref_suggestions_title">הצעות</string>
+    <string name="pref_suggestions_summary">להצעות למגירת היישומים ולמסך הבית</string>
+</resources>
