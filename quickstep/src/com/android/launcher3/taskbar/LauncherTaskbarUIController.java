@@ -24,12 +24,12 @@ import static com.android.launcher3.QuickstepTransitionManager.getTaskbarToHomeD
 import static com.android.launcher3.statemanager.BaseState.FLAG_NON_INTERACTIVE;
 import static com.android.launcher3.taskbar.TaskbarEduTooltipControllerKt.TOOLTIP_STEP_FEATURES;
 import static com.android.launcher3.taskbar.TaskbarLauncherStateController.FLAG_VISIBLE;
-import static com.android.launcher3.taskbar.TaskbarManagerImpl.TASKBAR_UI_THREAD;
 import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_IGNORE_IN_APP;
 import static com.android.launcher3.taskbar.navbutton.SetupNavLayoutterKt.GLIF_EXPRESSIVE_LIGHT_THEME;
 import static com.android.launcher3.taskbar.navbutton.SetupNavLayoutterKt.GLIF_EXPRESSIVE_THEME;
 import static com.android.launcher3.taskbar.navbutton.SetupNavLayoutterKt.SUW_THEME_SYSTEM_PROPERTY;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
+import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
 import static com.android.quickstep.interaction.AllSetActivity.ALL_SET_SWIPE_THRESHOLD_FOR_WORKSPACE_ANIM;
 
 import android.animation.Animator;
@@ -80,7 +80,6 @@ import kotlin.Unit;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.concurrent.Executor;
 
 /**
  * A data source which integrates with a Launcher instance
@@ -107,7 +106,6 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
 
     private final LauncherInteractor mLauncher;
     private final LauncherUiState mLauncherUiState;
-    private final Executor mTaskbarExecutor;
     private final HomeVisibilityState mHomeState;
 
     private final DeviceProfile.OnDeviceProfileChangeListener mOnDeviceProfileChangeListener =
@@ -136,7 +134,6 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
         mLauncher = launcher;
         mLauncherUiState = launcherUiState;
         mHomeState = homeState;
-        mTaskbarExecutor = enableTaskbarUiThread() ? TASKBAR_UI_THREAD : Runnable::run;
     }
 
     @Override
@@ -144,7 +141,7 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
         super.init(taskbarControllers);
 
         mTaskbarLauncherStateController.init(mControllers, mLauncher, mLauncherUiState,
-                mControllers.getSharedState().sysuiStateFlags, mTaskbarExecutor);
+                mControllers.getSharedState().sysuiStateFlags, TASKBAR_UI_THREAD);
         final TaskbarActivityContext taskbarContext = mControllers.taskbarActivityContext;
         int displayId = taskbarContext.getDisplayId();
         BaseContainerInterface<?, ?> containerInterface = OverviewComponentObserver.INSTANCE.get(
@@ -165,7 +162,7 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
 
         onStashedInAppChanged(getDeviceProfile());
         mOnDeviceProfileChangeListenerClosable =
-                mLauncherUiState.getDeviceProfileRef().forEach(mTaskbarExecutor, dp -> {
+                mLauncherUiState.getDeviceProfileRef().forEach(TASKBAR_UI_THREAD, dp -> {
                     if (mLauncherUiState.isDeviceProfileInitialized()) {
                         mOnDeviceProfileChangeListener.onDeviceProfileChanged(dp);
                     }

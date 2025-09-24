@@ -17,10 +17,10 @@
 package com.android.launcher3.taskbar
 
 import android.app.PendingIntent
-import android.os.Looper
 import com.android.launcher3.Flags.enableTaskbarUiThread
 import com.android.launcher3.anim.AnimatorPlaybackController
 import com.android.launcher3.statemanager.StatefulActivity
+import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
 import com.android.launcher3.util.Executors
 import com.android.quickstep.views.RecentsViewContainer
 import java.io.PrintWriter
@@ -33,204 +33,95 @@ import java.io.PrintWriter
 class TaskbarManagerImplWrapper(private val impl: TaskbarManagerImpl) : TaskbarManager {
 
     override fun onUserUnlocked() {
-        if (shouldPostToTaskbarUiThread()) {
-            impl.perWindowUiExecutor.execute(impl::onUserUnlocked)
-        } else {
-            impl.onUserUnlocked()
-        }
+        TASKBAR_UI_THREAD.execute(impl::onUserUnlocked)
     }
 
     override fun setActivity(activity: StatefulActivity<*>) {
-        // TODO(b/404636836) internal invocation on activity should be posted back to main thread
-        if (shouldPostToTaskbarUiThread()) {
-            impl.perWindowUiExecutor.execute { impl.setActivity(activity) }
-        } else {
-            impl.setActivity(activity)
-        }
+        TASKBAR_UI_THREAD.execute { impl.setActivity(activity) }
     }
 
     override fun setRecentsViewContainer(recentsViewContainer: RecentsViewContainer) {
-        // TODO(b/404636836) internal invocation on recentsViewContainer should be posted back to
-        //  main thread
-        if (shouldPostToTaskbarUiThread()) {
-            impl.perWindowUiExecutor.execute { impl.setRecentsViewContainer(recentsViewContainer) }
-        } else {
-            impl.setRecentsViewContainer(recentsViewContainer)
-        }
+        TASKBAR_UI_THREAD.execute { impl.setRecentsViewContainer(recentsViewContainer) }
     }
 
     override fun recreateTaskbars() {
-        if (shouldPostToTaskbarUiThread()) {
-            impl.perWindowUiExecutor.execute(impl::recreateTaskbars)
-        } else {
-            impl.recreateTaskbars()
-        }
+        TASKBAR_UI_THREAD.execute(impl::recreateTaskbars)
     }
 
     override fun onSystemUiFlagsChanged(systemUiStateFlags: Long, displayId: Int) {
-        if (shouldPostToTaskbarUiThread()) {
-            impl.perWindowUiExecutor.execute {
-                impl.onSystemUiFlagsChanged(systemUiStateFlags, displayId)
-            }
-        } else {
-            impl.onSystemUiFlagsChanged(systemUiStateFlags, displayId)
-        }
+        TASKBAR_UI_THREAD.execute { impl.onSystemUiFlagsChanged(systemUiStateFlags, displayId) }
     }
 
     override fun onLongPressHomeEnabled(assistantLongPressEnabled: Boolean) {
-        if (shouldPostToTaskbarUiThread()) {
-            impl.perWindowUiExecutor.execute {
-                impl.onLongPressHomeEnabled(assistantLongPressEnabled)
-            }
-        } else {
-            impl.onLongPressHomeEnabled(assistantLongPressEnabled)
-        }
+        TASKBAR_UI_THREAD.execute { impl.onLongPressHomeEnabled(assistantLongPressEnabled) }
     }
 
     override fun setSetupUIVisible(isVisible: Boolean) {
-        if (shouldPostToTaskbarUiThread()) {
-            impl.perWindowUiExecutor.execute { impl.setSetupUIVisible(isVisible) }
-        } else {
-            impl.setSetupUIVisible(isVisible)
-        }
+        TASKBAR_UI_THREAD.execute { impl.setSetupUIVisible(isVisible) }
     }
 
     override fun setWallpaperVisible(displayId: Int, isVisible: Boolean) {
-        if (shouldPostToTaskbarUiThread()) {
-            impl.perWindowUiExecutor.execute { impl.setWallpaperVisible(displayId, isVisible) }
-        } else {
-            impl.setWallpaperVisible(displayId, isVisible)
-        }
+        TASKBAR_UI_THREAD.execute { impl.setWallpaperVisible(displayId, isVisible) }
     }
 
     override fun checkNavBarModes(displayId: Int) {
-        if (shouldPostToTaskbarUiThread()) {
-            impl.perWindowUiExecutor.execute { impl.checkNavBarModes(displayId) }
-        } else {
-            impl.checkNavBarModes(displayId)
-        }
+        TASKBAR_UI_THREAD.execute { impl.checkNavBarModes(displayId) }
     }
 
     override fun finishBarAnimations(displayId: Int) {
-        if (shouldPostToTaskbarUiThread()) {
-            impl.perWindowUiExecutor.execute { impl.finishBarAnimations(displayId) }
-        } else {
-            impl.finishBarAnimations(displayId)
-        }
+        TASKBAR_UI_THREAD.execute { impl.finishBarAnimations(displayId) }
     }
 
     override fun touchAutoDim(displayId: Int, reset: Boolean) {
-        if (shouldPostToTaskbarUiThread()) {
-            impl.perWindowUiExecutor.execute { impl.touchAutoDim(displayId, reset) }
-        } else {
-            impl.touchAutoDim(displayId, reset)
-        }
+        TASKBAR_UI_THREAD.execute { impl.touchAutoDim(displayId, reset) }
     }
 
     override fun transitionTo(displayId: Int, barMode: Int, animate: Boolean) {
-        if (shouldPostToTaskbarUiThread()) {
-            impl.perWindowUiExecutor.execute { impl.transitionTo(displayId, barMode, animate) }
-        } else {
-            impl.transitionTo(displayId, barMode, animate)
-        }
+        TASKBAR_UI_THREAD.execute { impl.transitionTo(displayId, barMode, animate) }
     }
 
     override fun appTransitionPending(pending: Boolean) {
-        if (shouldPostToTaskbarUiThread()) {
-            impl.perWindowUiExecutor.execute { impl.appTransitionPending(pending) }
-        } else {
-            impl.appTransitionPending(pending)
-        }
+        TASKBAR_UI_THREAD.execute { impl.appTransitionPending(pending) }
     }
 
     override fun onRotationProposal(rotation: Int, isValid: Boolean) {
-        if (shouldPostToTaskbarUiThread()) {
-            impl.perWindowUiExecutor.execute { impl.onRotationProposal(rotation, isValid) }
-        } else {
-            impl.onRotationProposal(rotation, isValid)
-        }
+        TASKBAR_UI_THREAD.execute { impl.onRotationProposal(rotation, isValid) }
     }
 
     override fun disableNavBarElements(displayId: Int, state1: Int, state2: Int, animate: Boolean) {
-        if (shouldPostToTaskbarUiThread()) {
-            impl.perWindowUiExecutor.execute {
-                impl.disableNavBarElements(displayId, state1, state2, animate)
-            }
-        } else {
-            impl.disableNavBarElements(displayId, state1, state2, animate)
-        }
+        TASKBAR_UI_THREAD.execute { impl.disableNavBarElements(displayId, state1, state2, animate) }
     }
 
     override fun onSystemBarAttributesChanged(displayId: Int, behavior: Int) {
-        if (shouldPostToTaskbarUiThread()) {
-            impl.perWindowUiExecutor.execute {
-                impl.onSystemBarAttributesChanged(displayId, behavior)
-            }
-        } else {
-            impl.onSystemBarAttributesChanged(displayId, behavior)
-        }
+        TASKBAR_UI_THREAD.execute { impl.onSystemBarAttributesChanged(displayId, behavior) }
     }
 
     override fun onTransitionModeUpdated(barMode: Int, checkBarModes: Boolean) {
-        if (shouldPostToTaskbarUiThread()) {
-            impl.perWindowUiExecutor.execute {
-                impl.onTransitionModeUpdated(barMode, checkBarModes)
-            }
-        } else {
-            impl.onTransitionModeUpdated(barMode, checkBarModes)
-        }
+        TASKBAR_UI_THREAD.execute { impl.onTransitionModeUpdated(barMode, checkBarModes) }
     }
 
     override fun onNavButtonsDarkIntensityChanged(darkIntensity: Float) {
-        if (shouldPostToTaskbarUiThread()) {
-            impl.perWindowUiExecutor.execute {
-                impl.onNavButtonsDarkIntensityChanged(darkIntensity)
-            }
-        } else {
-            impl.onNavButtonsDarkIntensityChanged(darkIntensity)
-        }
+        TASKBAR_UI_THREAD.execute { impl.onNavButtonsDarkIntensityChanged(darkIntensity) }
     }
 
     override fun onNavigationBarLumaSamplingEnabled(displayId: Int, enable: Boolean) {
-        if (shouldPostToTaskbarUiThread()) {
-            impl.perWindowUiExecutor.execute {
-                impl.onNavigationBarLumaSamplingEnabled(displayId, enable)
-            }
-        } else {
-            impl.onNavigationBarLumaSamplingEnabled(displayId, enable)
-        }
+        TASKBAR_UI_THREAD.execute { impl.onNavigationBarLumaSamplingEnabled(displayId, enable) }
     }
 
     override fun onDisplayAddSystemDecorations(displayId: Int) {
-        if (shouldPostToTaskbarUiThread()) {
-            impl.perWindowUiExecutor.execute { impl.onDisplayAddSystemDecorations(displayId) }
-        } else {
-            impl.onDisplayAddSystemDecorations(displayId)
-        }
+        TASKBAR_UI_THREAD.execute { impl.onDisplayAddSystemDecorations(displayId) }
     }
 
     override fun onDisplayRemoved(displayId: Int) {
-        if (shouldPostToTaskbarUiThread()) {
-            impl.perWindowUiExecutor.execute { impl.onDisplayRemoved(displayId) }
-        } else {
-            impl.onDisplayRemoved(displayId)
-        }
+        TASKBAR_UI_THREAD.execute { impl.onDisplayRemoved(displayId) }
     }
 
     override fun onDisplayRemoveSystemDecorations(displayId: Int) {
-        if (shouldPostToTaskbarUiThread()) {
-            impl.perWindowUiExecutor.execute { impl.onDisplayRemoveSystemDecorations(displayId) }
-        } else {
-            impl.onDisplayRemoveSystemDecorations(displayId)
-        }
+        TASKBAR_UI_THREAD.execute { impl.onDisplayRemoveSystemDecorations(displayId) }
     }
 
     override fun destroy() {
-        if (shouldPostToTaskbarUiThread()) {
-            impl.perWindowUiExecutor.execute { impl.destroy() }
-        } else {
-            impl.destroy()
-        }
+        TASKBAR_UI_THREAD.execute { impl.destroy() }
     }
 
     override fun createLauncherStartFromSuwAnim(duration: Int): AnimatorPlaybackController? {
@@ -240,6 +131,7 @@ class TaskbarManagerImplWrapper(private val impl: TaskbarManagerImpl) : TaskbarM
     }
 
     override fun shouldForceAllSetFallbackAnimation(): Boolean {
+        // Thread safe
         return impl.shouldForceAllSetFallbackAnimation()
     }
 
@@ -261,7 +153,7 @@ class TaskbarManagerImplWrapper(private val impl: TaskbarManagerImpl) : TaskbarM
     override fun createAllAppsPendingIntent(): PendingIntent {
         // Thread safe
         return impl.createAllAppsPendingIntent(
-            if (enableTaskbarUiThread()) impl.perWindowUiExecutor else Executors.MAIN_EXECUTOR
+            if (enableTaskbarUiThread()) TASKBAR_UI_THREAD else Executors.MAIN_EXECUTOR
         )
     }
 
@@ -276,14 +168,6 @@ class TaskbarManagerImplWrapper(private val impl: TaskbarManagerImpl) : TaskbarM
     }
 
     override fun debugPrimaryTaskbar(debugReason: String, verbose: Boolean) {
-        if (shouldPostToTaskbarUiThread()) {
-            impl.perWindowUiExecutor.execute { impl.debugPrimaryTaskbar(debugReason, verbose) }
-        } else {
-            impl.debugPrimaryTaskbar(debugReason, verbose)
-        }
-    }
-
-    private fun shouldPostToTaskbarUiThread(): Boolean {
-        return enableTaskbarUiThread() && Looper.getMainLooper() == Looper.myLooper()
+        TASKBAR_UI_THREAD.execute { impl.debugPrimaryTaskbar(debugReason, verbose) }
     }
 }

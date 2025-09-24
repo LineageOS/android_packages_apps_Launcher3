@@ -20,8 +20,8 @@ import com.android.launcher3.Flags.refactorTaskbarUiState
 import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.statehandlers.DesktopVisibilityController.TaskbarDesktopModeListener
 import com.android.launcher3.taskbar.TaskbarBackgroundRenderer.Companion.MAX_ROUNDNESS
-import com.android.launcher3.taskbar.TaskbarManagerImpl.TASKBAR_UI_THREAD
 import com.android.launcher3.util.DisplayController
+import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
 
 /** Handles Taskbar in Desktop Windowing mode. */
 class TaskbarDesktopModeController(
