@@ -267,12 +267,21 @@ constructor(
             )
 
     private val tempCoordinates = FloatArray(2)
+    private val borderWidthPx: Int by lazy {
+        context.resources.getDimensionPixelSize(R.dimen.task_hover_focus_border_width)
+    }
+    private val borderOffsetPx: Int by lazy {
+        context.resources.getDimensionPixelSize(R.dimen.task_hover_focus_offset_size)
+    }
     private val focusBorderAnimator: BorderAnimator? =
         focusBorderAnimator
             ?: createSimpleBorderAnimator(
-                TaskCornerRadius.get(context).toInt(),
-                context.resources.getDimensionPixelSize(R.dimen.keyboard_quick_switch_border_width),
-                this::getThumbnailBounds,
+                TaskCornerRadius.get(context).toInt() + borderOffsetPx,
+                borderWidthPx,
+                {
+                    getThumbnailBounds(it)
+                    it.inset(-borderOffsetPx, -borderOffsetPx)
+                },
                 this,
                 context
                     .obtainStyledAttributes(attrs, R.styleable.TaskView, defStyleAttr, defStyleRes)
@@ -285,9 +294,12 @@ constructor(
     private val hoverBorderAnimator: BorderAnimator? =
         hoverBorderAnimator
             ?: createSimpleBorderAnimator(
-                TaskCornerRadius.get(context).toInt(),
-                context.resources.getDimensionPixelSize(R.dimen.task_hover_border_width),
-                this::getThumbnailBounds,
+                TaskCornerRadius.get(context).toInt() + borderOffsetPx,
+                borderWidthPx,
+                {
+                    getThumbnailBounds(it)
+                    it.inset(-borderOffsetPx, -borderOffsetPx)
+                },
                 this,
                 context
                     .obtainStyledAttributes(attrs, R.styleable.TaskView, defStyleAttr, defStyleRes)
