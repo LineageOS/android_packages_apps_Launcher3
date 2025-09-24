@@ -46,6 +46,7 @@ import com.android.launcher3.Utilities.qsbOnFirstScreen
 import com.android.launcher3.WorkspaceLayoutManager
 import com.android.launcher3.backuprestore.LauncherRestoreEventLogger.RestoreError
 import com.android.launcher3.homescreenfiles.HomeScreenFile
+import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils
 import com.android.launcher3.icons.BitmapInfo
 import com.android.launcher3.icons.CacheableShortcutInfo
 import com.android.launcher3.icons.IconCache
@@ -83,6 +84,7 @@ import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
@@ -785,33 +787,70 @@ class WorkspaceItemProcessorTest {
 
     @Test
     fun restoresFileSystemFileItemType() {
-        // Given
-        mockCursor.apply {
-            itemType = ITEM_TYPE_FILE_SYSTEM_FILE
-            whenever(title).thenReturn("name.ext")
-        }
-
-        // When
-        itemProcessorUnderTest = createWorkspaceItemProcessorUnderTest()
-        itemProcessorUnderTest.processItem()
-
-        // Then
-        // TODO(b/424466810): update expectation after implementing
-        // `WorkspaceItemProcessor#processFileSystemItem()`.
-        verify(mockCursor)
-            .markDeleted(
-                "File system item name.ext no longer exists",
-                RestoreError.FILE_SYSTEM_ITEM_NO_LONGER_EXISTS,
-            )
-        verify(mockCursor, times(0)).checkAndAddItem(any(), any(), anyOrNull())
+        testRestoresFileSystemItem(
+            ITEM_TYPE_FILE_SYSTEM_FILE,
+            HomeScreenFile(
+                uri = Uri.parse("content://media/external_primary/file/1"),
+                displayName = "file.png",
+                mimeType = "image/png",
+                isDirectory = false,
+                user = Process.myUserHandle(),
+            ),
+        )
     }
 
     @Test
     fun restoresFileSystemFolderItemType() {
+        testRestoresFileSystemItem(
+            ITEM_TYPE_FILE_SYSTEM_FOLDER,
+            HomeScreenFile(
+                uri = Uri.parse("content://media/external_primary/file/1"),
+                displayName = "folder_a",
+                mimeType = null,
+                isDirectory = true,
+                user = Process.myUserHandle(),
+            ),
+        )
+    }
+
+    private fun testRestoresFileSystemItem(itemType: Int, homeScreenFile: HomeScreenFile) {
+        // Given
+        val homeScreenFiles = lazyOf(mapOf(homeScreenFile.uri to homeScreenFile))
+        mockCursor.apply {
+            this.itemType = itemType
+            whenever(title).thenReturn(homeScreenFile.displayName)
+            whenever(parseIntent())
+                .thenReturn(
+                    HomeScreenFilesUtils.buildLaunchIntent(homeScreenFile.uri, homeScreenFile)
+                )
+        }
+
+        // When
+        itemProcessorUnderTest =
+            createWorkspaceItemProcessorUnderTest(homeScreenFiles = homeScreenFiles)
+        itemProcessorUnderTest.processItem()
+
+        // Then
+        val itemCaptor = argumentCaptor<ItemInfo>()
+        verify(mockCursor).markRestored()
+        verify(mockCursor).checkAndAddItem(itemCaptor.capture(), any(), anyOrNull())
+        assertThat(itemCaptor.firstValue.itemType).isEqualTo(itemType)
+        assertThat(itemCaptor.firstValue.title).isEqualTo(homeScreenFile.displayName)
+        assertThat(itemCaptor.firstValue.intent!!.data).isEqualTo(homeScreenFile.uri)
+    }
+
+    @Test
+    fun deletesFileSystemItemThatNoLongerExists() {
         // Given
         mockCursor.apply {
-            itemType = ITEM_TYPE_FILE_SYSTEM_FOLDER
-            whenever(title).thenReturn("folder_a")
+            itemType = ITEM_TYPE_FILE_SYSTEM_FILE
+            whenever(title).thenReturn("name.ext")
+            whenever(parseIntent())
+                .thenReturn(
+                    HomeScreenFilesUtils.buildLaunchIntent(
+                        Uri.parse("content://media/external_primary/file/1")
+                    )
+                )
         }
 
         // When
@@ -819,11 +858,9 @@ class WorkspaceItemProcessorTest {
         itemProcessorUnderTest.processItem()
 
         // Then
-        // TODO(b/424466810): update expectation after implementing
-        // `WorkspaceItemProcessor#processFileSystemItem()`.
         verify(mockCursor)
             .markDeleted(
-                "File system item folder_a no longer exists",
+                "File system item name.ext no longer exists",
                 RestoreError.FILE_SYSTEM_ITEM_NO_LONGER_EXISTS,
             )
         verify(mockCursor, times(0)).checkAndAddItem(any(), any(), anyOrNull())
