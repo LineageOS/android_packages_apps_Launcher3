@@ -26,6 +26,7 @@ import com.android.launcher3.Flags.enableTaskbarUiThread
 import com.android.launcher3.apppairs.AppPairIcon
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.ResolvedTargetInfo
+import com.android.launcher3.taskbar.TaskbarManagerImpl.TASKBAR_UI_THREAD
 import com.android.launcher3.util.AsyncView
 import com.android.launcher3.util.Executors.IMMEDIATE_EXECUTOR
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
@@ -50,6 +51,8 @@ class RecentsViewInteractor(private val recentsView: RecentsView<*, *>) {
     // is already on main thread.
     private val mainExecutor: Executor =
         if (enableTaskbarUiThread()) MAIN_EXECUTOR else IMMEDIATE_EXECUTOR
+    private val taskbarExecutor: Executor =
+        if (enableTaskbarUiThread()) TASKBAR_UI_THREAD else IMMEDIATE_EXECUTOR
 
     @AnyThread
     fun hasSameRecentsView(recentsView: RecentsView<*, *>) = this.recentsView === recentsView
@@ -71,24 +74,30 @@ class RecentsViewInteractor(private val recentsView: RecentsView<*, *>) {
             )
     }
 
-    // TODO(b/404636836): pass callback executor param and return SafeClosable
     @AnyThread
-    fun addSideTaskLaunchCallback(callback: RunnableList?) {
-        mainExecutor.execute { recentsView.addSideTaskLaunchCallback(callback) }
+    fun addSideTaskLaunchCallback(callback: RunnableList) {
+        val wrapperRunnable = Runnable { taskbarExecutor.execute(callback::executeAllAndDestroy) }
+        mainExecutor.execute { recentsView.addSideTaskLaunchCallback(wrapperRunnable) }
     }
 
-    // TODO(b/404636836): pass callback executor param and return SafeClosable
     @AnyThread
     fun setTaskLaunchListener(taskLaunchListener: RecentsView.TaskLaunchListener?) {
-        mainExecutor.execute { recentsView.setTaskLaunchListener(taskLaunchListener) }
+        val wrapperListener =
+            if (taskLaunchListener != null)
+                RecentsView.TaskLaunchListener {
+                    taskbarExecutor.execute { taskLaunchListener.onTaskLaunched() }
+                }
+            else null
+        mainExecutor.execute { recentsView.setTaskLaunchListener(wrapperListener) }
     }
 
-    // TODO(b/404636836): pass callback executor param and return SafeClosable
     @AnyThread
     fun setTaskLaunchCancelledRunnable(onTaskLaunchCancelledRunnable: Runnable?) {
-        mainExecutor.execute {
-            recentsView.setTaskLaunchCancelledRunnable(onTaskLaunchCancelledRunnable)
-        }
+        val wrapperRunnable =
+            if (onTaskLaunchCancelledRunnable != null)
+                Runnable { taskbarExecutor.execute(onTaskLaunchCancelledRunnable) }
+            else null
+        mainExecutor.execute { recentsView.setTaskLaunchCancelledRunnable(wrapperRunnable) }
     }
 
     @AnyThread
