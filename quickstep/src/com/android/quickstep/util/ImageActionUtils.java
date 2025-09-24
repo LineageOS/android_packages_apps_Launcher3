@@ -21,12 +21,14 @@ import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
 import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_OVERVIEW;
 import static android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE;
 
+import static com.android.launcher3.Flags.enableReplaceShareTargetWithSharesheet;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.THREAD_POOL_EXECUTOR;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 
 import android.app.Activity;
 import android.app.ActivityOptions;
+import android.app.PendingIntent;
 import android.app.prediction.AppTarget;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
@@ -41,16 +43,20 @@ import android.graphics.Insets;
 import android.graphics.Picture;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
+import android.service.chooser.ChooserAction;
 import android.util.Log;
 import android.view.View;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.core.content.FileProvider;
 
 import com.android.internal.app.ChooserActivity;
 import com.android.internal.util.ScreenshotRequest;
 import com.android.launcher3.BuildConfig;
+import com.android.launcher3.R;
 import com.android.quickstep.SystemUiProxy;
 import com.android.systemui.shared.recents.model.Task;
 
@@ -71,6 +77,9 @@ public class ImageActionUtils {
     private static final String SUB_FOLDER = "Overview";
     private static final String BASE_NAME = "overview_image_";
     private static final String TAG = "ImageActionUtils";
+    // Request code can be any number, as long as it remains consistent between calls if you want
+    // to refer to the same PendingIntent later.
+    private static final int COPY_REQUEST_CODE = 42;
 
     /**
      * Saves screenshot to location determine by SystemUiProxy
@@ -139,8 +148,14 @@ public class ImageActionUtils {
                 Log.e(tag, "No snapshot available, not starting share.");
                 return;
             }
-            persistBitmapAndStartActivity(context, bitmap, crop, intent,
-                    ImageActionUtils::getShareIntentForImageUri, tag);
+            if (enableReplaceShareTargetWithSharesheet()) {
+                startShareActivity(context, bitmapSupplier, crop, intent, tag,
+                        /* sharedElement= */ null, /* copyIntentAction= */ null,
+                        /* copyCropRectKey= */ null);
+            } else {
+                persistBitmapAndStartActivity(context, bitmap, crop, intent,
+                        ImageActionUtils::getShareIntentForImageUri, tag);
+            }
         });
     }
 
@@ -148,15 +163,34 @@ public class ImageActionUtils {
      * Launch the activity to share image with shared element transition.
      */
     public static void startShareActivity(Context context, Supplier<Bitmap> bitmapSupplier,
-            Rect crop, Intent intent, String tag, View sharedElement) {
+            Rect crop, Intent intent, String tag, View sharedElement, String copyIntentAction,
+            String copyCropRectKey) {
         UI_HELPER_EXECUTOR.execute(() -> {
             Bitmap bitmap = bitmapSupplier.get();
             if (bitmap == null) {
                 Log.e(tag, "No snapshot available, not starting share.");
                 return;
             }
-            persistBitmapAndStartActivity(context, bitmap,
-                    crop, intent, ImageActionUtils::getShareIntentForImageUri, tag, sharedElement);
+            if (enableReplaceShareTargetWithSharesheet()) {
+                Intent copyIntent = new Intent(copyIntentAction)
+                        .setPackage(context.getPackageName())
+                        .putExtra(copyCropRectKey, crop);
+                PendingIntent copyPendingIntent = PendingIntent.getBroadcast(context,
+                        COPY_REQUEST_CODE,
+                        copyIntent,
+                        PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+                ChooserAction[] customActions = new ChooserAction[]{
+                        new ChooserAction.Builder(Icon.createWithResource(context,
+                                R.drawable.ic_content_copy_vd_theme_24),
+                                context.getString(R.string.action_image_copy),
+                                copyPendingIntent).build()
+                };
+                persistBitmapAndStartActivity(context, bitmap, crop, intent,
+                        (uri, i) -> getShareIntentForImageUri(uri, i, customActions), tag);
+            } else {
+                persistBitmapAndStartActivity(context, bitmap, crop, intent,
+                        ImageActionUtils::getShareIntentForImageUri, tag, sharedElement);
+            }
         });
     }
 
@@ -280,10 +314,19 @@ public class ImageActionUtils {
     }
 
     /**
-     * Gets the intent used to share image.
+     * Gets the intent used to share image with custom actions.
      */
     @WorkerThread
     private static Intent[] getShareIntentForImageUri(Uri uri, Intent intent) {
+        return getShareIntentForImageUri(uri, intent, /* customActions= */ null);
+    }
+
+    /**
+     * Gets the intent used to share image with custom actions.
+     */
+    @WorkerThread
+    private static Intent[] getShareIntentForImageUri(Uri uri, Intent intent,
+            @Nullable ChooserAction[] customActions) {
         if (intent == null) {
             intent = new Intent();
         }
@@ -297,7 +340,11 @@ public class ImageActionUtils {
                 .setType("image/png")
                 .putExtra(Intent.EXTRA_STREAM, uri)
                 .setClipData(clipdata);
-        return new Intent[]{Intent.createChooser(intent, null).addFlags(FLAG_ACTIVITY_NEW_TASK)};
+        Intent chooser = Intent.createChooser(intent, null).addFlags(FLAG_ACTIVITY_NEW_TASK);
+        if (customActions != null) {
+            chooser.putExtra(Intent.EXTRA_CHOOSER_CUSTOM_ACTIONS, customActions);
+        }
+        return new Intent[]{chooser};
     }
 
     private static void clearOldCacheFiles(Context context) {
