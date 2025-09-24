@@ -78,14 +78,14 @@ import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
 import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper;
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
 
+import kotlin.Unit;
+
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.StringJoiner;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
-import kotlin.Unit;
 
 /**
  * Track LauncherState, RecentsAnimation, resumed state for task bar in one place here and animate
@@ -345,10 +345,11 @@ public class TaskbarLauncherStateController {
         mIsDestroyed = true;
         mCanSyncViews = false;
 
-        if (mRecentsAnimationCallbacks != null) {
+        if (mRecentsAnimationCallbacks != null && mTaskBarRecentsAnimationListener != null) {
             mRecentsAnimationCallbacks.removeListener(mTaskBarRecentsAnimationListener);
-            mRecentsAnimationCallbacks = null;
         }
+        mRecentsAnimationCallbacks = null;
+        mTaskBarRecentsAnimationListener = null;
 
         mIconAlignment.finishAnimation();
 
@@ -396,7 +397,8 @@ public class TaskbarLauncherStateController {
             mTaskBarRecentsAnimationListener.endGestureStateOverride(
                     !isStateManagerInState(LauncherState.OVERVIEW), /* canceled= */ false);
         }
-        mTaskBarRecentsAnimationListener = new TaskBarRecentsAnimationListener(callbacks);
+        mTaskBarRecentsAnimationListener = new TaskBarRecentsAnimationListener(
+                callbacks, enableTaskbarUiThread() ? TASKBAR_UI_THREAD : IMMEDIATE_EXECUTOR);
         callbacks.addListener(mTaskBarRecentsAnimationListener);
         RecentsViewInteractor recentsView = mControllers.uiController.getRecentsViewInteractor();
         if (recentsView != null) {
@@ -1145,19 +1147,22 @@ public class TaskbarLauncherStateController {
     private final class TaskBarRecentsAnimationListener implements
             RecentsAnimationCallbacks.RecentsAnimationListener {
         private final RecentsAnimationCallbacks mCallbacks;
+        private final Executor mExecutor;
 
-        TaskBarRecentsAnimationListener(RecentsAnimationCallbacks callbacks) {
+        TaskBarRecentsAnimationListener(RecentsAnimationCallbacks callbacks, Executor executor) {
             mCallbacks = callbacks;
+            mExecutor = executor;
         }
 
         @Override
         public void onRecentsAnimationCanceled(HashMap<Integer, ThumbnailData> thumbnailDatas) {
-            endGestureStateOverride(!isInLauncher(), /* canceled= */ true);
+            mExecutor.execute(() -> endGestureStateOverride(!isInLauncher(), /* canceled= */ true));
         }
 
         @Override
         public void onRecentsAnimationFinished(RecentsAnimationController controller) {
-            endGestureStateOverride(!controller.getFinishTargetIsLauncher(), /* canceled= */ false);
+            mExecutor.execute(() -> endGestureStateOverride(
+                    !controller.getFinishTargetIsLauncher(), /* canceled= */ false));
         }
 
         /**

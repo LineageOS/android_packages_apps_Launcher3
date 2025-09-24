@@ -26,16 +26,15 @@ import static com.android.wm.shell.shared.TransitionUtil.TYPE_SPLIT_SCREEN_DIM_L
 import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.util.ArraySet;
 import android.view.RemoteAnimationTarget;
 import android.window.TransitionInfo;
 
+import androidx.annotation.AnyThread;
 import androidx.annotation.BinderThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.UiThread;
 
 import com.android.launcher3.Utilities;
-import com.android.launcher3.util.Preconditions;
 import com.android.quickstep.util.ActiveGestureLog;
 import com.android.quickstep.util.ActiveGestureProtoLogProxy;
 import com.android.quickstep.views.RecentsViewContainer;
@@ -48,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Wrapper around {@link com.android.systemui.shared.system.RecentsAnimationListener} which
@@ -55,8 +55,7 @@ import java.util.Set;
  */
 public class RecentsAnimationCallbacks implements
         com.android.systemui.shared.system.RecentsAnimationListener {
-
-    private final Set<RecentsAnimationListener> mListeners = new ArraySet<>();
+    private final Set<RecentsAnimationListener> mListeners = ConcurrentHashMap.newKeySet();
     private final boolean mIsContainerRecentsWindowManager;
 
     // TODO(141886704): Remove these references when they are no longer needed
@@ -68,21 +67,18 @@ public class RecentsAnimationCallbacks implements
         mIsContainerRecentsWindowManager = container instanceof RecentsWindowManager;
     }
 
-    @UiThread
+    @AnyThread
     public void addListener(RecentsAnimationListener listener) {
-        Preconditions.assertUIThread();
         mListeners.add(listener);
     }
 
-    @UiThread
+    @AnyThread
     public void removeListener(RecentsAnimationListener listener) {
-        Preconditions.assertUIThread();
         mListeners.remove(listener);
     }
 
     @UiThread
     public void removeAllListeners() {
-        Preconditions.assertUIThread();
         mListeners.clear();
     }
 
@@ -137,7 +133,7 @@ public class RecentsAnimationCallbacks implements
 
             Utilities.postAsyncCallback(MAIN_EXECUTOR.getHandler(), () -> {
                 ActiveGestureProtoLogProxy.logOnRecentsAnimationStart(targets.apps.length);
-                for (RecentsAnimationListener listener : getListeners()) {
+                for (RecentsAnimationListener listener : mListeners) {
                     listener.onRecentsAnimationStart(mController, targets, transitionInfo);
                 }
             });
@@ -149,7 +145,7 @@ public class RecentsAnimationCallbacks implements
     public final void onAnimationCanceled(HashMap<Integer, ThumbnailData> thumbnailDatas) {
         Utilities.postAsyncCallback(MAIN_EXECUTOR.getHandler(), () -> {
             ActiveGestureProtoLogProxy.logRecentsAnimationCallbacksOnAnimationCancelled();
-            for (RecentsAnimationListener listener : getListeners()) {
+            for (RecentsAnimationListener listener : mListeners) {
                 listener.onRecentsAnimationCanceled(thumbnailDatas);
             }
         });
@@ -161,7 +157,7 @@ public class RecentsAnimationCallbacks implements
             RemoteAnimationTarget[] apps, @Nullable TransitionInfo transitionInfo) {
         Utilities.postAsyncCallback(MAIN_EXECUTOR.getHandler(), () -> {
             ActiveGestureProtoLogProxy.logRecentsAnimationCallbacksOnTasksAppeared();
-            for (RecentsAnimationListener listener : getListeners()) {
+            for (RecentsAnimationListener listener : mListeners) {
                 listener.onTasksAppeared(apps, transitionInfo);
             }
         });
@@ -170,14 +166,10 @@ public class RecentsAnimationCallbacks implements
     private void onAnimationFinished(RecentsAnimationController controller) {
         Utilities.postAsyncCallback(MAIN_EXECUTOR.getHandler(), () -> {
             ActiveGestureProtoLogProxy.logAbsSwipeUpHandlerOnRecentsAnimationFinished();
-            for (RecentsAnimationListener listener : getListeners()) {
+            for (RecentsAnimationListener listener : mListeners) {
                 listener.onRecentsAnimationFinished(controller);
             }
         });
-    }
-
-    private RecentsAnimationListener[] getListeners() {
-        return mListeners.toArray(new RecentsAnimationListener[mListeners.size()]);
     }
 
     private void classifyTargets(RemoteAnimationTarget[] appTargets,
