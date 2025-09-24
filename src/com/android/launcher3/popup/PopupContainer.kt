@@ -18,6 +18,7 @@ package com.android.launcher3.popup
 
 import android.content.Context
 import android.graphics.Rect
+import android.os.Trace
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -53,6 +54,18 @@ open class PopupContainer<T>(context: Context?, val originalView: View, val item
         )
 
     @CallSuper
+    override fun handleClose(animate: Boolean) {
+        Trace.beginAsyncSection("dismissPopupMenu", hashCode())
+        super.handleClose(animate)
+    }
+
+    @CallSuper
+    override fun closeComplete() {
+        super.closeComplete()
+        Trace.endAsyncSection("dismissPopupMenu", hashCode())
+    }
+
+    @CallSuper
     override fun onControllerInterceptTouchEvent(ev: MotionEvent): Boolean {
         if (ev.action == MotionEvent.ACTION_DOWN) {
             val dl = popupContainer
@@ -86,7 +99,7 @@ open class PopupContainer<T>(context: Context?, val originalView: View, val item
         // Either the original item or one of the shortcuts was dragged.
         // Hide the container, but don't remove it yet because that interferes with touch events.
         mDeferContainerRemoval = true
-        animateClose()
+        handleClose(/* animate */ true)
     }
 
     override fun onDropCompleted(target: View, d: DragObject, success: Boolean) {}
@@ -139,9 +152,9 @@ open class PopupContainer<T>(context: Context?, val originalView: View, val item
             if (
                 originalView != null &&
                     (!originalView.isAttachedToWindow ||
-                        !ShortcutUtil.supportsShortcuts(popup?.itemInfo))
+                        !ShortcutUtil.supportsShortcuts(popup.itemInfo))
             ) {
-                popup.animateClose()
+                popup.handleClose(/* animate */ true)
             }
         }
 
