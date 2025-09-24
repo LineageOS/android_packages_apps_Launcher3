@@ -47,6 +47,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Looper;
+import android.os.Trace;
 import android.text.InputType;
 import android.text.Selection;
 import android.text.TextUtils;
@@ -777,15 +778,22 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
         AnimatorSet animatorSet = getFolderAnimationManager()
                 .createAnimatorSet(/* isOpening */ true);
 
+
         animatorSet.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
+                if (Flags.enableExpressiveFolderExpansion()) {
+                    Trace.beginSection("FolderSpringAnimationOpen");
+                }
                 mFolderIcon.setIconVisible(false);
                 mFolderIcon.drawLeaveBehindIfExists();
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
+                if (Flags.enableExpressiveFolderExpansion()) {
+                    Trace.endSection();
+                }
                 setState(STATE_OPEN);
                 announceAccessibilityChanges();
                 AccessibilityManagerCompat.sendTestProtocolEventToTest(getContext(),
@@ -952,12 +960,18 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
         animatorSet.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
+                if (Flags.enableExpressiveFolderExpansion()) {
+                    Trace.beginSection("FolderSpringAnimationClose");
+                }
                 setWindowInsetsAnimationCallback(null);
                 mIsAnimatingClosed = true;
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
+                if (Flags.enableExpressiveFolderExpansion()) {
+                    Trace.endSection();
+                }
                 if (mKeyboardInsetAnimationCallback != null) {
                     setWindowInsetsAnimationCallback(mKeyboardInsetAnimationCallback);
                 }
