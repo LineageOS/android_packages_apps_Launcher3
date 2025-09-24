@@ -53,11 +53,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * View used as overflow icon within task bar, when the list of recent/running apps overflows the
- * available display bounds - if display is not wide enough to show all running apps in the taskbar,
- * this icon is added to the taskbar as an entry point to open UI that surfaces all running apps.
- * The icon contains icon representations of up to 4 more recent tasks in overflow, stacked on top
- * each other in counter clockwise manner (icons of tasks partially overlapping with each other).
+ * View used as an overflow icon within the taskbar.
+ * This view appears when the list of apps (either recent/running tasks or pinned apps)
+ * exceeds the available display space on the taskbar. If the display is not wide enough
+ * to show all relevant apps, this icon is added to the taskbar. Tapping this icon
+ * typically opens a UI that surfaces all the apps in the overflowed category.
+ * The icon visually represents some of the items in the overflow, often by stacking icon
+ * representations of up to a few apps (e.g., the 4 most recent tasks or a subset of pinned apps).
+ * These icons are typically stacked on top of each other in a counter-clockwise manner,
+ * partially overlapping.
  */
 public class TaskbarOverflowView extends FrameLayout implements Reorderable {
 
@@ -84,6 +88,15 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
     private static final long LEAVE_BEHIND_SIZE_ANIMATION_DURATION = 500L;
     private static final float LEAVE_BEHIND_SIZE_SCALE_DOWN_MULTIPLIER = 0.83f;
     private static final int MAX_ITEMS_IN_PREVIEW = 4;
+
+    public enum OverflowType {
+        /** The overflow icon that contains pinned apps. */
+        PINNED,
+        /** The overflow icon that contains recent tasks where the apps are not pinned. */
+        RECENTS
+    }
+
+    private OverflowType mOverflowType;
 
     private static final FloatProperty<TaskbarOverflowView> ITEM_ICON_CENTER_OFFSET =
             new FloatProperty<>("itemIconCenterOffset") {
@@ -209,17 +222,18 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
 
     /**
      * Inflates the taskbar overflow button view.
-     * @param resId The resource to inflate the view from.
+     * @param type The type of the overflow button.
      * @param group The parent view.
      * @param iconSize The size of the overflow button icon.
      * @param padding The internal padding of the overflow view.
      * @return A taskbar overflow button.
      */
-    public static TaskbarOverflowView inflateIcon(int resId, ViewGroup group, int iconSize,
+    public static TaskbarOverflowView inflateIcon(OverflowType type, ViewGroup group, int iconSize,
             int padding) {
         LayoutInflater inflater = LayoutInflater.from(group.getContext());
-        TaskbarOverflowView icon = (TaskbarOverflowView) inflater.inflate(resId, group, false);
-
+        TaskbarOverflowView icon = (TaskbarOverflowView) inflater.inflate(
+                R.layout.taskbar_overflow_view, group, false);
+        icon.mOverflowType = type;
         icon.mIconSize = iconSize;
 
         final float taskbarIconRadius =
@@ -384,7 +398,11 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
         if (mIsActive) {
             return null;
         }
-        return getResources().getString(R.string.taskbar_overflow_a11y_title);
+
+        return switch (mOverflowType) {
+            case PINNED -> getResources().getString(R.string.taskbar_pinned_overflow_a11y_title);
+            case RECENTS -> getResources().getString(R.string.taskbar_recents_overflow_a11y_title);
+        };
     }
 
     /**
