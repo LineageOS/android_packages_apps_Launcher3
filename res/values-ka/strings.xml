@@ -107,10 +107,8 @@
     <string name="widget_settings" msgid="5280157748464495511">"პარამეტრები"</string>
     <string name="pin_to_taskbar" msgid="5914002252642242332">"ამოც. ზოლში ჩანიშვნა"</string>
     <string name="unpin_from_taskbar" msgid="1025883383457627426">"ზოლიდან მოხსნა"</string>
-    <!-- no translation found for app_added_to_taskbar (6348755169793615171) -->
-    <skip />
-    <!-- no translation found for app_removed_from_taskbar (3471754847898675396) -->
-    <skip />
+    <string name="app_added_to_taskbar" msgid="6348755169793615171">"აპი დაემატა ამოცანათა ზოლს"</string>
+    <string name="app_removed_from_taskbar" msgid="3471754847898675396">"აპი ამოიშალა ამოცანათა ზოლიდან"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"მალსახმობების დაყენება"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"აპისთვის მალსახმობების დამოუკიდებლად დამატების უფლების მიცემა."</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"მთავარი ეკრანის პარამეტრებისა და მალსახმობების წაკითხვა"</string>
@@ -149,12 +147,9 @@
     <string name="msg_disabled_by_admin" msgid="6898038085516271325">"გათიშულია თქვენი ადმინისტრატორის მიერ"</string>
     <string name="allow_rotation_title" msgid="7222049633713050106">"მთავარი ეკრანის შეტრიალების დაშვება"</string>
     <string name="allow_rotation_desc" msgid="8662546029078692509">"ტელეფონის შეტრიალებისას"</string>
-    <!-- no translation found for compose_developer_options_section (8211460486549952595) -->
-    <skip />
-    <!-- no translation found for enable_composition_tracing_title (8989606591739368424) -->
-    <skip />
-    <!-- no translation found for enable_composition_tracing_desc (7187566039216492405) -->
-    <skip />
+    <string name="compose_developer_options_section" msgid="8211460486549952595">"Jetpack Compose"</string>
+    <string name="enable_composition_tracing_title" msgid="8989606591739368424">"შემადგენლობის გამოვლენის ჩართვა"</string>
+    <string name="enable_composition_tracing_desc" msgid="7187566039216492405">"ჩართეთ შემადგენლობის გამოვლენა Perfetto-ს შესრულების მიმოხილვისას"</string>
     <string name="landscape_mode_title" msgid="5138814555934843926">"პეიზაჟის რეჟიმი"</string>
     <string name="landscape_mode_desc" msgid="3085236452297838664">"დააყენეთ მთავარი ეკრანი პეიზაჟის რეჟიმში"</string>
     <string name="notification_dots_title" msgid="9062440428204120317">"შეტყობინების ნიშნულები"</string>

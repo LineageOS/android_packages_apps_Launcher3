@@ -107,10 +107,8 @@
     <string name="widget_settings" msgid="5280157748464495511">"Inställningar"</string>
     <string name="pin_to_taskbar" msgid="5914002252642242332">"Fäst i aktivitetsfält"</string>
     <string name="unpin_from_taskbar" msgid="1025883383457627426">"Lossa från aktivitetsfält"</string>
-    <!-- no translation found for app_added_to_taskbar (6348755169793615171) -->
-    <skip />
-    <!-- no translation found for app_removed_from_taskbar (3471754847898675396) -->
-    <skip />
+    <string name="app_added_to_taskbar" msgid="6348755169793615171">"Appen har lagts till i aktivitetsfältet"</string>
+    <string name="app_removed_from_taskbar" msgid="3471754847898675396">"Appen har tagits bort från aktivitetsfältet"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"installera genvägar"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"Tillåter att en app lägger till genvägar utan åtgärd från användaren."</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"läsa inställningar och genvägar på startskärmen"</string>
@@ -149,12 +147,9 @@
     <string name="msg_disabled_by_admin" msgid="6898038085516271325">"Inaktiverat av administratören"</string>
     <string name="allow_rotation_title" msgid="7222049633713050106">"Tillåt rotering av startskärmen"</string>
     <string name="allow_rotation_desc" msgid="8662546029078692509">"När telefonen vrids"</string>
-    <!-- no translation found for compose_developer_options_section (8211460486549952595) -->
-    <skip />
-    <!-- no translation found for enable_composition_tracing_title (8989606591739368424) -->
-    <skip />
-    <!-- no translation found for enable_composition_tracing_desc (7187566039216492405) -->
-    <skip />
+    <string name="compose_developer_options_section" msgid="8211460486549952595">"Jetpack Compose"</string>
+    <string name="enable_composition_tracing_title" msgid="8989606591739368424">"Aktivera kompositionsspårning"</string>
+    <string name="enable_composition_tracing_desc" msgid="7187566039216492405">"Aktivera kompositionsspårning när du gör en perfetto-spårning i översikten"</string>
     <string name="landscape_mode_title" msgid="5138814555934843926">"Liggande"</string>
     <string name="landscape_mode_desc" msgid="3085236452297838664">"Ställ in liggande läge på startskärmen"</string>
     <string name="notification_dots_title" msgid="9062440428204120317">"Aviseringsprickar"</string>
