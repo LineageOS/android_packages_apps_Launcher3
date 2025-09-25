@@ -63,9 +63,9 @@ public class TaplDragTest extends AbstractLauncherUiTest<Launcher, View> {
      * folder instead of creating one and drags it to the folder.
      */
     @Test
-    @PortraitLandscape
+    // @PortraitLandscape b/446270864
     @PlatinumTest(focusArea = "launcher")
-    @ScreenRecordRule.ScreenRecord // b/383917141
+    @ScreenRecordRule.ScreenRecord // b/446270864
     public void testDragToFolder() {
         // TODO: add the use case to drag an icon to an existing folder. Currently it either fails
         // on tablets or phones due to difference in resolution.
