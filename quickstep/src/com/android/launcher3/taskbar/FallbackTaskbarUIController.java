@@ -183,6 +183,10 @@ public class FallbackTaskbarUIController
         return topTask.isHomeTask() || topTask.isRecentsTask();
     }
 
+    protected boolean isInOverviewUi() {
+        return mRecentsContainer.getStateManager().getState().isRecentsViewVisible();
+    }
+
     @Override
     protected String getTaskbarUIControllerName() {
         return "FallbackTaskbarUIController<" + mRecentsContainer.getClass().getSimpleName() + ">";

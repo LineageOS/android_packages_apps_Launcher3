@@ -1648,9 +1648,10 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                 || !mControllers.uiController.isInOverviewUi()
                 || recents.isSplitSelectionActive()) {
             executor.execute(runnableToRun);
+            return;
         }
 
-        recents.launchRunningDesktopTaskView(runnableToRun, executor);
+        recents.launchDesktopTaskView(runnableToRun, executor);
     }
 
     protected void onTaskbarIconClicked(View view) {
@@ -1924,10 +1925,10 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     private void launchFromTaskbar(
             @Nullable RecentsViewInteractor recents, @Nullable View launchingIconView,
             List<? extends ItemInfo> itemInfos) {
-        if (isInApp()) {
-            launchFromInAppTaskbar(recents, launchingIconView, itemInfos);
-        } else {
+        if (mControllers.uiController.isInOverviewUi()) {
             launchFromOverviewTaskbar(recents, launchingIconView, itemInfos);
+        } else {
+            launchFromInAppTaskbar(recents, launchingIconView, itemInfos);
         }
     }
 
