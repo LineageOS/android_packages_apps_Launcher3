@@ -18,6 +18,8 @@ package com.android.launcher3.util;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.THREAD_PRIORITY_FOREGROUND;
 
+import static com.android.launcher3.Flags.enableTaskbarUiThread;
+
 import android.os.Looper;
 import android.os.Process;
 
@@ -78,6 +80,10 @@ public class Executors {
             new LooperExecutor(Looper.getMainLooper(), THREAD_PRIORITY_FOREGROUND);
 
     public static final Executor IMMEDIATE_EXECUTOR = Runnable::run;
+
+    public static final Executor TASKBAR_UI_THREAD = enableTaskbarUiThread()
+            ? new LooperExecutor("TASKBAR_UI_THREAD", THREAD_PRIORITY_FOREGROUND)
+            : IMMEDIATE_EXECUTOR;
 
     /**
      * A background executor for using time sensitive actions where user is waiting for response.

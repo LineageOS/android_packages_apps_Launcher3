@@ -33,8 +33,8 @@ import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.PredictedContainerInfo;
 import com.android.launcher3.model.data.WorkspaceData;
-import com.android.launcher3.taskbar.handoff.HandoffSuggestion;
 import com.android.launcher3.taskbar.TaskbarView.TaskbarLayoutParams;
+import com.android.launcher3.taskbar.handoff.HandoffSuggestion;
 import com.android.launcher3.util.ItemInfoMatcher;
 import com.android.launcher3.util.LauncherBindableItemsContainer;
 import com.android.launcher3.util.PackageUserKey;
@@ -42,7 +42,6 @@ import com.android.launcher3.util.Preconditions;
 import com.android.quickstep.util.GroupTask;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;

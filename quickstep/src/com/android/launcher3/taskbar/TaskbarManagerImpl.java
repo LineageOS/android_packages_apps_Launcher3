@@ -17,8 +17,6 @@ package com.android.launcher3.taskbar;
 
 import static android.content.Context.RECEIVER_EXPORTED;
 import static android.content.Context.RECEIVER_NOT_EXPORTED;
-import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
-import static android.os.Process.THREAD_PRIORITY_FOREGROUND;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 
@@ -100,7 +98,6 @@ import com.android.launcher3.taskbar.unfold.NonDestroyableScopedUnfoldTransition
 import com.android.launcher3.uioverrides.QuickstepLauncher;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.LockedUserState;
-import com.android.launcher3.util.LooperExecutor;
 import com.android.launcher3.util.SettingsCache;
 import com.android.launcher3.util.SimpleBroadcastReceiver;
 import com.android.launcher3.util.window.WindowManagerProxy;
@@ -164,9 +161,6 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
 
     private static final Uri NAV_BAR_KIDS_MODE = Settings.Secure.getUriFor(
             Settings.Secure.NAV_BAR_KIDS_MODE);
-
-    public static final LooperExecutor TASKBAR_UI_THREAD =
-            new LooperExecutor("TASKBAR_UI_THREAD", THREAD_PRIORITY_FOREGROUND);
 
     private final Context mBaseContext;
     private final WindowManager mBaseWindowManager;
@@ -516,15 +510,6 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         for (Display display : mDisplayManager.getDisplays()) {
             onDisplayAddSystemDecorations(display.getDisplayId());
         }
-    }
-
-    public LooperExecutor getPerWindowUiExecutor() {
-        return TASKBAR_UI_THREAD;
-    }
-
-    private boolean getFreeformWindowsManagementInfo() {
-        return getPrimaryWindowContext().getPackageManager().hasSystemFeature(
-                FEATURE_FREEFORM_WINDOW_MANAGEMENT);
     }
 
     private void destroyAllTaskbars() {
