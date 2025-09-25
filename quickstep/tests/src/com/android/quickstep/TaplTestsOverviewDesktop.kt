@@ -269,8 +269,8 @@ class TaplTestsOverviewDesktop : AbstractQuickStepTest() {
             .that(mLauncher.activeDeskId)
             .isEqualTo(desk3Id)
 
-        // Cleanup: Go to overview and dismiss all tasks to prevent memory leak.
-        mLauncher.launchedAppState.switchToOverview().dismissAllTasks()
+        // Dismiss all tasks to prevent memory leak.
+        clearAllRecentTasks()
     }
 
     @Test

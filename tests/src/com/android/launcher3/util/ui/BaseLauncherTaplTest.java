@@ -513,9 +513,15 @@ public abstract class BaseLauncherTaplTest {
     }
 
     /** Clears all recent tasks */
-    protected void clearAllRecentTasks() {
-        if (!mLauncher.getRecentTasks().isEmpty()) {
-            mLauncher.goHome().switchToOverview().dismissAllTasks();
+    public void clearAllRecentTasks() {
+        mLauncher.goHome();
+        try {
+            getUiDevice().executeShellCommand(
+                    "dumpsys activity service SystemUIService WMShell desktopmode removeAllDesks");
+            getUiDevice().executeShellCommand(
+                    "dumpsys activity service SystemUIService WMShell recents clearAll");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }
