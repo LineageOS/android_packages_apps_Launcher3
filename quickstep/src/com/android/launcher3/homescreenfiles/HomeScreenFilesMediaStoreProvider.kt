@@ -22,10 +22,15 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.ContentObserver
 import android.net.Uri
+import android.os.Environment
 import android.os.Process
 import android.provider.DocumentsContract
 import android.provider.MediaStore
+import android.provider.MediaStore.Files.FileColumns.DATA
+import android.provider.MediaStore.Files.FileColumns.DISPLAY_NAME
+import android.provider.MediaStore.Files.FileColumns.MIME_TYPE
 import android.provider.MediaStore.Files.FileColumns.RELATIVE_PATH
+import android.provider.MediaStore.Files.FileColumns._ID
 import android.provider.MediaStore.VOLUME_EXTERNAL_PRIMARY
 import android.util.Log
 import androidx.annotation.WorkerThread
@@ -41,6 +46,7 @@ import java.util.concurrent.CompletableFuture.supplyAsync
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Future
+import java.util.concurrent.TimeUnit
 
 /** MediaStore-based implementation of [HomeScreenFilesProvider]. */
 class HomeScreenFilesMediaStoreProvider(
@@ -50,17 +56,34 @@ class HomeScreenFilesMediaStoreProvider(
 ) : HomeScreenFilesProvider {
     override val fileChanges = MutableListenableStream<FileChange>()
 
+    // Future that completes when the external storage directory mounts.
+    private val externalStorageDirectoryMountedFuture = CompletableFuture<Void>()
+
     // Tracks URI movements originating from calls to [#moveToHomeScreen()]. This allows us to:
     // (1) Disallow overlapping attempts to move a given URI, and
     // (2) Reconcile media store URIs with URI aliases from other content provider authorities.
     private val inProgressMoveToHomeScreenUriAliases = ConcurrentHashMap<Uri, Uri>()
 
     init {
-        val uri = MediaStore.Files.getContentUri(VOLUME_EXTERNAL_PRIMARY)
+        if (isExternalStorageDirectoryMounted()) {
+            externalStorageDirectoryMountedFuture.complete(null)
+        }
+
         val observer =
             object : ContentObserver(null) {
                 override fun onChange(selfChange: Boolean, uri: Uri?, flags: Int) {
-                    if (!selfChange && uri != null && uri.hasIdSegment()) {
+                    if (selfChange || uri == null) {
+                        return
+                    }
+
+                    // NOTE: The media provider dispatches an event during both mount and unmount.
+                    with(externalStorageDirectoryMountedFuture) {
+                        if (!isDone && isExternalStorageDirectoryMounted()) {
+                            complete(null)
+                        }
+                    }
+
+                    if (uri.hasIdSegment()) {
                         fileChanges.dispatchValue(
                             FileChange(
                                 uri,
@@ -72,6 +95,8 @@ class HomeScreenFilesMediaStoreProvider(
                     }
                 }
             }
+
+        val uri = MediaStore.Files.getContentUri(VOLUME_EXTERNAL_PRIMARY)
         context.contentResolver.registerContentObserver(uri, true, observer)
         lifecycle.addCloseable { context.contentResolver.unregisterContentObserver(observer) }
     }
@@ -121,40 +146,64 @@ class HomeScreenFilesMediaStoreProvider(
     override fun query(): Lazy<Map<Uri, HomeScreenFile>> {
         val query: Callable<Map<Uri, HomeScreenFile>> = Callable {
             val result = mutableMapOf<Uri, HomeScreenFile>()
-            context.contentResolver
-                .query(
-                    MediaStore.Files.getContentUri(VOLUME_EXTERNAL_PRIMARY),
-                    arrayOf(MediaStore.Files.FileColumns._ID).plus(QUERY_DEFAULT_PROJECTION),
-                    QUERY_DEFAULT_SELECTION,
-                    QUERY_DEFAULT_SELECTION_ARGS,
-                    null,
-                    null,
-                )
-                ?.use {
-                    val idColumnIndex = it.getColumnIndex(MediaStore.Files.FileColumns._ID)
-                    val displayNameColumnIndex =
-                        it.getColumnIndex(MediaStore.Files.FileColumns.DISPLAY_NAME)
-                    val mimeTypeColumnIndex =
-                        it.getColumnIndex(MediaStore.Files.FileColumns.MIME_TYPE)
-                    val dataColumnIndex = it.getColumnIndex(MediaStore.Files.FileColumns.DATA)
-                    val user = Process.myUserHandle()
+            try {
+                context.contentResolver
+                    .query(
+                        MediaStore.Files.getContentUri(VOLUME_EXTERNAL_PRIMARY),
+                        arrayOf(_ID).plus(QUERY_DEFAULT_PROJECTION),
+                        QUERY_DEFAULT_SELECTION,
+                        QUERY_DEFAULT_SELECTION_ARGS,
+                        null,
+                        null,
+                    )
+                    ?.use {
+                        val idColumnIndex = it.getColumnIndex(_ID)
+                        val displayNameColumnIndex = it.getColumnIndex(DISPLAY_NAME)
+                        val mimeTypeColumnIndex = it.getColumnIndex(MIME_TYPE)
+                        val dataColumnIndex = it.getColumnIndex(DATA)
+                        val user = Process.myUserHandle()
 
-                    while (it.moveToNext()) {
-                        val id = it.getLong(idColumnIndex)
-                        val uri = MediaStore.Files.getContentUri(VOLUME_EXTERNAL_PRIMARY, id)
-                        result[uri] =
-                            HomeScreenFile(
-                                uri = uri,
-                                displayName = it.getString(displayNameColumnIndex),
-                                mimeType = it.getStringOrNull(mimeTypeColumnIndex),
-                                isDirectory = File(it.getString(dataColumnIndex)).isDirectory,
-                                user = user,
-                            )
+                        while (it.moveToNext()) {
+                            val id = it.getLong(idColumnIndex)
+                            val uri = MediaStore.Files.getContentUri(VOLUME_EXTERNAL_PRIMARY, id)
+                            result[uri] =
+                                HomeScreenFile(
+                                    uri = uri,
+                                    displayName = it.getString(displayNameColumnIndex),
+                                    mimeType = it.getStringOrNull(mimeTypeColumnIndex),
+                                    isDirectory = File(it.getString(dataColumnIndex)).isDirectory,
+                                    user = user,
+                                )
+                        }
                     }
-                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to query '$HOME_SCREEN_FOLDER_RELATIVE_PATH'", e)
+            }
             return@Callable result
         }
-        val future = executorService.submit(query)
+
+        // TODO(b/444563784): Implement more robust solution that doesn't block loader task thread.
+        // NOTE: The external storage directory may not have been mounted when [#query()] is called
+        // since it is called early in the both the user session and application lifecycles. Giving
+        // the directory an opportunity to mount is a temporary solution which has the potential to
+        // block the loader task thread, though the clock starts when the loader task is created,
+        // not when it is run. This will be replaced with a more robust solution that does not block
+        // the loader task prior to feature launch.
+        val future =
+            externalStorageDirectoryMountedFuture
+                .orTimeout(500, TimeUnit.MILLISECONDS)
+                .handleAsync(
+                    { _, throwable ->
+                        if (throwable != null) {
+                            Log.e(TAG, "External storage directory not mounted", throwable)
+                            emptyMap()
+                        } else {
+                            query.call()
+                        }
+                    },
+                    executorService,
+                )
+
         return lazy { future.get() }
     }
 
@@ -176,11 +225,9 @@ class HomeScreenFilesMediaStoreProvider(
                 ?.use {
                     if (it.count == 1) {
                         it.moveToFirst()
-                        val displayNameColumnIndex =
-                            it.getColumnIndex(MediaStore.Files.FileColumns.DISPLAY_NAME)
-                        val mimeTypeColumnIndex =
-                            it.getColumnIndex(MediaStore.Files.FileColumns.MIME_TYPE)
-                        val dataColumnIndex = it.getColumnIndex(MediaStore.Files.FileColumns.DATA)
+                        val displayNameColumnIndex = it.getColumnIndex(DISPLAY_NAME)
+                        val mimeTypeColumnIndex = it.getColumnIndex(MIME_TYPE)
+                        val dataColumnIndex = it.getColumnIndex(DATA)
                         HomeScreenFile(
                             uri = uri,
                             displayName = it.getString(displayNameColumnIndex),
@@ -197,16 +244,14 @@ class HomeScreenFilesMediaStoreProvider(
     }
 
     companion object {
-        private val QUERY_DEFAULT_PROJECTION =
-            arrayOf(
-                MediaStore.Files.FileColumns.DISPLAY_NAME,
-                MediaStore.Files.FileColumns.MIME_TYPE,
-                MediaStore.Files.FileColumns.DATA,
-            )
-        private const val QUERY_DEFAULT_SELECTION =
-            "${MediaStore.Files.FileColumns.RELATIVE_PATH} = ?"
+        private val QUERY_DEFAULT_PROJECTION = arrayOf(DISPLAY_NAME, MIME_TYPE, DATA)
+        private const val QUERY_DEFAULT_SELECTION = "$RELATIVE_PATH = ?"
         private val QUERY_DEFAULT_SELECTION_ARGS = arrayOf(HOME_SCREEN_FOLDER_RELATIVE_PATH)
         private const val TAG = "HomeScreenFilesMediaStoreProvider"
+
+        private fun isExternalStorageDirectoryMounted() =
+            Environment.getExternalStorageState(Environment.getExternalStorageDirectory()) ==
+                Environment.MEDIA_MOUNTED
 
         private fun isExternalStorageProviderUri(uri: Uri?) =
             uri?.scheme == ContentResolver.SCHEME_CONTENT &&
