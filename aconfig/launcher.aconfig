@@ -691,3 +691,10 @@ flag {
   description: "Enable background blur at app launch"
   bug: "379905951"
 }
+
+flag {
+  name: "blur_on_more_surfaces"
+  namespace: "launcher"
+  description: "Enable blur in more Launcher surfaces"
+  bug: "444141641"
+}
