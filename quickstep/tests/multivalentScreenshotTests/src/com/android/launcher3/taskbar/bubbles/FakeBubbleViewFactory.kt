@@ -57,6 +57,7 @@ object FakeBubbleViewFactory {
                 false,
                 true,
                 null,
+                false,
             )
         return BubbleCreator(context)
             .populateBubble(
