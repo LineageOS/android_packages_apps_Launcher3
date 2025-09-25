@@ -218,6 +218,9 @@ class TaskbarInteractor(private val taskbarUIController: TaskbarUIController) {
         callbacks: RecentsAnimationCallbacks,
     ) = taskbarUIController.getParallelAnimationToGestureEndTarget(endTarget, duration, callbacks)
 
+    @AnyThread
+    fun shouldAllowTaskbarToAutoStash() = taskbarUIController.shouldAllowTaskbarToAutoStash()
+
     @Deprecated(
         "Should be removed once we turned on [refactorTaskbarUiState()] flag",
         ReplaceWith("TaskbarUiState.isEventOverBubbleBarViews()"),
@@ -273,10 +276,4 @@ class TaskbarInteractor(private val taskbarUIController: TaskbarUIController) {
         ReplaceWith("TaskbarUiState.isTaskbarAllAppsOpenRef().value()"),
     )
     fun isTaskbarAllAppsOpen() = taskbarUIController.isTaskbarAllAppsOpen
-
-    @Deprecated(
-        "Should be removed once we turned on [refactorTaskbarUiState()] flag",
-        ReplaceWith("TaskbarUiState.getShowDesktopTaskbarForFreeformDisplayRef().value()"),
-    )
-    fun shouldAllowTaskbarToAutoStash() = taskbarUIController.shouldAllowTaskbarToAutoStash()
 }

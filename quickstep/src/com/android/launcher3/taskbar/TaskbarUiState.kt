@@ -22,6 +22,7 @@ import androidx.annotation.Px
 import com.android.launcher3.DeviceProfile
 import com.android.launcher3.util.ImmutableRect
 import com.android.launcher3.util.MutableListenableRef
+import com.android.launcher3.util.NavigationMode
 
 /**
  * Data class that represents taskbar's UI states. This state is shared to launcher and recents.
@@ -86,6 +87,8 @@ class TaskbarUiState {
     private var _navbarFloatingRotationButtonsBounds = ImmutableRect.EMPTY_RECT
 
     private var _deviceProfile = DeviceProfile.DEFAULT_DEVICE_PROFILE
+    private var _navigationMode = NavigationMode.THREE_BUTTONS
+    private var _isTransient = false
 
     fun setHasBubble(hasBubbles: Boolean) {
         _hasBubblesRef.diffAndDispatch(hasBubbles)
@@ -134,6 +137,19 @@ class TaskbarUiState {
     fun setIsPrimaryDisplay(isPrimaryDisplay: Boolean) {
         _isPrimaryDisplayRef.diffAndDispatch(isPrimaryDisplay)
     }
+
+    fun setIsTransient(isTransient: Boolean) {
+        _isTransient = isTransient
+    }
+
+    fun setNavigationMode(navigationMode: NavigationMode) {
+        _navigationMode = navigationMode
+    }
+
+    fun isThreeButtonNav() = _navigationMode == NavigationMode.THREE_BUTTONS
+
+    fun isTransientTaskbar() =
+        _isTransient && isPrimaryDisplayRef.value && !_deviceProfile.deviceProperties.isPhone
 
     fun isEventOverBubbleBarViews(ev: MotionEvent): Boolean {
         return isEventOverBubbleBarView(ev) || isEventOverStashedHandler(ev)

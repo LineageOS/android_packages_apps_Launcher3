@@ -117,7 +117,6 @@ import com.android.internal.util.LatencyTracker;
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.BuildConfig;
 import com.android.launcher3.DeviceProfile;
-import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.LifecycleTracker;
 import com.android.launcher3.QuickstepTransitionManager;
 import com.android.launcher3.R;
@@ -3188,43 +3187,9 @@ public abstract class AbsSwipeUpHandler<
     }
 
     private boolean shouldAllowTaskbarToAutoStash() {
-        if (refactorTaskbarUiState()) {
-            final boolean ret = newShouldAllowTaskbarToAutoStash();
-            if (BuildConfig.IS_STUDIO_BUILD && ret != legacyShouldAllowTaskbarToAutoStash()) {
-                throw new IllegalStateException("shouldAllowTaskbarToAutoStash() doesn't match");
-            }
-            return ret;
-        } else {
-            return legacyShouldAllowTaskbarToAutoStash();
-        }
-    }
-
-    private boolean legacyShouldAllowTaskbarToAutoStash() {
         return mContainerInterface.getTaskbarInteractor() == null
                 ? mIsTransientTaskbar
                 : mContainerInterface.getTaskbarInteractor().shouldAllowTaskbarToAutoStash();
-    }
-
-    private boolean newShouldAllowTaskbarToAutoStash() {
-        final int displayId = mContext.getDisplayId();
-        final TaskbarUiState taskbarUiState = TaskbarUiStateMonitor.INSTANCE.get(mContext)
-                .getTaskbarUiState(displayId);
-
-        // Mimic TaskbarActivityContext.isTransientTaskbar
-        final boolean isInPhoneMode = mDp.getDeviceProperties().isPhone() && !mDp.isTaskbarPresent;
-        if (mIsTransientTaskbar
-                && taskbarUiState.isPrimaryDisplayRef().getValue() && !isInPhoneMode) {
-            return true;
-        }
-
-        final boolean isTaskbarPinningOnInDesktopMode =
-                LauncherPrefs.TASKBAR_PINNING_IN_DESKTOP_MODE.get(mContext);
-        final boolean isTaskbarShowingDesktopTasks =
-                DesktopVisibilityController.INSTANCE.get(mContext).isInDesktopMode(displayId)
-                || taskbarUiState.getShowDesktopTaskbarForFreeformDisplayRef().getValue()
-                || (taskbarUiState.getShowLockedTaskbarOnHome().getValue()
-                        && taskbarUiState.isTaskbarOnHomeRef().getValue());
-        return !isTaskbarPinningOnInDesktopMode && isTaskbarShowingDesktopTasks;
     }
 
     private void setDividerShown(boolean shown) {
