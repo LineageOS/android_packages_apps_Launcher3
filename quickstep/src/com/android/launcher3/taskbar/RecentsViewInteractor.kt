@@ -32,12 +32,14 @@ import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
 import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.SplitConfigurationOptions
+import com.android.quickstep.util.GroupTask
 import com.android.quickstep.views.RecentsView
 import com.android.quickstep.views.TaskView
 import com.android.systemui.shared.recents.model.Task
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executor
 import java.util.function.Consumer
+import java.util.function.Predicate
 import javax.annotation.concurrent.ThreadSafe
 
 /**
@@ -113,12 +115,14 @@ class RecentsViewInteractor(private val recentsView: RecentsView<*, *>) {
 
     @AnyThread
     fun findLastActiveTasksAndRunCallback(
+        filter: Predicate<GroupTask>,
         resolvedTargetInfos: List<ResolvedTargetInfo>?,
         findExactPairMatch: Boolean,
         callback: Consumer<Array<Task>>,
     ) {
         mainExecutor.execute {
             recentsView.splitSelectController?.findLastActiveTasksAndRunCallback(
+                filter,
                 resolvedTargetInfos,
                 findExactPairMatch,
                 callback,

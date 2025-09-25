@@ -44,6 +44,8 @@ import com.android.launcher3.util.SplitConfigurationOptions;
 import com.android.launcher3.util.ThreadedAnimator;
 import com.android.quickstep.GestureState;
 import com.android.quickstep.RecentsAnimationCallbacks;
+import com.android.quickstep.RecentsFilterState;
+import com.android.quickstep.util.GroupTask;
 import com.android.quickstep.util.SplitTask;
 import com.android.quickstep.views.TaskContainer;
 import com.android.quickstep.views.TaskView;
@@ -54,6 +56,7 @@ import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
 import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
@@ -275,6 +278,7 @@ public class TaskbarUIController implements BubbleBarController.BubbleBarLocatio
         }
 
         recentsView.findLastActiveTasksAndRunCallback(
+                RecentsFilterState.getDesktopTaskFilter(),
                 Collections.singletonList(splitSelectSource.getItemInfo().getResolvedTargetInfo()),
                 false /* findExactPairMatch */,
                 foundTasks -> {
@@ -314,7 +318,8 @@ public class TaskbarUIController implements BubbleBarController.BubbleBarLocatio
     /**
      * Uses the clicked Taskbar icon to launch a second app for splitscreen.
      */
-    public void triggerSecondAppForSplit(ItemInfoWithIcon info, Intent intent, View startingView) {
+    public void triggerSecondAppForSplit(ItemInfoWithIcon info, Intent intent, View startingView,
+            Predicate<GroupTask> filter) {
         // When launching from Taskbar, e.g. from Overview, set FLAG_IN_APP immediately
         // to reduce potential visual noise during the app open transition.
         if (mControllers.taskbarStashController != null) {
@@ -324,6 +329,7 @@ public class TaskbarUIController implements BubbleBarController.BubbleBarLocatio
 
         RecentsViewInteractor recents = getRecentsViewInteractor();
         recents.findLastActiveTasksAndRunCallback(
+                filter,
                 Collections.singletonList(info.getResolvedTargetInfo()),
                 false /* findExactPairMatch */,
                 foundTasks -> {

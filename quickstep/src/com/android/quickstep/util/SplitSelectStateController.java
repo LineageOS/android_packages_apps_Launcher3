@@ -99,6 +99,7 @@ import com.android.quickstep.OverviewComponentObserver;
 import com.android.quickstep.RecentsAnimationCallbacks;
 import com.android.quickstep.RecentsAnimationController;
 import com.android.quickstep.RecentsAnimationTargets;
+import com.android.quickstep.RecentsFilterState;
 import com.android.quickstep.RecentsModel;
 import com.android.quickstep.RemoteAnimationTargets;
 import com.android.quickstep.SplitSelectionListener;
@@ -123,6 +124,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * Represent data needed for the transient state when user has selected one app for split screen
@@ -253,6 +255,18 @@ public class SplitSelectStateController {
         createAndLogInstanceIdsForSession();
     }
 
+
+    /**
+     * A version of {@link #findLastActiveTasksAndRunCallback(Predicate, List, boolean, Consumer)}
+     * that always filters out desktop tasks.
+     */
+    public void findLastActiveTasksAndRunCallback(
+            @Nullable List<ResolvedTargetInfo> resolvedTargetInfos, boolean findExactPairMatch,
+            Consumer<Task[]> callback) {
+        findLastActiveTasksAndRunCallback(RecentsFilterState.getDesktopTaskFilter(),
+                resolvedTargetInfos, findExactPairMatch, callback);
+    }
+
     /**
      * Given a list of task keys, searches through active Tasks in RecentsModel to find the last
      * active instances of these tasks.
@@ -262,12 +276,11 @@ public class SplitSelectStateController {
      *                                             the Activity that the associated Intent.
      * @param callback The callback that will be executed on the list of found tasks.
      * @param findExactPairMatch If {@code true}, only finds tasks that contain BOTH of the wanted
-     *                           tasks (i.e. searching for a running pair of tasks.)
-     */
-    public void findLastActiveTasksAndRunCallback(
+     *                           tasks (i.e. searching for a running pair of tasks.)*/
+    public void findLastActiveTasksAndRunCallback(Predicate<GroupTask> filter,
             @Nullable List<ResolvedTargetInfo> resolvedTargetInfos,
             boolean findExactPairMatch, Consumer<Task[]> callback) {
-        mRecentTasksModel.getTasks(taskGroups -> {
+        mRecentTasksModel.getTasks(filter, taskGroups -> {
             if (resolvedTargetInfos == null
                     || resolvedTargetInfos.isEmpty()) {
                 callback.accept(new Task[]{});
