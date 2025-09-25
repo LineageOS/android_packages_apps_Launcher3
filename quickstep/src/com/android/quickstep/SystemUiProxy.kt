@@ -57,14 +57,14 @@ import com.android.internal.logging.InstanceId
 import com.android.internal.util.ScreenshotRequest
 import com.android.internal.view.AppearanceRegion
 import com.android.launcher3.Flags
+import com.android.launcher3.concurrent.annotations.LightweightBackground
+import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority.UI
+import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.taskbar.bubbles.BubbleActivityStarter
 import com.android.launcher3.util.DaggerSingletonObject
-import com.android.launcher3.concurrent.annotations.LightweightBackground
-import com.android.launcher3.concurrent.annotations.Ui
-import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority.UI
 import com.android.launcher3.util.LooperExecutor
 import com.android.launcher3.util.Preconditions
 import com.android.launcher3.util.SplitConfigurationOptions.StagePosition
@@ -119,10 +119,12 @@ import javax.inject.Inject
 
 /** Holds the reference to SystemUI. */
 @LauncherAppSingleton
-class SystemUiProxy @Inject constructor(
+class SystemUiProxy
+@Inject
+constructor(
     @ApplicationContext private val context: Context,
     @Ui private val uiExecutor: Executor,
-    @LightweightBackground(priority = UI) private val lightweightBackgroundExecutor: LooperExecutor
+    @LightweightBackground(priority = UI) private val lightweightBackgroundExecutor: LooperExecutor,
 ) : NavHandle {
 
     private var systemUiProxy: ISystemUiProxy? = null
@@ -976,9 +978,9 @@ class SystemUiProxy @Inject constructor(
      * Call the desktop mode interface to start a TRANSIT_OPEN transition when launching an intent
      * from the taskbar so that it can be handled in desktop mode.
      */
-    fun startLaunchIntentTransition(intent: Intent, options: Bundle, displayId: Int) =
+    fun startLaunchIntentTransition(pendingIntent: PendingIntent, options: Bundle, displayId: Int) =
         executeWithErrorLog({ "Failed call startLaunchIntentTransition" }) {
-            desktopMode?.startLaunchIntentTransition(intent, options, displayId)
+            desktopMode?.startLaunchIntentTransition(pendingIntent, options, displayId)
         }
 
     //
