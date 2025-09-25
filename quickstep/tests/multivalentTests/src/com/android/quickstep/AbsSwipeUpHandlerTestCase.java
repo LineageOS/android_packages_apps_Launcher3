@@ -78,13 +78,13 @@ import com.android.launcher3.dragndrop.DragLayer;
 import com.android.launcher3.statemanager.BaseState;
 import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.statemanager.StatefulContainer;
-import com.android.launcher3.util.ThreadedAnimator;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.Executors;
 import com.android.launcher3.util.ImmediateAnimator;
 import com.android.launcher3.util.MSDLPlayerWrapper;
 import com.android.launcher3.util.SandboxApplication;
 import com.android.launcher3.util.SystemUiController;
+import com.android.launcher3.util.ThreadedAnimator;
 import com.android.quickstep.util.ActiveGestureLog;
 import com.android.quickstep.util.ContextInitListener;
 import com.android.quickstep.util.MotionPauseDetector;
@@ -109,6 +109,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 
 public abstract class AbsSwipeUpHandlerTestCase<
         STATE_TYPE extends BaseState<STATE_TYPE>,
@@ -707,6 +710,59 @@ public abstract class AbsSwipeUpHandlerTestCase<
                 /* isTrackpadGesture= */ false,
                 /* updateBackgroundAlpha= */ true);
         verify(getRecentsView(), never()).moveRunningTaskToExpectedPosition();
+    }
+
+    @Test
+    public void testDeferLifecycleOnDestroyFlags_cleanedUp_OnSwipeHandlerInvalidated() {
+        SWIPE_HANDLER handler = createSwipeHandler();
+
+        assertEquals(
+                /* message= */ "AbsSwipeUpHandler.mDeferLifecycleOnDestroyFlags was not initialized"
+                        + " properly",
+                /* expected= */ AbsSwipeUpHandler.HANDLER_VALID,
+                /* actual= */ handler.mDeferLifecycleOnDestroyFlags);
+
+        runOnMainSync(() -> handler.mStateCallback.setState(STATE_HANDLER_INVALIDATED));
+
+        assertEquals(
+                /* message= */ "State flag NOT_INVALIDATED was not cleaned up from "
+                        + "AbsSwipeUpHandler.mDeferLifecycleOnDestroyFlags on invalidate",
+                /* expected= */ 0,
+                /* actual= */ handler.mDeferLifecycleOnDestroyFlags);
+    }
+
+    @Test
+    public void testDeferLifecycleOnDestroyFlags_cleanedUp_afterLaunchWithoutAnimationCallback() {
+        SWIPE_HANDLER handler = createSwipeHandler();
+        ArgumentCaptor<Function1<Boolean, Unit>> callbackCaptor =
+                ArgumentCaptor.forClass(Function1.class);
+
+        handler.startNewTask(mNextPageTaskView, unused -> {});
+        verify(mNextPageTaskView).launchWithoutAnimation(anyBoolean(), callbackCaptor.capture());
+
+        assertEquals(
+                /* message= */ "AbsSwipeUpHandler.mDeferLifecycleOnDestroyFlags not initialized "
+                        + "properly",
+                /* expected= */ AbsSwipeUpHandler.HANDLER_VALID
+                        | AbsSwipeUpHandler.LAUNCH_WITHOUT_ANIMATION_CALLBACK_PENDING,
+                /* actual= */ handler.mDeferLifecycleOnDestroyFlags);
+
+        runOnMainSync(() -> handler.mStateCallback.setState(STATE_HANDLER_INVALIDATED));
+
+        assertEquals(
+                /* message= */ "State flag NOT_INVALIDATED was not cleaned up from "
+                        + "AbsSwipeUpHandler.mDeferLifecycleOnDestroyFlags on invalidate",
+                /* expected= */ AbsSwipeUpHandler.LAUNCH_WITHOUT_ANIMATION_CALLBACK_PENDING,
+                /* actual= */ handler.mDeferLifecycleOnDestroyFlags);
+
+        callbackCaptor.getValue().invoke(true);
+
+        assertEquals(
+                /* message= */ "State flag LAUNCH_WITHOUT_ANIMATION_CALLBACK_PENDING was not "
+                        + "cleaned up from AbsSwipeUpHandler.mDeferLifecycleOnDestroyFlags on "
+                        + "launchWithoutAnimation callback",
+                /* expected= */ 0,
+                /* actual= */ handler.mDeferLifecycleOnDestroyFlags);
     }
 
     /**
