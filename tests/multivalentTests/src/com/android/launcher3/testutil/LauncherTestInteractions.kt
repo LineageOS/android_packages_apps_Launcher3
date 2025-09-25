@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.util
+package com.android.launcher3.testutil
 
 import android.content.Intent
 import android.view.View
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.Launcher
+import com.android.launcher3.LauncherState
 import com.android.launcher3.R
 import com.android.launcher3.allapps.AllAppsStore.DEFER_UPDATES_TEST
 import com.android.launcher3.integration.util.LauncherActivityScenarioRule
+import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.util.Executors
+import com.android.launcher3.util.LooperExecutor
+import com.android.launcher3.util.TestUtil
 
 /** Common shared test interactions with the Launcher activity [LauncherActivityScenarioRule]. */
 class LauncherTestInteractions<LAUNCHER_TYPE : Launcher>(
@@ -71,5 +76,20 @@ class LauncherTestInteractions<LAUNCHER_TYPE : Launcher>(
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         getInstrumentation().targetContext.startActivity(intent)
         UiDevice.getInstance(getInstrumentation()).waitForIdle()
+    }
+
+    /** Open all-apps and scrolls to the item satisfying [predicate] */
+    fun scrollToAllAppIcon(predicate: (ItemInfo) -> Boolean) {
+        launcherActivity.goToState(LauncherState.ALL_APPS)
+        freezeAllApps()
+        launcherActivity.executeOnLauncher { l ->
+            l.hideKeyboard()
+            val rv = l.appsView.activeRecyclerView
+            val pos =
+                rv.apps.adapterItems.indexOfFirst { i ->
+                    i.itemInfo != null && predicate.invoke(i.itemInfo)
+                }
+            rv.layoutManager!!.scrollToPosition(pos)
+        }
     }
 }
