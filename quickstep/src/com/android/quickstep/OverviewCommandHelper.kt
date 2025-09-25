@@ -34,6 +34,7 @@ import com.android.app.displaylib.PerDisplayRepository
 import com.android.app.tracing.traceSection
 import com.android.internal.jank.Cuj
 import com.android.launcher3.DeviceProfile
+import com.android.launcher3.anim.AnimatorListeners
 import com.android.launcher3.concurrent.annotations.LightweightBackground
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority
 import com.android.launcher3.concurrent.annotations.Ui
@@ -56,6 +57,8 @@ import com.android.quickstep.OverviewCommandHelper.CommandType.SHOW_WITH_FOCUS
 import com.android.quickstep.OverviewCommandHelper.CommandType.TOGGLE
 import com.android.quickstep.OverviewCommandHelper.CommandType.TOGGLE_OVERVIEW_PREVIOUS
 import com.android.quickstep.OverviewCommandHelper.CommandType.TOGGLE_WITH_FOCUS
+import com.android.quickstep.fallback.RecentsState
+import com.android.quickstep.fallback.toRecentsState
 import com.android.quickstep.util.ActiveGestureLog
 import com.android.quickstep.util.ActiveGestureProtoLogProxy
 import com.android.quickstep.views.DesktopTaskView
@@ -276,17 +279,31 @@ constructor(
             }
 
             TOGGLE -> {
-                val runningTaskId = recentsView.runningTaskView?.taskIdSet
-                launchTask(
-                    recentsView,
-                    getNextToggledTaskView(recentsView, command.displayId),
-                    command,
-                ) {
-                    if (runningTaskId != null) {
-                        lastToggleInfo[command.displayId] =
-                            ToggleInfo(command.createTime, runningTaskId)
+                val recentsState = recentsView.getStateManager().state.toRecentsState()
+                if (recentsState == RecentsState.MODAL_TASK) {
+                    val recentsViewContainer =
+                        getContainerInterface(command.displayId)?.getCreatedContainer()
+                    if (recentsViewContainer != null) {
+                        val listener =
+                            AnimatorListeners.forEndCallback(Runnable { onCallbackResult() })
+                        recentsViewContainer.goToRecentsState(RecentsState.DEFAULT, true, listener)
+                        false
+                    } else {
+                        true
                     }
-                    onCallbackResult()
+                } else {
+                    val runningTaskId = recentsView.runningTaskView?.taskIdSet
+                    launchTask(
+                        recentsView,
+                        getNextToggledTaskView(recentsView, command.displayId),
+                        command,
+                    ) {
+                        if (runningTaskId != null) {
+                            lastToggleInfo[command.displayId] =
+                                ToggleInfo(command.createTime, runningTaskId)
+                        }
+                        onCallbackResult()
+                    }
                 }
             }
             TOGGLE_OVERVIEW_PREVIOUS -> {

@@ -1726,7 +1726,9 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     }
 
     @Override
-    public void goToRecentsState(RecentsState recentsState, boolean animated) {
-        getStateManager().goToState(RecentsStateUtilsKt.toLauncherState(recentsState), animated);
+    public void goToRecentsState(RecentsState recentsState, boolean animated,
+            Animator.AnimatorListener listener) {
+        getStateManager().goToState(RecentsStateUtilsKt.toLauncherState(recentsState), animated,
+                listener);
     }
 }

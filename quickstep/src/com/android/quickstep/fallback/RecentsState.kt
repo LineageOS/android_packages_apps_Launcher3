@@ -179,7 +179,7 @@ open class RecentsState(@JvmField val ordinal: Int, private val mFlags: Int) :
 
     private class ModalState(id: Int, flags: Int) : RecentsState(id, flags) {
         override fun onBackInvoked(container: RecentsViewContainer) {
-            container.goToRecentsState(DEFAULT, true)
+            container.goToRecentsState(DEFAULT, true, /* listener= */ null)
         }
 
         override fun onBackStarted(container: RecentsViewContainer) {
