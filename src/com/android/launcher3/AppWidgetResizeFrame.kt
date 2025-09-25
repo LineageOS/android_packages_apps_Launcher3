@@ -563,19 +563,6 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         widgetView.requestLayout()
     }
 
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-
-        launcher.dragController.removeDragListener(this)
-        // We are done with resizing the widget. Save the widget size & position to LauncherModel
-        resizeWidgetIfNeeded(true)
-        launcher.statsLogManager
-            .logger()
-            .withInstanceId(logInstanceId)
-            .withItemInfo(widgetView.tag as ItemInfo)
-            .log(LauncherEvent.LAUNCHER_WIDGET_RESIZE_COMPLETED)
-    }
-
     private fun onTouchUp() {
         val dp = launcher.deviceProfile
         val xThreshold = cellLayout.cellWidth + dp.workspaceIconProfile.cellLayoutBorderSpacePx.x
@@ -791,6 +778,15 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         dragLayer.removeView(this)
         widgetView.removeOnLayoutChangeListener(widgetViewLayoutListener)
         launcher.dragController.removeDragListener(this)
+
+        // We are done with resizing the widget. Save the widget size & position to LauncherModel
+        resizeWidgetIfNeeded(true)
+
+        launcher.statsLogManager
+            .logger()
+            .withInstanceId(logInstanceId)
+            .withItemInfo(widgetView.tag as ItemInfo)
+            .log(LauncherEvent.LAUNCHER_WIDGET_RESIZE_COMPLETED)
     }
 
     private fun updateInvalidResizeEffect(
