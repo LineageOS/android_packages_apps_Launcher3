@@ -34,8 +34,6 @@ import androidx.test.filters.LargeTest;
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.Launcher;
-import com.android.launcher3.LauncherState;
-import com.android.launcher3.allapps.AllAppsRecyclerView;
 import com.android.launcher3.dagger.LauncherComponentProvider;
 import com.android.launcher3.icons.mono.ThemedIconDelegate;
 import com.android.launcher3.popup.ArrowPopup;
@@ -62,7 +60,6 @@ public class ThemeIconsTest extends BaseLauncherActivityTest<Launcher> {
         setThemeEnabled(false);
         new FavoriteItemsTransaction(targetContext()).commit();
         loadLauncherSync();
-        switchToAllApps();
 
         scrollToAppIcon(APP_NAME);
         BubbleTextView btv = getLauncherActivity().getFromLauncher(
@@ -78,7 +75,6 @@ public class ThemeIconsTest extends BaseLauncherActivityTest<Launcher> {
         setThemeEnabled(false);
         new FavoriteItemsTransaction(targetContext()).commit();
         loadLauncherSync();
-        switchToAllApps();
 
         scrollToAppIcon(TEST_APP_NAME);
         BubbleTextView btv = getLauncherActivity().getFromLauncher(
@@ -101,7 +97,6 @@ public class ThemeIconsTest extends BaseLauncherActivityTest<Launcher> {
         setThemeEnabled(true);
         new FavoriteItemsTransaction(targetContext()).commit();
         loadLauncherSync();
-        switchToAllApps();
 
         scrollToAppIcon(APP_NAME);
         BubbleTextView btv = getLauncherActivity().getFromLauncher(
@@ -117,7 +112,6 @@ public class ThemeIconsTest extends BaseLauncherActivityTest<Launcher> {
     public void testShortcutIconWithTheme() throws Exception {
         setThemeEnabled(true);
         loadLauncherSync();
-        switchToAllApps();
 
         scrollToAppIcon(TEST_APP_NAME);
         BubbleTextView btv = getLauncherActivity().getFromLauncher(
@@ -170,20 +164,8 @@ public class ThemeIconsTest extends BaseLauncherActivityTest<Launcher> {
         assertTrue(result > 0);
     }
 
-    private void switchToAllApps() {
-        getLauncherActivity().goToState(LauncherState.ALL_APPS);
-        getLauncherTestInteractions().freezeAllApps();
-    }
-
     private void scrollToAppIcon(String appName) {
-        getLauncherActivity().executeOnLauncher(l -> {
-            l.hideKeyboard();
-            AllAppsRecyclerView rv = l.getAppsView().getActiveRecyclerView();
-            int pos = rv.getApps().getAdapterItems().indexOf(rv.getApps().getAdapterItems().stream()
-                    .filter(i -> i.itemInfo != null && appName.equals(i.itemInfo.title.toString()))
-                    .findFirst()
-                    .get());
-            rv.getLayoutManager().scrollToPosition(pos);
-        });
+        getLauncherTestInteractions().scrollToAllAppIcon(
+                info -> appName.equals(info.title.toString()));
     }
 }

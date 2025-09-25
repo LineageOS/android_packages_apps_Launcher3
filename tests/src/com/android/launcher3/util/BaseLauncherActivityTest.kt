@@ -21,6 +21,7 @@ import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherAppState
 import com.android.launcher3.integration.util.LauncherActivityScenarioRule
+import com.android.launcher3.testutil.LauncherTestInteractions
 import com.android.launcher3.testutil.Wait.atMost
 import com.android.launcher3.util.ModelTestExtensions.loadModelSync
 import org.junit.Rule

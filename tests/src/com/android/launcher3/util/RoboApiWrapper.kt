@@ -16,23 +16,14 @@
 
 package com.android.launcher3.util
 
-import android.content.ContentResolver
-import android.net.Uri
 import android.os.Handler
 import android.os.Looper
+import com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn
 import com.android.launcher3.util.rule.ShellCommandRule
-import java.io.InputStream
 import java.util.concurrent.CompletableFuture
-import java.util.function.Supplier
 import org.junit.rules.TestRule
 
 object RoboApiWrapper {
-
-    fun registerInputStream(
-        contentResolver: ContentResolver,
-        uri: Uri,
-        inputStreamSupplier: Supplier<InputStream>,
-    ) {}
 
     fun waitForLooperSync(looper: Looper) {
         CompletableFuture<Void>().apply { Handler(looper).post { complete(null) } }.get()
@@ -40,4 +31,8 @@ object RoboApiWrapper {
 
     /** Rule to grant shortcuts permission */
     fun grantShortcutsPermissionRule(): TestRule = ShellCommandRule.setDefaultLauncher()
+
+    fun convertObjectToSpy(obj: Any) {
+        spyOn(obj)
+    }
 }
