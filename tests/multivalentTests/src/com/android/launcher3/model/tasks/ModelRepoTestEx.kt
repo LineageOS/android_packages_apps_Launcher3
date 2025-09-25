@@ -25,6 +25,7 @@ import com.android.launcher3.model.tasks.ModelRepoTestEx.TrackedUpdates
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.ListenableDiffAwareRef
 import com.android.launcher3.util.ListenableStream
+import com.android.launcher3.util.SafeCloseable
 import com.android.launcher3.util.TestUtil
 import com.google.common.truth.Truth.assertThat
 
@@ -33,9 +34,9 @@ typealias TrackedWorkspaceUpdates = TrackedUpdates<WorkspaceData, WorkspaceChang
 object ModelRepoTestEx {
 
     fun <T> ListenableStream<T>.trackUpdate() =
-        mutableListOf<T>().also { updates ->
+        mutableListOf<T>().let { updates ->
             TestUtil.runOnExecutorSync(Executors.MODEL_EXECUTOR) {}
-            forEach(Executors.MODEL_EXECUTOR) { updates.add(it) }
+            TrackedChanges(updates, forEach(Executors.MODEL_EXECUTOR) { updates.add(it) })
         }
 
     fun <T, R> ListenableDiffAwareRef<T, R>.trackUpdateAndChanges() =
@@ -59,5 +60,21 @@ object ModelRepoTestEx {
         assertThat(changes[deleteIndex - 1]).isInstanceOf(RemoveEvent::class.java)
     }
 
-    data class TrackedUpdates<T, R>(val updates: List<T>, val changes: List<R>)
+    data class TrackedUpdates<T, R>(
+        val updates: TrackedChanges<T>,
+        val changes: TrackedChanges<R>,
+    ) {
+        fun end() {
+            updates.end()
+            changes.end()
+        }
+    }
+
+    data class TrackedChanges<T>(
+        private val list: MutableList<T>,
+        private val endAction: SafeCloseable,
+    ) : List<T> by list {
+
+        fun end() = endAction.close()
+    }
 }
