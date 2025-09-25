@@ -18,6 +18,7 @@ package com.android.launcher3;
 
 import static com.android.launcher3.AbstractFloatingView.TYPE_WIDGET_RESIZE_FRAME;
 import static com.android.launcher3.BubbleTextView.DISPLAY_FOLDER;
+import static com.android.launcher3.Flags.injectableModelItems;
 import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.LauncherAnimUtils.SPRING_LOADED_EXIT_DELAY;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_ALL_APPS_PREDICTION;
@@ -275,11 +276,8 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     private boolean mCreateUserFolderOnDrop = false;
     private boolean mAddToExistingFolderOnDrop = false;
 
-    // Variables relating to touch disambiguation (scrolling workspace vs. scrolling a widget)
-    private float mXDown;
-    private float mYDown;
     private View mFirstPagePinnedItem;
-    private boolean mIsEventOverFirstPagePinnedItem;
+    private boolean mIsDownOverHorizontalScrollContent;
 
     final static float START_DAMPING_TOUCH_SLOP_ANGLE = (float) Math.PI / 6;
     final static float MAX_SWIPE_ANGLE = (float) Math.PI / 3;
@@ -1231,30 +1229,60 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     @Override
     protected void updateIsBeingDraggedOnTouchDown(MotionEvent ev) {
         super.updateIsBeingDraggedOnTouchDown(ev);
+        float x = ev.getX();
+        float y = ev.getY();
 
-        mXDown = ev.getX();
-        mYDown = ev.getY();
+        mIsDownOverHorizontalScrollContent = false;
+        if (injectableModelItems()) {
+            int childCount = getChildCount();
+            if (childCount <= 0) return;
+            int currentPage = getCurrentPage();
+            int lastVisiblePage = getPanelCount() + currentPage;
+            CellLayout targetPage = null;
+            for (int index = currentPage; index < lastVisiblePage && index < childCount; index++) {
+                CellLayout page = (CellLayout) getPageAt(index);
+                int left = page.getLeft() - getScrollX();
+
+                if (x >= left && x <= (left + page.getWidth())) {
+                    targetPage = page;
+                    break;
+                }
+            }
+            if (targetPage == null) return;
+
+            // Find the item at the original down point
+            final float[] tempFXY = new float[] {x, y};
+            Utilities.mapCoordInSelfToDescendant(targetPage, this, tempFXY);
+            int[] coordinates = new int[2];
+            targetPage.pointToCellExact((int) tempFXY[0], (int) tempFXY[1], coordinates);
+            View targetItem = targetPage.getChildAt(coordinates[0], coordinates[1]);
+
+            mIsDownOverHorizontalScrollContent =
+                    (targetItem instanceof ScrollableContent sc) && sc.canScrollHorizontally();
+            return;
+        }
+
         if (mFirstPagePinnedItem != null) {
             final float[] tempFXY = new float[2];
-            tempFXY[0] = mXDown;
-            tempFXY[1] = mYDown;
+            tempFXY[0] = x;
+            tempFXY[1] = y;
             Utilities.mapCoordInSelfToDescendant(mFirstPagePinnedItem, this, tempFXY);
-            mIsEventOverFirstPagePinnedItem = mFirstPagePinnedItem.getLeft() <= tempFXY[0]
+            mIsDownOverHorizontalScrollContent = mFirstPagePinnedItem.getLeft() <= tempFXY[0]
                     && mFirstPagePinnedItem.getRight() >= tempFXY[0]
                     && mFirstPagePinnedItem.getTop() <= tempFXY[1]
                     && mFirstPagePinnedItem.getBottom() >= tempFXY[1];
         } else {
-            mIsEventOverFirstPagePinnedItem = false;
+            mIsDownOverHorizontalScrollContent = false;
         }
     }
 
     @Override
     protected void determineScrollingStart(MotionEvent ev) {
-        if (!isFinishedSwitchingState() || mIsEventOverFirstPagePinnedItem) return;
+        if (!isFinishedSwitchingState() || mIsDownOverHorizontalScrollContent) return;
 
-        float deltaX = ev.getX() - mXDown;
+        float deltaX = ev.getX() - getDownMotionX();
         float absDeltaX = Math.abs(deltaX);
-        float absDeltaY = Math.abs(ev.getY() - mYDown);
+        float absDeltaY = Math.abs(ev.getY() - getDownMotionY());
 
         if (Float.compare(absDeltaX, 0f) == 0) return;
 
@@ -3709,5 +3737,12 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     private Void runOnUiThread(Runnable runnable) {
         mLauncher.runOnUiThread(runnable);
         return null;
+    }
+
+    /** Interface implemented by a view to indicate that it can scroll horizontally */
+    public interface ScrollableContent {
+
+        /** Returns true if the view can scroll horizontally and thur prevent workspace scroll */
+        boolean canScrollHorizontally();
     }
 }
