@@ -1,0 +1,65 @@
+// launcher3-quickstep-e2e-inproc-tests
+
+filegroup {
+    name: "launcher3-quickstep-e2e-inproc-tests-only",
+    srcs: [
+        "com/android/quickstep/TaplPrivateSpaceTest.java",
+        "com/android/quickstep/TaplStartLauncherViaGestureTests.java",
+        "com/android/quickstep/TaplTaskbarPinningTest.kt",
+        "com/android/quickstep/TaplTestsDesktopFirstTaskbar.java",
+        "com/android/quickstep/TaplTestsKeyboardQuickSwitch.java",
+        "com/android/quickstep/TaplTestsOverviewDesktop.kt",
+        "com/android/quickstep/TaplTestsPersistentTaskbar.java",
+        "com/android/quickstep/TaplTestsTaskbar.java",
+        "com/android/quickstep/TaplTestsTrackpad.java",
+        "com/android/quickstep/TaplTestsTransientTaskbar.java",
+        "com/android/quickstep/TaplTestTaskbarIconDrag.kt",
+        "com/android/quickstep/FallbackRecentsTest.java",
+    ],
+}
+
+filegroup {
+    name: "launcher3-quickstep-e2e-inproc-tests-utils",
+    srcs: [
+        "com/android/quickstep/AbstractQuickStepTest.java",
+        "com/android/quickstep/AbstractTaplTestsTaskbar.java",
+        "com/android/quickstep/TaskbarModeSwitchRule.java",
+        "com/android/quickstep/NavigationModeSwitchRule.java",
+        "com/android/launcher3/testcomponent/ExcludeFromRecentsTestActivity.java",
+    ],
+}
+
+filegroup {
+    name: "launcher3-quickstep-e2e-inproc-tests",
+    srcs: [
+        ":launcher3-quickstep-e2e-inproc-tests-only",
+        ":launcher3-quickstep-e2e-inproc-tests-utils",
+    ],
+}
+
+// launcher3-quickstep-oop-tests
+
+filegroup {
+    name: "launcher3-quickstep-oop-tests-only",
+    srcs: [
+        "com/android/quickstep/TaplOverviewIconTest.java",
+        "com/android/quickstep/TaplTestsQuickstep.java",
+        "com/android/quickstep/TaplTestsSplitscreen.java",
+    ],
+}
+
+filegroup {
+    name: "launcher3-quickstep-oop-tests-utils",
+    srcs: [
+        "com/android/quickstep/util/SplitScreenTestUtils.kt",
+    ],
+}
+
+filegroup {
+    name: "launcher3-quickstep-oop-tests",
+    srcs: [
+        ":launcher3-quickstep-oop-tests-only",
+        ":launcher3-quickstep-oop-tests-utils",
+        ":launcher3-quickstep-e2e-inproc-tests-utils",
+    ],
+}
