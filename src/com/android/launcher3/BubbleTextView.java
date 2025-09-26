@@ -424,6 +424,10 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         applyIconAndLabel(info);
         setItemInfo(info);
 
+        // NOTE: We do not verify high res immediately for workspace items as doing so would result
+        // in eager loading of icons for foldered items which should instead be lazily loaded on
+        // first open.
+
         applyDotState(info, false /* animate */);
         setDownloadStateContentDescription(info, info.getProgressLevel());
     }
