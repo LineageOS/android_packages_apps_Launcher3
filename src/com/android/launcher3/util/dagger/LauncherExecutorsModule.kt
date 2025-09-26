@@ -15,32 +15,22 @@
  */
 package com.android.launcher3.util.dagger
 
+import com.android.launcher3.concurrent.ExecutorsModule
 import com.android.launcher3.concurrent.annotations.Background
 import com.android.launcher3.concurrent.annotations.LightweightBackground
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority
-import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.concurrent.annotations.ThreadPool
-
-import com.android.launcher3.concurrent.ExecutorsModule
-
+import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.LooperExecutor
-
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
-
-import dagger.Module
 import dagger.Binds
+import dagger.Module
 import dagger.Provides
 
-import java.util.concurrent.Executor
-import java.util.concurrent.ExecutorService
-
-/**
- * Module that provides the executors for Launcher3 as per the [ExecutorsModule]
- * interface.
- */
+/** Module that provides the executors for Launcher3 as per the [ExecutorsModule] interface. */
 @Module
 abstract class LauncherExecutorsModule {
 
@@ -49,16 +39,20 @@ abstract class LauncherExecutorsModule {
     @Binds
     @LauncherAppSingleton
     @Ui
-    abstract fun provideUiExecutor(
-        @Ui executor: LooperExecutor
-    ): ListeningExecutorService
+    abstract fun provideUiExecutor(@Ui executor: LooperExecutor): ListeningExecutorService
 
     @Binds
     @LauncherAppSingleton
     @LightweightBackground(LightweightBackgroundPriority.UI)
     abstract fun provideUiExecutorService(
-        @LightweightBackground(LightweightBackgroundPriority.UI)
-        executor: LooperExecutor
+        @LightweightBackground(LightweightBackgroundPriority.UI) executor: LooperExecutor
+    ): ListeningExecutorService
+
+    @Binds
+    @LauncherAppSingleton
+    @Background
+    abstract fun provideBackgroundExecutorService(
+        @Background executor: LooperExecutor
     ): ListeningExecutorService
 
     companion object {
@@ -86,7 +80,7 @@ abstract class LauncherExecutorsModule {
         @Provides
         @LauncherAppSingleton
         @Background
-        fun provideBackgroundExecutorService(): ListeningExecutorService {
+        fun provideBackgroundLooperExecutor(): LooperExecutor {
             return Executors.ORDERED_BG_EXECUTOR
         }
 

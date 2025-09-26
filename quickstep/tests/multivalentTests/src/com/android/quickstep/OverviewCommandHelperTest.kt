@@ -17,7 +17,6 @@
 package com.android.quickstep
 
 import android.content.Intent
-import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.view.Display.DEFAULT_DISPLAY
@@ -33,7 +32,6 @@ import com.android.launcher3.taskbar.TaskbarUIController
 import com.android.launcher3.uioverrides.QuickstepLauncher
 import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.RunnableList
-import com.android.launcher3.util.TestDispatcherProvider
 import com.android.quickstep.OverviewCommandHelper.CommandInfo
 import com.android.quickstep.OverviewCommandHelper.CommandInfo.CommandStatus
 import com.android.quickstep.OverviewCommandHelper.CommandType
@@ -129,13 +127,12 @@ class OverviewCommandHelperTest {
                 OverviewCommandHelper(
                     touchInteractionService = touchInteractionService,
                     overviewComponentObserver = overviewComponentObserver,
-                    dispatcherProvider = TestDispatcherProvider(dispatcher),
+                    uiDispatcher = dispatcher,
+                    uiLightweightDispatcher = dispatcher,
                     displayRepository = displayRepository,
                     taskbarManager = taskbarManager,
                     taskAnimationManagerRepository =
-                        FakePerDisplayRepository<TaskAnimationManager> { _ ->
-                            taskAnimationManager
-                        },
+                        FakePerDisplayRepository { _ -> taskAnimationManager },
                     elapsedRealtime = ::elapsedRealtime,
                     systemUiProxy = systemUiProxy,
                 )
