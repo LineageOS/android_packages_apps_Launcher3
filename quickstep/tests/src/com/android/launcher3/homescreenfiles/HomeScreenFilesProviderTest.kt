@@ -23,6 +23,7 @@ import android.database.ContentObserver
 import android.database.MatrixCursor
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.provider.DocumentsContract
 import android.provider.DocumentsContract.EXTERNAL_STORAGE_PROVIDER_AUTHORITY
 import android.provider.DocumentsContract.EXTRA_URI
@@ -30,14 +31,17 @@ import android.provider.MediaStore
 import android.provider.MediaStore.Files.FileColumns.RELATIVE_PATH
 import androidx.core.net.toUri
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider.Companion.HOME_SCREEN_FOLDER_RELATIVE_PATH
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestUtil
 import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors
+import java.io.File
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executor
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -47,11 +51,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.spy
-import org.mockito.junit.MockitoJUnit
+import org.mockito.MockitoSession
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.clearInvocations
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
@@ -59,27 +64,41 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.mockito.quality.Strictness
 
 @RunWith(AndroidJUnit4::class)
 class HomeScreenFilesProviderTest {
 
-    @get:Rule val mockito = MockitoJUnit.rule()
     @get:Rule val context = spy(SandboxApplication())
 
     @Mock private lateinit var contentResolver: ContentResolver
     @Mock private lateinit var contentProviderClient: ContentProviderClient
+    @Mock private lateinit var externalStorageDir: File
 
+    private lateinit var mockitoSession: MockitoSession
     private lateinit var provider: HomeScreenFilesProvider
 
     @Before
     fun setUp() {
+        mockitoSession =
+            mockitoSession()
+                .initMocks(this@HomeScreenFilesProviderTest)
+                .strictness(Strictness.LENIENT)
+                .mockStatic(Environment::class.java)
+                .startMocking()
+
         doReturn(contentResolver).whenever(context).contentResolver
-        provider =
-            HomeScreenFilesMediaStoreProvider(
-                context,
-                MoreExecutors.newDirectExecutorService(),
-                context.appComponent.daggerSingletonTracker,
-            )
+
+        whenever(Environment.getExternalStorageDirectory()).thenReturn(externalStorageDir)
+        whenever(Environment.getExternalStorageState(externalStorageDir))
+            .thenReturn(Environment.MEDIA_MOUNTED)
+
+        provider = createProvider()
+    }
+
+    @After
+    fun tearDown() {
+        mockitoSession.finishMocking()
     }
 
     @Test
@@ -163,7 +182,112 @@ class HomeScreenFilesProviderTest {
     }
 
     @Test
-    fun testQueriesMediaStore() {
+    fun testQueryWhenExternalStorageDirectoryMountsAfterCall() {
+        // Unmount external storage directory prior to [provider] init.
+        whenever(Environment.getExternalStorageState(externalStorageDir))
+            .thenReturn(Environment.MEDIA_UNMOUNTED)
+
+        // Init [provider].
+        clearInvocations(context)
+        clearInvocations(contentResolver)
+        provider = createProvider()
+
+        // Invoke [#query()].
+        testQuery(
+            expectResults = true,
+            afterQueryCallback = {
+                // Mount external storage directory.
+                whenever(Environment.getExternalStorageState(externalStorageDir))
+                    .thenReturn(Environment.MEDIA_MOUNTED)
+
+                // Notify external storage directory mounted.
+                val observerCaptor = argumentCaptor<ContentObserver>()
+                verify(contentResolver)
+                    .registerContentObserver(
+                        eq(Uri.parse("content://media/external_primary/file")),
+                        eq(true),
+                        observerCaptor.capture(),
+                    )
+                observerCaptor.firstValue.dispatchChange(
+                    /*selfChange=*/ false,
+                    Uri.parse("content://media/external_primary"),
+                    ContentResolver.NOTIFY_SYNC_TO_NETWORK,
+                )
+            },
+        )
+    }
+
+    @Test
+    fun testQueryWhenExternalStorageDirectoryMountsBeforeCall() {
+        // Unmount external storage directory prior to [provider] init.
+        whenever(Environment.getExternalStorageState(externalStorageDir))
+            .thenReturn(Environment.MEDIA_UNMOUNTED)
+
+        // Init [provider].
+        clearInvocations(context)
+        clearInvocations(contentResolver)
+        provider = createProvider()
+
+        // Invoke [#query()].
+        testQuery(
+            expectResults = true,
+            beforeQueryCallback = {
+                // Mount external storage directory.
+                whenever(Environment.getExternalStorageState(externalStorageDir))
+                    .thenReturn(Environment.MEDIA_MOUNTED)
+
+                // Notify external storage directory mounted.
+                val observerCaptor = argumentCaptor<ContentObserver>()
+                verify(contentResolver)
+                    .registerContentObserver(
+                        eq(Uri.parse("content://media/external_primary/file")),
+                        eq(true),
+                        observerCaptor.capture(),
+                    )
+                observerCaptor.firstValue.dispatchChange(
+                    /*selfChange=*/ false,
+                    Uri.parse("content://media/external_primary"),
+                    ContentResolver.NOTIFY_SYNC_TO_NETWORK,
+                )
+            },
+        )
+    }
+
+    @Test
+    fun testQueryWhenExternalStorageDirectoryMountsBeforeInit() {
+        // Mount external storage directory prior to [provider] init.
+        whenever(Environment.getExternalStorageState(externalStorageDir))
+            .thenReturn(Environment.MEDIA_MOUNTED)
+
+        // Init [provider].
+        clearInvocations(context)
+        clearInvocations(contentResolver)
+        provider = createProvider()
+
+        // Invoke [#query()].
+        testQuery(expectResults = true)
+    }
+
+    @Test
+    fun testQueryWhenExternalStorageDirectoryMountTimesOutDuringCall() {
+        // Unmount external storage directory prior to [provider] init.
+        whenever(Environment.getExternalStorageState(externalStorageDir))
+            .thenReturn(Environment.MEDIA_UNMOUNTED)
+
+        // Init [provider].
+        clearInvocations(context)
+        clearInvocations(contentResolver)
+        provider = createProvider()
+
+        // Invoke [#query()].
+        testQuery(expectResults = false)
+    }
+
+    private fun testQuery(
+        expectResults: Boolean,
+        beforeQueryCallback: (() -> Unit)? = null,
+        afterQueryCallback: (() -> Unit)? = null,
+    ) {
         val expectedUri = Uri.parse("content://media/external_primary/file")
         val expectedProjection =
             arrayOf(
@@ -194,7 +318,16 @@ class HomeScreenFilesProviderTest {
                 return@thenAnswer answer
             }
 
-        val result = provider.query().value
+        beforeQueryCallback?.invoke()
+        val query = provider.query()
+        afterQueryCallback?.invoke()
+
+        val result = query.value
+        if (!expectResults) {
+            assertTrue(result.isEmpty())
+            return
+        }
+
         assertThat(result.size).isEqualTo(2)
 
         val uri1 = Uri.parse("content://media/external_primary/file/1")
@@ -291,6 +424,13 @@ class HomeScreenFilesProviderTest {
         )
 
     private fun createMediaStoreUri(id: String) = MediaStore.Files.getContentUri(id)
+
+    private fun createProvider() =
+        HomeScreenFilesMediaStoreProvider(
+            context,
+            MoreExecutors.newDirectExecutorService(),
+            context.appComponent.daggerSingletonTracker,
+        )
 
     private fun createTestUri(id: String) = "content://test/path/$id".toUri()
 
