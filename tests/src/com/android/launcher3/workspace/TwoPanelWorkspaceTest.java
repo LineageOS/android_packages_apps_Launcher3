@@ -31,12 +31,12 @@ import androidx.test.filters.LargeTest;
 import com.android.launcher3.CellLayout;
 import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.Launcher;
+import com.android.launcher3.UtilitiesKt;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.testutil.rule.LayoutResource;
 import com.android.launcher3.util.BaseLauncherActivityTest;
 import com.android.launcher3.util.LauncherLayoutBuilder;
 import com.android.launcher3.util.LauncherModelHelper;
-import com.android.launcher3.util.ModelTestExtensions;
 import com.android.launcher3.util.WorkspaceDragHelper;
 
 import org.junit.Before;
@@ -352,7 +352,7 @@ public class TwoPanelWorkspaceTest extends BaseLauncherActivityTest<Launcher> {
         int itemCount = page.getShortcutsAndWidgets().getChildCount();
         for (int i = 0; i < itemCount; i++) {
             ItemInfo itemInfo = (ItemInfo) page.getShortcutsAndWidgets().getChildAt(i).getTag();
-            if (itemInfo != null && ModelTestExtensions.isPersistedModelItem(itemInfo)) {
+            if (itemInfo != null && UtilitiesKt.isPersistedModelItem(itemInfo)) {
                 assertTrue("There was an extra item on page " + pageId + ": " + className(itemInfo),
                         itemTitleSet.remove(className(itemInfo)));
             }

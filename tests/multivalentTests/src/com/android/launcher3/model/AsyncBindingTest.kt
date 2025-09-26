@@ -26,6 +26,7 @@ import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherModel
 import com.android.launcher3.ModelCallbacks
+import com.android.launcher3.UtilitiesKt.isPersistedModelItem
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.pageindicators.PageIndicatorDots
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
@@ -34,7 +35,6 @@ import com.android.launcher3.util.IntSet
 import com.android.launcher3.util.ItemInflater
 import com.android.launcher3.util.LauncherLayoutBuilder
 import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
-import com.android.launcher3.util.ModelTestExtensions.isPersistedModelItem
 import com.android.launcher3.util.ModelTestExtensions.loadModelSync
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestUtil

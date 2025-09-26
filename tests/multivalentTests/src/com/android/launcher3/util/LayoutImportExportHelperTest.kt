@@ -32,6 +32,7 @@ import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_GROUP
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FOLDER
+import com.android.launcher3.UtilitiesKt.isPersistedModelItem
 import com.android.launcher3.icons.BitmapInfo
 import com.android.launcher3.model.data.AppPairInfo
 import com.android.launcher3.model.data.FolderInfo
@@ -43,7 +44,6 @@ import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY
 import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY2
 import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
 import com.android.launcher3.util.ModelTestExtensions.bgDataModel
-import com.android.launcher3.util.ModelTestExtensions.isPersistedModelItem
 import java.util.function.Supplier
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

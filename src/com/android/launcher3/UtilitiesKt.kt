@@ -19,6 +19,7 @@ package com.android.launcher3
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewParent
+import com.android.launcher3.model.data.ItemInfo
 
 object UtilitiesKt {
 
@@ -31,7 +32,7 @@ object UtilitiesKt {
      */
     abstract class ViewGroupAttrModifier<T>(
         private val targetAttrValue: T,
-        private val tagKey: Int
+        private val tagKey: Int,
     ) {
         /**
          * If [targetAttrValue] is different from existing view attribute returned from
@@ -105,7 +106,7 @@ object UtilitiesKt {
     fun modifyAttributesOnViewTree(
         v: View?,
         parent: ViewParent?,
-        vararg modifiers: ViewGroupAttrModifier<*>
+        vararg modifiers: ViewGroupAttrModifier<*>,
     ) {
         if (v == null) {
             return
@@ -139,7 +140,7 @@ object UtilitiesKt {
     fun restoreAttributesOnViewTree(
         v: View?,
         parent: ViewParent?,
-        vararg modifiers: ViewGroupAttrModifier<*>
+        vararg modifiers: ViewGroupAttrModifier<*>,
     ) {
         if (v == null) {
             return
@@ -156,4 +157,12 @@ object UtilitiesKt {
             restoreAttributesOnViewTree(v.parent as View, parent, *modifiers)
         }
     }
+
+    /**
+     * Checks if an item is persisted in model. It excludes items whose ID corresponds to an AAPT
+     * generated id which always has a non-zero package identifier first-byte.
+     *
+     * @see android.view.View.generateViewId
+     */
+    @JvmStatic fun ItemInfo.isPersistedModelItem() = id > ItemInfo.NO_ID && (id ushr 24) == 0
 }

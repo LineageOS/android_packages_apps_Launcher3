@@ -26,11 +26,10 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.DropTarget;
 import com.android.launcher3.LauncherSettings;
+import com.android.launcher3.UtilitiesKt;
 import com.android.launcher3.dragndrop.DragController;
 import com.android.launcher3.dragndrop.DragOptions;
-import com.android.launcher3.model.data.CollectionInfo;
 import com.android.launcher3.model.data.ItemInfo;
-import com.android.launcher3.model.data.LauncherAppWidgetInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.util.Thunk;
 import com.android.launcher3.views.ActivityContext;
@@ -103,8 +102,7 @@ public abstract class BaseAccessibilityDelegate<T extends Context & ActivityCont
             return item.screenId >= 0
                     && item.container != LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION;
         }
-        return (item instanceof LauncherAppWidgetInfo)
-                || (item instanceof CollectionInfo);
+        return UtilitiesKt.isPersistedModelItem(item);
     }
 
     @Override

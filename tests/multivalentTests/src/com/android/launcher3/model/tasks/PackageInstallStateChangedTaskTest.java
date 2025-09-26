@@ -37,6 +37,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.launcher3.Flags;
+import com.android.launcher3.UtilitiesKt;
 import com.android.launcher3.model.TestableModelState;
 import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.ItemInfo;
@@ -46,7 +47,6 @@ import com.android.launcher3.pm.PackageInstallInfo;
 import com.android.launcher3.testutil.rule.LayoutResource;
 import com.android.launcher3.util.IntSet;
 import com.android.launcher3.util.LauncherLayoutBuilder;
-import com.android.launcher3.util.ModelTestExtensions;
 import com.android.launcher3.util.SandboxApplication;
 import com.android.launcher3.util.rule.InstallerSessionRule;
 
@@ -154,7 +154,7 @@ public class PackageInstallStateChangedTaskTest {
     private void verifyProgressUpdate(int progress, int... idsUpdated) {
         IntSet updates = IntSet.wrap(idsUpdated);
         for (ItemInfo info : mModelState.dataModel.itemsIdMap) {
-            if (info.id < 0 || !ModelTestExtensions.isPersistedModelItem(info)) continue;
+            if (info.id < 0 || !UtilitiesKt.isPersistedModelItem(info)) continue;
             int expectedProgress = updates.contains(info.id) ? progress
                     : (mDownloadingApps.contains(info.id) ? 0 : 100);
             if (info instanceof WorkspaceItemInfo wi) {
