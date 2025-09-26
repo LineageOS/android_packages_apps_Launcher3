@@ -107,10 +107,8 @@
     <string name="widget_settings" msgid="5280157748464495511">"Einstellungen"</string>
     <string name="pin_to_taskbar" msgid="5914002252642242332">"An Taskleiste pinnen"</string>
     <string name="unpin_from_taskbar" msgid="1025883383457627426">"Von Taskleiste lösen"</string>
-    <!-- no translation found for app_added_to_taskbar (6348755169793615171) -->
-    <skip />
-    <!-- no translation found for app_removed_from_taskbar (3471754847898675396) -->
-    <skip />
+    <string name="app_added_to_taskbar" msgid="6348755169793615171">"App zur Taskleiste hinzugefügt"</string>
+    <string name="app_removed_from_taskbar" msgid="3471754847898675396">"App von Taskleiste entfernt"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"Verknüpfungen installieren"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"Ermöglicht einer App das Hinzufügen von Verknüpfungen ohne Eingreifen des Nutzers"</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"Einstellungen und Verknüpfungen auf dem Startbildschirm lesen"</string>
@@ -149,12 +147,9 @@
     <string name="msg_disabled_by_admin" msgid="6898038085516271325">"Von deinem Administrator deaktiviert"</string>
     <string name="allow_rotation_title" msgid="7222049633713050106">"Drehen des Startbildschirms zulassen"</string>
     <string name="allow_rotation_desc" msgid="8662546029078692509">"Beim Drehen des Smartphones"</string>
-    <!-- no translation found for compose_developer_options_section (8211460486549952595) -->
-    <skip />
-    <!-- no translation found for enable_composition_tracing_title (8989606591739368424) -->
-    <skip />
-    <!-- no translation found for enable_composition_tracing_desc (7187566039216492405) -->
-    <skip />
+    <string name="compose_developer_options_section" msgid="8211460486549952595">"Jetpack Compose"</string>
+    <string name="enable_composition_tracing_title" msgid="8989606591739368424">"Kompositions-Tracing aktivieren"</string>
+    <string name="enable_composition_tracing_desc" msgid="7187566039216492405">"Kompositions-Tracing aktivieren, wenn in der Übersicht ein Perfetto-Trace erstellt wird"</string>
     <string name="landscape_mode_title" msgid="5138814555934843926">"Querformat"</string>
     <string name="landscape_mode_desc" msgid="3085236452297838664">"Startbildschirm im Querformat anzeigen"</string>
     <string name="notification_dots_title" msgid="9062440428204120317">"App-Benachrichtigungspunkte"</string>

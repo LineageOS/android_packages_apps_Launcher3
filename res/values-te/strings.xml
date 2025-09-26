@@ -107,10 +107,8 @@
     <string name="widget_settings" msgid="5280157748464495511">"సెట్టింగ్‌లు"</string>
     <string name="pin_to_taskbar" msgid="5914002252642242332">"టాస్క్‌బార్‌కు పిన్"</string>
     <string name="unpin_from_taskbar" msgid="1025883383457627426">"టాస్క్‌బార్ అన్‌పిన్"</string>
-    <!-- no translation found for app_added_to_taskbar (6348755169793615171) -->
-    <skip />
-    <!-- no translation found for app_removed_from_taskbar (3471754847898675396) -->
-    <skip />
+    <string name="app_added_to_taskbar" msgid="6348755169793615171">"టాస్క్‌బార్‌కు యాప్‌ను జోడించడం జరిగింది"</string>
+    <string name="app_removed_from_taskbar" msgid="3471754847898675396">"టాస్క్‌బార్ నుండి యాప్‌ను తీసివేయడం జరిగింది"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"షార్ట్‌కట్‌లను ఇన్‌స్టాల్ చేయడం"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"వినియోగదారు ప్రమేయం లేకుండా షార్ట్‌కట్‌లను జోడించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"హోమ్ సెట్టింగ్‌లు, షార్ట్‌కట్‌లను చదవండి"</string>
@@ -149,12 +147,9 @@
     <string name="msg_disabled_by_admin" msgid="6898038085516271325">"మీ నిర్వాహకులు నిలిపివేసారు"</string>
     <string name="allow_rotation_title" msgid="7222049633713050106">"మొదటి స్క్రీన్ రొటేషన్‌ను అనుమతించండి"</string>
     <string name="allow_rotation_desc" msgid="8662546029078692509">"ఫోన్‌‌ను తిప్పినప్పుడు"</string>
-    <!-- no translation found for compose_developer_options_section (8211460486549952595) -->
-    <skip />
-    <!-- no translation found for enable_composition_tracing_title (8989606591739368424) -->
-    <skip />
-    <!-- no translation found for enable_composition_tracing_desc (7187566039216492405) -->
-    <skip />
+    <string name="compose_developer_options_section" msgid="8211460486549952595">"Jetpack Compose"</string>
+    <string name="enable_composition_tracing_title" msgid="8989606591739368424">"కంపోజిషన్ ట్రేసింగ్‌ను ఎనేబుల్ చేయండి"</string>
+    <string name="enable_composition_tracing_desc" msgid="7187566039216492405">"ఓవర్‌వ్యూలో perfetto ట్రేస్ చేస్తున్నప్పుడు కంపోజిషన్ ట్రేసింగ్‌ను ఎనేబుల్ చేయండి"</string>
     <string name="landscape_mode_title" msgid="5138814555934843926">"ల్యాండ్‌స్కేప్ మోడ్"</string>
     <string name="landscape_mode_desc" msgid="3085236452297838664">"మొదటి స్క్రీన్‌ను ల్యాండ్‌స్కేప్ మోడ్‌లోకి సెట్ చేయండి"</string>
     <string name="notification_dots_title" msgid="9062440428204120317">"నోటిఫికేషన్ డాట్‌లు"</string>

@@ -107,10 +107,8 @@
     <string name="widget_settings" msgid="5280157748464495511">"सेटिंग्ज"</string>
     <string name="pin_to_taskbar" msgid="5914002252642242332">"टास्कबार वर पिन करा"</string>
     <string name="unpin_from_taskbar" msgid="1025883383457627426">"टास्कबार वरून अनपिन करा"</string>
-    <!-- no translation found for app_added_to_taskbar (6348755169793615171) -->
-    <skip />
-    <!-- no translation found for app_removed_from_taskbar (3471754847898675396) -->
-    <skip />
+    <string name="app_added_to_taskbar" msgid="6348755169793615171">"अ‍ॅप टास्कबार मध्ये जोडले आहे"</string>
+    <string name="app_removed_from_taskbar" msgid="3471754847898675396">"अ‍ॅप टास्कबार मधून काढून टाकले आहे"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"शॉर्टकट इंस्टॉल करा"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"वापरकर्ता हस्तक्षेपाशिवाय शॉर्टकट जोडण्यास अ‍ॅप ला अनुमती देते."</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"होम सेटिंग्ज आणि शॉर्टकट वाचा"</string>
@@ -149,12 +147,9 @@
     <string name="msg_disabled_by_admin" msgid="6898038085516271325">"आपल्या प्रशासकाने अक्षम केले"</string>
     <string name="allow_rotation_title" msgid="7222049633713050106">"होम स्क्रीन फिरवण्‍याची अनुमती द्या"</string>
     <string name="allow_rotation_desc" msgid="8662546029078692509">"फोन फिरवला जातो तेव्हा"</string>
-    <!-- no translation found for compose_developer_options_section (8211460486549952595) -->
-    <skip />
-    <!-- no translation found for enable_composition_tracing_title (8989606591739368424) -->
-    <skip />
-    <!-- no translation found for enable_composition_tracing_desc (7187566039216492405) -->
-    <skip />
+    <string name="compose_developer_options_section" msgid="8211460486549952595">"Jetpack Compose"</string>
+    <string name="enable_composition_tracing_title" msgid="8989606591739368424">"कंपोझिशन ट्रेसिंग सुरू करा"</string>
+    <string name="enable_composition_tracing_desc" msgid="7187566039216492405">"अवलोकनामध्ये perfetto ट्रेस घेताना कंपोझिशन ट्रेसिंग सुरू करा"</string>
     <string name="landscape_mode_title" msgid="5138814555934843926">"लँडस्केप मोड"</string>
     <string name="landscape_mode_desc" msgid="3085236452297838664">"होम स्क्रीन लँडस्केप मोडमध्ये सेट करा"</string>
     <string name="notification_dots_title" msgid="9062440428204120317">"नोटिफिकेशन बिंदू"</string>

@@ -107,10 +107,8 @@
     <string name="widget_settings" msgid="5280157748464495511">"Настройки"</string>
     <string name="pin_to_taskbar" msgid="5914002252642242332">"Закрепить на панели"</string>
     <string name="unpin_from_taskbar" msgid="1025883383457627426">"Открепить от панели"</string>
-    <!-- no translation found for app_added_to_taskbar (6348755169793615171) -->
-    <skip />
-    <!-- no translation found for app_removed_from_taskbar (3471754847898675396) -->
-    <skip />
+    <string name="app_added_to_taskbar" msgid="6348755169793615171">"Приложение добавлено на панель задач"</string>
+    <string name="app_removed_from_taskbar" msgid="3471754847898675396">"Приложение удалено с панели задач"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"Создание ярлыков"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"Приложение сможет самостоятельно добавлять ярлыки."</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"Доступ к данным о настройках и ярлыках на главном экране"</string>
@@ -149,12 +147,9 @@
     <string name="msg_disabled_by_admin" msgid="6898038085516271325">"Функция отключена администратором"</string>
     <string name="allow_rotation_title" msgid="7222049633713050106">"Разрешить поворачивать главный экран"</string>
     <string name="allow_rotation_desc" msgid="8662546029078692509">"При повороте телефона"</string>
-    <!-- no translation found for compose_developer_options_section (8211460486549952595) -->
-    <skip />
-    <!-- no translation found for enable_composition_tracing_title (8989606591739368424) -->
-    <skip />
-    <!-- no translation found for enable_composition_tracing_desc (7187566039216492405) -->
-    <skip />
+    <string name="compose_developer_options_section" msgid="8211460486549952595">"Jetpack Compose"</string>
+    <string name="enable_composition_tracing_title" msgid="8989606591739368424">"Включить трассировку композиции"</string>
+    <string name="enable_composition_tracing_desc" msgid="7187566039216492405">"Выполнять трассировку композиции, когда вы используете Perfetto в режиме Overview"</string>
     <string name="landscape_mode_title" msgid="5138814555934843926">"Горизонтальный режим"</string>
     <string name="landscape_mode_desc" msgid="3085236452297838664">"Показывать главный экран в горизонтальном режиме"</string>
     <string name="notification_dots_title" msgid="9062440428204120317">"Значки уведомлений"</string>
