@@ -62,6 +62,7 @@ import static java.lang.invoke.MethodHandles.Lookup.PROTECTED;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.app.ActivityOptions;
+import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -2106,7 +2107,14 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         // There is no task associated with this launch - launch a new task through an intent
         ActivityOptionsWrapper opts = getActivityLaunchDesktopOptions();
         if (DesktopModeFlags.ENABLE_START_LAUNCH_TRANSITION_FROM_TASKBAR_BUGFIX.isTrue()) {
-            mSysUiProxy.startLaunchIntentTransition(intent, opts.options.toBundle(), displayId);
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                    this,
+                    /* requestCode= */ 0,
+                    intent,
+                    PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_ONE_SHOT,
+                    /* options= */ null);
+            mSysUiProxy.startLaunchIntentTransition(pendingIntent, opts.options.toBundle(),
+                    displayId);
         } else {
             startActivity(intent, opts.options.toBundle());
         }
