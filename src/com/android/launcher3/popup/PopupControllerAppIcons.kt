@@ -17,6 +17,7 @@
 package com.android.launcher3.popup
 
 import android.content.Context
+import android.os.Trace
 import android.view.View
 import com.android.launcher3.BubbleTextView
 import com.android.launcher3.Launcher
@@ -32,39 +33,47 @@ import java.util.stream.Collectors
  */
 class PopupControllerForAppIcon<T> : PopupController<T> where T : Context, T : ActivityContext {
     override fun show(view: View): Popup? {
-        val icon = view as BubbleTextView
-        val launcher = Launcher.getLauncher(icon.context)
-        if (PopupContainer.getOpen(launcher) != null) {
-            // There is already an items container open, so don't open this one.
-            icon.clearFocus()
-            return null
-        }
-        val item = icon.tag as ItemInfo
-        if (!ShortcutUtil.supportsShortcuts(item)) {
-            return null
-        }
-        val popupDataProvider = launcher.activityComponent.popupDataProvider
-        val deepShortcutCount = popupDataProvider.getShortcutCountForItem(item)
-        val systemShortcuts =
-            launcher
-                .getSupportedShortcuts(item)
-                .map<SystemShortcut<Launcher>> { s ->
-                    s.getShortcut(launcher, item, icon) as SystemShortcut<Launcher>?
-                }
-                .filter { it != null }
-                .collect(Collectors.toList())
+        val container: PopupContainer<T>
+        try {
+            Trace.beginSection("showPopupMenu")
+            val icon = view as BubbleTextView
+            val launcher = Launcher.getLauncher(icon.context)
+            if (PopupContainer.getOpen(launcher) != null) {
+                // There is already an items container open, so don't open this one.
+                icon.clearFocus()
+                return null
+            }
+            val item = icon.tag as ItemInfo
+            if (!ShortcutUtil.supportsShortcuts(item)) {
+                return null
+            }
+            val popupDataProvider = launcher.activityComponent.popupDataProvider
+            val deepShortcutCount = popupDataProvider.getShortcutCountForItem(item)
+            val systemShortcuts =
+                launcher
+                    .getSupportedShortcuts(item)
+                    .map<SystemShortcut<Launcher>> { s ->
+                        s.getShortcut(launcher, item, icon) as SystemShortcut<Launcher>?
+                    }
+                    .filter { it != null }
+                    .collect(Collectors.toList())
 
-        val container =
-            PopupContainerWithArrow.create<Launcher>(
-                context = launcher,
-                originalView = icon,
-                itemInfo = item,
+            container =
+                PopupContainerWithArrow.create(
+                    context = launcher,
+                    originalView = icon,
+                    itemInfo = item,
+                )
+            container.configureForLauncher(launcher, item)
+            container.populateAndShowRows(
+                deepShortcutCount,
+                if (view.showingMinimalPopup) emptyList() else systemShortcuts,
             )
-        container.configureForLauncher(launcher, item)
-        container.populateAndShowRows(deepShortcutCount,
-            if (view.showingMinimalPopup) emptyList() else systemShortcuts)
-        launcher.refreshAndBindWidgetsForPackageUser(PackageUserKey.fromItemInfo(item))
-        container.requestFocus()
+            launcher.refreshAndBindWidgetsForPackageUser(PackageUserKey.fromItemInfo(item))
+            container.requestFocus()
+        } finally {
+            Trace.endSection()
+        }
         return container
     }
 
