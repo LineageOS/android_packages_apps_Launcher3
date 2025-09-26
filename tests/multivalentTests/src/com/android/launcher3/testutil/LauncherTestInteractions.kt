@@ -31,7 +31,9 @@ import com.android.launcher3.util.LooperExecutor
 import com.android.launcher3.util.TestUtil
 
 /** Common shared test interactions with the Launcher activity [LauncherActivityScenarioRule]. */
-class LauncherTestInteractions<LAUNCHER_TYPE : Launcher>(
+class LauncherTestInteractions<LAUNCHER_TYPE : Launcher>
+@JvmOverloads
+constructor(
     private val launcherActivity: LauncherActivityScenarioRule<LAUNCHER_TYPE>,
     private val mainThreadExecutor: LooperExecutor = Executors.MAIN_EXECUTOR,
 ) {

@@ -16,7 +16,6 @@
 
 package com.android.launcher3.util
 
-import android.content.ContentProvider
 import android.content.ContentResolver
 import android.content.Context
 import android.content.ContextParams
@@ -38,6 +37,7 @@ import android.util.ArrayMap
 import android.view.Display
 import androidx.test.core.app.ApplicationProvider
 import com.android.launcher3.dagger.LauncherBaseAppComponent.Builder
+import com.android.launcher3.util.ContentProviderProxy.ProxyProvider
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import java.io.File
 import java.util.UUID
@@ -179,10 +179,15 @@ class SandboxApplication private constructor(private val base: SandboxApplicatio
         return result
     }
 
-    fun setupProvider(authority: String, provider: ContentProvider) {
+    fun setupProvider(authority: String, proxy: ProxyProvider) {
         val providerInfo = ProviderInfo()
         providerInfo.authority = authority
         providerInfo.applicationInfo = applicationInfo
+        val provider =
+            object : ContentProviderProxy() {
+                override fun getProxy(ctx: Context) = proxy
+            }
+
         provider.attachInfo(this, providerInfo)
         mockResolver.addProvider(providerInfo.authority, provider)
         doReturn(providerInfo)
