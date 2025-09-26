@@ -208,6 +208,7 @@ import com.android.quickstep.util.SplitSelectStateController;
 import com.android.quickstep.util.SplitTask;
 import com.android.quickstep.util.SplitToWorkspaceController;
 import com.android.quickstep.util.SplitWithKeyboardShortcutController;
+import com.android.quickstep.util.SurfaceTransactionApplier;
 import com.android.quickstep.util.TISBindHelper;
 import com.android.quickstep.util.unfold.LauncherUnfoldTransitionController;
 import com.android.quickstep.util.unfold.ProxyUnfoldTransitionProvider;
@@ -326,7 +327,9 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         mOverviewBlurEnabled = isOverviewBackgroundBlurEnabled();
         getTheme().applyStyle(getOverviewBlurStyleResId(), true);
         super.setupViews();
-        mDepthController.setSurfaceTransactionApplier(getRootView());
+        SurfaceTransactionApplier surfaceTransactionApplier = new SurfaceTransactionApplier(
+                getRootView());
+        mDepthController.setSurfaceTransactionApplier(surfaceTransactionApplier);
 
         mActionsView = findViewById(R.id.overview_actions_view);
         RecentsView<?, LauncherState> overviewPanel = getOverviewPanel();
@@ -342,7 +345,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
                     getDepthController(), DesktopState.getInstance(this));
         }
         overviewPanel.init(mActionsView, mSplitSelectStateController,
-                mDesktopRecentsTransitionController);
+                mDesktopRecentsTransitionController, surfaceTransactionApplier);
         mSplitWithKeyboardShortcutController = new SplitWithKeyboardShortcutController(
                 this, mSplitSelectStateController);
         mSplitToWorkspaceController = new SplitToWorkspaceController(this,
