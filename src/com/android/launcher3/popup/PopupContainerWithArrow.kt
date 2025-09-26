@@ -87,10 +87,6 @@ private constructor(
 
     var widgetContainer: ViewGroup? = null
 
-    override fun getAccessibilityInitialFocusView(): View {
-        return systemShortcutContainer?.getChildAt(0) ?: super.getAccessibilityInitialFocusView()
-    }
-
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
         if (ev.action == MotionEvent.ACTION_DOWN) {
             interceptTouchDown[ev.x] = ev.y
