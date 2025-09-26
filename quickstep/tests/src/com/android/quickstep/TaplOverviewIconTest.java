@@ -66,6 +66,7 @@ public class TaplOverviewIconTest extends AbstractQuickStepTest {
 
     @Test
     public void testSplitTaskTapBothIconMenus() {
+        clearAllRecentTasks();
         Overview overview = SplitScreenTestUtils.createAndLaunchASplitPairInOverview(mLauncher);
 
         OverviewTaskMenu taskMenu = overview.getCurrentTask().tapMenu();

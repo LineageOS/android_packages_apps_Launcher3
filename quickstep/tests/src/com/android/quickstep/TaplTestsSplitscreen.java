@@ -95,6 +95,7 @@ public class TaplTestsSplitscreen extends AbstractQuickStepTest {
 
     @Test
     public void testSaveAppPairMenuItemOrActionExistsOnSplitPair() {
+        clearAllRecentTasks();
         Overview overview = SplitScreenTestUtils.createAndLaunchASplitPairInOverview(mLauncher);
 
         assertTrue("Save app pair menu item is missing",

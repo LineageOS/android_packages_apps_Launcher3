@@ -27,8 +27,6 @@ object SplitScreenTestUtils {
     /** Creates 2 tasks and makes a split mode pair. Also asserts the accessibility labels. */
     @JvmStatic
     fun createAndLaunchASplitPairInOverview(launcher: LauncherInstrumentation): Overview {
-        clearAllRecentTasks(launcher)
-
         AbstractLauncherUiTest.startTestActivity(2)
         AbstractLauncherUiTest.startTestActivity(3)
 
@@ -46,11 +44,5 @@ object SplitScreenTestUtils {
             OverviewTask.OverviewTaskContainer.SPLIT_BOTTOM_OR_RIGHT,
         )
         return overviewWithSplitPair
-    }
-
-    private fun clearAllRecentTasks(launcher: LauncherInstrumentation) {
-        if (launcher.recentTasks.isNotEmpty()) {
-            launcher.goHome().switchToOverview().dismissAllTasks()
-        }
     }
 }
