@@ -124,8 +124,7 @@
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"Animation showing how to search for an item on screen, by touching and holding the action key and selecting the area the item is in"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Taskbar education"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Drag an app to the side to use 2 apps at once"</string>
-    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
-    <skip />
+    <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"Drag to the bottom corners to make it float"</string>
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Slow-swipe up to show the Taskbar"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Get app suggestions based on your routine"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Long press on the divider to pin the Taskbar"</string>
@@ -149,7 +148,10 @@
     <string name="always_show_taskbar" msgid="3608801276107751229">"Always show Taskbar"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"Change navigation mode"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Taskbar Divider"</string>
-    <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"Other recent apps"</string>
+    <!-- no translation found for taskbar_recents_overflow_a11y_title (8005941062446304304) -->
+    <skip />
+    <!-- no translation found for taskbar_pinned_overflow_a11y_title (3427283798522326470) -->
+    <skip />
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Move to top/left"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Move to bottom/right"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"Open app as a bubble"</string>

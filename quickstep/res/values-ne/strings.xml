@@ -151,7 +151,10 @@
     <string name="always_show_taskbar" msgid="3608801276107751229">"टास्कबार सधैँ देखाउनुहोस्"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"नेभिगेसन मोड बदल्नुहोस्"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"टास्कबार डिभाइडर"</string>
-    <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"हालसालै खोलिएका अन्य एपहरू"</string>
+    <!-- no translation found for taskbar_recents_overflow_a11y_title (8005941062446304304) -->
+    <skip />
+    <!-- no translation found for taskbar_pinned_overflow_a11y_title (3427283798522326470) -->
+    <skip />
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"सिरान/बायाँतिर सार्नुहोस्"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"फेद/दायाँतिर सार्नुहोस्"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"एपलाई बबलका रूपमा खोल्नुहोस्"</string>

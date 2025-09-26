@@ -118,8 +118,7 @@
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Rotér skjermen"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Animasjon som viser hvordan oppgavelinjen kommer til syne fra bunnen av skjermen og skjules automatisk når den ikke er i bruk"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Animasjon som viser hvordan du fester oppgavelinjen med en bryter, slik at oppgavelinjen alltid er synlig nederst på skjermen"</string>
-    <!-- no translation found for taskbar_edu_bubbles_animation_description (421866726938396813) -->
-    <skip />
+    <string name="taskbar_edu_bubbles_animation_description" msgid="421866726938396813">"Animasjon som viser hvordan du lager en boble fra oppgavelinjen ved hjelp av en dra-bevegelse"</string>
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"Animasjon som viser hvordan du aktiverer delt skjerm, ved å dra og slippe en app fra oppgavelinjen over en åpen app"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"Animasjon som viser hvordan du åpner foreslåtte apper på enheten"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"Animasjon som viser hvordan du søker etter et element på skjermen, ved å trykke og holde på handlingstasten og velge området der elementet er"</string>
@@ -133,8 +132,7 @@
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Gjør mer med oppgavelinjen"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"Vis alltid oppgavelinjen"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"For å alltid vise oppgavelinjen nederst på skjermen, trykk og hold på skillelinjen"</string>
-    <!-- no translation found for taskbar_edu_bubbles_standalone (4182824636656528043) -->
-    <skip />
+    <string name="taskbar_edu_bubbles_standalone" msgid="4182824636656528043">"Dra en app til hjørnet for å gjøre den flytende"</string>
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"Trykk og hold på handlingstasten for å søke etter det som er på skjermen"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Dette produktet bruker den merkede delen av skjermen til å søke. Googles <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>personvernregler<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> og <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>vilkår for bruk<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> gjelder."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Lukk"</string>
@@ -151,7 +149,10 @@
     <string name="always_show_taskbar" msgid="3608801276107751229">"Vis alltid oppgavelinjen"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"Endre navigasjonsmodus"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Skille for oppgavelinjen"</string>
-    <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"Andre nylige apper"</string>
+    <!-- no translation found for taskbar_recents_overflow_a11y_title (8005941062446304304) -->
+    <skip />
+    <!-- no translation found for taskbar_pinned_overflow_a11y_title (3427283798522326470) -->
+    <skip />
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Flytt til øverst/venstre"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Flytt til nederst/høyre"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"Åpne appen som en boble"</string>

@@ -151,7 +151,10 @@
     <string name="always_show_taskbar" msgid="3608801276107751229">"ସର୍ବଦା ଟାସ୍କବାର ଦେଖାନ୍ତୁ"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"ନାଭିଗେସନ ମୋଡ ପରିବର୍ତ୍ତନ କରନ୍ତୁ"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"ଟାସ୍କବାର ଡିଭାଇଡର"</string>
-    <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"ଅନ୍ୟ ବର୍ତ୍ତମାନର ଆପ୍ସ"</string>
+    <!-- no translation found for taskbar_recents_overflow_a11y_title (8005941062446304304) -->
+    <skip />
+    <!-- no translation found for taskbar_pinned_overflow_a11y_title (3427283798522326470) -->
+    <skip />
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"ଶୀର୍ଷ/ବାମକୁ ମୁଭ କରନ୍ତୁ"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"ନିମ୍ନ/ଡାହାଣକୁ ମୁଭ କରନ୍ତୁ"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"ଏକ ବବଲ ଭାବେ ଆପ ଖୋଲନ୍ତୁ"</string>

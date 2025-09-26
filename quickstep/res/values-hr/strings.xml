@@ -118,8 +118,7 @@
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Zakretanje zaslona"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Animacija koja prikazuje kako alatna traka dolazi u vidno polje s dna zaslona i automatski se skriva kad se ne upotrebljava"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Animacija koja prikazuje kako prikvačiti traku sa zadacima pomoću prekidača kako bi traka sa zadacima bila trajno vidljiva pri dnu zaslona"</string>
-    <!-- no translation found for taskbar_edu_bubbles_animation_description (421866726938396813) -->
-    <skip />
+    <string name="taskbar_edu_bubbles_animation_description" msgid="421866726938396813">"Animacija koja prikazuje kako izraditi oblačić s trake sa zadacima pomoću pokreta povlačenja"</string>
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"Animacija koja prikazuje kako podijeliti prikaz zaslona povlačenjem i ispuštanjem aplikacije s trake sa zadacima iznad otvorene aplikacije"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"Animacija koja prikazuje kako pristupiti predloženim aplikacijama na uređaju"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"Animacija koja prikazuje kako pretražiti stavku na zaslonu tako da dodirnete tipku za radnju i zadržite pritisak te odaberete područje u kojem se nalazi stavka"</string>
@@ -133,8 +132,7 @@
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Učinite više pomoću trake sa zadacima"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"Uvijek prikazuj traku sa zadacima"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"Da bi se traka prikazivala, dodirnite i držite razdjelnik"</string>
-    <!-- no translation found for taskbar_edu_bubbles_standalone (4182824636656528043) -->
-    <skip />
+    <string name="taskbar_edu_bubbles_standalone" msgid="4182824636656528043">"Povucite aplikaciju u kut da bi se prikazivala u plutajućem prozoru"</string>
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"Dodirnite i zadržite tipku za radnju da biste pretražili što se nalazi na zaslonu"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Ovaj proizvod upotrebljava odabrani dio zaslona za pretraživanje. Primjenjuju se Googleova <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>pravila o privatnosti<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> i <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>uvjeti pružanja usluge<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g>."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Zatvori"</string>
@@ -151,7 +149,10 @@
     <string name="always_show_taskbar" msgid="3608801276107751229">"Uvijek prikaži traku zadataka"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"Promijeni način navigacije"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Razdjelnik trake sa zadacima"</string>
-    <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"Druge nedavne aplikacije"</string>
+    <!-- no translation found for taskbar_recents_overflow_a11y_title (8005941062446304304) -->
+    <skip />
+    <!-- no translation found for taskbar_pinned_overflow_a11y_title (3427283798522326470) -->
+    <skip />
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Premjesti gore/lijevo"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Premjesti dolje/desno"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"Otvori aplikaciju kao oblačić"</string>

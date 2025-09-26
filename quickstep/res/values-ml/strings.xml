@@ -118,8 +118,7 @@
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"സ്‌ക്രീൻ റൊട്ടേറ്റ് ചെയ്യുക"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"സ്‌ക്രീനിന്റെ അടിയിൽ നിന്ന് ടാസ്‌ക്ബാർ എങ്ങനെയാണ് ദൃശ്യമാകുന്നതെന്നും, ഉപയോഗത്തിലില്ലാത്തപ്പോൾ എങ്ങനെയാണ് സ്വയമേവ മറയുന്നതെന്നും കാണിക്കുന്ന ആനിമേഷൻ"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"ടാസ്‌ക്ബാർ ശാശ്വതമായി സ്‌ക്രീനിന്റെ താഴെ ദൃശ്യമാകുന്ന തരത്തിൽ, ടോഗിൾ ഉപയോഗിച്ച് ടാസ്‌ക്‌ബാർ എങ്ങനെ പിൻ ചെയ്യാമെന്ന് കാണിക്കുന്ന ആനിമേഷൻ"</string>
-    <!-- no translation found for taskbar_edu_bubbles_animation_description (421866726938396813) -->
-    <skip />
+    <string name="taskbar_edu_bubbles_animation_description" msgid="421866726938396813">"വലിച്ചിടൽ ജെസ്‌ച്ചർ ഉപയോഗിച്ച് ടാസ്‌ക്‌ബാറിൽ നിന്ന് എങ്ങനെ ബബിൾ സൃഷ്‌ടിക്കാമെന്ന് കാണിക്കുന്ന ആനിമേഷൻ"</string>
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"തുറന്ന ആപ്പിന് മുകളിലുള്ള ടാസ്‌ക്‌ബാറിൽ നിന്ന് ഒരു ആപ്പ് വലിച്ചിടുന്നതിലൂടെ സ്‌പ്ലിറ്റ് സ്‌ക്രീൻ എങ്ങനെ സൃഷ്‌ടിക്കാമെന്ന് കാണിക്കുന്ന ആനിമേഷൻ"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"നിർദ്ദേശിച്ചിരിക്കുന്ന ആപ്പുകൾ നിങ്ങളുടെ ഉപകരണത്തിൽ എങ്ങനെ ആക്സസ് ചെയ്യാമെന്ന് കാണിക്കുന്ന ആനിമേഷൻ"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"ഇനം സ്ഥിതി ചെയ്യുന്ന ഏരിയ തിരഞ്ഞെടുത്ത് ആക്ഷൻ കീ സ്‌പർശിച്ചുപിടിക്കുന്നതിലൂടെ, സ്ക്രീനിൽ ഇനം എങ്ങനെ തിരയാമെന്ന് കാണിക്കുന്ന ആനിമേഷൻ"</string>
@@ -133,8 +132,7 @@
     <string name="taskbar_edu_features" msgid="3320337287472848162">"ടാസ്‌ക്‌ബാർ ഉപയോഗിച്ച് കൂടുതൽ ചെയ്യുക"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"എല്ലായ്‌പ്പോഴും ടാസ്‌ക്‌ബാർ കാണിക്കുക"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"ടാസ്‌ക്ബാർ എല്ലായ്‌പ്പോഴും നിങ്ങളുടെ സ്‌ക്രീനിന്റെ ചുവടെ കാണിക്കുന്നതിന് ഡിവൈഡറിൽ സ്‌പർശിച്ച് പിടിക്കുക"</string>
-    <!-- no translation found for taskbar_edu_bubbles_standalone (4182824636656528043) -->
-    <skip />
+    <string name="taskbar_edu_bubbles_standalone" msgid="4182824636656528043">"ഒരു ആപ്പ് ഫ്ലോട്ട് ചെയ്യിക്കുന്നതിന് അത് കോണിലേക്ക് വലിച്ചിടുക"</string>
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"നിങ്ങളുടെ സ്‌ക്രീനിൽ എന്താണ് ഉള്ളതെന്ന് തിരയാൻ ആക്ഷൻ കീ സ്‌പർശിച്ച് പിടിക്കുക"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"തിരയുന്നതിന് ഈ ഉൽപ്പന്നം സ്‌ക്രീനിലെ തിരഞ്ഞെടുത്ത ഭാഗം ഉപയോഗിക്കുന്നു. Google-ന്റെ <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>സ്വകാര്യതാ നയവും<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>സേവന നിബന്ധനകളും<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> ബാധകമാണ്."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"അടയ്ക്കുക"</string>
@@ -151,7 +149,10 @@
     <string name="always_show_taskbar" msgid="3608801276107751229">"ടാസ്‌ക്ബാർ എപ്പോഴും കാണിക്കൂ"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"നാവിഗേഷൻ മോഡ് മാറ്റുക"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"ടാസ്‌ക്ബാർ ഡിവൈഡർ"</string>
-    <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"അടുത്തിടെ ഉപയോഗിച്ച മറ്റ് ആപ്പുകൾ"</string>
+    <!-- no translation found for taskbar_recents_overflow_a11y_title (8005941062446304304) -->
+    <skip />
+    <!-- no translation found for taskbar_pinned_overflow_a11y_title (3427283798522326470) -->
+    <skip />
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"മുകളിലേക്കോ ഇടത്തേക്കോ നീക്കുക"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"താഴേക്കോ വലത്തേക്കോ നീക്കുക"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"ആപ്പ് ഒരു ബബിളായി തുറക്കുക"</string>
