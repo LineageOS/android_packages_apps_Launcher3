@@ -16,10 +16,13 @@
 
 package com.android.launcher3.util;
 
+import static com.android.launcher3.Flags.enableTaskbarUiThread;
 import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
+import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
 
 import android.os.Looper;
 
+import com.android.launcher3.BuildConfig;
 import com.android.launcher3.config.FeatureFlags;
 
 /**
@@ -42,6 +45,21 @@ public class Preconditions {
     public static void assertUIThread() {
         if (FeatureFlags.IS_STUDIO_BUILD && !isSameLooper(Looper.getMainLooper())) {
             throw new IllegalStateException();
+        }
+    }
+
+    public static void assertTaskbarUiThread() {
+        if (!BuildConfig.IS_STUDIO_BUILD) {
+            return;
+        }
+        if (enableTaskbarUiThread()) {
+            if (!isSameLooper(((LooperExecutor) TASKBAR_UI_THREAD).getLooper())) {
+                throw new IllegalStateException();
+            }
+        } else {
+            if (!isSameLooper(Looper.getMainLooper())) {
+                throw new IllegalStateException();
+            }
         }
     }
 
