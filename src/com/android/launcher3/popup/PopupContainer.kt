@@ -52,6 +52,10 @@ open class PopupContainer<T>(context: Context?, val originalView: View, val item
             R.dimen.deep_shortcuts_start_drag_threshold
         )
 
+    override fun getAccessibilityInitialFocusView(): View {
+        return systemShortcutContainer?.getChildAt(0) ?: super.getAccessibilityInitialFocusView()
+    }
+
     @CallSuper
     override fun onControllerInterceptTouchEvent(ev: MotionEvent): Boolean {
         if (ev.action == MotionEvent.ACTION_DOWN) {
