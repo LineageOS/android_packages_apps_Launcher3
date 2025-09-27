@@ -22,6 +22,7 @@ import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_APP;
 
 import android.content.Intent;
+import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.View;
 import android.window.RemoteTransition;
@@ -87,6 +88,10 @@ public class TaskbarUIController implements BubbleBarController.BubbleBarLocatio
 
     protected TaskbarSpecsEvaluator getTaskbarSpecsEvaluator() {
         return mControllers.taskbarActivityContext.getTaskbarSpecsEvaluator();
+    }
+
+    protected SparseArray<ItemInfo> getAllPinnedApps() {
+        return mControllers.taskbarPopupController.getTaskbarInfoList();
     }
 
     protected boolean isTaskbarTouchable() {

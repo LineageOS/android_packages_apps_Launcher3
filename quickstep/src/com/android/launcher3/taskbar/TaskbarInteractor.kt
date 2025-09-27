@@ -17,11 +17,13 @@
 package com.android.launcher3.taskbar
 
 import android.animation.AnimatorSet
+import android.util.SparseArray
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewRootImpl
 import androidx.annotation.AnyThread
 import com.android.launcher3.LauncherState
+import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.taskbar.customization.TASKBAR_OVERFLOW_PIN_LIMIT
 import com.android.launcher3.util.AsyncView
 import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
@@ -200,11 +202,11 @@ class TaskbarInteractor(private val taskbarUIController: TaskbarUIController) {
         if (TaskbarPopupController.canPinAppsOverflow()) {
             TASKBAR_OVERFLOW_PIN_LIMIT
         } else {
-            taskbarUIController.mControllers
-                ?.taskbarActivityContext
-                ?.deviceProfile
-                ?.numShownHotseatIcons ?: -1
+            taskbarUIController.taskbarSpecsEvaluator.numShownHotseatIcons
         }
+
+    /** Returns a SparseArray of all pinned apps on the taskbar. */
+    fun getPinnedApps(): SparseArray<ItemInfo> = taskbarUIController.allPinnedApps
 
     @AnyThread
     fun findMatchingAsyncView(v: View): AsyncView<View> {

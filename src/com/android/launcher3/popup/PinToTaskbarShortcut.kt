@@ -30,7 +30,6 @@ import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherAppState
 import com.android.launcher3.LauncherSettings.Favorites
 import com.android.launcher3.R
-import com.android.launcher3.Workspace.mapOverCellLayouts
 import com.android.launcher3.model.BgDataModel
 import com.android.launcher3.model.ModelWriter
 import com.android.launcher3.model.data.ItemInfo
@@ -225,21 +224,21 @@ constructor(
         @JvmStatic
         fun getPinShortcutFactoryFromLauncher(maxPinnableItems: Int): Factory<Launcher> {
             return Factory { context, itemInfo, originalView ->
-                val hotseat = context.hotseat
-                val hotseatInfosList = SparseArray<ItemInfo?>()
+                val allPinnedItems = context.pinnedItems
 
-                val isPinnedInHotseat =
-                    mapOverCellLayouts(arrayOf(hotseat)) { info, _ ->
-                        info?.componentKey == itemInfo?.componentKey &&
-                            info?.itemType == itemInfo?.itemType
-                    } != null
+                if (allPinnedItems == null) {
+                    Log.e(TAG, "Can not load the valid list of pinned apps")
+                    return@Factory null
+                }
 
-                mapOverCellLayouts(arrayOf(hotseat)) { info, view ->
-                    if (info != null && !info.isPredictedItem && view != hotseat.qsb) {
-                        // In hotseat, the screenId is often used as the rank or position.
-                        hotseatInfosList.put(info.screenId, info)
+                // If the target ItemInfo is already pinned on taskbar. Show the unpin option
+                // instead.
+                var isPinnedInHotseat = false
+                for (i in 0 until allPinnedItems.size) {
+                    if (allPinnedItems.valueAt(i).getComponentKey() == itemInfo.componentKey) {
+                        isPinnedInHotseat = true
+                        break
                     }
-                    false // Return false to continue iterating through all items
                 }
 
                 if (isPinnedInHotseat) {
@@ -250,18 +249,18 @@ constructor(
                         originalView,
                         false,
                         maxPinnableItems,
-                        hotseatInfosList,
+                        allPinnedItems,
                     )
                 }
 
-                if (hotseatInfosList.size < maxPinnableItems) {
+                if (allPinnedItems.size < maxPinnableItems) {
                     return@Factory PinToTaskbarShortcut<Launcher>(
                         context,
                         itemInfo,
                         originalView,
                         true,
                         maxPinnableItems,
-                        hotseatInfosList,
+                        allPinnedItems,
                         context::onItemPinnedFromContextMenu,
                     )
                 }

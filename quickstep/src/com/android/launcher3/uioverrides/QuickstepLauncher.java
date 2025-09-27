@@ -97,6 +97,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.SparseArray;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.View;
@@ -1497,6 +1498,12 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
             taskbarManager.debugPrimaryTaskbar("QuickstepLauncher#onDeviceProfileChanged",
                     true);
         }
+    }
+
+    @Override
+    public SparseArray<ItemInfo> getPinnedItems() {
+        if (mTaskbarInteractor == null) return super.getPinnedItems();
+        return mTaskbarInteractor.getPinnedApps();
     }
 
     /**
