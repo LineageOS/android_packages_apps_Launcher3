@@ -26,6 +26,7 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.annotation.LayoutRes
 import androidx.core.view.contains
+import androidx.core.view.isEmpty
 import androidx.core.view.setPadding
 import com.android.launcher3.BubbleTextView
 import com.android.launcher3.LauncherSettings
@@ -50,7 +51,6 @@ import com.android.launcher3.util.MultiTranslateDelegate
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.views.PredictedAppIcon
 import kotlin.math.min
-import androidx.core.view.isEmpty
 
 /** This manages a group of icons within `TaskbarView`. */
 class TaskbarIconsContainer
@@ -79,7 +79,7 @@ constructor(
             TaskbarOverflowView.OverflowType.PINNED,
             this,
             taskbarIconSize,
-            activityContext.taskbarSpecsEvaluator.taskbarIconPadding
+            activityContext.taskbarSpecsEvaluator.taskbarIconPadding,
         )
 
     val isOverflowViewShowing: Boolean
@@ -97,8 +97,7 @@ constructor(
         var numViewsAnimated = 0
         val numMaxIcons = activityContext.taskbarSpecsEvaluator.numShownHotseatIcons
         val hotseatLength = itemInfos.size
-        val hasOverflow =
-            hotseatLength > numMaxIcons && TaskbarPopupController.canPinAppsOverflow()
+        val hasOverflow = hotseatLength > numMaxIcons && TaskbarPopupController.canPinAppsOverflow()
 
         var onTaskbarStartIdx = 0
 
@@ -150,7 +149,7 @@ constructor(
                                     this,
                                     collectionInfo as FolderInfo,
                                 )
-                            (hotseatView as FolderIcon).textVisible = false
+                            (hotseatView as FolderIcon).folderName.setContainerTextVisibility(false)
                         }
 
                         LauncherSettings.Favorites.ITEM_TYPE_APP_GROUP -> {
@@ -162,7 +161,9 @@ constructor(
                                     collectionInfo as AppPairInfo,
                                     BubbleTextView.DISPLAY_TASKBAR,
                                 )
-                            (hotseatView as AppPairIcon).setTextVisible(false)
+                            (hotseatView as AppPairIcon)
+                                .titleTextView
+                                .setContainerTextVisibility(false)
                         }
 
                         else ->
@@ -172,7 +173,7 @@ constructor(
                     }
                 } else {
                     hotseatView = inflate(expectedLayoutResId)
-                    (hotseatView as BubbleTextView).setTextVisibility(false)
+                    (hotseatView as BubbleTextView).setContainerTextVisibility(false)
                 }
                 val lp = TaskbarIconContainerLayoutParams(taskbarIconSize, taskbarIconSize)
                 if (index != 0) {
@@ -233,12 +234,11 @@ constructor(
             val overflownStartIndex = if (isRtl) 0 else onTaskbarEndIdx
             val overflownEndIndex = if (isRtl) onTaskbarStartIdx else hotseatLength
             val overflownItems = itemInfos.toList().subList(overflownStartIndex, overflownEndIndex)
-            taskbarPinnedOverflowView.setItems(overflownItems.map { iteminfo: ItemInfo? ->
-                ItemInfoWrapper(
-                    iteminfo,
-                    activityContext
-                )
-            })
+            taskbarPinnedOverflowView.setItems(
+                overflownItems.map { iteminfo: ItemInfo? ->
+                    ItemInfoWrapper(iteminfo, activityContext)
+                }
+            )
             maybeAddPinOverflowView()
         } else if (isOverflowViewShowing) {
             removeView(taskbarPinnedOverflowView)
@@ -274,8 +274,8 @@ constructor(
         icon?.setOnTouchListener { v: View, event: MotionEvent ->
             if (
                 event.isFromSource(InputDevice.SOURCE_MOUSE) &&
-                (event.buttonState and MotionEvent.BUTTON_SECONDARY) != 0 &&
-                v is BubbleTextView
+                    (event.buttonState and MotionEvent.BUTTON_SECONDARY) != 0 &&
+                    v is BubbleTextView
             ) {
                 activityContext.showPopupMenuForIcon(v)
                 true
@@ -306,7 +306,6 @@ constructor(
             taskbarViewCallbacks.pinnedOverflowOnLongClickListener
         setHoverListenerForIcon(taskbarPinnedOverflowView)
         addView(taskbarPinnedOverflowView, lp)
-
     }
 
     private fun inflate(@LayoutRes layoutResId: Int): View? {

@@ -589,7 +589,7 @@ public class BubbleTextViewTest {
     public void constructor_whenDisplayTaskbar_textIsHidden() {
         // Verifies that the text is hidden when the view is constructed for the taskbar.
         BubbleTextView taskbarBtv = createBubbleTextViewWithDisplay(DISPLAY_TASKBAR);
-        float actualAlpha = BubbleTextView.TEXT_ALPHA_PROPERTY.get(taskbarBtv);
+        float actualAlpha = taskbarBtv.getTextContainerVisibility();
 
         assertEquals(
                 "The text view is expected to be hidden when displayed in task bar, but the "
@@ -601,7 +601,7 @@ public class BubbleTextViewTest {
     public void constructor_whenDisplayWorkspace_textIsVisible() {
         // Verifies that the text is visible for a non-taskbar display type.
         BubbleTextView workspaceBtv = createBubbleTextViewWithDisplay(DISPLAY_WORKSPACE);
-        float actualAlpha = BubbleTextView.TEXT_ALPHA_PROPERTY.get(workspaceBtv);
+        float actualAlpha = workspaceBtv.getTextContainerVisibility();
 
         assertEquals(
                 "The text view is expected to be visible when displayed in workspace, but the "

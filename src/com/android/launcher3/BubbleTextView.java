@@ -60,7 +60,6 @@ import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.text.style.ImageSpan;
 import android.util.AttributeSet;
-import android.util.FloatProperty;
 import android.util.Log;
 import android.util.Property;
 import android.util.TypedValue;
@@ -79,10 +78,10 @@ import androidx.annotation.VisibleForTesting;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 
 import com.android.launcher3.accessibility.BaseAccessibilityDelegate;
+import com.android.launcher3.anim.AnimatedFloat;
 import com.android.launcher3.dot.DotInfo;
 import com.android.launcher3.dragndrop.DragOptions.PreDragCondition;
 import com.android.launcher3.dragndrop.DraggableView;
-import com.android.launcher3.folder.FolderIcon;
 import com.android.launcher3.graphics.PreloadIconDelegate;
 import com.android.launcher3.graphics.ThemeManager;
 import com.android.launcher3.icons.BitmapInfo.DrawableCreationFlags;
@@ -96,6 +95,7 @@ import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.ItemInfoWithIcon;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
+import com.android.launcher3.popup.IconViewController;
 import com.android.launcher3.popup.Poppable;
 import com.android.launcher3.popup.PoppableType;
 import com.android.launcher3.popup.Popup;
@@ -103,6 +103,7 @@ import com.android.launcher3.popup.PopupController;
 import com.android.launcher3.search.StringMatcherUtility;
 import com.android.launcher3.util.CancellableTask;
 import com.android.launcher3.util.IntArray;
+import com.android.launcher3.util.MultiPropertyFactory;
 import com.android.launcher3.util.MultiTranslateDelegate;
 import com.android.launcher3.util.SafeCloseable;
 import com.android.launcher3.util.ShortcutUtil;
@@ -121,7 +122,7 @@ import java.util.Locale;
  * too aggressive.
  */
 public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
-        FloatingIconViewCompanion, DraggableView, Reorderable, Poppable {
+        FloatingIconViewCompanion, DraggableView, Reorderable, Poppable, IconViewController {
 
     public static final String TAG = "BubbleTextView";
 
@@ -164,19 +165,6 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         }
     };
 
-    public static final FloatProperty<BubbleTextView> TEXT_ALPHA_PROPERTY
-            = new FloatProperty<BubbleTextView>("textAlpha") {
-        @Override
-        public Float get(BubbleTextView bubbleTextView) {
-            return bubbleTextView.mTextAlpha;
-        }
-
-        @Override
-        public void setValue(BubbleTextView bubbleTextView, float alpha) {
-            bubbleTextView.setTextAlpha(alpha);
-        }
-    };
-
     private final MultiTranslateDelegate mTranslateDelegate = new MultiTranslateDelegate(this);
     protected final ActivityContext mActivity;
     private FastBitmapDrawable mIcon;
@@ -202,9 +190,6 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     @ViewDebug.ExportedProperty(category = "launcher")
     private ColorStateList mTextColorStateList;
     @ViewDebug.ExportedProperty(category = "launcher")
-    private float mTextAlpha = 1;
-
-    @ViewDebug.ExportedProperty(category = "launcher")
     private DotInfo mDotInfo;
     private final DotRenderer mDotRenderer;
     @ViewDebug.ExportedProperty(category = "launcher", deepExport = true)
@@ -227,11 +212,50 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
 
     private final String mMinimizedStateDescription;
     private final String mRunningStateDescription;
+    private static final int TEXT_ALPHA_CHANNEL_COUNT = 2;
+    private static final int TEXT_ALPHA_INDEX_CONTAINER_VISIBILITY = 0;
+    private static final int TEXT_ALPHA_INDEX_TRANSITION = 1;
+
+    private final AnimatedFloat mTextAlpha = new AnimatedFloat(() -> {
+        if (mTextColorStateList != null) {
+            setTextColor(mTextColorStateList);
+        } else {
+            super.setTextColor(getModifiedColor());
+        }
+    }, 1f);
+    private final MultiPropertyFactory<AnimatedFloat> mTextAlphaMultiPropertyFactory =
+            new MultiPropertyFactory<>(
+                    mTextAlpha,
+                    AnimatedFloat.VALUE,
+                    TEXT_ALPHA_CHANNEL_COUNT,
+                    (a, b) -> a * b,
+                    1f);
 
     @NonNull
     @Override
     public PoppableType getPoppableType() {
         return PoppableType.APP;
+    }
+
+    /**
+     * Sets the visibility of the text container for a BubbleTextView
+     *
+     * @param visible defines whether we should make the container visible or invisible.
+     */
+    public void setContainerTextVisibility(boolean visible) {
+        mTextAlphaMultiPropertyFactory.get(TEXT_ALPHA_INDEX_CONTAINER_VISIBILITY).setValue(
+                visible ? 1f : 0f);
+    }
+
+    /**
+     * Gets the alpha for text inside a BubbleTextView.
+     *
+     * @return a MultiProperty that has the alpha for the text.
+     */
+    @NonNull
+    @Override
+    public MultiPropertyFactory<AnimatedFloat>.MultiProperty getFloatingViewTextAlpha() {
+        return mTextAlphaMultiPropertyFactory.get(TEXT_ALPHA_INDEX_TRANSITION);
     }
 
     /**
@@ -350,7 +374,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         setEllipsize(TruncateAt.END);
         setAccessibilityDelegate(mActivity.getAccessibilityDelegate());
 
-        setTextVisibility(mDisplay != DISPLAY_TASKBAR);
+        setContainerTextVisibility(mDisplay != DISPLAY_TASKBAR);
     }
 
     @Override
@@ -1105,59 +1129,46 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             mTextColorStateList = colors;
         }
 
-        if (Float.compare(mTextAlpha, 1) == 0) {
+        // mTextAlpha could be null if setTextColor is called before BubbleTextView is initialized.
+        if (mTextAlpha != null && Float.compare(mTextAlpha.value, 1f) == 0) {
             super.setTextColor(colors);
         } else {
             super.setTextColor(getModifiedColor());
         }
     }
 
-    public boolean shouldTextBeVisible() {
-        // Text should be visible everywhere but the hotseat.
-        Object tag = getParent() instanceof FolderIcon ? ((View) getParent()).getTag() : getTag();
-        ItemInfo info = tag instanceof ItemInfo ? (ItemInfo) tag : null;
-        return info == null || (info.container != LauncherSettings.Favorites.CONTAINER_HOTSEAT
-                && info.container != LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION);
+    @Override
+    public int getIconHeight() {
+        if (mIcon == null) {
+            return 0;
+        }
+
+        return mIcon.getBounds().height();
     }
 
     /**
      * Whether or not an App title contrast tile should be drawn for this element.
      **/
     public boolean shouldDrawAppContrastTile() {
-        return mDisplay == DISPLAY_WORKSPACE && shouldTextBeVisible()
+        return mDisplay == DISPLAY_WORKSPACE
+                // mTextAlpha could be null if setTextColor is called before BubbleTextView is
+                // initialized.
+                && (mTextAlpha == null || Float.compare(mTextAlpha.value, 1f) == 0)
                 && PillColorProvider.getInstance(getContext()).isMatchaEnabled()
                 && enableContrastTiles();
     }
 
-    public void setTextVisibility(boolean visible) {
-        setTextAlpha(visible ? 1 : 0);
-    }
-
-    private void setTextAlpha(float alpha) {
-        mTextAlpha = alpha;
-        if (mTextColorStateList != null) {
-            setTextColor(mTextColorStateList);
-        } else {
-            super.setTextColor(getModifiedColor());
-        }
-    }
-
     private int getModifiedColor() {
-        if (mTextAlpha == 0) {
+        if (mTextAlpha != null && mTextAlpha.value == 0f) {
             // Special case to prevent text shadows in high contrast mode
             return Color.TRANSPARENT;
         }
-        return setColorAlphaBound(mTextColor, Math.round(Color.alpha(mTextColor) * mTextAlpha));
+        return setColorAlphaBound(mTextColor, Math.round(Color.alpha(mTextColor)
+                * (mTextAlpha != null ? mTextAlpha.value : 1f)));
     }
 
-    /**
-     * Creates an animator to fade the text in or out.
-     *
-     * @param fadeIn Whether the text should fade in or fade out.
-     */
-    public ObjectAnimator createTextAlphaAnimator(boolean fadeIn) {
-        float toAlpha = shouldTextBeVisible() && fadeIn ? 1 : 0;
-        return ObjectAnimator.ofFloat(this, TEXT_ALPHA_PROPERTY, toAlpha);
+    public float getTextContainerVisibility() {
+        return mTextAlphaMultiPropertyFactory.get(TEXT_ALPHA_INDEX_CONTAINER_VISIBILITY).getValue();
     }
 
     /**

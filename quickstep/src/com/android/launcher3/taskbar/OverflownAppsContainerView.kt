@@ -83,7 +83,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 
             if (icon is BubbleTextView && item is WorkspaceItemInfo) {
                 icon.applyFromWorkspaceItem(item)
-                icon.setTextVisibility(false)
+                icon.setContainerTextVisibility(false)
                 icon.setOnClickListener(viewCallbacks.iconOnClickListener)
                 icon.setOnLongClickListener(viewCallbacks.iconOnLongClickListener)
 

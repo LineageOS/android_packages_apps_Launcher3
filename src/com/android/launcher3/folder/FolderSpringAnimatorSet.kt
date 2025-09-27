@@ -24,7 +24,6 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.util.FloatProperty
-import android.util.Property
 import android.view.View
 import androidx.dynamicanimation.animation.DynamicAnimation.MIN_VISIBLE_CHANGE_ALPHA
 import androidx.dynamicanimation.animation.DynamicAnimation.MIN_VISIBLE_CHANGE_PIXELS
@@ -37,6 +36,7 @@ import com.android.launcher3.Utilities.isDarkTheme
 import com.android.launcher3.anim.SpringAnimationBuilder
 import com.android.launcher3.apppairs.AppPairIcon
 import com.android.launcher3.folder.ClippedFolderIconLayoutRule.MAX_NUM_ITEMS_IN_PREVIEW
+import com.android.launcher3.util.MultiPropertyFactory
 import com.android.launcher3.util.Themes
 
 /** Holder for Animators created from [FolderAnimationSpringBuilderManager] */
@@ -83,7 +83,7 @@ class FolderSpringAnimatorSet(val animatorSet: AnimatorSet) {
             return FolderSpringAnimatorSet(animatorSet)
         }
 
-        private fun <T : View> playSpringAnimation(
+        private fun <T : Any> playSpringAnimation(
             context: Context,
             animatorSet: AnimatorSet,
             isOpening: Boolean,
@@ -93,7 +93,7 @@ class FolderSpringAnimatorSet(val animatorSet: AnimatorSet) {
             startValue: Float,
             endValue: Float,
             minVisibleChange: Float,
-            property: Property<T, Float>,
+            property: FloatProperty<T>,
             view: T,
         ) {
             val animatorBuilder =
@@ -105,9 +105,7 @@ class FolderSpringAnimatorSet(val animatorSet: AnimatorSet) {
                     .setMinimumVisibleChange(minVisibleChange)
 
             val animator =
-                animatorBuilder.build(view, property as FloatProperty<View>).apply {
-                    setStartDelay(startDelay.toLong())
-                }
+                animatorBuilder.build(view, property).apply { setStartDelay(startDelay.toLong()) }
             animatorSet.play(animator)
         }
 
@@ -147,7 +145,7 @@ class FolderSpringAnimatorSet(val animatorSet: AnimatorSet) {
                 startValue = animationData.xDistance,
                 endValue = 0f,
                 minVisibleChange = MIN_VISIBLE_CHANGE_PIXELS,
-                property = View.TRANSLATION_X,
+                property = LauncherAnimUtils.VIEW_TRANSLATE_X,
                 view = folder,
             )
             playSpringAnimation(
@@ -160,7 +158,7 @@ class FolderSpringAnimatorSet(val animatorSet: AnimatorSet) {
                 startValue = animationData.yDistance,
                 endValue = 0f,
                 minVisibleChange = MIN_VISIBLE_CHANGE_PIXELS,
-                property = View.TRANSLATION_Y,
+                property = LauncherAnimUtils.VIEW_TRANSLATE_Y,
                 view = folder,
             )
             playSpringAnimation(
@@ -200,7 +198,7 @@ class FolderSpringAnimatorSet(val animatorSet: AnimatorSet) {
                 startValue = -(animationData.contentHeightDifference),
                 endValue = 0f,
                 minVisibleChange = MIN_VISIBLE_CHANGE_PIXELS,
-                property = View.TRANSLATION_Y,
+                property = LauncherAnimUtils.VIEW_TRANSLATE_Y,
                 view = folder.mFooter,
             )
 
@@ -216,7 +214,7 @@ class FolderSpringAnimatorSet(val animatorSet: AnimatorSet) {
                 startValue = -folder.elevation,
                 endValue = 0f,
                 minVisibleChange = MIN_VISIBLE_CHANGE_PIXELS,
-                property = View.TRANSLATION_Z,
+                property = LauncherAnimUtils.VIEW_TRANSLATE_Z,
                 view = folder,
             )
             // store clip variables
@@ -270,7 +268,7 @@ class FolderSpringAnimatorSet(val animatorSet: AnimatorSet) {
                     startValue = 0f,
                     endValue = 1f,
                     minVisibleChange = MIN_VISIBLE_CHANGE_ALPHA,
-                    property = View.ALPHA,
+                    property = LauncherAnimUtils.VIEW_ALPHA,
                     view = mFooter,
                 )
                 // Fade in the folder name, as the text can overlap the icons when grid size is
@@ -286,7 +284,7 @@ class FolderSpringAnimatorSet(val animatorSet: AnimatorSet) {
                     startValue = 0f,
                     endValue = 1f,
                     minVisibleChange = MIN_VISIBLE_CHANGE_ALPHA,
-                    property = View.ALPHA,
+                    property = LauncherAnimUtils.VIEW_ALPHA,
                     view = folderName,
                 )
             }
@@ -392,7 +390,7 @@ class FolderSpringAnimatorSet(val animatorSet: AnimatorSet) {
             with(iconData) {
                 val titleText = getBubbleTextView(icon)
                 if (isOpening) {
-                    titleText.setTextVisibility(false)
+                    titleText.getFloatingViewTextAlpha().value = 0f
                 }
                 playSpringAnimation(
                     context = context,
@@ -404,8 +402,8 @@ class FolderSpringAnimatorSet(val animatorSet: AnimatorSet) {
                     startValue = 0f,
                     endValue = 1f,
                     minVisibleChange = MIN_VISIBLE_CHANGE_ALPHA,
-                    property = BubbleTextView.TEXT_ALPHA_PROPERTY,
-                    view = titleText,
+                    property = MultiPropertyFactory.MULTI_PROPERTY_VALUE,
+                    view = titleText.getFloatingViewTextAlpha(),
                 )
                 if (!itemsInPreview.contains(icon)) {
                     playSpringAnimation(
@@ -418,7 +416,7 @@ class FolderSpringAnimatorSet(val animatorSet: AnimatorSet) {
                         startValue = 0f,
                         endValue = 1f,
                         minVisibleChange = MIN_VISIBLE_CHANGE_ALPHA,
-                        property = View.ALPHA,
+                        property = LauncherAnimUtils.VIEW_ALPHA,
                         view = icon,
                     )
                 }
@@ -432,7 +430,7 @@ class FolderSpringAnimatorSet(val animatorSet: AnimatorSet) {
                     startValue = xDistance,
                     endValue = 0f,
                     minVisibleChange = MIN_VISIBLE_CHANGE_PIXELS,
-                    property = View.TRANSLATION_X,
+                    property = LauncherAnimUtils.VIEW_TRANSLATE_X,
                     view = icon,
                 )
                 playSpringAnimation(
@@ -445,7 +443,7 @@ class FolderSpringAnimatorSet(val animatorSet: AnimatorSet) {
                     startValue = yDistance,
                     endValue = 0f,
                     minVisibleChange = MIN_VISIBLE_CHANGE_PIXELS,
-                    property = View.TRANSLATION_Y,
+                    property = LauncherAnimUtils.VIEW_TRANSLATE_Y,
                     view = icon,
                 )
                 playSpringAnimation(

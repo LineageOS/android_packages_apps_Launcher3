@@ -1007,7 +1007,8 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
         if (mFolderIcon != null) {
             mFolderIcon.setVisibility(View.VISIBLE);
             mFolderIcon.setIconVisible(true);
-            mFolderIcon.mFolderName.setTextVisibility(true);
+            mFolderIcon.mFolderName.getFloatingViewTextAlpha().setValue(
+                    1f);
             if (wasAnimated) {
                 mFolderIcon.animateBgShadowAndStroke();
                 mFolderIcon.onFolderClose(mContent.getCurrentPage());

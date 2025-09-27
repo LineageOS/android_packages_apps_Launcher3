@@ -707,7 +707,8 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                             hotseatView = AppPairIcon.inflateIcon(
                                     expectedLayoutResId, mActivityContext, this,
                                     (AppPairInfo) collectionInfo, DISPLAY_TASKBAR);
-                            ((AppPairIcon) hotseatView).setTextVisible(false);
+                            ((AppPairIcon) hotseatView).getTitleTextView()
+                                    .setContainerTextVisibility(false);
                             break;
                         default:
                             throw new IllegalStateException(
@@ -889,7 +890,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                 } else if (task instanceof SplitTask st) {
                     recentIcon = AppPairIcon.inflateIcon(expectedLayoutResId, mActivityContext,
                             this, st.toAppPairInfo(), DISPLAY_TASKBAR);
-                    ((AppPairIcon) recentIcon).setTextVisible(false);
+                    ((AppPairIcon) recentIcon).getTitleTextView().setContainerTextVisibility(false);
                     recentIcon.setTag(task);
                 }
                 LayoutParams lp = new TaskbarLayoutParams(mIconTouchSize, mIconTouchSize);
