@@ -481,16 +481,6 @@ flag {
 }
 
 flag {
-  name: "home_button_uses_keycode_home"
-  namespace: "launcher"
-  description: "Sends KEYCODE_HOME to framework instead of calling startActivity directly"
-  bug: "381339822"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "enable_expressive_folder_expansion"
   namespace: "launcher"
   description: "Enables expressive folder expansion motion"
