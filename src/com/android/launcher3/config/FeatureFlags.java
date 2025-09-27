@@ -66,11 +66,6 @@ public final class FeatureFlags {
     public static final BooleanFlag FOLDABLE_SINGLE_PAGE = getDebugFlag(270395274,
             "FOLDABLE_SINGLE_PAGE", DISABLED, "Use a single page for the workspace");
 
-    // TODO(Block 12): Clean up flags
-    public static final BooleanFlag ENABLE_MULTI_INSTANCE = getDebugFlag(270396680,
-            "ENABLE_MULTI_INSTANCE", DISABLED,
-            "Enables creation and filtering of multiple task instances in overview");
-
     // TODO(Block 13): Clean up flags
     public static final BooleanFlag ENABLE_DEVICE_SEARCH_PERFORMANCE_LOGGING = getReleaseFlag(
             270391397, "ENABLE_DEVICE_SEARCH_PERFORMANCE_LOGGING", DISABLED,

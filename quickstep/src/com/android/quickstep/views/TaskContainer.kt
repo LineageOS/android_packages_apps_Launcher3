@@ -55,7 +55,6 @@ class TaskContainer(
     /** Defaults to STAGE_POSITION_UNDEFINED if in not a split screen task view */
     @SplitConfigurationOptions.StagePosition val stagePosition: Int,
     val digitalWellBeingToast: DigitalWellBeingToast?,
-    val showWindowsView: View?,
     taskOverlayFactory: TaskOverlayFactory,
 ) {
     val overlay: TaskOverlayFactory.TaskOverlay<*> = taskOverlayFactory.createOverlay(this)
@@ -129,7 +128,6 @@ class TaskContainer(
             if (enableRefactorTaskContentView()) taskContentView else snapshotView,
             outChildren,
         )
-        showWindowsView?.let { addAccessibleChildToList(it, outChildren) }
         digitalWellBeingToast?.let { addAccessibleChildToList(it, outChildren) }
         overlay.addChildForAccessibility(outChildren)
     }

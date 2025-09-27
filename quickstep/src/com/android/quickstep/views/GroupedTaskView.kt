@@ -133,7 +133,6 @@ class GroupedTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
                     R.id.task_content_view,
                     R.id.snapshot,
                     R.id.icon,
-                    R.id.show_windows,
                     R.id.digital_wellbeing_toast,
                     STAGE_POSITION_TOP_OR_LEFT,
                     taskOverlayFactory,
@@ -144,7 +143,6 @@ class GroupedTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
                     if (enableRefactorTaskContentView()) R.id.snapshot
                     else R.id.bottomright_snapshot,
                     R.id.bottomRight_icon,
-                    R.id.show_windows_right,
                     R.id.bottomRight_digital_wellbeing_toast,
                     STAGE_POSITION_BOTTOM_OR_RIGHT,
                     taskOverlayFactory,

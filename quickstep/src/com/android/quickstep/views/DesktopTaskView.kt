@@ -493,7 +493,6 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
                     iconTouchDelegate,
                     SplitConfigurationOptions.STAGE_POSITION_UNDEFINED,
                     digitalWellBeingToast = null,
-                    showWindowsView = null,
                     taskOverlayFactory,
                 )
             }

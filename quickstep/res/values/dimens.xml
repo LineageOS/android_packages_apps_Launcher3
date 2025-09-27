@@ -499,9 +499,6 @@
     <!--- The minimum insets size for the IME to be considered docked. -->
     <dimen name="ime_docked_threshold">80dp</dimen>
 
-    <!-- Recents overview -->
-    <dimen name="recents_filter_icon_size">30dp</dimen>
-
     <!-- Bubble bar -->
     <dimen name="bubblebar_size">72dp</dimen>
     <dimen name="bubblebar_stashed_handle_width">55dp</dimen>
