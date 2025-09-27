@@ -91,7 +91,6 @@ public class QuickstepModelDelegate extends ModelDelegate {
             CONTAINER_WIDGETS_PREDICTION, "widgets_prediction", DESKTOP_ICON_FLAG);
 
     private final InvariantDeviceProfile mIDP;
-    private final UserCache mUserCache;
     private final PredictedItemFactory.Factory mItemParserFactory;
     private final AppEventProducer mAppEventProducer;
 
@@ -109,7 +108,6 @@ public class QuickstepModelDelegate extends ModelDelegate {
 
 
         mIDP = idp;
-        mUserCache = userCache;
         mItemParserFactory = itemParserFactory;
 
         mAppEventProducer = new AppEventProducer(context, this::onAppTargetEvent);
@@ -139,7 +137,7 @@ public class QuickstepModelDelegate extends ModelDelegate {
             @NonNull PredictorState state, @NonNull IntSparseArrayMap<ItemInfo> outLoadedItems) {
         PredictedItemFactory parser = mItemParserFactory.newParser(numColumns, state);
         PredictedContainerInfo fci = new PredictedContainerInfo(state.containerId,
-                state.storage.read(mContext, parser, mUserCache::getUserForSerialNumber));
+                state.storage.read(mContext, parser));
         outLoadedItems.put(state.containerId, fci);
     }
 
