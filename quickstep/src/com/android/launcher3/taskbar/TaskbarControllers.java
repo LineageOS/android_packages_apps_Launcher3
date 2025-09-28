@@ -72,6 +72,7 @@ public class TaskbarControllers {
     public final TaskbarHandoffController taskbarHandoffController;
     public final NudgeController nudgeController;
     public final NudgeViewController nudgeViewController;
+    public final TaskbarViewDragDropController taskbarViewDragDropController;
 
     @Nullable private LoggableTaskbarController[] mControllersToLog = null;
     @Nullable private BackgroundRendererController[] mBackgroundRendererControllers = null;
@@ -123,7 +124,8 @@ public class TaskbarControllers {
             TaskbarDesktopModeController taskbarDesktopModeController,
             NudgeController nudgeController,
             NudgeViewController nudgeViewController,
-            TaskbarHandoffController taskbarHandoffController) {
+            TaskbarHandoffController taskbarHandoffController,
+            TaskbarViewDragDropController taskbarViewDragDropController) {
         this.taskbarActivityContext = taskbarActivityContext;
         this.taskbarDragController = taskbarDragController;
         this.navButtonController = navButtonController;
@@ -154,6 +156,7 @@ public class TaskbarControllers {
         this.nudgeController = nudgeController;
         this.nudgeViewController = nudgeViewController;
         this.taskbarHandoffController = taskbarHandoffController;
+        this.taskbarViewDragDropController = taskbarViewDragDropController;
     }
 
     /**

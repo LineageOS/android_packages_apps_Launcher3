@@ -18,6 +18,7 @@ package com.android.launcher3.taskbar;
 import static com.android.app.animation.Interpolators.FAST_OUT_SLOW_IN;
 import static com.android.launcher3.AbstractFloatingView.TYPE_TASKBAR_ALL_APPS;
 import static com.android.launcher3.Flags.enableSystemDrag;
+import static com.android.launcher3.Flags.enableTaskbarDragAndDrop;
 import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_ALL_APPS;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_ALL_APPS_PREDICTION;
@@ -148,6 +149,9 @@ public class TaskbarDragController extends DragController<BaseTaskbarContext> im
                             mDragToBubbleController = dragToBubbleController;
                             mDragToBubbleController.addBubbleBarDropTargets(this);
                         }));
+        if (enableTaskbarDragAndDrop()) {
+            mControllers.taskbarViewDragDropController.addDropTargets(this);
+        }
         mTaskbarUiState = taskbarUiState;
     }
 
@@ -155,6 +159,9 @@ public class TaskbarDragController extends DragController<BaseTaskbarContext> im
     public void onDestroy() {
         mControllers.bubbleControllers.ifPresent(
                 c -> c.dragToBubbleController.removeBubbleBarDropTargets(this));
+        if (enableTaskbarDragAndDrop()) {
+            mControllers.taskbarViewDragDropController.removeDropTargets(this);
+        }
     }
 
     public void setDisallowGlobalDrag(boolean disallowGlobalDrag) {

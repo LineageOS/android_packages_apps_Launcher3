@@ -452,7 +452,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                         DesktopVisibilityController.INSTANCE.get(this)),
                 new NudgeController(this),
                 new NudgeViewController(this, nudgeView),
-                new TaskbarHandoffController(this));
+                new TaskbarHandoffController(this),
+                new TaskbarViewDragDropController(this, taskbarView));
 
         mLauncherPrefs = LauncherPrefs.get(this);
         onViewCreated();
