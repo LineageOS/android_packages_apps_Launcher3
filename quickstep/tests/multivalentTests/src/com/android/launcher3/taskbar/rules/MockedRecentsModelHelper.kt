@@ -16,6 +16,8 @@
 
 package com.android.launcher3.taskbar.rules
 
+import com.android.launcher3.util.ListenableStream
+import com.android.launcher3.util.SafeCloseable
 import com.android.quickstep.RecentsModel
 import com.android.quickstep.RecentsModel.RecentTasksChangedListener
 import com.android.quickstep.TaskIconCache
@@ -25,6 +27,7 @@ import java.util.function.BiConsumer
 import java.util.function.Consumer
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
@@ -33,9 +36,21 @@ import org.mockito.kotlin.mock
 class MockedRecentsModelHelper {
     private val mockIconCache: TaskIconCache = mock()
     private val mockThumbnailCache: TaskThumbnailCache = mock()
+    private val argumentCaptor = argumentCaptor<(Void?) -> Unit>()
+    private val safeClosable: SafeCloseable = mock()
+    private val mockTaskChangeListenable: ListenableStream<Void> = mock {
+        on { forEach(any(), argumentCaptor.capture()) } doAnswer
+            {
+                onTaskChangeCallback = argumentCaptor.lastValue
+                safeClosable
+            }
+    }
 
     var taskListId = 0
     var recentTasksChangedListener: RecentTasksChangedListener? = null
+
+    var onTaskChangeCallback: ((Void?) -> Unit)? = null
+
     var taskRequests: MutableList<(List<GroupTask>) -> Unit> = mutableListOf()
 
     val mockRecentsModel: RecentsModel = mock {
@@ -52,6 +67,8 @@ class MockedRecentsModelHelper {
             {
                 recentTasksChangedListener = it.getArgument<RecentTasksChangedListener>(0)
             }
+
+        on { tasksChanges } doReturn mockTaskChangeListenable
 
         on { getTasks(anyOrNull<BiConsumer<List<GroupTask>, Int>>(), anyOrNull()) } doAnswer
             {

@@ -34,6 +34,7 @@ import com.android.internal.R
 import com.android.launcher3.BubbleTextView.RunningAppState
 import com.android.launcher3.DeviceProfile
 import com.android.launcher3.Flags
+import com.android.launcher3.Flags.enableTaskbarUiThread
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION
 import com.android.launcher3.graphics.ThemeManager
@@ -44,8 +45,11 @@ import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.TaskItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.taskbar.TaskbarRecentAppsController.TaskState
+import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
 import com.android.launcher3.util.LauncherMultivalentJUnit
+import com.android.launcher3.util.ListenableStream
 import com.android.launcher3.util.MutableListenableRef
+import com.android.launcher3.util.SafeCloseable
 import com.android.quickstep.RecentsModel
 import com.android.quickstep.RecentsModel.RecentTasksChangedListener
 import com.android.quickstep.TaskIconCache
@@ -71,6 +75,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.never
+import org.mockito.kotlin.same
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -94,6 +99,8 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
 
     @Mock private lateinit var mockIconCache: TaskIconCache
     @Mock private lateinit var mockRecentsModel: RecentsModel
+    @Mock private lateinit var mockTaskChangesListenable: ListenableStream<Void>
+    @Mock private lateinit var mockTaskChangesSafeClosable: SafeCloseable
     @Mock private lateinit var mockThemeManager: ThemeManager
     @Mock private lateinit var mockContext: Context
     @Mock private lateinit var mockResources: Resources
@@ -108,6 +115,7 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
 
     private var canShowRunningAndRecentAppsAtInit = true
     private var recentTasksChangedListener: RecentTasksChangedListener? = null
+    private var recentTasksChangedCallback: ((Void?) -> Unit)? = null
 
     val recentShownTasks: List<Task>
         get() = recentAppsController.shownTasks.flatMap { it.tasks }
@@ -126,6 +134,13 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
         whenever(mockRecentsModel.iconCache).thenReturn(mockIconCache)
         whenever(mockRecentsModel.unregisterRecentTasksChangedListener(any())).then {
             recentTasksChangedListener = null
+            it
+        }
+        whenever(mockRecentsModel.tasksChanges).thenReturn(mockTaskChangesListenable)
+        whenever(mockTaskChangesListenable.forEach(any(), any()))
+            .thenReturn(mockTaskChangesSafeClosable)
+        whenever(mockTaskChangesSafeClosable.close()).then {
+            recentTasksChangedCallback = null
             it
         }
         whenever(mockThemeManager.iconShapeData).thenReturn(MutableListenableRef(IconShape.EMPTY))
@@ -147,16 +162,30 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
         recentAppsController.init(taskbarControllers, emptyList())
         taskbarControllers.onPostInit()
 
-        recentTasksChangedListener =
-            if (canShowRunningAndRecentAppsAtInit) {
-                val listenerCaptor = ArgumentCaptor.forClass(RecentTasksChangedListener::class.java)
-                verify(mockRecentsModel)
-                    .registerRecentTasksChangedListener(listenerCaptor.capture())
-                listenerCaptor.value
-            } else {
-                verify(mockRecentsModel, never()).registerRecentTasksChangedListener(any())
-                null
-            }
+        if (enableTaskbarUiThread()) {
+            recentTasksChangedCallback =
+                if (canShowRunningAndRecentAppsAtInit) {
+                    val listenerCaptor = argumentCaptor<(Void?) -> Unit>()
+                    verify(mockTaskChangesListenable)
+                        .forEach(same(TASKBAR_UI_THREAD), listenerCaptor.capture())
+                    listenerCaptor.lastValue
+                } else {
+                    verify(mockTaskChangesListenable, never()).forEach(any(), any())
+                    null
+                }
+        } else {
+            recentTasksChangedListener =
+                if (canShowRunningAndRecentAppsAtInit) {
+                    val listenerCaptor =
+                        ArgumentCaptor.forClass(RecentTasksChangedListener::class.java)
+                    verify(mockRecentsModel)
+                        .registerRecentTasksChangedListener(listenerCaptor.capture())
+                    listenerCaptor.value
+                } else {
+                    verify(mockRecentsModel, never()).registerRecentTasksChangedListener(any())
+                    null
+                }
+        }
 
         // Make sure updateHotseatItemInfos() is called after commitRunningAppsToUI()
         whenever(taskbarViewController.commitRunningAppsToUI()).then {
@@ -193,8 +222,30 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
     }
 
     @Test
-    @EnableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX)
+    @EnableFlags(
+        com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX,
+        Flags.FLAG_ENABLE_TASKBAR_UI_THREAD,
+    )
     fun recentTasksChanged_duringGetTasksLoading_dontCallGetTasks() {
+        // getTasks() should have been called once from init().
+        verify(mockRecentsModel, times(1)).getTasks(any(), any<Consumer<List<GroupTask>>>())
+        // Override the mock answer for getTasks() so it doesn't call the callback immediately.
+        doAnswer { taskListChangeId }
+            .whenever(mockRecentsModel)
+            .getTasks(any(), any<Consumer<List<GroupTask>>>())
+        recentTasksChangedCallback?.invoke(null)
+        // By not invoking the callback passed to getTasks() we here emulate getTasks() loading.
+
+        recentTasksChangedCallback?.invoke(null)
+
+        // getTasks() is only called two times overall (init + once more).
+        verify(mockRecentsModel, times(2)).getTasks(any(), any<Consumer<List<GroupTask>>>())
+    }
+
+    @Test
+    @EnableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX)
+    @DisableFlags(Flags.FLAG_ENABLE_TASKBAR_UI_THREAD)
+    fun recentTasksChanged_duringGetTasksLoading_dontCallGetTasks_disableFlags_taskbarUiThread() {
         // getTasks() should have been called once from init().
         verify(mockRecentsModel, times(1)).getTasks(any(), any<Consumer<List<GroupTask>>>())
         // Override the mock answer for getTasks() so it doesn't call the callback immediately.
@@ -211,8 +262,32 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
     }
 
     @Test
-    @EnableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX)
+    @EnableFlags(
+        com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX,
+        Flags.FLAG_ENABLE_TASKBAR_UI_THREAD,
+    )
     fun recentTasksChanged_duringGetTasksLoading_getTasksCalledWhenLoadingDone() {
+        val callbackCaptor = argumentCaptor<Consumer<List<GroupTask>>>()
+        // getTasks() should have been called once from init().
+        verify(mockRecentsModel, times(1)).getTasks(any(), callbackCaptor.capture())
+        // Override the mock answer for getTasks() so it doesn't call the callback immediately.
+        doAnswer { taskListChangeId }
+            .whenever(mockRecentsModel)
+            .getTasks(any(), any<Consumer<List<GroupTask>>>())
+        recentTasksChangedCallback?.invoke(null)
+        // By not invoking the callback passed to getTasks() we here emulate getTasks() loading.
+
+        recentTasksChangedCallback?.invoke(null)
+        callbackCaptor.lastValue.accept(emptyList())
+
+        // getTasks() is called again now that the first getTasks() call finished.
+        verify(mockRecentsModel, times(3)).getTasks(any(), any<Consumer<List<GroupTask>>>())
+    }
+
+    @Test
+    @EnableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX)
+    @DisableFlags(Flags.FLAG_ENABLE_TASKBAR_UI_THREAD)
+    fun recentTasksChanged_duringGetTasksLoading_getTasksCalledWhenLoadingDone_legacy() {
         val callbackCaptor = argumentCaptor<Consumer<List<GroupTask>>>()
         // getTasks() should have been called once from init().
         verify(mockRecentsModel, times(1)).getTasks(any(), callbackCaptor.capture())
@@ -231,8 +306,30 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_ENABLE_TASKBAR_UI_THREAD)
     @DisableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX)
-    fun recentTasksChanged_duringGetTasksLoading_flagDisabled_callGetTasks() {
+    fun recentTasksChanged_duringGetTasksLoading_flagDisabled_callGetTasks_flagEnabled_taskbarUiThread() {
+        // getTasks() should have been called once from init().
+        verify(mockRecentsModel, times(1)).getTasks(any(), any<Consumer<List<GroupTask>>>())
+        // Override the mock answer for getTasks() so it doesn't call the callback immediately.
+        doAnswer { taskListChangeId }
+            .whenever(mockRecentsModel)
+            .getTasks(any(), any<Consumer<List<GroupTask>>>())
+        recentTasksChangedCallback?.invoke(null)
+        // By not invoking the callback passed to getTasks() we here emulate getTasks() loading.
+
+        recentTasksChangedCallback?.invoke(null)
+
+        // getTasks() is called once per onRecentTasksChanged() invocation (and once at init)
+        verify(mockRecentsModel, times(3)).getTasks(any(), any<Consumer<List<GroupTask>>>())
+    }
+
+    @Test
+    @DisableFlags(
+        com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX,
+        Flags.FLAG_ENABLE_TASKBAR_UI_THREAD,
+    )
+    fun recentTasksChanged_duringGetTasksLoading_flagDisabled_callGetTasks_taskbarUiThread() {
         // getTasks() should have been called once from init().
         verify(mockRecentsModel, times(1)).getTasks(any(), any<Consumer<List<GroupTask>>>())
         // Override the mock answer for getTasks() so it doesn't call the callback immediately.
@@ -249,8 +346,9 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_ENABLE_TASKBAR_UI_THREAD)
     @DisableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX)
-    fun recentTasksChanged_duringGetTasksLoading_flagDisabled_getTasksNotCalledWhenLoadingDone() {
+    fun recentTasksChanged_duringGetTasksLoading_flagDisabled_getTasksNotCalledWhenLoadingDone_flagEnabled_taskbarUiThread() {
         val callbackCaptor = argumentCaptor<Consumer<List<GroupTask>>>()
         // getTasks() should have been called once from init().
         verify(mockRecentsModel, times(1)).getTasks(any(), callbackCaptor.capture())
@@ -258,8 +356,31 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
         doAnswer { taskListChangeId }
             .whenever(mockRecentsModel)
             .getTasks(any(), any<Consumer<List<GroupTask>>>())
-        recentTasksChangedListener?.onRecentTasksChanged()
-        recentTasksChangedListener?.onRecentTasksChanged()
+        recentTasksChangedCallback?.invoke(null)
+        recentTasksChangedCallback?.invoke(null)
+        verify(mockRecentsModel, times(3)).getTasks(any(), any<Consumer<List<GroupTask>>>())
+
+        callbackCaptor.lastValue.accept(emptyList())
+
+        // getTasks() is called once per onRecentTasksChanged() invocation (and once at init)
+        verify(mockRecentsModel, times(3)).getTasks(any(), any<Consumer<List<GroupTask>>>())
+    }
+
+    @Test
+    @DisableFlags(
+        com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX,
+        Flags.FLAG_ENABLE_TASKBAR_UI_THREAD,
+    )
+    fun recentTasksChanged_duringGetTasksLoading_flagDisabled_getTasksNotCalledWhenLoadingDone_taskbarUiThread() {
+        val callbackCaptor = argumentCaptor<Consumer<List<GroupTask>>>()
+        // getTasks() should have been called once from init().
+        verify(mockRecentsModel, times(1)).getTasks(any(), callbackCaptor.capture())
+        // Override the mock answer for getTasks() so it doesn't call the callback immediately.
+        doAnswer { taskListChangeId }
+            .whenever(mockRecentsModel)
+            .getTasks(any(), any<Consumer<List<GroupTask>>>())
+        recentTasksChangedListener!!.onRecentTasksChanged()
+        recentTasksChangedListener!!.onRecentTasksChanged()
         verify(mockRecentsModel, times(3)).getTasks(any(), any<Consumer<List<GroupTask>>>())
 
         callbackCaptor.lastValue.accept(emptyList())
@@ -914,8 +1035,29 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
         assertThat(shownPackages).isEqualTo(listOf(RECENT_PACKAGE_2))
     }
 
+    @EnableFlags(Flags.FLAG_ENABLE_TASKBAR_UI_THREAD)
     @Test
-    fun onRecentTasksChanged_enterDesktopMode_shownTasks_onlyIncludesRunningTasks() {
+    fun onRecentTasksChanged_enterDesktopMode_shownTasks_onlyIncludesRunningTasks_enableFlags_taskbarUiThread() {
+        setInDesktopMode(false)
+        val runningTask1 = createTask(id = 1, RUNNING_APP_PACKAGE_1)
+        val runningTask2 = createTask(id = 2, RUNNING_APP_PACKAGE_2)
+        val recentTaskPackages = listOf(RECENT_PACKAGE_1, RECENT_PACKAGE_2)
+
+        prepareHotseatAndRunningAndRecentApps(
+            hotseatPackages = emptyList(),
+            runningTasks = listOf(runningTask1, runningTask2),
+            recentTaskPackages = recentTaskPackages,
+        )
+
+        setInDesktopMode(true)
+        recentTasksChangedCallback!!.invoke(null)
+        val shownPackages = recentAppsController.shownTasks.flatMap { it.packageNames }
+        assertThat(shownPackages).containsExactly(RUNNING_APP_PACKAGE_1, RUNNING_APP_PACKAGE_2)
+    }
+
+    @DisableFlags(Flags.FLAG_ENABLE_TASKBAR_UI_THREAD)
+    @Test
+    fun onRecentTasksChanged_enterDesktopMode_shownTasks_onlyIncludesRunningTasks_disableFlags_taskbarUiThread() {
         setInDesktopMode(false)
         val runningTask1 = createTask(id = 1, RUNNING_APP_PACKAGE_1)
         val runningTask2 = createTask(id = 2, RUNNING_APP_PACKAGE_2)
@@ -933,8 +1075,29 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
         assertThat(shownPackages).containsExactly(RUNNING_APP_PACKAGE_1, RUNNING_APP_PACKAGE_2)
     }
 
+    @EnableFlags(Flags.FLAG_ENABLE_TASKBAR_UI_THREAD)
     @Test
-    fun onRecentTasksChanged_exitDesktopMode_shownTasks_onlyIncludesRecentTasks() {
+    fun onRecentTasksChanged_exitDesktopMode_shownTasks_onlyIncludesRecentTasks_enableFlag_taskbarUiThread() {
+        setInDesktopMode(true)
+        val runningTask1 = createTask(id = 1, RUNNING_APP_PACKAGE_1)
+        val runningTask2 = createTask(id = 2, RUNNING_APP_PACKAGE_2)
+        val recentTaskPackages = listOf(RECENT_PACKAGE_1, RECENT_PACKAGE_2, RECENT_PACKAGE_3)
+        prepareHotseatAndRunningAndRecentApps(
+            hotseatPackages = emptyList(),
+            runningTasks = listOf(runningTask1, runningTask2),
+            recentTaskPackages = recentTaskPackages,
+        )
+        setInDesktopMode(false)
+        recentTasksChangedCallback!!.invoke(null)
+        val shownPackages = recentAppsController.shownTasks.flatMap { it.packageNames }
+        // Don't expect RECENT_PACKAGE_3 because it is currently running.
+        val expectedPackages = listOf(RECENT_PACKAGE_1, RECENT_PACKAGE_2)
+        assertThat(shownPackages).containsExactlyElementsIn(expectedPackages)
+    }
+
+    @DisableFlags(Flags.FLAG_ENABLE_TASKBAR_UI_THREAD)
+    @Test
+    fun onRecentTasksChanged_exitDesktopMode_shownTasks_onlyIncludesRecentTasks_disableFlag_taskbarUiThread() {
         setInDesktopMode(true)
         val runningTask1 = createTask(id = 1, RUNNING_APP_PACKAGE_1)
         val runningTask2 = createTask(id = 2, RUNNING_APP_PACKAGE_2)
@@ -1361,7 +1524,11 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
             }
             .whenever(mockRecentsModel)
             .getTasks(any(), any<Consumer<List<GroupTask>>>())
-        recentTasksChangedListener?.onRecentTasksChanged()
+        if (enableTaskbarUiThread()) {
+            recentTasksChangedCallback?.invoke(null)
+        } else {
+            recentTasksChangedListener?.onRecentTasksChanged()
+        }
     }
 
     private fun createHotseatItemsFromPackageUsers(

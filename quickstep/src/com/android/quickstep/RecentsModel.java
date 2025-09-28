@@ -17,6 +17,7 @@ package com.android.quickstep;
 
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 
+import static com.android.launcher3.Flags.enableTaskbarUiThread;
 import static com.android.quickstep.TaskUtils.checkCurrentOrManagedUserId;
 
 import android.annotation.SuppressLint;
@@ -47,8 +48,10 @@ import com.android.launcher3.util.DaggerSingletonObject;
 import com.android.launcher3.util.DaggerSingletonTracker;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.Executors.SimpleThreadFactory;
+import com.android.launcher3.util.ListenableStream;
 import com.android.launcher3.util.LockedUserState;
 import com.android.launcher3.util.LooperExecutor;
+import com.android.launcher3.util.MutableListenableStream;
 import com.android.launcher3.util.SafeCloseable;
 import com.android.launcher3.util.coroutines.DispatcherProvider;
 import com.android.quickstep.dagger.QuickstepBaseAppComponent;
@@ -95,6 +98,8 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
             new ConcurrentLinkedQueue<>();
     private final ConcurrentLinkedQueue<RecentTasksChangedListener> mRecentTasksChangedListeners =
             new ConcurrentLinkedQueue<>();
+    private final MutableListenableStream<Void> mTasksChangedListenable =
+            new MutableListenableStream<>();
 
     private final Context mContext;
     private final RecentTasksList mTaskList;
@@ -166,8 +171,15 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
         mContext = context;
         mTaskList = taskList;
         RecentTasksChangedListener recentTasksListObserver =
-                () -> mRecentTasksChangedListeners.forEach(
-                        RecentTasksChangedListener::onRecentTasksChanged);
+                () -> {
+                    if (enableTaskbarUiThread()) {
+                        mTasksChangedListenable.dispatchValue(null);
+                    } else {
+                        mRecentTasksChangedListeners.forEach(
+                                RecentTasksChangedListener::onRecentTasksChanged);
+                    }
+                };
+
         mTaskList.registerRecentTasksChangedListener(recentTasksListObserver);
         mIconCache = iconCache;
         mIconCache.registerTaskVisualsChangeListener(this);
@@ -207,6 +219,10 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
                 lockedUserState.removeOnUserUnlockedRunnable(unlockCallback);
             }
         });
+    }
+
+    public ListenableStream<Void> getTasksChanges() {
+        return mTasksChangedListenable;
     }
 
     public TaskIconCache getIconCache() {
@@ -408,6 +424,9 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
      * Registers a listener for recent tasks
      */
     public void registerRecentTasksChangedListener(RecentTasksChangedListener listener) {
+        if (enableTaskbarUiThread()) {
+            return;
+        }
         mRecentTasksChangedListeners.add(listener);
     }
 
@@ -415,6 +434,9 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
      * Removes the previously registered running tasks listener
      */
     public void unregisterRecentTasksChangedListener(RecentTasksChangedListener listener) {
+        if (enableTaskbarUiThread()) {
+            return;
+        }
         mRecentTasksChangedListeners.remove(listener);
     }
 
