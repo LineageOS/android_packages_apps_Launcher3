@@ -26,7 +26,7 @@ import android.view.WindowManagerGlobal
 import com.android.app.displaylib.DefaultDisplayOnlyInstanceRepositoryImpl
 import com.android.app.displaylib.DisplayLibBackground
 import com.android.app.displaylib.DisplayLibComponent
-import com.android.app.displaylib.DisplayLibHandlerThreadBackground
+import com.android.app.displaylib.DisplayLibMainThread
 import com.android.app.displaylib.DisplayRepository
 import com.android.app.displaylib.DisplaysWithDecorationsRepository
 import com.android.app.displaylib.DisplaysWithDecorationsRepositoryCompat
@@ -36,6 +36,7 @@ import com.android.app.displaylib.SingleInstanceRepositoryImpl
 import com.android.app.displaylib.createDisplayLibComponent
 import com.android.launcher3.concurrent.annotations.Background
 import com.android.launcher3.concurrent.annotations.BackgroundContext
+import com.android.launcher3.concurrent.annotations.UiContext
 import com.android.launcher3.util.LooperExecutor
 import com.android.quickstep.FallbackWindowInterface
 import com.android.quickstep.RecentsAnimationDeviceState
@@ -60,10 +61,8 @@ interface PerDisplayModule
 @Module(includes = [DisplayLibModule::class])
 interface BasePerDisplayModule {
     @Binds
-    @DisplayLibHandlerThreadBackground
-    fun bindDisplayLibHandlerThreadBackground(
-        @BackgroundContext bgContext: CoroutineContext
-    ): CoroutineContext
+    @DisplayLibMainThread
+    fun bindDisplayLibMainThread(@UiContext mainScope: CoroutineContext): CoroutineContext
 }
 
 @Module
