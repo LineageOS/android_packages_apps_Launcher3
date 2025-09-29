@@ -43,30 +43,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- Filtering affects only alpha instead of the visibility since visibility can be altered
-         separately through RecentsView#resetFromSplitSelectionState() -->
-    <ImageView
-        android:id="@+id/show_windows"
-        android:layout_height="@dimen/recents_filter_icon_size"
-        android:layout_width="@dimen/recents_filter_icon_size"
-        android:layout_gravity="start"
-        android:alpha="0"
-        android:tint="@color/recents_filter_icon"
-        android:importantForAccessibility="no"
-        android:src="@drawable/ic_select_windows" />
-
-    <!-- Filtering affects only alpha instead of the visibility since visibility can be altered
-         separately through RecentsView#resetFromSplitSelectionState() -->
-    <ImageView
-        android:id="@+id/show_windows_right"
-        android:layout_height="@dimen/recents_filter_icon_size"
-        android:layout_width="@dimen/recents_filter_icon_size"
-        android:layout_gravity="end"
-        android:alpha="0"
-        android:tint="@color/recents_filter_icon"
-        android:importantForAccessibility="no"
-        android:src="@drawable/ic_select_windows" />
-
     <include
         android:id="@+id/icon"
         layout="@layout/icon_app_chip_view" />

@@ -344,7 +344,6 @@ class DesktopSystemShortcutTest {
             mock<TransformingTouchDelegate>(),
             SplitConfigurationOptions.STAGE_POSITION_UNDEFINED,
             digitalWellBeingToast = null,
-            showWindowsView = null,
             overlayFactory,
         )
 

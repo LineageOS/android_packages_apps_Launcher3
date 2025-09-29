@@ -36,7 +36,6 @@ import android.util.Log
 import android.view.Display
 import android.view.MotionEvent
 import android.view.View
-import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.view.ViewStub
 import android.view.accessibility.AccessibilityNodeInfo
@@ -1059,7 +1058,6 @@ constructor(
                     R.id.task_content_view,
                     R.id.snapshot,
                     R.id.icon,
-                    R.id.show_windows,
                     R.id.digital_wellbeing_toast,
                     STAGE_POSITION_UNDEFINED,
                     taskOverlayFactory,
@@ -1119,7 +1117,6 @@ constructor(
         @IdRes taskContentViewId: Int,
         @IdRes thumbnailViewId: Int,
         @IdRes iconViewId: Int,
-        @IdRes showWindowViewId: Int,
         @IdRes digitalWellbeingBannerId: Int,
         @StagePosition stagePosition: Int,
         taskOverlayFactory: TaskOverlayFactory,
@@ -1151,7 +1148,6 @@ constructor(
                 TransformingTouchDelegate(iconView),
                 stagePosition,
                 digitalWellBeingToast,
-                findViewById(showWindowViewId)!!,
                 taskOverlayFactory,
             )
         }
@@ -1680,41 +1676,6 @@ constructor(
         )
     }
 
-    /** Sets up an on-click listener and the visibility for show_windows icon on top of the task. */
-    open fun setUpShowAllInstancesListener() {
-        taskContainers.forEach {
-            it.showWindowsView?.let { showWindowsView ->
-                updateFilterCallback(
-                    showWindowsView,
-                    getFilterUpdateCallback(it.task.key.packageName),
-                )
-            }
-        }
-    }
-
-    /**
-     * Returns a callback that updates the state of the filter and the recents overview
-     *
-     * @param taskPackageName package name of the task to filter by
-     */
-    private fun getFilterUpdateCallback(taskPackageName: String?) =
-        if (recentsView?.filterState?.shouldShowFilterUI(taskPackageName) == true)
-            OnClickListener { recentsView?.setAndApplyFilter(taskPackageName) }
-        else null
-
-    /**
-     * Sets the correct visibility and callback on the provided filterView based on whether the
-     * callback is null or not
-     */
-    private fun updateFilterCallback(filterView: View, callback: OnClickListener?) {
-        // Filtering changes alpha instead of the visibility since visibility
-        // can be altered separately through RecentsView#resetFromSplitSelectionState()
-        with(filterView) {
-            alpha = if (callback == null) 0f else 1f
-            setOnClickListener(callback)
-        }
-    }
-
     /**
      * Called to animate a smooth transition when going directly from an app into Overview (and vice
      * versa). Icons fade in, and DWB banners slide in with a "shift up" animation.
@@ -1774,7 +1735,6 @@ constructor(
                 sequenceOf(
                         taskContainer.taskContentView,
                         taskContainer.digitalWellBeingToast,
-                        taskContainer.showWindowsView,
                         taskContainer.overlay.suggestView,
                     )
                     .filterNotNull()

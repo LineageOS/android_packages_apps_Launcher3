@@ -216,7 +216,6 @@ import com.android.quickstep.util.DesktopTask;
 import com.android.quickstep.util.FontUtils;
 import com.android.quickstep.util.GroupTask;
 import com.android.quickstep.util.LayoutUtils;
-import com.android.quickstep.util.RecentsAtomicAnimationFactory;
 import com.android.quickstep.util.RecentsOrientedState;
 import com.android.quickstep.util.SingleTask;
 import com.android.quickstep.util.SplitAnimationController.Companion.SplitAnimInitProps;
@@ -672,8 +671,7 @@ public abstract class RecentsView<
                                 if (taskRemoved) {
                                     dismissTask(taskId, /*animate=*/true, /*removeTask=*/false);
                                 }
-                            }, RecentsFilterState.getFilter(mFilterState.getPackageNameToFilter(),
-                                    mContainer.getDisplayId()));
+                            }, RecentsFilterState.getFilter(mContainer.getDisplayId()));
                         }
                     }));
         }
@@ -837,10 +835,6 @@ public abstract class RecentsView<
     @Nullable
     private Runnable mOnTaskLaunchCancelledRunnable;
 
-
-    // keeps track of the state of the filter for tasks in recents view
-    private final RecentsFilterState mFilterState = new RecentsFilterState();
-
     private int mOffsetMidpointIndexOverride = INVALID_PAGE;
 
     /**
@@ -974,67 +968,6 @@ public abstract class RecentsView<
         mContainer.getViewCache().setCacheSize(R.layout.digital_wellbeing_toast, 5);
 
         mTintingColor = getForegroundScrimDimColor(context);
-
-        // if multi-instance feature is enabled
-        if (FeatureFlags.ENABLE_MULTI_INSTANCE.get()) {
-            // invalidate the current list of tasks if filter changes with a fading in/out animation
-            mFilterState.setOnFilterUpdatedListener(() -> {
-                Animator animatorFade = getStateManager().createStateElementAnimation(
-                        RecentsAtomicAnimationFactory.INDEX_RECENTS_FADE_ANIM, 1f, 0f);
-                Animator animatorAppear = getStateManager().createStateElementAnimation(
-                        RecentsAtomicAnimationFactory.INDEX_RECENTS_FADE_ANIM, 0f, 1f);
-                animatorFade.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(@NonNull Animator animation) {
-                        RecentsView.this.invalidateTaskList();
-                        updateClearAllFunction();
-                        reloadIfNeeded();
-                        if (mPendingAnimation != null) {
-                            mPendingAnimation.addEndListener(success -> {
-                                animatorAppear.start();
-                            });
-                        } else {
-                            animatorAppear.start();
-                        }
-                    }
-                });
-                animatorFade.start();
-            });
-        }
-        // make sure filter is turned off by default
-        mFilterState.setFilterBy(null);
-    }
-
-    /** Get the state of the filter */
-    public RecentsFilterState getFilterState() {
-        return mFilterState;
-    }
-
-    /**
-     * Toggles the filter and reloads the recents view if needed.
-     *
-     * @param packageName package name to filter by if the filter is being turned on;
-     *                    should be null if filter is being turned off
-     */
-    public void setAndApplyFilter(@Nullable String packageName) {
-        mFilterState.setFilterBy(packageName);
-    }
-
-    /**
-     * Updates the "Clear All" button and its function depending on the recents view state.
-     *
-     * TODO: add a different button for going back to overview. Present solution is for demo only.
-     */
-    public void updateClearAllFunction() {
-        if (mFilterState.isFiltered()) {
-            mClearAllButton.setText(R.string.recents_back);
-            mClearAllButton.setOnClickListener((view) -> {
-                this.setAndApplyFilter(null);
-            });
-        } else {
-            mClearAllButton.setText(R.string.recents_clear_all);
-            mClearAllButton.setOnClickListener(this::dismissAllTasks);
-        }
     }
 
     /**
@@ -1944,8 +1877,6 @@ public abstract class RecentsView<
         } else {
             stagedTaskIdToBeRemoved = INVALID_TASK_ID;
         }
-        // update the map of instance counts
-        mFilterState.updateInstanceCountMap(taskGroups);
 
         // Clear out desktop view if it is set
 
@@ -2001,11 +1932,6 @@ public abstract class RecentsView<
             traceBegin(Trace.TRACE_TAG_APP, "RecentsView.applyLoadPlan.forLoop.addTaskView");
             addView(taskView);
             traceEnd(Trace.TRACE_TAG_APP);
-
-            // enables instance filtering if the feature flag for it is on
-            if (FeatureFlags.ENABLE_MULTI_INSTANCE.get()) {
-                taskView.setUpShowAllInstancesListener();
-            }
         }
         // For loop end trace
         traceEnd(Trace.TRACE_TAG_APP);
@@ -2690,8 +2616,9 @@ public abstract class RecentsView<
      */
     public void reloadIfNeeded() {
         if (!mModel.isTaskListValid(mAppliedTaskListChangeId)) {
-            mModel.getTasks(this::applyLoadPlan, RecentsFilterState
-                    .getFilter(mFilterState.getPackageNameToFilter(), mContainer.getDisplayId()));
+            mModel.getTasks(
+                    this::applyLoadPlan,
+                    RecentsFilterState.getFilter(mContainer.getDisplayId()));
             Log.d(TAG, "reloadIfNeeded - getTasks: " + mAppliedTaskListChangeId);
             mRecentsViewModel.refreshAllTaskData();
         } else {
