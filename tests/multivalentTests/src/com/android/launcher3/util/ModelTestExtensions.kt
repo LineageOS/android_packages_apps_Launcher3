@@ -26,6 +26,7 @@ import com.android.launcher3.LauncherSettings.Favorites.SPANY
 import com.android.launcher3.LauncherSettings.Favorites.TABLE_NAME
 import com.android.launcher3.LauncherSettings.Favorites.TITLE
 import com.android.launcher3.LauncherSettings.Favorites._ID
+import com.android.launcher3.UtilitiesKt.isPersistedModelItem
 import com.android.launcher3.model.BgDataModel
 import com.android.launcher3.model.ModelDbController
 import com.android.launcher3.model.data.ItemInfo
@@ -111,14 +112,6 @@ object ModelTestExtensions {
     @JvmStatic
     val SandboxApplication.bgDataModel
         get() = appComponent.testableModelState.dataModel
-
-    /**
-     * Checks if an item is persisted in model. It excludes items whose ID corresponds to an AAPT
-     * generated id which always has a non-zero package identifier first-byte.
-     *
-     * @see [android.view.View.generateViewId]
-     */
-    @JvmStatic fun ItemInfo.isPersistedModelItem() = id >= 0 && (id ushr 24) == 0
 
     /**
      * Total number of items which are persisted in the model. This excludes any predicted item and

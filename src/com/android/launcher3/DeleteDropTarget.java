@@ -28,10 +28,7 @@ import android.view.View;
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate;
 import com.android.launcher3.dragndrop.DragOptions;
 import com.android.launcher3.logging.StatsLogManager;
-import com.android.launcher3.model.data.CollectionInfo;
 import com.android.launcher3.model.data.ItemInfo;
-import com.android.launcher3.model.data.LauncherAppWidgetInfo;
-import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.util.Preconditions;
 
 public class DeleteDropTarget extends ButtonDropTarget {
@@ -70,13 +67,7 @@ public class DeleteDropTarget extends ButtonDropTarget {
      * @return true for items that should have a "Remove" action in accessibility.
      */
     private boolean supportsAccessibilityDrop(ItemInfo info, View view) {
-        if (info instanceof WorkspaceItemInfo) {
-            // Support the action unless the item is in a context menu.
-            return canRemove(info);
-        }
-
-        return (info instanceof LauncherAppWidgetInfo)
-                || (info instanceof CollectionInfo);
+        return UtilitiesKt.isPersistedModelItem(info);
     }
 
     @Override
