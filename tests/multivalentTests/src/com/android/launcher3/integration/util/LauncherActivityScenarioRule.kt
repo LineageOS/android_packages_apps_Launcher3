@@ -29,7 +29,6 @@ import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherState
-import com.android.launcher3.integration.util.events.ActivityTestEvents.createStateWaiter
 import com.android.launcher3.testutil.Wait.atMost
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.TestUtil
@@ -82,10 +81,8 @@ open class LauncherActivityScenarioRule<LAUNCHER_TYPE : Launcher> : ExternalReso
         return result.get()
     }
 
-    fun goToState(state: LauncherState) {
-        val stateWaiter = createStateWaiter(state)
-        executeOnLauncher { it.stateManager.goToState(state, 0) }
-        stateWaiter.waitForSignal()
+    fun goToState(state: LauncherState) = executeOnLauncher {
+        it.stateManager.goToState(state, false)
     }
 
     fun <T> getOnceNotNull(message: String, f: Function<LAUNCHER_TYPE, T?>): T? {
@@ -123,4 +120,18 @@ open class LauncherActivityScenarioRule<LAUNCHER_TYPE : Launcher> : ExternalReso
 
     fun isInState(state: Supplier<LauncherState>): Boolean =
         getFromLauncher { it.stateManager.state == state.get() }!!
+
+    /** Waits until the [condition] is not true */
+    fun waitUntil(message: String, condition: (LAUNCHER_TYPE) -> Boolean) =
+        atMost(message) { getFromLauncher(condition)!! }
+
+    /** Waits until the [condition] is non-null and returns the non-null value */
+    fun <T> waitAndGet(message: String, condition: (LAUNCHER_TYPE) -> T?): T {
+        var result: T? = null
+        atMost(message) {
+            result = getFromLauncher(condition)
+            result != null
+        }
+        return result!!
+    }
 }
