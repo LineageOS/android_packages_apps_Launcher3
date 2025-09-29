@@ -107,10 +107,8 @@
     <string name="widget_settings" msgid="5280157748464495511">"सेटिङ"</string>
     <string name="pin_to_taskbar" msgid="5914002252642242332">"टास्कबारमा पिन गर्नुहोस्"</string>
     <string name="unpin_from_taskbar" msgid="1025883383457627426">"टास्कबारबाट अनपिन गर्नुहोस्"</string>
-    <!-- no translation found for app_added_to_taskbar (6348755169793615171) -->
-    <skip />
-    <!-- no translation found for app_removed_from_taskbar (3471754847898675396) -->
-    <skip />
+    <string name="app_added_to_taskbar" msgid="6348755169793615171">"टास्कबारमा एप हालियो"</string>
+    <string name="app_removed_from_taskbar" msgid="3471754847898675396">"टास्कबारबाट एप हटाइयो"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"सर्टकट स्थापना गर्नेहोस्"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"प्रयोगकर्ताको हस्तक्षेप बिना एउटा एपलाई सर्टकटमा थप्नको लागि अनुमति दिनुहोस्।"</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"होम स्क्रिनका सेटिङ र सर्टकटहरू रिड गर्नुहोस्"</string>
@@ -149,12 +147,9 @@
     <string name="msg_disabled_by_admin" msgid="6898038085516271325">"तपाईँको प्रशासकद्वारा असक्षम गरिएको"</string>
     <string name="allow_rotation_title" msgid="7222049633713050106">"होम स्क्रिन रोटेट हुन दिइयोस्"</string>
     <string name="allow_rotation_desc" msgid="8662546029078692509">"फोन घुमाउँदा"</string>
-    <!-- no translation found for compose_developer_options_section (8211460486549952595) -->
-    <skip />
-    <!-- no translation found for enable_composition_tracing_title (8989606591739368424) -->
-    <skip />
-    <!-- no translation found for enable_composition_tracing_desc (7187566039216492405) -->
-    <skip />
+    <string name="compose_developer_options_section" msgid="8211460486549952595">"Jetpack कम्पोज"</string>
+    <string name="enable_composition_tracing_title" msgid="8989606591739368424">"कम्पोजिसन ट्रेसिङ अन गर्नुहोस्"</string>
+    <string name="enable_composition_tracing_desc" msgid="7187566039216492405">"ओभरभ्यूमा perfetto ट्रेस लिँदा कम्पोजिसन ट्रेसिङ अन गर्नुहोस्"</string>
     <string name="landscape_mode_title" msgid="5138814555934843926">"ल्यान्डस्केप मोड"</string>
     <string name="landscape_mode_desc" msgid="3085236452297838664">"होम स्क्रिनलाई ल्यान्डस्केप मोडमा सेट गर्नुहोस्"</string>
     <string name="notification_dots_title" msgid="9062440428204120317">"नोटिफिकेसन डट"</string>
