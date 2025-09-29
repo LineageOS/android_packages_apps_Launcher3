@@ -22,6 +22,7 @@ import static android.window.DesktopModeFlags.ENABLE_TASKBAR_OVERFLOW;
 import static com.android.app.animation.Interpolators.EMPHASIZED;
 import static com.android.app.animation.Interpolators.FINAL_FRAME;
 import static com.android.app.animation.Interpolators.LINEAR;
+import static com.android.launcher3.Flags.enableTaskbarDragAndDrop;
 import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
 import static com.android.launcher3.LauncherAnimUtils.VIEW_ALPHA;
@@ -310,7 +311,9 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
                 ? mActivity.getResources().getDimensionPixelSize(R.dimen.taskbar_phone_size)
                 : mActivity.getDeviceProfile().getTaskbarProfile().getHeight();
         mOverflownAppsContainerController.init(viewCallbacks);
-
+        if (enableTaskbarDragAndDrop()) {
+            mControllers.taskbarViewDragDropController.setUpCallbacks(mModelCallbacks);
+        }
         mTaskbarIconScaleForStash.updateValue(1f);
         float pinningValue =
                 mActivity.isTransientTaskbar() ? PINNING_TRANSIENT : PINNING_PERSISTENT;
