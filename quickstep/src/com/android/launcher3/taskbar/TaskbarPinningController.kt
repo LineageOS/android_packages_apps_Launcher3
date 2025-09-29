@@ -44,6 +44,8 @@ class TaskbarPinningController(private val context: TaskbarActivityContext) :
     private val statsLogManager = context.statsLogManager
     @VisibleForTesting var isAnimatingTaskbarPinning = false
     @VisibleForTesting lateinit var onCloseCallback: (preferenceChanged: Boolean) -> Unit
+    // Counts number of popup instances that are visible, opening, or animating to closed.
+    private var popupCount = 0
 
     @SuppressLint("VisibleForTests")
     fun init(taskbarControllers: TaskbarControllers, sharedState: TaskbarSharedState) {
@@ -95,11 +97,25 @@ class TaskbarPinningController(private val context: TaskbarActivityContext) :
     }
 
     fun showPinningView(view: View, horizontalPosition: Float = -1f) {
-        context.isTaskbarWindowFullscreen = true
+        popupCount++
+        context.setTaskbarWindowFullscreen(
+            true,
+            TaskbarActivityContext.TASKBAR_WINDOW_TASKBAR_PINNING,
+        )
         view.post {
             val popupView = getPopupView(view, horizontalPosition)
             popupView.requestFocus()
-            popupView.onCloseCallback = onCloseCallback
+            popupView.onCloseStartedCallback = onCloseCallback
+
+            popupView.addOnCloseCallback {
+                if (--popupCount == 0) {
+                    context.setTaskbarWindowFullscreen(
+                        false,
+                        TaskbarActivityContext.TASKBAR_WINDOW_TASKBAR_PINNING,
+                    )
+                }
+            }
+
             context.onPopupVisibilityChanged(true)
             popupView.show()
             statsLogManager.logger().log(LAUNCHER_TASKBAR_DIVIDER_MENU_OPEN)

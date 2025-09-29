@@ -338,13 +338,6 @@ public class TaskbarDragLayerController implements TaskbarControllers.LoggableTa
         }
 
         /**
-         * Called when a child is removed from TaskbarDragLayer.
-         */
-        public void onDragLayerViewRemoved() {
-            mActivity.onDragEndOrViewRemoved();
-        }
-
-        /**
          * Returns how tall the background should be drawn at the bottom of the screen.
          */
         public int getTaskbarBackgroundHeight() {

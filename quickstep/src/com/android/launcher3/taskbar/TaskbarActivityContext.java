@@ -28,7 +28,6 @@ import static android.window.SplashScreen.SPLASH_SCREEN_STYLE_UNDEFINED;
 import static androidx.annotation.VisibleForTesting.PACKAGE_PRIVATE;
 
 import static com.android.app.animation.Interpolators.LINEAR;
-import static com.android.launcher3.AbstractFloatingView.TYPE_ALL;
 import static com.android.launcher3.AbstractFloatingView.TYPE_ON_BOARD_POPUP;
 import static com.android.launcher3.AbstractFloatingView.TYPE_REBIND_SAFE;
 import static com.android.launcher3.AbstractFloatingView.TYPE_TASKBAR_OVERLAY_PROXY;
@@ -170,6 +169,7 @@ import com.android.launcher3.util.ApplicationInfoWrapper;
 import com.android.launcher3.util.AsyncView;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.Executors;
+import com.android.launcher3.util.FlagDebugUtils;
 import com.android.launcher3.util.LauncherBindableItemsContainer;
 import com.android.launcher3.util.MultiPropertyFactory;
 import com.android.launcher3.util.NavigationMode;
@@ -209,6 +209,7 @@ import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -222,6 +223,14 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     private static final String IME_DRAWS_IME_NAV_BAR_RES_NAME = "config_imeDrawsImeNavBar";
 
     private static final String TAG = "TaskbarActivityContext";
+
+    public static final int TASKBAR_WINDOW_FULLSCREEN_DRAG = 1;
+    public static final int TASKBAR_WINDOW_FULLSCREEN_BUBBLE_DRAG = 1 << 1;
+    public static final int TASKBAR_WINDOW_FULLSCREEN_FOLDER = 1 << 2;
+    public static final int TASKBAR_WINDOW_ICON_POPUP_MENU = 1 << 3;
+    public static final int TASKBAR_WINDOW_ICON_TASKBAR_OVERFLOW = 1 << 4;
+    public static final int TASKBAR_WINDOW_TASKBAR_PINNING = 1 << 5;
+    public static final int TASKBAR_WINDOW_ICONS_TRANSITION = 1 << 6;
 
     private static final String WINDOW_TITLE = "Taskbar";
 
@@ -244,7 +253,10 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     private DeviceProfile mDeviceProfile;
     private WindowManager.LayoutParams mWindowLayoutParams;
     private WindowManager.LayoutParams mLastUpdatedLayoutParams;
-    private boolean mIsFullscreen;
+
+    // Set of use-cases that require taskbar to be fullscreen - non-zero value implies that the
+    // taskbar window is currently fullscreen.
+    private int mTaskbarFullscreenFlags = 0;
     private boolean mIsNotificationShadeExpanded = false;
     // The size we should return to when we call setTaskbarWindowFullscreen(false)
     private int mLastRequestedNonFullscreenSize;
@@ -299,6 +311,12 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
 
     private final boolean mIsTransient;
     private final boolean mIsPinned;
+
+    // Number of currently visible folders. Increased when a folder is about to be open, decreased
+    // when a folder closes (after closes animation completes). Used to determine whether taskbar
+    // needs to be fullscreen to accommodate folder bubbles.
+    private int mFolderCount = 0;
+    private int mVisiblePopupCount = 0;
 
     public TaskbarActivityContext(int displayId, Context windowContext,
             @Nullable Context navigationBarPanelContext, DeviceProfile launcherDp,
@@ -449,7 +467,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         });
         AbstractFloatingView.closeAllOpenViewsExcept(this, false, TYPE_REBIND_SAFE);
         // Reapply fullscreen to take potential new screen size into account.
-        setTaskbarWindowFullscreen(mIsFullscreen);
+        setTaskbarWindowFullscreenInternal(mTaskbarFullscreenFlags != 0);
 
         dispatchDeviceProfileChanged();
     }
@@ -1037,17 +1055,37 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
 
     @Override
     public void onDragStart() {
-        setTaskbarWindowFullscreen(true);
+        setTaskbarWindowFullscreen(true, TASKBAR_WINDOW_FULLSCREEN_DRAG);
     }
 
     @Override
     public void onDragEnd() {
-        onDragEndOrViewRemoved();
+        // Reverts Taskbar window to its original size
+        Runnable resetTaskbarFullscreen = () -> {
+            setTaskbarWindowFullscreen(false, TASKBAR_WINDOW_FULLSCREEN_DRAG);
+        };
+        mControllers.bubbleControllers.ifPresentOrElse(
+                bc -> bc.dragToBubbleController.runAfterDropTargetsHidden(
+                        resetTaskbarFullscreen), resetTaskbarFullscreen);
+
+        setAutohideSuspendFlag(FLAG_AUTOHIDE_SUSPEND_DRAGGING,
+                mControllers.taskbarDragController.isSystemDragInProgress());
     }
 
     @Override
     public void onPopupVisibilityChanged(boolean isVisible) {
-        setTaskbarWindowFocusable(isVisible /* focusable */, false /* imeFocusable */);
+        boolean needsUpdate = false;
+        if (isVisible) {
+            mVisiblePopupCount++;
+            needsUpdate = mVisiblePopupCount == 1;
+        } else {
+            mVisiblePopupCount--;
+            needsUpdate = mVisiblePopupCount == 0;
+        }
+        if (needsUpdate) {
+            setTaskbarWindowFocusable(isVisible /* focusable */, false /* imeFocusable */);
+            setTaskbarWindowFullscreen(isVisible, TASKBAR_WINDOW_ICON_POPUP_MENU);
+        }
     }
 
     @Override
@@ -1374,9 +1412,22 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     /**
      * Updates the TaskbarContainer to MATCH_PARENT vs original Taskbar size.
      */
-    public void setTaskbarWindowFullscreen(boolean fullscreen) {
+    public void setTaskbarWindowFullscreen(boolean fullscreen, int flags) {
+        boolean wasFullscreen = isTaskbarWindowFullscreen();
+        if (fullscreen) {
+            mTaskbarFullscreenFlags |= flags;
+        } else {
+            mTaskbarFullscreenFlags &= ~flags;
+        }
+        boolean newIsFullscreen = mTaskbarFullscreenFlags != 0;
+        if (wasFullscreen == newIsFullscreen) {
+            return;
+        }
+        setTaskbarWindowFullscreenInternal(newIsFullscreen);
+    }
+
+    private void setTaskbarWindowFullscreenInternal(boolean fullscreen) {
         setAutohideSuspendFlag(FLAG_AUTOHIDE_SUSPEND_FULLSCREEN, fullscreen);
-        mIsFullscreen = fullscreen;
         setTaskbarWindowSize(fullscreen ? MATCH_PARENT : mLastRequestedNonFullscreenSize);
     }
 
@@ -1399,35 +1450,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         }
     }
 
-    /**
-     * Called when drag ends or when a view is removed from the DragLayer.
-     */
-    void onDragEndOrViewRemoved() {
-        boolean isDragInProgress = mControllers.taskbarDragController.isSystemDragInProgress();
-
-        // Overlay AFVs are in a separate window and do not require Taskbar to be fullscreen.
-        if (!isDragInProgress
-                && !AbstractFloatingView.hasOpenView(
-                this, TYPE_ALL & ~TYPE_TASKBAR_OVERLAY_PROXY)) {
-            // Reverts Taskbar window to its original size
-            Runnable resetTaskbarFullscreen = () -> {
-                // If the app layout transition is running, the window reset will be handled
-                // after the transition is complete. See {@link TaskbarViewController
-                // .TransitionEndBoundsChangedNotifier}.
-                if (!mControllers.taskbarViewController.isTaskbarAppTransitionRunning()) {
-                    setTaskbarWindowFullscreen(false);
-                }
-            };
-            mControllers.bubbleControllers.ifPresentOrElse(
-                    bc -> bc.dragToBubbleController.runAfterDropTargetsHidden(
-                            resetTaskbarFullscreen), resetTaskbarFullscreen);
-        }
-
-        setAutohideSuspendFlag(FLAG_AUTOHIDE_SUSPEND_DRAGGING, isDragInProgress);
-    }
-
     public boolean isTaskbarWindowFullscreen() {
-        return mIsFullscreen;
+        return mTaskbarFullscreenFlags != 0;
     }
 
     /**
@@ -1445,7 +1469,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             size = mDeviceProfile.getDeviceProperties().getHeightPx();
         } else {
             mLastRequestedNonFullscreenSize = size;
-            if (mIsFullscreen || mIsTaskbarSizeFrozenForAnimatingBubble) {
+            if (isTaskbarWindowFullscreen() || mIsTaskbarSizeFrozenForAnimatingBubble) {
                 // We either still need to be fullscreen or a bubble is still animating, so defer
                 // any change to our height until setTaskbarWindowFullscreen(false) is called or
                 // setTaskbarWindowForAnimatingBubble() is called after the bubble animation
@@ -2115,6 +2139,9 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     /** Expands a folder icon when it is clicked */
     private void expandFolder(FolderIcon folderIcon) {
         Folder folder = folderIcon.getFolder();
+        if (!folder.isClosed()) {
+            return;
+        }
 
         folder.setPriorityOnFolderStateChangedListener(
                 new Folder.OnFolderStateChangedListener() {
@@ -2123,16 +2150,20 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                         if (newState == Folder.STATE_OPEN) {
                             setTaskbarWindowFocusableForIme(true);
                         } else if (newState == Folder.STATE_CLOSED) {
-                            // Defer by a frame to ensure we're no longer fullscreen and thus
-                            // won't jump.
-                            getDragLayer().post(() -> setTaskbarWindowFocusableForIme(false));
+                            if (--mFolderCount == 0) {
+                                setTaskbarWindowFullscreen(false, TASKBAR_WINDOW_FULLSCREEN_FOLDER);
+
+                                // Defer by a frame to ensure we're no longer fullscreen and thus
+                                // won't jump.
+                                getDragLayer().post(() -> setTaskbarWindowFocusableForIme(false));
+                            }
                             folder.setPriorityOnFolderStateChangedListener(null);
                         }
                     }
                 });
 
-        setTaskbarWindowFullscreen(true);
-
+        mFolderCount++;
+        setTaskbarWindowFullscreen(true, TASKBAR_WINDOW_FULLSCREEN_FOLDER);
         getDragLayer().post(() -> {
             folder.animateOpen();
             getStatsLogManager().logger().withItemInfo(folder.mInfo).log(LAUNCHER_FOLDER_OPEN);
@@ -2365,7 +2396,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     }
 
     public void showPopupMenuForIcon(BubbleTextView btv) {
-        setTaskbarWindowFullscreen(true);
+        setTaskbarWindowFullscreen(true, TASKBAR_WINDOW_ICON_POPUP_MENU);
         btv.post(() -> mControllers.taskbarPopupController.show(btv));
     }
 
@@ -2393,6 +2424,25 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         return mTaskbarSpecsEvaluator;
     }
 
+    private StringJoiner getFullscreenFlags() {
+        StringJoiner fullscreenFlags = new StringJoiner("|");
+        FlagDebugUtils.appendFlag(fullscreenFlags, mTaskbarFullscreenFlags,
+                TASKBAR_WINDOW_FULLSCREEN_DRAG, "TASKBAR_WINDOW_FULLSCREEN_DRAG");
+        FlagDebugUtils.appendFlag(fullscreenFlags, mTaskbarFullscreenFlags,
+                TASKBAR_WINDOW_FULLSCREEN_BUBBLE_DRAG, "TASKBAR_WINDOW_FULLSCREEN_BUBBLE_DRAG");
+        FlagDebugUtils.appendFlag(fullscreenFlags, mTaskbarFullscreenFlags,
+                TASKBAR_WINDOW_FULLSCREEN_FOLDER, "TASKBAR_WINDOW_FULLSCREEN_FOLDER");
+        FlagDebugUtils.appendFlag(fullscreenFlags, mTaskbarFullscreenFlags,
+                TASKBAR_WINDOW_ICON_POPUP_MENU, "TASKBAR_WINDOW_ICON_POPUP_MENU");
+        FlagDebugUtils.appendFlag(fullscreenFlags, mTaskbarFullscreenFlags,
+                TASKBAR_WINDOW_ICON_TASKBAR_OVERFLOW, "TASKBAR_WINDOW_ICON_TASKBAR_OVERFLOW");
+        FlagDebugUtils.appendFlag(fullscreenFlags, mTaskbarFullscreenFlags,
+                TASKBAR_WINDOW_TASKBAR_PINNING, "TASKBAR_WINDOW_TASKBAR_PINNING");
+        FlagDebugUtils.appendFlag(fullscreenFlags, mTaskbarFullscreenFlags,
+                TASKBAR_WINDOW_ICONS_TRANSITION, "TASKBAR_WINDOW_ICONS_TRANSITION");
+        return fullscreenFlags;
+    }
+
     protected void dumpLogs(String prefix, PrintWriter pw) {
         pw.println(prefix + "TaskbarActivityContext:");
 
@@ -2404,6 +2454,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                 "%s\tmIsUserSetupComplete=%b", prefix, mIsUserSetupComplete));
         pw.println(String.format(
                 "%s\tmWindowLayoutParams.height=%dpx", prefix, mWindowLayoutParams.height));
+        pw.println(String.format("%s\tmTaskbarFullscreenFlags=%s", prefix, getFullscreenFlags()));
+
         mControllers.dumpLogs(prefix + "\t", pw);
         mDeviceProfile.dump(this, prefix, pw);
     }

@@ -27,7 +27,6 @@ import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 
@@ -174,14 +173,6 @@ public class TaskbarDragLayer extends BaseDragLayer<TaskbarActivityContext> {
         // Unlike super class, we want to be able to find controllers when touches occur in the
         // gesture area. For example, this allows Folder to close itself when touching the Taskbar.
         return true;
-    }
-
-    @Override
-    public void onViewRemoved(View child) {
-        super.onViewRemoved(child);
-        if (mControllerCallbacks != null) {
-            mControllerCallbacks.onDragLayerViewRemoved();
-        }
     }
 
     @Override

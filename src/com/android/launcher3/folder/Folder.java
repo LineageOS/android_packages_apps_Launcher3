@@ -1267,6 +1267,11 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
         }
     }
 
+    /** Whether the folder is closed, and not animating. */
+    public boolean isClosed() {
+        return mState == STATE_CLOSED;
+    }
+
     public boolean isDropEnabled() {
         return mState != STATE_ANIMATING;
     }
