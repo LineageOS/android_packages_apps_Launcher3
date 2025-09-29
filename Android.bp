@@ -416,6 +416,7 @@ android_library {
     srcs: [],
     resource_dirs: ["res"],
     static_libs: [
+        "dynamiccolors",
         "LauncherPluginLib",
         "launcher_quickstep_log_protos_lite",
         "androidx-constraintlayout_constraintlayout",
