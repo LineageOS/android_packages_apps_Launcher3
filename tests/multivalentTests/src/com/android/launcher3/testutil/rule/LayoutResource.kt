@@ -25,6 +25,7 @@ import com.android.launcher3.model.BgDataModel
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import com.android.launcher3.util.LauncherLayoutBuilder
+import com.android.launcher3.util.ModelTestExtensions.loadModelSync
 import com.android.launcher3.util.TestUtil
 import org.junit.rules.ExternalResource
 
@@ -66,10 +67,8 @@ class LayoutResource(private val ctx: Context) : ExternalResource() {
                 }
             }
             TestUtil.runOnExecutorSync(MAIN_EXECUTOR) { model.forceReload() }
-            TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {}
+            model.loadModelSync()
         }
-
-        ctx.appComponent.layoutImportExportHelper.importModelFromXml(xmlRepresentation)
     }
 
     companion object {
