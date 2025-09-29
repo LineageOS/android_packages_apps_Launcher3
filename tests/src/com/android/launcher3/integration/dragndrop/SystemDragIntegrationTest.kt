@@ -32,6 +32,7 @@ import android.provider.MediaStore.Files.FileColumns.DISPLAY_NAME
 import android.provider.MediaStore.Files.FileColumns.MIME_TYPE
 import android.provider.MediaStore.Files.FileColumns.RELATIVE_PATH
 import android.provider.MediaStore.Files.FileColumns._ID
+import android.provider.MediaStore.VOLUME_EXTERNAL_PRIMARY
 import android.util.Log
 import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_DOWN
@@ -112,14 +113,14 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
     }
 
     @Test
-    fun testDragAndDropWhenPayloadContainsMediaStoreUris() {
+    fun testDragAndDropWhenPayloadContainsMovableUris() {
         val uniqueDisplayName = "${System.currentTimeMillis()}"
 
         val mediaStoreUris =
             listOf("$uniqueDisplayName (1).txt", "$uniqueDisplayName (2).txt").map { displayName ->
                 context.contentResolver
                     .insert(
-                        MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
+                        MediaStore.Files.getContentUri(VOLUME_EXTERNAL_PRIMARY),
                         ContentValues().apply {
                             put(DISPLAY_NAME, displayName)
                             put(MIME_TYPE, MIMETYPE_TEXT_PLAIN)
@@ -133,7 +134,7 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
                     }
             }
 
-        assertTrue(mediaStoreUris.all(this::isMediaStoreUri))
+        assertTrue(mediaStoreUris.all(this::isExternalPrimaryMediaStoreUri))
 
         testDragAndDrop(
             ClipDescription(/* label= */ "", /* mimeTypes= */ arrayOf(MIMETYPE_TEXT_PLAIN)),
@@ -157,11 +158,11 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
         // Expect a workspace item to be created on system-level drag-and-drop if and only if:
         // (a) the home screen files provider is implemented,
         // (b) the system-level drag controller is implemented, and
-        // (c) the dropped payload solely contains media store URIs.
+        // (c) the dropped payload solely contains external primary media store URIs.
         val expectWorkspaceItemCreated =
             HomeScreenFilesProvider.INSTANCE[context] !is HomeScreenFilesNoOpProvider &&
                 SystemDragController.INSTANCE[context] is SystemDragControllerImpl &&
-                itemList.map(ClipData.Item::getUri).all(this::isMediaStoreUri)
+                itemList.map(ClipData.Item::getUri).all(this::isExternalPrimaryMediaStoreUri)
 
         // Verify workspace item creation (or lack thereof).
         val workspaceItemView =
@@ -224,7 +225,7 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
     private fun deleteAllHomeScreenFiles() {
         try {
             context.contentResolver.delete(
-                MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
+                MediaStore.Files.getContentUri(VOLUME_EXTERNAL_PRIMARY),
                 "$RELATIVE_PATH = ?",
                 arrayOf(HOME_SCREEN_FOLDER_RELATIVE_PATH),
             )
@@ -242,8 +243,12 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
             }
         }
 
-    private fun isMediaStoreUri(uri: Uri?) =
-        uri?.scheme == ContentResolver.SCHEME_CONTENT && uri.authority == MediaStore.AUTHORITY
+    private fun isExternalPrimaryMediaStoreUri(uri: Uri?) =
+        uri?.scheme == ContentResolver.SCHEME_CONTENT &&
+            uri.authority == MediaStore.AUTHORITY &&
+            kotlin
+                .runCatching { MediaStore.getVolumeName(uri) == VOLUME_EXTERNAL_PRIMARY }
+                .getOrDefault(false)
 
     private fun isRemovedFromLayout(view: View?) =
         launcherActivity.getFromLauncher { view?.parent } == null

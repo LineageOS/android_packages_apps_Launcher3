@@ -103,8 +103,8 @@ class HomeScreenFilesProviderTest {
 
     @Test
     fun testCanMoveToHomeScreen() {
-        val espUri = createExternalStoreProviderUri("externalRelativePath", "externalDisplayName")
-        val mediaStoreUri = createMediaStoreUri("mediaStoreId")
+        val espUri = createExternalStorageProviderUri("externalRelativePath", "externalDisplayName")
+        val mediaStoreUri = createExternalPrimaryMediaStoreUri(1L)
         val testUri = createTestUri("testId")
 
         assertFalse(provider.canMoveToHomeScreen(null))
@@ -116,9 +116,9 @@ class HomeScreenFilesProviderTest {
 
     @Test
     fun testMoveToHomeScreen() {
-        val espUri = createExternalStoreProviderUri("externalRelativePath", "externalDisplayName")
-        val mediaStoreUri = createMediaStoreUri("mediaStoreId")
-        val mediaStoreUriResolvedFromEsp = createMediaStoreUri("externalId")
+        val espUri = createExternalStorageProviderUri("externalRelativePath", "externalDisplayName")
+        val mediaStoreUri = createExternalPrimaryMediaStoreUri(1L)
+        val mediaStoreUriResolvedFromEsp = createExternalPrimaryMediaStoreUri(2L)
         val testUri = createTestUri("testId")
 
         // Mock attempts to resolve media store URIs.
@@ -417,13 +417,14 @@ class HomeScreenFilesProviderTest {
         unregisterChangeCallback.close()
     }
 
-    private fun createExternalStoreProviderUri(relativePath: String, displayName: String) =
+    private fun createExternalPrimaryMediaStoreUri(id: Long) =
+        MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY, id)
+
+    private fun createExternalStorageProviderUri(relativePath: String, displayName: String) =
         DocumentsContract.buildDocumentUri(
             /*authority=*/ EXTERNAL_STORAGE_PROVIDER_AUTHORITY,
             /*documentId=*/ "primary:$relativePath%3F$displayName",
         )
-
-    private fun createMediaStoreUri(id: String) = MediaStore.Files.getContentUri(id)
 
     private fun createProvider() =
         HomeScreenFilesMediaStoreProvider(

@@ -106,36 +106,56 @@ class HomeScreenFilesMediaStoreProvider(
 
     /** NOTE: Currently only URIs which can be resolved by the media store are supported. */
     private fun canMoveToHomeScreen(uri: Uri): Boolean =
-        isExternalStorageProviderUri(uri) || isMediaStoreUri(uri)
+        isExternalStorageProviderUri(uri) || isExternalPrimaryMediaStoreUri(uri)
 
     override fun moveToHomeScreen(uriList: List<Uri>): List<CompletableFuture<Boolean>> =
         uriList.map { uri: Uri -> supplyAsync({ moveToHomeScreen(uri) }, executorService) }
 
     @WorkerThread
     private fun moveToHomeScreen(uri: Uri): Boolean {
-        var attemptMove = false
-        var mediaUri: Uri? = null
+        val mediaUri = getExternalPrimaryMediaStoreUri(context, uri)
+        if (mediaUri == null) {
+            Log.e(
+                TAG,
+                "Unable to move to '$HOME_SCREEN_FOLDER_RELATIVE_PATH' due to unsupported URI",
+            )
+            return false
+        }
+
+        // NOTE: Overlapping move attempts for a given URI are disallowed.
+        if (inProgressMoveToHomeScreenUriAliases.putIfAbsent(mediaUri, uri) != null) {
+            Log.e(
+                TAG,
+                "Unable to move to '$HOME_SCREEN_FOLDER_RELATIVE_PATH' due to overlapping attempt",
+            )
+            return false
+        }
+
         var success = false
         try {
-            // NOTE: Overlapping move attempts for a given URI are disallowed. Also note that the
-            // selection criteria below prevents moving a URI to a path it already occupies; the
-            // media provider itself has additional protections to prevent recursive moves.
-            mediaUri = if (isMediaStoreUri(uri)) uri else MediaStore.getMediaUri(context, uri)!!
-            attemptMove = inProgressMoveToHomeScreenUriAliases.putIfAbsent(mediaUri, uri) == null
+            // NOTE: The selection criteria below prevents moving a URI to a path it already
+            // occupies; the media provider has additional protections to prevent recursive moves.
             success =
-                attemptMove &&
-                    (context.contentResolver.update(
-                        /*uri=*/ mediaUri,
-                        /*contentValues=*/ ContentValues().apply {
-                            put(RELATIVE_PATH, HOME_SCREEN_FOLDER_RELATIVE_PATH)
-                        },
-                        /*where=*/ "$RELATIVE_PATH != ?",
-                        /*selectionArgs=*/ arrayOf(HOME_SCREEN_FOLDER_RELATIVE_PATH),
-                    ) == 1)
+                (context.contentResolver.update(
+                    /*uri=*/ mediaUri,
+                    /*contentValues=*/ ContentValues().apply {
+                        put(RELATIVE_PATH, HOME_SCREEN_FOLDER_RELATIVE_PATH)
+                    },
+                    /*where=*/ "$RELATIVE_PATH != ?",
+                    /*selectionArgs=*/ arrayOf(HOME_SCREEN_FOLDER_RELATIVE_PATH),
+                ) == 1)
+            if (!success) {
+                Log.e(
+                    TAG,
+                    "Unable to move to '$HOME_SCREEN_FOLDER_RELATIVE_PATH' possibly due to unmet " +
+                        "selection criteria or the media provider itself enforcing additional " +
+                        "unmet conditions",
+                )
+            }
         } catch (e: RuntimeException) {
-            Log.e(TAG, "Unable to move URI to '$HOME_SCREEN_FOLDER_RELATIVE_PATH'", e)
+            Log.e(TAG, "Unable to move to '$HOME_SCREEN_FOLDER_RELATIVE_PATH' due to exception", e)
         } finally {
-            if (attemptMove && !success) {
+            if (!success) {
                 inProgressMoveToHomeScreenUriAliases.remove(mediaUri)
             }
         }
@@ -209,7 +229,7 @@ class HomeScreenFilesMediaStoreProvider(
 
     /** Queries a single file from MediaStore by its URI. */
     private fun query(uri: Uri): Future<HomeScreenFile?> {
-        if (!isMediaStoreUri(uri)) {
+        if (!isExternalPrimaryMediaStoreUri(uri)) {
             return CompletableFuture.completedFuture(null)
         }
         val query: Callable<HomeScreenFile?> = Callable {
@@ -249,6 +269,45 @@ class HomeScreenFilesMediaStoreProvider(
         private val QUERY_DEFAULT_SELECTION_ARGS = arrayOf(HOME_SCREEN_FOLDER_RELATIVE_PATH)
         private const val TAG = "HomeScreenFilesMediaStoreProvider"
 
+        private fun getExternalPrimaryMediaStoreUri(context: Context, uri: Uri): Uri? {
+            if (isExternalPrimaryMediaStoreUri(uri)) {
+                return uri
+            }
+            try {
+                val mediaUri = MediaStore.getMediaUri(context, uri)
+                when {
+                    mediaUri == null -> {
+                        Log.e(
+                            TAG,
+                            "Unable to get external primary media store URI due to null media URI",
+                        )
+                        return null
+                    }
+                    isExternalPrimaryMediaStoreUri(mediaUri) -> {
+                        return mediaUri
+                    }
+                    else -> {
+                        Log.e(
+                            TAG,
+                            "Unable to get external primary media store URI due to unsupported " +
+                                "media URI volume",
+                        )
+                        return null
+                    }
+                }
+            } catch (e: RuntimeException) {
+                Log.e(TAG, "Unable to get external primary media store URI due to exception", e)
+                return null
+            }
+        }
+
+        private fun isExternalPrimaryMediaStoreUri(uri: Uri) =
+            uri.scheme == ContentResolver.SCHEME_CONTENT &&
+                uri.authority == MediaStore.AUTHORITY &&
+                kotlin
+                    .runCatching { MediaStore.getVolumeName(uri) == VOLUME_EXTERNAL_PRIMARY }
+                    .getOrDefault(false)
+
         private fun isExternalStorageDirectoryMounted() =
             Environment.getExternalStorageState(Environment.getExternalStorageDirectory()) ==
                 Environment.MEDIA_MOUNTED
@@ -256,9 +315,6 @@ class HomeScreenFilesMediaStoreProvider(
         private fun isExternalStorageProviderUri(uri: Uri?) =
             uri?.scheme == ContentResolver.SCHEME_CONTENT &&
                 uri.authority == DocumentsContract.EXTERNAL_STORAGE_PROVIDER_AUTHORITY
-
-        private fun isMediaStoreUri(uri: Uri) =
-            uri.scheme == ContentResolver.SCHEME_CONTENT && uri.authority == MediaStore.AUTHORITY
 
         private fun Uri.hasIdSegment(): Boolean =
             kotlin.runCatching { ContentUris.parseId(this) != -1L }.getOrDefault(false)
