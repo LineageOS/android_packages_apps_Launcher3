@@ -115,6 +115,8 @@
     <string name="toast_split_app_unsupported" msgid="2360229567007828914">"Für Splitscreen andere App auswählen"</string>
     <string name="blocked_by_policy" msgid="2071401072261365546">"Die App oder deine Organisation lässt diese Aktion nicht zu"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"Widgets werden momentan nicht unterstützt, bitte wähle eine andere App aus"</string>
+    <!-- no translation found for action_image_copy (6877540054727709339) -->
+    <skip />
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Bildschirm drehen"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Animation, die zeigt, wie die Taskleiste vom unteren Bildschirmrand aus eingeblendet und dann automatisch wieder ausgeblendet wird, wenn sie nicht verwendet wird"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Animation, die zeigt, wie du die Taskleiste mit einem Schalter anpinnst, damit sie immer unten auf dem Bildschirm sichtbar ist"</string>
@@ -124,8 +126,7 @@
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"Animation, die zeigt, wie du auf dem Bildschirm nach einem Element suchst, indem du die Aktionstaste gedrückt hältst und den Bereich auswählst, in dem sich das Element befindet"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Informationen zur Taskleiste"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"App zur Seite ziehen, um zwei Apps gleichzeitig zu nutzen"</string>
-    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
-    <skip />
+    <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"Ziehe eine App in eine der unteren Ecken, um ihre Verankerung zu lösen"</string>
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Langsam nach oben wischen, um die Taskleiste zu sehen"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"App-Vorschläge auf Grundlage deiner Nutzung erhalten"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Bildschirmteiler lange drücken, um die Taskleiste anzupinnen"</string>
@@ -151,7 +152,7 @@
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Taskleisten-Teiler"</string>
     <!-- no translation found for taskbar_recents_overflow_a11y_title (8005941062446304304) -->
     <skip />
-    <!-- no translation found for taskbar_pinned_overflow_a11y_title (3427283798522326470) -->
+    <!-- no translation found for taskbar_pinned_overflow_a11y_title (2314810718333302626) -->
     <skip />
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Nach oben / Nach links verschieben"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Nach unten / Nach rechts verschieben"</string>

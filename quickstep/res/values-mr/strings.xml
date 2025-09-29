@@ -115,6 +115,8 @@
     <string name="toast_split_app_unsupported" msgid="2360229567007828914">"स्प्लिट स्क्रीन वापरण्यासाठी दुसरे ॲप निवडा"</string>
     <string name="blocked_by_policy" msgid="2071401072261365546">"अ‍ॅप किंवा तुमच्या संस्थेद्वारे ही क्रिया करण्याची अनुमती नाही"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"विजेटना सध्या सपोर्ट नाही, कृपया दुसरे अ‍ॅप निवडा"</string>
+    <!-- no translation found for action_image_copy (6877540054727709339) -->
+    <skip />
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"स्क्रीन फिरवा"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"टास्कबार स्क्रीनच्या तळापासून कसा दिसू लागतो आणि वापरात नसताना आपोआप कसा लपवला जातो हे दाखवणारे ॲनिमेशन"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"टॉगल वापरून तुमचा टास्कबार कसा पिन करायचा, जेणेकरून टास्कबार तुमच्या स्क्रीनच्या तळाशी कायमचा दृश्यमान राहतो हे दाखवणारे ॲनिमेशन"</string>
@@ -124,8 +126,7 @@
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"अ‍ॅक्शन कीला स्‍पर्श करून धरून ठेवून आयटम असलेला भाग निवडून स्क्रीनवर आयटम कसा शोधावा हे दाखवणारे अ‍ॅनिमेशन"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"टास्कबारशी संबंधित माहिती"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"दोन ॲप्स एकत्र वापरण्यासाठी एक अ‍ॅप बाजूला ड्रॅग करा"</string>
-    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
-    <skip />
+    <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"ते तरंगण्यासाठी तळाच्या कोपऱ्यामध्ये ड्रॅग करा"</string>
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"टास्कबार दाखवण्यासाठी थोडे हळू वरती स्वाइप करा"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"तुमच्या दिनक्रमावर आधारित ॲप सूचना मिळवा"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"टास्कबार पिन करण्यासाठी विभाजकावर प्रेस करून ठेवा"</string>
@@ -151,7 +152,7 @@
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"टास्कबार विभाजक"</string>
     <!-- no translation found for taskbar_recents_overflow_a11y_title (8005941062446304304) -->
     <skip />
-    <!-- no translation found for taskbar_pinned_overflow_a11y_title (3427283798522326470) -->
+    <!-- no translation found for taskbar_pinned_overflow_a11y_title (2314810718333302626) -->
     <skip />
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"सर्वात वरती/डावीकडे हलवा"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"तळाशी/उजवीकडे हलवा"</string>

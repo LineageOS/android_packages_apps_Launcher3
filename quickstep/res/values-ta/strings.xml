@@ -115,6 +115,8 @@
     <string name="toast_split_app_unsupported" msgid="2360229567007828914">"திரைப் பிரிப்பை பயன்படுத்த வேறு ஆப்ஸை தேர்வுசெய்க"</string>
     <string name="blocked_by_policy" msgid="2071401072261365546">"ஆப்ஸோ உங்கள் நிறுவனமோ இந்த செயலை அனுமதிப்பதில்லை"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"விட்ஜெட்கள் தற்போது ஆதரிக்கப்படவில்லை, வேறு ஆப்ஸைத் தேர்ந்தெடுக்கவும்"</string>
+    <!-- no translation found for action_image_copy (6877540054727709339) -->
+    <skip />
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"திரையைச் சுழற்றும்"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"திரையின் அடிப்பகுதியில் இருந்து செயல் பட்டி எப்படிக் காட்டப்படுகிறது, பயன்பாட்டில் இல்லாதபோது தானாகவே மறைகிறது என்பதைக் காட்டும் அனிமேஷன்"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"நிலைமாற்றியைப் பயன்படுத்தி உங்கள் செயல் பட்டியை எப்படி பின் செய்வது என்பதைக் காட்டும் அனிமேஷன், இதனால் திரையின் அடிப்பகுதியில் செயல் பட்டி நிரந்தரமாகக் காட்டப்படும்"</string>
@@ -124,8 +126,7 @@
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"ஆக்‌ஷன் பட்டனைத் தொட்டுப் பிடித்து, ஆவணம் இருக்கும் பகுதியைத் தேர்ந்தெடுப்பதன் மூலம் திரையில் ஒன்றைத் தேடுவது எப்படி என்பதைக் காட்டும் அனிமேஷன்"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"செயல் பட்டியைப் பயன்படுத்தும் விதம்"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"ஆப்ஸை பக்கவாட்டில் இழுத்து ஒரே நேரத்தில் 2 ஆப்ஸைப் பயன்படுத்தலாம்"</string>
-    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
-    <skip />
+    <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"கீழ்ப்பக்க மூலைகளுக்கு இழுத்து அதை மிதக்க வைக்கலாம்"</string>
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"செயல் பட்டியைக் காட்ட மேல்நோக்கி மெதுவாக ஸ்வைப் செய்யவும்"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"உங்கள் வழக்கத்திற்கேற்ப ஆப்ஸ் பரிந்துரைகளைப் பெறலாம்"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"பிரிப்பானை நீண்ட நேரம் அழுத்தி, செயல் பட்டியைப் பின் செய்யலாம்"</string>
@@ -151,7 +152,7 @@
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"செயல் பட்டிப் பிரிப்பான்"</string>
     <!-- no translation found for taskbar_recents_overflow_a11y_title (8005941062446304304) -->
     <skip />
-    <!-- no translation found for taskbar_pinned_overflow_a11y_title (3427283798522326470) -->
+    <!-- no translation found for taskbar_pinned_overflow_a11y_title (2314810718333302626) -->
     <skip />
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"மேலே/இடதுபுறம் நகர்த்தும்"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"கீழே/வலதுபுறம் நகர்த்தும்"</string>
