@@ -1484,8 +1484,8 @@ public abstract class RecentsView<
     }
 
     @Nullable
-    public RunnableList launchDesktopTaskView() {
-        return mUtils.launchDesktopTaskView();
+    public RunnableList returnToDesktop() {
+        return mUtils.returnToDesktop();
     }
 
     /*

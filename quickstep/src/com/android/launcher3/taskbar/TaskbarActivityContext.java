@@ -1644,9 +1644,9 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         mControllers.uiController.startSplitSelection(splitSelectSource);
     }
 
-    // If in overview, and a desktop task is available, launches the overview desktop task and
-    // schedules the provided runnable.
-    private void runAfterLaunchingDesktopTaskIfInOverview(
+    // If in overview, return to desktop if any desks are available, then schedules the provided
+    // runnable.
+    private void runAfterReturningToDesktopIfInOverview(
             RecentsViewInteractor recents,
             Runnable runnableToRun,
             Executor executor) {
@@ -1657,7 +1657,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             return;
         }
 
-        recents.launchDesktopTaskView(runnableToRun, executor);
+        recents.returnToDesktop(runnableToRun, executor);
     }
 
     protected void onTaskbarIconClicked(View view) {
@@ -1680,7 +1680,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                     isTaskbarShowingDesktopTasks(), DesktopTaskToFrontReason.TASKBAR_TAP, view,
                     DesktopModeTransitionSource.TASKBAR);
 
-            runAfterLaunchingDesktopTaskIfInOverview(
+            runAfterReturningToDesktopIfInOverview(
                     recents, inferredTask.second, inferredTask.first);
 
             mControllers.taskbarStashController.updateAndAnimateTransientTaskbar(true);
@@ -1730,7 +1730,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                         SystemUiProxy.INSTANCE.get(this).showDesktopApp(
                                 info.getTaskId(), remoteTransition,
                                 DesktopTaskToFrontReason.TASKBAR_TAP);
-                runAfterLaunchingDesktopTaskIfInOverview(recents, launchTask, UI_HELPER_EXECUTOR);
+                runAfterReturningToDesktopIfInOverview(recents, launchTask, UI_HELPER_EXECUTOR);
             }
             mControllers.taskbarStashController.updateAndAnimateTransientTaskbar(
                     /* stash= */ true);
@@ -2015,7 +2015,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                     } else {
                         Runnable launchTask =
                                 () -> startItemInfoActivity(itemInfos.get(0), foundTask);
-                        runAfterLaunchingDesktopTaskIfInOverview(recents, launchTask, UI_EXECUTOR);
+                        runAfterReturningToDesktopIfInOverview(recents, launchTask, UI_EXECUTOR);
                     }
                 }
         );

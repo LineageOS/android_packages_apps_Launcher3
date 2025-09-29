@@ -867,12 +867,14 @@ class RecentsViewUtils(private val recentsView: RecentsView<*, *>) : DesktopVisi
     }
 
     /**
-     * Launch task view if it is instance of DesktopTaskView. Prioritize launching running task
-     * view, then current page task view, and finally the last desktop task view.
+     * Return to desktop by launching any available [DesktopTaskView].
+     *
+     * Prioritize launching live tile desktop, then current page desktop, and otherwise any desktop
+     * that is available.
      *
      * @return provides runnable list to attach runnable at end of Desktop Mode launch
      */
-    fun launchDesktopTaskView(): RunnableList? =
+    fun returnToDesktop(): RunnableList? =
         with(recentsView) {
             val desktopTaskView =
                 (runningTaskView as? DesktopTaskView)
