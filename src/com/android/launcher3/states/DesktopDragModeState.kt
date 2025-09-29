@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.android.launcher3.states
 
-import android.content.Context
-import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherState
 import com.android.launcher3.logging.StatsLogManager
 import com.android.launcher3.views.ActivityContext
 
-/** Definition for Edit Mode state used for home gardening multi-select */
-class EditModeState(id: Int) : LauncherState(id, StatsLogManager.LAUNCHER_STATE_HOME, STATE_FLAGS) {
+/** Definition for Desktop Drag Mode state used for desktop */
+class DesktopDragModeState(id: Int) :
+    LauncherState(id, StatsLogManager.LAUNCHER_STATE_HOME, STATE_FLAGS) {
 
     companion object {
-        const val DEPTH_15_PERCENT = 0.15f
 
         private val STATE_FLAGS =
             (FLAG_MULTI_PAGE or
@@ -37,26 +36,4 @@ class EditModeState(id: Int) : LauncherState(id, StatsLogManager.LAUNCHER_STATE_
     }
 
     override fun getTransitionDuration(context: ActivityContext, isToState: Boolean) = 150
-
-    override fun <T> getDepthUnchecked(context: T): Float where T : Context?, T : ActivityContext? {
-        return DEPTH_15_PERCENT
-    }
-
-    override fun getWorkspaceScaleAndTranslation(launcher: Launcher): ScaleAndTranslation {
-        val scale = launcher.deviceProfile.getWorkspaceSpringLoadScale(launcher)
-        return ScaleAndTranslation(scale, 0f, 0f)
-    }
-
-    override fun getHotseatScaleAndTranslation(launcher: Launcher): ScaleAndTranslation {
-        val scale = launcher.deviceProfile.getWorkspaceSpringLoadScale(launcher)
-        return ScaleAndTranslation(scale, 0f, 0f)
-    }
-
-    override fun getWorkspaceBackgroundAlpha(launcher: Launcher): Float {
-        return 0.2f
-    }
-
-    override fun onLeavingState(launcher: Launcher?, toState: LauncherState?) {
-        // cleanup any changes to workspace
-    }
 }

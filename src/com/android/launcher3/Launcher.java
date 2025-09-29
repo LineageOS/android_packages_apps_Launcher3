@@ -63,10 +63,10 @@ import static com.android.launcher3.LauncherState.ALL_APPS;
 import static com.android.launcher3.LauncherState.EDIT_MODE;
 import static com.android.launcher3.LauncherState.FLAG_MULTI_PAGE;
 import static com.android.launcher3.LauncherState.FLAG_NON_INTERACTIVE;
+import static com.android.launcher3.LauncherState.FLAG_WORKSPACE_ICONS_BEING_DRAGGED;
 import static com.android.launcher3.LauncherState.NORMAL;
 import static com.android.launcher3.LauncherState.NO_OFFSET;
 import static com.android.launcher3.LauncherState.NO_SCALE;
-import static com.android.launcher3.LauncherState.SPRING_LOADED;
 import static com.android.launcher3.Utilities.postAsyncCallback;
 import static com.android.launcher3.Utilities.shouldEnableMouseInteractionChanges;
 import static com.android.launcher3.Workspace.mapOverCellLayouts;
@@ -1118,7 +1118,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         }
         addActivityFlags(ACTIVITY_STATE_TRANSITION_ACTIVE);
 
-        if (state == SPRING_LOADED || state == EDIT_MODE) {
+        if (state.hasFlag(FLAG_WORKSPACE_ICONS_BEING_DRAGGED)) {
             // Prevent any Un/InstallShortcutReceivers from updating the db while we are
             // not on homescreen
             ItemInstallQueue.INSTANCE.get(this).pauseModelPush(FLAG_DRAG_AND_DROP);
@@ -1503,7 +1503,7 @@ public class Launcher extends StatefulActivity<LauncherState>
             mStateManager.addStateListener(new StateManager.StateListener<LauncherState>() {
                 @Override
                 public void onStateTransitionComplete(LauncherState finalState) {
-                    if ((mPrevLauncherState == SPRING_LOADED || mPrevLauncherState == EDIT_MODE)
+                    if (mPrevLauncherState.hasFlag(FLAG_WORKSPACE_ICONS_BEING_DRAGGED)
                             && finalState == NORMAL) {
                         AppWidgetResizeFrame.showForWidget(launcherHostView, cellLayout);
                         mStateManager.removeStateListener(this);
