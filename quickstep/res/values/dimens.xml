@@ -172,6 +172,9 @@
 
     <dimen name="recents_empty_message_text_size">14sp</dimen>
     <dimen name="recents_empty_message_text_padding">16dp</dimen>
+    <dimen name="recents_empty_message_icon_size">60dp</dimen>
+    <dimen name="recents_empty_message_background_size">190dp</dimen>
+    <dimen name="recents_empty_message_background_size_large">288dp</dimen>
 
     <dimen name="max_shadow_radius">0dp</dimen>
 

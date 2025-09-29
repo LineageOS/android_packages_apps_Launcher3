@@ -118,6 +118,7 @@ import android.view.MotionEvent;
 import android.view.RemoteAnimationTarget;
 import android.view.View;
 import android.view.ViewDebug;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver.OnScrollChangedListener;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -135,6 +136,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import androidx.core.graphics.ColorUtils;
+import androidx.core.view.ViewKt;
 import androidx.dynamicanimation.animation.SpringAnimation;
 
 import com.android.internal.jank.Cuj;
@@ -746,11 +748,12 @@ public abstract class RecentsView<
     protected boolean mLoadPlanEverApplied;
 
     // Variables for empty state
-    private final Drawable mEmptyIcon;
-    private final CharSequence mEmptyMessage;
-    private final TextPaint mEmptyMessagePaint;
-    private final Point mLastMeasureSize = new Point();
-    private final int mEmptyMessagePadding;
+    @Nullable private ViewGroup mEmptyRecentsMessageView;
+    private Drawable mEmptyIcon;
+    private CharSequence mEmptyMessage;
+    private TextPaint mEmptyMessagePaint;
+    private Point mLastMeasureSize = new Point();
+    private int mEmptyMessagePadding;
     private boolean mShowEmptyMessage;
     @Nullable
     private OnEmptyMessageUpdatedListener mOnEmptyMessageUpdatedListener;
@@ -945,22 +948,6 @@ public abstract class RecentsView<
         mClampedScrollOffsetBound = getResources().getDimensionPixelSize(
                 R.dimen.transient_taskbar_clamped_offset_bound);
 
-        mEmptyIcon = context.getDrawable(R.drawable.ic_view_carousel);
-        mEmptyIcon.setCallback(this);
-        mEmptyMessage = context.getText(R.string.recents_empty_message);
-        mEmptyMessagePaint = new TextPaint();
-        mEmptyMessagePaint.setColor(
-                getResources().getColor(R.color.materialColorOnSurface, context.getTheme()));
-
-        mEmptyMessagePaint.setTextSize(getResources()
-                .getDimension(R.dimen.recents_empty_message_text_size));
-        mEmptyMessagePaint.setTypeface(FontUtils.getTypeFace(getResources()));
-        mEmptyMessagePaint.setAntiAlias(true);
-        mEmptyMessagePadding = getResources()
-                .getDimensionPixelSize(R.dimen.recents_empty_message_text_padding);
-        setWillNotDraw(false);
-        updateEmptyMessage();
-
         mTaskOverlayFactory = LauncherComponentProvider.get(context).getTaskOverlayFactory();
 
         // Initialize quickstep specific cache params here, as this is constructed only once
@@ -1064,17 +1051,42 @@ public abstract class RecentsView<
 
     public void init(OverviewActionsView actionsView, SplitSelectStateController splitController,
             @Nullable DesktopRecentsTransitionController desktopRecentsTransitionController,
-            SurfaceTransactionApplier surfaceTransactionApplier) {
+            SurfaceTransactionApplier surfaceTransactionApplier,
+            @Nullable ViewGroup emptyRecentsMessageView) {
+        // OverviewActionsView related.
         mIs3PLauncher = !OverviewComponentObserver.INSTANCE.get(mContext).isHomeAndOverviewSame();
         mActionsView = actionsView;
         mActionsView.updateHiddenFlags(HIDDEN_NO_TASKS, !hasTaskViews());
         // Update flags for 1p/3p launchers
         mActionsView.updateFor3pLauncher(mIs3PLauncher);
+
+        // RecentsViewContainer provided dependencies.
         mSplitSelectStateController = splitController;
         mDesktopRecentsTransitionController = desktopRecentsTransitionController;
         // Set in launcher to be in sync with the other Surface transactions e.g. in
         // BaseDepthController for applying blur.
         mSyncTransactionApplier = surfaceTransactionApplier;
+
+        // Empty Recents related.
+        mEmptyRecentsMessageView = emptyRecentsMessageView;
+        if (mEmptyRecentsMessageView != null) {
+            updateEmptyMessageConfiguration();
+        } else {
+            mEmptyIcon = mContext.getDrawable(R.drawable.ic_view_carousel);
+            mEmptyIcon.setCallback(this);
+            mEmptyMessage = mContext.getText(R.string.recents_empty_message);
+            mEmptyMessagePaint = new TextPaint();
+            mEmptyMessagePadding = getResources().getDimensionPixelSize(
+                    R.dimen.recents_empty_message_text_padding);
+            mEmptyMessagePaint.setColor(
+                    getResources().getColor(R.color.materialColorOnSurface, mContext.getTheme()));
+            mEmptyMessagePaint.setTextSize(getResources()
+                    .getDimension(R.dimen.recents_empty_message_text_size));
+            mEmptyMessagePaint.setTypeface(FontUtils.getTypeFace(getResources()));
+            mEmptyMessagePaint.setAntiAlias(true);
+            setWillNotDraw(false);
+        }
+        updateEmptyMessage();
     }
 
     public SplitSelectStateController getSplitSelectController() {
@@ -1201,8 +1213,10 @@ public abstract class RecentsView<
         // RecentsView is set to RTL in the constructor when system is using LTR. Here we set the
         // child direction back to match system settings.
         child.setLayoutDirection(mIsRtl ? View.LAYOUT_DIRECTION_LTR : View.LAYOUT_DIRECTION_RTL);
-        mActionsView.updateHiddenFlags(HIDDEN_NO_TASKS, false);
-        updateEmptyMessage();
+        mActionsView.updateHiddenFlags(HIDDEN_NO_TASKS, !hasTaskViews());
+        if (mEmptyRecentsMessageView == null) {
+            updateEmptyMessage();
+        }
         traceEnd(Trace.TRACE_TAG_APP);
     }
 
@@ -3608,9 +3622,13 @@ public abstract class RecentsView<
         if (mAddDesktopButton != null) {
             mAddDesktopButton.setContentAlpha(mContentAlpha);
         }
-        int alphaInt = Math.round(alpha * 255);
-        mEmptyMessagePaint.setAlpha(alphaInt);
-        mEmptyIcon.setAlpha(alphaInt);
+        if (mEmptyRecentsMessageView != null) {
+            mEmptyRecentsMessageView.setAlpha(alpha);
+        } else {
+            int alphaInt = Math.round(alpha * 255);
+            mEmptyMessagePaint.setAlpha(alphaInt);
+            mEmptyIcon.setAlpha(alphaInt);
+        }
         mActionsView.getContentAlpha().updateValue(mContentAlpha);
 
         if (alpha > 0) {
@@ -3650,6 +3668,7 @@ public abstract class RecentsView<
         super.onConfigurationChanged(newConfig);
         updateRecentsRotation();
         onOrientationChanged();
+        updateEmptyMessageConfiguration();
     }
 
     /**
@@ -3780,18 +3799,33 @@ public abstract class RecentsView<
         boolean isEmpty = !hasTaskViews() && !isSplitSelectionActive();
         boolean hasSizeChanged = mLastMeasureSize.x != getWidth()
                 || mLastMeasureSize.y != getHeight();
-        if (isEmpty == mShowEmptyMessage && !hasSizeChanged) {
+        if (isEmpty == mShowEmptyMessage && (mEmptyRecentsMessageView != null || !hasSizeChanged)) {
             return;
         }
-        setContentDescription(isEmpty ? mEmptyMessage : "");
-        setFocusable(isEmpty);
         mShowEmptyMessage = isEmpty;
-        updateEmptyStateUi(hasSizeChanged);
-        invalidate();
+        if (mEmptyRecentsMessageView != null) {
+            ViewKt.setVisible(mEmptyRecentsMessageView, isEmpty);
+        } else {
+            setContentDescription(isEmpty ? mEmptyMessage : "");
+            setFocusable(isEmpty);
+            updateEmptyStateUi(hasSizeChanged);
+            invalidate();
+        }
 
         if (mOnEmptyMessageUpdatedListener != null) {
             mOnEmptyMessageUpdatedListener.onEmptyMessageUpdated(mShowEmptyMessage);
         }
+    }
+
+    private void updateEmptyMessageConfiguration() {
+        if (mEmptyRecentsMessageView == null) {
+            return;
+        }
+        ViewGroup.MarginLayoutParams layoutParams =
+                (MarginLayoutParams) mEmptyRecentsMessageView.getLayoutParams();
+        layoutParams.bottomMargin =
+                mContainer.getDeviceProfile().getOverviewActionsClaimedSpaceBelow();
+        mEmptyRecentsMessageView.setLayoutParams(layoutParams);
     }
 
     @Override
@@ -4546,6 +4580,9 @@ public abstract class RecentsView<
     }
 
     private void updateEmptyStateUi(boolean sizeChanged) {
+        if (mEmptyRecentsMessageView != null) {
+            return;
+        }
         boolean hasValidSize = getWidth() > 0 && getHeight() > 0;
         if (sizeChanged && hasValidSize) {
             mEmptyTextLayout = null;
@@ -4570,10 +4607,14 @@ public abstract class RecentsView<
 
     @Override
     protected boolean verifyDrawable(@NonNull Drawable who) {
-        return super.verifyDrawable(who) || (mShowEmptyMessage && who == mEmptyIcon);
+        return super.verifyDrawable(who) || (mEmptyRecentsMessageView == null && (
+                mShowEmptyMessage && who == mEmptyIcon));
     }
 
     protected void maybeDrawEmptyMessage(Canvas canvas) {
+        if (mEmptyRecentsMessageView != null) {
+            return;
+        }
         if (mShowEmptyMessage && mEmptyTextLayout != null) {
             // Offsets icon and text up so that the vertical center of screen (accounting for
             // insets) is between icon and text.

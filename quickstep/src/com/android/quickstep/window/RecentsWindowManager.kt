@@ -40,6 +40,7 @@ import android.view.SurfaceControl
 import android.view.SurfaceControl.Transaction
 import android.view.SurfaceControlViewHost
 import android.view.View
+import android.view.ViewGroup
 import android.window.BackEvent
 import android.window.DesktopExperienceFlags
 import android.window.OnBackInvokedCallback
@@ -299,6 +300,8 @@ constructor(
         windowView = layoutInflater.inflate(R.layout.fallback_recents_activity, null)
         windowView?.let {
             actionsView = it.findViewById(R.id.overview_actions_view)
+            val emptyRecentsMessageView =
+                it.findViewById<ViewGroup?>(R.id.empty_recents_message_view)
             recentsView =
                 it.findViewById<FallbackRecentsView<RecentsWindowManager>?>(R.id.overview_panel)
                     ?.apply {
@@ -313,6 +316,7 @@ constructor(
                                 desktopState,
                             ),
                             SurfaceTransactionApplier(rootView),
+                            emptyRecentsMessageView,
                         )
                     }
             actionsView?.apply {

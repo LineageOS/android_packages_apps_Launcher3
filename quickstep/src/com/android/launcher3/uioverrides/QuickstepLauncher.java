@@ -101,6 +101,7 @@ import android.util.SparseArray;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AnalogClock;
 import android.widget.TextClock;
 import android.window.BackEvent;
@@ -345,8 +346,10 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
                     getStateManager(), systemUiProxy, getIApplicationThread(),
                     getDepthController(), DesktopState.getInstance(this));
         }
+        ViewGroup emptyRecentsMessageView = findViewById(R.id.empty_recents_message_view);
         overviewPanel.init(mActionsView, mSplitSelectStateController,
-                mDesktopRecentsTransitionController, surfaceTransactionApplier);
+                mDesktopRecentsTransitionController, surfaceTransactionApplier,
+                emptyRecentsMessageView);
         mSplitWithKeyboardShortcutController = new SplitWithKeyboardShortcutController(
                 this, mSplitSelectStateController);
         mSplitToWorkspaceController = new SplitToWorkspaceController(this,
