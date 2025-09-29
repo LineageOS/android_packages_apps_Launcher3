@@ -26,8 +26,7 @@ filegroup {
         "src/**/*.kt",
         "multivalentTests/src/**/*.java",
         "multivalentTests/src/**/*.kt",
-        "src_e2e/**/*.java",
-        "src_e2e/**/*.kt",
+        ":launcher-e2e-inproc-tests",
     ],
     exclude_srcs: [
         ":launcher-non-quickstep-tests-src",
