@@ -37,6 +37,7 @@ import static com.android.launcher3.taskbar.growth.GrowthConstants.GROWTH_NUDGE_
 import static com.android.launcher3.util.DisplayController.CHANGE_DENSITY;
 import static com.android.launcher3.util.DisplayController.CHANGE_DESKTOP_MODE;
 import static com.android.launcher3.util.DisplayController.CHANGE_NAVIGATION_MODE;
+import static com.android.launcher3.util.DisplayController.CHANGE_ROTATION;
 import static com.android.launcher3.util.DisplayController.CHANGE_SHOW_LOCKED_TASKBAR;
 import static com.android.launcher3.util.DisplayController.CHANGE_TASKBAR_PINNING;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
@@ -293,6 +294,9 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
             if ((flags & CHANGE_TASKBAR_PINNING) != 0) {
                 debugTaskbarManager("onDisplayInfoChanged: Taskbar pinning changed", displayId);
             }
+            if ((flags & CHANGE_ROTATION) != 0) {
+                debugTaskbarManager("onDisplayInfoChanged: Rotation changed", displayId);
+            }
 
             // Use a helper to update DP (only for secondary displays) and then recreate taskbar.
             IntConsumer updateExternalDpAndRecreateTaskbar = displayIdToUpdate -> {
@@ -302,7 +306,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
             };
 
             if ((flags & (CHANGE_DENSITY | CHANGE_NAVIGATION_MODE
-                    | CHANGE_SHOW_LOCKED_TASKBAR)) != 0) {
+                    | CHANGE_SHOW_LOCKED_TASKBAR | CHANGE_ROTATION)) != 0) {
 
                 if ((flags & CHANGE_SHOW_LOCKED_TASKBAR) != 0) {
                     debugTaskbarManager("onDisplayInfoChanged: show locked taskbar changed!",
