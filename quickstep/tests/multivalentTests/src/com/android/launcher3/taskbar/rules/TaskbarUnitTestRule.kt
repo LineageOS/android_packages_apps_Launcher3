@@ -162,7 +162,7 @@ class TaskbarUnitTestRule(
                                 RecentsWindowManager.REPOSITORY_INSTANCE.get(context),
                                 // VirtualDisplaysRule dispatches system decoration changes.
                                 mock<DisplaysWithDecorationsRepositoryCompat>(),
-                                ProductionDispatchers.main,
+                                ProductionDispatchers.INSTANCE[context].main,
                             ) {
                             override fun recreateTaskbars() {
                                 super.recreateTaskbars()

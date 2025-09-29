@@ -16,7 +16,11 @@
 
 package com.android.launcher3.util.coroutines
 
+import com.android.launcher3.dagger.LauncherAppComponent
+import com.android.launcher3.dagger.LauncherAppSingleton
+import com.android.launcher3.util.DaggerSingletonObject
 import com.android.launcher3.util.coroutines.CoroutinesHelper.bgDispatcher
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -61,7 +65,8 @@ interface DispatcherProvider {
     val unconfined: CoroutineDispatcher
 }
 
-object ProductionDispatchers : DispatcherProvider {
+@LauncherAppSingleton
+class ProductionDispatchers @Inject constructor() : DispatcherProvider {
     override val default = Dispatchers.Default
     override val main = Dispatchers.Main.immediate
 
@@ -70,6 +75,11 @@ object ProductionDispatchers : DispatcherProvider {
     override val lightweightBackground = bgDispatcher(nThreads = 1, threadName = "LauncherBgLight")
 
     override val unconfined = Dispatchers.Unconfined
+
+    companion object {
+        @JvmField
+        val INSTANCE = DaggerSingletonObject(LauncherAppComponent::getProductionDispatchers)
+    }
 }
 
 private object CoroutinesHelper {
