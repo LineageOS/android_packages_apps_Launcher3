@@ -23,9 +23,14 @@ import static com.android.launcher3.Flags.enableTaskbarUiThread;
 import android.os.Looper;
 import android.os.Process;
 
+import androidx.annotation.VisibleForTesting;
+
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -120,6 +125,18 @@ public class Executors {
      */
     public static LooperExecutor getPackageExecutor(String packageName) {
         return PACKAGE_EXECUTORS.computeIfAbsent(packageName, LooperExecutor::new);
+    }
+
+    @VisibleForTesting
+    public static List<ExecutorService> getAllExecutorsForTesting() {
+        return Arrays.asList(
+                MODEL_EXECUTOR,
+                MAIN_EXECUTOR,
+                UI_HELPER_EXECUTOR,
+                DATA_HELPER_EXECUTOR,
+                THREAD_POOL_EXECUTOR,
+                ORDERED_BG_EXECUTOR
+        );
     }
 
     /**
