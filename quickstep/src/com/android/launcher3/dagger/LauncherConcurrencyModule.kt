@@ -16,57 +16,15 @@
 
 package com.android.launcher3.dagger
 
-import android.os.Handler
-import android.os.HandlerThread
-import android.os.Looper
-import android.os.Process
 import com.android.launcher3.util.coroutines.DispatcherProvider
 import com.android.launcher3.util.coroutines.ProductionDispatchers
-import com.android.systemui.dagger.qualifiers.Background
 import dagger.Module
 import dagger.Provides
-import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 
 /** Dagger Module for per-display thread handling. */
 // TODO(b/407594919) - Adapt this to use new concurrency module.
 @Module
 object LauncherConcurrencyModule {
-    // Slow BG executor can potentially affect UI if UI is waiting for an updated state from this
-    // thread
-    private const val BG_SLOW_DISPATCH_THRESHOLD = 1000L
-    private const val BG_SLOW_DELIVERY_THRESHOLD = 1000L
-
-    private val bgLooper: Looper by lazy {
-        val thread = HandlerThread("LauncherBg", Process.THREAD_PRIORITY_BACKGROUND)
-        thread.start()
-        thread.looper.setSlowLogThresholdMs(BG_SLOW_DISPATCH_THRESHOLD, BG_SLOW_DELIVERY_THRESHOLD)
-        thread.looper
-    }
-
-    /** Background Looper */
-    @Provides @LauncherAppSingleton @Background fun provideBgLooper(): Looper = bgLooper
-
-    /**
-     * Background Handler.
-     *
-     * Prefer the Background Executor when possible.
-     */
-    @Provides
-    @LauncherAppSingleton
-    @Background
-    fun provideBgHandler(@Background bgLooper: Looper): Handler = Handler(bgLooper)
-
     /** CoroutineDispatcher provider. */
     @Provides fun provideCoroutineDispatcherProvider(): DispatcherProvider = ProductionDispatchers
-
-    /** Background CoroutineScope provider. */
-    @Provides
-    @LauncherAppSingleton
-    @Background
-    fun provideBgCoroutineScope(dispatcherProvider: DispatcherProvider) =
-        CoroutineScope(
-            SupervisorJob() + dispatcherProvider.ioBackground + CoroutineName("LauncherBg")
-        )
 }
