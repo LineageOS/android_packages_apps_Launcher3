@@ -24,6 +24,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.launcher3.icons.BaseIconFactory;
+import com.android.launcher3.icons.BitmapInfo;
 import com.android.launcher3.icons.LauncherIcons;
 import com.android.launcher3.icons.cache.CacheLookupFlag;
 
@@ -82,20 +84,30 @@ public class IconRequestInfo<T extends ItemInfoWithIcon> {
         }
 
         try (LauncherIcons li = LauncherIcons.obtain(context)) {
+            BitmapInfo bitmap = parseIconBlob(li);
             ItemInfoWithIcon info = itemInfo;
-            if (iconBlob == null) {
+            if (bitmap == null) {
                 Log.d(TAG, "loadIconFromDb: icon blob null, returning. Component="
                         + info.getTargetComponent());
                 return false;
             }
-            info.bitmap = li.createIconBitmap(
-                    decodeByteArray(iconBlob, 0, iconBlob.length),
-                    /* isFullBleed **/ isBlobFullBleed
-            );
+            info.bitmap = bitmap;
             return true;
+        }
+    }
+
+    /** Tries to parse the icon from blob, or null on failure */
+    @Nullable
+    public BitmapInfo parseIconBlob(BaseIconFactory iconFactory) {
+        try {
+            return iconBlob == null ? null
+                    : iconFactory.createIconBitmap(
+                            decodeByteArray(iconBlob, 0, iconBlob.length),
+                            /* isFullBleed **/ isBlobFullBleed
+                    );
         } catch (Exception e) {
             Log.e(TAG, "Failed to decode byte array for info " + itemInfo, e);
-            return false;
+            return null;
         }
     }
 }

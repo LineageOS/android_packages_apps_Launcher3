@@ -27,7 +27,6 @@ import android.os.UserHandle;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.launcher3.LauncherAppState;
-import com.android.launcher3.icons.CacheableShortcutInfo;
 import com.android.launcher3.icons.IconCache;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
@@ -128,7 +127,7 @@ public class PopupPopulator {
             for (int i = 0; i < shortcuts.size() && i < shortcutViews.size(); i++) {
                 final ShortcutInfo shortcut = shortcuts.get(i);
                 final WorkspaceItemInfo si = new WorkspaceItemInfo(shortcut, context);
-                cache.getShortcutIcon(si, new CacheableShortcutInfo(shortcut, infoWrapper));
+                cache.getShortcutIcon(si, shortcut, infoWrapper);
                 si.rank = i;
                 si.container = CONTAINER_SHORTCUTS;
 
