@@ -372,10 +372,6 @@ public abstract class AbsSwipeUpHandler<
 
     @Nullable private SwipePipToHomeAnimator mSwipePipToHomeAnimator;
     protected boolean mIsSwipingPipToHome;
-    // TODO(b/195473090) no split PIP for now, remove once we have more clarity
-    //  can try to have RectFSpringAnim evaluate multiple rects at once
-    private final SwipePipToHomeAnimator[] mSwipePipToHomeAnimators =
-            new SwipePipToHomeAnimator[2];
 
     private final Runnable mLauncherOnDestroyCallback;
 
@@ -1895,13 +1891,24 @@ public abstract class AbsSwipeUpHandler<
                             || mRecentsView.getCurrentPage() == mRecentsView.getRunningTaskIndex()
                             ? null : mRecentsView.getCurrentPageTaskView());
             SwipePipToHomeAnimator swipePipToHomeAnimator = !mIsSwipeForSplit && appCanEnterPip
-                    ? createWindowAnimationToPip(homeAnimFactory, runningTaskTarget, start)
+                    ? createWindowAnimationToPip(homeAnimFactory, runningTaskTarget, null, start)
                     : null;
             mIsSwipingPipToHome = swipePipToHomeAnimator != null;
             final RectFSpringAnim[] windowAnim;
             if (mIsSwipingPipToHome) {
                 mSwipePipToHomeAnimator = swipePipToHomeAnimator;
-                mSwipePipToHomeAnimators[0] = mSwipePipToHomeAnimator;
+                // Animate all targets into the PiP window bounds, but all but the PiP task itself
+                // will fade out (e.g. if assistant or other translucent activity is on top).
+                SwipePipToHomeAnimator[] swipePipToHomeAnimators = new SwipePipToHomeAnimator[
+                        mRecentsAnimationTargets.apps.length];
+                swipePipToHomeAnimators[0] = mSwipePipToHomeAnimator;
+                int nextPipAnimatorIndex = 1;
+                for (RemoteAnimationTarget nonRunningTarget : mRecentsAnimationTargets.apps) {
+                    if (nonRunningTarget == runningTaskTarget) continue;
+                    swipePipToHomeAnimators[nextPipAnimatorIndex++] = createWindowAnimationToPip(
+                            homeAnimFactory, runningTaskTarget, nonRunningTarget, start);
+                }
+
                 if (mSwipePipToHomeReleaseCheck != null) {
                     mSwipePipToHomeReleaseCheck.setCanRelease(false);
                 }
@@ -1929,7 +1936,7 @@ public abstract class AbsSwipeUpHandler<
                         mSwipePipToHomeAnimator.getContentOverlay() != null ? new Rect()
                                 : mSwipePipToHomeAnimator.getSourceRectHint());
 
-                windowAnim = mSwipePipToHomeAnimators;
+                windowAnim = swipePipToHomeAnimators;
             } else {
                 mSwipePipToHomeAnimator = null;
                 if (mSwipePipToHomeReleaseCheck != null) {
@@ -2106,9 +2113,16 @@ public abstract class AbsSwipeUpHandler<
         }
     }
 
+    /**
+     * Creates the animation from full screen task to Picture-in-Picture window.
+     * @param runningTaskTarget The target that is entering PiP.
+     * @param fadeOutTarget If not null, a target that animates alongside the PiP target,
+     *                      but fades out during the transition. Shares bounds from PiP target.
+     */
     @Nullable
     private SwipePipToHomeAnimator createWindowAnimationToPip(HomeAnimationFactory homeAnimFactory,
-            RemoteAnimationTarget runningTaskTarget, float startProgress) {
+            RemoteAnimationTarget runningTaskTarget, @Nullable RemoteAnimationTarget fadeOutTarget,
+            float startProgress) {
         if (mRecentsView == null) {
             // Overview was destroyed, bail early.
             return null;
@@ -2153,7 +2167,7 @@ public abstract class AbsSwipeUpHandler<
                 .setTaskId(runningTaskTarget.taskId)
                 .setActivityInfo(taskInfo.topActivityInfo)
                 .setAppIconSizePx(mDp.getWorkspaceIconProfile().getIconSizePx())
-                .setLeash(runningTaskTarget.leash)
+                .setLeash(fadeOutTarget != null ? fadeOutTarget.leash : runningTaskTarget.leash)
                 .setSourceRectHint(
                         runningTaskTarget.taskInfo.pictureInPictureParams.getSourceRectHint())
                 .setAppBounds(appBounds)
@@ -2161,7 +2175,8 @@ public abstract class AbsSwipeUpHandler<
                 .setStartBounds(startRect)
                 .setDestinationBounds(destinationBounds)
                 .setPipResources(mRecentsView.getPipResources())
-                .setAttachedView(mRecentsView);
+                .setAttachedView(mRecentsView)
+                .setFadeOut(fadeOutTarget != null);
         // We would assume home and app window always in the same rotation While homeRotation
         // is not ROTATION_0 (which implies the rotation is turned on in launcher settings).
         if (homeRotation == ROTATION_0
