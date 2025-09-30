@@ -38,6 +38,7 @@ import com.android.launcher3.folder.Folder
 import com.android.launcher3.folder.FolderGridOrganizer.createFolderGridOrganizer
 import com.android.launcher3.homescreenfiles.HomeScreenFile
 import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils
+import com.android.launcher3.homescreenfiles.isFileSystemItem
 import com.android.launcher3.icons.CacheableShortcutInfo
 import com.android.launcher3.icons.IconCache
 import com.android.launcher3.icons.cache.CacheLookupFlag.Companion.DEFAULT_LOOKUP_FLAG
@@ -619,6 +620,17 @@ class WorkspaceItemProcessor(
 
     /** Restores file system items coming from the DB ([LoaderCursor]). */
     private fun processFileSystemItem() {
+        if (c.restoreFlag != 0) {
+            // NOTE: File system items are represented by device-specific URIs that are not unique
+            // across devices. Because we cannot be certain that a backed up URI continues to refer
+            // to the same file across backup-and-restore attempts, we cannot support restore.
+            c.markDeleted(
+                "File system items are not restored from backup",
+                RestoreError.FILE_SYSTEM_ITEM_FROM_BACKUP,
+            )
+            return
+        }
+
         val item =
             WorkspaceItemInfo().apply {
                 c.applyCommonProperties(this)
@@ -646,10 +658,7 @@ class WorkspaceItemProcessor(
             ArrayList(loadedItems.filter { it.container == Favorites.CONTAINER_DESKTOP })
         val alreadyRestoredFileSystemItems =
             knownDesktopContainerItems
-                .filter {
-                    it.itemType == Favorites.ITEM_TYPE_FILE_SYSTEM_FILE ||
-                        it.itemType == Favorites.ITEM_TYPE_FILE_SYSTEM_FOLDER
-                }
+                .filter(ItemInfo::isFileSystemItem)
                 .map { requireNotNull(it.intent).data }
                 .toSet()
         val excludedScreens = IntSet()
