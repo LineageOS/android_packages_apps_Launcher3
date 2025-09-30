@@ -16,13 +16,16 @@
 package com.android.quickstep
 
 import android.content.Context
+import android.hardware.display.DisplayManager
 import android.view.InputDevice
 import android.view.MotionEvent
+import android.view.ViewConfiguration
 import androidx.annotation.VisibleForTesting
 import com.android.launcher3.Utilities.shouldEnableMouseInteractionChanges
 import com.android.launcher3.anim.AnimatedFloat
 import com.android.launcher3.statemanager.BaseState
 import com.android.launcher3.statemanager.StatefulContainer
+import com.android.launcher3.taskbar.TaskbarApiProxy
 import com.android.launcher3.taskbar.TaskbarDesktopExperienceFlags.enableAutoStashConnectedDisplayTaskbar
 import com.android.launcher3.taskbar.TaskbarManager
 import com.android.launcher3.util.LockedUserState.Companion.get
@@ -245,9 +248,11 @@ object InputConsumerUtils {
                         TaskbarUnstashInputConsumer(
                             base,
                             inputMonitorCompat,
-                            tac,
+                            TaskbarApiProxy(tac),
+                            context.getSystemService(DisplayManager::class.java),
                             overviewCommandHelper,
                             gestureState,
+                            ViewConfiguration.get(context).scaledTouchSlop,
                         )
                 }
             }

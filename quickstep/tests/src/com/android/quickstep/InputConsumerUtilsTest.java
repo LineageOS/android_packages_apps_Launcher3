@@ -53,6 +53,7 @@ import com.android.launcher3.dagger.LauncherAppModule;
 import com.android.launcher3.dagger.LauncherAppSingleton;
 import com.android.launcher3.taskbar.TaskbarActivityContext;
 import com.android.launcher3.taskbar.TaskbarManager;
+import com.android.launcher3.taskbar.TaskbarUiState;
 import com.android.launcher3.taskbar.bubbles.BubbleBarController;
 import com.android.launcher3.taskbar.bubbles.BubbleBarSwipeController;
 import com.android.launcher3.taskbar.bubbles.BubbleBarViewController;
@@ -66,6 +67,7 @@ import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController;
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.LockedUserState;
+import com.android.launcher3.util.MutableListenableRef;
 import com.android.launcher3.util.SandboxApplication;
 import com.android.launcher3.views.BaseDragLayer;
 import com.android.quickstep.inputconsumers.AccessibilityInputConsumer;
@@ -124,6 +126,7 @@ public class InputConsumerUtilsTest {
     @NonNull @Mock private TaskbarFeatureEvaluator mTaskbarFeatureEvaluator;
     @NonNull @Mock private OverviewComponentObserver mOverviewComponentObserver;
     @NonNull @Mock private RecentsAnimationDeviceState mDeviceState;
+    @NonNull @Mock private TaskbarUiState mTaskbarUiState;
     @NonNull @Mock private RotationTouchHelper mRotationTouchHelper;
     @NonNull @Mock private AbsSwipeUpHandler.Factory mSwipeUpHandlerFactory;
     @NonNull @Mock private TaskbarManager mTaskbarManager;
@@ -439,8 +442,12 @@ public class InputConsumerUtilsTest {
         DeviceProfile deviceProfile = new DeviceProfile();
         deviceProfile.isTaskbarPresent = true;
         when(mTaskbarActivityContext.getDeviceProfile()).thenReturn(deviceProfile);
+        when(mTaskbarUiState.getDeviceProfile()).thenReturn(deviceProfile);
+        when(mTaskbarUiState.isTaskbarAllAppsOpenRef()).thenReturn(
+                new MutableListenableRef<>(false));
         when(mTaskbarActivityContext.getTaskbarFeatureEvaluator())
                 .thenReturn(mTaskbarFeatureEvaluator);
+        when(mTaskbarActivityContext.getTaskbarUiState()).thenReturn(mTaskbarUiState);
         when(mTaskbarFeatureEvaluator.isTransient()).thenReturn(true);
 
         assertCorrectInputConsumer(
