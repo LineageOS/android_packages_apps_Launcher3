@@ -167,6 +167,18 @@ class OSEManager(
                         ACTION_PACKAGE_REMOVED,
                     )
                 )
+                // Listen to the OseSettingValue package as well if it's installed little later or
+                // if the app gets archived/restored.
+                if (oseSettingsValue != null && oseSettingsValue != osePkg) {
+                    packageAvailableReceiver.register(
+                        packageFilter(
+                            oseSettingsValue,
+                            ACTION_PACKAGE_ADDED,
+                            ACTION_PACKAGE_CHANGED,
+                            ACTION_PACKAGE_REMOVED,
+                        )
+                    )
+                }
             }
 
             // Listen for overlay changes
