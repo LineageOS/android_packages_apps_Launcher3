@@ -312,9 +312,13 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> implements Cli
     }
 
     public void removeItem(View v) {
-        for (int i = getChildCount() - 1; i >= 0; i --) {
-            getPageAt(i).removeView(v);
+        if (v == null) {
+            return;
         }
+
+        ArrayList<View> views = new ArrayList<>(mFolder.getIconsInReadingOrder());
+        views.remove(v);
+        arrangeChildren(views);
     }
 
     @Override
