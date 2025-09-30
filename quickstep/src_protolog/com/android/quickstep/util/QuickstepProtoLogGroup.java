@@ -40,20 +40,12 @@ public enum QuickstepProtoLogGroup implements IProtoLogGroup {
     private final @NonNull String mTag;
 
     public static boolean isProtoLogInitialized() {
-        if (!Variables.sIsInitialized) {
-            Log.w(Constants.TAG,
-                    "Attempting to log to ProtoLog before initializing it.",
-                    new IllegalStateException());
-        }
         return Variables.sIsInitialized;
     }
 
     public static void initProtoLog() {
-        if (Variables.sIsInitialized) {
-            Log.e(Constants.TAG,
-                    "Attempting to re-initialize ProtoLog.", new IllegalStateException());
-            return;
-        }
+        if (Variables.sIsInitialized) return;
+
         Log.i(Constants.TAG, "Initializing ProtoLog.");
         Variables.sIsInitialized = true;
         ProtoLog.init(QuickstepProtoLogGroup.values());
