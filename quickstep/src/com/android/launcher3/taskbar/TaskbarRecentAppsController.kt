@@ -25,6 +25,7 @@ import com.android.launcher3.BubbleTextView.RunningAppState
 import com.android.launcher3.Flags
 import com.android.launcher3.Flags.enableRecentsInTaskbar
 import com.android.launcher3.Flags.enableTaskbarRecentsThemedIcons
+import com.android.launcher3.Flags.enableTaskbarUiThread
 import com.android.launcher3.graphics.ThemeManager
 import com.android.launcher3.graphics.ThemeManager.ThemeChangeListener
 import com.android.launcher3.model.data.AppPairInfo
@@ -35,6 +36,7 @@ import com.android.launcher3.taskbar.TaskbarControllers.LoggableTaskbarControlle
 import com.android.launcher3.taskbar.TaskbarPopupController.canPinAppWithContextMenu
 import com.android.launcher3.util.CancellableTask
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
+import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
 import com.android.launcher3.util.SafeCloseable
 import com.android.quickstep.RecentsFilterState
 import com.android.quickstep.RecentsModel
@@ -64,7 +66,12 @@ class TaskbarRecentAppsController(
         set(isEnabledFromTest) {
             field = isEnabledFromTest
             if (!field && !canShowRecentApps) {
-                recentsModel.unregisterRecentTasksChangedListener(recentTasksChangedListener)
+                if (enableTaskbarUiThread()) {
+                    recentTasksChangedListenerClosable?.close()
+                    recentTasksChangedListenerClosable = null
+                } else {
+                    recentsModel.unregisterRecentTasksChangedListener(recentTasksChangedListener)
+                }
             }
         }
 
@@ -77,7 +84,12 @@ class TaskbarRecentAppsController(
         set(isEnabledFromTest) {
             field = isEnabledFromTest
             if (!field && !canShowRunningApps) {
-                recentsModel.unregisterRecentTasksChangedListener(recentTasksChangedListener)
+                if (enableTaskbarUiThread()) {
+                    recentTasksChangedListenerClosable?.close()
+                    recentTasksChangedListenerClosable = null
+                } else {
+                    recentsModel.unregisterRecentTasksChangedListener(recentTasksChangedListener)
+                }
             }
         }
 
@@ -204,6 +216,8 @@ class TaskbarRecentAppsController(
 
     private val iconLoadRequests: MutableSet<CancellableTask<*>> = HashSet()
 
+    private var recentTasksChangedListenerClosable: SafeCloseable? = null
+
     // TODO(b/343291428): add TaskVisualsChangListener as well (for calendar/clock?)
 
     // Used to keep track of the last requested task list ID, so that we do not request to load the
@@ -231,7 +245,16 @@ class TaskbarRecentAppsController(
         orderedRunningTaskIds =
             controllers.sharedState?.recentOrderedRunningTaskIds?.filterNotNull() ?: emptyList()
         if (canShowRunningApps || canShowRecentApps) {
-            recentsModel.registerRecentTasksChangedListener(recentTasksChangedListener)
+            if (enableTaskbarUiThread()) {
+                recentTasksChangedListenerClosable?.close()
+                recentTasksChangedListenerClosable =
+                    recentsModel.tasksChanges.forEach(TASKBAR_UI_THREAD) {
+                        reloadRecentTasksIfNeeded()
+                    }
+            } else {
+                recentsModel.registerRecentTasksChangedListener(recentTasksChangedListener)
+            }
+
             controllers.runAfterInit { reloadRecentTasksIfNeeded() }
             if (enableTaskbarRecentsThemedIcons()) {
                 iconShapeDataCloseable =
@@ -251,7 +274,12 @@ class TaskbarRecentAppsController(
         if (orderedRunningTaskIds.isNotEmpty()) {
             controllers.sharedState?.recentOrderedRunningTaskIds?.addAll(orderedRunningTaskIds)
         }
-        recentsModel.unregisterRecentTasksChangedListener(recentTasksChangedListener)
+        if (enableTaskbarUiThread()) {
+            recentTasksChangedListenerClosable?.close()
+            recentTasksChangedListenerClosable = null
+        } else {
+            recentsModel.unregisterRecentTasksChangedListener(recentTasksChangedListener)
+        }
         cancelIconLoadRequests()
         iconShapeDataCloseable?.close()
         themeChangeListener?.let { themeManager.removeChangeListener(it) }
