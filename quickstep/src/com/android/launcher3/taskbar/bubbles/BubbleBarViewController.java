@@ -176,6 +176,7 @@ public class BubbleBarViewController {
         mTaskbarUiState = taskbarUiState;
         mBarView = barView;
         if (refactorTaskbarUiState()) {
+            mBarView.setTaskbarUiState(taskbarUiState);
             mBarView.setOnHierarchyChangeListener(new ViewGroup.OnHierarchyChangeListener() {
                 @Override
                 public void onChildViewAdded(View view, View view1) {
