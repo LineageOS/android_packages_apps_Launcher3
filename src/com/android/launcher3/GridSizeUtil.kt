@@ -19,7 +19,7 @@ package com.android.launcher3
 import android.content.Context
 import android.util.Log
 import android.util.Xml
-import com.android.launcher3.AutoInstallsLayout.getAttributeValueAsInt
+import com.android.launcher3.util.XmlElement.Companion.getRootElement
 import java.io.StringReader
 import kotlin.math.abs
 import org.xmlpull.v1.XmlPullParserException
@@ -48,14 +48,13 @@ class GridSizeUtil(private val context: Context) {
      */
     fun parseAndSetGridSize(xml: String) {
         try {
-            val parser = Xml.newPullParser().apply { setInput(StringReader(xml)) }
-
             // Only accept Launcher3 XML format, not NexusLauncher XML format.
-            AutoInstallsLayout.beginDocument(parser, AutoInstallsLayout.TAG_WORKSPACE)
-
-            val (rows, columns) =
-                getAttributeValueAsInt(parser, ROW_ATTR) to
-                    getAttributeValueAsInt(parser, COLUMN_ATTR)
+            val rootEl =
+                Xml.newPullParser()
+                    .apply { setInput(StringReader(xml)) }
+                    .getRootElement(AutoInstallsLayout.TAG_WORKSPACE)
+            val rows = rootEl.getAsInt(ROW_ATTR)
+            val columns = rootEl.getAsInt(COLUMN_ATTR)
 
             val idp = InvariantDeviceProfile.INSTANCE.get(context)
             val gridOptions = idp.parseAllGridOptions(context)

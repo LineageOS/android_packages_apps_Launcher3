@@ -1,5 +1,7 @@
 package com.android.launcher3;
 
+import static com.android.launcher3.util.XmlElement.getRootElement;
+
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -17,9 +19,9 @@ import android.util.Log;
 import com.android.launcher3.LauncherSettings.Favorites;
 import com.android.launcher3.util.Partner;
 import com.android.launcher3.util.Thunk;
+import com.android.launcher3.util.XmlElement;
 import com.android.launcher3.widget.LauncherWidgetHolder;
 
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
@@ -89,13 +91,14 @@ public class DefaultLayoutParser extends AutoInstallsLayout {
     }
 
     @Override
-    protected void parseContainerAndScreen(XmlPullParser parser, int[] out) {
+    protected void parseContainerAndScreen(XmlElement element, int[] out)
+            throws XmlPullParserException {
         out[0] = LauncherSettings.Favorites.CONTAINER_DESKTOP;
-        String strContainer = getAttributeValue(parser, ATTR_CONTAINER);
+        String strContainer = element.get(ATTR_CONTAINER);
         if (strContainer != null) {
             out[0] = Integer.parseInt(strContainer);
         }
-        out[1] = Integer.parseInt(getAttributeValue(parser, ATTR_SCREEN));
+        out[1] = element.getAsInt(ATTR_SCREEN);
     }
 
     /**
@@ -104,8 +107,8 @@ public class DefaultLayoutParser extends AutoInstallsLayout {
     public class AppShortcutWithUriParser extends AppShortcutParser {
 
         @Override
-        protected int invalidPackageOrClass(XmlPullParser parser) {
-            final String uri = getAttributeValue(parser, ATTR_URI);
+        protected int invalidPackageOrClass(XmlElement element) {
+            final String uri = element.get(ATTR_URI);
             if (TextUtils.isEmpty(uri)) {
                 Log.e(TAG, "Skipping invalid <favorite> with no component or uri");
                 return -1;
@@ -195,25 +198,12 @@ public class DefaultLayoutParser extends AutoInstallsLayout {
         private final AppShortcutWithUriParser mChildParser = new AppShortcutWithUriParser();
 
         @Override
-        public int parseAndAdd(XmlPullParser parser) throws XmlPullParserException,
-                IOException {
-            final int groupDepth = parser.getDepth();
-            int type;
-            int addedId = -1;
-            while ((type = parser.next()) != XmlPullParser.END_TAG ||
-                    parser.getDepth() > groupDepth) {
-                if (type != XmlPullParser.START_TAG || addedId > -1) {
-                    continue;
-                }
-                final String fallback_item_name = parser.getName();
-                if (TAG_FAVORITE.equals(fallback_item_name)) {
-                    addedId = mChildParser.parseAndAdd(parser);
-                } else {
-                    Log.e(TAG, "Fallback groups can contain only favorites, found "
-                            + fallback_item_name);
-                }
+        public int parseAndAdd(XmlElement element) {
+            for (XmlElement child: element.childIterator(TAG_FAVORITE)) {
+                int addedId = mChildParser.parseAndAdd(child);
+                if (addedId > -1) return addedId;
             }
-            return addedId;
+            return -1;
         }
     }
 
@@ -224,17 +214,16 @@ public class DefaultLayoutParser extends AutoInstallsLayout {
     class PartnerFolderParser implements TagParser {
 
         @Override
-        public int parseAndAdd(XmlPullParser parser) throws XmlPullParserException,
+        public int parseAndAdd(XmlElement element) throws XmlPullParserException,
                 IOException {
             // Folder contents come from an external XML resource
             final Partner partner = Partner.get(mPackageManager);
             if (partner != null) {
                 final int resId = partner.getXmlResId(RES_PARTNER_FOLDER);
                 if (resId != 0) {
-                    final XmlPullParser partnerParser = partner.getResources().getXml(resId);
-                    beginDocument(partnerParser, TAG_FOLDER);
-                    FolderParser folderParser = new FolderParser(getFolderElementsMap());
-                    return folderParser.parseAndAdd(partnerParser);
+                    XmlElement partnerElement =
+                            getRootElement(partner.getResources().getXml(resId), TAG_FOLDER);
+                    return new FolderParser(getFolderElementsMap()).parseAndAdd(partnerElement);
                 }
             }
             return -1;
@@ -248,14 +237,11 @@ public class DefaultLayoutParser extends AutoInstallsLayout {
     class MyFolderParser extends FolderParser {
 
         @Override
-        public int parseAndAdd(XmlPullParser parser) throws XmlPullParserException,
+        public int parseAndAdd(XmlElement element) throws XmlPullParserException,
                 IOException {
-            final int resId = getAttributeResourceValue(parser, ATTR_FOLDER_ITEMS, 0);
-            if (resId != 0) {
-                parser = mSourceRes.getXml(resId);
-                beginDocument(parser, TAG_FOLDER);
-            }
-            return super.parseAndAdd(parser);
+            final int resId = element.getResource(ATTR_FOLDER_ITEMS, 0);
+            return super.parseAndAdd(
+                    resId != 0 ? getRootElement(mSourceRes.getXml(resId), TAG_FOLDER) : element);
         }
     }
 
