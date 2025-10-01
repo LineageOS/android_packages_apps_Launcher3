@@ -132,8 +132,12 @@ public class RecentsOrientedState implements LauncherPrefChangeListener {
     private final Matrix mTmpMatrix = new Matrix();
 
     private int mFlags;
-    private int mPreviousRotation = ROTATION_0;
+    private int mRotation = ROTATION_0;
     private boolean mListenersInitialized = false;
+    private int mPreviousRotationCount = 0;
+    private int mPreviousRotation = ROTATION_0;
+
+    private static final int CONTINUOUS_ROTATION_COUNT_THRESHOLD = 3;
 
     // Combined int which encodes the full state.
     private int mStateId = 0;
@@ -150,10 +154,21 @@ public class RecentsOrientedState implements LauncherPrefChangeListener {
         mOrientationListener = new OrientationEventListener(mContext) {
             @Override
             public void onOrientationChanged(int degrees) {
-                int newRotation = getRotationForUserDegreesRotated(degrees, mPreviousRotation);
-                if (newRotation != mPreviousRotation) {
-                    mPreviousRotation = newRotation;
-                    rotationChangeListener.accept(newRotation);
+                int newRotation = getRotationForUserDegreesRotated(degrees, mRotation);
+                if (newRotation != mRotation) {
+                    // To avoid the animation being triggered by rotation noises (for example, if
+                    // the user is running), only rotate when receiving a few consecutive rotations
+                    // in a row
+                    if (newRotation == mPreviousRotation) {
+                        mPreviousRotationCount++;
+                    } else {
+                        mPreviousRotation = newRotation;
+                        mPreviousRotationCount = 1;
+                    }
+                    if (mPreviousRotationCount >= CONTINUOUS_ROTATION_COUNT_THRESHOLD) {
+                        mRotation = newRotation;
+                        rotationChangeListener.accept(newRotation);
+                    }
                 }
             }
         };
@@ -218,7 +233,7 @@ public class RecentsOrientedState implements LauncherPrefChangeListener {
             @SurfaceRotation int touchRotation, @SurfaceRotation int displayRotation) {
         mDisplayRotation = displayRotation;
         mTouchRotation = touchRotation;
-        mPreviousRotation = touchRotation;
+        mRotation = touchRotation;
         return updateHandler();
     }
 
