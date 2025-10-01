@@ -115,17 +115,18 @@
     <string name="toast_split_app_unsupported" msgid="2360229567007828914">"स्प्लिट स्क्रीन के लिए, दूसरा ऐप्लिकेशन चुनें"</string>
     <string name="blocked_by_policy" msgid="2071401072261365546">"ऐप्लिकेशन या आपका संगठन इस कार्रवाई की अनुमति नहीं देता"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"फ़िलहाल, विजेट काम नहीं कर रहें हैं. कृपया कोई दूसरा ऐप्लिकेशन चुनें"</string>
+    <!-- no translation found for action_image_copy (6877540054727709339) -->
+    <skip />
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"स्क्रीन घुमाएं"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"ऐनिमेशन में दिखाया गया है कि स्क्रीन के सबसे नीचे से टास्कबार कैसे दिखता है और इस्तेमाल में न होने पर अपने-आप छिप जाता है"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"ऐनिमेशन में दिखाया जा रहा है कि टॉगल के ज़रिए टास्कबार को कैसे पिन करें, ताकि टास्कबार हमेशा स्क्रीन के सबसे नीचे दिखता रहे"</string>
-    <string name="taskbar_edu_bubbles_animation_description" msgid="421866726938396813">"ऐनिमेशन में दिखाया गया है कि टास्कबार से बबल कैसे बनाया जाता है. इसके लिए, खींचने और छोड़ने के जेस्चर का इस्तेमाल किया गया है"</string>
+    <string name="taskbar_edu_bubbles_animation_description" msgid="421866726938396813">"ऐनिमेशन में दिखाया गया है कि खींचने और छोड़ने के जेस्चर का इस्तेमाल करके, टास्कबार से बबल कैसे बनाया जाता है"</string>
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"ऐनिमेशन में दिखाया जा रहा है कि टास्कबार से किसी ऐप्लिकेशन को खींचकर, किसी खुले हुए ऐप्लिकेशन के ऊपर छोड़कर स्प्लिट स्क्रीन कैसे बनाई जाती है"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"ऐनिमेशन में दिखाया गया है कि डिवाइस पर सुझाए गए ऐप्लिकेशन कैसे ऐक्सेस किए जाते हैं"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"ऐनिमेशन में दिखाया गया है कि स्क्रीन पर ऐक्शन बटन को दबाकर रखने से और आइटम वाली जगह को चुनने से, आइटम को कैसे खोजा जा सकता है"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"टास्कबार का ट्यूटोरियल"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"किसी ऐप को किनारे की ओर ड्रैग करके 2 ऐप एक साथ इस्तेमाल करें"</string>
-    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
-    <skip />
+    <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"इसे फ़्लोट करवाने के लिए, नीचे के कोनों तक खींचें और छोड़ें"</string>
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"टास्कबार देखने के लिए, ऊपर की ओर धीरे से स्वाइप करें"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"इस्तेमाल के आधार पर ऐप्लिकेशन के सुझाव पाएं"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"टास्कबार को पिन करने के लिए डिवाइडर को दबाकर रखें"</string>
@@ -151,7 +152,7 @@
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"टास्कबार डिवाइडर"</string>
     <!-- no translation found for taskbar_recents_overflow_a11y_title (8005941062446304304) -->
     <skip />
-    <!-- no translation found for taskbar_pinned_overflow_a11y_title (3427283798522326470) -->
+    <!-- no translation found for taskbar_pinned_overflow_a11y_title (2314810718333302626) -->
     <skip />
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"ऊपर/बाईं तरफ़ ले जाएं"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"नीचे/दाईं तरफ़ ले जाएं"</string>

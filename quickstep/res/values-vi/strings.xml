@@ -115,6 +115,8 @@
     <string name="toast_split_app_unsupported" msgid="2360229567007828914">"Chọn một ứng dụng khác để dùng chế độ chia đôi màn hình"</string>
     <string name="blocked_by_policy" msgid="2071401072261365546">"Ứng dụng hoặc tổ chức của bạn không cho phép thực hiện hành động này"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"Các tiện ích hiện không được hỗ trợ, vui lòng chọn một ứng dụng khác"</string>
+    <!-- no translation found for action_image_copy (6877540054727709339) -->
+    <skip />
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Xoay màn hình"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Ảnh động minh hoạ cách thanh tác vụ xuất hiện từ cuối màn hình và tự động ẩn khi người dùng không sử dụng"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Ảnh động minh hoạ cách ghim thanh tác vụ bằng nút bật/tắt để thanh tác vụ luôn hiển thị ở cuối màn hình"</string>
@@ -124,8 +126,7 @@
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"Ảnh động minh hoạ cách tìm một mục trên màn hình bằng cách chạm và giữ phím hành động rồi chọn khu vực có mục đó"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Cách sử dụng thanh tác vụ"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Kéo một ứng dụng sang bên để dùng 2 ứng dụng cùng lúc"</string>
-    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
-    <skip />
+    <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"Kéo xuống các góc dưới cùng để làm cho ứng dụng nổi"</string>
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Từ từ vuốt lên để Thanh tác vụ xuất hiện"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Nhận ứng dụng đề xuất dựa trên thói quen của bạn"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Nhấn và giữ trên đường phân chia để ghim Thanh tác vụ"</string>
@@ -151,7 +152,7 @@
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Đường phân chia Taskbar"</string>
     <!-- no translation found for taskbar_recents_overflow_a11y_title (8005941062446304304) -->
     <skip />
-    <!-- no translation found for taskbar_pinned_overflow_a11y_title (3427283798522326470) -->
+    <!-- no translation found for taskbar_pinned_overflow_a11y_title (2314810718333302626) -->
     <skip />
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Chuyển lên trên cùng/sang bên trái"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Chuyển xuống dưới cùng/sang bên phải"</string>

@@ -115,6 +115,8 @@
     <string name="toast_split_app_unsupported" msgid="2360229567007828914">"Escolle outra app para usar a pantalla dividida"</string>
     <string name="blocked_by_policy" msgid="2071401072261365546">"A aplicación ou a túa organización non permite realizar esta acción"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"Actualmente os widgets non se admiten. Selecciona outra aplicación"</string>
+    <!-- no translation found for action_image_copy (6877540054727709339) -->
+    <skip />
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Xira a pantalla"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Animación que mostra como aparece a barra de tarefas desde a parte inferior da pantalla e como se oculta automaticamente cando non se utiliza"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Animación que mostra como fixar a barra de tarefas mediante un interruptor para que a barra estea sempre visible na parte inferior da pantalla"</string>
@@ -124,8 +126,7 @@
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"Animación que mostra como buscar un elemento na pantalla mantendo premida a tecla de acción e seleccionando a área na que está o elemento"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Información sobre a función Barra de tarefas"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Arrastra unha aplicación cara a un lado para usar dúas á vez"</string>
-    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
-    <skip />
+    <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"Arrástraa ata as esquinas inferiores para que sexa flotante"</string>
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Pasa o dedo amodo cara arriba para ver a barra de tarefas"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Obtén suxestións de aplicacións en función da túa rutina"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Mantén premida a liña divisoria para fixar a barra de tarefas"</string>
@@ -151,7 +152,7 @@
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Divisor da Barra de tarefas"</string>
     <!-- no translation found for taskbar_recents_overflow_a11y_title (8005941062446304304) -->
     <skip />
-    <!-- no translation found for taskbar_pinned_overflow_a11y_title (3427283798522326470) -->
+    <!-- no translation found for taskbar_pinned_overflow_a11y_title (2314810718333302626) -->
     <skip />
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Mover á parte superior ou á esquerda"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Mover á parte inferior ou á dereita"</string>

@@ -115,11 +115,12 @@
     <string name="toast_split_app_unsupported" msgid="2360229567007828914">"ସ୍ପ୍ଲିଟ ସ୍କ୍ରିନ ବ୍ୟବହାର କରିବାକୁ ଅନ୍ୟ ଏକ ଆପ ବାଛନ୍ତୁ"</string>
     <string name="blocked_by_policy" msgid="2071401072261365546">"ଆପ୍ କିମ୍ବା ଆପଣଙ୍କ ସଂସ୍ଥା ଦ୍ୱାରା ଏହି କାର୍ଯ୍ୟକୁ ଅନୁମତି ଦିଆଯାଇ ନାହିଁ"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"ୱିଜେଟଗୁଡ଼ିକ ବର୍ତ୍ତମାନ ସମର୍ଥିତ ନୁହେଁ, ଦୟାକରି ଅନ୍ୟ ଏକ ଆପ ଚୟନ କରନ୍ତୁ"</string>
+    <!-- no translation found for action_image_copy (6877540054727709339) -->
+    <skip />
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"ସ୍କ୍ରିନ ଘୂରାନ୍ତୁ"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"ସ୍କ୍ରିନର ନିମ୍ନରୁ ଟାସ୍କବାର କିପରି ଦେଖାଯାଏ ଏବଂ ବ୍ୟବହାରରେ ନଥିବା ସମୟରେ ସ୍ୱତଃ ଲୁଚିଯାଏ ତାହା ଦେଖାଉଥିବା ଆନିମେସନ"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"ଏକ ଟୋଗଲ ବ୍ୟବହାର କରି ଆପଣଙ୍କର ଟାସ୍କବାରକୁ କିପରି ପିନ କରିବେ ତାହା ଦେଖାଉଥିବା ଆନିମେସନ, ଫଳରେ ଟାସ୍କବାର ସ୍କ୍ରିନର ନିମ୍ନରେ ସ୍ଥାୟୀ ଭାବରେ ଦେଖାଯିବ"</string>
-    <!-- no translation found for taskbar_edu_bubbles_animation_description (421866726938396813) -->
-    <skip />
+    <string name="taskbar_edu_bubbles_animation_description" msgid="421866726938396813">"ଡ୍ରାଗ ଜେଶ୍ଚର ବ୍ୟବହାର କରି ଟାସ୍କବାରରୁ କିପରି ଏକ ବବଲ ତିଆରି କରିବେ ତାହା ଦେଖାଉଥିବା ଆନିମେସନ"</string>
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"ଏକ ଖୋଲା ଥିବା ଆପ ଉପରେ ଟାସ୍କବାରରୁ ଏକ ଆପ ଡ୍ରାଗ ଏବଂ ଡ୍ରପ କରି ଏକ ସ୍ପ୍ଲିଟ ସ୍କ୍ରିନ କିପରି ତିଆରି କରିବେ ତାହା ଦେଖାଉଥିବା ଆନିମେସନ"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"ଆପଣଙ୍କ ଡିଭାଇସରେ ପ୍ରସ୍ତାବିତ ଆପ୍ସକୁ କିପରି ଆକ୍ସେସ କରିବେ ତାହା ଦେଖାଉଥିବା ଆନିମେସନ"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"ଆକ୍ସନ କୀ\'କୁ ସ୍ପର୍ଶ କରି ଧରି ରଖି ଏବଂ ଆଇଟମ କେଉଁ ଏରିଆରେ ଅଛି ତାହା ଚୟନ କରି ସ୍କ୍ରିନରେ ଏକ ଆଇଟମ କିପରି ସର୍ଚ୍ଚ କରିବେ ତାହା ଦେଖାଉଥିବା ଆନିମେସନ"</string>
@@ -133,8 +134,7 @@
     <string name="taskbar_edu_features" msgid="3320337287472848162">"ଟାସ୍କବାର ମାଧ୍ୟମରେ ଆହୁରି ଅନେକ କିଛି କରନ୍ତୁ"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"ସର୍ବଦା ଟାସ୍କବାର ଦେଖାନ୍ତୁ"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"ଆପଣଙ୍କ ସ୍କ୍ରିନର ନିମ୍ନରେ ସର୍ବଦା ଟାସ୍କବାର ଦେଖାଇବା ପାଇଁ ଡିଭାଇଡରକୁ ସ୍ପର୍ଶ କରି ଧରି ରଖନ୍ତୁ"</string>
-    <!-- no translation found for taskbar_edu_bubbles_standalone (4182824636656528043) -->
-    <skip />
+    <string name="taskbar_edu_bubbles_standalone" msgid="4182824636656528043">"ଗୋଟିଏ ଆପକୁ ଭାସମାନ କରିବା ପାଇଁ ତାର କୋଣକୁ ଡ୍ରାଗ କରନ୍ତୁ"</string>
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"ଆପଣଙ୍କ ସ୍କ୍ରିନରେ କଣ ଅଛି ତାହା ସର୍ଚ୍ଚ କରିବା ପାଇଁ ଆକ୍ସନ କୀ\'କୁ ସ୍ପର୍ଶ କରି ଧରି ରଖନ୍ତୁ"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"ସର୍ଚ୍ଚ କରିବା ପାଇଁ ଏହି ପ୍ରଡକ୍ଟ ଆପଣଙ୍କ ସ୍କ୍ରିନର ଚୟନିତ ଅଂଶକୁ ବ୍ୟବହାର କରେ। Googleର <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>ଗୋପନୀୟତା ନୀତି<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> ଏବଂ <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>ସେବାର ସର୍ତ୍ତାବଳୀ<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> ଲାଗୁ ହୁଏ।"</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"ବନ୍ଦ କରନ୍ତୁ"</string>
@@ -153,7 +153,7 @@
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"ଟାସ୍କବାର ଡିଭାଇଡର"</string>
     <!-- no translation found for taskbar_recents_overflow_a11y_title (8005941062446304304) -->
     <skip />
-    <!-- no translation found for taskbar_pinned_overflow_a11y_title (3427283798522326470) -->
+    <!-- no translation found for taskbar_pinned_overflow_a11y_title (2314810718333302626) -->
     <skip />
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"ଶୀର୍ଷ/ବାମକୁ ମୁଭ କରନ୍ତୁ"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"ନିମ୍ନ/ଡାହାଣକୁ ମୁଭ କରନ୍ତୁ"</string>
