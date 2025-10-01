@@ -21,7 +21,6 @@ import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
 
 import android.content.ComponentName;
 import android.content.Intent;
@@ -59,7 +58,7 @@ import org.mockito.junit.MockitoRule;
 public class ActivityAllAppsContainerViewTest {
 
     @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
-    @Rule public SandboxApplication app = spy(new SandboxApplication().withModelDependency());
+    @Rule public SandboxApplication app = new SandboxApplication().withModelDependency();
     @Rule public MockUsersRule mockUserRule = new MockUsersRule(app);
     @Rule public TestActivityContext mContext = new TestActivityContext(app);
 

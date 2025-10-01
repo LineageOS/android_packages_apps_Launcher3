@@ -16,7 +16,6 @@
 
 package com.android.launcher3.backuprestore
 
-import android.database.sqlite.SQLiteDatabase
 import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
@@ -28,16 +27,10 @@ import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestUtil
 import com.android.launcher3.util.rule.BackAndRestoreRule
-import java.io.File
-import java.nio.file.Files
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
-import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.spy
-import org.mockito.kotlin.whenever
 
 /**
  * Makes sure to test {@code RestoreDbTask#removeOldDBs}, we need to remove all the dbs that are not
@@ -48,27 +41,7 @@ import org.mockito.kotlin.whenever
 class BackupAndRestoreDBSelectionTest {
 
     @get:Rule val setFlagsRule = SetFlagsRule()
-    @get:Rule
-    val context =
-        spy(SandboxApplication()).apply {
-            val tempDir = Files.createTempDirectory(filesDir.toPath(), "bnr_test").toFile()
-            doAnswer { File(tempDir, it.getArgument(0, String::class.java)) }
-                .whenever(this)
-                .getDatabasePath(any())
-
-            doAnswer {
-                    try {
-                        SQLiteDatabase.deleteDatabase(
-                            getDatabasePath(it.getArgument(0, String::class.java))
-                        )
-                    } catch (e: Exception) {
-                        false
-                    }
-                }
-                .whenever(this)
-                .deleteDatabase(any())
-        }
-
+    @get:Rule val context = SandboxApplication()
     @get:Rule var backAndRestoreRule = BackAndRestoreRule(context)
 
     val modelDelegate = mock<ModelDelegate>()

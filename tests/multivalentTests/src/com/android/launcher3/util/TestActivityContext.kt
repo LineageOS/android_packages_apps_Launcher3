@@ -39,7 +39,7 @@ import org.junit.runners.model.Statement
 private typealias AllAppsView = ActivityAllAppsContainerView<TestActivityContext>
 
 /** [BaseContext] implementation for as a [TestRule] for easily managing cleanup */
-class TestActivityContext
+open class TestActivityContext
 @JvmOverloads
 constructor(
     base: Context = InstrumentationRegistry.getInstrumentation().targetContext,

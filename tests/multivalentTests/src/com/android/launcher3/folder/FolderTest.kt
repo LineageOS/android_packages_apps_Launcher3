@@ -48,6 +48,7 @@ import com.android.launcher3.folder.Folder.STATE_ANIMATING
 import com.android.launcher3.folder.Folder.STATE_CLOSED
 import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.testutil.rule.LazyInitRule.Companion.lazyRule
 import com.android.launcher3.util.ModelTestExtensions.clearModelDb
 import com.android.launcher3.util.TestActivityContext
 import junit.framework.TestCase.assertEquals
@@ -73,7 +74,8 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidJUnit4::class)
 class FolderTest {
 
-    @get:Rule val context = spy(TestActivityContext())
+    @get:Rule val contextSpy = lazyRule { spy(TestActivityContext()) }
+    private val context: TestActivityContext by contextSpy
 
     private lateinit var dragController: DragController<*>
     private lateinit var workspaceBuilder: TestWorkspaceBuilder

@@ -37,6 +37,7 @@ import com.android.launcher3.model.data.LauncherAppWidgetInfo
 import com.android.launcher3.model.data.LauncherAppWidgetInfo.FLAG_ID_NOT_VALID
 import com.android.launcher3.model.data.LauncherAppWidgetInfo.FLAG_UI_NOT_READY
 import com.android.launcher3.model.data.LauncherAppWidgetInfo.RESTORE_COMPLETED
+import com.android.launcher3.testutil.rule.LazyInitRule.Companion.lazyRule
 import com.android.launcher3.util.AsyncObjectAllocator.allocationExecutor
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
@@ -72,7 +73,8 @@ class ItemInflaterTest {
 
     @get:Rule val grantWidgetRule = ShellCommandRule.grantWidgetBind()
     @get:Rule val mockitoRule = MockitoJUnit.rule()
-    @get:Rule val uiContext = spy(TestActivityContext())
+    @get:Rule val uiContextSpy = lazyRule { spy(TestActivityContext()) }
+    private val uiContext: TestActivityContext by uiContextSpy
 
     private val clickListener = OnClickListener {}
     private val focusListener = OnFocusChangeListener { _, _ -> }

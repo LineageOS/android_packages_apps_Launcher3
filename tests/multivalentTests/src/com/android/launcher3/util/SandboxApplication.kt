@@ -25,6 +25,7 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.pm.ProviderInfo
 import android.content.res.Configuration
+import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.os.IBinder
 import android.os.UserHandle
@@ -71,7 +72,7 @@ class SandboxApplication private constructor(private val base: SandboxApplicatio
     private val manuallyNamedServices = ArrayMap<Class<*>, String>()
     private val spiedServices = ArrayMap<String, Any>()
     private val packageManager = spy(baseContext.packageManager)
-    private val dbDir = File(cacheDir, UUID.randomUUID().toString())
+    private val dbDir = File(cacheDir, UUID.randomUUID().toString()).apply { deleteRecursively() }
 
     private var lockModelThreadOnDestroy = false
 
@@ -108,6 +109,9 @@ class SandboxApplication private constructor(private val base: SandboxApplicatio
 
     override fun getDatabasePath(name: String) = File(dbDir.apply { if (!exists()) mkdirs() }, name)
 
+    override fun deleteDatabase(name: String): Boolean =
+        SQLiteDatabase.deleteDatabase(getDatabasePath(name))
+
     override fun getContentResolver(): ContentResolver = mockResolver
 
     override fun cleanUpObjects() {
@@ -122,22 +126,11 @@ class SandboxApplication private constructor(private val base: SandboxApplicatio
             }
             modelLock.await()
         }
-        if (deleteContents(dbDir)) {
-            dbDir.delete()
-        }
+        dbDir.deleteRecursively()
         super.cleanUpObjects()
         modelRelease.countDown()
         // Wait for all cleanup tasks to complete
         TestUtil.runOnExecutorSync(MAIN_EXECUTOR) {}
-    }
-
-    private fun deleteContents(dir: File): Boolean {
-        var success = true
-        dir.listFiles()?.forEach {
-            if (it.isDirectory) success = success and deleteContents(it)
-            if (!it.delete()) success = false
-        }
-        return success
     }
 
     override fun initDaggerComponent(componentBuilder: Builder) {

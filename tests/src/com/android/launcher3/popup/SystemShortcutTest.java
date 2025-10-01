@@ -29,6 +29,8 @@ import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCH
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_SYSTEM_SHORTCUT_DONT_SUGGEST_APP_TAP;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_TAP_TO_ADD_TO_HOME_SCREEN_FROM_ALL_APPS;
 import static com.android.launcher3.model.data.WorkspaceItemInfo.FLAG_SUPPORTS_WEB_UI;
+import static com.android.launcher3.testutil.rule.LazyInitRule.lazyP;
+import static com.android.launcher3.testutil.rule.LazyInitRule.lazyRule;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 
 import static org.junit.Assert.assertFalse;
@@ -69,6 +71,7 @@ import com.android.launcher3.logging.StatsLogManager.StatsLogger;
 import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
+import com.android.launcher3.testutil.rule.LazyInitRule;
 import com.android.launcher3.util.ComponentKey;
 import com.android.launcher3.util.LauncherMultivalentJUnit;
 import com.android.launcher3.util.SandboxApplication;
@@ -96,18 +99,24 @@ import java.util.function.Consumer;
 @SmallTest
 @RunWith(LauncherMultivalentJUnit.class)
 public class SystemShortcutTest {
-    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
-    @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
-    @Rule public final SandboxApplication mSandboxContext = spy(new SandboxApplication());
-    @Rule public final TestActivityContext mTestContext =
-            spy(new TestActivityContext(mSandboxContext));
-    @Rule public final MockUsersRule mMockUsers = new MockUsersRule(mSandboxContext);
+    @Rule(order = 0) public SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
+    @Rule(order = 1) public MockitoRule mockitoRule = MockitoJUnit.rule();
+    @Rule(order = 2) public LazyInitRule lazyInitRule = lazyRule(
+            lazyP(SandboxApplication.class, l -> spy(new SandboxApplication())),
+            lazyP(TestActivityContext.class,
+                    l -> spy(new TestActivityContext(l.get(SandboxApplication.class)))),
+            lazyP(MockUsersRule.class, l -> new MockUsersRule(l.get(SandboxApplication.class)))
+    );
 
     private View mView;
     private ItemInfo mItemInfo;
     private PrivateProfileManager mPrivateProfileManager;
     private WidgetPickerDataProvider mWidgetPickerDataProvider;
     private AppInfo mAppInfo;
+
+    private SandboxApplication mSandboxContext;
+    private TestActivityContext mTestContext;
+    private MockUsersRule mMockUsers;
 
     @Mock LauncherActivityInfo mLauncherActivityInfo;
     @Mock ApplicationInfo mApplicationInfo;
@@ -118,6 +127,9 @@ public class SystemShortcutTest {
 
     @Before
     public void setUp() {
+        mSandboxContext = lazyInitRule.get(SandboxApplication.class);
+        mTestContext = lazyInitRule.get(TestActivityContext.class);
+        mMockUsers = lazyInitRule.get(MockUsersRule.class);
         doReturn(mLauncherAccessibilityDelegate).when(mTestContext).getAccessibilityDelegate();
 
         doReturn(mStatsLogManager).when(mTestContext).getStatsLogManager();

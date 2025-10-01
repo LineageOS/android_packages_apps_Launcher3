@@ -38,6 +38,7 @@ import com.android.launcher3.model.data.AppsListData.Companion.FLAG_WORK_PROFILE
 import com.android.launcher3.model.data.IconRequestInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.provider.RestoreDbTask
+import com.android.launcher3.testutil.rule.LazyInitRule.Companion.lazyRule
 import com.android.launcher3.util.AllModulesForTest
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import com.android.launcher3.util.LooperIdleLock
@@ -82,8 +83,9 @@ private const val INSERTION_STATEMENT_FILE = "databases/workspace_items.sql"
 class LoaderTaskTest {
     @get:Rule val setFlagsRule = SetFlagsRule()
     @get:Rule val mockitoRule = MockitoJUnit.rule()
-    @get:Rule val context = spy(SandboxApplication().withModelDependency())
-    @get:Rule val mockUsers = MockUsersRule(context)
+    @get:Rule
+    val contextSpy =
+        lazyRule({ spy(SandboxApplication().withModelDependency()) }, { MockUsersRule(it.get()) })
 
     private val expectedBroadcastModel =
         FirstScreenBroadcastModel(
@@ -109,6 +111,8 @@ class LoaderTaskTest {
     @Mock private lateinit var idleLock: LooperIdleLock
     @Mock private lateinit var iconCacheUpdateHandler: IconCacheUpdateHandler
     @Mock private lateinit var settingsCache: SettingsCache
+
+    private val context: SandboxApplication by contextSpy
 
     private val testComponent: TestComponent
         get() = context.appComponent as TestComponent

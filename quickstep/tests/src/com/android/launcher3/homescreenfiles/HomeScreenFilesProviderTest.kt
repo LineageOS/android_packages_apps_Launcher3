@@ -33,6 +33,7 @@ import androidx.core.net.toUri
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider.Companion.HOME_SCREEN_FOLDER_RELATIVE_PATH
+import com.android.launcher3.testutil.rule.LazyInitRule.Companion.lazyRule
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestUtil
@@ -69,8 +70,9 @@ import org.mockito.quality.Strictness
 @RunWith(AndroidJUnit4::class)
 class HomeScreenFilesProviderTest {
 
-    @get:Rule val context = spy(SandboxApplication())
+    @get:Rule val contextSpy = lazyRule { spy(SandboxApplication()) }
 
+    private val context: SandboxApplication by contextSpy
     @Mock private lateinit var contentResolver: ContentResolver
     @Mock private lateinit var contentProviderClient: ContentProviderClient
     @Mock private lateinit var externalStorageDir: File
