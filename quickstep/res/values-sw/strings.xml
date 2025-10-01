@@ -115,8 +115,7 @@
     <string name="toast_split_app_unsupported" msgid="2360229567007828914">"Chagua programu nyingine ili utumie hali ya kugawa skrini"</string>
     <string name="blocked_by_policy" msgid="2071401072261365546">"Kitendo hiki hakiruhusiwi na programu au shirika lako"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"Wijeti hazitumiwi kwa sasa, tafadhali chagua programu nyingine"</string>
-    <!-- no translation found for action_image_copy (6877540054727709339) -->
-    <skip />
+    <string name="action_image_copy" msgid="6877540054727709339">"Nakili"</string>
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Zungusha skrini"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Uhuishaji unaoonyesha jinsi upauzana huonekana kutokea sehemu ya chini ya skrini na kufichwa kiotomatiki wakati hautumiki"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Uhuishaji unaoonyesha jinsi ya kubandika upauzana wako kwa kutumia kipengele cha kuwasha/kuzima, ili upauzana uendelee kuonekana sehemu ya chini kabisa ya skrini"</string>
@@ -150,8 +149,7 @@
     <string name="always_show_taskbar" msgid="3608801276107751229">"Onyesha Zana kila wakati"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"Badilisha hali ya usogezaji"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Kitenganishi cha Upauzana"</string>
-    <!-- no translation found for taskbar_recents_overflow_a11y_title (8005941062446304304) -->
-    <skip />
+    <string name="taskbar_recents_overflow_a11y_title" msgid="8005941062446304304">"Programu nyingine za hivi majuzi"</string>
     <!-- no translation found for taskbar_pinned_overflow_a11y_title (2314810718333302626) -->
     <skip />
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Sogeza juu/kushoto"</string>
