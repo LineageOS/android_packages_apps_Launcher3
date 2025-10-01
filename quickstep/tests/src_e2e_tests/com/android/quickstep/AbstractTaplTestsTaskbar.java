@@ -29,7 +29,6 @@ import com.android.launcher3.tapl.TestHelpers;
 import com.android.launcher3.util.LauncherLayoutBuilder;
 import com.android.launcher3.util.TaskbarModeUtil;
 import com.android.launcher3.util.TestUtil;
-import com.android.launcher3.util.ui.AbstractLauncherUiTest;
 
 import org.junit.After;
 import org.junit.Assume;
@@ -60,8 +59,8 @@ public class AbstractTaplTestsTaskbar extends AbstractQuickStepTest {
                         "com.android.launcher3.testcomponent.TestLauncherActivity");
 
         mLauncherLayout = TestUtil.setLauncherDefaultLayout(mTargetContext, layoutBuilder);
-        AbstractLauncherUiTest.initialize(this);
-        if (startCalendarAppDuringSetup()) {
+        performInitialization();
+        if (startCalculatorAppDuringSetup()) {
             startAppFast(CALCULATOR_APP_PACKAGE);
         }
         mLauncher.enableBlockTimeout(true);
@@ -80,7 +79,7 @@ public class AbstractTaplTestsTaskbar extends AbstractQuickStepTest {
         return TaskbarModeUtil.INSTANCE.get(context).isTransient();
     }
 
-    protected boolean startCalendarAppDuringSetup() {
+    protected boolean startCalculatorAppDuringSetup() {
         return true;
     }
 
