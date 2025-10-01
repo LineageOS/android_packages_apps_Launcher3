@@ -55,7 +55,6 @@ object FakeBubbleViewFactory {
                 "test app",
                 "test app",
                 false,
-                true,
                 null,
                 false,
             )

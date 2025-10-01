@@ -1574,7 +1574,6 @@ class BubbleBarViewAnimatorTest {
                     null,
                     null,
                     false,
-                    true,
                     null,
                     false,
                 )

@@ -76,7 +76,6 @@ class BubbleViewTest {
                     null,
                     null,
                     false,
-                    true,
                     null,
                     false,
                 )

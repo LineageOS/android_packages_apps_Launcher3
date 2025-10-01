@@ -232,7 +232,7 @@ public class BubbleView extends ConstraintLayout {
     public void setBubble(BubbleBarBubble bubble) {
         mBubble = bubble;
         bubble.getIcon().setOnImageView(mBubbleIcon);
-        if (bubble.getInfo().showAppBadge()) {
+        if (!bubble.getInfo().isApp()) {
             mAppIcon.setImageDrawable(bubble.getBadge().newIcon(getContext()));
         } else {
             mAppIcon.setVisibility(GONE);
