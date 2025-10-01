@@ -84,9 +84,6 @@ public class RecentTasksList {
 
     // The list change id, increments as the task list changes in the system
     private int mChangeId;
-    // Whether we are currently updating the tasks in the background (up to when the result is
-    // posted back on the main thread)
-    private boolean mLoadingTasksInBackground;
 
     private TaskLoadResult mResultsBg = INVALID_RESULT;
     private TaskLoadResult mResultsUi = INVALID_RESULT;
@@ -164,11 +161,6 @@ public class RecentTasksList {
                 () -> mSysUiProxy.unregisterRecentTasksListener(recentTasksListener));
     }
 
-    @VisibleForTesting
-    public boolean isLoadingTasksInBackground() {
-        return mLoadingTasksInBackground;
-    }
-
     /**
      * Fetches the task keys skipping any local cache.
      */
@@ -228,7 +220,6 @@ public class RecentTasksList {
         }
 
         // Kick off task loading in the background
-        mLoadingTasksInBackground = true;
         UI_HELPER_EXECUTOR.execute(() -> {
             if (!mResultsBg.isValidForRequest(requestLoadId, loadKeysOnly)) {
                 mResultsBg = loadTasksInBackground(Integer.MAX_VALUE, requestLoadId, loadKeysOnly);
@@ -236,7 +227,6 @@ public class RecentTasksList {
             }
             TaskLoadResult loadResult = mResultsBg;
             mMainThreadExecutor.execute(() -> {
-                mLoadingTasksInBackground = false;
                 mResultsUi = loadResult;
                 Log.d("b/417220811", "getTasks - updating mResultsUi: " + mResultsUi.mRequestId);
                 if (callback != null) {
