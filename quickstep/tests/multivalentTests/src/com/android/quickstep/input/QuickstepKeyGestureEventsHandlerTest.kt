@@ -33,6 +33,7 @@ import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.launcher3.testutil.rule.LazyInitRule.Companion.lazyRule
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.SettingsCacheSandbox
 import com.android.quickstep.OverviewCommandHelper
@@ -63,20 +64,15 @@ import org.mockito.kotlin.whenever
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class QuickstepKeyGestureEventsHandlerTest {
-    @get:Rule
-    val context =
-        spy(SandboxApplication()) {
-            on { checkSelfPermission(eq(MANAGE_KEY_GESTURES)) } doReturn PERMISSION_GRANTED
-        }
 
     @get:Rule val setFlagsRule = SetFlagsRule(SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT)
+    @get:Rule val contextSpy = lazyRule { spy(SandboxApplication()) }
+
+    private val context: SandboxApplication by contextSpy
+    private lateinit var inputManager: InputManager
 
     private val settingsCacheSandbox = SettingsCacheSandbox()
-    private val inputManager =
-        context.spyService(InputManager::class.java).stub {
-            doNothing().whenever(it).registerKeyGestureEventHandler(any(), any())
-            doNothing().whenever(it).unregisterKeyGestureEventHandler(any())
-        }
+
     private val allAppsPendingIntent: PendingIntent = mock()
     private val keyGestureEventsCaptor: KArgumentCaptor<List<Int>> = argumentCaptor()
     private val fakeOverviewHandler = FakeOverviewHandler()
@@ -85,6 +81,13 @@ class QuickstepKeyGestureEventsHandlerTest {
 
     @Before
     fun setup() {
+        doReturn(PERMISSION_GRANTED).whenever(context).checkSelfPermission(eq(MANAGE_KEY_GESTURES))
+        inputManager =
+            context.spyService(InputManager::class.java).stub {
+                doNothing().whenever(it).registerKeyGestureEventHandler(any(), any())
+                doNothing().whenever(it).unregisterKeyGestureEventHandler(any())
+            }
+
         keyGestureEventsManager =
             QuickstepKeyGestureEventsManager(context, settingsCacheSandbox.cache)
         keyGestureEventsManager.onUserSetupCompleteListener.onSettingsChanged(/* isEnabled= */ true)

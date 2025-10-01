@@ -41,15 +41,14 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.spy
 import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class UserAvailabilityChangedTaskTest {
 
     @get:Rule val setFlagsRule = SetFlagsRule()
-    @get:Rule val context = spy(SandboxApplication().withModelDependency())
     @get:Rule val mockito = MockitoJUnit.rule()
+    @get:Rule val context = SandboxApplication().withModelDependency()
     @get:Rule val mockUsers = MockUsersRule(context)
 
     @Mock lateinit var mockTaskController: ModelTaskController

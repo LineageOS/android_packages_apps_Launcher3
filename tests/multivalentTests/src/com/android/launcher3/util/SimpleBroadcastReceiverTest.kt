@@ -25,6 +25,7 @@ import android.os.Process
 import android.os.SystemClock
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.launcher3.testutil.rule.LazyInitRule.Companion.lazyRule
 import com.android.launcher3.util.SimpleBroadcastReceiver.Companion.actionsFilter
 import com.android.launcher3.util.SimpleBroadcastReceiver.Companion.packageFilter
 import com.google.common.truth.Truth.assertThat
@@ -48,8 +49,9 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidJUnit4::class)
 class SimpleBroadcastReceiverTest {
 
-    @get:Rule val context = spy(SandboxApplication())
+    @get:Rule val contextSpy = lazyRule { spy(SandboxApplication()) }
 
+    private val context: SandboxApplication by contextSpy
     private lateinit var executorThread: HandlerThread
     private lateinit var executor: LooperExecutor
 

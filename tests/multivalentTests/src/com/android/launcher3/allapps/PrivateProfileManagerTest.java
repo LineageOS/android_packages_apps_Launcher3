@@ -71,7 +71,7 @@ public class PrivateProfileManagerTest {
 
     @Rule public TestRule testStabilityRule = new TestStabilityRule();
     @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
-    @Rule public SandboxApplication app = spy(new SandboxApplication().withModelDependency());
+    @Rule public SandboxApplication app = new SandboxApplication().withModelDependency();
     @Rule public MockUsersRule mockUserRule = new MockUsersRule(app);
     @Rule public TestActivityContext context = new TestActivityContext(app);
 

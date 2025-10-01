@@ -23,6 +23,7 @@ import android.view.DragEvent
 import androidx.test.filters.SmallTest
 import com.android.launcher3.Flags.FLAG_ENABLE_SYSTEM_DRAG
 import com.android.launcher3.dragndrop.DragController
+import com.android.launcher3.testutil.rule.LazyInitRule.Companion.lazyRule
 import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.ReflectionHelpers
 import com.android.launcher3.util.TestActivityContext
@@ -43,13 +44,14 @@ import org.mockito.kotlin.whenever
 @RunWith(LauncherMultivalentJUnit::class)
 class BaseDragLayerTest {
 
-    @get:Rule val context = spy(TestActivityContext())
     @get:Rule val flags: SetFlagsRule = SetFlagsRule()
     @get:Rule val mockito = MockitoJUnit.rule()
+    @get:Rule val contextSpy = lazyRule { spy(TestActivityContext()) }
 
     @Mock private lateinit var mockDragController: DragController<*>
     @Mock private lateinit var mockDragEvent: DragEvent
 
+    private val context: TestActivityContext by contextSpy
     private lateinit var dragLayer: TestDragLayer
 
     @Before
