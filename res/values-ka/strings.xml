@@ -148,8 +148,8 @@
     <string name="allow_rotation_title" msgid="7222049633713050106">"მთავარი ეკრანის შეტრიალების დაშვება"</string>
     <string name="allow_rotation_desc" msgid="8662546029078692509">"ტელეფონის შეტრიალებისას"</string>
     <string name="compose_developer_options_section" msgid="8211460486549952595">"Jetpack Compose"</string>
-    <string name="enable_composition_tracing_title" msgid="8989606591739368424">"შემადგენლობის გამოვლენის ჩართვა"</string>
-    <string name="enable_composition_tracing_desc" msgid="7187566039216492405">"ჩართეთ შემადგენლობის გამოვლენა Perfetto-ს შესრულების მიმოხილვისას"</string>
+    <string name="enable_composition_tracing_title" msgid="8989606591739368424">"კომპოზიციის ტრასირების ჩართვა"</string>
+    <string name="enable_composition_tracing_desc" msgid="7187566039216492405">"ჩართეთ კომპოზიციის ტრასირება Perfetto-ს კვალის მიმოხილვისას"</string>
     <string name="landscape_mode_title" msgid="5138814555934843926">"პეიზაჟის რეჟიმი"</string>
     <string name="landscape_mode_desc" msgid="3085236452297838664">"დააყენეთ მთავარი ეკრანი პეიზაჟის რეჟიმში"</string>
     <string name="notification_dots_title" msgid="9062440428204120317">"შეტყობინების ნიშნულები"</string>
