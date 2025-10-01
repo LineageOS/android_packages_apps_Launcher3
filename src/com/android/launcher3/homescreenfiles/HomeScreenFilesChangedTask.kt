@@ -22,8 +22,10 @@ import android.net.Uri
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherModel
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
+import com.android.launcher3.LauncherSettings.Favorites.DESKTOP_ICON_FLAG
 import com.android.launcher3.Utilities.qsbOnFirstScreen
 import com.android.launcher3.WorkspaceLayoutManager
+import com.android.launcher3.icons.IconCache
 import com.android.launcher3.model.AllAppsList
 import com.android.launcher3.model.BgDataModel
 import com.android.launcher3.model.ModelTaskController
@@ -40,6 +42,7 @@ class HomeScreenFilesChangedTask
 @AssistedInject
 constructor(
     @Assisted private val fileChange: HomeScreenFilesProvider.FileChange,
+    private val iconCache: IconCache,
     private val idp: InvariantDeviceProfile,
     private val workspaceItemSpaceFinder: WorkspaceItemSpaceFinder,
 ) : LauncherModel.ModelUpdateTask {
@@ -67,6 +70,7 @@ constructor(
                 title = file.displayName
                 itemType = HomeScreenFilesUtils.buildItemType(file)
                 intent = HomeScreenFilesUtils.buildLaunchIntent(uri, file)
+                iconCache.getTitleAndIcon(this, DESKTOP_ICON_FLAG)
             }
         val coords =
             workspaceItemSpaceFinder.findSpaceForItem(
@@ -113,6 +117,7 @@ constructor(
                         it.intent = HomeScreenFilesUtils.buildLaunchIntent(uri, file)
                         it.itemType = HomeScreenFilesUtils.buildItemType(file)
                         it.title = file.displayName
+                        iconCache.getTitleAndIcon(it, it.matchingLookupFlag)
                         true
                     } else {
                         false

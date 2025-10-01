@@ -28,12 +28,15 @@ import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FILE
 import com.android.launcher3.Utilities.qsbOnFirstScreen
 import com.android.launcher3.WorkspaceLayoutManager
+import com.android.launcher3.icons.BitmapInfo
+import com.android.launcher3.icons.IconCache
 import com.android.launcher3.model.AllAppsList
 import com.android.launcher3.model.BgDataModel
 import com.android.launcher3.model.ModelTaskController
 import com.android.launcher3.model.ModelWriter
 import com.android.launcher3.model.WorkspaceItemSpaceFinder
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.model.data.ItemInfoWithIcon
 import com.android.launcher3.model.data.WorkspaceData.MutableWorkspaceData
 import com.android.launcher3.model.data.WorkspaceItemCoordinates
 import com.android.launcher3.model.data.WorkspaceItemInfo
@@ -49,6 +52,7 @@ import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.times
@@ -63,7 +67,9 @@ class HomeScreenFilesChangedTaskTest {
     @Mock private lateinit var modelTaskController: ModelTaskController
     @Mock private lateinit var modelWriter: ModelWriter
     @Mock private lateinit var bgDataModel: BgDataModel
+    @Mock private lateinit var bitmap: BitmapInfo
     @Mock private lateinit var allAppsList: AllAppsList
+    @Mock private lateinit var iconCache: IconCache
     @Mock private lateinit var idp: InvariantDeviceProfile
     @Mock private lateinit var workspaceItemSpaceFinder: WorkspaceItemSpaceFinder
 
@@ -81,6 +87,11 @@ class HomeScreenFilesChangedTaskTest {
     @Before
     fun setUp() {
         idp.numSearchContainerColumns = 3
+
+        doAnswer { it.getArgument<ItemInfoWithIcon>(0).bitmap = bitmap }
+            .whenever(iconCache)
+            .getTitleAndIcon(any(), any())
+
         whenever(modelTaskController.getModelWriter()).thenReturn(modelWriter)
         whenever(bgDataModel.updateAndCollectWorkspaceItemInfos(any(), any(), isNull()))
             .thenCallRealMethod()
@@ -119,6 +130,7 @@ class HomeScreenFilesChangedTaskTest {
                     CompletableFuture.completedFuture(testFile),
                     /*uriAlias=*/ null,
                 ),
+                iconCache,
                 idp,
                 workspaceItemSpaceFinder,
             )
@@ -127,19 +139,22 @@ class HomeScreenFilesChangedTaskTest {
         val itemCaptor = argumentCaptor<ItemInfo>()
         verify(modelWriter, times(1))
             .addItemToDatabase(itemCaptor.capture(), eq(CONTAINER_DESKTOP), eq(2), eq(3), eq(4))
-        with(itemCaptor.firstValue) {
-            assertThat(title).isEqualTo("file.png")
-            assertThat(itemType).isEqualTo(ITEM_TYPE_FILE_SYSTEM_FILE)
-            assertThat(intent).isNotNull()
-            assertThat(intent!!.action).isEqualTo(Intent.ACTION_VIEW)
-            assertThat(intent!!.flags)
+
+        val item = itemCaptor.firstValue as ItemInfoWithIcon
+        with(item) {
+            assertThat(item.bitmap).isEqualTo(bitmap)
+            assertThat(item.title).isEqualTo("file.png")
+            assertThat(item.itemType).isEqualTo(ITEM_TYPE_FILE_SYSTEM_FILE)
+            assertThat(item.intent).isNotNull()
+            assertThat(item.intent!!.action).isEqualTo(Intent.ACTION_VIEW)
+            assertThat(item.intent!!.flags)
                 .isEqualTo(
                     Intent.FLAG_ACTIVITY_NEW_TASK or
                         Intent.FLAG_GRANT_READ_URI_PERMISSION or
                         Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                 )
-            assertThat(intent!!.data).isEqualTo(testUri)
-            assertThat(intent!!.type).isEqualTo("image/png")
+            assertThat(item.intent!!.data).isEqualTo(testUri)
+            assertThat(item.intent!!.type).isEqualTo("image/png")
         }
     }
 
@@ -153,6 +168,7 @@ class HomeScreenFilesChangedTaskTest {
                     CompletableFuture.completedFuture(testFile),
                     /*uriAlias=*/ null,
                 ),
+                iconCache,
                 idp,
                 workspaceItemSpaceFinder,
             )
@@ -161,19 +177,22 @@ class HomeScreenFilesChangedTaskTest {
         val itemCaptor = argumentCaptor<ItemInfo>()
         verify(modelWriter, times(1))
             .addItemToDatabase(itemCaptor.capture(), eq(CONTAINER_DESKTOP), eq(2), eq(3), eq(4))
-        with(itemCaptor.firstValue) {
-            assertThat(title).isEqualTo("file.png")
-            assertThat(itemType).isEqualTo(ITEM_TYPE_FILE_SYSTEM_FILE)
-            assertThat(intent).isNotNull()
-            assertThat(intent!!.action).isEqualTo(Intent.ACTION_VIEW)
-            assertThat(intent!!.flags)
+
+        val item = itemCaptor.firstValue as ItemInfoWithIcon
+        with(item) {
+            assertThat(item.bitmap).isEqualTo(bitmap)
+            assertThat(item.title).isEqualTo("file.png")
+            assertThat(item.itemType).isEqualTo(ITEM_TYPE_FILE_SYSTEM_FILE)
+            assertThat(item.intent).isNotNull()
+            assertThat(item.intent!!.action).isEqualTo(Intent.ACTION_VIEW)
+            assertThat(item.intent!!.flags)
                 .isEqualTo(
                     Intent.FLAG_ACTIVITY_NEW_TASK or
                         Intent.FLAG_GRANT_READ_URI_PERMISSION or
                         Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                 )
-            assertThat(intent!!.data).isEqualTo(testUri)
-            assertThat(intent!!.type).isEqualTo("image/png")
+            assertThat(item.intent!!.data).isEqualTo(testUri)
+            assertThat(item.intent!!.type).isEqualTo("image/png")
         }
     }
 
@@ -196,6 +215,7 @@ class HomeScreenFilesChangedTaskTest {
                     CompletableFuture.completedFuture(testFile),
                     uriAlias,
                 ),
+                iconCache,
                 idp,
                 workspaceItemSpaceFinder,
             )
@@ -204,19 +224,22 @@ class HomeScreenFilesChangedTaskTest {
         val itemsCaptor = argumentCaptor<List<ItemInfo>>()
         verify(modelTaskController, times(1)).bindUpdatedWorkspaceItems(itemsCaptor.capture())
         assertThat(itemsCaptor.firstValue.size).isEqualTo(1)
-        with(itemsCaptor.firstValue[0]) {
-            assertThat(title).isEqualTo("file.png")
-            assertThat(itemType).isEqualTo(ITEM_TYPE_FILE_SYSTEM_FILE)
-            assertThat(intent).isNotNull()
-            assertThat(intent!!.action).isEqualTo(Intent.ACTION_VIEW)
-            assertThat(intent!!.flags)
+
+        val item = itemsCaptor.firstValue[0] as ItemInfoWithIcon
+        with(item) {
+            assertThat(item.bitmap).isEqualTo(bitmap)
+            assertThat(item.title).isEqualTo("file.png")
+            assertThat(item.itemType).isEqualTo(ITEM_TYPE_FILE_SYSTEM_FILE)
+            assertThat(item.intent).isNotNull()
+            assertThat(item.intent!!.action).isEqualTo(Intent.ACTION_VIEW)
+            assertThat(item.intent!!.flags)
                 .isEqualTo(
                     Intent.FLAG_ACTIVITY_NEW_TASK or
                         Intent.FLAG_GRANT_READ_URI_PERMISSION or
                         Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                 )
-            assertThat(intent!!.data).isEqualTo(testUri)
-            assertThat(intent!!.type).isEqualTo("image/png")
+            assertThat(item.intent!!.data).isEqualTo(testUri)
+            assertThat(item.intent!!.type).isEqualTo("image/png")
         }
     }
 
@@ -238,6 +261,7 @@ class HomeScreenFilesChangedTaskTest {
                     CompletableFuture.completedFuture(testFile),
                     /*uriAlias=*/ null,
                 ),
+                iconCache,
                 idp,
                 workspaceItemSpaceFinder,
             )
@@ -246,7 +270,12 @@ class HomeScreenFilesChangedTaskTest {
         val itemsCaptor = argumentCaptor<List<ItemInfo>>()
         verify(modelTaskController, times(1)).bindUpdatedWorkspaceItems(itemsCaptor.capture())
         assertThat(itemsCaptor.firstValue.size).isEqualTo(1)
-        assertThat(itemsCaptor.firstValue[0].title).isEqualTo("file.png")
+
+        val item = itemsCaptor.firstValue[0] as ItemInfoWithIcon
+        with(item) {
+            assertThat(item.bitmap).isEqualTo(bitmap)
+            assertThat(item.title).isEqualTo("file.png")
+        }
     }
 
     @Test
@@ -259,6 +288,7 @@ class HomeScreenFilesChangedTaskTest {
                     CompletableFuture.completedFuture(null),
                     /*uriAlias=*/ null,
                 ),
+                iconCache,
                 idp,
                 workspaceItemSpaceFinder,
             )
