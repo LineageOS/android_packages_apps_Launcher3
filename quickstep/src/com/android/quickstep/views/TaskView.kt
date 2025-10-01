@@ -55,7 +55,6 @@ import com.android.launcher3.Flags.enableRefactorTaskContentView
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent
-import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.TaskViewItemInfo
 import com.android.launcher3.testing.TestLogging
 import com.android.launcher3.testing.shared.TestProtocol
@@ -109,7 +108,6 @@ import com.android.quickstep.views.OverviewActionsView.DISABLED_ROTATED
 import com.android.quickstep.views.RecentsView.UNBOUND_TASK_VIEW_ID
 import com.android.quickstep.window.RecentsWindowFlags.enableOverviewOnConnectedDisplays
 import com.android.systemui.shared.recents.model.Task
-import com.android.systemui.shared.recents.model.ThumbnailData
 import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.wm.shell.shared.split.SplitScreenConstants
 import kotlinx.coroutines.CoroutineScope
@@ -149,7 +147,7 @@ constructor(
 
     val isGridTask: Boolean
         /** Returns whether the task is part of overview grid and not being focused. */
-        get() = container.deviceProfile.getDeviceProperties().isTablet && !isLargeTile
+        get() = container.deviceProfile.deviceProperties.isTablet && !isLargeTile
 
     val isRunningTask: Boolean
         get() = this === recentsView?.runningTaskView
@@ -180,9 +178,6 @@ constructor(
     val firstTask: Task?
         /** Returns the first task bound to this TaskView. */
         get() = firstTaskContainer?.task
-
-    val firstItemInfo: ItemInfo?
-        get() = firstTaskContainer?.itemInfo
 
     val isOnGridBottomRow: Boolean
         get() = recentsView?.isOnGridBottomRow(this) == true
@@ -272,7 +267,7 @@ constructor(
     private val borderOffsetPx: Int by lazy {
         context.resources.getDimensionPixelSize(R.dimen.task_hover_focus_offset_size)
     }
-    private val focusBorderAnimator: BorderAnimator? =
+    private val focusBorderAnimator: BorderAnimator =
         focusBorderAnimator
             ?: createSimpleBorderAnimator(
                 TaskCornerRadius.get(context).toInt() + borderOffsetPx,
@@ -290,7 +285,7 @@ constructor(
                     ),
             )
 
-    private val hoverBorderAnimator: BorderAnimator? =
+    private val hoverBorderAnimator: BorderAnimator =
         hoverBorderAnimator
             ?: createSimpleBorderAnimator(
                 TaskCornerRadius.get(context).toInt() + borderOffsetPx,
@@ -482,9 +477,12 @@ constructor(
     var splitAlpha by MultiPropertyDelegate(taskViewAlpha, Alpha.Split)
     private var modalAlpha by MultiPropertyDelegate(taskViewAlpha, Alpha.Modal)
 
-    protected var shouldShowScreenshot = false
+    var shouldShowScreenshot = false
         get() = !isRunningTask || field
-        private set
+        set(value) {
+            if (field == value) return
+            field = value
+        }
 
     /** Enable or disable showing border on hover and focus change */
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
@@ -496,8 +494,8 @@ constructor(
             field = value
             // Set the animation correctly in case it misses the hover/focus event during state
             // transition
-            hoverBorderAnimator?.setBorderVisibility(visible = field && isHovered, animated = true)
-            focusBorderAnimator?.setBorderVisibility(visible = field && isFocused, animated = true)
+            hoverBorderAnimator.setBorderVisibility(visible = field && isHovered, animated = true)
+            focusBorderAnimator.setBorderVisibility(visible = field && isFocused, animated = true)
         }
 
     /**
@@ -514,7 +512,7 @@ constructor(
                 TAG,
                 "${taskIds.contentToString()} - setting border animator visibility to: $field",
             )
-            hoverBorderAnimator?.setBorderVisibility(visible = field, animated = true)
+            hoverBorderAnimator.setBorderVisibility(visible = field, animated = true)
         }
 
     // Used to cache thumbnail bounds to avoid recalculating on every hover move.
@@ -591,7 +589,7 @@ constructor(
     ) {
         super.onFocusChanged(gainFocus, direction, previouslyFocusedRect)
         if (borderEnabled) {
-            focusBorderAnimator?.setBorderVisibility(gainFocus, /* animated= */ true)
+            focusBorderAnimator.setBorderVisibility(gainFocus, /* animated= */ true)
         }
     }
 
@@ -682,8 +680,8 @@ constructor(
 
     override fun draw(canvas: Canvas) {
         // Draw border first so any child views outside of the thumbnail bounds are drawn above it.
-        focusBorderAnimator?.drawBorder(canvas)
-        hoverBorderAnimator?.drawBorder(canvas)
+        focusBorderAnimator.drawBorder(canvas)
+        hoverBorderAnimator.drawBorder(canvas)
         super.draw(canvas)
     }
 
@@ -1279,15 +1277,6 @@ constructor(
                 setOnLongClickListener(null)
             }
         }
-    }
-
-    @JvmOverloads
-    open fun setShouldShowScreenshot(
-        shouldShowScreenshot: Boolean,
-        thumbnailDatas: Map<Int, ThumbnailData?>? = null,
-    ) {
-        if (this.shouldShowScreenshot == shouldShowScreenshot) return
-        this.shouldShowScreenshot = shouldShowScreenshot
     }
 
     private fun onClick() {

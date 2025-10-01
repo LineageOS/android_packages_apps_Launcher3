@@ -283,14 +283,6 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
     }
 
     /**
-     * @return Whether the task list is currently updating in the background
-     */
-    @VisibleForTesting
-    public boolean isLoadingTasksInBackground() {
-        return mTaskList.isLoadingTasksInBackground();
-    }
-
-    /**
      * Checks if a task has been removed or not.
      *
      * @param callback Receives true if task is removed, false otherwise
