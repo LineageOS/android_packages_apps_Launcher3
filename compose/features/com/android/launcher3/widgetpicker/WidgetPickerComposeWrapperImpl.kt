@@ -19,7 +19,9 @@ package com.android.launcher3.widgetpicker
 import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
+import android.os.UserHandle
 import android.util.Log
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -43,6 +45,7 @@ import com.android.launcher3.widgetpicker.logging.LauncherWidgetPickerCuiReporte
 import com.android.launcher3.widgetpicker.shared.model.CloseBehavior
 import com.android.launcher3.widgetpicker.shared.model.HostConstraint
 import com.android.launcher3.widgetpicker.shared.model.SheetStyle
+import com.android.launcher3.widgetpicker.shared.model.WidgetAppId
 import com.android.launcher3.widgetpicker.shared.model.WidgetHostInfo
 import com.android.launcher3.widgetpicker.shared.model.isAppWidget
 import com.android.launcher3.widgetpicker.theme.LauncherWidgetPickerTheme
@@ -77,10 +80,55 @@ constructor(
         widgetPickerConfig: WidgetPickerConfig,
     ) {
         val widgetPickerComponent = newWidgetPickerComponent(widgetPickerConfig)
+        val fullWidgetsCatalog = widgetPickerComponent.getFullWidgetsCatalog()
+
+        setupComposeView(activity = activity, widgetPickerConfig = widgetPickerConfig) {
+            eventListeners,
+            eventsReporter ->
+            fullWidgetsCatalog.Content(
+                eventListeners = eventListeners,
+                cuiReporter = eventsReporter,
+            )
+        }
+    }
+
+    override fun showWidgetsFor(
+        packageName: String,
+        userHandle: UserHandle,
+        activity: WidgetPickerActivity,
+        widgetPickerConfig: WidgetPickerConfig,
+    ) {
+        val widgetAppId = WidgetAppId(
+            packageName = packageName,
+            userHandle = userHandle,
+            category = NO_WIDGET_APP_CATEGORY
+        )
+
+        val widgetPickerComponent = newWidgetPickerComponent(widgetPickerConfig)
+        val singleAppCatalog = widgetPickerComponent.getSingleAppWidgetsCatalog()
+
+        setupComposeView(
+            activity = activity,
+            widgetPickerConfig = widgetPickerConfig,
+            widgetAppId = widgetAppId,
+        ) { eventListeners, uiEventsReporter ->
+            singleAppCatalog.Content(
+                widgetAppId = widgetAppId,
+                eventListeners = eventListeners,
+                cuiReporter = uiEventsReporter,
+            )
+        }
+    }
+
+    private fun setupComposeView(
+        activity: WidgetPickerActivity,
+        widgetPickerConfig: WidgetPickerConfig,
+        widgetAppId: WidgetAppId? = null,
+        content: @Composable (WidgetPickerEventListeners, LauncherWidgetPickerCuiReporter) -> Unit,
+    ) {
         val callbacks = activity.buildEventListeners(widgetPickerConfig, apiWrapper)
         val uiEventsReporter = LauncherWidgetPickerCuiReporter(activity.statsLogManager)
 
-        val fullWidgetsCatalog = widgetPickerComponent.getFullWidgetsCatalog()
         val composeView = ComposeFacade.initComposeView(activity.asContext()) as ComposeView
 
         composeView.apply {
@@ -90,11 +138,11 @@ constructor(
 
                 LauncherWidgetPickerTheme {
                     val eventListeners = remember { callbacks }
-                    fullWidgetsCatalog.Content(eventListeners, uiEventsReporter)
+                    content(eventListeners, uiEventsReporter)
                 }
 
                 DisposableEffect(view) {
-                    scope.launch { initializeRepositories() }
+                    scope.launch { initializeRepositories(widgetAppId) }
 
                     onDispose { cleanUpRepositories() }
                 }
@@ -134,10 +182,19 @@ constructor(
             )
     }
 
-    private fun initializeRepositories() {
-        widgetsRepository.initialize()
-        widgetUsersRepository.initialize()
-        widgetAppIconsRepository.initialize()
+    private fun initializeRepositories(widgetAppId: WidgetAppId? = null) {
+        val loadAllData = widgetAppId == null
+
+        widgetsRepository.initialize(
+            WidgetsRepository.InitializationOptions(
+                widgetAppId = widgetAppId,
+                loadFeaturedWidgets = loadAllData,
+            )
+        )
+        if (loadAllData) {
+            widgetUsersRepository.initialize()
+            widgetAppIconsRepository.initialize()
+        }
     }
 
     private fun cleanUpRepositories() {
@@ -150,6 +207,7 @@ constructor(
         private const val TAG = "WidgetPickerComposeWrapperImpl"
         private const val HOME_SCREEN_WIDGET_INTERACTION_REASON_STRING =
             "WidgetPickerActivity.OnWidgetInteraction"
+        private const val NO_WIDGET_APP_CATEGORY = -1
 
         private fun WidgetPickerActivity.buildEventListeners(
             widgetPickerConfig: WidgetPickerConfig,

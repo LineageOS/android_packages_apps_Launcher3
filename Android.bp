@@ -73,6 +73,7 @@ filegroup {
 filegroup {
     name: "launcher-compose-unit-tests-src",
     srcs: [
+        "compose/tests/com/android/launcher3/widgetpicker/SingleAppWidgetPickerTest.kt",
         "compose/tests/com/android/launcher3/widget/AddWidgetConfigTest.kt",
         "compose/tests/com/android/launcher3/widgetpicker/repository/WidgetsRepositoryImplTest.kt",
     ],
@@ -281,7 +282,6 @@ launcher_compose_tests_java_defaults {
             ],
             // Compose dependencies
             static_libs: [
-                "widget_picker_component",
                 "androidx.compose.runtime_runtime",
                 "androidx.compose.ui_ui-test-junit4",
                 "androidx.compose.ui_ui-test-manifest",
