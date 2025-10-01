@@ -64,15 +64,17 @@ class HomeScreenFilesUtils {
 /** Creates a [HomeScreenFile] from [ItemInfo]. */
 val ItemInfo.homeScreenFile: HomeScreenFile?
     get() {
-        if (itemType != ITEM_TYPE_FILE_SYSTEM_FILE && itemType != ITEM_TYPE_FILE_SYSTEM_FOLDER) {
-            return null
-        }
-
-        return HomeScreenFile(
-            uri = requireNotNull(requireNotNull(intent).data),
-            displayName = title?.toString() ?: "",
-            mimeType = requireNotNull(intent).type,
-            isDirectory = itemType == ITEM_TYPE_FILE_SYSTEM_FOLDER,
-            user = user,
-        )
+        return if (isFileSystemItem()) {
+            HomeScreenFile(
+                uri = requireNotNull(requireNotNull(intent).data),
+                displayName = title?.toString() ?: "",
+                mimeType = requireNotNull(intent).type,
+                isDirectory = itemType == ITEM_TYPE_FILE_SYSTEM_FOLDER,
+                user = user,
+            )
+        } else null
     }
+
+/** Returns whether an [ItemInfo] represents a file system item. */
+fun ItemInfo.isFileSystemItem(): Boolean =
+    itemType == ITEM_TYPE_FILE_SYSTEM_FILE || itemType == ITEM_TYPE_FILE_SYSTEM_FOLDER

@@ -786,8 +786,8 @@ class WorkspaceItemProcessorTest {
     }
 
     @Test
-    fun restoresFileSystemFileItemType() {
-        testRestoresFileSystemItem(
+    fun deletesFileSystemFileItemTypeWhenRestoringFromBackup() {
+        testRestoresFileSystemItemIfNotRestoringFromBackup(
             ITEM_TYPE_FILE_SYSTEM_FILE,
             HomeScreenFile(
                 uri = Uri.parse("content://media/external_primary/file/1"),
@@ -796,12 +796,13 @@ class WorkspaceItemProcessorTest {
                 isDirectory = false,
                 user = Process.myUserHandle(),
             ),
+            /*isRestoreFromBackup=*/ true,
         )
     }
 
     @Test
-    fun restoresFileSystemFolderItemType() {
-        testRestoresFileSystemItem(
+    fun deletesFileSystemFolderItemTypeWhenRestoringFromBackup() {
+        testRestoresFileSystemItemIfNotRestoringFromBackup(
             ITEM_TYPE_FILE_SYSTEM_FOLDER,
             HomeScreenFile(
                 uri = Uri.parse("content://media/external_primary/file/1"),
@@ -810,14 +811,50 @@ class WorkspaceItemProcessorTest {
                 isDirectory = true,
                 user = Process.myUserHandle(),
             ),
+            /*isRestoreFromBackup=*/ true,
         )
     }
 
-    private fun testRestoresFileSystemItem(itemType: Int, homeScreenFile: HomeScreenFile) {
+    @Test
+    fun restoresFileSystemFileItemTypeWhenNotRestoringFromBackup() {
+        testRestoresFileSystemItemIfNotRestoringFromBackup(
+            ITEM_TYPE_FILE_SYSTEM_FILE,
+            HomeScreenFile(
+                uri = Uri.parse("content://media/external_primary/file/1"),
+                displayName = "file.png",
+                mimeType = "image/png",
+                isDirectory = false,
+                user = Process.myUserHandle(),
+            ),
+            /*isRestoreFromBackup=*/ false,
+        )
+    }
+
+    @Test
+    fun restoresFileSystemFolderItemTypeWhenNotRestoringFromBackup() {
+        testRestoresFileSystemItemIfNotRestoringFromBackup(
+            ITEM_TYPE_FILE_SYSTEM_FOLDER,
+            HomeScreenFile(
+                uri = Uri.parse("content://media/external_primary/file/1"),
+                displayName = "folder_a",
+                mimeType = null,
+                isDirectory = true,
+                user = Process.myUserHandle(),
+            ),
+            /*isRestoreFromBackup=*/ false,
+        )
+    }
+
+    private fun testRestoresFileSystemItemIfNotRestoringFromBackup(
+        itemType: Int,
+        homeScreenFile: HomeScreenFile,
+        isRestoreFromBackup: Boolean,
+    ) {
         // Given
         val homeScreenFiles = lazyOf(mapOf(homeScreenFile.uri to homeScreenFile))
         mockCursor.apply {
             this.itemType = itemType
+            this.restoreFlag = if (isRestoreFromBackup) FLAG_RESTORED_ICON else 0
             whenever(title).thenReturn(homeScreenFile.displayName)
             whenever(parseIntent())
                 .thenReturn(
@@ -831,12 +868,21 @@ class WorkspaceItemProcessorTest {
         itemProcessorUnderTest.processItem()
 
         // Then
-        val itemCaptor = argumentCaptor<ItemInfo>()
-        verify(mockCursor).markRestored()
-        verify(mockCursor).checkAndAddItem(itemCaptor.capture(), any(), anyOrNull())
-        assertThat(itemCaptor.firstValue.itemType).isEqualTo(itemType)
-        assertThat(itemCaptor.firstValue.title).isEqualTo(homeScreenFile.displayName)
-        assertThat(itemCaptor.firstValue.intent!!.data).isEqualTo(homeScreenFile.uri)
+        if (isRestoreFromBackup) {
+            verify(mockCursor)
+                .markDeleted(
+                    "File system items are not restored from backup",
+                    RestoreError.FILE_SYSTEM_ITEM_FROM_BACKUP,
+                )
+            verify(mockCursor, times(0)).checkAndAddItem(any(), any(), anyOrNull())
+        } else {
+            val itemCaptor = argumentCaptor<ItemInfo>()
+            verify(mockCursor).markRestored()
+            verify(mockCursor).checkAndAddItem(itemCaptor.capture(), any(), anyOrNull())
+            assertThat(itemCaptor.firstValue.itemType).isEqualTo(itemType)
+            assertThat(itemCaptor.firstValue.title).isEqualTo(homeScreenFile.displayName)
+            assertThat(itemCaptor.firstValue.intent!!.data).isEqualTo(homeScreenFile.uri)
+        }
     }
 
     @Test
@@ -844,6 +890,7 @@ class WorkspaceItemProcessorTest {
         // Given
         mockCursor.apply {
             itemType = ITEM_TYPE_FILE_SYSTEM_FILE
+            restoreFlag = 0
             whenever(title).thenReturn("name.ext")
             whenever(parseIntent())
                 .thenReturn(

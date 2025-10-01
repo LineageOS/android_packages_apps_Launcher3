@@ -17,8 +17,6 @@
 package com.android.launcher3.icons;
 
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT;
-import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FILE;
-import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FOLDER;
 import static com.android.launcher3.icons.cache.CacheLookupFlag.DEFAULT_LOOKUP_FLAG;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
@@ -353,8 +351,7 @@ public class IconCache extends BaseIconCache {
     public synchronized void getTitleAndIcon(
             @NonNull ItemInfoWithIcon info,
             @NonNull CacheLookupFlag lookupFlag) {
-        if ((info.itemType == ITEM_TYPE_FILE_SYSTEM_FILE
-                || info.itemType == ITEM_TYPE_FILE_SYSTEM_FOLDER)) {
+        if (HomeScreenFilesUtilsKt.isFileSystemItem(info)) {
             HomeScreenFile hsf = HomeScreenFilesUtilsKt.getHomeScreenFile(info);
             if (hsf == null) {
                 info.bitmap = getDefaultIcon(info.user);
