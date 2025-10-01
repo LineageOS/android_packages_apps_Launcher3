@@ -54,9 +54,9 @@ import com.android.launcher3.dragndrop.SystemDragControllerImpl
 import com.android.launcher3.homescreenfiles.HomeScreenFilesNoOpProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider.Companion.HOME_SCREEN_FOLDER_RELATIVE_PATH
-import com.android.launcher3.testutil.FavoriteItemsTransaction
 import com.android.launcher3.testutil.Wait.atMost
 import com.android.launcher3.util.BaseLauncherActivityTest
+import com.android.launcher3.util.ModelTestExtensions.setEmptyModelLayout
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
@@ -77,7 +77,7 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
     fun setUp() {
         // Initialize file system and workspace.
         deleteAllHomeScreenFiles()
-        FavoriteItemsTransaction(context).commit()
+        context.setEmptyModelLayout()
         loadLauncherSync()
 
         // Initialize draggable view.
@@ -99,8 +99,7 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
             launcher.dragLayer.removeView(draggableView)
         }
 
-        // Clean up workspace and file system.
-        FavoriteItemsTransaction(context).commit()
+        // Clean up file system.
         deleteAllHomeScreenFiles()
     }
 

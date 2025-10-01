@@ -17,16 +17,11 @@
 package com.android.launcher3.testutil.rule
 
 import android.content.Context
-import android.database.sqlite.SQLiteReadOnlyDatabaseException
-import android.util.Log
 import com.android.launcher3.LauncherModel
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.model.BgDataModel
-import com.android.launcher3.util.Executors.MAIN_EXECUTOR
-import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import com.android.launcher3.util.LauncherLayoutBuilder
-import com.android.launcher3.util.ModelTestExtensions.loadModelSync
-import com.android.launcher3.util.TestUtil
+import com.android.launcher3.util.ModelTestExtensions.setModelLayout
 import org.junit.rules.ExternalResource
 
 /**
@@ -51,27 +46,8 @@ class LayoutResource(private val ctx: Context) : ExternalResource() {
         return this
     }
 
-    fun set(builder: LauncherLayoutBuilder) = set(builder.build())
-
-    private fun set(xmlRepresentation: String) {
+    fun set(builder: LauncherLayoutBuilder) {
         callbacks ?: withCallbacks(object : BgDataModel.Callbacks {})
-        ctx.appComponent.layoutParserFactory.overrideXmlLayout(xmlRepresentation).use {
-            TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {
-                try {
-                    model.modelDbController.createEmptyDB()
-                } catch (e: SQLiteReadOnlyDatabaseException) {
-                    // This issue has only been observed in tests so far, likely due
-                    // to less strict threading for accessing and writing to the
-                    // launcher test DB.
-                    Log.w(TAG, "Failed to clear Launcher DB. It was already deleted.", e)
-                }
-            }
-            TestUtil.runOnExecutorSync(MAIN_EXECUTOR) { model.forceReload() }
-            model.loadModelSync()
-        }
-    }
-
-    companion object {
-        private const val TAG = "LayoutResource"
+        ctx.setModelLayout(builder)
     }
 }

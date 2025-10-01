@@ -41,10 +41,10 @@ import com.android.launcher3.Launcher;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.LauncherAppWidgetInfo;
 import com.android.launcher3.testcomponent.WidgetConfigActivity;
-import com.android.launcher3.testutil.FavoriteItemsTransaction;
 import com.android.launcher3.testutil.Wait;
 import com.android.launcher3.util.BaseLauncherActivityTest;
 import com.android.launcher3.util.BlockingBroadcastReceiver;
+import com.android.launcher3.util.ModelTestExtensions;
 import com.android.launcher3.util.PackageUserKey;
 import com.android.launcher3.util.WidgetUtils;
 import com.android.launcher3.util.rule.ShellCommandRule;
@@ -97,7 +97,7 @@ public class AddConfigWidgetTest extends BaseLauncherActivityTest<Launcher> {
      * @param acceptConfig accept the config activity
      */
     private void runTest(boolean acceptConfig) throws Throwable {
-        new FavoriteItemsTransaction(targetContext()).commit();
+        ModelTestExtensions.setEmptyModelLayout(targetContext());
         loadLauncherSync();
 
         // Add widget to homescreen

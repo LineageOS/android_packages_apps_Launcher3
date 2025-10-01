@@ -3,7 +3,9 @@ package com.android.launcher3.util
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteReadOnlyDatabaseException
 import android.os.Process
+import android.util.Log
 import android.util.SparseArray
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.LauncherModel
@@ -27,14 +29,20 @@ import com.android.launcher3.LauncherSettings.Favorites.TABLE_NAME
 import com.android.launcher3.LauncherSettings.Favorites.TITLE
 import com.android.launcher3.LauncherSettings.Favorites._ID
 import com.android.launcher3.UtilitiesKt.isPersistedModelItem
+import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.model.BgDataModel
 import com.android.launcher3.model.ModelDbController
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.pm.UserCache
+import com.android.launcher3.util.Executors.MAIN_EXECUTOR
+import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
 object ModelTestExtensions {
+
+    private const val TAG = "ModelTestExtensions"
+
     /** Clears and reloads Launcher db to cleanup the workspace */
     fun LauncherModel.clearModelDb() {
         // Load the model once so that there is no pending migration:
@@ -144,5 +152,37 @@ object ModelTestExtensions {
     /** Initializes [BgDataModel.itemsIdMap] with provided [items] */
     fun BgDataModel.initItems(vararg items: ItemInfo) {
         dataLoadComplete(SparseArray<ItemInfo>().apply { items.forEach { this[it.id] = it } })
+    }
+
+    /** Sets the workspace as an empty layout and loads it */
+    @JvmStatic
+    fun Context.setEmptyModelLayout() {
+        // Launcher model reverts to using default layout when xml is empty. As a wrokaround we add
+        // an invalid icon at a very far off location
+        setModelLayout(
+            LauncherLayoutBuilder()
+                .atWorkspace(Int.MAX_VALUE, Int.MAX_VALUE, 0)
+                .putApp("missing-app", null)
+        )
+    }
+
+    /** Sets and loads the workspace layout */
+    @JvmStatic
+    fun Context.setModelLayout(builder: LauncherLayoutBuilder) {
+        val model = appComponent.testableModelState.model
+        appComponent.layoutParserFactory.overrideXmlLayout(builder.build()).use {
+            TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {
+                try {
+                    model.modelDbController.createEmptyDB()
+                } catch (e: SQLiteReadOnlyDatabaseException) {
+                    // This issue has only been observed in tests so far, likely due
+                    // to less strict threading for accessing and writing to the
+                    // launcher test DB.
+                    Log.w(TAG, "Failed to clear Launcher DB. It was already deleted.", e)
+                }
+            }
+            TestUtil.runOnExecutorSync(MAIN_EXECUTOR) { model.forceReload() }
+            model.loadModelSync()
+        }
     }
 }
