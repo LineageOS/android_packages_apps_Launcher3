@@ -242,8 +242,9 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
     }
 
     @Override
-    public void goToRecentsState(RecentsState recentsState, boolean animated) {
-        getStateManager().goToState(recentsState, animated);
+    public void goToRecentsState(RecentsState recentsState, boolean animated,
+            Animator.AnimatorListener listener) {
+        getStateManager().goToState(recentsState, animated, listener);
     }
 
     @Override

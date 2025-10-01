@@ -16,6 +16,7 @@
 
 package com.android.quickstep.views;
 
+import android.animation.Animator;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.LocusId;
@@ -198,6 +199,8 @@ public interface RecentsViewContainer extends ActivityContext {
      *
      * @param animated false if the state should change immediately without any animation,
      *                true otherwise
+     * @param listener a callback that is invoked after the state change logic completes.
      */
-    void goToRecentsState(RecentsState recentsState, boolean animated);
+    void goToRecentsState(RecentsState recentsState, boolean animated,
+            Animator.AnimatorListener listener);
 }

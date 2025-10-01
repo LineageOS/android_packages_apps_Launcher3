@@ -16,6 +16,7 @@
 
 package com.android.quickstep.window
 
+import android.animation.Animator
 import android.animation.AnimatorSet
 import android.app.ActivityOptions
 import android.app.ActivityTaskManager
@@ -751,8 +752,12 @@ constructor(
         return splitSelectStateController
     }
 
-    override fun goToRecentsState(recentsState: RecentsState, animated: Boolean) {
-        stateManager.goToState(recentsState, animated)
+    override fun goToRecentsState(
+        recentsState: RecentsState,
+        animated: Boolean,
+        listener: Animator.AnimatorListener,
+    ) {
+        stateManager.goToState(recentsState, animated, listener)
     }
 
     override fun getRootView(): View {
