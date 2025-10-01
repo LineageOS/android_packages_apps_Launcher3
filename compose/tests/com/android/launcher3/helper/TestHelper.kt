@@ -16,12 +16,16 @@
 
 package com.android.launcher3.helper
 
+import android.app.Activity
+import android.content.Intent
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.NativeKeyEvent
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.test.core.app.ActivityScenario
 
 val NATIVE_DPAD_DOWN = NativeKeyEvent(NativeKeyEvent.ACTION_DOWN, NativeKeyEvent.KEYCODE_DPAD_DOWN)
 val NATIVE_TAB = NativeKeyEvent(NativeKeyEvent.ACTION_DOWN, NativeKeyEvent.KEYCODE_TAB)
@@ -38,3 +42,26 @@ fun hasMinTouchArea(minWidth: Dp = 48.dp, minHeight: Dp = 48.dp): SemanticsMatch
                 (size.width.toDp() >= minWidth && size.height.toDp() >= minHeight)
         }
     }
+
+/**
+ * Wrapper for launching activity hosting composable content using the provided intent.
+ *
+ * Example:
+ * ```
+ * @get:Rule val composeRule = createEmptyComposeRule()
+ *
+ * @Test
+ * fum someTest() = composeRule.launchActivityWithIntent<MyActivity>(
+ *    intentProvider = this::buildMyActivityIntent
+ * ) {
+ *   composeRule.onNodeWithText("text).assertIsDisplayed()
+ * }
+ *
+ * ```
+ */
+inline fun <reified A : Activity> ComposeTestRule.launchActivityWithIntent(
+    intentProvider: () -> Intent,
+    runAssertions: ComposeTestRule.() -> Unit,
+) {
+    ActivityScenario.launch<A>(intentProvider()).use { runAssertions() }
+}

@@ -16,8 +16,10 @@
 
 package com.android.launcher3.widgetpicker
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.os.UserHandle
 import android.window.OnBackAnimationCallback
 import android.window.OnBackInvokedDispatcher
 import androidx.activity.OnBackPressedDispatcher
@@ -62,7 +64,28 @@ open class WidgetPickerActivity :
             .setViewTreeOnBackPressedDispatcherOwner(onBackPressedDispatcherOwner = this)
 
         if (Flags.enableWidgetPickerRefactor() && isComposeAvailable()) {
-            component.widgetPickerComposeWrapper.showAllWidgets(this, widgetPickerConfig)
+            val appPackageName =
+                if (Flags.enableAppWidgetPickerRefactor()) {
+                    intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME)
+                } else {
+                    null
+                }
+
+            if (appPackageName != null) {
+                val userHandle =
+                    intent.getParcelableExtra(Intent.EXTRA_USER, UserHandle::class.java)
+
+                userHandle?.let {
+                    component.widgetPickerComposeWrapper.showWidgetsFor(
+                        packageName = appPackageName,
+                        userHandle = userHandle,
+                        activity = this,
+                        widgetPickerConfig = widgetPickerConfig,
+                    )
+                } ?: finish()
+            } else {
+                component.widgetPickerComposeWrapper.showAllWidgets(this, widgetPickerConfig)
+            }
         }
     }
 
