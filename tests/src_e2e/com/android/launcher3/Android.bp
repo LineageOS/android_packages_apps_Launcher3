@@ -8,7 +8,6 @@ filegroup {
         "dragging/TaplDragTest.java",
         "dragging/TaplUninstallRemoveTest.java",
         "tapl/TaplUtilityTest.java",
-        "ui/TaplTestsLauncher3Test.java",
         "widget/TaplAddWidgetTest.java",
     ],
 }
@@ -22,6 +21,5 @@ filegroup {
         "appiconmenu/TaplAppIconMenuTest.java",
         "dragging/TaplDragTest.java",
         "dragging/TaplUninstallRemoveTest.java",
-        "ui/TaplTestsLauncher3Test.java",
     ],
 }
