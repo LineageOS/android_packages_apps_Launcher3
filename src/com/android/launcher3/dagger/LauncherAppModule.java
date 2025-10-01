@@ -31,7 +31,6 @@ import dagger.Module;
             WidgetModule.class,
             AppModule.class,
             PerDisplayModule.class,
-            LauncherConcurrencyModule.class,
             ExecutorsModule.class,
             LauncherExecutorsModule.class,
             LauncherWidgetPickerModule.class,

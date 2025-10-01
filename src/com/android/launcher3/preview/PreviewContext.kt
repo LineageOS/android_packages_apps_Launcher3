@@ -33,7 +33,6 @@ import com.android.launcher3.dagger.HomeScreenFilesModule
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
-import com.android.launcher3.dagger.LauncherConcurrencyModule
 import com.android.launcher3.dagger.LauncherModelModule
 import com.android.launcher3.dagger.PerDisplayModule
 import com.android.launcher3.dagger.PluginManagerWrapperModule
@@ -187,7 +186,6 @@ constructor(
                 StaticObjectModule::class,
                 AppModule::class,
                 PerDisplayModule::class,
-                LauncherConcurrencyModule::class,
                 ExecutorsModule::class,
                 LauncherExecutorsModule::class,
                 NoOpWidgetPickerModule::class,

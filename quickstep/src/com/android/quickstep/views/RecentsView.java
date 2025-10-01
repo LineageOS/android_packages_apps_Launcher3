@@ -869,7 +869,8 @@ public abstract class RecentsView<
 
         // Start Recents Dependency graph
         RecentsDependencies recentsDependencies =
-                RecentsDependencies.maybeInitialize(context, ProductionDispatchers.INSTANCE);
+                RecentsDependencies.maybeInitialize(context,
+                        ProductionDispatchers.INSTANCE.get(context));
         String scopeId = recentsDependencies.createRecentsViewScope(context);
         mRecentsViewModel = new RecentsViewModel(
                 recentsDependencies.inject(RecentTasksRepository.class, scopeId),

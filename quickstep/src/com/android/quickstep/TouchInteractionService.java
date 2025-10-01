@@ -773,7 +773,7 @@ public class TouchInteractionService extends Service {
         mSystemDecorationChangeObserver = SystemDecorationChangeObserver.getINSTANCE().get(this);
         mQuickstepKeyGestureEventsHandler =
                 QuickstepKeyGestureEventsManager.getINSTANCE().get(this);
-        mCoroutineDispatcher = ProductionDispatchers.INSTANCE.getMain();
+        mCoroutineDispatcher = ProductionDispatchers.INSTANCE.get(this).getMain();
         mDisplaysWithDecorationsRepositoryCompat =
                 LauncherDisplaysWithDecorationsRepositoryCompat.getINSTANCE().get(this);
         mDesktopState = DesktopState.getInstance(this);

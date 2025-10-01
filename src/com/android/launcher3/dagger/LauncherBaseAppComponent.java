@@ -66,6 +66,7 @@ import com.android.launcher3.util.SettingsCache;
 import com.android.launcher3.util.TaskbarModeUtil;
 import com.android.launcher3.util.VibratorWrapper;
 import com.android.launcher3.util.WallpaperColorHints;
+import com.android.launcher3.util.coroutines.ProductionDispatchers;
 import com.android.launcher3.util.window.RefreshRateTracker;
 import com.android.launcher3.util.window.WindowManagerProxy;
 import com.android.launcher3.widget.LauncherWidgetHolder.WidgetHolderFactory;
@@ -128,6 +129,7 @@ public interface LauncherBaseAppComponent {
     TestInformationHandler getTestInformationHandler();
     TaskbarModeUtil getTaskbarModeUtil();
     SystemDragController getSystemDragController();
+    ProductionDispatchers getProductionDispatchers();
 
     /** Utility class for importing/exporting launcher layout */
     LayoutImportExportHelper getLayoutImportExportHelper();
