@@ -50,6 +50,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeNotNull
 import org.junit.Assume.assumeTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -76,6 +77,11 @@ class LayoutImportExportHelperTest {
                 it.isPersistedModelItem() &&
                     (it.container == CONTAINER_DESKTOP || it.container == CONTAINER_HOTSEAT)
             }
+
+    @Before
+    fun setup() {
+        TestUtil.grantWriteSecurePermission()
+    }
 
     @Test
     fun exportAppOnHotseat() =
