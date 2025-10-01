@@ -18,12 +18,16 @@ package com.android.quickstep
 import android.platform.test.rule.AllowedDevices
 import android.platform.test.rule.DeviceProduct
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator
+import com.android.launcher3.util.rule.ScreenRecordRule
 import com.android.quickstep.TaskbarModeSwitchRule.TaskbarModeSwitch
 import com.google.common.truth.Truth.assertThat
+import org.junit.Rule
 import org.junit.Test
 
 @AllowedDevices(allowed = [DeviceProduct.TANGORPRO, DeviceProduct.CF_TABLET])
 class TaplTaskbarPinningTest : AbstractTaplTestsTaskbar() {
+
+    @get:Rule val screenRecordRule = ScreenRecordRule()
 
     private lateinit var taskbarFeatureEvaluator: TaskbarFeatureEvaluator
 
@@ -39,6 +43,7 @@ class TaplTaskbarPinningTest : AbstractTaplTestsTaskbar() {
 
     @Test
     @TaskbarModeSwitch(mode = TaskbarModeSwitchRule.Mode.TRANSIENT)
+    @ScreenRecordRule.ScreenRecord //b/440078235
     fun testPinningUnpinningTransientTaskbar_whenInOverview() {
         assertThat(taskbarFeatureEvaluator.isTransient).isTrue()
         mLauncher.goHome().switchToOverview()
@@ -60,6 +65,7 @@ class TaplTaskbarPinningTest : AbstractTaplTestsTaskbar() {
 
     @Test
     @TaskbarModeSwitch(mode = TaskbarModeSwitchRule.Mode.TRANSIENT)
+    @ScreenRecordRule.ScreenRecord //b/440078235
     fun testPinningUnpinningTransientTaskbar_whenInApp() {
         startAppFast(TEST_APP_PACKAGE)
         assertThat(taskbarFeatureEvaluator.isTransient).isTrue()
@@ -84,6 +90,7 @@ class TaplTaskbarPinningTest : AbstractTaplTestsTaskbar() {
 
     @Test
     @TaskbarModeSwitch(mode = TaskbarModeSwitchRule.Mode.TRANSIENT)
+    @ScreenRecordRule.ScreenRecord //b/440078235
     fun testPinningUnpinningTransientTaskbar_whenInDesktopMode() {
         startAppFast(CALCULATOR_APP_PACKAGE)
         assertThat(taskbarFeatureEvaluator.isTransient).isTrue()
