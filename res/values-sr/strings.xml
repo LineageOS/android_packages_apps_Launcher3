@@ -148,8 +148,8 @@
     <string name="allow_rotation_title" msgid="7222049633713050106">"Дозволи ротацију почетног екрана"</string>
     <string name="allow_rotation_desc" msgid="8662546029078692509">"Када се телефон ротира"</string>
     <string name="compose_developer_options_section" msgid="8211460486549952595">"Jetpack Compose"</string>
-    <string name="enable_composition_tracing_title" msgid="8989606591739368424">"Омогућите праћење састава"</string>
-    <string name="enable_composition_tracing_desc" msgid="7187566039216492405">"Омогућите праћење састава при прављењу perfetto трага у прегледу"</string>
+    <string name="enable_composition_tracing_title" msgid="8989606591739368424">"Омогућите праћење композиције"</string>
+    <string name="enable_composition_tracing_desc" msgid="7187566039216492405">"Омогућите праћење композиције приликом Perfetto праћења у прегледу"</string>
     <string name="landscape_mode_title" msgid="5138814555934843926">"Водоравни режим"</string>
     <string name="landscape_mode_desc" msgid="3085236452297838664">"Подесите почетни екран на водоравни режим"</string>
     <string name="notification_dots_title" msgid="9062440428204120317">"Тачке за обавештења"</string>
