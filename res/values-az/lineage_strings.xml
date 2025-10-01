@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 <resources>
-    <string name="settings_lock_layout_title">Kilid düzülüşü</string>
+    <string name="settings_lock_layout_title">Kilid düzümü</string>
     <string name="settings_lock_layout_summary_on">İkonlar və vicetlər əsas ekranda əlavə edilə, çıxarıla və ya daşına bilməz</string>
     <string name="settings_lock_layout_summary_off">İkonlar və vicetlər əsas ekranda əlavə edilə, çıxarıla və ya daşına bilər</string>
     <string name="settings_edit_widgets_error">Əsas ekrana vicet əlavə etmək mümkün deyil</string>
