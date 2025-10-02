@@ -48,6 +48,7 @@ import com.android.launcher3.Flags;
 import com.android.launcher3.R;
 import com.android.launcher3.anim.AnimatorListeners;
 import com.android.launcher3.taskbar.BarsLocationAnimatorHelper;
+import com.android.launcher3.taskbar.TaskbarUiState;
 import com.android.launcher3.taskbar.bubbles.animation.BubbleAnimator;
 import com.android.launcher3.util.DisplayController;
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
@@ -190,6 +191,9 @@ public class BubbleBarView extends FrameLayout {
     private BubbleView mDraggedBubbleView;
     @Nullable
     private BubbleView mDismissedByDragBubbleView;
+
+    @Nullable
+    private TaskbarUiState mTaskbarUiState;
     private float mAlphaDuringDrag = 1f;
 
     /** Additional translation in the y direction that is applied to each bubble */
@@ -237,6 +241,9 @@ public class BubbleBarView extends FrameLayout {
         setBackgroundDrawable(mBubbleBarBackground);
     }
 
+    public void setTaskbarUiState(TaskbarUiState taskbarUiState) {
+        mTaskbarUiState = taskbarUiState;
+    }
 
     /**
      * Animates icon sizes and spacing between icons and bubble bar borders.
@@ -1484,6 +1491,9 @@ public class BubbleBarView extends FrameLayout {
     private void setExpandedInternal(boolean isBarExpanded, boolean animate) {
         if (mIsBarExpanded == isBarExpanded) return;
         mIsBarExpanded = isBarExpanded;
+        if (mTaskbarUiState != null) {
+            mTaskbarUiState.setIsBubbleBarExpanded(mIsBarExpanded);
+        }
         updateArrowForSelected(/* shouldAnimate= */ false);
         setOrUnsetClickListener();
         if (animate) {

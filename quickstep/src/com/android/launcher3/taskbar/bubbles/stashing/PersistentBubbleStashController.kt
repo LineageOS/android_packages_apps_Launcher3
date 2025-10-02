@@ -23,9 +23,11 @@ import android.graphics.Rect
 import android.view.MotionEvent
 import android.view.View
 import com.android.app.animation.Interpolators
+import com.android.launcher3.Flags.refactorTaskbarUiState
 import com.android.launcher3.Utilities
 import com.android.launcher3.anim.AnimatedFloat
 import com.android.launcher3.taskbar.TaskbarInsetsController
+import com.android.launcher3.taskbar.TaskbarUiState
 import com.android.launcher3.taskbar.bubbles.BubbleBarViewController
 import com.android.launcher3.taskbar.bubbles.BubbleStashedHandleViewController
 import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController.BubbleLauncherState
@@ -38,7 +40,8 @@ import com.android.wm.shell.shared.animation.PhysicsAnimator
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation
 
 class PersistentBubbleStashController(
-    private val taskbarHotseatDimensionsProvider: TaskbarHotseatDimensionsProvider
+    private val taskbarHotseatDimensionsProvider: TaskbarHotseatDimensionsProvider,
+    private val taskbarUiState: TaskbarUiState,
 ) : BubbleStashController {
 
     private lateinit var taskbarInsetsController: TaskbarInsetsController
@@ -86,6 +89,14 @@ class PersistentBubbleStashController(
     override val hasHandleView: Boolean = false
 
     override var isStashed: Boolean = false
+        set(value) {
+            // TODO(b/404636836): after launching refactorTaskbarUiState(), rely only on
+            //  taskbarUiState to track isStashed state.
+            if (refactorTaskbarUiState()) {
+                taskbarUiState.setIsBubbleStashed(value)
+            }
+            field = value
+        }
 
     /** Determines whether stashing is allowed. */
     private var allowStashing: Boolean = false
