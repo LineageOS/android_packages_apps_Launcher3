@@ -24,6 +24,7 @@ import static com.android.launcher3.MotionEventsUtils.isTrackpadMultiFingerSwipe
 import static com.android.quickstep.AbsSwipeUpHandler.RECENTS_ATTACH_DURATION;
 import static com.android.quickstep.GestureState.GestureEndTarget.HOME;
 import static com.android.quickstep.GestureState.GestureEndTarget.LAST_TASK;
+import static com.android.quickstep.GestureState.GestureEndTarget.NEW_TASK;
 import static com.android.quickstep.GestureState.GestureEndTarget.RECENTS;
 import static com.android.quickstep.util.RecentsAtomicAnimationFactory.INDEX_RECENTS_ATTACHED_ALPHA_ANIM;
 import static com.android.quickstep.util.RecentsAtomicAnimationFactory.INDEX_RECENTS_FADE_ANIM;
@@ -353,27 +354,27 @@ public abstract class BaseContainerInterface<STATE_TYPE extends BaseState<STATE_
         if (container == null) {
             return;
         }
-        STATE_TYPE startState = container.getStateManager().getRestState();
         final var context = container.asContext();
         if (DesktopVisibilityController.INSTANCE.get(context).isInDesktopModeAndNotInOverview(
                 context.getDisplayId()) && endTarget == null) {
             // When tapping on the Taskbar in Desktop mode, reset to BackgroundApp to avoid the
-            // home screen icons flickering. Technically we could probably be do this for
-            // non-desktop as well, but limiting to this use case to reduce risk.
+            // home screen icons flickering.
             endTarget = LAST_TASK;
+        } else if (endTarget == null || endTarget == LAST_TASK || endTarget == NEW_TASK) {
+            // Fallback case to prevent leaving the user in the BackgroundApp state, where the
+            // recents view is visible and interactable.
+            endTarget = HOME;
         }
-        if (endTarget != null) {
-            // In the case where home is always shown behind desktop, ensure that we reset to
-            // Normal home state, and set `activityVisible` to false so we don't animate home
-            // because home is already showing.
-            if (DesktopState.getInstance(context).getShouldShowHomeBehindDesktop()) {
-                endTarget = HOME;
-                activityVisible = false;
-            }
-            // We were on our way to this state when we got canceled, end there instead.
-            startState = stateFromGestureEndTarget(endTarget);
+        // In the case where home is always shown behind desktop, ensure that we reset to
+        // Normal home state, and set `activityVisible` to false so we don't animate home
+        // because home is already showing.
+        if (DesktopState.getInstance(context).getShouldShowHomeBehindDesktop()) {
+            endTarget = HOME;
+            activityVisible = false;
         }
-        container.getStateManager().goToState(startState, activityVisible);
+
+        container.getStateManager().goToState(
+                stateFromGestureEndTarget(endTarget), activityVisible);
     }
 
     public final void calculateTaskSize(Context context, DeviceProfile dp, Rect outRect,
