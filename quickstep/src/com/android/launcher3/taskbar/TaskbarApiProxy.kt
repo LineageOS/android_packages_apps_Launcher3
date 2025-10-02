@@ -32,15 +32,12 @@ class TaskbarApiProxy(private val taskbarActivityContext: TaskbarActivityContext
 
     @AnyThread fun getTaskbarUiState(): TaskbarUiState = taskbarActivityContext.taskbarUiState
 
-    // TODO: Evaluate if this API is thread safe
+    @AnyThread
     fun isTransient(): Boolean = taskbarActivityContext.taskbarFeatureEvaluator.isTransient
 
     @AnyThread
     fun shouldAllowTaskbarToAutoStash(): Boolean =
         taskbarActivityContext.shouldAllowTaskbarToAutoStash()
-
-    // TODO: Expose property to TaskbarUiState
-    fun getResources(): Resources = taskbarActivityContext.resources
 
     /** Called only once during a gesture. Safe to post Runnable to TASKBAR_UI_THREAD. */
     @AnyThread
@@ -96,4 +93,7 @@ class TaskbarApiProxy(private val taskbarActivityContext: TaskbarActivityContext
 
     @Deprecated("Should be removed once we turned on [refactorTaskbarUiState()] flag")
     fun isTaskbarStashed() = taskbarActivityContext.isTaskbarStashed
+
+    @Deprecated("Should be removed once we turned on [refactorTaskbarUiState()] flag")
+    fun getResources(): Resources = taskbarActivityContext.resources
 }
