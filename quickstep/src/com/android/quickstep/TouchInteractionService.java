@@ -545,6 +545,12 @@ public class TouchInteractionService extends Service {
             return tis.mTaskbarManager;
         }
 
+        /** Returns the primary service */
+        @VisibleForTesting
+        public TouchInteractionService getService() {
+            return mTis.get();
+        }
+
         @VisibleForTesting
         public void injectFakeTrackpadForTesting() {
             TouchInteractionService tis = mTis.get();
@@ -1375,7 +1381,9 @@ public class TouchInteractionService extends Service {
         }
     }
 
-    private void reset(int displayId) {
+    /** Resets any active input related to this display */
+    @VisibleForTesting
+    public void reset(int displayId) {
         mConsumer = mUncheckedConsumer = InputConsumerUtils.getDefaultInputConsumer(
                 displayId,
                 mUserUnlocked,

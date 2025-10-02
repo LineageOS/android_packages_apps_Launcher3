@@ -15,6 +15,9 @@
  */
 package com.android.launcher3.util;
 
+import static android.view.KeyEvent.ACTION_DOWN;
+import static android.view.MotionEvent.ACTION_UP;
+
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static com.android.launcher3.LauncherSettings.Settings.LAYOUT_DIGEST_LABEL;
@@ -37,10 +40,14 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor.AutoCloseOutputStream;
 import android.os.Process;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.system.OsConstants;
 import android.util.Log;
+import android.view.InputDevice;
+import android.view.KeyCharacterMap;
+import android.view.KeyEvent;
 
 import androidx.test.uiautomator.UiDevice;
 
@@ -210,6 +217,25 @@ public class TestUtil {
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Consistent way to generate simple KeyEvents to interact with the Launcher activity.
+     */
+    public static KeyEvent createKeyEvent(int keyCode, int metaState, boolean actionDown) {
+        long eventTime = SystemClock.uptimeMillis();
+        return KeyEvent.obtain(
+                eventTime,
+                eventTime,
+                actionDown ? ACTION_DOWN : ACTION_UP,
+                keyCode,
+                /* repeat= */ 0,
+                metaState,
+                KeyCharacterMap.VIRTUAL_KEYBOARD,
+                /* scancode= */ 0,
+                /* flags= */ 0,
+                InputDevice.SOURCE_KEYBOARD,
+                /* characters =*/ null);
     }
 
     /**
