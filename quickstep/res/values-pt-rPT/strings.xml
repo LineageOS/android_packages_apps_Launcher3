@@ -115,8 +115,7 @@
     <string name="toast_split_app_unsupported" msgid="2360229567007828914">"Escolher outra app para usar o ecrã dividido"</string>
     <string name="blocked_by_policy" msgid="2071401072261365546">"Esta ação não é permitida pela app ou a sua entidade."</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"Os widgets não são atualmente suportados. Selecione outra app"</string>
-    <!-- no translation found for action_image_copy (6877540054727709339) -->
-    <skip />
+    <string name="action_image_copy" msgid="6877540054727709339">"Copiar"</string>
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Rodar ecrã"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Animação que mostra como a Barra de tarefas aparece na parte inferior do ecrã e é ocultada automaticamente quando não está em utilização"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Animação que mostra como afixar a Barra de tarefas através de um botão, para que a Barra de tarefas fique permanentemente visível na parte inferior do ecrã"</string>
@@ -150,10 +149,8 @@
     <string name="always_show_taskbar" msgid="3608801276107751229">"Ver sempre Barra de tarefas"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"Alterar modo de navegação"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Divisor da Barra de tarefas"</string>
-    <!-- no translation found for taskbar_recents_overflow_a11y_title (8005941062446304304) -->
-    <skip />
-    <!-- no translation found for taskbar_pinned_overflow_a11y_title (2314810718333302626) -->
-    <skip />
+    <string name="taskbar_recents_overflow_a11y_title" msgid="8005941062446304304">"Outras apps recentes"</string>
+    <string name="taskbar_pinned_overflow_a11y_title" msgid="2314810718333302626">"Outras apps"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Mover para a parte superior esquerda"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Mover para a part superior direita"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"Abrir app como um balão"</string>

@@ -115,8 +115,7 @@
     <string name="toast_split_app_unsupported" msgid="2360229567007828914">"မျက်နှာပြင်ခွဲ၍ပြသခြင်းသုံးရန် နောက်အက်ပ်တစ်ခုရွေးပါ"</string>
     <string name="blocked_by_policy" msgid="2071401072261365546">"ဤလုပ်ဆောင်ချက်ကို အက်ပ် သို့မဟုတ် သင်၏အဖွဲ့အစည်းက ခွင့်မပြုပါ"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"ဝိဂျက်များကို လောလောဆယ် ပံ့ပိုးမထားပါ။ အခြားအက်ပ်ရွေးပါ"</string>
-    <!-- no translation found for action_image_copy (6877540054727709339) -->
-    <skip />
+    <string name="action_image_copy" msgid="6877540054727709339">"မိတ္တူကူးရန်"</string>
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"ဖန်သားပြင်လှည့်ရန်"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Taskbar သည် စခရင်အောက်ခြေမှ ပေါ်လာပုံနှင့် အသုံးမပြုချိန်တွင် အလိုအလျောက်ပျောက်သွားပုံကို ပြသော လှုပ်ရှားသက်ဝင်ပုံ"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"စခရင်အောက်ခြေတွင် Taskbar အမြဲမြင်ရရန်အတွက် ခလုတ်ဖြင့် သင့် Taskbar ပင်ထိုးနည်းကို ပြသော လှုပ်ရှားသက်ဝင်ပုံ"</string>
@@ -150,8 +149,7 @@
     <string name="always_show_taskbar" msgid="3608801276107751229">"Taskbar အမြဲပြရန်"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"ရွှေ့ကြည့်သည့်မုဒ် ပြောင်းရန်"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"လုပ်ဆောင်စရာဘား ပိုင်းခြားစနစ်"</string>
-    <!-- no translation found for taskbar_recents_overflow_a11y_title (8005941062446304304) -->
-    <skip />
+    <string name="taskbar_recents_overflow_a11y_title" msgid="8005941062446304304">"လတ်တလော အခြားအက်ပ်များ"</string>
     <!-- no translation found for taskbar_pinned_overflow_a11y_title (2314810718333302626) -->
     <skip />
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"အပေါ်/ဘယ်ဘက်သို့ ရွှေ့ရန်"</string>

@@ -126,8 +126,7 @@
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"ଆକ୍ସନ କୀ\'କୁ ସ୍ପର୍ଶ କରି ଧରି ରଖି ଏବଂ ଆଇଟମ କେଉଁ ଏରିଆରେ ଅଛି ତାହା ଚୟନ କରି ସ୍କ୍ରିନରେ ଏକ ଆଇଟମ କିପରି ସର୍ଚ୍ଚ କରିବେ ତାହା ଦେଖାଉଥିବା ଆନିମେସନ"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"ଟାସ୍କବାର ଶିକ୍ଷା"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"ଥରକେ 2ଟି ଆପ୍ସ ବ୍ୟବହାର କରିବା ପାଇଁ ଏକ ଆପକୁ ପାର୍ଶ୍ୱକୁ ଡ୍ରାଗ କର"</string>
-    <!-- no translation found for taskbar_edu_bubbles (5179266214319135127) -->
-    <skip />
+    <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"ଏହାକୁ ଫ୍ଲୋଟ କରି ରଖିବାକୁ ନିମ୍ନର କୋଣଗୁଡ଼ିକୁ ଡ୍ରାଗ କରନ୍ତୁ"</string>
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"ଟାସ୍କବାର ଦେଖାଇବା ପାଇଁ ଉପରକୁ ଧୀରେ-ସ୍ୱାଇପ କରନ୍ତୁ"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"ଆପଣଙ୍କ ରୁଟିନ ଆଧାରରେ ଆପ ପରାମର୍ଶଗୁଡ଼ିକୁ ପାଆନ୍ତୁ"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"ଟାସ୍କବାର ପିନ କରିବା ପାଇଁ ଡିଭାଇଡରକୁ ଅଧିକ ସମୟ ଦବାନ୍ତୁ"</string>

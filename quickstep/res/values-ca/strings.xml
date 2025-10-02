@@ -115,8 +115,7 @@
     <string name="toast_split_app_unsupported" msgid="2360229567007828914">"Tria una altra app per utilitzar pantalla dividida"</string>
     <string name="blocked_by_policy" msgid="2071401072261365546">"L\'aplicació o la teva organització no permeten aquesta acció"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"Actualment els widgets no s\'admeten; selecciona una altra aplicació"</string>
-    <!-- no translation found for action_image_copy (6877540054727709339) -->
-    <skip />
+    <string name="action_image_copy" msgid="6877540054727709339">"Copia"</string>
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Gira la pantalla"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Animació que mostra com apareix la barra de tasques des de la part inferior de la pantalla i com s\'amaga automàticament quan no s\'utilitza"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Animació que mostra com es pot fixar la barra de tasques mitjançant un commutador perquè es mantingui visible permanentment a la part inferior de la pantalla"</string>
@@ -150,8 +149,7 @@
     <string name="always_show_taskbar" msgid="3608801276107751229">"Barra de tasques sempre visible"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"Canvia el mode de navegació"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Separador de la Barra de tasques"</string>
-    <!-- no translation found for taskbar_recents_overflow_a11y_title (8005941062446304304) -->
-    <skip />
+    <string name="taskbar_recents_overflow_a11y_title" msgid="8005941062446304304">"Altres aplicacions recents"</string>
     <!-- no translation found for taskbar_pinned_overflow_a11y_title (2314810718333302626) -->
     <skip />
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Mou a la part superior o a l\'esquerra"</string>
