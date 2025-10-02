@@ -16,26 +16,18 @@
 
 package com.android.launcher3.util.coroutines
 
+import com.android.launcher3.concurrent.annotations.Background
+import com.android.launcher3.concurrent.annotations.LightweightBackground
+import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority
+import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.util.DaggerSingletonObject
-import com.android.launcher3.util.coroutines.CoroutinesHelper.bgDispatcher
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.newFixedThreadPoolContext
 
 interface DispatcherProvider {
-    /**
-     * The default CoroutineDispatcher that is used by all standard builders like launch, async,
-     * etc. if neither a dispatcher nor any other ContinuationInterceptor is specified in their
-     * context.
-     *
-     * See Kotlin documentation for [Dispatchers.Default] for more detailed documentation.
-     */
-    val default: CoroutineDispatcher
-
     /**
      * Background thread pool for longer running work e.g. accessing storage, making network
      * requests, running AI tasks etc.
@@ -66,37 +58,18 @@ interface DispatcherProvider {
 }
 
 @LauncherAppSingleton
-class ProductionDispatchers @Inject constructor() : DispatcherProvider {
-    override val default = Dispatchers.Default
-    override val main = Dispatchers.Main.immediate
-
-    override val ioBackground = bgDispatcher(nThreads = 1, threadName = "LauncherBgIO")
-
-    override val lightweightBackground = bgDispatcher(nThreads = 1, threadName = "LauncherBgLight")
-
+class ProductionDispatchers
+@Inject
+constructor(
+    @Ui override val main: CoroutineDispatcher,
+    @Background override val ioBackground: CoroutineDispatcher,
+    @LightweightBackground(LightweightBackgroundPriority.UI)
+    override val lightweightBackground: CoroutineDispatcher,
+) : DispatcherProvider {
     override val unconfined = Dispatchers.Unconfined
 
     companion object {
         @JvmField
         val INSTANCE = DaggerSingletonObject(LauncherAppComponent::getProductionDispatchers)
-    }
-}
-
-private object CoroutinesHelper {
-    /**
-     * Default Coroutine dispatcher for background operations.
-     *
-     * Note that this is explicitly limiting the number of threads. In the past, we used
-     * [Dispatchers.IO]. This caused >40 threads to be spawned, and a lot of thread list lock
-     * contention between then, eventually causing jank.
-     */
-    @OptIn(DelicateCoroutinesApi::class)
-    fun bgDispatcher(nThreads: Int, threadName: String): CoroutineDispatcher {
-        // Why a new ThreadPool instead of just using Dispatchers.IO with
-        // CoroutineDispatcher.limitedParallelism? Because, if we were to use Dispatchers.IO, we
-        // would share those threads with other dependencies using Dispatchers.IO.
-        // Using a dedicated thread pool we have guarantees only Launcher is able to schedule
-        // code on those.
-        return newFixedThreadPoolContext(nThreads = nThreads, name = threadName)
     }
 }

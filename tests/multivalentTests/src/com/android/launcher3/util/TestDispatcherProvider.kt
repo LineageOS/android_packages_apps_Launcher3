@@ -20,7 +20,6 @@ import com.android.launcher3.util.coroutines.DispatcherProvider
 import kotlinx.coroutines.CoroutineDispatcher
 
 class TestDispatcherProvider(testDispatcher: CoroutineDispatcher) : DispatcherProvider {
-    override val default: CoroutineDispatcher = testDispatcher
     override val ioBackground: CoroutineDispatcher = testDispatcher
     override val lightweightBackground: CoroutineDispatcher = testDispatcher
     override val main: CoroutineDispatcher = testDispatcher
