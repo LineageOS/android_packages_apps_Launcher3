@@ -215,4 +215,6 @@ class TaskbarUiState {
     fun setDeviceProfile(dp: DeviceProfile) {
         _deviceProfile = dp
     }
+
+    fun getDeviceProfile(): DeviceProfile = _deviceProfile
 }
