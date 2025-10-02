@@ -35,6 +35,7 @@ import static com.android.launcher3.Utilities.mapRange;
 import static com.android.launcher3.anim.AnimatedFloat.VALUE;
 import static com.android.launcher3.anim.AnimatorListeners.forEndCallback;
 import static com.android.launcher3.config.FeatureFlags.enableTaskbarPinning;
+import static com.android.launcher3.taskbar.TaskbarActivityContext.TASKBAR_WINDOW_ICONS_TRANSITION;
 import static com.android.launcher3.taskbar.TaskbarPinningController.PINNING_PERSISTENT;
 import static com.android.launcher3.taskbar.TaskbarPinningController.PINNING_TRANSIENT;
 import static com.android.launcher3.taskbar.bubbles.BubbleBarView.FADE_IN_ANIM_ALPHA_DURATION_MS;
@@ -1539,6 +1540,9 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         @Override
         public void startTransition(
                 LayoutTransition transition, ViewGroup container, View view, int type) {
+            if (mActivity.isTaskbarWindowFullscreen()) {
+                mActivity.setTaskbarWindowFullscreen(true, TASKBAR_WINDOW_ICONS_TRANSITION);
+            }
             mRunningTransitionsCount++;
         }
 
@@ -1546,11 +1550,10 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         public void endTransition(
                 LayoutTransition transition, ViewGroup container, View view, int type) {
             mRunningTransitionsCount--;
-            if (mRunningTransitionsCount == 0
-                    && !mControllers.taskbarPopupController.isPopupOpened()) {
+            if (mRunningTransitionsCount == 0) {
                 // Reset the taskbar window size to default after all animations are done so
                 // there won't be janky animation with window resize.
-                mActivity.setTaskbarWindowFullscreen(false);
+                mActivity.setTaskbarWindowFullscreen(false, TASKBAR_WINDOW_ICONS_TRANSITION);
             }
             if (!transition.isRunning() && !mIsCanceled) {
                 mControllers.uiController.onIconLayoutBoundsChanged();

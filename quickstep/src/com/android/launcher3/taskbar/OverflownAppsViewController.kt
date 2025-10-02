@@ -42,10 +42,19 @@ class OverflownAppsViewController(
     init {
         overflownAppsContainerView.init(overflowIcon, viewCallbacks)
         overflownAppsContainerView.addOnCloseCallback(onClose)
+        overflownAppsContainerView.addOnCloseCallback {
+            activityContext.setTaskbarWindowFullscreen(
+                false,
+                TaskbarActivityContext.TASKBAR_WINDOW_ICON_TASKBAR_OVERFLOW,
+            )
+        }
     }
 
     fun show(overflownApps: List<ItemInfo>) {
-        activityContext.isTaskbarWindowFullscreen = true
+        activityContext.setTaskbarWindowFullscreen(
+            true,
+            TaskbarActivityContext.TASKBAR_WINDOW_ICON_TASKBAR_OVERFLOW,
+        )
         activityContext.dragLayer.post {
             overflownAppsContainerView.setOverflownApps(overflownApps)
             updateRunningAppState()

@@ -16,11 +16,15 @@
 package com.android.launcher3.taskbar
 
 import android.view.MotionEvent
+import android.view.MotionEvent.ACTION_HOVER_ENTER
+import android.view.MotionEvent.ACTION_HOVER_EXIT
 import android.view.ViewGroup
 import androidx.core.view.children
 import com.android.launcher3.AbstractFloatingView
+import com.android.launcher3.BubbleTextView
 import com.android.launcher3.R
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatItems
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
@@ -152,10 +156,75 @@ class OverflownAppsContainerControllerTest {
             .containsExactlyElementsIn(apps)
     }
 
+    @Test
+    fun testOverflownAppsContainerDoesNotOverlapTaskbar() {
+        val apps = createHotseatItems(numShownHotseatIcons + 3).toList()
+        toggleOverflownAppsView(apps)
+
+        verifyOverflowViewDoesNotOverlapTaskbar()
+    }
+
+    @Test
+    fun testOverflownAppsContainerDoesNotOverlapTaskbarAfterClosingTooltip() {
+        val apps = createHotseatItems(numShownHotseatIcons + 3)
+        runOnMainSync {
+            val taskbar: TaskbarView =
+                taskbarActivityContext.dragLayer.findViewById(R.id.taskbar_view)
+            taskbar.updateItems(apps, emptyList(), emptyList())
+            val iconView: BubbleTextView =
+                taskbar.iconViews.filterIsInstance<BubbleTextView>().first {
+                    it.tag is WorkspaceItemInfo
+                }
+            iconView.dispatchGenericMotionEvent(
+                MotionEvent.obtain(0, 0, ACTION_HOVER_ENTER, 0f, 0f, 0)
+            )
+            overflownController.toggleOverflownAppsView(overflowIcon, apps.toList()) {}
+            iconView.dispatchGenericMotionEvent(
+                MotionEvent.obtain(0, 0, ACTION_HOVER_EXIT, 0f, 0f, 0)
+            )
+        }
+        runOnMainSync {
+            // Run an empty frame so that the taskbar drag layer can resize and show the overflown
+            // container.
+        }
+
+        verifyOverflowViewDoesNotOverlapTaskbar()
+    }
+
+    private fun verifyOverflowViewDoesNotOverlapTaskbar() {
+        runOnMainSync {
+            val container: AbstractFloatingView =
+                AbstractFloatingView.getOpenView(
+                    taskbarActivityContext,
+                    AbstractFloatingView.TYPE_TASKBAR_OVERFLOW,
+                )
+            assertThat(container).isNotNull()
+
+            val location = IntArray(2)
+            container.getLocationOnScreen(location)
+            val containerTop = location[1]
+
+            val overflownContent: ViewGroup =
+                taskbarActivityContext.dragLayer.findViewById(R.id.overflown_content)
+
+            assertThat(container.height).isAtLeast(overflownContent.height)
+            assertThat(container.height)
+                .isAtLeast(taskbarActivityContext.deviceProfile.taskbarProfile.iconSize)
+
+            val taskbar: TaskbarView =
+                taskbarActivityContext.dragLayer.findViewById(R.id.taskbar_view)
+            taskbar.getLocationOnScreen(location)
+            val taskbarTop = location[1]
+
+            assertThat(containerTop + container.height).isAtMost(taskbarTop)
+        }
+    }
+
     private fun toggleOverflownAppsView(apps: List<ItemInfo>) {
         runOnMainSync { overflownController.toggleOverflownAppsView(overflowIcon, apps) {} }
-        // Run an empty frame so that the taskbar drag layer can resize and show the overflown
-        // container.
-        runOnMainSync {}
+        runOnMainSync {
+            // Run an empty frame so that the taskbar drag layer can resize and show the overflown
+            // container.
+        }
     }
 }

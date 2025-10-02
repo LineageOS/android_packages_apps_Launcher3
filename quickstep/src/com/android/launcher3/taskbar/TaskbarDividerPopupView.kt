@@ -94,7 +94,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         resources.getDimensionPixelSize(R.dimen.taskbar_pinning_popup_menu_vertical_margin)
 
     /** Callback invoked when the pinning popup view is closing. */
-    var onCloseCallback: (preferenceChanged: Boolean) -> Unit = {}
+    var onCloseStartedCallback: (preferenceChanged: Boolean) -> Unit = {}
 
     init {
         // This synchronizes the arrow and menu to open at the same time
@@ -276,8 +276,8 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         if (didPreferenceChange) {
             mOpenCloseAnimator = getCloseAnimator()
         }
-        onCloseCallback(didPreferenceChange)
-        onCloseCallback = {}
+        onCloseStartedCallback(didPreferenceChange)
+        onCloseStartedCallback = {}
     }
 
     /** Aligning the view pivot to center for animation. */
