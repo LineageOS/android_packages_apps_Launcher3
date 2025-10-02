@@ -149,7 +149,7 @@
     <string name="allow_rotation_desc" msgid="8662546029078692509">"Wanneer foon gedraai word"</string>
     <string name="compose_developer_options_section" msgid="8211460486549952595">"Jetpack Compose"</string>
     <string name="enable_composition_tracing_title" msgid="8989606591739368424">"Aktiveer komposisienasporing"</string>
-    <string name="enable_composition_tracing_desc" msgid="7187566039216492405">"Aktiveer komposisienasporing wanneer perfekte nasporing in oorsig geneem word"</string>
+    <string name="enable_composition_tracing_desc" msgid="7187566039216492405">"Aktiveer komposisienasporing wanneer Perfetto-nasporing in oorsig geneem word"</string>
     <string name="landscape_mode_title" msgid="5138814555934843926">"Landskapmodus"</string>
     <string name="landscape_mode_desc" msgid="3085236452297838664">"Stel tuisskerm na landskapmodus"</string>
     <string name="notification_dots_title" msgid="9062440428204120317">"Kennisgewingkolle"</string>
