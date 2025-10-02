@@ -87,7 +87,10 @@ constructor(
         get() = isPinned || hasNavButtons
 
     val supportsTransitionToTransientTaskbar: Boolean
-        get() = !hasNavButtons && !DisplayController.showDesktopTaskbarForFreeformDisplay(context)
+        get() =
+            !hasNavButtons &&
+                !DisplayController.showDesktopTaskbarForFreeformDisplay(context) &&
+                !desktopVisibilityController.isInDesktopMode(primaryDisplayId)
 
     companion object {
         @JvmField
