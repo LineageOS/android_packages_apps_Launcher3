@@ -15,12 +15,20 @@
  */
 package com.android.launcher3.taskbar;
 
+import static com.android.launcher3.Flags.enableTaskbarUiThread;
+import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
+import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
+
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ShortcutInfo;
 import android.graphics.Point;
 import android.os.UserHandle;
 import android.view.LayoutInflater;
+
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LifecycleRegistry;
 
 import com.android.launcher3.LifecycleTracker;
 import com.android.launcher3.dagger.LauncherComponentProvider;
@@ -40,8 +48,21 @@ public abstract class BaseTaskbarContext extends BaseContext
     private final boolean mIsPrimaryDisplay;
     protected final LayoutInflater mLayoutInflater;
 
+    /**
+     * {@link LifecycleRegistry#createUnsafe(LifecycleOwner)} allows created
+     * {@link LifecycleRegistry} obj be executed off main thread.
+     */
+    @SuppressLint("VisibleForTests")
     public BaseTaskbarContext(Context windowContext, int displayId, boolean isPrimaryDisplay) {
-        super(windowContext, Themes.getActivityThemeRes(windowContext));
+        super(
+                windowContext,
+                Themes.getActivityThemeRes(windowContext),
+                /* destroyOnDetach= */ true,
+                /* lifecycleRegistryProvider= */
+                (owner) -> enableTaskbarUiThread()
+                        ? LifecycleRegistry.createUnsafe(owner) : new LifecycleRegistry(owner),
+                /* savedStateRegistryExecutor= */
+                enableTaskbarUiThread() ? TASKBAR_UI_THREAD : MAIN_EXECUTOR);
         mDisplayId = displayId;
         mIsPrimaryDisplay = isPrimaryDisplay;
         mLayoutInflater = LayoutInflater.from(this).cloneInContext(this);
