@@ -2138,16 +2138,23 @@ public class Launcher extends StatefulActivity<LauncherState>
             return result;
         }
 
-        if (shouldShowHomeBehindDesktop() && isInState(ALL_APPS)) {
-            // On desktop form factor, first wait for the all apps page to close and then launch
-            // the activity.
-            getStateManager().goToState(NORMAL, forEndCallback(() -> {
-                startActivitySafely(v, intent, item);
-            }));
-            return null;
+        RunnableList result = super.startActivitySafely(v, intent, item);
+        if (shouldShowHomeBehindDesktop()) {
+            Runnable endAction = () -> {
+                closeOpenViews();
+                if (isInState(ALL_APPS)) {
+                    getStateManager().goToState(NORMAL);
+                }
+            };
+            if (result != null) {
+                result.add(endAction);
+            } else {
+                // |result| can be null in desktop mode (freeform multi window mode) when
+                // startActivity is cancelled, but an existing window is moved to the top
+                endAction.run();
+            }
         }
 
-        RunnableList result = super.startActivitySafely(v, intent, item);
         if (result != null && v instanceof BubbleTextView) {
             // This is set to the view that launched the activity that navigated the user away
             // from launcher. Since there is no callback for when the activity has finished
