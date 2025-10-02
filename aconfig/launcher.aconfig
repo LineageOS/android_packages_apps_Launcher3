@@ -508,7 +508,7 @@ flag {
   name: "simplified_launcher_model_binding"
   namespace: "launcher"
   description: "Simplified approach to binding launcher model asynchronously"
-  bug: "390572144"
+  bug: "448982751"
 }
 
 flag {
