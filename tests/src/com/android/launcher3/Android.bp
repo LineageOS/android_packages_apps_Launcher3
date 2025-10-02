@@ -15,12 +15,3 @@ filegroup {
         "util/rule/SetPropRule.java",
     ],
 }
-
-// Combination of tests and utils in the launcher3 package
-filegroup {
-    name: "launcher-e2e-tests",
-    srcs: [
-        ":launcher-e2e-tests-only",
-        ":launcher-e2e-tests-utils",
-    ],
-}
