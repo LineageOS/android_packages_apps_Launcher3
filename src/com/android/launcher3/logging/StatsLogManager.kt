@@ -615,6 +615,10 @@ open class StatsLogManager protected constructor(@JvmField protected val mContex
         LAUNCHER_OMNI_GET_LONG_PRESS_RUNNABLE(1545),
         @UiEvent(doc = "User tapped on \"change aspect ratio\" system shortcut.")
         LAUNCHER_ASPECT_RATIO_SETTINGS_SYSTEM_SHORTCUT_TAP(2219),
+        @UiEvent(
+            doc = "User tapped or long pressed on create new folder icon inside launcher settings."
+        )
+        LAUNCHER_CREATE_NEW_FOLDER_BUTTON_TAP_OR_LONGPRESS(2508),
 
         // One Grid Flags
         @UiEvent(doc = "User sets the device in Fixed Landscape")

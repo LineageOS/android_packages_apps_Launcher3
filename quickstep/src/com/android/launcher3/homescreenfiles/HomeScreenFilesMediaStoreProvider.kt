@@ -25,6 +25,7 @@ import android.net.Uri
 import android.os.Environment
 import android.os.Process
 import android.provider.DocumentsContract
+import android.provider.DocumentsContract.Document.MIME_TYPE_DIR
 import android.provider.MediaStore
 import android.provider.MediaStore.Files.FileColumns.DATA
 import android.provider.MediaStore.Files.FileColumns.DISPLAY_NAME
@@ -35,6 +36,7 @@ import android.provider.MediaStore.VOLUME_EXTERNAL_PRIMARY
 import android.util.Log
 import androidx.annotation.WorkerThread
 import androidx.core.database.getStringOrNull
+import com.android.launcher3.R
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider.Companion.HOME_SCREEN_FOLDER_RELATIVE_PATH
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider.FileChange
 import com.android.launcher3.util.DaggerSingletonTracker
@@ -52,6 +54,7 @@ import java.util.concurrent.TimeUnit
 class HomeScreenFilesMediaStoreProvider(
     private val context: Context,
     private val executorService: ExecutorService,
+    private val fileFactory: (path: String) -> File,
     lifecycle: DaggerSingletonTracker,
 ) : HomeScreenFilesProvider {
     override val fileChanges = MutableListenableStream<FileChange>()
@@ -99,6 +102,72 @@ class HomeScreenFilesMediaStoreProvider(
         val uri = MediaStore.Files.getContentUri(VOLUME_EXTERNAL_PRIMARY)
         context.contentResolver.registerContentObserver(uri, true, observer)
         lifecycle.addCloseable { context.contentResolver.unregisterContentObserver(observer) }
+    }
+
+    override fun canCreateNewFolder(): Boolean =
+        externalStorageDirectoryMountedFuture.isDone &&
+            !externalStorageDirectoryMountedFuture.isCancelled &&
+            !externalStorageDirectoryMountedFuture.isCompletedExceptionally
+
+    override fun createNewFolder(): CompletableFuture<Boolean> {
+        return supplyAsync(
+            {
+                if (!canCreateNewFolder()) {
+                    Log.e(TAG, "Unable to create folder due to unmet preconditions")
+                    return@supplyAsync false
+                }
+
+                try {
+                    // NOTE: The media provider will create a disambiguated folder name if needed so
+                    // as to ensure uniqueness (e.g. "New folder" -> "New folder (1)").
+                    val uri =
+                        context.contentResolver.insert(
+                            MediaStore.Files.getContentUri(VOLUME_EXTERNAL_PRIMARY),
+                            ContentValues().apply {
+                                put(
+                                    DISPLAY_NAME,
+                                    context.getString(R.string.default_new_folder_name),
+                                )
+                                put(MIME_TYPE, MIME_TYPE_DIR)
+                                put(RELATIVE_PATH, HOME_SCREEN_FOLDER_RELATIVE_PATH)
+                            },
+                        )
+
+                    if (uri == null) {
+                        Log.e(
+                            TAG,
+                            "Unable to create new folder due to failure to insert into media store",
+                        )
+                        return@supplyAsync false
+                    }
+
+                    context.contentResolver.query(uri, arrayOf(DATA), null, null).use { c ->
+                        if (c == null || !c.moveToFirst()) {
+                            Log.e(
+                                TAG,
+                                "Unable to create new folder due to failure to query media store",
+                            )
+                            return@supplyAsync false
+                        }
+
+                        // NOTE: Insertion into the media store doesn't guarantee the creation of
+                        // the new folder on the file system because it is empty. To ensure new
+                        // folder creation, we must do so explicitly using file system operations.
+                        val folder = fileFactory.invoke(c.getString(c.getColumnIndexOrThrow(DATA)))
+                        if (!folder.exists() && !folder.mkdirs()) {
+                            Log.e(TAG, "Unable to create new folder due to 'File#mkdirs()' failure")
+                            return@supplyAsync false
+                        }
+
+                        return@supplyAsync true
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Unable to create new folder due to exception.", e)
+                    return@supplyAsync false
+                }
+            },
+            executorService,
+        )
     }
 
     override fun canMoveToHomeScreen(uriList: List<Uri>?): Boolean =
@@ -186,12 +255,18 @@ class HomeScreenFilesMediaStoreProvider(
                         while (it.moveToNext()) {
                             val id = it.getLong(idColumnIndex)
                             val uri = MediaStore.Files.getContentUri(VOLUME_EXTERNAL_PRIMARY, id)
+                            val mimeType = it.getStringOrNull(mimeTypeColumnIndex)
                             result[uri] =
                                 HomeScreenFile(
                                     uri = uri,
                                     displayName = it.getString(displayNameColumnIndex),
-                                    mimeType = it.getStringOrNull(mimeTypeColumnIndex),
-                                    isDirectory = File(it.getString(dataColumnIndex)).isDirectory,
+                                    mimeType = mimeType,
+                                    isDirectory =
+                                        fileFactory.invoke(it.getString(dataColumnIndex)).let { f ->
+                                            // Defer to [mimeType] when the file does not yet exist.
+                                            (f.exists() && f.isDirectory) ||
+                                                (mimeType == MIME_TYPE_DIR)
+                                        },
                                     user = user,
                                 )
                         }
@@ -246,13 +321,18 @@ class HomeScreenFilesMediaStoreProvider(
                     if (it.count == 1) {
                         it.moveToFirst()
                         val displayNameColumnIndex = it.getColumnIndex(DISPLAY_NAME)
-                        val mimeTypeColumnIndex = it.getColumnIndex(MIME_TYPE)
                         val dataColumnIndex = it.getColumnIndex(DATA)
+                        val mimeTypeColumnIndex = it.getColumnIndex(MIME_TYPE)
+                        val mimeType = it.getStringOrNull(mimeTypeColumnIndex)
                         HomeScreenFile(
                             uri = uri,
                             displayName = it.getString(displayNameColumnIndex),
-                            mimeType = it.getStringOrNull(mimeTypeColumnIndex),
-                            isDirectory = File(it.getString(dataColumnIndex)).isDirectory,
+                            mimeType = mimeType,
+                            isDirectory =
+                                fileFactory.invoke(it.getString(dataColumnIndex)).let { f ->
+                                    // Defer to [mimeType] when the file does not yet exist.
+                                    (f.exists() && f.isDirectory) || (mimeType == MIME_TYPE_DIR)
+                                },
                             user = Process.myUserHandle(),
                         )
                     } else {
