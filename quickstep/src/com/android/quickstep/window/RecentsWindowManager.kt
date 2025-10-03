@@ -80,8 +80,10 @@ import com.android.launcher3.util.ActivityOptionsWrapper
 import com.android.launcher3.util.DaggerSingletonObject
 import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.Executors
+import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.LooperExecutor
 import com.android.launcher3.util.RunnableList
+import com.android.launcher3.util.SafeCloseable
 import com.android.launcher3.util.ScreenOnTracker
 import com.android.launcher3.util.ScreenOnTracker.ScreenOnListener
 import com.android.launcher3.util.SystemUiController
@@ -274,6 +276,8 @@ constructor(
 
     var activityLaunchAnimationRunner: RemoteAnimationFactory? = null
 
+    private var displayChangesSafeCloseable: SafeCloseable? = null
+
     init {
         fallbackWindowInterface.setRecentsWindowManager(this)
         if (displayId == DEFAULT_DISPLAY) {
@@ -288,7 +292,10 @@ constructor(
             splitSelectStateController.initSplitFromDesktopController(this)
         }
 
-        displayController.addChangeListenerForDisplay(this, displayId)
+        displayController.getListenable(displayId)?.let {
+            displayChangesSafeCloseable =
+                it.changes.forEach(MAIN_EXECUTOR) { _ -> onDisplayInfoChanged() }
+        }
     }
 
     fun createWindowView() {
@@ -349,7 +356,8 @@ constructor(
 
     override fun destroy() {
         super.destroy()
-        displayController.removeChangeListenerForDisplay(this, displayId)
+        displayChangesSafeCloseable?.close()
+        displayChangesSafeCloseable = null
         fallbackWindowInterface.setRecentsWindowManager(null)
         tisBindHelper.onDestroy()
         Executors.MAIN_EXECUTOR.execute {
@@ -421,14 +429,14 @@ constructor(
         val diff = oldConfiguration?.let { newConfiguration?.diff(it) } ?: -1
         val rotation = WindowManagerProxy.INSTANCE[this].getRotation(this)
         if ((diff and (CONFIG_ORIENTATION or CONFIG_SCREEN_SIZE)) != 0 || rotation != oldRotation) {
-            onHandleConfigurationChanged(newConfiguration)
+            onHandleConfigurationChanged()
         }
 
         oldConfiguration = newConfiguration
         oldRotation = rotation
     }
 
-    fun onHandleConfigurationChanged(configuration: Configuration?) {
+    private fun onHandleConfigurationChanged() {
         initDeviceProfile()
         AbstractFloatingView.closeOpenViews(
             this,
@@ -442,11 +450,7 @@ constructor(
         dragLayer?.recreateControllers()
     }
 
-    override fun onDisplayInfoChanged(
-        context: Context?,
-        info: DisplayController.Info?,
-        flags: Int,
-    ) {
+    private fun onDisplayInfoChanged() {
         initDeviceProfile()
         surfaceControlViewHost?.relayout(getWindowLayoutParams())
     }

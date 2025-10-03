@@ -19,11 +19,13 @@ import static android.view.Surface.ROTATION_0;
 
 import static com.android.launcher3.MotionEventsUtils.isTrackpadMultiFingerSwipe;
 import static com.android.launcher3.MotionEventsUtils.isTrackpadScroll;
+import static com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority.UI;
 import static com.android.launcher3.util.DisplayController.CHANGE_ACTIVE_SCREEN;
 import static com.android.launcher3.util.DisplayController.CHANGE_ALL;
 import static com.android.launcher3.util.DisplayController.CHANGE_NAVIGATION_MODE;
 import static com.android.launcher3.util.DisplayController.CHANGE_ROTATION;
 import static com.android.launcher3.util.DisplayController.CHANGE_SUPPORTED_BOUNDS;
+import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.NavigationMode.THREE_BUTTONS;
 
 import android.annotation.NonNull;
@@ -34,15 +36,14 @@ import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 
 import com.android.app.displaylib.PerDisplayRepository;
+import com.android.launcher3.concurrent.annotations.LightweightBackground;
 import com.android.launcher3.dagger.WindowContext;
 import com.android.launcher3.testing.shared.TestProtocol;
 import com.android.launcher3.util.DaggerSingletonObject;
 import com.android.launcher3.util.DaggerSingletonTracker;
 import com.android.launcher3.util.DisplayController;
-import com.android.launcher3.util.DisplayController.DisplayInfoChangeListener;
-import com.android.launcher3.concurrent.annotations.LightweightBackground;
-import static com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority.UI;
 import com.android.launcher3.util.DisplayController.Info;
+import com.android.launcher3.util.ListenableDiffAwareRef;
 import com.android.launcher3.util.NavigationMode;
 import com.android.quickstep.dagger.QuickstepBaseAppComponent;
 import com.android.quickstep.util.RecentsOrientedState;
@@ -61,7 +62,7 @@ import java.util.concurrent.Executor;
 /**
  * Helper class for transforming touch events
  */
-public class RotationTouchHelper implements DisplayInfoChangeListener {
+public class RotationTouchHelper {
 
     public static final DaggerSingletonObject<PerDisplayRepository<RotationTouchHelper>>
             REPOSITORY_INSTANCE = new DaggerSingletonObject<>(
@@ -160,10 +161,15 @@ public class RotationTouchHelper implements DisplayInfoChangeListener {
                 () -> QuickStepContract.getWindowCornerRadius(mWindowContext));
 
         // Register for navigation mode and rotation changes
-        mDisplayController.addChangeListenerForDisplay(this, mDisplayId);
+        ListenableDiffAwareRef<Info, Integer> listenable =
+                mDisplayController.getListenable(mDisplayId);
+        if (listenable != null) {
+            lifeCycle.addCloseable(listenable.forEachChange(
+                    MAIN_EXECUTOR, this::onDisplayInfoChanged));
+        }
         DisplayController.Info info = mDisplayController.getInfoForDisplay(mDisplayId);
         if (info != null) {
-            onDisplayInfoChanged(mWindowContext, info, CHANGE_ALL);
+            onDisplayInfoChanged(info, CHANGE_ALL);
         } else {
             Log.w(TAG, "Info null for display " + mDisplayId);
         }
@@ -189,7 +195,6 @@ public class RotationTouchHelper implements DisplayInfoChangeListener {
         };
 
         lifeCycle.addCloseable(() -> {
-            mDisplayController.removeChangeListenerForDisplay(this, mDisplayId);
             mOrientationListener.disable();
             TaskStackChangeListeners.getInstance()
                     .unregisterTaskStackListener(mFrozenTaskListener);
@@ -247,8 +252,7 @@ public class RotationTouchHelper implements DisplayInfoChangeListener {
                 event.getY(pointerIndex));
     }
 
-    @Override
-    public void onDisplayInfoChanged(Context context, @NonNull Info displayInfo, int flags) {
+    private void onDisplayInfoChanged(@NonNull Info displayInfo, int flags) {
         if ((flags & (CHANGE_ROTATION | CHANGE_ACTIVE_SCREEN | CHANGE_NAVIGATION_MODE
                 | CHANGE_SUPPORTED_BOUNDS)) != 0) {
             mDisplayRotation = displayInfo.rotation;

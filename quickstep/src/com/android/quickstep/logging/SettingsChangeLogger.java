@@ -37,6 +37,7 @@ import static com.android.launcher3.shapes.ShapesProvider.FOUR_SIDED_COOKIE_KEY;
 import static com.android.launcher3.shapes.ShapesProvider.SEVEN_SIDED_COOKIE_KEY;
 import static com.android.launcher3.shapes.ShapesProvider.SQUARE_KEY;
 import static com.android.launcher3.util.DisplayController.CHANGE_NAVIGATION_MODE;
+import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.SettingsCache.NOTIFICATION_BADGING_URI;
 
 import android.content.Context;
@@ -69,6 +70,7 @@ import com.android.launcher3.util.DaggerSingletonObject;
 import com.android.launcher3.util.DaggerSingletonTracker;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.DisplayController.Info;
+import com.android.launcher3.util.ListenableDiffAwareRef;
 import com.android.launcher3.util.NavigationMode;
 import com.android.launcher3.util.SettingsCache;
 import com.android.quickstep.dagger.QuickstepBaseAppComponent;
@@ -87,8 +89,7 @@ import javax.inject.Named;
  * Utility class to log launcher settings changes
  */
 @LauncherAppSingleton
-public class SettingsChangeLogger implements
-        DisplayController.DisplayInfoChangeListener, OnSharedPreferenceChangeListener {
+public class SettingsChangeLogger implements OnSharedPreferenceChangeListener {
 
     /**
      * Singleton instance
@@ -130,9 +131,12 @@ public class SettingsChangeLogger implements
         mThemePreference = themePreference;
         mThemeFactoryMap = themeFactoryMap;
 
-        displayController.addChangeListener(this);
+        ListenableDiffAwareRef<Info, Integer> listenable = displayController.getListenable();
+        if (listenable != null) {
+            tracker.addCloseable(
+                    listenable.forEachChange(MAIN_EXECUTOR, this::onDisplayInfoChanged));
+        }
         mNavMode = displayController.getInfo().getNavigationMode();
-        tracker.addCloseable(() -> displayController.removeChangeListener(this));
 
         mLauncherPrefs.getBackedUpPrefs().registerOnSharedPreferenceChangeListener(this);
         mLauncherPrefs.getDevicePrefs().registerOnSharedPreferenceChangeListener(this);
@@ -201,8 +205,7 @@ public class SettingsChangeLogger implements
         mNotificationDotsEvent = mEvent;
     }
 
-    @Override
-    public void onDisplayInfoChanged(Context context, Info info, int flags) {
+    private void onDisplayInfoChanged(Info info, int flags) {
         if ((flags & CHANGE_NAVIGATION_MODE) != 0) {
             mNavMode = info.getNavigationMode();
             mStatsLogManager.logger().log(mNavMode.launcherEvent);
