@@ -21,7 +21,7 @@ import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
 import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_OVERVIEW;
 import static android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE;
 
-import static com.android.launcher3.Flags.enableReplaceShareTargetWithSharesheet;
+import static com.android.launcher3.Flags.enableReplaceSharesheetAndEmptyMessageRo;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.THREAD_POOL_EXECUTOR;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
@@ -148,7 +148,7 @@ public class ImageActionUtils {
                 Log.e(tag, "No snapshot available, not starting share.");
                 return;
             }
-            if (enableReplaceShareTargetWithSharesheet()) {
+            if (enableReplaceSharesheetAndEmptyMessageRo()) {
                 startShareActivity(context, bitmapSupplier, crop, intent, tag,
                         /* sharedElement= */ null, /* copyIntentAction= */ null,
                         /* copyCropRectKey= */ null);
@@ -171,7 +171,7 @@ public class ImageActionUtils {
                 Log.e(tag, "No snapshot available, not starting share.");
                 return;
             }
-            if (enableReplaceShareTargetWithSharesheet()) {
+            if (enableReplaceSharesheetAndEmptyMessageRo()) {
                 Intent copyIntent = new Intent(copyIntentAction)
                         .setPackage(context.getPackageName())
                         .putExtra(copyCropRectKey, crop);
