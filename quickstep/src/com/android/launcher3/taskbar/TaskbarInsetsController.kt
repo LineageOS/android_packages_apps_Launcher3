@@ -196,7 +196,8 @@ class TaskbarInsetsController(val context: TaskbarActivityContext) : LoggableTas
         insetsRoundedCornerFlag: Int,
     ): Array<InsetsFrameProvider> {
         val navBarsFlag =
-            (if (context.isGestureNav) FLAG_SUPPRESS_SCRIM else 0) or insetsRoundedCornerFlag
+            (if (context.isGestureNav || !context.isPrimaryDisplay) FLAG_SUPPRESS_SCRIM else 0) or
+                insetsRoundedCornerFlag
         for (provider in providedInsets) {
             if (provider.type == navigationBars()) {
                 provider.setFlags(navBarsFlag, FLAG_SUPPRESS_SCRIM or FLAG_INSETS_ROUNDED_CORNER)
@@ -213,8 +214,9 @@ class TaskbarInsetsController(val context: TaskbarActivityContext) : LoggableTas
      */
     private fun getProvidedInsets(insetsRoundedCornerFlag: Int): Array<InsetsFrameProvider> {
         val navBarsFlag =
-            (if (context.isGestureNav) FLAG_SUPPRESS_SCRIM or FLAG_ANIMATE_RESIZING else 0) or
-                insetsRoundedCornerFlag
+            (if (context.isGestureNav || !context.isPrimaryDisplay)
+                FLAG_SUPPRESS_SCRIM or FLAG_ANIMATE_RESIZING
+            else 0) or insetsRoundedCornerFlag
         return arrayOf(
             InsetsFrameProvider(insetsOwner, 0, navigationBars())
                 .setFlags(
