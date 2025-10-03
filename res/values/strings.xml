@@ -589,4 +589,10 @@
     <string name="seven_sided_cookie_shape_title">7-sided cookie</string>
     <!-- label for arch shape option in customization picker -->
     <string name="arch_shape_title">Arch</string>
+
+    <!-- Strings for home screen files -->
+    <!-- Text for create new folder button [CHAR LIMIT=30] -->
+    <string name="create_new_folder_button_text">New folder</string>
+    <!-- Default name for a newly created folder -->
+    <string name="default_new_folder_name">New folder</string>
 </resources>

@@ -65,6 +65,7 @@ import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ElementsIntoSet
+import java.io.File
 import java.util.Optional
 import java.util.concurrent.ExecutorService
 import javax.inject.Named
@@ -180,7 +181,7 @@ object HomeScreenFilesModule {
         tracker: DaggerSingletonTracker,
     ): HomeScreenFilesProvider {
         return if (HomeScreenFilesUtils.isFeatureEnabled) {
-            HomeScreenFilesMediaStoreProvider(context, executorService, tracker)
+            HomeScreenFilesMediaStoreProvider(context, executorService, ::File, tracker)
         } else {
             HomeScreenFilesNoOpProvider()
         }

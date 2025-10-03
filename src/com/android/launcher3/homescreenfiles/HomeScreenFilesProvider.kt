@@ -39,6 +39,12 @@ data class HomeScreenFile(
 
 /** An interface for managing file items to be shown on the home screen. */
 interface HomeScreenFilesProvider {
+    /** Returns whether a new folder can be created. */
+    fun canCreateNewFolder(): Boolean
+
+    /** Attempts to asynchronously create a new folder. */
+    fun createNewFolder(): CompletableFuture<Boolean>
+
     /**
      * Returns whether all URIs in the specified list can be moved to the home screen.
      *

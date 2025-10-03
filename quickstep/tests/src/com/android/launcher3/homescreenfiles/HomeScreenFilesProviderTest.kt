@@ -28,10 +28,15 @@ import android.provider.DocumentsContract
 import android.provider.DocumentsContract.EXTERNAL_STORAGE_PROVIDER_AUTHORITY
 import android.provider.DocumentsContract.EXTRA_URI
 import android.provider.MediaStore
+import android.provider.MediaStore.Files.FileColumns.DATA
+import android.provider.MediaStore.Files.FileColumns.DISPLAY_NAME
+import android.provider.MediaStore.Files.FileColumns.MIME_TYPE
 import android.provider.MediaStore.Files.FileColumns.RELATIVE_PATH
+import android.provider.MediaStore.Files.FileColumns._ID
 import androidx.core.net.toUri
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
+import com.android.launcher3.R
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider.Companion.HOME_SCREEN_FOLDER_RELATIVE_PATH
 import com.android.launcher3.testutil.rule.LazyInitRule.Companion.lazyRule
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
@@ -76,6 +81,7 @@ class HomeScreenFilesProviderTest {
     @Mock private lateinit var contentResolver: ContentResolver
     @Mock private lateinit var contentProviderClient: ContentProviderClient
     @Mock private lateinit var externalStorageDir: File
+    @Mock private lateinit var fileFactory: (path: String) -> File
 
     private lateinit var mockitoSession: MockitoSession
     private lateinit var provider: HomeScreenFilesProvider
@@ -90,7 +96,7 @@ class HomeScreenFilesProviderTest {
                 .startMocking()
 
         doReturn(contentResolver).whenever(context).contentResolver
-
+        whenever(fileFactory.invoke(any())).thenAnswer { i -> File(i.getArgument<String>(0)) }
         whenever(Environment.getExternalStorageDirectory()).thenReturn(externalStorageDir)
         whenever(Environment.getExternalStorageState(externalStorageDir))
             .thenReturn(Environment.MEDIA_MOUNTED)
@@ -101,6 +107,119 @@ class HomeScreenFilesProviderTest {
     @After
     fun tearDown() {
         mockitoSession.finishMocking()
+    }
+
+    @Test
+    fun testCanCreateNewFolderWhenExternalStorageProviderIsMounted() {
+        whenever(Environment.getExternalStorageState(externalStorageDir))
+            .thenReturn(Environment.MEDIA_MOUNTED)
+
+        clearInvocations(context)
+        clearInvocations(contentResolver)
+        provider = createProvider()
+
+        assertTrue(provider.canCreateNewFolder())
+    }
+
+    @Test
+    fun testCanCreateNewFolderWhenExternalStorageProviderIsUnmounted() {
+        whenever(Environment.getExternalStorageState(externalStorageDir))
+            .thenReturn(Environment.MEDIA_UNMOUNTED)
+
+        clearInvocations(context)
+        clearInvocations(contentResolver)
+        provider = createProvider()
+
+        assertFalse(provider.canCreateNewFolder())
+    }
+
+    @Test
+    fun testCreateNewFolderWhenExternalStorageProviderIsMounted() {
+        testCreateNewFolder(externalStorageDirectoryIsMounted = true, expectSuccess = true)
+    }
+
+    @Test
+    fun testCreateNewFolderWhenExternalStorageProviderIsMountedButFolderCreationFails() {
+        testCreateNewFolder(
+            externalStorageDirectoryIsMounted = true,
+            folderCreationSucceeds = false,
+            expectSuccess = false,
+        )
+    }
+
+    @Test
+    fun testCreateNewFolderWhenExternalStorageProviderIsMountedButMediaStoreInsertionFails() {
+        testCreateNewFolder(
+            externalStorageDirectoryIsMounted = true,
+            mediaStoreInsertionSucceeds = false,
+            expectSuccess = false,
+        )
+    }
+
+    @Test
+    fun testCreateNewFolderWhenExternalStorageProviderIsMountedButMediaStoreQueryFails() {
+        testCreateNewFolder(
+            externalStorageDirectoryIsMounted = true,
+            mediaStoreQuerySucceeds = false,
+            expectSuccess = false,
+        )
+    }
+
+    @Test
+    fun testCreateNewFolderWhenExternalStorageProviderIsUnmounted() {
+        testCreateNewFolder(externalStorageDirectoryIsMounted = false, expectSuccess = false)
+    }
+
+    private fun testCreateNewFolder(
+        externalStorageDirectoryIsMounted: Boolean = true,
+        mediaStoreInsertionSucceeds: Boolean = true,
+        mediaStoreQuerySucceeds: Boolean = true,
+        folderCreationSucceeds: Boolean = true,
+        expectSuccess: Boolean = true,
+    ) {
+        val defaultNewFolderName = context.getString(R.string.default_new_folder_name)
+        val data = "$HOME_SCREEN_FOLDER_RELATIVE_PATH/$defaultNewFolderName"
+        val folder = mock<File>()
+        val uri = mock<Uri>()
+
+        // Mock external storage directory state.
+        whenever(Environment.getExternalStorageState(externalStorageDir))
+            .thenReturn(
+                if (externalStorageDirectoryIsMounted) Environment.MEDIA_MOUNTED
+                else Environment.MEDIA_UNMOUNTED
+            )
+
+        // Mock media store insertion success/failure.
+        whenever(
+                contentResolver.insert(
+                    eq(MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)),
+                    argThat {
+                        get(DISPLAY_NAME) == defaultNewFolderName &&
+                            get(MIME_TYPE) == DocumentsContract.Document.MIME_TYPE_DIR &&
+                            get(RELATIVE_PATH) == HOME_SCREEN_FOLDER_RELATIVE_PATH
+                    },
+                )
+            )
+            .thenReturn(if (mediaStoreInsertionSucceeds) uri else null)
+
+        // Mock media store query success/failure.
+        whenever(contentResolver.query(uri, arrayOf(DATA), null, null)).thenAnswer {
+            if (mediaStoreQuerySucceeds) MatrixCursor(arrayOf(DATA)).apply { addRow(arrayOf(data)) }
+            else null
+        }
+
+        // Mock folder creation success/failure.
+        whenever(folder.exists()).thenReturn(false)
+        whenever(folder.mkdirs()).thenReturn(folderCreationSucceeds)
+        whenever(fileFactory.invoke(data)).thenReturn(folder)
+
+        // Init [provider].
+        clearInvocations(context)
+        clearInvocations(contentResolver)
+        provider = createProvider()
+
+        // Invoke [#createNewFolder()].
+        assertEquals(expectSuccess, provider.createNewFolder().get())
     }
 
     @Test
@@ -291,13 +410,7 @@ class HomeScreenFilesProviderTest {
         afterQueryCallback: (() -> Unit)? = null,
     ) {
         val expectedUri = Uri.parse("content://media/external_primary/file")
-        val expectedProjection =
-            arrayOf(
-                MediaStore.Files.FileColumns._ID,
-                MediaStore.Files.FileColumns.DISPLAY_NAME,
-                MediaStore.Files.FileColumns.MIME_TYPE,
-                MediaStore.Files.FileColumns.DATA,
-            )
+        val expectedProjection = arrayOf(_ID, DISPLAY_NAME, MIME_TYPE, DATA)
 
         whenever(
                 contentResolver.query(
@@ -348,7 +461,7 @@ class HomeScreenFilesProviderTest {
             .query(
                 eq(expectedUri),
                 eq(expectedProjection),
-                eq("${MediaStore.Files.FileColumns.RELATIVE_PATH} = ?"),
+                eq("$RELATIVE_PATH = ?"),
                 argThat { x -> x.contentDeepEquals(arrayOf("Home screen/")) },
                 isNull(),
                 isNull(),
@@ -368,14 +481,7 @@ class HomeScreenFilesProviderTest {
                 )
             )
             .thenAnswer {
-                val answer =
-                    MatrixCursor(
-                        arrayOf(
-                            MediaStore.Files.FileColumns.DISPLAY_NAME,
-                            MediaStore.Files.FileColumns.MIME_TYPE,
-                            MediaStore.Files.FileColumns.DATA,
-                        )
-                    )
+                val answer = MatrixCursor(arrayOf(DISPLAY_NAME, MIME_TYPE, DATA))
                 answer.addRow(
                     arrayOf("NEW_test.png", "image/png", "/storage/emulated/0/Desktop/test.png")
                 )
@@ -432,6 +538,7 @@ class HomeScreenFilesProviderTest {
         HomeScreenFilesMediaStoreProvider(
             context,
             MoreExecutors.newDirectExecutorService(),
+            fileFactory,
             context.appComponent.daggerSingletonTracker,
         )
 
