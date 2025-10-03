@@ -688,3 +688,13 @@ flag {
   description: "Enable blur in more Launcher surfaces"
   bug: "444141641"
 }
+
+flag {
+  name: "fix_widget_drag_radius_loss"
+  namespace: "launcher"
+  description: "Fixes issue that during drag and drop, radius clips were lost"
+  bug: "326128683"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

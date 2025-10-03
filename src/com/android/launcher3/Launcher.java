@@ -123,6 +123,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -184,6 +185,7 @@ import com.android.launcher3.dragndrop.LauncherDragController;
 import com.android.launcher3.dragndrop.SystemDragController;
 import com.android.launcher3.folder.Folder;
 import com.android.launcher3.folder.FolderIcon;
+import com.android.launcher3.icons.FastBitmapDrawable;
 import com.android.launcher3.keyboard.ViewGroupFocusHelper;
 import com.android.launcher3.logger.LauncherAtom;
 import com.android.launcher3.logger.LauncherAtom.ContainerInfo;
@@ -241,6 +243,7 @@ import com.android.launcher3.util.Themes;
 import com.android.launcher3.util.Thunk;
 import com.android.launcher3.util.TouchController;
 import com.android.launcher3.util.TraceHelper;
+import com.android.launcher3.util.ViewEx;
 import com.android.launcher3.util.WallpaperThemeManager;
 import com.android.launcher3.views.FloatingIconView;
 import com.android.launcher3.views.FloatingSurfaceView;
@@ -1412,7 +1415,7 @@ public class Launcher extends StatefulActivity<LauncherState>
     void completeAddAppWidget(int appWidgetId, ItemInfo itemInfo,
             @Nullable AppWidgetHostView hostView, LauncherAppWidgetProviderInfo appWidgetInfo,
             boolean showPendingWidget, boolean updateWidgetSize,
-            @Nullable Bitmap widgetPreviewBitmap) {
+            @Nullable Drawable widgetPreviewDrawable) {
 
         if (appWidgetInfo == null) {
             appWidgetInfo = mAppWidgetManager.getLauncherAppWidgetInfo(appWidgetId,
@@ -1437,10 +1440,10 @@ public class Launcher extends StatefulActivity<LauncherState>
         if (showPendingWidget) {
             launcherInfo.restoreStatus = LauncherAppWidgetInfo.FLAG_UI_NOT_READY;
             PendingAppWidgetHostView pendingAppWidgetHostView = new PendingAppWidgetHostView(
-                    this, mAppWidgetHolder, launcherInfo, appWidgetInfo, widgetPreviewBitmap);
+                    this, mAppWidgetHolder, launcherInfo, appWidgetInfo, widgetPreviewDrawable);
             hostView = pendingAppWidgetHostView;
         } else if (hostView instanceof PendingAppWidgetHostView) {
-            ((PendingAppWidgetHostView) hostView).setPreviewBitmapAndUpdateBackground(null);
+            ((PendingAppWidgetHostView) hostView).setPreviewDrawableAndUpdateBackground(null);
             // User has selected a widget config and exited the config activity, we can trigger
             // re-inflation of PendingAppWidgetHostView to replace it with
             // LauncherAppWidgetHostView in workspace.
@@ -1822,15 +1825,25 @@ public class Launcher extends StatefulActivity<LauncherState>
         // started, we should remove the dropped AppWidgetHostView from drag layer and extract the
         // Bitmap that shows the preview. Then pass the Bitmap to completeAddAppWidget() to create
         // a PendingWidgetHostView.
-        Bitmap widgetPreviewBitmap = null;
+        Drawable widgetPreviewDrawable = null;
         if (isActivityStarted) {
-            DragView dropView = getDragLayer().clearAnimatedView();
-            if (dropView != null && dropView.containsAppWidgetHostView()) {
+            View dropView = getDragLayer().getAnimatedView();
+            if (dropView instanceof DragView
+                    && ((DragView<?>) dropView).containsAppWidgetHostView()) {
                 // Extracting Bitmap from dropView instead of its content view produces the correct
                 // bitmap.
-                widgetPreviewBitmap = createHardwareBitmap(
-                        dropView.getWidth(), dropView.getHeight(), dropView::draw);
+                if (Flags.fixWidgetDragRadiusLoss()) {
+                    widgetPreviewDrawable = ViewEx.captureSnapshotAsDrawable(
+                            dropView, /*debugString=*/ "NewWidgetWithConfigDrop",
+                            dropView.getWidth(), dropView.getHeight());
+                } else {
+                    widgetPreviewDrawable = new FastBitmapDrawable(
+                            createHardwareBitmap(dropView.getWidth(), dropView.getHeight(),
+                                    dropView::draw));
+                }
             }
+
+            getDragLayer().clearAnimatedView();
         }
 
         // Exit spring loaded mode if necessary after adding the widget; unless config activity was
@@ -1839,7 +1852,7 @@ public class Launcher extends StatefulActivity<LauncherState>
                 NORMAL, SPRING_LOADED_EXIT_DELAY);
         completeAddAppWidget(appWidgetId, info, boundWidget,
                 addFlowHandler.getProviderInfo(this), addFlowHandler.needsConfigure(),
-                false, widgetPreviewBitmap);
+                false, widgetPreviewDrawable);
         // Remove extra screen if widget drop concluded. If a config activity was started, extra
         // screen will be removed when we get back its result.
         if (!isActivityStarted) {

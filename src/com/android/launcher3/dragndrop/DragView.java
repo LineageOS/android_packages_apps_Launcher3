@@ -68,6 +68,7 @@ import com.android.launcher3.icons.FastBitmapDrawable;
 import com.android.launcher3.icons.IconNormalizer;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.util.RunnableList;
+import com.android.launcher3.util.ViewEx;
 import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.views.BaseDragLayer;
 
@@ -134,14 +135,14 @@ public abstract class DragView<T extends Context & ActivityContext> extends Fram
      * <p>
      * The registration point is the point inside our view that the touch events should
      * be centered upon.
-     * @param activity The Launcher instance/ActivityContext this DragView is in.
-     * @param content the view content that is attached to the drag view.
-     * @param width the width of the dragView
-     * @param height the height of the dragView
-     * @param initialScale The view that we're dragging around.  We scale it up when we draw it.
+     * @param activity      The Launcher instance/ActivityContext this DragView is in.
+     * @param content       the view content that is attached to the drag view.
+     * @param width         the width of the dragView
+     * @param height        the height of the dragView
+     * @param initialScale  The view that we're dragging around.  We scale it up when we draw it.
      * @param registrationX The x coordinate of the registration point.
      * @param registrationY The y coordinate of the registration point.
-     * @param scaleOnDrop the scale used in the drop animation.
+     * @param scaleOnDrop   the scale used in the drop animation.
      * @param finalScaleDps the scale used in the zoom out animation when the drag view is shown.
      */
     public DragView(T activity, View content, int width, int height, int registrationX,
@@ -500,11 +501,19 @@ public abstract class DragView<T extends Context & ActivityContext> extends Fram
      */
     public void detachContentView(boolean reattachToPreviousParent) {
         if (mContent != null && mContentViewParent != null && mContentViewInParentViewIndex >= 0) {
-            Picture picture = new Picture();
-            mContent.draw(picture.beginRecording(mWidth, mHeight));
-            picture.endRecording();
+            Drawable snapshotDrawable;
+            if (Flags.fixWidgetDragRadiusLoss()) {
+                snapshotDrawable = ViewEx.captureSnapshotAsDrawable(mContent,
+                        /*debugString=*/ "DragViewDrop", mWidth, mHeight);
+            } else {
+                Picture picture = new Picture();
+                mContent.draw(picture.beginRecording(mWidth, mHeight));
+                picture.endRecording();
+                snapshotDrawable = new PictureDrawable(picture);
+            }
+
             View view = new View(mActivity);
-            view.setBackground(new PictureDrawable(picture));
+            view.setBackground(snapshotDrawable);
             view.measure(makeMeasureSpec(mWidth, EXACTLY), makeMeasureSpec(mHeight, EXACTLY));
             view.layout(mContent.getLeft(), mContent.getTop(),
                     mContent.getRight(), mContent.getBottom());
