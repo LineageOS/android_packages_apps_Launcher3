@@ -342,6 +342,16 @@ class PopupDataSource @Inject constructor() {
             )
     }
 
+    val openHomeScreenFile =
+        PopupData(
+            iconResId = R.drawable.ic_home_screen_files_context_menu_open_in_app,
+            labelResId = R.string.home_screen_files_context_menu_open_in_app_label,
+            popupAction = { activityContext: ActivityContext, itemInfo: ItemInfo, view: View ->
+                activityContext.startActivitySafely(view, itemInfo.intent, itemInfo)
+            },
+            category = PopupCategory.SYSTEM_SHORTCUT_FIXED,
+        )
+
     companion object {
         private const val TAG = "PopupDataSource"
     }
