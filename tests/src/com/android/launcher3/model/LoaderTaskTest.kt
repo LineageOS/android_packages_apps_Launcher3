@@ -135,7 +135,7 @@ class LoaderTaskTest {
 
         `when`(launcherModel.modelDbController).thenReturn(modelDbController)
         doReturn(BitmapInfo.LOW_RES_INFO).whenever(iconCache).getDefaultIcon(any())
-        doAnswer {}.whenever(modelDbController).loadDefaultFavoritesIfNecessary()
+        doReturn(false).whenever(modelDbController).loadDefaultFavoritesIfNecessary()
         doAnswer { i ->
                 inMemoryDb.query(
                     TABLE_NAME,
