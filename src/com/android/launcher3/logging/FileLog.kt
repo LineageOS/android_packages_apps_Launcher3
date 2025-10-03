@@ -45,8 +45,9 @@ import java.util.concurrent.TimeUnit
 object FileLog {
     const val ENABLED: Boolean = true
     private const val FILE_NAME_PREFIX = "log-"
-    private const val MAX_LOG_FILE_SIZE = (8 shl 20 /** 8 mb **/ ).toLong()
-    public const val LOG_DAYS: Int = 4
+    /** 8 mb */
+    private const val MAX_LOG_FILE_SIZE = (8 shl 20).toLong()
+    const val LOG_DAYS: Int = 4
 
     private val DATE_FORMAT: DateFormat =
         DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
@@ -110,8 +111,8 @@ object FileLog {
     }
 
     @JvmStatic
-    fun e(tag: String?, msg: String) {
-        Log.e(tag, msg)
+    fun e(tag: String, msg: String?) {
+        Log.e(tag, msg, null)
         print(tag, msg)
     }
 

@@ -111,14 +111,6 @@ class WorkspaceItemProcessor(
      */
     fun processItem() {
         try {
-            if (c.user == null) {
-                // User has been deleted, remove the item.
-                c.markDeleted(
-                    "User has been deleted for item id=${c.id}",
-                    RestoreError.PROFILE_DELETED,
-                )
-                return
-            }
             when (c.itemType) {
                 Favorites.ITEM_TYPE_APPLICATION,
                 Favorites.ITEM_TYPE_DEEP_SHORTCUT -> processAppOrDeepShortcut()
@@ -474,7 +466,7 @@ class WorkspaceItemProcessor(
 
         c.applyCommonProperties(collection)
         // Do not trim the folder label, as is was set by the user.
-        collection.title = c.getString(c.mTitleIndex)
+        collection.title = c.title
         collection.spanX = 1
         collection.spanY = 1
         if (collection is FolderInfo) {
@@ -506,7 +498,7 @@ class WorkspaceItemProcessor(
      * widgets, installing / restoring widgets are treated differently, etc.
      */
     private fun processWidget() {
-        val component = ComponentName.unflattenFromString(c.appWidgetProvider)!!
+        val component = ComponentName.unflattenFromString(c.appWidgetProvider!!)!!
         val appWidgetInfo = LauncherAppWidgetInfo(c.appWidgetId, component)
         c.applyCommonProperties(appWidgetInfo)
         appWidgetInfo.spanX = c.spanX
@@ -646,7 +638,7 @@ class WorkspaceItemProcessor(
                 c.applyCommonProperties(this)
                 itemType = c.itemType
                 title = c.title
-                intent = c.parseIntent()
+                intent = c.parseIntent() ?: Intent()
             }
         if (homeScreenFiles.value.containsKey(item.intent.data)) {
             c.markRestored()

@@ -338,7 +338,7 @@ public class LauncherSettings {
 
         // LinkedHashMap maintains Order of Insertion
         @NonNull
-        private static LinkedHashMap<String, String> getColumnsToTypes(long profileId) {
+        public static LinkedHashMap<String, String> getColumnsToTypes(long profileId) {
             final LinkedHashMap<String, String> columnsToTypes = new LinkedHashMap<>();
             columnsToTypes.put(_ID, "INTEGER PRIMARY KEY");
             columnsToTypes.put(TITLE, "TEXT");

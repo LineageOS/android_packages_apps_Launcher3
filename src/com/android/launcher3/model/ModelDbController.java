@@ -171,7 +171,6 @@ public class ModelDbController {
         createDbIfNotExists();
 
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-        addModifiedTime(initialValues);
         int rowId = mOpenHelper.dbInsertAndCheck(db, TABLE_NAME, initialValues);
         if (rowId >= 0) {
             onAddOrDeleteOp(db);
@@ -201,7 +200,6 @@ public class ModelDbController {
     public int update(ContentValues values, String selection, String[] selectionArgs) {
         createDbIfNotExists();
 
-        addModifiedTime(values);
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         return db.update(TABLE_NAME, values, selection, selectionArgs);
     }
@@ -528,10 +526,6 @@ public class ModelDbController {
             Log.e(TAG, ex.getMessage(), ex);
             return null;
         }
-    }
-
-    private static void addModifiedTime(ContentValues values) {
-        values.put(LauncherSettings.Favorites.MODIFIED, System.currentTimeMillis());
     }
 
     private void clearFlagEmptyDbCreated() {

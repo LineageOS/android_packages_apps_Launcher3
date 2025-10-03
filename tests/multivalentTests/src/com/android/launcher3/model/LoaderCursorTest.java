@@ -22,28 +22,17 @@ import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType
 import static androidx.test.InstrumentationRegistry.getContext;
 
 import static com.android.launcher3.LauncherPrefs.IS_FIRST_LOAD_AFTER_RESTORE;
-import static com.android.launcher3.LauncherSettings.Favorites.APPWIDGET_ID;
-import static com.android.launcher3.LauncherSettings.Favorites.APPWIDGET_PROVIDER;
-import static com.android.launcher3.LauncherSettings.Favorites.APPWIDGET_SOURCE;
-import static com.android.launcher3.LauncherSettings.Favorites.CELLX;
-import static com.android.launcher3.LauncherSettings.Favorites.CELLY;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT;
 import static com.android.launcher3.LauncherSettings.Favorites.ICON;
-import static com.android.launcher3.LauncherSettings.Favorites.INTENT;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT;
-import static com.android.launcher3.LauncherSettings.Favorites.OPTIONS;
 import static com.android.launcher3.LauncherSettings.Favorites.PROFILE_ID;
-import static com.android.launcher3.LauncherSettings.Favorites.RANK;
-import static com.android.launcher3.LauncherSettings.Favorites.RESTORED;
-import static com.android.launcher3.LauncherSettings.Favorites.SCREEN;
-import static com.android.launcher3.LauncherSettings.Favorites.SPANX;
-import static com.android.launcher3.LauncherSettings.Favorites.SPANY;
 import static com.android.launcher3.LauncherSettings.Favorites.TITLE;
 import static com.android.launcher3.LauncherSettings.Favorites._ID;
+import static com.android.launcher3.LauncherSettings.Favorites.getColumnsToTypes;
 import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_ARCHIVED;
 import static com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY;
 
@@ -117,13 +106,7 @@ public class LoaderCursorTest {
         mIDP = InvariantDeviceProfile.INSTANCE.get(mContext);
         mApp = LauncherAppState.getInstance(mContext);
 
-        mCursor = new MatrixCursor(new String[] {
-                ICON, TITLE, _ID, CONTAINER, ITEM_TYPE,
-                PROFILE_ID, SCREEN, CELLX, CELLY, RESTORED,
-                INTENT, APPWIDGET_ID, APPWIDGET_PROVIDER,
-                SPANX, SPANY, RANK, OPTIONS, APPWIDGET_SOURCE
-        });
-
+        mCursor = new MatrixCursor(getColumnsToTypes(0L).keySet().toArray(new String[0]));
         mLoaderCursor = mContext.getAppComponent().getLoaderCursorFactory().createLoaderCursor(
                 mCursor, mContext.getAppComponent().getUserCache().getUserManagerState(), null);
     }
