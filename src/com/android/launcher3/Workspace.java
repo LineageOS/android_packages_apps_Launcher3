@@ -146,6 +146,7 @@ import com.android.launcher3.util.MSDLPlayerWrapper;
 import com.android.launcher3.util.OverlayEdgeEffect;
 import com.android.launcher3.util.RunnableList;
 import com.android.launcher3.util.Thunk;
+import com.android.launcher3.util.ViewEx;
 import com.android.launcher3.util.WallpaperOffsetInterpolator;
 import com.android.launcher3.widget.LauncherAppWidgetHostView;
 import com.android.launcher3.widget.NavigableAppWidgetHostView;
@@ -3135,10 +3136,17 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         int height = MeasureSpec.makeMeasureSpec(unScaledSize[1], MeasureSpec.EXACTLY);
         layout.measure(width, height);
         layout.layout(0, 0, unScaledSize[0], unScaledSize[1]);
-        Bitmap b = BitmapRenderer.createHardwareBitmap(
-                unScaledSize[0], unScaledSize[1], layout::draw);
+        Drawable widgetSnapshot;
+        if (Flags.fixWidgetDragRadiusLoss()) {
+            widgetSnapshot = ViewEx.captureSnapshotAsDrawable(layout,
+                    /*debugString=*/ "NewWidgetDrop", unScaledSize[0], unScaledSize[1]);
+        } else {
+            widgetSnapshot = new FastBitmapDrawable(
+                    BitmapRenderer.createHardwareBitmap(unScaledSize[0], unScaledSize[1],
+                            layout::draw));
+        }
         layout.setVisibility(visibility);
-        return new FastBitmapDrawable(b);
+        return widgetSnapshot;
     }
 
     private void getFinalPositionForDropAnimation(int[] loc, float[] scaleXY,
