@@ -21,6 +21,7 @@ import android.os.Looper;
 import android.os.Trace;
 import android.os.UserManager;
 import android.util.Log;
+import android.view.SurfaceControl;
 import android.view.ThreadedRenderer;
 
 import com.android.launcher3.BuildConfig;
@@ -96,5 +97,6 @@ public class QuickstepProcessInitializer extends MainProcessInitializer {
         }
 
         QuickstepProtoLogGroup.initProtoLog();
+        SurfaceControl.setDebugUsageAfterRelease(true);
     }
 }
