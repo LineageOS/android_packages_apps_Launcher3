@@ -46,6 +46,7 @@ import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl.Transaction;
 import android.view.View;
+import android.view.ViewGroup;
 import android.window.RemoteTransition;
 import android.window.SplashScreen;
 
@@ -151,6 +152,7 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
         mScrimView = rootView.findViewById(R.id.scrim_view);
         mFallbackRecentsView = rootView.findViewById(R.id.overview_panel);
         mActionsView = rootView.findViewById(R.id.overview_actions_view);
+        ViewGroup emptyRecentsMessageView = rootView.findViewById(R.id.empty_recents_message_view);
 
         if (DesktopModeStatus.canEnterDesktopMode(this)) {
             mDesktopRecentsTransitionController = new DesktopRecentsTransitionController(
@@ -159,7 +161,8 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
             );
         }
         mFallbackRecentsView.init(mActionsView, mSplitSelectStateController,
-                mDesktopRecentsTransitionController, new SurfaceTransactionApplier(getRootView()));
+                mDesktopRecentsTransitionController, new SurfaceTransactionApplier(getRootView()),
+                emptyRecentsMessageView);
 
         setContentView(rootView);
         rootView.getSysUiScrim().getSysUIProgress().updateValue(0);

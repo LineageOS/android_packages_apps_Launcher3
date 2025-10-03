@@ -27,6 +27,7 @@ import android.content.Context;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.ViewGroup;
 
 import androidx.annotation.Nullable;
 
@@ -75,9 +76,10 @@ public class LauncherRecentsView extends RecentsView<QuickstepLauncher, Launcher
     public void init(OverviewActionsView actionsView,
             SplitSelectStateController splitPlaceholderView,
             @Nullable DesktopRecentsTransitionController desktopRecentsTransitionController,
-            SurfaceTransactionApplier surfaceTransactionApplier) {
+            SurfaceTransactionApplier surfaceTransactionApplier,
+            @Nullable ViewGroup emptyRecentsMessageView) {
         super.init(actionsView, splitPlaceholderView, desktopRecentsTransitionController,
-                surfaceTransactionApplier);
+                surfaceTransactionApplier, emptyRecentsMessageView);
         setContentAlpha(0);
     }
 

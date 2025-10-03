@@ -26,6 +26,7 @@ import android.animation.AnimatorSet;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.ViewGroup;
 
 import androidx.annotation.Nullable;
 
@@ -78,9 +79,10 @@ public class FallbackRecentsView<CONTAINER_TYPE extends Context & RecentsViewCon
     @Override
     public void init(OverviewActionsView actionsView, SplitSelectStateController splitController,
             @Nullable DesktopRecentsTransitionController desktopRecentsTransitionController,
-            SurfaceTransactionApplier surfaceTransactionApplier) {
+            SurfaceTransactionApplier surfaceTransactionApplier,
+            @Nullable ViewGroup emptyRecentsMessageView) {
         super.init(actionsView, splitController, desktopRecentsTransitionController,
-                surfaceTransactionApplier);
+                surfaceTransactionApplier, emptyRecentsMessageView);
         if (mContainer instanceof RecentsWindowManager) {
             // These will be set during the state transition to DEFAULT
             return;
