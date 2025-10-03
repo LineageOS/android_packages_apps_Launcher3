@@ -20,8 +20,10 @@ import android.util.Log
 import android.util.SparseArray
 import android.util.SparseBooleanArray
 import android.view.Display.DEFAULT_DISPLAY
+import androidx.annotation.AnyThread
 import androidx.core.util.set
 import com.android.internal.util.LatencyTracker
+import com.android.launcher3.Flags.enableTaskbarUiThread
 import com.android.launcher3.LauncherState
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.LauncherAppComponent
@@ -155,6 +157,7 @@ constructor(
     }
 
     /** Returns whether a desk is currently active on the display with the given [displayId]. */
+    @AnyThread
     fun isInDesktopMode(displayId: Int): Boolean {
         if (!enableMultipleDesktops(context)) {
             return isInDesktopModeDeprecated
@@ -350,18 +353,20 @@ constructor(
             return
         }
 
-        displaysDesksConfigsMap.clear()
+        clearDisplaysDesksConfigsMap()
 
         displayDeskStates.forEach { displayDeskState ->
             if (DEBUG) {
                 Log.d(TAG, "onListenerConnected displayId=${displayDeskState.displayId}")
             }
-            displaysDesksConfigsMap[displayDeskState.displayId] =
+            putDisplaysDeskConfig(
+                displayDeskState.displayId,
                 DisplayDeskConfig(
                     displayId = displayDeskState.displayId,
                     activeDeskId = displayDeskState.activeDeskId,
                     deskIds = displayDeskState.deskIds.toMutableSet(),
-                )
+                ),
+            )
         }
 
         this.canCreateDesks = canCreateDesks
@@ -379,7 +384,23 @@ constructor(
         }
     }
 
-    private fun getDisplayDeskConfig(displayId: Int) = displaysDesksConfigsMap[displayId]
+    @AnyThread
+    private fun getDisplayDeskConfig(displayId: Int): DisplayDeskConfig? {
+        return if (enableTaskbarUiThread()) {
+            synchronized(displaysDesksConfigsMap) { displaysDesksConfigsMap[displayId] }
+        } else {
+            displaysDesksConfigsMap[displayId]
+        }
+    }
+
+    @AnyThread
+    private fun putDisplaysDeskConfig(displayId: Int, value: DisplayDeskConfig) {
+        if (enableTaskbarUiThread()) {
+            synchronized(displaysDesksConfigsMap) { displaysDesksConfigsMap[displayId] = value }
+        } else {
+            displaysDesksConfigsMap[displayId] = value
+        }
+    }
 
     private fun onCanCreateDesksChanged(canCreateDesks: Boolean) {
         if (!enableMultipleDesktops(context)) {
@@ -397,8 +418,10 @@ constructor(
         // Add the config for the desk if there is nothing yet, as the display can start without any
         // desks.
         if (getDisplayDeskConfig(displayId) == null) {
-            displaysDesksConfigsMap[displayId] =
-                DisplayDeskConfig(displayId, INACTIVE_DESK_ID, mutableSetOf(deskId))
+            putDisplaysDeskConfig(
+                displayId,
+                DisplayDeskConfig(displayId, INACTIVE_DESK_ID, mutableSetOf(deskId)),
+            )
         } else {
             getDisplayDeskConfig(displayId)!!.also {
                 check(it.deskIds.add(deskId)) {
@@ -455,6 +478,14 @@ constructor(
         pw.println("$prefix\tinOverviewState=$inOverviewStateMap")
         pw.println("$prefix\tdesktopTaskListener=$desktopTaskListener")
         pw.println("$prefix\tcontext=$context")
+    }
+
+    private fun clearDisplaysDesksConfigsMap() {
+        if (enableTaskbarUiThread()) {
+            synchronized(displaysDesksConfigsMap) { displaysDesksConfigsMap.clear() }
+        } else {
+            displaysDesksConfigsMap.clear()
+        }
     }
 
     /**

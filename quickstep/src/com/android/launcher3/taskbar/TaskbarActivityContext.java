@@ -329,6 +329,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         mIsTransient = mTaskbarFeatureEvaluator.isTransient();
         mIsPinned = mTaskbarFeatureEvaluator.isPinned();
         mTaskbarUiState = TaskbarUiStateMonitor.INSTANCE.get(this).getTaskbarUiState(displayId);
+        resetResourceValueInTaskbarUiState();
         mTaskbarUiState.setIsPrimaryDisplay(isPrimaryDisplay);
         mTaskbarUiState.setIsTransient(mIsTransient);
         mNavigationBarPanelContext = navigationBarPanelContext;
@@ -565,6 +566,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                 .withDimensionsOverride(overrideProvider).build();
         if (refactorTaskbarUiState()) {
             mTaskbarUiState.setDeviceProfile(mDeviceProfile);
+            resetResourceValueInTaskbarUiState();
         }
 
         if (isTransientTaskbar()) {
@@ -908,6 +910,31 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         if (!mIsUserSetupComplete) {
             setTaskbarWindowSize(getSetupWindowSize());
         }
+        resetResourceValueInTaskbarUiState();
+    }
+
+
+    /** Should be called after init, config changed or DeviceProfile change. */
+    private void resetResourceValueInTaskbarUiState() {
+        if (!refactorTaskbarUiState()) {
+            return;
+        }
+        final Resources res = getResources();
+        mTaskbarUiState.setUnstashAreaSizePx(
+                res.getDimensionPixelSize(R.dimen.taskbar_unstash_input_area));
+        mTaskbarUiState.setActionCornerPaddingPx(
+                res.getDimensionPixelSize(R.dimen.transient_taskbar_action_corner_padding));
+        if (mDeviceProfile != null) {
+            mTaskbarUiState.setTaskbarNavThreshold(
+                    TaskbarThresholdUtils.getFromNavThreshold(res, mDeviceProfile));
+        }
+        mTaskbarUiState.setTaskbarSlowVelocityYThreshold(
+                res.getDimensionPixelSize(R.dimen.taskbar_slow_velocity_y_threshold));
+        mTaskbarUiState.setTaskbarStashedScreenEdgeHoverDeadzoneHeightPx(
+                res.getDimensionPixelSize(
+                        R.dimen.taskbar_stashed_screen_edge_hover_deadzone_height));
+        mTaskbarUiState.setTaskbarStashedBelowHoverDeadzoneHeightPx(
+                res.getDimensionPixelSize(R.dimen.taskbar_stashed_below_hover_deadzone_height));
     }
 
     public boolean isThreeButtonNav() {

@@ -92,6 +92,13 @@ class TaskbarUiState {
     private var _navigationMode = NavigationMode.THREE_BUTTONS
     private var _isTransient = false
 
+    @Volatile var unstashAreaSizePx: Int = 0
+    @Volatile var actionCornerPaddingPx: Int = 0
+    @Volatile var taskbarNavThreshold: Int = 0
+    @Volatile var taskbarSlowVelocityYThreshold: Int = 0
+    @Volatile var taskbarStashedScreenEdgeHoverDeadzoneHeightPx: Int = 0
+    @Volatile var taskbarStashedBelowHoverDeadzoneHeightPx: Int = 0
+
     fun setHasBubble(hasBubbles: Boolean) {
         _hasBubblesRef.diffAndDispatch(hasBubbles)
     }
