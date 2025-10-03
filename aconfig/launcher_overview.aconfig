@@ -85,13 +85,6 @@ flag {
 }
 
 flag {
-    name: "enable_replace_share_target_with_sharesheet"
-    namespace: "launcher_overview"
-    description: "Replaces overview share target with share sheet."
-    bug: "437084247"
-}
-
-flag {
     name: "enable_replace_sharesheet_and_empty_message_ro"
     namespace: "launcher_overview"
     description: "Replaces overview share target with share sheet, adds new empty recents message."
