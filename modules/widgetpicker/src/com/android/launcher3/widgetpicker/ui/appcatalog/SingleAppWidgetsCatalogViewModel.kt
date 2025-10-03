@@ -43,7 +43,7 @@ class SingleAppWidgetsCatalogViewModel
 constructor(
     @Assisted private val widgetAppId: WidgetAppId,
     private val widgetsInteractor: WidgetsInteractor,
-    @WidgetPickerHostInfo private val hostInfo: WidgetHostInfo,
+    @param:WidgetPickerHostInfo private val hostInfo: WidgetHostInfo,
 ) : ViewModel {
     private var uiReady by mutableStateOf(false)
     private var pendingUpdate: (() -> Unit)? = null

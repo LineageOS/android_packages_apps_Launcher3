@@ -49,11 +49,11 @@ import kotlinx.coroutines.withContext
 class WidgetsInteractor
 @Inject
 constructor(
-    @WidgetPickerRepository private val widgetsRepository: WidgetsRepository,
-    @WidgetPickerRepository private val widgetUsersRepository: WidgetUsersRepository,
+    @param:WidgetPickerRepository private val widgetsRepository: WidgetsRepository,
+    @param:WidgetPickerRepository private val widgetUsersRepository: WidgetUsersRepository,
     private val filterWidgetsForHostUseCase: FilterWidgetsForHostUseCase,
     private val getWidgetAppsByProfileUseCase: GroupWidgetAppsByProfileUseCase,
-    @WidgetPickerBackground private val backgroundContext: CoroutineContext,
+    @param:WidgetPickerBackground private val backgroundContext: CoroutineContext,
 ) {
     /** Returns the list of widget apps per user profiles. */
     fun getWidgetAppsByProfile(): Flow<Map<WidgetUserProfile, List<WidgetApp>>> =
