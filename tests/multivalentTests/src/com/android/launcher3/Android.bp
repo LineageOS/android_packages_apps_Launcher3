@@ -8,7 +8,6 @@ filegroup {
         "util/ModelTestExtensions.kt",
         "util/rule/TestStabilityRule.java",
         "util/TestUtil.java",
-        "testutil/FavoriteItemsTransaction.java",
         "testutil/TouchEventGenerator.java",
     ],
 }

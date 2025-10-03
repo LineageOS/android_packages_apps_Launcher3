@@ -72,6 +72,8 @@ class LauncherLayoutBuilder(private val rows: Int? = null, private val columns: 
 
     @Throws(IOException::class) fun build() = StringWriter().apply { build(this) }.toString()
 
+    fun isEmpty() = nodes.isEmpty()
+
     @Throws(IOException::class)
     fun build(writer: Writer) {
         Xml.newSerializer().apply {

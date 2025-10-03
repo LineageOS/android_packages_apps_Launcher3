@@ -55,7 +55,6 @@ import com.android.launcher3.tapl.HomeAllApps;
 import com.android.launcher3.tapl.HomeAppIcon;
 import com.android.launcher3.tapl.LauncherInstrumentation;
 import com.android.launcher3.tapl.TestHelpers;
-import com.android.launcher3.testutil.FavoriteItemsTransaction;
 import com.android.launcher3.util.TestUtil;
 import com.android.launcher3.util.rule.FailureWatcher;
 import com.android.launcher3.util.rule.SamplerRule;
@@ -502,14 +501,6 @@ public abstract class BaseLauncherTaplTest {
             homeAppIcon = mLauncher.getWorkspace().getWorkspaceAppIcon(name);
         }
         return homeAppIcon;
-    }
-
-    protected void commitTransactionAndLoadHome(FavoriteItemsTransaction transaction) {
-        transaction.commit();
-
-        // Launch the home activity
-        UiDevice.getInstance(getInstrumentation()).pressHome();
-        mLauncher.waitForLauncherInitialized();
     }
 
     /** Clears all recent tasks */

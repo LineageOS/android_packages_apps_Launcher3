@@ -46,10 +46,10 @@ import com.android.launcher3.shortcuts.ShortcutKey;
 import com.android.launcher3.testcomponent.AppWidgetNoConfig;
 import com.android.launcher3.testcomponent.AppWidgetWithConfig;
 import com.android.launcher3.testcomponent.RequestPinItemActivity;
-import com.android.launcher3.testutil.FavoriteItemsTransaction;
 import com.android.launcher3.util.BaseLauncherActivityTest;
 import com.android.launcher3.util.BlockingBroadcastReceiver;
 import com.android.launcher3.util.LauncherBindableItemsContainer.ItemOperator;
+import com.android.launcher3.util.ModelTestExtensions;
 import com.android.launcher3.util.TestUtil;
 import com.android.launcher3.util.rule.ScreenRecordRule;
 import com.android.launcher3.util.rule.ShellCommandRule;
@@ -144,7 +144,7 @@ public class RequestPinItemTest extends BaseLauncherActivityTest<Launcher> {
 
     private void runTest(String activityMethod, boolean isWidget, ItemOperator itemMatcher,
             Intent... commandIntents) throws Throwable {
-        new FavoriteItemsTransaction(targetContext()).commit();
+        ModelTestExtensions.setEmptyModelLayout(targetContext());
         loadLauncherSync();
 
         // Open Pin item activity

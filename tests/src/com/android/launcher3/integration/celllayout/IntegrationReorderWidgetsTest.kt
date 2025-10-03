@@ -48,9 +48,10 @@ import com.android.launcher3.integration.util.TestUtils.getWidgetAtCell
 import com.android.launcher3.integration.util.TestUtils.searchChildren
 import com.android.launcher3.integration.util.events.ActivityTestEvents.createResizeFrameShownWaiter
 import com.android.launcher3.model.data.ItemInfo
-import com.android.launcher3.testutil.FavoriteItemsTransaction
 import com.android.launcher3.util.CellAndSpan
+import com.android.launcher3.util.LauncherLayoutBuilder
 import com.android.launcher3.util.ModelTestExtensions.clearModelDb
+import com.android.launcher3.util.ModelTestExtensions.setModelLayout
 import com.android.launcher3.util.rule.ScreenRecordRule
 import com.android.launcher3.util.rule.ScreenRecordRule.ScreenRecord
 import com.android.launcher3.util.rule.ShellCommandRule
@@ -107,17 +108,6 @@ class IntegrationReorderWidgetsTest {
             }
         }
         return true
-    }
-
-    private fun buildWorkspaceFromBoards(
-        boards: List<CellLayoutBoard>,
-        transaction: FavoriteItemsTransaction,
-    ): FavoriteItemsTransaction {
-        for (i in boards.indices) {
-            val board = boards[i]
-            workspaceBuilder!!.buildFromBoard(board, transaction, i)
-        }
-        return transaction
     }
 
     private fun printCurrentWorkspace() {
@@ -242,9 +232,13 @@ class IntegrationReorderWidgetsTest {
     private fun runTestCase(testCase: ReorderTestCase) {
         val workspaceLoadedEvent = eventsRule.createEventWaiter(TestEvent.WORKSPACE_FINISH_LOADING)
         val mainWidgetCellPos = CellLayoutBoard.getMainFromList(testCase.mStart)
-        var transaction = FavoriteItemsTransaction(targetContext)
-        transaction = buildWorkspaceFromBoards(testCase.mStart, transaction)
-        transaction.commit()
+
+        val layout = LauncherLayoutBuilder()
+        testCase.mStart.forEachIndexed { index, board ->
+            workspaceBuilder!!.buildFromBoard(board, layout, index)
+        }
+        targetContext.setModelLayout(layout)
+
         // This makes sure the Workspace is fully loaded before continuing
         workspaceLoadedEvent.waitForSignal()
         triggerWidgetResize(testCase)
