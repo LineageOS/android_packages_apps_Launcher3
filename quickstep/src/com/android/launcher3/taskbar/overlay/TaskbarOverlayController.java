@@ -47,6 +47,7 @@ import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.Flags;
 import com.android.launcher3.R;
+import com.android.launcher3.Utilities;
 import com.android.launcher3.taskbar.TaskbarActivityContext;
 import com.android.launcher3.taskbar.TaskbarControllers;
 import com.android.launcher3.taskbar.bubbles.BubbleActivityStarter;
@@ -68,6 +69,7 @@ public final class TaskbarOverlayController {
 
     private static final String TAG = "TaskbarOverlayController";
     private static final String WINDOW_TITLE = "Taskbar Overlay";
+    private static final boolean DEBUG = true; // b/446041145
 
     private final TaskbarActivityContext mTaskbarContext;
     private final Context mWindowContext;
@@ -147,6 +149,10 @@ public final class TaskbarOverlayController {
      * context for the current overlay window.
      */
     public TaskbarOverlayContext requestWindow() {
+        if (DEBUG) {
+            Log.d(TAG, "requestWindow: " + Utilities.getTrimmedStackTrace("requestWindow"));
+            Log.d(TAG, "requestWindow: Was window already present? " + (mOverlayContext != null));
+        }
         if (mOverlayContext == null) {
             mOverlayContext = TaskbarOverlayContextFactory.newInstance(mWindowContext).create(
                     mWindowContext, mTaskbarContext, mControllers);
@@ -189,6 +195,10 @@ public final class TaskbarOverlayController {
 
     /** Destroys the controller and any overlay window if present. */
     public void onDestroy() {
+        if (DEBUG) {
+            Log.d(TAG, "onDestroy: " + Utilities.getTrimmedStackTrace("onDestroy"));
+            Log.d(TAG, "onDestroy: Was window already present? " + (mOverlayContext != null));
+        }
         TaskStackChangeListeners.getInstance().unregisterTaskStackListener(mTaskStackListener);
         Optional.ofNullable(mOverlayContext).ifPresent(c -> {
             c.onDestroy();
