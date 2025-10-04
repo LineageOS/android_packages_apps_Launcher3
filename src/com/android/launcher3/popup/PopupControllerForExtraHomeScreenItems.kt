@@ -28,9 +28,9 @@ import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.widget.LauncherAppWidgetHostView
 
 /**
- * Controller for home screen items: folders, app pairs, and widgets. This controller does not
- * handle apps or app shortcuts. This controller handles actions for the popups such as showing and
- * dismissing them.
+ * Controller for home screen items: folders, app pairs, widgets, and file system based items. This
+ * controller does not handle apps or app shortcuts. This controller handles actions for the popups
+ * such as showing and dismissing them.
  */
 class PopupControllerForExtraHomeScreenItems<T>(
     private val popupDataRepository: PopupDataRepository,

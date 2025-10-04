@@ -17,25 +17,33 @@
 package com.android.launcher3.popup
 
 import android.content.Context
+import android.content.Intent
 import android.platform.test.annotations.EnableFlags
 import android.util.SparseArray
+import android.view.View
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.launcher3.Flags
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET
+import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FILE
+import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FOLDER
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FOLDER
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_QSB
 import com.android.launcher3.R
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceData.ImmutableWorkspaceData
+import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.model.repository.HomeScreenRepository
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.TestUtil
+import com.android.launcher3.views.ActivityContext
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 
 /** Tests for the [PopupDataRepositoryImpl] */
 @SmallTest
@@ -167,6 +175,38 @@ class PopupDataRepositoryImplUnitTest {
         assert(popupData?.get(0)?.iconResId == R.drawable.ic_remove_no_shadow)
         assert(popupData?.get(0)?.labelResId == R.string.remove_drop_target_label)
         assert(popupData?.get(0)?.popupAction != null)
+    }
+
+    @Test
+    fun getPopupDataForFileSystemFileItem() {
+        testPopupDataForFileSystemItem(ITEM_TYPE_FILE_SYSTEM_FILE)
+    }
+
+    @Test
+    fun getPopupDataForFileSystemFolderItem() {
+        testPopupDataForFileSystemItem(ITEM_TYPE_FILE_SYSTEM_FOLDER)
+    }
+
+    private fun testPopupDataForFileSystemItem(itemType: Int) {
+        val item =
+            WorkspaceItemInfo().apply {
+                id = 1
+                this.itemType = itemType
+                intent = mock<Intent>()
+            }
+        val popupData = popupDataRepository.getPopupDataByItemInfo(item)
+
+        assert(popupData!!.size == 1)
+        with(popupData[0]) {
+            assert(category == PopupCategory.SYSTEM_SHORTCUT_FIXED)
+            assert(iconResId == R.drawable.ic_home_screen_files_context_menu_open_in_app)
+            assert(labelResId == R.string.home_screen_files_context_menu_open_in_app_label)
+
+            val activityContext = mock<ActivityContext>()
+            val view = mock<View>()
+            popupAction.invoke(activityContext, item, view)
+            verify(activityContext, times(1)).startActivitySafely(view, item.intent, item)
+        }
     }
 
     private fun seedData(vararg items: ItemInfo) {
