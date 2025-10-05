@@ -137,8 +137,7 @@ public class ProgressDelegateInputConsumer implements InputConsumer,
 
         String SUWTheme = SystemProperties.get(SUW_THEME_SYSTEM_PROPERTY, "");
         mIsNewExpressiveThemeAnimation = (SUWTheme.equals(GLIF_EXPRESSIVE_THEME)
-                || SUWTheme.equals(GLIF_EXPRESSIVE_LIGHT_THEME))
-                && Flags.enableNewAllSetAnimation();
+                || SUWTheme.equals(GLIF_EXPRESSIVE_LIGHT_THEME));
     }
 
     @Override

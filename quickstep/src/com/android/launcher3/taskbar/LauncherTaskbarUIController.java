@@ -255,7 +255,7 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
         String SUWTheme = SystemProperties.get(SUW_THEME_SYSTEM_PROPERTY, "");
         boolean isExpressiveTheme = SUWTheme.equals(GLIF_EXPRESSIVE_THEME)
                 || SUWTheme.equals(GLIF_EXPRESSIVE_LIGHT_THEME);
-        if (!isExpressiveTheme || !Flags.enableNewAllSetAnimation()) {
+        if (!isExpressiveTheme) {
             return;
         }
         ValueAnimator autoPlayAnimator = ValueAnimator.ofFloat(0f, 1f);
