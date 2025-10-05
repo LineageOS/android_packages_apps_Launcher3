@@ -18,7 +18,6 @@ package com.android.launcher3.folder;
 
 import static com.android.launcher3.AbstractFloatingView.TYPE_ALL;
 import static com.android.launcher3.AbstractFloatingView.TYPE_FOLDER;
-import static com.android.launcher3.Flags.enableLauncherVisualRefresh;
 import static com.android.launcher3.folder.FolderGridOrganizer.createFolderGridOrganizer;
 
 import android.annotation.SuppressLint;
@@ -389,9 +388,7 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> implements Cli
 
         // Update footer
         mPageIndicator.setVisibility(getPageCount() > 1 ? View.VISIBLE : View.GONE);
-        if (enableLauncherVisualRefresh()) {
-            mFolder.onIndicatorVisibilityChanged();
-        }
+        mFolder.onIndicatorVisibilityChanged();
         // Set the gravity as LEFT or RIGHT instead of START, as START depends on the actual text.
         int horizontalGravity = getPageCount() > 1
                 ? (mIsRtl ? Gravity.RIGHT : Gravity.LEFT) : Gravity.CENTER_HORIZONTAL;
