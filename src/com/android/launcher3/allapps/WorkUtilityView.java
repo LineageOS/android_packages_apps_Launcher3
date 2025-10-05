@@ -46,7 +46,6 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.android.app.animation.Interpolators;
 import com.android.launcher3.DeviceProfile;
-import com.android.launcher3.Flags;
 import com.android.launcher3.Insettable;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
@@ -439,7 +438,7 @@ public class WorkUtilityView extends LinearLayout implements Insettable,
 
     @VisibleForTesting
     boolean shouldUseScheduler() {
-        return Flags.workSchedulerInWorkProfile() && !mWorkSchedulerIntentAction.isEmpty();
+        return !mWorkSchedulerIntentAction.isEmpty();
     }
 
     @VisibleForTesting
