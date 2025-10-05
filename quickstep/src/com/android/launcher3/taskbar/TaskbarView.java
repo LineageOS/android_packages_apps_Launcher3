@@ -437,10 +437,8 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                     supportsPinningPopup ? mControllerCallbacks : null);
         }
 
-        if (Flags.showTaskbarPinningPopupFromAnywhere()) {
-            setOnTouchListener(
-                    supportsPinningPopup ? mControllerCallbacks.getTaskbarTouchListener() : null);
-        }
+        setOnTouchListener(
+                supportsPinningPopup ? mControllerCallbacks.getTaskbarTouchListener() : null);
     }
 
     private void removeAndRecycle(View view) {
