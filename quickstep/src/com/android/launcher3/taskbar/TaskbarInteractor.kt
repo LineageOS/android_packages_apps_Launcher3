@@ -24,7 +24,6 @@ import android.view.ViewRootImpl
 import androidx.annotation.AnyThread
 import com.android.launcher3.LauncherState
 import com.android.launcher3.model.data.ItemInfo
-import com.android.launcher3.taskbar.customization.TASKBAR_OVERFLOW_PIN_LIMIT
 import com.android.launcher3.util.AsyncView
 import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
 import com.android.quickstep.GestureState
@@ -198,12 +197,7 @@ class TaskbarInteractor(private val taskbarUIController: TaskbarUIController) {
     }
 
     @AnyThread
-    fun getMaxPinnableCount() =
-        if (TaskbarPopupController.canPinAppsOverflow()) {
-            TASKBAR_OVERFLOW_PIN_LIMIT
-        } else {
-            taskbarUIController.taskbarSpecsEvaluator.numShownHotseatIcons
-        }
+    fun getMaxPinnableCount() = taskbarUIController.taskbarSpecsEvaluator.maxPinnableCount
 
     /** Returns a SparseArray of all pinned apps on the taskbar. */
     fun getPinnedApps(): SparseArray<ItemInfo> = taskbarUIController.allPinnedApps

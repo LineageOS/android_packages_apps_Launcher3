@@ -115,11 +115,13 @@ class TaskbarOverflowTest {
         TaskbarWindowSandboxContext.create(
             SandboxParams(
                 {
-                    spy(SystemUiProxy(
+                    spy(
+                        SystemUiProxy(
                             ApplicationProvider.getApplicationContext(),
                             MAIN_EXECUTOR,
-                            UI_HELPER_EXECUTOR
-                        )) { proxy ->
+                            UI_HELPER_EXECUTOR,
+                        )
+                    ) { proxy ->
                         systemUiProxySpy = proxy
                         doAnswer { desktopTaskListener = it.getArgument(0) }
                             .whenever(proxy)
@@ -288,7 +290,7 @@ class TaskbarOverflowTest {
     @TaskbarMode(PINNED)
     @EnableFlags(FLAG_ENABLE_OVERFLOW_BUTTON_FOR_TASKBAR_PINNED_ITEMS)
     fun testTaskbarWithPinAppsOverflow_pinned() {
-        val numHotseatIcons = taskbarContext.deviceProfile.numShownHotseatIcons
+        val numHotseatIcons = taskbarContext.deviceProfile.inv.numShownHotseatIcons
 
         val taskbarView = getOnUiThread {
             val view = taskbarContext.dragLayer.findViewById<TaskbarView>(R.id.taskbar_view)
