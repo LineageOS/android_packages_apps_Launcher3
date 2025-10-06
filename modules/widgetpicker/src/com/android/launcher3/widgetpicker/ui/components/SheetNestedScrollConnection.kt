@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.widgetpicker.ui.components.bottomsheet
+package com.android.launcher3.widgetpicker.ui.components
 
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.ScrollScope
@@ -27,8 +27,8 @@ import androidx.compose.ui.unit.Velocity
  * A [NestedScrollConnection] that resolves gesture conflicts for bottom with the nested scrolling
  * content within.
  */
-class BottomSheetNestedScrollConnection(
-    private val sheetState: BottomSheetDismissState,
+class SheetNestedScrollConnection(
+    private val sheetState: SheetDismissState,
     private val flingBehavior: FlingBehavior,
     private val enabled: Boolean,
 ) : NestedScrollConnection {

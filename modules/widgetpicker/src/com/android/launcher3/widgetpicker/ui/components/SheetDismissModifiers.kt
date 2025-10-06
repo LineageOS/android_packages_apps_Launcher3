@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.widgetpicker.ui.components.bottomsheet
+package com.android.launcher3.widgetpicker.ui.components
 
 import androidx.activity.BackEventCompat
 import androidx.activity.compose.PredictiveBackHandler
@@ -40,15 +40,15 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
-import com.android.launcher3.widgetpicker.ui.components.bottomsheet.BottomSheetDismissDimensions.NOT_VISIBLE_PREDICTIVE_BACK_SCALE
-import com.android.launcher3.widgetpicker.ui.components.bottomsheet.BottomSheetDismissDimensions.OFFSET_DIFF_TO_TRIGGER_DISMISS_CALLBACK
-import com.android.launcher3.widgetpicker.ui.components.bottomsheet.BottomSheetDismissDimensions.PredictiveBackContentTransformOrigin
-import com.android.launcher3.widgetpicker.ui.components.bottomsheet.BottomSheetDismissDimensions.SETTLE_ANIMATION_SPEC
-import com.android.launcher3.widgetpicker.ui.components.bottomsheet.BottomSheetDismissDimensions.VISIBLE_PREDICTIVE_BACK_SCALE
-import com.android.launcher3.widgetpicker.ui.components.bottomsheet.BottomSheetDismissDimensions.isInvalidSize
-import com.android.launcher3.widgetpicker.ui.components.bottomsheet.BottomSheetDismissDimensions.predictiveBackMaxScaleXDistance
-import com.android.launcher3.widgetpicker.ui.components.bottomsheet.BottomSheetDismissDimensions.predictiveBackMaxScaleYDistance
-import com.android.launcher3.widgetpicker.ui.components.bottomsheet.BottomSheetDismissDimensions.sheetPositionalThreshold
+import com.android.launcher3.widgetpicker.ui.components.SheetDismissDimensions.NOT_VISIBLE_PREDICTIVE_BACK_SCALE
+import com.android.launcher3.widgetpicker.ui.components.SheetDismissDimensions.OFFSET_DIFF_TO_TRIGGER_DISMISS_CALLBACK
+import com.android.launcher3.widgetpicker.ui.components.SheetDismissDimensions.PredictiveBackContentTransformOrigin
+import com.android.launcher3.widgetpicker.ui.components.SheetDismissDimensions.SETTLE_ANIMATION_SPEC
+import com.android.launcher3.widgetpicker.ui.components.SheetDismissDimensions.VISIBLE_PREDICTIVE_BACK_SCALE
+import com.android.launcher3.widgetpicker.ui.components.SheetDismissDimensions.isInvalidSize
+import com.android.launcher3.widgetpicker.ui.components.SheetDismissDimensions.predictiveBackMaxScaleXDistance
+import com.android.launcher3.widgetpicker.ui.components.SheetDismissDimensions.predictiveBackMaxScaleYDistance
+import com.android.launcher3.widgetpicker.ui.components.SheetDismissDimensions.sheetPositionalThreshold
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.abs
 import kotlin.math.min
@@ -61,7 +61,7 @@ import kotlinx.coroutines.launch
  * A modifier that handles the dismiss gestures (e.g. pull down to dismiss, predictive back) for
  * dismissing the bottom sheet.
  *
- * Use in combination with [dismissableBottomSheetContent] that's applied on the content.
+ * Use in combination with [dismissibleSheetContent] that's applied on the content.
  *
  * @param onSheetOpen callback invoked when sheet is fully opened first time.
  * @param onDismissSheet final callback invoked when the sheet has settled animating after a gesture
@@ -70,8 +70,8 @@ import kotlinx.coroutines.launch
  * @param enableNestedScrolling whether to support nested scrolling; can be set to false when using
  *   accessibility services.
  */
-fun Modifier.dismissibleBottomSheet(
-    sheetState: BottomSheetDismissState,
+fun Modifier.dismissibleSheet(
+    sheetState: SheetDismissState,
     onSheetOpen: () -> Unit,
     onDismissSheet: () -> Unit,
     maxHeight: Float,
@@ -98,7 +98,7 @@ fun Modifier.dismissibleBottomSheet(
                 flingBehavior = flingBehavior,
             )
             .nestedScroll(
-                BottomSheetNestedScrollConnection(
+                SheetNestedScrollConnection(
                     sheetState = sheetState,
                     flingBehavior = flingBehavior,
                     enabled = enableNestedScrolling,
@@ -185,7 +185,7 @@ fun Modifier.dismissibleBottomSheet(
  * Modifier to be applied on the content of the bottom sheet that handles the scale of content
  * during gestures such as predictive back.
  */
-fun Modifier.dismissableBottomSheetContent(sheetState: BottomSheetDismissState): Modifier {
+fun Modifier.dismissibleSheetContent(sheetState: SheetDismissState): Modifier {
     return this.graphicsLayer {
         val progress = sheetState.backProgress.value
         val predictiveBackScaleX = calculatePredictiveBackScaleX(progress)
@@ -233,7 +233,7 @@ private fun calculateContentPredictiveBackScaleY(sheetScaleX: Float, sheetScaleY
         VISIBLE_PREDICTIVE_BACK_SCALE
     }
 
-internal object BottomSheetDismissDimensions {
+internal object SheetDismissDimensions {
     val sheetPositionalThreshold = 56.dp
 
     val predictiveBackMaxScaleXDistance = 48.dp

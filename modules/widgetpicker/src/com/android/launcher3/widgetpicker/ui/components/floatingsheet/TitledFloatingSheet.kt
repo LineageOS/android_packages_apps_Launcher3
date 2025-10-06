@@ -16,6 +16,7 @@
 
 package com.android.launcher3.widgetpicker.ui.components.floatingsheet
 
+import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,22 +31,34 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import com.android.launcher3.widgetpicker.R
+import com.android.launcher3.widgetpicker.ui.components.SheetDismissState
 import com.android.launcher3.widgetpicker.ui.components.SheetHeader
+import com.android.launcher3.widgetpicker.ui.components.accessibility.LocalAccessibilityState
+import com.android.launcher3.widgetpicker.ui.components.dismissibleSheet
+import com.android.launcher3.widgetpicker.ui.components.dismissibleSheetContent
 import com.android.launcher3.widgetpicker.ui.components.floatingsheet.TitledFloatingSheetDimens.contentWindowInsets
 import com.android.launcher3.widgetpicker.ui.components.floatingsheet.TitledFloatingSheetDimens.sheetBottomPadding
 import com.android.launcher3.widgetpicker.ui.components.floatingsheet.TitledFloatingSheetDimens.sheetInnerHorizontalPadding
 import com.android.launcher3.widgetpicker.ui.components.floatingsheet.TitledFloatingSheetDimens.sheetInnerTopPadding
 import com.android.launcher3.widgetpicker.ui.components.floatingsheet.TitledFloatingSheetDimens.sheetShape
 import com.android.launcher3.widgetpicker.ui.theme.WidgetPickerTheme
+import kotlinx.coroutines.launch
 
 /**
  * A floating sheet detached from the screen edges with title and description on the top. Intended
@@ -61,6 +74,7 @@ import com.android.launcher3.widgetpicker.ui.theme.WidgetPickerTheme
  *   completed.
  * @param content the content to be displayed below the [title] and [description]
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun TitledFloatingSheet(
     modifier: Modifier = Modifier,
@@ -70,22 +84,35 @@ fun TitledFloatingSheet(
     onSheetOpen: () -> Unit,
     content: @Composable () -> Unit,
 ) {
-    // TODO(b/446677459): update onSheetOpen() after the floating sheet transition is completed.
-    LaunchedEffect(Unit) { onSheetOpen() }
-
+    val scope = rememberCoroutineScope()
+    val animSpec: AnimationSpec<Float> = MaterialTheme.motionScheme.slowSpatialSpec()
+    val sheetState = remember { SheetDismissState(expandCollapseAnimationSpec = animSpec) }
     Box(
         modifier =
-            modifier.fillMaxSize().pointerInput(Unit) { detectTapGestures { onDismissSheet() } },
+            modifier.fillMaxSize().pointerInput(Unit) {
+                detectTapGestures { scope.launch { sheetState.collapse() } }
+            },
         contentAlignment = Alignment.BottomCenter,
     ) {
         val sheetMaxWidth = dimensionResource(id = R.dimen.window_bottom_sheet_max_width)
         val sheetMaxHeight = dimensionResource(id = R.dimen.window_bottom_sheet_max_height)
+        val accessibilityState = LocalAccessibilityState.current
+        var sheetHeight by remember { mutableStateOf(0f) }
+
         Surface(
             modifier =
                 Modifier.padding(bottom = sheetBottomPadding)
                     .widthIn(max = sheetMaxWidth)
                     .heightIn(max = sheetMaxHeight)
                     .windowInsetsPadding(WindowInsets.safeDrawing)
+                    .onSizeChanged { sheetHeight = it.height.toFloat() }
+                    .dismissibleSheet(
+                        sheetState = sheetState,
+                        onSheetOpen = onSheetOpen,
+                        onDismissSheet = onDismissSheet,
+                        maxHeight = sheetHeight,
+                        enableNestedScrolling = !accessibilityState.isEnabled,
+                    )
                     // Consume clicks on the sheet itself, preventing them from
                     // passing through to the parent Box and dismissing the sheet.
                     .pointerInput(Unit) { detectTapGestures {} },
@@ -100,13 +127,14 @@ fun TitledFloatingSheet(
                                 horizontal = sheetInnerHorizontalPadding,
                                 vertical = sheetInnerTopPadding,
                             )
+                            .dismissibleSheetContent(sheetState)
                 ) {
                     title?.let {
                         SheetHeader(
                             title = title,
                             description = description,
                             shouldShowCloseButton = true,
-                            onCloseButtonClick = onDismissSheet,
+                            onCloseButtonClick = { scope.launch { sheetState.collapse() } },
                         )
                     }
                     content()
