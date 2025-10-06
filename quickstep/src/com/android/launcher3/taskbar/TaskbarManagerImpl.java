@@ -39,6 +39,7 @@ import static com.android.launcher3.util.DisplayController.CHANGE_ROTATION;
 import static com.android.launcher3.util.DisplayController.CHANGE_SHOW_LOCKED_TASKBAR;
 import static com.android.launcher3.util.DisplayController.CHANGE_TASKBAR_PINNING;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
+import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 import static com.android.launcher3.util.FlagDebugUtils.formatFlagChange;
 import static com.android.launcher3.util.SimpleBroadcastReceiver.actionsFilter;
@@ -98,7 +99,9 @@ import com.android.launcher3.taskbar.TaskbarNavButtonController.TaskbarNavButton
 import com.android.launcher3.taskbar.unfold.NonDestroyableScopedUnfoldTransitionProgressProvider;
 import com.android.launcher3.uioverrides.QuickstepLauncher;
 import com.android.launcher3.util.DisplayController;
+import com.android.launcher3.util.ListenableDiffAwareRef;
 import com.android.launcher3.util.LockedUserState;
+import com.android.launcher3.util.SafeCloseable;
 import com.android.launcher3.util.SettingsCache;
 import com.android.launcher3.util.SimpleBroadcastReceiver;
 import com.android.launcher3.util.window.WindowManagerProxy;
@@ -202,6 +205,8 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
     private StatefulActivity mActivity;
     private RecentsViewContainer mRecentsViewContainer;
 
+    private @Nullable SafeCloseable mDisplayChangeSafeCloseable;
+
     /**
      * Cache a copy here so we can initialize state whenever taskbar is recreated, since
      * this class does not get re-initialized w/ new taskbars.
@@ -263,51 +268,46 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
                 }
             };
 
+    /** Not {@code null} if direct boot support is enabled and not {@link #mUserUnlocked} yet. */
+    private @Nullable TaskbarBootAppContext mBootAppContext;
+
     /**
      * We use WindowManager's ComponentCallbacks() for internal UI changes (similar to an Activity)
      * which comes via a different channel
      */
-    private final RecreationListener mRecreationListener = new RecreationListener();
+    private void onDisplayInfoChanged(Context context, DisplayController.Info info, int flags) {
+        int displayId = context.getDisplayId();
+        if ((flags & CHANGE_DENSITY) != 0) {
+            debugTaskbarManager("onDisplayInfoChanged: Display density changed", displayId);
+        }
+        if ((flags & CHANGE_NAVIGATION_MODE) != 0) {
+            debugTaskbarManager("onDisplayInfoChanged: Navigation mode changed", displayId);
+        }
+        if ((flags & CHANGE_DESKTOP_MODE) != 0) {
+            debugTaskbarManager("onDisplayInfoChanged: Desktop mode changed", displayId);
+        }
+        if ((flags & CHANGE_TASKBAR_PINNING) != 0) {
+            debugTaskbarManager("onDisplayInfoChanged: Taskbar pinning changed", displayId);
+        }
+        if ((flags & CHANGE_ROTATION) != 0) {
+            debugTaskbarManager("onDisplayInfoChanged: Rotation changed", displayId);
+        }
 
-    /** Not {@code null} if direct boot support is enabled and not {@link #mUserUnlocked} yet. */
-    private @Nullable TaskbarBootAppContext mBootAppContext;
+        // Use a helper to update DP (only for secondary displays) and then recreate taskbar.
+        IntConsumer updateExternalDpAndRecreateTaskbar = displayIdToUpdate -> {
+            // Don't update DP for primary display as IDP already takes care of this.
+            createExternalDeviceProfile(displayIdToUpdate);
+            recreateTaskbarForDisplay(displayIdToUpdate, /* duration= */ 0);
+        };
 
-    private class RecreationListener implements DisplayController.DisplayInfoChangeListener {
-        @Override
-        public void onDisplayInfoChanged(Context context, DisplayController.Info info, int flags) {
-            int displayId = context.getDisplayId();
-            if ((flags & CHANGE_DENSITY) != 0) {
-                debugTaskbarManager("onDisplayInfoChanged: Display density changed", displayId);
-            }
-            if ((flags & CHANGE_NAVIGATION_MODE) != 0) {
-                debugTaskbarManager("onDisplayInfoChanged: Navigation mode changed", displayId);
-            }
-            if ((flags & CHANGE_DESKTOP_MODE) != 0) {
-                debugTaskbarManager("onDisplayInfoChanged: Desktop mode changed", displayId);
-            }
-            if ((flags & CHANGE_TASKBAR_PINNING) != 0) {
-                debugTaskbarManager("onDisplayInfoChanged: Taskbar pinning changed", displayId);
-            }
-            if ((flags & CHANGE_ROTATION) != 0) {
-                debugTaskbarManager("onDisplayInfoChanged: Rotation changed", displayId);
-            }
+        if ((flags & (CHANGE_DENSITY | CHANGE_NAVIGATION_MODE
+                | CHANGE_SHOW_LOCKED_TASKBAR | CHANGE_ROTATION)) != 0) {
 
-            // Use a helper to update DP (only for secondary displays) and then recreate taskbar.
-            IntConsumer updateExternalDpAndRecreateTaskbar = displayIdToUpdate -> {
-                // Don't update DP for primary display as IDP already takes care of this.
-                createExternalDeviceProfile(displayIdToUpdate);
-                recreateTaskbarForDisplay(displayIdToUpdate, /* duration= */ 0);
-            };
-
-            if ((flags & (CHANGE_DENSITY | CHANGE_NAVIGATION_MODE
-                    | CHANGE_SHOW_LOCKED_TASKBAR | CHANGE_ROTATION)) != 0) {
-
-                if ((flags & CHANGE_SHOW_LOCKED_TASKBAR) != 0) {
-                    debugTaskbarManager("onDisplayInfoChanged: show locked taskbar changed!",
-                            displayId);
-                }
-                updateExternalDpAndRecreateTaskbar.accept(displayId);
+            if ((flags & CHANGE_SHOW_LOCKED_TASKBAR) != 0) {
+                debugTaskbarManager("onDisplayInfoChanged: show locked taskbar changed!",
+                        displayId);
             }
+            updateExternalDpAndRecreateTaskbar.accept(displayId);
         }
     }
 
@@ -1102,7 +1102,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
             removeAndUnregisterComponentCallbacks(displayId);
 
             debugTaskbarManager("onDisplayRemoved: removeRecreationListener!", displayId);
-            removeRecreationListener(displayId);
+            removeRecreationListener();
 
             debugTaskbarManager("onDisplayRemoved: removing DeviceProfile from map!", displayId);
             removeDeviceProfileFromMap(displayId);
@@ -1174,7 +1174,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
             mGrowthBroadcastReceiver.close();
         }
 
-        removeRecreationListener(mPrimaryDisplayId);
+        removeRecreationListener();
         SettingsCache.INSTANCE.get(mPrimaryWindowContext)
                 .unregister(USER_SETUP_COMPLETE_URI, mOnSettingsChangeListener);
         SettingsCache.INSTANCE.get(mPrimaryWindowContext)
@@ -1458,17 +1458,25 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
             return;
         }
 
-        DisplayController.INSTANCE.get(mPrimaryWindowContext).addChangeListenerForDisplay(
-                mRecreationListener, displayId);
+        ListenableDiffAwareRef<DisplayController.Info, Integer> listenable =
+                DisplayController.INSTANCE.get(mPrimaryWindowContext)
+                        .getListenable(displayId);
+        if (listenable != null) {
+            mDisplayChangeSafeCloseable = listenable.forEachChange(
+                    TASKBAR_UI_THREAD, (info, flags) -> {
+                        onDisplayInfoChanged(mPrimaryWindowContext, info, flags);
+                    });
+        }
     }
 
-    private void removeRecreationListener(int displayId) {
+    private void removeRecreationListener() {
         if (!mUserUnlocked) {
             return;
         }
-
-        DisplayController.INSTANCE.get(mPrimaryWindowContext).removeChangeListenerForDisplay(
-                mRecreationListener, displayId);
+        if (mDisplayChangeSafeCloseable != null) {
+            mDisplayChangeSafeCloseable.close();
+            mDisplayChangeSafeCloseable = null;
+        }
     }
 
     /**

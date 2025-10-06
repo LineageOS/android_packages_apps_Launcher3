@@ -23,6 +23,7 @@ import static com.android.launcher3.MotionEventsUtils.isTrackpadScroll;
 import static com.android.launcher3.util.DisplayController.CHANGE_ALL;
 import static com.android.launcher3.util.DisplayController.CHANGE_NAVIGATION_MODE;
 import static com.android.launcher3.util.DisplayController.CHANGE_ROTATION;
+import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.NavigationMode.NO_BUTTON;
 import static com.android.launcher3.util.NavigationMode.THREE_BUTTONS;
 import static com.android.launcher3.util.SettingsCache.ONE_HANDED_ENABLED;
@@ -67,9 +68,10 @@ import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.util.DaggerSingletonObject;
 import com.android.launcher3.util.DaggerSingletonTracker;
 import com.android.launcher3.util.DisplayController;
-import com.android.launcher3.util.DisplayController.DisplayInfoChangeListener;
 import com.android.launcher3.util.DisplayController.Info;
+import com.android.launcher3.util.ListenableDiffAwareRef;
 import com.android.launcher3.util.NavigationMode;
+import com.android.launcher3.util.SafeCloseable;
 import com.android.launcher3.util.SettingsCache;
 import com.android.quickstep.TopTaskTracker.CachedTaskInfo;
 import com.android.quickstep.dagger.QuickstepBaseAppComponent;
@@ -94,7 +96,7 @@ import java.io.PrintWriter;
 /**
  * Manages the state of the system during a swipe up gesture.
  */
-public class RecentsAnimationDeviceState implements DisplayInfoChangeListener, ExclusionListener {
+public class RecentsAnimationDeviceState implements ExclusionListener {
 
     public static final int RESET_TO_DEFAULT_GESTURAL_HEIGHT = -1;
 
@@ -168,12 +170,16 @@ public class RecentsAnimationDeviceState implements DisplayInfoChangeListener, E
         lifeCycle.addCloseable(this::unregisterExclusionListener);
 
         // Register for display changes changes
-        mDisplayController.addChangeListener(this);
+        ListenableDiffAwareRef<Info, Integer> listenable = mDisplayController.getListenable();
+        if (listenable != null) {
+            lifeCycle.addCloseable(
+                    listenable.forEachChange(MAIN_EXECUTOR, this::onDisplayInfoChanged));
+        }
         Info displayInfo = mDisplayController.getInfoForDisplay(mDisplayId);
         if (displayInfo != null) {
-            onDisplayInfoChanged(context, displayInfo, CHANGE_ALL);
+            onDisplayInfoChanged(displayInfo, CHANGE_ALL);
         }
-        lifeCycle.addCloseable(() -> mDisplayController.removeChangeListener(this));
+
 
         if (mIsOneHandedModeSupported) {
             Uri oneHandedUri = Settings.Secure.getUriFor(ONE_HANDED_ENABLED);
@@ -230,32 +236,24 @@ public class RecentsAnimationDeviceState implements DisplayInfoChangeListener, E
      * Adds a listener for the change flag, guaranteed to be called after the device state's
      * mode has changed.
      *
-     * @return Added {@link DisplayInfoChangeListener} so that caller is
-     * responsible for removing the listener from {@link DisplayController} to avoid memory leak.
+     * @return {@link SafeCloseable} so that caller can remove the listener.
      */
-    public DisplayController.DisplayInfoChangeListener addDisplayInfoChangeCallback(
-            int changeFlag, Runnable callback) {
-        DisplayController.DisplayInfoChangeListener listener = (context, info, flags) -> {
+    @Nullable
+    public SafeCloseable addDisplayInfoChangeCallback(int changeFlag, Runnable callback) {
+        ListenableDiffAwareRef<Info, Integer> listenable =
+                mDisplayController.getListenable();
+        if (listenable == null) {
+            return null;
+        }
+        return listenable.getChanges().forEach(MAIN_EXECUTOR, (flags) -> {
             if ((flags & changeFlag) != 0) {
                 callback.run();
             }
-        };
-        mDisplayController.addChangeListener(listener);
-        callback.run();
-        return listener;
+            return null;
+        });
     }
 
-    /**
-     * Remove the {DisplayController.DisplayInfoChangeListener} added from
-     * {@link #addDisplayInfoChangeCallback} when {@link TouchInteractionService} is destroyed.
-     */
-    public void removeDisplayInfoChangeListener(
-            DisplayController.DisplayInfoChangeListener listener) {
-        mDisplayController.removeChangeListener(listener);
-    }
-
-    @Override
-    public void onDisplayInfoChanged(Context context, Info info, int flags) {
+    void onDisplayInfoChanged(Info info, int flags) {
         if ((flags & (CHANGE_ROTATION | CHANGE_NAVIGATION_MODE)) != 0) {
             mMode = info.getNavigationMode();
             ActiveGestureLog.INSTANCE.setIsFullyGesturalNavMode(isFullyGesturalNavMode());

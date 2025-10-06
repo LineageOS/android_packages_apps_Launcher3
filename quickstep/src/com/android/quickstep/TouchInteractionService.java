@@ -738,8 +738,8 @@ public class TouchInteractionService extends Service {
 
     private DesktopAppLaunchTransitionManager mDesktopAppLaunchTransitionManager;
 
-    private DisplayController.DisplayInfoChangeListener mNavigationModeChangeListener;
-    private DisplayController.DisplayInfoChangeListener mNightModeChangeListener;
+    private @Nullable SafeCloseable mNavigationModeChangeSafeClosable;
+    private @Nullable SafeCloseable mNightModeChangeSafeClosable;
 
     PerDisplayRepository<RecentsWindowManager> mRecentsWindowManagerRepository;
 
@@ -797,11 +797,11 @@ public class TouchInteractionService extends Service {
         // Call runOnUserUnlocked() before any other callbacks to ensure everything is initialized.
         LockedUserState.get(this).runOnUserUnlocked(mUserUnlockedRunnable);
         // Assume that the navigation mode changes for all displays at once.
-        mNavigationModeChangeListener =
+        mNavigationModeChangeSafeClosable =
                 mDeviceStateRepository.get(DEFAULT_DISPLAY).addDisplayInfoChangeCallback(
                         CHANGE_NAVIGATION_MODE, this::onNavigationModeChanged);
         // Assume that the night mode changes for all displays at once.
-        mNightModeChangeListener =
+        mNightModeChangeSafeClosable =
                 mDeviceStateRepository.get(DEFAULT_DISPLAY).addDisplayInfoChangeCallback(
                         CHANGE_NIGHT_MODE, this::onNightModeChanged);
         ScreenOnTracker.INSTANCE.get(this).addListener(mScreenOnListener);
@@ -1018,10 +1018,14 @@ public class TouchInteractionService extends Service {
             mDesktopAppLaunchTransitionManager.unregisterTransitions();
         }
         mDesktopAppLaunchTransitionManager = null;
-        mDeviceStateRepository.get(DEFAULT_DISPLAY).removeDisplayInfoChangeListener(
-                mNavigationModeChangeListener);
-        mDeviceStateRepository.get(DEFAULT_DISPLAY).removeDisplayInfoChangeListener(
-                mNightModeChangeListener);
+        if (mNavigationModeChangeSafeClosable != null) {
+            mNavigationModeChangeSafeClosable.close();
+            mNavigationModeChangeSafeClosable = null;
+        }
+        if (mNightModeChangeSafeClosable != null) {
+            mNightModeChangeSafeClosable.close();
+            mNightModeChangeSafeClosable = null;
+        }
         LockedUserState.get(this).removeOnUserUnlockedRunnable(mUserUnlockedRunnable);
         ScreenOnTracker.INSTANCE.get(this).removeListener(mScreenOnListener);
         if (RecentsWindowFlags.getEnableOverviewInWindow()) {

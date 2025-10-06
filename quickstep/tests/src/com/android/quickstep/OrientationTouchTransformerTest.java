@@ -305,9 +305,8 @@ public class OrientationTouchTransformerTest {
     public void testSimpleOrientationTouchTransformer() {
         final DisplayController displayController = mock(DisplayController.class);
         doReturn(mInfo).when(displayController).getInfoForDisplay(anyInt());
-        final SimpleOrientationTouchTransformer transformer =
-                new SimpleOrientationTouchTransformer(getApplicationContext(), displayController,
-                        mock(DaggerSingletonTracker.class));
+        final SimpleOrientationTouchTransformer transformer = new SimpleOrientationTouchTransformer(
+                displayController, mock(DaggerSingletonTracker.class));
         final MotionEvent move1 = generateMotionEvent(MotionEvent.ACTION_MOVE, 100, 10);
         transformer.transform(move1, Surface.ROTATION_90);
         // The position is transformed to 90 degree.

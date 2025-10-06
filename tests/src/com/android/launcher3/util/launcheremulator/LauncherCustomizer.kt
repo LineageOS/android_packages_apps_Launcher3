@@ -41,12 +41,11 @@ import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.get
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.util.DisplayController
-import com.android.launcher3.util.DisplayController.DisplayInfoChangeListener
-import com.android.launcher3.util.DisplayController.Info
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.ModelTestExtensions.clearModelDb
 import com.android.launcher3.util.NavigationMode
+import com.android.launcher3.util.SafeCloseable
 import com.android.launcher3.util.TestUtil
 import com.android.launcher3.util.launcheremulator.DensityPicker.Density
 import com.android.launcher3.util.launcheremulator.models.DeviceEmulationData
@@ -253,17 +252,17 @@ object LauncherCustomizer {
                 latch.countDown()
                 return@execute
             }
-            controller.addChangeListener(
-                object : DisplayInfoChangeListener {
-                    override fun onDisplayInfoChanged(context: Context, info: Info, flags: Int) {
+            controller.listenable?.let {
+                var safeCloseable: SafeCloseable? = null
+                safeCloseable =
+                    it.forEachChange(MAIN_EXECUTOR) { info, _ ->
                         if (info.densityDpi == targetDensity) {
                             // Remove listener asynchronously
-                            MAIN_EXECUTOR.handler.post { controller.removeChangeListener(this) }
+                            safeCloseable?.close()
                             latch.countDown()
                         }
                     }
-                }
-            )
+            }
         }
         setForcedDisplayDensityForUser(
             Display.DEFAULT_DISPLAY,
