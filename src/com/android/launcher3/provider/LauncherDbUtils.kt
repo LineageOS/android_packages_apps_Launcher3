@@ -169,7 +169,7 @@ object LauncherDbUtils {
     fun migrateLegacyShortcuts(context: Context, db: SQLiteDatabase) {
         val c = db.query(TABLE_NAME, null, "itemType = 1", null, null, null, null)
         val ums = UserCache.INSTANCE[context].userManagerState
-        val lc = context.appComponent.loaderCursorFactory.createLoaderCursor(c, ums, null)
+        val lc = context.appComponent.loaderCursorFactory.createLoaderCursor(c, ums, null)!!
         val deletedShortcuts = IntSet()
 
         while (lc.moveToNext()) {
@@ -205,7 +205,7 @@ object LauncherDbUtils {
                 ShortcutInfo.Builder(context, "migrated_shortcut-${lc.id}")
                     .setIntent(intent)
                     .setExtras(extras)
-                    .setShortLabel(lc.title)
+                    .setShortLabel(lc.title!!)
 
             var bitmap: Bitmap? = null
             val iconData = lc.iconBlob
@@ -277,11 +277,11 @@ object LauncherDbUtils {
                 cursor,
                 userManagerState,
                 /* restoreEventLogger */ null,
-            )
+            )!!
         try {
             SQLiteTransaction(db).use {
                 while (loaderCursor.moveToNext()) {
-                    val intent = loaderCursor.parseIntent()
+                    val intent = loaderCursor.parseIntent() ?: continue
                     val itemInfo =
                         loaderCursor.getAppShortcutInfo(
                             intent,
