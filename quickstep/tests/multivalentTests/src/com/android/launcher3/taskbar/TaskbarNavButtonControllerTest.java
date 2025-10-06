@@ -123,6 +123,7 @@ public class TaskbarNavButtonControllerTest {
                 mockSystemUiProxy,
                 mockHandler,
                 mockContextualSearchInvoker);
+        assertThat(mNavButtonController.hasControllersSet()).isFalse();
         mNavButtonController.init(mockTaskbarControllers);
     }
 
@@ -321,6 +322,15 @@ public class TaskbarNavButtonControllerTest {
         mNavButtonController.onButtonClick(BUTTON_HOME, mockView);
         verify(mockStatsLogger, times(1)).log(LAUNCHER_TASKBAR_HOME_BUTTON_TAP);
         verify(mockStatsLogger, times(0)).log(LAUNCHER_TASKBAR_HOME_BUTTON_LONGPRESS);
+        assertThat(mNavButtonController.hasControllersSet()).isFalse();
+    }
+
+    @Test
+    public void testOnDestroyClearsControllers() {
+        assertThat(mNavButtonController.hasControllersSet()).isTrue();
+        mNavButtonController.onDestroy();
+
+        assertThat(mNavButtonController.hasControllersSet()).isFalse();
     }
 
     @Test
