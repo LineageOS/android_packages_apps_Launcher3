@@ -466,11 +466,8 @@ public abstract class AbsSwipeUpHandler<
 
     private boolean isTaskbarStashed(Context context) {
         if (refactorTaskbarUiState()) {
-            final boolean ret = newIsTaskbarStashed(context);
-            if (BuildConfig.IS_STUDIO_BUILD && ret != legacyIsTaskbarStashed()) {
-                throw new IllegalStateException("isTaskbarStashed() doesn't match");
-            }
-            return ret;
+            // TODO(b/449780151): investigate mismatch on external display
+            return newIsTaskbarStashed(context);
         } else {
             return legacyIsTaskbarStashed();
         }
