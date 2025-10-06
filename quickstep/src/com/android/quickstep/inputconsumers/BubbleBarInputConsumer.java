@@ -34,6 +34,7 @@ import com.android.launcher3.taskbar.NavbarButtonsViewController;
 import com.android.launcher3.taskbar.TaskbarActivityContext;
 import com.android.launcher3.taskbar.TaskbarUiState;
 import com.android.launcher3.taskbar.bubbles.BubbleBarSwipeController;
+import com.android.launcher3.taskbar.bubbles.BubbleBarViewController;
 import com.android.launcher3.taskbar.bubbles.BubbleControllers;
 import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController;
 import com.android.launcher3.testing.TestLogging;
@@ -52,6 +53,7 @@ public class BubbleBarInputConsumer implements InputConsumer {
 
     private final TaskbarUiState mTaskbarUiState;
     private final BubbleStashController mBubbleStashController;
+    private final BubbleBarViewController mBubbleBarViewController;
     @Nullable
     private final BubbleBarSwipeController mBubbleBarSwipeController;
     private final InputMonitorCompat mInputMonitorCompat;
@@ -79,6 +81,7 @@ public class BubbleBarInputConsumer implements InputConsumer {
         mTaskbarUiState = taskbarUiState;
         mDisplayId = displayId;
         mBubbleStashController = bubbleControllers.bubbleStashController;
+        mBubbleBarViewController = bubbleControllers.bubbleBarViewController;
         mBubbleBarSwipeController = bubbleControllers.bubbleBarSwipeController.orElse(null);
 
         mInputMonitorCompat = inputMonitorCompat;
@@ -263,6 +266,6 @@ public class BubbleBarInputConsumer implements InputConsumer {
 
     @Deprecated
     private boolean legacyIsBubbleBarExpanded() {
-        return mBubbleStashController.isBubbleBarVisible();
+        return mBubbleBarViewController.isExpanded();
     }
 }
