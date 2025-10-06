@@ -16,10 +16,6 @@
 
 package com.android.launcher3.taskbar
 
-import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
-import android.platform.test.flag.junit.SetFlagsRule
-import com.android.launcher3.Flags.FLAG_ENABLE_TASKBAR_FOR_DIRECT_BOOT
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.UserLocked
@@ -40,9 +36,8 @@ import org.junit.runner.RunWith
 @EmulatedDevices(["pixelTablet2023"])
 class TaskbarManagerTest {
 
-    @get:Rule(order = 0) val setFlagsRule = SetFlagsRule()
-    @get:Rule(order = 1) val context = TaskbarWindowSandboxContext.create()
-    @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
+    @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()
+    @get:Rule(order = 1) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
 
     private val taskbarManager by taskbarUnitTestRule::taskbarManager
     private val activityContext by taskbarUnitTestRule::activityContext
@@ -70,27 +65,7 @@ class TaskbarManagerTest {
 
     @Test
     @UserLocked
-    @DisableFlags(FLAG_ENABLE_TASKBAR_FOR_DIRECT_BOOT)
-    fun onUserUnlocked_noDirectBootSupport_taskbarCreatedAfterUnlock() {
-        assertThat(taskbarManager.currentActivityContext).isNull()
-        taskbarUnitTestRule.unlockUser()
-        assertThat(taskbarManager.currentActivityContext).isNotNull()
-    }
-
-    @Test
-    @UserLocked
-    @DisableFlags(FLAG_ENABLE_TASKBAR_FOR_DIRECT_BOOT)
-    fun onUserUnlocked_noDirectBootSupport_connectedDisplay_taskbarCreatedAfterUnlock() {
-        val displayId = context.virtualDisplayRule.add()
-        assertThat(taskbarManager.getTaskbarForDisplay(displayId)).isNull()
-        taskbarUnitTestRule.unlockUser()
-        assertThat(taskbarManager.getTaskbarForDisplay(displayId)).isNotNull()
-    }
-
-    @Test
-    @UserLocked
-    @EnableFlags(FLAG_ENABLE_TASKBAR_FOR_DIRECT_BOOT)
-    fun onUserUnlocked_directBootSupport_taskbarRecreatedOutsideBootAppContext() {
+    fun onUserUnlocked_directBootStage_taskbarRecreatedOutsideBootAppContext() {
         assertThat(activityContext.applicationContext)
             .isInstanceOf(TaskbarBootAppContext::class.java)
         taskbarUnitTestRule.unlockUser()
@@ -99,8 +74,7 @@ class TaskbarManagerTest {
 
     @Test
     @UserLocked
-    @EnableFlags(FLAG_ENABLE_TASKBAR_FOR_DIRECT_BOOT)
-    fun onUserUnlocked_directBootSupport_connectedDisplay_taskbarRecreatedOutsideBootAppContext() {
+    fun onUserUnlocked_directBootStage_connectedDisplay_taskbarRecreatedOutsideBootAppContext() {
         val displayId = context.virtualDisplayRule.add()
         var application =
             checkNotNull(taskbarManager.getTaskbarForDisplay(displayId)).applicationContext
@@ -114,8 +88,7 @@ class TaskbarManagerTest {
 
     @Test
     @UserLocked
-    @EnableFlags(FLAG_ENABLE_TASKBAR_FOR_DIRECT_BOOT)
-    fun onUserUnlocked_directBootSupport_connectedDisplay_deviceProfileCacheCleared() {
+    fun onUserUnlocked_directBootStage_connectedDisplay_deviceProfileCacheCleared() {
         val displayId = context.virtualDisplayRule.add()
         val dp1 = checkNotNull(taskbarManager.getTaskbarForDisplay(displayId)).deviceProfile
 
@@ -157,7 +130,7 @@ class TaskbarManagerTest {
         runOnMainSync {
             taskbarManager.onSystemUiFlagsChanged(
                 SYSUI_STATE_NAVIGATION_BAR_DISABLED,
-                context.displayId
+                context.displayId,
             )
         }
 
@@ -170,7 +143,7 @@ class TaskbarManagerTest {
             // Start with taskbar disabled
             taskbarManager.onSystemUiFlagsChanged(
                 SYSUI_STATE_NAVIGATION_BAR_DISABLED,
-                context.displayId
+                context.displayId,
             )
         }
         assertThat(taskbarManager.currentActivityContext).isNull()
@@ -189,10 +162,7 @@ class TaskbarManagerTest {
         assertThat(taskbarManager.getTaskbarForDisplay(displayId)).isNotNull()
 
         runOnMainSync {
-            taskbarManager.onSystemUiFlagsChanged(
-                SYSUI_STATE_NAVIGATION_BAR_DISABLED,
-                displayId
-            )
+            taskbarManager.onSystemUiFlagsChanged(SYSUI_STATE_NAVIGATION_BAR_DISABLED, displayId)
         }
 
         assertThat(taskbarManager.getTaskbarForDisplay(displayId)).isNull()
@@ -203,10 +173,7 @@ class TaskbarManagerTest {
         val displayId = context.virtualDisplayRule.add()
         runOnMainSync {
             // Start with taskbar disabled
-            taskbarManager.onSystemUiFlagsChanged(
-                SYSUI_STATE_NAVIGATION_BAR_DISABLED,
-                displayId
-            )
+            taskbarManager.onSystemUiFlagsChanged(SYSUI_STATE_NAVIGATION_BAR_DISABLED, displayId)
         }
         assertThat(taskbarManager.getTaskbarForDisplay(displayId)).isNull()
 

@@ -22,7 +22,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 
 import static com.android.launcher3.BaseActivity.EVENT_DESTROYED;
 import static com.android.launcher3.Flags.enableGrowthNudge;
-import static com.android.launcher3.Flags.enableTaskbarForDirectBoot;
 import static com.android.launcher3.Flags.enableTaskbarUiThread;
 import static com.android.launcher3.Flags.enableUnfoldStateAnimation;
 import static com.android.launcher3.LauncherPrefs.TASKBAR_PINNING;
@@ -512,7 +511,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         // TIS can recreate after the user is unlocked, where it notifies unlock immediately. Also,
         // avoid initializing mUserUnlocked here and instead rely on TIS, because it initializes
         // several Taskbar dependencies before notifying us.
-        if (enableTaskbarForDirectBoot() && !LockedUserState.get(mBaseContext).isUserUnlocked()) {
+        if (!LockedUserState.get(mBaseContext).isUserUnlocked()) {
             mBootAppContext = new TaskbarBootAppContext(mBaseContext);
         }
         recreateTaskbarForDisplay(mPrimaryDisplayId, /* duration= */ 0);
