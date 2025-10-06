@@ -791,11 +791,13 @@ public abstract class RecentsView<
 
         @Override
         public void onSplitSelectionActive() {
+            mClearAllButton.setSplitSelectionActive(true);
         }
 
         @Override
         public void onSplitSelectionExit(boolean launchedSplit) {
             resetFromSplitSelectionState();
+            mClearAllButton.setSplitSelectionActive(false);
         }
     };
 
@@ -2492,6 +2494,7 @@ public abstract class RecentsView<
         }
         setEnableDrawingLiveTile(false);
         mBlurUtils.setDrawLiveTileBelowRecents(false);
+        mClearAllButton.setSplitSelectionActive(false);
 
         // TODO(b/391842220): This should not need to be explicitly called from here. When TVs
         //  are added and removed with the RecentsView lifecycle, this can be removed.

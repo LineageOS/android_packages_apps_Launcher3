@@ -242,6 +242,7 @@ public class SplitSelectStateController {
         mSplitSelectDataHolder.setInitialTaskSelect(intent, stagePosition, itemInfo, splitEvent,
                 alreadyRunningTask);
         createAndLogInstanceIdsForSession();
+        dispatchOnSplitSelectionActive();
     }
 
     /**
@@ -253,6 +254,7 @@ public class SplitSelectStateController {
             StatsLogManager.EventEnum splitEvent) {
         mSplitSelectDataHolder.setInitialTaskSelect(info, stagePosition, itemInfo, splitEvent);
         createAndLogInstanceIdsForSession();
+        dispatchOnSplitSelectionActive();
     }
 
 
@@ -386,6 +388,12 @@ public class SplitSelectStateController {
     private void dispatchOnSplitSelectionExit() {
         for (SplitSelectionListener listener : mSplitSelectionListeners) {
             listener.onSplitSelectionExit(false);
+        }
+    }
+
+    private void dispatchOnSplitSelectionActive() {
+        for (SplitSelectionListener listener : mSplitSelectionListeners) {
+            listener.onSplitSelectionActive();
         }
     }
 

@@ -51,6 +51,11 @@ constructor(
     var contentAlpha by MultiPropertyDelegate(clearAllButtonAlpha, Alpha.CONTENT)
     var visibilityAlpha by MultiPropertyDelegate(clearAllButtonAlpha, Alpha.VISIBILITY)
     var dismissAlpha by MultiPropertyDelegate(clearAllButtonAlpha, Alpha.DISMISS)
+    private var splitAlpha by MultiPropertyDelegate(clearAllButtonAlpha, Alpha.SPLIT)
+
+    fun setSplitSelectionActive(isActive: Boolean) {
+        splitAlpha = if (isActive) 0f else 1f
+    }
 
     var fullscreenProgress = 1f
         set(value) {
@@ -242,6 +247,7 @@ constructor(
             CONTENT,
             VISIBILITY,
             DISMISS,
+            SPLIT,
         }
 
         @JvmField
