@@ -683,6 +683,13 @@ flag {
 }
 
 flag {
+  name: "tooltip_edu_combinator"
+  namespace: "launcher"
+  description: "Separate logic of education tooltip combination from presentation"
+  bug: "444693509"
+}
+
+flag {
   name: "blur_on_more_surfaces"
   namespace: "launcher"
   description: "Enable blur in more Launcher surfaces"
