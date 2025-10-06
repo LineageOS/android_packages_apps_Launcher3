@@ -88,7 +88,6 @@ object InputConsumerUtils {
             val consumer: InputConsumer =
                 BubbleBarInputConsumer(
                     context,
-                    tac.taskbarUiState,
                     gestureState.displayId,
                     bubbleControllers,
                     inputMonitorCompat,

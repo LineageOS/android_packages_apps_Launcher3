@@ -78,8 +78,6 @@ class TaskbarUiState {
     private var _stashState = 0L
     private var _bubbleBarViewRect = ImmutableRect.EMPTY_RECT
     private var _isBubbleBarViewVisible = true
-    private var _isBubbleStashed = false
-    private var _isBubbleBarExpanded = false
     private var _stashedBubbleBarHeightPx = Int.MAX_VALUE
     private var _isStashedHandlerViewVisible = true
     private var _stashedHandlerViewRect = ImmutableRect.EMPTY_RECT
@@ -185,8 +183,6 @@ class TaskbarUiState {
         _bubbleBarViewRect = ImmutableRect.from(rect)
     }
 
-    fun getIsBubbleBarViewVisible() = _isBubbleBarViewVisible
-
     fun setIsBubbleBarViewVisible(isVisible: Boolean) {
         _isBubbleBarViewVisible = isVisible
     }
@@ -222,18 +218,6 @@ class TaskbarUiState {
     fun setNavbarFloatingRotationButtonsBounds(rect: Rect) {
         _navbarFloatingRotationButtonsBounds = ImmutableRect.from(rect)
     }
-
-    fun setIsBubbleBarExpanded(isExpanded: Boolean) {
-        _isBubbleBarExpanded = isExpanded
-    }
-
-    fun getIsBubbleBarExpanded() = _isBubbleBarExpanded
-
-    fun setIsBubbleStashed(isStashed: Boolean) {
-        _isBubbleStashed = isStashed
-    }
-
-    fun getIsBubbleStashed() = _isBubbleStashed
 
     fun setDeviceProfile(dp: DeviceProfile) {
         _deviceProfile = dp
