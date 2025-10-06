@@ -33,6 +33,7 @@ import com.android.launcher3.icons.IconProvider
 import com.android.launcher3.icons.LauncherIcons
 import com.android.launcher3.pm.UserCache
 import com.android.launcher3.util.CancellableTask
+import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
@@ -56,6 +57,7 @@ class TaskIconCache(
     private val iconProvider: IconProvider,
     displayController: DisplayController,
     val dispatcherProvider: DispatcherProvider,
+    daggerSingletonTracker: DaggerSingletonTracker,
 ) : TaskIconDataSource {
     private val recentsIconCacheSize = context.resources.getInteger(R.integer.recentsIconCacheSize)
     private var iconCache: TaskKeyLruCache<TaskCacheEntry>? = null
@@ -83,7 +85,9 @@ class TaskIconCache(
         // TODO (b/397205964): this will need to be updated when we support caches for different
         //  displays.
         displayController.listenable?.let {
-            it.changes.forEach(MAIN_EXECUTOR) { flags -> onDisplayInfoChanged(flags) }
+            daggerSingletonTracker.addCloseable(
+                it.changes.forEach(MAIN_EXECUTOR) { flags -> onDisplayInfoChanged(flags) }
+            )
         }
     }
 
