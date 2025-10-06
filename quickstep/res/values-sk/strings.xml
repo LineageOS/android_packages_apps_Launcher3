@@ -95,11 +95,11 @@
     <string name="allset_navigation_settings" msgid="4713404605961476027"><annotation id="link">"Nastavenia navigácie systémom"</annotation></string>
     <string name="allset_title_expressive" msgid="474399969304146994">"Vaše zariadenie <xliff:g id="DEVICE">%1$s</xliff:g> je \npripravené."</string>
     <string name="allset_title_expressive_fallback" msgid="2829102990606405239">"Vaše zariadenie je \npripravené."</string>
-    <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"Všetko máte pripravené."</string>
+    <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"Všetko máte pripravené"</string>
     <string name="allset_subtitle_expressive" msgid="419688197551192358">"Užite si svoj nový <xliff:g id="DEVICE">%1$s</xliff:g>!"</string>
     <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"Ak chcete začať so zariadením <xliff:g id="DEVICE">%1$s</xliff:g>, potiahnite nahor"</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> začnite klepnutím"</string>
-    <string name="allset_navigation_settings_expressive" msgid="3745595273748356"><annotation id="link">"Vyberte spôsob prechádzania"</annotation></string>
+    <string name="allset_navigation_settings_expressive" msgid="3745595273748356"><annotation id="link">"Vybrať spôsob navigácie"</annotation></string>
     <string name="allset_hint_expressive" msgid="756856423510976261">"Potiahnite nahor"</string>
     <string name="allset_button_hint_expressive" msgid="667643693410494225">"Klepnite na tlačidlo plochy"</string>
     <string name="allset_device_type_tablet" msgid="2173392009787325894">"tablet"</string>
@@ -150,8 +150,7 @@
     <string name="change_navigation_mode" msgid="9088393078736808968">"Zmeniť režim navigácie"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Rozdeľovač panela aplikácií"</string>
     <string name="taskbar_recents_overflow_a11y_title" msgid="8005941062446304304">"Iné nedávne aplikácie"</string>
-    <!-- no translation found for taskbar_pinned_overflow_a11y_title (2314810718333302626) -->
-    <skip />
+    <string name="taskbar_pinned_overflow_a11y_title" msgid="2314810718333302626">"Ďalšie aplikácie"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Presunúť hore alebo doľava"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Presunúť dole alebo doprava"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"Otvoriť aplikáciu ako bublinu"</string>

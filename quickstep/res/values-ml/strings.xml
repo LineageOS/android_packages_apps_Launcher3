@@ -150,8 +150,7 @@
     <string name="change_navigation_mode" msgid="9088393078736808968">"നാവിഗേഷൻ മോഡ് മാറ്റുക"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"ടാസ്‌ക്ബാർ ഡിവൈഡർ"</string>
     <string name="taskbar_recents_overflow_a11y_title" msgid="8005941062446304304">"അടുത്തിടെ ഉപയോഗിച്ച മറ്റ് ആപ്പുകൾ"</string>
-    <!-- no translation found for taskbar_pinned_overflow_a11y_title (2314810718333302626) -->
-    <skip />
+    <string name="taskbar_pinned_overflow_a11y_title" msgid="2314810718333302626">"മറ്റ് ആപ്പുകൾ"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"മുകളിലേക്കോ ഇടത്തേക്കോ നീക്കുക"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"താഴേക്കോ വലത്തേക്കോ നീക്കുക"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"ആപ്പ് ഒരു ബബിളായി തുറക്കുക"</string>
