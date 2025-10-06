@@ -19,7 +19,6 @@ package com.android.launcher3.model.tasks
 import android.content.ComponentName
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
-import android.util.Pair
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.launcher3.Flags
@@ -43,7 +42,6 @@ import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestUtil.runOnExecutorSync
 import com.google.common.truth.Truth.assertThat
-import java.util.ArrayList
 import java.util.UUID
 import org.junit.Before
 import org.junit.Rule
@@ -229,7 +227,7 @@ class AddWorkspaceItemsTaskTest {
      * with a mock.
      */
     private fun newTask(vararg items: ItemInfo) =
-        AddWorkspaceItemsTask(items.map { Pair.create(it, Any()) }, workspaceItemSpaceFinder)
+        AddWorkspaceItemsTask(items.toList(), workspaceItemSpaceFinder)
 
     private fun getExistingItem() =
         WorkspaceItemInfo().apply {
