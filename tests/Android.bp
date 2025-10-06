@@ -67,8 +67,6 @@ filegroup {
 android_library {
     name: "Launcher3TestLib",
     srcs: [],
-    asset_dirs: ["assets"],
-    resource_dirs: ["res"],
     static_libs: [
         "flag-junit-base",
         "launcher-aosp-tapl",
@@ -96,11 +94,10 @@ android_library {
         "kotlin-test",
         "systemui-helper",
         "systemui-tapl",
+        "Launcher3TestResources",
     ],
-    manifest: "AndroidManifest-common.xml",
+    package_name: "com.android.launcher3.tests",
     platform_apis: true,
-    // TODO(b/319712088): re-enable use_resource_processor
-    use_resource_processor: false,
 }
 
 android_library {
@@ -112,6 +109,7 @@ android_library {
     static_libs: [
         "kotlin-reflect",
     ],
+    manifest: "AndroidManifest-common.xml",
 }
 
 android_test {

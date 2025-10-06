@@ -32,7 +32,7 @@ object RoboApiWrapper {
     /** Rule to grant shortcuts permission */
     fun grantShortcutsPermissionRule(): TestRule = ShellCommandRule.setDefaultLauncher()
 
-    fun convertObjectToSpy(obj: Any) {
-        spyOn(obj)
+    fun Any.convertToSpy() {
+        spyOn(this)
     }
 }

@@ -172,6 +172,8 @@ class SandboxApplication private constructor(private val base: SandboxApplicatio
         return result
     }
 
+    inline fun <reified T : Any> spyService() = spyService(T::class.java)
+
     fun setupProvider(authority: String, proxy: ProxyProvider) {
         val providerInfo = ProviderInfo()
         providerInfo.authority = authority
