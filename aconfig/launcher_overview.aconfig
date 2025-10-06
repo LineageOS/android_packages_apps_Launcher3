@@ -19,16 +19,6 @@ flag {
 }
 
 flag {
-    name: "enable_meta_tab_toggle_in_overview"
-    namespace: "launcher_overview"
-    description: "Enables Meta-Tab toggle between Overview and recent tasks."
-    bug: "385128447"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "enable_overview_on_connected_displays"
     namespace: "launcher_overview"
     description: "Enable overview on connected displays."

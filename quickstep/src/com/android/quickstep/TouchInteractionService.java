@@ -24,7 +24,6 @@ import static android.view.MotionEvent.ACTION_POINTER_DOWN;
 import static android.view.MotionEvent.ACTION_POINTER_UP;
 import static android.view.MotionEvent.ACTION_UP;
 
-import static com.android.launcher3.Flags.enableMetaTabToggleInOverview;
 import static com.android.launcher3.Flags.enableTaskbarForDirectBoot;
 import static com.android.launcher3.LauncherPrefs.backedUpItem;
 import static com.android.launcher3.MotionEventsUtils.isTrackpadMotionEvent;
@@ -277,11 +276,7 @@ public class TouchInteractionService extends Service {
                     TaskUtils.closeSystemWindowsAsync(CLOSE_SYSTEM_WINDOWS_REASON_RECENTS);
                     tis.mOverviewCommandHelper.addCommand(CommandType.SHOW_ALT_TAB, displayId);
                 } else {
-                    tis.mOverviewCommandHelper.addCommand(
-                            enableMetaTabToggleInOverview()
-                                    ? CommandType.TOGGLE_WITH_FOCUS
-                                    : CommandType.SHOW_WITH_FOCUS,
-                            displayId);
+                    tis.mOverviewCommandHelper.addCommand(CommandType.TOGGLE_WITH_FOCUS, displayId);
                 }
             });
         }
