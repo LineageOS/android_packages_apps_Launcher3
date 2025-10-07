@@ -25,8 +25,9 @@ import android.provider.Settings
 import android.provider.Settings.Secure.USER_SETUP_COMPLETE
 import android.view.accessibility.AccessibilityManager
 import com.android.launcher3.R
+import com.android.launcher3.util.Executors.MAIN_EXECUTOR
+import com.android.launcher3.util.SafeCloseable
 import com.android.launcher3.util.SettingsCache
-import com.android.launcher3.util.SettingsCache.OnChangeListener
 import com.android.quickstep.input.QuickstepKeyGestureEventsManager
 import java.io.PrintWriter
 import java.util.concurrent.Executor
@@ -47,10 +48,15 @@ class AllAppsActionManager(
     private val createAllAppsPendingIntent: () -> PendingIntent,
 ) {
 
-    private val onSettingsChangeListener = OnChangeListener { v -> isUserSetupComplete = v }
+    private var onSettingsChangeSafeCloseable: SafeCloseable? = null
 
     init {
-        SettingsCache.INSTANCE[context].register(USER_SETUP_COMPLETE_URI, onSettingsChangeListener)
+        onSettingsChangeSafeCloseable =
+            SettingsCache.INSTANCE[context].getListenableRef(USER_SETUP_COMPLETE_URI).forEach(
+                MAIN_EXECUTOR
+            ) { v ->
+                isUserSetupComplete = v
+            }
     }
 
     /** `true` if home and overview are the same Activity. */
@@ -74,8 +80,7 @@ class AllAppsActionManager(
             updateSystemAction()
         }
 
-    private var isUserSetupComplete =
-        SettingsCache.INSTANCE[context].getValue(USER_SETUP_COMPLETE_URI)
+    private var isUserSetupComplete: Boolean = false
         set(value) {
             field = value
             updateSystemAction()
@@ -134,10 +139,8 @@ class AllAppsActionManager(
                 .getSystemService(AccessibilityManager::class.java)
                 ?.unregisterSystemAction(GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS)
             quickstepKeyGestureEventsManager.unregisterAllAppsKeyGestureEvent()
-            SettingsCache.INSTANCE[context].unregister(
-                USER_SETUP_COMPLETE_URI,
-                onSettingsChangeListener,
-            )
+            onSettingsChangeSafeCloseable?.close()
+            onSettingsChangeSafeCloseable = null
         }
     }
 

@@ -67,10 +67,6 @@ public class VibratorWrapper {
     private final Vibrator mVibrator;
     private final boolean mHasVibrator;
 
-    @VisibleForTesting
-    final SettingsCache.OnChangeListener mHapticChangeListener =
-            isEnabled -> mIsHapticFeedbackEnabled = isEnabled;
-
     private boolean mIsHapticFeedbackEnabled;
 
     @Inject
@@ -80,11 +76,11 @@ public class VibratorWrapper {
         mVibrator = context.getSystemService(Vibrator.class);
         mHasVibrator = mVibrator.hasVibrator();
         if (mHasVibrator) {
-            MAIN_EXECUTOR.execute(
-                    () -> settingsCache.register(HAPTIC_FEEDBACK_URI, mHapticChangeListener));
-            mIsHapticFeedbackEnabled = settingsCache.getValue(HAPTIC_FEEDBACK_URI);
-            tracker.addCloseable(
-                    () -> settingsCache.unregister(HAPTIC_FEEDBACK_URI, mHapticChangeListener));
+            tracker.addCloseable(settingsCache.getListenableRef(HAPTIC_FEEDBACK_URI).forEach(
+                    MAIN_EXECUTOR, (isEnabled) -> {
+                        mIsHapticFeedbackEnabled = isEnabled;
+                        return null;
+                    }));
         } else {
             mIsHapticFeedbackEnabled = false;
         }

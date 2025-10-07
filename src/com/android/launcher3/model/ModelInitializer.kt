@@ -134,25 +134,24 @@ constructor(
         )
 
         // Private space settings changes
-        val psSettingsListener = SettingsCache.OnChangeListener { model.forceReload() }
-        settingsCache.register(PRIVATE_SPACE_HIDE_WHEN_LOCKED_URI, psSettingsListener)
-        lifeCycle.addCloseable {
-            settingsCache.unregister(PRIVATE_SPACE_HIDE_WHEN_LOCKED_URI, psSettingsListener)
-        }
+        lifeCycle.addCloseable(
+            settingsCache.getListenableRef(PRIVATE_SPACE_HIDE_WHEN_LOCKED_URI).forEach(
+                MAIN_EXECUTOR
+            ) {
+                model.forceReload()
+            }
+        )
 
         // Notification dots changes
-        val notificationChanges =
-            SettingsCache.OnChangeListener { dotsEnabled ->
+        lifeCycle.addCloseable(
+            settingsCache.getListenableRef(NOTIFICATION_BADGING_URI).forEach(MAIN_EXECUTOR) {
+                dotsEnabled ->
                 if (dotsEnabled)
                     NotificationListener.requestRebind(
                         ComponentName(context, NotificationListener::class.java)
                     )
             }
-        settingsCache.register(NOTIFICATION_BADGING_URI, notificationChanges)
-        notificationChanges.onSettingsChanged(settingsCache.getValue(NOTIFICATION_BADGING_URI))
-        lifeCycle.addCloseable {
-            settingsCache.unregister(NOTIFICATION_BADGING_URI, notificationChanges)
-        }
+        )
 
         // Custom widgets
         lifeCycle.addCloseable(customWidgetManager.addWidgetRefreshCallback(model::rebindCallbacks))

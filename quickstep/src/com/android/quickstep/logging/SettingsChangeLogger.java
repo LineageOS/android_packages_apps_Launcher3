@@ -75,6 +75,8 @@ import com.android.launcher3.util.NavigationMode;
 import com.android.launcher3.util.SettingsCache;
 import com.android.quickstep.dagger.QuickstepBaseAppComponent;
 
+import kotlin.Unit;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -112,8 +114,6 @@ public class SettingsChangeLogger implements OnSharedPreferenceChangeListener {
     private NavigationMode mNavMode;
     private LauncherEvent mNotificationDotsEvent;
 
-    private final SettingsCache.OnChangeListener mListener = this::onNotificationDotsChanged;
-
     @Inject
     SettingsChangeLogger(@ApplicationContext Context context,
             DaggerSingletonTracker tracker,
@@ -145,9 +145,8 @@ public class SettingsChangeLogger implements OnSharedPreferenceChangeListener {
             mLauncherPrefs.getDevicePrefs().unregisterOnSharedPreferenceChangeListener(this);
         });
 
-        settingsCache.register(NOTIFICATION_BADGING_URI, mListener);
-        onNotificationDotsChanged(settingsCache.getValue(NOTIFICATION_BADGING_URI));
-        tracker.addCloseable(() -> settingsCache.unregister(NOTIFICATION_BADGING_URI, mListener));
+        tracker.addCloseable(settingsCache.getListenableRef(NOTIFICATION_BADGING_URI).forEach(
+                MAIN_EXECUTOR, this::onNotificationDotsChanged));
 
         ThemeChangeListener themeChangeListener = () -> logThemeEvent(mStatsLogManager.logger());
         themeManager.addChangeListener(themeChangeListener);
@@ -193,7 +192,7 @@ public class SettingsChangeLogger implements OnSharedPreferenceChangeListener {
         return result;
     }
 
-    private void onNotificationDotsChanged(boolean isDotsEnabled) {
+    private Unit onNotificationDotsChanged(boolean isDotsEnabled) {
         LauncherEvent mEvent =
                 isDotsEnabled ? LAUNCHER_NOTIFICATION_DOT_ENABLED
                         : LAUNCHER_NOTIFICATION_DOT_DISABLED;
@@ -203,6 +202,7 @@ public class SettingsChangeLogger implements OnSharedPreferenceChangeListener {
             mStatsLogManager.logger().log(mNotificationDotsEvent);
         }
         mNotificationDotsEvent = mEvent;
+        return null;
     }
 
     private void onDisplayInfoChanged(Info info, int flags) {

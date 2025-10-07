@@ -37,8 +37,9 @@ import androidx.annotation.VisibleForTesting
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.util.DaggerSingletonObject
+import com.android.launcher3.util.Executors.MAIN_EXECUTOR
+import com.android.launcher3.util.SafeCloseable
 import com.android.launcher3.util.SettingsCache
-import com.android.launcher3.util.SettingsCache.OnChangeListener
 import com.android.quickstep.OverviewCommandHelper
 import com.android.quickstep.dagger.QuickstepBaseAppComponent
 import com.android.quickstep.input.QuickstepKeyGestureEventsManager.OverviewGestureHandler.OverviewType.ALT_TAB
@@ -53,20 +54,19 @@ import javax.inject.Inject
 @LauncherAppSingleton
 class QuickstepKeyGestureEventsManager
 @Inject
-constructor(
-    @ApplicationContext private val context: Context,
-    private val settingsCache: SettingsCache,
-) {
-    @VisibleForTesting
-    val onUserSetupCompleteListener = OnChangeListener { isUserSetupCompleted = it }
+constructor(@ApplicationContext private val context: Context, settingsCache: SettingsCache) {
     private val inputManager = requireNotNull(context.getSystemService(InputManager::class.java))
+    private var onUserSetupCompleteSafeCloseable: SafeCloseable? = null
     private var allAppsPendingIntent: PendingIntent? = null
     private var overviewGestureHandler: OverviewGestureHandler? = null
     private var overviewCommandHelper: OverviewCommandHelper? = null
-    private var isUserSetupCompleted: Boolean = settingsCache.getValue(USER_SETUP_COMPLETE_URI)
+    private var isUserSetupCompleted: Boolean = false
 
     init {
-        settingsCache.register(USER_SETUP_COMPLETE_URI, onUserSetupCompleteListener)
+        onUserSetupCompleteSafeCloseable =
+            settingsCache.getListenableRef(USER_SETUP_COMPLETE_URI).forEach(MAIN_EXECUTOR) { v ->
+                isUserSetupCompleted = v
+            }
     }
 
     @VisibleForTesting
@@ -242,7 +242,8 @@ constructor(
     }
 
     fun onDestroy() {
-        settingsCache.unregister(USER_SETUP_COMPLETE_URI, onUserSetupCompleteListener)
+        onUserSetupCompleteSafeCloseable?.close()
+        onUserSetupCompleteSafeCloseable = null
         unregisterOverviewKeyGestureEvent()
         unregisterAllAppsKeyGestureEvent()
         unregisterHomeKeyGestureEvent()

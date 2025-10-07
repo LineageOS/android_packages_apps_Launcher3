@@ -183,31 +183,32 @@ public class RecentsAnimationDeviceState implements ExclusionListener {
 
         if (mIsOneHandedModeSupported) {
             Uri oneHandedUri = Settings.Secure.getUriFor(ONE_HANDED_ENABLED);
-            SettingsCache.OnChangeListener onChangeListener =
-                    enabled -> mIsOneHandedModeEnabled = enabled;
-            settingsCache.register(oneHandedUri, onChangeListener);
             mIsOneHandedModeEnabled = settingsCache.getValue(oneHandedUri);
-            lifeCycle.addCloseable(() -> settingsCache.unregister(oneHandedUri, onChangeListener));
+            lifeCycle.addCloseable(settingsCache.getListenableRef(oneHandedUri).forEach(
+                    MAIN_EXECUTOR, (enabled) -> {
+                        mIsOneHandedModeEnabled = enabled;
+                        return null;
+                    }));
         } else {
             mIsOneHandedModeEnabled = false;
         }
 
         Uri swipeBottomNotificationUri =
                 Settings.Secure.getUriFor(ONE_HANDED_SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED);
-        SettingsCache.OnChangeListener onChangeListener =
-                enabled -> mIsSwipeToNotificationEnabled = enabled;
-        settingsCache.register(swipeBottomNotificationUri, onChangeListener);
-        mIsSwipeToNotificationEnabled = settingsCache.getValue(swipeBottomNotificationUri);
-        lifeCycle.addCloseable(
-                () -> settingsCache.unregister(swipeBottomNotificationUri, onChangeListener));
-
+        lifeCycle.addCloseable(settingsCache.getListenableRef(swipeBottomNotificationUri).forEach(
+                MAIN_EXECUTOR, (enabled) -> {
+                    mIsSwipeToNotificationEnabled = enabled;
+                    return null;
+                }));
         Uri setupCompleteUri = Settings.Secure.getUriFor(Settings.Secure.USER_SETUP_COMPLETE);
         mIsUserSetupComplete = settingsCache.getValue(setupCompleteUri);
         if (!mIsUserSetupComplete) {
-            SettingsCache.OnChangeListener userSetupChangeListener = e -> mIsUserSetupComplete = e;
-            settingsCache.register(setupCompleteUri, userSetupChangeListener);
             lifeCycle.addCloseable(
-                    () -> settingsCache.unregister(setupCompleteUri, userSetupChangeListener));
+                    settingsCache.getListenableRef(setupCompleteUri).forEach(
+                            MAIN_EXECUTOR, (e) -> {
+                                mIsUserSetupComplete = e;
+                                return null;
+                            }));
         }
 
         try {

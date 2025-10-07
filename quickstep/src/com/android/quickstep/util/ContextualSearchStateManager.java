@@ -21,6 +21,7 @@ import static android.app.contextualsearch.ContextualSearchManager.FEATURE_CONTE
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_LAUNCH_OMNI_SUCCESSFUL_SYSTEM_ACTION;
+import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 import static com.android.launcher3.util.SimpleBroadcastReceiver.packageFilter;
 import static com.android.quickstep.util.SystemActionConstants.SYSTEM_ACTION_ID_SEARCH_SCREEN;
@@ -120,19 +121,17 @@ public class ContextualSearchStateManager  {
                 Intent.ACTION_PACKAGE_ADDED,
                 Intent.ACTION_PACKAGE_CHANGED,
                 Intent.ACTION_PACKAGE_REMOVED));
-
-        SettingsCache.OnChangeListener settingChangedListener =
-                isEnabled -> mIsContextualSearchSettingEnabled = isEnabled;
-        settingsCache.register(SEARCH_ALL_ENTRYPOINTS_ENABLED_URI, settingChangedListener);
-        mIsContextualSearchSettingEnabled =
-                settingsCache.getValue(SEARCH_ALL_ENTRYPOINTS_ENABLED_URI);
+        lifeCycle.addCloseable(settingsCache.getListenableRef(SEARCH_ALL_ENTRYPOINTS_ENABLED_URI)
+                .forEach(MAIN_EXECUTOR, (v) -> {
+                    mIsContextualSearchSettingEnabled = v;
+                    return null;
+                }));
 
         systemUiProxy.addOnStateChangeListener(mSysUiStateChangeListener);
 
         lifeCycle.addCloseable(() -> {
             mContextualSearchPackageReceiver.close();
             unregisterSearchScreenSystemAction();
-            settingsCache.unregister(SEARCH_ALL_ENTRYPOINTS_ENABLED_URI, settingChangedListener);
             systemUiProxy.removeOnStateChangeListener(mSysUiStateChangeListener);
         });
     }

@@ -121,6 +121,8 @@ import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider;
 
+import kotlin.Unit;
+
 import kotlinx.coroutines.CoroutineDispatcher;
 
 import java.io.PrintWriter;
@@ -311,11 +313,6 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         }
     }
 
-    private final SettingsCache.OnChangeListener mOnSettingsChangeListener = c -> {
-        debugPrimaryTaskbar("Settings changed! Recreating Taskbar!");
-        recreateTaskbars();
-    };
-
     private final DesktopVisibilityController.TaskbarDesktopModeListener
             mTaskbarDesktopModeListener =
             new DesktopVisibilityController.TaskbarDesktopModeListener() {
@@ -423,6 +420,9 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
                 }
             };
 
+    private @Nullable SafeCloseable mUserSetupCompleteSafeCloseable;
+    private @Nullable SafeCloseable mNavBarKidsModeSafeCloseable;
+
     @SuppressLint("WrongConstant")
     public TaskbarManagerImpl(
             Context context,
@@ -454,10 +454,12 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         createNavButtonController(mPrimaryDisplayId);
         createAndRegisterComponentCallbacks(mPrimaryDisplayId);
 
-        SettingsCache.INSTANCE.get(mPrimaryWindowContext)
-                .register(USER_SETUP_COMPLETE_URI, mOnSettingsChangeListener);
-        SettingsCache.INSTANCE.get(mPrimaryWindowContext)
-                .register(NAV_BAR_KIDS_MODE, mOnSettingsChangeListener);
+        mUserSetupCompleteSafeCloseable = SettingsCache.INSTANCE.get(mPrimaryWindowContext)
+                .getListenableRef(USER_SETUP_COMPLETE_URI).forEach(
+                        TASKBAR_UI_THREAD, (v) -> onSettingChanged());
+        mNavBarKidsModeSafeCloseable = SettingsCache.INSTANCE.get(mPrimaryWindowContext)
+                .getListenableRef(NAV_BAR_KIDS_MODE).forEach(
+                        TASKBAR_UI_THREAD, (v) -> onSettingChanged());
         if (DesktopExperienceFlags.ENABLE_SYS_DECORS_CALLBACKS_VIA_WM.isTrue()
                 && DesktopExperienceFlags.ENABLE_DISPLAY_CONTENT_MODE_MANAGEMENT.isTrue()) {
             displaysWithDecorationsRepositoryCompat
@@ -500,6 +502,12 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         recreateTaskbarForDisplay(mPrimaryDisplayId, /* duration= */ 0);
 
         debugPrimaryTaskbar("TaskbarManager created");
+    }
+
+    private Unit onSettingChanged() {
+        debugPrimaryTaskbar("Settings changed! Recreating Taskbar!");
+        recreateTaskbars();
+        return null;
     }
 
     /**
@@ -1175,10 +1183,14 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         }
 
         removeRecreationListener();
-        SettingsCache.INSTANCE.get(mPrimaryWindowContext)
-                .unregister(USER_SETUP_COMPLETE_URI, mOnSettingsChangeListener);
-        SettingsCache.INSTANCE.get(mPrimaryWindowContext)
-                .unregister(NAV_BAR_KIDS_MODE, mOnSettingsChangeListener);
+        if (mUserSetupCompleteSafeCloseable != null) {
+            mUserSetupCompleteSafeCloseable.close();
+            mUserSetupCompleteSafeCloseable = null;
+        }
+        if (mNavBarKidsModeSafeCloseable != null) {
+            mNavBarKidsModeSafeCloseable.close();
+            mNavBarKidsModeSafeCloseable = null;
+        }
         if (DesktopExperienceFlags.ENABLE_SYS_DECORS_CALLBACKS_VIA_WM.isTrue()
                 && DesktopExperienceFlags.ENABLE_DISPLAY_CONTENT_MODE_MANAGEMENT.isTrue()) {
             mDisplaysWithDecorationsRepositoryCompat.unregisterDisplayDecorationListener(this);
