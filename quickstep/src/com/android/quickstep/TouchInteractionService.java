@@ -490,6 +490,8 @@ public class TouchInteractionService extends Service {
             // sending the reply.
             MAIN_EXECUTOR.execute(() -> {
                 executeForTaskbarManager(TaskbarManager::destroy);
+                executeForTouchInteractionService(tis ->
+                        tis.mQuickstepKeyGestureEventsHandler.onDestroy());
                 try {
                     reply.sendResult(null);
                 } catch (RemoteException e) {
@@ -1008,7 +1010,6 @@ public class TouchInteractionService extends Service {
                 + " instance=" + System.identityHashCode(this));
         if (LockedUserState.get(this).isUserUnlocked()) {
             mInputConsumer.unregisterInputConsumer();
-            mQuickstepKeyGestureEventsHandler.onDestroy();
             mOverviewComponentObserver.setHomeDisabled(false);
             mOverviewComponentObserver.removeOverviewChangeListener(mOverviewChangeListener);
         }
