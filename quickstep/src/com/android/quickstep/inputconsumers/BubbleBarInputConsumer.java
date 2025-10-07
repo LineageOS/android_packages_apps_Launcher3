@@ -18,6 +18,7 @@ package com.android.quickstep.inputconsumers;
 
 import static android.view.MotionEvent.INVALID_POINTER_ID;
 
+import static com.android.launcher3.Flags.enableTaskbarUiThread;
 import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
 
@@ -132,17 +133,10 @@ public class BubbleBarInputConsumer implements InputConsumer {
                         Log.d(TAG, "ACTION_MOVE passed touch slop pos=" + mLastPos);
                     }
                 }
-                if (mBubbleBarSwipeController != null) {
-                    TASKBAR_UI_THREAD.execute(() -> {
-                        mBubbleBarSwipeController.swipeTo(dY);
-                        if (!mPilfered && mBubbleBarSwipeController.isSwipeGesture()) {
-                            Log.d(TAG, "ACTION_MOVE swipe gesture, pilfering");
-                            mPilfered = true;
-                            // Bubbles is handling the swipe so make sure no one else gets it.
-                            TestLogging.recordEvent(TestProtocol.SEQUENCE_PILFER, "pilferPointers");
-                            mInputMonitorCompat.pilferPointers();
-                        }
-                    });
+                if (enableTaskbarUiThread()) {
+                    TASKBAR_UI_THREAD.execute(() -> onActionMove(dY));
+                } else {
+                    onActionMove(dY);
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -171,6 +165,20 @@ public class BubbleBarInputConsumer implements InputConsumer {
         }
         if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
             cleanupAfterMotionEvent();
+        }
+    }
+
+    private void onActionMove(Float dY) {
+        if (mBubbleBarSwipeController == null) {
+            return;
+        }
+        mBubbleBarSwipeController.swipeTo(dY);
+        if (!mPilfered && mBubbleBarSwipeController.isSwipeGesture()) {
+            Log.d(TAG, "ACTION_MOVE swipe gesture, pilfering");
+            mPilfered = true;
+            // Bubbles is handling the swipe so make sure no one else gets it.
+            TestLogging.recordEvent(TestProtocol.SEQUENCE_PILFER, "pilferPointers");
+            mInputMonitorCompat.pilferPointers();
         }
     }
 
