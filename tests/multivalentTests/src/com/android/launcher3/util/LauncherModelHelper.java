@@ -46,6 +46,10 @@ public class LauncherModelHelper {
     public static final String SETTINGS_PACKAGE = "com.android.settings";
     public static final String SETTINGS_COMPONENT = "com.android.settings.Settings";
 
+    public static final String WIDGET_PACKAGE_NAME = "com.google.android.apps.nexuslauncher.tests";
+    public static final String WIDGET_CLASS_NAME_NO_CONFIG =
+            "com.android.launcher3.testcomponent.AppWidgetNoConfig";
+
     public static final List<String> ACTIVITY_LIST = Arrays.asList(
             TEST_ACTIVITY,
             TEST_ACTIVITY2,

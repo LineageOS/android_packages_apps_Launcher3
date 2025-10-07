@@ -19,6 +19,7 @@ package com.android.launcher3.integration.util.events
 import android.view.ViewTreeObserver
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.AbstractFloatingView.TYPE_WIDGET_RESIZE_FRAME
+import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherState
 import com.android.launcher3.debug.TestEventEmitter.TestEvent
@@ -83,6 +84,34 @@ object ActivityTestEvents {
                     }
                 }
             )
+        }
+        return waiter
+    }
+
+    /**
+     * Creates an event waiter to wait for the FixedLandscape value in the IDP to change. This will
+     * hang if the value of the fixed landscape never changes before waiting for it to change. This
+     * is by design so that tests fail if the state doesn't change.
+     */
+    fun <LAUNCHER_TYPE : Launcher> LauncherActivityScenarioRule<LAUNCHER_TYPE>
+        .createFixedLandscapeSwitchWaiter(expectedIsFixedLandscape: Boolean): EventWaiter {
+        // This works by listening to IDP changes until the value of fixed landscape changes.
+        val waiter = EventWaiter(TestEvent.FIXED_LANDSCAPE)
+        executeOnLauncher { launcher ->
+            if (
+                InvariantDeviceProfile.INSTANCE.get(launcher).isFixedLandscape ==
+                    expectedIsFixedLandscape
+            ) {
+                waiter.terminate()
+            }
+            InvariantDeviceProfile.INSTANCE.get(launcher).addOnChangeListener {
+                if (
+                    InvariantDeviceProfile.INSTANCE.get(launcher).isFixedLandscape ==
+                        expectedIsFixedLandscape
+                ) {
+                    waiter.terminate()
+                }
+            }
         }
         return waiter
     }
