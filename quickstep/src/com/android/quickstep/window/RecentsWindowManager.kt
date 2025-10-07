@@ -54,6 +54,7 @@ import com.android.app.displaylib.PerDisplayRepository
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.BaseActivity
 import com.android.launcher3.Flags.enablePredictiveBackInOverview
+import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherAnimationRunner
 import com.android.launcher3.LauncherAnimationRunner.RemoteAnimationFactory
 import com.android.launcher3.LauncherRootView
@@ -147,20 +148,20 @@ constructor(
     @Assisted private val recentsWindowTracker: RecentsWindowTracker,
     wallpaperColorHints: WallpaperColorHints,
     private val systemUiProxy: SystemUiProxy,
-    private val recentsModel: RecentsModel,
+    recentsModel: RecentsModel,
     private val screenOnTracker: ScreenOnTracker,
     private val desktopState: DesktopState,
-    private val displayController: DisplayController,
+    displayController: DisplayController,
     @Ui private val uiExecutor: LooperExecutor,
+    invariantDeviceProfile: InvariantDeviceProfile,
 ) :
-    RecentsWindowContext(windowContext, wallpaperColorHints.hints),
+    RecentsWindowContext(windowContext, wallpaperColorHints.hints, invariantDeviceProfile),
     RecentsViewContainer,
     StatefulContainer<RecentsState>,
     ComponentCallbacks {
 
     companion object {
         private const val HOME_APPEAR_DURATION: Long = 250
-        private const val RECENTS_ANIMATION_TIMEOUT = 1000L
         private const val TAG = "RecentsWindowManager"
 
         @JvmField
