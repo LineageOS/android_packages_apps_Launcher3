@@ -68,7 +68,7 @@ class SessionFailureTask(val packageName: String, val user: UserHandle) : ModelU
                     dataModel.itemsIdMap.filter { info ->
                         (info is WorkspaceItemInfo && info.hasPromiseIconUi()) &&
                             user == info.user &&
-                            TextUtils.equals(packageName, info.intent.getPackage())
+                            TextUtils.equals(packageName, info.targetPackage)
                     }
                 if (removedItems.isNotEmpty()) {
                     taskController.deleteAndBindComponentsRemoved(
