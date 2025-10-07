@@ -62,6 +62,9 @@ interface HomeScreenFilesProvider {
      */
     fun moveToHomeScreen(uriList: List<Uri>): List<CompletableFuture<Boolean>>
 
+    /** Moves a single file or folder to trash. */
+    fun moveToTrash(uri: Uri)
+
     /** Returns all eligible file items to be shown on the home screen. */
     fun query(): Lazy<Map<Uri, HomeScreenFile>>
 

@@ -252,6 +252,9 @@
     <!-- Context menu action for a file/folder on the home screen.
          This opens the item using its corresponding application. [CHAR_LIMIT=20] -->
     <string name="home_screen_files_context_menu_open_in_app_label">Open</string>
+    <!-- Context menu action for a file/folder on the home screen, which moves the item to trash.
+         [CHAR_LIMIT=20] -->
+    <string name="home_screen_files_context_menu_move_to_trash_label">Move to trash</string>
 
     <!-- Permissions: -->
     <skip />
