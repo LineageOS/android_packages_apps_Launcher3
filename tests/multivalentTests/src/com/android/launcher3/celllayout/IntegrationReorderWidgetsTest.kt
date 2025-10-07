@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.integration.celllayout
+package com.android.launcher3.celllayout
 
 import android.content.Context
 import android.graphics.Point
@@ -30,18 +30,12 @@ import com.android.launcher3.Flags
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherAppState
-import com.android.launcher3.celllayout.CellInfo
-import com.android.launcher3.celllayout.CellLayoutTestCaseReader
 import com.android.launcher3.celllayout.CellLayoutTestCaseReader.Board
 import com.android.launcher3.celllayout.CellLayoutTestCaseReader.TestSection
-import com.android.launcher3.celllayout.CellLayoutTestUtils
-import com.android.launcher3.celllayout.ReorderTestCase
 import com.android.launcher3.celllayout.board.CellLayoutBoard
 import com.android.launcher3.celllayout.board.TestWorkspaceBuilder
 import com.android.launcher3.celllayout.board.WidgetRect
-import com.android.launcher3.debug.TestEventEmitter.TestEvent
 import com.android.launcher3.dragndrop.DragOptions
-import com.android.launcher3.integration.events.EventsRule
 import com.android.launcher3.integration.util.LauncherActivityScenarioRule
 import com.android.launcher3.integration.util.TestUtils.getCellTopLeftRelativeToWorkspace
 import com.android.launcher3.integration.util.TestUtils.getWidgetAtCell
@@ -52,9 +46,6 @@ import com.android.launcher3.util.CellAndSpan
 import com.android.launcher3.util.LauncherLayoutBuilder
 import com.android.launcher3.util.ModelTestExtensions.clearModelDb
 import com.android.launcher3.util.ModelTestExtensions.setModelLayout
-import com.android.launcher3.util.rule.ScreenRecordRule
-import com.android.launcher3.util.rule.ScreenRecordRule.ScreenRecord
-import com.android.launcher3.util.rule.ShellCommandRule
 import com.android.launcher3.widget.LauncherAppWidgetHostView
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -75,12 +66,6 @@ class IntegrationReorderWidgetsTest {
     var targetContext: Context = getInstrumentation().targetContext
 
     @get:Rule val setFlagsRule: SetFlagsRule = SetFlagsRule()
-
-    @get:Rule var screenRecordRule: ScreenRecordRule = ScreenRecordRule()
-
-    @get:Rule var eventsRule: EventsRule = EventsRule(targetContext)
-
-    @get:Rule var grantWidgetRule: ShellCommandRule = ShellCommandRule.grantWidgetBind()
 
     @get:Rule var launcherActivity = LauncherActivityScenarioRule<Launcher>()
 
@@ -230,7 +215,6 @@ class IntegrationReorderWidgetsTest {
     }
 
     private fun runTestCase(testCase: ReorderTestCase) {
-        val workspaceLoadedEvent = eventsRule.createEventWaiter(TestEvent.WORKSPACE_FINISH_LOADING)
         val mainWidgetCellPos = CellLayoutBoard.getMainFromList(testCase.mStart)
 
         val layout = LauncherLayoutBuilder()
@@ -240,7 +224,6 @@ class IntegrationReorderWidgetsTest {
         targetContext.setModelLayout(layout)
 
         // This makes sure the Workspace is fully loaded before continuing
-        workspaceLoadedEvent.waitForSignal()
         triggerWidgetResize(testCase)
         val frameShowingEvent = launcherActivity.createResizeFrameShownWaiter()
         simulateDrag(
@@ -292,21 +275,18 @@ class IntegrationReorderWidgetsTest {
         return true
     }
 
-    @ScreenRecord
     @Test
     fun simpleReorder() =
         runTest(timeout = TIMEOUT) {
             runTestCaseMap(getTestMap("ReorderWidgets/simple_reorder_case"), "simple_reorder_case")
         }
 
-    @ScreenRecord
     @Test
     fun pushTest() =
         runTest(timeout = TIMEOUT) {
             runTestCaseMap(getTestMap("ReorderWidgets/push_reorder_case"), "push_reorder_case")
         }
 
-    @ScreenRecord
     @Test
     fun moveOutReorder() =
         runTest(timeout = TIMEOUT) {
