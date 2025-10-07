@@ -24,7 +24,6 @@ import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.os.UserHandle;
-import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -64,7 +63,7 @@ public class AddWorkspaceItemsTask implements ModelUpdateTask {
     private static final String LOG = "AddWorkspaceItemsTask";
 
     @NonNull
-    private final List<Pair<ItemInfo, Object>> mItemList;
+    private final List<ItemInfo> mItemList;
 
     @NonNull
     private final WorkspaceItemSpaceFinder mItemSpaceFinder;
@@ -73,7 +72,7 @@ public class AddWorkspaceItemsTask implements ModelUpdateTask {
      * @param itemList items to add on the workspace
      * @param itemSpaceFinder inject WorkspaceItemSpaceFinder dependency for testing
      */
-    public AddWorkspaceItemsTask(@NonNull final List<Pair<ItemInfo, Object>> itemList,
+    public AddWorkspaceItemsTask(@NonNull final List<ItemInfo> itemList,
             @NonNull final WorkspaceItemSpaceFinder itemSpaceFinder) {
         mItemList = itemList;
         mItemSpaceFinder = itemSpaceFinder;
@@ -93,8 +92,8 @@ public class AddWorkspaceItemsTask implements ModelUpdateTask {
 
         synchronized (dataModel) {
             List<ItemInfo> filteredItems = new ArrayList<>();
-            for (Pair<ItemInfo, Object> entry : mItemList) {
-                ItemInfo item = entry.first;
+            for (ItemInfo item : mItemList) {
+                if (item == null) continue;
                 if (item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION) {
                     // Short-circuit this logic if the icon exists somewhere on the workspace
                     if (shortcutExists(dataModel, item.getIntent(), item.user)) {
