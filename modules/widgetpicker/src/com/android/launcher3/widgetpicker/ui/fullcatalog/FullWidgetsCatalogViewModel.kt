@@ -42,7 +42,7 @@ class FullWidgetsCatalogViewModel
 constructor(
     landingScreenViewModelFactory: LandingScreenViewModel.Factory,
     searchScreenViewModelFactory: SearchScreenViewModel.Factory,
-    @WidgetPickerHostInfo private val hostInfo: WidgetHostInfo,
+    @param:WidgetPickerHostInfo private val hostInfo: WidgetHostInfo,
 ) : ViewModel {
     val landingScreenViewModel = landingScreenViewModelFactory.create()
     val searchScreenViewModel = searchScreenViewModelFactory.create()
