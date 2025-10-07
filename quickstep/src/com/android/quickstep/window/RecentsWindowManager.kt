@@ -180,6 +180,7 @@ constructor(
     private var systemUiController: SystemUiController? = null
 
     private var overviewOverlay: SurfaceControl? = null
+    private var homeOverlay: SurfaceControl? = null
     private var dragLayer: RecentsDragLayer<RecentsWindowManager>? = null
     private var windowRootView = RecentsWindowRootView(this)
     private var windowView: View? = null
@@ -365,10 +366,7 @@ constructor(
         Executors.MAIN_EXECUTOR.execute {
             onViewDestroyed()
             hideRecentsWindow()
-            if (windowView?.parent != null) {
-                surfaceControlViewHost?.release()
-                surfaceControlViewHost = null
-            }
+            cleanUpSurfaceControlViewHost()
             windowView
                 ?.findOnBackInvokedDispatcher()
                 ?.unregisterOnBackInvokedCallback(onBackInvokedCallback)
@@ -391,10 +389,18 @@ constructor(
             scvh.setView(windowRootView, getWindowLayoutParams())
             scvh.surfacePackage?.let { surfacePackage ->
                 getOverviewOverlay()?.let { overviewOverlay ->
-                    Transaction()
-                        .reparent(surfacePackage.surfaceControl, overviewOverlay)
-                        .show(surfacePackage.surfaceControl)
-                        .apply(true)
+                    val transaction =
+                        Transaction()
+                            .reparent(surfacePackage.surfaceControl, overviewOverlay)
+                            .show(surfacePackage.surfaceControl)
+
+                    getHomeTaskOverlay()?.let { homeOverlay ->
+                        // Use an arbitrarily large z-order since the home task can have multiple
+                        // child tasks
+                        transaction.setRelativeLayer(overviewOverlay, homeOverlay, 1000)
+                    }
+
+                    transaction.apply(true)
                 }
                     ?: run {
                         Log.e(TAG, "OverviewOverlay is null, can't reparent surface", Exception())
@@ -411,6 +417,7 @@ constructor(
             }
             it.release()
         }
+        homeOverlay = null
         overviewOverlay = null
         surfaceControlViewHost = null
     }
@@ -456,6 +463,17 @@ constructor(
             overviewOverlay = systemUiProxy.getOverviewOverlayContainer(displayId)
         }
         return overviewOverlay
+    }
+
+    private fun getHomeTaskOverlay(): SurfaceControl? {
+        // TODO(b/292269949): use the correct home task overlay once available on multiple displays
+        if (displayId != DEFAULT_DISPLAY) {
+            return null
+        }
+        if (homeOverlay == null) {
+            homeOverlay = systemUiProxy.getHomeTaskOverlayContainer()
+        }
+        return homeOverlay
     }
 
     @UiThread
