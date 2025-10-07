@@ -36,7 +36,6 @@ import com.android.quickstep.views.TaskContainer
 import com.android.quickstep.views.TaskView
 import com.android.window.flags.Flags
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource
-import com.android.wm.shell.shared.desktopmode.DesktopState
 import java.util.function.Consumer
 
 /** Manage recents related operations with desktop tasks */
@@ -45,7 +44,6 @@ class DesktopRecentsTransitionController(
     private val systemUiProxy: SystemUiProxy,
     private val appThread: IApplicationThread,
     private val depthController: DepthController?,
-    private val desktopState: DesktopState,
 ) {
 
     /**
@@ -63,7 +61,6 @@ class DesktopRecentsTransitionController(
                 desktopTaskView,
                 animated,
                 stateManager,
-                desktopState.shouldShowHomeBehindDesktop,
                 depthController,
                 callback,
             )
@@ -108,13 +105,13 @@ class DesktopRecentsTransitionController(
         private val taskView: TaskView,
         private val animated: Boolean,
         private val stateManager: StateManager<*, *>,
-        private val shouldShowHomeBehindDesktop: Boolean,
         private val depthController: DepthController?,
         private val successCallback: Consumer<Boolean>?,
     ) : RemoteTransitionStub() {
 
         override fun onTransitionConsumed(transition: IBinder?, aborted: Boolean) {
-            if (shouldShowHomeBehindDesktop) {
+            Log.d(TAG, "onTransitionConsumed - aborted: $aborted")
+            if (aborted) {
                 // This transition can be consumed in the empty desk case when there are no windows
                 // to animate, which means the launcher won't animate to a NORMAL state. However in
                 // this case we still want to animate launcher back from OVERVIEW to NORMAL state.
@@ -131,6 +128,7 @@ class DesktopRecentsTransitionController(
             t: SurfaceControl.Transaction,
             finishCallback: IRemoteTransitionFinishedCallback,
         ) {
+            Log.d(TAG, "startAnimation")
             val errorHandlingFinishCallback = Runnable {
                 try {
                     finishCallback.onTransitionFinished(null /* wct */, null /* sct */)
