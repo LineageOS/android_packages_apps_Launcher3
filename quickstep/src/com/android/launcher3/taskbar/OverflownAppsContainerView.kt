@@ -18,6 +18,7 @@ package com.android.launcher3.taskbar
 import android.content.Context
 import android.graphics.Rect
 import android.util.AttributeSet
+import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.widget.LinearLayout
@@ -28,6 +29,7 @@ import com.android.launcher3.R
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.popup.ArrowPopup
+import com.android.launcher3.popup.RoundedArrowDrawable
 
 /** A container view for overflown apps in the taskbar. */
 class OverflownAppsContainerView<T : TaskbarActivityContext>
@@ -114,5 +116,50 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 
     override fun getTargetObjectLocation(outPos: Rect?) {
         popupContainer.getDescendantRectRelativeToSelf(overflowIcon, outPos)
+    }
+
+    override fun orientAboutObject() {
+        super.orientAboutObject()
+        // Center the popup horizontally to the overflow icon.
+        val centeredX = mTempRect.centerX() - measuredWidth / 2f
+        val dragLayerWidth = popupContainer.width
+        val insets = popupContainer.insets
+        val minX = insets.left.toFloat()
+        val maxX = (dragLayerWidth - insets.right - measuredWidth).toFloat()
+
+        x = centeredX.coerceIn(minX, maxX)
+    }
+
+    override fun addArrow() {
+        super.addArrow()
+        // Center the arrow to the overflow icon.
+        val overflowIconCenterX = mTempRect.centerX().toFloat()
+        mArrow.x = overflowIconCenterX - (mArrowWidth / 2f)
+    }
+
+    override fun updateArrowColor() {
+        if (!Gravity.isVertical(mGravity)) {
+            mArrow.background =
+                RoundedArrowDrawable(
+                    mArrowWidth.toFloat(),
+                    mArrowHeight.toFloat(),
+                    mArrowPointRadius.toFloat(),
+                    mOutlineRadius,
+                    measuredWidth.toFloat(),
+                    measuredHeight.toFloat(),
+                    ((measuredWidth - mArrowWidth) / 2).toFloat(), // arrowOffsetX
+                    -mArrowOffsetVertical.toFloat(), // arrowOffsetY
+                    !mIsAboveIcon, // isPointingUp
+                    true, // leftAligned (doesn't matter for centered arrow)
+                    mArrowColor,
+                )
+            elevation = mElevation
+            mArrow.elevation = mElevation
+        }
+    }
+
+    override fun setPivotForOpenCloseAnimation() {
+        pivotX = mArrow.x + mArrowWidth / 2 - x
+        pivotY = measuredHeight.toFloat()
     }
 }
