@@ -26,6 +26,7 @@ import com.android.launcher3.icons.BitmapInfo
 import com.android.launcher3.icons.LauncherIcons
 import com.android.launcher3.icons.cache.BaseIconCache
 import com.google.common.truth.Truth.assertThat
+import java.io.IOException
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -107,6 +108,27 @@ class HomeScreenFilesCachingLogicTest {
                 user = Process.myUserHandle(),
             )
         whenever(contentResolver.getTypeInfo(eq("application/pdf")))
+            .thenReturn(ContentResolver.MimeTypeInfo(mock<Icon>(), "label", "contentDescription"))
+        whenever(launcherIcons.createBadgedIconBitmap(anyOrNull(), any()))
+            .thenReturn(BitmapInfo.LOW_RES_INFO)
+
+        val icon = HomeScreenFilesCachingLogic.loadIcon(context, baseIconCache, hsf)
+        assertThat(icon).isEqualTo(BitmapInfo.LOW_RES_INFO)
+    }
+
+    @Test
+    fun testGetGenericMimeTypeIconWhenThumbnailFails() {
+        val hsf =
+            HomeScreenFile(
+                uri = Uri.parse("content://media/external_primary/file/1"),
+                displayName = "file.png",
+                mimeType = "image/png",
+                isDirectory = false,
+                user = Process.myUserHandle(),
+            )
+        whenever(contentResolver.loadThumbnail(eq(hsf.uri), any(), isNull()))
+            .thenThrow(IOException("test"))
+        whenever(contentResolver.getTypeInfo(eq("image/png")))
             .thenReturn(ContentResolver.MimeTypeInfo(mock<Icon>(), "label", "contentDescription"))
         whenever(launcherIcons.createBadgedIconBitmap(anyOrNull(), any()))
             .thenReturn(BitmapInfo.LOW_RES_INFO)
