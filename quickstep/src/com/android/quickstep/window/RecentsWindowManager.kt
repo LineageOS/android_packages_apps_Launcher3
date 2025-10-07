@@ -114,6 +114,7 @@ import com.android.quickstep.fallback.RecentsState.Companion.DEFAULT
 import com.android.quickstep.fallback.RecentsState.Companion.MODAL_TASK
 import com.android.quickstep.fallback.RecentsState.Companion.OVERVIEW_SPLIT_SELECT
 import com.android.quickstep.fallback.toLauncherStateOrdinal
+import com.android.quickstep.util.QuickstepProtoLogGroup
 import com.android.quickstep.util.RecentsAtomicAnimationFactory
 import com.android.quickstep.util.RecentsWindowProtoLogProxy
 import com.android.quickstep.util.SplitSelectStateController
@@ -150,7 +151,7 @@ constructor(
     private val systemUiProxy: SystemUiProxy,
     recentsModel: RecentsModel,
     private val screenOnTracker: ScreenOnTracker,
-    private val desktopState: DesktopState,
+    desktopState: DesktopState,
     displayController: DisplayController,
     @Ui private val uiExecutor: LooperExecutor,
     invariantDeviceProfile: InvariantDeviceProfile,
@@ -162,7 +163,7 @@ constructor(
 
     companion object {
         private const val HOME_APPEAR_DURATION: Long = 250
-        private const val TAG = "RecentsWindowManager"
+        private const val TAG = "RecentsWindow"
 
         @JvmField
         val REPOSITORY_INSTANCE =
@@ -171,7 +172,7 @@ constructor(
             )
     }
 
-    protected var recentsView: FallbackRecentsView<RecentsWindowManager>? = null
+    private var recentsView: FallbackRecentsView<RecentsWindowManager>? = null
     private var surfaceControlViewHost: SurfaceControlViewHost? = null
     private var layoutInflater: LayoutInflater = LayoutInflater.from(this).cloneInContext(this)
     private var stateManager: StateManager<RecentsState, RecentsWindowManager> =
@@ -271,7 +272,8 @@ constructor(
 
     private val screenChangedListener = ScreenOnListener { isOn ->
         if (!isOn) {
-            hideRecentsWindow()
+            Log.d(TAG, "screen turned off")
+            recentsView?.returnToDesktop()
         }
     }
 
@@ -323,7 +325,6 @@ constructor(
                                 systemUiProxy,
                                 iApplicationThread,
                                 /* depthController= */ null,
-                                desktopState,
                             ),
                             SurfaceTransactionApplier(rootView),
                             emptyRecentsMessageView,
