@@ -25,6 +25,7 @@ import static com.android.launcher3.statemanager.BaseState.FLAG_NON_INTERACTIVE;
 import static com.android.launcher3.taskbar.TaskbarEduTooltipControllerKt.TOOLTIP_STEP_FEATURES;
 import static com.android.launcher3.taskbar.TaskbarLauncherStateController.FLAG_VISIBLE;
 import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_IGNORE_IN_APP;
+import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_STASHED_IN_OVERVIEW_FOR_TRANSLUCENT_APP;
 import static com.android.launcher3.taskbar.navbutton.SetupNavLayoutterKt.GLIF_EXPRESSIVE_LIGHT_THEME;
 import static com.android.launcher3.taskbar.navbutton.SetupNavLayoutterKt.GLIF_EXPRESSIVE_THEME;
 import static com.android.launcher3.taskbar.navbutton.SetupNavLayoutterKt.SUW_THEME_SYSTEM_PROPERTY;
@@ -117,6 +118,7 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
                 }
             };
     private SafeCloseable mOnDeviceProfileChangeListenerClosable;
+    private SafeCloseable mIsOnTopResumeActivityListenerClosable;
     private final HomeVisibilityState.VisibilityChangeListener  mVisibilityChangeListener =
             this::onLauncherVisibilityChanged;
 
@@ -169,6 +171,16 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
             return Unit.INSTANCE;
         });
 
+        mIsOnTopResumeActivityListenerClosable = mLauncherUiState.isTopResumedActivityRef().forEach(
+                TASKBAR_UI_THREAD, isTopResumedActivity -> {
+                    boolean shouldStashTaskbar = !isTopResumedActivity
+                            && mControllers.taskbarActivityContext.isTransientTaskbar();
+                    mControllers.taskbarStashController.updateStateForFlag(
+                            FLAG_STASHED_IN_OVERVIEW_FOR_TRANSLUCENT_APP, shouldStashTaskbar);
+                    mControllers.taskbarStashController.applyState();
+                    return Unit.INSTANCE;
+                });
+
         // Restore the in-app display progress from before Taskbar was recreated.
         float[] prevProgresses = mControllers.getSharedState().inAppDisplayProgressMultiPropValues;
         // Make a copy of the previous progress to set since updating the multiprop will update
@@ -189,6 +201,9 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
         onLauncherVisibilityChanged(false /* isVisible */, true /* fromInitOrDestroy */);
         if (mOnDeviceProfileChangeListenerClosable != null) {
             mOnDeviceProfileChangeListenerClosable.close();
+        }
+        if (mIsOnTopResumeActivityListenerClosable != null) {
+            mIsOnTopResumeActivityListenerClosable.close();
         }
         super.onDestroy();
         mTaskbarLauncherStateController.onDestroy();
