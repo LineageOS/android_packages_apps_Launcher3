@@ -169,6 +169,16 @@ class TaskbarRecentAppsController(
         } as? SingleTask
     }
 
+    /** Returns the non-desktop task represented by the given [itemInfo]. */
+    fun getNonDesktopTask(itemInfo: ItemInfo?): Task? {
+        val packageName = itemInfo?.targetPackage ?: return null
+        val userId = itemInfo.user.identifier
+        return allRecentTasks
+            .filterNot { it is DesktopTask }
+            .flatMap { it.tasks }
+            .find { task -> packageName == task.key.packageName && userId == task.key.userId }
+    }
+
     @VisibleForTesting
     val runningTaskIds: Set<Int>
         /**
