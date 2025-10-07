@@ -50,7 +50,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     LauncherAppWidgetHostView(context) {
 
     private val oseWidgetManager = context.appComponent.oseWidgetManager
-    @VisibleForTesting val closeActions = RunnableList()
+    @VisibleForTesting var closeActions = RunnableList()
     private val activityContext: ActivityContext = ActivityContext.lookupContext(context)
 
     init {

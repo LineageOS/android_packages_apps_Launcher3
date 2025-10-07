@@ -20,25 +20,27 @@ import android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID
 import android.appwidget.AppWidgetProviderInfo
 import android.widget.RemoteViews
 import androidx.test.annotation.UiThreadTest
-import com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppModule
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.MutableListenableRef
+import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestActivityContext
 import com.android.launcher3.util.WidgetUtils
 import com.android.launcher3.views.OptionsPopupView.OptionItem
 import dagger.BindsInstance
 import dagger.Component
-import kotlin.test.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.doAnswer
+import org.mockito.Mockito.spy
 import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doNothing
@@ -58,6 +60,7 @@ class OseWidgetViewTest {
     @Mock lateinit var oseWidgetManager: OseWidgetManager
     @Mock lateinit var oseWidgetOptionsProvider: OseWidgetOptionsProvider
     @Mock lateinit var optionItem: OptionItem
+    @Mock lateinit var closeActionList: RunnableList
 
     private lateinit var mVut: OseWidgetView
 
@@ -65,24 +68,32 @@ class OseWidgetViewTest {
     private val remoteView = RemoteViews(widgetInfo.provider.packageName, 0)
     private val mockProviderInfo = MutableListenableRef<AppWidgetProviderInfo>(widgetInfo)
     private val mockRemoteViews = MutableListenableRef(remoteView)
+    private val capturedRunnables = mutableListOf<Runnable>()
 
     @Before
     fun setUp() {
         sandboxContext.initDaggerComponent(
             DaggerOseWidgetViewTest_TestComponent.builder().bindOseWidgetManager(oseWidgetManager)
         )
-        val activityContextComponent = context.activityComponent
-        spyOn(activityContextComponent)
+        val spiedContext = spy(context)
+        val activityContextComponent = spy(context.activityComponent)
         doReturn(oseWidgetOptionsProvider)
             .whenever(activityContextComponent)
             .getOseWidgetOptionsProvider()
-        mVut = OseWidgetView(context)
-        spyOn(mVut)
-        spyOn(mVut.closeActions)
+        doReturn(activityContextComponent).whenever(spiedContext).activityComponent
+        mVut = spy(OseWidgetView(spiedContext))
+        mVut.closeActions = closeActionList
         doNothing().whenever(mVut).setAppWidget(any(), any())
 
         doReturn(mockProviderInfo).whenever(oseWidgetManager).providerInfo
         doReturn(mockRemoteViews).whenever(oseWidgetManager).views
+        doAnswer { invocation ->
+            capturedRunnables.add(invocation.getArgument(0))
+        }.whenever(closeActionList).add(any())
+        doAnswer {
+            capturedRunnables.forEach(Runnable::run)
+            capturedRunnables.clear()
+        }.whenever(closeActionList).executeAllAndClear()
     }
 
     @Test
@@ -161,14 +172,14 @@ class OseWidgetViewTest {
     fun when_view_longClicked_noOptionItems_returnsFalse() {
         doReturn(emptyList<OptionItem>()).whenever(oseWidgetOptionsProvider).getOptionItems()
         doNothing().whenever(mVut).showOptionsPopup(any(), any())
-        assertFalse { mVut.onWidgetLongClick(mVut) }
+        assertFalse(mVut.onWidgetLongClick(mVut))
     }
 
     @Test
     fun when_view_longClicked_optionItemsExist_returnsTrue() {
         doReturn(listOf(optionItem)).whenever(oseWidgetOptionsProvider).getOptionItems()
         doNothing().whenever(mVut).showOptionsPopup(any(), any())
-        assertTrue { mVut.onWidgetLongClick(mVut) }
+        assertTrue(mVut.onWidgetLongClick(mVut))
     }
 
     @LauncherAppSingleton
