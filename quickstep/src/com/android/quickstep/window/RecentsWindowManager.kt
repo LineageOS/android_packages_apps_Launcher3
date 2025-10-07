@@ -147,7 +147,7 @@ constructor(
     @Assisted private val recentsWindowTracker: RecentsWindowTracker,
     wallpaperColorHints: WallpaperColorHints,
     private val systemUiProxy: SystemUiProxy,
-    recentsModel: RecentsModel,
+    private val recentsModel: RecentsModel,
     private val screenOnTracker: ScreenOnTracker,
     private val desktopState: DesktopState,
     private val displayController: DisplayController,
@@ -160,6 +160,7 @@ constructor(
 
     companion object {
         private const val HOME_APPEAR_DURATION: Long = 250
+        private const val RECENTS_ANIMATION_TIMEOUT = 1000L
         private const val TAG = "RecentsWindowManager"
 
         @JvmField
@@ -177,7 +178,6 @@ constructor(
     private var systemUiController: SystemUiController? = null
 
     private var overviewOverlay: SurfaceControl? = null
-    private var homeOverlay: SurfaceControl? = null
     private var dragLayer: RecentsDragLayer<RecentsWindowManager>? = null
     private var windowRootView = RecentsWindowRootView(this)
     private var windowView: View? = null
@@ -363,7 +363,10 @@ constructor(
         Executors.MAIN_EXECUTOR.execute {
             onViewDestroyed()
             hideRecentsWindow()
-            cleanUpSurfaceControlViewHost()
+            if (windowView?.parent != null) {
+                surfaceControlViewHost?.release()
+                surfaceControlViewHost = null
+            }
             windowView
                 ?.findOnBackInvokedDispatcher()
                 ?.unregisterOnBackInvokedCallback(onBackInvokedCallback)
@@ -386,18 +389,10 @@ constructor(
             scvh.setView(windowRootView, getWindowLayoutParams())
             scvh.surfacePackage?.let { surfacePackage ->
                 getOverviewOverlay()?.let { overviewOverlay ->
-                    val transaction =
-                        Transaction()
-                            .reparent(surfacePackage.surfaceControl, overviewOverlay)
-                            .show(surfacePackage.surfaceControl)
-
-                    getHomeTaskOverlay()?.let { homeOverlay ->
-                        // Use an arbitrarily large z-order since the home task can have multiple
-                        // child tasks
-                        transaction.setRelativeLayer(overviewOverlay, homeOverlay, 1000)
-                    }
-
-                    transaction.apply(true)
+                    Transaction()
+                        .reparent(surfacePackage.surfaceControl, overviewOverlay)
+                        .show(surfacePackage.surfaceControl)
+                        .apply(true)
                 }
                     ?: run {
                         Log.e(TAG, "OverviewOverlay is null, can't reparent surface", Exception())
@@ -414,7 +409,6 @@ constructor(
             }
             it.release()
         }
-        homeOverlay = null
         overviewOverlay = null
         surfaceControlViewHost = null
     }
@@ -460,13 +454,6 @@ constructor(
             overviewOverlay = systemUiProxy.getOverviewOverlayContainer(displayId)
         }
         return overviewOverlay
-    }
-
-    private fun getHomeTaskOverlay(): SurfaceControl? {
-        if (homeOverlay == null) {
-            homeOverlay = systemUiProxy.getHomeTaskOverlayContainer()
-        }
-        return homeOverlay
     }
 
     @UiThread
