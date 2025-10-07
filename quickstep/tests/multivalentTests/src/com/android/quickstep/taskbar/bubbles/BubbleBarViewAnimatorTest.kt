@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.taskbar.bubbles.animation
+package com.android.quickstep.taskbar.bubbles
 
 import android.content.Context
 import android.graphics.Color
 import android.graphics.PointF
 import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
+import android.platform.test.rule.LimitDevicesRule
+import android.platform.test.rule.SkipOnDeviceless
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -45,6 +47,7 @@ import com.android.launcher3.taskbar.bubbles.BubbleBarView
 import com.android.launcher3.taskbar.bubbles.BubbleBarViewController
 import com.android.launcher3.taskbar.bubbles.BubbleStashedHandleViewController
 import com.android.launcher3.taskbar.bubbles.BubbleView
+import com.android.launcher3.taskbar.bubbles.animation.BubbleBarViewAnimator
 import com.android.launcher3.taskbar.bubbles.flyout.BubbleBarFlyoutController
 import com.android.launcher3.taskbar.bubbles.flyout.BubbleBarFlyoutMessage
 import com.android.launcher3.taskbar.bubbles.flyout.BubbleBarFlyoutPositioner
@@ -67,9 +70,11 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@SkipOnDeviceless
 class BubbleBarViewAnimatorTest {
 
     @get:Rule val animatorTestRule = AnimatorTestRule()
+    @get:Rule var limitDevicesRule: LimitDevicesRule = LimitDevicesRule()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private lateinit var animatorScheduler: TestBubbleBarViewAnimatorScheduler
@@ -1730,7 +1735,8 @@ class BubbleBarViewAnimatorTest {
             bubbleBarViewController: BubbleBarViewController,
             bubbleStashedHandleViewController: BubbleStashedHandleViewController?,
             controllersAfterInitAction: BubbleStashController.ControllersAfterInitAction,
-        ) {}
+        ) {
+        }
 
         override fun showBubbleBarImmediate() {
             _isStashed = false
