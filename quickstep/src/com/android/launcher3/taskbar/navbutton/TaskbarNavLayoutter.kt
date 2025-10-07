@@ -78,6 +78,10 @@ class TaskbarNavLayoutter(
         navButtonContainer.orientation = LinearLayout.HORIZONTAL
         navButtonContainer.layoutParams = navButtonParams
 
+        if (android.view.accessibility.Flags.navbarFlipOrderOption()) {
+            addThreeButtons()
+        }
+
         // Add the spaces in between the nav buttons
         val spaceInBetween = resources.getDimensionPixelSize(R.dimen.taskbar_button_space_inbetween)
         for (i in 0 until navButtonContainer.childCount) {
@@ -86,10 +90,12 @@ class TaskbarNavLayoutter(
             buttonLayoutParams.weight = 0f
             when (i) {
                 0 -> {
+                    buttonLayoutParams.marginStart = 0
                     buttonLayoutParams.marginEnd = spaceInBetween / 2
                 }
                 navButtonContainer.childCount - 1 -> {
                     buttonLayoutParams.marginStart = spaceInBetween / 2
+                    buttonLayoutParams.marginEnd = 0
                 }
                 else -> {
                     buttonLayoutParams.marginStart = spaceInBetween / 2
