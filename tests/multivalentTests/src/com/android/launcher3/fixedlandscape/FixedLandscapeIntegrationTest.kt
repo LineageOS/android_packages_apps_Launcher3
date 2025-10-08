@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.integration.fixedlandscape
+package com.android.launcher3.fixedlandscape
 
 import android.content.Context
+import android.platform.test.rule.LimitDevicesRule
+import android.platform.test.rule.SkipOnDeviceless
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
@@ -25,33 +27,33 @@ import com.android.launcher3.InvariantDeviceProfile.TYPE_PHONE
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.FIXED_LANDSCAPE_MODE
-import com.android.launcher3.debug.TestEventEmitter.TestEvent
-import com.android.launcher3.integration.events.EventsRule
 import com.android.launcher3.integration.util.LauncherActivityScenarioRule
-import com.android.launcher3.util.rule.ScreenRecordRule
+import com.android.launcher3.integration.util.events.ActivityTestEvents.createFixedLandscapeSwitchWaiter
+import com.android.launcher3.util.LauncherLayoutBuilder
+import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY
+import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY2
+import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
+import com.android.launcher3.util.LauncherModelHelper.WIDGET_CLASS_NAME_NO_CONFIG
+import com.android.launcher3.util.LauncherModelHelper.WIDGET_PACKAGE_NAME
+import com.android.launcher3.util.ModelTestExtensions.setModelLayout
 import org.junit.After
 import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 
 @LargeTest
 @RunWith(AndroidJUnit4::class)
 class FixedLandscapeIntegrationTest {
 
+    @Rule @JvmField val limitDevicesRule = LimitDevicesRule()
+
     private val targetContext: Context = getInstrumentation().targetContext
 
-    private val eventsRule = EventsRule(targetContext)
-
-    private val launcherActivity = LauncherActivityScenarioRule<Launcher>()
+    @get:Rule val launcherActivity = LauncherActivityScenarioRule<Launcher>()
 
     private val idp = InvariantDeviceProfile.INSTANCE.get(targetContext)
-
-    @get:Rule val mScreenRecordRule: ScreenRecordRule = ScreenRecordRule()
-
-    @get:Rule val chainRule: RuleChain = RuleChain.outerRule(eventsRule).around(launcherActivity)
 
     private fun getTotalItems(): Int =
         launcherActivity.getFromLauncher {
@@ -60,22 +62,23 @@ class FixedLandscapeIntegrationTest {
 
     private fun switchFixedLandscape(isFixedLandscape: Boolean) {
         val currentIsFixedLandscape =
-            launcherActivity.getFromLauncher { it.deviceProfile.inv.isFixedLandscape }
+            launcherActivity.getFromLauncher { it.deviceProfile.inv.isFixedLandscape }!!
         if (currentIsFixedLandscape != isFixedLandscape) {
-            val workspaceLoadedEvent =
-                eventsRule.createEventWaiter(TestEvent.WORKSPACE_FINISH_LOADING)
+            val fixedLandscapeSwitchedWaiter =
+                launcherActivity.createFixedLandscapeSwitchWaiter(isFixedLandscape)
             LauncherPrefs.get(targetContext).putSync(FIXED_LANDSCAPE_MODE.to(isFixedLandscape))
-            workspaceLoadedEvent.waitForSignal()
+            fixedLandscapeSwitchedWaiter.waitForSignal()
         }
-        assert(idp.isFixedLandscape == isFixedLandscape) {
-            "Did not switch Fixed Landscape IDP value ${idp.isFixedLandscape} expected $isFixedLandscape"
-        }
+        launcherActivity.waitUntil("Workspace didn't finished loading") { !it.isWorkspaceLoading }
         if (isFixedLandscape) {
-            assert(idp.numRows == 3) { "Fixed Landscape should have 3 columns" }
+            launcherActivity.waitUntil("Fixed Landscape should have 3 columns") {
+                it.deviceProfile.inv.numRows == 3
+            }
         }
     }
 
     @Test
+    @SkipOnDeviceless
     fun `can switch to fixed landscape and back`() {
         switchFixedLandscape(true)
         val countItemsInFixedLandscape = getTotalItems()
@@ -89,6 +92,7 @@ class FixedLandscapeIntegrationTest {
     }
 
     @Test
+    @SkipOnDeviceless
     fun `can switch to fixed landscape and back from non-default grid`() {
         val gridName = "small"
         val fixedLandscapeGridName = "fixed_landscape_mode"
@@ -107,6 +111,7 @@ class FixedLandscapeIntegrationTest {
     }
 
     @Test
+    @SkipOnDeviceless
     fun `stress test fixed landscape`() {
         // The number should be bigger than 1 but also not too big so that the test doesn't take too
         // long to run
@@ -118,7 +123,7 @@ class FixedLandscapeIntegrationTest {
             assert(countItemsInFixedLandscape == countItemsInLauncher) {
                 "The number of items should be the same in both orientations, the values " +
                     "are $countItemsInFixedLandscape in fixed landscape and" +
-                    "$countItemsInLauncher in the regular Launcher "
+                    " $countItemsInLauncher in the regular Launcher "
             }
         }
     }
@@ -126,6 +131,20 @@ class FixedLandscapeIntegrationTest {
     @Before
     fun setup() {
         launcherActivity.initializeActivity()
+        targetContext.setModelLayout(
+            LauncherLayoutBuilder()
+                .atWorkspace(0, 1, 0)
+                .putWidget(WIDGET_PACKAGE_NAME, WIDGET_CLASS_NAME_NO_CONFIG, 3, 1)
+                .atWorkspace(3, 1, 0)
+                .putApp(TEST_PACKAGE, TEST_ACTIVITY)
+                .atWorkspace(1, 2, 0)
+                .putWidget(WIDGET_PACKAGE_NAME, WIDGET_CLASS_NAME_NO_CONFIG, 3, 1)
+                .atWorkspace(0, 2, 0)
+                .putApp(TEST_PACKAGE, TEST_ACTIVITY)
+                .atWorkspace(2, 3, 0)
+                .putApp(TEST_PACKAGE, TEST_ACTIVITY2)
+        )
+
         assumeTrue(
             "Fixed landscape is only supported on phones, skip test for none phone",
             launcherActivity.getFromLauncher { it.deviceProfile.inv.deviceType } == TYPE_PHONE,
