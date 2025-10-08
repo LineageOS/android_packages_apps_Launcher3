@@ -30,6 +30,7 @@ import android.provider.DocumentsContract.EXTRA_URI
 import android.provider.MediaStore
 import android.provider.MediaStore.Files.FileColumns.DATA
 import android.provider.MediaStore.Files.FileColumns.DISPLAY_NAME
+import android.provider.MediaStore.Files.FileColumns.IS_TRASHED
 import android.provider.MediaStore.Files.FileColumns.MIME_TYPE
 import android.provider.MediaStore.Files.FileColumns.RELATIVE_PATH
 import android.provider.MediaStore.Files.FileColumns._ID
@@ -303,6 +304,20 @@ class HomeScreenFilesProviderTest {
     }
 
     @Test
+    fun testMoveToTrash() {
+        val uri = Uri.parse("content://media/external_primary/file/1")
+        provider.moveToTrash(uri)
+
+        verify(contentResolver, times(1))
+            .update(
+                eq(uri),
+                argThat { x -> x.containsKey(IS_TRASHED) && x.get(IS_TRASHED) == "1" },
+                eq("$RELATIVE_PATH = ? AND $IS_TRASHED = ?"),
+                eq(arrayOf(HOME_SCREEN_FOLDER_RELATIVE_PATH, "0")),
+            )
+    }
+
+    @Test
     fun testQueryWhenExternalStorageDirectoryMountsAfterCall() {
         // Unmount external storage directory prior to [provider] init.
         whenever(Environment.getExternalStorageState(externalStorageDir))
@@ -461,8 +476,8 @@ class HomeScreenFilesProviderTest {
             .query(
                 eq(expectedUri),
                 eq(expectedProjection),
-                eq("$RELATIVE_PATH = ?"),
-                argThat { x -> x.contentDeepEquals(arrayOf("Home screen/")) },
+                eq("$RELATIVE_PATH = ? AND $IS_TRASHED = ?"),
+                eq(arrayOf(HOME_SCREEN_FOLDER_RELATIVE_PATH, "0")),
                 isNull(),
                 isNull(),
             )

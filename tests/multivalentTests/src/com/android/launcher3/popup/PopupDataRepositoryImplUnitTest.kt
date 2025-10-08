@@ -196,7 +196,7 @@ class PopupDataRepositoryImplUnitTest {
             }
         val popupData = popupDataRepository.getPopupDataByItemInfo(item)
 
-        assert(popupData!!.size == 1)
+        assert(popupData!!.size == 2)
         with(popupData[0]) {
             assert(category == PopupCategory.SYSTEM_SHORTCUT_FIXED)
             assert(iconResId == R.drawable.ic_home_screen_files_context_menu_open_in_app)
@@ -206,6 +206,11 @@ class PopupDataRepositoryImplUnitTest {
             val view = mock<View>()
             popupAction.invoke(activityContext, item, view)
             verify(activityContext, times(1)).startActivitySafely(view, item.intent, item)
+        }
+        with(popupData[1]) {
+            assert(category == PopupCategory.SYSTEM_SHORTCUT_FIXED)
+            assert(iconResId == R.drawable.ic_home_screen_files_context_menu_move_to_trash)
+            assert(labelResId == R.string.home_screen_files_context_menu_move_to_trash_label)
         }
     }
 

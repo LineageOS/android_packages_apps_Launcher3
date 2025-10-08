@@ -29,6 +29,7 @@ import android.provider.DocumentsContract.Document.MIME_TYPE_DIR
 import android.provider.MediaStore
 import android.provider.MediaStore.Files.FileColumns.DATA
 import android.provider.MediaStore.Files.FileColumns.DISPLAY_NAME
+import android.provider.MediaStore.Files.FileColumns.IS_TRASHED
 import android.provider.MediaStore.Files.FileColumns.MIME_TYPE
 import android.provider.MediaStore.Files.FileColumns.RELATIVE_PATH
 import android.provider.MediaStore.Files.FileColumns._ID
@@ -44,6 +45,7 @@ import com.android.launcher3.util.MutableListenableStream
 import java.io.File
 import java.util.concurrent.Callable
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
 import java.util.concurrent.CompletableFuture.supplyAsync
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
@@ -231,6 +233,24 @@ class HomeScreenFilesMediaStoreProvider(
         return success
     }
 
+    override fun moveToTrash(uri: Uri) {
+        runAsync(
+                {
+                    context.contentResolver.update(
+                        uri,
+                        ContentValues().apply { put(IS_TRASHED, MEDIA_STORE_VALUE_TRUE) },
+                        QUERY_DEFAULT_SELECTION,
+                        QUERY_DEFAULT_SELECTION_ARGS,
+                    )
+                },
+                executorService,
+            )
+            .exceptionally {
+                Log.e(TAG, "Unable to move a single file or folder to trash", it)
+                null
+            }
+    }
+
     /** Returns all file items presented in [HOME_SCREEN_FOLDER_RELATIVE_PATH]. */
     override fun query(): Lazy<Map<Uri, HomeScreenFile>> {
         val query: Callable<Map<Uri, HomeScreenFile>> = Callable {
@@ -307,17 +327,21 @@ class HomeScreenFilesMediaStoreProvider(
         if (!isExternalPrimaryMediaStoreUri(uri)) {
             return CompletableFuture.completedFuture(null)
         }
-        val query: Callable<HomeScreenFile?> = Callable {
-            context.contentResolver
-                .query(
-                    uri,
-                    QUERY_DEFAULT_PROJECTION,
-                    QUERY_DEFAULT_SELECTION,
-                    QUERY_DEFAULT_SELECTION_ARGS,
-                    null,
-                    null,
-                )
-                ?.use {
+        return supplyAsync(
+                {
+                    context.contentResolver.query(
+                        uri,
+                        QUERY_DEFAULT_PROJECTION,
+                        QUERY_DEFAULT_SELECTION,
+                        QUERY_DEFAULT_SELECTION_ARGS,
+                        null,
+                        null,
+                    )
+                },
+                executorService,
+            )
+            .thenApply { cursor ->
+                cursor?.use {
                     if (it.count == 1) {
                         it.moveToFirst()
                         val displayNameColumnIndex = it.getColumnIndex(DISPLAY_NAME)
@@ -339,14 +363,20 @@ class HomeScreenFilesMediaStoreProvider(
                         null
                     }
                 }
-        }
-        return executorService.submit(query)
+            }
+            .exceptionally {
+                Log.e(TAG, "Unable to query a single file or folder by its URI", it)
+                null
+            }
     }
 
     companion object {
+        private const val MEDIA_STORE_VALUE_FALSE = "0"
+        private const val MEDIA_STORE_VALUE_TRUE = "1"
         private val QUERY_DEFAULT_PROJECTION = arrayOf(DISPLAY_NAME, MIME_TYPE, DATA)
-        private const val QUERY_DEFAULT_SELECTION = "$RELATIVE_PATH = ?"
-        private val QUERY_DEFAULT_SELECTION_ARGS = arrayOf(HOME_SCREEN_FOLDER_RELATIVE_PATH)
+        private const val QUERY_DEFAULT_SELECTION = "$RELATIVE_PATH = ? AND $IS_TRASHED = ?"
+        private val QUERY_DEFAULT_SELECTION_ARGS =
+            arrayOf(HOME_SCREEN_FOLDER_RELATIVE_PATH, MEDIA_STORE_VALUE_FALSE)
         private const val TAG = "HomeScreenFilesMediaStoreProvider"
 
         private fun getExternalPrimaryMediaStoreUri(context: Context, uri: Uri): Uri? {

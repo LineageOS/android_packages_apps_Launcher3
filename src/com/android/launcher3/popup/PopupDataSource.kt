@@ -31,6 +31,7 @@ import com.android.launcher3.Utilities
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate
 import com.android.launcher3.allapps.PrivateProfileManager
 import com.android.launcher3.dagger.LauncherAppSingleton
+import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
@@ -348,6 +349,18 @@ class PopupDataSource @Inject constructor() {
             labelResId = R.string.home_screen_files_context_menu_open_in_app_label,
             popupAction = { activityContext: ActivityContext, itemInfo: ItemInfo, view: View ->
                 activityContext.startActivitySafely(view, itemInfo.intent, itemInfo)
+            },
+            category = PopupCategory.SYSTEM_SHORTCUT_FIXED,
+        )
+
+    val moveToTrash =
+        PopupData(
+            iconResId = R.drawable.ic_home_screen_files_context_menu_move_to_trash,
+            labelResId = R.string.home_screen_files_context_menu_move_to_trash_label,
+            popupAction = { activityContext: ActivityContext, itemInfo: ItemInfo, _: View ->
+                // TODO(b/424466974): consider adding a confirmation dialog.
+                HomeScreenFilesProvider.INSTANCE.get(activityContext.asContext())
+                    .moveToTrash(requireNotNull(requireNotNull(itemInfo.intent).data))
             },
             category = PopupCategory.SYSTEM_SHORTCUT_FIXED,
         )
