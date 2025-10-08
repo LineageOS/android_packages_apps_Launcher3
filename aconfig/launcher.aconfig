@@ -484,7 +484,7 @@ flag {
   name: "enable_expressive_folder_expansion"
   namespace: "launcher"
   description: "Enables expressive folder expansion motion"
-  bug: "348708061"
+  bug: "387543793"
   metadata {
     purpose: PURPOSE_BUGFIX
   }
