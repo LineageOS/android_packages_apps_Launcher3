@@ -17,6 +17,7 @@ package com.android.launcher3.testutil
 
 import android.os.SystemClock
 import android.util.Log
+import com.android.launcher3.util.RoboApiWrapper
 import com.android.launcher3.util.TestUtil
 import org.junit.Assert
 
@@ -35,6 +36,7 @@ object Wait {
         Log.d("Wait", "atMost: $startTime - $endTime")
         while (SystemClock.uptimeMillis() < endTime) {
             if (condition.isTrue()) return
+            RoboApiWrapper.yieldToMainLooper()
             SystemClock.sleep(DEFAULT_SLEEP_MS)
         }
 

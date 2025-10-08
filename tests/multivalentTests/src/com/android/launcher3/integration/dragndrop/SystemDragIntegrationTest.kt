@@ -89,7 +89,7 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
         }
 
         // Wait for draggable view to finish initializing.
-        atMost("Draggable view not laid out", { draggableView.isLaidOut })
+        atMost("Draggable view not laid out") { draggableView.isLaidOut }
     }
 
     @After

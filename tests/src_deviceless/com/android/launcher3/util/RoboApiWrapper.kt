@@ -27,6 +27,10 @@ object RoboApiWrapper {
         Shadows.shadowOf(looper).runToEndOfTasks()
     }
 
+    fun yieldToMainLooper() {
+        Shadows.shadowOf(Looper.getMainLooper()).idle()
+    }
+
     /** Rule to grant shortcuts permission. No-op when running on robolectric */
     fun grantShortcutsPermissionRule(): TestRule = TestRule { statement, _ -> statement }
 
