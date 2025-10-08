@@ -16,7 +16,6 @@
 
 package com.android.quickstep
 
-import android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM
 import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.content.ComponentName
 import android.content.Context
@@ -24,11 +23,10 @@ import android.content.Intent
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.platform.test.rule.LimitDevicesRule
-import android.platform.test.rule.SkipOnDeviceless
 import android.view.Display.DEFAULT_DISPLAY
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.internal.R
+import com.android.internal.policy.DesktopModeCompatPolicy
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.AbstractFloatingViewHelper
 import com.android.launcher3.Flags.enableRefactorTaskContentView
@@ -52,7 +50,6 @@ import com.android.window.flags.Flags
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource
 import com.android.wm.shell.shared.desktopmode.FakeDesktopState
 import com.google.common.truth.Truth.assertThat
-import java.util.ArrayList
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -65,9 +62,9 @@ import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-/** Test for [ExternalDisplaySystemShortcut] */
+/** Test for [ExternalDisplayShortcutFactory] */
 @RunWith(AndroidJUnit4::class)
-class ExternalDisplaySystemShortcutTest {
+class ExternalDisplayShortcutTest {
 
     @get:Rule val setFlagsRule = SetFlagsRule(SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT)
     @get:Rule val limitDevicesRule = LimitDevicesRule()
@@ -79,10 +76,12 @@ class ExternalDisplaySystemShortcutTest {
     private val abstractFloatingViewHelper: AbstractFloatingViewHelper = mock()
     private val overlayFactory: TaskOverlayFactory = mock()
     private val desktopState = FakeDesktopState()
-    private val factory: TaskShortcutFactory =
-        ExternalDisplaySystemShortcut.createFactory(
+    private val desktopModeCompatPolicy: DesktopModeCompatPolicy = mock()
+    private val factory =
+        ExternalDisplayShortcutFactory(
             abstractFloatingViewHelper,
-            desktopStateFactory = { desktopState },
+            desktopState,
+            desktopModeCompatPolicy,
         )
     private val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
     private val taskView: TaskView = createTaskViewMock()
@@ -92,13 +91,23 @@ class ExternalDisplaySystemShortcutTest {
         desktopState.canEnterDesktopMode = true
         whenever(overlayFactory.createOverlay(any())).thenReturn(mock<TaskOverlay<*>>())
         whenever(launcher.asContext()).thenReturn(context)
+        whenever(
+                desktopModeCompatPolicy.shouldDisableDesktopEntryPoints(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            )
+            .thenReturn(false)
     }
 
     @Test
     @EnableFlags(Flags.FLAG_MOVE_TO_EXTERNAL_DISPLAY_SHORTCUT)
     fun createExternalDisplayTaskShortcut_desktopModeDisabled() {
         desktopState.canEnterDesktopMode = false
-
         val taskContainer = createTaskContainer(createTask())
 
         val shortcuts = factory.getShortcuts(launcher, taskContainer)
@@ -106,145 +115,21 @@ class ExternalDisplaySystemShortcutTest {
     }
 
     @Test
-    @EnableFlags(
-        Flags.FLAG_MOVE_TO_EXTERNAL_DISPLAY_SHORTCUT,
-        Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY,
-    )
-    fun createExternalDisplayTaskShortcut_noDisplayActivity() {
-        val baseComponent = ComponentName("", /* class */ "")
-        val taskKey =
-            TaskKey(
-                /* id */ 1,
-                /* windowingMode */ 0,
-                Intent(),
-                baseComponent,
-                context.userId,
-                /* lastActiveTime */ 2000,
-                DEFAULT_DISPLAY,
-                baseComponent,
-                /* numActivities */ 1,
-                /* isTopActivityNoDisplay */ true,
-                /* isActivityStackTransparent */ false,
-                /* topActivityType */ ACTIVITY_TYPE_STANDARD,
-                /* isTopActivityTransparent */ false,
+    @EnableFlags(Flags.FLAG_MOVE_TO_EXTERNAL_DISPLAY_SHORTCUT)
+    fun createExternalDisplayTaskShortcut_desktopEntryPointsDisabled() {
+        whenever(
+                desktopModeCompatPolicy.shouldDisableDesktopEntryPoints(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
             )
-        val taskContainer = createTaskContainer(Task(taskKey))
-        val shortcuts = factory.getShortcuts(launcher, taskContainer)
-        assertThat(shortcuts).isNull()
-    }
+            .thenReturn(true)
+        val taskContainer = createTaskContainer(createTask())
 
-    @Test
-    @EnableFlags(
-        Flags.FLAG_MOVE_TO_EXTERNAL_DISPLAY_SHORTCUT,
-        Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY,
-    )
-    fun createExternalDisplayTaskShortcut_transparentTask() {
-        val baseComponent = ComponentName("", /* class */ "")
-        val taskKey =
-            TaskKey(
-                /* id */ 1,
-                /* windowingMode */ 0,
-                Intent(),
-                baseComponent,
-                context.userId,
-                /* lastActiveTime */ 2000,
-                DEFAULT_DISPLAY,
-                baseComponent,
-                /* numActivities */ 1,
-                /* isTopActivityNoDisplay */ false,
-                /* isActivityStackTransparent */ true,
-                /* topActivityType */ ACTIVITY_TYPE_STANDARD,
-                /* isTopActivityTransparent */ false,
-            )
-        val taskContainer = createTaskContainer(Task(taskKey))
-        val shortcuts = factory.getShortcuts(launcher, taskContainer)
-        assertThat(shortcuts).isNull()
-    }
-
-    @Test
-    @EnableFlags(
-        Flags.FLAG_MOVE_TO_EXTERNAL_DISPLAY_SHORTCUT,
-        Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY,
-    )
-    fun createExternalDisplayTaskShortcut_systemUiTask() {
-        val sysUiPackageName: String = context.resources.getString(R.string.config_systemUi)
-        val baseComponent = ComponentName(sysUiPackageName, /* class */ "")
-        val taskKey =
-            TaskKey(
-                /* id */ 1,
-                /* windowingMode */ 0,
-                Intent(),
-                baseComponent,
-                context.userId,
-                /* lastActiveTime */ 2000,
-                DEFAULT_DISPLAY,
-                baseComponent,
-                /* numActivities */ 1,
-                /* isTopActivityNoDisplay */ false,
-                /* isActivityStackTransparent */ false,
-                /* topActivityType */ ACTIVITY_TYPE_STANDARD,
-                /* isTopActivityTransparent */ false,
-            )
-        val taskContainer = createTaskContainer(Task(taskKey))
-        val shortcuts = factory.getShortcuts(launcher, taskContainer)
-        assertThat(shortcuts).isNull()
-    }
-
-    @Test
-    @EnableFlags(
-        Flags.FLAG_MOVE_TO_EXTERNAL_DISPLAY_SHORTCUT,
-        Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY,
-    )
-    @SkipOnDeviceless
-    fun createExternalDisplayTaskShortcut_defaultHomeTask() {
-        val homeActivity = context.packageManager.getHomeActivities(ArrayList())
-        val homeActivities = ComponentName(homeActivity?.packageName.toString(), /* class */ "")
-        val taskKey =
-            TaskKey(
-                /* id */ 1,
-                /* windowingMode */ 0,
-                Intent(),
-                homeActivities,
-                context.userId,
-                /* lastActiveTime */ 2000,
-                DEFAULT_DISPLAY,
-                homeActivities,
-                /* numActivities */ 1,
-                /* isTopActivityNoDisplay */ false,
-                /* isActivityStackTransparent */ false,
-                /* topActivityType */ ACTIVITY_TYPE_STANDARD,
-                /* isTopActivityTransparent */ false,
-            )
-        val taskContainer = createTaskContainer(Task(taskKey).apply { isDockable = true })
-        val shortcuts = factory.getShortcuts(launcher, taskContainer)
-        assertThat(shortcuts).isNull()
-    }
-
-    @Test
-    @EnableFlags(
-        Flags.FLAG_MOVE_TO_EXTERNAL_DISPLAY_SHORTCUT,
-        Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY,
-        Flags.FLAG_ENABLE_DREAM_ACTIVITY_WINDOWING_EXCLUSION,
-    )
-    fun createExternalDisplayTaskShortcut_dreamActivity() {
-        val baseComponent = ComponentName("", /* class */ "")
-        val taskKey =
-            TaskKey(
-                /* id */ 1,
-                /* windowingMode */ 0,
-                Intent(),
-                baseComponent,
-                context.userId,
-                /* lastActiveTime */ 2000,
-                DEFAULT_DISPLAY,
-                baseComponent,
-                /* numActivities */ 1,
-                /* isTopActivityNoDisplay */ false,
-                /* isActivityStackTransparent */ false,
-                /* topActivityType */ ACTIVITY_TYPE_DREAM,
-                /* isTopActivityTransparent */ false,
-            )
-        val taskContainer = createTaskContainer(Task(taskKey))
         val shortcuts = factory.getShortcuts(launcher, taskContainer)
         assertThat(shortcuts).isNull()
     }
@@ -266,13 +151,9 @@ class ExternalDisplaySystemShortcutTest {
         val taskViewItemInfo = mock<TaskViewItemInfo>()
         doReturn(taskViewItemInfo).whenever(taskContainer).itemInfo
 
-        val shortcuts = factory.getShortcuts(launcher, taskContainer)
-        assertThat(shortcuts).hasSize(1)
-        assertThat(shortcuts!!.first()).isInstanceOf(ExternalDisplaySystemShortcut::class.java)
+        val singleShortcut = factory.getShortcuts(launcher, taskContainer)!!.single()
 
-        val externalDisplayShortcut = shortcuts.first() as ExternalDisplaySystemShortcut
-
-        externalDisplayShortcut.onClick(taskView)
+        singleShortcut.onClick(taskView)
 
         val allTypesExceptRebindSafe =
             AbstractFloatingView.TYPE_ALL and AbstractFloatingView.TYPE_REBIND_SAFE.inv()

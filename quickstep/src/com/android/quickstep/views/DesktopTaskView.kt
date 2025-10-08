@@ -496,11 +496,14 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
                     taskOverlayFactory,
                 )
             }
-        onBind(orientedState)
+        onBind(orientedState, taskOverlayFactory)
     }
 
-    override fun onBind(orientedState: RecentsOrientedState) {
-        super.onBind(orientedState)
+    override fun onBind(
+        orientedState: RecentsOrientedState,
+        taskOverlayFactory: TaskOverlayFactory,
+    ) {
+        super.onBind(orientedState, taskOverlayFactory)
         if (enableOverviewDesktopTileWallpaperBackground()) {
             setWallpaperBackground(false)
         }

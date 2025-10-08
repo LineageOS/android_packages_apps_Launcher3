@@ -59,20 +59,37 @@ import javax.inject.Inject;
  * Factory class to create and add an overlays on the TaskView
  */
 public class TaskOverlayFactory {
-
     @Inject
-    public TaskOverlayFactory() {
+    public TaskOverlayFactory(
+            DesktopShortcutFactory desktopShortcutFactory,
+            ExternalDisplayShortcutFactory externalDisplayShortcutFactory) {
+        mPerTaskMenuOptions = new TaskShortcutFactory[]{
+                TaskShortcutFactory.APP_INFO,
+                TaskShortcutFactory.SPLIT_SELECT,
+                TaskShortcutFactory.PIN,
+                TaskShortcutFactory.INSTALL,
+                TaskShortcutFactory.FREE_FORM,
+                desktopShortcutFactory,
+                externalDisplayShortcutFactory,
+                AspectRatioSystemShortcut.Companion.createFactory(),
+                TaskShortcutFactory.WELLBEING,
+                TaskShortcutFactory.SAVE_APP_PAIR,
+                TaskShortcutFactory.SCREENSHOT,
+                TaskShortcutFactory.MODAL,
+        };
     }
+
+    private final TaskShortcutFactory[] mPerTaskMenuOptions;
 
     /**
      * Returns menu options associated with TaskContainer.
      */
-    public static List<SystemShortcut> getEnabledShortcuts(TaskView taskView,
+    public List<SystemShortcut> getEnabledShortcuts(TaskView taskView,
             @Nullable TaskContainer taskContainer) {
         final RecentsViewContainer container = containerFromContext(taskView.getContext());
         final ArrayList<SystemShortcut> shortcuts = new ArrayList<>();
         if (taskContainer != null) {
-            for (TaskShortcutFactory menuOption : PER_TASK_MENU_OPTIONS) {
+            for (TaskShortcutFactory menuOption : mPerTaskMenuOptions) {
                 if (taskView instanceof GroupedTaskView && !menuOption.showForGroupedTask()) {
                     continue;
                 }
@@ -116,22 +133,6 @@ public class TaskOverlayFactory {
      * up over time
      */
     public void clearAllActiveState() { }
-
-    /** Note that these will be shown in order from top to bottom, if available for the task. */
-    private static final TaskShortcutFactory[] PER_TASK_MENU_OPTIONS = new TaskShortcutFactory[]{
-            TaskShortcutFactory.APP_INFO,
-            TaskShortcutFactory.SPLIT_SELECT,
-            TaskShortcutFactory.PIN,
-            TaskShortcutFactory.INSTALL,
-            TaskShortcutFactory.FREE_FORM,
-            DesktopSystemShortcut.Companion.createFactory(),
-            ExternalDisplaySystemShortcut.Companion.createFactory(),
-            AspectRatioSystemShortcut.Companion.createFactory(),
-            TaskShortcutFactory.WELLBEING,
-            TaskShortcutFactory.SAVE_APP_PAIR,
-            TaskShortcutFactory.SCREENSHOT,
-            TaskShortcutFactory.MODAL,
-    };
 
     /**
      * Overlay on each task handling Overview Action Buttons.

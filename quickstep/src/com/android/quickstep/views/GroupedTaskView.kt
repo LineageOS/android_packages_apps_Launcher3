@@ -150,7 +150,7 @@ class GroupedTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
             )
         this.splitBoundsConfig = splitTask.splitBounds
         taskContainers.forEach { it.digitalWellBeingToast?.splitBounds = splitBoundsConfig }
-        onBind(orientedState)
+        onBind(orientedState, taskOverlayFactory)
     }
 
     override fun setOrientationState(orientationState: RecentsOrientedState) {
