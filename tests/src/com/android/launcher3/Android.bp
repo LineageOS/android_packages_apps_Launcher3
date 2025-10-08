@@ -3,6 +3,7 @@ filegroup {
     srcs: [
         "testcomponent/TestCommandReceiver.java",
         "testcomponent/BaseTestingActivity.java",
+        "testcomponent/TestLauncherActivity.java",
         "util/rule/FailureWatcher.java",
         "util/rule/SkipAfterTimeOutRule.java",
         "util/rule/SamplerRule.java",

@@ -26,6 +26,7 @@ import android.content.Intent;
 
 import com.android.launcher3.tapl.LauncherInstrumentation;
 import com.android.launcher3.tapl.Taskbar;
+import com.android.launcher3.tapl.TestHelpers;
 import com.android.launcher3.util.LauncherLayoutBuilder;
 import com.android.launcher3.util.TaskbarModeUtil;
 import com.android.launcher3.util.TestUtil;
@@ -53,9 +54,14 @@ public class AbstractTaplTestsTaskbar extends AbstractQuickStepTest {
         Assume.assumeTrue("Ignoring test because device is not a tablet", mLauncher.isTablet());
         super.setUp();
 
-        LauncherLayoutBuilder layoutBuilder = new LauncherLayoutBuilder().atHotseat(0).putApp(
+        LauncherLayoutBuilder layoutBuilder = TestHelpers.isInLauncherProcess()
+                ? new LauncherLayoutBuilder().atHotseat(0).putApp(
                 "com.google.android.apps.nexuslauncher.tests",
-                "com.android.launcher3.testcomponent.BaseTestingActivity");
+                "com.android.launcher3.testcomponent.BaseTestingActivity")
+                : new LauncherLayoutBuilder().atHotseat(0).putApp(
+                        "com.google.android.apps.nexuslauncher.out_of_proc_tests",
+                        "com.android.launcher3.testcomponent.TestLauncherActivity");
+
         mLauncherLayout = TestUtil.setLauncherDefaultLayout(mTargetContext, layoutBuilder);
         AbstractLauncherUiTest.initialize(this);
         if (startCalendarAppDuringSetup()) {
