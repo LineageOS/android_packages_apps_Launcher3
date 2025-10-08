@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package com.android.launcher3.workspace;
 
 import static com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE;
-import static com.android.launcher3.util.WorkspaceDragHelper.className;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -353,8 +352,9 @@ public class TwoPanelWorkspaceTest extends BaseLauncherActivityTest<Launcher> {
         for (int i = 0; i < itemCount; i++) {
             ItemInfo itemInfo = (ItemInfo) page.getShortcutsAndWidgets().getChildAt(i).getTag();
             if (itemInfo != null && UtilitiesKt.isPersistedModelItem(itemInfo)) {
-                assertTrue("There was an extra item on page " + pageId + ": " + className(itemInfo),
-                        itemTitleSet.remove(className(itemInfo)));
+                assertTrue("There was an extra item on page " + pageId + ": "
+                                + WorkspaceDragHelper.className(itemInfo),
+                        itemTitleSet.remove(WorkspaceDragHelper.className(itemInfo)));
             }
         }
         assertTrue("Could NOT find some of the items on page " + pageId + ": "
