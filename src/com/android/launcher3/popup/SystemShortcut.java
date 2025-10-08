@@ -276,7 +276,7 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
     public static class RemoveApp<T extends ActivityContext> extends SystemShortcut<T> {
 
         public RemoveApp(T target, ItemInfo itemInfo, @NonNull View originalView) {
-            super(R.drawable.ic_remove_no_shadow, R.string.remove_drop_target_label, target,
+            super(R.drawable.ic_remove_no_shadow, R.string.remove_system_shortcut_label, target,
                     itemInfo, originalView, false);
         }
 
