@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 package com.android.launcher3.allapps;
 
+import android.platform.test.rule.LimitDevicesRule;
+import android.platform.test.rule.SkipOnDeviceless;
 import android.view.KeyEvent;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -25,6 +27,7 @@ import com.android.launcher3.LauncherState;
 import com.android.launcher3.util.BaseLauncherActivityTest;
 import com.android.launcher3.views.ActivityContext;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -32,7 +35,14 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class KeyboardFocusTest extends BaseLauncherActivityTest<Launcher> {
 
+    /**
+     * Tests can't run in Robolectric because they hang and never finish.
+     */
+    @Rule
+    public LimitDevicesRule mlimitDevicesRule = new LimitDevicesRule();
+
     @Test
+    @SkipOnDeviceless
     public void testAllAppsFocusApp() {
         loadLauncherSync();
         getLauncherActivity().goToState(LauncherState.ALL_APPS);
@@ -46,6 +56,7 @@ public class KeyboardFocusTest extends BaseLauncherActivityTest<Launcher> {
     }
 
     @Test
+    @SkipOnDeviceless
     public void testAllAppsExitSearchAndFocusApp() {
         loadLauncherSync();
         getLauncherActivity().goToState(LauncherState.ALL_APPS);
@@ -64,6 +75,7 @@ public class KeyboardFocusTest extends BaseLauncherActivityTest<Launcher> {
     }
 
     @Test
+    @SkipOnDeviceless
     public void testAllAppsExitSearchAndFocusSearchResults() {
         loadLauncherSync();
         getLauncherActivity().goToState(LauncherState.ALL_APPS);

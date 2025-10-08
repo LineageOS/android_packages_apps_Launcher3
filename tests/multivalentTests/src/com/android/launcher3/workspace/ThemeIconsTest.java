@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package com.android.launcher3.workspace;
 import static com.android.launcher3.AbstractFloatingView.TYPE_ACTION_POPUP;
 import static com.android.launcher3.Utilities.findViewByPredicate;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
-import static com.android.launcher3.util.TestConstants.AppNames.TEST_APP_NAME;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -27,8 +26,11 @@ import static org.junit.Assert.assertTrue;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.net.Uri;
+import android.platform.test.rule.LimitDevicesRule;
+import android.platform.test.rule.SkipOnDeviceless;
 import android.view.ViewGroup;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 
 import com.android.launcher3.AbstractFloatingView;
@@ -42,7 +44,9 @@ import com.android.launcher3.util.Executors;
 import com.android.launcher3.util.ModelTestExtensions;
 import com.android.launcher3.util.TestUtil;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for theme icon support in Launcher
@@ -50,12 +54,23 @@ import org.junit.Test;
  * Note running these tests will clear the workspace on the device.
  */
 @LargeTest
+@RunWith(AndroidJUnit4.class)
 public class ThemeIconsTest extends BaseLauncherActivityTest<Launcher> {
+
+    /**
+     * This test can't run in Robolectric because APP_NAME and TEST_APP_NAME can't found when
+     * running the test in Robolectric.
+     */
+    @Rule
+    public LimitDevicesRule mlimitDevicesRule = new LimitDevicesRule();
 
     private static final String APP_NAME = "IconThemedActivity";
     private static final String SHORTCUT_NAME = "Shortcut 1";
 
+    public static final String TEST_APP_NAME = "LauncherTestApp";
+
     @Test
+    @SkipOnDeviceless
     public void testIconWithoutTheme() throws Exception {
         setThemeEnabled(false);
         ModelTestExtensions.setEmptyModelLayout(targetContext());
@@ -71,6 +86,7 @@ public class ThemeIconsTest extends BaseLauncherActivityTest<Launcher> {
     }
 
     @Test
+    @SkipOnDeviceless
     public void testShortcutIconWithoutTheme() throws Exception {
         setThemeEnabled(false);
         ModelTestExtensions.setEmptyModelLayout(targetContext());
@@ -93,6 +109,7 @@ public class ThemeIconsTest extends BaseLauncherActivityTest<Launcher> {
     }
 
     @Test
+    @SkipOnDeviceless
     public void testIconWithTheme() throws Exception {
         setThemeEnabled(true);
         ModelTestExtensions.setEmptyModelLayout(targetContext());
@@ -109,6 +126,7 @@ public class ThemeIconsTest extends BaseLauncherActivityTest<Launcher> {
     }
 
     @Test
+    @SkipOnDeviceless
     public void testShortcutIconWithTheme() throws Exception {
         setThemeEnabled(true);
         loadLauncherSync();
