@@ -219,25 +219,29 @@ public class TaskbarViewCallbacks {
     }
 
     private void togglePinnedOverflowView(View view) {
-        if (!(view instanceof TaskbarOverflowView overflowIcon)
+        if (!(view instanceof TaskbarOverflowView)
                 || mTaskbarView.getTaskbarPinnedOverflowView() == null) {
             return;
         }
-        mTaskbarView.getTaskbarPinnedOverflowView().setIsActive(
-                !mTaskbarView.getTaskbarPinnedOverflowView().getIsActive());
+        TaskbarOverflowView overflowView = (TaskbarOverflowView) view;
+        overflowView.setIsActive(!overflowView.getIsActive());
         mControllers.taskbarAutohideSuspendController
                 .updateFlag(FLAG_AUTOHIDE_SUSPEND_TASKBAR_OVERFLOW,
-                        mTaskbarView.getTaskbarPinnedOverflowView().getIsActive());
+                        overflowView.getIsActive());
         mControllers.taskbarViewController.getOverflownAppsContainerController()
                 .toggleOverflownAppsView(
-                        overflowIcon,
-                        mTaskbarView.getTaskbarPinnedOverflowView().getOverflowInfoList(),
+                        overflowView,
+                        overflowView.getOverflowInfoList(),
                         this::onOverflownAppsContainerClosed);
     }
 
     private void onOverflownAppsContainerClosed() {
-        if (mTaskbarView.getTaskbarPinnedOverflowView() != null) {
-            mTaskbarView.getTaskbarPinnedOverflowView().setIsActive(false);
+        TaskbarOverflowView overflowView = mTaskbarView.getTaskbarHotseatIconsContainer() != null
+                ? mTaskbarView.getTaskbarHotseatIconsContainer().getTaskbarPinnedOverflowView()
+                : mTaskbarView.getTaskbarPinnedOverflowView();
+
+        if (overflowView != null) {
+            overflowView.setIsActive(false);
         }
         mControllers.taskbarAutohideSuspendController.updateFlag(
                 FLAG_AUTOHIDE_SUSPEND_TASKBAR_OVERFLOW, false);

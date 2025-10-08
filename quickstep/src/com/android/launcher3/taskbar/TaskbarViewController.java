@@ -244,8 +244,8 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         mTransientTaskbarProfile = mActivity.getTransientTaskbarProfile();
         mPersistentTaskbarProfile = mActivity.getPersistentTaskbarProfile();
 
-        mTransientIconSize = mTransientTaskbarProfile.getIconSize();
-        mPersistentIconSize = mPersistentTaskbarProfile.getIconSize();
+        mTransientIconSize = dpToPx(TaskbarIconSpecs.INSTANCE.getIconSize52dp().getSize());
+        mPersistentIconSize = dpToPx(TaskbarIconSpecs.INSTANCE.getIconSize40dp().getSize());
         mTaskbarView = taskbarView;
         mTaskbarUiState = taskbarUiState;
         mTaskbarIconAlpha = new MultiValueAlpha(mTaskbarView, NUM_ALPHA_CHANNELS);

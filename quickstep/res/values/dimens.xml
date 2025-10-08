@@ -446,6 +446,8 @@
     <dimen name="taskbar_tooltip_vertical_padding">8dp</dimen>
     <dimen name="taskbar_tooltip_horizontal_padding">16dp</dimen>
     <dimen name="taskbar_tooltip_y_offset">4dp</dimen>
+    <dimen name="persistent_taskbar_icon_size">44dp</dimen>
+    <dimen name="transient_taskbar_icon_size">57dp</dimen>
 
     <!-- An additional touch slop to prevent x-axis movement during the swipe up to show taskbar -->
     <dimen name="transient_taskbar_clamped_offset_bound">16dp</dimen>

@@ -106,6 +106,7 @@ import com.android.launcher3.util.IntArray;
 import com.android.launcher3.util.MultiTranslateDelegate;
 import com.android.launcher3.util.SafeCloseable;
 import com.android.launcher3.util.ShortcutUtil;
+import com.android.launcher3.util.TaskbarModeUtil;
 import com.android.launcher3.util.Themes;
 import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.views.FloatingIconViewCompanion;
@@ -306,7 +307,13 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             defaultIconSize = getResources().getDimensionPixelSize(
                     R.dimen.search_row_small_icon_size);
         } else if (mDisplay == DISPLAY_TASKBAR) {
-            defaultIconSize = mDeviceProfile.getTaskbarProfile().getIconSize();
+            float iconSize;
+            if (TaskbarModeUtil.INSTANCE.get(getContext()).isTransient()) {
+                iconSize = getResources().getDimension(R.dimen.transient_taskbar_icon_size);
+            } else {
+                iconSize = getResources().getDimension(R.dimen.persistent_taskbar_icon_size);
+            }
+            defaultIconSize = (int) iconSize;
         } else {
             // widget_selection or shortcut_popup
             defaultIconSize = mDeviceProfile.getWorkspaceIconProfile().getIconSizePx();
