@@ -86,6 +86,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
                 icon.setTextVisibility(false)
                 icon.setOnClickListener(viewCallbacks.iconOnClickListener)
                 icon.setOnLongClickListener(viewCallbacks.iconOnLongClickListener)
+                icon.setOnHoverListener(TaskbarHoverToolTipController(mActivityContext, this, icon))
 
                 val lp =
                     LayoutParams(
