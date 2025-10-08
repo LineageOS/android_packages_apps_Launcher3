@@ -65,6 +65,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import com.android.launcher3.widgetpicker.R
 import com.android.launcher3.widgetpicker.shared.model.CloseBehavior
+import com.android.launcher3.widgetpicker.ui.components.SheetDismissState
 import com.android.launcher3.widgetpicker.ui.components.SheetHeader
 import com.android.launcher3.widgetpicker.ui.components.accessibility.LocalAccessibilityState
 import com.android.launcher3.widgetpicker.ui.components.bottomsheet.TitledBottomSheetDimens.SHEET_HEIGHT_CAP_RATIO
@@ -76,6 +77,8 @@ import com.android.launcher3.widgetpicker.ui.components.bottomsheet.TitledBottom
 import com.android.launcher3.widgetpicker.ui.components.bottomsheet.TitledBottomSheetDimens.sheetInnerTopPadding
 import com.android.launcher3.widgetpicker.ui.components.bottomsheet.TitledBottomSheetDimens.sheetShape
 import com.android.launcher3.widgetpicker.ui.components.bottomsheet.TitledBottomSheetDimens.sheetWindowInsets
+import com.android.launcher3.widgetpicker.ui.components.dismissibleSheet
+import com.android.launcher3.widgetpicker.ui.components.dismissibleSheetContent
 import com.android.launcher3.widgetpicker.ui.theme.WidgetPickerTheme
 import kotlin.math.abs
 import kotlinx.coroutines.launch
@@ -130,9 +133,7 @@ fun TitledBottomSheet(
                     .windowInsetsPadding(sheetWindowInsets)
         ) {
             val animSpec: AnimationSpec<Float> = MaterialTheme.motionScheme.slowSpatialSpec()
-            val sheetState = remember {
-                BottomSheetDismissState(expandCollapseAnimationSpec = animSpec)
-            }
+            val sheetState = remember { SheetDismissState(expandCollapseAnimationSpec = animSpec) }
 
             Surface(
                 modifier =
@@ -147,7 +148,7 @@ fun TitledBottomSheet(
                                 )
                         }
                         .fillMaxSize()
-                        .dismissibleBottomSheet(
+                        .dismissibleSheet(
                             sheetState = sheetState,
                             onSheetOpen = onSheetOpen,
                             onDismissSheet = onDismissSheet,
@@ -168,7 +169,7 @@ fun TitledBottomSheet(
                                             closeBehavior != CloseBehavior.DRAG_HANDLE
                                         } ?: 0.dp
                                 )
-                                .dismissableBottomSheetContent(sheetState)
+                                .dismissibleSheetContent(sheetState)
                     ) {
                         if (closeBehavior == CloseBehavior.DRAG_HANDLE) {
                             DecorativeDragHandle(

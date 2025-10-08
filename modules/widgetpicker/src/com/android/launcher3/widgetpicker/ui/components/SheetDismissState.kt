@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.widgetpicker.ui.components.bottomsheet
+package com.android.launcher3.widgetpicker.ui.components
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
@@ -22,16 +22,15 @@ import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.animateTo
 import androidx.compose.runtime.Stable
-import com.android.launcher3.widgetpicker.ui.components.bottomsheet.BottomSheetDismissDimensions.SETTLE_ANIMATION_SPEC
 
 /**
  * A state holding information necessary to perform drag / predictive back gestures on sheet to
  * dismiss it.
  *
- * @see [dismissibleBottomSheet] modifier.
+ * @see [dismissibleSheet] modifier.
  */
 @Stable
-class BottomSheetDismissState(private val expandCollapseAnimationSpec: AnimationSpec<Float>) {
+class SheetDismissState(private val expandCollapseAnimationSpec: AnimationSpec<Float>) {
     val backProgress = Animatable(0f)
     val anchoredDraggableState = AnchoredDraggableState(initialValue = SheetPositionValue.COLLAPSED)
 
@@ -62,7 +61,10 @@ class BottomSheetDismissState(private val expandCollapseAnimationSpec: Animation
 
     /** Animates and settles the back progress to open position. */
     suspend fun settleProgress() {
-        backProgress.animateTo(targetValue = 0f, animationSpec = SETTLE_ANIMATION_SPEC)
+        backProgress.animateTo(
+            targetValue = 0f,
+            animationSpec = SheetDismissDimensions.SETTLE_ANIMATION_SPEC,
+        )
     }
 }
 
