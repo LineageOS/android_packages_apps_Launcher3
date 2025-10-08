@@ -19,19 +19,19 @@ package com.android.launcher3.qsb
 import android.appwidget.AppWidgetProviderInfo
 import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_RECONFIGURABLE
 import android.content.ComponentName
-import com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn
 import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.MutableListenableRef
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestActivityContext
 import com.android.launcher3.util.WidgetUtils
-import kotlin.test.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.spy
 import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.whenever
@@ -52,8 +52,7 @@ class OseWidgetOptionsProviderTest {
     @Before
     fun setup() {
         doReturn(testProviderInfo).whenever(oseWidgetManager).providerInfo
-        underTest = OseWidgetOptionsProvider(oseWidgetManager, context)
-        spyOn(underTest)
+        underTest = spy(OseWidgetOptionsProvider(oseWidgetManager, context))
     }
 
     @Test

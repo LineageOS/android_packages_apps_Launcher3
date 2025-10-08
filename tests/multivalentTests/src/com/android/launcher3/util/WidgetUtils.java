@@ -39,8 +39,6 @@ import com.android.launcher3.widget.LauncherWidgetHolder;
 import com.android.launcher3.widget.PendingAddWidgetInfo;
 import com.android.launcher3.widget.WidgetManagerHelper;
 
-import java.util.Objects;
-
 /**
  * Common method for widget binding
  */
@@ -133,7 +131,13 @@ public class WidgetUtils {
         ComponentName cn = new ComponentName(i.getContext(),
                 hasConfigureScreen ? AppWidgetWithConfig.class : AppWidgetNoConfig.class);
         Log.d(TAG, "findWidgetProvider componentName=" + cn.flattenToString());
-        return Objects.requireNonNull(new WidgetManagerHelper(
-                i.getTargetContext()).findProvider(cn, myUserHandle()));
+        WidgetManagerHelper widgetManagerHelper = new WidgetManagerHelper(i.getTargetContext());
+        LauncherAppWidgetProviderInfo providerInfo =
+                widgetManagerHelper.findProvider(cn, myUserHandle());
+        if (providerInfo != null) {
+            return providerInfo;
+        }
+        return LauncherAppWidgetProviderInfo.fromProviderInfo(i.getTargetContext(),
+                createAppWidgetProviderInfo(cn));
     }
 }
