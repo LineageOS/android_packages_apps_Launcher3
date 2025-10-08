@@ -65,9 +65,13 @@ constructor(
     }
 
     private fun processInsert(uri: Uri, file: HomeScreenFile, taskController: ModelTaskController) {
+        iconCache.addIconToDBAndMemCache(
+            file,
+            HomeScreenFilesCachingLogic,
+            iconCache.getSerialNumberForUser(file.user),
+        )
         val item =
             WorkspaceItemInfo().apply {
-                title = file.displayName
                 itemType = HomeScreenFilesUtils.buildItemType(file)
                 intent = HomeScreenFilesUtils.buildLaunchIntent(uri, file)
                 iconCache.getTitleAndIcon(this, DESKTOP_ICON_FLAG)
@@ -116,7 +120,11 @@ constructor(
                     if (data == uri || (uriAlias != null && data == uriAlias)) {
                         it.intent = HomeScreenFilesUtils.buildLaunchIntent(uri, file)
                         it.itemType = HomeScreenFilesUtils.buildItemType(file)
-                        it.title = file.displayName
+                        iconCache.addIconToDBAndMemCache(
+                            file,
+                            HomeScreenFilesCachingLogic,
+                            iconCache.getSerialNumberForUser(file.user),
+                        )
                         iconCache.getTitleAndIcon(it, it.matchingLookupFlag)
                         true
                     } else {
@@ -125,6 +133,7 @@ constructor(
                 },
             )
         if (updatedItems.isNotEmpty()) {
+            taskController.getModelWriter().run { updatedItems.forEach(::updateItemInDatabase) }
             taskController.bindUpdatedWorkspaceItems(updatedItems)
         } else {
             processInsert(uri, file, taskController)

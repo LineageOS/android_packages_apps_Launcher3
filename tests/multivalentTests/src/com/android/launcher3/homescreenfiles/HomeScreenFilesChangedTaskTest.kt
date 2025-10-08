@@ -88,7 +88,12 @@ class HomeScreenFilesChangedTaskTest {
     fun setUp() {
         idp.numSearchContainerColumns = 3
 
-        doAnswer { it.getArgument<ItemInfoWithIcon>(0).bitmap = bitmap }
+        doAnswer {
+                it.getArgument<ItemInfoWithIcon>(0).apply {
+                    bitmap = this@HomeScreenFilesChangedTaskTest.bitmap
+                    title = testFile.displayName
+                }
+            }
             .whenever(iconCache)
             .getTitleAndIcon(any(), any())
 
@@ -140,21 +145,20 @@ class HomeScreenFilesChangedTaskTest {
         verify(modelWriter, times(1))
             .addItemToDatabase(itemCaptor.capture(), eq(CONTAINER_DESKTOP), eq(2), eq(3), eq(4))
 
-        val item = itemCaptor.firstValue as ItemInfoWithIcon
-        with(item) {
-            assertThat(item.bitmap).isEqualTo(bitmap)
-            assertThat(item.title).isEqualTo("file.png")
-            assertThat(item.itemType).isEqualTo(ITEM_TYPE_FILE_SYSTEM_FILE)
-            assertThat(item.intent).isNotNull()
-            assertThat(item.intent!!.action).isEqualTo(Intent.ACTION_VIEW)
-            assertThat(item.intent!!.flags)
+        with(itemCaptor.firstValue as ItemInfoWithIcon) {
+            assertThat(bitmap).isEqualTo(this@HomeScreenFilesChangedTaskTest.bitmap)
+            assertThat(title).isEqualTo("file.png")
+            assertThat(itemType).isEqualTo(ITEM_TYPE_FILE_SYSTEM_FILE)
+            assertThat(intent).isNotNull()
+            assertThat(intent!!.action).isEqualTo(Intent.ACTION_VIEW)
+            assertThat(intent!!.flags)
                 .isEqualTo(
                     Intent.FLAG_ACTIVITY_NEW_TASK or
                         Intent.FLAG_GRANT_READ_URI_PERMISSION or
                         Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                 )
-            assertThat(item.intent!!.data).isEqualTo(testUri)
-            assertThat(item.intent!!.type).isEqualTo("image/png")
+            assertThat(intent!!.data).isEqualTo(testUri)
+            assertThat(intent!!.type).isEqualTo("image/png")
         }
     }
 
@@ -178,21 +182,20 @@ class HomeScreenFilesChangedTaskTest {
         verify(modelWriter, times(1))
             .addItemToDatabase(itemCaptor.capture(), eq(CONTAINER_DESKTOP), eq(2), eq(3), eq(4))
 
-        val item = itemCaptor.firstValue as ItemInfoWithIcon
-        with(item) {
-            assertThat(item.bitmap).isEqualTo(bitmap)
-            assertThat(item.title).isEqualTo("file.png")
-            assertThat(item.itemType).isEqualTo(ITEM_TYPE_FILE_SYSTEM_FILE)
-            assertThat(item.intent).isNotNull()
-            assertThat(item.intent!!.action).isEqualTo(Intent.ACTION_VIEW)
-            assertThat(item.intent!!.flags)
+        with(itemCaptor.firstValue as ItemInfoWithIcon) {
+            assertThat(bitmap).isEqualTo(this@HomeScreenFilesChangedTaskTest.bitmap)
+            assertThat(title).isEqualTo("file.png")
+            assertThat(itemType).isEqualTo(ITEM_TYPE_FILE_SYSTEM_FILE)
+            assertThat(intent).isNotNull()
+            assertThat(intent!!.action).isEqualTo(Intent.ACTION_VIEW)
+            assertThat(intent!!.flags)
                 .isEqualTo(
                     Intent.FLAG_ACTIVITY_NEW_TASK or
                         Intent.FLAG_GRANT_READ_URI_PERMISSION or
                         Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                 )
-            assertThat(item.intent!!.data).isEqualTo(testUri)
-            assertThat(item.intent!!.type).isEqualTo("image/png")
+            assertThat(intent!!.data).isEqualTo(testUri)
+            assertThat(intent!!.type).isEqualTo("image/png")
         }
     }
 
@@ -221,25 +224,28 @@ class HomeScreenFilesChangedTaskTest {
             )
         task.execute(modelTaskController, bgDataModel, allAppsList)
 
+        val itemCaptor = argumentCaptor<ItemInfo>()
+        verify(modelWriter, times(1)).updateItemInDatabase(itemCaptor.capture())
+
         val itemsCaptor = argumentCaptor<List<ItemInfo>>()
         verify(modelTaskController, times(1)).bindUpdatedWorkspaceItems(itemsCaptor.capture())
         assertThat(itemsCaptor.firstValue.size).isEqualTo(1)
 
-        val item = itemsCaptor.firstValue[0] as ItemInfoWithIcon
-        with(item) {
-            assertThat(item.bitmap).isEqualTo(bitmap)
-            assertThat(item.title).isEqualTo("file.png")
-            assertThat(item.itemType).isEqualTo(ITEM_TYPE_FILE_SYSTEM_FILE)
-            assertThat(item.intent).isNotNull()
-            assertThat(item.intent!!.action).isEqualTo(Intent.ACTION_VIEW)
-            assertThat(item.intent!!.flags)
+        with(itemsCaptor.firstValue[0] as ItemInfoWithIcon) {
+            assertThat(this).isEqualTo(itemCaptor.firstValue)
+            assertThat(bitmap).isEqualTo(this@HomeScreenFilesChangedTaskTest.bitmap)
+            assertThat(title).isEqualTo("file.png")
+            assertThat(itemType).isEqualTo(ITEM_TYPE_FILE_SYSTEM_FILE)
+            assertThat(intent).isNotNull()
+            assertThat(intent!!.action).isEqualTo(Intent.ACTION_VIEW)
+            assertThat(intent!!.flags)
                 .isEqualTo(
                     Intent.FLAG_ACTIVITY_NEW_TASK or
                         Intent.FLAG_GRANT_READ_URI_PERMISSION or
                         Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                 )
-            assertThat(item.intent!!.data).isEqualTo(testUri)
-            assertThat(item.intent!!.type).isEqualTo("image/png")
+            assertThat(intent!!.data).isEqualTo(testUri)
+            assertThat(intent!!.type).isEqualTo("image/png")
         }
     }
 
@@ -267,14 +273,17 @@ class HomeScreenFilesChangedTaskTest {
             )
         task.execute(modelTaskController, bgDataModel, allAppsList)
 
+        val itemCaptor = argumentCaptor<ItemInfo>()
+        verify(modelWriter, times(1)).updateItemInDatabase(itemCaptor.capture())
+
         val itemsCaptor = argumentCaptor<List<ItemInfo>>()
         verify(modelTaskController, times(1)).bindUpdatedWorkspaceItems(itemsCaptor.capture())
         assertThat(itemsCaptor.firstValue.size).isEqualTo(1)
 
-        val item = itemsCaptor.firstValue[0] as ItemInfoWithIcon
-        with(item) {
-            assertThat(item.bitmap).isEqualTo(bitmap)
-            assertThat(item.title).isEqualTo("file.png")
+        with(itemsCaptor.firstValue[0] as ItemInfoWithIcon) {
+            assertThat(this).isEqualTo(itemCaptor.firstValue)
+            assertThat(bitmap).isEqualTo(this@HomeScreenFilesChangedTaskTest.bitmap)
+            assertThat(title).isEqualTo("file.png")
         }
     }
 
