@@ -246,6 +246,7 @@ import com.android.wm.shell.common.pip.IPipAnimationListener.PipResources;
 import com.android.wm.shell.shared.GroupedTaskInfo;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
+import com.android.wm.shell.shared.desktopmode.DesktopState;
 import com.android.wm.shell.shared.pip.PipFlags;
 import com.android.wm.shell.shared.split.SplitBounds;
 
@@ -890,7 +891,10 @@ public abstract class RecentsView<
                 () -> new RecentsRotationStateRepositoryImpl(mOrientationState));
 
         recentsDependencies.provide(RecentsDeviceProfileRepository.class, scopeId,
-                () -> new RecentsDeviceProfileRepositoryImpl(mContainer));
+                () -> new RecentsDeviceProfileRepositoryImpl(
+                        mContainer.getDeviceProfile().getDeviceProperties(),
+                        DesktopState.getInstance(context)
+                ));
 
         recentsDependencies.provide(AppTimersRepository.class, scopeId,
                 () -> new AppTimersRepositoryImpl(

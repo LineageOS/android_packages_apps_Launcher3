@@ -23,10 +23,11 @@ import android.content.Context
 import android.content.Intent
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
+import android.platform.test.rule.LimitDevicesRule
+import android.platform.test.rule.SkipOnDeviceless
 import android.view.Display.DEFAULT_DISPLAY
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
-import com.android.dx.mockito.inline.extended.StaticMockitoSession
 import com.android.internal.R
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.AbstractFloatingViewHelper
@@ -48,15 +49,14 @@ import com.android.quickstep.views.TaskViewType
 import com.android.systemui.shared.recents.model.Task
 import com.android.systemui.shared.recents.model.Task.TaskKey
 import com.android.window.flags.Flags
-import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource
+import com.android.wm.shell.shared.desktopmode.FakeDesktopState
 import com.google.common.truth.Truth.assertThat
 import java.util.ArrayList
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mockito.`when`
+import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
@@ -64,12 +64,13 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.mockito.quality.Strictness
 
 /** Test for [ExternalDisplaySystemShortcut] */
+@RunWith(AndroidJUnit4::class)
 class ExternalDisplaySystemShortcutTest {
 
     @get:Rule val setFlagsRule = SetFlagsRule(SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT)
+    @get:Rule val limitDevicesRule = LimitDevicesRule()
 
     private val launcher: RecentsViewContainer = mock()
     private val statsLogManager: StatsLogManager = mock()
@@ -77,34 +78,26 @@ class ExternalDisplaySystemShortcutTest {
     private val recentsView: LauncherRecentsView = mock()
     private val abstractFloatingViewHelper: AbstractFloatingViewHelper = mock()
     private val overlayFactory: TaskOverlayFactory = mock()
+    private val desktopState = FakeDesktopState()
     private val factory: TaskShortcutFactory =
-        ExternalDisplaySystemShortcut.createFactory(abstractFloatingViewHelper)
-    private val context: Context = spy(InstrumentationRegistry.getInstrumentation().targetContext)
+        ExternalDisplaySystemShortcut.createFactory(
+            abstractFloatingViewHelper,
+            desktopStateFactory = { desktopState },
+        )
+    private val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
     private val taskView: TaskView = createTaskViewMock()
-
-    private lateinit var mockitoSession: StaticMockitoSession
 
     @Before
     fun setUp() {
-        mockitoSession =
-            mockitoSession()
-                .strictness(Strictness.LENIENT)
-                .mockStatic(DesktopModeStatus::class.java)
-                .startMocking()
-        whenever(DesktopModeStatus.canEnterDesktopMode(any())).thenReturn(true)
+        desktopState.canEnterDesktopMode = true
         whenever(overlayFactory.createOverlay(any())).thenReturn(mock<TaskOverlay<*>>())
         whenever(launcher.asContext()).thenReturn(context)
-    }
-
-    @After
-    fun tearDown() {
-        mockitoSession.finishMocking()
     }
 
     @Test
     @EnableFlags(Flags.FLAG_MOVE_TO_EXTERNAL_DISPLAY_SHORTCUT)
     fun createExternalDisplayTaskShortcut_desktopModeDisabled() {
-        `when`(DesktopModeStatus.canEnterDesktopMode(any())).thenReturn(false)
+        desktopState.canEnterDesktopMode = false
 
         val taskContainer = createTaskContainer(createTask())
 
@@ -202,6 +195,7 @@ class ExternalDisplaySystemShortcutTest {
         Flags.FLAG_MOVE_TO_EXTERNAL_DISPLAY_SHORTCUT,
         Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY,
     )
+    @SkipOnDeviceless
     fun createExternalDisplayTaskShortcut_defaultHomeTask() {
         val homeActivity = context.packageManager.getHomeActivities(ArrayList())
         val homeActivities = ComponentName(homeActivity?.packageName.toString(), /* class */ "")

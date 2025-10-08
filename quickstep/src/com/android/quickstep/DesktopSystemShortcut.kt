@@ -16,6 +16,7 @@
 
 package com.android.quickstep
 
+import android.content.Context
 import android.view.View
 import com.android.internal.jank.Cuj
 import com.android.launcher3.AbstractFloatingViewHelper
@@ -27,8 +28,8 @@ import com.android.quickstep.views.RecentsView
 import com.android.quickstep.views.RecentsViewContainer
 import com.android.quickstep.views.TaskContainer
 import com.android.systemui.shared.system.InteractionJankMonitorWrapper
-import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource
+import com.android.wm.shell.shared.desktopmode.DesktopState
 
 /** A menu item, "Desktop", that allows the user to bring the current app into Desktop Windowing. */
 class DesktopSystemShortcut(
@@ -64,7 +65,10 @@ class DesktopSystemShortcut(
         /** Creates a factory for creating Desktop system shortcuts. */
         @JvmOverloads
         fun createFactory(
-            abstractFloatingViewHelper: AbstractFloatingViewHelper = AbstractFloatingViewHelper()
+            abstractFloatingViewHelper: AbstractFloatingViewHelper = AbstractFloatingViewHelper(),
+            desktopStateFactory: (Context) -> DesktopState = { context ->
+                DesktopState.getInstance(context)
+            },
         ): TaskShortcutFactory =
             object : TaskShortcutFactory {
 
@@ -73,14 +77,12 @@ class DesktopSystemShortcut(
                     taskContainer: TaskContainer,
                 ): List<DesktopSystemShortcut>? {
                     val context = container.asContext()
+                    val desktopState = desktopStateFactory(context)
                     val taskKey = taskContainer.task.key
                     val desktopModeCompatPolicy = context.appComponent.desktopModeCompatPolicy
 
                     return when {
-                        !DesktopModeStatus.isDesktopModeSupportedOnDisplay(
-                            context,
-                            context.display,
-                        ) -> null
+                        !desktopState.isDesktopModeSupportedOnDisplay(context.display) -> null
 
                         desktopModeCompatPolicy.shouldDisableDesktopEntryPoints(
                             taskKey.baseActivity?.packageName,
