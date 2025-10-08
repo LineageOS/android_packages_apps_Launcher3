@@ -168,9 +168,11 @@ object ModelTestExtensions {
 
     /** Sets and loads the workspace layout */
     @JvmStatic
-    fun Context.setModelLayout(builder: LauncherLayoutBuilder) {
+    fun Context.setModelLayout(builder: LauncherLayoutBuilder) = setModelLayout(builder.build())
+
+    fun Context.setModelLayout(xmlString: String) {
         val model = appComponent.testableModelState.model
-        appComponent.layoutParserFactory.overrideXmlLayout(builder.build()).use {
+        appComponent.layoutParserFactory.overrideXmlLayout(xmlString).use {
             TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {
                 try {
                     model.modelDbController.createEmptyDB()
