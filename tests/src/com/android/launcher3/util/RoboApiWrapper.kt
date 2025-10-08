@@ -29,6 +29,11 @@ object RoboApiWrapper {
         CompletableFuture<Void>().apply { Handler(looper).post { complete(null) } }.get()
     }
 
+    fun yieldToMainLooper() {
+        // Intentionally left empty as this is not needed on device.
+        // Main looper continues running anyway without the need to yield.
+    }
+
     /** Rule to grant shortcuts permission */
     fun grantShortcutsPermissionRule(): TestRule = ShellCommandRule.setDefaultLauncher()
 
