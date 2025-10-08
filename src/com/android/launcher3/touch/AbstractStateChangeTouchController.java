@@ -112,6 +112,7 @@ public abstract class AbstractStateChangeTouchController
                 boolean ignoreWhenShownBehindDesktop = !mLauncher.isTopResumedActivity()
                         && mLauncher.shouldShowHomeBehindDesktop();
                 boolean ignoreMouseScroll = ev.getSource() == InputDevice.SOURCE_MOUSE
+                        && !isTrackpadScroll(ev)
                         && shouldEnableMouseInteractionChanges(
                         mLauncher.getWorkspace().getContext());
                 if (directionsToDetectScroll == 0 || ignoreMouseScroll
