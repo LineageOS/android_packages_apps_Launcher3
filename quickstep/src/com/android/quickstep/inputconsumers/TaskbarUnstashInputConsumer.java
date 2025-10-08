@@ -467,7 +467,7 @@ public class TaskbarUnstashInputConsumer extends DelegateInputConsumer {
             }
             return ret;
         } else {
-            return getTaskbarSlowVelocityYThreshold();
+            return legacyGetTaskbarSlowVelocityYThreshold();
         }
     }
 
