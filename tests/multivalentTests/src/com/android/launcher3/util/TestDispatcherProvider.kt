@@ -23,5 +23,6 @@ class TestDispatcherProvider(testDispatcher: CoroutineDispatcher) : DispatcherPr
     override val ioBackground: CoroutineDispatcher = testDispatcher
     override val lightweightBackground: CoroutineDispatcher = testDispatcher
     override val main: CoroutineDispatcher = testDispatcher
+    override val taskbarUi: CoroutineDispatcher = testDispatcher
     override val unconfined: CoroutineDispatcher = testDispatcher
 }

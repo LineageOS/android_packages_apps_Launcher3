@@ -19,6 +19,7 @@ package com.android.launcher3.util.coroutines
 import com.android.launcher3.concurrent.annotations.Background
 import com.android.launcher3.concurrent.annotations.LightweightBackground
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority
+import com.android.launcher3.concurrent.annotations.TaskbarUi
 import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
@@ -50,6 +51,13 @@ interface DispatcherProvider {
     val main: CoroutineDispatcher
 
     /**
+     * A coroutine dispatcher that is confined to the Taskbar Ui Thread operating with UI objects.
+     * It executes coroutines immediately when it is already in the right context without an
+     * additional re-dispatch.
+     */
+    val taskbarUi: CoroutineDispatcher
+
+    /**
      * A coroutine dispatcher that is not confined to any specific thread.
      *
      * See Kotlin documentation for [Dispatchers.Unconfined] for more detailed documentation.
@@ -62,6 +70,7 @@ class ProductionDispatchers
 @Inject
 constructor(
     @Ui override val main: CoroutineDispatcher,
+    @TaskbarUi override val taskbarUi: CoroutineDispatcher,
     @Background override val ioBackground: CoroutineDispatcher,
     @LightweightBackground(LightweightBackgroundPriority.UI)
     override val lightweightBackground: CoroutineDispatcher,

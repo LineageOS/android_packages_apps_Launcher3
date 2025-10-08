@@ -24,6 +24,7 @@ java_library {
         "src/com/android/launcher3/concurrent/annotations/LightweightBackground.kt",
         "src/com/android/launcher3/concurrent/annotations/ThreadPool.kt",
         "src/com/android/launcher3/concurrent/annotations/Ui.kt",
+        "src/com/android/launcher3/concurrent/annotations/TaskbarUi.kt",
         "src/com/android/launcher3/concurrent/annotations/UiContext.kt",
         "src/com/android/launcher3/concurrent/annotations/BackgroundContext.kt",
         "src/com/android/launcher3/concurrent/annotations/LightweightBackgroundContext.kt",

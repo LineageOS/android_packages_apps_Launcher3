@@ -21,6 +21,7 @@ import com.android.launcher3.concurrent.annotations.BackgroundContext
 import com.android.launcher3.concurrent.annotations.LightweightBackground
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundContext
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority
+import com.android.launcher3.concurrent.annotations.TaskbarUi
 import com.android.launcher3.concurrent.annotations.ThreadPool
 import com.android.launcher3.concurrent.annotations.ThreadPoolContext
 import com.android.launcher3.concurrent.annotations.Ui
@@ -119,6 +120,12 @@ interface ExecutorsModule {
     fun provideUiExecutor(@Ui listeningExecutorService: ListeningExecutorService): Executor
 
     @Binds
+    @TaskbarUi
+    fun provideTaskbarUiExecutor(
+        @TaskbarUi listeningExecutorService: ListeningExecutorService
+    ): Executor
+
+    @Binds
     @Ui
     fun provideUiExecutorService(
         @Ui listeningExecutorService: ListeningExecutorService
@@ -160,6 +167,11 @@ interface ExecutorsModule {
         @Provides
         @Ui
         fun provideUiDispatcher(@Ui executor: Executor) = executor.asCoroutineDispatcher()
+
+        @Provides
+        @TaskbarUi
+        fun provideTaskbarUiDispatcher(@TaskbarUi executor: Executor) =
+            executor.asCoroutineDispatcher()
 
         @Provides
         @LightweightBackground(LightweightBackgroundPriority.DATA)

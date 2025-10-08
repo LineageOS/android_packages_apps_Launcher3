@@ -749,7 +749,7 @@ public class TouchInteractionService extends Service {
 
     private QuickstepKeyGestureEventsManager mQuickstepKeyGestureEventsHandler;
     private DisplaysWithDecorationsRepositoryCompat mDisplaysWithDecorationsRepositoryCompat;
-    private CoroutineDispatcher mCoroutineDispatcher;
+    private CoroutineDispatcher mMainCoroutineDispatcher;
     private DesktopState mDesktopState;
 
     @Override
@@ -768,7 +768,7 @@ public class TouchInteractionService extends Service {
         mSystemDecorationChangeObserver = SystemDecorationChangeObserver.getINSTANCE().get(this);
         mQuickstepKeyGestureEventsHandler =
                 QuickstepKeyGestureEventsManager.getINSTANCE().get(this);
-        mCoroutineDispatcher = ProductionDispatchers.INSTANCE.get(this).getMain();
+        mMainCoroutineDispatcher = ProductionDispatchers.INSTANCE.get(this).getMain();
         mDisplaysWithDecorationsRepositoryCompat =
                 LauncherDisplaysWithDecorationsRepositoryCompat.getINSTANCE().get(this);
         mDesktopState = DesktopState.getInstance(this);
@@ -787,7 +787,7 @@ public class TouchInteractionService extends Service {
         mTaskbarManager = new TaskbarManagerImplWrapper(
             new TaskbarManagerImpl(this, mAllAppsActionManager, mNavCallbacks,
                 mRecentsWindowManagerRepository, mDisplaysWithDecorationsRepositoryCompat,
-                    mCoroutineDispatcher));
+                    ProductionDispatchers.INSTANCE.get(this).getTaskbarUi()));
         mDesktopAppLaunchTransitionManager =
                 new DesktopAppLaunchTransitionManager(this, SystemUiProxy.INSTANCE.get(this),
                         DisplayController.INSTANCE.get(this));
@@ -1570,7 +1570,7 @@ public class TouchInteractionService extends Service {
         private InputMonitorDisplayModel(
                 Context context, SystemDecorationChangeObserver systemDecorationChangeObserver) {
             super(context, systemDecorationChangeObserver, mDisplaysWithDecorationsRepositoryCompat,
-                    mCoroutineDispatcher);
+                    mMainCoroutineDispatcher);
             initializeDisplays();
         }
 
