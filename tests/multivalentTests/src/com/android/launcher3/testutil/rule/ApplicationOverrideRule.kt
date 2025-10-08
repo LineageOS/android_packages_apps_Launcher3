@@ -19,7 +19,7 @@ package com.android.launcher3.testutil.rule
 import android.app.Activity
 import android.app.Instrumentation
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.launcher3.util.RoboApiWrapper
+import com.android.launcher3.util.RoboApiWrapper.convertToSpy
 import com.android.launcher3.util.SandboxApplication
 import org.junit.rules.ExternalResource
 import org.mockito.Mockito.spy
@@ -42,7 +42,7 @@ class ApplicationOverrideRule(private val app: SandboxApplication, mockitoRule: 
 
     override fun before() {
         instrumentation = InstrumentationRegistry.getInstrumentation()
-        RoboApiWrapper.convertObjectToSpy(instrumentation)
+        instrumentation.convertToSpy()
 
         doAnswer {
                 val cl = it.getArgument(0, ClassLoader::class.java)

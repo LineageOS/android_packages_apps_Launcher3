@@ -30,7 +30,7 @@ object RoboApiWrapper {
     /** Rule to grant shortcuts permission. No-op when running on robolectric */
     fun grantShortcutsPermissionRule(): TestRule = TestRule { statement, _ -> statement }
 
-    fun convertObjectToSpy(obj: Any) {
+    fun Any.convertToSpy() {
         Assume.assumeTrue("convertObjectToSpy is not supported in device-less tests", false)
     }
 }
