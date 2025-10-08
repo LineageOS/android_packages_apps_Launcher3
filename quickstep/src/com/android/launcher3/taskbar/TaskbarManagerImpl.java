@@ -231,19 +231,27 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
 
                 @Override
                 public void onListenerInitializedFromShell() {
-                    if (!enableAutoStashConnectedDisplayTaskbar.isTrue()) {
-                        return;
-                    }
+                    TASKBAR_UI_THREAD.execute(() -> {
+                        if (!enableAutoStashConnectedDisplayTaskbar.isTrue()) {
+                            return;
+                        }
 
-                    for (TaskbarActivityContext tac : mTaskbars.values()) {
-                        TaskbarControllers controllers = tac.getControllers();
-                        controllers.taskbarStashController.updateFlagForDesktopModeOnCD(
-                                /* fromInit= */ false);
-                    }
+                        for (TaskbarActivityContext tac : mTaskbars.values()) {
+                            TaskbarControllers controllers = tac.getControllers();
+                            controllers.taskbarStashController.updateFlagForDesktopModeOnCD(
+                                    /* fromInit= */ false);
+                        }
+                    });
                 }
 
                 @Override
                 public void onActiveDeskChanged(int displayId, int newActiveDesk,
+                        int oldActiveDesk) {
+                    TASKBAR_UI_THREAD.execute(() ->
+                            onActiveDeskChangedInternal(displayId, newActiveDesk, oldActiveDesk));
+                }
+
+                private void onActiveDeskChangedInternal(int displayId, int newActiveDesk,
                         int oldActiveDesk) {
                     TaskbarActivityContext taskbarActivityContext = getTaskbarForDisplay(displayId);
                     if (taskbarActivityContext == null) {
@@ -277,7 +285,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
      * We use WindowManager's ComponentCallbacks() for internal UI changes (similar to an Activity)
      * which comes via a different channel
      */
-    private void onDisplayInfoChanged(Context context, DisplayController.Info info, int flags) {
+    private void onDisplayInfoChanged(Context context, int flags) {
         int displayId = context.getDisplayId();
         if ((flags & CHANGE_DENSITY) != 0) {
             debugTaskbarManager("onDisplayInfoChanged: Display density changed", displayId);
@@ -318,6 +326,10 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
             new DesktopVisibilityController.TaskbarDesktopModeListener() {
                 @Override
                 public void onExitDesktopMode(int duration) {
+                    TASKBAR_UI_THREAD.execute(() -> onExitDesktopModeInternal(duration));
+                }
+
+                private void onExitDesktopModeInternal(int duration) {
                     if (enableMultipleDesktops(mBaseContext)) {
                         LatencyTracker.getInstance(mBaseContext).onActionStart(
                                 LatencyTracker.ACTION_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE);
@@ -337,6 +349,10 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
 
                 @Override
                 public void onEnterDesktopMode(int duration) {
+                    TASKBAR_UI_THREAD.execute(() -> onEnterDesktopModeInternal(duration));
+                }
+
+                private void onEnterDesktopModeInternal(int duration) {
                     TaskbarActivityContext taskbarActivityContext = getCurrentActivityContext();
                     if (taskbarActivityContext != null
                             && !taskbarActivityContext.showDesktopTaskbarForFreeformDisplay()) {
@@ -1476,7 +1492,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         if (listenable != null) {
             mDisplayChangeSafeCloseable = listenable.forEachChange(
                     TASKBAR_UI_THREAD, (info, flags) -> {
-                        onDisplayInfoChanged(mPrimaryWindowContext, info, flags);
+                        onDisplayInfoChanged(mPrimaryWindowContext, flags);
                     });
         }
     }
