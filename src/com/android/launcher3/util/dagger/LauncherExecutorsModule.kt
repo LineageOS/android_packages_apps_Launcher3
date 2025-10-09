@@ -15,10 +15,12 @@
  */
 package com.android.launcher3.util.dagger
 
+import com.android.launcher3.Flags.enableTaskbarUiThread
 import com.android.launcher3.concurrent.ExecutorsModule
 import com.android.launcher3.concurrent.annotations.Background
 import com.android.launcher3.concurrent.annotations.LightweightBackground
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority
+import com.android.launcher3.concurrent.annotations.TaskbarUi
 import com.android.launcher3.concurrent.annotations.ThreadPool
 import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.dagger.LauncherAppSingleton
@@ -43,6 +45,13 @@ abstract class LauncherExecutorsModule {
 
     @Binds
     @LauncherAppSingleton
+    @TaskbarUi
+    abstract fun provideTaskbarUiExecutor(
+        @TaskbarUi executor: LooperExecutor
+    ): ListeningExecutorService
+
+    @Binds
+    @LauncherAppSingleton
     @LightweightBackground(LightweightBackgroundPriority.UI)
     abstract fun provideUiExecutorService(
         @LightweightBackground(LightweightBackgroundPriority.UI) executor: LooperExecutor
@@ -61,6 +70,14 @@ abstract class LauncherExecutorsModule {
         @Ui
         fun provideUiLooperExecutor(): LooperExecutor {
             return Executors.MAIN_EXECUTOR
+        }
+
+        @Provides
+        @LauncherAppSingleton
+        @TaskbarUi
+        fun provideTaskbarUiLooperExecutor(): LooperExecutor {
+            return if (enableTaskbarUiThread()) Executors.TASKBAR_UI_THREAD as LooperExecutor
+            else Executors.MAIN_EXECUTOR
         }
 
         @Provides
