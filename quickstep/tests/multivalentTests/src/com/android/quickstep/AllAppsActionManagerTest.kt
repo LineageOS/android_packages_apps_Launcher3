@@ -160,6 +160,7 @@ class AllAppsActionManagerTest {
     fun taskbarPresent_userSetupCompleted_actionRegistered() {
         settingsCacheSandbox[USER_SETUP_COMPLETE_URI] = 0
         allAppsActionManager.isTaskbarPresent = true
+        TestUtil.runOnExecutorSync(bgExecutor) {}
         reset(quickstepKeyGestureEventsManager)
 
         settingsCacheSandbox[USER_SETUP_COMPLETE_URI] = 1
@@ -173,6 +174,8 @@ class AllAppsActionManagerTest {
     fun taskbarPresent_setupUiDismissed_actionRegistered() {
         allAppsActionManager.isSetupUiVisible = true
         allAppsActionManager.isTaskbarPresent = true
+        TestUtil.runOnExecutorSync(bgExecutor) {}
+        reset(quickstepKeyGestureEventsManager)
 
         allAppsActionManager.isSetupUiVisible = false
         TestUtil.runOnExecutorSync(bgExecutor) {} // Force system action to register.
