@@ -46,6 +46,7 @@ import android.window.DesktopExperienceFlags
 import android.window.OnBackInvokedCallback
 import android.window.RemoteTransition
 import android.window.SplashScreen
+import android.window.TransitionInfo
 import androidx.annotation.UiThread
 import androidx.core.animation.addListener
 import androidx.core.view.isVisible
@@ -99,6 +100,7 @@ import com.android.quickstep.OverviewComponentObserver
 import com.android.quickstep.RecentsAnimationCallbacks
 import com.android.quickstep.RecentsAnimationCallbacks.RecentsAnimationListener
 import com.android.quickstep.RecentsAnimationController
+import com.android.quickstep.RecentsAnimationTargets
 import com.android.quickstep.RecentsModel
 import com.android.quickstep.RemoteAnimationTargets
 import com.android.quickstep.SystemUiProxy
@@ -126,6 +128,7 @@ import com.android.quickstep.views.RecentsViewContainer
 import com.android.quickstep.views.TaskView
 import com.android.systemui.animation.back.FlingOnBackAnimationCallback
 import com.android.systemui.shared.recents.model.ThumbnailData
+import com.android.window.flags.Flags.useInputReportedFocusForAccessibility
 import com.android.wm.shell.shared.desktopmode.DesktopState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -262,6 +265,18 @@ constructor(
 
     private val recentsAnimationListener =
         object : RecentsAnimationListener {
+
+            override fun onRecentsAnimationStart(
+                controller: RecentsAnimationController?,
+                targets: RecentsAnimationTargets?,
+                transitionInfo: TransitionInfo?,
+            ) {
+                super.onRecentsAnimationStart(controller, targets, transitionInfo)
+                if (useInputReportedFocusForAccessibility()) {
+                    surfaceControlViewHost?.requestInputFocus(/* focused= */ true)
+                }
+            }
+
             override fun onRecentsAnimationCanceled(thumbnailDatas: HashMap<Int, ThumbnailData>) {
                 recentAnimationStopped()
             }
@@ -422,6 +437,41 @@ constructor(
         surfaceControlViewHost = null
     }
 
+    @UiThread
+    fun showRecentsWindow(callbacks: RecentsAnimationCallbacks? = null) {
+        RecentsWindowProtoLogProxy.logStartRecentsWindow(isShowing(), windowView == null)
+        if (isShowing()) {
+            return
+        }
+
+        createWindowView()
+        windowRootView.visibility = View.VISIBLE
+
+        this.callbacks = callbacks
+        callbacks?.addListener(recentsAnimationListener)
+        screenOnTracker.addListener(screenChangedListener)
+    }
+
+    fun hideRecentsWindow() {
+        RecentsWindowProtoLogProxy.logCleanup(isShowing())
+        if (isShowing()) {
+            AbstractFloatingView.closeAllOpenViews(this, /* animate= */ false)
+            recentsView?.viewRootImpl?.touchModeChanged(true)
+            windowRootView.visibility = View.GONE
+            if (useInputReportedFocusForAccessibility()) {
+                surfaceControlViewHost?.requestInputFocus(/* focused= */ false)
+            }
+            AccessibilityManagerCompat.sendTestProtocolEventToTest(
+                this,
+                LAUNCHER_ACTIVITY_STOPPED_MESSAGE,
+            )
+        }
+        stateManager.moveToRestState()
+        callbacks?.removeListener(recentsAnimationListener)
+        callbacks = null
+        screenOnTracker.removeListener(screenChangedListener)
+    }
+
     fun onOverviewTargetChanged() {
         hideRecentsWindow()
 
@@ -474,21 +524,6 @@ constructor(
             homeOverlay = systemUiProxy.getHomeTaskOverlayContainer()
         }
         return homeOverlay
-    }
-
-    @UiThread
-    fun showRecentsWindow(callbacks: RecentsAnimationCallbacks? = null) {
-        RecentsWindowProtoLogProxy.logStartRecentsWindow(isShowing(), windowView == null)
-        if (isShowing()) {
-            return
-        }
-
-        createWindowView()
-        windowRootView.visibility = View.VISIBLE
-
-        this.callbacks = callbacks
-        callbacks?.addListener(recentsAnimationListener)
-        screenOnTracker.addListener(screenChangedListener)
     }
 
     override fun onConfigurationChanged(newConfiguration: Configuration) {
@@ -690,23 +725,6 @@ constructor(
         options.launchDisplayId = displayId
         OverviewComponentObserver.startHomeIntentSafely(this, options.toBundle(), TAG, displayId)
         stateManager.moveToRestState()
-    }
-
-    fun hideRecentsWindow() {
-        RecentsWindowProtoLogProxy.logCleanup(isShowing())
-        if (isShowing()) {
-            AbstractFloatingView.closeAllOpenViews(this, /* animate= */ false)
-            recentsView?.viewRootImpl?.touchModeChanged(true)
-            windowRootView.visibility = View.GONE
-            AccessibilityManagerCompat.sendTestProtocolEventToTest(
-                this,
-                LAUNCHER_ACTIVITY_STOPPED_MESSAGE,
-            )
-        }
-        stateManager.moveToRestState()
-        callbacks?.removeListener(recentsAnimationListener)
-        callbacks = null
-        screenOnTracker.removeListener(screenChangedListener)
     }
 
     private fun isShowing(): Boolean {
