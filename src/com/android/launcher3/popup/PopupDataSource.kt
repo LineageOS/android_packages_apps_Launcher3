@@ -62,7 +62,7 @@ class PopupDataSource @Inject constructor() {
     val removePopupData =
         PopupData(
             iconResId = R.drawable.ic_remove_no_shadow,
-            labelResId = R.string.remove_drop_target_label,
+            labelResId = R.string.remove_system_shortcut_label,
             popupAction = handleRemove,
             category = PopupCategory.SYSTEM_SHORTCUT_FIXED,
         )
