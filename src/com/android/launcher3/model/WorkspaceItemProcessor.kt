@@ -638,7 +638,10 @@ class WorkspaceItemProcessor(
                 c.applyCommonProperties(this)
                 itemType = c.itemType
                 title = c.title
-                intent = c.parseIntent() ?: Intent()
+                intent =
+                    (c.parseIntent() ?: Intent()).apply {
+                        addFlags(HomeScreenFilesUtils.LAUNCH_INTENT_DEFAULT_FLAGS)
+                    }
             }
         if (homeScreenFiles.value.containsKey(item.intent.data)) {
             c.markRestored()

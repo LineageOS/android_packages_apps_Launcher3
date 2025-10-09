@@ -868,9 +868,13 @@ class WorkspaceItemProcessorTest {
             val itemCaptor = argumentCaptor<ItemInfo>()
             verify(mockCursor).markRestored()
             verify(mockCursor).checkAndAddItem(itemCaptor.capture(), any(), anyOrNull())
-            assertThat(itemCaptor.firstValue.itemType).isEqualTo(itemType)
-            assertThat(itemCaptor.firstValue.title).isEqualTo(homeScreenFile.displayName)
-            assertThat(itemCaptor.firstValue.intent!!.data).isEqualTo(homeScreenFile.uri)
+            with(itemCaptor.firstValue) {
+                assertThat(itemType).isEqualTo(itemType)
+                assertThat(title).isEqualTo(homeScreenFile.displayName)
+                assertThat(intent!!.data).isEqualTo(homeScreenFile.uri)
+                assertThat(intent!!.flags)
+                    .isEqualTo(HomeScreenFilesUtils.LAUNCH_INTENT_DEFAULT_FLAGS)
+            }
         }
     }
 
@@ -960,44 +964,38 @@ class WorkspaceItemProcessorTest {
         // Then
         assertThat(items.size()).isEqualTo(2)
 
-        assertThat(items.get(0).id).isEqualTo(0)
-        assertThat(items.get(0).title).isEqualTo("file.png")
-        assertThat(items.get(0).itemType).isEqualTo(ITEM_TYPE_FILE_SYSTEM_FILE)
-        assertThat(items.get(0).container).isEqualTo(CONTAINER_DESKTOP)
-        assertThat(items.get(0).spanX).isEqualTo(1)
-        assertThat(items.get(0).spanY).isEqualTo(1)
-        assertThat(items.get(0).screenId).isEqualTo(0)
-        assertThat(items.get(0).cellX).isEqualTo(0)
-        assertThat(items.get(0).cellY).isEqualTo(0)
-        assertThat(items.get(0).intent).isNotNull()
-        assertThat(items.get(0).intent!!.action).isEqualTo(Intent.ACTION_VIEW)
-        assertThat(items.get(0).intent!!.flags)
-            .isEqualTo(
-                Intent.FLAG_ACTIVITY_NEW_TASK or
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-            )
-        assertThat(items.get(0).intent!!.data).isEqualTo(uri1)
-        assertThat(items.get(0).intent!!.type).isEqualTo("image/png")
+        with(items.get(0)) {
+            assertThat(id).isEqualTo(0)
+            assertThat(title).isEqualTo("file.png")
+            assertThat(itemType).isEqualTo(ITEM_TYPE_FILE_SYSTEM_FILE)
+            assertThat(container).isEqualTo(CONTAINER_DESKTOP)
+            assertThat(spanX).isEqualTo(1)
+            assertThat(spanY).isEqualTo(1)
+            assertThat(screenId).isEqualTo(0)
+            assertThat(cellX).isEqualTo(0)
+            assertThat(cellY).isEqualTo(0)
+            assertThat(intent).isNotNull()
+            assertThat(intent!!.action).isEqualTo(Intent.ACTION_VIEW)
+            assertThat(intent!!.flags).isEqualTo(HomeScreenFilesUtils.LAUNCH_INTENT_DEFAULT_FLAGS)
+            assertThat(intent!!.data).isEqualTo(uri1)
+            assertThat(intent!!.type).isEqualTo("image/png")
+        }
 
-        assertThat(items.get(1).id).isEqualTo(1)
-        assertThat(items.get(1).title).isEqualTo("folder_a")
-        assertThat(items.get(1).itemType).isEqualTo(ITEM_TYPE_FILE_SYSTEM_FOLDER)
-        assertThat(items.get(1).container).isEqualTo(CONTAINER_DESKTOP)
-        assertThat(items.get(1).spanX).isEqualTo(1)
-        assertThat(items.get(1).spanY).isEqualTo(1)
-        assertThat(items.get(1).screenId).isEqualTo(0)
-        assertThat(items.get(1).cellX).isEqualTo(1)
-        assertThat(items.get(1).cellY).isEqualTo(1)
-        assertThat(items.get(1).intent!!.action).isEqualTo(Intent.ACTION_VIEW)
-        assertThat(items.get(1).intent!!.flags)
-            .isEqualTo(
-                Intent.FLAG_ACTIVITY_NEW_TASK or
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-            )
-        assertThat(items.get(1).intent!!.data).isEqualTo(uri2)
-        assertThat(items.get(1).intent!!.type).isEqualTo(DocumentsContract.Document.MIME_TYPE_DIR)
+        with(items.get(1)) {
+            assertThat(id).isEqualTo(1)
+            assertThat(title).isEqualTo("folder_a")
+            assertThat(itemType).isEqualTo(ITEM_TYPE_FILE_SYSTEM_FOLDER)
+            assertThat(container).isEqualTo(CONTAINER_DESKTOP)
+            assertThat(spanX).isEqualTo(1)
+            assertThat(spanY).isEqualTo(1)
+            assertThat(screenId).isEqualTo(0)
+            assertThat(cellX).isEqualTo(1)
+            assertThat(cellY).isEqualTo(1)
+            assertThat(intent!!.action).isEqualTo(Intent.ACTION_VIEW)
+            assertThat(intent!!.flags).isEqualTo(HomeScreenFilesUtils.LAUNCH_INTENT_DEFAULT_FLAGS)
+            assertThat(intent!!.data).isEqualTo(uri2)
+            assertThat(intent!!.type).isEqualTo(DocumentsContract.Document.MIME_TYPE_DIR)
+        }
     }
 
     @Test

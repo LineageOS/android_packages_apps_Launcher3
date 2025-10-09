@@ -151,12 +151,7 @@ class HomeScreenFilesChangedTaskTest {
             assertThat(itemType).isEqualTo(ITEM_TYPE_FILE_SYSTEM_FILE)
             assertThat(intent).isNotNull()
             assertThat(intent!!.action).isEqualTo(Intent.ACTION_VIEW)
-            assertThat(intent!!.flags)
-                .isEqualTo(
-                    Intent.FLAG_ACTIVITY_NEW_TASK or
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                )
+            assertThat(intent!!.flags).isEqualTo(HomeScreenFilesUtils.LAUNCH_INTENT_DEFAULT_FLAGS)
             assertThat(intent!!.data).isEqualTo(testUri)
             assertThat(intent!!.type).isEqualTo("image/png")
         }
@@ -188,12 +183,7 @@ class HomeScreenFilesChangedTaskTest {
             assertThat(itemType).isEqualTo(ITEM_TYPE_FILE_SYSTEM_FILE)
             assertThat(intent).isNotNull()
             assertThat(intent!!.action).isEqualTo(Intent.ACTION_VIEW)
-            assertThat(intent!!.flags)
-                .isEqualTo(
-                    Intent.FLAG_ACTIVITY_NEW_TASK or
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                )
+            assertThat(intent!!.flags).isEqualTo(HomeScreenFilesUtils.LAUNCH_INTENT_DEFAULT_FLAGS)
             assertThat(intent!!.data).isEqualTo(testUri)
             assertThat(intent!!.type).isEqualTo("image/png")
         }
@@ -238,12 +228,7 @@ class HomeScreenFilesChangedTaskTest {
             assertThat(itemType).isEqualTo(ITEM_TYPE_FILE_SYSTEM_FILE)
             assertThat(intent).isNotNull()
             assertThat(intent!!.action).isEqualTo(Intent.ACTION_VIEW)
-            assertThat(intent!!.flags)
-                .isEqualTo(
-                    Intent.FLAG_ACTIVITY_NEW_TASK or
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                )
+            assertThat(intent!!.flags).isEqualTo(HomeScreenFilesUtils.LAUNCH_INTENT_DEFAULT_FLAGS)
             assertThat(intent!!.data).isEqualTo(testUri)
             assertThat(intent!!.type).isEqualTo("image/png")
         }
