@@ -23,10 +23,11 @@ import android.content.Context
 import android.content.Intent
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
+import android.platform.test.rule.LimitDevicesRule
+import android.platform.test.rule.SkipOnDeviceless
 import android.view.Display.DEFAULT_DISPLAY
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
-import com.android.dx.mockito.inline.extended.StaticMockitoSession
 import com.android.internal.R
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.AbstractFloatingViewHelper
@@ -49,17 +50,14 @@ import com.android.systemui.shared.recents.model.Task
 import com.android.systemui.shared.recents.model.Task.TaskKey
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY
 import com.android.window.flags.Flags.FLAG_ENABLE_DREAM_ACTIVITY_WINDOWING_EXCLUSION
-import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource
+import com.android.wm.shell.shared.desktopmode.FakeDesktopState
 import com.google.common.truth.Truth.assertThat
 import java.util.ArrayList
-import kotlin.test.assertIs
-import kotlin.test.assertNotNull
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mockito.`when`
+import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
@@ -67,12 +65,13 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.mockito.quality.Strictness
 
 /** Test for [DesktopSystemShortcut] */
+@RunWith(AndroidJUnit4::class)
 class DesktopSystemShortcutTest {
 
     @get:Rule val setFlagsRule = SetFlagsRule(SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT)
+    @get:Rule val limitDevicesRule = LimitDevicesRule()
 
     private val launcher: RecentsViewContainer = mock()
     private val statsLogManager: StatsLogManager = mock()
@@ -80,34 +79,26 @@ class DesktopSystemShortcutTest {
     private val recentsView: LauncherRecentsView = mock()
     private val abstractFloatingViewHelper: AbstractFloatingViewHelper = mock()
     private val overlayFactory: TaskOverlayFactory = mock()
+    private val desktopState = FakeDesktopState()
     private val factory: TaskShortcutFactory =
-        DesktopSystemShortcut.createFactory(abstractFloatingViewHelper)
+        DesktopSystemShortcut.createFactory(
+            abstractFloatingViewHelper,
+            desktopStateFactory = { desktopState },
+        )
     private val context: Context = spy(InstrumentationRegistry.getInstrumentation().targetContext)
     private val taskView: TaskView = createTaskViewMock()
 
-    private lateinit var mockitoSession: StaticMockitoSession
-
     @Before
     fun setUp() {
-        mockitoSession =
-            mockitoSession()
-                .strictness(Strictness.LENIENT)
-                .mockStatic(DesktopModeStatus::class.java)
-                .startMocking()
-        whenever(DesktopModeStatus.canEnterDesktopMode(any())).thenReturn(true)
+        desktopState.canEnterDesktopMode = true
         whenever(overlayFactory.createOverlay(any())).thenReturn(mock<TaskOverlay<*>>())
         doReturn(DEFAULT_DISPLAY).whenever(context).displayId
         whenever(launcher.asContext()).thenReturn(context)
     }
 
-    @After
-    fun tearDown() {
-        mockitoSession.finishMocking()
-    }
-
     @Test
     fun createDesktopTaskShortcutFactory_desktopModeDisabled() {
-        `when`(DesktopModeStatus.canEnterDesktopMode(any())).thenReturn(false)
+        desktopState.canEnterDesktopMode = false
 
         val taskContainer = createTaskContainer(createTask())
 
@@ -192,6 +183,7 @@ class DesktopSystemShortcutTest {
 
     @Test
     @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
+    @SkipOnDeviceless
     fun createDesktopTaskShortcutFactory_defaultHomeTask() {
         val homeActivity = context.packageManager.getHomeActivities(ArrayList())
         val homeActivities = ComponentName(homeActivity?.packageName.toString(), /* class */ "")
@@ -258,7 +250,7 @@ class DesktopSystemShortcutTest {
         val task = createTask()
         val taskContainer = spy(createTaskContainer(task))
 
-        whenever(DesktopModeStatus.isDesktopModeSupportedOnDisplay(any(), any())).thenReturn(false)
+        desktopState.overrideDesktopModeSupportPerDisplay[DEFAULT_DISPLAY] = false
         whenever(launcher.getOverviewPanel<LauncherRecentsView>()).thenReturn(recentsView)
         whenever(launcher.statsLogManager).thenReturn(statsLogManager)
         whenever(statsLogManager.logger()).thenReturn(statsLogger)
@@ -280,7 +272,6 @@ class DesktopSystemShortcutTest {
         val task = createTask()
         val taskContainer = spy(createTaskContainer(task))
 
-        whenever(DesktopModeStatus.isDesktopModeSupportedOnDisplay(any(), any())).thenReturn(true)
         whenever(launcher.getOverviewPanel<LauncherRecentsView>()).thenReturn(recentsView)
         whenever(launcher.statsLogManager).thenReturn(statsLogManager)
         whenever(statsLogManager.logger()).thenReturn(statsLogger)
@@ -293,10 +284,10 @@ class DesktopSystemShortcutTest {
         val taskViewItemInfo = mock<TaskViewItemInfo>()
         doReturn(taskViewItemInfo).whenever(taskContainer).itemInfo
 
-        val shortcuts = assertNotNull(factory.getShortcuts(launcher, taskContainer))
-        val desktopShortcut = assertIs<DesktopSystemShortcut>(shortcuts.single())
+        val singleShortcut = factory.getShortcuts(launcher, taskContainer)!!.single()
+        assertThat(singleShortcut).isInstanceOf(DesktopSystemShortcut::class.java)
 
-        desktopShortcut.onClick(taskView)
+        singleShortcut.onClick(taskView)
 
         val allTypesExceptRebindSafe =
             AbstractFloatingView.TYPE_ALL and AbstractFloatingView.TYPE_REBIND_SAFE.inv()

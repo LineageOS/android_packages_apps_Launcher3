@@ -16,6 +16,7 @@
 
 package com.android.quickstep
 
+import android.content.Context
 import android.view.View
 import com.android.launcher3.AbstractFloatingViewHelper
 import com.android.launcher3.R
@@ -26,8 +27,8 @@ import com.android.quickstep.views.RecentsView
 import com.android.quickstep.views.RecentsViewContainer
 import com.android.quickstep.views.TaskContainer
 import com.android.window.flags.Flags
-import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource
+import com.android.wm.shell.shared.desktopmode.DesktopState
 
 /** A menu item that allows the user to move the current app into external display. */
 class ExternalDisplaySystemShortcut(
@@ -64,7 +65,10 @@ class ExternalDisplaySystemShortcut(
          * [com.android.quickstep.TaskOverlayFactory].
          */
         fun createFactory(
-            abstractFloatingViewHelper: AbstractFloatingViewHelper = AbstractFloatingViewHelper()
+            abstractFloatingViewHelper: AbstractFloatingViewHelper = AbstractFloatingViewHelper(),
+            desktopStateFactory: (Context) -> DesktopState = { context ->
+                DesktopState.getInstance(context)
+            },
         ): TaskShortcutFactory =
             object : TaskShortcutFactory {
                 override fun getShortcuts(
@@ -72,10 +76,11 @@ class ExternalDisplaySystemShortcut(
                     taskContainer: TaskContainer,
                 ): List<ExternalDisplaySystemShortcut>? {
                     val context = container.asContext()
+                    val desktopState = desktopStateFactory(context)
                     val taskKey = taskContainer.task.key
                     val desktopModeCompatPolicy = context.appComponent.desktopModeCompatPolicy
                     return when {
-                        !DesktopModeStatus.canEnterDesktopMode(context) -> null
+                        !desktopState.canEnterDesktopMode -> null
 
                         !Flags.moveToExternalDisplayShortcut() -> null
 
