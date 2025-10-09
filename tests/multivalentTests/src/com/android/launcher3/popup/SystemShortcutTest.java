@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package com.android.launcher3.popup;
 
 import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.launcher3.AbstractFloatingView.TYPE_SNACKBAR;
 import static com.android.launcher3.Flags.FLAG_ENABLE_PRIVATE_SPACE;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_ALL_APPS;
@@ -65,6 +64,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.R;
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate;
+import com.android.launcher3.allapps.ActivityAllAppsContainerView;
 import com.android.launcher3.allapps.PrivateProfileManager;
 import com.android.launcher3.logging.StatsLogManager;
 import com.android.launcher3.logging.StatsLogManager.StatsLogger;
@@ -110,13 +110,14 @@ public class SystemShortcutTest {
 
     private View mView;
     private ItemInfo mItemInfo;
-    private PrivateProfileManager mPrivateProfileManager;
-    private WidgetPickerDataProvider mWidgetPickerDataProvider;
     private AppInfo mAppInfo;
 
     private SandboxApplication mSandboxContext;
-    private TestActivityContext mTestContext;
     private MockUsersRule mMockUsers;
+
+    private TestActivityContext mTestContext;
+    private PrivateProfileManager mPrivateProfileManager;
+    private WidgetPickerDataProvider mWidgetPickerDataProvider;
 
     @Mock LauncherActivityInfo mLauncherActivityInfo;
     @Mock ApplicationInfo mApplicationInfo;
@@ -128,7 +129,7 @@ public class SystemShortcutTest {
     @Before
     public void setUp() {
         mSandboxContext = lazyInitRule.get(SandboxApplication.class);
-        mTestContext = lazyInitRule.get(TestActivityContext.class);
+        mTestContext = spy(lazyInitRule.get(TestActivityContext.class));
         mMockUsers = lazyInitRule.get(MockUsersRule.class);
         doReturn(mLauncherAccessibilityDelegate).when(mTestContext).getAccessibilityDelegate();
 
@@ -143,11 +144,8 @@ public class SystemShortcutTest {
         doReturn(mLauncherActivityInfo).when(mLauncherApps).resolveActivity(any(), any());
         when(mLauncherActivityInfo.getApplicationInfo()).thenReturn(mApplicationInfo);
 
-        mPrivateProfileManager = mTestContext.getAppsView().getPrivateProfileManager();
-        spyOn(mPrivateProfileManager);
-
-        mWidgetPickerDataProvider = mTestContext.getWidgetPickerDataProvider();
-        spyOn(mWidgetPickerDataProvider);
+        mPrivateProfileManager = spy(mTestContext.getAppsView().getPrivateProfileManager());
+        mWidgetPickerDataProvider = spy(mTestContext.getWidgetPickerDataProvider());
     }
 
     @Test
@@ -164,10 +162,10 @@ public class SystemShortcutTest {
         mAppInfo.componentName = new ComponentName(mTestContext, getClass());
         assertNotNull(mAppInfo.getTargetComponent());
         doReturn(new WidgetPickerData()).when(mWidgetPickerDataProvider).get();
-        spyOn(mAppInfo);
+        AppInfo appInfo = spy(mAppInfo);
         SystemShortcut systemShortcut = SystemShortcut.WIDGETS
-                .getShortcut(mTestContext, mAppInfo, mView);
-        verify(mAppInfo, times(2)).getTargetComponent();
+                .getShortcut(mTestContext, appInfo, mView);
+        verify(appInfo, times(2)).getTargetComponent();
         assertNull(systemShortcut);
     }
 
@@ -291,10 +289,12 @@ public class SystemShortcutTest {
         mAppInfo = new AppInfo();
         mAppInfo.componentName = new ComponentName(mTestContext, getClass());
         mAppInfo.container = CONTAINER_ALL_APPS;
-        when(mPrivateProfileManager.isEnabled()).thenReturn(true);
 
         assertNotNull(mAppInfo.getTargetComponent());
         assertTrue(mAppInfo.getContainerInfo().hasAllAppsContainer());
+
+        enablePrivateProfileManager();
+
         assertNotNull(mPrivateProfileManager);
         assertNotNull(mPrivateProfileManager.getProfileUser());
         assertNull(mTestContext.getAppsView().getAppsStore().getApp(new ComponentKey(
@@ -305,6 +305,14 @@ public class SystemShortcutTest {
 
         verify(mPrivateProfileManager, atLeast(1)).isEnabled();
         assertNotNull(systemShortcut);
+    }
+
+    private void enablePrivateProfileManager() {
+        ActivityAllAppsContainerView<TestActivityContext>
+                allAppsView = spy(mTestContext.getAppsView());
+        when(mTestContext.getAppsView()).thenReturn(allAppsView);
+        when(allAppsView.getPrivateProfileManager()).thenReturn(mPrivateProfileManager);
+        when(mPrivateProfileManager.isEnabled()).thenReturn(true);
     }
 
     @Test
