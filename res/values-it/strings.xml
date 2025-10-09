@@ -85,13 +85,13 @@
     <string name="all_apps_no_search_results" msgid="3200346862396363786">"Nessuna app trovata corrispondente a \"<xliff:g id="QUERY">%1$s</xliff:g>\""</string>
     <string name="label_application" msgid="8531721983832654978">"App"</string>
     <string name="all_apps_label" msgid="5015784846527570951">"Tutte le app"</string>
-    <string name="all_apps_list_label" msgid="5106226764073070906">"Elenco di app"</string>
+    <string name="all_apps_list_label" msgid="5106226764073070906">"Lista di app"</string>
     <string name="notifications_header" msgid="1404149926117359025">"Notifiche"</string>
     <string name="long_press_shortcut_to_add" msgid="5405328730817637737">"Tocca e tieni premuto per spostare una scorciatoia."</string>
     <string name="long_accessible_way_to_add_shortcut" msgid="2199537273817090740">"Tocca due volte e tieni premuto per spostare una scorciatoia o per usare le azioni personalizzate."</string>
     <string name="out_of_space" msgid="6455557115204099579">"Non c\'è più spazio nella schermata Home"</string>
     <string name="hotseat_out_of_space" msgid="7448809638125333693">"Spazio esaurito nella barra dei Preferiti"</string>
-    <string name="all_apps_button_label" msgid="8130441508702294465">"Elenco di app"</string>
+    <string name="all_apps_button_label" msgid="8130441508702294465">"Lista di app"</string>
     <string name="all_apps_search_results" msgid="5889367432531296759">"Risultati di ricerca"</string>
     <string name="all_apps_button_personal_label" msgid="1315764287305224468">"Elenco di app personali"</string>
     <string name="all_apps_button_work_label" msgid="7270707118948892488">"Elenco di app di lavoro"</string>
