@@ -19,19 +19,20 @@ package com.android.launcher3.qsb
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID
 import android.appwidget.AppWidgetProviderInfo
+import android.platform.test.rule.LimitDevicesRule
+import android.platform.test.rule.SkipOnDeviceless
 import android.widget.RemoteViews
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.launcher3.util.RoboApiWrapper
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.WidgetUtils
-import com.android.launcher3.util.rule.ShellCommandRule
 import com.android.launcher3.widget.LauncherWidgetHolder
 import com.google.common.truth.Truth.assertThat
-import kotlin.test.assertContentEquals
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNotEquals
-import kotlin.test.assertTrue
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -41,7 +42,8 @@ import org.junit.runner.RunWith
 class QsbAppWidgetHostTest {
 
     @get:Rule val context = SandboxApplication()
-    @get:Rule val widgetsPermission = ShellCommandRule.grantWidgetBind()
+    @get:Rule val widgetsPermission = RoboApiWrapper.grantWidgetBindPermissionRule()
+    @get:Rule var mlimitDevicesRule: LimitDevicesRule = LimitDevicesRule()
 
     private val host = QsbAppWidgetHost(context).apply { deleteHost() }
 
@@ -55,6 +57,8 @@ class QsbAppWidgetHostTest {
     }
 
     @Test
+    /** Test runs on Robolectric but appWidgetIds has length of 0. */
+    @SkipOnDeviceless
     fun getBoundWidgetId_returns_last_bound_widget() {
         host.allocateAppWidgetId()
         host.allocateAppWidgetId()
@@ -66,6 +70,11 @@ class QsbAppWidgetHostTest {
     }
 
     @Test
+    /**
+     * Test runs on Robolectric but bindAppWidgetIdIfAllowed method return null since they are not
+     * implemented in the Robolectric API.
+     */
+    @SkipOnDeviceless
     fun setActiveWidget_sends_updates() {
         val widgetInfo = WidgetUtils.findWidgetProvider(false)
         val widgetId = host.allocateAppWidgetId()
@@ -93,10 +102,16 @@ class QsbAppWidgetHostTest {
         host.setActiveWidget(widgetId, widgetInfo)
         assertTrue(viewsUpdated)
         assertEquals(widgetId, host.getActiveWidgetId())
-        assertContentEquals(host.appWidgetIds, intArrayOf(widgetId))
+
+        assertEquals(host.appWidgetIds.toList(), intArrayOf(widgetId).toList())
     }
 
     @Test
+    /**
+     * Test runs on Robolectric but bindAppWidgetIdIfAllowed method return null since they are not
+     * implemented in the Robolectric API.
+     */
+    @SkipOnDeviceless
     fun setActiveWidget_multiple_times_has_no_effect() {
         val widgetInfo = WidgetUtils.findWidgetProvider(false)
         val widgetId = host.allocateAppWidgetId()
@@ -125,10 +140,15 @@ class QsbAppWidgetHostTest {
         host.setActiveWidget(widgetId, widgetInfo)
         assertFalse(updateReceived)
         assertEquals(widgetId, host.getActiveWidgetId())
-        assertContentEquals(host.appWidgetIds, intArrayOf(widgetId))
+        assertEquals(host.appWidgetIds.toList(), intArrayOf(widgetId).toList())
     }
 
     @Test
+    /**
+     * Test runs on Robolectric but bindAppWidgetIdIfAllowed method return null since they are not
+     * implemented in the Robolectric API.
+     */
+    @SkipOnDeviceless
     fun setActiveWidget_deletes_old_active_widget() {
         val widgetInfo = WidgetUtils.findWidgetProvider(false)
         val widgetId1 = host.allocateAppWidgetId()
@@ -149,7 +169,7 @@ class QsbAppWidgetHostTest {
         host.setActiveWidget(widgetId2, widgetInfo)
         assertEquals(widgetId2, host.getActiveWidgetId())
 
-        assertContentEquals(host.appWidgetIds, intArrayOf(widgetId2))
+        assertEquals(host.appWidgetIds.toList(), intArrayOf(widgetId2).toList())
     }
 
     @Test
