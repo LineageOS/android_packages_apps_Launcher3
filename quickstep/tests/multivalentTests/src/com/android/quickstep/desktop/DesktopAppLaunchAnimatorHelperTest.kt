@@ -41,17 +41,20 @@ import com.android.launcher3.desktop.DesktopAppLaunchAnimatorHelper
 import com.android.launcher3.desktop.DesktopAppLaunchTransition.AppLaunchType
 import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
+import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.window.flags.Flags
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
+@RunWith(LauncherMultivalentJUnit::class)
 class DesktopAppLaunchAnimatorHelperTest {
 
     @get:Rule val setFlagsRule = SetFlagsRule()
