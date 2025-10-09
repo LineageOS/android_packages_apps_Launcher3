@@ -30,6 +30,8 @@ import android.graphics.Bitmap;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.rule.LimitDevicesRule;
+import android.platform.test.rule.SkipOnDeviceless;
 import android.text.TextUtils;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -56,8 +58,20 @@ import java.util.UUID;
  * Test to verify promise icon flow.
  */
 @LargeTest
+/**
+ * This test can't run on the Robolectric for two reasons:
+ *  1. It's using TestUtil.installDummyApp(); nowadays we have preinstalled apps and they don't
+ *     need to be installed programmatically, so potentially this can be fixed by using
+ *     LauncherModelHelper.TEST_PACKAGE
+ *  2. The test uses adb commands (executeShellCommand) this could be done in a different way
+ *     but that would require further inspection.
+ */
+@SkipOnDeviceless
 @RunWith(AndroidJUnit4.class)
 public class PromiseIconUiTest extends BaseLauncherActivityTest<Launcher> {
+
+    @Rule
+    public LimitDevicesRule mlimitDevicesRule = new LimitDevicesRule();
 
     @Rule
     public final CheckFlagsRule mCheckFlagsRule =
