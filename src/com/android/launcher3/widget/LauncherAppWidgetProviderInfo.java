@@ -1,7 +1,5 @@
 package com.android.launcher3.widget;
 
-import static com.android.launcher3.InvariantDeviceProfile.TYPE_PHONE;
-
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.ComponentName;
 import android.content.Context;
@@ -112,8 +110,9 @@ public class LauncherAppWidgetProviderInfo extends AppWidgetProviderInfo impleme
         Point cellSize = new Point();
         for (DeviceProfile dp : idp.supportedProfiles) {
             // On phones we no longer support regular landscape, only fixed landscape for this
-            // reason we don't need to take regular landscape into account in phones
-            if (Flags.oneGridSpecs() && dp.inv.deviceType == TYPE_PHONE
+            // reason we don't need to take regular landscape into account in phones. Foldables
+            // still support regular landscape when unfolded.
+            if (Flags.oneGridSpecs() && !dp.getDeviceProperties().isTablet()
                     && dp.inv.isFixedLandscape != dp.getDeviceProperties().isLandscape()) {
                 continue;
             }
