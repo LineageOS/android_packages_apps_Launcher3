@@ -120,6 +120,7 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
     public static final int FLAG_IN_DESKTOP_MODE_ON_CD = 1 << 18;
     // Used on CD to not stash when in launcher. FLAG_IN_APP is always set on CD.
     public static final int FLAG_IN_SECONDARY_LAUNCHER_ON_CD = 1 << 19;
+    public static final int FLAG_STASHED_IN_OVERVIEW_FOR_TRANSLUCENT_APP = 1 << 20;
 
     // If any of these flags are enabled, isInApp should return true.
     private static final int FLAGS_IN_APP = FLAG_IN_APP | FLAG_IN_SETUP;
@@ -130,7 +131,8 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
             | FLAG_STASHED_SMALL_SCREEN | FLAG_STASHED_IN_APP_AUTO | FLAG_STASHED_IME;
 
     // If we're in overview and any of these flags are enabled, taskbar should be stashed.
-    private static final int FLAGS_STASHED_IN_OVERVIEW = FLAG_STASHED_IME;
+    private static final int FLAGS_STASHED_IN_OVERVIEW = FLAG_STASHED_IME
+            | FLAG_STASHED_IN_OVERVIEW_FOR_TRANSLUCENT_APP;
 
     // If any of these flags are enabled, inset apps by our stashed height instead of our unstashed
     // height. This way the reported insets are consistent even during transitions out of the app.
@@ -408,6 +410,7 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
         updateStateForFlag(FLAG_AUTO_STASHED_ON_HOME,
                 mActivity.shouldShowHomeBehindDesktop() && !desktopModeTaskbarPinned);
 
+        updateStateForFlag(FLAG_STASHED_IN_OVERVIEW_FOR_TRANSLUCENT_APP, false);
         applyState(/* duration = */ 0);
 
         // Hide the background while stashed so it doesn't show on fast swipes home
@@ -1610,9 +1613,12 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
         appendFlag(sj, flags, FLAG_STASHED_IN_APP_SETUP, "FLAG_STASHED_IN_APP_SETUP");
         appendFlag(sj, flags, FLAG_STASHED_IME, "FLAG_STASHED_IN_APP_IME");
         appendFlag(sj, flags, FLAG_IN_STASHED_LAUNCHER_STATE, "FLAG_IN_STASHED_LAUNCHER_STATE");
-        appendFlag(sj, flags, FLAG_STASHED_IN_TASKBAR_ALL_APPS, "FLAG_STASHED_IN_TASKBAR_ALL_APPS");
+        appendFlag(sj, flags, FLAG_STASHED_IN_TASKBAR_ALL_APPS,
+                "FLAG_STASHED_IN_TASKBAR_ALL_APPS");
         appendFlag(sj, flags, FLAG_IN_SETUP, "FLAG_IN_SETUP");
         appendFlag(sj, flags, FLAG_STASHED_IN_APP_AUTO, "FLAG_STASHED_IN_APP_AUTO");
+        appendFlag(sj, flags, FLAG_STASHED_IN_OVERVIEW_FOR_TRANSLUCENT_APP,
+                "FLAG_STASHED_IN_OVERVIEW_FOR_TRANSLUCENT_APP");
         appendFlag(sj, flags, FLAG_STASHED_SYSUI, "FLAG_STASHED_SYSUI");
         appendFlag(sj, flags, FLAG_STASHED_DEVICE_LOCKED, "FLAG_STASHED_DEVICE_LOCKED");
         appendFlag(sj, flags, FLAG_IN_OVERVIEW, "FLAG_IN_OVERVIEW");
