@@ -315,6 +315,8 @@
     <string name="taskbar_edu_close">Close</string>
     <!-- Text on button to finish a tutorial [CHAR_LIMIT=16] -->
     <string name="taskbar_edu_done">Done</string>
+    <!-- Text on button to show the tutorial next page [CHAR_LIMIT=16] -->
+    <string name="taskbar_edu_next">Next</string>
         <!-- Content description for home button [CHAR_LIMIT=16] -->
     <string name="taskbar_button_home">Home</string>
     <!-- Content description for accessibility button [CHAR_LIMIT=16] -->
