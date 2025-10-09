@@ -22,6 +22,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import android.platform.test.rule.LimitDevicesRule;
+import android.platform.test.rule.SkipOnDeviceless;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -29,6 +31,7 @@ import com.android.launcher3.search.StringMatcherUtility.StringMatcher;
 import com.android.launcher3.search.StringMatcherUtility.StringMatcherSpace;
 import com.android.launcher3.util.IntArray;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -38,6 +41,10 @@ import org.junit.runner.RunWith;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class StringMatcherUtilityTest {
+
+    @Rule
+    public final LimitDevicesRule mLimitDevicesRule = new LimitDevicesRule();
+
     private static final StringMatcher MATCHER = StringMatcher.getInstance();
     private static final StringMatcherSpace MATCHER_SPACE = StringMatcherSpace.getInstance();
 
@@ -86,6 +93,7 @@ public class StringMatcherUtilityTest {
     }
 
     @Test
+    @SkipOnDeviceless
     public void testMatchesVN() {
         assertTrue(matches("다", "다운로드", MATCHER));
         assertTrue(matches("드", "드라이브", MATCHER));
