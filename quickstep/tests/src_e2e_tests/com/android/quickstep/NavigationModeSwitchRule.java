@@ -24,7 +24,6 @@ import static com.android.quickstep.NavigationModeSwitchRule.Mode.ZERO_BUTTON;
 import static com.android.systemui.shared.system.QuickStepContract.NAV_BAR_MODE_3BUTTON_OVERLAY;
 import static com.android.systemui.shared.system.QuickStepContract.NAV_BAR_MODE_GESTURAL_OVERLAY;
 
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Process;
 import android.util.Log;
@@ -33,7 +32,6 @@ import androidx.test.uiautomator.UiDevice;
 
 import com.android.launcher3.tapl.LauncherInstrumentation;
 import com.android.launcher3.util.TestUtil;
-import com.android.launcher3.util.rule.FailureWatcher;
 import com.android.launcher3.util.ui.AbstractLauncherUiTest;
 import com.android.systemui.shared.system.QuickStepContract;
 
@@ -81,44 +79,53 @@ public class NavigationModeSwitchRule implements TestRule {
             @Override
             public void evaluate() throws Throwable {
                 mLauncher.enableDebugTracing();
-                final Context context = getInstrumentation().getContext();
-                final int currentInteractionMode =
-                        LauncherInstrumentation.getCurrentInteractionMode(context);
-                final String prevOverlayPkg = getCurrentOverlayPackage(currentInteractionMode);
+                final String prevOverlayPkg = getCurrentOverlayPackage(
+                        LauncherInstrumentation.getCurrentInteractionMode(
+                                getInstrumentation().getContext()
+                        )
+                );
                 final LauncherInstrumentation.NavigationModel originalMode =
                         mLauncher.getNavigationModel();
                 try {
                     if (mode == ZERO_BUTTON || mode == ALL) {
-                        evaluateWithZeroButtons();
+                        activateZeroButtons();
+                        base.evaluate();
                     }
                     if (mode == THREE_BUTTON || mode == ALL) {
-                        evaluateWithThreeButtons();
+                        activateThreeButtons();
+                        base.evaluate();
                     }
                 } catch (Throwable e) {
                     Log.e(TAG, "Error", e);
                     throw e;
                 } finally {
                     Log.d(TAG, "In Finally block");
-                    assertTrue(mLauncher, "Couldn't set overlay",
-                            setActiveOverlay(mLauncher, prevOverlayPkg, originalMode,
-                                    description), description);
-                }
-            }
-
-            private void evaluateWithThreeButtons() throws Throwable {
-                if (setActiveOverlay(mLauncher, NAV_BAR_MODE_3BUTTON_OVERLAY,
-                        LauncherInstrumentation.NavigationModel.THREE_BUTTON, description)) {
-                    base.evaluate();
-                }
-            }
-
-            private void evaluateWithZeroButtons() throws Throwable {
-                if (setActiveOverlay(mLauncher, NAV_BAR_MODE_GESTURAL_OVERLAY,
-                        LauncherInstrumentation.NavigationModel.ZERO_BUTTON, description)) {
-                    base.evaluate();
+                    setActiveOverlay(mLauncher, prevOverlayPkg, originalMode);
                 }
             }
         };
+    }
+
+    /**
+     * Set gesture nav to be Zero Buttons.
+     */
+    public void activateZeroButtons() throws Exception {
+        setActiveOverlay(
+                mLauncher,
+                NAV_BAR_MODE_GESTURAL_OVERLAY,
+                LauncherInstrumentation.NavigationModel.ZERO_BUTTON
+        );
+    }
+
+    /**
+     * Set gesture nav to be Three Buttons.
+     */
+    public void activateThreeButtons() throws Exception {
+        setActiveOverlay(
+                mLauncher,
+                NAV_BAR_MODE_3BUTTON_OVERLAY,
+                LauncherInstrumentation.NavigationModel.THREE_BUTTON
+        );
     }
 
     public static String getCurrentOverlayPackage(int currentInteractionMode) {
@@ -127,19 +134,23 @@ public class NavigationModeSwitchRule implements TestRule {
                 : NAV_BAR_MODE_3BUTTON_OVERLAY;
     }
 
-    public static boolean setActiveOverlay(LauncherInstrumentation launcher, String overlayPackage,
-            LauncherInstrumentation.NavigationModel expectedMode, Description description)
+    public static void setActiveOverlay(LauncherInstrumentation launcher, String overlayPackage,
+            LauncherInstrumentation.NavigationModel expectedMode)
             throws Exception {
         if (!packageExists(overlayPackage)) {
-            Log.d(TAG, "setActiveOverlay: " + overlayPackage + " pkg does not exist");
-            return false;
+            throw new RuntimeException(
+                    "setActiveOverlay: " + overlayPackage + " pkg does not exist"
+            );
         }
 
         Log.d(TAG, "setActiveOverlay: " + overlayPackage + "...");
-        UiDevice.getInstance(getInstrumentation()).executeShellCommand(
-                String.format("cmd overlay enable-exclusive --user %d --category %s",
-                        Process.myUserHandle().getIdentifier(),
-                        overlayPackage));
+        UiDevice.getInstance(getInstrumentation())
+                .executeShellCommand(
+                        String.format(
+                                "cmd overlay enable-exclusive --user %d --category %s",
+                                Process.myUserHandle().getIdentifier(), overlayPackage
+                        )
+                );
 
         launcher.waitForCondition("Couldn't switch to " + overlayPackage,
                 TestUtil.DEFAULT_UI_TIMEOUT, () -> launcher.getNavigationModel() == expectedMode);
@@ -149,7 +160,6 @@ public class NavigationModeSwitchRule implements TestRule {
                 TestUtil.DEFAULT_UI_TIMEOUT,
                 () -> launcher.getNavigationModeMismatchError(false) == null);
         AbstractLauncherUiTest.checkDetectedLeaks(launcher);
-        return true;
     }
 
     private static boolean packageExists(String packageName) {
@@ -162,20 +172,5 @@ public class NavigationModeSwitchRule implements TestRule {
             return false;
         }
         return true;
-    }
-
-    private static void assertTrue(LauncherInstrumentation launcher, String message,
-            boolean condition, Description description) {
-        try {
-            launcher.checkForAnomaly(true, true);
-            if (!condition) {
-                throw new AssertionError(message);
-            }
-        } catch (Throwable e) {
-            if (description != null) {
-                FailureWatcher.onError(launcher, description);
-            }
-            throw e;
-        }
     }
 }
