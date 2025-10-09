@@ -20,6 +20,8 @@ import static com.android.launcher3.Flags.enableScalabilityForDesktopExperience;
 import static com.android.launcher3.GridType.GRID_TYPE_ANY;
 import static com.android.launcher3.GridType.GRID_TYPE_NON_ONE_GRID;
 import static com.android.launcher3.GridType.GRID_TYPE_ONE_GRID;
+import static com.android.launcher3.GridType.GRID_TYPE_DUAL_OPTIMIZED_GRID;
+import static com.android.launcher3.GridType.GRID_TYPE_LANDSCAPE_OPTIMIZED_GRID;
 import static com.android.launcher3.LauncherPrefs.DB_FILE;
 import static com.android.launcher3.LauncherPrefs.ENABLE_TWOLINE_ALLAPPS_TOGGLE;
 import static com.android.launcher3.LauncherPrefs.FIXED_LANDSCAPE_MODE;
@@ -1357,6 +1359,13 @@ public class InvariantDeviceProfile {
          * Returns true if the grid option should be used given the flags that are toggled on/off.
          */
         public boolean filterByFlag(int deviceType, boolean isFixedLandscape) {
+            if (deviceType == TYPE_DESKTOP) {
+                if (Flags.orientationEnabledDesktopGridSpec()) {
+                    return gridType == GRID_TYPE_DUAL_OPTIMIZED_GRID;
+                }
+                return gridType == GRID_TYPE_LANDSCAPE_OPTIMIZED_GRID;
+            }
+
             if (deviceType == TYPE_TABLET) {
                 return Flags.oneGridRotationHandling() == mIsDualGrid;
             }
