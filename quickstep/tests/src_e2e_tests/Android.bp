@@ -11,7 +11,6 @@ filegroup {
         "com/android/quickstep/TaplTestsOverviewDesktop.kt",
         "com/android/quickstep/TaplTestsPersistentTaskbar.java",
         "com/android/quickstep/TaplTestsTaskbar.java",
-        "com/android/quickstep/TaplTestsTransientTaskbar.java",
         "com/android/quickstep/TaplTestTaskbarIconDrag.kt",
         "com/android/quickstep/FallbackRecentsTest.java",
     ],
@@ -45,6 +44,7 @@ filegroup {
         "com/android/quickstep/TaplTestsQuickstep.java",
         "com/android/quickstep/TaplTestsSplitscreen.java",
         "com/android/quickstep/TaplTestsTrackpad.java",
+        "com/android/quickstep/TaplTestsTransientTaskbar.java",
     ],
 }
 
