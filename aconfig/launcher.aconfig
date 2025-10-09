@@ -533,16 +533,6 @@ flag {
 }
 
 flag {
-  name: "enable_new_all_set_animation"
-  namespace: "launcher"
-  description: "Enables the new animation for the All Set page"
-  bug: "424506400"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
     namespace: "multitasking"
     name: "avoid_display_cutout_bubble_bar"
     description: "Use the DisplayCutout insets to avoid intersecting with the bubble bar."
