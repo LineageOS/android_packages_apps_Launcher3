@@ -81,3 +81,14 @@ flag {
     is_fixed_read_only: true
     bug: "437084247"
 }
+
+flag {
+    name: "enable_executor_based_dispatchers"
+    namespace: "launcher_overview"
+    description: "Enables executor based dispatchers for ProductionDispatchers."
+    bug:  "407594919"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
