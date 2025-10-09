@@ -90,7 +90,7 @@ class QuickstepKeyGestureEventsHandlerTest {
 
         keyGestureEventsManager =
             QuickstepKeyGestureEventsManager(context, settingsCacheSandbox.cache)
-        keyGestureEventsManager.onUserSetupCompleteListener.onSettingsChanged(/* isEnabled= */ true)
+        settingsCacheSandbox.listenable.dispatchValue(/* isEnabled= */ true)
     }
 
     @Test
@@ -317,9 +317,7 @@ class QuickstepKeyGestureEventsHandlerTest {
     @Test
     @EnableFlags(Flags.FLAG_GRANT_MANAGE_KEY_GESTURES_TO_RECENTS)
     fun handleAllAppsEvent_flagEnabled_userSetupIncomplete_noInteractionWithTaskbar() {
-        keyGestureEventsManager.onUserSetupCompleteListener.onSettingsChanged(
-            /* isEnabled= */ false
-        )
+        settingsCacheSandbox.listenable.dispatchValue(/* isEnabled= */ false)
         keyGestureEventsManager.registerAllAppsKeyGestureEvent(allAppsPendingIntent)
 
         keyGestureEventsManager.allAppsKeyGestureEventHandler.handleKeyGestureEvent(
@@ -387,9 +385,7 @@ class QuickstepKeyGestureEventsHandlerTest {
     @Test
     @EnableFlags(Flags.FLAG_GRANT_MANAGE_KEY_GESTURES_TO_RECENTS)
     fun handleRecentAppsEvent_userSetupIncomplete_noOverviewEventInFake() {
-        keyGestureEventsManager.onUserSetupCompleteListener.onSettingsChanged(
-            /* isEnabled= */ false
-        )
+        settingsCacheSandbox.listenable.dispatchValue(/* isEnabled= */ false)
         keyGestureEventsManager.registerOverviewKeyGestureEvent(fakeOverviewHandler)
 
         keyGestureEventsManager.overviewKeyGestureEventHandler.handleKeyGestureEvent(
@@ -460,9 +456,7 @@ class QuickstepKeyGestureEventsHandlerTest {
     @Test
     @EnableFlags(Flags.FLAG_GRANT_MANAGE_KEY_GESTURES_TO_RECENTS)
     fun handleRecentAppsSwitcherStartEvent_userSetupIncomplete_noOverviewEventInFake() {
-        keyGestureEventsManager.onUserSetupCompleteListener.onSettingsChanged(
-            /* isEnabled= */ false
-        )
+        settingsCacheSandbox.listenable.dispatchValue(/* isEnabled= */ false)
         keyGestureEventsManager.registerOverviewKeyGestureEvent(fakeOverviewHandler)
 
         keyGestureEventsManager.overviewKeyGestureEventHandler.handleKeyGestureEvent(
@@ -533,9 +527,7 @@ class QuickstepKeyGestureEventsHandlerTest {
     @Test
     @EnableFlags(Flags.FLAG_GRANT_MANAGE_KEY_GESTURES_TO_RECENTS)
     fun handleRecentAppsSwitcherCompleteEvent_userSetupIncomplete_noOverviewEventInFake() {
-        keyGestureEventsManager.onUserSetupCompleteListener.onSettingsChanged(
-            /* isEnabled= */ false
-        )
+        settingsCacheSandbox.listenable.dispatchValue(/* isEnabled= */ false)
         keyGestureEventsManager.registerOverviewKeyGestureEvent(fakeOverviewHandler)
 
         keyGestureEventsManager.overviewKeyGestureEventHandler.handleKeyGestureEvent(
@@ -603,9 +595,7 @@ class QuickstepKeyGestureEventsHandlerTest {
 
     @Test
     fun handleHomeEvent_userSetupIncomplete_noInteractionWithOverviewCommandHelper() {
-        keyGestureEventsManager.onUserSetupCompleteListener.onSettingsChanged(
-            /* isEnabled= */ false
-        )
+        settingsCacheSandbox.listenable.dispatchValue(/* isEnabled= */ false)
         keyGestureEventsManager.registerHomeKeyGestureEvent(overviewCommandHelper)
 
         keyGestureEventsManager.homeKeyGestureEventHandler.handleKeyGestureEvent(

@@ -34,6 +34,7 @@ import static com.android.launcher3.taskbar.TaskbarNavButtonController.BUTTON_RE
 import static com.android.launcher3.taskbar.TaskbarNavButtonController.BUTTON_SPACE;
 import static com.android.launcher3.taskbar.TaskbarViewController.ALPHA_INDEX_KEYGUARD;
 import static com.android.launcher3.taskbar.TaskbarViewController.ALPHA_INDEX_SMALL_SCREEN;
+import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.FlagDebugUtils.appendFlag;
 import static com.android.launcher3.util.MultiPropertyFactory.MULTI_PROPERTY_VALUE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_CLICKABLE;
@@ -107,6 +108,7 @@ import com.android.launcher3.util.DimensionUtils;
 import com.android.launcher3.util.LockedUserState;
 import com.android.launcher3.util.MultiPropertyFactory.MultiProperty;
 import com.android.launcher3.util.MultiValueAlpha;
+import com.android.launcher3.util.SafeCloseable;
 import com.android.launcher3.util.SettingsCache;
 import com.android.launcher3.util.TouchController;
 import com.android.launcher3.util.window.WindowManagerProxy;
@@ -264,7 +266,7 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
 
     private final Runnable mAutoDim = () -> mTaskbarTransitions.setAutoDim(true);
 
-    private final SettingsCache.OnChangeListener mButtonOrderListener;
+    private @Nullable SafeCloseable mSettingCacheSafeCloseable;
 
     private final boolean mIsUserUnlocked;
 
@@ -295,9 +297,6 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
                 || SUWTheme.equals(GLIF_EXPRESSIVE_LIGHT_THEME);
 
         mIsUserUnlocked = LockedUserState.get(context).isUserUnlocked();
-
-        mButtonOrderListener = isEnabled -> getLayoutterForCurrentState().layoutButtons(
-                mContext, isA11yButtonPersistent());
     }
 
     /**
@@ -532,8 +531,13 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
                 navButtonController.onButtonLongClick(BUTTON_SPACE, view));
 
         if (android.view.accessibility.Flags.navbarFlipOrderOption()) {
-            SettingsCache.INSTANCE.get(mContext).register(
-                    mButtonOrderChangedUri, mButtonOrderListener);
+            mSettingCacheSafeCloseable = SettingsCache.INSTANCE.get(mContext)
+                    .getListenableRef(mButtonOrderChangedUri).forEach(
+                            MAIN_EXECUTOR, (isEnabled) -> {
+                                getLayoutterForCurrentState().layoutButtons(
+                                        mContext, isA11yButtonPersistent());
+                                return null;
+                            });
         }
     }
 
@@ -1155,8 +1159,10 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
             mFloatingRotationButton.hide();
             mFloatingRotationButton = null;
         }
-        SettingsCache.INSTANCE.get(mContext).unregister(
-                    mButtonOrderChangedUri, mButtonOrderListener);
+        if (mSettingCacheSafeCloseable != null) {
+            mSettingCacheSafeCloseable.close();
+            mSettingCacheSafeCloseable = null;
+        }
 
         moveNavButtonsBackToTaskbarWindow();
         mNavButtonContainer.removeAllViews();

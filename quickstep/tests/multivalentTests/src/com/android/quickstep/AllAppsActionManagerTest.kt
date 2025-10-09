@@ -21,6 +21,7 @@ import android.content.IIntentSender
 import android.hardware.input.InputManager
 import android.provider.Settings
 import android.provider.Settings.Secure.USER_SETUP_COMPLETE
+import androidx.test.annotation.UiThreadTest
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
@@ -41,6 +42,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
@@ -51,6 +53,7 @@ private const val TIMEOUT = 5L
 private val USER_SETUP_COMPLETE_URI = Settings.Secure.getUriFor(USER_SETUP_COMPLETE)
 
 @RunWith(AndroidJUnit4::class)
+@UiThreadTest
 class AllAppsActionManagerTest {
     private val callbackSemaphore = Semaphore(0)
     private val bgExecutor = UI_HELPER_EXECUTOR
@@ -62,12 +65,7 @@ class AllAppsActionManagerTest {
         SettingsCacheSandbox().also { it[USER_SETUP_COMPLETE_URI] = 1 }
     private val quickstepKeyGestureEventsManager by
         lazy(LazyThreadSafetyMode.NONE) {
-            spy(
-                QuickstepKeyGestureEventsManager(
-                    context,
-                    settingsCacheSandbox.cache,
-                )
-            )
+            spy(QuickstepKeyGestureEventsManager(context, settingsCacheSandbox.cache))
         }
 
     private val allAppsActionManager by
@@ -162,6 +160,7 @@ class AllAppsActionManagerTest {
     fun taskbarPresent_userSetupCompleted_actionRegistered() {
         settingsCacheSandbox[USER_SETUP_COMPLETE_URI] = 0
         allAppsActionManager.isTaskbarPresent = true
+        reset(quickstepKeyGestureEventsManager)
 
         settingsCacheSandbox[USER_SETUP_COMPLETE_URI] = 1
         TestUtil.runOnExecutorSync(bgExecutor) {} // Force system action to register.

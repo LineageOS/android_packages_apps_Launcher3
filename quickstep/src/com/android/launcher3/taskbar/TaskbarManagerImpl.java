@@ -121,6 +121,8 @@ import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider;
 
+import kotlin.Unit;
+
 import kotlinx.coroutines.CoroutineDispatcher;
 
 import java.io.PrintWriter;
@@ -229,19 +231,27 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
 
                 @Override
                 public void onListenerInitializedFromShell() {
-                    if (!enableAutoStashConnectedDisplayTaskbar.isTrue()) {
-                        return;
-                    }
+                    TASKBAR_UI_THREAD.execute(() -> {
+                        if (!enableAutoStashConnectedDisplayTaskbar.isTrue()) {
+                            return;
+                        }
 
-                    for (TaskbarActivityContext tac : mTaskbars.values()) {
-                        TaskbarControllers controllers = tac.getControllers();
-                        controllers.taskbarStashController.updateFlagForDesktopModeOnCD(
-                                /* fromInit= */ false);
-                    }
+                        for (TaskbarActivityContext tac : mTaskbars.values()) {
+                            TaskbarControllers controllers = tac.getControllers();
+                            controllers.taskbarStashController.updateFlagForDesktopModeOnCD(
+                                    /* fromInit= */ false);
+                        }
+                    });
                 }
 
                 @Override
                 public void onActiveDeskChanged(int displayId, int newActiveDesk,
+                        int oldActiveDesk) {
+                    TASKBAR_UI_THREAD.execute(() ->
+                            onActiveDeskChangedInternal(displayId, newActiveDesk, oldActiveDesk));
+                }
+
+                private void onActiveDeskChangedInternal(int displayId, int newActiveDesk,
                         int oldActiveDesk) {
                     TaskbarActivityContext taskbarActivityContext = getTaskbarForDisplay(displayId);
                     if (taskbarActivityContext == null) {
@@ -275,7 +285,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
      * We use WindowManager's ComponentCallbacks() for internal UI changes (similar to an Activity)
      * which comes via a different channel
      */
-    private void onDisplayInfoChanged(Context context, DisplayController.Info info, int flags) {
+    private void onDisplayInfoChanged(Context context, int flags) {
         int displayId = context.getDisplayId();
         if ((flags & CHANGE_DENSITY) != 0) {
             debugTaskbarManager("onDisplayInfoChanged: Display density changed", displayId);
@@ -311,16 +321,15 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         }
     }
 
-    private final SettingsCache.OnChangeListener mOnSettingsChangeListener = c -> {
-        debugPrimaryTaskbar("Settings changed! Recreating Taskbar!");
-        recreateTaskbars();
-    };
-
     private final DesktopVisibilityController.TaskbarDesktopModeListener
             mTaskbarDesktopModeListener =
             new DesktopVisibilityController.TaskbarDesktopModeListener() {
                 @Override
                 public void onExitDesktopMode(int duration) {
+                    TASKBAR_UI_THREAD.execute(() -> onExitDesktopModeInternal(duration));
+                }
+
+                private void onExitDesktopModeInternal(int duration) {
                     if (enableMultipleDesktops(mBaseContext)) {
                         LatencyTracker.getInstance(mBaseContext).onActionStart(
                                 LatencyTracker.ACTION_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE);
@@ -340,6 +349,10 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
 
                 @Override
                 public void onEnterDesktopMode(int duration) {
+                    TASKBAR_UI_THREAD.execute(() -> onEnterDesktopModeInternal(duration));
+                }
+
+                private void onEnterDesktopModeInternal(int duration) {
                     TaskbarActivityContext taskbarActivityContext = getCurrentActivityContext();
                     if (taskbarActivityContext != null
                             && !taskbarActivityContext.showDesktopTaskbarForFreeformDisplay()) {
@@ -423,6 +436,9 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
                 }
             };
 
+    private @Nullable SafeCloseable mUserSetupCompleteSafeCloseable;
+    private @Nullable SafeCloseable mNavBarKidsModeSafeCloseable;
+
     @SuppressLint("WrongConstant")
     public TaskbarManagerImpl(
             Context context,
@@ -454,10 +470,12 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         createNavButtonController(mPrimaryDisplayId);
         createAndRegisterComponentCallbacks(mPrimaryDisplayId);
 
-        SettingsCache.INSTANCE.get(mPrimaryWindowContext)
-                .register(USER_SETUP_COMPLETE_URI, mOnSettingsChangeListener);
-        SettingsCache.INSTANCE.get(mPrimaryWindowContext)
-                .register(NAV_BAR_KIDS_MODE, mOnSettingsChangeListener);
+        mUserSetupCompleteSafeCloseable = SettingsCache.INSTANCE.get(mPrimaryWindowContext)
+                .getListenableRef(USER_SETUP_COMPLETE_URI).forEach(
+                        TASKBAR_UI_THREAD, (v) -> onSettingChanged());
+        mNavBarKidsModeSafeCloseable = SettingsCache.INSTANCE.get(mPrimaryWindowContext)
+                .getListenableRef(NAV_BAR_KIDS_MODE).forEach(
+                        TASKBAR_UI_THREAD, (v) -> onSettingChanged());
         if (DesktopExperienceFlags.ENABLE_SYS_DECORS_CALLBACKS_VIA_WM.isTrue()
                 && DesktopExperienceFlags.ENABLE_DISPLAY_CONTENT_MODE_MANAGEMENT.isTrue()) {
             displaysWithDecorationsRepositoryCompat
@@ -500,6 +518,12 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         recreateTaskbarForDisplay(mPrimaryDisplayId, /* duration= */ 0);
 
         debugPrimaryTaskbar("TaskbarManager created");
+    }
+
+    private Unit onSettingChanged() {
+        debugPrimaryTaskbar("Settings changed! Recreating Taskbar!");
+        recreateTaskbars();
+        return null;
     }
 
     /**
@@ -1175,10 +1199,14 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         }
 
         removeRecreationListener();
-        SettingsCache.INSTANCE.get(mPrimaryWindowContext)
-                .unregister(USER_SETUP_COMPLETE_URI, mOnSettingsChangeListener);
-        SettingsCache.INSTANCE.get(mPrimaryWindowContext)
-                .unregister(NAV_BAR_KIDS_MODE, mOnSettingsChangeListener);
+        if (mUserSetupCompleteSafeCloseable != null) {
+            mUserSetupCompleteSafeCloseable.close();
+            mUserSetupCompleteSafeCloseable = null;
+        }
+        if (mNavBarKidsModeSafeCloseable != null) {
+            mNavBarKidsModeSafeCloseable.close();
+            mNavBarKidsModeSafeCloseable = null;
+        }
         if (DesktopExperienceFlags.ENABLE_SYS_DECORS_CALLBACKS_VIA_WM.isTrue()
                 && DesktopExperienceFlags.ENABLE_DISPLAY_CONTENT_MODE_MANAGEMENT.isTrue()) {
             mDisplaysWithDecorationsRepositoryCompat.unregisterDisplayDecorationListener(this);
@@ -1464,7 +1492,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         if (listenable != null) {
             mDisplayChangeSafeCloseable = listenable.forEachChange(
                     TASKBAR_UI_THREAD, (info, flags) -> {
-                        onDisplayInfoChanged(mPrimaryWindowContext, info, flags);
+                        onDisplayInfoChanged(mPrimaryWindowContext, flags);
                     });
         }
     }

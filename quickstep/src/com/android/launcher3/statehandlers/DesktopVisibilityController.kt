@@ -41,6 +41,7 @@ import com.android.wm.shell.shared.desktopmode.DesktopModeStatus.enableMultipleD
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus.useRoundedCorners
 import java.io.PrintWriter
 import java.lang.ref.WeakReference
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 
 /**
@@ -83,8 +84,10 @@ constructor(
     /** Maps each display by its ID to its desks configuration. */
     private val displaysDesksConfigsMap = SparseArray<DisplayDeskConfig>()
 
-    private val desktopVisibilityListeners: MutableSet<DesktopVisibilityListener> = HashSet()
-    private val taskbarDesktopModeListeners: MutableSet<TaskbarDesktopModeListener> = HashSet()
+    private val desktopVisibilityListeners: MutableSet<DesktopVisibilityListener> =
+        ConcurrentHashMap.newKeySet()
+    private val taskbarDesktopModeListeners: MutableSet<TaskbarDesktopModeListener> =
+        ConcurrentHashMap.newKeySet()
 
     // This simply indicates that user is currently in desktop mode or not.
     @Deprecated("Does not work with multi-desks") private var isInDesktopModeDeprecated = false
@@ -204,11 +207,13 @@ constructor(
     }
 
     /** Registers a listener for Taskbar changes in Desktop Mode. */
+    @AnyThread
     fun registerTaskbarDesktopModeListener(listener: TaskbarDesktopModeListener) {
         taskbarDesktopModeListeners.add(listener)
     }
 
     /** Removes a previously registered listener for Taskbar changes in Desktop Mode. */
+    @AnyThread
     fun unregisterTaskbarDesktopModeListener(listener: TaskbarDesktopModeListener) {
         taskbarDesktopModeListeners.remove(listener)
     }
@@ -271,11 +276,13 @@ constructor(
     }
 
     /** Registers a listener for Taskbar changes in Desktop Mode. */
+    @AnyThread
     fun registerDesktopVisibilityListener(listener: DesktopVisibilityListener) {
         desktopVisibilityListeners.add(listener)
     }
 
     /** Removes a previously registered listener for Taskbar changes in Desktop Mode. */
+    @AnyThread
     fun unregisterDesktopVisibilityListener(listener: DesktopVisibilityListener) {
         desktopVisibilityListeners.remove(listener)
     }

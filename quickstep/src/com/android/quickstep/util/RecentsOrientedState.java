@@ -25,6 +25,7 @@ import static android.view.Surface.ROTATION_90;
 
 import static com.android.launcher3.LauncherPrefs.ALLOW_ROTATION;
 import static com.android.launcher3.LauncherPrefs.FIXED_LANDSCAPE_MODE;
+import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 import static com.android.launcher3.util.SettingsCache.ROTATION_SETTING_URI;
 import static com.android.quickstep.BaseActivityInterface.getTaskDimension;
@@ -43,6 +44,7 @@ import android.view.Surface;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.Flags;
@@ -52,11 +54,14 @@ import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.testing.shared.TestProtocol;
 import com.android.launcher3.touch.PagedOrientationHandler;
 import com.android.launcher3.util.DisplayController;
+import com.android.launcher3.util.SafeCloseable;
 import com.android.launcher3.util.SettingsCache;
 import com.android.quickstep.BaseContainerInterface;
 import com.android.quickstep.SystemUiProxy;
 import com.android.quickstep.TaskAnimationManager;
 import com.android.quickstep.orientation.RecentsPagedOrientationHandler;
+
+import kotlin.Unit;
 
 import java.lang.annotation.Retention;
 import java.util.function.IntConsumer;
@@ -126,8 +131,7 @@ public class RecentsOrientedState implements LauncherPrefChangeListener {
     private final BaseContainerInterface mContainerInterface;
     private final OrientationEventListener mOrientationListener;
     private final SettingsCache mSettingsCache;
-    private final SettingsCache.OnChangeListener mRotationChangeListener =
-            isEnabled -> updateAutoRotateSetting();
+    private @Nullable SafeCloseable mRotationChangeSafeCloseable;
 
     private final Matrix mTmpMatrix = new Matrix();
 
@@ -309,8 +313,9 @@ public class RecentsOrientedState implements LauncherPrefChangeListener {
         }
     }
 
-    private void updateAutoRotateSetting() {
+    private Unit updateAutoRotateSetting() {
         setFlag(FLAG_SYSTEM_ROTATION_ALLOWED, mSettingsCache.getValue(ROTATION_SETTING_URI));
+        return null;
     }
 
     private void updateFixedLandscapeSetting() {
@@ -339,13 +344,16 @@ public class RecentsOrientedState implements LauncherPrefChangeListener {
 
     private void initMultipleOrientationListeners() {
         LauncherPrefs.get(mContext).addListener(this, ALLOW_ROTATION);
-        mSettingsCache.register(ROTATION_SETTING_URI, mRotationChangeListener);
-        updateAutoRotateSetting();
+        mRotationChangeSafeCloseable = mSettingsCache.getListenableRef(ROTATION_SETTING_URI)
+                .forEach(MAIN_EXECUTOR, (v) -> updateAutoRotateSetting());
     }
 
     private void destroyMultipleOrientationListeners() {
         LauncherPrefs.get(mContext).removeListener(this, ALLOW_ROTATION);
-        mSettingsCache.unregister(ROTATION_SETTING_URI, mRotationChangeListener);
+        if (mRotationChangeSafeCloseable != null) {
+            mRotationChangeSafeCloseable.close();
+            mRotationChangeSafeCloseable = null;
+        }
     }
 
     /**
