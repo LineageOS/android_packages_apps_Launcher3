@@ -18,21 +18,26 @@ package com.android.launcher3.qsb
 
 import android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID
 import android.appwidget.AppWidgetProviderInfo
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.RectF
+import android.os.Process.myUserHandle
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import androidx.annotation.VisibleForTesting
 import androidx.core.net.toUri
+import com.android.launcher3.BubbleTextView
 import com.android.launcher3.LauncherSettings.Favorites
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
+import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.LauncherAppWidgetInfo
+import com.android.launcher3.util.ComponentKey
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.RunnableList
 import com.android.launcher3.views.ActivityContext
@@ -102,38 +107,56 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         return true
     }
 
-    override fun getErrorView(): View =
-        View.inflate(context, R.layout.ose_default_layout, null).apply {
-            setOnClickListener {
-                val oseManager = context.appComponent.getOseManager()
-                val oseInfo = oseManager.oseInfo.value
-                val osePkg: String? =
-                    when {
-                        oseInfo.isOseConfigured -> oseInfo.pkg
-                        else -> null
-                    }
-                osePkg?.run {
-                    val searchIntent =
-                        Intent(Intent.ACTION_SEARCH)
-                            .addFlags(
-                                Intent.FLAG_ACTIVITY_NEW_TASK or
-                                    Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
-                            )
-                            .setPackage(this)
-                    activityContext.startActivitySafely(it, searchIntent, null)
-                } ?: openDefaultBrowser(it)
+    override fun getErrorView(): View {
+        val oseManager = context.appComponent.getOseManager()
+        val oseInfo = oseManager.oseInfo.value
+        val osePkg: String? =
+            when {
+                oseInfo.isOseConfigured -> oseInfo.pkg
+                else -> null
             }
+        val appInfo =
+            osePkg?.let {
+                val componentKey = ComponentKey(ComponentName(osePkg, ""), myUserHandle())
+                activityContext.activityComponent.appsStore
+                    .getApp(componentKey, AppInfo.PACKAGE_KEY_COMPARATOR)
+                    ?.clone()
+            }
+        return appInfo?.run { showOseBubbleTextLayout(this, oseInfo.supportsSearchIntent) }
+            ?: showDefaultOseLayout()
+    }
+
+    fun showOseBubbleTextLayout(appInfo: AppInfo, launchSearchIntent: Boolean): View {
+        appInfo.title = context.resources.getString(R.string.abandoned_search)
+        return View.inflate(context, R.layout.ose_default_bubbletext_layout, null).apply {
+            val btv = this as BubbleTextView
+            btv.applyFromApplicationInfo(appInfo)
+            setOnClickIntent(
+                when {
+                    // Launch search intent.
+                    launchSearchIntent ->
+                        Intent(Intent.ACTION_SEARCH).setPackage(appInfo.targetPackage)
+                    // Launch main activity
+                    else -> appInfo.intent
+                }
+            )
+        }
+    }
+
+    fun showDefaultOseLayout(): View =
+        View.inflate(context, R.layout.ose_default_layout, null).apply {
+            // Since we don't have a valid appInfo, just open the default browser
+            // Set the data to a blank page uri
+            setOnClickIntent(Intent(Intent.ACTION_VIEW).setData("about:blank".toUri()))
         }
 
-    fun openDefaultBrowser(view: View) {
-        val browserIntent =
-            Intent(Intent.ACTION_VIEW)
-                .addFlags(
-                    Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
-                )
-        // Set the data to a blank page uri
-        browserIntent.setData("about:blank".toUri())
-        activityContext.startActivitySafely(view, browserIntent, /* item= */ null)
+    fun View.setOnClickIntent(intent: Intent) = setOnClickListener {
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)
+        activityContext.startActivitySafely(
+            this@OseWidgetView,
+            intent,
+            this@OseWidgetView.tag as? ItemInfo,
+        )
     }
 
     @VisibleForTesting
