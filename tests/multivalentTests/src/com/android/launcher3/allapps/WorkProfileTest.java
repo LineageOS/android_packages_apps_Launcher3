@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 import android.os.Process;
+import android.platform.test.rule.LimitDevicesRule;
+import android.platform.test.rule.SkipOnDeviceless;
 import android.util.Log;
 import android.view.View;
 
@@ -54,6 +56,10 @@ import org.junit.runner.RunWith;
 import java.util.function.Predicate;
 
 @LargeTest
+/*
+ * The test uses  executeShellCommand to setup WorkProfile, adb command doesn't work on Robolectric.
+ */
+@SkipOnDeviceless
 @RunWith(AndroidJUnit4.class)
 public class WorkProfileTest extends BaseLauncherActivityTest<Launcher> {
 
@@ -61,6 +67,9 @@ public class WorkProfileTest extends BaseLauncherActivityTest<Launcher> {
     public static final int WAIT_TIME_MS = 30000;
     @Rule
     public TestStabilityRule mTestStabilityRule = new TestStabilityRule();
+
+    @Rule
+    public LimitDevicesRule mlimitDevicesRule = new LimitDevicesRule();
 
     private int mProfileUserId;
     private boolean mWorkProfileSetupSuccessful;
