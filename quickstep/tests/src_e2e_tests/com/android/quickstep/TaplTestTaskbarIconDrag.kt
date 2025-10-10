@@ -47,8 +47,8 @@ class TaplTestTaskbarIconDrag : AbstractQuickStepTest() {
             LauncherLayoutBuilder()
                 .atHotseat(0)
                 .putApp(
-                    "com.google.android.apps.nexuslauncher.tests",
-                    "com.android.launcher3.testcomponent.BaseTestingActivity",
+                    "com.google.android.apps.nexuslauncher.out_of_proc_tests",
+                    "com.android.launcher3.testcomponent.TestLauncherActivity",
                 )
         launcherLayout = TestUtil.setLauncherDefaultLayout(mTargetContext, layoutBuilder)
         performInitialization()
