@@ -38,13 +38,16 @@ import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherAppState;
 import com.android.launcher3.R;
 import com.android.launcher3.Reorderable;
+import com.android.launcher3.anim.AnimatedFloat;
 import com.android.launcher3.dragndrop.DraggableView;
 import com.android.launcher3.icons.IconCache;
 import com.android.launcher3.model.data.AppPairInfo;
 import com.android.launcher3.model.data.ItemInfo;
+import com.android.launcher3.popup.IconViewController;
 import com.android.launcher3.popup.Poppable;
 import com.android.launcher3.popup.PoppableType;
 import com.android.launcher3.popup.PopupController;
+import com.android.launcher3.util.MultiPropertyFactory;
 import com.android.launcher3.util.MultiTranslateDelegate;
 import com.android.launcher3.views.ActivityContext;
 
@@ -57,7 +60,8 @@ import java.util.function.Predicate;
  * The app pair icon is two parallel background rectangles with rounded corners. Icons of the two
  * member apps are set into these rectangles.
  */
-public class AppPairIcon extends FrameLayout implements DraggableView, Reorderable, Poppable {
+public class AppPairIcon extends FrameLayout implements DraggableView, Reorderable, Poppable,
+        IconViewController {
     private static final String TAG = "AppPairIcon";
 
     // The duration of the scaling animation on hover enter/exit.
@@ -203,13 +207,18 @@ public class AppPairIcon extends FrameLayout implements DraggableView, Reorderab
         mIconGraphic.getIconBounds(outBounds);
     }
 
-    /** Sets the visibility of the icon's title text */
-    public void setTextVisible(boolean visible) {
+    @Override
+    public void setIconVisible(boolean visible) {
         if (visible) {
-            mAppPairName.setVisibility(VISIBLE);
+            mIconGraphic.setVisibility(VISIBLE);
         } else {
-            mAppPairName.setVisibility(INVISIBLE);
+            mIconGraphic.setVisibility(INVISIBLE);
         }
+    }
+
+    @Override
+    public int getIconHeight() {
+        return mIconGraphic.drawable.getBounds().height();
     }
 
     // Required for Reorderable
@@ -301,5 +310,14 @@ public class AppPairIcon extends FrameLayout implements DraggableView, Reorderab
     @Override
     public PoppableType getPoppableType() {
         return PoppableType.APP_PAIR;
+    }
+
+    // No-op since we don't show notification dot for app pairs.
+    @Override
+    public void setForceHideDot(boolean forceHideDot) {}
+
+    @Override
+    public MultiPropertyFactory<AnimatedFloat>.MultiProperty getFloatingViewTextAlpha() {
+        return mAppPairName.getFloatingViewTextAlpha();
     }
 }

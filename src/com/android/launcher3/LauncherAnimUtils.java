@@ -146,47 +146,26 @@ public class LauncherAnimUtils {
                 }
             };
 
-    public static final FloatProperty<View> VIEW_TRANSLATE_X =
-            View.TRANSLATION_X instanceof FloatProperty ? (FloatProperty) View.TRANSLATION_X
-                    : new FloatProperty<View>("translateX") {
-                        @Override
-                        public void setValue(View view, float v) {
-                            view.setTranslationX(v);
-                        }
+    public static final FloatProperty<View> VIEW_TRANSLATE_X = convert(View.TRANSLATION_X);
+    public static final FloatProperty<View> VIEW_TRANSLATE_Y = convert(View.TRANSLATION_Y);
+    public static final FloatProperty<View> VIEW_TRANSLATE_Z = convert(View.TRANSLATION_Z);
 
-                        @Override
-                        public Float get(View view) {
-                            return view.getTranslationX();
-                        }
-                    };
+    public static final FloatProperty<View> VIEW_ALPHA = convert(View.ALPHA);
 
-    public static final FloatProperty<View> VIEW_TRANSLATE_Y =
-            View.TRANSLATION_Y instanceof FloatProperty ? (FloatProperty) View.TRANSLATION_Y
-                    : new FloatProperty<View>("translateY") {
-                        @Override
-                        public void setValue(View view, float v) {
-                            view.setTranslationY(v);
-                        }
+    private static FloatProperty<View> convert(Property<View, Float> property) {
+        if (property instanceof FloatProperty<View> f) return f;
+        return new FloatProperty<>(property.getName()) {
+            @Override
+            public void setValue(View view, float v) {
+                property.set(view, v);
+            }
 
-                        @Override
-                        public Float get(View view) {
-                            return view.getTranslationY();
-                        }
-                    };
-
-    public static final FloatProperty<View> VIEW_ALPHA =
-            View.ALPHA instanceof FloatProperty ? (FloatProperty) View.ALPHA
-                    : new FloatProperty<View>("alpha") {
-                        @Override
-                        public void setValue(View view, float v) {
-                            view.setAlpha(v);
-                        }
-
-                        @Override
-                        public Float get(View view) {
-                            return view.getAlpha();
-                        }
-                    };
+            @Override
+            public Float get(View view) {
+                return property.get(view);
+            }
+        };
+    }
 
     public static final IntProperty<View> VIEW_BACKGROUND_COLOR =
             new IntProperty<View>("backgroundColor") {

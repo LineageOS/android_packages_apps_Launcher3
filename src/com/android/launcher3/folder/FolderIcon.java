@@ -62,6 +62,7 @@ import com.android.launcher3.Reorderable;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.Workspace;
 import com.android.launcher3.allapps.ActivityAllAppsContainerView;
+import com.android.launcher3.anim.AnimatedFloat;
 import com.android.launcher3.celllayout.CellLayoutLayoutParams;
 import com.android.launcher3.dot.FolderDotInfo;
 import com.android.launcher3.dragndrop.BaseItemDragListener;
@@ -80,9 +81,11 @@ import com.android.launcher3.model.data.FolderInfo.LabelState;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.WorkspaceItemFactory;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
+import com.android.launcher3.popup.IconViewController;
 import com.android.launcher3.popup.Poppable;
 import com.android.launcher3.popup.PoppableType;
 import com.android.launcher3.popup.PopupController;
+import com.android.launcher3.util.MultiPropertyFactory;
 import com.android.launcher3.util.MultiTranslateDelegate;
 import com.android.launcher3.util.Themes;
 import com.android.launcher3.util.Thunk;
@@ -98,7 +101,7 @@ import java.util.function.Predicate;
  * An icon that can appear on in the workspace representing an {@link Folder}.
  */
 public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion,
-        DraggableView, Reorderable, Poppable {
+        DraggableView, Reorderable, Poppable, IconViewController {
 
     private final MultiTranslateDelegate mTranslateDelegate = new MultiTranslateDelegate(this);
     @Thunk ActivityContext mActivity;
@@ -653,8 +656,11 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
         }
     }
 
-    public boolean getTextVisible() {
-        return mFolderName.getVisibility() == VISIBLE;
+    @Override
+    public int getIconHeight() {
+        Rect rect = new Rect();
+        getPreviewBounds(rect);
+        return rect.height();
     }
 
     /**
@@ -805,6 +811,11 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
     @Override
     public PoppableType getPoppableType() {
         return PoppableType.FOLDER;
+    }
+
+    @Override
+    public MultiPropertyFactory<AnimatedFloat>.MultiProperty getFloatingViewTextAlpha() {
+        return mFolderName.getFloatingViewTextAlpha();
     }
 
     /**
