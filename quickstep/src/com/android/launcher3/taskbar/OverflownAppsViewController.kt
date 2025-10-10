@@ -72,6 +72,7 @@ class OverflownAppsViewController(
                 } ?: BubbleTextView.RunningAppState.NOT_RUNNING
 
             runningAppStateAnimationController.updateRunningState(btv, state, animate = false)
+            btv.updateDescriptionWithRunningState()
         }
     }
 }

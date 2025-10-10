@@ -811,9 +811,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         for (BubbleTextView iconView : getAllAppIcons()) {
             updateRunningState(iconView);
             if (shouldUpdateIconContentDescription(iconView)) {
-                iconView.setContentDescription(
-                        iconView.getContentDescription() + " "
-                                + iconView.getIconStateDescription());
+                iconView.updateDescriptionWithRunningState();
             }
         }
     }
