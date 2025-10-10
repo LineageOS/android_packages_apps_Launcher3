@@ -765,6 +765,22 @@ public abstract class AbsSwipeUpHandlerTestCase<
                 /* actual= */ handler.mDeferLifecycleOnDestroyFlags);
     }
 
+    @Test
+    public void testContainerDestroyed_stillCallsInvalidateHandlerWithLauncher() {
+        SWIPE_HANDLER swipeHandler = createSwipeHandler();
+        RECENTS_VIEW recentsView = getRecentsView();
+
+        // Call onActivityInit to set RecentsView and set STATE_LAUNCHER_PRESENT
+        swipeHandler.onActivityInit(/* isHomeStarted= */ false);
+
+        runOnMainSync(() -> {
+            onContainerDestroyed();
+
+            verify(recentsView).onGestureAnimationEnd();
+            verify(recentsView).removeOnScrollChangedListener(any());
+        });
+    }
+
     /**
      * Verifies that RecentsAnimationController#finish() is called, and captures and runs any
      * callback that was passed to it. This ensures that STATE_CURRENT_TASK_FINISHED is correctly

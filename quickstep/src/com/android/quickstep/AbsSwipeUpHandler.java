@@ -412,13 +412,12 @@ public abstract class AbsSwipeUpHandler<
                 mContainerInterface.createActivityInitListener(this::onActivityInit);
         mLauncherOnDestroyCallback = () -> {
             ActiveGestureProtoLogProxy.logLauncherDestroyed();
-            if (mRecentsView != null) {
-                mRecentsView.removeOnScrollChangedListener(mOnRecentsScrollListener);
-                mRecentsView = null;
-            }
-            mContainer = null;
-            mStateCallback.clearState(STATE_LAUNCHER_PRESENT);
+            // Set STATE_HANDLER_INVALIDATED before clearing STATE_LAUNCHER_PRESENT so that
+            // invalidateHandlerWithLauncher can run
             mStateCallback.setStateOnUiThread(STATE_HANDLER_INVALIDATED);
+            mStateCallback.clearState(STATE_LAUNCHER_PRESENT);
+            mRecentsView = null;
+            mContainer = null;
             mRecentsAnimationStartCallbacks.clear();
             mTaskAnimationManager.onLauncherDestroyed();
         };
