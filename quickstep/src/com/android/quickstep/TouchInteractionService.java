@@ -48,6 +48,7 @@ import static com.android.systemui.shared.system.ActivityManagerWrapper.CLOSE_SY
 
 import android.app.ActivityManager;
 import android.app.Service;
+import android.app.contextualsearch.ContextualSearchConfig;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -334,6 +335,16 @@ public class TouchInteractionService extends Service {
             executeForTouchInteractionService(tis -> {
                 if (!new ContextualSearchInvoker(tis).tryStartAssistOverride(invocationType)) {
                     Log.w(TAG, "Failed to invoke Assist override");
+                }
+            });
+        }
+
+        @Override
+        public void invokeContextualSearch(
+            int entryPoint, @Nullable ContextualSearchConfig config) {
+            executeForTouchInteractionService(tis -> {
+                if (!new ContextualSearchInvoker(tis).show(entryPoint, config)) {
+                    Log.w(TAG, "Failed to invoke contextual search");
                 }
             });
         }
