@@ -234,6 +234,7 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
         TaskbarOverflowView icon = (TaskbarOverflowView) inflater.inflate(
                 R.layout.taskbar_overflow_view, group, false);
         icon.mOverflowType = type;
+        icon.setContentDescription(icon.getTextForTooltipPopup());
         icon.mIconSize = iconSize;
 
         final float taskbarIconRadius =
@@ -395,10 +396,6 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
      *         not have a tooltip.
      */
     public String getTextForTooltipPopup() {
-        if (mIsActive) {
-            return null;
-        }
-
         return switch (mOverflowType) {
             case PINNED -> getResources().getString(R.string.taskbar_pinned_overflow_a11y_title);
             case RECENTS -> getResources().getString(R.string.taskbar_recents_overflow_a11y_title);

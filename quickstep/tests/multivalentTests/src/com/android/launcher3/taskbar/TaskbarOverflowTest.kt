@@ -24,8 +24,12 @@ import android.os.Process
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
+import android.view.MotionEvent
+import android.view.MotionEvent.ACTION_HOVER_ENTER
+import android.view.MotionEvent.ACTION_HOVER_EXIT
 import android.window.RemoteTransition
 import androidx.test.core.app.ApplicationProvider
+import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.BubbleTextView
 import com.android.launcher3.Flags.FLAG_ENABLE_MULTI_INSTANCE_MENU_TASKBAR
 import com.android.launcher3.Flags.FLAG_ENABLE_TASKBAR_ICON_CONTAINER
@@ -306,6 +310,7 @@ class TaskbarOverflowTest {
         TaskbarViewTestUtil.assertThat(taskbarView)
             .hasIconTypes(ALL_APPS, *HOTSEAT * (numHotseatIcons - 1), OVERFLOW)
         assertThat(taskbarOverflowIconIndex).isEqualTo(numHotseatIcons)
+        verifyOverflowIconTooltip("Other apps")
         assertThat(overflowItems)
             .containsExactlyElementsIn(numHotseatIcons - 1..numHotseatIcons + 1)
     }
@@ -415,7 +420,7 @@ class TaskbarOverflowTest {
         createDesktopTask(createdTasks)
 
         assertThat(taskbarOverflowIconIndex).isEqualTo(initialIconCount)
-        assertThat(getOverflowIconTooltipText()).isEqualTo("Other recent apps")
+        verifyOverflowIconTooltip("Other recent apps")
 
         tapOverflowIcon()
         // Keyboard quick switch view is shown only after list of recent task is asynchronously
@@ -425,11 +430,11 @@ class TaskbarOverflowTest {
         assertThat(getOnUiThread { keyboardQuickSwitchController.isShownFromTaskbar }).isTrue()
         assertThat(getOnUiThread { keyboardQuickSwitchController.shownTaskIds() })
             .containsExactlyElementsIn(0..targetOverflowSize)
-        assertThat(getOverflowIconTooltipText()).isNull()
+        verifyOverflowIconTooltip(null)
 
         tapOverflowIcon()
         assertThat(keyboardQuickSwitchController.isShown).isFalse()
-        assertThat(getOverflowIconTooltipText()).isEqualTo("Other recent apps")
+        verifyOverflowIconTooltip("Other recent apps")
     }
 
     @Test
@@ -841,11 +846,40 @@ class TaskbarOverflowTest {
         }
     }
 
-    private fun getOverflowIconTooltipText(): String? {
-        return getOnUiThread {
-            val overflowIcon =
-                taskbarViewController.iconViews.firstOrNull { it is TaskbarOverflowView }
-            (overflowIcon as? TaskbarOverflowView)?.getTextForTooltipPopup()
+    /**
+     * Verifies that when hovering over the overflow icon, the tooltip popup is shown with the
+     * [expectedText], or verifies that the tooltip is not shown if [expectedText] is null.
+     */
+    private fun verifyOverflowIconTooltip(expectedText: String?) {
+        val overflowIcon = getOnUiThread {
+            taskbarViewController.iconViews
+                .filterIsInstance<TaskbarOverflowView>()
+                .firstOrNull()
+                ?.also {
+                    it.dispatchGenericMotionEvent(
+                        MotionEvent.obtain(0, 0, ACTION_HOVER_ENTER, 0f, 0f, 0)
+                    )
+                }
+        }
+
+        val isPopupOpen =
+            AbstractFloatingView.hasOpenView(
+                taskbarContext,
+                AbstractFloatingView.TYPE_ON_BOARD_POPUP,
+            )
+
+        if (expectedText == null) {
+            assertThat(isPopupOpen).isFalse()
+        } else {
+            assertThat(isPopupOpen).isTrue()
+            val actualText = getOnUiThread { overflowIcon?.textForTooltipPopup }
+            assertThat(actualText).isEqualTo(expectedText)
+        }
+
+        runOnMainSync {
+            overflowIcon?.dispatchGenericMotionEvent(
+                MotionEvent.obtain(0, 0, ACTION_HOVER_EXIT, 0f, 0f, 0)
+            )
         }
     }
 
