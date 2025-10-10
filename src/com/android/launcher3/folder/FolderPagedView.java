@@ -174,10 +174,6 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> implements Cli
         mViewsBound = true;
     }
 
-    void setCanAnnouncePageDescriptionForFolder(boolean canAnnounce) {
-        mCanAnnouncePageDescription = canAnnounce;
-    }
-
     private boolean canAnnouncePageDescriptionForFolder() {
         return mCanAnnouncePageDescription;
     }
