@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Parcelable
-import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
+import androidx.test.platform.app.InstrumentationRegistry
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.TimeUnit.SECONDS
-
-private const val DEFAULT_BROADCAST_TIMEOUT_SECS: Long = 10
+import java.util.concurrent.TimeUnit
 
 /** Broadcast receiver which blocks until the result is received. */
 open class BlockingBroadcastReceiver(action: String) : BroadcastReceiver() {
@@ -33,7 +31,7 @@ open class BlockingBroadcastReceiver(action: String) : BroadcastReceiver() {
     val value = CompletableFuture<Intent>()
 
     init {
-        getInstrumentation()
+        InstrumentationRegistry.getInstrumentation()
             .targetContext
             .registerReceiver(this, IntentFilter(action), Context.RECEIVER_EXPORTED)
     }
@@ -44,11 +42,13 @@ open class BlockingBroadcastReceiver(action: String) : BroadcastReceiver() {
 
     @Throws(InterruptedException::class)
     fun blockingGetIntent(): Intent =
-        value.get(DEFAULT_BROADCAST_TIMEOUT_SECS, SECONDS).also {
-            getInstrumentation().targetContext.unregisterReceiver(this)
+        value.get(DEFAULT_BROADCAST_TIMEOUT_SECS, TimeUnit.SECONDS).also {
+            InstrumentationRegistry.getInstrumentation().targetContext.unregisterReceiver(this)
         }
 
     @Throws(InterruptedException::class)
     fun blockingGetExtraIntent(): Intent? =
         blockingGetIntent().getParcelableExtra<Parcelable>(Intent.EXTRA_INTENT) as Intent?
+
+    val DEFAULT_BROADCAST_TIMEOUT_SECS: Long = 10
 }

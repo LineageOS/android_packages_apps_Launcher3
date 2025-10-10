@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.launcher3.widget;
+package com.android.launcher3.views;
 
 import static android.app.PendingIntent.FLAG_MUTABLE;
 import static android.app.PendingIntent.FLAG_ONE_SHOT;
@@ -30,6 +30,8 @@ import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.platform.test.rule.LimitDevicesRule;
+import android.platform.test.rule.SkipOnDeviceless;
 import android.view.View;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -50,12 +52,13 @@ import com.android.launcher3.util.BaseLauncherActivityTest;
 import com.android.launcher3.util.BlockingBroadcastReceiver;
 import com.android.launcher3.util.LauncherBindableItemsContainer.ItemOperator;
 import com.android.launcher3.util.ModelTestExtensions;
+import com.android.launcher3.util.RoboApiWrapper;
 import com.android.launcher3.util.TestUtil;
-import com.android.launcher3.util.rule.ShellCommandRule;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 
 import java.util.UUID;
@@ -69,10 +72,13 @@ import java.util.regex.Pattern;
 public class RequestPinItemTest extends BaseLauncherActivityTest<Launcher> {
 
     @Rule
-    public ShellCommandRule mGrantWidgetRule = ShellCommandRule.grantWidgetBind();
+    public TestRule mGrantWidgetRule = RoboApiWrapper.INSTANCE.grantWidgetBindPermissionRule();
 
     @Rule
-    public ShellCommandRule mDefaultLauncherRule = ShellCommandRule.setDefaultLauncher();
+    public TestRule mDefaultLauncherRule = RoboApiWrapper.INSTANCE.grantShortcutsPermissionRule();
+
+    @Rule
+    public LimitDevicesRule mlimitDevicesRule = new LimitDevicesRule();
 
     private String mCallbackAction;
     private String mShortcutId;
@@ -85,9 +91,10 @@ public class RequestPinItemTest extends BaseLauncherActivityTest<Launcher> {
     }
 
     @Test
-    public void testEmpty() throws Throwable { /* needed while the broken tests are being fixed */ }
-
-    @Test
+    /*
+     * Test is is hanging on Robolectric, possibly an issue with threading.
+     */
+    @SkipOnDeviceless
     public void testPinWidgetNoConfig() throws Throwable {
         runTest("pinWidgetNoConfig", true, (info, view) -> info instanceof LauncherAppWidgetInfo
                 && ((LauncherAppWidgetInfo) info).appWidgetId == mAppWidgetId
@@ -96,6 +103,10 @@ public class RequestPinItemTest extends BaseLauncherActivityTest<Launcher> {
     }
 
     @Test
+    /*
+     * Test is is hanging on Robolectric, possibly an issue with threading.
+     */
+    @SkipOnDeviceless
     public void testPinWidgetNoConfig_customPreview() throws Throwable {
         // Command to set custom preview
         Intent command = RequestPinItemActivity.getCommandIntent(
@@ -109,6 +120,10 @@ public class RequestPinItemTest extends BaseLauncherActivityTest<Launcher> {
     }
 
     @Test
+    /*
+     * Test is is hanging on Robolectric, possibly an issue with threading.
+     */
+    @SkipOnDeviceless
     public void testPinWidgetWithConfig() throws Throwable {
         runTest("pinWidgetWithConfig", true,
                 (info, view) -> info instanceof LauncherAppWidgetInfo
@@ -118,6 +133,10 @@ public class RequestPinItemTest extends BaseLauncherActivityTest<Launcher> {
     }
 
     @Test
+    /*
+     * Test is is hanging on Robolectric, possibly an issue with threading.
+     */
+    @SkipOnDeviceless
     public void testPinShortcut() throws Throwable {
         // Command to set the shortcut id
         Intent command = RequestPinItemActivity.getCommandIntent(
