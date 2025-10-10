@@ -84,4 +84,10 @@ enum class WidgetInteractionSource {
 
     /** Picker UI opened for a specific app. */
     APP_SPECIFIC_PICKER,
+
+    /**
+     * Picker UI opened when an app requests to pin a widget / short using RequestPinAppWidget /
+     * shortcut apis.
+     */
+    PIN_WIDGET_PICKER,
 }

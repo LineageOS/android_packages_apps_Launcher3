@@ -16,28 +16,37 @@
 
 package com.android.launcher3.compose.core.widgetpicker
 
+import android.content.pm.LauncherApps.PinItemRequest
 import android.os.UserHandle
-import com.android.launcher3.widgetpicker.WidgetPickerActivity
+import com.android.launcher3.BaseActivity
+import com.android.launcher3.dragndrop.PinItemAddHandler
+import com.android.launcher3.util.PackageUserKey
 import com.android.launcher3.widgetpicker.WidgetPickerConfig
 import javax.inject.Inject
 
 /**
- * A wrapper for widget picker activity that is responsible for displaying the compose based widget
- * picker in [WidgetPickerActivity] when compose is enabled via build flag.
+ * A wrapper for widget picker activities responsible for displaying the compose based widget picker
+ * when compose is enabled via build flag.
  */
 interface WidgetPickerComposeWrapper {
     /** Show the catalog of widgets available from all apps available on device. */
-    fun showAllWidgets(
-        activity: WidgetPickerActivity,
-        widgetPickerConfig: WidgetPickerConfig,
-    )
+    fun showAllWidgets(activity: BaseActivity, widgetPickerConfig: WidgetPickerConfig)
 
     /** Show the catalog of widgets available for the app with [packageName] and [userHandle]. */
     fun showWidgetsFor(
         packageName: String,
         userHandle: UserHandle,
-        activity: WidgetPickerActivity,
+        activity: BaseActivity,
         widgetPickerConfig: WidgetPickerConfig,
+    )
+
+    /** Show the catalog of widgets / shortcuts requested in [pinItemRequest]. */
+    fun showWidgetsForPinRequest(
+        activity: BaseActivity,
+        targetApp: PackageUserKey,
+        pinItemRequest: PinItemRequest,
+        widgetPickerConfig: WidgetPickerConfig,
+        pinItemAddHandler: PinItemAddHandler,
     )
 }
 
@@ -46,18 +55,25 @@ interface WidgetPickerComposeWrapper {
  * don't involve widget picker e.g. launcher preview OR when compose is disabled via build flag.
  */
 class NoOpWidgetPickerComposeWrapper @Inject constructor() : WidgetPickerComposeWrapper {
-    override fun showAllWidgets(
-        activity: WidgetPickerActivity,
-        widgetPickerConfig: WidgetPickerConfig,
-    ) {
+    override fun showAllWidgets(activity: BaseActivity, widgetPickerConfig: WidgetPickerConfig) {
         error("Widget picker with compose is not supported")
     }
 
     override fun showWidgetsFor(
         packageName: String,
         userHandle: UserHandle,
-        activity: WidgetPickerActivity,
+        activity: BaseActivity,
         widgetPickerConfig: WidgetPickerConfig,
+    ) {
+        error("Widget picker with compose is not supported")
+    }
+
+    override fun showWidgetsForPinRequest(
+        activity: BaseActivity,
+        targetApp: PackageUserKey,
+        pinItemRequest: PinItemRequest,
+        widgetPickerConfig: WidgetPickerConfig,
+        pinItemAddHandler: PinItemAddHandler,
     ) {
         error("Widget picker with compose is not supported")
     }

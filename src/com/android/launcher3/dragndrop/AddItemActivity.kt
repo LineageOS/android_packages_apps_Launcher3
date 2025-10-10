@@ -27,6 +27,7 @@ import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.Rect
 import android.os.AsyncTask
+import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.MotionEvent
@@ -35,13 +36,21 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityManager
 import android.widget.TextView
+import android.window.OnBackAnimationCallback
+import android.window.OnBackInvokedDispatcher
+import androidx.activity.OnBackPressedDispatcher
+import androidx.activity.OnBackPressedDispatcherOwner
+import androidx.activity.setViewTreeOnBackPressedDispatcherOwner
 import com.android.launcher3.BaseActivity
+import com.android.launcher3.Flags
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherAppState
 import com.android.launcher3.LauncherAppState.Companion.getInstance
 import com.android.launcher3.LauncherSettings
 import com.android.launcher3.R
+import com.android.launcher3.compose.ComposeFacade.isComposeAvailable
+import com.android.launcher3.dagger.LauncherComponentProvider
 import com.android.launcher3.logging.StatsLogManager
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent
 import com.android.launcher3.model.ItemInstallQueue
@@ -54,6 +63,7 @@ import com.android.launcher3.pm.PinRequestHelper
 import com.android.launcher3.util.ApiWrapper
 import com.android.launcher3.util.ApplicationInfoWrapper
 import com.android.launcher3.util.Executors
+import com.android.launcher3.util.PackageUserKey
 import com.android.launcher3.util.SystemUiController
 import com.android.launcher3.views.AbstractSlideInView
 import com.android.launcher3.views.BaseDragLayer
@@ -67,6 +77,7 @@ import com.android.launcher3.widget.WidgetCell.PreviewReadyListener
 import com.android.launcher3.widget.WidgetCellPreview
 import com.android.launcher3.widget.WidgetManagerHelper
 import com.android.launcher3.widget.WidgetSections
+import com.android.launcher3.widgetpicker.WidgetPickerConfig
 import java.lang.ref.WeakReference
 import java.util.function.Supplier
 import kotlin.math.min
@@ -77,7 +88,10 @@ open class AddItemActivity :
     View.OnLongClickListener,
     View.OnTouchListener,
     AbstractSlideInView.OnCloseListener,
-    PreviewReadyListener {
+    PreviewReadyListener,
+    OnBackPressedDispatcherOwner,
+    OnBackAnimationCallback,
+    PinItemAddHandler {
     private val mLastTouchPos = PointF()
 
     private lateinit var pinItemRequest: LauncherApps.PinItemRequest
@@ -90,12 +104,15 @@ open class AddItemActivity :
     private var widgetCell: WidgetCell? = null
 
     // Widget request specific options.
-    private var mAppWidgetHolder: LauncherWidgetHolder? = null
-    private var mAppWidgetManager: WidgetManagerHelper? = null
+    private var appWidgetHolder: LauncherWidgetHolder? = null
+    private var appWidgetManager: WidgetManagerHelper? = null
     private var pendingBindWidgetId = 0
     private var widgetOptions: Bundle? = null
 
     private var mFinishOnPause = false
+
+    private val showComposeView
+        get() = isComposeAvailable() && Flags.enableAppWidgetPickerRefactor()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -114,7 +131,12 @@ open class AddItemActivity :
         // confirmation activity might be rotated.
         mDeviceProfile = idp.getDeviceProfile(applicationContext)
 
-        setContentView(R.layout.add_item_confirmation_activity)
+        if (showComposeView) {
+            setContentView(R.layout.add_item_confirmation_activity_compose)
+        } else {
+            setContentView(R.layout.add_item_confirmation_activity)
+        }
+
         // Set flag to allow activity to draw over navigation and status bar.
         checkNotNull(window)
             .setFlags(
@@ -125,11 +147,15 @@ open class AddItemActivity :
         dragLayer.recreateControllers()
         accessibilityManager =
             checkNotNull(applicationContext.getSystemService(AccessibilityManager::class.java))
+        appWidgetManager = WidgetManagerHelper(this)
+        appWidgetHolder = LauncherWidgetHolder.newInstance(this)
 
-        widgetCell =
-            findViewById<WidgetCell>(R.id.widget_cell).apply {
-                addPreviewReadyListener(this@AddItemActivity)
-            }
+        if (!showComposeView) {
+            widgetCell =
+                findViewById<WidgetCell>(R.id.widget_cell).apply {
+                    addPreviewReadyListener(this@AddItemActivity)
+                }
+        }
 
         val targetApp =
             when (pinItemRequest.requestType) {
@@ -145,6 +171,21 @@ open class AddItemActivity :
         val info = ApplicationInfoWrapper(this, targetApp.packageName, targetApp.user).getInfo()
         if (info == null) {
             finish()
+            return
+        }
+
+        if (showComposeView) {
+            window?.decorView?.setViewTreeOnBackPressedDispatcherOwner(this)
+
+            LauncherComponentProvider.get(this)
+                .widgetPickerComposeWrapper
+                .showWidgetsForPinRequest(
+                    activity = this,
+                    targetApp = targetApp.toPackageUserKey(),
+                    pinItemRequest = pinItemRequest,
+                    widgetPickerConfig = WidgetPickerConfig(),
+                    pinItemAddHandler = this,
+                )
             return
         }
 
@@ -270,8 +311,11 @@ open class AddItemActivity :
 
     private fun setupShortcut(): PackageItemInfo {
         val shortcutInfo = PinShortcutRequestActivityInfo(pinItemRequest, this)
-        checkNotNull(widgetCell).widgetView.tag = PendingAddShortcutInfo(shortcutInfo)
-        applyWidgetItemAsync { WidgetItem(shortcutInfo, app.iconCache) }
+
+        if (!showComposeView) {
+            checkNotNull(widgetCell).widgetView.tag = PendingAddShortcutInfo(shortcutInfo)
+            applyWidgetItemAsync { WidgetItem(shortcutInfo, app.iconCache) }
+        }
 
         return checkNotNull(pinItemRequest.shortcutInfo).let {
             PackageItemInfo(it.getPackage(), it.userHandle)
@@ -288,19 +332,20 @@ open class AddItemActivity :
             // Cannot add widget
             return null
         }
-        widgetCell?.remoteViewsPreview = PinItemDragListener.getPreview(pinItemRequest)
 
-        mAppWidgetManager = WidgetManagerHelper(this)
-        mAppWidgetHolder = LauncherWidgetHolder.newInstance(this)
+        widgetCell?.remoteViewsPreview = PinItemDragListener.getPreview(pinItemRequest)
 
         val pendingInfo =
             PendingAddWidgetInfo(widgetInfo, LauncherSettings.Favorites.CONTAINER_PIN_WIDGETS)
         pendingInfo.spanX = min(idp.numColumns.toDouble(), widgetInfo.spanX.toDouble()).toInt()
         pendingInfo.spanY = min(idp.numRows.toDouble(), widgetInfo.spanY.toDouble()).toInt()
         widgetOptions = pendingInfo.getDefaultSizeOptions(this)
-        widgetCell?.apply { widgetView.tag = pendingInfo }
 
-        applyWidgetItemAsync { WidgetItem(widgetInfo, idp, app.iconCache, app.context) }
+        if (!showComposeView) {
+            widgetCell?.apply { widgetView.tag = pendingInfo }
+            applyWidgetItemAsync { WidgetItem(widgetInfo, idp, app.iconCache, app.context) }
+        }
+
         return WidgetsModel.newPendingItemInfo(this, widgetInfo.component, widgetInfo.user)
     }
 
@@ -332,11 +377,11 @@ open class AddItemActivity :
             return
         }
 
-        mAppWidgetHolder?.let { widgetHolder ->
+        appWidgetHolder?.let { widgetHolder ->
             pendingBindWidgetId = widgetHolder.allocateAppWidgetId()
             val widgetProviderInfo = checkNotNull(pinItemRequest.getAppWidgetProviderInfo(this))
             val success =
-                checkNotNull(mAppWidgetManager)
+                checkNotNull(appWidgetManager)
                     .bindAppWidgetIdIfAllowed(
                         pendingBindWidgetId,
                         widgetProviderInfo,
@@ -358,6 +403,11 @@ open class AddItemActivity :
         }
     }
 
+    override fun onAddItemClicked() {
+        onPlaceAutomaticallyClick(/*view*/ null)
+        finish()
+    }
+
     private fun acceptWidget(widgetId: Int) {
         pinItemRequest.getAppWidgetProviderInfo(this)?.let {
             ItemInstallQueue.INSTANCE[this].queueItem(SerializedItemItem(it, widgetId))
@@ -371,7 +421,7 @@ open class AddItemActivity :
     public override fun onDestroy() {
         super.onDestroy()
         // Necessary to destroy the holder to free up possible activity context
-        mAppWidgetHolder?.destroy()
+        appWidgetHolder?.destroy()
     }
 
     @Deprecated("Deprecated in Java")
@@ -390,7 +440,7 @@ open class AddItemActivity :
                 acceptWidget(widgetId)
             } else {
                 // Simply wait it out.
-                mAppWidgetHolder?.deleteAppWidgetId(widgetId)
+                appWidgetHolder?.deleteAppWidgetId(widgetId)
                 pendingBindWidgetId = -1
             }
             return
@@ -452,6 +502,25 @@ open class AddItemActivity :
         }
     }
 
+    override val onBackPressedDispatcher: OnBackPressedDispatcher
+        get() =
+            OnBackPressedDispatcher().apply {
+                if (Build.VERSION.SDK_INT >= 33) {
+                    setOnBackInvokedDispatcher(onBackInvokedDispatcher)
+                }
+            }
+
+    public override fun registerBackDispatcher() {
+        onBackInvokedDispatcher.registerOnBackInvokedCallback(
+            OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+            this,
+        )
+    }
+
+    override fun onBackInvoked() {
+        finish()
+    }
+
     companion object {
         private const val SHADOW_SIZE = 10
 
@@ -471,5 +540,18 @@ open class AddItemActivity :
                 widgetCellRef.get()?.applyFromCellItem(item)
             }
         }
+
+        private fun PackageItemInfo.toPackageUserKey() =
+            if (widgetCategory != -1) {
+                PackageUserKey(widgetCategory, user)
+            } else {
+                PackageUserKey(packageName, user)
+            }
     }
+}
+
+/** Interface for handling the add action in the Pin Item flow. */
+interface PinItemAddHandler {
+    /** Called when the user confirms adding the item (widget or shortcut). */
+    fun onAddItemClicked()
 }
