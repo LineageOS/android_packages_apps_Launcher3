@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import android.content.ComponentName
 import android.content.pm.LauncherApps
 import android.os.Bundle
 import android.os.Process
+import android.platform.test.rule.LimitDevicesRule
+import android.platform.test.rule.SkipOnDeviceless
 import android.view.View.OnClickListener
 import android.view.View.OnFocusChangeListener
 import android.widget.FrameLayout
@@ -41,7 +43,6 @@ import com.android.launcher3.testutil.rule.LazyInitRule.Companion.lazyRule
 import com.android.launcher3.util.AsyncObjectAllocator.allocationExecutor
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
-import com.android.launcher3.util.rule.ShellCommandRule
 import com.android.launcher3.widget.LauncherAppWidgetHostView
 import com.android.launcher3.widget.LauncherWidgetHolder
 import com.android.launcher3.widget.PendingAppWidgetHostView
@@ -71,7 +72,9 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidJUnit4::class)
 class ItemInflaterTest {
 
-    @get:Rule val grantWidgetRule = ShellCommandRule.grantWidgetBind()
+    @get:Rule var mlimitDevicesRule: LimitDevicesRule = LimitDevicesRule()
+
+    @get:Rule val grantWidgetRule = RoboApiWrapper.grantWidgetBindPermissionRule()
     @get:Rule val mockitoRule = MockitoJUnit.rule()
     @get:Rule val uiContextSpy = lazyRule { spy(TestActivityContext()) }
     private val uiContext: TestActivityContext by uiContextSpy
@@ -177,6 +180,11 @@ class ItemInflaterTest {
     }
 
     @Test
+    /**
+     * The test runs in Robolectric but fails, I think it has to do with how Robolectric threading
+     * works different from device threading since the test relies heavily of different threads.
+     */
+    @SkipOnDeviceless
     fun test_pending_widget_inflated_on_UI() {
         val itemInfo = widgetItemInfo(true)
 
@@ -187,6 +195,11 @@ class ItemInflaterTest {
     }
 
     @Test
+    /**
+     * The test runs in Robolectric but fails, I think it has to do with how Robolectric threading
+     * works different from device threading since the test relies heavily of different threads.
+     */
+    @SkipOnDeviceless
     fun test_pending_widget_inflated_on_BG() {
         val itemInfo = widgetItemInfo(true)
         val view = allocationExecutor.submit(Callable { underTest.inflateItem(itemInfo) }).get()
@@ -196,6 +209,11 @@ class ItemInflaterTest {
     }
 
     @Test
+    /**
+     * The test runs in Robolectric but fails, I think it has to do with how Robolectric threading
+     * works different from device threading since the test relies heavily of different threads.
+     */
+    @SkipOnDeviceless
     fun test_widget_restored_and_inflated_on_UI() {
         val itemInfo = widgetItemInfo(false)
 
@@ -210,6 +228,11 @@ class ItemInflaterTest {
     }
 
     @Test
+    /**
+     * The test runs in Robolectric but fails, I think it has to do with how Robolectric threading
+     * works different from device threading since the test relies heavily of different threads.
+     */
+    @SkipOnDeviceless
     fun test_widget_restored_and_inflated_on_BG() {
         val itemInfo = widgetItemInfo(false)
 
@@ -235,6 +258,11 @@ class ItemInflaterTest {
     }
 
     @Test
+    /**
+     * The test runs in Robolectric but fails, I think it has to do with how Robolectric threading
+     * works different from device threading since the test relies heavily of different threads.
+     */
+    @SkipOnDeviceless
     fun test_normal_widget_inflated_UI() {
         val providerInfo = WidgetUtils.findWidgetProvider(false)
         val id = widgetHolder.allocateAppWidgetId()

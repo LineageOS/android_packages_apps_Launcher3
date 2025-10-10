@@ -22,19 +22,21 @@ import android.appwidget.AppWidgetProviderInfo
 import android.appwidget.AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX
 import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_CONFIGURATION_OPTIONAL
 import android.content.ComponentName
+import android.platform.test.rule.LimitDevicesRule
+import android.platform.test.rule.SkipOnDeviceless
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.launcher3.qsb.OSEManager.Companion.OSE_LOOPER
 import com.android.launcher3.qsb.OSEManager.OSEInfo
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.MutableListenableRef
+import com.android.launcher3.util.RoboApiWrapper
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestUtil
 import com.android.launcher3.util.WidgetUtils
-import com.android.launcher3.util.rule.ShellCommandRule
 import com.android.launcher3.widget.util.WidgetSizeHandler
-import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -53,8 +55,9 @@ import org.mockito.kotlin.whenever
 class OseWidgetManagerTest {
 
     @get:Rule val context = SandboxApplication()
-    @get:Rule val widgetsPermission = ShellCommandRule.grantWidgetBind()
+    @get:Rule val widgetsPermission = RoboApiWrapper.grantShortcutsPermissionRule()
     @get:Rule val mockitoRule = MockitoJUnit.rule()
+    @get:Rule var mlimitDevicesRule: LimitDevicesRule = LimitDevicesRule()
 
     @Mock lateinit var oseManager: OSEManager
     @Mock lateinit var widgetHost: QsbAppWidgetHost
@@ -73,6 +76,8 @@ class OseWidgetManagerTest {
     }
 
     @Test
+    /** Test returns the wrong value. */
+    @SkipOnDeviceless
     fun findSearchWidgetForPackage_returns_non_config_widget() {
         val infoWithoutConfig = WidgetUtils.findWidgetProvider(false)
         val infoWithConfig = WidgetUtils.findWidgetProvider(true)
