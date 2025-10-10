@@ -196,11 +196,15 @@ class TaskbarInteractor(private val taskbarUIController: TaskbarUIController) {
         }
     }
 
+    val supportsPinnedAppsOverflow
+        get() = TaskbarPopupController.canPinAppsOverflow()
+
     @AnyThread
     fun getMaxPinnableCount() = taskbarUIController.taskbarSpecsEvaluator.maxPinnableCount
 
-    /** Returns a SparseArray of all pinned apps on the taskbar. */
-    fun getPinnedApps(): SparseArray<ItemInfo> = taskbarUIController.allPinnedApps
+    /** SparseArray of all pinned apps on the taskbar. */
+    val pinnedApps: SparseArray<ItemInfo>
+        get() = taskbarUIController.allPinnedApps
 
     @AnyThread
     fun findMatchingAsyncView(v: View): AsyncView<View> {

@@ -22,6 +22,7 @@ import android.util.SparseArray
 import android.view.View
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityManager
+import android.widget.Toast
 import androidx.annotation.VisibleForTesting
 import androidx.core.util.isEmpty
 import androidx.core.util.size
@@ -61,6 +62,12 @@ constructor(
     ) where T : Context?, T : ActivityContext? {
 
     override fun onClick(v: View?) {
+        if (isPin && pinnedInfoList.size >= maxPinnableItems) {
+            dismissTaskMenuView()
+            showNoSpaceMessage(requireNotNull(mTarget))
+            return
+        }
+
         // Create a placeholder callbacks for the writer to notify other launcher model callbacks
         // after update.
         val callbacks: BgDataModel.Callbacks = object : BgDataModel.Callbacks {}
@@ -125,22 +132,6 @@ constructor(
 
         pinItem(writer, newInfo, mItemInfo.screenId, cellX, cellY)
         onClickCleanUp(v)
-    }
-
-    @VisibleForTesting
-    fun pinItem(
-        writer: ModelWriter,
-        info: WorkspaceItemInfo,
-        screenId: Int,
-        cellX: Int,
-        cellY: Int,
-    ) {
-        writer.addOrMoveItemInDatabase(info, Favorites.CONTAINER_HOTSEAT, screenId, cellX, cellY)
-    }
-
-    @VisibleForTesting
-    fun unpinItem(writer: ModelWriter, info: ItemInfo) {
-        writer.deleteItemFromDatabase(info, "item unpinned through long-press menu")
     }
 
     /**
@@ -218,11 +209,37 @@ constructor(
         return Pair(cellX, cellY)
     }
 
+    /* Functions that are non-companion to be easier to spy in tests. */
+
+    @VisibleForTesting
+    fun pinItem(
+        writer: ModelWriter,
+        info: WorkspaceItemInfo,
+        screenId: Int,
+        cellX: Int,
+        cellY: Int,
+    ) {
+        writer.addOrMoveItemInDatabase(info, Favorites.CONTAINER_HOTSEAT, screenId, cellX, cellY)
+    }
+
+    @VisibleForTesting
+    fun unpinItem(writer: ModelWriter, info: ItemInfo) {
+        writer.deleteItemFromDatabase(info, "item unpinned through long-press menu")
+    }
+
+    @VisibleForTesting
+    fun showNoSpaceMessage(context: Context) {
+        Toast.makeText(context, R.string.no_room_in_taskbar, Toast.LENGTH_SHORT).show()
+    }
+
     companion object {
         private const val TAG = "PinToTaskbarShortcut"
 
         @JvmStatic
-        fun getPinShortcutFactoryFromLauncher(maxPinnableItems: Int): Factory<Launcher> {
+        fun getPinShortcutFactoryFromLauncher(
+            maxPinnableItems: Int,
+            supportsPinnedAppsOverflow: Boolean,
+        ): Factory<Launcher> {
             return Factory { context, itemInfo, originalView ->
                 val allPinnedItems = context.pinnedItems
 
@@ -253,7 +270,7 @@ constructor(
                     )
                 }
 
-                if (allPinnedItems.size < maxPinnableItems) {
+                if (supportsPinnedAppsOverflow || allPinnedItems.size < maxPinnableItems) {
                     return@Factory PinToTaskbarShortcut<Launcher>(
                         context,
                         itemInfo,

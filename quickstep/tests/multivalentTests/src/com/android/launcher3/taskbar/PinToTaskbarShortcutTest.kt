@@ -24,6 +24,7 @@ import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.util.SparseArray
 import android.view.View
+import androidx.core.util.containsValue
 import androidx.core.util.size
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.ItemInfo
@@ -152,6 +153,27 @@ class PinToTaskbarShortcutTest {
         verify(shortcut).pinItem(anyOrNull(), anyOrNull(), any(), eq(2), any())
         assertThat(pinnedInfoList.size).isEqualTo(3)
         assertThat(pinnedInfoList[2]?.targetComponent).isEqualTo(newItemInfo.componentName)
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_OVERFLOW_BUTTON_FOR_TASKBAR_PINNED_ITEMS)
+    fun testPin_overflowLimit_showsToast() {
+        // Fill the pinned list to the maximum capacity
+        val positions = IntArray(maxPinnableCount) { it }
+        populatePinnedInfoList(*positions)
+        assertThat(pinnedInfoList.size).isEqualTo(maxPinnableCount)
+
+        // Attempt to pin one more item
+        val newItemInfo = createItemInfoToPin()
+        val shortcut = createShortcut(true, newItemInfo)
+        mockPinItem(shortcut)
+
+        runOnMainSync { shortcut.onClick(null) }
+
+        // Verify that the error message is shown and no new item is pinned
+        verify(shortcut).showNoSpaceMessage(any())
+        assertThat(pinnedInfoList.size).isEqualTo(maxPinnableCount)
+        assertThat(pinnedInfoList.containsValue(newItemInfo.makeWorkspaceItem(context))).isFalse()
     }
 
     private fun createItemInfoToPin(): AppInfo {
