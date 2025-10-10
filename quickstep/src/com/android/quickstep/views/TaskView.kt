@@ -311,6 +311,7 @@ constructor(
         protected set
 
     lateinit var orientedState: RecentsOrientedState
+    lateinit var taskOverlayFactory: TaskOverlayFactory
 
     var taskViewId = UNBOUND_TASK_VIEW_ID
     var isEndQuickSwitchCuj = false
@@ -766,7 +767,7 @@ constructor(
             if (shouldPopulateAccessibilityMenu) {
                 taskContainers.forEach {
                     TraceHelper.allowIpcs("TV.a11yInfo") {
-                        TaskOverlayFactory.getEnabledShortcuts(this@TaskView, it).forEach { shortcut
+                        taskOverlayFactory.getEnabledShortcuts(this@TaskView, it).forEach { shortcut
                             ->
                             addAction(shortcut.createAccessibilityAction(context))
                         }
@@ -814,7 +815,7 @@ constructor(
                 }
             }
 
-            TaskOverlayFactory.getEnabledShortcuts(this, it).forEach { shortcut ->
+            taskOverlayFactory.getEnabledShortcuts(this, it).forEach { shortcut ->
                 if (shortcut.hasHandlerForAction(action)) {
                     shortcut.onClick(this)
                     return true
@@ -1048,7 +1049,6 @@ constructor(
         taskOverlayFactory: TaskOverlayFactory,
     ) {
         this.groupTask = singleTask
-        this.orientedState = orientedState // Needed for dependencies
         taskContainers =
             listOf(
                 createTaskContainer(
@@ -1061,11 +1061,17 @@ constructor(
                     taskOverlayFactory,
                 )
             )
-        onBind(orientedState)
+        onBind(orientedState, taskOverlayFactory)
     }
 
-    protected open fun onBind(orientedState: RecentsOrientedState) =
+    protected open fun onBind(
+        orientedState: RecentsOrientedState,
+        taskOverlayFactory: TaskOverlayFactory,
+    ) =
         traceSection("TaskView.onBind") {
+            this.orientedState = orientedState // Needed for dependencies
+            this.taskOverlayFactory = taskOverlayFactory
+
             traceSection("TaskView.onBind.bindViewModel") {
                 Log.d(TAG, "onBind $context ${orientedState.containerInterface}")
                 viewModel.bind(type, *taskIds)

@@ -43,7 +43,6 @@ import com.android.launcher3.popup.SystemShortcut
 import com.android.launcher3.util.MultiPropertyFactory
 import com.android.launcher3.util.SplitConfigurationOptions
 import com.android.launcher3.views.BaseDragLayer
-import com.android.quickstep.TaskOverlayFactory
 import com.android.quickstep.orientation.RecentsPagedOrientationHandler
 import com.android.quickstep.util.TaskCornerRadius
 import kotlin.math.max
@@ -151,7 +150,7 @@ constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int = 0) :
     }
 
     private fun addMenuOptions() {
-        TaskOverlayFactory.getEnabledShortcuts(taskView, taskContainer).forEach {
+        taskView.taskOverlayFactory.getEnabledShortcuts(taskView, taskContainer).forEach {
             menuOption: SystemShortcut<*> ->
             addMenuOption(menuOption)
         }
