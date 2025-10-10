@@ -75,15 +75,12 @@ import com.android.launcher3.model.data.WorkspaceItemCoordinates
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo.FLAG_RESTORED_ICON
 import com.android.launcher3.model.data.WorkspaceItemInfo.FLAG_RESTORE_STARTED
-import com.android.launcher3.pm.UserCache
-import com.android.launcher3.pm.UserManagerState
 import com.android.launcher3.shortcuts.ShortcutKey
 import com.android.launcher3.util.ContentWriter
 import com.android.launcher3.util.PackageManagerHelper
 import com.android.launcher3.util.PackageUserKey
 import com.android.launcher3.util.RoboApiWrapper
 import com.android.launcher3.util.SandboxApplication
-import com.android.launcher3.util.UserIconInfo
 import com.android.launcher3.widget.LauncherAppWidgetProviderInfo
 import com.android.launcher3.widget.WidgetInflater
 import com.google.common.truth.Truth.assertThat
@@ -100,7 +97,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -120,18 +116,15 @@ class WorkspaceItemProcessorTest {
     private val realCursor = MatrixCursor(getColumnsToTypes(0L).keys.toTypedArray<String>())
     private val realCursorRow = realCursor.newRow()
 
-    private lateinit var mockCursor: LoaderCursor
-
     @Mock private lateinit var mockIconRequestInfo: IconRequestInfo<WorkspaceItemInfo>
     @Mock private lateinit var mockWorkspaceInfo: WorkspaceItemInfo
     @Mock private lateinit var mockPmHelper: PackageManagerHelper
-    @Mock private lateinit var mockUserManagerState: UserManagerState
     @Mock private lateinit var mockWidgetInflater: WidgetInflater
     @Mock private lateinit var mockIconCache: IconCache
     @Mock private lateinit var mockWorkspaceItemSpaceFinder: WorkspaceItemSpaceFinder
     @Mock(answer = Answers.RETURNS_SELF) private lateinit var mockContentWriter: ContentWriter
 
-    lateinit var mLauncherApps: LauncherApps
+    private lateinit var mLauncherApps: LauncherApps
     private var mIntent: Intent = Intent()
     private var mUserHandle: UserHandle = Process.myUserHandle()
     private var mIconRequestInfos: MutableList<IconRequestInfo<WorkspaceItemInfo>> = mutableListOf()
@@ -142,6 +135,7 @@ class WorkspaceItemProcessorTest {
     private var mAllDeepShortcuts: MutableList<CacheableShortcutInfo> = mutableListOf()
     private var mPendingPackages: MutableSet<PackageUserKey> = mutableSetOf()
 
+    private lateinit var mockCursor: LoaderCursor
     private lateinit var itemProcessorUnderTest: WorkspaceItemProcessor
 
     @Before
@@ -164,19 +158,6 @@ class WorkspaceItemProcessorTest {
         whenever(mockPmHelper.getAppLaunchIntent(mComponentName.packageName, mUserHandle))
             .thenReturn(mIntent)
 
-        mockCursor =
-            spy(
-                LoaderCursor(
-                    cursor = realCursor,
-                    userManagerState = UserCache.getInstance(mContext).userManagerState,
-                    restoreEventLogger = null,
-                    context = mContext,
-                    iconCache = mockIconCache,
-                    idp = InvariantDeviceProfile.INSTANCE[mContext],
-                    model = mContext.appComponent.testableModelState.model,
-                    pmHelper = mContext.appComponent.packageManagerHelper,
-                )
-            )
         realCursorRow
             .add(ITEM_TYPE, ITEM_TYPE_APPLICATION)
             .add(_ID, 1)
@@ -185,16 +166,6 @@ class WorkspaceItemProcessorTest {
             .add(INTENT, mIntent.toUri(0))
 
         doReturn(1).whenever(mockContentWriter).commit()
-        doReturn(mockWorkspaceInfo)
-            .whenever(mockCursor)
-            .getAppShortcutInfo(any(), any(), any(), any())
-        doReturn(mockIconRequestInfo).whenever(mockCursor).createIconRequestInfo(any(), any())
-        doReturn(mockContentWriter).whenever(mockCursor).updater()
-
-        mockUserManagerState.apply {
-            val userIconInfo = mock<UserIconInfo>().apply { whenever(isPrivate).thenReturn(false) }
-            whenever(getUserInfo(any())).thenReturn(userIconInfo)
-        }
 
         mKeyToPinnedShortcutsMap = mutableMapOf()
         mInstallingPkgs = hashMapOf()
@@ -209,9 +180,7 @@ class WorkspaceItemProcessorTest {
      * as mocks/defaults, or to recreate it after modifying the default vars.
      */
     private fun createWorkspaceItemProcessorUnderTest(
-        cursor: LoaderCursor = mockCursor,
         memoryLogger: LoaderMemoryLogger? = null,
-        userManagerState: UserManagerState = mockUserManagerState,
         launcherApps: LauncherApps = mLauncherApps,
         shortcutKeyToPinnedShortcuts: Map<ShortcutKey, ShortcutInfo> = mKeyToPinnedShortcutsMap,
         widgetInflater: WidgetInflater = mockWidgetInflater,
@@ -223,45 +192,55 @@ class WorkspaceItemProcessorTest {
         installingPkgs: HashMap<PackageUserKey, PackageInstaller.SessionInfo> = mInstallingPkgs,
         allDeepShortcuts: MutableList<CacheableShortcutInfo> = mAllDeepShortcuts,
         homeScreenFiles: Lazy<Map<Uri, HomeScreenFile>> = lazyOf(mapOf()),
-    ) =
-        WorkspaceItemProcessor(
-                c = cursor,
-                memoryLogger = memoryLogger,
-                userManagerState = userManagerState,
-                launcherApps = launcherApps,
-                context = mContext,
-                widgetInflater = widgetInflater,
-                pmHelper = pmHelper,
-                unlockedUsers = unlockedUsers,
-                iconRequestInfos = iconRequestInfos,
-                pendingPackages = pendingPackages,
-                isSdCardReady = isSdCardReady,
-                shortcutKeyToPinnedShortcuts = shortcutKeyToPinnedShortcuts,
-                installingPkgs = installingPkgs,
-                allDeepShortcuts = allDeepShortcuts,
-                iconCache = mockIconCache,
-                idp = InvariantDeviceProfile.INSTANCE.get(mContext),
-                isSafeMode = false,
-                widgetSizeHandler = mContext.appComponent.widgetSizeHandler,
-                workspaceItemSpaceFinder = mockWorkspaceItemSpaceFinder,
-                homeScreenFiles = homeScreenFiles,
+    ): WorkspaceItemProcessor {
+        // Create the loader cursor after all the stubbing is set up as accessing the dagger graph
+        // objects initiates the creation of the full tree which starts various API calls on
+        // different threads. This can conflict with stubbing as stubbing is not thread safe
+        val ums = mContext.appComponent.userCache.userManagerState
+        mockCursor =
+            spy(
+                LoaderCursor(
+                    cursor = realCursor,
+                    userManagerState = ums,
+                    restoreEventLogger = null,
+                    context = mContext,
+                    iconCache = mockIconCache,
+                    idp = mContext.appComponent.idp,
+                    model = mContext.appComponent.testableModelState.model,
+                    pmHelper = mContext.appComponent.packageManagerHelper,
+                )
             )
-            .also { mockCursor.moveToNext() }
 
-    @Test
-    fun `When user is null then mark item deleted`() {
-        // Given
-        //        mockCursor = mock<LoaderCursor>().apply { id = 1 }
-        //
-        //        // When
-        //        itemProcessorUnderTest = createWorkspaceItemProcessorUnderTest()
-        //        itemProcessorUnderTest.processItem()
-        //
-        //        // Then
-        //        verify(mockCursor)
-        //            .markDeleted("User has been deleted for item id=1",
-        // RestoreError.PROFILE_DELETED)
-        //        verify(mockCursor, times(0)).checkAndAddItem(any(), any(), anyOrNull())
+        doReturn(mockWorkspaceInfo)
+            .whenever(mockCursor)
+            .getAppShortcutInfo(any(), any(), any(), any())
+        doReturn(mockIconRequestInfo).whenever(mockCursor).createIconRequestInfo(any(), any())
+        doReturn(mockContentWriter).whenever(mockCursor).updater()
+
+        mockCursor.moveToNext()
+
+        return WorkspaceItemProcessor(
+            c = mockCursor,
+            memoryLogger = memoryLogger,
+            userManagerState = ums,
+            launcherApps = launcherApps,
+            context = mContext,
+            widgetInflater = widgetInflater,
+            pmHelper = pmHelper,
+            unlockedUsers = unlockedUsers,
+            iconRequestInfos = iconRequestInfos,
+            pendingPackages = pendingPackages,
+            isSdCardReady = isSdCardReady,
+            shortcutKeyToPinnedShortcuts = shortcutKeyToPinnedShortcuts,
+            installingPkgs = installingPkgs,
+            allDeepShortcuts = allDeepShortcuts,
+            iconCache = mockIconCache,
+            idp = mContext.appComponent.idp,
+            isSafeMode = false,
+            widgetSizeHandler = mContext.appComponent.widgetSizeHandler,
+            workspaceItemSpaceFinder = mockWorkspaceItemSpaceFinder,
+            homeScreenFiles = homeScreenFiles,
+        )
     }
 
     @Test
@@ -398,7 +377,7 @@ class WorkspaceItemProcessorTest {
                 whenever(disabledReason).thenReturn(0)
                 whenever(persons).thenReturn(EMPTY_PERSON_ARRAY)
             }
-        val shortcutKey = ShortcutKey.fromIntent(mIntent, mockCursor.user)
+        val shortcutKey = ShortcutKey.fromIntent(mIntent, mUserHandle)
         mKeyToPinnedShortcutsMap[shortcutKey] = expectedShortcutInfo
         mIconRequestInfos = mutableListOf()
 
@@ -574,18 +553,17 @@ class WorkspaceItemProcessorTest {
             .add(ITEM_TYPE, ITEM_TYPE_FOLDER)
             .add(TITLE, "title")
             .add(OPTIONS, 5)
-            .add(_ID, 1)
+            .add(_ID, 3)
 
-        val actualFolderInfo = FolderInfo()
-        doReturn(actualFolderInfo).whenever(mockCursor).findOrMakeFolder(eq(1), any())
         val expectedFolderInfo =
             FolderInfo().apply {
                 itemType = ITEM_TYPE_FOLDER
+                title = "title"
                 spanX = 1
                 spanY = 1
                 options = 5
+                id = 3
             }
-        doAnswer {}.whenever(mockCursor).applyCommonProperties(any())
         itemProcessorUnderTest = createWorkspaceItemProcessorUnderTest()
 
         // When
@@ -596,16 +574,17 @@ class WorkspaceItemProcessorTest {
             .that(mockCursor.restoreFlag)
             .isEqualTo(0)
         verify(mockCursor).markRestored()
+
+        val folderCaptor = argumentCaptor<FolderInfo>()
+        verify(mockCursor).checkAndAddItem(folderCaptor.capture(), any(), anyOrNull())
+        val actualFolderInfo = folderCaptor.firstValue
+
         assertThat(actualFolderInfo.id).isEqualTo(expectedFolderInfo.id)
-        assertThat(actualFolderInfo.container).isEqualTo(expectedFolderInfo.container)
+        assertThat(actualFolderInfo.title).isEqualTo(expectedFolderInfo.title)
         assertThat(actualFolderInfo.itemType).isEqualTo(expectedFolderInfo.itemType)
-        assertThat(actualFolderInfo.screenId).isEqualTo(expectedFolderInfo.screenId)
-        assertThat(actualFolderInfo.cellX).isEqualTo(expectedFolderInfo.cellX)
-        assertThat(actualFolderInfo.cellY).isEqualTo(expectedFolderInfo.cellY)
         assertThat(actualFolderInfo.spanX).isEqualTo(expectedFolderInfo.spanX)
         assertThat(actualFolderInfo.spanY).isEqualTo(expectedFolderInfo.spanY)
         assertThat(actualFolderInfo.options).isEqualTo(expectedFolderInfo.options)
-        verify(mockCursor).checkAndAddItem(eq(actualFolderInfo), any(), anyOrNull())
     }
 
     @Test
