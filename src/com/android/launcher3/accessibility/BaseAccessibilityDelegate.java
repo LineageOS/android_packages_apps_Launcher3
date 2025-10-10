@@ -18,7 +18,6 @@ package com.android.launcher3.accessibility;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -135,8 +134,7 @@ public abstract class BaseAccessibilityDelegate<T extends Context & ActivityCont
      * @param dropLocation relative to {@param clickedTarget}. If provided, its center is used
      * as the actual drop location otherwise the views center is used.
      */
-    public void handleAccessibleDrop(View clickedTarget, Rect dropLocation,
-            String confirmation) {
+    public void handleAccessibleDrop(View clickedTarget, Rect dropLocation) {
         if (!isInAccessibleDrag()) return;
 
         int[] loc = new int[2];
@@ -150,10 +148,6 @@ public abstract class BaseAccessibilityDelegate<T extends Context & ActivityCont
 
         mContext.getDragLayer().getDescendantCoordRelativeToSelf(clickedTarget, loc);
         mContext.getDragController().completeAccessibleDrag(loc);
-
-        if (!TextUtils.isEmpty(confirmation)) {
-            announceConfirmation(confirmation);
-        }
     }
 
     protected abstract boolean beginAccessibleDrag(View item, ItemInfo info, boolean fromKeyboard);
