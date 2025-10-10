@@ -35,6 +35,7 @@ import android.view.View
 import android.widget.ImageView
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toDrawable
+import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import com.android.internal.hidden_from_bootclasspath.com.android.window.flags.Flags.enableDesktopRecentsTransitionsCornersBugfix
 import com.android.launcher3.Flags.enableDesktopExplodedView
@@ -623,6 +624,30 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
         super.addChildrenForAccessibility(outChildren)
         addAccessibleChildToList(iconView, outChildren)
         addAccessibleChildToList(backgroundView, outChildren)
+    }
+
+    override fun addFocusables(views: ArrayList<View>, direction: Int, focusableMode: Int) {
+        if (!isAttachedToWindow) {
+            return
+        }
+
+        // Manually control focus order.
+        // 1. Add this view itself if it is focusable, visible and enabled.
+        if (isFocusable && isVisible && isEnabled) {
+            views.add(this)
+        }
+
+        // 2. Add the icon view.
+        iconView.addFocusables(views, direction, focusableMode)
+
+        // 3. Add the individual task thumbnails in top-to-bottom, left-to-right tabbing order.
+        taskContainers
+            .asSequence()
+            .map { it.taskContentView }
+            .sortedWith(compareBy({ it.top }, { it.left }))
+            .forEach { taskContentView ->
+                taskContentView.addFocusables(views, direction, focusableMode)
+            }
     }
 
     fun removeTaskFromExplodedView(taskId: Int, animate: Boolean) {
