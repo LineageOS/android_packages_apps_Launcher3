@@ -158,8 +158,6 @@ public class CrossDisplayMoveTransition {
             final int mode = change.getMode();
             if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT) {
                 initializeLeashAsVisible(t, change.getEndAbsBounds(), change.getLeash());
-            } else if (mode == TRANSIT_TO_BACK) {
-                t.hide(change.getLeash());
             }
         }
 

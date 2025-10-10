@@ -261,20 +261,39 @@ class CrossDisplayMoveTransitionTest {
             .addCrossDisplayTask()
             .addLauncherChange()
         val toFrontChange = builder.addGenericTask(mode = WindowManager.TRANSIT_TO_FRONT)
+        val toBackChange = builder.addGenericTask(mode = WindowManager.TRANSIT_TO_BACK)
         val info = builder.build()
         val moveInfo = CrossDisplayMoveTransitionInfo.create(info)!!
 
         transition.setupInitialAnimationState(info, moveInfo, mockTransaction)
 
-        // Verify reparenting
+        // Parenting and visibility should follow the following logic:
+        //  - The task moving between displays should have 2 leashes, both visible, and each leash
+        //    should be parented to the corresponding animation root.
+        //  - The launcher should be visible.
+        //
+        // If we're not in one of the above named cases, then we wan to ensure:
+        //  - Any TRANSIT_FRONT is visible.
+        //  - Any TRANSIT_BACK is untouched (cross fade means we want to keep it as-is until the
+        //    effect is played out)
+
+        // Verify task state
         verify(mockTransaction).reparent(moveInfo.srcTaskLeash!!, moveInfo.srcRoot!!.leash)
         verify(mockTransaction).reparent(moveInfo.dstTaskLeash, moveInfo.dstRoot.leash)
-
-        // Verify visibility initialization
-        verifyInitializedAsVisible(moveInfo.launcherToFront!!.leash)
         verifyInitializedAsVisible(moveInfo.dstTaskLeash)
         verifyInitializedAsVisible(moveInfo.srcTaskLeash!!)
+
+        // Verify launcher state
+        verifyInitializedAsVisible(moveInfo.launcherToFront!!.leash)
+
+        // Verify default handling of TRANSIT_FRONT
         verifyInitializedAsVisible(toFrontChange.leash)
+
+        // Verify default handling of TRANSIT_BACK
+        verify(mockTransaction, never()).hide(toBackChange.leash)
+        verify(mockTransaction, never()).show(toBackChange.leash)
+        verify(mockTransaction, never()).setAlpha(eq(toBackChange.leash), any())
+        verify(mockTransaction, never()).setPosition(eq(toBackChange.leash), any(), any())
     }
 
     @Test
