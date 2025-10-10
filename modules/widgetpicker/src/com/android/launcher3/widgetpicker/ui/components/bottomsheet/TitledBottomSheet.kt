@@ -277,6 +277,9 @@ private fun Modifier.maxSheetHeight(
             sheetSize == SheetSize.WINDOW ->
                 Modifier.heightIn(max = dimensionResource(R.dimen.window_bottom_sheet_max_height))
 
+            sheetSize == SheetSize.X_SMALL ->
+                Modifier.heightIn(max = dimensionResource(R.dimen.x_small_bottom_sheet_max_height))
+
             // Cap height to 5/6th if in an elongated (i.e. tall) orientation on larger devices.
             availableHeight > SheetHeightCapBreakpoint &&
                 availableHeight.value / availableWidth.value >= TALL_ASPECT_RATIO_THRESHOLD ->
@@ -293,6 +296,7 @@ private fun Modifier.maxSheetWidth(sheetSize: SheetSize): Modifier =
             SheetSize.WINDOW ->
                 Modifier.widthIn(max = dimensionResource(R.dimen.window_bottom_sheet_max_width))
 
+            SheetSize.X_SMALL,
             SheetSize.COMPACT ->
                 Modifier.widthIn(max = dimensionResource(R.dimen.compact_bottom_sheet_max_width))
 
@@ -352,8 +356,10 @@ private object TitledBottomSheetDimens {
 enum class SheetSize {
     /** Full size sheet for content heavy use cases. Height is capped in certain taller layouts. */
     FULL,
-    /** Small sheet for single content use cases; values can overridden with resource xml. */
+    /** Small sheet for single app content use cases; values can overridden with resource xml. */
     COMPACT,
+    /** An extra small sheet for single widget use cases. */
+    X_SMALL,
     /** A window like sheet for desktop like uses cases; values can overridden with resource xml. */
     WINDOW,
 }

@@ -236,6 +236,8 @@ android_library {
         "src/com/android/launcher3/widgetpicker/ui/fullcatalog/screens/search/SearchScreenViewModel.kt",
         "src/com/android/launcher3/widgetpicker/ui/appcatalog/SingleAppWidgetsCatalog.kt",
         "src/com/android/launcher3/widgetpicker/ui/appcatalog/SingleAppWidgetsCatalogViewModel.kt",
+        "src/com/android/launcher3/widgetpicker/ui/pin/PinAppWidgetCatalog.kt",
+        "src/com/android/launcher3/widgetpicker/ui/pin/PinAppWidgetCatalogViewModel.kt",
     ],
     static_libs: [
         "widget_picker_ui_theme",

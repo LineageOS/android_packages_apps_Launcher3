@@ -84,4 +84,12 @@
     <!-- Text shown when there are no matching widget or shortcut search results for user's search
      query. [CHAR_LIMIT=150] -->
     <string name="widgets_no_search_results">No widgets or shortcuts found</string>
+
+    <!-- RequestPin(*) flow -->
+    <!-- Button label to automatically add a widget to home screen [CHAR_LIMIT=50] -->
+    <string name="widget_add_to_homescreen_button_label">Add to home screen</string>
+    <!-- Button label to close widget picker that shows when user requests to pin a widget from
+     within an app [CHAR_LIMIT=50] -->
+    <string name="widget_cancel_pin_button_label">Cancel</string>
+    <string name="widget_touch_hold_instruction">"Touch and hold to move a widget."</string>
 </resources>
