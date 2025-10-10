@@ -16,22 +16,22 @@
 
 package com.android.launcher3.pageindicators
 
-import com.android.launcher3.util.TestActivityContext
-import junit.framework.TestCase.assertEquals
-import org.junit.Rule
+import android.platform.uiautomatorhelpers.DeviceHelpers
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.common.truth.Truth.assertThat
 import org.junit.Test
-import org.mockito.Mockito
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 class PageIndicatorDotsTest {
 
-    @get:Rule val context = TestActivityContext()
-    private val pageIndicatorDots: PageIndicatorDots = Mockito.spy(PageIndicatorDots(context))
+    private val pageIndicatorDots: PageIndicatorDots = PageIndicatorDots(DeviceHelpers.context)
 
     @Test
     fun `setActiveMarker should set the active page to the parameter passed`() {
         pageIndicatorDots.setActiveMarker(2)
 
-        assertEquals(2, pageIndicatorDots.activePage)
+        assertThat(pageIndicatorDots.activePage).isEqualTo(2)
     }
 
     @Test
@@ -40,14 +40,14 @@ class PageIndicatorDotsTest {
 
         pageIndicatorDots.setActiveMarker(5)
 
-        assertEquals(2, pageIndicatorDots.activePage)
+        assertThat(pageIndicatorDots.activePage).isEqualTo(2)
     }
 
     @Test
     fun `setMarkersCount should set the number of pages to the passed parameter and if the last page gets removed we want to go to the previous page`() {
         pageIndicatorDots.setMarkersCount(3)
 
-        assertEquals(3, pageIndicatorDots.numPages)
+        assertThat(pageIndicatorDots.numPages).isEqualTo(3)
     }
 
     @Test
@@ -56,7 +56,8 @@ class PageIndicatorDotsTest {
 
         pageIndicatorDots.setMarkersCount(2)
 
-        assertEquals(1, pageIndicatorDots.activePage)
-        assertEquals(pageIndicatorDots.activePage.toFloat(), pageIndicatorDots.currentPosition)
+        assertThat(pageIndicatorDots.activePage).isEqualTo(1)
+        assertThat(pageIndicatorDots.currentPosition)
+            .isEqualTo(pageIndicatorDots.activePage.toFloat())
     }
 }
