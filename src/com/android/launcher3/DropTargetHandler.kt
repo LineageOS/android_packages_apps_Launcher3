@@ -95,9 +95,8 @@ class DropTargetHandler(launcher: Launcher) {
         )
     }
 
-    fun onAccessibilityDelete(view: View?, item: ItemInfo, announcement: CharSequence) {
+    fun onAccessibilityDelete(view: View?, item: ItemInfo) {
         removeItemAndStripEmptyScreens(view, item)
-        mLauncher.dragLayer.announceForAccessibility(announcement)
     }
 
     fun getDragLayer(): DragLayer {
