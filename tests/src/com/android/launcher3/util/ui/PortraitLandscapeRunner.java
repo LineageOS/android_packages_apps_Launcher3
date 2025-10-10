@@ -16,6 +16,7 @@
 
 package com.android.launcher3.util.ui;
 
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.Surface;
 
@@ -46,14 +47,14 @@ public class PortraitLandscapeRunner implements TestRule {
 
     @Override
     public Statement apply(Statement base, Description description) {
-        if (description.getAnnotation(PortraitLandscape.class) == null) {
-            return base;
-        }
-
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
                 try {
+                    if (description.getAnnotation(PortraitLandscape.class) == null) {
+                        base.evaluate();
+                        return;
+                    }
                     try {
                         // we expect to begin unlocked...
                         AbstractLauncherUiTest.verifyKeyguardInvisible();
@@ -65,8 +66,12 @@ public class PortraitLandscapeRunner implements TestRule {
                         throw e;
                     }
 
-                    evaluateInPortrait();
-                    evaluateInLandscape();
+                    goToPortrait();
+                    base.evaluate();
+                    mTest.getDevice().pressHome();
+                    goToLandscape();
+                    base.evaluate();
+                    mTest.getDevice().pressHome();
                 } catch (Throwable e) {
                     Log.e(TAG, "Error", e);
                     throw e;
@@ -81,22 +86,26 @@ public class PortraitLandscapeRunner implements TestRule {
                 }
             }
 
-            private void evaluateInPortrait() throws Throwable {
-                mTest.mDevice.setOrientationNatural();
-                mTest.mLauncher.setExpectedRotation(Surface.ROTATION_0);
-                AbstractLauncherUiTest.checkDetectedLeaks(mTest.mLauncher);
-                base.evaluate();
-                mTest.getDevice().pressHome();
-            }
 
-            private void evaluateInLandscape() throws Throwable {
-                mTest.mLauncher.setFixedLandscape(true);
-                mTest.mDevice.setOrientationLeft();
-                mTest.mLauncher.setExpectedRotation(Surface.ROTATION_90);
-                AbstractLauncherUiTest.checkDetectedLeaks(mTest.mLauncher);
-                base.evaluate();
-                mTest.getDevice().pressHome();
-            }
         };
+    }
+
+    /**
+     * Makes the phone go into Portrait mode.
+     */
+    public void goToPortrait() throws RemoteException {
+        mTest.mDevice.setOrientationNatural();
+        mTest.mLauncher.setExpectedRotation(Surface.ROTATION_0);
+        AbstractLauncherUiTest.checkDetectedLeaks(mTest.mLauncher);
+    }
+
+    /**
+     * Makes the phone go into Landscape mode or FixedLandscape for phones.
+     */
+    public void goToLandscape() throws RemoteException {
+        mTest.mLauncher.setFixedLandscape(true);
+        mTest.mDevice.setOrientationLeft();
+        AbstractLauncherUiTest.checkDetectedLeaks(mTest.mLauncher);
+        mTest.mLauncher.setExpectedRotation(Surface.ROTATION_90);
     }
 }
