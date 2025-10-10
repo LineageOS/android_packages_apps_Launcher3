@@ -36,6 +36,7 @@ import com.android.launcher3.taskbar.TaskbarUIController
 import com.android.launcher3.uioverrides.QuickstepLauncher
 import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.RunnableList
+import com.android.launcher3.util.TestDispatcherProvider
 import com.android.quickstep.OverviewCommandHelper.CommandInfo
 import com.android.quickstep.OverviewCommandHelper.CommandInfo.CommandStatus
 import com.android.quickstep.OverviewCommandHelper.CommandType
@@ -133,8 +134,7 @@ class OverviewCommandHelperTest {
                 OverviewCommandHelper(
                     touchInteractionService = touchInteractionService,
                     overviewComponentObserver = overviewComponentObserver,
-                    uiDispatcher = dispatcher,
-                    uiLightweightDispatcher = dispatcher,
+                    dispatcherProvider = TestDispatcherProvider(dispatcher),
                     displayRepository = displayRepository,
                     taskbarManager = taskbarManager,
                     taskAnimationManagerRepository =

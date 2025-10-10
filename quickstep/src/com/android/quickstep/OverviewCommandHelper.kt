@@ -35,9 +35,6 @@ import com.android.app.tracing.traceSection
 import com.android.internal.jank.Cuj
 import com.android.launcher3.DeviceProfile
 import com.android.launcher3.anim.AnimatorListeners
-import com.android.launcher3.concurrent.annotations.LightweightBackground
-import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority
-import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.logger.LauncherAtom
 import com.android.launcher3.logging.StatsLogManager
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_OVERVIEW_SHOW_OVERVIEW_FROM_3_BUTTON
@@ -47,6 +44,7 @@ import com.android.launcher3.taskbar.TaskbarInteractor
 import com.android.launcher3.taskbar.TaskbarManager
 import com.android.launcher3.util.OverviewCommandHelperProtoLogProxy
 import com.android.launcher3.util.RunnableList
+import com.android.launcher3.util.coroutines.DispatcherProvider
 import com.android.quickstep.GestureState.GestureEndTarget
 import com.android.quickstep.GestureState.displaySupportsHomeGesture
 import com.android.quickstep.OverviewCommandHelper.CommandInfo.CommandStatus
@@ -76,7 +74,6 @@ import java.io.PrintWriter
 import java.util.concurrent.ConcurrentLinkedDeque
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.ensureActive
@@ -90,16 +87,15 @@ class OverviewCommandHelper
 constructor(
     @Assisted private val touchInteractionService: TouchInteractionService,
     private val overviewComponentObserver: OverviewComponentObserver,
-    @Ui private val uiDispatcher: CoroutineDispatcher,
-    @LightweightBackground(LightweightBackgroundPriority.UI)
-    private val uiLightweightDispatcher: CoroutineDispatcher,
+    private val dispatcherProvider: DispatcherProvider,
     private val displayRepository: DisplayRepository,
     @Assisted private val taskbarManager: TaskbarManager,
     private val taskAnimationManagerRepository: PerDisplayRepository<TaskAnimationManager>,
     @ElapsedRealtimeLong private val elapsedRealtime: () -> Long,
     @Assisted private val systemUiProxy: SystemUiProxy,
 ) {
-    private val coroutineScope = CoroutineScope(SupervisorJob() + uiLightweightDispatcher)
+    private val coroutineScope =
+        CoroutineScope(SupervisorJob() + dispatcherProvider.lightweightBackground)
 
     private val commandQueue = ConcurrentLinkedDeque<CommandInfo>()
 
@@ -150,7 +146,7 @@ constructor(
 
         if (commandQueue.size == 1) {
             OverviewCommandHelperProtoLogProxy.logCommandExecuted(command, commandQueue.size)
-            coroutineScope.launch(uiDispatcher) { processNextCommand() }
+            coroutineScope.launch(dispatcherProvider.main) { processNextCommand() }
         } else {
             OverviewCommandHelperProtoLogProxy.logCommandNotExecuted(command, commandQueue.size)
         }
@@ -209,7 +205,7 @@ constructor(
             command.status = CommandStatus.PROCESSING
             OverviewCommandHelperProtoLogProxy.logExecutingCommand(command)
 
-            coroutineScope.launch(uiDispatcher) {
+            coroutineScope.launch(dispatcherProvider.main) {
                 traceSection("OverviewCommandHelper.executeCommandWithTimeout") {
                     withTimeout(QUEUE_WAIT_DURATION_IN_MS) {
                         executeCommandSuspended(command)
