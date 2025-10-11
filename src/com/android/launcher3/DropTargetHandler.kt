@@ -105,7 +105,7 @@ class DropTargetHandler(launcher: Launcher) {
     }
 
     fun onClick(buttonDropTarget: ButtonDropTarget) {
-        mLauncher.accessibilityDelegate.handleAccessibleDrop(buttonDropTarget, null, null)
+        mLauncher.accessibilityDelegate.handleAccessibleDrop(buttonDropTarget, null)
     }
 
     private fun removeItemAndStripEmptyScreens(view: View?, item: ItemInfo) {
