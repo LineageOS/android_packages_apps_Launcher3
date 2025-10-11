@@ -44,6 +44,7 @@ public abstract class BaseAccessibilityDelegate<T extends Context & ActivityCont
         ICON,
         FOLDER,
         APP_PAIR,
+        FILESYSTEM_ICON,
         WIDGET
     }
 
