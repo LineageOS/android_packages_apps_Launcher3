@@ -22,6 +22,7 @@ import android.content.Intent
 import android.content.Intent.ACTION_PACKAGE_ADDED
 import android.content.Intent.ACTION_PACKAGE_CHANGED
 import android.content.Intent.ACTION_PACKAGE_REMOVED
+import android.content.Intent.ACTION_SEARCH
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageInstaller
 import android.os.Process.myUserHandle
@@ -137,18 +138,33 @@ class OSEManager(
             else if (overlayAppsList.isNotEmpty()) overlayAppsList[0] else null
 
         val overlayTarget =
-            if (overlayPkg == null) null
-            else
-                try {
+            overlayPkg
+                ?.runCatching {
                     context.packageManager
                         .resolveActivity(Intent(OVERLAY_ACTION).setPackage(overlayPkg), 0)
                         ?.activityInfo
-                } catch (e: Exception) {
-                    null
                 }
+                ?.getOrNull()
+
+        val supportsSearchIntent =
+            osePkg
+                ?.runCatching {
+                    context.packageManager.resolveActivity(
+                        Intent(ACTION_SEARCH).setPackage(osePkg),
+                        0,
+                    )
+                }
+                ?.getOrNull() != null
 
         val oldOseInfo = mutableOSEInfoRef.value
-        val newOseInfo = OSEInfo(osePkg, overlayTarget, oseApkInstallPending, oseConfigured)
+        val newOseInfo =
+            OSEInfo(
+                osePkg,
+                overlayTarget,
+                oseApkInstallPending,
+                oseConfigured,
+                supportsSearchIntent,
+            )
 
         if (
             oldOseInfo.pkg != newOseInfo.pkg ||
@@ -215,6 +231,7 @@ class OSEManager(
         val overlayTarget: ActivityInfo? = null,
         val installPending: Boolean = false,
         val isOseConfigured: Boolean = false,
+        val supportsSearchIntent: Boolean = false,
     ) {
         val overlayPackage: String?
             get() = overlayTarget?.packageName ?: pkg

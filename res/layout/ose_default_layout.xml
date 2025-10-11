@@ -14,15 +14,35 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="0dp"
+    android:layout_height="match_parent"
+    android:minHeight="63dp"
+    android:background="@drawable/bg_ose_default"
+    android:backgroundTint="@color/materialColorSurfaceContainerLow"
+    android:clickable="true"
+    android:orientation="horizontal">
+    <ImageView
+        android:id="@+id/search_icon"
+        android:layout_width="@dimen/qsb_search_icon_tap_size"
+        android:layout_height="@dimen/qsb_search_icon_tap_size"
+        android:layout_gravity="center"
+        android:layout_marginStart="@dimen/qsb_search_icon_margin_start"
+        android:clickable="false"
+        android:focusable="false"
+        android:scaleType="center"
+        android:tint="?android:attr/colorAccent"
+        android:background="@android:color/transparent"
+        android:src="@drawable/ic_allapps_search" />
+    <TextView
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="center_vertical"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
+        android:paddingStart="@dimen/qsb_search_icon_margin_start"
+        android:paddingEnd="@dimen/qsb_search_icon_margin_start"
         android:text="@string/abandoned_search"
-        android:textColor="?android:attr/textColorSecondary"
+        android:textColor="@color/materialColorOnPrimaryContainer"
         android:textAppearance="?android:textAppearanceMedium"
-        android:clickable="true"
-        android:background="?android:attr/selectableItemBackground" />
+        android:fontFamily="variable-title-small" />
+</LinearLayout>
