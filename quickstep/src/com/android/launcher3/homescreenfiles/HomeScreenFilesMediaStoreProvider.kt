@@ -22,7 +22,6 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.ContentObserver
 import android.net.Uri
-import android.os.Environment
 import android.os.Process
 import android.provider.DocumentsContract
 import android.provider.DocumentsContract.Document.MIME_TYPE_DIR
@@ -57,6 +56,7 @@ class HomeScreenFilesMediaStoreProvider(
     private val context: Context,
     private val executorService: ExecutorService,
     private val fileFactory: (path: String) -> File,
+    private val environmentWrapper: EnvironmentWrapper,
     lifecycle: DaggerSingletonTracker,
 ) : HomeScreenFilesProvider {
     override val fileChanges = MutableListenableStream<FileChange>()
@@ -70,7 +70,7 @@ class HomeScreenFilesMediaStoreProvider(
     private val inProgressMoveToHomeScreenUriAliases = ConcurrentHashMap<Uri, Uri>()
 
     init {
-        if (isExternalStorageDirectoryMounted()) {
+        if (environmentWrapper.isExternalStorageDirectoryMounted()) {
             externalStorageDirectoryMountedFuture.complete(null)
         }
 
@@ -83,7 +83,7 @@ class HomeScreenFilesMediaStoreProvider(
 
                     // NOTE: The media provider dispatches an event during both mount and unmount.
                     with(externalStorageDirectoryMountedFuture) {
-                        if (!isDone && isExternalStorageDirectoryMounted()) {
+                        if (!isDone && environmentWrapper.isExternalStorageDirectoryMounted()) {
                             complete(null)
                         }
                     }
@@ -417,10 +417,6 @@ class HomeScreenFilesMediaStoreProvider(
                 kotlin
                     .runCatching { MediaStore.getVolumeName(uri) == VOLUME_EXTERNAL_PRIMARY }
                     .getOrDefault(false)
-
-        private fun isExternalStorageDirectoryMounted() =
-            Environment.getExternalStorageState(Environment.getExternalStorageDirectory()) ==
-                Environment.MEDIA_MOUNTED
 
         private fun isExternalStorageProviderUri(uri: Uri?) =
             uri?.scheme == ContentResolver.SCHEME_CONTENT &&
