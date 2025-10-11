@@ -147,7 +147,6 @@ public class DeleteDropTarget extends ButtonDropTarget {
         // Remove the item from launcher and the db, we can ignore the containerInfo in this call
         // because we already remove the drag view from the folder (if the drag originated from
         // a folder) in Folder.beginDrag()
-        CharSequence announcement = getContext().getString(R.string.item_removed);
-        mDropTargetHandler.onAccessibilityDelete(view, item, announcement);
+        mDropTargetHandler.onAccessibilityDelete(view, item);
     }
 }
