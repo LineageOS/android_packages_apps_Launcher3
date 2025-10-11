@@ -62,8 +62,6 @@ import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.SafeCloseable;
 import com.android.launcher3.util.SettingsCache;
 
-import kotlin.Unit;
-
 /**
  * Settings activity for Launcher. Currently implements the following setting: Allow rotation
  */
@@ -180,6 +178,8 @@ public class SettingsActivity extends FragmentActivity
 
         private boolean mPreferenceHighlighted = false;
 
+        private boolean mIsDeveloperSettingEnabledSet = false;
+
         @Override
         public void onCreate(@Nullable Bundle savedInstanceState) {
             if (BuildConfig.IS_DEBUG_DEVICE) {
@@ -187,7 +187,17 @@ public class SettingsActivity extends FragmentActivity
                 SettingsCache settingsCache = SettingsCache.INSTANCE.get(getContext());
                 mDeveloperOptionsEnabled = settingsCache.getValue(devUri);
                 mSettingCacheSafeCloseable = settingsCache.getListenableRef(devUri).forEach(
-                        MAIN_EXECUTOR, (v) -> tryRecreateActivity());
+                        MAIN_EXECUTOR, (v) -> {
+                            // Listening to developer enabled setting will immediately trigger
+                            // callback for current value. Yet we only want to recreate activity
+                            // when such value has changed.
+                            if (!mIsDeveloperSettingEnabledSet) {
+                                mIsDeveloperSettingEnabledSet = true;
+                                return null;
+                            }
+                            tryRecreateActivity();
+                            return null;
+                        });
             }
             super.onCreate(savedInstanceState);
         }
@@ -371,13 +381,12 @@ public class SettingsActivity extends FragmentActivity
         /**
          * Tries to recreate the preference
          */
-        protected Unit tryRecreateActivity() {
+        protected void tryRecreateActivity() {
             if (isResumed()) {
                 recreateActivityNow();
             } else {
                 mRestartOnResume = true;
             }
-            return null;
         }
 
         private void recreateActivityNow() {
