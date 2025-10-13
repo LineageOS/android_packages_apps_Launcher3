@@ -25,11 +25,11 @@ import android.content.Context;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
 
 import androidx.annotation.AnyThread;
+import androidx.annotation.WorkerThread;
 
 import com.android.launcher3.concurrent.annotations.LightweightBackground;
 import com.android.launcher3.dagger.ApplicationContext;
@@ -42,6 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 
+import javax.annotation.concurrent.ThreadSafe;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -58,6 +59,7 @@ import javax.inject.Named;
  *
  * Cache will also be updated if a key queried is missing (even if it has no listeners registered).
  */
+@ThreadSafe
 @LauncherAppSingleton
 public class SettingsCache extends ContentObserver {
 
@@ -112,21 +114,23 @@ public class SettingsCache extends ContentObserver {
     SettingsCache(@ApplicationContext Context context,
             @Named("SETTINGS_ENABLED_BY_DEFAULT") Set<Uri> urisEnabledByDefault,
             DaggerSingletonTracker tracker,
-            @LightweightBackground(priority = UI) Executor lightweightBackgroundExecutor) {
-        super(new Handler(Looper.getMainLooper()));
+            @LightweightBackground(priority = UI) LooperExecutor lightweightBgLooperExecutor) {
+        super(new Handler(lightweightBgLooperExecutor.getLooper()));
         mResolver = context.getContentResolver();
         mUrisEnabledByDefault = urisEnabledByDefault;
-        mLightweightBackgroundExecutor = lightweightBackgroundExecutor;
+        mLightweightBackgroundExecutor = lightweightBgLooperExecutor;
         tracker.addCloseable(() ->
                 mLightweightBackgroundExecutor.execute(
                         () -> mResolver.unregisterContentObserver(this)));
     }
 
+    @WorkerThread
     @Override
     public void onChange(boolean selfChange, Uri uri) {
         // We use default of 1, but if we're getting an onChange call, can assume a non-default
         // value will exist
-        boolean newVal = updateValue(uri);
+        boolean newVal = computeNewValue(uri);
+        mKeyCache.put(uri, newVal);
         MutableListenableStream<Boolean> listeners = mListenerMap.get(uri);
         if (listeners == null) {
             return;
@@ -136,14 +140,11 @@ public class SettingsCache extends ContentObserver {
 
     /**
      * Returns the value for this classes key from the cache. If not in cache, will call
-     * {@link #updateValue(Uri)} to fetch.
+     * {@link #computeNewValue(Uri)} to fetch.
      */
+    @AnyThread
     public boolean getValue(Uri keySetting) {
-        if (mKeyCache.containsKey(keySetting)) {
-            return mKeyCache.get(keySetting);
-        } else {
-            return updateValue(keySetting);
-        }
+        return mKeyCache.computeIfAbsent(keySetting, this::computeNewValue);
     }
 
     private void registerUriAsync(Uri uri) {
@@ -162,7 +163,7 @@ public class SettingsCache extends ContentObserver {
         return mListenerMap.computeIfAbsent(uri, mListenerMapper);
     }
 
-    private boolean updateValue(Uri keyUri) {
+    private boolean computeNewValue(Uri keyUri) {
         String key = keyUri.getLastPathSegment();
         boolean newVal;
         int defaultValue = mUrisEnabledByDefault.contains(keyUri) ? 1 : 0;
@@ -174,7 +175,6 @@ public class SettingsCache extends ContentObserver {
             newVal = Settings.Secure.getInt(mResolver, key, defaultValue) == 1;
         }
 
-        mKeyCache.put(keyUri, newVal);
         return newVal;
     }
 }
