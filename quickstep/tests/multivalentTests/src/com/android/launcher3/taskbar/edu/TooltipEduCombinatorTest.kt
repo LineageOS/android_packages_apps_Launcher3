@@ -1,0 +1,395 @@
+/*
+ * Copyright (C) 2025 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.launcher3.taskbar.edu
+
+import com.android.launcher3.R
+import com.android.launcher3.Utilities
+import com.android.launcher3.taskbar.TaskbarActivityContext
+import com.android.launcher3.taskbar.TaskbarControllerTestUtil.asProperty
+import com.android.launcher3.taskbar.TaskbarStashController
+import com.android.launcher3.taskbar.edu.TooltipsEduPage.DisplayLocation
+import com.android.launcher3.taskbar.rules.TaskbarModeRule
+import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.PINNED
+import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.THREE_BUTTONS
+import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.TRANSIENT
+import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
+import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
+import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
+import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
+import com.android.launcher3.util.LauncherMultivalentJUnit
+import com.android.launcher3.util.LauncherMultivalentJUnit.EmulatedDevices
+import com.android.launcher3.util.OnboardingPrefs
+import com.google.common.truth.Truth.assertThat
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+
+@RunWith(LauncherMultivalentJUnit::class)
+@EmulatedDevices(["pixelFoldable2023", "pixelTablet2023"])
+class TooltipEduCombinatorTest {
+
+    @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()
+
+    @get:Rule(order = 1) val taskbarModeRule = TaskbarModeRule(context)
+
+    @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
+
+    @InjectController lateinit var taskbarStashController: TaskbarStashController
+
+    private lateinit var tooltipEduCombinator: TooltipEduCombinator
+
+    private val taskbarContext: TaskbarActivityContext
+        get() = taskbarUnitTestRule.activityContext
+
+    private val wasInTestHarness = Utilities.isRunningInTestHarness()
+
+    private var tooltipStep by OnboardingPrefs.TASKBAR_EDU_TOOLTIP_STEP.prefItem.asProperty(context)
+    private var swipeEduSeen by OnboardingPrefs.TASKBAR_SWIPE_EDU_SEEN.asProperty(context)
+    private var featuresEduSeen by OnboardingPrefs.TASKBAR_FEATURES_EDU_SEEN.asProperty(context)
+    private var searchEduSeen by OnboardingPrefs.TASKBAR_SEARCH_EDU_SEEN.asProperty(context)
+    private var pinningEduSeen by OnboardingPrefs.TASKBAR_PINNING_EDU_SEEN.asProperty(context)
+
+    @Before
+    fun setUp() {
+        tooltipEduCombinator = TooltipEduCombinator(taskbarContext, taskbarStashController)
+        Utilities.disableRunningInTestHarnessForTests()
+    }
+
+    @After
+    fun tearDown() {
+        if (wasInTestHarness) {
+            Utilities.enableRunningInTestHarnessForTests()
+        }
+    }
+
+    @Test
+    @TaskbarMode(TRANSIENT)
+    fun testGetSwipeEdu_whenTaskbarIsTransientNotSeenBefore_returnSwipeEdu() {
+        val eduPage = tooltipEduCombinator.getSwipeEdu()!!
+        checkEduPage(
+            eduPage = eduPage,
+            titleResId = R.string.taskbar_edu_stashing,
+            canBeSkipped = true,
+            tooltipCheckers =
+                listOf { tooltipInfo ->
+                    checkTooltip(
+                        tooltipInfo = tooltipInfo,
+                        animationResId = R.raw.taskbar_edu_stashing,
+                        animationDescriptionResId = R.string.taskbar_edu_swipe_animation_description,
+                    )
+                },
+            location = DisplayLocation.TASKBAR_CENTER,
+        )
+    }
+
+    @Test
+    @TaskbarMode(THREE_BUTTONS)
+    fun testGetSwipeEdu_whenTaskbarIsInThreeButton_returnsNull() {
+        assertThat(tooltipEduCombinator.getSwipeEdu()).isNull()
+    }
+
+    @Test
+    @TaskbarMode(TRANSIENT)
+    fun testGetSwipeEdu_whenTaskbarIsTransientSeenBefore_returnsNull() {
+        swipeEduSeen = true
+        assertThat(tooltipEduCombinator.getSwipeEdu()).isNull()
+    }
+
+    @Test
+    @TaskbarMode(TRANSIENT)
+    fun getFeaturesTooltipsEduPages_whenTransientMode_andAllTooltipsPresent_returnsCorrectPaginatedPages() {
+        val eduPages = tooltipEduCombinator.getFeaturesTooltipsEduPages()!!
+
+        // Should be split into 2 pages as there are 4 tooltips in total.
+        assertThat(eduPages).hasSize(2)
+
+        // Check first page.
+        checkEduPage(
+            eduPage = eduPages[0],
+            titleResId = R.string.taskbar_edu_features,
+            canBeSkipped = false,
+            actionButtonTextResId = R.string.taskbar_edu_next,
+            tooltipCheckers =
+                listOf(
+                    { checkIfSplitScreenTooltip(it) },
+                    { checkIfBubbleTooltip(it) },
+                    { checkIfSuggestionsTooltip(it) },
+                ),
+            location = DisplayLocation.TASKBAR_CENTER,
+        )
+        // Check second page.
+        checkEduPage(
+            eduPage = eduPages[1],
+            titleResId = R.string.taskbar_edu_pinning_title,
+            canBeSkipped = true,
+            actionButtonTextResId = null,
+            tooltipCheckers = listOf { checkIfPinningTooltip(it, isStandAlone = true) },
+            location = DisplayLocation.SEARCH_DIVIDER,
+        )
+        // Check that the seen flags are updated.
+        assertThat(tooltipEduCombinator.userHasSeenFeaturesEdu).isTrue()
+        assertThat(tooltipEduCombinator.userHasSeenPinningEdu).isTrue()
+        assertThat(tooltipEduCombinator.userHasSeenSwipeEdu).isTrue()
+    }
+
+    @Test
+    @TaskbarMode(TRANSIENT)
+    fun getFeaturesTooltipsEduPages_whenTransientMode_oldToolTipsSeen_returnsCorrectPaginatedPages() {
+        setShownOldEdu()
+        val eduPages = tooltipEduCombinator.getFeaturesTooltipsEduPages()!!
+
+        assertThat(eduPages).hasSize(1)
+
+        // Check first page.
+        checkEduPage(
+            eduPage = eduPages[0],
+            titleResId = R.string.taskbar_edu_features,
+            canBeSkipped = false,
+            actionButtonTextResId = R.string.taskbar_edu_done,
+            tooltipCheckers =
+                listOf(
+                    { checkIfBubbleTooltip(it) },
+                    { checkIfSuggestionsTooltip(it) },
+                    { checkIfPinningTooltip(it, isStandAlone = false) },
+                ),
+            location = DisplayLocation.TASKBAR_CENTER,
+        )
+        // Check that the seen flags are updated.
+        assertThat(tooltipEduCombinator.userHasSeenFeaturesEdu).isTrue()
+        assertThat(tooltipEduCombinator.userHasSeenPinningEdu).isTrue()
+        assertThat(tooltipEduCombinator.userHasSeenSwipeEdu).isTrue()
+    }
+
+    @Test
+    @TaskbarMode(TRANSIENT)
+    fun getFeaturesTooltipsEduPages_whenTransientMode_createAnyBubbleDisabled_returnsCorrectPaginatedPages() {
+        tooltipEduCombinator.createAnyBubbleEnabled = false
+        val eduPages = tooltipEduCombinator.getFeaturesTooltipsEduPages()!!
+
+        assertThat(eduPages).hasSize(1)
+
+        // Check first page.
+        checkEduPage(
+            eduPage = eduPages[0],
+            titleResId = R.string.taskbar_edu_features,
+            canBeSkipped = false,
+            actionButtonTextResId = R.string.taskbar_edu_done,
+            tooltipCheckers =
+                listOf(
+                    { checkIfSplitScreenTooltip(it) },
+                    { checkIfSuggestionsTooltip(it) },
+                    { checkIfPinningTooltip(it, isStandAlone = false) },
+                ),
+            location = DisplayLocation.TASKBAR_CENTER,
+        )
+        // Check that the seen flags are updated.
+        assertThat(tooltipEduCombinator.userHasSeenFeaturesEdu).isTrue()
+        assertThat(tooltipEduCombinator.userHasSeenPinningEdu).isTrue()
+        assertThat(tooltipEduCombinator.userHasSeenSwipeEdu).isTrue()
+    }
+
+    @Test
+    fun getFeaturesTooltipsEduPages_whenTooltipsDisabled_returnsNull() {
+        Utilities.enableRunningInTestHarnessForTests()
+        assertThat(tooltipEduCombinator.getFeaturesTooltipsEduPages()).isNull()
+    }
+
+    @Test
+    @TaskbarMode(TRANSIENT)
+    fun getFeaturesTooltipsEduPages_whenFeaturesEduSeenBefore_returnsPinningEdu() {
+        featuresEduSeen = true
+        pinningEduSeen = false
+
+        val eduPages = tooltipEduCombinator.getFeaturesTooltipsEduPages()!!
+
+        assertThat(eduPages).hasSize(1)
+        val pinningPage = eduPages.first()
+
+        checkEduPage(
+            eduPage = pinningPage,
+            titleResId = R.string.taskbar_edu_pinning_title,
+            canBeSkipped = true,
+            tooltipCheckers = listOf { checkIfPinningTooltip(it, isStandAlone = true) },
+            location = DisplayLocation.SEARCH_DIVIDER,
+        )
+        assertThat(tooltipEduCombinator.userHasSeenPinningEdu).isTrue()
+    }
+
+    @Test
+    @TaskbarMode(THREE_BUTTONS)
+    fun getFeaturesTooltipsEduPages_whenPersistentMode_returnsSinglePage() {
+        val eduPages = tooltipEduCombinator.getFeaturesTooltipsEduPages()!!
+
+        assertThat(eduPages).hasSize(1)
+        val page = eduPages.first()
+
+        // Pinning tooltip should not be shown in persistent mode.
+        checkEduPage(
+            eduPage = page,
+            titleResId = R.string.taskbar_edu_features,
+            canBeSkipped = false,
+            actionButtonTextResId = R.string.taskbar_edu_done,
+            tooltipCheckers =
+                listOf(
+                    { checkIfSplitScreenTooltip(it, isTransient = false) },
+                    { checkIfBubbleTooltip(it, isTransient = false) },
+                    { checkIfSuggestionsTooltip(it, isTransient = false) },
+                ),
+            location = DisplayLocation.TASKBAR_CENTER,
+        )
+    }
+
+    @Test
+    @TaskbarMode(PINNED)
+    fun getSearchEdu_whenPinnedTaskbar_returnsSearchEdu() {
+        tooltipEduCombinator.shouldShowSearchEduResolver = { true }
+        val searchEdu = tooltipEduCombinator.getSearchEdu()
+        checkEduPage(
+            eduPage = searchEdu!!,
+            titleResId = R.string.taskbar_search_edu_title,
+            canBeSkipped = true,
+            tooltipCheckers = listOf { checkIfSearchTooltip(it) },
+            location = DisplayLocation.SEARCH_ICON,
+        )
+        assertThat(tooltipEduCombinator.userHasSeenSearchEdu).isTrue()
+    }
+
+    @Test
+    @TaskbarMode(TRANSIENT)
+    fun getSearchEdu_whenTransientTaskbar_returnsNull() {
+        assertThat(tooltipEduCombinator.getSearchEdu()).isNull()
+    }
+
+    @Test
+    @TaskbarMode(PINNED)
+    fun getSearchEdu_whenPinnedTaskbarSearchEduSeen_returnsNull() {
+        searchEduSeen = true
+        tooltipEduCombinator.shouldShowSearchEduResolver = { true }
+        assertThat(tooltipEduCombinator.getSearchEdu()).isNull()
+    }
+
+    @Test
+    @TaskbarMode(PINNED)
+    fun getSearchEdu_whenPinnedTaskbarShouldNotShowSearchEdu_returnsNull() {
+        tooltipEduCombinator.shouldShowSearchEduResolver = { false }
+        assertThat(tooltipEduCombinator.getSearchEdu()).isNull()
+    }
+
+    private fun checkEduPage(
+        eduPage: TooltipsEduPage,
+        titleResId: Int,
+        canBeSkipped: Boolean,
+        actionButtonTextResId: Int? = null,
+        tooltipCheckers: List<(TooltipInfo) -> Unit>,
+        location: DisplayLocation,
+    ) {
+        assertThat(eduPage.title).isEqualTo(context.getString(titleResId))
+        assertThat(eduPage.canBeSkipped).isEqualTo(canBeSkipped)
+        actionButtonTextResId?.let {
+            assertThat(eduPage.actionButton).isEqualTo(context.getString(it))
+        }
+        assertThat(eduPage.location).isEqualTo(location)
+        assertThat(tooltipCheckers.size).isEqualTo(eduPage.tooltips.size)
+        tooltipCheckers.zip(eduPage.tooltips).forEach { (checker, tooltip) -> checker(tooltip) }
+    }
+
+    private fun checkIfSearchTooltip(tooltipInfo: TooltipInfo) =
+        checkTooltip(
+            tooltipInfo,
+            animationResId = R.raw.taskbar_edu_search,
+            animationDescriptionResId = R.string.taskbar_edu_suggested_search_animation_description,
+        )
+
+    private fun checkIfSplitScreenTooltip(tooltipInfo: TooltipInfo, isTransient: Boolean = true) =
+        checkTooltip(
+            tooltipInfo = tooltipInfo,
+            messageResId = R.string.taskbar_edu_splitscreen,
+            animationResId =
+                if (isTransient) {
+                    R.raw.taskbar_edu_splitscreen_transient
+                } else {
+                    R.raw.taskbar_edu_splitscreen_persistent
+                },
+            animationDescriptionResId = R.string.taskbar_edu_split_screen_animation_description,
+        )
+
+    private fun checkIfBubbleTooltip(
+        tooltipInfo: TooltipInfo,
+        isTransient: Boolean = true,
+        isStandAloe: Boolean = false,
+    ) =
+        checkTooltip(
+            tooltipInfo = tooltipInfo,
+            messageResId =
+                if (isStandAloe) {
+                    R.string.taskbar_edu_bubbles_standalone
+                } else {
+                    R.string.taskbar_edu_bubbles
+                },
+            animationResId =
+                if (isTransient) {
+                    R.raw.taskbar_edu_bubbles_transient
+                } else {
+                    R.raw.taskbar_edu_bubbles_persistent
+                },
+            animationDescriptionResId = R.string.taskbar_edu_bubbles_animation_description,
+        )
+
+    private fun checkIfSuggestionsTooltip(tooltipInfo: TooltipInfo, isTransient: Boolean = true) =
+        checkTooltip(
+            tooltipInfo = tooltipInfo,
+            messageResId = R.string.taskbar_edu_suggestions,
+            animationResId =
+                if (isTransient) {
+                    R.raw.taskbar_edu_suggestions_transient
+                } else {
+                    R.raw.taskbar_edu_suggestions_persistent
+                },
+            animationDescriptionResId = R.string.taskbar_edu_suggested_app_animation_description,
+        )
+
+    private fun checkIfPinningTooltip(tooltipInfo: TooltipInfo, isStandAlone: Boolean = false) =
+        checkTooltip(
+            tooltipInfo = tooltipInfo,
+            messageResId =
+                if (isStandAlone) {
+                    R.string.taskbar_edu_pinning_standalone
+                } else {
+                    R.string.taskbar_edu_pinning
+                },
+            animationResId = R.raw.taskbar_edu_pinning_transient,
+            animationDescriptionResId = R.string.taskbar_edu_pinning_animation_description,
+        )
+
+    private fun checkTooltip(
+        tooltipInfo: TooltipInfo,
+        messageResId: Int? = null,
+        animationResId: Int,
+        animationDescriptionResId: Int,
+    ) {
+        messageResId?.let { assertThat(tooltipInfo.message).isEqualTo(context.getString(it)) }
+        assertThat(tooltipInfo.animationResId).isEqualTo(animationResId)
+        assertThat(tooltipInfo.animationDescription)
+            .isEqualTo(context.getString(animationDescriptionResId))
+    }
+
+    private fun setShownOldEdu() {
+        tooltipStep = 1
+    }
+}
