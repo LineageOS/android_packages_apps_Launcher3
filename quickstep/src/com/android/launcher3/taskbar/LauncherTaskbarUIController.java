@@ -45,7 +45,6 @@ import androidx.annotation.Nullable;
 import com.android.app.animation.Interpolators;
 import com.android.launcher3.BuildConfig;
 import com.android.launcher3.DeviceProfile;
-import com.android.launcher3.Flags;
 import com.android.launcher3.LauncherInteractor;
 import com.android.launcher3.LauncherState;
 import com.android.launcher3.LauncherUiState;
@@ -129,13 +128,10 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
     private RecentsViewContainer mRecentsViewContainer;
     private @Nullable RecentsViewInteractor mRecentsViewInteractor;
 
-    public LauncherTaskbarUIController(
-            LauncherInteractor launcher,
-            LauncherUiState launcherUiState,
-            HomeVisibilityState homeState) {
+    public LauncherTaskbarUIController(LauncherInteractor launcher) {
         mLauncher = launcher;
-        mLauncherUiState = launcherUiState;
-        mHomeState = homeState;
+        mLauncherUiState = launcher.getLauncherUiState();
+        mHomeState = launcher.getHomeVisibilityState();
     }
 
     @Override
@@ -155,7 +151,7 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
             mRecentsViewContainer.setTaskbarInteractor(new TaskbarInteractor(this));
         } else {
             // TODO(b/404636836) Refactor API calls on mRecentsViewContainer
-            mRecentsViewContainer = mLauncher.getLauncherAsRecentViewContainer();
+            mRecentsViewContainer = mLauncher.getRecentsViewContainer();
         }
         mLauncher.setTaskbarInteractor(new TaskbarInteractor(this));
 

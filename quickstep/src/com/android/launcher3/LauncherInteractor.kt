@@ -23,6 +23,7 @@ import androidx.annotation.AnyThread
 import androidx.annotation.MainThread
 import com.android.app.animation.Interpolators
 import com.android.launcher3.Flags.enableTaskbarUiThread
+import com.android.launcher3.Flags.enableUnfoldStateAnimation
 import com.android.launcher3.Hotseat.ALPHA_CHANNEL_TASKBAR_ALIGNMENT
 import com.android.launcher3.logging.InstanceId
 import com.android.launcher3.logging.StatsLogManager
@@ -34,23 +35,35 @@ import com.android.launcher3.uioverrides.QuickstepLauncher
 import com.android.launcher3.util.Executors.IMMEDIATE_EXECUTOR
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.SafeCloseable
+import com.android.quickstep.SystemUiProxy
 import com.android.quickstep.util.ScalingWorkspaceRevealAnim
 import com.android.quickstep.util.SplitTask
-import com.android.quickstep.views.RecentsViewContainer
 import com.android.systemui.animation.ViewRootSync.synchronizeNextDraw
+import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation
 import java.util.concurrent.Executor
 import javax.annotation.concurrent.ThreadSafe
 
 /** Expose [QuickstepLauncher] APIs to taskbar rendered on per-window UI thread. */
 @ThreadSafe
-class LauncherInteractor(private val launcher: QuickstepLauncher) {
+class LauncherInteractor(private val launcher: QuickstepLauncher) : ActivityInteractor(launcher) {
 
     val executor: Executor = if (enableTaskbarUiThread()) MAIN_EXECUTOR else IMMEDIATE_EXECUTOR
 
+    val launcherUiState: LauncherUiState = launcher.launcherUiState
+
+    val homeVisibilityState by lazy { SystemUiProxy.INSTANCE[launcher].homeVisibilityState }
+
     private var hotseatTranslationXAnimation: AnimatorSet? = null
 
-    @AnyThread fun getLauncherAsRecentViewContainer(): RecentsViewContainer = launcher
+    @Override
+    override fun getUnfoldTransitionProvider(): UnfoldTransitionProgressProvider? {
+        return if (!enableUnfoldStateAnimation()) {
+            launcher.unfoldTransitionProgressProvider
+        } else {
+            super.getUnfoldTransitionProvider()
+        }
+    }
 
     @AnyThread
     fun startScalingWorkspaceRevealAnim(playAlphaReveal: Boolean = true, playBlur: Boolean = true) {
@@ -226,13 +239,6 @@ class LauncherInteractor(private val launcher: QuickstepLauncher) {
     )
     @MainThread
     fun isTopResumedActivity() = launcher.isTopResumedActivity
-
-    @Deprecated(
-        "Should be removed once we turned on [refactorTaskbarUiState()] flag",
-        ReplaceWith("LauncherUiState.deviceProfileRef.value()"),
-    )
-    @MainThread
-    fun getDeviceProfile(): DeviceProfile = launcher.deviceProfile
 
     @Deprecated(
         "Should be removed once we turned on [refactorTaskbarUiState()] flag",
