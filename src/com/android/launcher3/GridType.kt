@@ -19,7 +19,13 @@ package com.android.launcher3
 import androidx.annotation.IntDef
 
 /** The type of grid. */
-@IntDef(GridType.GRID_TYPE_ONE_GRID, GridType.GRID_TYPE_NON_ONE_GRID, GridType.GRID_TYPE_ANY)
+@IntDef(
+    GridType.GRID_TYPE_ONE_GRID,
+    GridType.GRID_TYPE_NON_ONE_GRID,
+    GridType.GRID_TYPE_LANDSCAPE_OPTIMIZED_GRID,
+    GridType.GRID_TYPE_DUAL_OPTIMIZED_GRID,
+    GridType.GRID_TYPE_ANY,
+)
 @Retention(AnnotationRetention.SOURCE)
 annotation class GridType {
     companion object {
@@ -27,7 +33,15 @@ annotation class GridType {
         const val GRID_TYPE_ONE_GRID = 1
         /** These are grids that don't use one grid spec. */
         const val GRID_TYPE_NON_ONE_GRID = 2
+        /** These are desktop grids that use landscape optimized grid spec. */
+        const val GRID_TYPE_LANDSCAPE_OPTIMIZED_GRID = 4
+        /** These are desktop grid specs that are optimized for both landscape and portrait. */
+        const val GRID_TYPE_DUAL_OPTIMIZED_GRID = 8
         /** Any grid type. */
-        const val GRID_TYPE_ANY = GRID_TYPE_NON_ONE_GRID or GRID_TYPE_ONE_GRID
+        const val GRID_TYPE_ANY =
+            GRID_TYPE_NON_ONE_GRID or
+                GRID_TYPE_ONE_GRID or
+                GRID_TYPE_LANDSCAPE_OPTIMIZED_GRID or
+                GRID_TYPE_DUAL_OPTIMIZED_GRID
     }
 }
