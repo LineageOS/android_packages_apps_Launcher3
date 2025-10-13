@@ -239,12 +239,6 @@ flag {
     }
 }
 
-flag {
-    name: "work_scheduler_in_work_profile"
-    namespace: "launcher"
-    description: "Enables work scheduler view above the work pause button in work profile."
-    bug: "361589193"
-}
 
 flag {
     name: "one_grid_specs"
