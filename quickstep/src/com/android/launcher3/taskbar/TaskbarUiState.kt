@@ -77,7 +77,6 @@ class TaskbarUiState {
     private var _isTaskbarDragging = false
     private var _stashState = 0L
     private var _bubbleBarViewRect = ImmutableRect.EMPTY_RECT
-    private var _isBubbleBarViewVisible = true
     private var _stashedBubbleBarHeightPx = Int.MAX_VALUE
     private var _isStashedHandlerViewVisible = true
     private var _stashedHandlerViewRect = ImmutableRect.EMPTY_RECT
@@ -90,6 +89,9 @@ class TaskbarUiState {
     private var _navigationMode = NavigationMode.THREE_BUTTONS
     private var _isTransient = false
 
+    @Volatile var bubbleBarViewVisible = true
+    @Volatile var bubbleStashed = false
+    @Volatile var bubbleBarExpanded = false
     @Volatile var unstashAreaSizePx: Int = 0
     @Volatile var actionCornerPaddingPx: Int = 0
     @Volatile var taskbarNavThreshold: Int = 0
@@ -163,7 +165,7 @@ class TaskbarUiState {
     }
 
     private fun isEventOverBubbleBarView(e: MotionEvent) =
-        if (!_isBubbleBarViewVisible) {
+        if (!bubbleBarViewVisible) {
             false
         } else {
             _bubbleBarViewRect.contains(e.x, e.y)
@@ -181,10 +183,6 @@ class TaskbarUiState {
 
     fun setBubbleBarRect(rect: Rect) {
         _bubbleBarViewRect = ImmutableRect.from(rect)
-    }
-
-    fun setIsBubbleBarViewVisible(isVisible: Boolean) {
-        _isBubbleBarViewVisible = isVisible
     }
 
     fun setIsStashedHandlerViewVisible(isVisible: Boolean) {
