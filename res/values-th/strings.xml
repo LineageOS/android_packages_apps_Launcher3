@@ -107,9 +107,14 @@
     <string name="widget_settings" msgid="5280157748464495511">"การตั้งค่า"</string>
     <string name="pin_to_taskbar" msgid="5914002252642242332">"ปักหมุดไปยังแถบงาน"</string>
     <string name="unpin_from_taskbar" msgid="1025883383457627426">"เลิกปักหมุดจากแถบงาน"</string>
+    <!-- no translation found for no_room_in_taskbar (6885243748717395469) -->
+    <skip />
     <string name="app_added_to_taskbar" msgid="6348755169793615171">"เพิ่มแอปไปยังแถบงานแล้ว"</string>
     <string name="app_removed_from_taskbar" msgid="3471754847898675396">"นำแอปออกจากแถบงานแล้ว"</string>
-    <!-- no translation found for home_screen_files_context_menu_open_in_app_label (7930552598671791537) -->
+    <!-- no translation found for remove_system_shortcut_label (3991201411148073972) -->
+    <skip />
+    <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"เปิด"</string>
+    <!-- no translation found for home_screen_files_context_menu_move_to_trash_label (1145655050674479315) -->
     <skip />
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"ติดตั้งทางลัด"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"อนุญาตให้แอปเพิ่มทางลัดโดยไม่ต้องให้ผู้ใช้จัดการ"</string>
@@ -240,8 +245,6 @@
     <string name="four_sided_cookie_shape_title" msgid="3275212586290522151">"คุกกี้ 4 เหลี่ยม"</string>
     <string name="seven_sided_cookie_shape_title" msgid="4862560582029671668">"คุกกี้ 7 เหลี่ยม"</string>
     <string name="arch_shape_title" msgid="2213843822192871318">"ทรงโค้ง"</string>
-    <!-- no translation found for create_new_folder_button_text (4037052463794735069) -->
-    <skip />
-    <!-- no translation found for default_new_folder_name (8821062664729412079) -->
-    <skip />
+    <string name="create_new_folder_button_text" msgid="4037052463794735069">"โฟลเดอร์ใหม่"</string>
+    <string name="default_new_folder_name" msgid="8821062664729412079">"โฟลเดอร์ใหม่"</string>
 </resources>
