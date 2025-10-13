@@ -159,11 +159,7 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
          * @return drawable for Widget shortcut icon
          */
         public static int getDrawableId() {
-            if (Flags.enableLauncherVisualRefresh()) {
-                return R.drawable.widgets_24px;
-            } else {
-                return R.drawable.ic_widget;
-            }
+            return R.drawable.widgets_24px;
         }
 
         @Override
@@ -208,11 +204,7 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
          * @return drawable for App Info shortcut icon
          */
         public static int getDrawableId() {
-            if (Flags.enableLauncherVisualRefresh()) {
-                return R.drawable.info_24px;
-            } else {
-                return R.drawable.ic_info_no_shadow;
-            }
+            return R.drawable.info_24px;
         }
 
         /**

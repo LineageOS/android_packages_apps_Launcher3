@@ -142,9 +142,7 @@ class PopupDataSource @Inject constructor() {
     // Popup data for widgets shortcut.
     val widgetsPopupData =
         PopupData(
-            iconResId =
-                if (Flags.enableLauncherVisualRefresh()) R.drawable.widgets_24px
-                else R.drawable.ic_widget,
+            iconResId = R.drawable.widgets_24px,
             labelResId = R.string.widget_button_text,
             popupAction = handleWidgets,
             category = PopupCategory.SYSTEM_SHORTCUT_FIXED,
@@ -174,9 +172,7 @@ class PopupDataSource @Inject constructor() {
     // Popup data for app info shortcut.
     val appInfoPopupData =
         PopupData(
-            iconResId =
-                if (Flags.enableLauncherVisualRefresh()) R.drawable.info_24px
-                else R.drawable.ic_info_no_shadow,
+            iconResId = R.drawable.info_24px,
             labelResId = R.string.app_info_drop_target_label,
             popupAction = handleAppInfo,
             category = PopupCategory.SYSTEM_SHORTCUT,

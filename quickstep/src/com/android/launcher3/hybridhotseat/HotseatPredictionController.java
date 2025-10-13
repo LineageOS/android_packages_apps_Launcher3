@@ -251,11 +251,7 @@ public class HotseatPredictionController implements
         }
 
         public static int getDrawableId() {
-            if (Flags.enableLauncherVisualRefresh()) {
-                return R.drawable.keep_24px;
-            } else {
-                return R.drawable.ic_pin;
-            }
+            return R.drawable.keep_24px;
         }
 
         @Override

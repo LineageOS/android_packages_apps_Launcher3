@@ -358,13 +358,6 @@ flag {
 }
 
 flag {
-  name: "enable_launcher_visual_refresh"
-  namespace: "launcher"
-  description: "Adds refresh for font family, app longpress menu icons, and pagination dots"
-  bug: "395145453"
-}
-
-flag {
   name: "restore_archived_shortcuts"
   namespace: "launcher"
   description: "Makes sure pre-archived pinned shortcuts also get restored"
