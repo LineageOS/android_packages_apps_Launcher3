@@ -45,6 +45,7 @@ import com.android.launcher3.util.LooperIdleLock
 import com.android.launcher3.util.ModelTestExtensions
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.SettingsCache
+import com.android.launcher3.util.MutableListenableRef
 import com.android.launcher3.util.TestUtil
 import com.android.launcher3.util.UserIconInfo
 import com.android.launcher3.util.WidgetUtils
@@ -154,6 +155,9 @@ class LoaderTaskTest {
         `when`(launcherBinder.newIdleLock(any())).thenReturn(idleLock)
         `when`(idleLock.awaitLocked(1000)).thenReturn(false)
         `when`(iconCache.getUpdateHandler()).thenReturn(iconCacheUpdateHandler)
+
+        val listenableRef = MutableListenableRef(false)
+        `when`(settingsCache.getListenableRef(any())).thenReturn(listenableRef)
 
         context.initDaggerComponent(
             DaggerLoaderTaskTest_TestComponent.builder()
