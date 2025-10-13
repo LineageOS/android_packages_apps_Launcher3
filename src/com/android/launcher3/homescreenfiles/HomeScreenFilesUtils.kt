@@ -28,6 +28,11 @@ import com.android.launcher3.model.data.ItemInfo
 /** Other utility methods related to managing files on the home screen. */
 class HomeScreenFilesUtils {
     companion object {
+        const val LAUNCH_INTENT_DEFAULT_FLAGS =
+            Intent.FLAG_ACTIVITY_NEW_TASK or
+                Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+
         /** Returns `true` if the feature to show files on the home screen is enabled. */
         val isFeatureEnabled: Boolean by lazy {
             showFilesOnHomeScreen() && Environment.isExternalStorageManager()
@@ -47,11 +52,7 @@ class HomeScreenFilesUtils {
         @JvmOverloads
         fun buildLaunchIntent(uri: Uri, homeScreenFile: HomeScreenFile? = null) =
             Intent(Intent.ACTION_VIEW).apply {
-                addFlags(
-                    Intent.FLAG_ACTIVITY_NEW_TASK or
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                )
+                addFlags(LAUNCH_INTENT_DEFAULT_FLAGS)
                 setDataAndType(
                     uri,
                     if (homeScreenFile?.isDirectory == true) MIME_TYPE_DIR
