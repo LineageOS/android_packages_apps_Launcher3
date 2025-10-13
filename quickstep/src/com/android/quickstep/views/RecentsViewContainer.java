@@ -35,7 +35,7 @@ import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.views.ScrimView;
 import com.android.quickstep.BaseContainerInterface;
 import com.android.quickstep.fallback.RecentsState;
-import com.android.quickstep.util.SplitSelectStateController;
+import com.android.quickstep.split.SplitSelectStateController;
 
 /**
  * Interface to be implemented by the parent view of RecentsView

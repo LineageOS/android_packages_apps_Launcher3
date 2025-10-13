@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.quickstep.util;
+package com.android.quickstep.split;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -29,15 +29,15 @@ import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCH
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_BOTTOM_OR_RIGHT;
-import static com.android.quickstep.util.SplitSelectDataHolder.SPLIT_PENDINGINTENT_PENDINGINTENT;
-import static com.android.quickstep.util.SplitSelectDataHolder.SPLIT_PENDINGINTENT_TASK;
-import static com.android.quickstep.util.SplitSelectDataHolder.SPLIT_SHORTCUT_TASK;
-import static com.android.quickstep.util.SplitSelectDataHolder.SPLIT_SINGLE_INTENT_FULLSCREEN;
-import static com.android.quickstep.util.SplitSelectDataHolder.SPLIT_SINGLE_SHORTCUT_FULLSCREEN;
-import static com.android.quickstep.util.SplitSelectDataHolder.SPLIT_SINGLE_TASK_FULLSCREEN;
-import static com.android.quickstep.util.SplitSelectDataHolder.SPLIT_TASK_PENDINGINTENT;
-import static com.android.quickstep.util.SplitSelectDataHolder.SPLIT_TASK_SHORTCUT;
-import static com.android.quickstep.util.SplitSelectDataHolder.SPLIT_TASK_TASK;
+import static com.android.quickstep.split.SplitSelectDataHolder.SPLIT_PENDINGINTENT_PENDINGINTENT;
+import static com.android.quickstep.split.SplitSelectDataHolder.SPLIT_PENDINGINTENT_TASK;
+import static com.android.quickstep.split.SplitSelectDataHolder.SPLIT_SHORTCUT_TASK;
+import static com.android.quickstep.split.SplitSelectDataHolder.SPLIT_SINGLE_INTENT_FULLSCREEN;
+import static com.android.quickstep.split.SplitSelectDataHolder.SPLIT_SINGLE_SHORTCUT_FULLSCREEN;
+import static com.android.quickstep.split.SplitSelectDataHolder.SPLIT_SINGLE_TASK_FULLSCREEN;
+import static com.android.quickstep.split.SplitSelectDataHolder.SPLIT_TASK_PENDINGINTENT;
+import static com.android.quickstep.split.SplitSelectDataHolder.SPLIT_TASK_SHORTCUT;
+import static com.android.quickstep.split.SplitSelectDataHolder.SPLIT_TASK_TASK;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.KEY_EXTRA_WIDGET_INTENT;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_50_50;
 
@@ -104,6 +104,14 @@ import com.android.quickstep.RecentsModel;
 import com.android.quickstep.RemoteAnimationTargets;
 import com.android.quickstep.SplitSelectionListener;
 import com.android.quickstep.SystemUiProxy;
+import com.android.quickstep.util.ActiveGestureLog;
+import com.android.quickstep.util.ExternalDisplaysKt;
+import com.android.quickstep.util.GroupTask;
+import com.android.quickstep.util.LogUtils;
+import com.android.quickstep.util.ScalingWorkspaceRevealAnim;
+import com.android.quickstep.util.SplitTask;
+import com.android.quickstep.util.SurfaceTransaction;
+import com.android.quickstep.util.SurfaceTransactionApplier;
 import com.android.quickstep.views.FloatingDesktopTaskView;
 import com.android.quickstep.views.FloatingTaskView;
 import com.android.quickstep.views.GroupedTaskView;

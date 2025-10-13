@@ -42,7 +42,7 @@ import com.android.quickstep.GestureState;
 import com.android.quickstep.RemoteTargetGluer.RemoteTargetHandle;
 import com.android.quickstep.util.GroupTask;
 import com.android.quickstep.util.SingleTask;
-import com.android.quickstep.util.SplitSelectStateController;
+import com.android.quickstep.split.SplitSelectStateController;
 import com.android.quickstep.util.SurfaceTransactionApplier;
 import com.android.quickstep.views.OverviewActionsView;
 import com.android.quickstep.views.RecentsDismissUtils;

@@ -113,7 +113,7 @@ import com.android.quickstep.fallback.RecentsState.Companion.OVERVIEW_SPLIT_SELE
 import com.android.quickstep.fallback.toLauncherStateOrdinal
 import com.android.quickstep.util.RecentsAtomicAnimationFactory
 import com.android.quickstep.util.RecentsWindowProtoLogProxy
-import com.android.quickstep.util.SplitSelectStateController
+import com.android.quickstep.split.SplitSelectStateController
 import com.android.quickstep.util.SurfaceTransactionApplier
 import com.android.quickstep.util.TISBindHelper
 import com.android.quickstep.views.OverviewActionsView

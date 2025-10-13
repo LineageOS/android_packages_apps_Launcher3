@@ -63,6 +63,7 @@ import com.android.launcher3.states.StateAnimationConfig.ANIM_WORKSPACE_TRANSLAT
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator
 import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.NavigationMode
+import com.android.quickstep.split.SplitAnimationTimings
 import com.android.quickstep.views.RecentsView
 import com.android.quickstep.views.RecentsViewContainer
 import kotlin.math.max
