@@ -30,6 +30,7 @@ import com.android.launcher3.dragndrop.SystemDragControllerImpl
 import com.android.launcher3.dragndrop.SystemDragControllerStub
 import com.android.launcher3.dragndrop.SystemDragListener
 import com.android.launcher3.dragndrop.SystemDragListenerFactory
+import com.android.launcher3.homescreenfiles.EnvironmentWrapper
 import com.android.launcher3.homescreenfiles.HomeScreenFilesMediaStoreProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesNoOpProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider
@@ -178,10 +179,17 @@ object HomeScreenFilesModule {
     fun provideHomeScreenFilesProvider(
         @ApplicationContext context: Context,
         @ThreadPool executorService: ExecutorService,
+        environmentWrapper: EnvironmentWrapper,
         tracker: DaggerSingletonTracker,
     ): HomeScreenFilesProvider {
         return if (HomeScreenFilesUtils.isFeatureEnabled) {
-            HomeScreenFilesMediaStoreProvider(context, executorService, ::File, tracker)
+            HomeScreenFilesMediaStoreProvider(
+                context,
+                executorService,
+                ::File,
+                environmentWrapper,
+                tracker,
+            )
         } else {
             HomeScreenFilesNoOpProvider()
         }

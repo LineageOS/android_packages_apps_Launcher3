@@ -23,7 +23,6 @@ import android.database.ContentObserver
 import android.database.MatrixCursor
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.provider.DocumentsContract
 import android.provider.DocumentsContract.EXTERNAL_STORAGE_PROVIDER_AUTHORITY
 import android.provider.DocumentsContract.EXTRA_URI
@@ -36,7 +35,6 @@ import android.provider.MediaStore.Files.FileColumns.RELATIVE_PATH
 import android.provider.MediaStore.Files.FileColumns._ID
 import androidx.core.net.toUri
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.launcher3.R
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider.Companion.HOME_SCREEN_FOLDER_RELATIVE_PATH
 import com.android.launcher3.testutil.rule.LazyInitRule.Companion.lazyRule
@@ -48,7 +46,6 @@ import com.google.common.util.concurrent.MoreExecutors
 import java.io.File
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executor
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -58,7 +55,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.spy
-import org.mockito.MockitoSession
+import org.mockito.junit.MockitoJUnit
+import org.mockito.junit.MockitoRule
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
@@ -71,50 +69,32 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.mockito.quality.Strictness
 
 @RunWith(AndroidJUnit4::class)
 class HomeScreenFilesProviderTest {
 
     @get:Rule val contextSpy = lazyRule { spy(SandboxApplication()) }
+    @get:Rule var mockitoRule: MockitoRule = MockitoJUnit.rule()
 
     private val context: SandboxApplication by contextSpy
     @Mock private lateinit var contentResolver: ContentResolver
     @Mock private lateinit var contentProviderClient: ContentProviderClient
-    @Mock private lateinit var externalStorageDir: File
     @Mock private lateinit var fileFactory: (path: String) -> File
+    @Mock private lateinit var environmentWrapper: EnvironmentWrapper
 
-    private lateinit var mockitoSession: MockitoSession
     private lateinit var provider: HomeScreenFilesProvider
 
     @Before
     fun setUp() {
-        mockitoSession =
-            mockitoSession()
-                .initMocks(this@HomeScreenFilesProviderTest)
-                .strictness(Strictness.LENIENT)
-                .mockStatic(Environment::class.java)
-                .startMocking()
-
         doReturn(contentResolver).whenever(context).contentResolver
         whenever(fileFactory.invoke(any())).thenAnswer { i -> File(i.getArgument<String>(0)) }
-        whenever(Environment.getExternalStorageDirectory()).thenReturn(externalStorageDir)
-        whenever(Environment.getExternalStorageState(externalStorageDir))
-            .thenReturn(Environment.MEDIA_MOUNTED)
+        whenever(environmentWrapper.isExternalStorageDirectoryMounted()).thenReturn(true)
 
         provider = createProvider()
     }
 
-    @After
-    fun tearDown() {
-        mockitoSession.finishMocking()
-    }
-
     @Test
     fun testCanCreateNewFolderWhenExternalStorageProviderIsMounted() {
-        whenever(Environment.getExternalStorageState(externalStorageDir))
-            .thenReturn(Environment.MEDIA_MOUNTED)
-
         clearInvocations(context)
         clearInvocations(contentResolver)
         provider = createProvider()
@@ -124,8 +104,7 @@ class HomeScreenFilesProviderTest {
 
     @Test
     fun testCanCreateNewFolderWhenExternalStorageProviderIsUnmounted() {
-        whenever(Environment.getExternalStorageState(externalStorageDir))
-            .thenReturn(Environment.MEDIA_UNMOUNTED)
+        whenever(environmentWrapper.isExternalStorageDirectoryMounted()).thenReturn(false)
 
         clearInvocations(context)
         clearInvocations(contentResolver)
@@ -184,11 +163,8 @@ class HomeScreenFilesProviderTest {
         val uri = mock<Uri>()
 
         // Mock external storage directory state.
-        whenever(Environment.getExternalStorageState(externalStorageDir))
-            .thenReturn(
-                if (externalStorageDirectoryIsMounted) Environment.MEDIA_MOUNTED
-                else Environment.MEDIA_UNMOUNTED
-            )
+        whenever(environmentWrapper.isExternalStorageDirectoryMounted())
+            .thenReturn(externalStorageDirectoryIsMounted)
 
         // Mock media store insertion success/failure.
         whenever(
@@ -320,8 +296,7 @@ class HomeScreenFilesProviderTest {
     @Test
     fun testQueryWhenExternalStorageDirectoryMountsAfterCall() {
         // Unmount external storage directory prior to [provider] init.
-        whenever(Environment.getExternalStorageState(externalStorageDir))
-            .thenReturn(Environment.MEDIA_UNMOUNTED)
+        whenever(environmentWrapper.isExternalStorageDirectoryMounted()).thenReturn(false)
 
         // Init [provider].
         clearInvocations(context)
@@ -333,8 +308,7 @@ class HomeScreenFilesProviderTest {
             expectResults = true,
             afterQueryCallback = {
                 // Mount external storage directory.
-                whenever(Environment.getExternalStorageState(externalStorageDir))
-                    .thenReturn(Environment.MEDIA_MOUNTED)
+                whenever(environmentWrapper.isExternalStorageDirectoryMounted()).thenReturn(true)
 
                 // Notify external storage directory mounted.
                 val observerCaptor = argumentCaptor<ContentObserver>()
@@ -356,8 +330,7 @@ class HomeScreenFilesProviderTest {
     @Test
     fun testQueryWhenExternalStorageDirectoryMountsBeforeCall() {
         // Unmount external storage directory prior to [provider] init.
-        whenever(Environment.getExternalStorageState(externalStorageDir))
-            .thenReturn(Environment.MEDIA_UNMOUNTED)
+        whenever(environmentWrapper.isExternalStorageDirectoryMounted()).thenReturn(false)
 
         // Init [provider].
         clearInvocations(context)
@@ -369,8 +342,7 @@ class HomeScreenFilesProviderTest {
             expectResults = true,
             beforeQueryCallback = {
                 // Mount external storage directory.
-                whenever(Environment.getExternalStorageState(externalStorageDir))
-                    .thenReturn(Environment.MEDIA_MOUNTED)
+                whenever(environmentWrapper.isExternalStorageDirectoryMounted()).thenReturn(true)
 
                 // Notify external storage directory mounted.
                 val observerCaptor = argumentCaptor<ContentObserver>()
@@ -391,10 +363,6 @@ class HomeScreenFilesProviderTest {
 
     @Test
     fun testQueryWhenExternalStorageDirectoryMountsBeforeInit() {
-        // Mount external storage directory prior to [provider] init.
-        whenever(Environment.getExternalStorageState(externalStorageDir))
-            .thenReturn(Environment.MEDIA_MOUNTED)
-
         // Init [provider].
         clearInvocations(context)
         clearInvocations(contentResolver)
@@ -407,8 +375,7 @@ class HomeScreenFilesProviderTest {
     @Test
     fun testQueryWhenExternalStorageDirectoryMountTimesOutDuringCall() {
         // Unmount external storage directory prior to [provider] init.
-        whenever(Environment.getExternalStorageState(externalStorageDir))
-            .thenReturn(Environment.MEDIA_UNMOUNTED)
+        whenever(environmentWrapper.isExternalStorageDirectoryMounted()).thenReturn(false)
 
         // Init [provider].
         clearInvocations(context)
@@ -554,6 +521,7 @@ class HomeScreenFilesProviderTest {
             context,
             MoreExecutors.newDirectExecutorService(),
             fileFactory,
+            environmentWrapper,
             context.appComponent.daggerSingletonTracker,
         )
 
