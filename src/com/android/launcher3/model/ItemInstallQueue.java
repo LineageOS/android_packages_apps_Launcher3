@@ -16,35 +16,35 @@
 
 package com.android.launcher3.model;
 
+import static com.android.launcher3.AbstractFloatingView.TYPE_SNACKBAR;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
 
-import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
-import android.content.pm.ShortcutInfo;
 import android.os.UserHandle;
 
-import androidx.annotation.UiThread;
+import androidx.annotation.AnyThread;
 import androidx.annotation.WorkerThread;
 
 import com.android.launcher3.AbstractFloatingView;
-import com.android.launcher3.Launcher;
+import com.android.launcher3.LauncherModel;
 import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.dagger.LauncherAppSingleton;
 import com.android.launcher3.dagger.LauncherBaseAppComponent;
-import com.android.launcher3.logging.FileLog;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.tasks.AddWorkspaceItemsTask;
 import com.android.launcher3.shortcuts.ShortcutKey;
 import com.android.launcher3.util.DaggerSingletonObject;
 import com.android.launcher3.util.PersistedItemArray;
 import com.android.launcher3.util.Preconditions;
+import com.android.launcher3.views.ActivityContext;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
@@ -55,8 +55,6 @@ import javax.inject.Provider;
  */
 @LauncherAppSingleton
 public class ItemInstallQueue {
-
-    private static final String LOG = "ItemInstallQueue";
 
     public static final int FLAG_ACTIVITY_PAUSED = 1;
     public static final int FLAG_LOADER_RUNNING = 2;
@@ -76,6 +74,7 @@ public class ItemInstallQueue {
     private final Context mContext;
     private final WorkspaceItemSerializer mPendingItemParser;
     private final Provider<WorkspaceItemSpaceFinder> mSpaceFinderProvider;
+    private final Provider<LauncherModel> mModelProvider;
 
     // Determines whether to defer installing shortcuts immediately until
     // processAllPendingInstalls() is called.
@@ -84,13 +83,39 @@ public class ItemInstallQueue {
     // Only accessed on worker thread
     private List<SerializedItemItem> mItems;
 
+    private WeakReference<ActivityContext> mIconUISurface = new WeakReference<>(null);
+
     @Inject
     public ItemInstallQueue(@ApplicationContext Context context,
             Provider<WorkspaceItemSpaceFinder> spaceFinderProvider,
-            WorkspaceItemSerializer pendingItemParser) {
+            WorkspaceItemSerializer pendingItemParser,
+            Provider<LauncherModel> modelProvider) {
         mContext = context;
         mSpaceFinderProvider = spaceFinderProvider;
         mPendingItemParser = pendingItemParser;
+        mModelProvider = modelProvider;
+    }
+
+    /**
+     * Sets the UI surface responsible for drawing the icons. The queue will only be pushed if
+     * there is a valid UI surface available.
+     */
+    public void setIconUISurface(ActivityContext context) {
+        mIconUISurface = new WeakReference<>(context);
+    }
+
+    /** Queues a pending item to ths install queue */
+    @AnyThread
+    public void queueItem(SerializedItemItem info) {
+        // Queue the item up for adding if launcher has not loaded properly yet
+        MODEL_EXECUTOR.post(() -> {
+            ensureQueueLoaded();
+            if (!mItems.contains(info)) {
+                mItems.add(info);
+                mStorage.write(mContext, mItems);
+            }
+        });
+        flushInstallQueue();
     }
 
     @WorkerThread
@@ -102,52 +127,29 @@ public class ItemInstallQueue {
     }
 
     @WorkerThread
-    private void addToQueue(SerializedItemItem info) {
-        ensureQueueLoaded();
-        if (!mItems.contains(info)) {
-            mItems.add(info);
-            mStorage.write(mContext, mItems);
-        }
-    }
-
-    @WorkerThread
     private void flushQueueInBackground() {
-        Launcher launcher = Launcher.ACTIVITY_TRACKER.getCreatedContext();
-        if (launcher == null) {
-            // Launcher not loaded
-            return;
-        }
         ensureQueueLoaded();
-        if (mItems.isEmpty()) {
-            return;
-        }
+        if (mItems.isEmpty()) return;
 
-        List<ItemInfo> installQueue = mItems.stream()
-                .map(mPendingItemParser::decode)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-        // Add the items and clear queue
-        if (!installQueue.isEmpty()) {
-            MAIN_EXECUTOR.execute(() -> commitInstallQueue(launcher, installQueue));
-        }
-        mItems.clear();
-        mStorage.getFile(mContext).delete();
-    }
+        List<Supplier<ItemInfo>> itemSuppliers = new ArrayList<>();
+        mItems.forEach(it -> itemSuppliers.add(() -> mPendingItemParser.decode(it)));
+        MAIN_EXECUTOR.execute(() -> {
+            ActivityContext uiSurface = mIconUISurface.get();
+            // Launcher not loaded
+            if (uiSurface == null) return;
 
-    @UiThread
-    private void commitInstallQueue(Launcher launcher, List<ItemInfo> itemList) {
-        // If there's an undo snackbar, force it to complete to ensure empty screens are
-        // removed before trying to add new items.
-        launcher.getModelWriter().commitDelete();
-        AbstractFloatingView snackbar = AbstractFloatingView.getOpenView(
-                launcher,
-                AbstractFloatingView.TYPE_SNACKBAR
-        );
-        if (snackbar != null) {
-            snackbar.close(true);
-        }
-        launcher.getModel().enqueueModelUpdateTask(
-                new AddWorkspaceItemsTask(itemList, mSpaceFinderProvider.get()));
+            // If there's an undo snack bar, force it to complete to ensure empty screens are
+            // removed before trying to add new items.
+            uiSurface.getModelWriter().commitDelete();
+            AbstractFloatingView.closeOpenViews(uiSurface, true, TYPE_SNACKBAR);
+
+            MODEL_EXECUTOR.execute(() -> {
+                mItems.clear();
+                mStorage.getFile(mContext).delete();
+                mModelProvider.get().enqueueModelUpdateTask(
+                        new AddWorkspaceItemsTask(itemSuppliers, mSpaceFinderProvider.get()));
+            });
+        });
     }
 
     /**
@@ -166,27 +168,6 @@ public class ItemInstallQueue {
     }
 
     /**
-     * Adds an item to the install queue
-     */
-    public void queueItem(ShortcutInfo info) {
-        queuePendingShortcutInfo(new SerializedItemItem(info));
-    }
-
-    /**
-     * Adds an item to the install queue
-     */
-    public void queueItem(AppWidgetProviderInfo info, int widgetId) {
-        queuePendingShortcutInfo(new SerializedItemItem(info, widgetId));
-    }
-
-    /**
-     * Adds an item to the install queue
-     */
-    public void queueItem(String packageName, UserHandle userHandle) {
-        queuePendingShortcutInfo(new SerializedItemItem(packageName, userHandle));
-    }
-
-    /**
      * Returns a stream of all pending shortcuts in the queue
      */
     @WorkerThread
@@ -195,23 +176,6 @@ public class ItemInstallQueue {
         return mItems.stream()
                 .filter(item -> item.itemType == ITEM_TYPE_DEEP_SHORTCUT && user.equals(item.user))
                 .map(item -> ShortcutKey.fromIntent(item.getIntent(), user));
-    }
-
-    private void queuePendingShortcutInfo(SerializedItemItem info) {
-        // Queue the item up for adding if launcher has not loaded properly yet
-        MODEL_EXECUTOR.post(() -> {
-            ItemInfo itemInfo = mPendingItemParser.decode(info);
-            if (itemInfo == null) {
-                FileLog.d(LOG,
-                        "Adding PendingInstallShortcutInfo with no attached info to queue.");
-            } else {
-                FileLog.d(LOG,
-                        "Adding PendingInstallShortcutInfo to queue."
-                                + " Attached info: " + itemInfo);
-            }
-            addToQueue(info);
-        });
-        flushInstallQueue();
     }
 
     /**

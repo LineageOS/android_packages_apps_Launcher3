@@ -29,6 +29,7 @@ import androidx.annotation.WorkerThread;
 
 import com.android.launcher3.logging.FileLog;
 import com.android.launcher3.model.ItemInstallQueue;
+import com.android.launcher3.model.SerializedItemItem;
 import com.android.launcher3.pm.InstallSessionHelper;
 import com.android.launcher3.pm.UserCache;
 import com.android.launcher3.util.Executors;
@@ -95,8 +96,8 @@ public class SessionCommitReceiver extends BroadcastReceiver {
                         + ", has app icon: " + (info.getAppIcon() != null)
                         + ", has app label: " + !TextUtils.isEmpty(info.getAppLabel()));
 
-        ItemInstallQueue.INSTANCE.get(context)
-                .queueItem(info.getAppPackageName(), user);
+        ItemInstallQueue.INSTANCE.get(context).queueItem(
+                new SerializedItemItem(info.getAppPackageName(), user));
     }
 
     /**

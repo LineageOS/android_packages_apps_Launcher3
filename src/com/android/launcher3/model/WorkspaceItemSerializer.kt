@@ -21,11 +21,10 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.pm.LauncherActivityInfo
 import android.content.pm.LauncherApps
 import android.content.pm.ShortcutInfo
 import android.os.UserHandle
-import com.android.launcher3.Flags
+import android.util.Log
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherSettings.Favorites.DESKTOP_ICON_FLAG
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION
@@ -35,9 +34,10 @@ import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.icons.IconCache
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.ItemInfo
-import com.android.launcher3.model.data.ItemInfoWithIcon
 import com.android.launcher3.model.data.LauncherAppWidgetInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
+import com.android.launcher3.pm.InstallSessionHelper
+import com.android.launcher3.pm.PackageInstallInfo
 import com.android.launcher3.shortcuts.ShortcutKey
 import com.android.launcher3.shortcuts.ShortcutRequest
 import com.android.launcher3.widget.LauncherAppWidgetProviderInfo
@@ -98,42 +98,48 @@ constructor(
     @ApplicationContext private val context: Context,
     private val iconCache: IconCache,
     private val idp: InvariantDeviceProfile,
+    private val packageInstaller: InstallSessionHelper,
 ) {
+
+    private fun createAppTarget(packageName: String, user: UserHandle): WorkspaceItemInfo? {
+        val laiList =
+            context.getSystemService(LauncherApps::class.java)!!.getActivityList(packageName, user)
+
+        val lai = laiList.getOrNull(0)
+        if (lai != null) {
+            val si = AppInfo(context, lai, user).makeWorkspaceItem(context)
+            iconCache.getTitleAndIcon(si, DESKTOP_ICON_FLAG)
+            return si
+        }
+
+        // Create a pending icon
+        val sessionInfo = packageInstaller.getActiveSessionInfo(user, packageName) ?: return null
+        if (!packageInstaller.verifySessionInfo(sessionInfo)) {
+            Log.d(TAG, ("Item info failed session info verification. Skipping : $packageName"))
+            return null
+        }
+
+        val si = WorkspaceItemInfo()
+        si.user = user
+        si.itemType = ITEM_TYPE_APPLICATION
+        si.intent = AppInfo.makeLaunchIntent(ComponentName(packageName, "")).setPackage(packageName)
+        si.status = WorkspaceItemInfo.FLAG_AUTOINSTALL_ICON
+        si.setProgressLevel(
+            (sessionInfo.getProgress() * 100).toInt(),
+            PackageInstallInfo.STATUS_INSTALLING,
+        )
+
+        si.title = ""
+        si.bitmap = iconCache.getDefaultIcon(user)
+        iconCache.getTitleAndIcon(si, DESKTOP_ICON_FLAG.withUsePackageIcon(true))
+        return si
+    }
 
     fun decode(item: SerializedItemItem): ItemInfo? {
         when (item.itemType) {
             ITEM_TYPE_APPLICATION -> {
                 val packageName = item.intent.getPackage() ?: return null
-                val laiList =
-                    context
-                        .getSystemService(LauncherApps::class.java)!!
-                        .getActivityList(packageName, item.user)
-
-                val si = WorkspaceItemInfo()
-                si.user = item.user
-
-                val lai: LauncherActivityInfo?
-                val usePackageIcon = laiList.isEmpty()
-                if (usePackageIcon) {
-                    lai = null
-                    si.intent =
-                        AppInfo.makeLaunchIntent(ComponentName(packageName, ""))
-                            .setPackage(packageName)
-                    si.status = si.status or WorkspaceItemInfo.FLAG_AUTOINSTALL_ICON
-                } else {
-                    lai = laiList[0]
-                    si.intent = AppInfo.makeLaunchIntent(lai)
-                    if (Flags.enableSupportForArchiving() && lai.activityInfo.isArchived) {
-                        si.runtimeStatusFlags =
-                            si.runtimeStatusFlags or ItemInfoWithIcon.FLAG_ARCHIVED
-                    }
-                }
-                iconCache.getTitleAndIcon(
-                    si,
-                    { lai },
-                    DESKTOP_ICON_FLAG.withUsePackageIcon(usePackageIcon),
-                )
-                return si
+                return createAppTarget(packageName, item.user)
             }
 
             ITEM_TYPE_DEEP_SHORTCUT ->
@@ -162,5 +168,9 @@ constructor(
             }
         }
         return null
+    }
+
+    companion object {
+        private const val TAG = "WorkspaceItemSerializer"
     }
 }

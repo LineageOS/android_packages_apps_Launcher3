@@ -43,6 +43,7 @@ import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestUtil.runOnExecutorSync
 import com.google.common.truth.Truth.assertThat
 import java.util.UUID
+import java.util.function.Supplier
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -227,7 +228,7 @@ class AddWorkspaceItemsTaskTest {
      * with a mock.
      */
     private fun newTask(vararg items: ItemInfo) =
-        AddWorkspaceItemsTask(items.toList(), workspaceItemSpaceFinder)
+        AddWorkspaceItemsTask(items.map { Supplier { it } }.toList(), workspaceItemSpaceFinder)
 
     private fun getExistingItem() =
         WorkspaceItemInfo().apply {
