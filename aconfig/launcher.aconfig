@@ -444,16 +444,6 @@ flag {
 }
 
 flag {
-  name: "enable_taskbar_for_direct_boot"
-  namespace: "launcher"
-  description: "Initializes parts of Taskbar before onUserUnlocked"
-  bug: "324485921"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "enable_taskbar_ui_thread"
   namespace: "launcher"
   description: "Enable per-window thread for taskbar"
