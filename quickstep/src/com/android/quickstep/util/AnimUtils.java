@@ -17,7 +17,6 @@
 package com.android.quickstep.util;
 
 import static com.android.app.animation.Interpolators.clampToProgress;
-import static com.android.launcher3.LauncherState.NORMAL;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 
 import android.animation.Animator;
@@ -40,6 +39,8 @@ import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.states.StateAnimationConfig;
 import com.android.launcher3.util.RunnableList;
 import com.android.launcher3.views.ActivityContext;
+import com.android.quickstep.split.SplitAnimationController;
+import com.android.quickstep.split.SplitAnimationTimings;
 import com.android.quickstep.views.RecentsViewContainer;
 
 /**

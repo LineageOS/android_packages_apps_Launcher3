@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.quickstep.util;
+package com.android.quickstep.split;
 
 /**
- * Timings for the OverviewSplitSelect > confirmed animation on tablets.
+ * Timings for the OverviewSplitSelect > confirmed animation on phones.
  */
-public class TabletSplitToConfirmTimings
+public class PhoneSplitToConfirmTimings
         extends SplitToConfirmTimings implements SplitAnimationTimings {
     public int getPlaceholderFadeInStart() { return 0; }
     public int getPlaceholderFadeInEnd() { return 133; }
-    public int getPlaceholderIconFadeInStart() { return 167; }
-    public int getPlaceholderIconFadeInEnd() { return 250; }
+    public int getPlaceholderIconFadeInStart() { return 50; }
+    public int getPlaceholderIconFadeInEnd() { return 133; }
     public int getStagedRectSlideStart() { return 0; }
-    public int getStagedRectSlideEnd() { return 500; }
+    public int getStagedRectSlideEnd() { return 333; }
     public int getBackingScrimFadeInStart() { return 0; }
-    public int getBackingScrimFadeInEnd() { return 400; }
+    public int getBackingScrimFadeInEnd() { return 266; }
 
-    public int getDuration() { return TABLET_CONFIRM_DURATION; }
+    public int getDuration() { return PHONE_CONFIRM_DURATION; }
 }

@@ -40,7 +40,7 @@ import com.android.quickstep.RecentsModel
 import com.android.quickstep.TopTaskTracker
 import com.android.quickstep.util.GroupTask
 import com.android.quickstep.util.SingleTask
-import com.android.quickstep.util.SplitSelectStateController
+import com.android.quickstep.split.SplitSelectStateController
 import com.android.quickstep.util.SplitTask
 import com.android.systemui.shared.recents.model.Task
 import com.android.systemui.shared.system.ActivityManagerWrapper

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 
-package com.android.quickstep.util;
+package com.android.quickstep.split;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 
@@ -67,6 +67,7 @@ import com.android.quickstep.OverviewComponentObserver;
 import com.android.quickstep.SystemUiProxy;
 import com.android.quickstep.TaskUtils;
 import com.android.quickstep.TopTaskTracker;
+import com.android.quickstep.util.LogUtils;
 import com.android.quickstep.views.GroupedTaskView;
 import com.android.quickstep.views.RecentsViewContainer;
 import com.android.quickstep.views.TaskContainer;

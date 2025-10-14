@@ -1,21 +1,20 @@
 /*
- *  Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-package com.android.quickstep.util
+package com.android.quickstep.split
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
@@ -65,7 +64,9 @@ import com.android.launcher3.util.SplitConfigurationOptions.SplitSelectSource
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.views.BaseDragLayer
 import com.android.quickstep.TaskViewUtils
-import com.android.quickstep.util.SplitScreenUtils.Companion.extractTopParentAndChildren
+import com.android.quickstep.split.SplitScreenUtils.Companion.extractTopParentAndChildren
+import com.android.quickstep.util.AnimUtils
+import com.android.quickstep.util.MultiValueUpdateListener
 import com.android.quickstep.views.FloatingAppPairView
 import com.android.quickstep.views.FloatingTaskView
 import com.android.quickstep.views.GroupedTaskView

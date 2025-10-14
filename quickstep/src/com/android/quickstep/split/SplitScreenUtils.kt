@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.quickstep.util
+package com.android.quickstep.split
 
 import android.util.Log
 import android.view.WindowManager.TRANSIT_CHANGE
 import android.window.TransitionInfo
 import android.window.TransitionInfo.Change
 import android.window.TransitionInfo.FLAG_FIRST_CUSTOM
-import com.android.launcher3.util.SplitConfigurationOptions
 import com.android.wm.shell.shared.TransitionUtil
-import com.android.wm.shell.shared.split.SplitBounds
 
 class SplitScreenUtils {
     companion object {
