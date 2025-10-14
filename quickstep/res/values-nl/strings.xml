@@ -137,6 +137,7 @@
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Dit product gebruikt het geselecteerde gedeelte van je scherm om te zoeken. Het <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>Privacybeleid<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> en de <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>Servicevoorwaarden<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> van Google zijn van toepassing."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Sluiten"</string>
     <string name="taskbar_edu_done" msgid="6880178093977704569">"Klaar"</string>
+    <string name="taskbar_edu_next" msgid="4007618274426775841">"Volgende"</string>
     <string name="taskbar_button_home" msgid="2151398979630664652">"Home"</string>
     <string name="taskbar_button_a11y" msgid="5241161324875094465">"Toegankelijkheid"</string>
     <string name="taskbar_button_back" msgid="8558862226461164514">"Terug"</string>

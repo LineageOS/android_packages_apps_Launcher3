@@ -137,6 +137,7 @@
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Lo mkhiqizo usebenzisa ingxenye ekhethiwe yesikrini sakho ukusesha. <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>Inqubomgomo Yobumfihlo<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> ye-Google kanye <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>Nemigomo Yesevisi<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> ziyasebenza."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Vala"</string>
     <string name="taskbar_edu_done" msgid="6880178093977704569">"Kwenziwe"</string>
+    <string name="taskbar_edu_next" msgid="4007618274426775841">"Okulandelayo"</string>
     <string name="taskbar_button_home" msgid="2151398979630664652">"Ikhaya"</string>
     <string name="taskbar_button_a11y" msgid="5241161324875094465">"Ukufinyeleleka"</string>
     <string name="taskbar_button_back" msgid="8558862226461164514">"Emuva"</string>

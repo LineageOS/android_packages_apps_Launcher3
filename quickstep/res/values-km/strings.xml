@@ -137,6 +137,7 @@
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"ផលិតផលនេះប្រើប្រាស់ផ្នែកដែលបានជ្រើសរើសនៃអេក្រង់របស់អ្នក ដើម្បីស្វែងរក។ <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>គោលការណ៍​ឯកជនភាព<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> និង<xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>លក្ខខណ្ឌ​ប្រើប្រាស់<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g>របស់ Google ត្រូវបានអនុវត្ត។"</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"បិទ"</string>
     <string name="taskbar_edu_done" msgid="6880178093977704569">"រួចរាល់"</string>
+    <string name="taskbar_edu_next" msgid="4007618274426775841">"បន្ទាប់"</string>
     <string name="taskbar_button_home" msgid="2151398979630664652">"ទំព័រដើម"</string>
     <string name="taskbar_button_a11y" msgid="5241161324875094465">"ភាពងាយស្រួល"</string>
     <string name="taskbar_button_back" msgid="8558862226461164514">"ថយក្រោយ"</string>

@@ -137,6 +137,7 @@
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"തിരയുന്നതിന് ഈ ഉൽപ്പന്നം സ്‌ക്രീനിലെ തിരഞ്ഞെടുത്ത ഭാഗം ഉപയോഗിക്കുന്നു. Google-ന്റെ <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>സ്വകാര്യതാ നയവും<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>സേവന നിബന്ധനകളും<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> ബാധകമാണ്."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"അടയ്ക്കുക"</string>
     <string name="taskbar_edu_done" msgid="6880178093977704569">"പൂർത്തിയായി"</string>
+    <string name="taskbar_edu_next" msgid="4007618274426775841">"അടുത്തത്"</string>
     <string name="taskbar_button_home" msgid="2151398979630664652">"ഹോം"</string>
     <string name="taskbar_button_a11y" msgid="5241161324875094465">"ഉപയോഗസഹായി"</string>
     <string name="taskbar_button_back" msgid="8558862226461164514">"മടങ്ങുക"</string>

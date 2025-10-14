@@ -137,6 +137,7 @@
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Гэты прадукт выконвае пошук па змесціве выбранай часткі экрана. Прымяняюцца <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>Умовы выкарыстання<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> і <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>Палітыка прыватнасці<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> Google."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Закрыць"</string>
     <string name="taskbar_edu_done" msgid="6880178093977704569">"Гатова"</string>
+    <string name="taskbar_edu_next" msgid="4007618274426775841">"Далей"</string>
     <string name="taskbar_button_home" msgid="2151398979630664652">"Галоўны экран"</string>
     <string name="taskbar_button_a11y" msgid="5241161324875094465">"Спецыяльныя"</string>
     <string name="taskbar_button_back" msgid="8558862226461164514">"Назад"</string>
