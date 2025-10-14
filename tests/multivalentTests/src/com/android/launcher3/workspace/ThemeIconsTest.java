@@ -178,7 +178,7 @@ public class ThemeIconsTest extends BaseLauncherActivityTest<Launcher> {
         values.put("boolean_value", isEnabled);
 
         int result = LauncherComponentProvider.get(targetContext()).getGridCustomizationsProxy()
-                .update(uri, values, null, null);
+                .update(uri, values, null, null, null);
         assertTrue(result > 0);
     }
 

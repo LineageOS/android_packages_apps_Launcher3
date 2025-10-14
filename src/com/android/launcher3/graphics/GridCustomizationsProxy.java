@@ -44,6 +44,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.InvariantDeviceProfile.GridOption;
@@ -260,20 +261,21 @@ public class GridCustomizationsProxy implements ProxyProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs,
+            Bundle extras) {
         String path = uri.getPath();
         if (path == null) {
             return 0;
         }
 
-        int result = handleUpdate(path, values);
+        int result = handleUpdate(path, values, extras);
         if (result != 0) {
             mContext.getContentResolver().notifyChange(uri, null);
         }
         return result;
     }
 
-    public int handleUpdate(@NonNull String path, ContentValues values) {
+    public int handleUpdate(@NonNull String path, ContentValues values, @Nullable Bundle extras) {
         switch (path) {
             case KEY_DEFAULT_GRID: {
                 String gridName = values.getAsString(KEY_NAME);
