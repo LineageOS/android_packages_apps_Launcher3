@@ -90,6 +90,7 @@ import androidx.test.uiautomator.UiDevice;
 import androidx.test.uiautomator.UiObject2;
 import androidx.test.uiautomator.Until;
 
+import com.android.internal.R;
 import com.android.launcher3.testing.shared.ResourceUtils;
 import com.android.launcher3.testing.shared.TestProtocol;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -2848,6 +2849,14 @@ public final class LauncherInstrumentation {
         // completely cover the display.
         Log.d(TAG, "Rounded corners top: " + topRadius + " bottom: " + bottomRadius);
         return Math.max(topRadius, bottomRadius) + tmpBuffer;
+    }
+
+    /** Whether creating new desks is allowed. */
+    boolean canCreateDesks() {
+        final int deskLimit = getResources().getInteger(R.integer.config_maxDesktopWindowingDesks);
+        final int deskCount = getTestInfo(TestProtocol.REQUEST_GET_DESK_COUNT, null, null)
+                .getInt(TestProtocol.TEST_INFO_RESPONSE_FIELD);
+        return deskCount < deskLimit;
     }
 
     private Context getLauncherContext(Context baseContext)
