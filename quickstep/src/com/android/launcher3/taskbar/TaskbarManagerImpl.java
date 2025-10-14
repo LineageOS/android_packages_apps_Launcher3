@@ -1517,6 +1517,10 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
 
             @Override
             public void onConfigurationChanged(Configuration newConfig) {
+                TASKBAR_UI_THREAD.execute(() -> onConfigurationChangedInternal(newConfig));
+            }
+
+            private void onConfigurationChangedInternal(Configuration newConfig) {
                 Trace.instantForTrack(Trace.TRACE_TAG_APP, "TaskbarManager",
                         "onConfigurationChanged: " + newConfig);
                 debugTaskbarManager("onConfigurationChanged: " + newConfig, displayId);
