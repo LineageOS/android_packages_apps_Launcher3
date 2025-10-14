@@ -24,6 +24,7 @@ import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.popup.SystemShortcut
 import com.android.launcher3.views.ActivityContext
 import com.android.quickstep.RecentsModel
+import com.android.quickstep.util.DesktopTask
 import com.android.systemui.shared.recents.model.Task
 import com.android.systemui.shared.system.ActivityManagerWrapper
 
@@ -61,7 +62,8 @@ class CloseAppTaskbarShortcut<T>(
             task.key?.packageName == targetPackage && task.key?.userId == targetUserId
         }
         recentsModel.getTasks { tasks ->
-            val allUniqueTasks = tasks.flatMap { it.tasks }.distinctBy { it.key.id }
+            val allUniqueTasks =
+                tasks.filterIsInstance<DesktopTask>().flatMap { it.tasks }.distinctBy { it.key.id }
             val taskIdsToClose =
                 allUniqueTasks.filter(isTargetPackageTask).mapNotNull { it.key?.id }
 

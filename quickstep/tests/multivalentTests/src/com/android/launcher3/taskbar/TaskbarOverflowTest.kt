@@ -718,6 +718,112 @@ class TaskbarOverflowTest {
         assertThat(recentAppsController.shownTasks.map { it.tasks[0].key.id }).isEqualTo(listOf(1))
     }
 
+    @Test
+    @TaskbarMode(PINNED)
+    fun recentTaskIconHasClosePopupOption() {
+        // Create two tasks and two pinned items.
+        createDesktopTask(2)
+        val hotseatItems = createHotseatItems(2)
+
+        var shortcut: SystemShortcut<*>? = null
+        runOnMainSync {
+            val taskbarView = setUpTaskbarAndModelCallback(hotseatItems)
+            // Get the first recent task icon
+            val recentTaskIcon =
+                taskbarView.iconViews.filterIsInstance<BubbleTextView>().first {
+                    it.tag is GroupTask
+                }
+            assertNotNull(recentTaskIcon)
+
+            val recentTaskInfo =
+                createTaskItemInfo(
+                    recentTaskIcon!!.tag as SingleTask,
+                    WorkspaceItemInfo().apply {
+                        title = "Test App 2"
+                        intent = Intent().apply { `package` = "fake" }
+                    },
+                )
+            shortcut =
+                taskbarContext.controllers.taskbarPopupController
+                    .createCloseAppTaskbarShortcutFactory()
+                    ?.getShortcut(taskbarContext, recentTaskInfo, recentTaskIcon!!)
+        }
+        assertThat(shortcut).isNotNull()
+    }
+
+    @Test
+    @TaskbarMode(PINNED)
+    fun pinnedAppIconWithDesktopTaskHasClosePopupOption() {
+        // Create two hotseat items with a task for both of them respectively.
+        var hotseatItems =
+            createHotseatItems(2).mapIndexed { idx, item -> TaskItemInfo(idx, item) }.toTypedArray()
+        createDesktopTaskWithTasksFromPackages(hotseatItems.mapNotNull { it.targetPackage })
+
+        var shortcut: SystemShortcut<*>? = null
+        runOnMainSync {
+            val taskbarView = setUpTaskbarAndModelCallback(hotseatItems.map { it }.toTypedArray())
+            val hotseatIcon =
+                taskbarView.iconViews.filterIsInstance<BubbleTextView>().first {
+                    it.tag is WorkspaceItemInfo
+                }
+            assertNotNull(hotseatIcon)
+            shortcut =
+                taskbarContext.controllers.taskbarPopupController
+                    .createCloseAppTaskbarShortcutFactory()
+                    ?.getShortcut(taskbarContext, hotseatIcon!!.tag as ItemInfo, hotseatIcon!!)
+        }
+        assertThat(shortcut).isNotNull()
+    }
+
+    @Test
+    @TaskbarMode(PINNED)
+    fun pinnedAppIconWithFullscreenTaskDoesntHaveClosePopupOption() {
+        // Create two hotseat items with a task for both of them respectively.
+        var hotseatItems =
+            createHotseatItems(2).mapIndexed { idx, item -> TaskItemInfo(idx, item) }.toTypedArray()
+        createFullscreenAndDesktopTasksFromPackages(
+            hotseatItems.mapNotNull { it.targetPackage },
+            emptyList(),
+        )
+
+        var shortcut: SystemShortcut<*>? = null
+        runOnMainSync {
+            val taskbarView = setUpTaskbarAndModelCallback(hotseatItems.map { it }.toTypedArray())
+            val hotseatIcon =
+                taskbarView.iconViews.filterIsInstance<BubbleTextView>().first {
+                    it.tag is WorkspaceItemInfo
+                }
+            assertNotNull(hotseatIcon)
+            shortcut =
+                taskbarContext.controllers.taskbarPopupController
+                    .createCloseAppTaskbarShortcutFactory()
+                    ?.getShortcut(taskbarContext, hotseatIcon!!.tag as ItemInfo, hotseatIcon!!)
+        }
+        assertThat(shortcut).isNull()
+    }
+
+    @Test
+    @TaskbarMode(PINNED)
+    fun pinnedAppIconWithoutDesktopTaskDoesNotHaveClosePopupOption() {
+        // Create two hotseat items with a task for both of them respectively.
+        var hotseatItems = createHotseatItems(2)
+
+        var shortcut: SystemShortcut<*>? = null
+        runOnMainSync {
+            val taskbarView = setUpTaskbarAndModelCallback(hotseatItems.map { it }.toTypedArray())
+            val hotseatIcon =
+                taskbarView.iconViews.filterIsInstance<BubbleTextView>().first {
+                    it.tag is WorkspaceItemInfo
+                }
+            assertNotNull(hotseatIcon)
+            shortcut =
+                taskbarContext.controllers.taskbarPopupController
+                    .createCloseAppTaskbarShortcutFactory()
+                    ?.getShortcut(taskbarContext, hotseatIcon!!.tag as ItemInfo, hotseatIcon!!)
+        }
+        assertThat(shortcut).isNull()
+    }
+
     private fun setUpTaskbarAndModelCallback(hotseatItems: Array<WorkspaceItemInfo>): TaskbarView {
         val taskbarView: TaskbarView =
             taskbarUnitTestRule.activityContext.dragLayer.findViewById(R.id.taskbar_view)
