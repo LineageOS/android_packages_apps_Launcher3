@@ -18,6 +18,7 @@ package com.android.launcher3.graphics
 
 import android.content.Context
 import android.content.res.Resources
+import androidx.annotation.AnyThread
 import com.android.launcher3.LauncherPrefChangeListener
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.backedUpItem
@@ -118,9 +119,9 @@ constructor(
         _iconShapeData.dispatchValue(iconShape.createIconShape(iconShapeData.value.pathSize))
     }
 
-    fun addChangeListener(listener: ThemeChangeListener) = listeners.add(listener)
+    @AnyThread fun addChangeListener(listener: ThemeChangeListener) = listeners.add(listener)
 
-    fun removeChangeListener(listener: ThemeChangeListener) = listeners.remove(listener)
+    @AnyThread fun removeChangeListener(listener: ThemeChangeListener) = listeners.remove(listener)
 
     /**
      * Generates new IconShape based given [iconSize] and current [iconShape] Allocates new Bitmap
