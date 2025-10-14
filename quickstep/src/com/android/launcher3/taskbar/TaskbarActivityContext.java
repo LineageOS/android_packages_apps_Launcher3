@@ -52,6 +52,7 @@ import static com.android.quickstep.util.AnimUtils.completeRunnableListCallback;
 import static com.android.quickstep.util.ExternalDisplaysKt.isExternalDisplay;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING;
+import static com.android.window.flags.Flags.enableDesktopFirstSplitscreenRefocusBugfix;
 import static com.android.wm.shell.Flags.enableBubbleBar;
 import static com.android.wm.shell.Flags.enableBubbleBarOnPhones;
 import static com.android.wm.shell.Flags.enableTinyTaskbar;
@@ -2120,14 +2121,17 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             return false;
         }
         final SingleTask singleTask = mControllers.taskbarRecentAppsController.getSingleTask(info);
+        final Task nonDesktopTask = enableDesktopFirstSplitscreenRefocusBugfix()
+                ? mControllers.taskbarRecentAppsController.getNonDesktopTask(info)
+                : (singleTask == null ? null : singleTask.getTask());
         if (DesktopExperienceFlags.ENABLE_DESKTOP_FIRST_FULLSCREEN_REFOCUS_BUGFIX.isTrue()
-                && DisplayController.isInDesktopFirstMode(this) && singleTask != null) {
+                && DisplayController.isInDesktopFirstMode(this) && nonDesktopTask != null) {
             if (!DesktopExperienceFlags.ENABLE_DESKTOP_FIRST_POLICY_IN_LPM.isTrue()) {
                 // Keep the fullscreen mode in desktop-first mode.
                 return false;
             }
             final DisplayController.Info currentDisplayInfo = DisplayController.INSTANCE.get(this)
-                    .getInfoForDisplay(singleTask.getTask().getKey().displayId);
+                    .getInfoForDisplay(nonDesktopTask.getKey().displayId);
             if (currentDisplayInfo != null && currentDisplayInfo.isInDesktopFirstMode()) {
                 // Keep the fullscreen mode if both current and target displays are in desktop-first
                 // mode.
