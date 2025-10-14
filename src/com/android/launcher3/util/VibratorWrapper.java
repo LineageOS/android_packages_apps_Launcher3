@@ -19,6 +19,7 @@ import static android.os.VibrationEffect.Composition.PRIMITIVE_LOW_TICK;
 import static android.os.VibrationEffect.createPredefined;
 import static android.provider.Settings.System.HAPTIC_FEEDBACK_ENABLED;
 
+import static com.android.launcher3.util.Executors.IMMEDIATE_EXECUTOR;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 
@@ -77,7 +78,7 @@ public class VibratorWrapper {
         mHasVibrator = mVibrator.hasVibrator();
         if (mHasVibrator) {
             tracker.addCloseable(settingsCache.getListenableRef(HAPTIC_FEEDBACK_URI).forEach(
-                    MAIN_EXECUTOR, (isEnabled) -> {
+                    IMMEDIATE_EXECUTOR, (isEnabled) -> {
                         mIsHapticFeedbackEnabled = isEnabled;
                         return null;
                     }));
