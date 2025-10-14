@@ -17,7 +17,9 @@ package com.android.launcher3.taskbar.bubbles;
 
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 
+import static com.android.launcher3.Flags.enableTaskbarUiThread;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
+import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_VISIBLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
@@ -117,6 +119,8 @@ public class BubbleBarController {
     private final SystemUiProxy mSystemUiProxy;
     private final BubbleBarListener mListener;
 
+    private final Executor mTaskbarUiThread;
+
     private BubbleBarItem mSelectedBubble;
 
     private TaskbarSharedState mSharedState;
@@ -179,6 +183,10 @@ public class BubbleBarController {
 
         mListener = new BubbleBarListener(this);
         mSystemUiProxy = SystemUiProxy.INSTANCE.get(context);
+        // BubbleBarController can call UI operations from BG thread, so the taskbar ui thread must
+        // be MAIN_EXECUTOR (rather than IMMEDIATE_EXECUTOR) when enableTaskbarUiThread() returns
+        // false
+        mTaskbarUiThread = enableTaskbarUiThread() ? TASKBAR_UI_THREAD : MAIN_EXECUTOR;
     }
 
     public void onDestroy() {
@@ -302,12 +310,11 @@ public class BubbleBarController {
                     }
                     viewUpdate.currentBubbles = currentBubbles;
                 }
-                MAIN_EXECUTOR.execute(() -> applyViewChanges(viewUpdate));
+                mTaskbarUiThread.execute(() -> applyViewChanges(viewUpdate));
             });
         } else {
             // No bubbles to load, immediately apply the changes.
-            BUBBLE_STATE_EXECUTOR.execute(
-                    () -> MAIN_EXECUTOR.execute(() -> applyViewChanges(viewUpdate)));
+            mTaskbarUiThread.execute(() -> applyViewChanges(viewUpdate));
         }
     }
 
@@ -631,7 +638,7 @@ public class BubbleBarController {
     }
 
     public void animateBubbleBarLocation(BubbleBarLocation bubbleBarLocation) {
-        MAIN_EXECUTOR.execute(
+        mTaskbarUiThread.execute(
                 () -> {
                     mBubbleBarViewController.animateBubbleBarLocation(bubbleBarLocation);
                     mBubbleBarLocationListener.onBubbleBarLocationAnimated(bubbleBarLocation);
@@ -639,7 +646,8 @@ public class BubbleBarController {
     }
 
     private void showBubbleBarDropTargetAt(@Nullable BubbleBarLocation location) {
-        MAIN_EXECUTOR.execute(() -> mBubbleBarViewController.showBubbleBarDropTargetAt(location));
+        mTaskbarUiThread.execute(
+                () -> mBubbleBarViewController.showBubbleBarDropTargetAt(location));
     }
 
 
