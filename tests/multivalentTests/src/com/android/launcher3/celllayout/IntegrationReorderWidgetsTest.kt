@@ -46,6 +46,8 @@ import com.android.launcher3.util.CellAndSpan
 import com.android.launcher3.util.LauncherLayoutBuilder
 import com.android.launcher3.util.ModelTestExtensions.clearModelDb
 import com.android.launcher3.util.ModelTestExtensions.setModelLayout
+import com.android.launcher3.util.RoboApiWrapper
+import com.android.launcher3.util.rule.ScreenRecordRule
 import com.android.launcher3.widget.LauncherAppWidgetHostView
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -68,6 +70,8 @@ class IntegrationReorderWidgetsTest {
     @get:Rule val setFlagsRule: SetFlagsRule = SetFlagsRule()
 
     @get:Rule var launcherActivity = LauncherActivityScenarioRule<Launcher>()
+
+    @get:Rule var screenRecord = RoboApiWrapper.screenRecordRule()
 
     private var workspaceBuilder: TestWorkspaceBuilder? = null
 
@@ -276,6 +280,7 @@ class IntegrationReorderWidgetsTest {
     }
 
     @Test
+    @ScreenRecordRule.ScreenRecord // b/450885440
     fun simpleReorder() =
         runTest(timeout = TIMEOUT) {
             runTestCaseMap(getTestMap("ReorderWidgets/simple_reorder_case"), "simple_reorder_case")
