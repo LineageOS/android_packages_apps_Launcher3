@@ -26,6 +26,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.util.AllModulesForTest
+import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.SettingsCache
@@ -145,6 +146,7 @@ class AllAppsActionManagerTest {
     @Test
     fun taskbarPresent_userSetupIncomplete_actionUnregistered() {
         settingsCacheSandbox[USER_SETUP_COMPLETE_URI] = 0
+        TestUtil.runOnExecutorSync(MAIN_EXECUTOR) {}
         allAppsActionManager.isTaskbarPresent = true
         assertThat(allAppsActionManager.isActionRegistered).isFalse()
     }
