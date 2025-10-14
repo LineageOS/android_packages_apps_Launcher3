@@ -24,7 +24,6 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.launcher3.InvariantDeviceProfile
-import com.android.launcher3.LauncherModel
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION
@@ -37,20 +36,18 @@ import com.android.launcher3.icons.BitmapInfo
 import com.android.launcher3.model.data.AppPairInfo
 import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.ItemInfo
-import com.android.launcher3.testutil.rule.LayoutResource
-import com.android.launcher3.util.Executors.MAIN_EXECUTOR
-import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY
 import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY2
 import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
 import com.android.launcher3.util.ModelTestExtensions.bgDataModel
+import com.android.launcher3.util.ModelTestExtensions.setEmptyModelLayout
+import com.android.launcher3.util.ModelTestExtensions.setModelLayout
 import java.util.function.Supplier
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeNotNull
 import org.junit.Assume.assumeTrue
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -66,10 +63,6 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class LayoutImportExportHelperTest {
     @get:Rule val context = SandboxApplication().withModelDependency()
-    @get:Rule val layout = LayoutResource(context)
-
-    private val model: LauncherModel
-        get() = context.appComponent.testableModelState.model
 
     private val workspaceItems: List<ItemInfo>
         get() =
@@ -77,11 +70,6 @@ class LayoutImportExportHelperTest {
                 it.isPersistedModelItem() &&
                     (it.container == CONTAINER_DESKTOP || it.container == CONTAINER_HOTSEAT)
             }
-
-    @Before
-    fun setup() {
-        TestUtil.grantWriteSecurePermission()
-    }
 
     @Test
     fun exportAppOnHotseat() =
@@ -268,7 +256,7 @@ class LayoutImportExportHelperTest {
         layoutBuilder: LauncherLayoutBuilder,
         verification: Supplier<Boolean>,
     ) {
-        layout.set(layoutBuilder)
+        context.setModelLayout(layoutBuilder)
         assertTrue(verification.get())
 
         val exportedXml =
@@ -276,18 +264,10 @@ class LayoutImportExportHelperTest {
 
         // To test the exported XML, we merely clear the DB and re-load it. If the XML is
         // well-formatted, it will be loaded into the DB properly. Otherwise, it will be rejected.
-        layout.set(LauncherLayoutBuilder())
-        MODEL_EXECUTOR.submit {
-                try {
-                    model.modelDbController.createEmptyDB()
-                } catch (_: Exception) {}
-            }
-            .get()
-        MAIN_EXECUTOR.submit { model.forceReload() }.get()
-        MODEL_EXECUTOR.submit {}.get()
+        context.setEmptyModelLayout()
         assertFalse(verification.get())
 
-        context.appComponent.layoutImportExportHelper.importModelFromXml(exportedXml)
+        context.setModelLayout(exportedXml)
         assertTrue(verification.get())
     }
 }
