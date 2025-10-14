@@ -385,7 +385,6 @@ public interface ActivityContext extends SavedStateRegistryOwner {
             Log.d(TAG, "hideKeyboard: getDragLayer() is null, returning early");
             return;
         }
-        Preconditions.assertUIThread();
         // Hide keyboard with WindowInsetsController if could. In case hideSoftInputFromWindow may
         // get ignored by input connection being finished when the screen is off.
         //
