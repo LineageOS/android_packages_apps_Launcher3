@@ -245,6 +245,6 @@
     <string name="four_sided_cookie_shape_title" msgid="3275212586290522151">"4 邊形餅乾"</string>
     <string name="seven_sided_cookie_shape_title" msgid="4862560582029671668">"7 邊形餅乾"</string>
     <string name="arch_shape_title" msgid="2213843822192871318">"拱形"</string>
-    <string name="create_new_folder_button_text" msgid="4037052463794735069">"新資料夾"</string>
+    <string name="create_new_folder_button_text" msgid="4037052463794735069">"新增資料夾"</string>
     <string name="default_new_folder_name" msgid="8821062664729412079">"新資料夾"</string>
 </resources>
