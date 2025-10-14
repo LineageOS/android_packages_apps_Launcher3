@@ -120,6 +120,7 @@ android_test {
     srcs: [
         ":launcher-tests-src",
         ":launcher-non-quickstep-tests-src",
+        ":launcher-tests-shared-utils",
     ],
     exclude_srcs: [
         // Launcher3 tests setup has an issue with resolving a few resources within transitive

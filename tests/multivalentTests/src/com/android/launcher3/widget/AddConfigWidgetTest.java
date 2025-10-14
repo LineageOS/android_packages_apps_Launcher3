@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@ import android.content.Intent;
 import android.os.Process;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
+import android.platform.test.rule.LimitDevicesRule;
+import android.platform.test.rule.SkipOnDeviceless;
 import android.view.View;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -46,8 +48,8 @@ import com.android.launcher3.util.BaseLauncherActivityTest;
 import com.android.launcher3.util.BlockingBroadcastReceiver;
 import com.android.launcher3.util.ModelTestExtensions;
 import com.android.launcher3.util.PackageUserKey;
+import com.android.launcher3.util.RoboApiWrapper;
 import com.android.launcher3.util.WidgetUtils;
-import com.android.launcher3.util.rule.ShellCommandRule;
 import com.android.launcher3.widget.picker.WidgetsFullSheet;
 import com.android.launcher3.widget.picker.WidgetsListAdapter;
 import com.android.launcher3.widget.picker.WidgetsRecyclerView;
@@ -55,6 +57,7 @@ import com.android.launcher3.widget.picker.WidgetsRecyclerView;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 
 /**
@@ -68,7 +71,10 @@ public class AddConfigWidgetTest extends BaseLauncherActivityTest<Launcher> {
             new SetFlagsRule(SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT);
 
     @Rule
-    public ShellCommandRule mGrantWidgetRule = ShellCommandRule.grantWidgetBind();
+    public TestRule mGrantWidgetRule = RoboApiWrapper.INSTANCE.grantWidgetBindPermissionRule();
+
+    @Rule
+    public LimitDevicesRule mlimitDevicesRule = new LimitDevicesRule();
 
     private LauncherAppWidgetProviderInfo mWidgetInfo;
     private AppWidgetManager mAppWidgetManager;
@@ -82,12 +88,20 @@ public class AddConfigWidgetTest extends BaseLauncherActivityTest<Launcher> {
     }
 
     @Test
+    /*
+     * Test is is hanging on Robolectric, possibly an issue with threading.
+     */
+    @SkipOnDeviceless
     @DisableFlags(Flags.FLAG_ENABLE_WIDGET_PICKER_REFACTOR)
     public void testWidgetConfig() throws Throwable {
         runTest(true);
     }
 
     @Test
+    /*
+     * Test is is hanging on Robolectric, possibly an issue with threading.
+     */
+    @SkipOnDeviceless
     @DisableFlags(Flags.FLAG_ENABLE_WIDGET_PICKER_REFACTOR)
     public void testConfigCancelled() throws Throwable {
         runTest(false);

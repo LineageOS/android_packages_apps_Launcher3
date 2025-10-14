@@ -25,5 +25,6 @@ filegroup {
     srcs: [
         ":launcher-e2e-inproc-tests-only",
         ":launcher-e2e-tests-utils",
+        ":launcher-e2e-tests-utils",
     ],
 }
