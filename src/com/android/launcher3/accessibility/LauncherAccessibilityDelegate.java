@@ -42,6 +42,7 @@ import com.android.launcher3.dragndrop.DragOptions;
 import com.android.launcher3.dragndrop.DragOptions.PreDragCondition;
 import com.android.launcher3.dragndrop.DragView;
 import com.android.launcher3.folder.Folder;
+import com.android.launcher3.homescreenfiles.HomeScreenFilesUtilsKt;
 import com.android.launcher3.keyboard.KeyboardDragAndDropView;
 import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.AppPairInfo;
@@ -368,6 +369,8 @@ public class LauncherAccessibilityDelegate extends BaseAccessibilityDelegate<Lau
             mDragInfo.dragType = DragType.APP_PAIR;
         } else if (info instanceof LauncherAppWidgetInfo) {
             mDragInfo.dragType = DragType.WIDGET;
+        } else if (HomeScreenFilesUtilsKt.isFileSystemItem(info)) {
+            mDragInfo.dragType = DragType.FILESYSTEM_ICON;
         }
 
         Rect pos = new Rect();

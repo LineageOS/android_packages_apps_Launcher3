@@ -1774,7 +1774,6 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
      */
     public DragView beginDragShared(View child, DraggableView draggableView, DragSource source,
             ItemInfo dragObject, DragPreviewProvider previewProvider, DragOptions dragOptions) {
-
         float iconScale = 1f;
         if (child instanceof BubbleTextView) {
             Drawable icon = ((BubbleTextView) child).getIcon();
@@ -1832,9 +1831,9 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                 if (btv.isDisplaySearchResult()) {
                     dragOptions.preDragEndScale = (float) mAllAppsIconSize / btv.getIconSize();
                 }
-            } else if ((Flags.homeScreenEditImprovements() && child instanceof Poppable
-                    && !dragOptions.isAccessibleDrag) || HomeScreenFilesUtilsKt.isFileSystemItem(
-                    item)) {
+            } else if (((Flags.homeScreenEditImprovements() && child instanceof Poppable)
+                    || HomeScreenFilesUtilsKt.isFileSystemItem(item))
+                    && !dragOptions.isAccessibleDrag) {
                 Popup popup = mLauncher.getPopupControllerForHomeScreenItems()
                         .show(child);
                 if (popup != null) {
