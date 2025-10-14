@@ -21,6 +21,7 @@ import android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID
 import android.appwidget.AppWidgetProviderInfo
 import android.appwidget.AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX
 import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_CONFIGURATION_OPTIONAL
+import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_HIDE_FROM_PICKER
 import android.content.ComponentName
 import android.platform.test.rule.LimitDevicesRule
 import android.platform.test.rule.SkipOnDeviceless
@@ -107,6 +108,30 @@ class OseWidgetManagerTest {
             .getInstalledProvidersForPackage(any(), any())
         assertEquals(
             infoSearch.provider,
+            OseWidgetManager.findSearchWidgetForPackage(context, "test")?.provider,
+        )
+    }
+
+    @Test
+    fun findSearchWidgetForPackage_multipleSearchWidgets_prefers_notHiddenSearchWidget() {
+        val infoWithoutConfig = WidgetUtils.findWidgetProvider(false)
+        val hiddenSearchWidget =
+            WidgetUtils.findWidgetProvider(false).apply {
+                provider = ComponentName("s", "d")
+                widgetCategory = WIDGET_CATEGORY_SEARCHBOX
+                widgetFeatures = WIDGET_FEATURE_HIDE_FROM_PICKER
+            }
+        val notHiddenSearchWidget =
+            WidgetUtils.findWidgetProvider(false).apply {
+                provider = ComponentName("s", "d")
+                widgetCategory = WIDGET_CATEGORY_SEARCHBOX
+            }
+
+        doReturn(listOf(infoWithoutConfig, hiddenSearchWidget, notHiddenSearchWidget))
+            .whenever(widgetManager)
+            .getInstalledProvidersForPackage(any(), any())
+        assertEquals(
+            notHiddenSearchWidget.provider,
             OseWidgetManager.findSearchWidgetForPackage(context, "test")?.provider,
         )
     }
