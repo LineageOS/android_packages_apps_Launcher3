@@ -182,20 +182,6 @@ flag {
 }
 
 flag {
-    name: "all_apps_sheet_for_handheld"
-    namespace: "launcher"
-    description: "All Apps will be presented on a bottom sheet in handheld mode"
-    bug: "374186088"
-}
-
-flag {
-    name: "all_apps_blur"
-    namespace: "launcher"
-    description: "Content behind the all apps panel in Launcher will be blurred."
-    bug: "400827727"
-}
-
-flag {
     name: "blurred_home_animation"
     namespace: "launcher"
     description: "Launcher will be blurred when the user swipes to home."
@@ -203,6 +189,13 @@ flag {
     metadata {
       purpose: PURPOSE_BUGFIX
     }
+}
+
+flag {
+    name: "all_apps_surface"
+    namespace: "launcher"
+    description: "All Apps will be drawn on a separate surface to improve performance."
+    bug: "414847564"
 }
 
 flag {

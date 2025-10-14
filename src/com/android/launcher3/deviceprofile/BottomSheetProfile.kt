@@ -39,7 +39,6 @@ data class BottomSheetProfile(
             insets: Rect,
             res: Resources,
             edgeMarginPx: Int,
-            shouldShowAllAppsOnSheet: Boolean,
             workspaceProfile: WorkspaceProfile,
         ): BottomSheetProfile {
 
@@ -52,7 +51,6 @@ data class BottomSheetProfile(
             val derivedTopPadding: Int = deviceProperties.heightPx / 6
             val bottomSheetDepth =
                 when {
-                    !shouldShowAllAppsOnSheet -> 0f
                     // TODO(b/259893832): Revert to use maxWallpaperScale to calculate
                     // bottomSheetDepth when screen recorder bug is fixed.
                     deviceProperties.isMultiDisplay -> 0.3f
@@ -83,8 +81,7 @@ data class BottomSheetProfile(
                 bottomSheetOpenDuration = res.getInteger(R.integer.config_bottomSheetOpenDuration),
                 bottomSheetCloseDuration =
                     res.getInteger(R.integer.config_bottomSheetCloseDuration),
-                bottomSheetWorkspaceScale =
-                    if (shouldShowAllAppsOnSheet) workspaceProfile.workspaceContentScale else 1f,
+                bottomSheetWorkspaceScale = workspaceProfile.workspaceContentScale,
                 bottomSheetDepth = bottomSheetDepth,
             )
         }

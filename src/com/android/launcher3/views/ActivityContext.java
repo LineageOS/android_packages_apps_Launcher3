@@ -66,7 +66,6 @@ import com.android.launcher3.CellLayout;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.DeviceProfile.OnDeviceProfileChangeListener;
 import com.android.launcher3.DropTargetHandler;
-import com.android.launcher3.Flags;
 import com.android.launcher3.LauncherAppState;
 import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.R;
@@ -231,10 +230,6 @@ public interface ActivityContext extends SavedStateRegistryOwner {
 
     /** @return the resource id of the style to apply for the current blur state in All Apps. */
     default int getAllAppsBlurStyleResId() {
-        if (!Flags.allAppsBlur()) {
-            // Don't alter the colors provided in the default Launcher themes.
-            return View.NO_ID;
-        }
         return isAllAppsBackgroundBlurEnabled() ? R.style.AllAppsBlurStyle
                 : R.style.AllAppsBlurFallbackStyle;
     }

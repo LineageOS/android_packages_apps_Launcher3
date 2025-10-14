@@ -33,7 +33,6 @@ import android.view.accessibility.AccessibilityManager;
 import androidx.annotation.ColorInt;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.launcher3.Flags;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.allapps.FloatingHeaderRow;
@@ -86,9 +85,7 @@ public class AppsDividerView extends View implements FloatingHeaderRow {
                 getResources().getDimensionPixelSize(R.dimen.all_apps_divider_height)
         };
 
-        mStrokeColor = Flags.allAppsBlur()
-                ? Themes.getAttrColor(context, R.attr.bottomSheetDragHandleColor)
-                : context.getColor(R.color.materialColorOutlineVariant);
+        mStrokeColor = Themes.getAttrColor(context, R.attr.bottomSheetDragHandleColor);
         mAllAppsLabelTextColor = context.getColor(R.color.materialColorOnSurface);
 
         mAccessibilityManager = AccessibilityManager.getInstance(context);

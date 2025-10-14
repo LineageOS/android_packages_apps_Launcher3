@@ -34,7 +34,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.app.animation.Interpolators;
-import com.android.launcher3.Flags;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherState;
 import com.android.launcher3.R;
@@ -50,7 +49,6 @@ import com.android.systemui.shared.system.BlurUtils;
  */
 public class BaseDepthController {
     public static final float DEPTH_0_PERCENT = 0f;
-    public static final float DEPTH_60_PERCENT = 0.6f;
     public static final float DEPTH_70_PERCENT = 0.7f;
 
     private static final FloatProperty<BaseDepthController> DEPTH =
@@ -301,9 +299,6 @@ public class BaseDepthController {
     /** @return {@code true} if the workspace should be blurred. */
     @VisibleForTesting
     public boolean blurWorkspaceDepthTargets() {
-        if (!Flags.allAppsBlur()) {
-            return false;
-        }
         StateManager<LauncherState, Launcher> stateManager = mLauncher.getStateManager();
         LauncherState targetState = stateManager.getTargetState() != null
                 ? stateManager.getTargetState() : stateManager.getState();

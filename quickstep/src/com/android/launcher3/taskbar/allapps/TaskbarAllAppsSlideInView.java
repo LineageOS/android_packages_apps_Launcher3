@@ -20,8 +20,6 @@ import static android.os.Trace.TRACE_TAG_APP;
 import static com.android.app.animation.Interpolators.DECELERATED_EASE;
 import static com.android.app.animation.Interpolators.EMPHASIZED;
 import static com.android.app.animation.Interpolators.LINEAR;
-import static com.android.launcher3.touch.AllAppsSwipeController.ALL_APPS_FADE_MANUAL;
-import static com.android.launcher3.touch.AllAppsSwipeController.SCRIM_FADE_MANUAL;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 
 import android.animation.Animator;
@@ -42,9 +40,7 @@ import android.window.OnBackInvokedDispatcher;
 
 import androidx.annotation.Nullable;
 
-import com.android.app.animation.Interpolators;
 import com.android.launcher3.DeviceProfile;
-import com.android.launcher3.Flags;
 import com.android.launcher3.Insettable;
 import com.android.launcher3.R;
 import com.android.launcher3.anim.AnimatorListeners;
@@ -147,33 +143,14 @@ public class TaskbarAllAppsSlideInView extends AbstractSlideInView<TaskbarOverla
     protected void onOpenCloseAnimationPending(PendingAnimation animation) {
         final boolean isOpening = mToTranslationShift == TRANSLATION_SHIFT_OPENED;
 
-        if (mActivityContext.getDeviceProfile().getDeviceProperties().isPhone()) {
-            final Interpolator allAppsFadeInterpolator =
-                    isOpening ? ALL_APPS_FADE_MANUAL : Interpolators.reverse(ALL_APPS_FADE_MANUAL);
-            animation.setViewAlpha(mAppsView, 1 - mToTranslationShift, allAppsFadeInterpolator);
-        }
-
-        if (Flags.allAppsBlur()) {
-            Interpolator blurInterpolator = isOpening ? LINEAR : DECELERATED_EASE;
-            animation.addOnFrameListener(a -> {
-                float blurProgress =
-                        isOpening ? a.getAnimatedFraction() : 1 - a.getAnimatedFraction();
-                mBlurRadius =
-                        (int) (mMaxBlurRadius * blurInterpolator.getInterpolation(blurProgress));
-            });
-        }
+        Interpolator blurInterpolator = isOpening ? LINEAR : DECELERATED_EASE;
+        animation.addOnFrameListener(a -> {
+            float blurProgress =
+                    isOpening ? a.getAnimatedFraction() : 1 - a.getAnimatedFraction();
+            mBlurRadius = (int) (mMaxBlurRadius * blurInterpolator.getInterpolation(blurProgress));
+        });
 
         mAllAppsCallbacks.onAllAppsAnimationPending(animation, isOpening);
-    }
-
-    @Override
-    protected Interpolator getScrimInterpolator() {
-        if (mActivityContext.getDeviceProfile().getDeviceProperties().isTablet()) {
-            return super.getScrimInterpolator();
-        }
-        return mToTranslationShift == TRANSLATION_SHIFT_OPENED
-                ? SCRIM_FADE_MANUAL
-                : Interpolators.reverse(SCRIM_FADE_MANUAL);
     }
 
     /** The apps container inside this view. */
@@ -213,9 +190,6 @@ public class TaskbarAllAppsSlideInView extends AbstractSlideInView<TaskbarOverla
     protected void onFinishInflate() {
         super.onFinishInflate();
         mAppsView = findViewById(R.id.apps_view);
-        if (mActivityContext.getDeviceProfile().getDeviceProperties().isPhone()) {
-            mAppsView.setAlpha(0);
-        }
         mContent = mAppsView;
 
         // Setup header protection for search bar, if enabled.
@@ -273,13 +247,6 @@ public class TaskbarAllAppsSlideInView extends AbstractSlideInView<TaskbarOverla
 
     @Override
     protected int getScrimColor(Context context) {
-        if (!mActivityContext.getDeviceProfile().shouldShowAllAppsOnSheet()) {
-            // Always use an opaque scrim if there's no sheet.
-            return context.getResources().getColor(R.color.materialColorSurfaceDim);
-        } else if (!Flags.allAppsBlur()) {
-            // If there's a sheet but no blur, use the old scrim color.
-            return context.getResources().getColor(R.color.widgets_picker_scrim);
-        }
         return Themes.getAttrColor(context, R.attr.allAppsScrimColor);
     }
 
