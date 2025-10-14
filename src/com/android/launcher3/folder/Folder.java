@@ -441,14 +441,13 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
         if (dragObject.dragSource != this) {
             return;
         }
+        mIsDragInProgress = true;
         mContent.removeItem(mCurrentDragView);
         mItemsInvalidated = true;
 
         // We do not want to get events for the item being removed, as they will get handled
         // when the drop completes
         executeWithContentUpdateSuppressed(() -> removeFolderContent(true, dragObject.dragInfo));
-
-        mIsDragInProgress = true;
         mItemAddedBackToSelfViaIcon = false;
     }
 
