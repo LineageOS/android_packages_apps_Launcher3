@@ -27,6 +27,7 @@ import com.android.launcher3.util.CellAndSpan
 import com.android.launcher3.widget.LauncherAppWidgetHostView
 
 object TestUtils {
+
     fun <T> searchChildren(viewGroup: ViewGroup, type: Class<T>): T? where T : View {
         for (i in 0..<viewGroup.childCount) {
             val child = viewGroup.getChildAt(i)
