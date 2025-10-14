@@ -778,6 +778,10 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     override fun handleClose(animate: Boolean) {
         try {
             Trace.beginSection("closeAppWidgetResizeFrame")
+            // Mark the frame as closed before removing it from drag layer so drag layer knows not
+            // to asynchronously call `close()` again (which happens with `AbstractFloatingView`s
+            // that get removed without being closed).
+            mIsOpen = false
             dragLayer.removeView(this)
             widgetView.removeOnLayoutChangeListener(widgetViewLayoutListener)
             launcher.dragController.removeDragListener(this)
