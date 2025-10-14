@@ -99,6 +99,7 @@ import com.android.launcher3.widget.LauncherWidgetHolder;
 import com.android.launcher3.widget.picker.model.WidgetPickerDataProvider;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * An interface to be used along with a context for various activities in Launcher. This allows a
@@ -110,6 +111,10 @@ public interface ActivityContext extends SavedStateRegistryOwner {
 
     /** Returns the dagger graph for this UI context */
     ActivityContextComponent getActivityComponent();
+
+    default Executor getUiExecutor() {
+        return MAIN_EXECUTOR;
+    }
 
     default boolean finishAutoCancelActionMode() {
         return false;
@@ -619,7 +624,7 @@ public interface ActivityContext extends SavedStateRegistryOwner {
 
     /** Closes the closeable when this context is destroyed */
     default void closeOnDestroy(SafeCloseable closeable) {
-        MAIN_EXECUTOR.execute(() -> getLifecycle().addObserver(new DefaultLifecycleObserver() {
+        getUiExecutor().execute(() -> getLifecycle().addObserver(new DefaultLifecycleObserver() {
             @Override
             public void onDestroy(@NonNull LifecycleOwner owner) {
                 closeable.close();

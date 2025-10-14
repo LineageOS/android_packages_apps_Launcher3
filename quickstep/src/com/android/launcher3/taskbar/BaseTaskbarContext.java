@@ -39,6 +39,8 @@ import com.android.launcher3.util.NavigationMode;
 import com.android.launcher3.util.Themes;
 import com.android.wm.shell.shared.bubbles.logging.EntryPoint;
 
+import java.util.concurrent.Executor;
+
 // TODO(b/218912746): Share more behavior to avoid all apps context depending directly on taskbar.
 /** Base for common behavior between taskbar window contexts. */
 public abstract class BaseTaskbarContext extends BaseContext
@@ -71,6 +73,11 @@ public abstract class BaseTaskbarContext extends BaseContext
     @Override
     public int getDisplayId() {
         return mDisplayId;
+    }
+
+    @Override
+    public Executor getUiExecutor() {
+        return TASKBAR_UI_THREAD;
     }
 
     /**
