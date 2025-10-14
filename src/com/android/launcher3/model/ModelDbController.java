@@ -538,9 +538,11 @@ public class ModelDbController {
      *   2) From a package provided by play store
      *   3) From a partner configuration APK, already in the system image
      *   4) The default configuration for the particular device
+     *
+     * Returns true if default favorites was loaded, false if a valid data already exists
      */
     @WorkerThread
-    public synchronized void loadDefaultFavoritesIfNecessary() {
+    public synchronized boolean loadDefaultFavoritesIfNecessary() {
         createDbIfNotExists();
 
         if (mPrefs.get(getEmptyDbCreatedKey())) {
@@ -568,10 +570,12 @@ public class ModelDbController {
                             getDefaultLayoutParser(widgetHolder));
                 }
                 clearFlagEmptyDbCreated();
+                return true;
             } finally {
                 widgetHolder.destroy();
             }
         }
+        return false;
     }
 
     public static Uri getLayoutUri(String authority, Context ctx) {

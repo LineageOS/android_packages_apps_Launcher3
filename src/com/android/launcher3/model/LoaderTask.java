@@ -80,7 +80,10 @@ import com.android.launcher3.model.data.IconRequestInfo;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.LauncherAppWidgetInfo;
 import com.android.launcher3.model.data.LoaderParams;
+import com.android.launcher3.model.data.WorkspaceChangeEvent;
+import com.android.launcher3.model.data.WorkspaceChangeEvent.AddEvent;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
+import com.android.launcher3.model.tasks.BrowserIconMigratorFactory;
 import com.android.launcher3.pm.InstallSessionHelper;
 import com.android.launcher3.pm.PackageInstallInfo;
 import com.android.launcher3.pm.UserCache;
@@ -174,6 +177,7 @@ public class LoaderTask implements Runnable {
     private final kotlin.Lazy<Map<Uri, HomeScreenFile>> mHomeScreenFilesQueryResult;
     private final FirstScreenBroadcastHelper mFirstScreenBroadcastHelper;
     private final SettingsCache mSettingsCache;
+    private final BrowserIconMigratorFactory mBrowserIconMigratorFactory;
 
     @AssistedInject
     protected LoaderTask(
@@ -197,7 +201,8 @@ public class LoaderTask implements Runnable {
             WorkspaceItemSpaceFinder workspaceItemSpaceFinder,
             HomeScreenFilesProvider homeScreenFilesProvider,
             FirstScreenBroadcastHelper firstScreenBroadcastHelper,
-            SettingsCache settingsCache) {
+            SettingsCache settingsCache,
+            BrowserIconMigratorFactory browserIconMigratorFactory) {
         mContext = context;
         mIDP = idp;
         mModel = model;
@@ -223,6 +228,7 @@ public class LoaderTask implements Runnable {
         mFirstScreenBroadcastHelper = firstScreenBroadcastHelper;
         mSettingsCache = settingsCache;
         mUserManagerState = mUserCache.getUserManagerState();
+        mBrowserIconMigratorFactory = browserIconMigratorFactory;
     }
 
     protected synchronized void waitForIdle() {
@@ -445,7 +451,7 @@ public class LoaderTask implements Runnable {
         }
 
         Log.d(TAG, "loadWorkspace: loading default favorites if necessary");
-        dbController.loadDefaultFavoritesIfNecessary();
+        final var isNewUserSetup = dbController.loadDefaultFavoritesIfNecessary();
 
         synchronized (mBgDataModel) {
             mBgDataModel.clear();
@@ -503,8 +509,23 @@ public class LoaderTask implements Runnable {
             }
 
             mBgDataModel.updateStringCache(mContext);
-            mBgDataModel.dataLoadComplete(
-                    itemProcessor.finalizeData(mModelDelegate, mModel.getModelDbController()));
+
+
+            var loadedItems =
+                    itemProcessor.finalizeData(mModelDelegate, mModel.getModelDbController());
+            if (Flags.migrateBrowserIconOnSetup() && (isNewUserSetup || mIsRestoreFromBackup)) {
+                var changes = mBrowserIconMigratorFactory
+                        .createBrowserIconMigrator(loadedItems).processItems();
+                for (WorkspaceChangeEvent changeEvent: changes) {
+                    if (changeEvent instanceof AddEvent ae) {
+                        ae.getItems().forEach(item -> {
+                            loadedItems.put(item.id, item);
+                        });
+                    }
+                }
+            }
+
+            mBgDataModel.dataLoadComplete(loadedItems);
         }
     }
 

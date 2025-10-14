@@ -27,7 +27,6 @@ import android.net.Uri
 import android.text.TextUtils
 import android.util.Log
 import android.util.LongSparseArray
-import android.util.SparseArray
 import com.android.launcher3.Flags
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherSettings.Favorites
@@ -763,7 +762,7 @@ class WorkspaceItemProcessor(
     fun finalizeData(
         delegate: ModelDelegate,
         modelDbController: ModelDbController,
-    ): SparseArray<ItemInfo> {
+    ): IntSparseArrayMap<ItemInfo> {
         delegate.loadAndAddExtraModelItems(loadedItems)
         delegate.markActive()
 
