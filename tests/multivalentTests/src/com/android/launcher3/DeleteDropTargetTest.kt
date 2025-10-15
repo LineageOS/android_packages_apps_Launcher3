@@ -4,8 +4,11 @@ import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.launcher3.LauncherSettings.Favorites
 import com.android.launcher3.Utilities.enableRunningInTestHarnessForTests
+import com.android.launcher3.dragndrop.DragOptions
 import com.android.launcher3.dragndrop.DragView
+import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.util.MSDLPlayerWrapper
 import com.android.launcher3.util.TestActivityContext
 import com.google.android.msdl.data.model.MSDLToken
@@ -61,5 +64,41 @@ class DeleteDropTargetTest {
 
         verify(msdlPlayerWrapper, times(1)).playToken(eq(MSDLToken.SWIPE_THRESHOLD_INDICATOR))
         verifyNoMoreInteractions(msdlPlayerWrapper)
+    }
+
+    @Test
+    fun setsTextBasedOnDragSource() {
+        verifyTextForItemInfo(ItemInfo().apply { id = ItemInfo.NO_ID }, "Cancel")
+        verifyTextForItemInfo(
+            ItemInfo().apply {
+                id = 1
+                itemType = Favorites.ITEM_TYPE_FILE_SYSTEM_FILE
+            },
+            "Delete permanently",
+        )
+        verifyTextForItemInfo(
+            ItemInfo().apply {
+                id = 1
+                itemType = Favorites.ITEM_TYPE_FILE_SYSTEM_FOLDER
+            },
+            "Delete permanently",
+        )
+        verifyTextForItemInfo(
+            ItemInfo().apply {
+                id = 1
+                itemType = Favorites.ITEM_TYPE_APPLICATION
+            },
+            "Remove",
+        )
+    }
+
+    private fun verifyTextForItemInfo(item: ItemInfo, expectedText: String) {
+        buttonDropTarget.updateText("My Test")
+
+        val target = DropTarget.DragObject(mContext)
+        target.dragInfo = item
+        buttonDropTarget.onDragStart(target, DragOptions())
+
+        assertThat(buttonDropTarget.mText).isEqualTo(expectedText)
     }
 }

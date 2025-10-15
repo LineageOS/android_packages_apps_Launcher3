@@ -27,6 +27,7 @@ import android.view.View;
 
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate;
 import com.android.launcher3.dragndrop.DragOptions;
+import com.android.launcher3.homescreenfiles.HomeScreenFilesUtilsKt;
 import com.android.launcher3.logging.StatsLogManager;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.util.Preconditions;
@@ -92,13 +93,22 @@ public class DeleteDropTarget extends ButtonDropTarget {
     }
 
     /**
-     * Set the drop target's text to either "Remove" or "Cancel" depending on the drag item.
+     * Set the drop target's text to either "Remove", "Delete permanently" or "Cancel" depending on
+     * the drag item.
      */
     private void setTextBasedOnDragSource(ItemInfo item) {
         if (!TextUtils.isEmpty(mText)) {
-            mText = getResources().getString(canRemove(item)
-                    ? R.string.remove_drop_target_label
-                    : android.R.string.cancel);
+            int resId;
+            if (canRemove(item)) {
+                if (HomeScreenFilesUtilsKt.isFileSystemItem(item)) {
+                    resId = R.string.home_screen_files_context_menu_delete_permanently_label;
+                } else {
+                    resId = R.string.remove_drop_target_label;
+                }
+            } else {
+                resId = android.R.string.cancel;
+            }
+            mText = getResources().getString(resId);
             setContentDescription(mText);
             requestLayout();
         }
