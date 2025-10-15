@@ -18,12 +18,14 @@ package com.android.quickstep.views
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.graphics.PointF
 import android.graphics.Rect
 import android.util.FloatProperty
 import android.util.Log
 import android.util.Property
 import android.view.KeyEvent
+import android.view.RemoteAnimationTarget
 import android.view.View
 import android.view.View.LAYOUT_DIRECTION_LTR
 import android.view.View.LAYOUT_DIRECTION_RTL
@@ -889,6 +891,11 @@ constructor(
     @AssistedFactory
     interface Factory {
         fun create(recentsView: RecentsView<*, *>): RecentsViewUtils
+    }
+
+    fun isTaskLaunchingInFreeFromWindow(taskId: Int, apps: Array<RemoteAnimationTarget>): Boolean {
+        return apps.firstOrNull { it.taskId == taskId }?.windowConfiguration?.windowingMode ==
+            WINDOWING_MODE_FREEFORM
     }
 
     companion object {
