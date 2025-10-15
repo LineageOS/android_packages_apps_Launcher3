@@ -678,3 +678,13 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+  name: "disable_obsolete_swipe_handler_logic"
+  namespace: "launcher"
+  description: "Disables a potentially-obsolete codepath in AbsSwipeUpHandler, helping keep its eventual clean up safe."
+  bug: "449855328"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
