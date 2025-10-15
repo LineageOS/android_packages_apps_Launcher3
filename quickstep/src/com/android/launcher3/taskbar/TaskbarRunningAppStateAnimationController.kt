@@ -42,7 +42,7 @@ import com.android.launcher3.BubbleTextView.RunningAppState.RUNNING
 import com.android.launcher3.R
 import com.android.launcher3.Utilities as LauncherUtilities
 import com.android.launcher3.model.data.TaskItemInfo
-import com.android.launcher3.taskbar.TaskbarViewController.TRANSITION_DEFAULT_DURATION
+import com.android.launcher3.taskbar.TaskbarLayoutTransitionFactory.Companion.TRANSITION_DEFAULT_DURATION
 import com.android.launcher3.util.MultiPropertyFactory
 import com.android.launcher3.util.MultiTranslateDelegate.INDEX_TASKBAR_APP_RUNNING_STATE_ANIM
 
