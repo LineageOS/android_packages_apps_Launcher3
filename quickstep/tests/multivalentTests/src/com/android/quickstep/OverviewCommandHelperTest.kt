@@ -22,6 +22,7 @@ import android.content.Intent
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.view.Display.DEFAULT_DISPLAY
+import androidx.test.annotation.UiThreadTest
 import androidx.test.filters.SmallTest
 import com.android.app.displaylib.DisplayRepository
 import com.android.app.displaylib.fakes.FakePerDisplayRepository
@@ -76,6 +77,7 @@ import org.mockito.kotlin.whenever
 @SmallTest
 @RunWith(LauncherMultivalentJUnit::class)
 @OptIn(ExperimentalCoroutinesApi::class)
+@UiThreadTest
 class OverviewCommandHelperTest {
 
     @get:Rule val mSetFlagsRule: SetFlagsRule = SetFlagsRule()

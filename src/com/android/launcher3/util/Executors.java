@@ -88,7 +88,7 @@ public class Executors {
 
     public static final Executor TASKBAR_UI_THREAD = enableTaskbarUiThread()
             ? new LooperExecutor("TASKBAR_UI_THREAD", THREAD_PRIORITY_FOREGROUND)
-            : IMMEDIATE_EXECUTOR;
+            : MAIN_EXECUTOR;
 
     /**
      * A background executor for using time sensitive actions where user is waiting for response.
