@@ -52,6 +52,7 @@ class PreviewLifecycleObserver(
                             .entries
                     )
             },
+            null,
         )
     }
 

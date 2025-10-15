@@ -155,7 +155,7 @@ object LauncherCustomizer {
         values.putObject(arg, argValue)
         Assert.assertEquals(
             RESULT_SUCCESS,
-            context.appComponent.gridCustomizationsProxy.update(gridUri, values, null, null),
+            context.appComponent.gridCustomizationsProxy.update(gridUri, values, null, null, null),
         )
     }
 

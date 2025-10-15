@@ -50,7 +50,10 @@ abstract class ContentProviderProxy : ContentProvider() {
         values: ContentValues?,
         selection: String?,
         selectionArgs: Array<out String>?,
-    ): Int = checkGetProxy()?.update(uri, values, selection, selectionArgs) ?: 0
+    ): Int = checkGetProxy()?.update(uri, values, selection, selectionArgs, null) ?: 0
+
+    override fun update(uri: Uri, values: ContentValues?, extras: Bundle?): Int =
+        checkGetProxy()?.update(uri, values, null, null, extras) ?: 0
 
     override fun call(method: String, arg: String?, extras: Bundle?): Bundle? =
         checkGetProxy()?.call(method, arg, extras)
@@ -79,6 +82,7 @@ abstract class ContentProviderProxy : ContentProvider() {
             values: ContentValues?,
             selection: String?,
             selectionArgs: Array<out String>?,
+            extras: Bundle?,
         ): Int = 0
 
         fun call(method: String, arg: String?, extras: Bundle?): Bundle? = null
