@@ -21,25 +21,30 @@ import android.os.UserHandle
 import android.util.Log
 import android.view.InsetsState
 import android.view.WindowInsets
+import androidx.annotation.AnyThread
 import com.android.launcher3.Utilities
 import com.android.launcher3.config.FeatureFlags
 import com.android.launcher3.util.Executors
 import com.android.wm.shell.shared.IHomeTransitionListener.Stub
 import com.android.wm.shell.shared.IShellTransitions
+import java.util.concurrent.CopyOnWriteArrayList
+import javax.annotation.concurrent.ThreadSafe
 
 /** Class to track visibility state of Launcher */
+@ThreadSafe
 class HomeVisibilityState {
 
+    @Volatile
     var isHomeVisible = true
         private set
 
     @Volatile var navbarInsetPosition = 0
 
-    private var listeners = mutableSetOf<VisibilityChangeListener>()
+    private var listeners = CopyOnWriteArrayList<VisibilityChangeListener>()
 
-    fun addListener(l: VisibilityChangeListener) = listeners.add(l)
+    @AnyThread fun addListener(l: VisibilityChangeListener) = listeners.add(l)
 
-    fun removeListener(l: VisibilityChangeListener) = listeners.remove(l)
+    @AnyThread fun removeListener(l: VisibilityChangeListener) = listeners.remove(l)
 
     fun init(transitions: IShellTransitions?) {
         if (!FeatureFlags.enableHomeTransitionListener()) return
@@ -49,8 +54,7 @@ class HomeVisibilityState {
                     override fun onHomeVisibilityChanged(isVisible: Boolean) {
                         Utilities.postAsyncCallback(Executors.MAIN_EXECUTOR.handler) {
                             isHomeVisible = isVisible
-                            val copiedListeners = listeners.toSet()
-                            copiedListeners.forEach { it.onHomeVisibilityChanged(isVisible) }
+                            listeners.forEach { it.onHomeVisibilityChanged(isVisible) }
                         }
                     }
 

@@ -218,7 +218,9 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
                 public void onPrefChanged(String key) {
                     boolean isTaskbarPinningChanged = TASKBAR_PINNING_KEY.equals(key);
                     if (isTaskbarPinningChanged) {
-                        recreateTaskbars();
+                        TASKBAR_UI_THREAD.execute(() -> {
+                            recreateTaskbars();
+                        });
                     }
                 }
             };

@@ -86,8 +86,6 @@ import java.util.Arrays;
  */
 public class LauncherTaskbarUIController extends TaskbarUIController {
 
-    private static final String TAG = "TaskbarUIController";
-
     public static final int MINUS_ONE_PAGE_PROGRESS_INDEX = 0;
     public static final int ALL_APPS_PAGE_PROGRESS_INDEX = 1;
     public static final int WIDGETS_PAGE_PROGRESS_INDEX = 2;
@@ -118,8 +116,13 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
             };
     private SafeCloseable mOnDeviceProfileChangeListenerClosable;
     private SafeCloseable mIsOnTopResumeActivityListenerClosable;
-    private final HomeVisibilityState.VisibilityChangeListener  mVisibilityChangeListener =
-            this::onLauncherVisibilityChanged;
+    private final HomeVisibilityState.VisibilityChangeListener mVisibilityChangeListener =
+            new HomeVisibilityState.VisibilityChangeListener() {
+        @Override
+        public void onHomeVisibilityChanged(boolean isVisible) {
+            TASKBAR_UI_THREAD.execute(() -> onLauncherVisibilityChanged(isVisible));
+        }
+    };
 
     // Initialized in init.
     private final TaskbarLauncherStateController
