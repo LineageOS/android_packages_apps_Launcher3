@@ -255,6 +255,7 @@ import kotlin.collections.CollectionsKt;
 
 import kotlinx.coroutines.CoroutineScope;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -5801,44 +5802,47 @@ public abstract class RecentsView<
     private static class PinnedStackAnimationListener<T extends RecentsViewContainer> extends
             IPipAnimationListener.Stub {
         @Nullable
-        private T mActivity;
+        private WeakReference<T> mActivity;
         @Nullable
-        private RecentsView mRecentsView;
+        private WeakReference<RecentsView> mRecentsView;
 
         public void setActivityAndRecentsView(@Nullable T activity,
                 @Nullable RecentsView recentsView) {
-            mActivity = activity;
-            mRecentsView = recentsView;
+            mActivity = new WeakReference<>(activity);
+            mRecentsView = new WeakReference<>(recentsView);
         }
 
         @Override
         public void onPipAnimationStarted() {
             MAIN_EXECUTOR.execute(() -> {
+                final T activity = mActivity.get();
                 // Needed for activities that auto-enter PiP, which will not trigger a remote
                 // animation to be created
-                if (mActivity != null) {
-                    mActivity.clearForceInvisibleFlag(STATE_HANDLER_INVISIBILITY_FLAGS);
+                if (activity != null) {
+                    activity.clearForceInvisibleFlag(STATE_HANDLER_INVISIBILITY_FLAGS);
                 }
             });
         }
 
         @Override
         public void onPipResourceDimensionsChanged(PipResources res) {
-            if (mRecentsView != null) {
-                mRecentsView.mPipResources = res;
+            final RecentsView recentsView = mRecentsView.get();
+            if (recentsView != null) {
+                recentsView.mPipResources = res;
             }
         }
 
         @Override
         public void onExpandPip() {
             MAIN_EXECUTOR.execute(() -> {
-                if (mRecentsView == null
-                        || mRecentsView.mContainerInterface.getTaskbarInteractor() == null) {
+                final RecentsView recentsView = mRecentsView.get();
+                if (recentsView == null
+                        || recentsView.mContainerInterface.getTaskbarInteractor() == null) {
                     return;
                 }
                 // Hide the task bar when leaving PiP to prevent it from flickering once
                 // the app settles in full-screen mode.
-                mRecentsView.mContainerInterface.getTaskbarInteractor().onExpandPip();
+                recentsView.mContainerInterface.getTaskbarInteractor().onExpandPip();
             });
         }
     }
