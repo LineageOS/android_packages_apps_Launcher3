@@ -496,8 +496,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
 
     @Override
     public boolean isAllAppsBackgroundBlurEnabled() {
-        return mDepthController != null && mDepthController.isCrossWindowBlursEnabled()
-                && Flags.allAppsBlur();
+        return mDepthController != null && mDepthController.isCrossWindowBlursEnabled();
     }
 
     @Override

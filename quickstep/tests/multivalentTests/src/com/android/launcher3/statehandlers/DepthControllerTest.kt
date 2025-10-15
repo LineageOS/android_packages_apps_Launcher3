@@ -17,11 +17,9 @@
 package com.android.launcher3.statehandlers
 
 import android.content.res.Resources
-import android.platform.test.annotations.EnableFlags
 import android.view.ViewTreeObserver
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.launcher3.Flags
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherState
 import com.android.launcher3.dragndrop.DragLayer
@@ -114,7 +112,6 @@ class DepthControllerTest {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ALL_APPS_BLUR)
     fun test_blurWorkspaceDepthTargets() {
         // Transitioning to ALL_APPS from any state should blur the workspace depth targets.
 
@@ -160,7 +157,6 @@ class DepthControllerTest {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ALL_APPS_BLUR)
     fun test_blurWorkspaceDepthTargets_withTargetState() {
         // Transitioning to ALL_APPS from any state should blur the workspace depth targets.
 

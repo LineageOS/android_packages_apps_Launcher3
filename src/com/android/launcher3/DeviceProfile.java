@@ -515,7 +515,6 @@ public class DeviceProfile {
                 mInsets,
                 res,
                 mWorkspaceProfile.getEdgeMarginPx(),
-                shouldShowAllAppsOnSheet(),
                 mWorkspaceProfile
         );
 
@@ -530,14 +529,8 @@ public class DeviceProfile {
         }
 
 
-        if (shouldShowAllAppsOnSheet()) {
-            allAppsPadding.top = allAppsTopPadding;
-            allAppsShiftRange = mDeviceProperties.getHeightPx() - allAppsTopPadding + mInsets.top;
-        } else {
-            allAppsPadding.top = 0;
-            allAppsShiftRange =
-                    res.getDimensionPixelSize(R.dimen.all_apps_starting_vertical_translate);
-        }
+        allAppsPadding.top = allAppsTopPadding;
+        allAppsShiftRange = mDeviceProperties.getHeightPx() - allAppsTopPadding + mInsets.top;
         allAppsOpenDuration = res.getInteger(R.integer.config_allAppsOpenDuration);
         allAppsCloseDuration = res.getInteger(R.integer.config_allAppsCloseDuration);
 
@@ -926,11 +919,6 @@ public class DeviceProfile {
                             + cellLayoutHorizontalPadding
                             - (getAllAppsProfile().getBorderSpacePx().x / 2));
         }
-    }
-
-    /** Whether All Apps should be presented on a bottom sheet. */
-    public boolean shouldShowAllAppsOnSheet() {
-        return mDeviceProperties.isTablet() || Flags.allAppsSheetForHandheld();
     }
 
     private void setupAllAppsStyle(Context context) {
