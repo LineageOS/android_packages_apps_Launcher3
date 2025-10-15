@@ -280,6 +280,7 @@ public abstract class RecentsView<
         TaskVisualsChangeListener {
 
     protected static final String TAG = "RecentsView";
+    private static final String PAGE_SCROLL_TAG = "RecentsPageScroll";
 
     public static final FloatProperty<RecentsView<?, ?>> CONTENT_ALPHA =
             new FloatProperty<>("contentAlpha") {
@@ -1727,7 +1728,7 @@ public abstract class RecentsView<
             if (extraScrollDuration > 0) {
                 mScroller.extendDuration(extraScrollDuration);
             }
-            debugLog(TAG, "onNotSnappingToPageInFreeScroll - mNextPage: " + mNextPage
+            debugLog(PAGE_SCROLL_TAG, "onNotSnappingToPageInFreeScroll - mNextPage: " + mNextPage
                     + ", scrollSnapped: " + pageSnapped);
         }
     }
@@ -3457,8 +3458,9 @@ public abstract class RecentsView<
 
     @Override
     protected boolean snapToPage(int whichPage, int delta, int duration, boolean immediate) {
-        debugLog(TAG, "snapToPage, whichPage: " + whichPage + ", delta: " + delta + ", duration: "
-                + duration + ", immediate: " + immediate);
+        debugLog(PAGE_SCROLL_TAG,
+                "snapToPage, whichPage: " + whichPage + ", delta: " + delta + ", duration: "
+                        + duration + ", immediate: " + immediate);
         return super.snapToPage(whichPage, delta, duration, immediate);
     }
 
@@ -5116,8 +5118,8 @@ public abstract class RecentsView<
     @Override
     protected void updateMinAndMaxScrollX() {
         super.updateMinAndMaxScrollX();
-        debugLog(TAG, "updateMinAndMaxScrollX - mMinScroll: " + mMinScroll);
-        debugLog(TAG, "updateMinAndMaxScrollX - mMaxScroll: " + mMaxScroll);
+        debugLog(PAGE_SCROLL_TAG, "updateMinAndMaxScrollX - mMinScroll: " + mMinScroll);
+        debugLog(PAGE_SCROLL_TAG, "updateMinAndMaxScrollX - mMaxScroll: " + mMaxScroll);
     }
 
     @Override
@@ -5219,7 +5221,7 @@ public abstract class RecentsView<
                 pageScroll = lastTaskScroll;
             }
             outPageScrolls[index] = pageScroll;
-            debugLog(TAG,
+            debugLog(PAGE_SCROLL_TAG,
                     "getPageScrolls - outPageScrolls[" + index + "]: " + outPageScrolls[index]);
         });
 
@@ -5229,10 +5231,10 @@ public abstract class RecentsView<
             if (firstViewIndex >= 0 && firstViewIndex < outPageScrolls.length) {
                 outPageScrolls[addDesktopButtonIndex] = outPageScrolls[firstViewIndex];
             }
-            debugLog(TAG, "getPageScrolls - addDesktopButtonScroll: "
+            debugLog(PAGE_SCROLL_TAG, "getPageScrolls - addDesktopButtonScroll: "
                     + outPageScrolls[addDesktopButtonIndex]);
         }
-        debugLog(TAG, "getPageScrolls - clearAllScroll: " + clearAllScroll);
+        debugLog(PAGE_SCROLL_TAG, "getPageScrolls - clearAllScroll: " + clearAllScroll);
         return !Arrays.equals(oldPageScrolls, outPageScrolls);
     }
 
