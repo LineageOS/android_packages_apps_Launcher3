@@ -147,7 +147,7 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
                         systemUiProxy,
                         topTaskTracker, tracker),
                 new TaskIconCache(context, RECENTS_MODEL_EXECUTOR, iconProvider, displayController,
-                        dispatcherProvider, tracker),
+                        dispatcherProvider),
                 new TaskThumbnailCache(context, RECENTS_MODEL_EXECUTOR, dispatcherProvider),
                 TaskStackChangeListeners.getInstance(),
                 lockedUserState,

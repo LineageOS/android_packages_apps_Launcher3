@@ -23,16 +23,15 @@ import static android.util.DisplayMetrics.DENSITY_DEVICE_STABLE;
 
 import static com.android.launcher3.LauncherPrefs.ALLOW_ROTATION;
 import static com.android.launcher3.Utilities.dpiFromPx;
-import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 import static com.android.launcher3.util.window.WindowManagerProxy.MIN_TABLET_WIDTH;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 
 import com.android.launcher3.BaseActivity;
@@ -41,14 +40,13 @@ import com.android.launcher3.LauncherPrefChangeListener;
 import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.util.ContextTracker;
 import com.android.launcher3.util.DisplayController;
-import com.android.launcher3.util.ListenableDiffAwareRef;
-import com.android.launcher3.util.SafeCloseable;
 
 /**
  * Utility class to manage launcher rotation
  */
 public class RotationHelper implements LauncherPrefChangeListener,
-        DeviceProfile.OnDeviceProfileChangeListener {
+        DeviceProfile.OnDeviceProfileChangeListener,
+        DisplayController.DisplayInfoChangeListener {
 
     public static final String ALLOW_ROTATION_PREFERENCE_KEY = "pref_allowRotation";
 
@@ -72,8 +70,6 @@ public class RotationHelper implements LauncherPrefChangeListener,
     @NonNull
     private final BaseActivity mActivity;
     private final Handler mRequestOrientationHandler;
-
-    private @Nullable SafeCloseable mDisplayInfoChangesSafeCloseable;
 
     private boolean mIgnoreAutoRotateSettings;
     private boolean mForceAllowRotationForTesting;
@@ -135,7 +131,8 @@ public class RotationHelper implements LauncherPrefChangeListener,
      * the foreground. When in the background, we can still rely on onDisplayInfoChanged to update,
      * assuming that the delay is tolerable since it takes time to change to foreground.
      */
-    private void onDisplayInfoChanged(DisplayController.Info info) {
+    @Override
+    public void onDisplayInfoChanged(Context context, DisplayController.Info info, int flags) {
         onIgnoreAutoRotateChanged(info.isTablet(info.realBounds));
     }
 
@@ -195,16 +192,7 @@ public class RotationHelper implements LauncherPrefChangeListener,
         DisplayController displayController = DisplayController.INSTANCE.get(mActivity);
         DisplayController.Info info = displayController.getInfo();
         setIgnoreAutoRotateSettings(info.isTablet(info.realBounds));
-        ListenableDiffAwareRef<DisplayController.Info, Integer> listenable =
-                displayController.getListenable();
-        if (listenable != null) {
-            mDisplayInfoChangesSafeCloseable =
-                    listenable.forEach(
-                            MAIN_EXECUTOR, (newInfo) -> {
-                                onDisplayInfoChanged(newInfo);
-                                return null;
-                            });
-        }
+        displayController.addChangeListener(this);
         mActivity.addOnDeviceProfileChangeListener(this);
         notifyChange();
     }
@@ -213,10 +201,7 @@ public class RotationHelper implements LauncherPrefChangeListener,
         if (mDestroyed) return;
         mDestroyed = true;
         mActivity.removeOnDeviceProfileChangeListener(this);
-        if (mDisplayInfoChangesSafeCloseable != null) {
-            mDisplayInfoChangesSafeCloseable.close();
-            mDisplayInfoChangesSafeCloseable = null;
-        }
+        DisplayController.INSTANCE.get(mActivity).removeChangeListener(this);
         LauncherPrefs.get(mActivity).removeListener(this, ALLOW_ROTATION);
     }
 

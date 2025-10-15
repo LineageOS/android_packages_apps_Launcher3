@@ -26,6 +26,7 @@ import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_CONSUME_IME_INSETS
 import com.android.launcher3.DeviceProfile
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.util.BaseContext
+import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.Themes
 
 /**
@@ -43,7 +44,8 @@ abstract class RecentsWindowContext(
         base = windowContext,
         themeResId = Themes.getActivityThemeRes(windowContext, wallpaperColorHints),
         destroyOnDetach = false,
-    ) {
+    ),
+    DisplayController.DisplayInfoChangeListener {
 
     private var deviceProfile: DeviceProfile? = null
 
@@ -57,6 +59,15 @@ abstract class RecentsWindowContext(
     }
 
     open fun onRootViewDispatchKeyEvent(event: KeyEvent?): Boolean = false
+
+    init {
+        DisplayController.INSTANCE.get(this).addChangeListener(this)
+    }
+
+    override fun destroy() {
+        super.destroy()
+        DisplayController.INSTANCE.get(this).removeChangeListener(this)
+    }
 
     fun initDeviceProfile() {
         deviceProfile =

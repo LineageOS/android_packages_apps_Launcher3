@@ -17,7 +17,6 @@
 package com.android.launcher3;
 
 import static com.android.launcher3.util.DisplayController.CHANGE_ROTATION;
-import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.FlagDebugUtils.appendFlag;
 import static com.android.launcher3.util.FlagDebugUtils.formatFlagChange;
 import static com.android.launcher3.util.SystemUiController.UI_STATE_FULLSCREEN_TASK;
@@ -53,11 +52,10 @@ import com.android.launcher3.testing.TestLogging;
 import com.android.launcher3.testing.shared.TestProtocol;
 import com.android.launcher3.util.ActivityOptionsWrapper;
 import com.android.launcher3.util.DisplayController;
+import com.android.launcher3.util.DisplayController.DisplayInfoChangeListener;
 import com.android.launcher3.util.DisplayController.Info;
 import com.android.launcher3.util.LifecycleHelper;
-import com.android.launcher3.util.ListenableDiffAwareRef;
 import com.android.launcher3.util.RunnableList;
-import com.android.launcher3.util.SafeCloseable;
 import com.android.launcher3.util.SystemUiController;
 import com.android.launcher3.util.ViewCache;
 import com.android.launcher3.util.WeakCleanupSet;
@@ -73,7 +71,8 @@ import java.util.StringJoiner;
 /**
  * Launcher BaseActivity
  */
-public abstract class BaseActivity extends Activity implements ActivityContext {
+public abstract class BaseActivity extends Activity implements ActivityContext,
+        DisplayInfoChangeListener {
 
     private static final String TAG = "BaseActivity";
     // TODO(b/406230491): Trun DEBUG back to false once done with investigation.
@@ -265,13 +264,7 @@ public abstract class BaseActivity extends Activity implements ActivityContext {
         registerBackDispatcher();
 
         // TODO: b/362720616 - Investigate the impact of adding listener using correct displayId.
-        ListenableDiffAwareRef<Info, Integer> listenable =
-                DisplayController.INSTANCE.get(this).getListenable();
-        if (listenable != null) {
-            SafeCloseable safeCloseable = listenable.forEachChange(
-                    MAIN_EXECUTOR, this::onDisplayInfoChanged);
-            addEventCallback(EVENT_DESTROYED, safeCloseable::close);
-        }
+        DisplayController.INSTANCE.get(this).addChangeListener(this);
     }
 
     @Override
@@ -311,6 +304,7 @@ public abstract class BaseActivity extends Activity implements ActivityContext {
     protected void onDestroy() {
         super.onDestroy();
         mEventCallbacks[EVENT_DESTROYED].executeAllAndClear();
+        DisplayController.INSTANCE.get(this).removeChangeListener(this);
     }
 
     @Override
@@ -491,7 +485,8 @@ public abstract class BaseActivity extends Activity implements ActivityContext {
         return wrapper;
     }
 
-    protected void onDisplayInfoChanged(Info info, int flags) {
+    @Override
+    public void onDisplayInfoChanged(Context context, Info info, int flags) {
         if ((flags & CHANGE_ROTATION) != 0 && mDeviceProfile.isVerticalBarLayout()) {
             reapplyUi();
         }

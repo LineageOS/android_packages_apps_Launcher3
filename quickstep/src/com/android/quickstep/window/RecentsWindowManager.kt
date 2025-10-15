@@ -82,10 +82,8 @@ import com.android.launcher3.util.ActivityOptionsWrapper
 import com.android.launcher3.util.DaggerSingletonObject
 import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.Executors
-import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.LooperExecutor
 import com.android.launcher3.util.RunnableList
-import com.android.launcher3.util.SafeCloseable
 import com.android.launcher3.util.ScreenOnTracker
 import com.android.launcher3.util.ScreenOnTracker.ScreenOnListener
 import com.android.launcher3.util.SystemUiController
@@ -116,10 +114,10 @@ import com.android.quickstep.fallback.RecentsState.Companion.DEFAULT
 import com.android.quickstep.fallback.RecentsState.Companion.MODAL_TASK
 import com.android.quickstep.fallback.RecentsState.Companion.OVERVIEW_SPLIT_SELECT
 import com.android.quickstep.fallback.toLauncherStateOrdinal
+import com.android.quickstep.split.SplitSelectStateController
 import com.android.quickstep.util.QuickstepProtoLogGroup
 import com.android.quickstep.util.RecentsAtomicAnimationFactory
 import com.android.quickstep.util.RecentsWindowProtoLogProxy
-import com.android.quickstep.split.SplitSelectStateController
 import com.android.quickstep.util.SurfaceTransactionApplier
 import com.android.quickstep.util.TISBindHelper
 import com.android.quickstep.views.OverviewActionsView
@@ -155,7 +153,7 @@ constructor(
     recentsModel: RecentsModel,
     private val screenOnTracker: ScreenOnTracker,
     desktopState: DesktopState,
-    displayController: DisplayController,
+    private val displayController: DisplayController,
     @Ui private val uiExecutor: LooperExecutor,
     invariantDeviceProfile: InvariantDeviceProfile,
 ) :
@@ -295,8 +293,6 @@ constructor(
 
     var activityLaunchAnimationRunner: RemoteAnimationFactory? = null
 
-    private var displayChangesSafeCloseable: SafeCloseable? = null
-
     init {
         fallbackWindowInterface.setRecentsWindowManager(this)
         if (displayId == DEFAULT_DISPLAY) {
@@ -311,10 +307,7 @@ constructor(
             splitSelectStateController.initSplitFromDesktopController(this)
         }
 
-        displayController.getListenable(displayId)?.let {
-            displayChangesSafeCloseable =
-                it.changes.forEach(MAIN_EXECUTOR) { _ -> onDisplayInfoChanged() }
-        }
+        displayController.addChangeListenerForDisplay(this, displayId)
     }
 
     fun createWindowView() {
@@ -374,8 +367,7 @@ constructor(
 
     override fun destroy() {
         super.destroy()
-        displayChangesSafeCloseable?.close()
-        displayChangesSafeCloseable = null
+        displayController.removeChangeListenerForDisplay(this, displayId)
         fallbackWindowInterface.setRecentsWindowManager(null)
         tisBindHelper.onDestroy()
         Executors.MAIN_EXECUTOR.execute {
@@ -482,14 +474,14 @@ constructor(
         val diff = oldConfiguration?.let { newConfiguration?.diff(it) } ?: -1
         val rotation = WindowManagerProxy.INSTANCE[this].getRotation(this)
         if ((diff and (CONFIG_ORIENTATION or CONFIG_SCREEN_SIZE)) != 0 || rotation != oldRotation) {
-            onHandleConfigurationChanged()
+            onHandleConfigurationChanged(newConfiguration)
         }
 
         oldConfiguration = newConfiguration
         oldRotation = rotation
     }
 
-    private fun onHandleConfigurationChanged() {
+    fun onHandleConfigurationChanged(configuration: Configuration?) {
         initDeviceProfile()
         AbstractFloatingView.closeOpenViews(
             this,
@@ -503,7 +495,11 @@ constructor(
         dragLayer?.recreateControllers()
     }
 
-    private fun onDisplayInfoChanged() {
+    override fun onDisplayInfoChanged(
+        context: Context?,
+        info: DisplayController.Info?,
+        flags: Int,
+    ) {
         initDeviceProfile()
         surfaceControlViewHost?.relayout(getWindowLayoutParams())
     }
