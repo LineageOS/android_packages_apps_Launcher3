@@ -107,8 +107,7 @@
     <string name="widget_settings" msgid="5280157748464495511">"Settings"</string>
     <string name="pin_to_taskbar" msgid="5914002252642242332">"Pin to Taskbar"</string>
     <string name="unpin_from_taskbar" msgid="1025883383457627426">"Unpin from Taskbar"</string>
-    <!-- no translation found for no_room_in_taskbar (6885243748717395469) -->
-    <skip />
+    <string name="no_room_in_taskbar" msgid="6885243748717395469">"No room in the Taskbar"</string>
     <string name="app_added_to_taskbar" msgid="6348755169793615171">"App added to Taskbar"</string>
     <string name="app_removed_from_taskbar" msgid="3471754847898675396">"App removed from Taskbar"</string>
     <string name="remove_system_shortcut_label" msgid="3991201411148073972">"Remove"</string>
