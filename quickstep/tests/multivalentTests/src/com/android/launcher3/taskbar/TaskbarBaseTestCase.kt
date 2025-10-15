@@ -65,6 +65,7 @@ abstract class TaskbarBaseTestCase {
     @Mock lateinit var nudgeController: NudgeController
     @Mock lateinit var nudgeViewController: NudgeViewController
     @Mock lateinit var taskbarHandoffController: TaskbarHandoffController
+    @Mock lateinit var taskbarViewDragDropController: TaskbarViewDragDropController
 
     lateinit var taskbarControllers: TaskbarControllers
 
@@ -109,6 +110,7 @@ abstract class TaskbarBaseTestCase {
                 nudgeController,
                 nudgeViewController,
                 taskbarHandoffController,
+                taskbarViewDragDropController,
             )
     }
 }

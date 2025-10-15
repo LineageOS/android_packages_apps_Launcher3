@@ -15,6 +15,7 @@
  */
 package com.android.launcher3.taskbar;
 
+import static com.android.launcher3.Flags.enableTaskbarDragAndDrop;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_ALL_APPS_PREDICTION;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION;
@@ -245,6 +246,9 @@ public class TaskbarModelCallbacks implements
         mContainer.updateItems(hotseatItemInfos, recentTasks, handoffSuggestions);
         mControllers.taskbarViewController.updateIconViewsRunningStates();
         mControllers.taskbarPopupController.setTaskbarInfoList(mHotseatItems);
+        if (enableTaskbarDragAndDrop()) {
+            mControllers.taskbarViewDragDropController.setTaskbarInfoList(mHotseatItems);
+        }
     }
 
     /**
@@ -290,6 +294,9 @@ public class TaskbarModelCallbacks implements
         TASKBAR_UI_THREAD.execute(() -> {
             mControllers.taskbarAllAppsController.setApps(apps, flags, packageUserKeytoUidMap);
             mControllers.taskbarPopupController.setApps(apps);
+            if (enableTaskbarDragAndDrop()) {
+                mControllers.taskbarViewDragDropController.setApps(apps);
+            }
         });
     }
 
