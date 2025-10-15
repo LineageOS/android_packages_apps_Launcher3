@@ -137,6 +137,7 @@
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"ສິນຄ້ານີ້ໃຊ້ສ່ວນທີ່ເລືອກຂອງໜ້າຈໍຂອງທ່ານເພື່ອຊອກຫາ. ເປັນໄປຕາມ <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>ນະໂຍບາຍຄວາມເປັນສ່ວນຕົວ<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> ແລະ <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>ຂໍ້ກຳນົດບໍລິການ<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> ຂອງ Google."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"ປິດ"</string>
     <string name="taskbar_edu_done" msgid="6880178093977704569">"ແລ້ວໆ"</string>
+    <string name="taskbar_edu_next" msgid="4007618274426775841">"ຕໍ່ໄປ"</string>
     <string name="taskbar_button_home" msgid="2151398979630664652">"ໜ້າຫຼັກ"</string>
     <string name="taskbar_button_a11y" msgid="5241161324875094465">"ການຊ່ວຍເຂົ້າເຖິງ"</string>
     <string name="taskbar_button_back" msgid="8558862226461164514">"ກັບຄືນ"</string>

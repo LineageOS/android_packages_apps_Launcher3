@@ -137,6 +137,7 @@
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Hierdie produk gebruik die gekose deel van jou skerm om te soek. Google se <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>privaatheidsbeleid<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> en <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>diensbepalings<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> geld."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Maak toe"</string>
     <string name="taskbar_edu_done" msgid="6880178093977704569">"Klaar"</string>
+    <string name="taskbar_edu_next" msgid="4007618274426775841">"Volgende"</string>
     <string name="taskbar_button_home" msgid="2151398979630664652">"Tuis"</string>
     <string name="taskbar_button_a11y" msgid="5241161324875094465">"Toeganklikheid"</string>
     <string name="taskbar_button_back" msgid="8558862226461164514">"Terug"</string>

@@ -137,6 +137,7 @@
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"தேடுவதற்கு உங்கள் திரையின் தேர்ந்தெடுக்கப்பட்ட பகுதியை இந்தத் தயாரிப்பு பயன்படுத்துகிறது. Googleளின் <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>தனியுரிமைக் கொள்கையும்<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>சேவை விதிமுறைகளும்<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> பொருந்தும்."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"மூடுக"</string>
     <string name="taskbar_edu_done" msgid="6880178093977704569">"முடிந்தது"</string>
+    <string name="taskbar_edu_next" msgid="4007618274426775841">"அடுத்து"</string>
     <string name="taskbar_button_home" msgid="2151398979630664652">"முகப்பு"</string>
     <string name="taskbar_button_a11y" msgid="5241161324875094465">"மாற்றுத்திறன் வசதி"</string>
     <string name="taskbar_button_back" msgid="8558862226461164514">"பின்செல்லும்"</string>

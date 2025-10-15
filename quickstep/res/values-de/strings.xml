@@ -137,6 +137,7 @@
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Dieses Produkt sucht dann anhand des ausgewählten Teils deines Displays nach weiteren Informationen. Es gelten die <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>Datenschutzerklärung<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> und die <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>Nutzungsbedingungen<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> von Google."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Schließen"</string>
     <string name="taskbar_edu_done" msgid="6880178093977704569">"Fertig"</string>
+    <string name="taskbar_edu_next" msgid="4007618274426775841">"Weiter"</string>
     <string name="taskbar_button_home" msgid="2151398979630664652">"Startbildschirm"</string>
     <string name="taskbar_button_a11y" msgid="5241161324875094465">"Bedienungshilfen"</string>
     <string name="taskbar_button_back" msgid="8558862226461164514">"Zurück"</string>

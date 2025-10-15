@@ -137,6 +137,7 @@
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"यो उत्पादनले तपाईंले चयन गर्नुभएको स्क्रिनको भाग प्रयोग गरेर खोजी गर्छ। Google को <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>गोपनीयता नीति<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> र <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>सेवाका सर्तहरू<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> लागू हुन्छन्।"</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"बन्द गर्नुहोस्"</string>
     <string name="taskbar_edu_done" msgid="6880178093977704569">"सम्पन्न भयो"</string>
+    <string name="taskbar_edu_next" msgid="4007618274426775841">"अर्को"</string>
     <string name="taskbar_button_home" msgid="2151398979630664652">"होम"</string>
     <string name="taskbar_button_a11y" msgid="5241161324875094465">"सर्वसुलभता"</string>
     <string name="taskbar_button_back" msgid="8558862226461164514">"पछाडि जानुहोस्"</string>

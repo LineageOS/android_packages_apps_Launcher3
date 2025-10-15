@@ -137,6 +137,7 @@
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Bu məhsul axtarış üçün ekranın seçilmiş hissəsindən istifadə edir. Google <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>Məxfilik Siyasəti<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> və <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>Xidmət Şərtləri<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> tətbiq edilir."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Bağlayın"</string>
     <string name="taskbar_edu_done" msgid="6880178093977704569">"Hazırdır"</string>
+    <string name="taskbar_edu_next" msgid="4007618274426775841">"Sonra"</string>
     <string name="taskbar_button_home" msgid="2151398979630664652">"Ev"</string>
     <string name="taskbar_button_a11y" msgid="5241161324875094465">"Əlçatımlılıq"</string>
     <string name="taskbar_button_back" msgid="8558862226461164514">"Geriyə"</string>

@@ -137,6 +137,7 @@
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"ผลิตภัณฑ์นี้ใช้ส่วนที่เลือกของหน้าจอเพื่อค้นหา เป็นไปตาม<xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>นโยบายความเป็นส่วนตัว<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g>และ<xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>ข้อกําหนดในการให้บริการ<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g>ของ Google"</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"ปิด"</string>
     <string name="taskbar_edu_done" msgid="6880178093977704569">"เสร็จ"</string>
+    <string name="taskbar_edu_next" msgid="4007618274426775841">"ถัดไป"</string>
     <string name="taskbar_button_home" msgid="2151398979630664652">"หน้าแรก"</string>
     <string name="taskbar_button_a11y" msgid="5241161324875094465">"การช่วยเหลือพิเศษ"</string>
     <string name="taskbar_button_back" msgid="8558862226461164514">"กลับ"</string>
