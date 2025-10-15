@@ -15,10 +15,6 @@
  */
 package com.android.quickstep;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.view.Display.DEFAULT_DISPLAY;
-
 import static androidx.test.InstrumentationRegistry.getTargetContext;
 
 import static com.android.launcher3.util.TestConstants.AppNames.TEST_APP_NAME;
@@ -27,62 +23,41 @@ import static com.android.wm.shell.shared.desktopmode.DesktopModeStatus.ENTER_DE
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.os.RemoteException;
-import android.util.Log;
-import android.view.WindowManagerGlobal;
-
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.launcher3.tapl.HomeAllApps;
 import com.android.launcher3.util.rule.SetPropRule;
-import com.android.launcher3.util.ui.PortraitLandscapeRunner.PortraitLandscape;
 import com.android.quickstep.NavigationModeSwitchRule.NavigationModeSwitch;
 import com.android.quickstep.TaskbarModeSwitchRule.TaskbarModeSwitch;
+import com.android.quickstep.util.OOPDisplayWindowingModeRule;
 import com.android.window.flags.Flags;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 
 import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExternalResource;
 import org.junit.runner.RunWith;
 
 /**
- * Test taskbar behavior on desktop devices, and more generally, freeform windowing mode displays
- * where launching an app opens enters desktop windowing by default.
+ * Test taskbar all apps dragging behavior on desktop devices.
  */
 @LargeTest
 @RunWith(AndroidJUnit4.class)
-public class TaplTestsDesktopFirstTaskbar extends AbstractTaplTestsTaskbar {
+public class TaplTestsDesktopTaskbarAllAppsDragTest extends AbstractTaplTestsTaskbar {
     private static final String TAG = "TaplTestsDesktopFirstTaskbar";
 
     @Rule
     public SetPropRule mSetPropRule =
             new SetPropRule(ENTER_DESKTOP_BY_DEFAULT_ON_FREEFORM_DISPLAY_SYS_PROP, "true");
 
-    // Default-to-desktop feature requires the display to be freeform mode.
     @Rule
-    public ExternalResource mFreeformDisplayRule = new ExternalResource() {
-        private int mOriginalWindowingMode = WINDOWING_MODE_UNDEFINED;
-
-        @Override
-        protected void before() {
-            mOriginalWindowingMode = setDisplayWindowingMode(WINDOWING_MODE_FREEFORM);
-        }
-
-        @Override
-        protected void after() {
-            if (mOriginalWindowingMode != WINDOWING_MODE_UNDEFINED) {
-                setDisplayWindowingMode(mOriginalWindowingMode);
-            }
-        }
-    };
+    public OOPDisplayWindowingModeRule mWindowingModeRule = new OOPDisplayWindowingModeRule(
+            OOPDisplayWindowingModeRule.MODES.FREEFORM
+    );
 
     @Override
     public void setUp() throws Exception {
-        Assume.assumeTrue("Ignoring test because device is not a tablet",
-                mLauncher.isTablet());
         Assume.assumeTrue(Flags.enterDesktopByDefaultOnFreeformDisplays());
         Assume.assumeTrue(
                 "Ignoring test because device does not support desktop mode",
@@ -101,7 +76,6 @@ public class TaplTestsDesktopFirstTaskbar extends AbstractTaplTestsTaskbar {
     }
 
     @Test
-    @PortraitLandscape
     @NavigationModeSwitch
     @TaskbarModeSwitch(mode = PERSISTENT)
     public void testDragFromAllAppsToWorspace() {
@@ -115,19 +89,6 @@ public class TaplTestsDesktopFirstTaskbar extends AbstractTaplTestsTaskbar {
             assertThat(mLauncher.getWorkspace().getWorkspaceAppIcon(TEST_APP_NAME)).isNotNull();
         } finally {
             allApps.unfreeze();
-        }
-    }
-
-    private int setDisplayWindowingMode(int windowingMode) {
-        try {
-            int originalWindowingMode =
-                    WindowManagerGlobal.getWindowManagerService().getWindowingMode(DEFAULT_DISPLAY);
-            WindowManagerGlobal.getWindowManagerService().setWindowingMode(
-                    DEFAULT_DISPLAY, windowingMode);
-            return originalWindowingMode;
-        } catch (RemoteException e) {
-            Log.e(TAG, "error setting windowing mode", e);
-            throw new RuntimeException(e);
         }
     }
 }
