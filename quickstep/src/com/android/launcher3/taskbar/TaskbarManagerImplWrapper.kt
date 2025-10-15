@@ -17,11 +17,14 @@
 package com.android.launcher3.taskbar
 
 import android.app.PendingIntent
+import com.android.launcher3.ActivityInteractor
 import com.android.launcher3.Flags.enableTaskbarUiThread
+import com.android.launcher3.LauncherInteractor
 import com.android.launcher3.anim.AnimatorPlaybackController
 import com.android.launcher3.statemanager.StatefulActivity
-import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
+import com.android.launcher3.uioverrides.QuickstepLauncher
 import com.android.launcher3.util.Executors
+import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
 import com.android.quickstep.views.RecentsViewContainer
 import java.io.PrintWriter
 
@@ -37,7 +40,12 @@ class TaskbarManagerImplWrapper(private val impl: TaskbarManagerImpl) : TaskbarM
     }
 
     override fun setActivity(activity: StatefulActivity<*>) {
-        TASKBAR_UI_THREAD.execute { impl.setActivity(activity) }
+        TASKBAR_UI_THREAD.execute {
+            impl.setActivityInteractor(
+                if (activity is QuickstepLauncher) LauncherInteractor(activity)
+                else ActivityInteractor(activity)
+            )
+        }
     }
 
     override fun setRecentsViewContainer(recentsViewContainer: RecentsViewContainer) {

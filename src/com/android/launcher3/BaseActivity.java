@@ -110,7 +110,7 @@ public abstract class BaseActivity extends Activity implements ActivityContext {
     private final LifecycleRegistry mLifecycleRegistry = new LifecycleRegistry(this);
     private final WeakCleanupSet mCleanupSet = new WeakCleanupSet(this);
 
-    protected DeviceProfile mDeviceProfile;
+    protected volatile DeviceProfile mDeviceProfile;
     protected SystemUiController mSystemUiController;
     protected int mDisplayId;
     private StatsLogManager mStatsLogManager;

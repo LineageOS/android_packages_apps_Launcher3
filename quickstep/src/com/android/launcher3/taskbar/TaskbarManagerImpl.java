@@ -23,7 +23,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 import static com.android.launcher3.BaseActivity.EVENT_DESTROYED;
 import static com.android.launcher3.Flags.enableGrowthNudge;
 import static com.android.launcher3.Flags.enableTaskbarUiThread;
-import static com.android.launcher3.Flags.enableUnfoldStateAnimation;
 import static com.android.launcher3.LauncherPrefs.TASKBAR_PINNING;
 import static com.android.launcher3.LauncherPrefs.TASKBAR_PINNING_IN_DESKTOP_MODE;
 import static com.android.launcher3.LauncherPrefs.TASKBAR_PINNING_KEY;
@@ -82,9 +81,9 @@ import com.android.app.displaylib.DisplayDecorationListener;
 import com.android.app.displaylib.DisplaysWithDecorationsRepositoryCompat;
 import com.android.app.displaylib.PerDisplayRepository;
 import com.android.internal.util.LatencyTracker;
+import com.android.launcher3.ActivityInteractor;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.InvariantDeviceProfile;
-import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherAppState;
 import com.android.launcher3.LauncherInteractor;
 import com.android.launcher3.LauncherPrefChangeListener;
@@ -96,7 +95,6 @@ import com.android.launcher3.statehandlers.DesktopVisibilityController;
 import com.android.launcher3.statemanager.StatefulActivity;
 import com.android.launcher3.taskbar.TaskbarNavButtonController.TaskbarNavButtonCallbacks;
 import com.android.launcher3.taskbar.unfold.NonDestroyableScopedUnfoldTransitionProgressProvider;
-import com.android.launcher3.uioverrides.QuickstepLauncher;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.ListenableDiffAwareRef;
 import com.android.launcher3.util.LockedUserState;
@@ -203,8 +201,8 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
     private final SparseArray<ComponentCallbacks> mComponentCallbacks = new SparseArray<>();
     /** DisplayId - {@link DeviceProfile} map for Connected Display. */
     private final SparseArray<DeviceProfile> mExternalDeviceProfiles = new SparseArray<>();
-    private StatefulActivity mActivity;
-    private RecentsViewContainer mRecentsViewContainer;
+    private @Nullable ActivityInteractor mActivityInteractor;
+    private @Nullable RecentsViewContainer mRecentsViewContainer;
 
     private @Nullable SafeCloseable mDisplayChangeSafeCloseable;
 
@@ -380,22 +378,29 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
 
     private final AllAppsActionManager mAllAppsActionManager;
 
+    private @Nullable SafeCloseable mActivityOnDestroySafeCloseable;
+
     private final Runnable mActivityOnDestroyCallback = new Runnable() {
         @Override
         public void run() {
             int displayId = mPrimaryDisplayId;
             debugTaskbarManager("onActivityDestroyed:", displayId);
-            if (mActivity != null) {
-                displayId = mActivity.getDisplayId();
-                mActivity.removeOnDeviceProfileChangeListener(
-                        mDebugActivityDeviceProfileChanged);
+            if (mActivityInteractor != null) {
+                displayId = mActivityInteractor.getDisplayId();
+                if (mDebugActivityDeviceProfileChangedSafeCloseable != null) {
+                    mDebugActivityDeviceProfileChangedSafeCloseable.close();
+                    mDebugActivityDeviceProfileChangedSafeCloseable = null;
+                }
                 debugTaskbarManager("onActivityDestroyed: unregistering callbacks", displayId);
-                mActivity.removeEventCallback(EVENT_DESTROYED, this);
+                if (mActivityOnDestroySafeCloseable != null) {
+                    mActivityOnDestroySafeCloseable.close();
+                    mActivityOnDestroySafeCloseable = null;
+                }
+                if (mActivityInteractor.isActivitySameObj(mRecentsViewContainer)) {
+                    mRecentsViewContainer = null;
+                }
             }
-            if (mActivity == mRecentsViewContainer) {
-                mRecentsViewContainer = null;
-            }
-            mActivity = null;
+            mActivityInteractor = null;
             TaskbarActivityContext taskbar = getTaskbarForDisplay(displayId);
             if (taskbar != null) {
                 debugTaskbarManager("onActivityDestroyed: setting taskbarUIController", displayId);
@@ -407,6 +412,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         }
     };
 
+    private @Nullable SafeCloseable mUnfoldTransitionProgressSafeCloseable;
     UnfoldTransitionProgressProvider.TransitionProgressListener mUnfoldTransitionProgressListener =
             new UnfoldTransitionProgressProvider.TransitionProgressListener() {
                 @Override
@@ -607,7 +613,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         if (taskbar == null) {
             // Home All Apps should be toggled from this class, because the controllers are not
             // initialized when Taskbar is disabled (i.e. TaskbarActivityContext is null).
-            if (mActivity instanceof Launcher l) l.toggleAllApps(true);
+            if (mActivityInteractor instanceof LauncherInteractor l) l.toggleAllApps(true);
         } else {
             taskbar.getControllers().uiController.toggleAllApps(true);
         }
@@ -665,25 +671,29 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
     /**
      * Sets a {@link StatefulActivity} to act as taskbar callback
      */
-    public void setActivity(@NonNull StatefulActivity activity) {
-        debugPrimaryTaskbar("setActivity: mActivity=" + mActivity);
-        if (mActivity == activity) {
-            debugPrimaryTaskbar("setActivity: No need to set activity!");
+    public void setActivityInteractor(@NonNull ActivityInteractor activityInteractor) {
+        debugPrimaryTaskbar(
+                "setActivityInteractor: mActivityInteractor=" + mActivityInteractor);
+        if (mActivityInteractor == activityInteractor) {
+            debugPrimaryTaskbar("setActivityInteractor: No need to set activityInteractor!");
             return;
         }
         removeActivityCallbacksAndListeners();
-        mActivity = activity;
-        mActivity.addOnDeviceProfileChangeListener(mDebugActivityDeviceProfileChanged);
-        debugPrimaryTaskbar("setActivity: registering activity lifecycle callbacks.");
-        mActivity.addEventCallback(EVENT_DESTROYED, mActivityOnDestroyCallback);
-        UnfoldTransitionProgressProvider unfoldTransitionProgressProvider =
-                getUnfoldTransitionProgressProviderForActivity(activity);
-        if (unfoldTransitionProgressProvider != null) {
-            unfoldTransitionProgressProvider.addCallback(mUnfoldTransitionProgressListener);
-        }
-        mUnfoldProgressProvider.setSourceProvider(unfoldTransitionProgressProvider);
+        mActivityInteractor = activityInteractor;
+        mDebugActivityDeviceProfileChangedSafeCloseable =
+                mActivityInteractor.addOnDeviceProfileChangeListener(
+                        dp -> debugPrimaryTaskbar(
+                                "mActivity onDeviceProfileChanged", true), TASKBAR_UI_THREAD);
+        debugPrimaryTaskbar("setActivityInteractor: registering activity lifecycle callbacks.");
+        mActivityOnDestroySafeCloseable = mActivityInteractor.addEventCallback(
+                EVENT_DESTROYED, mActivityOnDestroyCallback, TASKBAR_UI_THREAD);
+        mUnfoldTransitionProgressSafeCloseable = mActivityInteractor.addUnfoldTransitionCallback(
+                mUnfoldTransitionProgressListener, TASKBAR_UI_THREAD);
+        mUnfoldProgressProvider.setSourceProvider(
+                mActivityInteractor.getUnfoldTransitionProvider());
 
-        if (activity instanceof RecentsViewContainer recentsViewContainer) {
+        RecentsViewContainer recentsViewContainer = activityInteractor.getRecentsViewContainer();
+        if (recentsViewContainer != null) {
             setRecentsViewContainer(recentsViewContainer);
         }
     }
@@ -696,7 +706,8 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         if (mRecentsViewContainer == recentsViewContainer) {
             return;
         }
-        if (mRecentsViewContainer == mActivity) {
+        if (mActivityInteractor != null
+                && mActivityInteractor.isActivitySameObj(mRecentsViewContainer)) {
             // When switching to RecentsWindowManager (not an Activity), the old mActivity is not
             // destroyed, nor is there a new Activity to replace it. Thus if we don't clear it here,
             // it will not get re-set properly if we return to the Activity (e.g. NexusLauncher).
@@ -709,23 +720,6 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
                     createTaskbarUIControllerForRecentsViewContainer(mRecentsViewContainer,
                             mPrimaryDisplayId));
         }
-    }
-
-    /**
-     * Returns an {@link UnfoldTransitionProgressProvider} to use while the given StatefulActivity
-     * is active.
-     */
-    private UnfoldTransitionProgressProvider getUnfoldTransitionProgressProviderForActivity(
-            StatefulActivity activity) {
-        debugPrimaryTaskbar("getUnfoldTransitionProgressProviderForActivity");
-        if (!enableUnfoldStateAnimation()) {
-            if (activity instanceof QuickstepLauncher ql) {
-                return ql.getUnfoldTransitionProgressProvider();
-            }
-        } else {
-            return SystemUiProxy.INSTANCE.get(mBaseContext).getUnfoldTransitionProvider();
-        }
-        return null;
     }
 
     /** Creates a {@link TaskbarUIController} to use with non default displays. */
@@ -749,16 +743,13 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
             RecentsViewContainer container, int displayId) {
         debugTaskbarManager("createTaskbarUIControllerForRecentsViewContainer", displayId);
         if (!isExternalDisplay(displayId)
-                && mActivity instanceof QuickstepLauncher quickstepLauncher) {
+                && mActivityInteractor instanceof LauncherInteractor launcherInteractor) {
             // If 1P Launcher is default, always use LauncherTaskbarUIController, regardless of
             // whether the recents container is NexusLauncherActivity or RecentsWindowManager. This
             // is only applicable for primary displays. In case of foldables both displays have
             // primary display ID and only one of them is primary at a given time, the other one is
             // inactive or has limited functionality (has different display ID in that case).
-            return new LauncherTaskbarUIController(
-                    new LauncherInteractor(quickstepLauncher),
-                    quickstepLauncher.getLauncherUiState(),
-                    SystemUiProxy.INSTANCE.get(quickstepLauncher).getHomeVisibilityState());
+            return new LauncherTaskbarUIController(launcherInteractor);
         }
         // If a 3P Launcher is default, always use FallbackTaskbarUIController regardless of
         // whether the recents container is RecentsActivity or RecentsWindowManager.
@@ -1156,15 +1147,20 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
     }
 
     private void removeActivityCallbacksAndListeners() {
-        if (mActivity != null) {
-            mActivity.removeOnDeviceProfileChangeListener(mDebugActivityDeviceProfileChanged);
-            debugPrimaryTaskbar("unregistering activity lifecycle callbacks");
-            mActivity.removeEventCallback(EVENT_DESTROYED, mActivityOnDestroyCallback);
-            UnfoldTransitionProgressProvider unfoldTransitionProgressProvider =
-                    getUnfoldTransitionProgressProviderForActivity(mActivity);
-            if (unfoldTransitionProgressProvider != null) {
-                unfoldTransitionProgressProvider.removeCallback(mUnfoldTransitionProgressListener);
-            }
+        debugPrimaryTaskbar("unregistering activity lifecycle callbacks");
+        if (mActivityOnDestroySafeCloseable != null) {
+            mActivityOnDestroySafeCloseable.close();
+            mActivityOnDestroySafeCloseable = null;
+        }
+
+        if (mUnfoldTransitionProgressSafeCloseable != null) {
+            mUnfoldTransitionProgressSafeCloseable.close();
+            mUnfoldTransitionProgressSafeCloseable = null;
+        }
+
+        if (mDebugActivityDeviceProfileChangedSafeCloseable != null) {
+            mDebugActivityDeviceProfileChangedSafeCloseable.close();
+            mDebugActivityDeviceProfileChangedSafeCloseable = null;
         }
     }
 
@@ -1520,6 +1516,10 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
 
             @Override
             public void onConfigurationChanged(Configuration newConfig) {
+                TASKBAR_UI_THREAD.execute(() -> onConfigurationChangedInternal(newConfig));
+            }
+
+            private void onConfigurationChangedInternal(Configuration newConfig) {
                 Trace.instantForTrack(Trace.TRACE_TAG_APP, "TaskbarManager",
                         "onConfigurationChanged: " + newConfig);
                 debugTaskbarManager("onConfigurationChanged: " + newConfig, displayId);
@@ -1905,8 +1905,8 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
      * Logs verbose debug information about the TaskbarManager for a specific display.
      */
     private void generateVerboseLogs(StringJoiner log, int displayId) {
-        boolean activityTaskbarPresent = mActivity != null
-                && mActivity.getDeviceProfile().isTaskbarPresent;
+        boolean activityTaskbarPresent = mActivityInteractor != null
+                && mActivityInteractor.getDeviceProfile().isTaskbarPresent;
         // TODO (b/381113004): make this display-specific via getWindowContext()
         Context windowContext = mPrimaryWindowContext;
         if (windowContext == null) {
@@ -1928,11 +1928,9 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         log.add("mActivity & mWindowContext device profiles have different values, add more logs.");
 
         log.add("\tmActivity logs:");
-        log.add("\t\tmActivity=" + mActivity);
-        if (mActivity != null) {
-            log.add("\t\tmActivity.getResources().getConfiguration()="
-                    + mActivity.getResources().getConfiguration());
-            log.add("\t\tmActivity.getDeviceProfile().isTaskbarPresent="
+        log.add("\t\tmActivityInteractor=" + mActivityInteractor);
+        if (mActivityInteractor != null) {
+            log.add("\t\tmActivityInteractor.getDeviceProfile().isTaskbarPresent="
                     + activityTaskbarPresent);
         }
         log.add("\tWindowContext logs:");
@@ -1947,8 +1945,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         }
     }
 
-    private final DeviceProfile.OnDeviceProfileChangeListener mDebugActivityDeviceProfileChanged =
-            dp -> debugPrimaryTaskbar("mActivity onDeviceProfileChanged", true);
+    private @Nullable SafeCloseable mDebugActivityDeviceProfileChangedSafeCloseable;
 
     /** Use weak reference to avoid leaking TIS via {@link TaskbarManagerImpl} */
     private static class AllAppsIntentSender extends IIntentSender.Stub {

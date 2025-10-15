@@ -268,9 +268,10 @@ class TaskbarRecentAppsController(
             controllers.runAfterInit { reloadRecentTasksIfNeeded() }
             if (enableTaskbarRecentsThemedIcons()) {
                 iconShapeDataCloseable =
-                    themeManager.iconShapeData.forEach(MAIN_EXECUTOR) { fetchIcons() }
+                    themeManager.iconShapeData.forEach(TASKBAR_UI_THREAD) { fetchIcons() }
                 themeChangeListener =
-                    ThemeChangeListener { fetchIcons() }.also { themeManager.addChangeListener(it) }
+                    ThemeChangeListener { TASKBAR_UI_THREAD.execute { fetchIcons() } }
+                        .also { themeManager.addChangeListener(it) }
             }
         }
     }
@@ -356,33 +357,37 @@ class TaskbarRecentAppsController(
         loadingRecentsTasks = enableRecentTasksThrottle
         taskListChangeId =
             recentsModel.getTasks(RecentsFilterState.EMPTY_FILTER) { tasks ->
-                loadingRecentsTasks = false
-                recentTasksLoaded = true
-                allRecentTasks = tasks
-                val oldRunningTaskdIds = runningTaskIds
-                val oldMinimizedTaskIds = minimizedTaskIds
-                desktopTasks =
-                    allRecentTasks
-                        .filterIsInstance<DesktopTask>()
-                        .flatMap { it.tasks }
-                        .filterNot {
-                            it.key.isTopActivityTransparent &&
-                                it.key.isActivityStackTransparent &&
-                                it.key.windowingMode == WINDOWING_MODE_FULLSCREEN
-                        }
-                val runningTasksChanged = oldRunningTaskdIds != runningTaskIds
-                val minimizedTasksChanged = oldMinimizedTaskIds != minimizedTaskIds
+                TASKBAR_UI_THREAD.execute {
+                    loadingRecentsTasks = false
+                    recentTasksLoaded = true
+                    allRecentTasks = tasks
+                    val oldRunningTaskdIds = runningTaskIds
+                    val oldMinimizedTaskIds = minimizedTaskIds
+                    desktopTasks =
+                        allRecentTasks
+                            .filterIsInstance<DesktopTask>()
+                            .flatMap { it.tasks }
+                            .filterNot {
+                                it.key.isTopActivityTransparent &&
+                                    it.key.isActivityStackTransparent &&
+                                    it.key.windowingMode == WINDOWING_MODE_FULLSCREEN
+                            }
+                    val runningTasksChanged = oldRunningTaskdIds != runningTaskIds
+                    val minimizedTasksChanged = oldMinimizedTaskIds != minimizedTaskIds
 
-                if (
-                    (onRecentsOrHotseatChanged() || runningTasksChanged || minimizedTasksChanged) &&
-                        !controllers.taskbarDesktopModeController.isLauncherAnimationRunning
-                ) {
-                    controllers.taskbarViewController.commitRunningAppsToUI()
-                }
-                if (needsRecentsTasksReload) {
-                    Log.v(TAG, "reloadRecentTasksIfNeeded: reload recents tasks")
-                    needsRecentsTasksReload = false
-                    reloadRecentTasksIfNeeded()
+                    if (
+                        (onRecentsOrHotseatChanged() ||
+                            runningTasksChanged ||
+                            minimizedTasksChanged) &&
+                            !controllers.taskbarDesktopModeController.isLauncherAnimationRunning
+                    ) {
+                        controllers.taskbarViewController.commitRunningAppsToUI()
+                    }
+                    if (needsRecentsTasksReload) {
+                        Log.v(TAG, "reloadRecentTasksIfNeeded: reload recents tasks")
+                        needsRecentsTasksReload = false
+                        reloadRecentTasksIfNeeded()
+                    }
                 }
             }
     }
@@ -413,24 +418,30 @@ class TaskbarRecentAppsController(
 
         for (groupTask in shownTasks) {
             for ((i, task) in groupTask.tasks.withIndex()) {
-                val cancellableTask =
-                    if (enableTaskbarRecentsThemedIcons()) {
-                        recentsModel.iconCache.getBitmapInfoInBackground(task) { bi, d, t ->
-                            groupTask.bitmapInfos[i] = bi
-                            task.titleDescription = d
-                            task.title = t
-                            controllers.taskbarViewController.onTaskUpdated(task, groupTask)
+                MAIN_EXECUTOR.execute {
+                    val cancellableTask =
+                        if (enableTaskbarRecentsThemedIcons()) {
+                            recentsModel.iconCache.getBitmapInfoInBackground(task) { bi, d, t ->
+                                groupTask.bitmapInfos[i] = bi
+                                task.titleDescription = d
+                                task.title = t
+                                TASKBAR_UI_THREAD.execute {
+                                    controllers.taskbarViewController.onTaskUpdated(task, groupTask)
+                                }
+                            }
+                        } else {
+                            recentsModel.iconCache.getIconInBackground(task) { ic, d, t ->
+                                task.icon = ic
+                                task.titleDescription = d
+                                task.title = t
+                                TASKBAR_UI_THREAD.execute {
+                                    controllers.taskbarViewController.onTaskUpdated(task, groupTask)
+                                }
+                            }
                         }
-                    } else {
-                        recentsModel.iconCache.getIconInBackground(task) { ic, d, t ->
-                            task.icon = ic
-                            task.titleDescription = d
-                            task.title = t
-                            controllers.taskbarViewController.onTaskUpdated(task, groupTask)
-                        }
+                    if (cancellableTask != null) {
+                        TASKBAR_UI_THREAD.execute { iconLoadRequests.add(cancellableTask) }
                     }
-                if (cancellableTask != null) {
-                    iconLoadRequests.add(cancellableTask)
                 }
             }
         }
