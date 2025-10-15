@@ -866,8 +866,8 @@ public abstract class RecentsView<
 
         mContainer = RecentsViewContainer.containerFromContext(context);
         mContainerInterface = mContainer.getContainerInterface();
-        mOrientationState = new RecentsOrientedState(
-                context, mContainerInterface, this::animateRecentsRotationInPlace);
+        mOrientationState = new RecentsOrientedState(context, mContainerInterface);
+        mOrientationState.setRotationChangeListener(this::animateRecentsRotationInPlace);
         final int rotation = mContainer.getDisplay().getRotation();
         mOrientationState.setRecentsRotation(rotation);
 
@@ -1170,6 +1170,7 @@ public abstract class RecentsView<
         mTaskViewPool.cancelOngoingInitializations();
         mGroupedTaskViewPool.cancelOngoingInitializations();
         mDesktopTaskViewPool.cancelOngoingInitializations();
+        mOrientationState.setRotationChangeListener(null);
         mHelper.onDestroy();
         RecentsDependencies.destroy(getContext());
     }
