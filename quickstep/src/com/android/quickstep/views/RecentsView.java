@@ -212,6 +212,9 @@ import com.android.quickstep.recents.data.RecentsRotationStateRepositoryImpl;
 import com.android.quickstep.recents.di.RecentsDependencies;
 import com.android.quickstep.recents.viewmodel.RecentsViewData;
 import com.android.quickstep.recents.viewmodel.RecentsViewModel;
+import com.android.quickstep.split.SplitAnimationController.Companion.SplitAnimInitProps;
+import com.android.quickstep.split.SplitAnimationTimings;
+import com.android.quickstep.split.SplitSelectStateController;
 import com.android.quickstep.util.ActiveGestureLog;
 import com.android.quickstep.util.ActiveGestureProtoLogProxy;
 import com.android.quickstep.util.AnimUtils;
@@ -221,9 +224,6 @@ import com.android.quickstep.util.GroupTask;
 import com.android.quickstep.util.LayoutUtils;
 import com.android.quickstep.util.RecentsOrientedState;
 import com.android.quickstep.util.SingleTask;
-import com.android.quickstep.split.SplitAnimationController.Companion.SplitAnimInitProps;
-import com.android.quickstep.split.SplitAnimationTimings;
-import com.android.quickstep.split.SplitSelectStateController;
 import com.android.quickstep.util.SplitTask;
 import com.android.quickstep.util.SurfaceTransaction;
 import com.android.quickstep.util.SurfaceTransactionApplier;
@@ -637,17 +637,6 @@ public abstract class RecentsView<
         }
 
         @Override
-        public void onActivityUnpinned() {
-            if (!mHandleTaskStackChanges) {
-                return;
-            }
-
-            // Only invalidate task list but don't trigger the reload, so that the list is only
-            // updated the next time user enters Overview
-            invalidateTaskList();
-        }
-
-        @Override
         public void onTaskRemoved(int taskId) {
             if (!mHandleTaskStackChanges) {
                 Log.d(TAG, "onTaskRemoved: " + taskId + ", not handling task stack changes");
@@ -792,11 +781,13 @@ public abstract class RecentsView<
 
         @Override
         public void onSplitSelectionActive() {
+            Log.d(TAG, "onSplitSelectionActive");
             mClearAllButton.setSplitSelectionActive(true);
         }
 
         @Override
         public void onSplitSelectionExit(boolean launchedSplit) {
+            Log.d(TAG, "onSplitSelectionExit");
             resetFromSplitSelectionState();
             mClearAllButton.setSplitSelectionActive(false);
         }
@@ -960,13 +951,6 @@ public abstract class RecentsView<
         mContainer.getViewCache().setCacheSize(R.layout.digital_wellbeing_toast, 5);
 
         mTintingColor = getForegroundScrimDimColor(context);
-    }
-
-    /**
-     * Invalidates the list of tasks so that an update occurs to the list of tasks if requested.
-     */
-    private void invalidateTaskList() {
-        mAppliedTaskListChangeId = -1;
     }
 
     public OverScroller getScroller() {
@@ -4230,6 +4214,11 @@ public abstract class RecentsView<
      */
     public void handleDesktopTaskInSplitSelectState(PendingAnimation builder,
             Interpolator deskTopFadeInterPolator) {
+        if (mAppliedTaskListChangeId == -1) {
+            // If applyLoadPlan hasn't been called, skip animating the DesktopTaskViews as they
+            // won't be added in applyLoadPlan during Split Select.
+            return;
+        }
         SplitAnimationTimings timings = AnimUtils.getDeviceOverviewToSplitTimings(
                 mContainer.getDeviceProfile().getDeviceProperties().isTablet());
         getTaskViews().forEachWithIndexInParent((index, taskView) -> {
