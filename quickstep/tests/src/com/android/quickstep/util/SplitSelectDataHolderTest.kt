@@ -411,4 +411,12 @@ class SplitSelectDataHolderTest {
         splitSelectDataHolder.resetState()
         assertFalse(splitSelectDataHolder.isSplitSelectActive())
     }
+
+    @Test
+    fun callingTwoSetters_shouldNotMerge() {
+        splitSelectDataHolder.setSecondTask(9, sampleItemInfo)
+        assertEquals(9, splitSelectDataHolder.getSecondTaskId())
+        splitSelectDataHolder.setSecondTask(sampleIntent, sampleUser, sampleItemInfo2)
+        assertEquals(INVALID_TASK_ID, splitSelectDataHolder.getSecondTaskId())
+    }
 }
