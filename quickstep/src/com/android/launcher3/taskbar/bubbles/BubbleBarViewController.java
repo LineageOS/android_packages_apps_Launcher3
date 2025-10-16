@@ -781,7 +781,7 @@ public class BubbleBarViewController {
                 mBarView.dismiss(() -> {
                     updateVisibilityForStateChange();
                     mBarView.animateExpanded(false);
-                    adjustTaskbarAndHotseatToBubbleBarState(/* isBubbleBarExpanded= */ false);
+                    adjustTaskbarToBubbleBarState(/* isBubbleBarExpanded= */ false);
                     mActivity.bubbleBarVisibilityChanged(/* isVisible= */ false);
                 });
             } else {
@@ -1251,7 +1251,7 @@ public class BubbleBarViewController {
         }
         if (!mBubbleBarPinning.isAnimating() && isExpanded != mBarView.isExpanded()) {
             mBarView.animateExpanded(isExpanded);
-            adjustTaskbarAndHotseatToBubbleBarState(isExpanded);
+            adjustTaskbarToBubbleBarState(isExpanded);
             if (!isExpanded) {
                 mSystemUiProxy.collapseBubbles();
             } else {
@@ -1264,7 +1264,7 @@ public class BubbleBarViewController {
      * Hides the persistent taskbar if it is going to intersect with the expanded bubble bar if in
      * app or overview.
      */
-    private void adjustTaskbarAndHotseatToBubbleBarState(boolean isBubbleBarExpanded) {
+    public void adjustTaskbarToBubbleBarState(boolean isBubbleBarExpanded) {
         if (!mBubbleStashController.isBubblesShowingOnHome()
                 && !mBubbleStashController.isTransientTaskBar()) {
             boolean hideTaskbar = isBubbleBarExpanded && isIntersectingTaskbar();
@@ -1315,7 +1315,7 @@ public class BubbleBarViewController {
             } else {
                 mBubbleStashController.showBubbleBarImmediate();
                 mBarView.setExpanded(true);
-                adjustTaskbarAndHotseatToBubbleBarState(true);
+                adjustTaskbarToBubbleBarState(true);
             }
         }
     }
@@ -1426,7 +1426,7 @@ public class BubbleBarViewController {
 
     /** Called when the controller is destroyed. */
     public void onDestroy() {
-        adjustTaskbarAndHotseatToBubbleBarState(/*isBubbleBarExpanded = */false);
+        adjustTaskbarToBubbleBarState(/*isBubbleBarExpanded = */false);
         if (refactorTaskbarUiState()) {
             mBarView.removeOnLayoutChangeListener(mBubbleBarViewOnLayoutChangeListener);
         }
