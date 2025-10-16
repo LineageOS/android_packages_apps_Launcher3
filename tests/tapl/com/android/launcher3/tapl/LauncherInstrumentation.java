@@ -561,6 +561,12 @@ public final class LauncherInstrumentation {
         getTestInfo(TestProtocol.REQUEST_ENABLE_FIXED_LANDSCAPE, Boolean.toString(on));
     }
 
+    /** Enables/disables detecting events not from the test. */
+    public void setEnableRegisterEventNotFromTest(boolean enable) {
+        getTestInfo(TestProtocol.REQUEST_ENABLE_REGISTER_EVENT_NOT_FROM_TEST,
+                Boolean.toString(enable));
+    }
+
     public boolean hadNontestEvents() {
         return getTestInfo(TestProtocol.REQUEST_GET_HAD_NONTEST_EVENTS)
                 .getBoolean(TestProtocol.TEST_INFO_RESPONSE_FIELD);

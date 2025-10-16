@@ -31,6 +31,7 @@ public final class TestLogging {
     private static final String LAUNCHER_EVENTS_TAG = "LauncherEvents";
     private static BiConsumer<String, String> sEventConsumer;
     public static boolean sHadEventsNotFromTest;
+    private static boolean sEnableRegisterEventNotFromTest = false;
 
     private static void recordEventSlow(String sequence, String event, boolean reportToTapl) {
         Log.d(reportToTapl ? TAPL_EVENTS_TAG : LAUNCHER_EVENTS_TAG,
@@ -54,7 +55,9 @@ public final class TestLogging {
     }
 
     private static void registerEventNotFromTest(InputEvent event) {
-        if (!sHadEventsNotFromTest && event.getDeviceId() != -1) {
+        if (sEnableRegisterEventNotFromTest
+                && !sHadEventsNotFromTest
+                && event.getDeviceId() != -1) {
             sHadEventsNotFromTest = true;
             Log.d(TestProtocol.PERMANENT_DIAG_TAG, "First event not from test: " + event);
         }
@@ -85,6 +88,10 @@ public final class TestLogging {
             recordEventSlow(sequence, message + ": " + event, false);
             if (action != MotionEvent.ACTION_CANCEL) registerEventNotFromTest(event);
         }
+    }
+
+    public static void setEnableRegisterEventNotFromTest(boolean enable) {
+        sEnableRegisterEventNotFromTest = enable;
     }
 
     static void setEventConsumer(BiConsumer<String, String> consumer) {
