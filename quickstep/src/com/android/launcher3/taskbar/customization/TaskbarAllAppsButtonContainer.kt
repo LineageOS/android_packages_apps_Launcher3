@@ -55,7 +55,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     override val spaceNeeded: Int
         get() {
             return dpToPx(
-                activityContext.taskbarSpecsEvaluator.taskbarIconSize.size.toFloat(),
+                activityContext.taskbarSpecsEvaluator.taskbarIconTouchSize,
                 activityContext,
             )
         }
@@ -73,7 +73,8 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
             )
         backgroundTintList = ColorStateList.valueOf(TRANSPARENT)
         // TODO(b/445195034): refactor as part of the icon size change
-        val padding = activityContext.taskbarSpecsEvaluator.taskbarIconPadding
+        val padding =
+            dpToPx(activityContext.taskbarSpecsEvaluator.taskbarIconPadding, activityContext)
         setPadding(padding)
         setIconDrawable(drawable)
         width = spaceNeeded

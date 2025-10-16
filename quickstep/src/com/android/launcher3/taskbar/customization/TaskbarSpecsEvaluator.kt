@@ -16,7 +16,6 @@
 
 package com.android.launcher3.taskbar.customization
 
-import com.android.launcher3.Utilities.dpToPx
 import com.android.launcher3.taskbar.TaskbarActivityContext
 import com.android.launcher3.taskbar.TaskbarPopupController
 
@@ -29,8 +28,21 @@ class TaskbarSpecsEvaluator(
 ) {
     val taskbarIconSize: TaskbarIconSize
         get() =
-            if (taskbarActivityContext.isThreeButtonNav) TaskbarIconSpecs.defaultPersistentIconSize
-            else TaskbarIconSpecs.defaultTransientIconSize
+            if (taskbarFeatureEvaluator.supportsTransitionToTransientTaskbar)
+                TaskbarIconSpecs.defaultTransientIconSize
+            else TaskbarIconSpecs.defaultPersistentIconSize
+
+    /**
+     * The taskbar icon size used to size the icon view so it satisfies min touch size requirements.
+     * The icon should use `taskbarIconPadding` to ensure that the actual icon size within the view
+     * matches the intended icon size.
+     */
+    val taskbarIconTouchSize: Float
+        get() =
+            Math.max(
+                TaskbarIconSpecs.minimumTaskbarIconTouchSize.size.toFloat(),
+                taskbarIconSize.size.toFloat(),
+            )
 
     val numShownHotseatIcons
         get() =
@@ -49,15 +61,14 @@ class TaskbarSpecsEvaluator(
     // TODO(b/341146605) : initialize it to taskbar container in later cl.
     private var taskbarContainer: List<TaskbarContainer> = emptyList()
 
-    val taskbarIconPadding: Int =
-        if (taskbarActivityContext.isPinnedTaskbar && !taskbarActivityContext.isThreeButtonNav) {
-            val sizeDifference =
-                (TaskbarIconSpecs.defaultTransientIconSize.size
-                        - TaskbarIconSpecs.defaultPersistentIconSize.size).toFloat()
-            dpToPx(sizeDifference, taskbarActivityContext) / 2
+    private val defaultIconSize: TaskbarIconSize =
+        if (taskbarActivityContext.isPinnedTaskbar) {
+            TaskbarIconSpecs.defaultPersistentIconSize
         } else {
-            0
+            TaskbarIconSpecs.defaultTransientIconSize
         }
+
+    val taskbarIconPadding: Float = (taskbarIconTouchSize - defaultIconSize.size.toFloat()) / 2.0f
 
     val taskbarIconMargin: TaskbarIconMarginSize =
         if (taskbarFeatureEvaluator.isTransient) {
@@ -67,7 +78,7 @@ class TaskbarSpecsEvaluator(
         }
 
     fun getIconSizeByGrid(columns: Int, rows: Int): TaskbarIconSize {
-        return if (!taskbarFeatureEvaluator.hasNavButtons) {
+        return if (taskbarFeatureEvaluator.supportsTransitionToTransientTaskbar) {
             TaskbarIconSpecs.transientTaskbarIconSizeByGridSize.getOrDefault(
                 TransientTaskbarIconSizeKey(
                     columns,

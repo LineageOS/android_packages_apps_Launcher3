@@ -68,18 +68,15 @@ constructor(
     private var reorderBounceScale = DEFAULT_BOUNCE_SCALE
     private val isRtl = isRtl(resources)
 
-    private val taskbarIconSize =
-        dpToPx(
-            activityContext.taskbarSpecsEvaluator.taskbarIconSize.size.toFloat(),
-            activityContext,
-        )
+    private val taskbarIconViewSize =
+        dpToPx(activityContext.taskbarSpecsEvaluator.taskbarIconTouchSize, activityContext)
 
     val taskbarPinnedOverflowView: TaskbarOverflowView =
         TaskbarOverflowView.inflateIcon(
             TaskbarOverflowView.OverflowType.PINNED,
             this,
-            taskbarIconSize,
-            activityContext.taskbarSpecsEvaluator.taskbarIconPadding,
+            taskbarIconViewSize,
+            dpToPx(activityContext.taskbarSpecsEvaluator.taskbarIconPadding),
         )
 
     val isOverflowViewShowing: Boolean
@@ -175,7 +172,7 @@ constructor(
                     hotseatView = inflate(expectedLayoutResId)
                     (hotseatView as BubbleTextView).setContainerTextVisibility(false)
                 }
-                val lp = TaskbarIconContainerLayoutParams(taskbarIconSize, taskbarIconSize)
+                val lp = TaskbarIconContainerLayoutParams(taskbarIconViewSize, taskbarIconViewSize)
                 if (index != 0) {
                     lp.marginStart = itemMarginLeftRight
                 }
@@ -183,7 +180,7 @@ constructor(
                     lp.marginEnd = itemMarginLeftRight
                 }
 
-                val padding = activityContext.taskbarSpecsEvaluator.taskbarIconPadding
+                val padding = dpToPx(activityContext.taskbarSpecsEvaluator.taskbarIconPadding)
                 hotseatView.setPadding(padding)
                 addView(hotseatView, lp)
             } else if (hotseatView is FolderIcon) {
@@ -295,8 +292,8 @@ constructor(
         }
         // adding overflow view remove last hotseat item
         removeViewAt(childCount - 1)
-        val lp = TaskbarIconContainerLayoutParams(taskbarIconSize, taskbarIconSize)
-        val padding = activityContext.taskbarSpecsEvaluator.taskbarIconPadding
+        val lp = TaskbarIconContainerLayoutParams(taskbarIconViewSize, taskbarIconViewSize)
+        val padding = dpToPx(activityContext.taskbarSpecsEvaluator.taskbarIconPadding)
         lp.marginStart = itemMarginLeftRight
         taskbarPinnedOverflowView.setPadding(padding)
         taskbarPinnedOverflowView.setOnClickListener(
@@ -345,7 +342,7 @@ constructor(
     override val spaceNeeded: Int
         get() =
             if (isEmpty()) 0
-            else (childCount * taskbarIconSize) + ((childCount - 1) * 2 * itemMarginLeftRight)
+            else (childCount * taskbarIconViewSize) + ((childCount - 1) * 2 * itemMarginLeftRight)
 
     companion object {
         // effectively a no-op since we do not scale this container.

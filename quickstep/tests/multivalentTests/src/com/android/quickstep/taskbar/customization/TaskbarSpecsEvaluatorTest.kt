@@ -43,18 +43,11 @@ class TaskbarSpecsEvaluatorTest {
         on { deviceProfile } doReturn deviceProfile
     }
     private val taskbarSpecsEvaluator =
-        spy(
-            TaskbarSpecsEvaluator(
-                taskbarActivityContext,
-                taskbarFeatureEvaluator,
-                0,
-                0
-            )
-        )
+        spy(TaskbarSpecsEvaluator(taskbarActivityContext, taskbarFeatureEvaluator, 0, 0))
 
     @Test
     fun testGetIconSizeByGrid_whenTaskbarIsTransient_withValidRowAndColumnInLandscape() {
-        doReturn(false).whenever(taskbarFeatureEvaluator).hasNavButtons
+        doReturn(true).whenever(taskbarFeatureEvaluator).supportsTransitionToTransientTaskbar
         doReturn(true).whenever(deviceProperties).isLandscape
         assertThat(taskbarSpecsEvaluator.getIconSizeByGrid(4, 4))
             .isEqualTo(TaskbarIconSpecs.iconSize52dp)
@@ -62,7 +55,7 @@ class TaskbarSpecsEvaluatorTest {
 
     @Test
     fun testGetIconSizeByGrid_whenTaskbarIsTransient_withValidRowAndColumnInPortrait() {
-        doReturn(false).whenever(taskbarFeatureEvaluator).hasNavButtons
+        doReturn(true).whenever(taskbarFeatureEvaluator).supportsTransitionToTransientTaskbar
         doReturn(false).whenever(deviceProperties).isLandscape
         assertThat(taskbarSpecsEvaluator.getIconSizeByGrid(4, 4))
             .isEqualTo(TaskbarIconSpecs.iconSize48dp)
@@ -70,7 +63,7 @@ class TaskbarSpecsEvaluatorTest {
 
     @Test
     fun testGetIconSizeByGrid_whenTaskbarIsTransient_withInvalidRowAndColumn() {
-        doReturn(false).whenever(taskbarFeatureEvaluator).hasNavButtons
+        doReturn(true).whenever(taskbarFeatureEvaluator).supportsTransitionToTransientTaskbar
         doReturn(true).whenever(deviceProperties).isLandscape
         assertThat(taskbarSpecsEvaluator.getIconSizeByGrid(1, 2))
             .isEqualTo(TaskbarIconSpecs.defaultTransientIconSize)
@@ -78,14 +71,14 @@ class TaskbarSpecsEvaluatorTest {
 
     @Test
     fun testGetIconSizeByGrid_whenTaskbarIsPersistent() {
-        doReturn(true).whenever(taskbarFeatureEvaluator).hasNavButtons
+        doReturn(false).whenever(taskbarFeatureEvaluator).supportsTransitionToTransientTaskbar
         assertThat(taskbarSpecsEvaluator.getIconSizeByGrid(6, 5))
             .isEqualTo(TaskbarIconSpecs.defaultPersistentIconSize)
     }
 
     @Test
     fun testGetIconSizeStepDown_whenTaskbarIsPersistent() {
-        doReturn(true).whenever(taskbarFeatureEvaluator).hasNavButtons
+        doReturn(false).whenever(taskbarFeatureEvaluator).supportsTransitionToTransientTaskbar
         assertThat(taskbarSpecsEvaluator.getIconSizeStepDown(TaskbarIconSpecs.iconSize44dp))
             .isEqualTo(TaskbarIconSpecs.defaultPersistentIconSize)
     }
@@ -106,7 +99,7 @@ class TaskbarSpecsEvaluatorTest {
 
     @Test
     fun testGetIconSizeStepUp_whenTaskbarIsPersistent() {
-        doReturn(true).whenever(taskbarFeatureEvaluator).hasNavButtons
+        doReturn(false).whenever(taskbarFeatureEvaluator).supportsTransitionToTransientTaskbar
         assertThat(taskbarSpecsEvaluator.getIconSizeStepUp(TaskbarIconSpecs.iconSize40dp))
             .isEqualTo(TaskbarIconSpecs.iconSize40dp)
     }
