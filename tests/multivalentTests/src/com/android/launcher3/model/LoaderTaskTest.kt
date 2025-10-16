@@ -2,10 +2,13 @@ package com.android.launcher3.model
 
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
+import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.LauncherActivityInfo
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
+import android.os.Process
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
@@ -17,6 +20,7 @@ import com.android.launcher3.LauncherModel.LoaderTransaction
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.IS_FIRST_LOAD_AFTER_RESTORE
 import com.android.launcher3.LauncherPrefs.Companion.RESTORE_DEVICE
+import com.android.launcher3.LauncherSettings.Favorites
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_GROUP
@@ -37,12 +41,22 @@ import com.android.launcher3.model.data.AppsListData.Companion.FLAG_QUIET_MODE_E
 import com.android.launcher3.model.data.AppsListData.Companion.FLAG_WORK_PROFILE_QUIET_MODE_ENABLED
 import com.android.launcher3.model.data.IconRequestInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
+import com.android.launcher3.pm.UserCache
 import com.android.launcher3.provider.RestoreDbTask
 import com.android.launcher3.testutil.rule.LazyInitRule.Companion.lazyRule
 import com.android.launcher3.util.AllModulesForTest
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
+import com.android.launcher3.util.LauncherLayoutBuilder
+import com.android.launcher3.util.LauncherLayoutBuilder.FolderBuilder
+import com.android.launcher3.util.LauncherModelHelper.ACTIVITY_LIST
+import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY
+import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY2
+import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY3
+import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY4
+import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY5
+import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
 import com.android.launcher3.util.LooperIdleLock
-import com.android.launcher3.util.ModelTestExtensions
+import com.android.launcher3.util.ModelTestExtensions.setModelLayout
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.SettingsCache
 import com.android.launcher3.util.MutableListenableRef
@@ -76,8 +90,6 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-
-private const val INSERTION_STATEMENT_FILE = "databases/workspace_items.sql"
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -122,7 +134,13 @@ class LoaderTaskTest {
         get() = testComponent.getDataModel()
 
     private val inMemoryDb: SQLiteDatabase by lazy {
-        ModelTestExtensions.createInMemoryDb(context, INSERTION_STATEMENT_FILE)
+        SQLiteDatabase.createInMemory(SQLiteDatabase.OpenParams.Builder().build()).also {
+            Favorites.addTableToDb(
+                it,
+                UserCache.INSTANCE.get(context).getSerialNumberForUser(Process.myUserHandle()),
+                false,
+            )
+        }
     }
 
     @Before
@@ -182,9 +200,92 @@ class LoaderTaskTest {
         inMemoryDb.close()
     }
 
+    private fun FolderBuilder.addApps(count: Int) =
+        apply {
+                for (i in 0..<count) {
+                    putApp(TEST_PACKAGE, ACTIVITY_LIST[i])
+                }
+            }
+            .build()
+
+    fun Cursor.forEveryValue(callback: (ContentValues) -> Unit) = use {
+        val columnNames = it.columnNames
+        while (it.moveToNext()) {
+            val rowValues = ContentValues()
+            for ((index, columnName) in columnNames.withIndex()) {
+                when (it.getType(index)) {
+                    Cursor.FIELD_TYPE_STRING -> rowValues.put(columnName, it.getString(index))
+                    Cursor.FIELD_TYPE_INTEGER -> rowValues.put(columnName, it.getLong(index))
+                    Cursor.FIELD_TYPE_FLOAT -> rowValues.put(columnName, it.getDouble(index))
+                    Cursor.FIELD_TYPE_BLOB -> rowValues.put(columnName, it.getBlob(index))
+                    Cursor.FIELD_TYPE_NULL -> rowValues.putNull(columnName)
+                }
+            }
+            callback.invoke(rowValues)
+        }
+    }
+
+    private fun SandboxApplication.setupMockWidget() {
+        val widget = WidgetUtils.findWidgetProvider(false)
+
+        val appWidget = spyService<AppWidgetManager>()
+        doReturn(listOf(widget))
+            .whenever(appWidget)
+            .getInstalledProvidersForPackage(widget.provider.packageName, widget.user)
+        doReturn(listOf(widget)).whenever(appWidget).getInstalledProvidersForProfile(widget.user)
+    }
+
     @Test
-    @MockUser(userType = UserIconInfo.TYPE_WORK)
-    fun loadsDataProperly() =
+    fun loadsDataProperly() {
+        // Create a new sandbox context, and copy-over its db to our test db and verify reload
+        val sourceSandbox = SandboxApplication()
+        sourceSandbox.init()
+        sourceSandbox.setupMockWidget()
+        sourceSandbox.appComponent.idp.apply {
+            numRows = context.appComponent.idp.numRows
+            numColumns = context.appComponent.idp.numColumns
+            numDatabaseHotseatIcons = context.appComponent.idp.numDatabaseHotseatIcons
+        }
+        val widget = WidgetUtils.findWidgetProvider(false)
+        val builder =
+            LauncherLayoutBuilder()
+                .atWorkspace(0, -1, 0)
+                .putApp(TEST_PACKAGE, TEST_ACTIVITY)
+                .atWorkspace(1, -1, 0)
+                .putApp(TEST_PACKAGE, TEST_ACTIVITY2)
+                .atWorkspace(0, -1, 1)
+                .putApp(TEST_PACKAGE, TEST_ACTIVITY3)
+                .atWorkspace(1, -1, 1)
+                .putApp(TEST_PACKAGE, TEST_ACTIVITY4)
+                .atWorkspace(0, -1, 2)
+                .putApp(TEST_PACKAGE, TEST_ACTIVITY5)
+                .atWorkspace(0, -1, 4)
+                .putFolder("Folder 1")
+                .addApps(3)
+                .atWorkspace(1, -1, 4)
+                .putFolder("Folder 2")
+                .addApps(8)
+                .atWorkspace(0, 0, 4)
+                .putFolder("Folder 3")
+                .addApps(5)
+                .atWorkspace(1, 0, 4)
+                .putFolder("Folder 4")
+                .addApps(2)
+                .atWorkspace(0, 0, 5)
+                .putWidget(widget.provider.packageName, widget.provider.className, 2, 2)
+                .atWorkspace(0, 0, 6)
+                .putWidget(widget.provider.packageName, widget.provider.className, 3, 3)
+                .atWorkspace(0, 0, 7)
+                .putWidget(widget.provider.packageName, widget.provider.className, 2, 2)
+        sourceSandbox.setModelLayout(builder)
+
+        sourceSandbox.appComponent.testableModelState.dbController
+            .query(null, null, null, null)
+            .forEveryValue { inMemoryDb.insert(TABLE_NAME, null, it) }
+        sourceSandbox.onDestroy()
+
+        context.setupMockWidget()
+
         with(bgDataModel) {
             testComponent
                 .getLoaderTaskFactory()
@@ -197,8 +298,8 @@ class LoaderTaskTest {
                         }
                         .size
                 )
-                .isAtLeast(32)
-            assertThat(itemsIdMap.filter { ModelUtils.WIDGET_FILTER.test(it) }.size).isAtLeast(7)
+                .isAtLeast(12)
+            assertThat(itemsIdMap.filter { ModelUtils.WIDGET_FILTER.test(it) }.size).isAtLeast(3)
             assertThat(
                     itemsIdMap
                         .filter {
@@ -206,9 +307,10 @@ class LoaderTaskTest {
                         }
                         .size
                 )
-                .isAtLeast(8)
-            assertThat(itemsIdMap.count()).isAtLeast(40)
+                .isAtLeast(4)
+            assertThat(itemsIdMap.count()).isAtLeast(30)
         }
+    }
 
     @Test
     fun bindsLoadedDataCorrectly() {
