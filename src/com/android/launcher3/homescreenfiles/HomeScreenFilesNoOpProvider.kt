@@ -25,17 +25,22 @@ import java.util.concurrent.CompletableFuture
 class HomeScreenFilesNoOpProvider : HomeScreenFilesProvider {
     override val fileChanges = MutableListenableStream<FileChange>()
 
+    override val updates = MutableListenableStream<HomeScreenFilesUpdate>()
+
+    override fun onReady(): CompletableFuture<Void> = CompletableFuture.completedFuture(null)
+
     override fun canCreateNewFolder(): Boolean = false
 
     override fun createNewFolder(): CompletableFuture<Boolean> =
-        CompletableFuture.supplyAsync { false }
+        CompletableFuture.completedFuture(false)
 
     override fun canMoveToHomeScreen(uriList: List<Uri>?) = false
 
     override fun moveToHomeScreen(uriList: List<Uri>): List<CompletableFuture<Boolean>> =
-        uriList.map { CompletableFuture.supplyAsync { false } }
+        uriList.map { CompletableFuture.completedFuture(false) }
 
     override fun delete(uri: Uri, permanent: Boolean) {}
 
-    override fun query(): Lazy<Map<Uri, HomeScreenFile>> = lazyOf(emptyMap())
+    override fun query(): CompletableFuture<Map<Uri, HomeScreenFile>> =
+        CompletableFuture.completedFuture(emptyMap())
 }

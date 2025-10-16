@@ -16,6 +16,7 @@
 
 package com.android.launcher3.model;
 
+import static com.android.launcher3.Flags.enableFilesOnHomeScreenDecoupledInit;
 import static com.android.launcher3.Flags.enableLauncherBrMetricsFixed;
 import static com.android.launcher3.LauncherPrefs.IS_FIRST_LOAD_AFTER_RESTORE;
 import static com.android.launcher3.icons.CacheableShortcutInfo.convertShortcutsToCacheableShortcuts;
@@ -30,6 +31,7 @@ import static com.android.launcher3.model.data.AppsListData.FLAG_QUIET_MODE_ENAB
 import static com.android.launcher3.model.data.AppsListData.FLAG_WORK_PROFILE_QUIET_MODE_ENABLED;
 import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_INSTALL_SESSION_ACTIVE;
 import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
+import static com.android.launcher3.util.Executors.THREAD_POOL_EXECUTOR;
 import static com.android.launcher3.util.LooperExecutor.CALLER_LOADER_TASK;
 import static com.android.launcher3.util.PackageManagerHelper.hasShortcutsPermission;
 
@@ -44,6 +46,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Process;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.Log;
@@ -65,6 +68,8 @@ import com.android.launcher3.folder.FolderNameInfos;
 import com.android.launcher3.folder.FolderNameProvider;
 import com.android.launcher3.homescreenfiles.HomeScreenFile;
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider;
+import com.android.launcher3.homescreenfiles.HomeScreenFilesUpdate;
+import com.android.launcher3.homescreenfiles.HomeScreenFilesUpdateTask;
 import com.android.launcher3.icons.CacheableShortcutCachingLogic;
 import com.android.launcher3.icons.CacheableShortcutInfo;
 import com.android.launcher3.icons.IconCache;
@@ -112,6 +117,7 @@ import dagger.assisted.AssistedInject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -120,6 +126,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -174,7 +181,8 @@ public class LoaderTask implements Runnable {
     private final Provider<FolderNameProvider> mFolderNameProviderFactory;
     private final Provider<LauncherRestoreEventLogger> mRestoreEventLoggerProvider;
     private final WorkspaceItemSpaceFinder mWorkspaceItemSpaceFinder;
-    private final kotlin.Lazy<Map<Uri, HomeScreenFile>> mHomeScreenFilesQueryResult;
+    private final CompletableFuture<Map<Uri, HomeScreenFile>> mHomeScreenFilesQueryResult;
+    private final HomeScreenFilesUpdateTask.Factory mHomeScreenFilesUpdateTask;
     private final FirstScreenBroadcastHelper mFirstScreenBroadcastHelper;
     private final SettingsCache mSettingsCache;
     private final BrowserIconMigratorFactory mBrowserIconMigratorFactory;
@@ -200,6 +208,7 @@ public class LoaderTask implements Runnable {
             LoaderParams params,
             WorkspaceItemSpaceFinder workspaceItemSpaceFinder,
             HomeScreenFilesProvider homeScreenFilesProvider,
+            HomeScreenFilesUpdateTask.Factory homeScreenFilesUpdateTask,
             FirstScreenBroadcastHelper firstScreenBroadcastHelper,
             SettingsCache settingsCache,
             BrowserIconMigratorFactory browserIconMigratorFactory) {
@@ -224,11 +233,21 @@ public class LoaderTask implements Runnable {
         mWidgetSizeHandler = widgetSizeHandler;
         mParams = params;
         mWorkspaceItemSpaceFinder = workspaceItemSpaceFinder;
-        mHomeScreenFilesQueryResult = homeScreenFilesProvider.query();
+        mHomeScreenFilesUpdateTask = homeScreenFilesUpdateTask;
         mFirstScreenBroadcastHelper = firstScreenBroadcastHelper;
         mSettingsCache = settingsCache;
         mUserManagerState = mUserCache.getUserManagerState();
         mBrowserIconMigratorFactory = browserIconMigratorFactory;
+
+        // NOTE: When files on home screen initialization is decoupled from the loader task we must
+        // wait for the provider to become ready before querying for file system items.
+        mHomeScreenFilesQueryResult =
+                enableFilesOnHomeScreenDecoupledInit()
+                        ? homeScreenFilesProvider.onReady()
+                            .thenCompose((unused) -> mStopped
+                                    ? CompletableFuture.completedFuture(Collections.emptyMap())
+                                    : homeScreenFilesProvider.query())
+                        : homeScreenFilesProvider.query();
     }
 
     protected synchronized void waitForIdle() {
@@ -300,6 +319,21 @@ public class LoaderTask implements Runnable {
         verifyNotStopped();
         mLauncherBinder.bindWorkspace(true /* incrementBindId */, /* isBindSync= */ false);
         logASplit("bindWorkspace finished");
+
+        // NOTE: Model task must be enqueued after the loader has finished. Since MODEL_EXECUTOR
+        // runs the task immediately if the caller is on the same thread, using a different executor
+        // (THREAD_POOL_EXECUTOR) ensures the task runs after the current code-block is complete.
+        if (enableFilesOnHomeScreenDecoupledInit()) {
+            final CompletableFuture<Void> unused =
+                    mHomeScreenFilesQueryResult.thenRunAsync(() ->
+                        mModel.enqueueModelUpdateTask(
+                                mHomeScreenFilesUpdateTask.create(
+                                        new HomeScreenFilesUpdate(
+                                                mHomeScreenFilesQueryResult,
+                                                Process.myUserHandle(),
+                                                /*isDelayedInit=*/true))),
+                        THREAD_POOL_EXECUTOR);
+        }
 
         if (!mParams.getLoadNonWorkspaceItems()) {
             logASplit("Skipping remaining items");
