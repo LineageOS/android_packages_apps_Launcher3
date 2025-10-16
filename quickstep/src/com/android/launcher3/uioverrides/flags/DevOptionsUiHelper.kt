@@ -41,6 +41,7 @@ import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceViewHolder
 import androidx.preference.SwitchPreference
 import com.android.launcher3.ExtendedEditText
+import com.android.launcher3.Flags
 import com.android.launcher3.LauncherAppState
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.COMPOSITION_TRACING_PREF_KEY
@@ -57,7 +58,10 @@ import com.android.launcher3.util.OnboardingPrefs.HOME_BOUNCE_SEEN
 import com.android.launcher3.util.OnboardingPrefs.HOTSEAT_DISCOVERY_TIP_COUNT
 import com.android.launcher3.util.OnboardingPrefs.HOTSEAT_LONGPRESS_TIP_SEEN
 import com.android.launcher3.util.OnboardingPrefs.TASKBAR_EDU_TOOLTIP_STEP
+import com.android.launcher3.util.OnboardingPrefs.TASKBAR_FEATURES_EDU_SEEN
+import com.android.launcher3.util.OnboardingPrefs.TASKBAR_PINNING_EDU_SEEN
 import com.android.launcher3.util.OnboardingPrefs.TASKBAR_SEARCH_EDU_SEEN
+import com.android.launcher3.util.OnboardingPrefs.TASKBAR_SWIPE_EDU_SEEN
 import com.android.launcher3.util.PluginManagerWrapper
 import com.android.launcher3.util.StartActivityParams
 import com.android.quickstep.compose.QuickstepComposeFacade
@@ -394,7 +398,13 @@ class DevOptionsUiHelper(c: Context, attr: AttributeSet?) : PreferenceGroup(c, a
                 HOTSEAT_DISCOVERY_TIP_COUNT.sharedPrefKey,
                 HOTSEAT_LONGPRESS_TIP_SEEN.sharedPrefKey,
             )
-            addOnboardPref("Taskbar Education", TASKBAR_EDU_TOOLTIP_STEP.sharedPrefKey)
+            val taskbarEduKeys = mutableListOf(TASKBAR_EDU_TOOLTIP_STEP.sharedPrefKey)
+            if (Flags.tooltipEduCombinator()) {
+                taskbarEduKeys.add(TASKBAR_SWIPE_EDU_SEEN.sharedPrefKey)
+                taskbarEduKeys.add(TASKBAR_FEATURES_EDU_SEEN.sharedPrefKey)
+                taskbarEduKeys.add(TASKBAR_PINNING_EDU_SEEN.sharedPrefKey)
+            }
+            addOnboardPref("Taskbar Education", *taskbarEduKeys.toTypedArray())
             addOnboardPref("Taskbar Search Education", TASKBAR_SEARCH_EDU_SEEN.sharedPrefKey)
             addOnboardPref("All Apps Visited Count", ALL_APPS_VISITED_COUNT.sharedPrefKey)
         }
