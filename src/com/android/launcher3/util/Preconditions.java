@@ -48,12 +48,18 @@ public class Preconditions {
         }
     }
 
+    public static void assertThreadOnExecutor(LooperExecutor looperExecutor) {
+        if (FeatureFlags.IS_STUDIO_BUILD && !isSameLooper(looperExecutor.getLooper())) {
+            throw new IllegalStateException();
+        }
+    }
+
     public static void assertTaskbarUiThread() {
         if (!BuildConfig.IS_STUDIO_BUILD) {
             return;
         }
         if (enableTaskbarUiThread()) {
-            if (!isSameLooper(((LooperExecutor) TASKBAR_UI_THREAD).getLooper())) {
+            if (!isSameLooper(TASKBAR_UI_THREAD.getLooper())) {
                 throw new IllegalStateException();
             }
         } else {

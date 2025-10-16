@@ -87,6 +87,7 @@ import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.util.ActivityOptionsWrapper;
 import com.android.launcher3.util.ApplicationInfoWrapper;
 import com.android.launcher3.util.LauncherBindableItemsContainer;
+import com.android.launcher3.util.LooperExecutor;
 import com.android.launcher3.util.PendingRequestArgs;
 import com.android.launcher3.util.Preconditions;
 import com.android.launcher3.util.RunnableList;
@@ -99,7 +100,6 @@ import com.android.launcher3.widget.LauncherWidgetHolder;
 import com.android.launcher3.widget.picker.model.WidgetPickerDataProvider;
 
 import java.util.List;
-import java.util.concurrent.Executor;
 
 /**
  * An interface to be used along with a context for various activities in Launcher. This allows a
@@ -112,7 +112,7 @@ public interface ActivityContext extends SavedStateRegistryOwner {
     /** Returns the dagger graph for this UI context */
     ActivityContextComponent getActivityComponent();
 
-    default Executor getUiExecutor() {
+    default LooperExecutor getUiExecutor() {
         return MAIN_EXECUTOR;
     }
 
@@ -494,7 +494,7 @@ public interface ActivityContext extends SavedStateRegistryOwner {
      */
     default RunnableList startActivitySafely(
             View v, Intent intent, @Nullable ItemInfo item) {
-        Preconditions.assertUIThread();
+        Preconditions.assertThreadOnExecutor(getUiExecutor());
         Context context = (Context) this;
         if (LauncherAppState.getInstance(context).isSafeModeEnabled()
                 && !new ApplicationInfoWrapper(context, intent).isSystem()) {
