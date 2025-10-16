@@ -33,6 +33,7 @@ import com.android.launcher3.icons.IconProvider
 import com.android.launcher3.icons.LauncherIcons
 import com.android.launcher3.pm.UserCache
 import com.android.launcher3.util.CancellableTask
+import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
@@ -56,7 +57,8 @@ class TaskIconCache(
     private val iconProvider: IconProvider,
     displayController: DisplayController,
     val dispatcherProvider: DispatcherProvider,
-) : TaskIconDataSource, DisplayController.DisplayInfoChangeListener {
+    daggerSingletonTracker: DaggerSingletonTracker,
+) : TaskIconDataSource {
     private val recentsIconCacheSize = context.resources.getInteger(R.integer.recentsIconCacheSize)
     private var iconCache: TaskKeyLruCache<TaskCacheEntry>? = null
     // TODO: b/431811298 - Make non-null when flag is cleaned up.
@@ -82,10 +84,14 @@ class TaskIconCache(
         }
         // TODO (b/397205964): this will need to be updated when we support caches for different
         //  displays.
-        displayController.addChangeListener(this)
+        displayController.listenable?.let {
+            daggerSingletonTracker.addCloseable(
+                it.changes.forEach(MAIN_EXECUTOR) { flags -> onDisplayInfoChanged(flags) }
+            )
+        }
     }
 
-    override fun onDisplayInfoChanged(context: Context, info: DisplayController.Info, flags: Int) {
+    private fun onDisplayInfoChanged(flags: Int) {
         if ((flags and DisplayController.CHANGE_DENSITY) != 0) {
             clearCache()
         }

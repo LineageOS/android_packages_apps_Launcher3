@@ -1403,8 +1403,8 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     }
 
     @Override
-    public void onDisplayInfoChanged(Context context, DisplayController.Info info, int flags) {
-        super.onDisplayInfoChanged(context, info, flags);
+    public void onDisplayInfoChanged(DisplayController.Info info, int flags) {
+        super.onDisplayInfoChanged(info, flags);
         // When changing screens, force moving to rest state similar to StatefulActivity.onStop, as
         // StatefulActivity isn't called consistently.
         if ((flags & CHANGE_ACTIVE_SCREEN) != 0) {

@@ -33,7 +33,7 @@ import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.testutil.rule.LazyInitRule.Companion.lazyRule
 import com.android.launcher3.util.DisplayController.CHANGE_DENSITY
 import com.android.launcher3.util.DisplayController.CHANGE_ROTATION
-import com.android.launcher3.util.DisplayController.DisplayInfoChangeListener
+import com.android.launcher3.util.Executors.IMMEDIATE_EXECUTOR
 import com.android.launcher3.util.window.CachedDisplayInfo
 import com.android.launcher3.util.window.WindowManagerProxy
 import dagger.BindsInstance
@@ -68,7 +68,7 @@ class DisplayControllerTest {
     private lateinit var displayManager: DisplayManager
     private val display: Display = mock()
     private val resources: Resources = mock()
-    private val displayInfoChangeListener: DisplayInfoChangeListener = mock()
+    private val displayInfoChangeListener: (Int) -> Unit = mock()
 
     private lateinit var displayController: DisplayController
 
@@ -138,7 +138,9 @@ class DisplayControllerTest {
 
         // Initialize DisplayController
         displayController = DisplayController.INSTANCE.get(context)
-        displayController.addChangeListener(displayInfoChangeListener)
+        displayController.listenable
+            ?.changes
+            ?.forEach(IMMEDIATE_EXECUTOR, displayInfoChangeListener)
     }
 
     @After
@@ -161,7 +163,7 @@ class DisplayControllerTest {
 
         displayController.onConfigurationChanged(configuration)
 
-        verify(displayInfoChangeListener).onDisplayInfoChanged(any(), any(), eq(CHANGE_ROTATION))
+        verify(displayInfoChangeListener).invoke(eq(CHANGE_ROTATION))
     }
 
     @Test
@@ -172,7 +174,7 @@ class DisplayControllerTest {
 
         displayController.onConfigurationChanged(configuration)
 
-        verify(displayInfoChangeListener).onDisplayInfoChanged(any(), any(), eq(CHANGE_DENSITY))
+        verify(displayInfoChangeListener).invoke(eq(CHANGE_DENSITY))
     }
 }
 

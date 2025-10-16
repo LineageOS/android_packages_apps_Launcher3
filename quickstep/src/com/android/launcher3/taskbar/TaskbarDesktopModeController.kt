@@ -22,6 +22,7 @@ import com.android.launcher3.statehandlers.DesktopVisibilityController.TaskbarDe
 import com.android.launcher3.taskbar.TaskbarBackgroundRenderer.Companion.MAX_ROUNDNESS
 import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
+import com.android.launcher3.util.SafeCloseable
 
 /** Handles Taskbar in Desktop Windowing mode. */
 class TaskbarDesktopModeController(
@@ -29,12 +30,7 @@ class TaskbarDesktopModeController(
     private val desktopVisibilityController: DesktopVisibilityController,
 ) : TaskbarDesktopModeListener {
 
-    private val displayInfoChangeListener =
-        DisplayController.DisplayInfoChangeListener { _, _, _ ->
-            // DisplayInfoChangeListener is called on main thread, we should switch to taskbar's UI
-            // thread to update UI state.
-            TASKBAR_UI_THREAD.execute { updateTaskbarUiState() }
-        }
+    private var displayInfoChangeSafeCloseable: SafeCloseable? = null
 
     private lateinit var taskbarControllers: TaskbarControllers
     private lateinit var taskbarSharedState: TaskbarSharedState
@@ -53,9 +49,12 @@ class TaskbarDesktopModeController(
         taskbarUiState = uiState
         desktopVisibilityController.registerTaskbarDesktopModeListener(this)
         if (refactorTaskbarUiState()) {
-            DisplayController.INSTANCE.get(taskbarActivityContext)
-                .addChangeListener(displayInfoChangeListener)
-            updateTaskbarUiState()
+            displayInfoChangeSafeCloseable =
+                DisplayController.INSTANCE.get(taskbarActivityContext).listenable?.forEach(
+                    TASKBAR_UI_THREAD
+                ) { _ ->
+                    updateTaskbarUiState()
+                }
         }
     }
 
@@ -92,10 +91,8 @@ class TaskbarDesktopModeController(
 
     fun onDestroy() {
         desktopVisibilityController.unregisterTaskbarDesktopModeListener(this)
-        if (refactorTaskbarUiState()) {
-            DisplayController.INSTANCE.get(taskbarActivityContext)
-                .removeChangeListener(displayInfoChangeListener)
-        }
+        displayInfoChangeSafeCloseable?.close()
+        displayInfoChangeSafeCloseable = null
     }
 
     private fun updateTaskbarUiState() {
