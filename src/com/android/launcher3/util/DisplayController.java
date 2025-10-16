@@ -73,6 +73,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.inject.Inject;
 
@@ -114,6 +115,9 @@ public class DisplayController {
 
     private final @ApplicationContext Context mAppContext;
 
+    // The callback in this listener updates DeviceProfile, which other listeners might depend on
+    private DisplayInfoChangeListener mPriorityListener;
+
     // Will replace it with mThreadSafePerDisplayInfo.
     @Deprecated
     private final SparseArray<PerDisplayInfo> mPerDisplayInfo = new SparseArray<>();
@@ -148,7 +152,7 @@ public class DisplayController {
         mReceiver.register(packageFilter(TARGET_OVERLAY_PACKAGE, ACTION_OVERLAY_CHANGED));
 
         FileLog.i(TAG, "(CTOR) perDisplayBounds: "
-                + defaultPerDisplayInfo.mInfo.getValue().mPerDisplayBounds);
+                + defaultPerDisplayInfo.mInfo.mPerDisplayBounds);
 
         if (mWMProxy.enableOverviewOnConnectedDisplays()) {
             final DisplayManager.DisplayListener displayListener =
@@ -233,6 +237,20 @@ public class DisplayController {
         return controller.getInfo();
     }
 
+    /**
+     * Interface for listening for display changes
+     */
+    public interface DisplayInfoChangeListener {
+
+        /**
+         * Invoked when display info has changed.
+         * @param context updated context associated with the display.
+         * @param info updated display information.
+         * @param flags bitmask indicating type of change.
+         */
+        void onDisplayInfoChanged(Context context, Info info, int flags);
+    }
+
     private void onIntent(Intent intent) {
         if (mDestroyed) {
             return;
@@ -253,7 +271,7 @@ public class DisplayController {
         Log.d(TASKBAR_NOT_DESTROYED_TAG, "DisplayController#onConfigurationChanged: " + config);
         PerDisplayInfo perDisplayInfo = getPerDisplayInfoById(displayId);
         Context windowContext = perDisplayInfo.mWindowContext;
-        Info info = perDisplayInfo.mInfo.getValue();
+        Info info = perDisplayInfo.mInfo;
         if (config.densityDpi != info.densityDpi
                 || config.fontScale != info.fontScale
                 || !info.mScreenSizeDp.equals(
@@ -268,22 +286,39 @@ public class DisplayController {
         }
     }
 
-    @Nullable
-    @AnyThread
-    public ListenableDiffAwareRef<Info, Integer> getListenable() {
-        return getListenable(DEFAULT_DISPLAY);
+    public void setPriorityListener(DisplayInfoChangeListener listener) {
+        mPriorityListener = listener;
     }
 
-    @Nullable
     @AnyThread
-    public ListenableDiffAwareRef<Info, Integer> getListenable(int displayId) {
+    public void addChangeListener(DisplayInfoChangeListener listener) {
+        addChangeListenerForDisplay(listener, DEFAULT_DISPLAY);
+    }
+
+    @AnyThread
+    public void removeChangeListener(DisplayInfoChangeListener listener) {
+        removeChangeListenerForDisplay(listener, DEFAULT_DISPLAY);
+    }
+
+    @AnyThread
+    public void addChangeListenerForDisplay(DisplayInfoChangeListener listener, int displayId) {
         PerDisplayInfo perDisplayInfo = getPerDisplayInfoById(displayId);
-        return perDisplayInfo != null ? perDisplayInfo.mInfo : null;
+        if (perDisplayInfo != null) {
+            perDisplayInfo.addListener(listener);
+        }
+    }
+
+    @AnyThread
+    public void removeChangeListenerForDisplay(DisplayInfoChangeListener listener, int displayId) {
+        PerDisplayInfo perDisplayInfo = getPerDisplayInfoById(displayId);
+        if (perDisplayInfo != null) {
+            perDisplayInfo.removeListener(listener);
+        }
     }
 
     @AnyThread
     public Info getInfo() {
-        return getPerDisplayInfoById(DEFAULT_DISPLAY).mInfo.getValue();
+        return getPerDisplayInfoById(DEFAULT_DISPLAY).mInfo;
     }
 
     @AnyThread
@@ -291,7 +326,7 @@ public class DisplayController {
         if (mWMProxy.enableOverviewOnConnectedDisplays()) {
             PerDisplayInfo perDisplayInfo = getPerDisplayInfoById(displayId);
             if (perDisplayInfo != null) {
-                return perDisplayInfo.mInfo.getValue();
+                return perDisplayInfo.mInfo;
             } else {
                 return null;
             }
@@ -361,11 +396,18 @@ public class DisplayController {
     public void notifyConfigChangeForDisplay(int displayId) {
         PerDisplayInfo perDisplayInfo = getPerDisplayInfoById(displayId);
         if (perDisplayInfo == null) return;
-        Info oldInfo = perDisplayInfo.mInfo.getValue();
+        Info oldInfo = perDisplayInfo.mInfo;
         final Info newInfo = getNewInfo(oldInfo, perDisplayInfo.mWindowContext);
         final int flags = calculateChange(oldInfo, newInfo);
         if (flags != 0) {
-            perDisplayInfo.mInfo.dispatchValue(newInfo, flags);
+            MAIN_EXECUTOR.execute(() -> {
+                perDisplayInfo.mInfo = newInfo;
+                if (displayId == DEFAULT_DISPLAY && mPriorityListener != null) {
+                    mPriorityListener.onDisplayInfoChanged(perDisplayInfo.mWindowContext, newInfo,
+                            flags);
+                }
+                perDisplayInfo.notifyListeners(newInfo, flags);
+            });
         }
     }
 
@@ -405,8 +447,8 @@ public class DisplayController {
     @Nullable
     @AnyThread
     private PerDisplayInfo getPerDisplayInfoById(int displayId) {
-        return enableTaskbarUiThread()
-                ? mThreadSafePerDisplayInfo.get(displayId) : mPerDisplayInfo.get(displayId);
+        return enableTaskbarUiThread() ?
+                mThreadSafePerDisplayInfo.get(displayId) : mPerDisplayInfo.get(displayId);
     }
 
     @AnyThread
@@ -718,14 +760,33 @@ public class DisplayController {
     @VisibleForTesting
     protected class PerDisplayInfo implements ComponentCallbacks {
         final int mDisplayId;
-        final MutableDiffAwareRef<Info, Integer> mInfo;
+        final CopyOnWriteArrayList<DisplayInfoChangeListener> mListeners =
+                new CopyOnWriteArrayList<>();
         final Context mWindowContext;
+        Info mInfo;
 
         PerDisplayInfo(int displayId, Context windowContext, Info info) {
             this.mDisplayId = displayId;
             this.mWindowContext = windowContext;
-            mInfo = new MutableDiffAwareRef<>(info);
+            this.mInfo = info;
             windowContext.registerComponentCallbacks(this);
+        }
+
+        @AnyThread
+        void addListener(DisplayInfoChangeListener listener) {
+            mListeners.add(listener);
+        }
+
+        @AnyThread
+        void removeListener(DisplayInfoChangeListener listener) {
+            mListeners.remove(listener);
+        }
+
+        void notifyListeners(Info info, int flags) {
+            int count = mListeners.size();
+            for (int i = 0; i < count; ++i) {
+                mListeners.get(i).onDisplayInfoChanged(mWindowContext, info, flags);
+            }
         }
 
         @Override
@@ -738,6 +799,7 @@ public class DisplayController {
 
         void cleanup() {
             mWindowContext.unregisterComponentCallbacks(this);
+            mListeners.clear();
         }
     }
 

@@ -19,7 +19,6 @@ package com.android.launcher3.util
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.Executor
-import java.util.function.BiConsumer
 
 /** Represents a stream of data which supports listening for updates */
 interface ListenableStream<T> {
@@ -91,13 +90,6 @@ interface ListenableDiffAwareRef<T, R> : ListenableRef<T> {
 
     /** Stream of ongoing changes */
     val changes: ListenableStream<R>
-
-    /**
-     * Similar to [ListenableStream.forEach] on [changes] but also passes the current value to the
-     * callback
-     */
-    fun forEachChange(executor: Executor, callback: BiConsumer<T, R>): SafeCloseable =
-        changes.forEach(executor) { callback.accept(value, it) }
 }
 
 /** [ListenableDiffAwareRef] which allows updating its value */
