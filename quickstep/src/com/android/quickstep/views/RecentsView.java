@@ -212,6 +212,9 @@ import com.android.quickstep.recents.data.RecentsRotationStateRepositoryImpl;
 import com.android.quickstep.recents.di.RecentsDependencies;
 import com.android.quickstep.recents.viewmodel.RecentsViewData;
 import com.android.quickstep.recents.viewmodel.RecentsViewModel;
+import com.android.quickstep.split.SplitAnimationController.Companion.SplitAnimInitProps;
+import com.android.quickstep.split.SplitAnimationTimings;
+import com.android.quickstep.split.SplitSelectStateController;
 import com.android.quickstep.util.ActiveGestureLog;
 import com.android.quickstep.util.ActiveGestureProtoLogProxy;
 import com.android.quickstep.util.AnimUtils;
@@ -221,9 +224,6 @@ import com.android.quickstep.util.GroupTask;
 import com.android.quickstep.util.LayoutUtils;
 import com.android.quickstep.util.RecentsOrientedState;
 import com.android.quickstep.util.SingleTask;
-import com.android.quickstep.split.SplitAnimationController.Companion.SplitAnimInitProps;
-import com.android.quickstep.split.SplitAnimationTimings;
-import com.android.quickstep.split.SplitSelectStateController;
 import com.android.quickstep.util.SplitTask;
 import com.android.quickstep.util.SurfaceTransaction;
 import com.android.quickstep.util.SurfaceTransactionApplier;
@@ -851,7 +851,8 @@ public abstract class RecentsView<
 
     protected final RecentsViewModel mRecentsViewModel;
     private final RecentsViewModelHelper mHelper;
-    protected final RecentsViewUtils mUtils = new RecentsViewUtils(this);
+    protected final RecentsViewUtils mUtils = LauncherComponentProvider.get(
+            getContext()).getRecentsViewUtilsFactory().create(this);
     protected final RecentsDismissUtils mDismissUtils = LauncherComponentProvider.get(
             getContext()).getRecentsDismissUtilsFactory().create(this);
 
@@ -2973,15 +2974,17 @@ public abstract class RecentsView<
         int lastLargeTaskViewShift = 0;
         int largeTaskWidthAndSpacing = 0;
         int snappedTaskRowWidth = 0;
-        int expectedCurrentTaskRowWidth = 0;
+        int expectedSnapReferenceTaskRowWidth = 0;
         TaskView snappedTaskView = isKeyboardTaskFocusPending()
                 ? getKeyboardFocusTaskView() : getNextPageTaskView();
         TaskView homeTaskView = getHomeTaskView();
         boolean encounteredHomeTaskView = false;
-        // Determine the currentTaskView when going from Home to Overview, and ensure it can be
-        // snapped to its expected position.
-        TaskView expectedCurrentTaskView = mUtils.getExpectedCurrentTask(/* runningTaskView= */
-                null);
+        // Determine the first grid task, or the last desktop task when there are no grid tasks, and
+        // ensure it can be snapped to its expected position.
+        TaskView snapReferenceTaskView = getFirstNonDesktopTaskView();
+        if (snapReferenceTaskView == null) {
+            snapReferenceTaskView = getLastDesktopTaskView();
+        }
 
         // Don't clear the top row, if the user has dismissed a task, to maintain the task order.
         if (!mAnyTaskHasBeenDismissed) {
@@ -3033,8 +3036,8 @@ public abstract class RecentsView<
                 if (taskView == snappedTaskView) {
                     snappedTaskRowWidth = largeTileRowWidth;
                 }
-                if (taskView == expectedCurrentTaskView) {
-                    expectedCurrentTaskRowWidth = largeTileRowWidth;
+                if (taskView == snapReferenceTaskView) {
+                    expectedSnapReferenceTaskRowWidth = largeTileRowWidth;
                 }
             } else {
                 if (encounteredLastLargeTaskView) {
@@ -3107,8 +3110,8 @@ public abstract class RecentsView<
                 if (taskView == snappedTaskView) {
                     snappedTaskRowWidth = taskViewRowWidth;
                 }
-                if (taskView == expectedCurrentTaskView) {
-                    expectedCurrentTaskRowWidth = taskViewRowWidth;
+                if (taskView == snapReferenceTaskView) {
+                    expectedSnapReferenceTaskRowWidth = taskViewRowWidth;
                 }
             }
             gridTranslations.put(taskView, gridTranslation);
@@ -3149,16 +3152,16 @@ public abstract class RecentsView<
         float clearAllShortTotalWidthTranslation = 0;
         int longRowWidth = Math.max(topRowWidth, bottomRowWidth);
 
-        // If first task is not in the expected position (mLastComputedTaskSize) and being too close
-        // to ClearAllButton, then apply extra translation to ClearAllButton.
-        int rowWidthAfterExpectedCurrentTask = longRowWidth - expectedCurrentTaskRowWidth;
-        int expectedCurrentTaskWidthAndSpacing =
-                (expectedCurrentTaskView != null
-                        ? expectedCurrentTaskView.getLayoutParams().width
+        // If snap reference task is not in the expected position (mLastComputedTaskSize) and being
+        // too close to ClearAllButton, then apply extra translation to ClearAllButton.
+        int rowWidthAfterSnapReferenceTask = longRowWidth - expectedSnapReferenceTaskRowWidth;
+        int snapReferenceTaskWidthAndSpacing =
+                (snapReferenceTaskView != null
+                        ? snapReferenceTaskView.getLayoutParams().width
                         : 0
                 ) + mPageSpacing;
-        int firstTaskStart = mLastComputedGridSize.left + rowWidthAfterExpectedCurrentTask
-                + expectedCurrentTaskWidthAndSpacing;
+        int firstTaskStart = mLastComputedGridSize.left + rowWidthAfterSnapReferenceTask
+                + snapReferenceTaskWidthAndSpacing;
         int expectedFirstTaskStart = mLastComputedTaskSize.right;
         if (firstTaskStart < expectedFirstTaskStart) {
             mClearAllShortTotalWidthTranslation = expectedFirstTaskStart - firstTaskStart;

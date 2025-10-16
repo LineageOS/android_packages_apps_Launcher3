@@ -38,11 +38,9 @@ import com.android.app.animation.Interpolators.LINEAR
 import com.android.launcher3.AbstractFloatingView.TYPE_TASK_MENU
 import com.android.launcher3.AbstractFloatingView.getTopOpenViewWithType
 import com.android.launcher3.Flags.enableDesktopExplodedView
-import com.android.launcher3.Flags.enableOverviewOnConnectedDisplays
 import com.android.launcher3.PagedView.INVALID_PAGE
 import com.android.launcher3.R
 import com.android.launcher3.Utilities.getPivotsForScalingRectToRect
-import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.statehandlers.DesktopVisibilityController.Companion.INACTIVE_DESK_ID
 import com.android.launcher3.statemanager.BaseState
 import com.android.launcher3.util.DisplayController
@@ -64,7 +62,10 @@ import com.android.quickstep.views.RecentsView.TASK_THUMBNAIL_SPLASH_ALPHA
 import com.android.systemui.shared.recents.model.Task
 import com.android.systemui.shared.recents.model.ThumbnailData
 import com.android.wm.shell.shared.GroupedTaskInfo
-import com.android.wm.shell.shared.desktopmode.DesktopModeStatus.enableMultipleDesktops
+import com.android.wm.shell.shared.desktopmode.DesktopState
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import java.util.function.BiConsumer
 import kotlin.math.max
 import kotlin.math.min
@@ -74,10 +75,14 @@ import kotlin.reflect.KMutableProperty1
  * Helper class for [RecentsView]. This util class contains refactored and extracted functions from
  * RecentsView to facilitate the implementation of unit tests.
  */
-class RecentsViewUtils(private val recentsView: RecentsView<*, *>) : DesktopVisibilityListener {
+class RecentsViewUtils
+@AssistedInject
+constructor(
+    @Assisted private val recentsView: RecentsView<*, *>,
+    private val displayController: DisplayController,
+    private val desktopState: DesktopState,
+) : DesktopVisibilityListener {
     val taskViews = TaskViewsIterable(recentsView)
-
-    private val displayController = DisplayController.INSTANCE[recentsView.context]
 
     var keyboardFocusTask: KeyboardFocusTask = KeyboardFocusTask.Unfocused
 
@@ -221,11 +226,6 @@ class RecentsViewUtils(private val recentsView: RecentsView<*, *>) : DesktopVisi
             as? DesktopTaskView
     }
 
-    /** Returns the active desk ID of the display that contains the [recentsView] instance. */
-    fun getActiveDeskIdOnThisDisplay(): Int =
-        DesktopVisibilityController.INSTANCE.get(recentsView.context)
-            .getActiveDeskId(recentsView.mContainer.display.displayId)
-
     /** Returns the expected focus task. */
     fun getFirstNonDesktopTaskView(): TaskView? = taskViews.firstOrNull { it !is DesktopTaskView }
 
@@ -253,17 +253,16 @@ class RecentsViewUtils(private val recentsView: RecentsView<*, *>) : DesktopVisi
      * Returns the [TaskView] that should be the current page during task binding, in the following
      * priorities:
      * 1. Running task
-     * 2. First non-desktop task
-     * 3. Last desktop task
-     * 4. null otherwise
+     * 2. Last desktop task if it's desktop-first mode.
+     * 3. First non-desktop task
+     * 4. Last desktop task
+     * 5. null otherwise
      */
     fun getExpectedCurrentTask(runningTaskView: TaskView?): TaskView? =
         runningTaskView
-            ?: taskViews.firstOrNull {
-                it !is DesktopTaskView &&
-                    (enableOverviewOnConnectedDisplays() || !it.isExternalDisplay)
-            }
-            ?: taskViews.lastOrNull()
+            ?: (if (isInDesktopFirstMode()) getLastDesktopTaskView() else null)
+            ?: getFirstNonDesktopTaskView()
+            ?: getLastDesktopTaskView()
 
     fun handleTabKeyEvent(event: KeyEvent, superCall: (KeyEvent) -> Boolean): Boolean {
         val isShiftPressed = event.isShiftPressed
@@ -732,7 +731,7 @@ class RecentsViewUtils(private val recentsView: RecentsView<*, *>) : DesktopVisi
     }
 
     fun getRunningTaskViewFromGroupTaskInfo(groupedTaskInfo: GroupedTaskInfo) =
-        if (enableMultipleDesktops(recentsView.context)) {
+        if (desktopState.enableMultipleDesktops) {
             if (groupedTaskInfo.isBaseType(GroupedTaskInfo.TYPE_DESK)) {
                 getDesktopTaskViewForDeskId(groupedTaskInfo.deskId)
             } else {
@@ -886,6 +885,11 @@ class RecentsViewUtils(private val recentsView: RecentsView<*, *>) : DesktopVisi
             }
             return desktopTaskView.launchWithAnimation()
         }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(recentsView: RecentsView<*, *>): RecentsViewUtils
+    }
 
     companion object {
         class RecentsViewFloatProperty(
