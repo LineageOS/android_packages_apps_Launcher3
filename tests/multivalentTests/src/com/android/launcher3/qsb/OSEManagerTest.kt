@@ -126,12 +126,28 @@ class OSEManagerTest {
     }
 
     @Test
-    fun testOsePkgIsNull() {
+    fun testOseSettingsIsNull() {
         doReturn(null).whenever(settingsObserver).getValue()
 
         TestUtil.runOnExecutorSync(UI_HELPER_EXECUTOR) { oseManager.reloadOse() }
 
         assertThat(oseManager.oseInfo.value.pkg).isEqualTo(BING_PKG)
+        verifyNoInteractions(installSessionHelper)
+    }
+
+    @Test
+    fun testOseSettingsIsNull_defaultSearchPackageDisabled() {
+        doReturn(null).whenever(settingsObserver).getValue()
+        val appInfoDisabled = ApplicationInfo()
+        appInfoDisabled.enabled = false
+        launcherApps = context.spyService(LauncherApps::class.java)
+        doReturn(appInfoDisabled)
+            .whenever(launcherApps)
+            .getApplicationInfo(eq(BING_PKG), anyInt(), eq(Process.myUserHandle()))
+
+        TestUtil.runOnExecutorSync(UI_HELPER_EXECUTOR) { oseManager.reloadOse() }
+
+        assertThat(oseManager.oseInfo.value.pkg).isEqualTo(null)
         verifyNoInteractions(installSessionHelper)
     }
 

@@ -24,9 +24,13 @@ import android.content.Intent.ACTION_PACKAGE_CHANGED
 import android.content.Intent.ACTION_PACKAGE_REMOVED
 import android.content.Intent.ACTION_SEARCH
 import android.content.pm.ActivityInfo
+import android.content.pm.LauncherApps
 import android.content.pm.PackageInstaller
+import android.content.pm.PackageManager
+import android.content.pm.PackageManager.NameNotFoundException
 import android.os.Process.myUserHandle
 import android.os.UserHandle
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
 import com.android.launcher3.R
@@ -53,7 +57,7 @@ import javax.inject.Inject
  */
 @LauncherAppSingleton
 class OSEManager(
-    private val context: Context,
+    val context: Context,
     private val settingsObserver: SecureStringObserver,
     private val installhelper: InstallSessionHelper,
     private val executor: LooperExecutor = OSE_LOOPER,
@@ -69,9 +73,9 @@ class OSEManager(
      * changes
      */
     val oseInfo = mutableOSEInfoRef.asListenable()
-
     private val defaultSearchPackage =
         context.getSystemService(SearchManager::class.java)?.globalSearchActivity?.packageName
+            ?: context.resources.getString(R.string.fallback_search_package_name)
 
     @Inject
     constructor(
@@ -106,7 +110,8 @@ class OSEManager(
             when {
                 oseApkInstalled || activeInstallSession -> oseSettingsValue
                 // No install session available, so fallback to defaultSearchPackage
-                else -> defaultSearchPackage
+                isDefaultSearchPackageEnabled() -> defaultSearchPackage
+                else -> null
             }
 
         val oseApkInstallPending =
@@ -165,6 +170,21 @@ class OSEManager(
                 oseConfigured,
                 supportsSearchIntent,
             )
+        Log.i(TAG, "reloadOse oldOseInfo= " + oldOseInfo + "\nnewOseInfo= " + newOseInfo)
+        if (osePkg == null && oldOseInfo.pkg == newOseInfo.pkg) {
+            // osePkg can be null only when defaultSearchPackage is disabled.
+            // So register to defaultSearchPackage changes.
+            // This condition can only happen with launcher force-stop or reboot of the device when
+            // defaultSearchPackage is disabled
+            packageAvailableReceiver.register(
+                packageFilter(
+                    defaultSearchPackage,
+                    ACTION_PACKAGE_ADDED,
+                    ACTION_PACKAGE_CHANGED,
+                    ACTION_PACKAGE_REMOVED,
+                )
+            )
+        }
 
         if (
             oldOseInfo.pkg != newOseInfo.pkg ||
@@ -213,6 +233,23 @@ class OSEManager(
         }
     }
 
+    private fun isDefaultSearchPackageEnabled(): Boolean {
+        try {
+            return defaultSearchPackage?.let {
+                context
+                    .getSystemService(LauncherApps::class.java)
+                    ?.getApplicationInfo(
+                        it,
+                        PackageManager.MATCH_UNINSTALLED_PACKAGES,
+                        myUserHandle(),
+                    )
+                    ?.enabled
+            } ?: false
+        } catch (e: NameNotFoundException) {
+            return false
+        }
+    }
+
     private fun unregisterInstallSessionTracker() {
         tracker?.close()
         tracker = null
@@ -235,10 +272,23 @@ class OSEManager(
     ) {
         val overlayPackage: String?
             get() = overlayTarget?.packageName ?: pkg
+
+        override fun toString(): String {
+            return "pkg=" +
+                pkg +
+                " overlayPackage=" +
+                overlayPackage +
+                " installPending=" +
+                installPending +
+                " isOseConfigured=" +
+                isOseConfigured +
+                " supportsSearchIntent=" +
+                supportsSearchIntent
+        }
     }
 
     companion object {
-
+        const val TAG = "OSEManager"
         const val SEARCH_ENGINE_SETTINGS_KEY = "selected_search_engine"
 
         val OSE_LOOPER = LooperExecutor("OSEManager")
