@@ -569,7 +569,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                 : getChildCount() - mNumStaticViews == 0
                         && mHotseatIconsContainer.getChildCount() > 0;
         if (getChildAt(expectedAllAppsDividerIndex) == mTaskbarDividerContainer
-                && getTotalNumberOfIcons() == mNumStaticViews) {
+                && getTotalNumberOfIconsWithPossibleQsb() == mNumStaticViews) {
             // Only static views with divider so remove divider.
             removeView(mTaskbarDividerContainer);
         } else if (getChildAt(expectedAllAppsDividerIndex) != mTaskbarDividerContainer
@@ -1405,6 +1405,13 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         actualBounds.top = getTop();
         actualBounds.bottom = getBottom();
         return actualBounds;
+    }
+
+    private int getTotalNumberOfIconsWithPossibleQsb() {
+        final int totalNumberOfIcons = getTotalNumberOfIcons();
+        return mActivityContext.getDeviceProfile().isQsbInline
+                ? totalNumberOfIcons + 1
+                : totalNumberOfIcons;
     }
 
     /** Returns the total number of icons in the taskbar. **/
