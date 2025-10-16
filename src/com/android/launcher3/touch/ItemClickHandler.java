@@ -33,6 +33,7 @@ import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.os.Process;
+import android.os.Trace;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -96,6 +97,7 @@ public class ItemClickHandler {
         Launcher launcher = Launcher.getLauncher(v.getContext());
         if (!launcher.getWorkspace().isFinishedSwitchingState()) return;
 
+        Trace.beginSection("ItemClickHandler#onClick");
         Object tag = v.getTag();
         if (tag instanceof WorkspaceItemInfo) {
             onClickAppShortcut(v, (WorkspaceItemInfo) tag, launcher);
@@ -124,6 +126,7 @@ public class ItemClickHandler {
         } else if (tag instanceof ItemClickProxy) {
             ((ItemClickProxy) tag).onItemClicked(v);
         }
+        Trace.endSection();
     }
 
     /**
