@@ -310,10 +310,17 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> implements Cli
         if (v == null) {
             return;
         }
-
-        ArrayList<View> views = new ArrayList<>(mFolder.getIconsInReadingOrder());
-        views.remove(v);
-        arrangeChildren(views);
+        if (mFolder.getIsDragInProgress()) {
+            // A drag is in progress, so we shouldn't immediately reshuffle the folder.
+            for (int i = getChildCount() - 1; i >= 0; i--) {
+                getPageAt(i).removeView(v);
+            }
+        } else {
+            // This is a permanent removal, so rearrange the items immediately.
+            ArrayList<View> views = new ArrayList<>(mFolder.getIconsInReadingOrder());
+            views.remove(v);
+            arrangeChildren(views);
+        }
     }
 
     @Override
