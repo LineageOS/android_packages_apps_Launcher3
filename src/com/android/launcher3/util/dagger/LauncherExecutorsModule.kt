@@ -15,7 +15,6 @@
  */
 package com.android.launcher3.util.dagger
 
-import com.android.launcher3.Flags.enableTaskbarUiThread
 import com.android.launcher3.concurrent.ExecutorsModule
 import com.android.launcher3.concurrent.annotations.Background
 import com.android.launcher3.concurrent.annotations.LightweightBackground
@@ -83,8 +82,7 @@ abstract class LauncherExecutorsModule {
         @LauncherAppSingleton
         @TaskbarUi
         fun provideTaskbarUiLooperExecutor(): LooperExecutor {
-            return if (enableTaskbarUiThread()) Executors.TASKBAR_UI_THREAD as LooperExecutor
-            else Executors.MAIN_EXECUTOR
+            return Executors.TASKBAR_UI_THREAD as LooperExecutor
         }
 
         @Provides
