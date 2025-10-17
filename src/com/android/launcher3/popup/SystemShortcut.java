@@ -53,6 +53,7 @@ import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.views.Snackbar;
 import com.android.launcher3.widget.WidgetsBottomSheet;
 import com.android.launcher3.widget.picker.model.data.WidgetPickerData;
+import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper;
 import com.android.wm.shell.shared.bubbles.logging.EntryPoint;
 
 import java.util.Arrays;
@@ -509,7 +510,8 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
                         && !(itemInfo instanceof WorkspaceItemInfo)) {
                     return null;
                 }
-                if (itemInfo instanceof ItemInfoWithIcon itemInfoWithIcon) {
+                if (!BubbleAnythingFlagHelper.allowMultiWindowNonResizableActivities()
+                        && itemInfo instanceof ItemInfoWithIcon itemInfoWithIcon) {
                     // Don't show bubble shortcut option for non-resizeable apps on small screens.
                     // TODO(b/411558731): isPhone just checks for smallest width < 600dp, so it
                     // basically is a check for small screens including Foldables when folded.
