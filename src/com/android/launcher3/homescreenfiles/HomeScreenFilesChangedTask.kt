@@ -74,6 +74,11 @@ constructor(
             WorkspaceItemInfo().apply {
                 itemType = HomeScreenFilesUtils.buildItemType(file)
                 intent = HomeScreenFilesUtils.buildLaunchIntent(uri, file)
+                // Explicitly set `title` so that when `IconCache#getTitleAndIcon` converts a
+                // `WorkspaceItemInfo` to a `HomeScreenFile`, it doesn't end up with an empty
+                // string, which would then cause a component to be used as a fallback title in some
+                // cases.
+                title = file.displayName
                 iconCache.getTitleAndIcon(this, DESKTOP_ICON_FLAG)
             }
         val coords =
@@ -120,6 +125,11 @@ constructor(
                     if (data == uri || (uriAlias != null && data == uriAlias)) {
                         it.intent = HomeScreenFilesUtils.buildLaunchIntent(uri, file)
                         it.itemType = HomeScreenFilesUtils.buildItemType(file)
+                        // Explicitly set `title` so that when `IconCache#getTitleAndIcon` converts
+                        // a `WorkspaceItemInfo` to a `HomeScreenFile`, it doesn't end up with an
+                        // empty string, which would then cause a component to be used as a fallback
+                        // title in some cases.
+                        it.title = file.displayName
                         iconCache.addIconToDBAndMemCache(
                             file,
                             HomeScreenFilesCachingLogic,

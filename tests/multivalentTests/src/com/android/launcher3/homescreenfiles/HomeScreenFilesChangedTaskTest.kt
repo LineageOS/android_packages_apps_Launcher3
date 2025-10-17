@@ -89,13 +89,11 @@ class HomeScreenFilesChangedTaskTest {
         idp.numSearchContainerColumns = 3
 
         doAnswer {
-                it.getArgument<ItemInfoWithIcon>(0).apply {
-                    bitmap = this@HomeScreenFilesChangedTaskTest.bitmap
-                    title = testFile.displayName
-                }
+                it.getArgument<ItemInfoWithIcon>(0).bitmap =
+                    this@HomeScreenFilesChangedTaskTest.bitmap
             }
             .whenever(iconCache)
-            .getTitleAndIcon(any(), any())
+            .getTitleAndIcon(argThat { x -> x.title == testFile.displayName }, any())
 
         whenever(modelTaskController.getModelWriter()).thenReturn(modelWriter)
         whenever(bgDataModel.updateAndCollectWorkspaceItemInfos(any(), any(), isNull()))
