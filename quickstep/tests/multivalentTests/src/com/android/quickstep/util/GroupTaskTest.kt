@@ -20,18 +20,23 @@ import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.content.ComponentName
 import android.content.Intent
 import android.graphics.Rect
+import android.os.UserHandle
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.Display.INVALID_DISPLAY
+import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.util.LauncherMultivalentJUnit
+import com.android.launcher3.util.TestActivityContext
 import com.android.systemui.shared.recents.model.Task
 import com.android.wm.shell.shared.split.SplitBounds
 import com.android.wm.shell.shared.split.SplitScreenConstants
 import com.google.common.truth.Truth.assertThat
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(LauncherMultivalentJUnit::class)
 class GroupTaskTest {
+    @get:Rule val context = TestActivityContext()
 
     @Test
     fun testGroupTask_sameInstance_isEqual() {
@@ -135,15 +140,39 @@ class GroupTaskTest {
         assertThat(task6.matchesDisplayId(DISPLAY_2)).isTrue()
     }
 
+    @Test
+    fun testSingleTask_makeWorkspaceItem() {
+        val testComponentName = ComponentName(PACKAGE, "")
+        val matchingApp =
+            AppInfo().apply {
+                componentName = testComponentName
+                user = UserHandle.of(0)
+                title = "Test App"
+                intent = Intent().setComponent(testComponentName)
+            }
+        context.activityComponent.appsStore.setApps(arrayOf(matchingApp), 0, null)
+
+        val machingTask = SingleTask(createTask(0, DISPLAY_2, PACKAGE))
+        val workspaceItemInfo = machingTask.makeWorkspaceItem(context)
+
+        assertThat(workspaceItemInfo).isNotNull()
+        assertThat(workspaceItemInfo!!.title).isEqualTo(matchingApp.title)
+
+        val anotherTask = SingleTask(createTask(0, DISPLAY_2, "OTHER_PACKAGE"))
+        val mismatchingItemInfo = anotherTask.makeWorkspaceItem(context)
+        assertThat(mismatchingItemInfo).isNull()
+    }
+
     private fun createTask(id: Int, displayId: Int = INVALID_DISPLAY, pkg: String? = null): Task {
-        val intent = Intent()
+        val componentName = ComponentName(pkg ?: "", "")
+        val intent = Intent().setComponent(componentName)
         pkg.let { intent.setPackage(it) }
         return Task(
             Task.TaskKey(
                 id,
                 0,
                 intent,
-                ComponentName(pkg ?: "", ""),
+                componentName,
                 0,
                 0,
                 displayId,
