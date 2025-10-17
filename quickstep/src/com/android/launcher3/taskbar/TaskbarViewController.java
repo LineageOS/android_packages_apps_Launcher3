@@ -15,9 +15,6 @@
  */
 package com.android.launcher3.taskbar;
 
-import static android.animation.LayoutTransition.APPEARING;
-import static android.animation.LayoutTransition.CHANGE_APPEARING;
-import static android.animation.LayoutTransition.CHANGE_DISAPPEARING;
 import static android.animation.LayoutTransition.DISAPPEARING;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.DesktopModeFlags.ENABLE_TASKBAR_OVERFLOW;
@@ -55,7 +52,6 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.graphics.Rect;
-import android.util.FloatProperty;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -95,7 +91,6 @@ import com.android.launcher3.taskbar.handoff.HandoffSuggestion;
 import com.android.launcher3.util.ItemInfoMatcher;
 import com.android.launcher3.util.LauncherBindableItemsContainer;
 import com.android.launcher3.util.MultiPropertyFactory;
-import com.android.launcher3.util.MultiPropertyFactory.MultiProperty;
 import com.android.launcher3.util.MultiTranslateDelegate;
 import com.android.launcher3.util.MultiValueAlpha;
 import com.android.launcher3.util.SandboxContext;
@@ -109,6 +104,7 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -143,11 +139,6 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
     /** Used if an unexpected edge case is hit in {@link #getPositionInHotseat}. */
     private static final float ERROR_POSITION_IN_HOTSEAT_NOT_FOUND = -100;
 
-    private static final int TRANSITION_DELAY = 50;
-    static final int TRANSITION_DEFAULT_DURATION = 500;
-    private static final int TRANSITION_FADE_IN_DURATION = 167;
-    private static final int TRANSITION_FADE_OUT_DURATION = 83;
-
     private final TaskbarActivityContext mActivity;
     private @Nullable TaskbarDragLayerController mDragLayerController;
     private @NonNull TaskbarView mTaskbarView;
@@ -173,6 +164,22 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
 
     private final TransitionEndBoundsChangedNotifier mTransitionEndBoundsChangedNotifier =
             new TransitionEndBoundsChangedNotifier();
+    private final TransitionListener mUpdateRunningStateOnDisappear = new TransitionListener() {
+        @Override
+        public void startTransition(LayoutTransition transition, ViewGroup container, View view,
+                int type) {
+            if (type == DISAPPEARING && view instanceof BubbleTextView btv) {
+                // Running state updates happen after removing this view, so update it here.
+                updateRunningState(btv);
+            }
+        }
+
+        @Override
+        public void endTransition(LayoutTransition transition, ViewGroup container, View view,
+                int type) {
+            // Do nothing.
+        }
+    };
 
     @Nullable
     private Animator mTaskbarShiftXAnim;
@@ -979,7 +986,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
     }
 
     void notifyIconLayoutBoundsChanged() {
-        if (isTaskbarAppTransitionRunning()) {
+        if (isAnyTaskbarAppTransitionRunning()) {
             // Defers notify until after transitions finish.
             mTransitionEndBoundsChangedNotifier.mIsCanceled = false;
         } else {
@@ -1011,7 +1018,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
             mIsIconAlignedWithHotseat = isIconAlignedWithHotseat;
             mIsStashed = isStashed;
 
-            if (isTaskbarAppTransitionRunning()) {
+            if (isAnyTaskbarAppTransitionRunning()) {
                 mTransitionEndBoundsChangedNotifier.mIsCanceled = true;
                 mTaskbarView.getLayoutTransition().cancel();
             }
@@ -1357,9 +1364,13 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
     /** Called when there's a change in running apps to update the UI. */
     public void commitRunningAppsToUI() {
         mModelCallbacks.commitRunningAppsToUI();
-        if (!mActivity.isTransientTaskbar() && mTaskbarView.getLayoutTransition() == null) {
+        if (mTaskbarView.getLayoutTransition() == null) {
             // Set up after the first commit so that the initial recents do not animate (janky).
-            mTaskbarView.setLayoutTransition(createLayoutTransitionForRunningApps());
+            TaskbarLayoutTransitionFactory factory = new TaskbarLayoutTransitionFactory(
+                    mTransitionEndBoundsChangedNotifier, mUpdateRunningStateOnDisappear);
+            mTaskbarView.setLayoutTransition(factory.createForTaskbarView());
+            Optional.ofNullable(mTaskbarView.getTaskbarHotseatIconsContainer()).ifPresent(
+                    c -> c.setLayoutTransition(factory.createForTaskbarContainer()));
         }
     }
 
@@ -1372,94 +1383,17 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         mModelCallbacks.commitHandoffSuggestionsToUI();
     }
 
-    private LayoutTransition createLayoutTransitionForRunningApps() {
-        LayoutTransition layoutTransition = new LayoutTransition();
-        layoutTransition.setDuration(TRANSITION_DEFAULT_DURATION);
-        layoutTransition.addTransitionListener(new TransitionListener() {
-
-            @Override
-            public void startTransition(
-                    LayoutTransition transition, ViewGroup container, View view, int type) {
-                if (type == APPEARING) {
-                    view.setAlpha(0f);
-                    view.setScaleX(0f);
-                    view.setScaleY(0f);
-                } else if (type == DISAPPEARING && view instanceof BubbleTextView btv) {
-                    // Running state updates happen after removing this view, so update it here.
-                    updateRunningState(btv);
-                }
-            }
-
-            @Override
-            public void endTransition(
-                    LayoutTransition transition, ViewGroup container, View view, int type) {
-                // Do nothing.
-            }
-        });
-        layoutTransition.addTransitionListener(mTransitionEndBoundsChangedNotifier);
-
-        // Appearing.
-        AnimatorSet appearingSet = new AnimatorSet();
-        Animator appearingAlphaAnimator = ObjectAnimator.ofFloat(null, "alpha", 0f, 1f);
-        appearingAlphaAnimator.setInterpolator(Interpolators.clampToProgress(LINEAR, 0f,
-                (float) TRANSITION_FADE_IN_DURATION / TRANSITION_DEFAULT_DURATION));
-        Animator appearingScaleAnimator = ObjectAnimator.ofFloat(null, SCALE_PROPERTY, 0f, 1f);
-        appearingScaleAnimator.setInterpolator(EMPHASIZED);
-        appearingSet.playTogether(appearingAlphaAnimator, appearingScaleAnimator);
-        layoutTransition.setAnimator(APPEARING, appearingSet);
-        layoutTransition.setStartDelay(APPEARING, TRANSITION_DELAY);
-
-        // Disappearing.
-        AnimatorSet disappearingSet = new AnimatorSet();
-        Animator disappearingAlphaAnimator = ObjectAnimator.ofFloat(null, "alpha", 1f, 0f);
-        disappearingAlphaAnimator.setInterpolator(Interpolators.clampToProgress(LINEAR,
-                (float) TRANSITION_DELAY / TRANSITION_DEFAULT_DURATION,
-                (float) (TRANSITION_DELAY + TRANSITION_FADE_OUT_DURATION)
-                        / TRANSITION_DEFAULT_DURATION));
-        Animator disappearingScaleAnimator = ObjectAnimator.ofFloat(null, SCALE_PROPERTY, 1f, 0f);
-        disappearingScaleAnimator.setInterpolator(EMPHASIZED);
-        disappearingSet.playTogether(disappearingAlphaAnimator, disappearingScaleAnimator);
-        layoutTransition.setAnimator(DISAPPEARING, disappearingSet);
-
-        // Change transitions.
-        FloatProperty<View> translateXPinning = new FloatProperty<>("translateXPinning") {
-            @Override
-            public void setValue(View view, float value) {
-                getTranslationXForPinning(view).setValue(value);
-            }
-
-            @Override
-            public Float get(View view) {
-                return getTranslationXForPinning(view).getValue();
-            }
-
-            private MultiProperty getTranslationXForPinning(View view) {
-                return ((Reorderable) view).getTranslateDelegate()
-                        .getTranslationX(INDEX_TASKBAR_PINNING_ANIM);
-            }
-        };
-        AnimatorSet changeSet = new AnimatorSet();
-        changeSet.playTogether(
-                layoutTransition.getAnimator(CHANGE_APPEARING),
-                ObjectAnimator.ofFloat(null, translateXPinning, 0f, 1f));
-
-        // Change appearing.
-        layoutTransition.setAnimator(CHANGE_APPEARING, changeSet);
-        layoutTransition.setInterpolator(CHANGE_APPEARING, EMPHASIZED);
-
-        // Change disappearing.
-        layoutTransition.setAnimator(CHANGE_DISAPPEARING, changeSet);
-        layoutTransition.setInterpolator(CHANGE_DISAPPEARING, EMPHASIZED);
-        layoutTransition.setStartDelay(CHANGE_DISAPPEARING, TRANSITION_DELAY);
-
-        return layoutTransition;
+    /** Returns whether a LayoutTransition is currently running on any Taskbar ViewGroup. */
+    private boolean isAnyTaskbarAppTransitionRunning() {
+        return isTaskbarAppTransitionRunning(mTaskbarView)
+                || isTaskbarAppTransitionRunning(mTaskbarView.getTaskbarHotseatIconsContainer());
     }
 
-
-    /** Returns whether a LayoutTransition is currently running on the TaskbarView. */
-    public boolean isTaskbarAppTransitionRunning() {
-        LayoutTransition transition = mTaskbarView.getLayoutTransition();
-        return transition != null && transition.isRunning();
+    private static boolean isTaskbarAppTransitionRunning(@Nullable ViewGroup viewGroup) {
+        return Optional.ofNullable(viewGroup)
+                .map(ViewGroup::getLayoutTransition)
+                .map(LayoutTransition::isRunning)
+                .orElse(false);
     }
 
     public boolean isTaskbarInMinimalState() {
@@ -1553,7 +1487,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
                 // there won't be janky animation with window resize.
                 mActivity.setTaskbarWindowFullscreen(false, TASKBAR_WINDOW_ICONS_TRANSITION);
             }
-            if (!transition.isRunning() && !mIsCanceled) {
+            if (!isAnyTaskbarAppTransitionRunning() && !mIsCanceled) {
                 mControllers.uiController.onIconLayoutBoundsChanged();
             }
         }

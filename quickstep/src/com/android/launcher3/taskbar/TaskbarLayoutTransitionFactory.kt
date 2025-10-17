@@ -1,0 +1,213 @@
+/*
+ * Copyright (C) 2025 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.launcher3.taskbar
+
+import android.animation.AnimatorSet
+import android.animation.LayoutTransition
+import android.animation.LayoutTransition.APPEARING
+import android.animation.LayoutTransition.CHANGE_APPEARING
+import android.animation.LayoutTransition.CHANGE_DISAPPEARING
+import android.animation.LayoutTransition.DISAPPEARING
+import android.animation.LayoutTransition.TransitionListener
+import android.animation.ObjectAnimator
+import android.util.FloatProperty
+import android.util.Property
+import android.view.View
+import android.view.ViewGroup
+import androidx.core.view.children
+import androidx.core.view.get
+import com.android.app.animation.Interpolators
+import com.android.app.animation.Interpolators.EMPHASIZED
+import com.android.app.animation.Interpolators.LINEAR
+import com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY
+import com.android.launcher3.Reorderable
+import com.android.launcher3.Utilities
+import com.android.launcher3.taskbar.customization.TaskbarIconsContainer
+import com.android.launcher3.util.MultiPropertyFactory
+import com.android.launcher3.util.MultiTranslateDelegate.INDEX_TASKBAR_PINNING_ANIM
+
+/**
+ * Creates a [LayoutTransition] for [TaskbarView] or its icon containers.
+ *
+ * Both Taskbar and [ViewGroup] containers within it need to support a common set of transitions,
+ * but each need their own [LayoutTransition] instance. [TaskbarView] has extra change transition
+ * behavior to propagate [INDEX_TASKBAR_PINNING_ANIM] `translateX` to icons in containers.
+ *
+ * [transitionListeners] will be added to any [LayoutTransition] instance.
+ */
+class TaskbarLayoutTransitionFactory(private vararg val transitionListeners: TransitionListener) {
+    private val appearingAlphaAnimator =
+        ObjectAnimator.ofFloat(null, "alpha", 0f, 1f).apply {
+            interpolator =
+                Interpolators.clampToProgress(
+                    LINEAR,
+                    0f,
+                    TRANSITION_FADE_IN_DURATION.toFloat() / TRANSITION_DEFAULT_DURATION,
+                )
+        }
+    private val appearingScaleAnimator =
+        ObjectAnimator.ofFloat(null, SCALE_PROPERTY, 0f, 1f).apply { interpolator = EMPHASIZED }
+
+    private val disappearingAlphaAnimator =
+        ObjectAnimator.ofFloat(null, "alpha", 1f, 0f).apply {
+            interpolator =
+                Interpolators.clampToProgress(
+                    LINEAR,
+                    TRANSITION_DELAY.toFloat() / TRANSITION_DEFAULT_DURATION,
+                    (TRANSITION_DELAY + TRANSITION_FADE_OUT_DURATION).toFloat() /
+                        TRANSITION_DEFAULT_DURATION,
+                )
+        }
+    private val disappearingScaleAnimator =
+        ObjectAnimator.ofFloat(null, SCALE_PROPERTY, 1f, 0f).apply { interpolator = EMPHASIZED }
+
+    private val translateXPinningAnimator =
+        ObjectAnimator.ofFloat(
+            null,
+            object : FloatProperty<View>("translateXPinning") {
+                override fun setValue(view: View, value: Float) {
+                    view.pinningTranslationX.value = value
+                }
+
+                override fun get(view: View): Float = view.pinningTranslationX.value
+            },
+            0f,
+            1f,
+        )
+
+    /**
+     * Propagates [INDEX_TASKBAR_PINNING_ANIM] `translateX` to icons in [TaskbarView] containers.
+     *
+     * [CHANGE_APPEARING] and [CHANGE_DISAPPEARING] on the root view occur due to a child being
+     * added or removed. If the child is an icon (e.g. app icon, divider, etc.), the total number of
+     * icons across Taskbar and its containers may have changed. In this case, `translateX` is
+     * recalculated per icon. This animator ensures the resulting `translateX` changes within
+     * containers, where the transition did not happen, smoothly animate.
+     */
+    private val containerIconsTranslateXPinningAnimator =
+        ObjectAnimator.ofObject(
+            null as View?, // Needed to call correct overload; a few do not take in a target.
+            object :
+                Property<View, FloatArray>(
+                    FloatArray::class.java,
+                    "containerIconsTranslateXPinning",
+                ) {
+                override fun get(view: View): FloatArray {
+                    return if (view is TaskbarIconsContainer) {
+                        view.children.map { it.pinningTranslationX.value }.toList().toFloatArray()
+                    } else {
+                        FloatArray(0)
+                    }
+                }
+
+                override fun set(view: View, values: FloatArray) {
+                    if (view is TaskbarIconsContainer) {
+                        for ((i, v) in values.withIndex()) view[i].pinningTranslationX.value = v
+                    }
+                }
+            },
+            { fraction, start, end ->
+                if (start.size != end.size) {
+                    FloatArray(0)
+                } else {
+                    FloatArray(start.size) { Utilities.mapRange(fraction, start[it], end[it]) }
+                }
+            },
+            FloatArray(0),
+        )
+
+    /** Creates a [LayoutTransition] for the root [TaskbarView]. */
+    fun createForTaskbarView(): LayoutTransition = create(isRootView = true)
+
+    /** Creates a [LayoutTransition] for an icon container in Taskbar. */
+    fun createForTaskbarContainer(): LayoutTransition = create(isRootView = false)
+
+    private fun create(isRootView: Boolean): LayoutTransition {
+        val layoutTransition = LayoutTransition()
+        layoutTransition.setDuration(TRANSITION_DEFAULT_DURATION)
+        layoutTransition.addTransitionListener(
+            object : TransitionListener {
+                override fun startTransition(
+                    transition: LayoutTransition,
+                    container: ViewGroup,
+                    view: View,
+                    type: Int,
+                ) {
+                    if (type == APPEARING) {
+                        view.alpha = 0f
+                        view.scaleX = 0f
+                        view.scaleY = 0f
+                    }
+                }
+
+                override fun endTransition(
+                    transition: LayoutTransition,
+                    container: ViewGroup,
+                    view: View,
+                    type: Int,
+                ) = Unit
+            }
+        )
+        for (listener in transitionListeners) layoutTransition.addTransitionListener(listener)
+
+        // Appearing.
+        val appearingSet = AnimatorSet()
+        appearingSet.playTogether(appearingAlphaAnimator, appearingScaleAnimator)
+        layoutTransition.setAnimator(APPEARING, appearingSet)
+        layoutTransition.setStartDelay(APPEARING, TRANSITION_DELAY)
+
+        // Disappearing.
+        val disappearingSet = AnimatorSet()
+        disappearingSet.playTogether(disappearingAlphaAnimator, disappearingScaleAnimator)
+        layoutTransition.setAnimator(DISAPPEARING, disappearingSet)
+
+        // Change transitions.
+        val changeSet =
+            AnimatorSet().apply {
+                playTogether(
+                    layoutTransition.getAnimator(CHANGE_APPEARING),
+                    translateXPinningAnimator,
+                )
+                if (isRootView) play(containerIconsTranslateXPinningAnimator)
+            }
+
+        // Change appearing.
+        layoutTransition.setAnimator(CHANGE_APPEARING, changeSet)
+        layoutTransition.setInterpolator(CHANGE_APPEARING, EMPHASIZED)
+
+        // Change disappearing.
+        layoutTransition.setAnimator(CHANGE_DISAPPEARING, changeSet)
+        layoutTransition.setInterpolator(CHANGE_DISAPPEARING, EMPHASIZED)
+        layoutTransition.setStartDelay(CHANGE_DISAPPEARING, TRANSITION_DELAY)
+
+        return layoutTransition
+    }
+
+    companion object {
+        private const val TRANSITION_DELAY = 50L
+        const val TRANSITION_DEFAULT_DURATION = 500L
+        private const val TRANSITION_FADE_IN_DURATION = 167L
+        private const val TRANSITION_FADE_OUT_DURATION = 83L
+
+        private val View.pinningTranslationX: MultiPropertyFactory<*>.MultiProperty
+            get() {
+                return (this as Reorderable)
+                    .translateDelegate
+                    .getTranslationX(INDEX_TASKBAR_PINNING_ANIM)
+            }
+    }
+}

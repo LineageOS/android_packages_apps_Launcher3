@@ -32,7 +32,6 @@ import static com.android.launcher3.icons.IconNormalizer.ICON_VISIBLE_AREA_FACTO
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;
-import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.Resources;
@@ -1450,14 +1449,6 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         iconLayoutBoundsWidth -= mAllAppsButtonTranslationOffset;
 
         return iconLayoutBoundsWidth;
-    }
-
-    @Override
-    public void setLayoutTransition(LayoutTransition transition) {
-        super.setLayoutTransition(transition);
-        if (mHotseatIconsContainer != null) {
-            mHotseatIconsContainer.setLayoutTransition(transition);
-        }
     }
 
     /**
