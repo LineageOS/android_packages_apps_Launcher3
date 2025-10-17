@@ -24,6 +24,7 @@ import static android.window.DesktopModeFlags.ENABLE_TASKBAR_OVERFLOW;
 import static com.android.launcher3.AbstractFloatingView.TYPE_ALL;
 import static com.android.launcher3.AbstractFloatingView.TYPE_REBIND_SAFE;
 import static com.android.launcher3.LauncherState.ALL_APPS;
+import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -88,28 +89,32 @@ public final class TaskbarOverlayController {
         @Override
         public void onTaskMovedToFront(int taskId) {
             // New front task will be below existing overlay, so move out of the way.
-            hideWindowOnTaskStackChange();
+            TASKBAR_UI_THREAD.execute(this::hideWindowOnTaskStackChange);
         }
 
         @Override
         public void onTaskStackChanged() {
-            // The other callbacks are insufficient for All Apps, because there are many cases where
-            // it can relaunch the same task already behind it. However, this callback needs to be a
-            // no-op when only EDU is shown, because going between the EDU steps invokes this
-            // callback.
-            if (mControllers.getSharedState() != null
-                    && mControllers.getSharedState().allAppsVisible) {
-                hideWindowOnTaskStackChange();
-            }
+            TASKBAR_UI_THREAD.execute(() -> {
+                // The other callbacks are insufficient for All Apps, because there are many cases
+                // where it can relaunch the same task already behind it. However, this callback
+                // needs to be a no-op when only EDU is shown, because going between the EDU steps
+                // invokes this callback.
+                if (mControllers.getSharedState() != null
+                        && mControllers.getSharedState().allAppsVisible) {
+                    hideWindowOnTaskStackChange();
+                }
+            });
         }
 
         private void hideWindowOnTaskStackChange() {
-            // A task was launched while overlay window was open, so stash Taskbar.
-            mControllers.taskbarStashController.updateAndAnimateTransientTaskbar(
-                    /* stash = */ true,
-                    /* shouldBubblesFollow = */ !mBubbleShowRequested
-            );
-            hideWindow();
+            TASKBAR_UI_THREAD.execute(() -> {
+                // A task was launched while overlay window was open, so stash Taskbar.
+                mControllers.taskbarStashController.updateAndAnimateTransientTaskbar(
+                        /* stash = */ true,
+                        /* shouldBubblesFollow = */ !mBubbleShowRequested
+                );
+                hideWindow();
+            });
         }
     };
 
