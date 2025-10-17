@@ -82,6 +82,7 @@ import com.android.launcher3.model.ModelWriter;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.TaskItemInfo;
 import com.android.launcher3.taskbar.bubbles.BubbleBarController;
+import com.android.launcher3.taskbar.bubbles.BubbleBarViewController;
 import com.android.launcher3.taskbar.bubbles.BubbleControllers;
 import com.android.launcher3.taskbar.customization.TaskbarAllAppsButtonContainer;
 import com.android.launcher3.taskbar.customization.TaskbarDividerContainer;
@@ -212,6 +213,10 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
                 if (enableTaskbarPinning() && mBubbleControllers != null) {
                     mControllers.navbarButtonsViewController.onLayoutsUpdated();
                     adjustTaskbarXForBubbleBar();
+                    BubbleBarViewController bbvc = mBubbleControllers.bubbleBarViewController;
+                    if (bbvc.isExpanded()) {
+                        bbvc.adjustTaskbarToBubbleBarState(/* isBubbleBarExpanded = */ true);
+                    }
                 }
                 updateTaskbarIconsActualBounds();
             };
