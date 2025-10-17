@@ -35,7 +35,7 @@ class HomeScreenFilesNoOpProvider : HomeScreenFilesProvider {
     override fun moveToHomeScreen(uriList: List<Uri>): List<CompletableFuture<Boolean>> =
         uriList.map { CompletableFuture.supplyAsync { false } }
 
-    override fun moveToTrash(uri: Uri) {}
+    override fun delete(uri: Uri, permanent: Boolean) {}
 
     override fun query(): Lazy<Map<Uri, HomeScreenFile>> = lazyOf(emptyMap())
 }

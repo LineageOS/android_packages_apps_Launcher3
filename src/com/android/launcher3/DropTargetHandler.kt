@@ -8,6 +8,8 @@ import com.android.launcher3.DropTarget.DragObject
 import com.android.launcher3.LauncherConstants.ActivityCodes
 import com.android.launcher3.SecondaryDropTarget.DeferredOnComplete
 import com.android.launcher3.dragndrop.DragLayer
+import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider
+import com.android.launcher3.homescreenfiles.isFileSystemItem
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.LauncherAppWidgetInfo
@@ -80,19 +82,20 @@ class DropTargetHandler(launcher: Launcher) {
             if (pageItem.container == LauncherSettings.Favorites.CONTAINER_DESKTOP)
                 IntSet.wrap(pageItem.screenId)
             else mLauncher.workspace.currentPageScreenIds
+        val onDismissed = Runnable {
+            if (item.isFileSystemItem()) {
+                HomeScreenFilesProvider.INSTANCE.get(mLauncher.asContext())
+                    .delete(requireNotNull(requireNotNull(item.intent).data), permanent = true)
+            }
+            mLauncher.modelWriter.commitDelete()
+        }
         val onUndoClicked = Runnable {
             mLauncher.setPagesToBindSynchronously(pageIds)
             mLauncher.modelWriter.abortDelete()
             mLauncher.statsLogManager.logger().log(LauncherEvent.LAUNCHER_UNDO)
         }
 
-        Snackbar.show(
-            mLauncher,
-            R.string.item_removed,
-            R.string.undo,
-            mLauncher.modelWriter::commitDelete,
-            onUndoClicked,
-        )
+        Snackbar.show(mLauncher, R.string.item_removed, R.string.undo, onDismissed, onUndoClicked)
     }
 
     fun onAccessibilityDelete(view: View?, item: ItemInfo) {

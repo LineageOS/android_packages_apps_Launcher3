@@ -282,12 +282,25 @@ class HomeScreenFilesProviderTest {
     @Test
     fun testMoveToTrash() {
         val uri = Uri.parse("content://media/external_primary/file/1")
-        provider.moveToTrash(uri)
+        provider.delete(uri, permanent = false)
 
         verify(contentResolver, times(1))
             .update(
                 eq(uri),
                 argThat { x -> x.containsKey(IS_TRASHED) && x.get(IS_TRASHED) == "1" },
+                eq("$RELATIVE_PATH = ? AND $IS_TRASHED = ?"),
+                eq(arrayOf(HOME_SCREEN_FOLDER_RELATIVE_PATH, "0")),
+            )
+    }
+
+    @Test
+    fun testDeletePermanently() {
+        val uri = Uri.parse("content://media/external_primary/file/1")
+        provider.delete(uri, permanent = true)
+
+        verify(contentResolver, times(1))
+            .delete(
+                eq(uri),
                 eq("$RELATIVE_PATH = ? AND $IS_TRASHED = ?"),
                 eq(arrayOf(HOME_SCREEN_FOLDER_RELATIVE_PATH, "0")),
             )

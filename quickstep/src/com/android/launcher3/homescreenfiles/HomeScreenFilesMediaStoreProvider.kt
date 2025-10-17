@@ -233,20 +233,31 @@ class HomeScreenFilesMediaStoreProvider(
         return success
     }
 
-    override fun moveToTrash(uri: Uri) {
+    override fun delete(uri: Uri, permanent: Boolean) {
         runAsync(
                 {
-                    context.contentResolver.update(
-                        uri,
-                        ContentValues().apply { put(IS_TRASHED, MEDIA_STORE_VALUE_TRUE) },
-                        QUERY_DEFAULT_SELECTION,
-                        QUERY_DEFAULT_SELECTION_ARGS,
-                    )
+                    if (permanent) {
+                        context.contentResolver.delete(
+                            uri,
+                            QUERY_DEFAULT_SELECTION,
+                            QUERY_DEFAULT_SELECTION_ARGS,
+                        )
+                    } else {
+                        context.contentResolver.update(
+                            uri,
+                            ContentValues().apply { put(IS_TRASHED, MEDIA_STORE_VALUE_TRUE) },
+                            QUERY_DEFAULT_SELECTION,
+                            QUERY_DEFAULT_SELECTION_ARGS,
+                        )
+                    }
                 },
                 executorService,
             )
             .exceptionally {
-                Log.e(TAG, "Unable to move a single file or folder to trash", it)
+                val message =
+                    if (permanent) "Unable to permanently delete a single file or folder"
+                    else "Unable to move a single file or folder to trash"
+                Log.e(TAG, message, it)
                 null
             }
     }
