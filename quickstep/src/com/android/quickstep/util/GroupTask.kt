@@ -15,11 +15,15 @@
  */
 package com.android.quickstep.util
 
+import android.content.Context
 import android.os.UserHandle
 import com.android.launcher3.icons.BitmapInfo
+import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.AppPairInfo
 import com.android.launcher3.model.data.TaskItemInfo
+import com.android.launcher3.model.data.WorkspaceItemFactory
 import com.android.launcher3.model.data.WorkspaceItemInfo
+import com.android.launcher3.views.ActivityContext
 import com.android.quickstep.views.TaskViewType
 import com.android.systemui.shared.recents.model.Task
 import com.android.wm.shell.shared.split.SplitBounds
@@ -70,7 +74,8 @@ abstract class GroupTask(
 }
 
 /** A [Task] container that must contain exactly one task in the recent tasks list. */
-class SingleTask(task: Task) : GroupTask(listOf(task), task.key.displayId, TaskViewType.SINGLE) {
+class SingleTask(task: Task) :
+    GroupTask(listOf(task), task.key.displayId, TaskViewType.SINGLE), WorkspaceItemFactory {
 
     val task: Task
         get() = tasks[0]
@@ -94,6 +99,21 @@ class SingleTask(task: Task) : GroupTask(listOf(task), task.key.displayId, TaskV
     }
 
     override fun hashCode() = super.hashCode()
+
+    override fun makeWorkspaceItem(context: Context): WorkspaceItemInfo? {
+        val activityContext: ActivityContext = ActivityContext.lookupContext(context)
+        val allApps: Array<AppInfo> = activityContext.activityComponent.appsStore.apps
+        val taskUser = UserHandle.of(task.key.userId)
+        val taskComponentName = task.key.component
+
+        val foundAppInfo =
+            allApps.firstOrNull { it.user == taskUser && it.targetComponent == taskComponentName }
+                ?: allApps.firstOrNull {
+                    it.user == taskUser && it.targetPackage == taskComponentName.packageName
+                }
+
+        return foundAppInfo?.makeWorkspaceItem(context)
+    }
 }
 
 /**
