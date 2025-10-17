@@ -36,19 +36,14 @@ import com.android.launcher3.R
 import com.android.launcher3.concurrent.annotations.Background
 import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.taskbar.TaskbarActivityContext
+import com.android.launcher3.util.ListenableRef
+import com.android.launcher3.util.MutableListenableRef
+import com.android.quickstep.cuebar.data.ActionModel
+import com.android.quickstep.cuebar.data.IconModel
 import com.android.quickstep.cuebar.logger.AmbientCueLogger
-import com.android.systemui.plugins.cuebar.ActionModel
-import com.android.systemui.plugins.cuebar.IconModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.PrintWriter
 import java.util.concurrent.Executor
@@ -57,33 +52,30 @@ import javax.inject.Inject
 /** Source of truth for ambient actions and visibility of their system space. */
 interface AmbientCueRepository {
     /** Chips that should be visible on the UI. */
-    val actions: StateFlow<List<ActionModel>>
-
-    /** If the root view is attached to the WindowManager. */
-    val isRootViewAttached: StateFlow<Boolean>
+    val actions: ListenableRef<List<ActionModel>>
 
     /** If IME is visible or not. */
-    val isImeVisible: StateFlow<Boolean>
+    val isImeVisible: ListenableRef<Boolean>
 
     /** If the UI is occluded. (Hard to determine globally from Launcher) */
-    val isOccludedBySystemUi: StateFlow<Boolean>
+    val isOccludedBySystemUi: ListenableRef<Boolean>
 
     /** If the UI is deactivated, such as closed by user or not used for a long period. */
-    val isDeactivated: MutableStateFlow<Boolean>
+    val isDeactivated: MutableListenableRef<Boolean>
 
     /** If the taskbar is fully visible and not stashed. */
-    val isTaskBarVisible: MutableStateFlow<Boolean>
+    val isTaskBarVisible: MutableListenableRef<Boolean>
 
     /** True if in gesture nav mode, false when in 3-button navbar. */
-    val isGestureNav: MutableStateFlow<Boolean>
+    val isGestureNav: MutableListenableRef<Boolean>
 
-    val recentsButtonPosition: MutableStateFlow<Rect?>
+    val recentsButtonPosition: MutableListenableRef<Rect?>
 
     /* If AmbientCue is enabled. */
-    val isAmbientCueEnabled: StateFlow<Boolean>
+    val isAmbientCueEnabled: ListenableRef<Boolean>
 
     /* The timeout for Ambient Cue to disappear. */
-    val ambientCueTimeoutMs: StateFlow<Int>
+    val ambientCueTimeoutMs: ListenableRef<Int>
 
     fun updateActions(newActions: List<ActionModel>)
     fun connectToSmartspace()
@@ -105,10 +97,10 @@ class AmbientCueRepositoryImpl
     private val autofillManager: AutofillManager? =
         context.getSystemService(AutofillManager::class.java)
 
-    private val _actions = MutableStateFlow<List<ActionModel>>(emptyList())
-    override val actions: StateFlow<List<ActionModel>> = _actions.asStateFlow()
+    private val _actions = MutableListenableRef<List<ActionModel>>(emptyList())
+    override val actions: ListenableRef<List<ActionModel>> = _actions
 
-    override val isDeactivated = MutableStateFlow(false)
+    override val isDeactivated = MutableListenableRef(false)
 
     /**
      * The [RunningTaskInfo] for the task that is currently in the foreground. Updated whenever a
@@ -116,56 +108,23 @@ class AmbientCueRepositoryImpl
      */
     private var frontRunningTask: RunningTaskInfo? = null
 
-    override val isTaskBarVisible = MutableStateFlow(true)
-    override val isGestureNav = MutableStateFlow(context.isGestureNav)
-    override val recentsButtonPosition = MutableStateFlow<Rect?>(null)
+    // These need to be updated from outside, e.g., by CuebarController
+    override val isTaskBarVisible = MutableListenableRef(true)
+    override val isGestureNav = MutableListenableRef(context.isGestureNav)
+    override val recentsButtonPosition = MutableListenableRef<Rect?>(null)
 
-    private val _isImeVisible = MutableStateFlow(false)
-    override val isImeVisible: StateFlow<Boolean> = _isImeVisible.asStateFlow()
-    private val _isOccludedBySystemUi = MutableStateFlow(false)
-    override val isOccludedBySystemUi: StateFlow<Boolean> = _isOccludedBySystemUi.asStateFlow()
+    // IME and Occlusion are hard to track from Launcher for other apps.
+    private val _isImeVisible = MutableListenableRef(false)
+    override val isImeVisible: ListenableRef<Boolean> = _isImeVisible
 
+    private val _isOccludedBySystemUi = MutableListenableRef(false)
+    override val isOccludedBySystemUi: ListenableRef<Boolean> = _isOccludedBySystemUi
 
-    val targetTaskId: MutableStateFlow<Int> = MutableStateFlow(INVALID_TASK_ID)
-    var isSessionStarted = false
+    private val _isAmbientCueEnabled = MutableListenableRef(isAmbientCueSettingEnabled())
+    override val isAmbientCueEnabled: ListenableRef<Boolean> = _isAmbientCueEnabled
 
-    private val _isAmbientCueEnabled = MutableStateFlow(isAmbientCueSettingEnabled())
-    override val isAmbientCueEnabled: StateFlow<Boolean> = _isAmbientCueEnabled.asStateFlow()
-
-    private val _ambientCueTimeoutMs = MutableStateFlow(getAmbientCueTimeoutMs())
-    override val ambientCueTimeoutMs: StateFlow<Int> = _ambientCueTimeoutMs.asStateFlow()
-
-    override val isRootViewAttached: StateFlow<Boolean> =
-        combine(isDeactivated, actions, isAmbientCueEnabled) {
-                isDeactivated,
-                actions,
-                isAmbientCueEnabled ->
-            actions.isNotEmpty() &&
-                    isAmbientCueEnabled &&
-                    !isDeactivated
-        }
-            .onEach { isAttached ->
-                if (isAttached && !isSessionStarted) {
-                    isSessionStarted = true
-                    var maCount = 0
-                    var mrCount = 0
-                    val packageName = frontRunningTask?.baseIntent?.component?.packageName ?: ""
-                    actions.value.forEach { action ->
-                        when (action.actionType) {
-                            MA_ACTION_TYPE_NAME -> maCount++
-                            MR_ACTION_TYPE_NAME -> mrCount++
-                            else -> {}
-                        }
-                    }
-                    ambientCueLogger.setPackageName(packageName)
-                    ambientCueLogger.setAmbientCueDisplayStatus(maCount, mrCount)
-                }
-            }
-            .stateIn(
-                scope = backgroundScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = false,
-            )
+    private val _ambientCueTimeoutMs = MutableListenableRef(getAmbientCueTimeoutMs())
+    override val ambientCueTimeoutMs: ListenableRef<Int> = _ambientCueTimeoutMs
 
     private var smartspaceSession: SmartspaceSession? = null
     private var smartspaceJob: Job? = null
@@ -307,7 +266,7 @@ class AmbientCueRepositoryImpl
     }
 
     override fun updateActions(newActions: List<ActionModel>) {
-        _actions.value = newActions
+        _actions.dispatchValue(newActions)
     }
 
     private fun isAmbientCueSettingEnabled(): Boolean {
@@ -331,7 +290,6 @@ class AmbientCueRepositoryImpl
 
     override fun dump(pw: PrintWriter, prefix: String) {
         pw.println("$prefix AmbientCueRepositoryImpl:")
-        pw.println("$prefix   isRootViewAttached: ${isRootViewAttached.value}")
         pw.println("$prefix   isDeactivated: ${isDeactivated.value}")
         pw.println("$prefix   isImeVisible: ${isImeVisible.value} (STUBBED)")
         pw.println("$prefix   isOccludedBySystemUi: ${isOccludedBySystemUi.value} (STUBBED)")

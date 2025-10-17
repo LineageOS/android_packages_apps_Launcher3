@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,9 +46,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.window.core.layout.WindowSizeClass
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
-import com.android.quickstep.cuebar.ui.utils.AmbientCueAnimationState
+import com.android.launcher3.widgetpicker.ui.rememberViewModel
 import com.android.quickstep.cuebar.ui.compose.NavBarPill
 import com.android.quickstep.cuebar.ui.compose.ShortPill
+import com.android.quickstep.cuebar.ui.utils.AmbientCueAnimationState
 import com.android.quickstep.cuebar.ui.viewmodel.ActionViewModel
 import com.android.quickstep.cuebar.ui.viewmodel.AmbientCueViewModel
 import com.android.quickstep.cuebar.ui.viewmodel.PillStyleViewModel
@@ -58,16 +58,17 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun AmbientCueContainer(
-    viewModel: AmbientCueViewModel,
+    ambientCueViewModelFactory: AmbientCueViewModel.Factory,
     onShouldInterceptTouches: (Boolean, Rect?) -> Unit,
     modifier: Modifier = Modifier,
     onAnimationStateChange: (Int, AmbientCueAnimationState) -> Unit,
 ) {
+    val viewModel = rememberViewModel("AmbientCueContainer") { ambientCueViewModelFactory.create() }
 
     val visible = viewModel.isVisible
     val expanded = viewModel.isExpanded
-    val actions by viewModel.actions.collectAsState()
-    val pillStyle by viewModel.pillStyle.collectAsState()
+    val actions = viewModel.actions
+    val pillStyle = viewModel.pillStyle
 
     LaunchedEffect(expanded) {
         if (expanded) {

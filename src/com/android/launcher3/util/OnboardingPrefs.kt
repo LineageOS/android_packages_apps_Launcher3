@@ -80,6 +80,13 @@ object OnboardingPrefs {
     @JvmField
     val HOTSEAT_LONGPRESS_TIP_SEEN = backedUpItem("launcher.hotseat_longpress_tip_seen", false)
 
+    @JvmField
+    val AMBIENT_CUE_FIRST_TIME_SHOWN_AT =
+        backedUpItem("ambient_cue_show_first_time_onboarding", -1L)
+
+    @JvmField
+    val AMBIENT_CUE_LONG_PRESS_SEEN = backedUpItem("ambient_cue_show_long_press_onboarding", true)
+
     @JvmField val TASKBAR_SEARCH_EDU_SEEN = backedUpItem("launcher.taskbar_search_edu_seen", false)
 
     @JvmField val TASKBAR_SEEN_EDU_FLAGS = backedUpItem("launcher.taskbar_seen_edu_flags", 0)

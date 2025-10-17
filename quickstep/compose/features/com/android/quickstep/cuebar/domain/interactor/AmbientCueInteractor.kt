@@ -18,9 +18,9 @@ package com.android.quickstep.cuebar.domain.interactor
 
 
 import android.graphics.Rect
+import com.android.launcher3.util.ListenableRef
+import com.android.quickstep.cuebar.data.ActionModel
 import com.android.quickstep.cuebar.data.repository.AmbientCueRepository
-import com.android.systemui.plugins.cuebar.ActionModel
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 /**
@@ -34,46 +34,43 @@ class AmbientCueInteractor @Inject constructor(
 ) {
 
     /**
-     * Flow of actions to be displayed in the Cuebar.
+     * ListenableRef of actions to be displayed in the Cuebar.
      */
-    val actions: Flow<List<ActionModel>> = ambientCueRepository.actions
+    val actions: ListenableRef<List<ActionModel>> = ambientCueRepository.actions
 
     /**
-     * Flow indicating if the root view for the cuebar is attached or should be.
-     * In the Launcher context, this might represent visibility or enablement.
+     * ListenableRef indicating if the Input Method Editor (keyboard) is visible.
      */
-    val isRootViewAttached: Flow<Boolean> = ambientCueRepository.isRootViewAttached
+    val isImeVisible: ListenableRef<Boolean> = ambientCueRepository.isImeVisible
 
     /**
-     * Flow indicating if the Input Method Editor (keyboard) is visible.
+     * ListenableRef indicating if the Cuebar is occluded by other system UI elements.
      */
-    val isImeVisible: Flow<Boolean> = ambientCueRepository.isImeVisible
+    val isOccludedBySystemUi: ListenableRef<Boolean> = ambientCueRepository.isOccludedBySystemUi
 
     /**
-     * Flow indicating if the Cuebar is occluded by other system UI elements.
-     * This logic might need significant adaptation in Launcher.
+     * ListenableRef providing the timeout duration for the Ambient Cue.
      */
-    val isOccludedBySystemUi: Flow<Boolean> = ambientCueRepository.isOccludedBySystemUi
+    val ambientCueTimeoutMs: ListenableRef<Int> = ambientCueRepository.ambientCueTimeoutMs
 
     /**
-     * Flow providing the timeout duration for the Ambient Cue.
+     * ListenableRef indicating if gesture navigation is enabled.
      */
-    val ambientCueTimeoutMs: Flow<Int> = ambientCueRepository.ambientCueTimeoutMs
+    val isGestureNav: ListenableRef<Boolean> = ambientCueRepository.isGestureNav
 
     /**
-     * Flow indicating if gesture navigation is enabled.
+     * ListenableRef indicating if the Taskbar is fully visible and not stashed.
      */
-    val isGestureNav: Flow<Boolean> = ambientCueRepository.isGestureNav
+    val isTaskBarVisible: ListenableRef<Boolean> = ambientCueRepository.isTaskBarVisible
 
     /**
-     * Flow indicating if the Taskbar is fully visible and not stashed.
+     * ListenableRef providing the position of the recents button (in 3-button nav).
      */
-    val isTaskBarVisible: Flow<Boolean> = ambientCueRepository.isTaskBarVisible
+    val recentsButtonPosition: ListenableRef<Rect?> = ambientCueRepository.recentsButtonPosition
 
-    /**
-     * Flow providing the position of the recents button (in 3-button nav).
-     */
-    val recentsButtonPosition: Flow<Rect?> = ambientCueRepository.recentsButtonPosition
+    val isDeactivated: ListenableRef<Boolean> = ambientCueRepository.isDeactivated
+
+    val isAmbientCueEnabled: ListenableRef<Boolean> = ambientCueRepository.isAmbientCueEnabled
 
     /**
      * Sets the deactivated state of the Ambient Cue.
@@ -81,6 +78,6 @@ class AmbientCueInteractor @Inject constructor(
      * @param isDeactivated True to deactivate, false to potentially reactivate.
      */
     fun setDeactivated(isDeactivated: Boolean) {
-        ambientCueRepository.isDeactivated.value = isDeactivated
+        ambientCueRepository.isDeactivated.dispatchValue(isDeactivated)
     }
 }
