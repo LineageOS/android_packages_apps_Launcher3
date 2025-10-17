@@ -43,6 +43,7 @@ import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.spy
 import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.any
+import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.times
@@ -66,7 +67,7 @@ class OseWidgetViewTest {
 
     private val widgetInfo = WidgetUtils.findWidgetProvider(false)
     private val remoteView = RemoteViews(widgetInfo.provider.packageName, 0)
-    private val mockProviderInfo = MutableListenableRef<AppWidgetProviderInfo>(widgetInfo)
+    private val mockProviderInfo = MutableListenableRef<AppWidgetProviderInfo?>(widgetInfo)
     private val mockRemoteViews = MutableListenableRef(remoteView)
     private val capturedRunnables = mutableListOf<Runnable>()
 
@@ -87,13 +88,15 @@ class OseWidgetViewTest {
 
         doReturn(mockProviderInfo).whenever(oseWidgetManager).providerInfo
         doReturn(mockRemoteViews).whenever(oseWidgetManager).views
-        doAnswer { invocation ->
-            capturedRunnables.add(invocation.getArgument(0))
-        }.whenever(closeActionList).add(any())
+        doAnswer { invocation -> capturedRunnables.add(invocation.getArgument(0)) }
+            .whenever(closeActionList)
+            .add(any())
         doAnswer {
-            capturedRunnables.forEach(Runnable::run)
-            capturedRunnables.clear()
-        }.whenever(closeActionList).executeAllAndClear()
+                capturedRunnables.forEach(Runnable::run)
+                capturedRunnables.clear()
+            }
+            .whenever(closeActionList)
+            .executeAllAndClear()
     }
 
     @Test
@@ -115,6 +118,18 @@ class OseWidgetViewTest {
 
         verify(mVut).setAppWidget(INVALID_APPWIDGET_ID, newWidgetInfo)
         verify(mVut, times(1)).updateAppWidget(remoteView)
+    }
+
+    @Test
+    fun when_providerInfo_changesToNull() {
+        mVut.attachedToWindow()
+        verify(mVut).setAppWidget(INVALID_APPWIDGET_ID, widgetInfo)
+
+        mockProviderInfo.dispatchValue(null)
+
+        verify(mVut, times(1)).setAppWidget(INVALID_APPWIDGET_ID, widgetInfo)
+        // Verify that setAppWidget calls is followed by broken remoteView call.
+        verify(mVut, atLeastOnce()).updateAppWidget(any())
     }
 
     @Test
@@ -151,7 +166,7 @@ class OseWidgetViewTest {
     @Test
     fun when_remoteView_changes_after_view_detachedFromWindow() {
         mVut.attachedToWindow()
-        verify(mVut, times(1)).updateAppWidget(remoteView)
+        verify(mVut, times(2)).updateAppWidget(any())
         mVut.detachedFromWindow()
         verify(mVut.closeActions, times(2)).executeAllAndClear()
 
@@ -159,13 +174,13 @@ class OseWidgetViewTest {
         val newRemoteView = RemoteViews(newWidgetInfo.provider.packageName, 0)
         mockRemoteViews.dispatchValue(newRemoteView)
         // updateAppWidget is not called since view is detached even though remoteView changes
-        verify(mVut, times(1)).updateAppWidget(any())
+        verify(mVut, times(2)).updateAppWidget(any())
 
         val anotherWidgetInfo = WidgetUtils.findWidgetProvider(false)
         val anotherRemoteView = RemoteViews(anotherWidgetInfo.provider.packageName, 0)
         mockRemoteViews.dispatchValue(anotherRemoteView)
         // updateAppWidget is not called since view is detached even though remoteView changes
-        verify(mVut, times(1)).updateAppWidget(any())
+        verify(mVut, times(2)).updateAppWidget(any())
     }
 
     @Test

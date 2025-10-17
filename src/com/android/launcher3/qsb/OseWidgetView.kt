@@ -73,21 +73,25 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         closeActions.executeAllAndClear()
         // We use INVALID_APPWIDGET_ID because appWidgetId is not tracked in OseWidgetView. Instead
         // it is managed by OseWidgetManager and QsbAppWidgetHost.
-        Log.i(
-            TAG,
-            "providerInfo= " +
-                oseWidgetManager.providerInfo.value +
-                " view = " +
-                oseWidgetManager.views.value,
-        )
+
         closeActions.add(
             oseWidgetManager.providerInfo.forEach(MAIN_EXECUTOR) {
                 setAppWidget(INVALID_APPWIDGET_ID, it)
+                // We will get valid updateAppWidget remoteview call from OseWidgetManager again.
+                // This is only for resetting the remoteviews using a broken remote view.
+                updateAppWidget(RemoteViews(context.packageName, 0))
                 tag = getTagInfo(it)
+                Log.i(TAG, "setAppWidget providerInfo= " + it)
             }::close
         )
         closeActions.add(
-            oseWidgetManager.views.forEach(MAIN_EXECUTOR, { updateAppWidget(it) })::close
+            oseWidgetManager.views.forEach(
+                MAIN_EXECUTOR,
+                {
+                    updateAppWidget(it)
+                    Log.i(TAG, "updateAppWidget view= " + it)
+                },
+            )::close
         )
     }
 
