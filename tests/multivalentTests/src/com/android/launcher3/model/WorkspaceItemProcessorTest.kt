@@ -34,6 +34,7 @@ import android.util.LongSparseArray
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.Flags
 import com.android.launcher3.Flags.FLAG_ENABLE_SUPPORT_FOR_ARCHIVING
+import com.android.launcher3.Flags.enableFilesOnHomeScreenDecoupledInit
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherSettings.Favorites
 import com.android.launcher3.LauncherSettings.Favorites.APPWIDGET_ID
@@ -68,11 +69,12 @@ import com.android.launcher3.icons.CacheableShortcutInfo
 import com.android.launcher3.icons.IconCache
 import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.IconRequestInfo
-import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.model.data.ItemInfoWithIcon
 import com.android.launcher3.model.data.LauncherAppWidgetInfo
 import com.android.launcher3.model.data.LauncherAppWidgetInfo.FLAG_UI_NOT_READY
 import com.android.launcher3.model.data.WorkspaceItemCoordinates
 import com.android.launcher3.model.data.WorkspaceItemInfo
+import com.android.launcher3.model.data.WorkspaceItemInfo.FLAG_DISABLED_FILE_SYSTEM_NOT_READY
 import com.android.launcher3.model.data.WorkspaceItemInfo.FLAG_RESTORED_ICON
 import com.android.launcher3.model.data.WorkspaceItemInfo.FLAG_RESTORE_STARTED
 import com.android.launcher3.shortcuts.ShortcutKey
@@ -85,6 +87,8 @@ import com.android.launcher3.widget.LauncherAppWidgetProviderInfo
 import com.android.launcher3.widget.WidgetInflater
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.atomic.AtomicBoolean
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -191,7 +195,8 @@ class WorkspaceItemProcessorTest {
         unlockedUsers: LongSparseArray<Boolean> = mUnlockedUsersArray,
         installingPkgs: HashMap<PackageUserKey, PackageInstaller.SessionInfo> = mInstallingPkgs,
         allDeepShortcuts: MutableList<CacheableShortcutInfo> = mAllDeepShortcuts,
-        homeScreenFiles: Lazy<Map<Uri, HomeScreenFile>> = lazyOf(mapOf()),
+        homeScreenFiles: CompletableFuture<Map<Uri, HomeScreenFile>> =
+            CompletableFuture.completedFuture(mapOf()),
     ): WorkspaceItemProcessor {
         // Create the loader cursor after all the stubbing is set up as accessing the dagger graph
         // objects initiates the creation of the full tree which starts various API calls on
@@ -765,6 +770,7 @@ class WorkspaceItemProcessorTest {
                 isDirectory = false,
                 user = Process.myUserHandle(),
             ),
+            /*isFileSystemReady=*/ true,
             /*isRestoreFromBackup=*/ true,
         )
     }
@@ -780,7 +786,40 @@ class WorkspaceItemProcessorTest {
                 isDirectory = true,
                 user = Process.myUserHandle(),
             ),
+            /*isFileSystemReady=*/ true,
             /*isRestoreFromBackup=*/ true,
+        )
+    }
+
+    @Test
+    fun disablesFilesSystemFileItemTypeWhenNotRestoringFromBackup() {
+        testRestoresFileSystemItemIfNotRestoringFromBackup(
+            ITEM_TYPE_FILE_SYSTEM_FILE,
+            HomeScreenFile(
+                uri = Uri.parse("content://media/external_primary/file/1"),
+                displayName = "folder_a",
+                mimeType = null,
+                isDirectory = true,
+                user = Process.myUserHandle(),
+            ),
+            /*isFileSystemReady=*/ false,
+            /*isRestoreFromBackup=*/ false,
+        )
+    }
+
+    @Test
+    fun disablesFilesSystemFolderItemTypeWhenNotRestoringFromBackup() {
+        testRestoresFileSystemItemIfNotRestoringFromBackup(
+            ITEM_TYPE_FILE_SYSTEM_FOLDER,
+            HomeScreenFile(
+                uri = Uri.parse("content://media/external_primary/file/1"),
+                displayName = "folder_a",
+                mimeType = null,
+                isDirectory = true,
+                user = Process.myUserHandle(),
+            ),
+            /*isFileSystemReady=*/ false,
+            /*isRestoreFromBackup=*/ false,
         )
     }
 
@@ -795,6 +834,7 @@ class WorkspaceItemProcessorTest {
                 isDirectory = false,
                 user = Process.myUserHandle(),
             ),
+            /*isFileSystemReady=*/ true,
             /*isRestoreFromBackup=*/ false,
         )
     }
@@ -810,6 +850,7 @@ class WorkspaceItemProcessorTest {
                 isDirectory = true,
                 user = Process.myUserHandle(),
             ),
+            /*isFileSystemReady=*/ true,
             /*isRestoreFromBackup=*/ false,
         )
     }
@@ -817,10 +858,19 @@ class WorkspaceItemProcessorTest {
     private fun testRestoresFileSystemItemIfNotRestoringFromBackup(
         itemType: Int,
         homeScreenFile: HomeScreenFile,
+        isFileSystemReady: Boolean,
         isRestoreFromBackup: Boolean,
     ) {
         // Given
-        val homeScreenFiles = lazyOf(mapOf(homeScreenFile.uri to homeScreenFile))
+        val homeScreenFiles =
+            mock<CompletableFuture<Map<Uri, HomeScreenFile>>>().also { mock ->
+                val isDone = AtomicBoolean(isFileSystemReady)
+                whenever(mock.isDone).thenAnswer { isDone.get() }
+                whenever(mock.get()).thenAnswer {
+                    isDone.set(true)
+                    mapOf(homeScreenFile.uri to homeScreenFile)
+                }
+            }
         realCursorRow
             .add(ITEM_TYPE, itemType)
             .add(RESTORED, if (isRestoreFromBackup) FLAG_RESTORED_ICON else 0)
@@ -844,15 +894,19 @@ class WorkspaceItemProcessorTest {
                 )
             verify(mockCursor, times(0)).checkAndAddItem(any(), any(), anyOrNull())
         } else {
-            val itemCaptor = argumentCaptor<ItemInfo>()
+            val itemCaptor = argumentCaptor<ItemInfoWithIcon>()
             verify(mockCursor).markRestored()
             verify(mockCursor).checkAndAddItem(itemCaptor.capture(), any(), anyOrNull())
             with(itemCaptor.firstValue) {
                 assertThat(itemType).isEqualTo(itemType)
                 assertThat(title).isEqualTo(homeScreenFile.displayName)
-                assertThat(intent!!.data).isEqualTo(homeScreenFile.uri)
-                assertThat(intent!!.flags)
-                    .isEqualTo(HomeScreenFilesUtils.LAUNCH_INTENT_DEFAULT_FLAGS)
+                with(intent!!) {
+                    assertThat(data).isEqualTo(homeScreenFile.uri)
+                    assertThat(flags).isEqualTo(HomeScreenFilesUtils.LAUNCH_INTENT_DEFAULT_FLAGS)
+                }
+                val disabled = (runtimeStatusFlags and FLAG_DISABLED_FILE_SYSTEM_NOT_READY) != 0
+                val expectedDisabled = enableFilesOnHomeScreenDecoupledInit() && !isFileSystemReady
+                assertThat(disabled).isEqualTo(expectedDisabled)
             }
         }
     }
@@ -891,7 +945,7 @@ class WorkspaceItemProcessorTest {
         val uri1 = Uri.parse("content://media/external_primary/file/1")
         val uri2 = Uri.parse("content://media/external_primary/file/2")
         val homeScreenFiles =
-            lazyOf(
+            CompletableFuture.completedFuture(
                 mapOf(
                     uri1 to
                         HomeScreenFile(
@@ -941,6 +995,11 @@ class WorkspaceItemProcessorTest {
         val items = itemProcessorUnderTest.finalizeData(mockModelDelegate, mockModelDbController)
 
         // Then
+        if (enableFilesOnHomeScreenDecoupledInit()) {
+            assertThat(items.size()).isEqualTo(0)
+            return
+        }
+
         assertThat(items.size()).isEqualTo(2)
 
         with(items.get(0)) {

@@ -28,6 +28,7 @@ import android.text.TextUtils
 import android.util.Log
 import android.util.LongSparseArray
 import com.android.launcher3.Flags
+import com.android.launcher3.Flags.enableFilesOnHomeScreenDecoupledInit
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherSettings.Favorites
 import com.android.launcher3.Utilities.qsbOnFirstScreen
@@ -48,6 +49,7 @@ import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.IconRequestInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.ItemInfoWithIcon
+import com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_DISABLED_FILE_SYSTEM_NOT_READY
 import com.android.launcher3.model.data.LauncherAppWidgetInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.pm.PackageInstallInfo
@@ -65,6 +67,7 @@ import com.android.launcher3.util.PackageUserKey
 import com.android.launcher3.widget.LauncherAppWidgetProviderInfo
 import com.android.launcher3.widget.WidgetInflater
 import com.android.launcher3.widget.util.WidgetSizeHandler
+import java.util.concurrent.CompletableFuture
 
 /**
  * This items is used by LoaderTask to process items that have been loaded from the Launcher's DB.
@@ -93,7 +96,7 @@ class WorkspaceItemProcessor(
     private val allDeepShortcuts: MutableList<CacheableShortcutInfo>,
     private val widgetSizeHandler: WidgetSizeHandler,
     private val workspaceItemSpaceFinder: WorkspaceItemSpaceFinder,
-    private val homeScreenFiles: Lazy<Map<Uri, HomeScreenFile>>,
+    private val homeScreenFiles: CompletableFuture<Map<Uri, HomeScreenFile>>,
 ) {
 
     private val loadedItems = IntSparseArrayMap<ItemInfo>()
@@ -642,7 +645,17 @@ class WorkspaceItemProcessor(
                         addFlags(HomeScreenFilesUtils.LAUNCH_INTENT_DEFAULT_FLAGS)
                     }
             }
-        if (homeScreenFiles.value.containsKey(item.intent.data)) {
+
+        // NOTE: File system items may not yet be available when initialization is decoupled from
+        // the loader task. When that is the case, it signals that the file system is not yet ready
+        // and so any file item shortcuts should be disabled. Once the file system is ready a model
+        // update task is enqueued to reconcile file system and workspace item states.
+        val isDelayedInit = enableFilesOnHomeScreenDecoupledInit() && !homeScreenFiles.isDone
+        if (isDelayedInit) {
+            item.runtimeStatusFlags = item.runtimeStatusFlags or FLAG_DISABLED_FILE_SYSTEM_NOT_READY
+        }
+
+        if (isDelayedInit || homeScreenFiles.get().containsKey(item.intent.data)) {
             c.markRestored()
             c.checkAndAddItem(item, loadedItems, memoryLogger)
         } else {
@@ -658,6 +671,13 @@ class WorkspaceItemProcessor(
      * restore in [processFileSystemItem].
      */
     private fun addRemainingFileSystemItems(modelDbController: ModelDbController) {
+        // NOTE: When file items on home screen initialization is decoupled from the loader task,
+        // any remaining file system items will be restored in a model update task that is scheduled
+        // once the file system is ready.
+        if (enableFilesOnHomeScreenDecoupledInit()) {
+            return
+        }
+
         val knownDesktopContainerItems =
             ArrayList(loadedItems.filter { it.container == Favorites.CONTAINER_DESKTOP })
         val alreadyRestoredFileSystemItems =
@@ -683,7 +703,7 @@ class WorkspaceItemProcessor(
             )
         }
 
-        for ((uri, file) in homeScreenFiles.value) {
+        for ((uri, file) in homeScreenFiles.get()) {
             if (alreadyRestoredFileSystemItems.contains(uri)) {
                 continue
             }

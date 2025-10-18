@@ -36,6 +36,7 @@ import android.provider.MediaStore.VOLUME_EXTERNAL_PRIMARY
 import android.util.Log
 import androidx.annotation.WorkerThread
 import androidx.core.database.getStringOrNull
+import com.android.launcher3.Flags.enableFilesOnHomeScreenDecoupledInit
 import com.android.launcher3.R
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider.Companion.HOME_SCREEN_FOLDER_RELATIVE_PATH
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider.FileChange
@@ -48,7 +49,6 @@ import java.util.concurrent.CompletableFuture.runAsync
 import java.util.concurrent.CompletableFuture.supplyAsync
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
-import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 
 /** MediaStore-based implementation of [HomeScreenFilesProvider]. */
@@ -60,6 +60,8 @@ class HomeScreenFilesMediaStoreProvider(
     lifecycle: DaggerSingletonTracker,
 ) : HomeScreenFilesProvider {
     override val fileChanges = MutableListenableStream<FileChange>()
+
+    override val updates = MutableListenableStream<HomeScreenFilesUpdate>()
 
     // Future that completes when the external storage directory mounts.
     private val externalStorageDirectoryMountedFuture = CompletableFuture<Void>()
@@ -88,7 +90,24 @@ class HomeScreenFilesMediaStoreProvider(
                         }
                     }
 
-                    if (uri.hasIdSegment()) {
+                    if (!uri.hasIdSegment()) {
+                        return
+                    }
+
+                    if (enableFilesOnHomeScreenDecoupledInit()) {
+                        val uriAlias = inProgressMoveToHomeScreenUriAliases.remove(uri)
+                        updates.dispatchValue(
+                            HomeScreenFilesUpdate(
+                                query(uri).thenApply { file ->
+                                    buildMap {
+                                        put(uri, file)
+                                        uriAlias?.run { put(this, file) }
+                                    }
+                                },
+                                Process.myUserHandle(),
+                            )
+                        )
+                    } else {
                         fileChanges.dispatchValue(
                             FileChange(
                                 uri,
@@ -105,6 +124,9 @@ class HomeScreenFilesMediaStoreProvider(
         context.contentResolver.registerContentObserver(uri, true, observer)
         lifecycle.addCloseable { context.contentResolver.unregisterContentObserver(observer) }
     }
+
+    override fun onReady(): CompletableFuture<Void> =
+        externalStorageDirectoryMountedFuture.thenRunAsync({}, executorService)
 
     override fun canCreateNewFolder(): Boolean =
         externalStorageDirectoryMountedFuture.isDone &&
@@ -263,7 +285,7 @@ class HomeScreenFilesMediaStoreProvider(
     }
 
     /** Returns all file items presented in [HOME_SCREEN_FOLDER_RELATIVE_PATH]. */
-    override fun query(): Lazy<Map<Uri, HomeScreenFile>> {
+    override fun query(): CompletableFuture<Map<Uri, HomeScreenFile>> {
         val query: Callable<Map<Uri, HomeScreenFile>> = Callable {
             val result = mutableMapOf<Uri, HomeScreenFile>()
             try {
@@ -308,6 +330,13 @@ class HomeScreenFilesMediaStoreProvider(
             return@Callable result
         }
 
+        // NOTE: When home screen files initialization is decoupled, we don't need to wait for the
+        // external storage directory to be mounted as [#query()] will not be called until the
+        // home screen files provider is ready to interact with the MediaStore.
+        if (enableFilesOnHomeScreenDecoupledInit()) {
+            return supplyAsync(query::call, executorService)
+        }
+
         // TODO(b/444563784): Implement more robust solution that doesn't block loader task thread.
         // NOTE: The external storage directory may not have been mounted when [#query()] is called
         // since it is called early in the both the user session and application lifecycles. Giving
@@ -315,26 +344,23 @@ class HomeScreenFilesMediaStoreProvider(
         // block the loader task thread, though the clock starts when the loader task is created,
         // not when it is run. This will be replaced with a more robust solution that does not block
         // the loader task prior to feature launch.
-        val future =
-            externalStorageDirectoryMountedFuture
-                .orTimeout(500, TimeUnit.MILLISECONDS)
-                .handleAsync(
-                    { _, throwable ->
-                        if (throwable != null) {
-                            Log.e(TAG, "External storage directory not mounted", throwable)
-                            emptyMap()
-                        } else {
-                            query.call()
-                        }
-                    },
-                    executorService,
-                )
-
-        return lazy { future.get() }
+        return externalStorageDirectoryMountedFuture
+            .orTimeout(500, TimeUnit.MILLISECONDS)
+            .handleAsync(
+                { _, throwable ->
+                    if (throwable != null) {
+                        Log.e(TAG, "External storage directory not mounted", throwable)
+                        emptyMap()
+                    } else {
+                        query.call()
+                    }
+                },
+                executorService,
+            )
     }
 
     /** Queries a single file from MediaStore by its URI. */
-    private fun query(uri: Uri): Future<HomeScreenFile?> {
+    private fun query(uri: Uri): CompletableFuture<HomeScreenFile?> {
         if (!isExternalPrimaryMediaStoreUri(uri)) {
             return CompletableFuture.completedFuture(null)
         }

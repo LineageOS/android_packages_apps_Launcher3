@@ -668,3 +668,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+    name: "enable_files_on_home_screen_decoupled_init"
+    namespace: "launcher"
+    description: "Enables decoupling of files on home screen initialization from the loader task"
+    bug: "444563784"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
