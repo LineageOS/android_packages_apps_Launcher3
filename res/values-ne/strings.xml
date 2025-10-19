@@ -107,14 +107,12 @@
     <string name="widget_settings" msgid="5280157748464495511">"सेटिङ"</string>
     <string name="pin_to_taskbar" msgid="5914002252642242332">"टास्कबारमा पिन गर्नुहोस्"</string>
     <string name="unpin_from_taskbar" msgid="1025883383457627426">"टास्कबारबाट अनपिन गर्नुहोस्"</string>
-    <!-- no translation found for no_room_in_taskbar (6885243748717395469) -->
-    <skip />
+    <string name="no_room_in_taskbar" msgid="6885243748717395469">"टास्कबारमा ठाउँ छैन"</string>
     <string name="app_added_to_taskbar" msgid="6348755169793615171">"टास्कबारमा एप हालियो"</string>
     <string name="app_removed_from_taskbar" msgid="3471754847898675396">"टास्कबारबाट एप हटाइयो"</string>
-    <!-- no translation found for remove_system_shortcut_label (3991201411148073972) -->
-    <skip />
+    <string name="remove_system_shortcut_label" msgid="3991201411148073972">"हटाउनुहोस्"</string>
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"खोल्नुहोस्"</string>
-    <!-- no translation found for home_screen_files_context_menu_move_to_trash_label (1145655050674479315) -->
+    <!-- no translation found for home_screen_files_context_menu_delete_permanently_label (8660443461874174185) -->
     <skip />
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"सर्टकट स्थापना गर्नेहोस्"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"प्रयोगकर्ताको हस्तक्षेप बिना एउटा एपलाई सर्टकटमा थप्नको लागि अनुमति दिनुहोस्।"</string>
@@ -130,7 +128,7 @@
     <string name="paginate_left" msgid="7915437358451360433">"बायाँतिर पेजिनेट गर्नुहोस्"</string>
     <string name="paginate_right" msgid="6701038155201975878">"दायाँतिर पेजिनेट गर्नुहोस्"</string>
     <string name="disabled_app_label" msgid="6673129024321402780">"असक्षम पारिएको <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="dotted_app_label" msgid="1865617679843363410">"{count,plural, =1{{app_name} सँग सम्बन्धित # सूचना छ}other{{app_name} सँग सम्बन्धित # वटा सूचना छन्}}"</string>
+    <string name="dotted_app_label" msgid="1865617679843363410">"{count,plural, =1{{app_name} सँग सम्बन्धित # नोटिफिकेसन छ}other{{app_name} सँग सम्बन्धित # वटा नोटिफिकेसन छन्}}"</string>
     <string name="hotseat_prediction_content_description" msgid="7680403232742709704">"पूर्वानुमान गरिएको एप: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="default_scroll_format" msgid="7475544710230993317">"पृष्ठ %2$d को %1$d"</string>
     <string name="workspace_scroll_format" msgid="8458889198184077399">"होम स्क्रिन %1$d को %2$d"</string>
