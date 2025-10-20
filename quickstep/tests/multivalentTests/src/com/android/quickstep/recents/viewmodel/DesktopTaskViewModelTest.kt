@@ -16,10 +16,12 @@
 
 package com.android.quickstep.recents.viewmodel
 
+import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
 import android.content.ComponentName
 import android.content.Intent
 import android.graphics.Rect
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.internal.policy.DesktopModeCompatPolicy
 import com.android.launcher3.util.coroutines.DispatcherProvider
 import com.android.quickstep.recents.data.DesktopTileBackgroundRepository
 import com.android.quickstep.recents.domain.model.DesktopLayoutConfig
@@ -52,6 +54,7 @@ class DesktopTaskViewModelTest {
     private val getObscuredDesktopTaskIdsUseCase = mock<GetObscuredDesktopTaskIdsUseCase>()
     private val desktopTileBackgroundRepository = mock<DesktopTileBackgroundRepository>()
     private val dispatcherProvider = mock<DispatcherProvider>()
+    private val desktopModeCompatPolicy = mock<DesktopModeCompatPolicy>()
 
     private lateinit var systemUnderTest: DesktopTaskViewModel
 
@@ -63,6 +66,7 @@ class DesktopTaskViewModelTest {
                 getObscuredDesktopTaskIdsUseCase,
                 desktopTileBackgroundRepository,
                 dispatcherProvider,
+                desktopModeCompatPolicy,
             )
     }
 
@@ -285,21 +289,26 @@ class DesktopTaskViewModelTest {
 
     @Test
     fun organizeDesktopTasks_transparentActivityTransparentActivityStackTaskInDesktop_isHidden() {
+        val transparentTask =
+            createTask(
+                TRANSPARENT_TASK_ID,
+                TRANSPARENT_TASK_BOUNDS,
+                isActivityStackTransparent = true,
+                windowingMode = WINDOWING_MODE_FULLSCREEN,
+            )
         whenever(organizeDesktopTasksUseCase.invoke(any(), any(), any(), isNull()))
             .thenReturn(listOf(ORGANIZED_RENDERED_TASK_BOUNDS_DATA))
-
-        systemUnderTest.bind(
-            createDesktopTask(
-                listOf(
-                    createTask(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1),
-                    createTask(
-                        TRANSPARENT_TASK_ID,
-                        TRANSPARENT_TASK_BOUNDS,
-                        isTopActivityTransparent = true,
-                        isActivityStackTransparent = true,
-                    ),
+        whenever(
+                desktopModeCompatPolicy.isTransparentOverlay(
+                    transparentTask.key.isActivityStackTransparent,
+                    transparentTask.key.numActivities,
+                    transparentTask.key.windowingMode,
                 )
             )
+            .thenReturn(true)
+
+        systemUnderTest.bind(
+            createDesktopTask(listOf(createTask(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1), transparentTask))
         )
         systemUnderTest.organizeDesktopTasks(layoutConfig = TEST_LAYOUT_CONFIG)
 
@@ -340,7 +349,7 @@ class DesktopTaskViewModelTest {
                     createTask(
                         SEMI_TRANSPARENT_TASK_ID,
                         SEMI_TRANSPARENT_TASK_BOUNDS,
-                        isTopActivityTransparent = true,
+                        windowingMode = WINDOWING_MODE_FULLSCREEN,
                     ),
                 )
             )
@@ -378,22 +387,22 @@ class DesktopTaskViewModelTest {
     private fun createTask(
         id: Int,
         appBounds: Rect,
-        isTopActivityTransparent: Boolean = false,
         isMinimized: Boolean = false,
         isActivityStackTransparent: Boolean = false,
+        windowingMode: Int = 0,
     ) =
         Task().apply {
             key =
                 TaskKey(
                     id,
-                    /* windowingMode= */ 0,
+                    windowingMode,
                     Intent(),
                     ComponentName("", ""),
                     /* userId */ 0,
                     /* lastActiveTime */ 0,
                 )
             this.appBounds = appBounds
-            this.key.isTopActivityTransparent = isTopActivityTransparent
+            this.key.numActivities = 1
             this.key.isActivityStackTransparent = isActivityStackTransparent
             this.isMinimized = isMinimized
         }

@@ -138,6 +138,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
             getObscuredDesktopTaskIdsUseCase = RecentsDependencies.get(context),
             desktopTileBackgroundRepository = RecentsDependencies.get(context),
             dispatcherProvider = dispatcherProvider,
+            desktopModeCompatPolicy = RecentsDependencies.get(context),
         )
     private val coroutineScope: CoroutineScope = RecentsDependencies.get(context)
     private val wallpaperBackgroundFetchCoroutineJobs = mutableListOf<Job>()
