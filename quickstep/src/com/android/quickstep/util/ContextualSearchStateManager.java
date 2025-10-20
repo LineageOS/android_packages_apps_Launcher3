@@ -20,6 +20,7 @@ import static android.app.contextualsearch.ContextualSearchManager.ENTRYPOINT_SY
 import static android.app.contextualsearch.ContextualSearchManager.FEATURE_CONTEXTUAL_SEARCH;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.hardware.input.Flags.enableContextualSearchDesktopEntrypoints;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_LAUNCH_OMNI_SUCCESSFUL_SYSTEM_ACTION;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
@@ -144,6 +145,10 @@ public class ContextualSearchStateManager  {
     /** Whether ContextualSearchService invocation path is available. */
     @VisibleForTesting
     protected final boolean isContextualSearchIntentAvailable() {
+        if (mContext.getResources().getBoolean(R.bool.desktop_form_factor)
+                && !enableContextualSearchDesktopEntrypoints()) {
+            return false;
+        }
         return mIsContextualSearchIntentAvailable;
     }
 
