@@ -220,7 +220,7 @@ public class TaskbarModelCallbacks implements
         hotseatItemInfos = recentAppsController.updateHotseatItemInfos(hotseatItemInfos);
 
         final List<HandoffSuggestion> handoffSuggestions
-            = android.companion.Flags.enableTaskContinuity()
+            = android.companion.Flags.taskContinuity()
                 ? mControllers.taskbarHandoffController.getSuggestions()
                 : Collections.emptyList();
 
@@ -280,7 +280,7 @@ public class TaskbarModelCallbacks implements
     public void commitHandoffSuggestionsToUI() {
         // This API is only exposed to taskbar
         Preconditions.assertTaskbarUiThread();
-        if (!android.companion.Flags.enableTaskContinuity()) {
+        if (!android.companion.Flags.taskContinuity()) {
             return;
         }
 

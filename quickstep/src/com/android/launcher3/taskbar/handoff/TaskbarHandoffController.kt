@@ -18,6 +18,7 @@ package com.android.launcher3.taskbar.handoff
 
 import android.companion.datatransfer.continuity.RemoteTask
 import android.companion.datatransfer.continuity.TaskContinuityManager
+import android.companion.Flags.taskContinuity
 import android.os.Handler
 import android.util.Log
 import com.android.launcher3.taskbar.TaskbarActivityContext
@@ -53,7 +54,7 @@ class TaskbarHandoffController(val taskbarActivityContext: TaskbarActivityContex
     /** Starts the controller. */
     fun init(taskbarControllers: TaskbarControllers) {
         this.taskbarControllers = taskbarControllers
-        if (android.companion.Flags.enableTaskContinuity()) {
+        if (taskContinuity()) {
             taskContinuityManager =
                 taskbarActivityContext.applicationContext.getSystemService(
                     TaskContinuityManager::class.java
