@@ -23,6 +23,7 @@ import android.hardware.display.DisplayManager
 import android.util.ArrayMap
 import android.util.DisplayMetrics
 import android.view.Display
+import android.view.Display.DEFAULT_DISPLAY
 import android.view.Surface
 import androidx.test.annotation.UiThreadTest
 import androidx.test.filters.SmallTest
@@ -36,6 +37,7 @@ import com.android.launcher3.util.DisplayController.CHANGE_ROTATION
 import com.android.launcher3.util.DisplayController.DisplayInfoChangeListener
 import com.android.launcher3.util.window.CachedDisplayInfo
 import com.android.launcher3.util.window.WindowManagerProxy
+import com.google.common.truth.Truth.assertThat
 import dagger.BindsInstance
 import dagger.Component
 import kotlin.math.min
@@ -173,6 +175,91 @@ class DisplayControllerTest {
         displayController.onConfigurationChanged(configuration)
 
         verify(displayInfoChangeListener).onDisplayInfoChanged(any(), any(), eq(CHANGE_DENSITY))
+    }
+
+    @Test
+    fun isTablet_defaultDisplayTabletSize_returnsTrue() {
+        val bounds =
+            WindowBounds(
+                Rect(0, 0, WindowManagerProxy.MIN_TABLET_WIDTH, 800),
+                Rect(),
+                Surface.ROTATION_0
+            )
+        val info = setupInfoForTabletTest(bounds, DEFAULT_DISPLAY, 160)
+
+        assertThat(info.isTablet(bounds)).isTrue()
+    }
+
+    @Test
+    fun isTablet_defaultDisplayPhoneSize_returnsFalse() {
+        val bounds = WindowBounds(Rect(0, 0, 400, 800), Rect(), Surface.ROTATION_0)
+        val info = setupInfoForTabletTest(bounds, DEFAULT_DISPLAY, 160)
+
+        assertThat(info.isTablet(bounds)).isFalse()
+    }
+
+    @Test
+    fun isTablet_externalDisplayTabletSize_returnsTrue() {
+        val externalDisplayId = DEFAULT_DISPLAY + 1
+        val bounds =
+            WindowBounds(
+                Rect(0, 0, WindowManagerProxy.MIN_TABLET_WIDTH, 800),
+                Rect(),
+                Surface.ROTATION_0
+            )
+        val info = setupInfoForTabletTest(bounds, externalDisplayId, 160)
+
+        assertThat(info.isTablet(bounds)).isTrue()
+    }
+
+    @Test
+    fun isTablet_externalDisplayPhoneSize_returnsTrue() {
+        val externalDisplayId = DEFAULT_DISPLAY + 1
+        val bounds = WindowBounds(Rect(0, 0, 400, 800), Rect(), Surface.ROTATION_0)
+        val info = setupInfoForTabletTest(bounds, externalDisplayId, 160)
+
+        assertThat(info.isTablet(bounds)).isTrue()
+    }
+
+    /** Helper function to create a DisplayController.Info object. */
+    private fun setupInfoForTabletTest(
+        bounds: WindowBounds,
+        displayId: Int,
+        densityDpi: Int
+    ): DisplayController.Info {
+        val width = bounds.bounds.width()
+        val height = bounds.bounds.height()
+
+        // Mock display ID
+        whenever(display.displayId).thenReturn(displayId)
+
+        // Mock resources to reflect the desired size and density
+        val density = densityDpi / DisplayMetrics.DENSITY_DEFAULT.toFloat()
+        val testConfiguration =
+            Configuration(configuration).apply {
+                this.densityDpi = densityDpi
+                screenWidthDp = (width / density).toInt()
+                screenHeightDp = (height / density).toInt()
+            }
+        whenever(resources.configuration).thenReturn(testConfiguration)
+
+        // Mock WindowManagerProxy to return the specified bounds
+        val displayInfo = CachedDisplayInfo(Point(width, height), Surface.ROTATION_0)
+        whenever(windowManagerProxy.getDisplayInfo(any())).thenReturn(displayInfo)
+        val perDisplayBounds = ArrayMap<CachedDisplayInfo, List<WindowBounds>>()
+        perDisplayBounds[displayInfo] = listOf(bounds)
+        whenever(windowManagerProxy.estimateInternalDisplayBounds(any()))
+            .thenReturn(perDisplayBounds)
+        whenever(windowManagerProxy.getRealBounds(any(), any())).thenReturn(bounds)
+
+        // Create a new Info object with the mocked dependencies
+        return DisplayController.Info(
+            context,
+            false, // isDesktopFormFactor
+            windowManagerProxy,
+            windowManagerProxy.estimateInternalDisplayBounds(context),
+            DisplayMetrics.DENSITY_DEVICE_STABLE
+        )
     }
 }
 
