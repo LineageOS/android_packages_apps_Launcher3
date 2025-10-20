@@ -28,7 +28,6 @@ import com.android.launcher3.Hotseat;
 import com.android.launcher3.LauncherState;
 import com.android.launcher3.Workspace;
 import com.android.launcher3.states.StateAnimationConfig;
-import com.android.launcher3.touch.AllAppsSwipeController;
 import com.android.launcher3.uioverrides.QuickstepLauncher;
 import com.android.quickstep.util.RecentsAtomicAnimationFactory;
 import com.android.quickstep.views.RecentsView;
@@ -91,17 +90,5 @@ public class QuickstepAtomicAnimationFactory extends
             mHintToNormalDuration = (int) va.getDuration();
         }
         return mHintToNormalDuration;
-    }
-
-    @Override
-    protected void applyAllAppsToNormalConfig(@NonNull StateAnimationConfig config) {
-        super.applyAllAppsToNormalConfig(config);
-        AllAppsSwipeController.applyAllAppsToNormalConfig(getContainer(), config);
-    }
-
-    @Override
-    protected void applyNormalToAllAppsAnimConfig(@NonNull StateAnimationConfig config) {
-        super.applyNormalToAllAppsAnimConfig(config);
-        AllAppsSwipeController.applyNormalToAllAppsAnimConfig(getContainer(), config);
     }
 }

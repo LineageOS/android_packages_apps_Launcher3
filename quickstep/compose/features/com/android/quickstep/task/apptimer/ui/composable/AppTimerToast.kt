@@ -17,11 +17,6 @@
 package com.android.quickstep.task.apptimer.ui.composable
 
 import android.app.ActivityOptions
-import android.content.Context
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
@@ -32,7 +27,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Placeable
@@ -43,33 +37,29 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.android.launcher3.R
-import com.android.quickstep.task.apptimer.DurationFormatter
 import com.android.quickstep.task.apptimer.TaskAppTimerUiState
+import com.android.quickstep.task.apptimer.ViewModel
 import com.android.quickstep.task.apptimer.ui.composable.AppTimerToastDimensions.ICON_ONLY_WIDTH_RATIO_THRESHOLD
 import com.android.quickstep.task.apptimer.ui.composable.AppTimerToastDimensions.ICON_SHORT_TEXT_WIDTH_RATIO_THRESHOLD
-import java.time.Duration
 
 @Composable
-fun AppTimerToast(appTimerUiState: TaskAppTimerUiState, modifier: Modifier = Modifier) {
-    AnimatedVisibility(
-        visible = appTimerUiState is TaskAppTimerUiState.Timer,
-        enter = slideInVertically { it },
-        exit = slideOutVertically { it },
-    ) {
-        when (appTimerUiState) {
-            is TaskAppTimerUiState.Timer ->
-                ActiveTimerToast(appTimerUiState, onClick = appTimerUiState.onClick, modifier)
-            else -> {
-                /* Do nothing */
-            }
+fun AppTimerToast(
+    appTimerUiState: TaskAppTimerUiState,
+    viewModel: ViewModel<TaskAppTimerUiState>,
+    modifier: Modifier = Modifier,
+) {
+    when (appTimerUiState) {
+        is TaskAppTimerUiState.Timer -> ActiveTimerToast(viewModel, appTimerUiState, modifier)
+        else -> {
+            /* Do nothing */
         }
     }
 }
 
 @Composable
 private fun ActiveTimerToast(
+    viewModel: ViewModel<TaskAppTimerUiState>,
     appTimerUiState: TaskAppTimerUiState.Timer,
-    onClick: ((ActivityOptions, Context) -> Unit)?,
     modifier: Modifier = Modifier,
     iconTextSpacing: Dp = 4.dp,
 ) {
@@ -78,34 +68,31 @@ private fun ActiveTimerToast(
         modifier =
             modifier
                 .fillMaxWidth()
-                .height(dimensionResource(R.dimen.digital_wellbeing_toast_height))
-                .clickable(
-                    onClick = {
-                        onClick?.invoke(
-                            ActivityOptions.makeScaleUpAnimation(
-                                view,
-                                0,
-                                0,
-                                view.width,
-                                view.height,
-                            ),
-                            view.context,
-                        )
-                    }
-                ),
+                .height(dimensionResource(R.dimen.digital_wellbeing_toast_height)),
         shape = MaterialTheme.shapes.extraLarge,
+        onClick = {
+            viewModel.startActivityWithScaleUpAnimation(
+                ActivityOptions.makeScaleUpAnimation(view, 0, 0, view.width, view.height),
+                view.context,
+                appTimerUiState.taskPackageName,
+                appTimerUiState.taskDescription,
+            )
+        },
         color = MaterialTheme.colorScheme.secondaryFixed,
     ) {
-        CustomTimerToastLayout(appTimerUiState, iconTextSpacing, modifier)
+        CustomTimerToastLayout(viewModel, appTimerUiState, iconTextSpacing, modifier)
     }
 }
 
 @Composable
 private fun CustomTimerToastLayout(
+    viewModel: ViewModel<TaskAppTimerUiState>,
     appTimerUiState: TaskAppTimerUiState.Timer,
     iconTextSpacing: Dp,
     modifier: Modifier = Modifier,
 ) {
+    val formattedDuration =
+        viewModel.getFormattedDuration(appTimerUiState.timeRemaining, LocalContext.current)
     Layout(
         content = {
             Icon(
@@ -113,8 +100,8 @@ private fun CustomTimerToastLayout(
                 contentDescription = null,
                 modifier = Modifier.size(24.dp),
             )
-            FormattedTimeRemainingText(appTimerUiState.timeRemaining)
-            FullTimeRemainingText(appTimerUiState.timeRemaining)
+            FormattedTimeRemainingText(formattedDuration)
+            FullTimeRemainingText(formattedDuration)
         },
         modifier = modifier,
     ) { measurables, constraints ->
@@ -187,36 +174,20 @@ private fun Placeable.PlacementScope.layoutPlaceables(
 }
 
 @Composable
-private fun FormattedTimeRemainingText(timeRemaining: Duration) {
-    val formattedDuration =
-        DurationFormatter.format(
-            LocalContext.current,
-            timeRemaining,
-            R.string.shorter_duration_less_than_one_minute,
-        )
-
-    Text(
-        text = formattedDuration,
-        color = MaterialTheme.colorScheme.onSecondaryFixed,
-        style = MaterialTheme.typography.bodyMedium,
-    )
-}
+private fun FormattedTimeRemainingText(formattedDuration: String) =
+    TimeRemainingText(formattedDuration)
 
 @Composable
-private fun FullTimeRemainingText(timeRemaining: Duration) {
-    val formattedDuration =
-        DurationFormatter.format(
-            LocalContext.current,
-            timeRemaining,
-            R.string.shorter_duration_less_than_one_minute,
-        )
+private fun FullTimeRemainingText(formattedDuration: String) =
+    TimeRemainingText(stringResource(R.string.time_left_for_app, formattedDuration))
 
+@Composable
+private fun TimeRemainingText(text: String) =
     Text(
-        text = stringResource(R.string.time_left_for_app, formattedDuration),
+        text = text,
         color = MaterialTheme.colorScheme.onSecondaryFixed,
         style = MaterialTheme.typography.bodyMedium,
     )
-}
 
 private object AppTimerToastDimensions {
     // If the full text ("$icon $formattedDuration left today") takes a lot more space than is

@@ -47,7 +47,6 @@ import kotlinx.coroutines.flow.map
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class TaskViewModel(
-    private val taskViewType: TaskViewType,
     recentsViewData: RecentsViewData,
     private val getTaskUseCase: GetTaskUseCase,
     private val getSysUiStatusNavFlagsUseCase: GetSysUiStatusNavFlagsUseCase,
@@ -55,6 +54,7 @@ class TaskViewModel(
     private val getThumbnailPositionUseCase: GetThumbnailPositionUseCase,
     dispatcherProvider: DispatcherProvider,
 ) {
+    private lateinit var taskViewType: TaskViewType
     private val taskIds = MutableStateFlow(emptySet<Int>())
 
     private val taskModels =
@@ -110,8 +110,15 @@ class TaskViewModel(
             }
             .flowOn(dispatcherProvider.lightweightBackground)
 
-    fun bind(vararg taskId: TaskId) {
-        taskIds.value = taskId.toSet().also { Log.d(TAG, "bind: $it") }
+    fun bind(taskViewType: TaskViewType, vararg taskId: TaskId) {
+        this.taskViewType = taskViewType
+        taskIds.value = taskId.toSet()
+            .also { Log.d(TAG, "bind $this as $taskViewType to taskIds: $it") }
+    }
+
+    fun unbind() {
+        taskIds.value = emptySet()
+        Log.d(TAG, "unbind $this")
     }
 
     fun isThumbnailValid(

@@ -18,7 +18,6 @@ package com.android.launcher3.folder;
 
 import static com.android.launcher3.AbstractFloatingView.TYPE_ALL;
 import static com.android.launcher3.AbstractFloatingView.TYPE_FOLDER;
-import static com.android.launcher3.Flags.enableLauncherVisualRefresh;
 import static com.android.launcher3.folder.FolderGridOrganizer.createFolderGridOrganizer;
 
 import android.annotation.SuppressLint;
@@ -174,10 +173,6 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> implements Cli
         mViewsBound = true;
     }
 
-    void setCanAnnouncePageDescriptionForFolder(boolean canAnnounce) {
-        mCanAnnouncePageDescription = canAnnounce;
-    }
-
     private boolean canAnnouncePageDescriptionForFolder() {
         return mCanAnnouncePageDescription;
     }
@@ -312,8 +307,19 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> implements Cli
     }
 
     public void removeItem(View v) {
-        for (int i = getChildCount() - 1; i >= 0; i --) {
-            getPageAt(i).removeView(v);
+        if (v == null) {
+            return;
+        }
+        if (mFolder.getIsDragInProgress()) {
+            // A drag is in progress, so we shouldn't immediately reshuffle the folder.
+            for (int i = getChildCount() - 1; i >= 0; i--) {
+                getPageAt(i).removeView(v);
+            }
+        } else {
+            // This is a permanent removal, so rearrange the items immediately.
+            ArrayList<View> views = new ArrayList<>(mFolder.getIconsInReadingOrder());
+            views.remove(v);
+            arrangeChildren(views);
         }
     }
 
@@ -389,9 +395,7 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> implements Cli
 
         // Update footer
         mPageIndicator.setVisibility(getPageCount() > 1 ? View.VISIBLE : View.GONE);
-        if (enableLauncherVisualRefresh()) {
-            mFolder.onIndicatorVisibilityChanged();
-        }
+        mFolder.onIndicatorVisibilityChanged();
         // Set the gravity as LEFT or RIGHT instead of START, as START depends on the actual text.
         int horizontalGravity = getPageCount() > 1
                 ? (mIsRtl ? Gravity.RIGHT : Gravity.LEFT) : Gravity.CENTER_HORIZONTAL;

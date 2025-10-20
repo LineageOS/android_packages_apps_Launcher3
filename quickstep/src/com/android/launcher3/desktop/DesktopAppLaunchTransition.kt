@@ -29,6 +29,7 @@ import android.window.TransitionInfo
 import androidx.core.util.Supplier
 import com.android.app.animation.Interpolators
 import com.android.internal.jank.Cuj
+import com.android.launcher3.util.DisplayController
 import com.android.quickstep.RemoteRunnable
 import com.android.wm.shell.shared.animation.WindowAnimator
 import java.util.concurrent.Executor
@@ -45,6 +46,7 @@ class DesktopAppLaunchTransition
 constructor(
     // If context needs to become a property, it has to be application context to avoid memory leak.
     context: Context,
+    displayController: DisplayController,
     private val launchType: AppLaunchType,
     @Cuj.CujType private val cujType: Int,
     private val mainExecutor: Executor,
@@ -55,6 +57,7 @@ constructor(
         DesktopAppLaunchAnimatorHelper(
             // We need to pass application to avoid leak of activity.
             context.applicationContext,
+            displayController,
             launchType,
             cujType,
             transactionSupplier,

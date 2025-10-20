@@ -47,7 +47,6 @@
     <string name="hotseat_tip_gaps_filled" msgid="3035673010274223538">"रिकाम्या जागेवर जोडलेल्या अ‍ॅप सूचना"</string>
     <string name="hotsaet_tip_prediction_enabled" msgid="2233554377501347650">"अ‍ॅप सूचना सुरू केल्या आहेत"</string>
     <string name="hotsaet_tip_prediction_disabled" msgid="1506426298884658491">"अ‍ॅप सूचना बंद केल्या आहेत"</string>
-    <string name="hotseat_prediction_content_description" msgid="4582028296938078419">"पूर्वानुमान केलेले अ‍ॅप: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="gesture_tutorial_title" msgid="2750751261768388354">"जेश्चर नेव्हिगेशन ट्यूटोरियल"</string>
     <string name="gesture_tutorial_rotation_prompt_title" msgid="7537946781362766964">"तुमचे डिव्हाइस फिरवा"</string>
     <string name="gesture_tutorial_rotation_prompt" msgid="1664493449851960691">"कृपया जेश्चर नेव्हिगेशन ट्यूटोरियल पूर्ण करण्यासाठी तुमचे डिव्हाइस फिरवा"</string>
@@ -116,24 +115,29 @@
     <string name="toast_split_app_unsupported" msgid="2360229567007828914">"स्प्लिट स्क्रीन वापरण्यासाठी दुसरे ॲप निवडा"</string>
     <string name="blocked_by_policy" msgid="2071401072261365546">"अ‍ॅप किंवा तुमच्या संस्थेद्वारे ही क्रिया करण्याची अनुमती नाही"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"विजेटना सध्या सपोर्ट नाही, कृपया दुसरे अ‍ॅप निवडा"</string>
+    <string name="action_image_copy" msgid="6877540054727709339">"कॉपी करा"</string>
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"स्क्रीन फिरवा"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"टास्कबार स्क्रीनच्या तळापासून कसा दिसू लागतो आणि वापरात नसताना आपोआप कसा लपवला जातो हे दाखवणारे ॲनिमेशन"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"टॉगल वापरून तुमचा टास्कबार कसा पिन करायचा, जेणेकरून टास्कबार तुमच्या स्क्रीनच्या तळाशी कायमचा दृश्यमान राहतो हे दाखवणारे ॲनिमेशन"</string>
+    <string name="taskbar_edu_bubbles_animation_description" msgid="421866726938396813">"ड्रॅग जेश्चर वापरून टास्कबारवरून बबल कसा तयार करावा हे दाखवणारे अ‍ॅनिमेशन"</string>
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"उघडलेल्या अ‍ॅपच्या वर असलेल्या टास्कबारमधून अ‍ॅप ड्रॅग करून ड्रॉप करून स्प्लिट स्क्रीन कशी तयार करावी हे दाखवणारे ॲनिमेशन"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"तुमच्या डिव्हाइसवर सुचवलेली अ‍ॅप्स अ‍ॅक्सेस कशी करावी हे दाखवणारे अ‍ॅनिमेशन"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"अ‍ॅक्शन कीला स्‍पर्श करून धरून ठेवून आयटम असलेला भाग निवडून स्क्रीनवर आयटम कसा शोधावा हे दाखवणारे अ‍ॅनिमेशन"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"टास्कबारशी संबंधित माहिती"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"दोन ॲप्स एकत्र वापरण्यासाठी एक अ‍ॅप बाजूला ड्रॅग करा"</string>
+    <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"ते तरंगण्यासाठी तळाच्या कोपऱ्यामध्ये ड्रॅग करा"</string>
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"टास्कबार दाखवण्यासाठी थोडे हळू वरती स्वाइप करा"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"तुमच्या दिनक्रमावर आधारित ॲप सूचना मिळवा"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"टास्कबार पिन करण्यासाठी विभाजकावर प्रेस करून ठेवा"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"टास्कबार चा पुरेपूर वापर करा"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"टास्कबार नेहमी दाखवा"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"टास्कबार नेहमी तुमच्या स्क्रीनच्या तळाशी दाखवण्यासाठी, विभाजकाला स्पर्श करून धरून ठेवा"</string>
+    <string name="taskbar_edu_bubbles_standalone" msgid="4182824636656528043">"अ‍ॅप फ्लोट करण्यासाठी ते कोपऱ्यात ड्रॅग करा"</string>
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"तुमच्या स्क्रीनवरील गोष्टी शोधण्यासाठी अ‍ॅक्शन की स्पर्श करून धरून ठेवा"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"हे उत्पादन शोधण्याच्या हेतूसाठी तुमच्या स्क्रीनचा निवडक भाग वापरते. Google चे <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>गोपनीयता धोरण<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> आणि <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>सेवा अटी<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> लागू होतात."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"बंद करा"</string>
     <string name="taskbar_edu_done" msgid="6880178093977704569">"पूर्ण झाले"</string>
+    <string name="taskbar_edu_next" msgid="4007618274426775841">"पुढे"</string>
     <string name="taskbar_button_home" msgid="2151398979630664652">"होम"</string>
     <string name="taskbar_button_a11y" msgid="5241161324875094465">"अ‍ॅक्सेसिबिलिटी"</string>
     <string name="taskbar_button_back" msgid="8558862226461164514">"मागे जा"</string>
@@ -142,18 +146,12 @@
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"सूचना"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"क्विक सेटिंग्ज"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"टास्कबार"</string>
-    <string name="taskbar_a11y_shown_title" msgid="6842833581088937713">"टास्कबार दाखवलेला आहे"</string>
-    <string name="taskbar_a11y_shown_with_bubbles_left_title" msgid="4242431789851790046">"टास्कबार आणि डावे बबल दाखवले"</string>
-    <string name="taskbar_a11y_shown_with_bubbles_right_title" msgid="8219065376188180113">"टास्कबार आणि उजवे बबल लपवले"</string>
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"नेव्हिगेशन बार"</string>
     <string name="always_show_taskbar" msgid="3608801276107751229">"नेहमी टास्कबार दाखवा"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"नेव्हिगेशन मोड बदला"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"टास्कबार विभाजक"</string>
-    <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"अलीकडील इतर अ‍ॅप्स"</string>
-    <!-- no translation found for app_added_to_taskbar (1160433791917609063) -->
-    <skip />
-    <!-- no translation found for app_removed_from_taskbar (7887298201562912487) -->
-    <skip />
+    <string name="taskbar_recents_overflow_a11y_title" msgid="8005941062446304304">"अलीकडील इतर अ‍ॅप्स"</string>
+    <string name="taskbar_pinned_overflow_a11y_title" msgid="2314810718333302626">"इतर अ‍ॅप्स"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"सर्वात वरती/डावीकडे हलवा"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"तळाशी/उजवीकडे हलवा"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"बबल म्हणून अ‍ॅप उघडा"</string>

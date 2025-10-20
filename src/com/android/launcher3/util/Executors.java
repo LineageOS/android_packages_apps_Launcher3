@@ -18,11 +18,18 @@ package com.android.launcher3.util;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.THREAD_PRIORITY_FOREGROUND;
 
+import static com.android.launcher3.Flags.enableTaskbarUiThread;
+
 import android.os.Looper;
 import android.os.Process;
 
+import androidx.annotation.VisibleForTesting;
+
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
@@ -77,6 +84,12 @@ public class Executors {
     public static final LooperExecutor MAIN_EXECUTOR =
             new LooperExecutor(Looper.getMainLooper(), THREAD_PRIORITY_FOREGROUND);
 
+    public static final Executor IMMEDIATE_EXECUTOR = Runnable::run;
+
+    public static final Executor TASKBAR_UI_THREAD = enableTaskbarUiThread()
+            ? new LooperExecutor("TASKBAR_UI_THREAD", THREAD_PRIORITY_FOREGROUND)
+            : MAIN_EXECUTOR;
+
     /**
      * A background executor for using time sensitive actions where user is waiting for response.
      *
@@ -99,21 +112,7 @@ public class Executors {
             new LooperExecutor("DataThreadHelper", Process.THREAD_PRIORITY_DEFAULT);
 
     /**
-     * A background executor to preinflate views.
-     *
-     * @deprecated Prefer using an executor annotated from the
-     * {@link com.android.launcher3.concurrent} package.
-     */
-    public static final ExecutorService VIEW_PREINFLATION_EXECUTOR =
-            java.util.concurrent.Executors.newSingleThreadExecutor(
-                    new SimpleThreadFactory(
-                            "preinflate-allapps-icons", THREAD_PRIORITY_BACKGROUND));
-
-    /**
      * Executor used for running Launcher model related tasks (eg loading icons or updated db)
-     *
-     * @deprecated Prefer using an executor annotated from the
-     * {@link com.android.launcher3.concurrent} package.
      */
     public static final LooperExecutor MODEL_EXECUTOR = new LooperExecutor("launcher-loader");
 
@@ -126,6 +125,18 @@ public class Executors {
      */
     public static LooperExecutor getPackageExecutor(String packageName) {
         return PACKAGE_EXECUTORS.computeIfAbsent(packageName, LooperExecutor::new);
+    }
+
+    @VisibleForTesting
+    public static List<ExecutorService> getAllExecutorsForTesting() {
+        return Arrays.asList(
+                MODEL_EXECUTOR,
+                MAIN_EXECUTOR,
+                UI_HELPER_EXECUTOR,
+                DATA_HELPER_EXECUTOR,
+                THREAD_POOL_EXECUTOR,
+                ORDERED_BG_EXECUTOR
+        );
     }
 
     /**

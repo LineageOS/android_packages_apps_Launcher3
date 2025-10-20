@@ -43,8 +43,19 @@ import java.util.Map;
 public class SamplerRule implements TestRule {
     private static final int TOO_LONG_TEST_MS = 180000;
     private static final int SAMPLE_INTERVAL_MS = 3000;
-    private static final int MAX_THREADS_WITH_SAME_NAME = 10;
+    private static final int MAX_THREADS_WITH_SAME_NAME = 1;
     private static boolean sTooManyThreadsAssertionThrown = false;
+
+    // Individual thread limits.
+    private static final Map<String, Integer> THREAD_LIMITS = new HashMap<>();
+
+    static {
+        // System thread that we don't control.
+        THREAD_LIMITS.put("process reaper", 4);
+        // Temporarily having 2 OSEManager threads. The one in nexuslauncher will be deleted once
+        // the flag rollout is complete
+        THREAD_LIMITS.put("OSEManager", 2);
+    }
 
     private static Thread startThread(Description description) {
         Thread thread =
@@ -143,7 +154,8 @@ public class SamplerRule implements TestRule {
     }
 
     /**
-     * Checks if there are more than MAX_THREADS_WITH_SAME_NAME threads with the same name.
+     * Checks if there are more than a specified number of threads with the same name.
+     * It uses individual limits if defined, otherwise falls back to MAX_THREADS_WITH_SAME_NAME.
      * @return an error message string if the check fails, or null if it passes.
      */
     private String checkTooManyThreads() {
@@ -153,11 +165,15 @@ public class SamplerRule implements TestRule {
         }
 
         for (Map.Entry<String, Integer> e : threadNameCounts.entrySet()) {
-            if (e.getValue() > MAX_THREADS_WITH_SAME_NAME) {
+            final String threadName = e.getKey();
+            final int threadCount = e.getValue();
+            final int limit = THREAD_LIMITS.getOrDefault(threadName, MAX_THREADS_WITH_SAME_NAME);
+
+            if (threadCount > limit) {
                 return "Assertion failed: More than "
-                        + MAX_THREADS_WITH_SAME_NAME
-                        + " threads with the same name '" + e.getKey()
-                        + "'. Count: " + e.getValue();
+                        + limit
+                        + " threads with the same name '" + threadName
+                        + "'. Count: " + threadCount;
             }
         }
         return null;

@@ -78,6 +78,8 @@ data class WorkspaceProfile(
     val cellLayoutHeightSpecification: Int,
     val cellLayoutWidthSpecification: Int,
     val cellSize: Point,
+    val scale: Float,
+    val extraSpace: Int = 0,
 ) {
 
     fun getTotalWorkspacePadding(): Point =
@@ -94,7 +96,6 @@ data class WorkspaceProfile(
     fun calculateAndSetWorkspaceVerticalPadding(
         context: Context,
         inv: InvariantDeviceProfile,
-        extraSpace: Int,
     ): WorkspaceProfile {
         if (inv.devicePaddingId != ResourceUtils.INVALID_RESOURCE_HANDLE) {
             // Paddings were created assuming no scaling, so we first unscale the extra space.
@@ -526,6 +527,8 @@ data class WorkspaceProfile(
                         cellLayoutPaddingPx.right),
                 panelCount = panelCount,
                 cellSize = cellSize,
+                scale = 1f,
+                extraSpace = 0,
             )
         }
 
@@ -553,6 +556,7 @@ data class WorkspaceProfile(
             hotseatProfile: HotseatProfile,
             hotseatBarBottomSpacePx: Int,
             hotseatQsbSpace: Int,
+            hotseatBarSizePx: Int,
         ): WorkspaceProfile {
             // Icon scale should never exceed 1, otherwise pixellation may occur.
             val iconScale = min(1f, scale)
@@ -603,6 +607,7 @@ data class WorkspaceProfile(
                         hotseatProfile = hotseatProfile,
                         hotseatBarBottomSpacePx = hotseatBarBottomSpacePx,
                         hotseatQsbSpace = hotseatQsbSpace,
+                        hotseatBarSizePx = hotseatBarSizePx,
                     )
             }
         }

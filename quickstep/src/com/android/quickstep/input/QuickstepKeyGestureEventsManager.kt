@@ -27,33 +27,47 @@ import android.hardware.input.KeyGestureEvent.ACTION_GESTURE_COMPLETE
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER
+import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_REJECT_HOME_ON_EXTERNAL_DISPLAY
 import android.net.Uri
 import android.os.IBinder
 import android.provider.Settings
 import android.provider.Settings.Secure.USER_SETUP_COMPLETE
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import com.android.launcher3.dagger.ApplicationContext
+import com.android.launcher3.dagger.LauncherAppSingleton
+import com.android.launcher3.util.DaggerSingletonObject
+import com.android.launcher3.util.Executors.IMMEDIATE_EXECUTOR
+import com.android.launcher3.util.SafeCloseable
 import com.android.launcher3.util.SettingsCache
-import com.android.launcher3.util.SettingsCache.OnChangeListener
+import com.android.quickstep.OverviewCommandHelper
+import com.android.quickstep.dagger.QuickstepBaseAppComponent
 import com.android.quickstep.input.QuickstepKeyGestureEventsManager.OverviewGestureHandler.OverviewType.ALT_TAB
 import com.android.quickstep.input.QuickstepKeyGestureEventsManager.OverviewGestureHandler.OverviewType.UNDEFINED
 import com.android.window.flags.Flags
+import javax.inject.Inject
 
 /**
  * Manages subscription and unsubscription to launcher's key gesture events, e.g. all apps and
  * recents (incl. alt + tab).
  */
-class QuickstepKeyGestureEventsManager(private val context: Context) {
-    private val settingsCache = SettingsCache.INSTANCE[context]
-    @VisibleForTesting
-    val onUserSetupCompleteListener = OnChangeListener { isUserSetupCompleted = it }
+@LauncherAppSingleton
+class QuickstepKeyGestureEventsManager
+@Inject
+constructor(@ApplicationContext private val context: Context, settingsCache: SettingsCache) {
     private val inputManager = requireNotNull(context.getSystemService(InputManager::class.java))
+    private var onUserSetupCompleteSafeCloseable: SafeCloseable? = null
     private var allAppsPendingIntent: PendingIntent? = null
     private var overviewGestureHandler: OverviewGestureHandler? = null
-    private var isUserSetupCompleted: Boolean = settingsCache.getValue(USER_SETUP_COMPLETE_URI)
+    private var overviewCommandHelper: OverviewCommandHelper? = null
+    @Volatile private var isUserSetupCompleted: Boolean = false
 
     init {
-        settingsCache.register(USER_SETUP_COMPLETE_URI, onUserSetupCompleteListener)
+        onUserSetupCompleteSafeCloseable =
+            settingsCache.getListenableRef(USER_SETUP_COMPLETE_URI).forEach(IMMEDIATE_EXECUTOR) { v
+                ->
+                isUserSetupCompleted = v
+            }
     }
 
     @VisibleForTesting
@@ -77,6 +91,7 @@ class QuickstepKeyGestureEventsManager(private val context: Context) {
                 allAppsPendingIntent?.send()
             }
         }
+
     @VisibleForTesting
     val overviewKeyGestureEventHandler =
         object : KeyGestureEventHandler {
@@ -110,6 +125,29 @@ class QuickstepKeyGestureEventsManager(private val context: Context) {
                         )
                     }
                 }
+            }
+        }
+
+    @VisibleForTesting
+    val homeKeyGestureEventHandler =
+        object : KeyGestureEventHandler {
+            override fun handleKeyGestureEvent(event: KeyGestureEvent, focusedToken: IBinder?) {
+                if (!isManageKeyGesturesGrantedToRecents()) {
+                    return
+                }
+                if (!isUserSetupCompleted) {
+                    return
+                }
+
+                if (event.keyGestureType != KEY_GESTURE_TYPE_REJECT_HOME_ON_EXTERNAL_DISPLAY) {
+                    Log.e(TAG, "Ignore unsupported key gesture event type: ${event.keyGestureType}")
+                    return
+                }
+
+                overviewCommandHelper?.addCommand(
+                    OverviewCommandHelper.CommandType.HOME,
+                    event.displayId,
+                )
             }
         }
 
@@ -175,10 +213,41 @@ class QuickstepKeyGestureEventsManager(private val context: Context) {
         }
     }
 
+    fun registerHomeKeyGestureEvent(overviewCommandHelper: OverviewCommandHelper) {
+        if (!isManageKeyGesturesGrantedToRecents()) {
+            return
+        }
+        synchronized(this) {
+            if (this.overviewCommandHelper != null) {
+                Log.w(TAG, "Overview command helper has already been registered. Ignored.")
+                return
+            }
+            this.overviewCommandHelper = overviewCommandHelper
+            inputManager.registerKeyGestureEventHandler(
+                listOf(KEY_GESTURE_TYPE_REJECT_HOME_ON_EXTERNAL_DISPLAY),
+                homeKeyGestureEventHandler,
+            )
+        }
+    }
+
+    /** Unregisters the home key gesture events. */
+    @VisibleForTesting
+    fun unregisterHomeKeyGestureEvent() {
+        if (!isManageKeyGesturesGrantedToRecents()) {
+            return
+        }
+        synchronized(this) {
+            inputManager.unregisterKeyGestureEventHandler(homeKeyGestureEventHandler)
+            this.overviewCommandHelper = null
+        }
+    }
+
     fun onDestroy() {
-        settingsCache.unregister(USER_SETUP_COMPLETE_URI, onUserSetupCompleteListener)
+        onUserSetupCompleteSafeCloseable?.close()
+        onUserSetupCompleteSafeCloseable = null
         unregisterOverviewKeyGestureEvent()
         unregisterAllAppsKeyGestureEvent()
+        unregisterHomeKeyGestureEvent()
     }
 
     private fun isManageKeyGesturesGrantedToRecents(): Boolean =
@@ -203,5 +272,11 @@ class QuickstepKeyGestureEventsManager(private val context: Context) {
     private companion object {
         const val TAG = "KeyGestureEventsHandler"
         val USER_SETUP_COMPLETE_URI: Uri = Settings.Secure.getUriFor(USER_SETUP_COMPLETE)
+
+        @JvmStatic
+        val INSTANCE: DaggerSingletonObject<QuickstepKeyGestureEventsManager> =
+            DaggerSingletonObject<QuickstepKeyGestureEventsManager>(
+                QuickstepBaseAppComponent::getQuickstepKeyGestureEventsManager
+            )
     }
 }

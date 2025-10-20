@@ -58,7 +58,6 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 
 /**
@@ -72,14 +71,13 @@ public class DatabaseHelper extends SQLiteOpenHelper implements
      * Represents the schema of the database. Changes in scheme need not be backwards compatible.
      * When increasing the scheme version, ensure that downgrade_schema.json is updated
      */
-    public static final int SCHEMA_VERSION = Flags.enableLauncherIconShapes() ? 33 : 32;
+    public static final int SCHEMA_VERSION = Flags.enableLauncherIconShapes() ? 34 : 32;
     private static final String TAG = "DatabaseHelper";
     private static final boolean LOGD = false;
 
     private static final String DOWNGRADE_SCHEMA_FILE = "downgrade_schema.json";
 
     private final Context mContext;
-    private final ToLongFunction<UserHandle> mUserSerialProvider;
     private final Runnable mOnEmptyDbCreateCallback;
     private final AtomicInteger mMaxItemId = new AtomicInteger(-1);
 
@@ -88,11 +86,9 @@ public class DatabaseHelper extends SQLiteOpenHelper implements
     /**
      * Constructor used in tests and for restore.
      */
-    public DatabaseHelper(Context context, String dbName,
-            ToLongFunction<UserHandle> userSerialProvider, Runnable onEmptyDbCreateCallback) {
+    public DatabaseHelper(Context context, String dbName, Runnable onEmptyDbCreateCallback) {
         super(context, dbName, SCHEMA_VERSION, createNoLocaleParams());
         mContext = context;
-        mUserSerialProvider = userSerialProvider;
         mOnEmptyDbCreateCallback = onEmptyDbCreateCallback;
     }
 
@@ -123,7 +119,7 @@ public class DatabaseHelper extends SQLiteOpenHelper implements
     }
 
     private long getDefaultUserSerial() {
-        return mUserSerialProvider.applyAsLong(Process.myUserHandle());
+        return UserCache.INSTANCE.get(mContext).getSerialNumberForUser(Process.myUserHandle());
     }
 
     @Override
@@ -272,13 +268,15 @@ public class DatabaseHelper extends SQLiteOpenHelper implements
             case 31: {
                 LauncherDbUtils.migrateLegacyShortcuts(mContext, db);
             }
-            case 32: {
-                // Ensure backup icons are updated to full-bleed for icon shapes to restore.
-                Log.d(TAG, "Refreshing launcher db icons to ensure full-bleed");
-                LauncherDbUtils.updateBackupIcons(mContext, db);
+            // Skip version 32 as it introduced a restore bug, and is no longer necessary
+            case 32:
+            case 33: {
+                // Ensure backup icons are updated to default shape to handle downgrade backup
+                FileLog.d(TAG, "Cropping db icons to default shape for downgrade backup");
+                LauncherDbUtils.updateBackupIcons(mContext, db, /** useDefaultShape */ true);
             }
             // Fall through
-            case 33: {
+            case 34: {
                 // DB Upgraded successfully
                 return;
             }

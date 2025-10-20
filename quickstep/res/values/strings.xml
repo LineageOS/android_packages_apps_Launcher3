@@ -100,9 +100,6 @@
     <!-- tip shown when hotseat edu is requested while predictions are disabled -->
     <string name="hotsaet_tip_prediction_disabled">App suggestions are disabled</string>
 
-    <!-- content description for hotseat items -->
-    <string name="hotseat_prediction_content_description">Predicted app: <xliff:g id="title" example="Chrome">%1$s</xliff:g></string>
-
     <!-- Title of the Gesture Navigation Tutorial page [CHAR LIMIT=NONE] -->
     <string name="gesture_tutorial_title">Gesture Navigation Tutorial</string>
 
@@ -270,6 +267,8 @@
     <!-- Message shown when an action is blocked by a policy enforced by the app or the organization managing the device. [CHAR_LIMIT=NONE] -->
     <string name="blocked_by_policy">This action isn\'t allowed by the app or your organization</string>
     <string name="split_widgets_not_supported">Widgets not currently supported, please select another app</string>
+    <!-- Label for the sharesheet Image copy action [CHAR LIMIT=32] -->
+    <string name="action_image_copy">Copy</string>
 
 
     <!-- Accessibility label for the rotation suggestion button -->
@@ -280,6 +279,8 @@
     <string name="taskbar_edu_swipe_animation_description">Animation showing how the taskbar comes into view from the bottom of the screen, and automatically hides when not in use</string>
     <!-- Text description to describe Taskbar education animation for Taskbar pinning functionality. [CHAR_LIMIT=NONE] -->
     <string name="taskbar_edu_pinning_animation_description">Animation showing how to pin your taskbar using a toggle, so the taskbar remains permanently visible at the bottom of the screen</string>
+    <!-- Text description to describe Taskbar education animation for Taskbar bubbles functionality. [CHAR_LIMIT=NONE] -->
+    <string name="taskbar_edu_bubbles_animation_description">Animation showing how to create a bubble from the taskbar using a drag gesture</string>
     <!-- Text description to describe Taskbar education animation for split screen functionality. [CHAR_LIMIT=NONE] -->
     <string name="taskbar_edu_split_screen_animation_description">Animation showing how to create a split screen, by dragging and dropping an app from the taskbar above an open app</string>
     <!-- Text description to describe Taskbar education animation for app suggestion functionality. [CHAR_LIMIT=NONE] -->
@@ -290,6 +291,8 @@
     <string name="taskbar_edu_a11y_title">Taskbar education</string>
     <!-- Text in dialog that lets a user know how they can use the Taskbar to use multiple apps at once on their device. [CHAR_LIMIT=60] -->
     <string name="taskbar_edu_splitscreen">Drag an app to the side to use 2 apps at once</string>
+    <!-- Text in dialog that lets a user know how they can use the Taskbar to create application bubble. [CHAR_LIMIT=60] -->
+    <string name="taskbar_edu_bubbles">Drag to the bottom corners to make it float</string>
     <!-- Text in dialog that lets a user know how they can show the Taskbar on their device. [CHAR_LIMIT=60] -->
     <string name="taskbar_edu_stashing">Slow-swipe up to show the Taskbar</string>
     <!-- Text in dialog that lets a user know how the Taskbar suggests apps based on their usage. [CHAR_LIMIT=60] -->
@@ -302,6 +305,8 @@
     <string name="taskbar_edu_pinning_title">Always show the Taskbar</string>
     <!-- Text in dialog that shows a user how to pin the Taskbar. [CHAR_LIMIT 150] -->
     <string name="taskbar_edu_pinning_standalone">To always show the Taskbar on the bottom of your screen, touch &amp; hold the divider</string>
+    <!-- Text in dialog that shows a user how to create a bubble from the Taskbar icon. [CHAR_LIMIT 150] -->
+    <string name="taskbar_edu_bubbles_standalone">Drag an app to the corner to make it float</string>
     <!-- Title in dialog that shows a user how to invoke the Search feature. [CHAR_LIMIT 150] -->
     <string name="taskbar_search_edu_title">Touch &amp; hold the action key to search what\'s on your screen</string>
     <!-- Message showed to user to disclose privacy information they need to accept in order to access the app. [CHAR LIMIT=200]-->
@@ -310,6 +315,8 @@
     <string name="taskbar_edu_close">Close</string>
     <!-- Text on button to finish a tutorial [CHAR_LIMIT=16] -->
     <string name="taskbar_edu_done">Done</string>
+    <!-- Text on button to show the tutorial next page [CHAR_LIMIT=16] -->
+    <string name="taskbar_edu_next">Next</string>
         <!-- Content description for home button [CHAR_LIMIT=16] -->
     <string name="taskbar_button_home">Home</string>
     <!-- Content description for accessibility button [CHAR_LIMIT=16] -->
@@ -326,12 +333,6 @@
     <string name="taskbar_button_quick_settings">Quick Settings</string>
     <!-- Accessibility title for the Taskbar window. [CHAR_LIMIT=NONE] -->
     <string name="taskbar_a11y_title">Taskbar</string>
-    <!-- Accessibility title for the Taskbar window appeared. [CHAR_LIMIT=30] -->
-    <string name="taskbar_a11y_shown_title">Taskbar shown</string>
-    <!-- Accessibility title for the Taskbar window appearing together with bubble bar on left. [CHAR_LIMIT=30] -->
-    <string name="taskbar_a11y_shown_with_bubbles_left_title">Taskbar &#38; bubbles left shown</string>
-    <!-- Accessibility title for the Taskbar window appearing together with bubble bar on right. [CHAR_LIMIT=30] -->
-    <string name="taskbar_a11y_shown_with_bubbles_right_title">Taskbar &#38; bubbles right shown</string>
     <!-- Accessibility title for the Taskbar window on phones. [CHAR_LIMIT=NONE] -->
     <string name="taskbar_phone_a11y_title">Navigation bar</string>
     <!-- Text in popup dialog for user to switch between always showing Taskbar or not. [CHAR LIMIT=30] -->
@@ -341,11 +342,9 @@
     <!-- Accessibility title for the Taskbar vertical divider icon. [CHAR_LIMIT=NONE] -->
     <string name="taskbar_divider_a11y_title">Taskbar Divider</string>
     <!-- Accessibility title for the Taskbar Overflow icon. [CHAR_LIMIT=NONE] -->
-    <string name="taskbar_overflow_a11y_title">Other recent apps</string>
-    <!-- Accessibility confirmation for item pinned to taskbar. [CHAR_LIMIT=NONE] -->
-    <string name="app_added_to_taskbar">App added to Taskbar</string>
-    <!-- Accessibility confirmation for item unpinned from taskbar. [CHAR_LIMIT=NONE] -->
-    <string name="app_removed_from_taskbar">App removed from Taskbar</string>
+    <string name="taskbar_recents_overflow_a11y_title">Other recent apps</string>
+    <!-- Accessibility title for the Taskbar Overflow icon. [CHAR_LIMIT=NONE] -->
+    <string name="taskbar_pinned_overflow_a11y_title">Other apps</string>
 
     <!-- Label for moving drop target to the top or left side of the screen, depending on orientation (from the Taskbar only). -->
     <string name="move_drop_target_top_or_left">Move to top&#47;left</string>

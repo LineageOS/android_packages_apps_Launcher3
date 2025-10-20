@@ -16,6 +16,8 @@
 
 package com.android.quickstep.recents.viewmodel
 
+import android.content.ComponentName
+import android.content.Intent
 import android.graphics.Rect
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.util.coroutines.DispatcherProvider
@@ -29,6 +31,9 @@ import com.android.quickstep.recents.domain.usecase.GetObscuredDesktopTaskIdsUse
 import com.android.quickstep.recents.domain.usecase.OrganizeDesktopTasksUseCase
 import com.android.quickstep.recents.ui.viewmodel.DesktopTaskViewModel
 import com.android.quickstep.recents.ui.viewmodel.DesktopTaskViewModel.TaskPosition
+import com.android.quickstep.util.DesktopTask
+import com.android.systemui.shared.recents.model.Task
+import com.android.systemui.shared.recents.model.Task.TaskKey
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -67,16 +72,15 @@ class DesktopTaskViewModelTest {
         whenever(organizeDesktopTasksUseCase.invoke(any(), any(), any(), isNull()))
             .thenReturn(emptyList())
 
-        systemUnderTest.organizeDesktopTasks(
-            defaultPositions = emptyList(),
-            layoutConfig = TEST_LAYOUT_CONFIG,
-        )
+        systemUnderTest.bind(createDesktopTask(emptyList()))
+        systemUnderTest.organizeDesktopTasks(layoutConfig = TEST_LAYOUT_CONFIG)
 
         val result = systemUnderTest.organizedDesktopTaskVisibilityDataMap
         assertThat(result).isEmpty()
 
         verify(getObscuredDesktopTaskIdsUseCase).invoke(emptyList())
-        verify(organizeDesktopTasksUseCase).invoke(eq(emptyList()), any(), any(), isNull())
+        verify(organizeDesktopTasksUseCase)
+            .invoke(eq(emptyList()), any(), eq(emptyList()), isNull())
     }
 
     @Test
@@ -85,10 +89,10 @@ class DesktopTaskViewModelTest {
         whenever(organizeDesktopTasksUseCase.invoke(any(), any(), any(), isNull()))
             .thenReturn(listOf(ORGANIZED_RENDERED_TASK_BOUNDS_DATA))
 
-        systemUnderTest.organizeDesktopTasks(
-            defaultPositions = listOf(NEW_TASK_POSITION_1),
-            layoutConfig = TEST_LAYOUT_CONFIG,
+        systemUnderTest.bind(
+            createDesktopTask(listOf(createTask(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1)))
         )
+        systemUnderTest.organizeDesktopTasks(layoutConfig = TEST_LAYOUT_CONFIG)
 
         val result = systemUnderTest.organizedDesktopTaskVisibilityDataMap
         assertThat(result)
@@ -116,10 +120,10 @@ class DesktopTaskViewModelTest {
         whenever(organizeDesktopTasksUseCase.invoke(any(), any(), any(), isNull()))
             .thenReturn(listOf(ORGANIZED_HIDDEN_TASK_BOUNDS_DATA))
 
-        systemUnderTest.organizeDesktopTasks(
-            defaultPositions = listOf(NEW_TASK_POSITION_2),
-            layoutConfig = TEST_LAYOUT_CONFIG,
+        systemUnderTest.bind(
+            createDesktopTask(listOf(createTask(NEW_TASK_ID_2, NEW_TASK_BOUNDS_2)))
         )
+        systemUnderTest.organizeDesktopTasks(layoutConfig = TEST_LAYOUT_CONFIG)
 
         val result = systemUnderTest.organizedDesktopTaskVisibilityDataMap
         assertThat(result)
@@ -143,10 +147,15 @@ class DesktopTaskViewModelTest {
                 listOf(ORGANIZED_RENDERED_TASK_BOUNDS_DATA, ORGANIZED_HIDDEN_TASK_BOUNDS_DATA)
             )
 
-        systemUnderTest.organizeDesktopTasks(
-            defaultPositions = listOf(NEW_TASK_POSITION_1, NEW_TASK_POSITION_2),
-            layoutConfig = TEST_LAYOUT_CONFIG,
+        systemUnderTest.bind(
+            createDesktopTask(
+                listOf(
+                    createTask(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1),
+                    createTask(NEW_TASK_ID_2, NEW_TASK_BOUNDS_2),
+                )
+            )
         )
+        systemUnderTest.organizeDesktopTasks(layoutConfig = TEST_LAYOUT_CONFIG)
 
         val result = systemUnderTest.organizedDesktopTaskVisibilityDataMap
         assertThat(result)
@@ -182,10 +191,11 @@ class DesktopTaskViewModelTest {
         // converted properly.
         systemUnderTest.organizedDesktopTaskVisibilityDataMap =
             mapOf(OLD_RENDERED_TASK_VISIBILITY_DATA_PAIR, OLD_HIDDEN_TASK_VISIBILITY_DATA_PAIR)
-        systemUnderTest.organizeDesktopTasks(
-            defaultPositions = listOf(NEW_TASK_POSITION_1),
-            layoutConfig = TEST_LAYOUT_CONFIG,
+
+        systemUnderTest.bind(
+            createDesktopTask(listOf(createTask(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1)))
         )
+        systemUnderTest.organizeDesktopTasks(layoutConfig = TEST_LAYOUT_CONFIG)
 
         val result = systemUnderTest.organizedDesktopTaskVisibilityDataMap
         assertThat(result)
@@ -223,8 +233,15 @@ class DesktopTaskViewModelTest {
         whenever(organizeDesktopTasksUseCase.invoke(any(), any(), any(), any()))
             .thenReturn(listOf(ORGANIZED_RENDERED_TASK_BOUNDS_DATA))
 
+        systemUnderTest.bind(
+            createDesktopTask(
+                listOf(
+                    createTask(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1),
+                    createTask(NEW_TASK_ID_2, NEW_TASK_BOUNDS_2),
+                )
+            )
+        )
         systemUnderTest.organizeDesktopTasks(
-            defaultPositions = listOf(NEW_TASK_POSITION_1, NEW_TASK_POSITION_2),
             layoutConfig = TEST_LAYOUT_CONFIG,
             dismissedTaskId = NEW_TASK_ID_2,
         )
@@ -250,6 +267,140 @@ class DesktopTaskViewModelTest {
             .invoke(eq(allCurrentOriginalTaskBounds), any(), eq(emptyList()), eq(NEW_TASK_ID_2))
     }
 
+    @Test
+    fun organizeDesktopTasks_minimizedTask_taskPositionMinimized() {
+        whenever(getObscuredDesktopTaskIdsUseCase.invoke(any())).thenReturn(emptySet())
+        whenever(organizeDesktopTasksUseCase.invoke(any(), any(), any(), isNull()))
+            .thenReturn(emptyList())
+
+        systemUnderTest.bind(
+            createDesktopTask(
+                listOf(createTask(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1, isMinimized = true))
+            )
+        )
+        systemUnderTest.organizeDesktopTasks(layoutConfig = TEST_LAYOUT_CONFIG)
+
+        verify(getObscuredDesktopTaskIdsUseCase).invoke(listOf(NEW_TASK_POSITION_1_MINIMIZED))
+    }
+
+    @Test
+    fun organizeDesktopTasks_transparentActivityTransparentActivityStackTaskInDesktop_isHidden() {
+        whenever(organizeDesktopTasksUseCase.invoke(any(), any(), any(), isNull()))
+            .thenReturn(listOf(ORGANIZED_RENDERED_TASK_BOUNDS_DATA))
+
+        systemUnderTest.bind(
+            createDesktopTask(
+                listOf(
+                    createTask(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1),
+                    createTask(
+                        TRANSPARENT_TASK_ID,
+                        TRANSPARENT_TASK_BOUNDS,
+                        isTopActivityTransparent = true,
+                        isActivityStackTransparent = true,
+                    ),
+                )
+            )
+        )
+        systemUnderTest.organizeDesktopTasks(layoutConfig = TEST_LAYOUT_CONFIG)
+
+        val result = systemUnderTest.organizedDesktopTaskVisibilityDataMap
+        assertThat(result)
+            .containsExactly(
+                NEW_TASK_ID_1,
+                RenderedDesktopTaskVisibilityData(
+                    isObscured = false,
+                    bounds = ORGANIZED_RENDERED_TASK_BOUNDS,
+                ),
+                TRANSPARENT_TASK_ID,
+                HiddenDesktopTaskVisibilityData(isObscured = false),
+            )
+
+        val allCurrentOriginalTaskBounds =
+            listOf(
+                RenderedDesktopTaskBoundsData(taskId = NEW_TASK_ID_1, bounds = NEW_TASK_BOUNDS_1)
+            )
+        verify(organizeDesktopTasksUseCase)
+            .invoke(eq(allCurrentOriginalTaskBounds), any(), eq(emptyList()), isNull())
+    }
+
+    @Test
+    fun organizeDesktopTasks_transparentActivityNonTransparentActivityStackTaskInDesktop_isShown() {
+        whenever(organizeDesktopTasksUseCase.invoke(any(), any(), any(), isNull()))
+            .thenReturn(
+                listOf(
+                    ORGANIZED_RENDERED_TASK_BOUNDS_DATA,
+                    ORGANIZED_RENDERED_TASK_BOUNDS_DATA_FOR_SEMITRANSPARENT_TASK,
+                )
+            )
+
+        systemUnderTest.bind(
+            createDesktopTask(
+                listOf(
+                    createTask(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1),
+                    createTask(
+                        SEMI_TRANSPARENT_TASK_ID,
+                        SEMI_TRANSPARENT_TASK_BOUNDS,
+                        isTopActivityTransparent = true,
+                    ),
+                )
+            )
+        )
+        systemUnderTest.organizeDesktopTasks(layoutConfig = TEST_LAYOUT_CONFIG)
+
+        val result = systemUnderTest.organizedDesktopTaskVisibilityDataMap
+        assertThat(result)
+            .containsExactly(
+                NEW_TASK_ID_1,
+                RenderedDesktopTaskVisibilityData(
+                    isObscured = false,
+                    bounds = ORGANIZED_RENDERED_TASK_BOUNDS,
+                ),
+                SEMI_TRANSPARENT_TASK_ID,
+                RenderedDesktopTaskVisibilityData(
+                    isObscured = false,
+                    bounds = ORGANIZED_RENDERED_TASK_BOUNDS,
+                ),
+            )
+
+        val allCurrentOriginalTaskBounds =
+            listOf(
+                RenderedDesktopTaskBoundsData(taskId = NEW_TASK_ID_1, bounds = NEW_TASK_BOUNDS_1),
+                RenderedDesktopTaskBoundsData(
+                    taskId = SEMI_TRANSPARENT_TASK_ID,
+                    bounds = SEMI_TRANSPARENT_TASK_BOUNDS,
+                ),
+            )
+
+        verify(organizeDesktopTasksUseCase)
+            .invoke(eq(allCurrentOriginalTaskBounds), any(), eq(emptyList()), isNull())
+    }
+
+    private fun createTask(
+        id: Int,
+        appBounds: Rect,
+        isTopActivityTransparent: Boolean = false,
+        isMinimized: Boolean = false,
+        isActivityStackTransparent: Boolean = false,
+    ) =
+        Task().apply {
+            key =
+                TaskKey(
+                    id,
+                    /* windowingMode= */ 0,
+                    Intent(),
+                    ComponentName("", ""),
+                    /* userId */ 0,
+                    /* lastActiveTime */ 0,
+                )
+            this.appBounds = appBounds
+            this.key.isTopActivityTransparent = isTopActivityTransparent
+            this.key.isActivityStackTransparent = isActivityStackTransparent
+            this.isMinimized = isMinimized
+        }
+
+    private fun createDesktopTask(tasks: List<Task>) =
+        DesktopTask(deskId = 0, desktopDisplayId = 0, tasks = tasks)
+
     companion object {
         private val TEST_LAYOUT_CONFIG =
             DesktopLayoutConfig(
@@ -269,6 +420,8 @@ class DesktopTaskViewModelTest {
         val NEW_TASK_BOUNDS_1 = Rect(0, 0, 1, 1)
         val NEW_TASK_POSITION_1 =
             TaskPosition(taskId = NEW_TASK_ID_1, isMinimized = false, bounds = NEW_TASK_BOUNDS_1)
+        val NEW_TASK_POSITION_1_MINIMIZED =
+            TaskPosition(taskId = NEW_TASK_ID_1, isMinimized = true, bounds = NEW_TASK_BOUNDS_1)
 
         val NEW_TASK_ID_2 = 2
         val NEW_TASK_BOUNDS_2 = Rect(0, 0, 2, 2)
@@ -297,5 +450,16 @@ class DesktopTaskViewModelTest {
                 bounds = ORGANIZED_RENDERED_TASK_BOUNDS,
             )
         val ORGANIZED_HIDDEN_TASK_BOUNDS_DATA = HiddenDesktopTaskBoundsData(taskId = NEW_TASK_ID_2)
+
+        val TRANSPARENT_TASK_ID = 3
+        val TRANSPARENT_TASK_BOUNDS = Rect(0, 0, 3, 3)
+
+        val SEMI_TRANSPARENT_TASK_ID = 4
+        val SEMI_TRANSPARENT_TASK_BOUNDS = Rect(0, 0, 4, 4)
+        val ORGANIZED_RENDERED_TASK_BOUNDS_DATA_FOR_SEMITRANSPARENT_TASK =
+            RenderedDesktopTaskBoundsData(
+                taskId = SEMI_TRANSPARENT_TASK_ID,
+                bounds = ORGANIZED_RENDERED_TASK_BOUNDS,
+            )
     }
 }

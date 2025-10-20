@@ -32,8 +32,6 @@ import android.os.Bundle
 import android.os.Flags.allowPrivateProfile
 import android.os.IBinder
 import android.os.UserHandle
-import android.os.UserManager
-import android.util.ArrayMap
 import android.view.SurfaceControlViewHost
 import android.widget.Toast
 import android.window.RemoteTransition
@@ -41,7 +39,6 @@ import android.window.ScreenCapture.ScreenCaptureParams
 import android.window.ScreenCaptureInternal
 import com.android.launcher3.BaseActivity
 import com.android.launcher3.Flags.enablePrivateSpace
-import com.android.launcher3.Flags.privateSpaceSysAppsSeparation
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
 import com.android.launcher3.dagger.ApplicationContext
@@ -51,7 +48,6 @@ import com.android.launcher3.uioverrides.touchcontrollers.StatusBarTouchControll
 import com.android.launcher3.util.ApiWrapper
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.StartActivityParams
-import com.android.launcher3.util.UserIconInfo
 import com.android.quickstep.util.FadeOutRemoteTransition
 import java.util.function.Supplier
 import javax.inject.Inject
@@ -70,36 +66,6 @@ open class SystemApiWrapper @Inject constructor(@ApplicationContext context: Con
         ActivityOptions.makeBasic().apply {
             remoteTransition = RemoteTransition(FadeOutRemoteTransition(), "FadeOut")
         }
-
-    override fun queryAllUsers(): Map<UserHandle, UserIconInfo> {
-        if (!allowPrivateProfile() || !enablePrivateSpace()) {
-            return super.queryAllUsers()
-        }
-        val users = ArrayMap<UserHandle, UserIconInfo>()
-        mContext.getSystemService(UserManager::class.java)!!.userProfiles?.forEach { user ->
-            mContext.getSystemService(LauncherApps::class.java)!!.getLauncherUserInfo(user)?.apply {
-                users[user] =
-                    UserIconInfo(
-                        user,
-                        when (userType) {
-                            UserManager.USER_TYPE_PROFILE_MANAGED -> UserIconInfo.TYPE_WORK
-                            UserManager.USER_TYPE_PROFILE_CLONE -> UserIconInfo.TYPE_CLONED
-                            UserManager.USER_TYPE_PROFILE_PRIVATE -> UserIconInfo.TYPE_PRIVATE
-                            else -> UserIconInfo.TYPE_MAIN
-                        },
-                        userSerialNumber.toLong(),
-                    )
-            }
-        }
-        return users
-    }
-
-    override fun getPreInstalledSystemPackages(user: UserHandle): List<String> =
-        if (allowPrivateProfile() && enablePrivateSpace() && privateSpaceSysAppsSeparation())
-            mContext
-                .getSystemService(LauncherApps::class.java)!!
-                .getPreInstalledSystemPackages(user)
-        else ArrayList()
 
     override fun getAppMarketActivityIntent(packageName: String, user: UserHandle): Intent =
         if (allowPrivateProfile() && enablePrivateSpace())

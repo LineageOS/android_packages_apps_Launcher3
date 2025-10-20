@@ -24,24 +24,24 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.launcher3.InvariantDeviceProfile
-import com.android.launcher3.LauncherModel
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET
-import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_PAIR
+import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_GROUP
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FOLDER
+import com.android.launcher3.UtilitiesKt.isPersistedModelItem
 import com.android.launcher3.icons.BitmapInfo
 import com.android.launcher3.model.data.AppPairInfo
 import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.ItemInfo
-import com.android.launcher3.util.Executors.MAIN_EXECUTOR
-import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY
 import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY2
 import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
 import com.android.launcher3.util.ModelTestExtensions.bgDataModel
+import com.android.launcher3.util.ModelTestExtensions.setEmptyModelLayout
+import com.android.launcher3.util.ModelTestExtensions.setModelLayout
 import java.util.function.Supplier
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -63,15 +63,12 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class LayoutImportExportHelperTest {
     @get:Rule val context = SandboxApplication().withModelDependency()
-    @get:Rule val layout = LayoutResource(context)
-
-    private val model: LauncherModel
-        get() = context.appComponent.testableModelState.model
 
     private val workspaceItems: List<ItemInfo>
         get() =
             context.bgDataModel.itemsIdMap.filter {
-                it.container == CONTAINER_DESKTOP || it.container == CONTAINER_HOTSEAT
+                it.isPersistedModelItem() &&
+                    (it.container == CONTAINER_DESKTOP || it.container == CONTAINER_HOTSEAT)
             }
 
     @Test
@@ -204,7 +201,7 @@ class LayoutImportExportHelperTest {
                 .build()
         ) {
             1 == workspaceItems.size &&
-                ITEM_TYPE_APP_PAIR == workspaceItems[0].itemType &&
+                ITEM_TYPE_APP_GROUP == workspaceItems[0].itemType &&
                 2 == (workspaceItems[0] as AppPairInfo).getContents().size &&
                 "CustomAppPair" == workspaceItems[0].title
         }
@@ -227,7 +224,7 @@ class LayoutImportExportHelperTest {
             val folderInfo = workspaceItems[0] as FolderInfo
             val appPairInfo = folderInfo.getContents()[1] as AppPairInfo
 
-            ITEM_TYPE_APP_PAIR == appPairInfo.itemType &&
+            ITEM_TYPE_APP_GROUP == appPairInfo.itemType &&
                 2 == appPairInfo.getContents().size &&
                 "CustomAppPair" == appPairInfo.title
         }
@@ -250,7 +247,7 @@ class LayoutImportExportHelperTest {
                 .addApp(TEST_PACKAGE, TEST_ACTIVITY)
                 .addApp(TEST_PACKAGE, TEST_ACTIVITY2)
                 .build()
-        LayoutImportExportHelper.importModelFromXml(context, layoutXml.build())
+        context.appComponent.layoutImportExportHelper.importModelFromXml(layoutXml.build())
         assertEquals(differentGridOption.numRows, idp.numRows)
         assertEquals(differentGridOption.numColumns, idp.numColumns)
     }
@@ -259,24 +256,18 @@ class LayoutImportExportHelperTest {
         layoutBuilder: LauncherLayoutBuilder,
         verification: Supplier<Boolean>,
     ) {
-        layout.set(layoutBuilder)
+        context.setModelLayout(layoutBuilder)
         assertTrue(verification.get())
 
-        val exportedXml = LayoutImportExportHelper.exportModelDbAsXmlFuture(context).get()
+        val exportedXml =
+            context.appComponent.layoutImportExportHelper.exportModelDbAsXmlFuture().get()
 
         // To test the exported XML, we merely clear the DB and re-load it. If the XML is
         // well-formatted, it will be loaded into the DB properly. Otherwise, it will be rejected.
-        MODEL_EXECUTOR.submit {
-                try {
-                    model.modelDbController.createEmptyDB()
-                } catch (_: Exception) {}
-            }
-            .get()
-        MAIN_EXECUTOR.submit { model.forceReload() }.get()
-        MODEL_EXECUTOR.submit {}.get()
+        context.setEmptyModelLayout()
         assertFalse(verification.get())
 
-        LayoutImportExportHelper.importModelFromXml(context, exportedXml)
+        context.setModelLayout(exportedXml)
         assertTrue(verification.get())
     }
 }

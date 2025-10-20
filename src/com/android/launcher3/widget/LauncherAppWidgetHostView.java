@@ -16,6 +16,8 @@
 
 package com.android.launcher3.widget;
 
+import static android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID;
+
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
 import android.graphics.Rect;
@@ -129,7 +131,7 @@ public class LauncherAppWidgetHostView extends BaseLauncherAppWidgetHostView
     @Override
     public void setAppWidget(int appWidgetId, AppWidgetProviderInfo info) {
         super.setAppWidget(appWidgetId, info);
-        if (!mTrackingWidgetUpdate && appWidgetId != -1) {
+        if (!mTrackingWidgetUpdate && appWidgetId != INVALID_APPWIDGET_ID) {
             mTrackingWidgetUpdate = true;
             Trace.beginAsyncSection(TRACE_METHOD_NAME + info.provider, appWidgetId);
             Log.i(TAG, "App widget created with id: " + appWidgetId);

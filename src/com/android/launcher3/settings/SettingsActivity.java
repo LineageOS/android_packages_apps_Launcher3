@@ -20,11 +20,11 @@ import static android.provider.Settings.Global.DEVELOPMENT_SETTINGS_ENABLED;
 
 import static androidx.preference.PreferenceFragmentCompat.ARG_PREFERENCE_ROOT;
 
-import static com.android.launcher3.BuildConfig.IS_DEBUG_DEVICE;
 import static com.android.launcher3.BuildConfig.IS_STUDIO_BUILD;
 import static com.android.launcher3.InvariantDeviceProfile.TYPE_MULTI_DISPLAY;
 import static com.android.launcher3.InvariantDeviceProfile.TYPE_TABLET;
 import static com.android.launcher3.states.RotationHelper.ALLOW_ROTATION_PREFERENCE_KEY;
+import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -59,6 +59,7 @@ import com.android.launcher3.LauncherFiles;
 import com.android.launcher3.R;
 import com.android.launcher3.states.RotationHelper;
 import com.android.launcher3.util.DisplayController;
+import com.android.launcher3.util.SafeCloseable;
 import com.android.launcher3.util.SettingsCache;
 
 /**
@@ -165,8 +166,9 @@ public class SettingsActivity extends FragmentActivity
     /**
      * This fragment shows the launcher preferences.
      */
-    public static class LauncherSettingsFragment extends PreferenceFragmentCompat implements
-            SettingsCache.OnChangeListener {
+    public static class LauncherSettingsFragment extends PreferenceFragmentCompat {
+
+        private @Nullable SafeCloseable mSettingCacheSafeCloseable;
 
         protected boolean mDeveloperOptionsEnabled = false;
 
@@ -176,13 +178,26 @@ public class SettingsActivity extends FragmentActivity
 
         private boolean mPreferenceHighlighted = false;
 
+        private boolean mIsDeveloperSettingEnabledSet = false;
+
         @Override
         public void onCreate(@Nullable Bundle savedInstanceState) {
             if (BuildConfig.IS_DEBUG_DEVICE) {
                 Uri devUri = Settings.Global.getUriFor(DEVELOPMENT_SETTINGS_ENABLED);
                 SettingsCache settingsCache = SettingsCache.INSTANCE.get(getContext());
                 mDeveloperOptionsEnabled = settingsCache.getValue(devUri);
-                settingsCache.register(devUri, this);
+                mSettingCacheSafeCloseable = settingsCache.getListenableRef(devUri).forEach(
+                        MAIN_EXECUTOR, (v) -> {
+                            // Listening to developer enabled setting will immediately trigger
+                            // callback for current value. Yet we only want to recreate activity
+                            // when such value has changed.
+                            if (!mIsDeveloperSettingEnabledSet) {
+                                mIsDeveloperSettingEnabledSet = true;
+                                return null;
+                            }
+                            tryRecreateActivity();
+                            return null;
+                        });
             }
             super.onCreate(savedInstanceState);
         }
@@ -355,17 +370,11 @@ public class SettingsActivity extends FragmentActivity
         }
 
         @Override
-        public void onSettingsChanged(boolean isEnabled) {
-            // Developer options changed, try recreate
-            tryRecreateActivity();
-        }
-
-        @Override
         public void onDestroy() {
             super.onDestroy();
-            if (IS_DEBUG_DEVICE) {
-                SettingsCache.INSTANCE.get(getContext())
-                        .unregister(Settings.Global.getUriFor(DEVELOPMENT_SETTINGS_ENABLED), this);
+            if (mSettingCacheSafeCloseable != null) {
+                mSettingCacheSafeCloseable.close();
+                mSettingCacheSafeCloseable = null;
             }
         }
 

@@ -29,6 +29,7 @@ import android.provider.Settings.Global
 import android.provider.Settings.System
 import android.util.Log
 import android.view.Display
+import android.view.IWindowManager
 import android.view.Surface
 import android.view.WindowManagerGlobal
 import com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn
@@ -155,7 +156,7 @@ object LauncherCustomizer {
         values.putObject(arg, argValue)
         Assert.assertEquals(
             RESULT_SUCCESS,
-            context.appComponent.gridCustomizationsProxy.update(gridUri, values, null, null),
+            context.appComponent.gridCustomizationsProxy.update(gridUri, values, null, null, null),
         )
     }
 
@@ -231,28 +232,22 @@ object LauncherCustomizer {
             doAnswer(answer).whenever(wmp).getNavigationMode(any())
         }
 
-        val userId = UserHandle.myUserId()
-
-        // This is equivalent to calling:
-        //   adb shell wm size {device.width}x{device.height} and adb shell wm scale 1 "
         WindowManagerGlobal.getWindowManagerService()!!.apply {
-            setForcedDisplaySize(Display.DEFAULT_DISPLAY, device.width, device.height)
             setForcedDisplayScalingMode(Display.DEFAULT_DISPLAY, 1)
 
-            // Change density twice to force display controller to reset its state
-            val targetDensity = densities[densityScale]!!
-            setForcedDisplayDensityForUser(Display.DEFAULT_DISPLAY, targetDensity / 2, userId)
-            waitForDensityChange(context, targetDensity / 2)
+            // This is equivalent to calling: adb shell wm size {device.width}x{device.height}"
+            setForcedDisplaySize(Display.DEFAULT_DISPLAY, device.width, device.height)
 
-            setForcedDisplayDensityForUser(Display.DEFAULT_DISPLAY, targetDensity, userId)
-            waitForDensityChange(context, targetDensity)
+            // Change density twice to force display controller to reset its state
+            setAndWaitForDensity(context, densities[densityScale]!! + 1)
+            setAndWaitForDensity(context, densities[densityScale]!!)
         }
     }
 
     @Throws(Exception::class)
-    private fun waitForDensityChange(context: Context, targetDensity: Int) {
+    private fun IWindowManager.setAndWaitForDensity(context: Context, targetDensity: Int) {
         val latch = CountDownLatch(1)
-        Executors.MAIN_EXECUTOR.execute {
+        MAIN_EXECUTOR.execute {
             val controller = DisplayController.INSTANCE[context]
             if (controller.info.densityDpi == targetDensity) {
                 latch.countDown()
@@ -263,15 +258,18 @@ object LauncherCustomizer {
                     override fun onDisplayInfoChanged(context: Context, info: Info, flags: Int) {
                         if (info.densityDpi == targetDensity) {
                             // Remove listener asynchronously
-                            Executors.MAIN_EXECUTOR.handler.post {
-                                controller.removeChangeListener(this)
-                            }
+                            MAIN_EXECUTOR.handler.post { controller.removeChangeListener(this) }
                             latch.countDown()
                         }
                     }
                 }
             )
         }
+        setForcedDisplayDensityForUser(
+            Display.DEFAULT_DISPLAY,
+            targetDensity,
+            UserHandle.myUserId(),
+        )
         latch.await()
     }
 

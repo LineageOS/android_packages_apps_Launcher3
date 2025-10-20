@@ -30,11 +30,10 @@ import com.android.launcher3.Launcher;
 import com.android.launcher3.tapl.Widget;
 import com.android.launcher3.tapl.WidgetResizeFrame;
 import com.android.launcher3.util.TestUtil;
+import com.android.launcher3.util.WidgetUtils;
 import com.android.launcher3.util.rule.ShellCommandRule;
 import com.android.launcher3.util.ui.AbstractLauncherUiTest;
 import com.android.launcher3.util.ui.PortraitLandscapeRunner.PortraitLandscape;
-import com.android.launcher3.util.ui.TestViewHelpers;
-import com.android.launcher3.util.workspace.FavoriteItemsTransaction;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -57,12 +56,11 @@ public class TaplAddWidgetTest extends AbstractLauncherUiTest<Launcher, View> {
     @PortraitLandscape
     @EnableFlags(Flags.FLAG_ENABLE_WIDGET_PICKER_REFACTOR)
     public void testDragIcon() throws Throwable {
-        commitTransactionAndLoadHome(new FavoriteItemsTransaction(mTargetContext));
-
+        reinitializeLauncherData(true);
         waitForLauncherCondition("Workspace didn't finish loading", l -> !l.isWorkspaceLoading());
 
         final LauncherAppWidgetProviderInfo widgetInfo =
-                TestViewHelpers.findWidgetProvider(false /* hasConfigureScreen */);
+                WidgetUtils.findWidgetProvider(false /* hasConfigureScreen */);
 
         WidgetResizeFrame resizeFrame = mLauncher
                 .getWorkspace()
@@ -89,8 +87,7 @@ public class TaplAddWidgetTest extends AbstractLauncherUiTest<Launcher, View> {
     @PortraitLandscape
     @EnableFlags(Flags.FLAG_ENABLE_WIDGET_PICKER_REFACTOR)
     public void testDragCustomShortcut() throws Throwable {
-        commitTransactionAndLoadHome(new FavoriteItemsTransaction(mTargetContext));
-
+        reinitializeLauncherData(true);
         waitForLauncherCondition("Workspace didn't finish loading", l -> !l.isWorkspaceLoading());
 
         mLauncher.getWorkspace().openAllWidgets()
@@ -107,12 +104,11 @@ public class TaplAddWidgetTest extends AbstractLauncherUiTest<Launcher, View> {
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_WIDGET_PICKER_REFACTOR)
     public void testResizeWidget() throws Throwable {
-        commitTransactionAndLoadHome(new FavoriteItemsTransaction(mTargetContext));
-
+        reinitializeLauncherData(true);
         waitForLauncherCondition("Workspace didn't finish loading", l -> !l.isWorkspaceLoading());
 
         final LauncherAppWidgetProviderInfo widgetInfo =
-                TestViewHelpers.findWidgetProvider(false /* hasConfigureScreen */);
+                WidgetUtils.findWidgetProvider(false /* hasConfigureScreen */);
 
         WidgetResizeFrame resizeFrame = mLauncher
                 .getWorkspace()

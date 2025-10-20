@@ -16,7 +16,6 @@
 
 package com.android.launcher3.folder;
 
-import static com.android.launcher3.Flags.enableCursorHoverStates;
 import static com.android.launcher3.folder.ClippedFolderIconLayoutRule.ICON_OVERLAP_FACTOR;
 import static com.android.launcher3.folder.ClippedFolderIconLayoutRule.MAX_NUM_ITEMS_IN_PREVIEW;
 import static com.android.launcher3.folder.FolderGridOrganizer.createFolderGridOrganizer;
@@ -54,6 +53,7 @@ import com.android.launcher3.CellLayout;
 import com.android.launcher3.CheckLongPressHelper;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.DropTarget.DragObject;
+import com.android.launcher3.Flags;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.OnAlarmListener;
@@ -62,6 +62,7 @@ import com.android.launcher3.Reorderable;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.Workspace;
 import com.android.launcher3.allapps.ActivityAllAppsContainerView;
+import com.android.launcher3.anim.AnimatedFloat;
 import com.android.launcher3.celllayout.CellLayoutLayoutParams;
 import com.android.launcher3.dot.FolderDotInfo;
 import com.android.launcher3.dragndrop.BaseItemDragListener;
@@ -80,9 +81,11 @@ import com.android.launcher3.model.data.FolderInfo.LabelState;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.WorkspaceItemFactory;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
+import com.android.launcher3.popup.IconViewController;
 import com.android.launcher3.popup.Poppable;
 import com.android.launcher3.popup.PoppableType;
 import com.android.launcher3.popup.PopupController;
+import com.android.launcher3.util.MultiPropertyFactory;
 import com.android.launcher3.util.MultiTranslateDelegate;
 import com.android.launcher3.util.Themes;
 import com.android.launcher3.util.Thunk;
@@ -98,7 +101,7 @@ import java.util.function.Predicate;
  * An icon that can appear on in the workspace representing an {@link Folder}.
  */
 public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion,
-        DraggableView, Reorderable, Poppable {
+        DraggableView, Reorderable, Poppable, IconViewController {
 
     private final MultiTranslateDelegate mTranslateDelegate = new MultiTranslateDelegate(this);
     @Thunk ActivityContext mActivity;
@@ -221,8 +224,8 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
         icon.mActivity = activity;
         icon.mDotRenderer = grid.mDotRendererWorkSpace;
 
-        icon.setContentDescription(icon.getAccessiblityTitle(folderInfo.title));
         icon.updateDotInfo();
+        icon.setContentDescription(icon.getAccessiblityTitle(folderInfo.title));
 
         icon.setAccessibilityDelegate(activity.getAccessibilityDelegate());
 
@@ -505,6 +508,10 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
     }
 
     public ClippedFolderIconLayoutRule getLayoutRule() {
+        if (Flags.enableExpressiveFolderExpansion() && mPreviewLayoutRule.getIconSize() == 0) {
+            // Make sure the layout rule is initialized
+            mPreviewItemManager.recomputePreviewDrawingParams();
+        }
         return mPreviewLayoutRule;
     }
 
@@ -649,8 +656,11 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
         }
     }
 
-    public boolean getTextVisible() {
-        return mFolderName.getVisibility() == VISIBLE;
+    @Override
+    public int getIconHeight() {
+        Rect rect = new Rect();
+        getPreviewBounds(rect);
+        return rect.height();
     }
 
     /**
@@ -779,25 +789,33 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
         }
         int size = mInfo.getContents().size();
         if (size < MAX_NUM_ITEMS_IN_PREVIEW) {
-            return getContext().getString(R.string.folder_name_format_exact, title, size);
+            return getContext().getString(hasDot()
+                    ? R.string.folder_name_format_exact_with_dot
+                    : R.string.folder_name_format_exact,
+                    title, size);
         } else {
-            return getContext().getString(R.string.folder_name_format_overflow, title,
-                    MAX_NUM_ITEMS_IN_PREVIEW);
+            return getContext().getString(hasDot()
+                    ? R.string.folder_name_format_overflow_with_dot
+                    : R.string.folder_name_format_overflow,
+                    title, MAX_NUM_ITEMS_IN_PREVIEW);
         }
     }
 
     @Override
     public void onHoverChanged(boolean hovered) {
         super.onHoverChanged(hovered);
-        if (enableCursorHoverStates()) {
-            mBackground.setHovered(hovered);
-        }
+        mBackground.setHovered(hovered);
     }
 
     @NonNull
     @Override
     public PoppableType getPoppableType() {
         return PoppableType.FOLDER;
+    }
+
+    @Override
+    public MultiPropertyFactory<AnimatedFloat>.MultiProperty getFloatingViewTextAlpha() {
+        return mFolderName.getFloatingViewTextAlpha();
     }
 
     /**

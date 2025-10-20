@@ -25,18 +25,21 @@ import android.util.Log
 import com.android.launcher3.AutoInstallsLayout
 import com.android.launcher3.GridSizeUtil
 import com.android.launcher3.InvariantDeviceProfile
-import com.android.launcher3.LauncherAppState
+import com.android.launcher3.LauncherModel
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET
-import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_PAIR
+import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_GROUP
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FOLDER
 import com.android.launcher3.LauncherSettings.Settings.LAYOUT_DIGEST_LABEL
 import com.android.launcher3.LauncherSettings.Settings.LAYOUT_DIGEST_TAG
 import com.android.launcher3.LauncherSettings.Settings.LAYOUT_PROVIDER_KEY
 import com.android.launcher3.LauncherSettings.Settings.createBlobProviderKey
+import com.android.launcher3.concurrent.annotations.Background
+import com.android.launcher3.concurrent.annotations.Ui
+import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.logging.FileLog
 import com.android.launcher3.model.data.AppPairInfo
 import com.android.launcher3.model.data.FolderInfo
@@ -44,28 +47,32 @@ import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.LauncherAppWidgetInfo
 import com.android.launcher3.pm.UserCache
 import com.android.launcher3.shortcuts.ShortcutKey
-import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
-import com.android.launcher3.util.Executors.ORDERED_BG_EXECUTOR
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.ExecutorService
+import javax.inject.Inject
 
-object LayoutImportExportHelper {
-    private const val TAG = "LayoutImportExportHelper"
+class LayoutImportExportHelper
+@Inject
+constructor(
+    @ApplicationContext private val context: Context,
+    private val model: LauncherModel,
+    private val idp: InvariantDeviceProfile,
+    @Background private val backgroundExecutor: ExecutorService,
+    @Ui private val uiExecutor: ExecutorService,
+) {
 
-    fun exportModelDbAsXmlFuture(context: Context): CompletableFuture<String> {
+    fun exportModelDbAsXmlFuture(): CompletableFuture<String> {
         val future = CompletableFuture<String>()
-        exportModelDbAsXml(context) { xmlString -> future.complete(xmlString) }
+        exportModelDbAsXml { xmlString -> future.complete(xmlString) }
         return future
     }
 
-    fun exportModelDbAsXml(context: Context, callback: (String) -> Unit) {
-        val model = LauncherAppState.getInstance(context).model
-
+    fun exportModelDbAsXml(callback: (String) -> Unit) {
         model.enqueueModelUpdateTask { _, dataModel, _ ->
-            val idp = InvariantDeviceProfile.INSTANCE.get(context)
             val builder = LauncherLayoutBuilder(idp.numRows, idp.numColumns)
             dataModel.itemsIdMap.forEach { info ->
                 val loc =
@@ -85,8 +92,8 @@ object LayoutImportExportHelper {
         }
     }
 
-    fun importModelFromXml(context: Context, xmlString: String) {
-        importModelFromXml(context, xmlString.toByteArray(StandardCharsets.UTF_8))
+    fun importModelFromXml(xmlString: String) {
+        importModelFromXml(xmlString.toByteArray(StandardCharsets.UTF_8))
     }
 
     /**
@@ -104,42 +111,39 @@ object LayoutImportExportHelper {
      * Internally, LauncherModel.rebindCallbacks() is called to load the updated data into in-memory
      * data model. This will short-circuit (and not load the new data) if called without callbacks.
      */
-    fun importModelFromXml(context: Context, data: ByteArray) {
-        val model = LauncherAppState.getInstance(context).model
-
+    fun importModelFromXml(data: ByteArray) {
         val digest = MessageDigest.getInstance("SHA-256").digest(data)
         val handle = createWithSha256(digest, LAYOUT_DIGEST_LABEL, 0, LAYOUT_DIGEST_TAG)
         val blobManager = context.getSystemService(BlobStoreManager::class.java)!!
-
-        val resolver = context.contentResolver
         val syncLatch = CountDownLatch(1)
 
+        val resolver = context.contentResolver
         blobManager.openSession(blobManager.createSession(handle)).use { session ->
             AutoCloseOutputStream(session.openWrite(0, -1)).use { it.write(data) }
             session.allowPublicAccess()
-
-            session.commit(ORDERED_BG_EXECUTOR) {
+            session.commit(backgroundExecutor) {
                 Secure.putString(resolver, LAYOUT_PROVIDER_KEY, createBlobProviderKey(digest))
                 val xmlString = data.toString(StandardCharsets.UTF_8)
                 GridSizeUtil(context).parseAndSetGridSize(xmlString)
                 FileLog.i(TAG, "Importing XML as Home Screen Layout:\n$xmlString")
-                MODEL_EXECUTOR.submit {
-                        try {
-                            model.modelDbController.createEmptyDB()
-                        } catch (e: SQLiteReadOnlyDatabaseException) {
-                            // This issue has only been observed in tests so far, likely due to less
-                            // strict threading for accessing and writing to the launcher test DB.
-                            Log.w(TAG, "Failed to clear Launcher DB. It was already deleted.", e)
-                        }
-                    }
-                    .get()
-                MAIN_EXECUTOR.submit { model.forceReload() }.get()
+                MODEL_EXECUTOR.submit { createEmptyDbSafe() }.get()
+                uiExecutor.submit { model.forceReload() }.get()
                 MODEL_EXECUTOR.submit {}.get()
-                Secure.putString(resolver, LAYOUT_PROVIDER_KEY, null)
                 syncLatch.countDown()
             }
         }
         syncLatch.await()
+    }
+
+    private fun createEmptyDbSafe() {
+        try {
+            model.modelDbController.createEmptyDB()
+        } catch (e: SQLiteReadOnlyDatabaseException) {
+            // This issue has only been observed in tests so far, likely due
+            // to less strict threading for accessing and writing to the
+            // launcher test DB.
+            Log.w(TAG, "Failed to clear Launcher DB. It was already deleted.", e)
+        }
     }
 
     private fun LauncherLayoutBuilder.ItemTarget.addItem(context: Context, info: ItemInfo) {
@@ -172,7 +176,7 @@ object LayoutImportExportHelper {
                     info.spanY,
                     userType,
                 )
-            ITEM_TYPE_APP_PAIR ->
+            ITEM_TYPE_APP_GROUP ->
                 (info as AppPairInfo).let { appPairInfo ->
                     putAppPair(appPairInfo.title?.toString() ?: "").also { appPairBuilder ->
                         appPairInfo.getContents().forEach { appPairContent ->
@@ -181,5 +185,9 @@ object LayoutImportExportHelper {
                     }
                 }
         }
+    }
+
+    companion object {
+        private const val TAG = "LayoutImportExportHelper"
     }
 }

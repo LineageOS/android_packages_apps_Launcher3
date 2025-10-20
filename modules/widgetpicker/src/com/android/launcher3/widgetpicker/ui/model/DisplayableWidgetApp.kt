@@ -28,6 +28,8 @@ import com.android.launcher3.widgetpicker.shared.model.isShortcut
  *
  * @param id unique id for the app section
  * @param title title for the widget
+ * @param accessibilityPrefix an optional prefix to be used for content description of the header
+ *   e.g. to differentiate between work / personal app when displayed together in same list.
  * @param widgetSizeGroups groups of similar sized widgets that can be displayed together
  * @param widgetsCount total number of widgets in the app
  * @param shortcutsCount total number of shortcuts in the app
@@ -37,6 +39,7 @@ import com.android.launcher3.widgetpicker.shared.model.isShortcut
 data class DisplayableWidgetApp(
     val id: WidgetAppId,
     val title: CharSequence?,
+    val accessibilityPrefix: String? = null,
     val widgetSizeGroups: List<WidgetSizeGroup>,
     val widgetsCount: Int,
     val shortcutsCount: Int,

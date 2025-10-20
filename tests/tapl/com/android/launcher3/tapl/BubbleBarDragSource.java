@@ -97,8 +97,8 @@ public interface BubbleBarDragSource {
                                 endPoint,
                                 LauncherInstrumentation.GestureScope.DONT_EXPECT_PILFER);
                         try (LauncherInstrumentation.Closable c4 = launcher.addContextLayer(
-                                "BubbleBar should appear")) {
-                            new BubbleBar(launcher);
+                                "BubbleBar should appear and expand")) {
+                            new BubbleBar(launcher).verifyExpanded(null);
                         }
                     }
                 }

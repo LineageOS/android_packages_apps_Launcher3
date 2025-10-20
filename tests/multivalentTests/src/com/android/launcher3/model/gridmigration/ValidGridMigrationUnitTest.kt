@@ -82,7 +82,7 @@ class ValidGridMigrationUnitTest {
                 .groupingBy {
                     when (it.type) {
                         Favorites.ITEM_TYPE_FOLDER,
-                        Favorites.ITEM_TYPE_APP_PAIR -> throw Exception("Not implemented")
+                        Favorites.ITEM_TYPE_APP_GROUP -> throw Exception("Not implemented")
                         Favorites.ITEM_TYPE_APPWIDGET -> it.appWidgetProvider
                         Favorites.ITEM_TYPE_APPLICATION -> it.intent
                         else -> it.title
@@ -125,13 +125,7 @@ class ValidGridMigrationUnitTest {
 
     private fun migrate(srcGrid: Grid, dstGrid: Grid): List<WorkspaceItem> {
         val userSerial = UserCache.INSTANCE[context].getSerialNumberForUser(Process.myUserHandle())
-        val dbHelper =
-            DatabaseHelper(
-                context,
-                null,
-                { UserCache.INSTANCE.get(context).getSerialNumberForUser(it) },
-                {},
-            )
+        val dbHelper = DatabaseHelper(context, null) {}
 
         dbHelper.writableDatabase.use { writableDb ->
             Favorites.addTableToDb(writableDb, userSerial, false, srcGrid.tableName)

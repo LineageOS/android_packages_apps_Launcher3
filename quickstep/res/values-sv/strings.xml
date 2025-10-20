@@ -47,7 +47,6 @@
     <string name="hotseat_tip_gaps_filled" msgid="3035673010274223538">"Appförslag har lagts till på tom yta"</string>
     <string name="hotsaet_tip_prediction_enabled" msgid="2233554377501347650">"Appförslag har aktiverats"</string>
     <string name="hotsaet_tip_prediction_disabled" msgid="1506426298884658491">"Appförslag har inaktiverats"</string>
-    <string name="hotseat_prediction_content_description" msgid="4582028296938078419">"Appförslag: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="gesture_tutorial_title" msgid="2750751261768388354">"Guide för navigering med rörelser"</string>
     <string name="gesture_tutorial_rotation_prompt_title" msgid="7537946781362766964">"Rotera enheten"</string>
     <string name="gesture_tutorial_rotation_prompt" msgid="1664493449851960691">"Rotera enheten för att slutföra guiden för navigering med rörelser"</string>
@@ -116,24 +115,29 @@
     <string name="toast_split_app_unsupported" msgid="2360229567007828914">"Välj en annan app för att använda delad skärm"</string>
     <string name="blocked_by_policy" msgid="2071401072261365546">"Appen eller organisationen tillåter inte den här åtgärden"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"Widgetar stöds för närvarande inte. Välj en annan app"</string>
+    <string name="action_image_copy" msgid="6877540054727709339">"Kopiera"</string>
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Rotera skärmen"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Animation som visar hur aktivitetsfältet dyker upp längst ned på skärmen och automatiskt döljs när det inte används"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Animation som visar hur du fäster aktivitetsfältet med ett reglage så att det alltid är synligt längst ned på skärmen"</string>
+    <string name="taskbar_edu_bubbles_animation_description" msgid="421866726938396813">"Animation som visar hur du skapar en bubbla från aktivitetsfältet genom att dra"</string>
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"Animation som visar hur du skapar en delad skärm genom att dra och släppa en app från aktivitetsfältet ovanför en öppen app"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"Animation som visar hur du kommer åt föreslagna appar på enheten"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"Animation som visar hur du söker efter ett objekt på skärmen genom att trycka länge på åtgärdstangenten och välja området där objektet finns"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Aktivitetsfältsutbildning"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Dra en app till sidan om du vill använda två appar samtidigt"</string>
+    <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"Dra den till ett av de nedre hörnen för att få den att flyta"</string>
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Svep långsamt uppåt för att visa aktivitetsfältet"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Få appförslag utifrån dina rutiner"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Tryck länge på avskiljaren om du vill fästa aktivitetsfältet"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Gör mer med aktivitetsfältet"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"Visa alltid aktivitetsfältet"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"Tryck länge på avgränsaren för att alltid visa aktivitetsfältet längst ned på skärmen"</string>
+    <string name="taskbar_edu_bubbles_standalone" msgid="4182824636656528043">"Dra en app till hörnet för att göra den flytande"</string>
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"Tryck länge på åtgärdstangenten för att söka efter det som finns på skärmen"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Den här produkten använder den valda delen av skärmen för att söka. Googles <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>integritetspolicy<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> och <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>användarvillkor<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> gäller."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Stäng"</string>
     <string name="taskbar_edu_done" msgid="6880178093977704569">"Klar"</string>
+    <string name="taskbar_edu_next" msgid="4007618274426775841">"Nästa"</string>
     <string name="taskbar_button_home" msgid="2151398979630664652">"Startsida"</string>
     <string name="taskbar_button_a11y" msgid="5241161324875094465">"Tillgänglighet"</string>
     <string name="taskbar_button_back" msgid="8558862226461164514">"Tillbaka"</string>
@@ -142,18 +146,12 @@
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"Aviseringar"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"Snabbinställn."</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"Aktivitetsfält"</string>
-    <string name="taskbar_a11y_shown_title" msgid="6842833581088937713">"Aktivitetsfältet visas"</string>
-    <string name="taskbar_a11y_shown_with_bubbles_left_title" msgid="4242431789851790046">"Vänster fält och bubblor visas"</string>
-    <string name="taskbar_a11y_shown_with_bubbles_right_title" msgid="8219065376188180113">"Höger fält och bubblor visas"</string>
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"Navigeringsfält"</string>
     <string name="always_show_taskbar" msgid="3608801276107751229">"Visa alltid aktivitetsfältet"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"Ändra navigeringsläge"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Avdelare för aktivitetsfältet"</string>
-    <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"Andra appar som använts nyligen"</string>
-    <!-- no translation found for app_added_to_taskbar (1160433791917609063) -->
-    <skip />
-    <!-- no translation found for app_removed_from_taskbar (7887298201562912487) -->
-    <skip />
+    <string name="taskbar_recents_overflow_a11y_title" msgid="8005941062446304304">"Andra appar som använts nyligen"</string>
+    <string name="taskbar_pinned_overflow_a11y_title" msgid="2314810718333302626">"Andra appar"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Flytta högst upp/till vänster"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Flytta längst ned/till höger"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"Öppna appen som en bubbla"</string>

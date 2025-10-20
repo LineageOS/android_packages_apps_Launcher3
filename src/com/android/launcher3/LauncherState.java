@@ -22,6 +22,7 @@ import static com.android.launcher3.logging.StatsLogManager.LAUNCHER_STATE_HOME;
 import static com.android.launcher3.logging.StatsLogManager.LAUNCHER_STATE_OVERVIEW;
 import static com.android.launcher3.testing.shared.TestProtocol.ALL_APPS_STATE_ORDINAL;
 import static com.android.launcher3.testing.shared.TestProtocol.BACKGROUND_APP_STATE_ORDINAL;
+import static com.android.launcher3.testing.shared.TestProtocol.DESKTOP_DRAG_MODE_ORDINAL;
 import static com.android.launcher3.testing.shared.TestProtocol.EDIT_MODE_STATE_ORDINAL;
 import static com.android.launcher3.testing.shared.TestProtocol.HINT_STATE_ORDINAL;
 import static com.android.launcher3.testing.shared.TestProtocol.HINT_STATE_TWO_BUTTON_ORDINAL;
@@ -43,6 +44,7 @@ import androidx.annotation.StringRes;
 import com.android.launcher3.deviceprofile.DeviceProperties;
 import com.android.launcher3.statemanager.BaseState;
 import com.android.launcher3.statemanager.StateManager;
+import com.android.launcher3.states.DesktopDragModeState;
 import com.android.launcher3.states.EditModeState;
 import com.android.launcher3.states.SpringLoadedState;
 import com.android.launcher3.testing.shared.TestProtocol;
@@ -95,6 +97,9 @@ public abstract class LauncherState implements BaseState<LauncherState> {
     // Flag indicating that this state should not be announced by Talkback when reached
     public static final int FLAG_SKIP_STATE_ANNOUNCEMENT = BaseState.getFlag(8);
 
+    // Flag indicating that the icons are being dragged in workspace.
+    public static final int FLAG_WORKSPACE_ICONS_BEING_DRAGGED = BaseState.getFlag(9);
+
 
     public static final float NO_OFFSET = 0;
     public static final float NO_SCALE = 1;
@@ -115,7 +120,7 @@ public abstract class LauncherState implements BaseState<LauncherState> {
                 }
             };
 
-    private static final LauncherState[] sAllStates = new LauncherState[11];
+    private static final LauncherState[] sAllStates = new LauncherState[12];
 
     /**
      * TODO: Create a separate class for NORMAL state.
@@ -135,6 +140,8 @@ public abstract class LauncherState implements BaseState<LauncherState> {
      */
     public static final LauncherState SPRING_LOADED = new SpringLoadedState(
             SPRING_LOADED_STATE_ORDINAL);
+    public static final LauncherState DESKTOP_DRAG_MODE = new DesktopDragModeState(
+            DESKTOP_DRAG_MODE_ORDINAL);
     public static final LauncherState EDIT_MODE = new EditModeState(EDIT_MODE_STATE_ORDINAL);
     public static final LauncherState ALL_APPS = new AllAppsState(ALL_APPS_STATE_ORDINAL);
     public static final LauncherState HINT_STATE = new HintState(HINT_STATE_ORDINAL);
@@ -223,7 +230,7 @@ public abstract class LauncherState implements BaseState<LauncherState> {
      */
     public int getFloatingSearchBarRestingMarginBottom(Launcher launcher) {
         DeviceProfile dp = launcher.getDeviceProfile();
-        return areElementsVisible(launcher.launcherUiState, FLOATING_SEARCH_BAR)
+        return areElementsVisible(launcher.getLauncherUiState(), FLOATING_SEARCH_BAR)
                 ? dp.getQsbOffsetY()
                 : -dp.getHotseatProfile().getQsbHeight();
     }
@@ -386,7 +393,7 @@ public abstract class LauncherState implements BaseState<LauncherState> {
         boolean shouldFadeAdjacentScreens = (this == NORMAL || this == HINT_STATE)
                 && dp.shouldFadeAdjacentWorkspaceScreens();
         // Avoid showing adjacent screens behind handheld All Apps sheet.
-        if (Flags.allAppsSheetForHandheld() && dp.getDeviceProperties().isPhone() && this == ALL_APPS) {
+        if (dp.getDeviceProperties().isPhone() && this == ALL_APPS) {
             shouldFadeAdjacentScreens = true;
         }
         if (!shouldFadeAdjacentScreens) {
@@ -405,7 +412,7 @@ public abstract class LauncherState implements BaseState<LauncherState> {
      * Gets the translation provider for workspace pages.
      */
     public PageTranslationProvider getWorkspacePageTranslationProvider(Launcher launcher) {
-        if (!(this == SPRING_LOADED || this == EDIT_MODE)
+        if (!this.hasFlag(FLAG_WORKSPACE_ICONS_BEING_DRAGGED)
                 || !launcher.getDeviceProfile().getDeviceProperties().isTwoPanels()) {
             return DEFAULT_PAGE_TRANSLATION_PROVIDER;
         }

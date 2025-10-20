@@ -32,21 +32,23 @@ import com.android.launcher3.DropTarget.DragObject
 import com.android.launcher3.dragndrop.DragOptions
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.taskbar.bubbles.BubbleBarController.BubbleBarLocationListener
-import com.android.quickstep.SystemUiProxy
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation
 import com.android.wm.shell.shared.bubbles.DeviceConfig
 import com.android.wm.shell.shared.bubbles.DragZoneFactory
 import com.android.wm.shell.shared.bubbles.DragZoneFactory.BubbleBarPropertiesProvider
 import com.android.wm.shell.shared.bubbles.DragZoneFactory.SplitScreenModeChecker.SplitScreenMode
 import com.android.wm.shell.shared.bubbles.DropTargetView
+import com.android.wm.shell.shared.bubbles.logging.EntryPoint
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.clearInvocations
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -63,7 +65,7 @@ class DragToBubbleControllerTest {
     private val context = getApplicationContext<Context>()
     private val container = FrameLayout(context)
     private val bubbleBarViewController: BubbleBarViewController = mock()
-    private val systemUiProxy: SystemUiProxy = mock()
+    private val bubbleActivityStarter: BubbleActivityStarter = mock()
     private val bubbleBarLocationListener: BubbleBarLocationListener = mock()
     private val bubbleBarPropertiesProvider = FakeBubbleBarPropertiesProvider()
     private val testDragZonesFactory = createTestDragZoneFactory()
@@ -107,7 +109,7 @@ class DragToBubbleControllerTest {
             bubbleBarViewController,
             bubbleBarPropertiesProvider,
             bubbleBarLocationListener,
-            systemUiProxy,
+            bubbleActivityStarter,
         )
         dragToBubbleController.dragZoneFactory = testDragZonesFactory
     }
@@ -294,8 +296,8 @@ class DragToBubbleControllerTest {
         }
 
         assertThat(dragToBubbleController.isItemDropHandled).isFalse()
-        verify(systemUiProxy, never()).showAppBubble(any(), any(), any())
-        verify(systemUiProxy, never()).showShortcutBubble(any(), any())
+        verify(bubbleActivityStarter, never()).showAppBubble(any(), any(), any(), any())
+        verify(bubbleActivityStarter, never()).showShortcutBubble(any(), any(), any())
     }
 
     @Test
@@ -315,7 +317,16 @@ class DragToBubbleControllerTest {
             bubbleBarLeftDropTarget.onDragExit(dragObject)
         }
 
-        verify(systemUiProxy).showAppBubble(itemIntent, appInfo.user, BubbleBarLocation.LEFT)
+        // Intent does not implement equals() so we need to capture and compare the intents manually
+        val intentCaptor = argumentCaptor<Intent>()
+        verify(bubbleActivityStarter)
+            .showAppBubble(
+                intentCaptor.capture(),
+                eq(appInfo.user),
+                eq(EntryPoint.TASKBAR_ICON_DRAG),
+                eq(BubbleBarLocation.LEFT),
+            )
+        assertThat(intentCaptor.firstValue.filterEquals(itemIntent)).isTrue()
     }
 
     @Test

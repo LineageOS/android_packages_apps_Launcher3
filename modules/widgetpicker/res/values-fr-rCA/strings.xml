@@ -34,7 +34,7 @@
     <string name="widgets_tab_accessibility_label" msgid="559010210491169400">"<xliff:g id="TAB_NAME">%1$s</xliff:g> widgets"</string>
     <string name="widget_picker_right_pane_accessibility_label" msgid="5095301787174820892">"Widgets <xliff:g id="SELECTED_HEADER">%1$s</xliff:g> à droite, recherche et options à gauche"</string>
     <string name="widget_picker_left_pane_accessibility_label" msgid="4719054594582596067">"Options de recherche et de widget à gauche, widgets à droite"</string>
-    <string name="widgets_search_bar_hint" msgid="5705758627532180867">"Rechercher"</string>
+    <string name="widgets_search_bar_hint" msgid="5705758627532180867">"Recherchez"</string>
     <string name="widget_search_bar_clear_button_label" msgid="6120140737164336517">"Effacer"</string>
     <string name="widget_search_bar_back_button_label" msgid="7028448831228587743">"Retour"</string>
     <string name="widgets_list_no_widgets_available" msgid="6451723564588621540">"Aucun widget ni raccourci accessible"</string>

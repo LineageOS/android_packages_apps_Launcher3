@@ -26,7 +26,6 @@ import android.content.Intent
 import android.content.pm.LauncherApps
 import android.content.pm.ShortcutInfo
 import android.os.UserHandle
-import android.os.UserManager
 import androidx.annotation.VisibleForTesting
 import com.android.launcher3.LauncherModel
 import com.android.launcher3.LauncherModel.ModelUpdateTask
@@ -63,8 +62,6 @@ constructor(
     @Assisted private val predictorState: PredictorState,
 ) : ItemFactory<ItemInfo> {
 
-    private val quietModeCache = mutableMapOf<UserHandle, Boolean>()
-
     // Number of items persisted can be different than what is needed if the grid changed between
     // the two operations
     private var readCount = 0
@@ -82,14 +79,9 @@ constructor(
                 val info =
                     AppInfo(
                         lai,
-                        userCache.getUserInfo(user),
+                        userCache.userManagerState.getCachedInfo(user),
                         apiWrapper,
                         pmHelper,
-                        quietModeCache.getOrPut(user) {
-                            context
-                                .getSystemService(UserManager::class.java)
-                                ?.isQuietModeEnabled(user) ?: true
-                        },
                     )
                 info.container = predictorState.containerId
                 iconCache.getTitleAndIcon(info, lai, predictorState.lookupFlag)

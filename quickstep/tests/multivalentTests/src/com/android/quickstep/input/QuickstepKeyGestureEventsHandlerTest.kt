@@ -27,12 +27,16 @@ import android.hardware.input.KeyGestureEvent.ACTION_GESTURE_START
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER
+import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_REJECT_HOME_ON_EXTERNAL_DISPLAY
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.launcher3.testutil.rule.LazyInitRule.Companion.lazyRule
 import com.android.launcher3.util.SandboxApplication
+import com.android.launcher3.util.SettingsCacheSandbox
+import com.android.quickstep.OverviewCommandHelper
 import com.android.quickstep.input.QuickstepKeyGestureEventsHandlerTest.FakeOverviewHandler.OverviewEvent
 import com.android.quickstep.input.QuickstepKeyGestureEventsManager.OverviewGestureHandler
 import com.android.quickstep.input.QuickstepKeyGestureEventsManager.OverviewGestureHandler.OverviewType
@@ -60,28 +64,33 @@ import org.mockito.kotlin.whenever
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class QuickstepKeyGestureEventsHandlerTest {
-    @get:Rule
-    val context =
-        spy(SandboxApplication()) {
-            on { checkSelfPermission(eq(MANAGE_KEY_GESTURES)) } doReturn PERMISSION_GRANTED
-        }
 
     @get:Rule val setFlagsRule = SetFlagsRule(SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT)
+    @get:Rule val contextSpy = lazyRule { spy(SandboxApplication()) }
 
-    private val inputManager =
-        context.spyService(InputManager::class.java).stub {
-            doNothing().whenever(it).registerKeyGestureEventHandler(any(), any())
-            doNothing().whenever(it).unregisterKeyGestureEventHandler(any())
-        }
+    private val context: SandboxApplication by contextSpy
+    private lateinit var inputManager: InputManager
+
+    private val settingsCacheSandbox = SettingsCacheSandbox()
+
     private val allAppsPendingIntent: PendingIntent = mock()
     private val keyGestureEventsCaptor: KArgumentCaptor<List<Int>> = argumentCaptor()
     private val fakeOverviewHandler = FakeOverviewHandler()
+    private val overviewCommandHelper = mock<OverviewCommandHelper>()
     private lateinit var keyGestureEventsManager: QuickstepKeyGestureEventsManager
 
     @Before
     fun setup() {
-        keyGestureEventsManager = QuickstepKeyGestureEventsManager(context)
-        keyGestureEventsManager.onUserSetupCompleteListener.onSettingsChanged(/* isEnabled= */ true)
+        doReturn(PERMISSION_GRANTED).whenever(context).checkSelfPermission(eq(MANAGE_KEY_GESTURES))
+        inputManager =
+            context.spyService(InputManager::class.java).stub {
+                doNothing().whenever(it).registerKeyGestureEventHandler(any(), any())
+                doNothing().whenever(it).unregisterKeyGestureEventHandler(any())
+            }
+
+        keyGestureEventsManager =
+            QuickstepKeyGestureEventsManager(context, settingsCacheSandbox.cache)
+        settingsCacheSandbox.listenable.dispatchValue(/* isEnabled= */ true)
     }
 
     @Test
@@ -177,6 +186,42 @@ class QuickstepKeyGestureEventsHandlerTest {
     }
 
     @Test
+    fun registerHomeGestureHandler_registerWithExpectedKeyGestureEvents() {
+        keyGestureEventsManager.registerHomeKeyGestureEvent(overviewCommandHelper)
+
+        verify(inputManager)
+            .registerKeyGestureEventHandler(
+                keyGestureEventsCaptor.capture(),
+                eq(keyGestureEventsManager.homeKeyGestureEventHandler),
+            )
+        assertThat(keyGestureEventsCaptor.firstValue)
+            .containsExactly(KEY_GESTURE_TYPE_REJECT_HOME_ON_EXTERNAL_DISPLAY)
+    }
+
+    @Test
+    fun registerHomeGestureHandlerTwice_registerWithExpectedKeyGestureEventsOnce() {
+        keyGestureEventsManager.registerHomeKeyGestureEvent(overviewCommandHelper)
+        keyGestureEventsManager.registerHomeKeyGestureEvent(overviewCommandHelper)
+
+        verify(inputManager)
+            .registerKeyGestureEventHandler(
+                keyGestureEventsCaptor.capture(),
+                eq(keyGestureEventsManager.homeKeyGestureEventHandler),
+            )
+        assertThat(keyGestureEventsCaptor.firstValue)
+            .containsExactly(KEY_GESTURE_TYPE_REJECT_HOME_ON_EXTERNAL_DISPLAY)
+    }
+
+    @Test
+    fun registerHomeGestureHandler_noPermission_unregisterHandler() {
+        whenever(context.checkSelfPermission(eq(MANAGE_KEY_GESTURES))).thenReturn(PERMISSION_DENIED)
+
+        keyGestureEventsManager.registerHomeKeyGestureEvent(overviewCommandHelper)
+
+        verifyNoInteractions(inputManager)
+    }
+
+    @Test
     @EnableFlags(Flags.FLAG_GRANT_MANAGE_KEY_GESTURES_TO_RECENTS)
     fun unregisterAllAppsHandler_flagEnabled_unregisterHandler() {
         keyGestureEventsManager.unregisterAllAppsKeyGestureEvent()
@@ -235,6 +280,25 @@ class QuickstepKeyGestureEventsHandlerTest {
     }
 
     @Test
+    fun unregisterHomeGestureHandler_unregisterHandler() {
+        keyGestureEventsManager.unregisterHomeKeyGestureEvent()
+
+        verify(inputManager)
+            .unregisterKeyGestureEventHandler(
+                eq(keyGestureEventsManager.homeKeyGestureEventHandler)
+            )
+    }
+
+    @Test
+    fun unregisterHomeGestureHandler_noPermission_noUnregister() {
+        whenever(context.checkSelfPermission(eq(MANAGE_KEY_GESTURES))).thenReturn(PERMISSION_DENIED)
+
+        keyGestureEventsManager.unregisterHomeKeyGestureEvent()
+
+        verifyNoInteractions(inputManager)
+    }
+
+    @Test
     @EnableFlags(Flags.FLAG_GRANT_MANAGE_KEY_GESTURES_TO_RECENTS)
     fun handleAllAppsEvent_flagEnabled_toggleAllAppsSearch() {
         keyGestureEventsManager.registerAllAppsKeyGestureEvent(allAppsPendingIntent)
@@ -253,9 +317,7 @@ class QuickstepKeyGestureEventsHandlerTest {
     @Test
     @EnableFlags(Flags.FLAG_GRANT_MANAGE_KEY_GESTURES_TO_RECENTS)
     fun handleAllAppsEvent_flagEnabled_userSetupIncomplete_noInteractionWithTaskbar() {
-        keyGestureEventsManager.onUserSetupCompleteListener.onSettingsChanged(
-            /* isEnabled= */ false
-        )
+        settingsCacheSandbox.listenable.dispatchValue(/* isEnabled= */ false)
         keyGestureEventsManager.registerAllAppsKeyGestureEvent(allAppsPendingIntent)
 
         keyGestureEventsManager.allAppsKeyGestureEventHandler.handleKeyGestureEvent(
@@ -323,9 +385,7 @@ class QuickstepKeyGestureEventsHandlerTest {
     @Test
     @EnableFlags(Flags.FLAG_GRANT_MANAGE_KEY_GESTURES_TO_RECENTS)
     fun handleRecentAppsEvent_userSetupIncomplete_noOverviewEventInFake() {
-        keyGestureEventsManager.onUserSetupCompleteListener.onSettingsChanged(
-            /* isEnabled= */ false
-        )
+        settingsCacheSandbox.listenable.dispatchValue(/* isEnabled= */ false)
         keyGestureEventsManager.registerOverviewKeyGestureEvent(fakeOverviewHandler)
 
         keyGestureEventsManager.overviewKeyGestureEventHandler.handleKeyGestureEvent(
@@ -396,9 +456,7 @@ class QuickstepKeyGestureEventsHandlerTest {
     @Test
     @EnableFlags(Flags.FLAG_GRANT_MANAGE_KEY_GESTURES_TO_RECENTS)
     fun handleRecentAppsSwitcherStartEvent_userSetupIncomplete_noOverviewEventInFake() {
-        keyGestureEventsManager.onUserSetupCompleteListener.onSettingsChanged(
-            /* isEnabled= */ false
-        )
+        settingsCacheSandbox.listenable.dispatchValue(/* isEnabled= */ false)
         keyGestureEventsManager.registerOverviewKeyGestureEvent(fakeOverviewHandler)
 
         keyGestureEventsManager.overviewKeyGestureEventHandler.handleKeyGestureEvent(
@@ -469,9 +527,7 @@ class QuickstepKeyGestureEventsHandlerTest {
     @Test
     @EnableFlags(Flags.FLAG_GRANT_MANAGE_KEY_GESTURES_TO_RECENTS)
     fun handleRecentAppsSwitcherCompleteEvent_userSetupIncomplete_noOverviewEventInFake() {
-        keyGestureEventsManager.onUserSetupCompleteListener.onSettingsChanged(
-            /* isEnabled= */ false
-        )
+        settingsCacheSandbox.listenable.dispatchValue(/* isEnabled= */ false)
         keyGestureEventsManager.registerOverviewKeyGestureEvent(fakeOverviewHandler)
 
         keyGestureEventsManager.overviewKeyGestureEventHandler.handleKeyGestureEvent(
@@ -519,6 +575,70 @@ class QuickstepKeyGestureEventsHandlerTest {
         )
 
         assertThat(fakeOverviewHandler.overviewEvent).isNull()
+    }
+
+    @Test
+    fun handleHomeEvent_addHomeCommand() {
+        keyGestureEventsManager.registerHomeKeyGestureEvent(overviewCommandHelper)
+
+        keyGestureEventsManager.homeKeyGestureEventHandler.handleKeyGestureEvent(
+            KeyGestureEvent.Builder()
+                .setDisplayId(TEST_DISPLAY_ID)
+                .setKeyGestureType(KEY_GESTURE_TYPE_REJECT_HOME_ON_EXTERNAL_DISPLAY)
+                .build(),
+            /* focusedToken= */ null,
+        )
+
+        verify(overviewCommandHelper)
+            .addCommand(OverviewCommandHelper.CommandType.HOME, TEST_DISPLAY_ID)
+    }
+
+    @Test
+    fun handleHomeEvent_userSetupIncomplete_noInteractionWithOverviewCommandHelper() {
+        settingsCacheSandbox.listenable.dispatchValue(/* isEnabled= */ false)
+        keyGestureEventsManager.registerHomeKeyGestureEvent(overviewCommandHelper)
+
+        keyGestureEventsManager.homeKeyGestureEventHandler.handleKeyGestureEvent(
+            KeyGestureEvent.Builder()
+                .setDisplayId(TEST_DISPLAY_ID)
+                .setKeyGestureType(KEY_GESTURE_TYPE_REJECT_HOME_ON_EXTERNAL_DISPLAY)
+                .build(),
+            /* focusedToken= */ null,
+        )
+
+        verifyNoInteractions(overviewCommandHelper)
+    }
+
+    @Test
+    fun handleHomeEvent_noPermission_noInteractionWithOverviewCommandHelper() {
+        whenever(context.checkSelfPermission(eq(MANAGE_KEY_GESTURES))).thenReturn(PERMISSION_DENIED)
+        keyGestureEventsManager.registerHomeKeyGestureEvent(overviewCommandHelper)
+
+        keyGestureEventsManager.homeKeyGestureEventHandler.handleKeyGestureEvent(
+            KeyGestureEvent.Builder()
+                .setDisplayId(TEST_DISPLAY_ID)
+                .setKeyGestureType(KEY_GESTURE_TYPE_REJECT_HOME_ON_EXTERNAL_DISPLAY)
+                .build(),
+            /* focusedToken= */ null,
+        )
+
+        verifyNoInteractions(overviewCommandHelper)
+    }
+
+    @Test
+    fun handleHomeEvent_wrongEventType_noInteractionWithOverviewCommandHelper() {
+        keyGestureEventsManager.registerHomeKeyGestureEvent(overviewCommandHelper)
+
+        // Use a different key gesture type
+        keyGestureEventsManager.homeKeyGestureEventHandler.handleKeyGestureEvent(
+            KeyGestureEvent.Builder()
+                .setDisplayId(TEST_DISPLAY_ID)
+                .setKeyGestureType(KEY_GESTURE_TYPE_ALL_APPS)
+                .build(),
+            /* focusedToken= */ null,
+        )
+
+        verifyNoInteractions(overviewCommandHelper)
     }
 
     private class FakeOverviewHandler : OverviewGestureHandler {

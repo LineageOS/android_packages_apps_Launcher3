@@ -16,6 +16,7 @@
 
 package com.android.launcher3.taskbar.rules
 
+import com.android.launcher3.Flags.enableTaskbarUiThread
 import com.android.quickstep.util.GroupTask
 import org.junit.rules.TestRule
 import org.junit.runner.Description
@@ -37,7 +38,11 @@ class MockedRecentsModelTestRule(private val modelHelper: MockedRecentsModelHelp
     fun updateRecentTasks(tasks: List<GroupTask>) {
         ++modelHelper.taskListId
         recentTasks = tasks
-        modelHelper.recentTasksChangedListener?.onRecentTasksChanged()
+        if (enableTaskbarUiThread()) {
+            modelHelper.onTaskChangeCallback?.invoke(null)
+        } else {
+            modelHelper.recentTasksChangedListener?.onRecentTasksChanged()
+        }
     }
 
     fun resolvePendingTaskRequests() {

@@ -17,11 +17,14 @@
 package com.android.quickstep.compose
 
 import android.content.Context
+import android.os.Trace
 import android.view.View
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composer
+import androidx.compose.runtime.CompositionTracer
+import androidx.compose.runtime.InternalComposeTracingApi
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.theme.PlatformTheme
 import com.android.launcher3.compose.ComposeFacade
 import com.android.launcher3.compose.core.BaseComposeFacade
@@ -31,21 +34,23 @@ import com.android.quickstep.recents.ui.viewmodel.TaskViewModel
 import com.android.quickstep.task.apptimer.TaskAppTimerUiState
 import com.android.quickstep.task.apptimer.ViewModel
 import com.android.quickstep.task.apptimer.ui.composable.AppTimerToast
-import com.android.quickstep.views.TaskViewIcon
+import com.android.quickstep.views.IconAppChipView
 
 object QuickstepComposeFacade : BaseComposeFacade, QuickstepComposeFeatures {
     override fun isComposeAvailable() = ComposeFacade.isComposeAvailable()
 
     override fun initComposeView(appContext: Context) = ComposeFacade.initComposeView(appContext)
 
+    override fun disposeComposition(view: View) = ComposeFacade.disposeComposition(view)
+
     override fun startIconAppChip(
-        composeView: TaskViewIcon,
+        composeView: IconAppChipView,
         viewModel: TaskViewModel,
         taskId: Int,
         onClick: () -> Unit,
         onLongClick: () -> Unit,
     ): View =
-        (composeView.asView() as ComposeView).apply {
+        (composeView as ComposeView).apply {
             setContent { MaterialTheme { TaskAppChip(viewModel, taskId, onClick, onLongClick) } }
         }
 
@@ -55,9 +60,29 @@ object QuickstepComposeFacade : BaseComposeFacade, QuickstepComposeFeatures {
     ): View {
         return (view as ComposeView).apply {
             setContent {
-                val timerUiState by viewModel.uiState.collectAsStateWithLifecycle()
-                PlatformTheme { AppTimerToast(timerUiState) }
+                val timerUiState by viewModel.uiState
+                PlatformTheme { AppTimerToast(timerUiState, viewModel) }
             }
         }
+    }
+
+    @OptIn(InternalComposeTracingApi::class)
+    override fun enableCompositionTracing() {
+        Composer.setTracer(
+            object : CompositionTracer {
+                override fun traceEventStart(key: Int, dirty1: Int, dirty2: Int, info: String) {
+                    Trace.traceBegin(Trace.TRACE_TAG_APP, info)
+                }
+
+                override fun traceEventEnd() = Trace.traceEnd(Trace.TRACE_TAG_APP)
+
+                override fun isTraceInProgress(): Boolean = Trace.isEnabled()
+            }
+        )
+    }
+
+    @OptIn(InternalComposeTracingApi::class)
+    override fun disableCompositionTracing() {
+        Composer.setTracer(null)
     }
 }

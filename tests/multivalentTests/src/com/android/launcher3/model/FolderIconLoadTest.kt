@@ -24,10 +24,10 @@ import com.android.launcher3.icons.BitmapInfo
 import com.android.launcher3.icons.waitForUpdateHandlerToFinish
 import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
+import com.android.launcher3.testutil.rule.LayoutResource
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.LauncherLayoutBuilder
 import com.android.launcher3.util.LauncherModelHelper.*
-import com.android.launcher3.util.LayoutResource
 import com.android.launcher3.util.ModelTestExtensions.bgDataModel
 import com.android.launcher3.util.ModelTestExtensions.loadModelSync
 import com.android.launcher3.util.SandboxApplication
@@ -44,7 +44,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class FolderIconLoadTest {
 
-    @get:Rule val context = SandboxApplication()
+    @get:Rule val context = SandboxApplication().withModelDependency()
     @get:Rule val layoutResource = LayoutResource(context)
 
     private val uniqueActivities =

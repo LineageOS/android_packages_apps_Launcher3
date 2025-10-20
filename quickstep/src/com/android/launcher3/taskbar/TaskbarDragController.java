@@ -17,6 +17,8 @@ package com.android.launcher3.taskbar;
 
 import static com.android.app.animation.Interpolators.FAST_OUT_SLOW_IN;
 import static com.android.launcher3.AbstractFloatingView.TYPE_TASKBAR_ALL_APPS;
+import static com.android.launcher3.Flags.enableSystemDrag;
+import static com.android.launcher3.Flags.enableTaskbarDragAndDrop;
 import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_ALL_APPS;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_ALL_APPS_PREDICTION;
@@ -124,10 +126,13 @@ public class TaskbarDragController extends DragController<BaseTaskbarContext> im
     private boolean mDisallowGlobalDrag;
     private boolean mDisallowLongClick;
 
-    private TaskbarUiState mTaskbarUiState;
+    private @Nullable TaskbarUiState mTaskbarUiState;
 
     private boolean mIsTaskbarDragging;
     private @Nullable DragToBubbleController mDragToBubbleController;
+
+    private @Nullable DragController.SystemDragHandler mSystemDragHandler;
+    private @Nullable View.OnDragListener mSystemDragListener;
 
     public TaskbarDragController(BaseTaskbarContext activity) {
         super(activity);
@@ -135,7 +140,7 @@ public class TaskbarDragController extends DragController<BaseTaskbarContext> im
         mDragIconSize = resources.getDimensionPixelSize(R.dimen.taskbar_icon_drag_icon_size);
     }
 
-    public void init(TaskbarControllers controllers, TaskbarUiState taskbarUiState) {
+    public void init(TaskbarControllers controllers, @Nullable TaskbarUiState taskbarUiState) {
         mControllers = controllers;
         mControllers.runAfterInit(() ->
                 mControllers.bubbleControllers
@@ -144,6 +149,9 @@ public class TaskbarDragController extends DragController<BaseTaskbarContext> im
                             mDragToBubbleController = dragToBubbleController;
                             mDragToBubbleController.addBubbleBarDropTargets(this);
                         }));
+        if (enableTaskbarDragAndDrop()) {
+            mControllers.taskbarViewDragDropController.addDropTargets(this);
+        }
         mTaskbarUiState = taskbarUiState;
     }
 
@@ -151,6 +159,9 @@ public class TaskbarDragController extends DragController<BaseTaskbarContext> im
     public void onDestroy() {
         mControllers.bubbleControllers.ifPresent(
                 c -> c.dragToBubbleController.removeBubbleBarDropTargets(this));
+        if (enableTaskbarDragAndDrop()) {
+            mControllers.taskbarViewDragDropController.removeDropTargets(this);
+        }
     }
 
     public void setDisallowGlobalDrag(boolean disallowGlobalDrag) {
@@ -181,7 +192,7 @@ public class TaskbarDragController extends DragController<BaseTaskbarContext> im
     private void updateIsDragging() {
         mIsTaskbarDragging = TaskbarDragController.super.isDragging()
                 || mIsSystemDragInProgress;
-        if (refactorTaskbarUiState()) {
+        if (refactorTaskbarUiState() && mTaskbarUiState != null) {
             mTaskbarUiState.setIsTaskbarDragging(mIsTaskbarDragging);
         }
     }
@@ -245,7 +256,6 @@ public class TaskbarDragController extends DragController<BaseTaskbarContext> im
                     (PopupContainerWithArrow<BaseTaskbarContext>)
                             mControllers.taskbarPopupController.show(btv);
             if (popupContainer != null) {
-                popupContainer.setUpdateIconUi(false);
                 dragOptions.preDragCondition = popupContainer.createPreDragCondition();
             }
         }
@@ -519,7 +529,7 @@ public class TaskbarDragController extends DragController<BaseTaskbarContext> im
                     View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_OPAQUE
                             | View.DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION)) {
                 notifyDragToBubbleController(/* dragInProgress = */ true);
-                onSystemDragStarted(btv);
+                onSystemDragStarted();
 
                 mActivity.getStatsLogManager().logger().withItemInfo(mDragObject.dragInfo)
                         .withInstanceId(launcherInstanceId)
@@ -531,30 +541,52 @@ public class TaskbarDragController extends DragController<BaseTaskbarContext> im
         AbstractFloatingView.closeAllOpenViews(mActivity);
     }
 
-    private void onSystemDragStarted(BubbleTextView btv) {
+    private void onSystemDragStarted() {
         mIsSystemDragInProgress = true;
         updateIsDragging();
-        mActivity.getDragLayer().setOnDragListener((view, dragEvent) -> {
-            switch (dragEvent.getAction()) {
-                case DragEvent.ACTION_DRAG_STARTED:
-                    // Return true to tell system we are interested in events, so we get DRAG_ENDED.
-                    return true;
-                case DragEvent.ACTION_DRAG_ENDED:
-                    mIsSystemDragInProgress = false;
-                    updateIsDragging();
-                    if (dragEvent.getResult()) {
-                        maybeOnDragEnd();
-                    } else {
-                        // This will take care of calling maybeOnDragEnd() after the animation
-                        animateGlobalDragViewToOriginalPosition(btv, dragEvent);
-                    }
-                    notifyDragToBubbleController(/* dragInProgress = */ false);
-                    mActivity.getDragLayer().setOnDragListener(null);
 
-                    return true;
+        if (enableSystemDrag()) {
+            if (mSystemDragHandler == null) {
+                mSystemDragHandler = this::onSystemDrag;
             }
-            return false;
-        });
+            mActivity.getDragController().addSystemDragHandler(mSystemDragHandler);
+        } else {
+            if (mSystemDragListener == null) {
+                mSystemDragListener = (view, dragEvent) -> onSystemDrag(dragEvent);
+            }
+            mActivity.getDragLayer().setOnDragListener(mSystemDragListener);
+        }
+    }
+
+    private boolean onSystemDrag(DragEvent dragEvent) {
+        final boolean enableSystemDrag = enableSystemDrag();
+        return switch (dragEvent.getAction()) {
+            case DragEvent.ACTION_DRAG_STARTED -> {
+                // Return true to tell system we are interested in events, so we get DRAG_ENDED.
+                yield true;
+            }
+            case DragEvent.ACTION_DRAG_ENDED -> {
+                mIsSystemDragInProgress = false;
+                updateIsDragging();
+                if (dragEvent.getResult()) {
+                    maybeOnDragEnd();
+                } else {
+                    // This will take care of calling maybeOnDragEnd() after the animation
+                    BubbleTextView btv = (BubbleTextView) mDragObject.originalView;
+                    animateGlobalDragViewToOriginalPosition(btv, dragEvent);
+                }
+                notifyDragToBubbleController(/* dragInProgress = */ false);
+
+                if (enableSystemDrag) {
+                    mActivity.getDragController().removeSystemDragHandler(mSystemDragHandler);
+                } else {
+                    mActivity.getDragLayer().setOnDragListener(null);
+                }
+
+                yield true;
+            }
+            default -> enableSystemDrag;
+        };
     }
 
     /**
@@ -776,10 +808,10 @@ public class TaskbarDragController extends DragController<BaseTaskbarContext> im
         }
         float toScale = iconSize / mDragIconSize;
         float toAlpha = (target == originalView) ? 1f : 0f;
-        MultiValueUpdateListener listener = new MultiValueUpdateListener() {
-            final FloatProp mDx = new FloatProp(fromX, toPosition[0], FAST_OUT_SLOW_IN);
-            final FloatProp mDy = new FloatProp(fromY, toPosition[1], FAST_OUT_SLOW_IN);
-            final FloatProp mScale = new FloatProp(1f, toScale, FAST_OUT_SLOW_IN);
+        MultiValueUpdateListener listener = new MultiValueUpdateListener(FAST_OUT_SLOW_IN) {
+            final FloatProp mDx = new FloatProp(fromX, toPosition[0]);
+            final FloatProp mDy = new FloatProp(fromY, toPosition[1]);
+            final FloatProp mScale = new FloatProp(1f, toScale);
             final FloatProp mAlpha = new FloatProp(1f, toAlpha, Interpolators.ACCELERATE_2);
             @Override
             public void onUpdate(float percent, boolean initOnly) {

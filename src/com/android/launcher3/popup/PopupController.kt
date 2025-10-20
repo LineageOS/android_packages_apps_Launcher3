@@ -49,7 +49,7 @@ interface PopupController<T> where T : Context, T : ActivityContext {
             popupDataRepository: PopupDataRepository,
             dragController: LauncherDragController,
         ): PopupController<T> where T : Context, T : ActivityContext? {
-            return PopupControllerForHomeScreenItems(popupDataRepository, dragController)
+            return PopupControllerForExtraHomeScreenItems(popupDataRepository, dragController)
         }
 
         /**

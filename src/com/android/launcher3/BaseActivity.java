@@ -30,6 +30,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ActionMode;
+import android.view.Display;
 import android.view.View;
 import android.window.OnBackInvokedDispatcher;
 
@@ -108,8 +109,9 @@ public abstract class BaseActivity extends Activity implements ActivityContext,
     private final LifecycleRegistry mLifecycleRegistry = new LifecycleRegistry(this);
     private final WeakCleanupSet mCleanupSet = new WeakCleanupSet(this);
 
-    protected DeviceProfile mDeviceProfile;
+    protected volatile DeviceProfile mDeviceProfile;
     protected SystemUiController mSystemUiController;
+    protected int mDisplayId;
     private StatsLogManager mStatsLogManager;
 
     public static final int ACTIVITY_STATE_STARTED = 1 << 0;
@@ -255,7 +257,13 @@ public abstract class BaseActivity extends Activity implements ActivityContext,
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Cache displayId as it is a binder call.
+        Display display = getDisplay();
+        mDisplayId = display != null ? display.getDisplayId() : Display.DEFAULT_DISPLAY;
         registerBackDispatcher();
+
+        // TODO: b/362720616 - Investigate the impact of adding listener using correct displayId.
         DisplayController.INSTANCE.get(this).addChangeListener(this);
     }
 

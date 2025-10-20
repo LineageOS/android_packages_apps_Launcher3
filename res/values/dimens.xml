@@ -109,7 +109,6 @@
     <dimen name="min_page_snap_velocity">1500dp</dimen>
 
     <!-- All Apps -->
-    <dimen name="all_apps_starting_vertical_translate">300dp</dimen>
     <dimen name="all_apps_search_bar_field_height">48dp</dimen>
     <!-- all_apps_search_bar_field_height / 2 -->
     <dimen name="all_apps_search_bar_content_overlap">24dp</dimen>
@@ -122,8 +121,6 @@
     <dimen name="all_apps_tabs_indicator_height">2dp</dimen>
     <dimen name="all_apps_header_top_margin">33dp</dimen>
     <dimen name="all_apps_header_top_padding">36dp</dimen>
-    <!-- Additional top padding to add when Floating Searchbar is enabled. -->
-    <dimen name="all_apps_additional_top_padding_floating_search">16dp</dimen>
     <dimen name="all_apps_header_bottom_padding">14dp</dimen>
     <dimen name="all_apps_header_top_adjustment">6dp</dimen>
     <dimen name="all_apps_header_bottom_adjustment">4dp</dimen>
@@ -361,6 +358,8 @@
     <dimen name="bg_popup_item_height">52dp</dimen>
     <dimen name="bg_popup_item_vertical_padding">12dp</dimen>
     <dimen name="pre_drag_view_scale">6dp</dimen>
+    <dimen name="deep_shortcut_add_button_size">48dp</dimen>
+    <dimen name="deep_shortcut_text_end_padding">48dp</dimen>
     <!-- Minimum size of the widget dragged view to keep it visible under the finger. -->
     <dimen name="widget_drag_view_min_scale_down_size">70dp</dimen>
     <!-- an icon with shortcuts must be dragged this far before the container is removed. -->
@@ -453,6 +452,8 @@
     <dimen name="taskbar_stashed_size">0dp</dimen>
     <dimen name="qsb_widget_height">0dp</dimen>
     <dimen name="qsb_shadow_height">0dp</dimen>
+    <dimen name="qsb_search_icon_tap_size">48dp</dimen>
+    <dimen name="qsb_search_icon_margin_start">4dp</dimen>
     <dimen name="min_hotseat_icon_space">18dp</dimen>
     <dimen name="max_hotseat_icon_space">50dp</dimen>
     <dimen name="min_hotseat_qsb_width">0dp</dimen>
@@ -462,6 +463,10 @@
     <dimen name="taskbar_minimized_app_indicator_width">0dp</dimen>
     <dimen name="taskbar_line_indicator_width_spring">0dp</dimen>
     <dimen name="taskbar_app_translate_y_spring">0dp</dimen>
+    <dimen name="persistent_taskbar_icon_size">0dp</dimen>
+    <dimen name="transient_taskbar_icon_size">0dp</dimen>
+    <dimen name="taskbar_unpinned_hit_rect_buffer">100dp</dimen>
+    <dimen name="taskbar_pinned_hit_rect_buffer">20dp</dimen>
 
     <!-- Transient taskbar (placeholders to compile in Launcher3 without Quickstep) -->
     <dimen name="transient_taskbar_padding">0dp</dimen>

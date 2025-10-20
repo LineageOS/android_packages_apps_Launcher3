@@ -266,7 +266,7 @@ public class NoButtonQuickSwitchTouchController implements TouchController,
         mRecentsView.setContentAlpha(1);
         mRecentsView.setFullscreenProgress(fromState.getOverviewFullscreenProgress());
         final boolean isOverviewActionVisible = (
-                fromState.getVisibleElements(mLauncher.launcherUiState)
+                fromState.getVisibleElements(mLauncher.getLauncherUiState())
                         & OVERVIEW_ACTIONS) != 0;
         mLauncher.getActionsView().getVisibilityAlpha().updateValue(
                 isOverviewActionVisible ? 1f : 0f);

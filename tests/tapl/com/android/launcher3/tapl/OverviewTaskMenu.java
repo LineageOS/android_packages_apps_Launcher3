@@ -170,4 +170,10 @@ public class OverviewTaskMenu {
     public void touchOutsideTaskMenuToDismiss() {
         mLauncher.touchOutsideContainer(mMenu, false);
     }
+
+    /** Taps the Clear item from the overview task menu. */
+    void tapClearMenuItem() {
+        mLauncher.clickLauncherObject(
+                mLauncher.waitForObjectInContainer(mMenu, By.text("Clear")));
+    }
 }

@@ -34,18 +34,27 @@ import org.mockito.kotlin.whenever
 @RunWith(LauncherMultivalentJUnit::class)
 class TaskbarSpecsEvaluatorTest {
 
-    private val taskbarFeatureEvaluator = mock<TaskbarFeatureEvaluator>()
-    private val taskbarActivityContext = mock<TaskbarActivityContext>()
-    private val deviceProfile = mock<DeviceProfile>()
-    private val deviceProperties = mock<DeviceProperties>()
-    private var taskbarSpecsEvaluator =
-        spy(TaskbarSpecsEvaluator(taskbarActivityContext, taskbarFeatureEvaluator, 0, 0))
+    private val taskbarFeatureEvaluator: TaskbarFeatureEvaluator = mock()
+    private val deviceProperties: DeviceProperties = mock()
+    private val deviceProfile: DeviceProfile = mock {
+        on { deviceProperties } doReturn deviceProperties
+    }
+    private val taskbarActivityContext: TaskbarActivityContext = mock {
+        on { deviceProfile } doReturn deviceProfile
+    }
+    private val taskbarSpecsEvaluator =
+        spy(
+            TaskbarSpecsEvaluator(
+                taskbarActivityContext,
+                taskbarFeatureEvaluator,
+                0,
+                0
+            )
+        )
 
     @Test
     fun testGetIconSizeByGrid_whenTaskbarIsTransient_withValidRowAndColumnInLandscape() {
-        doReturn(true).whenever(taskbarFeatureEvaluator).isTransient
-        doReturn(deviceProfile).whenever(taskbarActivityContext).deviceProfile
-        doReturn(deviceProperties).whenever(deviceProfile).deviceProperties
+        doReturn(false).whenever(taskbarFeatureEvaluator).hasNavButtons
         doReturn(true).whenever(deviceProperties).isLandscape
         assertThat(taskbarSpecsEvaluator.getIconSizeByGrid(4, 4))
             .isEqualTo(TaskbarIconSpecs.iconSize52dp)
@@ -53,9 +62,7 @@ class TaskbarSpecsEvaluatorTest {
 
     @Test
     fun testGetIconSizeByGrid_whenTaskbarIsTransient_withValidRowAndColumnInPortrait() {
-        doReturn(true).whenever(taskbarFeatureEvaluator).isTransient
-        doReturn(deviceProfile).whenever(taskbarActivityContext).deviceProfile
-        doReturn(deviceProperties).whenever(deviceProfile).deviceProperties
+        doReturn(false).whenever(taskbarFeatureEvaluator).hasNavButtons
         doReturn(false).whenever(deviceProperties).isLandscape
         assertThat(taskbarSpecsEvaluator.getIconSizeByGrid(4, 4))
             .isEqualTo(TaskbarIconSpecs.iconSize48dp)
@@ -63,9 +70,7 @@ class TaskbarSpecsEvaluatorTest {
 
     @Test
     fun testGetIconSizeByGrid_whenTaskbarIsTransient_withInvalidRowAndColumn() {
-        doReturn(true).whenever(taskbarFeatureEvaluator).isTransient
-        doReturn(deviceProfile).whenever(taskbarActivityContext).deviceProfile
-        doReturn(deviceProperties).whenever(deviceProfile).deviceProperties
+        doReturn(false).whenever(taskbarFeatureEvaluator).hasNavButtons
         doReturn(true).whenever(deviceProperties).isLandscape
         assertThat(taskbarSpecsEvaluator.getIconSizeByGrid(1, 2))
             .isEqualTo(TaskbarIconSpecs.defaultTransientIconSize)
@@ -73,14 +78,14 @@ class TaskbarSpecsEvaluatorTest {
 
     @Test
     fun testGetIconSizeByGrid_whenTaskbarIsPersistent() {
-        doReturn(false).whenever(taskbarFeatureEvaluator).isTransient
+        doReturn(true).whenever(taskbarFeatureEvaluator).hasNavButtons
         assertThat(taskbarSpecsEvaluator.getIconSizeByGrid(6, 5))
             .isEqualTo(TaskbarIconSpecs.defaultPersistentIconSize)
     }
 
     @Test
     fun testGetIconSizeStepDown_whenTaskbarIsPersistent() {
-        doReturn(false).whenever(taskbarFeatureEvaluator).isTransient
+        doReturn(true).whenever(taskbarFeatureEvaluator).hasNavButtons
         assertThat(taskbarSpecsEvaluator.getIconSizeStepDown(TaskbarIconSpecs.iconSize44dp))
             .isEqualTo(TaskbarIconSpecs.defaultPersistentIconSize)
     }
@@ -101,7 +106,7 @@ class TaskbarSpecsEvaluatorTest {
 
     @Test
     fun testGetIconSizeStepUp_whenTaskbarIsPersistent() {
-        doReturn(false).whenever(taskbarFeatureEvaluator).isTransient
+        doReturn(true).whenever(taskbarFeatureEvaluator).hasNavButtons
         assertThat(taskbarSpecsEvaluator.getIconSizeStepUp(TaskbarIconSpecs.iconSize40dp))
             .isEqualTo(TaskbarIconSpecs.iconSize40dp)
     }

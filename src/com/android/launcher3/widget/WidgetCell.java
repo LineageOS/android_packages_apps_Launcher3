@@ -16,6 +16,7 @@
 
 package com.android.launcher3.widget;
 
+import static android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_WIDGETS_TRAY;
@@ -314,7 +315,8 @@ public class WidgetCell extends LinearLayout {
             AppWidgetProviderInfo providerInfo,
             @Nullable RemoteViews remoteViews) {
         appWidgetHostViewPreview.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
-        appWidgetHostViewPreview.setAppWidget(/* appWidgetId= */ -1, providerInfo);
+        appWidgetHostViewPreview.setAppWidget(/* appWidgetId= */ INVALID_APPWIDGET_ID,
+                providerInfo);
         appWidgetHostViewPreview.updateAppWidget(remoteViews);
         appWidgetHostViewPreview.setClipToPadding(false);
         appWidgetHostViewPreview.setClipChildren(false);

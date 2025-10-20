@@ -35,7 +35,6 @@ import com.android.launcher3.states.StateAnimationConfig.ANIM_OVERVIEW_SCALE
 import com.android.launcher3.states.StateAnimationConfig.ANIM_OVERVIEW_TRANSLATE_X
 import com.android.launcher3.states.StateAnimationConfig.ANIM_OVERVIEW_TRANSLATE_Y
 import com.android.launcher3.states.StateAnimationConfig.SKIP_OVERVIEW
-import com.android.launcher3.util.OverviewReleaseFlags.enableGridOnlyOverview
 import com.android.quickstep.util.AnimUtils
 import com.android.quickstep.views.AddDesktopButton
 import com.android.quickstep.views.ClearAllButton
@@ -52,7 +51,6 @@ import com.android.quickstep.views.RecentsView.TASK_SECONDARY_SPLIT_TRANSLATION
 import com.android.quickstep.views.RecentsView.TASK_SECONDARY_TRANSLATION
 import com.android.quickstep.views.RecentsView.TASK_THUMBNAIL_SPLASH_ALPHA
 import com.android.quickstep.views.RecentsViewUtils.Companion.DESK_EXPLODE_PROGRESS
-import com.android.quickstep.views.TaskView.Companion.FLAG_UPDATE_ALL
 
 /**
  * State handler for handling UI changes for [com.android.quickstep.views.LauncherRecentsView]. In
@@ -143,8 +141,7 @@ class RecentsViewStateController(private val launcher: QuickstepLauncher) :
             toState.overviewModalness,
             config.getInterpolator(
                 ANIM_OVERVIEW_MODAL,
-                if (enableGridOnlyOverview() && !toState.isRecentsViewVisible) FINAL_FRAME
-                else LINEAR,
+                if (!toState.isRecentsViewVisible) FINAL_FRAME else LINEAR,
             ),
         )
 
@@ -181,7 +178,7 @@ class RecentsViewStateController(private val launcher: QuickstepLauncher) :
 
         if (toState.isRecentsViewVisible) {
             // While animating into recents, update the visible task data as needed
-            builder.addOnFrameCallback { recentsView.loadVisibleTaskData(FLAG_UPDATE_ALL) }
+            builder.addOnFrameCallback { recentsView.loadVisibleTaskData() }
             recentsView.updateEmptyMessage()
         } else {
             builder.addListener(forSuccessCallback { recentsView.resetTaskVisuals() })
@@ -247,10 +244,7 @@ class RecentsViewStateController(private val launcher: QuickstepLauncher) :
             )
         if (!goingToOverviewFromWorkspaceContextual) {
             // This animation is already done for the contextual case, don't redo it
-            recentsView.createSplitSelectInitAnimation(
-                builder,
-                toState.getTransitionDuration(launcher, true),
-            )
+            recentsView.createSplitSelectInitAnimation(builder)
         }
         // Shift tasks vertically downward to get out of placeholder view
         builder.setFloat(

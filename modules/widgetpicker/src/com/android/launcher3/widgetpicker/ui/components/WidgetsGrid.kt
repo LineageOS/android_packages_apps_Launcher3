@@ -261,12 +261,7 @@ private fun Details(
             onWidgetAddClick = onWidgetInteraction,
             onClick = onClick,
             onHoverChange = { isHovered -> onHoverChange(widgetItem.id, isHovered) },
-            modifier =
-                Modifier.semantics(mergeDescendants = true) {
-                    traversalIndex = index.toFloat()
-                    isTraversalGroup = true
-                    testTag = buildWidgetPickerTestTag(WIDGET_DETAILS_TEST_TAG)
-                },
+            traversalIndex = index,
         )
     }
 }
@@ -489,4 +484,3 @@ private object WidgetGridDimensions {
 }
 
 private const val WIDGET_PREVIEW_TEST_TAG = "widget_preview"
-private const val WIDGET_DETAILS_TEST_TAG = "widget_details"

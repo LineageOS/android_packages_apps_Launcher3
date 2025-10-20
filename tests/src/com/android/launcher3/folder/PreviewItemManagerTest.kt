@@ -24,12 +24,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn
 import com.android.launcher3.LauncherAppState
-import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherSettings.Favorites.DESKTOP_ICON_FLAG
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.graphics.PreloadIconDelegate
-import com.android.launcher3.graphics.ThemeManager
+import com.android.launcher3.graphics.theme.ThemePreference.Companion.MONO_THEME_VALUE
 import com.android.launcher3.icons.BitmapInfo
 import com.android.launcher3.icons.FastBitmapDrawable
 import com.android.launcher3.icons.IconCache
@@ -98,7 +97,7 @@ class PreviewItemManagerTest {
     fun setup() {
         context.initDaggerComponent(DaggerPreviewItemManagerTestComponent.builder())
         theseStateRule.themeState?.let {
-            LauncherPrefs.get(context).putSync(ThemeManager.THEMED_ICONS.to(it))
+            context.appComponent.themePreference.setValue(if (it) MONO_THEME_VALUE else null)
         }
         folderIcon = FolderIcon(uiContext)
 

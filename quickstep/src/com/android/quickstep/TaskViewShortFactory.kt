@@ -58,7 +58,7 @@ interface TaskViewShortFactory {
         override fun onClick(view: View) {
             val recentsView = taskView.recentsView ?: return
             dismissTaskMenuView()
-            recentsView.dismissTaskView(taskView, true, true)
+            recentsView.dismissTaskView(taskView, /* removeTask= */ true)
             mTarget.statsLogManager
                 .logger()
                 .withItemInfo(taskView.itemInfo)

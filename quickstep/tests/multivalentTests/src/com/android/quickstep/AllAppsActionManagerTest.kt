@@ -21,10 +21,12 @@ import android.content.IIntentSender
 import android.hardware.input.InputManager
 import android.provider.Settings
 import android.provider.Settings.Secure.USER_SETUP_COMPLETE
+import androidx.test.annotation.UiThreadTest
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.util.AllModulesForTest
+import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.SettingsCache
@@ -41,6 +43,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
@@ -51,6 +54,7 @@ private const val TIMEOUT = 5L
 private val USER_SETUP_COMPLETE_URI = Settings.Secure.getUriFor(USER_SETUP_COMPLETE)
 
 @RunWith(AndroidJUnit4::class)
+@UiThreadTest
 class AllAppsActionManagerTest {
     private val callbackSemaphore = Semaphore(0)
     private val bgExecutor = UI_HELPER_EXECUTOR
@@ -61,7 +65,9 @@ class AllAppsActionManagerTest {
     private val settingsCacheSandbox =
         SettingsCacheSandbox().also { it[USER_SETUP_COMPLETE_URI] = 1 }
     private val quickstepKeyGestureEventsManager by
-        lazy(LazyThreadSafetyMode.NONE) { spy(QuickstepKeyGestureEventsManager(context)) }
+        lazy(LazyThreadSafetyMode.NONE) {
+            spy(QuickstepKeyGestureEventsManager(context, settingsCacheSandbox.cache))
+        }
 
     private val allAppsActionManager by
         lazy(LazyThreadSafetyMode.NONE) {
@@ -140,6 +146,7 @@ class AllAppsActionManagerTest {
     @Test
     fun taskbarPresent_userSetupIncomplete_actionUnregistered() {
         settingsCacheSandbox[USER_SETUP_COMPLETE_URI] = 0
+        TestUtil.runOnExecutorSync(MAIN_EXECUTOR) {}
         allAppsActionManager.isTaskbarPresent = true
         assertThat(allAppsActionManager.isActionRegistered).isFalse()
     }
@@ -155,6 +162,8 @@ class AllAppsActionManagerTest {
     fun taskbarPresent_userSetupCompleted_actionRegistered() {
         settingsCacheSandbox[USER_SETUP_COMPLETE_URI] = 0
         allAppsActionManager.isTaskbarPresent = true
+        TestUtil.runOnExecutorSync(bgExecutor) {}
+        reset(quickstepKeyGestureEventsManager)
 
         settingsCacheSandbox[USER_SETUP_COMPLETE_URI] = 1
         TestUtil.runOnExecutorSync(bgExecutor) {} // Force system action to register.
@@ -167,6 +176,8 @@ class AllAppsActionManagerTest {
     fun taskbarPresent_setupUiDismissed_actionRegistered() {
         allAppsActionManager.isSetupUiVisible = true
         allAppsActionManager.isTaskbarPresent = true
+        TestUtil.runOnExecutorSync(bgExecutor) {}
+        reset(quickstepKeyGestureEventsManager)
 
         allAppsActionManager.isSetupUiVisible = false
         TestUtil.runOnExecutorSync(bgExecutor) {} // Force system action to register.

@@ -57,7 +57,7 @@ sealed class AppIconBadge {
      * A badge that should be rendered using the provided drawable [drawableResId] and tinted with
      * provided [tintColor].
      */
-    data class DrawableBadge(@DrawableRes val drawableResId: Int, val tintColor: Int) :
+    data class DrawableBadge(@param:DrawableRes val drawableResId: Int, val tintColor: Int) :
         AppIconBadge()
 
     /** Indicates there is no badge available for an app icon. */

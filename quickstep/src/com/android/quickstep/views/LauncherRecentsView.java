@@ -21,13 +21,13 @@ import static com.android.launcher3.LauncherState.CLEAR_ALL_BUTTON;
 import static com.android.launcher3.LauncherState.OVERVIEW;
 import static com.android.launcher3.LauncherState.OVERVIEW_MODAL_TASK;
 import static com.android.launcher3.LauncherState.OVERVIEW_SPLIT_SELECT;
-import static com.android.launcher3.util.OverviewReleaseFlags.enableGridOnlyOverview;
 
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.ViewGroup;
 
 import androidx.annotation.Nullable;
 
@@ -45,7 +45,8 @@ import com.android.launcher3.util.SplitConfigurationOptions;
 import com.android.launcher3.util.SplitConfigurationOptions.SplitSelectSource;
 import com.android.quickstep.GestureState;
 import com.android.quickstep.SystemUiProxy;
-import com.android.quickstep.util.SplitSelectStateController;
+import com.android.quickstep.split.SplitSelectStateController;
+import com.android.quickstep.util.SurfaceTransactionApplier;
 import com.android.wm.shell.shared.GroupedTaskInfo;
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
 
@@ -74,8 +75,11 @@ public class LauncherRecentsView extends RecentsView<QuickstepLauncher, Launcher
     @Override
     public void init(OverviewActionsView actionsView,
             SplitSelectStateController splitPlaceholderView,
-            @Nullable DesktopRecentsTransitionController desktopRecentsTransitionController) {
-        super.init(actionsView, splitPlaceholderView, desktopRecentsTransitionController);
+            @Nullable DesktopRecentsTransitionController desktopRecentsTransitionController,
+            SurfaceTransactionApplier surfaceTransactionApplier,
+            @Nullable ViewGroup emptyRecentsMessageView) {
+        super.init(actionsView, splitPlaceholderView, desktopRecentsTransitionController,
+                surfaceTransactionApplier, emptyRecentsMessageView);
         setContentAlpha(0);
     }
 
@@ -131,13 +135,8 @@ public class LauncherRecentsView extends RecentsView<QuickstepLauncher, Launcher
     public void onStateTransitionStart(LauncherState toState) {
         setOverviewStateEnabled(toState.isRecentsViewVisible);
 
-        if (enableGridOnlyOverview()) {
-            if (toState.displayOverviewTasksAsGrid(mContainer.getDeviceProfile())) {
-                setOverviewGridEnabled(true);
-            }
-        } else {
-            setOverviewGridEnabled(
-                    toState.displayOverviewTasksAsGrid(mContainer.getDeviceProfile()));
+        if (toState.displayOverviewTasksAsGrid(mContainer.getDeviceProfile())) {
+            setOverviewGridEnabled(true);
         }
         setOverviewFullscreenEnabled(toState.getOverviewFullscreenProgress() == 1);
         if (toState == OVERVIEW_MODAL_TASK) {
@@ -161,10 +160,8 @@ public class LauncherRecentsView extends RecentsView<QuickstepLauncher, Launcher
     public void onStateTransitionComplete(LauncherState finalState) {
         DesktopVisibilityController.INSTANCE.get(mContainer).onLauncherStateChanged(
                 mContainer.getDisplayId(), finalState);
-        if (enableGridOnlyOverview()) {
-            if (!finalState.displayOverviewTasksAsGrid(mContainer.getDeviceProfile())) {
-                setOverviewGridEnabled(false);
-            }
+        if (!finalState.displayOverviewTasksAsGrid(mContainer.getDeviceProfile())) {
+            setOverviewGridEnabled(false);
         }
 
         if (!finalState.isRecentsViewVisible) {
@@ -181,9 +178,6 @@ public class LauncherRecentsView extends RecentsView<QuickstepLauncher, Launcher
         if (finalState.isRecentsViewVisible && finalState != OVERVIEW_MODAL_TASK) {
             setTaskBorderEnabled(true);
         }
-        if (isOverlayEnabled) {
-            mBlurUtils.setDrawLiveTileBelowRecents(true);
-        }
     }
 
     @Override
@@ -191,7 +185,7 @@ public class LauncherRecentsView extends RecentsView<QuickstepLauncher, Launcher
         super.setOverviewStateEnabled(enabled);
         if (enabled) {
             LauncherState state = getStateManager().getState();
-            boolean hasClearAllButton = (state.getVisibleElements(mContainer.launcherUiState)
+            boolean hasClearAllButton = (state.getVisibleElements(mContainer.getLauncherUiState())
                             & CLEAR_ALL_BUTTON) != 0;
             setDisallowScrollToClearAll(!hasClearAllButton);
         }

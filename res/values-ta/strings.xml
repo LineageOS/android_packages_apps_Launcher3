@@ -35,6 +35,7 @@
     <string name="close_task_accessibility" msgid="4765872229211282647">"%1$s ஐ மூடும்"</string>
     <string name="new_window_option_taskbar" msgid="6448780542727767211">"புதிய சாளரம்"</string>
     <string name="manage_windows_option_taskbar" msgid="2294109489960654212">"சாளரங்களை நிர்வகியுங்கள்"</string>
+    <string name="close_app_taskbar" msgid="3238979263877091273">"மூடு"</string>
     <string name="save_app_pair" msgid="5647523853662686243">"ஆப்ஸ் ஜோடியைச் சேமி"</string>
     <string name="app_pair_default_title" msgid="4045241727446873529">"<xliff:g id="APP1">%1$s</xliff:g> | <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="app_pair_unlaunchable_at_screen_size" msgid="3446551575502685376">"இந்தச் சாதனத்தில் இந்த ஆப்ஸ் ஜோடி ஆதரிக்கப்படவில்லை"</string>
@@ -106,6 +107,13 @@
     <string name="widget_settings" msgid="5280157748464495511">"அமைப்புகள்"</string>
     <string name="pin_to_taskbar" msgid="5914002252642242332">"செயல் பட்டியில் பின் செய்"</string>
     <string name="unpin_from_taskbar" msgid="1025883383457627426">"செயல் பட்டியிலிருந்து அகற்று"</string>
+    <!-- no translation found for no_room_in_taskbar (6885243748717395469) -->
+    <skip />
+    <string name="app_added_to_taskbar" msgid="6348755169793615171">"செயல் பட்டியில் ஆப்ஸ் சேர்க்கப்பட்டது"</string>
+    <string name="app_removed_from_taskbar" msgid="3471754847898675396">"செயல் பட்டியில் இருந்து ஆப்ஸ் அகற்றப்பட்டது"</string>
+    <string name="remove_system_shortcut_label" msgid="3991201411148073972">"அகற்று"</string>
+    <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"திற"</string>
+    <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"நீக்கு"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"குறுக்குவழிகளை நிறுவுதல்"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"பயனரின் அனுமதி இல்லாமல் குறுக்குவழிகளைச் சேர்க்கப் ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"முகப்புத் திரையின் அமைப்புகளையும் ஷார்ட்கட்களையும் படித்தல்"</string>
@@ -121,6 +129,7 @@
     <string name="paginate_right" msgid="6701038155201975878">"வலதுபுறம் பக்கங்களாகப் பிரித்தல்"</string>
     <string name="disabled_app_label" msgid="6673129024321402780">"<xliff:g id="APP_NAME">%1$s</xliff:g> முடக்கப்பட்டது"</string>
     <string name="dotted_app_label" msgid="1865617679843363410">"{count,plural, =1{{app_name} ஆப்ஸில் # அறிவிப்பு உள்ளது}other{{app_name} ஆப்ஸில் # அறிவிப்புகள் உள்ளன}}"</string>
+    <string name="hotseat_prediction_content_description" msgid="7680403232742709704">"கணித்த ஆப்ஸ்: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="default_scroll_format" msgid="7475544710230993317">"பக்கம் %1$d / %2$d"</string>
     <string name="workspace_scroll_format" msgid="8458889198184077399">"முகப்புத் திரை %1$d of %2$d"</string>
     <string name="workspace_new_page" msgid="257366611030256142">"புதிய முகப்புத் திரை பக்கம்"</string>
@@ -132,7 +141,9 @@
     <string name="folder_closed" msgid="4100806530910930934">"ஃபோல்டர் மூடப்பட்டது"</string>
     <string name="folder_renamed" msgid="1794088362165669656">"ஃபோல்டர் <xliff:g id="NAME">%1$s</xliff:g> என மறுபெயரிடப்பட்டது"</string>
     <string name="folder_name_format_exact" msgid="8626242716117004803">"ஃபோல்டர்: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> ஃபைல்கள்"</string>
+    <string name="folder_name_format_exact_with_dot" msgid="30828041991324911">"ஃபோல்டர்: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> ஃபைல்கள், அறிவிப்புகள் உள்ளன"</string>
     <string name="folder_name_format_overflow" msgid="4270108890534995199">"ஃபோல்டர்: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> அல்லது அதற்கு அதிகமான ஃபைல்கள்"</string>
+    <string name="folder_name_format_overflow_with_dot" msgid="9174809519194154156">"ஃபோல்டர்: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> அல்லது அதற்கு மேற்பட்ட ஃபைல்கள், அறிவிப்புகள் உள்ளன"</string>
     <string name="unnamed_folder" msgid="2420192029474044442">"பெயரிடப்படாத ஃபோல்டர்"</string>
     <string name="app_pair_name_format" msgid="8134106404716224054">"ஆப்ஸ் ஜோடி: <xliff:g id="APP1">%1$s</xliff:g> மற்றும் <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="styles_wallpaper_button_text" msgid="8216961355289236794">"வால்பேப்பர் &amp; ஸ்டைல்"</string>
@@ -141,6 +152,9 @@
     <string name="msg_disabled_by_admin" msgid="6898038085516271325">"உங்கள் நிர்வாகி முடக்கியுள்ளார்"</string>
     <string name="allow_rotation_title" msgid="7222049633713050106">"முகப்புத் திரை சுழற்சியை அனுமதித்தல்"</string>
     <string name="allow_rotation_desc" msgid="8662546029078692509">"மொபைலைச் சுழற்றும் போது"</string>
+    <string name="compose_developer_options_section" msgid="8211460486549952595">"Jetpack Compose"</string>
+    <string name="enable_composition_tracing_title" msgid="8989606591739368424">"காட்சியமைப்பை டிரேஸ் செய்வதை இயக்குங்கள்"</string>
+    <string name="enable_composition_tracing_desc" msgid="7187566039216492405">"அறிமுகத்தில் பெர்ஃபெட்டோ டிரேஸ் எடுக்கும்போது காட்சியமைப்பை டிரேஸ் செய்வதை இயக்கலாம்"</string>
     <string name="landscape_mode_title" msgid="5138814555934843926">"லேண்ட்ஸ்கேப் பயன்முறை"</string>
     <string name="landscape_mode_desc" msgid="3085236452297838664">"முகப்புத் திரையை லேண்ட்ஸ்கேப் பயன்முறையில் அமைக்கும்"</string>
     <string name="notification_dots_title" msgid="9062440428204120317">"அறிவிப்புப் புள்ளிகள்"</string>
@@ -229,4 +243,6 @@
     <string name="four_sided_cookie_shape_title" msgid="3275212586290522151">"4 பக்கம் கொண்ட குக்கீ"</string>
     <string name="seven_sided_cookie_shape_title" msgid="4862560582029671668">"7 பக்கம் கொண்ட குக்கீ"</string>
     <string name="arch_shape_title" msgid="2213843822192871318">"வளைவு"</string>
+    <string name="create_new_folder_button_text" msgid="4037052463794735069">"புதிய ஃபோல்டர்"</string>
+    <string name="default_new_folder_name" msgid="8821062664729412079">"புதிய ஃபோல்டர்"</string>
 </resources>

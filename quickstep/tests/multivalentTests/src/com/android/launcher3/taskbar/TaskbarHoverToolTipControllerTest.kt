@@ -77,7 +77,7 @@ class TaskbarHoverToolTipControllerTest {
                 createHotseatFolderItem(),
             )
         runOnMainSync {
-            taskbarView.updateItems(hotseatItems, emptyList())
+            taskbarView.updateItems(hotseatItems, emptyList(), emptyList())
             iconView =
                 taskbarView.iconViews.filterIsInstance<BubbleTextView>().first {
                     it.tag is WorkspaceItemInfo

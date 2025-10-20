@@ -42,7 +42,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Process;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
@@ -117,8 +116,6 @@ public class PrivateSpaceHeaderViewTest {
     @Mock
     private UserCache mUserCache;
     @Mock
-    private UserManager mUserManager;
-    @Mock
     private StatsLogManager mStatsLogManager;
 
     @Before
@@ -128,8 +125,7 @@ public class PrivateSpaceHeaderViewTest {
         when(mUserCache.getUserProfiles())
                 .thenReturn(Arrays.asList(MAIN_HANDLE, PRIVATE_HANDLE));
         when(mUserCache.getUserInfo(Process.myUserHandle())).thenReturn(MAIN_ICON_INFO);
-        mPrivateProfileManager = new PrivateProfileManager(mUserManager,
-                mAllApps, mStatsLogManager, mUserCache);
+        mPrivateProfileManager = new PrivateProfileManager(mAllApps, mStatsLogManager, mUserCache);
         mPsHeaderLayout = (RelativeLayout) LayoutInflater.from(mContext).inflate(
                 R.layout.private_space_header, null);
     }

@@ -95,7 +95,7 @@ public final class KeyboardQuickSwitchController implements
     public void init(@NonNull TaskbarControllers controllers) {
         mControllers = controllers;
         mModel = RecentsModel.INSTANCE.get(controllers.taskbarActivityContext);
-        mIsProjectedMode = DesktopState.fromContext(
+        mIsProjectedMode = DesktopState.getInstance(
                 mControllers.taskbarActivityContext).isProjectedMode();
     }
 
@@ -182,12 +182,13 @@ public final class KeyboardQuickSwitchController implements
                                         wasOpenedFromTaskbar ? 0 : mNumHiddenTasks,
                                         currentFocusIndexOverride,
                                         mHasDesktopTask,
-                                        mWasDesktopTaskFilteredOut);
+                                        mWasDesktopTaskFilteredOut,
+                                        /* useAnimationStartDelay= */ !wasOpenedFromTaskbar);
                             });
                 }
 
-                mQuickSwitchViewController.updateLayoutForSurface(wasOpenedFromTaskbar,
-                        currentFocusIndexOverride);
+                mQuickSwitchViewController.updateLayoutForSurface(
+                        wasOpenedFromTaskbar, currentFocusIndexOverride);
                 return;
             } else {
                 // Allow the KQS to be reopened during the close animation to make it more
@@ -269,7 +270,14 @@ public final class KeyboardQuickSwitchController implements
             processLoadedTasksOutsideDesktop(tasks, taskIdsToExclude);
         }
 
-        // Find the non-desktop tasks that were excluded from mTasks.
+        // With flattened KQS structure, there is no max app limit and so there is no overview.
+        if (enableAltTabKqsFlatenning.isTrue() && !openedFromTaskbar) {
+            mFirstHiddenTaskIds = null;
+            mNumHiddenTasks = 0;
+            return;
+        }
+
+        // Find the non-desktop tasks that were excluded from mTasks when opened from taskbar.
         // These are the tasks we want to refer to in the overview button.
         List<GroupTask> hiddenTasks = tasks.stream()
                 .filter(task -> !mTasks.contains(task) && !(task instanceof DesktopTask))
@@ -303,7 +311,7 @@ public final class KeyboardQuickSwitchController implements
                 .filter(this::shouldIncludeTaskBasedOnProjectedMode)
                 .sorted(combinedTasksComparator());
 
-        if (!openedFromTaskbar) {
+        if (!enableAltTabKqsFlatenning.isTrue() && !openedFromTaskbar) {
             allTasks = allTasks.limit(MAX_TASKS);
         }
 
@@ -543,6 +551,12 @@ public final class KeyboardQuickSwitchController implements
         boolean isAspectRatioSquare() {
             return mControllers != null && LayoutUtils.isAspectRatioSquare(
                     mControllers.taskbarActivityContext.getDeviceProfile().getDeviceProperties().getAspectRatio());
+        }
+
+        boolean isLandscape() {
+            return mControllers != null
+                    && mControllers.taskbarActivityContext
+                    .getDeviceProfile().getDeviceProperties().isLandscape();
         }
 
         @Nullable

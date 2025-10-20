@@ -164,6 +164,7 @@ public class NavHandleLongPressInputConsumer extends DelegateInputConsumer {
 
     @Override
     public void onConsumerAboutToBeSwitched() {
+        super.onConsumerAboutToBeSwitched();
         if (MAIN_EXECUTOR.getHandler().hasCallbacks(mTriggerLongPress)) {
             cancelLongPress(CANCEL_REASON_INPUT_CONSUMER_SWITCHED);
         }

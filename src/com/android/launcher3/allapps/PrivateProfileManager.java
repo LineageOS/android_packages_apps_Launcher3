@@ -47,7 +47,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -84,6 +83,7 @@ import com.android.launcher3.views.RecyclerViewFastScroller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 /**
@@ -149,11 +149,11 @@ public class PrivateProfileManager extends UserProfileManager {
     private final String mUnLockedStateContentDesc;
     private final String mPSAppTitleOverride;
 
-    public PrivateProfileManager(UserManager userManager,
+    public PrivateProfileManager(
             ActivityAllAppsContainerView<?> allApps,
             StatsLogManager statsLogManager,
             UserCache userCache) {
-        super(userManager, statsLogManager, userCache);
+        super(statsLogManager, userCache);
         mAllApps = allApps;
         mPrivateProfileMatcher = (user) -> userCache.getUserInfo(user).isPrivate();
 
@@ -346,7 +346,7 @@ public class PrivateProfileManager extends UserProfileManager {
      * When the list of system apps is empty, all apps are treated as system.
      */
     public Predicate<AppInfo> splitIntoUserInstalledAndSystemApps(Context context) {
-        List<String> preInstallApps = UserCache.getInstance(context)
+        Set<String> preInstallApps = UserCache.getInstance(context)
                 .getPreInstallApps(getProfileUser());
         return appInfo -> !preInstallApps.isEmpty()
                 && (appInfo.componentName == null

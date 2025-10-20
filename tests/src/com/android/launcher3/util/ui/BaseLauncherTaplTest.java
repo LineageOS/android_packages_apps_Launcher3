@@ -18,6 +18,7 @@ package com.android.launcher3.util.ui;
 
 import static android.os.Process.myUserHandle;
 import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
+import static android.view.Display.DEFAULT_DISPLAY;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
@@ -55,7 +56,6 @@ import com.android.launcher3.tapl.HomeAppIcon;
 import com.android.launcher3.tapl.LauncherInstrumentation;
 import com.android.launcher3.tapl.TestHelpers;
 import com.android.launcher3.util.TestUtil;
-import com.android.launcher3.util.Wait;
 import com.android.launcher3.util.rule.FailureWatcher;
 import com.android.launcher3.util.rule.SamplerRule;
 import com.android.launcher3.util.rule.ScreenRecordRule;
@@ -63,7 +63,6 @@ import com.android.launcher3.util.rule.ShellCommandRule;
 import com.android.launcher3.util.rule.SkipAfterTimeOutRule;
 import com.android.launcher3.util.rule.TestIsolationRule;
 import com.android.launcher3.util.rule.TestStabilityRule;
-import com.android.launcher3.util.workspace.FavoriteItemsTransaction;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -112,6 +111,8 @@ public abstract class BaseLauncherTaplTest {
     private final ActivityManager mActivityManager;
     private long mMemoryBefore;
 
+    protected int mDisplayId = DEFAULT_DISPLAY;
+
     /** Detects UI surface leaks and throws an exception if a leak is found. */
     public static void checkDetectedLeaks(LauncherInstrumentation launcher) {
         if (TestStabilityRule.isPresubmit()) return; // b/313501215
@@ -119,12 +120,12 @@ public abstract class BaseLauncherTaplTest {
         if (sUiSurfaceLeakReported) return;
 
         // Check whether activity leak detector has found leaked activities.
-        Wait.atMost(() -> getUiSurfaceLeakErrorMessage(launcher),
-                () -> {
+        launcher.waitForCondition(() -> getUiSurfaceLeakErrorMessage(launcher),
+                DEFAULT_UI_TIMEOUT, () -> {
                     launcher.forceGc();
                     return MAIN_EXECUTOR.submit(
                             () -> launcher.noLeakedUiSurfaces()).get();
-                }, launcher, DEFAULT_UI_TIMEOUT);
+                });
     }
 
     public static String getAppPackageName() {
@@ -460,9 +461,10 @@ public abstract class BaseLauncherTaplTest {
 
         // Wait for the Launcher to stop.
         final LauncherInstrumentation launcherInstrumentation = new LauncherInstrumentation();
-        Wait.atMost("Launcher activity didn't stop",
-                () -> !launcherInstrumentation.isLauncherActivityStarted(),
-                launcherInstrumentation, DEFAULT_ACTIVITY_TIMEOUT);
+        launcherInstrumentation.waitForCondition(
+                "Launcher activity didn't stop",
+                DEFAULT_ACTIVITY_TIMEOUT,
+                () -> !launcherInstrumentation.isLauncherActivityStarted());
     }
 
     public static ActivityInfo resolveSystemAppInfo(String category) {
@@ -501,18 +503,16 @@ public abstract class BaseLauncherTaplTest {
         return homeAppIcon;
     }
 
-    protected void commitTransactionAndLoadHome(FavoriteItemsTransaction transaction) {
-        transaction.commit();
-
-        // Launch the home activity
-        UiDevice.getInstance(getInstrumentation()).pressHome();
-        mLauncher.waitForLauncherInitialized();
-    }
-
     /** Clears all recent tasks */
-    protected void clearAllRecentTasks() {
-        if (!mLauncher.getRecentTasks().isEmpty()) {
-            mLauncher.goHome().switchToOverview().dismissAllTasks();
+    public void clearAllRecentTasks() {
+        mLauncher.goHome();
+        try {
+            getUiDevice().executeShellCommand(
+                    "dumpsys activity service SystemUIService WMShell desktopmode removeAllDesks");
+            getUiDevice().executeShellCommand(
+                    "dumpsys activity service SystemUIService WMShell recents clearAll");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }

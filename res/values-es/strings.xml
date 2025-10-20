@@ -35,6 +35,7 @@
     <string name="close_task_accessibility" msgid="4765872229211282647">"Cerrar %1$s"</string>
     <string name="new_window_option_taskbar" msgid="6448780542727767211">"Ventana nueva"</string>
     <string name="manage_windows_option_taskbar" msgid="2294109489960654212">"Gestionar ventanas"</string>
+    <string name="close_app_taskbar" msgid="3238979263877091273">"Cerrar"</string>
     <string name="save_app_pair" msgid="5647523853662686243">"Guardar apps emparejadas"</string>
     <string name="app_pair_default_title" msgid="4045241727446873529">"<xliff:g id="APP1">%1$s</xliff:g> | <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="app_pair_unlaunchable_at_screen_size" msgid="3446551575502685376">"El dispositivo no admite esta aplicación emparejada"</string>
@@ -84,7 +85,7 @@
     <string name="all_apps_no_search_results" msgid="3200346862396363786">"No se han encontrado aplicaciones que contengan \"<xliff:g id="QUERY">%1$s</xliff:g>\""</string>
     <string name="label_application" msgid="8531721983832654978">"Aplicación"</string>
     <string name="all_apps_label" msgid="5015784846527570951">"Todas las aplicaciones"</string>
-    <string name="all_apps_list_label" msgid="5106226764073070906">"Lista de aplicaciones"</string>
+    <string name="all_apps_list_label" msgid="5106226764073070906">"Lista de apps"</string>
     <string name="notifications_header" msgid="1404149926117359025">"Notificaciones"</string>
     <string name="long_press_shortcut_to_add" msgid="5405328730817637737">"Mantén pulsado un acceso directo para moverlo."</string>
     <string name="long_accessible_way_to_add_shortcut" msgid="2199537273817090740">"Toca dos veces y mantén pulsado un acceso directo para moverlo o usar acciones personalizadas."</string>
@@ -96,7 +97,7 @@
     <string name="all_apps_button_work_label" msgid="7270707118948892488">"Lista de aplicaciones del trabajo"</string>
     <string name="remove_drop_target_label" msgid="7812859488053230776">"Quitar"</string>
     <string name="uninstall_drop_target_label" msgid="4722034217958379417">"Desinstalar"</string>
-    <string name="app_info_drop_target_label" msgid="692894985365717661">"Info de la app"</string>
+    <string name="app_info_drop_target_label" msgid="692894985365717661">"Info de la aplicación"</string>
     <string name="install_private_system_shortcut_label" msgid="1616889277073184841">"Descargar en privado"</string>
     <string name="uninstall_private_system_shortcut_label" msgid="8423460530441627982">"Desinstalar aplicación"</string>
     <string name="install_drop_target_label" msgid="2539096853673231757">"Instalar"</string>
@@ -106,6 +107,15 @@
     <string name="widget_settings" msgid="5280157748464495511">"Ajustes"</string>
     <string name="pin_to_taskbar" msgid="5914002252642242332">"Fijar a Barra de Tareas"</string>
     <string name="unpin_from_taskbar" msgid="1025883383457627426">"Desfijar de Barra de Tareas"</string>
+    <!-- no translation found for no_room_in_taskbar (6885243748717395469) -->
+    <skip />
+    <string name="app_added_to_taskbar" msgid="6348755169793615171">"App añadida a la barra de tareas"</string>
+    <string name="app_removed_from_taskbar" msgid="3471754847898675396">"App quitada de la barra de tareas"</string>
+    <!-- no translation found for remove_system_shortcut_label (3991201411148073972) -->
+    <skip />
+    <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"Abrir"</string>
+    <!-- no translation found for home_screen_files_context_menu_move_to_trash_label (1145655050674479315) -->
+    <skip />
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"instalar accesos directos"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"Permite que una aplicación añada accesos directos sin intervención del usuario."</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"leer ajustes y accesos directos de la pantalla de inicio"</string>
@@ -121,6 +131,7 @@
     <string name="paginate_right" msgid="6701038155201975878">"Pasar a la página de la derecha"</string>
     <string name="disabled_app_label" msgid="6673129024321402780">"Se ha inhabilitado <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="dotted_app_label" msgid="1865617679843363410">"{count,plural, =1{{app_name} tiene # notificación}other{{app_name} tiene # notificaciones}}"</string>
+    <string name="hotseat_prediction_content_description" msgid="7680403232742709704">"App prevista: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="default_scroll_format" msgid="7475544710230993317">"Página %1$d de %2$d"</string>
     <string name="workspace_scroll_format" msgid="8458889198184077399">"Pantalla de inicio %1$d de %2$d"</string>
     <string name="workspace_new_page" msgid="257366611030256142">"Nueva página de pantalla de inicio"</string>
@@ -132,15 +143,20 @@
     <string name="folder_closed" msgid="4100806530910930934">"Carpeta cerrada"</string>
     <string name="folder_renamed" msgid="1794088362165669656">"Se ha cambiado el nombre de la carpeta a <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="folder_name_format_exact" msgid="8626242716117004803">"Carpeta: <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SIZE">%2$d</xliff:g> elementos)"</string>
+    <string name="folder_name_format_exact_with_dot" msgid="30828041991324911">"Carpeta: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> elementos, tiene notificaciones"</string>
     <string name="folder_name_format_overflow" msgid="4270108890534995199">"Carpeta: <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SIZE">%2$d</xliff:g> o más elementos)"</string>
+    <string name="folder_name_format_overflow_with_dot" msgid="9174809519194154156">"Carpeta: <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SIZE">%2$d</xliff:g> o más elementos, tiene notificaciones)"</string>
     <string name="unnamed_folder" msgid="2420192029474044442">"Carpeta sin nombre"</string>
-    <string name="app_pair_name_format" msgid="8134106404716224054">"Aplicaciones emparejadas: <xliff:g id="APP1">%1$s</xliff:g> y <xliff:g id="APP2">%2$s</xliff:g>"</string>
+    <string name="app_pair_name_format" msgid="8134106404716224054">"Apps emparejadas: <xliff:g id="APP1">%1$s</xliff:g> y <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="styles_wallpaper_button_text" msgid="8216961355289236794">"Fondo de pantalla y estilo"</string>
     <string name="edit_home_screen" msgid="8947858375782098427">"Editar pantalla de inicio"</string>
     <string name="settings_button_text" msgid="8873672322605444408">"Ajustes de la pantalla de inicio"</string>
     <string name="msg_disabled_by_admin" msgid="6898038085516271325">"Inhabilitado por el administrador"</string>
     <string name="allow_rotation_title" msgid="7222049633713050106">"Permitir rotación de la pantalla de inicio"</string>
     <string name="allow_rotation_desc" msgid="8662546029078692509">"Al girar el teléfono"</string>
+    <string name="compose_developer_options_section" msgid="8211460486549952595">"Jetpack Compose"</string>
+    <string name="enable_composition_tracing_title" msgid="8989606591739368424">"Habilitar el rastreo de composición"</string>
+    <string name="enable_composition_tracing_desc" msgid="7187566039216492405">"Habilita el rastreo de composición al hacer un rastreo de perfetto en la vista general"</string>
     <string name="landscape_mode_title" msgid="5138814555934843926">"Modo de vista horizontal"</string>
     <string name="landscape_mode_desc" msgid="3085236452297838664">"Establecer la pantalla de inicio en modo de vista horizontal"</string>
     <string name="notification_dots_title" msgid="9062440428204120317">"Burbujas de notificación"</string>
@@ -197,19 +213,19 @@
     <string name="accessibility_close" msgid="2277148124685870734">"Cerrar"</string>
     <string name="all_apps_personal_tab" msgid="4190252696685155002">"Personal"</string>
     <string name="all_apps_work_tab" msgid="4884822796154055118">"Trabajo"</string>
-    <string name="all_apps_personal_tab_content_description" msgid="6286808898381807242">"Pestaña Aplicaciones personales"</string>
-    <string name="all_apps_work_tab_content_description" msgid="3835637212347968316">"Pestaña Aplicaciones de trabajo"</string>
+    <string name="all_apps_personal_tab_content_description" msgid="6286808898381807242">"Pestaña Apps personales"</string>
+    <string name="all_apps_work_tab_content_description" msgid="3835637212347968316">"Pestaña Apps de trabajo"</string>
     <string name="work_profile_toggle_label" msgid="3081029915775481146">"Perfil de trabajo"</string>
     <string name="work_profile_edu_work_apps" msgid="7895468576497746520">"Las aplicaciones de trabajo tienen una insignia, y tu administrador de TI las puede ver"</string>
     <string name="work_apps_paused_title" msgid="3040901117349444598">"Las aplicaciones de trabajo están en pausa"</string>
-    <string name="work_apps_paused_info_body" msgid="1687828929959237477">"No recibirás notificaciones de tus aplicaciones de trabajo"</string>
+    <string name="work_apps_paused_info_body" msgid="1687828929959237477">"No recibirás notificaciones de tus apps de trabajo"</string>
     <string name="work_apps_paused_body" msgid="261634750995824906">"Tus aplicaciones de trabajo no pueden enviarte notificaciones, usar batería ni acceder a tu ubicación"</string>
-    <string name="work_apps_paused_telephony_unavailable_body" msgid="8358872357502756790">"No recibirás llamadas, mensajes de texto ni notificaciones de tus aplicaciones de trabajo"</string>
+    <string name="work_apps_paused_telephony_unavailable_body" msgid="8358872357502756790">"No recibirás llamadas, mensajes de texto ni notificaciones de tus apps de trabajo"</string>
     <string name="work_apps_paused_edu_banner" msgid="8872412121608402058">"Las aplicaciones de trabajo tienen una insignia y tu administrador de TI las puede ver"</string>
     <string name="work_apps_paused_edu_accept" msgid="6377476824357318532">"Entendido"</string>
     <string name="work_apps_pause_btn_text" msgid="4669288269140620646">"Pausar aplicaciones de trabajo"</string>
     <string name="work_apps_enable_btn_text" msgid="1736198302467317371">"Reanudar"</string>
-    <string name="work_scheduler_button_content_description" msgid="917340740986764967">"Horario de aplicaciones de trabajo"</string>
+    <string name="work_scheduler_button_content_description" msgid="917340740986764967">"Horario de apps de trabajo"</string>
     <string name="developer_options_filter_hint" msgid="5896817443635989056">"Filtro"</string>
     <string name="remote_action_failed" msgid="1383965239183576790">"Se ha producido un error: <xliff:g id="WHAT">%1$s</xliff:g>"</string>
     <string name="private_space_label" msgid="2359721649407947001">"Espacio privado"</string>
@@ -222,11 +238,13 @@
     <string name="ps_container_transition" msgid="8667331812048014412">"Cambiar a espacio privado"</string>
     <string name="ps_add_button_label" msgid="8127988716897128773">"Instalar"</string>
     <string name="ps_app_label_override" msgid="6876160706011676804">"Añadir"</string>
-    <string name="ps_add_button_content_description" msgid="3254274107740952556">"Descargar aplicaciones en el espacio privado"</string>
+    <string name="ps_add_button_content_description" msgid="3254274107740952556">"Descargar apps en el espacio privado"</string>
     <string name="ps_app_content_description" msgid="1129133475892816226">"Añade archivos y más al espacio privado"</string>
     <string name="circle_shape_title" msgid="3582075061179674565">"Círculo"</string>
     <string name="square_shape_title" msgid="3085320803149569308">"Cuadrado"</string>
     <string name="four_sided_cookie_shape_title" msgid="3275212586290522151">"Galleta de 4 lados"</string>
     <string name="seven_sided_cookie_shape_title" msgid="4862560582029671668">"Galleta de 7 lados"</string>
     <string name="arch_shape_title" msgid="2213843822192871318">"Arco"</string>
+    <string name="create_new_folder_button_text" msgid="4037052463794735069">"Nueva carpeta"</string>
+    <string name="default_new_folder_name" msgid="8821062664729412079">"Nueva carpeta"</string>
 </resources>

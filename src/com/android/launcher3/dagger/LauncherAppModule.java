@@ -31,7 +31,6 @@ import dagger.Module;
             WidgetModule.class,
             AppModule.class,
             PerDisplayModule.class,
-            LauncherConcurrencyModule.class,
             ExecutorsModule.class,
             LauncherExecutorsModule.class,
             LauncherWidgetPickerModule.class,
@@ -39,6 +38,7 @@ import dagger.Module;
             SettingsModule.class,
             SystemDragModule.class,
             HomeScreenFilesModule.class,
+            DesktopModule.class,
         },
         subcomponents = ActivityContextComponent.class)
 public class LauncherAppModule { }

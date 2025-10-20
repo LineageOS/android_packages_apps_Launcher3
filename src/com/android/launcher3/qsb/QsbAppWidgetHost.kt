@@ -92,7 +92,7 @@ class QsbAppWidgetHost @Inject constructor(@ApplicationContext private val ctx: 
 
     private class WrappedContext(ctx: Context) : ContextWrapper(ctx) {
 
-        override fun getMainLooper() = OSE_LOOPER
+        override fun getMainLooper() = OSE_LOOPER.looper
     }
 
     companion object {

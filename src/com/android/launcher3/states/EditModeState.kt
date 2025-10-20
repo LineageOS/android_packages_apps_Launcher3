@@ -32,7 +32,8 @@ class EditModeState(id: Int) : LauncherState(id, StatsLogManager.LAUNCHER_STATE_
                 FLAG_WORKSPACE_INACCESSIBLE or
                 FLAG_DISABLE_RESTORE or
                 FLAG_WORKSPACE_ICONS_CAN_BE_DRAGGED or
-                FLAG_WORKSPACE_HAS_BACKGROUNDS)
+                FLAG_WORKSPACE_HAS_BACKGROUNDS or
+                FLAG_WORKSPACE_ICONS_BEING_DRAGGED)
     }
 
     override fun getTransitionDuration(context: ActivityContext, isToState: Boolean) = 150

@@ -18,16 +18,18 @@ package com.android.launcher3.taskbar
 
 import android.content.Context
 import android.content.ContextWrapper
+import android.view.View
+import android.view.ViewGroup
 import com.android.launcher3.InMemoryLauncherPrefs
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.compose.widgetpicker.LauncherWidgetPickerModule
 import com.android.launcher3.concurrent.ExecutorsModule
 import com.android.launcher3.dagger.ApiWrapperModule
 import com.android.launcher3.dagger.AppModule
+import com.android.launcher3.dagger.DesktopModule
 import com.android.launcher3.dagger.HomeScreenFilesModule
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
-import com.android.launcher3.dagger.LauncherConcurrencyModule
 import com.android.launcher3.dagger.LauncherModelModule
 import com.android.launcher3.dagger.PerDisplayModule
 import com.android.launcher3.dagger.SettingsModule
@@ -35,11 +37,15 @@ import com.android.launcher3.dagger.StaticObjectModule
 import com.android.launcher3.dagger.SystemDragModule
 import com.android.launcher3.dagger.WidgetModule
 import com.android.launcher3.dagger.WindowManagerProxyModule
+import com.android.launcher3.qsb.QsbWidgetFactory
 import com.android.launcher3.util.PluginManagerWrapper
 import com.android.launcher3.util.SandboxContext
 import com.android.launcher3.util.dagger.LauncherExecutorsModule
+import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
+import dagger.Module
+import javax.inject.Inject
 
 /**
  * Sandbox for enabling Taskbar in direct boot mode.
@@ -71,6 +77,18 @@ class TaskbarBootAppContext(base: Context) : SandboxContext(base) {
     }
 }
 
+class NoOpQsbFactory @Inject constructor() : QsbWidgetFactory() {
+
+    override fun createView(container: ViewGroup): View =
+        View(container.context).apply { layoutParams = ViewGroup.LayoutParams(0, 0) }
+}
+
+@Module
+abstract class QsbWidgetModule {
+
+    @Binds abstract fun bindQsbWidgetModule(impl: NoOpQsbFactory): QsbWidgetFactory
+}
+
 @LauncherAppSingleton
 @Component(
     modules =
@@ -81,14 +99,15 @@ class TaskbarBootAppContext(base: Context) : SandboxContext(base) {
             WidgetModule::class,
             AppModule::class,
             PerDisplayModule::class,
-            LauncherConcurrencyModule::class,
             ExecutorsModule::class,
             LauncherExecutorsModule::class,
             LauncherWidgetPickerModule::class,
             LauncherModelModule::class,
             HomeScreenFilesModule::class,
+            DesktopModule::class,
             SettingsModule::class,
             SystemDragModule::class,
+            QsbWidgetModule::class,
         ]
 )
 interface TaskbarBootComponent : LauncherAppComponent {

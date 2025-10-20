@@ -20,7 +20,7 @@ import static android.provider.BaseColumns._ID;
 import static com.android.launcher3.LauncherPrefs.DB_FILE;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE;
-import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_PAIR;
+import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_GROUP;
 import static com.android.launcher3.LauncherSettings.Favorites.TABLE_NAME;
 import static com.android.launcher3.LauncherSettings.Favorites.addTableToDb;
 import static com.android.launcher3.provider.LauncherDbUtils.tableExists;
@@ -56,12 +56,14 @@ import com.android.launcher3.backuprestore.LauncherRestoreEventLogger.RestoreErr
 import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.dagger.LauncherAppSingleton;
 import com.android.launcher3.logging.FileLog;
+import com.android.launcher3.model.data.AppPairInfo;
 import com.android.launcher3.pm.UserCache;
 import com.android.launcher3.provider.LauncherDbUtils;
 import com.android.launcher3.provider.LauncherDbUtils.SQLiteTransaction;
 import com.android.launcher3.provider.RestoreDbTask;
 import com.android.launcher3.util.IntArray;
 import com.android.launcher3.widget.LauncherWidgetHolder;
+import com.android.wm.shell.Flags;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -125,8 +127,8 @@ public class ModelDbController {
         Runnable onEmptyDbCreateCallback = forMigration ? () -> { }
                 : () -> mPrefs.putSync(getEmptyDbCreatedKey(dbFile).to(true));
 
-        DatabaseHelper databaseHelper = new DatabaseHelper(mContext, dbFile,
-                this::getSerialNumberForUser, onEmptyDbCreateCallback);
+        DatabaseHelper databaseHelper = new DatabaseHelper(
+                mContext, dbFile, onEmptyDbCreateCallback);
         // Table creation sometimes fails silently, which leads to a crash loop.
         // This way, we will try to create a table every time after crash, so the device
         // would eventually be able to recover.
@@ -169,7 +171,6 @@ public class ModelDbController {
         createDbIfNotExists();
 
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-        addModifiedTime(initialValues);
         int rowId = mOpenHelper.dbInsertAndCheck(db, TABLE_NAME, initialValues);
         if (rowId >= 0) {
             onAddOrDeleteOp(db);
@@ -199,7 +200,6 @@ public class ModelDbController {
     public int update(ContentValues values, String selection, String[] selectionArgs) {
         createDbIfNotExists();
 
-        addModifiedTime(values);
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         return db.update(TABLE_NAME, values, selection, selectionArgs);
     }
@@ -455,8 +455,8 @@ public class ModelDbController {
     }
 
     /**
-     * Deletes any app pair that doesn't contain 2 member apps from the DB.
-     * @return Ids of deleted app pairs.
+     * Deletes any app group that contains an illegal number of member apps.
+     * @return Ids of deleted app groups.
      */
     @WorkerThread
     @Nullable
@@ -465,13 +465,23 @@ public class ModelDbController {
 
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         try (SQLiteTransaction t = new SQLiteTransaction(db)) {
-            // Select all entries with ITEM_TYPE = ITEM_TYPE_APP_PAIR whose id does not appear
-            // exactly twice in the CONTAINER column.
-            String selection =
-                    ITEM_TYPE + " = " + ITEM_TYPE_APP_PAIR
-                            + " AND " + _ID +  " NOT IN"
-                            + " (SELECT " + CONTAINER + " FROM " + TABLE_NAME
-                            + " GROUP BY " + CONTAINER + " HAVING COUNT(*) = 2)";
+            // Make sure that every container with ITEM_TYPE = ITEM_TYPE_APP_GROUP has an expected
+            // number of items inside. If not, delete them.
+            String selection;
+            if (Flags.enable2x1Split()) {
+                selection =
+                        ITEM_TYPE + " = " + ITEM_TYPE_APP_GROUP
+                                + " AND " + _ID +  " NOT IN"
+                                + " (SELECT " + CONTAINER + " FROM " + TABLE_NAME
+                                + " GROUP BY " + CONTAINER + " HAVING COUNT BETWEEN "
+                                + AppPairInfo.MIN_ITEMS + " AND " + AppPairInfo.MAX_ITEMS + ")";
+            } else {
+                selection =
+                        ITEM_TYPE + " = " + ITEM_TYPE_APP_GROUP
+                                + " AND " + _ID +  " NOT IN"
+                                + " (SELECT " + CONTAINER + " FROM " + TABLE_NAME
+                                + " GROUP BY " + CONTAINER + " HAVING COUNT(*) = 2)";
+            }
 
             IntArray appPairIds = LauncherDbUtils.queryIntArray(false, db, TABLE_NAME,
                     _ID, selection, null, null);
@@ -518,10 +528,6 @@ public class ModelDbController {
         }
     }
 
-    private static void addModifiedTime(ContentValues values) {
-        values.put(LauncherSettings.Favorites.MODIFIED, System.currentTimeMillis());
-    }
-
     private void clearFlagEmptyDbCreated() {
         mPrefs.removeSync(getEmptyDbCreatedKey());
     }
@@ -532,9 +538,11 @@ public class ModelDbController {
      *   2) From a package provided by play store
      *   3) From a partner configuration APK, already in the system image
      *   4) The default configuration for the particular device
+     *
+     * Returns true if default favorites was loaded, false if a valid data already exists
      */
     @WorkerThread
-    public synchronized void loadDefaultFavoritesIfNecessary() {
+    public synchronized boolean loadDefaultFavoritesIfNecessary() {
         createDbIfNotExists();
 
         if (mPrefs.get(getEmptyDbCreatedKey())) {
@@ -562,10 +570,12 @@ public class ModelDbController {
                             getDefaultLayoutParser(widgetHolder));
                 }
                 clearFlagEmptyDbCreated();
+                return true;
             } finally {
                 widgetHolder.destroy();
             }
         }
+        return false;
     }
 
     public static Uri getLayoutUri(String authority, Context ctx) {

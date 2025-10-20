@@ -34,7 +34,8 @@
     <string name="split_app_usage_settings" msgid="7214375263347964093">"Mipangilio ya matumizi ya %1$s"</string>
     <string name="close_task_accessibility" msgid="4765872229211282647">"Funga %1$s"</string>
     <string name="new_window_option_taskbar" msgid="6448780542727767211">"Dirisha Jipya"</string>
-    <string name="manage_windows_option_taskbar" msgid="2294109489960654212">"Dhibiti Windows"</string>
+    <string name="manage_windows_option_taskbar" msgid="2294109489960654212">"Dhibiti Madirisha"</string>
+    <string name="close_app_taskbar" msgid="3238979263877091273">"Funga"</string>
     <string name="save_app_pair" msgid="5647523853662686243">"Hifadhi jozi ya programu"</string>
     <string name="app_pair_default_title" msgid="4045241727446873529">"<xliff:g id="APP1">%1$s</xliff:g> | <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="app_pair_unlaunchable_at_screen_size" msgid="3446551575502685376">"Jozi hii ya programu haitumiki kwenye kifaa hiki"</string>
@@ -106,6 +107,13 @@
     <string name="widget_settings" msgid="5280157748464495511">"Mipangilio"</string>
     <string name="pin_to_taskbar" msgid="5914002252642242332">"Bandika kwenye Upauzana"</string>
     <string name="unpin_from_taskbar" msgid="1025883383457627426">"Bandua kwenye Upauzana"</string>
+    <!-- no translation found for no_room_in_taskbar (6885243748717395469) -->
+    <skip />
+    <string name="app_added_to_taskbar" msgid="6348755169793615171">"Programu imewekwa kwenye Upauzana"</string>
+    <string name="app_removed_from_taskbar" msgid="3471754847898675396">"Programu imeondolewa kwenye Upauzana"</string>
+    <string name="remove_system_shortcut_label" msgid="3991201411148073972">"Ondoa"</string>
+    <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"Fungua"</string>
+    <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"Weka kwenye tupio"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"kuweka njia za mkato"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"Huruhusu programu kuongeza njia za mkato bila mtumiaji kuingilia kati."</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"kusoma mipangilio ya skrini ya kwanza na njia za mkato"</string>
@@ -121,6 +129,7 @@
     <string name="paginate_right" msgid="6701038155201975878">"Gawa katika kurasa kwenda kulia"</string>
     <string name="disabled_app_label" msgid="6673129024321402780">"<xliff:g id="APP_NAME">%1$s</xliff:g> imezimwa"</string>
     <string name="dotted_app_label" msgid="1865617679843363410">"{count,plural, =1{{app_name} ina arifa #}other{{app_name} ina arifa #}}"</string>
+    <string name="hotseat_prediction_content_description" msgid="7680403232742709704">"Programu iliyotabiriwa: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="default_scroll_format" msgid="7475544710230993317">"Ukurasa%1$d wa %2$d"</string>
     <string name="workspace_scroll_format" msgid="8458889198184077399">"Skrini ya mwanzo %1$d ya %2$d"</string>
     <string name="workspace_new_page" msgid="257366611030256142">"Ukurasa mpya wa skrini ya kwanza"</string>
@@ -132,7 +141,9 @@
     <string name="folder_closed" msgid="4100806530910930934">"Folda imefungwa"</string>
     <string name="folder_renamed" msgid="1794088362165669656">"Folda imebadilishwa jina kuwa <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="folder_name_format_exact" msgid="8626242716117004803">"Folda: <xliff:g id="NAME">%1$s</xliff:g>, vipengee <xliff:g id="SIZE">%2$d</xliff:g>"</string>
+    <string name="folder_name_format_exact_with_dot" msgid="30828041991324911">"Folda: <xliff:g id="NAME">%1$s</xliff:g>, vipengee <xliff:g id="SIZE">%2$d</xliff:g>, ina arifa"</string>
     <string name="folder_name_format_overflow" msgid="4270108890534995199">"Folda: <xliff:g id="NAME">%1$s</xliff:g>, vipengee <xliff:g id="SIZE">%2$d</xliff:g> au zaidi"</string>
+    <string name="folder_name_format_overflow_with_dot" msgid="9174809519194154156">"Folda: <xliff:g id="NAME">%1$s</xliff:g>, vipengee <xliff:g id="SIZE">%2$d</xliff:g> au zaidi, ina arifa"</string>
     <string name="unnamed_folder" msgid="2420192029474044442">"Folda isiyo na jina"</string>
     <string name="app_pair_name_format" msgid="8134106404716224054">"Jozi ya programu: <xliff:g id="APP1">%1$s</xliff:g> na <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="styles_wallpaper_button_text" msgid="8216961355289236794">"Mandhari na mtindo"</string>
@@ -141,6 +152,9 @@
     <string name="msg_disabled_by_admin" msgid="6898038085516271325">"Imezimwa na msimamizi wako"</string>
     <string name="allow_rotation_title" msgid="7222049633713050106">"Ruhusu kipengele cha kuzungusha skrini ya kwanza"</string>
     <string name="allow_rotation_desc" msgid="8662546029078692509">"Simu inapozungushwa"</string>
+    <string name="compose_developer_options_section" msgid="8211460486549952595">"Jetpack Compose"</string>
+    <string name="enable_composition_tracing_title" msgid="8989606591739368424">"Washa mipangilio ya ufuatiliaji wa utunzi"</string>
+    <string name="enable_composition_tracing_desc" msgid="7187566039216492405">"Washa mipangilio ya kufuatilia utunzi unaporekodi historia ya shughuli ya perfetto katika muhtasari"</string>
     <string name="landscape_mode_title" msgid="5138814555934843926">"Mkao wa mlalo"</string>
     <string name="landscape_mode_desc" msgid="3085236452297838664">"Weka skrini ya kwanza iwe katika mkao wa mlalo"</string>
     <string name="notification_dots_title" msgid="9062440428204120317">"Vitone vya arifa"</string>
@@ -229,4 +243,6 @@
     <string name="four_sided_cookie_shape_title" msgid="3275212586290522151">"Biskuti yenye pande 4"</string>
     <string name="seven_sided_cookie_shape_title" msgid="4862560582029671668">"Biskuti yenye pande 7"</string>
     <string name="arch_shape_title" msgid="2213843822192871318">"Tao"</string>
+    <string name="create_new_folder_button_text" msgid="4037052463794735069">"Folda mpya"</string>
+    <string name="default_new_folder_name" msgid="8821062664729412079">"Folda mpya"</string>
 </resources>

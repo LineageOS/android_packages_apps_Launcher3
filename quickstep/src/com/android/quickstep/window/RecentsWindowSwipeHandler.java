@@ -78,6 +78,7 @@ import com.android.quickstep.RotationTouchHelper;
 import com.android.quickstep.TaskAnimationManager;
 import com.android.quickstep.fallback.FallbackRecentsView;
 import com.android.quickstep.fallback.RecentsState;
+import com.android.quickstep.util.ActiveGestureLog;
 import com.android.quickstep.util.RectFSpringAnim;
 import com.android.quickstep.util.SurfaceTransaction.SurfaceProperties;
 import com.android.quickstep.util.TransformParams;
@@ -252,7 +253,11 @@ public class RecentsWindowSwipeHandler extends AbsSwipeUpHandler<RecentsWindowMa
             mRecentsView.cleanupRemoteTargets();
         }
         mRecentsAnimationController.finish(
-                true /* toRecents */, recentsCallback, true /* sendUserLeaveHint */);
+                /* toHome= */ true,
+                recentsCallback,
+                /* sendUserLeaveHint= */ true,
+                /* reason= */ new ActiveGestureLog.CompoundString(
+                        "RecentsWindowSwipeHandler.finishRecentsControllerToHome"));
     }
 
     @Override

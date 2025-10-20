@@ -22,7 +22,7 @@ import static com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY;
 import static com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY2;
 import static com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY3;
 import static com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE;
-import static com.android.launcher3.util.ModelTestExtensions.nonPredictedItemCount;
+import static com.android.launcher3.util.ModelTestExtensions.countPersistedModelItems;
 import static com.android.launcher3.util.TestUtil.runOnExecutorSync;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -37,15 +37,16 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.launcher3.Flags;
+import com.android.launcher3.UtilitiesKt;
 import com.android.launcher3.model.TestableModelState;
 import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.LauncherAppWidgetInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.pm.PackageInstallInfo;
+import com.android.launcher3.testutil.rule.LayoutResource;
 import com.android.launcher3.util.IntSet;
 import com.android.launcher3.util.LauncherLayoutBuilder;
-import com.android.launcher3.util.LayoutResource;
 import com.android.launcher3.util.SandboxApplication;
 import com.android.launcher3.util.rule.InstallerSessionRule;
 
@@ -67,7 +68,7 @@ public class PackageInstallStateChangedTaskTest {
     private static final String PENDING_APP_1 = TEST_PACKAGE + ".pending1";
     private static final String PENDING_APP_2 = TEST_PACKAGE + ".pending2";
 
-    @Rule public SandboxApplication mContext = new SandboxApplication();
+    @Rule public SandboxApplication mContext = new SandboxApplication().withModelDependency();
     @Rule public SetFlagsRule mSetFlagsRule = new SetFlagsRule();
     @Rule public LayoutResource mLayout = new LayoutResource(mContext);
     @Rule public InstallerSessionRule mInstallerSessionRule = new InstallerSessionRule();
@@ -100,7 +101,7 @@ public class PackageInstallStateChangedTaskTest {
         mDownloadingApps = IntSet.wrap(4, 5, 6, 7, 8, 9, 10);
         mLayout.set(builder);
         assertTrue(mModelState.model.isModelLoaded());
-        assertEquals(10, nonPredictedItemCount(mModelState.dataModel.itemsIdMap));
+        assertEquals(10, countPersistedModelItems(mModelState.dataModel.itemsIdMap));
 
         mModelState.appsRepo.getIncrementalUpdates().forEach(MODEL_EXECUTOR, info -> {
             mIncrementalUpdates.add(info);
@@ -153,7 +154,7 @@ public class PackageInstallStateChangedTaskTest {
     private void verifyProgressUpdate(int progress, int... idsUpdated) {
         IntSet updates = IntSet.wrap(idsUpdated);
         for (ItemInfo info : mModelState.dataModel.itemsIdMap) {
-            if (info.id < 0) continue;
+            if (info.id < 0 || !UtilitiesKt.isPersistedModelItem(info)) continue;
             int expectedProgress = updates.contains(info.id) ? progress
                     : (mDownloadingApps.contains(info.id) ? 0 : 100);
             if (info instanceof WorkspaceItemInfo wi) {

@@ -17,14 +17,11 @@
 package com.android.launcher3.statehandlers
 
 import android.content.res.Resources
-import android.platform.test.annotations.EnableFlags
 import android.view.ViewTreeObserver
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.launcher3.Flags
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherState
-import com.android.launcher3.R
 import com.android.launcher3.dragndrop.DragLayer
 import com.android.launcher3.statemanager.StateManager
 import com.android.launcher3.uioverrides.QuickstepLauncher
@@ -32,6 +29,7 @@ import java.util.Collections
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -40,13 +38,14 @@ import org.mockito.Mockito.same
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.`when`
-import org.mockito.MockitoAnnotations
+import org.mockito.junit.MockitoJUnit
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class DepthControllerTest {
 
     private lateinit var underTest: DepthController
+    @get:Rule val mockito = MockitoJUnit.rule()
     @Mock private lateinit var launcher: QuickstepLauncher
     @Mock private lateinit var stateManager: StateManager<LauncherState, Launcher>
     @Mock private lateinit var resource: Resources
@@ -55,9 +54,7 @@ class DepthControllerTest {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
         `when`(launcher.resources).thenReturn(resource)
-        `when`(resource.getInteger(R.integer.max_depth_blur_radius)).thenReturn(30)
         `when`(launcher.dragLayer).thenReturn(dragLayer)
         `when`(dragLayer.viewTreeObserver).thenReturn(viewTreeObserver)
         `when`(launcher.stateManager).thenReturn(stateManager)
@@ -115,7 +112,6 @@ class DepthControllerTest {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ALL_APPS_BLUR)
     fun test_blurWorkspaceDepthTargets() {
         // Transitioning to ALL_APPS from any state should blur the workspace depth targets.
 
@@ -161,7 +157,6 @@ class DepthControllerTest {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ALL_APPS_BLUR)
     fun test_blurWorkspaceDepthTargets_withTargetState() {
         // Transitioning to ALL_APPS from any state should blur the workspace depth targets.
 

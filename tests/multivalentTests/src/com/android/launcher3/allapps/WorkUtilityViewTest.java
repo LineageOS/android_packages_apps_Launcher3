@@ -21,15 +21,10 @@ import static android.view.View.VISIBLE;
 
 import static androidx.test.core.app.ApplicationProvider.getApplicationContext;
 
-import static com.android.launcher3.Flags.FLAG_WORK_SCHEDULER_IN_WORK_PROFILE;
-
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.doReturn;
 
-import android.platform.test.annotations.DisableFlags;
-import android.platform.test.annotations.EnableFlags;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.ViewGroup;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -49,10 +44,6 @@ import org.mockito.junit.MockitoRule;
 @RunWith(AndroidJUnit4.class)
 public class WorkUtilityViewTest {
 
-    @Rule
-    public final SetFlagsRule mSetFlagsRule =
-            new SetFlagsRule(SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT);
-
     @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
     @Rule
@@ -68,8 +59,7 @@ public class WorkUtilityViewTest {
     }
 
     @Test
-    @EnableFlags(FLAG_WORK_SCHEDULER_IN_WORK_PROFILE)
-    public void testInflateFlagOn_visible() {
+    public void testScheduler_visible() {
         WorkUtilityView workUtilityView = Mockito.spy(mVut);
         doReturn(true).when(workUtilityView).shouldUseScheduler();
 
@@ -77,14 +67,5 @@ public class WorkUtilityViewTest {
 
         assertThat(workUtilityView.getSchedulerButton().getVisibility()).isEqualTo(VISIBLE);
         assertThat(workUtilityView.getSchedulerButton().hasOnClickListeners()).isEqualTo(true);
-    }
-
-    @Test
-    @DisableFlags(FLAG_WORK_SCHEDULER_IN_WORK_PROFILE)
-    public void testInflateFlagOff_gone() {
-        mVut.onFinishInflate();
-
-        assertThat(mVut.getSchedulerButton().getVisibility()).isEqualTo(GONE);
-        assertThat(mVut.getSchedulerButton().hasOnClickListeners()).isEqualTo(false);
     }
 }

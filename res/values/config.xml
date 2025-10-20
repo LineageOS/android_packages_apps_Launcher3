@@ -27,6 +27,9 @@
     <!-- String representing the fragment class for settings activity.-->
     <string name="settings_fragment_name" translatable="false">com.android.launcher3.settings.SettingsActivity$LauncherSettingsFragment</string>
 
+    <!-- String representing the fallback search package name.-->
+    <string name="fallback_search_package_name" translatable="false"></string>
+
     <!-- AllApps & Launcher transitions -->
     <!-- The duration of the PagedView page snap animation -->
     <integer name="config_pageSnapAnimationDuration">750</integer>

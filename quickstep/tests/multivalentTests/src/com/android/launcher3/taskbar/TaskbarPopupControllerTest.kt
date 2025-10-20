@@ -22,6 +22,7 @@ import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.util.SparseArray
+import android.view.accessibility.AccessibilityNodeInfo
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.BubbleTextView
 import com.android.launcher3.Flags.FLAG_ENABLE_MULTI_INSTANCE_MENU_TASKBAR
@@ -30,6 +31,7 @@ import com.android.launcher3.R
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
+import com.android.launcher3.popup.PinToTaskbarShortcut
 import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatWorkspaceItem
@@ -40,6 +42,7 @@ import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.LauncherMultivalentJUnit.EmulatedDevices
+import com.android.launcher3.util.TestUtil.getOnUiThread
 import com.android.quickstep.util.GroupTask
 import com.android.window.flags.Flags.FLAG_ENABLE_PINNING_APP_WITH_CONTEXT_MENU
 import com.google.common.truth.Truth.assertThat
@@ -84,10 +87,10 @@ class TaskbarPopupControllerTest {
                 .map { item -> AppInfo(item.targetComponent, item.title, item.user, item.intent) }
                 .toTypedArray()
         )
-        popupController.setTaskbarInfoList(SparseArray())
+        popupController.taskbarInfoList = SparseArray()
         val recentItems = createRecents(2)
         runOnMainSync {
-            taskbarView.updateItems(hotseatItems, recentItems)
+            taskbarView.updateItems(hotseatItems, recentItems, emptyList())
             hotseatIcon =
                 taskbarView.iconViews.filterIsInstance<BubbleTextView>().first {
                     it.tag is WorkspaceItemInfo
@@ -116,6 +119,36 @@ class TaskbarPopupControllerTest {
     }
 
     @Test
+    fun showForIconUsingA11yAction_hotseatItem() {
+        assertThat(hasPopupMenu()).isFalse()
+        whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
+
+        runOnMainSync {
+            hotseatIcon.performAccessibilityAction(AccessibilityNodeInfo.ACTION_LONG_CLICK, null)
+        }
+        assertThat(hasPopupMenu()).isTrue()
+        assertThat(hasTaskbarDragView()).isFalse()
+
+        closePopupMenu()
+        assertThat(hasTaskbarDragView()).isFalse()
+    }
+
+    @Test
+    fun showForIconUsingA11yAction_recentTask() {
+        assertThat(hasPopupMenu()).isFalse()
+        whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
+
+        runOnMainSync {
+            recentTaskIcon.performAccessibilityAction(AccessibilityNodeInfo.ACTION_LONG_CLICK, null)
+        }
+        assertThat(hasPopupMenu()).isTrue()
+        assertThat(hasTaskbarDragView()).isFalse()
+
+        closePopupMenu()
+        assertThat(hasTaskbarDragView()).isFalse()
+    }
+
+    @Test
     fun createPinShortcut_itemAlreadyPinned_returnsUnpinShortcut() {
         val hotseatItems = SparseArray<ItemInfo>()
         val appUser = android.os.Process.myUserHandle()
@@ -140,7 +173,7 @@ class TaskbarPopupControllerTest {
             )
 
         hotseatItems.put(0, pinnedItemInHotseat)
-        popupController.setTaskbarInfoList(hotseatItems)
+        popupController.taskbarInfoList = hotseatItems
         val allAppsAppIcon = Mockito.mock(BubbleTextView::class.java)
 
         val shortcut =
@@ -150,14 +183,32 @@ class TaskbarPopupControllerTest {
             "Shortcut should be PinToTaskbarShortcut",
             shortcut is PinToTaskbarShortcut<*>,
         )
-        Assert.assertFalse((shortcut as PinToTaskbarShortcut<*>).mIsPin)
+        Assert.assertFalse((shortcut as PinToTaskbarShortcut<*>).isPin)
+    }
+
+    private fun hasTaskbarDragView(): Boolean {
+        return getOnUiThread {
+            val dragView: TaskbarDragView? =
+                taskbarContext.dragLayer.findViewByPredicate { it is TaskbarDragView }
+            dragView != null
+        }
     }
 
     private fun hasPopupMenu(): Boolean {
-        return AbstractFloatingView.hasOpenView(
-            taskbarContext,
-            AbstractFloatingView.TYPE_ACTION_POPUP,
-        )
+        return getOnUiThread {
+            AbstractFloatingView.hasOpenView(taskbarContext, AbstractFloatingView.TYPE_ACTION_POPUP)
+        }
+    }
+
+    private fun closePopupMenu() {
+        runOnMainSync {
+            val popup: AbstractFloatingView =
+                AbstractFloatingView.getOpenView(
+                    taskbarContext,
+                    AbstractFloatingView.TYPE_ACTION_POPUP,
+                )
+            popup?.close(false)
+        }
     }
 
     @Test

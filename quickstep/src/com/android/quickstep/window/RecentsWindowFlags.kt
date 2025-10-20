@@ -51,15 +51,5 @@ object RecentsWindowFlags {
                 enableFallbackOverviewInWindow.isTrue ||
                 enableOverviewOnConnectedDisplays.isTrue
 
-    @JvmStatic
-    val enableDesktopMenuOnSecondaryDisplay: Boolean
-        get() =
-            DesktopExperienceFlag(
-                    Flags::enableDesktopMenuOnSecondaryDisplayBugfix,
-                    false,
-                    Flags.FLAG_ENABLE_DESKTOP_MENU_ON_SECONDARY_DISPLAY_BUGFIX,
-                )
-                .isTrue
-
     @JvmStatic fun enableOverviewOnConnectedDisplays() = enableOverviewOnConnectedDisplays.isTrue
 }

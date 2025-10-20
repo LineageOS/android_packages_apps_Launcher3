@@ -17,6 +17,7 @@
 package com.android.launcher3.taskbar.customization
 
 import android.content.Context
+import androidx.annotation.AnyThread
 import com.android.launcher3.Flags.enableRecentsInTaskbar
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.TASKBAR_PINNING
@@ -41,17 +42,20 @@ constructor(
     private val desktopVisibilityController: DesktopVisibilityController,
     private val launcherPrefs: LauncherPrefs,
 ) {
+    val primaryDisplayId = context.displayId
     val hasBubbles = false
-    val hasNavButtons = displayController.info.navigationMode == THREE_BUTTONS
+    val hasNavButtons: Boolean
+        get() = displayController.info.navigationMode == THREE_BUTTONS
 
     val isRecentsEnabled: Boolean
         get() = enableRecentsInTaskbar()
 
+    @get:AnyThread
     val isTransient: Boolean
         get() =
             if (
                 displayController.info.navigationMode != NO_BUTTON ||
-                    desktopVisibilityController.isInDesktopMode(context.displayId) ||
+                    desktopVisibilityController.isInDesktopMode(primaryDisplayId) ||
                     displayController.info.showDesktopTaskbarForFreeformDisplay() ||
                     (displayController.info.showLockedTaskbarOnHome() &&
                         displayController.info.isHomeVisible)
@@ -65,9 +69,12 @@ constructor(
 
     val isPinned: Boolean
         get() =
-            if (desktopVisibilityController.isInDesktopModeAndNotInOverview(context.displayId)) {
+            if (
+                desktopVisibilityController.isInDesktopModeAndNotInOverview(primaryDisplayId) ||
+                    displayController.info.showDesktopTaskbarForFreeformDisplay()
+            ) {
                 true
-            } else if (desktopVisibilityController.isInDesktopMode(context.displayId)) {
+            } else if (desktopVisibilityController.isInDesktopMode(primaryDisplayId)) {
                 launcherPrefs.get(TASKBAR_PINNING_IN_DESKTOP_MODE)
             } else {
                 launcherPrefs.get(TASKBAR_PINNING)
@@ -80,7 +87,10 @@ constructor(
         get() = isPinned || hasNavButtons
 
     val supportsTransitionToTransientTaskbar: Boolean
-        get() = !hasNavButtons && !DisplayController.showDesktopTaskbarForFreeformDisplay(context)
+        get() =
+            !hasNavButtons &&
+                !DisplayController.showDesktopTaskbarForFreeformDisplay(context) &&
+                !desktopVisibilityController.isInDesktopMode(primaryDisplayId)
 
     companion object {
         @JvmField

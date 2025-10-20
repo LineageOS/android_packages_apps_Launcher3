@@ -1,10 +1,6 @@
 filegroup {
     name: "launcher-e2e-tests-utils",
     srcs: [
-        "testcomponent/TestCommandReceiver.java",
-        "testcomponent/BaseTestingActivity.java",
-        "util/TestConstants.java",
-        "util/Wait.kt",
         "util/rule/FailureWatcher.java",
         "util/rule/SkipAfterTimeOutRule.java",
         "util/rule/SamplerRule.java",
@@ -15,14 +11,5 @@ filegroup {
         "util/ui/BaseLauncherTaplTest.java",
         "util/ui/PortraitLandscapeRunner.java",
         "util/rule/SetPropRule.java",
-    ],
-}
-
-// Combination of tests and utils in the launcher3 package
-filegroup {
-    name: "launcher-e2e-tests",
-    srcs: [
-        ":launcher-e2e-tests-only",
-        ":launcher-e2e-tests-utils",
     ],
 }

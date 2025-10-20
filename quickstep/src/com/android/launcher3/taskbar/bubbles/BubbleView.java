@@ -73,8 +73,6 @@ public class BubbleView extends ConstraintLayout {
     private BubbleBarItem mBubble;
     private boolean mIsOverflow;
 
-    private Bitmap mIcon;
-
     @Nullable
     private Controller mController;
 
@@ -233,9 +231,8 @@ public class BubbleView extends ConstraintLayout {
     /** Sets the bubble being rendered in this view. */
     public void setBubble(BubbleBarBubble bubble) {
         mBubble = bubble;
-        mIcon = bubble.getIcon();
-        updateBubbleIcon();
-        if (bubble.getInfo().showAppBadge()) {
+        bubble.getIcon().setOnImageView(mBubbleIcon);
+        if (!bubble.getInfo().isApp()) {
             mAppIcon.setImageDrawable(bubble.getBadge().newIcon(getContext()));
         } else {
             mAppIcon.setVisibility(GONE);
@@ -254,10 +251,6 @@ public class BubbleView extends ConstraintLayout {
         setContentDescription(contentDesc);
     }
 
-    private void updateBubbleIcon() {
-        mBubbleIcon.setImageBitmap(mIcon);
-    }
-
     /**
      * Sets that this bubble represents the overflow. The overflow appears in the list of bubbles
      * but does not represent app content, instead it shows recent bubbles that couldn't fit into
@@ -267,8 +260,7 @@ public class BubbleView extends ConstraintLayout {
     public void setOverflow(BubbleBarOverflow overflow, Bitmap bitmap) {
         mBubble = overflow;
         mIsOverflow = true;
-        mIcon = bitmap;
-        updateBubbleIcon();
+        mBubbleIcon.setImageBitmap(bitmap);
         mAppIcon.setVisibility(GONE); // Overflow doesn't show the app badge
         setContentDescription(getResources().getString(R.string.bubble_bar_overflow_description));
     }

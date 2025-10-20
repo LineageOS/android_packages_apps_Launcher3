@@ -109,12 +109,26 @@ class DesktopRecentsTransitionController(
         private val successCallback: Consumer<Boolean>?,
     ) : RemoteTransitionStub() {
 
+        override fun onTransitionConsumed(transition: IBinder?, aborted: Boolean) {
+            Log.d(TAG, "onTransitionConsumed - aborted: $aborted")
+            if (aborted) {
+                // This transition can be consumed in the empty desk case when there are no windows
+                // to animate, which means the launcher won't animate to a NORMAL state. However in
+                // this case we still want to animate launcher back from OVERVIEW to NORMAL state.
+                MAIN_EXECUTOR.execute {
+                    stateManager.moveToRestState()
+                    successCallback?.accept(true)
+                }
+            }
+        }
+
         override fun startAnimation(
             token: IBinder,
             info: TransitionInfo,
             t: SurfaceControl.Transaction,
             finishCallback: IRemoteTransitionFinishedCallback,
         ) {
+            Log.d(TAG, "startAnimation")
             val errorHandlingFinishCallback = Runnable {
                 try {
                     finishCallback.onTransitionFinished(null /* wct */, null /* sct */)

@@ -17,43 +17,64 @@
 package com.android.launcher3.model.tasks
 
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.model.data.WorkspaceChangeEvent
 import com.android.launcher3.model.data.WorkspaceChangeEvent.RemoveEvent
 import com.android.launcher3.model.data.WorkspaceChangeEvent.UpdateEvent
 import com.android.launcher3.model.data.WorkspaceData
+import com.android.launcher3.model.tasks.ModelRepoTestEx.TrackedUpdates
 import com.android.launcher3.util.Executors
-import com.android.launcher3.util.ListenableRef
+import com.android.launcher3.util.ListenableDiffAwareRef
+import com.android.launcher3.util.ListenableStream
+import com.android.launcher3.util.SafeCloseable
 import com.android.launcher3.util.TestUtil
 import com.google.common.truth.Truth.assertThat
 
+typealias TrackedWorkspaceUpdates = TrackedUpdates<WorkspaceData, WorkspaceChangeEvent?>
+
 object ModelRepoTestEx {
 
-    fun <T> ListenableRef<T>.trackUpdate() =
-        mutableListOf<T>().also { updates ->
+    fun <T> ListenableStream<T>.trackUpdate() =
+        mutableListOf<T>().let { updates ->
             TestUtil.runOnExecutorSync(Executors.MODEL_EXECUTOR) {}
-            forEach(Executors.MODEL_EXECUTOR) { updates.add(it) }
+            TrackedChanges(updates, forEach(Executors.MODEL_EXECUTOR) { updates.add(it) })
         }
 
+    fun <T, R> ListenableDiffAwareRef<T, R>.trackUpdateAndChanges() =
+        TrackedUpdates(updates = trackUpdate(), changes = changes.trackUpdate())
+
     /** Verifies that the update list contains an update operation, and returns the updated items */
-    fun List<WorkspaceData>.verifyAndGetItemsUpdated(
+    fun TrackedWorkspaceUpdates.verifyAndGetItemsUpdated(
         updateIndex: Int = 1,
         totalUpdates: Int = 2,
     ): List<ItemInfo> {
-        assertThat(this).hasSize(totalUpdates)
-        val initialData = this[updateIndex - 1]
-        val finalData = this[updateIndex]
-        val diff = finalData.diff(initialData)!!
-        assertThat(diff).hasSize(1)
-        val updates = diff[0] as UpdateEvent
+        assertThat(updates).hasSize(totalUpdates)
+        assertThat(changes).hasSize(totalUpdates - 1)
+        val updates = changes[updateIndex - 1] as UpdateEvent
         return updates.items
     }
 
     /** Verifies that the update list contains a delete operation */
-    fun List<WorkspaceData>.verifyDelete(deleteIndex: Int = 1, totalUpdates: Int = 2) {
-        assertThat(this).hasSize(totalUpdates)
-        val initialData = this[deleteIndex - 1]
-        val finalData = this[deleteIndex]
-        val diff = finalData.diff(initialData)!!
-        assertThat(diff).hasSize(1)
-        assertThat(diff[0]).isInstanceOf(RemoveEvent::class.java)
+    fun TrackedWorkspaceUpdates.verifyDelete(deleteIndex: Int = 1, totalUpdates: Int = 2) {
+        assertThat(updates).hasSize(totalUpdates)
+        assertThat(changes).hasSize(totalUpdates - 1)
+        assertThat(changes[deleteIndex - 1]).isInstanceOf(RemoveEvent::class.java)
+    }
+
+    data class TrackedUpdates<T, R>(
+        val updates: TrackedChanges<T>,
+        val changes: TrackedChanges<R>,
+    ) {
+        fun end() {
+            updates.end()
+            changes.end()
+        }
+    }
+
+    data class TrackedChanges<T>(
+        private val list: MutableList<T>,
+        private val endAction: SafeCloseable,
+    ) : List<T> by list {
+
+        fun end() = endAction.close()
     }
 }

@@ -620,6 +620,7 @@ class TasksRepositoryTest {
                 false,
                 false,
                 ACTIVITY_TYPE_STANDARD,
+                false,
             )
         )
 

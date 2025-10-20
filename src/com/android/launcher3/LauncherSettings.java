@@ -124,9 +124,9 @@ public class LauncherSettings {
         public static final int ITEM_TYPE_DEEP_SHORTCUT = 6;
 
         /**
-         * The favorite is an app pair for launching split screen
+         * The favorite is an app group for launching split screen
          */
-        public static final int ITEM_TYPE_APP_PAIR = 10;
+        public static final int ITEM_TYPE_APP_GROUP = 10;
 
         // *** Below enum values are used for metrics purpose but not used in Favorites DB ***
 
@@ -149,6 +149,28 @@ public class LauncherSettings {
          * Private space install app button.
          */
         public static final int ITEM_TYPE_PRIVATE_SPACE_INSTALL_APP_BUTTON = 11;
+
+        /**
+         * The file item that comes from the local file system and is displayed on workspace.
+         */
+        public static final int ITEM_TYPE_FILE_SYSTEM_FILE = 12;
+
+        /**
+         * The folder item that comes from the local file system and is displayed on workspace.
+         */
+        public static final int ITEM_TYPE_FILE_SYSTEM_FOLDER = 13;
+
+        /**
+         * A custom view which typically implemented using
+         * {@link com.android.launcher3.model.data.ItemViewProvider}.
+         */
+        public static final int ITEM_TYPE_CUSTOM_VIEW = 14;
+
+        /**
+         * Type for a temporary item that exists during a system drag-and-drop sequence before being
+         * replaced with N-many items of more appropriate types during drop handling.
+         */
+        public static final int ITEM_TYPE_SYSTEM_DRAG = 15;
 
         /**
          * The custom icon bitmap.
@@ -218,9 +240,10 @@ public class LauncherSettings {
                 case ITEM_TYPE_DEEP_SHORTCUT: return "DEEPSHORTCUT";
                 case ITEM_TYPE_TASK: return "TASK";
                 case ITEM_TYPE_QSB: return "QSB";
-                case ITEM_TYPE_APP_PAIR: return "APP_PAIR";
+                case ITEM_TYPE_APP_GROUP: return "APP_PAIR";
                 case ITEM_TYPE_PRIVATE_SPACE_INSTALL_APP_BUTTON:
                     return "PRIVATE_SPACE_INSTALL_APP_BUTTON";
+                case ITEM_TYPE_SYSTEM_DRAG: return "SYSTEM_DRAG";
                 default: return String.valueOf(type);
             }
         }
@@ -315,7 +338,7 @@ public class LauncherSettings {
 
         // LinkedHashMap maintains Order of Insertion
         @NonNull
-        private static LinkedHashMap<String, String> getColumnsToTypes(long profileId) {
+        public static LinkedHashMap<String, String> getColumnsToTypes(long profileId) {
             final LinkedHashMap<String, String> columnsToTypes = new LinkedHashMap<>();
             columnsToTypes.put(_ID, "INTEGER PRIMARY KEY");
             columnsToTypes.put(TITLE, "TEXT");

@@ -7,6 +7,7 @@ import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.WindowInsets;
 
@@ -15,14 +16,17 @@ import androidx.annotation.Nullable;
 import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.R;
 import com.android.launcher3.dagger.ApplicationContext;
+import com.android.launcher3.statehandlers.DesktopVisibilityController;
 import com.android.launcher3.taskbar.TaskbarActivityContext;
 import com.android.launcher3.testing.TestInformationHandler;
 import com.android.launcher3.testing.shared.TestProtocol;
 import com.android.quickstep.util.GroupTask;
 import com.android.quickstep.util.LayoutUtils;
 import com.android.quickstep.util.TISBindHelper;
+import com.android.quickstep.views.DesktopTaskView;
 import com.android.quickstep.views.RecentsView;
 import com.android.quickstep.views.RecentsViewContainer;
+import com.android.quickstep.views.TaskView;
 import com.android.systemui.shared.recents.model.Task;
 import com.android.wm.shell.shared.bubbles.DeviceConfig;
 import com.android.wm.shell.shared.desktopmode.DesktopState;
@@ -42,17 +46,20 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
     private final RecentsModel mRecentsModel;
     private final SystemUiProxy mSystemUiProxy;
     private final  OverviewComponentObserver mOverviewComponentObserver;
+    private final DesktopVisibilityController mDesktopVisibilityController;
 
 
     @Inject
     public QuickstepTestInformationHandler(@ApplicationContext Context context,
             RecentsModel recentsModel,
             SystemUiProxy systemUiProxy,
-            OverviewComponentObserver overviewComponentObserver) {
+            OverviewComponentObserver overviewComponentObserver,
+            DesktopVisibilityController desktopVisibilityController) {
         mContext = context;
         mRecentsModel = recentsModel;
         mSystemUiProxy = systemUiProxy;
         mOverviewComponentObserver = overviewComponentObserver;
+        mDesktopVisibilityController = desktopVisibilityController;
     }
 
     @Override
@@ -239,6 +246,13 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
                             .unstashBubbleBarIfStashed();
                 });
                 return response;
+            case TestProtocol.REQUEST_REMOVE_ALL_BUBBLES:
+                runOnTISBinder(tisBinder -> {
+                    // Allow null-pointer to catch illegal states.
+                    Context context = tisBinder.getTaskbarManager().getCurrentActivityContext();
+                    SystemUiProxy.INSTANCE.get(context).removeAllBubbles();
+                });
+                return response;
             case TestProtocol.REQUEST_INJECT_FAKE_TRACKPAD:
                 runOnTISBinder(tisBinder -> tisBinder.injectFakeTrackpadForTesting());
                 return response;
@@ -278,6 +292,28 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
                                 .isMultipleDesktopFrontendEnabledOnDisplay(
                                         Integer.parseInt(arg)));
                 return response;
+            }
+            case TestProtocol.REQUEST_GET_ACTIVE_DESK_ID: {
+                response.putInt(TestProtocol.TEST_INFO_RESPONSE_FIELD,
+                        mDesktopVisibilityController.getActiveDeskId(Integer.parseInt(arg)));
+                return response;
+            }
+            case TestProtocol.REQUEST_GET_DESK_ID: {
+                final Rect taskBounds = extras.getParcelable(TestProtocol.TEST_INFO_RESPONSE_FIELD);
+                return getUIProperty(Bundle::putInt,
+                        recentsViewContainer -> {
+                            RecentsView recentsView = recentsViewContainer.getOverviewPanel();
+                            for (TaskView taskView : recentsView.getTaskViews()) {
+                                Rect bounds = new Rect();
+                                taskView.getGlobalVisibleRect(bounds);
+                                if (bounds.equals(taskBounds)
+                                        && taskView instanceof DesktopTaskView) {
+                                    return ((DesktopTaskView) taskView).getDeskId();
+                                }
+                            }
+                            return -1;
+                        },
+                        this::getRecentsViewContainer);
             }
         }
 

@@ -23,7 +23,6 @@ import android.os.UserHandle
 import android.util.SparseArray
 import androidx.annotation.WorkerThread
 import androidx.core.graphics.drawable.toDrawable
-import com.android.launcher3.Flags.enableRefactorTaskThumbnail
 import com.android.launcher3.Flags.enableTaskbarRecentsThemedIcons
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
@@ -35,10 +34,9 @@ import com.android.launcher3.icons.LauncherIcons
 import com.android.launcher3.pm.UserCache
 import com.android.launcher3.util.CancellableTask
 import com.android.launcher3.util.DisplayController
-import com.android.launcher3.util.DisplayController.DisplayInfoChangeListener
 import com.android.launcher3.util.Executors
+import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.FlagOp
-import com.android.launcher3.util.OverviewReleaseFlags.enableOverviewIconMenu
 import com.android.launcher3.util.Preconditions
 import com.android.launcher3.util.coroutines.DispatcherProvider
 import com.android.quickstep.task.thumbnail.data.TaskIconDataSource
@@ -58,7 +56,7 @@ class TaskIconCache(
     private val iconProvider: IconProvider,
     displayController: DisplayController,
     val dispatcherProvider: DispatcherProvider,
-) : TaskIconDataSource, DisplayInfoChangeListener {
+) : TaskIconDataSource, DisplayController.DisplayInfoChangeListener {
     private val recentsIconCacheSize = context.resources.getInteger(R.integer.recentsIconCacheSize)
     private var iconCache: TaskKeyLruCache<TaskCacheEntry>? = null
     // TODO: b/431811298 - Make non-null when flag is cleaned up.
@@ -72,10 +70,9 @@ class TaskIconCache(
     private val iconFactory: BaseIconFactory
         get() =
             if (enableTaskbarRecentsThemedIcons()) LauncherIcons.obtain(context)
-            else if (enableRefactorTaskThumbnail()) createIconFactory()
-            else _iconFactory ?: createIconFactory().also { _iconFactory = it }
+            else createIconFactory()
 
-    var taskVisualsChangeListener: TaskVisualsChangeListener? = null
+    private var taskVisualsChangeListener: TaskVisualsChangeListener? = null
 
     init {
         if (enableTaskbarRecentsThemedIcons()) {
@@ -256,10 +253,10 @@ class TaskIconCache(
             PackageManagerWrapper.getInstance().getActivityInfo(key.component, key.userId)
         val entryIcon = getBitmapInfo(task).newIcon(context)
 
-        return when {
-            // Skip loading the content description if the activity no longer exists
-            activityInfo == null -> TaskCacheEntry(entryIcon)
-            enableOverviewIconMenu() ->
+        return (if (activityInfo == null) {
+                // Skip loading the content description if the activity no longer exists
+                TaskCacheEntry(entryIcon)
+            } else {
                 TaskCacheEntry(
                     entryIcon,
                     getBadgedContentDescription(
@@ -270,17 +267,8 @@ class TaskIconCache(
                     ),
                     Utilities.trim(activityInfo.loadLabel(context.packageManager)),
                 )
-            else ->
-                TaskCacheEntry(
-                    entryIcon,
-                    getBadgedContentDescription(
-                        context,
-                        activityInfo,
-                        task.key.userId,
-                        task.taskDescription,
-                    ),
-                )
-        }.also { iconCache?.put(task.key, it) }
+            })
+            .also { iconCache?.put(task.key, it) }
     }
 
     @WorkerThread
@@ -290,10 +278,10 @@ class TaskIconCache(
             PackageManagerWrapper.getInstance().getActivityInfo(key.component, key.userId)
         val bitmapInfo = getBitmapInfo(task)
 
-        return when {
-            // Skip loading the content description if the activity no longer exists
-            activityInfo == null -> TaskBitmapInfoCacheEntry(bitmapInfo)
-            enableOverviewIconMenu() ->
+        return (if (activityInfo == null) {
+                // Skip loading the content description if the activity no longer exists
+                TaskBitmapInfoCacheEntry(bitmapInfo)
+            } else {
                 TaskBitmapInfoCacheEntry(
                     bitmapInfo,
                     getBadgedContentDescription(
@@ -304,17 +292,8 @@ class TaskIconCache(
                     ),
                     Utilities.trim(activityInfo.loadLabel(context.packageManager)),
                 )
-            else ->
-                TaskBitmapInfoCacheEntry(
-                    bitmapInfo,
-                    getBadgedContentDescription(
-                        context,
-                        activityInfo,
-                        task.key.userId,
-                        task.taskDescription,
-                    ),
-                )
-        }.also { bitmapInfoCache?.put(task.key, it) }
+            })
+            .also { bitmapInfoCache?.put(task.key, it) }
     }
 
     private fun getIcon(desc: ActivityManager.TaskDescription, userId: Int): Bitmap? =

@@ -15,6 +15,8 @@
  */
 package com.android.launcher3.taskbar;
 
+import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
+
 import static com.android.launcher3.accessibility.LauncherAccessibilityDelegate.DEEP_SHORTCUTS;
 import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT;
@@ -23,6 +25,7 @@ import static com.android.launcher3.util.SplitConfigurationOptions.getLogEventFo
 import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
+import android.os.Bundle;
 import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.View;
@@ -36,10 +39,14 @@ import com.android.launcher3.logging.StatsLogManager;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.ItemInfoWithIcon;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
+import com.android.launcher3.taskbar.bubbles.BubbleActivityStarter;
 import com.android.launcher3.util.ShortcutUtil;
+import com.android.launcher3.views.BubbleTextHolder;
 import com.android.quickstep.SystemUiProxy;
+import com.android.quickstep.util.GroupTask;
 import com.android.quickstep.util.LogUtils;
 import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper;
+import com.android.wm.shell.shared.bubbles.logging.EntryPoint;
 
 import java.util.List;
 
@@ -88,18 +95,31 @@ public class TaskbarShortcutMenuAccessibilityDelegate
     }
 
     @Override
+    public boolean performAccessibilityAction(View host, int action, Bundle args) {
+        if (host.getTag() instanceof GroupTask && action == ACTION_LONG_CLICK) {
+            return performLongClick(host);
+        }
+        return super.performAccessibilityAction(host, action, args);
+    }
+
+    @Override
     protected boolean performAction(View host, ItemInfo item, int action, boolean fromKeyboard) {
-        if (action == DEEP_SHORTCUTS) {
+        if (action == ACTION_LONG_CLICK) {
+            return performLongClick(host);
+        } else if (action == DEEP_SHORTCUTS) {
             mContext.showPopupMenuForIcon((BubbleTextView) host);
             return true;
         } else if (action == CREATE_APPLICATION_BUBBLE) {
+            EntryPoint entryPoint = EntryPoint.TASKBAR_ICON_MENU;
             if (item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT
                     && item instanceof WorkspaceItemInfo) {
                 ShortcutInfo shortcutInfo = ((WorkspaceItemInfo) item).getDeepShortcutInfo();
-                SystemUiProxy.INSTANCE.get(mContext).showShortcutBubble(shortcutInfo);
+                BubbleActivityStarter.INSTANCE.get(mContext)
+                        .showShortcutBubble(shortcutInfo, entryPoint);
                 return true;
             } else if (item.getIntent() != null && item.getIntent().getPackage() != null) {
-                SystemUiProxy.INSTANCE.get(mContext).showAppBubble(item.getIntent(), item.user);
+                BubbleActivityStarter.INSTANCE.get(mContext).showAppBubble(item.getIntent(),
+                        item.user, entryPoint);
                 return true;
             }
         } else if (item instanceof ItemInfoWithIcon
@@ -140,6 +160,24 @@ public class TaskbarShortcutMenuAccessibilityDelegate
 
     @Override
     protected boolean beginAccessibleDrag(View item, ItemInfo info, boolean fromKeyboard) {
+        return false;
+    }
+
+    private boolean performLongClick(View host) {
+        // Long press should be consumed for workspace items, and it should invoke the
+        // Shortcuts / Notifications / Actions pop-up menu, and not start a drag as the
+        // standard long press path does.
+        if (host instanceof BubbleTextView bubbleTextView) {
+            mContext.showPopupMenuForIcon(bubbleTextView);
+            return true;
+        }
+
+        if (host instanceof BubbleTextHolder holder) {
+            if (holder.getBubbleText() != null) {
+                mContext.showPopupMenuForIcon(holder.getBubbleText());
+                return true;
+            }
+        }
         return false;
     }
 }

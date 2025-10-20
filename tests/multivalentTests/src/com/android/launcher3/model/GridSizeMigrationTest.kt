@@ -27,10 +27,20 @@ import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.WORKSPACE_SIZE
 import com.android.launcher3.LauncherSettings.Favorites.*
+import com.android.launcher3.WorkspaceLayoutManager.FIRST_SCREEN_ID
+import com.android.launcher3.dagger.LauncherAppComponent
+import com.android.launcher3.dagger.LauncherAppSingleton
+import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.pm.UserCache
 import com.android.launcher3.provider.LauncherDbUtils
+import com.android.launcher3.util.AllModulesForTest
 import com.android.launcher3.util.SandboxApplication
 import com.google.common.truth.Truth.assertThat
+import dagger.Component
+import dagger.Module
+import dagger.Provides
+import dagger.multibindings.ElementsIntoSet
+import javax.inject.Named
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -60,12 +70,8 @@ class GridSizeMigrationTest {
 
     @Before
     fun setUp() {
-        dbHelper =
-            DatabaseHelper(
-                context,
-                null,
-                UserCache.INSTANCE.get(context)::getSerialNumberForUser,
-            ) {}
+        context.initDaggerComponent(DaggerGridSizeMigrationTest_TestComponent.builder())
+        dbHelper = DatabaseHelper(context, null) {}
         db = dbHelper.writableDatabase
 
         idp = InvariantDeviceProfile.INSTANCE[context]
@@ -965,5 +971,41 @@ class GridSizeMigrationTest {
         values.put(INTENT, Intent(Intent.ACTION_MAIN).setPackage(packageName).toUri(0))
         db.insert(tableName, null, values)
         return id
+    }
+
+    @Module
+    object FirstRowModule {
+
+        /** Maximum number of columns on both source and target grid used during migration */
+        private const val MAX_COLUMN_COUNT = 10
+
+        @Provides
+        @ElementsIntoSet
+        @Named("MODEL_ITEMS")
+        @JvmStatic
+        fun provideFirstRowWidget(): Set<ItemInfo> =
+            IntArray(MAX_COLUMN_COUNT) { it }
+                .map {
+                    ItemInfo().apply {
+                        container = CONTAINER_DESKTOP
+                        screenId = FIRST_SCREEN_ID
+                        cellX = it
+                        cellY = 0
+                        spanX = 1
+                        spanY = 1
+                    }
+                }
+                .toSet()
+    }
+
+    @LauncherAppSingleton
+    @Component(modules = [AllModulesForTest::class, FirstRowModule::class])
+    interface TestComponent : LauncherAppComponent {
+
+        @Component.Builder
+        interface Builder : LauncherAppComponent.Builder {
+
+            override fun build(): TestComponent
+        }
     }
 }

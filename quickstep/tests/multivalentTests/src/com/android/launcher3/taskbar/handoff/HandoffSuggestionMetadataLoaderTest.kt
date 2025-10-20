@@ -31,6 +31,7 @@ import com.android.launcher3.util.rule.TestStabilityRule.LOCAL
 import com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT
 import com.android.launcher3.util.rule.TestStabilityRule.Stability
 import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertWithMessage
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -100,7 +101,7 @@ class HandoffSuggestionMetadataLoaderTest {
         suggestionMetadataLoader.loadMetadata(listOf(suggestion)) { wasCallbackCalled = true }
 
         // Verify no loads were queued.
-        assertThat(testLooperManager.poll()).isNull()
+        assertWithMessage("There are no pending loads!").that(testLooperManager.poll()).isNull()
         assertThat(wasCallbackCalled).isFalse()
     }
 
@@ -116,7 +117,7 @@ class HandoffSuggestionMetadataLoaderTest {
         suggestionMetadataLoader.loadMetadata(listOf(suggestion)) { wasCallbackCalled = true }
 
         // Verify no loads were queued.
-        assertThat(testLooperManager.poll()).isNull()
+        assertWithMessage("There are no pending loads!").that(testLooperManager.poll()).isNull()
         assertThat(wasCallbackCalled).isFalse()
     }
 
@@ -135,7 +136,7 @@ class HandoffSuggestionMetadataLoaderTest {
         suggestionMetadataLoader.cancelPendingLoads()
 
         // Verify no loads were queued.
-        assertThat(testLooperManager.poll()).isNull()
+        assertWithMessage("There are no pending loads!").that(testLooperManager.poll()).isNull()
         assertThat(wasCallbackCalled).isFalse()
     }
 

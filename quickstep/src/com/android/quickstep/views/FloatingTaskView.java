@@ -46,7 +46,7 @@ import com.android.launcher3.views.BaseDragLayer;
 import com.android.quickstep.orientation.RecentsPagedOrientationHandler;
 import com.android.quickstep.util.AnimUtils;
 import com.android.quickstep.util.MultiValueUpdateListener;
-import com.android.quickstep.util.SplitAnimationTimings;
+import com.android.quickstep.split.SplitAnimationTimings;
 import com.android.quickstep.util.TaskCornerRadius;
 import com.android.systemui.shared.system.QuickStepContract;
 
@@ -324,7 +324,7 @@ public class FloatingTaskView extends FrameLayout {
 
             // Fade in the placeholder view during Normal > OverviewSplitSelect
             if (mSplitPlaceholderView.getAlpha() == 0) {
-                mSplitPlaceholderView.getIconView().setContentAlpha(0);
+                mSplitPlaceholderView.getIconView().setAlpha(0);
                 fadeInSplitPlaceholder(animation, timings);
             }
 

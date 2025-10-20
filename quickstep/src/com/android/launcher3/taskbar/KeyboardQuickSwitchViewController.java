@@ -43,6 +43,7 @@ import com.android.launcher3.anim.AnimatorListeners;
 import com.android.launcher3.desktop.DesktopAppLaunchTransition;
 import com.android.launcher3.taskbar.overlay.TaskbarOverlayContext;
 import com.android.launcher3.taskbar.overlay.TaskbarOverlayDragLayer;
+import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.views.BaseDragLayer;
 import com.android.quickstep.FocusState;
 import com.android.quickstep.SystemUiProxy;
@@ -137,7 +138,8 @@ public class KeyboardQuickSwitchViewController {
                 updateTasks,
                 currentFocusIndexOverride,
                 mViewCallbacks,
-                /* useDesktopTaskView= */ !onDesktop && hasDesktopTask);
+                /* useDesktopTaskView= */ !onDesktop && hasDesktopTask,
+                /* useAnimationStartDelay= */ !wasOpenedFromTaskbar);
     }
 
     protected void updateQuickSwitchView(
@@ -145,7 +147,8 @@ public class KeyboardQuickSwitchViewController {
             int numHiddenTasks,
             int currentFocusIndexOverride,
             boolean hasDesktopTask,
-            boolean wasDesktopTaskFilteredOut) {
+            boolean wasDesktopTaskFilteredOut,
+            boolean useAnimationStartDelay) {
         mWasDesktopTaskFilteredOut = wasDesktopTaskFilteredOut;
         mKeyboardQuickSwitchView.applyLoadPlan(
                 mOverlayContext,
@@ -154,7 +157,8 @@ public class KeyboardQuickSwitchViewController {
                 /* updateTasks= */ true,
                 currentFocusIndexOverride,
                 mViewCallbacks,
-                /* useDesktopTaskView= */ !mOnDesktop && hasDesktopTask);
+                /* useDesktopTaskView= */ !mOnDesktop && hasDesktopTask,
+                useAnimationStartDelay);
     }
 
     protected void positionView(boolean wasOpenedFromTaskbar, boolean isTransientTaskbar) {
@@ -185,18 +189,13 @@ public class KeyboardQuickSwitchViewController {
         mKeyboardQuickSwitchView.setLayoutParams(lp);
     }
 
-    protected void updateLayoutForSurface(boolean updateLayoutFromTaskbar,
-            int currentFocusIndexOverride) {
-        BaseDragLayer.LayoutParams lp =
-                (BaseDragLayer.LayoutParams) mKeyboardQuickSwitchView.getLayoutParams();
+    protected void updateLayoutForSurface(
+            boolean updateLayoutFromTaskbar, int currentFocusIndexOverride) {
+        mKeyboardQuickSwitchView.getLayoutParams().width = updateLayoutFromTaskbar
+                ? BaseDragLayer.LayoutParams.WRAP_CONTENT
+                : BaseDragLayer.LayoutParams.MATCH_PARENT;
 
-        if (updateLayoutFromTaskbar) {
-            lp.width = BaseDragLayer.LayoutParams.WRAP_CONTENT;
-        } else {
-            lp.width = BaseDragLayer.LayoutParams.MATCH_PARENT;
-        }
-
-        mKeyboardQuickSwitchView.animateOpen(currentFocusIndexOverride);
+        mKeyboardQuickSwitchView.animateOpen(currentFocusIndexOverride, !updateLayoutFromTaskbar);
     }
 
     boolean isCloseAnimationRunning() {
@@ -343,6 +342,7 @@ public class KeyboardQuickSwitchViewController {
         return new RemoteTransition(
                 new DesktopAppLaunchTransition(
                         mControllers.taskbarActivityContext,
+                        DisplayController.INSTANCE.get(mControllers.taskbarActivityContext),
                         UNMINIMIZE,
                         Cuj.CUJ_DESKTOP_MODE_KEYBOARD_QUICK_SWITCH_APP_LAUNCH,
                         MAIN_EXECUTOR
@@ -448,6 +448,10 @@ public class KeyboardQuickSwitchViewController {
 
         boolean isAspectRatioSquare() {
             return mControllerCallbacks.isAspectRatioSquare();
+        }
+
+        boolean isLandscape() {
+            return mControllerCallbacks.isLandscape();
         }
 
         void onViewDetchedFromWindow() {

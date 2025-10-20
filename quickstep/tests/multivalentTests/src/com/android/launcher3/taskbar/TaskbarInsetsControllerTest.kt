@@ -65,7 +65,7 @@ class TaskbarInsetsControllerTest {
     @TaskbarMode(TRANSIENT)
     fun imeShowing_transientTaskbarUnstashed_taskbarWindowTouchable() {
         runOnMainSync {
-            taskbarContext.updateSysuiStateFlags(SYSUI_STATE_IME_VISIBLE, false)
+            taskbarContext.updateSysuiStateFlags(SYSUI_STATE_IME_VISIBLE, true)
             taskbarStashController.updateAndAnimateTransientTaskbar(false)
             animatorTestRule.advanceTimeBy(taskbarStashController.stashDuration)
         }
@@ -80,8 +80,22 @@ class TaskbarInsetsControllerTest {
     }
 
     @Test
+    @TaskbarMode(TRANSIENT)
+    fun imeShowing_transientTaskbarStashed_taskbarWindowUntouchable() {
+        runOnMainSync { taskbarContext.updateSysuiStateFlags(SYSUI_STATE_IME_VISIBLE, true) }
+        runOnMainSync {
+            assertThat(taskbarInsetsController.debugTouchableRegion.lastSetTouchableReason)
+                .isEqualTo(ICONS_INVISIBLE)
+            assertThat(taskbarInsetsController.debugTouchableRegion.lastSetTouchableInsets)
+                .isEqualTo(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION)
+            assertThat(taskbarInsetsController.debugTouchableRegion.lastSetTouchableBounds.isEmpty)
+                .isTrue()
+        }
+    }
+
+    @Test
     fun windowFullscreen_entireTaskbarWindowTouchable() {
-        runOnMainSync { taskbarContext.setTaskbarWindowFullscreen(true) }
+        runOnMainSync { taskbarContext.setTaskbarWindowFullscreen(true, 1) }
         runOnMainSync {
             assertThat(taskbarInsetsController.debugTouchableRegion.lastSetTouchableReason)
                 .isEqualTo(FULLSCREEN_TASKBAR_WINDOW)
@@ -93,7 +107,7 @@ class TaskbarInsetsControllerTest {
     @Test
     fun windowFullscreen_imeShowing_entireTaskbarWindowTouchable() {
         runOnMainSync {
-            taskbarContext.setTaskbarWindowFullscreen(true)
+            taskbarContext.setTaskbarWindowFullscreen(true, 1)
             taskbarContext.updateSysuiStateFlags(SYSUI_STATE_IME_VISIBLE, false)
         }
         runOnMainSync {

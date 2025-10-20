@@ -25,7 +25,6 @@ import android.widget.FrameLayout;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.DeviceProfile;
-import com.android.launcher3.Flags;
 import com.android.launcher3.InsettableFrameLayout.LayoutParams;
 import com.android.launcher3.R;
 import com.android.launcher3.popup.PopupDataProvider;
@@ -71,7 +70,10 @@ public class TaskbarOverlayContext extends BaseTaskbarContext {
         mOverlayController = controllers.taskbarOverlayController;
         mDragToBubbleController = controllers.bubbleControllers.map(c -> c.dragToBubbleController);
         mDragController = new TaskbarDragController(this);
-        mDragController.init(controllers, taskbarContext.getTaskbarUiState());
+        // We don't query isDragging from DragController attached to TaskbarOverlayContext. Instead
+        // we only query it from DragController attached to TaskbarControllers. Thus we don't pass
+        // TaskbarUiState to DragController here.
+        mDragController.init(controllers, null);
         mDragLayer = new TaskbarOverlayDragLayer(this);
         mStashedTaskbarHeight = controllers.taskbarStashController.getStashedHeight();
         updateBlurStyle();
@@ -136,15 +138,11 @@ public class TaskbarOverlayContext extends BaseTaskbarContext {
 
     @Override
     public boolean isAllAppsBackgroundBlurEnabled() {
-        return Flags.allAppsBlur() && mOverlayController != null
-                && mOverlayController.isBackgroundBlurEnabled();
+        return mOverlayController != null && mOverlayController.isBackgroundBlurEnabled();
     }
 
     /** Apply the blur or blur fallback style to the current theme. */
     private void updateBlurStyle() {
-        if (!Flags.allAppsBlur()) {
-            return;
-        }
         getTheme().applyStyle(getAllAppsBlurStyleResId(), true);
     }
 

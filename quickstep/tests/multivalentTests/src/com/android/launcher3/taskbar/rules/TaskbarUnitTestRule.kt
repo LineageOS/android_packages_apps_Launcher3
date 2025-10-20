@@ -116,7 +116,12 @@ class TaskbarUnitTestRule(
                     if (description.getAnnotation(NavBarKidsMode::class.java) != null) 1 else 0
 
                 val quickstepKeyGestureEventsManagerSpy =
-                    spy(QuickstepKeyGestureEventsManager(context))
+                    spy(
+                        QuickstepKeyGestureEventsManager(
+                            context,
+                            context.settingsCacheSandbox.cache,
+                        )
+                    )
                 doNothing()
                     .whenever(quickstepKeyGestureEventsManagerSpy)
                     .registerAllAppsKeyGestureEvent(any())
@@ -157,7 +162,7 @@ class TaskbarUnitTestRule(
                                 RecentsWindowManager.REPOSITORY_INSTANCE.get(context),
                                 // VirtualDisplaysRule dispatches system decoration changes.
                                 mock<DisplaysWithDecorationsRepositoryCompat>(),
-                                ProductionDispatchers.main,
+                                ProductionDispatchers.INSTANCE[context].main,
                             ) {
                             override fun recreateTaskbars() {
                                 super.recreateTaskbars()

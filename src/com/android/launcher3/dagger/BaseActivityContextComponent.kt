@@ -17,8 +17,10 @@
 package com.android.launcher3.dagger
 
 import com.android.launcher3.allapps.AllAppsStore
-import com.android.launcher3.dagger.LauncherBaseAppComponent.Builder
 import com.android.launcher3.popup.PopupDataProvider
+import com.android.launcher3.qsb.OseWidgetOptionsProvider
+import com.android.launcher3.recyclerview.AllAppsRecyclerViewPool
+import com.android.launcher3.recyclerview.AllAppsRecyclerViewPool.Companion.PRELOAD_ALL_APPS_DAGGER_KEY
 import com.android.launcher3.secondarydisplay.SecondaryDisplayDelegate
 import com.android.launcher3.views.ActivityContext
 import dagger.BindsInstance
@@ -29,15 +31,20 @@ interface BaseActivityContextComponent {
 
     fun getSecondaryDisplayDelegate(): SecondaryDisplayDelegate
 
+    fun getOseWidgetOptionsProvider(): OseWidgetOptionsProvider
+
     val appsStore: AllAppsStore
     val popupDataProvider: PopupDataProvider
+    val sharedAppsPool: AllAppsRecyclerViewPool
 
     /** Builder for BaseActivityContextComponent. */
     interface Builder {
         @BindsInstance fun activityContext(activityContext: ActivityContext): Builder
 
         @BindsInstance
-        fun setAllAppsPreloaded(@Named("PRELOAD_ALL_APPS") preloadAllApps: Boolean): Builder
+        fun setAllAppsPreloaded(
+            @Named(PRELOAD_ALL_APPS_DAGGER_KEY) preloadAllApps: Boolean
+        ): Builder
 
         fun build(): BaseActivityContextComponent
     }

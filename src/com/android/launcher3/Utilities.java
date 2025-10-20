@@ -16,8 +16,10 @@
 
 package com.android.launcher3;
 
+import static com.android.launcher3.Flags.enableCursorDrivenWorkflows;
 import static com.android.launcher3.Flags.enableMouseInteractionChanges;
 import static com.android.launcher3.Flags.injectableModelItems;
+import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_PRIVATESPACE;
 import static com.android.launcher3.folder.ClippedFolderIconLayoutRule.ICON_OVERLAP_FACTOR;
 import static com.android.launcher3.graphics.ShapeDelegate.DEFAULT_PATH_SIZE;
 import static com.android.launcher3.icons.BitmapInfo.FLAG_THEMED;
@@ -25,6 +27,7 @@ import static com.android.launcher3.icons.IconNormalizer.ICON_VISIBLE_AREA_FACTO
 import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT;
 import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_TYPE_MAIN;
+import static com.android.window.flags.Flags.enableNonDefaultDisplaySplit;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
@@ -77,6 +80,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.core.graphics.ColorUtils;
 
+import com.android.launcher3.deviceprofile.DeviceProperties;
 import com.android.launcher3.dragndrop.FolderAdaptiveIcon;
 import com.android.launcher3.graphics.ThemeManager;
 import com.android.launcher3.graphics.TintedDrawableSpan;
@@ -506,8 +510,8 @@ public final class Utilities {
     }
 
     /** Converts a pixel value (px) to scale pixel value (SP) for the current device. */
-    public static float pxToSp(float size) {
-        return size / Resources.getSystem().getDisplayMetrics().scaledDensity;
+    public static float pxToSp(float size, Context context) {
+        return size / context.getResources().getDisplayMetrics().scaledDensity;
     }
 
     public static float dpiFromPx(float size, int densityDpi) {
@@ -686,7 +690,11 @@ public final class Utilities {
             if (activityInfo == null) {
                 return null;
             }
-            mainIcon = appState.getIconCache().getFullResIcon(activityInfo.getActivityInfo());
+            if (info instanceof ItemInfoWithIcon && info.container == CONTAINER_PRIVATESPACE) {
+                mainIcon = ((ItemInfoWithIcon) info).bitmap.getBadgeDrawable(context, useTheme);
+            } else {
+                mainIcon = appState.getIconCache().getFullResIcon(activityInfo.getActivityInfo());
+            }
         } else if (info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT) {
             List<ShortcutInfo> siList = ShortcutKey.fromItemInfo(info)
                     .buildRequest(context)
@@ -1021,6 +1029,15 @@ public final class Utilities {
     }
 
     /**
+     * Returns whether cursor-driven workflows intended for the desktop form factor should be
+     * enabled.
+     */
+    public static boolean shouldEnableCursorDrivenWorkflows(Context context) {
+        return enableCursorDrivenWorkflows() && context.getResources().getBoolean(
+                R.bool.desktop_form_factor);
+    }
+
+    /**
      * Returns a partial, loggable stack trace.
      */
     public static String getTrimmedStackTrace(String callingMethodName) {
@@ -1030,5 +1047,28 @@ public final class Utilities {
                 .filter(traceLine -> !traceLine.contains(callingMethodName))
                 .limit(3)
                 .collect(Collectors.joining("\n"));
+    }
+
+    /**
+     * Determines whether the split should be left/right split layout and returns a boolean.
+     * The split orientation depends on the device's properties (tablet vs. phone, landscape vs.
+     * portrait), if current display is external display, and flags.
+     *
+     * @return {@code true} if the split should be a left/right split, {@code false} if it should
+     *     be a top/bottom split.
+     */
+    public static boolean calculateIsLeftRightSplit(boolean allowLeftRightSplitInPortrait,
+            DeviceProperties deviceProperties, boolean isExternalDisplay) {
+        if (allowLeftRightSplitInPortrait && deviceProperties.isTablet()) {
+            if (!isExternalDisplay || !enableNonDefaultDisplaySplit()) {
+                return !deviceProperties.isLandscape();
+            } else {
+                // If split is started in external display and the non_default_display_split
+                // is enabled, set isLeftRightSplit to true in landscape mode.
+                return deviceProperties.isLandscape();
+            }
+        } else {
+            return deviceProperties.isLandscape();
+        }
     }
 }

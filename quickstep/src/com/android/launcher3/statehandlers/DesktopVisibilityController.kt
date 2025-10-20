@@ -20,8 +20,10 @@ import android.util.Log
 import android.util.SparseArray
 import android.util.SparseBooleanArray
 import android.view.Display.DEFAULT_DISPLAY
+import androidx.annotation.AnyThread
 import androidx.core.util.set
 import com.android.internal.util.LatencyTracker
+import com.android.launcher3.Flags.enableTaskbarUiThread
 import com.android.launcher3.LauncherState
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.LauncherAppComponent
@@ -39,6 +41,7 @@ import com.android.wm.shell.shared.desktopmode.DesktopModeStatus.enableMultipleD
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus.useRoundedCorners
 import java.io.PrintWriter
 import java.lang.ref.WeakReference
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 
 /**
@@ -81,8 +84,10 @@ constructor(
     /** Maps each display by its ID to its desks configuration. */
     private val displaysDesksConfigsMap = SparseArray<DisplayDeskConfig>()
 
-    private val desktopVisibilityListeners: MutableSet<DesktopVisibilityListener> = HashSet()
-    private val taskbarDesktopModeListeners: MutableSet<TaskbarDesktopModeListener> = HashSet()
+    private val desktopVisibilityListeners: MutableSet<DesktopVisibilityListener> =
+        ConcurrentHashMap.newKeySet()
+    private val taskbarDesktopModeListeners: MutableSet<TaskbarDesktopModeListener> =
+        ConcurrentHashMap.newKeySet()
 
     // This simply indicates that user is currently in desktop mode or not.
     @Deprecated("Does not work with multi-desks") private var isInDesktopModeDeprecated = false
@@ -155,6 +160,7 @@ constructor(
     }
 
     /** Returns whether a desk is currently active on the display with the given [displayId]. */
+    @AnyThread
     fun isInDesktopMode(displayId: Int): Boolean {
         if (!enableMultipleDesktops(context)) {
             return isInDesktopModeDeprecated
@@ -201,11 +207,13 @@ constructor(
     }
 
     /** Registers a listener for Taskbar changes in Desktop Mode. */
+    @AnyThread
     fun registerTaskbarDesktopModeListener(listener: TaskbarDesktopModeListener) {
         taskbarDesktopModeListeners.add(listener)
     }
 
     /** Removes a previously registered listener for Taskbar changes in Desktop Mode. */
+    @AnyThread
     fun unregisterTaskbarDesktopModeListener(listener: TaskbarDesktopModeListener) {
         taskbarDesktopModeListeners.remove(listener)
     }
@@ -268,11 +276,13 @@ constructor(
     }
 
     /** Registers a listener for Taskbar changes in Desktop Mode. */
+    @AnyThread
     fun registerDesktopVisibilityListener(listener: DesktopVisibilityListener) {
         desktopVisibilityListeners.add(listener)
     }
 
     /** Removes a previously registered listener for Taskbar changes in Desktop Mode. */
+    @AnyThread
     fun unregisterDesktopVisibilityListener(listener: DesktopVisibilityListener) {
         desktopVisibilityListeners.remove(listener)
     }
@@ -350,24 +360,54 @@ constructor(
             return
         }
 
-        displaysDesksConfigsMap.clear()
+        clearDisplaysDesksConfigsMap()
 
         displayDeskStates.forEach { displayDeskState ->
             if (DEBUG) {
                 Log.d(TAG, "onListenerConnected displayId=${displayDeskState.displayId}")
             }
-            displaysDesksConfigsMap[displayDeskState.displayId] =
+            putDisplaysDeskConfig(
+                displayDeskState.displayId,
                 DisplayDeskConfig(
                     displayId = displayDeskState.displayId,
                     activeDeskId = displayDeskState.activeDeskId,
                     deskIds = displayDeskState.deskIds.toMutableSet(),
-                )
+                ),
+            )
         }
 
         this.canCreateDesks = canCreateDesks
+
+        notifyOnListenerInitializedFromShell()
     }
 
-    private fun getDisplayDeskConfig(displayId: Int) = displaysDesksConfigsMap[displayId]
+    private fun notifyOnListenerInitializedFromShell() {
+        if (DEBUG) {
+            Log.d(TAG, "notifyOnListenerInitializedFromShell")
+        }
+
+        for (listener in desktopVisibilityListeners) {
+            listener.onListenerInitializedFromShell()
+        }
+    }
+
+    @AnyThread
+    private fun getDisplayDeskConfig(displayId: Int): DisplayDeskConfig? {
+        return if (enableTaskbarUiThread()) {
+            synchronized(displaysDesksConfigsMap) { displaysDesksConfigsMap[displayId] }
+        } else {
+            displaysDesksConfigsMap[displayId]
+        }
+    }
+
+    @AnyThread
+    private fun putDisplaysDeskConfig(displayId: Int, value: DisplayDeskConfig) {
+        if (enableTaskbarUiThread()) {
+            synchronized(displaysDesksConfigsMap) { displaysDesksConfigsMap[displayId] = value }
+        } else {
+            displaysDesksConfigsMap[displayId] = value
+        }
+    }
 
     private fun onCanCreateDesksChanged(canCreateDesks: Boolean) {
         if (!enableMultipleDesktops(context)) {
@@ -385,8 +425,10 @@ constructor(
         // Add the config for the desk if there is nothing yet, as the display can start without any
         // desks.
         if (getDisplayDeskConfig(displayId) == null) {
-            displaysDesksConfigsMap[displayId] =
-                DisplayDeskConfig(displayId, INACTIVE_DESK_ID, mutableSetOf(deskId))
+            putDisplaysDeskConfig(
+                displayId,
+                DisplayDeskConfig(displayId, INACTIVE_DESK_ID, mutableSetOf(deskId)),
+            )
         } else {
             getDisplayDeskConfig(displayId)!!.also {
                 check(it.deskIds.add(deskId)) {
@@ -443,6 +485,14 @@ constructor(
         pw.println("$prefix\tinOverviewState=$inOverviewStateMap")
         pw.println("$prefix\tdesktopTaskListener=$desktopTaskListener")
         pw.println("$prefix\tcontext=$context")
+    }
+
+    private fun clearDisplaysDesksConfigsMap() {
+        if (enableTaskbarUiThread()) {
+            synchronized(displaysDesksConfigsMap) { displaysDesksConfigsMap.clear() }
+        } else {
+            displaysDesksConfigsMap.clear()
+        }
     }
 
     /**

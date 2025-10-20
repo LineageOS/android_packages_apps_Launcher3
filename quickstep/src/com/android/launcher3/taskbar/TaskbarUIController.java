@@ -21,12 +21,13 @@ import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION;
 import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_APP;
 
-import android.animation.Animator;
 import android.content.Intent;
+import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.View;
 import android.window.RemoteTransition;
 
+import androidx.annotation.AnyThread;
 import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -38,11 +39,15 @@ import com.android.launcher3.model.data.ItemInfoWithIcon;
 import com.android.launcher3.popup.SystemShortcut;
 import com.android.launcher3.taskbar.bubbles.BubbleBarController;
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator;
+import com.android.launcher3.taskbar.customization.TaskbarSpecsEvaluator;
+import com.android.launcher3.util.AsyncView;
 import com.android.launcher3.util.SplitConfigurationOptions;
+import com.android.launcher3.util.ThreadedAnimator;
 import com.android.quickstep.GestureState;
 import com.android.quickstep.RecentsAnimationCallbacks;
+import com.android.quickstep.RecentsFilterState;
+import com.android.quickstep.util.GroupTask;
 import com.android.quickstep.util.SplitTask;
-import com.android.quickstep.views.RecentsView;
 import com.android.quickstep.views.TaskContainer;
 import com.android.quickstep.views.TaskView;
 import com.android.systemui.shared.recents.model.Task;
@@ -52,6 +57,7 @@ import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
 import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
@@ -73,11 +79,19 @@ public class TaskbarUIController implements BubbleBarController.BubbleBarLocatio
     @CallSuper
     protected void onDestroy() {
         mControllers = null;
-        RecentsView recentsView = getRecentsView();
+        RecentsViewInteractor recentsView = getRecentsViewInteractor();
         if (recentsView != null) {
             recentsView.setTaskLaunchListener(null);
             recentsView.setTaskLaunchCancelledRunnable(null);
         }
+    }
+
+    protected TaskbarSpecsEvaluator getTaskbarSpecsEvaluator() {
+        return mControllers.taskbarActivityContext.getTaskbarSpecsEvaluator();
+    }
+
+    protected SparseArray<ItemInfo> getAllPinnedApps() {
+        return mControllers.taskbarPopupController.getTaskbarInfoList();
     }
 
     protected boolean isTaskbarTouchable() {
@@ -163,6 +177,7 @@ public class TaskbarUIController implements BubbleBarController.BubbleBarLocatio
     /**
      * @return if we should allow taskbar to auto stash
      */
+    @AnyThread
     public boolean shouldAllowTaskbarToAutoStash() {
         return mControllers.taskbarActivityContext.shouldAllowTaskbarToAutoStash();
     }
@@ -231,6 +246,10 @@ public class TaskbarUIController implements BubbleBarController.BubbleBarLocatio
         }
     }
 
+    /**
+     * Return true only if drags originating from taskbar window is dragging an item. Drag
+     * originating from all apps using {@link TaskbarOverlayContext} is excluded.
+     */
     public boolean isDraggingItem() {
         boolean bubblesDragging = false;
         if (mControllers.bubbleControllers.isPresent()) {
@@ -249,22 +268,23 @@ public class TaskbarUIController implements BubbleBarController.BubbleBarLocatio
     }
 
     /**
-     * Returns RecentsView. Overwritten in LauncherTaskbarUIController and
+     * Returns RecentsViewInteractor. Overwritten in LauncherTaskbarUIController and
      * FallbackTaskbarUIController with Launcher-specific implementations. Returns null for other
      * UI controllers (like DesktopTaskbarUIController) that don't have a RecentsView.
      */
-    public @Nullable RecentsView getRecentsView() {
+    public @Nullable RecentsViewInteractor getRecentsViewInteractor() {
         return null;
     }
 
     public void startSplitSelection(SplitConfigurationOptions.SplitSelectSource splitSelectSource) {
-        RecentsView recentsView = getRecentsView();
+        RecentsViewInteractor recentsView = getRecentsViewInteractor();
         if (recentsView == null) {
             return;
         }
 
-        recentsView.getSplitSelectController().findLastActiveTasksAndRunCallback(
-                Collections.singletonList(splitSelectSource.getItemInfo().getComponentKey()),
+        recentsView.findLastActiveTasksAndRunCallback(
+                RecentsFilterState.getDesktopTaskFilter(),
+                Collections.singletonList(splitSelectSource.getItemInfo().getResolvedTargetInfo()),
                 false /* findExactPairMatch */,
                 foundTasks -> {
                     @Nullable Task foundTask = foundTasks[0];
@@ -289,7 +309,7 @@ public class TaskbarUIController implements BubbleBarController.BubbleBarLocatio
             mControllers.taskbarStashController.applyState();
         }
 
-        getRecentsView().confirmSplitSelect(
+        getRecentsViewInteractor().confirmSplitSelect(
                 null /* containerTaskView */,
                 task /* task */,
                 task.icon,
@@ -303,7 +323,8 @@ public class TaskbarUIController implements BubbleBarController.BubbleBarLocatio
     /**
      * Uses the clicked Taskbar icon to launch a second app for splitscreen.
      */
-    public void triggerSecondAppForSplit(ItemInfoWithIcon info, Intent intent, View startingView) {
+    public void triggerSecondAppForSplit(ItemInfoWithIcon info, Intent intent, View startingView,
+            Predicate<GroupTask> filter) {
         // When launching from Taskbar, e.g. from Overview, set FLAG_IN_APP immediately
         // to reduce potential visual noise during the app open transition.
         if (mControllers.taskbarStashController != null) {
@@ -311,20 +332,22 @@ public class TaskbarUIController implements BubbleBarController.BubbleBarLocatio
             mControllers.taskbarStashController.applyState();
         }
 
-        RecentsView recents = getRecentsView();
-        recents.getSplitSelectController().findLastActiveTasksAndRunCallback(
-                Collections.singletonList(info.getComponentKey()),
+        RecentsViewInteractor recents = getRecentsViewInteractor();
+        recents.findLastActiveTasksAndRunCallback(
+                filter,
+                Collections.singletonList(info.getResolvedTargetInfo()),
                 false /* findExactPairMatch */,
                 foundTasks -> {
                     @Nullable Task foundTask = foundTasks[0];
                     if (foundTask != null) {
-                        TaskView foundTaskView = recents.getTaskViewByTaskId(foundTask.key.id);
+                        AsyncView<TaskView> asyncTaskView =
+                                recents.getTaskViewByTaskId(foundTask.key.id);
                         // TODO (b/266482558): This additional null check is needed because there
                         // are times when our Tasks list doesn't match our TaskViews list (like when
                         // a tile is removed during {@link RecentsView#applyLoadPlan()}. A clearer
                         // state management system is in the works so that we don't need to rely on
                         // null checks as much. See comments at ag/21152798.
-                        if (foundTaskView != null) {
+                        asyncTaskView.postCallback((foundTaskView) -> {
                             // There is already a running app of this type, use that as second app.
                             // Get index of task (0 or 1), in case it's a GroupedTaskView
                             TaskContainer taskContainer =
@@ -338,8 +361,7 @@ public class TaskbarUIController implements BubbleBarController.BubbleBarLocatio
                                     null /* intent */,
                                     null /* user */,
                                     info);
-                            return;
-                        }
+                        });
                     }
 
                     // No running app of that type, create a new instance as second app.
@@ -518,7 +540,7 @@ public class TaskbarUIController implements BubbleBarController.BubbleBarLocatio
      *                 automatically reset once the recents animation finishes
      * @return An optional Animator to play in parallel with the default gesture end animation.
      */
-    public @Nullable Animator getParallelAnimationToGestureEndTarget(
+    public @Nullable ThreadedAnimator getParallelAnimationToGestureEndTarget(
             GestureState.GestureEndTarget endTarget,
             long duration,
             RecentsAnimationCallbacks callbacks) {

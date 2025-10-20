@@ -27,7 +27,6 @@ import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.taskbar.bubbles.BubbleBarController.BubbleBarLocationListener
 import com.android.launcher3.taskbar.bubbles.BubbleBarLocationDropTarget.BubbleBarDropTargetController
-import com.android.quickstep.SystemUiProxy
 import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation
 import com.android.wm.shell.shared.bubbles.ContextUtils.isRtl
@@ -43,6 +42,7 @@ import com.android.wm.shell.shared.bubbles.DraggedObject
 import com.android.wm.shell.shared.bubbles.DraggedObject.LauncherIcon
 import com.android.wm.shell.shared.bubbles.DropTargetManager
 import com.android.wm.shell.shared.bubbles.DropTargetManager.DragZoneChangedListener
+import com.android.wm.shell.shared.bubbles.logging.EntryPoint
 import com.google.common.annotations.VisibleForTesting
 import kotlin.math.min
 
@@ -66,7 +66,7 @@ class DragToBubbleController(
     // If item drop is handled the next sysui update will set the bubble bar location
     @VisibleForTesting var isItemDropHandled = false
     private lateinit var bubbleBarLocationListener: BubbleBarLocationListener
-    private lateinit var systemUiProxy: SystemUiProxy
+    private lateinit var bubbleActivityStarter: BubbleActivityStarter
     private lateinit var bubbleBarViewController: BubbleBarViewController
     private val bubbleDropController: BubbleBarDropTargetController = createDropController()
     private var isShellDragInProgress = false
@@ -80,10 +80,10 @@ class DragToBubbleController(
         bubbleBarViewController: BubbleBarViewController,
         bubbleBarPropertiesProvider: BubbleBarPropertiesProvider,
         bubbleBarLocationListener: BubbleBarLocationListener,
-        systemUiProxy: SystemUiProxy,
+        bubbleActivityStarter: BubbleActivityStarter,
     ) {
         this.bubbleBarViewController = bubbleBarViewController
-        this.systemUiProxy = systemUiProxy
+        this.bubbleActivityStarter = bubbleActivityStarter
         this.bubbleBarLocationListener = bubbleBarLocationListener
         dragZoneFactory = createDragZoneFactory(bubbleBarPropertiesProvider)
         bubbleBarLeftDropTarget = createDropTarget(bubbleDropController, isLeftDropTarget = true)
@@ -258,15 +258,24 @@ class DragToBubbleController(
                     } else {
                         BubbleBarLocation.RIGHT
                     }
+                val entryPoint =
+                    if (itemInfo.isInAllApps) {
+                        EntryPoint.ALL_APPS_ICON_DRAG
+                    } else {
+                        EntryPoint.TASKBAR_ICON_DRAG
+                    }
                 if (hasShortcutInfo(itemInfo)) {
                     val si = (itemInfo as WorkspaceItemInfo).deepShortcutInfo
-                    systemUiProxy.showShortcutBubble(si, location)
+                    bubbleActivityStarter.showShortcutBubble(si, entryPoint, location)
                     return true
                 }
-                val itemIntent: Intent = itemInfo.intent ?: return false
+                if (itemInfo.intent == null) {
+                    return false
+                }
+                val itemIntent = Intent(itemInfo.intent)
                 val packageName = itemIntent.component?.packageName ?: return false
                 itemIntent.setPackage(packageName)
-                systemUiProxy.showAppBubble(itemIntent, itemInfo.user, location)
+                bubbleActivityStarter.showAppBubble(itemIntent, itemInfo.user, entryPoint, location)
                 return true
             }
         }

@@ -111,11 +111,6 @@ public abstract class ItemInfoWithIcon extends ItemInfo {
      */
     public static final int FLAG_DISABLED_VERSION_LOWER = 1 << 12;
 
-    public static final int FLAG_DISABLED_MASK = FLAG_DISABLED_SAFEMODE
-            | FLAG_DISABLED_NOT_AVAILABLE | FLAG_DISABLED_SUSPENDED
-            | FLAG_DISABLED_QUIET_USER | FLAG_DISABLED_BY_PUBLISHER | FLAG_DISABLED_LOCKED_USER
-            | FLAG_DISABLED_VERSION_LOWER;
-
     /**
      * Flag indicating this item can't be pinned to home screen.
      */
@@ -136,6 +131,16 @@ public abstract class ItemInfoWithIcon extends ItemInfo {
      * Flag indicating whether the package related to the item & user supports multiple instances.
      */
     public static final int FLAG_SUPPORTS_MULTI_INSTANCE = 1 << 16;
+
+    /**
+     * Indicates that the icon is disabled because the file system is not ready.
+     */
+    public static final int FLAG_DISABLED_FILE_SYSTEM_NOT_READY = 1 << 17;
+
+    public static final int FLAG_DISABLED_MASK = FLAG_DISABLED_SAFEMODE
+            | FLAG_DISABLED_NOT_AVAILABLE | FLAG_DISABLED_SUSPENDED
+            | FLAG_DISABLED_QUIET_USER | FLAG_DISABLED_BY_PUBLISHER | FLAG_DISABLED_LOCKED_USER
+            | FLAG_DISABLED_VERSION_LOWER | FLAG_DISABLED_FILE_SYSTEM_NOT_READY;
 
     /**
      * Status associated with the system state of the underlying item. This is calculated every
@@ -325,18 +330,24 @@ public abstract class ItemInfoWithIcon extends ItemInfo {
     public FastBitmapDrawable newIcon(Context context, @DrawableCreationFlags int creationFlags) {
         ThemeManager themeManager = ThemeManager.INSTANCE.get(context);
         IconShape iconShape = null;
-        if (Flags.enableLauncherIconShapes()) {
-            if ((creationFlags & FLAG_THEMED) != 0) {
-                iconShape = themeManager.getIconShapeData().getValue();
-            }
+        if (supportsCustomShapes(creationFlags)) {
+            iconShape = themeManager.getIconShapeData().getValue();
         }
         if (!themeManager.isIconThemeEnabled()) {
             creationFlags &= ~FLAG_THEMED;
         }
-
         FastBitmapDrawable drawable = bitmap.newIcon(context, creationFlags, iconShape);
         drawable.setDisabled(isDisabled());
         return drawable;
+    }
+
+    /**
+     * Returns true if the current BitmapInfo can support cropping to custom icon shapes.
+     */
+    public boolean supportsCustomShapes(@DrawableCreationFlags int creationFlags) {
+        return Flags.enableLauncherIconShapes()
+                && (creationFlags & FLAG_THEMED) != 0
+                && bitmap.isFullBleed();
     }
 
     /**

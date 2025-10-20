@@ -47,7 +47,6 @@
     <string name="hotseat_tip_gaps_filled" msgid="3035673010274223538">"Engadíronse suxestións de aplicacións ao espazo baleiro"</string>
     <string name="hotsaet_tip_prediction_enabled" msgid="2233554377501347650">"As suxestións de aplicacións están activadas"</string>
     <string name="hotsaet_tip_prediction_disabled" msgid="1506426298884658491">"As suxestións de aplicacións están desactivadas"</string>
-    <string name="hotseat_prediction_content_description" msgid="4582028296938078419">"Aplicación predita: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="gesture_tutorial_title" msgid="2750751261768388354">"Titorial de navegación con xestos"</string>
     <string name="gesture_tutorial_rotation_prompt_title" msgid="7537946781362766964">"Xira o dispositivo"</string>
     <string name="gesture_tutorial_rotation_prompt" msgid="1664493449851960691">"Xira o dispositivo para completar o titorial de navegación con xestos"</string>
@@ -116,24 +115,29 @@
     <string name="toast_split_app_unsupported" msgid="2360229567007828914">"Escolle outra app para usar a pantalla dividida"</string>
     <string name="blocked_by_policy" msgid="2071401072261365546">"A aplicación ou a túa organización non permite realizar esta acción"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"Actualmente os widgets non se admiten. Selecciona outra aplicación"</string>
+    <string name="action_image_copy" msgid="6877540054727709339">"Copiar"</string>
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Xira a pantalla"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Animación que mostra como aparece a barra de tarefas desde a parte inferior da pantalla e como se oculta automaticamente cando non se utiliza"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Animación que mostra como fixar a barra de tarefas mediante un interruptor para que a barra estea sempre visible na parte inferior da pantalla"</string>
+    <string name="taskbar_edu_bubbles_animation_description" msgid="421866726938396813">"Animación que mostra como crear unha burbulla desde a barra de tarefas cun xesto de arrastre"</string>
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"Animación que mostra como crear unha pantalla dividida arrastrando e soltando unha aplicación desde a barra de tarefas sobre unha aplicación aberta"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"Animación que mostra como acceder ás aplicacións suxeridas no teu dispositivo"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"Animación que mostra como buscar un elemento na pantalla mantendo premida a tecla de acción e seleccionando a área na que está o elemento"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Información sobre a función Barra de tarefas"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Arrastra unha aplicación cara a un lado para usar dúas á vez"</string>
+    <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"Arrástraa ata as esquinas inferiores para que sexa flotante"</string>
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Pasa o dedo amodo cara arriba para ver a barra de tarefas"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Obtén suxestións de aplicacións en función da túa rutina"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Mantén premida a liña divisoria para fixar a barra de tarefas"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Tira máis proveito da barra de tarefas"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"Mostrar sempre a barra de tarefas"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"Para fixar a barra de tarefas na parte inferior, mantén premida a liña divisoria"</string>
+    <string name="taskbar_edu_bubbles_standalone" msgid="4182824636656528043">"Arrastra unha aplicación cara a esquina para que flote"</string>
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"Mantén premida a tecla de acción para buscar o que hai na pantalla"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Este produto utiliza a parte seleccionada da pantalla para facer buscas. Aplícanse as <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>Condicións de servizo<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> e a <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>Política de privacidade<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> de Google."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Pechar"</string>
     <string name="taskbar_edu_done" msgid="6880178093977704569">"Listo"</string>
+    <string name="taskbar_edu_next" msgid="4007618274426775841">"Seguinte"</string>
     <string name="taskbar_button_home" msgid="2151398979630664652">"Inicio"</string>
     <string name="taskbar_button_a11y" msgid="5241161324875094465">"Accesibilidade"</string>
     <string name="taskbar_button_back" msgid="8558862226461164514">"Atrás"</string>
@@ -142,18 +146,12 @@
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"Notificacións"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"Configuración rápida"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"Barra de tarefas"</string>
-    <string name="taskbar_a11y_shown_title" msgid="6842833581088937713">"Estase mostrando a barra de tarefas"</string>
-    <string name="taskbar_a11y_shown_with_bubbles_left_title" msgid="4242431789851790046">"Barra e burbullas á esquerda"</string>
-    <string name="taskbar_a11y_shown_with_bubbles_right_title" msgid="8219065376188180113">"Barra e burbullas á dereita"</string>
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"Barra de navegación"</string>
     <string name="always_show_taskbar" msgid="3608801276107751229">"Ver sempre a barra de tarefas"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"Cambiar modo de navegación"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Divisor da Barra de tarefas"</string>
-    <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"Outras aplicacións recentes"</string>
-    <!-- no translation found for app_added_to_taskbar (1160433791917609063) -->
-    <skip />
-    <!-- no translation found for app_removed_from_taskbar (7887298201562912487) -->
-    <skip />
+    <string name="taskbar_recents_overflow_a11y_title" msgid="8005941062446304304">"Outras aplicacións recentes"</string>
+    <string name="taskbar_pinned_overflow_a11y_title" msgid="2314810718333302626">"Outras aplicacións"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Mover á parte superior ou á esquerda"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Mover á parte inferior ou á dereita"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"Abrir aplicación como unha burbulla"</string>

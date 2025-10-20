@@ -2,27 +2,6 @@ package: "com.android.launcher3"
 container: "system_ext"
 
 flag {
-    name: "enable_grid_only_overview"
-    namespace: "launcher_overview"
-    description: "Enable a grid-only overview without a focused task."
-    bug: "360204325"
-}
-
-flag {
-    name: "enable_overview_icon_menu"
-    namespace: "launcher_overview"
-    description: "Enable updated overview icon and menu within task."
-    bug: "360205084"
-}
-
-flag {
-    name: "enable_refactor_task_thumbnail"
-    namespace: "launcher_overview"
-    description: "Enables rewritten version of TaskThumbnailViews in Overview"
-    bug: "331754864"
-}
-
-flag {
     name: "enable_later_is_locked_check"
     namespace: "launcher_overview"
     description: "Checks if users associated with tasks are locked later in the data flow to prevent stale data"
@@ -40,34 +19,10 @@ flag {
 }
 
 flag {
-    name: "enable_expressive_dismiss_task_motion"
-    namespace: "launcher_overview"
-    description: "Enables expressive motion and animations for dismissing a task in Overview."
-    bug: "381239462"
-}
-
-flag {
-    name: "enable_meta_tab_toggle_in_overview"
-    namespace: "launcher_overview"
-    description: "Enables Meta-Tab toggle between Overview and recent tasks."
-    bug: "385128447"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "enable_overview_on_connected_displays"
     namespace: "launcher_overview"
     description: "Enable overview on connected displays."
     bug: "363251602"
-}
-
-flag {
-    name: "enable_overview_background_wallpaper_blur"
-    namespace: "launcher_overview"
-    description: "Enable wallpaper blur in overview."
-    bug: "360297985"
 }
 
 flag {
@@ -92,16 +47,6 @@ flag {
 }
 
 flag {
-    name: "enable_desktop_menu_on_secondary_display_bugfix"
-    namespace: "launcher_overview"
-    description: "Enable the 'Desktop' menu entry on full screen tiles on secondary display."
-    bug:  "418822736"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "enable_simultaneous_overview_trigger_on_extended_desktop"
     namespace: "launcher_overview"
     description: "Enable Overview to launch and exit simultaneously on default and external displays wherever it was triggered or quit from"
@@ -121,3 +66,29 @@ flag {
     description: "Enables showing a button to close the task in Overview when the TaskView is hovered."
     bug: "426125944"
 }
+
+flag {
+    name: "enable_overview_pagination"
+    namespace: "launcher_overview"
+    description: "Allows the user to scroll overview with a mouse click."
+    bug: "443252794"
+}
+
+flag {
+    name: "enable_replace_sharesheet_and_empty_message_ro"
+    namespace: "launcher_overview"
+    description: "Replaces overview share target with share sheet, adds new empty recents message."
+    is_fixed_read_only: true
+    bug: "437084247"
+}
+
+flag {
+    name: "enable_executor_based_dispatchers"
+    namespace: "launcher_overview"
+    description: "Enables executor based dispatchers for ProductionDispatchers."
+    bug:  "407594919"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+

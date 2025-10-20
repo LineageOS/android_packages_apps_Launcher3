@@ -27,6 +27,10 @@ sealed class KeyboardFocusTask {
     // Focus the current page TaskView
     data object CurrentPageTaskView : KeyboardFocusTask()
 
+    // Focus the task that is expected to be the current task.
+    // See comments in RecentsViewUtils#getExpectedCurrentTask() for more details.
+    data object ExpectedCurrentTask : KeyboardFocusTask()
+
     // Focus the TaskView with task ids matching a given set
     data class TaskViewWithIds(val taskIds: Set<Int>) : KeyboardFocusTask()
 
@@ -34,6 +38,7 @@ sealed class KeyboardFocusTask {
         return when (this) {
             is Unfocused -> "Unfocused"
             is CurrentPageTaskView -> "CurrentPageTaskView"
+            is ExpectedCurrentTask -> "ExpectedCurrentTask"
             is TaskViewWithIds -> "TaskViewWithIds( $taskIds )"
         }
     }

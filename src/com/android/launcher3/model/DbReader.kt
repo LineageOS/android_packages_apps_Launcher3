@@ -23,7 +23,25 @@ import android.graphics.Point
 import android.util.ArrayMap
 import android.util.Log
 import androidx.annotation.VisibleForTesting
-import com.android.launcher3.LauncherSettings
+import com.android.launcher3.LauncherSettings.Favorites.APPWIDGET_ID
+import com.android.launcher3.LauncherSettings.Favorites.APPWIDGET_PROVIDER
+import com.android.launcher3.LauncherSettings.Favorites.CELLX
+import com.android.launcher3.LauncherSettings.Favorites.CELLY
+import com.android.launcher3.LauncherSettings.Favorites.CONTAINER
+import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
+import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
+import com.android.launcher3.LauncherSettings.Favorites.INTENT
+import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE
+import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION
+import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET
+import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_GROUP
+import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT
+import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FOLDER
+import com.android.launcher3.LauncherSettings.Favorites.SCREEN
+import com.android.launcher3.LauncherSettings.Favorites.SPANX
+import com.android.launcher3.LauncherSettings.Favorites.SPANY
+import com.android.launcher3.LauncherSettings.Favorites._ID
+import com.android.launcher3.model.data.AppPairInfo
 import com.android.launcher3.util.IntArray
 import com.android.launcher3.widget.WidgetManagerHelper
 import kotlin.math.max
@@ -36,52 +54,45 @@ class DbReader(val mDb: SQLiteDatabase, val mTableName: String, val mContext: Co
 
     fun loadHotseatEntries(): List<DbEntry> {
         val hotseatEntries: MutableList<DbEntry> = ArrayList()
+        val columnsToRead = arrayOf(_ID, ITEM_TYPE, INTENT, SCREEN)
         val c =
-            queryWorkspace(
-                arrayOf(
-                    LauncherSettings.Favorites._ID, // 0
-                    LauncherSettings.Favorites.ITEM_TYPE, // 1
-                    LauncherSettings.Favorites.INTENT, // 2
-                    LauncherSettings.Favorites.SCREEN,
-                ), // 3
-                (LauncherSettings.Favorites.CONTAINER +
-                    " = " +
-                    LauncherSettings.Favorites.CONTAINER_HOTSEAT),
+            ModelCursorWrapper(
+                queryWorkspace(columnsToRead, (CONTAINER + " = " + CONTAINER_HOTSEAT)),
+                columnsToRead,
             )
-
-        val indexId = c.getColumnIndexOrThrow(LauncherSettings.Favorites._ID)
-        val indexItemType = c.getColumnIndexOrThrow(LauncherSettings.Favorites.ITEM_TYPE)
-        val indexIntent = c.getColumnIndexOrThrow(LauncherSettings.Favorites.INTENT)
-        val indexScreen = c.getColumnIndexOrThrow(LauncherSettings.Favorites.SCREEN)
 
         val entriesToRemove = IntArray()
         while (c.moveToNext()) {
             val entry =
                 DbEntry().apply {
-                    id = c.getInt(indexId)
-                    itemType = c.getInt(indexItemType)
-                    screenId = c.getInt(indexScreen)
+                    id = c.id
+                    itemType = c.itemType
+                    screenId = c.screen
                 }
 
             try {
                 // calculate weight
                 when (entry.itemType) {
-                    LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT,
-                    LauncherSettings.Favorites.ITEM_TYPE_APPLICATION -> {
-                        entry.mIntent = c.getString(indexIntent)
+                    ITEM_TYPE_DEEP_SHORTCUT,
+                    ITEM_TYPE_APPLICATION -> {
+                        entry.mIntent = c.intentString
                     }
 
-                    LauncherSettings.Favorites.ITEM_TYPE_FOLDER -> {
+                    ITEM_TYPE_FOLDER -> {
                         val total = getFolderItemsCount(entry)
-                        if (total == 0) {
-                            throw Exception("Folder is empty")
+                        // If the folder contains fewer than 2 items, it is likely that the
+                        // folder was created by mistake and should be removed.
+                        if (total < 2) {
+                            throw Exception("Folder contains fewer than 2 items")
                         }
                     }
 
-                    LauncherSettings.Favorites.ITEM_TYPE_APP_PAIR -> {
+                    ITEM_TYPE_APP_GROUP -> {
                         val total = getFolderItemsCount(entry)
-                        if (total != 2) {
-                            throw Exception("App pair contains fewer or more than 2 items")
+                        // If the app group contains an unsupported number of items, it is likely
+                        // that the app pair was created by mistake and should be removed.
+                        if (!AppPairInfo.hasValidItemCount(total)) {
+                            throw Exception("App group contains an unsupported number of items")
                         }
                     }
 
@@ -104,63 +115,52 @@ class DbReader(val mDb: SQLiteDatabase, val mTableName: String, val mContext: Co
     fun loadAllWorkspaceEntries(): List<DbEntry> {
         mWorkspaceEntriesByScreenId.clear()
         val workspaceEntries: MutableList<DbEntry> = ArrayList()
-        val c =
-            queryWorkspace(
-                arrayOf(
-                    LauncherSettings.Favorites._ID, // 0
-                    LauncherSettings.Favorites.ITEM_TYPE, // 1
-                    LauncherSettings.Favorites.SCREEN, // 2
-                    LauncherSettings.Favorites.CELLX, // 3
-                    LauncherSettings.Favorites.CELLY, // 4
-                    LauncherSettings.Favorites.SPANX, // 5
-                    LauncherSettings.Favorites.SPANY, // 6
-                    LauncherSettings.Favorites.INTENT, // 7
-                    LauncherSettings.Favorites.APPWIDGET_PROVIDER, // 8
-                    LauncherSettings.Favorites.APPWIDGET_ID,
-                ), // 9
-                (LauncherSettings.Favorites.CONTAINER +
-                    " = " +
-                    LauncherSettings.Favorites.CONTAINER_DESKTOP),
+        val columnsToRead =
+            arrayOf(
+                _ID,
+                ITEM_TYPE,
+                SCREEN,
+                CELLX,
+                CELLY,
+                SPANX,
+                SPANY,
+                INTENT,
+                APPWIDGET_PROVIDER,
+                APPWIDGET_ID,
             )
-        val indexId = c.getColumnIndexOrThrow(LauncherSettings.Favorites._ID)
-        val indexItemType = c.getColumnIndexOrThrow(LauncherSettings.Favorites.ITEM_TYPE)
-        val indexScreen = c.getColumnIndexOrThrow(LauncherSettings.Favorites.SCREEN)
-        val indexCellX = c.getColumnIndexOrThrow(LauncherSettings.Favorites.CELLX)
-        val indexCellY = c.getColumnIndexOrThrow(LauncherSettings.Favorites.CELLY)
-        val indexSpanX = c.getColumnIndexOrThrow(LauncherSettings.Favorites.SPANX)
-        val indexSpanY = c.getColumnIndexOrThrow(LauncherSettings.Favorites.SPANY)
-        val indexIntent = c.getColumnIndexOrThrow(LauncherSettings.Favorites.INTENT)
-        val indexAppWidgetProvider =
-            c.getColumnIndexOrThrow(LauncherSettings.Favorites.APPWIDGET_PROVIDER)
-        val indexAppWidgetId = c.getColumnIndexOrThrow(LauncherSettings.Favorites.APPWIDGET_ID)
+        val c =
+            ModelCursorWrapper(
+                queryWorkspace(columnsToRead, "$CONTAINER = $CONTAINER_DESKTOP"),
+                columnsToRead,
+            )
 
         val entriesToRemove = IntArray()
         val widgetManagerHelper = WidgetManagerHelper(mContext)
         while (c.moveToNext()) {
             val entry =
                 DbEntry().apply {
-                    id = c.getInt(indexId)
-                    itemType = c.getInt(indexItemType)
-                    screenId = c.getInt(indexScreen)
-                    cellX = c.getInt(indexCellX)
-                    cellY = c.getInt(indexCellY)
-                    spanX = c.getInt(indexSpanX)
-                    spanY = c.getInt(indexSpanY)
+                    id = c.id
+                    itemType = c.itemType
+                    screenId = c.screen
+                    cellX = c.cellX
+                    cellY = c.cellY
+                    spanX = c.spanX
+                    spanY = c.spanY
                 }
-            mLastScreenId = max(mLastScreenId.toDouble(), entry.screenId.toDouble()).toInt()
+            mLastScreenId = max(mLastScreenId, entry.screenId)
 
             try {
                 // calculate weight
                 when (entry.itemType) {
-                    LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT,
-                    LauncherSettings.Favorites.ITEM_TYPE_APPLICATION -> {
-                        entry.mIntent = c.getString(indexIntent)
+                    ITEM_TYPE_DEEP_SHORTCUT,
+                    ITEM_TYPE_APPLICATION -> {
+                        entry.mIntent = c.intentString
                     }
 
-                    LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET -> {
-                        val provider = c.getString(indexAppWidgetProvider)
+                    ITEM_TYPE_APPWIDGET -> {
+                        val provider = c.appWidgetProvider!!
                         entry.mProvider = provider
-                        entry.appWidgetId = c.getInt(indexAppWidgetId)
+                        entry.appWidgetId = c.appWidgetId
                         val cn = ComponentName.unflattenFromString(provider)
 
                         val spans: Point? =
@@ -177,12 +177,14 @@ class DbReader(val mDb: SQLiteDatabase, val mTableName: String, val mContext: Co
                         }
                     }
 
-                    LauncherSettings.Favorites.ITEM_TYPE_FOLDER ->
-                        check(getFolderItemsCount(entry) > 0) { "Folder is empty" }
+                    ITEM_TYPE_FOLDER ->
+                        // Ensure that the folder has at least 2 items.
+                        check(getFolderItemsCount(entry) > 1) { "Folder has too few items" }
 
-                    LauncherSettings.Favorites.ITEM_TYPE_APP_PAIR -> {
-                        check(getFolderItemsCount(entry) != 2) {
-                            "App pair contains fewer or more than 2 items"
+                    ITEM_TYPE_APP_GROUP -> {
+                        // Ensure that the app group has a supported number of items.
+                        check(AppPairInfo.hasValidItemCount(getFolderItemsCount(entry))) {
+                            "App group contains an unsupported number of items"
                         }
                     }
 
@@ -204,11 +206,7 @@ class DbReader(val mDb: SQLiteDatabase, val mTableName: String, val mContext: Co
     }
 
     private fun getFolderItemsCount(entry: DbEntry): Int {
-        val c =
-            queryWorkspace(
-                arrayOf(LauncherSettings.Favorites._ID, LauncherSettings.Favorites.INTENT),
-                LauncherSettings.Favorites.CONTAINER + " = " + entry.id,
-            )
+        val c = queryWorkspace(arrayOf(_ID, INTENT), "$CONTAINER = ${entry.id}")
 
         var total = 0
         while (c.moveToNext()) {

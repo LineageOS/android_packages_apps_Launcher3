@@ -19,6 +19,7 @@ package com.android.quickstep.util
 import android.graphics.RectF
 import android.view.View
 import com.android.launcher3.uioverrides.QuickstepLauncher
+import com.android.launcher3.util.AsyncView
 import com.android.launcher3.views.FloatingIconView
 
 /**
@@ -35,8 +36,8 @@ object FloatingIconViewHelper {
     fun getFloatingIconView(
         launcher: QuickstepLauncher,
         originalView: View,
-        visibilitySyncView: View?,
-        fadeOutView: View?,
+        visibilitySyncView: AsyncView<View>?,
+        fadeOutView: AsyncView<View>?,
         hideOriginal: Boolean,
         positionOut: RectF,
         isOpening: Boolean,

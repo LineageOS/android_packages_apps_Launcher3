@@ -17,7 +17,7 @@ package com.android.launcher3.taskbar.bubbles;
 
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 
-import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
+import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_VISIBLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
@@ -148,6 +148,7 @@ public class BubbleBarController {
         Point expandedViewDropTargetSize;
         boolean showOverflow;
         boolean showOverflowChanged;
+        boolean suppressAnimation;
 
         // These need to be loaded in the background
         BubbleBarBubble addedBubble;
@@ -168,6 +169,7 @@ public class BubbleBarController {
             expandedViewDropTargetSize = update.expandedViewDropTargetSize;
             showOverflow = update.showOverflow;
             showOverflowChanged = update.showOverflowChanged;
+            suppressAnimation = update.suppressAnimation;
         }
     }
 
@@ -300,12 +302,11 @@ public class BubbleBarController {
                     }
                     viewUpdate.currentBubbles = currentBubbles;
                 }
-                MAIN_EXECUTOR.execute(() -> applyViewChanges(viewUpdate));
+                TASKBAR_UI_THREAD.execute(() -> applyViewChanges(viewUpdate));
             });
         } else {
             // No bubbles to load, immediately apply the changes.
-            BUBBLE_STATE_EXECUTOR.execute(
-                    () -> MAIN_EXECUTOR.execute(() -> applyViewChanges(viewUpdate)));
+            TASKBAR_UI_THREAD.execute(() -> applyViewChanges(viewUpdate));
         }
     }
 
@@ -377,7 +378,8 @@ public class BubbleBarController {
         // enabling gesture nav. also suppress animation if the bubble bar is hidden for sysui e.g.
         // the shade is open, or we're locked.
         final boolean suppressAnimation =
-                update.initialState || mBubbleBarViewController.isHiddenForSysui() || mIsImeVisible;
+                update.initialState || update.suppressAnimation
+                        || mBubbleBarViewController.isHiddenForSysui() || mIsImeVisible;
 
         if (update.initialState && mSharedState.hasSavedBubbles()) {
             // clear restored state
@@ -628,7 +630,7 @@ public class BubbleBarController {
     }
 
     public void animateBubbleBarLocation(BubbleBarLocation bubbleBarLocation) {
-        MAIN_EXECUTOR.execute(
+        TASKBAR_UI_THREAD.execute(
                 () -> {
                     mBubbleBarViewController.animateBubbleBarLocation(bubbleBarLocation);
                     mBubbleBarLocationListener.onBubbleBarLocationAnimated(bubbleBarLocation);
@@ -636,7 +638,8 @@ public class BubbleBarController {
     }
 
     private void showBubbleBarDropTargetAt(@Nullable BubbleBarLocation location) {
-        MAIN_EXECUTOR.execute(() -> mBubbleBarViewController.showBubbleBarDropTargetAt(location));
+        TASKBAR_UI_THREAD.execute(
+                () -> mBubbleBarViewController.showBubbleBarDropTargetAt(location));
     }
 
 

@@ -47,7 +47,6 @@
     <string name="hotseat_tip_gaps_filled" msgid="3035673010274223538">"Tillögðum forritum bætt við autt svæði"</string>
     <string name="hotsaet_tip_prediction_enabled" msgid="2233554377501347650">"Kveikt á tillögum að forritum"</string>
     <string name="hotsaet_tip_prediction_disabled" msgid="1506426298884658491">"Slökkt er á tillögðum forritum"</string>
-    <string name="hotseat_prediction_content_description" msgid="4582028296938078419">"Tillaga að forriti: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="gesture_tutorial_title" msgid="2750751261768388354">"Leiðsögn fyrir bendingastjórnun"</string>
     <string name="gesture_tutorial_rotation_prompt_title" msgid="7537946781362766964">"Snúðu tækinu"</string>
     <string name="gesture_tutorial_rotation_prompt" msgid="1664493449851960691">"Snúðu tækinu til að ljúka leiðsögn um bendingastjórnun"</string>
@@ -116,24 +115,29 @@
     <string name="toast_split_app_unsupported" msgid="2360229567007828914">"Veldu annað forrit til að nota skjáskiptingu"</string>
     <string name="blocked_by_policy" msgid="2071401072261365546">"Forritið eða fyrirtækið leyfir ekki þessa aðgerð"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"Græjur ekki studdar eins og er, veldu annað forrit"</string>
+    <string name="action_image_copy" msgid="6877540054727709339">"Afrita"</string>
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Snúa skjánum"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Hreyfimynd sem sýnir hvernig forritastikan birtist neðst á skjánum og hverfur þegar hún er ekki í notkun"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Hreyfimynd sem sýnir hvernig hægt er að nota rofa til að festa forritastikuna og gera hana þannig varanlega sýnilega neðst á skjánum"</string>
+    <string name="taskbar_edu_bubbles_animation_description" msgid="421866726938396813">"Hreyfimynd sem sýnir hvernig hægt er að búa til blöðru úr forritastikunni með því að nota dragbendingu"</string>
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"Hreyfimynd sem sýnir hvernig hægt er að skipta skjánum með því að draga forrit af forritastikunni og sleppa því yfir opnu forriti"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"Hreyfimynd sem sýnir hvernig hægt er að nálgast tillögð forrit í tæki"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"Hreyfimynd sem sýnir hvernig hægt er að leita að atriði á skjánum með því að halda aðgerðalyklinum inni og velja svæðið sem atriðið er á"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Leiðsögn verkefnastiku"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Dragðu forrit til hliðar til að nota 2 forrit í einu"</string>
+    <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"Dragðu í hornin niðri til að láta það svífa"</string>
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Strjúktu hægt upp til að birta forritastikuna"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Fáðu forritatillögur sem byggjast á rútínunni þinni"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Haltu skiptingu forritastikunnar inni til að festa hana"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Nýttu forritastikuna betur"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"Halda forritastikunni sýnilegri"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"Haltu skjáskiptingunni neðst á skjánum inni til að halda forritastikunni sýnilegri"</string>
+    <string name="taskbar_edu_bubbles_standalone" msgid="4182824636656528043">"Dragðu forrit út í horn til að láta það svífa"</string>
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"Haltu aðgerðalyklinum inni til að leita að því sem er á skjánum"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Þessi vara notar valinn hluta skjásins til að leita. <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>Persónuverndarstefna<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> og <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>þjónustuskilmálar<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> Google gilda."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Loka"</string>
     <string name="taskbar_edu_done" msgid="6880178093977704569">"Lokið"</string>
+    <string name="taskbar_edu_next" msgid="4007618274426775841">"Áfram"</string>
     <string name="taskbar_button_home" msgid="2151398979630664652">"Heim"</string>
     <string name="taskbar_button_a11y" msgid="5241161324875094465">"Aðgengi"</string>
     <string name="taskbar_button_back" msgid="8558862226461164514">"Til baka"</string>
@@ -142,18 +146,12 @@
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"Tilkynningar"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"Flýtistillingar"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"Verkstika"</string>
-    <string name="taskbar_a11y_shown_title" msgid="6842833581088937713">"Forritastika sýnd"</string>
-    <string name="taskbar_a11y_shown_with_bubbles_left_title" msgid="4242431789851790046">"Verkstika og blöðrur sýndar til vinstri"</string>
-    <string name="taskbar_a11y_shown_with_bubbles_right_title" msgid="8219065376188180113">"Verkstika og blöðrur sýndar til hægri"</string>
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"Yfirlitsstika"</string>
     <string name="always_show_taskbar" msgid="3608801276107751229">"Alltaf sýna forritastiku"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"Breyta leiðsagnarstillingu"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Skipting forritastiku"</string>
-    <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"Önnur nýleg forrit"</string>
-    <!-- no translation found for app_added_to_taskbar (1160433791917609063) -->
-    <skip />
-    <!-- no translation found for app_removed_from_taskbar (7887298201562912487) -->
-    <skip />
+    <string name="taskbar_recents_overflow_a11y_title" msgid="8005941062446304304">"Önnur nýleg forrit"</string>
+    <string name="taskbar_pinned_overflow_a11y_title" msgid="2314810718333302626">"Önnur forrit"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Færa efst/til vinstri"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Færa neðst/til hægri"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"Opna forrit sem blöðru"</string>

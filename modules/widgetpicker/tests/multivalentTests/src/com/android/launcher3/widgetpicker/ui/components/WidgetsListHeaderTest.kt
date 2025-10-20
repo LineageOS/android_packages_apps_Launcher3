@@ -42,6 +42,7 @@ import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onChildAt
@@ -280,14 +281,55 @@ class WidgetsListHeaderTest {
         }
     }
 
+    @Test
+    fun selectableHeader_titleTextHasAccessibilityPrefixWhenSet() {
+        composeTestRule.setContent {
+            SelectableWidgetListHeaderTestContent(
+                selected = false,
+                accessibilityPrefix = WORK_ACCESSIBILITY_PREFIX,
+                onSelect = {},
+            )
+        }
+
+        // accessibility prefix only on content description; not on visual content
+        composeTestRule
+            .onNode(hasText(TITLE), useUnmergedTree = true)
+            .assertExists()
+            .assert(hasText(WORK_ACCESSIBILITY_PREFIX).not())
+            .assert(hasContentDescription("$WORK_ACCESSIBILITY_PREFIX $TITLE"))
+    }
+
+    @Test
+    fun expandableHeader_titleTextHasAccessibilityPrefixWhenSet() {
+        composeTestRule.setContent {
+            ExpandableWidgetListHeaderTestContent(
+                expanded = false,
+                accessibilityPrefix = WORK_ACCESSIBILITY_PREFIX,
+                onClick = {},
+            )
+        }
+
+        // accessibility prefix only on content description; not on visual content
+        composeTestRule
+            .onNode(hasText(TITLE), useUnmergedTree = true)
+            .assertExists()
+            .assert(hasText(WORK_ACCESSIBILITY_PREFIX).not())
+            .assert(hasContentDescription("$WORK_ACCESSIBILITY_PREFIX $TITLE"))
+    }
+
     @Composable
-    private fun ExpandableWidgetListHeaderTestContent(expanded: Boolean, onClick: () -> Unit) {
+    private fun ExpandableWidgetListHeaderTestContent(
+        expanded: Boolean,
+        accessibilityPrefix: String? = null,
+        onClick: () -> Unit,
+    ) {
         WidgetPickerTheme {
             ExpandableListHeader(
                 modifier = Modifier.fillMaxWidth(),
                 expanded = expanded,
                 leadingAppIcon = {},
                 title = TITLE,
+                accessibilityPrefix = accessibilityPrefix,
                 subTitle = SUB_TITLE,
                 onClick = onClick,
                 shape = RoundedCornerShape(28.dp),
@@ -301,7 +343,11 @@ class WidgetsListHeaderTest {
     }
 
     @Composable
-    private fun SelectableWidgetListHeaderTestContent(selected: Boolean, onSelect: () -> Unit) {
+    private fun SelectableWidgetListHeaderTestContent(
+        selected: Boolean,
+        accessibilityPrefix: String? = null,
+        onSelect: () -> Unit,
+    ) {
         WidgetPickerTheme {
             Row(modifier = Modifier.fillMaxWidth()) {
                 SelectableListHeader(
@@ -309,6 +355,7 @@ class WidgetsListHeaderTest {
                     selected = selected,
                     leadingAppIcon = {},
                     title = TITLE,
+                    accessibilityPrefix = accessibilityPrefix,
                     subTitle = SUB_TITLE,
                     onSelect = onSelect,
                     shape = RoundedCornerShape(28.dp),
@@ -322,6 +369,7 @@ class WidgetsListHeaderTest {
 
     companion object {
         private const val TITLE = "Title"
+        private const val WORK_ACCESSIBILITY_PREFIX = "Work"
         private const val SUB_TITLE = "SubTitle"
         private const val EXPANDED_CONTENT_TEXT = "Expanded test content"
         private const val SELECTED_CONTENT_TEXT = "Selected test content"

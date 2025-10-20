@@ -112,6 +112,7 @@ public abstract class AbstractStateChangeTouchController
                 boolean ignoreWhenShownBehindDesktop = !mLauncher.isTopResumedActivity()
                         && mLauncher.shouldShowHomeBehindDesktop();
                 boolean ignoreMouseScroll = ev.getSource() == InputDevice.SOURCE_MOUSE
+                        && !isTrackpadScroll(ev)
                         && shouldEnableMouseInteractionChanges(
                         mLauncher.getWorkspace().getContext());
                 if (directionsToDetectScroll == 0 || ignoreMouseScroll
@@ -318,13 +319,6 @@ public abstract class AbstractStateChangeTouchController
             if (mLauncher.getDeviceProfile().getDeviceProperties().isTablet()
                     && (mToState == ALL_APPS || mFromState == ALL_APPS)) {
                 successTransitionProgress = TABLET_BOTTOM_SHEET_SUCCESS_TRANSITION_PROGRESS;
-            } else if (!mLauncher.getDeviceProfile().getDeviceProperties().isTablet()
-                    && mToState == ALL_APPS && mFromState == NORMAL) {
-                successTransitionProgress = AllAppsSwipeController.ALL_APPS_STATE_TRANSITION_MANUAL;
-            } else if (!mLauncher.getDeviceProfile().getDeviceProperties().isTablet()
-                    && mToState == NORMAL && mFromState == ALL_APPS) {
-                successTransitionProgress =
-                        1 - AllAppsSwipeController.ALL_APPS_STATE_TRANSITION_MANUAL;
             }
             targetState =
                     (interpolatedProgress > successTransitionProgress) ? mToState : mFromState;

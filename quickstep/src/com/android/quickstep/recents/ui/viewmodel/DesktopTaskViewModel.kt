@@ -30,6 +30,7 @@ import com.android.quickstep.recents.domain.model.DesktopTaskVisibilityData.Hidd
 import com.android.quickstep.recents.domain.model.DesktopTaskVisibilityData.RenderedDesktopTaskVisibilityData
 import com.android.quickstep.recents.domain.usecase.GetObscuredDesktopTaskIdsUseCase
 import com.android.quickstep.recents.domain.usecase.OrganizeDesktopTasksUseCase
+import com.android.quickstep.util.DesktopTask
 import kotlinx.coroutines.withContext
 
 /** ViewModel used for [com.android.quickstep.views.DesktopTaskView]. */
@@ -45,23 +46,43 @@ class DesktopTaskViewModel(
     var organizedDesktopTaskVisibilityDataMap = emptyMap<Int, DesktopTaskVisibilityData>()
         @VisibleForTesting set
 
+    private var desktopTask: DesktopTask? = null
+
+    /** Holds the default (user placed) positions of task windows. */
+    var fullscreenTaskPositions: List<TaskPosition> = emptyList()
+        private set
+
+    fun bind(desktopTask: DesktopTask?) {
+        this.desktopTask = desktopTask
+        fullscreenTaskPositions =
+            desktopTask?.tasks?.mapNotNull { task ->
+                task.appBounds?.let { appBounds ->
+                    TaskPosition(
+                        taskId = task.key.id,
+                        isMinimized = task.isMinimized,
+                        bounds = appBounds,
+                    )
+                }
+            } ?: emptyList()
+    }
+
     /**
      * Computes new task positions using [organizeDesktopTasksUseCase] and obscured states using
      * [getObscuredDesktopTaskIdsUseCase]. The result is stored in
-     * [organizedDesktopTaskVisibilityData]. This is used for the exploded desktop view where the
+     * [organizedDesktopTaskVisibilityDataMap]. This is used for the exploded desktop view where the
      * use case will scale and translate tasks so that they don't overlap.
      *
-     * @param defaultPositions the tasks and their bounds and minimized states as they appear on a
-     *   desktop. These are considered all current tasks for the layout.
      * @param layoutConfig the pre-scaled dimension configuration for the desktop layout.
      * @param dismissedTaskId Optional ID of a task being dismissed. If provided, the use case will
      *   decide whether to reflow or fully reorganize.
      */
-    fun organizeDesktopTasks(
-        defaultPositions: List<TaskPosition>,
-        layoutConfig: DesktopLayoutConfig,
-        dismissedTaskId: Int? = null,
-    ) {
+    fun organizeDesktopTasks(layoutConfig: DesktopLayoutConfig, dismissedTaskId: Int? = null) {
+        val transparentTaskIds =
+            desktopTask
+                ?.tasks
+                ?.filter { it.key.isTopActivityTransparent && it.key.isActivityStackTransparent }
+                ?.map { it.key.id } ?: emptyList()
+        val defaultPositions = fullscreenTaskPositions.filterNot { it.taskId in transparentTaskIds }
         val obscuredWindowIds =
             getObscuredDesktopTaskIdsUseCase(
                 defaultPositions.filterNot { it.taskId == dismissedTaskId }
@@ -79,7 +100,7 @@ class DesktopTaskViewModel(
                 layoutConfig = layoutConfig,
                 taskPositionsHint = oldOrganizedDesktopTaskBoundsData,
                 dismissedTaskId = dismissedTaskId,
-            )
+            ) + transparentTaskIds.map { HiddenDesktopTaskBoundsData(taskId = it) }
 
         // Convert DesktopTaskBoundsData back to pairs of task IDs and DesktopTaskVisibilityData by
         // adding the new obscured state information to the new task bounds data.

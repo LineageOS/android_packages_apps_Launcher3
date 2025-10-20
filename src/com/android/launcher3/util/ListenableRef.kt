@@ -80,3 +80,40 @@ class MutableListenableRef<T>(initValue: T) : MutableListenableStream<T>(), List
 
     override fun asListenable(): ListenableRef<T> = this
 }
+
+/**
+ * A [ListenableRef] which also supports listening to changes
+ *
+ * @param R The type of the diff
+ */
+interface ListenableDiffAwareRef<T, R> : ListenableRef<T> {
+
+    /** Stream of ongoing changes */
+    val changes: ListenableStream<R>
+}
+
+/** [ListenableDiffAwareRef] which allows updating its value */
+class MutableDiffAwareRef<T, R>(initValue: T) : ListenableDiffAwareRef<T, R> {
+
+    private val _changes = MutableListenableStream<R>()
+    override val changes: ListenableStream<R> = _changes
+
+    private val _value = MutableListenableRef(initValue)
+
+    override val value: T
+        get() = _value.value
+
+    override fun forEach(executor: Executor, callback: (T) -> Unit) =
+        _value.forEach(executor, callback)
+
+    /**
+     * Updates the reference [value] and also dispatches it to the stream, followed by dispatching
+     * the [diff] to the changes stream
+     */
+    fun dispatchValue(newValue: T, diff: R) {
+        _value.dispatchValue(newValue)
+        _changes.dispatchValue(diff)
+    }
+
+    fun asListenable(): ListenableDiffAwareRef<T, R> = this
+}

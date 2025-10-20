@@ -19,7 +19,6 @@ import static com.android.app.animation.Interpolators.FINAL_FRAME;
 import static com.android.app.animation.Interpolators.INSTANT;
 import static com.android.app.animation.Interpolators.LINEAR;
 import static com.android.launcher3.Flags.enableDesktopExplodedView;
-import static com.android.launcher3.util.OverviewReleaseFlags.enableGridOnlyOverview;
 import static com.android.launcher3.states.StateAnimationConfig.ANIM_OVERVIEW_MODAL;
 import static com.android.launcher3.states.StateAnimationConfig.ANIM_OVERVIEW_SCALE;
 import static com.android.launcher3.states.StateAnimationConfig.ANIM_OVERVIEW_TRANSLATE_X;
@@ -38,7 +37,6 @@ import static com.android.quickstep.views.RecentsView.TASK_SECONDARY_SPLIT_TRANS
 import static com.android.quickstep.views.RecentsView.TASK_SECONDARY_TRANSLATION;
 import static com.android.quickstep.views.RecentsView.TASK_THUMBNAIL_SPLASH_ALPHA;
 import static com.android.quickstep.views.RecentsViewUtils.DESK_EXPLODE_PROGRESS;
-import static com.android.quickstep.views.TaskView.FLAG_UPDATE_ALL;
 
 import android.util.FloatProperty;
 import android.util.Pair;
@@ -84,7 +82,7 @@ public class FallbackRecentsStateController implements StateHandler<RecentsState
             return;
         }
         // While animating into recents, update the visible task data as needed
-        setter.addOnFrameCallback(() -> mRecentsView.loadVisibleTaskData(FLAG_UPDATE_ALL));
+        setter.addOnFrameCallback(() -> mRecentsView.loadVisibleTaskData());
         setter.addEndListener(success -> {
             if (!success && !toState.isRecentsViewVisible()) {
                 mRecentsView.reset();
@@ -119,8 +117,7 @@ public class FallbackRecentsStateController implements StateHandler<RecentsState
 
         setter.setFloat(mRecentsView, TASK_MODALNESS, state.getOverviewModalness(),
                 config.getInterpolator(ANIM_OVERVIEW_MODAL,
-                        enableGridOnlyOverview() && !state.isRecentsViewVisible() ? FINAL_FRAME
-                                : LINEAR));
+                        !state.isRecentsViewVisible() ? FINAL_FRAME : LINEAR));
         setter.setFloat(mRecentsView, FULLSCREEN_PROGRESS, state.isFullScreen() ? 1 : 0, LINEAR);
         boolean showAsGrid =
                 state.displayOverviewTasksAsGrid(mRecentsViewContainer.getDeviceProfile());
@@ -143,7 +140,7 @@ public class FallbackRecentsStateController implements StateHandler<RecentsState
             int duration = state.getTransitionDuration(mRecentsViewContainer, true);
             // TODO (b/246851887): Pass in setter as a NO_ANIM PendingAnimation instead
             PendingAnimation pa = new PendingAnimation(duration);
-            mRecentsView.createSplitSelectInitAnimation(pa, duration);
+            mRecentsView.createSplitSelectInitAnimation(pa);
             setter.add(pa.buildAnim());
         }
 

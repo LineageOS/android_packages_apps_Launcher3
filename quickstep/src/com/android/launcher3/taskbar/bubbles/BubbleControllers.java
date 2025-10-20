@@ -27,7 +27,6 @@ import com.android.launcher3.taskbar.bubbles.stashing.BubbleBarLocationOnDemandL
 import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController;
 import com.android.launcher3.util.MultiPropertyFactory;
 import com.android.launcher3.util.RunnableList;
-import com.android.quickstep.SystemUiProxy;
 import com.android.wm.shell.shared.bubbles.DragZoneFactory;
 
 import java.io.PrintWriter;
@@ -133,7 +132,7 @@ public class BubbleControllers {
                     }
                 },
                 bubbleBarLocationListeners,
-                SystemUiProxy.INSTANCE.get(taskbarControllers.taskbarActivityContext));
+                BubbleActivityStarter.INSTANCE.get(taskbarControllers.taskbarActivityContext));
         mPostInitRunnables.executeAllAndDestroy();
     }
 

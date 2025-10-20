@@ -20,7 +20,9 @@ import android.platform.test.rule.DisableAnimationsRule
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performClick
 import com.android.launcher3.widgetpicker.WidgetPickerComponent
+import com.android.launcher3.widgetpicker.dagger.DaggerScreenshotTestComponent
 import com.android.launcher3.widgetpicker.goldenpathmanager.WidgetPickerGoldenPathManager
+import com.android.launcher3.widgetpicker.shared.model.SheetStyle
 import com.android.launcher3.widgetpicker.shared.model.WidgetHostInfo
 import com.android.launcher3.widgetpicker.ui.NoOpWidgetPickerCuiReporter
 import com.android.launcher3.widgetpicker.ui.WidgetInteractionInfo
@@ -30,26 +32,24 @@ import com.android.launcher3.widgetpicker.ui.testdata.ScreenshotTestWidgetAppIco
 import com.android.launcher3.widgetpicker.ui.testdata.ScreenshotTestWidgetUsersRepository
 import com.android.launcher3.widgetpicker.ui.testdata.ScreenshotTestWidgetsRepository
 import com.android.launcher3.widgetpicker.ui.theme.WidgetPickerTheme
-import dagger.Component
-import dagger.Module
-import javax.inject.Singleton
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
+import platform.test.screenshot.DesktopMinimal
 import platform.test.screenshot.DeviceEmulationSpec
 import platform.test.screenshot.Displays
 import platform.test.screenshot.getEmulatedDevicePathConfig
 import platform.test.screenshot.utils.compose.ComposeScreenshotTestRule
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(ParameterizedAndroidJunit4::class)
 class LandingScreenScreenshotTest(emulationSpec: DeviceEmulationSpec) {
     @get:Rule(order = 0) val disableAnimationsRule = DisableAnimationsRule()
@@ -70,30 +70,34 @@ class LandingScreenScreenshotTest(emulationSpec: DeviceEmulationSpec) {
     private val widgetsRepository = ScreenshotTestWidgetsRepository(testData)
     private val widgetAppIconsRepository = ScreenshotTestWidgetAppIconsRepository(testData)
 
-    @OptIn(ExperimentalCoroutinesApi::class) private val testDispatcher = UnconfinedTestDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
-    private lateinit var widgetPickerComponent: WidgetPickerComponent
+    private val testComponent by lazy { DaggerScreenshotTestComponent.create() }
 
-    @Before
-    fun setUp() {
-        val widgetPickerComponentFactory =
-            DaggerScreenshotTestComponent.create().widgetPickerComponentFactory()
+    private val isDesktop = emulationSpec.display == Displays.Desktop
 
-        widgetPickerComponent =
-            widgetPickerComponentFactory.build(
+    private fun createWidgetPickerComponent(): WidgetPickerComponent {
+        return testComponent
+            .widgetPickerComponentFactory()
+            .build(
                 widgetUsersRepository = usersRepository,
                 widgetAppIconsRepository = widgetAppIconsRepository,
                 widgetsRepository = widgetsRepository,
-                widgetHostInfo = WidgetHostInfo(title = "Widgets"),
+                widgetHostInfo =
+                    if (isDesktop) {
+                        TestWidgetHostInfo.copy(sheetStyle = SheetStyle.FLOATING_SHEET)
+                    } else {
+                        TestWidgetHostInfo
+                    },
                 backgroundContext = testDispatcher,
             )
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun fullCatalog_landingScreen_featuredSection() =
         testScope.runTest {
+            val widgetPickerComponent = createWidgetPickerComponent()
             screenshotRule.screenshotTest(
                 goldenIdentifier = "fullCatalog_landingScreen_featuredSection",
                 beforeScreenshot = {
@@ -112,10 +116,10 @@ class LandingScreenScreenshotTest(emulationSpec: DeviceEmulationSpec) {
             }
         }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun fullCatalog_landingScreen_browseSection() =
         testScope.runTest {
+            val widgetPickerComponent = createWidgetPickerComponent()
             screenshotRule.screenshotTest(
                 goldenIdentifier = "fullCatalog_landingScreen_browseSection",
                 beforeScreenshot = {
@@ -163,6 +167,8 @@ class LandingScreenScreenshotTest(emulationSpec: DeviceEmulationSpec) {
                 override fun onWidgetInteraction(widgetInteractionInfo: WidgetInteractionInfo) {}
             }
 
+        private val TestWidgetHostInfo = WidgetHostInfo(title = "Widgets")
+
         @Parameters(name = "{0}")
         @JvmStatic
         fun getTestSpecs(): List<DeviceEmulationSpec> {
@@ -171,16 +177,7 @@ class LandingScreenScreenshotTest(emulationSpec: DeviceEmulationSpec) {
                 Displays.FoldableInner,
                 Displays.Tablet,
                 isDarkTheme = false,
-            )
+            ) + DeviceEmulationSpec.DesktopMinimal
         }
     }
 }
-
-@Singleton
-@Component(modules = [ScreenshotTestSubcomponentModule::class])
-interface ScreenshotTestComponent {
-    // This function allows us to get the factory for the subcomponent.
-    fun widgetPickerComponentFactory(): WidgetPickerComponent.Factory
-}
-
-@Module(subcomponents = [WidgetPickerComponent::class]) class ScreenshotTestSubcomponentModule

@@ -24,6 +24,8 @@ import static com.android.launcher3.BubbleTextView.DISPLAY_ALL_APPS;
 import static com.android.launcher3.BubbleTextView.DISPLAY_PREDICTION_ROW;
 import static com.android.launcher3.BubbleTextView.DISPLAY_SEARCH_RESULT;
 import static com.android.launcher3.BubbleTextView.DISPLAY_SEARCH_RESULT_SMALL;
+import static com.android.launcher3.BubbleTextView.DISPLAY_TASKBAR;
+import static com.android.launcher3.BubbleTextView.DISPLAY_WORKSPACE;
 import static com.android.launcher3.Flags.FLAG_ENABLE_SUPPORT_FOR_ARCHIVING;
 import static com.android.launcher3.Flags.FLAG_USE_NEW_ICON_FOR_ARCHIVED_APPS;
 import static com.android.launcher3.LauncherPrefs.ENABLE_TWOLINE_ALLAPPS_TOGGLE;
@@ -34,11 +36,16 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Typeface;
@@ -49,6 +56,7 @@ import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.text.SpannedString;
 import android.text.style.ImageSpan;
+import android.util.AttributeSet;
 import android.view.ViewGroup;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -58,6 +66,7 @@ import androidx.test.filters.SmallTest;
 import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.Flags;
 import com.android.launcher3.LauncherPrefs;
+import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.graphics.PreloadIconDelegate;
 import com.android.launcher3.icons.BitmapInfo;
@@ -417,6 +426,34 @@ public class BubbleTextViewTest {
         assertThat(mBubbleTextView.getIcon().hasBadge()).isEqualTo(false);
     }
 
+    @Test
+    public void configureMinimalPopupOnReset_minimalPopupFalse() {
+        BubbleTextView spyTextView = spy(mBubbleTextView);
+
+        spyTextView.reset();
+
+        verify(spyTextView).configureMinimalPopup(false);
+        assertThat(spyTextView.getShowingMinimalPopup()).isEqualTo(false);
+    }
+
+    @Test
+    public void configureMinimalPopupTrue_minimalPopupTrue() {
+        BubbleTextView spyTextView = spy(mBubbleTextView);
+
+        spyTextView.configureMinimalPopup(true);
+
+        assertThat(spyTextView.getShowingMinimalPopup()).isEqualTo(true);
+    }
+
+    @Test
+    public void configureMinimalPopupFalse_minimalPopupFalse() {
+        BubbleTextView spyTextView = spy(mBubbleTextView);
+
+        spyTextView.configureMinimalPopup(false);
+
+        assertThat(spyTextView.getShowingMinimalPopup()).isEqualTo(false);
+    }
+
     @EnableFlags({FLAG_ENABLE_SUPPORT_FOR_ARCHIVING, FLAG_USE_NEW_ICON_FOR_ARCHIVED_APPS})
     @Test
     public void applyIconAndLabel_setsImageSpan_whenInactiveArchivedApp() {
@@ -518,4 +555,57 @@ public class BubbleTextViewTest {
         assertThat(mBubbleTextView.getIcon()).isNotInstanceOf(PreloadIconDelegate.class);
     }
 
+    /**
+     * Creates a BubbleTextView with a mocked display type set during construction.
+     * This allows testing constructor logic that depends on XML attributes.
+     */
+    private BubbleTextView createBubbleTextViewWithDisplay(int displayType) {
+        // Spy on the context to intercept the call to obtainStyledAttributes
+        TestActivityContext spyContext = spy(mContext);
+
+        // Create a real TypedArray by calling the original method. This is more robust than a full
+        // mock, as we only need to override one value.
+        TypedArray realTypedArray = mContext.obtainStyledAttributes(
+                null, R.styleable.BubbleTextView, 0, 0);
+
+        // Spy the real TypedArray to override one of its methods
+        TypedArray spyTypedArray = spy(realTypedArray);
+
+        // When getInteger is called for iconDisplay, return our desired value
+        doReturn(displayType).when(spyTypedArray).getInteger(
+                eq(R.styleable.BubbleTextView_iconDisplay), anyInt());
+
+        // When the spied context calls obtainStyledAttributes, return our spied TypedArray
+        doReturn(spyTypedArray).when(spyContext).obtainStyledAttributes(
+                nullable(AttributeSet.class),
+                eq(R.styleable.BubbleTextView),
+                anyInt(),
+                anyInt());
+
+        return new BubbleTextView(spyContext, null, 0);
+    }
+
+    @Test
+    public void constructor_whenDisplayTaskbar_textIsHidden() {
+        // Verifies that the text is hidden when the view is constructed for the taskbar.
+        BubbleTextView taskbarBtv = createBubbleTextViewWithDisplay(DISPLAY_TASKBAR);
+        float actualAlpha = taskbarBtv.getTextContainerVisibility();
+
+        assertEquals(
+                "The text view is expected to be hidden when displayed in task bar, but the "
+                        + "actual alpha was "
+                        + actualAlpha, 0f, actualAlpha, 1e-5);
+    }
+
+    @Test
+    public void constructor_whenDisplayWorkspace_textIsVisible() {
+        // Verifies that the text is visible for a non-taskbar display type.
+        BubbleTextView workspaceBtv = createBubbleTextViewWithDisplay(DISPLAY_WORKSPACE);
+        float actualAlpha = workspaceBtv.getTextContainerVisibility();
+
+        assertEquals(
+                "The text view is expected to be visible when displayed in workspace, but the "
+                        + "actual alpha was "
+                        + actualAlpha, 1f, actualAlpha, 1e-5);
+    }
 }

@@ -32,9 +32,10 @@ import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.launcher3.Flags
 import com.android.launcher3.model.BgDataModel.Callbacks
 import com.android.launcher3.model.TestableModelState
+import com.android.launcher3.model.data.WorkspaceChangeEvent
 import com.android.launcher3.model.data.WorkspaceChangeEvent.RemoveEvent
 import com.android.launcher3.model.data.WorkspaceChangeEvent.UpdateEvent
-import com.android.launcher3.model.data.WorkspaceData
+import com.android.launcher3.testutil.rule.LayoutResource
 import com.android.launcher3.util.ComponentKey
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
@@ -42,8 +43,8 @@ import com.android.launcher3.util.LauncherLayoutBuilder
 import com.android.launcher3.util.LauncherModelHelper.SHORTCUT_ID
 import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY
 import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
-import com.android.launcher3.util.LayoutResource
-import com.android.launcher3.util.ModelTestExtensions.nonPredictedItemCount
+import com.android.launcher3.util.ModelTestExtensions.countPersistedModelItems
+import com.android.launcher3.util.RoboApiWrapper
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestUtil
 import com.google.common.truth.Truth.assertThat
@@ -71,6 +72,7 @@ class ShortcutsChangedTaskTest {
     @get:Rule val context = SandboxApplication().withModelDependency()
     @get:Rule var layout = LayoutResource(context)
     @get:Rule val mockito = MockitoJUnit.rule()
+    @get:Rule val shortcutAccessRule = RoboApiWrapper.grantShortcutsPermissionRule()
 
     private lateinit var launcherApps: LauncherApps
 
@@ -82,7 +84,7 @@ class ShortcutsChangedTaskTest {
     @Mock lateinit var mockShortcut: ShortcutInfo
     @Mock lateinit var mockCallbacks: Callbacks
 
-    private val workspaceUpdates = mutableListOf<WorkspaceData>()
+    private val workspaceUpdates = mutableListOf<WorkspaceChangeEvent?>()
 
     @Before
     fun setup() {
@@ -97,7 +99,7 @@ class ShortcutsChangedTaskTest {
                     .putApp(TEST_PACKAGE, TEST_ACTIVITY)
             )
 
-        assertEquals(2, modelState.dataModel.itemsIdMap.nonPredictedItemCount().toLong())
+        assertEquals(2, modelState.dataModel.itemsIdMap.countPersistedModelItems())
     }
 
     private fun setupMockLauncherApps(callback: (ApplicationInfo, ShortcutInfo) -> Unit) {
@@ -120,7 +122,9 @@ class ShortcutsChangedTaskTest {
         TestUtil.runOnExecutorSync(MAIN_EXECUTOR) {}
         reset(mockCallbacks)
 
-        modelState.homeRepo.workspaceState.forEach(MODEL_EXECUTOR) { workspaceUpdates.add(it) }
+        modelState.homeRepo.workspaceState.changes.forEach(MODEL_EXECUTOR) {
+            workspaceUpdates.add(it)
+        }
     }
 
     private fun executeTask(
@@ -135,19 +139,16 @@ class ShortcutsChangedTaskTest {
     private fun verifyCallbacks(itemUpdated: Boolean, itemRemoved: Boolean) {
         // Verify repository update
         if (!itemRemoved && !itemUpdated) {
-            assertThat(workspaceUpdates).hasSize(1)
+            assertThat(workspaceUpdates).isEmpty()
         } else {
-            assertThat(workspaceUpdates).hasSize(2)
-            val initialState = workspaceUpdates[0]
-            val finalState = workspaceUpdates[1]
-            assertThat(finalState.diff(initialState)!!).hasSize(1)
+            assertThat(workspaceUpdates).hasSize(1)
 
             if (itemUpdated) {
-                val updateEvent = finalState.diff(initialState)!![0] as UpdateEvent
+                val updateEvent = workspaceUpdates[0] as UpdateEvent
                 assertThat(updateEvent.items).hasSize(1)
                 updateEvent.items.forEach { assertThat(it.targetPackage).isEqualTo(TEST_PACKAGE) }
             } else {
-                assertThat(finalState.diff(initialState)!![0]).isInstanceOf(RemoveEvent::class.java)
+                assertThat(workspaceUpdates[0]).isInstanceOf(RemoveEvent::class.java)
             }
         }
 

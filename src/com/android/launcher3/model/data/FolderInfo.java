@@ -21,7 +21,7 @@ import static android.text.TextUtils.isEmpty;
 import static androidx.core.util.Preconditions.checkNotNull;
 
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION;
-import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_PAIR;
+import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_GROUP;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT;
 import static com.android.launcher3.logger.LauncherAtom.Attribute.EMPTY_LABEL;
 import static com.android.launcher3.logger.LauncherAtom.Attribute.MANUAL_LABEL;
@@ -321,6 +321,6 @@ public class FolderInfo extends CollectionInfo {
     public static boolean willAcceptItemType(int itemType) {
         return itemType == ITEM_TYPE_APPLICATION
                 || itemType == ITEM_TYPE_DEEP_SHORTCUT
-                || itemType == ITEM_TYPE_APP_PAIR;
+                || itemType == ITEM_TYPE_APP_GROUP;
     }
 }

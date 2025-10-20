@@ -53,12 +53,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 @RunWith(AndroidJUnit4.class)
 public class TaskbarNavButtonControllerTest {
 
     private final static int DISPLAY_ID = 2;
+
+
+    @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
     @Mock
     SystemUiProxy mockSystemUiProxy;
@@ -103,7 +107,6 @@ public class TaskbarNavButtonControllerTest {
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
         when(mockService.getDisplayId()).thenReturn(DISPLAY_ID);
         when(mockService.getApplicationContext())
                 .thenReturn(InstrumentationRegistry.getInstrumentation().getTargetContext()
@@ -120,6 +123,7 @@ public class TaskbarNavButtonControllerTest {
                 mockSystemUiProxy,
                 mockHandler,
                 mockContextualSearchInvoker);
+        assertThat(mNavButtonController.hasControllersSet()).isFalse();
         mNavButtonController.init(mockTaskbarControllers);
     }
 
@@ -318,6 +322,15 @@ public class TaskbarNavButtonControllerTest {
         mNavButtonController.onButtonClick(BUTTON_HOME, mockView);
         verify(mockStatsLogger, times(1)).log(LAUNCHER_TASKBAR_HOME_BUTTON_TAP);
         verify(mockStatsLogger, times(0)).log(LAUNCHER_TASKBAR_HOME_BUTTON_LONGPRESS);
+        assertThat(mNavButtonController.hasControllersSet()).isFalse();
+    }
+
+    @Test
+    public void testOnDestroyClearsControllers() {
+        assertThat(mNavButtonController.hasControllersSet()).isTrue();
+        mNavButtonController.onDestroy();
+
+        assertThat(mNavButtonController.hasControllersSet()).isFalse();
     }
 
     @Test

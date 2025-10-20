@@ -95,7 +95,11 @@ public final class TaskOverlayFactoryGo extends TaskOverlayFactory {
 
     private AssistContentRequester mContentRequester;
 
-    public TaskOverlayFactoryGo(Context context) {
+    public TaskOverlayFactoryGo(
+            Context context,
+            DesktopShortcutFactory desktopShortcutFactory,
+            ExternalDisplayShortcutFactory externalDisplayShortcutFactory) {
+        super(desktopShortcutFactory, externalDisplayShortcutFactory);
         mContentRequester = new AssistContentRequester(context);
     }
 

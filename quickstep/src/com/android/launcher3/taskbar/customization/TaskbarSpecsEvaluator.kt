@@ -16,7 +16,9 @@
 
 package com.android.launcher3.taskbar.customization
 
+import com.android.launcher3.Utilities.dpToPx
 import com.android.launcher3.taskbar.TaskbarActivityContext
+import com.android.launcher3.taskbar.TaskbarPopupController
 
 /** Evaluates the taskbar specs based on the taskbar grid size and the taskbar icon size. */
 class TaskbarSpecsEvaluator(
@@ -25,19 +27,34 @@ class TaskbarSpecsEvaluator(
     numRows: Int = taskbarActivityContext.deviceProfile.inv.numRows,
     numColumns: Int = taskbarActivityContext.deviceProfile.inv.numColumns,
 ) {
-    var taskbarIconSize: TaskbarIconSize = getIconSizeByGrid(numColumns, numRows)
+    val taskbarIconSize: TaskbarIconSize
+        get() =
+            if (taskbarActivityContext.isThreeButtonNav) TaskbarIconSpecs.defaultPersistentIconSize
+            else TaskbarIconSpecs.defaultTransientIconSize
+
     val numShownHotseatIcons
-        get() = taskbarActivityContext.deviceProfile.numShownHotseatIcons
+        get() =
+            if (TaskbarPopupController.canPinAppsOverflow())
+                taskbarActivityContext.deviceProfile.inv.numShownHotseatIcons
+            else taskbarActivityContext.deviceProfile.numShownHotseatIcons
+
+    val maxPinnableCount
+        get() =
+            if (TaskbarPopupController.canPinAppsOverflow()) {
+                taskbarActivityContext.deviceProfile.inv.numDatabaseHotseatIcons
+            } else {
+                numShownHotseatIcons
+            }
 
     // TODO(b/341146605) : initialize it to taskbar container in later cl.
     private var taskbarContainer: List<TaskbarContainer> = emptyList()
 
     val taskbarIconPadding: Int =
-        if (
-            TaskbarIconSpecs.transientOrPinnedTaskbarIconPaddingSize.size > taskbarIconSize.size &&
-                taskbarFeatureEvaluator.supportsTransitionToTransientTaskbar
-        ) {
-            (TaskbarIconSpecs.iconSize52dp.size - taskbarIconSize.size) / 2
+        if (taskbarActivityContext.isPinnedTaskbar && !taskbarActivityContext.isThreeButtonNav) {
+            val sizeDifference =
+                (TaskbarIconSpecs.defaultTransientIconSize.size
+                        - TaskbarIconSpecs.defaultPersistentIconSize.size).toFloat()
+            dpToPx(sizeDifference, taskbarActivityContext) / 2
         } else {
             0
         }
@@ -50,7 +67,7 @@ class TaskbarSpecsEvaluator(
         }
 
     fun getIconSizeByGrid(columns: Int, rows: Int): TaskbarIconSize {
-        return if (taskbarFeatureEvaluator.isTransient) {
+        return if (!taskbarFeatureEvaluator.hasNavButtons) {
             TaskbarIconSpecs.transientTaskbarIconSizeByGridSize.getOrDefault(
                 TransientTaskbarIconSizeKey(
                     columns,
@@ -94,14 +111,16 @@ class TaskbarSpecsEvaluator(
     }
 
     // TODO(jagrutdesai) : Call this in init once the containers are ready.
-    private fun calculateTaskbarIconSize() {
+    private fun calculateTaskbarIconSize(): TaskbarIconSize {
+        var currentIconSize = taskbarIconSize
         while (
-            taskbarIconSize != TaskbarIconSpecs.minimumIconSize &&
+            currentIconSize != TaskbarIconSpecs.minimumIconSize &&
                 taskbarActivityContext.transientTaskbarBounds.width() <
                     calculateSpaceNeeded(taskbarContainer)
         ) {
-            taskbarIconSize = getIconSizeStepDown(taskbarIconSize)
+            currentIconSize = getIconSizeStepDown(taskbarIconSize)
         }
+        return currentIconSize
     }
 
     private fun calculateSpaceNeeded(containers: List<TaskbarContainer>): Int {

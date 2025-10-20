@@ -66,7 +66,6 @@ import com.android.launcher3.CellLayout;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.DeviceProfile.OnDeviceProfileChangeListener;
 import com.android.launcher3.DropTargetHandler;
-import com.android.launcher3.Flags;
 import com.android.launcher3.LauncherAppState;
 import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.R;
@@ -100,6 +99,7 @@ import com.android.launcher3.widget.LauncherWidgetHolder;
 import com.android.launcher3.widget.picker.model.WidgetPickerDataProvider;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * An interface to be used along with a context for various activities in Launcher. This allows a
@@ -111,6 +111,10 @@ public interface ActivityContext extends SavedStateRegistryOwner {
 
     /** Returns the dagger graph for this UI context */
     ActivityContextComponent getActivityComponent();
+
+    default Executor getUiExecutor() {
+        return MAIN_EXECUTOR;
+    }
 
     default boolean finishAutoCancelActionMode() {
         return false;
@@ -231,10 +235,6 @@ public interface ActivityContext extends SavedStateRegistryOwner {
 
     /** @return the resource id of the style to apply for the current blur state in All Apps. */
     default int getAllAppsBlurStyleResId() {
-        if (!Flags.allAppsBlur()) {
-            // Don't alter the colors provided in the default Launcher themes.
-            return View.NO_ID;
-        }
         return isAllAppsBackgroundBlurEnabled() ? R.style.AllAppsBlurStyle
                 : R.style.AllAppsBlurFallbackStyle;
     }
@@ -379,13 +379,12 @@ public interface ActivityContext extends SavedStateRegistryOwner {
      * Hides the keyboard if it is visible
      */
     default void hideKeyboard() {
-        Log.d(TAG, "hideKeyboard: ", new Exception());
+        Log.d(TAG, "hideKeyboard");
         View root = getDragLayer();
         if (root == null) {
             Log.d(TAG, "hideKeyboard: getDragLayer() is null, returning early");
             return;
         }
-        Preconditions.assertUIThread();
         // Hide keyboard with WindowInsetsController if could. In case hideSoftInputFromWindow may
         // get ignored by input connection being finished when the screen is off.
         //
@@ -625,7 +624,7 @@ public interface ActivityContext extends SavedStateRegistryOwner {
 
     /** Closes the closeable when this context is destroyed */
     default void closeOnDestroy(SafeCloseable closeable) {
-        MAIN_EXECUTOR.execute(() -> getLifecycle().addObserver(new DefaultLifecycleObserver() {
+        getUiExecutor().execute(() -> getLifecycle().addObserver(new DefaultLifecycleObserver() {
             @Override
             public void onDestroy(@NonNull LifecycleOwner owner) {
                 closeable.close();

@@ -27,12 +27,14 @@ import android.view.WindowManagerGlobal;
 import android.window.PictureInPictureSurfaceTransaction;
 import android.window.WindowAnimationState;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.UiThread;
 
 import com.android.internal.jank.Cuj;
 import com.android.internal.os.IResultReceiver;
 import com.android.launcher3.util.Preconditions;
 import com.android.launcher3.util.RunnableList;
+import com.android.quickstep.util.ActiveGestureLog;
 import com.android.quickstep.util.ActiveGestureProtoLogProxy;
 import com.android.systemui.shared.recents.model.ThumbnailData;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
@@ -96,19 +98,17 @@ public class RecentsAnimationController {
     }
 
     @UiThread
-    public void finishAnimationToHome() {
-        finishController(true /* toHome */, null, false /* sendUserLeaveHint */);
+    public void finishAnimationToApp(@NonNull ActiveGestureLog.CompoundString reason) {
+        finishController(/* toHome= */ false, null, /* sendUserLeaveHint= */ false, reason);
     }
 
+    /** See {@link #finish(boolean, Runnable, boolean, ActiveGestureLog.CompoundString)} */
     @UiThread
-    public void finishAnimationToApp() {
-        finishController(false /* toHome */, null, false /* sendUserLeaveHint */);
-    }
-
-    /** See {@link #finish(boolean, Runnable, boolean)} */
-    @UiThread
-    public void finish(boolean toHome, Runnable onFinishComplete) {
-        finish(toHome, onFinishComplete, false /* sendUserLeaveHint */);
+    public void finish(
+            boolean toHome,
+            Runnable onFinishComplete,
+            @NonNull ActiveGestureLog.CompoundString reason) {
+        finish(toHome, onFinishComplete, /* sendUserLeaveHint= */ false, reason);
     }
 
     /**
@@ -119,19 +119,31 @@ public class RecentsAnimationController {
      *                          picture-in-picture mode upon being paused.
      */
     @UiThread
-    public void finish(boolean toHome, Runnable onFinishComplete, boolean sendUserLeaveHint) {
+    public void finish(
+            boolean toHome,
+            Runnable onFinishComplete,
+            boolean sendUserLeaveHint,
+            @NonNull ActiveGestureLog.CompoundString reason) {
         Preconditions.assertUIThread();
-        finishController(toHome, onFinishComplete, sendUserLeaveHint);
+        finishController(toHome, onFinishComplete, sendUserLeaveHint, reason);
     }
 
     @UiThread
-    public void finishController(boolean toHome, Runnable callback, boolean sendUserLeaveHint) {
-        finishController(toHome, callback, sendUserLeaveHint, false /* forceFinish */);
+    public void finishController(
+            boolean toHome,
+            Runnable callback,
+            boolean sendUserLeaveHint,
+            @NonNull ActiveGestureLog.CompoundString reason) {
+        finishController(toHome, callback, sendUserLeaveHint, /* forceFinish= */ false, reason);
     }
 
     @UiThread
-    public void finishController(boolean toHome, Runnable callback, boolean sendUserLeaveHint,
-            boolean forceFinish) {
+    public void finishController(
+            boolean toHome,
+            Runnable callback,
+            boolean sendUserLeaveHint,
+            boolean forceFinish,
+            @NonNull ActiveGestureLog.CompoundString reason) {
         mPendingFinishCallbacks.add(callback);
         if (!forceFinish && mFinishRequested) {
             // If finish has already been requested, then add the callback to the pending list.
@@ -139,7 +151,7 @@ public class RecentsAnimationController {
             // trigger the callback to be called immediately
             return;
         }
-        ActiveGestureProtoLogProxy.logFinishRecentsAnimation(toHome);
+        ActiveGestureProtoLogProxy.logFinishRecentsAnimation(toHome, reason);
         // Finish not yet requested
         mFinishRequested = true;
         mFinishTargetIsLauncher = toHome;
@@ -149,9 +161,7 @@ public class RecentsAnimationController {
                 @Override
                 public void send(int i, Bundle bundle) throws RemoteException {
                     ActiveGestureProtoLogProxy.logFinishRecentsAnimationCallback();
-                    MAIN_EXECUTOR.execute(() -> {
-                        mPendingFinishCallbacks.executeAllAndDestroy();
-                    });
+                    MAIN_EXECUTOR.execute(mPendingFinishCallbacks::executeAllAndDestroy);
                 }
             });
             InteractionJankMonitorWrapper.end(Cuj.CUJ_LAUNCHER_QUICK_SWITCH);

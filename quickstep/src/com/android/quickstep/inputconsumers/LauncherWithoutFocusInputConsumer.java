@@ -31,6 +31,8 @@ import com.android.launcher3.views.ActivityContext;
 import com.android.quickstep.GestureState;
 import com.android.quickstep.InputConsumer;
 import com.android.quickstep.RecentsAnimationDeviceState;
+import com.android.quickstep.TaskAnimationManager;
+import com.android.quickstep.util.ActiveGestureLog;
 import com.android.quickstep.util.TriggerSwipeUpTouchTracker;
 import com.android.systemui.shared.system.InputMonitorCompat;
 
@@ -42,18 +44,21 @@ public class LauncherWithoutFocusInputConsumer implements InputConsumer,
     private final InputMonitorCompat mInputMonitor;
     private final TriggerSwipeUpTouchTracker mTriggerSwipeUpTracker;
     private final GestureState mGestureState;
+    private final TaskAnimationManager mTaskAnimationManager;
 
     public LauncherWithoutFocusInputConsumer(
             Context context,
             RecentsAnimationDeviceState deviceState,
             GestureState gestureState,
             InputMonitorCompat inputMonitor,
+            TaskAnimationManager taskAnimationManager,
             boolean disableHorizontalSwipe) {
         mContext = context;
         mGestureState = gestureState;
         mInputMonitor = inputMonitor;
         mTriggerSwipeUpTracker = new TriggerSwipeUpTouchTracker(context, disableHorizontalSwipe,
                 deviceState.getNavBarPosition(), this);
+        mTaskAnimationManager = taskAnimationManager;
     }
 
     @Override
@@ -87,6 +92,10 @@ public class LauncherWithoutFocusInputConsumer implements InputConsumer,
     @Override
     public void onSwipeUp(boolean wasFling, PointF finalVelocity) {
         startHomeIntentSafely(mContext, mGestureState.getHomeIntent(), null, TAG);
+        mTaskAnimationManager.finishRunningRecentsAnimation(
+                /* toHome= */ true,
+                /* reason= */ new ActiveGestureLog.CompoundString(
+                        "LauncherWithoutFocusInputConsumer: finish recents animation onSwipeUp"));
         ActivityContext activity = ActivityContext.lookupContext(mContext);
         int state = (mGestureState != null && mGestureState.getEndTarget() != null)
                 ? mGestureState.getEndTarget().containerType

@@ -47,7 +47,6 @@
     <string name="hotseat_tip_gaps_filled" msgid="3035673010274223538">"යෙදුම් යෝජනා හිස් අවකාශයට එක් කර ඇත"</string>
     <string name="hotsaet_tip_prediction_enabled" msgid="2233554377501347650">"යෙදුම් යෝජනා සබලිතයි"</string>
     <string name="hotsaet_tip_prediction_disabled" msgid="1506426298884658491">"යෙදුම් යෝජනා අබල කර ඇත"</string>
-    <string name="hotseat_prediction_content_description" msgid="4582028296938078419">"පුරෝකථනය කළ යෙදුම: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="gesture_tutorial_title" msgid="2750751261768388354">"අභින සංචාලන නිබන්ධනය"</string>
     <string name="gesture_tutorial_rotation_prompt_title" msgid="7537946781362766964">"ඔබේ උපාංගය කරකවන්න"</string>
     <string name="gesture_tutorial_rotation_prompt" msgid="1664493449851960691">"අභින සංචාලන නිබන්ධනය සම්පූර්ණ කිරීම සඳහා ඔබේ උපාංගය කරකවන්න"</string>
@@ -116,24 +115,29 @@
     <string name="toast_split_app_unsupported" msgid="2360229567007828914">"බෙදීම් තිරය භාවිතා කිරීමට වෙනත් යෙදුමක් තෝරා ගන්න"</string>
     <string name="blocked_by_policy" msgid="2071401072261365546">"මෙම ක්‍රියාව යෙදුම හෝ ඔබේ සංවිධානය මගින් ඉඩ නොදේ"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"විජට් දැනට සහාය නොදක්වයි, වෙනත් යෙදුමක් තෝරන්න"</string>
+    <string name="action_image_copy" msgid="6877540054727709339">"පිටපත් කරන්න"</string>
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"තිරය කරකවන්න"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"තිරයේ පහළ සිට කාර්ය තීරුව දර්ශනය වන ආකාරය සහ භාවිතයේ නොමැති විට ස්වයංක්‍රීයව සැඟවෙන ආකාරය පෙන්වන සජීවීකරණය"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"තිරයේ පහළින් කාර්ය තීරුව ස්ථිරවම දෘශ්‍යමානව පවතින පරිදි, ටොගලයක් භාවිතයෙන් ඔබේ කාර්ය තීරුව ඇමිණෙන ආකාරය පෙන්වන සජීවීකරණය"</string>
+    <string name="taskbar_edu_bubbles_animation_description" msgid="421866726938396813">"අදින්න ඉංගිතය භාවිතයෙන් කාර්ය තීරුවෙන් බුබුලක් සාදන ආකාරය පෙන්වන සජීවිකරණය"</string>
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"විවෘත යෙදුමකට ඉහළින් ඇති කාර්ය තීරුවෙන් යෙදුමක් ඇදගෙන යාමෙන්, බෙදීම් තිරයක් නිර්මාණය කරන ආකාරය පෙන්වන සජීවීකරණය"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"ඔබේ උපාංගයේ යෝජිත යෙදුම් වෙත ප්‍රවේශ වන ආකාරය පෙන්වන සජීවීකරණය"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"ක්‍රියා යතුර ස්පර්ශ කරගෙන අයිතමය ඇති ප්‍රදේශය තේරීමෙන් තිරය මත අයිතමයක් සොයන ආකාරය පෙන්වන සජීවීකරණය"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"කාර්ය තීරු අධ්‍යාපනය"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"එකවර යෙදුම් 2ක් භාවිතා කිරීමට යෙදුමක් පැත්තට අදින්න"</string>
+    <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"පාවෙන පරිදි පහළ කෙළවරට අදින්න"</string>
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"කාර්ය තීරුව පෙන්වීමට ඉහළට සෙමින් ස්වයිප් කරන්න"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"ඔබේ දිනචරියාව මත පදනම්ව යෙදුම් යෝජනා ලබා ගන්න"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"කාර්ය තීරුව ඇමිණීමට බෙදනය මත දිගු වේලාවක් ඔබන්න"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"කාර්ය තීරුව සමග තවත් කරන්න"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"සෑම විටම කාර්ය තීරුව පෙන්වන්න"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"සෑම විටම ඔබේ තිරයේ පතුලේ ඇති කාර්ය තීරුව පෙන්වීමට, බෙදුම්කරු ස්පර්ශ කර අල්ලාගෙන සිටින්න"</string>
+    <string name="taskbar_edu_bubbles_standalone" msgid="4182824636656528043">"යෙදුමක් පාවෙන පරිදි කෙළවරට අදින්න"</string>
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"ඔබේ තිරයෙහි ඇති දේ සෙවීමට ක්‍රියා යතුර ස්පර්ශ කර සිටින්න"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"මෙම නිෂ්පාදනය සෙවීමට ඔබේ තිරයෙහි තෝරන ලද කොටස භාවිතා කරයි. Google හි <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>පෞද්ගලිකත්ව ප්‍රතිපත්තිය<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> සහ <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>සේවා නියමයන්<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> අදාළ වේ."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"වසන්න"</string>
     <string name="taskbar_edu_done" msgid="6880178093977704569">"නිමයි"</string>
+    <string name="taskbar_edu_next" msgid="4007618274426775841">"ඊළඟ"</string>
     <string name="taskbar_button_home" msgid="2151398979630664652">"මුල් පිටුව"</string>
     <string name="taskbar_button_a11y" msgid="5241161324875094465">"ප්‍රවේශ්‍යතාව"</string>
     <string name="taskbar_button_back" msgid="8558862226461164514">"ආපසු"</string>
@@ -142,18 +146,12 @@
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"දැනුම්දීම්"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"ඉක්මන් සැකසීම්"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"කාර්ය තීරුව"</string>
-    <string name="taskbar_a11y_shown_title" msgid="6842833581088937713">"කාර්ය තීරුව පෙන්වා ඇත"</string>
-    <string name="taskbar_a11y_shown_with_bubbles_left_title" msgid="4242431789851790046">"කාර්ය තීරුව සහ බුබුළු පෙන්වා ඇත"</string>
-    <string name="taskbar_a11y_shown_with_bubbles_right_title" msgid="8219065376188180113">"කාර්ය තීරුව සහ බුබුළු දකුණට පෙන්වා ඇත"</string>
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"සංචලන තීරුව"</string>
     <string name="always_show_taskbar" msgid="3608801276107751229">"සෑම විටම කාර්ය තීරුව පෙන්වන්න"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"සංචාලන ප්‍රකාරය වෙනස් කරන්න"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"කාර්ය තීරු බෙදනය"</string>
-    <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"අනෙකුත් මෑත යෙදුම්"</string>
-    <!-- no translation found for app_added_to_taskbar (1160433791917609063) -->
-    <skip />
-    <!-- no translation found for app_removed_from_taskbar (7887298201562912487) -->
-    <skip />
+    <string name="taskbar_recents_overflow_a11y_title" msgid="8005941062446304304">"අනෙකුත් මෑත යෙදුම්"</string>
+    <string name="taskbar_pinned_overflow_a11y_title" msgid="2314810718333302626">"වෙනත් යෙදුම්"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"ඉහළ/වම වෙත ගෙන යන්න"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"පහළ/දකුණ වෙත ගෙන යන්න"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"යෙදුම බුබුලක් ලෙස විවෘත කරන්න"</string>

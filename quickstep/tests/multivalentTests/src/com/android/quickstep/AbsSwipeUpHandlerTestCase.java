@@ -70,6 +70,7 @@ import android.view.ViewTreeObserver;
 import androidx.annotation.NonNull;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.app.displaylib.fakes.FakePerDisplayRepository;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.LauncherRootView;
 import com.android.launcher3.anim.AnimationSuccessListener;
@@ -79,9 +80,12 @@ import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.statemanager.StatefulContainer;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.Executors;
+import com.android.launcher3.util.ImmediateAnimator;
 import com.android.launcher3.util.MSDLPlayerWrapper;
 import com.android.launcher3.util.SandboxApplication;
 import com.android.launcher3.util.SystemUiController;
+import com.android.launcher3.util.ThreadedAnimator;
+import com.android.quickstep.util.ActiveGestureLog;
 import com.android.quickstep.util.ContextInitListener;
 import com.android.quickstep.util.MotionPauseDetector;
 import com.android.quickstep.util.RecentsOrientedState;
@@ -105,6 +109,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 
 public abstract class AbsSwipeUpHandlerTestCase<
         STATE_TYPE extends BaseState<STATE_TYPE>,
@@ -278,8 +285,12 @@ public abstract class AbsSwipeUpHandlerTestCase<
     @Before
     public void setUpRecentsContainer() {
         DisplayController displayController = DisplayController.INSTANCE.get(mContext);
-        mTaskAnimationManager = spy(
-                new TaskAnimationManager(mContext, mDisplayId, displayController));
+        FakePerDisplayRepository<TaskAnimationManager> fakePerDisplayRepository =
+                new FakePerDisplayRepository<>();
+        TaskAnimationManager taskAnimationManager = new TaskAnimationManager(mContext, mDisplayId,
+                displayController, fakePerDisplayRepository);
+        fakePerDisplayRepository.add(mDisplayId, taskAnimationManager);
+        mTaskAnimationManager = spy(taskAnimationManager);
         RECENTS_CONTAINER recentsContainer = getRecentsContainer();
         RECENTS_VIEW recentsView = getRecentsView();
 
@@ -475,9 +486,10 @@ public abstract class AbsSwipeUpHandlerTestCase<
     @Test
     public void testHomeGesture_invalidatesHandlerAfterParallelAnim() {
         ValueAnimator parallelAnim = new ValueAnimator();
+        ThreadedAnimator threadedAnimator = new ImmediateAnimator(parallelAnim);
         parallelAnim.setRepeatCount(ValueAnimator.INFINITE);
         when(mActivityInterface.getParallelAnimationToGestureEndTarget(any(), anyLong(), any()))
-                .thenReturn(parallelAnim);
+                .thenReturn(threadedAnimator);
         SWIPE_HANDLER handler = createSwipeUpHandlerForGesture(GestureState.GestureEndTarget.HOME);
         runOnMainSync(() -> {
             parallelAnim.start();
@@ -700,6 +712,75 @@ public abstract class AbsSwipeUpHandlerTestCase<
         verify(getRecentsView(), never()).moveRunningTaskToExpectedPosition();
     }
 
+    @Test
+    public void testDeferLifecycleOnDestroyFlags_cleanedUp_OnSwipeHandlerInvalidated() {
+        SWIPE_HANDLER handler = createSwipeHandler();
+
+        assertEquals(
+                /* message= */ "AbsSwipeUpHandler.mDeferLifecycleOnDestroyFlags was not initialized"
+                        + " properly",
+                /* expected= */ AbsSwipeUpHandler.HANDLER_VALID,
+                /* actual= */ handler.mDeferLifecycleOnDestroyFlags);
+
+        runOnMainSync(() -> handler.mStateCallback.setState(STATE_HANDLER_INVALIDATED));
+
+        assertEquals(
+                /* message= */ "State flag NOT_INVALIDATED was not cleaned up from "
+                        + "AbsSwipeUpHandler.mDeferLifecycleOnDestroyFlags on invalidate",
+                /* expected= */ 0,
+                /* actual= */ handler.mDeferLifecycleOnDestroyFlags);
+    }
+
+    @Test
+    public void testDeferLifecycleOnDestroyFlags_cleanedUp_afterLaunchWithoutAnimationCallback() {
+        SWIPE_HANDLER handler = createSwipeHandler();
+        ArgumentCaptor<Function1<Boolean, Unit>> callbackCaptor =
+                ArgumentCaptor.forClass(Function1.class);
+
+        handler.startNewTask(mNextPageTaskView, unused -> {});
+        verify(mNextPageTaskView).launchWithoutAnimation(anyBoolean(), callbackCaptor.capture());
+
+        assertEquals(
+                /* message= */ "AbsSwipeUpHandler.mDeferLifecycleOnDestroyFlags not initialized "
+                        + "properly",
+                /* expected= */ AbsSwipeUpHandler.HANDLER_VALID
+                        | AbsSwipeUpHandler.LAUNCH_WITHOUT_ANIMATION_CALLBACK_PENDING,
+                /* actual= */ handler.mDeferLifecycleOnDestroyFlags);
+
+        runOnMainSync(() -> handler.mStateCallback.setState(STATE_HANDLER_INVALIDATED));
+
+        assertEquals(
+                /* message= */ "State flag NOT_INVALIDATED was not cleaned up from "
+                        + "AbsSwipeUpHandler.mDeferLifecycleOnDestroyFlags on invalidate",
+                /* expected= */ AbsSwipeUpHandler.LAUNCH_WITHOUT_ANIMATION_CALLBACK_PENDING,
+                /* actual= */ handler.mDeferLifecycleOnDestroyFlags);
+
+        callbackCaptor.getValue().invoke(true);
+
+        assertEquals(
+                /* message= */ "State flag LAUNCH_WITHOUT_ANIMATION_CALLBACK_PENDING was not "
+                        + "cleaned up from AbsSwipeUpHandler.mDeferLifecycleOnDestroyFlags on "
+                        + "launchWithoutAnimation callback",
+                /* expected= */ 0,
+                /* actual= */ handler.mDeferLifecycleOnDestroyFlags);
+    }
+
+    @Test
+    public void testContainerDestroyed_stillCallsInvalidateHandlerWithLauncher() {
+        SWIPE_HANDLER swipeHandler = createSwipeHandler();
+        RECENTS_VIEW recentsView = getRecentsView();
+
+        // Call onActivityInit to set RecentsView and set STATE_LAUNCHER_PRESENT
+        swipeHandler.onActivityInit(/* isHomeStarted= */ false);
+
+        runOnMainSync(() -> {
+            onContainerDestroyed();
+
+            verify(recentsView).onGestureAnimationEnd();
+            verify(recentsView).removeOnScrollChangedListener(any());
+        });
+    }
+
     /**
      * Verifies that RecentsAnimationController#finish() is called, and captures and runs any
      * callback that was passed to it. This ensures that STATE_CURRENT_TASK_FINISHED is correctly
@@ -709,11 +790,14 @@ public abstract class AbsSwipeUpHandlerTestCase<
         ArgumentCaptor<Runnable> finishCallback = ArgumentCaptor.forClass(Runnable.class);
         // Check if the 2 parameter method is called.
         verify(mRecentsAnimationController, atLeast(0)).finish(
-                anyBoolean(), finishCallback.capture());
+                anyBoolean(), finishCallback.capture(), any(ActiveGestureLog.CompoundString.class));
         if (finishCallback.getAllValues().isEmpty()) {
             // Check if the 3 parameter method is called.
             verify(mRecentsAnimationController).finish(
-                    anyBoolean(), finishCallback.capture(), anyBoolean());
+                    anyBoolean(),
+                    finishCallback.capture(),
+                    anyBoolean(),
+                    any(ActiveGestureLog.CompoundString.class));
         }
         if (finishCallback.getValue() != null) {
             finishCallback.getValue().run();

@@ -36,10 +36,10 @@ import com.android.internal.R
 import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.statehandlers.DesktopVisibilityController.Companion.INACTIVE_DESK_ID
 import com.android.launcher3.util.DaggerSingletonTracker
+import com.android.quickstep.TopTaskTracker.HISTORY_SIZE
 import com.android.window.flags.Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND
 import com.android.window.flags.Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_FRONTEND
 import com.android.wm.shell.Flags.FLAG_ENABLE_SHELL_TOP_TASK_TRACKING
-import com.android.wm.shell.Flags.FLAG_FIX_BUBBLES_TO_RECENTS
 import com.android.wm.shell.shared.GroupedTaskInfo
 import com.android.wm.shell.shared.GroupedTaskInfo.TYPE_DESK
 import com.android.wm.shell.shared.GroupedTaskInfo.TYPE_FULLSCREEN
@@ -53,6 +53,8 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+
+private const val SECONDARY_DISPLAY_ID = 1
 
 /** Test for [TopTaskTracker] */
 @RunWith(AndroidJUnit4::class)
@@ -213,7 +215,6 @@ class TopTaskTrackerTest {
     }
 
     @Test
-    @EnableFlags(FLAG_FIX_BUBBLES_TO_RECENTS)
     @DisableFlags(FLAG_ENABLE_SHELL_TOP_TASK_TRACKING)
     fun getCachedTopTask_filtersOutBubbleTask() {
         val appBubbleTask = createBubbleTaskInfo(taskId = 100, appBubble = true)
@@ -231,7 +232,6 @@ class TopTaskTrackerTest {
     }
 
     @Test
-    @EnableFlags(FLAG_FIX_BUBBLES_TO_RECENTS)
     @DisableFlags(FLAG_ENABLE_SHELL_TOP_TASK_TRACKING)
     fun getCachedTopTask_allBubbles_noTopTask() {
         val convoBubbleTask = createBubbleTaskInfo(taskId = 100, appBubble = false)
@@ -246,22 +246,131 @@ class TopTaskTrackerTest {
         assertThat(topTask.taskId).isEqualTo(INVALID_TASK_ID)
     }
 
-    private fun createTaskInfo(taskId: Int, displayId: Int = DEFAULT_DISPLAY): TaskInfo {
-        val taskInfo = ActivityManager.RunningTaskInfo()
-        taskInfo.taskId = taskId
-        taskInfo.displayId = displayId
-        taskInfo.baseIntent = Intent()
-        taskInfo.baseActivity = ComponentName("test", "test")
-        taskInfo.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_STANDARD)
-        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN)
-        return taskInfo
+    @Test
+    @DisableFlags(FLAG_ENABLE_SHELL_TOP_TASK_TRACKING)
+    fun getAllTasks_tasksMoreThanHistorySize_onlyFreeFormTasksNotRemoved() {
+        val freeformTaskCount = HISTORY_SIZE * 2
+        val fullScreenTaskCount = HISTORY_SIZE + 2
+        var taskId = 0
+        val freeformTasks = mutableListOf<TaskInfo>()
+        repeat(freeformTaskCount) {
+            val task = createTaskInfo(taskId = ++taskId, windowingMode = WINDOWING_MODE_FREEFORM)
+            freeformTasks.add(task)
+            topTaskTracker.handleTaskMovedToFront(task)
+        }
+        val fullScreenTasks = mutableListOf<TaskInfo>()
+        repeat(fullScreenTaskCount) {
+            val task = createTaskInfo(taskId = ++taskId, windowingMode = WINDOWING_MODE_FULLSCREEN)
+            fullScreenTasks.add(task)
+            topTaskTracker.handleTaskMovedToFront(task)
+        }
+
+        val cachedInfo =
+            topTaskTracker.getCachedTopTask(/* filterOnlyVisibleRecents= */ false, DEFAULT_DISPLAY)
+        val tasks = cachedInfo.mAllCachedTasks
+
+        val expectedTasks = freeformTasks + fullScreenTasks.takeLast(HISTORY_SIZE)
+        assertThat(tasks).containsExactlyElementsIn(expectedTasks)
     }
 
-    private fun createDesktopTaskInfo(taskId: Int, displayId: Int): TaskInfo {
-        val taskInfo = createTaskInfo(taskId, displayId)
-        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM)
-        return taskInfo
+    @Test
+    @DisableFlags(
+        FLAG_ENABLE_SHELL_TOP_TASK_TRACKING,
+        "com.android.launcher3.enable_overview_on_connected_displays"
+    )
+    fun handleTaskMovedToFront_nonDefaultDisplayTask_flagDisabled_keepsDefaultDisplayTaskOnTop() {
+        // Arrange: Add a task on the default display.
+        val taskOnDefaultDisplay = createTaskInfo(taskId = 1, displayId = DEFAULT_DISPLAY)
+        topTaskTracker.handleTaskMovedToFront(taskOnDefaultDisplay)
+
+        // Add a task on a secondary display.
+        val taskOnSecondaryDisplay = createTaskInfo(taskId = 2, displayId = SECONDARY_DISPLAY_ID)
+
+        // Act: Move the task on the secondary display to the front.
+        topTaskTracker.handleTaskMovedToFront(taskOnSecondaryDisplay)
+
+        // Assert: The task on the default display should be moved back to the top of the list
+        // because the flag is disabled.
+        val cachedInfo =
+            topTaskTracker.getCachedTopTask(/* filterOnlyVisibleRecents= */ false, DEFAULT_DISPLAY)
+        val tasks = cachedInfo.mAllCachedTasks!!
+        assertThat(tasks).hasSize(2)
+        assertThat(tasks[0].taskId).isEqualTo(taskOnDefaultDisplay.taskId)
+        assertThat(tasks[1].taskId).isEqualTo(taskOnSecondaryDisplay.taskId)
     }
+
+    @Test
+    @DisableFlags(FLAG_ENABLE_SHELL_TOP_TASK_TRACKING)
+    @EnableFlags("com.android.launcher3.enable_overview_on_connected_displays")
+    fun handleTaskMovedToFront_nonDefaultDisplayTask_flagEnabled_doesNotReorder() {
+        // Arrange: Add a task on the default display.
+        val taskOnDefaultDisplay = createTaskInfo(taskId = 1, displayId = DEFAULT_DISPLAY)
+        topTaskTracker.handleTaskMovedToFront(taskOnDefaultDisplay)
+
+        // Add a task on a secondary display.
+        val taskOnSecondaryDisplay = createTaskInfo(taskId = 2, displayId = SECONDARY_DISPLAY_ID)
+
+        // Act: Move the task on the secondary display to the front.
+        topTaskTracker.handleTaskMovedToFront(taskOnSecondaryDisplay)
+
+        // Assert: With the flag enabled, each display maintains its own top task. The task on the
+        // secondary display should be the top task for that display.
+        val topTaskSecondary =
+            topTaskTracker
+                .getCachedTopTask(/* filterOnlyVisibleRecents= */ false, SECONDARY_DISPLAY_ID)
+                .getLegacyBaseTask()
+        assertThat(topTaskSecondary?.taskId).isEqualTo(taskOnSecondaryDisplay.taskId)
+
+        // And the task on the default display should remain the top task for the default display.
+        val topTaskDefault =
+            topTaskTracker
+                .getCachedTopTask(/* filterOnlyVisibleRecents= */ false, DEFAULT_DISPLAY)
+                .getLegacyBaseTask()
+        assertThat(topTaskDefault?.taskId).isEqualTo(taskOnDefaultDisplay.taskId)
+    }
+
+    @Test
+    @DisableFlags(
+        FLAG_ENABLE_SHELL_TOP_TASK_TRACKING,
+        "com.android.launcher3.enable_overview_on_connected_displays"
+    )
+    fun handleTaskMovedToFront_defaultDisplayTask_flagDisabled_noReorder() {
+        // Arrange: Add a task on a secondary display.
+        val taskOnSecondaryDisplay = createTaskInfo(taskId = 1, displayId = SECONDARY_DISPLAY_ID)
+        topTaskTracker.handleTaskMovedToFront(taskOnSecondaryDisplay)
+
+        // Add a task on the default display.
+        val taskOnDefaultDisplay = createTaskInfo(taskId = 2, displayId = DEFAULT_DISPLAY)
+
+        // Act: Move the task on the default display to the front.
+        topTaskTracker.handleTaskMovedToFront(taskOnDefaultDisplay)
+
+        // Assert: The task on the default display should be at the top, and no special reordering
+        // should occur as the top task is already on the default display.
+        val cachedInfo =
+            topTaskTracker.getCachedTopTask(/* filterOnlyVisibleRecents= */ false, DEFAULT_DISPLAY)
+        val tasks = cachedInfo.mAllCachedTasks!!
+        assertThat(tasks).hasSize(2)
+        assertThat(tasks[0].taskId).isEqualTo(taskOnDefaultDisplay.taskId)
+        assertThat(tasks[1].taskId).isEqualTo(taskOnSecondaryDisplay.taskId)
+    }
+
+    private fun createTaskInfo(
+        taskId: Int,
+        displayId: Int = DEFAULT_DISPLAY,
+        windowingMode: Int = WINDOWING_MODE_FULLSCREEN,
+    ) =
+        ActivityManager.RunningTaskInfo().apply {
+            this.taskId = taskId
+            this.displayId = displayId
+            this.baseIntent = Intent()
+            this.baseActivity = ComponentName("test", "test")
+            this.configuration.windowConfiguration.activityType = ACTIVITY_TYPE_STANDARD
+            this.configuration.windowConfiguration.windowingMode = windowingMode
+        }
+
+    private fun createDesktopTaskInfo(taskId: Int, displayId: Int) =
+        createTaskInfo(taskId, displayId, WINDOWING_MODE_FREEFORM)
 
     private fun createBubbleTaskInfo(
         taskId: Int,

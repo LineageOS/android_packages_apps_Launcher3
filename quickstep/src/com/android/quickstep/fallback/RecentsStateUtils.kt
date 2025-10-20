@@ -17,6 +17,7 @@
 package com.android.quickstep.fallback
 
 import com.android.launcher3.LauncherState
+import com.android.launcher3.statemanager.BaseState
 import com.android.launcher3.testing.shared.TestProtocol
 
 fun RecentsState.toLauncherState(): LauncherState {
@@ -41,6 +42,13 @@ fun LauncherState.toRecentsState(): RecentsState {
         else -> RecentsState.BG_LAUNCHER
     }
 }
+
+fun <T> BaseState<T>.toRecentsState(): RecentsState? =
+    when (this) {
+        is RecentsState -> this
+        is LauncherState -> this.toRecentsState()
+        else -> null
+    }
 
 fun LauncherState.hasEquivalentRecentsState(): Boolean {
     return when (this) {

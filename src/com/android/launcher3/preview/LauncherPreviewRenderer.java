@@ -105,6 +105,7 @@ public class LauncherPreviewRenderer extends BaseContext
     private final Hotseat mHotseat;
     private final Map<Integer, CellLayout> mWorkspaceScreens = new HashMap<>();
     private final ItemInflater<LauncherPreviewRenderer> mItemInflater;
+    private final LauncherWidgetHolder mWidgetHolder;
 
     public LauncherPreviewRenderer(Context context,
             int workspaceScreenId,
@@ -119,6 +120,12 @@ public class LauncherPreviewRenderer extends BaseContext
                 .setViewScaleProvider(new PreviewScaleProvider(this)).build();
         Rect insets = getInsets(context);
         mDp.updateInsets(insets);
+        mWidgetHolder =
+                LauncherComponentProvider.get(this).getWidgetHolderFactory().newInstance(this);
+        if (wallpaperColorResources != null) {
+            mWidgetHolder.setOnViewCreationCallback(
+                    v -> v.setColorResources(wallpaperColorResources));
+        }
 
         mHomeElementInflater = LayoutInflater.from(
                 new ContextThemeWrapper(this, R.style.HomeScreenElementTheme));
@@ -168,17 +175,10 @@ public class LauncherPreviewRenderer extends BaseContext
             mWorkspaceScreens.put(workspaceScreenId, firstScreen);
         }
 
-        LauncherWidgetHolder widgetHolder = LauncherComponentProvider.get(this)
-                .getWidgetHolderFactory().newInstance(this);
-        if (wallpaperColorResources != null) {
-            widgetHolder.setOnViewCreationCallback(
-                    v -> v.setColorResources(wallpaperColorResources));
-        }
-        widgetHolder.startListeningForSharedUpdate();
-
+        mWidgetHolder.startListeningForSharedUpdate();
         mItemInflater = new ItemInflater<>(
                 this,
-                widgetHolder,
+                mWidgetHolder,
                 view -> { },
                 (view, b) -> { },
                 mHotseat
@@ -189,9 +189,15 @@ public class LauncherPreviewRenderer extends BaseContext
             @Override
             public void onDestroy(@NonNull LifecycleOwner owner) {
                 model.removeCallbacks(LauncherPreviewRenderer.this);
-                widgetHolder.destroy();
+                mWidgetHolder.destroy();
             }
         });
+    }
+
+    @Nullable
+    @Override
+    public LauncherWidgetHolder getAppWidgetHolder() {
+        return mWidgetHolder;
     }
 
     @Override

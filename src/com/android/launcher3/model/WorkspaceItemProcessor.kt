@@ -23,16 +23,22 @@ import android.content.pm.LauncherApps
 import android.content.pm.LauncherApps.ShortcutQuery
 import android.content.pm.PackageInstaller
 import android.content.pm.ShortcutInfo
+import android.net.Uri
 import android.text.TextUtils
 import android.util.Log
 import android.util.LongSparseArray
-import android.util.SparseArray
 import com.android.launcher3.Flags
+import com.android.launcher3.Flags.enableFilesOnHomeScreenDecoupledInit
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherSettings.Favorites
+import com.android.launcher3.Utilities.qsbOnFirstScreen
+import com.android.launcher3.WorkspaceLayoutManager
 import com.android.launcher3.backuprestore.LauncherRestoreEventLogger.RestoreError
 import com.android.launcher3.folder.Folder
 import com.android.launcher3.folder.FolderGridOrganizer.createFolderGridOrganizer
+import com.android.launcher3.homescreenfiles.HomeScreenFile
+import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils
+import com.android.launcher3.homescreenfiles.isFileSystemItem
 import com.android.launcher3.icons.CacheableShortcutInfo
 import com.android.launcher3.icons.IconCache
 import com.android.launcher3.icons.cache.CacheLookupFlag.Companion.DEFAULT_LOOKUP_FLAG
@@ -43,21 +49,25 @@ import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.IconRequestInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.ItemInfoWithIcon
+import com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_DISABLED_FILE_SYSTEM_NOT_READY
 import com.android.launcher3.model.data.LauncherAppWidgetInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.pm.PackageInstallInfo
-import com.android.launcher3.pm.UserCache
+import com.android.launcher3.pm.UserManagerState
 import com.android.launcher3.shortcuts.ShortcutKey
 import com.android.launcher3.shortcuts.ShortcutRequest
 import com.android.launcher3.util.ApiWrapper
 import com.android.launcher3.util.ApplicationInfoWrapper
+import com.android.launcher3.util.ContentWriter
 import com.android.launcher3.util.IntArray
+import com.android.launcher3.util.IntSet
 import com.android.launcher3.util.IntSparseArrayMap
 import com.android.launcher3.util.PackageManagerHelper
 import com.android.launcher3.util.PackageUserKey
 import com.android.launcher3.widget.LauncherAppWidgetProviderInfo
 import com.android.launcher3.widget.WidgetInflater
 import com.android.launcher3.widget.util.WidgetSizeHandler
+import java.util.concurrent.CompletableFuture
 
 /**
  * This items is used by LoaderTask to process items that have been loaded from the Launcher's DB.
@@ -69,7 +79,6 @@ import com.android.launcher3.widget.util.WidgetSizeHandler
 class WorkspaceItemProcessor(
     private val c: LoaderCursor,
     private val memoryLogger: LoaderMemoryLogger?,
-    private val userCache: UserCache,
     private val userManagerState: UserManagerState,
     private val launcherApps: LauncherApps,
     private val pendingPackages: MutableSet<PackageUserKey>,
@@ -86,6 +95,8 @@ class WorkspaceItemProcessor(
     private val unlockedUsers: LongSparseArray<Boolean>,
     private val allDeepShortcuts: MutableList<CacheableShortcutInfo>,
     private val widgetSizeHandler: WidgetSizeHandler,
+    private val workspaceItemSpaceFinder: WorkspaceItemSpaceFinder,
+    private val homeScreenFiles: CompletableFuture<Map<Uri, HomeScreenFile>>,
 ) {
 
     private val loadedItems = IntSparseArrayMap<ItemInfo>()
@@ -102,21 +113,15 @@ class WorkspaceItemProcessor(
      */
     fun processItem() {
         try {
-            if (c.user == null) {
-                // User has been deleted, remove the item.
-                c.markDeleted(
-                    "User has been deleted for item id=${c.id}",
-                    RestoreError.PROFILE_DELETED,
-                )
-                return
-            }
             when (c.itemType) {
                 Favorites.ITEM_TYPE_APPLICATION,
                 Favorites.ITEM_TYPE_DEEP_SHORTCUT -> processAppOrDeepShortcut()
                 Favorites.ITEM_TYPE_FOLDER,
-                Favorites.ITEM_TYPE_APP_PAIR -> processFolderOrAppPair()
+                Favorites.ITEM_TYPE_APP_GROUP -> processFolderOrAppPair()
                 Favorites.ITEM_TYPE_APPWIDGET,
                 Favorites.ITEM_TYPE_CUSTOM_APPWIDGET -> processWidget()
+                Favorites.ITEM_TYPE_FILE_SYSTEM_FILE,
+                Favorites.ITEM_TYPE_FILE_SYSTEM_FOLDER -> processFileSystemItem()
             }
         } catch (e: Exception) {
             Log.e(TAG, "Desktop items loading interrupted", e)
@@ -322,8 +327,18 @@ class WorkspaceItemProcessor(
                     info = WorkspaceItemInfo(pinnedShortcut, context)
                     // If the pinned deep shortcut is no longer published,
                     // use the last saved icon instead of the default.
-                    val csi = CacheableShortcutInfo(pinnedShortcut, appInfoWrapper)
-                    iconCache.getShortcutIcon(info, csi, c::loadIconFromDb)
+                    val csi =
+                        CacheableShortcutInfo(
+                            shortcutInfo = pinnedShortcut,
+                            appInfo = appInfoWrapper,
+                            fallbackIconProvider = {
+                                runCatching {
+                                        c.createIconRequestInfo(info, false).parseIconBlob(it)
+                                    }
+                                    .getOrNull()
+                            },
+                        )
+                    iconCache.getShortcutIcon(info, csi, DEFAULT_LOOKUP_FLAG.withThemeIcon())
                     if (appInfoWrapper.isSuspended()) {
                         info.runtimeStatusFlags =
                             info.runtimeStatusFlags or ItemInfoWithIcon.FLAG_DISABLED_SUSPENDED
@@ -381,7 +396,7 @@ class WorkspaceItemProcessor(
                 AppInfo.updateRuntimeFlagsForActivityTarget(
                     info,
                     activityInfo,
-                    userCache.getUserInfo(c.user),
+                    userManagerState.getUserInfo(c.user),
                     ApiWrapper.INSTANCE[context],
                     pmHelper,
                 )
@@ -444,7 +459,7 @@ class WorkspaceItemProcessor(
         var collection = c.findOrMakeFolder(c.id, loadedItems)
         // If we generated a placeholder Folder before this point, it may need to be replaced with
         // an app pair.
-        if (c.itemType == Favorites.ITEM_TYPE_APP_PAIR && collection is FolderInfo) {
+        if (c.itemType == Favorites.ITEM_TYPE_APP_GROUP && collection is FolderInfo) {
             val newAppPair = AppPairInfo()
             // Move the placeholder's contents over to the new app pair.
             collection.getContents().forEach(newAppPair::add)
@@ -453,7 +468,7 @@ class WorkspaceItemProcessor(
 
         c.applyCommonProperties(collection)
         // Do not trim the folder label, as is was set by the user.
-        collection.title = c.getString(c.mTitleIndex)
+        collection.title = c.title
         collection.spanX = 1
         collection.spanY = 1
         if (collection is FolderInfo) {
@@ -485,7 +500,7 @@ class WorkspaceItemProcessor(
      * widgets, installing / restoring widgets are treated differently, etc.
      */
     private fun processWidget() {
-        val component = ComponentName.unflattenFromString(c.appWidgetProvider)!!
+        val component = ComponentName.unflattenFromString(c.appWidgetProvider!!)!!
         val appWidgetInfo = LauncherAppWidgetInfo(c.appWidgetId, component)
         c.applyCommonProperties(appWidgetInfo)
         appWidgetInfo.spanX = c.spanX
@@ -607,6 +622,120 @@ class WorkspaceItemProcessor(
         c.checkAndAddItem(appWidgetInfo, loadedItems, memoryLogger)
     }
 
+    /** Restores file system items coming from the DB ([LoaderCursor]). */
+    private fun processFileSystemItem() {
+        if (c.restoreFlag != 0) {
+            // NOTE: File system items are represented by device-specific URIs that are not unique
+            // across devices. Because we cannot be certain that a backed up URI continues to refer
+            // to the same file across backup-and-restore attempts, we cannot support restore.
+            c.markDeleted(
+                "File system items are not restored from backup",
+                RestoreError.FILE_SYSTEM_ITEM_FROM_BACKUP,
+            )
+            return
+        }
+
+        val item =
+            WorkspaceItemInfo().apply {
+                c.applyCommonProperties(this)
+                itemType = c.itemType
+                title = c.title
+                intent =
+                    (c.parseIntent() ?: Intent()).apply {
+                        addFlags(HomeScreenFilesUtils.LAUNCH_INTENT_DEFAULT_FLAGS)
+                    }
+            }
+
+        // NOTE: File system items may not yet be available when initialization is decoupled from
+        // the loader task. When that is the case, it signals that the file system is not yet ready
+        // and so any file item shortcuts should be disabled. Once the file system is ready a model
+        // update task is enqueued to reconcile file system and workspace item states.
+        val isDelayedInit = enableFilesOnHomeScreenDecoupledInit() && !homeScreenFiles.isDone
+        if (isDelayedInit) {
+            item.runtimeStatusFlags = item.runtimeStatusFlags or FLAG_DISABLED_FILE_SYSTEM_NOT_READY
+        }
+
+        if (isDelayedInit || homeScreenFiles.get().containsKey(item.intent.data)) {
+            c.markRestored()
+            c.checkAndAddItem(item, loadedItems, memoryLogger)
+        } else {
+            c.markDeleted(
+                "File system item ${c.title} no longer exists",
+                RestoreError.FILE_SYSTEM_ITEM_NO_LONGER_EXISTS,
+            )
+        }
+    }
+
+    /**
+     * Creates remaining file system items presented in [homeScreenFiles] that were not part of the
+     * restore in [processFileSystemItem].
+     */
+    private fun addRemainingFileSystemItems(modelDbController: ModelDbController) {
+        // NOTE: When file items on home screen initialization is decoupled from the loader task,
+        // any remaining file system items will be restored in a model update task that is scheduled
+        // once the file system is ready.
+        if (enableFilesOnHomeScreenDecoupledInit()) {
+            return
+        }
+
+        val knownDesktopContainerItems =
+            ArrayList(loadedItems.filter { it.container == Favorites.CONTAINER_DESKTOP })
+        val alreadyRestoredFileSystemItems =
+            knownDesktopContainerItems
+                .filter(ItemInfo::isFileSystemItem)
+                .map { requireNotNull(it.intent).data }
+                .toSet()
+        val excludedScreens = IntSet()
+
+        if (qsbOnFirstScreen()) {
+            // Reserve layout space for the search container. Note that this is not required when
+            // [Flags.FLAG_INJECTABLE_MODEL_ITEMS] is enabled as injected items will already be
+            // accounted for in [knownDesktopContainerItems].
+            knownDesktopContainerItems.add(
+                WorkspaceItemInfo().apply {
+                    cellX = 0
+                    cellY = 0
+                    container = Favorites.CONTAINER_DESKTOP
+                    screenId = WorkspaceLayoutManager.FIRST_SCREEN_ID
+                    spanX = idp.numSearchContainerColumns
+                    spanY = 1
+                }
+            )
+        }
+
+        for ((uri, file) in homeScreenFiles.get()) {
+            if (alreadyRestoredFileSystemItems.contains(uri)) {
+                continue
+            }
+
+            val item = WorkspaceItemInfo()
+            item.id = modelDbController.generateNewItemId()
+            item.title = file.displayName
+            item.container = Favorites.CONTAINER_DESKTOP
+            item.itemType = HomeScreenFilesUtils.buildItemType(file)
+            item.intent = HomeScreenFilesUtils.buildLaunchIntent(uri, file)
+
+            val coords =
+                workspaceItemSpaceFinder.findSpaceForItem(
+                    knownDesktopContainerItems,
+                    item.spanX,
+                    item.spanY,
+                    excludedScreens,
+                )
+            item.screenId = coords.screenId
+            item.cellX = coords.cellX
+            item.cellY = coords.cellY
+
+            val writer = ContentWriter(context)
+            item.onAddToDatabase(writer)
+            writer.put(Favorites._ID, item.id)
+            modelDbController.insert(writer.getValues(context))
+
+            knownDesktopContainerItems.add(item)
+            loadedItems.put(item.id, item)
+        }
+    }
+
     /**
      * After all items have been processed and added to the BgDataModel, this method can correctly
      * rank items inside folders and load the correct miniature preview icons to be shown when the
@@ -645,7 +774,7 @@ class WorkspaceItemProcessor(
     /**
      * Applies any queued update data update tasks and data sanity checks and returns the final set
      * of workspace data. This includes:
-     * 1) Loading any additional model data, not coming from the DB
+     * 1) Loading any additional model data, not coming from the DB (including file system items)
      * 2) Sanity checks on folder and app pair: removing empty and single item folders, and sorting
      *    contents
      * 3) Committing any persistent modifications and deletions to the storage
@@ -653,7 +782,7 @@ class WorkspaceItemProcessor(
     fun finalizeData(
         delegate: ModelDelegate,
         modelDbController: ModelDbController,
-    ): SparseArray<ItemInfo> {
+    ): IntSparseArrayMap<ItemInfo> {
         delegate.loadAndAddExtraModelItems(loadedItems)
         delegate.markActive()
 
@@ -672,6 +801,9 @@ class WorkspaceItemProcessor(
         // Cleans up app pairs if they don't have the right number of member apps (2).
         removeItems(modelDbController.deleteBadAppPairs())
         removeItems(modelDbController.deleteUnparentedApps())
+
+        addRemainingFileSystemItems(modelDbController)
+
         return loadedItems
     }
 

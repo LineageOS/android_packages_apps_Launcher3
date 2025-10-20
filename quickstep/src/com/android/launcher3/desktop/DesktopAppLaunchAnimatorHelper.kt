@@ -38,6 +38,7 @@ import com.android.internal.jank.InteractionJankMonitor
 import com.android.launcher3.R
 import com.android.launcher3.desktop.DesktopAppLaunchTransition.AppLaunchType
 import com.android.launcher3.desktop.DesktopAppLaunchTransition.Companion.LAUNCH_CHANGE_MODES
+import com.android.launcher3.util.DisplayController
 import com.android.wm.shell.shared.animation.MinimizeAnimator
 import com.android.wm.shell.shared.animation.WindowAnimator
 
@@ -55,16 +56,13 @@ import com.android.wm.shell.shared.animation.WindowAnimator
  */
 class DesktopAppLaunchAnimatorHelper(
     private val context: Context,
+    private val displayController: DisplayController,
     private val launchType: AppLaunchType,
     @Cuj.CujType private val cujType: Int,
     private val transactionSupplier: Supplier<Transaction>,
 ) {
 
     private val interactionJankMonitor = InteractionJankMonitor.getInstance()
-    private val taskCornerRadiusInPx =
-        context.resources
-            .getDimensionPixelSize(R.dimen.desktop_windowing_freeform_task_rounded_corner_radius)
-            .toFloat()
 
     fun createAnimators(info: TransitionInfo, finishCallback: (Animator) -> Unit): List<Animator> {
         val launchChange = getLaunchChange(info)
@@ -163,6 +161,14 @@ class DesktopAppLaunchAnimatorHelper(
             }
         val clipRect = Rect(change.endAbsBounds).apply { offsetTo(0, 0) }
         transaction.setCrop(change.leash, clipRect)
+        val displayContext = displayController.getInfoForDisplay(change.endDisplayId)?.getContext()
+        val animatorContext = displayContext ?: context
+        val taskCornerRadiusInPx =
+            animatorContext.resources
+                .getDimensionPixelSize(
+                    R.dimen.desktop_windowing_freeform_task_rounded_corner_radius
+                )
+                .toFloat()
         transaction.setCornerRadius(change.leash, taskCornerRadiusInPx)
         return AnimatorSet().apply {
             interactionJankMonitor.begin(change.leash, context, context.mainThreadHandler, cujType)

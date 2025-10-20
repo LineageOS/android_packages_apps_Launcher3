@@ -39,6 +39,8 @@ import com.android.launcher3.taskbar.rules.TaskbarSandboxComponent
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
+import com.android.launcher3.util.Executors.MAIN_EXECUTOR
+import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
 import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.LauncherMultivalentJUnit.EmulatedDevices
 import com.android.launcher3.util.TestUtil.getOnUiThread
@@ -52,13 +54,11 @@ import com.android.quickstep.util.SplitTask
 import com.android.systemui.shared.recents.model.Task
 import com.android.wm.shell.desktopmode.IDesktopTaskListener
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource
-import com.android.wm.shell.shared.desktopmode.DesktopTaskToFrontReason
 import com.android.wm.shell.shared.split.SplitBounds
 import com.android.wm.shell.shared.split.SplitScreenConstants
 import com.google.common.truth.Truth.assertThat
 import dagger.BindsInstance
 import dagger.Component
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -73,7 +73,6 @@ import org.mockito.kotlin.whenever
 
 @RunWith(LauncherMultivalentJUnit::class)
 @EmulatedDevices(["pixelTablet2023"])
-@Ignore("b/413540825")
 class KeyboardQuickSwitchControllerTest {
     private var systemUiProxySpy: SystemUiProxy? = null
     private var desktopTaskListener: IDesktopTaskListener? = null
@@ -87,7 +86,13 @@ class KeyboardQuickSwitchControllerTest {
         TaskbarWindowSandboxContext.create(
             SandboxParams(
                 {
-                    spy(SystemUiProxy(ApplicationProvider.getApplicationContext())) { proxy ->
+                    spy(
+                        SystemUiProxy(
+                            ApplicationProvider.getApplicationContext(),
+                            MAIN_EXECUTOR,
+                            UI_HELPER_EXECUTOR,
+                        )
+                    ) { proxy ->
                         systemUiProxySpy = proxy
                         doAnswer { desktopTaskListener = it.getArgument(0) }
                             .whenever(proxy)
@@ -279,15 +284,12 @@ class KeyboardQuickSwitchControllerTest {
             ?.activateDesk(
                 deskIdCaptor.capture(),
                 transitionCaptor.capture(),
+                taskIdToReorderToFront = eq(PREVIOUS_TASK_ID),
                 transitionSource = eq(DesktopModeTransitionSource.KEYBOARD_SHORTCUT),
             )
         assertThat(deskIdCaptor.firstValue).isEqualTo(deskId)
         assertThat(transitionCaptor.firstValue.remoteTransition)
             .isInstanceOf(SlideInRemoteTransition::class.java)
-
-        verify(systemUiProxySpy)
-            ?.showDesktopApp(taskIdCaptor.capture(), eq(null), eq(DesktopTaskToFrontReason.ALT_TAB))
-        assertThat(taskIdCaptor.firstValue).isEqualTo(PREVIOUS_TASK_ID)
     }
 
     @Test

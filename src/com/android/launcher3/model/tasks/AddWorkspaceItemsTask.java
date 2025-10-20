@@ -15,44 +15,37 @@
  */
 package com.android.launcher3.model.tasks;
 
-import static com.android.launcher3.LauncherSettings.Favorites.DESKTOP_ICON_FLAG;
+import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION;
+import static com.android.launcher3.WorkspaceLayoutManager.FIRST_SCREEN_ID;
+import static com.android.launcher3.WorkspaceLayoutManager.TAG;
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.LauncherActivityInfo;
-import android.content.pm.LauncherApps;
-import android.content.pm.PackageInstaller.SessionInfo;
 import android.os.UserHandle;
-import android.util.Pair;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.android.launcher3.LauncherModel.ModelUpdateTask;
 import com.android.launcher3.LauncherSettings;
-import com.android.launcher3.icons.IconCache;
 import com.android.launcher3.logging.FileLog;
 import com.android.launcher3.model.AllAppsList;
 import com.android.launcher3.model.BgDataModel;
 import com.android.launcher3.model.ModelTaskController;
 import com.android.launcher3.model.ModelWriter;
 import com.android.launcher3.model.WorkspaceItemSpaceFinder;
-import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.CollectionInfo;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.ItemInfoWithIcon;
 import com.android.launcher3.model.data.LauncherAppWidgetInfo;
+import com.android.launcher3.model.data.WorkspaceItemCoordinates;
 import com.android.launcher3.model.data.WorkspaceItemFactory;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
-import com.android.launcher3.pm.InstallSessionHelper;
-import com.android.launcher3.pm.PackageInstallInfo;
 import com.android.launcher3.util.ApplicationInfoWrapper;
-import com.android.launcher3.util.IntArray;
-import com.android.launcher3.util.PackageManagerHelper;
+import com.android.launcher3.util.IntSet;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.function.Supplier;
+import java.util.stream.StreamSupport;
 
 /**
  * Task to add auto-created workspace items.
@@ -62,7 +55,7 @@ public class AddWorkspaceItemsTask implements ModelUpdateTask {
     private static final String LOG = "AddWorkspaceItemsTask";
 
     @NonNull
-    private final List<Pair<ItemInfo, Object>> mItemList;
+    private final List<Supplier<ItemInfo>> mItemList;
 
     @NonNull
     private final WorkspaceItemSpaceFinder mItemSpaceFinder;
@@ -71,7 +64,7 @@ public class AddWorkspaceItemsTask implements ModelUpdateTask {
      * @param itemList items to add on the workspace
      * @param itemSpaceFinder inject WorkspaceItemSpaceFinder dependency for testing
      */
-    public AddWorkspaceItemsTask(@NonNull final List<Pair<ItemInfo, Object>> itemList,
+    public AddWorkspaceItemsTask(@NonNull final List<Supplier<ItemInfo>> itemList,
             @NonNull final WorkspaceItemSpaceFinder itemSpaceFinder) {
         mItemList = itemList;
         mItemSpaceFinder = itemSpaceFinder;
@@ -86,126 +79,57 @@ public class AddWorkspaceItemsTask implements ModelUpdateTask {
         }
 
         final ArrayList<ItemInfo> addedItemsFinal = new ArrayList<>();
-        final IntArray addedWorkspaceScreensFinal = new IntArray();
+        final IntSet excludedScreens = IntSet.wrap(FIRST_SCREEN_ID);
         final Context context = taskController.getContext();
 
         synchronized (dataModel) {
-            IntArray workspaceScreens = dataModel.itemsIdMap.collectWorkspaceScreens();
+            ModelWriter writer = taskController.getModelWriter();
+            for (Supplier<ItemInfo> itemProvider : mItemList) {
+                ItemInfo item = itemProvider.get();
+                if (item instanceof WorkspaceItemFactory factory) {
+                    item = factory.makeWorkspaceItem(context);
+                }
+                if (item == null) continue;
+                if (item.itemType == ITEM_TYPE_APPLICATION) {
+                    var targetPackage = item.getTargetPackage();
+                    if (targetPackage == null) continue;
 
-            List<ItemInfo> filteredItems = new ArrayList<>();
-            for (Pair<ItemInfo, Object> entry : mItemList) {
-                ItemInfo item = entry.first;
-                if (item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION) {
-                    // Short-circuit this logic if the icon exists somewhere on the workspace
-                    if (shortcutExists(dataModel, item.getIntent(), item.user)) {
+                    var user = item.user;
+                    // Short-circuit this logic if a similar icon exists somewhere on the workspace
+                    if (containsAppTarget(dataModel.itemsIdMap, targetPackage, user)
+                            || containsAppTarget(addedItemsFinal, targetPackage, user)) {
                         continue;
                     }
 
                     // b/139663018 Short-circuit this logic if the icon is a system app
-                    if (new ApplicationInfoWrapper(context,
-                            Objects.requireNonNull(item.getIntent())).isSystem()) {
+                    if (new ApplicationInfoWrapper(context, targetPackage, item.user).isSystem()) {
                         continue;
                     }
 
-                    if (item instanceof ItemInfoWithIcon
-                            && ((ItemInfoWithIcon) item).isArchived()) {
+                    if (item instanceof ItemInfoWithIcon iiwi && iiwi.isArchived()) {
                         continue;
                     }
                 }
-
-                if (item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION) {
-                    if (item instanceof WorkspaceItemFactory) {
-                        item = ((WorkspaceItemFactory) item).makeWorkspaceItem(context);
-                    }
+                if (!(item instanceof WorkspaceItemInfo
+                        || item instanceof CollectionInfo
+                        || item instanceof LauncherAppWidgetInfo)) {
+                    FileLog.e(TAG, "Unexpected info type: " + item);
+                    continue;
                 }
-                if (item != null) {
-                    filteredItems.add(item);
-                }
-            }
 
-            InstallSessionHelper packageInstaller =
-                    InstallSessionHelper.INSTANCE.get(context);
-            LauncherApps launcherApps = context.getSystemService(LauncherApps.class);
-
-            ModelWriter writer = taskController.getModelWriter();
-            for (ItemInfo item : filteredItems) {
                 // Find appropriate space for the item.
-                int[] coords = mItemSpaceFinder.findSpaceForItem(workspaceScreens,
-                        addedWorkspaceScreensFinal, addedItemsFinal, item.spanX, item.spanY);
-                int screenId = coords[0];
-
-                ItemInfo itemInfo;
-                if (item instanceof WorkspaceItemInfo || item instanceof CollectionInfo
-                        || item instanceof LauncherAppWidgetInfo) {
-                    itemInfo = item;
-                } else if (item instanceof WorkspaceItemFactory) {
-                    itemInfo = ((WorkspaceItemFactory) item).makeWorkspaceItem(context);
-                } else {
-                    throw new RuntimeException("Unexpected info type");
-                }
-
-                if (item instanceof WorkspaceItemInfo && ((WorkspaceItemInfo) item).isPromise()) {
-                    WorkspaceItemInfo workspaceInfo = (WorkspaceItemInfo) item;
-                    String packageName = item.getTargetComponent() != null
-                            ? item.getTargetComponent().getPackageName() : null;
-                    if (packageName == null) {
-                        continue;
-                    }
-                    SessionInfo sessionInfo = packageInstaller.getActiveSessionInfo(item.user,
-                            packageName);
-
-                    if (!packageInstaller.verifySessionInfo(sessionInfo)) {
-                        FileLog.d(LOG, "Item info failed session info verification. "
-                                + "Skipping : " + workspaceInfo);
-                        continue;
-                    }
-
-                    List<LauncherActivityInfo> activities = Objects.requireNonNull(launcherApps)
-                            .getActivityList(packageName, item.user);
-                    boolean hasActivity = activities != null && !activities.isEmpty();
-
-                    if (sessionInfo == null) {
-                        if (!hasActivity) {
-                            // Session was cancelled, do not add.
-                            continue;
-                        }
-                    } else {
-                        workspaceInfo.setProgressLevel(
-                                (int) (sessionInfo.getProgress() * 100),
-                                PackageInstallInfo.STATUS_INSTALLING);
-                    }
-
-                    if (hasActivity) {
-                        // App was installed while launcher was in the background,
-                        // or app was already installed for another user.
-                        itemInfo = new AppInfo(context, activities.get(0), item.user)
-                                .makeWorkspaceItem(context);
-
-                        if (shortcutExists(dataModel, itemInfo.getIntent(), itemInfo.user)) {
-                            // We need this additional check here since we treat all auto added
-                            // workspace items as promise icons. At this point we now have the
-                            // correct intent to compare against existing workspace icons.
-                            // Icon already exists on the workspace and should not be auto-added.
-                            continue;
-                        }
-
-                        IconCache cache = taskController.getIconCache();
-                        WorkspaceItemInfo wii = (WorkspaceItemInfo) itemInfo;
-                        wii.title = "";
-                        wii.bitmap = cache.getDefaultIcon(item.user);
-                        cache.getTitleAndIcon(wii, DESKTOP_ICON_FLAG);
-                    }
-                }
+                WorkspaceItemCoordinates coords = mItemSpaceFinder.findSpaceForItem(addedItemsFinal,
+                        item.spanX, item.spanY, excludedScreens);
 
                 // Save the WorkspaceItemInfo for binding in the workspace
-                writer.updateItemInfoProps(itemInfo,
-                        LauncherSettings.Favorites.CONTAINER_DESKTOP, screenId,
-                        coords[1], coords[2]);
-                addedItemsFinal.add(itemInfo);
+                writer.updateItemInfoProps(item, LauncherSettings.Favorites.CONTAINER_DESKTOP,
+                        coords.getScreenId(), coords.getCellX(), coords.getCellY());
+                addedItemsFinal.add(item);
 
                 // log bitmap and label
-                FileLog.d(LOG, "Adding item info to workspace: " + itemInfo);
+                FileLog.d(LOG, "Adding item info to workspace: " + item);
             }
+
             // Add the shortcut to the db
             writer.addItemsToDatabase(addedItemsFinal);
         }
@@ -215,60 +139,9 @@ public class AddWorkspaceItemsTask implements ModelUpdateTask {
         }
     }
 
-    /**
-     * Returns true if the shortcuts already exists on the workspace. This must be called after
-     * the workspace has been loaded. We identify a shortcut by its intent.
-     */
-    protected boolean shortcutExists(@NonNull final BgDataModel dataModel,
-            @Nullable final Intent intent, @NonNull final UserHandle user) {
-        final String compPkgName, intentWithPkg, intentWithoutPkg;
-        if (intent == null) {
-            // Skip items with null intents
-            return true;
-        }
-        if (intent.getComponent() != null) {
-            // If component is not null, an intent with null package will produce
-            // the same result and should also be a match.
-            compPkgName = intent.getComponent().getPackageName();
-            if (intent.getPackage() != null) {
-                intentWithPkg = intent.toUri(0);
-                intentWithoutPkg = new Intent(intent).setPackage(null).toUri(0);
-            } else {
-                intentWithPkg = new Intent(intent).setPackage(compPkgName).toUri(0);
-                intentWithoutPkg = intent.toUri(0);
-            }
-        } else {
-            compPkgName = null;
-            intentWithPkg = intent.toUri(0);
-            intentWithoutPkg = intent.toUri(0);
-        }
-
-        boolean isLauncherAppTarget = PackageManagerHelper.isLauncherAppTarget(intent);
-        synchronized (dataModel) {
-            for (ItemInfo item : dataModel.itemsIdMap) {
-                if (item instanceof WorkspaceItemInfo) {
-                    WorkspaceItemInfo info = (WorkspaceItemInfo) item;
-                    if (item.getIntent() != null && info.user.equals(user)) {
-                        Intent copyIntent = new Intent(item.getIntent());
-                        copyIntent.setSourceBounds(intent.getSourceBounds());
-                        String s = copyIntent.toUri(0);
-                        if (intentWithPkg.equals(s) || intentWithoutPkg.equals(s)) {
-                            return true;
-                        }
-
-                        // checking for existing promise icon with same package name
-                        if (isLauncherAppTarget
-                                && info.isPromise()
-                                && info.hasStatusFlag(WorkspaceItemInfo.FLAG_AUTOINSTALL_ICON)
-                                && info.getTargetComponent() != null
-                                && compPkgName != null
-                                && compPkgName.equals(info.getTargetComponent().getPackageName())) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
+    private boolean containsAppTarget(Iterable<ItemInfo> container, String pkg, UserHandle user) {
+        return StreamSupport.stream(container.spliterator(), false).anyMatch(i ->
+                i.itemType == ITEM_TYPE_APPLICATION
+                        && user.equals(i.user) && pkg.equals(i.getTargetPackage()));
     }
 }

@@ -24,8 +24,9 @@ import androidx.test.filters.SmallTest
 import com.android.launcher3.Flags
 import com.android.launcher3.model.TestableModelState
 import com.android.launcher3.model.data.AppInfo
+import com.android.launcher3.model.data.WorkspaceChangeEvent
 import com.android.launcher3.model.data.WorkspaceChangeEvent.UpdateEvent
-import com.android.launcher3.model.data.WorkspaceData
+import com.android.launcher3.testutil.rule.LayoutResource
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import com.android.launcher3.util.LauncherLayoutBuilder
 import com.android.launcher3.util.LauncherModelHelper.SETTINGS_COMPONENT
@@ -33,8 +34,7 @@ import com.android.launcher3.util.LauncherModelHelper.SETTINGS_PACKAGE
 import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY
 import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY2
 import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
-import com.android.launcher3.util.LayoutResource
-import com.android.launcher3.util.ModelTestExtensions.nonPredictedItemCount
+import com.android.launcher3.util.ModelTestExtensions.countPersistedModelItems
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestUtil
 import com.google.common.truth.Truth.assertThat
@@ -76,7 +76,7 @@ class PackageIncrementalDownloadUpdatedTaskTest {
         )
 
         Assert.assertTrue(modelState.model.isModelLoaded())
-        assertEquals(6, modelState.dataModel.itemsIdMap.nonPredictedItemCount())
+        assertEquals(6, modelState.dataModel.itemsIdMap.countPersistedModelItems())
     }
 
     @Test
@@ -89,8 +89,10 @@ class PackageIncrementalDownloadUpdatedTaskTest {
                 incrementalUpdates.add(it)
             }
 
-            val workspaceUpdates = mutableListOf<WorkspaceData>()
-            modelState.homeRepo.workspaceState.forEach(MODEL_EXECUTOR) { workspaceUpdates.add(it) }
+            val workspaceUpdates = mutableListOf<WorkspaceChangeEvent?>()
+            modelState.homeRepo.workspaceState.changes.forEach(MODEL_EXECUTOR) {
+                workspaceUpdates.add(it)
+            }
 
             modelState.model.enqueueModelUpdateTask(
                 PackageIncrementalDownloadUpdatedTask(TEST_PACKAGE, myUserHandle(), 30f)
@@ -101,13 +103,10 @@ class PackageIncrementalDownloadUpdatedTaskTest {
             incrementalUpdates.forEach { assertEquals(TEST_PACKAGE, it.targetPackage) }
 
             // Workspace update received only once
-            assertThat(workspaceUpdates).hasSize(2)
-            val initialState = workspaceUpdates[0]
-            val finalState = workspaceUpdates[1]
-            assertThat(finalState.diff(initialState)!!).hasSize(1)
+            assertThat(workspaceUpdates).hasSize(1)
 
             // Only 2 items corresponding to test package got updated
-            val update = finalState.diff(initialState)!![0] as UpdateEvent
+            val update = workspaceUpdates[0] as UpdateEvent
             assertThat(update.items).hasSize(2)
             assertThat(update.items[0].targetPackage).isEqualTo(TEST_PACKAGE)
             assertThat(update.items[1].targetPackage).isEqualTo(TEST_PACKAGE)

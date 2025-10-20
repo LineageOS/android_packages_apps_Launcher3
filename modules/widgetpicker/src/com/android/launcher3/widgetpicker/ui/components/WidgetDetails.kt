@@ -57,17 +57,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.InputMode.Companion.Touch
+import androidx.compose.ui.input.InputMode.Companion.Keyboard
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.hideFromAccessibility
+import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -97,6 +103,7 @@ import com.android.launcher3.widgetpicker.ui.theme.WidgetPickerTheme
  * @param onWidgetAddClick callback when user clicks on the add button to add the widget
  * @param onClick callback when user clicks on the details of a widget.
  * @param onHoverChange callback when user hovers on the details of a widget.
+ * @param traversalIndex index of traversal of this item within parent.
  * @param modifier modifier for the top level composable.
  */
 @Composable
@@ -109,7 +116,8 @@ fun WidgetDetails(
     onWidgetAddClick: (WidgetInteractionInfo.WidgetAddInfo) -> Unit,
     onClick: (WidgetId) -> Unit,
     onHoverChange: (Boolean) -> Unit,
-    modifier: Modifier,
+    traversalIndex: Int,
+    modifier: Modifier = Modifier,
 ) {
     val haptic = LocalHapticFeedback.current
     val interactionSource = remember { MutableInteractionSource() }
@@ -120,8 +128,21 @@ fun WidgetDetails(
             widget.sizeInfo.spanX,
             widget.sizeInfo.spanY,
         )
+    val customAccessibilityAddActionLabel =
+        stringResource(R.string.widget_tap_to_add_button_content_description, widget.label)
+
+    val onWidgetAddAction = {
+        onWidgetAddClick(
+            WidgetInteractionInfo.WidgetAddInfo(
+                source = widgetInteractionSource,
+                widgetInfo = widget.widgetInfo,
+            )
+        )
+        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+    }
 
     val isHovered by interactionSource.collectIsHoveredAsState()
+    val inputModeManager = LocalInputModeManager.current
 
     val detailsAlpha: Float by
         animateFloatAsState(
@@ -138,25 +159,37 @@ fun WidgetDetails(
             Modifier.fillMaxSize()
         }
 
-    // When showing add button, there isn't anything shown in outer details, so keyboard users might
-    // be confused on what the outer click corresponds to; so we don't allow focus on this item.
-    // Touch users can still click it to toggle add button.
-    val detailsContainerFocusModifier = Modifier.focusProperties { canFocus = !showAddButton }
-
     LaunchedEffect(isHovered) { onHoverChange(isHovered) }
 
     Box(
         contentAlignment = Alignment.Center,
         modifier =
             modifier
+                .semantics(mergeDescendants = true) {
+                    this.traversalIndex = traversalIndex.toFloat()
+                    isTraversalGroup = true
+                    testTag = buildWidgetPickerTestTag(WIDGET_DETAILS_TEST_TAG)
+                    customActions =
+                        listOf(
+                            CustomAccessibilityAction(customAccessibilityAddActionLabel) {
+                                onWidgetAddAction()
+                                true
+                            }
+                        )
+                    if (showAddButton) {
+                        // When showing add button there is no text on outer container, so setting
+                        // its description here instead of text content; so it can be called out.
+                        contentDescription = widgetLabelContentDescription
+                    }
+                }
                 .then(sizeModifier)
                 .borderOnFocus(
+                    enabled = inputModeManager.inputMode == Keyboard,
                     color = WidgetPickerTheme.colors.focusOutline,
                     cornerSize = WidgetDetailsDimensions.focusOutlineRadius,
                     strokeWidth = WidgetDetailsDimensions.focusOutlineStrokeWidth,
                     padding = WidgetDetailsDimensions.focusOutlinePadding,
                 )
-                .then(detailsContainerFocusModifier)
                 .clickable(
                     onClickLabel =
                         if (showAddButton) {
@@ -186,6 +219,11 @@ fun WidgetDetails(
             modifier =
                 Modifier.defaultMinSize(minHeight = LocalMinimumInteractiveComponentSize.current)
                     .graphicsLayer { alpha = detailsAlpha }
+                    .semantics {
+                        if (showAddButton) {
+                            hideFromAccessibility()
+                        }
+                    }
                     .fillMaxSize(),
         ) {
             WidgetLabel(
@@ -215,22 +253,15 @@ fun WidgetDetails(
         ) {
             AddButton(
                 widget = widget,
-                onClick = {
-                    onWidgetAddClick(
-                        WidgetInteractionInfo.WidgetAddInfo(
-                            source = widgetInteractionSource,
-                            widgetInfo = widget.widgetInfo,
-                        )
-                    )
-                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                },
+                autoFocus = !isHovered && inputModeManager.inputMode == Keyboard,
+                onClick = onWidgetAddAction,
             )
         }
     }
 }
 
 @Composable
-private fun AddButton(widget: PickableWidget, onClick: () -> Unit) {
+private fun AddButton(widget: PickableWidget, autoFocus: Boolean, onClick: () -> Unit) {
     val accessibleDescription =
         stringResource(R.string.widget_tap_to_add_button_content_description, widget.label)
     var hasTextOverflow by remember { mutableStateOf(false) }
@@ -240,10 +271,10 @@ private fun AddButton(widget: PickableWidget, onClick: () -> Unit) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Button(
             modifier =
-                Modifier.focusRequester(addButtonFocusRequester)
-                    // Enable focus on non-touch e.g. keyboard interactions to show focus outline.
-                    .focusProperties { canFocus = inputModeManager.inputMode != Touch }
+                Modifier.semantics { this.contentDescription = accessibleDescription }
+                    .focusRequester(addButtonFocusRequester)
                     .borderOnFocus(
+                        enabled = inputModeManager.inputMode == Keyboard,
                         color = WidgetPickerTheme.colors.focusOutline,
                         cornerSize = CornerSize(AddButtonDimensions.focusOutlineRadius),
                         strokeWidth = AddButtonDimensions.focusOutlineStrokeWidth,
@@ -278,7 +309,7 @@ private fun AddButton(widget: PickableWidget, onClick: () -> Unit) {
                                     AddButtonDimensions.textEndPadding
                                 }
                         )
-                        .semantics { this.contentDescription = accessibleDescription }
+                        .clearAndSetSemantics {} // description set on parent
                         .layout { measurable, constraints ->
                             val placeable = measurable.measure(constraints)
                             // Don't show text is it leads to overflow
@@ -300,8 +331,10 @@ private fun AddButton(widget: PickableWidget, onClick: () -> Unit) {
     }
 
     LaunchedEffect(Unit) {
-        // Request focus; if we are in non-touch mode, button will be focusable and get focus.
-        addButtonFocusRequester.requestFocus()
+        if (autoFocus) {
+            // Request focus; if we are in non-touch mode, button will be focusable and get focus.
+            addButtonFocusRequester.requestFocus()
+        }
     }
 }
 
@@ -364,6 +397,8 @@ private fun WidgetSpanSizeLabel(spanX: Int, spanY: Int) {
     )
 }
 
+private const val WIDGET_DETAILS_TEST_TAG = "widget_details"
+
 private object WidgetDetailsDimensions {
     val horizontalPadding: Dp = 4.dp
     val multiLineDetailsTopPadding: Dp = 8.dp
@@ -381,6 +416,7 @@ private object WidgetDetailsDimensions {
 
 private object AddButtonDimensions {
     val paddingValues = PaddingValues(start = 8.dp, top = 11.dp, end = 8.dp, bottom = 11.dp)
+
     // Padding when showing add icon and the text
     val textEndPadding = 8.dp
 

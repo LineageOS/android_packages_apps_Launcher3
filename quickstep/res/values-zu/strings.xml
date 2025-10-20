@@ -47,7 +47,6 @@
     <string name="hotseat_tip_gaps_filled" msgid="3035673010274223538">"Iziphakamiso zohlelo lokusebenza ezengezwe esikhaleni esingenalutho"</string>
     <string name="hotsaet_tip_prediction_enabled" msgid="2233554377501347650">"Iziphakamiso zohlelo lokusebenza zinikwe amandla"</string>
     <string name="hotsaet_tip_prediction_disabled" msgid="1506426298884658491">"Iziphakamiso zohlelo lokusebenza zikhutshaziwe"</string>
-    <string name="hotseat_prediction_content_description" msgid="4582028296938078419">"Uhlelo lokusebenza olubikezelwe: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="gesture_tutorial_title" msgid="2750751261768388354">"Okokufundisa Kokuzulazula Kokuthinta"</string>
     <string name="gesture_tutorial_rotation_prompt_title" msgid="7537946781362766964">"Zungezisa idivayisi yakho"</string>
     <string name="gesture_tutorial_rotation_prompt" msgid="1664493449851960691">"Sicela uzungezise idivayisi yakho ukuze uqedele okokufundisa kokufuna ngokuthinta"</string>
@@ -116,24 +115,29 @@
     <string name="toast_split_app_unsupported" msgid="2360229567007828914">"Khetha enye i-app ukuze usebenzise ukuhlukanisa isikrini"</string>
     <string name="blocked_by_policy" msgid="2071401072261365546">"Lesi senzo asivunyelwanga uhlelo lokusebenza noma inhlangano yakho"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"Amawijethi awasekelwe okwamanje, sicela ukhethe enye i-app"</string>
+    <string name="action_image_copy" msgid="6877540054727709339">"Kopisha"</string>
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Zungezisa isikrini"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Upopayi obonisa ukuthi i-taskbar ivela kanjani phansi esikrinini, iphinde izifihle ngokuzenzakalelayo lapho ingasetshenziswa"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Upopayi obonisa indlela yokuphina i-taskbar yakho usebenzisa ukuguqula, ukuze i-taskbar ihlale ibonakala unomphela phansi esikrinini."</string>
+    <string name="taskbar_edu_bubbles_animation_description" msgid="421866726938396813">"Upopayi obonisa indlela yokusungula ibhamuza ku-taskbar usebenzisa uphawu lokuhudula"</string>
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"Upopayi obonisa ukuthi ungasakha kanjani isikrini esihlukanisayo, ngokuhudula nokudedela i-app ku-taskbar phezu kwe-app evuliwe."</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"Upopayi obonisa indlela yokufinyelela ama-app aphakanyisiwe kudivayisi yakho"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"Upopayi obonisa indlela yokusesha into esikrinini, ngokuthinta uphinde ubambe inkinobho yokufinyelela nokukhetha indawo into ekuyo."</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Imfundo ye-taskbar"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Hudula i-app ukusebenzisa ama-app ama-2 ngesikhathi esisodwa"</string>
+    <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"Yidonsele emakhoneni aphansi ukuze uyenze intante"</string>
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Swayiphela phezulu kancane ukuze ubonise i-Taskbar"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Thola iziphakamiso ze-app ngokusekelwe kumjikelezo wakho"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Cindezela isikhathi eside kusihlukanisi ukuze uphine i-Taskbar"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Yenza okwengeziwe nge-Taskbar"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"Bonisa njalo i-Taskbar"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"Ukuze ubonise njalo i-Taskbar phansi kwesikrini sakho, thinta bese ubamba isihlukanisi"</string>
+    <string name="taskbar_edu_bubbles_standalone" msgid="4182824636656528043">"Hudulela i-app ekhoneni ukuze intante"</string>
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"Thinta uphinde ubambe inkinobho yokufinyelela ukuze useshe lokho okusesikrinini sakho"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Lo mkhiqizo usebenzisa ingxenye ekhethiwe yesikrini sakho ukusesha. <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>Inqubomgomo Yobumfihlo<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> ye-Google kanye <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>Nemigomo Yesevisi<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> ziyasebenza."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Vala"</string>
     <string name="taskbar_edu_done" msgid="6880178093977704569">"Kwenziwe"</string>
+    <string name="taskbar_edu_next" msgid="4007618274426775841">"Okulandelayo"</string>
     <string name="taskbar_button_home" msgid="2151398979630664652">"Ikhaya"</string>
     <string name="taskbar_button_a11y" msgid="5241161324875094465">"Ukufinyeleleka"</string>
     <string name="taskbar_button_back" msgid="8558862226461164514">"Emuva"</string>
@@ -142,18 +146,12 @@
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"Izaziso"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"Amasethingi Asheshayo"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"I-Taskbar"</string>
-    <string name="taskbar_a11y_shown_title" msgid="6842833581088937713">"Ibha yomsebenzi ibonisiwe"</string>
-    <string name="taskbar_a11y_shown_with_bubbles_left_title" msgid="4242431789851790046">"ITaskbar namabhamuza aboniswe kwesokunxele"</string>
-    <string name="taskbar_a11y_shown_with_bubbles_right_title" msgid="8219065376188180113">"ITaskbar namabhamuza aboniswe kwesokudla"</string>
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"Ibha yokufuna"</string>
     <string name="always_show_taskbar" msgid="3608801276107751229">"Bonisa i-Taskbar njalo."</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"Shintsha imodi yokufuna"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Isihlukanisi se-Taskbar"</string>
-    <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"Amanye ama-app akamuva"</string>
-    <!-- no translation found for app_added_to_taskbar (1160433791917609063) -->
-    <skip />
-    <!-- no translation found for app_removed_from_taskbar (7887298201562912487) -->
-    <skip />
+    <string name="taskbar_recents_overflow_a11y_title" msgid="8005941062446304304">"Amanye ama-app akamuva"</string>
+    <string name="taskbar_pinned_overflow_a11y_title" msgid="2314810718333302626">"Amanye ama-app"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Hamba phezulu/kwesokunxele"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Hamba phansi/kwesokudla"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"Vula i-app njengebhamuza"</string>

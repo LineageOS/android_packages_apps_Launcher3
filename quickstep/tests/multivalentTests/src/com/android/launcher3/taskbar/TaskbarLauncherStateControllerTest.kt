@@ -22,8 +22,10 @@ import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.Hotseat
 import com.android.launcher3.Launcher
+import com.android.launcher3.LauncherInteractor
 import com.android.launcher3.LauncherState
 import com.android.launcher3.LauncherUiState
+import com.android.launcher3.SplitScreenUiState
 import com.android.launcher3.statemanager.StateManager
 import com.android.launcher3.taskbar.bubbles.BubbleControllers
 import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController
@@ -31,6 +33,7 @@ import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.uioverrides.QuickstepLauncher
+import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
 import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.LauncherMultivalentJUnit.EmulatedDevices
 import com.android.launcher3.util.MutableListenableRef
@@ -39,12 +42,12 @@ import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_WAKEFULN
 import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags
 import com.android.wm.shell.Flags.FLAG_ENABLE_CREATE_ANY_BUBBLE
 import com.google.common.truth.Truth.assertThat
-import java.util.Optional
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
+import java.util.Optional
 
 @RunWith(LauncherMultivalentJUnit::class)
 @EmulatedDevices(["pixel9profold", "pixelTablet2023"])
@@ -127,25 +130,32 @@ class TaskbarLauncherStateControllerTest {
                 on { state } doReturn mock<LauncherState>()
             }
         val dp = taskbarUnitTestRule.activityContext.deviceProfile
+        val mockedSplitScreenUiState =
+            mock<SplitScreenUiState> {
+                on { isSplitSelectActiveRef } doReturn MutableListenableRef(false)
+            }
+        val mockedLauncherUiState =
+            mock<LauncherUiState> {
+                on { deviceProfileRef } doReturn MutableListenableRef(dp)
+                on { splitScreenUiState } doReturn mockedSplitScreenUiState
+                on { launcherStateRef } doReturn MutableListenableRef(LauncherState.NORMAL)
+                on { taskbarAlignmentChannelAlpha } doReturn MutableListenableRef(0f)
+            }
         val quickstepLauncher =
             mock<QuickstepLauncher> {
                 on { deviceProfile } doReturn dp
                 on { hotseat } doReturn mock<Hotseat>()
                 on { stateManager } doReturn launcherStateManager
-            }
-        val launcherUiState =
-            mock<LauncherUiState> {
-                on { deviceProfileRef } doReturn MutableListenableRef(dp)
-                on { isSplitSelectActiveRef } doReturn MutableListenableRef(false)
-                on { launcherStateRef } doReturn MutableListenableRef(LauncherState.NORMAL)
+                on { launcherUiState } doReturn mockedLauncherUiState
             }
         val controllers = taskbarUnitTestRule.activityContext.controllers
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             taskbarLauncherStateController.init(
                 controllers,
-                quickstepLauncher,
-                launcherUiState,
+                LauncherInteractor(quickstepLauncher),
+                mockedLauncherUiState,
                 sysUiStateFlags,
+                TASKBAR_UI_THREAD,
             )
             taskbarStashController.toggleTaskbarStash() // Un-stashing the taskbar.
             bubbleBarViewController.setHiddenForBubbles(false) // Show the bubble bar.

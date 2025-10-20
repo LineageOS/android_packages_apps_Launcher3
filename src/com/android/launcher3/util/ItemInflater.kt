@@ -65,7 +65,9 @@ class ItemInflater<T>(
         return when (item.itemType) {
             Favorites.ITEM_TYPE_APPLICATION,
             Favorites.ITEM_TYPE_DEEP_SHORTCUT,
-            Favorites.ITEM_TYPE_SEARCH_ACTION ->
+            Favorites.ITEM_TYPE_SEARCH_ACTION,
+            Favorites.ITEM_TYPE_FILE_SYSTEM_FILE,
+            Favorites.ITEM_TYPE_FILE_SYSTEM_FOLDER ->
                 createShortcut(
                     info =
                         when (item) {
@@ -86,7 +88,7 @@ class ItemInflater<T>(
                     )
                     .apply { onFocusChangeListener = focusListener }
 
-            Favorites.ITEM_TYPE_APP_PAIR ->
+            Favorites.ITEM_TYPE_APP_GROUP ->
                 AppPairIcon.inflateIcon(
                     R.layout.app_pair_icon,
                     context,

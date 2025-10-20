@@ -18,9 +18,11 @@ package com.android.launcher3.uioverrides.states;
 import static com.android.app.animation.Interpolators.DECELERATE_2;
 import static com.android.launcher3.Flags.enableDesktopExplodedView;
 import static com.android.launcher3.Flags.enablePredictiveBackInOverview;
+import static com.android.launcher3.Flags.enableReplaceSharesheetAndEmptyMessageRo;
 import static com.android.launcher3.logging.StatsLogManager.LAUNCHER_STATE_OVERVIEW;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.SystemProperties;
 
@@ -129,7 +131,7 @@ public class OverviewState extends LauncherState {
         if (showFloatingSearch) {
             elements |= FLOATING_SEARCH_BAR;
         }
-        if (launcherUiState.isSplitSelectActiveRef().getValue()) {
+        if (launcherUiState.getSplitScreenUiState().isSplitSelectActiveRef().getValue()) {
             elements &= ~CLEAR_ALL_BUTTON & ~ADD_DESK_BUTTON;
         }
         return elements;
@@ -146,7 +148,7 @@ public class OverviewState extends LauncherState {
 
     @Override
     public int getFloatingSearchBarRestingMarginBottom(Launcher launcher) {
-        return areElementsVisible(launcher.launcherUiState, FLOATING_SEARCH_BAR) ? 0
+        return areElementsVisible(launcher.getLauncherUiState(), FLOATING_SEARCH_BAR) ? 0
                 : super.getFloatingSearchBarRestingMarginBottom(launcher);
     }
 
@@ -163,11 +165,17 @@ public class OverviewState extends LauncherState {
 
     @Override
     public ScrimColors getWorkspaceScrimColor(Launcher launcher) {
-        return new ScrimColors(
-                /* backgroundColor */ Themes.getAttrColor(launcher, R.attr.overviewScrimColor),
-                /* foregroundColor */ ColorUtils.compositeColors(
-                Themes.getAttrColor(launcher, R.attr.overviewScrimForegroundPrimary),
-                Themes.getAttrColor(launcher, R.attr.overviewScrimForegroundSecondary)));
+        if (enableReplaceSharesheetAndEmptyMessageRo()) {
+            return new ScrimColors(
+                    /* backgroundColor= */ Themes.getAttrColor(launcher, R.attr.overviewScrimColor),
+                    /* foregroundColor= */ Color.TRANSPARENT);
+        } else {
+            return new ScrimColors(
+                    /* backgroundColor= */ Themes.getAttrColor(launcher, R.attr.overviewScrimColor),
+                    /* foregroundColor= */ ColorUtils.compositeColors(
+                            Themes.getAttrColor(launcher, R.attr.overviewScrimForegroundPrimary),
+                    Themes.getAttrColor(launcher, R.attr.overviewScrimForegroundSecondary)));
+        }
     }
 
     @Override

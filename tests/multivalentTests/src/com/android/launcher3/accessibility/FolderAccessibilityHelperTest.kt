@@ -98,15 +98,4 @@ class FolderAccessibilityHelperTest {
         val expectedResult = "Move to position ${id + (index * countX * countY) + 1}"
         assertEquals(expectedResult, result)
     }
-
-    // Test for getConfirmationForIconDrop()
-    @Test
-    fun testGetConfirmationForIconDrop() {
-        // Execute
-        val result =
-            folderAccessibilityHelper.getConfirmationForIconDrop(0) // Id doesn't matter here
-
-        // Verify
-        assertEquals("Item moved", result)
-    }
 }

@@ -26,6 +26,7 @@ import android.view.WindowManagerGlobal
 import com.android.app.displaylib.DefaultDisplayOnlyInstanceRepositoryImpl
 import com.android.app.displaylib.DisplayLibBackground
 import com.android.app.displaylib.DisplayLibComponent
+import com.android.app.displaylib.DisplayLibMainThread
 import com.android.app.displaylib.DisplayRepository
 import com.android.app.displaylib.DisplaysWithDecorationsRepository
 import com.android.app.displaylib.DisplaysWithDecorationsRepositoryCompat
@@ -33,7 +34,10 @@ import com.android.app.displaylib.PerDisplayInstanceRepositoryImpl
 import com.android.app.displaylib.PerDisplayRepository
 import com.android.app.displaylib.SingleInstanceRepositoryImpl
 import com.android.app.displaylib.createDisplayLibComponent
-import com.android.launcher3.util.coroutines.DispatcherProvider
+import com.android.launcher3.concurrent.annotations.Background
+import com.android.launcher3.concurrent.annotations.BackgroundContext
+import com.android.launcher3.concurrent.annotations.UiContext
+import com.android.launcher3.util.LooperExecutor
 import com.android.quickstep.FallbackWindowInterface
 import com.android.quickstep.RecentsAnimationDeviceState
 import com.android.quickstep.RotationTouchHelper
@@ -41,11 +45,15 @@ import com.android.quickstep.TaskAnimationManager
 import com.android.quickstep.window.RecentsWindowFlags.enableOverviewOnConnectedDisplays
 import com.android.quickstep.window.RecentsWindowManager
 import com.android.quickstep.window.RecentsWindowManagerInstanceProvider
-import com.android.systemui.dagger.qualifiers.Background
+import com.android.quickstep.window.RecentsWindowTracker
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 
 @Module(includes = [BasePerDisplayModule::class, PerDisplayRepositoriesModule::class])
 interface PerDisplayModule
@@ -53,8 +61,8 @@ interface PerDisplayModule
 @Module(includes = [DisplayLibModule::class])
 interface BasePerDisplayModule {
     @Binds
-    @DisplayLibBackground
-    abstract fun bindDisplayLibBackground(@Background bgScope: CoroutineScope): CoroutineScope
+    @DisplayLibMainThread
+    fun bindDisplayLibMainThread(@UiContext mainScope: CoroutineContext): CoroutineContext
 }
 
 @Module
@@ -94,9 +102,9 @@ object PerDisplayRepositoriesModule {
         return if (enableOverviewOnConnectedDisplays()) {
             repositoryFactory.create("TaskAnimationManagerRepo", instanceFactory::create)
         } else {
-            SingleInstanceRepositoryImpl(
+            DefaultDisplayOnlyInstanceRepositoryImpl(
                 "TaskAnimationManager",
-                instanceFactory.create(DEFAULT_DISPLAY),
+                instanceFactory::create,
             )
         }
     }
@@ -126,15 +134,21 @@ object PerDisplayRepositoriesModule {
     @Provides
     @LauncherAppSingleton
     fun provideFallbackWindowInterfaceRepo(
-        repositoryFactory: PerDisplayInstanceRepositoryImpl.Factory<FallbackWindowInterface>
+        repositoryFactory: PerDisplayInstanceRepositoryImpl.Factory<FallbackWindowInterface>,
+        recentsWindowTrackerRepository: PerDisplayRepository<RecentsWindowTracker>,
     ): PerDisplayRepository<FallbackWindowInterface> {
         return if (enableOverviewOnConnectedDisplays()) {
             repositoryFactory.create(
                 "FallbackWindowInterfaceRepo",
-                { _ -> FallbackWindowInterface() },
+                { displayId ->
+                    recentsWindowTrackerRepository[displayId]?.let { FallbackWindowInterface(it) }
+                },
             )
         } else {
-            SingleInstanceRepositoryImpl("FallbackWindowInterfaceRepo", FallbackWindowInterface())
+            SingleInstanceRepositoryImpl(
+                "FallbackWindowInterfaceRepo",
+                FallbackWindowInterface(recentsWindowTrackerRepository[DEFAULT_DISPLAY]!!),
+            )
         }
     }
 
@@ -148,6 +162,21 @@ object PerDisplayRepositoriesModule {
             repositoryFactory.create("RecentsWindowManagerRepo", instanceProvider)
         } else {
             DefaultDisplayOnlyInstanceRepositoryImpl("RecentsWindowManagerRepo", instanceProvider)
+        }
+    }
+
+    @Provides
+    @LauncherAppSingleton
+    fun provideRecentsWindowTrackerRepo(
+        repositoryFactory: PerDisplayInstanceRepositoryImpl.Factory<RecentsWindowTracker>
+    ): PerDisplayRepository<RecentsWindowTracker> {
+        return if (enableOverviewOnConnectedDisplays()) {
+            repositoryFactory.create("RecentsWindowTrackerRepo", { _ -> RecentsWindowTracker() })
+        } else {
+            DefaultDisplayOnlyInstanceRepositoryImpl(
+                "RecentsWindowTrackerRepo",
+                { _ -> RecentsWindowTracker() },
+            )
         }
     }
 
@@ -217,20 +246,26 @@ object PerDisplayRepositoriesModule {
 object DisplayLibModule {
     @Provides
     @LauncherAppSingleton
+    @DisplayLibBackground
+    fun provideBgCoroutineScope(@BackgroundContext backgroundContext: CoroutineContext) =
+        CoroutineScope(SupervisorJob() + backgroundContext + CoroutineName("LauncherBg"))
+
+    @Provides
+    @LauncherAppSingleton
     fun displayLibComponent(
         @ApplicationContext context: Context,
-        @Background bgHandler: Handler,
-        @Background bgApplicationScope: CoroutineScope,
-        coroutineDispatcherProvider: DispatcherProvider,
+        @Background looperExecutor: LooperExecutor,
+        @DisplayLibBackground backgroundScope: CoroutineScope,
+        @Background backgroundDispatcher: CoroutineDispatcher,
     ): DisplayLibComponent {
-        val displayManager = context.getSystemService(DisplayManager::class.java)
-        val windowManager = checkNotNull(WindowManagerGlobal.getWindowManagerService())
+        val displayManager = context.getSystemService(DisplayManager::class.java)!!
+        val windowManager = WindowManagerGlobal.getWindowManagerService()!!
         return createDisplayLibComponent(
             displayManager,
             windowManager,
-            bgHandler,
-            bgApplicationScope,
-            coroutineDispatcherProvider.ioBackground,
+            Handler(looperExecutor.looper),
+            backgroundScope,
+            backgroundDispatcher,
         )
     }
 

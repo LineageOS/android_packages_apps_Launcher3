@@ -43,6 +43,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.any
+import org.mockito.kotlin.capture
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.same
@@ -78,7 +79,7 @@ class CustomWidgetManagerTest {
 
     @Test
     fun close_widget_manager_should_remove_plugin_listener() {
-        verify(tracker).addCloseable(closableCaptor.capture())
+        verify(tracker).addCloseable(capture(closableCaptor))
         closableCaptor.allValues.forEach(SafeCloseable::close)
         verify(pluginManager).removePluginListener(same(underTest))
     }

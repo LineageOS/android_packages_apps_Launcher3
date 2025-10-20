@@ -92,7 +92,10 @@ constructor(
                         resultsState =
                             SearchResultsState(
                                 results =
-                                    matchedResults.map { DisplayableWidgetApp.fromWidgetApp(it) }
+                                    matchedResults.map {
+                                        DisplayableWidgetApp.fromWidgetApp(it.widgetApp)
+                                            .copy(accessibilityPrefix = it.resultLabel)
+                                    }
                             )
                     }
                 }

@@ -25,7 +25,6 @@ import static com.android.launcher3.AbstractFloatingView.TYPE_REBIND_SAFE;
 import static com.android.launcher3.BaseActivity.INVISIBLE_ALL;
 import static com.android.launcher3.BaseActivity.INVISIBLE_BY_PENDING_FLAGS;
 import static com.android.launcher3.BaseActivity.PENDING_INVISIBLE_BY_WALLPAPER_ANIMATION;
-import static com.android.launcher3.Flags.enableOverviewBackgroundWallpaperBlur;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -59,12 +58,11 @@ import com.android.internal.policy.SystemBarUtils;
 import com.android.internal.view.AppearanceRegion;
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.BubbleTextView;
-import com.android.launcher3.Flags;
 import com.android.launcher3.LauncherState;
 import com.android.launcher3.QuickstepTransitionManager;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
-import com.android.launcher3.taskbar.LauncherTaskbarUIController;
+import com.android.launcher3.taskbar.TaskbarInteractor;
 import com.android.launcher3.uioverrides.QuickstepLauncher;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.NavigationMode;
@@ -384,7 +382,7 @@ public class LauncherBackAnimationController {
         mScrimLayer = new SurfaceControl.Builder()
                 .setName("Back to launcher background scrim")
                 .setCallsite("LauncherBackAnimationController")
-                .setColorLayer()
+                .setEffectLayer()
                 .setParent(parent)
                 .setOpaque(false)
                 .setHidden(false)
@@ -483,9 +481,9 @@ public class LauncherBackAnimationController {
             return;
         }
         mLauncher.setPredictiveBackToHomeInProgress(true);
-        LauncherTaskbarUIController taskbarUIController = mLauncher.getTaskbarUIController();
-        if (taskbarUIController != null) {
-            taskbarUIController.onLauncherVisibilityChanged(true);
+        TaskbarInteractor taskbarInteractor = mLauncher.getTaskbarInteractor();
+        if (taskbarInteractor != null) {
+            taskbarInteractor.onLauncherVisibilityChanged(true);
         }
         // TODO: Catch the moment when launcher becomes visible after the top app un-occludes
         //  launcher and start animating afterwards. Currently we occasionally get a flicker from
@@ -596,12 +594,8 @@ public class LauncherBackAnimationController {
                 : 0;
         mWindowScaleStartCornerRadius = QuickStepContract.getWindowCornerRadius(mLauncher);
         mStatusBarHeight = SystemBarUtils.getStatusBarHeight(mLauncher);
-        if (Flags.allAppsBlur() || enableOverviewBackgroundWallpaperBlur()) {
-            mMaxBlurRadius = mLauncher.getResources().getDimensionPixelSize(
-                    R.dimen.max_depth_blur_radius_enhanced);
-        } else {
-            mMaxBlurRadius = mLauncher.getResources().getInteger(R.integer.max_depth_blur_radius);
-        }
+        mMaxBlurRadius = mLauncher.getResources().getDimensionPixelSize(
+            R.dimen.max_depth_blur_radius_enhanced);
     }
 
     /**

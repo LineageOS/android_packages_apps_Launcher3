@@ -16,24 +16,28 @@
 
 package com.android.launcher3.util
 
-import android.content.ContentResolver
-import android.net.Uri
 import android.os.Looper
-import java.io.InputStream
-import java.util.function.Supplier
+import org.junit.Assume
+import org.junit.rules.TestRule
 import org.robolectric.Shadows
 
 object RoboApiWrapper {
 
-    fun registerInputStream(
-        contentResolver: ContentResolver,
-        uri: Uri,
-        inputStreamSupplier: Supplier<InputStream>,
-    ) {
-        Shadows.shadowOf(contentResolver).registerInputStreamSupplier(uri, inputStreamSupplier)
-    }
-
     fun waitForLooperSync(looper: Looper) {
         Shadows.shadowOf(looper).runToEndOfTasks()
+    }
+
+    fun yieldToMainLooper() {
+        Shadows.shadowOf(Looper.getMainLooper()).idle()
+    }
+
+    /** Rule to grant shortcuts permission. No-op when running on robolectric */
+    fun grantShortcutsPermissionRule(): TestRule = TestRule { statement, _ -> statement }
+
+    /** Rule to grant widget bind permission. No-op when running on robolectric */
+    fun grantWidgetBindPermissionRule(): TestRule = TestRule { statement, _ -> statement }
+
+    fun Any.convertToSpy() {
+        Assume.assumeTrue("convertObjectToSpy is not supported in device-less tests", false)
     }
 }

@@ -21,6 +21,7 @@ import com.android.launcher3.celllayout.CellLayoutLayoutParams
 import com.android.launcher3.folder.ClippedFolderIconLayoutRule.MAX_NUM_ITEMS_IN_PREVIEW
 import com.android.launcher3.folder.FolderAnimationSpringBuilderManager.Companion.getBubbleTextView
 import com.android.launcher3.folder.FolderAnimationSpringBuilderManager.Companion.getPreviewIconsOnPage
+import com.android.launcher3.folder.FolderGridOrganizer.createFolderGridOrganizer
 
 /** Animation Values for animating icons inside Folder Content */
 data class IconAnimationData(
@@ -61,6 +62,12 @@ data class IconAnimationData(
             val shortcutsAndWidgets = content.getPageAt(0)?.shortcutsAndWidgets
             val mTmpParams = PreviewItemDrawingParams(0f, 0f, 0f)
             val layoutRule = folderIcon.layoutRule
+            val organizer =
+                createFolderGridOrganizer(
+                    mActivityContext.deviceProfile,
+                )
+            organizer.setContentSize(numItemsOnPage)
+            val numFolderColumns = organizer.countX
 
             // We delay the animation of each icon from top left to bottom right
             var iconDelay = if (isOpening) 0 else (numItemsOnPage * ICON_DELAY_INCREMENT)
@@ -97,7 +104,13 @@ data class IconAnimationData(
                         numItemsOnPage
                     }
                 // Match positions of the icons in the folder with their positions in the preview
-                layoutRule.computeSpringAnimationItemParams(i, pageLayoutCount, page, mTmpParams)
+                layoutRule.computeSpringAnimationItemParams(
+                    i,
+                    pageLayoutCount,
+                    page,
+                    numFolderColumns,
+                    mTmpParams,
+                )
 
                 // The PreviewLayoutRule assumes that the icon size takes up the entire width so we
                 // offset by the actual size.

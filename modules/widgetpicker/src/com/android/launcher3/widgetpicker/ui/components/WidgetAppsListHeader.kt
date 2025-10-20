@@ -55,6 +55,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.collapse
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.expand
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -75,6 +76,8 @@ import com.android.launcher3.widgetpicker.ui.theme.WidgetPickerTheme
  * @param expanded whether to show the [expandedContent] below the header
  * @param leadingAppIcon an app icon shown in the beginning of the header row
  * @param title a short 1 line title for the header
+ * @param accessibilityPrefix an optional prefix to be used for content description of the header
+ *   e.g. to differentiate between work / personal app when displayed together in same list.
  * @param subTitle a short 1 line description (e.g. number of items in the [expandedContent]).
  * @param expandedContent the content for the header when its selected
  * @param onClick action to perform on click; e.g. manage the expand / collapse state
@@ -86,6 +89,7 @@ fun ExpandableListHeader(
     expanded: Boolean,
     leadingAppIcon: @Composable () -> Unit,
     title: String,
+    accessibilityPrefix: String? = null,
     subTitle: String,
     expandedContent: @Composable () -> Unit,
     onClick: () -> Unit,
@@ -144,6 +148,7 @@ fun ExpandableListHeader(
                     },
             leadingIcon = { leadingAppIcon() },
             title = title,
+            accessibilityPrefix = accessibilityPrefix,
             subTitle = subTitle,
             headerTextStyle = ExpandedListHeaderDefaults.headerTextStyle,
             trailingButton = { ExpandCollapseIndicator(expanded) },
@@ -170,6 +175,8 @@ fun ExpandableListHeader(
  *   selected.
  * @param leadingAppIcon an app icon shown in the beginning of the header row
  * @param title a short 1 line title for the header
+ * @param accessibilityPrefix an optional prefix to be used for content description of the header
+ *   e.g. to differentiate between work / personal app when displayed together in same list.
  * @param subTitle a short 1 line description (e.g. number of widgets in the selected app).
  * @param onSelect action to perform when user clicks to select the header
  * @param shape shape for the header e.g. depending on position in the list, a different corner
@@ -180,6 +187,7 @@ fun SelectableListHeader(
     selected: Boolean,
     leadingAppIcon: @Composable () -> Unit,
     title: String,
+    accessibilityPrefix: String? = null,
     subTitle: String,
     onSelect: () -> Unit,
     shape: RoundedCornerShape,
@@ -214,6 +222,7 @@ fun SelectableListHeader(
                 },
         leadingIcon = { leadingAppIcon() },
         title = title,
+        accessibilityPrefix = accessibilityPrefix,
         subTitle = subTitle,
         headerTextStyle =
             if (selected) {
@@ -274,6 +283,7 @@ private fun WidgetAppHeader(
     modifier: Modifier,
     leadingIcon: @Composable () -> Unit,
     title: String,
+    accessibilityPrefix: String?,
     subTitle: String,
     headerTextStyle: HeaderTextStyle,
     trailingButton: (@Composable () -> Unit)? = null,
@@ -302,6 +312,7 @@ private fun WidgetAppHeader(
                 Modifier.weight(1f)
                     .padding(horizontal = ListHeaderDimensions.centerTextHorizontalPadding),
             title = title,
+            accessibilityPrefix = accessibilityPrefix,
             subTitle = subTitle,
             textStyle = headerTextStyle,
         )
@@ -312,6 +323,7 @@ private fun WidgetAppHeader(
 @Composable
 private fun HeaderText(
     title: String,
+    accessibilityPrefix: String?,
     subTitle: String,
     textStyle: HeaderTextStyle,
     modifier: Modifier,
@@ -323,6 +335,12 @@ private fun HeaderText(
             overflow = TextOverflow.Ellipsis,
             color = textStyle.titleColor,
             style = textStyle.titleTextStyle,
+            modifier =
+                Modifier.semantics {
+                    if (accessibilityPrefix != null) {
+                        contentDescription = "$accessibilityPrefix $title"
+                    } // else default derived from title text
+                },
         )
         Text(
             text = subTitle,

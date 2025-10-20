@@ -30,7 +30,6 @@ import static com.android.launcher3.model.data.AppsListData.FLAG_QUIET_MODE_ENAB
 import static com.android.launcher3.model.data.AppsListData.FLAG_WORK_PROFILE_QUIET_MODE_ENABLED;
 
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.util.Log;
 import android.view.View;
 
@@ -63,10 +62,9 @@ public class WorkProfileManager extends UserProfileManager
     private WorkUtilityView mWorkUtilityView;
     private final Predicate<UserHandle> mWorkProfileMatcher;
 
-    public WorkProfileManager(
-            UserManager userManager, ActivityAllAppsContainerView allApps,
+    public WorkProfileManager(ActivityAllAppsContainerView allApps,
             StatsLogManager statsLogManager, UserCache userCache) {
-        super(userManager, statsLogManager, userCache);
+        super(statsLogManager, userCache);
         mAllApps = allApps;
         mWorkProfileMatcher = (user) -> userCache.getUserInfo(user).isWork();
     }

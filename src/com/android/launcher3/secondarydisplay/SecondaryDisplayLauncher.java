@@ -27,6 +27,8 @@ import android.content.Intent;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.view.Display;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewAnimationUtils;
@@ -134,6 +136,8 @@ public class SecondaryDisplayLauncher extends BaseActivity
         updateStatusBarIconColors(
                 mWallpaperManager.getWallpaperColors(WallpaperManager.FLAG_SYSTEM)
         );
+
+        mSecondaryDisplayDelegate.onCreate();
     }
 
     /** Set the status bar icon colours depending on wallpaper hint. */
@@ -340,7 +344,7 @@ public class SecondaryDisplayLauncher extends BaseActivity
                 ItemInfoWithIcon appInfo = (ItemInfoWithIcon) item;
                 intent = appInfo.getMarketIntent(this);
             } else {
-                intent = item.getIntent();
+                intent = new Intent(item.getIntent());
             }
             if (intent == null) {
                 throw new IllegalArgumentException("Input must have a valid intent");
@@ -451,4 +455,19 @@ public class SecondaryDisplayLauncher extends BaseActivity
 
     @Override
     public void onDragEnd() { }
+
+    @Override
+    protected void onActivityFlagsChanged(int changeBits) {
+        super.onActivityFlagsChanged(changeBits);
+
+        if (mDisplayId != Display.DEFAULT_DISPLAY && (changeBits & ACTIVITY_STATE_RESUMED) != 0) {
+            mSecondaryDisplayDelegate.updateStashControllerStateFlags(mDisplayId, hasBeenResumed());
+        }
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        return mSecondaryDisplayDelegate.dispatchKeyEvent(event)
+                || super.dispatchKeyEvent(event);
+    }
 }

@@ -9,7 +9,8 @@
 -keepclasseswithmembernames class com.android.systemui.shared.** {*;}
 -keep,allowshrinking,allowoptimization class com.android.quickstep.** {*;}
 -keepclasseswithmembernames class com.android.quickstep.** {*;}
-
+-keep class android.gui.BoxShadowSettings
+-keep class android.gui.BorderSettings
 # Proguard will strip methods required for talkback to properly scroll to
 # next row when focus is on the last item of last row when using a RecyclerView
 # Keep optimized and shrunk proguard to prevent issues like this when using

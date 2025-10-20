@@ -15,6 +15,7 @@
  */
 package com.android.quickstep;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.os.Trace.TRACE_TAG_APP;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
@@ -45,6 +46,7 @@ import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl.Transaction;
 import android.view.View;
+import android.view.ViewGroup;
 import android.window.RemoteTransition;
 import android.window.SplashScreen;
 
@@ -60,6 +62,7 @@ import com.android.launcher3.LauncherAnimationRunner.AnimationResult;
 import com.android.launcher3.LauncherAnimationRunner.RemoteAnimationFactory;
 import com.android.launcher3.LauncherRootView;
 import com.android.launcher3.R;
+import com.android.launcher3.SplitScreenUiState;
 import com.android.launcher3.anim.AnimatorPlaybackController;
 import com.android.launcher3.anim.PendingAnimation;
 import com.android.launcher3.compat.AccessibilityManagerCompat;
@@ -69,9 +72,8 @@ import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.statemanager.StateManager.AtomicAnimationFactory;
 import com.android.launcher3.statemanager.StateManager.StateHandler;
 import com.android.launcher3.statemanager.StatefulActivity;
-import com.android.launcher3.taskbar.FallbackTaskbarUIController;
+import com.android.launcher3.taskbar.TaskbarInteractor;
 import com.android.launcher3.taskbar.TaskbarManager;
-import com.android.launcher3.taskbar.TaskbarUIController;
 import com.android.launcher3.util.ActivityOptionsWrapper;
 import com.android.launcher3.util.ContextTracker;
 import com.android.launcher3.util.RunnableList;
@@ -84,7 +86,8 @@ import com.android.quickstep.fallback.FallbackRecentsView;
 import com.android.quickstep.fallback.RecentsDragLayer;
 import com.android.quickstep.fallback.RecentsState;
 import com.android.quickstep.util.RecentsAtomicAnimationFactory;
-import com.android.quickstep.util.SplitSelectStateController;
+import com.android.quickstep.split.SplitSelectStateController;
+import com.android.quickstep.util.SurfaceTransactionApplier;
 import com.android.quickstep.util.TISBindHelper;
 import com.android.quickstep.views.OverviewActionsView;
 import com.android.quickstep.views.RecentsView;
@@ -117,7 +120,7 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
     private FallbackRecentsView mFallbackRecentsView;
     private OverviewActionsView<?> mActionsView;
     private TISBindHelper mTISBindHelper;
-    private @Nullable FallbackTaskbarUIController<RecentsActivity> mTaskbarUIController;
+    private @Nullable TaskbarInteractor mTaskbarInteractor;
 
     private StateManager<RecentsState, RecentsActivity> mStateManager;
 
@@ -140,7 +143,7 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
                 new SplitSelectStateController(this, getStateManager(),
                         null /* depthController */, getStatsLogManager(),
                         systemUiProxy, RecentsModel.INSTANCE.get(this),
-                        null /*activityBackCallback*/);
+                        null /*activityBackCallback*/, new SplitScreenUiState());
         // Setup root and child views
         inflateRootView(R.layout.fallback_recents_activity);
         LauncherRootView rootView = getRootView();
@@ -148,6 +151,7 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
         mScrimView = rootView.findViewById(R.id.scrim_view);
         mFallbackRecentsView = rootView.findViewById(R.id.overview_panel);
         mActionsView = rootView.findViewById(R.id.overview_actions_view);
+        ViewGroup emptyRecentsMessageView = rootView.findViewById(R.id.empty_recents_message_view);
 
         if (DesktopModeStatus.canEnterDesktopMode(this)) {
             mDesktopRecentsTransitionController = new DesktopRecentsTransitionController(
@@ -156,7 +160,8 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
             );
         }
         mFallbackRecentsView.init(mActionsView, mSplitSelectStateController,
-                mDesktopRecentsTransitionController);
+                mDesktopRecentsTransitionController, new SurfaceTransactionApplier(getRootView()),
+                emptyRecentsMessageView);
 
         setContentView(rootView);
         rootView.getSysUiScrim().getSysUIProgress().updateValue(0);
@@ -178,14 +183,14 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
     }
 
     @Override
-    public void setTaskbarUIController(@Nullable TaskbarUIController taskbarUIController) {
-        mTaskbarUIController = (FallbackTaskbarUIController<RecentsActivity>) taskbarUIController;
+    public void setTaskbarInteractor(@Nullable TaskbarInteractor taskbarInteractor) {
+        mTaskbarInteractor = taskbarInteractor;
     }
 
     @Nullable
     @Override
-    public FallbackTaskbarUIController<RecentsActivity> getTaskbarUIController() {
-        return mTaskbarUIController;
+    public TaskbarInteractor getTaskbarInteractor() {
+        return mTaskbarInteractor;
     }
 
     @Override
@@ -239,8 +244,9 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
     }
 
     @Override
-    public void goToRecentsState(RecentsState recentsState, boolean animated) {
-        getStateManager().goToState(recentsState, animated);
+    public void goToRecentsState(RecentsState recentsState, boolean animated,
+            Animator.AnimatorListener listener) {
+        getStateManager().goToState(recentsState, animated, listener);
     }
 
     @Override
@@ -336,8 +342,8 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
         boolean activityClosing = taskIsATargetWithMode(appTargets, getTaskId(), MODE_CLOSING);
         PendingAnimation pa = new PendingAnimation(RECENTS_LAUNCH_DURATION);
         createRecentsWindowAnimator(recentsView, taskView, !activityClosing, appTargets,
-                wallpaperTargets, nonAppTargets, /* depthController= */ null ,
-                /* transitionInfo= */ null, pa);
+                wallpaperTargets, nonAppTargets, /* depthController= */ null,
+                /* transitionInfo= */ null, /* appearedTaskId= */ INVALID_TASK_ID, pa);
         target.play(pa.buildAnim());
 
         // Found a visible recents task that matches the opening app, lets launch the app from there

@@ -53,7 +53,6 @@ import com.android.launcher3.LauncherSettings.Favorites;
 import com.android.launcher3.R;
 import com.android.launcher3.model.DatabaseHelper;
 import com.android.launcher3.model.DbDowngradeHelper;
-import com.android.launcher3.pm.UserCache;
 import com.android.launcher3.settings.SettingsActivity;
 import com.android.launcher3.shortcuts.ShortcutKey;
 import com.android.launcher3.util.IOUtils;
@@ -166,7 +165,7 @@ public class LauncherDbUtilsTest {
         assertEquals("Error creating test db, unexpected row count.",
                 1, getFavoriteDataCount(db));
         TestUtil.runOnExecutorSync(MODEL_EXECUTOR, () -> {
-            LauncherDbUtils.updateBackupIcons(mContext, db);
+            LauncherDbUtils.updateBackupIcons(mContext, db, /* useDefaultShape **/ false);
         });
         assertEquals("Unexpected row count after updateBackupIcons().",
                 1, getFavoriteDataCount(db));
@@ -190,7 +189,7 @@ public class LauncherDbUtilsTest {
         assertEquals("Error creating test db, unexpected row count.",
                 1, getFavoriteDataCount(db));
         TestUtil.runOnExecutorSync(MODEL_EXECUTOR, () -> {
-            LauncherDbUtils.updateBackupIcons(mContext, db);
+            LauncherDbUtils.updateBackupIcons(mContext, db, /* useDefaultShape **/ false);
         });
         assertEquals("Unexpected row count after updateBackupIcons().",
                 1, getFavoriteDataCount(db));
@@ -216,7 +215,7 @@ public class LauncherDbUtilsTest {
         assertEquals("Error creating test db, unexpected row count.",
                 1, getFavoriteDataCount(db));
         TestUtil.runOnExecutorSync(MODEL_EXECUTOR, () -> {
-            LauncherDbUtils.updateBackupIcons(mContext, db);
+            LauncherDbUtils.updateBackupIcons(mContext, db, /* useDefaultShape **/ false);
         });
         assertEquals("Unexpected row count after updateBackupIcons().",
                 1, getFavoriteDataCount(db));
@@ -243,7 +242,7 @@ public class LauncherDbUtilsTest {
         assertEquals("Error creating test db, unexpected row count.",
                 1, getFavoriteDataCount(db));
         TestUtil.runOnExecutorSync(MODEL_EXECUTOR, () -> {
-            LauncherDbUtils.updateBackupIcons(mContext, db);
+            LauncherDbUtils.updateBackupIcons(mContext, db, /* useDefaultShape **/ false);
         });
         assertEquals("Unexpected row count after updateBackupIcons().",
                 1, getFavoriteDataCount(db));
@@ -289,8 +288,8 @@ public class LauncherDbUtilsTest {
         assertFalse(
                 "Icon blob should have changed.",
                 Arrays.equals(
-                     unexpectedIcon,
-                     cursor.getBlob(cursor.getColumnIndexOrThrow(Favorites.ICON))
+                        unexpectedIcon,
+                        cursor.getBlob(cursor.getColumnIndexOrThrow(Favorites.ICON))
                 )
         );
     }
@@ -304,8 +303,7 @@ public class LauncherDbUtilsTest {
     private class MyDatabaseHelper extends DatabaseHelper {
 
         MyDatabaseHelper() {
-            super(mContext, null, UserCache.INSTANCE.get(mContext)::getSerialNumberForUser,
-                    () -> { });
+            super(mContext, null, () -> { });
         }
 
         @Override

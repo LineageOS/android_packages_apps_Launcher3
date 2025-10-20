@@ -25,7 +25,7 @@ import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.PredictedContainerInfo
 import com.android.launcher3.model.data.WorkspaceData
-import com.android.launcher3.popup.PopupContainerWithArrow
+import com.android.launcher3.popup.PopupContainer
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
@@ -48,7 +48,7 @@ import java.util.function.Predicate
 
 class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
 
-    private var activeBindTask = AtomicReference(CancellationSignal())
+    @VisibleForTesting var activeBindTask = AtomicReference(CancellationSignal())
 
     var synchronouslyBoundPages = IntSet()
     var pagesToBindSynchronously = IntSet()
@@ -176,7 +176,7 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
         Preconditions.assertUIThread()
         val hadWorkApps = launcher.appsView.shouldShowTabs()
         launcher.activityComponent.appsStore.setApps(apps, flags, packageUserKeytoUidMap)
-        PopupContainerWithArrow.dismissInvalidPopup(launcher)
+        PopupContainer.dismissInvalidPopup(launcher)
         if (
             hadWorkApps != launcher.appsView.shouldShowTabs() &&
                 launcher.stateManager.state == LauncherState.ALL_APPS
@@ -197,7 +197,7 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
     override fun bindItemsUpdated(updates: Set<ItemInfo>) {
         val workspace = launcher.workspace
         val itemsToRebind = workspace.updateContainerItems(updates, launcher)
-        PopupContainerWithArrow.dismissInvalidPopup(launcher)
+        PopupContainer.dismissInvalidPopup(launcher)
 
         updates
             .mapNotNull { if (it is PredictedContainerInfo) it else null }
@@ -224,7 +224,7 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
     override fun bindWorkspaceComponentsRemoved(matcher: Predicate<ItemInfo?>) {
         launcher.workspace.removeItemsByMatcher(matcher, true)
         launcher.dragController.onAppsRemoved(matcher)
-        PopupContainerWithArrow.dismissInvalidPopup(launcher)
+        PopupContainer.dismissInvalidPopup(launcher)
     }
 
     override fun bindAllWidgets(widgets: List<WidgetsListBaseEntry>) {
@@ -277,9 +277,6 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
         if (orderedScreenIds.indexOf(FIRST_SCREEN_ID) != firstScreenPosition) {
             orderedScreenIds.removeValue(FIRST_SCREEN_ID)
             orderedScreenIds.add(firstScreenPosition, FIRST_SCREEN_ID)
-        } else if (orderedScreenIds.isEmpty) {
-            // If there are no screens, we need to have an empty screen
-            launcher.workspace.addExtraEmptyScreens()
         }
         bindAddScreens(orderedScreenIds)
 

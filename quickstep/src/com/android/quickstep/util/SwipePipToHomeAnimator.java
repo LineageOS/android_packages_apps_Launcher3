@@ -41,6 +41,7 @@ import com.android.launcher3.icons.IconProvider;
 import com.android.quickstep.TaskAnimationManager;
 import com.android.systemui.shared.pip.PipSurfaceTransactionHelper;
 import com.android.systemui.shared.system.InteractionJankMonitorWrapper;
+import com.android.wm.shell.common.pip.IPipAnimationListener.PipResources;
 import com.android.wm.shell.shared.pip.PipContentOverlay;
 
 /**
@@ -63,6 +64,7 @@ public class SwipePipToHomeAnimator extends RectFSpringAnim {
     private final Rect mCurrentBounds = new Rect();
     private final Rect mDestinationBounds = new Rect();
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
+    private final boolean mFadeOut;
 
     /**
      * For calculating transform in
@@ -121,9 +123,9 @@ public class SwipePipToHomeAnimator extends RectFSpringAnim {
             @NonNull Rect destinationBounds,
             @RecentsOrientedState.SurfaceRotation int fromRotation,
             @NonNull Rect destinationBoundsTransformed,
-            int cornerRadius,
-            int shadowRadius,
-            @NonNull View view) {
+            @NonNull View view,
+            PipResources pipRes,
+            boolean fadeOut) {
         super(new DefaultSpringConfig(context, null, startBounds,
                 new RectF(destinationBoundsTransformed)));
         mTaskId = taskId;
@@ -135,7 +137,8 @@ public class SwipePipToHomeAnimator extends RectFSpringAnim {
         mDestinationBounds.set(destinationBounds);
         mFromRotation = fromRotation;
         mDestinationBoundsTransformed.set(destinationBoundsTransformed);
-        mSurfaceTransactionHelper = new PipSurfaceTransactionHelper(cornerRadius, shadowRadius);
+        mSurfaceTransactionHelper = new PipSurfaceTransactionHelper(pipRes);
+        mFadeOut = fadeOut;
 
         final Rational aspectRatio = new Rational(
                 destinationBounds.width(), destinationBounds.height());
@@ -252,6 +255,9 @@ public class SwipePipToHomeAnimator extends RectFSpringAnim {
         if (mPipContentOverlay != null) {
             mPipContentOverlay.onAnimationUpdate(tx, mCurrentBounds, progress);
         }
+        if (mFadeOut) {
+            tx.setAlpha(mLeash, 1 - progress);
+        }
         return onAnimationScaleAndCrop(progress, tx, mCurrentBounds);
     }
 
@@ -355,9 +361,9 @@ public class SwipePipToHomeAnimator extends RectFSpringAnim {
         private Matrix mHomeToWindowPositionMap;
         private RectF mStartBounds;
         private Rect mDestinationBounds;
-        private int mCornerRadius;
-        private int mShadowRadius;
+        private PipResources mPipRes;
         private View mAttachedView;
+        private boolean mFadeOut = false;
         private @RecentsOrientedState.SurfaceRotation int mFromRotation = Surface.ROTATION_0;
         private final Rect mDestinationBoundsTransformed = new Rect();
 
@@ -411,13 +417,11 @@ public class SwipePipToHomeAnimator extends RectFSpringAnim {
             return this;
         }
 
-        public Builder setCornerRadius(int cornerRadius) {
-            mCornerRadius = cornerRadius;
-            return this;
-        }
-
-        public Builder setShadowRadius(int shadowRadius) {
-            mShadowRadius = shadowRadius;
+        /**
+         * Sets the {@link PipResources} for the animator.
+         */
+        public Builder setPipResources(PipResources res) {
+            mPipRes = res;
             return this;
         }
 
@@ -454,6 +458,11 @@ public class SwipePipToHomeAnimator extends RectFSpringAnim {
             return this;
         }
 
+        public Builder setFadeOut(boolean fadeOut) {
+            mFadeOut = fadeOut;
+            return this;
+        }
+
         public SwipePipToHomeAnimator build() {
             if (mDestinationBoundsTransformed.isEmpty()) {
                 mDestinationBoundsTransformed.set(mDestinationBounds);
@@ -474,7 +483,7 @@ public class SwipePipToHomeAnimator extends RectFSpringAnim {
                     mLeash, mSourceRectHint, mAppBounds,
                     mHomeToWindowPositionMap, mStartBounds, mDestinationBounds,
                     mFromRotation, mDestinationBoundsTransformed,
-                    mCornerRadius, mShadowRadius, mAttachedView);
+                    mAttachedView, mPipRes, mFadeOut);
         }
     }
 

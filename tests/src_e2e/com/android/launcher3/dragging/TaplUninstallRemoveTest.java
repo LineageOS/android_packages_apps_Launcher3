@@ -32,7 +32,6 @@ import com.android.launcher3.tapl.HomeAllApps;
 import com.android.launcher3.tapl.HomeAppIcon;
 import com.android.launcher3.tapl.Workspace;
 import com.android.launcher3.util.TestUtil;
-import com.android.launcher3.util.Wait;
 import com.android.launcher3.util.ui.AbstractLauncherUiTest;
 import com.android.launcher3.util.ui.PortraitLandscapeRunner.PortraitLandscape;
 
@@ -65,8 +64,8 @@ public class TaplUninstallRemoveTest extends AbstractLauncherUiTest<Launcher, Vi
 
     private void verifyAppUninstalledFromAllApps(Workspace workspace, String appName) {
         final HomeAllApps allApps = workspace.switchToAllApps();
-        Wait.atMost(appName + " app was found on all apps after being uninstalled",
-                () -> allApps.tryGetAppIcon(appName) == null, mLauncher);
+        mLauncher.waitForCondition(appName + " app was found on all apps after being uninstalled",
+                TestUtil.DEFAULT_UI_TIMEOUT, () -> allApps.tryGetAppIcon(appName) == null);
     }
 
     private void installDummyAppAndWaitForUIUpdate() throws IOException {

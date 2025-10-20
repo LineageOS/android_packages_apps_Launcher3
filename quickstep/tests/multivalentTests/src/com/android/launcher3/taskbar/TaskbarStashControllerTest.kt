@@ -35,6 +35,7 @@ import com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLAG_AUTOH
 import com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLAG_AUTOHIDE_SUSPEND_EDU_OPEN
 import com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLAG_AUTOHIDE_SUSPEND_GROWTH_NUDGE_OPEN
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.asProperty
+import com.android.launcher3.taskbar.TaskbarStashController.FLAG_AUTO_STASHED_ON_HOME
 import com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_APP
 import com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_OVERVIEW
 import com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_STASHED_LAUNCHER_STATE
@@ -193,6 +194,26 @@ class TaskbarStashControllerTest {
     fun testIsStashed_pinnedInApp_isUnstashed() {
         getInstrumentation().runOnMainSync {
             stashController.updateStateForFlag(FLAG_IN_APP, true)
+            stashController.applyState(0)
+        }
+        assertThat(stashController.isStashed).isFalse()
+    }
+
+    @Test
+    @TaskbarMode(PINNED)
+    fun testIsStashed_pinnedOnHome_isStashed() {
+        getInstrumentation().runOnMainSync {
+            stashController.updateStateForFlag(FLAG_AUTO_STASHED_ON_HOME, true)
+            stashController.applyState(0)
+        }
+        assertThat(stashController.isStashed).isTrue()
+    }
+
+    @Test
+    @TaskbarMode(PINNED)
+    fun testIsStashed_pinnedOnHome_unStashed() {
+        getInstrumentation().runOnMainSync {
+            stashController.updateStateForFlag(FLAG_AUTO_STASHED_ON_HOME, false)
             stashController.applyState(0)
         }
         assertThat(stashController.isStashed).isFalse()
@@ -445,6 +466,13 @@ class TaskbarStashControllerTest {
         whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
         stashController.updateTaskbarTimeout(false)
         assertThat(stashController.timeoutAlarm.alarmPending()).isFalse()
+    }
+
+
+    @Test
+    @TaskbarMode(THREE_BUTTONS)
+    fun shouldAllowTaskbarToAutoStash_ThreeButtonNavTaskbar() {
+        assertThat(stashController.shouldAllowTaskbarToAutoStash()).isFalse()
     }
 
     @Test

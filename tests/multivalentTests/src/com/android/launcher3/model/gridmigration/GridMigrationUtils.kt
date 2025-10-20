@@ -39,7 +39,7 @@ fun itemListToBoard(itemsArg: List<WorkspaceItem>, boardSize: Point): List<CellL
     items.forEach {
         when (it.type) {
             Favorites.ITEM_TYPE_FOLDER,
-            Favorites.ITEM_TYPE_APP_PAIR -> throw Exception("Not implemented")
+            Favorites.ITEM_TYPE_APP_GROUP -> throw Exception("Not implemented")
             Favorites.ITEM_TYPE_APPWIDGET ->
                 boardList[it.screenId].addWidget(it.x, it.y, it.spanX, it.spanY)
             Favorites.ITEM_TYPE_APPLICATION -> boardList[it.screenId].addIcon(it.x, it.y)

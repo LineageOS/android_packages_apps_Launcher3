@@ -47,7 +47,6 @@
     <string name="hotseat_tip_gaps_filled" msgid="3035673010274223538">"အက်ပ်အကြံပြုချက်များကို နေရာလွတ်သို့ ထည့်လိုက်သည်"</string>
     <string name="hotsaet_tip_prediction_enabled" msgid="2233554377501347650">"အက်ပ်အကြံပြုချက်များ ဖွင့်ထားသည်"</string>
     <string name="hotsaet_tip_prediction_disabled" msgid="1506426298884658491">"အက်ပ်အကြံပြုချက်များကို ပိတ်ထားသည်"</string>
-    <string name="hotseat_prediction_content_description" msgid="4582028296938078419">"ကြိုတင်မှန်းဆထားသော အက်ပ်− <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="gesture_tutorial_title" msgid="2750751261768388354">"လက်ဟန်ဖြင့် လမ်းညွှန်ခြင်း အသုံးပြုနည်း"</string>
     <string name="gesture_tutorial_rotation_prompt_title" msgid="7537946781362766964">"သင့်စက်ကို လှည့်ပါ"</string>
     <string name="gesture_tutorial_rotation_prompt" msgid="1664493449851960691">"လက်ဟန်ဖြင့် လမ်းညွှန်ခြင်း ရှင်းလင်းပို့ချချက်အား အပြီးသတ်ရန် သင့်စက်ကို လှည့်ပါ"</string>
@@ -116,24 +115,29 @@
     <string name="toast_split_app_unsupported" msgid="2360229567007828914">"မျက်နှာပြင်ခွဲ၍ပြသခြင်းသုံးရန် နောက်အက်ပ်တစ်ခုရွေးပါ"</string>
     <string name="blocked_by_policy" msgid="2071401072261365546">"ဤလုပ်ဆောင်ချက်ကို အက်ပ် သို့မဟုတ် သင်၏အဖွဲ့အစည်းက ခွင့်မပြုပါ"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"ဝိဂျက်များကို လောလောဆယ် ပံ့ပိုးမထားပါ။ အခြားအက်ပ်ရွေးပါ"</string>
+    <string name="action_image_copy" msgid="6877540054727709339">"မိတ္တူကူးရန်"</string>
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"ဖန်သားပြင်လှည့်ရန်"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Taskbar သည် စခရင်အောက်ခြေမှ ပေါ်လာပုံနှင့် အသုံးမပြုချိန်တွင် အလိုအလျောက်ပျောက်သွားပုံကို ပြသော လှုပ်ရှားသက်ဝင်ပုံ"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"စခရင်အောက်ခြေတွင် Taskbar အမြဲမြင်ရရန်အတွက် ခလုတ်ဖြင့် သင့် Taskbar ပင်ထိုးနည်းကို ပြသော လှုပ်ရှားသက်ဝင်ပုံ"</string>
+    <string name="taskbar_edu_bubbles_animation_description" msgid="421866726938396813">"ဖိဆွဲသည့် လက်ဟန်ဖြင့် Taskbar မှတစ်ဆင့် ပူဖောင်းကွက်ပြုလုပ်နည်းကို ပြထားသည့် လှုပ်ရှားသက်ဝင်ပုံ"</string>
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"အက်ပ်တစ်ခုကို Taskbar မှ ဖွင့်ထားသည့် အက်ပ်ပေါ်သို့ ဆွဲထည့်ခြင်းဖြင့် မျက်နှာပြင် ခွဲ၍ပြသခြင်း ပြုလုပ်နည်းကို ပြသော လှုပ်ရှားသက်ဝင်ပုံ"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"သင့်စက်တွင် အကြံပြုထားသော အက်ပ်များသုံးနည်းကို ပြသော လှုပ်ရှားသက်ဝင်ပုံ"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"လုပ်ဆောင်ချက်ကီးကို ထိပြီးဖိထားကာ ဖိုင်ရှိသောနေရာကို ရွေးခြင်းဖြင့် စခရင်ပေါ်ရှိဖိုင်ရှာနည်းကို ပြသော လှုပ်ရှားသက်ဝင်ပုံ"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"လုပ်ဆောင်စရာဘား ပညာပေး"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"အက်ပ် ၂ ခု တစ်ပြိုင်တည်းသုံးရန် အက်ပ်တစ်ခုကို ဘေးသို့ဖိဆွဲပါ"</string>
+    <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"၎င်းလွင့်မျောနေစေရန် အောက်ခြေထောင့်များသို့ ဖိဆွဲပါ"</string>
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Taskbar ပြရန် အပေါ်သို့ ဖြည်းဖြည်းပွတ်ဆွဲပါ"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"ပုံမှန်အစီအစဉ်ပေါ် အခြေခံ၍ အက်ပ်အကြံပြုချက်များကို ရယူပါ"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Taskbar ပင်ထိုးရန် ခွဲခြားမျဉ်းကို နှိပ်ထားပါ"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Taskbar ဖြင့် ပိုမိုလုပ်ဆောင်နိုင်ခြင်း"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"Taskbar ကို အမြဲပြပါ"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"Taskbar ကို စခရင်အောက်ခြေတွင် အမြဲပြရန် ခွဲခြားမျဉ်းကို ထိထားပါ"</string>
+    <string name="taskbar_edu_bubbles_standalone" msgid="4182824636656528043">"အက်ပ်ကို လွင့်မျောနေစေရန် ထောင့်စွန်းသို့ ဖိဆွဲပါ"</string>
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"သင့်စခရင်ပေါ်ရှိအရာကို ရှာရန် လုပ်ဆောင်ချက်ကီးကို ထိ၍ဖိထားပါ"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"ဤကုန်ပစ္စည်းသည် သင့်စခရင်၌ ရွေးထားသောအပိုင်းကိုသုံး၍ ရှာဖွေသည်။ Google ၏ <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>ကိုယ်ရေးအချက်အလက်လုံခြုံမှုဆိုင်ရာ မူဝါဒ<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> နှင့် <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>ဝန်ဆောင်မှုစည်းမျဉ်းများ<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> အကျုံးဝင်သည်။"</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"ပိတ်ရန်"</string>
     <string name="taskbar_edu_done" msgid="6880178093977704569">"ပြီးပြီ"</string>
+    <string name="taskbar_edu_next" msgid="4007618274426775841">"ရှေ့သို့"</string>
     <string name="taskbar_button_home" msgid="2151398979630664652">"ပင်မစာမျက်နှာ"</string>
     <string name="taskbar_button_a11y" msgid="5241161324875094465">"အများသုံးနိုင်မှု"</string>
     <string name="taskbar_button_back" msgid="8558862226461164514">"နောက်သို့"</string>
@@ -142,18 +146,12 @@
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"အကြောင်းကြားချက်"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"အမြန်ဆက်တင်များ"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"လုပ်ဆောင်စရာဘား"</string>
-    <string name="taskbar_a11y_shown_title" msgid="6842833581088937713">"Taskbar ပြထားသည်"</string>
-    <string name="taskbar_a11y_shown_with_bubbles_left_title" msgid="4242431789851790046">"ဘယ်ဘက်၌ Taskbar နှင့် ပူဖောင်းကွက် ပြထားသည်"</string>
-    <string name="taskbar_a11y_shown_with_bubbles_right_title" msgid="8219065376188180113">"ညာဘက်၌ Taskbar နှင့် ပူဖောင်းကွက် ပြထားသည်"</string>
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"လမ်းညွှန်ဘား"</string>
     <string name="always_show_taskbar" msgid="3608801276107751229">"Taskbar အမြဲပြရန်"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"ရွှေ့ကြည့်သည့်မုဒ် ပြောင်းရန်"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"လုပ်ဆောင်စရာဘား ပိုင်းခြားစနစ်"</string>
-    <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"လတ်တလော အခြားအက်ပ်များ"</string>
-    <!-- no translation found for app_added_to_taskbar (1160433791917609063) -->
-    <skip />
-    <!-- no translation found for app_removed_from_taskbar (7887298201562912487) -->
-    <skip />
+    <string name="taskbar_recents_overflow_a11y_title" msgid="8005941062446304304">"လတ်တလော အခြားအက်ပ်များ"</string>
+    <string name="taskbar_pinned_overflow_a11y_title" msgid="2314810718333302626">"အခြားအက်ပ်များ"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"အပေါ်/ဘယ်ဘက်သို့ ရွှေ့ရန်"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"အောက်ခြေ/ညာဘက်သို့ ရွှေ့ရန်"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"အက်ပ်ကို ပူဖောင်းကွက်အဖြစ် ဖွင့်ရန်"</string>

@@ -45,10 +45,12 @@ import androidx.annotation.Nullable;
 
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.DeviceProfile;
-import com.android.launcher3.Flags;
 import com.android.launcher3.R;
+import com.android.launcher3.Utilities;
 import com.android.launcher3.taskbar.TaskbarActivityContext;
 import com.android.launcher3.taskbar.TaskbarControllers;
+import com.android.launcher3.taskbar.bubbles.BubbleActivityStarter;
+import com.android.launcher3.taskbar.bubbles.BubbleActivityStarter.Listener;
 import com.android.systemui.shared.system.BlurUtils;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
@@ -66,12 +68,21 @@ public final class TaskbarOverlayController {
 
     private static final String TAG = "TaskbarOverlayController";
     private static final String WINDOW_TITLE = "Taskbar Overlay";
+    private static final boolean DEBUG = true; // b/446041145
 
     private final TaskbarActivityContext mTaskbarContext;
     private final Context mWindowContext;
     private final TaskbarOverlayProxyView mProxyView;
     private final LayoutParams mLayoutParams;
     private final int mMaxBlurRadius;
+    private final BubbleActivityStarter mBubbleBarActivityStarter;
+
+    private final Listener mBubbleShowListener = new Listener() {
+        @Override
+        public void onBubbleLaunchRequested() {
+            mBubbleShowRequested = true;
+        }
+    };
 
     private final TaskStackChangeListener mTaskStackListener = new TaskStackChangeListener() {
         @Override
@@ -94,7 +105,10 @@ public final class TaskbarOverlayController {
 
         private void hideWindowOnTaskStackChange() {
             // A task was launched while overlay window was open, so stash Taskbar.
-            mControllers.taskbarStashController.updateAndAnimateTransientTaskbar(true);
+            mControllers.taskbarStashController.updateAndAnimateTransientTaskbar(
+                    /* stash = */ true,
+                    /* shouldBubblesFollow = */ !mBubbleShowRequested
+            );
             hideWindow();
         }
     };
@@ -104,6 +118,7 @@ public final class TaskbarOverlayController {
     private TaskbarControllers mControllers; // Initialized in init.
     // True if we have alerted surface flinger of an expensive call for blur.
     private boolean mInEarlyWakeUp;
+    private boolean mBubbleShowRequested;
     /**
      * Token for early wakeup requests to SurfaceFlinger.
      */
@@ -120,6 +135,7 @@ public final class TaskbarOverlayController {
                 R.dimen.max_depth_blur_radius_enhanced);
         mEarlyWakeupInfo.token = new Binder();
         mEarlyWakeupInfo.trace = TaskbarOverlayController.class.getName();
+        mBubbleBarActivityStarter = BubbleActivityStarter.INSTANCE.get(taskbarContext);
     }
 
     /** Initialize the controller. */
@@ -132,9 +148,14 @@ public final class TaskbarOverlayController {
      * context for the current overlay window.
      */
     public TaskbarOverlayContext requestWindow() {
+        if (DEBUG) {
+            Log.d(TAG, "requestWindow: " + Utilities.getTrimmedStackTrace("requestWindow"));
+            Log.d(TAG, "requestWindow: Was window already present? " + (mOverlayContext != null));
+        }
         if (mOverlayContext == null) {
             mOverlayContext = TaskbarOverlayContextFactory.newInstance(mWindowContext).create(
                     mWindowContext, mTaskbarContext, mControllers);
+            mBubbleBarActivityStarter.addListener(mBubbleShowListener);
         }
 
         if (!mProxyView.isOpen()) {
@@ -173,6 +194,10 @@ public final class TaskbarOverlayController {
 
     /** Destroys the controller and any overlay window if present. */
     public void onDestroy() {
+        if (DEBUG) {
+            Log.d(TAG, "onDestroy: " + Utilities.getTrimmedStackTrace("onDestroy"));
+            Log.d(TAG, "onDestroy: Was window already present? " + (mOverlayContext != null));
+        }
         TaskStackChangeListeners.getInstance().unregisterTaskStackListener(mTaskStackListener);
         Optional.ofNullable(mOverlayContext).ifPresent(c -> {
             c.onDestroy();
@@ -182,6 +207,8 @@ public final class TaskbarOverlayController {
             }
         });
         mOverlayContext = null;
+        mBubbleBarActivityStarter.removeListener(mBubbleShowListener);
+        mBubbleShowRequested = false;
     }
 
     /** The current device profile for the overlay window. */
@@ -231,9 +258,7 @@ public final class TaskbarOverlayController {
      *               are unsupported on the device.
      */
     public void setBackgroundBlurRadius(int radius) {
-        if (!Flags.allAppsBlur()) {
-            return;
-        }
+
         if (!BlurUtils.supportsBlursOnWindows()) {
             Log.d(TAG, "setBackgroundBlurRadius: not supported, setting to 0");
             radius = 0;

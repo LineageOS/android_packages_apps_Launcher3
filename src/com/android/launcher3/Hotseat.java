@@ -28,7 +28,6 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewDebug;
@@ -40,7 +39,10 @@ import androidx.annotation.Nullable;
 
 import com.android.launcher3.ShortcutAndWidgetContainer.TranslationProvider;
 import com.android.launcher3.celllayout.CellLayoutLayoutParams;
+import com.android.launcher3.dagger.LauncherComponentProvider;
+import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.util.HorizontalInsettableView;
+import com.android.launcher3.util.LauncherBindableItemsContainer.ItemOperator;
 import com.android.launcher3.util.MultiPropertyFactory;
 import com.android.launcher3.util.MultiPropertyFactory.MultiProperty;
 import com.android.launcher3.util.MultiTranslateDelegate;
@@ -103,13 +105,7 @@ public class Hotseat extends CellLayout implements Insettable {
 
     public Hotseat(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        if (Flags.enableQsbOnHotseat()) {
-            mQsb = LayoutInflater.from(context).inflate(R.layout.qsb_container_hotseat, this,
-                    false);
-        } else {
-            mQsb = LayoutInflater.from(context).inflate(R.layout.search_container_hotseat, this,
-                    false);
-        }
+        mQsb = LauncherComponentProvider.get(context).getQsbWidgetFactory().createView(this);
 
         addView(mQsb);
         mIconsAlphaChannels = new MultiValueAlpha(getShortcutsAndWidgets(),
@@ -374,6 +370,18 @@ public class Hotseat extends CellLayout implements Insettable {
      */
     public View getQsb() {
         return mQsb;
+    }
+
+    @Nullable
+    @Override
+    public View mapOverItems(ItemOperator op) {
+        if (Flags.enableQsbOnHotseat()
+                && mQsb != null
+                && mQsb.getTag() instanceof ItemInfo info
+                && op.evaluate(info, mQsb)) {
+            return mQsb;
+        }
+        return super.mapOverItems(op);
     }
 
     /** Dumps the Hotseat internal state */

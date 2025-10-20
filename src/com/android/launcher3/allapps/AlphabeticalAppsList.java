@@ -17,6 +17,7 @@ package com.android.launcher3.allapps;
 
 import static android.multiuser.Flags.enableMovingContentIntoPrivateSpace;
 
+import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_PRIVATESPACE;
 import static com.android.launcher3.allapps.BaseAllAppsAdapter.VIEW_TYPE_BOTTOM_VIEW_TO_SCROLL_TO;
 import static com.android.launcher3.allapps.BaseAllAppsAdapter.VIEW_TYPE_MASK_PRIVATE_SPACE_HEADER;
 import static com.android.launcher3.allapps.SectionDecorationInfo.ROUND_BOTTOM_LEFT;
@@ -60,7 +61,7 @@ import java.util.stream.Stream;
 public class AlphabeticalAppsList implements AllAppsStore.OnUpdateListener {
 
     public static final String TAG = "AlphabeticalAppsList";
-    private static final String PRIVATE_SPACE_PACKAGE = "com.android.privatespace";
+    public static final String PRIVATE_SPACE_PACKAGE = "com.android.privatespace";
 
     private final WorkProfileManager mWorkProviderManager;
 
@@ -242,7 +243,9 @@ public class AlphabeticalAppsList implements AllAppsStore.OnUpdateListener {
         mApps.clear();
         mPrivateApps.clear();
 
-        Stream<AppInfo> appSteam = Stream.of(mAllAppsStore.getApps());
+        // Filter against private space app that may show outside of Private Profile.
+        Stream<AppInfo> appSteam = Stream.of(mAllAppsStore.getApps()).filter(
+                info -> !isPrivateSpaceApp(info));
         Stream<AppInfo> privateAppStream = Stream.of(mAllAppsStore.getApps());
 
         if (!hasSearchResults() && mItemFilter != null) {
@@ -438,6 +441,7 @@ public class AlphabeticalAppsList implements AllAppsStore.OnUpdateListener {
                     currentItem.itemInfo.title = mPrivateProviderManager.getPSAppTitleOverride();
                     currentItem.itemInfo.contentDescription =
                             mPrivateProviderManager.getPsAppContentDesc();
+                    currentItem.itemInfo.container = CONTAINER_PRIVATESPACE;
                     privateSpaceAppIndex = i;
                 }
             }
@@ -490,7 +494,7 @@ public class AlphabeticalAppsList implements AllAppsStore.OnUpdateListener {
     }
 
     private boolean isPrivateSpaceApp(AppInfo appInfo) {
-        return Objects.equals(appInfo.getTargetPackage(), PRIVATE_SPACE_PACKAGE);
+        return appInfo != null && Objects.equals(appInfo.getTargetPackage(), PRIVATE_SPACE_PACKAGE);
     }
 
     /**

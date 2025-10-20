@@ -38,5 +38,5 @@
     <string name="widget_search_bar_clear_button_label" msgid="6120140737164336517">"Kosongkan"</string>
     <string name="widget_search_bar_back_button_label" msgid="7028448831228587743">"Kembali"</string>
     <string name="widgets_list_no_widgets_available" msgid="6451723564588621540">"Widget dan pintasan tidak tersedia"</string>
-    <string name="widgets_no_search_results" msgid="4336254967062545985">"Tiada widget atau pintasan yang ditemukan"</string>
+    <string name="widgets_no_search_results" msgid="4336254967062545985">"Tiada widget atau pintasan ditemukan"</string>
 </resources>

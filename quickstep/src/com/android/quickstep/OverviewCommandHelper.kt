@@ -34,16 +34,15 @@ import com.android.app.displaylib.PerDisplayRepository
 import com.android.app.tracing.traceSection
 import com.android.internal.jank.Cuj
 import com.android.launcher3.DeviceProfile
-import com.android.launcher3.Flags
+import com.android.launcher3.anim.AnimatorListeners
 import com.android.launcher3.logger.LauncherAtom
 import com.android.launcher3.logging.StatsLogManager
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_OVERVIEW_SHOW_OVERVIEW_FROM_3_BUTTON
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_OVERVIEW_SHOW_OVERVIEW_FROM_KEYBOARD_QUICK_SWITCH
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_OVERVIEW_SHOW_OVERVIEW_FROM_KEYBOARD_SHORTCUT
+import com.android.launcher3.taskbar.TaskbarInteractor
 import com.android.launcher3.taskbar.TaskbarManager
-import com.android.launcher3.taskbar.TaskbarUIController
 import com.android.launcher3.util.OverviewCommandHelperProtoLogProxy
-import com.android.launcher3.util.OverviewReleaseFlags.enableGridOnlyOverview
 import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.coroutines.DispatcherProvider
 import com.android.quickstep.GestureState.GestureEndTarget
@@ -55,8 +54,12 @@ import com.android.quickstep.OverviewCommandHelper.CommandType.SHOW_ALT_TAB
 import com.android.quickstep.OverviewCommandHelper.CommandType.SHOW_WITH_FOCUS
 import com.android.quickstep.OverviewCommandHelper.CommandType.TOGGLE
 import com.android.quickstep.OverviewCommandHelper.CommandType.TOGGLE_OVERVIEW_PREVIOUS
+import com.android.quickstep.OverviewCommandHelper.CommandType.TOGGLE_WITH_FOCUS
+import com.android.quickstep.fallback.RecentsState
+import com.android.quickstep.fallback.toRecentsState
 import com.android.quickstep.util.ActiveGestureLog
 import com.android.quickstep.util.ActiveGestureProtoLogProxy
+import com.android.quickstep.views.DesktopTaskView
 import com.android.quickstep.views.KeyboardFocusTask
 import com.android.quickstep.views.RecentsView
 import com.android.quickstep.views.TaskView
@@ -272,17 +275,31 @@ constructor(
             }
 
             TOGGLE -> {
-                val runningTaskId = recentsView.runningTaskView?.taskIdSet
-                launchTask(
-                    recentsView,
-                    getNextToggledTaskView(recentsView, command.displayId),
-                    command,
-                ) {
-                    if (enableGridOnlyOverview() && runningTaskId != null) {
-                        lastToggleInfo[command.displayId] =
-                            ToggleInfo(command.createTime, runningTaskId)
+                val recentsState = recentsView.getStateManager().state.toRecentsState()
+                if (recentsState == RecentsState.MODAL_TASK) {
+                    val recentsViewContainer =
+                        getContainerInterface(command.displayId)?.getCreatedContainer()
+                    if (recentsViewContainer != null) {
+                        val listener =
+                            AnimatorListeners.forEndCallback(Runnable { onCallbackResult() })
+                        recentsViewContainer.goToRecentsState(RecentsState.DEFAULT, true, listener)
+                        false
+                    } else {
+                        true
                     }
-                    onCallbackResult()
+                } else {
+                    val runningTaskId = recentsView.runningTaskView?.taskIdSet
+                    launchTask(
+                        recentsView,
+                        getNextToggledTaskView(recentsView, command.displayId),
+                        command,
+                    ) {
+                        if (runningTaskId != null) {
+                            lastToggleInfo[command.displayId] =
+                                ToggleInfo(command.createTime, runningTaskId)
+                        }
+                        onCallbackResult()
+                    }
                 }
             }
             TOGGLE_OVERVIEW_PREVIOUS -> {
@@ -293,6 +310,30 @@ constructor(
                     recentsView.startHome()
                     true
                 }
+            }
+            TOGGLE_WITH_FOCUS -> {
+                val focusedTask = recentsView.taskViews.firstOrNull { it.isFocused || it.isHovered }
+                focusedTask?.let {
+                    return launchTask(recentsView, it, command, onCallbackResult)
+                }
+                val selectedDesktopTask =
+                    recentsView.taskViews
+                        .filterIsInstance<DesktopTaskView>()
+                        .firstNotNullOfOrNull { desktopTaskView ->
+                            desktopTaskView.selectedTaskId?.let { selectedTaskId ->
+                                desktopTaskView to selectedTaskId
+                            }
+                        }
+                selectedDesktopTask?.let { (desktopTaskView, selectedTaskId) ->
+                    return launchTaskWithDesktopController(
+                        recentsView,
+                        desktopTaskView,
+                        selectedTaskId,
+                        command,
+                        onCallbackResult,
+                    )
+                }
+                launchTask(recentsView, recentsView.currentPageTaskView, command, onCallbackResult)
             }
             HOME -> {
                 if (displaySupportsHomeGesture(command.displayId)) {
@@ -309,18 +350,13 @@ constructor(
         val lastToggleInfo = lastToggleInfo[displayId]
         val lastToggleTaskView =
             if (
-                enableGridOnlyOverview() &&
-                    lastToggleInfo != null &&
+                lastToggleInfo != null &&
                     elapsedRealtime() - lastToggleInfo.createTime < TOGGLE_PREVIOUS_TIMEOUT_MS
             ) {
                 recentsView.getTaskViewByTaskIds(lastToggleInfo.taskIds.toIntArray())
             } else null
         val runningTaskView = recentsView.runningTaskView
         return when {
-            runningTaskView == null && !enableGridOnlyOverview() ->
-                // When running task view is null we return last large taskView - typically
-                // focusView or last desktop task view.
-                recentsView.lastLargeTaskView ?: recentsView.firstTaskView
             runningTaskView == null ->
                 recentsView.firstNonDesktopTaskView ?: recentsView.lastDesktopTaskView
             lastToggleTaskView != null && lastToggleTaskView != runningTaskView ->
@@ -340,17 +376,37 @@ constructor(
             taskView.isEndQuickSwitchCuj = true
             callbackList = taskView.launchWithAnimation()
         }
+        return handleLaunchResult(callbackList, recents, command, onCallbackResult)
+    }
 
-        if (callbackList != null) {
+    private fun launchTaskWithDesktopController(
+        recents: RecentsView<*, *>,
+        taskView: DesktopTaskView,
+        taskIdToReorderToFront: Int,
+        command: CommandInfo,
+        onCallbackResult: () -> Unit,
+    ): Boolean {
+        val callbackList: RunnableList? =
+            taskView.launchTaskWithDesktopController(true, taskIdToReorderToFront)
+        return handleLaunchResult(callbackList, recents, command, onCallbackResult)
+    }
+
+    private fun handleLaunchResult(
+        callbackList: RunnableList?,
+        recents: RecentsView<*, *>,
+        command: CommandInfo,
+        onCallbackResult: () -> Unit,
+    ): Boolean {
+        return if (callbackList != null) {
             callbackList.add {
                 OverviewCommandHelperProtoLogProxy.logLaunchingTaskCallback(command)
                 onCallbackResult()
             }
             OverviewCommandHelperProtoLogProxy.logLaunchingTaskWaitingForCallback(command)
-            return false
+            false
         } else {
             recents.startHome()
-            return true
+            true
         }
     }
 
@@ -363,16 +419,18 @@ constructor(
         val recentsViewContainer = containerInterface.getCreatedContainer()
         val recentsView: RecentsView<*, *>? = recentsViewContainer?.getOverviewPanel()
         val deviceProfile = recentsViewContainer?.getDeviceProfile()
-        val taskbarUIController: TaskbarUIController? =
+        val taskbarInteractor: TaskbarInteractor? =
             if (
                 command.displayId != DEFAULT_DISPLAY &&
                     recentsViewContainer !is RecentsWindowManager
             ) {
                 // When recentsViewContainer is not RecentsWindowManager, get TaskbarUiController
                 // from TaskbarManager as a workaround.
-                taskbarManager.getUIControllerForDisplay(command.displayId)
+                taskbarManager.getUIControllerForDisplay(command.displayId)?.let {
+                    TaskbarInteractor(it)
+                }
             } else {
-                containerInterface.getTaskbarController()
+                containerInterface.getTaskbarInteractor()
             }
 
         val taskAnimationManager = taskAnimationManagerRepository[command.displayId]
@@ -385,12 +443,17 @@ constructor(
         when (command.type) {
             HIDE_ALT_TAB -> {
                 if (
-                    taskbarUIController == null ||
+                    taskbarInteractor == null ||
                         !shouldShowAltTabKqs(deviceProfile, command.displayId)
                 ) {
                     return true
                 }
-                val focusedTaskIds = taskbarUIController.launchFocusedTask()
+                val focusedTaskIds =
+                    try {
+                        taskbarInteractor.launchFocusedTask().get()
+                    } catch (e: Exception) {
+                        null
+                    }
                 keyboardFocusTask =
                     if (focusedTaskIds == null) KeyboardFocusTask.Unfocused
                     else KeyboardFocusTask.TaskViewWithIds(focusedTaskIds)
@@ -400,10 +463,10 @@ constructor(
 
             SHOW_ALT_TAB ->
                 if (
-                    taskbarUIController != null &&
+                    taskbarInteractor != null &&
                         shouldShowAltTabKqs(deviceProfile, command.displayId)
                 ) {
-                    taskbarUIController.openQuickSwitchView()
+                    taskbarInteractor.openQuickSwitchView()
                     return true
                 } else {
                     keyboardFocusTask = KeyboardFocusTask.CurrentPageTaskView
@@ -411,18 +474,12 @@ constructor(
 
             HOME -> {
                 if (displaySupportsHomeGesture(command.displayId)) {
-                    if (Flags.homeButtonUsesKeycodeHome()) {
-                        systemUiProxy.onKeyEvent(KeyEvent.KEYCODE_HOME, command.displayId)
-                    } else {
-                        // Although IActivityTaskManager$Stub$Proxy.startActivity is a slow binder
-                        // call, we should still call it on main thread because launcher is waiting
-                        // for ActivityTaskManager to resume it. Also calling startActivity() on bg
-                        // thread could potentially delay resuming launcher. See b/348668521 for
-                        // more details.
-                        touchInteractionService.startActivity(
-                            overviewComponentObserver.getHomeIntent(command.displayId)
-                        )
-                    }
+                    // Although IActivityTaskManager$Stub$Proxy.startActivity is a slow binder
+                    // call, we should still call it on main thread because launcher is waiting
+                    // for ActivityTaskManager to resume it. Also calling startActivity() on bg
+                    // thread could potentially delay resuming launcher. See b/348668521 for
+                    // more details.
+                    systemUiProxy.onKeyEvent(KeyEvent.KEYCODE_HOME, command.displayId)
                     return true
                 } else {
                     // Initiate a recents animation that is immediately rejected, which will
@@ -438,12 +495,13 @@ constructor(
                 }
             }
 
-            SHOW_WITH_FOCUS ->
+            SHOW_WITH_FOCUS,
+            TOGGLE_WITH_FOCUS ->
                 // When Recents is not currently visible, the command's type is SHOW
                 // when overview is triggered via the keyboard overview button or Action+Tab
                 // keys (Not Alt+Tab which is KQS). The overview button on-screen in 3-button
                 // nav is TYPE_TOGGLE.
-                keyboardFocusTask = KeyboardFocusTask.CurrentPageTaskView
+                keyboardFocusTask = KeyboardFocusTask.ExpectedCurrentTask
 
             TOGGLE,
             TOGGLE_OVERVIEW_PREVIOUS -> {}
@@ -656,7 +714,8 @@ constructor(
         if (
             command.type != SHOW_ALT_TAB &&
                 command.type != HIDE_ALT_TAB &&
-                command.type != SHOW_WITH_FOCUS
+                command.type != SHOW_WITH_FOCUS &&
+                command.type != TOGGLE_WITH_FOCUS
         ) {
             return
         }
@@ -769,6 +828,9 @@ constructor(
          * either be a task or the home screen.
          */
         TOGGLE_OVERVIEW_PREVIOUS,
+
+        /** Toggle between Overview and the keyboard-focused Overview task. */
+        TOGGLE_WITH_FOCUS,
     }
 
     data class ToggleInfo(val createTime: Long, val taskIds: Set<Int>)

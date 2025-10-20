@@ -167,6 +167,7 @@ object WorkspaceProfileNonResponsiveFactory {
         hotseatBarBottomSpacePx: Int,
         hotseatQsbSpace: Int,
         panelCount: Int,
+        scale: Float,
     ): WorkspaceProfile {
         val cellLayoutBorderSpacePx = Point(0, 0)
         var cellSize =
@@ -304,6 +305,7 @@ object WorkspaceProfileNonResponsiveFactory {
                     cellLayoutPaddingPx.right),
             panelCount = panelCount,
             cellSize = cellSize,
+            scale = scale,
         )
     }
 
@@ -332,17 +334,6 @@ object WorkspaceProfileNonResponsiveFactory {
             Point(
                 pxFromDp(inv.borderSpaces[typeIndex].x, metrics, scale),
                 pxFromDp(inv.borderSpaces[typeIndex].y, metrics, scale),
-            )
-
-        var cellSize =
-            calculateCellSize(
-                cellLayoutBorderSpacePx = cellLayoutBorderSpacePx,
-                panelCount = panelCount,
-                deviceProperties = deviceProperties,
-                numColumns = inv.numColumns,
-                numRows = inv.numRows,
-                cellLayoutPadding = Rect(0, 0, 0, 0),
-                totalWorkspacePadding = Point(0, 0),
             )
 
         val desiredWorkspaceHorizontalMarginOriginalPx =
@@ -450,9 +441,7 @@ object WorkspaceProfileNonResponsiveFactory {
             )
 
         val numColumns: Int = panelCount * inv.numColumns
-
-        // TODO: this is really bad, we shouldn't be calculating this twice
-        cellSize =
+        val cellSize =
             calculateCellSize(
                 cellLayoutBorderSpacePx = cellLayoutBorderSpacePx,
                 panelCount = panelCount,
@@ -513,10 +502,11 @@ object WorkspaceProfileNonResponsiveFactory {
                     cellLayoutPaddingPx.right),
             panelCount = panelCount,
             cellSize = cellSize,
+            scale = scale,
         )
     }
 
-    fun createWorkspaceProfileNonResponsive(
+    private fun internalCreateWorkspaceProfileNonResponsive(
         context: Context,
         res: Resources,
         deviceProperties: DeviceProperties,
@@ -595,8 +585,121 @@ object WorkspaceProfileNonResponsiveFactory {
                         hotseatBarBottomSpacePx = hotseatBarBottomSpacePx,
                         hotseatQsbSpace = hotseatQsbSpace,
                         panelCount = panelCount,
+                        scale = scale,
                     )
                     .let { hideWorkspaceLabelsIfNotEnoughSpace(isVerticalLayout, it, inv) }
         }
+    }
+
+    fun createWorkspaceProfileNonResponsive(
+        context: Context,
+        res: Resources,
+        deviceProperties: DeviceProperties,
+        scale: Float,
+        inv: InvariantDeviceProfile,
+        isVerticalLayout: Boolean,
+        isScalableGrid: Boolean,
+        typeIndex: Int,
+        metrics: DisplayMetrics,
+        panelCount: Int,
+        iconSizePx: Int,
+        isFirstPass: Boolean,
+        insets: Rect,
+        isSeascape: Boolean,
+        hotseatProfile: HotseatProfile,
+        hotseatBarBottomSpacePx: Int,
+        hotseatQsbSpace: Int,
+        hotseatBarSizePx: Int,
+    ): WorkspaceProfile {
+        var workspaceProfile =
+            internalCreateWorkspaceProfileNonResponsive(
+                context = context,
+                res = res,
+                deviceProperties = deviceProperties,
+                scale = scale,
+                inv = inv,
+                isVerticalLayout = isVerticalLayout,
+                isScalableGrid = isScalableGrid,
+                typeIndex = typeIndex,
+                metrics = metrics,
+                panelCount = panelCount,
+                iconSizePx = iconSizePx,
+                isFirstPass = isFirstPass,
+                insets = insets,
+                isSeascape = isSeascape,
+                hotseatProfile = hotseatProfile,
+                hotseatBarBottomSpacePx = hotseatBarBottomSpacePx,
+                hotseatQsbSpace = hotseatQsbSpace,
+            )
+
+        // Check to see if the icons fit within the available height.
+        val usedHeight: Float = workspaceProfile.cellLayoutHeightSpecification.toFloat()
+        val maxHeight: Int =
+            (deviceProperties.availableHeightPx - workspaceProfile.getTotalWorkspacePadding().y)
+        var extraHeight = max(0f, maxHeight - usedHeight)
+        val scaleY = maxHeight / usedHeight
+        var shouldScale = scaleY < 1f
+
+        var scaleX = 1f
+        if (isScalableGrid) {
+            // We scale to fit the cellWidth and cellHeight in the available space.
+            // The benefit of scalable grids is that we can get consistent aspect ratios between
+            // devices.
+            val usedWidth: Float =
+                (workspaceProfile.cellLayoutWidthSpecification +
+                        (workspaceProfile.desiredWorkspaceHorizontalMarginPx * 2))
+                    .toFloat()
+            // We do not subtract padding here, as we also scale the workspace padding if needed.
+            scaleX = deviceProperties.availableWidthPx / usedWidth
+            shouldScale = true
+        }
+
+        if (shouldScale) {
+            workspaceProfile =
+                internalCreateWorkspaceProfileNonResponsive(
+                    context = context,
+                    res = res,
+                    deviceProperties = deviceProperties,
+                    scale = min(scaleX.toDouble(), scaleY.toDouble()).toFloat(),
+                    inv = inv,
+                    isVerticalLayout = isVerticalLayout,
+                    isScalableGrid = isScalableGrid,
+                    typeIndex = typeIndex,
+                    metrics = metrics,
+                    panelCount = panelCount,
+                    iconSizePx = iconSizePx,
+                    isFirstPass = isFirstPass,
+                    insets = insets,
+                    isSeascape = isSeascape,
+                    hotseatProfile = hotseatProfile,
+                    hotseatBarBottomSpacePx = hotseatBarBottomSpacePx,
+                    hotseatQsbSpace = hotseatQsbSpace,
+                )
+            extraHeight =
+                max(0, (maxHeight - workspaceProfile.cellLayoutHeightSpecification)).toFloat()
+        }
+        workspaceProfile = workspaceProfile.copy(extraSpace = Math.round(extraHeight))
+
+        if (isScalableGrid) {
+            workspaceProfile =
+                workspaceProfile.calculateAndSetWorkspaceVerticalPadding(context, inv)
+        }
+
+        // We also need to update WorkspacePadding and CellLayoutPadding, keeping it in a
+        // different method to make it easier to keep track
+        return workspaceProfile.recalculateWorkspacePadding(
+            isVerticalLayout,
+            isSeascape,
+            inv.isFixedLandscape,
+            isScalableGrid,
+            hotseatProfile,
+            hotseatBarSizePx,
+            insets,
+            deviceProperties,
+            res,
+            hotseatBarBottomSpacePx,
+            hotseatQsbSpace,
+            inv,
+        )
     }
 }

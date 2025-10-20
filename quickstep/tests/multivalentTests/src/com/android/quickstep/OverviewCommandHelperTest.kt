@@ -16,18 +16,22 @@
 
 package com.android.quickstep
 
+import android.animation.Animator
+import android.animation.AnimatorSet
 import android.content.Intent
-import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.view.Display.DEFAULT_DISPLAY
+import androidx.test.annotation.UiThreadTest
 import androidx.test.filters.SmallTest
 import com.android.app.displaylib.DisplayRepository
 import com.android.app.displaylib.fakes.FakePerDisplayRepository
-import com.android.launcher3.Flags
 import com.android.launcher3.LauncherState
+import com.android.launcher3.LauncherState.OVERVIEW
+import com.android.launcher3.LauncherState.OVERVIEW_MODAL_TASK
 import com.android.launcher3.statemanager.StateManager
 import com.android.launcher3.statemanager.StatefulActivity
+import com.android.launcher3.taskbar.TaskbarInteractor
 import com.android.launcher3.taskbar.TaskbarManager
 import com.android.launcher3.taskbar.TaskbarUIController
 import com.android.launcher3.uioverrides.QuickstepLauncher
@@ -38,8 +42,11 @@ import com.android.quickstep.OverviewCommandHelper.CommandInfo
 import com.android.quickstep.OverviewCommandHelper.CommandInfo.CommandStatus
 import com.android.quickstep.OverviewCommandHelper.CommandType
 import com.android.quickstep.OverviewCommandHelper.Companion.TOGGLE_PREVIOUS_TIMEOUT_MS
+import com.android.quickstep.fallback.RecentsState
+import com.android.quickstep.views.DesktopTaskView
 import com.android.quickstep.views.KeyboardFocusTask
 import com.android.quickstep.views.RecentsView
+import com.android.quickstep.views.RecentsViewUtils
 import com.android.quickstep.views.TaskView
 import com.android.window.flags.Flags as WindowFlags
 import com.google.common.truth.Truth.assertThat
@@ -70,6 +77,7 @@ import org.mockito.kotlin.whenever
 @SmallTest
 @RunWith(LauncherMultivalentJUnit::class)
 @OptIn(ExperimentalCoroutinesApi::class)
+@UiThreadTest
 class OverviewCommandHelperTest {
 
     @get:Rule val mSetFlagsRule: SetFlagsRule = SetFlagsRule()
@@ -90,9 +98,11 @@ class OverviewCommandHelperTest {
     private val touchInteractionService: TouchInteractionService = mock()
     private val taskbarManager: TaskbarManager = mock()
     private val taskbarUIController: TaskbarUIController = mock()
+    private val taskbarInteractor: TaskbarInteractor = TaskbarInteractor(taskbarUIController)
     private val launcher: QuickstepLauncher = mock()
     private var elapsedRealtime = 100L
     private val systemUiProxy: SystemUiProxy = mock()
+    private val overviewComponentObserver = mock<OverviewComponentObserver>()
 
     private fun setupDefaultDisplay() {
         whenever(displayRepository.displayIds).thenReturn(MutableStateFlow(setOf(DEFAULT_DISPLAY)))
@@ -108,7 +118,6 @@ class OverviewCommandHelperTest {
     fun setup() {
         setupDefaultDisplay()
 
-        val overviewComponentObserver = mock<OverviewComponentObserver>()
         whenever(overviewComponentObserver.getContainerInterface(any()))
             .thenReturn(containerInterface)
         whenever(overviewComponentObserver.getHomeIntent(any())).thenReturn(mock<Intent>())
@@ -116,10 +125,11 @@ class OverviewCommandHelperTest {
         whenever(containerInterface.switchToRecentsIfVisible(any())).thenReturn(true)
         whenever(launcher.getOverviewPanel<RecentsView<*, *>>()).thenReturn(recentView)
         whenever(containerInterface.createdContainer).thenReturn(launcher)
-        whenever(containerInterface.taskbarController).thenReturn(taskbarUIController)
-        whenever(taskbarUIController.launchFocusedTask())
+        whenever(containerInterface.taskbarInteractor).thenReturn(taskbarInteractor)
+        whenever(taskbarInteractor.launchFocusedTask().get())
             .thenReturn(REQUESTED_KEYBOARD_FOCUS_TASK_IDS)
         whenever(taskbarManager.getUIControllerForDisplay(anyInt())).thenReturn(taskbarUIController)
+        whenever(stateManager.state).thenReturn(OVERVIEW)
 
         sut =
             spy(
@@ -130,9 +140,7 @@ class OverviewCommandHelperTest {
                     displayRepository = displayRepository,
                     taskbarManager = taskbarManager,
                     taskAnimationManagerRepository =
-                        FakePerDisplayRepository<TaskAnimationManager> { _ ->
-                            taskAnimationManager
-                        },
+                        FakePerDisplayRepository { _ -> taskAnimationManager },
                     elapsedRealtime = ::elapsedRealtime,
                     systemUiProxy = systemUiProxy,
                 )
@@ -452,12 +460,125 @@ class OverviewCommandHelperTest {
         }
 
     @Test
-    @DisableFlags(Flags.FLAG_HOME_BUTTON_USES_KEYCODE_HOME)
-    fun whenHomeCommandIsAdded_executeHomeAction_withKeycodeHomeDisabled() =
+    fun toggleWithFocus_recentViewNotVisible_goToOverview() =
         testScope.runTest {
-            val command = sut.addCommand(CommandType.HOME)!!
+            whenever(containerInterface.getVisibleRecentsView<RecentsView<*, *>>()).thenReturn(null)
+            sut.addCommand(CommandType.TOGGLE_WITH_FOCUS)!!
             runCurrent()
-            verify(touchInteractionService).startActivity(any())
+            verify(containerInterface).switchToRecentsIfVisible(any())
+        }
+
+    @Test
+    fun toggleWithFocus_recentViewVisible_windowTaskFocused_launchFocusedTask() =
+        testScope.runTest {
+            val mockFocusedTask = mock<TaskView>()
+            val callbackList = RunnableList()
+
+            whenever(containerInterface.getVisibleRecentsView<RecentsView<*, *>>())
+                .thenReturn(recentView)
+            whenever(mockFocusedTask.isFocused).thenReturn(true)
+            whenever(recentView.taskViews)
+                .thenReturn(
+                    object : RecentsViewUtils.TaskViewsIterable(recentView) {
+                        override fun iterator(): Iterator<TaskView> =
+                            listOf(mockFocusedTask).iterator()
+                    }
+                )
+            whenever(mockFocusedTask.launchWithAnimation()).thenReturn(callbackList)
+
+            val command = sut.addCommand(CommandType.TOGGLE_WITH_FOCUS)!!
+            runCurrent()
+
+            verify(mockFocusedTask).launchWithAnimation()
+            assertThat(command.status).isEqualTo(CommandStatus.PROCESSING)
+
+            callbackList.executeAllAndDestroy()
+            runCurrent()
+
+            assertThat(command.status).isEqualTo(CommandStatus.COMPLETED)
+        }
+
+    @Test
+    fun toggleWithFocus_recentViewVisible_windowTaskHovered_launchHoveredTask() =
+        testScope.runTest {
+            val mockFocusedTask = mock<TaskView>()
+            val callbackList = RunnableList()
+
+            whenever(containerInterface.getVisibleRecentsView<RecentsView<*, *>>())
+                .thenReturn(recentView)
+            whenever(mockFocusedTask.isFocused).thenReturn(false)
+            whenever(mockFocusedTask.isHovered).thenReturn(true)
+            whenever(recentView.taskViews)
+                .thenReturn(
+                    object : RecentsViewUtils.TaskViewsIterable(recentView) {
+                        override fun iterator(): Iterator<TaskView> =
+                            listOf(mockFocusedTask).iterator()
+                    }
+                )
+            whenever(mockFocusedTask.launchWithAnimation()).thenReturn(callbackList)
+
+            val command = sut.addCommand(CommandType.TOGGLE_WITH_FOCUS)!!
+            runCurrent()
+
+            verify(mockFocusedTask).launchWithAnimation()
+            assertThat(command.status).isEqualTo(CommandStatus.PROCESSING)
+
+            callbackList.executeAllAndDestroy()
+            runCurrent()
+
+            assertThat(command.status).isEqualTo(CommandStatus.COMPLETED)
+        }
+
+    @Test
+    fun toggleWithFocus_recentViewVisible_desktopTaskFocused_launchFocusedTaskOnTop() =
+        testScope.runTest {
+            val mockDesktopTask = mock<DesktopTaskView>()
+            val callbackList = RunnableList()
+
+            whenever(containerInterface.getVisibleRecentsView<RecentsView<*, *>>())
+                .thenReturn(recentView)
+            whenever(mockDesktopTask.isFocused).thenReturn(false)
+            whenever(mockDesktopTask.isHovered).thenReturn(false)
+            whenever(mockDesktopTask.selectedTaskId).thenReturn(TASK_ID)
+            whenever(recentView.taskViews)
+                .thenReturn(
+                    object : RecentsViewUtils.TaskViewsIterable(recentView) {
+                        override fun iterator(): Iterator<TaskView> =
+                            listOf(mockDesktopTask).iterator()
+                    }
+                )
+            whenever(mockDesktopTask.launchWithAnimation()).thenReturn(callbackList)
+
+            val command = sut.addCommand(CommandType.TOGGLE_WITH_FOCUS)!!
+            runCurrent()
+
+            verify(mockDesktopTask).launchTaskWithDesktopController(true, TASK_ID)
+            assertThat(command.status).isEqualTo(CommandStatus.COMPLETED)
+        }
+
+    @Test
+    fun toggleWithFocus_recentViewVisible_noTaskFocused_launchCurrentPageTaskView() =
+        testScope.runTest {
+            val mockTask = mock<TaskView>()
+            val mockTaskViewsIterable = mock<RecentsViewUtils.TaskViewsIterable>()
+            val callbackList = RunnableList()
+
+            whenever(containerInterface.getVisibleRecentsView<RecentsView<*, *>>())
+                .thenReturn(recentView)
+            whenever(mockTaskViewsIterable.iterator()).thenReturn(emptyList<TaskView>().iterator())
+            whenever(recentView.taskViews).thenReturn(mockTaskViewsIterable)
+            whenever(recentView.currentPageTaskView).thenReturn(mockTask)
+            whenever(mockTask.launchWithAnimation()).thenReturn(callbackList)
+
+            val command = sut.addCommand(CommandType.TOGGLE_WITH_FOCUS)!!
+            runCurrent()
+
+            verify(mockTask).launchWithAnimation()
+            assertThat(command.status).isEqualTo(CommandStatus.PROCESSING)
+
+            callbackList.executeAllAndDestroy()
+            runCurrent()
+
             assertThat(command.status).isEqualTo(CommandStatus.COMPLETED)
         }
 
@@ -515,7 +636,6 @@ class OverviewCommandHelperTest {
         }
 
     @Test
-    @EnableFlags(Flags.FLAG_HOME_BUTTON_USES_KEYCODE_HOME)
     fun whenHomeCommandIsAdded_executeHomeAction_withKeycodeHomeEnabled() =
         testScope.runTest {
             sut.addCommand(CommandType.HOME)
@@ -594,7 +714,7 @@ class OverviewCommandHelperTest {
             assertThat(command.status).isEqualTo(CommandStatus.PROCESSING)
             verify(swipeUpHandler).onGestureStarted(any())
             verify(newGestureState).setHandlingAtomicEvent(GestureState.GestureEndTarget.RECENTS)
-            verify(recentView).setKeyboardFocusTask(KeyboardFocusTask.CurrentPageTaskView)
+            verify(recentView).setKeyboardFocusTask(KeyboardFocusTask.ExpectedCurrentTask)
 
             // Make sure we can transition to completed state once we see an end callback.
             val gestureAnimationEndCallbackCaptor = argumentCaptor<Runnable>()
@@ -607,6 +727,31 @@ class OverviewCommandHelperTest {
             runCurrent()
             assertThat(command.status).isEqualTo(CommandStatus.COMPLETED)
             verify(recentView).setKeyboardFocusTask(KeyboardFocusTask.Unfocused)
+        }
+
+    @Test
+    fun toggleCommand_inModalTaskMode_goToRecentsState() =
+        testScope.runTest {
+            val recentsContainerInterface: BaseActivityInterface<RecentsState, RecentsActivity> =
+                mock()
+            val recentsViewContainer = mock<RecentsActivity>()
+            whenever(recentsContainerInterface.createdContainer).thenReturn(recentsViewContainer)
+            whenever(recentsContainerInterface.getVisibleRecentsView<RecentsView<*, *>>())
+                .thenReturn(recentView)
+            whenever(overviewComponentObserver.getContainerInterface(any()))
+                .thenReturn(recentsContainerInterface)
+            whenever(stateManager.state).thenReturn(OVERVIEW_MODAL_TASK)
+
+            val commandInfo: CommandInfo = sut.addCommand(CommandType.TOGGLE)!!
+            runCurrent()
+            assertThat(commandInfo.status).isEqualTo(CommandStatus.PROCESSING)
+
+            val animationEndCallbackCaptor = argumentCaptor<Animator.AnimatorListener>()
+            verify(recentsViewContainer)
+                .goToRecentsState(any(), any(), animationEndCallbackCaptor.capture())
+            animationEndCallbackCaptor.firstValue.onAnimationEnd(AnimatorSet())
+            runCurrent()
+            assertThat(commandInfo.status).isEqualTo(CommandStatus.COMPLETED)
         }
 
     private fun setupGestureDependencies(): Pair<AbsSwipeUpHandler<*, *, *>, GestureState> {

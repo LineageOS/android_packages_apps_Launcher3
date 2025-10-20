@@ -23,8 +23,6 @@ import static com.android.launcher3.LauncherAnimUtils.newSingleUseCancelListener
 import static com.android.launcher3.LauncherState.ALL_APPS;
 import static com.android.launcher3.LauncherState.NORMAL;
 import static com.android.launcher3.MotionEventsUtils.isTrackpadMotionEvent;
-import static com.android.launcher3.allapps.AllAppsTransitionController.ALL_APPS_PULL_BACK_ALPHA;
-import static com.android.launcher3.allapps.AllAppsTransitionController.ALL_APPS_PULL_BACK_TRANSLATION;
 import static com.android.launcher3.anim.AnimatorListeners.forSuccessCallback;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_HOME_GESTURE;
 import static com.android.launcher3.util.NavigationMode.THREE_BUTTONS;
@@ -157,16 +155,9 @@ public class NavBarToHomeTouchController implements TouchController,
             AbstractFloatingView.closeOpenContainer(mLauncher, AbstractFloatingView.TYPE_TASK_MENU);
         } else if (mStartState == ALL_APPS) {
             AllAppsTransitionController allAppsController = mLauncher.getAllAppsController();
-            if (mLauncher.getDeviceProfile().shouldShowAllAppsOnSheet()) {
-                allAppsController.setShouldScaleHeader(true);
-                builder.addAnimatedFloat(allAppsController.getAllAppScale(), 1f,
-                        PREDICTIVE_BACK_MIN_SCALE, PULLBACK_INTERPOLATOR);
-            } else {
-                builder.setFloat(allAppsController, ALL_APPS_PULL_BACK_TRANSLATION,
-                        -mPullbackDistance, PULLBACK_INTERPOLATOR);
-                builder.setFloat(allAppsController, ALL_APPS_PULL_BACK_ALPHA,
-                        0.5f, PULLBACK_INTERPOLATOR);
-            }
+            allAppsController.setShouldScaleHeader(true);
+            builder.addAnimatedFloat(allAppsController.getAllAppScale(), 1f,
+                    PREDICTIVE_BACK_MIN_SCALE, PULLBACK_INTERPOLATOR);
         }
         AbstractFloatingView topView = AbstractFloatingView.getTopOpenView(mLauncher);
         if (topView != null) {

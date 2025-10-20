@@ -264,7 +264,7 @@ public abstract class BaseAllAppsAdapter
                 icon.reset();
                 icon.applyFromApplicationInfo(adapterItem.itemInfo);
                 icon.setOnFocusChangeListener(mIconFocusListener);
-                icon.setIconAnimationDisabled(
+                icon.configureMinimalPopup(
                         holder.getItemViewType() == VIEW_TYPE_PRIVATE_SPACE_APP_ICON);
                 PrivateProfileManager privateProfileManager = mApps.getPrivateProfileManager();
                 if (privateProfileManager != null) {

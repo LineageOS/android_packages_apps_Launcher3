@@ -43,6 +43,7 @@ public final class TestProtocol {
     public static final int HINT_STATE_TWO_BUTTON_ORDINAL = 8;
     public static final int OVERVIEW_SPLIT_SELECT_ORDINAL = 9;
     public static final int EDIT_MODE_STATE_ORDINAL = 10;
+    public static final int DESKTOP_DRAG_MODE_ORDINAL = 11;
     public static final String SEQUENCE_MAIN = "Main";
     public static final String SEQUENCE_TIS = "TIS";
     public static final String SEQUENCE_PILFER = "Pilfer";
@@ -71,6 +72,8 @@ public final class TestProtocol {
                 return "OverviewSplitSelect";
             case EDIT_MODE_STATE_ORDINAL:
                 return "EditMode";
+            case DESKTOP_DRAG_MODE_ORDINAL:
+                return "DesktopDragMode";
             default:
                 return "Unknown";
         }
@@ -168,6 +171,7 @@ public final class TestProtocol {
             "get-overview-first-taskview-index";
     public static final String REQUEST_GET_SPLIT_SELECTION_ACTIVE = "get-split-selection-active";
     public static final String REQUEST_ENABLE_ROTATION = "enable_rotation";
+    public static final String REQUEST_ENABLE_FIXED_LANDSCAPE = "enable_fixed_landscape";
     public static final String REQUEST_MODEL_QUEUE_CLEARED = "model-queue-cleared";
 
     public static boolean sDebugTracing = false;
@@ -179,14 +183,20 @@ public final class TestProtocol {
     public static final String REQUEST_MOCK_SENSOR_ROTATION = "mock-sensor-rotation";
 
     public static final String PERMANENT_DIAG_TAG = "TaplTarget";
-    public static final String REQUEST_FLAG_ENABLE_GRID_ONLY_OVERVIEW = "enable-grid-only-overview";
 
     public static final String REQUEST_FLAG_ENABLE_MULTIPLE_DESKTOPS = "enable-multiple-desks";
+
+    public static final String REQUEST_GET_ACTIVE_DESK_ID = "get-active-desk-id";
+
+    public static final String REQUEST_GET_DESK_ID = "get-desk-id";
 
     public static final String REQUEST_IS_RECENTS_WINDOW_ENABLED = "recents-window-enabled";
 
     public static final String REQUEST_UNSTASH_BUBBLE_BAR_IF_STASHED =
             "unstash-bubble-bar-if-stashed";
+
+    public static final String REQUEST_REMOVE_ALL_BUBBLES =
+            "remove-all-bubbles";
 
     public static final String REQUEST_INJECT_FAKE_TRACKPAD = "inject-fake-trackpad";
     public static final String REQUEST_EJECT_FAKE_TRACKPAD = "eject-fake-trackpad";

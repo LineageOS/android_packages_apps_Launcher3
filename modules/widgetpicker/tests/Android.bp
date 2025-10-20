@@ -42,6 +42,7 @@ android_test {
     name: "WidgetPickerScreenshotTests",
     manifest: "AndroidManifest.xml",
     srcs: [
+        "multivalentScreenshotTests/src/com/android/launcher3/widgetpicker/dagger/ScreenshotTestComponent.kt",
         "multivalentScreenshotTests/src/com/android/launcher3/widgetpicker/goldenpathmanager/WidgetPickerGoldenPathManager.kt",
         "multivalentScreenshotTests/src/com/android/launcher3/widgetpicker/ui/components/FloatingToolbarScreenshotTest.kt",
         "multivalentScreenshotTests/src/com/android/launcher3/widgetpicker/ui/components/WidgetsGridScreenshotTest.kt",
@@ -50,6 +51,7 @@ android_test {
         "multivalentScreenshotTests/src/com/android/launcher3/widgetpicker/ui/components/WidgetAppsListHeaderScreenshotTest.kt",
         "multivalentScreenshotTests/src/com/android/launcher3/widgetpicker/ui/components/WidgetDetailsScreenshotTest.kt",
         "multivalentScreenshotTests/src/com/android/launcher3/widgetpicker/ui/screens/LandingScreenScreenshotTest.kt",
+        "multivalentScreenshotTests/src/com/android/launcher3/widgetpicker/ui/appcatalog/SingleAppWidgetsCatalogScreenshotTest.kt",
         "multivalentScreenshotTests/src/com/android/launcher3/widgetpicker/ui/testdata/ScreenshotTestData.kt",
         "multivalentScreenshotTests/src/com/android/launcher3/widgetpicker/ui/testdata/ScreenshotTestWidgetAppIconsRepository.kt",
         "multivalentScreenshotTests/src/com/android/launcher3/widgetpicker/ui/testdata/ScreenshotTestWidgetsRepository.kt",
@@ -107,9 +109,11 @@ filegroup {
         "multivalentTests/src/com/android/launcher3/widgetpicker/ui/fullcatalog/screens/landing/LandingScreenSinglePaneTest.kt",
         "multivalentTests/src/com/android/launcher3/widgetpicker/ui/fullcatalog/screens/landing/LandingScreenTwoPaneTest.kt",
         "multivalentTests/src/com/android/launcher3/widgetpicker/ui/fullcatalog/screens/search/SearchScreenTest.kt",
+        "multivalentTests/src/com/android/launcher3/widgetpicker/ui/appcatalog/SingleAppWidgetsCatalogTest.kt",
         "multivalentTests/src/com/android/launcher3/widgetpicker/ui/components/WidgetInteractionsTest.kt",
         "multivalentTests/src/com/android/launcher3/widgetpicker/ui/components/WidgetsListHeaderTest.kt",
         "multivalentTests/src/com/android/launcher3/widgetpicker/ui/components/bottomsheet/TitledBottomSheetTest.kt",
+        "multivalentTests/src/com/android/launcher3/widgetpicker/ui/components/floatingsheet/TitledFloatingSheetTest.kt",
     ],
 }
 

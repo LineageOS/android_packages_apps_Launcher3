@@ -127,12 +127,14 @@ open class StatsLogManager protected constructor(@JvmField protected val mContex
         LAUNCHER_WIDGET_PICKER_OPEN_ANIMATION_BEGIN(1979),
         @UiEvent(doc = ("Widget picker was fully opened"))
         LAUNCHER_WIDGET_PICKER_OPEN_ANIMATION_END(1980),
-        @UiEvent(doc =
+        @UiEvent(
+            doc =
                 ("User tapped on an app in the single pane variant of widget picker to" +
                     " expand it.")
         )
         LAUNCHER_WIDGET_PICKER_APP_EXPAND_ANIMATION_BEGIN(1981),
-        @UiEvent(doc =
+        @UiEvent(
+            doc =
                 ("An app section that user tapped on in the single pane variant of widget " +
                     "picker was fully expanded.")
         )
@@ -613,6 +615,10 @@ open class StatsLogManager protected constructor(@JvmField protected val mContex
         LAUNCHER_OMNI_GET_LONG_PRESS_RUNNABLE(1545),
         @UiEvent(doc = "User tapped on \"change aspect ratio\" system shortcut.")
         LAUNCHER_ASPECT_RATIO_SETTINGS_SYSTEM_SHORTCUT_TAP(2219),
+        @UiEvent(
+            doc = "User tapped or long pressed on create new folder icon inside launcher settings."
+        )
+        LAUNCHER_CREATE_NEW_FOLDER_BUTTON_TAP_OR_LONGPRESS(2508),
 
         // One Grid Flags
         @UiEvent(doc = "User sets the device in Fixed Landscape")
@@ -639,6 +645,12 @@ open class StatsLogManager protected constructor(@JvmField protected val mContex
         LAUNCHER_DESKTOP_MODE_TASKBAR_UNPINNED(2242),
         @UiEvent(doc = "Launcher window insets controller reportedly null")
         LAUNCHER_WINDOW_INSETS_CONTROLLER_NULL(2400),
+        @UiEvent(doc = "Widget settings tapped on QSB in launcher")
+        LAUNCHER_QSB_WIDGET_SETTINGS_TAP(2415),
+        @UiEvent(doc = "User tapped to add an icon to home screen from all apps")
+        LAUNCHER_TAP_TO_ADD_TO_HOME_SCREEN_FROM_ALL_APPS(2445),
+        @UiEvent(doc = "User tapped to add a deep shortcut from the long press menu")
+        LAUNCHER_TAP_TO_ADD_DEEP_SHORTCUT(2446),
         // ADD MORE
     }
 

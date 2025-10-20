@@ -26,14 +26,17 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
+import com.android.launcher3.widgetpicker.shared.model.CloseBehavior
+import com.android.launcher3.widgetpicker.shared.model.SheetStyle
 import com.android.launcher3.widgetpicker.ui.LocalWidgetPickerCuiReporter
 import com.android.launcher3.widgetpicker.ui.WidgetPickerCui
 import com.android.launcher3.widgetpicker.ui.WidgetPickerCuiReporter
 import com.android.launcher3.widgetpicker.ui.WidgetPickerEventListeners
 import com.android.launcher3.widgetpicker.ui.components.accessibility.LocalAccessibilityState
 import com.android.launcher3.widgetpicker.ui.components.accessibility.produceAccessibilityState
-import com.android.launcher3.widgetpicker.ui.components.bottomsheet.ModalBottomSheetHeightStyle
+import com.android.launcher3.widgetpicker.ui.components.bottomsheet.SheetSize
 import com.android.launcher3.widgetpicker.ui.components.bottomsheet.TitledBottomSheet
+import com.android.launcher3.widgetpicker.ui.components.floatingsheet.TitledFloatingSheet
 import com.android.launcher3.widgetpicker.ui.components.widgetPickerTestTag
 import com.android.launcher3.widgetpicker.ui.components.widgetPickerTestTagContainer
 import com.android.launcher3.widgetpicker.ui.fullcatalog.FullWidgetsCatalogDimens.compactHeightBreakpoint
@@ -89,49 +92,78 @@ constructor(private val viewModelFactory: FullWidgetsCatalogViewModel.Factory) {
     ) {
         val cuiReporter = LocalWidgetPickerCuiReporter.current
         val localView = LocalView.current
+        val testTagModifier =
+            Modifier.widgetPickerTestTagContainer().widgetPickerTestTag(WIDGET_CATALOG_TEST_TAG)
+
+        val onDismissSheet = {
+            // Report end of cui in case user tried to close picker while it was opening.
+            // If there was no begin, this won't do anything.
+            cuiReporter.report(WidgetPickerCui.OPEN_ANIMATION_END, localView)
+            eventListeners.onClose()
+        }
+        val onSheetOpen = {
+            cuiReporter.report(WidgetPickerCui.OPEN_ANIMATION_END, localView)
+            viewModel.landingScreenViewModel.onUiReady()
+        }
 
         LaunchedEffect(Unit) { cuiReporter.report(WidgetPickerCui.OPEN_ANIMATION_BEGIN, localView) }
 
-        TitledBottomSheet(
-            title = viewModel.title.takeIf { !isCompactHeight },
-            modifier =
-                Modifier.widgetPickerTestTagContainer()
-                    .widgetPickerTestTag(WIDGET_CATALOG_TEST_TAG),
-            description = viewModel.description,
-            heightStyle = ModalBottomSheetHeightStyle.FILL_HEIGHT,
-            showDragHandle = true,
-            enableSwipeUpToDismiss = viewModel.enableSwipeUpToClose,
-            onDismissSheet = {
-                // Report end of cui in case user tried to close picker while it was opening.
-                // If there was no begin, this won't do anything.
-                cuiReporter.report(WidgetPickerCui.OPEN_ANIMATION_END, localView)
-                eventListeners.onClose()
-            },
-            onSheetOpen = {
-                cuiReporter.report(WidgetPickerCui.OPEN_ANIMATION_END, localView)
-                viewModel.landingScreenViewModel.onUiReady()
-            },
-        ) {
-            when (viewModel.activeScreen) {
-                Screen.LANDING -> {
-                    LandingScreen(
-                        isCompact = isCompactWidth,
-                        onEnterSearchMode = { viewModel.onActiveScreenChange(Screen.SEARCH) },
-                        onWidgetInteraction = eventListeners::onWidgetInteraction,
-                        showDragShadow = viewModel.showDragShadow,
-                        viewModel = viewModel.landingScreenViewModel,
-                    )
-                }
+        if (viewModel.sheetStyle == SheetStyle.FLOATING_SHEET) {
+            TitledFloatingSheet(
+                modifier = testTagModifier,
+                title = viewModel.title.takeIf { !isCompactHeight },
+                description = viewModel.description,
+                onDismissSheet = onDismissSheet,
+                onSheetOpen = onSheetOpen,
+            ) {
+                ActiveScreen(viewModel, isCompactWidth, eventListeners)
+            }
+        } else {
+            TitledBottomSheet(
+                modifier = testTagModifier,
+                sheetSize =
+                    if (viewModel.closeBehavior == CloseBehavior.CLOSE_BUTTON) {
+                        SheetSize.WINDOW
+                    } else {
+                        SheetSize.FULL
+                    },
+                title = viewModel.title.takeIf { !isCompactHeight },
+                description = viewModel.description,
+                closeBehavior = viewModel.closeBehavior,
+                enableSwipeUpToDismiss = viewModel.enableSwipeUpToClose,
+                onDismissSheet = onDismissSheet,
+                onSheetOpen = onSheetOpen,
+            ) {
+                ActiveScreen(viewModel, isCompactWidth, eventListeners)
+            }
+        }
+    }
 
-                Screen.SEARCH -> {
-                    SearchScreen(
-                        isCompact = isCompactWidth,
-                        onExitSearchMode = { viewModel.onActiveScreenChange(Screen.LANDING) },
-                        onWidgetInteraction = eventListeners::onWidgetInteraction,
-                        showDragShadow = viewModel.showDragShadow,
-                        viewModel = viewModel.searchScreenViewModel,
-                    )
-                }
+    @Composable
+    private fun ActiveScreen(
+        viewModel: FullWidgetsCatalogViewModel,
+        isCompactWidth: Boolean,
+        eventListeners: WidgetPickerEventListeners,
+    ) {
+        when (viewModel.activeScreen) {
+            Screen.LANDING -> {
+                LandingScreen(
+                    isCompact = isCompactWidth,
+                    onEnterSearchMode = { viewModel.onActiveScreenChange(Screen.SEARCH) },
+                    onWidgetInteraction = eventListeners::onWidgetInteraction,
+                    showDragShadow = viewModel.showDragShadow,
+                    viewModel = viewModel.landingScreenViewModel,
+                )
+            }
+
+            Screen.SEARCH -> {
+                SearchScreen(
+                    isCompact = isCompactWidth,
+                    onExitSearchMode = { viewModel.onActiveScreenChange(Screen.LANDING) },
+                    onWidgetInteraction = eventListeners::onWidgetInteraction,
+                    showDragShadow = viewModel.showDragShadow,
+                    viewModel = viewModel.searchScreenViewModel,
+                )
             }
         }
     }

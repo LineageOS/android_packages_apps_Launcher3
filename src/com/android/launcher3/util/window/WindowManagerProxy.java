@@ -579,6 +579,9 @@ public class WindowManagerProxy {
          *                      active before.
          */
         default void onActiveDeskChanged(int displayId, int newActiveDesk, int oldActiveDesk) {}
+
+        /** Called when the listener is initialised from shell. */
+        default void onListenerInitializedFromShell() {}
     }
 
 }

@@ -15,6 +15,8 @@
  */
 package com.android.launcher3.taskbar.bubbles;
 
+import static com.android.launcher3.taskbar.TaskbarActivityContext.TASKBAR_WINDOW_FULLSCREEN_BUBBLE_DRAG;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Point;
@@ -496,7 +498,7 @@ public class BubbleDragController {
         private void startDragging(@NonNull View view) {
             onDragStart();
             BubbleDragController.this.setIsDragging(true);
-            mActivity.setTaskbarWindowFullscreen(true);
+            mActivity.setTaskbarWindowFullscreen(true, TASKBAR_WINDOW_FULLSCREEN_BUBBLE_DRAG);
             mAnimator = new BubbleDragAnimator(view);
             mAnimator.animateFocused();
             mBubbleDismissController.setupDismissView(view, mAnimator);
@@ -522,7 +524,7 @@ public class BubbleDragController {
         private void stopDragging(@NonNull View view, @NonNull MotionEvent event) {
             BubbleDragController.this.setIsDragging(false);
             Runnable onComplete = () -> {
-                mActivity.setTaskbarWindowFullscreen(false);
+                mActivity.setTaskbarWindowFullscreen(false, TASKBAR_WINDOW_FULLSCREEN_BUBBLE_DRAG);
                 cleanUp(view);
                 onDragEnd(event.getRawX(), event.getRawY());
             };

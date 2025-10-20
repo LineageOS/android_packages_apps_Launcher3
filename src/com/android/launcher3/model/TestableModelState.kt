@@ -17,6 +17,7 @@
 package com.android.launcher3.model
 
 import com.android.launcher3.LauncherModel
+import com.android.launcher3.icons.IconCache
 import com.android.launcher3.model.repository.AppsListRepository
 import com.android.launcher3.model.repository.HomeScreenRepository
 import javax.inject.Inject
@@ -33,4 +34,6 @@ constructor(
     @JvmField val appsList: AllAppsList,
     @JvmField val homeRepo: HomeScreenRepository,
     @JvmField val appsRepo: AppsListRepository,
+    @JvmField val dbController: ModelDbController,
+    @JvmField val iconCache: IconCache,
 )

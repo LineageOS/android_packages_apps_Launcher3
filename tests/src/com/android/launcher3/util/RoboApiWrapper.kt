@@ -16,19 +16,31 @@
 
 package com.android.launcher3.util
 
-import android.content.ContentResolver
-import android.net.Uri
+import android.os.Handler
 import android.os.Looper
-import java.io.InputStream
-import java.util.function.Supplier
+import com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn
+import com.android.launcher3.util.rule.ShellCommandRule
+import java.util.concurrent.CompletableFuture
+import org.junit.rules.TestRule
 
 object RoboApiWrapper {
 
-    fun registerInputStream(
-        contentResolver: ContentResolver,
-        uri: Uri,
-        inputStreamSupplier: Supplier<InputStream>,
-    ) {}
+    fun waitForLooperSync(looper: Looper) {
+        CompletableFuture<Void>().apply { Handler(looper).post { complete(null) } }.get()
+    }
 
-    fun waitForLooperSync(looper: Looper) {}
+    fun yieldToMainLooper() {
+        // Intentionally left empty as this is not needed on device.
+        // Main looper continues running anyway without the need to yield.
+    }
+
+    /** Rule to grant shortcuts permission */
+    fun grantShortcutsPermissionRule(): TestRule = ShellCommandRule.setDefaultLauncher()
+
+    /** Rule to grant widget bind permission */
+    fun grantWidgetBindPermissionRule(): TestRule = ShellCommandRule.grantWidgetBind()
+
+    fun Any.convertToSpy() {
+        spyOn(this)
+    }
 }

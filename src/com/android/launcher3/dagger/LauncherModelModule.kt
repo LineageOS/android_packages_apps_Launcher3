@@ -16,13 +16,22 @@
 
 package com.android.launcher3.dagger
 
+import com.android.launcher3.ConstantItem
 import com.android.launcher3.LifecycleTracker
+import com.android.launcher3.graphics.ThemeManager.Companion.ICON_FACTORY_DAGGER_KEY
+import com.android.launcher3.graphics.theme.IconThemeFactory
+import com.android.launcher3.graphics.theme.MonoIconThemeFactory
+import com.android.launcher3.graphics.theme.MonoIconThemeFactory.MONO_FACTORY_ID
+import com.android.launcher3.graphics.theme.ThemePreference.Companion.THEME_OVERRIDES_DAGGER_KEY
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.popup.PopupDataRepository
 import com.android.launcher3.popup.PopupDataRepositoryImpl
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
+import dagger.multibindings.IntoMap
 import dagger.multibindings.Multibinds
+import dagger.multibindings.StringKey
 import javax.inject.Named
 
 @Module
@@ -32,4 +41,18 @@ abstract class LauncherModelModule {
     @Multibinds @Named("MODEL_ITEMS") abstract fun extraModelItems(): Set<ItemInfo>
 
     @Multibinds abstract fun lifecycleTrackers(): Set<LifecycleTracker>
+
+    @Multibinds
+    @Named(THEME_OVERRIDES_DAGGER_KEY)
+    abstract fun legacyThemeKeys(): Map<String, ConstantItem<String>>
+
+    companion object {
+
+        @Provides
+        @IntoMap
+        @StringKey(MONO_FACTORY_ID)
+        @Named(ICON_FACTORY_DAGGER_KEY)
+        @JvmStatic
+        fun monoIconFactory(): IconThemeFactory = MonoIconThemeFactory
+    }
 }

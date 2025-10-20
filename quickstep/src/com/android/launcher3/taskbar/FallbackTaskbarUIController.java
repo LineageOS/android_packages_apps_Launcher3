@@ -15,9 +15,12 @@
  */
 package com.android.launcher3.taskbar;
 
+import static com.android.launcher3.Flags.enableTaskbarUiThread;
 import static com.android.launcher3.Utilities.isRunningInTestHarness;
 import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_APP;
 import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_STASHED_LAUNCHER_STATE;
+import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
+import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
 
 import android.animation.Animator;
 
@@ -26,6 +29,9 @@ import androidx.annotation.Nullable;
 import com.android.launcher3.popup.SystemShortcut;
 import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.statemanager.StatefulContainer;
+import com.android.launcher3.util.ImmediateAnimator;
+import com.android.launcher3.util.TaskbarAsyncAnimator;
+import com.android.launcher3.util.ThreadedAnimator;
 import com.android.quickstep.FallbackActivityInterface;
 import com.android.quickstep.GestureState;
 import com.android.quickstep.RecentsAnimationCallbacks;
@@ -47,18 +53,20 @@ public class FallbackTaskbarUIController
 
     private final T mRecentsContainer;
 
+    private @Nullable RecentsViewInteractor mRecentsViewInteractor;
+
     private final StateManager.StateListener<RecentsState> mStateListener =
             new StateManager.StateListener<RecentsState>() {
                 @Override
                 public void onStateTransitionStart(RecentsState toState) {
                     animateToRecentsState(toState);
 
-                    RecentsView recentsView = getRecentsView();
-                    if (recentsView == null) {
+                    RecentsViewInteractor recentsViewInteractor = getRecentsViewInteractor();
+                    if (recentsViewInteractor == null) {
                         return;
                     }
                     // Handle tapping on live tile.
-                    recentsView.setTaskLaunchListener(toState == RecentsState.DEFAULT
+                    recentsViewInteractor.setTaskLaunchListener(toState == RecentsState.DEFAULT
                             ? (() -> animateToRecentsState(RecentsState.BACKGROUND_APP)) : null);
                 }
 
@@ -81,23 +89,37 @@ public class FallbackTaskbarUIController
     @Override
     protected void init(TaskbarControllers taskbarControllers) {
         super.init(taskbarControllers);
-        mRecentsContainer.setTaskbarUIController(this);
+        mRecentsContainer.setTaskbarInteractor(new TaskbarInteractor(this));
         mRecentsContainer.getStateManager().addStateListener(mStateListener);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mRecentsContainer.setTaskbarUIController(null);
+        mRecentsContainer.setTaskbarInteractor(null);
         mRecentsContainer.getStateManager().removeStateListener(mStateListener);
     }
 
     @Nullable
     @Override
-    public Animator getParallelAnimationToGestureEndTarget(GestureState.GestureEndTarget endTarget,
-            long duration, RecentsAnimationCallbacks callbacks) {
-        return createAnimToRecentsState(
-                FallbackActivityInterface.INSTANCE.stateFromGestureEndTarget(endTarget), duration);
+    public ThreadedAnimator getParallelAnimationToGestureEndTarget(
+            GestureState.GestureEndTarget endTarget,
+            long duration,
+            RecentsAnimationCallbacks callbacks) {
+        if (mControllers.taskbarActivityContext.isPhoneMode()) {
+            return null;
+        }
+        if (enableTaskbarUiThread()) {
+            return new TaskbarAsyncAnimator(TASKBAR_UI_THREAD, MAIN_EXECUTOR,
+                    () -> createAnimToRecentsState(
+                            FallbackActivityInterface.INSTANCE.stateFromGestureEndTarget(endTarget),
+                            duration));
+        } else {
+            Animator animator = createAnimToRecentsState(
+                    FallbackActivityInterface.INSTANCE.stateFromGestureEndTarget(endTarget),
+                    duration);
+            return animator != null ? new ImmediateAnimator(animator) : null;
+        }
     }
 
     /**
@@ -129,8 +151,19 @@ public class FallbackTaskbarUIController
     }
 
     @Override
-    public @Nullable RecentsView getRecentsView() {
-        return mRecentsContainer.getOverviewPanel();
+    public @Nullable RecentsViewInteractor getRecentsViewInteractor() {
+        RecentsView recentsView = mRecentsContainer.getOverviewPanel();
+        if (recentsView == null) {
+            mRecentsViewInteractor = null;
+            return null;
+        }
+
+        if (mRecentsViewInteractor == null
+                || !mRecentsViewInteractor.hasSameRecentsView(recentsView)) {
+            mRecentsViewInteractor = new RecentsViewInteractor(recentsView);
+        }
+
+        return mRecentsViewInteractor;
     }
 
     @Override
@@ -148,6 +181,10 @@ public class FallbackTaskbarUIController
                 .get(mControllers.taskbarActivityContext).getCachedTopTask(true,
                         mRecentsContainer.asContext().getDisplayId());
         return topTask.isHomeTask() || topTask.isRecentsTask();
+    }
+
+    protected boolean isInOverviewUi() {
+        return mRecentsContainer.getStateManager().getState().isRecentsViewVisible();
     }
 
     @Override

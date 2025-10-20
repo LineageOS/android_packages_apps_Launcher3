@@ -2,7 +2,8 @@
   // Note: Comments are not supported in JSON schema, but android parser is lenient.
 
   // Maximum DB version supported by this schema
-  "version" : 33,
+  "version" : 34,
+  "downgrade_to_33" : [],
   "downgrade_to_32" : [],
   "downgrade_to_31" : [
     "ALTER TABLE favorites ADD COLUMN iconPackage TEXT;",

@@ -30,6 +30,7 @@ import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.TASKBAR_PINNING
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
+import com.android.launcher3.testutil.rule.LazyInitRule.Companion.lazyRule
 import com.android.launcher3.util.DisplayController.CHANGE_DENSITY
 import com.android.launcher3.util.DisplayController.CHANGE_ROTATION
 import com.android.launcher3.util.DisplayController.DisplayInfoChangeListener
@@ -59,7 +60,9 @@ import org.mockito.stubbing.Answer
 @RunWith(LauncherMultivalentJUnit::class)
 class DisplayControllerTest {
 
-    @get:Rule val context = spy(SandboxApplication())
+    @get:Rule val contextSpy = lazyRule { spy(SandboxApplication()) }
+
+    private val context: SandboxApplication by contextSpy
     private val windowManagerProxy: MyWmProxy = mock()
     private val launcherPrefs: LauncherPrefs = mock()
     private lateinit var displayManager: DisplayManager
@@ -81,16 +84,17 @@ class DisplayControllerTest {
             WindowBounds(Rect(0, 0, width, height), Rect(0, inset, 0, 0), Surface.ROTATION_180),
             WindowBounds(Rect(0, 0, height, width), Rect(0, inset, 0, 0), Surface.ROTATION_270),
         )
-    private val configuration =
-        Configuration(context.resources.configuration).apply {
-            densityDpi = this@DisplayControllerTest.densityDpi
-            screenWidthDp = (bounds[0].bounds.width() / density).toInt()
-            screenHeightDp = (bounds[0].bounds.height() / density).toInt()
-            smallestScreenWidthDp = min(screenWidthDp, screenHeightDp)
-        }
+    private lateinit var configuration: Configuration
 
     @Before
     fun setUp() {
+        configuration =
+            Configuration(context.resources.configuration).apply {
+                densityDpi = this@DisplayControllerTest.densityDpi
+                screenWidthDp = (bounds[0].bounds.width() / density).toInt()
+                screenHeightDp = (bounds[0].bounds.height() / density).toInt()
+                smallestScreenWidthDp = min(screenWidthDp, screenHeightDp)
+            }
         context.initDaggerComponent(
             DaggerDisplayControllerTestComponent.builder()
                 .bindWMProxy(windowManagerProxy)

@@ -23,7 +23,7 @@ import android.view.View;
 import com.android.launcher3.CellLayout;
 import com.android.launcher3.R;
 import com.android.launcher3.accessibility.BaseAccessibilityDelegate.DragType;
-import com.android.launcher3.folder.Folder;
+import com.android.launcher3.homescreenfiles.HomeScreenFilesUtilsKt;
 import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.FolderInfo;
 import com.android.launcher3.model.data.ItemInfo;
@@ -95,11 +95,13 @@ public class WorkspaceAccessibilityHelper extends DragAndDropAccessibilityDelega
             if (child == null || child == dragInfo.item) {
                 // Empty cell. Good for an icon or folder.
                 return id;
-            } else if (dragInfo.dragType != DragType.FOLDER) {
+            } else if (dragInfo.dragType != DragType.FOLDER
+                    && dragInfo.dragType != DragType.FILESYSTEM_ICON) {
                 // For icons, we can consider cells that have another icon or a folder.
                 ItemInfo info = (ItemInfo) child.getTag();
                 if (info instanceof AppInfo || info instanceof FolderInfo ||
-                        info instanceof WorkspaceItemInfo) {
+                        (info instanceof WorkspaceItemInfo
+                                && !HomeScreenFilesUtilsKt.isFileSystemItem(info))) {
                     return id;
                 }
             }
@@ -107,24 +109,6 @@ public class WorkspaceAccessibilityHelper extends DragAndDropAccessibilityDelega
         }
     }
 
-    @Override
-    protected String getConfirmationForIconDrop(int id) {
-        int x = id % mView.getCountX();
-        int y = id / mView.getCountX();
-        LauncherAccessibilityDelegate.DragInfo dragInfo = mDelegate.getDragInfo();
-
-        View child = mView.getChildAt(x, y);
-        if (child != null && child != dragInfo.item) {
-            ItemInfo info = (ItemInfo) child.getTag();
-            if (Folder.willAccept(info)) {
-                return mContext.getString(R.string.folder_created);
-
-            } else if (info instanceof FolderInfo) {
-                return mContext.getString(R.string.added_to_folder);
-            }
-        }
-        return "";
-    }
     @Override
     protected String getLocationDescriptionForIconDrop(int id) {
         int x = id % mView.getCountX();

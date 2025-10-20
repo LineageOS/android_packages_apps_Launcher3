@@ -16,6 +16,7 @@
 
 package com.android.launcher3.taskbar.rules
 
+import android.companion.datatransfer.continuity.TaskContinuityManager
 import android.content.Context
 import android.content.ContextWrapper
 import android.hardware.display.DisplayManager
@@ -25,6 +26,8 @@ import android.view.Display.DEFAULT_DISPLAY
 import android.view.WindowManager
 import android.window.DesktopExperienceFlags
 import androidx.test.core.app.ApplicationProvider
+import com.android.launcher3.util.Executors.MAIN_EXECUTOR
+import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.SettingsCacheSandbox
 import com.android.launcher3.util.VirtualDisplaysRule
@@ -35,6 +38,7 @@ import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
 import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
 /**
@@ -52,6 +56,7 @@ private constructor(
 
     val settingsCacheSandbox = SettingsCacheSandbox()
     val windowManagerSpy = base.spyService(WindowManager::class.java)
+    val taskContinuityManagerMock: TaskContinuityManager = mock<TaskContinuityManager>()
 
     private val sandboxSpyServicesRule =
         object : ExternalResource() {
@@ -59,6 +64,11 @@ private constructor(
                 // Filter out DEFAULT_DISPLAY in case code accesses displays property. The primary
                 // virtual display has a different ID.
                 val dm = base.spyService(DisplayManager::class.java)
+                base.mockService(
+                    Context.TASK_CONTINUITY_SERVICE,
+                    TaskContinuityManager::class.java,
+                    taskContinuityManagerMock,
+                )
                 whenever(dm.displays).thenAnswer { i ->
                     @Suppress("UNCHECKED_CAST")
                     val displays = i.callRealMethod() as? Array<Display> ?: emptyArray<Display>()
@@ -115,6 +125,6 @@ private constructor(
 
 /** Include additional bindings when building a [TaskbarSandboxComponent]. */
 data class SandboxParams(
-    val systemUiProxyProvider: (Context) -> SystemUiProxy = { SystemUiProxy(it) },
+    val systemUiProxyProvider: (Context) -> SystemUiProxy = { SystemUiProxy(it, MAIN_EXECUTOR, UI_HELPER_EXECUTOR) },
     val builderBase: TaskbarSandboxComponent.Builder = DaggerTaskbarSandboxComponent.builder(),
 )

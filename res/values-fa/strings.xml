@@ -35,6 +35,7 @@
     <string name="close_task_accessibility" msgid="4765872229211282647">"‏بستن %1$s"</string>
     <string name="new_window_option_taskbar" msgid="6448780542727767211">"پنجره جدید"</string>
     <string name="manage_windows_option_taskbar" msgid="2294109489960654212">"مدیریت کردن پنجره‌ها"</string>
+    <string name="close_app_taskbar" msgid="3238979263877091273">"بستن"</string>
     <string name="save_app_pair" msgid="5647523853662686243">"ذخیره جفت برنامه"</string>
     <string name="app_pair_default_title" msgid="4045241727446873529">"<xliff:g id="APP1">%1$s</xliff:g> | <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="app_pair_unlaunchable_at_screen_size" msgid="3446551575502685376">"از این جفت برنامه در این دستگاه پشتیبانی نمی‌شود"</string>
@@ -106,6 +107,15 @@
     <string name="widget_settings" msgid="5280157748464495511">"تنظیمات"</string>
     <string name="pin_to_taskbar" msgid="5914002252642242332">"سنجاق به نواروظیفه"</string>
     <string name="unpin_from_taskbar" msgid="1025883383457627426">"برداشتن از نواروظیفه"</string>
+    <!-- no translation found for no_room_in_taskbar (6885243748717395469) -->
+    <skip />
+    <string name="app_added_to_taskbar" msgid="6348755169793615171">"برنامه به «نوار وظیفه» اضافه شد"</string>
+    <string name="app_removed_from_taskbar" msgid="3471754847898675396">"برنامه از «نوار وظیفه» برداشته شد"</string>
+    <!-- no translation found for remove_system_shortcut_label (3991201411148073972) -->
+    <skip />
+    <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"باز کردن"</string>
+    <!-- no translation found for home_screen_files_context_menu_move_to_trash_label (1145655050674479315) -->
+    <skip />
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"نصب میان‌برها"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"به برنامه اجازه می‌دهد میان‌برها را بدون دخالت کاربر اضافه کند."</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"خواندن تنظیمات و میان‌برهای صفحه اصلی"</string>
@@ -121,6 +131,7 @@
     <string name="paginate_right" msgid="6701038155201975878">"صفحه‌بندی به‌راست"</string>
     <string name="disabled_app_label" msgid="6673129024321402780">"<xliff:g id="APP_NAME">%1$s</xliff:g> غیرفعال شد"</string>
     <string name="dotted_app_label" msgid="1865617679843363410">"{count,plural, =1{{app_name} ‏# اعلان دارد}one{{app_name} ‏# اعلان دارد}other{{app_name} ‏# اعلان دارد}}"</string>
+    <string name="hotseat_prediction_content_description" msgid="7680403232742709704">"برنامه پیش‌بینی‌شده: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="default_scroll_format" msgid="7475544710230993317">"‏صفحه %1$d از %2$d"</string>
     <string name="workspace_scroll_format" msgid="8458889198184077399">"‏صفحه اصلی %1$d از %2$d"</string>
     <string name="workspace_new_page" msgid="257366611030256142">"صفحه اصلی جدید"</string>
@@ -132,7 +143,9 @@
     <string name="folder_closed" msgid="4100806530910930934">"پوشه بسته شد"</string>
     <string name="folder_renamed" msgid="1794088362165669656">"نام پوشه به <xliff:g id="NAME">%1$s</xliff:g> تغییر کرد"</string>
     <string name="folder_name_format_exact" msgid="8626242716117004803">"پوشه: <xliff:g id="NAME">%1$s</xliff:g>، <xliff:g id="SIZE">%2$d</xliff:g> مورد"</string>
+    <string name="folder_name_format_exact_with_dot" msgid="30828041991324911">"پوشه: <xliff:g id="NAME">%1$s</xliff:g>،‏ <xliff:g id="SIZE">%2$d</xliff:g> مورد، دارای اعلان است"</string>
     <string name="folder_name_format_overflow" msgid="4270108890534995199">"پوشه: <xliff:g id="NAME">%1$s</xliff:g>، <xliff:g id="SIZE">%2$d</xliff:g> مورد یا بیشتر"</string>
+    <string name="folder_name_format_overflow_with_dot" msgid="9174809519194154156">"پوشه: <xliff:g id="NAME">%1$s</xliff:g>،‏ <xliff:g id="SIZE">%2$d</xliff:g> مورد یا بیشتر، دارای اعلان است"</string>
     <string name="unnamed_folder" msgid="2420192029474044442">"پوشه بی‌نام"</string>
     <string name="app_pair_name_format" msgid="8134106404716224054">"جفت برنامه: <xliff:g id="APP1">%1$s</xliff:g> و <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="styles_wallpaper_button_text" msgid="8216961355289236794">"کاغذدیواری و سبک"</string>
@@ -141,6 +154,9 @@
     <string name="msg_disabled_by_admin" msgid="6898038085516271325">"توسط سرپرست سیستم غیرفعال شده است"</string>
     <string name="allow_rotation_title" msgid="7222049633713050106">"مجاز کردن چرخش صفحه اصلی"</string>
     <string name="allow_rotation_desc" msgid="8662546029078692509">"وقتی تلفن چرخانده می‌شود"</string>
+    <string name="compose_developer_options_section" msgid="8211460486549952595">"Jetpack Compose"</string>
+    <string name="enable_composition_tracing_title" msgid="8989606591739368424">"فعال کردن ردیابی ترکیب‌بندی"</string>
+    <string name="enable_composition_tracing_desc" msgid="7187566039216492405">"‏فعال کردن ردیابی ترکیب‌بندی هنگام ثبت ردیابی perfetto در نمای کلی"</string>
     <string name="landscape_mode_title" msgid="5138814555934843926">"حالت افقی"</string>
     <string name="landscape_mode_desc" msgid="3085236452297838664">"تنظیم صفحه اصلی روی حالت افقی"</string>
     <string name="notification_dots_title" msgid="9062440428204120317">"نقطه‌های اعلان"</string>
@@ -154,7 +170,7 @@
     <string name="auto_add_shortcuts_label" msgid="4926805029653694105">"افزودن نماد برنامه‌ها به صفحه اصلی"</string>
     <string name="auto_add_shortcuts_description" msgid="7117251166066978730">"برای برنامه‌های جدید"</string>
     <string name="package_state_unknown" msgid="7592128424511031410">"نامشخص"</string>
-    <string name="abandoned_clean_this" msgid="7610119707847920412">"حذف"</string>
+    <string name="abandoned_clean_this" msgid="7610119707847920412">"برداشتن"</string>
     <string name="abandoned_search" msgid="891119232568284442">"جستجو"</string>
     <string name="abandoned_promises_title" msgid="7096178467971716750">"این برنامه نصب نشده است."</string>
     <string name="abandoned_promise_explanation" msgid="3990027586878167529">"برنامه برای این نماد نصب نشده است. می‌توانید آن را حذف کنید یا سعی کنید برنامه را جستجو کنید و آن را به صورت دستی نصب کنید."</string>
@@ -193,7 +209,7 @@
     <string name="action_deep_shortcut" msgid="4766835855579976045">"منو میان‌بر"</string>
     <string name="widget_frame_name" msgid="8782828448471444270">"قاب تغییر اندازه ابزاره برای <xliff:g id="STRING">%1$s</xliff:g>"</string>
     <string name="action_close" msgid="1077760267194136901">"بستن"</string>
-    <string name="action_dismiss_notification" msgid="5909461085055959187">"رد کردن"</string>
+    <string name="action_dismiss_notification" msgid="5909461085055959187">"بستن"</string>
     <string name="accessibility_close" msgid="2277148124685870734">"بستن"</string>
     <string name="all_apps_personal_tab" msgid="4190252696685155002">"شخصی"</string>
     <string name="all_apps_work_tab" msgid="4884822796154055118">"کاری"</string>
@@ -229,4 +245,6 @@
     <string name="four_sided_cookie_shape_title" msgid="3275212586290522151">"کلوچه ۴ ضلعی"</string>
     <string name="seven_sided_cookie_shape_title" msgid="4862560582029671668">"کلوچه ۷ ضلعی"</string>
     <string name="arch_shape_title" msgid="2213843822192871318">"طاق"</string>
+    <string name="create_new_folder_button_text" msgid="4037052463794735069">"پوشه جدید"</string>
+    <string name="default_new_folder_name" msgid="8821062664729412079">"پوشه جدید"</string>
 </resources>

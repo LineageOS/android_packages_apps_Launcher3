@@ -16,6 +16,8 @@
 
 package com.android.quickstep;
 
+import static com.android.launcher3.util.Executors.IMMEDIATE_EXECUTOR;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -23,6 +25,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -33,6 +36,8 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.test.annotation.UiThreadTest;
@@ -42,9 +47,13 @@ import androidx.test.filters.SmallTest;
 import com.android.launcher3.Flags;
 import com.android.launcher3.R;
 import com.android.launcher3.graphics.ThemeManager;
-import com.android.launcher3.icons.IconProvider;
+import com.android.launcher3.icons.IconChangeTracker;
 import com.android.launcher3.util.DaggerSingletonTracker;
+import com.android.launcher3.util.Executors;
 import com.android.launcher3.util.LockedUserState;
+import com.android.launcher3.util.MutableListenableStream;
+import com.android.launcher3.util.PackageUserKey;
+import com.android.launcher3.util.SafeCloseable;
 import com.android.quickstep.util.GroupTask;
 import com.android.quickstep.util.SplitTask;
 import com.android.systemui.shared.recents.model.Task;
@@ -58,14 +67,20 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class RecentsModelTest {
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
     @Mock
     private Context mContext;
 
@@ -79,6 +94,8 @@ public class RecentsModelTest {
     @Mock
     private HighResLoadingState mHighResLoadingState;
 
+    @Mock private IconChangeTracker mIconChangeTracker;
+
     @Mock
     private LockedUserState mLockedUserState;
 
@@ -91,13 +108,10 @@ public class RecentsModelTest {
 
     private Resources mResource;
 
-    @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+    @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
     @Before
     public void setup() throws NoSuchFieldException {
-        MockitoAnnotations.initMocks(this);
-        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_GRID_ONLY_OVERVIEW);
         mTaskResult = getTaskResult();
         doAnswer(invocation-> {
             Consumer<ArrayList<GroupTask>> callback = invocation.getArgument(1);
@@ -123,9 +137,19 @@ public class RecentsModelTest {
         when(mThumbnailCache.getHighResLoadingState()).thenReturn(mHighResLoadingState);
         when(mThumbnailCache.isPreloadingEnabled()).thenReturn(true);
 
-        mRecentsModel = new RecentsModel(mContext, mTasksList, mock(TaskIconCache.class),
-                mThumbnailCache, mock(IconProvider.class), mock(TaskStackChangeListeners.class),
-                mLockedUserState, () -> mThemeManager, mock(DaggerSingletonTracker.class));
+        doReturn(new MutableListenableStream<PackageUserKey>())
+                .when(mIconChangeTracker).getChanges();
+        mRecentsModel = new RecentsModel(
+                mContext,
+                mTasksList,
+                mock(TaskIconCache.class),
+                mThumbnailCache,
+                mock(TaskStackChangeListeners.class),
+                mLockedUserState,
+                () -> mThemeManager,
+                mock(DaggerSingletonTracker.class),
+                Executors.UI_HELPER_EXECUTOR,
+                mIconChangeTracker);
 
         mResource = mock(Resources.class);
         when(mResource.getInteger((R.integer.recentsThumbnailCacheSize))).thenReturn(3);
@@ -202,7 +226,28 @@ public class RecentsModelTest {
     }
 
     @Test
-    public void recentTaskListChangesNotiftListeners() {
+    @EnableFlags(Flags.FLAG_ENABLE_TASKBAR_UI_THREAD)
+    public void recentTaskListChangesNotiftListeners_enableFlag_taskbarUiThread() {
+        List<Void> changes = new ArrayList<>();
+        SafeCloseable closeable = mRecentsModel.getTasksChanges().forEach(
+                IMMEDIATE_EXECUTOR,
+                (unused) -> {
+                    changes.add(unused);
+                    return null;
+                });
+        assertThat(changes).hasSize(0);
+
+        mTasksList.onRecentTasksChanged();
+        assertThat(changes).hasSize(1);
+
+        closeable.close();
+        mTasksList.onRecentTasksChanged();
+        assertThat(changes).hasSize(1);
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_TASKBAR_UI_THREAD)
+    public void recentTaskListChangesNotiftListeners_disableFlag_taskbarUiThread() {
         RecentsModel.RecentTasksChangedListener listener1 = mock(
                 RecentsModel.RecentTasksChangedListener.class);
         RecentsModel.RecentTasksChangedListener listener2 = mock(

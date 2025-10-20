@@ -68,19 +68,14 @@ filegroup {
     ],
 }
 
-filegroup {
-    name: "launcher-compose-ui-tests-src",
-    srcs: [
-        "compose/tests/com/android/launcher3/widgetpicker/theme/LauncherWidgetPickerThemeScreenshotTest.kt",
-    ],
-}
-
 // Tests for features that are enabled only when compose dependency is enabled & run as part of
 // Launcher3Tests
 filegroup {
     name: "launcher-compose-unit-tests-src",
     srcs: [
+        "compose/tests/com/android/launcher3/widgetpicker/SingleAppWidgetPickerTest.kt",
         "compose/tests/com/android/launcher3/widget/AddWidgetConfigTest.kt",
+        "compose/tests/com/android/launcher3/widgetpicker/repository/WidgetsRepositoryImplTest.kt",
     ],
 }
 
@@ -287,7 +282,6 @@ launcher_compose_tests_java_defaults {
             ],
             // Compose dependencies
             static_libs: [
-                "widget_picker_component",
                 "androidx.compose.runtime_runtime",
                 "androidx.compose.ui_ui-test-junit4",
                 "androidx.compose.ui_ui-test-manifest",
@@ -422,6 +416,7 @@ android_library {
     srcs: [],
     resource_dirs: ["res"],
     static_libs: [
+        "dynamiccolors",
         "LauncherPluginLib",
         "launcher_quickstep_log_protos_lite",
         "androidx-constraintlayout_constraintlayout",
@@ -455,6 +450,7 @@ android_library {
         "launcher-dagger-qualifiers",
         "launcher-executor-qualifiers",
         "launcher-executors-module",
+        "launcher-recents-module",
     ],
     manifest: "AndroidManifest-common.xml",
     sdk_version: "current",

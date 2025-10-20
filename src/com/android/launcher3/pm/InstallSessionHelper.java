@@ -36,6 +36,7 @@ import com.android.launcher3.dagger.LauncherAppSingleton;
 import com.android.launcher3.dagger.LauncherBaseAppComponent;
 import com.android.launcher3.logging.FileLog;
 import com.android.launcher3.model.ItemInstallQueue;
+import com.android.launcher3.model.SerializedItemItem;
 import com.android.launcher3.util.ApplicationInfoWrapper;
 import com.android.launcher3.util.DaggerSingletonObject;
 import com.android.launcher3.util.IntArray;
@@ -230,8 +231,8 @@ public class InstallSessionHelper {
                         + sessionInfo.getInstallerPackageName()
                         + "Session id: "
                         + sessionInfo.getSessionId());
-                ItemInstallQueue.INSTANCE.get(mAppContext)
-                        .queueItem(sessionInfo.getAppPackageName(), getUserHandle(sessionInfo));
+                ItemInstallQueue.INSTANCE.get(mAppContext).queueItem(new SerializedItemItem(
+                        sessionInfo.getAppPackageName(), getUserHandle(sessionInfo)));
             }
 
             getPromiseIconIds().add(sessionInfo.getSessionId());

@@ -31,6 +31,8 @@ import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
+import com.android.launcher3.util.Executors.MAIN_EXECUTOR
+import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
 import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.LauncherMultivalentJUnit.EmulatedDevices
 import com.android.quickstep.SystemUiProxy
@@ -51,7 +53,11 @@ class TaskbarAutohideSuspendControllerTest {
     val context =
         TaskbarWindowSandboxContext.create(
             SandboxParams({
-                spy(SystemUiProxy(ApplicationProvider.getApplicationContext())) { proxy ->
+                spy(SystemUiProxy(
+                        ApplicationProvider.getApplicationContext(),
+                        MAIN_EXECUTOR,
+                        UI_HELPER_EXECUTOR,
+                    )) { proxy ->
                     doAnswer { latestSuspendNotification = it.getArgument(0) }
                         .whenever(proxy)
                         .notifyTaskbarAutohideSuspend(anyOrNull())

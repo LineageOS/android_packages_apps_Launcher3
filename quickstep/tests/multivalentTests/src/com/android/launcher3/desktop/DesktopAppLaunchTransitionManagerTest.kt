@@ -30,6 +30,7 @@ import android.window.TransitionFilter.CONTAINER_ORDER_ANY
 import android.window.TransitionFilter.CONTAINER_ORDER_TOP
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.launcher3.util.DisplayController
 import com.android.quickstep.SystemUiProxy
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_APP_LAUNCH_BUGFIX
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX
@@ -56,6 +57,7 @@ class DesktopAppLaunchTransitionManagerTest {
     private val applicationContext = mock<Context>()
     private val resources = mock<Resources>()
     private val systemUiProxy = mock<SystemUiProxy>()
+    private val displayController = mock<DisplayController>()
     private lateinit var transitionManager: DesktopAppLaunchTransitionManager
 
     @Before
@@ -65,7 +67,8 @@ class DesktopAppLaunchTransitionManagerTest {
         whenever(applicationContext.resources).thenReturn(resources)
         whenever(resources.getDimensionPixelSize(any())).thenReturn(42)
         whenever(DesktopModeStatus.canEnterDesktopMode(context)).thenReturn(true)
-        transitionManager = DesktopAppLaunchTransitionManager(context, systemUiProxy)
+        transitionManager =
+            DesktopAppLaunchTransitionManager(context, systemUiProxy, displayController)
     }
 
     @Test

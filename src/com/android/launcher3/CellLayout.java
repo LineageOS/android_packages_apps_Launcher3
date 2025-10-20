@@ -72,6 +72,7 @@ import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.LauncherAppWidgetInfo;
 import com.android.launcher3.util.CellAndSpan;
 import com.android.launcher3.util.GridOccupancy;
+import com.android.launcher3.util.LauncherBindableItemsContainer.ItemOperator;
 import com.android.launcher3.util.MSDLPlayerWrapper;
 import com.android.launcher3.util.MultiTranslateDelegate;
 import com.android.launcher3.util.ParcelableSparseArray;
@@ -771,7 +772,7 @@ public class CellLayout extends ViewGroup {
         // Hotseat icons - remove text
         if (child instanceof BubbleTextView) {
             BubbleTextView bubbleChild = (BubbleTextView) child;
-            bubbleChild.setTextVisibility(mContainerType != HOTSEAT);
+            bubbleChild.setContainerTextVisibility(mContainerType != HOTSEAT);
         }
 
         child.setScaleX(DEFAULT_SCALE);
@@ -1968,20 +1969,25 @@ public class CellLayout extends ViewGroup {
         return false;
     }
 
-    /**
-     * returns a copy of cell layout's grid occupancy
-     */
-    public GridOccupancy cloneGridOccupancy() {
-        GridOccupancy occupancy = new GridOccupancy(mCountX, mCountY);
-        mOccupied.copyTo(occupancy);
-        return occupancy;
-    }
-
     public boolean isRegionVacant(int x, int y, int spanX, int spanY) {
         return mOccupied.isRegionVacant(x, y, spanX, spanY);
     }
 
     public void setSpaceBetweenCellLayoutsPx(@Px int spaceBetweenCellLayoutsPx) {
         mSpaceBetweenCellLayoutsPx = spaceBetweenCellLayoutsPx;
+    }
+
+    /** Perform {param op} over all the items, and returns the first match */
+    @Nullable
+    public View mapOverItems(ItemOperator op) {
+        // map over all the shortcuts on the layout
+        final int itemCount = mShortcutsAndWidgets.getChildCount();
+        for (int itemIdx = 0; itemIdx < itemCount; itemIdx++) {
+            View item = mShortcutsAndWidgets.getChildAt(itemIdx);
+            if (op.evaluate((ItemInfo) item.getTag(), item)) {
+                return item;
+            }
+        }
+        return null;
     }
 }

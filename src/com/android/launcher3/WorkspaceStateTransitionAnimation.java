@@ -122,7 +122,7 @@ public class WorkspaceStateTransitionAnimation {
                     propertySetter, config);
         }
 
-        int elements = state.getVisibleElements(mLauncher.launcherUiState);
+        int elements = state.getVisibleElements(mLauncher.getLauncherUiState());
         Hotseat hotseat = mWorkspace.getHotseat();
         Interpolator scaleInterpolator = config.getInterpolator(ANIM_WORKSPACE_SCALE, ZOOM_OUT);
         LauncherState fromState = mLauncher.getStateManager().getState();
@@ -222,7 +222,7 @@ public class WorkspaceStateTransitionAnimation {
             StateAnimationConfig config) {
         float pageAlpha = pageAlphaProvider.getPageAlpha(childIndex);
         float springLoadedProgress =
-                (state instanceof  SpringLoadedState || state instanceof EditModeState) ? 1f : 0f;
+                (state instanceof SpringLoadedState || state instanceof EditModeState) ? 1f : 0f;
         propertySetter.setFloat(cl,
                 CellLayout.SPRING_LOADED_PROGRESS, springLoadedProgress, ZOOM_OUT);
         Interpolator fadeInterpolator = config.getInterpolator(ANIM_WORKSPACE_FADE,

@@ -51,6 +51,8 @@
     <string name="new_window_option_taskbar">New Window</string>
     <!-- Title for an option to manage open windows for a given app   -->
     <string name="manage_windows_option_taskbar">Manage Windows</string>
+    <!-- Title for an option to close open windows for a given app   -->
+    <string name="close_app_taskbar">Close</string>
 
     <!-- App pairs -->
     <string name="save_app_pair">Save app pair</string>
@@ -243,6 +245,22 @@
     <string name="pin_to_taskbar">Pin to Taskbar</string>
     <!-- Label for unpinning an item from the taskbar. [CHAR_LIMIT=20] -->
     <string name="unpin_from_taskbar">Unpin from Taskbar</string>
+    <!-- The text of the toast to inform the user that there is no room in the taskbar when the user is trying to pin an item to the taskbar. -->
+    <string name="no_room_in_taskbar">No room in the Taskbar</string>
+    <!-- Accessibility confirmation for item pinned to taskbar. [CHAR_LIMIT=NONE] -->
+    <string name="app_added_to_taskbar">App added to Taskbar</string>
+    <!-- Accessibility confirmation for item unpinned from taskbar. [CHAR_LIMIT=NONE] -->
+    <string name="app_removed_from_taskbar">App removed from Taskbar</string>
+    <!-- Label for remove item system shortcut [CHAR_LIMIT=20] -->
+    <string name="remove_system_shortcut_label">Remove</string>
+    <!-- Context menu action for a file/folder on the home screen.
+         This opens the item using its corresponding application. [CHAR_LIMIT=20] -->
+    <string name="home_screen_files_context_menu_open_in_app_label">Open</string>
+    <!-- Context menu action for a file / files folder on the home screen,
+         which permanently deletes the item. [CHAR_LIMIT=20] -->
+    <string name="home_screen_files_context_menu_delete_permanently_label">
+        Delete permanently
+    </string>
 
     <!-- Permissions: -->
     <skip />
@@ -292,6 +310,8 @@
             other   {{app_name} has # notifications}
         }
     </string>
+    <!-- content description for hotseat items -->
+    <string name="hotseat_prediction_content_description">Predicted app: <xliff:g id="title" example="Chrome">%1$s</xliff:g></string>
     <skip />
 
     <!-- The format string for default page scroll text [CHAR_LIMIT=none] -->
@@ -317,8 +337,12 @@
     <string name="folder_renamed">Folder renamed to <xliff:g id="name" example="Games">%1$s</xliff:g></string>
     <!-- Folder name format when folder has less than 4 items -->
     <string name="folder_name_format_exact">Folder: <xliff:g id="name" example="Games">%1$s</xliff:g>, <xliff:g id="size" example="2">%2$d</xliff:g> items</string>
+    <!-- Folder name format when folder has less than 4 items and a notification dot -->
+    <string name="folder_name_format_exact_with_dot">Folder: <xliff:g id="name" example="Games">%1$s</xliff:g>, <xliff:g id="size" example="2">%2$d</xliff:g> items, has notifications</string>
     <!-- Folder name format when folder has 4 or more items shown in preview-->
     <string name="folder_name_format_overflow">Folder: <xliff:g id="name" example="Games">%1$s</xliff:g>, <xliff:g id="size" example="2">%2$d</xliff:g> or more items</string>
+    <!-- Folder name format when folder has 4 or more items shown in preview and a notification dot -->
+    <string name="folder_name_format_overflow_with_dot">Folder: <xliff:g id="name" example="Games">%1$s</xliff:g>, <xliff:g id="size" example="2">%2$d</xliff:g> or more items, has notifications</string>
     <!-- Accessibility announement for unnamed folders -->
     <string name="unnamed_folder">Unnamed folder</string>
 
@@ -341,6 +365,12 @@
     <string name="allow_rotation_title">Allow home screen rotation</string>
     <!-- Text explaining when the home screen will get rotated. [CHAR LIMIT=100] -->
     <string name="allow_rotation_desc">When phone is rotated</string>
+    <!-- Title for Compose settings  [CHAR LIMIT=50] -->
+    <string name="compose_developer_options_section">Jetpack Compose</string>
+    <!-- Title for Enable Composition Tracing. [CHAR LIMIT=50] -->
+    <string name="enable_composition_tracing_title">Enable composition tracing</string>
+    <!-- Text explaining composition tracing preference switch. [CHAR LIMIT=100] -->
+    <string name="enable_composition_tracing_desc">Enable composition tracing when taking perfetto trace in overview</string>
 
     <!-- Title for Landscape Mode setting. [CHAR LIMIT=50] -->
     <string name="landscape_mode_title">Landscape mode</string>
@@ -571,4 +601,10 @@
     <string name="seven_sided_cookie_shape_title">7-sided cookie</string>
     <!-- label for arch shape option in customization picker -->
     <string name="arch_shape_title">Arch</string>
+
+    <!-- Strings for home screen files -->
+    <!-- Text for create new folder button [CHAR LIMIT=30] -->
+    <string name="create_new_folder_button_text">New folder</string>
+    <!-- Default name for a newly created folder -->
+    <string name="default_new_folder_name">New folder</string>
 </resources>

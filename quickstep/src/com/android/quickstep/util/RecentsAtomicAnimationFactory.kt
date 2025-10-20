@@ -61,8 +61,10 @@ import com.android.launcher3.states.StateAnimationConfig.ANIM_WORKSPACE_FADE
 import com.android.launcher3.states.StateAnimationConfig.ANIM_WORKSPACE_SCALE
 import com.android.launcher3.states.StateAnimationConfig.ANIM_WORKSPACE_TRANSLATE
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator
+import com.android.launcher3.touch.AllAppsSwipeController
 import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.NavigationMode
+import com.android.quickstep.split.SplitAnimationTimings
 import com.android.quickstep.views.RecentsView
 import com.android.quickstep.views.RecentsViewContainer
 import kotlin.math.max
@@ -182,10 +184,6 @@ CONTAINER : StatefulContainer<STATE_TYPE> {
 
     protected open fun getHintToNormalAnimationDuration(toState: STATE_TYPE) = -1
 
-    protected open fun applyAllAppsToNormalConfig(config: StateAnimationConfig) {}
-
-    protected open fun applyNormalToAllAppsAnimConfig(config: StateAnimationConfig) {}
-
     override fun prepareForAtomicAnimation(
         fromState: STATE_TYPE,
         toState: STATE_TYPE,
@@ -243,9 +241,9 @@ CONTAINER : StatefulContainer<STATE_TYPE> {
             config.duration =
                 max(config.duration, getHintToNormalAnimationDuration(toState).toLong())
         } else if (fromState == ALL_APPS && toState == NORMAL) {
-            applyAllAppsToNormalConfig(config)
+            AllAppsSwipeController.applyAllAppsToNormalConfig(config)
         } else if (fromState == NORMAL && toState == ALL_APPS) {
-            applyNormalToAllAppsAnimConfig(config)
+            AllAppsSwipeController.applyNormalToAllAppsAnimConfig(config)
         } else if (fromState == OVERVIEW && toState == OVERVIEW_SPLIT_SELECT) {
             val timings =
                 if (container.deviceProfile.deviceProperties.isTablet)

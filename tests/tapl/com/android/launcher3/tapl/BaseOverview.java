@@ -100,6 +100,25 @@ public class BaseOverview extends LauncherInstrumentation.VisibleContainer {
         }
     }
 
+    /**
+     * Scrolls forward (left) by the width of one task.
+     */
+    public BaseOverview scrollForwardByOneTask() {
+        try (LauncherInstrumentation.Closable e = mLauncher.eventsCheck();
+             LauncherInstrumentation.Closable c = mLauncher.addContextLayer(
+                     "scrolling forward by one task in overview")) {
+            final OverviewTask currentTask = getCurrentTask();
+            final int taskWidth = currentTask.getUiObject().getVisibleBounds().width();
+            final int pageSpacing = mLauncher.getOverviewPageSpacing();
+            final int scrollDistance =
+                    taskWidth + pageSpacing + mLauncher.getTouchSlop();
+
+            final UiObject2 overview = verifyActiveContainer();
+            mLauncher.scrollLeftByDistance(overview, scrollDistance);
+        }
+        return this;
+    }
+
     private void flingForwardImpl() {
         try (LauncherInstrumentation.Closable c =
                      mLauncher.addContextLayer("want to fling forward in overview")) {
@@ -516,7 +535,7 @@ public class BaseOverview extends LauncherInstrumentation.VisibleContainer {
     /**
      * Returns the number of desktops in Overview.
      */
-    private int getDesktopTasksCount() {
+    public int getDesktopTasksCount() {
         return (int) getTasks().stream()
                 .filter(task -> OverviewTask.getType(task) == OverviewTask.TaskViewType.DESKTOP)
                 .count();
@@ -552,7 +571,7 @@ public class BaseOverview extends LauncherInstrumentation.VisibleContainer {
             return false;
         }
         boolean isTablet = mLauncher.isTablet();
-        if (isTablet && mLauncher.isGridOnlyOverviewEnabled()) {
+        if (isTablet) {
             testLogD(TAG, "Not expecting an actions bar: device is tablet with grid-only Overview");
             return false;
         }
@@ -649,10 +668,6 @@ public class BaseOverview extends LauncherInstrumentation.VisibleContainer {
      * Verifies that the 'Add desktop' button is visible if it is expected.
      */
     private void verifyAddDesktopButtonVisibility() {
-        if (mLauncher.isInDesktopFirstMode()) {
-            return;
-        }
-
         final boolean expected = isAddDesktopButtonExpected();
         try (LauncherInstrumentation.Closable c = mLauncher.addContextLayer(
                 "want to assert add desktop button visibility="

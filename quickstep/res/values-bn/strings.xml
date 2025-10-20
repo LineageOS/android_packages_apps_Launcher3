@@ -47,7 +47,6 @@
     <string name="hotseat_tip_gaps_filled" msgid="3035673010274223538">"খালি জায়গাতে অ্যাপ সাজেশন যোগ করা হয়েছে"</string>
     <string name="hotsaet_tip_prediction_enabled" msgid="2233554377501347650">"অ্যাপ সাজেশন চালু করা আছে"</string>
     <string name="hotsaet_tip_prediction_disabled" msgid="1506426298884658491">"অ্যাপ সাজেশন বন্ধ করা আছে"</string>
-    <string name="hotseat_prediction_content_description" msgid="4582028296938078419">"আপনার প্রয়োজন হতে পারে এমন অ্যাপ: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="gesture_tutorial_title" msgid="2750751261768388354">"জেসচার নেভিগেশন সম্পর্কিত টিউটোরিয়াল"</string>
     <string name="gesture_tutorial_rotation_prompt_title" msgid="7537946781362766964">"আপনার ডিভাইস ঘোরান"</string>
     <string name="gesture_tutorial_rotation_prompt" msgid="1664493449851960691">"জেসচার নেভিগেশন টিউটোরিয়াল সম্পূর্ণ করতে আপনার ডিভাইসটি ঘোরান"</string>
@@ -116,24 +115,29 @@
     <string name="toast_split_app_unsupported" msgid="2360229567007828914">"স্প্লিট স্ক্রিন ব্যবহার করতে অন্য অ্যাপ বেছে নিন"</string>
     <string name="blocked_by_policy" msgid="2071401072261365546">"এই অ্যাপ বা আপনার প্রতিষ্ঠান এই অ্যাকশনটি পারফর্ম করার অনুমতি দেয়নি"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"উইজেট বর্তমানে ব্যবহার করা যাচ্ছে না, অন্য একটি অ্যাপ বেছে নিন"</string>
+    <string name="action_image_copy" msgid="6877540054727709339">"কপি করুন"</string>
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"স্ক্রিন ঘোরান"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"অ্যানিমেশন যেখানে দেখানো হচ্ছে, কীভাবে টাস্কবারটি স্ক্রিনের নিচ থেকে দেখা যায় এবং ব্যবহার করা না হলে অটোমেটিক লুকানো হয়"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"অ্যানিমেশন যেখানে দেখানো হচ্ছে, টগল ব্যবহার করে কীভাবে আপনার টাস্কবার পিন করতে হয়, যাতে স্ক্রিনের নিচে টাস্কবার স্থায়ীভাবে দেখা যায়"</string>
+    <string name="taskbar_edu_bubbles_animation_description" msgid="421866726938396813">"\'টেনে আনা\' জেসচার ব্যবহার করে টাস্কবার থেকে কীভাবে বাবল তৈরি করা হয় তা অ্যানিমেশনে দেখানো হচ্ছে"</string>
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"অ্যানিমেশন যেখানে দেখানো হচ্ছে, টাস্কবার থেকে একটি অ্যাপকে, খোলা আছে এমন অ্যাপের উপরে টেনে এনে রেখে কীভাবে \'স্প্লিট স্ক্রিন\' তৈরি করতে হয়"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"অ্যানিমেশন যেখানে দেখানো হচ্ছে, আপনার ডিভাইসে সাজেস্ট করা অ্যাপ কীভাবে অ্যাক্সেস করবেন"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"অ্যানিমেশন যেখানে দেখানো হচ্ছে, অ্যাকশন \'কী\' টাচ করে ধরে রেখে এবং আইটেমটি যেখানে রয়েছে তা বেছে নিয়ে কীভাবে স্ক্রিনে কোনও আইটেম সার্চ করতে হয়"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"টাস্কবার এডুকেশন"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"একসাথে ২টি অ্যাপ ব্যবহার করতে একটি অ্যাপ পাশে টেনে আনুন"</string>
+    <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"ফ্লোটিং করানোর জন্য নিচে কোণ পর্যন্ত টেনে আনুন"</string>
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"\'টাস্কবার\' দেখার জন্য উপরের দিকে ধীরে সোয়াইপ করুন"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"আপনার রুটিন অনুযায়ী অ্যাপ থেকে সাজেশন পান"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"\'টাস্কবার\' পিন করতে, ডিভাইডার বেশ কিছুক্ষণ প্রেস করে রাখুন"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"\'টাস্কবার\' ফিচারের সাহায্যে আরও অনেক কিছু করুন"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"টাস্কবার সবসময় দেখানো"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"স্ক্রিনের নিচে টাস্কবার সবসময় দেখাতে ডিভাইডার টাচ করে ধরে থাকুন"</string>
+    <string name="taskbar_edu_bubbles_standalone" msgid="4182824636656528043">"কোনও অ্যাপকে ফ্লোটিং করাতে, সেটিকে কোণের দিকে টেনে আনুন"</string>
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"আপনার স্ক্রিনে দেখতে পাওয়া কন্টেন্ট সার্চ করতে অ্যাকশন কী স্পর্শ করে ধরে রাখুন"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"সার্চ করার জন্য এই প্রোডাক্ট স্ক্রিনের বেছে নেওয়া অংশটুকু ব্যবহার করে। Google-এর <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>গোপনীয়তা নীতি<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> এবং <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>পরিষেবার শর্তাবলী<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> প্রযোজ্য।"</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"বন্ধ করুন"</string>
     <string name="taskbar_edu_done" msgid="6880178093977704569">"হয়ে গেছে"</string>
+    <string name="taskbar_edu_next" msgid="4007618274426775841">"পরবর্তী"</string>
     <string name="taskbar_button_home" msgid="2151398979630664652">"হোম"</string>
     <string name="taskbar_button_a11y" msgid="5241161324875094465">"অ্যাক্সেসিবিলিটি"</string>
     <string name="taskbar_button_back" msgid="8558862226461164514">"ফিরে যান"</string>
@@ -142,18 +146,12 @@
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"বিজ্ঞপ্তি"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"দ্রুত সেটিংস"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"টাস্কবার"</string>
-    <string name="taskbar_a11y_shown_title" msgid="6842833581088937713">"\'টাস্কবার\' দেখানো হয়েছে"</string>
-    <string name="taskbar_a11y_shown_with_bubbles_left_title" msgid="4242431789851790046">"টাস্কবার ও বাবল বাঁদিকে দেখানো হয়েছে"</string>
-    <string name="taskbar_a11y_shown_with_bubbles_right_title" msgid="8219065376188180113">"টাস্কবার ও বাবল ডানদিকে দেখানো হয়েছে"</string>
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"নেভিগেশন বার"</string>
     <string name="always_show_taskbar" msgid="3608801276107751229">"সবসময় টাস্কবার দেখুন"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"\'নেভিগেশন\' মোড পরিবর্তন করুন"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"টাস্কবার ডিভাইডার"</string>
-    <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"অন্যান্য সাম্প্রতিক অ্যাপ"</string>
-    <!-- no translation found for app_added_to_taskbar (1160433791917609063) -->
-    <skip />
-    <!-- no translation found for app_removed_from_taskbar (7887298201562912487) -->
-    <skip />
+    <string name="taskbar_recents_overflow_a11y_title" msgid="8005941062446304304">"অন্যান্য সাম্প্রতিক অ্যাপ"</string>
+    <string name="taskbar_pinned_overflow_a11y_title" msgid="2314810718333302626">"অন্যান্য অ্যাপ"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"উপরে/বাঁদিকে সরান"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"নিচে/ডানদিকে সরান"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"বাবল হিসেবে অ্যাপ খুলুন"</string>

@@ -16,6 +16,8 @@
 
 package com.android.launcher3.widget;
 
+import static android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID;
+
 import static com.android.launcher3.widget.util.WidgetSizes.getWidgetSizePx;
 
 import android.graphics.Bitmap;
@@ -138,7 +140,7 @@ public class PendingItemDragHelper extends DragPreviewProvider {
                     }
                 } else {
                     mAppWidgetHostViewPreview = new LauncherAppWidgetHostView(launcher);
-                    mAppWidgetHostViewPreview.setAppWidget(/* appWidgetId= */ -1,
+                    mAppWidgetHostViewPreview.setAppWidget(/* appWidgetId= */ INVALID_APPWIDGET_ID,
                             mWidgetPreviewInfo.providerInfo);
                     mAppWidgetHostViewPreview.setClipChildren(false);
                     mAppWidgetHostViewPreview.setClipToPadding(false);
@@ -152,7 +154,7 @@ public class PendingItemDragHelper extends DragPreviewProvider {
                 }
             } else if (mRemoteViewsPreview != null) {
                 mAppWidgetHostViewPreview = new LauncherAppWidgetHostView(launcher);
-                mAppWidgetHostViewPreview.setAppWidget(/* appWidgetId= */ -1,
+                mAppWidgetHostViewPreview.setAppWidget(/* appWidgetId= */ INVALID_APPWIDGET_ID,
                         ((PendingAddWidgetInfo) mAddInfo).info);
                 DeviceProfile deviceProfile = launcher.getDeviceProfile();
                 mAppWidgetHostViewPreview.updateAppWidget(/* remoteViews= */ mRemoteViewsPreview);

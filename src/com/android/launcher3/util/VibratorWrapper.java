@@ -19,6 +19,7 @@ import static android.os.VibrationEffect.Composition.PRIMITIVE_LOW_TICK;
 import static android.os.VibrationEffect.createPredefined;
 import static android.provider.Settings.System.HAPTIC_FEEDBACK_ENABLED;
 
+import static com.android.launcher3.util.Executors.IMMEDIATE_EXECUTOR;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 
@@ -67,10 +68,6 @@ public class VibratorWrapper {
     private final Vibrator mVibrator;
     private final boolean mHasVibrator;
 
-    @VisibleForTesting
-    final SettingsCache.OnChangeListener mHapticChangeListener =
-            isEnabled -> mIsHapticFeedbackEnabled = isEnabled;
-
     private boolean mIsHapticFeedbackEnabled;
 
     @Inject
@@ -80,11 +77,11 @@ public class VibratorWrapper {
         mVibrator = context.getSystemService(Vibrator.class);
         mHasVibrator = mVibrator.hasVibrator();
         if (mHasVibrator) {
-            MAIN_EXECUTOR.execute(
-                    () -> settingsCache.register(HAPTIC_FEEDBACK_URI, mHapticChangeListener));
-            mIsHapticFeedbackEnabled = settingsCache.getValue(HAPTIC_FEEDBACK_URI);
-            tracker.addCloseable(
-                    () -> settingsCache.unregister(HAPTIC_FEEDBACK_URI, mHapticChangeListener));
+            tracker.addCloseable(settingsCache.getListenableRef(HAPTIC_FEEDBACK_URI).forEach(
+                    IMMEDIATE_EXECUTOR, (isEnabled) -> {
+                        mIsHapticFeedbackEnabled = isEnabled;
+                        return null;
+                    }));
         } else {
             mIsHapticFeedbackEnabled = false;
         }

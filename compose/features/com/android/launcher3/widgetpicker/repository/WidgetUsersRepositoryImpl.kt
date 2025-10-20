@@ -18,7 +18,7 @@ package com.android.launcher3.widgetpicker.repository
 
 import android.content.Context
 import android.os.UserHandle
-import android.os.UserManager
+import com.android.launcher3.concurrent.annotations.Background
 import com.android.launcher3.concurrent.annotations.BackgroundContext
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.model.StringCache
@@ -28,6 +28,7 @@ import com.android.launcher3.widgetpicker.data.repository.WidgetUsersRepository
 import com.android.launcher3.widgetpicker.shared.model.WidgetUserProfile
 import com.android.launcher3.widgetpicker.shared.model.WidgetUserProfileType
 import com.android.launcher3.widgetpicker.shared.model.WidgetUserProfiles
+import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineName
@@ -51,8 +52,8 @@ constructor(
     @ApplicationContext private val appContext: Context,
     private val userCache: UserCache,
     @BackgroundContext private val backgroundContext: CoroutineContext,
+    @Background private val backgroundExecutor: Executor,
 ) : WidgetUsersRepository {
-    private val userManagerService = appContext.getSystemService(UserManager::class.java)
     private var stringCache: StringCache = StringCache.EMPTY
     private var closableUseChangeListener: SafeCloseable? = null
     private val _userProfiles = MutableStateFlow<WidgetUserProfiles?>(null)
@@ -71,7 +72,11 @@ constructor(
 
             closableUseChangeListener?.close()
             closableUseChangeListener =
-                userCache.addUserEventListener { userHandle, _ -> maybeUpdate(userHandle) }
+                userCache.userChanges.forEach(backgroundExecutor) {
+                    maybeUpdate(
+                        changedUser = it.newUser?.iconInfo?.user ?: it.oldUser?.iconInfo?.user
+                    )
+                }
         }
     }
 
@@ -89,15 +94,13 @@ constructor(
     }
 
     private fun maybeUpdate(changedUser: UserHandle?) {
-        check(userManagerService != null)
 
         workProfileUser = userCache.userProfiles.firstOrNull { userCache.getUserInfo(it).isWork }
         val needsUpdate = changedUser == null || changedUser == workProfileUser
 
         if (needsUpdate) {
             val isUserQuiet =
-                workProfileUser?.let { userManagerService.isQuietModeEnabled(workProfileUser) }
-                    ?: false
+                workProfileUser?.let { userCache.userManagerState.isUserQuiet(it) } ?: false
 
             _userProfiles.update {
                 WidgetUserProfiles(

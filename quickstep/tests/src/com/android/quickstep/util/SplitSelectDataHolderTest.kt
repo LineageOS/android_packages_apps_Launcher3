@@ -25,20 +25,21 @@ import android.content.Intent
 import android.os.Process
 import android.os.UserHandle
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.launcher3.LauncherUiState
+import com.android.launcher3.SplitScreenUiState
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.shortcuts.ShortcutKey
 import com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT
 import com.android.launcher3.util.ui.AbstractLauncherUiTest
-import com.android.quickstep.util.SplitSelectDataHolder.Companion.SPLIT_PENDINGINTENT_PENDINGINTENT
-import com.android.quickstep.util.SplitSelectDataHolder.Companion.SPLIT_PENDINGINTENT_TASK
-import com.android.quickstep.util.SplitSelectDataHolder.Companion.SPLIT_SHORTCUT_TASK
-import com.android.quickstep.util.SplitSelectDataHolder.Companion.SPLIT_SINGLE_INTENT_FULLSCREEN
-import com.android.quickstep.util.SplitSelectDataHolder.Companion.SPLIT_SINGLE_SHORTCUT_FULLSCREEN
-import com.android.quickstep.util.SplitSelectDataHolder.Companion.SPLIT_SINGLE_TASK_FULLSCREEN
-import com.android.quickstep.util.SplitSelectDataHolder.Companion.SPLIT_TASK_PENDINGINTENT
-import com.android.quickstep.util.SplitSelectDataHolder.Companion.SPLIT_TASK_SHORTCUT
-import com.android.quickstep.util.SplitSelectDataHolder.Companion.SPLIT_TASK_TASK
+import com.android.quickstep.split.SplitSelectDataHolder
+import com.android.quickstep.split.SplitSelectDataHolder.Companion.SPLIT_PENDINGINTENT_PENDINGINTENT
+import com.android.quickstep.split.SplitSelectDataHolder.Companion.SPLIT_PENDINGINTENT_TASK
+import com.android.quickstep.split.SplitSelectDataHolder.Companion.SPLIT_SHORTCUT_TASK
+import com.android.quickstep.split.SplitSelectDataHolder.Companion.SPLIT_SINGLE_INTENT_FULLSCREEN
+import com.android.quickstep.split.SplitSelectDataHolder.Companion.SPLIT_SINGLE_SHORTCUT_FULLSCREEN
+import com.android.quickstep.split.SplitSelectDataHolder.Companion.SPLIT_SINGLE_TASK_FULLSCREEN
+import com.android.quickstep.split.SplitSelectDataHolder.Companion.SPLIT_TASK_PENDINGINTENT
+import com.android.quickstep.split.SplitSelectDataHolder.Companion.SPLIT_TASK_SHORTCUT
+import com.android.quickstep.split.SplitSelectDataHolder.Companion.SPLIT_TASK_TASK
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
@@ -65,11 +66,11 @@ class SplitSelectDataHolderTest {
     private val sampleItemInfo2 = ItemInfo()
     private val samplePackage =
         AbstractLauncherUiTest.resolveSystemApp(Intent.CATEGORY_APP_CALCULATOR)
-    private val launcherUiState = LauncherUiState()
+    private val splitScreenUiState = SplitScreenUiState()
 
     @Before
     fun setup() {
-        splitSelectDataHolder = SplitSelectDataHolder(context)
+        splitSelectDataHolder = SplitSelectDataHolder(context, splitScreenUiState)
 
         sampleTaskInfo.taskId = sampleTaskId
         sampleItemInfo.user = sampleUser
@@ -79,7 +80,6 @@ class SplitSelectDataHolderTest {
         sampleShortcut2.setPackage(samplePackage)
         sampleShortcut.putExtra(ShortcutKey.EXTRA_SHORTCUT_ID, "sampleShortcut")
         sampleShortcut2.putExtra(ShortcutKey.EXTRA_SHORTCUT_ID, "sampleShortcut2")
-        splitSelectDataHolder.setLauncherUiState(launcherUiState)
     }
 
     @Test
@@ -91,7 +91,6 @@ class SplitSelectDataHolderTest {
             null,
         )
         assertTrue(splitSelectDataHolder.isSplitSelectActive())
-        assertTrue(launcherUiState.isSplitSelectActiveRef.value)
     }
 
     @Test
@@ -104,7 +103,6 @@ class SplitSelectDataHolderTest {
             INVALID_TASK_ID,
         )
         assertTrue(splitSelectDataHolder.isSplitSelectActive())
-        assertTrue(launcherUiState.isSplitSelectActiveRef.value)
     }
 
     @Test
@@ -117,7 +115,6 @@ class SplitSelectDataHolderTest {
             sampleTaskId,
         )
         assertTrue(splitSelectDataHolder.isSplitSelectActive())
-        assertTrue(launcherUiState.isSplitSelectActiveRef.value)
     }
 
     @Test
@@ -130,7 +127,6 @@ class SplitSelectDataHolderTest {
             INVALID_TASK_ID,
         )
         assertTrue(splitSelectDataHolder.isSplitSelectActive())
-        assertTrue(launcherUiState.isSplitSelectActiveRef.value)
     }
 
     @Test
@@ -400,7 +396,6 @@ class SplitSelectDataHolderTest {
         splitSelectDataHolder.setSecondTask(sampleIntent, sampleUser, sampleItemInfo2)
         splitSelectDataHolder.resetState()
         assertFalse(splitSelectDataHolder.isSplitSelectActive())
-        assertFalse(launcherUiState.isSplitSelectActiveRef.value)
     }
 
     @Test
@@ -415,6 +410,13 @@ class SplitSelectDataHolderTest {
         splitSelectDataHolder.setSecondTask(sampleIntent, sampleUser, sampleItemInfo2)
         splitSelectDataHolder.resetState()
         assertFalse(splitSelectDataHolder.isSplitSelectActive())
-        assertFalse(launcherUiState.isSplitSelectActiveRef.value)
+    }
+
+    @Test
+    fun callingTwoSetters_shouldNotMerge() {
+        splitSelectDataHolder.setSecondTask(9, sampleItemInfo)
+        assertEquals(9, splitSelectDataHolder.getSecondTaskId())
+        splitSelectDataHolder.setSecondTask(sampleIntent, sampleUser, sampleItemInfo2)
+        assertEquals(INVALID_TASK_ID, splitSelectDataHolder.getSecondTaskId())
     }
 }

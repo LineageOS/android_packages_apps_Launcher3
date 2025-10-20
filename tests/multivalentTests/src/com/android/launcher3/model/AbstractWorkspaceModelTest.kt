@@ -20,13 +20,13 @@ import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherAppState
 import com.android.launcher3.LauncherModel
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.testutil.rule.LayoutResource
 import com.android.launcher3.util.GridOccupancy
 import com.android.launcher3.util.IntArray
 import com.android.launcher3.util.IntSparseArrayMap
 import com.android.launcher3.util.LauncherLayoutBuilder
 import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY
 import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
-import com.android.launcher3.util.LayoutResource
 import com.android.launcher3.util.SandboxApplication
 import org.junit.Rule
 
@@ -44,7 +44,6 @@ abstract class AbstractWorkspaceModelTest {
     protected lateinit var mIdp: InvariantDeviceProfile
     protected lateinit var mAppState: LauncherAppState
     protected lateinit var mExistingScreens: IntArray
-    protected lateinit var mNewScreens: IntArray
     protected lateinit var mAddedWorkspaceItems: ArrayList<ItemInfo>
     protected lateinit var mScreenOccupancy: IntSparseArrayMap<GridOccupancy>
 
@@ -59,7 +58,6 @@ abstract class AbstractWorkspaceModelTest {
         mAppState = LauncherAppState.getInstance(mTargetContext)
         mExistingScreens = IntArray()
         mScreenOccupancy = IntSparseArrayMap()
-        mNewScreens = IntArray()
         mAddedWorkspaceItems = ArrayList()
     }
 
@@ -99,13 +97,5 @@ abstract class AbstractWorkspaceModelTest {
                 }
             }
         }
-    }
-}
-
-data class NewItemSpace(val screenId: Int, val cellX: Int, val cellY: Int) {
-    fun toIntArray() = intArrayOf(screenId, cellX, cellY)
-
-    companion object {
-        fun fromIntArray(array: kotlin.IntArray) = NewItemSpace(array[0], array[1], array[2])
     }
 }

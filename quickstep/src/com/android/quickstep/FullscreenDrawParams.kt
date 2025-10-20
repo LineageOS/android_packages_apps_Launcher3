@@ -36,7 +36,9 @@ constructor(
     private val taskCornerRadiusProvider: (Context) -> Float = ::computeTaskCornerRadius,
     private val windowCornerRadiusProvider: (Context) -> Float = ::computeWindowCornerRadius,
 ) : SafeCloseable {
-    private var taskCornerRadius = 0f
+    var taskCornerRadius = 0f
+        private set
+
     private var windowCornerRadius = 0f
     var currentCornerRadius = 0f
 

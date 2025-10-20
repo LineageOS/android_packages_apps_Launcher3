@@ -1,0 +1,53 @@
+/*
+ * Copyright (C) 2025 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.launcher3.testutil.rule
+
+import android.content.Context
+import com.android.launcher3.LauncherModel
+import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
+import com.android.launcher3.model.BgDataModel
+import com.android.launcher3.util.LauncherLayoutBuilder
+import com.android.launcher3.util.ModelTestExtensions.setModelLayout
+import org.junit.rules.ExternalResource
+
+/**
+ * This uses the LauncherProvider API to import a workspace layout into the launcher under test's db
+ */
+class LayoutResource(private val ctx: Context) : ExternalResource() {
+    // Internally, LauncherModel.rebindCallbacks() is called to load the updated data into in-memory
+    // data model. This will short-circuit (and not load the new data) if called without callbacks.
+    private var callbacks: BgDataModel.Callbacks? = null
+
+    private val model: LauncherModel
+        get() = ctx.appComponent.testableModelState.model
+
+    override fun after() {
+        callbacks?.let { model.removeCallbacks(it) }
+    }
+
+    fun withCallbacks(cb: BgDataModel.Callbacks): LayoutResource {
+        callbacks?.let { model.removeCallbacks(it) }
+        model.addCallbacks(cb)
+        callbacks = cb
+        return this
+    }
+
+    fun set(builder: LauncherLayoutBuilder) {
+        callbacks ?: withCallbacks(object : BgDataModel.Callbacks {})
+        ctx.setModelLayout(builder)
+    }
+}

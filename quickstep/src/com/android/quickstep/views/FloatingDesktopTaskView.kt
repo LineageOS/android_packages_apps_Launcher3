@@ -33,7 +33,7 @@ import com.android.launcher3.anim.PendingAnimation
 import com.android.launcher3.uioverrides.QuickstepLauncher
 import com.android.launcher3.views.BaseDragLayer
 import com.android.quickstep.util.MultiValueUpdateListener
-import com.android.quickstep.util.SplitAnimationTimings
+import com.android.quickstep.split.SplitAnimationTimings
 import com.android.systemui.shared.system.QuickStepContract
 
 /**

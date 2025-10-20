@@ -33,10 +33,8 @@ import com.android.launcher3.icons.FastBitmapDrawable;
 import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.ItemInfoWithIcon;
-import com.android.launcher3.recyclerview.AllAppsRecyclerViewPool;
 import com.android.launcher3.util.ComponentKey;
 import com.android.launcher3.util.PackageUserKey;
-import com.android.launcher3.views.ActivityContext;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -51,7 +49,6 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 /**
  * A utility class to maintain the collection of all apps.
@@ -77,22 +74,13 @@ public class AllAppsStore {
     private int mDeferUpdatesFlags = 0;
     private boolean mUpdatePending = false;
 
-    private final ActivityContext mContext;
-    private final boolean mShouldPreinflate;
-    private final AllAppsRecyclerViewPool mAllAppsRecyclerViewPool;
 
     public AppInfo[] getApps() {
         return mApps;
     }
 
     @Inject
-    public AllAppsStore(
-            ActivityContext context,
-            @Named("PRELOAD_ALL_APPS") boolean preinflateAllApps) {
-        mContext = context;
-        mShouldPreinflate = preinflateAllApps;
-        mAllAppsRecyclerViewPool = new AllAppsRecyclerViewPool(context);
-    }
+    AllAppsStore() { }
 
     /**
      * Sets the current set of apps and sets mapping for {@link PackageUserKey} to Uid for
@@ -107,17 +95,7 @@ public class AllAppsStore {
         mModelFlags = flags;
         notifyUpdate();
         mPackageUserKeytoUidMap = map;
-        // Preinflate all apps RV when apps has changed, which can happen after unlocking screen,
-        // rotating screen, or downloading/upgrading apps.
-        if (mShouldPreinflate) {
-            mAllAppsRecyclerViewPool.preInflateAllAppsViewHolders();
-        }
     }
-
-    AllAppsRecyclerViewPool getRecyclerViewPool() {
-        return mAllAppsRecyclerViewPool;
-    }
-
     /**
      * Look up for Uid using package name and user handle for the current set of apps.
      */

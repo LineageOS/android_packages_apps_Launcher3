@@ -35,6 +35,7 @@
     <string name="close_task_accessibility" msgid="4765872229211282647">"%1$s बंद करा"</string>
     <string name="new_window_option_taskbar" msgid="6448780542727767211">"नवीन विंडो"</string>
     <string name="manage_windows_option_taskbar" msgid="2294109489960654212">"विंडो व्यवस्थापित करा"</string>
+    <string name="close_app_taskbar" msgid="3238979263877091273">"बंद करा"</string>
     <string name="save_app_pair" msgid="5647523853662686243">"ॲपची जोडी सेव्ह करा"</string>
     <string name="app_pair_default_title" msgid="4045241727446873529">"<xliff:g id="APP1">%1$s</xliff:g> | <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="app_pair_unlaunchable_at_screen_size" msgid="3446551575502685376">"या ॲपची जोडीला या डिव्हाइसवर सपोर्ट नाही"</string>
@@ -106,6 +107,15 @@
     <string name="widget_settings" msgid="5280157748464495511">"सेटिंग्ज"</string>
     <string name="pin_to_taskbar" msgid="5914002252642242332">"टास्कबार वर पिन करा"</string>
     <string name="unpin_from_taskbar" msgid="1025883383457627426">"टास्कबार वरून अनपिन करा"</string>
+    <!-- no translation found for no_room_in_taskbar (6885243748717395469) -->
+    <skip />
+    <string name="app_added_to_taskbar" msgid="6348755169793615171">"अ‍ॅप टास्कबार मध्ये जोडले आहे"</string>
+    <string name="app_removed_from_taskbar" msgid="3471754847898675396">"अ‍ॅप टास्कबार मधून काढून टाकले आहे"</string>
+    <!-- no translation found for remove_system_shortcut_label (3991201411148073972) -->
+    <skip />
+    <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"उघडा"</string>
+    <!-- no translation found for home_screen_files_context_menu_move_to_trash_label (1145655050674479315) -->
+    <skip />
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"शॉर्टकट इंस्टॉल करा"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"वापरकर्ता हस्तक्षेपाशिवाय शॉर्टकट जोडण्यास अ‍ॅप ला अनुमती देते."</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"होम सेटिंग्ज आणि शॉर्टकट वाचा"</string>
@@ -121,6 +131,7 @@
     <string name="paginate_right" msgid="6701038155201975878">"उजवीकडील पेजनुसार विभागणी"</string>
     <string name="disabled_app_label" msgid="6673129024321402780">"<xliff:g id="APP_NAME">%1$s</xliff:g> अक्षम केला आहे"</string>
     <string name="dotted_app_label" msgid="1865617679843363410">"{count,plural, =1{{app_name} संबंधित # सूचना आहे}other{{app_name} संबंधित # सूचना आहेत}}"</string>
+    <string name="hotseat_prediction_content_description" msgid="7680403232742709704">"पूर्वानुमान केलेले अ‍ॅप: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="default_scroll_format" msgid="7475544710230993317">"%2$d पैकी %1$d पेज"</string>
     <string name="workspace_scroll_format" msgid="8458889198184077399">"%2$d पैकी %1$d मुख्य स्क्रीन"</string>
     <string name="workspace_new_page" msgid="257366611030256142">"नवीन होम स्क्रीन पेज"</string>
@@ -132,7 +143,9 @@
     <string name="folder_closed" msgid="4100806530910930934">"फोल्डर बंद"</string>
     <string name="folder_renamed" msgid="1794088362165669656">"फोल्डरचे नाव बदलून <xliff:g id="NAME">%1$s</xliff:g> असे ठेवले"</string>
     <string name="folder_name_format_exact" msgid="8626242716117004803">"फोल्डर: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> आयटम"</string>
+    <string name="folder_name_format_exact_with_dot" msgid="30828041991324911">"फोल्डर: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> आयटम, नोटिफिकेशन आहेत"</string>
     <string name="folder_name_format_overflow" msgid="4270108890534995199">"फोल्डर: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> किंवा त्याहून अधिक आयटम"</string>
+    <string name="folder_name_format_overflow_with_dot" msgid="9174809519194154156">"फोल्डर: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> किंवा त्याहून अधिक आयटम, नोटिफिकेशन आहेत"</string>
     <string name="unnamed_folder" msgid="2420192029474044442">"नाव नसलेले फोल्डर"</string>
     <string name="app_pair_name_format" msgid="8134106404716224054">"ॲपची जोडी: <xliff:g id="APP1">%1$s</xliff:g> आणि <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="styles_wallpaper_button_text" msgid="8216961355289236794">"वॉलपेपर आणि शैली"</string>
@@ -141,6 +154,9 @@
     <string name="msg_disabled_by_admin" msgid="6898038085516271325">"आपल्या प्रशासकाने अक्षम केले"</string>
     <string name="allow_rotation_title" msgid="7222049633713050106">"होम स्क्रीन फिरवण्‍याची अनुमती द्या"</string>
     <string name="allow_rotation_desc" msgid="8662546029078692509">"फोन फिरवला जातो तेव्हा"</string>
+    <string name="compose_developer_options_section" msgid="8211460486549952595">"Jetpack Compose"</string>
+    <string name="enable_composition_tracing_title" msgid="8989606591739368424">"कंपोझिशन ट्रेसिंग सुरू करा"</string>
+    <string name="enable_composition_tracing_desc" msgid="7187566039216492405">"अवलोकनामध्ये perfetto ट्रेस घेताना कंपोझिशन ट्रेसिंग सुरू करा"</string>
     <string name="landscape_mode_title" msgid="5138814555934843926">"लँडस्केप मोड"</string>
     <string name="landscape_mode_desc" msgid="3085236452297838664">"होम स्क्रीन लँडस्केप मोडमध्ये सेट करा"</string>
     <string name="notification_dots_title" msgid="9062440428204120317">"नोटिफिकेशन बिंदू"</string>
@@ -229,4 +245,6 @@
     <string name="four_sided_cookie_shape_title" msgid="3275212586290522151">"४ बाजू असलेले बिस्कीट"</string>
     <string name="seven_sided_cookie_shape_title" msgid="4862560582029671668">"७ बाजू असलेले बिस्कीट"</string>
     <string name="arch_shape_title" msgid="2213843822192871318">"कमान"</string>
+    <string name="create_new_folder_button_text" msgid="4037052463794735069">"नवीन फोल्डर"</string>
+    <string name="default_new_folder_name" msgid="8821062664729412079">"नवीन फोल्डर"</string>
 </resources>

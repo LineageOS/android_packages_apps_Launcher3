@@ -17,18 +17,13 @@
 package com.android.launcher3.model.data
 
 import android.util.SparseArray
-import androidx.annotation.VisibleForTesting
 import androidx.core.util.putAll
 import androidx.core.util.valueIterator
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
 import com.android.launcher3.Utilities.qsbOnFirstScreen
 import com.android.launcher3.Workspace
-import com.android.launcher3.model.data.WorkspaceChangeEvent.AddEvent
-import com.android.launcher3.model.data.WorkspaceChangeEvent.RemoveEvent
-import com.android.launcher3.model.data.WorkspaceChangeEvent.UpdateEvent
 import com.android.launcher3.util.IntArray
 import com.android.launcher3.util.IntSet
-import com.android.launcher3.util.ItemInfoMatcher
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.stream.Stream
 import java.util.stream.StreamSupport
@@ -57,9 +52,7 @@ sealed class WorkspaceData : Iterable<ItemInfo> {
     /** Version determines the uniqueness per model load cycle */
     abstract val version: Int
     /** Number of times, this data has been modified */
-    internal abstract val modificationId: Int
-    /** Previous modifications to this data in reverse order: 1st entry is the latest update */
-    protected abstract val changeHistory: List<WorkspaceChangeEvent>
+    abstract val modificationId: Int
 
     /**
      * Returns the predicted items for the provided [containerId] or an empty list id no such
@@ -72,24 +65,6 @@ sealed class WorkspaceData : Iterable<ItemInfo> {
     /** Returns an immutable copy of the dataset */
     abstract fun copy(): WorkspaceData
 
-    /**
-     * Returns a list of [WorkspaceChangeEvent] to apply for reaching from [source] to current
-     * state. Returns an empty list of the source is same as the current state and null if such a
-     * transition is not possible.
-     */
-    fun diff(source: WorkspaceData): List<WorkspaceChangeEvent>? {
-        if (version != source.version) return null
-        val requiredHistorySize = modificationId - source.modificationId
-
-        val changes = changeHistory
-        return when {
-            requiredHistorySize < 0 -> null
-            requiredHistorySize > changes.size -> null
-            requiredHistorySize == 0 -> emptyList()
-            else -> changes.subList(0, requiredHistorySize).reversed()
-        }
-    }
-
     override fun equals(other: Any?): Boolean {
         return other is WorkspaceData &&
             other.version == version &&
@@ -99,13 +74,11 @@ sealed class WorkspaceData : Iterable<ItemInfo> {
     /** A mutable implementation of [WorkspaceData] */
     class MutableWorkspaceData : WorkspaceData() {
 
-        private val itemsIdMap = SparseArray<ItemInfo>()
+        val itemsIdMap = SparseArray<ItemInfo>()
 
         override var version: Int = VERSION_COUNTER.incrementAndGet()
 
         override var modificationId: Int = 0
-
-        override val changeHistory = mutableListOf<WorkspaceChangeEvent>()
 
         override fun iterator() = itemsIdMap.valueIterator()
 
@@ -117,51 +90,22 @@ sealed class WorkspaceData : Iterable<ItemInfo> {
             itemsIdMap.putAll(items)
             version = VERSION_COUNTER.incrementAndGet()
             modificationId = 0
-            changeHistory.clear()
         }
 
-        /** Adds the [item] to the dataset */
-        fun addItems(items: List<ItemInfo>, owner: Any?) {
-            items.forEach { itemsIdMap[it.id] = it }
-            pushUpdate(AddEvent(items, owner))
-        }
-
-        /** Removes existing [items] from the dataset */
-        fun removeItems(items: Collection<ItemInfo>, owner: Any?) {
-            items.forEach { itemsIdMap.remove(it.id) }
-            pushUpdate(RemoveEvent(ItemInfoMatcher.ofItems(items), owner))
-        }
-
-        /** Replaces an existing [item] from the dataset */
-        fun replaceItem(item: ItemInfo, owner: Any?) {
-            itemsIdMap[item.id] = item
-            notifyItemsUpdated(listOf(item), owner)
-        }
-
-        /**
-         * Notifies this dataset that or updates already performed on existing [items]. Since the
-         * underlying [ItemInfo]s are mutable objects, its possible to update their properties
-         * without going though this dataset
-         */
-        fun notifyItemsUpdated(items: List<ItemInfo>, owner: Any?) {
-            pushUpdate(UpdateEvent(items, owner))
-        }
-
-        private fun pushUpdate(update: WorkspaceChangeEvent) {
+        /** Performs some modification on the dataset and updates the [modificationId] */
+        inline fun modifyItems(block: SparseArray<ItemInfo>.() -> Unit) {
+            block.invoke(itemsIdMap)
             modificationId++
-            changeHistory.add(0, update)
-            if (changeHistory.size > MAX_HISTORY_SIZE) changeHistory.removeLast()
         }
 
         override fun copy(): WorkspaceData =
-            ImmutableWorkspaceData(version, modificationId, changeHistory.toList(), itemsIdMap)
+            ImmutableWorkspaceData(version, modificationId, itemsIdMap)
     }
 
     /** An immutable implementation of [WorkspaceData] */
     class ImmutableWorkspaceData(
         override val version: Int,
         override val modificationId: Int,
-        override val changeHistory: List<WorkspaceChangeEvent>,
         items: SparseArray<ItemInfo>,
     ) : WorkspaceData() {
 
@@ -175,9 +119,6 @@ sealed class WorkspaceData : Iterable<ItemInfo> {
     }
 
     companion object {
-        // Maximum number of historic change events to keep in memory
-        @VisibleForTesting const val MAX_HISTORY_SIZE = 4
-
         private val VERSION_COUNTER = AtomicInteger()
     }
 }

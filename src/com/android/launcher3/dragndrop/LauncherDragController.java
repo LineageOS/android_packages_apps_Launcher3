@@ -160,7 +160,7 @@ public class LauncherDragController extends DragController<Launcher> {
         mDragObject.yOffset = mMotionDown.y - (dragLayerY + dragRegionTop);
 
         mDragDriver = DragDriver.create(this, mOptions, mFlingToDeleteHelper::recordMotionEvent);
-        prepareViewForAccessibility(dragView);
+        updateDescendantsAccessibility(dragView, /*accessible=*/ false);
         if (!mOptions.isAccessibleDrag) {
             mDragObject.stateAnnouncer = DragViewStateAnnouncer.createFor(dragView);
         }
@@ -190,8 +190,8 @@ public class LauncherDragController extends DragController<Launcher> {
 
         handleMoveEvent(mLastTouch.x, mLastTouch.y);
 
-        if (!isItemPinnable()
-                || (!mActivity.isTouchInProgress() && options.simulatedDndStartPoint == null)) {
+        if (!isItemPinnable() || (!mIsInPreDrag && !mActivity.isTouchInProgress()
+                && options.simulatedDndStartPoint == null)) {
             // If it is an internal drag and the touch is already complete, cancel immediately
             MAIN_EXECUTOR.post(this::cancelDrag);
         }
@@ -203,16 +203,17 @@ public class LauncherDragController extends DragController<Launcher> {
      * since those descendants are not a valid position in the workspace.
      * We need to go through the children because the view itself is important for
      * accessibility, basically we are implementing:
-     * IMPORTANT_FOR_ACCESSIBILITY_YES_HIDE_DESCENDANTS
+     * IMPORTANT_FOR_ACCESSIBILITY_YES_HIDE_DESCENDANTS when {@code accessible} is true and
+     * reversing it when false.
      */
-    void prepareViewForAccessibility(DragView dragView) {
+    void updateDescendantsAccessibility(DragView dragView, boolean accessible) {
         for (int i = 0; i < dragView.getChildCount(); i++) {
             dragView.getChildAt(i).setImportantForAccessibility(
-                    View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+                    accessible ? View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
+                            : View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
             );
         }
     }
-
 
     /**
      * Returns the scale in terms of pixels (to be applied on width) to scale the preview
@@ -249,6 +250,9 @@ public class LauncherDragController extends DragController<Launcher> {
 
     @Override
     protected boolean endWithFlingAnimation() {
+        if (mDragObject != null && mDragObject.dragView != null) {
+            updateDescendantsAccessibility(mDragObject.dragView, /*accessible=*/ true);
+        }
         Runnable flingAnimation = mFlingToDeleteHelper.getFlingAnimation(mDragObject, mOptions);
         if (flingAnimation != null) {
             drop(mFlingToDeleteHelper.getDropTarget(), flingAnimation);
@@ -259,6 +263,9 @@ public class LauncherDragController extends DragController<Launcher> {
 
     @Override
     protected void endDrag() {
+        if (mDragObject != null && mDragObject.dragView != null) {
+            updateDescendantsAccessibility(mDragObject.dragView, /*accessible=*/ true);
+        }
         super.endDrag();
         mFlingToDeleteHelper.releaseVelocityTracker();
     }

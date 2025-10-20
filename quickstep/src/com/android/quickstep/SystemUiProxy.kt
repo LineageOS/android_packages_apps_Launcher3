@@ -42,6 +42,7 @@ import android.view.MotionEvent
 import android.view.RemoteAnimationTarget
 import android.view.SurfaceControl
 import android.view.SurfaceControl.Transaction
+import android.window.DesktopExperienceFlags
 import android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS
 import android.window.IOnBackInvokedCallback
 import android.window.RemoteTransition
@@ -56,11 +57,15 @@ import com.android.internal.logging.InstanceId
 import com.android.internal.util.ScreenshotRequest
 import com.android.internal.view.AppearanceRegion
 import com.android.launcher3.Flags
+import com.android.launcher3.concurrent.annotations.LightweightBackground
+import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority.UI
+import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
+import com.android.launcher3.taskbar.bubbles.BubbleActivityStarter
 import com.android.launcher3.util.DaggerSingletonObject
-import com.android.launcher3.util.Executors
+import com.android.launcher3.util.LooperExecutor
 import com.android.launcher3.util.Preconditions
 import com.android.launcher3.util.SplitConfigurationOptions.StagePosition
 import com.android.quickstep.util.ActiveGestureProtoLogProxy
@@ -97,6 +102,7 @@ import com.android.wm.shell.shared.GroupedTaskInfo
 import com.android.wm.shell.shared.IShellTransitions
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation.UpdateSource
+import com.android.wm.shell.shared.bubbles.logging.EntryPoint
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource
 import com.android.wm.shell.shared.desktopmode.DesktopTaskToFrontReason
@@ -108,12 +114,18 @@ import com.android.wm.shell.splitscreen.ISplitSelectListener
 import com.android.wm.shell.startingsurface.IStartingWindow
 import com.android.wm.shell.startingsurface.IStartingWindowListener
 import java.io.PrintWriter
+import java.util.concurrent.Executor
 import javax.inject.Inject
 
 /** Holds the reference to SystemUI. */
 @LauncherAppSingleton
-class SystemUiProxy @Inject constructor(@ApplicationContext private val context: Context) :
-    NavHandle {
+class SystemUiProxy
+@Inject
+constructor(
+    @ApplicationContext private val context: Context,
+    @Ui private val uiExecutor: Executor,
+    @LightweightBackground(priority = UI) private val lightweightBackgroundExecutor: LooperExecutor,
+) : NavHandle {
 
     private var systemUiProxy: ISystemUiProxy? = null
     private var pip: IPip? = null
@@ -129,7 +141,7 @@ class SystemUiProxy @Inject constructor(@ApplicationContext private val context:
     private var unfoldAnimation: IUnfoldAnimation? = null
 
     private val systemUiProxyDeathRecipient =
-        IBinder.DeathRecipient { Executors.MAIN_EXECUTOR.execute { clearProxy() } }
+        IBinder.DeathRecipient { uiExecutor.execute { clearProxy() } }
 
     // Save the listeners passed into the proxy since LauncherProxyService may not have been bound
     // yet, and we'll need to set/register these listeners with SysUI when they do.  Note that it is
@@ -139,6 +151,35 @@ class SystemUiProxy @Inject constructor(@ApplicationContext private val context:
     private var bubblesListener: IBubblesListener? = null
     private var splitScreenListener: ISplitScreenListener? = null
     private var splitSelectListener: ISplitSelectListener? = null
+    private val splitSelectListeners = HashSet<ISplitSelectListener>()
+    private val splitSelectListenerTracker: ISplitSelectListener =
+        object : ISplitSelectListener.Stub() {
+            override fun onRequestSplitSelect(
+                taskInfo: RunningTaskInfo?,
+                splitPosition: Int,
+                taskBounds: Rect?,
+                startRecents: Boolean,
+                withRecentsWct: WindowContainerTransaction?,
+            ): Boolean {
+                uiExecutor.execute {
+                    for (listener in splitSelectListeners) {
+                        if (
+                            listener.onRequestSplitSelect(
+                                taskInfo,
+                                splitPosition,
+                                taskBounds,
+                                startRecents,
+                                withRecentsWct,
+                            )
+                        ) {
+                            break
+                        }
+                    }
+                }
+                // Always return true to shell to signal that SystemUiProxy received the request.
+                return true
+            }
+        }
     private var startingWindowListener: IStartingWindowListener? = null
     private var launcherUnlockAnimationController: ILauncherUnlockAnimationController? = null
     private var launcherActivityClass: String? = null
@@ -169,7 +210,7 @@ class SystemUiProxy @Inject constructor(@ApplicationContext private val context:
     private var lastLauncherKeepClearAreaHeightVisible = false
 
     private val asyncHandler =
-        Handler(Executors.UI_HELPER_EXECUTOR.looper) { handleMessageAsync(it) }
+        Handler(lightweightBackgroundExecutor.looper) { handleMessageAsync(it) }
 
     // TODO(141886704): Find a way to remove this
     @SystemUiStateFlags var lastSystemUiStateFlags: Long = 0
@@ -288,7 +329,13 @@ class SystemUiProxy @Inject constructor(@ApplicationContext private val context:
         setPipAnimationListener(pipAnimationListener)
         setBubblesListener(bubblesListener)
         registerSplitScreenListener(splitScreenListener)
-        registerSplitSelectListener(splitSelectListener)
+        if (DesktopExperienceFlags.ENABLE_NON_DEFAULT_DISPLAY_SPLIT_BUGFIX.isTrue) {
+            executeWithErrorLog({ "Failed call registerSplitSelectListener" }) {
+                splitScreen?.registerSplitSelectListener(splitSelectListenerTracker)
+            }
+        } else {
+            registerSplitSelectListener(splitSelectListener)
+        }
         homeVisibilityState.init(this.shellTransitions)
         focusState.init(this.shellTransitions)
         setStartingWindowListener(startingWindowListener)
@@ -694,29 +741,42 @@ class SystemUiProxy @Inject constructor(@ApplicationContext private val context:
     /**
      * Tells SysUI to show a shortcut bubble.
      *
+     * This method should NOT be used directly. Please use
+     * [BubbleActivityStarter.showShortcutBubble] instead.
+     *
      * @param info the shortcut info used to create or identify the bubble.
+     * @param entryPoint indicates how the bubble was created.
      * @param bubbleBarLocation the optional location of the bubble bar.
      */
     @JvmOverloads
-    fun showShortcutBubble(info: ShortcutInfo?, bubbleBarLocation: BubbleBarLocation? = null) =
+    fun showShortcutBubble(
+        info: ShortcutInfo?,
+        entryPoint: EntryPoint,
+        bubbleBarLocation: BubbleBarLocation? = null,
+    ) =
         executeWithErrorLog({ "Failed call showShortcutBubble" }) {
-            bubbles?.showShortcutBubble(info, bubbleBarLocation)
+            bubbles?.showShortcutBubble(info, entryPoint, bubbleBarLocation)
         }
 
     /**
      * Tells SysUI to show a bubble of an app.
      *
+     * This method should NOT be used directly. Please use [BubbleActivityStarter.showAppBubble]
+     * instead.
+     *
      * @param intent the intent used to create the bubble.
+     * @param entryPoint indicates how the bubble was created.
      * @param bubbleBarLocation the optional location of the bubble bar.
      */
     @JvmOverloads
     fun showAppBubble(
         intent: Intent?,
         user: UserHandle,
+        entryPoint: EntryPoint,
         bubbleBarLocation: BubbleBarLocation? = null,
     ) =
         executeWithErrorLog({ "Failed call showAppBubble" }) {
-            bubbles?.showAppBubble(intent, user, bubbleBarLocation)
+            bubbles?.showAppBubble(intent, user, entryPoint, bubbleBarLocation)
         }
 
     /** Tells SysUI to show the expanded view. */
@@ -748,6 +808,19 @@ class SystemUiProxy @Inject constructor(@ApplicationContext private val context:
     }
 
     fun registerSplitSelectListener(listener: ISplitSelectListener?) {
+        if (
+            DesktopExperienceFlags.ENABLE_NON_DEFAULT_DISPLAY_SPLIT_BUGFIX.isTrue &&
+                listener != null
+        ) {
+            if (splitSelectListeners.isEmpty()) {
+                executeWithErrorLog({ "Failed call registerSplitSelectListener" }) {
+                    splitScreen?.registerSplitSelectListener(splitSelectListenerTracker)
+                }
+            }
+            splitSelectListeners.add(listener)
+            return
+        }
+
         executeWithErrorLog({ "Failed call registerSplitSelectListener" }) {
             splitScreen?.registerSplitSelectListener(listener)
         }
@@ -755,6 +828,19 @@ class SystemUiProxy @Inject constructor(@ApplicationContext private val context:
     }
 
     fun unregisterSplitSelectListener(listener: ISplitSelectListener?) {
+        if (
+            DesktopExperienceFlags.ENABLE_NON_DEFAULT_DISPLAY_SPLIT_BUGFIX.isTrue &&
+                listener != null
+        ) {
+            splitSelectListeners.remove(listener)
+            if (splitSelectListeners.isEmpty()) {
+                executeWithErrorLog({ "Failed call unregisterSplitSelectListener" }) {
+                    splitScreen?.unregisterSplitSelectListener(splitSelectListenerTracker)
+                }
+            }
+            return
+        }
+
         executeWithErrorLog({ "Failed call unregisterSplitSelectListener" }) {
             splitScreen?.unregisterSplitSelectListener(listener)
         }
@@ -892,9 +978,9 @@ class SystemUiProxy @Inject constructor(@ApplicationContext private val context:
      * Call the desktop mode interface to start a TRANSIT_OPEN transition when launching an intent
      * from the taskbar so that it can be handled in desktop mode.
      */
-    fun startLaunchIntentTransition(intent: Intent, options: Bundle, displayId: Int) =
+    fun startLaunchIntentTransition(pendingIntent: PendingIntent, options: Bundle, displayId: Int) =
         executeWithErrorLog({ "Failed call startLaunchIntentTransition" }) {
-            desktopMode?.startLaunchIntentTransition(intent, options, displayId)
+            desktopMode?.startLaunchIntentTransition(pendingIntent, options, displayId)
         }
 
     //
@@ -1378,6 +1464,8 @@ class SystemUiProxy @Inject constructor(@ApplicationContext private val context:
         pw.println("\tmSplitScreen=$splitScreen")
         pw.println("\tmSplitScreenListener=$splitScreenListener")
         pw.println("\tmSplitSelectListener=$splitSelectListener")
+        pw.println("\tmSplitSelectListeners=$splitSelectListeners")
+        pw.println("\tmSplitSelectListenerTracker=$splitSelectListenerTracker")
         pw.println("\tmOneHanded=$oneHanded")
         pw.println("\tmShellTransitions=$shellTransitions")
         pw.println("\tmHomeVisibilityState=" + homeVisibilityState)

@@ -17,7 +17,6 @@ package com.android.quickstep.fallback
 
 import android.content.Context
 import android.graphics.Color
-import android.graphics.Rect
 import androidx.annotation.FloatRange
 import com.android.app.animation.Interpolators
 import com.android.launcher3.DeviceProfile
@@ -29,13 +28,11 @@ import com.android.launcher3.anim.AnimatorPlaybackController
 import com.android.launcher3.anim.PendingAnimation
 import com.android.launcher3.statemanager.BaseState
 import com.android.launcher3.statemanager.BaseState.FLAG_DISABLE_RESTORE
-import com.android.launcher3.util.OverviewReleaseFlags.enableGridOnlyOverview
 import com.android.launcher3.util.Themes
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.views.ScrimColors
 import com.android.quickstep.views.RecentsView
 import com.android.quickstep.views.RecentsViewContainer
-import kotlin.math.min
 
 /** State definition for Fallback recents */
 open class RecentsState(@JvmField val ordinal: Int, private val mFlags: Int) :
@@ -181,26 +178,8 @@ open class RecentsState(@JvmField val ordinal: Int, private val mFlags: Int) :
     }
 
     private class ModalState(id: Int, flags: Int) : RecentsState(id, flags) {
-        override fun getOverviewScaleAndOffset(container: RecentsViewContainer): FloatArray =
-            if (enableGridOnlyOverview()) {
-                super.getOverviewScaleAndOffset(container)
-            } else getOverviewScaleAndOffsetForModalState(container.getOverviewPanel())
-
-        private fun getOverviewScaleAndOffsetForModalState(
-            recentsView: RecentsView<*, *>
-        ): FloatArray {
-            val taskSize = recentsView.selectedTaskBounds
-            val modalTaskSize = Rect().apply { recentsView.getModalTaskSize(this) }
-            val scale =
-                min(
-                    modalTaskSize.height().toFloat() / taskSize.height(),
-                    modalTaskSize.width().toFloat() / taskSize.width(),
-                )
-            return floatArrayOf(scale, LauncherState.NO_OFFSET)
-        }
-
         override fun onBackInvoked(container: RecentsViewContainer) {
-            container.goToRecentsState(DEFAULT, true)
+            container.goToRecentsState(DEFAULT, true, /* listener= */ null)
         }
 
         override fun onBackStarted(container: RecentsViewContainer) {

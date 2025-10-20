@@ -52,13 +52,17 @@ public class SystemWindowManagerProxy extends WindowManagerProxy {
     private final DesktopVisibilityController mDesktopVisibilityController;
     private final SystemUiProxy mSystemUiProxy;
 
+    private final DesktopState mDesktopState;
+
     @Inject
     public SystemWindowManagerProxy(
             DesktopVisibilityController desktopVisibilityController,
-            SystemUiProxy systemUiProxy) {
+            SystemUiProxy systemUiProxy,
+            DesktopState desktopState) {
         super(true);
         mDesktopVisibilityController = desktopVisibilityController;
         mSystemUiProxy = systemUiProxy;
+        mDesktopState = desktopState;
     }
 
     @Override
@@ -84,7 +88,7 @@ public class SystemWindowManagerProxy extends WindowManagerProxy {
 
     @Override
     public boolean isDisplayDesktopFirst(Context displayInfoContext) {
-        if (!DesktopState.fromContext(displayInfoContext).canEnterDesktopMode()) {
+        if (!mDesktopState.canEnterDesktopMode()) {
             return false;
         }
         return displayInfoContext.getResources().getConfiguration()

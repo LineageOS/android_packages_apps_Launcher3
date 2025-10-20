@@ -239,6 +239,8 @@ constructor(@ApplicationContext private val encryptedContext: Context) {
     companion object {
         @VisibleForTesting const val BOOT_AWARE_PREFS_KEY = "boot_aware_prefs"
 
+        const val COMPOSITION_TRACING_PREF_KEY = "pref_enableCompositionTracing"
+
         @JvmField val INSTANCE = DaggerSingletonObject(LauncherAppComponent::getLauncherPrefs)
 
         @JvmStatic fun get(context: Context): LauncherPrefs = INSTANCE.get(context)
@@ -306,6 +308,8 @@ constructor(@ApplicationContext private val encryptedContext: Context) {
             backedUpItem(RotationHelper.ALLOW_ROTATION_PREFERENCE_KEY, Boolean::class.java) {
                 RotationHelper.getAllowRotationDefaultValue(DisplayController.INSTANCE.get(it).info)
             }
+
+        @JvmField val ENABLE_COMPOSITION_TRACING = backedUpItem(COMPOSITION_TRACING_PREF_KEY, false)
 
         @JvmField
         val FIXED_LANDSCAPE_MODE = backedUpItem(SettingsActivity.FIXED_LANDSCAPE_MODE, false)

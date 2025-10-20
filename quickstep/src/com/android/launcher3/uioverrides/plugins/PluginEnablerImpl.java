@@ -17,6 +17,8 @@ package com.android.launcher3.uioverrides.plugins;
 import android.content.ComponentName;
 import android.content.SharedPreferences;
 
+import androidx.annotation.NonNull;
+
 import com.android.launcher3.LauncherPrefs;
 import com.android.systemui.shared.plugins.PluginEnabler;
 
@@ -36,8 +38,8 @@ public class PluginEnablerImpl implements PluginEnabler {
     }
 
     @Override
-    public void setDisabled(ComponentName component, int reason) {
-        setState(component, reason == ENABLED);
+    public void setDisabled(ComponentName component, @NonNull DisableReason reason) {
+        setState(component, reason == DisableReason.ENABLED);
     }
 
     private void setState(ComponentName component, boolean enabled) {
@@ -49,9 +51,10 @@ public class PluginEnablerImpl implements PluginEnabler {
         return mSharedPrefs.getBoolean(pluginEnabledKey(component), true);
     }
 
+    @NonNull
     @Override
-    public int getDisableReason(ComponentName componentName) {
-        return isEnabled(componentName) ? ENABLED : DISABLED_MANUALLY;
+    public DisableReason getDisableReason(ComponentName componentName) {
+        return isEnabled(componentName) ? DisableReason.ENABLED : DisableReason.DISABLED_MANUALLY;
     }
 
     private static String pluginEnabledKey(ComponentName cn) {

@@ -27,6 +27,7 @@ import androidx.lifecycle.Lifecycle.State.CREATED
 import androidx.lifecycle.Lifecycle.State.DESTROYED
 import androidx.lifecycle.Lifecycle.State.RESUMED
 import androidx.lifecycle.Lifecycle.State.STARTED
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.SavedStateRegistry
@@ -37,7 +38,9 @@ import com.android.launcher3.Utilities
 import com.android.launcher3.dagger.ActivityContextComponent
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.testing.TestInformationHandler
+import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.views.ActivityContext
+import java.util.concurrent.Executor
 
 /**
  * A context wrapper with lifecycle tracking based on the window events on the rootView of the
@@ -45,13 +48,20 @@ import com.android.launcher3.views.ActivityContext
  */
 abstract class BaseContext
 @JvmOverloads
-constructor(base: Context, themeResId: Int, private val destroyOnDetach: Boolean = true) :
-    ContextThemeWrapper(base, themeResId), ActivityContext {
+constructor(
+    base: Context,
+    themeResId: Int,
+    private val destroyOnDetach: Boolean = true,
+    lifecycleRegistryProvider: (LifecycleOwner) -> LifecycleRegistry = { owner ->
+        LifecycleRegistry(owner)
+    },
+    savedStateRegistryExecutor: Executor = MAIN_EXECUTOR,
+) : ContextThemeWrapper(base, themeResId), ActivityContext {
 
     private val listeners = mutableListOf<OnDeviceProfileChangeListener>()
 
     private val savedStateRegistryController = SavedStateRegistryController.create(this)
-    private val lifecycleRegistry = LifecycleRegistry(this)
+    private val lifecycleRegistry = lifecycleRegistryProvider(this)
     private val cleanupSet = WeakCleanupSet(this)
 
     override val savedStateRegistry: SavedStateRegistry
@@ -72,7 +82,7 @@ constructor(base: Context, themeResId: Int, private val destroyOnDetach: Boolean
     override fun getActivityComponent(): ActivityContextComponent = activityComponentLazy
 
     init {
-        Executors.MAIN_EXECUTOR.execute {
+        savedStateRegistryExecutor.execute {
             savedStateRegistryController.performAttach()
             savedStateRegistryController.performRestore(null)
             TestInformationHandler.trackUiSurface(this)

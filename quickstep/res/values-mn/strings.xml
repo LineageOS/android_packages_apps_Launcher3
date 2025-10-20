@@ -47,7 +47,6 @@
     <string name="hotseat_tip_gaps_filled" msgid="3035673010274223538">"Санал болгож буй аппуудыг хоосон зайд нэмсэн"</string>
     <string name="hotsaet_tip_prediction_enabled" msgid="2233554377501347650">"Санал болгож буй аппуудыг идэвхжүүлсэн"</string>
     <string name="hotsaet_tip_prediction_disabled" msgid="1506426298884658491">"Санал болгож буй аппуудыг идэвхгүй болгосон"</string>
-    <string name="hotseat_prediction_content_description" msgid="4582028296938078419">"Таамаглаж буй апп: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="gesture_tutorial_title" msgid="2750751261768388354">"Зангааны навигацын заавар"</string>
     <string name="gesture_tutorial_rotation_prompt_title" msgid="7537946781362766964">"Төхөөрөмжөө эргүүлэх"</string>
     <string name="gesture_tutorial_rotation_prompt" msgid="1664493449851960691">"Зангааны навигацын практик хичээлийг дуусгахын тулд төхөөрөмжөө эргүүлнэ үү"</string>
@@ -116,24 +115,29 @@
     <string name="toast_split_app_unsupported" msgid="2360229567007828914">"Дэлгэцийг хуваах горим ашиглах өөр апп сонгоно уу"</string>
     <string name="blocked_by_policy" msgid="2071401072261365546">"Энэ үйлдлийг апп эсвэл танай байгууллага зөвшөөрдөггүй"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"Виджетүүдийг одоогоор дэмждэггүй. Өөр апп сонгоно уу"</string>
+    <string name="action_image_copy" msgid="6877540054727709339">"Хуулах"</string>
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Дэлгэцийг эргүүлэх"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Ажлын хэсэг дэлгэцийн доод талаас хэрхэн гарч ирж, ашиглаагүй үед автоматаар нуугдахыг харуулах хөдөлгөөнт зураг"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Ажлын хэсгийг дэлгэцийн доод талд байнга харуулахын тулд асаах/унтраах тохиргоог ашиглан ажлын хэсгээ хэрхэн бэхлэхийг харуулах хөдөлгөөнт зураг"</string>
+    <string name="taskbar_edu_bubbles_animation_description" msgid="421866726938396813">"Чирэх зангааг ашиглан ажлын хэсгээс бөмбөлөг хэрхэн үүсгэхийг харуулах хөдөлгөөнт зураг"</string>
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"Нээлттэй аппын дээрх ажлын хэсгээс аппыг зөөж хийж хуваагдсан дэлгэц хэрхэн үүсгэхийг харуулах хөдөлгөөнт зураг"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"Төхөөрөмж дээр тань санал болгосон аппад хэрхэн хандахыг харуулах хөдөлгөөнт зураг"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"Тусгай товчинд хүрээд удаан дарж, юм байгаа хэсгийг сонгож дэлгэц дээрээс хэрхэн юм хайхыг харуулах хөдөлгөөнт зураг"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Ажлын хэсгийн боловсрол"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"2 аппыг зэрэг ашиглахын тулд аппыг хажуу тийш чирнэ үү"</string>
+    <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"Үүнийг хөвүүлэхийн тулд доод булан руу чирнэ үү"</string>
     <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Ажлын хэсгийг харуулахын тулд аажмаар дээш шударна уу"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Таны хэвшилд тулгуурлан санал болгож буй аппуудыг аваарай"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Ажлын хэсгийг бэхлэхийн тулд тусгаарлагчийг удаан дарна уу"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Ажлын хэсгийн тусламжтай илүү ихийг хийгээрэй"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"Ажлын хэсгийг үргэлж харуулах"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"Дэлгэцийнхээ доод талд Ажлын хэсгийг үргэлж харуулахын тулд хуваагч дээр хүрээд удаан дарна уу"</string>
+    <string name="taskbar_edu_bubbles_standalone" msgid="4182824636656528043">"Аппыг хөвүүлэхийн тулд булан руу чирнэ үү"</string>
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"Дэлгэц дээрээ байгаа зүйлийг хайхын тулд тусгай товчлуурыг удаан дарна уу"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Энэ бүтээгдэхүүн хайхын тулд таны дэлгэцийн сонгосон хэсгийг ашигладаг. Google-н <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>нууцлалын бодлого<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> болон <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>үйлчилгээний нөхцөл<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> хэрэгжинэ."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Хаах"</string>
     <string name="taskbar_edu_done" msgid="6880178093977704569">"Дууссан"</string>
+    <string name="taskbar_edu_next" msgid="4007618274426775841">"Дараах"</string>
     <string name="taskbar_button_home" msgid="2151398979630664652">"Гэр"</string>
     <string name="taskbar_button_a11y" msgid="5241161324875094465">"Хандалт"</string>
     <string name="taskbar_button_back" msgid="8558862226461164514">"Буцах"</string>
@@ -142,18 +146,12 @@
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"Мэдэгдэл"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"Шуурхай тохиргоо"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"Ажлын хэсэг"</string>
-    <string name="taskbar_a11y_shown_title" msgid="6842833581088937713">"Ажлын хэсгийг харуулсан"</string>
-    <string name="taskbar_a11y_shown_with_bubbles_left_title" msgid="4242431789851790046">"Ажлын хэсэг, бөмбөлгийг зүүн талд харуулсан"</string>
-    <string name="taskbar_a11y_shown_with_bubbles_right_title" msgid="8219065376188180113">"Ажлын хэсэг, бөмбөлгийг баруун талд харуулсан"</string>
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"Навигацын самбар"</string>
     <string name="always_show_taskbar" msgid="3608801276107751229">"Ажлын хэсгийг үргэлж харуулах"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"Навигацын горимыг өөрчлөх"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Ажлын хэсгийг хуваагч"</string>
-    <string name="taskbar_overflow_a11y_title" msgid="8114045167370723746">"Саяхан ашигласан бусад апп"</string>
-    <!-- no translation found for app_added_to_taskbar (1160433791917609063) -->
-    <skip />
-    <!-- no translation found for app_removed_from_taskbar (7887298201562912487) -->
-    <skip />
+    <string name="taskbar_recents_overflow_a11y_title" msgid="8005941062446304304">"Саяхан ашигласан бусад апп"</string>
+    <string name="taskbar_pinned_overflow_a11y_title" msgid="2314810718333302626">"Бусад апп"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Зүүн дээд хэсэг рүү зөөх"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Баруун доод хэсэг рүү зөөх"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"Аппыг бөмбөлөг байдлаар нээх"</string>

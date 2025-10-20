@@ -15,7 +15,6 @@
  */
 package com.android.launcher3.uioverrides.states;
 
-import static com.android.app.animation.Interpolators.DECELERATE_2;
 import static com.android.launcher3.logging.StatsLogManager.LAUNCHER_STATE_ALLAPPS;
 
 import android.content.Context;
@@ -23,7 +22,6 @@ import android.graphics.Color;
 
 import com.android.internal.jank.Cuj;
 import com.android.launcher3.DeviceProfile;
-import com.android.launcher3.Flags;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherState;
 import com.android.launcher3.LauncherUiState;
@@ -31,7 +29,6 @@ import com.android.launcher3.R;
 import com.android.launcher3.util.Themes;
 import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.views.ScrimColors;
-import com.android.quickstep.util.BaseDepthController;
 import com.android.systemui.shared.system.InteractionJankMonitorWrapper;
 
 import java.util.concurrent.TimeUnit;
@@ -120,30 +117,9 @@ public class AllAppsState extends LauncherState {
     }
 
     @Override
-    public ScaleAndTranslation getHotseatScaleAndTranslation(Launcher launcher) {
-        if (launcher.getDeviceProfile().shouldShowAllAppsOnSheet()) {
-            return getWorkspaceScaleAndTranslation(launcher);
-        } else {
-            ScaleAndTranslation overviewScaleAndTranslation = LauncherState.OVERVIEW
-                    .getWorkspaceScaleAndTranslation(launcher);
-            return new ScaleAndTranslation(
-                    launcher.getDeviceProfile().mWorkspaceProfile.getWorkspaceContentScale(),
-                    overviewScaleAndTranslation.translationX,
-                    overviewScaleAndTranslation.translationY);
-        }
-    }
-
-    @Override
     protected <DEVICE_PROFILE_CONTEXT extends Context & ActivityContext>
             float getDepthUnchecked(DEVICE_PROFILE_CONTEXT context) {
-        if (context.getDeviceProfile().shouldShowAllAppsOnSheet()) {
-            return context.getDeviceProfile().getBottomSheetProfile().getBottomSheetDepth();
-        } else {
-            // The scrim fades in at approximately 50% of the swipe gesture.
-            // The depth should be twice of what we want, in order to fully zoom out during the
-            // visible portion of the animation.
-            return BaseDepthController.DEPTH_60_PERCENT;
-        }
+        return context.getDeviceProfile().getBottomSheetProfile().getBottomSheetDepth();
     }
 
     @Override
@@ -152,29 +128,8 @@ public class AllAppsState extends LauncherState {
     }
 
     @Override
-    public PageAlphaProvider getWorkspacePageAlphaProvider(Launcher launcher) {
-        PageAlphaProvider superPageAlphaProvider = super.getWorkspacePageAlphaProvider(launcher);
-        return new PageAlphaProvider(DECELERATE_2) {
-            @Override
-            public float getPageAlpha(int pageIndex) {
-                return isWorkspaceVisible(launcher.getDeviceProfile())
-                        ? superPageAlphaProvider.getPageAlpha(pageIndex)
-                        : 0;
-            }
-        };
-    }
-
-    @Override
     public int getVisibleElements(LauncherUiState launcherUiState) {
-        int elements = ALL_APPS_CONTENT | FLOATING_SEARCH_BAR;
-        if (isWorkspaceVisible(launcherUiState.getDeviceProfileRef().getValue())) {
-            elements |= HOTSEAT_ICONS;
-        }
-        return elements;
-    }
-
-    private static boolean isWorkspaceVisible(DeviceProfile deviceProfile) {
-        return deviceProfile.getDeviceProperties().isTablet() || (Flags.allAppsSheetForHandheld() && Flags.allAppsBlur());
+        return ALL_APPS_CONTENT | FLOATING_SEARCH_BAR | HOTSEAT_ICONS;
     }
 
     @Override
@@ -202,16 +157,7 @@ public class AllAppsState extends LauncherState {
 
     @Override
     public ScrimColors getWorkspaceScrimColor(Launcher launcher) {
-        int backgroundColor;
-        if (!launcher.getDeviceProfile().shouldShowAllAppsOnSheet()) {
-            // Always use an opaque scrim if there's no sheet.
-            backgroundColor = launcher.getResources().getColor(R.color.materialColorSurfaceDim);
-        } else if (!Flags.allAppsBlur()) {
-            // If there's a sheet but no blur, use the old scrim color.
-            backgroundColor = launcher.getResources().getColor(R.color.widgets_picker_scrim);
-        } else {
-            backgroundColor = Themes.getAttrColor(launcher, R.attr.allAppsScrimColor);
-        }
+        int backgroundColor = Themes.getAttrColor(launcher, R.attr.allAppsScrimColor);
         return new ScrimColors(backgroundColor, /* foregroundColor */ Color.TRANSPARENT);
     }
 }

@@ -48,6 +48,7 @@ import android.view.View;
 import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.launcher3.R;
 import com.android.launcher3.logging.StatsLogManager;
@@ -120,6 +121,9 @@ public class TaskbarNavButtonController implements TaskbarControllers.LoggableTa
     private final SystemUiProxy mSystemUiProxy;
     private final Handler mHandler;
     private final ContextualSearchInvoker mContextualSearchInvoker;
+    // The lifecycle of TaskbarNavButtonController for primary display can be as long as TIS, which
+    // is longer than TaskbarActivityContext. Thus we should clear ref of TaskbarControllers which
+    // holds a lot of TaskbarActivityContext lifecycle objs to avoid memory leaks.
     private TaskbarControllers mControllers;
     @Nullable private StatsLogManager mStatsLogManager;
 
@@ -323,6 +327,7 @@ public class TaskbarNavButtonController implements TaskbarControllers.LoggableTa
 
     public void onDestroy() {
         mStatsLogManager = null;
+        mControllers = null;
     }
 
     private void logEvent(StatsLogManager.LauncherEvent event) {
@@ -422,6 +427,11 @@ public class TaskbarNavButtonController implements TaskbarControllers.LoggableTa
 
     private void showNotifications() {
         mSystemUiProxy.toggleNotificationPanel();
+    }
+
+    @VisibleForTesting
+    boolean hasControllersSet() {
+        return mControllers != null;
     }
 
     /** Callbacks for navigation buttons on Taskbar. */

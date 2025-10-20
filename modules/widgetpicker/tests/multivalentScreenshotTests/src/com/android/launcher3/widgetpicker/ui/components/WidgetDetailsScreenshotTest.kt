@@ -37,8 +37,6 @@ import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.NativeKeyEvent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInputModeManager
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performKeyPress
 import androidx.compose.ui.tooling.preview.Preview
@@ -76,28 +74,14 @@ class WidgetsDetailsScreenshotTest(emulationSpec: DeviceEmulationSpec) {
                 screenshotRule.composeRule.onRoot().performKeyPress(keyEvent = TAB_EVENT)
             },
         ) {
-            DetailsFocusedStateTest()
+            TestWithKeyboardInputMode { DetailsFocusedStateTest() }
         }
     }
 
     @Test
     fun focusedState_addButtonFocused() {
-        val keyboardMockManager =
-            object : InputModeManager {
-                override val inputMode = InputMode.Keyboard
-
-                override fun requestInputMode(inputMode: InputMode) = true
-            }
-
-        screenshotRule.screenshotTest(
-            goldenIdentifier = "focusedStates_addButtonFocused",
-            beforeScreenshot = {
-                screenshotRule.composeRule.onRoot().performKeyPress(keyEvent = TAB_EVENT)
-            },
-        ) {
-            CompositionLocalProvider(LocalInputModeManager provides keyboardMockManager) {
-                AddButtonFocusedTest()
-            }
+        screenshotRule.screenshotTest("focusedStates_addButtonFocused") {
+            TestWithKeyboardInputMode { AddButtonFocusedTest() }
         }
     }
 
@@ -184,7 +168,19 @@ private fun WidgetDetailsTestContent(showAddButton: Boolean, cellWidth: Int) {
         onWidgetAddClick = { Log.i(TAG, "Add button click") },
         onClick = {},
         onHoverChange = {},
-        modifier =
-            Modifier.width(cellWidthDp).semantics(mergeDescendants = true) { traversalIndex = 0f },
+        traversalIndex = 0,
+        modifier = Modifier.width(cellWidthDp),
     )
 }
+
+@Composable
+private fun TestWithKeyboardInputMode(content: @Composable () -> Unit) {
+    CompositionLocalProvider(LocalInputModeManager provides keyboardMockManager, content)
+}
+
+private val keyboardMockManager =
+    object : InputModeManager {
+        override val inputMode = InputMode.Keyboard
+
+        override fun requestInputMode(inputMode: InputMode) = true
+    }

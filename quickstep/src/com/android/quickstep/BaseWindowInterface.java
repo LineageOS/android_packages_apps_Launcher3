@@ -26,7 +26,7 @@ import com.android.launcher3.Launcher;
 import com.android.launcher3.anim.AnimatorPlaybackController;
 import com.android.launcher3.anim.PendingAnimation;
 import com.android.launcher3.statehandlers.DepthController;
-import com.android.launcher3.taskbar.TaskbarUIController;
+import com.android.launcher3.taskbar.TaskbarInteractor;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.NavigationMode;
 import com.android.quickstep.fallback.RecentsState;
@@ -77,8 +77,8 @@ public abstract class BaseWindowInterface extends
      * Closes any overlays.
      */
     public void closeOverlay() {
-        Optional.ofNullable(getTaskbarController()).ifPresent(
-                TaskbarUIController::hideOverlayWindow);
+        Optional.ofNullable(getTaskbarInteractor()).ifPresent(
+                TaskbarInteractor::hideOverlayWindow);
     }
 
     public void switchRunningTaskViewToScreenshot(HashMap<Integer, ThumbnailData> thumbnailDatas,

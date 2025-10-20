@@ -24,8 +24,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -146,7 +148,7 @@ class SearchScreenTest {
             runCurrent()
             composeTestRule.waitForIdle()
 
-            // has both apps
+            // has both apps from personal
             composeTestRule.onNode(hasText(PERSONAL_TEST_APPS[0].title!!.toString())).assertExists()
             composeTestRule.onNode(hasText(PERSONAL_TEST_APPS[1].title!!.toString())).assertExists()
 
@@ -158,14 +160,28 @@ class SearchScreenTest {
             composeTestRule.waitForIdle()
 
             // change query
-            val testInputTwo = "PersonalWidget1A"
+            val testInputTwo = "Widget1A"
             composeTestRule.onNodeWithText(searchBarHint).performTextInput(testInputTwo)
 
             runCurrent()
             composeTestRule.waitForIdle()
 
-            // has only app 1
-            composeTestRule.onNode(hasText(PERSONAL_TEST_APPS[0].title!!.toString())).assertExists()
+            // has only app 1 (no app 2) from personal, and show both work and personal matches
+            val matchedPersonalApp1Title = PERSONAL_TEST_APPS[0].title!!.toString()
+            val matchedWorkApp1Title = WORK_TEST_APPS[0].title!!.toString()
+            val workApp1Label = "${TestUtils.widgetUserProfileWork.label} $matchedWorkApp1Title"
+            composeTestRule
+                .onNode(hasText(matchedPersonalApp1Title))
+                .assertExists()
+                .assert(
+                    hasContentDescription(TestUtils.widgetUserProfileWork.label, substring = true)
+                        .not()
+                )
+            composeTestRule
+                .onNode(hasText(matchedWorkApp1Title))
+                .assertExists()
+                .assert(hasContentDescription(workApp1Label)) // with correctly mapped description.
+            // previously matched not shown
             composeTestRule
                 .onNode(hasText(PERSONAL_TEST_APPS[1].title!!.toString()))
                 .assertDoesNotExist()

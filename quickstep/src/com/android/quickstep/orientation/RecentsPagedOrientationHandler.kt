@@ -209,7 +209,6 @@ interface RecentsPagedOrientationHandler : PagedOrientationHandler {
         iconParams: FrameLayout.LayoutParams,
         taskIconMargin: Int,
         taskIconHeight: Int,
-        thumbnailTopMargin: Int,
         isRtl: Boolean,
     )
 
@@ -229,9 +228,8 @@ interface RecentsPagedOrientationHandler : PagedOrientationHandler {
     )
 
     fun setSplitIconParams(
-        primaryIconView: View,
-        secondaryIconView: View,
-        taskIconHeight: Int,
+        primaryAppChipView: IconAppChipView,
+        secondaryAppChipView: IconAppChipView,
         primarySnapshotWidth: Int,
         primarySnapshotHeight: Int,
         groupedTaskViewHeight: Int,
@@ -240,7 +238,6 @@ interface RecentsPagedOrientationHandler : PagedOrientationHandler {
         deviceProfile: DeviceProfile,
         splitConfig: SplitBounds,
         inSplitSelection: Boolean,
-        oneIconHiddenDueToSmallWidth: Boolean,
     )
 
     /*
@@ -249,32 +246,13 @@ interface RecentsPagedOrientationHandler : PagedOrientationHandler {
      * taskMenu width is the same size as the thumbnail width (what got set below in
      * getTaskMenuWidth()), so we directly use that in the calculations.
      */
-    fun getTaskMenuX(
-        x: Float,
-        thumbnailView: View,
-        deviceProfile: DeviceProfile,
-        taskInsetMargin: Float,
-        taskViewIcon: View,
-    ): Float
+    fun getTaskMenuX(x: Float, appChip: IconAppChipView): Float
 
-    fun getTaskMenuY(
-        y: Float,
-        thumbnailView: View,
-        stagePosition: Int,
-        taskMenuView: View,
-        taskInsetMargin: Float,
-        taskViewIcon: View,
-    ): Float
+    fun getTaskMenuY(y: Float, taskMenuView: View, appChip: IconAppChipView): Float
 
     fun getAppChipMenuMarginX(appChipView: IconAppChipView, isRtl: Boolean): Int
 
     fun getAppChipMenuMarginY(appChipView: IconAppChipView, isRtl: Boolean): Int
-
-    fun getTaskMenuWidth(
-        thumbnailView: View,
-        deviceProfile: DeviceProfile,
-        @StagePosition stagePosition: Int,
-    ): Int
 
     fun getTaskMenuHeight(
         taskInsetMargin: Float,
@@ -326,7 +304,6 @@ interface RecentsPagedOrientationHandler : PagedOrientationHandler {
         taskViewHeight: Int,
         splitBounds: SplitBounds?,
         deviceProfile: DeviceProfile,
-        thumbnailViews: Array<View>,
         desiredTaskId: Int,
         banner: View,
     ): Pair<Float, Float>

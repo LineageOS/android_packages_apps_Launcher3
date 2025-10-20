@@ -62,6 +62,7 @@ import com.android.launcher3.LauncherAppState;
 import com.android.launcher3.R;
 import com.android.launcher3.logging.StatsLogManager;
 import com.android.launcher3.model.ItemInstallQueue;
+import com.android.launcher3.model.SerializedItemItem;
 import com.android.launcher3.model.WidgetItem;
 import com.android.launcher3.model.WidgetsModel;
 import com.android.launcher3.model.data.ItemInfo;
@@ -340,7 +341,8 @@ public class AddItemActivity extends BaseActivity
     public void onPlaceAutomaticallyClick(View v) {
         if (mRequest.getRequestType() == PinItemRequest.REQUEST_TYPE_SHORTCUT) {
             ShortcutInfo shortcutInfo = mRequest.getShortcutInfo();
-            ItemInstallQueue.INSTANCE.get(this).queueItem(shortcutInfo);
+            ItemInstallQueue.INSTANCE.get(this).queueItem(
+                    new SerializedItemItem(shortcutInfo));
             logCommand(LAUNCHER_ADD_EXTERNAL_ITEM_PLACED_AUTOMATICALLY);
             mRequest.accept();
             CharSequence label = shortcutInfo.getLongLabel();
@@ -368,8 +370,8 @@ public class AddItemActivity extends BaseActivity
     }
 
     private void acceptWidget(int widgetId) {
-        ItemInstallQueue.INSTANCE.get(this)
-                .queueItem(mRequest.getAppWidgetProviderInfo(this), widgetId);
+        ItemInstallQueue.INSTANCE.get(this).queueItem(
+                new SerializedItemItem(mRequest.getAppWidgetProviderInfo(this), widgetId));
         mWidgetOptions.putInt(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
         mRequest.accept(mWidgetOptions);
         logCommand(LAUNCHER_ADD_EXTERNAL_ITEM_PLACED_AUTOMATICALLY);

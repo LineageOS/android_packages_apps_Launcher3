@@ -18,6 +18,8 @@ package com.android.launcher3.tapl;
 import static android.view.KeyEvent.KEYCODE_META_RIGHT;
 
 import static com.android.launcher3.tapl.LauncherInstrumentation.KEYBOARD_QUICK_SWITCH_RES_ID;
+import static com.android.launcher3.tapl.LauncherInstrumentation.TASKBAR_DIVIDER_CONTENT_DESCRIPTION;
+import static com.android.launcher3.tapl.LauncherInstrumentation.TASKBAR_PINNING_SWITCH_RES_ID;
 import static com.android.launcher3.tapl.LauncherInstrumentation.TASKBAR_RES_ID;
 
 import android.graphics.Point;
@@ -142,6 +144,20 @@ public final class Taskbar {
     }
 
     /**
+     * Toggles always show taskbar option
+     */
+    public void toggleAlwaysShowTaskbarOption() {
+        try (LauncherInstrumentation.Closable c = mLauncher.addContextLayer(
+                "want to open taskbar divider menu and toggle always show taskbar option");
+             LauncherInstrumentation.Closable e = mLauncher.eventsCheck()) {
+            mLauncher.waitForObjectInContainer(
+                    mLauncher.waitForSystemLauncherObject(TASKBAR_RES_ID),
+                    getDividerButtonSelector()).longClick();
+            mLauncher.waitForLauncherObject(TASKBAR_PINNING_SWITCH_RES_ID).click();
+        }
+    }
+
+    /**
      *  Opens the Home all apps page by clicking the taskbar all apps icon. To be used to open all
      *  apps when taskbar is visible on home.
      */
@@ -229,6 +245,11 @@ public final class Taskbar {
     private static BySelector getAllAppsButtonSelector() {
         // Look for an icon with no text
         return By.clazz(TextView.class).text("");
+    }
+
+    private static BySelector getDividerButtonSelector() {
+        // Look for an icon with no content description
+        return By.clazz(TextView.class).desc(TASKBAR_DIVIDER_CONTENT_DESCRIPTION);
     }
 
     public Rect getVisibleBounds() {

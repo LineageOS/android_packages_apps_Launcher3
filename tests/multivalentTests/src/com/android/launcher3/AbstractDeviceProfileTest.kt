@@ -19,12 +19,14 @@ import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Point
 import android.graphics.Rect
+import android.hardware.display.DisplayManager
 import android.platform.test.flag.junit.SetFlagsRule
 import android.platform.test.rule.AllowedDevices
 import android.platform.test.rule.DeviceProduct
 import android.platform.test.rule.IgnoreLimit
 import android.platform.test.rule.LimitDevicesRule
 import android.util.DisplayMetrics
+import android.view.Display.DEFAULT_DISPLAY
 import android.view.Surface
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.platform.app.InstrumentationRegistry
@@ -342,7 +344,12 @@ abstract class AbstractDeviceProfileTest {
                 screenHeightDp = (realBounds.bounds.height() / density).toInt()
                 smallestScreenWidthDp = min(screenWidthDp, screenHeightDp)
             }
-        val configurationContext = runningContext.createConfigurationContext(config)
+        val displayContext =
+            runningContext
+                .getSystemService(DisplayManager::class.java)
+                ?.getDisplay(DEFAULT_DISPLAY)
+                ?.let { runningContext.createDisplayContext(it) } ?: runningContext
+        val configurationContext = displayContext.createConfigurationContext(config)
         context = SandboxContext(configurationContext)
         context.initDaggerComponent(
             DaggerAbsDPTestSandboxComponent.builder()

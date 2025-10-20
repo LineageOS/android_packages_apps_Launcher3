@@ -24,10 +24,12 @@ import com.android.quickstep.inputconsumers.BubbleBarInputConsumer
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.MockitoAnnotations
+import org.mockito.junit.MockitoJUnit
+import org.mockito.junit.MockitoRule
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 
@@ -39,6 +41,8 @@ import org.mockito.kotlin.whenever
 class BubbleBarInputConsumerTest {
 
     private lateinit var bubbleControllers: BubbleControllers
+
+    @get:Rule var mockitoRule: MockitoRule = MockitoJUnit.rule()
 
     @Mock private lateinit var taskbarActivityContext: TaskbarActivityContext
     @Mock private lateinit var bubbleBarController: BubbleBarController
@@ -55,8 +59,6 @@ class BubbleBarInputConsumerTest {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
-
         bubbleControllers =
             BubbleControllers(
                 bubbleBarController,

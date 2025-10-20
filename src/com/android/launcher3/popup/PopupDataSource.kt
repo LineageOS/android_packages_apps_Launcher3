@@ -23,17 +23,18 @@ import android.view.View
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.AbstractFloatingViewHelper
 import com.android.launcher3.DropTargetHandler
-import com.android.launcher3.Flags
 import com.android.launcher3.LauncherConstants
 import com.android.launcher3.R
 import com.android.launcher3.SecondaryDropTarget
 import com.android.launcher3.Utilities
+import com.android.launcher3.accessibility.LauncherAccessibilityDelegate
 import com.android.launcher3.allapps.PrivateProfileManager
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.popup.SystemShortcut.BubbleActivityStarter
+import com.android.launcher3.popup.SystemShortcut.TaskbarBubbleActivityStarter
 import com.android.launcher3.util.ActivityOptionsWrapper
 import com.android.launcher3.util.ApiWrapper
 import com.android.launcher3.util.PackageManagerHelper
@@ -42,6 +43,7 @@ import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.views.Snackbar
 import com.android.launcher3.widget.LauncherAppWidgetHostView
 import com.android.launcher3.widget.WidgetsBottomSheet
+import com.android.wm.shell.shared.bubbles.logging.EntryPoint
 import javax.inject.Inject
 
 @LauncherAppSingleton
@@ -58,8 +60,32 @@ class PopupDataSource @Inject constructor() {
     val removePopupData =
         PopupData(
             iconResId = R.drawable.ic_remove_no_shadow,
-            labelResId = R.string.remove_drop_target_label,
+            labelResId = R.string.remove_system_shortcut_label,
             popupAction = handleRemove,
+            category = PopupCategory.SYSTEM_SHORTCUT_FIXED,
+        )
+
+    private val handleAddToHomeScreenFromAllApps =
+        { activityContext: ActivityContext, itemInfo: ItemInfo, view: View ->
+            AbstractFloatingView.closeAllOpenViews(activityContext)
+            val launcherAccessibilityDelegate =
+                activityContext.accessibilityDelegate as LauncherAccessibilityDelegate
+            launcherAccessibilityDelegate.addToWorkspace(itemInfo, /* accessibility= */ false)
+            /*finishCallback=*/ {
+                activityContext.statsLogManager
+                    .logger()
+                    .withItemInfo(itemInfo)
+                    .log(LauncherEvent.LAUNCHER_TAP_TO_ADD_TO_HOME_SCREEN_FROM_ALL_APPS)
+            }
+            Unit
+        }
+
+    // Popup data for add to home screen from all apps shortcut.
+    val addToHomeScreenFromAllAppsPopupData =
+        PopupData(
+            iconResId = R.drawable.ic_plus,
+            labelResId = R.string.action_add_to_workspace,
+            popupAction = handleAddToHomeScreenFromAllApps,
             category = PopupCategory.SYSTEM_SHORTCUT_FIXED,
         )
 
@@ -114,9 +140,7 @@ class PopupDataSource @Inject constructor() {
     // Popup data for widgets shortcut.
     val widgetsPopupData =
         PopupData(
-            iconResId =
-                if (Flags.enableLauncherVisualRefresh()) R.drawable.widgets_24px
-                else R.drawable.ic_widget,
+            iconResId = R.drawable.widgets_24px,
             labelResId = R.string.widget_button_text,
             popupAction = handleWidgets,
             category = PopupCategory.SYSTEM_SHORTCUT_FIXED,
@@ -146,9 +170,7 @@ class PopupDataSource @Inject constructor() {
     // Popup data for app info shortcut.
     val appInfoPopupData =
         PopupData(
-            iconResId =
-                if (Flags.enableLauncherVisualRefresh()) R.drawable.info_24px
-                else R.drawable.ic_info_no_shadow,
+            iconResId = R.drawable.info_24px,
             labelResId = R.string.app_info_drop_target_label,
             popupAction = handleAppInfo,
             category = PopupCategory.SYSTEM_SHORTCUT,
@@ -256,7 +278,7 @@ class PopupDataSource @Inject constructor() {
 
     // Handles action when tapping bubble shortcut.
     private val handleBubbleShortcut =
-        { activityContext: ActivityContext, itemInfo: ItemInfo, view: View ->
+        { activityContext: ActivityContext, itemInfo: ItemInfo, _: View ->
             val starter: BubbleActivityStarter = activityContext as BubbleActivityStarter
 
             dismissTaskMenuView(activityContext)
@@ -264,23 +286,34 @@ class PopupDataSource @Inject constructor() {
         }
 
     private fun showBubbleShortcut(starter: BubbleActivityStarter, itemInfo: ItemInfo) {
+        fun ItemInfo.getEntryPoint() =
+            when {
+                isInAllApps -> EntryPoint.ALL_APPS_ICON_MENU
+                isInHotseat ->
+                    if (starter is TaskbarBubbleActivityStarter) {
+                        EntryPoint.TASKBAR_ICON_MENU
+                    } else {
+                        EntryPoint.HOTSEAT_ICON_MENU
+                    }
+                else -> EntryPoint.LAUNCHER_ICON_MENU
+            }
+
         // TODO: handle GroupTask (single) items so that recent items in taskbar work
         if (itemInfo is WorkspaceItemInfo) {
-            val workspaceItemInfo = itemInfo
-            val shortcutInfo = workspaceItemInfo.deepShortcutInfo
+            val shortcutInfo = itemInfo.deepShortcutInfo
             if (shortcutInfo != null) {
-                starter.showShortcutBubble(shortcutInfo)
+                starter.showShortcutBubble(shortcutInfo, itemInfo.getEntryPoint())
                 return
             }
         }
 
         // If we're here check for an intent
-        val intent: Intent? = itemInfo.intent
-        if (intent != null) {
+        if (itemInfo.intent != null) {
+            val intent = Intent(itemInfo.intent)
             if (intent.getPackage() == null) {
                 intent.setPackage(itemInfo.getTargetPackage())
             }
-            starter.showAppBubble(intent, itemInfo.user)
+            starter.showAppBubble(intent, itemInfo.user, itemInfo.getEntryPoint())
         } else {
             Log.w(TAG, "unable to bubble, no intent: $itemInfo")
         }
@@ -303,6 +336,24 @@ class PopupDataSource @Inject constructor() {
                 AbstractFloatingView.TYPE_ALL and AbstractFloatingView.TYPE_REBIND_SAFE.inv(),
             )
     }
+
+    val openHomeScreenFile =
+        PopupData(
+            iconResId = R.drawable.ic_home_screen_files_context_menu_open_in_app,
+            labelResId = R.string.home_screen_files_context_menu_open_in_app_label,
+            popupAction = { activityContext: ActivityContext, itemInfo: ItemInfo, view: View ->
+                activityContext.startActivitySafely(view, itemInfo.intent, itemInfo)
+            },
+            category = PopupCategory.SYSTEM_SHORTCUT_FIXED,
+        )
+
+    val deletePermanently =
+        PopupData(
+            iconResId = R.drawable.ic_home_screen_files_context_menu_move_to_trash,
+            labelResId = R.string.home_screen_files_context_menu_delete_permanently_label,
+            popupAction = handleRemove,
+            category = PopupCategory.SYSTEM_SHORTCUT_FIXED,
+        )
 
     companion object {
         private const val TAG = "PopupDataSource"

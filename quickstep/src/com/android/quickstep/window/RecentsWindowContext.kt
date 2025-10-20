@@ -35,7 +35,11 @@ import com.android.launcher3.util.Themes
  * <p>
  * Overlays have their own window and need a window context.
  */
-abstract class RecentsWindowContext(windowContext: Context, wallpaperColorHints: Int) :
+abstract class RecentsWindowContext(
+    windowContext: Context,
+    wallpaperColorHints: Int,
+    private val invariantDeviceProfile: InvariantDeviceProfile,
+) :
     BaseContext(
         base = windowContext,
         themeResId = Themes.getActivityThemeRes(windowContext, wallpaperColorHints),
@@ -67,9 +71,8 @@ abstract class RecentsWindowContext(windowContext: Context, wallpaperColorHints:
 
     fun initDeviceProfile() {
         deviceProfile =
-            if (displayId == Display.DEFAULT_DISPLAY)
-                InvariantDeviceProfile.INSTANCE[this].getDeviceProfile(this)
-            else InvariantDeviceProfile.INSTANCE[this].createDeviceProfileForSecondaryDisplay(this)
+            if (displayId == Display.DEFAULT_DISPLAY) invariantDeviceProfile.getDeviceProfile(this)
+            else invariantDeviceProfile.createDeviceProfileForSecondaryDisplay(this)
     }
 
     override fun getDeviceProfile(): DeviceProfile {

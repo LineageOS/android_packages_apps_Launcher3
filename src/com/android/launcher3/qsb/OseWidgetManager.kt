@@ -21,20 +21,25 @@ import android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID
 import android.appwidget.AppWidgetProviderInfo
 import android.appwidget.AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX
 import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_CONFIGURATION_OPTIONAL
+import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_HIDE_FROM_PICKER
+import android.content.ActivityNotFoundException
 import android.content.Context
-import android.os.Process
 import android.os.Process.myUserHandle
+import android.util.Log
 import android.widget.RemoteViews
+import android.widget.Toast
 import androidx.annotation.VisibleForTesting
+import com.android.launcher3.BaseActivity
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.InvariantDeviceProfile.OnIDPChangeListener
+import com.android.launcher3.LauncherConstants.ActivityCodes.REQUEST_RECONFIGURE_APPWIDGET
+import com.android.launcher3.R
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.qsb.OSEManager.Companion.OSE_LOOPER
 import com.android.launcher3.qsb.OSEManager.OSEInfo
 import com.android.launcher3.qsb.QsbAppWidgetHost.Callbacks
 import com.android.launcher3.util.DaggerSingletonTracker
-import com.android.launcher3.util.LooperExecutor
 import com.android.launcher3.util.MutableListenableRef
 import com.android.launcher3.util.PackageUserKey
 import com.android.launcher3.widget.WidgetManagerHelper
@@ -64,7 +69,7 @@ constructor(
     private val mutableViews = MutableListenableRef<RemoteViews?>(null)
     val views = mutableViews.asListenable()
 
-    private val executor = LooperExecutor(OSE_LOOPER, Process.THREAD_PRIORITY_DEFAULT)
+    private val executor = OSE_LOOPER
 
     init {
         widgetHost.setCallbacks(
@@ -91,7 +96,14 @@ constructor(
     private fun handleOseInfoUpdate(info: OSEInfo) {
         // If the package is null, leave it to the current value as the OSEManager
         // may not have initialized yet
-        val providerPkg = info.pkg ?: return
+        val providerPkg =
+            if (info.pkg != null) {
+                info.pkg
+            } else {
+                // When defaultSearchPackage is disabled oseInfo pkg is null.
+                dispatchNullValues()
+                return
+            }
         val searchWidget = findSearchWidgetForPackage(context, providerPkg)
 
         val currentWidgetId = widgetHost.getBoundWidgetId()
@@ -142,7 +154,33 @@ constructor(
         if (mutableViews.value != null) mutableViews.dispatchValue(null)
     }
 
+    fun startConfigActivity(activity: BaseActivity): Boolean {
+        val widgetId = widgetHost.getActiveWidgetId()
+        if (widgetId == 0) {
+            Log.e(TAG, "Couldn't find a valid widgetId")
+            return false
+        }
+        try {
+            widgetHost.startAppWidgetConfigureActivityForResult(
+                activity,
+                widgetId,
+                0,
+                REQUEST_RECONFIGURE_APPWIDGET,
+                activity
+                    .makeDefaultActivityOptions(-1 /* SPLASH_SCREEN_STYLE_UNDEFINED */)
+                    .toBundle(),
+            )
+            return true
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(activity, R.string.activity_not_found, Toast.LENGTH_SHORT).show()
+        } catch (e: SecurityException) {
+            Log.e(TAG, "Security Exception " + e)
+        }
+        return false
+    }
+
     companion object {
+        private const val TAG = "OseWidgetManager"
 
         @VisibleForTesting
         fun findSearchWidgetForPackage(context: Context, pkg: String): AppWidgetProviderInfo? {
@@ -153,9 +191,13 @@ constructor(
                         it.configure == null ||
                             ((it.widgetFeatures and WIDGET_FEATURE_CONFIGURATION_OPTIONAL) != 0)
                     }
-            return allEligibleWidgets.firstOrNull {
-                (it.widgetCategory and WIDGET_CATEGORY_SEARCHBOX) != 0
-            } ?: allEligibleWidgets.firstOrNull()
+            val allSearchBoxWidgets =
+                allEligibleWidgets.filter { (it.widgetCategory and WIDGET_CATEGORY_SEARCHBOX) != 0 }
+            return allSearchBoxWidgets.firstOrNull {
+                // If multiple search box widgets are available, choose the widget that is
+                // not hidden from the picker
+                (it.widgetFeatures and WIDGET_FEATURE_HIDE_FROM_PICKER) == 0
+            } ?: allSearchBoxWidgets.firstOrNull() ?: allEligibleWidgets.firstOrNull()
         }
     }
 }

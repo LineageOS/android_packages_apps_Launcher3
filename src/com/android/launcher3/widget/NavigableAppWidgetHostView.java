@@ -20,6 +20,7 @@ import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
 import android.graphics.Rect;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewDebug;
@@ -27,7 +28,6 @@ import android.view.ViewGroup;
 
 import com.android.launcher3.Reorderable;
 import com.android.launcher3.dragndrop.DraggableView;
-import com.android.launcher3.logging.FileLog;
 import com.android.launcher3.util.MultiTranslateDelegate;
 import com.android.launcher3.views.ActivityContext;
 
@@ -174,7 +174,7 @@ public abstract class NavigableAppWidgetHostView extends AppWidgetHostView
     }
 
     private void updateScale() {
-        FileLog.d(TAG, "updateScale - [fitScale,bounceScale]: ["
+        Log.d(TAG, "updateScale - [fitScale,bounceScale]: ["
                 + mScaleToFit + "," + mScaleForReorderBounce + "]");
         super.setScaleX(mScaleToFit * mScaleForReorderBounce);
         super.setScaleY(mScaleToFit * mScaleForReorderBounce);

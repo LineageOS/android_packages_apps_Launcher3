@@ -26,12 +26,13 @@ import static com.android.wm.shell.shared.GroupedTaskInfo.TYPE_SPLIT;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.KeyguardManager;
 import android.app.TaskInfo;
+import android.companion.virtual.VirtualDeviceManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Process;
-import android.os.RemoteException;
 import android.util.Log;
 import android.util.SparseBooleanArray;
+import android.view.Display;
 import android.window.DesktopExperienceFlags;
 
 import androidx.annotation.Nullable;
@@ -77,65 +78,70 @@ public class RecentTasksList {
 
     private final Context mContext;
     private final KeyguardManager mKeyguardManager;
+    private final VirtualDeviceManager mVirtualDeviceManager;
     private final LooperExecutor mMainThreadExecutor;
     private final SystemUiProxy mSysUiProxy;
 
     // The list change id, increments as the task list changes in the system
     private int mChangeId;
-    // Whether we are currently updating the tasks in the background (up to when the result is
-    // posted back on the main thread)
-    private boolean mLoadingTasksInBackground;
 
     private TaskLoadResult mResultsBg = INVALID_RESULT;
     private TaskLoadResult mResultsUi = INVALID_RESULT;
 
-    private @Nullable RecentsModel.RunningTasksListener mRunningTasksListener;
     private @Nullable RecentsModel.RecentTasksChangedListener mRecentTasksChangedListener;
-    // Tasks are stored in order of least recently launched to most recently launched.
-    private ArrayList<RunningTaskInfo> mRunningTasks;
+
+    // Track displays that belong to virtual devices. Tasks on such displays are treated as if
+    // they are running on the default display.
+    // TODO(b/443015666): Move this logic upstream to WM Shell or WM Core.
+    private final SparseBooleanArray mVirtualDeviceDisplays = new SparseBooleanArray() {
+        @Override
+        public boolean get(int displayId) {
+            if (indexOfKey(displayId) < 0) {
+                final boolean isVirtualDeviceDisplay =
+                        mVirtualDeviceManager != null
+                                && mVirtualDeviceManager.getDeviceIdForDisplayId(displayId)
+                                != Context.DEVICE_ID_DEFAULT;
+                put(displayId, isVirtualDeviceDisplay);
+            }
+            return super.get(displayId);
+        }
+    };
 
     public RecentTasksList(Context context, LooperExecutor mainThreadExecutor,
-            KeyguardManager keyguardManager, SystemUiProxy sysUiProxy,
-            TopTaskTracker topTaskTracker,
+            KeyguardManager keyguardManager, VirtualDeviceManager virtualDeviceManager,
+            SystemUiProxy sysUiProxy, TopTaskTracker topTaskTracker,
             DaggerSingletonTracker tracker) {
         mContext = context;
         mMainThreadExecutor = mainThreadExecutor;
         mKeyguardManager = keyguardManager;
+        mVirtualDeviceManager = virtualDeviceManager;
         mChangeId = 1;
         mSysUiProxy = sysUiProxy;
         final IRecentTasksListener recentTasksListener = new IRecentTasksListener.Stub() {
             @Override
-            public void onRecentTasksChanged() throws RemoteException {
+            public void onRecentTasksChanged() {
                 mMainThreadExecutor.execute(RecentTasksList.this::onRecentTasksChanged);
             }
 
             @Override
             public void onRunningTaskAppeared(RunningTaskInfo taskInfo) {
-                mMainThreadExecutor.execute(() -> {
-                    RecentTasksList.this.onRunningTaskAppeared(taskInfo);
-                });
+                // Do nothing
             }
 
             @Override
             public void onRunningTaskVanished(RunningTaskInfo taskInfo) {
-                mMainThreadExecutor.execute(() -> {
-                    RecentTasksList.this.onRunningTaskVanished(taskInfo);
-                });
+                // Do nothing
             }
 
             @Override
             public void onRunningTaskChanged(RunningTaskInfo taskInfo) {
-                mMainThreadExecutor.execute(() -> {
-                    RecentTasksList.this.onRunningTaskChanged(taskInfo);
-                });
+                // Do nothing
             }
 
             @Override
             public void onTaskMovedToFront(GroupedTaskInfo taskToFront) {
-                mMainThreadExecutor.execute(() -> {
-                    topTaskTracker.handleTaskMovedToFront(
-                            taskToFront.getBaseGroupedTask().getTaskInfo1());
-                });
+                mMainThreadExecutor.execute(() -> topTaskTracker.handleTaskMovedToFront(
+                        taskToFront.getBaseGroupedTask().getTaskInfo1()));
             }
 
             @Override
@@ -145,26 +151,14 @@ public class RecentTasksList {
 
             @Override
             public void onVisibleTasksChanged(GroupedTaskInfo[] visibleTasks) {
-                mMainThreadExecutor.execute(() -> {
-                    topTaskTracker.onVisibleTasksChanged(visibleTasks);
-                });
+                mMainThreadExecutor.execute(
+                        () -> topTaskTracker.onVisibleTasksChanged(visibleTasks));
             }
         };
 
         mSysUiProxy.registerRecentTasksListener(recentTasksListener);
         tracker.addCloseable(
                 () -> mSysUiProxy.unregisterRecentTasksListener(recentTasksListener));
-
-        // We may receive onRunningTaskAppeared events later for tasks which have already been
-        // included in the list returned by mSysUiProxy.getRunningTasks(), or may receive
-        // onRunningTaskVanished for tasks not included in the returned list. These cases will be
-        // addressed when the tasks are added to/removed from mRunningTasks.
-        initRunningTasks(mSysUiProxy.getRunningTasks(Integer.MAX_VALUE));
-    }
-
-    @VisibleForTesting
-    public boolean isLoadingTasksInBackground() {
-        return mLoadingTasksInBackground;
     }
 
     /**
@@ -219,16 +213,13 @@ public class RecentTasksList {
                         .map(GroupTask::copy)
                         .collect(Collectors.toCollection(ArrayList<GroupTask>::new));
 
-                mMainThreadExecutor.post(() -> {
-                    callback.accept(result, requestLoadId);
-                });
+                mMainThreadExecutor.post(() -> callback.accept(result, requestLoadId));
             }
 
             return requestLoadId;
         }
 
         // Kick off task loading in the background
-        mLoadingTasksInBackground = true;
         UI_HELPER_EXECUTOR.execute(() -> {
             if (!mResultsBg.isValidForRequest(requestLoadId, loadKeysOnly)) {
                 mResultsBg = loadTasksInBackground(Integer.MAX_VALUE, requestLoadId, loadKeysOnly);
@@ -236,7 +227,6 @@ public class RecentTasksList {
             }
             TaskLoadResult loadResult = mResultsBg;
             mMainThreadExecutor.execute(() -> {
-                mLoadingTasksInBackground = false;
                 mResultsUi = loadResult;
                 Log.d("b/417220811", "getTasks - updating mResultsUi: " + mResultsUi.mRequestId);
                 if (callback != null) {
@@ -278,20 +268,6 @@ public class RecentTasksList {
     /**
      * Registers a listener for running tasks
      */
-    public void registerRunningTasksListener(RecentsModel.RunningTasksListener listener) {
-        mRunningTasksListener = listener;
-    }
-
-    /**
-     * Removes the previously registered running tasks listener
-     */
-    public void unregisterRunningTasksListener() {
-        mRunningTasksListener = null;
-    }
-
-    /**
-     * Registers a listener for running tasks
-     */
     public void registerRecentTasksChangedListener(
             RecentsModel.RecentTasksChangedListener listener) {
         mRecentTasksChangedListener = listener;
@@ -302,59 +278,6 @@ public class RecentTasksList {
      */
     public void unregisterRecentTasksChangedListener() {
         mRecentTasksChangedListener = null;
-    }
-
-    private void initRunningTasks(List<RunningTaskInfo> runningTasks) {
-        // Tasks are retrieved in order of most recently launched/used to least recently launched.
-        mRunningTasks = new ArrayList<>(runningTasks);
-        Collections.reverse(mRunningTasks);
-    }
-
-    /**
-     * Gets the set of running tasks.
-     */
-    public ArrayList<RunningTaskInfo> getRunningTasks() {
-        return mRunningTasks;
-    }
-
-    private void onRunningTaskAppeared(RunningTaskInfo taskInfo) {
-        // Make sure this task is not already in the list
-        for (RunningTaskInfo existingTask : mRunningTasks) {
-            if (taskInfo.taskId == existingTask.taskId) {
-                return;
-            }
-        }
-        mRunningTasks.add(taskInfo);
-        if (mRunningTasksListener != null) {
-            mRunningTasksListener.onRunningTasksChanged();
-        }
-    }
-
-    private void onRunningTaskVanished(RunningTaskInfo taskInfo) {
-        // Find the task from the list of running tasks, if it exists
-        for (RunningTaskInfo existingTask : mRunningTasks) {
-            if (existingTask.taskId != taskInfo.taskId) continue;
-
-            mRunningTasks.remove(existingTask);
-            if (mRunningTasksListener != null) {
-                mRunningTasksListener.onRunningTasksChanged();
-            }
-            return;
-        }
-    }
-
-    private void onRunningTaskChanged(RunningTaskInfo taskInfo) {
-        // Find the task from the list of running tasks, if it exists
-        for (RunningTaskInfo existingTask : mRunningTasks) {
-            if (existingTask.taskId != taskInfo.taskId) continue;
-
-            mRunningTasks.remove(existingTask);
-            mRunningTasks.add(taskInfo);
-            if (mRunningTasksListener != null) {
-                mRunningTasksListener.onRunningTasksChanged();
-            }
-            return;
-        }
     }
 
     /**
@@ -411,13 +334,13 @@ public class RecentTasksList {
             // [getTaskInfo1] will not be null for types below beside [TYPE_DESK].
             if (Flags.enableShellTopTaskTracking()) {
                 final TaskInfo taskInfo1 = rawTask.getBaseGroupedTask().getTaskInfo1();
-                final Task.TaskKey task1Key = new Task.TaskKey(taskInfo1);
+                final Task.TaskKey task1Key = createTaskKey(taskInfo1);
                 final Task task1 = Task.from(task1Key, taskInfo1,
                         tmpLockedUsers.get(task1Key.userId) /* isLocked */);
 
                 if (rawTask.isBaseType(TYPE_SPLIT)) {
                     final TaskInfo taskInfo2 = rawTask.getBaseGroupedTask().getTaskInfo2();
-                    final Task.TaskKey task2Key = new Task.TaskKey(taskInfo2);
+                    final Task.TaskKey task2Key = createTaskKey(taskInfo2);
                     final Task task2 = Task.from(task2Key, taskInfo2,
                             tmpLockedUsers.get(task2Key.userId) /* isLocked */);
                     allTasks.add(new SplitTask(task1, task2,
@@ -428,7 +351,7 @@ public class RecentTasksList {
             } else {
                 TaskInfo taskInfo1 = rawTask.getTaskInfo1();
                 TaskInfo taskInfo2 = rawTask.getTaskInfo2();
-                Task.TaskKey task1Key = new Task.TaskKey(taskInfo1);
+                Task.TaskKey task1Key = createTaskKey(taskInfo1);
                 Task task1 = loadKeysOnly
                         ? new Task(task1Key)
                         : Task.from(task1Key, taskInfo1,
@@ -436,7 +359,7 @@ public class RecentTasksList {
                 Task task2 = null;
                 if (taskInfo2 != null) {
                     // Is split task
-                    Task.TaskKey task2Key = new Task.TaskKey(taskInfo2);
+                    Task.TaskKey task2Key = createTaskKey(taskInfo2);
                     task2 = loadKeysOnly
                             ? new Task(task2Key)
                             : Task.from(task2Key, taskInfo2,
@@ -469,13 +392,20 @@ public class RecentTasksList {
     }
 
     private Task createTask(TaskInfo taskInfo, Set<Integer> minimizedTaskIds) {
-        Task.TaskKey key = new Task.TaskKey(taskInfo);
+        Task.TaskKey key = createTaskKey(taskInfo);
         Task task = Task.from(key, taskInfo, false);
         task.positionInParent = taskInfo.positionInParent;
         task.appBounds = taskInfo.configuration.windowConfiguration.getAppBounds();
         task.isVisible = taskInfo.isVisible;
         task.isMinimized = minimizedTaskIds.contains(taskInfo.taskId);
         return task;
+    }
+
+    private Task.TaskKey createTaskKey(TaskInfo taskInfo) {
+        final int displayId = mVirtualDeviceDisplays.get(taskInfo.displayId)
+                ? Display.DEFAULT_DISPLAY
+                : taskInfo.displayId;
+        return new Task.TaskKey(taskInfo, displayId);
     }
 
     private List<DesktopTask> createDesktopTasks(GroupedTaskInfo recentTaskInfo) {

@@ -24,7 +24,6 @@ import static com.android.launcher3.util.DisplayController.CHANGE_ALL;
 import static com.android.launcher3.util.DisplayController.CHANGE_NAVIGATION_MODE;
 import static com.android.launcher3.util.DisplayController.CHANGE_ROTATION;
 import static com.android.launcher3.util.DisplayController.CHANGE_SUPPORTED_BOUNDS;
-import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 import static com.android.launcher3.util.NavigationMode.THREE_BUTTONS;
 
 import android.annotation.NonNull;
@@ -41,6 +40,8 @@ import com.android.launcher3.util.DaggerSingletonObject;
 import com.android.launcher3.util.DaggerSingletonTracker;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.DisplayController.DisplayInfoChangeListener;
+import com.android.launcher3.concurrent.annotations.LightweightBackground;
+import static com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority.UI;
 import com.android.launcher3.util.DisplayController.Info;
 import com.android.launcher3.util.NavigationMode;
 import com.android.quickstep.dagger.QuickstepBaseAppComponent;
@@ -55,6 +56,7 @@ import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 
 import java.io.PrintWriter;
+import java.util.concurrent.Executor;
 
 /**
  * Helper class for transforming touch events
@@ -70,6 +72,7 @@ public class RotationTouchHelper implements DisplayInfoChangeListener {
     private final DisplayController mDisplayController;
     private final SystemUiProxy mSystemUiProxy;
     private final int mDisplayId;
+    private final Executor mLightweightBackgroundExecutor;
     private int mDisplayRotation;
 
     private NavigationMode mMode = THREE_BUTTONS;
@@ -143,11 +146,14 @@ public class RotationTouchHelper implements DisplayInfoChangeListener {
             @Assisted Context windowContext,
             DisplayController displayController,
             SystemUiProxy systemUiProxy,
-            DaggerSingletonTracker lifeCycle) {
+            DaggerSingletonTracker lifeCycle,
+            @LightweightBackground(priority = UI) Executor lightweightBackgroundExecutor
+        ) {
         mWindowContext = windowContext;
         mDisplayId = windowContext.getDisplayId();
         mDisplayController = displayController;
         mSystemUiProxy = systemUiProxy;
+        mLightweightBackgroundExecutor = lightweightBackgroundExecutor;
 
         Resources resources = mWindowContext.getResources();
         mOrientationTouchTransformer = new OrientationTouchTransformer(resources, mMode,
@@ -322,9 +328,9 @@ public class RotationTouchHelper implements DisplayInfoChangeListener {
         if (enable && !mInOverview && !TestProtocol.sDisableSensorRotation) {
             // Clear any previous state from sensor manager
             mSensorRotation = mCurrentAppRotation;
-            UI_HELPER_EXECUTOR.execute(mOrientationListener::enable);
+            mLightweightBackgroundExecutor.execute(mOrientationListener::enable);
         } else {
-            UI_HELPER_EXECUTOR.execute(mOrientationListener::disable);
+            mLightweightBackgroundExecutor.execute(mOrientationListener::disable);
         }
     }
 
@@ -372,7 +378,8 @@ public class RotationTouchHelper implements DisplayInfoChangeListener {
     }
 
     private void notifySysuiOfCurrentRotation(int rotation) {
-        UI_HELPER_EXECUTOR.execute(() -> mSystemUiProxy.notifyPrioritizedRotation(rotation));
+        mLightweightBackgroundExecutor.execute(
+                () -> mSystemUiProxy.notifyPrioritizedRotation(rotation));
     }
 
     /**

@@ -28,11 +28,11 @@ import com.android.launcher3.concurrent.ExecutorsModule
 import com.android.launcher3.dagger.ApiWrapperModule
 import com.android.launcher3.dagger.AppModule
 import com.android.launcher3.dagger.ApplicationContext
+import com.android.launcher3.dagger.DesktopModule
 import com.android.launcher3.dagger.HomeScreenFilesModule
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
-import com.android.launcher3.dagger.LauncherConcurrencyModule
 import com.android.launcher3.dagger.LauncherModelModule
 import com.android.launcher3.dagger.PerDisplayModule
 import com.android.launcher3.dagger.PluginManagerWrapperModule
@@ -40,8 +40,6 @@ import com.android.launcher3.dagger.SettingsModule
 import com.android.launcher3.dagger.StaticObjectModule
 import com.android.launcher3.dagger.SystemDragModule
 import com.android.launcher3.dagger.WindowManagerProxyModule
-import com.android.launcher3.model.LayoutParserFactory
-import com.android.launcher3.model.LayoutParserFactory.XmlLayoutParserFactory
 import com.android.launcher3.model.ModelInitializer
 import com.android.launcher3.model.data.LoaderParams
 import com.android.launcher3.provider.LauncherDbUtils.selectionForWorkspaceScreen
@@ -112,18 +110,16 @@ constructor(
 
         if (layoutXml.isNullOrEmpty() || !Flags.extendibleThemeManager()) {
             mDbDir = null
-            builder
-                .bindParserFactory(LayoutParserFactory(this))
-                .bindWidgetsFactory(base.appComponent.widgetHolderFactory)
+            initDaggerComponent(builder.bindWidgetsFactory(base.appComponent.widgetHolderFactory))
         } else {
             mDbDir = File(base.filesDir, randomUid)
             emptyDbDir()
             mDbDir.mkdirs()
-            builder.bindParserFactory(XmlLayoutParserFactory(this, layoutXml)).bindWidgetsFactory {
-                NonPrimaryWidgetHolder(it, widgetHostId)
-            }
+            initDaggerComponent(
+                builder.bindWidgetsFactory { NonPrimaryWidgetHolder(it, widgetHostId) }
+            )
+            appComponent.layoutParserFactory.overrideXmlLayout(layoutXml)
         }
-        initDaggerComponent(builder)
 
         if (!TextUtils.isEmpty(layoutXml)) {
             // Use null the DB file so that we use a new in-memory DB
@@ -190,13 +186,13 @@ constructor(
                 StaticObjectModule::class,
                 AppModule::class,
                 PerDisplayModule::class,
-                LauncherConcurrencyModule::class,
                 ExecutorsModule::class,
                 LauncherExecutorsModule::class,
                 NoOpWidgetPickerModule::class,
                 LauncherModelModule::class,
                 PreviewModule::class,
                 HomeScreenFilesModule::class,
+                DesktopModule::class,
                 SettingsModule::class,
                 SystemDragModule::class,
             ]
@@ -210,8 +206,6 @@ constructor(
         @Component.Builder
         interface Builder : LauncherAppComponent.Builder {
             @BindsInstance fun bindPrefs(prefs: LauncherPrefs): Builder
-
-            @BindsInstance fun bindParserFactory(parserFactory: LayoutParserFactory): Builder
 
             @BindsInstance fun bindWidgetsFactory(holderFactory: WidgetHolderFactory): Builder
 

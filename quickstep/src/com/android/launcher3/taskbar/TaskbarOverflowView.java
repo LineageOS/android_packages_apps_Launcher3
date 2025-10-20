@@ -26,6 +26,7 @@ import android.graphics.BlendMode;
 import android.graphics.BlendModeColorFilter;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.PointF;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
@@ -43,21 +44,37 @@ import com.android.launcher3.R;
 import com.android.launcher3.Reorderable;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.icons.IconNormalizer;
+import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.util.MultiTranslateDelegate;
 import com.android.launcher3.util.Themes;
-import com.android.systemui.shared.recents.model.Task;
+import com.android.quickstep.util.SingleTask;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * View used as overflow icon within task bar, when the list of recent/running apps overflows the
- * available display bounds - if display is not wide enough to show all running apps in the taskbar,
- * this icon is added to the taskbar as an entry point to open UI that surfaces all running apps.
- * The icon contains icon representations of up to 4 more recent tasks in overflow, stacked on top
- * each other in counter clockwise manner (icons of tasks partially overlapping with each other).
+ * View used as an overflow icon within the taskbar.
+ * This view appears when the list of apps (either recent/running tasks or pinned apps)
+ * exceeds the available display space on the taskbar. If the display is not wide enough
+ * to show all relevant apps, this icon is added to the taskbar. Tapping this icon
+ * typically opens a UI that surfaces all the apps in the overflowed category.
+ * The icon visually represents some of the items in the overflow, often by stacking icon
+ * representations of up to a few apps (e.g., the 4 most recent tasks or a subset of pinned apps).
+ * These icons are typically stacked on top of each other in a counter-clockwise manner,
+ * partially overlapping.
  */
 public class TaskbarOverflowView extends FrameLayout implements Reorderable {
+
+    /**
+     * The height divided by the width of the horizontal box containing two overlapping app icons.
+     * According to the spec, this ratio is constant for different sizes of taskbar app icons.
+     * Assuming the width of this box = taskbar app icon size - 2 paddings - 2 stroke widths, and
+     * the height = width * 0.61, which is also equal to the height of a single item in the
+     * preview.
+     */
+    public static final float TWO_ITEM_ICONS_BOX_ASPECT_RATIO = 0.61f;
+    public static final long ITEM_ICON_SIZE_ANIMATION_DURATION = 500L;
+
     private static final int ALPHA_TRANSPARENT = 0;
     private static final int ALPHA_OPAQUE = 255;
     private static final long ANIMATION_DURATION_APPS_TO_LEAVE_BEHIND = 300L;
@@ -65,7 +82,6 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
     private static final long ANIMATION_SET_DURATION = 1000L;
     private static final long ITEM_ICON_CENTER_OFFSET_ANIMATION_DURATION = 500L;
     private static final long ITEM_ICON_COLOR_FILTER_OPACITY_ANIMATION_DURATION = 600L;
-    private static final long ITEM_ICON_SIZE_ANIMATION_DURATION = 500L;
     private static final long ITEM_ICON_STROKE_WIDTH_ANIMATION_DURATION = 500L;
     private static final long LEAVE_BEHIND_ANIMATIONS_DELAY = 500L;
     private static final long LEAVE_BEHIND_OPACITY_ANIMATION_DURATION = 100L;
@@ -73,11 +89,14 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
     private static final float LEAVE_BEHIND_SIZE_SCALE_DOWN_MULTIPLIER = 0.83f;
     private static final int MAX_ITEMS_IN_PREVIEW = 4;
 
-    // The height divided by the width of the horizontal box containing two overlapping app icons.
-    // According to the spec, this ratio is constant for different sizes of taskbar app icons.
-    // Assuming the width of this box = taskbar app icon size - 2 paddings - 2 stroke widths, and
-    // the height = width * 0.61, which is also equal to the height of a single item in the preview.
-    private static final float TWO_ITEM_ICONS_BOX_ASPECT_RATIO = 0.61f;
+    public enum OverflowType {
+        /** The overflow icon that contains pinned apps. */
+        PINNED,
+        /** The overflow icon that contains recent tasks where the apps are not pinned. */
+        RECENTS
+    }
+
+    private OverflowType mOverflowType;
 
     private static final FloatProperty<TaskbarOverflowView> ITEM_ICON_CENTER_OFFSET =
             new FloatProperty<>("itemIconCenterOffset") {
@@ -164,7 +183,7 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
             };
 
     private boolean mIsRtlLayout;
-    private final List<Task> mItems = new ArrayList<Task>();
+    private final List<TaskbarOverflowItem> mItems = new ArrayList<TaskbarOverflowItem>();
     private int mIconSize;
     private Paint mItemBackgroundPaint;
     private final MultiTranslateDelegate mTranslateDelegate = new MultiTranslateDelegate(this);
@@ -189,6 +208,7 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
     private float mLeaveBehindSizeScaledDown;
     private float mLeaveBehindSizeDefault;
     private float mLeaveBehindSize;  // [mLeaveBehindSizeScaledDown..mLeaveBehindSizeDefault]
+    private boolean mIsFirstItemHiddenForAnimation;
 
     public TaskbarOverflowView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -202,17 +222,19 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
 
     /**
      * Inflates the taskbar overflow button view.
-     * @param resId The resource to inflate the view from.
+     * @param type The type of the overflow button.
      * @param group The parent view.
      * @param iconSize The size of the overflow button icon.
      * @param padding The internal padding of the overflow view.
      * @return A taskbar overflow button.
      */
-    public static TaskbarOverflowView inflateIcon(int resId, ViewGroup group, int iconSize,
+    public static TaskbarOverflowView inflateIcon(OverflowType type, ViewGroup group, int iconSize,
             int padding) {
         LayoutInflater inflater = LayoutInflater.from(group.getContext());
-        TaskbarOverflowView icon = (TaskbarOverflowView) inflater.inflate(resId, group, false);
-
+        TaskbarOverflowView icon = (TaskbarOverflowView) inflater.inflate(
+                R.layout.taskbar_overflow_view, group, false);
+        icon.mOverflowType = type;
+        icon.setContentDescription(icon.getTextForTooltipPopup());
         icon.mIconSize = iconSize;
 
         final float taskbarIconRadius =
@@ -265,8 +287,12 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
 
         int itemsToShow = Math.min(mItems.size(), MAX_ITEMS_IN_PREVIEW);
         for (int i = itemsToShow - 1; i >= 0; --i) {
-            Drawable icon = mItems.get(mItems.size() - i - 1).icon;
+            Drawable icon = mItems.get(mItems.size() - i - 1).getDrawableIcon();
             if (icon == null) {
+                continue;
+            }
+
+            if (i == 0 && mIsFirstItemHiddenForAnimation) {
                 continue;
             }
 
@@ -311,7 +337,7 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
      * Update the view to represent a new list of recent tasks.
      * @param items Items to be shown in the view.
      */
-    public void setItems(List<Task> items) {
+    public void setItems(List<? extends TaskbarOverflowItem> items) {
         mItems.clear();
         mItems.addAll(items);
         invalidate();
@@ -319,19 +345,44 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
 
     @VisibleForTesting
     public List<Integer> getItemIds() {
-        return mItems.stream().map(task -> task.key.id).toList();
+        return mItems.stream().map(TaskbarOverflowItem::getItemId).toList();
+    }
+
+    List<ItemInfo> getOverflowInfoList() {
+        return mItems.stream().map(item -> ((ItemInfoWrapper) item).getItemInfo()).toList();
+    }
+
+    /**
+     * Updates the first item in the preview to be hidden to allow another icon to animate into
+     * its place.
+     * @param isHidden The hidden state for the first item in the preview is hidden.
+     */
+    public void setFirstItemHiddenForAnimation(boolean isHidden) {
+        if (mIsFirstItemHiddenForAnimation != isHidden) {
+            mIsFirstItemHiddenForAnimation = isHidden;
+            invalidate();
+        }
+    }
+
+    /**
+     * Returns {@code true} if the first item in the preview is hidden to allow another icon
+     * to animate into its place.
+     */
+    public boolean isFirstItemHiddenForAnimation() {
+        return mIsFirstItemHiddenForAnimation;
     }
 
     /**
      * Called when a task is updated. If the task is contained within the view, it's cached value
      * gets updated. If the task is shown within the icon, invalidates the view, so the task icon
      * gets updated.
-     * @param task The updated task.
+     * @param singleTask The updated SingeTask.
      */
-    public void updateTaskIsShown(Task task) {
+    public void updateTaskIsShown(SingleTask singleTask) {
         for (int i = 0; i < mItems.size(); ++i) {
-            if (mItems.get(i).key.id == task.key.id) {
-                mItems.set(i, task);
+            if (mItems.get(i) instanceof TaskWrapper taskItem
+                    && taskItem.getItemId() == singleTask.getTask().key.id) {
+                mItems.set(i, new TaskWrapper(getContext(), singleTask));
                 if (i >= mItems.size() - MAX_ITEMS_IN_PREVIEW) {
                     invalidate();
                 }
@@ -345,10 +396,10 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
      *         not have a tooltip.
      */
     public String getTextForTooltipPopup() {
-        if (mIsActive) {
-            return null;
-        }
-        return getResources().getString(R.string.taskbar_overflow_a11y_title);
+        return switch (mOverflowType) {
+            case PINNED -> getResources().getString(R.string.taskbar_pinned_overflow_a11y_title);
+            case RECENTS -> getResources().getString(R.string.taskbar_recents_overflow_a11y_title);
+        };
     }
 
     /**
@@ -504,5 +555,26 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
         }
         // First half of items is on top, later half is on bottom.
         return (itemIndex + 1 <= itemCount / 2 ? -1 : 1) * baseOffset;
+    }
+
+    /**
+     * Calculate the x and y offsets of the first item.
+     */
+    public PointF getOverlayOffsetsForFirstItem(boolean isMovingAway, int indexOfItem) {
+        int itemsToShow = Math.min(mItems.size(), MAX_ITEMS_IN_PREVIEW);
+        int totalItems = isMovingAway && itemsToShow < MAX_ITEMS_IN_PREVIEW
+                ? itemsToShow + 1 : itemsToShow;
+
+        // Reverse the overlay offset item index for the special case of overflow icon removing
+        // from view in RTL layout,
+        if (mIsRtlLayout && itemsToShow == 0 && isMovingAway) {
+            indexOfItem = indexOfItem == 0 ? 1 : 0;
+        }
+
+        float xOffset = getItemXOffset(
+                mItemIconCenterOffset, mIsRtlLayout, indexOfItem, totalItems);
+        float yOffset = getItemYOffset(mItemIconCenterOffset, indexOfItem, totalItems);
+
+        return new PointF(xOffset, yOffset);
     }
 }

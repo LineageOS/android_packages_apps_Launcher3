@@ -21,6 +21,7 @@ import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import static com.android.launcher3.model.data.AppInfo.COMPONENT_KEY_COMPARATOR;
 import static com.android.launcher3.model.data.AppInfo.PACKAGE_KEY_COMPARATOR;
 import static com.android.launcher3.util.SplitConfigurationOptions.getLogEventForPosition;
+import static com.android.window.flags.Flags.enableOverflowButtonForTaskbarPinnedItems;
 
 import android.content.Intent;
 import android.content.pm.LauncherApps;
@@ -41,11 +42,12 @@ import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.Flags;
 import com.android.launcher3.LauncherSettings;
-import com.android.launcher3.R;
 import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
+import com.android.launcher3.popup.PinToTaskbarShortcut;
 import com.android.launcher3.popup.Popup;
+import com.android.launcher3.popup.PopupContainer;
 import com.android.launcher3.popup.PopupContainerWithArrow;
 import com.android.launcher3.popup.PopupController;
 import com.android.launcher3.popup.PopupItemDragHandler;
@@ -93,10 +95,6 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
     // Saves the ItemInfos in the hotseat without the predicted items.
     private SparseArray<ItemInfo> mTaskbarInfoList;
     private ManageWindowsTaskbarShortcut<BaseTaskbarContext> mManageWindowsTaskbarShortcut;
-    // Whether the popup is currently open. This is reset to false when the close animation is
-    // complete.
-    private boolean mIsPopupOpened = false;
-
 
     public TaskbarPopupController(TaskbarActivityContext context) {
         mContext = context;
@@ -127,10 +125,6 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
         mAllowInitialSplitSelection = allowInitialSplitSelection;
     }
 
-    public boolean isPopupOpened() {
-        return mIsPopupOpened;
-    }
-
     // Create a Stream of all applicable system shortcuts
     private Stream<SystemShortcut.Factory<BaseTaskbarContext>> getSystemShortcuts() {
         // append split options to APP_INFO shortcut if not in Desktop Windowing mode, the order
@@ -151,6 +145,12 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
             maybeCloseMultiInstanceMenu();
             shortcuts.addAll(getMultiInstanceMenuOptions().toList());
         }
+
+        if (!mControllers.taskbarStashController.isInOverview()
+                && mControllers.taskbarDesktopModeController.shouldShowDesktopTasksInTaskbar(
+                        mContext.getDisplayId())) {
+            shortcuts.add(createCloseAppTaskbarShortcutFactory());
+        }
         return shortcuts.stream();
     }
 
@@ -162,9 +162,11 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
         if (itemInfo.container == CONTAINER_HOTSEAT_PREDICTION) {
             return null;
         }
+
+        int maxPinnableCount = mContext.getTaskbarSpecsEvaluator().getMaxPinnableCount();
         if (itemInfo.container == CONTAINER_HOTSEAT) {
             return new PinToTaskbarShortcut<>(target, itemInfo, originalView, false,
-                    mTaskbarInfoList);
+                    maxPinnableCount, mTaskbarInfoList);
         }
 
         if (itemInfo.isInAllApps()) {
@@ -173,15 +175,15 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
                 if (Objects.equals(mTaskbarInfoList.valueAt(i).getComponentKey(),
                         itemInfo.getComponentKey())) {
                     return new PinToTaskbarShortcut<>(target, itemInfo, originalView, false,
-                            mTaskbarInfoList);
+                            maxPinnableCount, mTaskbarInfoList);
                 }
             }
         }
 
-        if (mTaskbarInfoList.size()
-                < mContext.getTaskbarSpecsEvaluator().getNumShownHotseatIcons()) {
+        if (canPinAppsOverflow() || mTaskbarInfoList.size()
+                < mContext.getTaskbarSpecsEvaluator().getMaxPinnableCount()) {
             return new PinToTaskbarShortcut<>(target, itemInfo, originalView, true,
-                    mTaskbarInfoList);
+                    maxPinnableCount, mTaskbarInfoList);
         }
 
         return null;
@@ -197,7 +199,7 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
     public Popup show(@NonNull View view) {
         BubbleTextView icon = (BubbleTextView) view;
         BaseTaskbarContext context = ActivityContext.lookupContext(icon.getContext());
-        if (PopupContainerWithArrow.getOpen(context) != null) {
+        if (PopupContainer.getOpen(context) != null) {
             // There is already an items container open, so don't open this one.
             icon.clearFocus();
             return null;
@@ -240,11 +242,11 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
             }
         }
 
-        container = (PopupContainerWithArrow) context.getLayoutInflater().inflate(
-                R.layout.popup_container, context.getDragLayer(), false);
-        container.populateAndShowRows(icon, itemInfo, deepShortcutCount, systemShortcuts);
-
+        container = PopupContainerWithArrow.create(context, /* originalView */ icon,
+                /*itemInfo */ itemInfo,
+                /* updateIconUi */ false);
         // TODO (b/198438631): configure for taskbar/context
+        container.populateAndShowRows(deepShortcutCount, systemShortcuts);
         container.setPopupItemDragHandler(new TaskbarPopupItemDragHandler());
         context.getDragController().addDragListener(container);
         container.requestFocus();
@@ -253,9 +255,7 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
         context.onPopupVisibilityChanged(true);
         container.addOnCloseCallback(() -> {
             context.getDragLayer().post(() -> context.onPopupVisibilityChanged(false));
-            mIsPopupOpened = false;
         });
-        mIsPopupOpened = true;
 
         return container;
     }
@@ -395,6 +395,23 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
     }
 
     /**
+     * Creates a factory function representing a "Close" menu item only if the calling app
+     * is in Desktop Mode.
+     * @return A factory function to be used in populating the long-press menu.
+     */
+    @Nullable
+    @VisibleForTesting
+    SystemShortcut.Factory<BaseTaskbarContext> createCloseAppTaskbarShortcutFactory() {
+        return (context, itemInfo, originalView) -> {
+            if (mControllers.taskbarRecentAppsController.getDesktopItemState(
+                    itemInfo).getRunningAppState() == BubbleTextView.RunningAppState.NOT_RUNNING) {
+                return null;
+            }
+            return new CloseAppTaskbarShortcut<>(context, itemInfo, originalView, mControllers);
+        };
+    }
+
+    /**
      * Determines whether to show multi-instance options for a given item.
      */
     private boolean shouldShowMultiInstanceOptions(ItemInfo itemInfo) {
@@ -407,6 +424,14 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
     protected static boolean canPinAppWithContextMenu(TaskbarActivityContext context) {
         return DesktopExperienceFlags.ENABLE_PINNING_APP_WITH_CONTEXT_MENU.isTrue()
                 && context.isTaskbarShowingDesktopTasks();
+    }
+
+    /**
+     * @return whether the taskbar can have the overflow icon to accommodate pinned apps that
+     * can't fit in taskbar.
+     */
+    public static boolean canPinAppsOverflow() {
+        return enableOverflowButtonForTaskbarPinnedItems();
     }
 
     /**

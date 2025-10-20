@@ -32,25 +32,32 @@ import com.android.launcher3.dragndrop.SystemDragController;
 import com.android.launcher3.folder.FolderNameSuggestionLoader;
 import com.android.launcher3.graphics.GridCustomizationsProxy;
 import com.android.launcher3.graphics.ThemeManager;
+import com.android.launcher3.graphics.theme.ThemePreference;
+import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider;
+import com.android.launcher3.icons.IconChangeTracker;
 import com.android.launcher3.icons.LauncherIcons.IconPool;
 import com.android.launcher3.logging.DumpManager;
 import com.android.launcher3.logging.StatsLogManager;
 import com.android.launcher3.model.GridSizeMigrationLogic;
 import com.android.launcher3.model.ItemInstallQueue;
+import com.android.launcher3.model.LayoutParserFactory;
 import com.android.launcher3.model.LoaderCursor.LoaderCursorFactory;
 import com.android.launcher3.model.TestableModelState;
 import com.android.launcher3.notification.NotificationRepository;
 import com.android.launcher3.pm.InstallSessionHelper;
 import com.android.launcher3.pm.UserCache;
 import com.android.launcher3.popup.PopupDataRepository;
+import com.android.launcher3.qsb.OSEManager;
 import com.android.launcher3.qsb.OseWidgetManager;
 import com.android.launcher3.qsb.QsbAppWidgetHost;
+import com.android.launcher3.qsb.QsbWidgetFactory;
 import com.android.launcher3.testing.TestInformationHandler;
 import com.android.launcher3.util.ApiWrapper;
 import com.android.launcher3.util.DaggerSingletonTracker;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.DynamicResource;
 import com.android.launcher3.util.InstantAppResolver;
+import com.android.launcher3.util.LayoutImportExportHelper;
 import com.android.launcher3.util.LockedUserState;
 import com.android.launcher3.util.MSDLPlayerWrapper;
 import com.android.launcher3.util.PackageManagerHelper;
@@ -60,6 +67,7 @@ import com.android.launcher3.util.SettingsCache;
 import com.android.launcher3.util.TaskbarModeUtil;
 import com.android.launcher3.util.VibratorWrapper;
 import com.android.launcher3.util.WallpaperColorHints;
+import com.android.launcher3.util.coroutines.ProductionDispatchers;
 import com.android.launcher3.util.window.RefreshRateTracker;
 import com.android.launcher3.util.window.WindowManagerProxy;
 import com.android.launcher3.widget.LauncherWidgetHolder.WidgetHolderFactory;
@@ -117,10 +125,17 @@ public interface LauncherBaseAppComponent {
     WidgetSizeHandler getWidgetSizeHandler();
     MainProcessInitializer getMainProcessInitializer();
     OseWidgetManager getOseWidgetManager();
+    OSEManager getOseManager();
     QsbAppWidgetHost getQsbAppWidgetHost();
     TestInformationHandler getTestInformationHandler();
     TaskbarModeUtil getTaskbarModeUtil();
     SystemDragController getSystemDragController();
+    ProductionDispatchers getProductionDispatchers();
+
+    /** Utility class for importing/exporting launcher layout */
+    LayoutImportExportHelper getLayoutImportExportHelper();
+    /** Returns the layout parser factory for default layout parsing */
+    LayoutParserFactory getLayoutParserFactory();
 
     @VisibleForTesting
     GridSizeMigrationLogic createNewGridSizeMigrationLogic();
@@ -129,6 +144,16 @@ public interface LauncherBaseAppComponent {
 
     PopupDataRepository getPopupDataRepository();
     NotificationRepository getNotificationRepository();
+    HomeScreenFilesProvider getHomeScreenFilesProvider();
+
+    /** Preferences for icon theme */
+    ThemePreference getThemePreference();
+
+    /** Tracker for any app icon changes */
+    IconChangeTracker getIconChangeTracker();
+
+    /** Factory for qsb inflation */
+    QsbWidgetFactory getQsbWidgetFactory();
 
     /** Builder for LauncherBaseAppComponent. */
     interface Builder {

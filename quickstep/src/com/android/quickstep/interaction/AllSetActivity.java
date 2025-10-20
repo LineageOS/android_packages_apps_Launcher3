@@ -309,7 +309,7 @@ public class AllSetActivity extends Activity implements UIControllerChangeListen
                 Typeface.create(FontFamily.GSF_HEADLINE_SMALL_EMPHASIZED.getValue(),
                         Typeface.NORMAL));
 
-        if (mIsExpressiveThemeEnabledInSUW && Flags.enableNewAllSetAnimation()) {
+        if (mIsExpressiveThemeEnabledInSUW) {
             mWallpaperClipPath = findViewById(R.id.wallpaper_clip_path);
             mWallpaperClipPath.setVisibility(VISIBLE);
 
@@ -355,7 +355,7 @@ public class AllSetActivity extends Activity implements UIControllerChangeListen
     }
 
     private AnimatorSet buildExpressiveAnimatorSet() {
-        if (!mIsExpressiveThemeEnabledInSUW || !Flags.enableNewAllSetAnimation()) {
+        if (!mIsExpressiveThemeEnabledInSUW) {
             return null;
         }
 
@@ -555,7 +555,7 @@ public class AllSetActivity extends Activity implements UIControllerChangeListen
         }
         if (mIsExpressiveThemeEnabledInSUW) {
             getWindow().setBackgroundBlurRadius(WALLPAPER_BLUR_RADIUS);
-            if (Flags.enableNewAllSetAnimation() && binder != null) {
+            if (binder != null) {
                 int height = getWindowManager().getCurrentWindowMetrics().getBounds().height();
                 binder.setGesturalHeight((int) (height * GESTURE_HEIGHT_RATIO_OF_WINDOW_HEIGHT));
             }
@@ -566,7 +566,7 @@ public class AllSetActivity extends Activity implements UIControllerChangeListen
     private void onTISConnected(TISBinder binder) {
         setSetupUIVisible(isResumed());
         binder.setSwipeUpProxy(isResumed() ? this::createSwipeUpProxy : null);
-        if (mIsExpressiveThemeEnabledInSUW && Flags.enableNewAllSetAnimation() && isResumed()) {
+        if (mIsExpressiveThemeEnabledInSUW && isResumed()) {
             int height = getWindowManager().getCurrentWindowMetrics().getBounds().height();
             binder.setGesturalHeight((int) (height * GESTURE_HEIGHT_RATIO_OF_WINDOW_HEIGHT));
         }
@@ -623,7 +623,7 @@ public class AllSetActivity extends Activity implements UIControllerChangeListen
         if (binder != null) {
             setSetupUIVisible(false);
             binder.setSwipeUpProxy(null);
-            if (mIsExpressiveThemeEnabledInSUW && Flags.enableNewAllSetAnimation()) {
+            if (mIsExpressiveThemeEnabledInSUW) {
                 binder.setGesturalHeight(RESET_TO_DEFAULT_GESTURAL_HEIGHT);
             }
         }
@@ -700,6 +700,10 @@ public class AllSetActivity extends Activity implements UIControllerChangeListen
             }
         } else {
             mBackground.setProgress(mSwipeProgress.value);
+
+            float alpha = getContentViewAlphaForSwipeProgress();
+            mRootView.setAlpha(alpha);
+            mRootView.setTranslationY((alpha - 1) * mSwipeUpShift);
         }
         if (mLauncherStartAnim != null) {
             mLauncherStartAnim.setPlayFraction(

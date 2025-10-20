@@ -23,15 +23,20 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.launcher3.deviceprofile.DeviceProperties
 import com.android.launcher3.util.TestActivityContext
+import com.android.window.flags.Flags.enableNonDefaultDisplaySplit
 import kotlin.random.Random
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Assume
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
 
 @RunWith(AndroidJUnit4::class)
 class UtilitiesTest {
@@ -41,6 +46,16 @@ class UtilitiesTest {
     }
 
     @get:Rule val mContext = TestActivityContext()
+
+    private val mockDeviceProperties = mock(DeviceProperties::class.java)
+
+    private fun mockDeviceIsTablet(isTablet: Boolean) {
+        `when`(mockDeviceProperties!!.isTablet).thenReturn(isTablet)
+    }
+
+    private fun mockDeviceIsLandscape(isLandscape: Boolean) {
+        `when`(mockDeviceProperties!!.isLandscape).thenReturn(isLandscape)
+    }
 
     @Test
     fun testIsPropertyEnabled() {
@@ -378,5 +393,130 @@ class UtilitiesTest {
         rect = Rect(20, 70, 60, 80)
         Utilities.rotateBounds(rect, 100, 100, 3)
         assertEquals(Rect(20, 20, 30, 60), rect)
+    }
+
+    @Test
+    fun testIsLeftRightSplit_portraitMode() {
+        // Mock a device in portrait mode.
+        mockDeviceIsLandscape(false)
+
+        // WHEN: `allowLeftRightSplitInPortrait` is false, and it's not a tablet.
+        mockDeviceIsTablet(false)
+        var result: Boolean =
+            Utilities.calculateIsLeftRightSplit(false, mockDeviceProperties, false)
+        // THEN: The split should be top/bottom, so `false` is returned.
+        assertEquals(false, result)
+
+        // WHEN: `allowLeftRightSplitInPortrait` is true, but it's not a tablet.
+        mockDeviceIsTablet(false)
+        result = Utilities.calculateIsLeftRightSplit(true, mockDeviceProperties, false)
+        // THEN: The split should still be top/bottom, so `false` is returned.
+        assertEquals(false, result)
+    }
+
+    @Test
+    fun testIsLeftRightSplit_landscapeMode() {
+        // Mock a device in landscape mode.
+        mockDeviceIsLandscape(true)
+
+        // WHEN: `allowLeftRightSplitInPortrait` is false.
+        var result: Boolean =
+            Utilities.calculateIsLeftRightSplit(false, mockDeviceProperties, false)
+        // THEN: The split should be left/right, so `true` is returned.
+        assertEquals(true, result)
+
+        // WHEN: `allowLeftRightSplitInPortrait` is true, but it's not a tablet.
+        mockDeviceIsTablet(false)
+        result = Utilities.calculateIsLeftRightSplit(true, mockDeviceProperties, false)
+        // THEN: The split should be left/right, so `true` is returned.
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun testIsLeftRightSplit_tablet_portrait_noExternalDisplay() {
+        // GIVEN: A tablet in portrait mode.
+        mockDeviceIsTablet(true)
+        mockDeviceIsLandscape(false)
+
+        // WHEN: It's not an external display.
+        val result: Boolean = Utilities.calculateIsLeftRightSplit(true, mockDeviceProperties, false)
+        // THEN: The split should be left/right, so `true` is returned.
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun testIsLeftRightSplit_tablet_landscape_noExternalDisplay() {
+        // GIVEN: A tablet in landscape mode.
+        mockDeviceIsTablet(true)
+        mockDeviceIsLandscape(true)
+
+        // WHEN: It's not an external display.
+        val result: Boolean = Utilities.calculateIsLeftRightSplit(true, mockDeviceProperties, false)
+        // THEN: The split should be top/bottom, so `false` is returned.
+        assertEquals(false, result)
+    }
+
+    @Test
+    fun testIsLeftRightSplit_tablet_portrait_externalDisplay_disabled() {
+        Assume.assumeFalse(
+            "assume FLAG_ENABLE_NON_DEFAULT_DISPLAY_SPLIT is not enabled.",
+            enableNonDefaultDisplaySplit(),
+        )
+
+        // GIVEN: A tablet in portrait mode, on an external display.
+        mockDeviceIsTablet(true)
+        mockDeviceIsLandscape(false)
+
+        val result: Boolean = Utilities.calculateIsLeftRightSplit(true, mockDeviceProperties, true)
+        // THEN: The split should be left/right, so `true` is returned.
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun testIsLeftRightSplit_tablet_landscape_externalDisplay_disabled() {
+        Assume.assumeFalse(
+            "assume FLAG_ENABLE_NON_DEFAULT_DISPLAY_SPLIT is not enabled.",
+            enableNonDefaultDisplaySplit(),
+        )
+
+        // GIVEN: A tablet in landscape mode, on an external display.
+        mockDeviceIsTablet(true)
+        mockDeviceIsLandscape(true)
+
+        val result: Boolean = Utilities.calculateIsLeftRightSplit(true, mockDeviceProperties, true)
+        // THEN: The split should be top/bottom, so `false` is returned.
+        assertEquals(false, result)
+    }
+
+    @Test
+    fun testIsLeftRightSplit_tablet_portrait_externalDisplay_enabled() {
+        Assume.assumeTrue(
+            "assume FLAG_ENABLE_NON_DEFAULT_DISPLAY_SPLIT is enabled.",
+            enableNonDefaultDisplaySplit(),
+        )
+
+        // GIVEN: A tablet in portrait mode, on an external display.
+        mockDeviceIsTablet(true)
+        mockDeviceIsLandscape(false)
+
+        val result: Boolean = Utilities.calculateIsLeftRightSplit(true, mockDeviceProperties, true)
+        // THEN: The split should be top/bottom, so `false` is returned.
+        assertEquals(false, result)
+    }
+
+    @Test
+    fun testIsLeftRightSplit_tablet_landscape_externalDisplay_enabled() {
+        Assume.assumeTrue(
+            "assume FLAG_ENABLE_NON_DEFAULT_DISPLAY_SPLIT is enabled.",
+            enableNonDefaultDisplaySplit(),
+        )
+
+        // GIVEN: A tablet in landscape mode, on an external display.
+        mockDeviceIsTablet(true)
+        mockDeviceIsLandscape(true)
+
+        val result: Boolean = Utilities.calculateIsLeftRightSplit(true, mockDeviceProperties, true)
+        // THEN: The split should be left/right, so `true` is returned.
+        assertEquals(true, result)
     }
 }

@@ -29,10 +29,12 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.quickstep.task.thumbnail.TaskThumbnailView;
+
 /**
  * A child view of {@link com.android.quickstep.views.FloatingTaskView} to draw the thumbnail in a
  * rounded corner frame. While the purpose of this class sounds similar to
- * {@link TaskThumbnailViewDeprecated}, it doesn't need a lot of complex logic in {@link TaskThumbnailViewDeprecated}
+ * {@link TaskThumbnailView}, it doesn't need a lot of complex logic in {@link TaskThumbnailView}
  * in relation to moving with {@link RecentsView}.
  */
 public class FloatingTaskThumbnailView extends View {

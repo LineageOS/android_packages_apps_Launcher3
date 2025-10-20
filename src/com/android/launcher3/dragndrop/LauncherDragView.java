@@ -15,6 +15,8 @@
  */
 package com.android.launcher3.dragndrop;
 
+import static com.android.launcher3.LauncherState.FLAG_WORKSPACE_ICONS_BEING_DRAGGED;
+
 import android.graphics.drawable.Drawable;
 import android.view.View;
 
@@ -57,8 +59,7 @@ public class LauncherDragView extends DragView<Launcher>
     @Override
     public void onStateTransitionComplete(LauncherState finalState) {
         setVisibility((finalState == LauncherState.NORMAL
-                || finalState == LauncherState.SPRING_LOADED
-                || finalState == LauncherState.EDIT_MODE) ? VISIBLE : INVISIBLE);
+                || finalState.hasFlag(FLAG_WORKSPACE_ICONS_BEING_DRAGGED)) ? VISIBLE : INVISIBLE);
     }
 
     @Override

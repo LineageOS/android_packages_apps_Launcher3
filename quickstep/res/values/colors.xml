@@ -79,9 +79,6 @@
 
     <color name="all_set_page_background">@android:color/system_neutral1_50</color>
 
-    <!-- Recents overview -->
-    <color name="recents_filter_icon">#333333</color>
-
     <!-- Lottie light theme colors. -->
     <color name="lottie_blue400">#669df6</color>
     <color name="lottie_blue600">#1a73e8</color>

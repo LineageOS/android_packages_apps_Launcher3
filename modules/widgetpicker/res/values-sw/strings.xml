@@ -27,7 +27,7 @@
     <string name="widget_details_accessibility_label" msgid="4525863892199168041">"Wijeti ya <xliff:g id="WIDGET_NAME">%1$s</xliff:g>, upana wa %2$d kwa urefu wa %3$d"</string>
     <string name="widget_tap_to_show_add_button_label" msgid="3358071294981269937">"Onyesha kitufe cha kuweka"</string>
     <string name="widget_tap_to_hide_add_button_label" msgid="7484536838079871360">"Ficha kitufe cha kuweka"</string>
-    <string name="widget_tap_to_add_button_label" msgid="3110313936849291769">"Weka"</string>
+    <string name="widget_tap_to_add_button_label" msgid="3110313936849291769">"Ongeza"</string>
     <string name="widget_tap_to_add_button_content_description" msgid="3591512565497536699">"Weka wijeti ya <xliff:g id="WIDGET_NAME">%1$s</xliff:g>"</string>
     <string name="featured_widgets_tab_label" msgid="5911854248145111652">"Zinazoangaziwa"</string>
     <string name="browse_widgets_tab_label" msgid="7179933202350730737">"Vinjari"</string>

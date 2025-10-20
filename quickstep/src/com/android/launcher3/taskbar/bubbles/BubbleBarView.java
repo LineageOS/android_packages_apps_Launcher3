@@ -804,11 +804,12 @@ public class BubbleBarView extends FrameLayout {
 
     /** Add a new bubble and remove an old bubble from the bubble bar. */
     public void addBubbleAndRemoveBubble(BubbleView addedBubble, BubbleView removedBubble,
-            @Nullable BubbleView bubbleToSelect, Runnable onEndRunnable) {
+            @Nullable BubbleView bubbleToSelect, boolean suppressAnimation,
+            Runnable onEndRunnable) {
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams((int) mIconSize, (int) mIconSize,
                 Gravity.LEFT);
         int addedIndex = addedBubble.isOverflow() ? getChildCount() : 0;
-        if (!isExpanded()) {
+        if (suppressAnimation || !isExpanded()) {
             removeView(removedBubble);
             addView(addedBubble, addedIndex, lp);
             if (onEndRunnable != null) {

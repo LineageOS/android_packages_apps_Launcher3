@@ -17,12 +17,30 @@
 package com.android.launcher3.homescreenfiles
 
 import android.net.Uri
+import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider.FileChange
+import com.android.launcher3.util.MutableListenableStream
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.Future
 
 /** No-op implementation of [HomeScreenFilesProvider]. */
 class HomeScreenFilesNoOpProvider : HomeScreenFilesProvider {
-    override fun query(): Future<Map<Uri, HomeScreenFile>> {
-        return CompletableFuture.completedFuture(emptyMap())
-    }
+    override val fileChanges = MutableListenableStream<FileChange>()
+
+    override val updates = MutableListenableStream<HomeScreenFilesUpdate>()
+
+    override fun onReady(): CompletableFuture<Void> = CompletableFuture.completedFuture(null)
+
+    override fun canCreateNewFolder(): Boolean = false
+
+    override fun createNewFolder(): CompletableFuture<Boolean> =
+        CompletableFuture.completedFuture(false)
+
+    override fun canMoveToHomeScreen(uriList: List<Uri>?) = false
+
+    override fun moveToHomeScreen(uriList: List<Uri>): List<CompletableFuture<Boolean>> =
+        uriList.map { CompletableFuture.completedFuture(false) }
+
+    override fun delete(uri: Uri, permanent: Boolean) {}
+
+    override fun query(): CompletableFuture<Map<Uri, HomeScreenFile>> =
+        CompletableFuture.completedFuture(emptyMap())
 }

@@ -19,31 +19,31 @@ package com.android.launcher3.model.tasks
 import android.content.ComponentName
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
-import android.util.Pair
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.launcher3.Flags
+import com.android.launcher3.WorkspaceLayoutManager.FIRST_SCREEN_ID
 import com.android.launcher3.model.BgDataModel.Callbacks
-import com.android.launcher3.model.NewItemSpace
 import com.android.launcher3.model.TestableModelState
 import com.android.launcher3.model.WorkspaceItemSpaceFinder
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.model.data.WorkspaceChangeEvent
 import com.android.launcher3.model.data.WorkspaceChangeEvent.AddEvent
-import com.android.launcher3.model.data.WorkspaceData
+import com.android.launcher3.model.data.WorkspaceItemCoordinates
 import com.android.launcher3.model.data.WorkspaceItemInfo
+import com.android.launcher3.testutil.rule.LayoutResource
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
-import com.android.launcher3.util.IntArray
+import com.android.launcher3.util.IntSet
 import com.android.launcher3.util.LauncherLayoutBuilder
 import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY
 import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
-import com.android.launcher3.util.LayoutResource
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestUtil.runOnExecutorSync
 import com.google.common.truth.Truth.assertThat
-import java.util.ArrayList
 import java.util.UUID
+import java.util.function.Supplier
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -86,12 +86,12 @@ class AddWorkspaceItemsTaskTest {
     fun givenNewItemAndNonEmptyPages_whenExecuteTask_thenAddNewItem() {
         val itemToAdd = getNewItem()
         val nonEmptyScreenIds = listOf(0, 1, 2)
-        givenNewItemSpaces(NewItemSpace(1, 2, 2))
+        givenNewItemSpaces(WorkspaceItemCoordinates(1, 2, 2))
 
         testAddItems(nonEmptyScreenIds, itemToAdd) { addedItems ->
             assertThat(addedItems.size).isEqualTo(1)
             assertThat(addedItems.first().screenId).isEqualTo(1)
-            verifyItemSpaceFinderCall(nonEmptyScreenIds, numberOfExpectedCall = 1, addedItems)
+            verifyItemSpaceFinderCall(numberOfExpectedCall = 1, addedItems)
         }
     }
 
@@ -99,13 +99,13 @@ class AddWorkspaceItemsTaskTest {
     @EnableFlags(Flags.FLAG_MODEL_REPOSITORY)
     fun givenNewAndExistingItems_whenExecuteTask_thenOnlyAddNewItem() {
         val itemsToAdd = arrayOf(getNewItem(), getExistingItem())
-        givenNewItemSpaces(NewItemSpace(1, 0, 0))
+        givenNewItemSpaces(WorkspaceItemCoordinates(1, 0, 0))
         val nonEmptyScreenIds = listOf(0)
 
         testAddItems(nonEmptyScreenIds, *itemsToAdd) { addedItems ->
             assertThat(addedItems.size).isEqualTo(1)
             assertThat(addedItems.first().screenId).isEqualTo(1)
-            verifyItemSpaceFinderCall(nonEmptyScreenIds, numberOfExpectedCall = 1, addedItems)
+            verifyItemSpaceFinderCall(numberOfExpectedCall = 1, addedItems)
         }
     }
 
@@ -113,7 +113,7 @@ class AddWorkspaceItemsTaskTest {
     @EnableFlags(Flags.FLAG_MODEL_REPOSITORY)
     fun givenOnlyExistingItem_whenExecuteTask_thenDoNotAddItem() {
         val itemToAdd = getExistingItem()
-        givenNewItemSpaces(NewItemSpace(1, 0, 0))
+        givenNewItemSpaces(WorkspaceItemCoordinates(1, 0, 0))
         val nonEmptyScreenIds = listOf(0)
 
         testAddItems(nonEmptyScreenIds, itemToAdd) { addedItems ->
@@ -127,13 +127,13 @@ class AddWorkspaceItemsTaskTest {
     @EnableFlags(Flags.FLAG_MODEL_REPOSITORY)
     fun givenNonSequentialScreenIds_whenExecuteTask_thenReturnNewScreenId() {
         val itemToAdd = getNewItem()
-        givenNewItemSpaces(NewItemSpace(2, 1, 3))
+        givenNewItemSpaces(WorkspaceItemCoordinates(2, 1, 3))
         val nonEmptyScreenIds = listOf(0, 2, 3)
 
         testAddItems(nonEmptyScreenIds, itemToAdd) { addedItems ->
             assertThat(addedItems.size).isEqualTo(1)
             assertThat(addedItems.first().screenId).isEqualTo(2)
-            verifyItemSpaceFinderCall(nonEmptyScreenIds, numberOfExpectedCall = 1, addedItems)
+            verifyItemSpaceFinderCall(numberOfExpectedCall = 1, addedItems)
         }
     }
 
@@ -142,7 +142,11 @@ class AddWorkspaceItemsTaskTest {
     fun givenMultipleItems_whenExecuteTask_thenAddThem() {
         val itemsToAdd =
             arrayOf(getNewItem(), getExistingItem(), getNewItem(), getNewItem(), getExistingItem())
-        givenNewItemSpaces(NewItemSpace(1, 3, 3), NewItemSpace(2, 0, 0), NewItemSpace(2, 0, 1))
+        givenNewItemSpaces(
+            WorkspaceItemCoordinates(1, 3, 3),
+            WorkspaceItemCoordinates(2, 0, 0),
+            WorkspaceItemCoordinates(2, 0, 1),
+        )
         val nonEmptyScreenIds = listOf(0, 1)
 
         testAddItems(nonEmptyScreenIds, *itemsToAdd) { addedItems ->
@@ -157,34 +161,25 @@ class AddWorkspaceItemsTaskTest {
             // Items that are added to the second screen should be animated
             val itemsAddedToSecondScreen = addedItems.filter { it.screenId == 2 }
             assertThat(itemsAddedToSecondScreen.size).isEqualTo(2)
-            verifyItemSpaceFinderCall(nonEmptyScreenIds, numberOfExpectedCall = 3, addedItems)
+            verifyItemSpaceFinderCall(numberOfExpectedCall = 3, addedItems)
         }
     }
 
     /** Sets up the item space data that will be returned from WorkspaceItemSpaceFinder. */
-    private fun givenNewItemSpaces(vararg newItemSpaces: NewItemSpace) {
+    private fun givenNewItemSpaces(vararg newItemSpaces: WorkspaceItemCoordinates) {
         val spaceStack = newItemSpaces.toMutableList()
-        whenever(workspaceItemSpaceFinder.findSpaceForItem(any(), any(), any(), any(), any()))
-            .then { spaceStack.removeFirst().toIntArray() }
+        whenever(workspaceItemSpaceFinder.findSpaceForItem(any(), any(), any(), any())).then {
+            spaceStack.removeFirst()
+        }
     }
 
     /**
      * Verifies if WorkspaceItemSpaceFinder was called with proper arguments and how many times was
      * it called.
      */
-    private fun verifyItemSpaceFinderCall(
-        nonEmptyScreenIds: List<Int>,
-        numberOfExpectedCall: Int,
-        items: List<ItemInfo>,
-    ) {
+    private fun verifyItemSpaceFinderCall(numberOfExpectedCall: Int, items: List<ItemInfo>) {
         verify(workspaceItemSpaceFinder, times(numberOfExpectedCall))
-            .findSpaceForItem(
-                eq(IntArray.wrap(*nonEmptyScreenIds.toIntArray())),
-                eq(IntArray()),
-                eq(ArrayList(items)),
-                eq(1),
-                eq(1),
-            )
+            .findSpaceForItem(eq(ArrayList(items)), eq(1), eq(1), eq(IntSet.wrap(FIRST_SCREEN_ID)))
     }
 
     /**
@@ -209,18 +204,17 @@ class AddWorkspaceItemsTaskTest {
         val task = newTask(*itemsToAdd)
 
         runOnExecutorSync(MODEL_EXECUTOR) {
-            val workspaceUpdates = mutableListOf<WorkspaceData>()
-            modelState.homeRepo.workspaceState.forEach(MODEL_EXECUTOR) { workspaceUpdates.add(it) }
+            val workspaceUpdates = mutableListOf<WorkspaceChangeEvent?>()
+            modelState.homeRepo.workspaceState.changes.forEach(MODEL_EXECUTOR) {
+                workspaceUpdates.add(it)
+            }
 
             mDataModelCallbacks.addedItems.clear()
             modelState.model.enqueueModelUpdateTask(task)
 
             // Verify that only one workspace update was pushed
-            assertThat(workspaceUpdates).hasSize(2)
-            val initialState = workspaceUpdates[0]
-            val finalState = workspaceUpdates[1]
-            assertThat(finalState.diff(initialState)!!).hasSize(1)
-            val addEvent = finalState.diff(initialState)!![0] as AddEvent
+            assertThat(workspaceUpdates).hasSize(1)
+            val addEvent = workspaceUpdates[0] as AddEvent
             verification.invoke(addEvent.items)
 
             // Verify the legacy callback behavior
@@ -234,7 +228,7 @@ class AddWorkspaceItemsTaskTest {
      * with a mock.
      */
     private fun newTask(vararg items: ItemInfo) =
-        AddWorkspaceItemsTask(items.map { Pair.create(it, Any()) }, workspaceItemSpaceFinder)
+        AddWorkspaceItemsTask(items.map { Supplier { it } }.toList(), workspaceItemSpaceFinder)
 
     private fun getExistingItem() =
         WorkspaceItemInfo().apply {

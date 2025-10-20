@@ -17,9 +17,7 @@
 package com.android.launcher3.taskbar
 
 import android.animation.AnimatorTestRule
-import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
-import com.android.launcher3.Flags.FLAG_ENABLE_TASKBAR_FOR_DIRECT_BOOT
 import com.android.launcher3.taskbar.NavbarButtonsViewController.ALPHA_INDEX_KEYGUARD_OR_DISABLE
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
 import com.android.launcher3.taskbar.rules.TaskbarModeRule
@@ -38,7 +36,6 @@ import org.junit.runner.RunWith
 private const val ANIMATION_DURATION = 300L // Default from ValueAnimator.
 
 @RunWith(LauncherMultivalentJUnit::class)
-@EnableFlags(FLAG_ENABLE_TASKBAR_FOR_DIRECT_BOOT)
 class NavbarButtonsViewControllerTest {
 
     @get:Rule(order = 0) val animatorTestRule = AnimatorTestRule(this)

@@ -218,7 +218,6 @@ public class WidgetsModel {
 
         // add and update.
         mWidgetsByPackageItem.putAll(rawWidgetsShortcuts.stream()
-                .filter(new WidgetFlagCheck())
                 .flatMap(widgetItem -> getPackageUserKeys(mContext, widgetItem).stream()
                         .map(key -> new Pair<>(packageItemInfoCache.getOrCreate(key), widgetItem)))
                 .collect(groupingBy(pair -> pair.first, mapping(pair -> pair.second, toList()))));
@@ -328,25 +327,6 @@ public class WidgetsModel {
                 return false;
             }
 
-            return true;
-        }
-    }
-
-    /**
-     * Checks if certain widgets that are available behind flag can be used across all surfaces in
-     * launcher.
-     */
-    private static class WidgetFlagCheck implements Predicate<WidgetItem> {
-
-        private static final String BUBBLES_SHORTCUT_WIDGET =
-                "com.android.systemui/com.android.wm.shell.bubbles.shortcut"
-                        + ".CreateBubbleShortcutActivity";
-
-        @Override
-        public boolean test(WidgetItem widgetItem) {
-            if (BUBBLES_SHORTCUT_WIDGET.equals(widgetItem.componentName.flattenToString())) {
-                return Flags.enableRetrievableBubbles();
-            }
             return true;
         }
     }

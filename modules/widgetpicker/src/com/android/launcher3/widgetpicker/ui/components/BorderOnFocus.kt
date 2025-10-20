@@ -41,13 +41,15 @@ import androidx.compose.ui.unit.dp
  * Same as system ui's `borderOnFocus`.
  */
 internal fun Modifier.borderOnFocus(
+    enabled: Boolean,
     color: Color,
     cornerSize: CornerSize,
     strokeWidth: Dp = 3.dp,
     padding: Dp = 2.dp,
-) = this then BorderOnFocusElement(color, cornerSize, strokeWidth, padding)
+) = this then BorderOnFocusElement(enabled, color, cornerSize, strokeWidth, padding)
 
 private class BorderOnFocusNode(
+    var enabled: Boolean,
     var color: Color,
     var cornerSize: CornerSize,
     var strokeWidth: Dp,
@@ -63,7 +65,7 @@ private class BorderOnFocusNode(
     override fun ContentDrawScope.draw() {
         drawContent()
         val focusOutline = Rect(Offset.Zero, size).inflate(padding.toPx())
-        if (focused) {
+        if (enabled && focused) {
             drawRoundRect(
                 color = color,
                 topLeft = focusOutline.topLeft,
@@ -76,16 +78,18 @@ private class BorderOnFocusNode(
 }
 
 private data class BorderOnFocusElement(
+    val enabled: Boolean,
     val color: Color,
     val cornerSize: CornerSize,
     val strokeWidth: Dp,
     val padding: Dp,
 ) : ModifierNodeElement<BorderOnFocusNode>() {
     override fun create(): BorderOnFocusNode {
-        return BorderOnFocusNode(color, cornerSize, strokeWidth, padding)
+        return BorderOnFocusNode(enabled, color, cornerSize, strokeWidth, padding)
     }
 
     override fun update(node: BorderOnFocusNode) {
+        node.enabled = enabled
         node.color = color
         node.cornerSize = cornerSize
         node.strokeWidth = strokeWidth
@@ -94,6 +98,7 @@ private data class BorderOnFocusElement(
 
     override fun InspectorInfo.inspectableProperties() {
         name = "borderOnFocus"
+        properties["enabled"] = enabled
         properties["color"] = color
         properties["cornerSize"] = cornerSize
         properties["strokeWidth"] = strokeWidth

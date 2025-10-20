@@ -45,11 +45,11 @@ public class TaskbarAutohideSuspendController implements
     public static final int FLAG_AUTOHIDE_SUSPEND_IN_LAUNCHER = 1 << 4;
     // Transient Taskbar is temporarily unstashed (pending a timeout).
     public static final int FLAG_AUTOHIDE_SUSPEND_TRANSIENT_TASKBAR = 1 << 5;
-    // User has hovered the taskbar.
+    // User has hovered the Taskbar.
     public static final int FLAG_AUTOHIDE_SUSPEND_HOVERING_ICONS = 1 << 6;
     // User has multi instance window open.
     public static final int FLAG_AUTOHIDE_SUSPEND_MULTI_INSTANCE_MENU_OPEN = 1 << 7;
-    // User has taskbar overflow open.
+    // User has Taskbar overflow open.
     public static final int FLAG_AUTOHIDE_SUSPEND_TASKBAR_OVERFLOW = 1 << 8;
     // Growth Framework nudge overlay is open above the Taskbar.
     public static final int FLAG_AUTOHIDE_SUSPEND_GROWTH_NUDGE_OPEN = 1 << 9;

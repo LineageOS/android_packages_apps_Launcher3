@@ -16,6 +16,7 @@
 package com.android.launcher3.widget;
 
 import static android.app.Activity.RESULT_CANCELED;
+import static android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID;
 
 import static com.android.launcher3.BuildConfig.WIDGETS_ENABLED;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
@@ -214,7 +215,7 @@ public class LauncherWidgetHolder {
      */
     public int allocateAppWidgetId() {
         if (!WIDGETS_ENABLED) {
-            return AppWidgetManager.INVALID_APPWIDGET_ID;
+            return INVALID_APPWIDGET_ID;
         }
 
         return mWidgetHost.allocateAppWidgetId();
@@ -241,6 +242,12 @@ public class LauncherWidgetHolder {
      */
     public void setOnViewCreationCallback(@Nullable Consumer<LauncherAppWidgetHostView> callback) {
         mOnViewCreationCallback = callback;
+    }
+
+    /** Returns a previously set view creation callback */
+    @Nullable
+    public Consumer<LauncherAppWidgetHostView> getOnViewCreationCallback() {
+        return mOnViewCreationCallback;
     }
 
     /** Sets a callback for listening app widget removals */
@@ -378,7 +385,7 @@ public class LauncherWidgetHolder {
             int appWidgetId, @NonNull LauncherAppWidgetProviderInfo appWidget) {
         if (appWidget.isCustomWidget()) {
             LauncherAppWidgetHostView lahv = new LauncherAppWidgetHostView(mContext);
-            lahv.setAppWidget(0, appWidget);
+            lahv.setAppWidget(INVALID_APPWIDGET_ID, appWidget);
             CustomWidgetManager.INSTANCE.get(mContext).onViewCreated(lahv);
             return lahv;
         }

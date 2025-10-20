@@ -23,6 +23,8 @@ import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.launcher3.config.FeatureFlags.SEPARATE_RECENTS_ACTIVITY;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
+import static com.android.launcher3.util.SimpleBroadcastReceiver.actionsFilter;
+import static com.android.launcher3.util.SimpleBroadcastReceiver.packageFilter;
 import static com.android.quickstep.window.RecentsWindowFlags.enableFallbackOverviewInWindow;
 import static com.android.quickstep.window.RecentsWindowFlags.enableLauncherOverviewInWindow;
 import static com.android.quickstep.window.RecentsWindowFlags.enableOverviewOnConnectedDisplays;
@@ -81,7 +83,6 @@ public final class OverviewComponentObserver {
     private final PerDisplayRepository<RecentsWindowManager> mRecentsWindowManagerRepository;
 
     private final Intent mCurrentPrimaryHomeIntent;
-    private final Intent mSecondaryHomeIntent;
     private final Intent mMyPrimaryHomeIntent;
     private final Intent mFallbackIntent;
     private final SparseIntArray mConfigChangesMap = new SparseIntArray();
@@ -89,7 +90,9 @@ public final class OverviewComponentObserver {
 
     private final List<OverviewChangeListener> mOverviewChangeListeners =
             new CopyOnWriteArrayList<>();
+    private final Context mContext;
 
+    private Intent mLazySecondaryHomeIntent;
     private String mUpdateRegisteredPackage;
     private BaseContainerInterface mDefaultDisplayContainerInterface;
     private Intent mOverviewIntent;
@@ -102,6 +105,7 @@ public final class OverviewComponentObserver {
             @ApplicationContext Context context,
             PerDisplayRepository<RecentsWindowManager> recentsWindowManagerRepository,
             DaggerSingletonTracker lifecycleTracker) {
+        mContext = context;
         mUserPreferenceChangeReceiver =
                 new SimpleBroadcastReceiver(context, MAIN_EXECUTOR, this::updateOverviewTargets);
         mOtherHomeAppUpdateReceiver =
@@ -115,14 +119,6 @@ public final class OverviewComponentObserver {
         ComponentName myHomeComponent =
                 new ComponentName(context.getPackageName(), info.activityInfo.name);
         mMyPrimaryHomeIntent.setComponent(myHomeComponent);
-        // Set up secondary home intent
-        mSecondaryHomeIntent = createSecondaryHomeIntent().setPackage(
-                context.getPackageName());
-        ResolveInfo secondaryInfo = context.getPackageManager().resolveActivity(
-                mSecondaryHomeIntent, 0);
-        ComponentName secondaryComponent = new ComponentName(context,
-                secondaryInfo.activityInfo.name);
-        mSecondaryHomeIntent.setComponent(secondaryComponent);
 
         mConfigChangesMap.append(myHomeComponent.hashCode(), info.activityInfo.configChanges);
         mSetupWizardPkg = context.getString(R.string.setup_wizard_pkg);
@@ -139,10 +135,31 @@ public final class OverviewComponentObserver {
             mConfigChangesMap.append(fallbackComponent.hashCode(), fallbackInfo.configChanges);
         } catch (PackageManager.NameNotFoundException ignored) { /* Impossible */ }
 
-        mUserPreferenceChangeReceiver.register(ACTION_PREFERRED_ACTIVITY_CHANGED);
+        mUserPreferenceChangeReceiver.register(actionsFilter(ACTION_PREFERRED_ACTIVITY_CHANGED));
         updateOverviewTargets();
 
         lifecycleTracker.addCloseable(this::onDestroy);
+    }
+
+    private Intent getSecondaryHomeIntent() {
+        synchronized (this) {
+            if (mLazySecondaryHomeIntent == null) {
+                // Set up secondary home intent
+                mLazySecondaryHomeIntent = createSecondaryHomeIntent().setPackage(
+                        mContext.getPackageName());
+                ResolveInfo secondaryInfo = mContext.getPackageManager().resolveActivity(
+                        mLazySecondaryHomeIntent, 0);
+                if (secondaryInfo != null) {
+                    ComponentName secondaryComponent = new ComponentName(mContext,
+                            secondaryInfo.activityInfo.name);
+                    mLazySecondaryHomeIntent.setComponent(secondaryComponent);
+                } else {
+                    Log.w(TAG, "Secondary home info not available to construct Intent");
+                    mLazySecondaryHomeIntent.setComponent(mMyPrimaryHomeIntent.getComponent());
+                }
+            }
+            return mLazySecondaryHomeIntent;
+        }
     }
 
     /** Adds a listener for changes in {@link #isHomeAndOverviewSame()} */
@@ -248,9 +265,8 @@ public final class OverviewComponentObserver {
                 unregisterOtherHomeAppUpdateReceiver();
 
                 mUpdateRegisteredPackage = defaultHome.getPackageName();
-                mOtherHomeAppUpdateReceiver.registerPkgActions(
-                        mUpdateRegisteredPackage, ACTION_PACKAGE_ADDED,
-                        ACTION_PACKAGE_CHANGED, ACTION_PACKAGE_REMOVED);
+                mOtherHomeAppUpdateReceiver.register(packageFilter(mUpdateRegisteredPackage,
+                        ACTION_PACKAGE_ADDED, ACTION_PACKAGE_CHANGED, ACTION_PACKAGE_REMOVED));
             }
         }
         mOverviewChangeListeners.forEach(l -> l.onOverviewTargetChange(mIsHomeAndOverviewSame));
@@ -260,13 +276,13 @@ public final class OverviewComponentObserver {
      * Clean up any registered receivers.
      */
     private void onDestroy() {
-        mUserPreferenceChangeReceiver.unregisterReceiverSafely();
+        mUserPreferenceChangeReceiver.close();
         unregisterOtherHomeAppUpdateReceiver();
     }
 
     private void unregisterOtherHomeAppUpdateReceiver() {
         if (mUpdateRegisteredPackage != null) {
-            mOtherHomeAppUpdateReceiver.unregisterReceiverSafely();
+            mOtherHomeAppUpdateReceiver.close();
             mUpdateRegisteredPackage = null;
         }
     }
@@ -313,7 +329,7 @@ public final class OverviewComponentObserver {
         if (displayId == DEFAULT_DISPLAY) {
             return mCurrentPrimaryHomeIntent;
         } else {
-            return mSecondaryHomeIntent;
+            return getSecondaryHomeIntent();
         }
     }
 
@@ -350,7 +366,7 @@ public final class OverviewComponentObserver {
         pw.println("  homeAndOverviewSame=" + mIsHomeAndOverviewSame);
         pw.println("  overviewIntent=" + mOverviewIntent);
         pw.println("  homeIntent=" + mCurrentPrimaryHomeIntent);
-        pw.println("  secondaryHomeIntent=" + mSecondaryHomeIntent);
+        pw.println("  secondaryHomeIntent=" + getSecondaryHomeIntent());
     }
 
     /**

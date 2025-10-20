@@ -22,12 +22,15 @@ import android.content.Intent
 import android.content.Intent.ACTION_PACKAGE_ADDED
 import android.content.Intent.ACTION_PACKAGE_CHANGED
 import android.content.Intent.ACTION_PACKAGE_REMOVED
+import android.content.Intent.ACTION_SEARCH
 import android.content.pm.ActivityInfo
+import android.content.pm.LauncherApps
 import android.content.pm.PackageInstaller
-import android.os.Handler
-import android.os.Looper
+import android.content.pm.PackageManager
+import android.content.pm.PackageManager.NameNotFoundException
 import android.os.Process.myUserHandle
 import android.os.UserHandle
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
 import com.android.launcher3.R
@@ -44,6 +47,7 @@ import com.android.launcher3.util.PackageUserKey
 import com.android.launcher3.util.Preconditions
 import com.android.launcher3.util.SecureStringObserver
 import com.android.launcher3.util.SimpleBroadcastReceiver
+import com.android.launcher3.util.SimpleBroadcastReceiver.Companion.packageFilter
 import javax.inject.Inject
 
 /**
@@ -53,15 +57,14 @@ import javax.inject.Inject
  */
 @LauncherAppSingleton
 class OSEManager(
-    private val context: Context,
+    val context: Context,
     private val settingsObserver: SecureStringObserver,
     private val installhelper: InstallSessionHelper,
-    private val handlerLooper: Looper = OSE_LOOPER,
+    private val executor: LooperExecutor = OSE_LOOPER,
 ) {
 
-    private val handler = Handler(handlerLooper)
     private val packageAvailableReceiver =
-        SimpleBroadcastReceiver(context, handler) { handler.post { reloadOse() } }
+        SimpleBroadcastReceiver(context, executor) { reloadOse() }
     @VisibleForTesting var tracker: InstallSessionTracker? = null
     private val mutableOSEInfoRef = MutableListenableRef(OSEInfo())
 
@@ -70,9 +73,9 @@ class OSEManager(
      * changes
      */
     val oseInfo = mutableOSEInfoRef.asListenable()
-
     private val defaultSearchPackage =
         context.getSystemService(SearchManager::class.java)?.globalSearchActivity?.packageName
+            ?: context.resources.getString(R.string.fallback_search_package_name)
 
     @Inject
     constructor(
@@ -81,11 +84,11 @@ class OSEManager(
         installhelper: InstallSessionHelper,
     ) : this(
         context,
-        SecureStringObserver(context, Handler(OSE_LOOPER), SEARCH_ENGINE_SETTINGS_KEY),
+        SecureStringObserver(context, OSE_LOOPER.handler, SEARCH_ENGINE_SETTINGS_KEY),
         installhelper,
     ) {
         settingsObserver.callback = Runnable { reloadOse() }
-        handler.post { reloadOse() }
+        executor.execute { reloadOse() }
         tracker.addCloseable(this::close)
     }
 
@@ -107,7 +110,8 @@ class OSEManager(
             when {
                 oseApkInstalled || activeInstallSession -> oseSettingsValue
                 // No install session available, so fallback to defaultSearchPackage
-                else -> defaultSearchPackage
+                isDefaultSearchPackageEnabled() -> defaultSearchPackage
+                else -> null
             }
 
         val oseApkInstallPending =
@@ -117,6 +121,8 @@ class OSEManager(
                 // No install session available, so apk install is not pending
                 else -> false
             }
+
+        val oseConfigured = oseSettingsValue != null && (oseApkInstalled || activeInstallSession)
 
         unregisterInstallSessionTracker()
         if (!oseApkInstalled) {
@@ -137,46 +143,110 @@ class OSEManager(
             else if (overlayAppsList.isNotEmpty()) overlayAppsList[0] else null
 
         val overlayTarget =
-            if (overlayPkg == null) null
-            else
-                try {
+            overlayPkg
+                ?.runCatching {
                     context.packageManager
                         .resolveActivity(Intent(OVERLAY_ACTION).setPackage(overlayPkg), 0)
                         ?.activityInfo
-                } catch (e: Exception) {
-                    null
                 }
+                ?.getOrNull()
+
+        val supportsSearchIntent =
+            osePkg
+                ?.runCatching {
+                    context.packageManager.resolveActivity(
+                        Intent(ACTION_SEARCH).setPackage(osePkg),
+                        0,
+                    )
+                }
+                ?.getOrNull() != null
 
         val oldOseInfo = mutableOSEInfoRef.value
-        val newOseInfo = OSEInfo(osePkg, overlayTarget, oseApkInstallPending)
+        val newOseInfo =
+            OSEInfo(
+                osePkg,
+                overlayTarget,
+                oseApkInstallPending,
+                oseConfigured,
+                supportsSearchIntent,
+            )
+        Log.i(TAG, "reloadOse oldOseInfo= " + oldOseInfo + "\nnewOseInfo= " + newOseInfo)
+        if (osePkg == null && oldOseInfo.pkg == newOseInfo.pkg) {
+            // osePkg can be null only when defaultSearchPackage is disabled.
+            // So register to defaultSearchPackage changes.
+            // This condition can only happen with launcher force-stop or reboot of the device when
+            // defaultSearchPackage is disabled
+            packageAvailableReceiver.register(
+                packageFilter(
+                    defaultSearchPackage,
+                    ACTION_PACKAGE_ADDED,
+                    ACTION_PACKAGE_CHANGED,
+                    ACTION_PACKAGE_REMOVED,
+                )
+            )
+        }
 
         if (
             oldOseInfo.pkg != newOseInfo.pkg ||
                 oldOseInfo.overlayPackage != newOseInfo.overlayPackage ||
-                oldOseInfo.installPending != newOseInfo.installPending
+                oldOseInfo.installPending != newOseInfo.installPending ||
+                oldOseInfo.isOseConfigured != newOseInfo.isOseConfigured
         ) {
-            packageAvailableReceiver.unregisterReceiverSafely()
+            packageAvailableReceiver.close()
             // Listen for ose changes
             if (osePkg != null) {
-                packageAvailableReceiver.registerPkgActions(
-                    osePkg,
-                    ACTION_PACKAGE_ADDED,
-                    ACTION_PACKAGE_CHANGED,
-                    ACTION_PACKAGE_REMOVED,
+                packageAvailableReceiver.register(
+                    packageFilter(
+                        osePkg,
+                        ACTION_PACKAGE_ADDED,
+                        ACTION_PACKAGE_CHANGED,
+                        ACTION_PACKAGE_REMOVED,
+                    )
                 )
+                // Listen to the OseSettingValue package as well if it's installed little later or
+                // if the app gets archived/restored.
+                if (oseSettingsValue != null && oseSettingsValue != osePkg) {
+                    packageAvailableReceiver.register(
+                        packageFilter(
+                            oseSettingsValue,
+                            ACTION_PACKAGE_ADDED,
+                            ACTION_PACKAGE_CHANGED,
+                            ACTION_PACKAGE_REMOVED,
+                        )
+                    )
+                }
             }
 
             // Listen for overlay changes
             if (overlayPkg != null && osePkg != overlayPkg) {
-                packageAvailableReceiver.registerPkgActions(
-                    overlayPkg,
-                    ACTION_PACKAGE_ADDED,
-                    ACTION_PACKAGE_CHANGED,
-                    ACTION_PACKAGE_REMOVED,
+                packageAvailableReceiver.register(
+                    packageFilter(
+                        overlayPkg,
+                        ACTION_PACKAGE_ADDED,
+                        ACTION_PACKAGE_CHANGED,
+                        ACTION_PACKAGE_REMOVED,
+                    )
                 )
             }
 
             mutableOSEInfoRef.dispatchValue(newOseInfo)
+        }
+    }
+
+    private fun isDefaultSearchPackageEnabled(): Boolean {
+        try {
+            return defaultSearchPackage?.let {
+                context
+                    .getSystemService(LauncherApps::class.java)
+                    ?.getApplicationInfo(
+                        it,
+                        PackageManager.MATCH_UNINSTALLED_PACKAGES,
+                        myUserHandle(),
+                    )
+                    ?.enabled
+            } ?: false
+        } catch (e: NameNotFoundException) {
+            return false
         }
     }
 
@@ -188,8 +258,8 @@ class OSEManager(
     @VisibleForTesting
     fun close() {
         settingsObserver.close()
-        packageAvailableReceiver.unregisterReceiverSafely()
-        handler.post { unregisterInstallSessionTracker() }
+        packageAvailableReceiver.close()
+        executor.execute { unregisterInstallSessionTracker() }
     }
 
     /** Object representing properties of the on-device search engine */
@@ -197,18 +267,31 @@ class OSEManager(
         val pkg: String? = null,
         val overlayTarget: ActivityInfo? = null,
         val installPending: Boolean = false,
+        val isOseConfigured: Boolean = false,
+        val supportsSearchIntent: Boolean = false,
     ) {
         val overlayPackage: String?
             get() = overlayTarget?.packageName ?: pkg
+
+        override fun toString(): String {
+            return "pkg=" +
+                pkg +
+                " overlayPackage=" +
+                overlayPackage +
+                " installPending=" +
+                installPending +
+                " isOseConfigured=" +
+                isOseConfigured +
+                " supportsSearchIntent=" +
+                supportsSearchIntent
+        }
     }
 
     companion object {
-
+        const val TAG = "OSEManager"
         const val SEARCH_ENGINE_SETTINGS_KEY = "selected_search_engine"
 
-        val OSE_LOOPER = LooperExecutor.createAndStartNewLooper("OSEManager")
-
-        private const val TAG = "OSEManager"
+        val OSE_LOOPER = LooperExecutor("OSEManager")
 
         const val OVERLAY_ACTION = "com.android.launcher3.WINDOW_OVERLAY"
     }
@@ -247,7 +330,7 @@ class OSEManager(
         }
 
         private fun postInstallSessionUpdate() {
-            handler.post { reloadOse() }
+            executor.execute { reloadOse() }
         }
     }
 }

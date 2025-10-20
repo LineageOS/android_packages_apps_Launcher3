@@ -27,12 +27,12 @@ import com.android.launcher3.icons.BitmapInfo.Companion.fromBitmap
 import com.android.launcher3.model.TestableModelState
 import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
+import com.android.launcher3.testutil.rule.LayoutResource
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.IntSet
 import com.android.launcher3.util.LauncherLayoutBuilder
 import com.android.launcher3.util.LauncherModelHelper
-import com.android.launcher3.util.LayoutResource
-import com.android.launcher3.util.ModelTestExtensions.nonPredictedItemCount
+import com.android.launcher3.util.ModelTestExtensions.countPersistedModelItems
 import com.android.launcher3.util.PackageUserKey
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestUtil
@@ -53,7 +53,7 @@ import org.junit.runner.RunWith
 class CacheDataUpdatedTaskTest {
 
     @get:Rule var testStabilityRule: TestRule = TestStabilityRule()
-    @get:Rule var context: SandboxApplication = SandboxApplication()
+    @get:Rule var context: SandboxApplication = SandboxApplication().withModelDependency()
     @get:Rule var layout: LayoutResource = LayoutResource(context)
     @get:Rule var installerSessionRule: InstallerSessionRule = InstallerSessionRule()
 
@@ -89,7 +89,7 @@ class CacheDataUpdatedTaskTest {
                 .build()
         layout.set(builder)
         // Items on homescreen and folders:
-        Assert.assertEquals(10, modelState.dataModel.itemsIdMap.nonPredictedItemCount().toLong())
+        Assert.assertEquals(10, modelState.dataModel.itemsIdMap.countPersistedModelItems())
     }
 
     private fun executeTask(op: Int, vararg pkg: String) {

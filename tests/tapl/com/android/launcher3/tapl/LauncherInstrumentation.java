@@ -106,6 +106,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
@@ -196,6 +197,8 @@ public final class LauncherInstrumentation {
     private static final String CONTEXT_MENU_RES_ID = "popup_container";
     private static final String OPEN_FOLDER_RES_ID = "folder_content";
     static final String TASKBAR_RES_ID = "taskbar_view";
+    static final String TASKBAR_PINNING_SWITCH_RES_ID = "taskbar_pinning_switch";
+    static final String TASKBAR_DIVIDER_CONTENT_DESCRIPTION = "Taskbar Divider";
     private static final String SPLIT_PLACEHOLDER_RES_ID = "split_placeholder";
     static final String KEYBOARD_QUICK_SWITCH_RES_ID = "keyboard_quick_switch_view";
     public static final int WAIT_TIME_MS = 30000;
@@ -459,9 +462,16 @@ public final class LauncherInstrumentation {
                 TestProtocol.TEST_INFO_RESPONSE_FIELD);
     }
 
+    public int getActiveDeskId() {
+        return getTestInfo(TestProtocol.REQUEST_GET_ACTIVE_DESK_ID,
+                String.valueOf(mDisplayId)).getInt(
+                TestProtocol.TEST_INFO_RESPONSE_FIELD);
+    }
+
     public boolean isInDesktopFirstMode() {
-        return getTestInfo(TestProtocol.REQUEST_IS_IN_DESKTOP_FIRST_MODE,
-                String.valueOf(mDisplayId)).getBoolean(
+        Bundle bundle = getTestInfo(TestProtocol.REQUEST_IS_IN_DESKTOP_FIRST_MODE,
+                String.valueOf(mDisplayId));
+        return bundle != null && bundle.getBoolean(
                 TestProtocol.TEST_INFO_RESPONSE_FIELD);
     }
 
@@ -472,11 +482,6 @@ public final class LauncherInstrumentation {
 
     private boolean isPredictiveBackSwipeEnabled() {
         return getTestInfo(TestProtocol.REQUEST_IS_PREDICTIVE_BACK_SWIPE_ENABLED)
-                .getBoolean(TestProtocol.TEST_INFO_RESPONSE_FIELD);
-    }
-
-    public boolean isTaskbarNavbarUnificationEnabled() {
-        return getTestInfo(TestProtocol.REQUEST_ENABLE_TASKBAR_NAVBAR_UNIFICATION)
                 .getBoolean(TestProtocol.TEST_INFO_RESPONSE_FIELD);
     }
 
@@ -549,6 +554,11 @@ public final class LauncherInstrumentation {
 
     public void setEnableRotation(boolean on) {
         getTestInfo(TestProtocol.REQUEST_ENABLE_ROTATION, Boolean.toString(on));
+    }
+
+    /** Enables fixed landscape mode if supported on device */
+    public void setFixedLandscape(boolean on) {
+        getTestInfo(TestProtocol.REQUEST_ENABLE_FIXED_LANDSCAPE, Boolean.toString(on));
     }
 
     public boolean hadNontestEvents() {
@@ -975,7 +985,7 @@ public final class LauncherInstrumentation {
     public String getNavigationModeMismatchError(boolean waitForCorrectState) {
         final int waitTime = waitForCorrectState ? WAIT_TIME_MS : 0;
         final NavigationModel navigationModel = getNavigationModel();
-        String resPackage = getNavigationButtonResPackage();
+        String resPackage = getLauncherPackageName();
         final BySelector recentAppsSelector = By.res(resPackage, "recent_apps");
         final BySelector homeSelector = By.res(resPackage, "home");
         recentAppsSelector.displayId(mDisplayId);
@@ -1001,11 +1011,6 @@ public final class LauncherInstrumentation {
             }
         }
         return null;
-    }
-
-    private String getNavigationButtonResPackage() {
-        return isTablet() || isTaskbarNavbarUnificationEnabled()
-                ? getLauncherPackageName() : SYSTEMUI_PACKAGE;
     }
 
     UiObject2 verifyContainerType(ContainerType containerType) {
@@ -1418,10 +1423,12 @@ public final class LauncherInstrumentation {
     }
 
     void pressBackImpl() {
+        pressBackImpl(true);
+    }
+
+    void pressBackImpl(boolean expectBackEvent) {
         waitForLauncherInitialized();
-        final boolean launcherVisible =
-                (isTablet() || isTaskbarNavbarUnificationEnabled()) ? isLauncherContainerVisible()
-                        : isLauncherVisible();
+        final boolean launcherVisible = isLauncherContainerVisible();
         boolean isThreeFingerTrackpadGesture =
                 mTrackpadGestureType == TrackpadGestureType.THREE_FINGER;
         if (getNavigationModel() == NavigationModel.ZERO_BUTTON
@@ -1434,7 +1441,7 @@ public final class LauncherInstrumentation {
         } else {
             waitForNavigationUiObject("back").click();
         }
-        if (launcherVisible) {
+        if (expectBackEvent && launcherVisible) {
             if (isPredictiveBackSwipeEnabled()) {
                 expectEvent(TestProtocol.SEQUENCE_MAIN, EVENT_ON_BACK_INVOKED);
             } else {
@@ -1445,16 +1452,6 @@ public final class LauncherInstrumentation {
 
     private static BySelector getAnyObjectSelector() {
         return By.textStartsWith("");
-    }
-
-    boolean isLauncherVisible() {
-        try {
-            Trace.beginSection("isLauncherVisible");
-            mDevice.waitForIdle();
-            return hasLauncherObject(getAnyObjectSelector());
-        } finally {
-            Trace.endSection();
-        }
     }
 
     boolean isLauncherContainerVisible() {
@@ -1628,7 +1625,7 @@ public final class LauncherInstrumentation {
 
     @NonNull
     UiObject2 waitForNavigationUiObject(String resId) {
-        String resPackage = getNavigationButtonResPackage();
+        String resPackage = getLauncherPackageName();
         final UiObject2 object = mDevice.wait(
                 Until.findObject(By.res(resPackage, resId).displayId(mDisplayId)), WAIT_TIME_MS);
         assertNotNull("Can't find a navigation UI object with id: " + resId, object);
@@ -2256,17 +2253,13 @@ public final class LauncherInstrumentation {
                 TestProtocol.TEST_INFO_RESPONSE_FIELD);
     }
 
-    public boolean isGridOnlyOverviewEnabled() {
-        return getTestInfo(TestProtocol.REQUEST_FLAG_ENABLE_GRID_ONLY_OVERVIEW).getBoolean(
-                TestProtocol.TEST_INFO_RESPONSE_FIELD);
-    }
-
     /**
      * returns if multi-desks feature is enabled or not.
      */
     public boolean areMultiDesksFlagsEnabled() {
-        return getTestInfo(TestProtocol.REQUEST_FLAG_ENABLE_MULTIPLE_DESKTOPS,
-                String.valueOf(mDisplayId)).getBoolean(
+        Bundle bundle = getTestInfo(TestProtocol.REQUEST_FLAG_ENABLE_MULTIPLE_DESKTOPS,
+                String.valueOf(mDisplayId));
+        return bundle != null && bundle.getBoolean(
                 TestProtocol.TEST_INFO_RESPONSE_FIELD);
     }
 
@@ -2646,6 +2639,11 @@ public final class LauncherInstrumentation {
         getTestInfo(TestProtocol.REQUEST_UNSTASH_BUBBLE_BAR_IF_STASHED);
     }
 
+    /** Remove all bubbles. */
+    public void removeAllBubbles() {
+        getTestInfo(TestProtocol.REQUEST_REMOVE_ALL_BUBBLES);
+    }
+
     public void injectFakeTrackpad() {
         getTestInfo(TestProtocol.REQUEST_INJECT_FAKE_TRACKPAD);
     }
@@ -2750,7 +2748,10 @@ public final class LauncherInstrumentation {
     }
 
     public Closable eventsCheck() {
-        Assert.assertTrue("Nested event checking", mEventChecker == null);
+        if (mEventChecker != null) {
+            // Nested call, do nothing.
+            return () -> {};
+        }
         disableSensorRotation();
         final Integer initialPid = getPid();
         final LogEventChecker eventChecker = new LogEventChecker(this);
@@ -2954,5 +2955,29 @@ public final class LauncherInstrumentation {
     public int getTaskbarUnstashInputArea() {
         return getTestInfo(TestProtocol.REQUEST_TASKBAR_UNSTASHED_INPUT_AREA).getInt(
                 TestProtocol.TEST_INFO_RESPONSE_FIELD);
+    }
+
+    /**
+     * Waits for the provided condition to be true, otherwise fails with the provided message
+     */
+    public void waitForCondition(String errorMessage, long timeout, Callable<Boolean> condition) {
+        waitForCondition(() -> errorMessage, timeout, condition);
+    }
+
+    /**
+     * Waits for the provided condition to be true, otherwise fails with the provided message
+     */
+    public void waitForCondition(
+            Supplier<String> errorMessage, long timeout, Callable<Boolean> condition) {
+        if (!mDevice.wait(d -> {
+            try {
+                return condition.call();
+            } catch (Throwable t) {
+                throw new RuntimeException(t);
+            }
+        }, timeout)) {
+            checkForAnomaly(false, false);
+            fail(errorMessage.get());
+        }
     }
 }

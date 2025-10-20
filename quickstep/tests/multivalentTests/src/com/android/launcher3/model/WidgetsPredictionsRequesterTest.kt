@@ -51,7 +51,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.MockitoAnnotations
+import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
@@ -76,13 +76,13 @@ class WidgetsPredictionsRequesterTest {
 
     private lateinit var allWidgets: Map<ComponentKey, WidgetItem>
 
+    @get:Rule val mockito = MockitoJUnit.rule()
     @Mock private lateinit var iconCache: IconCache
     @Mock private lateinit var apmMock: AppPredictionManager
     @Mock private lateinit var predictorMock: AppPredictor
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
         mUserHandle = myUserHandle()
         doReturn(predictorMock).whenever(apmMock).createAppPredictionSession(any())
 

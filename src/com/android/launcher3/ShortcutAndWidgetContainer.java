@@ -30,6 +30,7 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Trace;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,7 +40,6 @@ import androidx.annotation.Nullable;
 import com.android.launcher3.CellLayout.ContainerType;
 import com.android.launcher3.celllayout.CellLayoutLayoutParams;
 import com.android.launcher3.folder.FolderIcon;
-import com.android.launcher3.logging.FileLog;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.widget.LauncherAppWidgetHostView;
@@ -229,7 +229,7 @@ public class ShortcutAndWidgetContainer extends ViewGroup implements FolderIcon.
             final PointF appWidgetScale = profile.getAppWidgetScale((ItemInfo) child.getTag());
             float scaleX = appWidgetScale.x;
             float scaleY = appWidgetScale.y;
-            FileLog.d(TAG, "appWidgetScale - [x,y]: [" + scaleX + "," + scaleY + "]");
+            Log.d(TAG, "appWidgetScale - [x,y]: [" + scaleX + "," + scaleY + "]");
 
             nahv.setScaleToFit(Math.min(scaleX, scaleY));
             nahv.getTranslateDelegate().setTranslation(INDEX_WIDGET_CENTERING,

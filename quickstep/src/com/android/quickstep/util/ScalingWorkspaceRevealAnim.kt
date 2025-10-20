@@ -185,16 +185,10 @@ class ScalingWorkspaceRevealAnim(
             )
 
             // Add a blur animation to the scrim layer.
-            var maxBlurRadius =
-                launcher.resources.getDimensionPixelSize(
-                    if (Flags.allAppsBlur() || Flags.enableOverviewBackgroundWallpaperBlur()) {
-                        R.dimen.max_depth_blur_radius_enhanced
-                    } else {
-                        R.integer.max_depth_blur_radius
-                    }
-                )
+            val maxBlurRadius =
+                launcher.resources.getDimensionPixelSize(R.dimen.max_depth_blur_radius_enhanced)
             val blurAnimator = ValueAnimator.ofFloat(1f, 0f)
-            blurAnimator.setInterpolator(BLUR_INTERPOLATOR)
+            blurAnimator.interpolator = BLUR_INTERPOLATOR
             blurAnimator.addUpdateListener {
                 applyBlur(maxBlurRadius * blurAnimator.animatedValue as Float)
             }
@@ -314,6 +308,9 @@ class ScalingWorkspaceRevealAnim(
     }
 
     private fun addBlurLayer() {
+        if (!Flags.blurredHomeAnimation()) {
+            return
+        }
         val parent = launcher.dragLayer.viewRootImpl?.surfaceControl ?: return
         if (!parent.isValid) {
             Log.e(TAG, "Parent surface is not ready at the moment. Can't apply blur.")
