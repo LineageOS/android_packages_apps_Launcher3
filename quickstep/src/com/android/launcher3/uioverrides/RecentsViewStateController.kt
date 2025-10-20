@@ -95,7 +95,7 @@ class RecentsViewStateController(private val launcher: QuickstepLauncher) :
         recentsView.setFullscreenProgress(state.overviewFullscreenProgress)
         // In Overview, we may be layering app surfaces behind Launcher, so we need to notify
         // DepthController to prevent optimizations which might occlude the layers behind
-        launcher.depthController.setHasContentBehindLauncher(state.isRecentsViewVisible)
+        launcher.depthController.setHasContentBehindContainer(state.isRecentsViewVisible)
 
         val builder = PendingAnimation(state.getTransitionDuration(launcher, true).toLong())
         handleSplitSelectionState(state, builder, animate = false)
@@ -187,7 +187,7 @@ class RecentsViewStateController(private val launcher: QuickstepLauncher) :
         // DepthController to prevent optimizations which might occlude the layers behind
         builder.addListener(
             forSuccessCallback {
-                launcher.depthController.setHasContentBehindLauncher(toState.isRecentsViewVisible)
+                launcher.depthController.setHasContentBehindContainer(toState.isRecentsViewVisible)
             }
         )
 

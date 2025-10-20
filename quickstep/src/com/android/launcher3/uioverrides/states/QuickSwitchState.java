@@ -60,4 +60,5 @@ public class QuickSwitchState extends BackgroundAppState {
     public boolean detachDesktopCarousel() {
         return true;
     }
+
 }

@@ -182,10 +182,6 @@ public abstract class StatefulActivity<STATE_TYPE extends BaseState<STATE_TYPE>>
         Trace.endSection();
     }
 
-    /**
-     * Handles configuration change when system calls {@link #onConfigurationChanged}, or on other
-     * situations that configuration might change.
-     */
     public void handleConfigurationChanged(Configuration newConfig) {
         int diff = newConfig.diff(mOldConfig);
         int rotation = WindowManagerProxy.INSTANCE.get(this).getRotation(this);

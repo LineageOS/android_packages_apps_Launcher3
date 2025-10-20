@@ -59,6 +59,7 @@ import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION;
 import static com.android.launcher3.LauncherState.ALL_APPS;
+import static com.android.launcher3.LauncherState.BACKGROUND_APP;
 import static com.android.launcher3.LauncherState.EDIT_MODE;
 import static com.android.launcher3.LauncherState.FLAG_MULTI_PAGE;
 import static com.android.launcher3.LauncherState.FLAG_NON_INTERACTIVE;
@@ -2917,6 +2918,11 @@ public class Launcher extends StatefulActivity<LauncherState>
     @Override
     public ScrimView getScrimView() {
         return mScrimView;
+    }
+
+    @Override
+    public LauncherState getBackgroundAppState() {
+        return BACKGROUND_APP;
     }
 
     @Nullable

@@ -4724,7 +4724,7 @@ public abstract class RecentsView<
                 anim.play(ObjectAnimator.ofFloat(this, DESK_EXPLODE_PROGRESS, 1f, 0f));
             }
         }
-        DepthController depthController = getDepthController();
+        DepthController<?, ?> depthController = getDepthController();
         if (depthController != null) {
             float targetDepth = taskView instanceof DesktopTaskView ? 0 : BACKGROUND_APP.getDepth(
                     mContainer);
@@ -5550,7 +5550,7 @@ public abstract class RecentsView<
     }
 
     @Nullable
-    protected DepthController getDepthController() {
+    protected DepthController<?, ?> getDepthController() {
         return null;
     }
 

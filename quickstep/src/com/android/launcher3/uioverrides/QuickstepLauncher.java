@@ -150,8 +150,8 @@ import com.android.launcher3.model.data.ItemInfoWithIcon;
 import com.android.launcher3.model.data.PredictedContainerInfo;
 import com.android.launcher3.popup.SystemShortcut;
 import com.android.launcher3.proxy.ProxyActivityStarter;
-import com.android.launcher3.statehandlers.DepthController;
 import com.android.launcher3.statehandlers.DesktopVisibilityController;
+import com.android.launcher3.statehandlers.LauncherDepthController;
 import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.statemanager.StateManager.AtomicAnimationFactory;
 import com.android.launcher3.statemanager.StateManager.StateHandler;
@@ -264,7 +264,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
 
     private PredictedContainerInfo mAllAppsPredictions;
     private HotseatPredictionController mHotseatPredictionController;
-    private DepthController mDepthController;
+    private LauncherDepthController mDepthController;
     private QuickstepTransitionManager mAppTransitionManager;
 
     private OverviewActionsView<?> mActionsView;
@@ -326,7 +326,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     @Override
     protected void setupViews() {
         getAppWidgetHolder().setOnViewCreationCallback(new QuickstepInteractionHandler(this));
-        mDepthController = new DepthController(this);
+        mDepthController = new LauncherDepthController(this);
         mOverviewBlurEnabled = isOverviewBackgroundBlurEnabled();
         getTheme().applyStyle(getOverviewBlurStyleResId(), true);
         super.setupViews();
@@ -504,7 +504,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         return mDepthController != null && mDepthController.isCrossWindowBlursEnabled();
     }
 
-    /** Apply the blur or blur fallback style to the current theme. */
+    @Override
     public void updateBlurStyle() {
         if (isOverviewBackgroundBlurEnabled() != mOverviewBlurEnabled) {
             mWallpaperThemeManager.recreateToUpdateTheme();
@@ -1324,7 +1324,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         out.add(new RecentsViewStateController(this));
     }
 
-    public DepthController getDepthController() {
+    public LauncherDepthController getDepthController() {
         return mDepthController;
     }
 

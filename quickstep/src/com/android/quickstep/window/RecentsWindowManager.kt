@@ -18,6 +18,7 @@ package com.android.quickstep.window
 
 import android.animation.Animator
 import android.animation.AnimatorSet
+import android.annotation.SuppressLint
 import android.app.ActivityOptions
 import android.app.ActivityTaskManager
 import android.content.ComponentCallbacks
@@ -81,8 +82,6 @@ import com.android.launcher3.testing.shared.TestProtocol.SEQUENCE_MAIN
 import com.android.launcher3.util.ActivityOptionsWrapper
 import com.android.launcher3.util.DaggerSingletonObject
 import com.android.launcher3.util.DisplayController
-import com.android.launcher3.util.Executors
-import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.LooperExecutor
 import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.SafeCloseable
@@ -116,10 +115,10 @@ import com.android.quickstep.fallback.RecentsState.Companion.DEFAULT
 import com.android.quickstep.fallback.RecentsState.Companion.MODAL_TASK
 import com.android.quickstep.fallback.RecentsState.Companion.OVERVIEW_SPLIT_SELECT
 import com.android.quickstep.fallback.toLauncherStateOrdinal
+import com.android.quickstep.split.SplitSelectStateController
 import com.android.quickstep.util.QuickstepProtoLogGroup
 import com.android.quickstep.util.RecentsAtomicAnimationFactory
 import com.android.quickstep.util.RecentsWindowProtoLogProxy
-import com.android.quickstep.split.SplitSelectStateController
 import com.android.quickstep.util.SurfaceTransactionApplier
 import com.android.quickstep.util.TISBindHelper
 import com.android.quickstep.views.OverviewActionsView
@@ -293,7 +292,7 @@ constructor(
         }
     }
 
-    var activityLaunchAnimationRunner: RemoteAnimationFactory? = null
+    private var activityLaunchAnimationRunner: RemoteAnimationFactory? = null
 
     private var displayChangesSafeCloseable: SafeCloseable? = null
 
@@ -313,10 +312,11 @@ constructor(
 
         displayController.getListenable(displayId)?.let {
             displayChangesSafeCloseable =
-                it.changes.forEach(MAIN_EXECUTOR) { _ -> onDisplayInfoChanged() }
+                it.changes.forEach(uiExecutor) { _ -> onDisplayInfoChanged() }
         }
     }
 
+    @SuppressLint("InflateParams")
     fun createWindowView() {
         if (windowView != null) {
             createSurfaceControlViewHost()
@@ -378,7 +378,7 @@ constructor(
         displayChangesSafeCloseable = null
         fallbackWindowInterface.setRecentsWindowManager(null)
         tisBindHelper.onDestroy()
-        Executors.MAIN_EXECUTOR.execute {
+        uiExecutor.execute {
             onViewDestroyed()
             hideRecentsWindow()
             cleanUpSurfaceControlViewHost()
@@ -531,6 +531,7 @@ constructor(
         handleConfigurationChanged(newConfiguration)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onLowMemory() {
         // Do nothing
     }
@@ -578,13 +579,7 @@ constructor(
                     nonApps: Array<RemoteAnimationTarget>?,
                     callback: LauncherAnimationRunner.AnimationResult?,
                 ) {
-                    if (
-                        apps == null ||
-                            wallpapers == null ||
-                            nonApps == null ||
-                            callback == null ||
-                            recentsView == null
-                    ) {
+                    if (apps == null || wallpapers == null || nonApps == null || callback == null) {
                         return
                     }
                     val anim =
@@ -727,9 +722,7 @@ constructor(
         stateManager.moveToRestState()
     }
 
-    private fun isShowing(): Boolean {
-        return windowView?.parent != null && windowRootView.isVisible
-    }
+    private fun isShowing() = windowView?.parent != null && windowRootView.isVisible
 
     private fun recentAnimationStopped() {
         if (isInState(BACKGROUND_APP)) {
@@ -737,9 +730,7 @@ constructor(
         }
     }
 
-    override fun getComponentName(): ComponentName {
-        return ComponentName(this, RecentsWindowManager::class.java)
-    }
+    override fun getComponentName() = ComponentName(this, RecentsWindowManager::class.java)
 
     override fun canStartHomeSafely(): Boolean {
         val overviewCommandHelper = tisBindHelper.overviewCommandHelper
@@ -752,25 +743,15 @@ constructor(
         this.taskbarInteractor = taskbarInteractor
     }
 
-    override fun getTaskbarInteractor(): TaskbarInteractor? {
-        return taskbarInteractor
-    }
+    override fun getTaskbarInteractor() = taskbarInteractor
 
     override fun collectStateHandlers(out: MutableList<StateManager.StateHandler<RecentsState?>>?) {
         out!!.add(FallbackRecentsStateController(this))
     }
 
-    override fun getStateManager(): StateManager<RecentsState, RecentsWindowManager> {
-        return this.stateManager
-    }
+    override fun getStateManager() = stateManager
 
-    override fun shouldAnimateStateChange(): Boolean {
-        return false
-    }
-
-    override fun isInState(state: RecentsState?): Boolean {
-        return stateManager.state == state
-    }
+    override fun shouldAnimateStateChange() = false
 
     override fun onStateSetStart(state: RecentsState) {
         super.onStateSetStart(state)
@@ -801,21 +782,16 @@ constructor(
         return systemUiController
     }
 
-    override fun getScrimView(): ScrimView? {
-        return scrimView
-    }
+    override fun getScrimView() = scrimView
 
-    override fun <T : BaseContainerInterface<*, *>?> getContainerInterface(): T {
-        return fallbackWindowInterface as T
-    }
+    override fun getBackgroundAppState() = BACKGROUND_APP
 
-    override fun <T : View?> getOverviewPanel(): T {
-        return recentsView as T
-    }
+    override fun <T : BaseContainerInterface<*, *>?> getContainerInterface() =
+        fallbackWindowInterface as T
 
-    override fun getSplitSelectStateController(): SplitSelectStateController {
-        return splitSelectStateController
-    }
+    override fun <T : View?> getOverviewPanel() = recentsView as T
+
+    override fun getSplitSelectStateController() = splitSelectStateController
 
     override fun goToRecentsState(
         recentsState: RecentsState,
@@ -825,21 +801,14 @@ constructor(
         stateManager.goToState(recentsState, animated, listener)
     }
 
-    override fun getRootView(): View {
-        return windowRootView
-    }
+    override fun getRootView(): View = windowRootView
 
-    override fun getDragLayer(): BaseDragLayer<RecentsWindowManager> {
-        return dragLayer!!
-    }
+    override fun getDragLayer(): BaseDragLayer<RecentsWindowManager>? = dragLayer
 
-    override fun dispatchGenericMotionEvent(ev: MotionEvent?): Boolean {
-        return windowRootView.dispatchGenericMotionEvent(ev)
-    }
+    override fun dispatchGenericMotionEvent(ev: MotionEvent?) =
+        windowRootView.dispatchGenericMotionEvent(ev)
 
-    override fun dispatchKeyEvent(ev: KeyEvent?): Boolean {
-        return windowRootView.dispatchKeyEvent(ev)
-    }
+    override fun dispatchKeyEvent(ev: KeyEvent?) = windowRootView.dispatchKeyEvent(ev)
 
     override fun onRootViewDispatchKeyEvent(event: KeyEvent?): Boolean {
         TestLogging.recordKeyEvent(SEQUENCE_MAIN, "Key event", event)
@@ -858,9 +827,7 @@ constructor(
         }
     }
 
-    override fun getActionsView(): OverviewActionsView<*>? {
-        return actionsView
-    }
+    override fun getActionsView() = actionsView
 
     override fun addForceInvisibleFlag(flag: Int) {}
 
@@ -892,17 +859,13 @@ constructor(
         startHomeWithRemoteAnimation()
     }
 
-    override fun isRecentsViewVisible(): Boolean {
-        return isShowing() || getStateManager().state!!.isRecentsViewVisible()
-    }
+    override fun isRecentsViewVisible() =
+        isShowing() || getStateManager().state!!.isRecentsViewVisible()
 
-    override fun createAtomicAnimationFactory(): AtomicAnimationFactory<RecentsState> {
-        return RecentsAtomicAnimationFactory(this)
-    }
+    override fun createAtomicAnimationFactory(): AtomicAnimationFactory<RecentsState> =
+        RecentsAtomicAnimationFactory(this)
 
-    override fun getOverviewBlurStyleResId(): Int {
-        return R.style.OverviewBlurFallbackStyle
-    }
+    override fun getOverviewBlurStyleResId() = R.style.OverviewBlurFallbackStyle
 
     @AssistedFactory
     interface Factory {

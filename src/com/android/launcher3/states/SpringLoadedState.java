@@ -17,8 +17,6 @@ package com.android.launcher3.states;
 
 import static com.android.launcher3.logging.StatsLogManager.LAUNCHER_STATE_HOME;
 
-import android.content.Context;
-
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherState;
@@ -65,7 +63,7 @@ public class SpringLoadedState extends LauncherState {
     }
 
     @Override
-    protected float getDepthUnchecked(Context context) {
+    protected float getDepthUnchecked(ActivityContext context) {
         return DEPTH_15_PERCENT;
     }
 

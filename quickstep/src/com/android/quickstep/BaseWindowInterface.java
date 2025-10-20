@@ -60,7 +60,7 @@ public abstract class BaseWindowInterface extends
     public abstract RecentsWindowManager getCreatedContainer();
 
     @Nullable
-    public DepthController getDepthController() {
+    public DepthController<RecentsState, RecentsWindowManager> getDepthController() {
         return null;
     }
 

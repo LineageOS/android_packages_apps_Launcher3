@@ -17,7 +17,6 @@ package com.android.launcher3.uioverrides.states;
 
 import static com.android.launcher3.logging.StatsLogManager.LAUNCHER_STATE_ALLAPPS;
 
-import android.content.Context;
 import android.graphics.Color;
 
 import com.android.internal.jank.Cuj;
@@ -117,8 +116,7 @@ public class AllAppsState extends LauncherState {
     }
 
     @Override
-    protected <DEVICE_PROFILE_CONTEXT extends Context & ActivityContext>
-            float getDepthUnchecked(DEVICE_PROFILE_CONTEXT context) {
+    protected float getDepthUnchecked(ActivityContext context) {
         return context.getDeviceProfile().getBottomSheetProfile().getBottomSheetDepth();
     }
 

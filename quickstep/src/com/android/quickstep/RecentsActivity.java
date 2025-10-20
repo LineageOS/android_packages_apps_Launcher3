@@ -31,6 +31,7 @@ import static com.android.launcher3.util.WallpaperThemeManager.setWallpaperDepen
 import static com.android.quickstep.OverviewComponentObserver.startHomeIntentSafely;
 import static com.android.quickstep.TaskUtils.taskIsATargetWithMode;
 import static com.android.quickstep.TaskViewUtils.createRecentsWindowAnimator;
+import static com.android.quickstep.fallback.RecentsState.BACKGROUND_APP;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -85,8 +86,8 @@ import com.android.quickstep.fallback.FallbackRecentsStateController;
 import com.android.quickstep.fallback.FallbackRecentsView;
 import com.android.quickstep.fallback.RecentsDragLayer;
 import com.android.quickstep.fallback.RecentsState;
-import com.android.quickstep.util.RecentsAtomicAnimationFactory;
 import com.android.quickstep.split.SplitSelectStateController;
+import com.android.quickstep.util.RecentsAtomicAnimationFactory;
 import com.android.quickstep.util.SurfaceTransactionApplier;
 import com.android.quickstep.util.TISBindHelper;
 import com.android.quickstep.views.OverviewActionsView;
@@ -231,6 +232,11 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
 
     public ScrimView getScrimView() {
         return mScrimView;
+    }
+
+    @Override
+    public RecentsState getBackgroundAppState() {
+        return BACKGROUND_APP;
     }
 
     @Override

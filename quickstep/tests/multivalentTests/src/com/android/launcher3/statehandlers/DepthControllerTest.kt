@@ -44,7 +44,7 @@ import org.mockito.junit.MockitoJUnit
 @RunWith(AndroidJUnit4::class)
 class DepthControllerTest {
 
-    private lateinit var underTest: DepthController
+    private lateinit var underTest: LauncherDepthController
     @get:Rule val mockito = MockitoJUnit.rule()
     @Mock private lateinit var launcher: QuickstepLauncher
     @Mock private lateinit var stateManager: StateManager<LauncherState, Launcher>
@@ -60,7 +60,7 @@ class DepthControllerTest {
         `when`(launcher.stateManager).thenReturn(stateManager)
         `when`(launcher.depthBlurTargets).thenReturn(Collections.emptyList())
 
-        underTest = DepthController(launcher)
+        underTest = LauncherDepthController(launcher)
     }
 
     @Test

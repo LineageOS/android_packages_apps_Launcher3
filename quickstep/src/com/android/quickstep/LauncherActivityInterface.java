@@ -38,14 +38,14 @@ import com.android.launcher3.LauncherAnimUtils;
 import com.android.launcher3.LauncherInitListener;
 import com.android.launcher3.LauncherState;
 import com.android.launcher3.anim.PendingAnimation;
-import com.android.launcher3.statehandlers.DepthController;
+import com.android.launcher3.statehandlers.LauncherDepthController;
 import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.taskbar.TaskbarInteractor;
 import com.android.launcher3.uioverrides.QuickstepLauncher;
-import com.android.launcher3.util.ThreadedAnimator;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.JoinedAnimator;
 import com.android.launcher3.util.NavigationMode;
+import com.android.launcher3.util.ThreadedAnimator;
 import com.android.launcher3.views.ScrimColors;
 import com.android.quickstep.GestureState.GestureEndTarget;
 import com.android.quickstep.orientation.RecentsPagedOrientationHandler;
@@ -158,7 +158,7 @@ public final class LauncherActivityInterface extends
 
     @Nullable
     @Override
-    public DepthController getDepthController() {
+    public LauncherDepthController getDepthController() {
         QuickstepLauncher launcher = getCreatedContainer();
         if (launcher == null) {
             return null;

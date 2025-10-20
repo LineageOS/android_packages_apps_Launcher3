@@ -89,4 +89,13 @@ public interface BaseState<T> {
     default boolean shouldPreserveDataStateOnReapply() {
         return false;
     }
+
+    /**
+     * The amount of blur and wallpaper zoom to apply to the background of either the app
+     * or StatefulContainer surface in this state. Should be a number between 0 and 1, inclusive.
+     * <p>
+     * 0 means completely zoomed in, without blurs. 1 is zoomed out, with blurs.
+     */
+    float getDepth(ActivityContext context);
+
 }
