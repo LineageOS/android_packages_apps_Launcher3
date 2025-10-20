@@ -634,4 +634,13 @@ public class ActiveGestureProtoLogProxy {
                     reason.toString());
         }
     }
+
+    public static void logEarlyExitForCanceledAnimation(@NonNull String startNewTask) {
+        ActiveGestureLog.INSTANCE.addLog(new ActiveGestureLog.CompoundString(
+                "%s: aborting due to canceled shift animation", startNewTask));
+        if (willProtoLog()) {
+            ProtoLog.d(PROTO_LOG_GROUP,
+                    "%s: aborting due to canceled shift animation", startNewTask);
+        }
+    }
 }

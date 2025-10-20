@@ -31,6 +31,7 @@ import static com.android.launcher3.BaseActivity.EVENT_DESTROYED;
 import static com.android.launcher3.BaseActivity.EVENT_STARTED;
 import static com.android.launcher3.BaseActivity.INVISIBLE_BY_STATE_HANDLER;
 import static com.android.launcher3.BaseActivity.STATE_HANDLER_INVISIBILITY_FLAGS;
+import static com.android.launcher3.Flags.disableObsoleteSwipeHandlerLogic;
 import static com.android.launcher3.Flags.msdlFeedback;
 import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.PagedView.INVALID_PAGE;
@@ -228,7 +229,7 @@ public abstract class AbsSwipeUpHandler<
     protected Runnable mGestureEndCallback;
     protected Runnable mGestureAnimationEndCallback;
     protected MultiStateCallback mStateCallback;
-    protected boolean mCanceled;
+    protected boolean mAnimationCanceled;
     private boolean mRecentsViewScrollLinked = false;
     // The previous task view type before the user quick switches between tasks
     private TaskViewType mPreviousTaskViewType;
@@ -1849,6 +1850,15 @@ public abstract class AbsSwipeUpHandler<
             }
         }
 
+        // This is likely unnecessary, however adding this to prevent reintroducing any forgotten
+        // bugs fixed by the previous implementation.
+        AnimatorListenerAdapter shiftAnimationListener = new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                super.onAnimationStart(animation);
+                mAnimationCanceled = false;
+            }
+        };
         if (mGestureState.getEndTarget() == HOME) {
             getOrientationHandler().adjustFloatingIconStartVelocity(velocityPxPerMs);
             // Take first task ID, if there are multiple we don't have any special home
@@ -2015,9 +2025,11 @@ public abstract class AbsSwipeUpHandler<
                 goingUpAnim.setDuration(goingUpDuration);
                 goingDownAnim.setDuration(goingDownDuration);
                 goingDownAnim.addListener(successListener);
-
                 animatorSet.play(goingUpAnim);
                 animatorSet.play(goingDownAnim).after(goingUpAnim);
+            }
+            if (!disableObsoleteSwipeHandlerLogic()) {
+                animatorSet.addListener(shiftAnimationListener);
             }
             animatorSet.setInterpolator(interpolator);
             animatorSet.start();
@@ -2025,6 +2037,9 @@ public abstract class AbsSwipeUpHandler<
         } else {
             AnimatorSet animatorSet = new AnimatorSet();
             ValueAnimator windowAnim = mCurrentShift.animateToValue(start, end);
+            if (!disableObsoleteSwipeHandlerLogic()) {
+                windowAnim.addListener(shiftAnimationListener);
+            }
             windowAnim.addUpdateListener(valueAnimator -> {
                 computeRecentsScrollIfInvisible();
             });
@@ -2265,7 +2280,7 @@ public abstract class AbsSwipeUpHandler<
     private void continueComputingRecentsScrollIfNecessary() {
         if (!mGestureState.hasState(STATE_RECENTS_SCROLLING_FINISHED)
                 && !mStateCallback.hasStates(STATE_HANDLER_INVALIDATED)
-                && !mCanceled
+                && !mAnimationCanceled
                 && mRecentsView != null) {
             computeRecentsScrollIfInvisible();
             mRecentsView.postOnAnimation(this::continueComputingRecentsScrollIfNecessary);
@@ -2352,12 +2367,12 @@ public abstract class AbsSwipeUpHandler<
         }
     }
 
-    public boolean isCanceled() {
-        return mCanceled;
-    }
-
     @UiThread
     private void resumeLastTask() {
+        if (mAnimationCanceled) {
+            ActiveGestureProtoLogProxy.logEarlyExitForCanceledAnimation("resumeLastTask");
+            return;
+        }
         if (mRecentsAnimationController != null) {
             mRecentsAnimationController.finish(
                     /* toHome= */ false,
@@ -2371,6 +2386,10 @@ public abstract class AbsSwipeUpHandler<
 
     @UiThread
     private void finishRejectHome() {
+        if (mAnimationCanceled) {
+            ActiveGestureProtoLogProxy.logEarlyExitForCanceledAnimation("finishRejectHome");
+            return;
+        }
         if (mRecentsAnimationController != null) {
             mRecentsAnimationController.finish(
                     /* toHome=  */ false,
@@ -2435,7 +2454,7 @@ public abstract class AbsSwipeUpHandler<
      */
     private void cancelCurrentAnimation() {
         ActiveGestureProtoLogProxy.logAbsSwipeUpHandlerCancelCurrentAnimation();
-        mCanceled = true;
+        mAnimationCanceled = true;
         mCurrentShift.cancelAnimation();
 
         // Cleanup when switching handlers
@@ -2761,8 +2780,8 @@ public abstract class AbsSwipeUpHandler<
     }
 
     protected void startNewTask(@Nullable TaskView taskToLaunch, Consumer<Boolean> resultCallback) {
-        if (mCanceled) {
-            mCanceled = false;
+        if (mAnimationCanceled) {
+            ActiveGestureProtoLogProxy.logEarlyExitForCanceledAnimation("startNewTask");
             return;
         }
         if (taskToLaunch == null) {
@@ -2775,7 +2794,6 @@ public abstract class AbsSwipeUpHandler<
                         /* reason= */ new ActiveGestureLog.CompoundString(
                                 "AbsSwipeUpHander.startNewTask: missing task to launch"));
             }
-            mCanceled = false;
             return;
         }
         int[] taskIds = taskToLaunch.getTaskIds();
@@ -2815,7 +2833,6 @@ public abstract class AbsSwipeUpHandler<
             updateDeferStateForFlag(LAUNCH_WITHOUT_ANIMATION_CALLBACK_PENDING, false);
             return Unit.INSTANCE;
         }  /* freezeTaskList */);
-        mCanceled = false;
     }
 
     /**
