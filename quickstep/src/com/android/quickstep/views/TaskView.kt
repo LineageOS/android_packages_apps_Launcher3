@@ -191,9 +191,8 @@ constructor(
     val itemInfo: TaskViewItemInfo
         get() = TaskViewItemInfo(this, firstTaskContainer)
 
-    protected val container: RecentsViewContainer by lazy {
+    protected val container: RecentsViewContainer =
         RecentsViewContainer.containerFromContext(context)
-    }
     protected val lastTouchDownPosition = PointF()
 
     // Derived view properties
