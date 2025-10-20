@@ -121,7 +121,7 @@ class RecentsAnimationDeviceStateTest {
     fun onDisplayInfoChanged_noButton_registerExclusionListener() {
         doReturn(NavigationMode.NO_BUTTON).whenever(info).getNavigationMode()
 
-        underTest.onDisplayInfoChanged(context, info, CHANGE_ROTATION or CHANGE_NAVIGATION_MODE)
+        underTest.onDisplayInfoChanged(info, CHANGE_ROTATION or CHANGE_NAVIGATION_MODE)
 
         verify(exclusionManager).addListener(underTest)
     }
@@ -132,7 +132,7 @@ class RecentsAnimationDeviceStateTest {
         whenever(info.getNavigationMode()).thenReturn(NavigationMode.TWO_BUTTONS)
         reset(exclusionManager)
 
-        underTest.onDisplayInfoChanged(context, info, CHANGE_ROTATION or CHANGE_NAVIGATION_MODE)
+        underTest.onDisplayInfoChanged(info, CHANGE_ROTATION or CHANGE_NAVIGATION_MODE)
 
         verify(exclusionManager).removeListener(underTest)
     }
@@ -143,7 +143,7 @@ class RecentsAnimationDeviceStateTest {
         whenever(info.getNavigationMode()).thenReturn(NavigationMode.NO_BUTTON)
         reset(exclusionManager)
 
-        underTest.onDisplayInfoChanged(context, info, CHANGE_DENSITY)
+        underTest.onDisplayInfoChanged(info, CHANGE_DENSITY)
 
         verifyNoMoreInteractions(exclusionManager)
     }
