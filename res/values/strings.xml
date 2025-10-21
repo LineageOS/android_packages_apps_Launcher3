@@ -504,6 +504,21 @@
     <!-- Accessibility action to decrease height of a widget. [CHAR_LIMIT=30] -->
     <string name="action_decrease_height">Decrease height</string>
 
+    <!-- Accessibility label for the resize handle shown on start (left in LTR) edge that can be
+     tapped to show resize buttons for widget. [CHAR_LIMIT=30] -->
+    <string name="resize_handle_start">Left resize handle</string>
+    <!-- Accessibility label for the resize handle shown on top edge that can be tapped to show
+     resize buttons for widget. [CHAR_LIMIT=30] -->
+    <string name="resize_handle_top">Top resize handle</string>
+    <!-- Accessibility label for the resize handle shown on end (right in LTR) edge that can be
+     tapped to show resize buttons for widget. [CHAR_LIMIT=30] -->
+    <string name="resize_handle_end">Right resize handle</string>
+    <!-- Accessibility label for the resize handle shown on bottom edge that can be tapped to show
+     resize buttons for widget. [CHAR_LIMIT=30] -->
+    <string name="resize_handle_bottom">Bottom resize handle</string>
+    <!-- Accessibility click label for tap action on the resize handles shown on widgets.
+    [CHAR_LIMIT=30] -->
+    <string name="tap_to_show_resize_buttons">Show resize buttons</string>
     <!-- Accessibility confirmation for widget resize. -->
     <string name="widget_resized">Widget resized to width <xliff:g id="number" example="2">%1$s</xliff:g> height <xliff:g id="number" example="1">%2$s</xliff:g></string>
 
