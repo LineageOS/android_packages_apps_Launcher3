@@ -39,6 +39,7 @@ filegroup {
 filegroup {
     name: "launcher3-quickstep-oop-tests-only",
     srcs: [
+        "com/android/quickstep/TaplTaskbarDragging.kt",
         "com/android/quickstep/TaplOverviewIconTest.java",
         "com/android/quickstep/TaplTestsQuickstep.java",
         "com/android/quickstep/TaplTestsSplitscreen.java",
