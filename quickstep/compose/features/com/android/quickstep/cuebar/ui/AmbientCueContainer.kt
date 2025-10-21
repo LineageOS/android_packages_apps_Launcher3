@@ -63,7 +63,7 @@ fun AmbientCueContainer(
     modifier: Modifier = Modifier,
     onAnimationStateChange: (Int, AmbientCueAnimationState) -> Unit,
 ) {
-    val viewModel = rememberViewModel("AmbientCueContainer") { ambientCueViewModelFactory.create() }
+    val viewModel = rememberViewModel { ambientCueViewModelFactory.create() }
 
     val visible = viewModel.isVisible
     val expanded = viewModel.isExpanded

@@ -80,4 +80,8 @@ class AmbientCueInteractor @Inject constructor(
     fun setDeactivated(isDeactivated: Boolean) {
         ambientCueRepository.isDeactivated.dispatchValue(isDeactivated)
     }
+
+    val globallyFocusedTaskId: ListenableRef<Int> = ambientCueRepository.globallyFocusedTaskId
+
+    val frontTaskPackageName: ListenableRef<String> = ambientCueRepository.frontTaskPackageName
 }

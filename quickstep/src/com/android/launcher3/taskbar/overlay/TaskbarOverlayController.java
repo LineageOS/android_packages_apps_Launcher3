@@ -25,6 +25,7 @@ import static com.android.launcher3.AbstractFloatingView.TYPE_ALL;
 import static com.android.launcher3.AbstractFloatingView.TYPE_REBIND_SAFE;
 import static com.android.launcher3.LauncherState.ALL_APPS;
 import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
+import static com.android.systemui.shared.Flags.cueBarAceMigration;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -113,7 +114,14 @@ public final class TaskbarOverlayController {
                         /* stash = */ true,
                         /* shouldBubblesFollow = */ !mBubbleShowRequested
                 );
-                hideWindow();
+                boolean cueBarVisible = cueBarAceMigration()
+                        && (mControllers.getSharedState() != null
+                        && mControllers.getSharedState().cueBarVisible);
+                // Don't hide the window when cueBar is visible. This method can be invoked when
+                // cueBar is clicked due to onTaskMovedToFront() and hide the cueBar unexpectedly.
+                if (!cueBarVisible) {
+                    hideWindow();
+                }
             });
         }
     };
@@ -202,6 +210,9 @@ public final class TaskbarOverlayController {
         if (DEBUG) {
             Log.d(TAG, "onDestroy: " + Utilities.getTrimmedStackTrace("onDestroy"));
             Log.d(TAG, "onDestroy: Was window already present? " + (mOverlayContext != null));
+        }
+        if (cueBarAceMigration()) {
+            mControllers.cueBarController.cleanUpOverlay();
         }
         TaskStackChangeListeners.getInstance().unregisterTaskStackListener(mTaskStackListener);
         Optional.ofNullable(mOverlayContext).ifPresent(c -> {

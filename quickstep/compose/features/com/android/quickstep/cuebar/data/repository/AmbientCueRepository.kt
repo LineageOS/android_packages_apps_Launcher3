@@ -41,10 +41,15 @@ import com.android.launcher3.util.MutableListenableRef
 import com.android.quickstep.cuebar.data.ActionModel
 import com.android.quickstep.cuebar.data.IconModel
 import com.android.quickstep.cuebar.logger.AmbientCueLogger
+import com.android.systemui.shared.system.TaskStackChangeListener
+import com.android.systemui.shared.system.TaskStackChangeListeners
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -77,6 +82,12 @@ interface AmbientCueRepository {
     /* The timeout for Ambient Cue to disappear. */
     val ambientCueTimeoutMs: ListenableRef<Int>
 
+    /** Task Id which is globally focused on display. */
+    val globallyFocusedTaskId: ListenableRef<Int>
+
+    /** The package name of the task that is in the foreground. */
+    val frontTaskPackageName: ListenableRef<String>
+
     fun updateActions(newActions: List<ActionModel>)
     fun connectToSmartspace()
     fun disconnectFromSmartspace()
@@ -98,15 +109,9 @@ class AmbientCueRepositoryImpl
         context.getSystemService(AutofillManager::class.java)
 
     private val _actions = MutableListenableRef<List<ActionModel>>(emptyList())
-    override val actions: ListenableRef<List<ActionModel>> = _actions
+    override val actions: MutableListenableRef<List<ActionModel>> = _actions
 
     override val isDeactivated = MutableListenableRef(false)
-
-    /**
-     * The [RunningTaskInfo] for the task that is currently in the foreground. Updated whenever a
-     * new task moves to the front. Used to derive the package name for logging.
-     */
-    private var frontRunningTask: RunningTaskInfo? = null
 
     // These need to be updated from outside, e.g., by CuebarController
     override val isTaskBarVisible = MutableListenableRef(true)
@@ -128,6 +133,40 @@ class AmbientCueRepositoryImpl
 
     private var smartspaceSession: SmartspaceSession? = null
     private var smartspaceJob: Job? = null
+
+    private val _globallyFocusedTaskId = MutableListenableRef(INVALID_TASK_ID)
+    override val globallyFocusedTaskId: ListenableRef<Int> = _globallyFocusedTaskId
+
+    private val _frontTaskPackageName = MutableListenableRef("")
+    override val frontTaskPackageName: ListenableRef<String> = _frontTaskPackageName
+
+    private var debounceTaskJob: Job? = null
+
+    /**
+     * The [RunningTaskInfo] for the task that is currently in the foreground. Updated whenever a
+     * new task moves to the front. Used to derive the package name for logging and for CueBar to
+     * display itself when the user is actually looking at the target app by checking
+     * globallyFocusedTaskId == targetTaskId in the viewmodel.
+     */
+    private val taskStackListener = object : TaskStackChangeListener {
+        override fun onTaskMovedToFront(runningTaskInfo: RunningTaskInfo) {
+            debounceTaskJob?.cancel()
+            debounceTaskJob = backgroundScope.launch {
+                delay(DEBOUNCE_DELAY_MS)
+                withContext(uiExecutor.asCoroutineDispatcher()) {
+                    _globallyFocusedTaskId.dispatchValue(runningTaskInfo.taskId)
+                    _frontTaskPackageName.dispatchValue(
+                        runningTaskInfo.baseIntent?.component?.packageName ?: ""
+                    )
+                    debounceTaskJob = null
+                }
+            }
+        }
+    }
+
+    init {
+        TaskStackChangeListeners.getInstance().registerTaskStackListener(taskStackListener)
+    }
 
     private val smartspaceListener = OnTargetsAvailableListener { targets ->
         Log.i(TAG, "Receiving SmartSpace targets # ${targets.size}")
@@ -219,6 +258,9 @@ class AmbientCueRepositoryImpl
                     )
                 }
         Log.i(TAG, "SmartSpace actions $actions")
+        if (actions.isNotEmpty()) {
+            isDeactivated.dispatchValue(false)
+        }
         updateActions(actions)
     }
 
@@ -263,6 +305,8 @@ class AmbientCueRepositoryImpl
             Log.e(TAG, "Exception on closing Smartspace: $e", e)
         }
         smartspaceSession = null
+        backgroundScope.cancel()
+        TaskStackChangeListeners.getInstance().unregisterTaskStackListener(taskStackListener)
     }
 
     override fun updateActions(newActions: List<ActionModel>) {
@@ -299,10 +343,12 @@ class AmbientCueRepositoryImpl
         pw.println("$prefix   isAmbientCueEnabled: ${isAmbientCueEnabled.value}")
         pw.println("$prefix   ambientCueTimeoutMs: ${ambientCueTimeoutMs.value}")
         pw.println("$prefix   Smartspace Session active: ${smartspaceSession != null}")
+        pw.println("$prefix   globallyFocusedTaskId: ${globallyFocusedTaskId.value}")
+        pw.println("$prefix  debounceTaskJob active: ${debounceTaskJob?.isActive == true}")
+        pw.println("$prefix  frontTaskPackageName: ${frontTaskPackageName.value}")
     }
 
     companion object {
-        // Surface that PCC wants to push cards into
         @VisibleForTesting const val AMBIENT_CUE_SURFACE = "ambientcue"
         // In-coming intent extras from the intelligent service.
         @VisibleForTesting const val EXTRA_ACTIVITY_ID = "activityId"
