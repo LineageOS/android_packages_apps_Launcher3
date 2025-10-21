@@ -274,6 +274,11 @@ public class TestInformationHandler {
                         TestProtocol.TEST_INFO_RESPONSE_FIELD, TestLogging.sHadEventsNotFromTest);
                 return response;
 
+            case TestProtocol.REQUEST_ENABLE_REGISTER_EVENT_NOT_FROM_TEST: {
+                TestLogging.setEnableRegisterEventNotFromTest(Boolean.parseBoolean(arg));
+                return response;
+            }
+
             case TestProtocol.REQUEST_START_DRAG_THRESHOLD: {
                 final Resources resources = mContext.getResources();
                 response.putInt(TestProtocol.TEST_INFO_RESPONSE_FIELD,
