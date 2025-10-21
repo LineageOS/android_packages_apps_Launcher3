@@ -25,7 +25,7 @@ import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
-import com.android.launcher3.AppWidgetResizeFrame
+import com.android.launcher3.AppWidgetResizeFrameBase
 import com.android.launcher3.Flags
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.Launcher
@@ -189,7 +189,7 @@ class IntegrationReorderWidgetsTest {
 
     private fun dismissResizeFrame() {
         launcherActivity.executeOnLauncher {
-            searchChildren(it.rootView, AppWidgetResizeFrame::class.java)!!.close(false)
+            searchChildren(it.rootView, AppWidgetResizeFrameBase::class.java)!!.close(false)
         }
         getInstrumentation().waitForIdleSync()
     }

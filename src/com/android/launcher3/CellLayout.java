@@ -445,7 +445,8 @@ public class CellLayout extends ViewGroup {
         return mDropPending;
     }
 
-    void setIsDragOverlapping(boolean isDragOverlapping) {
+    /** Set if the drag is overlapping the sibling cell layout. */
+    public void setIsDragOverlapping(boolean isDragOverlapping) {
         if (mIsDragOverlapping != isDragOverlapping) {
             mIsDragOverlapping = isDragOverlapping;
             mBackground.setState(mIsDragOverlapping
@@ -1560,14 +1561,30 @@ public class CellLayout extends ViewGroup {
         }
     }
 
-    boolean createAreaForResize(int cellX, int cellY, int spanX, int spanY,
-            View dragView, int[] direction, boolean commit) {
+    /** Returns true if there exists an arrangement to support the given resizing needs. */
+    public boolean hasAreaForResize(int cellX, int cellY, int spanX, int spanY,
+            View dragView, int[] direction) {
+        ItemConfiguration swapSolution = checkAreaForResize(cellX, cellY, spanX, spanY, dragView,
+                direction);
+        return swapSolution != null && swapSolution.isSolution;
+    }
+
+    @Nullable
+    private ItemConfiguration checkAreaForResize(int cellX, int cellY, int spanX, int spanY,
+            View dragView, int[] direction) {
         int[] pixelXY = new int[2];
         regionToCenterPoint(cellX, cellY, spanX, spanY, pixelXY);
 
         // First we determine if things have moved enough to cause a different layout
-        ItemConfiguration swapSolution = findReorderSolution(pixelXY[0], pixelXY[1], spanX, spanY,
+        return findReorderSolution(pixelXY[0], pixelXY[1], spanX, spanY,
                 spanX,  spanY, direction, dragView,  true);
+    }
+
+    /** Create area for resizing the widget in given the direction. */
+    public boolean createAreaForResize(int cellX, int cellY, int spanX, int spanY,
+            View dragView, int[] direction, boolean commit) {
+        final ItemConfiguration swapSolution = checkAreaForResize(cellX, cellY, spanX, spanY,
+                dragView, direction);
 
         setUseTempCoords(true);
         if (swapSolution != null && swapSolution.isSolution) {

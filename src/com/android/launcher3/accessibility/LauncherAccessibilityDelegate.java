@@ -4,6 +4,7 @@ import static android.view.accessibility.AccessibilityEvent.TYPE_VIEW_FOCUSED;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
 
+import static com.android.launcher3.AbstractFloatingView.TYPE_WIDGET_RESIZE_FRAME;
 import static com.android.launcher3.LauncherState.NORMAL;
 import static com.android.launcher3.anim.AnimatorListeners.forEndCallback;
 import static com.android.launcher3.anim.AnimatorListeners.forSuccessCallback;
@@ -27,7 +28,7 @@ import android.view.accessibility.AccessibilityEvent;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.AbstractFloatingView;
-import com.android.launcher3.AppWidgetResizeFrame;
+import com.android.launcher3.AppWidgetResizeFrameBase;
 import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.ButtonDropTarget;
 import com.android.launcher3.CellLayout;
@@ -152,7 +153,7 @@ public class LauncherAccessibilityDelegate extends BaseAccessibilityDelegate<Lau
             }
         }
 
-        if (host instanceof AppWidgetResizeFrame) {
+        if (host instanceof AppWidgetResizeFrameBase) {
             out.add(mActions.get(CLOSE));
         }
 
@@ -211,18 +212,16 @@ public class LauncherAccessibilityDelegate extends BaseAccessibilityDelegate<Lau
             Popup popup = popupController.show(host);
             return popup != null && popup.createPreDragCondition() != null;
         } else if (action == MOVE) {
-            final View itemView = (host instanceof AppWidgetResizeFrame)
-                    ? ((AppWidgetResizeFrame) host).getViewForAccessibility()
-                    : host;
+            final View itemView = (host instanceof AppWidgetResizeFrameBase)
+                    ? ((AppWidgetResizeFrameBase) host).getViewForAccessibility() : host;
             return beginAccessibleDrag(itemView, item, fromKeyboard);
         } else if (action == ADD_TO_WORKSPACE) {
             return addToWorkspace(item, true /*accessibility*/, null /*finishCallback*/);
         } else if (action == MOVE_TO_WORKSPACE) {
             return moveToWorkspace(item);
         } else if (action == RESIZE) {
-            final View itemView = (host instanceof AppWidgetResizeFrame)
-                    ? ((AppWidgetResizeFrame) host).getViewForAccessibility()
-                    : host;
+            final View itemView = (host instanceof AppWidgetResizeFrameBase)
+                    ? ((AppWidgetResizeFrameBase) host).getViewForAccessibility() : host;
             final LauncherAppWidgetInfo info = (LauncherAppWidgetInfo) item;
             List<OptionItem> actions = getSupportedResizeActions(itemView, info);
             Rect pos = new Rect();
@@ -246,9 +245,9 @@ public class LauncherAccessibilityDelegate extends BaseAccessibilityDelegate<Lau
                     && mContext.getPopupControllerForAppIcons()
                     .show(btv) != null;
         } else if (action == CLOSE) {
-            if (host instanceof AppWidgetResizeFrame) {
+            if (host instanceof AppWidgetResizeFrameBase) {
                 AbstractFloatingView.closeOpenViews(mContext, /* animate= */ false,
-                        AbstractFloatingView.TYPE_WIDGET_RESIZE_FRAME);
+                        TYPE_WIDGET_RESIZE_FRAME);
             }
         } else {
             for (ButtonDropTarget dropTarget : mContext.getDropTargetBar().getDropTargets()) {
@@ -264,9 +263,9 @@ public class LauncherAccessibilityDelegate extends BaseAccessibilityDelegate<Lau
 
     private List<OptionItem> getSupportedResizeActions(View host, LauncherAppWidgetInfo info) {
         List<OptionItem> actions = new ArrayList<>();
-        if (host instanceof AppWidgetResizeFrame) {
+        if (host instanceof AppWidgetResizeFrameBase) {
             return getSupportedResizeActions(
-                    ((AppWidgetResizeFrame) host).getViewForAccessibility(), info);
+                    ((AppWidgetResizeFrameBase) host).getViewForAccessibility(), info);
         }
         AppWidgetProviderInfo providerInfo = ((LauncherAppWidgetHostView) host).getAppWidgetInfo();
         if (providerInfo == null) {
