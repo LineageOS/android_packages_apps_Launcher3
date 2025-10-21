@@ -1381,7 +1381,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
 
     /** Called when there's a change in handoff suggestions to update the UI. */
     public void commitHandoffSuggestionsToUI() {
-        if (!android.companion.Flags.enableTaskContinuity()) {
+        if (!android.companion.Flags.taskContinuity()) {
             return;
         }
 

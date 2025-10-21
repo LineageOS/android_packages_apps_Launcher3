@@ -1865,7 +1865,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         } else if (tag instanceof ItemClickProxy) {
             ((ItemClickProxy) tag).onItemClicked(view);
         } else if (tag instanceof HandoffSuggestion handoffSuggestion) {
-            if (android.companion.Flags.enableTaskContinuity()) {
+            if (android.companion.Flags.taskContinuity()) {
                 mControllers.taskbarHandoffController.launch(handoffSuggestion);
             } else {
                 Log.w(

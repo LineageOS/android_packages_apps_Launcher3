@@ -18,6 +18,7 @@ package com.android.launcher3.taskbar.handoff
 
 import android.companion.datatransfer.continuity.RemoteTask
 import android.companion.datatransfer.continuity.TaskContinuityManager
+import android.companion.Flags.taskContinuity
 import android.util.Log
 import java.util.concurrent.Executor
 
@@ -28,7 +29,7 @@ class HandoffSuggestionLauncher(
 ) : TaskContinuityManager.HandoffRequestCallback {
 
     fun launch(suggestion: HandoffSuggestion) {
-        if (android.companion.Flags.enableTaskContinuity()) {
+        if (taskContinuity()) {
             if (DEBUG) {
                 Log.d(TAG, "Launching suggestion.")
             }
