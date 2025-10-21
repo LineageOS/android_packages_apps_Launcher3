@@ -51,9 +51,6 @@ sealed class SystemDragController {
  */
 class SystemDragControllerStub : SystemDragController()
 
-/** Factory used to create listeners for system-level drag-and-drop. */
-typealias SystemDragListenerFactory = (@JvmSuppressWildcards Launcher) -> SystemDragListener
-
 /**
  * Production implementation of the controller for system-level drag-and-drop. Injected when {@link
  * com.android.launcher3.Flags.FLAG_ENABLE_SYSTEM_DRAG} is enabled.
@@ -88,7 +85,7 @@ class SystemDragControllerImpl(private val systemDragListenerFactory: SystemDrag
         launcher?.run {
             dragController?.isDragging == false &&
                 event.action == DragEvent.ACTION_DRAG_STARTED &&
-                systemDragListenerFactory(this)
+                systemDragListenerFactory(this, /* params= */ null)
                     .also { listener ->
                         systemDragListener = listener
                         listener.setCleanupCallback {
