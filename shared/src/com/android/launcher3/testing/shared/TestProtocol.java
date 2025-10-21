@@ -190,6 +190,8 @@ public final class TestProtocol {
 
     public static final String REQUEST_GET_DESK_ID = "get-desk-id";
 
+    public static final String REQUEST_GET_DESK_COUNT = "get-desk-count";
+
     public static final String REQUEST_IS_RECENTS_WINDOW_ENABLED = "recents-window-enabled";
 
     public static final String REQUEST_UNSTASH_BUBBLE_BAR_IF_STASHED =

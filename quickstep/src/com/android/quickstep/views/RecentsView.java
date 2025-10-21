@@ -2044,6 +2044,11 @@ public abstract class RecentsView<
         return mUtils.getNonDesktopTaskViewCount();
     }
 
+    /** Counts {@link TaskView}s that are {@link DesktopTaskView} instances. */
+    public int getDesktopTaskViewCount() {
+        return mUtils.getDesktopTaskViewCount();
+    }
+
     /**
      * Returns the number of tasks in the top row of the overview grid.
      */

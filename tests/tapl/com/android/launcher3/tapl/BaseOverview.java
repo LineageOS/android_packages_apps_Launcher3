@@ -165,14 +165,14 @@ public class BaseOverview extends LauncherInstrumentation.VisibleContainer {
     /**
      * Flings to the 1st (right-most) task in Overview.
      */
-    private OverviewTask flingToFirstTask() {
+    public BaseOverview flingToFirstTask() {
         UiObject2 rightMostTask = getRightMostTaskOnScreen();
         while (rightMostTask != null && !isFirstTask(rightMostTask)) {
             flingBackwardImpl();
             rightMostTask = getRightMostTaskOnScreen();
         }
         mLauncher.assertNotNull("Unable to find the rightmost task", rightMostTask);
-        return new OverviewTask(mLauncher, rightMostTask, this);
+        return new BaseOverview(mLauncher);
     }
 
     private boolean isFirstTask(@NonNull UiObject2 task) {
@@ -285,10 +285,10 @@ public class BaseOverview extends LauncherInstrumentation.VisibleContainer {
                         "Need to have at least 2 tasks");
             }
 
-            OverviewTask currentTask = flingToFirstTask();
+            final UiObject2 currentTask = flingToFirstTask().getRightMostTaskOnScreen();
 
             mLauncher.runToState(
-                    () -> mLauncher.touchOutsideContainer(currentTask.getUiObject(),
+                    () -> mLauncher.touchOutsideContainer(currentTask,
                             /* tapRight= */ true,
                             /* halfwayToEdge= */ false),
                     NORMAL_STATE_ORDINAL,
@@ -310,9 +310,9 @@ public class BaseOverview extends LauncherInstrumentation.VisibleContainer {
                         "Need to have at least 2 tasks");
             }
 
-            OverviewTask currentTask = flingToFirstTask();
+            final UiObject2 currentTask = flingToFirstTask().getRightMostTaskOnScreen();
 
-            mLauncher.touchOutsideContainer(currentTask.getUiObject(),
+            mLauncher.touchOutsideContainer(currentTask,
                     /* tapRight= */ false,
                     /* halfwayToEdge= */ false);
         }
@@ -517,16 +517,17 @@ public class BaseOverview extends LauncherInstrumentation.VisibleContainer {
         try (LauncherInstrumentation.Closable e = mLauncher.eventsCheck();
              LauncherInstrumentation.Closable c = mLauncher.addContextLayer(
                      "want to click add desktop button")) {
-            flingToFirstTask();
+            final BaseOverview overview = flingToFirstTask();
             try (LauncherInstrumentation.Closable c1 = mLauncher.addContextLayer(
                     "scrolled to add desktop button")) {
-                int desktopTasksCount = getDesktopTasksCount();
+                int desktopTasksCount = overview.getDesktopTasksCount();
                 mLauncher.clickLauncherObject(mLauncher
                         .waitForOverviewObject("add_desktop_button"));
                 mLauncher.assertTrue("Failed to verify the num of desks, expected num is: "
-                        + (desktopTasksCount + 1) + ", but get: " + getDesktopTasksCount(),
-                        mLauncher.waitAndGet(() -> getDesktopTasksCount() == desktopTasksCount + 1,
-                        WAIT_TIME_MS, DEFAULT_POLL_INTERVAL));
+                        + (desktopTasksCount + 1) + ", but get: " + overview.getDesktopTasksCount(),
+                        mLauncher.waitAndGet(() ->
+                                        overview.getDesktopTasksCount() == desktopTasksCount + 1,
+                                WAIT_TIME_MS, DEFAULT_POLL_INTERVAL));
                 return new BaseOverview(mLauncher);
             }
         }
@@ -661,7 +662,7 @@ public class BaseOverview extends LauncherInstrumentation.VisibleContainer {
     protected boolean isAddDesktopButtonExpected() {
         UiObject2 rightMostTask = getRightMostTaskOnScreen();
         return mLauncher.areMultiDesksFlagsEnabled() && rightMostTask != null
-                && isFirstTask(rightMostTask);
+                && isFirstTask(rightMostTask) && mLauncher.canCreateDesks();
     }
 
     /**
