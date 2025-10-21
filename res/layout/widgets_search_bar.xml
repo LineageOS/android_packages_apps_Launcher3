@@ -24,7 +24,7 @@
         android:inputType="text"
         android:imeOptions="actionSearch"
         android:importantForAutofill="no"
-        android:textColor="?android:attr/textColorPrimary"
+        android:textColor="@color/materialColorOnSurface"
         android:textColorHint="?attr/widgetPickerSearchTextColor"/>
 
     <ImageButton
