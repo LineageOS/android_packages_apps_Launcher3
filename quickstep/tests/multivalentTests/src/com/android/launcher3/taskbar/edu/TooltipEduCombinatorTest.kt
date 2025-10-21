@@ -94,7 +94,7 @@ class TooltipEduCombinatorTest {
                         animationDescriptionResId = R.string.taskbar_edu_swipe_animation_description,
                     )
                 },
-            location = DisplayLocation.TASKBAR_CENTER,
+            location = DisplayLocation.TASKBAR_HANDLE,
         )
     }
 

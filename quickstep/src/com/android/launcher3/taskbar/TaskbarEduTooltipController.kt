@@ -702,7 +702,7 @@ constructor(
             }
         val location = tooltipPage.location
         updateLayoutParams<MarginLayoutParams> {
-            if (activityContext.isTransientTaskbar) {
+            if (activityContext.isTransientTaskbar && location != DisplayLocation.TASKBAR_HANDLE) {
                 bottomMargin += activityContext.deviceProfile.taskbarProfile.height
             }
             width = resources.getDimensionPixelSize(widthDimenResId)

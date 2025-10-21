@@ -38,6 +38,9 @@ data class TooltipsEduPage(
     /** The location where the page should be displayed. Interpreted by the presenter. */
     enum class DisplayLocation {
 
+        /** The taskbar handle. */
+        TASKBAR_HANDLE,
+
         /** The center of the taskbar. */
         TASKBAR_CENTER,
 
