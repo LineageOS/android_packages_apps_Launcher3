@@ -1355,6 +1355,9 @@ public abstract class RecentsView<
                     });
                 }
             });
+            if (mUtils.isTaskLaunchingInFreeFromWindow(taskId, apps)) {
+                returnToDesktop();
+            }
         } else {
             TaskViewUtils.composeRecentsLaunchAnimator(anim, taskView, apps, wallpaper, nonApps,
                     true /* launcherClosing */, getStateManager(), this,
