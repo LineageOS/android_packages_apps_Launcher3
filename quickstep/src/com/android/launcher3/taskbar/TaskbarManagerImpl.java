@@ -111,6 +111,7 @@ import com.android.quickstep.SystemUiProxy;
 import com.android.quickstep.util.ContextualSearchInvoker;
 import com.android.quickstep.util.SystemUiFlagUtils;
 import com.android.quickstep.views.RecentsViewContainer;
+import com.android.quickstep.views.RecentsViewContainerInteractor;
 import com.android.quickstep.window.RecentsWindowManager;
 import com.android.systemui.shared.statusbar.phone.BarTransitions;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -202,7 +203,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
     /** DisplayId - {@link DeviceProfile} map for Connected Display. */
     private final SparseArray<DeviceProfile> mExternalDeviceProfiles = new SparseArray<>();
     private @Nullable ActivityInteractor mActivityInteractor;
-    private @Nullable RecentsViewContainer mRecentsViewContainer;
+    private @Nullable RecentsViewContainerInteractor mRecentsViewContainerInteractor;
 
     private @Nullable SafeCloseable mDisplayChangeSafeCloseable;
 
@@ -398,8 +399,8 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
                     mActivityOnDestroySafeCloseable.close();
                     mActivityOnDestroySafeCloseable = null;
                 }
-                if (mActivityInteractor.isActivitySameObj(mRecentsViewContainer)) {
-                    mRecentsViewContainer = null;
+                if (mActivityInteractor.isActivitySameObj(mRecentsViewContainerInteractor)) {
+                    mRecentsViewContainerInteractor = null;
                 }
             }
             mActivityInteractor = null;
@@ -694,32 +695,35 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         mUnfoldProgressProvider.setSourceProvider(
                 mActivityInteractor.getUnfoldTransitionProvider());
 
-        RecentsViewContainer recentsViewContainer = activityInteractor.getRecentsViewContainer();
+        RecentsViewContainerInteractor recentsViewContainer =
+                activityInteractor.getRecentsViewContainerInteractor();
         if (recentsViewContainer != null) {
-            setRecentsViewContainer(recentsViewContainer);
+            setRecentsViewContainerInteractor(recentsViewContainer);
         }
     }
 
     /**
      * Sets the current RecentsViewContainer, from which we create a TaskbarUIController.
      */
-    public void setRecentsViewContainer(@NonNull RecentsViewContainer recentsViewContainer) {
+    public void setRecentsViewContainerInteractor(
+            @NonNull RecentsViewContainerInteractor recentsViewContainerInteractor) {
         debugPrimaryTaskbar("setRecentsViewContainer");
-        if (mRecentsViewContainer == recentsViewContainer) {
+        if (mRecentsViewContainerInteractor == recentsViewContainerInteractor) {
             return;
         }
         if (mActivityInteractor != null
-                && mActivityInteractor.isActivitySameObj(mRecentsViewContainer)) {
+                && mActivityInteractor.isActivitySameObj(mRecentsViewContainerInteractor)) {
             // When switching to RecentsWindowManager (not an Activity), the old mActivity is not
             // destroyed, nor is there a new Activity to replace it. Thus if we don't clear it here,
             // it will not get re-set properly if we return to the Activity (e.g. NexusLauncher).
             mActivityOnDestroyCallback.run();
         }
-        mRecentsViewContainer = recentsViewContainer;
+        mRecentsViewContainerInteractor = recentsViewContainerInteractor;
         TaskbarActivityContext taskbar = getCurrentActivityContext();
         if (taskbar != null) {
             taskbar.setUIController(
-                    createTaskbarUIControllerForRecentsViewContainer(mRecentsViewContainer,
+                    createTaskbarUIControllerForRecentsViewContainer(
+                            mRecentsViewContainerInteractor,
                             mPrimaryDisplayId));
         }
     }
@@ -742,7 +746,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
      * Creates a {@link TaskbarUIController} to use while the given StatefulActivity is active.
      */
     private TaskbarUIController createTaskbarUIControllerForRecentsViewContainer(
-            RecentsViewContainer container, int displayId) {
+            RecentsViewContainerInteractor interactor, int displayId) {
         debugTaskbarManager("createTaskbarUIControllerForRecentsViewContainer", displayId);
         if (!isExternalDisplay(displayId)
                 && mActivityInteractor instanceof LauncherInteractor launcherInteractor) {
@@ -755,10 +759,10 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         }
         // If a 3P Launcher is default, always use FallbackTaskbarUIController regardless of
         // whether the recents container is RecentsActivity or RecentsWindowManager.
-        if (container instanceof RecentsActivity recentsActivity) {
+        if (interactor instanceof RecentsActivity recentsActivity) {
             return new FallbackTaskbarUIController<>(recentsActivity);
         }
-        if (container instanceof RecentsWindowManager recentsWindowManager) {
+        if (interactor instanceof RecentsWindowManager recentsWindowManager) {
             return new FallbackTaskbarUIController<>(recentsWindowManager);
         }
         return new TaskbarUIController();
@@ -843,9 +847,10 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
             // have access to the Launcher activity.
             if (isExternalDisplay(displayId)) {
                 taskbar.setUIController(createTaskbarUIControllerForNonDefaultDisplay(displayId));
-            } else if (mRecentsViewContainer != null) {
+            } else if (mRecentsViewContainerInteractor != null) {
                 taskbar.setUIController(
-                        createTaskbarUIControllerForRecentsViewContainer(mRecentsViewContainer,
+                        createTaskbarUIControllerForRecentsViewContainer(
+                                mRecentsViewContainerInteractor,
                                 mPrimaryDisplayId));
             }
 
@@ -1171,7 +1176,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
      */
     public void destroy() {
         debugPrimaryTaskbar("TaskbarManager#destroy()");
-        mRecentsViewContainer = null;
+        mRecentsViewContainerInteractor = null;
 
         if (mBootAppContext != null) {
             mBootAppContext.onDestroy();
