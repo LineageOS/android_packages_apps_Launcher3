@@ -82,7 +82,7 @@ abstract class LauncherExecutorsModule {
         @LauncherAppSingleton
         @TaskbarUi
         fun provideTaskbarUiLooperExecutor(): LooperExecutor {
-            return Executors.TASKBAR_UI_THREAD as LooperExecutor
+            return Executors.TASKBAR_UI_THREAD
         }
 
         @Provides

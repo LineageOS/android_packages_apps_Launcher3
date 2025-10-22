@@ -27,6 +27,7 @@ import androidx.test.filters.SmallTest
 import com.android.launcher3.util.AsyncObjectAllocator
 import com.android.launcher3.util.AsyncObjectAllocator.JobDescription
 import com.android.launcher3.util.Executors
+import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestActivityContext
 import com.android.launcher3.util.TestUtil
@@ -78,7 +79,7 @@ class AllAppsRecyclerViewPoolTest {
 
     @Test
     fun preinflate_success() {
-        underTest.preInflateAllAppsViewHolders(adapter, VIEW_TYPE, parent, 10) { 10 }
+        underTest.preInflateAllAppsViewHolders(adapter, VIEW_TYPE, parent, 10, MAIN_EXECUTOR) { 10 }
 
         awaitTasksCompleted()
         assertThat(underTest.getRecycledViewCount(VIEW_TYPE)).isEqualTo(10)
@@ -86,7 +87,7 @@ class AllAppsRecyclerViewPoolTest {
 
     @Test
     fun preinflate_not_triggered() {
-        underTest.preInflateAllAppsViewHolders(adapter, VIEW_TYPE, parent, 0) { 0 }
+        underTest.preInflateAllAppsViewHolders(adapter, VIEW_TYPE, parent, 0, MAIN_EXECUTOR) { 0 }
 
         awaitTasksCompleted()
         assertThat(underTest.getRecycledViewCount(VIEW_TYPE)).isEqualTo(0)
@@ -95,7 +96,7 @@ class AllAppsRecyclerViewPoolTest {
     @Test
     @UiThreadTest
     fun preinflate_cancel_before_runOnMainThread() {
-        underTest.preInflateAllAppsViewHolders(adapter, VIEW_TYPE, parent, 10) { 10 }
+        underTest.preInflateAllAppsViewHolders(adapter, VIEW_TYPE, parent, 10, MAIN_EXECUTOR) { 10 }
         assertThat((underTest.mCancellableTask as JobDescription<*>).cancelled).isFalse()
 
         underTest.clear()
@@ -108,7 +109,7 @@ class AllAppsRecyclerViewPoolTest {
 
     @Test
     fun preinflate_cancel_after_run() {
-        underTest.preInflateAllAppsViewHolders(adapter, VIEW_TYPE, parent, 10) { 10 }
+        underTest.preInflateAllAppsViewHolders(adapter, VIEW_TYPE, parent, 10, MAIN_EXECUTOR) { 10 }
         assertThat((underTest.mCancellableTask as JobDescription<*>).cancelled).isFalse()
         awaitTasksCompleted()
 

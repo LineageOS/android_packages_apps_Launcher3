@@ -89,8 +89,8 @@ class AllAppsActionManagerTest {
 
         // Trigger any property access to initialize allAppsActionManager
         allAppsActionManager.isActionRegistered
-        // Wait for SettingCache update isUserSetupComplete on main thread.
-        MAIN_EXECUTOR.submit<Any?> { null }.get()
+        // Wait for SettingCache update isUserSetupComplete on bgExecutor.
+        bgExecutor.submit<Any?> { null }.get()
     }
 
     @Before fun unlockUser() = allAppsActionManager.onUserUnlocked()

@@ -32,7 +32,7 @@ import com.android.launcher3.Utilities.dpToPx
 import com.android.launcher3.config.FeatureFlags.enableTaskbarPinning
 import com.android.launcher3.taskbar.TaskbarActivityContext
 import com.android.launcher3.taskbar.TaskbarViewCallbacks
-import com.android.launcher3.util.Executors.MAIN_EXECUTOR
+import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.views.IconButtonView
 import com.android.quickstep.DeviceConfigWrapper
@@ -149,7 +149,10 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         when (ev.action) {
             MotionEvent.ACTION_DOWN -> {
                 allAppsTouchTriggered = false
-                MAIN_EXECUTOR.handler.postDelayed(allAppsTouchRunnable!!, allAppsButtonTouchDelayMs)
+                TASKBAR_UI_THREAD.handler.postDelayed(
+                    allAppsTouchRunnable!!,
+                    allAppsButtonTouchDelayMs,
+                )
             }
             MotionEvent.ACTION_UP,
             MotionEvent.ACTION_CANCEL -> cancelAllAppsButtonTouch()
@@ -158,7 +161,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     }
 
     private fun cancelAllAppsButtonTouch() {
-        MAIN_EXECUTOR.handler.removeCallbacks(allAppsTouchRunnable!!)
+        TASKBAR_UI_THREAD.handler.removeCallbacks(allAppsTouchRunnable!!)
         // ACTION_UP is first triggered, then click listener / long-click listener is triggered on
         // the next frame, so we need to post twice and delay the reset.
         this.post { this.post { allAppsTouchTriggered = false } }
@@ -172,7 +175,10 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 
     // Handle long click from Switch Access and Voice Access
     private fun onAllAppsButtonLongClick(view: View): Boolean {
-        if (!MAIN_EXECUTOR.handler.hasCallbacks(allAppsTouchRunnable!!) && !allAppsTouchTriggered) {
+        if (
+            !TASKBAR_UI_THREAD.handler.hasCallbacks(allAppsTouchRunnable!!) &&
+                !allAppsTouchTriggered
+        ) {
             taskbarViewCallbacks.triggerAllAppsButtonLongClick()
         }
         return true

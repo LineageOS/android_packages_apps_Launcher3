@@ -20,7 +20,7 @@ import static android.os.Trace.TRACE_TAG_APP;
 import static com.android.app.animation.Interpolators.DECELERATED_EASE;
 import static com.android.app.animation.Interpolators.EMPHASIZED;
 import static com.android.app.animation.Interpolators.LINEAR;
-import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
+import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
 
 import android.animation.Animator;
 import android.content.Context;
@@ -210,7 +210,7 @@ public class TaskbarAllAppsSlideInView extends AbstractSlideInView<TaskbarOverla
             dispatcher.registerOnBackInvokedCallback(
                     OnBackInvokedDispatcher.PRIORITY_DEFAULT, this);
         }
-        CrossWindowBlurListeners.getInstance().addListener(MAIN_EXECUTOR, mWindowBlurListener);
+        CrossWindowBlurListeners.getInstance().addListener(TASKBAR_UI_THREAD, mWindowBlurListener);
     }
 
     @Override

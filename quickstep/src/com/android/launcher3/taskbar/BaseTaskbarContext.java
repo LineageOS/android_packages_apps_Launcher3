@@ -16,7 +16,6 @@
 package com.android.launcher3.taskbar;
 
 import static com.android.launcher3.Flags.enableTaskbarUiThread;
-import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
 
 import android.annotation.SuppressLint;
@@ -63,7 +62,7 @@ public abstract class BaseTaskbarContext extends BaseContext
                 (owner) -> enableTaskbarUiThread()
                         ? LifecycleRegistry.createUnsafe(owner) : new LifecycleRegistry(owner),
                 /* savedStateRegistryExecutor= */
-                enableTaskbarUiThread() ? TASKBAR_UI_THREAD : MAIN_EXECUTOR);
+                TASKBAR_UI_THREAD);
         mDisplayId = displayId;
         mIsPrimaryDisplay = isPrimaryDisplay;
         mLayoutInflater = LayoutInflater.from(this).cloneInContext(this);
