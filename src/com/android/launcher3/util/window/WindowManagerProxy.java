@@ -327,12 +327,12 @@ public class WindowManagerProxy {
 
         navBarHeightPortrait = isTablet
                 ? (mTaskbarDrawnInProcess
-                        ? 0 : context.getResources().getDimensionPixelSize(R.dimen.taskbar_size))
+                        ? 0 : context.getResources().getDimensionPixelSize(com.android.internal.R.dimen.taskbar_frame_height))
                 : getDimenByName(systemRes, NAVBAR_HEIGHT);
 
         navBarHeightLandscape = isTablet
                 ? (mTaskbarDrawnInProcess
-                        ? 0 : context.getResources().getDimensionPixelSize(R.dimen.taskbar_size))
+                        ? 0 : context.getResources().getDimensionPixelSize(com.android.internal.R.dimen.taskbar_frame_height))
                 : (isTabletOrGesture
                         ? getDimenByName(systemRes, NAVBAR_HEIGHT_LANDSCAPE) : 0);
         navbarWidthLandscape = isTabletOrGesture

@@ -1329,7 +1329,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
 
         if (isPhoneMode()) {
             return isThreeButtonNav() ?
-                    resources.getDimensionPixelSize(R.dimen.taskbar_phone_size) :
+                    resources.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_frame_height) :
                     resources.getDimensionPixelSize(R.dimen.taskbar_stashed_size);
         }
 

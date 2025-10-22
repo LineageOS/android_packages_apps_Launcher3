@@ -52,12 +52,12 @@ object DimensionUtils {
         // Taskbar on phone, portrait
         if (!deviceProfile.isLandscape) {
             p.x = ViewGroup.LayoutParams.MATCH_PARENT
-            p.y = res.getDimensionPixelSize(R.dimen.taskbar_phone_size)
+            p.y = res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_frame_height)
             return p
         }
 
         // Taskbar on phone, landscape
-        p.x = res.getDimensionPixelSize(R.dimen.taskbar_phone_size)
+        p.x = res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_frame_height)
         p.y = ViewGroup.LayoutParams.MATCH_PARENT
         return p
     }

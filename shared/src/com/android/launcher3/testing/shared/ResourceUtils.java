@@ -38,6 +38,8 @@ public class ResourceUtils {
 
     public static final String NAV_BAR_INTERACTION_MODE_RES_NAME = "config_navBarInteractionMode";
 
+    public static final String ROUNDED_CORNER_CONTENT_PADDING = "rounded_corner_content_padding";
+
     public static int getNavbarSize(String resName, Resources res) {
         return getDimenByName(resName, res, DEFAULT_NAVBAR_VALUE);
     }

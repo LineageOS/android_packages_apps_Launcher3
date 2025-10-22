@@ -27,6 +27,7 @@ import android.widget.Space
 import com.android.launcher3.R
 import com.android.launcher3.taskbar.TaskbarActivityContext
 import com.android.launcher3.taskbar.TaskbarManager.NAV_BAR_INVERSE
+import com.android.launcher3.testing.shared.ResourceUtils
 import com.android.launcher3.util.SettingsCache
 
 class PhonePortraitNavLayoutter(
@@ -53,7 +54,7 @@ class PhonePortraitNavLayoutter(
         val homeButtonWidth =
             resources.getDimensionPixelSize(R.dimen.taskbar_phone_home_button_size)
         val roundedCornerContentMargin =
-            resources.getDimensionPixelSize(R.dimen.taskbar_phone_rounded_corner_content_margin)
+            ResourceUtils.getDimenByName(ResourceUtils.ROUNDED_CORNER_CONTENT_PADDING, resources, 0)
         val contentPadding = resources.getDimensionPixelSize(R.dimen.taskbar_phone_content_padding)
         val contentWidth = totalWidth - roundedCornerContentMargin * 2 - contentPadding * 2
 
