@@ -29,6 +29,14 @@ def process_file(src_path, dest_path):
         content = content.replace('?androidprv:attr/colorAccentPrimary', '?attr/colorOnPrimary')
         modified = True
 
+    if 'fontFamily="@*android:string/config_bodyFontFamilyMedium"' in content:
+        content = content.replace('fontFamily="@*android:string/config_bodyFontFamilyMedium"', 'textFontWeight="@integer/bodyFontFamilyMediumWeight"')
+        modified = True
+
+    if 'fontFamily="@*android:string/config_bodyFontFamily"' in content:
+        content = content.replace('fontFamily="@*android:string/config_bodyFontFamily"', 'textFontWeight="@integer/bodyFontFamilyWeight"')
+        modified = True
+
     # General androidprv: removal
     if 'androidprv:' in content:
         content = content.replace('androidprv:', '')

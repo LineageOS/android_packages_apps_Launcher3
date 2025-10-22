@@ -25,6 +25,7 @@ import android.widget.LinearLayout
 import android.widget.Space
 import com.android.launcher3.R
 import com.android.launcher3.taskbar.TaskbarManager.NAV_BAR_INVERSE
+import com.android.launcher3.testing.shared.ResourceUtils
 import com.android.launcher3.util.SettingsCache
 
 class PhoneSeascapeNavLayoutter(
@@ -64,7 +65,7 @@ class PhoneSeascapeNavLayoutter(
         startContextualContainer.removeAllViews()
 
         val roundedCornerContentMargin =
-            resources.getDimensionPixelSize(R.dimen.taskbar_phone_rounded_corner_content_margin)
+            ResourceUtils.getDimenByName(ResourceUtils.ROUNDED_CORNER_CONTENT_PADDING, resources, 0)
         val contentPadding = resources.getDimensionPixelSize(R.dimen.taskbar_phone_content_padding)
         repositionContextualContainer(
             startContextualContainer,

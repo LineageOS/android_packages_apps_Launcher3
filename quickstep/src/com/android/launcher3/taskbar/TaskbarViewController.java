@@ -263,7 +263,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         mTaskbarView.init(TaskbarViewCallbacksFactory.newInstance(mActivity).create(
                 mActivity, mControllers, mTaskbarView));
         mTaskbarView.getLayoutParams().height = mActivity.isPhoneMode()
-                ? mActivity.getResources().getDimensionPixelSize(R.dimen.taskbar_phone_size)
+                ? mActivity.getResources().getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_frame_height)
                 : mActivity.getDeviceProfile().taskbarHeight;
 
         mTaskbarIconScaleForStash.updateValue(1f);
@@ -1182,7 +1182,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         if (mActivity.isPhoneMode()) {
             taskbarWindowSize = mActivity.getResources().getDimensionPixelSize(
                     mActivity.isThreeButtonNav()
-                            ? R.dimen.taskbar_phone_size
+                            ? com.android.internal.R.dimen.navigation_bar_frame_height
                             : R.dimen.taskbar_stashed_size);
         } else {
             taskbarWindowSize = deviceProfile.taskbarHeight + deviceProfile.getTaskbarOffsetY();

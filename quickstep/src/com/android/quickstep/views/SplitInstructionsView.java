@@ -135,7 +135,7 @@ public class SplitInstructionsView extends LinearLayout {
         // After layout, expand touch target of cancel button to meet minimum a11y measurements.
         post(() -> {
             int minTouchSize = getResources()
-                    .getDimensionPixelSize(settingslib_preferred_minimum_touch_target);
+                    .getDimensionPixelSize(R.dimen.task_thumbnail_icon_size);
             Rect r = new Rect();
             cancelTextView.getHitRect(r);
 
