@@ -24,6 +24,7 @@ import android.os.UserHandle
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.Display.INVALID_DISPLAY
 import com.android.launcher3.model.data.AppInfo
+import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.TestActivityContext
 import com.android.systemui.shared.recents.model.Task
@@ -152,36 +153,116 @@ class GroupTaskTest {
             }
         context.activityComponent.appsStore.setApps(arrayOf(matchingApp), 0, null)
 
-        val machingTask = SingleTask(createTask(0, DISPLAY_2, PACKAGE))
+        val machingTask = SingleTask(createTask(id = 0, displayId = DISPLAY_2, pkg = PACKAGE))
         val workspaceItemInfo = machingTask.makeWorkspaceItem(context)
 
         assertThat(workspaceItemInfo).isNotNull()
         assertThat(workspaceItemInfo!!.title).isEqualTo(matchingApp.title)
 
-        val anotherTask = SingleTask(createTask(0, DISPLAY_2, "OTHER_PACKAGE"))
+        val anotherTask = SingleTask(createTask(id = 0, displayId = DISPLAY_2, pkg = "OTHER_PACKAGE"))
         val mismatchingItemInfo = anotherTask.makeWorkspaceItem(context)
         assertThat(mismatchingItemInfo).isNull()
     }
 
-    private fun createTask(id: Int, displayId: Int = INVALID_DISPLAY, pkg: String? = null): Task {
-        val componentName = ComponentName(pkg ?: "", "")
-        val intent = Intent().setComponent(componentName)
-        pkg.let { intent.setPackage(it) }
+    @Test
+    fun makeWorkspaceItem_findsAppByExactComponent() {
+        // Sets up an app in the store and verifies that makeWorkspaceItem can find it
+        // using an exact component name and user match.
+        val component = ComponentName(PACKAGE, "$PACKAGE.Activity1")
+        val appInfo = createAppInfo(component, "App 1", 0)
+        context.activityComponent.appsStore.setApps(arrayOf(appInfo), 0, null)
+
+        val task = createTask(id = 1, componentName = component, userId = 0)
+        val workspaceItemInfo = SingleTask(task).makeWorkspaceItem(context)
+
+        assertThat(workspaceItemInfo).isNotNull()
+        assertThat(workspaceItemInfo?.title).isEqualTo("App 1")
+    }
+
+    @Test
+    fun makeWorkspaceItem_findsAppByPackageAsFallback() {
+        // Verifies that if an exact component match fails, makeWorkspaceItem falls back to
+        // matching by package name.
+        val storedComponent = ComponentName(PACKAGE, "$PACKAGE.Activity1")
+        val taskComponent = ComponentName(PACKAGE, "$PACKAGE.Activity2")
+        val appInfo = createAppInfo(storedComponent, "App 1", 0)
+        context.activityComponent.appsStore.setApps(arrayOf(appInfo), 0, null)
+
+        val task = createTask(id = 1, componentName = taskComponent, userId = 0)
+        val workspaceItemInfo = SingleTask(task).makeWorkspaceItem(context)
+
+        assertThat(workspaceItemInfo).isNotNull()
+        assertThat(workspaceItemInfo?.title).isEqualTo("App 1")
+    }
+
+    @Test
+    fun makeWorkspaceItem_prefersExactComponentOverPackageMatch() {
+        // Sets up two apps with the same package. Verifies that makeWorkspaceItem chooses the
+        // one with the exact component match, not just the first one with a package match.
+        val component1 = ComponentName(PACKAGE, "$PACKAGE.Activity1")
+        val component2 = ComponentName(PACKAGE, "$PACKAGE.Activity2")
+        val appInfo1 = createAppInfo(component1, "App 1", 0)
+        val appInfo2 = createAppInfo(component2, "App 2", 0)
+        context.activityComponent.appsStore.setApps(arrayOf(appInfo1, appInfo2), 0, null)
+
+        val task = createTask(id = 1, componentName = component2, userId = 0)
+        val workspaceItemInfo = SingleTask(task).makeWorkspaceItem(context)
+
+        assertThat(workspaceItemInfo).isNotNull()
+        assertThat(workspaceItemInfo?.title).isEqualTo("App 2")
+    }
+
+    @Test
+    fun makeWorkspaceItem_returnsNullForUserMismatch() {
+        // Verifies that if an app component matches but the user ID does not,
+        // makeWorkspaceItem returns null.
+        val component = ComponentName(PACKAGE, "$PACKAGE.Activity1")
+        val appInfo = createAppInfo(component, "App 1", userId = 0)
+        context.activityComponent.appsStore.setApps(arrayOf(appInfo), 0, null)
+
+        val task = createTask(id = 1, componentName = component, userId = 10)
+        val workspaceItemInfo = SingleTask(task).makeWorkspaceItem(context)
+
+        assertThat(workspaceItemInfo).isNull()
+    }
+
+    private fun createAppInfo(component: ComponentName, title: String, userId: Int): AppInfo {
+        return AppInfo().apply {
+            componentName = component
+            this.title = title
+            user = UserHandle.of(userId)
+            intent = Intent().setComponent(component)
+        }
+    }
+
+    private fun createTask(
+        id: Int,
+        displayId: Int = INVALID_DISPLAY,
+        componentName: ComponentName = ComponentName("", ""),
+        userId: Int = 0,
+        pkg: String? = null
+    ): Task {
+        val finalComponentName = componentName.takeIf { it.packageName.isNotEmpty() }
+                ?: ComponentName(pkg ?: "", "")
+        val intent = Intent().setComponent(finalComponentName)
+        (pkg ?: finalComponentName.packageName.takeIf { it.isNotEmpty() })?.let {
+            intent.setPackage(it)
+        }
         return Task(
             Task.TaskKey(
                 id,
-                0,
+                0, /* windowingMode */
                 intent,
-                componentName,
-                0,
-                0,
+                finalComponentName,
+                userId,
+                0, /* realActivity */
                 displayId,
-                null,
-                0,
-                false,
-                false,
+                null, /* lastActiveTime */
+                0, /* colorPrimary */
+                false, /* isDockable */
+                false, /* isLocked */
                 ACTIVITY_TYPE_STANDARD,
-                false,
+                false, /* topIsHome */
             )
         )
     }
