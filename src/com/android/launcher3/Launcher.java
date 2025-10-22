@@ -73,8 +73,8 @@ import static com.android.launcher3.anim.AnimatorListeners.forEndCallback;
 import static com.android.launcher3.config.FeatureFlags.FOLDABLE_SINGLE_PAGE;
 import static com.android.launcher3.config.FeatureFlags.MULTI_SELECT_EDIT_MODE;
 import static com.android.launcher3.icons.BitmapRenderer.createHardwareBitmap;
-import static com.android.launcher3.logging.KeyboardStateManager.KeyboardState.HIDE;
-import static com.android.launcher3.logging.KeyboardStateManager.KeyboardState.SHOW;
+import static com.android.launcher3.keyboard.KeyboardStateManager.KeyboardState.HIDE;
+import static com.android.launcher3.keyboard.KeyboardStateManager.KeyboardState.SHOW;
 import static com.android.launcher3.logging.StatsLogManager.EventEnum;
 import static com.android.launcher3.logging.StatsLogManager.LAUNCHER_STATE_BACKGROUND;
 import static com.android.launcher3.logging.StatsLogManager.LAUNCHER_STATE_HOME;
@@ -1049,7 +1049,7 @@ public class Launcher extends StatefulActivity<LauncherState>
                         WindowInsets insets = getRootView().getRootWindowInsets();
                         boolean isImeVisible =
                                 insets != null && insets.isVisible(WindowInsets.Type.ime());
-                        getStatsLogManager().keyboardStateManager().setKeyboardState(
+                        getActivityComponent().getKeyboardStateManager().setKeyboardState(
                                 isImeVisible ? SHOW : HIDE);
                     }
                 });
