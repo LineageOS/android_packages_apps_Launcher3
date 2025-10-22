@@ -88,6 +88,7 @@ import com.android.launcher3.util.SplitConfigurationOptions;
 import com.android.launcher3.util.SystemUiController;
 import com.android.launcher3.util.ViewCache;
 import com.android.launcher3.util.WeakCleanupSet;
+import com.android.launcher3.util.WindowBlurState;
 import com.android.launcher3.widget.LauncherWidgetHolder;
 import com.android.launcher3.widget.picker.model.WidgetPickerDataProvider;
 
@@ -217,23 +218,7 @@ public interface ActivityContext extends SavedStateRegistryOwner {
 
     /** @return {@code true} if all apps background blur is enabled */
     default boolean isAllAppsBackgroundBlurEnabled() {
-        return false;
-    }
-
-    /** @return {@code true} if overview background blur is enabled */
-    default boolean isOverviewBackgroundBlurEnabled() {
-        return false;
-    }
-
-    /** @return the resource id of the style to apply for the current blur state in All Apps. */
-    default int getAllAppsBlurStyleResId() {
-        return isAllAppsBackgroundBlurEnabled() ? R.style.AllAppsBlurStyle
-                : R.style.AllAppsBlurFallbackStyle;
-    }
-
-    /** @return the resource id of the style to apply for the current blur state in Overview. */
-    default int getOverviewBlurStyleResId() {
-        return View.NO_ID;
+        return WindowBlurState.getInstance(asContext()).getValue();
     }
 
     DeviceProfile getDeviceProfile();

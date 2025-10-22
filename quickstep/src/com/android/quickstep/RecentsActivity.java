@@ -136,8 +136,8 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
     /**
      * Init drag layer and overview panel views.
      */
-    protected void setupViews() {
-        getTheme().applyStyle(getOverviewBlurStyleResId(), true);
+    private void setupViews() {
+        getTheme().applyStyle(R.style.OverviewBlurFallbackStyle, true);
         SystemUiProxy systemUiProxy = SystemUiProxy.INSTANCE.get(this);
         // SplitSelectStateController needs to be created before setContentView()
         mSplitSelectStateController =
@@ -584,10 +584,5 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
     @Override
     public void onIdpChanged(boolean modelPropertiesChanged) {
         onHandleConfigurationChanged();
-    }
-
-    @Override
-    public int getOverviewBlurStyleResId() {
-        return R.style.OverviewBlurFallbackStyle;
     }
 }

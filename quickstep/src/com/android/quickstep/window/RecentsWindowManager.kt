@@ -324,7 +324,7 @@ constructor(
         }
         surfaceControlViewHost?.let { cleanUpSurfaceControlViewHost() }
 
-        theme.applyStyle(overviewBlurStyleResId, true)
+        theme.applyStyle(R.style.OverviewBlurFallbackStyle, true)
         windowView = layoutInflater.inflate(R.layout.fallback_recents_activity, null)
         windowView?.let {
             actionsView = it.findViewById(R.id.overview_actions_view)
@@ -864,8 +864,6 @@ constructor(
 
     override fun createAtomicAnimationFactory(): AtomicAnimationFactory<RecentsState> =
         RecentsAtomicAnimationFactory(this)
-
-    override fun getOverviewBlurStyleResId() = R.style.OverviewBlurFallbackStyle
 
     @AssistedFactory
     interface Factory {

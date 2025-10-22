@@ -396,10 +396,6 @@
         <item name="bottomSheetDragHandleColor">@color/materialColorOnSurface</item>
     </style>
 
-    <!-- Currently All Apps fallback should only change the panel background color, but not
-    other surface effects. The background color is handled in ActivityAllAppsContainerView. -->
-    <style name="AllAppsBlurFallbackStyle" parent="AllAppsBlurStyle" />
-
     <style name="OverviewBlurStyle">
         <item name="overviewScrimColor">?attr/overviewScrimColorBlur</item>
         <item name="overviewActionsContainerStyle">@style/OverviewActionsContainerBlur</item>

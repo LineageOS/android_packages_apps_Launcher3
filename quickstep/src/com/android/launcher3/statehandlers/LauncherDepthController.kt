@@ -24,8 +24,8 @@ import com.android.launcher3.LauncherState
 import com.android.launcher3.uioverrides.QuickstepLauncher
 
 /** Controls blur and wallpaper zoom, for the Launcher surface only. */
-class LauncherDepthController(private val launcher: QuickstepLauncher) :
-    DepthController<LauncherState, QuickstepLauncher>(launcher) {
+class LauncherDepthController(private val launcher: QuickstepLauncher, blurEnabled: Boolean) :
+    DepthController<LauncherState, QuickstepLauncher>(launcher, blurEnabled) {
 
     override fun onDepthAndBlurApplied() {
         super.onDepthAndBlurApplied()

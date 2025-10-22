@@ -158,8 +158,8 @@ public final class TaskbarOverlayController {
             Log.d(TAG, "requestWindow: Was window already present? " + (mOverlayContext != null));
         }
         if (mOverlayContext == null) {
-            mOverlayContext = TaskbarOverlayContextFactory.newInstance(mWindowContext).create(
-                    mWindowContext, mTaskbarContext, mControllers);
+            mOverlayContext =
+                    new TaskbarOverlayContext(mWindowContext, mTaskbarContext, mControllers);
             mBubbleBarActivityStarter.addListener(mBubbleShowListener);
         }
 
@@ -322,11 +322,6 @@ public final class TaskbarOverlayController {
 
             rootSurfaceControl.applyTransactionOnDraw(transaction);
         }
-    }
-
-    boolean isBackgroundBlurEnabled() {
-        return BlurUtils.supportsBlursOnWindows()
-                && CrossWindowBlurListeners.getInstance().isCrossWindowBlurEnabled();
     }
 
     /** Returns {@code true} if overlay or Taskbar windows are handling a system drag. */

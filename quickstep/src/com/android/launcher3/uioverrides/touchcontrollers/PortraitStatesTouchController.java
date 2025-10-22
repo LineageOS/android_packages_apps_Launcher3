@@ -35,6 +35,7 @@ import com.android.launcher3.touch.AllAppsSwipeController;
 import com.android.launcher3.touch.SingleAxisSwipeDetector;
 import com.android.launcher3.uioverrides.QuickstepLauncher;
 import com.android.launcher3.uioverrides.states.OverviewState;
+import com.android.launcher3.util.WindowBlurState;
 import com.android.quickstep.SystemUiProxy;
 import com.android.quickstep.util.LayoutUtils;
 import com.android.quickstep.views.RecentsView;
@@ -217,7 +218,7 @@ public class PortraitStatesTouchController extends AbstractStateChangeTouchContr
     @Override
     protected void onReinitToState(LauncherState newToState) {
         super.onReinitToState(newToState);
-        if (mLauncher.isAllAppsBackgroundBlurEnabled() && newToState == ALL_APPS) {
+        if (WindowBlurState.getInstance(mLauncher).getValue() && newToState == ALL_APPS) {
             // About to start blurring during swipe to All Apps; prepare the renderer.
             ((QuickstepLauncher) mLauncher).getDepthController().setEarlyWakeup(true);
         }

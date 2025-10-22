@@ -108,11 +108,6 @@ public interface StatefulContainer<STATE_TYPE extends BaseState<STATE_TYPE>> ext
     /** Returns the {@link ScrimView} to apply blur on.*/
     ScrimView getScrimView();
 
-    /** Apply the blur or blur fallback style to the current theme. */
-    default void updateBlurStyle() {
-        // no-op
-    }
-
     /** Returns the STATE_TYPE that correspond to inside an app. */
     STATE_TYPE getBackgroundAppState();
 }
