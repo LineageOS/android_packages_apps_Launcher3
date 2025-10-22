@@ -20,10 +20,10 @@ import android.graphics.Rect
 import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.core.animation.Animator
 import androidx.core.animation.ValueAnimator
 import com.android.app.animation.InterpolatorsAndroidX
 import com.android.launcher3.R
-import com.android.systemui.util.addListener
 
 /** Creates and manages the visibility of the [BubbleBarFlyoutView]. */
 class BubbleBarFlyoutController
@@ -85,6 +85,31 @@ constructor(
             onInit()
             showFlyout(AnimationType.MORPH, onEnd)
         }
+    }
+
+    /**
+     * Add a listener to this Animator using the provided actions.
+     *
+     * @return the [Animator.AnimatorListener] added to the Animator
+     */
+    private inline fun Animator.addListener(
+        crossinline onEnd: (animator: Animator) -> Unit = {},
+        crossinline onStart: (animator: Animator) -> Unit = {},
+        crossinline onCancel: (animator: Animator) -> Unit = {},
+        crossinline onRepeat: (animator: Animator) -> Unit = {}
+    ): Animator.AnimatorListener {
+        val listener =
+            object : Animator.AnimatorListener {
+                override fun onAnimationRepeat(animator: Animator) = onRepeat(animator)
+
+                override fun onAnimationEnd(animator: Animator) = onEnd(animator)
+
+                override fun onAnimationCancel(animator: Animator) = onCancel(animator)
+
+                override fun onAnimationStart(animator: Animator) = onStart(animator)
+            }
+        addListener(listener)
+        return listener
     }
 
     private fun showFlyout(animationType: AnimationType, endAction: () -> Unit) {

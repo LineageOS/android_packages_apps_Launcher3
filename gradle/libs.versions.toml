@@ -1,0 +1,40 @@
+[versions]
+airbnb-lottie = "6.6.10"
+agp = "8.13.0"
+androidx-core = "1.17.0"
+androidx-preference = "1.2.1"
+androidx-slice-view = "1.0.0"
+core-animation = "1.0.0"
+dagger = "2.57.2"
+google-material = "1.13.0"
+google-protobuf = "0.9.5"
+google-protobuf-javalite = "4.33.0"
+graphics-shapes = "1.1.0"
+# Freeze kotlin to 2.1.10 for a16
+kotlin = "2.1.10"
+kotlinx-coroutines-core = "1.10.2"
+ksp = "2.1.10-1.0.31"
+okio = "3.16.2"
+window = "1.5.0"
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+google-protobuf = { id = "com.google.protobuf", version.ref = "google-protobuf" }
+kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+
+[libraries]
+airbnb-lottie = { module = "com.airbnb.android:lottie", version.ref = "airbnb-lottie" }
+androidx-core = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
+androidx-core-animation = { module = "androidx.core:core-animation", version.ref = "core-animation" }
+androidx-graphics-shapes = { module = "androidx.graphics:graphics-shapes", version.ref = "graphics-shapes" }
+androidx-preference = { module = "androidx.preference:preference-ktx", version.ref = "androidx-preference" }
+androidx-slice-view = { module = "androidx.slice:slice-view", version.ref = "androidx-slice-view" }
+androidx-window = { module = "androidx.window:window", version.ref = "window" }
+dagger = { module = "com.google.dagger:dagger", version.ref = "dagger" }
+dagger-compiler = { module = "com.google.dagger:dagger-compiler", version.ref = "dagger" }
+google-material = { module = "com.google.android.material:material", version.ref = "google-material" }
+google-protobuf-javalite = { module = "com.google.protobuf:protobuf-javalite", version.ref = "google-protobuf-javalite" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines-core" }
+okio = { module = "com.squareup.okio:okio", version.ref = "okio" }

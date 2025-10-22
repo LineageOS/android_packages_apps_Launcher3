@@ -1,0 +1,30 @@
+pluginManagement {
+    repositories {
+        google()
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url = "https://gitlab.e.foundation/api/v4/groups/9/-/packages/maven" }
+    }
+}
+
+include ':animationlib'
+project(':animationlib').projectDir = new File("$rootDir/libs_systemui", 'animationlib')
+
+include ':IconLoader'
+project(':IconLoader').projectDir = new File("$rootDir/libs_systemui", 'iconloaderlib')
+
+include ':msdllib'
+project(':msdllib').projectDir = new File("$rootDir/libs_systemui", 'msdllib')
+
+include ':contextualeducationlib'
+project(':contextualeducationlib').projectDir = new File("$rootDir/libs_systemui", 'contextualeducationlib')
+
+rootProject.name = "Launcher3"

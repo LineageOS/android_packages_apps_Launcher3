@@ -1,0 +1,245 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+plugins {
+    alias libs.plugins.android.application
+    alias libs.plugins.android.library apply false
+    alias libs.plugins.kotlin
+    alias libs.plugins.google.protobuf
+    alias libs.plugins.ksp
+}
+
+allprojects {
+    var FRAMEWORK_PREBUILTS_DIR = "$rootDir/libs/"
+    ext.addFrameworkJar = { String name ->
+        def frameworkJar = new File(FRAMEWORK_PREBUILTS_DIR, name)
+        if (frameworkJar.exists()) {
+            gradle.projectsEvaluated {
+                tasks.withType(JavaCompile).configureEach {
+                    classpath = files(frameworkJar, classpath)
+                }
+                tasks.withType(KotlinCompile).configureEach {
+                    libraries.from(files(frameworkJar))
+                }
+            }
+
+            dependencies {
+                compileOnly files(frameworkJar)
+                compileOnly fileTree(dir: FRAMEWORK_PREBUILTS_DIR, include: 'Launcher3QuickStepLib')
+            }
+        }
+    }
+}
+
+android {
+    namespace = "com.android.launcher3"
+    compileSdkVersion 36
+
+    defaultConfig {
+        minSdkVersion 36
+        targetSdkVersion 36
+        versionCode 16
+        versionName "16"
+    }
+
+    signingConfigs {
+        testkeyConfig {
+            storeFile file("$rootDir/keystore/testkey.jks")
+            storePassword 'testkey'
+            keyAlias 'testkey'
+            keyPassword 'testkey'
+        }
+    }
+
+    android.applicationVariants.configureEach { variant ->
+        def nameCap = variant.name.capitalize()
+        def filteredResDir = "$rootDir/build/filteredRes/${nameCap}"
+
+        def resDirs = variant.sourceSets
+                .collectMany { it.res.srcDirs }
+                .findAll { it.exists() }
+                .collect { it.absolutePath }
+
+        tasks.register("filterResFor${nameCap}", Exec) {
+            doFirst { delete(filteredResDir) }
+            commandLine(["python3", "filter_androidprv.py", filteredResDir] + resDirs)
+        }
+
+        tasks.named("merge${nameCap}Resources").configure {
+            dependsOn("filterResFor${nameCap}")
+        }
+    }
+
+
+    buildTypes {
+        debug {
+            minifyEnabled = false
+            signingConfig = signingConfigs.testkeyConfig
+        }
+
+        release {
+            minifyEnabled = true
+            shrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.testkeyConfig
+        }
+    }
+
+    flavorDimensions "app", "recents"
+
+    productFlavors {
+        launcher3 {
+            dimension "app"
+            applicationId 'com.android.launcher3'
+            isDefault = true
+        }
+
+        withQuickstep {
+            dimension "recents"
+        }
+    }
+
+    sourceSets {
+        launcher3WithQuickstep {
+            manifest.srcFile "quickstep/AndroidManifest-launcher.xml"
+        }
+
+        main {
+            java.srcDirs = [
+                    'libs_systemui/tracinglib/core/src',
+                    'shared/src',
+                    'src',
+                    'src_build_config',
+                    'tests/multivalentTests/shared'
+            ]
+            manifest.srcFile 'AndroidManifest-common.xml'
+            proto.srcDirs = ['protos/']
+            res.srcDirs = [
+                    'libs_systemui/animationlib/res',
+                    'libs_systemui/iconloaderlib/res',
+                    'res',
+                    'studio/res'
+            ]
+        }
+
+        withQuickstep {
+            java.srcDirs = [
+                    'quickstep/dagger',
+                    'quickstep/recents_ui_overrides/src',
+                    'quickstep/src',
+                    'quickstep/src_protolog'
+            ]
+            manifest.srcFile "quickstep/AndroidManifest.xml"
+            proto.srcDirs = ['quickstep/protos_overrides/']
+            res.srcDirs = [
+                    'quickstep/recents_ui_overrides/res',
+                    'quickstep/res'
+            ]
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
+    }
+
+    kotlinOptions {
+        jvmTarget = "21"
+        freeCompilerArgs += ["-Xjvm-default=all"]
+    }
+
+    lint {
+        abortOnError = true
+        checkReleaseBuilds = false
+    }
+
+    addFrameworkJar('framework.jar')
+
+    preBuild.dependsOn 'makeReleaseJar'
+}
+
+tasks.register("makeReleaseJar", Jar) {
+    archiveFileName.set("Launcher3QuickStepLib.jar")
+    destinationDirectory.set(file("libs"))
+
+    def outputFile = file("libs/Launcher3QuickStepLib.jar")
+    onlyIf {
+        if (outputFile.exists()) {
+            println("Launcher3QuickStepLib.jar already exists. Skipping task.")
+            return false  // Skip task execution
+        }
+        return true
+    }
+
+    from(zipTree("libs/classes.jar")) {
+        include("**/*.class")
+        exclude(
+                "_COROUTINE/**",
+                "android/os/**",
+                "android/support/v4/**",
+                "androidx/**",
+                "com/airbnb/**",
+                "com/android/app/animation/**",
+                "com/android/app/tracing/**",
+                "com/android/launcher3/**",
+                "com/android/quickstep/**",
+                "com/android/systemui/contextualeducation/**",
+                "com/google/**",
+                "dagger/**",
+                "io/reactivex/rxjava3/**",
+                "jakarta/inject/**",
+                "javax/**",
+                "kotlin/**",
+                "kotlinx/**",
+                "META-INF/**",
+                "okhttp3/**",
+                "okio/**",
+                "org/**",
+                "retrofit2/**",
+        )
+    }
+}
+
+dependencies {
+    api libs.airbnb.lottie
+
+    implementation libs.androidx.core
+    implementation libs.androidx.core.animation
+    implementation libs.androidx.graphics.shapes
+    implementation libs.androidx.preference
+    implementation libs.androidx.slice.view
+    implementation libs.androidx.window
+    implementation libs.dagger
+    implementation libs.google.protobuf.javalite
+    implementation libs.google.material
+    implementation libs.kotlinx.coroutines.core
+    implementation libs.okio
+
+    ksp libs.dagger.compiler
+
+    implementation project(':animationlib')
+    implementation project(':IconLoader')
+    implementation project(':msdllib')
+    implementation project(':contextualeducationlib')
+
+    implementation fileTree(dir: "libs", include: [
+            'libGoogleFeed.jar',
+            'Launcher3QuickStepLib.jar',
+            'com_android_launcher3_flags_lib.jar',
+            'android.os.flags-aconfig-java.jar',
+            'com.android.window.flags.window-aconfig-java.jar'
+    ])
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:4.33.0"
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                remove java
+                java { option "lite" }
+            }
+        }
+    }
+}
