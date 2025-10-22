@@ -88,6 +88,7 @@ import com.google.common.truth.Truth.assertThat
 import dagger.BindsInstance
 import dagger.Component
 import java.util.function.Predicate
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -189,6 +190,11 @@ class TaskbarOverflowTest {
         runOnMainSync { recentsModel.resolvePendingTaskRequests() }
     }
 
+    @After
+    fun resetForcedMaxIconCount() {
+        runOnMainSync { taskbarViewController.limitMaxTaskbarIconsNum(-1) }
+    }
+
     @Test
     @TaskbarMode(PINNED)
     fun testTaskbarWithMaxNumIcons_pinned() {
@@ -227,10 +233,14 @@ class TaskbarOverflowTest {
 
     @Test
     @TaskbarMode(PINNED)
-    @DisableFlags(FLAG_ENABLE_TASKBAR_ICON_CONTAINER)
-    // TODO: b/448650325 - update/remove test to adapt to overflow icon in pinned apps section.
     fun testOverflownTaskbarWithNoSpaceForRecentApps_pinned() {
         val initialIconCount = currentNumberOfTaskbarIcons.coerceAtLeast(2)
+
+        val numberOfHotseatApps =
+            taskbarUnitTestRule.activityContext.deviceProfile.numShownHotseatIcons
+        val forcedMaxIconCount = numberOfHotseatApps + 2
+
+        runOnMainSync { taskbarViewController.limitMaxTaskbarIconsNum(forcedMaxIconCount) }
 
         // Create two "recent" desktop tasks, and then add enough hotseat items so the taskbar
         // reaches max number of items with hotseat item icons, all apps and divider icons only.
@@ -240,15 +250,14 @@ class TaskbarOverflowTest {
             val taskbarView: TaskbarView =
                 taskbarUnitTestRule.activityContext.dragLayer.findViewById(R.id.taskbar_view)
             taskbarView.updateItems(
-                createHotseatItems(maxNumberOfTaskbarIcons - initialIconCount),
+                createHotseatItems(forcedMaxIconCount - initialIconCount),
                 recentAppsController.shownTasks,
                 emptyList(),
             )
         }
 
-        // Verify that taskbar overflow view is shown (eventhough it exceeds max taskbar icons).
-        assertThat(currentNumberOfTaskbarIcons).isEqualTo(maxNumberOfTaskbarIcons + 1)
-        assertThat(taskbarOverflowIconIndex).isEqualTo(maxNumberOfTaskbarIcons)
+        // Verify that taskbar overflow view is shown.
+        assertThat(taskbarOverflowIconIndex).isEqualTo(currentNumberOfTaskbarIcons - 1)
         assertThat(overflowItems).containsExactlyElementsIn(0..1)
     }
 
@@ -259,6 +268,12 @@ class TaskbarOverflowTest {
     fun testOverflownTaskbarWithNoSpaceForRecentApps_singleRecent_pinned() {
         val initialIconCount = currentNumberOfTaskbarIcons.coerceAtLeast(2)
 
+        val numberOfHotseatApps =
+            taskbarUnitTestRule.activityContext.deviceProfile.numShownHotseatIcons
+        val forcedMaxIconCount = numberOfHotseatApps + 2
+
+        runOnMainSync { taskbarViewController.limitMaxTaskbarIconsNum(forcedMaxIconCount) }
+
         // Create a "recent" desktop task, and then add enough hotseat items so the taskbar
         // reaches max number of items with hotseat item icons, all apps and divider icons only.
         // I.e. so the single desktop tasks is in taskbar overflow.
@@ -266,7 +281,7 @@ class TaskbarOverflowTest {
         runOnMainSync {
             val taskbarView: TaskbarView =
                 taskbarUnitTestRule.activityContext.dragLayer.findViewById(R.id.taskbar_view)
-            val hotseatItems = createHotseatItems(maxNumberOfTaskbarIcons - initialIconCount)
+            val hotseatItems = createHotseatItems(forcedMaxIconCount - initialIconCount)
 
             taskbarView.updateItems(
                 recentAppsController.updateHotseatItemInfos(hotseatItems as Array<ItemInfo?>),
@@ -277,8 +292,8 @@ class TaskbarOverflowTest {
 
         // Verify that recent task is shown (eventhough it exceeds max taskbar icons), and that
         // the taskbar overflow view is not added for the single recent app.
-        assertThat(currentNumberOfTaskbarIcons).isEqualTo(maxNumberOfTaskbarIcons + 1)
         assertThat(taskbarOverflowIconIndex).isEqualTo(-1)
+        assertThat(runningAppIconIndex(0)).isEqualTo(currentNumberOfTaskbarIcons - 1)
     }
 
     @Test
@@ -943,6 +958,16 @@ class TaskbarOverflowTest {
                 }
             }
         }
+
+    private fun runningAppIconIndex(taskId: Int): Int {
+        return getOnUiThread {
+            taskbarViewController.iconViews.indexOfFirst {
+                it is BubbleTextView &&
+                    it.tag is SingleTask &&
+                    (it.tag as SingleTask)?.task?.key?.id == taskId
+            }
+        }
+    }
 
     private fun tapOverflowIcon() {
         runOnMainSync {
