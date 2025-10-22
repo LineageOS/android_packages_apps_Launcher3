@@ -130,6 +130,7 @@ public class RecentsOrientedState implements LauncherPrefChangeListener {
     private final Context mContext;
     private final BaseContainerInterface mContainerInterface;
     private final OrientationEventListener mOrientationListener;
+    private @Nullable IntConsumer mRotationChangeListener;
     private final SettingsCache mSettingsCache;
     private @Nullable SafeCloseable mRotationChangeSafeCloseable;
 
@@ -146,13 +147,7 @@ public class RecentsOrientedState implements LauncherPrefChangeListener {
     // Combined int which encodes the full state.
     private int mStateId = 0;
 
-    /**
-     * @param rotationChangeListener Callback for receiving rotation events when rotation watcher
-     *                              is enabled
-     * @see #setRotationWatcherEnabled(boolean)
-     */
-    public RecentsOrientedState(Context context, BaseContainerInterface containerInterface,
-            IntConsumer rotationChangeListener) {
+    public RecentsOrientedState(Context context, BaseContainerInterface containerInterface) {
         mContext = context;
         mContainerInterface = containerInterface;
         mOrientationListener = new OrientationEventListener(mContext) {
@@ -171,7 +166,9 @@ public class RecentsOrientedState implements LauncherPrefChangeListener {
                     }
                     if (mPreviousRotationCount >= CONTINUOUS_ROTATION_COUNT_THRESHOLD) {
                         mRotation = newRotation;
-                        rotationChangeListener.accept(newRotation);
+                        if (mRotationChangeListener != null) {
+                            mRotationChangeListener.accept(newRotation);
+                        }
                     }
                 }
             }
@@ -207,6 +204,15 @@ public class RecentsOrientedState implements LauncherPrefChangeListener {
                 }
             }
         }
+    }
+
+    /**
+     * Sets a callback for receiving rotation events when rotation watcher is enabled
+     *
+     * @see #setRotationWatcherEnabled(boolean)
+     */
+    public void setRotationChangeListener(IntConsumer rotationChangeListener) {
+        this.mRotationChangeListener = rotationChangeListener;
     }
 
     /**

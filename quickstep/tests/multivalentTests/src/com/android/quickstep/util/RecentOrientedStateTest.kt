@@ -74,7 +74,7 @@ class RecentOrientedStateTest {
             RecentsOrientedState(
                 ApplicationProvider.getApplicationContext(),
                 FallbackActivityInterface.INSTANCE,
-            ) {}
+            )
         )
 
     private fun rotationHandlerTest(
