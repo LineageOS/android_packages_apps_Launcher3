@@ -37,11 +37,12 @@ import com.android.launcher3.PendingAddItemInfo;
 import com.android.launcher3.R;
 import com.android.launcher3.ShortcutAndWidgetContainer;
 import com.android.launcher3.Workspace;
+import com.android.launcher3.apppairs.AppPairIcon;
 import com.android.launcher3.celllayout.CellLayoutLayoutParams;
 import com.android.launcher3.dragndrop.DragOptions;
-import com.android.launcher3.dragndrop.DragOptions.PreDragCondition;
 import com.android.launcher3.dragndrop.DragView;
 import com.android.launcher3.folder.Folder;
+import com.android.launcher3.folder.FolderIcon;
 import com.android.launcher3.homescreenfiles.HomeScreenFilesUtilsKt;
 import com.android.launcher3.keyboard.KeyboardDragAndDropView;
 import com.android.launcher3.model.data.AppInfo;
@@ -53,7 +54,9 @@ import com.android.launcher3.model.data.LauncherAppWidgetInfo;
 import com.android.launcher3.model.data.WorkspaceItemFactory;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.popup.ArrowPopup;
+import com.android.launcher3.popup.Popup;
 import com.android.launcher3.popup.PopupContainer;
+import com.android.launcher3.popup.PopupController;
 import com.android.launcher3.shortcuts.DeepShortcutView;
 import com.android.launcher3.touch.ItemLongClickListener;
 import com.android.launcher3.util.IntArray;
@@ -64,6 +67,7 @@ import com.android.launcher3.views.BubbleTextHolder;
 import com.android.launcher3.views.OptionsPopupView;
 import com.android.launcher3.views.OptionsPopupView.OptionItem;
 import com.android.launcher3.widget.LauncherAppWidgetHostView;
+import com.android.launcher3.widget.NavigableAppWidgetHostView;
 import com.android.launcher3.widget.PendingAddWidgetInfo;
 import com.android.launcher3.widget.util.WidgetSizeHandler;
 
@@ -186,20 +190,26 @@ public class LauncherAccessibilityDelegate extends BaseAccessibilityDelegate<Lau
     protected boolean performAction(final View host, final ItemInfo item, int action,
             boolean fromKeyboard) {
         if (action == ACTION_LONG_CLICK) {
-            PreDragCondition dragCondition = null;
+            PopupController<Launcher> popupController = null;
             // Long press should be consumed for workspace items, and it should invoke the
             // Shortcuts / Notifications / Actions pop-up menu, and not start a drag as the
             // standard long press path does.
-            if (host instanceof BubbleTextView) {
-                dragCondition = ((BubbleTextView) host)
-                        .startLongPressAction(mContext.getPopupControllerForAppIcons());
-            } else if (host instanceof BubbleTextHolder) {
-                BubbleTextHolder holder = (BubbleTextHolder) host;
-                dragCondition = holder.getBubbleText() == null ? null
-                        : holder.getBubbleText()
-                                .startLongPressAction(mContext.getPopupControllerForAppIcons());
+            if (host instanceof BubbleTextView || (host instanceof BubbleTextHolder
+                    && ((BubbleTextHolder) host).getBubbleText() != null)) {
+                popupController = ShortcutUtil.supportsShortcuts(item)
+                        ? mContext.getPopupControllerForAppIcons()
+                        : mContext.getPopupControllerForHomeScreenItems();
+            } else if (host instanceof FolderIcon || host instanceof AppPairIcon
+                    || host instanceof NavigableAppWidgetHostView) {
+                popupController = mContext.getPopupControllerForHomeScreenItems();
             }
-            return dragCondition != null;
+
+            if (popupController == null) {
+                return false;
+            }
+
+            Popup popup = popupController.show(host);
+            return popup != null && popup.createPreDragCondition() != null;
         } else if (action == MOVE) {
             final View itemView = (host instanceof AppWidgetResizeFrame)
                     ? ((AppWidgetResizeFrame) host).getViewForAccessibility()
