@@ -154,7 +154,7 @@ public class SplitSelectStateController {
     @Nullable
     private SplitFromDesktopController mSplitFromDesktopController;
     @Nullable
-    private DepthController mDepthController;
+    private DepthController<?, ?> mDepthController;
     private boolean mRecentsAnimationRunning;
     /** If {@code true}, animates the existing task view split placeholder view */
     private boolean mAnimateCurrentTaskDismissal;
@@ -212,9 +212,9 @@ public class SplitSelectStateController {
     };
 
     public SplitSelectStateController(RecentsViewContainer container,
-            StateManager stateManager, DepthController depthController,
+            StateManager<?, ?> stateManager, @Nullable DepthController<?, ?> depthController,
             StatsLogManager statsLogManager, SystemUiProxy systemUiProxy, RecentsModel recentsModel,
-            Runnable activityBackCallback, SplitScreenUiState splitScreenUiState) {
+            @Nullable Runnable activityBackCallback, SplitScreenUiState splitScreenUiState) {
         mContainer = container;
         mStatsLogManager = statsLogManager;
         mSystemUiProxy = systemUiProxy;

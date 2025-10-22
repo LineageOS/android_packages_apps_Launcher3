@@ -64,7 +64,7 @@ import org.mockito.kotlin.whenever
 class SplitSelectStateControllerTest {
 
     private val systemUiProxy: SystemUiProxy = mock()
-    private val depthController: DepthController = mock()
+    private val depthController: DepthController<*, *> = mock()
     private val statsLogManager: StatsLogManager = mock()
     private val statsLogger: StatsLogger = mock()
     private val stateManager: StateManager<LauncherState, StatefulActivity<LauncherState>> = mock()

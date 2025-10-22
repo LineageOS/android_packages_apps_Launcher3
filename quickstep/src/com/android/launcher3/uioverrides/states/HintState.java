@@ -17,7 +17,6 @@ package com.android.launcher3.uioverrides.states;
 
 import static com.android.launcher3.logging.StatsLogManager.LAUNCHER_STATE_HOME;
 
-import android.content.Context;
 import android.graphics.Color;
 
 import androidx.core.graphics.ColorUtils;
@@ -51,7 +50,7 @@ public class HintState extends LauncherState {
     }
 
     @Override
-    protected float getDepthUnchecked(Context context) {
+    protected float getDepthUnchecked(ActivityContext context) {
         return DEPTH_5_PERCENT;
     }
 

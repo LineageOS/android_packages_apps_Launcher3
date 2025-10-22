@@ -43,7 +43,7 @@ class DesktopRecentsTransitionController(
     private val stateManager: StateManager<*, *>,
     private val systemUiProxy: SystemUiProxy,
     private val appThread: IApplicationThread,
-    private val depthController: DepthController?,
+    private val depthController: DepthController<*, *>?,
 ) {
 
     /**
@@ -105,7 +105,7 @@ class DesktopRecentsTransitionController(
         private val taskView: TaskView,
         private val animated: Boolean,
         private val stateManager: StateManager<*, *>,
-        private val depthController: DepthController?,
+        private val depthController: DepthController<*, *>?,
         private val successCallback: Consumer<Boolean>?,
     ) : RemoteTransitionStub() {
 

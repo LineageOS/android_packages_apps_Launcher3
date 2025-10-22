@@ -27,7 +27,6 @@ import static com.android.launcher3.Flags.enableDesktopExplodedView;
 import static com.android.launcher3.LauncherAnimUtils.VIEW_ALPHA;
 import static com.android.launcher3.LauncherAnimUtils.VIEW_TRANSLATE_X;
 import static com.android.launcher3.LauncherAnimUtils.VIEW_TRANSLATE_Y;
-import static com.android.launcher3.LauncherState.BACKGROUND_APP;
 import static com.android.launcher3.LauncherState.NORMAL;
 import static com.android.launcher3.QuickstepTransitionManager.ANIMATION_DELAY_NAV_FADE_IN;
 import static com.android.launcher3.QuickstepTransitionManager.ANIMATION_NAV_FADE_IN_DURATION;
@@ -70,6 +69,8 @@ import androidx.annotation.Nullable;
 import com.android.app.animation.Interpolators;
 import com.android.internal.jank.Cuj;
 import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.Launcher;
+import com.android.launcher3.LauncherState;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.anim.AnimatedFloat;
 import com.android.launcher3.anim.AnimationSuccessListener;
@@ -118,22 +119,20 @@ public final class TaskViewUtils {
 
     /**
      * Try to find a TaskView that corresponds with the component of the launched view.
-     *
+     * <p>
      * If this method returns a non-null TaskView, it will be used in composeRecentsLaunchAnimation.
      * Otherwise, we will assume we are using a normal app transition, but it's possible that the
      * opening remote target (which we don't get until onAnimationStart) will resolve to a TaskView.
      */
     public static TaskView findTaskViewToLaunch(
             RecentsView<?, ?> recentsView, View v, RemoteAnimationTarget[] targets) {
-        if (v instanceof TaskView) {
-            TaskView taskView = (TaskView) v;
+        if (v instanceof TaskView taskView) {
             return recentsView.isTaskViewVisible(taskView) ? taskView : null;
         }
 
         // It's possible that the launched view can still be resolved to a visible task view, check
         // the task id of the opening task and see if we can find a match.
-        if (v.getTag() instanceof ItemInfo) {
-            ItemInfo itemInfo = (ItemInfo) v.getTag();
+        if (v.getTag() instanceof ItemInfo itemInfo) {
             ComponentName componentName = itemInfo.getTargetComponent();
             int userId = itemInfo.user.getIdentifier();
             if (componentName != null) {
@@ -183,7 +182,7 @@ public final class TaskViewUtils {
             @NonNull RemoteAnimationTarget[] appTargets,
             @NonNull RemoteAnimationTarget[] wallpaperTargets,
             @NonNull RemoteAnimationTarget[] nonAppTargets,
-            @Nullable DepthController depthController,
+            @Nullable DepthController<?, ?> depthController,
             @Nullable TransitionInfo transitionInfo,
             int appearedTaskId,
             PendingAnimation out) {
@@ -315,12 +314,12 @@ public final class TaskViewUtils {
             if (navBarTarget != null) {
                 final Rect cropRect = new Rect();
                 out.addOnFrameListener(new MultiValueUpdateListener() {
-                    FloatProp mNavFadeOut = new FloatProp(1f, 0f, clampToDuration(
+                    final FloatProp mNavFadeOut = new FloatProp(1f, 0f, clampToDuration(
                             NAV_FADE_OUT_INTERPOLATOR,
                             0,
                             ANIMATION_NAV_FADE_OUT_DURATION,
                             out.getDuration()));
-                    FloatProp mNavFadeIn = new FloatProp(0f, 1f, clampToDuration(
+                    final FloatProp mNavFadeIn = new FloatProp(0f, 1f, clampToDuration(
                             NAV_FADE_IN_INTERPOLATOR,
                             ANIMATION_DELAY_NAV_FADE_IN,
                             ANIMATION_NAV_FADE_IN_DURATION,
@@ -356,8 +355,7 @@ public final class TaskViewUtils {
         int taskIndex = recentsView.indexOfChild(taskView);
         boolean parallaxCenterAndAdjacentTask =
                 !dp.getDeviceProperties().isTablet() && taskIndex != recentsView.getCurrentPage();
-        if (!skipViewChanges && parallaxCenterAndAdjacentTask && topMostSimulators != null
-                && topMostSimulators.length > 0) {
+        if (!skipViewChanges && parallaxCenterAndAdjacentTask && topMostSimulators != null) {
             out.addFloat(taskView, VIEW_ALPHA, 1, 0, clampToProgress(LINEAR, 0.2f, 0.4f));
 
             RemoteTargetHandle[] simulatorCopies = topMostSimulators;
@@ -463,7 +461,7 @@ public final class TaskViewUtils {
 
         if (depthController != null) {
             out.setFloat(depthController.stateDepth, MULTI_PROPERTY_VALUE,
-                    BACKGROUND_APP.getDepth(container),
+                    container.getBackgroundAppState().getDepth(container),
                     TOUCH_RESPONSE);
         }
     }
@@ -475,9 +473,12 @@ public final class TaskViewUtils {
      * {@link #composeRecentsSplitLaunchAnimatorLegacy} below, but the way we launch tasks whether
      * it's a single task or multiple tasks results in different entry-points.
      */
-    public static void composeRecentsSplitLaunchAnimator(GroupedTaskView launchingTaskView,
-            @NonNull StateManager stateManager, @Nullable DepthController depthController,
-            @NonNull TransitionInfo transitionInfo, SurfaceControl.Transaction t,
+    public static void composeRecentsSplitLaunchAnimator(
+            GroupedTaskView launchingTaskView,
+            @NonNull StateManager<?, ?> stateManager,
+            @Nullable DepthController<?, ?> depthController,
+            @NonNull TransitionInfo transitionInfo,
+            SurfaceControl.Transaction t,
             @NonNull Runnable finishCallback) {
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.addListener(new AnimatorListenerAdapter() {
@@ -495,7 +496,7 @@ public final class TaskViewUtils {
         final RemoteAnimationTarget[] nonAppTargets =
                 RemoteAnimationTargetCompat.wrapNonApps(
                         transitionInfo, false /* wallpapers */, t, null /* leashMap */);
-        final RecentsView recentsView = launchingTaskView.getRecentsView();
+        final RecentsView<?, ?> recentsView = launchingTaskView.getRecentsView();
         composeRecentsLaunchAnimator(animatorSet, launchingTaskView, appTargets, wallpaperTargets,
                 nonAppTargets, /* launcherClosing */ true, stateManager, recentsView,
                 depthController, /* transitionInfo= */ null, /* appearedTaskId= */ INVALID_TASK_ID);
@@ -506,13 +507,13 @@ public final class TaskViewUtils {
 
     /**
      * Legacy version (until shell transitions are enabled)
-     *
+     * <p>
      * If {@param launchingTaskView} is not null, then this will play the tasks launch animation
      * from the position of the GroupedTaskView (when user taps on the TaskView to start it).
-     * Technically this case should be taken care of by
-     * {@link #composeRecentsSplitLaunchAnimatorLegacy} below, but the way we launch tasks whether
-     * it's a single task or multiple tasks results in different entry-points.
-     *
+     * Technically this case should be taken care of by composeRecentsSplitLaunchAnimatorLegacy
+     * below, but the way we launch tasks whether it's a single task or multiple tasks results in
+     * different entry-points.
+     * <p>
      * If it is null, then it will simply fade in the starting apps and fade out launcher (for the
      * case where launcher handles animating starting split tasks from app icon)
      * @deprecated with shell transitions
@@ -522,12 +523,12 @@ public final class TaskViewUtils {
             @NonNull RemoteAnimationTarget[] appTargets,
             @NonNull RemoteAnimationTarget[] wallpaperTargets,
             @NonNull RemoteAnimationTarget[] nonAppTargets,
-            @NonNull StateManager stateManager,
-            @Nullable DepthController depthController,
+            @NonNull StateManager<?, ?> stateManager,
+            @Nullable DepthController<?, ?> depthController,
             @NonNull Runnable finishCallback) {
         if (launchingTaskView != null) {
             AnimatorSet animatorSet = new AnimatorSet();
-            RecentsView recentsView = launchingTaskView.getRecentsView();
+            RecentsView<?, ?> recentsView = launchingTaskView.getRecentsView();
             animatorSet.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
@@ -562,9 +563,9 @@ public final class TaskViewUtils {
             }
         }
 
-        for (int i = 0; i < nonAppTargets.length; ++i) {
-            final SurfaceControl leash = nonAppTargets[i].leash;
-            if (nonAppTargets[i].windowType == TYPE_DOCK_DIVIDER && leash != null) {
+        for (RemoteAnimationTarget nonAppTarget : nonAppTargets) {
+            final SurfaceControl leash = nonAppTarget.leash;
+            if (nonAppTarget.windowType == TYPE_DOCK_DIVIDER && leash != null) {
                 openingTargets.add(leash);
             }
         }
@@ -604,8 +605,10 @@ public final class TaskViewUtils {
      */
     public static AnimatorSet composeRecentsDesktopLaunchAnimator(
             @NonNull TaskView launchingTaskView,
-            @NonNull StateManager stateManager, @Nullable DepthController depthController,
-            @NonNull TransitionInfo transitionInfo, SurfaceControl.Transaction t,
+            @NonNull StateManager<?, ?> stateManager,
+            @Nullable DepthController<?, ?> depthController,
+            @NonNull TransitionInfo transitionInfo,
+            SurfaceControl.Transaction t,
             @NonNull Runnable finishCallback
     ) {
         AnimatorSet animatorSet = new AnimatorSet();
@@ -635,13 +638,26 @@ public final class TaskViewUtils {
         return animatorSet;
     }
 
-    public static void composeRecentsLaunchAnimator(@NonNull AnimatorSet anim, @NonNull View v,
+    /**
+     * Compose the TaskView launch animation.
+     */
+    public static void composeRecentsLaunchAnimator(
+            @NonNull AnimatorSet anim,
+            @NonNull View v,
             @NonNull RemoteAnimationTarget[] appTargets,
             @NonNull RemoteAnimationTarget[] wallpaperTargets,
-            @NonNull RemoteAnimationTarget[] nonAppTargets, boolean launcherClosing,
-            @NonNull StateManager stateManager, @NonNull RecentsView recentsView,
-            @Nullable DepthController depthController, @Nullable TransitionInfo transitionInfo,
+            @NonNull RemoteAnimationTarget[] nonAppTargets,
+            boolean launcherClosing,
+            @NonNull StateManager<?, ?> stateManager,
+            @Nullable RecentsView<?, ?> recentsView,
+            @Nullable DepthController<?, ?> depthController,
+            @Nullable TransitionInfo transitionInfo,
             int appearedTaskId) {
+        if (recentsView == null) {
+            Log.w(TAG, "composeRecentsLaunchAnimator - recentsView is null");
+            return;
+        }
+
         boolean skipLauncherChanges = !launcherClosing;
 
         TaskView taskView = findTaskViewToLaunch(recentsView, v, appTargets);
@@ -733,9 +749,12 @@ public final class TaskViewUtils {
                     recentsView.setTaskLaunchCancelledRunnable(null);
                 }
             };
-        } else {
+        } else if (RecentsViewContainer.containerFromContext(
+                taskView.getContext()) instanceof Launcher launcher) {
+            StateManager<LauncherState, Launcher> launcherStateManager = launcher.getStateManager();
             AnimatorPlaybackController controller =
-                    stateManager.createAnimationToNewWorkspace(NORMAL, RECENTS_LAUNCH_DURATION);
+                    launcherStateManager.createAnimationToNewWorkspace(NORMAL,
+                            RECENTS_LAUNCH_DURATION);
             controller.dispatchOnStart();
             childStateAnimation = controller.getTarget();
             launcherAnim = controller.getAnimationPlayer().setDuration(RECENTS_LAUNCH_DURATION);
@@ -743,11 +762,16 @@ public final class TaskViewUtils {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     recentsView.finishRecentsAnimation(false /* toHome */,
-                            () -> stateManager.goToState(NORMAL, false));
+                            () -> launcherStateManager.goToState(NORMAL, false));
                 }
             };
+        } else {
+            launcherAnim = null;
+            windowAnimEndListener = null;
         }
-        pa.add(launcherAnim);
+        if (launcherAnim != null) {
+            pa.add(launcherAnim);
+        }
         if (recentsView.getRunningTaskIndex() != -1) {
             pa.addOnFrameCallback(recentsView::redrawLiveTile);
         }
@@ -757,7 +781,9 @@ public final class TaskViewUtils {
         // animation adds some listeners which need to be called before windowAnimEndListener
         // (the ordering of listeners matter in this case).
         stateManager.setCurrentAnimation(anim, childStateAnimation);
-        anim.addListener(windowAnimEndListener);
+        if (windowAnimEndListener != null) {
+            anim.addListener(windowAnimEndListener);
+        }
     }
 
     /**
@@ -895,7 +921,7 @@ public final class TaskViewUtils {
     private static void initTaskViewSimulatorsForRemoteTargetHandles(
             List<RemoteTargetHandle> handleList,
             DeviceProfile deviceProfile,
-            RecentsView recentsView,
+            RecentsView<?, ?> recentsView,
             TaskView taskView,
             PendingAnimation out) {
         // RecentsView never updates the display rotation until swipe-up so the value may

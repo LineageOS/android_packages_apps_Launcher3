@@ -80,7 +80,7 @@ class SplitAnimationControllerTest {
     private val mockItemInfo: ItemInfo = mock()
 
     private val stateManager: StateManager<*, *> = mock()
-    private val depthController: DepthController = mock()
+    private val depthController: DepthController<*, *> = mock()
     private val transitionInfo: TransitionInfo = mock()
     private val transaction: Transaction = mock()
 

@@ -481,7 +481,7 @@ class SplitAnimationController(val splitSelectStateController: SplitSelectStateC
         wallpapers: Array<RemoteAnimationTarget>?,
         nonApps: Array<RemoteAnimationTarget>?,
         stateManager: StateManager<*, *>,
-        depthController: DepthController?,
+        depthController: DepthController<*, *>?,
         info: TransitionInfo?,
         t: Transaction?,
         finishCallback: Runnable,
@@ -574,7 +574,7 @@ class SplitAnimationController(val splitSelectStateController: SplitSelectStateC
     fun composeRecentsSplitLaunchAnimator(
         launchingTaskView: GroupedTaskView,
         stateManager: StateManager<*, *>,
-        depthController: DepthController?,
+        depthController: DepthController<*, *>?,
         info: TransitionInfo,
         t: Transaction,
         finishCallback: Runnable,
@@ -602,7 +602,7 @@ class SplitAnimationController(val splitSelectStateController: SplitSelectStateC
         wallpapers: Array<RemoteAnimationTarget>,
         nonApps: Array<RemoteAnimationTarget>,
         stateManager: StateManager<*, *>,
-        depthController: DepthController?,
+        depthController: DepthController<*, *>?,
         finishCallback: Runnable,
     ) {
         TaskViewUtils.composeRecentsSplitLaunchAnimatorLegacy(

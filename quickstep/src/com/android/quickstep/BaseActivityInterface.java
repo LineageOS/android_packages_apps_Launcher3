@@ -59,7 +59,7 @@ public abstract class BaseActivityInterface<STATE_TYPE extends BaseState<STATE_T
     public abstract ACTIVITY_TYPE getCreatedContainer();
 
     @Nullable
-    public DepthController getDepthController() {
+    public DepthController<STATE_TYPE, ACTIVITY_TYPE> getDepthController() {
         return null;
     }
 

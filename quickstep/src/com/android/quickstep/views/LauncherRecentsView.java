@@ -199,7 +199,7 @@ public class LauncherRecentsView extends RecentsView<QuickstepLauncher, Launcher
     }
 
     @Override
-    protected DepthController getDepthController() {
+    protected DepthController<?, ?> getDepthController() {
         return mContainer.getDepthController();
     }
 
