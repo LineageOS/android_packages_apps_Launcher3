@@ -9,6 +9,7 @@ import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCH
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_SYSTEM_SHORTCUT_APP_INFO_TAP;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_SYSTEM_SHORTCUT_DONT_SUGGEST_APP_TAP;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_SYSTEM_SHORTCUT_WIDGETS_TAP;
+import static com.android.launcher3.testing.shared.ResourceUtils.INVALID_RESOURCE_HANDLE;
 import static com.android.launcher3.widget.picker.model.data.WidgetPickerDataUtils.findAllWidgetsForPackageUser;
 
 import android.content.ComponentName;
@@ -43,6 +44,7 @@ import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.ItemInfoWithIcon;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.pm.UserCache;
+import com.android.launcher3.testing.shared.ResourceUtils;
 import com.android.launcher3.util.ActivityOptionsWrapper;
 import com.android.launcher3.util.ApiWrapper;
 import com.android.launcher3.util.ComponentKey;
@@ -510,7 +512,13 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
                         && !(itemInfo instanceof WorkspaceItemInfo)) {
                     return null;
                 }
-                if (!BubbleAnythingFlagHelper.allowMultiWindowNonResizableActivities()
+                final boolean systemAlwaysSupportsNonResizableMultiWindow =
+                        ResourceUtils.getIntegerByName("config_supportsNonResizableMultiWindow",
+                                ((Context) activity).getResources(), INVALID_RESOURCE_HANDLE) == 1;
+                final boolean supportsBubbleNonResizableMultiWindow =
+                        BubbleAnythingFlagHelper.allowMultiWindowNonResizableActivities()
+                                && systemAlwaysSupportsNonResizableMultiWindow;
+                if (!supportsBubbleNonResizableMultiWindow
                         && itemInfo instanceof ItemInfoWithIcon itemInfoWithIcon) {
                     // Don't show bubble shortcut option for non-resizeable apps on small screens.
                     // TODO(b/411558731): isPhone just checks for smallest width < 600dp, so it
