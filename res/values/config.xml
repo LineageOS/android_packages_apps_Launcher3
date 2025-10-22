@@ -151,7 +151,10 @@
         <item>@dimen/swipe_up_max_velocity</item>
     </array>
 
-    <string-array name="filtered_components" ></string-array>
+    <string-array name="filtered_components">
+        <item>com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher</item>
+        <item>com.android.launcher3/com.android.launcher3.Launcher</item>
+    </string-array>
 
     <!-- Swipe back to home related -->
     <dimen name="swipe_back_window_scale_x_margin">10dp</dimen>
