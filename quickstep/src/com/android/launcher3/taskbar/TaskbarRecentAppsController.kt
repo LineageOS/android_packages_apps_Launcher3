@@ -94,6 +94,15 @@ class TaskbarRecentAppsController(
             }
         }
 
+    /** `true` if recent icons are replacing predictions. */
+    val isReplacingPredictions: Boolean
+        get() {
+            val showDesktopTasks =
+                controllers.taskbarDesktopModeController.shouldShowDesktopTasksInTaskbar()
+            return (showDesktopTasks && canShowRunningApps) ||
+                (!showDesktopTasks && canShowRecentApps)
+        }
+
     // Initialized in init.
     private lateinit var controllers: TaskbarControllers
 
@@ -305,11 +314,7 @@ class TaskbarRecentAppsController(
     /** Called to update hotseatItems, in order to de-dupe them from Recent/Running tasks later. */
     fun updateHotseatItemInfos(hotseatItems: Array<ItemInfo?>): Array<ItemInfo?> {
         // Ignore predicted apps - we show running or recent apps instead.
-        val showDesktopTasks =
-            controllers.taskbarDesktopModeController.shouldShowDesktopTasksInTaskbar()
-        val removePredictions =
-            (showDesktopTasks && canShowRunningApps) || (!showDesktopTasks && canShowRecentApps)
-        if (!removePredictions) {
+        if (!isReplacingPredictions) {
             shownHotseatItems = hotseatItems.filterNotNull()
             onRecentsOrHotseatChanged()
             return hotseatItems
@@ -320,6 +325,8 @@ class TaskbarRecentAppsController(
                 .filter { itemInfo -> !itemInfo.isPredictedItem }
                 .toMutableList()
 
+        val showDesktopTasks =
+            controllers.taskbarDesktopModeController.shouldShowDesktopTasksInTaskbar()
         if (showDesktopTasks && canShowRunningApps) {
             shownHotseatItems =
                 updateHotseatItemsFromRunningTasks(
