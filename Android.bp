@@ -202,12 +202,19 @@ filegroup {
     ],
 }
 
+sh_binary_host {
+    name: "launcher-build-config-tool",
+    src: "tools/buildconfig.sh",
+}
+
 // Default build config for Launcher3
-filegroup {
+genrule {
     name: "launcher-build-config",
-    srcs: [
-        "src_build_config/**/*.java",
+    tools: [
+        "launcher-build-config-tool",
     ],
+    cmd: " $(location launcher-build-config-tool) > $(out)",
+    out: ["BuildConfig.java"],
 }
 
 // Proguard files for Launcher3
@@ -337,6 +344,16 @@ quickstep_compose_java_defaults {
     },
 }
 
+// Build config for tapl library
+genrule {
+    name: "launcher-tapl-build-config",
+    tools: [
+        "launcher-build-config-tool",
+    ],
+    cmd: " $(location launcher-build-config-tool) --pkg com.android.launcher3.testing > $(out)",
+    out: ["BuildConfig.java"],
+}
+
 android_library {
     name: "launcher-aosp-tapl",
     libs: [
@@ -356,8 +373,7 @@ android_library {
     srcs: [
         "tests/tapl/**/*.java",
         "tests/tapl/**/*.kt",
-        "tests/src_tapl_build_config/**/*.java",
-        "tests/src_tapl_build_config/**/*.kt",
+        ":launcher-tapl-build-config",
     ],
     resource_dirs: [],
     manifest: "tests/tapl/AndroidManifest.xml",
@@ -546,6 +562,16 @@ android_library {
     ],
 }
 
+// Build config for Launcher3 Go
+genrule {
+    name: "launcher-go-build-config",
+    tools: [
+        "launcher-build-config-tool",
+    ],
+    cmd: " $(location launcher-build-config-tool) -d WIDGETS_ENABLED -d NOTIFICATION_DOTS_ENABLED > $(out)",
+    out: ["BuildConfig.java"],
+}
+
 // Library with all the source code and dependencies for building Launcher Go
 android_library {
     name: "Launcher3GoLib",
@@ -557,6 +583,7 @@ android_library {
         ":launcher-src",
         ":launcher-quickstep-src",
         ":launcher-quickstep-dagger",
+        ":launcher-go-build-config",
         "go/quickstep/src/**/*.java",
         "go/quickstep/src/**/*.kt",
     ],
