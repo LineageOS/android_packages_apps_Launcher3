@@ -29,6 +29,7 @@ import androidx.core.animation.doOnStart
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.app.animation.Interpolators.EMPHASIZED
 import com.android.app.animation.Interpolators.LINEAR
+import com.android.launcher3.Flags.refactorTaskbarUiState
 import com.android.launcher3.R
 import com.android.launcher3.anim.AnimatedFloat
 import com.android.launcher3.anim.SpringAnimationBuilder
@@ -41,6 +42,7 @@ import com.android.launcher3.taskbar.BarsLocationAnimatorHelper.outShift
 import com.android.launcher3.taskbar.TaskbarInsetsController
 import com.android.launcher3.taskbar.TaskbarStashController.TASKBAR_STASH_ALPHA_START_DELAY
 import com.android.launcher3.taskbar.TaskbarStashController.TRANSIENT_TASKBAR_STASH_ALPHA_DURATION
+import com.android.launcher3.taskbar.TaskbarUiState
 import com.android.launcher3.taskbar.bubbles.BubbleBarViewController
 import com.android.launcher3.taskbar.bubbles.BubbleStashedHandleViewController
 import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController.BubbleLauncherState
@@ -55,8 +57,9 @@ import com.android.wm.shell.shared.bubbles.ContextUtils.isRtl
 import kotlin.math.max
 
 class TransientBubbleStashController(
-    private val taskbarHotseatDimensionsProvider: TaskbarHotseatDimensionsProvider,
+    taskbarHotseatDimensionsProvider: TaskbarHotseatDimensionsProvider,
     private val context: Context,
+    private val taskbarUiState: TaskbarUiState,
 ) : BubbleStashController {
 
     private lateinit var bubbleBarViewController: BubbleBarViewController
@@ -89,7 +92,15 @@ class TransientBubbleStashController(
     override var bubbleBarVerticalCenterForHome: Int = 0
 
     override var isStashed: Boolean = false
-        @VisibleForTesting set
+        @VisibleForTesting
+        set(value) {
+            // TODO(b/404636836): after launching refactorTaskbarUiState(), rely only on
+            //  taskbarUiState to track isStashed state.
+            if (refactorTaskbarUiState()) {
+                taskbarUiState.bubbleStashed = value
+            }
+            field = value
+        }
 
     override var launcherState: BubbleLauncherState = BubbleLauncherState.IN_APP
         set(state) {
