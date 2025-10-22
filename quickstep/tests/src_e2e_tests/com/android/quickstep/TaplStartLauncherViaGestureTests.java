@@ -21,6 +21,8 @@ import static com.android.launcher3.util.rule.TestStabilityRule.LOCAL;
 import static com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT;
 import static com.android.launcher3.util.rule.TestStabilityRule.Stability;
 
+import static org.junit.Assume.assumeFalse;
+
 import android.util.Log;
 
 import androidx.test.filters.LargeTest;
@@ -61,6 +63,10 @@ public class TaplStartLauncherViaGestureTests extends AbstractQuickStepTest {
     @NavigationModeSwitch(mode = NavigationModeSwitchRule.Mode.THREE_BUTTON)
     @Stability(flavors = LOCAL | PLATFORM_POSTSUBMIT) // b/435425092
     public void testStressPressHome() {
+        // TODO(b/377678992): revert ag/36346262 once NexusLauncherTests-OverviewInWindowEnabled is
+        //  successfully blocking presubmit.
+        assumeFalse("Skipping test because overview in window flags are enabled",
+                mLauncher.isRecentsWindowEnabled());
         runTest(TestCase.TO_HOME);
     }
 
@@ -73,6 +79,10 @@ public class TaplStartLauncherViaGestureTests extends AbstractQuickStepTest {
     @Test
     @NavigationModeSwitch(mode = NavigationModeSwitchRule.Mode.THREE_BUTTON)
     public void testStressPressOverview() {
+        // TODO(b/377678992): revert ag/36346262 once NexusLauncherTests-OverviewInWindowEnabled is
+        //  successfully blocking presubmit.
+        assumeFalse("Skipping test because overview in window flags are enabled",
+                mLauncher.isRecentsWindowEnabled());
         runTest(TestCase.TO_OVERVIEW);
     }
 
