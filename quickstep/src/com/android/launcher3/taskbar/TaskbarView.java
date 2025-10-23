@@ -79,8 +79,8 @@ import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.taskbar.TaskbarOverflowView.OverflowType;
 import com.android.launcher3.taskbar.customization.TaskbarAllAppsButtonContainer;
 import com.android.launcher3.taskbar.customization.TaskbarDividerContainer;
-import com.android.launcher3.taskbar.customization.TaskbarIconSpecs;
 import com.android.launcher3.taskbar.customization.TaskbarIconsContainer;
+import com.android.launcher3.taskbar.customization.TaskbarSpecsEvaluator;
 import com.android.launcher3.taskbar.handoff.HandoffSuggestion;
 import com.android.launcher3.util.LauncherBindableItemsContainer.ItemOperator;
 import com.android.launcher3.util.Themes;
@@ -224,15 +224,13 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         mQsb = LauncherComponentProvider.get(context).getQsbWidgetFactory().createView(this);
         onDeviceProfileChanged(mActivityContext.getDeviceProfile());
 
+        final TaskbarSpecsEvaluator specsEvaluator = mActivityContext.getTaskbarSpecsEvaluator();
         int actualMargin = resources.getDimensionPixelSize(R.dimen.taskbar_icon_spacing);
-        int actualIconSize = dpToPx(TaskbarIconSpecs.INSTANCE.getIconSize40dp().getSize());
-        if (enableTaskbarPinning() && canTransitionToTransientTaskbar()) {
-            actualIconSize = dpToPx(TaskbarIconSpecs.INSTANCE.getIconSize52dp().getSize());
-        }
+        int actualIconSize =
+                dpToPx(specsEvaluator.getTaskbarIconSize().getSize(), mActivityContext);
         int visualIconSize = (int) (actualIconSize * ICON_VISIBLE_AREA_FACTOR);
 
-        mIconTouchSize = Math.max(actualIconSize,
-                resources.getDimensionPixelSize(R.dimen.taskbar_icon_min_touch_size));
+        mIconTouchSize = dpToPx(specsEvaluator.getTaskbarIconTouchSize(), mActivityContext);
 
         // We layout the icons to be of mIconTouchSize in width and height
         mItemMarginLeftRight = actualMargin - (mIconTouchSize - visualIconSize) / 2;
@@ -242,12 +240,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                     TaskbarIconsContainer.create(context, mIconTouchSize, mItemMarginLeftRight);
         }
 
-        // We always layout taskbar as a transient taskbar when we have taskbar pinning feature on,
-        // then we scale and translate the icons to match persistent taskbar designs, so we use
-        // taskbar icon size from current device profile to calculate correct item padding.
-        int paddingForPinnedTaskbar = dpToPx(TaskbarIconSpecs.INSTANCE.getIconSize52dp().getSize()
-                - TaskbarIconSpecs.INSTANCE.getIconSize40dp().getSize(), mActivityContext) / 2;
-        mItemPadding = mActivityContext.isPinnedTaskbar() ? paddingForPinnedTaskbar : 0;
+        mItemPadding = dpToPx(specsEvaluator.getTaskbarIconPadding(), mActivityContext);
 
         mFolderLeaveBehindColor = Themes.getAttrColor(mActivityContext,
                 android.R.attr.textColorTertiary);

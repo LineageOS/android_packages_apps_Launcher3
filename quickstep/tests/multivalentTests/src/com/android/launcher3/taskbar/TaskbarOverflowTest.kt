@@ -32,7 +32,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.BubbleTextView
 import com.android.launcher3.Flags.FLAG_ENABLE_MULTI_INSTANCE_MENU_TASKBAR
-import com.android.launcher3.Flags.FLAG_ENABLE_TASKBAR_ICON_CONTAINER
 import com.android.launcher3.R
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
@@ -92,7 +91,9 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TestRule
 import org.junit.runner.RunWith
+import org.junit.runners.model.Statement
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doAnswer
@@ -143,9 +144,20 @@ class TaskbarOverflowTest {
 
     @get:Rule(order = 3) val taskbarModeRule = TaskbarModeRule(context)
 
-    @get:Rule(order = 4) val animatorTestRule = AnimatorTestRule(this)
+    @get:Rule(order = 4)
+    val desktopModeRule = TestRule { base, description ->
+        object : Statement() {
+            override fun evaluate() {
+                whenever(desktopVisibilityController.isInDesktopMode(context.displayId))
+                    .thenReturn(true)
+                base?.evaluate()
+            }
+        }
+    }
 
-    @get:Rule(order = 5)
+    @get:Rule(order = 5) val animatorTestRule = AnimatorTestRule(this)
+
+    @get:Rule(order = 6)
     val taskbarUnitTestRule = TaskbarUnitTestRule(this, context, this::onControllersInitialized)
 
     @InjectController lateinit var taskbarViewController: TaskbarViewController
@@ -186,7 +198,6 @@ class TaskbarOverflowTest {
 
     @Before
     fun ensureRunningAppsShowing() {
-        whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
         runOnMainSync { recentsModel.resolvePendingTaskRequests() }
     }
 
@@ -263,8 +274,6 @@ class TaskbarOverflowTest {
 
     @Test
     @TaskbarMode(PINNED)
-    @DisableFlags(FLAG_ENABLE_TASKBAR_ICON_CONTAINER)
-    // TODO: b/448650325 - update/remove test to adapt to overflow icon in pinned apps section.
     fun testOverflownTaskbarWithNoSpaceForRecentApps_singleRecent_pinned() {
         val initialIconCount = currentNumberOfTaskbarIcons.coerceAtLeast(2)
 
