@@ -25,7 +25,6 @@ import androidx.test.filters.SmallTest;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherState;
 import com.android.launcher3.util.BaseLauncherActivityTest;
-import com.android.launcher3.views.ActivityContext;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -96,7 +95,7 @@ public class KeyboardFocusTest extends BaseLauncherActivityTest<Launcher> {
                 launcher -> launcher.getAppsView().getSearchUiManager().getEditText()
                         .hideKeyboard(/* clearFocus= */ false));
         waitForLauncherCondition("Keyboard still visible.",
-                ActivityContext::isSoftwareKeyboardHidden);
+                l -> l.getActivityComponent().getKeyboardStateManager().isSoftwareKeyboardHidden());
 
         getLauncherActivity().injectKeyEvent(KeyEvent.KEYCODE_DPAD_DOWN, true);
         getLauncherActivity().injectKeyEvent(KeyEvent.KEYCODE_DPAD_DOWN, false);
