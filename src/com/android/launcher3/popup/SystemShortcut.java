@@ -512,25 +512,48 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
                         && !(itemInfo instanceof WorkspaceItemInfo)) {
                     return null;
                 }
-                final boolean systemAlwaysSupportsNonResizableMultiWindow =
-                        ResourceUtils.getIntegerByName("config_supportsNonResizableMultiWindow",
-                                ((Context) activity).getResources(), INVALID_RESOURCE_HANDLE) == 1;
-                final boolean supportsBubbleNonResizableMultiWindow =
-                        BubbleAnythingFlagHelper.allowMultiWindowNonResizableActivities()
-                                && systemAlwaysSupportsNonResizableMultiWindow;
-                if (!supportsBubbleNonResizableMultiWindow
-                        && itemInfo instanceof ItemInfoWithIcon itemInfoWithIcon) {
-                    // Don't show bubble shortcut option for non-resizeable apps on small screens.
-                    // TODO(b/411558731): isPhone just checks for smallest width < 600dp, so it
-                    // basically is a check for small screens including Foldables when folded.
-                    // However, the name is a bit misleading, so considering renaming.
-                    if (itemInfoWithIcon.isNonResizeable()
-                            && activity.getDeviceProfile().getDeviceProperties().isPhone()) {
-                        return null;
+                if (itemInfo instanceof ItemInfoWithIcon itemInfoWithIcon) {
+                    // Don't show bubble shortcut if the item is non-resizeable but not supported.
+                    // TODO(b/419379112): Double check with UX that the launcher shortcut should be
+                    // hidden if not supported. If the shortcut is still shown, the flow for launch
+                    // needs to be fixed first before re-enabling here.
+                    if (itemInfoWithIcon.isNonResizeable()) {
+                        // TODO(b/411558731): isPhone just checks for smallest width < 600dp, so it
+                        // basically is a check for small screens including Foldables when folded.
+                        // However, the name is a bit misleading, so considering renaming.
+                        final boolean isSmallScreen =
+                                activity.getDeviceProfile().getDeviceProperties().isPhone();
+                        final boolean supportsBubbleNonResizeable =
+                                BubbleAnythingFlagHelper.allowMultiWindowNonResizableActivities()
+                                        && systemSupportsNonResizableMultiWindow(
+                                        (Context) activity, isSmallScreen);
+                        if (!supportsBubbleNonResizeable) {
+                            return null;
+                        }
                     }
                 }
                 return new BubbleShortcut<>(activity, itemInfo, originalView);
             };
+
+    /**
+     * Checks if the system framework policy supports multi-window for non-resizable activities
+     * The support is defined by a device specific config and can be conditional on screen size.
+     *
+     * @param context The {@link Context} used to access resources.
+     * @param isSmallScreen true if the current device display is considered a small screen.
+     * @return true if non-resizable activities are allowed in multi-window, false otherwise.
+     */
+    private static boolean systemSupportsNonResizableMultiWindow(
+            Context context, boolean isSmallScreen) {
+        final int config = ResourceUtils.getIntegerByName("config_supportsNonResizableMultiWindow",
+                context.getResources(), INVALID_RESOURCE_HANDLE);
+        return switch (config) {
+            case -1 -> false; // Never supports multi-window for non-resizable apps.
+            case 0 -> !isSmallScreen; // Supports only on large screens.
+            case 1 -> true; // Always supports multi-window for non-resizable apps.
+            default -> false; // Should not occur with valid system configurations.
+        };
+    }
 
     public interface BubbleActivityStarter {
         /** Tell SysUI to show the provided shortcut in a bubble. */
