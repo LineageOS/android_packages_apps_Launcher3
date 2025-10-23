@@ -155,7 +155,7 @@
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Mover arriba/a la izquierda"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Mover abajo/a la derecha"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"Abrir aplicación como burbuja"</string>
-    <string name="quick_switch_pane_title" msgid="4677158207760585812">"Apps recientes"</string>
+    <string name="quick_switch_pane_title" msgid="4677158207760585812">"Aplicaciones recientes"</string>
     <string name="quick_switch_content_description" msgid="2851244536728720005">"Lista de apps recientes"</string>
     <string name="quick_switch_overflow" msgid="3679780650881041632">"{count,plural, =1{app más}other{apps más}}"</string>
     <string name="quick_switch_desktop" msgid="8393802056024499749">"Ordenador"</string>
