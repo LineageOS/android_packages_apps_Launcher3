@@ -16,8 +16,7 @@
   -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="0dp"
-    android:layout_height="match_parent"
-    android:minHeight="63dp"
+    android:layout_height="@dimen/qsb_default_widget_height"
     android:background="@drawable/bg_ose_default"
     android:backgroundTint="@color/materialColorSurfaceContainerLow"
     android:clickable="true"
@@ -26,12 +25,13 @@
         android:id="@+id/search_icon"
         android:layout_width="@dimen/qsb_search_icon_tap_size"
         android:layout_height="@dimen/qsb_search_icon_tap_size"
-        android:layout_gravity="center"
-        android:layout_marginStart="@dimen/qsb_search_icon_margin_start"
+        android:layout_gravity="center_vertical"
+        android:paddingStart="@dimen/qsb_search_icon_padding_start"
+        android:paddingEnd="@dimen/qsb_search_icon_padding_end"
         android:clickable="false"
         android:focusable="false"
         android:scaleType="center"
-        android:tint="?android:attr/colorAccent"
+        android:tint="@color/materialColorOnSurface"
         android:background="@android:color/transparent"
         android:src="@drawable/ic_allapps_search" />
     <TextView
@@ -39,10 +39,6 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="center_vertical"
-        android:paddingStart="@dimen/qsb_search_icon_margin_start"
-        android:paddingEnd="@dimen/qsb_search_icon_margin_start"
         android:text="@string/abandoned_search"
-        android:textColor="@color/materialColorOnPrimaryContainer"
-        android:textAppearance="?android:textAppearanceMedium"
-        android:fontFamily="variable-title-small" />
+        style="@style/QsbWidgetText" />
 </LinearLayout>

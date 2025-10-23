@@ -213,6 +213,12 @@
         <item name="android:textColorSecondary">?attr/workspaceTextColor</item>
     </style>
 
+    <style name="QsbWidgetText">
+        <item name="android:fontFamily">variable-title-medium</item>
+        <item name="android:textColor">@color/materialColorOnSurfaceVariant</item>
+        <item name="android:textAppearance">?android:textAppearanceMedium</item>
+    </style>
+
     <!-- Theme for the widget container. -->
     <style name="WidgetContainerTheme" parent="@android:style/Theme.DeviceDefault.Settings">
         <item name="android:colorPrimaryDark">#E8EAED</item>
