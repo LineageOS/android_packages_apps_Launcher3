@@ -41,7 +41,7 @@ import kotlinx.coroutines.launch
 class SingleAppWidgetsCatalogViewModel
 @AssistedInject
 constructor(
-    @Assisted private val widgetAppId: WidgetAppId,
+    @param:Assisted private val widgetAppId: WidgetAppId,
     private val widgetsInteractor: WidgetsInteractor,
     @param:WidgetPickerHostInfo private val hostInfo: WidgetHostInfo,
 ) : ViewModel {
