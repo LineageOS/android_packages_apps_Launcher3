@@ -23,7 +23,7 @@ import com.android.launcher3.statemanager.StatefulActivity
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.SafeCloseable
 import com.android.quickstep.SystemUiProxy
-import com.android.quickstep.views.RecentsViewContainer
+import com.android.quickstep.views.RecentsViewContainerInteractor
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
 import java.util.concurrent.Executor
@@ -33,8 +33,8 @@ import javax.annotation.concurrent.ThreadSafe
 @ThreadSafe
 open class ActivityInteractor(private val statefulActivity: StatefulActivity<*>) {
 
-    // TODO(b/404636836): Evaluate if exposing RecentsViewContainer to taskbar is thread safe.:
-    @get:AnyThread val recentsViewContainer = statefulActivity as? RecentsViewContainer
+    @get:AnyThread
+    val recentsViewContainerInteractor = statefulActivity as? RecentsViewContainerInteractor
 
     @AnyThread fun isActivitySameObj(obj: Any?) = statefulActivity === obj
 

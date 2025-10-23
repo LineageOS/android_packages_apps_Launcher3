@@ -90,6 +90,7 @@ public class TaskbarUIController implements BubbleBarController.BubbleBarLocatio
         return mControllers.taskbarActivityContext.getTaskbarSpecsEvaluator();
     }
 
+    @AnyThread
     protected SparseArray<ItemInfo> getAllPinnedApps() {
         return mControllers.taskbarPopupController.getTaskbarInfoList();
     }

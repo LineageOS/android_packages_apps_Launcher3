@@ -49,7 +49,7 @@ class TaskbarManagerImplWrapper(private val impl: TaskbarManagerImpl) : TaskbarM
     }
 
     override fun setRecentsViewContainer(recentsViewContainer: RecentsViewContainer) {
-        TASKBAR_UI_THREAD.execute { impl.setRecentsViewContainer(recentsViewContainer) }
+        TASKBAR_UI_THREAD.execute { impl.setRecentsViewContainerInteractor(recentsViewContainer) }
     }
 
     override fun recreateTaskbars() {

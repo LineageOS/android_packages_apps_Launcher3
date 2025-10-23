@@ -71,8 +71,7 @@ import com.android.quickstep.LauncherActivityInterface;
 import com.android.quickstep.OverviewComponentObserver;
 import com.android.quickstep.RecentsAnimationCallbacks;
 import com.android.quickstep.util.SplitTask;
-import com.android.quickstep.views.RecentsView;
-import com.android.quickstep.views.RecentsViewContainer;
+import com.android.quickstep.views.RecentsViewContainerInteractor;
 import com.android.quickstep.window.RecentsWindowManager;
 import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
@@ -129,7 +128,7 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
     private final TaskbarLauncherStateController
             mTaskbarLauncherStateController = new TaskbarLauncherStateController();
     // When overview-in-a-window is enabled, that window is the container, else it is mLauncher.
-    private RecentsViewContainer mRecentsViewContainer;
+    private RecentsViewContainerInteractor mRecentsViewContainer;
     private @Nullable RecentsViewInteractor mRecentsViewInteractor;
 
     public LauncherTaskbarUIController(LauncherInteractor launcher) {
@@ -151,11 +150,10 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
         if (containerInterface != null
                 && containerInterface.getCreatedContainer()
                 instanceof RecentsWindowManager recentsWindowManager) {
+            recentsWindowManager.setTaskbarInteractor(new TaskbarInteractor(this));
             mRecentsViewContainer = recentsWindowManager;
-            mRecentsViewContainer.setTaskbarInteractor(new TaskbarInteractor(this));
         } else {
-            // TODO(b/404636836) Refactor API calls on mRecentsViewContainer
-            mRecentsViewContainer = mLauncher.getRecentsViewContainer();
+            mRecentsViewContainer = mLauncher.getRecentsViewContainerInteractor();
         }
         mLauncher.setTaskbarInteractor(new TaskbarInteractor(this));
 
@@ -626,17 +624,8 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
 
     @Override
     public RecentsViewInteractor getRecentsViewInteractor() {
-        RecentsView recentsView = mRecentsViewContainer.getOverviewPanel();
-        if (recentsView == null) {
-            mRecentsViewInteractor = null;
-            return null;
-        }
-
-        if (mRecentsViewInteractor == null
-                || !mRecentsViewInteractor.hasSameRecentsView(recentsView)) {
-            mRecentsViewInteractor = new RecentsViewInteractor(recentsView);
-        }
-
+        mRecentsViewInteractor =
+                mRecentsViewContainer.getRecentsViewInteractor(mRecentsViewInteractor);
         return mRecentsViewInteractor;
     }
 

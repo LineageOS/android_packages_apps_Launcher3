@@ -41,6 +41,15 @@ import javax.annotation.concurrent.ThreadSafe
 @ThreadSafe
 class TaskbarInteractor(private val taskbarUIController: TaskbarUIController) {
 
+    /** SparseArray of all pinned apps on the taskbar. */
+    @get:AnyThread
+    val pinnedApps: SparseArray<ItemInfo>
+        get() = taskbarUIController.allPinnedApps
+
+    @get:AnyThread
+    val supportsPinnedAppsOverflow
+        get() = TaskbarPopupController.canPinAppsOverflow()
+
     @AnyThread
     fun setUserIsNotGoingHome(isNotGoingHome: Boolean) {
         TASKBAR_UI_THREAD.execute { taskbarUIController.setUserIsNotGoingHome(isNotGoingHome) }
@@ -196,15 +205,8 @@ class TaskbarInteractor(private val taskbarUIController: TaskbarUIController) {
         }
     }
 
-    val supportsPinnedAppsOverflow
-        get() = TaskbarPopupController.canPinAppsOverflow()
-
     @AnyThread
     fun getMaxPinnableCount() = taskbarUIController.taskbarSpecsEvaluator.maxPinnableCount
-
-    /** SparseArray of all pinned apps on the taskbar. */
-    val pinnedApps: SparseArray<ItemInfo>
-        get() = taskbarUIController.allPinnedApps
 
     @AnyThread
     fun findMatchingAsyncView(v: View): AsyncView<View> {
