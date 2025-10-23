@@ -15,6 +15,9 @@
  */
 package com.android.launcher3.taskbar;
 
+import static android.os.Trace.TRACE_TAG_APP;
+import static android.os.Trace.traceBegin;
+import static android.os.Trace.traceEnd;
 import static android.window.DesktopModeFlags.ENABLE_TASKBAR_OVERFLOW;
 
 import static com.android.launcher3.BubbleTextView.DISPLAY_TASKBAR;
@@ -462,6 +465,9 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         List<HandoffSuggestion> handoffSuggestions) {
 
         if (mActivityContext.isDestroyed()) return;
+
+        traceBegin(TRACE_TAG_APP, "TaskbarView#updateItems");
+
         // Filter out unsupported items.
         hotseatItemInfos = Arrays.stream(hotseatItemInfos)
                 .filter(Objects::nonNull)
@@ -528,6 +534,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         }
 
         mAllAppsButtonContainer.updateTaskbarMinimalState(isTaskbarInMinimalState());
+        traceEnd(TRACE_TAG_APP);
     }
 
     public boolean isTaskbarInMinimalState() {
@@ -613,6 +620,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
     }
 
     private void updateHotseatItems(ItemInfo[] hotseatItemInfos) {
+        traceBegin(TRACE_TAG_APP, "TaskbarView#updateHotseatItems");
         int numViewsAnimated = 0;
         final int numMaxIcons =
                 mActivityContext.getTaskbarSpecsEvaluator().getNumShownHotseatIcons();
@@ -709,6 +717,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                                     .setContainerTextVisibility(false);
                             break;
                         default:
+                            traceEnd(TRACE_TAG_APP); // updateHotseatItems
                             throw new IllegalStateException(
                                     "Unexpected item type: " + hotseatItemInfo.itemType);
                     }
@@ -755,6 +764,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         if (hasOverflow && !mIsRtl) {
             maybeAddPinOverflowView();
         }
+        traceEnd(TRACE_TAG_APP);
     }
 
     private boolean isOverflowViewShowing() {
@@ -779,6 +789,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
     }
 
     private void updateRecents(List<GroupTask> recentTasks, int hotseatSize) {
+        traceBegin(TRACE_TAG_APP, "TaskbarView#updateRecents");
         boolean supportsOverflow = ENABLE_TASKBAR_OVERFLOW.isTrue() && recentTasks.size() > 1;
         int overflowSize = 0;
         boolean hasOverflow = false;
@@ -912,6 +923,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
             setClickAndLongClickListenersForIcon(recentIcon);
             setHoverListenerForIcon(recentIcon);
             mNextViewIndex++;
+            traceEnd(TRACE_TAG_APP);
         }
 
         while (isNextViewInSection(GroupTask.class)) {
@@ -933,6 +945,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
 
         mPrevRecentTasks = recentTasksSet;
         mPrevOverflowTasks = overflownRecentsSet;
+        traceEnd(TRACE_TAG_APP);
     }
 
     private void updateHandoffSuggestions(List<HandoffSuggestion> handoffSuggestions) {
@@ -1132,6 +1145,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         if (!(groupTask instanceof SingleTask singleTask)) {
             return;
         }
+        traceBegin(TRACE_TAG_APP, "TaskbarView#applyGroupTaskToBubbleTextView");
 
         Task task = singleTask.getTask();
         // TODO(b/344038728): use FastBitmapDrawable instead of Drawable, to get disabled state
@@ -1156,6 +1170,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
 
         btv.applyIconAndLabel(taskIcon, task.title, task.titleDescription);
         btv.setTag(singleTask);
+        traceEnd(TRACE_TAG_APP);
     }
 
     /**

@@ -28,6 +28,7 @@ import androidx.annotation.LayoutRes
 import androidx.core.view.contains
 import androidx.core.view.isEmpty
 import androidx.core.view.setPadding
+import com.android.app.tracing.traceSection
 import com.android.launcher3.BubbleTextView
 import com.android.launcher3.LauncherSettings
 import com.android.launcher3.R
@@ -97,6 +98,12 @@ constructor(
     }
 
     fun updateIcons(itemInfos: Array<ItemInfo>) {
+        traceSection("TaskbarIconsContainer#updateIcons") {
+            updateIconsInternal(itemInfos)
+        }
+    }
+
+    private fun updateIconsInternal(itemInfos: Array<ItemInfo>) {
         var numViewsAnimated = 0
         val numMaxIcons = activityContext.taskbarSpecsEvaluator.numShownHotseatIcons
         val hotseatLength = itemInfos.size
@@ -110,7 +117,7 @@ constructor(
 
         var list = itemInfos.asList().subList(onTaskbarStartIdx, onTaskbarEndIdx)
         if (isRtl) list = list.reversed()
-        for ((index, itemInfo) in list.withIndex()) {
+        forEachIcon(list) { index, itemInfo ->
             // Replace any Hotseat views with the appropriate type if it's not already that type.
             var isCollection = false
             val expectedLayoutResId: Int =
@@ -250,6 +257,13 @@ constructor(
 
         while (childCount > hotseatLength) {
             removeAndRecycle(getChildAt(childCount - 1))
+        }
+    }
+
+    /** Applies and traces [body] for each [icons] instance. */
+    private inline fun forEachIcon(icons: List<ItemInfo>, body: (Int, ItemInfo) -> Unit) {
+        for ((index, icon) in icons.withIndex()) {
+            traceSection("TaskbarIconsContainer#forEachIcon.icon") { body(index, icon) }
         }
     }
 
