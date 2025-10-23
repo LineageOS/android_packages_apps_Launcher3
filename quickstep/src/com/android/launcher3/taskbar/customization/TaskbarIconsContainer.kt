@@ -48,6 +48,7 @@ import com.android.launcher3.taskbar.TaskbarOverflowView
 import com.android.launcher3.taskbar.TaskbarPopupController
 import com.android.launcher3.taskbar.TaskbarViewCallbacks
 import com.android.launcher3.util.MultiTranslateDelegate
+import com.android.launcher3.util.ViewCache
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.views.PredictedAppIcon
 import kotlin.math.min
@@ -62,6 +63,11 @@ constructor(
     defStyleRes: Int = 0,
 ) : LinearLayout(context, attrs, defStyleAttr, defStyleRes), Reorderable, TaskbarContainer {
     private val activityContext: TaskbarActivityContext = ActivityContext.lookupContext(context)
+    // Needs its own cache to avoid crashes from moving icons between containers. LayoutTransition
+    // doesn't remove views immediately from this in order to perform the disappear animation.
+    // If a cache is shared, when a different container may tries to take this view from the cache,
+    // there will be a crash.
+    private val viewCache = ViewCache()
     private var iconTouchSize = 0
     private var itemMarginLeftRight = 0
     private val translateDelegate = MultiTranslateDelegate(this)
@@ -257,7 +263,7 @@ constructor(
         view.setOnClickListener(null)
         view.onLongClickListener = null
         if (view.tag !is CollectionInfo) {
-            activityContext.viewCache.recycleView(view.sourceLayoutResId, view)
+            viewCache.recycleView(view.sourceLayoutResId, view)
         }
         view.tag = null
     }
@@ -306,7 +312,7 @@ constructor(
     }
 
     private fun inflate(@LayoutRes layoutResId: Int): View? {
-        return activityContext.viewCache.getView(layoutResId, activityContext, this)
+        return viewCache.getView(layoutResId, activityContext, this)
     }
 
     class TaskbarIconContainerLayoutParams : LayoutParams {
