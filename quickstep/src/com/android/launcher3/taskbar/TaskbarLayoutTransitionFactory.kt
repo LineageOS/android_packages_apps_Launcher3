@@ -24,6 +24,7 @@ import android.animation.LayoutTransition.CHANGE_DISAPPEARING
 import android.animation.LayoutTransition.DISAPPEARING
 import android.animation.LayoutTransition.TransitionListener
 import android.animation.ObjectAnimator
+import android.animation.PropertyValuesHolder
 import android.util.FloatProperty
 import android.util.Property
 import android.view.View
@@ -50,30 +51,36 @@ import com.android.launcher3.util.MultiTranslateDelegate.INDEX_TASKBAR_PINNING_A
  * [transitionListeners] will be added to any [LayoutTransition] instance.
  */
 class TaskbarLayoutTransitionFactory(private vararg val transitionListeners: TransitionListener) {
-    private val appearingAlphaAnimator =
-        ObjectAnimator.ofFloat(null, "alpha", 0f, 1f).apply {
-            interpolator =
-                Interpolators.clampToProgress(
-                    LINEAR,
-                    0f,
-                    TRANSITION_FADE_IN_DURATION.toFloat() / TRANSITION_DEFAULT_DURATION,
-                )
+    private val appearingAnimator =
+        AnimatorSet().apply {
+            playTogether(
+                ObjectAnimator.ofFloat(null, "alpha", 0f, 1f).apply {
+                    interpolator = APPEARING_ALPHA_INTERPOLATOR
+                },
+                ObjectAnimator.ofFloat(null, SCALE_PROPERTY, 0f, 1f).apply {
+                    interpolator = EMPHASIZED
+                },
+            )
         }
-    private val appearingScaleAnimator =
-        ObjectAnimator.ofFloat(null, SCALE_PROPERTY, 0f, 1f).apply { interpolator = EMPHASIZED }
 
-    private val disappearingAlphaAnimator =
-        ObjectAnimator.ofFloat(null, "alpha", 1f, 0f).apply {
-            interpolator =
-                Interpolators.clampToProgress(
-                    LINEAR,
-                    TRANSITION_DELAY.toFloat() / TRANSITION_DEFAULT_DURATION,
-                    (TRANSITION_DELAY + TRANSITION_FADE_OUT_DURATION).toFloat() /
-                        TRANSITION_DEFAULT_DURATION,
-                )
+    private val disappearingAnimator =
+        AnimatorSet().apply {
+            playTogether(
+                ObjectAnimator.ofFloat(null, "alpha", 1f, 0f).apply {
+                    interpolator = DISAPPEARING_ALPHA_INTERPOLATOR
+                },
+                ObjectAnimator.ofFloat(null, SCALE_PROPERTY, 1f, 0f).apply {
+                    interpolator = EMPHASIZED
+                },
+            )
         }
-    private val disappearingScaleAnimator =
-        ObjectAnimator.ofFloat(null, SCALE_PROPERTY, 1f, 0f).apply { interpolator = EMPHASIZED }
+
+    private val leftRightAnimator =
+        ObjectAnimator.ofPropertyValuesHolder(
+            null as View?,
+            PropertyValuesHolder.ofInt("left", 0, 1),
+            PropertyValuesHolder.ofInt("right", 0, 1),
+        )
 
     private val translateXPinningAnimator =
         ObjectAnimator.ofFloat(
@@ -136,65 +143,58 @@ class TaskbarLayoutTransitionFactory(private vararg val transitionListeners: Tra
     /** Creates a [LayoutTransition] for an icon container in Taskbar. */
     fun createForTaskbarContainer(): LayoutTransition = create(isRootView = false)
 
+    private val setUpViewOnAppearingStart =
+        object : TransitionListener {
+            override fun startTransition(
+                transition: LayoutTransition,
+                container: ViewGroup,
+                view: View,
+                type: Int,
+            ) {
+                if (type == APPEARING) {
+                    view.alpha = 0f
+                    view.scaleX = 0f
+                    view.scaleY = 0f
+                }
+            }
+
+            override fun endTransition(
+                transition: LayoutTransition,
+                container: ViewGroup,
+                view: View,
+                type: Int,
+            ) = Unit
+        }
+
     private fun create(isRootView: Boolean): LayoutTransition {
-        val layoutTransition = LayoutTransition()
-        layoutTransition.setDuration(TRANSITION_DEFAULT_DURATION)
-        layoutTransition.addTransitionListener(
-            object : TransitionListener {
-                override fun startTransition(
-                    transition: LayoutTransition,
-                    container: ViewGroup,
-                    view: View,
-                    type: Int,
-                ) {
-                    if (type == APPEARING) {
-                        view.alpha = 0f
-                        view.scaleX = 0f
-                        view.scaleY = 0f
-                    }
+        return LayoutTransition().apply {
+            setDuration(TRANSITION_DEFAULT_DURATION)
+            addTransitionListener(setUpViewOnAppearingStart)
+            for (l in this@TaskbarLayoutTransitionFactory.transitionListeners) {
+                addTransitionListener(l)
+            }
+
+            setAnimator(APPEARING, appearingAnimator)
+            setStartDelay(APPEARING, TRANSITION_DELAY)
+
+            setAnimator(DISAPPEARING, disappearingAnimator)
+
+            // Change transitions.
+            val changeAnimator =
+                AnimatorSet().apply {
+                    playTogether(leftRightAnimator, translateXPinningAnimator)
+                    if (isRootView) play(containerIconsTranslateXPinningAnimator)
                 }
 
-                override fun endTransition(
-                    transition: LayoutTransition,
-                    container: ViewGroup,
-                    view: View,
-                    type: Int,
-                ) = Unit
-            }
-        )
-        for (listener in transitionListeners) layoutTransition.addTransitionListener(listener)
+            // Change appearing.
+            setAnimator(CHANGE_APPEARING, changeAnimator)
+            setInterpolator(CHANGE_APPEARING, EMPHASIZED)
 
-        // Appearing.
-        val appearingSet = AnimatorSet()
-        appearingSet.playTogether(appearingAlphaAnimator, appearingScaleAnimator)
-        layoutTransition.setAnimator(APPEARING, appearingSet)
-        layoutTransition.setStartDelay(APPEARING, TRANSITION_DELAY)
-
-        // Disappearing.
-        val disappearingSet = AnimatorSet()
-        disappearingSet.playTogether(disappearingAlphaAnimator, disappearingScaleAnimator)
-        layoutTransition.setAnimator(DISAPPEARING, disappearingSet)
-
-        // Change transitions.
-        val changeSet =
-            AnimatorSet().apply {
-                playTogether(
-                    layoutTransition.getAnimator(CHANGE_APPEARING),
-                    translateXPinningAnimator,
-                )
-                if (isRootView) play(containerIconsTranslateXPinningAnimator)
-            }
-
-        // Change appearing.
-        layoutTransition.setAnimator(CHANGE_APPEARING, changeSet)
-        layoutTransition.setInterpolator(CHANGE_APPEARING, EMPHASIZED)
-
-        // Change disappearing.
-        layoutTransition.setAnimator(CHANGE_DISAPPEARING, changeSet)
-        layoutTransition.setInterpolator(CHANGE_DISAPPEARING, EMPHASIZED)
-        layoutTransition.setStartDelay(CHANGE_DISAPPEARING, TRANSITION_DELAY)
-
-        return layoutTransition
+            // Change disappearing.
+            setAnimator(CHANGE_DISAPPEARING, changeAnimator)
+            setInterpolator(CHANGE_DISAPPEARING, EMPHASIZED)
+            setStartDelay(CHANGE_DISAPPEARING, TRANSITION_DELAY)
+        }
     }
 
     companion object {
@@ -202,6 +202,20 @@ class TaskbarLayoutTransitionFactory(private vararg val transitionListeners: Tra
         const val TRANSITION_DEFAULT_DURATION = 500L
         private const val TRANSITION_FADE_IN_DURATION = 167L
         private const val TRANSITION_FADE_OUT_DURATION = 83L
+
+        private val APPEARING_ALPHA_INTERPOLATOR =
+            Interpolators.clampToProgress(
+                LINEAR,
+                0f,
+                TRANSITION_FADE_IN_DURATION.toFloat() / TRANSITION_DEFAULT_DURATION,
+            )
+        private val DISAPPEARING_ALPHA_INTERPOLATOR =
+            Interpolators.clampToProgress(
+                LINEAR,
+                TRANSITION_DELAY.toFloat() / TRANSITION_DEFAULT_DURATION,
+                (TRANSITION_DELAY + TRANSITION_FADE_OUT_DURATION).toFloat() /
+                    TRANSITION_DEFAULT_DURATION,
+            )
 
         private val View.pinningTranslationX: MultiPropertyFactory<*>.MultiProperty
             get() {
