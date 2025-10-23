@@ -58,6 +58,11 @@ class OverflownAppsViewController(
         activityContext.dragLayer.post {
             overflownAppsContainerView.setOverflownApps(overflownApps)
             updateRunningAppState()
+            activityContext.onPopupVisibilityChanged(true)
+            overflownAppsContainerView.addOnCloseCallback {
+                activityContext.dragLayer.post { activityContext.onPopupVisibilityChanged(false) }
+            }
+
             overflownAppsContainerView.show()
         }
     }
