@@ -570,9 +570,16 @@ public abstract class ArrowPopup<T extends Context & ActivityContext>
                 setAlpha(1f);
                 announceAccessibilityChanges();
                 mOpenCloseAnimator = null;
+                if (requestFocusOnOpened()) {
+                    requestFocus();
+                }
             }
         });
         mOpenCloseAnimator.start();
+    }
+
+    protected boolean requestFocusOnOpened() {
+        return false;
     }
 
     private void fadeInChildViews(ViewGroup group, float[] alphaValues, long startDelay,

@@ -52,6 +52,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         get() = content.children.filterIsInstance<BubbleTextView>().toList()
 
     fun init(icon: TaskbarOverflowView, callbacks: TaskbarViewCallbacks) {
+        isFocusableInTouchMode = true
         overflowIcon = icon
         viewCallbacks = callbacks
         content = findViewById(R.id.overflown_content)
@@ -163,4 +164,6 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         pivotX = mArrow.x + mArrowWidth / 2 - x
         pivotY = measuredHeight.toFloat()
     }
+
+    override fun requestFocusOnOpened() = true
 }
