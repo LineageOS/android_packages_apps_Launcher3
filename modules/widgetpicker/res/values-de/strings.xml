@@ -25,8 +25,8 @@
     <string name="widget_span_dimensions_format" msgid="4325492869474815131">"%1$d × %2$d"</string>
     <string name="widget_span_dimensions_accessible_format" msgid="6976586776463259811">"%1$d breit und %2$d hoch"</string>
     <string name="widget_details_accessibility_label" msgid="4525863892199168041">"Widget „<xliff:g id="WIDGET_NAME">%1$s</xliff:g>“, %2$d breit und %3$d hoch"</string>
-    <string name="widget_tap_to_show_add_button_label" msgid="3358071294981269937">"Schaltfläche „Hinzufügen“ anzeigen"</string>
-    <string name="widget_tap_to_hide_add_button_label" msgid="7484536838079871360">"Schaltfläche „Hinzufügen“ ausblenden"</string>
+    <string name="widget_tap_to_show_add_button_label" msgid="3358071294981269937">"Button „Hinzufügen“ anzeigen"</string>
+    <string name="widget_tap_to_hide_add_button_label" msgid="7484536838079871360">"Button „Hinzufügen“ ausblenden"</string>
     <string name="widget_tap_to_add_button_label" msgid="3110313936849291769">"Hinzufügen"</string>
     <string name="widget_tap_to_add_button_content_description" msgid="3591512565497536699">"Widget „<xliff:g id="WIDGET_NAME">%1$s</xliff:g>“ hinzufügen"</string>
     <string name="featured_widgets_tab_label" msgid="5911854248145111652">"Empfohlen"</string>
