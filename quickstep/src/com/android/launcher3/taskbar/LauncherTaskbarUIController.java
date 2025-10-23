@@ -45,6 +45,7 @@ import androidx.annotation.Nullable;
 import com.android.app.animation.Interpolators;
 import com.android.launcher3.BuildConfig;
 import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.Flags;
 import com.android.launcher3.LauncherInteractor;
 import com.android.launcher3.LauncherState;
 import com.android.launcher3.LauncherUiState;
@@ -468,7 +469,14 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
         if (Utilities.isRunningInTestHarness()) {
             return false;
         }
-
+        TaskbarEduTooltipController eduController = mControllers.taskbarEduTooltipController;
+        if (Flags.tooltipEduCombinator()) {
+            boolean shouldShowFeaturesEdu = !eduController.getUserHasSeenFeaturesEdu();
+            boolean shouldShowPinningEduForTransient =
+                    mControllers.taskbarActivityContext.isTransientTaskbar()
+                            && !eduController.getUserHasSeenPinningEdu();
+            return shouldShowFeaturesEdu || shouldShowPinningEduForTransient;
+        }
         // Persistent features EDU tooltip.
         if (!mControllers.taskbarActivityContext.isTransientTaskbar()) {
             return !OnboardingPrefs.TASKBAR_EDU_TOOLTIP_STEP.hasReachedMax(
@@ -476,7 +484,7 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
         }
 
         // Transient swipe EDU tooltip.
-        return mControllers.taskbarEduTooltipController.getTooltipStep() < TOOLTIP_STEP_FEATURES;
+        return eduController.getTooltipStep() < TOOLTIP_STEP_FEATURES;
     }
 
     @Override

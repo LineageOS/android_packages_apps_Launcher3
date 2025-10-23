@@ -38,6 +38,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.text.HtmlCompat
 import androidx.core.view.updateLayoutParams
 import com.airbnb.lottie.LottieAnimationView
+import com.android.launcher3.Flags
 import com.android.launcher3.Flags.refactorTaskbarUiState
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.R
@@ -46,6 +47,7 @@ import com.android.launcher3.Utilities
 import com.android.launcher3.config.FeatureFlags.enableTaskbarPinning
 import com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLAG_AUTOHIDE_SUSPEND_EDU_OPEN
 import com.android.launcher3.taskbar.TaskbarControllers.LoggableTaskbarController
+import com.android.launcher3.taskbar.edu.TooltipEduCombinator
 import com.android.launcher3.taskbar.edu.TooltipEduCombinator.Companion.MAX_TOOLTIPS_PER_PAGE
 import com.android.launcher3.taskbar.edu.TooltipInfo
 import com.android.launcher3.taskbar.edu.TooltipsEduPage
@@ -114,6 +116,8 @@ constructor(
     private lateinit var controllers: TaskbarControllers
     private lateinit var taskbarUIState: TaskbarUiState
 
+    @VisibleForTesting lateinit var tooltipEduCombinator: TooltipEduCombinator
+
     // Keep track of whether the user has seen the Search Edu
     @VisibleForTesting
     var userHasSeenSearchEdu: Boolean
@@ -134,6 +138,12 @@ constructor(
             updateShouldShowEduOnAppLaunch()
         }
 
+    val userHasSeenFeaturesEdu: Boolean
+        get() = tooltipEduCombinator.userHasSeenFeaturesEdu
+
+    val userHasSeenPinningEdu: Boolean
+        get() = tooltipEduCombinator.userHasSeenPinningEdu
+
     /** Controls setting the [FLAG_AUTOHIDE_SUSPEND_EDU_OPEN] flag to false on tooltip close */
     private var releaseTaskbarBlock = true
 
@@ -142,6 +152,8 @@ constructor(
     fun init(controllers: TaskbarControllers, taskbarUiState: TaskbarUiState) {
         this.controllers = controllers
         this.taskbarUIState = taskbarUiState
+        tooltipEduCombinator =
+            TooltipEduCombinator(activityContext, controllers.taskbarStashController)
         updateShouldShowEduOnAppLaunch()
         // We want to show the Search Edu right after pinning the taskbar, so we post it here
         activityContext.dragLayer.post { maybeShowSearchEdu() }
@@ -184,6 +196,10 @@ constructor(
 
     /** Shows swipe EDU tooltip if it is the current [tooltipStep]. */
     fun maybeShowSwipeEdu() {
+        if (Flags.tooltipEduCombinator()) {
+            showTooltipPage(tooltipEduCombinator.getSwipeEdu())
+            return
+        }
         if (
             !isTooltipEnabled ||
                 !activityContext.isTransientTaskbar ||
@@ -215,6 +231,10 @@ constructor(
      * swipe up is necessary to show this step.
      */
     fun maybeShowFeaturesEdu() {
+        if (Flags.tooltipEduCombinator()) {
+            showTooltipPages(tooltipEduCombinator.getFeaturesTooltipsEduPages())
+            return
+        }
         if (!isTooltipEnabled || tooltipStep > TOOLTIP_STEP_FEATURES) {
             maybeShowPinningEdu()
             maybeShowSearchEdu()
@@ -364,47 +384,6 @@ constructor(
         }
     }
 
-    /** Shows standalone Bubble EDU tooltip */
-    private fun showBubbleEdu() {
-        inflateTooltip(R.layout.taskbar_edu_bubbles)
-
-        tooltip?.run {
-            allowTouchDismissal = true
-            TypefaceUtils.setTypeface(
-                requireViewById(R.id.taskbar_edu_title),
-                FontFamily.GSF_HEADLINE_SMALL_EMPHASIZED,
-            )
-            TypefaceUtils.setTypeface(
-                requireViewById(R.id.bubbles_text),
-                FontFamily.GSF_BODY_MEDIUM,
-            )
-
-            val bubblesAnim =
-                requireViewById<LottieAnimationView>(R.id.standalone_bubbles_animation)
-            bubblesAnim.contentDescription =
-                context.getString(R.string.taskbar_edu_bubbles_animation_description)
-            val animationRes =
-                if (activityContext.isTransientTaskbar) {
-                    R.raw.taskbar_edu_bubbles_transient
-                } else {
-                    R.raw.taskbar_edu_bubbles_persistent
-                }
-            bubblesAnim.setAnimation(animationRes)
-            bubblesAnim.supportLightTheme()
-            handleEduAnimations(listOf(bubblesAnim))
-            updateLayoutParams<BaseDragLayer.LayoutParams> {
-                if (activityContext.isTransientTaskbar) {
-                    bottomMargin += activityContext.deviceProfile.taskbarProfile.height
-                }
-                width =
-                    resources.getDimensionPixelSize(
-                        R.dimen.taskbar_edu_features_tooltip_width_with_one_feature
-                    )
-            }
-            show()
-        }
-    }
-
     /**
      * Shows standalone Search EDU tooltip if this EDU has not been seen.
      *
@@ -412,6 +391,10 @@ constructor(
      * taskbar
      */
     fun maybeShowSearchEdu() {
+        if (Flags.tooltipEduCombinator()) {
+            showTooltipPage(tooltipEduCombinator.getSearchEdu())
+            return
+        }
         if (
             !enableTaskbarPinning() ||
                 !activityContext.isPinnedTaskbar ||
@@ -585,6 +568,12 @@ constructor(
         pw?.println("$prefix\tisTooltipEnabled=$isTooltipEnabled")
         pw?.println("$prefix\tisOpen=$isTooltipOpen")
         pw?.println("$prefix\ttooltipStep=$tooltipStep")
+        if (Flags.tooltipEduCombinator()) {
+            pw?.println("$prefix\tisSwipeShown=${tooltipEduCombinator.userHasSeenSwipeEdu}")
+            pw?.println("$prefix\tisFeaturesShown=${tooltipEduCombinator.userHasSeenFeaturesEdu}")
+            pw?.println("$prefix\tisPinningShown=${tooltipEduCombinator.userHasSeenPinningEdu}")
+            pw?.println("$prefix\tisSearchShown=${tooltipEduCombinator.userHasSeenSearchEdu}")
+        }
     }
 
     /** Shows tooltips pages, binding the action button to show the next page. */

@@ -16,6 +16,10 @@
 
 package com.android.launcher3.taskbar
 
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.SetFlagsRule
+import com.android.launcher3.Flags
 import com.android.launcher3.Utilities
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.asProperty
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
@@ -41,13 +45,17 @@ import org.junit.runner.RunWith
 @EmulatedDevices(["pixelFoldable2023", "pixelTablet2023"])
 class TaskbarEduTooltipControllerTest {
 
-    @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()
+    @get:Rule(order = 0) val setFlagsRule = SetFlagsRule()
 
-    @get:Rule(order = 1) val taskbarModeRule = TaskbarModeRule(context)
+    @get:Rule(order = 1) val context = TaskbarWindowSandboxContext.create()
 
-    @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
+    @get:Rule(order = 2) val taskbarModeRule = TaskbarModeRule(context)
+
+    @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
 
     @InjectController lateinit var taskbarEduTooltipController: TaskbarEduTooltipController
+    private val tooltipEduCombinator
+        get() = taskbarEduTooltipController.tooltipEduCombinator
 
     private val taskbarContext: TaskbarActivityContext
         get() = taskbarUnitTestRule.activityContext
@@ -91,6 +99,7 @@ class TaskbarEduTooltipControllerTest {
 
     @Test
     @TaskbarMode(TRANSIENT)
+    @DisableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
     fun testMaybeShowSwipeEdu_whenUserHasNotSeen_doesShowSwipeEdu() {
         tooltipStep = TOOLTIP_STEP_SWIPE
         assertThat(taskbarEduTooltipController.tooltipStep).isEqualTo(TOOLTIP_STEP_SWIPE)
@@ -101,6 +110,18 @@ class TaskbarEduTooltipControllerTest {
 
     @Test
     @TaskbarMode(TRANSIENT)
+    @EnableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
+    fun testMaybeShowSwipeEdu_whenUserHasNotSeen_doesShowSwipeEdu_eduCombinator() {
+        tooltipStep = TOOLTIP_STEP_SWIPE
+        assertThat(taskbarEduTooltipController.tooltipStep).isEqualTo(TOOLTIP_STEP_SWIPE)
+        runOnMainSync { taskbarEduTooltipController.maybeShowSwipeEdu() }
+        assertThat(tooltipEduCombinator.userHasSeenSwipeEdu).isTrue()
+        assertThat(taskbarEduTooltipController.isTooltipOpen).isTrue()
+    }
+
+    @Test
+    @TaskbarMode(TRANSIENT)
+    @DisableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
     fun testMaybeShowFeaturesEdu_whenFeatureEduAlreadyShown_doesNotShowFeatureEdu() {
         tooltipStep = TOOLTIP_STEP_NONE
         assertThat(taskbarEduTooltipController.tooltipStep).isEqualTo(TOOLTIP_STEP_NONE)
@@ -111,6 +132,17 @@ class TaskbarEduTooltipControllerTest {
 
     @Test
     @TaskbarMode(TRANSIENT)
+    @EnableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
+    fun testMaybeShowFeaturesEdu_whenFeatureEduAlreadyShown_doesNotShowFeatureEdu_eduCombinator() {
+        tooltipEduCombinator.userHasSeenFeaturesEdu = true
+        tooltipEduCombinator.userHasSeenPinningEdu = true
+        runOnMainSync { taskbarEduTooltipController.maybeShowFeaturesEdu() }
+        assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
+    }
+
+    @Test
+    @TaskbarMode(TRANSIENT)
+    @DisableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
     fun testMaybeShowFeaturesEdu_whenUserHasNotSeen_doesShowFeatureEdu() {
         tooltipStep = TOOLTIP_STEP_FEATURES
         assertThat(taskbarEduTooltipController.tooltipStep).isEqualTo(TOOLTIP_STEP_FEATURES)
@@ -120,7 +152,18 @@ class TaskbarEduTooltipControllerTest {
     }
 
     @Test
+    @TaskbarMode(TRANSIENT)
+    @EnableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
+    fun testMaybeShowFeaturesEdu_whenUserHasNotSeen_doesShowFeatureEdu_eduCombinator() {
+        runOnMainSync { taskbarEduTooltipController.maybeShowFeaturesEdu() }
+        assertThat(tooltipEduCombinator.userHasSeenFeaturesEdu).isTrue()
+        assertThat(tooltipEduCombinator.userHasSeenPinningEdu).isTrue()
+        assertThat(taskbarEduTooltipController.isTooltipOpen).isTrue()
+    }
+
+    @Test
     @TaskbarMode(THREE_BUTTONS)
+    @DisableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
     fun testMaybeShowPinningEdu_whenTaskbarIsInThreeButtonMode_doesNotShowPinningEdu() {
         tooltipStep = TOOLTIP_STEP_PINNING
         assertThat(taskbarEduTooltipController.tooltipStep).isEqualTo(TOOLTIP_STEP_PINNING)
@@ -130,13 +173,36 @@ class TaskbarEduTooltipControllerTest {
     }
 
     @Test
+    @TaskbarMode(THREE_BUTTONS)
+    @EnableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
+    fun testMaybeShowPinningEdu_whenTaskbarIsInThreeButtonMode_doesNotShowPinningEdu_eduCombinator() {
+        tooltipEduCombinator.userHasSeenFeaturesEdu = true
+        tooltipEduCombinator.userHasSeenPinningEdu = false
+        runOnMainSync { taskbarEduTooltipController.maybeShowFeaturesEdu() }
+        assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
+    }
+
+    @Test
     @TaskbarMode(TRANSIENT)
+    @DisableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
     fun testMaybeShowPinningEdu_whenUserHasNotSeen_doesShowPinningEdu() {
         // Test standalone pinning edu, where user has seen taskbar edu before, but not pinning edu.
         tooltipStep = TOOLTIP_STEP_PINNING
         assertThat(taskbarEduTooltipController.tooltipStep).isEqualTo(TOOLTIP_STEP_PINNING)
         runOnMainSync { taskbarEduTooltipController.maybeShowFeaturesEdu() }
         assertThat(taskbarEduTooltipController.tooltipStep).isEqualTo(TOOLTIP_STEP_NONE)
+        assertThat(taskbarEduTooltipController.isTooltipOpen).isTrue()
+    }
+
+    @Test
+    @TaskbarMode(TRANSIENT)
+    @EnableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
+    fun testMaybeShowPinningEdu_whenUserHasNotSeen_doesShowPinningEdu_eduCombinator() {
+        // Test standalone pinning edu, where user has seen taskbar edu before, but not pinning edu.
+        tooltipEduCombinator.userHasSeenFeaturesEdu = true
+        tooltipEduCombinator.userHasSeenPinningEdu = false
+        runOnMainSync { taskbarEduTooltipController.maybeShowFeaturesEdu() }
+        assertThat(tooltipEduCombinator.userHasSeenPinningEdu).isTrue()
         assertThat(taskbarEduTooltipController.isTooltipOpen).isTrue()
     }
 
