@@ -469,11 +469,7 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
         }
         TaskbarEduTooltipController eduController = mControllers.taskbarEduTooltipController;
         if (Flags.tooltipEduCombinator()) {
-            boolean shouldShowFeaturesEdu = !eduController.getUserHasSeenFeaturesEdu();
-            boolean shouldShowPinningEduForTransient =
-                    mControllers.taskbarActivityContext.isTransientTaskbar()
-                            && !eduController.getUserHasSeenPinningEdu();
-            return shouldShowFeaturesEdu || shouldShowPinningEduForTransient;
+            return eduController.getHasFeaturesEduToShow();
         }
         // Persistent features EDU tooltip.
         if (!mControllers.taskbarActivityContext.isTransientTaskbar()) {

@@ -82,11 +82,5 @@ object OnboardingPrefs {
 
     @JvmField val TASKBAR_SEARCH_EDU_SEEN = backedUpItem("launcher.taskbar_search_edu_seen", false)
 
-    @JvmField val TASKBAR_SWIPE_EDU_SEEN = backedUpItem("launcher.taskbar_swipe_edu_seen", false)
-
-    @JvmField
-    val TASKBAR_FEATURES_EDU_SEEN = backedUpItem("launcher.taskbar_feature_edu_seen", false)
-
-    @JvmField
-    val TASKBAR_PINNING_EDU_SEEN = backedUpItem("launcher.taskbar_pinning_edu_seen", false)
+    @JvmField val TASKBAR_SEEN_EDU_FLAGS = backedUpItem("launcher.taskbar_seen_edu_flags", 0)
 }
