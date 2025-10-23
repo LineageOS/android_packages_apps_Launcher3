@@ -38,9 +38,9 @@
     <string name="close_app_taskbar" msgid="3238979263877091273">"Luk"</string>
     <string name="save_app_pair" msgid="5647523853662686243">"Gem app-parring"</string>
     <string name="app_pair_default_title" msgid="4045241727446873529">"<xliff:g id="APP1">%1$s</xliff:g> | <xliff:g id="APP2">%2$s</xliff:g>"</string>
-    <string name="app_pair_unlaunchable_at_screen_size" msgid="3446551575502685376">"Denne appsammenknytning understøttes ikke på enheden"</string>
-    <string name="app_pair_needs_unfold" msgid="4588897528143807002">"Fold enheden ud for at bruge denne appsammenknytning"</string>
-    <string name="app_pair_not_available" msgid="3556767440808032031">"Appsammenknytning er ikke tilgængelig"</string>
+    <string name="app_pair_unlaunchable_at_screen_size" msgid="3446551575502685376">"Denne app-parring understøttes ikke på enheden"</string>
+    <string name="app_pair_needs_unfold" msgid="4588897528143807002">"Fold enheden ud for at bruge denne app-parring"</string>
+    <string name="app_pair_not_available" msgid="3556767440808032031">"App-parring er ikke tilgængelig"</string>
     <string name="long_press_widget_to_add" msgid="3587712543577675817">"Hold en widget nede for at flytte den."</string>
     <string name="long_accessible_way_to_add" msgid="2733588281439571974">"Tryk to gange, og hold en widget nede for at flytte den eller bruge tilpassede handlinger."</string>
     <string name="widget_picker_widget_options_button_description" msgid="4770099264476852363">"Flere valgmuligheder"</string>
@@ -145,7 +145,7 @@
     <string name="folder_name_format_overflow" msgid="4270108890534995199">"Mappe: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> eller flere elementer"</string>
     <string name="folder_name_format_overflow_with_dot" msgid="9174809519194154156">"Mappe: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> eller flere elementer, har notifikationer"</string>
     <string name="unnamed_folder" msgid="2420192029474044442">"Unavngiven mappe"</string>
-    <string name="app_pair_name_format" msgid="8134106404716224054">"Appsammenknytning: <xliff:g id="APP1">%1$s</xliff:g> og <xliff:g id="APP2">%2$s</xliff:g>"</string>
+    <string name="app_pair_name_format" msgid="8134106404716224054">"App-parring: <xliff:g id="APP1">%1$s</xliff:g> og <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="styles_wallpaper_button_text" msgid="8216961355289236794">"Baggrund og stil"</string>
     <string name="edit_home_screen" msgid="8947858375782098427">"Rediger startskærm"</string>
     <string name="settings_button_text" msgid="8873672322605444408">"Indst. for startskærm"</string>
