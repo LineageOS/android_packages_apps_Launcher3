@@ -852,6 +852,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         final int endIndex =
                 mIsRtl ? recentTasks.size() - itemsToAddToOverflow : recentTasks.size();
         for (GroupTask task : recentTasks.subList(startIndex, endIndex)) {
+            traceBegin(TRACE_TAG_APP, "TaskbarView#updateRecents.task");
             // Replace any Recent views with the appropriate type if it's not already that type.
             final int expectedLayoutResId;
             boolean isCollection = false;
