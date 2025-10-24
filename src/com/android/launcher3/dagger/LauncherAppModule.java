@@ -30,6 +30,7 @@ import dagger.Module;
             StaticObjectModule.class,
             WidgetModule.class,
             AppModule.class,
+            ProductionAppModule.class,
             PerDisplayModule.class,
             ExecutorsModule.class,
             LauncherExecutorsModule.class,

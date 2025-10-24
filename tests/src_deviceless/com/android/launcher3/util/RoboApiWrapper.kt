@@ -17,9 +17,23 @@
 package com.android.launcher3.util
 
 import android.os.Looper
+import android.provider.Settings.Global
+import android.provider.Settings.Secure
 import org.junit.Assume
+import org.junit.rules.MethodRule
 import org.junit.rules.TestRule
+import org.junit.runners.model.FrameworkMethod
+import org.junit.runners.model.Statement
+import org.mockito.MockedStatic
+import org.mockito.MockedStatic.Verification
+import org.mockito.Mockito
+import org.mockito.Mockito.mockStatic
+import org.mockito.Mockito.withSettings
+import org.mockito.quality.Strictness.LENIENT
 import org.robolectric.Shadows
+import org.robolectric.shadows.ShadowSettings.ShadowGlobal
+import org.robolectric.shadows.ShadowSettings.ShadowSecure
+import org.robolectric.shadows.ShadowSettings.ShadowSystem
 
 object RoboApiWrapper {
 
@@ -39,5 +53,49 @@ object RoboApiWrapper {
 
     fun Any.convertToSpy() {
         Assume.assumeTrue("convertObjectToSpy is not supported in device-less tests", false)
+    }
+
+    inline fun <reified T> staticMockHelper() = StaticMockHelper(T::class.java)
+
+    class StaticMockHelper(requestedClazz: Class<*>) {
+
+        /** Map settings to their corresponding shadow classes */
+        private val clazz: Class<*> =
+            when (requestedClazz) {
+                Secure::class.java -> ShadowSecure::class.java
+                System::class.java -> ShadowSystem::class.java
+                Global::class.java -> ShadowGlobal::class.java
+                else -> requestedClazz
+            }
+
+        private lateinit var mockSession: MockedStatic<*>
+
+        internal fun init() {
+            mockSession = mockStatic(clazz, withSettings().strictness(LENIENT))
+        }
+
+        fun whenever(method: Verification) = mockSession.`when`<Any?>(method)
+
+        internal fun cleanup() = mockSession.close()
+    }
+
+    /**
+     * Rule for using static mocks in unit test. Separate implementations are provided for on-device
+     * and robolectric tests, while keeping a common API signature.
+     */
+    class StaticMockRule(vararg val helpers: StaticMockHelper) : MethodRule {
+
+        override fun apply(base: Statement, method: FrameworkMethod?, target: Any) =
+            object : Statement() {
+                override fun evaluate() {
+                    val mockSession = Mockito.mockitoSession().initMocks(target).startMocking()
+                    helpers.forEach { it.init() }
+                    val error = kotlin.runCatching { base.evaluate() }.exceptionOrNull()
+
+                    helpers.forEach { it.cleanup() }
+                    mockSession.finishMocking(error)
+                    error?.let { throw error }
+                }
+            }
     }
 }

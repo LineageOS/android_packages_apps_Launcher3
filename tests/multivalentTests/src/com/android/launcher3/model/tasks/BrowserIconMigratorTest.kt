@@ -25,13 +25,14 @@ import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
+import com.android.launcher3.model.ModelDbController
 import com.android.launcher3.model.SerializedItemItem
 import com.android.launcher3.model.WorkspaceItemSerializer
 import com.android.launcher3.model.data.ItemInfo
-import com.android.launcher3.model.data.WorkspaceChangeEvent.AddEvent
-import com.android.launcher3.model.data.WorkspaceChangeEvent.UpdateEvent
 import com.android.launcher3.util.AllModulesForTest
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
+import com.android.launcher3.util.FakePrefsModule
+import com.android.launcher3.util.IntSparseArrayMap
 import com.android.launcher3.util.LauncherLayoutBuilder
 import com.android.launcher3.util.LauncherModelHelper
 import com.android.launcher3.util.ModelTestExtensions.setModelLayout
@@ -47,6 +48,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 /** Tests for [BrowserIconMigrator] */
@@ -68,6 +70,8 @@ class BrowserIconMigratorTest {
 
     private val idp: InvariantDeviceProfile
         get() = appComponent.idp
+
+    private lateinit var itemIdMap: IntSparseArrayMap<ItemInfo>
 
     @Before
     fun setUp() {
@@ -103,10 +107,10 @@ class BrowserIconMigratorTest {
                 .putApp(browserPkg, null)
         )
 
-        val changes = createMigrator().processItems()
-
+        val changes = performMigration()
         // Nothing was changed
-        assertThat(changes).isEmpty()
+        assertThat(changes).isEqualTo(0)
+        verify(evaluator).notifyMigrationComplete(false)
     }
 
     @Test
@@ -119,22 +123,25 @@ class BrowserIconMigratorTest {
                 .putApp(browserPkg, null)
         )
 
-        val changes = createMigrator().processItems()
+        val changes = performMigration()
+        verify(evaluator).notifyMigrationComplete(true)
 
         // Target moved to bottom-right corner and browser moved to browser's location
-        assertThat(changes).hasSize(2)
-        (changes[0] as UpdateEvent).items[0].apply {
-            assertThat(targetPackage).isEqualTo(targetPkg)
-            assertThat(container).isEqualTo(CONTAINER_DESKTOP)
-            assertThat(screenId).isEqualTo(0)
-            assertThat(cellX).isEqualTo(idp.numColumns - 1)
-            assertThat(cellY).isEqualTo(idp.numRows - 1)
-        }
-        (changes[1] as UpdateEvent).items[0].apply {
-            assertThat(targetPackage).isEqualTo(browserPkg)
-            assertThat(container).isEqualTo(CONTAINER_HOTSEAT)
-            assertThat(screenId).isEqualTo(3)
-        }
+        assertThat(changes).isEqualTo(2)
+        itemIdMap
+            .first { it.targetPackage == targetPkg }
+            .apply {
+                assertThat(container).isEqualTo(CONTAINER_DESKTOP)
+                assertThat(screenId).isEqualTo(0)
+                assertThat(cellX).isEqualTo(idp.numColumns - 1)
+                assertThat(cellY).isEqualTo(idp.numRows - 1)
+            }
+        itemIdMap
+            .first { it.targetPackage == browserPkg }
+            .apply {
+                assertThat(container).isEqualTo(CONTAINER_HOTSEAT)
+                assertThat(screenId).isEqualTo(3)
+            }
     }
 
     @Test
@@ -147,22 +154,25 @@ class BrowserIconMigratorTest {
                 .putApp(browserPkg, null)
         )
 
-        val changes = createMigrator().processItems()
+        val changes = performMigration()
+        verify(evaluator).notifyMigrationComplete(true)
 
         // Target moved to bottom-right corner and browser moved to browser's location
-        assertThat(changes).hasSize(2)
-        (changes[0] as UpdateEvent).items[0].apply {
-            assertThat(targetPackage).isEqualTo(targetPkg)
-            assertThat(container).isEqualTo(CONTAINER_DESKTOP)
-            assertThat(screenId).isEqualTo(0)
-            assertThat(cellX).isEqualTo(idp.numColumns - 1)
-            assertThat(cellY).isEqualTo(idp.numRows - 1)
-        }
-        (changes[1] as UpdateEvent).items[0].apply {
-            assertThat(targetPackage).isEqualTo(browserPkg)
-            assertThat(container).isEqualTo(CONTAINER_HOTSEAT)
-            assertThat(screenId).isEqualTo(3)
-        }
+        assertThat(changes).isEqualTo(2)
+        itemIdMap
+            .first { it.targetPackage == targetPkg }
+            .apply {
+                assertThat(container).isEqualTo(CONTAINER_DESKTOP)
+                assertThat(screenId).isEqualTo(0)
+                assertThat(cellX).isEqualTo(idp.numColumns - 1)
+                assertThat(cellY).isEqualTo(idp.numRows - 1)
+            }
+        itemIdMap
+            .first { it.targetPackage == browserPkg }
+            .apply {
+                assertThat(container).isEqualTo(CONTAINER_HOTSEAT)
+                assertThat(screenId).isEqualTo(3)
+            }
     }
 
     @Test
@@ -175,10 +185,10 @@ class BrowserIconMigratorTest {
                 .putApp(browserPkg, null)
         )
 
-        val changes = createMigrator().processItems()
-
+        val changes = performMigration()
         // Nothing was changed
-        assertThat(changes).isEmpty()
+        assertThat(changes).isEqualTo(0)
+        verify(evaluator).notifyMigrationComplete(false)
     }
 
     @Test
@@ -191,10 +201,10 @@ class BrowserIconMigratorTest {
                 .putApp(browserPkg, null)
         )
 
-        val changes = createMigrator().processItems()
-
+        val changes = performMigration()
         // Nothing was changed
-        assertThat(changes).isEmpty()
+        assertThat(changes).isEqualTo(0)
+        verify(evaluator).notifyMigrationComplete(false)
     }
 
     @Test
@@ -207,99 +217,120 @@ class BrowserIconMigratorTest {
                 .putApp(browserPkg, null)
         )
 
-        val changes = createMigrator().processItems()
-
+        val changes = performMigration()
         // Nothing was changed
-        assertThat(changes).isEmpty()
+        assertThat(changes).isEqualTo(0)
+        verify(evaluator).notifyMigrationComplete(false)
     }
 
     @Test
     fun testMigration_targetOnWorkspace0_noBrowser() {
         context.setModelLayout(LauncherLayoutBuilder().atWorkspace(0, 1, 0).putApp(targetPkg, null))
 
-        val changes = createMigrator().processItems()
+        val changes = performMigration()
+        verify(evaluator).notifyMigrationComplete(true)
 
         // Browser is added at target location and target is moved to bottom-left corner
-        assertThat(changes).hasSize(2)
-        (changes[0] as UpdateEvent).items[0].apply {
-            assertThat(targetPackage).isEqualTo(targetPkg)
-            assertThat(container).isEqualTo(CONTAINER_DESKTOP)
-            assertThat(screenId).isEqualTo(0)
-            assertThat(cellX).isEqualTo(idp.numColumns - 1)
-            assertThat(cellY).isEqualTo(idp.numRows - 1)
-        }
-        (changes[1] as AddEvent).items[0].apply {
-            assertThat(targetPackage).isEqualTo(browserPkg)
-            assertThat(container).isEqualTo(CONTAINER_DESKTOP)
-            assertThat(screenId).isEqualTo(0)
-            assertThat(cellX).isEqualTo(0)
-            assertThat(cellY).isEqualTo(1)
-        }
+        assertThat(changes).isEqualTo(2)
+        itemIdMap
+            .first { it.targetPackage == targetPkg }
+            .apply {
+                assertThat(container).isEqualTo(CONTAINER_DESKTOP)
+                assertThat(screenId).isEqualTo(0)
+                assertThat(cellX).isEqualTo(idp.numColumns - 1)
+                assertThat(cellY).isEqualTo(idp.numRows - 1)
+            }
+        itemIdMap
+            .first { it.targetPackage == browserPkg }
+            .apply {
+                assertThat(container).isEqualTo(CONTAINER_DESKTOP)
+                assertThat(screenId).isEqualTo(0)
+                assertThat(cellX).isEqualTo(0)
+                assertThat(cellY).isEqualTo(1)
+            }
     }
 
     @Test
     fun testMigration_targetOnHotseat_noBrowser() {
         context.setModelLayout(LauncherLayoutBuilder().atHotseat(1).putApp(targetPkg, null))
 
-        val changes = createMigrator().processItems()
+        val changes = performMigration()
+        verify(evaluator).notifyMigrationComplete(true)
 
         // Browser is added at target location and target is moved to bottom-left corner
-        assertThat(changes).hasSize(2)
-        (changes[0] as UpdateEvent).items[0].apply {
-            assertThat(targetPackage).isEqualTo(targetPkg)
-            assertThat(container).isEqualTo(CONTAINER_DESKTOP)
-            assertThat(screenId).isEqualTo(0)
-            assertThat(cellX).isEqualTo(idp.numColumns - 1)
-            assertThat(cellY).isEqualTo(idp.numRows - 1)
-        }
-        (changes[1] as AddEvent).items[0].apply {
-            assertThat(targetPackage).isEqualTo(browserPkg)
-            assertThat(container).isEqualTo(CONTAINER_HOTSEAT)
-            assertThat(screenId).isEqualTo(1)
-        }
+        assertThat(changes).isEqualTo(2)
+        itemIdMap
+            .first { it.targetPackage == targetPkg }
+            .apply {
+                assertThat(container).isEqualTo(CONTAINER_DESKTOP)
+                assertThat(screenId).isEqualTo(0)
+                assertThat(cellX).isEqualTo(idp.numColumns - 1)
+                assertThat(cellY).isEqualTo(idp.numRows - 1)
+            }
+        itemIdMap
+            .first { it.targetPackage == browserPkg }
+            .apply {
+                assertThat(container).isEqualTo(CONTAINER_HOTSEAT)
+                assertThat(screenId).isEqualTo(1)
+            }
     }
 
     @Test
     fun testMigration_targetOnWorkspace1_noBrowser() {
         context.setModelLayout(LauncherLayoutBuilder().atWorkspace(0, 0, 1).putApp(targetPkg, null))
 
-        val changes = createMigrator().processItems()
+        val changes = performMigration()
+        verify(evaluator).notifyMigrationComplete(true)
 
         // Browser is added at second page, target is unchanged
-        assertThat(changes).hasSize(1)
-        (changes[0] as AddEvent).items[0].apply {
-            assertThat(targetPackage).isEqualTo(browserPkg)
-            assertThat(container).isEqualTo(CONTAINER_DESKTOP)
-            assertThat(screenId).isEqualTo(1)
-        }
+        assertThat(changes).isEqualTo(1)
+        itemIdMap
+            .first { it.targetPackage == browserPkg }
+            .apply {
+                assertThat(container).isEqualTo(CONTAINER_DESKTOP)
+                assertThat(screenId).isEqualTo(1)
+            }
     }
 
     @Test
     fun testMigration_noTarget_noBrowser() {
         context.setModelLayout(LauncherLayoutBuilder().atWorkspace(0, 0, 1).putApp(targetPkg, null))
 
-        val changes = createMigrator().processItems()
+        val changes = performMigration()
+        verify(evaluator).notifyMigrationComplete(true)
 
         // Browser is added at second page, target is unchanged
-        assertThat(changes).hasSize(1)
-        (changes[0] as AddEvent).items[0].apply {
-            assertThat(targetPackage).isEqualTo(browserPkg)
-            assertThat(container).isEqualTo(CONTAINER_DESKTOP)
-            assertThat(screenId).isEqualTo(1)
+        assertThat(changes).isEqualTo(1)
+        itemIdMap
+            .first { it.targetPackage == browserPkg }
+            .apply {
+                assertThat(container).isEqualTo(CONTAINER_DESKTOP)
+                assertThat(screenId).isEqualTo(1)
+            }
+    }
+
+    private fun performMigration(): Int {
+        itemIdMap = IntSparseArrayMap()
+        context.appComponent.testableModelState.dataModel.itemsIdMap.forEach {
+            itemIdMap[it.id] = it
+        }
+
+        appComponent.dbController.newTransaction().use {
+            val initialChangeCount = it.db.totalChangedRowCount
+            appComponent.migratorFactory.createBrowserIconMigrator(itemIdMap).performMigration()
+            return (it.db.totalChangedRowCount - initialChangeCount).toInt()
         }
     }
 
-    private fun createMigrator(): BrowserIconMigrator =
-        appComponent.migratorFactory.createBrowserIconMigrator(
-            context.appComponent.testableModelState.homeRepo.workspaceState.value
-        )
+    fun countDbChanges() = appComponent.dbController.db.totalChangedRowCount
 
     @LauncherAppSingleton
-    @Component(modules = [AllModulesForTest::class])
+    @Component(modules = [AllModulesForTest::class, FakePrefsModule::class])
     interface TestComponent : LauncherAppComponent {
 
         val migratorFactory: BrowserIconMigratorFactory
         val serializer: WorkspaceItemSerializer
+        val dbController: ModelDbController
 
         @Component.Builder
         interface Builder : LauncherAppComponent.Builder {
