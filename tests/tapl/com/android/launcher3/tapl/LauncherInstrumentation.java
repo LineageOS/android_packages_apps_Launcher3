@@ -1173,7 +1173,9 @@ public final class LauncherInstrumentation {
         }
     }
 
-    boolean isRecentsWindowEnabled() {
+    // TODO(b/377678992): revert ag/36346262 once NexusLauncherTests-OverviewInWindowEnabled is
+    //  successfully blocking presubmit.
+    public boolean isRecentsWindowEnabled() {
         return getTestInfo(TestProtocol.REQUEST_IS_RECENTS_WINDOW_ENABLED)
                 .getBoolean(TestProtocol.TEST_INFO_RESPONSE_FIELD);
     }
