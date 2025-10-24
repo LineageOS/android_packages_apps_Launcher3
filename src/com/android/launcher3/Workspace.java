@@ -408,16 +408,10 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                 (FrameLayout.LayoutParams) pageIndicatorContainer.getLayoutParams();
 
         // Set insets for page indicator
-        Rect padding = grid.mWorkspaceProfile.getWorkspacePadding();
-        if (grid.isVerticalBarLayout()) {
-            lp.leftMargin = padding.left + grid.mWorkspaceProfile.getWorkspaceCellPaddingXPx();
-            lp.rightMargin = padding.right + grid.mWorkspaceProfile.getWorkspaceCellPaddingXPx();
-            lp.bottomMargin = padding.bottom;
-        } else {
-            lp.leftMargin = lp.rightMargin = 0;
-            lp.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
-            lp.bottomMargin = grid.hotseatBarSizePx;
-        }
+        lp.topMargin = 0;
+        lp.leftMargin = lp.rightMargin = 0;
+        lp.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
+        lp.bottomMargin = grid.hotseatBarSizePx;
         pageIndicatorContainer.setLayoutParams(lp);
     }
 
