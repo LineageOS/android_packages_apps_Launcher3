@@ -26,7 +26,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.launcher3.util.AsyncObjectAllocator
 import com.android.launcher3.util.AsyncObjectAllocator.JobDescription
-import com.android.launcher3.util.Executors
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestActivityContext
@@ -38,7 +37,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mock
-import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
@@ -99,12 +97,14 @@ class AllAppsRecyclerViewPoolTest {
         underTest.preInflateAllAppsViewHolders(adapter, VIEW_TYPE, parent, 10, MAIN_EXECUTOR) { 10 }
         assertThat((underTest.mCancellableTask as JobDescription<*>).cancelled).isFalse()
 
+        // Calling clear() is only a best effort to cancel the pre-inflation. Due different
+        // threading set up in on-device test vs robolectric test, there is no guarantee that the
+        // job will be 100% cancelled.
         underTest.clear()
 
         awaitTasksCompleted()
-        verify(underTest, never()).putRecycledView(any(ViewHolder::class.java))
         assertThat((underTest.mCancellableTask as JobDescription<*>).cancelled).isTrue()
-        assertThat(underTest.getRecycledViewCount(VIEW_TYPE)).isEqualTo(0)
+        assertThat(underTest.getRecycledViewCount(VIEW_TYPE)).isLessThan(10)
     }
 
     @Test
@@ -122,7 +122,7 @@ class AllAppsRecyclerViewPoolTest {
 
     private fun awaitTasksCompleted() {
         TestUtil.runOnExecutorSync(AsyncObjectAllocator.allocationExecutor) {}
-        TestUtil.runOnExecutorSync(Executors.MAIN_EXECUTOR) {}
+        TestUtil.runOnExecutorSync(MAIN_EXECUTOR) {}
     }
 
     companion object {
