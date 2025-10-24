@@ -142,7 +142,7 @@ public class BubbleStashedHandleViewController {
                     public Rect getSampledRegion(View sampledView) {
                         return mStashedHandleView.getSampledRegion();
                     }
-                }, Executors.MAIN_EXECUTOR, Executors.UI_HELPER_EXECUTOR);
+                }, Executors.TASKBAR_UI_THREAD, Executors.UI_HELPER_EXECUTOR);
 
         mStashedHandleView.addOnLayoutChangeListener((view, i, i1, i2, i3, i4, i5, i6, i7) -> {
                     updateBounds(mBarViewController.getBubbleBarLocation());

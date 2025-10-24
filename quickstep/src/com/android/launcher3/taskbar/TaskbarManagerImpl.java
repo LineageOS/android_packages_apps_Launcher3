@@ -36,7 +36,6 @@ import static com.android.launcher3.util.DisplayController.CHANGE_NAVIGATION_MOD
 import static com.android.launcher3.util.DisplayController.CHANGE_ROTATION;
 import static com.android.launcher3.util.DisplayController.CHANGE_SHOW_LOCKED_TASKBAR;
 import static com.android.launcher3.util.DisplayController.CHANGE_TASKBAR_PINNING;
-import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 import static com.android.launcher3.util.FlagDebugUtils.formatFlagChange;
@@ -496,7 +495,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         mShutdownReceiver = new SimpleBroadcastReceiver(
                 mPrimaryWindowContext,
                 UI_HELPER_EXECUTOR,
-                MAIN_EXECUTOR,
+                TASKBAR_UI_THREAD,
                 i -> destroyAllTaskbars());
 
         mShutdownReceiver.register(actionsFilter(Intent.ACTION_SHUTDOWN));
@@ -505,7 +504,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
             mGrowthBroadcastReceiver = new SimpleBroadcastReceiver(
                     mPrimaryWindowContext,
                     UI_HELPER_EXECUTOR,
-                    MAIN_EXECUTOR,
+                    TASKBAR_UI_THREAD,
                     this::showGrowthNudge);
             mGrowthBroadcastReceiver.register(
                     actionsFilter(BROADCAST_SHOW_NUDGE),
@@ -1352,7 +1351,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
             SimpleBroadcastReceiver broadcastReceiver = new SimpleBroadcastReceiver(
                     windowContext,
                     UI_HELPER_EXECUTOR,
-                    MAIN_EXECUTOR,
+                    TASKBAR_UI_THREAD,
                     (intent) -> showTaskbarFromBroadcast(intent, displayId));
             mTaskbarBroadcastReceivers.put(displayId, broadcastReceiver);
 

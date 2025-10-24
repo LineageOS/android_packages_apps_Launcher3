@@ -25,7 +25,6 @@ import android.provider.Settings
 import android.provider.Settings.Secure.USER_SETUP_COMPLETE
 import android.view.accessibility.AccessibilityManager
 import com.android.launcher3.R
-import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.SafeCloseable
 import com.android.launcher3.util.SettingsCache
 import com.android.quickstep.input.QuickstepKeyGestureEventsManager
@@ -53,13 +52,16 @@ class AllAppsActionManager(
     init {
         onSettingsChangeSafeCloseable =
             SettingsCache.INSTANCE[context].getListenableRef(USER_SETUP_COMPLETE_URI).forEach(
-                MAIN_EXECUTOR
+                bgExecutor
             ) { v ->
+                // Setting will call updateSystemAction() which is synchronized, thus this callback
+                // is safe to be called on bgExecutor
                 isUserSetupComplete = v
             }
     }
 
     /** `true` if home and overview are the same Activity. */
+    @Volatile
     var isHomeAndOverviewSame = false
         set(value) {
             field = value
@@ -67,6 +69,7 @@ class AllAppsActionManager(
         }
 
     /** `true` if Taskbar is enabled. */
+    @Volatile
     var isTaskbarPresent = false
         set(value) {
             field = value
@@ -74,12 +77,14 @@ class AllAppsActionManager(
         }
 
     /** `true` if the setup UI is visible. */
+    @Volatile
     var isSetupUiVisible = false
         set(value) {
             field = value
             updateSystemAction()
         }
 
+    @Volatile
     private var isUserSetupComplete: Boolean = false
         set(value) {
             field = value
@@ -87,10 +92,11 @@ class AllAppsActionManager(
         }
 
     /** `true` if the action should be registered. */
+    @Volatile
     var isActionRegistered = false
         private set
 
-    private var isUserUnlocked = false
+    @Volatile private var isUserUnlocked = false
 
     fun onUserUnlocked() {
         isUserUnlocked = true

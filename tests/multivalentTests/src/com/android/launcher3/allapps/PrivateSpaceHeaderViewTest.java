@@ -22,6 +22,7 @@ import static com.android.launcher3.allapps.BaseAllAppsAdapter.VIEW_TYPE_PRIVATE
 import static com.android.launcher3.allapps.UserProfileManager.STATE_DISABLED;
 import static com.android.launcher3.allapps.UserProfileManager.STATE_ENABLED;
 import static com.android.launcher3.allapps.UserProfileManager.STATE_TRANSITION;
+import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 
 import static org.junit.Assert.assertEquals;
@@ -125,7 +126,8 @@ public class PrivateSpaceHeaderViewTest {
         when(mUserCache.getUserProfiles())
                 .thenReturn(Arrays.asList(MAIN_HANDLE, PRIVATE_HANDLE));
         when(mUserCache.getUserInfo(Process.myUserHandle())).thenReturn(MAIN_ICON_INFO);
-        mPrivateProfileManager = new PrivateProfileManager(mAllApps, mStatsLogManager, mUserCache);
+        mPrivateProfileManager = new PrivateProfileManager(
+                mAllApps, MAIN_EXECUTOR, mStatsLogManager, mUserCache);
         mPsHeaderLayout = (RelativeLayout) LayoutInflater.from(mContext).inflate(
                 R.layout.private_space_header, null);
     }
