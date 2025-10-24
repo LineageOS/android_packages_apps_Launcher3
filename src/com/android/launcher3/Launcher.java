@@ -62,12 +62,10 @@ import static com.android.launcher3.LauncherState.ALL_APPS;
 import static com.android.launcher3.LauncherState.BACKGROUND_APP;
 import static com.android.launcher3.LauncherState.EDIT_MODE;
 import static com.android.launcher3.LauncherState.FLAG_MULTI_PAGE;
-import static com.android.launcher3.LauncherState.FLAG_NON_INTERACTIVE;
 import static com.android.launcher3.LauncherState.FLAG_WORKSPACE_ICONS_BEING_DRAGGED;
 import static com.android.launcher3.LauncherState.NORMAL;
 import static com.android.launcher3.LauncherState.NO_OFFSET;
 import static com.android.launcher3.LauncherState.NO_SCALE;
-import static com.android.launcher3.Utilities.postAsyncCallback;
 import static com.android.launcher3.Utilities.shouldEnableMouseInteractionChanges;
 import static com.android.launcher3.Workspace.mapOverCellLayouts;
 import static com.android.launcher3.anim.AnimatorListeners.forEndCallback;
@@ -230,7 +228,6 @@ import com.android.launcher3.util.KeyboardShortcutsDelegate;
 import com.android.launcher3.util.LauncherBindableItemsContainer;
 import com.android.launcher3.util.PackageUserKey;
 import com.android.launcher3.util.PendingRequestArgs;
-import com.android.launcher3.util.PluginManagerWrapper;
 import com.android.launcher3.util.RunnableList;
 import com.android.launcher3.util.SafeCloseable;
 import com.android.launcher3.util.ScreenOnTracker;
@@ -264,8 +261,6 @@ import com.android.launcher3.widget.model.WidgetsListBaseEntry;
 import com.android.launcher3.widget.picker.WidgetsFullSheet;
 import com.android.launcher3.widget.picker.model.WidgetPickerDataProvider;
 import com.android.launcher3.widget.util.WidgetSizeHandler;
-import com.android.systemui.plugins.LauncherOverlayPlugin;
-import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.shared.LauncherOverlayManager;
 import com.android.systemui.plugins.shared.LauncherOverlayManager.LauncherOverlayTouchProxy;
 
@@ -279,15 +274,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
  * Default launcher application.
  */
 public class Launcher extends StatefulActivity<LauncherState>
-        implements Callbacks, InvariantDeviceProfile.OnIDPChangeListener,
-        PluginListener<LauncherOverlayPlugin> {
+        implements Callbacks, InvariantDeviceProfile.OnIDPChangeListener {
     public static final String TAG = "Launcher";
 
     public static final ContextTracker.ActivityTracker<Launcher> ACTIVITY_TRACKER =
@@ -398,9 +391,6 @@ public class Launcher extends StatefulActivity<LauncherState>
 
     protected LauncherOverlayManager mOverlayManager;
     protected LauncherDragController mDragController;
-    // If true, overlay callbacks are deferred
-    private boolean mDeferOverlayCallbacks;
-    private final Runnable mDeferredOverlayCallbacks = this::checkIfOverlayStillDeferred;
 
     protected long mLastTouchUpTime = -1;
     private boolean mTouchInProgress;
@@ -537,8 +527,6 @@ public class Launcher extends StatefulActivity<LauncherState>
                 Themes.getAttrBoolean(this, R.attr.isWorkspaceDarkText));
 
         mOverlayManager = getDefaultOverlay();
-        PluginManagerWrapper.INSTANCE.get(this)
-                .addPluginListener(this, LauncherOverlayPlugin.class);
 
         mRotationHelper.initialize();
         TraceHelper.INSTANCE.endSection();
@@ -634,32 +622,20 @@ public class Launcher extends StatefulActivity<LauncherState>
         return new LauncherOverlayManager() { };
     }
 
-    @Override
-    public void onPluginConnected(LauncherOverlayPlugin overlayManager, Context context) {
-        switchOverlay(() -> overlayManager.createOverlayManager(this));
-    }
-
-    @Override
-    public void onPluginDisconnected(LauncherOverlayPlugin plugin) {
-        switchOverlay(this::getDefaultOverlay);
-    }
-
-    private void switchOverlay(Supplier<LauncherOverlayManager> overlaySupplier) {
+    /** Recreates the active overlay */
+    public void recreateOverlay() {
+        setLauncherOverlay(null);
         if (mOverlayManager != null) {
             mOverlayManager.onActivityDestroyed();
         }
-        mOverlayManager = overlaySupplier.get();
-        if (getRootView().isAttachedToWindow()) {
-            mOverlayManager.onAttachedToWindow();
-        }
-        mDeferOverlayCallbacks = true;
-        checkIfOverlayStillDeferred();
+        mOverlayManager = getDefaultOverlay();
     }
 
-    @Override
-    public void dispatchDeviceProfileChanged() {
-        super.dispatchDeviceProfileChanged();
-        mOverlayManager.onDeviceProvideChanged();
+    /**
+     * Call this after onCreate to set or clear overlay.
+     */
+    public void setLauncherOverlay(LauncherOverlayTouchProxy overlay) {
+        mWorkspace.setLauncherOverlay(overlay);
     }
 
     @Override
@@ -996,11 +972,6 @@ public class Launcher extends StatefulActivity<LauncherState>
     @Override
     protected void onStop() {
         super.onStop();
-        if (mDeferOverlayCallbacks) {
-            checkIfOverlayStillDeferred();
-        } else {
-            mOverlayManager.onActivityStopped();
-        }
         hideKeyboard();
         logStopAndResume(false /* isResume */);
         mAppWidgetHolder.setActivityStarted(false);
@@ -1013,10 +984,6 @@ public class Launcher extends StatefulActivity<LauncherState>
     protected void onStart() {
         TraceHelper.INSTANCE.beginSection(ON_START_EVT);
         super.onStart();
-        if (!mDeferOverlayCallbacks) {
-            mOverlayManager.onActivityStarted();
-        }
-
         mAppWidgetHolder.setActivityStarted(true);
         TraceHelper.INSTANCE.endSection();
     }
@@ -1082,45 +1049,9 @@ public class Launcher extends StatefulActivity<LauncherState>
         logger.log(event);
     }
 
-    private void scheduleDeferredCheck() {
-        mHandler.removeCallbacks(mDeferredOverlayCallbacks);
-        postAsyncCallback(mHandler, mDeferredOverlayCallbacks);
-    }
-
-    private void checkIfOverlayStillDeferred() {
-        if (!mDeferOverlayCallbacks) {
-            return;
-        }
-        if (isStarted() && (!hasBeenResumed()
-                || mStateManager.getState().hasFlag(FLAG_NON_INTERACTIVE))) {
-            return;
-        }
-        mDeferOverlayCallbacks = false;
-
-        // Move the client to the correct state. Calling the same method twice is no-op.
-        if (isStarted()) {
-            mOverlayManager.onActivityStarted();
-        }
-        if (hasBeenResumed()) {
-            mOverlayManager.onActivityResumed();
-        } else {
-            mOverlayManager.onActivityPaused();
-        }
-        if (!isStarted()) {
-            mOverlayManager.onActivityStopped();
-        }
-    }
-
-    public void deferOverlayCallbacksUntilNextResumeOrStop() {
-        mDeferOverlayCallbacks = true;
-    }
-
     @Override
     public void onStateSetStart(LauncherState state) {
         super.onStateSetStart(state);
-        if (mDeferOverlayCallbacks) {
-            scheduleDeferredCheck();
-        }
         addActivityFlags(ACTIVITY_STATE_TRANSITION_ACTIVE);
 
         if (state.hasFlag(FLAG_WORKSPACE_ICONS_BEING_DRAGGED)) {
@@ -1208,13 +1139,6 @@ public class Launcher extends StatefulActivity<LauncherState>
     protected void onResume() {
         TraceHelper.INSTANCE.beginSection(ON_RESUME_EVT);
         super.onResume();
-
-        if (mDeferOverlayCallbacks) {
-            scheduleDeferredCheck();
-        } else {
-            mOverlayManager.onActivityResumed();
-        }
-
         DragView.removeAllViews(this);
         TraceHelper.INSTANCE.endSection();
     }
@@ -1229,9 +1153,6 @@ public class Launcher extends StatefulActivity<LauncherState>
         mLastTouchUpTime = -1;
         mDropTargetBar.animateToVisibility(false);
 
-        if (!mDeferOverlayCallbacks) {
-            mOverlayManager.onActivityPaused();
-        }
         mAppWidgetHolder.setActivityResumed(false);
     }
 
@@ -1519,15 +1440,8 @@ public class Launcher extends StatefulActivity<LauncherState>
     private final ScreenOnListener mScreenOnListener = this::onScreenOnChanged;
 
     @Override
-    public void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        mOverlayManager.onAttachedToWindow();
-    }
-
-    @Override
     public void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        mOverlayManager.onDetachedFromWindow();
         closeContextMenu();
     }
 
@@ -1723,7 +1637,6 @@ public class Launcher extends StatefulActivity<LauncherState>
             mNaturalScrollingChangedSafeCloseable = null;
         }
         ScreenOnTracker.INSTANCE.get(this).removeListener(mScreenOnListener);
-        PluginManagerWrapper.INSTANCE.get(this).removePluginListener(this);
 
         mModel.removeCallbacks(this);
         mRotationHelper.destroy();
@@ -2824,13 +2737,6 @@ public class Launcher extends StatefulActivity<LauncherState>
 
     public void setWaitingForResult(PendingRequestArgs args) {
         mPendingRequestArgs = args;
-    }
-
-    /**
-     * Call this after onCreate to set or clear overlay.
-     */
-    public void setLauncherOverlay(LauncherOverlayTouchProxy overlay) {
-        mWorkspace.setLauncherOverlay(overlay);
     }
 
     /**
