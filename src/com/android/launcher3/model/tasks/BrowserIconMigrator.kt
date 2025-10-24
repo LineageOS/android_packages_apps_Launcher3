@@ -18,7 +18,10 @@ package com.android.launcher3.model.tasks
 
 import android.content.Context
 import android.provider.BaseColumns._ID
+import com.android.launcher3.EncryptionType
 import com.android.launcher3.InvariantDeviceProfile
+import com.android.launcher3.LauncherPrefs
+import com.android.launcher3.LauncherPrefs.Companion.nonRestorableItem
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION
@@ -26,13 +29,11 @@ import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.model.ModelDbController
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.ItemInfo.NO_ID
-import com.android.launcher3.model.data.WorkspaceChangeEvent
-import com.android.launcher3.model.data.WorkspaceChangeEvent.AddEvent
-import com.android.launcher3.model.data.WorkspaceChangeEvent.UpdateEvent
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.util.ContentWriter
 import com.android.launcher3.util.ContentWriter.CommitParams
 import com.android.launcher3.util.GridOccupancy
+import com.android.launcher3.util.IntSparseArrayMap
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -42,18 +43,26 @@ import javax.inject.Inject
 class BrowserIconMigrator
 @AssistedInject
 constructor(
-    @Assisted private val allModelItems: Iterable<ItemInfo>,
+    @Assisted private val allModelItems: IntSparseArrayMap<ItemInfo>,
     @ApplicationContext private val context: Context,
     private val idp: InvariantDeviceProfile,
     private val evaluator: BrowserMigrationConditionEvaluator,
     private val dbController: ModelDbController,
+    private val prefs: LauncherPrefs,
 ) {
 
-    private val updates = mutableListOf<WorkspaceChangeEvent>()
+    private var itemsModified = false
 
-    fun processItems(): List<WorkspaceChangeEvent> {
-        val (srcBrowser, targetAppIcon) = evaluator.evaluateSourceAndTarget() ?: return listOf()
-        val targetPkg = targetAppIcon.targetPackage ?: return listOf()
+    /** Performs the data migration, and updates the pending flag */
+    fun performMigration() {
+        val migrationDone = processItems()
+        prefs.put(PREF_MIGRATION_PENDING, false)
+        if (migrationDone) evaluator.notifyMigrationComplete(itemsModified)
+    }
+
+    private fun processItems(): Boolean {
+        val (srcBrowser, targetAppIcon) = evaluator.evaluateSourceAndTarget() ?: return false
+        val targetPkg = targetAppIcon.targetPackage ?: return false
 
         //  Find the existing browser icon on the hotseat or first page
         val browserIcon =
@@ -91,7 +100,7 @@ constructor(
             else -> {}
         }
 
-        return updates
+        return true
     }
 
     private fun ItemInfo.addOrMoveTo(location: ItemLocation) {
@@ -107,7 +116,7 @@ constructor(
             onAddToDatabase(writer)
             writer.put(_ID, id)
             dbController.insert(writer.getValues(context))
-            updates.add(AddEvent(listOf(this), null))
+            allModelItems.put(id, this)
         } else {
             val writer =
                 ContentWriter(
@@ -116,8 +125,9 @@ constructor(
                 )
             onAddToDatabase(writer)
             writer.commit()
-            updates.add(UpdateEvent(listOf(this), null))
         }
+
+        itemsModified = true
     }
 
     private fun ItemInfo.getLocation() =
@@ -185,12 +195,21 @@ constructor(
             }
             .sortedWith(compareBy({ it.container }, { it.screenId }, { it.cellY }, { it.cellX }))
             .firstOrNull(predicate)
+
+    companion object {
+
+        @JvmField
+        val PREF_MIGRATION_PENDING =
+            nonRestorableItem("browser_migration_pending", false, EncryptionType.DEVICE_PROTECTED)
+    }
 }
 
 @AssistedFactory
 interface BrowserIconMigratorFactory {
 
-    fun createBrowserIconMigrator(@Assisted allModelItems: Iterable<ItemInfo>): BrowserIconMigrator
+    fun createBrowserIconMigrator(
+        @Assisted allModelItems: IntSparseArrayMap<ItemInfo>
+    ): BrowserIconMigrator
 }
 
 open class BrowserMigrationConditionEvaluator @Inject constructor() {
@@ -200,4 +219,7 @@ open class BrowserMigrationConditionEvaluator @Inject constructor() {
      * null if browser migration is not required
      */
     open fun evaluateSourceAndTarget(): Pair<String, ItemInfo>? = null
+
+    /** Notifies that the browser migration is complete */
+    open fun notifyMigrationComplete(itemsModified: Boolean) {}
 }
