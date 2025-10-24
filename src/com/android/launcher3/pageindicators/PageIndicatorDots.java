@@ -45,7 +45,6 @@ import android.view.animation.OvershootInterpolator;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.launcher3.Flags;
 import com.android.launcher3.Insettable;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
@@ -582,38 +581,6 @@ public class PageIndicatorDots extends View implements Insettable, PageIndicator
 
         rect.left -= horizontalAdjustment;
         rect.right += horizontalAdjustment;
-    }
-
-    private RectF getActiveRect() {
-        float startCircle = (int) mCurrentPosition;
-        float delta = mCurrentPosition - startCircle;
-        float diameter = 2 * mDotRadius;
-        float startX = ((float) getWidth() / 2)
-                - (mCircleGap * (((float) mNumPages - 1) / 2))
-                - mDotRadius;
-        sTempRect.top = (getHeight() * 0.5f) - mDotRadius;
-        sTempRect.bottom = (getHeight() * 0.5f) + mDotRadius;
-        sTempRect.left = startX + (startCircle * mCircleGap);
-        sTempRect.right = sTempRect.left + diameter;
-
-        if (delta < SHIFT_PER_ANIMATION) {
-            // dot is capturing the right circle.
-            sTempRect.right += delta * mCircleGap * 2;
-        } else {
-            // Dot is leaving the left circle.
-            sTempRect.right += mCircleGap;
-
-            delta -= SHIFT_PER_ANIMATION;
-            sTempRect.left += delta * mCircleGap * 2;
-        }
-
-        if (mIsRtl) {
-            float rectWidth = sTempRect.width();
-            sTempRect.right = getWidth() - sTempRect.left;
-            sTempRect.left = sTempRect.right - rectWidth;
-        }
-
-        return sTempRect;
     }
 
     @VisibleForTesting
