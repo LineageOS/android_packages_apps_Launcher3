@@ -24,22 +24,24 @@ import dagger.Module;
 
 @Module(
         includes = {
-            WindowManagerProxyModule.class,
-            ApiWrapperModule.class,
-            PluginManagerWrapperModule.class,
-            StaticObjectModule.class,
-            WidgetModule.class,
-            AppModule.class,
-            ProductionAppModule.class,
-            PerDisplayModule.class,
-            ExecutorsModule.class,
-            LauncherExecutorsModule.class,
-            LauncherWidgetPickerModule.class,
-            LauncherModelModule.class,
-            SettingsModule.class,
-            SystemDragModule.class,
-            HomeScreenFilesModule.class,
-            DesktopModule.class,
+                WindowManagerProxyModule.class,
+                ApiWrapperModule.class,
+                PluginManagerWrapperModule.class,
+                StaticObjectModule.class,
+                WidgetModule.class,
+                AppModule.class,
+                ProductionAppModule.class,
+                PerDisplayModule.class,
+                ExecutorsModule.class,
+                LauncherExecutorsModule.class,
+                LauncherWidgetPickerModule.class,
+                LauncherModelModule.class,
+                SettingsModule.class,
+                SystemDragModule.class,
+                HomeScreenFilesModule.class,
+                DesktopModule.class,
+                TaskOverlayModule.class,
         },
         subcomponents = ActivityContextComponent.class)
-public class LauncherAppModule { }
+public class LauncherAppModule {
+}

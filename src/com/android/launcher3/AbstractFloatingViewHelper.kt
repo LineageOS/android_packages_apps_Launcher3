@@ -18,16 +18,13 @@ package com.android.launcher3
 
 import androidx.core.view.size
 import com.android.launcher3.AbstractFloatingView.FloatingViewType
-import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.views.ActivityContext
-import javax.inject.Inject
 
 /**
- * Helper class for manaing AbstractFloatingViews which shows a floating UI on top of the launcher
+ * Helper class for managing AbstractFloatingViews which shows a floating UI on top of the launcher
  * UI.
  */
-@LauncherAppSingleton
-class AbstractFloatingViewHelper @Inject constructor() {
+object AbstractFloatingViewHelper {
     fun closeOpenViews(activity: ActivityContext, animate: Boolean, @FloatingViewType type: Int) {
         val dragLayer = activity.getDragLayer()
         // Iterate in reverse order. AbstractFloatingView is added later to the dragLayer,

@@ -55,14 +55,16 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-/** Test for [ExternalDisplayShortcutFactory] */
+/** Test for [ExternalDisplayShortcut] */
 @RunWith(AndroidJUnit4::class)
 class ExternalDisplayShortcutTest {
 
@@ -78,7 +80,7 @@ class ExternalDisplayShortcutTest {
     private val desktopState = FakeDesktopState()
     private val desktopModeCompatPolicy: DesktopModeCompatPolicy = mock()
     private val factory =
-        ExternalDisplayShortcutFactory(
+        ExternalDisplayShortcut.Factory(
             abstractFloatingViewHelper,
             desktopState,
             desktopModeCompatPolicy,
@@ -91,17 +93,6 @@ class ExternalDisplayShortcutTest {
         desktopState.canEnterDesktopMode = true
         whenever(overlayFactory.createOverlay(any())).thenReturn(mock<TaskOverlay<*>>())
         whenever(launcher.asContext()).thenReturn(context)
-        whenever(
-                desktopModeCompatPolicy.shouldDisableDesktopEntryPoints(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                )
-            )
-            .thenReturn(false)
     }
 
     @Test
@@ -112,6 +103,15 @@ class ExternalDisplayShortcutTest {
 
         val shortcuts = factory.getShortcuts(launcher, taskContainer)
         assertThat(shortcuts).isNull()
+        verify(desktopModeCompatPolicy, never())
+            .shouldDisableDesktopEntryPoints(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+            )
     }
 
     @Test
@@ -119,19 +119,21 @@ class ExternalDisplayShortcutTest {
     fun createExternalDisplayTaskShortcut_desktopEntryPointsDisabled() {
         whenever(
                 desktopModeCompatPolicy.shouldDisableDesktopEntryPoints(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
                 )
             )
             .thenReturn(true)
-        val taskContainer = createTaskContainer(createTask())
+        val task = createTask()
+        val taskContainer = createTaskContainer(task)
 
         val shortcuts = factory.getShortcuts(launcher, taskContainer)
         assertThat(shortcuts).isNull()
+        verifyShouldDisableDesktopEntryPoints(task)
     }
 
     @Test
@@ -166,6 +168,7 @@ class ExternalDisplayShortcutTest {
             )
         verify(statsLogger).withItemInfo(taskViewItemInfo)
         verify(statsLogger).log(LauncherEvent.LAUNCHER_SYSTEM_SHORTCUT_EXTERNAL_DISPLAY_TAP)
+        verifyShouldDisableDesktopEntryPoints(task)
     }
 
     private fun createTask() =
@@ -206,5 +209,18 @@ class ExternalDisplayShortcutTest {
         whenever(taskView.type).thenReturn(TaskViewType.SINGLE)
         whenever(taskView.context).thenReturn(context)
         return taskView
+    }
+
+    private fun verifyShouldDisableDesktopEntryPoints(task: Task) {
+        val taskKey = task.getKey()
+        verify(desktopModeCompatPolicy)
+            .shouldDisableDesktopEntryPoints(
+                taskKey.baseActivity?.packageName,
+                taskKey.numActivities,
+                taskKey.isTopActivityNoDisplay,
+                taskKey.isActivityStackTransparent,
+                taskKey.topActivityType,
+                context.userId,
+            )
     }
 }

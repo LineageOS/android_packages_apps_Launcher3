@@ -329,12 +329,11 @@ class PopupDataSource @Inject constructor() {
         )
 
     private fun dismissTaskMenuView(activityContext: ActivityContext) {
-        AbstractFloatingViewHelper()
-            .closeOpenViews(
-                activityContext,
-                true,
-                AbstractFloatingView.TYPE_ALL and AbstractFloatingView.TYPE_REBIND_SAFE.inv(),
-            )
+        AbstractFloatingViewHelper.closeOpenViews(
+            activityContext,
+            true,
+            AbstractFloatingView.TYPE_ALL and AbstractFloatingView.TYPE_REBIND_SAFE.inv(),
+        )
     }
 
     val openHomeScreenFile =

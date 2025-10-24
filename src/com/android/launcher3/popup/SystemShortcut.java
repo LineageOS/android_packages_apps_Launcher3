@@ -86,13 +86,13 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
     public SystemShortcut(int iconResId, int labelResId, T target, ItemInfo itemInfo,
             View originalView) {
         this(iconResId, labelResId, target, itemInfo, originalView,
-                new AbstractFloatingViewHelper(), /* isCollapsible */ true);
+                AbstractFloatingViewHelper.INSTANCE, /* isCollapsible */ true);
     }
 
     public SystemShortcut(int iconResId, int labelResId, T target, ItemInfo itemInfo,
             View originalView, boolean isCollapsible) {
         this(iconResId, labelResId, target, itemInfo, originalView,
-                new AbstractFloatingViewHelper(), isCollapsible);
+                AbstractFloatingViewHelper.INSTANCE, isCollapsible);
     }
 
     public SystemShortcut(int iconResId, int labelResId, T target, ItemInfo itemInfo,
