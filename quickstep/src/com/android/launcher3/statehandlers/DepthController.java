@@ -33,7 +33,7 @@ import com.android.launcher3.statemanager.BaseState;
 import com.android.launcher3.statemanager.StateManager.StateHandler;
 import com.android.launcher3.statemanager.StatefulContainer;
 import com.android.launcher3.states.StateAnimationConfig;
-import com.android.quickstep.util.BaseDepthController;
+import com.android.quickstep.util.BaseDepthControllerImpl;
 
 import java.io.PrintWriter;
 
@@ -45,7 +45,7 @@ import java.io.PrintWriter;
 public class DepthController<
         STATE extends BaseState<STATE>,
         CONTAINER extends Context & StatefulContainer<STATE>>
-        extends BaseDepthController<STATE, CONTAINER>
+        extends BaseDepthControllerImpl<STATE, CONTAINER>
         implements StateHandler<STATE> {
     public static final float DEPTH_0_PERCENT = 0f;
     public static final float DEPTH_70_PERCENT = 0.7f;
