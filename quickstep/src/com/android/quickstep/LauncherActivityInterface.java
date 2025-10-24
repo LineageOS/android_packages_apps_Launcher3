@@ -35,21 +35,21 @@ import androidx.annotation.UiThread;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherAnimUtils;
+import com.android.launcher3.LauncherInitListener;
 import com.android.launcher3.LauncherState;
 import com.android.launcher3.anim.PendingAnimation;
 import com.android.launcher3.statehandlers.LauncherDepthController;
 import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.taskbar.TaskbarInteractor;
 import com.android.launcher3.uioverrides.QuickstepLauncher;
+import com.android.launcher3.util.ThreadedAnimator;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.JoinedAnimator;
 import com.android.launcher3.util.NavigationMode;
-import com.android.launcher3.util.ThreadedAnimator;
 import com.android.launcher3.views.ScrimColors;
 import com.android.quickstep.GestureState.GestureEndTarget;
 import com.android.quickstep.orientation.RecentsPagedOrientationHandler;
 import com.android.quickstep.util.AnimatorControllerWithResistance;
-import com.android.quickstep.util.ContextInitListener;
 import com.android.quickstep.util.LayoutUtils;
 import com.android.quickstep.views.RecentsView;
 import com.android.systemui.plugins.shared.LauncherOverlayManager;
@@ -136,11 +136,9 @@ public final class LauncherActivityInterface extends
     }
 
     @Override
-    public ContextInitListener<Launcher> createActivityInitListener(
-            Predicate<Boolean> onInitListener) {
-        return new ContextInitListener<>(
-                (activity, alreadyOnHome) -> onInitListener.test(alreadyOnHome),
-                Launcher.ACTIVITY_TRACKER);
+    public LauncherInitListener createActivityInitListener(Predicate<Boolean> onInitListener) {
+        return new LauncherInitListener((activity, alreadyOnHome) ->
+                onInitListener.test(alreadyOnHome));
     }
 
     @Override
