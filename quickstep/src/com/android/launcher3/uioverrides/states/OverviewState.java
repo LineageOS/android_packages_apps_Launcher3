@@ -130,7 +130,7 @@ public class OverviewState extends LauncherState {
         if (showFloatingSearch) {
             elements |= FLOATING_SEARCH_BAR;
         }
-        if (launcherUiState.getSplitScreenUiState().isSplitSelectActiveRef().getValue()) {
+        if (launcherUiState.getSplitScreenUiState().isSplitSelectActive()) {
             elements &= ~CLEAR_ALL_BUTTON & ~ADD_DESK_BUTTON;
         }
         return elements;

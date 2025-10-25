@@ -42,12 +42,12 @@ import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_WAKEFULN
 import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags
 import com.android.wm.shell.Flags.FLAG_ENABLE_CREATE_ANY_BUBBLE
 import com.google.common.truth.Truth.assertThat
+import java.util.Optional
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
-import java.util.Optional
 
 @RunWith(LauncherMultivalentJUnit::class)
 @EmulatedDevices(["pixel9profold", "pixelTablet2023"])
@@ -131,9 +131,7 @@ class TaskbarLauncherStateControllerTest {
             }
         val dp = taskbarUnitTestRule.activityContext.deviceProfile
         val mockedSplitScreenUiState =
-            mock<SplitScreenUiState> {
-                on { isSplitSelectActiveRef } doReturn MutableListenableRef(false)
-            }
+            mock<SplitScreenUiState> { on { isSplitSelectActive } doReturn false }
         val mockedLauncherUiState =
             mock<LauncherUiState> {
                 on { deviceProfileRef } doReturn MutableListenableRef(dp)

@@ -414,7 +414,7 @@ class SplitSelectDataHolder(var context: Context?, val splitScreenUiState: Split
     @AnyThread
     fun isSplitSelectActive(): Boolean {
         return if (refactorTaskbarUiState()) {
-            val ret = splitScreenUiState.isSplitSelectActiveRef.value
+            val ret = splitScreenUiState.isSplitSelectActive
             if (BuildConfig.IS_STUDIO_BUILD && ret != legacyIsSplitSelectActive()) {
                 throw IllegalStateException("isSplitSelectActive doesn't match")
             }
