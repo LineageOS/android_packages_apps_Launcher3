@@ -252,7 +252,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiConsumer;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
@@ -659,12 +658,6 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     public void onItemPinnedFromContextMenu() {
         super.onItemPinnedFromContextMenu();
         mHotseatPredictionController.onItemPinnedFromContextMenu();
-    }
-
-    @Override
-    public void bindWorkspaceComponentsRemoved(Predicate<ItemInfo> matcher) {
-        super.bindWorkspaceComponentsRemoved(matcher);
-        mHotseatPredictionController.onModelItemsRemoved(matcher);
     }
 
     @Override

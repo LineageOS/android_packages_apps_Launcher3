@@ -5,6 +5,7 @@ import android.os.CancellationSignal
 import android.os.Trace
 import android.util.Log
 import android.util.Pair
+import android.util.SparseArray
 import androidx.annotation.AnyThread
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
@@ -17,6 +18,7 @@ import com.android.launcher3.WorkspaceLayoutManager.FIRST_SCREEN_ID
 import com.android.launcher3.allapps.AllAppsStore
 import com.android.launcher3.config.FeatureFlags
 import com.android.launcher3.model.BgDataModel
+import com.android.launcher3.model.BgDataModel.FixedContainerItems
 import com.android.launcher3.model.ItemInstallQueue
 import com.android.launcher3.model.ItemInstallQueue.FLAG_LOADER_RUNNING
 import com.android.launcher3.model.ModelUtils.currentScreenContentFilter
@@ -29,6 +31,7 @@ import com.android.launcher3.popup.PopupContainer
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
+import com.android.launcher3.util.HybridHotseatOrganizer
 import com.android.launcher3.util.IntArray as LIntArray
 import com.android.launcher3.util.IntArray
 import com.android.launcher3.util.IntSet as LIntSet
@@ -44,6 +47,7 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionStage
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicReference
+import java.util.function.Consumer
 import java.util.function.Predicate
 
 class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
@@ -56,6 +60,10 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
 
     var pendingExecutor: ViewOnDrawExecutor? = null
     var workspaceLoading = true
+
+    var hybridHotseatOrganizer: HybridHotseatOrganizer? = null
+
+    val extraContainerCallbacks = SparseArray<Consumer<List<ItemInfo>>>()
 
     /**
      * Refreshes the shortcuts shown on the workspace.
@@ -225,6 +233,7 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
         launcher.workspace.removeItemsByMatcher(matcher, true)
         launcher.dragController.onAppsRemoved(matcher)
         PopupContainer.dismissInvalidPopup(launcher)
+        hybridHotseatOrganizer?.onModelItemsRemoved(matcher)
     }
 
     override fun bindAllWidgets(widgets: List<WidgetsListBaseEntry>) {
@@ -554,6 +563,10 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
                 finishBindingItems(currentScreenIds)
                 emptyList<Void>()
             }
+    }
+
+    override fun bindExtraContainerItems(item: FixedContainerItems) {
+        extraContainerCallbacks[item.containerId]?.accept(item.items)
     }
 
     companion object {
