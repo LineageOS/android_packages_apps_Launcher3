@@ -586,9 +586,9 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
             return false;
         }
         return DesktopVisibilityController.INSTANCE.get(this).isInDesktopMode(getDisplayId())
-                || mTaskbarUiState.getShowDesktopTaskbarForFreeformDisplayRef().getValue()
-                || (mTaskbarUiState.getShowLockedTaskbarOnHome().getValue()
-                && mTaskbarUiState.isTaskbarOnHomeRef().getValue());
+                || mTaskbarUiState.getShowDesktopTaskbarForFreeformDisplay()
+                || (mTaskbarUiState.getShowLockedTaskbarOnHome()
+                && mTaskbarUiState.isTaskbarOnHome());
     }
 
     private List<SystemShortcut.Factory<QuickstepLauncher>> getSplitShortcuts() {
@@ -1573,7 +1573,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     }
 
     private boolean newHasBubbles() {
-        return mTaskbarUiState.getHasBubblesRef().getValue();
+        return mTaskbarUiState.getHasBubbles();
     }
 
     private boolean legacyHasBubbles() {

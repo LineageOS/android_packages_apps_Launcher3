@@ -189,7 +189,7 @@ public class BubbleBarViewController {
                 }
 
                 private void onChildViewCountChanged() {
-                    taskbarUiState.setHasBubble(mBarView.getBubbleChildCount() > 0);
+                    taskbarUiState.setHasBubbles(mBarView.getBubbleChildCount() > 0);
                 }
             });
             mBarView.addOnLayoutChangeListener(mBubbleBarViewOnLayoutChangeListener);
