@@ -1240,7 +1240,7 @@ public class TaskbarLauncherStateController {
 
     private boolean isOverlayShown() {
         if (refactorTaskbarUiState()) {
-            final boolean ret = mLauncherUiState.isOverlayShownRef().getValue();
+            final boolean ret = mLauncherUiState.isOverlayShown();
             if (BuildConfig.IS_STUDIO_BUILD && ret != legacyIsOverlayShown()) {
                 throw new IllegalStateException("isOverlayShown doesn't match");
             }

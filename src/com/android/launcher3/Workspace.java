@@ -1409,7 +1409,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             }
         }
         if (refactorTaskbarUiState()) {
-            mLauncherUiState.setIsOverlayShown(mOverlayShown);
+            mLauncherUiState.setOverlayShown(mOverlayShown);
         }
         int count = mOverlayCallbacks.size();
         for (int i = 0; i < count; i++) {

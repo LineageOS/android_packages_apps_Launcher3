@@ -136,8 +136,8 @@ class TaskbarLauncherStateControllerTest {
             mock<LauncherUiState> {
                 on { deviceProfileRef } doReturn MutableListenableRef(dp)
                 on { splitScreenUiState } doReturn mockedSplitScreenUiState
-                on { launcherStateRef } doReturn MutableListenableRef(LauncherState.NORMAL)
-                on { taskbarAlignmentChannelAlpha } doReturn MutableListenableRef(0f)
+                on { launcherState } doReturn LauncherState.NORMAL
+                on { taskbarAlignmentChannelAlpha } doReturn 0f
             }
         val quickstepLauncher =
             mock<QuickstepLauncher> {
