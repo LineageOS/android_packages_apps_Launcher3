@@ -112,8 +112,7 @@
     <string name="app_removed_from_taskbar" msgid="3471754847898675396">"App quitada de la barra de tareas"</string>
     <string name="remove_system_shortcut_label" msgid="3991201411148073972">"Eliminar"</string>
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"Abrir"</string>
-    <!-- no translation found for home_screen_files_context_menu_delete_permanently_label (8660443461874174185) -->
-    <skip />
+    <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"Eliminar para siempre"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"instalar accesos directos"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"Permite que una aplicación añada accesos directos sin intervención del usuario."</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"leer ajustes y accesos directos de la pantalla de inicio"</string>
@@ -148,7 +147,7 @@
     <string name="app_pair_name_format" msgid="8134106404716224054">"Apps emparejadas: <xliff:g id="APP1">%1$s</xliff:g> y <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="styles_wallpaper_button_text" msgid="8216961355289236794">"Fondo de pantalla y estilo"</string>
     <string name="edit_home_screen" msgid="8947858375782098427">"Editar pantalla de inicio"</string>
-    <string name="settings_button_text" msgid="8873672322605444408">"Ajustes de la pantalla de inicio"</string>
+    <string name="settings_button_text" msgid="8873672322605444408">"Ajustes de inicio"</string>
     <string name="msg_disabled_by_admin" msgid="6898038085516271325">"Inhabilitado por el administrador"</string>
     <string name="allow_rotation_title" msgid="7222049633713050106">"Permitir rotación de la pantalla de inicio"</string>
     <string name="allow_rotation_desc" msgid="8662546029078692509">"Al girar el teléfono"</string>
