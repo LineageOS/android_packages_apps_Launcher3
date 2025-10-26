@@ -126,7 +126,8 @@
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Taskbar education"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Drag an app to the side to use two apps at once"</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"Drag to the bottom corners to make it float"</string>
-    <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Slow-swipe up to show the Taskbar"</string>
+    <!-- no translation found for taskbar_edu_stashing (911857479758694381) -->
+    <skip />
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Get app suggestions based on your routine"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Long press on the divider to pin the Taskbar"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Do more with the Taskbar"</string>

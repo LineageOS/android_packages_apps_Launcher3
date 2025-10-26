@@ -126,7 +126,8 @@
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Tegumiriba tutvustus"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"2 rakenduse korraga kasutamiseks lohistage rakendus kõrvale"</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"Lohistage alumistesse nurkadesse, et see hõljuma panna."</string>
-    <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Tegumiriba kuvamiseks pühkige aeglaselt üles"</string>
+    <!-- no translation found for taskbar_edu_stashing (911857479758694381) -->
+    <skip />
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Hankige oma rutiini põhjal rakenduste soovitusi"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Tegumiriba kinnitamiseks vajutage pikalt jagajat"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Tehke tegumiriba abil enamat"</string>

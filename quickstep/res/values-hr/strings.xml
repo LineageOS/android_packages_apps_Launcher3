@@ -126,7 +126,8 @@
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Upute za traku sa zadacima"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Povucite aplikaciju u stranu radi istodobne upotrebe dviju aplikacija"</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"Povucite u donje kutove za plutanje"</string>
-    <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Polako prijeđite prstom prema gore za prikaz trake sa zadacima"</string>
+    <!-- no translation found for taskbar_edu_stashing (911857479758694381) -->
+    <skip />
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Primajte prijedloge aplikacija na temelju svoje rutine"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Dugo pritisnite razdjelnik da biste prikvačili alatnu traku"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Učinite više pomoću trake sa zadacima"</string>

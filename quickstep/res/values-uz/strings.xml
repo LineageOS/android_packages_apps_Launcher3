@@ -126,7 +126,8 @@
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Vazifalar paneli qoʻllanmasi"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Bitta ilovani yon tomonga sudrab, bir vaqtda 2 ta ilovadan foydalaning."</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"Qalqib chiqishi uchun pastki burchaklarga torting"</string>
-    <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Vazifalar panelini ochish uchun tepaga asta suring"</string>
+    <!-- no translation found for taskbar_edu_stashing (911857479758694381) -->
+    <skip />
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Harakatlaringiz asosida tavsiyalar oling."</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Vazifa panelini mahkamlash uchun ajratgichni bosib turing"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Vazifalar panelidan maksimal darajada foydalaning"</string>

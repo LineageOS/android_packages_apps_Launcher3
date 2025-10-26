@@ -126,7 +126,8 @@
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"任务栏教程"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"将一个应用拖到一侧，即可同时使用两个应用"</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"拖到下方角落即可使其悬浮"</string>
-    <string name="taskbar_edu_stashing" msgid="5645461372669217294">"缓慢上滑即可显示任务栏"</string>
+    <!-- no translation found for taskbar_edu_stashing (911857479758694381) -->
+    <skip />
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"根据您的日常使用习惯获得应用建议"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"长按分隔线即可固定任务栏"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"体验任务栏的更多功能"</string>

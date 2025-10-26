@@ -126,7 +126,8 @@
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"ការអប់រំលើរបារកិច្ចការ"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"អូសកម្មវិធីទៅចំហៀង ដើម្បីប្រើកម្មវិធី 2 ក្នុងពេលតែមួយ"</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"អូសទៅជ្រុងខាងក្រោម ដើម្បីធ្វើឱ្យវាអណ្ដែត"</string>
-    <string name="taskbar_edu_stashing" msgid="5645461372669217294">"អូសឡើងលើយឺតៗ ដើម្បីបង្ហាញរបារកិច្ចការ"</string>
+    <!-- no translation found for taskbar_edu_stashing (911857479758694381) -->
+    <skip />
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"ទទួលការណែនាំកម្មវិធីដោយផ្អែកលើទម្លាប់របស់អ្នក"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"ចុចឱ្យយូរនៅលើបន្ទាត់ខណ្ឌចែក ដើម្បីខ្ទាស់របារកិច្ចការ"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"ធ្វើបានកាន់តែច្រើនដោយប្រើរបារកិច្ចការ"</string>

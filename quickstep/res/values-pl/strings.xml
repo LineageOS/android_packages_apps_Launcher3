@@ -126,7 +126,8 @@
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Informacje o pasku aplikacji"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Przeciągnij aplikację na bok, aby używać 2 aplikacji naraz"</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"Przeciągnij ikonę do dolnych rogów, aby pływała"</string>
-    <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Aby wyświetlić pasek aplikacji, wolno przesuń palcem w górę"</string>
+    <!-- no translation found for taskbar_edu_stashing (911857479758694381) -->
+    <skip />
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Otrzymuj sugestie aplikacji na podstawie typowych działań"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Przytrzymaj separator, aby przypiąć pasek aplikacji"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Wykorzystaj potencjał paska aplikacji"</string>
