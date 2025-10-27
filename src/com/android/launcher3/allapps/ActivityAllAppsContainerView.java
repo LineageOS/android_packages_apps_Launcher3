@@ -26,7 +26,6 @@ import static com.android.launcher3.allapps.BaseAllAppsAdapter.VIEW_TYPE_WORK_ED
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_ALLAPPS_COUNT;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_ALLAPPS_TAP_ON_PERSONAL_TAB;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_ALLAPPS_TAP_ON_WORK_TAB;
-import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.ScrollableLayoutManager.PREDICTIVE_BACK_MIN_SCALE;
 import static com.android.launcher3.views.RecyclerViewFastScroller.FastScrollerLocation.ALL_APPS_SCROLLER;
 
@@ -207,6 +206,7 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
                 UserCache.INSTANCE.get(mActivityContext));
         mPrivateProfileManager = new PrivateProfileManager(
                 this,
+                mActivityContext.getUiExecutor(),
                 mActivityContext.getStatsLogManager(),
                 UserCache.INSTANCE.get(mActivityContext));
         mPrivateSpaceBottomExtraSpace = context.getResources().getDimensionPixelSize(
@@ -480,7 +480,7 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
         updateHeaderScroll(0);
         if (exitSearch) {
             // Reset the search bar and search RV after transitioning home.
-            MAIN_EXECUTOR.getHandler().post(mSearchUiManager::resetSearch);
+            mActivityContext.getUiExecutor().getHandler().post(mSearchUiManager::resetSearch);
         }
         if (isSearching()) {
             mWorkManager.reset();
@@ -499,7 +499,7 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
         // conflict with following scrolling to bottom, so we need it with 0 time here.
         animateToSearchState(false, 0);
 
-        MAIN_EXECUTOR.getHandler().post(() -> {
+        mActivityContext.getUiExecutor().getHandler().post(() -> {
             // Reset the search bar after transitioning home.
             // When `resetSearch` is called after `animateToSearchState` is finished, the inside
             // `animateToSearchState` with delay is a just no-op and return early.

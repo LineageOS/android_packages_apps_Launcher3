@@ -107,13 +107,13 @@
     <string name="widget_settings" msgid="5280157748464495511">"Ezarpenak"</string>
     <string name="pin_to_taskbar" msgid="5914002252642242332">"Ainguratu zereginen barran"</string>
     <string name="unpin_from_taskbar" msgid="1025883383457627426">"Kendu aingura zereginen barratik"</string>
-    <!-- no translation found for no_room_in_taskbar (6885243748717395469) -->
-    <skip />
+    <string name="no_room_in_taskbar" msgid="6885243748717395469">"Ez dago tokirik zereginen barran"</string>
     <string name="app_added_to_taskbar" msgid="6348755169793615171">"Gehitu da aplikazioa zereginen barran"</string>
     <string name="app_removed_from_taskbar" msgid="3471754847898675396">"Kendu da aplikazioa zereginen barratik"</string>
     <string name="remove_system_shortcut_label" msgid="3991201411148073972">"Kendu"</string>
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"Ireki"</string>
-    <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"Eraman zaborrontzira"</string>
+    <!-- no translation found for home_screen_files_context_menu_delete_permanently_label (8660443461874174185) -->
+    <skip />
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"Instalatu lasterbideak"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"Erabiltzaileak ezer egin gabe lasterbideak gehitzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"irakurri hasierako pantailako ezarpenak eta lasterbideak"</string>
@@ -148,7 +148,7 @@
     <string name="app_pair_name_format" msgid="8134106404716224054">"Aplikazio parea: <xliff:g id="APP1">%1$s</xliff:g> eta <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="styles_wallpaper_button_text" msgid="8216961355289236794">"Horma-papera eta estiloa"</string>
     <string name="edit_home_screen" msgid="8947858375782098427">"Editatu orri nagusia"</string>
-    <string name="settings_button_text" msgid="8873672322605444408">"Orri nagusiaren ezarpenak"</string>
+    <string name="settings_button_text" msgid="8873672322605444408">"Orri nag. ezarpenak"</string>
     <string name="msg_disabled_by_admin" msgid="6898038085516271325">"Administratzaileak desgaitu du"</string>
     <string name="allow_rotation_title" msgid="7222049633713050106">"Eman orri nagusia biratzeko baimena"</string>
     <string name="allow_rotation_desc" msgid="8662546029078692509">"Telefonoa biratzean"</string>

@@ -15,6 +15,7 @@
  */
 package com.android.launcher3.taskbar;
 
+import static com.android.launcher3.Flags.enableTaskbarUiThread;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_ALL_APPS;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION;
@@ -33,6 +34,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.window.DesktopExperienceFlags;
 
+import androidx.annotation.AnyThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -93,6 +95,7 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
     private boolean mAllowInitialSplitSelection;
     private AppInfo[] mAppInfosList = AppInfo.EMPTY_ARRAY;
     // Saves the ItemInfos in the hotseat without the predicted items.
+    private final Object mTaskbarInfoListLock = new Object();
     private SparseArray<ItemInfo> mTaskbarInfoList;
     private ManageWindowsTaskbarShortcut<BaseTaskbarContext> mManageWindowsTaskbarShortcut;
 
@@ -163,27 +166,44 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
             return null;
         }
 
+        SparseArray<ItemInfo> taskbarInfoList;
+        if (enableTaskbarUiThread()) {
+            // As we need to share mTaskbarInfoList to SystemShortcut within taskbar in below code,
+            // rather than gating all read & write access with synchronized() block, we can create a
+            // shadow copy of the sparse array.
+            // Note that the assumption is that changes in SystemShortcut does NOT need to be
+            // reflected back to in mTaskbarInfoList in this class. If such assumption changes, we
+            // should not make a shadow copy to share, but instead, either pass mTaskbarInfoListLock
+            // to SystemShortcut, or switch to use CopyOnWriteArrayList for mTaskbarInfoList.
+            synchronized (mTaskbarInfoListLock) {
+                taskbarInfoList = mTaskbarInfoList.clone();
+            }
+        } else {
+            taskbarInfoList = mTaskbarInfoList;
+        }
+
+
         int maxPinnableCount = mContext.getTaskbarSpecsEvaluator().getMaxPinnableCount();
         if (itemInfo.container == CONTAINER_HOTSEAT) {
             return new PinToTaskbarShortcut<>(target, itemInfo, originalView, false,
-                    maxPinnableCount, mTaskbarInfoList);
+                    maxPinnableCount, taskbarInfoList);
         }
 
         if (itemInfo.isInAllApps()) {
             // If the target ItemInfo is already pinned on taskbar. Show the unpin option instead.
-            for (int i = 0; i < mTaskbarInfoList.size(); i++) {
-                if (Objects.equals(mTaskbarInfoList.valueAt(i).getComponentKey(),
+            for (int i = 0; i < taskbarInfoList.size(); i++) {
+                if (Objects.equals(taskbarInfoList.valueAt(i).getComponentKey(),
                         itemInfo.getComponentKey())) {
                     return new PinToTaskbarShortcut<>(target, itemInfo, originalView, false,
-                            maxPinnableCount, mTaskbarInfoList);
+                            maxPinnableCount, taskbarInfoList);
                 }
             }
         }
 
-        if (canPinAppsOverflow() || mTaskbarInfoList.size()
+        if (canPinAppsOverflow() || taskbarInfoList.size()
                 < mContext.getTaskbarSpecsEvaluator().getMaxPinnableCount()) {
             return new PinToTaskbarShortcut<>(target, itemInfo, originalView, true,
-                    maxPinnableCount, mTaskbarInfoList);
+                    maxPinnableCount, taskbarInfoList);
         }
 
         return null;
@@ -347,12 +367,30 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
         return index < 0 ? null : mAppInfosList[index];
     }
 
+    /**
+     * if enableTaskbarUiThread() is enabled, taskbar info list can be cloned and shared to launcher
+     * on different thread. Thus we should clone() the list when its passed from
+     * {@link TaskbarModelCallbacks}.
+     */
     public void setTaskbarInfoList(SparseArray<ItemInfo> info) {
-        mTaskbarInfoList = info;
+        if (enableTaskbarUiThread()) {
+            synchronized (mTaskbarInfoListLock) {
+                mTaskbarInfoList = info.clone();
+            }
+        } else {
+            mTaskbarInfoList = info;
+        }
     }
 
+    @AnyThread
     public SparseArray<ItemInfo> getTaskbarInfoList() {
-        return mTaskbarInfoList.clone();
+        if (enableTaskbarUiThread()) {
+            synchronized (mTaskbarInfoListLock) {
+                return mTaskbarInfoList.clone();
+            }
+        } else {
+            return mTaskbarInfoList.clone();
+        }
     }
 
     /**
@@ -430,6 +468,7 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
      * @return whether the taskbar can have the overflow icon to accommodate pinned apps that
      * can't fit in taskbar.
      */
+    @AnyThread
     public static boolean canPinAppsOverflow() {
         return enableOverflowButtonForTaskbarPinnedItems();
     }

@@ -39,7 +39,7 @@ import org.mockito.kotlin.verify
 /** Tests for [TaskbarHandoffController]. */
 @RunWith(LauncherMultivalentJUnit::class)
 @EmulatedDevices(["pixelTablet2023"])
-@EnableFlags(android.companion.Flags.FLAG_ENABLE_TASK_CONTINUITY)
+@EnableFlags(Flags.FLAG_TASK_CONTINUITY)
 class TaskbarHandoffControllerTest {
 
     @get:Rule(order = 1) val setFlagsRule = SetFlagsRule()
@@ -51,13 +51,11 @@ class TaskbarHandoffControllerTest {
 
     @Test
     @TaskbarMode(TRANSIENT)
-    @EnableFlags(Flags.FLAG_ENABLE_TASK_CONTINUITY)
     fun init_registersListener() {
         verify(context.taskContinuityManagerMock).registerRemoteTaskListener(any(), any())
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_TASK_CONTINUITY)
     fun onRemoteTasksChanged_updatesSuggestions() {
         val task1 = createRemoteTask(1, "Task 1")
         val task2 = createRemoteTask(2, "Task 2")
@@ -70,7 +68,6 @@ class TaskbarHandoffControllerTest {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_TASK_CONTINUITY)
     fun getSuggestions_afterUpdate_returnsSuggestions() {
         assertThat(controller.suggestions).isEmpty()
 

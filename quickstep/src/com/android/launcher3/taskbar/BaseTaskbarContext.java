@@ -16,7 +16,6 @@
 package com.android.launcher3.taskbar;
 
 import static com.android.launcher3.Flags.enableTaskbarUiThread;
-import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
 
 import android.annotation.SuppressLint;
@@ -35,11 +34,10 @@ import com.android.launcher3.dagger.LauncherComponentProvider;
 import com.android.launcher3.popup.SystemShortcut;
 import com.android.launcher3.taskbar.bubbles.BubbleActivityStarter;
 import com.android.launcher3.util.BaseContext;
+import com.android.launcher3.util.LooperExecutor;
 import com.android.launcher3.util.NavigationMode;
 import com.android.launcher3.util.Themes;
 import com.android.wm.shell.shared.bubbles.logging.EntryPoint;
-
-import java.util.concurrent.Executor;
 
 // TODO(b/218912746): Share more behavior to avoid all apps context depending directly on taskbar.
 /** Base for common behavior between taskbar window contexts. */
@@ -64,7 +62,7 @@ public abstract class BaseTaskbarContext extends BaseContext
                 (owner) -> enableTaskbarUiThread()
                         ? LifecycleRegistry.createUnsafe(owner) : new LifecycleRegistry(owner),
                 /* savedStateRegistryExecutor= */
-                enableTaskbarUiThread() ? TASKBAR_UI_THREAD : MAIN_EXECUTOR);
+                TASKBAR_UI_THREAD);
         mDisplayId = displayId;
         mIsPrimaryDisplay = isPrimaryDisplay;
         mLayoutInflater = LayoutInflater.from(this).cloneInContext(this);
@@ -76,7 +74,7 @@ public abstract class BaseTaskbarContext extends BaseContext
     }
 
     @Override
-    public Executor getUiExecutor() {
+    public LooperExecutor getUiExecutor() {
         return TASKBAR_UI_THREAD;
     }
 

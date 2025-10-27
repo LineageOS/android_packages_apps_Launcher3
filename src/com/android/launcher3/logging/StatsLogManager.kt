@@ -18,7 +18,6 @@ package com.android.launcher3.logging
 import android.content.Context
 import android.view.View
 import androidx.slice.SliceItem
-import com.android.launcher3.R
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.logger.LauncherAtom
 import com.android.launcher3.logger.LauncherAtom.ContainerInfo
@@ -46,7 +45,6 @@ open class StatsLogManager protected constructor(@JvmField protected val mContex
     protected val mActivityContext: ActivityContext? =
         ActivityContext.lookupContextNoThrow(mContext)
 
-    private var mKeyboardStateManager: KeyboardStateManager? = null
     private var mInstanceId: InstanceId? = null
 
     /**
@@ -871,17 +869,6 @@ open class StatsLogManager protected constructor(@JvmField protected val mContex
             logger.withInstanceId(mInstanceId)
         }
         return logger
-    }
-
-    /** Returns a singleton KeyboardStateManager. */
-    fun keyboardStateManager(): KeyboardStateManager {
-        if (mKeyboardStateManager == null) {
-            mKeyboardStateManager =
-                KeyboardStateManager(
-                    mContext.resources?.getDimensionPixelSize(R.dimen.default_ime_height) ?: 0
-                )
-        }
-        return mKeyboardStateManager!!
     }
 
     protected open fun createLogger(): StatsLogger {

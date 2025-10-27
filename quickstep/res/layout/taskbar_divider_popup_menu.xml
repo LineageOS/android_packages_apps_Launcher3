@@ -44,7 +44,7 @@
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:background="@drawable/ic_visibility"
-            android:backgroundTint="?android:attr/textColorPrimary" />
+            android:backgroundTint="@color/materialColorOnSurface" />
 
         <Switch
             style="@style/Switch.SettingsLib"
@@ -60,7 +60,7 @@
             android:fontFamily="@*android:string/config_bodyFontFamilyMedium"
             android:lines="1"
             android:textSize="14sp"
-            android:textColor="?android:attr/textColorPrimary"
+            android:textColor="@color/materialColorOnSurface"
             android:text="@string/always_show_taskbar" />
 
     </LinearLayout>

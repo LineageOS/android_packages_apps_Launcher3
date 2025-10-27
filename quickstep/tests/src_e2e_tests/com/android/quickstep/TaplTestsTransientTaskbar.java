@@ -19,6 +19,7 @@ import static com.android.launcher3.util.TestConstants.AppNames.TEST_APP_NAME;
 import static com.android.quickstep.TaskbarModeSwitchRule.Mode.TRANSIENT;
 import static com.android.systemui.shared.Flags.cursorHotCorner;
 
+import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
 import androidx.test.filters.LargeTest;
@@ -64,6 +65,10 @@ public class TaplTestsTransientTaskbar extends AbstractTaplTestsTaskbar {
     @Test
     @TaskbarModeSwitch(mode = TRANSIENT)
     public void testUnstashTaskbarOnScreenBottomEdgeHover() {
+        // TODO(b/377678992): revert ag/36346262 once NexusLauncherTests-OverviewInWindowEnabled is
+        //  successfully blocking presubmit.
+        assumeFalse("Skipping test because overview in window flags are enabled",
+                mLauncher.isRecentsWindowEnabled());
         getTaskbar().getAppIcon(TEST_APP_NAME).launch(TEST_APP_PACKAGE);
         mLauncher.getLaunchedAppState().hoverScreenBottomEdgeToUnstashTaskbar();
         mLauncher.getLaunchedAppState().assertTaskbarVisible();

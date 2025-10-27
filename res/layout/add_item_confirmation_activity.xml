@@ -48,7 +48,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/widget_list_horizontal_margin"
                 android:gravity="center_horizontal"
-                android:textColor="?android:attr/textColorPrimary"
+                android:textColor="@color/materialColorOnSurface"
                 android:textSize="24sp"
                 android:ellipsize="end"
                 android:fadingEdge="horizontal"
@@ -64,7 +64,7 @@
                 android:paddingTop="8dp"
                 android:text="@string/add_item_request_drag_hint"
                 android:textSize="14sp"
-                android:textColor="?android:attr/textColorSecondary"
+                android:textColor="@color/materialColorOnSurfaceVariant"
                 android:alpha="0.7"/>
 
             <ScrollView

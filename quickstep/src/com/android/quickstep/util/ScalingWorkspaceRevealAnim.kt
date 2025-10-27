@@ -43,7 +43,7 @@ import com.android.launcher3.R
 import com.android.launcher3.anim.AnimatorListeners
 import com.android.launcher3.anim.PendingAnimation
 import com.android.launcher3.anim.PropertySetter
-import com.android.launcher3.statehandlers.DepthController
+import com.android.launcher3.statehandlers.LauncherDepthController
 import com.android.launcher3.states.StateAnimationConfig
 import com.android.launcher3.states.StateAnimationConfig.SKIP_DEPTH_CONTROLLER
 import com.android.launcher3.states.StateAnimationConfig.SKIP_OVERVIEW
@@ -171,7 +171,7 @@ class ScalingWorkspaceRevealAnim(
         val transitionConfig = StateAnimationConfig()
         transitionConfig.duration = SCALE_DURATION_MS
 
-        var depthController: DepthController? = null
+        var depthController: LauncherDepthController? = null
         if (playBlur) {
             // Match the Wallpaper depth to the rest of the content.
             depthController = (launcher as? QuickstepLauncher)?.depthController

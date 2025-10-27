@@ -860,8 +860,8 @@ public abstract class RecentsView<
 
         mContainer = RecentsViewContainer.containerFromContext(context);
         mContainerInterface = mContainer.getContainerInterface();
-        mOrientationState = new RecentsOrientedState(
-                context, mContainerInterface, this::animateRecentsRotationInPlace);
+        mOrientationState = new RecentsOrientedState(context, mContainerInterface);
+        mOrientationState.setRotationChangeListener(this::animateRecentsRotationInPlace);
         final int rotation = mContainer.getDisplay().getRotation();
         mOrientationState.setRecentsRotation(rotation);
 
@@ -1157,6 +1157,7 @@ public abstract class RecentsView<
         mTaskViewPool.cancelOngoingInitializations();
         mGroupedTaskViewPool.cancelOngoingInitializations();
         mDesktopTaskViewPool.cancelOngoingInitializations();
+        mOrientationState.setRotationChangeListener(null);
         mHelper.onDestroy();
         RecentsDependencies.destroy(getContext());
     }
@@ -1354,6 +1355,9 @@ public abstract class RecentsView<
                     });
                 }
             });
+            if (mUtils.isTaskLaunchingInFreeFromWindow(taskId, apps)) {
+                returnToDesktop();
+            }
         } else {
             TaskViewUtils.composeRecentsLaunchAnimator(anim, taskView, apps, wallpaper, nonApps,
                     true /* launcherClosing */, getStateManager(), this,
@@ -2042,6 +2046,11 @@ public abstract class RecentsView<
     /** Counts {@link TaskView}s that are not {@link DesktopTaskView} instances. */
     public int getNonDesktopTaskViewCount() {
         return mUtils.getNonDesktopTaskViewCount();
+    }
+
+    /** Counts {@link TaskView}s that are {@link DesktopTaskView} instances. */
+    public int getDesktopTaskViewCount() {
+        return mUtils.getDesktopTaskViewCount();
     }
 
     /**
@@ -4724,7 +4733,7 @@ public abstract class RecentsView<
                 anim.play(ObjectAnimator.ofFloat(this, DESK_EXPLODE_PROGRESS, 1f, 0f));
             }
         }
-        DepthController depthController = getDepthController();
+        DepthController<?, ?> depthController = getDepthController();
         if (depthController != null) {
             float targetDepth = taskView instanceof DesktopTaskView ? 0 : BACKGROUND_APP.getDepth(
                     mContainer);
@@ -5550,7 +5559,7 @@ public abstract class RecentsView<
     }
 
     @Nullable
-    protected DepthController getDepthController() {
+    protected DepthController<?, ?> getDepthController() {
         return null;
     }
 

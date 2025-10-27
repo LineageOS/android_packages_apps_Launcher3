@@ -24,7 +24,6 @@ import static junit.framework.TestCase.assertEquals;
 import android.content.Context;
 import android.content.Intent;
 
-import com.android.launcher3.tapl.LauncherInstrumentation;
 import com.android.launcher3.tapl.Taskbar;
 import com.android.launcher3.tapl.TestHelpers;
 import com.android.launcher3.util.LauncherLayoutBuilder;
@@ -46,8 +45,6 @@ public class AbstractTaplTestsTaskbar extends AbstractQuickStepTest {
             resolveSystemApp(Intent.CATEGORY_APP_CALCULATOR);
 
     protected AutoCloseable mLauncherLayout;
-    protected boolean mTaskbarWasInTransientMode;
-
 
     @Override
     public void setUp() throws Exception {
@@ -112,13 +109,5 @@ public class AbstractTaplTestsTaskbar extends AbstractQuickStepTest {
         }
 
         return taskbar;
-    }
-
-    protected static void setTaskbarMode(LauncherInstrumentation launcher,
-            boolean expectTransientTaskbar) {
-        launcher.enableTransientTaskbar(expectTransientTaskbar);
-        launcher.recreateTaskbar();
-        launcher.checkForAnomaly(true, true);
-        AbstractLauncherUiTest.checkDetectedLeaks(launcher);
     }
 }

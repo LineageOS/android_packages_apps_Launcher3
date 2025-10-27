@@ -103,6 +103,7 @@ constructor(
                     view.rootView.setViewTreeLifecycleOwner(this@BaseContext)
                     view.rootView.setViewTreeSavedStateRegistryOwner(this@BaseContext)
                     lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+                    updateState()
 
                     val treeObserver = view.viewTreeObserver
 

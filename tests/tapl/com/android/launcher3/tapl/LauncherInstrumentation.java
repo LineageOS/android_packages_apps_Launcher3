@@ -90,6 +90,7 @@ import androidx.test.uiautomator.UiDevice;
 import androidx.test.uiautomator.UiObject2;
 import androidx.test.uiautomator.Until;
 
+import com.android.internal.R;
 import com.android.launcher3.testing.shared.ResourceUtils;
 import com.android.launcher3.testing.shared.TestProtocol;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -559,6 +560,12 @@ public final class LauncherInstrumentation {
     /** Enables fixed landscape mode if supported on device */
     public void setFixedLandscape(boolean on) {
         getTestInfo(TestProtocol.REQUEST_ENABLE_FIXED_LANDSCAPE, Boolean.toString(on));
+    }
+
+    /** Enables/disables detecting events not from the test. */
+    public void setEnableRegisterEventNotFromTest(boolean enable) {
+        getTestInfo(TestProtocol.REQUEST_ENABLE_REGISTER_EVENT_NOT_FROM_TEST,
+                Boolean.toString(enable));
     }
 
     public boolean hadNontestEvents() {
@@ -1166,7 +1173,9 @@ public final class LauncherInstrumentation {
         }
     }
 
-    boolean isRecentsWindowEnabled() {
+    // TODO(b/377678992): revert ag/36346262 once NexusLauncherTests-OverviewInWindowEnabled is
+    //  successfully blocking presubmit.
+    public boolean isRecentsWindowEnabled() {
         return getTestInfo(TestProtocol.REQUEST_IS_RECENTS_WINDOW_ENABLED)
                 .getBoolean(TestProtocol.TEST_INFO_RESPONSE_FIELD);
     }
@@ -2848,6 +2857,14 @@ public final class LauncherInstrumentation {
         // completely cover the display.
         Log.d(TAG, "Rounded corners top: " + topRadius + " bottom: " + bottomRadius);
         return Math.max(topRadius, bottomRadius) + tmpBuffer;
+    }
+
+    /** Whether creating new desks is allowed. */
+    boolean canCreateDesks() {
+        final int deskLimit = getResources().getInteger(R.integer.config_maxDesktopWindowingDesks);
+        final int deskCount = getTestInfo(TestProtocol.REQUEST_GET_DESK_COUNT, null, null)
+                .getInt(TestProtocol.TEST_INFO_RESPONSE_FIELD);
+        return deskCount < deskLimit;
     }
 
     private Context getLauncherContext(Context baseContext)

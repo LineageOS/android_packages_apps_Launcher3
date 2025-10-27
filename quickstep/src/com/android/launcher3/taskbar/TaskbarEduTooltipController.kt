@@ -29,13 +29,16 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.MarginLayoutParams
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import android.widget.Button
 import android.widget.TextView
+import androidx.annotation.IdRes
 import androidx.annotation.IntDef
 import androidx.annotation.LayoutRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.text.HtmlCompat
 import androidx.core.view.updateLayoutParams
 import com.airbnb.lottie.LottieAnimationView
+import com.android.launcher3.Flags
 import com.android.launcher3.Flags.refactorTaskbarUiState
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.R
@@ -44,6 +47,11 @@ import com.android.launcher3.Utilities
 import com.android.launcher3.config.FeatureFlags.enableTaskbarPinning
 import com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLAG_AUTOHIDE_SUSPEND_EDU_OPEN
 import com.android.launcher3.taskbar.TaskbarControllers.LoggableTaskbarController
+import com.android.launcher3.taskbar.edu.TooltipEduCombinator
+import com.android.launcher3.taskbar.edu.TooltipEduCombinator.Companion.MAX_TOOLTIPS_PER_PAGE
+import com.android.launcher3.taskbar.edu.TooltipInfo
+import com.android.launcher3.taskbar.edu.TooltipsEduPage
+import com.android.launcher3.taskbar.edu.TooltipsEduPage.DisplayLocation
 import com.android.launcher3.util.OnboardingPrefs.TASKBAR_EDU_TOOLTIP_STEP
 import com.android.launcher3.util.OnboardingPrefs.TASKBAR_SEARCH_EDU_SEEN
 import com.android.launcher3.views.ActivityContext
@@ -108,6 +116,8 @@ constructor(
     private lateinit var controllers: TaskbarControllers
     private lateinit var taskbarUIState: TaskbarUiState
 
+    @VisibleForTesting lateinit var tooltipEduCombinator: TooltipEduCombinator
+
     // Keep track of whether the user has seen the Search Edu
     @VisibleForTesting
     var userHasSeenSearchEdu: Boolean
@@ -128,11 +138,22 @@ constructor(
             updateShouldShowEduOnAppLaunch()
         }
 
+    val userHasSeenFeaturesEdu: Boolean
+        get() = tooltipEduCombinator.userHasSeenFeaturesEdu
+
+    val userHasSeenPinningEdu: Boolean
+        get() = tooltipEduCombinator.userHasSeenPinningEdu
+
+    /** Controls setting the [FLAG_AUTOHIDE_SUSPEND_EDU_OPEN] flag to false on tooltip close */
+    private var releaseTaskbarBlock = true
+
     private var tooltip: TaskbarEduTooltip? = null
 
     fun init(controllers: TaskbarControllers, taskbarUiState: TaskbarUiState) {
         this.controllers = controllers
         this.taskbarUIState = taskbarUiState
+        tooltipEduCombinator =
+            TooltipEduCombinator(activityContext, controllers.taskbarStashController)
         updateShouldShowEduOnAppLaunch()
         // We want to show the Search Edu right after pinning the taskbar, so we post it here
         activityContext.dragLayer.post { maybeShowSearchEdu() }
@@ -152,25 +173,33 @@ constructor(
         }
     }
 
+    private fun handleEduAnimation(animationView: LottieAnimationView) {
+        if (removeAnimationSettingsTracker.isRemoveAnimationEnabled()) {
+            animationView.pauseAnimation()
+        } else {
+            animationView.setOnClickListener {
+                if (animationView.isAnimating) animationView.pauseAnimation()
+                else animationView.playAnimation()
+            }
+        }
+    }
+
     /**
      * Turns off auto play of lottie animations if user has opted to remove animation else attaches
      * click listener to allow user to play or pause animations.
      */
     fun handleEduAnimations(animationViews: List<LottieAnimationView>) {
         for (animationView in animationViews) {
-            if (removeAnimationSettingsTracker.isRemoveAnimationEnabled()) {
-                animationView.pauseAnimation()
-            } else {
-                animationView.setOnClickListener {
-                    if (animationView.isAnimating) animationView.pauseAnimation()
-                    else animationView.playAnimation()
-                }
-            }
+            handleEduAnimation(animationView)
         }
     }
 
     /** Shows swipe EDU tooltip if it is the current [tooltipStep]. */
     fun maybeShowSwipeEdu() {
+        if (Flags.tooltipEduCombinator()) {
+            showTooltipPage(tooltipEduCombinator.getSwipeEdu())
+            return
+        }
         if (
             !isTooltipEnabled ||
                 !activityContext.isTransientTaskbar ||
@@ -202,6 +231,10 @@ constructor(
      * swipe up is necessary to show this step.
      */
     fun maybeShowFeaturesEdu() {
+        if (Flags.tooltipEduCombinator()) {
+            showTooltipPages(tooltipEduCombinator.getFeaturesTooltipsEduPages())
+            return
+        }
         if (!isTooltipEnabled || tooltipStep > TOOLTIP_STEP_FEATURES) {
             maybeShowPinningEdu()
             maybeShowSearchEdu()
@@ -351,47 +384,6 @@ constructor(
         }
     }
 
-    /** Shows standalone Bubble EDU tooltip */
-    private fun showBubbleEdu() {
-        inflateTooltip(R.layout.taskbar_edu_bubbles)
-
-        tooltip?.run {
-            allowTouchDismissal = true
-            TypefaceUtils.setTypeface(
-                requireViewById(R.id.taskbar_edu_title),
-                FontFamily.GSF_HEADLINE_SMALL_EMPHASIZED,
-            )
-            TypefaceUtils.setTypeface(
-                requireViewById(R.id.bubbles_text),
-                FontFamily.GSF_BODY_MEDIUM,
-            )
-
-            val bubblesAnim =
-                requireViewById<LottieAnimationView>(R.id.standalone_bubbles_animation)
-            bubblesAnim.contentDescription =
-                context.getString(R.string.taskbar_edu_bubbles_animation_description)
-            val animationRes =
-                if (activityContext.isTransientTaskbar) {
-                    R.raw.taskbar_edu_bubbles_transient
-                } else {
-                    R.raw.taskbar_edu_bubbles_persistent
-                }
-            bubblesAnim.setAnimation(animationRes)
-            bubblesAnim.supportLightTheme()
-            handleEduAnimations(listOf(bubblesAnim))
-            updateLayoutParams<BaseDragLayer.LayoutParams> {
-                if (activityContext.isTransientTaskbar) {
-                    bottomMargin += activityContext.deviceProfile.taskbarProfile.height
-                }
-                width =
-                    resources.getDimensionPixelSize(
-                        R.dimen.taskbar_edu_features_tooltip_width_with_one_feature
-                    )
-            }
-            show()
-        }
-    }
-
     /**
      * Shows standalone Search EDU tooltip if this EDU has not been seen.
      *
@@ -399,6 +391,10 @@ constructor(
      * taskbar
      */
     fun maybeShowSearchEdu() {
+        if (Flags.tooltipEduCombinator()) {
+            showTooltipPage(tooltipEduCombinator.getSearchEdu())
+            return
+        }
         if (
             !enableTaskbarPinning() ||
                 !activityContext.isPinnedTaskbar ||
@@ -501,7 +497,7 @@ constructor(
     }
 
     /** Initializes [tooltip] with content from [contentResId]. */
-    private fun inflateTooltip(@LayoutRes contentResId: Int) {
+    private fun inflateTooltip(@LayoutRes contentResId: Int): TaskbarEduTooltip {
         val overlayContext = controllers.taskbarOverlayController.requestWindow()
         val tooltip =
             overlayContext.layoutInflater.inflate(
@@ -517,16 +513,19 @@ constructor(
 
         tooltip.onCloseCallback = {
             this.tooltip = null
-            controllers.taskbarAutohideSuspendController.updateFlag(
-                FLAG_AUTOHIDE_SUSPEND_EDU_OPEN,
-                false,
-            )
+            if (releaseTaskbarBlock) {
+                controllers.taskbarAutohideSuspendController.updateFlag(
+                    FLAG_AUTOHIDE_SUSPEND_EDU_OPEN,
+                    false,
+                )
+            }
             controllers.taskbarStashController.updateAndAnimateTransientTaskbar(true)
         }
         tooltip.accessibilityDelegate = createAccessibilityDelegate()
 
         overlayContext.layoutInflater.inflate(contentResId, tooltip.content, true)
         this.tooltip = tooltip
+        return tooltip
     }
 
     private fun createAccessibilityDelegate() =
@@ -569,9 +568,171 @@ constructor(
         pw?.println("$prefix\tisTooltipEnabled=$isTooltipEnabled")
         pw?.println("$prefix\tisOpen=$isTooltipOpen")
         pw?.println("$prefix\ttooltipStep=$tooltipStep")
+        if (Flags.tooltipEduCombinator()) {
+            pw?.println("$prefix\tisSwipeShown=${tooltipEduCombinator.userHasSeenSwipeEdu}")
+            pw?.println("$prefix\tisFeaturesShown=${tooltipEduCombinator.userHasSeenFeaturesEdu}")
+            pw?.println("$prefix\tisPinningShown=${tooltipEduCombinator.userHasSeenPinningEdu}")
+            pw?.println("$prefix\tisSearchShown=${tooltipEduCombinator.userHasSeenSearchEdu}")
+        }
+    }
+
+    /** Shows tooltips pages, binding the action button to show the next page. */
+    private fun showTooltipPages(tooltipPages: List<TooltipsEduPage>? = null, index: Int = 0) {
+        if (tooltipPages.isNullOrEmpty()) return
+        showTooltipPage(tooltipPages[index]) { tooltipView ->
+            val hasMorePages = index < tooltipPages.size - 1
+            tooltipView.closeControllingTaskbar(closeTaskbar = !hasMorePages)
+            if (hasMorePages) {
+                showTooltipPages(tooltipPages, index + 1)
+            }
+        }
+    }
+
+    /** Closes tooltip, but can leave the taskbar in locked un-stashed state. */
+    private fun TaskbarEduTooltip.closeControllingTaskbar(closeTaskbar: Boolean) {
+        releaseTaskbarBlock = closeTaskbar
+        close(true)
+        releaseTaskbarBlock = true
+    }
+
+    /**
+     * Shows tooltip single page, using provided [onActionButtonClick] as an action button listener.
+     */
+    private fun showTooltipPage(
+        tooltipPage: TooltipsEduPage? = null,
+        onActionButtonClick: ((TaskbarEduTooltip) -> Unit)? = null,
+    ) {
+        val tooltipInfos = tooltipPage?.tooltips ?: return
+        val tooltipsCount = tooltipInfos.size
+        if (tooltipsCount !in 1..MAX_TOOLTIPS_PER_PAGE) {
+            throw IllegalStateException(
+                "Invalid tooltips count: $tooltipsCount, should be in" +
+                    " range  of 1 to $MAX_TOOLTIPS_PER_PAGE"
+            )
+        }
+        val tooltipView =
+            if (tooltipsCount == 1) {
+                inflateTooltip(R.layout.taskbar_edu_standalone)
+            } else {
+                inflateTooltip(R.layout.taskbar_edu_multipane)
+            }
+        tooltipView.run {
+            allowTouchDismissal = tooltipPage.canBeSkipped
+            bindTitle(tooltipPage)
+            bindActionButton(tooltipPage, onActionButtonClick)
+            bindTooltips(tooltipInfos)
+            adjustTooltipDisplayLocation(tooltipPage)
+            show()
+        }
+    }
+
+    private fun View.bindTitle(tooltipPage: TooltipsEduPage) {
+        val tooltipPageTitle: TextView = requireViewById(R.id.taskbar_edu_title)
+        TypefaceUtils.setTypeface(tooltipPageTitle, FontFamily.GSF_HEADLINE_SMALL_EMPHASIZED)
+        tooltipPageTitle.text = tooltipPage.title
+    }
+
+    private fun TaskbarEduTooltip.bindActionButton(
+        tooltipPage: TooltipsEduPage,
+        onActionButtonClick: ((TaskbarEduTooltip) -> Unit)? = null,
+    ) {
+        findViewById<Button>(R.id.action_button)?.let { actionButton ->
+            val buttonText = tooltipPage.actionButton
+            if (buttonText != null) {
+                actionButton.text = buttonText
+                actionButton.setOnClickListener { onActionButtonClick?.invoke(this) }
+            } else {
+                actionButton.visibility = GONE
+            }
+        }
+    }
+
+    private fun View.bindTooltips(tooltipInfos: List<TooltipInfo>) {
+        tooltipInfos.forEachIndexed { index, tooltipInfo ->
+            bindTooltipInfo(
+                tooltipInfo,
+                TOOLTIP_ANIMATION_IDS[index],
+                TOOLTIP_DESCRIPTION_IDS[index],
+            )
+        }
+        if (tooltipInfos.size < MAX_TOOLTIPS_PER_PAGE) {
+            // If there are fewer tooltips than the maximum allowed, hide the unused tooltip views.
+            findViewById<View>(R.id.tooltip_2_group)?.visibility = GONE
+        }
+    }
+
+    private fun View.bindTooltipInfo(
+        tooltipInfo: TooltipInfo,
+        @IdRes lottieAnimationViewId: Int,
+        @IdRes descriptionViewResId: Int,
+    ) {
+        val tooltipAnimation = requireViewById<LottieAnimationView>(lottieAnimationViewId)
+        tooltipAnimation.contentDescription = tooltipInfo.animationDescription
+        tooltipAnimation.supportLightTheme()
+        tooltipAnimation.setAnimation(tooltipInfo.animationResId)
+        handleEduAnimation(tooltipAnimation)
+
+        val eduDescription: TextView = requireViewById(descriptionViewResId)
+        if (tooltipInfo.message.isNullOrBlank()) {
+            eduDescription.visibility = GONE
+        } else {
+            TypefaceUtils.setTypeface(eduDescription, FontFamily.GSF_BODY_MEDIUM)
+            eduDescription.text = tooltipInfo.message
+        }
+    }
+
+    private fun TaskbarEduTooltip.adjustTooltipDisplayLocation(tooltipPage: TooltipsEduPage) {
+        val widthDimenResId =
+            when (tooltipPage.tooltips.size) {
+                1 -> R.dimen.taskbar_edu_features_tooltip_width_with_one_feature
+                2 -> R.dimen.taskbar_edu_features_tooltip_width_with_two_features
+                3 -> R.dimen.taskbar_edu_features_tooltip_width_with_three_features
+                else -> throw IllegalArgumentException("Unsupported tooltips count")
+            }
+        val location = tooltipPage.location
+        updateLayoutParams<MarginLayoutParams> {
+            if (activityContext.isTransientTaskbar && location != DisplayLocation.TASKBAR_HANDLE) {
+                bottomMargin += activityContext.deviceProfile.taskbarProfile.height
+            }
+            width = resources.getDimensionPixelSize(widthDimenResId)
+        }
+        if (location == DisplayLocation.SEARCH_DIVIDER || location == DisplayLocation.SEARCH_ICON) {
+            updateLayoutParams<BaseDragLayer.LayoutParams> {
+                marginStart = 0
+                gravity = Gravity.BOTTOM
+            }
+            if (location == DisplayLocation.SEARCH_DIVIDER) {
+                // Calculate shift to align with the taskbar divider
+                val taskbarDividerView = controllers.taskbarViewController.taskbarDividerView
+                val dividerLocation = taskbarDividerView.x + taskbarDividerView.width / 2
+                x = dividerLocation - layoutParams.width / 2
+            }
+
+            if (location == DisplayLocation.SEARCH_ICON) {
+                // Calculate shift to align with the all apps (search icon) button
+                val allAppsButtonView = controllers.taskbarViewController.allAppsButtonView
+                if (allAppsButtonView != null) {
+                    val allAppsIconLocation = allAppsButtonView.x + allAppsButtonView.width / 2
+                    x = allAppsIconLocation - layoutParams.width / 2
+                }
+            }
+        }
     }
 
     companion object {
+
+        /** Id's of tooltip animation views. */
+        private val TOOLTIP_ANIMATION_IDS =
+            listOf(R.id.tooltip_0_animation, R.id.tooltip_1_animation, R.id.tooltip_2_animation)
+
+        /** Id's of tooltip description views. */
+        private val TOOLTIP_DESCRIPTION_IDS =
+            listOf(
+                R.id.tooltip_0_description,
+                R.id.tooltip_1_description,
+                R.id.tooltip_2_description,
+            )
+
         @JvmStatic
         fun newInstance(activityContext: ActivityContext): TaskbarEduTooltipController =
             activityContext.activityComponent.createTaskbarEduTooltipController()

@@ -86,7 +86,7 @@ public class Executors {
 
     public static final Executor IMMEDIATE_EXECUTOR = Runnable::run;
 
-    public static final Executor TASKBAR_UI_THREAD = enableTaskbarUiThread()
+    public static final LooperExecutor TASKBAR_UI_THREAD = enableTaskbarUiThread()
             ? new LooperExecutor("TASKBAR_UI_THREAD", THREAD_PRIORITY_FOREGROUND)
             : MAIN_EXECUTOR;
 

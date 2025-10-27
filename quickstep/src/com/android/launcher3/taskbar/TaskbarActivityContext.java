@@ -31,7 +31,6 @@ import static com.android.app.animation.Interpolators.LINEAR;
 import static com.android.launcher3.AbstractFloatingView.TYPE_ON_BOARD_POPUP;
 import static com.android.launcher3.AbstractFloatingView.TYPE_REBIND_SAFE;
 import static com.android.launcher3.AbstractFloatingView.TYPE_TASKBAR_OVERLAY_PROXY;
-import static com.android.launcher3.Flags.enableTaskbarUiThread;
 import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.Utilities.calculateTextHeight;
 import static com.android.launcher3.Utilities.isRunningInTestHarness;
@@ -44,7 +43,6 @@ import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_SECON
 import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_STASHED_IN_APP_AUTO;
 import static com.android.launcher3.taskbar.TaskbarStashController.SHOULD_BUBBLES_FOLLOW_DEFAULT_VALUE;
 import static com.android.launcher3.testing.shared.ResourceUtils.getBoolByName;
-import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 import static com.android.quickstep.RecentsFilterState.EMPTY_FILTER;
@@ -236,9 +234,6 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
 
     private static final String WINDOW_TITLE = "Taskbar";
 
-    private static final Executor UI_EXECUTOR = enableTaskbarUiThread()
-            ? TASKBAR_UI_THREAD : MAIN_EXECUTOR;
-
     public static final String SIMPLE_VIEW_SETTINGS_KEY = "matcha_enable";
 
     protected static final DesktopModeFlag ENABLE_TASKBAR_BEHIND_SHADE = new DesktopModeFlag(
@@ -387,8 +382,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             TaskbarHotseatDimensionsProvider dimensionsProvider =
                     new DeviceProfileDimensionsProviderAdapter(this);
             BubbleStashController bubbleStashController = isTransientTaskbar
-                    ? new TransientBubbleStashController(dimensionsProvider, this)
-                    : new PersistentBubbleStashController(dimensionsProvider);
+                    ? new TransientBubbleStashController(dimensionsProvider, this, mTaskbarUiState)
+                    : new PersistentBubbleStashController(dimensionsProvider, mTaskbarUiState);
             bubbleStashController.setBubbleBarVerticalCenterForHome(
                     launcherDp.getBubbleBarVerticalCenterForHome());
             bubbleControllersOptional = Optional.of(new BubbleControllers(
@@ -1865,7 +1860,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         } else if (tag instanceof ItemClickProxy) {
             ((ItemClickProxy) tag).onItemClicked(view);
         } else if (tag instanceof HandoffSuggestion handoffSuggestion) {
-            if (android.companion.Flags.enableTaskContinuity()) {
+            if (android.companion.Flags.taskContinuity()) {
                 mControllers.taskbarHandoffController.launch(handoffSuggestion);
             } else {
                 Log.w(
@@ -1925,7 +1920,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
 
             if (DesktopExperienceFlags.ENABLE_TASKBAR_RUNNING_TASKS_IN_SPLITSCREEN_SELECT_BUGFIX
                     .isTrue() && recents != null && recents.isSplitSelectionActive()) {
-                return Pair.create(UI_EXECUTOR,
+                return Pair.create(TASKBAR_UI_THREAD,
                         () -> taskbarUIController.moveRunningTaskToSplitSelection(
                                 singleTask.getTask(), null, startingView));
             }
@@ -1951,7 +1946,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         }
 
         assert task instanceof SplitTask;
-        return Pair.create(UI_EXECUTOR,
+        return Pair.create(TASKBAR_UI_THREAD,
                 () -> mControllers.uiController.launchSplitTasks(
                         (SplitTask) task, remoteTransition));
     }
@@ -1973,7 +1968,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                         DisplayController.INSTANCE.get(this),
                         appLaunchType,
                         cujType,
-                        getMainExecutor()
+                        TASKBAR_UI_THREAD
                 ),
                 "TaskbarDesktopAppLaunch");
     }
@@ -2068,7 +2063,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                     } else {
                         Runnable launchTask =
                                 () -> startItemInfoActivity(itemInfos.get(0), foundTask);
-                        runAfterReturningToDesktopIfInOverview(recents, launchTask, UI_EXECUTOR);
+                        runAfterReturningToDesktopIfInOverview(
+                                recents, launchTask, TASKBAR_UI_THREAD);
                     }
                 }
         );

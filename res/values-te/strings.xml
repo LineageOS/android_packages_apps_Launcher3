@@ -107,15 +107,12 @@
     <string name="widget_settings" msgid="5280157748464495511">"సెట్టింగ్‌లు"</string>
     <string name="pin_to_taskbar" msgid="5914002252642242332">"టాస్క్‌బార్‌కు పిన్"</string>
     <string name="unpin_from_taskbar" msgid="1025883383457627426">"టాస్క్‌బార్ అన్‌పిన్"</string>
-    <!-- no translation found for no_room_in_taskbar (6885243748717395469) -->
-    <skip />
+    <string name="no_room_in_taskbar" msgid="6885243748717395469">"టాస్క్‌బార్‌లో రూమ్ లేదు"</string>
     <string name="app_added_to_taskbar" msgid="6348755169793615171">"టాస్క్‌బార్‌కు యాప్‌ను జోడించడం జరిగింది"</string>
     <string name="app_removed_from_taskbar" msgid="3471754847898675396">"టాస్క్‌బార్ నుండి యాప్‌ను తీసివేయడం జరిగింది"</string>
-    <!-- no translation found for remove_system_shortcut_label (3991201411148073972) -->
-    <skip />
+    <string name="remove_system_shortcut_label" msgid="3991201411148073972">"తీసివేయండి"</string>
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"తెరవండి"</string>
-    <!-- no translation found for home_screen_files_context_menu_move_to_trash_label (1145655050674479315) -->
-    <skip />
+    <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"శాశ్వతంగా తొలగించండి"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"షార్ట్‌కట్‌లను ఇన్‌స్టాల్ చేయడం"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"వినియోగదారు ప్రమేయం లేకుండా షార్ట్‌కట్‌లను జోడించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"హోమ్ సెట్టింగ్‌లు, షార్ట్‌కట్‌లను చదవండి"</string>

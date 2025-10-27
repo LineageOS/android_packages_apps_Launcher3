@@ -13,12 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.quickstep.views
 
-package com.android.launcher3.testing;
+import androidx.annotation.AnyThread
+import com.android.launcher3.taskbar.RecentsViewInteractor
+import com.android.launcher3.taskbar.TaskbarInteractor
+import javax.annotation.concurrent.ThreadSafe
 
-public final class BuildConfig {
-    public static final boolean DEBUG = Boolean.parseBoolean("true");
+/** Expose thread safe API of [RecentsViewContainer] to taskbar. */
+@ThreadSafe
+interface RecentsViewContainerInteractor {
+    @AnyThread fun setTaskbarInteractor(taskbarInteractor: TaskbarInteractor?)
 
-    // Field from default config.
-    public static final boolean IS_STUDIO_BUILD = false;
+    @AnyThread
+    fun getRecentsViewInteractor(oldInteractor: RecentsViewInteractor?): RecentsViewInteractor?
 }

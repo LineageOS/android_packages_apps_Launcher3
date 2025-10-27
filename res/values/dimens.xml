@@ -452,8 +452,10 @@
     <dimen name="taskbar_stashed_size">0dp</dimen>
     <dimen name="qsb_widget_height">0dp</dimen>
     <dimen name="qsb_shadow_height">0dp</dimen>
+    <dimen name="qsb_default_widget_height">52dp</dimen>
     <dimen name="qsb_search_icon_tap_size">48dp</dimen>
-    <dimen name="qsb_search_icon_margin_start">4dp</dimen>
+    <dimen name="qsb_search_icon_padding_start">10dp</dimen>
+    <dimen name="qsb_search_icon_padding_end">8dp</dimen>
     <dimen name="min_hotseat_icon_space">18dp</dimen>
     <dimen name="max_hotseat_icon_space">50dp</dimen>
     <dimen name="min_hotseat_qsb_width">0dp</dimen>

@@ -28,13 +28,13 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 
-private object Modules {}
+private object Modules
 
-@Module abstract class WindowManagerProxyModule {}
+@Module abstract class WindowManagerProxyModule
 
-@Module abstract class ActivityContextModule {}
+@Module abstract class ActivityContextModule
 
-@Module abstract class ApiWrapperModule {}
+@Module abstract class ApiWrapperModule
 
 @Module
 abstract class WidgetModule {
@@ -42,7 +42,7 @@ abstract class WidgetModule {
     abstract fun bindWidgetHolderFactory(factor: WidgetHolderFactoryImpl): WidgetHolderFactory
 }
 
-@Module abstract class PluginManagerWrapperModule {}
+@Module abstract class PluginManagerWrapperModule
 
 @Module
 abstract class StaticObjectModule {
@@ -57,12 +57,14 @@ object SystemDragModule {
 }
 
 // Module containing bindings for the final derivative app
-@Module abstract class AppModule {}
+@Module abstract class AppModule
+
+@Module abstract class ProductionAppModule
 
 // Module containing bindings of [ActivityContext] for the final derivative app
-@Module abstract class AppActivityContextModule {}
+@Module abstract class AppActivityContextModule
 
-@Module abstract class PerDisplayModule {}
+@Module abstract class PerDisplayModule
 
 @Module abstract class LauncherConcurrencyModule {}
 
@@ -74,4 +76,4 @@ object HomeScreenFilesModule {
     fun provideHomeScreenFilesProvider(): HomeScreenFilesProvider = HomeScreenFilesNoOpProvider()
 }
 
-@Module object DesktopModule {}
+@Module object DesktopModule

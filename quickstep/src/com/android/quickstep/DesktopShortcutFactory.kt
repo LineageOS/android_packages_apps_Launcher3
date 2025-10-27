@@ -53,7 +53,7 @@ constructor(
                 taskKey.isTopActivityNoDisplay,
                 taskKey.isActivityStackTransparent,
                 taskKey.topActivityType,
-                taskKey.userId,
+                context.userId,
             ) -> null
             !taskContainer.task.isDockable -> null
             else -> listOf(DesktopShortcut(container, taskContainer, abstractFloatingViewHelper))

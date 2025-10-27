@@ -78,7 +78,7 @@ class AllAppsActionManagerTest {
         }
 
     @Before
-    fun initDaggerGraph() {
+    fun initDaggerGraphAndWaitForSettingUpdate() {
         context.initDaggerComponent(
             DaggerAllAppsActionManagerTestComponent.builder()
                 .bindSettingsCache(settingsCacheSandbox.cache)
@@ -86,6 +86,11 @@ class AllAppsActionManagerTest {
 
         doNothing().whenever(inputManager).registerKeyGestureEventHandler(any(), any())
         doNothing().whenever(inputManager).unregisterKeyGestureEventHandler(any())
+
+        // Trigger any property access to initialize allAppsActionManager
+        allAppsActionManager.isActionRegistered
+        // Wait for SettingCache update isUserSetupComplete on bgExecutor.
+        bgExecutor.submit<Any?> { null }.get()
     }
 
     @Before fun unlockUser() = allAppsActionManager.onUserUnlocked()

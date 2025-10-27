@@ -77,7 +77,7 @@
         <item name="folderHintTextColor">@color/folder_hint_text_color_light</item>
         <item name="appPairSurfaceInFolder">@color/materialColorSurfaceContainerLowest</item>
         <item name="loadingIconColor">#CCFFFFFF</item>
-        <item name="iconOnlyShortcutColor">?android:attr/textColorSecondary</item>
+        <item name="iconOnlyShortcutColor">@color/materialColorOnSurfaceVariant</item>
         <item name="eduHalfSheetBGColor">?android:attr/colorAccent</item>
         <item name="workspaceAccentColor">@color/workspace_accent_color_light</item>
         <item name="workspaceSurfaceColor">@color/workspace_surface_color</item>
@@ -213,11 +213,17 @@
         <item name="android:textColorSecondary">?attr/workspaceTextColor</item>
     </style>
 
+    <style name="QsbWidgetText">
+        <item name="android:fontFamily">variable-title-medium</item>
+        <item name="android:textColor">@color/materialColorOnSurfaceVariant</item>
+        <item name="android:textAppearance">?android:textAppearanceMedium</item>
+    </style>
+
     <!-- Theme for the widget container. -->
     <style name="WidgetContainerTheme" parent="@android:style/Theme.DeviceDefault.Settings">
         <item name="android:colorPrimaryDark">#E8EAED</item>
-        <item name="android:textColorSecondary">?android:attr/textColorPrimary</item>
-        <item name="android:colorEdgeEffect">?android:attr/textColorSecondary</item>
+        <item name="android:textColorSecondary">@color/materialColorOnSurface</item>
+        <item name="android:colorEdgeEffect">@color/materialColorOnSurfaceVariant</item>
         <item name="widgetPickerPrimarySurfaceColor">
             @color/widget_picker_primary_surface_color_light</item>
         <item name="widgetPickerSecondarySurfaceColor">
@@ -262,7 +268,7 @@
             @color/widget_cell_subtitle_color_light</item>
     </style>
     <style name="WidgetContainerTheme.Dark" parent="AppTheme.Dark">
-        <item name="android:colorEdgeEffect">?android:attr/textColorSecondary</item>
+        <item name="android:colorEdgeEffect">@color/materialColorOnSurfaceVariant</item>
         <item name="android:colorPrimaryDark">#616161</item> <!-- Gray 700 -->
         <item name="widgetPickerPrimarySurfaceColor">
             @color/widget_picker_primary_surface_color_dark</item>
@@ -432,7 +438,7 @@
         <item name="android:layout_gravity">center</item>
         <item name="android:focusable">true</item>
         <item name="android:gravity">center_horizontal</item>
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textColor">@color/workspace_text_color_light</item>
         <item name="android:defaultFocusHighlightEnabled">false</item>
         <!-- No shadows in the base theme -->
         <item name="android:shadowRadius">0</item>

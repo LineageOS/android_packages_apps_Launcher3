@@ -23,6 +23,7 @@ import static androidx.test.core.app.ApplicationProvider.getApplicationContext;
 import static com.android.launcher3.allapps.UserProfileManager.STATE_DISABLED;
 import static com.android.launcher3.allapps.UserProfileManager.STATE_ENABLED;
 import static com.android.launcher3.model.data.AppsListData.FLAG_PRIVATE_PROFILE_QUIET_MODE_ENABLED;
+import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 
 import static org.junit.Assert.assertEquals;
@@ -100,7 +101,8 @@ public class PrivateProfileManagerTest {
                 .getIntentSender()).when(launcherApps).getAppMarketActivityIntent(any(), any());
 
         mPrivateProfileManager = spy(new PrivateProfileManager(
-                mActivityAllAppsContainerView, mStatsLogManager, UserCache.getInstance(app)));
+                mActivityAllAppsContainerView, MAIN_EXECUTOR, mStatsLogManager,
+                UserCache.getInstance(app)));
         doReturn(mAllAppsRecyclerView).when(mPrivateProfileManager).getMainRecyclerView();
 
         mUserManager = app.spyService(UserManager.class);

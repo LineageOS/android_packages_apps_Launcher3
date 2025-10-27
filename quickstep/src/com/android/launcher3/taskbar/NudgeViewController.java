@@ -18,7 +18,7 @@ package com.android.launcher3.taskbar;
 
 import static android.content.Context.RECEIVER_EXPORTED;
 
-import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
+import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 import static com.android.launcher3.util.SimpleBroadcastReceiver.actionsFilter;
 
@@ -61,7 +61,7 @@ public class NudgeViewController implements TaskbarControllers.LoggableTaskbarCo
         final Resources resources = mActivity.getResources();
         if (Flags.nudgePill() && mNudgeView != null) {
             mNudgeReceiver = new SimpleBroadcastReceiver(
-                    mActivity, UI_HELPER_EXECUTOR, MAIN_EXECUTOR, this::shouldChangeNavBar);
+                    mActivity, UI_HELPER_EXECUTOR, TASKBAR_UI_THREAD, this::shouldChangeNavBar);
             mNudgeReceiver.register(actionsFilter(NAV_UPDATE_ACTION), RECEIVER_EXPORTED);
         }
         mTranslateIcon = resources.getDrawable(R.drawable.ic_translate, activity.getTheme());

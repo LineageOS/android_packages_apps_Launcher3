@@ -49,7 +49,7 @@ constructor(
     displayController: DisplayController,
     private val launchType: AppLaunchType,
     @Cuj.CujType private val cujType: Int,
-    private val mainExecutor: Executor,
+    private val uiExecutor: Executor,
     transactionSupplier: Supplier<Transaction> = Supplier { Transaction() },
 ) : RemoteTransitionStub() {
 
@@ -81,7 +81,7 @@ constructor(
         val safeTransitionFinishedCallback = RemoteRunnable {
             transitionFinishedCallback.onTransitionFinished(/* wct= */ null, /* sct= */ null)
         }
-        mainExecutor.execute {
+        uiExecutor.execute {
             getLaunchChange(info)?.let { launchChange ->
                 transaction.reparent(launchChange.leash, info.rootLeash)
             }

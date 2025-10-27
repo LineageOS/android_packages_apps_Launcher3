@@ -45,6 +45,7 @@ import androidx.annotation.Nullable;
 import com.android.app.animation.Interpolators;
 import com.android.launcher3.BuildConfig;
 import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.Flags;
 import com.android.launcher3.LauncherInteractor;
 import com.android.launcher3.LauncherState;
 import com.android.launcher3.LauncherUiState;
@@ -70,8 +71,7 @@ import com.android.quickstep.LauncherActivityInterface;
 import com.android.quickstep.OverviewComponentObserver;
 import com.android.quickstep.RecentsAnimationCallbacks;
 import com.android.quickstep.util.SplitTask;
-import com.android.quickstep.views.RecentsView;
-import com.android.quickstep.views.RecentsViewContainer;
+import com.android.quickstep.views.RecentsViewContainerInteractor;
 import com.android.quickstep.window.RecentsWindowManager;
 import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
@@ -128,7 +128,7 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
     private final TaskbarLauncherStateController
             mTaskbarLauncherStateController = new TaskbarLauncherStateController();
     // When overview-in-a-window is enabled, that window is the container, else it is mLauncher.
-    private RecentsViewContainer mRecentsViewContainer;
+    private RecentsViewContainerInteractor mRecentsViewContainer;
     private @Nullable RecentsViewInteractor mRecentsViewInteractor;
 
     public LauncherTaskbarUIController(LauncherInteractor launcher) {
@@ -150,11 +150,10 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
         if (containerInterface != null
                 && containerInterface.getCreatedContainer()
                 instanceof RecentsWindowManager recentsWindowManager) {
+            recentsWindowManager.setTaskbarInteractor(new TaskbarInteractor(this));
             mRecentsViewContainer = recentsWindowManager;
-            mRecentsViewContainer.setTaskbarInteractor(new TaskbarInteractor(this));
         } else {
-            // TODO(b/404636836) Refactor API calls on mRecentsViewContainer
-            mRecentsViewContainer = mLauncher.getRecentsViewContainer();
+            mRecentsViewContainer = mLauncher.getRecentsViewContainerInteractor();
         }
         mLauncher.setTaskbarInteractor(new TaskbarInteractor(this));
 
@@ -468,7 +467,14 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
         if (Utilities.isRunningInTestHarness()) {
             return false;
         }
-
+        TaskbarEduTooltipController eduController = mControllers.taskbarEduTooltipController;
+        if (Flags.tooltipEduCombinator()) {
+            boolean shouldShowFeaturesEdu = !eduController.getUserHasSeenFeaturesEdu();
+            boolean shouldShowPinningEduForTransient =
+                    mControllers.taskbarActivityContext.isTransientTaskbar()
+                            && !eduController.getUserHasSeenPinningEdu();
+            return shouldShowFeaturesEdu || shouldShowPinningEduForTransient;
+        }
         // Persistent features EDU tooltip.
         if (!mControllers.taskbarActivityContext.isTransientTaskbar()) {
             return !OnboardingPrefs.TASKBAR_EDU_TOOLTIP_STEP.hasReachedMax(
@@ -476,7 +482,7 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
         }
 
         // Transient swipe EDU tooltip.
-        return mControllers.taskbarEduTooltipController.getTooltipStep() < TOOLTIP_STEP_FEATURES;
+        return eduController.getTooltipStep() < TOOLTIP_STEP_FEATURES;
     }
 
     @Override
@@ -618,17 +624,8 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
 
     @Override
     public RecentsViewInteractor getRecentsViewInteractor() {
-        RecentsView recentsView = mRecentsViewContainer.getOverviewPanel();
-        if (recentsView == null) {
-            mRecentsViewInteractor = null;
-            return null;
-        }
-
-        if (mRecentsViewInteractor == null
-                || !mRecentsViewInteractor.hasSameRecentsView(recentsView)) {
-            mRecentsViewInteractor = new RecentsViewInteractor(recentsView);
-        }
-
+        mRecentsViewInteractor =
+                mRecentsViewContainer.getRecentsViewInteractor(mRecentsViewInteractor);
         return mRecentsViewInteractor;
     }
 

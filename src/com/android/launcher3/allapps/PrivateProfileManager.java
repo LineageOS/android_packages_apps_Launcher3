@@ -34,7 +34,6 @@ import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCH
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_PRIVATE_SPACE_UNLOCK_TAP;
 import static com.android.launcher3.model.data.AppsListData.FLAG_PRIVATE_PROFILE_QUIET_MODE_ENABLED;
 import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_NOT_PINNABLE;
-import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 import static com.android.launcher3.util.SettingsCache.PRIVATE_SPACE_HIDE_WHEN_LOCKED_URI;
 
@@ -76,6 +75,7 @@ import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.PrivateSpaceInstallAppButtonInfo;
 import com.android.launcher3.pm.UserCache;
 import com.android.launcher3.util.ApiWrapper;
+import com.android.launcher3.util.LooperExecutor;
 import com.android.launcher3.util.Preconditions;
 import com.android.launcher3.util.SettingsCache;
 import com.android.launcher3.views.ActivityContext;
@@ -107,6 +107,7 @@ public class PrivateProfileManager extends UserProfileManager {
     private static final int NO_DELAY = 0;
     private static final int CONTAINER_OPACITY_DURATION = 150;
     private final ActivityAllAppsContainerView<?> mAllApps;
+    private final LooperExecutor mUiExecutor;
     private final Predicate<UserHandle> mPrivateProfileMatcher;
     private final int mPsHeaderHeight;
     private final int mFloatingMaskViewCornerRadius;
@@ -151,10 +152,12 @@ public class PrivateProfileManager extends UserProfileManager {
 
     public PrivateProfileManager(
             ActivityAllAppsContainerView<?> allApps,
+            LooperExecutor uiExecutor,
             StatsLogManager statsLogManager,
             UserCache userCache) {
         super(statsLogManager, userCache);
         mAllApps = allApps;
+        mUiExecutor = uiExecutor;
         mPrivateProfileMatcher = (user) -> userCache.getUserInfo(user).isPrivate();
 
         Context appContext = allApps.getContext().getApplicationContext();
@@ -312,16 +315,16 @@ public class PrivateProfileManager extends UserProfileManager {
      */
     void postUnlock() {
         if (mAllApps.isSearching()) {
-            MAIN_EXECUTOR.post(this::exitSearchAndExpand);
+            mUiExecutor.post(this::exitSearchAndExpand);
         } else {
-            MAIN_EXECUTOR.post(this::expandPrivateSpace);
+            mUiExecutor.post(this::expandPrivateSpace);
         }
     }
 
     /** Collapses the private space before the app list has been updated. */
     void executeLock() {
         Trace.beginSection("PrivateProfileManager#executeLock");
-        MAIN_EXECUTOR.execute(() -> updatePrivateStateAnimator(false));
+        mUiExecutor.execute(() -> updatePrivateStateAnimator(false));
         Trace.endSection();
     }
 
@@ -359,7 +362,7 @@ public class PrivateProfileManager extends UserProfileManager {
         Log.d(TAG, "bindPrivateSpaceHeaderViewElements: " + "Binding private space.");
         updateView();
         if (mOnPSHeaderAdded != null) {
-            MAIN_EXECUTOR.execute(mOnPSHeaderAdded);
+            mUiExecutor.execute(mOnPSHeaderAdded);
             mOnPSHeaderAdded = null;
         }
     }
@@ -850,7 +853,7 @@ public class PrivateProfileManager extends UserProfileManager {
         mAllApps.updateHeaderScroll(0);
         // Animate to A-Z with 0 time to reset the animation with proper state management.
         mAllApps.animateToSearchState(false, 0);
-        MAIN_EXECUTOR.post(() -> {
+        mUiExecutor.post(() -> {
             mAllApps.mSearchUiManager.resetSearch();
             mAllApps.switchToTab(ActivityAllAppsContainerView.AdapterHolder.MAIN);
             expandPrivateSpace();

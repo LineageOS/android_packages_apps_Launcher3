@@ -18,8 +18,7 @@ package com.android.quickstep.util;
 import static android.os.Trace.TRACE_TAG_APP;
 
 import android.app.WallpaperManager;
-import android.graphics.RenderEffect;
-import android.graphics.Shader;
+import android.content.Context;
 import android.gui.EarlyWakeupInfo;
 import android.os.Binder;
 import android.os.IBinder;
@@ -31,28 +30,27 @@ import android.view.SurfaceControl;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 
 import com.android.app.animation.Interpolators;
-import com.android.launcher3.Launcher;
-import com.android.launcher3.LauncherState;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
-import com.android.launcher3.statemanager.StateManager;
-import com.android.launcher3.uioverrides.QuickstepLauncher;
+import com.android.launcher3.statemanager.BaseState;
+import com.android.launcher3.statemanager.StatefulContainer;
 import com.android.launcher3.util.MultiPropertyFactory;
 import com.android.launcher3.util.MultiPropertyFactory.MultiProperty;
 import com.android.systemui.shared.system.BlurUtils;
 
 /**
- * Utility class for applying depth effect
+ * Utility class for applying depth effect.
+ * @param <STATE> state associated with the container.
+ * @param <CONTAINER> the StatefulContainer.
  */
-public class BaseDepthController {
-    public static final float DEPTH_0_PERCENT = 0f;
-    public static final float DEPTH_70_PERCENT = 0.7f;
+public class BaseDepthController<
+        STATE extends BaseState<STATE>,
+        CONTAINER extends Context & StatefulContainer<STATE>> {
 
-    private static final FloatProperty<BaseDepthController> DEPTH =
-            new FloatProperty<BaseDepthController>("depth") {
+    private static final FloatProperty<BaseDepthController<?, ?>> DEPTH =
+            new FloatProperty<>("depth") {
                 @Override
                 public void setValue(BaseDepthController depthController, float depth) {
                     depthController.setDepth(depth);
@@ -69,9 +67,9 @@ public class BaseDepthController {
     private static final int DEPTH_INDEX_COUNT = 2;
 
     // b/291401432
-    private static final String TAG = "BaseDepthController";
+    protected static final String TAG = "BaseDepthController";
 
-    protected final QuickstepLauncher mLauncher;
+    protected final CONTAINER mContainer;
     /** Property to set the depth for state transition. */
     public final MultiProperty stateDepth;
     /** Property to set the depth for widget picker. */
@@ -93,16 +91,16 @@ public class BaseDepthController {
 
     protected SurfaceControl mBaseSurface;
     protected SurfaceControl mBaseSurfaceOverride;
-    // May be temporarily null while the Launcher is being created, in which case all blur
+    // May be temporarily null while the container is being created, in which case all blur
     // requests will be applied immediately rather than synced to the RenderThread. This shouldn't
-    // really happen in practice since we won't apply blur until the Launcher is interactive.
+    // really happen in practice since we won't apply blur until the container is interactive.
     @Nullable protected SurfaceTransactionApplier mSurfaceTransactionApplier;
 
-    // Hints that there is potentially content behind Launcher and that we shouldn't optimize by
-    // marking the launcher surface as opaque.  Only used in certain Launcher states.
-    private boolean mHasContentBehindLauncher;
+    // Hints that there is potentially content behind container and that we shouldn't optimize by
+    // marking the container surface as opaque.  Only used in certain container states.
+    private boolean mHasContentBehindContainer;
 
-    /** Pause blur but allow transparent, can be used when launch something behind the Launcher. */
+    /** Pause blur but allow transparent, can be used when launch something behind the container. */
     protected boolean mPauseBlurs;
 
     /**
@@ -120,17 +118,17 @@ public class BaseDepthController {
     /**
      * Info for early wakeup requests to SurfaceFlinger.
      */
-    private EarlyWakeupInfo mEarlyWakeupInfo = new EarlyWakeupInfo();
+    private final EarlyWakeupInfo mEarlyWakeupInfo = new EarlyWakeupInfo();
 
-    public BaseDepthController(QuickstepLauncher activity) {
-        mLauncher = activity;
+    public BaseDepthController(CONTAINER container) {
+        mContainer = container;
         mCrossWindowBlursEnabled =
                 CrossWindowBlurListeners.getInstance().isCrossWindowBlurEnabled();
-        mMaxBlurRadius = activity.getResources().getDimensionPixelSize(
+        mMaxBlurRadius = container.getResources().getDimensionPixelSize(
                 R.dimen.max_depth_blur_radius_enhanced);
-        mWallpaperManager = activity.getSystemService(WallpaperManager.class);
+        mWallpaperManager = container.getSystemService(WallpaperManager.class);
 
-        MultiPropertyFactory<BaseDepthController> depthProperty =
+        MultiPropertyFactory<BaseDepthController<?, ?>> depthProperty =
                 new MultiPropertyFactory<>(this, DEPTH, DEPTH_INDEX_COUNT, Float::max);
         stateDepth = depthProperty.get(DEPTH_INDEX_STATE_TRANSITION);
         widgetDepth = depthProperty.get(DEPTH_INDEX_WIDGET);
@@ -141,7 +139,7 @@ public class BaseDepthController {
     /**
      * Sets the applier to use for syncing surface transactions to the RenderThread.
      *
-     * @param surfaceTransactionApplier created in launcher to be in sync with the other Surface
+     * @param surfaceTransactionApplier created in container to be in sync with the other Surface
      *                                  transactions e.g. in RecentsView.
      */
     public void setSurfaceTransactionApplier(
@@ -150,8 +148,8 @@ public class BaseDepthController {
     }
 
     /**
-     * Returns if cross window blurs are enabled. In other words, whether launcher should use blurs
-     * style UI or fallback style UI.
+     * Returns if cross window blurs are enabled. In other words, whether the container should use
+     * blurs style UI or fallback style UI.
      */
     public boolean isCrossWindowBlursEnabled() {
         return mCrossWindowBlursEnabled;
@@ -162,12 +160,12 @@ public class BaseDepthController {
             return;
         }
         mCrossWindowBlursEnabled = isEnabled;
-        mLauncher.updateBlurStyle();
+        mContainer.updateBlurStyle();
         applyDepthAndBlur();
     }
 
-    public void setHasContentBehindLauncher(boolean hasContentBehindLauncher) {
-        mHasContentBehindLauncher = hasContentBehindLauncher;
+    public void setHasContentBehindContainer(boolean hasContentBehindContainer) {
+        mHasContentBehindContainer = hasContentBehindContainer;
     }
 
     public void pauseBlursOnWindows(boolean pause) {
@@ -185,7 +183,7 @@ public class BaseDepthController {
     }
 
     /**
-     * Applies depth and blur to the launcher.
+     * Applies depth and blur to the container.
      *
      * @param surfaceTransaction optional SurfaceTransaction to apply the blur to.
      * @param applyImmediately whether to apply the blur immediately or defer to the next frame.
@@ -194,7 +192,7 @@ public class BaseDepthController {
     private void applyDepthAndBlur(@Nullable SurfaceTransaction surfaceTransaction,
             boolean applyImmediately, boolean skipSimilarBlur) {
         float depth = mDepth;
-        IBinder windowToken = mLauncher.getRootView().getWindowToken();
+        IBinder windowToken = mContainer.getRootView().getWindowToken();
         if (windowToken != null) {
             mWallpaperManager.setWallpaperZoomOut(windowToken, depth);
         }
@@ -213,8 +211,8 @@ public class BaseDepthController {
             return;
         }
         mWaitingOnSurfaceValidity = false;
-        boolean hasOpaqueBg = mLauncher.getScrimView().isFullyOpaque();
-        boolean isSurfaceOpaque = !mHasContentBehindLauncher && hasOpaqueBg && !mPauseBlurs;
+        boolean hasOpaqueBg = mContainer.getScrimView().isFullyOpaque();
+        boolean isSurfaceOpaque = !mHasContentBehindContainer && hasOpaqueBg && !mPauseBlurs;
 
         float blurAmount = mapDepthToBlur(depth);
         SurfaceControl blurSurface = mBlurSurface != null ? mBlurSurface : mBaseSurface;
@@ -257,8 +255,10 @@ public class BaseDepthController {
             mSurfaceTransactionApplier.scheduleApply(surfaceTransaction);
         }
 
-        blurWorkspaceDepthTargets();
+        onDepthAndBlurApplied();
     }
+
+    protected void onDepthAndBlurApplied() {}
 
     /**
      * Sets the early wakeup state.
@@ -288,7 +288,7 @@ public class BaseDepthController {
         Log.d(TAG, "setEarlyWakeup: " + start);
         if (start) {
             Trace.instantForTrack(TRACE_TAG_APP, TAG, "notifyRendererForGpuLoadUp");
-            mLauncher.getRootView().getViewRootImpl().notifyRendererForGpuLoadUp("applyBlur");
+            mContainer.getRootView().getViewRootImpl().notifyRendererForGpuLoadUp("applyBlur");
             transaction.setEarlyWakeupStart(mEarlyWakeupInfo);
         } else {
             transaction.setEarlyWakeupEnd(mEarlyWakeupInfo);
@@ -296,33 +296,10 @@ public class BaseDepthController {
         mInEarlyWakeUp = start;
     }
 
-    /** @return {@code true} if the workspace should be blurred. */
-    @VisibleForTesting
-    public boolean blurWorkspaceDepthTargets() {
-        StateManager<LauncherState, Launcher> stateManager = mLauncher.getStateManager();
-        LauncherState targetState = stateManager.getTargetState() != null
-                ? stateManager.getTargetState() : stateManager.getState();
-        // Only blur workspace if the current state wants to blur based on the target state.
-        boolean shouldBlurWorkspace =
-                stateManager.getCurrentStableState().shouldBlurWorkspace(targetState);
-
-        RenderEffect blurEffect = shouldBlurWorkspace && mCurrentBlur > 0
-                ? RenderEffect.createBlurEffect(mCurrentBlur, mCurrentBlur, Shader.TileMode.DECAL)
-                // If blur is not desired, clear the blur effect from the depth targets.
-                : null;
-        Log.d(TAG, "shouldBlurWorkspace: " + shouldBlurWorkspace
-                + " targetState: " + targetState
-                + " currentStableState: " + stateManager.getCurrentStableState()
-                + " mCurrentBlur: " + mCurrentBlur
-                + " mLauncher.getDepthBlurTargets(): " + mLauncher.getDepthBlurTargets());
-        mLauncher.getDepthBlurTargets().forEach(target -> target.setRenderEffect(blurEffect));
-        return shouldBlurWorkspace;
-    }
-
     private void setDepth(float depth) {
         depth = Utilities.boundToRange(depth, 0, 1);
-        // Depth of the Launcher state we are in or transitioning to.
-        float targetStateDepth = mLauncher.getStateManager().getState().getDepth(mLauncher);
+        // Depth of the container state we are in or transitioning to.
+        float targetStateDepth = mContainer.getStateManager().getState().getDepth(mContainer);
 
         float depthF;
         if (depth == targetStateDepth) {

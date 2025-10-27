@@ -566,11 +566,12 @@ object InputConsumerUtils {
                 deviceState.isPredictiveBackToHomeInProgress)
         // with shell-transitions, home is resumed during recents animation, so
         // explicitly check against recents animation too.
-        // Home is always running and isn't resumed when home shows behind desktop.
+        // Home is always running and is resumed when home shows behind desktop, so check whether
+        // running task is home in that case.
         val launcherResumedThroughShellTransition =
             containerInterface.isResumed() &&
                 !previousGestureState.isRecentsAnimationRunning &&
-                !desktopState.shouldShowHomeBehindDesktop
+                (!desktopState.shouldShowHomeBehindDesktop || runningTask?.isHomeTask == true)
 
         // If a task fragment within Launcher is resumed
         val launcherChildActivityResumed =

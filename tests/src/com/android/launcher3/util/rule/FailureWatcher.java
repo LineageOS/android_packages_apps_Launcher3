@@ -64,8 +64,10 @@ public class FailureWatcher extends TestWatcher {
             @Override
             public void evaluate() throws Throwable {
                 try {
+                    mLauncher.setEnableRegisterEventNotFromTest(true);
                     FailureWatcher.super.apply(base, description).evaluate();
                 } finally {
+                    mLauncher.setEnableRegisterEventNotFromTest(false);
                     // Detect touch events coming from physical screen.
                     if (mLauncher.hadNontestEvents()) {
                         throw new AssertionError(

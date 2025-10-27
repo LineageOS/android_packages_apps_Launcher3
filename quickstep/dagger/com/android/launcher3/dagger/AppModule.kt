@@ -44,3 +44,5 @@ abstract class AppModule {
         impl: QuickstepTestInformationHandler
     ): TestInformationHandler
 }
+
+@Module abstract class ProductionAppModule

@@ -30,6 +30,7 @@ import static com.android.launcher3.model.data.AppsListData.FLAG_QUIET_MODE_CHAN
 import static com.android.launcher3.model.data.AppsListData.FLAG_QUIET_MODE_ENABLED;
 import static com.android.launcher3.model.data.AppsListData.FLAG_WORK_PROFILE_QUIET_MODE_ENABLED;
 import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_INSTALL_SESSION_ACTIVE;
+import static com.android.launcher3.model.tasks.BrowserIconMigrator.PREF_MIGRATION_PENDING;
 import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
 import static com.android.launcher3.util.Executors.THREAD_POOL_EXECUTOR;
 import static com.android.launcher3.util.LooperExecutor.CALLER_LOADER_TASK;
@@ -85,8 +86,6 @@ import com.android.launcher3.model.data.IconRequestInfo;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.LauncherAppWidgetInfo;
 import com.android.launcher3.model.data.LoaderParams;
-import com.android.launcher3.model.data.WorkspaceChangeEvent;
-import com.android.launcher3.model.data.WorkspaceChangeEvent.AddEvent;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.model.tasks.BrowserIconMigratorFactory;
 import com.android.launcher3.pm.InstallSessionHelper;
@@ -186,6 +185,7 @@ public class LoaderTask implements Runnable {
     private final FirstScreenBroadcastHelper mFirstScreenBroadcastHelper;
     private final SettingsCache mSettingsCache;
     private final BrowserIconMigratorFactory mBrowserIconMigratorFactory;
+    private final LauncherPrefs mPrefs;
 
     @AssistedInject
     protected LoaderTask(
@@ -211,7 +211,8 @@ public class LoaderTask implements Runnable {
             HomeScreenFilesUpdateTask.Factory homeScreenFilesUpdateTask,
             FirstScreenBroadcastHelper firstScreenBroadcastHelper,
             SettingsCache settingsCache,
-            BrowserIconMigratorFactory browserIconMigratorFactory) {
+            BrowserIconMigratorFactory browserIconMigratorFactory,
+            LauncherPrefs prefs) {
         mContext = context;
         mIDP = idp;
         mModel = model;
@@ -238,6 +239,7 @@ public class LoaderTask implements Runnable {
         mSettingsCache = settingsCache;
         mUserManagerState = mUserCache.getUserManagerState();
         mBrowserIconMigratorFactory = browserIconMigratorFactory;
+        mPrefs = prefs;
 
         // NOTE: When files on home screen initialization is decoupled from the loader task we must
         // wait for the provider to become ready before querying for file system items.
@@ -433,8 +435,7 @@ public class LoaderTask implements Runnable {
         TraceHelper.INSTANCE.beginSection(TAG);
         MODEL_EXECUTOR.elevatePriority(CALLER_LOADER_TASK);
         LoaderMemoryLogger memoryLogger = new LoaderMemoryLogger();
-        mIsRestoreFromBackup =
-                LauncherPrefs.get(mContext).get(IS_FIRST_LOAD_AFTER_RESTORE);
+        mIsRestoreFromBackup = mPrefs.get(IS_FIRST_LOAD_AFTER_RESTORE);
         LauncherRestoreEventLogger restoreEventLogger = null;
         if (enableLauncherBrMetricsFixed()) {
             restoreEventLogger = mRestoreEventLoggerProvider.get();
@@ -446,7 +447,7 @@ public class LoaderTask implements Runnable {
             memoryLogger.clearLogs();
             if (mIsRestoreFromBackup) {
                 mIsRestoreFromBackup = false;
-                LauncherPrefs.get(mContext).putSync(IS_FIRST_LOAD_AFTER_RESTORE.to(false));
+                mPrefs.putSync(IS_FIRST_LOAD_AFTER_RESTORE.to(false));
                 if (restoreEventLogger != null) {
                     restoreEventLogger.reportLauncherRestoreResults();
                 }
@@ -485,7 +486,9 @@ public class LoaderTask implements Runnable {
         }
 
         Log.d(TAG, "loadWorkspace: loading default favorites if necessary");
-        final var isNewUserSetup = dbController.loadDefaultFavoritesIfNecessary();
+        if (dbController.loadDefaultFavoritesIfNecessary()) {
+            mPrefs.put(PREF_MIGRATION_PENDING, true);
+        }
 
         synchronized (mBgDataModel) {
             mBgDataModel.clear();
@@ -544,19 +547,12 @@ public class LoaderTask implements Runnable {
 
             mBgDataModel.updateStringCache(mContext);
 
-
             var loadedItems =
                     itemProcessor.finalizeData(mModelDelegate, mModel.getModelDbController());
-            if (Flags.migrateBrowserIconOnSetup() && (isNewUserSetup || mIsRestoreFromBackup)) {
-                var changes = mBrowserIconMigratorFactory
-                        .createBrowserIconMigrator(loadedItems).processItems();
-                for (WorkspaceChangeEvent changeEvent: changes) {
-                    if (changeEvent instanceof AddEvent ae) {
-                        ae.getItems().forEach(item -> {
-                            loadedItems.put(item.id, item);
-                        });
-                    }
-                }
+            if (Flags.migrateBrowserIconOnSetup()
+                    && (mIsRestoreFromBackup || mPrefs.get(PREF_MIGRATION_PENDING))) {
+                mBrowserIconMigratorFactory
+                        .createBrowserIconMigrator(loadedItems).performMigration();
             }
 
             mBgDataModel.dataLoadComplete(loadedItems);

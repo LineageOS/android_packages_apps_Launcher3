@@ -177,6 +177,8 @@ open class RecentsState(@JvmField val ordinal: Int, private val mFlags: Int) :
         backAnimationController?.setPlayFraction(backProgress)
     }
 
+    override fun getDepth(context: ActivityContext) = 0f
+
     private class ModalState(id: Int, flags: Int) : RecentsState(id, flags) {
         override fun onBackInvoked(container: RecentsViewContainer) {
             container.goToRecentsState(DEFAULT, true, /* listener= */ null)

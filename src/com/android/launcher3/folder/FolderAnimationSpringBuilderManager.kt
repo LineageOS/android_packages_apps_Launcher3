@@ -16,10 +16,9 @@
 package com.android.launcher3.folder
 
 import android.animation.AnimatorSet
+import android.graphics.Color
 import android.view.View
 import com.android.launcher3.BubbleTextView
-import com.android.launcher3.Hotseat
-import com.android.launcher3.Workspace
 import com.android.launcher3.apppairs.AppPairIcon
 import com.android.launcher3.folder.ClipRevealData.Factory.getClipRevealData
 import com.android.launcher3.folder.FolderAnimationData.Factory.getAnimationData
@@ -42,7 +41,9 @@ class FolderAnimationSpringBuilderManager(
     private val launcherDelegate: LauncherDelegate,
 ) : FolderAnimationCreator {
     override fun createAnimatorSet(isOpening: Boolean): AnimatorSet {
-        resetLauncherScale(launcherDelegate.launcher?.workspace, launcherDelegate.launcher?.hotseat)
+        // Since we scale down workspace/hotseat when opening folder,
+        // need to have initial values to find starting folder icon location
+        resetLauncherUi(launcherDelegate)
         val folderAnimData: FolderAnimationData = folder.getAnimationData(isOpening)
         val clipRevealData: ClipRevealData = folder.getClipRevealData(shapeDelegate, folderAnimData)
         val iconAnimData: List<IconAnimationData> = folder.getIconAnimationDataList(folderAnimData)
@@ -56,22 +57,25 @@ class FolderAnimationSpringBuilderManager(
             .animatorSet
     }
 
-    // Folders can exist outside of Launcher (Ex. Transient Taskbar)
-    // So we only apply Launcher effects when we have a Launcher.
-    // We need to reset these values before calculating folder positioning.
-    private fun resetLauncherScale(workspace: Workspace<*>?, hotseat: Hotseat?) {
-        if (hotseat == null || workspace == null) return
-        // Used to match the translation of the scaling between hotseat and workspace.
-        workspace.setPivotToScaleWithSelf(hotseat)
-        // Since we scale down workspace/hotseat when opening folder,
-        // need to have initial values to find starting folder icon location
-        workspace.scaleX = 1f
-        workspace.scaleY = 1f
-        hotseat.scaleX = 1f
-        hotseat.scaleY = 1f
-    }
-
     companion object {
+        /** Resets the scale of the launcher components and the scrim. */
+        @JvmStatic
+        fun resetLauncherUi(launcherDelegate: LauncherDelegate) {
+            val launcher = launcherDelegate.launcher ?: return
+            val workspace = launcher.workspace
+            val hotseat = launcher.hotseat
+            val scrim = launcher.scrimView
+
+            // Used to match the translation of the scaling between hotseat and workspace.
+            workspace.setPivotToScaleWithSelf(hotseat)
+            workspace.scaleX = 1f
+            workspace.scaleY = 1f
+            hotseat.scaleX = 1f
+            hotseat.scaleY = 1f
+            scrim.alpha = 1f
+            scrim.setBackgroundColor(Color.TRANSPARENT)
+        }
+
         /** Returns the list of "preview items" on {@param page}. */
         fun getPreviewIconsOnPage(folder: Folder, page: Int): List<View> {
             return createFolderGridOrganizer(folder.mActivityContext.deviceProfile)

@@ -315,6 +315,13 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
                         },
                         this::getRecentsViewContainer);
             }
+            case TestProtocol.REQUEST_GET_DESK_COUNT:
+                return getUIProperty(Bundle::putInt,
+                        recentsViewContainer -> {
+                            final RecentsView recentsView = recentsViewContainer.getOverviewPanel();
+                            return recentsView.getDesktopTaskViewCount();
+                        },
+                        this::getRecentsViewContainer);
         }
 
         return super.call(method, arg, extras);

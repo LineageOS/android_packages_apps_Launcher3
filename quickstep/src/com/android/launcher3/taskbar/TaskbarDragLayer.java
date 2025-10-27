@@ -266,7 +266,11 @@ public class TaskbarDragLayer extends BaseDragLayer<TaskbarActivityContext> {
     /** Called while Taskbar window is focusable, e.g. when pressing back while a folder is open */
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if (event.getAction() == ACTION_UP && event.getKeyCode() == KEYCODE_BACK) {
+        final boolean backEvent =
+                event.getAction() == ACTION_UP && event.getKeyCode() == KEYCODE_BACK;
+        final boolean escEvent = event.getAction() == KeyEvent.ACTION_DOWN
+                && event.getKeyCode() == KeyEvent.KEYCODE_ESCAPE && event.hasNoModifiers();
+        if (backEvent || escEvent) {
             AbstractFloatingView topView = AbstractFloatingView.getTopOpenView(mContainer);
             if (topView != null && topView.canHandleBack()) {
                 topView.onBackInvoked();

@@ -39,16 +39,13 @@ import com.android.launcher3.util.OnboardingPrefs.TASKBAR_SWIPE_EDU_SEEN
 import com.android.launcher3.views.ActivityContext
 import com.android.quickstep.util.ContextualSearchInvoker
 import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper
-import javax.inject.Inject
 
 /**
  * Class that encapsulates the logic for determining which educational tooltip should be shown to
  * the user. It manages the display conditions and content for various educational tooltips related
  * to the taskbar, such as swipe gestures, features, pinning, and search.
  */
-class TooltipEduCombinator
-@Inject
-constructor(
+class TooltipEduCombinator(
     activityContext: ActivityContext,
     private val taskbarStashController: TaskbarStashController,
 ) {
@@ -88,7 +85,7 @@ constructor(
     @VisibleForTesting
     var userHasSeenSwipeEdu: Boolean
         get() = TASKBAR_SWIPE_EDU_SEEN.get(context)
-        private set(seen) {
+        set(seen) {
             LauncherPrefs.get(context).put(TASKBAR_SWIPE_EDU_SEEN, seen)
         }
 
@@ -96,7 +93,7 @@ constructor(
     @VisibleForTesting
     var userHasSeenFeaturesEdu: Boolean
         get() = TASKBAR_FEATURES_EDU_SEEN.get(context)
-        private set(seen) {
+        set(seen) {
             LauncherPrefs.get(context).put(TASKBAR_FEATURES_EDU_SEEN, seen)
         }
 
@@ -104,7 +101,7 @@ constructor(
     @VisibleForTesting
     var userHasSeenPinningEdu: Boolean
         get() = TASKBAR_PINNING_EDU_SEEN.get(context)
-        private set(seen) {
+        set(seen) {
             LauncherPrefs.get(context).put(TASKBAR_PINNING_EDU_SEEN, seen)
         }
 
@@ -112,7 +109,7 @@ constructor(
     @VisibleForTesting
     var userHasSeenSearchEdu: Boolean
         get() = TASKBAR_SEARCH_EDU_SEEN.get(context)
-        private set(seen) {
+        set(seen) {
             LauncherPrefs.get(context).put(TASKBAR_SEARCH_EDU_SEEN, seen)
         }
 
@@ -221,7 +218,7 @@ constructor(
                             context.getString(R.string.taskbar_edu_swipe_animation_description),
                     )
                 ),
-            location = DisplayLocation.TASKBAR_CENTER,
+            location = DisplayLocation.TASKBAR_HANDLE,
         )
     }
 

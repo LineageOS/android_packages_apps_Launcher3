@@ -18,12 +18,10 @@ package com.android.launcher3.taskbar
 
 import android.app.PendingIntent
 import com.android.launcher3.ActivityInteractor
-import com.android.launcher3.Flags.enableTaskbarUiThread
 import com.android.launcher3.LauncherInteractor
 import com.android.launcher3.anim.AnimatorPlaybackController
 import com.android.launcher3.statemanager.StatefulActivity
 import com.android.launcher3.uioverrides.QuickstepLauncher
-import com.android.launcher3.util.Executors
 import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
 import com.android.quickstep.views.RecentsViewContainer
 import java.io.PrintWriter
@@ -49,7 +47,7 @@ class TaskbarManagerImplWrapper(private val impl: TaskbarManagerImpl) : TaskbarM
     }
 
     override fun setRecentsViewContainer(recentsViewContainer: RecentsViewContainer) {
-        TASKBAR_UI_THREAD.execute { impl.setRecentsViewContainer(recentsViewContainer) }
+        TASKBAR_UI_THREAD.execute { impl.setRecentsViewContainerInteractor(recentsViewContainer) }
     }
 
     override fun recreateTaskbars() {
@@ -160,9 +158,7 @@ class TaskbarManagerImplWrapper(private val impl: TaskbarManagerImpl) : TaskbarM
 
     override fun createAllAppsPendingIntent(): PendingIntent {
         // Thread safe
-        return impl.createAllAppsPendingIntent(
-            if (enableTaskbarUiThread()) TASKBAR_UI_THREAD else Executors.MAIN_EXECUTOR
-        )
+        return impl.createAllAppsPendingIntent(TASKBAR_UI_THREAD)
     }
 
     override fun getPrimaryDisplayId(): Int {

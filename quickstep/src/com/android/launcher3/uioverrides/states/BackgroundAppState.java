@@ -17,17 +17,17 @@ package com.android.launcher3.uioverrides.states;
 
 import static com.android.launcher3.logging.StatsLogManager.LAUNCHER_STATE_BACKGROUND;
 
-import android.content.Context;
 import android.graphics.Color;
 
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherUiState;
 import com.android.launcher3.allapps.AllAppsTransitionController;
+import com.android.launcher3.statehandlers.DepthController;
 import com.android.launcher3.uioverrides.QuickstepLauncher;
+import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.views.ScrimColors;
 import com.android.quickstep.fallback.RecentsState;
-import com.android.quickstep.util.BaseDepthController;
 import com.android.quickstep.util.LayoutUtils;
 import com.android.quickstep.views.RecentsView;
 
@@ -100,12 +100,12 @@ public class BackgroundAppState extends OverviewState {
     }
 
     @Override
-    protected float getDepthUnchecked(Context context) {
-        if (Launcher.getLauncher(context).areDesktopTasksVisible()) {
+    protected float getDepthUnchecked(ActivityContext context) {
+        if (Launcher.getLauncher(context.asContext()).areDesktopTasksVisible()) {
             // Don't blur the background while desktop tasks are visible
-            return BaseDepthController.DEPTH_0_PERCENT;
+            return DepthController.DEPTH_0_PERCENT;
         } else {
-            return BaseDepthController.DEPTH_70_PERCENT;
+            return DepthController.DEPTH_70_PERCENT;
         }
     }
 
@@ -127,4 +127,5 @@ public class BackgroundAppState extends OverviewState {
         // Disallow split select from taskbar items in overview
         return false;
     }
+
 }

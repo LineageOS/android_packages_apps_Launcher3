@@ -20,11 +20,9 @@ import static android.window.SplashScreen.SPLASH_SCREEN_STYLE_SOLID_COLOR;
 import static com.android.launcher3.BuildConfig.WIDGETS_ENABLED;
 import static com.android.launcher3.LauncherSettings.Animation.DEFAULT_NO_ICON;
 import static com.android.launcher3.Utilities.allowBGLaunch;
-import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_ALLAPPS_KEYBOARD_CLOSED;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_APP_LAUNCH_PENDING_INTENT;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_APP_LAUNCH_TAP;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
-import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 
 import android.app.Activity;
 import android.app.ActivityOptions;
@@ -35,11 +33,9 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.pm.LauncherApps;
-import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.Process;
 import android.os.UserHandle;
 import android.util.Log;
@@ -48,14 +44,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.AccessibilityDelegate;
 import android.view.Window;
-import android.view.WindowInsets;
-import android.view.WindowInsetsController;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.savedstate.SavedStateRegistryOwner;
@@ -87,6 +79,7 @@ import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.util.ActivityOptionsWrapper;
 import com.android.launcher3.util.ApplicationInfoWrapper;
 import com.android.launcher3.util.LauncherBindableItemsContainer;
+import com.android.launcher3.util.LooperExecutor;
 import com.android.launcher3.util.PendingRequestArgs;
 import com.android.launcher3.util.Preconditions;
 import com.android.launcher3.util.RunnableList;
@@ -99,7 +92,6 @@ import com.android.launcher3.widget.LauncherWidgetHolder;
 import com.android.launcher3.widget.picker.model.WidgetPickerDataProvider;
 
 import java.util.List;
-import java.util.concurrent.Executor;
 
 /**
  * An interface to be used along with a context for various activities in Launcher. This allows a
@@ -112,7 +104,7 @@ public interface ActivityContext extends SavedStateRegistryOwner {
     /** Returns the dagger graph for this UI context */
     ActivityContextComponent getActivityComponent();
 
-    default Executor getUiExecutor() {
+    default LooperExecutor getUiExecutor() {
         return MAIN_EXECUTOR;
     }
 
@@ -379,80 +371,7 @@ public interface ActivityContext extends SavedStateRegistryOwner {
      * Hides the keyboard if it is visible
      */
     default void hideKeyboard() {
-        Log.d(TAG, "hideKeyboard");
-        View root = getDragLayer();
-        if (root == null) {
-            Log.d(TAG, "hideKeyboard: getDragLayer() is null, returning early");
-            return;
-        }
-        // Hide keyboard with WindowInsetsController if could. In case hideSoftInputFromWindow may
-        // get ignored by input connection being finished when the screen is off.
-        //
-        // In addition, inside IMF, the keyboards are closed asynchronously that launcher no longer
-        // need to post to the message queue.
-        final WindowInsetsController wic = root.getWindowInsetsController();
-        WindowInsets insets = root.getRootWindowInsets();
-        boolean isImeShown = insets != null && insets.isVisible(WindowInsets.Type.ime());
-        Log.d(TAG, "isImeShown: " + isImeShown);
-        if (wic == null) {
-            Log.d(TAG, "hideKeyboard: WIC IS NULL");
-        } else {
-            // Only hide the keyboard if it is actually showing.
-            if (isImeShown) {
-                // this method cannot be called cross threads
-                Log.d(TAG, "hideKeyboard: calling wic.hide() because isImeShown is true");
-                wic.hide(WindowInsets.Type.ime());
-                getStatsLogManager().logger().log(LAUNCHER_ALLAPPS_KEYBOARD_CLOSED);
-            }
-
-            // If the WindowInsetsController is not null, we end here regardless of whether we hid
-            // the keyboard or not.
-            return;
-        }
-
-        InputMethodManager imm = root.getContext().getSystemService(InputMethodManager.class);
-        IBinder token = root.getWindowToken();
-        Log.d(TAG, "InputMethodManager: " + imm + " token: " + token);
-        if (imm != null && token != null) {
-            Log.d(TAG, "EXECUTING BECAUSE IMM AND TOKEN IS NOT NULL");
-            UI_HELPER_EXECUTOR.execute(() -> {
-                if (imm.hideSoftInputFromWindow(token, 0)) {
-                    Log.d(TAG, "imm.hideSoftInputFromWindow() is true and should be closed");
-                    // log keyboard close event only when keyboard is actually closed
-                    MAIN_EXECUTOR.execute(() ->
-                            getStatsLogManager().logger().log(LAUNCHER_ALLAPPS_KEYBOARD_CLOSED));
-                } else {
-                    Log.d(TAG, "imm.hideSoftInputFromWindow() is false");
-                }
-            });
-        }
-    }
-
-    /**
-     * Returns if the connected keyboard is a hardware keyboard.
-     */
-    default boolean isHardwareKeyboard() {
-        return Configuration.KEYBOARD_QWERTY
-                == ((Context) this).getResources().getConfiguration().keyboard;
-    }
-
-    /**
-     * Returns if the software keyboard (including input toolbar) is hidden. Hardware
-     * keyboards do not display on screen by default.
-     */
-    default boolean isSoftwareKeyboardHidden() {
-        if (isHardwareKeyboard()) {
-            return true;
-        } else {
-            View dragLayer = getDragLayer();
-            WindowInsets insets = dragLayer.getRootWindowInsets();
-            if (insets == null) {
-                return false;
-            }
-            WindowInsetsCompat insetsCompat =
-                    WindowInsetsCompat.toWindowInsetsCompat(insets, dragLayer);
-            return !insetsCompat.isVisible(WindowInsetsCompat.Type.ime());
-        }
+        getActivityComponent().getKeyboardStateManager().hideKeyboard();
     }
 
     /**
@@ -494,7 +413,7 @@ public interface ActivityContext extends SavedStateRegistryOwner {
      */
     default RunnableList startActivitySafely(
             View v, Intent intent, @Nullable ItemInfo item) {
-        Preconditions.assertUIThread();
+        Preconditions.assertThreadOnExecutor(getUiExecutor());
         Context context = (Context) this;
         if (LauncherAppState.getInstance(context).isSafeModeEnabled()
                 && !new ApplicationInfoWrapper(context, intent).isSystem()) {

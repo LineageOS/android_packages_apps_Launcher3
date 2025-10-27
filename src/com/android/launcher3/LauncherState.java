@@ -33,7 +33,6 @@ import static com.android.launcher3.testing.shared.TestProtocol.OVERVIEW_STATE_O
 import static com.android.launcher3.testing.shared.TestProtocol.QUICK_SWITCH_STATE_ORDINAL;
 import static com.android.launcher3.testing.shared.TestProtocol.SPRING_LOADED_STATE_ORDINAL;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.view.View;
 import android.view.animation.Interpolator;
@@ -354,19 +353,12 @@ public abstract class LauncherState implements BaseState<LauncherState> {
         return 0;
     }
 
-    /**
-     * The amount of blur and wallpaper zoom to apply to the background of either the app
-     * or Launcher surface in this state. Should be a number between 0 and 1, inclusive.
-     *
-     * 0 means completely zoomed in, without blurs. 1 is zoomed out, with blurs.
-     */
-    public final  <DEVICE_PROFILE_CONTEXT extends Context & ActivityContext>
-            float getDepth(DEVICE_PROFILE_CONTEXT context) {
+    @Override
+    public final float getDepth(ActivityContext context) {
         return getDepthUnchecked(context);
     }
 
-    protected <DEVICE_PROFILE_CONTEXT extends Context & ActivityContext>
-            float getDepthUnchecked(DEVICE_PROFILE_CONTEXT context) {
+    protected float getDepthUnchecked(ActivityContext context) {
         return 0f;
     }
 

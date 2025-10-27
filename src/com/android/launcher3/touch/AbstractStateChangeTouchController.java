@@ -22,6 +22,7 @@ import static com.android.launcher3.LauncherAnimUtils.newCancelListener;
 import static com.android.launcher3.LauncherState.ALL_APPS;
 import static com.android.launcher3.LauncherState.NORMAL;
 import static com.android.launcher3.LauncherState.OVERVIEW;
+import static com.android.launcher3.MotionEventsUtils.isTrackpadMultiFingerSwipe;
 import static com.android.launcher3.MotionEventsUtils.isTrackpadScroll;
 import static com.android.launcher3.Utilities.shouldEnableMouseInteractionChanges;
 import static com.android.launcher3.anim.AnimatorListeners.forEndCallback;
@@ -112,7 +113,7 @@ public abstract class AbstractStateChangeTouchController
                 boolean ignoreWhenShownBehindDesktop = !mLauncher.isTopResumedActivity()
                         && mLauncher.shouldShowHomeBehindDesktop();
                 boolean ignoreMouseScroll = ev.getSource() == InputDevice.SOURCE_MOUSE
-                        && !isTrackpadScroll(ev)
+                        && !isTrackpadScroll(ev) && !isTrackpadMultiFingerSwipe(ev)
                         && shouldEnableMouseInteractionChanges(
                         mLauncher.getWorkspace().getContext());
                 if (directionsToDetectScroll == 0 || ignoreMouseScroll

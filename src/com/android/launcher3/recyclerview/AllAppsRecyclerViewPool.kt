@@ -31,10 +31,10 @@ import com.android.launcher3.allapps.BaseAllAppsAdapter
 import com.android.launcher3.dagger.ActivityContextSingleton
 import com.android.launcher3.pm.UserCache
 import com.android.launcher3.util.AsyncObjectAllocator
-import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.SafeCloseable
 import com.android.launcher3.util.Themes
 import com.android.launcher3.views.ActivityContext
+import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -138,6 +138,7 @@ constructor(
             BaseAllAppsAdapter.VIEW_TYPE_ICON,
             activeRv,
             preInflateCount,
+            activityContext.uiExecutor,
         ) {
             getPreInflateCount()
         }
@@ -149,6 +150,7 @@ constructor(
         viewType: Int,
         activeRv: RecyclerView,
         preInflationCount: Int,
+        uiExecutor: Executor,
         crossinline preInflationCountProvider: () -> Int,
     ) {
         if (preInflationCount <= 0) {
@@ -166,7 +168,7 @@ constructor(
                     if (activeRv.layoutManager != null) adapter.createViewHolder(activeRv, viewType)
                     else null
                 },
-                callbackExecutor = MAIN_EXECUTOR,
+                callbackExecutor = uiExecutor,
             ) {
                 if (preInflationCountProvider.invoke() > 0) putRecycledView(it)
             }

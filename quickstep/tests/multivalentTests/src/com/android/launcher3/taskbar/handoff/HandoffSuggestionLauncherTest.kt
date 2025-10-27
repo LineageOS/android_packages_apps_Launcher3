@@ -18,6 +18,7 @@ package com.android.launcher3.taskbar.handoff
 
 import android.companion.datatransfer.continuity.RemoteTask
 import android.companion.datatransfer.continuity.TaskContinuityManager
+import android.companion.Flags
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
@@ -42,7 +43,7 @@ class HandoffSuggestionLauncherTest {
         HandoffSuggestionLauncher(mockTaskContinuityManager, context.mainExecutor)
 
     @Test
-    @EnableFlags(android.companion.Flags.FLAG_ENABLE_TASK_CONTINUITY)
+    @EnableFlags(Flags.FLAG_TASK_CONTINUITY)
     fun launch_launchesSuggestion() {
         val suggestion = createSuggestion()
         launcher.launch(suggestion)
@@ -56,7 +57,7 @@ class HandoffSuggestionLauncherTest {
     }
 
     @Test
-    @DisableFlags(android.companion.Flags.FLAG_ENABLE_TASK_CONTINUITY)
+    @DisableFlags(Flags.FLAG_TASK_CONTINUITY)
     fun launch_flagDisabled_doesNotLaunchSuggestion() {
         val suggestion = createSuggestion()
         launcher.launch(suggestion)
