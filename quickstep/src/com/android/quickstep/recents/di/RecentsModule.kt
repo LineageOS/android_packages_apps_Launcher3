@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.quickstep.recents.dagger
+package com.android.quickstep.recents.di
 
 import dagger.Module
 

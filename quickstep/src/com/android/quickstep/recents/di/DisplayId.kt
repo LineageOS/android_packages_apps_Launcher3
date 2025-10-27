@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.quickstep.recents.dagger
+package com.android.quickstep.recents.di
 
 import javax.inject.Qualifier
 
 /** Qualifier for the current display id. */
-@MustBeDocumented @Retention(AnnotationRetention.RUNTIME) @Qualifier annotation class DisplayId
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+@Qualifier
+annotation class DisplayIdForRecents

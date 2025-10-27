@@ -14,17 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.quickstep.recents.dagger
+package com.android.quickstep.recents.di
 
-import dagger.BindsInstance
-import dagger.Subcomponent
+import javax.inject.Scope
 
-/** A sub-component that controls the lifecycle of an instance of Recents. */
-@RecentsSingleton
-@Subcomponent
-interface RecentsComponent {
-    @Subcomponent.Factory
-    interface Factory {
-        fun build(@DisplayId @BindsInstance displayId: Int): RecentsComponent
-    }
-}
+/** Scope annotation for singleton items within a recents instance. */
+@MustBeDocumented @Retention(AnnotationRetention.RUNTIME) @Scope annotation class RecentsSingleton
