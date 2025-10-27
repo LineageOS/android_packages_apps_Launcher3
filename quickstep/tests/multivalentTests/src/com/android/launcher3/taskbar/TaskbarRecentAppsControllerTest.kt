@@ -1414,6 +1414,26 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
     }
 
     @Test
+    fun onRecentTasksChanged_notInDesktopMode_addTask_existingTaskInstanceReused() {
+        setInDesktopMode(false)
+
+        // Initial task.
+        updateRecentTasks(
+            runningTasks = emptyList(),
+            recentTaskPackages = listOf(RECENT_PACKAGE_1, RECENT_PACKAGE_3),
+        )
+        val task1 = recentAppsController.shownTasks.first().tasks.first()
+
+        // New task.
+        updateRecentTasks(
+            runningTasks = emptyList(),
+            recentTaskPackages = listOf(RECENT_PACKAGE_1, RECENT_PACKAGE_2, RECENT_PACKAGE_3),
+        )
+        val task2 = recentAppsController.shownTasks.first().tasks.first()
+        assertThat(task1).isSameInstanceAs(task2)
+    }
+
+    @Test
     fun hasSingleTask_noTargetPackage_returnsFalse() {
         prepareHotseatAndRunningAndRecentApps(
             hotseatPackages = emptyList(),

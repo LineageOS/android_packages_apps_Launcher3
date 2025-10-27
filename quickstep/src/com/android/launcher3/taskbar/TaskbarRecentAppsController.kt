@@ -540,12 +540,16 @@ class TaskbarRecentAppsController(
         }
         // Remove the current task.
         val allRecentTasks = allRecentTasks.subList(0, allRecentTasks.size - 1)
-        var shownTasks = dedupeHotseatTasks(allRecentTasks, shownHotseatItems)
-        if (shownTasks.size > MAX_RECENT_TASKS) {
+        var nextShownTasks = dedupeHotseatTasks(allRecentTasks, shownHotseatItems)
+        if (nextShownTasks.size > MAX_RECENT_TASKS) {
             // Remove any tasks older than MAX_RECENT_TASKS.
-            shownTasks = shownTasks.subList(shownTasks.size - MAX_RECENT_TASKS, shownTasks.size)
+            nextShownTasks =
+                nextShownTasks.subList(nextShownTasks.size - MAX_RECENT_TASKS, nextShownTasks.size)
         }
-        return shownTasks
+
+        // Reuse matching previous GroupTasks, which may already tag a View and/or have BitmapInfo.
+        val prevTasksSet = shownTasks.toSet()
+        return nextShownTasks.map { n -> prevTasksSet.find { p -> p == n } ?: n }
     }
 
     private fun dedupeHotseatTasks(
