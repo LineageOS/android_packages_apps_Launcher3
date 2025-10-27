@@ -17,7 +17,6 @@ import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.R;
 import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.statehandlers.DesktopVisibilityController;
-import com.android.launcher3.taskbar.TaskbarActivityContext;
 import com.android.launcher3.testing.TestInformationHandler;
 import com.android.launcher3.testing.shared.TestProtocol;
 import com.android.quickstep.util.GroupTask;
@@ -151,15 +150,14 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
             case TestProtocol.REQUEST_UNSTASH_TASKBAR_IF_STASHED:
                 runOnTISBinder(tisBinder -> {
                     // Allow null-pointer to catch illegal states.
-                    tisBinder.getTaskbarManager().getCurrentActivityContext()
-                            .unstashTaskbarIfStashed();
+                    tisBinder.getTaskbarManager().unstashTaskbarIfStashed();
                 });
                 return response;
 
             case TestProtocol.REQUEST_COLLAPSE_BUBBLE_BAR:
                 runOnTISBinder(tisBinder -> {
                     // Allow null-pointer to catch illegal states.
-                    tisBinder.getTaskbarManager().getCurrentActivityContext().removeAllBubbles();
+                    tisBinder.getTaskbarManager().removeAllBubbles();
                 });
                 return response;
 
@@ -173,9 +171,7 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
             case TestProtocol.REQUEST_STASHED_TASKBAR_SCALE: {
                 runOnTISBinder(tisBinder -> {
                     response.putFloat(TestProtocol.TEST_INFO_RESPONSE_FIELD,
-                            tisBinder.getTaskbarManager()
-                                    .getCurrentActivityContext()
-                                    .getStashedTaskbarScale());
+                            tisBinder.getTaskbarManager().getStashedTaskbarScale());
                 });
                 return response;
             }
@@ -183,21 +179,17 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
             case TestProtocol.REQUEST_TASKBAR_ALL_APPS_TOP_PADDING: {
                 return getTISBinderUIProperty(Bundle::putInt, tisBinder ->
                         tisBinder.getTaskbarManager()
-                                .getCurrentActivityContext()
                                 .getTaskbarAllAppsTopPadding());
             }
 
             case TestProtocol.REQUEST_TASKBAR_APPS_LIST_SCROLL_Y: {
                 return getTISBinderUIProperty(Bundle::putInt, tisBinder ->
-                        tisBinder.getTaskbarManager()
-                                .getCurrentActivityContext()
-                                .getTaskbarAllAppsScroll());
+                        tisBinder.getTaskbarManager().getTaskbarAllAppsScroll());
             }
 
             case TestProtocol.REQUEST_LIMIT_MAX_TASKBAR_ICON_NUMBER: {
                 runOnTISBinder(tisBinder ->
                         tisBinder.getTaskbarManager()
-                                .getCurrentActivityContext()
                                 .limitMaxTaskbarIconsNum(Integer.parseInt(arg)));
                 return response;
             }
@@ -237,20 +229,17 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
                 return response;
             case TestProtocol.REQUEST_TASKBAR_IME_DOCKED:
                 return getTISBinderUIProperty(Bundle::putBoolean, tisBinder ->
-                        tisBinder.getTaskbarManager()
-                                .getCurrentActivityContext().isImeDocked());
+                        tisBinder.getTaskbarManager().isImeDocked());
             case TestProtocol.REQUEST_UNSTASH_BUBBLE_BAR_IF_STASHED:
                 runOnTISBinder(tisBinder -> {
                     // Allow null-pointer to catch illegal states.
-                    tisBinder.getTaskbarManager().getCurrentActivityContext()
-                            .unstashBubbleBarIfStashed();
+                    tisBinder.getTaskbarManager().unstashBubbleBarIfStashed();
                 });
                 return response;
             case TestProtocol.REQUEST_REMOVE_ALL_BUBBLES:
                 runOnTISBinder(tisBinder -> {
                     // Allow null-pointer to catch illegal states.
-                    Context context = tisBinder.getTaskbarManager().getCurrentActivityContext();
-                    SystemUiProxy.INSTANCE.get(context).removeAllBubbles();
+                    tisBinder.getTaskbarManager().removeAllSystemUiBubbles();
                 });
                 return response;
             case TestProtocol.REQUEST_INJECT_FAKE_TRACKPAD:
@@ -283,9 +272,7 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
             }
             case TestProtocol.REQUEST_IS_TRANSIENT_TASKBAR:
                 return getTISBinderUIProperty(Bundle::putBoolean, tisBinder ->
-                        tisBinder.getTaskbarManager()
-                                .getCurrentActivityContext()
-                                .getTaskbarFeatureEvaluator().isTransient());
+                        tisBinder.getTaskbarManager().isTransient());
             case TestProtocol.REQUEST_FLAG_ENABLE_MULTIPLE_DESKTOPS: {
                 response.putBoolean(TestProtocol.TEST_INFO_RESPONSE_FIELD,
                         DesktopState.fromContext(mContext)
@@ -354,11 +341,7 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
 
     private void enableBlockingTimeout(
             TouchInteractionService.TISBinder tisBinder, boolean enable) {
-        TaskbarActivityContext context = tisBinder.getTaskbarManager().getCurrentActivityContext();
-        if (context == null) {
-            return;
-        }
-        context.enableBlockingTimeoutDuringTests(enable);
+        tisBinder.getTaskbarManager().enableBlockingTimeoutDuringTests(enable);
     }
 
     private void enableTransientTaskbar(boolean enable) {

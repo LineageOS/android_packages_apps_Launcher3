@@ -1116,7 +1116,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     private void onTaskbarInAppDisplayProgressUpdate(float progress, int flag) {
         TaskbarManager taskbarManager = mTISBindHelper.getTaskbarManager();
         if (taskbarManager == null
-                || taskbarManager.getCurrentActivityContext() == null
+                || !taskbarManager.hasCurrentActivityContext()
                 || mTaskbarInteractor == null) {
             return;
         }

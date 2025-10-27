@@ -83,7 +83,6 @@ import com.android.launcher3.RemoveAnimationSettingsTracker;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.anim.AnimatedFloat;
 import com.android.launcher3.taskbar.StashedHandleViewController;
-import com.android.launcher3.taskbar.TaskbarActivityContext;
 import com.android.launcher3.taskbar.TaskbarActivityContext.UIControllerChangeListener;
 import com.android.launcher3.taskbar.TaskbarManager;
 import com.android.launcher3.taskbar.TaskbarUIController;
@@ -429,8 +428,7 @@ public class AllSetActivity extends Activity implements UIControllerChangeListen
         if (mTISBindHelper != null) {
             TaskbarManager taskbarManager = mTISBindHelper.getTaskbarManager();
             if (taskbarManager != null) {
-                return taskbarManager.getCurrentActivityContext()
-                        .getControllers().stashedHandleViewController;
+                return taskbarManager.getStashedHandleViewController();
             }
         }
         return null;
@@ -582,10 +580,8 @@ public class AllSetActivity extends Activity implements UIControllerChangeListen
     private void setUIControllerChangeListener(UIControllerChangeListener listener) {
         TaskbarManager taskbarManager = mTISBindHelper.getTaskbarManager();
         if (taskbarManager != null) {
-            TaskbarActivityContext context = taskbarManager.getCurrentActivityContext();
-            if (context != null) {
-                context.setUIControllerChangeListener(listener);
-            }
+            // TODO(b/404636836): Ensure listener is called on main thraed
+            taskbarManager.setUIControllerChangeListener(listener);
         }
     }
 

@@ -35,6 +35,7 @@ import android.graphics.Rect;
 import android.view.View;
 import android.view.ViewOutlineProvider;
 
+import androidx.annotation.AnyThread;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.ConstantItem;
@@ -237,6 +238,7 @@ public class StashedHandleViewController implements TaskbarControllers.LoggableT
         return mTaskbarStashedHandleAlpha;
     }
 
+    @AnyThread
     public AnimatedFloat getStashedHandleHintScale() {
         return mTaskbarStashedHandleHintScale;
     }

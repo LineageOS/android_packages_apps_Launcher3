@@ -17,15 +17,17 @@
 package com.android.launcher3.taskbar
 
 import android.app.PendingIntent
-import androidx.annotation.AnyThread
+import androidx.annotation.VisibleForTesting
 import com.android.launcher3.ActivityInteractor
 import com.android.launcher3.AsyncAnimatorPlaybackController
 import com.android.launcher3.LauncherInteractor
 import com.android.launcher3.statemanager.StatefulActivity
 import com.android.launcher3.uioverrides.QuickstepLauncher
 import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
+import com.android.quickstep.SystemUiProxy
 import com.android.quickstep.views.RecentsViewContainer
 import java.io.PrintWriter
+import java.util.concurrent.Callable
 import javax.annotation.concurrent.ThreadSafe
 
 /**
@@ -36,12 +38,10 @@ import javax.annotation.concurrent.ThreadSafe
 @ThreadSafe
 class TaskbarManagerImplWrapper(private val impl: TaskbarManagerImpl) : TaskbarManager {
 
-    @AnyThread
     override fun onUserUnlocked() {
         TASKBAR_UI_THREAD.execute(impl::onUserUnlocked)
     }
 
-    @AnyThread
     override fun setActivity(activity: StatefulActivity<*>) {
         TASKBAR_UI_THREAD.execute {
             impl.setActivityInteractor(
@@ -51,145 +51,128 @@ class TaskbarManagerImplWrapper(private val impl: TaskbarManagerImpl) : TaskbarM
         }
     }
 
-    @AnyThread
     override fun setRecentsViewContainer(recentsViewContainer: RecentsViewContainer) {
         TASKBAR_UI_THREAD.execute { impl.setRecentsViewContainerInteractor(recentsViewContainer) }
     }
 
-    @AnyThread
     override fun recreateTaskbars() {
         TASKBAR_UI_THREAD.execute(impl::recreateTaskbars)
     }
 
-    @AnyThread
     override fun onSystemUiFlagsChanged(systemUiStateFlags: Long, displayId: Int) {
         TASKBAR_UI_THREAD.execute { impl.onSystemUiFlagsChanged(systemUiStateFlags, displayId) }
     }
 
-    @AnyThread
     override fun onLongPressHomeEnabled(assistantLongPressEnabled: Boolean) {
         TASKBAR_UI_THREAD.execute { impl.onLongPressHomeEnabled(assistantLongPressEnabled) }
     }
 
-    @AnyThread
     override fun setSetupUIVisible(isVisible: Boolean) {
         TASKBAR_UI_THREAD.execute { impl.setSetupUIVisible(isVisible) }
     }
 
-    @AnyThread
     override fun setWallpaperVisible(displayId: Int, isVisible: Boolean) {
         TASKBAR_UI_THREAD.execute { impl.setWallpaperVisible(displayId, isVisible) }
     }
 
-    @AnyThread
     override fun checkNavBarModes(displayId: Int) {
         TASKBAR_UI_THREAD.execute { impl.checkNavBarModes(displayId) }
     }
 
-    @AnyThread
     override fun finishBarAnimations(displayId: Int) {
         TASKBAR_UI_THREAD.execute { impl.finishBarAnimations(displayId) }
     }
 
-    @AnyThread
     override fun touchAutoDim(displayId: Int, reset: Boolean) {
         TASKBAR_UI_THREAD.execute { impl.touchAutoDim(displayId, reset) }
     }
 
-    @AnyThread
     override fun transitionTo(displayId: Int, barMode: Int, animate: Boolean) {
         TASKBAR_UI_THREAD.execute { impl.transitionTo(displayId, barMode, animate) }
     }
 
-    @AnyThread
     override fun appTransitionPending(pending: Boolean) {
         TASKBAR_UI_THREAD.execute { impl.appTransitionPending(pending) }
     }
 
-    @AnyThread
     override fun onRotationProposal(rotation: Int, isValid: Boolean) {
         TASKBAR_UI_THREAD.execute { impl.onRotationProposal(rotation, isValid) }
     }
 
-    @AnyThread
     override fun disableNavBarElements(displayId: Int, state1: Int, state2: Int, animate: Boolean) {
         TASKBAR_UI_THREAD.execute { impl.disableNavBarElements(displayId, state1, state2, animate) }
     }
 
-    @AnyThread
     override fun onSystemBarAttributesChanged(displayId: Int, behavior: Int) {
         TASKBAR_UI_THREAD.execute { impl.onSystemBarAttributesChanged(displayId, behavior) }
     }
 
-    @AnyThread
     override fun onTransitionModeUpdated(barMode: Int, checkBarModes: Boolean) {
         TASKBAR_UI_THREAD.execute { impl.onTransitionModeUpdated(barMode, checkBarModes) }
     }
 
-    @AnyThread
     override fun onNavButtonsDarkIntensityChanged(darkIntensity: Float) {
         TASKBAR_UI_THREAD.execute { impl.onNavButtonsDarkIntensityChanged(darkIntensity) }
     }
 
-    @AnyThread
     override fun onNavigationBarLumaSamplingEnabled(displayId: Int, enable: Boolean) {
         TASKBAR_UI_THREAD.execute { impl.onNavigationBarLumaSamplingEnabled(displayId, enable) }
     }
 
-    @AnyThread
     override fun onDisplayAddSystemDecorations(displayId: Int) {
         TASKBAR_UI_THREAD.execute { impl.onDisplayAddSystemDecorations(displayId) }
     }
 
-    @AnyThread
     override fun onDisplayRemoved(displayId: Int) {
         TASKBAR_UI_THREAD.execute { impl.onDisplayRemoved(displayId) }
     }
 
-    @AnyThread
     override fun onDisplayRemoveSystemDecorations(displayId: Int) {
         TASKBAR_UI_THREAD.execute { impl.onDisplayRemoveSystemDecorations(displayId) }
     }
 
-    @AnyThread
     override fun destroy() {
         TASKBAR_UI_THREAD.execute { impl.destroy() }
     }
 
-    @AnyThread
     override fun createLauncherStartFromSuwAnim(duration: Int): AsyncAnimatorPlaybackController? {
         return impl.createLauncherStartFromSuwAnim(duration)
     }
 
-    @AnyThread
     override fun shouldForceAllSetFallbackAnimation(): Boolean {
         return impl.shouldForceAllSetFallbackAnimation()
     }
 
-    /* TODO(b/404636836): Evaluate API calls on returned TaskbarActivityContext */
-    @AnyThread
-    override fun getCurrentActivityContext(): TaskbarActivityContext? {
-        return impl.currentActivityContext
+    override fun hasCurrentActivityContext() = impl.currentActivityContext != null
+
+    override fun toggleTaskbarStash() {
+        TASKBAR_UI_THREAD.execute { impl.currentActivityContext?.toggleTaskbarStash() }
+    }
+
+    override fun getStashedHandleViewController(): StashedHandleViewController? {
+        return impl.currentActivityContext?.controllers?.stashedHandleViewController
+    }
+
+    override fun setUIControllerChangeListener(
+        uiControllerChangeListener: TaskbarActivityContext.UIControllerChangeListener
+    ) {
+        impl.currentActivityContext?.setUIControllerChangeListener(uiControllerChangeListener)
     }
 
     /* TODO(b/404636836): Evaluate API calls on returned TaskbarUIController */
-    @AnyThread
     override fun getUIControllerForDisplay(displayId: Int): TaskbarUIController? {
         return impl.getUIControllerForDisplay(displayId)
     }
 
     /* TODO(b/404636836): Evaluate API calls on returned TaskbarActivityContext */
-    @AnyThread
     override fun getTaskbarForDisplay(displayId: Int): TaskbarActivityContext? {
         return impl.getTaskbarForDisplay(displayId)
     }
 
-    @AnyThread
     override fun createAllAppsPendingIntent(): PendingIntent {
         return impl.createAllAppsPendingIntent(TASKBAR_UI_THREAD)
     }
 
-    @AnyThread
     override fun getPrimaryDisplayId(): Int {
         return impl.primaryDisplayId
     }
@@ -202,4 +185,67 @@ class TaskbarManagerImplWrapper(private val impl: TaskbarManagerImpl) : TaskbarM
     override fun debugPrimaryTaskbar(debugReason: String, verbose: Boolean) {
         TASKBAR_UI_THREAD.execute { impl.debugPrimaryTaskbar(debugReason, verbose) }
     }
+
+    @VisibleForTesting
+    override fun getCurrentActivityContext(): TaskbarActivityContext? {
+        return impl.currentActivityContext
+    }
+
+    @VisibleForTesting
+    override fun removeAllSystemUiBubbles() {
+        SystemUiProxy.INSTANCE[impl.currentActivityContext].removeAllBubbles()
+    }
+
+    @VisibleForTesting
+    override fun unstashBubbleBarIfStashed() {
+        TASKBAR_UI_THREAD.execute { impl.currentActivityContext?.unstashBubbleBarIfStashed() }
+    }
+
+    @VisibleForTesting
+    override fun limitMaxTaskbarIconsNum(maxIconLimitNum: Int) {
+        TASKBAR_UI_THREAD.execute {
+            impl.currentActivityContext?.limitMaxTaskbarIconsNum(maxIconLimitNum)
+        }
+    }
+
+    @VisibleForTesting
+    override fun getStashedTaskbarScale() = impl.currentActivityContext!!.stashedTaskbarScale
+
+    @VisibleForTesting
+    override fun removeAllBubbles() {
+        return TASKBAR_UI_THREAD.execute { impl.currentActivityContext!!.removeAllBubbles() }
+    }
+
+    @VisibleForTesting
+    override fun unstashTaskbarIfStashed() {
+        return TASKBAR_UI_THREAD.execute { impl.currentActivityContext!!.unstashTaskbarIfStashed() }
+    }
+
+    @VisibleForTesting
+    override fun enableBlockingTimeoutDuringTests(enableBlockingTimeout: Boolean) {
+        impl.currentActivityContext?.enableBlockingTimeoutDuringTests(enableBlockingTimeout)
+    }
+
+    @VisibleForTesting
+    override fun isTransient(): Boolean =
+        impl.currentActivityContext?.taskbarFeatureEvaluator?.isTransient ?: false
+
+    @VisibleForTesting
+    override fun getTaskbarAllAppsScroll(): Int {
+        return TASKBAR_UI_THREAD.submit(
+                Callable { impl.currentActivityContext!!.taskbarAllAppsScroll }
+            )
+            .get()
+    }
+
+    @VisibleForTesting
+    override fun getTaskbarAllAppsTopPadding(): Int =
+        TASKBAR_UI_THREAD.submit(
+                Callable { impl.currentActivityContext!!.taskbarAllAppsTopPadding }
+            )
+            .get()
+
+    @VisibleForTesting
+    override fun isImeDocked(): Boolean =
+        TASKBAR_UI_THREAD.submit(Callable { impl.currentActivityContext!!.isImeDocked }).get()
 }
