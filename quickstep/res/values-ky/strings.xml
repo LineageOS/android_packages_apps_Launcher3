@@ -126,7 +126,8 @@
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Тапшырмалар тактасы жөнүндө маалымат"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"2 колдонмону бир убакта пайдалануу үчүн капталга сүйрөйсүз"</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"Аны калкытып коюу үчүн ылдыйкы бурчтарынан сүйрөңүз"</string>
-    <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Тапшырмалар тактасын көрүү үчүн экранды жай өйдө сүрүңүз"</string>
+    <!-- no translation found for taskbar_edu_stashing (911857479758694381) -->
+    <skip />
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Аракеттериңизге негизделген сунуштарды алып турасыз"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Тапшырмалар тактасын кадап коюу үчүн бөлгүчтү коё бербей басып турасыз"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Тапшырмалар тактасы менен көбүрөөк иш бүтүрөсүз"</string>

@@ -126,7 +126,8 @@
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"செயல் பட்டியைப் பயன்படுத்தும் விதம்"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"ஆப்ஸை பக்கவாட்டில் இழுத்து ஒரே நேரத்தில் 2 ஆப்ஸைப் பயன்படுத்தலாம்"</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"கீழ்ப்பக்க மூலைகளுக்கு இழுத்து அதை மிதக்க வைக்கலாம்"</string>
-    <string name="taskbar_edu_stashing" msgid="5645461372669217294">"செயல் பட்டியைக் காட்ட மேல்நோக்கி மெதுவாக ஸ்வைப் செய்யவும்"</string>
+    <!-- no translation found for taskbar_edu_stashing (911857479758694381) -->
+    <skip />
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"உங்கள் வழக்கத்திற்கேற்ப ஆப்ஸ் பரிந்துரைகளைப் பெறலாம்"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"பிரிப்பானை நீண்ட நேரம் அழுத்தி, செயல் பட்டியைப் பின் செய்யலாம்"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"செயல் பட்டி மூலம் மேலும் பலவற்றைச் செய்யுங்கள்"</string>

@@ -126,7 +126,8 @@
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Información sobre a función Barra de tarefas"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Arrastra unha aplicación cara a un lado para usar dúas á vez"</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"Arrástraa ata as esquinas inferiores para que sexa flotante"</string>
-    <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Pasa o dedo amodo cara arriba para ver a barra de tarefas"</string>
+    <!-- no translation found for taskbar_edu_stashing (911857479758694381) -->
+    <skip />
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Obtén suxestións de aplicacións en función da túa rutina"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Mantén premida a liña divisoria para fixar a barra de tarefas"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Tira máis proveito da barra de tarefas"</string>

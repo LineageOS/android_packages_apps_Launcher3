@@ -126,7 +126,8 @@
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"టాస్క్‌బార్ ఎడ్యుకేషన్"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"ఒకేసారి 2 యాప్‌లను ఉపయోగించడానికి యాప్‌ను పక్కకు లాగండి"</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"ఫ్లోట్ అయ్యేలా చేయడానికి దానిని దిగువ మూలలకు లాగండి"</string>
-    <string name="taskbar_edu_stashing" msgid="5645461372669217294">"టాస్క్‌బార్‌ను చూపడానికి నెమ్మదిగా పైకి స్వైప్ చేయండి"</string>
+    <!-- no translation found for taskbar_edu_stashing (911857479758694381) -->
+    <skip />
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"మీ రొటీన్ ఆధారంగా యాప్ సూచనలను పొందండి"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"టాస్క్‌బార్‌ను పిన్ చేయడానికి డివైడర్‌ను ఎక్కువసేపు నొక్కండి"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"టాస్క్‌బార్‌తో మరిన్ని చేయండి"</string>

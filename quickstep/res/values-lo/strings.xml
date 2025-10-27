@@ -126,7 +126,8 @@
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"ແຖບໜ້າວຽກ Education"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"ລາກແອັບໄປດ້ານຂ້າງເພື່ອໃຊ້ 2 ແອັບໃນເວລາດຽວກັນ"</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"ລາກລົງຫາມຸມລຸ່ມສຸດເພື່ອໃຫ້ມັນລອຍ"</string>
-    <string name="taskbar_edu_stashing" msgid="5645461372669217294">"ປັດຂຶ້ນຊ້າໆເພື່ອສະແດງແຖບໜ້າວຽກ"</string>
+    <!-- no translation found for taskbar_edu_stashing (911857479758694381) -->
+    <skip />
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"ຮັບການແນະນຳແອັບໂດຍອີງໃສ່ສິ່ງທີ່ເຮັດປະຈຳຂອງທ່ານ"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"ກົດຕົວຂັ້ນຄ້າງໄວ້ເພື່ອປັກໝຸດແຖບໜ້າວຽກ"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"ເຮັດສິ່ງຕ່າງໆໄດ້ຫຼາຍຂຶ້ນດ້ວຍແຖບໜ້າວຽກ"</string>

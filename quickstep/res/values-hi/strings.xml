@@ -126,7 +126,8 @@
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"टास्कबार का ट्यूटोरियल"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"किसी ऐप को किनारे की ओर ड्रैग करके 2 ऐप एक साथ इस्तेमाल करें"</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"इसे फ़्लोट करवाने के लिए, नीचे के कोनों तक खींचें और छोड़ें"</string>
-    <string name="taskbar_edu_stashing" msgid="5645461372669217294">"टास्कबार देखने के लिए, ऊपर की ओर धीरे से स्वाइप करें"</string>
+    <!-- no translation found for taskbar_edu_stashing (911857479758694381) -->
+    <skip />
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"इस्तेमाल के आधार पर ऐप्लिकेशन के सुझाव पाएं"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"टास्कबार को पिन करने के लिए डिवाइडर को दबाकर रखें"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"टास्कबार की मदद से कई काम करें"</string>

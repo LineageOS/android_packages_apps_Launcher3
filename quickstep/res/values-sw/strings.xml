@@ -126,7 +126,8 @@
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Elimu ya Upauzana"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Buruta programu pembeni ili utumie programu 2 kwa wakati mmoja"</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"Buruta hadi kona za chini ili kufanya ielee"</string>
-    <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Telezesha kidole juu taratibu ili ufungue Upauzana"</string>
+    <!-- no translation found for taskbar_edu_stashing (911857479758694381) -->
+    <skip />
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Pata mapendekezo ya programu kulingana na ratiba yako"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Bonyeza kwa muda mrefu kigawaji ili ubandike Upauzana"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Kamilisha mengi kwa kutumia Upauzana huu"</string>
