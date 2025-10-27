@@ -714,7 +714,8 @@ public final class TaskViewUtils {
                 public void onAnimationSuccess(Animator animation) {
                     recentsView.finishRecentsAnimation(false /* toHome */, () -> {
                         recentsView.post(() -> {
-                            stateManager.moveToRestState();
+                            stateManager.moveToRestState(
+                                    !(taskView instanceof DesktopTaskView) /* isAnimated */);
                             stateManager.reapplyState();
 
                             // We may have notified launcher is not visible so that taskbar can
