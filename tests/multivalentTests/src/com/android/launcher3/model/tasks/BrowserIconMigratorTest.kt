@@ -17,9 +17,11 @@
 package com.android.launcher3.model.tasks
 
 import android.os.Process
+import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.launcher3.Flags
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
@@ -54,11 +56,13 @@ import org.mockito.kotlin.whenever
 /** Tests for [BrowserIconMigrator] */
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@EnableFlags(Flags.FLAG_MIGRATE_BROWSER_ICON_ON_SETUP)
 class BrowserIconMigratorTest {
 
     @get:Rule val setFlagsRule = SetFlagsRule()
     @get:Rule val context = SandboxApplication().withModelDependency()
     @get:Rule val mockito = MockitoJUnit.rule()
+    @get:Rule val setFlags = SetFlagsRule()
 
     @Mock lateinit var evaluator: BrowserMigrationConditionEvaluator
 
@@ -78,23 +82,6 @@ class BrowserIconMigratorTest {
         context.initDaggerComponent(
             DaggerBrowserIconMigratorTest_TestComponent.builder().bindEvaluator(evaluator)
         )
-
-        doAnswer {
-                var targetItemInfo: ItemInfo? = null
-                TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {
-                    targetItemInfo =
-                        appComponent.serializer.decode(
-                            SerializedItemItem(
-                                packageName = browserPkg,
-                                userHandle = Process.myUserHandle(),
-                            )
-                        )
-                }
-
-                Pair(targetPkg, targetItemInfo!!)
-            }
-            .whenever(evaluator)
-            .evaluateSourceAndTarget()
     }
 
     @Test
@@ -310,6 +297,23 @@ class BrowserIconMigratorTest {
     }
 
     private fun performMigration(): Int {
+        doAnswer {
+                var targetItemInfo: ItemInfo? = null
+                TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {
+                    targetItemInfo =
+                        appComponent.serializer.decode(
+                            SerializedItemItem(
+                                packageName = browserPkg,
+                                userHandle = Process.myUserHandle(),
+                            )
+                        )
+                }
+
+                Pair(targetPkg, targetItemInfo!!)
+            }
+            .whenever(evaluator)
+            .evaluateSourceAndTarget()
+
         itemIdMap = IntSparseArrayMap()
         context.appComponent.testableModelState.dataModel.itemsIdMap.forEach {
             itemIdMap[it.id] = it
