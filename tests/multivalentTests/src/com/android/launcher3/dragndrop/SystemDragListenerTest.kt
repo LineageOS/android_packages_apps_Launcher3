@@ -279,6 +279,31 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
         }
     }
 
+    @Test
+    fun testStartDrag() {
+        val dragView = mock<DragView<*>>()
+
+        whenever(
+                mockLauncher.dragController.startDrag(
+                    if (params != null) eq(params.dragImage) else any(),
+                    if (params != null) eq(params.draggableView) else any(),
+                    if (params != null) eq(params.dragLayerX) else any(),
+                    if (params != null) eq(params.dragLayerY) else any(),
+                    if (params != null) eq(params.dragSource) else any(),
+                    if (params != null) eq(params.dragInfo) else any(),
+                    if (params != null) eq(params.dragRegion) else any(),
+                    if (params != null) eq(params.initialDragViewScale) else any(),
+                    if (params != null) eq(params.dragViewScaleOnDrop) else any(),
+                    if (params != null) eq(params.dragOptions) else any(),
+                )
+            )
+            .thenReturn(dragView)
+
+        val expectedResult = if (params != null) dragView else null
+
+        assertEquals(expectedResult, listener.startDrag())
+    }
+
     private fun initMock(mockDragEvent: DragEvent) {
         val mockClipDescription = mock<ClipDescription>()
         whenever(mockClipDescription.hasMimeType("*/*")).thenReturn(true)
