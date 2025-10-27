@@ -98,11 +98,12 @@ constructor(
         activity: WidgetPickerActivity,
         widgetPickerConfig: WidgetPickerConfig,
     ) {
-        val widgetAppId = WidgetAppId(
-            packageName = packageName,
-            userHandle = userHandle,
-            category = NO_WIDGET_APP_CATEGORY
-        )
+        val widgetAppId =
+            WidgetAppId(
+                packageName = packageName,
+                userHandle = userHandle,
+                category = NO_WIDGET_APP_CATEGORY,
+            )
 
         val widgetPickerComponent = newWidgetPickerComponent(widgetPickerConfig)
         val singleAppCatalog = widgetPickerComponent.getSingleAppWidgetsCatalog()
@@ -185,12 +186,7 @@ constructor(
     private fun initializeRepositories(widgetAppId: WidgetAppId? = null) {
         val loadAllData = widgetAppId == null
 
-        widgetsRepository.initialize(
-            WidgetsRepository.InitializationOptions(
-                widgetAppId = widgetAppId,
-                loadFeaturedWidgets = loadAllData,
-            )
-        )
+        widgetsRepository.initialize(WidgetsRepository.InitializationOptions.AllWidgets)
         if (loadAllData) {
             widgetUsersRepository.initialize()
             widgetAppIconsRepository.initialize()

@@ -15,10 +15,12 @@ import static java.util.stream.Collectors.toList;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.LauncherApps;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Pair;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.collection.ArrayMap;
 
@@ -28,6 +30,7 @@ import com.android.launcher3.LauncherAppState;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.dagger.ApplicationContext;
+import com.android.launcher3.dragndrop.PinShortcutRequestActivityInfo;
 import com.android.launcher3.icons.IconCache;
 import com.android.launcher3.icons.cache.CachedObject;
 import com.android.launcher3.model.data.PackageItemInfo;
@@ -39,7 +42,6 @@ import com.android.launcher3.util.Preconditions;
 import com.android.launcher3.widget.LauncherAppWidgetProviderInfo;
 import com.android.launcher3.widget.WidgetManagerHelper;
 import com.android.launcher3.widget.WidgetSections;
-import com.android.wm.shell.Flags;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -193,6 +195,33 @@ public class WidgetsModel {
         }
 
         return updatedItems;
+    }
+
+    /** Updates the model with info about the requested widget / shortcut for pinning. */
+    public void updateForPinRequest(@NonNull LauncherApps.PinItemRequest pinItemRequest) {
+        if (!WIDGETS_ENABLED) {
+            return;
+        }
+        Preconditions.assertWorkerThread();
+
+        final ArrayList<WidgetItem> widgetsAndShortcuts = new ArrayList<>();
+        switch (pinItemRequest.getRequestType()) {
+            case LauncherApps.PinItemRequest.REQUEST_TYPE_APPWIDGET -> {
+                LauncherAppWidgetProviderInfo launcherWidgetInfo =
+                        LauncherAppWidgetProviderInfo.fromProviderInfo(mContext,
+                                pinItemRequest.getAppWidgetProviderInfo(mContext));
+                widgetsAndShortcuts.add(new WidgetItem(
+                        launcherWidgetInfo, mIdp, mIconCache, mContext));
+            }
+            case LauncherApps.PinItemRequest.REQUEST_TYPE_SHORTCUT -> {
+                PinShortcutRequestActivityInfo launcherShortcutInfo =
+                        new PinShortcutRequestActivityInfo(pinItemRequest, mContext);
+                widgetsAndShortcuts.add(new WidgetItem(launcherShortcutInfo, mIconCache));
+            }
+            default -> Log.w(TAG, "Unknown request type " + pinItemRequest.getRequestType());
+        }
+
+        setWidgetsAndShortcuts(widgetsAndShortcuts, /*packageUser=*/ null);
     }
 
     private synchronized void setWidgetsAndShortcuts(
