@@ -74,15 +74,14 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.core.graphics.ColorUtils;
 
+import com.android.launcher3.AsyncAnimatorPlaybackController;
 import com.android.launcher3.DeviceProfile;
-import com.android.launcher3.Flags;
 import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.LauncherAppState;
 import com.android.launcher3.R;
 import com.android.launcher3.RemoveAnimationSettingsTracker;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.anim.AnimatedFloat;
-import com.android.launcher3.anim.AnimatorPlaybackController;
 import com.android.launcher3.taskbar.StashedHandleViewController;
 import com.android.launcher3.taskbar.TaskbarActivityContext;
 import com.android.launcher3.taskbar.TaskbarActivityContext.UIControllerChangeListener;
@@ -164,7 +163,7 @@ public class AllSetActivity extends Activity implements UIControllerChangeListen
     private LottieAnimationView mAnimatedBackground;
     private Animator.AnimatorListener mBackgroundAnimatorListener;
 
-    private AnimatorPlaybackController mLauncherStartAnim = null;
+    @Nullable private AsyncAnimatorPlaybackController mLauncherStartAnim = null;
 
     // Auto play background animation by default
     private boolean mBackgroundAnimationToggledOn = true;

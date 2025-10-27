@@ -2415,6 +2415,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     /**
      * @return true if we should force the fallback animation for All Set page
      */
+    @AnyThread
     public boolean shouldForceAllSetFallbackAnimation() {
         return !(mControllers.uiController instanceof LauncherTaskbarUIController);
     }
