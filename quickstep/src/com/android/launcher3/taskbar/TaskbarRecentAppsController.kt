@@ -277,10 +277,16 @@ class TaskbarRecentAppsController(
 
             controllers.runAfterInit { reloadRecentTasksIfNeeded() }
             if (enableTaskbarRecentsThemedIcons()) {
+                // Both callbacks force an icon fetch, because these changes may affect how icons
+                // are generated from BitmapInfo.
                 iconShapeDataCloseable =
-                    themeManager.iconShapeData.forEach(TASKBAR_UI_THREAD) { fetchIcons() }
+                    themeManager.iconShapeData.forEach(TASKBAR_UI_THREAD) {
+                        fetchIcons(forceUpdate = true)
+                    }
                 themeChangeListener =
-                    ThemeChangeListener { TASKBAR_UI_THREAD.execute { fetchIcons() } }
+                    ThemeChangeListener {
+                            TASKBAR_UI_THREAD.execute { fetchIcons(forceUpdate = true) }
+                        }
                         .also { themeManager.addChangeListener(it) }
             }
         }
@@ -421,7 +427,12 @@ class TaskbarRecentAppsController(
         return true
     }
 
-    private fun fetchIcons() {
+    /**
+     * Fetches the icons for shown tasks.
+     *
+     * Only updates the task views if the bitmap info has changed or [forceUpdate] is `true`.
+     */
+    private fun fetchIcons(forceUpdate: Boolean = false) {
         if (enableRecentsInTaskbar()) {
             cancelIconLoadRequests() // Cancel any previous requests.
         }
@@ -432,6 +443,14 @@ class TaskbarRecentAppsController(
                     val cancellableTask =
                         if (enableTaskbarRecentsThemedIcons()) {
                             recentsModel.iconCache.getBitmapInfoInBackground(task) { bi, d, t ->
+                                if (
+                                    !forceUpdate &&
+                                        bi === groupTask.bitmapInfos[i] &&
+                                        d == task.titleDescription &&
+                                        t == task.title
+                                ) {
+                                    return@getBitmapInfoInBackground
+                                }
                                 groupTask.bitmapInfos[i] = bi
                                 task.titleDescription = d
                                 task.title = t
