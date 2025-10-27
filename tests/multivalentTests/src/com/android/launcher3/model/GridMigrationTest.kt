@@ -18,6 +18,8 @@ package com.android.launcher3.model
 
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
+import android.platform.test.rule.LimitDevicesRule
+import android.platform.test.rule.SkipOnDeviceless
 import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -78,9 +80,12 @@ class GridMigrationData(dbFileName: String?, val gridState: DeviceGridState) {
  * later compared against a database in the test assets to make sure they are identical.
  */
 @SmallTest
+@SkipOnDeviceless // SQLite
 @RunWith(AndroidJUnit4::class)
 @EnableFlags(Flags.FLAG_ONE_GRID_SPECS)
 class GridMigrationTest {
+    @Rule @JvmField val limitDevicesRule = LimitDevicesRule()
+
     private val DB_FILE = "test_launcher.db"
 
     @JvmField

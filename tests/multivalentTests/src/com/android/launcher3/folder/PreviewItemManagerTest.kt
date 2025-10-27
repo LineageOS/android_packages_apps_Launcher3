@@ -22,7 +22,6 @@ import android.graphics.drawable.Drawable
 import android.os.Process
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn
 import com.android.launcher3.LauncherAppState
 import com.android.launcher3.LauncherSettings.Favorites.DESKTOP_ICON_FLAG
 import com.android.launcher3.dagger.LauncherAppComponent
@@ -50,6 +49,7 @@ import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY2
 import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY3
 import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY4
 import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
+import com.android.launcher3.util.RoboApiWrapper.convertToSpy
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestActivityContext
 import com.android.launcher3.util.TestUtil
@@ -102,7 +102,7 @@ class PreviewItemManagerTest {
         folderIcon = FolderIcon(uiContext)
 
         iconCache = LauncherAppState.INSTANCE[context].iconCache
-        spyOn(iconCache)
+        iconCache.convertToSpy()
         doReturn(null).whenever(iconCache).updateIconInBackground(any(), any(), any())
 
         previewItemManager = PreviewItemManager(folderIcon)

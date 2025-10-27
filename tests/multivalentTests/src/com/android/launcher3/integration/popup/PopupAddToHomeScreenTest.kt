@@ -17,12 +17,12 @@
 package com.android.launcher3.integration.popup
 
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.os.Process.myUserHandle
+import android.platform.test.rule.LimitDevicesRule
+import android.platform.test.rule.SkipOnDeviceless
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.launcher3.BubbleTextView
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherSettings.Favorites
@@ -31,13 +31,16 @@ import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.popup.SystemShortcut
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@SkipOnDeviceless // Timing out
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class PopupAddToHomeScreenTest {
-    private val targetContext: Context = getInstrumentation().targetContext
+    @Rule @JvmField val limitDevicesRule = LimitDevicesRule()
+
     private val launcherActivity = LauncherActivityScenarioRule<Launcher>()
     private val userHandle = myUserHandle()
     private val appPackage = "appPackage"
