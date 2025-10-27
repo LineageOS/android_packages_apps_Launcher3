@@ -33,6 +33,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.jank.Cuj;
+import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.taskbar.bubbles.BubbleBarViewController;
 import com.android.systemui.shared.system.InteractionJankMonitorWrapper;
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
@@ -195,6 +196,10 @@ public class TaskbarViewCallbacks {
             togglePinnedOverflowView(v);
             return true;
         };
+    }
+
+    void updateDescriptionWithRunningState(BubbleTextView btv) {
+        mControllers.taskbarViewController.updateDescriptionWithRunningState(btv);
     }
 
     private void toggleKeyboardQuickSwitchView() {

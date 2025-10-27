@@ -416,4 +416,7 @@
     <!-- Accessibility announcement for closing the nudge window. [CHAR_LIMIT=16] -->
     <string name="nudge_a11y_close">Close</string>
     <string name="nudge_a11y_image">Nudge image</string>
+
+    <!-- Content description for running app in desktop mode if it is active or minimized. [CHAR_LIMIT=NONE] -->
+    <string name="running_app_description"><xliff:g id="app_title" example="Gmail">%1$s</xliff:g> <xliff:g id="running_state" example="Active or Minimized">%2$s</xliff:g></string>
 </resources>

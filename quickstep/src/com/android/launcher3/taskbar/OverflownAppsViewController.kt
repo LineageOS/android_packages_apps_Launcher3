@@ -26,7 +26,7 @@ import com.android.launcher3.model.data.TaskItemInfo
 class OverflownAppsViewController(
     private val activityContext: TaskbarActivityContext,
     private val runningAppStateAnimationController: TaskbarRunningAppStateAnimationController,
-    viewCallbacks: TaskbarViewCallbacks,
+    private val viewCallbacks: TaskbarViewCallbacks,
     overflowIcon: TaskbarOverflowView,
     onClose: Runnable,
 ) {
@@ -77,7 +77,7 @@ class OverflownAppsViewController(
                 } ?: BubbleTextView.RunningAppState.NOT_RUNNING
 
             runningAppStateAnimationController.updateRunningState(btv, state, animate = false)
-            btv.updateDescriptionWithRunningState()
+            viewCallbacks.updateDescriptionWithRunningState(btv)
         }
     }
 }

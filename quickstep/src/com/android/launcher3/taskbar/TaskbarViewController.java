@@ -84,8 +84,6 @@ import com.android.launcher3.model.data.TaskItemInfo;
 import com.android.launcher3.taskbar.bubbles.BubbleBarController;
 import com.android.launcher3.taskbar.bubbles.BubbleBarViewController;
 import com.android.launcher3.taskbar.bubbles.BubbleControllers;
-import com.android.launcher3.taskbar.customization.TaskbarAllAppsButtonContainer;
-import com.android.launcher3.taskbar.customization.TaskbarDividerContainer;
 import com.android.launcher3.taskbar.customization.TaskbarIconSpecs;
 import com.android.launcher3.taskbar.customization.TaskbarIconsContainer;
 import com.android.launcher3.taskbar.handoff.HandoffSuggestion;
@@ -822,19 +820,31 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
     public void updateIconViewsRunningStates() {
         for (BubbleTextView iconView : getAllAppIcons()) {
             updateRunningState(iconView);
-            if (shouldUpdateIconContentDescription(iconView)) {
-                iconView.updateDescriptionWithRunningState();
-            }
+            updateDescriptionWithRunningState(iconView);
         }
     }
 
-    private boolean shouldUpdateIconContentDescription(BubbleTextView btv) {
-        boolean isInDesktopMode =
-                mControllers.taskbarDesktopModeController.shouldShowDesktopTasksInTaskbar(
-                        DEFAULT_DISPLAY);
-        boolean isAllAppsButton = btv instanceof TaskbarAllAppsButtonContainer;
-        boolean isDividerButton = btv instanceof TaskbarDividerContainer;
-        return isInDesktopMode && !isAllAppsButton && !isDividerButton;
+    void updateDescriptionWithRunningState(BubbleTextView btv) {
+        final Object tag = btv.getTag();
+        final CharSequence tagDescription;
+        if (tag instanceof ItemInfo itemInfo) {
+            tagDescription = itemInfo.contentDescription;
+        } else if (tag instanceof SingleTask singleTask) {
+            tagDescription = singleTask.getTask().titleDescription;
+        } else {
+            return; // Tag does not support running state.
+        }
+
+        if (!mControllers.taskbarDesktopModeController.shouldShowDesktopTasksInTaskbar(
+                DEFAULT_DISPLAY)) {
+            btv.setContentDescription(tagDescription);
+            return;
+        }
+        final String iconStateDescription = btv.getIconStateDescription();
+        btv.setContentDescription(iconStateDescription.isEmpty()
+                ? tagDescription
+                : mActivity.getString(
+                        R.string.running_app_description, tagDescription, iconStateDescription));
     }
 
     /**
