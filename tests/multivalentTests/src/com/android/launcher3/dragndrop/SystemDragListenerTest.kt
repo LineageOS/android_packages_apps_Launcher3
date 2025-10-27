@@ -35,8 +35,9 @@ import com.android.launcher3.Launcher
 import com.android.launcher3.icons.BitmapInfo
 import com.android.launcher3.icons.FastBitmapDrawable
 import com.android.launcher3.icons.IconCache
-import com.android.launcher3.util.LauncherMultivalentJUnit
+import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.util.RoboApiWrapper
+import java.util.concurrent.atomic.AtomicReference
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -56,14 +57,53 @@ import org.mockito.kotlin.argThat
 import org.mockito.kotlin.clearInvocations
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.mockingDetails
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 /** Tests for {@link SystemDragListener}. */
 @SmallTest
 @EnableFlags(FLAG_ENABLE_SYSTEM_DRAG)
-@RunWith(LauncherMultivalentJUnit::class)
-class SystemDragListenerTest {
+@RunWith(ParameterizedAndroidJunit4::class)
+class SystemDragListenerTest(val name: String, private val params: SystemDragParams?) {
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams() =
+            listOf(
+                arrayOf("WithItemInfoParams", createParams(mock<ItemInfo>())),
+                arrayOf("WithNullParams", createParams(null)),
+                arrayOf("WithSystemDragItemInfoParams", createParams(mock<SystemDragItemInfo>())),
+            )
+
+        private fun createParams(itemInfo: ItemInfo?) =
+            itemInfo?.let { dragInfo ->
+                SystemDragParams(
+                    dragImage = mock(),
+                    draggableView = mock(),
+                    dragLayerX = DRAG_LAYER_X,
+                    dragLayerY = DRAG_LAYER_Y,
+                    dragSource = mock(),
+                    dragInfo = dragInfo,
+                    dragRegion = mock(),
+                    initialDragViewScale = INITIAL_DRAG_VIEW_SCALE,
+                    dragViewScaleOnDrop = DRAG_VIEW_SCALE_ON_DROP,
+                    dragOptions = mock(),
+                )
+            }
+
+        private const val DRAG_EVENT_X = 10.0f
+        private const val DRAG_EVENT_Y = 20.0f
+        private const val DRAG_IMAGE_INTRINSIC_HEIGHT = 24
+        private const val DRAG_IMAGE_INTRINSIC_WIDTH = 48
+        private const val DRAG_LAYER_X = 1
+        private const val DRAG_LAYER_Y = 2
+        private const val DRAG_VIEW_SCALE_ON_DROP = 3.0f
+        private const val INITIAL_DRAG_VIEW_SCALE = 4.0f
+    }
 
     @get:Rule val flags: SetFlagsRule = SetFlagsRule()
     @get:Rule val mockito = MockitoJUnit.rule()
@@ -82,7 +122,11 @@ class SystemDragListenerTest {
         initMock(mockIconCache)
         initMock(mockLauncher)
 
-        listener = SystemDragListener(mockLauncher) { mockIconCache }
+        if (params?.dragInfo is SystemDragItemInfo && mockingDetails(params.dragInfo).isMock) {
+            initMock(params.dragInfo as SystemDragItemInfo)
+        }
+
+        listener = SystemDragListener(mockLauncher, { mockIconCache }, params)
 
         // NOTE: The system drag listener registers itself with the launcher's drag controller
         // during construction. Verify the expected registration but then clear invocations so that
@@ -131,25 +175,42 @@ class SystemDragListenerTest {
         whenever(mockDragEvent.action).thenReturn(DragEvent.ACTION_DRAG_STARTED)
         whenever(mockLauncher.dragController.isDragging).thenReturn(false)
 
-        val screenPos = Point(mockDragEvent.x.toInt(), mockDragEvent.y.toInt())
-        val dragLayerX = screenPos.x - (mockDragImage.intrinsicWidth / 2)
-        val dragLayerY = screenPos.y - (mockDragImage.intrinsicHeight / 2)
-
         assertTrue(listener.onDrag(mockDragEvent))
-        verify(mockLauncher.dragController)
-            .startDrag(
-                /*drawable=*/ eq(mockDragImage),
-                /*originalView=*/ argThat { viewType == DraggableView.DRAGGABLE_ICON },
-                /*dragLayerX=*/ eq(dragLayerX),
-                /*dragLayerY=*/ eq(dragLayerY),
-                /*source=*/ eq(listener),
-                /*dragInfo=*/ if (dragInfoCaptor != null) dragInfoCaptor.capture()
-                else any<SystemDragItemInfo>(),
-                /*dragRegion=*/ eq(Rect()),
-                /*initialDragViewScale=*/ eq(1.0f),
-                /*dragViewScaleOnDrop=*/ eq(1.0f),
-                /*options=*/ argThat { simulatedDndStartPoint == screenPos },
-            )
+
+        if (params != null) {
+            verify(mockLauncher.dragController)
+                .startDrag(
+                    params.dragImage,
+                    params.draggableView,
+                    params.dragLayerX,
+                    params.dragLayerY,
+                    params.dragSource,
+                    params.dragInfo,
+                    params.dragRegion,
+                    params.initialDragViewScale,
+                    params.dragViewScaleOnDrop,
+                    params.dragOptions,
+                )
+        } else {
+            val screenPos = Point(mockDragEvent.x.toInt(), mockDragEvent.y.toInt())
+            val dragLayerX = screenPos.x - (mockDragImage.intrinsicWidth / 2)
+            val dragLayerY = screenPos.y - (mockDragImage.intrinsicHeight / 2)
+
+            verify(mockLauncher.dragController)
+                .startDrag(
+                    /*drawable=*/ eq(mockDragImage),
+                    /*originalView=*/ argThat { viewType == DraggableView.DRAGGABLE_ICON },
+                    /*dragLayerX=*/ eq(dragLayerX),
+                    /*dragLayerY=*/ eq(dragLayerY),
+                    /*source=*/ eq(listener),
+                    /*dragInfo=*/ if (dragInfoCaptor != null) dragInfoCaptor.capture()
+                    else any<SystemDragItemInfo>(),
+                    /*dragRegion=*/ eq(Rect()),
+                    /*initialDragViewScale=*/ eq(1.0f),
+                    /*dragViewScaleOnDrop=*/ eq(1.0f),
+                    /*options=*/ argThat { simulatedDndStartPoint == screenPos },
+                )
+        }
     }
 
     @Test
@@ -163,12 +224,15 @@ class SystemDragListenerTest {
     }
 
     private fun testDrop(throwExceptionWhenRequestingPermissions: Boolean) {
-        val dragInfoCaptor = ArgumentCaptor.forClass(SystemDragItemInfo::class.java)
+        val dragInfoCaptor =
+            if (params == null) ArgumentCaptor.forClass(SystemDragItemInfo::class.java) else null
 
         testDragLocation(dragInfoCaptor)
         clearInvocations(mockLauncher.dragController)
 
-        assertNull(dragInfoCaptor.value.uriList)
+        val systemDragItemInfo = dragInfoCaptor?.value ?: params?.dragInfo as? SystemDragItemInfo
+
+        assertNull(systemDragItemInfo?.uriList)
 
         val mockUri1 = mock<Uri>()
         val mockUri2 = mock<Uri>()
@@ -197,17 +261,20 @@ class SystemDragListenerTest {
         }
 
         assertTrue(listener.onDrag(mockDragEvent))
-        verify(mockLauncher).requestDragAndDropPermissions(mockDragEvent)
         verify(mockLauncher.dragController).isDragging
         verifyNoMoreInteractions(mockLauncher.dragController)
 
-        with(dragInfoCaptor.value) {
-            if (throwExceptionWhenRequestingPermissions) {
-                assertNull(permissions)
-                assertNull(uriList)
-            } else {
-                assertNotNull(permissions)
-                assertEquals(listOf(mockUri1, mockUri2), uriList)
+        if (systemDragItemInfo != null) {
+            verify(mockLauncher).requestDragAndDropPermissions(mockDragEvent)
+
+            with(systemDragItemInfo) {
+                if (throwExceptionWhenRequestingPermissions) {
+                    assertNull(permissions)
+                    assertNull(uriList)
+                } else {
+                    assertNotNull(permissions)
+                    assertEquals(listOf(mockUri1, mockUri2), uriList)
+                }
             }
         }
     }
@@ -239,10 +306,17 @@ class SystemDragListenerTest {
         whenever(mockLauncher.stateManager).thenReturn(mock())
     }
 
-    companion object {
-        private const val DRAG_EVENT_X = 10.0f
-        private const val DRAG_EVENT_Y = 20.0f
-        private const val DRAG_IMAGE_INTRINSIC_HEIGHT = 24
-        private const val DRAG_IMAGE_INTRINSIC_WIDTH = 48
+    private fun initMock(mockSystemDragItemInfo: SystemDragItemInfo) {
+        val permissions = AtomicReference<DragAndDropPermissions?>(null)
+        whenever(mockSystemDragItemInfo.permissions).thenAnswer { permissions.get() }
+        whenever(mockSystemDragItemInfo::permissions.setter.invoke(any())).thenAnswer {
+            permissions.set(it.getArgument<DragAndDropPermissions?>(0))
+        }
+
+        val uriList = AtomicReference<List<Uri>?>(null)
+        whenever(mockSystemDragItemInfo.uriList).thenAnswer { uriList.get() }
+        whenever(mockSystemDragItemInfo::uriList.setter.invoke(any())).thenAnswer {
+            uriList.set(it.getArgument<List<Uri>?>(0))
+        }
     }
 }

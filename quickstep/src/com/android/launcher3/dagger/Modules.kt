@@ -164,8 +164,8 @@ object SystemDragModule {
     ): SystemDragController =
         if (enableSystemDrag())
             SystemDragControllerImpl(
-                systemDragListenerFactory.orElse { launcher ->
-                    SystemDragListener(launcher, iconCache)
+                systemDragListenerFactory.orElse { launcher, params ->
+                    SystemDragListener(launcher, iconCache, params)
                 }
             )
         else SystemDragControllerStub()

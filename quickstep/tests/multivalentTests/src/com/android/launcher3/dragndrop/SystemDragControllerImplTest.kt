@@ -72,7 +72,7 @@ class SystemDragControllerImplTest {
 
         context.initDaggerComponent(
             DaggerSystemDragControllerImplTest_TestComponent.builder()
-                .bindSystemDragListenerFactory { mockSystemDragListener }
+                .bindSystemDragListenerFactory { launcher, params -> mockSystemDragListener }
         )
 
         val controller = SystemDragController.INSTANCE[context]
