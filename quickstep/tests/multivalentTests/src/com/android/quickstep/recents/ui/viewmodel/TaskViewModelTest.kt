@@ -26,7 +26,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_BOTTOM_OR_RIGHT
 import com.android.launcher3.util.SystemUiController.FLAG_LIGHT_NAV
 import com.android.launcher3.util.SystemUiController.FLAG_LIGHT_STATUS
-import com.android.launcher3.util.TestDispatcherProvider
 import com.android.quickstep.recents.data.FakeRecentsRotationStateRepository
 import com.android.quickstep.recents.domain.model.TaskModel
 import com.android.quickstep.recents.domain.usecase.GetSysUiStatusNavFlagsUseCase
@@ -115,7 +114,7 @@ class TaskViewModelTest {
                         getSysUiStatusNavFlagsUseCase = GetSysUiStatusNavFlagsUseCase(),
                         isThumbnailValidUseCase = isThumbnailValidUseCase,
                         getThumbnailPositionUseCase = getThumbnailPositionUseCase,
-                        dispatcherProvider = TestDispatcherProvider(unconfinedTestDispatcher),
+                        lightweightBackgroundDispatcher = unconfinedTestDispatcher,
                     )
                 sut.bind(type, TASK_MODEL_1.id)
                 assertThat(sut.state.first().hasHeader).isEqualTo(expectedResult)
@@ -400,7 +399,7 @@ class TaskViewModelTest {
             getSysUiStatusNavFlagsUseCase = GetSysUiStatusNavFlagsUseCase(),
             isThumbnailValidUseCase = isThumbnailValidUseCase,
             getThumbnailPositionUseCase = getThumbnailPositionUseCase,
-            dispatcherProvider = TestDispatcherProvider(unconfinedTestDispatcher),
+            lightweightBackgroundDispatcher = unconfinedTestDispatcher,
         )
 
     private companion object {

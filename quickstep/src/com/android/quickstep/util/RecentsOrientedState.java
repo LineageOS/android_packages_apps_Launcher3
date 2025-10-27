@@ -66,6 +66,8 @@ import kotlin.Unit;
 import java.lang.annotation.Retention;
 import java.util.function.IntConsumer;
 
+import javax.inject.Inject;
+
 /**
  * Container to hold orientation/rotation related information for Launcher.
  * This is not meant to be an abstraction layer for applying different functionality between
@@ -147,6 +149,7 @@ public class RecentsOrientedState implements LauncherPrefChangeListener {
     // Combined int which encodes the full state.
     private int mStateId = 0;
 
+    @Inject
     public RecentsOrientedState(Context context, BaseContainerInterface containerInterface) {
         mContext = context;
         mContainerInterface = containerInterface;

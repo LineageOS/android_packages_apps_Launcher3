@@ -80,6 +80,9 @@ import com.android.launcher3.util.window.WindowManagerProxy;
 import java.io.PrintWriter;
 import java.util.Locale;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
+
+import javax.inject.Inject;
 
 @SuppressLint("NewApi")
 public class DeviceProfile {
@@ -1966,6 +1969,19 @@ public class DeviceProfile {
             boolean isTwoPanels = info.isTablet(windowBounds) && isMultiDisplay;
             boolean isLandscape = windowBounds.isLandscape();
             return new DisplayOptionSpec(inv, isTwoPanels, isLandscape);
+        }
+    }
+
+    public static class Getter {
+        private final Supplier<DeviceProfile> mDeviceProfileSupplier;
+
+        @Inject
+        public Getter(Supplier<DeviceProfile> deviceProfileSupplier) {
+            mDeviceProfileSupplier = deviceProfileSupplier;
+        }
+
+        public DeviceProfile get() {
+            return mDeviceProfileSupplier.get();
         }
     }
 }

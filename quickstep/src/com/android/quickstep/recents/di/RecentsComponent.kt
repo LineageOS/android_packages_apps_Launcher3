@@ -16,15 +16,34 @@
 
 package com.android.quickstep.recents.di
 
+import com.android.launcher3.dagger.LauncherAppSingleton
+import com.android.quickstep.recents.viewmodel.RecentsViewModel
+import com.android.quickstep.views.DesktopTaskView
+import com.android.quickstep.views.GroupedTaskView
+import com.android.quickstep.views.RecentsViewContainer
+import com.android.quickstep.views.RecentsViewModelHelper
+import com.android.quickstep.views.TaskView
 import dagger.BindsInstance
 import dagger.Subcomponent
 
 /** A sub-component that controls the lifecycle of an instance of Recents. */
 @RecentsSingleton
-@Subcomponent
+@RecentsScope
+@Subcomponent(modules = [LauncherRecentsModule::class])
 interface RecentsComponent {
+    fun getRecentsViewModel(): RecentsViewModel
+
+    fun getRecentsViewModelHelper(): RecentsViewModelHelper
+
+    fun inject(taskView: TaskView)
+
+    fun inject(taskView: GroupedTaskView)
+
+    fun inject(taskView: DesktopTaskView)
+
+    @LauncherAppSingleton
     @Subcomponent.Factory
     interface Factory {
-        fun build(@DisplayIdForRecents @BindsInstance displayId: Int): RecentsComponent
+        fun build(@BindsInstance recentsViewContainer: RecentsViewContainer): RecentsComponent
     }
 }

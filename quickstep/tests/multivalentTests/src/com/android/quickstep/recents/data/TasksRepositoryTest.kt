@@ -26,7 +26,6 @@ import android.platform.test.annotations.EnableFlags
 import android.view.Display.DEFAULT_DISPLAY
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.Flags
-import com.android.launcher3.util.TestDispatcherProvider
 import com.android.quickstep.util.DesktopTask
 import com.android.quickstep.util.SingleTask
 import com.android.quickstep.util.SplitTask
@@ -108,7 +107,7 @@ class TasksRepositoryTest {
             userLockedStateRepository,
             taskVisualsChangedDelegate,
             testScope.backgroundScope,
-            TestDispatcherProvider(dispatcher),
+            dispatcher,
         )
 
     @Before

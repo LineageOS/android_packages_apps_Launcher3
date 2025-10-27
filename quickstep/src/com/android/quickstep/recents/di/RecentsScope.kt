@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,6 @@
 
 package com.android.quickstep.recents.di
 
-data class RecentsDependenciesExtras(private val data: MutableMap<String, Any> = mutableMapOf()) {
-    constructor(value: Array<out Pair<String, Any>>) : this(value.toMap().toMutableMap())
+import javax.inject.Scope
 
-    operator fun get(key: String) = data[key]
-
-    operator fun set(key: String, value: Any) {
-        data[key] = value
-    }
-}
+@Scope @Retention(AnnotationRetention.RUNTIME) annotation class RecentsScope

@@ -23,12 +23,13 @@ import com.android.quickstep.recents.domain.model.DesktopLayoutConfig
 import com.android.quickstep.recents.domain.model.DesktopTaskBoundsData
 import com.android.quickstep.recents.domain.model.DesktopTaskBoundsData.HiddenDesktopTaskBoundsData
 import com.android.quickstep.recents.domain.model.DesktopTaskBoundsData.RenderedDesktopTaskBoundsData
+import javax.inject.Inject
 
 /**
  * This usecase is responsible for organizing desktop windows in a non-overlapping way, and can also
  * reflow a layout when a task is dismissed.
  */
-class OrganizeDesktopTasksUseCase {
+class OrganizeDesktopTasksUseCase @Inject constructor() {
 
     /**
      * Arranges desktop tasks or rebalances layout after a task dismissal.

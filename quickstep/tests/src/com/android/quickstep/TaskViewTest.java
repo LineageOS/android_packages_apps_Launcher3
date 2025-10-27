@@ -16,7 +16,6 @@
 
 package com.android.quickstep;
 
-import static com.android.quickstep.TaskViewTestDIHelpers.initializeRecentsDependencies;
 import static com.android.quickstep.TaskViewTestDIHelpers.mockRecentsModel;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -42,11 +41,9 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.launcher3.uioverrides.QuickstepLauncher;
 import com.android.launcher3.util.SandboxContext;
-import com.android.quickstep.recents.di.RecentsDependencies;
 import com.android.quickstep.util.BorderAnimator;
 import com.android.quickstep.views.TaskView;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -86,13 +83,7 @@ public class TaskViewTest {
 
         mApplicationContext.initDaggerComponent(
                 DaggerTaskViewTestComponent.builder().bindRecentsModel(mockRecentsModel()));
-        initializeRecentsDependencies(mContext);
         mTaskView = new TaskView(mContext, null, 0, 0, mFocusAnimator, mHoverAnimator);
-    }
-
-    @After
-    public void tearDown() {
-        RecentsDependencies.destroy(mContext);
     }
 
     @Test

@@ -29,9 +29,12 @@ import com.android.quickstep.recents.domain.model.DesktopTaskVisibilityData.Rend
 import com.android.quickstep.recents.domain.usecase.GetObscuredDesktopTaskIdsUseCase
 import com.android.quickstep.recents.domain.usecase.OrganizeDesktopTasksUseCase
 import com.android.quickstep.util.DesktopTask
+import javax.inject.Inject
 
 /** ViewModel used for [com.android.quickstep.views.DesktopTaskView]. */
-class DesktopTaskViewModel(
+class DesktopTaskViewModel
+@Inject
+constructor(
     private val organizeDesktopTasksUseCase: OrganizeDesktopTasksUseCase,
     private val getObscuredDesktopTaskIdsUseCase: GetObscuredDesktopTaskIdsUseCase,
     private val desktopModeCompatPolicy: DesktopModeCompatPolicy,

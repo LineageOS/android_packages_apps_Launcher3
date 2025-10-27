@@ -27,6 +27,7 @@ import com.android.systemui.shared.recents.utilities.Utilities
 import com.android.wm.shell.shared.split.SplitBounds
 import com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_10_90
 import com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_90_10
+import javax.inject.Inject
 
 /**
  * Use case responsible for validating the aspect ratio and rotation of a thumbnail against the
@@ -38,12 +39,25 @@ import com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_90_10
  *
  * @property rotationStateRepository Repository providing the current rotation state of the device.
  */
-class IsThumbnailValidUseCase(private val rotationStateRepository: RecentsRotationStateRepository) {
-    operator fun invoke(thumbnailData: ThumbnailData?, viewWidth: Int, viewHeight: Int,
-                        splitBounds: SplitBounds?, stagePosition: Int): Boolean {
+class IsThumbnailValidUseCase
+@Inject
+constructor(private val rotationStateRepository: RecentsRotationStateRepository) {
+    operator fun invoke(
+        thumbnailData: ThumbnailData?,
+        viewWidth: Int,
+        viewHeight: Int,
+        splitBounds: SplitBounds?,
+        stagePosition: Int,
+    ): Boolean {
         val thumbnail = thumbnailData?.thumbnail ?: return false
-        return !isInaccurateThumbnail(thumbnail, viewWidth, viewHeight, thumbnailData.rotation,
-            splitBounds, stagePosition)
+        return !isInaccurateThumbnail(
+            thumbnail,
+            viewWidth,
+            viewHeight,
+            thumbnailData.rotation,
+            splitBounds,
+            stagePosition,
+        )
     }
 
     private fun isInaccurateThumbnail(
@@ -53,12 +67,13 @@ class IsThumbnailValidUseCase(private val rotationStateRepository: RecentsRotati
         rotation: Int,
         splitBounds: SplitBounds?,
         stagePosition: Int,
-    ) = isAspectRatioDifferentFromViewAspectRatio(
+    ) =
+        isAspectRatioDifferentFromViewAspectRatio(
             thumbnail = thumbnail,
             width = viewWidth.toFloat(),
             height = viewHeight.toFloat(),
             splitBounds = splitBounds,
-            stagePosition = stagePosition
+            stagePosition = stagePosition,
         ) || isRotationDifferentFromTask(rotation)
 
     private fun isAspectRatioDifferentFromViewAspectRatio(
@@ -73,10 +88,10 @@ class IsThumbnailValidUseCase(private val rotationStateRepository: RecentsRotati
         if (splitBounds != null) {
             val isTopLeft10PercentApp =
                 (splitBounds.snapPosition == SNAP_TO_2_10_90 &&
-                        stagePosition == STAGE_POSITION_TOP_OR_LEFT)
+                    stagePosition == STAGE_POSITION_TOP_OR_LEFT)
             val isBottomRight10PercentApp =
-                        (splitBounds.snapPosition == SNAP_TO_2_90_10 &&
-                                stagePosition == STAGE_POSITION_BOTTOM_OR_RIGHT)
+                (splitBounds.snapPosition == SNAP_TO_2_90_10 &&
+                    stagePosition == STAGE_POSITION_BOTTOM_OR_RIGHT)
             if (isTopLeft10PercentApp || isBottomRight10PercentApp) {
                 return false
             }

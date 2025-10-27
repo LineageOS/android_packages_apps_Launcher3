@@ -46,6 +46,7 @@ import com.android.quickstep.actioncorner.ActionCornerHandler;
 import com.android.quickstep.input.QuickstepKeyGestureEventsManager;
 import com.android.quickstep.inputconsumers.NavHandleLongPressHandler;
 import com.android.quickstep.logging.SettingsChangeLogger;
+import com.android.quickstep.recents.di.RecentsComponent;
 import com.android.quickstep.util.AsyncClockEventDelegate;
 import com.android.quickstep.util.ContextualSearchHapticManager;
 import com.android.quickstep.util.ContextualSearchStateManager;
@@ -132,4 +133,6 @@ public interface QuickstepBaseAppComponent extends LauncherBaseAppComponent {
     QuickstepKeyGestureEventsManager getQuickstepKeyGestureEventsManager();
 
     DesktopModeCompatPolicy getDesktopModeCompatPolicy();
+
+    RecentsComponent.Factory getRecentsComponentFactory();
 }

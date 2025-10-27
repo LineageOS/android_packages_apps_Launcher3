@@ -55,8 +55,7 @@ import com.android.quickstep.FullscreenDrawParams
 import com.android.quickstep.RemoteTargetGluer.RemoteTargetHandle
 import com.android.quickstep.TaskOverlayFactory
 import com.android.quickstep.ViewUtils.addAccessibleChildToList
-import com.android.quickstep.recents.di.RecentsDependencies
-import com.android.quickstep.recents.di.get
+import com.android.quickstep.recents.di.RecentsComponent
 import com.android.quickstep.recents.domain.model.DesktopLayoutConfig
 import com.android.quickstep.recents.domain.model.DesktopTaskVisibilityData
 import com.android.quickstep.recents.domain.model.DesktopTaskVisibilityData.HiddenDesktopTaskVisibilityData
@@ -70,6 +69,7 @@ import com.android.quickstep.util.DesktopTask
 import com.android.quickstep.util.RecentsOrientedState
 import com.android.quickstep.util.getRemoteTargetHandle
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus.enableMultipleDesktops
+import javax.inject.Inject
 import kotlin.math.roundToInt
 
 /** TaskView that contains all tasks that are part of the desktop. */
@@ -122,12 +122,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
     private lateinit var iconTouchDelegate: TransformingTouchDelegate
     private lateinit var contentView: DesktopTaskContentView
     private lateinit var backgroundView: View
-    private var viewModel =
-        DesktopTaskViewModel(
-            organizeDesktopTasksUseCase = RecentsDependencies.get(context),
-            getObscuredDesktopTaskIdsUseCase = RecentsDependencies.get(context),
-            desktopModeCompatPolicy = RecentsDependencies.get(context),
-        )
+    @Inject lateinit var desktopTaskViewModel: DesktopTaskViewModel
 
     /**
      * Map from task IDs to previous organized task positions. This is used to animate between two
@@ -179,6 +174,10 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
                 super.displayId
             }
 
+    override fun initialiseInjectables(recentsComponent: RecentsComponent) {
+        recentsComponent.inject(this)
+    }
+
     override fun onFinishInflate() {
         super.onFinishInflate()
         contentView =
@@ -200,12 +199,13 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
         taskContainers.forEach { taskContainer ->
             val taskId = taskContainer.task.key.id
             val fullscreenTaskBounds =
-                viewModel.fullscreenTaskPositions.firstOrNull { it.taskId == taskId }?.bounds
-                    ?: return@forEach
+                desktopTaskViewModel.fullscreenTaskPositions
+                    .firstOrNull { it.taskId == taskId }
+                    ?.bounds ?: return@forEach
 
             val organizedTaskVisibilityData: DesktopTaskVisibilityData? =
                 if (enableDesktopExplodedView()) {
-                    viewModel.organizedDesktopTaskVisibilityDataMap[taskId]
+                    desktopTaskViewModel.organizedDesktopTaskVisibilityDataMap[taskId]
                 } else {
                     null
                 }
@@ -418,7 +418,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
         orientedState: RecentsOrientedState,
         taskOverlayFactory: TaskOverlayFactory,
     ) {
-        viewModel.bind(desktopTask)
+        desktopTaskViewModel.bind(desktopTask)
         this.groupTask = desktopTask
         // Minimized tasks are shown in Overview when exploded view is enabled.
         val tasks =
@@ -499,7 +499,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
         taskContainers.forEach { removeAndRecycleThumbnailView(it) }
         remoteTargetHandles = null
         taskIdReorderToFront = null
-        viewModel.bind(null)
+        desktopTaskViewModel.bind(null)
     }
 
     @SuppressLint("RtlHardcoded")
@@ -677,7 +677,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
             // Store the current organized positions before computing new ones. This allows us to
             // animate from the current layout to the new.
             previousOrganizedDesktopTaskVisibilityDataMap =
-                viewModel.organizedDesktopTaskVisibilityDataMap
+                desktopTaskViewModel.organizedDesktopTaskVisibilityDataMap
             updateTaskPositions(taskId)
         }
     }
@@ -694,7 +694,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
     private fun updateTaskPositions(dismissedTaskId: Int? = null) {
         if (enableDesktopExplodedView()) {
             val layoutConfig = getDesktopLayoutConfig()
-            viewModel.organizeDesktopTasks(layoutConfig, dismissedTaskId)
+            desktopTaskViewModel.organizeDesktopTasks(layoutConfig, dismissedTaskId)
         }
         positionTaskWindows(updateLayout = true)
     }

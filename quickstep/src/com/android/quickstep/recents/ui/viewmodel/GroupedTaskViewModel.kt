@@ -17,7 +17,10 @@
 package com.android.quickstep.recents.ui.viewmodel
 
 import com.android.quickstep.recents.domain.usecase.IsPointerConnectedUseCase
+import javax.inject.Inject
 
-class GroupedTaskViewModel(private val isPointerConnectedUseCase: IsPointerConnectedUseCase) {
+class GroupedTaskViewModel
+@Inject
+constructor(private val isPointerConnectedUseCase: IsPointerConnectedUseCase) {
     fun showTaskDismissButton(): Boolean = isPointerConnectedUseCase.isAnyPointerDeviceConnected()
 }

@@ -18,12 +18,13 @@ package com.android.quickstep.recents.domain.usecase
 
 import android.graphics.Region
 import com.android.quickstep.recents.ui.viewmodel.DesktopTaskViewModel.TaskPosition
+import javax.inject.Inject
 
 /**
  * This usecase is responsible for returning the task IDs of all desktop windows that are completely
  * obscured (they are completely overlapped by windows above them in the z-order).
  */
-class GetObscuredDesktopTaskIdsUseCase {
+class GetObscuredDesktopTaskIdsUseCase @Inject constructor() {
     operator fun invoke(desktopTaskPositions: List<TaskPosition>): Set<Int> {
         var obscuredWindowIdSet = mutableSetOf<Int>()
         val totalOccludedRegion = Region()

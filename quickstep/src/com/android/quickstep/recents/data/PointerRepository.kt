@@ -19,12 +19,14 @@ package com.android.quickstep.recents.data
 import android.view.InputDevice.SOURCE_MOUSE
 import android.view.InputDevice.SOURCE_TOUCHPAD
 import com.android.app.tracing.traceSection
+import javax.inject.Inject
 
 interface PointerRepository {
     fun isAnyPointerDeviceConnected(): Boolean
 }
 
-class PointerRepositoryImpl(private val inputManager: InputDeviceDataSource) : PointerRepository {
+class PointerRepositoryImpl @Inject constructor(private val inputManager: InputDeviceDataSource) :
+    PointerRepository {
     override fun isAnyPointerDeviceConnected(): Boolean =
         traceSection("PointerRepositoryImpl.isAnyPointerDeviceConnected") {
             return inputManager.inputDeviceIds.any { isPointerDeviceEnabled(it) }

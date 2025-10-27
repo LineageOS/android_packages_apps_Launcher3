@@ -19,7 +19,8 @@ package com.android.quickstep.recents.ui.viewmodel
 import android.annotation.ColorInt
 import android.util.Log
 import androidx.core.graphics.ColorUtils
-import com.android.launcher3.util.coroutines.DispatcherProvider
+import com.android.launcher3.concurrent.annotations.LightweightBackground
+import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority
 import com.android.quickstep.recents.domain.model.TaskId
 import com.android.quickstep.recents.domain.model.TaskModel
 import com.android.quickstep.recents.domain.usecase.GetSysUiStatusNavFlagsUseCase
@@ -31,6 +32,8 @@ import com.android.quickstep.recents.viewmodel.RecentsViewData
 import com.android.quickstep.views.TaskViewType
 import com.android.systemui.shared.recents.model.ThumbnailData
 import com.android.wm.shell.shared.split.SplitBounds
+import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,13 +49,16 @@ import kotlinx.coroutines.flow.map
  * [com.android.quickstep.views.DesktopTaskView] and [com.android.quickstep.views.GroupedTaskView].
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class TaskViewModel(
+class TaskViewModel
+@Inject
+constructor(
     recentsViewData: RecentsViewData,
     private val getTaskUseCase: GetTaskUseCase,
     private val getSysUiStatusNavFlagsUseCase: GetSysUiStatusNavFlagsUseCase,
     private val isThumbnailValidUseCase: IsThumbnailValidUseCase,
     private val getThumbnailPositionUseCase: GetThumbnailPositionUseCase,
-    dispatcherProvider: DispatcherProvider,
+    @LightweightBackground(LightweightBackgroundPriority.UI)
+    lightweightBackgroundDispatcher: CoroutineDispatcher,
 ) {
     private lateinit var taskViewType: TaskViewType
     private val taskIds = MutableStateFlow(emptySet<Int>())
@@ -108,12 +114,12 @@ class TaskViewModel(
                     0
                 }
             }
-            .flowOn(dispatcherProvider.lightweightBackground)
+            .flowOn(lightweightBackgroundDispatcher)
 
     fun bind(taskViewType: TaskViewType, vararg taskId: TaskId) {
         this.taskViewType = taskViewType
-        taskIds.value = taskId.toSet()
-            .also { Log.d(TAG, "bind $this as $taskViewType to taskIds: $it") }
+        taskIds.value =
+            taskId.toSet().also { Log.d(TAG, "bind $this as $taskViewType to taskIds: $it") }
     }
 
     fun unbind() {
