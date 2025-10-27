@@ -41,6 +41,7 @@ import com.android.launcher3.LauncherConstants.ActivityCodes
 import com.android.launcher3.LauncherPrefs.Companion.get
 import com.android.launcher3.accessibility.DragViewStateAnnouncer
 import com.android.launcher3.celllayout.CellLayoutLayoutParams
+import com.android.launcher3.compose.ComposeFacade
 import com.android.launcher3.dragndrop.DragController
 import com.android.launcher3.dragndrop.DragLayer
 import com.android.launcher3.dragndrop.DragOptions
@@ -1041,8 +1042,13 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
                 // If widget is not added to view hierarchy, we cannot show resize frame at correct
                 // location
                 if (widget == null || widget.parent == null) return
-
                 val activityContext = cellLayout.mActivity
+
+                if (ComposeFacade.isComposeAvailable() && Flags.fixWidgetSinglePtrResize()) {
+                    ComposeFacade.showResizeFrame(cellLayout.mActivity, widget, cellLayout)
+                    return
+                }
+
                 val dragLayer = activityContext.dragLayer as DragLayer
 
                 closeAllOpenViewsExcept(activityContext, TYPE_ACTION_POPUP)
