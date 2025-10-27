@@ -239,8 +239,8 @@ class TaskContentView @JvmOverloads constructor(context: Context, attrs: Attribu
     }
 
     fun onParentAnimationProgress(progress: Float) {
-        taskAppTimerToast?.apply { translationY = timerToastHeight * (1f - progress) }
-        taskAppTimerToastCompose?.apply { translationY = timerToastHeight * (1f - progress) }
+        taskAppTimerToast?.apply { alpha = progress }
+        taskAppTimerToastCompose?.apply { alpha = progress }
     }
 
     /** Returns accessibility actions supported by items in the task content view. */
