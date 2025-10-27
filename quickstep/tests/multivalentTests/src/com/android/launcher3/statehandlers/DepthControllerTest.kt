@@ -60,7 +60,7 @@ class DepthControllerTest {
         `when`(launcher.stateManager).thenReturn(stateManager)
         `when`(launcher.depthBlurTargets).thenReturn(Collections.emptyList())
 
-        underTest = LauncherDepthController(launcher)
+        underTest = LauncherDepthController(launcher, true)
     }
 
     @Test

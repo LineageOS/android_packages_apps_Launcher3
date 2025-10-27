@@ -25,7 +25,6 @@ import android.os.IBinder;
 import android.os.Trace;
 import android.util.FloatProperty;
 import android.util.Log;
-import android.view.CrossWindowBlurListeners;
 import android.view.SurfaceControl;
 
 import androidx.annotation.NonNull;
@@ -80,7 +79,7 @@ public class BaseDepthController<
      */
     protected final int mMaxBlurRadius;
     protected final WallpaperManager mWallpaperManager;
-    protected boolean mCrossWindowBlursEnabled;
+    protected final boolean mCrossWindowBlursEnabled;
 
     /**
      * Ratio from 0 to 1, where 0 is fully zoomed out, and 1 is zoomed in.
@@ -120,10 +119,9 @@ public class BaseDepthController<
      */
     private final EarlyWakeupInfo mEarlyWakeupInfo = new EarlyWakeupInfo();
 
-    public BaseDepthController(CONTAINER container) {
+    public BaseDepthController(CONTAINER container, boolean blurEnabled) {
         mContainer = container;
-        mCrossWindowBlursEnabled =
-                CrossWindowBlurListeners.getInstance().isCrossWindowBlurEnabled();
+        mCrossWindowBlursEnabled = blurEnabled;
         mMaxBlurRadius = container.getResources().getDimensionPixelSize(
                 R.dimen.max_depth_blur_radius_enhanced);
         mWallpaperManager = container.getSystemService(WallpaperManager.class);
@@ -145,23 +143,6 @@ public class BaseDepthController<
     public void setSurfaceTransactionApplier(
             @Nullable SurfaceTransactionApplier surfaceTransactionApplier) {
         mSurfaceTransactionApplier = surfaceTransactionApplier;
-    }
-
-    /**
-     * Returns if cross window blurs are enabled. In other words, whether the container should use
-     * blurs style UI or fallback style UI.
-     */
-    public boolean isCrossWindowBlursEnabled() {
-        return mCrossWindowBlursEnabled;
-    }
-
-    protected void setCrossWindowBlursEnabled(boolean isEnabled) {
-        if (mCrossWindowBlursEnabled == isEnabled) {
-            return;
-        }
-        mCrossWindowBlursEnabled = isEnabled;
-        mContainer.updateBlurStyle();
-        applyDepthAndBlur();
     }
 
     public void setHasContentBehindContainer(boolean hasContentBehindContainer) {

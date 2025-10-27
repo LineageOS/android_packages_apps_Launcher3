@@ -178,6 +178,7 @@ import com.android.launcher3.uioverrides.touchcontrollers.TwoButtonNavbarTouchCo
 import com.android.launcher3.util.ActivityOptionsWrapper;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.IntSet;
+import com.android.launcher3.util.ListenableRef;
 import com.android.launcher3.util.NavigationMode;
 import com.android.launcher3.util.ObjectWrapper;
 import com.android.launcher3.util.OverviewCommandHelperProtoLogProxy;
@@ -190,6 +191,7 @@ import com.android.launcher3.util.SplitConfigurationOptions.SplitSelectSource;
 import com.android.launcher3.util.StableViewInfo;
 import com.android.launcher3.util.StartActivityParams;
 import com.android.launcher3.util.TouchController;
+import com.android.launcher3.util.WindowBlurState;
 import com.android.launcher3.views.FloatingIconView;
 import com.android.quickstep.BaseContainerInterface;
 import com.android.quickstep.LauncherActivityInterface;
@@ -302,8 +304,6 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
 
     private final OverviewChangeListener mOverviewChangeListener = this::onOverviewTargetChanged;
 
-    private boolean mOverviewBlurEnabled;
-
     private final TaskViewRecentsTouchContext mTaskViewRecentsTouchContext =
             new TaskViewRecentsTouchContext() {
                 @Override
@@ -323,12 +323,24 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
                 }
             };
 
+    private void setupBlurState() {
+        ListenableRef<Boolean> blurState = WindowBlurState.getInstance(this);
+        boolean blurEnabled = blurState.getValue();
+
+        // Recreate launcher if the blur enabled state changes
+        closeOnDestroy(blurState.forEach(getUiExecutor(), v -> {
+            if (v != blurEnabled) mWallpaperThemeManager.recreateToUpdateTheme();
+            return null;
+        }));
+        mDepthController = new LauncherDepthController(this, blurEnabled);
+        getTheme().applyStyle(blurEnabled ? R.style.OverviewBlurStyle
+                : R.style.OverviewBlurFallbackStyle, true);
+    }
+
     @Override
     protected void setupViews() {
         getAppWidgetHolder().setOnViewCreationCallback(new QuickstepInteractionHandler(this));
-        mDepthController = new LauncherDepthController(this);
-        mOverviewBlurEnabled = isOverviewBackgroundBlurEnabled();
-        getTheme().applyStyle(getOverviewBlurStyleResId(), true);
+        setupBlurState();
         super.setupViews();
         SurfaceTransactionApplier surfaceTransactionApplier = new SurfaceTransactionApplier(
                 getRootView());
@@ -492,23 +504,6 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     protected void showAllAppsFromIntent(boolean alreadyOnHome) {
         TaskUtils.closeSystemWindowsAsync(CLOSE_SYSTEM_WINDOWS_REASON_HOME_KEY);
         super.showAllAppsFromIntent(alreadyOnHome);
-    }
-
-    @Override
-    public boolean isAllAppsBackgroundBlurEnabled() {
-        return mDepthController != null && mDepthController.isCrossWindowBlursEnabled();
-    }
-
-    @Override
-    public boolean isOverviewBackgroundBlurEnabled() {
-        return mDepthController != null && mDepthController.isCrossWindowBlursEnabled();
-    }
-
-    @Override
-    public void updateBlurStyle() {
-        if (isOverviewBackgroundBlurEnabled() != mOverviewBlurEnabled) {
-            mWallpaperThemeManager.recreateToUpdateTheme();
-        }
     }
 
     public TaskbarUiState getTaskbarUiState() {
@@ -1715,12 +1710,6 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     @Override
     public void returnToHomescreen() {
         getStateManager().goToState(LauncherState.NORMAL);
-    }
-
-    @Override
-    public int getOverviewBlurStyleResId() {
-        return isOverviewBackgroundBlurEnabled() ? R.style.OverviewBlurStyle
-                : R.style.OverviewBlurFallbackStyle;
     }
 
     @Override
