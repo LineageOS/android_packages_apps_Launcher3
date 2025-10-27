@@ -24,6 +24,7 @@ import com.android.launcher3.LauncherInteractor
 import com.android.launcher3.statemanager.StatefulActivity
 import com.android.launcher3.uioverrides.QuickstepLauncher
 import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
+import com.android.launcher3.util.ListenableStream
 import com.android.quickstep.SystemUiProxy
 import com.android.quickstep.views.RecentsViewContainer
 import java.io.PrintWriter
@@ -153,11 +154,8 @@ class TaskbarManagerImplWrapper(private val impl: TaskbarManagerImpl) : TaskbarM
         return impl.currentActivityContext?.controllers?.stashedHandleViewController
     }
 
-    override fun setUIControllerChangeListener(
-        uiControllerChangeListener: TaskbarActivityContext.UIControllerChangeListener
-    ) {
-        impl.currentActivityContext?.setUIControllerChangeListener(uiControllerChangeListener)
-    }
+    override fun getPrimaryDisplayUiControllerStream(): ListenableStream<TaskbarUIController> =
+        impl.primaryDisplayUiControllerStream
 
     /* TODO(b/404636836): Evaluate API calls on returned TaskbarUIController */
     override fun getUIControllerForDisplay(displayId: Int): TaskbarUIController? {

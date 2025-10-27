@@ -97,7 +97,9 @@ import com.android.launcher3.taskbar.TaskbarNavButtonController.TaskbarNavButton
 import com.android.launcher3.taskbar.unfold.NonDestroyableScopedUnfoldTransitionProgressProvider;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.ListenableDiffAwareRef;
+import com.android.launcher3.util.ListenableStream;
 import com.android.launcher3.util.LockedUserState;
+import com.android.launcher3.util.MutableListenableStream;
 import com.android.launcher3.util.SafeCloseable;
 import com.android.launcher3.util.SettingsCache;
 import com.android.launcher3.util.SimpleBroadcastReceiver;
@@ -174,6 +176,8 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
     private final Context mPrimaryWindowContext;
     private final WindowManager mPrimaryWindowManager;
     private final DisplayManager mDisplayManager;
+    private final MutableListenableStream<TaskbarUIController> mPrimaryDisplayUiControllerStream =
+            new MutableListenableStream<>();
     private TaskbarNavButtonController mPrimaryNavButtonController;
     private ComponentCallbacks mPrimaryComponentCallbacks;
 
@@ -407,7 +411,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
             TaskbarActivityContext taskbar = getTaskbarForDisplay(displayId);
             if (taskbar != null) {
                 debugTaskbarManager("onActivityDestroyed: setting taskbarUIController", displayId);
-                taskbar.setUIController(TaskbarUIController.DEFAULT);
+                setUiController(taskbar, TaskbarUIController.DEFAULT);
             } else {
                 debugTaskbarManager("onActivityDestroyed: taskbar is null!", displayId);
             }
@@ -526,6 +530,10 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         recreateTaskbarForDisplay(mPrimaryDisplayId, /* duration= */ 0);
 
         debugPrimaryTaskbar("TaskbarManager created");
+    }
+
+    public ListenableStream<TaskbarUIController> getPrimaryDisplayUiControllerStream() {
+        return mPrimaryDisplayUiControllerStream;
     }
 
     private Unit onSettingChanged() {
@@ -727,10 +735,21 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         mRecentsViewContainerInteractor = recentsViewContainerInteractor;
         TaskbarActivityContext taskbar = getCurrentActivityContext();
         if (taskbar != null) {
-            taskbar.setUIController(
-                    createTaskbarUIControllerForRecentsViewContainer(
-                            mRecentsViewContainerInteractor,
-                            mPrimaryDisplayId));
+            setUiController(taskbar, createTaskbarUIControllerForRecentsViewContainer(
+                    mRecentsViewContainerInteractor, mPrimaryDisplayId));
+        }
+    }
+
+    /**
+     * Sets {@link TaskbarUIController} on {@link TaskbarActivityContext} and only notify changes
+     * when {@link TaskbarActivityContext} is tied to primary display.
+     */
+    private void setUiController(
+            @NonNull TaskbarActivityContext taskbarActivityContext,
+            @NonNull TaskbarUIController taskbarUIController) {
+        taskbarActivityContext.setUIController(taskbarUIController);
+        if (taskbarActivityContext.getDisplayId() == mPrimaryDisplayId) {
+            mPrimaryDisplayUiControllerStream.dispatchValue(taskbarUIController);
         }
     }
 
@@ -852,12 +871,11 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
             // Non default displays should not use LauncherTaskbarUIController as they shouldn't
             // have access to the Launcher activity.
             if (isExternalDisplay(displayId)) {
-                taskbar.setUIController(createTaskbarUIControllerForNonDefaultDisplay(displayId));
+                setUiController(taskbar, createTaskbarUIControllerForNonDefaultDisplay(displayId));
             } else if (mRecentsViewContainerInteractor != null) {
-                taskbar.setUIController(
-                        createTaskbarUIControllerForRecentsViewContainer(
-                                mRecentsViewContainerInteractor,
-                                mPrimaryDisplayId));
+                setUiController(taskbar, createTaskbarUIControllerForRecentsViewContainer(
+                        mRecentsViewContainerInteractor,
+                        mPrimaryDisplayId));
             }
 
             debugTaskbarManager("recreateTaskbarForDisplay: adding rootView", displayId);
