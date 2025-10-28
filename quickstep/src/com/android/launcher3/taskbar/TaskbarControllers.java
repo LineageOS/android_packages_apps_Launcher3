@@ -78,7 +78,7 @@ public class TaskbarControllers {
     @Nullable private BackgroundRendererController[] mBackgroundRendererControllers = null;
 
     /** Do not store this controller, as it may change at runtime. */
-    @NonNull public TaskbarUIController uiController = TaskbarUIController.DEFAULT;
+    @NonNull public volatile TaskbarUIController uiController = TaskbarUIController.DEFAULT;
 
     private boolean mAreAllControllersInitialized;
     private final List<Runnable> mPostInitCallbacks = new ArrayList<>();

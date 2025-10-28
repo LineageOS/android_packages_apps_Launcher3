@@ -72,6 +72,7 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.window.DesktopExperienceFlags;
 
+import androidx.annotation.AnyThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -81,6 +82,7 @@ import com.android.app.displaylib.DisplaysWithDecorationsRepositoryCompat;
 import com.android.app.displaylib.PerDisplayRepository;
 import com.android.internal.util.LatencyTracker;
 import com.android.launcher3.ActivityInteractor;
+import com.android.launcher3.AsyncAnimatorPlaybackController;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.LauncherAppState;
@@ -89,7 +91,6 @@ import com.android.launcher3.LauncherPrefChangeListener;
 import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.R;
 import com.android.launcher3.anim.AnimatorListeners;
-import com.android.launcher3.anim.AnimatorPlaybackController;
 import com.android.launcher3.statehandlers.DesktopVisibilityController;
 import com.android.launcher3.statemanager.StatefulActivity;
 import com.android.launcher3.taskbar.TaskbarNavButtonController.TaskbarNavButtonCallbacks;
@@ -627,17 +628,23 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
      * This should be used to run a first Launcher reveal animation whose progress matches a swipe
      * progress.
      */
-    public AnimatorPlaybackController createLauncherStartFromSuwAnim(int duration) {
+    @AnyThread
+    @Nullable
+    public AsyncAnimatorPlaybackController createLauncherStartFromSuwAnim(int duration) {
         TaskbarActivityContext taskbar = getTaskbarForDisplay(mPrimaryDisplayId);
-        return taskbar == null ? null : taskbar.createLauncherStartFromSuwAnim(duration);
+        return taskbar == null
+                ? null
+                : new AsyncAnimatorPlaybackController(
+                        TASKBAR_UI_THREAD, () -> taskbar.createLauncherStartFromSuwAnim(duration));
     }
 
     /**
      * @return true if we should force the fallback animation for All Set page
      */
+    @AnyThread
     public boolean shouldForceAllSetFallbackAnimation() {
         TaskbarActivityContext taskbar = getTaskbarForDisplay(mPrimaryDisplayId);
-        return taskbar == null ? true : taskbar.shouldForceAllSetFallbackAnimation();
+        return taskbar == null || taskbar.shouldForceAllSetFallbackAnimation();
     }
 
     /** Called when the user is unlocked */
@@ -1225,6 +1232,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         debugPrimaryTaskbar("destroy: finished!");
     }
 
+    @AnyThread
     public @Nullable TaskbarActivityContext getCurrentActivityContext() {
         return getTaskbarForDisplay(mPrimaryDisplayId);
     }
@@ -1330,6 +1338,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
      * @return The {@link TaskbarActivityContext} for the specified display, or
      * {@code null} if no taskbar is associated with that display.
      */
+    @AnyThread
     @Nullable
     public TaskbarActivityContext getTaskbarForDisplay(int displayId) {
         return mTaskbars.get(displayId);
