@@ -43,6 +43,7 @@ import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
 import com.android.launcher3.util.ModelTestExtensions.loadModelSync
 import com.android.launcher3.util.TestUtil
 import com.android.launcher3.views.DoubleShadowBubbleTextView
+import com.android.quickstep.taskbar.util.IntegrationNavigationModeSwitchRule
 import com.android.quickstep.taskbar.util.IntegrationTaskbarModeSwitchRule
 import java.io.IOException
 import junit.framework.TestCase.assertNotNull
@@ -61,6 +62,8 @@ import org.junit.rules.RuleChain
 open class BaseTaskbarIntegrationTest {
 
     val targetContext: Context = getInstrumentation().targetContext
+
+    @get:Rule val navigationModeSwitch = IntegrationNavigationModeSwitchRule()
 
     @get:Rule val layoutResource = LayoutResource(targetContext)
 
