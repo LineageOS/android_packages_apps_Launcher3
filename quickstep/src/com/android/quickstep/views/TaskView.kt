@@ -1010,7 +1010,7 @@ constructor(
             cancelJobs()
         }
 
-    open fun cancelJobs() {
+    fun cancelJobs() {
         // The jobs are being cancelled in the background thread. So we make a copy of the
         // list to prevent cleaning a new job that might be added to this list during
         // onAttach or another moment in the lifecycle.
