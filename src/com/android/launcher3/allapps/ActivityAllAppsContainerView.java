@@ -15,7 +15,6 @@
  */
 package com.android.launcher3.allapps;
 
-import static com.android.launcher3.Flags.clearScrimOnReset;
 import static com.android.launcher3.Flags.enableExpandingPauseWorkButton;
 import static com.android.launcher3.allapps.ActivityAllAppsContainerView.AdapterHolder.MAIN;
 import static com.android.launcher3.allapps.ActivityAllAppsContainerView.AdapterHolder.SEARCH;
@@ -485,7 +484,7 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
         if (isSearching()) {
             mWorkManager.reset();
         }
-        if (clearScrimOnReset() && mScrimView != null && clearScrim) {
+        if (mScrimView != null && clearScrim) {
             mScrimView.setDrawingController(null);
         }
     }
