@@ -45,7 +45,6 @@ import android.view.animation.OvershootInterpolator;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.launcher3.Flags;
 import com.android.launcher3.Insettable;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
@@ -59,8 +58,6 @@ import com.android.launcher3.util.Themes;
  * WorkspacePageIndicator. A lot of the functionality in this class is only used by one UI purpose.
  */
 public class PageIndicatorDots extends View implements Insettable, PageIndicator {
-    private static final float SHIFT_PER_ANIMATION = 0.5f;
-    private static final float SHIFT_THRESHOLD = 0.5f;
     private static final long ANIMATION_DURATION = 200;
     private static final int PAGINATION_FADE_DELAY = ViewConfiguration.getScrollDefaultDelay();
     private static final int PAGINATION_FADE_IN_DURATION = 83;
@@ -71,12 +68,10 @@ public class PageIndicatorDots extends View implements Insettable, PageIndicator
     private static final int ENTER_ANIMATION_DURATION = 400;
 
     private static final int HEIGHT_MULTIPLIER = 4;
-    private static final int WIDTH_MULTIPLIER = 3;
 
     private static final int PAGE_INDICATOR_ALPHA = 255;
     private static final int DOT_ALPHA = 128;
     private static final float DOT_ALPHA_FRACTION = 0.5f;
-    private static final int DOT_GAP_FACTOR = 4;
     private static final int VISIBLE_ALPHA = 255;
     private static final int INVISIBLE_ALPHA = 0;
     private Paint mPaginationPaint;
@@ -582,38 +577,6 @@ public class PageIndicatorDots extends View implements Insettable, PageIndicator
 
         rect.left -= horizontalAdjustment;
         rect.right += horizontalAdjustment;
-    }
-
-    private RectF getActiveRect() {
-        float startCircle = (int) mCurrentPosition;
-        float delta = mCurrentPosition - startCircle;
-        float diameter = 2 * mDotRadius;
-        float startX = ((float) getWidth() / 2)
-                - (mCircleGap * (((float) mNumPages - 1) / 2))
-                - mDotRadius;
-        sTempRect.top = (getHeight() * 0.5f) - mDotRadius;
-        sTempRect.bottom = (getHeight() * 0.5f) + mDotRadius;
-        sTempRect.left = startX + (startCircle * mCircleGap);
-        sTempRect.right = sTempRect.left + diameter;
-
-        if (delta < SHIFT_PER_ANIMATION) {
-            // dot is capturing the right circle.
-            sTempRect.right += delta * mCircleGap * 2;
-        } else {
-            // Dot is leaving the left circle.
-            sTempRect.right += mCircleGap;
-
-            delta -= SHIFT_PER_ANIMATION;
-            sTempRect.left += delta * mCircleGap * 2;
-        }
-
-        if (mIsRtl) {
-            float rectWidth = sTempRect.width();
-            sTempRect.right = getWidth() - sTempRect.left;
-            sTempRect.left = sTempRect.right - rectWidth;
-        }
-
-        return sTempRect;
     }
 
     @VisibleForTesting
