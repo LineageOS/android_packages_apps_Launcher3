@@ -563,6 +563,21 @@ abstract class TutorialController implements BackGestureAttemptCallback,
     void showActionButton() {
         mDoneButton.setVisibility(View.VISIBLE);
         mDoneButton.setOnClickListener(this::onActionButtonClicked);
+
+        mDoneButton.post(() -> {
+            int buttonOvershoot = mDoneButton.getBottom() - mScreenHeight;
+            if (buttonOvershoot > 0) {
+                // Calculate the amount of free space available to the contents of mFeedbackView.
+                // That free space can then be equally distributed above and below the visual
+                // contents of mFeedbackView.
+                int spaceAboveTitle = mFeedbackTitleView.getTop();
+                float freeSpace = spaceAboveTitle - buttonOvershoot;
+
+                for (int i = 0; i < mFeedbackView.getChildCount(); i++) {
+                    mFeedbackView.getChildAt(i).setTranslationY((freeSpace / 2f) - spaceAboveTitle);
+                }
+            }
+        });
     }
 
     void hideFakeTaskbar(boolean animateToHotseat) {
