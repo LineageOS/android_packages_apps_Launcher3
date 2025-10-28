@@ -130,7 +130,7 @@ class LauncherInteractor(private val launcher: QuickstepLauncher) : ActivityInte
     fun setHotseatIconsAlpha(alpha: Float, @Hotseat.HotseatQsbAlphaId channelId: Int) {
         executor.execute {
             if (channelId == ALPHA_CHANNEL_TASKBAR_ALIGNMENT) {
-                launcher.getLauncherUiState().setTaskbarAlignmentChannelAlpha(alpha)
+                launcher.launcherUiState.taskbarAlignmentChannelAlpha = alpha
             }
             launcher.hotseat.setIconsAlpha(alpha, channelId)
         }

@@ -16,18 +16,14 @@
 
 package com.android.launcher3
 
-import com.android.launcher3.util.MutableListenableRef
-
 /** Expose Split Screen UI State to Taskbar. */
 class SplitScreenUiState {
 
-    private val _isSplitSelectActiveRef = MutableListenableRef(false)
-
-    val isSplitSelectActiveRef = _isSplitSelectActiveRef.asListenable()
+    @Volatile var isSplitSelectActive = false
 
     // Split select state
-    private var _initialTask = SplitSelectTask()
-    private var _secondTask = SplitSelectTask()
+    @Volatile private var _initialTask = SplitSelectTask()
+    @Volatile private var _secondTask = SplitSelectTask()
 
     fun setSplitSelectInitialTask(initialTask: SplitSelectTask) {
         _initialTask = initialTask
@@ -40,14 +36,6 @@ class SplitScreenUiState {
     }
 
     private fun updateIsSplitSelectActiveRef() {
-        _isSplitSelectActiveRef.diffAndDispatch(
-            _initialTask.isIntentSet && !_secondTask.isIntentSet
-        )
-    }
-
-    private fun <T> MutableListenableRef<T>.diffAndDispatch(newValue: T) {
-        if (value != newValue) {
-            dispatchValue(newValue)
-        }
+        isSplitSelectActive = _initialTask.isIntentSet && !_secondTask.isIntentSet
     }
 }
