@@ -236,7 +236,6 @@ constructor(
     /** Reloads the [stringCache] */
     fun updateStringCache(context: Context) {
         stringCache = StringCache.fromContext(context)
-        if (Flags.modelRepository()) repo.get().dispatchStringCacheChange(stringCache)
     }
 
     fun notifyWidgetsUpdate(allWidgets: List<WidgetsListBaseEntry>) {
