@@ -70,6 +70,7 @@ public class TaskbarControllers {
     public final Optional<BubbleControllers> bubbleControllers;
     public final TaskbarDesktopModeController taskbarDesktopModeController;
     public final TaskbarHandoffController taskbarHandoffController;
+    public final CuebarController cuebarController;
     public final NudgeController nudgeController;
     public final NudgeViewController nudgeViewController;
     public final TaskbarViewDragDropController taskbarViewDragDropController;
@@ -122,6 +123,7 @@ public class TaskbarControllers {
             TaskbarPinningController taskbarPinningController,
             Optional<BubbleControllers> bubbleControllers,
             TaskbarDesktopModeController taskbarDesktopModeController,
+            CuebarController cuebarController,
             NudgeController nudgeController,
             NudgeViewController nudgeViewController,
             TaskbarHandoffController taskbarHandoffController,
@@ -153,6 +155,7 @@ public class TaskbarControllers {
         this.taskbarPinningController = taskbarPinningController;
         this.bubbleControllers = bubbleControllers;
         this.taskbarDesktopModeController = taskbarDesktopModeController;
+        this.cuebarController = cuebarController;
         this.nudgeController = nudgeController;
         this.nudgeViewController = nudgeViewController;
         this.taskbarHandoffController = taskbarHandoffController;
@@ -197,6 +200,7 @@ public class TaskbarControllers {
         taskbarDesktopModeController.init(this, mSharedState, taskbarUiState);
         nudgeController.init(this);
         taskbarHandoffController.init(this);
+        cuebarController.init();
 
         mControllersToLog = new LoggableTaskbarController[] {
                 taskbarDragController, navButtonController, navbarButtonsViewController,
@@ -207,7 +211,7 @@ public class TaskbarControllers {
                 voiceInteractionWindowController, taskbarRecentAppsController,
                 taskbarTranslationController, taskbarEduTooltipController,
                 keyboardQuickSwitchController, taskbarPinningController,
-                nudgeController
+                nudgeController, cuebarController
         };
         mBackgroundRendererControllers = new BackgroundRendererController[] {
                 taskbarDragLayerController, taskbarScrimViewController,
@@ -288,6 +292,7 @@ public class TaskbarControllers {
         taskbarUnfoldAnimationController.onDestroy();
         taskbarViewController.onDestroy();
         stashedHandleViewController.onDestroy();
+        cuebarController.onDestroy();
         nudgeViewController.onDestroy();
         taskbarAutohideSuspendController.onDestroy();
         taskbarPopupController.onDestroy();

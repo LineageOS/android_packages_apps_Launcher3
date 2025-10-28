@@ -450,6 +450,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                 bubbleControllersOptional,
                 new TaskbarDesktopModeController(this,
                         DesktopVisibilityController.INSTANCE.get(this)),
+                new CuebarController(this),
                 new NudgeController(this),
                 new NudgeViewController(this, nudgeView),
                 new TaskbarHandoffController(this),
