@@ -23,6 +23,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ShortcutInfo;
 import android.graphics.Point;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.UserHandle;
 import android.view.LayoutInflater;
 
@@ -38,6 +40,8 @@ import com.android.launcher3.util.LooperExecutor;
 import com.android.launcher3.util.NavigationMode;
 import com.android.launcher3.util.Themes;
 import com.android.wm.shell.shared.bubbles.logging.EntryPoint;
+
+import java.util.concurrent.Executor;
 
 // TODO(b/218912746): Share more behavior to avoid all apps context depending directly on taskbar.
 /** Base for common behavior between taskbar window contexts. */
@@ -66,6 +70,25 @@ public abstract class BaseTaskbarContext extends BaseContext
         mDisplayId = displayId;
         mIsPrimaryDisplay = isPrimaryDisplay;
         mLayoutInflater = LayoutInflater.from(this).cloneInContext(this);
+    }
+
+    /**
+     * For taskbar the "main" thread should be TASKBAR_UI_THREAD obtained from
+     * [ActivityContext.getUiExecutor]
+     */
+    @Override
+    public Handler getMainThreadHandler()  {
+        return getUiExecutor().getHandler();
+    }
+
+    @Override
+    public Looper getMainLooper() {
+        return getUiExecutor().getLooper();
+    }
+
+    @Override
+    public Executor getMainExecutor() {
+        return getUiExecutor();
     }
 
     @Override
