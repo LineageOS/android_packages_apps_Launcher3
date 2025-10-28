@@ -21,24 +21,20 @@ import android.content.ComponentCallbacks
 import android.content.res.Configuration
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.dx.mockito.inline.extended.ExtendedMockito.any
-import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
-import com.android.dx.mockito.inline.extended.ExtendedMockito.eq
-import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
-import com.android.dx.mockito.inline.extended.ExtendedMockito.times
-import com.android.dx.mockito.inline.extended.ExtendedMockito.verify
-import com.android.dx.mockito.inline.extended.StaticMockitoSession
 import com.android.launcher3.util.WallpaperThemeManager.Companion.setWallpaperDependentTheme
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.doReturn
+import org.mockito.Mockito.verify
 import org.mockito.kotlin.never
+import org.mockito.kotlin.times
 import org.mockito.kotlin.whenever
 
 /** Tests for WallpaperThemeManager */
@@ -48,23 +44,17 @@ class WallpaperThemeManagerTest {
 
     @get:Rule val context = SandboxApplication()
 
+    private val themeStatic = RoboApiWrapper.StaticMockHelper(Themes::class.java)
+    @get:Rule val mockito = RoboApiWrapper.StaticMockRule(themeStatic)
+
     @Mock lateinit var activity: Activity
     @Captor lateinit var callbacksCaptor: ArgumentCaptor<ComponentCallbacks>
 
-    private lateinit var mockSession: StaticMockitoSession
-
     @Before
     fun setup() {
-        MockitoAnnotations.initMocks(this)
-        mockSession = mockitoSession().spyStatic(Themes::class.java).startMocking()
+        themeStatic.whenever { Themes.getActivityThemeRes(any()) }.thenReturn(1)
 
-        doReturn(1).`when`<Int> { Themes.getActivityThemeRes(any()) }
         doReturn(context).whenever(activity).applicationContext
-    }
-
-    @After
-    fun tearDown() {
-        mockSession.finishMocking()
     }
 
     @Test
@@ -86,7 +76,7 @@ class WallpaperThemeManagerTest {
         activity.setWallpaperDependentTheme()
         verify(activity).registerComponentCallbacks(callbacksCaptor.capture())
 
-        doReturn(3).`when`<Int> { Themes.getActivityThemeRes(any()) }
+        themeStatic.whenever { Themes.getActivityThemeRes(any()) }.thenReturn(3)
         callbacksCaptor.value.onConfigurationChanged(Configuration())
         verify(activity, times(1)).recreate()
     }
