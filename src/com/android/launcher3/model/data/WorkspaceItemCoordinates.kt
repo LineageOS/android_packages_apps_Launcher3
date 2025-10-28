@@ -16,6 +16,8 @@
 
 package com.android.launcher3.model.data
 
+import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
+
 /**
  * Represents the spacial coordinates of a single workspace item.
  *
@@ -23,4 +25,19 @@ package com.android.launcher3.model.data
  * @property cellX Specifies the X position of the associated cell.
  * @property cellY Specifies the Y position of the associated cell.
  */
-data class WorkspaceItemCoordinates(val screenId: Int, val cellX: Int, val cellY: Int)
+data class WorkspaceItemCoordinates
+@JvmOverloads
+constructor(
+    val screenId: Int,
+    val cellX: Int,
+    val cellY: Int,
+    val container: Int = CONTAINER_DESKTOP,
+) {
+
+    fun applyTo(info: ItemInfo) {
+        info.screenId = screenId
+        info.cellX = cellX
+        info.cellY = cellY
+        info.container = container
+    }
+}

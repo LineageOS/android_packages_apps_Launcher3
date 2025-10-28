@@ -120,7 +120,15 @@ constructor(
         verifyChanges: Boolean,
         cellPosMapper: CellPosMapper?,
         owner: BgDataModel.Callbacks?,
-    ) = ModelWriter(context, this, mBgDataModel, verifyChanges, cellPosMapper, owner)
+    ) =
+        ModelWriter(
+            context,
+            this,
+            mBgDataModel,
+            verifyChanges,
+            cellPosMapper ?: CellPosMapper.DEFAULT,
+            owner,
+        )
 
     /** Called when the workspace items have drastically changed */
     fun onWorkspaceUiChanged() {
