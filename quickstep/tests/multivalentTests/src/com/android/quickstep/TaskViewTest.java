@@ -18,28 +18,19 @@ package com.android.quickstep;
 
 import static com.android.quickstep.TaskViewTestDIHelpers.mockRecentsModel;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import android.content.pm.ApplicationInfo;
-import android.content.res.Configuration;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.graphics.Rect;
-import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.launcher3.uioverrides.QuickstepLauncher;
 import com.android.launcher3.util.SandboxContext;
 import com.android.quickstep.util.BorderAnimator;
 import com.android.quickstep.views.TaskView;
@@ -47,22 +38,19 @@ import com.android.quickstep.views.TaskView;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 @SmallTest
+@RunWith(AndroidJUnit4.class)
 public class TaskViewTest {
-
-    private final SandboxContext mApplicationContext =
+    private final SandboxContext mApp =
             new SandboxContext(InstrumentationRegistry.getInstrumentation().getTargetContext());
 
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule();
-    @Mock
-    private QuickstepLauncher mContext;
-    @Mock
-    private Resources mResource;
     @Mock
     private BorderAnimator mHoverAnimator;
     @Mock
@@ -71,19 +59,9 @@ public class TaskViewTest {
 
     @Before
     public void setup() {
-        when(mResource.getDisplayMetrics()).thenReturn(mock(DisplayMetrics.class));
-        when(mResource.getConfiguration()).thenReturn(new Configuration());
-
-        when(mContext.getResources()).thenReturn(mResource);
-        when(mContext.getTheme()).thenReturn(mock(Resources.Theme.class));
-        when(mContext.getApplicationInfo()).thenReturn(mock(ApplicationInfo.class));
-        when(mContext.obtainStyledAttributes(any(), any(), anyInt(), anyInt())).thenReturn(
-                mock(TypedArray.class));
-        when(mContext.getApplicationContext()).thenReturn(mApplicationContext);
-
-        mApplicationContext.initDaggerComponent(
+        mApp.initDaggerComponent(
                 DaggerTaskViewTestComponent.builder().bindRecentsModel(mockRecentsModel()));
-        mTaskView = new TaskView(mContext, null, 0, 0, mFocusAnimator, mHoverAnimator);
+        mTaskView = new TaskView(mApp, null, 0, 0, mFocusAnimator, mHoverAnimator);
     }
 
     @Test
@@ -135,8 +113,10 @@ public class TaskViewTest {
         // Make the task view focused and hovered
         MotionEvent event = MotionEvent.obtain(0, 0, MotionEvent.ACTION_HOVER_ENTER, 0.0f, 0.0f, 0);
         mTaskView.onHoverEvent(MotionEvent.obtain(event));
+        mTaskView.setFocusableInTouchMode(true);
         mTaskView.requestFocus();
         mTaskView.setBorderEnabled(/* enabled= */ enabled);
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
         // Reset invocation count after presetting status
         reset(mHoverAnimator);
         reset(mFocusAnimator);
