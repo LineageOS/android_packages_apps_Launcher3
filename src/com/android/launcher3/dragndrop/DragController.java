@@ -528,6 +528,10 @@ public abstract class DragController<T extends ActivityContext>
         return mDistanceSinceScroll;
     }
 
+    public Point getDownPoint() {
+        return mMotionDown;
+    }
+
     public void forceTouchMove() {
         checkTouchMove(mLastTouch.x, mLastTouch.y);
     }

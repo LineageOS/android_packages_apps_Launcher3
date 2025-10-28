@@ -16,10 +16,19 @@
 
 package com.android.launcher3.dragndrop
 
+import android.graphics.Canvas
+import android.graphics.Point
+import android.graphics.Rect
 import android.view.DragEvent
+import android.view.View
+import android.view.View.DRAG_FLAG_GLOBAL
+import android.view.View.DRAG_FLAG_GLOBAL_URI_READ
+import android.view.View.DRAG_FLAG_GLOBAL_URI_WRITE
+import android.view.View.DRAG_FLAG_OPAQUE
 import com.android.launcher3.Launcher
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.util.DaggerSingletonObject
+import kotlin.math.roundToInt
 
 /** Controller for system-level drag-and-drop. */
 sealed class SystemDragController {
@@ -87,8 +96,15 @@ class SystemDragControllerImpl(private val systemDragListenerFactory: SystemDrag
         }
     }
 
-    override fun startDrag(params: SystemDragParams): DragView<*>? =
-        createSystemDragListener(params)?.startDrag()
+    override fun startDrag(params: SystemDragParams): DragView<*>? {
+        val dragController = launcher?.dragController ?: return null
+        params.dragOptions.simulatedDndStartPoint = dragController.downPoint
+        return createSystemDragListener(params)?.startDrag()?.also { dragView ->
+            if (!startSystemDrag(dragView, params)) {
+                dragController.cancelDrag()
+            }
+        }
+    }
 
     private fun continueDrag(event: DragEvent): Boolean? = systemDragListener?.onDrag(event)
 
@@ -110,4 +126,42 @@ class SystemDragControllerImpl(private val systemDragListenerFactory: SystemDrag
                 event.action == DragEvent.ACTION_DRAG_STARTED &&
                 createSystemDragListener()?.onDrag(event) == true
         }
+
+    private fun startSystemDrag(dragView: DragView<*>, params: SystemDragParams): Boolean =
+        launcher
+            ?.dragLayer
+            ?.startDragAndDrop(
+                params.clipData,
+                object : View.DragShadowBuilder() {
+                    val h = (params.dragImage.intrinsicHeight * params.initialDragViewScale).toInt()
+                    val w = (params.dragImage.intrinsicWidth * params.initialDragViewScale).toInt()
+
+                    val touch =
+                        Point(dragView.registrationX, dragView.registrationY).apply {
+                            val offsetX = (w - params.dragImage.intrinsicWidth) / 2.0f
+                            val offsetY = (h - params.dragImage.intrinsicHeight) / 2.0f
+                            offset(offsetX.roundToInt(), offsetY.roundToInt())
+                        }
+
+                    override fun onDrawShadow(canvas: Canvas) {
+                        val oldBounds = params.dragImage.copyBounds()
+                        params.dragImage.bounds = Rect(0, 0, w, h)
+                        params.dragImage.draw(canvas)
+                        params.dragImage.bounds = oldBounds
+                    }
+
+                    override fun onProvideShadowMetrics(
+                        outShadowSize: Point,
+                        outShadowTouchPoint: Point,
+                    ) {
+                        outShadowSize.set(w, h)
+                        outShadowTouchPoint.set(touch.x, touch.y)
+                    }
+                },
+                /*localState=*/ null,
+                /*flags=*/ DRAG_FLAG_GLOBAL or
+                    DRAG_FLAG_GLOBAL_URI_READ or
+                    DRAG_FLAG_GLOBAL_URI_WRITE or
+                    DRAG_FLAG_OPAQUE,
+            ) == true
 }

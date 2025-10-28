@@ -20,6 +20,10 @@ import android.net.Uri
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.view.DragEvent
+import android.view.View.DRAG_FLAG_GLOBAL
+import android.view.View.DRAG_FLAG_GLOBAL_URI_READ
+import android.view.View.DRAG_FLAG_GLOBAL_URI_WRITE
+import android.view.View.DRAG_FLAG_OPAQUE
 import androidx.test.filters.SmallTest
 import com.android.launcher3.Flags.FLAG_ENABLE_SYSTEM_DRAG
 import com.android.launcher3.Launcher
@@ -44,6 +48,8 @@ import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.clearInvocations
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verifyNoInteractions
@@ -197,34 +203,69 @@ class SystemDragControllerImplTest {
     }
 
     @Test
-    fun testStartDragWithLauncher() {
-        testStartDrag(/* withLauncher= */ true)
+    fun testStartDragWithLauncherAndStartSystemDragFailure() {
+        testStartDrag(withLauncher = true, withStartSystemDragSuccess = false)
     }
 
     @Test
-    fun testStartDragWithoutLauncher() {
-        testStartDrag(/* withLauncher= */ false)
+    fun testStartDragWithLauncherAndStartSystemDragSuccess() {
+        testStartDrag(withLauncher = true, withStartSystemDragSuccess = true)
     }
 
-    private fun testStartDrag(withLauncher: Boolean) {
+    @Test
+    fun testStartDragWithoutLauncherAndStartSystemDragFailure() {
+        testStartDrag(withLauncher = false, withStartSystemDragSuccess = false)
+    }
+
+    @Test
+    fun testStartDragWithoutLauncherAndStartSystemDragSuccess() {
+        testStartDrag(withLauncher = false, withStartSystemDragSuccess = true)
+    }
+
+    private fun testStartDrag(withLauncher: Boolean, withStartSystemDragSuccess: Boolean) {
         if (withLauncher) {
             controller.setLauncher(mockLauncher)
         }
 
         val dragView = mock<DragView<*>>()
         val listener = mock<SystemDragListener>()
-        val params = mock<SystemDragParams>()
+        val params =
+            mock<SystemDragParams>().apply {
+                whenever(clipData).thenReturn(mock())
+                whenever(dragImage).thenReturn(mock())
+                whenever(dragOptions).thenReturn(mock())
+            }
+
+        whenever(
+                mockLauncher.dragLayer.startDragAndDrop(
+                    eq(params.clipData),
+                    /*dragShadowBuilder=*/ any(),
+                    /*localState=*/ isNull(),
+                    eq(
+                        DRAG_FLAG_GLOBAL or
+                            DRAG_FLAG_GLOBAL_URI_READ or
+                            DRAG_FLAG_GLOBAL_URI_WRITE or
+                            DRAG_FLAG_OPAQUE
+                    ),
+                )
+            )
+            .thenReturn(withStartSystemDragSuccess)
 
         whenever(mockSystemDragListenerFactory.invoke(mockLauncher, params)).thenReturn(listener)
         whenever(listener.startDrag()).thenReturn(dragView)
 
+        // NOTE: Drag view is returned when the sequence starts successfully.
         val expectedResult = if (withLauncher) dragView else null
-
         assertEquals(expectedResult, controller.startDrag(params))
+
+        // NOTE: Drag is cancelled when the system-level sequence fails to start successfully.
+        val expectedCancellation = times(if (withLauncher && !withStartSystemDragSuccess) 1 else 0)
+        verify(mockLauncher.dragController, expectedCancellation).cancelDrag()
     }
 
     private fun initMock(mockLauncher: Launcher) {
         whenever(mockLauncher.dragController).thenReturn(mock())
+        whenever(mockLauncher.dragLayer).thenReturn(mock())
     }
 
     private fun initMock(mockSystemDragListener: SystemDragListener) {

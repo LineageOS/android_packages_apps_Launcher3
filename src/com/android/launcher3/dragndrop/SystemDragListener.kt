@@ -130,6 +130,7 @@ class SystemDragListener(
                     ?: createDragImage()
                         .let { dragImage ->
                             SystemDragParams(
+                                clipData = null,
                                 dragImage = dragImage,
                                 dragInfo = SystemDragItemInfo(),
                                 dragLayerX = screenPos.x - (dragImage.intrinsicWidth / 2),
