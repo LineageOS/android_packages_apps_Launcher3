@@ -54,7 +54,6 @@ class TaskbarUiState {
     @Volatile var showLockedTaskbarOnHome = false
     @Volatile var isPrimaryDisplay = false
 
-    @Volatile var bubbleBarViewVisible = true
     @Volatile var bubbleStashed = false
     @Volatile var bubbleBarExpanded = false
     @Volatile var unstashAreaSizePx: Int = 0
@@ -64,6 +63,7 @@ class TaskbarUiState {
     @Volatile var taskbarStashedScreenEdgeHoverDeadzoneHeightPx: Int = 0
     @Volatile var taskbarStashedBelowHoverDeadzoneHeightPx: Int = 0
 
+    @Volatile private var _bubbleBarViewVisible = true
     @Volatile private var _isBubbleDragging = false
     @Volatile private var _isTaskbarDragging = false
     @Volatile private var _stashState = 0L
@@ -115,7 +115,7 @@ class TaskbarUiState {
     }
 
     private fun isEventOverBubbleBarView(e: MotionEvent) =
-        if (!bubbleBarViewVisible) {
+        if (!_bubbleBarViewVisible) {
             false
         } else {
             _bubbleBarViewRect.contains(e.x, e.y)
@@ -129,6 +129,10 @@ class TaskbarUiState {
         val x = ev.rawX
         val y = ev.rawY
         return y >= top && x >= _stashedHandlerViewRect.left && x <= _stashedHandlerViewRect.right
+    }
+
+    fun setBubbleBarViewVisible(visible: Boolean) {
+        _bubbleBarViewVisible = visible
     }
 
     fun setBubbleBarRect(rect: Rect) {
