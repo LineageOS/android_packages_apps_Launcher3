@@ -613,6 +613,9 @@ android_library {
     kotlincflags: [
         "-Xjvm-default=all",
     ],
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }
 
 // Library with all the source code and dependencies for building Quickstep
@@ -649,6 +652,9 @@ android_library {
     kotlincflags: [
         "-Xjvm-default=all",
     ],
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }
 
 // Build rule for Quickstep app.
