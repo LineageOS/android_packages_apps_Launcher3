@@ -178,24 +178,19 @@ public class SettingsActivity extends FragmentActivity
 
         private boolean mPreferenceHighlighted = false;
 
-        private boolean mIsDeveloperSettingEnabledSet = false;
-
         @Override
         public void onCreate(@Nullable Bundle savedInstanceState) {
             if (BuildConfig.IS_DEBUG_DEVICE) {
+                // Query DEVELOPMENT_SETTINGS_ENABLED and recreate activity if such setting
+                // has changed.
                 Uri devUri = Settings.Global.getUriFor(DEVELOPMENT_SETTINGS_ENABLED);
                 SettingsCache settingsCache = SettingsCache.INSTANCE.get(getContext());
                 mDeveloperOptionsEnabled = settingsCache.getValue(devUri);
                 mSettingCacheSafeCloseable = settingsCache.getListenableRef(devUri).forEach(
                         MAIN_EXECUTOR, (v) -> {
-                            // Listening to developer enabled setting will immediately trigger
-                            // callback for current value. Yet we only want to recreate activity
-                            // when such value has changed.
-                            if (!mIsDeveloperSettingEnabledSet) {
-                                mIsDeveloperSettingEnabledSet = true;
-                                return null;
+                            if (v != mDeveloperOptionsEnabled) {
+                                tryRecreateActivity();
                             }
-                            tryRecreateActivity();
                             return null;
                         });
             }
