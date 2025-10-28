@@ -56,22 +56,22 @@ class TaskbarHandoffControllerTest {
     }
 
     @Test
-    fun onRemoteTasksChanged_updatesSuggestions() {
-        val task1 = createRemoteTask(1, "Task 1")
-        val task2 = createRemoteTask(2, "Task 2")
+    fun onRemoteTasksChanged_onlyReturnsMostRecentSuggestions() {
+        val task1 = createRemoteTask(1, "Task 1", 100L)
+        val task2 = createRemoteTask(2, "Task 2", 200L)
 
         controller.onRemoteTasksChanged(listOf(task1, task2))
 
         val suggestions = controller.suggestions
-        assertThat(suggestions).hasSize(2)
-        assertThat(suggestions.map { it.deviceId }).containsExactly(1, 2).inOrder()
+        assertThat(suggestions).hasSize(1)
+        assertThat(suggestions.map { it.deviceId }).containsExactly(2).inOrder()
     }
 
     @Test
     fun getSuggestions_afterUpdate_returnsSuggestions() {
         assertThat(controller.suggestions).isEmpty()
 
-        val task = createRemoteTask(1, "Task")
+        val task = createRemoteTask(1, "Task", 10L)
 
         controller.onRemoteTasksChanged(listOf(task))
 
@@ -83,7 +83,15 @@ class TaskbarHandoffControllerTest {
         assertThat(controller.suggestions).isEmpty()
     }
 
-    private fun createRemoteTask(deviceId: Int, label: String): RemoteTask {
-        return RemoteTask.Builder(1).setDeviceId(deviceId).setLabel(label).build()
+    private fun createRemoteTask(
+        deviceId: Int,
+        label: String,
+        lastUsedTimestampMillis: Long,
+    ): RemoteTask {
+        return RemoteTask.Builder(1)
+            .setDeviceId(deviceId)
+            .setLabel(label)
+            .setLastUsedTimestampMillis(lastUsedTimestampMillis)
+            .build()
     }
 }
