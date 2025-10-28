@@ -326,7 +326,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         mIsPinned = mTaskbarFeatureEvaluator.isPinned();
         mTaskbarUiState = TaskbarUiStateMonitor.INSTANCE.get(this).getTaskbarUiState(displayId);
         resetResourceValueInTaskbarUiState();
-        mTaskbarUiState.setIsPrimaryDisplay(isPrimaryDisplay);
+        mTaskbarUiState.setPrimaryDisplay(isPrimaryDisplay);
         mTaskbarUiState.setIsTransient(mIsTransient);
         mNavigationBarPanelContext = navigationBarPanelContext;
         mSysUiProxy = sysUiProxy;
@@ -366,7 +366,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         // If Bubble bar is present, TaskbarControllers depends on it so build it first.
         Optional<BubbleControllers> bubbleControllersOptional = Optional.empty();
         BubbleBarController.onTaskbarRecreated();
-        mTaskbarUiState.setHasBubble(false);
+        mTaskbarUiState.setHasBubbles(false);
         final boolean deviceBubbleBarEnabled = enableBubbleBarOnPhones()
                 || (!mDeviceProfile.getDeviceProperties().isPhone() && !mDeviceProfile.isVerticalBarLayout());
         if (BubbleBarController.isBubbleBarEnabled() && deviceBubbleBarEnabled

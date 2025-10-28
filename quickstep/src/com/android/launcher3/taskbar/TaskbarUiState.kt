@@ -21,7 +21,6 @@ import android.view.MotionEvent
 import androidx.annotation.Px
 import com.android.launcher3.DeviceProfile
 import com.android.launcher3.util.ImmutableRect
-import com.android.launcher3.util.MutableListenableRef
 import com.android.launcher3.util.NavigationMode
 
 /**
@@ -29,65 +28,31 @@ import com.android.launcher3.util.NavigationMode
  * Taskbar's UI thread is responsible to update below fields whenever any field is changed.
  *
  * Timings when each field is changed:
- * - [_hasBubblesRef]: when BubbleBarView's child bubble view count is changed between 0 vs
- *   non-zero. Should be reset to false if we don't show bubble bar view and BubbleBarViewController
- *   is not even created.
- * - [_shouldShowEduOnAppLaunchRef]: when DeviceProfile, TaskbarUIController or tooltip steps is
- *   changed
- * - [_isDraggingItemRef]: when ether bubble or taskbar is dragging item. Note that this flag only
+ * - [hasBubbles]: when BubbleBarView's child bubble view count is changed between 0 vs non-zero.
+ *   Should be reset to false if we don't show bubble bar view and BubbleBarViewController is not
+ *   even created.
+ * - [shouldShowEduOnAppLaunch]: when DeviceProfile, TaskbarUIController or tooltip steps is changed
+ * - [isDraggingItem]: when ether bubble or taskbar is dragging item. Note that this flag only
  *   represents drags originating from the main Taskbar window and does NOT represents drags
  *   originating from all apps using TaskbarOverlayContext.
- * - [_isTaskbarStashedRef]: when [TaskbarStashController.mIsStashed] has changed
- * - [_isTaskbarAllAppsOpenRef]: when [TaskbarAllAppsController.isOpen] has changed
- * - [_isTaskbarOnHomeRef]: when [TaskbarStashController.mState] is changed
- * - [_showDesktopTaskbarForFreeformDisplayRef]: when [DisplayInfo] is changed
- * - [_showLockedTaskbarOnHome]: when [DisplayInfo] is changed
- * - [_isPrimaryDisplayRef]: when [TaskbarActivityContext] is constructed
+ * - [isTaskbarStashed]: when [TaskbarStashController.mIsStashed] has changed
+ * - [isTaskbarAllAppsOpen]: when [TaskbarAllAppsController.isOpen] has changed
+ * - [isTaskbarOnHome]: when [TaskbarStashController.mState] is changed
+ * - [showDesktopTaskbarForFreeformDisplay]: when [DisplayInfo] is changed
+ * - [showLockedTaskbarOnHome]: when [DisplayInfo] is changed
+ * - [isPrimaryDisplay]: when [TaskbarActivityContext] is constructed
  */
 class TaskbarUiState {
 
-    private val _hasBubblesRef = MutableListenableRef(false)
-    private val _shouldShowEduOnAppLaunchRef = MutableListenableRef(false)
-    private val _isDraggingItemRef = MutableListenableRef(false)
-    private val _isTaskbarStashedRef = MutableListenableRef(false)
-    private val _isTaskbarAllAppsOpenRef = MutableListenableRef(false)
-    private val _isTaskbarOnHomeRef = MutableListenableRef(false)
-    private val _showDesktopTaskbarForFreeformDisplayRef = MutableListenableRef(false)
-    private val _showLockedTaskbarOnHome = MutableListenableRef(false)
-    private val _isPrimaryDisplayRef = MutableListenableRef(false)
-
-    private fun <T> MutableListenableRef<T>.diffAndDispatch(newValue: T) {
-        if (value != newValue) {
-            dispatchValue(newValue)
-        }
-    }
-
-    val hasBubblesRef = _hasBubblesRef.asListenable()
-    val shouldShowEduOnAppLaunchRef = _shouldShowEduOnAppLaunchRef.asListenable()
-    val isDraggingItemRef = _isDraggingItemRef.asListenable()
-    val isTaskbarStashedRef = _isTaskbarStashedRef.asListenable()
-    val isTaskbarAllAppsOpenRef = _isTaskbarAllAppsOpenRef.asListenable()
-    val isTaskbarOnHomeRef = _isTaskbarOnHomeRef.asListenable()
-    val showDesktopTaskbarForFreeformDisplayRef =
-        _showDesktopTaskbarForFreeformDisplayRef.asListenable()
-    val showLockedTaskbarOnHome = _showLockedTaskbarOnHome.asListenable()
-    val isPrimaryDisplayRef = _isPrimaryDisplayRef.asListenable()
-
-    private var _isBubbleDragging = false
-    private var _isTaskbarDragging = false
-    private var _stashState = 0L
-    private var _bubbleBarViewRect = ImmutableRect.EMPTY_RECT
-    private var _stashedBubbleBarHeightPx = Int.MAX_VALUE
-    private var _isStashedHandlerViewVisible = true
-    private var _stashedHandlerViewRect = ImmutableRect.EMPTY_RECT
-
-    private var _isTaskbarViewShown = false
-    private var _taskbarIconsActualBounds = ImmutableRect.EMPTY_RECT
-    private var _navbarFloatingRotationButtonsBounds = ImmutableRect.EMPTY_RECT
-
-    private var _deviceProfile = DeviceProfile.DEFAULT_DEVICE_PROFILE
-    private var _navigationMode = NavigationMode.THREE_BUTTONS
-    private var _isTransient = false
+    @Volatile var hasBubbles = false
+    @Volatile var shouldShowEduOnAppLaunch = false
+    @Volatile var isDraggingItem = false
+    @Volatile var isTaskbarStashed = false
+    @Volatile var isTaskbarAllAppsOpen = false
+    @Volatile var isTaskbarOnHome = false
+    @Volatile var showDesktopTaskbarForFreeformDisplay = false
+    @Volatile var showLockedTaskbarOnHome = false
+    @Volatile var isPrimaryDisplay = false
 
     @Volatile var bubbleBarViewVisible = true
     @Volatile var bubbleStashed = false
@@ -99,52 +64,37 @@ class TaskbarUiState {
     @Volatile var taskbarStashedScreenEdgeHoverDeadzoneHeightPx: Int = 0
     @Volatile var taskbarStashedBelowHoverDeadzoneHeightPx: Int = 0
 
-    fun setHasBubble(hasBubbles: Boolean) {
-        _hasBubblesRef.diffAndDispatch(hasBubbles)
-    }
+    @Volatile private var _isBubbleDragging = false
+    @Volatile private var _isTaskbarDragging = false
+    @Volatile private var _stashState = 0L
+    @Volatile private var _bubbleBarViewRect = ImmutableRect.EMPTY_RECT
+    @Volatile private var _stashedBubbleBarHeightPx = Int.MAX_VALUE
+    @Volatile private var _isStashedHandlerViewVisible = true
+    @Volatile private var _stashedHandlerViewRect = ImmutableRect.EMPTY_RECT
 
-    fun setShouldShowEduOnAppLaunch(shouldShowEduOnAppLaunch: Boolean) {
-        _shouldShowEduOnAppLaunchRef.diffAndDispatch(shouldShowEduOnAppLaunch)
-    }
+    @Volatile private var _isTaskbarViewShown = false
+    @Volatile private var _taskbarIconsActualBounds = ImmutableRect.EMPTY_RECT
+    @Volatile private var _navbarFloatingRotationButtonsBounds = ImmutableRect.EMPTY_RECT
+
+    @Volatile private var _deviceProfile = DeviceProfile.DEFAULT_DEVICE_PROFILE
+    @Volatile private var _navigationMode = NavigationMode.THREE_BUTTONS
+    @Volatile private var _isTransient = false
 
     fun setIsBubbleDragging(isBubbleDragging: Boolean) {
         _isBubbleDragging = isBubbleDragging
-        _isDraggingItemRef.diffAndDispatch(_isBubbleDragging or _isTaskbarDragging)
+        isDraggingItem = _isBubbleDragging or _isTaskbarDragging
     }
 
     fun setIsTaskbarDragging(isTaskbarDragging: Boolean) {
         _isTaskbarDragging = isTaskbarDragging
-        _isDraggingItemRef.diffAndDispatch(_isBubbleDragging or _isTaskbarDragging)
-    }
-
-    fun setIsTaskbarStashed(isTaskbarStashed: Boolean) {
-        _isTaskbarStashedRef.diffAndDispatch(isTaskbarStashed)
-    }
-
-    fun setIsTaskbarAllAppsOpen(isTaskbarAllAppsOpen: Boolean) {
-        _isTaskbarAllAppsOpenRef.diffAndDispatch(isTaskbarAllAppsOpen)
+        isDraggingItem = _isBubbleDragging or _isTaskbarDragging
     }
 
     fun setStashStateRef(state: Long) {
         _stashState = state
-        _isTaskbarOnHomeRef.diffAndDispatch(
+        isTaskbarOnHome =
             (_stashState and TaskbarStashController.FLAG_IN_OVERVIEW.toLong()) == 0L &&
                 (_stashState and TaskbarStashController.FLAG_IN_APP.toLong()) == 0L
-        )
-    }
-
-    fun setShowDesktopTaskbarForFreeformDisplay(showDesktopTaskbarForFreeformDisplay: Boolean) {
-        _showDesktopTaskbarForFreeformDisplayRef.diffAndDispatch(
-            showDesktopTaskbarForFreeformDisplay
-        )
-    }
-
-    fun setShowLockedTaskbarOnHome(showLockedTaskbarOnHome: Boolean) {
-        _showLockedTaskbarOnHome.diffAndDispatch(showLockedTaskbarOnHome)
-    }
-
-    fun setIsPrimaryDisplay(isPrimaryDisplay: Boolean) {
-        _isPrimaryDisplayRef.diffAndDispatch(isPrimaryDisplay)
     }
 
     fun setIsTransient(isTransient: Boolean) {
@@ -158,7 +108,7 @@ class TaskbarUiState {
     fun isThreeButtonNav() = _navigationMode == NavigationMode.THREE_BUTTONS
 
     fun isTransientTaskbar() =
-        _isTransient && isPrimaryDisplayRef.value && !_deviceProfile.deviceProperties.isPhone
+        _isTransient && isPrimaryDisplay && !_deviceProfile.deviceProperties.isPhone
 
     fun isEventOverBubbleBarViews(ev: MotionEvent): Boolean {
         return isEventOverBubbleBarView(ev) || isEventOverStashedHandler(ev)

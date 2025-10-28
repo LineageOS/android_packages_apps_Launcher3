@@ -169,7 +169,7 @@ constructor(
         }
         val uiController = controllers.uiController
         if (uiController is LauncherTaskbarUIController) {
-            taskbarUIState.setShouldShowEduOnAppLaunch(uiController.shouldShowEduOnAppLaunch())
+            taskbarUIState.shouldShowEduOnAppLaunch = uiController.shouldShowEduOnAppLaunch()
         }
     }
 

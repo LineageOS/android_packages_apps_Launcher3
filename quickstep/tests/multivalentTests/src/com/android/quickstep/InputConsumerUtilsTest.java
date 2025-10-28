@@ -67,7 +67,6 @@ import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController;
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.LockedUserState;
-import com.android.launcher3.util.MutableListenableRef;
 import com.android.launcher3.util.SandboxApplication;
 import com.android.launcher3.views.BaseDragLayer;
 import com.android.quickstep.inputconsumers.AccessibilityInputConsumer;
@@ -443,8 +442,7 @@ public class InputConsumerUtilsTest {
         deviceProfile.isTaskbarPresent = true;
         when(mTaskbarActivityContext.getDeviceProfile()).thenReturn(deviceProfile);
         when(mTaskbarUiState.getDeviceProfile()).thenReturn(deviceProfile);
-        when(mTaskbarUiState.isTaskbarAllAppsOpenRef()).thenReturn(
-                new MutableListenableRef<>(false));
+        when(mTaskbarUiState.isTaskbarAllAppsOpen()).thenReturn(false);
         when(mTaskbarActivityContext.getTaskbarFeatureEvaluator())
                 .thenReturn(mTaskbarFeatureEvaluator);
         when(mTaskbarActivityContext.getTaskbarUiState()).thenReturn(mTaskbarUiState);

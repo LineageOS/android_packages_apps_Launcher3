@@ -286,7 +286,7 @@ public abstract class BaseContainerInterface<STATE_TYPE extends BaseState<STATE_
         CONTAINER_TYPE container = getCreatedContainer();
         return container != null
                 && TaskbarUiStateMonitor.INSTANCE.get(container.asContext())
-                .getTaskbarUiState(displayId).isDraggingItemRef().getValue();
+                .getTaskbarUiState(displayId).isDraggingItem();
     }
 
     public void runOnInitBackgroundStateUI(Runnable callback) {
