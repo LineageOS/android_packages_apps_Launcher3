@@ -1312,6 +1312,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         out.add(new RecentsViewStateController(this));
     }
 
+    @Override
     public LauncherDepthController getDepthController() {
         return mDepthController;
     }
