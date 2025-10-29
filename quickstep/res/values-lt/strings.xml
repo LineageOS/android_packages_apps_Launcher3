@@ -126,8 +126,7 @@
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Užduočių juostos mokomoji informacija"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Nuvilkę programą į šoną vienu metu naudokite dvi programas"</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"Nuvilkite į apatinius kampus, kad slankiotų"</string>
-    <!-- no translation found for taskbar_edu_stashing (911857479758694381) -->
-    <skip />
+    <string name="taskbar_edu_stashing" msgid="911857479758694381">"Lėtai perbraukite aukštyn, kad būtų rodoma Užduočių juosta"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Gaukite programų pasiūlymų pagal savo veiklą"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Ilgai paspauskite daliklį, kad prisegtumėte užduočių juostą"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Atlikite daugiau naudodami Užduočių juostą"</string>
@@ -180,4 +179,6 @@
     <string name="nudge_a11y_title" msgid="2126529303123687912">"Priminimas"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"Uždaryti"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"Pastumti vaizdą"</string>
+    <!-- no translation found for running_app_description (1309281047289078871) -->
+    <skip />
 </resources>

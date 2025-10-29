@@ -126,8 +126,7 @@
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"ਟਾਸਕਬਾਰ ਸਿੱਖਿਆ"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"ਇੱਕੋ ਵੇਲੇ 2 ਐਪਾਂ ਵਰਤਣ ਲਈ, ਕਿਸੇ ਐਪ ਨੂੰ ਸਾਈਡ \'ਤੇ ਘਸੀਟੋ"</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"ਫਲੋਟ ਕਰਵਾਉਣ ਲਈ ਹੇਠਲੇ ਕੋਨਿਆਂ \'ਤੇ ਘਸੀਟੋ"</string>
-    <!-- no translation found for taskbar_edu_stashing (911857479758694381) -->
-    <skip />
+    <string name="taskbar_edu_stashing" msgid="911857479758694381">"ਟਾਸਕਬਾਰ ਦਿਖਾਉਣ ਲਈ ਹੌਲੀ-ਹੌਲੀ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰੋ"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"ਤੁਹਾਡੇ ਨਿਯਮਬੱਧ ਕੰਮ ਦੇ ਆਧਾਰ \'ਤੇ ਐਪ ਸੁਝਾਅ ਪ੍ਰਾਪਤ ਕਰੋ"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"ਟਾਸਕਬਾਰ \'ਤੇ ਪਿੰਨ ਕਰਨ ਲਈ ਵਿਭਾਜਕ \'ਤੇ ਦਬਾਈ ਰੱਖੋ"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"ਟਾਸਕਬਾਰ ਦਾ ਹੋਰ ਲਾਹਾ ਲਓ"</string>
@@ -180,4 +179,6 @@
     <string name="nudge_a11y_title" msgid="2126529303123687912">"ਰਿਮਾਈਂਡਰ"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"ਬੰਦ ਕਰੋ"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"ਰਿਮਾਈਂਡਰ ਦਾ ਚਿੱਤਰ"</string>
+    <!-- no translation found for running_app_description (1309281047289078871) -->
+    <skip />
 </resources>

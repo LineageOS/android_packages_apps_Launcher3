@@ -180,4 +180,6 @@
     <string name="nudge_a11y_title" msgid="2126529303123687912">"ገፋ አድርግ"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"ዝጋ"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"ምስልን ገፋ ማድረግ"</string>
+    <!-- no translation found for running_app_description (1309281047289078871) -->
+    <skip />
 </resources>

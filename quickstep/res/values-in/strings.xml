@@ -72,7 +72,7 @@
     <string name="home_gesture_tutorial_subtitle" msgid="7245995490408668778">"Geser ke atas dari bagian bawah layar"</string>
     <string name="home_gesture_tutorial_success" msgid="1736295017642244751">"Bagus!"</string>
     <string name="overview_gesture_feedback_swipe_too_far_from_edge" msgid="6402349235265407385">"Pastikan Anda menggeser ke atas dari tepi bawah layar"</string>
-    <string name="overview_gesture_feedback_home_detected" msgid="663432226180397138">"Coba tahan jendela lebih lama sebelum melepaskan"</string>
+    <string name="overview_gesture_feedback_home_detected" msgid="663432226180397138">"Coba tahan jendela lebih lama sebelum melepasnya"</string>
     <string name="overview_gesture_feedback_wrong_swipe_direction" msgid="1191055451018584958">"Pastikan Anda menggeser lurus ke atas, lalu berhenti sejenak"</string>
     <string name="overview_gesture_feedback_complete_with_follow_up" msgid="3544611727467765026">"Anda telah mempelajari cara menggunakan gestur. Untuk menonaktifkan gestur, buka Setelan."</string>
     <string name="overview_gesture_feedback_complete_without_follow_up" msgid="2903050864432331629">"Anda telah menyelesaikan gestur beralih aplikasi"</string>
@@ -180,4 +180,6 @@
     <string name="nudge_a11y_title" msgid="2126529303123687912">"Saran tindak lanjut"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"Tutup"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"Gambar saran tindak lanjut"</string>
+    <!-- no translation found for running_app_description (1309281047289078871) -->
+    <skip />
 </resources>
