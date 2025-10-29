@@ -32,7 +32,6 @@ import static com.android.app.animation.Interpolators.clampToProgress;
 import static com.android.launcher3.AbstractFloatingView.TYPE_REBIND_SAFE;
 import static com.android.launcher3.BaseActivity.STATE_HANDLER_INVISIBILITY_FLAGS;
 import static com.android.launcher3.Flags.enableDesktopExplodedView;
-import static com.android.launcher3.Flags.enableOverviewDesktopTileWallpaperBackground;
 import static com.android.launcher3.Flags.enableOverviewPagination;
 import static com.android.launcher3.LauncherAnimUtils.SUCCESS_TRANSITION_PROGRESS;
 import static com.android.launcher3.LauncherAnimUtils.VIEW_BACKGROUND_COLOR;
@@ -1151,9 +1150,6 @@ public abstract class RecentsView<
      */
     public void destroy() {
         Log.d(TAG, "destroy");
-        if (enableOverviewDesktopTileWallpaperBackground()) {
-            reset();
-        }
         mTaskViewPool.cancelOngoingInitializations();
         mGroupedTaskViewPool.cancelOngoingInitializations();
         mDesktopTaskViewPool.cancelOngoingInitializations();

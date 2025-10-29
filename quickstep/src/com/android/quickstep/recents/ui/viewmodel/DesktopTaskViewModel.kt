@@ -19,9 +19,6 @@ package com.android.quickstep.recents.ui.viewmodel
 import android.graphics.Rect
 import androidx.annotation.VisibleForTesting
 import com.android.internal.policy.DesktopModeCompatPolicy
-import com.android.launcher3.util.coroutines.DispatcherProvider
-import com.android.quickstep.recents.data.DesktopBackgroundResult
-import com.android.quickstep.recents.data.DesktopTileBackgroundRepository
 import com.android.quickstep.recents.domain.model.DesktopLayoutConfig
 import com.android.quickstep.recents.domain.model.DesktopTaskBoundsData
 import com.android.quickstep.recents.domain.model.DesktopTaskBoundsData.HiddenDesktopTaskBoundsData
@@ -32,14 +29,11 @@ import com.android.quickstep.recents.domain.model.DesktopTaskVisibilityData.Rend
 import com.android.quickstep.recents.domain.usecase.GetObscuredDesktopTaskIdsUseCase
 import com.android.quickstep.recents.domain.usecase.OrganizeDesktopTasksUseCase
 import com.android.quickstep.util.DesktopTask
-import kotlinx.coroutines.withContext
 
 /** ViewModel used for [com.android.quickstep.views.DesktopTaskView]. */
 class DesktopTaskViewModel(
     private val organizeDesktopTasksUseCase: OrganizeDesktopTasksUseCase,
     private val getObscuredDesktopTaskIdsUseCase: GetObscuredDesktopTaskIdsUseCase,
-    private val desktopTileBackgroundRepository: DesktopTileBackgroundRepository,
-    private val dispatcherProvider: DispatcherProvider,
     private val desktopModeCompatPolicy: DesktopModeCompatPolicy,
 ) {
     data class TaskPosition(val taskId: Int, val isMinimized: Boolean, val bounds: Rect)
@@ -115,11 +109,6 @@ class DesktopTaskViewModel(
         organizedDesktopTaskVisibilityDataMap =
             newOrganizedDesktopTaskBoundsData.toDesktopTaskVisibilityDataMap(obscuredWindowIds)
     }
-
-    suspend fun getWallpaperBackground(forceRefresh: Boolean): DesktopBackgroundResult =
-        withContext(dispatcherProvider.ioBackground) {
-            desktopTileBackgroundRepository.getWallpaperBackground(forceRefresh)
-        }
 
     private fun Map<Int, DesktopTaskVisibilityData>.toDesktopTaskBoundsData():
         List<DesktopTaskBoundsData> = map {

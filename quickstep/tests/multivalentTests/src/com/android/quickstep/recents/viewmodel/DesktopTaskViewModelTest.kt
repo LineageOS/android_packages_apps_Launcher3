@@ -22,8 +22,6 @@ import android.content.Intent
 import android.graphics.Rect
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.internal.policy.DesktopModeCompatPolicy
-import com.android.launcher3.util.coroutines.DispatcherProvider
-import com.android.quickstep.recents.data.DesktopTileBackgroundRepository
 import com.android.quickstep.recents.domain.model.DesktopLayoutConfig
 import com.android.quickstep.recents.domain.model.DesktopTaskBoundsData.HiddenDesktopTaskBoundsData
 import com.android.quickstep.recents.domain.model.DesktopTaskBoundsData.RenderedDesktopTaskBoundsData
@@ -52,8 +50,6 @@ import org.mockito.kotlin.whenever
 class DesktopTaskViewModelTest {
     private val organizeDesktopTasksUseCase = mock<OrganizeDesktopTasksUseCase>()
     private val getObscuredDesktopTaskIdsUseCase = mock<GetObscuredDesktopTaskIdsUseCase>()
-    private val desktopTileBackgroundRepository = mock<DesktopTileBackgroundRepository>()
-    private val dispatcherProvider = mock<DispatcherProvider>()
     private val desktopModeCompatPolicy = mock<DesktopModeCompatPolicy>()
 
     private lateinit var systemUnderTest: DesktopTaskViewModel
@@ -64,8 +60,6 @@ class DesktopTaskViewModelTest {
             DesktopTaskViewModel(
                 organizeDesktopTasksUseCase,
                 getObscuredDesktopTaskIdsUseCase,
-                desktopTileBackgroundRepository,
-                dispatcherProvider,
                 desktopModeCompatPolicy,
             )
     }

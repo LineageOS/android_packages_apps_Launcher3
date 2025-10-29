@@ -19,12 +19,9 @@ package com.android.quickstep.recents.di
 import android.app.KeyguardManager
 import android.content.Context
 import android.util.Log
-import android.view.WindowManagerGlobal
 import com.android.internal.policy.DesktopModeCompatPolicy
 import com.android.launcher3.util.coroutines.DispatcherProvider
 import com.android.quickstep.RecentsModel
-import com.android.quickstep.recents.data.DesktopTileBackgroundDataSource
-import com.android.quickstep.recents.data.DesktopTileBackgroundRepository
 import com.android.quickstep.recents.data.RecentTasksRepository
 import com.android.quickstep.recents.data.TaskVisualsChangedDelegate
 import com.android.quickstep.recents.data.TaskVisualsChangedDelegateImpl
@@ -112,7 +109,6 @@ private constructor(appContext: Context, dispatcherProvider: DispatcherProvider)
         val scope =
             createScope(scopeId).apply {
                 set(RecentsViewData::class.java.simpleName, RecentsViewData())
-                set(DisplayId::class.java.simpleName, DisplayId(viewContext.displayId))
                 val dispatcherProvider: DispatcherProvider =
                     get<DispatcherProvider>(DEFAULT_SCOPE_ID)
                 val recentsCoroutineScope =
@@ -227,13 +223,6 @@ private constructor(appContext: Context, dispatcherProvider: DispatcherProvider)
                     )
                 OrganizeDesktopTasksUseCase::class.java -> OrganizeDesktopTasksUseCase()
                 GetObscuredDesktopTaskIdsUseCase::class.java -> GetObscuredDesktopTaskIdsUseCase()
-                DesktopTileBackgroundDataSource::class.java ->
-                    DesktopTileBackgroundDataSource(
-                        WindowManagerGlobal.getWindowManagerService(),
-                        inject(scopeId),
-                    )
-                DesktopTileBackgroundRepository::class.java ->
-                    DesktopTileBackgroundRepository(inject(scopeId))
                 IsPointerConnectedUseCase::class.java ->
                     IsPointerConnectedUseCase(pointerRepository = inject(scopeId))
                 DesktopModeCompatPolicy::class.java -> inject(scopeId)
@@ -353,5 +342,3 @@ inline fun <reified T> RecentsDependencies.Companion.get(
 ): T = get(scope, RecentsDependenciesExtras(extras), factory)
 
 fun RecentsDependencies.Companion.getScope(scopeId: Any) = getInstance().getScope(scopeId)
-
-@JvmInline value class DisplayId(val displayId: Int)

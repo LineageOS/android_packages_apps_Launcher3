@@ -32,14 +32,11 @@ import android.util.Log
 import android.view.Display.INVALID_DISPLAY
 import android.view.Gravity
 import android.view.View
-import android.widget.ImageView
 import androidx.core.content.res.ResourcesCompat
-import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import com.android.internal.hidden_from_bootclasspath.com.android.window.flags.Flags.enableDesktopRecentsTransitionsCornersBugfix
 import com.android.launcher3.Flags.enableDesktopExplodedView
-import com.android.launcher3.Flags.enableOverviewDesktopTileWallpaperBackground
 import com.android.launcher3.Flags.enableRefactorTaskContentView
 import com.android.launcher3.R
 import com.android.launcher3.statehandlers.DesktopVisibilityController
@@ -50,7 +47,6 @@ import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.SplitConfigurationOptions
 import com.android.launcher3.util.TransformingTouchDelegate
 import com.android.launcher3.util.ViewPool
-import com.android.launcher3.util.coroutines.DispatcherProvider
 import com.android.launcher3.util.rects.lerpRect
 import com.android.launcher3.util.rects.set
 import com.android.quickstep.BaseContainerInterface
@@ -59,8 +55,6 @@ import com.android.quickstep.FullscreenDrawParams
 import com.android.quickstep.RemoteTargetGluer.RemoteTargetHandle
 import com.android.quickstep.TaskOverlayFactory
 import com.android.quickstep.ViewUtils.addAccessibleChildToList
-import com.android.quickstep.recents.data.DesktopBackgroundResult
-import com.android.quickstep.recents.data.DesktopTileBackgroundRepository.Companion.DESKTOP_BACKGROUND_FALLBACK_COLOR
 import com.android.quickstep.recents.di.RecentsDependencies
 import com.android.quickstep.recents.di.get
 import com.android.quickstep.recents.domain.model.DesktopLayoutConfig
@@ -77,9 +71,6 @@ import com.android.quickstep.util.RecentsOrientedState
 import com.android.quickstep.util.getRemoteTargetHandle
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus.enableMultipleDesktops
 import kotlin.math.roundToInt
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 
 /** TaskView that contains all tasks that are part of the desktop. */
 class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
@@ -130,18 +121,13 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
     private lateinit var iconView: IconAppChipView
     private lateinit var iconTouchDelegate: TransformingTouchDelegate
     private lateinit var contentView: DesktopTaskContentView
-    private lateinit var backgroundView: ImageView
-    private val dispatcherProvider: DispatcherProvider = RecentsDependencies.get(context)
+    private lateinit var backgroundView: View
     private var viewModel =
         DesktopTaskViewModel(
             organizeDesktopTasksUseCase = RecentsDependencies.get(context),
             getObscuredDesktopTaskIdsUseCase = RecentsDependencies.get(context),
-            desktopTileBackgroundRepository = RecentsDependencies.get(context),
-            dispatcherProvider = dispatcherProvider,
             desktopModeCompatPolicy = RecentsDependencies.get(context),
         )
-    private val coroutineScope: CoroutineScope = RecentsDependencies.get(context)
-    private val wallpaperBackgroundFetchCoroutineJobs = mutableListOf<Job>()
 
     /**
      * Map from task IDs to previous organized task positions. This is used to animate between two
@@ -199,13 +185,9 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
             findViewById<DesktopTaskContentView>(R.id.desktop_content).apply {
                 cornerRadius = contentViewFullscreenParams.currentCornerRadius
                 backgroundView = findViewById(R.id.background)
-                if (!enableOverviewDesktopTileWallpaperBackground()) {
-                    setWallpaperBackground(
-                        DesktopBackgroundResult.FallbackBackground(
-                            DESKTOP_BACKGROUND_FALLBACK_COLOR
-                        )
-                    )
-                }
+                backgroundView.setBackgroundColor(
+                    resources.getColor(android.R.color.system_neutral2_300, context.theme)
+                )
             }
     }
 
@@ -506,9 +488,6 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
         taskOverlayFactory: TaskOverlayFactory,
     ) {
         super.onBind(orientedState, taskOverlayFactory)
-        if (enableOverviewDesktopTileWallpaperBackground()) {
-            setWallpaperBackground(false)
-        }
     }
 
     override fun onRecycle() {
@@ -782,51 +761,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     override fun onConfigurationChanged(newConfig: Configuration?) {
         super.onConfigurationChanged(newConfig)
-        if (enableOverviewDesktopTileWallpaperBackground()) {
-            cancelFetchWallpaperBackgroundJobs()
-            setWallpaperBackground(true)
-        }
         contentViewFullscreenParams.updateCornerRadius(context)
-    }
-
-    private fun setWallpaperBackground(forceRefresh: Boolean) {
-        wallpaperBackgroundFetchCoroutineJobs +=
-            coroutineScope.launch(dispatcherProvider.main) {
-                setWallpaperBackground(viewModel.getWallpaperBackground(forceRefresh))
-            }
-    }
-
-    private fun setWallpaperBackground(desktopBackgroundResult: DesktopBackgroundResult) {
-        backgroundView.setImageDrawable(
-            when (desktopBackgroundResult) {
-                is DesktopBackgroundResult.WallpaperBackground -> {
-                    desktopBackgroundResult.background.toDrawable(resources)
-                }
-
-                is DesktopBackgroundResult.FallbackBackground -> {
-                    resources
-                        .getColor(desktopBackgroundResult.background, context.theme)
-                        .toDrawable()
-                }
-            }
-        )
-    }
-
-    override fun cancelJobs() {
-        super.cancelJobs()
-        cancelFetchWallpaperBackgroundJobs()
-    }
-
-    private fun cancelFetchWallpaperBackgroundJobs() {
-        if (enableOverviewDesktopTileWallpaperBackground()) {
-            val coroutineJobsToCancel = wallpaperBackgroundFetchCoroutineJobs.toList()
-            wallpaperBackgroundFetchCoroutineJobs.clear()
-            if (coroutineJobsToCancel.isNotEmpty()) {
-                coroutineScope.launch(dispatcherProvider.lightweightBackground) {
-                    coroutineJobsToCancel.forEach { it.cancel() }
-                }
-            }
-        }
     }
 
     companion object {
