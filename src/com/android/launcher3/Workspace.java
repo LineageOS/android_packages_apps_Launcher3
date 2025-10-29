@@ -126,6 +126,7 @@ import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.LauncherAppWidgetInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.pageindicators.PageIndicator;
+import com.android.launcher3.pageindicators.PageIndicatorDotsWithArrows;
 import com.android.launcher3.popup.Poppable;
 import com.android.launcher3.popup.Popup;
 import com.android.launcher3.statemanager.StateManager;
@@ -374,6 +375,19 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     }
 
     @Override
+    public void initParentViews(View parent) {
+        super.initParentViews(parent);
+        if (mPageIndicator instanceof PageIndicatorDotsWithArrows) {
+            ((PageIndicatorDotsWithArrows) mPageIndicator).setOnNextArrowClickedListener(v ->
+                    snapToPage(getCurrentPage() + 1)
+            );
+            ((PageIndicatorDotsWithArrows) mPageIndicator).setOnPrevArrowClickedListener(v ->
+                    snapToPage(getCurrentPage() - 1)
+            );
+        }
+    }
+
+    @Override
     public void setInsets(Rect insets) {
         DeviceProfile grid = mLauncher.getDeviceProfile();
 
@@ -402,17 +416,12 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
     private void setPageIndicatorInset() {
         DeviceProfile grid = mLauncher.getDeviceProfile();
-
-        View pageIndicatorContainer = (View) mPageIndicator.getParent();
-        FrameLayout.LayoutParams lp =
-                (FrameLayout.LayoutParams) pageIndicatorContainer.getLayoutParams();
-
+        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mPageIndicator.getLayoutParams();
         // Set insets for page indicator
-        lp.topMargin = 0;
-        lp.leftMargin = lp.rightMargin = 0;
+        lp.topMargin = lp.leftMargin = lp.rightMargin = 0;
         lp.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
         lp.bottomMargin = grid.hotseatBarSizePx;
-        pageIndicatorContainer.setLayoutParams(lp);
+        mPageIndicator.setLayoutParams(lp);
     }
 
     private void updateCellLayoutMeasures() {
@@ -634,13 +643,6 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         cl.setOnInterceptTouchListener(this);
         cl.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
         super.onViewAdded(child);
-        mLauncher.updatePaginationArrowVisibilities();
-    }
-
-    @Override
-    public void onViewRemoved(View child) {
-        super.onViewRemoved(child);
-        mLauncher.updatePaginationArrowVisibilities();
     }
 
     /**
@@ -1447,7 +1449,6 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                                             .setPageIndex(prevPage)).build())
                     .log(event);
         }
-        mLauncher.updatePaginationArrowAlphas();
     }
 
     protected void setWallpaperDimension() {
