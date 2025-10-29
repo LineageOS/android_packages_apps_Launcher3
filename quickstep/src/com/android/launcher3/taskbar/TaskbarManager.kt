@@ -21,7 +21,7 @@ import androidx.annotation.VisibleForTesting
 import com.android.app.displaylib.DisplayDecorationListener
 import com.android.launcher3.AsyncAnimatorPlaybackController
 import com.android.launcher3.statemanager.StatefulActivity
-import com.android.launcher3.taskbar.TaskbarActivityContext.UIControllerChangeListener
+import com.android.launcher3.util.ListenableStream
 import com.android.quickstep.views.RecentsViewContainer
 import com.android.systemui.shared.statusbar.phone.BarTransitions
 import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags
@@ -83,7 +83,7 @@ interface TaskbarManager : DisplayDecorationListener {
     // TODO(b/404636836): Ensure calling API on StashedHandleViewController on taskbar ui thread
     fun getStashedHandleViewController(): StashedHandleViewController?
 
-    fun setUIControllerChangeListener(uiControllerChangeListener: UIControllerChangeListener)
+    fun getPrimaryDisplayUiControllerStream(): ListenableStream<TaskbarUIController>
 
     fun dumpLogs(prefix: String, pw: PrintWriter)
 

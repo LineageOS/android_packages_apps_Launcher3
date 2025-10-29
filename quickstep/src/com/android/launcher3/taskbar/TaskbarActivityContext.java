@@ -305,8 +305,6 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     private @Nullable View mTaskbarSnapshotView;
     private @Nullable TaskbarOverlayContext mTaskbarSnapshotOverlay;
 
-    private volatile @Nullable UIControllerChangeListener mUIControllerChangeListener;
-
     private final boolean mIsTransient;
     private final boolean mIsPinned;
 
@@ -1171,9 +1169,6 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
      */
     public void setUIController(@NonNull TaskbarUIController uiController) {
         mControllers.setUiController(uiController);
-        if (mUIControllerChangeListener != null) {
-            mUIControllerChangeListener.onUIControllerChanged(uiController);
-        }
         if (BubbleBarController.isBubbleBarEnabled() && mControllers.bubbleControllers.isEmpty()) {
             // if the bubble bar was visible in a previous configuration of taskbar and is being
             // recreated now without bubbles, clean up any bubble bar adjustments from hotseat
@@ -2541,21 +2536,4 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         return mControllers;
     }
 
-    /**
-     * Sets a new UIControllerChangeListener
-     */
-    @AnyThread
-    public void setUIControllerChangeListener(UIControllerChangeListener listener) {
-        mUIControllerChangeListener = listener;
-    }
-
-    /**
-     * Listens to when TaskbarUIController changes.
-     */
-    public interface UIControllerChangeListener {
-        /**
-         * Called whenever the UIIController changes.
-         */
-        void onUIControllerChanged(TaskbarUIController uiController);
-    }
 }
