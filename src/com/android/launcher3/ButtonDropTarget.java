@@ -18,6 +18,8 @@ package com.android.launcher3;
 
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
+import static com.android.launcher3.Flags.disableSystemLevelDragEventHandlingInButtonDropTarget;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Paint;
@@ -26,6 +28,7 @@ import android.graphics.drawable.Drawable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -105,6 +108,13 @@ public abstract class ButtonDropTarget extends TextView
         mDrawableSize = resources.getDimensionPixelSize(R.dimen.drop_target_button_drawable_size);
         mDrawablePadding = resources.getDimensionPixelSize(
                 R.dimen.drop_target_button_drawable_padding);
+    }
+
+    @Override
+    public boolean onDragEvent(DragEvent event) {
+        // We don't want this view to interfere with Launcher's own drag and drop.
+        if (disableSystemLevelDragEventHandlingInButtonDropTarget()) return false;
+        return super.onDragEvent(event);
     }
 
     @Override

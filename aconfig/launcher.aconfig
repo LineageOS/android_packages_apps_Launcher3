@@ -719,3 +719,14 @@ flag {
     description: "Enables the magnetic detach effect to the swipe up from app gestures"
     bug: "455552698"
 }
+
+flag {
+  name: "disable_system_level_drag_event_handling_in_button_drop_target"
+  namespace: "launcher"
+  description: "Disables system-level drag event handling in ButtonDropTarget as it may interfere with Launcher's own drag and drop."
+  bug: "456188853"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
