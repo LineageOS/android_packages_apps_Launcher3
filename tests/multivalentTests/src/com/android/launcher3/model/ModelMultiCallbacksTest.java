@@ -26,6 +26,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
 
 import android.os.Process;
+import android.platform.test.rule.LimitDevicesRule;
+import android.platform.test.rule.SkipOnDeviceless;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -58,6 +60,8 @@ import java.util.stream.Collectors;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class ModelMultiCallbacksTest {
+    @Rule
+    public LimitDevicesRule mlimitDevicesRule = new LimitDevicesRule();
 
     @Rule public SandboxApplication mContext = new SandboxApplication().withModelDependency();
     @Rule public LayoutResource mLayoutProvider = new LayoutResource(mContext);
@@ -107,6 +111,7 @@ public class ModelMultiCallbacksTest {
         assertNull(cb2.mItems);
     }
 
+    @SkipOnDeviceless // shell commands
     @Test
     public void testTwoCallbacks_receiveUpdates() throws Exception {
         TestUtil.uninstallDummyApp();

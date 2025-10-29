@@ -21,6 +21,8 @@ import static org.junit.Assert.assertTrue;
 
 import android.content.Intent;
 import android.platform.test.annotations.LargeTest;
+import android.platform.test.rule.LimitDevicesRule;
+import android.platform.test.rule.SkipOnDeviceless;
 import android.view.KeyEvent;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -30,12 +32,16 @@ import com.android.launcher3.allapps.SearchRecyclerView;
 import com.android.launcher3.util.BaseLauncherActivityTest;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
 public class LauncherIntentTest extends BaseLauncherActivityTest<Launcher> {
+
+    @Rule
+    public LimitDevicesRule mlimitDevicesRule = new LimitDevicesRule();
 
     public final Intent allAppsIntent = new Intent(Intent.ACTION_ALL_APPS);
 
@@ -44,6 +50,7 @@ public class LauncherIntentTest extends BaseLauncherActivityTest<Launcher> {
         loadLauncherSync();
     }
 
+    @SkipOnDeviceless // timing out
     @Test
     public void testAllAppsIntent() {
         // Try executing ALL_APPS intent

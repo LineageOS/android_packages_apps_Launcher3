@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package com.google.android.apps.nexuslauncher.integration.optionspopup
+package com.android.launcher3.integration.optionspopup
 
 import android.content.Context
 import android.os.Environment
+import android.platform.test.rule.LimitDevicesRule
+import android.platform.test.rule.SkipOnDeviceless
 import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
@@ -33,9 +35,11 @@ import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.views.OptionsPopupView
 import com.google.common.truth.Truth.assertWithMessage
 import java.util.concurrent.TimeUnit
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@SkipOnDeviceless
 @MediumTest
 @RunWith(AndroidJUnit4::class)
 class OptionsPopupTest {
@@ -45,6 +49,8 @@ class OptionsPopupTest {
         const val CREATE_NEW_FOLDER_OPTION_LABEL = "New folder"
         const val TAG = "OptionsPopupTest"
     }
+
+    @Rule @JvmField val limitDevicesRule = LimitDevicesRule()
 
     var targetContext: Context = getInstrumentation().targetContext
 

@@ -17,17 +17,17 @@
 package com.android.launcher3.integration.popup
 
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.content.pm.ShortcutInfo
 import android.os.Process.myUserHandle
+import android.platform.test.rule.LimitDevicesRule
+import android.platform.test.rule.SkipOnDeviceless
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.launcher3.BubbleTextView
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
@@ -44,13 +44,16 @@ import com.android.launcher3.shortcuts.ShortcutKey
 import com.android.launcher3.util.WorkspaceDragHelper.Companion.className
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@SkipOnDeviceless // Timing out
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class PopupAddDeepShortcutTest {
-    private val targetContext: Context = getInstrumentation().targetContext
+    @Rule @JvmField val limitDevicesRule = LimitDevicesRule()
+
     private val launcherActivity = LauncherActivityScenarioRule<Launcher>()
     private val userHandle = myUserHandle()
     private val appPackage = "appPackage"

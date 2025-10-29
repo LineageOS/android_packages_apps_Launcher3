@@ -48,6 +48,10 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Process;
+import android.platform.test.rule.LimitDevicesRule;
+import android.platform.test.rule.SkipOnDeviceless;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.launcher3.LauncherSettings.Favorites;
 import com.android.launcher3.R;
@@ -59,7 +63,9 @@ import com.android.launcher3.util.IOUtils;
 import com.android.launcher3.util.TestUtil;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
 import java.io.InputStream;
@@ -68,7 +74,12 @@ import java.util.Arrays;
 /**
  * Test for {@link LauncherDbUtils}.
  */
+@SkipOnDeviceless // SQLite
+@RunWith(AndroidJUnit4.class)
 public class LauncherDbUtilsTest {
+
+    @Rule
+    public LimitDevicesRule mlimitDevicesRule = new LimitDevicesRule();
 
     private Context mContext;
     private ArgumentCaptor<ShortcutInfo> mInfoArgumentCaptor;
