@@ -304,7 +304,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     private @Nullable View mTaskbarSnapshotView;
     private @Nullable TaskbarOverlayContext mTaskbarSnapshotOverlay;
 
-    private @Nullable UIControllerChangeListener mUIControllerChangeListener;
+    private volatile @Nullable UIControllerChangeListener mUIControllerChangeListener;
 
     private final boolean mIsTransient;
     private final boolean mIsPinned;
@@ -2312,6 +2312,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
      * Enables the auto timeout for taskbar stashing. This method should only be used for taskbar
      * testing.
      */
+    @AnyThread
     @VisibleForTesting
     public void enableBlockingTimeoutDuringTests(boolean enableBlockingTimeout) {
         mControllers.taskbarStashController.enableBlockingTimeoutDuringTests(enableBlockingTimeout);
@@ -2453,6 +2454,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         return mControllers.taskbarStashController.isInStashedLauncherState();
     }
 
+    @AnyThread
     public TaskbarFeatureEvaluator getTaskbarFeatureEvaluator() {
         return mTaskbarFeatureEvaluator;
     }
@@ -2508,6 +2510,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     }
 
     @VisibleForTesting
+    @AnyThread
     public float getStashedTaskbarScale() {
         return mControllers.stashedHandleViewController.getStashedHandleHintScale().value;
     }
@@ -2531,6 +2534,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
 
     // TODO(b/395061396): Remove `otherwise` when overview in widow is enabled.
     @VisibleForTesting(otherwise = PACKAGE_PRIVATE)
+    @AnyThread
     public TaskbarControllers getControllers() {
         return mControllers;
     }
@@ -2538,6 +2542,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     /**
      * Sets a new UIControllerChangeListener
      */
+    @AnyThread
     public void setUIControllerChangeListener(UIControllerChangeListener listener) {
         mUIControllerChangeListener = listener;
     }

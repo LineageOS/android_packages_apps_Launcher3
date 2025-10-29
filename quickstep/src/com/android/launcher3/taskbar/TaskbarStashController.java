@@ -275,7 +275,7 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
     private boolean mIsImeVisible;
 
     private final Alarm mTimeoutAlarm = new Alarm();
-    private boolean mEnableBlockingTimeoutDuringTests = false;
+    private volatile boolean mEnableBlockingTimeoutDuringTests = false;
 
     private Animator mTaskbarBackgroundAlphaAnimator;
     private final long mTaskbarBackgroundDuration;
@@ -474,6 +474,7 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
      * Enables the auto timeout for taskbar stashing. This method should only be used for taskbar
      * testing.
      */
+    @AnyThread
     @VisibleForTesting
     public void enableBlockingTimeoutDuringTests(boolean enableBlockingTimeout) {
         mEnableBlockingTimeoutDuringTests = enableBlockingTimeout;

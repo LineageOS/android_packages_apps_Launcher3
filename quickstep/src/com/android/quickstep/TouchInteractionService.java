@@ -223,14 +223,9 @@ public class TouchInteractionService extends Service {
         @BinderThread
         @Override
         public void onTaskbarToggled() {
-            MAIN_EXECUTOR.execute(() -> executeForTouchInteractionService(tis -> {
-                TaskbarActivityContext activityContext =
-                        tis.mTaskbarManager.getCurrentActivityContext();
-
-                if (activityContext != null) {
-                    activityContext.toggleTaskbarStash();
-                }
-            }));
+            executeForTouchInteractionService(tis -> {
+                tis.mTaskbarManager.toggleTaskbarStash();
+            });
         }
 
         @BinderThread
