@@ -51,6 +51,9 @@ object RoboApiWrapper {
     /** Rule to grant widget bind permission. No-op when running on robolectric */
     fun grantWidgetBindPermissionRule(): TestRule = TestRule { statement, _ -> statement }
 
+    /** Rule to screen record the device. No-op when running on robolectric */
+    fun screenRecordRule(): TestRule = TestRule { statement, _ -> statement }
+
     fun Any.convertToSpy() {
         Assume.assumeTrue("convertObjectToSpy is not supported in device-less tests", false)
     }

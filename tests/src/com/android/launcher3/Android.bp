@@ -4,7 +4,6 @@ filegroup {
         "util/rule/FailureWatcher.java",
         "util/rule/SkipAfterTimeOutRule.java",
         "util/rule/SamplerRule.java",
-        "util/rule/ScreenRecordRule.java",
         "util/rule/ShellCommandRule.java",
         "util/rule/TestIsolationRule.java",
         "util/ui/AbstractLauncherUiTest.java",

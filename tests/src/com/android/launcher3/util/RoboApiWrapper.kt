@@ -21,6 +21,7 @@ import android.os.Looper
 import com.android.dx.mockito.inline.extended.ExtendedMockito
 import com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn
 import com.android.dx.mockito.inline.extended.MockedVoidMethod
+import com.android.launcher3.util.rule.ScreenRecordRule
 import com.android.launcher3.util.rule.ShellCommandRule
 import java.util.concurrent.CompletableFuture
 import org.junit.rules.MethodRule
@@ -46,6 +47,9 @@ object RoboApiWrapper {
 
     /** Rule to grant widget bind permission */
     fun grantWidgetBindPermissionRule(): TestRule = ShellCommandRule.grantWidgetBind()
+
+    /** Rule to screen record the device */
+    fun screenRecordRule(): TestRule = ScreenRecordRule()
 
     fun Any.convertToSpy() {
         spyOn(this)
