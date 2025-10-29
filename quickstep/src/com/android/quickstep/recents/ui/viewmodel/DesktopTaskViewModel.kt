@@ -18,6 +18,7 @@ package com.android.quickstep.recents.ui.viewmodel
 
 import android.graphics.Rect
 import androidx.annotation.VisibleForTesting
+import com.android.internal.policy.DesktopModeCompatPolicy
 import com.android.launcher3.util.coroutines.DispatcherProvider
 import com.android.quickstep.recents.data.DesktopBackgroundResult
 import com.android.quickstep.recents.data.DesktopTileBackgroundRepository
@@ -39,6 +40,7 @@ class DesktopTaskViewModel(
     private val getObscuredDesktopTaskIdsUseCase: GetObscuredDesktopTaskIdsUseCase,
     private val desktopTileBackgroundRepository: DesktopTileBackgroundRepository,
     private val dispatcherProvider: DispatcherProvider,
+    private val desktopModeCompatPolicy: DesktopModeCompatPolicy,
 ) {
     data class TaskPosition(val taskId: Int, val isMinimized: Boolean, val bounds: Rect)
 
@@ -80,7 +82,13 @@ class DesktopTaskViewModel(
         val transparentTaskIds =
             desktopTask
                 ?.tasks
-                ?.filter { it.key.isTopActivityTransparent && it.key.isActivityStackTransparent }
+                ?.filter {
+                    desktopModeCompatPolicy.isTransparentOverlay(
+                        it.key.isActivityStackTransparent,
+                        it.key.numActivities,
+                        it.key.windowingMode,
+                    )
+                }
                 ?.map { it.key.id } ?: emptyList()
         val defaultPositions = fullscreenTaskPositions.filterNot { it.taskId in transparentTaskIds }
         val obscuredWindowIds =

@@ -20,6 +20,7 @@ import android.app.KeyguardManager
 import android.content.Context
 import android.util.Log
 import android.view.WindowManagerGlobal
+import com.android.internal.policy.DesktopModeCompatPolicy
 import com.android.launcher3.util.coroutines.DispatcherProvider
 import com.android.quickstep.RecentsModel
 import com.android.quickstep.recents.data.DesktopTileBackgroundDataSource
@@ -81,7 +82,7 @@ private constructor(appContext: Context, dispatcherProvider: DispatcherProvider)
             val keyguardManager = appContext.getSystemService(KeyguardManager::class.java)
             val userLockedRepository = UserLockedRepository(keyguardManager)
             set(UserLockedStateRepository::class.java.simpleName, userLockedRepository)
-
+            set(DesktopModeCompatPolicy::class.java.simpleName, DesktopModeCompatPolicy(appContext))
             // Create RecentsTaskRepository singleton
             val recentTasksRepository: RecentTasksRepository =
                 with(recentsModel) {
@@ -235,6 +236,7 @@ private constructor(appContext: Context, dispatcherProvider: DispatcherProvider)
                     DesktopTileBackgroundRepository(inject(scopeId))
                 IsPointerConnectedUseCase::class.java ->
                     IsPointerConnectedUseCase(pointerRepository = inject(scopeId))
+                DesktopModeCompatPolicy::class.java -> inject(scopeId)
                 else -> {
                     log("Factory for ${modelClass.simpleName} not defined!", Log.ERROR)
                     error("Factory for ${modelClass.simpleName} not defined!")

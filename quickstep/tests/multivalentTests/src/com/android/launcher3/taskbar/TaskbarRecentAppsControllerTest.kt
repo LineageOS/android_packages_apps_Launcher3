@@ -31,6 +31,7 @@ import android.platform.test.flag.junit.SetFlagsRule
 import android.view.Display.DEFAULT_DISPLAY
 import androidx.test.annotation.UiThreadTest
 import com.android.internal.R
+import com.android.internal.policy.DesktopModeCompatPolicy
 import com.android.launcher3.BubbleTextView.RunningAppState
 import com.android.launcher3.DeviceProfile
 import com.android.launcher3.Flags
@@ -105,6 +106,7 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
     @Mock private lateinit var mockContext: Context
     @Mock private lateinit var mockResources: Resources
     @Mock private lateinit var mockDeviceProfile: DeviceProfile
+    @Mock private lateinit var mockDesktopModeCompatPolicy: DesktopModeCompatPolicy
 
     private var taskListChangeId: Int = 1
 
@@ -146,7 +148,12 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
         whenever(mockThemeManager.iconShapeData).thenReturn(MutableListenableRef(IconShape.EMPTY))
         whenever(taskbarDesktopModeController.isLauncherAnimationRunning).thenReturn(false)
         recentAppsController =
-            TaskbarRecentAppsController(mockContext, mockRecentsModel, mockThemeManager)
+            TaskbarRecentAppsController(
+                mockContext,
+                mockRecentsModel,
+                mockThemeManager,
+                mockDesktopModeCompatPolicy,
+            )
         recentAppsController.canShowRunningApps = canShowRunningAndRecentAppsAtInit
         recentAppsController.canShowRecentApps = canShowRunningAndRecentAppsAtInit
 
@@ -1465,10 +1472,18 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
     fun onRecentTasksChanged_inDesktopMode_transparentTask_isFilteredOut() {
         setInDesktopMode(true)
         val transparentTask = createTask(id = 1, "transparentPackage")
-        transparentTask.key.isTopActivityTransparent = true
+        transparentTask.key.numActivities = 1
         transparentTask.key.isActivityStackTransparent = true
         transparentTask.key.windowingMode = WINDOWING_MODE_FULLSCREEN
         val regularTask = createTask(id = 2, RUNNING_APP_PACKAGE_1)
+        whenever(
+                mockDesktopModeCompatPolicy.isTransparentOverlay(
+                    transparentTask.key.isActivityStackTransparent,
+                    transparentTask.key.numActivities,
+                    transparentTask.key.windowingMode,
+                )
+            )
+            .thenReturn(true)
 
         prepareHotseatAndRunningAndRecentApps(
             hotseatPackages = emptyList(),
