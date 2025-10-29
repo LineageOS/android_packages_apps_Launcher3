@@ -18,7 +18,6 @@ package com.android.launcher3.taskbar
 import android.content.Context
 import android.util.Log
 import android.window.DesktopExperienceFlags
-import android.window.DesktopModeFlags
 import androidx.annotation.VisibleForTesting
 import com.android.internal.policy.DesktopModeCompatPolicy
 import com.android.launcher3.BubbleTextView.RunningAppState
@@ -60,9 +59,7 @@ class TaskbarRecentAppsController(
     private val desktopModeCompatPolicy: DesktopModeCompatPolicy,
 ) : LoggableTaskbarController {
 
-    var canShowRunningApps =
-        DesktopModeStatus.canEnterDesktopMode(context) &&
-            DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS.isTrue
+    var canShowRunningApps = DesktopModeStatus.canEnterDesktopMode(context)
         @VisibleForTesting
         set(isEnabledFromTest) {
             field = isEnabledFromTest

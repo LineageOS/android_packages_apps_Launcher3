@@ -43,7 +43,6 @@ import android.view.RemoteAnimationTarget
 import android.view.SurfaceControl
 import android.view.SurfaceControl.Transaction
 import android.window.DesktopExperienceFlags
-import android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS
 import android.window.IOnBackInvokedCallback
 import android.window.RemoteTransition
 import android.window.TaskSnapshot
@@ -1206,8 +1205,7 @@ constructor(
     }
 
     private fun shouldEnableRunningTasksForDesktopMode(): Boolean =
-        DesktopModeStatus.canEnterDesktopMode(context) &&
-            ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS.isTrue
+        DesktopModeStatus.canEnterDesktopMode(context)
 
     private fun handleMessageAsync(msg: Message): Boolean {
         return when (msg.what) {
