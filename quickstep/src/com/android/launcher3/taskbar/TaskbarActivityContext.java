@@ -72,6 +72,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
+import android.net.Uri;
 import android.os.IRemoteCallback;
 import android.os.Process;
 import android.os.Trace;
@@ -222,6 +223,9 @@ import java.util.function.Consumer;
 public class TaskbarActivityContext extends BaseTaskbarContext {
 
     private static final String IME_DRAWS_IME_NAV_BAR_RES_NAME = "config_imeDrawsImeNavBar";
+
+    private static final Uri URI_USER_SETUP_COMPLETE = Secure.getUriFor(Secure.USER_SETUP_COMPLETE);
+    private static final Uri URI_NAV_BAR_KIDS_MODE = Secure.getUriFor(Secure.NAV_BAR_KIDS_MODE);
 
     private static final String TAG = "TaskbarActivityContext";
 
@@ -591,8 +595,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         mTaskbarUiState.setNavigationMode(mNavMode);
 
         SettingsCache settingsCache = SettingsCache.INSTANCE.get(this);
-        mIsUserSetupComplete = settingsCache.getValue(Secure.getUriFor(Secure.USER_SETUP_COMPLETE));
-        mIsNavBarKidsMode = settingsCache.getValue(Secure.getUriFor(Secure.NAV_BAR_KIDS_MODE));
+        mIsUserSetupComplete = settingsCache.getValue(URI_USER_SETUP_COMPLETE);
+        mIsNavBarKidsMode = settingsCache.getValue(URI_NAV_BAR_KIDS_MODE);
         mIsNavBarForceVisible = mIsNavBarKidsMode;
         if (mControllers != null) {
             mControllers.taskbarEduTooltipController.updateShouldShowEduOnAppLaunch();
