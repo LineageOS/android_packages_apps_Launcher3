@@ -16,11 +16,11 @@
 
 package com.android.launcher3.taskbar.handoff
 
-import android.animation.AnimatorTestRule
 import android.companion.Flags
 import android.companion.datatransfer.continuity.RemoteTask
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
+import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
 import com.android.launcher3.taskbar.rules.TaskbarModeRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.TRANSIENT
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
@@ -42,11 +42,10 @@ import org.mockito.kotlin.verify
 @EnableFlags(Flags.FLAG_TASK_CONTINUITY)
 class TaskbarHandoffControllerTest {
 
-    @get:Rule(order = 1) val setFlagsRule = SetFlagsRule()
-    @get:Rule(order = 2) val context = TaskbarWindowSandboxContext.create()
-    @get:Rule(order = 3) val taskbarModeRule = TaskbarModeRule(context)
-    @get:Rule(order = 4) val animatorTestRule = AnimatorTestRule(this)
-    @get:Rule(order = 5) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
+    @get:Rule(order = 0) val setFlagsRule = SetFlagsRule()
+    @get:Rule(order = 1) val context = TaskbarWindowSandboxContext.create()
+    @get:Rule(order = 2) val taskbarModeRule = TaskbarModeRule(context)
+    @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
     @InjectController lateinit var controller: TaskbarHandoffController
 
     @Test
@@ -60,7 +59,7 @@ class TaskbarHandoffControllerTest {
         val task1 = createRemoteTask(1, "Task 1", 100L)
         val task2 = createRemoteTask(2, "Task 2", 200L)
 
-        controller.onRemoteTasksChanged(listOf(task1, task2))
+        runOnMainSync { controller.onRemoteTasksChanged(listOf(task1, task2)) }
 
         val suggestions = controller.suggestions
         assertThat(suggestions).hasSize(1)
@@ -73,7 +72,7 @@ class TaskbarHandoffControllerTest {
 
         val task = createRemoteTask(1, "Task", 10L)
 
-        controller.onRemoteTasksChanged(listOf(task))
+        runOnMainSync { controller.onRemoteTasksChanged(listOf(task)) }
 
         assertThat(controller.suggestions).hasSize(1)
         assertThat(controller.suggestions.first().deviceId).isEqualTo(1)
