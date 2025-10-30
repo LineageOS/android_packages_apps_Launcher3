@@ -141,7 +141,7 @@ object WorkspaceProfileNonResponsiveFactory {
             iconDrawablePaddingPx = 0,
             cellHeightPx = cellHeightPx,
             maxIconTextLineCount = 0,
-            isLabelHidden = true,
+            isItemsLabelHidden = true,
             cellLayoutHeightSpecification =
                 ((cellHeightPx * inv.numRows) +
                     (workspaceProfile.cellLayoutBorderSpacePx.y * (inv.numRows - 1)) +

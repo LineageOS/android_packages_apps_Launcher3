@@ -23,6 +23,7 @@ import android.graphics.Rect
 import android.util.DisplayMetrics
 import com.android.launcher3.DevicePaddings
 import com.android.launcher3.DeviceProfile
+import com.android.launcher3.Flags
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.R
 import com.android.launcher3.Utilities.getIconSizeWithOverlap
@@ -73,7 +74,7 @@ data class WorkspaceProfile(
     // Workspace page indicator
     val workspacePageIndicatorHeight: Int,
     val workspacePageIndicatorOverlapWorkspace: Int,
-    val isLabelHidden: Boolean = false,
+    val isItemsLabelHidden: Boolean = false,
     val iconDrawablePaddingOriginalPx: Int,
     val cellLayoutHeightSpecification: Int,
     val cellLayoutWidthSpecification: Int,
@@ -367,6 +368,7 @@ data class WorkspaceProfile(
             hotseatBarBottomSpacePx: Int,
             hotseatQsbSpace: Int,
             panelCount: Int,
+            isItemLabelHidden: Boolean,
         ): WorkspaceProfile {
 
             val cellLayoutBorderSpacePx =
@@ -386,7 +388,7 @@ data class WorkspaceProfile(
             var iconTextSizePx = responsiveWorkspaceCellSpec.iconTextSize
             var iconSizePx = responsiveWorkspaceCellSpec.iconSize
             val cellWidthPx = responsiveWorkspaceWidthSpec.cellSizePx
-            val cellHeightPx = responsiveWorkspaceHeightSpec.cellSizePx
+            var cellHeightPx = responsiveWorkspaceHeightSpec.cellSizePx
             var maxIconTextLineCount = responsiveWorkspaceCellSpec.iconTextMaxLineCount
 
             if (cellWidthPx < iconSizePx) {
@@ -395,7 +397,8 @@ data class WorkspaceProfile(
             }
 
             var iconDrawablePaddingPx: Int
-            if (isVerticalLayout) {
+
+            if (isItemLabelHidden && Flags.workspaceHiddenLabels()) {
                 iconDrawablePaddingPx = 0
                 iconTextSizePx = 0
                 maxIconTextLineCount = 0
@@ -477,6 +480,7 @@ data class WorkspaceProfile(
                             workspacePadding.bottom + workspacePadding.top,
                         ),
                 )
+
             return WorkspaceProfile(
                 // Workspace icons
                 iconScale = iconScale,
@@ -529,6 +533,7 @@ data class WorkspaceProfile(
                 cellSize = cellSize,
                 scale = 1f,
                 extraSpace = 0,
+                isItemsLabelHidden = isItemLabelHidden,
             )
         }
 
@@ -557,6 +562,7 @@ data class WorkspaceProfile(
             hotseatBarBottomSpacePx: Int,
             hotseatQsbSpace: Int,
             hotseatBarSizePx: Int,
+            isItemLabelHidden: Boolean,
         ): WorkspaceProfile {
             // Icon scale should never exceed 1, otherwise pixellation may occur.
             val iconScale = min(1f, scale)
@@ -586,6 +592,7 @@ data class WorkspaceProfile(
                         hotseatQsbSpace = hotseatQsbSpace,
                         isQsbInline = isQsbInline,
                         panelCount = panelCount,
+                        isItemLabelHidden = isItemLabelHidden,
                     )
 
                 else ->

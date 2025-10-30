@@ -57,6 +57,7 @@ abstract class FakeInvariantDeviceProfileTest {
     private var useTwoPanels = false
     private var isGestureMode = true
     private var isTransientTaskbar = true
+    private var workspaceItemsLabelHidden = true
 
     @Rule @JvmField val limitDevicesRule = LimitDevicesRule()
 
@@ -65,6 +66,7 @@ abstract class FakeInvariantDeviceProfileTest {
         // make sure to reset values
         useTwoPanels = false
         isGestureMode = true
+        workspaceItemsLabelHidden = false
     }
 
     protected fun newDP(): DeviceProfile =
@@ -78,6 +80,7 @@ abstract class FakeInvariantDeviceProfileTest {
             transposeLayoutWithOrientation,
             useTwoPanels,
             isGestureMode,
+            workspaceItemsLabelHidden,
             DEFAULT_PROVIDER,
             DEFAULT_DIMENSION_PROVIDER,
             createDefaultDisplayOptionSpec(
@@ -91,6 +94,7 @@ abstract class FakeInvariantDeviceProfileTest {
     protected fun initializeVarsForPhone(
         isGestureMode: Boolean = true,
         isVerticalBar: Boolean = false,
+        workspaceItemsLabelHidden: Boolean = false,
     ) {
         val (x, y) = if (isVerticalBar) Pair(2400, 1080) else Pair(1080, 2400)
 
@@ -111,6 +115,7 @@ abstract class FakeInvariantDeviceProfileTest {
 
         this.isGestureMode = isGestureMode
         this.isTransientTaskbar = false
+        this.workspaceItemsLabelHidden = workspaceItemsLabelHidden
         transposeLayoutWithOrientation = true
 
         inv =
@@ -190,6 +195,7 @@ abstract class FakeInvariantDeviceProfileTest {
     protected fun initializeVarsForTablet(
         isLandscape: Boolean = false,
         isGestureMode: Boolean = true,
+        workspaceItemsLabelHidden: Boolean = false,
     ) {
         val (x, y) = if (isLandscape) Pair(2560, 1600) else Pair(1600, 2560)
 
@@ -201,6 +207,7 @@ abstract class FakeInvariantDeviceProfileTest {
 
         this.isGestureMode = isGestureMode
         this.isTransientTaskbar = true
+        this.workspaceItemsLabelHidden = workspaceItemsLabelHidden
         useTwoPanels = false
 
         inv =
@@ -283,6 +290,7 @@ abstract class FakeInvariantDeviceProfileTest {
         isGestureMode: Boolean = true,
         rows: Int = 4,
         cols: Int = 4,
+        workspaceItemsLabelHidden: Boolean = false,
     ) {
         val (x, y) = if (isLandscape) Pair(2208, 1840) else Pair(1840, 2208)
 
@@ -294,6 +302,7 @@ abstract class FakeInvariantDeviceProfileTest {
 
         this.isGestureMode = isGestureMode
         this.isTransientTaskbar = true
+        this.workspaceItemsLabelHidden = workspaceItemsLabelHidden
         useTwoPanels = true
 
         inv =

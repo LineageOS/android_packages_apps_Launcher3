@@ -74,6 +74,7 @@ constructor(
     widgetHostId: Int = LauncherWidgetHolder.APPWIDGET_HOST_ID,
     layoutXml: String? = null,
     workspacePageId: Int = WorkspaceLayoutManager.FIRST_SCREEN_ID,
+    workspaceHideItemsLabel: Boolean = false,
 ) : SandboxContext(base) {
     private val mPrefName: String
 
@@ -85,6 +86,9 @@ constructor(
         val prefs = ProxyPrefs(this, getSharedPreferences(mPrefName, MODE_PRIVATE))
         prefs.putOrRemove(LauncherPrefs.GRID_NAME, gridName)
         prefs.put(LauncherPrefs.FIXED_LANDSCAPE_MODE, false)
+        if (com.android.launcher3.Flags.workspaceHiddenLabels()) {
+            prefs.put(LauncherPrefs.WORKSPACE_ITEMS_LABEL_HIDDEN, workspaceHideItemsLabel)
+        }
 
         val isTwoPanel =
             base.appComponent.idp.supportedProfiles.any { it.deviceProperties.isTwoPanels }

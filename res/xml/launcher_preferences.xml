@@ -50,4 +50,12 @@
         launcher:logIdOn="615"
         launcher:logIdOff="616" />
 
+    <!--  Temporary setting to manually test the feature while Widget Picker is updated  -->
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="pref_workspace_items_label_hidden"
+        android:summary="Hide labels in the Home Screen"
+        android:title="Hide workspace items label"
+        />
+
 </androidx.preference.PreferenceScreen>
