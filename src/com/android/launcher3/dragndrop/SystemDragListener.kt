@@ -53,7 +53,8 @@ class SystemDragListener(
     private var dragView: DragView<*>? = null
 
     init {
-        init(launcher, /* isHomeStarted= */ launcher.isStarted)
+        val closeAllOpenViews = params?.closeAllOpenViews ?: true
+        initInternal(launcher, /* isHomeStarted= */ launcher.isStarted, closeAllOpenViews)
     }
 
     /**
@@ -131,6 +132,7 @@ class SystemDragListener(
                         .let { dragImage ->
                             SystemDragParams(
                                 clipData = null,
+                                closeAllOpenViews = true,
                                 dragImage = dragImage,
                                 dragInfo = SystemDragItemInfo(),
                                 dragLayerX = screenPos.x - (dragImage.intrinsicWidth / 2),
