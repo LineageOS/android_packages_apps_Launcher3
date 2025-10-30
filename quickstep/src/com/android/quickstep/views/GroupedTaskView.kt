@@ -36,8 +36,8 @@ import com.android.quickstep.TaskOverlayFactory
 import com.android.quickstep.recents.di.RecentsDependencies
 import com.android.quickstep.recents.di.get
 import com.android.quickstep.recents.ui.viewmodel.GroupedTaskViewModel
-import com.android.quickstep.util.RecentsOrientedState
 import com.android.quickstep.split.SplitSelectStateController
+import com.android.quickstep.util.RecentsOrientedState
 import com.android.quickstep.util.SplitTask
 import com.android.systemui.shared.system.InteractionJankMonitorWrapper
 import com.android.wm.shell.Flags.enableFlexibleTwoAppSplit
@@ -250,6 +250,7 @@ class GroupedTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
         taskContainers.forEach {
             it.digitalWellBeingToast?.splitBounds = splitBoundsConfig
             it.digitalWellBeingToast?.initialize()
+            it.onTaskViewDisplayConfigChanged()
         }
         invalidate()
     }

@@ -191,6 +191,19 @@ class TaskContainer(
         snapshotView.setImageMatrix(matrix)
     }
 
+    fun onTaskViewDisplayConfigChanged() {
+        if (enableRefactorTaskContentView()) {
+            (taskContentView as? TaskContentView)?.onTaskViewDisplayConfigChanged(
+                taskView.layoutParams.width,
+                taskView.layoutParams.height,
+                taskView is GroupedTaskView,
+                (taskView as? GroupedTaskView)?.splitBoundsConfig,
+                taskView.pagedOrientationHandler,
+                stagePosition,
+            )
+        }
+    }
+
     fun digitalWellBeingBannerHeight(): Int {
         if (enableRefactorTaskContentView() && enableRefactorDigitalWellbeingToast()) {
             return (taskContentView as? TaskContentView)?.getTaskAppTimerToastHeight() ?: 0
