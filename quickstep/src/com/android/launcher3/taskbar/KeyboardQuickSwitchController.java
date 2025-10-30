@@ -19,6 +19,8 @@ import static android.window.DesktopModeFlags.ENABLE_TASKBAR_OVERFLOW;
 
 import static com.android.launcher3.taskbar.TaskbarDesktopExperienceFlags.enableAltTabKqsFlatenning;
 import static com.android.launcher3.taskbar.TaskbarDesktopExperienceFlags.enableAltTabKqsOnConnectedDisplays;
+import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
+import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
 
 import android.app.ActivityManager;
 import android.content.ComponentName;
@@ -171,7 +173,7 @@ public final class KeyboardQuickSwitchController implements
                     mTaskListChangeId = mModel.getTasks(
                             shouldShowDesktopTasks ? RecentsFilterState.EMPTY_FILTER
                                     : RecentsFilterState.getDesktopTaskFilter(),
-                            (tasks) -> {
+                            (tasks) -> TASKBAR_UI_THREAD.execute(() -> {
                                 processLoadedTasks(
                                         wasOpenedFromTaskbar,
                                         shouldShowDesktopTasks,
@@ -184,7 +186,7 @@ public final class KeyboardQuickSwitchController implements
                                         mHasDesktopTask,
                                         mWasDesktopTaskFilteredOut,
                                         /* useAnimationStartDelay= */ !wasOpenedFromTaskbar);
-                            });
+                            }));
                 }
 
                 mQuickSwitchViewController.updateLayoutForSurface(
@@ -231,7 +233,7 @@ public final class KeyboardQuickSwitchController implements
         mTaskListChangeId = mModel.getTasks(
                 shouldShowDesktopTasks ? RecentsFilterState.EMPTY_FILTER
                         : RecentsFilterState.getDesktopTaskFilter(),
-                (tasks) -> {
+                (tasks) -> TASKBAR_UI_THREAD.execute(() -> {
                     processLoadedTasks(
                             wasOpenedFromTaskbar, shouldShowDesktopTasks, tasks, taskIdsToExclude);
                     // Check if the first task is running after the recents model has updated so
@@ -246,7 +248,7 @@ public final class KeyboardQuickSwitchController implements
                             mHasDesktopTask,
                             mWasDesktopTaskFilteredOut,
                             wasOpenedFromTaskbar);
-                });
+                }));
     }
 
     private boolean shouldIncludeTask(GroupTask task, Set<Integer> taskIdsToExclude) {
@@ -498,20 +500,23 @@ public final class KeyboardQuickSwitchController implements
         }
 
         void updateThumbnailInBackground(Task task, Consumer<ThumbnailData> callback) {
-            mModel.getThumbnailCache().getThumbnailInBackground(task,
-                    thumbnailData -> {
+            MAIN_EXECUTOR.execute(() -> mModel.getThumbnailCache().getThumbnailInBackground(task,
+                    thumbnailData -> TASKBAR_UI_THREAD.execute(() -> {
                         task.thumbnail = thumbnailData;
                         callback.accept(thumbnailData);
-                    });
+                    })));
         }
 
         void updateIconInBackground(Task task, Consumer<Task> callback) {
-            mModel.getIconCache().getIconInBackground(task, (icon, contentDescription, title) -> {
-                task.icon = icon;
-                task.titleDescription = contentDescription;
-                task.title = title;
-                callback.accept(task);
-            });
+            MAIN_EXECUTOR.execute(() -> mModel.getIconCache().getIconInBackground(
+                    task, (icon, contentDescription, title) ->
+                            TASKBAR_UI_THREAD.execute(() -> {
+                                task.icon = icon;
+                                task.titleDescription = contentDescription;
+                                task.title = title;
+                                callback.accept(task);
+                            }))
+            );
         }
 
         void onCloseStarted() {
