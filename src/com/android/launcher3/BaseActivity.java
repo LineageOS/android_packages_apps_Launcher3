@@ -139,6 +139,8 @@ public abstract class BaseActivity extends Activity implements ActivityContext {
      */
     public static final int ACTIVITY_STATE_TRANSITION_ACTIVE = 1 << 6;
 
+    public static final int ACTIVITY_STATE_IS_TOP_RESUMED = 1 << 7;
+
     @Retention(SOURCE)
     @IntDef(
             flag = true,
@@ -188,6 +190,10 @@ public abstract class BaseActivity extends Activity implements ActivityContext {
     // Callback array that corresponds to events defined in @ActivityEvent
     private final RunnableList[] mEventCallbacks =
             {new RunnableList(), new RunnableList(), new RunnableList(), new RunnableList()};
+
+    // List of persistent callbacks (i.e. the list is not cleared when callbacks are first run) to
+    // be run when the top resumed activity state changes.
+    private final ArrayList<Runnable> mTopResumedChangedCallbacks = new ArrayList<Runnable>();
 
     private ActionMode mCurrentActionMode;
 
@@ -335,6 +341,22 @@ public abstract class BaseActivity extends Activity implements ActivityContext {
         }
     }
 
+
+    @Override
+    public void onTopResumedActivityChanged(boolean isTopResumed) {
+        super.onTopResumedActivityChanged(isTopResumed);
+
+        if (isTopResumed) {
+            addActivityFlags(ACTIVITY_STATE_IS_TOP_RESUMED);
+        } else {
+            removeActivityFlags(ACTIVITY_STATE_IS_TOP_RESUMED);
+        }
+
+        for (Runnable callback : mTopResumedChangedCallbacks) {
+            callback.run();
+        }
+    }
+
     protected void registerBackDispatcher() {
         if (Utilities.ATLEAST_T) {
             getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
@@ -373,6 +395,14 @@ public abstract class BaseActivity extends Activity implements ActivityContext {
 
     public boolean isUserActive() {
         return (mActivityFlags & ACTIVITY_STATE_USER_ACTIVE) != 0;
+    }
+
+
+    /**
+     * @return true if Launcher is the current top resumed activity.
+     */
+    public boolean isTopResumedActivity() {
+        return (mActivityFlags & ACTIVITY_STATE_IS_TOP_RESUMED) != 0;
     }
 
     public int getActivityFlags() {
@@ -438,6 +468,16 @@ public abstract class BaseActivity extends Activity implements ActivityContext {
     /** Removes a previously added callback */
     public void removeEventCallback(@ActivityEvent int event, Runnable callback) {
         mEventCallbacks[event].remove(callback);
+    }
+
+    /** Adds a callback to run when top resumed activity state changes. */
+    public void addTopResumedChangedCallback(Runnable callback) {
+        mTopResumedChangedCallbacks.add(callback);
+    }
+
+    /** Removes a callback previously added using [addTopResumedChangedCallback]. */
+    public void removeTopResumedChangedCallback(Runnable callback) {
+        mTopResumedChangedCallbacks.remove(callback);
     }
 
     protected void dumpMisc(String prefix, PrintWriter writer) {

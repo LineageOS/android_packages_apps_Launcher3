@@ -47,8 +47,10 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import com.android.launcher3.widgetpicker.R
+import com.android.launcher3.widgetpicker.ui.components.LocalWidgetPickerHostStateProvider
 import com.android.launcher3.widgetpicker.ui.components.SheetDismissState
 import com.android.launcher3.widgetpicker.ui.components.SheetHeader
+import com.android.launcher3.widgetpicker.ui.components.WidgetPickerHostStateEffect
 import com.android.launcher3.widgetpicker.ui.components.accessibility.LocalAccessibilityState
 import com.android.launcher3.widgetpicker.ui.components.dismissibleSheet
 import com.android.launcher3.widgetpicker.ui.components.dismissibleSheetContent
@@ -87,6 +89,13 @@ fun TitledFloatingSheet(
     val scope = rememberCoroutineScope()
     val animSpec: AnimationSpec<Float> = MaterialTheme.motionScheme.slowSpatialSpec()
     val sheetState = remember { SheetDismissState(expandCollapseAnimationSpec = animSpec) }
+
+    WidgetPickerHostStateEffect(LocalWidgetPickerHostStateProvider.current) { isTopResumed ->
+        if (!isTopResumed) {
+            scope.launch { sheetState.collapse() }
+        }
+    }
+
     Box(
         modifier =
             modifier.fillMaxSize().pointerInput(Unit) {
