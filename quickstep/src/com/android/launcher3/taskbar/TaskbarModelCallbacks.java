@@ -139,7 +139,9 @@ public class TaskbarModelCallbacks implements
                     }
                 }
             }
-            if (removed || added || predictionsUpdated) {
+            if (removed || added || (predictionsUpdated
+                    // Avoid committing for prediction updates if they are not shown.
+                    && !mControllers.taskbarRecentAppsController.isReplacingPredictions())) {
                 commitItemsToUI();
             }
         });

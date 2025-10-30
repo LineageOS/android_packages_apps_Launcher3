@@ -40,6 +40,7 @@ import com.android.launcher3.taskbar.TaskbarIconType.RECENT
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.assertThat
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHandoffSuggestions
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatItems
+import com.android.launcher3.taskbar.TaskbarViewTestUtil.createRecentTask
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createRecents
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createSplitTask
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
@@ -999,6 +1000,26 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
         assertThat(outRect.bottom).isEqualTo(taskbarRectInDragLayer.bottom)
         assertThat(outRect.left).isEqualTo(taskbarRectInDragLayer.left)
         assertThat(outRect.right).isEqualTo(taskbarRectInDragLayer.left + dividerContainer.left)
+    }
+
+    @Test
+    fun testUpdateItems_nonDesktopRecentsChange_viewForRemovedTaskIsRecycledForNewTask() {
+        val prevTasks = listOf(createRecentTask(0), createRecentTask(1))
+        runOnMainSync { taskbarView.updateItems(emptyArray(), prevTasks, emptyList()) }
+        val prevIcons = taskbarView.children.toList().takeLast(2)
+
+        // Task 0 removed and Task 2 added.
+        val nextTasks = listOf(createRecentTask(1), createRecentTask(2))
+        runOnMainSync { taskbarView.updateItems(emptyArray(), nextTasks, emptyList()) }
+        val nextIcons = taskbarView.children.toList().takeLast(2)
+
+        // Existing icon for Task 1 should shift left.
+        assertThat(nextIcons.first()).isSameInstanceAs(prevIcons.last())
+        assertThat(nextIcons.first().tag).isEqualTo(nextTasks.first())
+
+        // Icon for Task 2 should be recycled from Task 0.
+        assertThat(nextIcons.last()).isSameInstanceAs(prevIcons.first())
+        assertThat(nextIcons.last().tag).isEqualTo(nextTasks.last())
     }
 
     /** Returns the number of expected recents outside of the overflow based on [hotseatSize]. */
