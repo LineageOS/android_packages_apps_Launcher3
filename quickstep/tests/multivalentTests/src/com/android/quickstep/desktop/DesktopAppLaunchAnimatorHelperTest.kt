@@ -166,7 +166,6 @@ class DesktopAppLaunchAnimatorHelperTest {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_TRAMPOLINE_CLOSE_ANIMATION_BUGFIX)
     fun trampolineTransition_flagEnabled_returnsLaunchAndCloseAnimator() = runOnUiThread {
         val transitionInfo = createTransitionInfo(listOf(OPEN_CHANGE, CLOSE_CHANGE))
 
@@ -178,7 +177,6 @@ class DesktopAppLaunchAnimatorHelperTest {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_TRAMPOLINE_CLOSE_ANIMATION_BUGFIX)
     fun trampolineTransition_flagEnabled_callsAnimationEndListener() = runOnUiThread {
         val finishCallback = mock<Function1<Animator, Unit>>()
         val transitionInfo = createTransitionInfo(listOf(OPEN_CHANGE, CLOSE_CHANGE))
@@ -193,18 +191,6 @@ class DesktopAppLaunchAnimatorHelperTest {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_TRAMPOLINE_CLOSE_ANIMATION_BUGFIX)
-    fun trampolineTransition_flagDisabled_returnsLaunchAnimator() = runOnUiThread {
-        val transitionInfo = createTransitionInfo(listOf(OPEN_CHANGE, CLOSE_CHANGE))
-
-        val actual = helper.createAnimators(transitionInfo, finishCallback = {})
-
-        assertThat(actual).hasSize(1)
-        assertLaunchAnimator(actual[0])
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_TRAMPOLINE_CLOSE_ANIMATION_BUGFIX)
     fun trampolineTransition_flagEnabled_hitDesktopWindowLimit_returnsLaunchMinimizeCloseAnimator() =
         runOnUiThread {
             val transitionInfo =
@@ -216,20 +202,6 @@ class DesktopAppLaunchAnimatorHelperTest {
             assertTrampolineLaunchAnimator(actual[0])
             assertMinimizeAnimator(actual[1])
             assertCloseAnimator(actual[2])
-        }
-
-    @Test
-    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_TRAMPOLINE_CLOSE_ANIMATION_BUGFIX)
-    fun trampolineTransition_flagDisabled_hitDesktopWindowLimit_returnsLaunchMinimizeAnimator() =
-        runOnUiThread {
-            val transitionInfo =
-                createTransitionInfo(listOf(OPEN_CHANGE, MINIMIZE_CHANGE, CLOSE_CHANGE))
-
-            val actual = helper.createAnimators(transitionInfo, finishCallback = {})
-
-            assertThat(actual).hasSize(2)
-            assertLaunchAnimator(actual[0])
-            assertMinimizeAnimator(actual[1])
         }
 
     @Test

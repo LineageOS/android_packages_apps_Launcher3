@@ -112,10 +112,7 @@ class DesktopAppLaunchAnimatorHelper(
         }
 
     private fun getTrampolineCloseChange(info: TransitionInfo): Change? {
-        if (
-            info.changes.size < 2 ||
-                !DesktopModeFlags.ENABLE_DESKTOP_TRAMPOLINE_CLOSE_ANIMATION_BUGFIX.isTrue
-        ) {
+        if (info.changes.size < 2) {
             return null
         }
         val openChange =
