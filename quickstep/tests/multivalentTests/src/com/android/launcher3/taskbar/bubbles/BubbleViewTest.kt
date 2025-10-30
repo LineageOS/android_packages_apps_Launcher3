@@ -29,6 +29,7 @@ import com.android.launcher3.R
 import com.android.launcher3.icons.BitmapInfo
 import com.android.launcher3.taskbar.bubbles.model.BubbleIcon
 import com.android.wm.shell.shared.bubbles.BubbleInfo
+import com.android.wm.shell.shared.bubbles.UserType
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -78,6 +79,7 @@ class BubbleViewTest {
                     false,
                     null,
                     false,
+                    UserType.MAIN,
                 )
             bubbleView = inflater.inflate(R.layout.bubblebar_item_view, null, false) as BubbleView
             bubble =

@@ -60,6 +60,7 @@ import com.android.wm.shell.shared.animation.PhysicsAnimator
 import com.android.wm.shell.shared.animation.PhysicsAnimatorTestUtils
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation
 import com.android.wm.shell.shared.bubbles.BubbleInfo
+import com.android.wm.shell.shared.bubbles.UserType
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
@@ -1581,6 +1582,7 @@ class BubbleBarViewAnimatorTest {
                     false,
                     null,
                     false,
+                    UserType.MAIN,
                 )
             bubbleView =
                 inflater.inflate(R.layout.bubblebar_item_view, bubbleBarView, false) as BubbleView
@@ -1735,8 +1737,7 @@ class BubbleBarViewAnimatorTest {
             bubbleBarViewController: BubbleBarViewController,
             bubbleStashedHandleViewController: BubbleStashedHandleViewController?,
             controllersAfterInitAction: BubbleStashController.ControllersAfterInitAction,
-        ) {
-        }
+        ) {}
 
         override fun showBubbleBarImmediate() {
             _isStashed = false
