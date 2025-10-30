@@ -308,7 +308,8 @@ public class BindWidgetTest extends BaseLauncherActivityTest<Launcher> {
         ModelTestExtensions.setEmptyModelLayout(targetContext());
         TestUtil.runOnExecutorSync(MODEL_EXECUTOR, () -> {
             LauncherAppWidgetInfo info = widget.get();
-            mModel.getWriter(false, null, null).addItemsToDatabase(singletonList(info));
+            mModel.enqueueModelUpdateTask(((taskController, dataModel, apps) ->
+                    taskController.getModelWriter().addItemsToDatabase(singletonList(info))));
             addedId.set(info.id);
         });
         TestUtil.runOnExecutorSync(MAIN_EXECUTOR, mModel::forceReload);

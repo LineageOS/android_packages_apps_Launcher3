@@ -510,7 +510,7 @@ public interface ActivityContext extends SavedStateRegistryOwner {
     /** Returns a writer for updating model properties */
     default ModelWriter getModelWriter() {
         return LauncherAppState.getInstance(asContext()).getModel().getWriter(
-                false, getCellPosMapper(), null);
+                false, this, null);
     }
 
     /** Set to manage objects that can be cleaned up along with the context */

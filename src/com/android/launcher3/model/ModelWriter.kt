@@ -25,6 +25,7 @@ import com.android.launcher3.Utilities
 import com.android.launcher3.celllayout.CellPosMapper
 import com.android.launcher3.config.FeatureFlags
 import com.android.launcher3.model.BgDataModel.Callbacks
+import com.android.launcher3.model.BgDataModel.ModificationSource
 import com.android.launcher3.model.data.CollectionInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.LauncherAppWidgetInfo
@@ -45,6 +46,7 @@ class ModelWriter(
     private val bgDataModel: BgDataModel,
     private val verifyChanges: Boolean,
     private val cellPosMapper: CellPosMapper,
+    private val modificationSource: ModificationSource,
     private val owner: Callbacks?,
 ) {
     private val uiExecutor: LooperExecutor = Executors.MAIN_EXECUTOR
@@ -243,7 +245,7 @@ class ModelWriter(
                     for (item in items) {
                         checkItemInfoLocked(item.id, item, stackTrace)
                     }
-                    bgDataModel.addItems(context, items, owner)
+                    bgDataModel.addItems(context, items, modificationSource)
                     verifier.verifyModel()
                 }
             }
@@ -261,7 +263,7 @@ class ModelWriter(
     }
 
     /** Removes the specified items from the database */
-    fun deleteItemsFromDatabase(items: Collection<ItemInfo>, reason: String?) {
+    fun deleteItemsFromDatabase(items: List<ItemInfo>, reason: String?) {
         val verifier = ModelVerifier()
         Log.d(
             TAG,
@@ -273,7 +275,7 @@ class ModelWriter(
                 for (item in items) {
                     model.modelDbController.delete(itemIdMatch(item.id), null)
                 }
-                bgDataModel.removeItem(context, items, owner)
+                bgDataModel.removeItems(context, items, modificationSource)
                 verifier.verifyModel()
             }
         )
@@ -290,7 +292,7 @@ class ModelWriter(
                 model.modelDbController.delete(Favorites._ID + "=" + info.id, null)
 
                 val itemsToDelete = info.getContents() + info
-                bgDataModel.removeItem(context, itemsToDelete, owner)
+                bgDataModel.removeItems(context, itemsToDelete, modificationSource)
                 verifier.verifyModel()
             }
         )
@@ -377,7 +379,7 @@ class ModelWriter(
                 null,
             )
             updateItemArrays(item, itemId)
-            bgDataModel.updateItems(listOf(item), owner)
+            bgDataModel.updateItems(listOf(item), modificationSource)
         }
     }
 
@@ -394,7 +396,7 @@ class ModelWriter(
                         updateItemArrays(item, itemId)
                     }
                     t.commit()
-                    bgDataModel.updateItems(items, owner)
+                    bgDataModel.updateItems(items, modificationSource)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()

@@ -18,7 +18,6 @@ package com.android.launcher3
 import android.content.Context
 import android.content.pm.ShortcutInfo
 import android.os.UserHandle
-import com.android.launcher3.celllayout.CellPosMapper
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.icons.IconCache
@@ -27,6 +26,7 @@ import com.android.launcher3.logging.DumpManager.LauncherDumpable
 import com.android.launcher3.model.AllAppsList
 import com.android.launcher3.model.BaseLauncherBinder.BaseLauncherBinderFactory
 import com.android.launcher3.model.BgDataModel
+import com.android.launcher3.model.BgDataModel.ModificationSource.UISurface
 import com.android.launcher3.model.ItemInstallQueue
 import com.android.launcher3.model.LoaderTask
 import com.android.launcher3.model.LoaderTask.LoaderTaskFactory
@@ -42,6 +42,7 @@ import com.android.launcher3.pm.UserCache
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import com.android.launcher3.util.PackageUserKey
+import com.android.launcher3.views.ActivityContext
 import java.io.PrintWriter
 import java.util.concurrent.CancellationException
 import java.util.function.Consumer
@@ -118,7 +119,7 @@ constructor(
 
     fun getWriter(
         verifyChanges: Boolean,
-        cellPosMapper: CellPosMapper?,
+        activity: ActivityContext,
         owner: BgDataModel.Callbacks?,
     ) =
         ModelWriter(
@@ -126,7 +127,8 @@ constructor(
             this,
             mBgDataModel,
             verifyChanges,
-            cellPosMapper ?: CellPosMapper.DEFAULT,
+            activity.cellPosMapper,
+            UISurface(activity),
             owner,
         )
 
@@ -373,8 +375,6 @@ constructor(
             si.updateFromDeepShortcutInfo(info, context)
             iconCache.getShortcutIcon(si, info)
             taskController.getModelWriter().updateItemInDatabase(si)
-
-            dataModel.updateItems(listOf(si), null)
             taskController.bindUpdatedWorkspaceItems(listOf(si))
         }
     }

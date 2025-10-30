@@ -704,7 +704,7 @@ public class Launcher extends StatefulActivity<LauncherState>
             mCellPosMapper = new CellPosMapper(mDeviceProfile.isVerticalBarLayout(),
                     mDeviceProfile.numShownHotseatIcons);
         }
-        mModelWriter = mModel.getWriter(true, mCellPosMapper, modelCallbacks);
+        mModelWriter = mModel.getWriter(true, this, modelCallbacks);
         updateFixedLandscape();
         return true;
     }

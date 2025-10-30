@@ -460,7 +460,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
     /** Creates a ModelWriter for updating model properties */
     public ModelWriter getModelWriter() {
         return LauncherAppState.getInstance(mActivity).getModel()
-                .getWriter(false, mActivity.getCellPosMapper(), mModelCallbacks);
+                .getWriter(false, mActivity, mModelCallbacks);
     }
 
     /**

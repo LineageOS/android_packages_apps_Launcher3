@@ -34,6 +34,7 @@ import com.android.launcher3.ConstantItem;
 import com.android.launcher3.LauncherModel.ModelUpdateTask;
 import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.icons.IconCache;
+import com.android.launcher3.model.BgDataModel.ModificationSource.ModelTask;
 import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.PredictedContainerInfo;
@@ -125,7 +126,7 @@ public class PredictionUpdateTask implements ModelUpdateTask {
         }
 
         PredictedContainerInfo pci = new PredictedContainerInfo(mPredictorState.containerId, items);
-        dataModel.updateAndDispatchItem(pci /* item */, null /* owner */);
+        dataModel.updateAndDispatchItem(pci /* item */, ModelTask.INSTANCE /* owner */);
         taskController.bindUpdatedWorkspaceItems(Collections.singleton(pci));
         usersForChangedShortcuts.forEach(u -> dataModel.updateShortcutPinnedState(context, u));
 

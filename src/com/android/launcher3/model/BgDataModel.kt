@@ -32,6 +32,7 @@ import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.logging.DumpManager
 import com.android.launcher3.logging.DumpManager.LauncherDumpable
 import com.android.launcher3.logging.FileLog
+import com.android.launcher3.model.BgDataModel.ModificationSource.ModelTask
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.LauncherAppWidgetInfo
@@ -52,6 +53,7 @@ import com.android.launcher3.util.Executors
 import com.android.launcher3.util.IntSparseArrayMap
 import com.android.launcher3.util.ItemInfoMatcher
 import com.android.launcher3.util.PackageUserKey
+import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.widget.model.WidgetsListBaseEntry
 import java.io.PrintWriter
 import java.util.Collections
@@ -126,13 +128,7 @@ constructor(
     }
 
     @Synchronized
-    fun removeItem(context: Context, vararg items: ItemInfo) {
-        removeItem(context, listOf(*items))
-    }
-
-    @Synchronized
-    @JvmOverloads
-    fun removeItem(context: Context, items: Collection<ItemInfo>, owner: Any? = null) {
+    fun removeItems(context: Context, items: List<ItemInfo>, owner: ModificationSource) {
         if (BuildConfig.IS_STUDIO_BUILD) {
             items
                 .asSequence()
@@ -170,14 +166,8 @@ constructor(
             .forEach { updateShortcutPinnedState(context, it) }
     }
 
-    @JvmOverloads
-    fun addItem(context: Context, item: ItemInfo, owner: Any? = null) {
-        addItems(context, listOf(item), owner)
-    }
-
     @Synchronized
-    @JvmOverloads
-    fun addItems(context: Context, items: List<ItemInfo>, owner: Any? = null) {
+    fun addItems(context: Context, items: List<ItemInfo>, owner: ModificationSource) {
         mutableWorkspaceData.modifyItems { items.forEach { put(it.id, it) } }
 
         if (Flags.modelRepository()) {
@@ -193,7 +183,7 @@ constructor(
     }
 
     @Synchronized
-    fun updateAndDispatchItem(item: ItemInfo, owner: Any?) {
+    fun updateAndDispatchItem(item: ItemInfo, owner: ModificationSource) {
         mutableWorkspaceData.modifyItems { put(item.id, item) }
         if (Flags.modelRepository()) {
             repo
@@ -206,7 +196,7 @@ constructor(
     }
 
     @Synchronized
-    fun updateItems(items: List<ItemInfo>, owner: Any?) {
+    fun updateItems(items: List<ItemInfo>, owner: ModificationSource) {
         mutableWorkspaceData.modifyItems {}
         if (Flags.modelRepository()) {
             repo
@@ -399,7 +389,7 @@ constructor(
             }
             .apply {
                 // Dispatch an update
-                if (isNotEmpty()) updateItems(this, null)
+                if (isNotEmpty()) updateItems(this, ModelTask)
             }
 
     /** An object containing items corresponding to a fixed container */
@@ -447,6 +437,13 @@ constructor(
 
         /** Binds the cache of string resources */
         fun bindStringCache(cache: StringCache) {}
+    }
+
+    sealed class ModificationSource {
+
+        data class UISurface(val surface: ActivityContext) : ModificationSource()
+
+        data object ModelTask : ModificationSource()
     }
 
     companion object {
