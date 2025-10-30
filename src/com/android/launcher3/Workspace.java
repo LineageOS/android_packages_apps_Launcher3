@@ -144,7 +144,6 @@ import com.android.launcher3.util.LauncherBindableItemsContainer;
 import com.android.launcher3.util.MSDLPlayerWrapper;
 import com.android.launcher3.util.OverlayEdgeEffect;
 import com.android.launcher3.util.RunnableList;
-import com.android.launcher3.util.ShortcutUtil;
 import com.android.launcher3.util.Thunk;
 import com.android.launcher3.util.ViewEx;
 import com.android.launcher3.util.WallpaperOffsetInterpolator;
@@ -1817,7 +1816,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         }
 
         if (child.getTag() instanceof ItemInfo item) {
-            if (child instanceof BubbleTextView && ShortcutUtil.supportsShortcuts(item)) {
+            if (child instanceof BubbleTextView && !HomeScreenFilesUtilsKt.isFileSystemItem(item)) {
                 BubbleTextView btv = (BubbleTextView) child;
                 if (!dragOptions.isAccessibleDrag) {
                     dragOptions.preDragCondition =
