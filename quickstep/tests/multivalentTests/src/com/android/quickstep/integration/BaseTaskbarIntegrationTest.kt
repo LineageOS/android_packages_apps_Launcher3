@@ -43,6 +43,7 @@ import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
 import com.android.launcher3.util.ModelTestExtensions.loadModelSync
 import com.android.launcher3.util.TestUtil
 import com.android.launcher3.views.DoubleShadowBubbleTextView
+import com.android.quickstep.taskbar.util.IntegrationTaskbarModeSwitchRule
 import java.io.IOException
 import junit.framework.TestCase.assertNotNull
 import org.junit.After
@@ -50,6 +51,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Rule
+import org.junit.rules.RuleChain
 
 /**
  * Base class for writing taskbar integration tests.
@@ -66,7 +68,13 @@ open class BaseTaskbarIntegrationTest {
 
     var interactions = LauncherTestInteractions(launcherActivity)
 
-    @get:Rule val tisBinderRule = TISBinderRule()
+    val tisBinderRule = TISBinderRule()
+
+    val taskbarModeSwitchRule = IntegrationTaskbarModeSwitchRule(tisBinderRule)
+
+    // This makes sure that tisBinderRule was executed before taskbarModeSwitchRule since it
+    // depends on it.
+    @get:Rule val chainedRules = RuleChain.outerRule(tisBinderRule).around(taskbarModeSwitchRule)
 
     val uiDevice = UiDevice.getInstance(getInstrumentation())
 
