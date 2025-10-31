@@ -1814,7 +1814,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         if (child.getTag() instanceof ItemInfo item) {
             if (child instanceof BubbleTextView && !HomeScreenFilesUtilsKt.isFileSystemItem(item)) {
                 BubbleTextView btv = (BubbleTextView) child;
-                if (!dragOptions.isAccessibleDrag) {
+                if (!dragOptions.isAccessibleDrag && !dragOptions.isMouseDrag) {
                     dragOptions.preDragCondition =
                             btv.startLongPressAction(mLauncher.getPopupControllerForAppIcons());
                 }
@@ -1823,7 +1823,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                 }
             } else if (((Flags.homeScreenEditImprovements() && child instanceof Poppable)
                     || HomeScreenFilesUtilsKt.isFileSystemItem(item))
-                    && !dragOptions.isAccessibleDrag) {
+                    && !dragOptions.isAccessibleDrag && !dragOptions.isMouseDrag) {
                 Popup popup = mLauncher.getPopupControllerForHomeScreenItems()
                         .show(child);
                 if (popup != null) {
