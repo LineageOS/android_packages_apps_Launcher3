@@ -41,7 +41,7 @@ import org.junit.Before
 import org.junit.Test
 
 /** Test Desktop windowing in Overview. */
-@AllowedDevices(allowed = [DeviceProduct.CF_TABLET, DeviceProduct.TANGORPRO])
+@AllowedDevices(allowed = [DeviceProduct.CF_TABLET, DeviceProduct.TANGORPRO, DeviceProduct.CF_DESKTOP])
 @IgnoreLimit(ignoreLimit = BuildConfig.IS_STUDIO_BUILD)
 class TaplTestsOverviewDesktop : AbstractQuickStepTest() {
     @Before

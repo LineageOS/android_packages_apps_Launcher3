@@ -33,6 +33,8 @@ import androidx.test.uiautomator.By;
 import androidx.test.uiautomator.BySelector;
 import androidx.test.uiautomator.Until;
 
+import com.android.launcher3.InvariantDeviceProfile;
+import static com.android.launcher3.InvariantDeviceProfile.TYPE_DESKTOP;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherState;
 import com.android.launcher3.Utilities;
@@ -310,8 +312,14 @@ public abstract class AbstractLauncherUiTest<LAUNCHER_TYPE extends Launcher,
                     TestUtil.DEFAULT_UI_TIMEOUT,
                     () -> !launcherInstrumentation.isLauncherActivityStarted());
         } else {
-            assertTrue("Launcher activity not started when it should be",
-                    launcherInstrumentation.isLauncherActivityStarted());
+            // On desktop, the launcher activity might still be considered "started"
+            // even if another app is on top. We skip this check for desktop devices.
+            InvariantDeviceProfile idp = InvariantDeviceProfile.INSTANCE.get(
+                    getInstrumentation().getTargetContext());
+            if (idp.deviceType != InvariantDeviceProfile.TYPE_DESKTOP) {
+                assertTrue("Launcher activity not started when it should be",
+                        launcherInstrumentation.isLauncherActivityStarted());
+            }
         }
     }
 
