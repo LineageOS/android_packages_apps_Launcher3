@@ -1466,8 +1466,7 @@ public abstract class AbsSwipeUpHandler<
                 ? mRecentsView.getCurrentPageTaskView() : null;
 
         if (DesktopModeStatus.canEnterDesktopMode(mContext)
-                && !(DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY.isTrue()
-                && DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_QUICK_SWITCH.isTrue())) {
+                && !DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY.isTrue()) {
             if ((nextPageTaskView instanceof DesktopTaskView
                     || currentPageTaskView instanceof DesktopTaskView)
                     && endTarget == NEW_TASK) {
@@ -1725,8 +1724,7 @@ public abstract class AbsSwipeUpHandler<
         };
 
         if (DesktopModeStatus.canEnterDesktopMode(mContext)
-                && !(DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY.isTrue()
-                && DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_QUICK_SWITCH.isTrue())) {
+                && !DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY.isTrue()) {
             if (mRecentsView != null && (mRecentsView.getCurrentPageTaskView() != null
                     && !(mRecentsView.getCurrentPageTaskView() instanceof DesktopTaskView))) {
                 ActiveGestureLog.INSTANCE.trackEvent(ActiveGestureErrorDetector.GestureEvent
@@ -1783,8 +1781,7 @@ public abstract class AbsSwipeUpHandler<
             case NEW_TASK:
                 events.add(mLogDirectionUpOrLeft ? LAUNCHER_QUICKSWITCH_LEFT
                         : LAUNCHER_QUICKSWITCH_RIGHT);
-                if (targetTaskView != null && DesktopModeStatus.canEnterDesktopMode(mContext)
-                        && DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_QUICK_SWITCH.isTrue()) {
+                if (targetTaskView != null && DesktopModeStatus.canEnterDesktopMode(mContext)) {
                     if (targetTaskView.getType() == TaskViewType.DESKTOP) {
                         events.add(LAUNCHER_QUICKSWITCH_ENTER_DESKTOP_MODE);
                     } else if (mPreviousTaskViewType == TaskViewType.DESKTOP) {
@@ -2795,8 +2792,7 @@ public abstract class AbsSwipeUpHandler<
         });
 
         if (DesktopModeStatus.canEnterDesktopMode(mContext)
-                && !(DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY.isTrue()
-                        && DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_QUICK_SWITCH.isTrue())) {
+                && !DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY.isTrue()) {
             if (mRecentsView.getNextPageTaskView() instanceof DesktopTaskView
                     || mRecentsView.getCurrentPageTaskView() instanceof DesktopTaskView) {
                 mRecentsViewScrollLinked = false;
