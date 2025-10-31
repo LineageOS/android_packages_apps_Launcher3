@@ -126,8 +126,7 @@
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"タスクバーの説明"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"アプリを横にドラッグすると 2 個のアプリを同時に使用できます"</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"下隅にドラッグすると、フローティング表示になります"</string>
-    <!-- no translation found for taskbar_edu_stashing (911857479758694381) -->
-    <skip />
+    <string name="taskbar_edu_stashing" msgid="911857479758694381">"タスクバーを表示するには、上にゆっくりとスワイプします"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"毎日の使用状況に基づいてアプリの候補が表示されます"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"分割線を長押ししてタスクバーを固定します"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"タスクバーの各種機能"</string>
@@ -180,4 +179,6 @@
     <string name="nudge_a11y_title" msgid="2126529303123687912">"ナッジ"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"閉じる"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"ナッジの画像"</string>
+    <!-- no translation found for running_app_description (1309281047289078871) -->
+    <skip />
 </resources>

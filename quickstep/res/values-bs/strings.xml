@@ -64,15 +64,15 @@
     <string name="home_gesture_feedback_swipe_too_far_from_edge" msgid="4816365433160895458">"Prevucite prema gore s donjeg ruba ekrana"</string>
     <string name="home_gesture_feedback_overview_detected" msgid="5177627157303895077">"Pazite da ne zastanete prije puštanja"</string>
     <string name="home_gesture_feedback_wrong_swipe_direction" msgid="8328465201424027148">"Prevucite ravno nagore"</string>
-    <string name="home_gesture_feedback_complete_with_follow_up" msgid="8766981412895888417">"Savladali ste pokret za otvaranje početnog ekrana. Sljedeće naučite kako se vratiti."</string>
-    <string name="home_gesture_feedback_complete_without_follow_up" msgid="2978063221383413443">"Savladali ste pokret za otvaranje početnog ekrana"</string>
+    <string name="home_gesture_feedback_complete_with_follow_up" msgid="8766981412895888417">"Savladali ste pokret za odlazak na početni ekran. Sljedeće naučite kako se vratiti."</string>
+    <string name="home_gesture_feedback_complete_without_follow_up" msgid="2978063221383413443">"Savladali ste pokret za odlazak na početni ekran"</string>
     <string name="home_gesture_intro_title" msgid="836590312858441830">"Prevucite da odete na početni ekran"</string>
     <string name="home_gesture_intro_subtitle" msgid="2632238748497975326">"Prevucite s dna ekrana prema gore. Tim pokretom uvijek idete na početni ekran."</string>
     <string name="home_gesture_tutorial_title" msgid="3126834347496917376">"Idite na početni ekran"</string>
     <string name="home_gesture_tutorial_subtitle" msgid="7245995490408668778">"Prevucite s dna ekrana prema gore"</string>
     <string name="home_gesture_tutorial_success" msgid="1736295017642244751">"Sjajno!"</string>
     <string name="overview_gesture_feedback_swipe_too_far_from_edge" msgid="6402349235265407385">"Vodite računa da prevučete s donjeg ruba ekrana prema gore"</string>
-    <string name="overview_gesture_feedback_home_detected" msgid="663432226180397138">"Pokušajte zadržati prozor duže prije puštanja"</string>
+    <string name="overview_gesture_feedback_home_detected" msgid="663432226180397138">"Pokušajte zadržati prozor duže prije otpuštanja"</string>
     <string name="overview_gesture_feedback_wrong_swipe_direction" msgid="1191055451018584958">"Prevucite ravno nagore, a zatim zastanite"</string>
     <string name="overview_gesture_feedback_complete_with_follow_up" msgid="3544611727467765026">"Naučili ste kako koristiti pokrete. Da ih isključite, idite u Postavke."</string>
     <string name="overview_gesture_feedback_complete_without_follow_up" msgid="2903050864432331629">"Savladali ste pokret za prebacivanje između aplikacija"</string>
@@ -180,4 +180,6 @@
     <string name="nudge_a11y_title" msgid="2126529303123687912">"Podsjećanje"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"Zatvaranje"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"Slika podsjećanja"</string>
+    <!-- no translation found for running_app_description (1309281047289078871) -->
+    <skip />
 </resources>

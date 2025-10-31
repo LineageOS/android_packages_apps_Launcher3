@@ -126,8 +126,7 @@
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"ಟಾಸ್ಕ್‌ಬಾರ್ ಶಿಕ್ಷಣ"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"ಒಂದೇ ಬಾರಿಗೆ 2 ಆ್ಯಪ್‌ಗಳನ್ನು ಬಳಸಲು ಆ್ಯಪ್ ಅನ್ನು ಬದಿಗೆ ಎಳೆಯಿರಿ"</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"ಅದನ್ನು ತೇಲುವಂತೆ ಮಾಡಲು ಕೆಳಗಿನ ಮೂಲೆಗಳಿಗೆ ಡ್ರ್ಯಾಗ್ ಮಾಡಿ"</string>
-    <!-- no translation found for taskbar_edu_stashing (911857479758694381) -->
-    <skip />
+    <string name="taskbar_edu_stashing" msgid="911857479758694381">"ಟಾಸ್ಕ್‌ಬಾರ್ ಅನ್ನು ತೋರಿಸಲು ನಿಧಾನವಾಗಿ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"ನಿಮ್ಮ ದಿನಚರಿಯ ಆಧಾರದ ಮೇಲೆ ಆ್ಯಪ್ ಸಲಹೆಗಳನ್ನು ಪಡೆಯಿರಿ"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"ಟಾಸ್ಕ್‌‌ಬಾರ್ ಅನ್ನು ಪಿನ್ ಮಾಡಲು ಡಿವೈಡರ್ ಮೇಲೆ ದೀರ್ಘಕಾಲ ಒತ್ತಿರಿ"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"ಟಾಸ್ಕ್‌ಬಾರ್ ಮೂಲಕ ಹೆಚ್ಚಿನದನ್ನು ಮಾಡಿ"</string>
@@ -180,4 +179,6 @@
     <string name="nudge_a11y_title" msgid="2126529303123687912">"ನಡ್ಜ್"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"ಮುಚ್ಚಿರಿ"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"ಚಿತ್ರವನ್ನು ನಡ್ಜ್ ಮಾಡಿ"</string>
+    <!-- no translation found for running_app_description (1309281047289078871) -->
+    <skip />
 </resources>

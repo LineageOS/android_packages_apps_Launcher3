@@ -72,7 +72,7 @@
     <string name="home_gesture_tutorial_subtitle" msgid="7245995490408668778">"从屏幕底部向上滑动"</string>
     <string name="home_gesture_tutorial_success" msgid="1736295017642244751">"太棒了！"</string>
     <string name="overview_gesture_feedback_swipe_too_far_from_edge" msgid="6402349235265407385">"确保从屏幕底部边缘向上滑动"</string>
-    <string name="overview_gesture_feedback_home_detected" msgid="663432226180397138">"尝试按住窗口较长时间，然后再松开手指"</string>
+    <string name="overview_gesture_feedback_home_detected" msgid="663432226180397138">"请尝试长按窗口，然后再松开手指"</string>
     <string name="overview_gesture_feedback_wrong_swipe_direction" msgid="1191055451018584958">"确保笔直向上滑动，然后停住"</string>
     <string name="overview_gesture_feedback_complete_with_follow_up" msgid="3544611727467765026">"您已了解如何使用手势了。如要关闭手势，请前往“设置”。"</string>
     <string name="overview_gesture_feedback_complete_without_follow_up" msgid="2903050864432331629">"您已完成“切换应用”手势教程"</string>
@@ -180,4 +180,6 @@
     <string name="nudge_a11y_title" msgid="2126529303123687912">"智能推送"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"关闭"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"智能推送图片"</string>
+    <!-- no translation found for running_app_description (1309281047289078871) -->
+    <skip />
 </resources>

@@ -72,7 +72,7 @@
     <string name="home_gesture_tutorial_subtitle" msgid="7245995490408668778">"Pühkige ekraani allosast üles."</string>
     <string name="home_gesture_tutorial_success" msgid="1736295017642244751">"Väga hea!"</string>
     <string name="overview_gesture_feedback_swipe_too_far_from_edge" msgid="6402349235265407385">"Pühkige kindlasti ekraani alumisest servast üles."</string>
-    <string name="overview_gesture_feedback_home_detected" msgid="663432226180397138">"Hoidke sõrme aknal pisut kauem, enne kui vabastate"</string>
+    <string name="overview_gesture_feedback_home_detected" msgid="663432226180397138">"Hoidke sõrme aknal pisut kauem, enne kui vabastate."</string>
     <string name="overview_gesture_feedback_wrong_swipe_direction" msgid="1191055451018584958">"Pühkige kindlasti otse üles, seejärel peatuge."</string>
     <string name="overview_gesture_feedback_complete_with_follow_up" msgid="3544611727467765026">"Õppisite liigutusi kasutama. Liigutuste väljalülitamiseks avage Seaded."</string>
     <string name="overview_gesture_feedback_complete_without_follow_up" msgid="2903050864432331629">"Tegite rakenduste vahel vahetamise liigutuse."</string>
@@ -180,4 +180,6 @@
     <string name="nudge_a11y_title" msgid="2126529303123687912">"Müksamine"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"Sulgemine"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"Müksamise pilt"</string>
+    <!-- no translation found for running_app_description (1309281047289078871) -->
+    <skip />
 </resources>
