@@ -22,6 +22,7 @@ import com.android.launcher3.widgetpicker.data.repository.WidgetsRepository
 import com.android.launcher3.widgetpicker.shared.model.WidgetHostInfo
 import com.android.launcher3.widgetpicker.ui.appcatalog.SingleAppWidgetsCatalog
 import com.android.launcher3.widgetpicker.ui.fullcatalog.FullWidgetsCatalog
+import com.android.launcher3.widgetpicker.ui.pin.PinAppWidgetCatalog
 import dagger.BindsInstance
 import dagger.Subcomponent
 import kotlin.coroutines.CoroutineContext
@@ -73,4 +74,9 @@ interface WidgetPickerComponent {
 
     /** Provides UI for the catalog of widgets hosted by a single app. */
     fun getSingleAppWidgetsCatalog(): SingleAppWidgetsCatalog
+
+    /**
+     * Provides UI for when user requests to pin a specific widget / shortcut from within an app.
+     */
+    fun getPinAppWidgetCatalog(): PinAppWidgetCatalog
 }

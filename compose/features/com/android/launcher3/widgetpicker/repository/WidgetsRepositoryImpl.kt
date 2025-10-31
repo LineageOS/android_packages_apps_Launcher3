@@ -24,6 +24,7 @@ import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.model.WidgetItem
 import com.android.launcher3.model.WidgetsModel
 import com.android.launcher3.model.data.PackageItemInfo
+import com.android.launcher3.pm.ShortcutConfigActivityInfo
 import com.android.launcher3.pm.ShortcutConfigActivityInfo.ShortcutConfigActivityInfoVO
 import com.android.launcher3.util.ComponentKey
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
@@ -32,6 +33,8 @@ import com.android.launcher3.widget.DatabaseWidgetPreviewLoader
 import com.android.launcher3.widget.picker.util.WidgetPreviewContainerSize
 import com.android.launcher3.widget.util.WidgetSizes
 import com.android.launcher3.widgetpicker.data.repository.WidgetsRepository
+import com.android.launcher3.widgetpicker.data.repository.WidgetsRepository.InitializationOptions
+import com.android.launcher3.widgetpicker.data.repository.WidgetsRepository.InitializationOptions.Companion.getWidgetAppId
 import com.android.launcher3.widgetpicker.datasource.FeaturedWidgetsDataSource
 import com.android.launcher3.widgetpicker.datasource.WidgetsSearchAlgorithm
 import com.android.launcher3.widgetpicker.shared.model.PickableWidget
@@ -80,23 +83,26 @@ constructor(
     private val _widgetItemsByPackage = MutableStateFlow<List<WidgetApp>>(emptyList())
     private val databaseWidgetPreviewLoader = DatabaseWidgetPreviewLoader(appContext, deviceProfile)
 
-    override fun initialize(options: WidgetsRepository.InitializationOptions) {
-        val packageUserKeyOrAll =
-            options.widgetAppId?.let {
-                checkNotNull(it.packageName) { "invalid package name passed" }
-                PackageUserKey(it.packageName, it.userHandle)
-            }
-
+    override fun initialize(options: InitializationOptions) {
         // TODO(b/419495339): Remove the model executor requirement from widgets model and replace
         // with scope.launch
         MODEL_EXECUTOR.execute {
-            widgetsModel.update(/* packageUser= */ packageUserKeyOrAll)
+            if (options is InitializationOptions.PinWidget) {
+                widgetsModel.updateForPinRequest(options.pinItemRequest)
+            } else {
+                val packageUserKeyOrAll =
+                    options.getWidgetAppId()?.let {
+                        checkNotNull(it.packageName) { "invalid package name passed" }
+                        PackageUserKey(it.packageName, it.userHandle)
+                    }
+                widgetsModel.update(/* packageUser= */ packageUserKeyOrAll)
+            }
             _widgetItemsByPackage.update {
                 widgetsModel.widgetsByPackageItemForPicker.toPickableWidgets(deviceProfile)
             }
         }
 
-        if (options.loadFeaturedWidgets) {
+        if (options is InitializationOptions.AllWidgets) {
             backgroundScope.launch { featuredWidgetsDataSource.initialize() }
         }
     }
@@ -203,10 +209,17 @@ constructor(
                                     WidgetInfo.AppWidgetInfo(
                                         appWidgetProviderInfo = widgetItem.widgetInfo.clone()
                                     )
-                                } else {
-                                    check(widgetItem.activityInfo is ShortcutConfigActivityInfoVO)
-                                    WidgetInfo.ShortcutInfo(
+                                } else if (
+                                    widgetItem.activityInfo is ShortcutConfigActivityInfoVO
+                                ) {
+                                    WidgetInfo.StaticShortcutInfo(
                                         launcherActivityInfo = widgetItem.activityInfo.mInfo
+                                    )
+                                } else {
+                                    check(widgetItem.activityInfo is ShortcutConfigActivityInfo)
+                                    WidgetInfo.PinnedShortcutInfo(
+                                        componentName = widgetItem.activityInfo.component,
+                                        user = widgetItem.activityInfo.user,
                                     )
                                 },
                             sizeInfo =

@@ -18,6 +18,7 @@ package com.android.launcher3.widgetpicker.listeners
 
 import android.graphics.Point
 import android.graphics.Rect
+import android.util.Log
 import android.view.View
 import com.android.launcher3.PendingAddItemInfo
 import com.android.launcher3.dragndrop.BaseItemDragListener
@@ -76,10 +77,21 @@ class WidgetPickerDragItemListener(
                     PendingAddWidgetInfo(launcherProviderInfo, container)
                 }
 
-                is WidgetInfo.ShortcutInfo ->
+                is WidgetInfo.StaticShortcutInfo ->
                     PendingAddShortcutInfo(
                         ShortcutConfigActivityInfoVO(widgetInfo.launcherActivityInfo)
                     )
+
+                else -> {
+                    // items such as pinned shortcuts don't go through normal drag and drop; they
+                    // go through pin flow where config activity might be skipped; and use separate
+                    // listener
+                    Log.w(
+                        TAG,
+                        "Unsupported widget info encountered during drag and drop: $widgetInfo",
+                    )
+                    return
+                }
             }
 
         val view = View(mLauncher)
@@ -128,5 +140,9 @@ class WidgetPickerDragItemListener(
                 )
         }
         dragHelper.setWidgetPreviewInfo(info)
+    }
+
+    companion object {
+        private const val TAG = "WidgetPickerDragItemListener"
     }
 }

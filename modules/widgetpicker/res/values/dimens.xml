@@ -21,5 +21,8 @@
 
     <!-- For sheets that show compact info e.g. single app picker / pin sheet. -->
     <dimen name="compact_bottom_sheet_max_width">700dp</dimen>
+
+    <!-- For sheets that show compact info e.g. single app picker / pin sheet. -->
+    <dimen name="x_small_bottom_sheet_max_height">595dp</dimen>
 </resources>
 

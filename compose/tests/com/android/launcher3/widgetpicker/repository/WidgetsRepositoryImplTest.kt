@@ -24,6 +24,8 @@ import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
 import android.content.pm.LauncherActivityInfo
 import android.content.pm.LauncherApps
+import android.content.pm.LauncherApps.PinItemRequest
+import android.content.pm.ShortcutInfo
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
@@ -52,6 +54,7 @@ import com.android.launcher3.util.rule.MockUsersRule
 import com.android.launcher3.util.rule.MockUsersRule.MockUser
 import com.android.launcher3.widget.LauncherAppWidgetProviderInfo
 import com.android.launcher3.widgetpicker.data.repository.WidgetsRepository
+import com.android.launcher3.widgetpicker.data.repository.WidgetsRepository.InitializationOptions
 import com.android.launcher3.widgetpicker.datasource.FeaturedWidgetsDataSource
 import com.android.launcher3.widgetpicker.datasource.InMemoryWidgetSearchAlgorithm
 import com.android.launcher3.widgetpicker.shared.model.PickableWidget
@@ -103,6 +106,8 @@ class WidgetsRepositoryImplTest {
     @Mock private lateinit var appFilterMock: AppFilter
 
     @Mock lateinit var mockShortcutLauncherActivityInfo: LauncherActivityInfo
+    @Mock lateinit var mockPinRequest: PinItemRequest
+    @Mock lateinit var mockShortcutInfo: ShortcutInfo
 
     @Mock lateinit var mockActivityInfo: ActivityInfo
 
@@ -264,12 +269,7 @@ class WidgetsRepositoryImplTest {
             val widgetAppId =
                 WidgetAppId(packageName = APP_1_PACKAGE_NAME, userHandle = user, category = -1)
 
-            underTest.initialize(
-                WidgetsRepository.InitializationOptions(
-                    widgetAppId = widgetAppId,
-                    loadFeaturedWidgets = false,
-                )
-            )
+            underTest.initialize(InitializationOptions.SingleAppWidgets(widgetAppId = widgetAppId))
             TestUtil.runOnExecutorSync(Executors.MODEL_EXECUTOR) {}
 
             val widgetApp = underTest.observeWidgetApp(widgetAppId = widgetAppId).first()
@@ -297,12 +297,7 @@ class WidgetsRepositoryImplTest {
             val widgetAppId =
                 WidgetAppId(packageName = APP_2_PACKAGE_NAME, userHandle = user, category = -1)
 
-            underTest.initialize(
-                WidgetsRepository.InitializationOptions(
-                    widgetAppId = widgetAppId,
-                    loadFeaturedWidgets = false,
-                )
-            )
+            underTest.initialize(InitializationOptions.SingleAppWidgets(widgetAppId))
             TestUtil.runOnExecutorSync(Executors.MODEL_EXECUTOR) {}
 
             val widgetApp = underTest.observeWidgetApp(widgetAppId = widgetAppId).first()
@@ -316,6 +311,59 @@ class WidgetsRepositoryImplTest {
                 val widget2A = assertNotNull(widgets.find { it.id == expectedWidget2AId })
                 assertThat(widget2A.widgetInfo.isAppWidget()).isTrue()
                 assertThat(widget2A.label).isEqualTo(WIDGET_2A_NAME)
+            }
+        }
+
+    @Test
+    fun initializeWithPinRequest_mapsCorrectWidget() =
+        testScope.runTest {
+            val widgetAppId =
+                WidgetAppId(packageName = APP_1_PACKAGE_NAME, userHandle = user, category = -1)
+            whenever(mockPinRequest.requestType).thenReturn(PinItemRequest.REQUEST_TYPE_APPWIDGET)
+            whenever(mockPinRequest.getAppWidgetProviderInfo(any()))
+                .thenReturn(App1Widget1ProviderInfo)
+
+            underTest.initialize(InitializationOptions.PinWidget(mockPinRequest))
+            TestUtil.runOnExecutorSync(Executors.MODEL_EXECUTOR) {}
+
+            val widgetApp = underTest.observeWidgetApp(widgetAppId = widgetAppId).first()
+            assertThat(widgetApp).isNotNull()
+            widgetApp?.run {
+                assertThat(title).isEqualTo(APP_1)
+                assertThat(widgets).hasSize(1)
+
+                val expectedWidget1AId = WidgetId(App1Widget1ProviderName, user)
+                assertThat(widgets.first().id).isEqualTo(expectedWidget1AId)
+            }
+        }
+
+    @Test
+    fun initializeWithPinRequest_mapsCorrectShortcut() =
+        testScope.runTest {
+            val widgetAppId =
+                WidgetAppId(packageName = APP_1_PACKAGE_NAME, userHandle = user, category = -1)
+            mockPinRequest.apply {
+                whenever(requestType).thenReturn(PinItemRequest.REQUEST_TYPE_SHORTCUT)
+                whenever(shortcutInfo).thenReturn(mockShortcutInfo)
+            }
+            mockShortcutInfo.apply {
+                whenever(userHandle).thenReturn(user)
+                whenever(shortLabel).thenReturn("TestShortcut")
+                whenever(mockShortcutInfo.getPackage()).thenReturn(APP_1_PACKAGE_NAME)
+            }
+
+            underTest.initialize(InitializationOptions.PinWidget(mockPinRequest))
+            TestUtil.runOnExecutorSync(Executors.MODEL_EXECUTOR) {}
+
+            val widgetApp = underTest.observeWidgetApp(widgetAppId = widgetAppId).first()
+            assertThat(widgetApp).isNotNull()
+            widgetApp?.run {
+                assertThat(title).isEqualTo(APP_1)
+                assertThat(widgets).hasSize(1)
+
+                val expectedWidget1AId =
+                    WidgetId(ComponentName(APP_1_PACKAGE_NAME, STUB_SHORTCUT_COMPONENT_CLASS), user)
+                assertThat(widgets.first().id).isEqualTo(expectedWidget1AId)
             }
         }
 
@@ -423,6 +471,10 @@ class WidgetsRepositoryImplTest {
         }
 
     companion object {
+        // Class name used in the target component, such that it will never represent an
+        // actual existing class. See PinShortcutRequestActivityInfo
+        private const val STUB_SHORTCUT_COMPONENT_CLASS: String = "pinned-shortcut"
+
         const val APP_1 = "app1"
         const val APP_1_PACKAGE_NAME = "com.test.app1"
         const val WIDGET_1A_NAME = "TestWidgetProvider1A"

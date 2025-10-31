@@ -31,6 +31,9 @@ import android.view.DragEvent;
 import android.view.View;
 import android.widget.RemoteViews;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.android.launcher3.DragSource;
 import com.android.launcher3.PendingAddItemInfo;
 import com.android.launcher3.widget.LauncherAppWidgetProviderInfo;
@@ -49,18 +52,44 @@ public class PinItemDragListener extends BaseItemDragListener {
     private final PinItemRequest mRequest;
     private final CancellationSignal mCancelSignal;
     private final float mPreviewScale;
+    @Nullable
+    private String mMimeType = null;
 
+    /**
+     * {@link DragSource} for handling drop from a different window with the scale = 1 and a
+     * default {@code mimeType}.
+     */
     public PinItemDragListener(PinItemRequest request, Rect previewRect,
             int previewBitmapWidth, int previewViewWidth) {
         this(request, previewRect, previewBitmapWidth, previewViewWidth, /* previewScale= */ 1f);
     }
 
+    /**
+     * {@link DragSource} for handling drop from a different window with the specified
+     * {@code mimeType}
+     */
+    public PinItemDragListener(PinItemRequest request, Rect previewRect,
+            int previewBitmapWidth, int previewViewWidth,
+            @NonNull String mimeType) {
+        this(request, previewRect, previewBitmapWidth, previewViewWidth, /* previewScale= */ 1f);
+        mMimeType = mimeType;
+    }
+
+    /**
+     * {@link DragSource} for handling drop from a different window with the specified
+     * {@code previewScale} and a default {@code mimeType}.
+     */
     public PinItemDragListener(PinItemRequest request, Rect previewRect,
             int previewBitmapWidth, int previewViewWidth, float previewScale) {
         super(previewRect, previewBitmapWidth, previewViewWidth);
         mRequest = request;
         mCancelSignal = new CancellationSignal();
         mPreviewScale = previewScale;
+    }
+
+    @Override
+    public String getMimeType() {
+        return mMimeType != null ? mMimeType : super.getMimeType();
     }
 
     @Override
