@@ -38,6 +38,7 @@ import com.android.launcher3.taskbar.TaskbarView
 import com.android.launcher3.testutil.LauncherTestInteractions
 import com.android.launcher3.testutil.Wait.atMost
 import com.android.launcher3.testutil.rule.LayoutResource
+import com.android.launcher3.util.IntegrationLandscapeRule
 import com.android.launcher3.util.LauncherLayoutBuilder
 import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
 import com.android.launcher3.util.ModelTestExtensions.loadModelSync
@@ -65,6 +66,8 @@ open class BaseTaskbarIntegrationTest {
     @get:Rule val layoutResource = LayoutResource(targetContext)
 
     @get:Rule val launcherActivity = LauncherActivityScenarioRule<Launcher>()
+
+    @get:Rule val mIntegrationLandscapeRule = IntegrationLandscapeRule(launcherActivity)
 
     var interactions = LauncherTestInteractions(launcherActivity)
 
