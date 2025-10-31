@@ -208,6 +208,7 @@ public final class TaskbarAllAppsController {
         mSlideInView.addOnCloseListener(this::cleanUpOverlay);
         TaskbarAllAppsViewController viewController = new TaskbarAllAppsViewController(
                 mOverlayContext,
+                mTaskbarUiState,
                 mSlideInView,
                 mControllers,
                 mSearchSessionController,
@@ -225,7 +226,6 @@ public final class TaskbarAllAppsController {
         // doesn't also close
         mOverlayContext.getDragController().setDisallowGlobalDrag(mDisallowGlobalDrag);
         mOverlayContext.getDragController().setDisallowLongClick(mDisallowLongClick);
-        mTaskbarUiState.setTaskbarAllAppsOpen(true);
     }
 
     private void cleanUpOverlay() {

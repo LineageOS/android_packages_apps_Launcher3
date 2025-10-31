@@ -29,6 +29,7 @@ import com.android.launcher3.taskbar.NavbarButtonsViewController;
 import com.android.launcher3.taskbar.TaskbarControllers;
 import com.android.launcher3.taskbar.TaskbarSharedState;
 import com.android.launcher3.taskbar.TaskbarStashController;
+import com.android.launcher3.taskbar.TaskbarUiState;
 import com.android.launcher3.taskbar.overlay.TaskbarOverlayContext;
 import com.android.launcher3.taskbar.overlay.TaskbarOverlayController;
 import com.android.systemui.shared.system.InteractionJankMonitorWrapper;
@@ -52,6 +53,7 @@ final class TaskbarAllAppsViewController {
 
     TaskbarAllAppsViewController(
             TaskbarOverlayContext context,
+            TaskbarUiState taskbarUiState,
             TaskbarAllAppsSlideInView slideInView,
             TaskbarControllers taskbarControllers,
             TaskbarSearchSessionController searchSessionController,
@@ -65,8 +67,7 @@ final class TaskbarAllAppsViewController {
         mOverlayController = taskbarControllers.taskbarOverlayController;
         mTaskbarSharedState = taskbarControllers.getSharedState();
         mShowKeyboard = showKeyboard;
-
-        mSlideInView.init(new TaskbarAllAppsCallbacks(searchSessionController));
+        mSlideInView.init(new TaskbarAllAppsCallbacks(searchSessionController), taskbarUiState);
         setUpAppDivider();
         setUpTaskbarStashing();
     }

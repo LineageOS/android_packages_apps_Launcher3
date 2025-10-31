@@ -45,6 +45,7 @@ import com.android.launcher3.Insettable;
 import com.android.launcher3.R;
 import com.android.launcher3.anim.AnimatorListeners;
 import com.android.launcher3.anim.PendingAnimation;
+import com.android.launcher3.taskbar.TaskbarUiState;
 import com.android.launcher3.taskbar.allapps.TaskbarAllAppsViewController.TaskbarAllAppsCallbacks;
 import com.android.launcher3.taskbar.overlay.TaskbarOverlayContext;
 import com.android.launcher3.util.Themes;
@@ -68,6 +69,7 @@ public class TaskbarAllAppsSlideInView extends AbstractSlideInView<TaskbarOverla
 
     // Initialized in init.
     private TaskbarAllAppsCallbacks mAllAppsCallbacks;
+    private TaskbarUiState mTaskbarUiState;
 
     public TaskbarAllAppsSlideInView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -81,8 +83,9 @@ public class TaskbarAllAppsSlideInView extends AbstractSlideInView<TaskbarOverla
                 R.dimen.max_depth_blur_radius_enhanced);
     }
 
-    void init(TaskbarAllAppsCallbacks callbacks) {
+    void init(TaskbarAllAppsCallbacks callbacks, TaskbarUiState taskbarUiState) {
         mAllAppsCallbacks = callbacks;
+        mTaskbarUiState = taskbarUiState;
     }
 
     /** Opens the all apps view. */
@@ -91,6 +94,7 @@ public class TaskbarAllAppsSlideInView extends AbstractSlideInView<TaskbarOverla
             return;
         }
         mIsOpen = true;
+        mTaskbarUiState.setTaskbarAllAppsOpen(true);
 
         addOnAttachStateChangeListener(new OnAttachStateChangeListener() {
             @Override
@@ -168,6 +172,7 @@ public class TaskbarAllAppsSlideInView extends AbstractSlideInView<TaskbarOverla
             mAllAppsCallbacks.onAllAppsTransitionStart(false);
         }
         handleClose(animate, mAllAppsCallbacks.getCloseDuration());
+        mTaskbarUiState.setTaskbarAllAppsOpen(false);
     }
 
     @Override
