@@ -35,11 +35,11 @@ abstract class DisplayModel<RESOURCE_TYPE : DisplayResource>(
     private val systemDecorationChangeObserver: SystemDecorationChangeObserver,
     private val displaysWithDecorationsRepositoryCompat: DisplaysWithDecorationsRepositoryCompat,
     private val dispatcher: CoroutineDispatcher,
+    private val debug: Boolean = false,
 ) : DisplayDecorationListener {
 
     companion object {
         private const val TAG = "DisplayModel"
-        private const val DEBUG = false
     }
 
     private val displayManager = context.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
@@ -49,17 +49,17 @@ abstract class DisplayModel<RESOURCE_TYPE : DisplayResource>(
             DesktopExperienceFlags.ENABLE_DISPLAY_CONTENT_MODE_MANAGEMENT.isTrue()
 
     override fun onDisplayAddSystemDecorations(displayId: Int) {
-        if (DEBUG) Log.d(TAG, "onDisplayAdded: displayId=$displayId")
+        if (debug) Log.d(TAG, "onDisplayAdded: displayId=$displayId")
         storeDisplayResource(displayId)
     }
 
     override fun onDisplayRemoved(displayId: Int) {
-        if (DEBUG) Log.d(TAG, "onDisplayRemoved: displayId=$displayId")
+        if (debug) Log.d(TAG, "onDisplayRemoved: displayId=$displayId")
         deleteDisplayResource(displayId)
     }
 
     override fun onDisplayRemoveSystemDecorations(displayId: Int) {
-        if (DEBUG) Log.d(TAG, "onDisplayRemoveSystemDecorations: displayId=$displayId")
+        if (debug) Log.d(TAG, "onDisplayRemoveSystemDecorations: displayId=$displayId")
         deleteDisplayResource(displayId)
     }
 
@@ -92,12 +92,12 @@ abstract class DisplayModel<RESOURCE_TYPE : DisplayResource>(
     }
 
     fun getDisplayResource(displayId: Int): RESOURCE_TYPE? {
-        if (DEBUG) Log.d(TAG, Log.getStackTraceString(Throwable("get: displayId=$displayId")))
+        if (debug) Log.d(TAG, Log.getStackTraceString(Throwable("get: displayId=$displayId")))
         return displayResourceArray[displayId]
     }
 
     fun deleteDisplayResource(displayId: Int) {
-        if (DEBUG) Log.d(TAG, "delete: displayId=$displayId")
+        if (debug) Log.d(TAG, "delete: displayId=$displayId")
         getDisplayResource(displayId)?.let {
             it.cleanup()
             displayResourceArray.remove(displayId)
@@ -105,13 +105,13 @@ abstract class DisplayModel<RESOURCE_TYPE : DisplayResource>(
     }
 
     fun storeDisplayResource(displayId: Int) {
-        if (DEBUG) Log.d(TAG, "store: displayId=$displayId")
+        if (debug) Log.d(TAG, "store: displayId=$displayId")
         getDisplayResource(displayId)?.let {
             return
         }
         val display = displayManager.getDisplay(displayId)
         if (display == null) {
-            if (DEBUG)
+            if (debug)
                 Log.w(
                     TAG,
                     "storeDisplayResource: could not create display for displayId=$displayId",
