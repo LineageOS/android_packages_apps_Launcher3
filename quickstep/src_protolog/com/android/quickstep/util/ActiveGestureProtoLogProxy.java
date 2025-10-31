@@ -643,4 +643,41 @@ public class ActiveGestureProtoLogProxy {
                     "%s: aborting due to canceled shift animation", startNewTask);
         }
     }
+
+    public static void logOnRecentsAnimationDeviceStateNotAvailable(int displayId) {
+        ActiveGestureLog.INSTANCE.addLog(new ActiveGestureLog.CompoundString(
+                "RecentsAnimationDeviceState not available for displayId=%d", displayId));
+        if (willProtoLog()) {
+            ProtoLog.d(PROTO_LOG_GROUP, "RecentsAnimationDeviceState not available for "
+                            + "displayId=%d",
+                    displayId);
+        }
+    }
+
+    public static void logOnRotationTouchHelperNotAvailable(int displayId) {
+        ActiveGestureLog.INSTANCE.addLog(new ActiveGestureLog.CompoundString(
+                "RotationTouchHelper not available for displayId=%d", displayId));
+        if (willProtoLog()) {
+            ProtoLog.d(PROTO_LOG_GROUP, "RotationTouchHelper not available for displayId=%d",
+                    displayId);
+        }
+    }
+
+    public static void logOnInputMonitorCompatNotAvailable(int displayId) {
+        ActiveGestureLog.INSTANCE.addLog(new ActiveGestureLog.CompoundString(
+                "InputMonitorCompat not available for displayId=%d", displayId));
+        if (willProtoLog()) {
+            ProtoLog.d(PROTO_LOG_GROUP, "InputMonitorCompat not available for displayId=%d",
+                    displayId);
+        }
+    }
+
+    public static void logOnInputEventReceiverNotAvailable(int displayId) {
+        ActiveGestureLog.INSTANCE.addLog(new ActiveGestureLog.CompoundString(
+                "InputEventReceiver not available for displayId=%d", displayId));
+        if (willProtoLog()) {
+            ProtoLog.d(PROTO_LOG_GROUP, "InputEventReceiver not available for displayId=%d",
+                    displayId);
+        }
+    }
 }

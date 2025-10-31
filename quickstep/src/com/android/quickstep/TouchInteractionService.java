@@ -1081,12 +1081,14 @@ public class TouchInteractionService extends Service {
         RecentsAnimationDeviceState deviceState = mDeviceStateRepository.get(displayId);
         if (deviceState == null) {
             Log.d(TAG, "RecentsAnimationDeviceState not available for displayId " + displayId);
+            ActiveGestureProtoLogProxy.logOnRecentsAnimationDeviceStateNotAvailable(displayId);
             return;
         }
 
         RotationTouchHelper rotationTouchHelper = mRotationTouchHelperRepository.get(displayId);
         if (rotationTouchHelper == null) {
             Log.d(TAG, "RotationTouchHelper not available for displayId " + displayId);
+            ActiveGestureProtoLogProxy.logOnRotationTouchHelperNotAvailable(displayId);
             return;
         }
 
@@ -1134,6 +1136,17 @@ public class TouchInteractionService extends Service {
 
         InputMonitorCompat inputMonitorCompat = getInputMonitorCompat(displayId);
         InputEventReceiver inputEventReceiver = getInputEventReceiver(displayId);
+
+        if (inputMonitorCompat == null) {
+            Log.e(TAG, "InputMonitorCompat not available for displayId " + displayId);
+            ActiveGestureProtoLogProxy.logOnInputMonitorCompatNotAvailable(displayId);
+            return;
+        }
+        if (inputEventReceiver == null) {
+            Log.e(TAG, "InputEventReceiver not available for displayId " + displayId);
+            ActiveGestureProtoLogProxy.logOnInputEventReceiverNotAvailable(displayId);
+            return;
+        }
 
         if (action == ACTION_DOWN || isHoverActionWithoutConsumer) {
             mGestureStartNavMode.set(displayId, currentNavMode);
@@ -1580,8 +1593,11 @@ public class TouchInteractionService extends Service {
 
         private InputMonitorDisplayModel(
                 Context context, SystemDecorationChangeObserver systemDecorationChangeObserver) {
-            super(context, systemDecorationChangeObserver, mDisplaysWithDecorationsRepositoryCompat,
-                    mMainCoroutineDispatcher);
+            super(context,
+                    systemDecorationChangeObserver,
+                    mDisplaysWithDecorationsRepositoryCompat,
+                    mMainCoroutineDispatcher,
+                    /* debug= */ true);
             initializeDisplays();
         }
 
