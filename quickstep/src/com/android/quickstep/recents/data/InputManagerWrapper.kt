@@ -18,6 +18,7 @@ package com.android.quickstep.recents.data
 
 import android.hardware.input.InputManager
 import android.view.InputDevice
+import javax.inject.Inject
 
 interface InputDeviceDataSource {
     val inputDeviceIds: IntArray
@@ -25,7 +26,8 @@ interface InputDeviceDataSource {
     fun getInputDevice(deviceId: Int): InputDevice?
 }
 
-class InputManagerWrapper(private val inputManager: InputManager) : InputDeviceDataSource {
+class InputManagerWrapper @Inject constructor(private val inputManager: InputManager) :
+    InputDeviceDataSource {
     override val inputDeviceIds: IntArray
         get() = inputManager.inputDeviceIds
 

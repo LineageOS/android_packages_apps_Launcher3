@@ -47,10 +47,8 @@ import com.android.launcher3.util.SandboxContext
 import com.android.launcher3.util.SplitConfigurationOptions
 import com.android.launcher3.util.TransformingTouchDelegate
 import com.android.launcher3.util.WindowBounds
-import com.android.quickstep.TaskViewTestDIHelpers.initializeRecentsDependencies
 import com.android.quickstep.TaskViewTestDIHelpers.mockRecentsModel
 import com.android.quickstep.orientation.LandscapePagedViewHandler
-import com.android.quickstep.recents.di.RecentsDependencies
 import com.android.quickstep.task.thumbnail.TaskContentView
 import com.android.quickstep.task.thumbnail.TaskThumbnailView
 import com.android.quickstep.util.RecentsOrientedState
@@ -63,7 +61,6 @@ import com.android.quickstep.views.TaskView
 import com.android.systemui.shared.recents.model.Task
 import com.android.systemui.shared.recents.model.Task.TaskKey
 import com.google.common.truth.Truth.assertThat
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -140,16 +137,11 @@ class AspectRatioSystemShortcutTests {
         applicationContext.initDaggerComponent(
             DaggerTaskViewTestComponent.builder().bindRecentsModel(mockRecentsModel())
         )
-        initializeRecentsDependencies(launcher)
         taskView =
             LayoutInflater.from(context).cloneInContext(launcher).inflate(R.layout.task, null)
                 as TaskView
+        taskView.viewModel = mock()
         taskView.setLayoutParams(ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT))
-    }
-
-    @After
-    fun tearDown() {
-        RecentsDependencies.destroy(launcher)
     }
 
     /**

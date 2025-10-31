@@ -20,13 +20,16 @@ import android.graphics.drawable.Drawable
 import android.util.Log
 import android.util.SparseArray
 import androidx.core.util.valueIterator
-import com.android.launcher3.util.coroutines.DispatcherProvider
+import com.android.launcher3.concurrent.annotations.LightweightBackground
+import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority
 import com.android.quickstep.recents.data.TaskVisualsChangedDelegate.TaskIconChangedCallback
 import com.android.quickstep.recents.data.TaskVisualsChangedDelegate.TaskThumbnailChangedCallback
 import com.android.quickstep.task.thumbnail.data.TaskIconDataSource
 import com.android.quickstep.task.thumbnail.data.TaskThumbnailDataSource
 import com.android.systemui.shared.recents.model.Task
 import com.android.systemui.shared.recents.model.ThumbnailData
+import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -39,14 +42,17 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class TasksRepository(
+class TasksRepository
+@Inject
+constructor(
     private val recentsModel: RecentTasksDataSource,
     private val taskThumbnailDataSource: TaskThumbnailDataSource,
     private val taskIconDataSource: TaskIconDataSource,
     private val userLockedStateRepository: UserLockedStateRepository,
     private val taskVisualsChangedDelegate: TaskVisualsChangedDelegate,
     private val recentsCoroutineScope: CoroutineScope,
-    private val dispatcherProvider: DispatcherProvider,
+    @LightweightBackground(LightweightBackgroundPriority.UI)
+    private val lightweightBackgroundDispatcher: CoroutineDispatcher,
 ) : RecentTasksRepository {
     private val tasks = MutableStateFlow(MapForStateFlow<Int, Task>(emptyMap()))
     private var visibleTaskIdsPerDisplay = SparseArray<Set<Int>>()
@@ -129,7 +135,7 @@ class TasksRepository(
         taskRequests[taskId] =
             Pair(
                 task.key,
-                recentsCoroutineScope.launch(dispatcherProvider.lightweightBackground) {
+                recentsCoroutineScope.launch(lightweightBackgroundDispatcher) {
                     val thumbnailFetchDeferred = async { fetchThumbnail(task) }
                     val iconFetchDeferred = async { fetchIcon(task) }
                     awaitAll(thumbnailFetchDeferred, iconFetchDeferred)
@@ -169,7 +175,7 @@ class TasksRepository(
             task.key,
             object : TaskIconChangedCallback {
                 override fun onTaskIconChanged() {
-                    recentsCoroutineScope.launch(dispatcherProvider.lightweightBackground) {
+                    recentsCoroutineScope.launch(lightweightBackgroundDispatcher) {
                         updateIcon(task.key.id, getIconFromDataSource(task))
                     }
                 }
@@ -197,7 +203,7 @@ class TasksRepository(
                             (isCurrentThumbnailLowRes && highResEnabled)
                     if (!isRequestedResHigherThanCurrent) return
 
-                    recentsCoroutineScope.launch(dispatcherProvider.lightweightBackground) {
+                    recentsCoroutineScope.launch(lightweightBackgroundDispatcher) {
                         updateThumbnail(task.key.id, getThumbnailFromDataSource(task))
                     }
                 }
@@ -228,12 +234,10 @@ class TasksRepository(
     }
 
     private suspend fun getThumbnailFromDataSource(task: Task) =
-        withContext(dispatcherProvider.lightweightBackground) {
-            taskThumbnailDataSource.getThumbnail(task)
-        }
+        withContext(lightweightBackgroundDispatcher) { taskThumbnailDataSource.getThumbnail(task) }
 
     private suspend fun getIconFromDataSource(task: Task) =
-        withContext(dispatcherProvider.lightweightBackground) {
+        withContext(lightweightBackgroundDispatcher) {
             val iconCacheEntry = taskIconDataSource.getIcon(task)
             IconData(iconCacheEntry.icon, iconCacheEntry.contentDescription, iconCacheEntry.title)
         }

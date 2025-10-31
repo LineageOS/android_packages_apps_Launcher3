@@ -22,10 +22,13 @@ import com.android.launcher3.Flags.enableRefactorDigitalWellbeingToast
 import com.android.quickstep.recents.data.RecentTasksRepository
 import com.android.quickstep.recents.data.UserLockedStateRepository
 import com.android.quickstep.recents.domain.model.TaskModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class GetTaskUseCase(
+class GetTaskUseCase
+@Inject
+constructor(
     private val tasksRepository: RecentTasksRepository,
     private val getRemainingAppTimerDurationUseCase: GetRemainingAppTimerDurationUseCase,
     private val userLockedStateRepository: UserLockedStateRepository,

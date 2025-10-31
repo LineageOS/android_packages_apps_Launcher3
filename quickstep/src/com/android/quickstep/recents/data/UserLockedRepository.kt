@@ -19,8 +19,9 @@ package com.android.quickstep.recents.data
 import android.app.KeyguardManager
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
+import javax.inject.Inject
 
-class UserLockedRepository(private val keyguardManager: KeyguardManager) :
+class UserLockedRepository @Inject constructor(private val keyguardManager: KeyguardManager) :
     UserLockedStateRepository {
     private val cache: ConcurrentMap<Int, Boolean> = ConcurrentHashMap()
 

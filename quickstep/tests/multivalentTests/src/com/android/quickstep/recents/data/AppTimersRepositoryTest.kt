@@ -19,7 +19,6 @@ package com.android.quickstep.recents.data
 import android.content.pm.LauncherApps
 import android.os.UserHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.launcher3.util.TestDispatcherProvider
 import com.google.common.truth.Truth.assertThat
 import java.time.Duration
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -38,8 +37,7 @@ class AppTimersRepositoryTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
-    private val systemUnderTest =
-        AppTimersRepositoryImpl(launcherAppsMock, TestDispatcherProvider(testDispatcher))
+    private val systemUnderTest = AppTimersRepositoryImpl(launcherAppsMock, testDispatcher)
 
     @Test
     fun getRemainingDuration_noSetLimit_returnsNull() =

@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.quickstep.recents.dagger
+package com.android.quickstep.recents.di
 
-import javax.inject.Scope
+import dagger.Module
 
-/** Scope annotation for singleton items within a recents instance. */
-@MustBeDocumented @Retention(AnnotationRetention.RUNTIME) @Scope annotation class RecentsSingleton
+/** Module that provides dependencies required for an instance of Recents. */
+@Module
+interface RecentsModule {
+    companion object {
+        // TODO add providers for recents dependencies
+    }
+}

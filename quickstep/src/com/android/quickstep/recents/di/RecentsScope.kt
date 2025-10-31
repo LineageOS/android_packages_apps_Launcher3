@@ -14,14 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.quickstep.recents.dagger
+package com.android.quickstep.recents.di
 
-import dagger.Module
+import javax.inject.Scope
 
-/** Module that provides dependencies required for an instance of Recents. */
-@Module
-interface RecentsModule {
-    companion object {
-        // TODO add providers for recents dependencies
-    }
-}
+@Scope @Retention(AnnotationRetention.RUNTIME) annotation class RecentsScope

@@ -54,6 +54,9 @@ import com.android.launcher3.Flags.enableRefactorDigitalWellbeingToast
 import com.android.launcher3.Flags.enableRefactorTaskContentView
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
+import com.android.launcher3.concurrent.annotations.LightweightBackground
+import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority
+import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent
 import com.android.launcher3.model.data.TaskViewItemInfo
 import com.android.launcher3.testing.TestLogging
@@ -70,7 +73,6 @@ import com.android.launcher3.util.SplitConfigurationOptions.StagePosition
 import com.android.launcher3.util.TraceHelper
 import com.android.launcher3.util.TransformingTouchDelegate
 import com.android.launcher3.util.ViewPool
-import com.android.launcher3.util.coroutines.DispatcherProvider
 import com.android.launcher3.util.rects.set
 import com.android.quickstep.FullscreenDrawParams
 import com.android.quickstep.RemoteAnimationTargets
@@ -78,8 +80,7 @@ import com.android.quickstep.RemoteTargetGluer.RemoteTargetHandle
 import com.android.quickstep.TaskOverlayFactory
 import com.android.quickstep.TaskViewUtils
 import com.android.quickstep.orientation.RecentsPagedOrientationHandler
-import com.android.quickstep.recents.di.RecentsDependencies
-import com.android.quickstep.recents.di.get
+import com.android.quickstep.recents.di.RecentsComponent
 import com.android.quickstep.recents.domain.usecase.ThumbnailPosition
 import com.android.quickstep.recents.ui.mapper.TaskUiStateMapper
 import com.android.quickstep.recents.ui.viewmodel.TaskData
@@ -110,6 +111,8 @@ import com.android.quickstep.window.RecentsWindowFlags.enableOverviewOnConnected
 import com.android.systemui.shared.recents.model.Task
 import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.wm.shell.shared.split.SplitScreenConstants
+import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
@@ -545,17 +548,12 @@ constructor(
     private var settledProgressDismiss by
         MultiPropertyDelegate(settledProgressPropertyFactory, SettledProgress.Dismiss)
 
-    private val viewModel =
-        TaskViewModel(
-            recentsViewData = RecentsDependencies.get(context),
-            getTaskUseCase = RecentsDependencies.get(context),
-            getSysUiStatusNavFlagsUseCase = RecentsDependencies.get(context),
-            isThumbnailValidUseCase = RecentsDependencies.get(context),
-            getThumbnailPositionUseCase = RecentsDependencies.get(context),
-            dispatcherProvider = RecentsDependencies.get(context),
-        )
-    private val dispatcherProvider: DispatcherProvider = RecentsDependencies.get(context)
-    private val coroutineScope: CoroutineScope = RecentsDependencies.get(context)
+    @Inject lateinit var viewModel: TaskViewModel
+    @Inject
+    @LightweightBackground(LightweightBackgroundPriority.UI)
+    lateinit var lightweightBackgroundDispatcher: CoroutineDispatcher
+    @Inject @Ui lateinit var mainDispatcher: CoroutineDispatcher
+    @Inject lateinit var coroutineScope: CoroutineScope
     private val coroutineJobs = mutableListOf<Job>()
     private var taskDismissButton: FrameLayout? = null
     private var taskDismissButtonAnimator: ObjectAnimator? = null
@@ -614,6 +612,10 @@ constructor(
             }
         }
         return super.onHoverEvent(event)
+    }
+
+    open fun initialiseInjectables(recentsComponent: RecentsComponent) {
+        recentsComponent.inject(this)
     }
 
     private fun showTaskDismissButton() {
@@ -862,7 +864,7 @@ constructor(
             // should start listening here.
             // TV Lifecycle: onBind -> onAttachedToWindow -> onDetachFromWindow -> onRecycle
             coroutineJobs +=
-                coroutineScope.launch(dispatcherProvider.main) {
+                coroutineScope.launch(mainDispatcher) {
                     viewModel.state.collectLatest(::updateTaskViewState)
                 }
         }
@@ -1035,7 +1037,7 @@ constructor(
             }
         }
 
-        coroutineScope.launch(dispatcherProvider.lightweightBackground) {
+        coroutineScope.launch(lightweightBackgroundDispatcher) {
             traceSection("TaskView.onDetachedFromWindow.cancellingJobs") {
                 coroutineJobsToCancel.forEach { it.cancel("TaskView detaching from window") }
             }
