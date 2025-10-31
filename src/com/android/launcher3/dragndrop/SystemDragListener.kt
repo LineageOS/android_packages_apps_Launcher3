@@ -50,6 +50,7 @@ class SystemDragListener(
     ) {
 
     private var cleanupCallback: Runnable? = null
+    private var dragView: DragView<*>? = null
 
     init {
         init(launcher, /* isHomeStarted= */ launcher.isStarted)
@@ -74,6 +75,23 @@ class SystemDragListener(
     fun setCleanupCallback(callback: Runnable?) {
         cleanupCallback = callback
     }
+
+    /**
+     * Starts a system-level drag-and-drop sequence.
+     *
+     * @return The drag view for the sequence if started successfully.
+     */
+    fun startDrag(): DragView<*>? =
+        params?.run {
+            startDrag(
+                /*previewRect=*/ Rect(),
+                /*previewBitmapWidth=*/ 0,
+                /*previewViewWidth=*/ 0,
+                /*screenPos=*/ Point(),
+                dragOptions,
+            )
+            dragView
+        }
 
     override fun onDrag(event: DragEvent): Boolean {
         if (event.action == DragEvent.ACTION_DROP) {
@@ -102,6 +120,10 @@ class SystemDragListener(
         screenPos: Point,
         options: DragOptions,
     ) {
+        if (dragView != null) {
+            return
+        }
+
         mLauncher.dragController?.run {
             val params =
                 this@SystemDragListener.params
@@ -122,18 +144,19 @@ class SystemDragListener(
                         }
                         .also { params -> this@SystemDragListener.params = params }
 
-            startDrag(
-                params.dragImage,
-                params.draggableView,
-                params.dragLayerX,
-                params.dragLayerY,
-                params.dragSource,
-                params.dragInfo,
-                params.dragRegion,
-                params.initialDragViewScale,
-                params.dragViewScaleOnDrop,
-                params.dragOptions,
-            )
+            dragView =
+                startDrag(
+                    params.dragImage,
+                    params.draggableView,
+                    params.dragLayerX,
+                    params.dragLayerY,
+                    params.dragSource,
+                    params.dragInfo,
+                    params.dragRegion,
+                    params.initialDragViewScale,
+                    params.dragViewScaleOnDrop,
+                    params.dragOptions,
+                )
         }
     }
 

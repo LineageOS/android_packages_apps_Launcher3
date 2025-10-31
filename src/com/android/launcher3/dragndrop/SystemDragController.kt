@@ -39,6 +39,14 @@ sealed class SystemDragController {
      */
     open fun setLauncher(launcher: Launcher) {}
 
+    /**
+     * Starts a system-level drag-and-drop sequence.
+     *
+     * @param params The parameters to use for the sequence.
+     * @return The drag view for the sequence if started successfully.
+     */
+    open fun startDrag(params: SystemDragParams): DragView<*>? = null
+
     companion object {
         @JvmField
         val INSTANCE = DaggerSingletonObject(LauncherAppComponent::getSystemDragController)
@@ -79,21 +87,27 @@ class SystemDragControllerImpl(private val systemDragListenerFactory: SystemDrag
         }
     }
 
+    override fun startDrag(params: SystemDragParams): DragView<*>? =
+        createSystemDragListener(params)?.startDrag()
+
     private fun continueDrag(event: DragEvent): Boolean? = systemDragListener?.onDrag(event)
+
+    private fun createSystemDragListener(params: SystemDragParams? = null): SystemDragListener? =
+        launcher?.run {
+            systemDragListenerFactory(this, params).also { listener ->
+                systemDragListener = listener
+                listener.setCleanupCallback {
+                    if (systemDragListener == listener) {
+                        systemDragListener = null
+                    }
+                }
+            }
+        }
 
     private fun startDrag(event: DragEvent): Boolean? =
         launcher?.run {
             dragController?.isDragging == false &&
                 event.action == DragEvent.ACTION_DRAG_STARTED &&
-                systemDragListenerFactory(this, /* params= */ null)
-                    .also { listener ->
-                        systemDragListener = listener
-                        listener.setCleanupCallback {
-                            if (systemDragListener == listener) {
-                                systemDragListener = null
-                            }
-                        }
-                    }
-                    .onDrag(event)
+                createSystemDragListener()?.onDrag(event) == true
         }
 }

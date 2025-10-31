@@ -22,6 +22,7 @@ import android.content.ClipDescription.MIMETYPE_TEXT_PLAIN
 import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Context
+import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.Rect
 import android.net.Uri
@@ -42,11 +43,14 @@ import android.view.View
 import android.view.View.DRAG_FLAG_GLOBAL
 import android.view.View.DRAG_FLAG_GLOBAL_URI_READ
 import android.view.View.DRAG_FLAG_GLOBAL_URI_WRITE
+import android.view.ViewConfiguration
 import android.view.ViewGroup.LayoutParams
+import androidx.core.graphics.toPointF
 import androidx.core.net.toUri
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
+import com.android.launcher3.CellLayout
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FILE
 import com.android.launcher3.dragndrop.SystemDragController
@@ -54,11 +58,15 @@ import com.android.launcher3.dragndrop.SystemDragControllerImpl
 import com.android.launcher3.homescreenfiles.HomeScreenFilesNoOpProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider.Companion.HOME_SCREEN_FOLDER_RELATIVE_PATH
+import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.testutil.Wait.atMost
 import com.android.launcher3.util.BaseLauncherActivityTest
 import com.android.launcher3.util.ModelTestExtensions.setEmptyModelLayout
+import java.util.LinkedList
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -151,8 +159,11 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
 
     private fun testDragAndDrop(description: ClipDescription, itemList: List<ClipData.Item>) {
         // Perform a system-level drag-and-drop sequence.
-        val endPoint = launcherActivity.getFromLauncher { it.dragLayer.getExactCenterOnScreen() }!!
+        var endPoint = launcherActivity.getFromLauncher { it.dragLayer.getExactCenterOnScreen() }!!
         draggableView.performDragAndDropSequenceTo(endPoint, description, itemList)
+        waitForLauncherCondition("Workspace item animation not completed") {
+            it.dragLayer.animatedView == null
+        }
 
         // Expect a workspace item to be created on system-level drag-and-drop if and only if:
         // (a) the home screen files provider is implemented,
@@ -166,16 +177,9 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
         // Verify workspace item creation (or lack thereof).
         val workspaceItemView =
             launcherActivity.getFromLauncher {
-                assertThrowsIf(
-                    "Workspace item created",
-                    {
-                        findWorkspaceItem(
-                            "Workspace item not created",
-                            itemList.firstIfNotEmpty()?.uri,
-                        )
-                    },
-                    !expectWorkspaceItemCreated,
-                )
+                assertThrowsIf("Workspace item created", !expectWorkspaceItemCreated) {
+                    findWorkspaceItem("Workspace item not created", itemList.firstIfNotEmpty()?.uri)
+                }
             }
         val workspaceItemCreated = workspaceItemView != null
         assertEquals(expectWorkspaceItemCreated, workspaceItemCreated)
@@ -185,37 +189,41 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
             return
         }
 
+        // If external storage permissions are not held, verify workspace item removal.
+        if (!Environment.isExternalStorageManager()) {
+            atMost("Workspace item not removed") { isRemovedFromLayout(workspaceItemView) }
+            return
+        }
+
         // If external storage permissions are held, verify expected file system changes.
-        if (Environment.isExternalStorageManager()) {
-            return itemList.forEach { item ->
-                atMost(
-                    "'${item.uri}' not moved to '$HOME_SCREEN_FOLDER_RELATIVE_PATH'",
-                    {
-                        context.contentResolver
-                            .query(
-                                item.uri,
-                                /*projection=*/ arrayOf(_ID),
-                                /*selection=*/ "$RELATIVE_PATH = ?",
-                                /*selectionArgs=*/ arrayOf(HOME_SCREEN_FOLDER_RELATIVE_PATH),
-                                /*sortOrder=*/ null,
-                            )
-                            ?.use { cursor -> cursor.count } == 1
-                    },
-                )
+        itemList.forEach { item ->
+            atMost("'${item.uri}' not moved to '$HOME_SCREEN_FOLDER_RELATIVE_PATH'") {
+                hasFileSystemItem(item.uri)
             }
         }
 
-        // If external storage permissions are not held, verify workspace item removal.
-        atMost("Workspace item not removed", { isRemovedFromLayout(workspaceItemView) })
+        // Find a vacant cell nearest the created workspace item.
+        val itemInfo = workspaceItemView?.tag as? ItemInfo
+        assertNotNull("Workspace item not tagged", itemInfo)
+        val cellLayout = findCellLayout("Workspace cell layout not found", itemInfo!!)
+        val cell = findNearestVacantCell(cellLayout, itemInfo.cellX, itemInfo.cellY)
+        assertNotNull("Workspace cell vacancy not found", cell)
+        assertNotEquals(cell!!.x, itemInfo.cellX)
+        assertNotEquals(cell.y, itemInfo.cellY)
+
+        // Perform a drag-and-drop sequence and verify the workspace item can be moved.
+        endPoint = findExactCenterOnScreen(cellLayout, cell.x, cell.y).toPointF()
+        workspaceItemView.performDragAndDropSequenceTo(endPoint)
+        atMost("Workspace item not moved") { itemInfo.cellX == cell.x && itemInfo.cellY == cell.y }
     }
 
     private fun assertThrows(message: String, block: () -> Unit) {
         assertThrows(message, AssertionError::class.java, block)
     }
 
-    private fun <T> assertThrowsIf(message: String, block: () -> T, condition: Boolean): T? {
+    private fun <T> assertThrowsIf(message: String, condition: Boolean, block: () -> T): T? {
         if (condition) {
-            assertThrows(message, { block() })
+            assertThrows(message) { block() }
             return null
         }
         return block()
@@ -233,14 +241,79 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
         }
     }
 
+    private fun findCellLayout(message: String, itemInfo: ItemInfo): CellLayout =
+        launcherActivity.getOnceNotNull(message) { launcher ->
+            launcher.getCellLayout(itemInfo.container, itemInfo.screenId)
+        }!!
+
+    private fun findExactCenterOnScreen(cellLayout: CellLayout, cellX: Int, cellY: Int): Point =
+        IntArray(2)
+            .apply {
+                cellLayout.regionToCenterPoint(
+                    cellX,
+                    cellY,
+                    /*spanX=*/ 1,
+                    /*spanY=*/ 1,
+                    /*result=*/ this,
+                )
+            }
+            .let { centerPoint ->
+                val boundsOnScreen = Rect().apply(cellLayout::getBoundsOnScreen)
+                Point(boundsOnScreen.left + centerPoint[0], boundsOnScreen.top + centerPoint[1])
+            }
+
+    private fun findNearestVacantCell(cellLayout: CellLayout, cellX: Int, cellY: Int): Point? {
+        val offsetsToNeighboringCells =
+            listOf(
+                Point(-1, -1), // Top-left.
+                Point(0, -1), // Top.
+                Point(1, -1), // Top-right.
+                Point(1, 0), // Right.
+                Point(1, 1), // Bottom-right.
+                Point(0, 1), // Bottom.
+                Point(-1, 1), // Bottom-left.
+                Point(-1, 0), // Left.
+            )
+
+        val queuedCells = LinkedList<Point>().apply { add(Point(cellX, cellY)) }
+        val visitedCells = mutableSetOf<Point>()
+
+        while (queuedCells.isNotEmpty()) {
+            val cell = queuedCells.removeFirst()
+            visitedCells.add(cell)
+
+            if (cellLayout.isRegionVacant(cell.x, cell.y, /* spanX= */ 1, /* spanY= */ 1)) {
+                return cell
+            }
+
+            offsetsToNeighboringCells
+                .map { offset -> Point(cell).apply { offset(offset.x, offset.y) } }
+                .filter { neighbor -> neighbor.x in 0..<cellLayout.countX }
+                .filter { neighbor -> neighbor.y in 0..<cellLayout.countY }
+                .filterNot(visitedCells::contains)
+                .forEach(queuedCells::addLast)
+        }
+
+        return null
+    }
+
     private fun findWorkspaceItem(message: String, uri: Uri?) =
         launcherActivity.getOnceNotNull(message) { launcher ->
             launcher.workspace.mapOverItems { itemInfo, _ ->
-                itemInfo?.let {
-                    it.itemType == ITEM_TYPE_FILE_SYSTEM_FILE && it.intent?.data == uri
-                } == true
+                itemInfo?.itemType == ITEM_TYPE_FILE_SYSTEM_FILE && itemInfo.intent?.data == uri
             }
         }
+
+    private fun hasFileSystemItem(uri: Uri): Boolean =
+        context.contentResolver
+            .query(
+                uri,
+                /*projection=*/ arrayOf(_ID),
+                /*selection=*/ "$RELATIVE_PATH = ?",
+                /*selectionArgs=*/ arrayOf(HOME_SCREEN_FOLDER_RELATIVE_PATH),
+                /*sortOrder=*/ null,
+            )
+            .use { cursor -> cursor?.count == 1 }
 
     private fun isExternalPrimaryMediaStoreUri(uri: Uri?) =
         uri?.scheme == ContentResolver.SCHEME_CONTENT &&
@@ -273,8 +346,8 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
 
     private fun View.performDragAndDropSequenceTo(
         endPt: PointF,
-        description: ClipDescription,
-        items: List<ClipData.Item>,
+        description: ClipDescription? = null,
+        items: List<ClipData.Item>? = null,
     ) {
         InstrumentationRegistry.getInstrumentation().run {
             val downTime = SystemClock.uptimeMillis()
@@ -282,15 +355,18 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
             val midPt = startPt.getMidPointTo(endPt)
             val sync = true
             uiAutomation.injectInputEvent(obtainMotionEvent(ACTION_DOWN, startPt, downTime), sync)
-            runOnMainSync {
-                startDragAndDrop(
-                    ClipData(description, items.firstIfNotEmpty()).apply {
-                        items.drop(1).forEach(this::addItem)
-                    },
-                    View.DragShadowBuilder(this@performDragAndDropSequenceTo),
-                    /*localState=*/ null,
-                    DRAG_FLAG_GLOBAL or DRAG_FLAG_GLOBAL_URI_READ or DRAG_FLAG_GLOBAL_URI_WRITE,
-                )
+            Thread.sleep(ViewConfiguration.getLongPressTimeout().toLong())
+            if (description != null && items != null) {
+                runOnMainSync {
+                    startDragAndDrop(
+                        ClipData(description, items.firstIfNotEmpty()).apply {
+                            items.drop(1).forEach(this::addItem)
+                        },
+                        View.DragShadowBuilder(this@performDragAndDropSequenceTo),
+                        /*localState=*/ null,
+                        DRAG_FLAG_GLOBAL or DRAG_FLAG_GLOBAL_URI_READ or DRAG_FLAG_GLOBAL_URI_WRITE,
+                    )
+                }
             }
             uiAutomation.injectInputEvent(obtainMotionEvent(ACTION_MOVE, midPt, downTime), sync)
             uiAutomation.injectInputEvent(obtainMotionEvent(ACTION_MOVE, endPt, downTime), sync)
