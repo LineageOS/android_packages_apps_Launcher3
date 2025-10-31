@@ -17,6 +17,7 @@
 package com.android.launcher3.imagecomparison
 
 import android.platform.test.flag.junit.SetFlagsRule
+import android.platform.test.rule.DisableAnimationsRule
 import com.android.launcher3.util.rule.ScreenRecordRule
 import com.android.launcher3.util.rule.TestStabilityRule
 import com.google.android.apps.nexuslauncher.MultivalentTestWrapper
@@ -29,13 +30,14 @@ import platform.test.screenshot.utils.compose.ComposeScreenshotTestRule
 
 abstract class ComposableBasedImageTest(deviceEmulationSpec: DeviceEmulationSpec) {
     @get:Rule(order = 0) val testStabilityRule = TestStabilityRule()
+    @get:Rule(order = 1) val disableAnimationsRule = DisableAnimationsRule()
 
-    @get:Rule(order = 1) val screenRecordRule = ScreenRecordRule()
-
-    @get:Rule(order = 2)
-    val setFlagsRule = SetFlagsRule(SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT)
+    @get:Rule(order = 2) val screenRecordRule = ScreenRecordRule()
 
     @get:Rule(order = 3)
+    val setFlagsRule = SetFlagsRule(SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT)
+
+    @get:Rule(order = 4)
     open val screenshotRule =
         ComposeScreenshotTestRule(
             deviceEmulationSpec,

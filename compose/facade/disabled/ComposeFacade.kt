@@ -18,7 +18,10 @@ package com.android.launcher3.compose
 
 import android.content.Context
 import android.view.View
+import com.android.launcher3.CellLayout
 import com.android.launcher3.compose.core.BaseComposeFacade
+import com.android.launcher3.views.ActivityContext
+import com.android.launcher3.widget.LauncherAppWidgetHostView
 
 object ComposeFacade : BaseComposeFacade {
     override fun isComposeAvailable(): Boolean = false
@@ -31,6 +34,17 @@ object ComposeFacade : BaseComposeFacade {
     }
 
     override fun disposeComposition(view: View) {
+        error(
+            "Compose is not available. Make sure to check isComposeAvailable() before calling any" +
+                " other function on ComposeFacade."
+        )
+    }
+
+    fun showResizeFrame(
+        activityContext: ActivityContext,
+        widgetView: LauncherAppWidgetHostView,
+        cellLayout: CellLayout,
+    ) {
         error(
             "Compose is not available. Make sure to check isComposeAvailable() before calling any" +
                 " other function on ComposeFacade."

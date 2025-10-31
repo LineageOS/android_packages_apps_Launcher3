@@ -63,6 +63,8 @@
     <!-- App Widget resize frame -->
     <dimen name="widget_handle_margin">13dp</dimen>
     <dimen name="resize_frame_background_padding">24dp</dimen>
+    <!-- Padding outside resize frame that its clickable content (e.g. buttons) extend to. -->
+    <dimen name="resize_frame_touch_target_size">48dp</dimen>
     <dimen name="resize_frame_margin">23dp</dimen>
     <dimen name="resize_frame_invalid_drag_across_two_panel_opacity_margin">24dp</dimen>
 
