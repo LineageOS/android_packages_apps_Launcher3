@@ -106,7 +106,9 @@ class ShortcutIconTest {
 
         // Ensure that the icon is saved in the main DB
         TestUtil.runOnExecutorSync(Executors.MODEL_EXECUTOR) {
-            state.model.getWriter(false, null, null).updateItemInDatabase(getPinnedInfo())
+            state.model.enqueueModelUpdateTask { taskController, _, _ ->
+                taskController.getModelWriter().updateItemInDatabase(getPinnedInfo())
+            }
         }
 
         // Make the system fail to load shortcut icons

@@ -75,7 +75,7 @@ constructor(
         val writer =
             LauncherAppState.getInstance(mOriginalView.context)
                 .model
-                .getWriter(true, requireNotNull(mTarget).cellPosMapper, callbacks)
+                .getWriter(true, requireNotNull(mTarget), callbacks)
 
         if (!isPin) {
             var infoToUnpin = mItemInfo
