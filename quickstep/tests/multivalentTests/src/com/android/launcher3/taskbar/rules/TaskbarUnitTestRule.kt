@@ -38,7 +38,6 @@ import com.android.launcher3.util.TestUtil
 import com.android.launcher3.util.coroutines.ProductionDispatchers
 import com.android.quickstep.AllAppsActionManager
 import com.android.quickstep.input.QuickstepKeyGestureEventsManager
-import com.android.quickstep.window.RecentsWindowManager
 import java.lang.reflect.Field
 import java.lang.reflect.ParameterizedType
 import java.util.Locale
@@ -159,7 +158,6 @@ class TaskbarUnitTestRule(
                                     PendingIntent(IIntentSender.Default())
                                 },
                                 object : TaskbarNavButtonCallbacks {},
-                                RecentsWindowManager.REPOSITORY_INSTANCE.get(context),
                                 // VirtualDisplaysRule dispatches system decoration changes.
                                 mock<DisplaysWithDecorationsRepositoryCompat>(),
                                 ProductionDispatchers.INSTANCE[context].main,

@@ -798,7 +798,7 @@ public class TouchInteractionService extends Service {
 
         mTaskbarManager = new TaskbarManagerImplWrapper(
             new TaskbarManagerImpl(this, mAllAppsActionManager, mNavCallbacks,
-                mRecentsWindowManagerRepository, mDisplaysWithDecorationsRepositoryCompat,
+                mDisplaysWithDecorationsRepositoryCompat,
                     ProductionDispatchers.INSTANCE.get(this).getTaskbarUi()));
         mDesktopAppLaunchTransitionManager =
                 new DesktopAppLaunchTransitionManager(this, SystemUiProxy.INSTANCE.get(this),
