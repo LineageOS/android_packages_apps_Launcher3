@@ -1,0 +1,4 @@
+[submodule "libs_systemui"]
+	path = libs_systemui
+	url = https://github.com/LineageOS/android_frameworks_libs_systemui
+	branch = lineage-23.0
