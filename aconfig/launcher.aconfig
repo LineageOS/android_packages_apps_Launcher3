@@ -698,3 +698,10 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+  name: "enable_app_automation_indicator"
+  namespace: "launcher"
+  description: "Enables indicator for active app automation in Launcher"
+  bug: "440353845"
+}
