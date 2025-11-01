@@ -1760,9 +1760,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                 mControllers.taskbarStashController.updateAndAnimateTransientTaskbar(true);
             }
         } else if (tag instanceof TaskItemInfo info) {
-            if (DesktopExperienceFlags.ENABLE_TASKBAR_RUNNING_TASKS_IN_SPLITSCREEN_SELECT_BUGFIX
-                        .isTrue()
-                    && recents != null && recents.isSplitSelectionActive()
+            if (recents != null && recents.isSplitSelectionActive()
                     && (getControllers().taskbarRecentAppsController.getDesktopTaskWithId(
                                 info.getTaskId())) != null) {
                 taskbarUIController.triggerSecondAppForSplit(info, info.intent, view, EMPTY_FILTER);
@@ -1916,8 +1914,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             TaskbarUIController taskbarUIController = mControllers.uiController;
             RecentsViewInteractor recents = taskbarUIController.getRecentsViewInteractor();
 
-            if (DesktopExperienceFlags.ENABLE_TASKBAR_RUNNING_TASKS_IN_SPLITSCREEN_SELECT_BUGFIX
-                    .isTrue() && recents != null && recents.isSplitSelectionActive()) {
+            if (recents != null && recents.isSplitSelectionActive()) {
                 return Pair.create(TASKBAR_UI_THREAD,
                         () -> taskbarUIController.moveRunningTaskToSplitSelection(
                                 singleTask.getTask(), null, startingView));
