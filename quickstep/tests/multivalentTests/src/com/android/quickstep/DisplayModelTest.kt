@@ -38,6 +38,8 @@ class DisplayModelTest {
         SystemDecorationChangeObserver.INSTANCE.get(context)
     private val displayRepositoryCompat = mock<DisplaysWithDecorationsRepositoryCompat>()
     private val dispatcher = StandardTestDispatcher()
+    private val displayId = Display.DEFAULT_DISPLAY
+    private val invalidDisplayId = -1
 
     class TestableResource : DisplayModel.DisplayResource() {
         var isCleanupCalled = false
@@ -64,20 +66,79 @@ class DisplayModelTest {
             }
         }
 
+    private val testableDisplayModelWithDebug =
+        object :
+            DisplayModel<TestableResource>(
+                context,
+                systemDecorationChangeObserver,
+                displayRepositoryCompat,
+                dispatcher,
+                debug = true,
+            ) {
+            override fun createDisplayResource(display: Display): TestableResource {
+                return TestableResource()
+            }
+        }
+
     @Test
     fun testCreate() {
-        testableDisplayModel.storeDisplayResource(Display.DEFAULT_DISPLAY)
-        val resource = testableDisplayModel.getDisplayResource(Display.DEFAULT_DISPLAY)
+        testableDisplayModel.storeDisplayResource(displayId)
+        val resource = testableDisplayModel.getDisplayResource(displayId)
         assertNotNull(resource)
     }
 
     @Test
     fun testCleanAndDelete() {
-        testableDisplayModel.storeDisplayResource(Display.DEFAULT_DISPLAY)
-        val resource = testableDisplayModel.getDisplayResource(Display.DEFAULT_DISPLAY)!!
+        testableDisplayModel.storeDisplayResource(displayId)
+        val resource = testableDisplayModel.getDisplayResource(displayId)!!
         assertNotNull(resource)
-        testableDisplayModel.deleteDisplayResource(Display.DEFAULT_DISPLAY)
+        testableDisplayModel.deleteDisplayResource(displayId)
         assert(resource.isCleanupCalled)
-        assertNull(testableDisplayModel.getDisplayResource(Display.DEFAULT_DISPLAY))
+        assertNull(testableDisplayModel.getDisplayResource(displayId))
+    }
+
+    @Test
+    fun testDebug_getDisplayResource_doesNotCrash() {
+        assertNull(testableDisplayModelWithDebug.getDisplayResource(displayId))
+    }
+
+    @Test
+    fun testDebug_storeDisplayResource_doesNotCrash() {
+        testableDisplayModelWithDebug.storeDisplayResource(displayId)
+        assertNotNull(testableDisplayModelWithDebug.getDisplayResource(displayId))
+    }
+
+    @Test
+    fun testDebug_onDisplayAddSystemDecorations_doesNotCrash() {
+        testableDisplayModelWithDebug.storeDisplayResource(displayId)
+        testableDisplayModelWithDebug.onDisplayAddSystemDecorations(displayId)
+        assertNotNull(testableDisplayModelWithDebug.getDisplayResource(displayId))
+    }
+
+    @Test
+    fun testDebug_deleteDisplayResource_doesNotCrash() {
+        testableDisplayModelWithDebug.storeDisplayResource(displayId)
+        testableDisplayModelWithDebug.deleteDisplayResource(displayId)
+        assertNull(testableDisplayModelWithDebug.getDisplayResource(displayId))
+    }
+
+    @Test
+    fun testDebug_onDisplayRemoved_doesNotCrash() {
+        testableDisplayModelWithDebug.storeDisplayResource(displayId)
+        testableDisplayModelWithDebug.onDisplayRemoved(displayId)
+        assertNull(testableDisplayModelWithDebug.getDisplayResource(displayId))
+    }
+
+    @Test
+    fun testDebug_onDisplayRemoveSystemDecorations_doesNotCrash() {
+        testableDisplayModelWithDebug.storeDisplayResource(displayId)
+        testableDisplayModelWithDebug.onDisplayRemoveSystemDecorations(displayId)
+        assertNull(testableDisplayModelWithDebug.getDisplayResource(displayId))
+    }
+
+    @Test
+    fun testDebug_storeInvalidDisplayResource_doesNotCrash() {
+        testableDisplayModelWithDebug.storeDisplayResource(invalidDisplayId)
+        assertNull(testableDisplayModelWithDebug.getDisplayResource(invalidDisplayId))
     }
 }
