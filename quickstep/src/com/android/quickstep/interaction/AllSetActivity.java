@@ -83,7 +83,7 @@ import com.android.launcher3.R;
 import com.android.launcher3.RemoveAnimationSettingsTracker;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.anim.AnimatedFloat;
-import com.android.launcher3.taskbar.StashedHandleViewController;
+import com.android.launcher3.taskbar.StashedHandleViewControllerProxy;
 import com.android.launcher3.taskbar.TaskbarManager;
 import com.android.launcher3.util.Executors;
 import com.android.launcher3.util.SafeCloseable;
@@ -174,6 +174,8 @@ public class AllSetActivity extends Activity {
     @Nullable private WallpaperScreenshotClipView mWallpaperClipPath;
 
     @Nullable private SafeCloseable mUiControllerChangeSafeCloseable;
+
+    @Nullable private StashedHandleViewControllerProxy mStashedHandleViewControllerProxy;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -370,9 +372,9 @@ public class AllSetActivity extends Activity {
             public void onAnimationUpdate(ValueAnimator animation) {
                 float transY = (float) animation.getAnimatedValue();
                 mWallpaperClipPath.setClipTranslationY(transY, animation.getAnimatedFraction());
-                StashedHandleViewController controller = getStashedHandleViewController();
-                if (controller != null) {
-                    controller.setTranslationYForSwipe(transY);
+                StashedHandleViewControllerProxy proxy = getStashedHandleViewController();
+                if (proxy != null) {
+                    proxy.setTranslationYForSwipe(transY);
                 }
             }
         });
@@ -397,11 +399,9 @@ public class AllSetActivity extends Activity {
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 float alpha = (float) valueAnimator.getAnimatedValue();
                 mHintView.setAlpha(alpha);
-                StashedHandleViewController controller = getStashedHandleViewController();
-                if (controller != null) {
-                    controller.getStashedHandleAlpha()
-                            .get(ALPHA_INDEX_ALL_SET_TRANSITION)
-                            .setValue(alpha);
+                StashedHandleViewControllerProxy proxy = getStashedHandleViewController();
+                if (proxy != null) {
+                    proxy.setStashedHandleAlpha(ALPHA_INDEX_ALL_SET_TRANSITION, alpha);
                 }
             }
         });
@@ -414,26 +414,28 @@ public class AllSetActivity extends Activity {
         as.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                StashedHandleViewController controller = getStashedHandleViewController();
-                if (controller != null) {
-                    controller.setTranslationYForSwipe(0);
-                    controller.getStashedHandleAlpha()
-                            .get(ALPHA_INDEX_ALL_SET_TRANSITION)
-                            .setValue(1f);
+                StashedHandleViewControllerProxy proxy = getStashedHandleViewController();
+                if (proxy != null) {
+                    proxy.setTranslationYForSwipe(0);
+                    proxy.setStashedHandleAlpha(ALPHA_INDEX_ALL_SET_TRANSITION, 1f);
                 }
             }
         });
         return as;
     }
 
-    private @Nullable StashedHandleViewController getStashedHandleViewController() {
-        if (mTISBindHelper != null) {
-            TaskbarManager taskbarManager = mTISBindHelper.getTaskbarManager();
-            if (taskbarManager != null) {
-                return taskbarManager.getStashedHandleViewController();
-            }
+    private @Nullable StashedHandleViewControllerProxy getStashedHandleViewController() {
+        if (mStashedHandleViewControllerProxy != null) {
+            return mStashedHandleViewControllerProxy;
         }
-        return null;
+        if (mTISBindHelper == null) {
+            return null;
+        }
+        TaskbarManager taskbarManager = mTISBindHelper.getTaskbarManager();
+        if (taskbarManager != null) {
+            mStashedHandleViewControllerProxy = taskbarManager.getStashedHandleViewController();
+        }
+        return mStashedHandleViewControllerProxy;
     }
 
     @Override
