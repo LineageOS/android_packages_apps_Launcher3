@@ -27,6 +27,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.BubbleTextView
 import com.android.launcher3.Flags.FLAG_ENABLE_MULTI_INSTANCE_MENU_TASKBAR
+import com.android.launcher3.Flags.FLAG_ENABLE_TASKBAR_UI_THREAD
 import com.android.launcher3.LauncherSettings
 import com.android.launcher3.R
 import com.android.launcher3.dragndrop.DragView
@@ -183,6 +184,105 @@ class TaskbarPopupControllerTest {
             shortcut is PinToTaskbarShortcut<*>,
         )
         Assert.assertFalse((shortcut as PinToTaskbarShortcut<*>).isPin)
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_TASKBAR_UI_THREAD)
+    fun createPinShortcut_itemAlreadyPinned_withUiThreadEnabled_returnsUnpinShortcut() {
+        val hotseatItems = SparseArray<ItemInfo>()
+        val appUser = android.os.Process.myUserHandle()
+        val appAIntent = Intent().setComponent(ComponentName("com.example.app", "AppAActivity"))
+
+        val itemFromAllApps =
+            createTestWorkspaceItem(
+                0,
+                "AppA",
+                appAIntent,
+                appUser,
+                LauncherSettings.Favorites.CONTAINER_ALL_APPS,
+            )
+
+        val pinnedItemInHotseat =
+            createTestWorkspaceItem(
+                1,
+                "AppA",
+                appAIntent,
+                appUser,
+                LauncherSettings.Favorites.CONTAINER_HOTSEAT,
+            )
+
+        hotseatItems.put(0, pinnedItemInHotseat)
+        popupController.taskbarInfoList = hotseatItems
+        val allAppsAppIcon = Mockito.mock(BubbleTextView::class.java)
+
+        val shortcut =
+            popupController.createPinShortcut(taskbarContext, itemFromAllApps, allAppsAppIcon)
+        Assert.assertNotNull("Shortcut should not be null", shortcut)
+        Assert.assertTrue(
+            "Shortcut should be PinToTaskbarShortcut",
+            shortcut is PinToTaskbarShortcut<*>,
+        )
+        Assert.assertFalse((shortcut as PinToTaskbarShortcut<*>).isPin)
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_TASKBAR_UI_THREAD)
+    fun setTaskbarInfoList_withUiThreadEnabled_clonesList() {
+        // Verifies that setTaskbarInfoList clones the input list when UI thread is enabled.
+        val originalList = SparseArray<ItemInfo>()
+        val item = createHotseatWorkspaceItem()
+        originalList.put(0, item)
+
+        popupController.taskbarInfoList = originalList
+
+        // Modify the original list after setting it.
+        originalList.remove(0)
+
+        // The internal list should not be affected.
+        val internalList = popupController.taskbarInfoList
+        assertThat(internalList.size()).isEqualTo(1)
+        assertThat(internalList.get(0)).isEqualTo(item)
+    }
+
+    @Test
+    @DisableFlags(FLAG_ENABLE_TASKBAR_UI_THREAD)
+    fun setTaskbarInfoList_withUiThreadDisabled_doesNotCloneList() {
+        // Verifies that setTaskbarInfoList uses the same list reference when UI thread is disabled.
+        val originalList = SparseArray<ItemInfo>()
+        val item = createHotseatWorkspaceItem()
+        originalList.put(0, item)
+
+        popupController.taskbarInfoList = originalList
+
+        // Modify the original list after setting it.
+        originalList.remove(0)
+
+        // The internal list should be affected.
+        val internalList = popupController.taskbarInfoList
+        assertThat(internalList.size()).isEqualTo(0)
+    }
+
+    @Test
+    fun getTaskbarInfoList_returnsClonedList() {
+        // Verifies that getTaskbarInfoList always returns a defensive copy.
+        val originalList = SparseArray<ItemInfo>()
+        val item = createHotseatWorkspaceItem()
+        originalList.put(0, item)
+        popupController.taskbarInfoList = originalList
+
+        val retrievedList1 = popupController.taskbarInfoList
+        val retrievedList2 = popupController.taskbarInfoList
+
+        // Verify it's a clone and we get a new instance each time.
+        assertThat(retrievedList1).isNotSameInstanceAs(retrievedList2)
+
+        // Modify the retrieved list.
+        retrievedList1.remove(0)
+
+        // Verify the internal list is not modified by getting it again.
+        val internalList = popupController.taskbarInfoList
+        assertThat(internalList.size()).isEqualTo(1)
+        assertThat(internalList.get(0)).isEqualTo(item)
     }
 
     private fun hasTaskbarDragView(): Boolean {
