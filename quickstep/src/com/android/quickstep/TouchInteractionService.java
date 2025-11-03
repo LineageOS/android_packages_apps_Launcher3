@@ -688,37 +688,38 @@ public class TouchInteractionService extends Service {
                         // display.
                         return;
                     }
-                    if (mGestureState != DEFAULT_STATE) {
-                        // If there's an ongoing gesture, we shouldn't clean up the recents window
-                        // since gestures will clean up the recents window when needed.
-                        return;
-                    }
                     BaseContainerInterface<?, ?> defaultContainerInterface =
                             OverviewComponentObserver.INSTANCE.get(
                                     TouchInteractionService.this).getContainerInterface(
                                     DEFAULT_DISPLAY);
-                    if (defaultContainerInterface != null
-                            && defaultContainerInterface.getCreatedContainer()
-                            instanceof RecentsWindowManager recentsWindowManager) {
-                        TaskAnimationManager taskAnimationManager =
-                                mTaskAnimationManagerRepository.get(DEFAULT_DISPLAY);
-                        if (taskAnimationManager == null) {
+                    if (defaultContainerInterface == null
+                            || !(defaultContainerInterface.getCreatedContainer()
+                            instanceof RecentsWindowManager recentsWindowManager)) {
+                        return;
+                    }
+                    TaskAnimationManager taskAnimationManager =
+                            mTaskAnimationManagerRepository.get(DEFAULT_DISPLAY);
+                    if (taskAnimationManager == null) {
+                        return;
+                    }
+                    if (taskAnimationManager.hasOngoingGesture()) {
+                        // If there's an ongoing gesture, we shouldn't clean up the recents window
+                        // since gestures will clean up the recents window when needed.
+                        return;
+                    }
+                    if (taskAnimationManager.isRecentsAnimationRunning()) {
+                        RecentsState recentsState =
+                                recentsWindowManager.getStateManager().getState();
+                        if (!recentsState.isRecentsViewVisible()) {
+                            // If we're in a state where the recents view is visible, we can
+                            // ignore the recents animation running check, otherwise we should
+                            // wait for the recents animation to end.
                             return;
                         }
-                        if (taskAnimationManager.isRecentsAnimationRunning()) {
-                            RecentsState recentsState =
-                                    recentsWindowManager.getStateManager().getState();
-                            if (!recentsState.isRecentsViewVisible()) {
-                                // If we're in a state where the recents view is visible, we can
-                                // ignore the recents animation running check, otherwise we should
-                                // wait for the recents animation to end.
-                                return;
-                            }
-                        }
-                        if (recentsWindowManager.isStarted()) {
-                            recentsWindowManager.getStateManager().goToState(RecentsState.HOME,
-                                    true);
-                        }
+                    }
+                    if (recentsWindowManager.isStarted()) {
+                        recentsWindowManager.getStateManager().goToState(RecentsState.HOME,
+                                true);
                     }
                 }
             };
