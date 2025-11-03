@@ -126,8 +126,7 @@
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Oplysninger om proceslinjen"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Træk en app til siden for at bruge 2 apps på én gang"</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"Træk til de nederste hjørner for at få den til at svæve"</string>
-    <!-- no translation found for taskbar_edu_stashing (911857479758694381) -->
-    <skip />
+    <string name="taskbar_edu_stashing" msgid="911857479758694381">"Stryg langsomt opad for at se proceslinjen"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Få appforslag baseret på din rutine"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Fastgør proceslinjen med et langt tryk på skillelinjen"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Få mere fra hånden med proceslinjen"</string>
@@ -180,6 +179,5 @@
     <string name="nudge_a11y_title" msgid="2126529303123687912">"Skub"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"Luk"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"Skub billedet"</string>
-    <!-- no translation found for running_app_description (1309281047289078871) -->
-    <skip />
+    <string name="running_app_description" msgid="1309281047289078871">"<xliff:g id="APP_TITLE">%1$s</xliff:g> og <xliff:g id="RUNNING_STATE">%2$s</xliff:g>"</string>
 </resources>

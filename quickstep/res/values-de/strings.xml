@@ -126,8 +126,7 @@
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Informationen zur Taskleiste"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"App zur Seite ziehen, um zwei Apps gleichzeitig zu nutzen"</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"Ziehe eine App in eine der unteren Ecken, um ihre Verankerung zu lösen"</string>
-    <!-- no translation found for taskbar_edu_stashing (911857479758694381) -->
-    <skip />
+    <string name="taskbar_edu_stashing" msgid="911857479758694381">"Langsam nach oben wischen, um die Taskleiste anzuzeigen"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"App-Vorschläge auf Grundlage deiner Nutzung erhalten"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Bildschirmteiler lange drücken, um die Taskleiste anzupinnen"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Mehr Möglichkeiten mit der Taskleiste"</string>
@@ -176,10 +175,9 @@
     <string name="search_gesture_feature_title" msgid="1294044108313175306">"Circle to Search"</string>
     <string name="header_app_icon_description" msgid="2184625881433608027">"App-Symbol"</string>
     <string name="header_default_app_title" msgid="8308052350689531566">"Titel der App"</string>
-    <string name="header_close_icon_description" msgid="5400033616675911319">"Schaltfläche „Schließen“"</string>
+    <string name="header_close_icon_description" msgid="5400033616675911319">"Button „Schließen“"</string>
     <string name="nudge_a11y_title" msgid="2126529303123687912">"Erinnerung"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"Schließen"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"Bild für Erinnerung"</string>
-    <!-- no translation found for running_app_description (1309281047289078871) -->
-    <skip />
+    <string name="running_app_description" msgid="1309281047289078871">"<xliff:g id="APP_TITLE">%1$s</xliff:g> <xliff:g id="RUNNING_STATE">%2$s</xliff:g>"</string>
 </resources>
