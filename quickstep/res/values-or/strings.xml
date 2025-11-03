@@ -72,7 +72,7 @@
     <string name="home_gesture_tutorial_subtitle" msgid="7245995490408668778">"ଆପଣଙ୍କ ସ୍କ୍ରିନର ତଳୁ ଉପରକୁ ସ୍ୱାଇପ କରନ୍ତୁ"</string>
     <string name="home_gesture_tutorial_success" msgid="1736295017642244751">"ବଢ଼ିଆ କାମ!"</string>
     <string name="overview_gesture_feedback_swipe_too_far_from_edge" msgid="6402349235265407385">"ଆପଣ ସ୍କ୍ରିନର ତଳ ଧାରରୁ ଉପରକୁ ସ୍ୱାଇପ କରୁଥିବା ସୁନିଶ୍ଚିତ କରନ୍ତୁ"</string>
-    <string name="overview_gesture_feedback_home_detected" msgid="663432226180397138">"ୱିଣ୍ଡୋକୁ ରିଲିଜ୍ କରିବା ପୂର୍ବରୁ ଅଧିକ ସମୟ ଧରି ରଖିବାକୁ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="overview_gesture_feedback_home_detected" msgid="663432226180397138">"ୱିଣ୍ଡୋକୁ ରିଲିଜ କରିବା ପୂର୍ବରୁ ଅଧିକ ସମୟ ଧରି ରଖିବାକୁ ଚେଷ୍ଟା କରନ୍ତୁ"</string>
     <string name="overview_gesture_feedback_wrong_swipe_direction" msgid="1191055451018584958">"ଆପଣ ସିଧା ଉପରକୁ ସ୍ୱାଇପ କରି ତା\'ପରେ ବିରତ କରୁଥିବା ସୁନିଶ୍ଚିତ କରନ୍ତୁ।"</string>
     <string name="overview_gesture_feedback_complete_with_follow_up" msgid="3544611727467765026">"ଜେଶ୍ଚରଗୁଡ଼ିକୁ କିପରି ବ୍ୟବହାର କରାଯିବ ଆପଣ ତାହା ଶିଖିଛନ୍ତି। ଜେଶ୍ଚରଗୁଡ଼ିକୁ ବନ୍ଦ କରିବାକୁ, ସେଟିଂସକୁ ଯାଆନ୍ତୁ।"</string>
     <string name="overview_gesture_feedback_complete_without_follow_up" msgid="2903050864432331629">"ଆପଣ ଆପ୍ସ ସୁଇଚ କରନ୍ତୁ ଜେଶ୍ଚର ସମ୍ପୂର୍ଣ୍ଣ କରିଛନ୍ତି।"</string>
@@ -126,8 +126,7 @@
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"ଟାସ୍କବାର ଶିକ୍ଷା"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"ଥରକେ 2ଟି ଆପ୍ସ ବ୍ୟବହାର କରିବା ପାଇଁ ଏକ ଆପକୁ ପାର୍ଶ୍ୱକୁ ଡ୍ରାଗ କର"</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"ଏହାକୁ ଫ୍ଲୋଟ କରି ରଖିବାକୁ ନିମ୍ନର କୋଣଗୁଡ଼ିକୁ ଡ୍ରାଗ କରନ୍ତୁ"</string>
-    <!-- no translation found for taskbar_edu_stashing (911857479758694381) -->
-    <skip />
+    <string name="taskbar_edu_stashing" msgid="911857479758694381">"ଟାସ୍କବାର ଦେଖାଇବା ପାଇଁ ଉପରକୁ ଧୀରେ ସ୍ୱାଇପ କରନ୍ତୁ"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"ଆପଣଙ୍କ ରୁଟିନ ଆଧାରରେ ଆପ ପରାମର୍ଶଗୁଡ଼ିକୁ ପାଆନ୍ତୁ"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"ଟାସ୍କବାର ପିନ କରିବା ପାଇଁ ଡିଭାଇଡରକୁ ଅଧିକ ସମୟ ଦବାନ୍ତୁ"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"ଟାସ୍କବାର ମାଧ୍ୟମରେ ଆହୁରି ଅନେକ କିଛି କରନ୍ତୁ"</string>
@@ -180,6 +179,5 @@
     <string name="nudge_a11y_title" msgid="2126529303123687912">"ନଜ"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"ନଜ ଇମେଜ"</string>
-    <!-- no translation found for running_app_description (1309281047289078871) -->
-    <skip />
+    <string name="running_app_description" msgid="1309281047289078871">"<xliff:g id="APP_TITLE">%1$s</xliff:g> <xliff:g id="RUNNING_STATE">%2$s</xliff:g>⁠"</string>
 </resources>
