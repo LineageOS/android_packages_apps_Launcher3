@@ -42,7 +42,7 @@ import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE
 import com.android.wm.shell.Flags.FLAG_ENABLE_BUBBLE_BAR
-import com.android.wm.shell.shared.bubbles.BubbleConstants.BUBBLE_EXPANDED_SCRIM_ALPHA
+import com.android.wm.shell.shared.bubbles.BubbleConstants.BUBBLE_BAR_EXPANDED_SCRIM_ALPHA
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -61,11 +61,13 @@ class TaskbarScrimViewControllerTest {
     val context =
         TaskbarWindowSandboxContext.create(
             SandboxParams({
-                spy(SystemUiProxy(
+                spy(
+                    SystemUiProxy(
                         ApplicationProvider.getApplicationContext(),
                         MAIN_EXECUTOR,
                         UI_HELPER_EXECUTOR,
-                    )) {
+                    )
+                ) {
                     doAnswer { backPressed = true }.whenever(it).onBackEvent(anyOrNull(), any())
                 }
             })
@@ -102,7 +104,7 @@ class TaskbarScrimViewControllerTest {
             animatorTestRule.advanceTimeBy(animationDuration)
         }
 
-        assertThat(scrimViewController.scrimAlpha).isEqualTo(BUBBLE_EXPANDED_SCRIM_ALPHA)
+        assertThat(scrimViewController.scrimAlpha).isEqualTo(BUBBLE_BAR_EXPANDED_SCRIM_ALPHA)
     }
 
     @Test
@@ -113,7 +115,7 @@ class TaskbarScrimViewControllerTest {
             scrimViewController.onTaskbarVisibilityChanged(VISIBLE)
             scrimViewController.updateStateForSysuiFlags(SYSUI_STATE_BUBBLES_EXPANDED, true)
         }
-        assertThat(scrimViewController.scrimAlpha).isEqualTo(BUBBLE_EXPANDED_SCRIM_ALPHA)
+        assertThat(scrimViewController.scrimAlpha).isEqualTo(BUBBLE_BAR_EXPANDED_SCRIM_ALPHA)
 
         getInstrumentation().runOnMainSync {
             scrimViewController.onTaskbarVisibilityChanged(GONE)
@@ -133,7 +135,7 @@ class TaskbarScrimViewControllerTest {
                 .launcherState = BubbleStashController.BubbleLauncherState.HOME
             scrimViewController.updateStateForSysuiFlags(SYSUI_STATE_BUBBLES_EXPANDED, true)
         }
-        assertThat(scrimViewController.scrimAlpha).isEqualTo(BUBBLE_EXPANDED_SCRIM_ALPHA)
+        assertThat(scrimViewController.scrimAlpha).isEqualTo(BUBBLE_BAR_EXPANDED_SCRIM_ALPHA)
 
         getInstrumentation().runOnMainSync {
             scrimViewController.onTaskbarVisibilityChanged(GONE)
@@ -165,7 +167,7 @@ class TaskbarScrimViewControllerTest {
                 true,
             )
         }
-        assertThat(scrimViewController.scrimAlpha).isGreaterThan(BUBBLE_EXPANDED_SCRIM_ALPHA)
+        assertThat(scrimViewController.scrimAlpha).isGreaterThan(BUBBLE_BAR_EXPANDED_SCRIM_ALPHA)
     }
 
     @Test

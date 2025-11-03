@@ -21,7 +21,7 @@ import static com.android.launcher3.taskbar.bubbles.BubbleBarController.isBubble
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE;
-import static com.android.wm.shell.shared.bubbles.BubbleConstants.BUBBLE_EXPANDED_SCRIM_ALPHA;
+import static com.android.wm.shell.shared.bubbles.BubbleConstants.BUBBLE_BAR_EXPANDED_SCRIM_ALPHA;
 
 import android.animation.ObjectAnimator;
 import android.view.animation.Interpolator;
@@ -129,10 +129,10 @@ public class TaskbarScrimViewController implements TaskbarControllers.LoggableTa
         if (isPersistentTaskBarVisible && manageMenuExpanded) {
             // When manage menu shows for persistent task bar there's the first scrim and second
             // scrim so figure out what the total transparency would be.
-            return BUBBLE_EXPANDED_SCRIM_ALPHA
-                    + (BUBBLE_EXPANDED_SCRIM_ALPHA * (1 - BUBBLE_EXPANDED_SCRIM_ALPHA));
+            return BUBBLE_BAR_EXPANDED_SCRIM_ALPHA
+                    + (BUBBLE_BAR_EXPANDED_SCRIM_ALPHA * (1 - BUBBLE_BAR_EXPANDED_SCRIM_ALPHA));
         } else if (shouldShowScrim()) {
-            return BUBBLE_EXPANDED_SCRIM_ALPHA;
+            return BUBBLE_BAR_EXPANDED_SCRIM_ALPHA;
         } else {
             return 0;
         }
