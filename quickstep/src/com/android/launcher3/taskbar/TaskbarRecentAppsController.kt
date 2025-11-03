@@ -15,12 +15,11 @@
  */
 package com.android.launcher3.taskbar
 
-import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
 import android.content.Context
 import android.util.Log
 import android.window.DesktopExperienceFlags
-import android.window.DesktopModeFlags
 import androidx.annotation.VisibleForTesting
+import com.android.internal.policy.DesktopModeCompatPolicy
 import com.android.launcher3.BubbleTextView.RunningAppState
 import com.android.launcher3.Flags
 import com.android.launcher3.Flags.enableRecentsInTaskbar
@@ -57,11 +56,10 @@ class TaskbarRecentAppsController(
     private val context: Context,
     private val recentsModel: RecentsModel,
     private val themeManager: ThemeManager,
+    private val desktopModeCompatPolicy: DesktopModeCompatPolicy,
 ) : LoggableTaskbarController {
 
-    var canShowRunningApps =
-        DesktopModeStatus.canEnterDesktopMode(context) &&
-            DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS.isTrue
+    var canShowRunningApps = DesktopModeStatus.canEnterDesktopMode(context)
         @VisibleForTesting
         set(isEnabledFromTest) {
             field = isEnabledFromTest
@@ -91,6 +89,15 @@ class TaskbarRecentAppsController(
                     recentsModel.unregisterRecentTasksChangedListener(recentTasksChangedListener)
                 }
             }
+        }
+
+    /** `true` if recent icons are replacing predictions. */
+    val isReplacingPredictions: Boolean
+        get() {
+            val showDesktopTasks =
+                controllers.taskbarDesktopModeController.shouldShowDesktopTasksInTaskbar()
+            return (showDesktopTasks && canShowRunningApps) ||
+                (!showDesktopTasks && canShowRecentApps)
         }
 
     // Initialized in init.
@@ -267,10 +274,16 @@ class TaskbarRecentAppsController(
 
             controllers.runAfterInit { reloadRecentTasksIfNeeded() }
             if (enableTaskbarRecentsThemedIcons()) {
+                // Both callbacks force an icon fetch, because these changes may affect how icons
+                // are generated from BitmapInfo.
                 iconShapeDataCloseable =
-                    themeManager.iconShapeData.forEach(TASKBAR_UI_THREAD) { fetchIcons() }
+                    themeManager.iconShapeData.forEach(TASKBAR_UI_THREAD) {
+                        fetchIcons(forceUpdate = true)
+                    }
                 themeChangeListener =
-                    ThemeChangeListener { TASKBAR_UI_THREAD.execute { fetchIcons() } }
+                    ThemeChangeListener {
+                            TASKBAR_UI_THREAD.execute { fetchIcons(forceUpdate = true) }
+                        }
                         .also { themeManager.addChangeListener(it) }
             }
         }
@@ -304,11 +317,7 @@ class TaskbarRecentAppsController(
     /** Called to update hotseatItems, in order to de-dupe them from Recent/Running tasks later. */
     fun updateHotseatItemInfos(hotseatItems: Array<ItemInfo?>): Array<ItemInfo?> {
         // Ignore predicted apps - we show running or recent apps instead.
-        val showDesktopTasks =
-            controllers.taskbarDesktopModeController.shouldShowDesktopTasksInTaskbar()
-        val removePredictions =
-            (showDesktopTasks && canShowRunningApps) || (!showDesktopTasks && canShowRecentApps)
-        if (!removePredictions) {
+        if (!isReplacingPredictions) {
             shownHotseatItems = hotseatItems.filterNotNull()
             onRecentsOrHotseatChanged()
             return hotseatItems
@@ -319,6 +328,8 @@ class TaskbarRecentAppsController(
                 .filter { itemInfo -> !itemInfo.isPredictedItem }
                 .toMutableList()
 
+        val showDesktopTasks =
+            controllers.taskbarDesktopModeController.shouldShowDesktopTasksInTaskbar()
         if (showDesktopTasks && canShowRunningApps) {
             shownHotseatItems =
                 updateHotseatItemsFromRunningTasks(
@@ -368,9 +379,11 @@ class TaskbarRecentAppsController(
                             .filterIsInstance<DesktopTask>()
                             .flatMap { it.tasks }
                             .filterNot {
-                                it.key.isTopActivityTransparent &&
-                                    it.key.isActivityStackTransparent &&
-                                    it.key.windowingMode == WINDOWING_MODE_FULLSCREEN
+                                desktopModeCompatPolicy.isTransparentOverlay(
+                                    it.key.isActivityStackTransparent,
+                                    it.key.numActivities,
+                                    it.key.windowingMode,
+                                )
                             }
                     val runningTasksChanged = oldRunningTaskdIds != runningTaskIds
                     val minimizedTasksChanged = oldMinimizedTaskIds != minimizedTaskIds
@@ -411,7 +424,12 @@ class TaskbarRecentAppsController(
         return true
     }
 
-    private fun fetchIcons() {
+    /**
+     * Fetches the icons for shown tasks.
+     *
+     * Only updates the task views if the bitmap info has changed or [forceUpdate] is `true`.
+     */
+    private fun fetchIcons(forceUpdate: Boolean = false) {
         if (enableRecentsInTaskbar()) {
             cancelIconLoadRequests() // Cancel any previous requests.
         }
@@ -422,6 +440,14 @@ class TaskbarRecentAppsController(
                     val cancellableTask =
                         if (enableTaskbarRecentsThemedIcons()) {
                             recentsModel.iconCache.getBitmapInfoInBackground(task) { bi, d, t ->
+                                if (
+                                    !forceUpdate &&
+                                        bi === groupTask.bitmapInfos[i] &&
+                                        d == task.titleDescription &&
+                                        t == task.title
+                                ) {
+                                    return@getBitmapInfoInBackground
+                                }
                                 groupTask.bitmapInfos[i] = bi
                                 task.titleDescription = d
                                 task.title = t
@@ -530,12 +556,16 @@ class TaskbarRecentAppsController(
         }
         // Remove the current task.
         val allRecentTasks = allRecentTasks.subList(0, allRecentTasks.size - 1)
-        var shownTasks = dedupeHotseatTasks(allRecentTasks, shownHotseatItems)
-        if (shownTasks.size > MAX_RECENT_TASKS) {
+        var nextShownTasks = dedupeHotseatTasks(allRecentTasks, shownHotseatItems)
+        if (nextShownTasks.size > MAX_RECENT_TASKS) {
             // Remove any tasks older than MAX_RECENT_TASKS.
-            shownTasks = shownTasks.subList(shownTasks.size - MAX_RECENT_TASKS, shownTasks.size)
+            nextShownTasks =
+                nextShownTasks.subList(nextShownTasks.size - MAX_RECENT_TASKS, nextShownTasks.size)
         }
-        return shownTasks
+
+        // Reuse matching previous GroupTasks, which may already tag a View and/or have BitmapInfo.
+        val prevTasksSet = shownTasks.toSet()
+        return nextShownTasks.map { n -> prevTasksSet.find { p -> p == n } ?: n }
     }
 
     private fun dedupeHotseatTasks(

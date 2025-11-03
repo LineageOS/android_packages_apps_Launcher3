@@ -76,6 +76,7 @@ import com.android.launcher3.model.ModelWriter;
 import com.android.launcher3.model.StringCache;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
+import com.android.launcher3.statehandlers.BaseDepthController;
 import com.android.launcher3.util.ActivityOptionsWrapper;
 import com.android.launcher3.util.ApplicationInfoWrapper;
 import com.android.launcher3.util.LauncherBindableItemsContainer;
@@ -88,6 +89,7 @@ import com.android.launcher3.util.SplitConfigurationOptions;
 import com.android.launcher3.util.SystemUiController;
 import com.android.launcher3.util.ViewCache;
 import com.android.launcher3.util.WeakCleanupSet;
+import com.android.launcher3.util.WindowBlurState;
 import com.android.launcher3.widget.LauncherWidgetHolder;
 import com.android.launcher3.widget.picker.model.WidgetPickerDataProvider;
 
@@ -215,25 +217,13 @@ public interface ActivityContext extends SavedStateRegistryOwner {
         return null;
     }
 
+    default BaseDepthController getDepthController() {
+        return null;
+    }
+
     /** @return {@code true} if all apps background blur is enabled */
     default boolean isAllAppsBackgroundBlurEnabled() {
-        return false;
-    }
-
-    /** @return {@code true} if overview background blur is enabled */
-    default boolean isOverviewBackgroundBlurEnabled() {
-        return false;
-    }
-
-    /** @return the resource id of the style to apply for the current blur state in All Apps. */
-    default int getAllAppsBlurStyleResId() {
-        return isAllAppsBackgroundBlurEnabled() ? R.style.AllAppsBlurStyle
-                : R.style.AllAppsBlurFallbackStyle;
-    }
-
-    /** @return the resource id of the style to apply for the current blur state in Overview. */
-    default int getOverviewBlurStyleResId() {
-        return View.NO_ID;
+        return WindowBlurState.getInstance(asContext()).getValue();
     }
 
     DeviceProfile getDeviceProfile();
@@ -520,7 +510,7 @@ public interface ActivityContext extends SavedStateRegistryOwner {
     /** Returns a writer for updating model properties */
     default ModelWriter getModelWriter() {
         return LauncherAppState.getInstance(asContext()).getModel().getWriter(
-                false, getCellPosMapper(), null);
+                false, this, null);
     }
 
     /** Set to manage objects that can be cleaned up along with the context */

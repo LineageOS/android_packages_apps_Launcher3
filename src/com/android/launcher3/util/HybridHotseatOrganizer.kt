@@ -100,7 +100,7 @@ class HybridHotseatOrganizer(
      *
      * @param matcher filter matching items that have been removed
      */
-    fun onModelItemsRemoved(matcher: Predicate<ItemInfo>) {
+    fun onModelItemsRemoved(matcher: Predicate<ItemInfo?>) {
         val oldItems = predictedItems.toMutableList()
         if (oldItems.removeIf(matcher)) {
             predictedItems = oldItems

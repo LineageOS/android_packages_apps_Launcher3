@@ -24,6 +24,7 @@ import com.android.launcher3.appprediction.PredictionRowView
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.asProperty
 import com.android.launcher3.taskbar.TaskbarStashController
 import com.android.launcher3.taskbar.TaskbarStashController.FLAG_STASHED_IN_APP_AUTO
+import com.android.launcher3.taskbar.TaskbarUiState
 import com.android.launcher3.taskbar.allapps.TaskbarAllAppsControllerTest.Companion.TEST_PREDICTED_APPS
 import com.android.launcher3.taskbar.overlay.TaskbarOverlayController
 import com.android.launcher3.taskbar.rules.TaskbarModeRule
@@ -147,6 +148,7 @@ class TaskbarAllAppsViewControllerTest {
             val overlayContext = overlayController.requestWindow()
             TaskbarAllAppsViewController(
                 overlayContext,
+                TaskbarUiState(),
                 overlayContext.layoutInflater.inflate(
                     R.layout.taskbar_all_apps_sheet,
                     overlayContext.dragLayer,

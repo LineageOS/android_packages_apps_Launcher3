@@ -30,6 +30,8 @@ import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.platform.test.rule.LimitDevicesRule;
 import android.platform.test.rule.SkipOnDeviceless;
 import android.view.View;
@@ -39,6 +41,7 @@ import androidx.test.filters.LargeTest;
 import androidx.test.uiautomator.By;
 import androidx.test.uiautomator.BySelector;
 
+import com.android.launcher3.Flags;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherSettings.Favorites;
 import com.android.launcher3.model.data.ItemInfo;
@@ -70,6 +73,9 @@ import java.util.regex.Pattern;
 @LargeTest
 @RunWith(AndroidJUnit4.class)
 public class RequestPinItemTest extends BaseLauncherActivityTest<Launcher> {
+    @Rule
+    public final SetFlagsRule mSetFlagsRule =
+            new SetFlagsRule(SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT);
 
     @Rule
     public TestRule mGrantWidgetRule = RoboApiWrapper.INSTANCE.grantWidgetBindPermissionRule();
@@ -95,6 +101,7 @@ public class RequestPinItemTest extends BaseLauncherActivityTest<Launcher> {
      * Test is is hanging on Robolectric, possibly an issue with threading.
      */
     @SkipOnDeviceless
+    @EnableFlags(Flags.FLAG_ENABLE_APP_WIDGET_PICKER_REFACTOR)
     public void testPinWidgetNoConfig() throws Throwable {
         runTest("pinWidgetNoConfig", true, (info, view) -> info instanceof LauncherAppWidgetInfo
                 && ((LauncherAppWidgetInfo) info).appWidgetId == mAppWidgetId
@@ -107,6 +114,7 @@ public class RequestPinItemTest extends BaseLauncherActivityTest<Launcher> {
      * Test is is hanging on Robolectric, possibly an issue with threading.
      */
     @SkipOnDeviceless
+    @EnableFlags(Flags.FLAG_ENABLE_APP_WIDGET_PICKER_REFACTOR)
     public void testPinWidgetNoConfig_customPreview() throws Throwable {
         // Command to set custom preview
         Intent command = RequestPinItemActivity.getCommandIntent(
@@ -124,6 +132,7 @@ public class RequestPinItemTest extends BaseLauncherActivityTest<Launcher> {
      * Test is is hanging on Robolectric, possibly an issue with threading.
      */
     @SkipOnDeviceless
+    @EnableFlags(Flags.FLAG_ENABLE_APP_WIDGET_PICKER_REFACTOR)
     public void testPinWidgetWithConfig() throws Throwable {
         runTest("pinWidgetWithConfig", true,
                 (info, view) -> info instanceof LauncherAppWidgetInfo
@@ -137,6 +146,7 @@ public class RequestPinItemTest extends BaseLauncherActivityTest<Launcher> {
      * Test is is hanging on Robolectric, possibly an issue with threading.
      */
     @SkipOnDeviceless
+    @EnableFlags(Flags.FLAG_ENABLE_APP_WIDGET_PICKER_REFACTOR)
     public void testPinShortcut() throws Throwable {
         // Command to set the shortcut id
         Intent command = RequestPinItemActivity.getCommandIntent(

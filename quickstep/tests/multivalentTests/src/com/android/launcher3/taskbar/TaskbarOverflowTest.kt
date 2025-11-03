@@ -76,7 +76,6 @@ import com.android.quickstep.util.SingleTask.Companion.createTaskItemInfo
 import com.android.quickstep.util.SlideInRemoteTransition
 import com.android.systemui.shared.recents.model.Task
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE
-import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS
 import com.android.window.flags.Flags.FLAG_ENABLE_OVERFLOW_BUTTON_FOR_TASKBAR_PINNED_ITEMS
 import com.android.window.flags.Flags.FLAG_ENABLE_PINNING_APP_WITH_CONTEXT_MENU
 import com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_OVERFLOW
@@ -104,7 +103,6 @@ import org.mockito.kotlin.whenever
 @RunWith(LauncherMultivalentJUnit::class)
 @EmulatedDevices(["pixelTablet2023"])
 @EnableFlags(
-    FLAG_ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS,
     FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
     FLAG_ENABLE_BUBBLE_BAR,
     FLAG_ENABLE_TASKBAR_OVERFLOW,

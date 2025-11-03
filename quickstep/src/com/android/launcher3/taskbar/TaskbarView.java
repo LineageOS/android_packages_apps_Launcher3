@@ -868,9 +868,11 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
             }
 
             View recentIcon = null;
-            // If a task is new, we should not reuse a view so that it animates in when it is added.
-            final boolean canReuseView =
-                    mPrevRecentTasks.contains(task) && !mPrevOverflowTasks.contains(task);
+            // If a task is new, we should try to reuse a view so that it animates in when it is
+            // added. This only works for LTR more right now, so we do not reuse views of previous
+            // tasks for new icons in RTL mode.
+            final boolean canReuseView = (!mIsRtl || mPrevRecentTasks.contains(task))
+                    && !mPrevOverflowTasks.contains(task);
             while (canReuseView && isNextViewInSection(GroupTask.class)) {
                 recentIcon = getChildAt(mNextViewIndex);
                 GroupTask tag = (GroupTask) recentIcon.getTag();

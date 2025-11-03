@@ -25,7 +25,7 @@ import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.deviceprofile.DeviceProperties
 import com.android.launcher3.util.TestActivityContext
-import com.android.window.flags.Flags.enableNonDefaultDisplaySplit
+import com.android.window.flags.Flags.enableNonDefaultDisplaySplitBugfix
 import kotlin.random.Random
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -459,8 +459,8 @@ class UtilitiesTest {
     @Test
     fun testIsLeftRightSplit_tablet_portrait_externalDisplay_disabled() {
         Assume.assumeFalse(
-            "assume FLAG_ENABLE_NON_DEFAULT_DISPLAY_SPLIT is not enabled.",
-            enableNonDefaultDisplaySplit(),
+            "assume FLAG_ENABLE_NON_DEFAULT_DISPLAY_SPLIT_BUGFIX is not enabled.",
+            enableNonDefaultDisplaySplitBugfix(),
         )
 
         // GIVEN: A tablet in portrait mode, on an external display.
@@ -475,8 +475,8 @@ class UtilitiesTest {
     @Test
     fun testIsLeftRightSplit_tablet_landscape_externalDisplay_disabled() {
         Assume.assumeFalse(
-            "assume FLAG_ENABLE_NON_DEFAULT_DISPLAY_SPLIT is not enabled.",
-            enableNonDefaultDisplaySplit(),
+            "assume FLAG_ENABLE_NON_DEFAULT_DISPLAY_SPLIT_BUGFIX is not enabled.",
+            enableNonDefaultDisplaySplitBugfix(),
         )
 
         // GIVEN: A tablet in landscape mode, on an external display.
@@ -491,8 +491,8 @@ class UtilitiesTest {
     @Test
     fun testIsLeftRightSplit_tablet_portrait_externalDisplay_enabled() {
         Assume.assumeTrue(
-            "assume FLAG_ENABLE_NON_DEFAULT_DISPLAY_SPLIT is enabled.",
-            enableNonDefaultDisplaySplit(),
+            "assume FLAG_ENABLE_NON_DEFAULT_DISPLAY_SPLIT_BUGFIX is enabled.",
+            enableNonDefaultDisplaySplitBugfix(),
         )
 
         // GIVEN: A tablet in portrait mode, on an external display.
@@ -507,8 +507,8 @@ class UtilitiesTest {
     @Test
     fun testIsLeftRightSplit_tablet_landscape_externalDisplay_enabled() {
         Assume.assumeTrue(
-            "assume FLAG_ENABLE_NON_DEFAULT_DISPLAY_SPLIT is enabled.",
-            enableNonDefaultDisplaySplit(),
+            "assume FLAG_ENABLE_NON_DEFAULT_DISPLAY_SPLIT_BUGFIX is enabled.",
+            enableNonDefaultDisplaySplitBugfix(),
         )
 
         // GIVEN: A tablet in landscape mode, on an external display.

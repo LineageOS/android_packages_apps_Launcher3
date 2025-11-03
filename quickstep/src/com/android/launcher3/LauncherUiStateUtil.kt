@@ -27,7 +27,7 @@ object LauncherUiStateUtil {
         launcherUiState: LauncherUiState,
     ): DeviceProfile =
         if (refactorTaskbarUiState()) {
-            val ret: DeviceProfile = launcherUiState.deviceProfileRef.value!!
+            val ret: DeviceProfile = launcherUiState.deviceProfileRef.value
             check(!(BuildConfig.IS_STUDIO_BUILD && ret !== launcher.getDeviceProfile())) {
                 "getDeviceProfile() doesn't match"
             }
@@ -42,7 +42,7 @@ object LauncherUiStateUtil {
         launcherUiState: LauncherUiState,
     ): LauncherState =
         if (refactorTaskbarUiState()) {
-            val ret: LauncherState = launcherUiState.launcherStateRef.value
+            val ret: LauncherState = launcherUiState.launcherState
             if (BuildConfig.IS_STUDIO_BUILD && ret !== launcher.getState()) {
                 throw IllegalStateException("launcher state doesn't match")
             }
@@ -57,7 +57,7 @@ object LauncherUiStateUtil {
         launcherUiState: LauncherUiState,
     ): Float =
         if (refactorTaskbarUiState()) {
-            val ret: Float = launcherUiState.taskbarAlignmentChannelAlpha.value
+            val ret: Float = launcherUiState.taskbarAlignmentChannelAlpha
             if (BuildConfig.IS_STUDIO_BUILD && ret != launcher.getTaskbarAlignmentChannelAlpha()) {
                 throw IllegalStateException("taskbarAlignmentChannelAlpha doesn't match")
             }

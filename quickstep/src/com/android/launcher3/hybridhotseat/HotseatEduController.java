@@ -114,7 +114,7 @@ public class HotseatEduController {
     void moveHotseatItems() {
         mHotseat.removeAllViewsInLayout();
         if (!mNewItems.isEmpty()) {
-            mLauncher.bindItemsAdded(mNewItems);
+            mLauncher.modelCallbacks.bindItemsAdded(mNewItems);
         }
     }
 

@@ -38,6 +38,8 @@ import com.android.launcher3.taskbar.allapps.TaskbarSearchSessionController;
 import com.android.launcher3.taskbar.bubbles.DragToBubbleController;
 import com.android.launcher3.util.NavigationMode;
 import com.android.launcher3.util.SplitConfigurationOptions.SplitSelectSource;
+import com.android.launcher3.util.WindowBlurState;
+import com.android.systemui.shared.system.BlurUtils;
 
 import java.util.Optional;
 
@@ -76,7 +78,9 @@ public class TaskbarOverlayContext extends BaseTaskbarContext {
         mDragController.init(controllers, null);
         mDragLayer = new TaskbarOverlayDragLayer(this);
         mStashedTaskbarHeight = controllers.taskbarStashController.getStashedHeight();
-        updateBlurStyle();
+
+        // Apply the blur or blur fallback style to the current theme.
+        getTheme().applyStyle(R.style.AllAppsBlurStyle, true);
 
         mUiController = controllers.uiController;
         onViewCreated();
@@ -138,12 +142,7 @@ public class TaskbarOverlayContext extends BaseTaskbarContext {
 
     @Override
     public boolean isAllAppsBackgroundBlurEnabled() {
-        return mOverlayController != null && mOverlayController.isBackgroundBlurEnabled();
-    }
-
-    /** Apply the blur or blur fallback style to the current theme. */
-    private void updateBlurStyle() {
-        getTheme().applyStyle(getAllAppsBlurStyleResId(), true);
+        return BlurUtils.supportsBlursOnWindows() && WindowBlurState.getInstance(this).getValue();
     }
 
     @Override

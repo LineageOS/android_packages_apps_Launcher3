@@ -85,7 +85,10 @@ class TaskbarHandoffController(val taskbarActivityContext: TaskbarActivityContex
             Log.d(TAG, "onRemoteTasksChanged: updating suggestions.")
         }
 
-        if (suggestionList.updateSuggestions(remoteTasks)) {
+        val remoteTasksToDisplay =
+            remoteTasks.sortedBy { it.lastUsedTimestampMillis }.takeLast(MAX_SUGGESTIONS)
+
+        if (suggestionList.updateSuggestions(remoteTasksToDisplay)) {
             taskbarControllers.taskbarViewController.commitHandoffSuggestionsToUI()
         }
 
@@ -112,5 +115,6 @@ class TaskbarHandoffController(val taskbarActivityContext: TaskbarActivityContex
     private companion object {
         const val DEBUG = false
         const val TAG = "TaskbarHandoffController"
+        const val MAX_SUGGESTIONS = 1
     }
 }

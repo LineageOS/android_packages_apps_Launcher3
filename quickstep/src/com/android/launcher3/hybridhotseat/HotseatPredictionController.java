@@ -57,7 +57,6 @@ import com.android.launcher3.views.PredictedAppIcon;
 import com.android.launcher3.views.Snackbar;
 
 import java.io.PrintWriter;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -83,6 +82,7 @@ public class HotseatPredictionController implements
                 mLauncher::isWorkspaceLoading);
         mHotseat = launcher.getHotseat();
         mLauncher.getDragController().addDragListener(mHotseatOrganizer);
+        mLauncher.modelCallbacks.setHybridHotseatOrganizer(mHotseatOrganizer);
     }
 
     private boolean onPredictedItemLongClicked(View v) {
@@ -221,16 +221,6 @@ public class HotseatPredictionController implements
                         .setPredictedHotseatContainer(containerBuilder)
                         .build())
                 .log(LAUNCHER_HOTSEAT_RANKED);
-    }
-
-    /**
-     * Called when app/shortcut icon is removed by system. This is used to prune visible stale
-     * predictions while while waiting for AppAPrediction service to send new batch of predictions.
-     *
-     * @param matcher filter matching items that have been removed
-     */
-    public void onModelItemsRemoved(Predicate<ItemInfo> matcher) {
-        mHotseatOrganizer.onModelItemsRemoved(matcher);
     }
 
     /**

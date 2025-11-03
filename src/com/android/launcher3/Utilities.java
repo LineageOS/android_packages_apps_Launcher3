@@ -27,7 +27,7 @@ import static com.android.launcher3.icons.IconNormalizer.ICON_VISIBLE_AREA_FACTO
 import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT;
 import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_TYPE_MAIN;
-import static com.android.window.flags.Flags.enableNonDefaultDisplaySplit;
+import static com.android.window.flags.Flags.enableNonDefaultDisplaySplitBugfix;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
@@ -1060,7 +1060,7 @@ public final class Utilities {
     public static boolean calculateIsLeftRightSplit(boolean allowLeftRightSplitInPortrait,
             DeviceProperties deviceProperties, boolean isExternalDisplay) {
         if (allowLeftRightSplitInPortrait && deviceProperties.isTablet()) {
-            if (!isExternalDisplay || !enableNonDefaultDisplaySplit()) {
+            if (!isExternalDisplay || !enableNonDefaultDisplaySplitBugfix()) {
                 return !deviceProperties.isLandscape();
             } else {
                 // If split is started in external display and the non_default_display_split

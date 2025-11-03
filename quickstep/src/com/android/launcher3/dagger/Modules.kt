@@ -20,6 +20,7 @@ import android.annotation.ElapsedRealtimeLong
 import android.content.Context
 import android.net.Uri
 import android.os.SystemClock
+import android.view.CrossWindowBlurListeners
 import com.android.internal.R
 import com.android.internal.policy.DesktopModeCompatPolicy
 import com.android.launcher3.Flags.enableSystemDrag
@@ -46,8 +47,12 @@ import com.android.launcher3.uioverrides.SystemApiWrapper
 import com.android.launcher3.uioverrides.plugins.PluginManagerWrapperImpl
 import com.android.launcher3.util.ApiWrapper
 import com.android.launcher3.util.DaggerSingletonTracker
+import com.android.launcher3.util.Executors.IMMEDIATE_EXECUTOR
 import com.android.launcher3.util.InstantAppResolver
+import com.android.launcher3.util.ListenableRef
+import com.android.launcher3.util.MutableListenableRef
 import com.android.launcher3.util.PluginManagerWrapper
+import com.android.launcher3.util.WindowBlurState.WINDOW_BLUR_STATE
 import com.android.launcher3.util.window.RefreshRateTracker
 import com.android.launcher3.util.window.WindowManagerProxy
 import com.android.launcher3.widget.LauncherWidgetHolder.WidgetHolderFactory
@@ -69,6 +74,7 @@ import dagger.multibindings.ElementsIntoSet
 import java.io.File
 import java.util.Optional
 import java.util.concurrent.ExecutorService
+import java.util.function.Consumer
 import javax.inject.Named
 
 private object Modules {}
@@ -147,6 +153,20 @@ object StaticObjectModule {
         if (ctx.resources.getBoolean(R.bool.config_searchAllEntrypointsEnabledDefault)) {
             setOf(ContextualSearchStateManager.SEARCH_ALL_ENTRYPOINTS_ENABLED_URI)
         } else emptySet()
+
+    @Provides
+    @JvmStatic
+    @LauncherAppSingleton
+    @Named(WINDOW_BLUR_STATE)
+    fun provideWindowBlurState(lifecycle: DaggerSingletonTracker): ListenableRef<Boolean> {
+        val blurListeners = CrossWindowBlurListeners.getInstance()
+        val value = MutableListenableRef(blurListeners.isCrossWindowBlurEnabled)
+
+        val callback = Consumer<Boolean> { value.dispatchValue(it) }
+        blurListeners.addListener(IMMEDIATE_EXECUTOR, callback)
+        lifecycle.addCloseable { blurListeners.removeListener(callback) }
+        return value.asListenable()
+    }
 }
 
 @Module
@@ -164,8 +184,8 @@ object SystemDragModule {
     ): SystemDragController =
         if (enableSystemDrag())
             SystemDragControllerImpl(
-                systemDragListenerFactory.orElse { launcher ->
-                    SystemDragListener(launcher, iconCache)
+                systemDragListenerFactory.orElse { launcher, params ->
+                    SystemDragListener(launcher, iconCache, params)
                 }
             )
         else SystemDragControllerStub()

@@ -24,14 +24,12 @@ import com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_NOT_PINNABLE
 import com.android.launcher3.model.data.TaskViewItemInfo.Companion.createTaskViewAtom
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.SplitConfigurationOptions
-import com.android.launcher3.util.TestDispatcherProvider
 import com.android.launcher3.util.TransformingTouchDelegate
 import com.android.launcher3.util.UserIconInfo
 import com.android.launcher3.util.rule.MockUsersRule
 import com.android.launcher3.util.rule.MockUsersRule.MockUser
 import com.android.quickstep.TaskOverlayFactory
 import com.android.quickstep.TaskOverlayFactory.TaskOverlay
-import com.android.quickstep.recents.di.RecentsDependencies
 import com.android.quickstep.task.thumbnail.TaskContentView
 import com.android.quickstep.task.thumbnail.TaskThumbnailView
 import com.android.quickstep.views.IconAppChipView
@@ -42,8 +40,6 @@ import com.android.quickstep.views.TaskViewType
 import com.android.systemui.shared.recents.model.Task
 import com.android.systemui.shared.recents.model.Task.TaskKey
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.test.StandardTestDispatcher
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -62,7 +58,6 @@ class TaskViewItemInfoTest {
     private val taskView = mock<TaskView>()
     private val recentsView = mock<RecentsView<*, *>>()
     private val overlayFactory = mock<TaskOverlayFactory>()
-    private val dispatcher = StandardTestDispatcher()
 
     @Before
     fun setUp() {
@@ -70,12 +65,6 @@ class TaskViewItemInfoTest {
         whenever(taskView.context).thenReturn(context)
         whenever(taskView.recentsView).thenReturn(recentsView)
         whenever(recentsView.indexOfChild(taskView)).thenReturn(TASK_VIEW_INDEX)
-        RecentsDependencies.maybeInitialize(context, TestDispatcherProvider(dispatcher))
-    }
-
-    @After
-    fun tearDown() {
-        RecentsDependencies.destroy(context)
     }
 
     @Test

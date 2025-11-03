@@ -525,16 +525,8 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         invalidate();
     }
 
-    /**
-     * Updates the content description of the app icon based on its running state.
-     * This is primarily used for accessibility to announce whether an app is running
-     * or minimized.
-     */
-    public void updateDescriptionWithRunningState() {
-        setContentDescription(getContentDescription() + " " + getIconStateDescription());
-    }
-
-    private String getIconStateDescription() {
+    /** Returns the description of the icon based on its running state. */
+    public String getIconStateDescription() {
         if (mRunningAppState == MINIMIZED) {
             return mMinimizedStateDescription;
         } else if (mRunningAppState == RUNNING) {

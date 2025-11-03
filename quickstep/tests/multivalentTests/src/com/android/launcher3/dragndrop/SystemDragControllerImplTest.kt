@@ -30,6 +30,7 @@ import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.SandboxApplication
 import dagger.BindsInstance
 import dagger.Component
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -40,6 +41,8 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
+import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.clearInvocations
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
@@ -61,6 +64,7 @@ class SystemDragControllerImplTest {
     @Mock private lateinit var mockItemInfo: SystemDragItemInfo
     @Mock private lateinit var mockLauncher: Launcher
     @Mock private lateinit var mockSystemDragListener: SystemDragListener
+    @Mock private lateinit var mockSystemDragListenerFactory: SystemDragListenerFactory
     @Mock private lateinit var mockUri: Uri
 
     private lateinit var controller: SystemDragControllerImpl
@@ -69,10 +73,11 @@ class SystemDragControllerImplTest {
     fun setUp() {
         initMock(mockLauncher)
         initMock(mockSystemDragListener)
+        initMock(mockSystemDragListenerFactory)
 
         context.initDaggerComponent(
             DaggerSystemDragControllerImplTest_TestComponent.builder()
-                .bindSystemDragListenerFactory { mockSystemDragListener }
+                .bindSystemDragListenerFactory(mockSystemDragListenerFactory)
         )
 
         val controller = SystemDragController.INSTANCE[context]
@@ -191,12 +196,45 @@ class SystemDragControllerImplTest {
         verify(mockLauncher.dragController).addSystemDragHandler(controller)
     }
 
+    @Test
+    fun testStartDragWithLauncher() {
+        testStartDrag(/* withLauncher= */ true)
+    }
+
+    @Test
+    fun testStartDragWithoutLauncher() {
+        testStartDrag(/* withLauncher= */ false)
+    }
+
+    private fun testStartDrag(withLauncher: Boolean) {
+        if (withLauncher) {
+            controller.setLauncher(mockLauncher)
+        }
+
+        val dragView = mock<DragView<*>>()
+        val listener = mock<SystemDragListener>()
+        val params = mock<SystemDragParams>()
+
+        whenever(mockSystemDragListenerFactory.invoke(mockLauncher, params)).thenReturn(listener)
+        whenever(listener.startDrag()).thenReturn(dragView)
+
+        val expectedResult = if (withLauncher) dragView else null
+
+        assertEquals(expectedResult, controller.startDrag(params))
+    }
+
     private fun initMock(mockLauncher: Launcher) {
         whenever(mockLauncher.dragController).thenReturn(mock())
     }
 
     private fun initMock(mockSystemDragListener: SystemDragListener) {
         whenever(mockSystemDragListener.onDrag(mockDragEvent)).thenReturn(true)
+    }
+
+    private fun initMock(mockSystemDragListenerFactory: SystemDragListenerFactory) {
+        whenever(mockSystemDragListenerFactory.invoke(any(), anyOrNull())).thenAnswer {
+            mockSystemDragListener
+        }
     }
 
     @LauncherAppSingleton

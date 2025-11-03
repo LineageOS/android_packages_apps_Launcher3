@@ -16,6 +16,7 @@
 
 package com.android.launcher3.widgetpicker.listeners
 
+import android.util.Log
 import android.view.View
 import com.android.launcher3.Launcher
 import com.android.launcher3.PendingAddItemInfo
@@ -53,10 +54,18 @@ class WidgetPickerAddItemListener(private val container: Int, private val widget
                     PendingAddWidgetInfo(launcherProviderInfo, container)
                 }
 
-                is WidgetInfo.ShortcutInfo ->
+                is WidgetInfo.StaticShortcutInfo ->
                     PendingAddShortcutInfo(
                         ShortcutConfigActivityInfoVO(widgetInfo.launcherActivityInfo)
                     )
+
+                else -> {
+                    // items such as pinned shortcuts don't go through normal drag and drop; they
+                    // go through pin flow where config activity might be skipped; and use separate
+                    // listener
+                    Log.w(TAG, "Unsupported widget info encountered in add flow: $widgetInfo")
+                    return false
+                }
             }
 
         val view = View(launcher)
@@ -72,5 +81,9 @@ class WidgetPickerAddItemListener(private val container: Int, private val widget
                 .log(LauncherEvent.LAUNCHER_WIDGET_ADD_BUTTON_TAP)
         }
         return false // don't receive any more callbacks as we got launcher and handled it
+    }
+
+    companion object {
+        private const val TAG = "WidgetPickerAddItemListener"
     }
 }

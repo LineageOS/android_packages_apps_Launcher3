@@ -90,8 +90,6 @@ import static com.android.launcher3.logging.StatsLogManager.LauncherLatencyEvent
 import static com.android.launcher3.model.ItemInstallQueue.FLAG_ACTIVITY_PAUSED;
 import static com.android.launcher3.model.ItemInstallQueue.FLAG_DRAG_AND_DROP;
 import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_NOT_PINNABLE;
-import static com.android.launcher3.pageindicators.PaginationArrow.DISABLED_ARROW_OPACITY;
-import static com.android.launcher3.pageindicators.PaginationArrow.FULLY_OPAQUE;
 import static com.android.launcher3.popup.SystemShortcut.ADD_TO_HOME_SCREEN;
 import static com.android.launcher3.popup.SystemShortcut.APP_INFO;
 import static com.android.launcher3.popup.SystemShortcut.INSTALL;
@@ -155,7 +153,6 @@ import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.annotation.UiThread;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.os.BuildCompat;
 import androidx.window.embedding.RuleController;
@@ -191,20 +188,16 @@ import com.android.launcher3.logging.InstanceId;
 import com.android.launcher3.logging.InstanceIdSequence;
 import com.android.launcher3.logging.StartupLatencyLogger;
 import com.android.launcher3.logging.StatsLogManager;
-import com.android.launcher3.model.BgDataModel.Callbacks;
 import com.android.launcher3.model.ItemInstallQueue;
 import com.android.launcher3.model.ModelWriter;
 import com.android.launcher3.model.StringCache;
-import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.CollectionInfo;
 import com.android.launcher3.model.data.FolderInfo;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.ItemInfoWithIcon;
 import com.android.launcher3.model.data.LauncherAppWidgetInfo;
 import com.android.launcher3.model.data.PredictedContainerInfo;
-import com.android.launcher3.model.data.WorkspaceData;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
-import com.android.launcher3.pageindicators.PaginationArrow;
 import com.android.launcher3.pm.PinRequestHelper;
 import com.android.launcher3.popup.ArrowPopup;
 import com.android.launcher3.popup.PopupController;
@@ -257,7 +250,6 @@ import com.android.launcher3.widget.WidgetAddFlowHandler;
 import com.android.launcher3.widget.WidgetManagerHelper;
 import com.android.launcher3.widget.WidgetVisibilityTracker;
 import com.android.launcher3.widget.custom.CustomWidgetManager;
-import com.android.launcher3.widget.model.WidgetsListBaseEntry;
 import com.android.launcher3.widget.picker.WidgetsFullSheet;
 import com.android.launcher3.widget.picker.model.WidgetPickerDataProvider;
 import com.android.launcher3.widget.util.WidgetSizeHandler;
@@ -269,10 +261,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -280,7 +270,7 @@ import java.util.stream.Stream;
  * Default launcher application.
  */
 public class Launcher extends StatefulActivity<LauncherState>
-        implements Callbacks, InvariantDeviceProfile.OnIDPChangeListener {
+        implements InvariantDeviceProfile.OnIDPChangeListener {
     public static final String TAG = "Launcher";
 
     public static final ContextTracker.ActivityTracker<Launcher> ACTIVITY_TRACKER =
@@ -316,7 +306,7 @@ public class Launcher extends StatefulActivity<LauncherState>
     private static final FloatProperty<Hotseat> HOTSEAT_WIDGET_SCALE =
             HOTSEAT_SCALE_PROPERTY_FACTORY.get(SCALE_INDEX_WIDGET_TRANSITION);
 
-    private final ModelCallbacks mModelCallbacks = createModelCallbacks();
+    public final ModelCallbacks modelCallbacks = new ModelCallbacks(this);
 
     protected final LauncherUiState mLauncherUiState = new LauncherUiState();
 
@@ -325,8 +315,6 @@ public class Launcher extends StatefulActivity<LauncherState>
 
     @Thunk
     Workspace<?> mWorkspace;
-    private PaginationArrow mLeftArrow;
-    private PaginationArrow mRightArrow;
 
     @Thunk
     DragLayer mDragLayer;
@@ -490,12 +478,12 @@ public class Launcher extends StatefulActivity<LauncherState>
         if (savedInstanceState != null) {
             int[] pageIds = savedInstanceState.getIntArray(RUNTIME_STATE_CURRENT_SCREEN_IDS);
             if (pageIds != null) {
-                mModelCallbacks.setPagesToBindSynchronously(IntSet.wrap(pageIds));
+                modelCallbacks.setPagesToBindSynchronously(IntSet.wrap(pageIds));
             }
         }
 
         mStartupLatencyLogger.logWorkspaceLoadStartTime();
-        if (!mModel.addCallbacksAndLoad(this)) {
+        if (!mModel.addCallbacksAndLoad(modelCallbacks)) {
             if (!internalStateHandled) {
                 // If we are not binding synchronously, pause drawing until initial bind complete,
                 // so that the system could continue to show the device loading prompt
@@ -540,10 +528,6 @@ public class Launcher extends StatefulActivity<LauncherState>
                     RuleController.parseRules(this, R.xml.split_configuration));
         }
         mStartupLatencyLogger.logEnd(LAUNCHER_LATENCY_STARTUP_ACTIVITY_ON_CREATE);
-    }
-
-    protected ModelCallbacks createModelCallbacks() {
-        return new ModelCallbacks(this);
     }
 
     @NonNull View getAccessibilityActionView() {
@@ -720,7 +704,7 @@ public class Launcher extends StatefulActivity<LauncherState>
             mCellPosMapper = new CellPosMapper(mDeviceProfile.isVerticalBarLayout(),
                     mDeviceProfile.numShownHotseatIcons);
         }
-        mModelWriter = mModel.getWriter(true, mCellPosMapper, this);
+        mModelWriter = mModel.getWriter(true, this, modelCallbacks);
         updateFixedLandscape();
         return true;
     }
@@ -1024,7 +1008,7 @@ public class Launcher extends StatefulActivity<LauncherState>
     }
 
     private void logStopAndResume(boolean isResume) {
-        if (mModelCallbacks.getPendingExecutor() != null) return;
+        if (modelCallbacks.getPendingExecutor() != null) return;
         int pageIndex = mWorkspace.isOverlayShown() ? -1 : mWorkspace.getCurrentPage();
         int statsLogOrdinal = mStateManager.getState().statsLogOrdinal;
 
@@ -1199,7 +1183,7 @@ public class Launcher extends StatefulActivity<LauncherState>
      * Finds all the views we need and configure them properly.
      */
     protected void setupViews() {
-        getTheme().applyStyle(getAllAppsBlurStyleResId(), true);
+        getTheme().applyStyle(R.style.AllAppsBlurStyle, true);
         mStartupLatencyLogger.logStart(LAUNCHER_LATENCY_STARTUP_VIEW_INFLATION);
         inflateRootView(R.layout.launcher);
         mStartupLatencyLogger.logEnd(LAUNCHER_LATENCY_STARTUP_VIEW_INFLATION);
@@ -1211,14 +1195,6 @@ public class Launcher extends StatefulActivity<LauncherState>
         mOverviewPanel = findViewById(R.id.overview_panel);
         mHotseat = findViewById(R.id.hotseat);
         mHotseat.setWorkspace(mWorkspace);
-
-        // Set up pagination arrows for workspace
-        mLeftArrow = findViewById(R.id.left_indicator_arrow);
-        mRightArrow = findViewById(R.id.right_indicator_arrow);
-        mRightArrow.setOnClickListener(v -> mWorkspace.snapToPage(
-                mWorkspace.getCurrentPage() + 1));
-        mLeftArrow.setOnClickListener(v -> mWorkspace.snapToPage(
-                mWorkspace.getCurrentPage() - 1));
 
         // Setup the drag layer
         mDragLayer.setup(mDragController, mWorkspace);
@@ -1582,7 +1558,7 @@ public class Launcher extends StatefulActivity<LauncherState>
     @Override
     public void onRestoreInstanceState(Bundle state) {
         super.onRestoreInstanceState(state);
-        IntSet synchronouslyBoundPages = mModelCallbacks.getSynchronouslyBoundPages();
+        IntSet synchronouslyBoundPages = modelCallbacks.getSynchronouslyBoundPages();
         if (synchronouslyBoundPages != null) {
             synchronouslyBoundPages.forEach(screenId -> {
                 int pageIndex = mWorkspace.getPageIndexForScreenId(screenId);
@@ -1638,7 +1614,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         }
         ScreenOnTracker.INSTANCE.get(this).removeListener(mScreenOnListener);
 
-        mModel.removeCallbacks(this);
+        mModel.removeCallbacks(modelCallbacks);
         mRotationHelper.destroy();
 
         mAppWidgetHolder.stopListening();
@@ -1647,7 +1623,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         mWidgetPickerDataProvider.destroy();
 
         TextKeyListener.getInstance().release();
-        mModelCallbacks.clearPendingBinds();
+        modelCallbacks.clearPendingBinds();
         LauncherAppState.getIDP(this).removeOnChangeListener(this);
         // if Launcher activity is recreated, {@link Window} including {@link ViewTreeObserver}
         // could be preserved in {@link ActivityThread#scheduleRelaunchActivity(IBinder)} if the
@@ -1656,31 +1632,6 @@ public class Launcher extends StatefulActivity<LauncherState>
         getRootView().getViewTreeObserver().removeOnPreDrawListener(mOnInitialBindListener);
         mOverlayManager.onActivityDestroyed();
         PillColorProvider.getInstance(mWorkspace.getContext()).unregisterObserver();
-    }
-
-    /**
-     * Called when a page is added or removed. Sets the visibility of pagination arrows based on
-     * the number of pages/workspaces.
-     */
-    public void updatePaginationArrowVisibilities() {
-        if (shouldEnableMouseInteractionChanges(mWorkspace.getContext())) {
-            int visibilityStatus = mWorkspace.getPageCount() > 1 ? View.VISIBLE : View.GONE;
-            mLeftArrow.setVisibility(visibilityStatus);
-            mRightArrow.setVisibility(visibilityStatus);
-        }
-    }
-
-    /**
-     * Called when the page is switched. Sets arrow UX to a disabled appearance if the page is at
-     * one end or the other.
-     */
-    public void updatePaginationArrowAlphas() {
-        if (shouldEnableMouseInteractionChanges(mWorkspace.getContext())) {
-            mLeftArrow.setAlpha(
-                    0 == mWorkspace.getCurrentPage() ? DISABLED_ARROW_OPACITY : FULLY_OPAQUE);
-            mRightArrow.setAlpha(mWorkspace.getPageCount() == mWorkspace.getCurrentPage() + 1
-                    ? DISABLED_ARROW_OPACITY : FULLY_OPAQUE);
-        }
     }
 
     public LauncherAccessibilityDelegate getAccessibilityDelegate() {
@@ -2112,16 +2063,6 @@ public class Launcher extends StatefulActivity<LauncherState>
         return result;
     }
 
-    @Override
-    public void bindCompleteModelAsync(WorkspaceData itemIdMap, boolean isBindingSync) {
-        mModelCallbacks.bindCompleteModelAsync(itemIdMap, isBindingSync);
-    }
-
-    @Override
-    public void bindItemsAdded(@NonNull List<ItemInfo> items) {
-        mModelCallbacks.bindItemsAdded(items);
-    }
-
     /** Inflates the binds the provided item using animation */
     public void inflateAndBindItemWithAnimation(ItemInfo info) {
         bindInflatedItems(
@@ -2341,52 +2282,7 @@ public class Launcher extends StatefulActivity<LauncherState>
      */
     public void onPageEndTransition() {}
 
-    /**
-     * See {@code LauncherBindingDelegate}
-     */
-    @Override
-    @TargetApi(Build.VERSION_CODES.S)
-    @UiThread
-    public void bindAllApplications(AppInfo[] apps, int flags,
-            Map<PackageUserKey, Integer> packageUserKeytoUidMap) {
-        mModelCallbacks.bindAllApplications(apps, flags, packageUserKeytoUidMap);
-    }
-
-    @Override
-    public void bindIncrementalDownloadProgressUpdated(AppInfo app) {
-        mModelCallbacks.bindIncrementalDownloadProgressUpdated(app);
-    }
-
-    /**
-     * See {@code LauncherBindingDelegate}
-     */
-    @Override
-    public void bindItemsUpdated(Set<ItemInfo> updates) {
-        mModelCallbacks.bindItemsUpdated(updates);
-    }
-
-    /**
-     * See {@code LauncherBindingDelegate}
-     */
-    @Override
-    public void bindWorkspaceComponentsRemoved(Predicate<ItemInfo> matcher) {
-        mModelCallbacks.bindWorkspaceComponentsRemoved(matcher);
-    }
-
-    /**
-     * See {@code LauncherBindingDelegate}
-     */
-    @Override
-    public void bindAllWidgets(@NonNull final List<WidgetsListBaseEntry> allWidgets) {
-        mModelCallbacks.bindAllWidgets(allWidgets);
-    }
-
-    @Override
-    public void bindStringCache(StringCache cache) {
-        mModelCallbacks.bindStringCache(cache);
-    }
-
-    /** Called to updated any prediction info by the {@link #mModelCallbacks} */
+    /** Called to updated any prediction info by the {@link #modelCallbacks} */
     public void bindPredictedContainerInfo(PredictedContainerInfo info) { }
 
     /** Called after an item is pinned using the context menu. */
@@ -2434,7 +2330,7 @@ public class Launcher extends StatefulActivity<LauncherState>
 
         writer.println(prefix + "Misc:");
         dumpMisc(prefix + "\t", writer);
-        writer.println(prefix + "\tmWorkspaceLoading=" + mModelCallbacks.getWorkspaceLoading());
+        writer.println(prefix + "\tmWorkspaceLoading=" + modelCallbacks.getWorkspaceLoading());
         writer.println(prefix + "\tmPendingRequestArgs=" + mPendingRequestArgs
                 + " mPendingActivityResult=" + mPendingActivityResult);
         writer.println(prefix + "\tmRotationHelper: " + mRotationHelper);
@@ -2715,7 +2611,7 @@ public class Launcher extends StatefulActivity<LauncherState>
     }
 
     public boolean isWorkspaceLoading() {
-        return mModelCallbacks.getWorkspaceLoading();
+        return modelCallbacks.getWorkspaceLoading();
     }
 
     /**
@@ -2752,7 +2648,7 @@ public class Launcher extends StatefulActivity<LauncherState>
      * @param pages should not be null.
      */
     public void setPagesToBindSynchronously(@NonNull IntSet pages) {
-        mModelCallbacks.setPagesToBindSynchronously(pages);
+        modelCallbacks.setPagesToBindSynchronously(pages);
     }
 
     @Override
@@ -2872,7 +2768,7 @@ public class Launcher extends StatefulActivity<LauncherState>
 
     @Override
     public StringCache getStringCache() {
-        return mModelCallbacks.getStringCache();
+        return modelCallbacks.getStringCache();
     }
 
     /**

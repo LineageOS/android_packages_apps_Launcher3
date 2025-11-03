@@ -29,6 +29,7 @@ import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.model.ModelDbController
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.ItemInfo.NO_ID
+import com.android.launcher3.model.data.WorkspaceItemCoordinates
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.util.ContentWriter
 import com.android.launcher3.util.ContentWriter.CommitParams
@@ -103,11 +104,8 @@ constructor(
         return true
     }
 
-    private fun ItemInfo.addOrMoveTo(location: ItemLocation) {
-        screenId = location.screenId
-        cellX = location.cellX
-        cellY = location.cellY
-        container = location.container
+    private fun ItemInfo.addOrMoveTo(location: WorkspaceItemCoordinates) {
+        location.applyTo(this)
 
         if (id == NO_ID) {
             id = dbController.generateNewItemId()
@@ -131,9 +129,14 @@ constructor(
     }
 
     private fun ItemInfo.getLocation() =
-        ItemLocation(screenId = screenId, cellX = cellX, cellY = cellY, container = container)
+        WorkspaceItemCoordinates(
+            screenId = screenId,
+            cellX = cellX,
+            cellY = cellY,
+            container = container,
+        )
 
-    private fun getFirstPageEmptyLocation(): ItemLocation? {
+    private fun getFirstPageEmptyLocation(): WorkspaceItemCoordinates? {
         val occupancy = GridOccupancy(idp.numColumns, idp.numRows)
         allModelItems.forEach {
             if (it.container == CONTAINER_DESKTOP && it.screenId == 0) occupancy.markCells(it, true)
@@ -141,13 +144,13 @@ constructor(
 
         for (y in idp.numRows - 1 downTo 0) {
             for (x in idp.numColumns - 1 downTo 0) {
-                if (!occupancy.cells[x][y]) return ItemLocation(0, x, y)
+                if (!occupancy.cells[x][y]) return WorkspaceItemCoordinates(0, x, y)
             }
         }
         return null
     }
 
-    private fun findNextAvailableSpace(): ItemLocation {
+    private fun findNextAvailableSpace(): WorkspaceItemCoordinates {
         val sortedItems =
             allModelItems
                 .filter { it.container == CONTAINER_DESKTOP && it.screenId > 0 }
@@ -162,22 +165,15 @@ constructor(
 
                     val outLocation = IntArray(2)
                     if (occupancy.findVacantCell(outLocation, 1, 1))
-                        ItemLocation(screenId, outLocation[0], outLocation[1])
+                        WorkspaceItemCoordinates(screenId, outLocation[0], outLocation[1])
                     else null
                 }
 
         if (foundLocation != null) return foundLocation
         // Add a new screenId as max of all screen id
         val newScreenId = ((sortedItems.lastOrNull()?.screenId ?: 0) + 1).coerceAtLeast(1)
-        return ItemLocation(newScreenId, 0, 0)
+        return WorkspaceItemCoordinates(newScreenId, 0, 0)
     }
-
-    data class ItemLocation(
-        val screenId: Int,
-        val cellX: Int,
-        val cellY: Int,
-        val container: Int = CONTAINER_DESKTOP,
-    )
 
     /**
      * Returns the existing icon for [appPkg] with highest location priority

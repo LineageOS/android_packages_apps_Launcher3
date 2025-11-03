@@ -32,6 +32,7 @@ import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.icons.IconCache
 import com.android.launcher3.model.AllAppsList
+import com.android.launcher3.model.BgDataModel.ModificationSource.ModelTask
 import com.android.launcher3.model.ModelTaskController
 import com.android.launcher3.model.TestableModelState
 import com.android.launcher3.model.data.AppInfo
@@ -131,7 +132,7 @@ class PackageTaskFactoryTest {
             expectedActivityInfo,
         )
         modelState.appsList.getAndResetChangeFlag()
-        modelState.dataModel.addItem(context, expectedWorkspaceItem)
+        modelState.dataModel.addItems(context, listOf(expectedWorkspaceItem), ModelTask)
         val appUpdates = modelState.appsRepo.appsListStateRef.trackUpdate()
         val workspaceUpdates = modelState.homeRepo.workspaceState.trackUpdateAndChanges()
 
@@ -151,7 +152,7 @@ class PackageTaskFactoryTest {
     @Test
     @EnableFlags(Flags.FLAG_MODEL_REPOSITORY)
     fun unavailability_triggers_package_removal_from_all_apps_list() {
-        modelState.dataModel.addItem(context, expectedWorkspaceItem)
+        modelState.dataModel.addItems(context, listOf(expectedWorkspaceItem), ModelTask)
         val workspaceUpdates = modelState.homeRepo.workspaceState.trackUpdateAndChanges()
 
         PackageTaskFactory.appsUnavailable(myUser, setOf(expectedPackage)).executeSync()
@@ -167,7 +168,7 @@ class PackageTaskFactoryTest {
     @Test
     @EnableFlags(Flags.FLAG_MODEL_REPOSITORY)
     fun suspend_triggers_flag_update_in_apps_list() {
-        modelState.dataModel.addItem(context, expectedWorkspaceItem)
+        modelState.dataModel.addItems(context, listOf(expectedWorkspaceItem), ModelTask)
         modelState.appsList.add(
             AppInfo(context, expectedActivityInfo, myUser),
             expectedActivityInfo,
@@ -189,7 +190,7 @@ class PackageTaskFactoryTest {
     @Test
     @EnableFlags(Flags.FLAG_MODEL_REPOSITORY)
     fun unsuspend_triggers_no_update_when_app_not_suspended() {
-        modelState.dataModel.addItem(context, expectedWorkspaceItem)
+        modelState.dataModel.addItems(context, listOf(expectedWorkspaceItem), ModelTask)
         modelState.appsList.getAndResetChangeFlag()
         doAnswer {}.whenever(mockTaskController).bindApplicationsIfNeeded()
         val workspaceUpdates = modelState.homeRepo.workspaceState.trackUpdateAndChanges()

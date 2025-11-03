@@ -17,7 +17,8 @@
 package com.android.quickstep.recents.domain.usecase
 
 import com.android.quickstep.recents.data.PointerRepository
+import javax.inject.Inject
 
-class IsPointerConnectedUseCase(val pointerRepository: PointerRepository) {
+class IsPointerConnectedUseCase @Inject constructor(val pointerRepository: PointerRepository) {
     fun isAnyPointerDeviceConnected(): Boolean = pointerRepository.isAnyPointerDeviceConnected()
 }

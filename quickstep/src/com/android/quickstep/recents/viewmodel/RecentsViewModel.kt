@@ -17,15 +17,19 @@
 package com.android.quickstep.recents.viewmodel
 
 import com.android.quickstep.recents.data.RecentTasksRepository
+import com.android.quickstep.recents.di.DisplayId
 import com.android.systemui.shared.recents.model.ThumbnailData
+import javax.inject.Inject
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 
-class RecentsViewModel(
+class RecentsViewModel
+@Inject
+constructor(
     private val recentsTasksRepository: RecentTasksRepository,
     private val recentsViewData: RecentsViewData,
-    private val displayId: Int,
+    @DisplayId private val displayId: Int,
 ) {
     var visibleTaskIds = emptySet<Int>()
         private set

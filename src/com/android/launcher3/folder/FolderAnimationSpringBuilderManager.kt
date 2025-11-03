@@ -72,6 +72,8 @@ class FolderAnimationSpringBuilderManager(
             workspace.scaleY = 1f
             hotseat.scaleX = 1f
             hotseat.scaleY = 1f
+
+            launcherDelegate.launcher?.depthController?.folderZoom?.value = 0f
             scrim.alpha = 1f
             scrim.setBackgroundColor(Color.TRANSPARENT)
         }

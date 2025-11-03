@@ -19,16 +19,13 @@ package com.android.launcher3.statehandlers;
 import static com.android.app.animation.Interpolators.LINEAR;
 import static com.android.launcher3.states.StateAnimationConfig.ANIM_DEPTH;
 import static com.android.launcher3.states.StateAnimationConfig.SKIP_DEPTH_CONTROLLER;
-import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 import static com.android.launcher3.util.MultiPropertyFactory.MULTI_PROPERTY_VALUE;
 
 import android.content.Context;
-import android.view.CrossWindowBlurListeners;
 import android.view.View;
 import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.launcher3.anim.PendingAnimation;
@@ -36,10 +33,9 @@ import com.android.launcher3.statemanager.BaseState;
 import com.android.launcher3.statemanager.StateManager.StateHandler;
 import com.android.launcher3.statemanager.StatefulContainer;
 import com.android.launcher3.states.StateAnimationConfig;
-import com.android.quickstep.util.BaseDepthController;
+import com.android.quickstep.util.BaseDepthControllerImpl;
 
 import java.io.PrintWriter;
-import java.util.function.Consumer;
 
 /**
  * Controls blur and wallpaper zoom.
@@ -49,15 +45,13 @@ import java.util.function.Consumer;
 public class DepthController<
         STATE extends BaseState<STATE>,
         CONTAINER extends Context & StatefulContainer<STATE>>
-        extends BaseDepthController<STATE, CONTAINER>
+        extends BaseDepthControllerImpl<STATE, CONTAINER>
         implements StateHandler<STATE> {
     public static final float DEPTH_0_PERCENT = 0f;
     public static final float DEPTH_70_PERCENT = 0.7f;
 
     @VisibleForTesting
     final ViewTreeObserver.OnDrawListener mOnDrawListener = this::onContainerDraw;
-
-    private final Consumer<Boolean> mCrossWindowBlurListener = this::setCrossWindowBlursEnabled;
 
     private final Runnable mOpaquenessListener = this::applyDepthAndBlur;
 
@@ -68,8 +62,8 @@ public class DepthController<
     private boolean mIsOnDrawListenerAdded = false;
     private boolean mRemoveOnDrawListenerCancelled = false;
 
-    public DepthController(CONTAINER container) {
-        super(container);
+    public DepthController(CONTAINER container, boolean blurEnabled) {
+        super(container, blurEnabled);
     }
 
     private void onContainerDraw() {
@@ -94,11 +88,7 @@ public class DepthController<
         }
         mOnAttachListener = new View.OnAttachStateChangeListener() {
             @Override
-            public void onViewAttachedToWindow(@NonNull View view) {
-                UI_HELPER_EXECUTOR.execute(() ->
-                        CrossWindowBlurListeners.getInstance().addListener(
-                                mContainer.getMainExecutor(),
-                                mCrossWindowBlurListener));
+            public void onViewAttachedToWindow(View view) {
                 mContainer.getScrimView().addOpaquenessListener(mOpaquenessListener);
 
                 // To handle the case where window token is invalid during last setDepth call.
@@ -106,34 +96,11 @@ public class DepthController<
             }
 
             @Override
-            public void onViewDetachedFromWindow(@NonNull View view) {
-                removeSecondaryListeners();
-            }
+            public void onViewDetachedFromWindow(View view) { }
         };
         rootView.addOnAttachStateChangeListener(mOnAttachListener);
         if (rootView.isAttachedToWindow()) {
             mOnAttachListener.onViewAttachedToWindow(rootView);
-        }
-    }
-
-    /**
-     * Cleans up after this controller so it can be garbage collected without leaving traces.
-     */
-    public void dispose() {
-        removeSecondaryListeners();
-
-        if (mContainer.getRootView() != null && mOnAttachListener != null) {
-            mContainer.getRootView().removeOnAttachStateChangeListener(mOnAttachListener);
-            mOnAttachListener = null;
-        }
-    }
-
-    private void removeSecondaryListeners() {
-        UI_HELPER_EXECUTOR.execute(() ->
-                CrossWindowBlurListeners.getInstance()
-                        .removeListener(mCrossWindowBlurListener));
-        if (mOpaquenessListener != null) {
-            mContainer.getScrimView().removeOpaquenessListener(mOpaquenessListener);
         }
     }
 

@@ -30,7 +30,6 @@ import com.android.launcher3.taskbar.TaskbarUiStateMonitor;
 import com.android.launcher3.taskbar.TaskbarViewCallbacksFactory;
 import com.android.launcher3.taskbar.bubbles.BubbleActivityStarter;
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator;
-import com.android.launcher3.taskbar.overlay.TaskbarOverlayContextFactory;
 import com.android.quickstep.FallbackWindowInterface;
 import com.android.quickstep.OverviewCommandHelper;
 import com.android.quickstep.OverviewComponentObserver;
@@ -47,6 +46,7 @@ import com.android.quickstep.actioncorner.ActionCornerHandler;
 import com.android.quickstep.input.QuickstepKeyGestureEventsManager;
 import com.android.quickstep.inputconsumers.NavHandleLongPressHandler;
 import com.android.quickstep.logging.SettingsChangeLogger;
+import com.android.quickstep.recents.di.RecentsComponent;
 import com.android.quickstep.util.AsyncClockEventDelegate;
 import com.android.quickstep.util.ContextualSearchHapticManager;
 import com.android.quickstep.util.ContextualSearchStateManager;
@@ -122,8 +122,6 @@ public interface QuickstepBaseAppComponent extends LauncherBaseAppComponent {
 
     TaskbarViewCallbacksFactory getTaskbarViewCallbacksFactory();
 
-    TaskbarOverlayContextFactory getTaskbarOverlayContextFactory();
-
     TaskOverlayFactory getTaskOverlayFactory();
 
     TaskbarUiStateMonitor getTaskbarUiStateMonitor();
@@ -135,4 +133,6 @@ public interface QuickstepBaseAppComponent extends LauncherBaseAppComponent {
     QuickstepKeyGestureEventsManager getQuickstepKeyGestureEventsManager();
 
     DesktopModeCompatPolicy getDesktopModeCompatPolicy();
+
+    RecentsComponent.Factory getRecentsComponentFactory();
 }

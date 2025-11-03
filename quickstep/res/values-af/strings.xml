@@ -126,7 +126,7 @@
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Taakbalkopvoeding"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Sleep ’n app na die kant toe om 2 apps tegelyk te gebruik"</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"Sleep na die onderste hoeke toe om dit te laat sweef"</string>
-    <string name="taskbar_edu_stashing" msgid="5645461372669217294">"Stadigswiep op om die Taakbalk te wys"</string>
+    <string name="taskbar_edu_stashing" msgid="911857479758694381">"Swiep stadig op om die Taakbalk te wys"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Kry appvoorstelle op grond van jou roetine"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Langdruk op die verdeler om die Taakbalk vas te speld"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Doen meer met die Taakbalk"</string>
@@ -179,4 +179,6 @@
     <string name="nudge_a11y_title" msgid="2126529303123687912">"Por"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"Maak toe"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"Porprent"</string>
+    <!-- no translation found for running_app_description (1309281047289078871) -->
+    <skip />
 </resources>

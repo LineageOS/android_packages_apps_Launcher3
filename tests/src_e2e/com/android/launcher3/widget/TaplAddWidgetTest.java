@@ -102,7 +102,8 @@ public class TaplAddWidgetTest extends AbstractLauncherUiTest<Launcher, View> {
      */
     @PlatinumTest(focusArea = "launcher")
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_WIDGET_PICKER_REFACTOR)
+    @EnableFlags({Flags.FLAG_ENABLE_WIDGET_PICKER_REFACTOR,
+            Flags.FLAG_FIX_WIDGET_SINGLE_PTR_RESIZE})
     public void testResizeWidget() throws Throwable {
         reinitializeLauncherData(true);
         waitForLauncherCondition("Workspace didn't finish loading", l -> !l.isWorkspaceLoading());

@@ -96,11 +96,9 @@ class TaskbarDesktopModeController(
     }
 
     private fun updateTaskbarUiState() {
-        taskbarUiState.setShowDesktopTaskbarForFreeformDisplay(
+        taskbarUiState.showDesktopTaskbarForFreeformDisplay =
             DisplayController.showDesktopTaskbarForFreeformDisplay(taskbarActivityContext)
-        )
-        taskbarUiState.setShowLockedTaskbarOnHome(
+        taskbarUiState.showLockedTaskbarOnHome =
             DisplayController.showLockedTaskbarOnHome(taskbarActivityContext)
-        )
     }
 }

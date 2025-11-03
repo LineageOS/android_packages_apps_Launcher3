@@ -16,21 +16,24 @@
 
 package com.android.quickstep.recents.data
 
-import com.android.launcher3.deviceprofile.DeviceProperties
+import com.android.launcher3.DeviceProfile
 import com.android.wm.shell.shared.desktopmode.DesktopState
+import javax.inject.Inject
 
 /**
  * Repository for shrink down version of [com.android.launcher3.DeviceProfile] that only contains
  * data related to Recents.
  */
-class RecentsDeviceProfileRepositoryImpl(
-    private val deviceProperties: DeviceProperties,
+class RecentsDeviceProfileRepositoryImpl
+@Inject
+constructor(
+    private val deviceProfileGetter: DeviceProfile.Getter,
     private val desktopState: DesktopState,
 ) : RecentsDeviceProfileRepository {
 
     override fun getRecentsDeviceProfile() =
         RecentsDeviceProfile(
-            isLargeScreen = deviceProperties.isTablet,
+            isLargeScreen = deviceProfileGetter.get().deviceProperties.isTablet,
             canEnterDesktopMode = desktopState.canEnterDesktopMode,
         )
 }

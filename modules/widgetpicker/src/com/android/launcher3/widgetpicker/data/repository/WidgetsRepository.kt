@@ -16,6 +16,7 @@
 
 package com.android.launcher3.widgetpicker.data.repository
 
+import android.content.pm.LauncherApps.PinItemRequest
 import com.android.launcher3.widgetpicker.shared.model.PickableWidget
 import com.android.launcher3.widgetpicker.shared.model.WidgetApp
 import com.android.launcher3.widgetpicker.shared.model.WidgetAppId
@@ -31,7 +32,7 @@ interface WidgetsRepository {
      *
      * @param options what aspects to initialize
      */
-    fun initialize(options: InitializationOptions = InitializationOptions())
+    fun initialize(options: InitializationOptions = InitializationOptions.AllWidgets)
 
     /** Observe widgets available on the device from different apps. */
     fun observeWidgets(): Flow<List<WidgetApp>>
@@ -56,14 +57,27 @@ interface WidgetsRepository {
     /** Clean up any external listeners or state (if necessary). */
     fun cleanUp()
 
-    /**
-     * Options around what kind of widgets to work with in the widgets repository.
-     *
-     * @param widgetAppId initialize repository only for specific app that hosts widgets
-     * @param loadFeaturedWidgets initialize featured widgets as well
-     */
-    data class InitializationOptions(
-        val widgetAppId: WidgetAppId? = null,
-        val loadFeaturedWidgets: Boolean = true,
-    )
+    /** Options around what kind of widgets to initialize in the widgets repository. */
+    sealed class InitializationOptions {
+        /** All types of widgets from all apps available on device are initialized. */
+        data object AllWidgets : InitializationOptions()
+
+        /** @param widgetAppId the app for which to load widgets */
+        data class SingleAppWidgets(val widgetAppId: WidgetAppId) : InitializationOptions()
+
+        /**
+         * @param pinItemRequest info about specific widget / shortcuts to initialize the repository
+         *   with.
+         */
+        data class PinWidget(val pinItemRequest: PinItemRequest) : InitializationOptions()
+
+        companion object {
+            /** Extracts app widget id from initialization options (if any). */
+            fun InitializationOptions.getWidgetAppId() =
+                when (this) {
+                    is SingleAppWidgets -> widgetAppId
+                    else -> null
+                }
+        }
+    }
 }

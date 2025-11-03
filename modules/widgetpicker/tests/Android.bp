@@ -52,6 +52,7 @@ android_test {
         "multivalentScreenshotTests/src/com/android/launcher3/widgetpicker/ui/components/WidgetDetailsScreenshotTest.kt",
         "multivalentScreenshotTests/src/com/android/launcher3/widgetpicker/ui/screens/LandingScreenScreenshotTest.kt",
         "multivalentScreenshotTests/src/com/android/launcher3/widgetpicker/ui/appcatalog/SingleAppWidgetsCatalogScreenshotTest.kt",
+        "multivalentScreenshotTests/src/com/android/launcher3/widgetpicker/ui/pin/PinAppWidgetCatalogScreenshotTest.kt",
         "multivalentScreenshotTests/src/com/android/launcher3/widgetpicker/ui/testdata/ScreenshotTestData.kt",
         "multivalentScreenshotTests/src/com/android/launcher3/widgetpicker/ui/testdata/ScreenshotTestWidgetAppIconsRepository.kt",
         "multivalentScreenshotTests/src/com/android/launcher3/widgetpicker/ui/testdata/ScreenshotTestWidgetsRepository.kt",

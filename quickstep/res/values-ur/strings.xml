@@ -126,7 +126,8 @@
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"ٹاسک بار کی تعلیم"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"ایک وقت میں 2 ایپس استعمال کرنے کیلئے ایپ سائیڈ پر گھسیٹیں"</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"اسے نیچے کے کونوں تک گھسیٹیں تاکہ یہ فلوٹ کرے"</string>
-    <string name="taskbar_edu_stashing" msgid="5645461372669217294">"ٹاسک بار دکھانے کے لیے آہستہ سے اوپر سوائپ کریں"</string>
+    <!-- no translation found for taskbar_edu_stashing (911857479758694381) -->
+    <skip />
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"اپنی روٹین پر مبنی ایپس کی تجاویز حاصل کریں"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"ٹاسک بار کو پن کرنے کے لیے ڈیوائیڈر پر لانگ پریس کریں"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"ٹاسک بار سے بہت کچھ کریں"</string>
@@ -179,4 +180,6 @@
     <string name="nudge_a11y_title" msgid="2126529303123687912">"کھسکائیں"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"بند کریں"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"تصویر کو کھسکائیں"</string>
+    <!-- no translation found for running_app_description (1309281047289078871) -->
+    <skip />
 </resources>

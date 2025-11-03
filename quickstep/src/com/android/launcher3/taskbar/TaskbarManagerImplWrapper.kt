@@ -17,20 +17,26 @@
 package com.android.launcher3.taskbar
 
 import android.app.PendingIntent
+import androidx.annotation.VisibleForTesting
 import com.android.launcher3.ActivityInteractor
+import com.android.launcher3.AsyncAnimatorPlaybackController
 import com.android.launcher3.LauncherInteractor
-import com.android.launcher3.anim.AnimatorPlaybackController
 import com.android.launcher3.statemanager.StatefulActivity
 import com.android.launcher3.uioverrides.QuickstepLauncher
 import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
+import com.android.launcher3.util.ListenableStream
+import com.android.quickstep.SystemUiProxy
 import com.android.quickstep.views.RecentsViewContainer
 import java.io.PrintWriter
+import java.util.concurrent.Callable
+import javax.annotation.concurrent.ThreadSafe
 
 /**
  * Wrapper of [TaskbarManagerImpl], this class controls which thread the invocation happens. The
  * goal of this class is to minimize the changes to [TaskbarManagerImpl] during migration of
  * rendering taskbar in per-window ui thread.
  */
+@ThreadSafe
 class TaskbarManagerImplWrapper(private val impl: TaskbarManagerImpl) : TaskbarManager {
 
     override fun onUserUnlocked() {
@@ -130,40 +136,43 @@ class TaskbarManagerImplWrapper(private val impl: TaskbarManagerImpl) : TaskbarM
         TASKBAR_UI_THREAD.execute { impl.destroy() }
     }
 
-    override fun createLauncherStartFromSuwAnim(duration: Int): AnimatorPlaybackController? {
-        // TODO(b/404636836): Evaluate if internal impl taskbar.createLauncherStartFromSuwAnim() is
-        //  thread safe
+    override fun createLauncherStartFromSuwAnim(duration: Int): AsyncAnimatorPlaybackController? {
         return impl.createLauncherStartFromSuwAnim(duration)
     }
 
     override fun shouldForceAllSetFallbackAnimation(): Boolean {
-        // Thread safe
         return impl.shouldForceAllSetFallbackAnimation()
     }
 
-    override fun getCurrentActivityContext(): TaskbarActivityContext? {
-        // Thread safe
-        return impl.currentActivityContext
+    override fun hasCurrentActivityContext() = impl.currentActivityContext != null
+
+    override fun toggleTaskbarStash() {
+        TASKBAR_UI_THREAD.execute { impl.currentActivityContext?.toggleTaskbarStash() }
     }
 
+    override fun getStashedHandleViewController(): StashedHandleViewController? {
+        return impl.currentActivityContext?.controllers?.stashedHandleViewController
+    }
+
+    override fun getPrimaryDisplayUiControllerStream(): ListenableStream<TaskbarUIController> =
+        impl.primaryDisplayUiControllerStream
+
+    /* TODO(b/404636836): Evaluate API calls on returned TaskbarUIController */
     override fun getUIControllerForDisplay(displayId: Int): TaskbarUIController? {
-        // Thread safe
         return impl.getUIControllerForDisplay(displayId)
     }
 
+    /* TODO(b/404636836): Evaluate API calls on returned TaskbarActivityContext */
     override fun getTaskbarForDisplay(displayId: Int): TaskbarActivityContext? {
-        // Thread safe
         return impl.getTaskbarForDisplay(displayId)
     }
 
     override fun createAllAppsPendingIntent(): PendingIntent {
-        // Thread safe
         return impl.createAllAppsPendingIntent(TASKBAR_UI_THREAD)
     }
 
     override fun getPrimaryDisplayId(): Int {
-        // Thread safe
-        return impl.getPrimaryDisplayId()
+        return impl.primaryDisplayId
     }
 
     override fun dumpLogs(prefix: String, pw: PrintWriter) {
@@ -174,4 +183,67 @@ class TaskbarManagerImplWrapper(private val impl: TaskbarManagerImpl) : TaskbarM
     override fun debugPrimaryTaskbar(debugReason: String, verbose: Boolean) {
         TASKBAR_UI_THREAD.execute { impl.debugPrimaryTaskbar(debugReason, verbose) }
     }
+
+    @VisibleForTesting
+    override fun getCurrentActivityContext(): TaskbarActivityContext? {
+        return impl.currentActivityContext
+    }
+
+    @VisibleForTesting
+    override fun removeAllSystemUiBubbles() {
+        SystemUiProxy.INSTANCE[impl.currentActivityContext].removeAllBubbles()
+    }
+
+    @VisibleForTesting
+    override fun unstashBubbleBarIfStashed() {
+        TASKBAR_UI_THREAD.execute { impl.currentActivityContext?.unstashBubbleBarIfStashed() }
+    }
+
+    @VisibleForTesting
+    override fun limitMaxTaskbarIconsNum(maxIconLimitNum: Int) {
+        TASKBAR_UI_THREAD.execute {
+            impl.currentActivityContext?.limitMaxTaskbarIconsNum(maxIconLimitNum)
+        }
+    }
+
+    @VisibleForTesting
+    override fun getStashedTaskbarScale() = impl.currentActivityContext!!.stashedTaskbarScale
+
+    @VisibleForTesting
+    override fun removeAllBubbles() {
+        return TASKBAR_UI_THREAD.execute { impl.currentActivityContext!!.removeAllBubbles() }
+    }
+
+    @VisibleForTesting
+    override fun unstashTaskbarIfStashed() {
+        return TASKBAR_UI_THREAD.execute { impl.currentActivityContext!!.unstashTaskbarIfStashed() }
+    }
+
+    @VisibleForTesting
+    override fun enableBlockingTimeoutDuringTests(enableBlockingTimeout: Boolean) {
+        impl.currentActivityContext?.enableBlockingTimeoutDuringTests(enableBlockingTimeout)
+    }
+
+    @VisibleForTesting
+    override fun isTransient(): Boolean =
+        impl.currentActivityContext?.taskbarFeatureEvaluator?.isTransient ?: false
+
+    @VisibleForTesting
+    override fun getTaskbarAllAppsScroll(): Int {
+        return TASKBAR_UI_THREAD.submit(
+                Callable { impl.currentActivityContext!!.taskbarAllAppsScroll }
+            )
+            .get()
+    }
+
+    @VisibleForTesting
+    override fun getTaskbarAllAppsTopPadding(): Int =
+        TASKBAR_UI_THREAD.submit(
+                Callable { impl.currentActivityContext!!.taskbarAllAppsTopPadding }
+            )
+            .get()
+
+    @VisibleForTesting
+    override fun isImeDocked(): Boolean =
+        TASKBAR_UI_THREAD.submit(Callable { impl.currentActivityContext!!.isImeDocked }).get()
 }

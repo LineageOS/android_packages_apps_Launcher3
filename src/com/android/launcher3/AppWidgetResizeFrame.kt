@@ -33,7 +33,6 @@ import android.view.View.OnLayoutChangeListener
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
-import androidx.annotation.VisibleForTesting
 import androidx.core.view.children
 import com.android.launcher3.AppWidgetResizeFrame.Companion.DragHandles.Companion.HANDLE_COUNT
 import com.android.launcher3.DropTarget.DragObject
@@ -42,6 +41,7 @@ import com.android.launcher3.LauncherConstants.ActivityCodes
 import com.android.launcher3.LauncherPrefs.Companion.get
 import com.android.launcher3.accessibility.DragViewStateAnnouncer
 import com.android.launcher3.celllayout.CellLayoutLayoutParams
+import com.android.launcher3.compose.ComposeFacade
 import com.android.launcher3.dragndrop.DragController
 import com.android.launcher3.dragndrop.DragLayer
 import com.android.launcher3.dragndrop.DragOptions
@@ -63,6 +63,34 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
+/** Base class for the resize frame displayed around a widget. */
+abstract class AppWidgetResizeFrameBase(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0,
+) : AbstractFloatingView(context, attrs, defStyleAttr) {
+    override fun isOfType(type: Int): Boolean = (type and TYPE_WIDGET_RESIZE_FRAME) != 0
+
+    /** Retrieves the view where accessibility actions happen. */
+    abstract fun getViewForAccessibility(): View
+
+    /** When true, resize frame can be dismissed. */
+    protected fun shouldCloseResizeFrame(keyCode: Int): Boolean {
+        return when (keyCode) {
+            KeyEvent.KEYCODE_DPAD_LEFT,
+            KeyEvent.KEYCODE_DPAD_RIGHT,
+            KeyEvent.KEYCODE_DPAD_UP,
+            KeyEvent.KEYCODE_DPAD_DOWN,
+            KeyEvent.KEYCODE_MOVE_HOME,
+            KeyEvent.KEYCODE_MOVE_END,
+            KeyEvent.KEYCODE_PAGE_UP,
+            KeyEvent.KEYCODE_PAGE_DOWN -> true
+
+            else -> false
+        }
+    }
+}
+
 /**
  * A floating view representing the frame shown with resize handles (dots) around the widgets when
  * you hold press it.
@@ -70,7 +98,7 @@ import kotlin.math.min
 class AppWidgetResizeFrame
 @JvmOverloads
 constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
-    AbstractFloatingView(context, attrs, defStyleAttr),
+    AppWidgetResizeFrameBase(context, attrs, defStyleAttr),
     View.OnKeyListener,
     DragController.DragListener {
     private val launcher: Launcher = Launcher.getLauncher(context)
@@ -201,7 +229,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     }
 
     /** Retrieves the view where accessibility actions happen. */
-    fun getViewForAccessibility(): View = widgetView
+    override fun getViewForAccessibility(): View = widgetView
 
     /** Initializes a resize frame that can be shown around the provided [widgetView]. */
     private fun setupForWidget(
@@ -857,8 +885,6 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         }
     }
 
-    override fun isOfType(type: Int): Boolean = (type and TYPE_WIDGET_RESIZE_FRAME) != 0
-
     override fun onDragStart(dragObject: DragObject, options: DragOptions) {
         close(true)
     }
@@ -868,7 +894,6 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     }
 
     /** A mutable class for describing the range of two int values. */
-    @VisibleForTesting
     class IntRange {
         var start: Int = 0
         var end: Int = 0
@@ -1017,8 +1042,13 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
                 // If widget is not added to view hierarchy, we cannot show resize frame at correct
                 // location
                 if (widget == null || widget.parent == null) return
-
                 val activityContext = cellLayout.mActivity
+
+                if (ComposeFacade.isComposeAvailable() && Flags.fixWidgetSinglePtrResize()) {
+                    ComposeFacade.showResizeFrame(cellLayout.mActivity, widget, cellLayout)
+                    return
+                }
+
                 val dragLayer = activityContext.dragLayer as DragLayer
 
                 closeAllOpenViewsExcept(activityContext, TYPE_ACTION_POPUP)
@@ -1061,18 +1091,6 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
             } else {
                 0
             }
-        }
-
-        /** When true, resize frame can be dismissed. */
-        private fun shouldCloseResizeFrame(keyCode: Int): Boolean {
-            return (keyCode == KeyEvent.KEYCODE_DPAD_LEFT ||
-                keyCode == KeyEvent.KEYCODE_DPAD_RIGHT ||
-                keyCode == KeyEvent.KEYCODE_DPAD_UP ||
-                keyCode == KeyEvent.KEYCODE_DPAD_DOWN ||
-                keyCode == KeyEvent.KEYCODE_MOVE_HOME ||
-                keyCode == KeyEvent.KEYCODE_MOVE_END ||
-                keyCode == KeyEvent.KEYCODE_PAGE_UP ||
-                keyCode == KeyEvent.KEYCODE_PAGE_DOWN)
         }
 
         private fun AppWidgetProviderInfo.hasHorizontalResizeModeEnabled() =

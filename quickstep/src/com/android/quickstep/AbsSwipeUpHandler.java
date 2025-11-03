@@ -476,7 +476,7 @@ public abstract class AbsSwipeUpHandler<
     private boolean newIsTaskbarStashed(Context context) {
         TaskbarUiState taskbarUiState = TaskbarUiStateMonitor.INSTANCE.get(context)
                 .getTaskbarUiState(context.getDisplayId());
-        return taskbarUiState.isTaskbarStashedRef().getValue();
+        return taskbarUiState.isTaskbarStashed();
     }
 
     private boolean legacyIsTaskbarStashed() {
@@ -500,7 +500,7 @@ public abstract class AbsSwipeUpHandler<
     private boolean newIsTaskbarAllAppsOpen(Context context) {
         TaskbarUiState taskbarUiState = TaskbarUiStateMonitor.INSTANCE.get(context)
                 .getTaskbarUiState(context.getDisplayId());
-        return taskbarUiState.isTaskbarAllAppsOpenRef().getValue();
+        return taskbarUiState.isTaskbarAllAppsOpen();
     }
 
     private boolean legacyIsTaskbarAllAppsOpen() {

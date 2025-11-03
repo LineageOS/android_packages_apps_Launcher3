@@ -62,7 +62,7 @@ class TaskbarSpecsEvaluator(
     private var taskbarContainer: List<TaskbarContainer> = emptyList()
 
     private val defaultIconSize: TaskbarIconSize =
-        if (taskbarActivityContext.isPinnedTaskbar) {
+        if (taskbarActivityContext.isPinnedTaskbar || taskbarActivityContext.isThreeButtonNav) {
             TaskbarIconSpecs.defaultPersistentIconSize
         } else {
             TaskbarIconSpecs.defaultTransientIconSize

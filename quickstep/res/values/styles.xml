@@ -385,20 +385,16 @@
 
     <style name="AllAppsBlurStyle">
         <item name="allAppsScrimColor">@androidprv:color/shade_panel_scrim_color</item>
-        <item name="groupHighlight">@androidprv:color/surface_effect_1</item>
-        <item name="focusHighlight">@androidprv:color/surface_effect_2</item>
-        <item name="allAppsSurfaceLow">@androidprv:color/surface_effect_0</item>
-        <item name="allAppsSurfaceHighest">@androidprv:color/surface_effect_2</item>
-        <item name="allAppsUnselectedTab">@androidprv:color/surface_effect_2</item>
-        <item name="allappsHeaderProtectionColor">@androidprv:color/surface_effect_1</item>
-        <item name="privateSpaceSettingsColor">@androidprv:color/surface_effect_2</item>
-        <item name="privateSpaceDividerColor">@androidprv:color/surface_effect_3</item>
+        <item name="groupHighlight">@androidprv:color/customColorSurfaceEffect1</item>
+        <item name="focusHighlight">@androidprv:color/customColorSurfaceEffect2</item>
+        <item name="allAppsSurfaceLow">@androidprv:color/customColorSurfaceEffect0</item>
+        <item name="allAppsSurfaceHighest">@androidprv:color/customColorSurfaceEffect2</item>
+        <item name="allAppsUnselectedTab">@androidprv:color/customColorSurfaceEffect2</item>
+        <item name="allappsHeaderProtectionColor">@androidprv:color/customColorSurfaceEffect1</item>
+        <item name="privateSpaceSettingsColor">@androidprv:color/customColorSurfaceEffect2</item>
+        <item name="privateSpaceDividerColor">@androidprv:color/customColorSurfaceEffect3</item>
         <item name="bottomSheetDragHandleColor">@color/materialColorOnSurface</item>
     </style>
-
-    <!-- Currently All Apps fallback should only change the panel background color, but not
-    other surface effects. The background color is handled in ActivityAllAppsContainerView. -->
-    <style name="AllAppsBlurFallbackStyle" parent="AllAppsBlurStyle" />
 
     <style name="OverviewBlurStyle">
         <item name="overviewScrimColor">?attr/overviewScrimColorBlur</item>

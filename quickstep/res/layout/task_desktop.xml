@@ -35,12 +35,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- TODO(b/405863833): Fix desktop tile background in portrait. -->
-        <com.android.quickstep.views.FixedSizeImageView
+        <View
             android:id="@+id/background"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="matrix" />
+            android:layout_height="match_parent" />
 
     </com.android.quickstep.views.DesktopTaskContentView>
 

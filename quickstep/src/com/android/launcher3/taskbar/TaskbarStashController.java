@@ -275,7 +275,7 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
     private boolean mIsImeVisible;
 
     private final Alarm mTimeoutAlarm = new Alarm();
-    private boolean mEnableBlockingTimeoutDuringTests = false;
+    private volatile boolean mEnableBlockingTimeoutDuringTests = false;
 
     private Animator mTaskbarBackgroundAlphaAnimator;
     private final long mTaskbarBackgroundDuration;
@@ -474,6 +474,7 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
      * Enables the auto timeout for taskbar stashing. This method should only be used for taskbar
      * testing.
      */
+    @AnyThread
     @VisibleForTesting
     public void enableBlockingTimeoutDuringTests(boolean enableBlockingTimeout) {
         mEnableBlockingTimeoutDuringTests = enableBlockingTimeout;
@@ -757,7 +758,7 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
     /** @return if we should allow taskbar to auto stash. */
     @AnyThread
     private boolean newShouldAllowTaskbarToAutoStash() {
-        final boolean isPrimaryDisplay = mTaskbarUiState.isPrimaryDisplayRef().getValue();
+        final boolean isPrimaryDisplay = mTaskbarUiState.isPrimaryDisplay();
         if (mTaskbarUiState.isThreeButtonNav() && isPrimaryDisplay) {
             return false;
         }
@@ -773,9 +774,9 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
                 LauncherPrefs.TASKBAR_PINNING_IN_DESKTOP_MODE.get(mActivity);
         final boolean isTaskbarShowingDesktopTasks = DesktopVisibilityController.INSTANCE
                 .get(mActivity).isInDesktopMode(mActivity.getDisplayId())
-                        || mTaskbarUiState.getShowDesktopTaskbarForFreeformDisplayRef().getValue()
-                        || (mTaskbarUiState.getShowLockedTaskbarOnHome().getValue()
-                        && mTaskbarUiState.isTaskbarOnHomeRef().getValue());
+                        || mTaskbarUiState.getShowDesktopTaskbarForFreeformDisplay()
+                        || (mTaskbarUiState.getShowLockedTaskbarOnHome()
+                        && mTaskbarUiState.isTaskbarOnHome());
         return !isTaskbarPinningOnInDesktopMode && isTaskbarShowingDesktopTasks;
     }
 
@@ -1271,7 +1272,7 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
 
     private void updateIsTaskbarStashed(boolean isStashed) {
         if (refactorTaskbarUiState()) {
-            mActivity.getTaskbarUiState().setIsTaskbarStashed(isStashed);
+            mActivity.getTaskbarUiState().setTaskbarStashed(isStashed);
         }
     }
 

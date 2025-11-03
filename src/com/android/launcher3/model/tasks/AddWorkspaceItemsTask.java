@@ -25,7 +25,6 @@ import android.os.UserHandle;
 import androidx.annotation.NonNull;
 
 import com.android.launcher3.LauncherModel.ModelUpdateTask;
-import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.logging.FileLog;
 import com.android.launcher3.model.AllAppsList;
 import com.android.launcher3.model.BgDataModel;
@@ -122,8 +121,7 @@ public class AddWorkspaceItemsTask implements ModelUpdateTask {
                         item.spanX, item.spanY, excludedScreens);
 
                 // Save the WorkspaceItemInfo for binding in the workspace
-                writer.updateItemInfoProps(item, LauncherSettings.Favorites.CONTAINER_DESKTOP,
-                        coords.getScreenId(), coords.getCellX(), coords.getCellY());
+                coords.applyTo(item);
                 addedItemsFinal.add(item);
 
                 // log bitmap and label

@@ -271,9 +271,12 @@ constructor(
                 transitionInfo: TransitionInfo?,
             ) {
                 super.onRecentsAnimationStart(controller, targets, transitionInfo)
-                if (useInputReportedFocusForAccessibility()) {
-                    surfaceControlViewHost?.requestInputFocus(/* focused= */ true)
-                }
+                // When the overview is launched via alt+tab, the subsequent tab to cycle through
+                // tasks in overview can only be dispatched to focused views, while focus is
+                // requested after posting on the requested view in OverviewCommandHelper. We
+                // therefore also need to post this request onto the recents view.
+                // (see OverviewCommandHelper#updateRecentsViewFocus)
+                recentsView?.post { requestInputFocus(/* focused= */ true) }
             }
 
             override fun onRecentsAnimationCanceled(thumbnailDatas: HashMap<Int, ThumbnailData>) {
@@ -324,7 +327,7 @@ constructor(
         }
         surfaceControlViewHost?.let { cleanUpSurfaceControlViewHost() }
 
-        theme.applyStyle(overviewBlurStyleResId, true)
+        theme.applyStyle(R.style.OverviewBlurFallbackStyle, true)
         windowView = layoutInflater.inflate(R.layout.fallback_recents_activity, null)
         windowView?.let {
             actionsView = it.findViewById(R.id.overview_actions_view)
@@ -458,9 +461,7 @@ constructor(
             AbstractFloatingView.closeAllOpenViews(this, /* animate= */ false)
             recentsView?.viewRootImpl?.touchModeChanged(true)
             windowRootView.visibility = View.GONE
-            if (useInputReportedFocusForAccessibility()) {
-                surfaceControlViewHost?.requestInputFocus(/* focused= */ false)
-            }
+            requestInputFocus(/* focused= */ false)
             AccessibilityManagerCompat.sendTestProtocolEventToTest(
                 this,
                 LAUNCHER_ACTIVITY_STOPPED_MESSAGE,
@@ -524,6 +525,12 @@ constructor(
             homeOverlay = systemUiProxy.getHomeTaskOverlayContainer()
         }
         return homeOverlay
+    }
+
+    fun requestInputFocus(focused: Boolean) {
+        if (useInputReportedFocusForAccessibility()) {
+            surfaceControlViewHost?.requestInputFocus(focused)
+        }
     }
 
     override fun onConfigurationChanged(newConfiguration: Configuration) {
@@ -864,8 +871,6 @@ constructor(
 
     override fun createAtomicAnimationFactory(): AtomicAnimationFactory<RecentsState> =
         RecentsAtomicAnimationFactory(this)
-
-    override fun getOverviewBlurStyleResId() = R.style.OverviewBlurFallbackStyle
 
     @AssistedFactory
     interface Factory {

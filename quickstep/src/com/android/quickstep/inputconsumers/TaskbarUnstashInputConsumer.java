@@ -367,7 +367,7 @@ public class TaskbarUnstashInputConsumer extends DelegateInputConsumer {
 
     private boolean isTaskbarStashed() {
         if (refactorTaskbarUiState()) {
-            boolean ret = mTaskbarUiState.isTaskbarStashedRef().getValue();
+            boolean ret = mTaskbarUiState.isTaskbarStashed();
             if (BuildConfig.IS_STUDIO_BUILD && ret != legacyIsTaskbarStashed()) {
                 throw new IllegalStateException("isTaskbarStashed doesn't match!");
             }
@@ -384,7 +384,7 @@ public class TaskbarUnstashInputConsumer extends DelegateInputConsumer {
 
     private boolean isTaskbarAllAppsOpen() {
         if (refactorTaskbarUiState()) {
-            boolean ret = mTaskbarUiState.isTaskbarAllAppsOpenRef().getValue();
+            boolean ret = mTaskbarUiState.isTaskbarAllAppsOpen();
             if (BuildConfig.IS_STUDIO_BUILD && ret != legacyIsTaskbarAllAppsOpen()) {
                 throw new IllegalStateException("isTaskbarAllAppsOpen doesn't match!");
             }

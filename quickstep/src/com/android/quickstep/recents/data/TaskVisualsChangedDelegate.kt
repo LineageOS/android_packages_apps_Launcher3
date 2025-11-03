@@ -25,6 +25,7 @@ import com.android.quickstep.util.TaskVisualsChangeListener
 import com.android.systemui.shared.recents.model.Task
 import com.android.systemui.shared.recents.model.ThumbnailData
 import java.util.concurrent.ConcurrentHashMap
+import javax.inject.Inject
 
 /** Delegates the checking of task visuals (thumbnails, high res changes, icons) */
 interface TaskVisualsChangedDelegate :
@@ -63,7 +64,9 @@ interface TaskVisualsChangedDelegate :
     }
 }
 
-class TaskVisualsChangedDelegateImpl(
+class TaskVisualsChangedDelegateImpl
+@Inject
+constructor(
     private val taskVisualsChangeNotifier: TaskVisualsChangeNotifier,
     private val highResLoadingStateNotifier: HighResLoadingStateNotifier,
 ) : TaskVisualsChangedDelegate {

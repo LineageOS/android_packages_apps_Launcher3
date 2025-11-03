@@ -33,16 +33,16 @@ import com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_BOTTO
 import com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT
 import com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_UNDEFINED
 import com.android.quickstep.TaskOverlayFactory
-import com.android.quickstep.recents.di.RecentsDependencies
-import com.android.quickstep.recents.di.get
+import com.android.quickstep.recents.di.RecentsComponent
 import com.android.quickstep.recents.ui.viewmodel.GroupedTaskViewModel
-import com.android.quickstep.util.RecentsOrientedState
 import com.android.quickstep.split.SplitSelectStateController
+import com.android.quickstep.util.RecentsOrientedState
 import com.android.quickstep.util.SplitTask
 import com.android.systemui.shared.system.InteractionJankMonitorWrapper
 import com.android.wm.shell.Flags.enableFlexibleTwoAppSplit
 import com.android.wm.shell.shared.split.SplitBounds
 import com.android.wm.shell.shared.split.SplitScreenConstants.PersistentSnapPosition
+import javax.inject.Inject
 
 /**
  * TaskView that contains and shows thumbnails for not one, BUT TWO(!!) tasks
@@ -74,8 +74,11 @@ class GroupedTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
         /** Returns the [PersistentSnapPosition] of this pair of tasks. */
         get() = splitBoundsConfig?.snapPosition ?: STAGE_POSITION_UNDEFINED
 
-    private val viewModel =
-        GroupedTaskViewModel(isPointerConnectedUseCase = RecentsDependencies.get(context))
+    @Inject lateinit var groupedTaskViewModel: GroupedTaskViewModel
+
+    override fun initialiseInjectables(recentsComponent: RecentsComponent) {
+        recentsComponent.inject(this)
+    }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
@@ -184,7 +187,7 @@ class GroupedTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
     }
 
     private fun calculateSpaceForTaskDismissButton() =
-        if (showCloseButtonOnTaskviewHover() && viewModel.showTaskDismissButton()) {
+        if (showCloseButtonOnTaskviewHover() && groupedTaskViewModel.showTaskDismissButton()) {
             val taskDismissBtnWidth =
                 resources.getDimensionPixelSize(R.dimen.task_dismiss_button_width)
             val taskDismissBtnMargin =

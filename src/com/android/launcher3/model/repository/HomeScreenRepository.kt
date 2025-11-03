@@ -18,7 +18,6 @@ package com.android.launcher3.model.repository
 
 import android.util.SparseArray
 import com.android.launcher3.dagger.LauncherAppSingleton
-import com.android.launcher3.model.StringCache
 import com.android.launcher3.model.data.WorkspaceChangeEvent
 import com.android.launcher3.model.data.WorkspaceData
 import com.android.launcher3.model.data.WorkspaceData.ImmutableWorkspaceData
@@ -48,10 +47,6 @@ class HomeScreenRepository @Inject constructor() {
     /** List of all widgets on device */
     val allWidgets = _allWidgets.asListenable()
 
-    private val _stringCache = MutableListenableRef(StringCache.EMPTY)
-    /** Cache for strings used in launcher */
-    val stringCache = _stringCache.asListenable()
-
     /** sets a new value to [workspaceState] */
     fun dispatchWorkspaceDataChange(workspaceData: WorkspaceData, change: WorkspaceChangeEvent?) {
         _workspaceState.dispatchValue(workspaceData, change)
@@ -59,9 +54,5 @@ class HomeScreenRepository @Inject constructor() {
 
     fun dispatchWidgetsChange(widgets: List<WidgetsListBaseEntry>) {
         _allWidgets.dispatchValue(widgets)
-    }
-
-    fun dispatchStringCacheChange(stringCache: StringCache) {
-        _stringCache.dispatchValue(stringCache)
     }
 }

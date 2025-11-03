@@ -112,8 +112,7 @@
     <string name="app_removed_from_taskbar" msgid="3471754847898675396">"Ilova vazifalar panelidan olib tashlandi"</string>
     <string name="remove_system_shortcut_label" msgid="3991201411148073972">"Olib tashlash"</string>
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"Ochish"</string>
-    <!-- no translation found for home_screen_files_context_menu_delete_permanently_label (8660443461874174185) -->
-    <skip />
+    <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"Butunlay oʻchirish"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"yorliqlar yaratish"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"Ilovalarga foydalanuvchidan so‘ramasdan yorliqlar qo‘shishga ruxsat beradi."</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"Bosh ekrandagi sozlamalar va yorliqlarni koʻrish"</string>

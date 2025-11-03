@@ -31,6 +31,7 @@ import androidx.annotation.NonNull;
 
 import com.android.launcher3.LauncherModel.ModelUpdateTask;
 import com.android.launcher3.R;
+import com.android.launcher3.model.BgDataModel.ModificationSource.ModelTask;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.PredictedContainerInfo;
 import com.android.launcher3.util.ComponentKey;
@@ -136,7 +137,7 @@ public final class WidgetsPredictionUpdateTask implements ModelUpdateTask {
         PredictedContainerInfo pci =
                 new PredictedContainerInfo(mPredictorState.containerId, items);
 
-        dataModel.updateAndDispatchItem(pci /* item */, null /* owner */);
+        dataModel.updateAndDispatchItem(pci /* item */, ModelTask.INSTANCE /* owner */);
         taskController.bindUpdatedWorkspaceItems(Collections.singleton(pci));
 
         // Don't store widgets prediction to disk because it is not used frequently.

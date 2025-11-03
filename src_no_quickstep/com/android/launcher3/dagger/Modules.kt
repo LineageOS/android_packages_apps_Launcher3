@@ -20,6 +20,8 @@ import com.android.launcher3.dragndrop.SystemDragController
 import com.android.launcher3.dragndrop.SystemDragControllerStub
 import com.android.launcher3.homescreenfiles.HomeScreenFilesNoOpProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider
+import com.android.launcher3.util.MutableListenableRef
+import com.android.launcher3.util.WindowBlurState.WINDOW_BLUR_STATE
 import com.android.launcher3.util.window.RefreshRateTracker
 import com.android.launcher3.util.window.RefreshRateTracker.RefreshRateTrackerImpl
 import com.android.launcher3.widget.LauncherWidgetHolder.WidgetHolderFactory
@@ -27,6 +29,7 @@ import com.android.launcher3.widget.LauncherWidgetHolder.WidgetHolderFactoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import javax.inject.Named
 
 private object Modules
 
@@ -57,7 +60,15 @@ object SystemDragModule {
 }
 
 // Module containing bindings for the final derivative app
-@Module abstract class AppModule
+@Module
+object AppModule {
+
+    @Provides
+    @JvmStatic
+    @LauncherAppSingleton
+    @Named(WINDOW_BLUR_STATE)
+    fun provideWindowBlurState() = MutableListenableRef<Boolean>(false).asListenable()
+}
 
 @Module abstract class ProductionAppModule
 
