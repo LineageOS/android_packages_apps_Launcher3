@@ -202,6 +202,16 @@
     <string name="action_increase_height" msgid="459390020612501122">"ਉਂਚਾਈ ਵਧਾਓ"</string>
     <string name="action_decrease_width" msgid="1374549771083094654">"ਚੌੜਾਈ ਘਟਾਓ"</string>
     <string name="action_decrease_height" msgid="282377193880900022">"ਉਂਚਾਈ ਘਟਾਓ"</string>
+    <!-- no translation found for resize_handle_start (431073846880883794) -->
+    <skip />
+    <!-- no translation found for resize_handle_top (280799523356834542) -->
+    <skip />
+    <!-- no translation found for resize_handle_end (8411240534474246075) -->
+    <skip />
+    <!-- no translation found for resize_handle_bottom (4217171801060928429) -->
+    <skip />
+    <!-- no translation found for tap_to_show_resize_buttons (964815552123289232) -->
+    <skip />
     <string name="widget_resized" msgid="9130327887929620">"ਵਿਜੈਟ ਨੂੰ ਚੌੜਾਈ <xliff:g id="NUMBER_0">%1$s</xliff:g> ਉਂਚਾਈ <xliff:g id="NUMBER_1">%2$s</xliff:g> ਨੂੰ ਮੁੜ ਆਕਾਰ ਦਿੱਤਾ"</string>
     <string name="action_deep_shortcut" msgid="4766835855579976045">"ਸ਼ਾਰਟਕੱਟ ਮੀਨੂ"</string>
     <string name="widget_frame_name" msgid="8782828448471444270">"<xliff:g id="STRING">%1$s</xliff:g> ਲਈ, ਵਿਜੇਟ ਦਾ ਆਕਾਰ ਬਦਲਣ ਵਾਲਾ ਫ੍ਰੇਮ"</string>

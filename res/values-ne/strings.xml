@@ -202,6 +202,16 @@
     <string name="action_increase_height" msgid="459390020612501122">"उँचाइ बढाउनुहोस्"</string>
     <string name="action_decrease_width" msgid="1374549771083094654">"चौडाइ घटाउनुहोस्"</string>
     <string name="action_decrease_height" msgid="282377193880900022">"उँचाइ घटाउनुहोस्"</string>
+    <!-- no translation found for resize_handle_start (431073846880883794) -->
+    <skip />
+    <!-- no translation found for resize_handle_top (280799523356834542) -->
+    <skip />
+    <!-- no translation found for resize_handle_end (8411240534474246075) -->
+    <skip />
+    <!-- no translation found for resize_handle_bottom (4217171801060928429) -->
+    <skip />
+    <!-- no translation found for tap_to_show_resize_buttons (964815552123289232) -->
+    <skip />
     <string name="widget_resized" msgid="9130327887929620">"विजेट चौडाइ <xliff:g id="NUMBER_0">%1$s</xliff:g> उचाइ <xliff:g id="NUMBER_1">%2$s</xliff:g> मा पुनः आकार मिलाइयो"</string>
     <string name="action_deep_shortcut" msgid="4766835855579976045">"सर्टकटसम्बन्धी मेनु"</string>
     <string name="widget_frame_name" msgid="8782828448471444270">"<xliff:g id="STRING">%1$s</xliff:g> एपको विजेटको आकार बदल्ने फ्रेम"</string>

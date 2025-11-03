@@ -202,6 +202,16 @@
     <string name="action_increase_height" msgid="459390020612501122">"افزایش ارتفاع"</string>
     <string name="action_decrease_width" msgid="1374549771083094654">"کاهش عرض"</string>
     <string name="action_decrease_height" msgid="282377193880900022">"کاهش ارتفاع"</string>
+    <!-- no translation found for resize_handle_start (431073846880883794) -->
+    <skip />
+    <!-- no translation found for resize_handle_top (280799523356834542) -->
+    <skip />
+    <!-- no translation found for resize_handle_end (8411240534474246075) -->
+    <skip />
+    <!-- no translation found for resize_handle_bottom (4217171801060928429) -->
+    <skip />
+    <!-- no translation found for tap_to_show_resize_buttons (964815552123289232) -->
+    <skip />
     <string name="widget_resized" msgid="9130327887929620">"اندازه ابزاره به عرض <xliff:g id="NUMBER_0">%1$s</xliff:g> ارتفاع <xliff:g id="NUMBER_1">%2$s</xliff:g> تغییر کرد"</string>
     <string name="action_deep_shortcut" msgid="4766835855579976045">"منو میان‌بر"</string>
     <string name="widget_frame_name" msgid="8782828448471444270">"قاب تغییر اندازه ابزاره برای <xliff:g id="STRING">%1$s</xliff:g>"</string>
