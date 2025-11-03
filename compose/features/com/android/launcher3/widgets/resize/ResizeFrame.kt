@@ -378,8 +378,9 @@ private fun DotHandle(
                     }
                     .pointerInput(edge) { detectTapGestures(onTap = { onHandleTapped(edge) }) }
                     .padding(DotPadding)
-                    .background(color = backgroundColor, shape = CircleShape)
                     .border(width = BorderWidth, color = borderColor, shape = CircleShape)
+                    .padding(BorderWidth)
+                    .background(color = backgroundColor, shape = CircleShape)
         )
     }
 }
@@ -524,8 +525,9 @@ private fun ResizeButton(
                             this.scaleY = buttonContainerScale * buttonLengthPercent
                         }
                     }
-                    .background(backgroundColor, shape)
-                    .border(width = borderWidth, color = contentColor, shape = shape),
+                    .border(width = borderWidth, color = contentColor, shape = shape)
+                    .padding(borderWidth)
+                    .background(backgroundColor, shape),
         ) {
             Icon(
                 modifier =
