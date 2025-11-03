@@ -63,7 +63,7 @@ class TaskbarHandoffControllerTest {
 
         val suggestions = controller.suggestions
         assertThat(suggestions).hasSize(1)
-        assertThat(suggestions.map { it.deviceId }).containsExactly(2).inOrder()
+        assertThat(suggestions.map { it.associationId }).containsExactly(2).inOrder()
     }
 
     @Test
@@ -75,7 +75,7 @@ class TaskbarHandoffControllerTest {
         runOnMainSync { controller.onRemoteTasksChanged(listOf(task)) }
 
         assertThat(controller.suggestions).hasSize(1)
-        assertThat(controller.suggestions.first().deviceId).isEqualTo(1)
+        assertThat(controller.suggestions.first().associationId).isEqualTo(1)
 
         controller.onDestroy()
 
@@ -83,12 +83,11 @@ class TaskbarHandoffControllerTest {
     }
 
     private fun createRemoteTask(
-        deviceId: Int,
+        associationId: Int,
         label: String,
         lastUsedTimestampMillis: Long,
     ): RemoteTask {
-        return RemoteTask.Builder(1)
-            .setDeviceId(deviceId)
+        return RemoteTask.Builder(associationId, 1)
             .setLabel(label)
             .setLastUsedTimestampMillis(lastUsedTimestampMillis)
             .build()

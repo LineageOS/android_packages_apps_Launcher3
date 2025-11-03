@@ -92,7 +92,8 @@ class HandoffSuggestionMetadataLoader(private val context: Context, private val 
     ) {
         if (drawable != null) {
             Log.v(TAG, "onDrawableLoaded: drawable loaded")
-            suggestion.metadata = HandoffSuggestion.Metadata(suggestion.remoteTask.label, drawable)
+            suggestion.metadata =
+                HandoffSuggestion.Metadata(suggestion.remoteTask.getLabel(), drawable)
             callback.onLoaded(suggestion)
         } else {
             Log.v(TAG, "onDrawableLoaded: drawable is null")
