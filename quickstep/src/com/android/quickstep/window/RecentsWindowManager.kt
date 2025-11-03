@@ -276,7 +276,10 @@ constructor(
                 // requested after posting on the requested view in OverviewCommandHelper. We
                 // therefore also need to post this request onto the recents view.
                 // (see OverviewCommandHelper#updateRecentsViewFocus)
-                recentsView?.post { requestInputFocus(/* focused= */ true) }
+                if (!useInputReportedFocusForAccessibility()) {
+                    return
+                }
+                recentsView?.post { requestInputFocus(focused = true) }
             }
 
             override fun onRecentsAnimationCanceled(thumbnailDatas: HashMap<Int, ThumbnailData>) {
@@ -461,7 +464,7 @@ constructor(
             AbstractFloatingView.closeAllOpenViews(this, /* animate= */ false)
             recentsView?.viewRootImpl?.touchModeChanged(true)
             windowRootView.visibility = View.GONE
-            requestInputFocus(/* focused= */ false)
+            requestInputFocus(focused = false)
             AccessibilityManagerCompat.sendTestProtocolEventToTest(
                 this,
                 LAUNCHER_ACTIVITY_STOPPED_MESSAGE,
@@ -527,10 +530,11 @@ constructor(
         return homeOverlay
     }
 
-    fun requestInputFocus(focused: Boolean) {
-        if (useInputReportedFocusForAccessibility()) {
-            surfaceControlViewHost?.requestInputFocus(focused)
+    private fun requestInputFocus(focused: Boolean) {
+        if (!useInputReportedFocusForAccessibility()) {
+            return
         }
+        surfaceControlViewHost?.requestInputFocus(focused)
     }
 
     override fun onConfigurationChanged(newConfiguration: Configuration) {
