@@ -74,6 +74,7 @@ public class BaseDepthControllerImpl<
 
     // b/291401432
     protected static final String TAG = "BaseDepthController";
+    private static final boolean DEBUG = false;
 
     protected final CONTAINER mContainer;
     /** Property to set the depth for state transition. */
@@ -245,8 +246,10 @@ public class BaseDepthControllerImpl<
         int delta = Math.abs(newBlur - previousBlur);
         if (skipSimilarBlur && delta < Utilities.dpToPx(1) && newBlur != 0 && previousBlur != 0
                 && blurAmount != 1f) {
-            Log.d(TAG, "Skipping small blur delta. newBlur: " + newBlur + " previousBlur: "
-                    + previousBlur + " delta: " + delta + " surface: " + blurSurface);
+            if (DEBUG) {
+                Log.v(TAG, "Skipping small blur delta. newBlur: " + newBlur + " previousBlur: "
+                        + previousBlur + " delta: " + delta + " surface: " + blurSurface);
+            }
             return;
         }
         mCurrentBlur = newBlur;
