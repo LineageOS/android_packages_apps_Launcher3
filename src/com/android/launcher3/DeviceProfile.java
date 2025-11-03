@@ -511,7 +511,7 @@ public class DeviceProfile {
                 /*hotseatBarSizePx*/hotseatBarSizePx
         );
 
-        updateIconSize(mWorkspaceProfile.getScale(), context);
+        updateIconSize(context);
 
         mBottomSheetProfile = BottomSheetProfile.Factory.createBottomSheetProfile(
                 getDeviceProperties(),
@@ -824,7 +824,7 @@ public class DeviceProfile {
      * iconTextSizePx, iconDrawablePaddingPx, cellWidth/Height, allApps* variants,
      * hotseat sizes, workspaceSpringLoadedShrinkFactor, folderIconSizePx, and folderIconOffsetYPx.
      */
-    public void updateIconSize(float scale, Context context) {
+    public void updateIconSize(Context context) {
         // All apps
         final boolean isVerticalLayout = isVerticalBarLayout();
         if (mIsResponsiveGrid) {
@@ -843,7 +843,7 @@ public class DeviceProfile {
                     mMetrics,
                     mIsScalableGrid,
                     mTypeIndex,
-                    scale,
+                    mWorkspaceProfile.getScale(),
                     getWorkspaceIconProfile().getIconSizePx(),
                     mWorkspaceProfile.getIconDrawablePaddingOriginalPx()
             );
