@@ -29,7 +29,6 @@ import androidx.lifecycle.LifecycleOwner
 import com.android.launcher3.BaseActivity
 import com.android.launcher3.Flags
 import com.android.launcher3.R
-import com.android.launcher3.compose.ComposeFacade.isComposeAvailable
 import com.android.launcher3.dagger.LauncherComponentProvider
 import com.android.launcher3.dragndrop.SimpleDragLayer
 import com.android.launcher3.util.ScreenOnTracker
@@ -63,29 +62,26 @@ open class WidgetPickerActivity :
             .decorView
             .setViewTreeOnBackPressedDispatcherOwner(onBackPressedDispatcherOwner = this)
 
-        if (Flags.enableWidgetPickerRefactor() && isComposeAvailable()) {
-            val appPackageName =
-                if (Flags.enableAppWidgetPickerRefactor()) {
-                    intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME)
-                } else {
-                    null
-                }
-
-            if (appPackageName != null) {
-                val userHandle =
-                    intent.getParcelableExtra(Intent.EXTRA_USER, UserHandle::class.java)
-
-                userHandle?.let {
-                    component.widgetPickerComposeWrapper.showWidgetsFor(
-                        packageName = appPackageName,
-                        userHandle = userHandle,
-                        activity = this,
-                        widgetPickerConfig = widgetPickerConfig,
-                    )
-                } ?: finish()
+        val appPackageName =
+            if (Flags.enableAppWidgetPickerRefactor()) {
+                intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME)
             } else {
-                component.widgetPickerComposeWrapper.showAllWidgets(this, widgetPickerConfig)
+                null
             }
+
+        if (appPackageName != null) {
+            val userHandle = intent.getParcelableExtra(Intent.EXTRA_USER, UserHandle::class.java)
+
+            userHandle?.let {
+                component.widgetPickerComposeWrapper.showWidgetsFor(
+                    packageName = appPackageName,
+                    userHandle = userHandle,
+                    activity = this,
+                    widgetPickerConfig = widgetPickerConfig,
+                )
+            } ?: finish()
+        } else {
+            component.widgetPickerComposeWrapper.showAllWidgets(this, widgetPickerConfig)
         }
     }
 
