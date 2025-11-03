@@ -92,3 +92,10 @@ flag {
     }
 }
 
+flag {
+    name: "hide_automated_tasks_in_overview"
+    namespace: "launcher_overview"
+    description: "Hide a task from overview if it is being automated."
+    bug:  "440355882"
+}
+
