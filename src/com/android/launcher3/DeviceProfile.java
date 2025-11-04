@@ -208,6 +208,7 @@ public class DeviceProfile {
                 false,
                 false,
                 false,
+                false,
                 false
         );
         mBottomSheetProfile = new BottomSheetProfile(0, 0, 0, 0f, 0f);
@@ -1512,6 +1513,7 @@ public class DeviceProfile {
 
         writer.println(prefix + "\tisTablet:" + mDeviceProperties.isTablet());
         writer.println(prefix + "\tisPhone:" + mDeviceProperties.isPhone());
+        writer.println(prefix + "\tisRotationAllowed:" + mDeviceProperties.isRotationAllowed());
         writer.println(prefix + "\ttransposeLayoutWithOrientation:"
                 + mDeviceProperties.getTransposeLayoutWithOrientation());
         writer.println(prefix + "\tisGestureMode:" + mDeviceProperties.isGestureMode());
