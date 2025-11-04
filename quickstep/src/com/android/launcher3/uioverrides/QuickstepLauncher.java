@@ -207,9 +207,9 @@ import com.android.quickstep.TaskUtils;
 import com.android.quickstep.fallback.RecentsState;
 import com.android.quickstep.fallback.RecentsStateUtilsKt;
 import com.android.quickstep.recents.di.RecentsComponent;
+import com.android.quickstep.split.SplitFromRunningTaskController;
 import com.android.quickstep.split.SplitSelectStateController;
 import com.android.quickstep.split.SplitToWorkspaceController;
-import com.android.quickstep.split.SplitWithKeyboardShortcutController;
 import com.android.quickstep.sysuiconnection.SysUIConnectionTracker;
 import com.android.quickstep.util.ActiveGestureProtoLogProxy;
 import com.android.quickstep.util.AnimUtils;
@@ -279,7 +279,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     private @Nullable LauncherUnfoldAnimationController mLauncherUnfoldAnimationController;
 
     private SplitSelectStateController mSplitSelectStateController;
-    private SplitWithKeyboardShortcutController mSplitWithKeyboardShortcutController;
+    private SplitFromRunningTaskController mSplitFromRunningTaskController;
     private SplitToWorkspaceController mSplitToWorkspaceController;
     private BubbleBarLocation mBubbleBarLocation;
 
@@ -352,11 +352,14 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         mActionsView = findViewById(R.id.overview_actions_view);
         RecentsView<?, LauncherState> overviewPanel = getOverviewPanel();
         SystemUiProxy systemUiProxy = SystemUiProxy.INSTANCE.get(this);
+        mSplitFromRunningTaskController = new SplitFromRunningTaskController(this);
         mSplitSelectStateController =
                 new SplitSelectStateController(this, getStateManager(),
                         getDepthController(), getStatsLogManager(),
                         systemUiProxy, RecentsModel.INSTANCE.get(this),
-                        () -> onStateBack(), mLauncherUiState.getSplitScreenUiState());
+                        () -> onStateBack(), mLauncherUiState.getSplitScreenUiState(),
+                        mSplitFromRunningTaskController);
+        mSplitFromRunningTaskController.init(mSplitSelectStateController);
         if (DesktopModeStatus.canEnterDesktopMode(this)) {
             mDesktopRecentsTransitionController = new DesktopRecentsTransitionController(
                     getStateManager(), systemUiProxy, getIApplicationThread(),
@@ -366,8 +369,6 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         overviewPanel.init(mActionsView, mSplitSelectStateController,
                 mDesktopRecentsTransitionController, surfaceTransactionApplier,
                 emptyRecentsMessageView);
-        mSplitWithKeyboardShortcutController = new SplitWithKeyboardShortcutController(
-                this, mSplitSelectStateController);
         mSplitToWorkspaceController = new SplitToWorkspaceController(this,
                 mSplitSelectStateController);
         mActionsView.updateDimension(getDeviceProfile(), overviewPanel.getLastComputedTaskSize());
@@ -383,7 +384,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         mSysUIConnectionTracker.onConnected(this, c -> c.getTaskbarManager().setActivity(this));
 
         if (DesktopModeStatus.canEnterDesktopModeOrShowAppHandle(this)) {
-            mSplitSelectStateController.initSplitFromDesktopController(this);
+            mSplitSelectStateController.initSplitFromRunningTaskController(this);
         }
         mHotseatPredictionController = new HotseatPredictionController(this);
 
@@ -1395,12 +1396,6 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         options.setOnAnimationAbortListener(endCallback);
         options.setOnAnimationFinishedListener(endCallback);
         return new ActivityOptionsWrapper(options, callbacks);
-    }
-
-    @Override
-    @BinderThread
-    public void enterStageSplitFromRunningApp(boolean leftOrTop, int displayId) {
-        mSplitWithKeyboardShortcutController.enterStageSplit(leftOrTop, displayId);
     }
 
     @Override
