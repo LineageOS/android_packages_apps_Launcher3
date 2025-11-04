@@ -321,7 +321,8 @@ public class SettingsActivity extends FragmentActivity
                         return false;
                     }
                     // Initialize the UI once
-                    preference.setDefaultValue(RotationHelper.getAllowRotationDefaultValue(info));
+                    preference.setDefaultValue(
+                            RotationHelper.getAllowRotationDefaultValue(getContext(), info));
                     return true;
                 case DEVELOPER_OPTIONS_KEY:
                     if (IS_STUDIO_BUILD) {
