@@ -559,9 +559,6 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             deviceProfile.mWorkspaceProfile = deviceProfile
                     .mWorkspaceProfile
                     .changeIconSize(deviceProfile.getTaskbarProfile().getIconSize());
-
-            // Update icon size
-            deviceProfile.updateIconSize(1f, this);
         };
         mDeviceProfile = originDeviceProfile.toBuilder()
                 .withDimensionsOverride(overrideProvider).build();
