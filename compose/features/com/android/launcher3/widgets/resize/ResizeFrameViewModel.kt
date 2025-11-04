@@ -154,7 +154,6 @@ class ResizeFrameViewModel(
             vertical = handles.vertical,
             totalDragAmount = totalDragAmount,
         )
-        refreshHandlesAndButtonsState()
     }
 
     fun onDragEnd() {
