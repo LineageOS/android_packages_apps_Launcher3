@@ -124,7 +124,7 @@ object TaskbarViewTestUtil {
     }
 
     fun createHandoffSuggestion(id: Int = 0): HandoffSuggestion {
-        val remoteTask = RemoteTask.Builder(1).setDeviceId(id).build()
+        val remoteTask = RemoteTask.Builder(1, id).build()
         return HandoffSuggestion(remoteTask)
     }
 

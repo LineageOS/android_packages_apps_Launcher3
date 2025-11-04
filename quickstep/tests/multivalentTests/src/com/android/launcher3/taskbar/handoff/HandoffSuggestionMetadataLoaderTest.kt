@@ -70,7 +70,7 @@ class HandoffSuggestionMetadataLoaderTest {
     @Stability(flavors = LOCAL or PLATFORM_POSTSUBMIT) // b/438797644
     fun loadMetadata_drawableLoaded_callsCallback() {
         // Create a fake suggestion to load
-        val remoteTask = RemoteTask.Builder(1).setIcon(icon).setLabel(TEST_LABEL).build()
+        val remoteTask = RemoteTask.Builder(1, 1).setIcon(icon).setLabel(TEST_LABEL).build()
         val suggestion = HandoffSuggestion(remoteTask)
 
         // Trigger a load.
@@ -99,7 +99,7 @@ class HandoffSuggestionMetadataLoaderTest {
             Flags.enableLauncherOverviewInWindow() || Flags.enableFallbackOverviewInWindow(),
         )
         // Create a fake suggestion with loaded metadata
-        val remoteTask = RemoteTask.Builder(1).setIcon(icon).setLabel(TEST_LABEL).build()
+        val remoteTask = RemoteTask.Builder(1, 1).setIcon(icon).setLabel(TEST_LABEL).build()
         val suggestion = HandoffSuggestion(remoteTask)
         suggestion.metadata =
             HandoffSuggestion.Metadata(TEST_LABEL, BitmapDrawable(context.resources, bitmap))
@@ -123,7 +123,7 @@ class HandoffSuggestionMetadataLoaderTest {
             Flags.enableLauncherOverviewInWindow() || Flags.enableFallbackOverviewInWindow(),
         )
         // Create a fake suggestion to load with a null icon
-        val remoteTask = RemoteTask.Builder(1).setLabel(TEST_LABEL).build()
+        val remoteTask = RemoteTask.Builder(1, 1).setLabel(TEST_LABEL).build()
         val suggestion = HandoffSuggestion(remoteTask)
 
         // Trigger a load.
@@ -145,7 +145,7 @@ class HandoffSuggestionMetadataLoaderTest {
             Flags.enableLauncherOverviewInWindow() || Flags.enableFallbackOverviewInWindow(),
         )
         // Create a fake suggestion to load with a null icon
-        val remoteTask = RemoteTask.Builder(1).setLabel(TEST_LABEL).build()
+        val remoteTask = RemoteTask.Builder(1, 1).setLabel(TEST_LABEL).build()
         val suggestion = HandoffSuggestion(remoteTask)
 
         // Trigger a load.
