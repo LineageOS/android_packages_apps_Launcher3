@@ -16,7 +16,6 @@
 
 package com.android.launcher3.taskbar
 
-import android.animation.AnimatorTestRule
 import android.graphics.Rect
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
@@ -43,6 +42,7 @@ import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatItems
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createRecentTask
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createRecents
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createSplitTask
+import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.ForceRtl
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
@@ -74,7 +74,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
         }
     }
 
-    @get:Rule(order = 0) val animatorTestRule = AnimatorTestRule(this)
+    @get:Rule(order = 0) val animatorTestRule = TaskbarAnimatorTestRule(this)
     @get:Rule(order = 1) val setFlagsRule = SetFlagsRule(flags)
     @get:Rule(order = 2) val context = TaskbarWindowSandboxContext.create(deviceName)
     @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)

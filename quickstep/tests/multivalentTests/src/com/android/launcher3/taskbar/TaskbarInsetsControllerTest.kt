@@ -16,13 +16,13 @@
 
 package com.android.launcher3.taskbar
 
-import android.animation.AnimatorTestRule
 import android.view.ViewTreeObserver
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
 import com.android.launcher3.taskbar.TaskbarInsetsController.DebugTouchableRegion.Companion.DEFAULT_TOUCH_REGION
 import com.android.launcher3.taskbar.TaskbarInsetsController.DebugTouchableRegion.Companion.FULLSCREEN_TASKBAR_WINDOW
 import com.android.launcher3.taskbar.TaskbarInsetsController.DebugTouchableRegion.Companion.ICONS_INVISIBLE
+import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.TRANSIENT
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
@@ -38,7 +38,7 @@ import org.junit.runner.RunWith
 class TaskbarInsetsControllerTest {
 
     @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()
-    @get:Rule(order = 1) val animatorTestRule = AnimatorTestRule(this)
+    @get:Rule(order = 1) val animatorTestRule = TaskbarAnimatorTestRule(this)
     @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
 
     @InjectController lateinit var taskbarInsetsController: TaskbarInsetsController

@@ -16,7 +16,6 @@
 
 package com.android.launcher3.taskbar
 
-import android.animation.AnimatorTestRule
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
@@ -53,6 +52,7 @@ import com.android.launcher3.taskbar.TaskbarStashController.TRANSIENT_TASKBAR_ST
 import com.android.launcher3.taskbar.TaskbarViewController.ALPHA_INDEX_STASH
 import com.android.launcher3.taskbar.bubbles.BubbleBarViewController
 import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController
+import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.PINNED
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.THREE_BUTTONS
@@ -83,7 +83,7 @@ class TaskbarStashControllerTest {
     @get:Rule(order = 0) val setFlagsRule = SetFlagsRule()
     @get:Rule(order = 1) val context = TaskbarWindowSandboxContext.create()
     @get:Rule(order = 2) val taskbarModeRule = TaskbarModeRule(context)
-    @get:Rule(order = 4) val animatorTestRule = AnimatorTestRule(this)
+    @get:Rule(order = 4) val animatorTestRule = TaskbarAnimatorTestRule(this)
     @get:Rule(order = 5) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
 
     @InjectController lateinit var stashController: TaskbarStashController

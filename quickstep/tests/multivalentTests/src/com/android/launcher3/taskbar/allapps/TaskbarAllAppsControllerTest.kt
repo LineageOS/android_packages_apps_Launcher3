@@ -16,7 +16,6 @@
 
 package com.android.launcher3.taskbar.allapps
 
-import android.animation.AnimatorTestRule
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Process
@@ -31,6 +30,7 @@ import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.notification.NotificationKeyData
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
 import com.android.launcher3.taskbar.overlay.TaskbarOverlayController
+import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
@@ -46,7 +46,7 @@ class TaskbarAllAppsControllerTest {
 
     @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()
     @get:Rule(order = 1) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
-    @get:Rule(order = 2) val animatorTestRule = AnimatorTestRule(this)
+    @get:Rule(order = 2) val animatorTestRule = TaskbarAnimatorTestRule(this)
 
     @InjectController lateinit var allAppsController: TaskbarAllAppsController
     @InjectController lateinit var overlayController: TaskbarOverlayController

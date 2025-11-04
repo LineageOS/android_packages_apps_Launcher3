@@ -16,7 +16,6 @@
 
 package com.android.launcher3.taskbar
 
-import android.animation.AnimatorTestRule
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
@@ -27,6 +26,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController
 import com.android.launcher3.taskbar.rules.SandboxParams
+import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.PINNED
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.TRANSIENT
@@ -73,7 +73,7 @@ class TaskbarScrimViewControllerTest {
         )
 
     @get:Rule(order = 2) val taskbarModeRule = TaskbarModeRule(context)
-    @get:Rule(order = 3) val animatorTestRule = AnimatorTestRule(this)
+    @get:Rule(order = 3) val animatorTestRule = TaskbarAnimatorTestRule(this)
     @get:Rule(order = 4) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
 
     @InjectController lateinit var scrimViewController: TaskbarScrimViewController

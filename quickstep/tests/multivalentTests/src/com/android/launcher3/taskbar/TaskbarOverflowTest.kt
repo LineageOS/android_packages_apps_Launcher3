@@ -16,7 +16,6 @@
 
 package com.android.launcher3.taskbar
 
-import android.animation.AnimatorTestRule
 import android.app.WindowConfiguration
 import android.content.ComponentName
 import android.content.Intent
@@ -54,6 +53,7 @@ import com.android.launcher3.taskbar.rules.AllTaskbarSandboxModules
 import com.android.launcher3.taskbar.rules.MockedRecentsModelHelper
 import com.android.launcher3.taskbar.rules.MockedRecentsModelTestRule
 import com.android.launcher3.taskbar.rules.SandboxParams
+import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.PINNED
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.TRANSIENT
@@ -152,7 +152,7 @@ class TaskbarOverflowTest {
         }
     }
 
-    @get:Rule(order = 5) val animatorTestRule = AnimatorTestRule(this)
+    @get:Rule(order = 5) val animatorTestRule = TaskbarAnimatorTestRule(this)
 
     @get:Rule(order = 6)
     val taskbarUnitTestRule = TaskbarUnitTestRule(this, context, this::onControllersInitialized)

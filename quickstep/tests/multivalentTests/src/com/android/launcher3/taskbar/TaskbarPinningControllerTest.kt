@@ -16,7 +16,6 @@
 
 package com.android.launcher3.taskbar
 
-import android.animation.AnimatorTestRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.AbstractFloatingView.TYPE_TASKBAR_PINNING_POPUP
@@ -25,6 +24,7 @@ import com.android.launcher3.popup.ArrowPopup.OPEN_DURATION_U
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatItems
 import com.android.launcher3.taskbar.customization.TaskbarDividerContainer
+import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
@@ -38,7 +38,7 @@ import org.junit.runner.RunWith
 class TaskbarPinningControllerTest {
     @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()
     @get:Rule(order = 1) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
-    @get:Rule(order = 2) val animatorTestRule = AnimatorTestRule(this)
+    @get:Rule(order = 2) val animatorTestRule = TaskbarAnimatorTestRule(this)
 
     @InjectController lateinit var pinningController: TaskbarPinningController
 

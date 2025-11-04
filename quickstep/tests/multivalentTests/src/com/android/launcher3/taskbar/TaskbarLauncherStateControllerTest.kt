@@ -16,7 +16,6 @@
 
 package com.android.launcher3.taskbar
 
-import android.animation.AnimatorTestRule
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -30,6 +29,7 @@ import com.android.launcher3.SplitScreenUiState
 import com.android.launcher3.statemanager.StateManager
 import com.android.launcher3.taskbar.bubbles.BubbleControllers
 import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController
+import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
@@ -54,7 +54,7 @@ import org.mockito.kotlin.whenever
 class TaskbarLauncherStateControllerTest {
     @get:Rule(order = 0) val setFlagsRule = SetFlagsRule()
     @get:Rule(order = 1) val context = TaskbarWindowSandboxContext.create()
-    @get:Rule(order = 2) val animatorTestRule = AnimatorTestRule(this)
+    @get:Rule(order = 2) val animatorTestRule = TaskbarAnimatorTestRule(this)
     @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(testInstance = this, context)
 
     @InjectController lateinit var bubbleControllers: Optional<BubbleControllers>

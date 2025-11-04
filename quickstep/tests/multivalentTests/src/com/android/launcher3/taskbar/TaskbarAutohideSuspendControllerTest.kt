@@ -16,7 +16,6 @@
 
 package com.android.launcher3.taskbar
 
-import android.animation.AnimatorTestRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
@@ -26,6 +25,7 @@ import com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLAG_AUTOH
 import com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLAG_AUTOHIDE_SUSPEND_TOUCHING
 import com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLAG_AUTOHIDE_SUSPEND_TRANSIENT_TASKBAR
 import com.android.launcher3.taskbar.rules.SandboxParams
+import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.TRANSIENT
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
@@ -65,7 +65,7 @@ class TaskbarAutohideSuspendControllerTest {
                     }
                 })
         )
-    @get:Rule(order = 1) val animatorTestRule = AnimatorTestRule(this)
+    @get:Rule(order = 1) val animatorTestRule = TaskbarAnimatorTestRule(this)
     @get:Rule(order = 2) val taskbarModeRule = TaskbarModeRule(context)
     @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
 
