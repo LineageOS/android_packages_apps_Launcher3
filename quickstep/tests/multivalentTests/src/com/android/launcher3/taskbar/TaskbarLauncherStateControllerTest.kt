@@ -48,6 +48,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.whenever
 
 @RunWith(LauncherMultivalentJUnit::class)
 @EmulatedDevices(["pixel9profold", "pixelTablet2023"])
@@ -127,7 +129,7 @@ class TaskbarLauncherStateControllerTest {
     private fun initForWakeTransitionWithBubbles(@SystemUiStateFlags sysUiStateFlags: Long) {
         val launcherStateManager =
             mock<StateManager<LauncherState, Launcher>> {
-                on { state } doReturn mock<LauncherState>()
+                on { state } doReturn LauncherState.NORMAL
             }
         val dp = taskbarUnitTestRule.activityContext.deviceProfile
         val mockedSplitScreenUiState =
@@ -146,11 +148,15 @@ class TaskbarLauncherStateControllerTest {
                 on { stateManager } doReturn launcherStateManager
                 on { launcherUiState } doReturn mockedLauncherUiState
             }
+        val launcherInteractor =
+            spy(LauncherInteractor(quickstepLauncher)) {
+                doReturn(dp).whenever(mock).getDeviceProfile()
+            }
         val controllers = taskbarUnitTestRule.activityContext.controllers
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             taskbarLauncherStateController.init(
                 controllers,
-                LauncherInteractor(quickstepLauncher),
+                launcherInteractor,
                 mockedLauncherUiState,
                 sysUiStateFlags,
                 TASKBAR_UI_THREAD,
