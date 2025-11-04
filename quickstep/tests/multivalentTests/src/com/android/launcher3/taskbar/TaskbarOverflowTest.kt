@@ -29,6 +29,7 @@ import android.view.MotionEvent.ACTION_HOVER_ENTER
 import android.view.MotionEvent.ACTION_HOVER_EXIT
 import android.window.RemoteTransition
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.BubbleTextView
 import com.android.launcher3.Flags.FLAG_ENABLE_MULTI_INSTANCE_MENU_TASKBAR
@@ -63,8 +64,6 @@ import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
-import com.android.launcher3.util.LauncherMultivalentJUnit
-import com.android.launcher3.util.LauncherMultivalentJUnit.EmulatedDevices
 import com.android.launcher3.util.Preconditions.assertNotNull
 import com.android.launcher3.util.TestUtil.getOnUiThread
 import com.android.quickstep.RecentsModel
@@ -100,8 +99,7 @@ import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-@RunWith(LauncherMultivalentJUnit::class)
-@EmulatedDevices(["pixelTablet2023"])
+@RunWith(AndroidJUnit4::class)
 @EnableFlags(
     FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
     FLAG_ENABLE_BUBBLE_BAR,
@@ -118,24 +116,25 @@ class TaskbarOverflowTest {
     @get:Rule(order = 1)
     val context =
         TaskbarWindowSandboxContext.create(
-            SandboxParams(
-                {
-                    spy(
-                        SystemUiProxy(
-                            ApplicationProvider.getApplicationContext(),
-                            MAIN_EXECUTOR,
-                            UI_HELPER_EXECUTOR,
-                        )
-                    ) { proxy ->
-                        systemUiProxySpy = proxy
-                        doAnswer { desktopTaskListener = it.getArgument(0) }
-                            .whenever(proxy)
-                            .setDesktopTaskListener(anyOrNull())
-                    }
-                },
-                DaggerTaskbarOverflowComponent.builder()
-                    .bindRecentsModel(mockRecentsModelHelper.mockRecentsModel),
-            )
+            params =
+                SandboxParams(
+                    {
+                        spy(
+                            SystemUiProxy(
+                                ApplicationProvider.getApplicationContext(),
+                                MAIN_EXECUTOR,
+                                UI_HELPER_EXECUTOR,
+                            )
+                        ) { proxy ->
+                            systemUiProxySpy = proxy
+                            doAnswer { desktopTaskListener = it.getArgument(0) }
+                                .whenever(proxy)
+                                .setDesktopTaskListener(anyOrNull())
+                        }
+                    },
+                    DaggerTaskbarOverflowComponent.builder()
+                        .bindRecentsModel(mockRecentsModelHelper.mockRecentsModel),
+                )
         )
 
     @get:Rule(order = 2) val recentsModel = MockedRecentsModelTestRule(mockRecentsModelHelper)

@@ -47,8 +47,7 @@ import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.ForceRtl
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
-import com.android.launcher3.util.LauncherMultivalentJUnit.Companion.isRunningInRobolectric
-import com.android.launcher3.util.LauncherMultivalentJUnit.EmulatedDevices
+import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext.Companion.getDeviceParams
 import com.android.window.flags.Flags.FLAG_ENABLE_OVERFLOW_BUTTON_FOR_TASKBAR_PINNED_ITEMS
 import com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_OVERFLOW
 import com.google.common.truth.Truth
@@ -62,7 +61,6 @@ import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
 
 @RunWith(ParameterizedAndroidJunit4::class)
-@EmulatedDevices(["pixelFoldable2023", "pixelTablet2023"])
 @EnableFlags(FLAG_ENABLE_TASKBAR_OVERFLOW)
 class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
@@ -70,20 +68,15 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
         @JvmStatic
         @Parameters(name = "{0},{1}")
         fun getParams(): List<Array<Any>> {
-            val devices =
-                if (isRunningInRobolectric) {
-                    listOf("pixelFoldable2023", "pixelTablet2023")
-                } else {
-                    listOf("onDevice") // Unused.
-                }
+            val devices = getDeviceParams("pixelFoldable2023", "pixelTablet2023")
             val flags = allCombinationsOf(FLAG_ENABLE_TASKBAR_ICON_CONTAINER)
             return devices.flatMap { d -> flags.map { f -> arrayOf(d, f) } } // Cartesian product.
         }
     }
 
     @get:Rule(order = 0) val animatorTestRule = AnimatorTestRule(this)
-    @get:Rule(order = 1) val setFlagsRule = SetFlagsRule()
-    @get:Rule(order = 2) val context = TaskbarWindowSandboxContext.create()
+    @get:Rule(order = 1) val setFlagsRule = SetFlagsRule(flags)
+    @get:Rule(order = 2) val context = TaskbarWindowSandboxContext.create(deviceName)
     @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
 
     private val activityContext by taskbarUnitTestRule::activityContext

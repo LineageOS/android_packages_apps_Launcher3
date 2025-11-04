@@ -23,6 +23,7 @@ import android.platform.test.flag.junit.SetFlagsRule
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController
 import com.android.launcher3.taskbar.rules.SandboxParams
@@ -35,8 +36,6 @@ import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
-import com.android.launcher3.util.LauncherMultivalentJUnit
-import com.android.launcher3.util.LauncherMultivalentJUnit.EmulatedDevices
 import com.android.quickstep.SystemUiProxy
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED
@@ -53,24 +52,24 @@ import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.whenever
 
-@RunWith(LauncherMultivalentJUnit::class)
-@EmulatedDevices(["pixelTablet2023"])
+@RunWith(AndroidJUnit4::class)
 class TaskbarScrimViewControllerTest {
     @get:Rule(order = 0) val setFlagsRule = SetFlagsRule()
     @get:Rule(order = 1)
     val context =
         TaskbarWindowSandboxContext.create(
-            SandboxParams({
-                spy(
-                    SystemUiProxy(
-                        ApplicationProvider.getApplicationContext(),
-                        MAIN_EXECUTOR,
-                        UI_HELPER_EXECUTOR,
-                    )
-                ) {
-                    doAnswer { backPressed = true }.whenever(it).onBackEvent(anyOrNull(), any())
-                }
-            })
+            params =
+                SandboxParams({
+                    spy(
+                        SystemUiProxy(
+                            ApplicationProvider.getApplicationContext(),
+                            MAIN_EXECUTOR,
+                            UI_HELPER_EXECUTOR,
+                        )
+                    ) {
+                        doAnswer { backPressed = true }.whenever(it).onBackEvent(anyOrNull(), any())
+                    }
+                })
         )
 
     @get:Rule(order = 2) val taskbarModeRule = TaskbarModeRule(context)

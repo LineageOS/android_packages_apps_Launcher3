@@ -20,6 +20,7 @@ import android.animation.AnimatorTestRule
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Process
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.launcher3.BubbleTextView
 import com.android.launcher3.appprediction.PredictionRowView
@@ -33,8 +34,6 @@ import com.android.launcher3.taskbar.overlay.TaskbarOverlayController
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
-import com.android.launcher3.util.LauncherMultivalentJUnit
-import com.android.launcher3.util.LauncherMultivalentJUnit.EmulatedDevices
 import com.android.launcher3.util.PackageUserKey
 import com.android.launcher3.util.TestUtil
 import com.google.common.truth.Truth.assertThat
@@ -42,8 +41,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@RunWith(LauncherMultivalentJUnit::class)
-@EmulatedDevices(["pixelFoldable2023", "pixelTablet2023"])
+@RunWith(AndroidJUnit4::class)
 class TaskbarAllAppsControllerTest {
 
     @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()

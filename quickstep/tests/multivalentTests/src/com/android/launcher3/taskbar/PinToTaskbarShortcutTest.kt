@@ -26,6 +26,7 @@ import android.util.SparseArray
 import android.view.View
 import androidx.core.util.containsValue
 import androidx.core.util.size
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
@@ -33,7 +34,6 @@ import com.android.launcher3.popup.PinToTaskbarShortcut
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
-import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.TestUtil.getOnUiThread
 import com.android.window.flags.Flags.FLAG_ENABLE_OVERFLOW_BUTTON_FOR_TASKBAR_PINNED_ITEMS
 import com.google.common.truth.Truth.assertThat
@@ -50,7 +50,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 /** Tests for [PinToTaskbarShortcut]. */
-@RunWith(LauncherMultivalentJUnit::class)
+@RunWith(AndroidJUnit4::class)
 class PinToTaskbarShortcutTest {
     @get:Rule(order = 0) val setFlagsRule = SetFlagsRule()
 
