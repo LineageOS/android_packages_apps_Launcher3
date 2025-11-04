@@ -54,11 +54,14 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 
     override val spaceNeeded: Int
         get() {
-            return dpToPx(
-                activityContext.taskbarSpecsEvaluator.taskbarIconTouchSize,
-                activityContext,
-            )
+            return taskbarIconViewSize
         }
+
+    override val taskbarIconViewSize =
+        dpToPx(activityContext.taskbarSpecsEvaluator.taskbarIconTouchSize, activityContext)
+
+    override val taskbarIconViewPadding =
+        dpToPx(activityContext.taskbarSpecsEvaluator.taskbarIconPadding, activityContext)
 
     init {
         contentDescription = context.getString(R.string.all_apps_button_label)
@@ -72,10 +75,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
                 getAllAppsButton(activityContext.taskbarFeatureEvaluator.isTransient)
             )
         backgroundTintList = ColorStateList.valueOf(TRANSPARENT)
-        // TODO(b/445195034): refactor as part of the icon size change
-        val padding =
-            dpToPx(activityContext.taskbarSpecsEvaluator.taskbarIconPadding, activityContext)
-        setPadding(padding)
+        setPadding(taskbarIconViewPadding)
         setIconDrawable(drawable)
         width = spaceNeeded
         height = spaceNeeded

@@ -240,7 +240,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
 
         if (Flags.enableTaskbarIconContainer()) {
             mHotseatIconsContainer =
-                    TaskbarIconsContainer.create(context, mIconTouchSize, mItemMarginLeftRight);
+                    TaskbarIconsContainer.create(context, mItemMarginLeftRight);
         }
 
         mItemPadding = dpToPx(specsEvaluator.getTaskbarIconPadding(), mActivityContext);
