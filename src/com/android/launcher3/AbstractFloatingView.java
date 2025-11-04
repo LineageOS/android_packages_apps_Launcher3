@@ -282,7 +282,7 @@ public abstract class AbstractFloatingView extends LinearLayout implements Touch
 
     public static void closeOpenViews(ActivityContext activity, boolean animate,
             @FloatingViewType int type) {
-        new AbstractFloatingViewHelper().closeOpenViews(activity, animate, type);
+        AbstractFloatingViewHelper.INSTANCE.closeOpenViews(activity, animate, type);
     }
 
     public static void closeAllOpenViews(ActivityContext activity, boolean animate) {

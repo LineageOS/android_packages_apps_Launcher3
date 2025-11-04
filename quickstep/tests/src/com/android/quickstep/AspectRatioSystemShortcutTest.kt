@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *            http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -75,7 +75,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 /** Test for [AspectRatioSystemShortcut] */
-class AspectRatioSystemShortcutTests {
+class AspectRatioSystemShortcutTest {
 
     @get:Rule val setFlagsRule = SetFlagsRule(SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT)
 
@@ -117,8 +117,7 @@ class AspectRatioSystemShortcutTests {
     private val abstractFloatingViewHelper: AbstractFloatingViewHelper = mock()
     private val taskOverlayFactory: TaskOverlayFactory =
         mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
-    private val factory: TaskShortcutFactory =
-        AspectRatioSystemShortcut.createFactory(abstractFloatingViewHelper)
+    private val factory = AspectRatioSystemShortcut.Factory(abstractFloatingViewHelper)
     private val statsLogger = mock<StatsLogger>()
     private val orientedState: RecentsOrientedState =
         mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
@@ -191,12 +190,8 @@ class AspectRatioSystemShortcutTests {
         setScreenSizeDp(widthDp = 1200, heightDp = 800)
         taskView.bind(SingleTask(task), orientedState, taskOverlayFactory)
 
-        val shortcuts = factory.getShortcuts(launcher, taskContainer)
-        assertThat(shortcuts).hasSize(1)
-
-        // On clicking the shortcut:
-        val shortcut = shortcuts!!.first() as AspectRatioSystemShortcut
-        shortcut.onClick(taskView)
+        val singleShortcut = factory.getShortcuts(launcher, taskContainer)!!.single()
+        singleShortcut.onClick(taskView)
 
         // 1) Panel should be closed
         val allTypesExceptRebindSafe =
@@ -207,7 +202,7 @@ class AspectRatioSystemShortcutTests {
         val intentCaptor = argumentCaptor<Intent>()
         verify(launcher)
             .startActivitySafely(any<View>(), intentCaptor.capture(), eq(taskViewItemInfo))
-        val intent = intentCaptor.firstValue!!
+        val intent = intentCaptor.firstValue
         assertThat(intent.action).isEqualTo(Settings.ACTION_MANAGE_USER_ASPECT_RATIO_SETTINGS)
 
         // 3) Shortcut tap event should be reported

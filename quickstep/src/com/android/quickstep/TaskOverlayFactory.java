@@ -60,26 +60,11 @@ import javax.inject.Inject;
  */
 public class TaskOverlayFactory {
     @Inject
-    public TaskOverlayFactory(
-            DesktopShortcutFactory desktopShortcutFactory,
-            ExternalDisplayShortcutFactory externalDisplayShortcutFactory) {
-        mPerTaskMenuOptions = new TaskShortcutFactory[]{
-                TaskShortcutFactory.APP_INFO,
-                TaskShortcutFactory.SPLIT_SELECT,
-                TaskShortcutFactory.PIN,
-                TaskShortcutFactory.INSTALL,
-                TaskShortcutFactory.FREE_FORM,
-                desktopShortcutFactory,
-                externalDisplayShortcutFactory,
-                AspectRatioSystemShortcut.Companion.createFactory(),
-                TaskShortcutFactory.WELLBEING,
-                TaskShortcutFactory.SAVE_APP_PAIR,
-                TaskShortcutFactory.SCREENSHOT,
-                TaskShortcutFactory.MODAL,
-        };
+    public TaskOverlayFactory(List<TaskShortcutFactory> perTaskShortcutFactories) {
+        mPerTaskShortcutFactories = perTaskShortcutFactories;
     }
 
-    private final TaskShortcutFactory[] mPerTaskMenuOptions;
+    private final List<TaskShortcutFactory> mPerTaskShortcutFactories;
 
     /**
      * Returns menu options associated with TaskContainer.
@@ -89,7 +74,7 @@ public class TaskOverlayFactory {
         final RecentsViewContainer container = containerFromContext(taskView.getContext());
         final ArrayList<SystemShortcut> shortcuts = new ArrayList<>();
         if (taskContainer != null) {
-            for (TaskShortcutFactory menuOption : mPerTaskMenuOptions) {
+            for (TaskShortcutFactory menuOption : mPerTaskShortcutFactories) {
                 if (taskView instanceof GroupedTaskView && !menuOption.showForGroupedTask()) {
                     continue;
                 }

@@ -53,16 +53,18 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-/** Test for [DesktopShortcutFactory] */
+/** Test for [DesktopShortcut] */
 @RunWith(AndroidJUnit4::class)
-class DesktopShortcutFactoryTest {
+class DesktopShortcutTest {
 
     @get:Rule val setFlagsRule = SetFlagsRule(SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT)
     @get:Rule val limitDevicesRule = LimitDevicesRule()
@@ -76,7 +78,7 @@ class DesktopShortcutFactoryTest {
     private val desktopState = FakeDesktopState()
     private val desktopModeCompatPolicy: DesktopModeCompatPolicy = mock()
     private val factory =
-        DesktopShortcutFactory(abstractFloatingViewHelper, desktopState, desktopModeCompatPolicy)
+        DesktopShortcut.Factory(abstractFloatingViewHelper, desktopState, desktopModeCompatPolicy)
     private val context: Context = spy(InstrumentationRegistry.getInstrumentation().targetContext)
     private val taskView: TaskView = createTaskViewMock()
 
@@ -86,45 +88,65 @@ class DesktopShortcutFactoryTest {
         whenever(overlayFactory.createOverlay(any())).thenReturn(mock<TaskOverlay<*>>())
         doReturn(DEFAULT_DISPLAY).whenever(context).displayId
         whenever(launcher.asContext()).thenReturn(context)
-        whenever(
-                desktopModeCompatPolicy.shouldDisableDesktopEntryPoints(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                )
-            )
-            .thenReturn(false)
     }
 
     @Test
     fun createDesktopTaskShortcutFactory_desktopModeDisabled() {
         desktopState.canEnterDesktopMode = false
-        val taskContainer = createTaskContainer(createTask())
+        val task = createTask()
+        val taskContainer = createTaskContainer(task)
 
         val shortcuts = factory.getShortcuts(launcher, taskContainer)
         assertThat(shortcuts).isNull()
+        verify(desktopModeCompatPolicy, never())
+            .shouldDisableDesktopEntryPoints(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+            )
+    }
+
+    @Test
+    fun desktopSystemShortcutClickedWithoutDesktopModeOnDisplay() {
+        desktopState.overrideDesktopModeSupportPerDisplay[DEFAULT_DISPLAY] = false
+        val task = createTask()
+        val taskContainer = spy(createTaskContainer(task))
+
+        val shortcuts = factory.getShortcuts(launcher, taskContainer)
+        assertThat(shortcuts).isNull()
+        verify(desktopModeCompatPolicy, never())
+            .shouldDisableDesktopEntryPoints(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+            )
     }
 
     @Test
     fun createDesktopTaskShortcutFactory_desktopEntryPointsDisabled() {
         whenever(
                 desktopModeCompatPolicy.shouldDisableDesktopEntryPoints(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
                 )
             )
             .thenReturn(true)
-        val taskContainer = createTaskContainer(createTask())
+        val task = createTask()
+        val taskContainer = createTaskContainer(task)
 
         val shortcuts = factory.getShortcuts(launcher, taskContainer)
         assertThat(shortcuts).isNull()
+        verifyShouldDisableDesktopEntryPoints(task)
     }
 
     @Test
@@ -134,28 +156,7 @@ class DesktopShortcutFactoryTest {
 
         val shortcuts = factory.getShortcuts(launcher, taskContainer)
         assertThat(shortcuts).isNull()
-    }
-
-    @Test
-    fun desktopSystemShortcutClickedWithoutDesktopModeOnDisplay() {
-        val task = createTask()
-        val taskContainer = spy(createTaskContainer(task))
-
-        desktopState.overrideDesktopModeSupportPerDisplay[DEFAULT_DISPLAY] = false
-        whenever(launcher.getOverviewPanel<LauncherRecentsView>()).thenReturn(recentsView)
-        whenever(launcher.statsLogManager).thenReturn(statsLogManager)
-        whenever(statsLogManager.logger()).thenReturn(statsLogger)
-        whenever(statsLogger.withItemInfo(any())).thenReturn(statsLogger)
-        whenever(taskView.context).thenReturn(context)
-        whenever(recentsView.moveTaskToDesktop(any(), any(), any())).thenAnswer {
-            val successCallback = it.getArgument<Runnable>(2)
-            successCallback.run()
-        }
-        val taskViewItemInfo = mock<TaskViewItemInfo>()
-        doReturn(taskViewItemInfo).whenever(taskContainer).itemInfo
-
-        val shortcuts = factory.getShortcuts(launcher, taskContainer)
-        assertThat(shortcuts).isNull()
+        verifyShouldDisableDesktopEntryPoints(unDockableTask)
     }
 
     @Test
@@ -189,6 +190,7 @@ class DesktopShortcutFactoryTest {
             )
         verify(statsLogger).withItemInfo(taskViewItemInfo)
         verify(statsLogger).log(LauncherEvent.LAUNCHER_SYSTEM_SHORTCUT_DESKTOP_TAP)
+        verifyShouldDisableDesktopEntryPoints(task)
     }
 
     private fun createTask(displayId: Int = DEFAULT_DISPLAY) =
@@ -232,5 +234,18 @@ class DesktopShortcutFactoryTest {
         whenever(taskView.type).thenReturn(TaskViewType.SINGLE)
         whenever(taskView.context).thenReturn(context)
         return taskView
+    }
+
+    private fun verifyShouldDisableDesktopEntryPoints(task: Task) {
+        val taskKey = task.getKey()
+        verify(desktopModeCompatPolicy)
+            .shouldDisableDesktopEntryPoints(
+                taskKey.baseActivity?.packageName,
+                taskKey.numActivities,
+                taskKey.isTopActivityNoDisplay,
+                taskKey.isActivityStackTransparent,
+                taskKey.topActivityType,
+                context.userId,
+            )
     }
 }

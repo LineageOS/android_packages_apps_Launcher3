@@ -29,6 +29,7 @@ import com.android.launcher3.dagger.PerDisplayModule
 import com.android.launcher3.dagger.SettingsModule
 import com.android.launcher3.dagger.StaticObjectModule
 import com.android.launcher3.dagger.SystemDragModule
+import com.android.launcher3.dagger.TaskOverlayModule
 import com.android.launcher3.dagger.WidgetModule
 import com.android.launcher3.dagger.WindowManagerProxyModule
 import com.android.launcher3.util.dagger.LauncherExecutorsModule
@@ -57,6 +58,7 @@ abstract class FakePrefsModule {
             DesktopModule::class,
             SettingsModule::class,
             SystemDragModule::class,
+            TaskOverlayModule::class,
         ]
 )
 class CommonModulesForTest
