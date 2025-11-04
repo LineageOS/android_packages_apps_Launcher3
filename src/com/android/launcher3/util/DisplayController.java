@@ -541,6 +541,8 @@ public class DisplayController implements DesktopVisibilityListener {
 
         private final boolean mIsNightModeActive;
 
+        private final boolean mIsRotationAllowed;
+
         public Info(Context displayInfoContext) {
             /* don't need system overrides for external displays */
             this(displayInfoContext, enableScalabilityForDesktopExperience()
@@ -569,6 +571,8 @@ public class DisplayController implements DesktopVisibilityListener {
             mScreenSizeDp = new PortraitSize(config.screenHeightDp, config.screenWidthDp);
             navigationMode = wmProxy.getNavigationMode(displayInfoContext);
             mIsNightModeActive = config.isNightModeActive();
+            mIsRotationAllowed =
+                    displayInfoContext.getResources().getBoolean(R.bool.config_allowRotation);
 
             mPerDisplayBounds.putAll(perDisplayBoundsCache);
             List<WindowBounds> cachedValue = getCurrentBounds();
@@ -673,6 +677,13 @@ public class DisplayController implements DesktopVisibilityListener {
          */
         public boolean isTablet(WindowBounds bounds) {
             return smallestSizeDp(bounds) >= MIN_TABLET_WIDTH;
+        }
+
+        /**
+         * Returns {@code true} if rotation is allowed.
+         */
+        public boolean isRotationAllowed() {
+            return mIsRotationAllowed;
         }
 
         /** Getter for {@link #navigationMode} to allow mocking. */
