@@ -322,7 +322,7 @@ public class SettingsActivity extends FragmentActivity
                 case NOTIFICATION_DOTS_PREFERENCE_KEY:
                     return BuildConfig.NOTIFICATION_DOTS_ENABLED;
                 case ALLOW_ROTATION_PREFERENCE_KEY:
-                    if (Flags.oneGridSpecs()) {
+                    if (Flags.oneGridSpecs() && !info.isRotationAllowed()) {
                         return false;
                     }
                     if (info.isTablet(info.realBounds)) {
@@ -343,7 +343,8 @@ public class SettingsActivity extends FragmentActivity
                             || InvariantDeviceProfile.INSTANCE.get(getContext()).deviceType
                             == TYPE_MULTI_DISPLAY
                             || InvariantDeviceProfile.INSTANCE.get(getContext()).deviceType
-                            == TYPE_TABLET) {
+                            == TYPE_TABLET
+                            || info.isRotationAllowed()) {
                         return false;
                     }
                     // When the setting changes rotate the screen accordingly to showcase the result
