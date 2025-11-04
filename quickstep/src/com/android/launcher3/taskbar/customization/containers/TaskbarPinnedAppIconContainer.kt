@@ -26,6 +26,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.core.view.contains
+import androidx.core.view.get
 import androidx.core.view.isEmpty
 import androidx.core.view.setPadding
 import com.android.app.tracing.traceSection
@@ -42,6 +43,7 @@ import com.android.launcher3.taskbar.TaskbarViewCallbacks
 import com.android.launcher3.taskbar.customization.TaskbarContainer
 import com.android.launcher3.taskbar.customization.util.TaskbarIconContainerLayoutParams
 import com.android.launcher3.taskbar.customization.util.TaskbarIconContainerUtil.DEFAULT_BOUNCE_SCALE
+import com.android.launcher3.taskbar.customization.viewfactory.TaskbarPinnedAppsIconsViewFactory
 import com.android.launcher3.util.MultiTranslateDelegate
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.views.PredictedAppIcon
@@ -61,6 +63,8 @@ class TaskbarPinnedAppIconContainer(context: Context) :
 
     override val taskbarIconViewPadding =
         dpToPx(activityContext.taskbarSpecsEvaluator.taskbarIconPadding, activityContext)
+
+    private val itemViewFactory = TaskbarPinnedAppsIconsViewFactory(activityContext, this)
 
     lateinit var taskbarViewCallbacks: TaskbarViewCallbacks
 
@@ -85,8 +89,7 @@ class TaskbarPinnedAppIconContainer(context: Context) :
         if (isRtl) itemList = itemList.reversed()
 
         forEachIcon(itemList) { index, item ->
-            // TODO : refactor this in future cl to get view from item factory
-            val itemView = BubbleTextView(context)
+            val itemView = itemViewFactory.getView(item, index)
             itemView.setPadding(taskbarIconViewPadding)
             if (itemView !in this) {
                 addView(itemView, getLayoutParams(index, itemCount))
@@ -118,7 +121,7 @@ class TaskbarPinnedAppIconContainer(context: Context) :
         }
         // Recycle the remaining view if view count is more than items to show
         while (childCount > itemCount) {
-            // TODO : Use view factory to recycle excess views.
+            itemViewFactory.removeAndRecycle(this[childCount - 1])
         }
     }
 
