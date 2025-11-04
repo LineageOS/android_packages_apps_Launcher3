@@ -2136,8 +2136,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             }
         }
         // Always launch in freeform if in external display.
-        return (DesktopExperienceFlags.ENABLE_FREEFORM_DISPLAY_LAUNCH_PARAMS.isTrue()
-                && isExternalDisplay(displayId)) || isTaskbarShowingDesktopTasks();
+        return isExternalDisplay(displayId) || isTaskbarShowingDesktopTasks();
     }
 
     private void launchDesktopApp(Intent intent, ItemInfo info, int displayId) {
