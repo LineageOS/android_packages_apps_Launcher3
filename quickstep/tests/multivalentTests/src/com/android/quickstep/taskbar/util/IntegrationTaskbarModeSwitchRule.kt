@@ -21,6 +21,7 @@ import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.get
 import com.android.launcher3.testutil.Wait.atMost
+import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
 import com.android.launcher3.util.TaskbarModeUtil
 import com.android.quickstep.integration.TISBinderRule
 import org.junit.rules.TestRule
@@ -91,8 +92,15 @@ class IntegrationTaskbarModeSwitchRule(val tisBinderRule: TISBinderRule) : TestR
         get(getInstrumentation().targetContext)
             .put(LauncherPrefs.TASKBAR_PINNING, mode == Mode.PERSISTENT)
 
-        tisBinderRule.withTISBinder { taskbarManager!!.recreateTaskbars() }
+        tisBinderRule.withTISBinder {
+            taskbarManager!!.recreateTaskbars()
+            waitForTaskbarUiThreadSync()
+        }
         atMost("Taskbar didn't switch to ${mode.name}") { currentMode() == mode }
+    }
+
+    private fun waitForTaskbarUiThreadSync() {
+        TASKBAR_UI_THREAD.submit {}.get()
     }
 
     companion object {
