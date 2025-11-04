@@ -94,7 +94,7 @@ public class TaskbarModelCallbacks implements
                     instanceof PredictedContainerInfo pci) {
                 mControllers.taskbarAllAppsController.setPredictedApps(pci.getContents());
             }
-            commitItemsToUI();
+            commitItemsToUI(/* forceUpdateHotseat = */ true);
         });
     }
 
@@ -202,6 +202,10 @@ public class TaskbarModelCallbacks implements
     }
 
     private void commitItemsToUI() {
+        commitItemsToUI(/* forceUpdateHotseat = */ false);
+    }
+
+    private void commitItemsToUI(boolean forceUpdateHotseat) {
         Preconditions.assertTaskbarUiThread();
         int taskbarSize = mContext.getTaskbarSpecsEvaluator().getMaxPinnableCount();
         ItemInfo[] hotseatItemInfos = new ItemInfo[taskbarSize];
@@ -231,21 +235,30 @@ public class TaskbarModelCallbacks implements
             mDeferredUpdates = () ->
                     commitHotseatItemUpdates(finalHotseatItemInfos,
                             recentAppsController.getShownTasks(),
-                            handoffSuggestions);
+                            handoffSuggestions,
+                            forceUpdateHotseat);
         } else {
             commitHotseatItemUpdates(
-                hotseatItemInfos,
-                recentAppsController.getShownTasks(),
-                handoffSuggestions);
+                    hotseatItemInfos,
+                    recentAppsController.getShownTasks(),
+                    handoffSuggestions,
+                    forceUpdateHotseat);
         }
     }
 
+    /**
+     * Commits all updates throughout Taskbar.
+     *
+     * @param forceUpdateHotseat Whether to force update every hotseat icon.
+     */
     private void commitHotseatItemUpdates(
             ItemInfo[] hotseatItemInfos,
             List<GroupTask> recentTasks,
-            List<HandoffSuggestion> handoffSuggestions) {
+            List<HandoffSuggestion> handoffSuggestions,
+            boolean forceUpdateHotseat) {
         Preconditions.assertTaskbarUiThread();
-        mContainer.updateItems(hotseatItemInfos, recentTasks, handoffSuggestions);
+        mContainer.updateItems(
+                hotseatItemInfos, recentTasks, handoffSuggestions, forceUpdateHotseat);
         mControllers.taskbarViewController.updateIconViewsRunningStates();
         mControllers.taskbarPopupController.setTaskbarInfoList(mHotseatItems);
         if (enableTaskbarDragAndDrop()) {

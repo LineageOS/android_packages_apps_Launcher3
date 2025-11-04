@@ -28,6 +28,7 @@ import com.android.launcher3.Flags.FLAG_ENABLE_TASKBAR_DRAG_AND_DROP
 import com.android.launcher3.Flags.FLAG_ENABLE_TASKBAR_ICON_CONTAINER
 import com.android.launcher3.R
 import com.android.launcher3.apppairs.AppPairIcon
+import com.android.launcher3.model.data.TaskItemInfo
 import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
 import com.android.launcher3.taskbar.TaskbarIconType.ALL_APPS
@@ -39,6 +40,7 @@ import com.android.launcher3.taskbar.TaskbarIconType.RECENT
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.assertThat
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHandoffSuggestions
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatItems
+import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatWorkspaceItem
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createRecentTask
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createRecents
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createSplitTask
@@ -56,6 +58,11 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.never
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
@@ -1013,6 +1020,51 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
         // Icon for Task 2 should be recycled from Task 0.
         assertThat(nextIcons.last()).isSameInstanceAs(prevIcons.first())
         assertThat(nextIcons.last().tag).isEqualTo(nextTasks.last())
+    }
+
+    @Test
+    fun testUpdateItems_hotseatItemUnchanged_iconNotRegenerated() {
+        val item = spy(createHotseatWorkspaceItem())
+        runOnMainSync { taskbarView.updateItems(arrayOf(item), emptyList(), emptyList()) }
+        verify(item, times(1)).newIcon(any(), any())
+
+        runOnMainSync { taskbarView.updateItems(arrayOf(item), emptyList(), emptyList()) }
+        verify(item, times(1)).newIcon(any(), any()) // Icon is not generated a second time.
+    }
+
+    @Test
+    fun testUpdateItems_hotseatItemIsOpened_tagUpdatedAndIconNotRegenerated() {
+        val item = spy(createHotseatWorkspaceItem())
+        runOnMainSync { taskbarView.updateItems(arrayOf(item), emptyList(), emptyList()) }
+        verify(item, times(1)).newIcon(any(), any())
+
+        val taskItem = spy(TaskItemInfo(0, item))
+        runOnMainSync { taskbarView.updateItems(arrayOf(taskItem), emptyList(), emptyList()) }
+
+        assertThat(taskbarView.iconViews.last().tag).isSameInstanceAs(taskItem)
+        verify(taskItem, never()).newIcon(any(), any()) // Icon is not regenerated from task.
+    }
+
+    @Test
+    fun testUpdateItems_hotseatTaskItemIsClosed_tagUpdatedAndIconNotRegenerated() {
+        val item = spy(createHotseatWorkspaceItem())
+        val taskItem = spy(TaskItemInfo(0, item))
+        runOnMainSync { taskbarView.updateItems(arrayOf(taskItem), emptyList(), emptyList()) }
+        verify(taskItem, times(1)).newIcon(any(), any())
+
+        runOnMainSync { taskbarView.updateItems(arrayOf(item), emptyList(), emptyList()) }
+        assertThat(taskbarView.iconViews.last().tag).isSameInstanceAs(item)
+        verify(item, never()).newIcon(any(), any()) // Icon is not regenerated from item.
+    }
+
+    @Test
+    fun testUpdateItems_recentTaskUnchanged_iconNotRegenerated() {
+        val recentTask = spy(createRecentTask())
+        runOnMainSync { taskbarView.updateItems(emptyArray(), listOf(recentTask), emptyList()) }
+        verify(recentTask, times(1)).bitmapInfos
+
+        runOnMainSync { taskbarView.updateItems(emptyArray(), listOf(recentTask), emptyList()) }
+        verify(recentTask, times(1)).bitmapInfos // Icon is not generated a second time.
     }
 
     /** Returns the number of expected recents outside of the overflow based on [hotseatSize]. */
