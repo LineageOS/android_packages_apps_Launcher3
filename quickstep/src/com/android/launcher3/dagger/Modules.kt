@@ -21,6 +21,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.SystemClock
 import android.view.CrossWindowBlurListeners
+import com.android.extensions.computercontrol.ComputerControlExtensions
 import com.android.internal.R
 import com.android.internal.policy.DesktopModeCompatPolicy
 import com.android.launcher3.AbstractFloatingViewHelper
@@ -58,6 +59,8 @@ import com.android.launcher3.util.window.RefreshRateTracker
 import com.android.launcher3.util.window.WindowManagerProxy
 import com.android.launcher3.widget.LauncherWidgetHolder.WidgetHolderFactory
 import com.android.quickstep.AspectRatioSystemShortcut
+import com.android.quickstep.AutomationRepository
+import com.android.quickstep.AutomationRepositoryImpl
 import com.android.quickstep.DesktopShortcut
 import com.android.quickstep.ExternalDisplayShortcut
 import com.android.quickstep.InstantAppResolverImpl
@@ -176,6 +179,12 @@ object StaticObjectModule {
     }
 
     @Provides fun provideAbstractFloatingViewHelper() = AbstractFloatingViewHelper
+
+    @Provides
+    @JvmStatic
+    fun provideComputerControlExtensions(
+        @ApplicationContext context: Context
+    ): ComputerControlExtensions? = ComputerControlExtensions.getInstance(context)
 }
 
 @Module
@@ -260,4 +269,9 @@ object TaskOverlayModule {
             TaskShortcutFactory.SCREENSHOT,
             TaskShortcutFactory.MODAL,
         )
+}
+
+@Module
+interface TaskAutomationModule {
+    @Binds fun bindAutomatedRepository(impl: AutomationRepositoryImpl): AutomationRepository
 }
