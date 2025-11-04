@@ -404,8 +404,6 @@ public class Launcher extends StatefulActivity<LauncherState>
 
     protected WallpaperThemeManager mWallpaperThemeManager;
 
-    private boolean mIsTopResumedActivity;
-
     public static Launcher getLauncher(Context context) {
         return fromContext(context);
     }
@@ -2847,7 +2845,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         if (floatingView != null) {
             return (WidgetsFullSheet) floatingView;
         }
-        if (shouldShowHomeBehindDesktop() && !mIsTopResumedActivity) {
+        if (shouldShowHomeBehindDesktop() && !isTopResumedActivity()) {
             Intent intent = new Intent(Intent.ACTION_MAIN)
                     .addCategory(Intent.CATEGORY_HOME)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -2893,16 +2891,9 @@ public class Launcher extends StatefulActivity<LauncherState>
         return ItemClickHandler.INSTANCE;
     }
 
-    /**
-     * @return true if Launcher is the current top resumed activity.
-     */
-    public boolean isTopResumedActivity() {
-        return mIsTopResumedActivity;
-    }
-
     @Override
     public void onTopResumedActivityChanged(boolean isResumed) {
-        mIsTopResumedActivity = isResumed;
+        super.onTopResumedActivityChanged(isResumed);
         mLauncherUiState.setIsTopResumedActivity(isResumed);
     }
 

@@ -65,8 +65,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import com.android.launcher3.widgetpicker.R
 import com.android.launcher3.widgetpicker.shared.model.CloseBehavior
+import com.android.launcher3.widgetpicker.ui.components.LocalWidgetPickerHostStateProvider
 import com.android.launcher3.widgetpicker.ui.components.SheetDismissState
 import com.android.launcher3.widgetpicker.ui.components.SheetHeader
+import com.android.launcher3.widgetpicker.ui.components.WidgetPickerHostStateEffect
 import com.android.launcher3.widgetpicker.ui.components.accessibility.LocalAccessibilityState
 import com.android.launcher3.widgetpicker.ui.components.bottomsheet.TitledBottomSheetDimens.SHEET_HEIGHT_CAP_RATIO
 import com.android.launcher3.widgetpicker.ui.components.bottomsheet.TitledBottomSheetDimens.SheetHeightCapBreakpoint
@@ -135,6 +137,15 @@ fun TitledBottomSheet(
             val animSpec: AnimationSpec<Float> = MaterialTheme.motionScheme.slowSpatialSpec()
             val sheetState = remember { SheetDismissState(expandCollapseAnimationSpec = animSpec) }
 
+            val scope = rememberCoroutineScope()
+
+            WidgetPickerHostStateEffect(LocalWidgetPickerHostStateProvider.current) { isTopResumed
+                ->
+                if (!isTopResumed) {
+                    scope.launch { sheetState.collapse() }
+                }
+            }
+
             Surface(
                 modifier =
                     Modifier.semantics {
@@ -195,8 +206,6 @@ fun TitledBottomSheet(
             )
 
             if (enableSwipeUpToDismiss) {
-                val scope = rememberCoroutineScope()
-
                 SwipeUpToDismissHandler(
                     modifier = Modifier.align(Alignment.BottomCenter),
                     contentHeight = maxHeight,

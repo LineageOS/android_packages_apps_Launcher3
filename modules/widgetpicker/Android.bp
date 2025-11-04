@@ -156,6 +156,7 @@ android_library {
         "src/com/android/launcher3/widgetpicker/ui/components/WidgetAppIcon.kt",
         "src/com/android/launcher3/widgetpicker/ui/components/Strings.kt",
         "src/com/android/launcher3/widgetpicker/ui/components/WidgetDetails.kt",
+        "src/com/android/launcher3/widgetpicker/ui/components/WidgetPickerHostStateProvider.kt",
         "src/com/android/launcher3/widgetpicker/ui/components/WidgetPreview.kt",
         "src/com/android/launcher3/widgetpicker/ui/components/DragAndDrop.kt",
         "src/com/android/launcher3/widgetpicker/ui/components/WidgetPreviewHostView.kt",

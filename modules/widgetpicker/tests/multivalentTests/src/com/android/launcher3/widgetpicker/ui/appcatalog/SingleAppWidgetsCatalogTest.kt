@@ -35,6 +35,7 @@ import com.android.launcher3.widgetpicker.repository.FakeWidgetsRepository
 import com.android.launcher3.widgetpicker.shared.model.WidgetHostInfo
 import com.android.launcher3.widgetpicker.ui.NoOpWidgetPickerCuiReporter
 import com.android.launcher3.widgetpicker.ui.WidgetPickerEventListeners
+import com.android.launcher3.widgetpicker.ui.components.WidgetPickerHostStateProvider
 import com.android.launcher3.widgetpicker.ui.rememberViewModel
 import com.android.launcher3.widgetpicker.ui.theme.WidgetPickerTheme
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -67,6 +68,8 @@ class SingleAppWidgetsCatalogTest {
     private lateinit var appCatalogViewModel: SingleAppWidgetsCatalogViewModel
 
     @Mock private lateinit var eventListenersMock: WidgetPickerEventListeners
+
+    private val topResumedChangedCallbacks: MutableList<(Boolean) -> Unit> = mutableListOf()
 
     @Before
     fun setUp() {
@@ -101,15 +104,42 @@ class SingleAppWidgetsCatalogTest {
             verify(eventListenersMock).onClose()
         }
 
+    @Test
+    fun closeWhenActivityNotTop_callbackInvoked() =
+        testScope.runTest {
+            composeTestRule.setContent { SingleAppWidgetsCatalogTestContent() }
+            runCurrent()
+            composeTestRule.waitForIdle()
+
+            topResumedChangedCallbacks.forEach { it(false) }
+
+            runCurrent()
+            composeTestRule.waitForIdle()
+
+            verify(eventListenersMock).onClose()
+        }
+
     @Composable
     private fun SingleAppWidgetsCatalogTestContent() {
         val viewModel = rememberViewModel { appCatalogViewModel }
+
+        val hostStateProvider =
+            object : WidgetPickerHostStateProvider {
+                override fun observeIsTopResumed(listener: (Boolean) -> Unit) {
+                    topResumedChangedCallbacks.add(listener)
+                }
+
+                override fun stopObservingIsTopResumed(listener: (Boolean) -> Unit) {
+                    topResumedChangedCallbacks.remove(listener)
+                }
+            }
 
         WidgetPickerTheme {
             SingleAppWidgetsCatalogContent(
                 viewModel = viewModel,
                 cuiReporter = NoOpWidgetPickerCuiReporter(),
                 eventListeners = eventListenersMock,
+                hostStateProvider = hostStateProvider,
             )
         }
     }
