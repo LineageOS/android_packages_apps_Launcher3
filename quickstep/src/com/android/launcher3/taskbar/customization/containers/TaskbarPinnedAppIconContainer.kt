@@ -31,6 +31,7 @@ import androidx.core.view.isEmpty
 import androidx.core.view.setPadding
 import com.android.app.tracing.traceSection
 import com.android.launcher3.BubbleTextView
+import com.android.launcher3.R
 import com.android.launcher3.Reorderable
 import com.android.launcher3.Utilities.dpToPx
 import com.android.launcher3.Utilities.isRtl
@@ -38,11 +39,21 @@ import com.android.launcher3.celllayout.CellInfo
 import com.android.launcher3.folder.FolderIcon
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
+import com.android.launcher3.taskbar.ItemInfoWrapper
 import com.android.launcher3.taskbar.TaskbarActivityContext
+import com.android.launcher3.taskbar.TaskbarOverflowView
+import com.android.launcher3.taskbar.TaskbarPopupController
 import com.android.launcher3.taskbar.TaskbarViewCallbacks
 import com.android.launcher3.taskbar.customization.TaskbarContainer
+import com.android.launcher3.taskbar.customization.enums.OverflowIconPosition
+import com.android.launcher3.taskbar.customization.listeners.TaskbarIconsContainerHoverListener
+import com.android.launcher3.taskbar.customization.listeners.TaskbarIconsContainerOverflowClickListeners
+import com.android.launcher3.taskbar.customization.overflow.TaskbarIconsContainerOverflowViewHelper
+import com.android.launcher3.taskbar.customization.overflow.TaskbarOverflowIconWrapper
 import com.android.launcher3.taskbar.customization.util.TaskbarIconContainerLayoutParams
+import com.android.launcher3.taskbar.customization.util.TaskbarIconContainerUtil
 import com.android.launcher3.taskbar.customization.util.TaskbarIconContainerUtil.DEFAULT_BOUNCE_SCALE
+import com.android.launcher3.taskbar.customization.util.TaskbarIconContainerUtil.getMaxIconCount
 import com.android.launcher3.taskbar.customization.viewfactory.TaskbarPinnedAppsIconsViewFactory
 import com.android.launcher3.util.MultiTranslateDelegate
 import com.android.launcher3.views.ActivityContext
@@ -50,7 +61,11 @@ import com.android.launcher3.views.PredictedAppIcon
 
 /** Taskbar container which hosts its pinned apps. */
 class TaskbarPinnedAppIconContainer(context: Context) :
-    LinearLayout(context), Reorderable, TaskbarContainer {
+    LinearLayout(context),
+    Reorderable,
+    TaskbarContainer,
+    TaskbarIconsContainerHoverListener,
+    TaskbarIconsContainerOverflowClickListeners {
 
     private var itemMarginLeftRight = 0
     private val activityContext: TaskbarActivityContext = ActivityContext.lookupContext(context)
@@ -64,9 +79,30 @@ class TaskbarPinnedAppIconContainer(context: Context) :
     override val taskbarIconViewPadding =
         dpToPx(activityContext.taskbarSpecsEvaluator.taskbarIconPadding, activityContext)
 
+    override val overflowIconClickListener: OnClickListener =
+        taskbarViewCallbacks.pinnedOverflowOnClickListener
+
+    override val overflowIconLongClickListener: OnLongClickListener =
+        taskbarViewCallbacks.pinnedOverflowOnLongClickListener
+
     private val itemViewFactory = TaskbarPinnedAppsIconsViewFactory(activityContext, this)
 
-    lateinit var taskbarViewCallbacks: TaskbarViewCallbacks
+    private val taskbarIconsContainerOverflowHelper =
+        TaskbarIconsContainerOverflowViewHelper.create(
+            taskbarIconViewSize,
+            taskbarIconViewPadding,
+            OverflowIconPosition.END,
+            TaskbarOverflowIconWrapper<ItemInfo> { item -> ItemInfoWrapper(item, activityContext) },
+            parentView = this,
+            TaskbarOverflowView.OverflowType.PINNED,
+        )
+
+    private val isOverflowEnabled = TaskbarPopupController.canPinAppsOverflow()
+
+    val overflowView: TaskbarOverflowView =
+        taskbarIconsContainerOverflowHelper.taskbarContainerOverflowView
+
+    private lateinit var taskbarViewCallbacks: TaskbarViewCallbacks
 
     init {
         orientation = HORIZONTAL
@@ -76,6 +112,10 @@ class TaskbarPinnedAppIconContainer(context: Context) :
 
     fun setUpCallbacks(taskbarViewCallbacks: TaskbarViewCallbacks) {
         this.taskbarViewCallbacks = taskbarViewCallbacks
+        taskbarIconsContainerOverflowHelper.setUpCallbacks(
+            hoverListener = this,
+            overflowClickListeners = this,
+        )
     }
 
     fun updateIcons(itemInfos: List<ItemInfo>) {
@@ -85,10 +125,23 @@ class TaskbarPinnedAppIconContainer(context: Context) :
     private fun updateIconsInternal(itemInfos: List<ItemInfo>) {
         var numViewsAnimated = 0
         val itemCount = itemInfos.size
+        val numMaxIcons =
+            getMaxIconCount(
+                itemCount,
+                activityContext.numbersOfTaskbarIconsOverflowing,
+                isOverflowEnabled,
+            )
         var itemList = itemInfos
         if (isRtl) itemList = itemList.reversed()
 
-        forEachIcon(itemList) { index, item ->
+        val taskbarContainerIconsBySection =
+            TaskbarIconContainerUtil.getOverflowAndNonOverflowLists(
+                itemList,
+                OverflowIconPosition.END,
+                numMaxIcons,
+            )
+
+        forEachIcon(taskbarContainerIconsBySection.nonOverflownItems) { index, item ->
             val itemView = itemViewFactory.getView(item, index)
             itemView.setPadding(taskbarIconViewPadding)
             if (itemView !in this) {
@@ -117,11 +170,23 @@ class TaskbarPinnedAppIconContainer(context: Context) :
             }
 
             setClickAndLongClickListenersForIcon(itemView)
+            if (itemView.getTag(R.id.taskbar_icon_has_hover_listener) == true) {
+                // Creating hover listener is expensive due to view inflation, so reuse if possible.
+                return
+            }
             itemView.setOnHoverListener(taskbarViewCallbacks.getIconOnHoverListener(itemView))
+            itemView.setTag(R.id.taskbar_icon_has_hover_listener, true)
         }
         // Recycle the remaining view if view count is more than items to show
         while (childCount > itemCount) {
             itemViewFactory.removeAndRecycle(this[childCount - 1])
+        }
+
+        if (!isOverflowEnabled) {
+            taskbarIconsContainerOverflowHelper.setUpOverflowView(
+                taskbarContainerIconsBySection.overflownItems,
+                itemMarginLeftRight,
+            )
         }
     }
 
@@ -200,6 +265,9 @@ class TaskbarPinnedAppIconContainer(context: Context) :
         get() =
             if (isEmpty()) 0
             else (childCount * taskbarIconViewSize) + ((childCount - 1) * 2 * itemMarginLeftRight)
+
+    override fun getHoverListener(icon: View): OnHoverListener =
+        taskbarViewCallbacks.getIconOnHoverListener(icon)
 
     companion object {
         /** Returns a new instance of [TaskbarPinnedAppIconContainer]. */

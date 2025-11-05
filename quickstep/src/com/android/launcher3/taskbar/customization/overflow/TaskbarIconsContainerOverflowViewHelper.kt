@@ -19,25 +19,22 @@ package com.android.launcher3.taskbar.customization.overflow
 import android.view.ViewGroup
 import androidx.core.view.contains
 import androidx.core.view.setPadding
-import com.android.launcher3.taskbar.TaskbarActivityContext
 import com.android.launcher3.taskbar.TaskbarOverflowView
 import com.android.launcher3.taskbar.TaskbarOverflowView.OverflowType
 import com.android.launcher3.taskbar.customization.enums.OverflowIconPosition
 import com.android.launcher3.taskbar.customization.listeners.TaskbarIconsContainerHoverListener
 import com.android.launcher3.taskbar.customization.listeners.TaskbarIconsContainerOverflowClickListeners
 import com.android.launcher3.taskbar.customization.util.TaskbarIconContainerLayoutParams
-import com.android.launcher3.taskbar.customization.util.TaskbarIconContainerUtil.getMaxIconCount
 
 /** Helper class for taskbar icon container to show overflow view. */
 class TaskbarIconsContainerOverflowViewHelper<T>
 private constructor(
-    private val activityContext: TaskbarActivityContext,
     private val taskbarIconViewSize: Int,
     private val taskbarIconPadding: Int,
     private val overflowIconPosition: OverflowIconPosition,
     private val taskbarOverflowIconWrapper: TaskbarOverflowIconWrapper<T>,
     private val parentView: ViewGroup,
-    private val taskbarContainerOverflowView: TaskbarOverflowView,
+    val taskbarContainerOverflowView: TaskbarOverflowView,
 ) {
     private val isOverflowViewShowing: Boolean
         get() = taskbarContainerOverflowView in parentView
@@ -52,12 +49,7 @@ private constructor(
         if (overflowIconPosition == OverflowIconPosition.END) -1 else 0
 
     fun setUpOverflowView(items: List<T>, itemMarginLeftRight: Int) {
-        val itemCount = items.size
-        val numMaxIcons =
-            getMaxIconCount(itemCount, activityContext.numbersOfTaskbarIconsOverflowing)
-        val hasOverflow = itemCount > numMaxIcons
-
-        if (hasOverflow) {
+        if (items.isNotEmpty()) {
             taskbarContainerOverflowView.setItems(
                 items.map { item -> taskbarOverflowIconWrapper.getTaskbarOverflowItemWrapper(item) }
             )
@@ -70,13 +62,13 @@ private constructor(
 
     fun setUpCallbacks(
         hoverListener: TaskbarIconsContainerHoverListener,
-        overflowClickListener: TaskbarIconsContainerOverflowClickListeners,
+        overflowClickListeners: TaskbarIconsContainerOverflowClickListeners,
     ) {
         taskbarContainerOverflowView.setOnClickListener(
-            overflowClickListener.overflowIconClickListener
+            overflowClickListeners.overflowIconClickListener
         )
         taskbarContainerOverflowView.onLongClickListener =
-            overflowClickListener.overflowIconLongClickListener
+            overflowClickListeners.overflowIconLongClickListener
         taskbarContainerOverflowView.setOnHoverListener(
             hoverListener.getHoverListener(taskbarContainerOverflowView)
         )
@@ -108,7 +100,6 @@ private constructor(
          * [TaskbarIconsContainerOverflowViewHelper].
          */
         fun <T> create(
-            activityContext: TaskbarActivityContext,
             taskbarIconViewSize: Int,
             taskbarIconPadding: Int,
             overflowIconPosition: OverflowIconPosition,
@@ -126,7 +117,6 @@ private constructor(
                 )
 
             return TaskbarIconsContainerOverflowViewHelper(
-                activityContext,
                 taskbarIconViewSize,
                 taskbarIconPadding,
                 overflowIconPosition,
