@@ -23,6 +23,7 @@ import android.graphics.drawable.Drawable
 import android.os.Process
 import android.util.Log
 import android.view.DragEvent
+import com.android.launcher3.DropTarget.DragObject
 import com.android.launcher3.Launcher
 import com.android.launcher3.icons.IconCache
 import dagger.Lazy
@@ -47,7 +48,8 @@ class SystemDragListener(
         /*previewRect=*/ Rect(),
         /*previewBitmapWidth=*/ 0,
         /*previewViewWidth*/ 0,
-    ) {
+    ),
+    DragController.DragListener {
 
     private var cleanupCallback: Runnable? = null
     private var dragView: DragView<*>? = null
@@ -55,6 +57,7 @@ class SystemDragListener(
     init {
         val closeAllOpenViews = params?.closeAllOpenViews ?: true
         initInternal(launcher, /* isHomeStarted= */ launcher.isStarted, closeAllOpenViews)
+        launcher.dragController.addDragListener(this)
     }
 
     /**
@@ -112,6 +115,15 @@ class SystemDragListener(
             }
         }
         return super.onDrag(event)
+    }
+
+    override fun onDragEnd() {
+        mLauncher.dragController.removeDragListener(this)
+        postCleanup()
+    }
+
+    override fun onDragStart(dragObject: DragObject, options: DragOptions) {
+        // No-op
     }
 
     override fun startDrag(
