@@ -48,6 +48,7 @@ import com.android.launcher3.model.data.LauncherAppWidgetInfo.FLAG_ID_NOT_VALID
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.pm.UserCache
 import com.android.launcher3.provider.LauncherDbUtils.SQLiteTransaction
+import com.android.launcher3.provider.LauncherDbUtils.asSequence
 import com.android.launcher3.provider.LauncherDbUtils.dropTable
 import com.android.launcher3.provider.LauncherDbUtils.queryIntArray
 import com.android.launcher3.util.ApiWrapper
@@ -55,6 +56,7 @@ import com.android.launcher3.util.ContentWriter
 import com.android.launcher3.util.ContentWriter.CommitParams
 import com.android.launcher3.util.IntArray as LIntArray
 import com.android.launcher3.util.LogConfig
+import com.android.launcher3.util.SQLiteTable
 import com.android.launcher3.widget.LauncherWidgetHolder
 import java.io.InvalidObjectException
 import java.util.function.Consumer
@@ -123,7 +125,10 @@ class RestoreDbTask {
         val selection = "profileId NOT IN (${profileMapping.keys.joinToString()})"
         logFavoritesTable(db, "items to delete from unrestored profiles:", selection)
         if (Flags.enableLauncherBrMetricsFixed()) {
-            reportUnrestoredProfiles(db, selection, restoreEventLogger)
+            restoreEventLogger.sendMetricsForFailedMigration(
+                controller.getTable(),
+                RestoreError.PROFILE_NOT_RESTORED,
+            )
         }
         val itemsDeletedCount = db.delete(TABLE_NAME, selection, null)
         FileLog.d(TAG, "$itemsDeletedCount total items from unrestored user(s) were deleted")
@@ -414,38 +419,6 @@ class RestoreDbTask {
 
         logFavoritesTable(controller.db, "launcher db after remap widget ids")
         LauncherAppState.INSTANCE[context].model.reloadIfActive()
-    }
-
-    /**
-     * Queries and reports the count of each itemType to be removed due to unrestored profiles.
-     *
-     * @param database The Launcher db to query from.
-     * @param where Query being used for to find unrestored profiles
-     * @param profileIds profile ids that were not restored
-     * @param restoreEventLogger Backup/Restore Logger to report metrics
-     */
-    private fun reportUnrestoredProfiles(
-        database: SQLiteDatabase,
-        selection: String,
-        restoreEventLogger: LauncherRestoreEventLogger,
-    ) {
-        val query =
-            "SELECT itemType, COUNT(*) AS count FROM favorites WHERE $selection GROUP BY itemType"
-        try {
-            database.rawQuery(query, null).use { cursor ->
-                if (cursor.moveToFirst()) {
-                    do {
-                        restoreEventLogger.logFavoritesItemsRestoreFailed(
-                            cursor.getInt(cursor.getColumnIndexOrThrow(Favorites.ITEM_TYPE)),
-                            cursor.getInt(cursor.getColumnIndexOrThrow("count")),
-                            RestoreError.PROFILE_NOT_RESTORED,
-                        )
-                    } while (cursor.moveToNext())
-                }
-            }
-        } catch (e: Exception) {
-            FileLog.e(TAG, "reportUnrestoredProfiles: Error reading from database", e)
-        }
     }
 
     companion object {
@@ -764,6 +737,31 @@ class RestoreDbTask {
                     }
             } catch (e: Exception) {
                 FileLog.e(TAG, "logFavoritesTable: Error reading from database", e)
+            }
+        }
+
+        /**
+         * Queries and reports the count of each itemType to be removed due to unrestored profiles.
+         *
+         * @param selection Query being used for to find unrestored profiles
+         */
+        fun LauncherRestoreEventLogger.sendMetricsForFailedMigration(
+            table: SQLiteTable,
+            @RestoreError error: String,
+            selection: String? = null,
+        ) {
+            try {
+                table.query(arrayOf(ITEM_TYPE), selection) {
+                    asSequence()
+                        .map { getInt(0) }
+                        .groupingBy { it }
+                        .eachCount()
+                        .forEach { (type, count) ->
+                            logFavoritesItemsRestoreFailed(type, count, error)
+                        }
+                }
+            } catch (e: Exception) {
+                FileLog.e(TAG, "sendMetricsForFailedMigration: Error reading from database", e)
             }
         }
     }
