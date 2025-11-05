@@ -228,7 +228,7 @@ class PersistentBubbleStashControllerTest {
     @Test
     fun isStashed_false() {
         assertThat(persistentTaskBarStashController.isStashed).isFalse()
-        assertThat(taskbarUiState.bubbleStashed).isFalse()
+        assertThat(taskbarUiState.isBubbleStashed).isFalse()
     }
 
     @Test
@@ -467,7 +467,7 @@ class PersistentBubbleStashControllerTest {
         // Then bubble bar is stashed
         assertThat(bubbleBarView.translationY).isEqualTo(TASK_BAR_STASHED_TRANSLATION_Y)
         assertThat(persistentTaskBarStashController.isStashed).isTrue()
-        assertThat(taskbarUiState.bubbleStashed).isTrue()
+        assertThat(taskbarUiState.isBubbleStashed).isTrue()
     }
 
     @Test
@@ -498,7 +498,7 @@ class PersistentBubbleStashControllerTest {
         }
         // Check that bubble bar is un-stashed
         assertThat(persistentTaskBarStashController.isStashed).isFalse()
-        assertThat(taskbarUiState.bubbleStashed).isFalse()
+        assertThat(taskbarUiState.isBubbleStashed).isFalse()
         assertThat(bubbleBarView.translationY).isEqualTo(TASK_BAR_TRANSLATION_Y)
 
         // When calling to stash
@@ -510,7 +510,7 @@ class PersistentBubbleStashControllerTest {
         // Then Bubble bar is stashed
         assertThat(bubbleBarView.translationY).isEqualTo(TASK_BAR_STASHED_TRANSLATION_Y)
         assertThat(persistentTaskBarStashController.isStashed).isTrue()
-        assertThat(taskbarUiState.bubbleStashed).isTrue()
+        assertThat(taskbarUiState.isBubbleStashed).isTrue()
     }
 
     private fun advanceTimeBy(advanceMs: Long) {

@@ -97,7 +97,7 @@ class TransientBubbleStashController(
             // TODO(b/404636836): after launching refactorTaskbarUiState(), rely only on
             //  taskbarUiState to track isStashed state.
             if (refactorTaskbarUiState()) {
-                taskbarUiState.bubbleStashed = value
+                taskbarUiState.isBubbleStashed = value
             }
             field = value
         }

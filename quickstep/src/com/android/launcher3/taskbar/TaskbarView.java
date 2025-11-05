@@ -219,7 +219,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
             R.dimen.taskbar_pinned_hit_rect_buffer);
 
         if (refactorTaskbarUiState()) {
-            mTaskbarUiState.setTaskbarViewIsShown(isShown());
+            mTaskbarUiState.setIsTaskbarViewShown(isShown());
         }
         mTransientTaskbarMinWidth = resources.getDimension(R.dimen.transient_taskbar_min_width);
 
@@ -1395,7 +1395,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
     public void onVisibilityAggregated(boolean isVisible) {
         super.onVisibilityAggregated(isVisible);
         if (refactorTaskbarUiState()) {
-            mTaskbarUiState.setTaskbarViewIsShown(isShown());
+            mTaskbarUiState.setIsTaskbarViewShown(isShown());
         }
     }
 
