@@ -28,17 +28,15 @@ import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
 import com.android.launcher3.config.FeatureFlags.enableTaskbarPinning
+import com.android.launcher3.taskbar.TOOLTIP_STEP_FEATURES
 import com.android.launcher3.taskbar.TaskbarActivityContext
 import com.android.launcher3.taskbar.TaskbarStashController
 import com.android.launcher3.taskbar.edu.TooltipsEduPage.DisplayLocation
 import com.android.launcher3.util.OnboardingPrefs.TASKBAR_EDU_TOOLTIP_STEP
-import com.android.launcher3.util.OnboardingPrefs.TASKBAR_FEATURES_EDU_SEEN
-import com.android.launcher3.util.OnboardingPrefs.TASKBAR_PINNING_EDU_SEEN
-import com.android.launcher3.util.OnboardingPrefs.TASKBAR_SEARCH_EDU_SEEN
-import com.android.launcher3.util.OnboardingPrefs.TASKBAR_SWIPE_EDU_SEEN
+import com.android.launcher3.util.OnboardingPrefs.TASKBAR_SEEN_EDU_FLAGS
 import com.android.launcher3.views.ActivityContext
-import com.android.quickstep.util.ContextualSearchInvoker
 import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper
+import java.io.PrintWriter
 
 /**
  * Class that encapsulates the logic for determining which educational tooltip should be shown to
@@ -48,6 +46,7 @@ import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper
 class TooltipEduCombinator(
     activityContext: ActivityContext,
     private val taskbarStashController: TaskbarStashController,
+    private val shouldShowSearchEduResolver: () -> Boolean,
 ) {
 
     private val context = activityContext as TaskbarActivityContext
@@ -65,53 +64,16 @@ class TooltipEduCombinator(
         get() = TASKBAR_EDU_TOOLTIP_STEP.get(context) > 0
 
     /**
-     * Indicates whether the conditions for showing the search-related educational tooltip are met.
-     * This typically involves checking if contextual search can be invoked successfully.
+     * Indicates whether the user has seen the original pinning educational flow for the taskbar.
+     * Use old value of tooltipStep that was set to the previous value of TOOLTIP_STEP_NONE (2 for
+     * the original edu steps) as a proxy to needing to show the separate pinning edu
      */
-    private val shouldShowSearchEdu: Boolean
-        get() = shouldShowSearchEduResolver.invoke()
-
-    /** Indicates whether the search educational tooltip should be shown. */
-    @VisibleForTesting
-    var shouldShowSearchEduResolver: () -> Boolean = {
-        ContextualSearchInvoker(context).runContextualSearchInvocationChecksAndLogFailures()
-    }
+    private val userHasSeenOldPinningEdu: Boolean
+        get() = TASKBAR_EDU_TOOLTIP_STEP.get(context) > TOOLTIP_STEP_FEATURES
 
     /** Indicates whether the createAnyBubbleEnabled is enabled. */
     @VisibleForTesting
     var createAnyBubbleEnabled: Boolean = BubbleAnythingFlagHelper.enableCreateAnyBubble()
-
-    /** Tracks whether the user has seen the educational tooltip for the swipe gesture. */
-    @VisibleForTesting
-    var userHasSeenSwipeEdu: Boolean
-        get() = TASKBAR_SWIPE_EDU_SEEN.get(context)
-        set(seen) {
-            LauncherPrefs.get(context).put(TASKBAR_SWIPE_EDU_SEEN, seen)
-        }
-
-    /** Tracks whether the user has seen the educational flow for general taskbar features. */
-    @VisibleForTesting
-    var userHasSeenFeaturesEdu: Boolean
-        get() = TASKBAR_FEATURES_EDU_SEEN.get(context)
-        set(seen) {
-            LauncherPrefs.get(context).put(TASKBAR_FEATURES_EDU_SEEN, seen)
-        }
-
-    /** Tracks whether the user has seen the educational tooltip for taskbar pinning. */
-    @VisibleForTesting
-    var userHasSeenPinningEdu: Boolean
-        get() = TASKBAR_PINNING_EDU_SEEN.get(context)
-        set(seen) {
-            LauncherPrefs.get(context).put(TASKBAR_PINNING_EDU_SEEN, seen)
-        }
-
-    /** Tracks whether the user has seen the educational tooltip for taskbar search. */
-    @VisibleForTesting
-    var userHasSeenSearchEdu: Boolean
-        get() = TASKBAR_SEARCH_EDU_SEEN.get(context)
-        set(seen) {
-            LauncherPrefs.get(context).put(TASKBAR_SEARCH_EDU_SEEN, seen)
-        }
 
     /** Creates the [TooltipInfo] for the split-screen educational tooltip. */
     private val splitTooltipInfo: TooltipInfo
@@ -192,6 +154,11 @@ class TooltipEduCombinator(
                     context.getString(R.string.taskbar_edu_suggested_search_animation_description),
             )
 
+    /** Returns whether there are educational tooltips to show. */
+    fun hasFeaturesEduToShow(): Boolean {
+        return collectFeatureTooltipsUpdateFlags(false).isNotEmpty()
+    }
+
     /**
      * Returns the [TooltipsEduPage] page for the swipe gesture to stash the taskbar, or `null` if
      * it should not be shown (e.g., if tooltips are disabled, in phone mode, in tiny taskbar mode,
@@ -199,14 +166,15 @@ class TooltipEduCombinator(
      */
     fun getSwipeEdu(): TooltipsEduPage? {
         if (
-            !isTooltipEnabled ||
-                !context.isTransientTaskbar ||
-                userHasSeenOldEdu ||
-                userHasSeenSwipeEdu
+            !setFlagIfUnset(
+                optionalCondition = {
+                    isTooltipEnabled && context.isTransientTaskbar && !userHasSeenOldEdu
+                },
+                flag = TASKBAR_SWIPE_EDU_SEEN_FLAG,
+            )
         ) {
             return null
         }
-        userHasSeenSwipeEdu = true
         return TooltipsEduPage(
             title = context.getString(R.string.taskbar_edu_stashing),
             canBeSkipped = true,
@@ -233,13 +201,13 @@ class TooltipEduCombinator(
         if (!isTooltipEnabled) {
             return null
         }
-        userHasSeenSwipeEdu = true
-        if (userHasSeenFeaturesEdu) {
-            return onFeaturesEduShown()
+        setFlag(TASKBAR_SWIPE_EDU_SEEN_FLAG)
+        val tooltipsToShow = collectFeatureTooltipsUpdateFlags()
+        return if (tooltipsToShow.isEmpty()) {
+            onFeaturesEduShown()
+        } else {
+            convertToFeaturesEduPages(tooltipsToShow)
         }
-        userHasSeenFeaturesEdu = true
-        val tooltipsToShow = collectFeatureTooltipsUpdatePinning()
-        return convertToFeaturesEduPages(tooltipsToShow)
     }
 
     /**
@@ -248,16 +216,19 @@ class TooltipEduCombinator(
      */
     fun getSearchEdu(): TooltipsEduPage? {
         if (
-            !enableTaskbarPinning() ||
-                !context.isPinnedTaskbar ||
-                !isTooltipEnabled ||
-                !shouldShowSearchEdu ||
-                userHasSeenSearchEdu ||
-                !taskbarStashController.isTaskbarVisibleAndNotStashing
+            !setFlagIfUnset(
+                optionalCondition = {
+                    isTooltipEnabled &&
+                        context.isPinnedTaskbar &&
+                        enableTaskbarPinning() &&
+                        taskbarStashController.isTaskbarVisibleAndNotStashing &&
+                        shouldShowSearchEduResolver.invoke()
+                },
+                flag = TASKBAR_SEARCH_EDU_SEEN_FLAG,
+            )
         ) {
             return null
         }
-        userHasSeenSearchEdu = true
         return TooltipsEduPage(
             title = context.getString(R.string.taskbar_search_edu_title),
             canBeSkipped = true,
@@ -273,11 +244,6 @@ class TooltipEduCombinator(
      * This method also marks the pinning EDU as seen if it's included in the returned tooltips.
      */
     private fun onFeaturesEduShown(): List<TooltipsEduPage>? {
-        val pinningEdu = getPinningEdu()
-        if (pinningEdu != null) {
-            userHasSeenPinningEdu = true
-            return listOf(pinningEdu)
-        }
         val searchEdu = getSearchEdu()
         if (searchEdu != null) {
             return listOf(searchEdu)
@@ -295,7 +261,7 @@ class TooltipEduCombinator(
         if (tooltipsToShow.isEmpty()) {
             return null
         }
-        val isSinglePage = tooltipsToShow.size <= MAX_TOOLTIPS_PER_PAGE
+        val isSingleMultipanePage = tooltipsToShow.size in 2..MAX_TOOLTIPS_PER_PAGE
         val tooltipsPages = mutableListOf<TooltipsEduPage>()
         while (tooltipsToShow.isNotEmpty()) {
             // Get tooltips for current page, not exceeding list size
@@ -308,7 +274,8 @@ class TooltipEduCombinator(
             // Determine action button text for current page
             val actionButtonTextResId =
                 when {
-                    isSinglePage -> R.string.taskbar_edu_done // done for single page tooltip
+                    isSingleMultipanePage ->
+                        R.string.taskbar_edu_done // done for single page tooltip
                     hasMorePages -> R.string.taskbar_edu_next // next for multi-page, non last page
                     else -> null // nothing for the last tutorial page
                 }
@@ -324,8 +291,9 @@ class TooltipEduCombinator(
                         } else {
                             context.getString(R.string.taskbar_edu_features)
                         },
-                    // can be skipped if not single page and it is the last page (no more pages)
-                    canBeSkipped = !isSinglePage && !hasMorePages,
+                    // can be skipped if not single multipane page and it is the last page (no more
+                    // pages)
+                    canBeSkipped = !isSingleMultipanePage && !hasMorePages,
                     tooltips = currentPageTooltips,
                     actionButton = actionButtonTextResId?.let { context.getString(it) },
                     location =
@@ -344,22 +312,52 @@ class TooltipEduCombinator(
      * Gathers the appropriate feature tooltips to be shown to the user. This method also marks the
      * pinning EDU as seen if it's included in the returned tooltips.
      */
-    private fun collectFeatureTooltipsUpdatePinning(): MutableCollection<TooltipInfo> {
+    private fun collectFeatureTooltipsUpdateFlags(
+        updateFlags: Boolean = true
+    ): MutableCollection<TooltipInfo> {
         val tooltipsToShow = mutableListOf<TooltipInfo>()
         var bubblesTooltipIndex = -1
         var pinningTooltipIndex = -1
-        if (!userHasSeenOldEdu) {
+        if (
+            setFlagIfUnset(
+                optionalCondition = { !userHasSeenOldEdu },
+                flag = TASKBAR_SPLIT_EDU_SEEN_FLAG,
+                updateFlag = updateFlags,
+            )
+        ) {
             tooltipsToShow.add(splitTooltipInfo)
         }
-        if (createAnyBubbleEnabled) {
+        if (
+            setFlagIfUnset(
+                optionalCondition = { createAnyBubbleEnabled },
+                flag = TASKBAR_BUBBLES_EDU_SEEN_FLAG,
+                updateFlag = updateFlags,
+            )
+        ) {
             bubblesTooltipIndex = tooltipsToShow.size
             tooltipsToShow.add(bubbleTooltipInfo)
         }
-        if (enableRecentsInTaskbar()) {
+        if (
+            setFlagIfUnset(
+                optionalCondition = { enableRecentsInTaskbar() },
+                flag = TASKBAR_SUGGESTIONS_EDU_SEEN_FLAG,
+                updateFlag = updateFlags,
+            )
+        ) {
             tooltipsToShow.add(suggestionsTooltipInfo)
         }
-        if (context.isTransientTaskbar && enableTaskbarPinning() && !userHasSeenPinningEdu) {
-            userHasSeenPinningEdu = true
+
+        if (
+            setFlagIfUnset(
+                optionalCondition = {
+                    context.isTransientTaskbar &&
+                        enableTaskbarPinning() &&
+                        !userHasSeenOldPinningEdu
+                },
+                flag = TASKBAR_PINNING_EDU_SEEN_FLAG,
+                updateFlag = updateFlags,
+            )
+        ) {
             pinningTooltipIndex = tooltipsToShow.size
             tooltipsToShow.add(pinningTooltipInfo)
         }
@@ -374,38 +372,27 @@ class TooltipEduCombinator(
     }
 
     /**
+     * Returns true if flag was not set and optionalCondition is null or met. If function returns
+     * true it also updates the flag, unless updateFlag is false.
+     */
+    private fun setFlagIfUnset(
+        optionalCondition: (() -> Boolean)? = null,
+        flag: Int,
+        updateFlag: Boolean = true,
+    ): Boolean {
+        val result = !getFlag(flag) && (optionalCondition?.invoke() ?: true)
+        if (result && updateFlag) {
+            setFlag(flag)
+        }
+        return result
+    }
+
+    /**
      * Check weather index corresponds to the single item on the last page. The page size is taken
      * from [MAX_TOOLTIPS_PER_PAGE].
      */
     private fun List<Any>.isSingleItemOnTheLastPage(index: Int) =
         index % MAX_TOOLTIPS_PER_PAGE == 0 && index == lastIndex
-
-    /**
-     * Returns the [TooltipsEduPage] for taskbar pinning if the conditions are met (e.g., pinning is
-     * enabled, in transient taskbar mode, tooltips are enabled, and the user has not seen this EDU
-     * before).
-     */
-    private fun getPinningEdu(): TooltipsEduPage? {
-        if (
-            !enableTaskbarPinning() ||
-                !context.isTransientTaskbar ||
-                !isTooltipEnabled ||
-                userHasSeenPinningEdu
-        ) {
-            return null
-        }
-        return TooltipsEduPage(
-            title = context.getString(R.string.taskbar_edu_pinning_title),
-            canBeSkipped = true,
-            tooltips =
-                listOf(
-                    pinningTooltipInfo.copy(
-                        message = context.getString(R.string.taskbar_edu_pinning_standalone)
-                    )
-                ),
-            location = DisplayLocation.SEARCH_DIVIDER,
-        )
-    }
 
     /**
      * Generates the formatted disclosure text for the search educational tooltip, including
@@ -449,6 +436,43 @@ class TooltipEduCombinator(
         return text
     }
 
+    @VisibleForTesting
+    fun getFlag(flag: Int): Boolean {
+        return TASKBAR_SEEN_EDU_FLAGS.get(context) and flag == flag
+    }
+
+    @VisibleForTesting
+    fun setFlag(flag: Int, seen: Boolean = true) {
+        val flags = TASKBAR_SEEN_EDU_FLAGS.get(context)
+        val newFlags = if (seen) flags or flag else flags and flag.inv()
+        LauncherPrefs.get(context).put(TASKBAR_SEEN_EDU_FLAGS, newFlags)
+    }
+
+    fun dumpLogs(prefix: String?, pw: PrintWriter?) {
+        pw?.println(prefix + "TooltipEduCombinator:")
+        val shownTooltips = mutableListOf<String>()
+
+        if (getFlag(TASKBAR_SWIPE_EDU_SEEN_FLAG) || userHasSeenOldEdu) {
+            shownTooltips.add("swipe_up")
+        }
+        if (getFlag(TASKBAR_SPLIT_EDU_SEEN_FLAG) || userHasSeenOldEdu) {
+            shownTooltips.add("split")
+        }
+        if (getFlag(TASKBAR_BUBBLES_EDU_SEEN_FLAG)) {
+            shownTooltips.add("bubbles")
+        }
+        if (getFlag(TASKBAR_SUGGESTIONS_EDU_SEEN_FLAG)) {
+            shownTooltips.add("suggestions")
+        }
+        if (getFlag(TASKBAR_PINNING_EDU_SEEN_FLAG)) {
+            shownTooltips.add("pinning")
+        }
+        if (getFlag(TASKBAR_SEARCH_EDU_SEEN_FLAG)) {
+            shownTooltips.add("search")
+        }
+        pw?.println("$prefix\tShown tooltips: [${shownTooltips.joinToString()}]")
+    }
+
     companion object {
         /** The maximum amount of the tooltips that can be shown per page. */
         const val MAX_TOOLTIPS_PER_PAGE = 3
@@ -459,5 +483,27 @@ class TooltipEduCombinator(
 
         /** The base URL for the Terms of Service that will later be localized. */
         private const val TOS_BASE_URL = "https://policies.google.com/terms?hl="
+
+        /**
+         * Flag indicating whether the user has seen the educational tooltip for the swipe gesture.
+         */
+        const val TASKBAR_SWIPE_EDU_SEEN_FLAG = 1 shl 0
+
+        /** Flag indicating whether the user has seen the educational tooltip for split screen. */
+        const val TASKBAR_SPLIT_EDU_SEEN_FLAG = 1 shl 1
+
+        /** Flag indicating whether the user has seen the educational tooltip for bubbles. */
+        const val TASKBAR_BUBBLES_EDU_SEEN_FLAG = 1 shl 2
+
+        /** Flag indicating whether the user has seen the educational tooltip for suggestions. */
+        const val TASKBAR_SUGGESTIONS_EDU_SEEN_FLAG = 1 shl 3
+
+        /**
+         * Flag indicating whether the user has seen the educational tooltip for taskbar pinning.
+         */
+        const val TASKBAR_PINNING_EDU_SEEN_FLAG = 1 shl 4
+
+        /** Flag indicating whether the user has seen the educational tooltip for taskbar search. */
+        const val TASKBAR_SEARCH_EDU_SEEN_FLAG = 1 shl 5
     }
 }
