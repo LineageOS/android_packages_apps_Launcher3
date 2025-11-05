@@ -78,8 +78,7 @@ interface TaskbarManager : DisplayDecorationListener {
 
     fun toggleTaskbarStash()
 
-    // TODO(b/404636836): Ensure calling API on StashedHandleViewController on taskbar ui thread
-    fun getStashedHandleViewController(): StashedHandleViewController?
+    fun getStashedHandleViewController(): StashedHandleViewControllerProxy?
 
     fun getPrimaryDisplayUiControllerStream(): ListenableStream<TaskbarUIController>
 

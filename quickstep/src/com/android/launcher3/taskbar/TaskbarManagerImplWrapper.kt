@@ -146,8 +146,10 @@ class TaskbarManagerImplWrapper(private val impl: TaskbarManagerImpl) : TaskbarM
         TASKBAR_UI_THREAD.execute { impl.currentActivityContext?.toggleTaskbarStash() }
     }
 
-    override fun getStashedHandleViewController(): StashedHandleViewController? {
-        return impl.currentActivityContext?.controllers?.stashedHandleViewController
+    override fun getStashedHandleViewController(): StashedHandleViewControllerProxy? {
+        return impl.currentActivityContext?.controllers?.stashedHandleViewController?.let {
+            StashedHandleViewControllerProxy(it)
+        }
     }
 
     override fun getPrimaryDisplayUiControllerStream(): ListenableStream<TaskbarUIController> =
