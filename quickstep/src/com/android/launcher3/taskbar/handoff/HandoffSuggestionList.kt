@@ -54,12 +54,10 @@ class HandoffSuggestionList {
             }
         }
 
-        for (associationId in previousSuggestions.keys) {
-            if (remoteTasks.none { it.companionDeviceAssociationId == associationId }) {
-                Log.v(TAG, "Removing suggestion for associationId ${associationId}")
-                previousSuggestions.remove(associationId)
-                didChange = true
-            }
+        val remoteAssociationIds = remoteTasks.map { it.companionDeviceAssociationId }.toSet()
+        if (previousSuggestions.keys.retainAll(remoteAssociationIds)) {
+            Log.v(TAG, "Removing suggestions")
+            didChange = true
         }
 
         Log.v(TAG, "Finished updating handoff suggestions. didChange=$didChange")
