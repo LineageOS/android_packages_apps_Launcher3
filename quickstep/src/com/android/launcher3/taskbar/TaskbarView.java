@@ -112,6 +112,9 @@ import java.util.Set;
 public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconParent, Insettable,
         DeviceProfile.OnDeviceProfileChangeListener,
         TaskbarViewDragDropController.PinnedAppsContainerDelegate {
+    // The number of icons always present in the taskbar, including the All Apps button and the
+    // divider.
+    private static final int NUM_ALWAYS_VISIBLE_TASKBAR_ICONS = 2;
     private static final Rect sTmpRect = new Rect();
     private final int mUnpinnedHitRectBuffer;
     private final int mPinnedHitRectBuffer;
@@ -161,6 +164,9 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
     private int mNextViewIndex = 0;
     // Iterates within child views of mHotseatIconsContainer (if non-null)
     private int mNextHotseatIndex = 0;
+
+
+    private int mNumbersOfTaskbarIconsOverflowing = 0;
 
     public int getIgnoreTaskbarIconCount() {
         return mIgnoreTaskbarIconCount;
@@ -489,6 +495,10 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                 .filter(it -> it instanceof SingleTask || it instanceof SplitTask)
                 .toList();
 
+        mNumbersOfTaskbarIconsOverflowing = Math.min(
+                (hotseatItemInfos.length + recentTasks.size() + NUM_ALWAYS_VISIBLE_TASKBAR_ICONS)
+                        - mMaxNumIcons, 0);
+
         if (mNumStaticViews == 0) {
             mNumStaticViews = addStaticViews();
         }
@@ -548,6 +558,10 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
 
         mAllAppsButtonContainer.updateTaskbarMinimalState(isTaskbarInMinimalState());
         traceEnd(TRACE_TAG_APP);
+    }
+
+    public int getNumbersOfTaskbarIconsOverflowing() {
+        return mNumbersOfTaskbarIconsOverflowing;
     }
 
     public boolean isTaskbarInMinimalState() {

@@ -2514,6 +2514,10 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         return mControllers.uiController.isIconAlignedWithHotseat();
     }
 
+    public int getNumbersOfTaskbarIconsOverflowing() {
+        return mControllers.taskbarViewController.getNumbersOfTaskbarIconsOverflowing();
+    }
+
     // TODO(b/395061396): Remove `otherwise` when overview in widow is enabled.
     @VisibleForTesting(otherwise = PACKAGE_PRIVATE)
     @AnyThread
