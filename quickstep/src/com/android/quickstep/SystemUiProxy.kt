@@ -93,6 +93,7 @@ import com.android.wm.shell.desktopmode.IDesktopTaskListener
 import com.android.wm.shell.desktopmode.IMoveToDesktopCallback
 import com.android.wm.shell.draganddrop.IDragAndDrop
 import com.android.wm.shell.onehanded.IOneHanded
+import com.android.wm.shell.onehanded.IOneHanded.Stub
 import com.android.wm.shell.recents.IRecentTasks
 import com.android.wm.shell.recents.IRecentTasksListener
 import com.android.wm.shell.recents.IRecentsAnimationController
@@ -292,36 +293,30 @@ constructor(
      * Sets proxy state, including death linkage, various listeners, and other configuration objects
      */
     @MainThread
-    fun setProxy(
-        proxy: ISystemUiProxy?,
-        pip: IPip?,
-        bubbles: IBubbles?,
-        splitScreen: ISplitScreen?,
-        oneHanded: IOneHanded?,
-        shellTransitions: IShellTransitions?,
-        startingWindow: IStartingWindow?,
-        recentTasks: IRecentTasks?,
-        sysuiUnlockAnimationController: ISysuiUnlockAnimationController?,
-        backAnimation: IBackAnimation?,
-        desktopMode: IDesktopMode?,
-        unfoldAnimation: IUnfoldAnimation?,
-        dragAndDrop: IDragAndDrop?,
-    ) {
+    fun setInitializationParams(params: Bundle) {
         Preconditions.assertUIThread()
         unlinkToDeath()
-        systemUiProxy = proxy
-        this.pip = pip
-        this.bubbles = bubbles
-        this.splitScreen = splitScreen
-        this.oneHanded = oneHanded
-        this.shellTransitions = shellTransitions
-        this.startingWindow = startingWindow
-        this.sysuiUnlockAnimationController = sysuiUnlockAnimationController
-        this.recentTasks = recentTasks
-        this.backAnimation = backAnimation
-        this.desktopMode = desktopMode
-        this.unfoldAnimation = if (Flags.enableUnfoldStateAnimation()) null else unfoldAnimation
-        this.dragAndDrop = dragAndDrop
+        systemUiProxy = ISystemUiProxy.Stub.asInterface(params.getBinder(ISystemUiProxy.DESCRIPTOR))
+
+        pip = IPip.Stub.asInterface(params.getBinder(IPip.DESCRIPTOR))
+        bubbles = IBubbles.Stub.asInterface(params.getBinder(IBubbles.DESCRIPTOR))
+        splitScreen = ISplitScreen.Stub.asInterface(params.getBinder(ISplitScreen.DESCRIPTOR))
+        oneHanded = Stub.asInterface(params.getBinder(IOneHanded.DESCRIPTOR))
+        shellTransitions =
+            IShellTransitions.Stub.asInterface(params.getBinder(IShellTransitions.DESCRIPTOR))
+        startingWindow =
+            IStartingWindow.Stub.asInterface(params.getBinder(IStartingWindow.DESCRIPTOR))
+        sysuiUnlockAnimationController =
+            ISysuiUnlockAnimationController.Stub.asInterface(
+                params.getBinder(ISysuiUnlockAnimationController.DESCRIPTOR)
+            )
+        recentTasks = IRecentTasks.Stub.asInterface(params.getBinder(IRecentTasks.DESCRIPTOR))
+        backAnimation = IBackAnimation.Stub.asInterface(params.getBinder(IBackAnimation.DESCRIPTOR))
+        desktopMode = IDesktopMode.Stub.asInterface(params.getBinder(IDesktopMode.DESCRIPTOR))
+        unfoldAnimation =
+            if (Flags.enableUnfoldStateAnimation()) null
+            else IUnfoldAnimation.Stub.asInterface(params.getBinder(IUnfoldAnimation.DESCRIPTOR))
+        dragAndDrop = IDragAndDrop.Stub.asInterface(params.getBinder(IDragAndDrop.DESCRIPTOR))
         linkToDeath()
         setHasBubbleBar(hasBubbleBar)
         // re-attach the listeners once missing due to setProxy has not been initialized yet.
@@ -358,7 +353,7 @@ constructor(
         if (unfoldTransitionProvider != null) {
             if (unfoldAnimation != null) {
                 try {
-                    unfoldAnimation.setListener(unfoldTransitionProvider)
+                    unfoldAnimation?.setListener(unfoldTransitionProvider)
                     unfoldTransitionProvider.isActive = true
                 } catch (e: RemoteException) {
                     // Ignore
@@ -372,9 +367,7 @@ constructor(
     /**
      * Clear the proxy to release held resources and turn the majority of its operations into no-ops
      */
-    @MainThread
-    fun clearProxy() =
-        setProxy(null, null, null, null, null, null, null, null, null, null, null, null, null)
+    @MainThread fun clearProxy() = setInitializationParams(Bundle.EMPTY)
 
     /** Adds a callback to be notified whenever the active state changes */
     fun addOnStateChangeListener(callback: Runnable) = stateChangeCallbacks.add(callback)

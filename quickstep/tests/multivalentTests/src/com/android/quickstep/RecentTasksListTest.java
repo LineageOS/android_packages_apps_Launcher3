@@ -29,6 +29,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -110,12 +111,13 @@ public class RecentTasksListTest {
         when(mResources.getBoolean(R.bool.config_isDesktopModeSupported)).thenReturn(true);
         when(mResources.getBoolean(R.bool.config_canInternalDisplayHostDesktops))
                 .thenReturn(true);
+        doReturn(mVirtualDeviceManager).when(mContext).getSystemService(VirtualDeviceManager.class);
+        doReturn(mKeyguardManager).when(mContext).getSystemService(KeyguardManager.class);
         when(mVirtualDeviceManager.getDeviceIdForDisplayId(anyInt()))
                 .thenReturn(Context.DEVICE_ID_DEFAULT);
 
         mRecentTasksList = new RecentTasksList(mContext, mainThreadExecutor,
-                mKeyguardManager, mVirtualDeviceManager, mSystemUiProxy, mTopTaskTracker,
-                mock(DaggerSingletonTracker.class));
+                mSystemUiProxy, mTopTaskTracker, mock(DaggerSingletonTracker.class));
     }
 
     @Test

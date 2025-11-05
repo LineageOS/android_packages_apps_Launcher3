@@ -69,6 +69,7 @@ import com.android.quickstep.util.ContextualSearchStateManager
 import com.android.quickstep.util.GestureExclusionManager
 import com.android.quickstep.util.SystemWindowManagerProxy
 import com.android.systemui.shared.system.ActivityManagerWrapper
+import com.android.systemui.shared.system.TaskStackChangeListeners
 import com.android.wm.shell.shared.desktopmode.DesktopState
 import dagger.Binds
 import dagger.BindsOptionalOf
@@ -143,6 +144,12 @@ object StaticObjectModule {
         ActivityManagerWrapper.getInstance()
 
     @Provides
+    @JvmStatic
+    fun provideTaskStackChangeListeners(): TaskStackChangeListeners =
+        TaskStackChangeListeners.getInstance()
+
+    @Provides
+    @JvmStatic
     @ElapsedRealtimeLong
     fun provideElapsedRealTime(): () -> Long = SystemClock::elapsedRealtime
 
