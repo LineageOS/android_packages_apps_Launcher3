@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "167bb5f9_2cf4e441",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 29242
+      },
+      "writtenOn": "2025-11-05T03:10:31Z",
+      "side": 1,
+      "message": "Confirmed to be working. Some devices uses an old bool for this named allow_rotation e.g fxtec_pro1. They will need to be updated to reflect the new bool. \n\nThis is a re-implementation of an old change (Ifee6a6ff6ae6fc67160931de4bffcba630081d6d) introduced in lineage 19.1, but was never added to subsequent lineage versions; likely due to upstream changes in launcher3. I was unaware of the aforementioned change prior to making this, hence the authorship.",
+      "revId": "5051328a94e6fd19373c50e0e691e926659786de",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
