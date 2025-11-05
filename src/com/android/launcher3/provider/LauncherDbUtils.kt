@@ -18,6 +18,7 @@ package com.android.launcher3.provider
 import android.content.ContentValues
 import android.content.Context
 import android.content.pm.ShortcutInfo
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -337,4 +338,7 @@ object LauncherDbUtils {
         }
         return null
     }
+
+    /** Utility method to simplify iterating over cursor */
+    fun Cursor.asSequence() = generateSequence { if (moveToNext()) this else null }
 }
