@@ -54,6 +54,7 @@ import com.android.window.flags.Flags.FLAG_ENABLE_OVERFLOW_BUTTON_FOR_TASKBAR_PI
 import com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_OVERFLOW
 import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.TruthJUnit.assume
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -69,7 +70,7 @@ import platform.test.runner.parameterized.Parameters
 
 @RunWith(ParameterizedAndroidJunit4::class)
 @EnableFlags(FLAG_ENABLE_TASKBAR_OVERFLOW)
-class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
+class TaskbarViewTest(private val deviceName: String, flags: FlagsParameterization) {
 
     companion object {
         @JvmStatic
@@ -623,6 +624,18 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
         Truth.assertThat(appPairIcon1).isNotSameInstanceAs(appPairIcon2)
         Truth.assertThat(appPairIcon1.parent).isNull()
+    }
+
+    @Test
+    fun testUpdateItems_qsbInline_removesDividerWhenOnlyStaticViewsRemain() {
+        // This test runs only on devices with an inline QSB, like tablets.
+        assume().that(activityContext.deviceProfile.isQsbInline).isTrue()
+
+        runOnMainSync { taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList()) }
+        assertThat(taskbarView.taskbarDividerViewContainer?.parent).isNotNull()
+
+        runOnMainSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
+        assertThat(taskbarView.taskbarDividerViewContainer?.parent).isNull()
     }
 
     @Test
