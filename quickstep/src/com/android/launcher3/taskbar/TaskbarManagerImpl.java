@@ -370,7 +370,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
 
                 @Override
                 public void onTaskbarCornerRoundingUpdate(
-                        boolean doesAnyTaskRequireTaskbarRounding) {
+                        boolean doesAnyTaskRequireTaskbarRounding, int displayId) {
                     //NO-OP
                 }
             };

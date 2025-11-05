@@ -287,16 +287,21 @@ constructor(
         desktopVisibilityListeners.remove(listener)
     }
 
-    private fun notifyTaskbarDesktopModeListeners(doesAnyTaskRequireTaskbarRounding: Boolean) {
+    private fun notifyTaskbarDesktopModeListeners(
+        doesAnyTaskRequireTaskbarRounding: Boolean,
+        displayId: Int,
+    ) {
         if (DEBUG) {
             Log.d(
                 TAG,
                 "notifyTaskbarDesktopModeListeners: doesAnyTaskRequireTaskbarRounding=" +
-                    doesAnyTaskRequireTaskbarRounding,
+                    doesAnyTaskRequireTaskbarRounding +
+                    " displayId=" +
+                    displayId,
             )
         }
         for (listener in taskbarDesktopModeListeners) {
-            listener.onTaskbarCornerRoundingUpdate(doesAnyTaskRequireTaskbarRounding)
+            listener.onTaskbarCornerRoundingUpdate(doesAnyTaskRequireTaskbarRounding, displayId)
         }
     }
 
@@ -533,16 +538,21 @@ constructor(
             Log.w(TAG, "DesktopTaskListenerImpl: onStashedChanged is deprecated")
         }
 
-        override fun onTaskbarCornerRoundingUpdate(doesAnyTaskRequireTaskbarRounding: Boolean) {
+        override fun onTaskbarCornerRoundingUpdate(
+            doesAnyTaskRequireTaskbarRounding: Boolean,
+            displayId: Int,
+        ) {
             if (!useRoundedCorners()) return
             MAIN_EXECUTOR.execute {
                 controller.get()?.apply {
                     Log.d(
                         TAG,
                         "DesktopTaskListenerImpl: doesAnyTaskRequireTaskbarRounding= " +
-                            doesAnyTaskRequireTaskbarRounding,
+                            doesAnyTaskRequireTaskbarRounding +
+                            " displayId=" +
+                            displayId,
                     )
-                    notifyTaskbarDesktopModeListeners(doesAnyTaskRequireTaskbarRounding)
+                    notifyTaskbarDesktopModeListeners(doesAnyTaskRequireTaskbarRounding, displayId)
                 }
             }
         }
@@ -628,7 +638,10 @@ constructor(
          *
          * @param doesAnyTaskRequireTaskbarRounding whether task requires taskbar corner roundness.
          */
-        fun onTaskbarCornerRoundingUpdate(doesAnyTaskRequireTaskbarRounding: Boolean) {}
+        fun onTaskbarCornerRoundingUpdate(
+            doesAnyTaskRequireTaskbarRounding: Boolean,
+            displayId: Int,
+        ) {}
 
         /**
          * Callback for when user is exiting desktop mode.
