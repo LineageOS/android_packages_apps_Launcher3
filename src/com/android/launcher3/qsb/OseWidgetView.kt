@@ -21,6 +21,7 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.RectF
 import android.os.Process.myUserHandle
 import android.util.AttributeSet
@@ -151,11 +152,23 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         View.inflate(context, R.layout.ose_default_layout, null).apply {
             // Since we don't have a valid appInfo, just open the default browser
             // Set the data to a blank page uri
-            setOnClickIntent(Intent(Intent.ACTION_VIEW).setData("about:blank".toUri()))
+            setOnClickIntent(Intent(Intent.ACTION_VIEW).setData("http://".toUri()))
         }
 
     fun View.setOnClickIntent(intent: Intent) = setOnClickListener {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)
+        if (intent.action == Intent.ACTION_VIEW) {
+            // Browser Intent and set the default browser package.
+            val resolveInfo =
+                runCatching {
+                        context.packageManager.resolveActivity(
+                            intent,
+                            PackageManager.MATCH_DEFAULT_ONLY,
+                        )
+                    }
+                    .getOrNull()
+            resolveInfo?.activityInfo?.packageName.apply { intent.setPackage(this) }
+        }
         activityContext.startActivitySafely(
             this@OseWidgetView,
             intent,
