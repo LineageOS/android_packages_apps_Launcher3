@@ -16,6 +16,7 @@
 
 package com.android.launcher3.dagger
 
+import com.android.launcher3.WorkspaceSelectionManager
 import com.android.launcher3.allapps.AllAppsStore
 import com.android.launcher3.keyboard.KeyboardStateManager
 import com.android.launcher3.popup.PopupDataProvider
@@ -38,6 +39,7 @@ interface BaseActivityContextComponent {
     val popupDataProvider: PopupDataProvider
     val sharedAppsPool: AllAppsRecyclerViewPool
     val keyboardStateManager: KeyboardStateManager
+    val workspaceSelectionManager: WorkspaceSelectionManager
 
     /** Builder for BaseActivityContextComponent. */
     interface Builder {

@@ -3568,6 +3568,18 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         return mapOverCellLayouts(getWorkspaceAndHotseatCellLayouts(), op);
     }
 
+    @Override
+    public View mapOverVisibleItems(@NonNull ItemOperator op) {
+        IntSet visibleScreenIds = getVisiblePageIndices();
+        View result = mapOverItems((info, view) -> {
+            if (visibleScreenIds.contains(info.screenId)) {
+                return op.evaluate(info, view);
+            }
+            return false; // Continue iterating if not on a visible screen
+        });
+        return result;
+    }
+
     /**
      * Perform {param op} over all the items in the provided {param layouts} until a match is found
      */

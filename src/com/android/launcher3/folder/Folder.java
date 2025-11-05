@@ -1645,6 +1645,21 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
         return mContent.iterateOverItems(op);
     }
 
+    @Nullable
+    @Override
+    public View mapOverVisibleItems(@NonNull ItemOperator op) {
+        for (int pageIndex : mContent.getVisiblePageIndices()) {
+            List<View> itemsOnPage = getItemsOnPage(pageIndex);
+            for (View view : itemsOnPage) {
+                ItemInfo info = (ItemInfo) view.getTag();
+                if (op.evaluate(info, view)) {
+                    return view;
+                }
+            }
+        }
+        return null;
+    }
+
     /**
      * Returns the sorted list of all the icons in the folder
      */
