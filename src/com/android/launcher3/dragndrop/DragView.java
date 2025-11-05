@@ -73,7 +73,7 @@ import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.views.BaseDragLayer;
 
 /** A custom view for rendering an icon, folder, shortcut or widget during drag-n-drop. */
-public abstract class DragView<T extends Context & ActivityContext> extends FrameLayout {
+public class DragView<T extends Context & ActivityContext> extends FrameLayout {
 
     public static final int VIEW_ZOOM_DURATION = 150;
 
@@ -464,8 +464,27 @@ public abstract class DragView<T extends Context & ActivityContext> extends Fram
     /**
      * Animate this DragView to the given DragLayer coordinates and then remove it.
      */
-    public abstract void animateTo(int toTouchX, int toTouchY, Runnable onCompleteRunnable,
-            int duration);
+    public void animateTo(int toTouchX, int toTouchY, Runnable onCompleteRunnable,
+            int duration) {
+        Runnable onAnimationEnd = () -> {
+            if (onCompleteRunnable != null) {
+                onCompleteRunnable.run();
+            }
+            mActivity.getDragLayer().removeView(this);
+        };
+
+        duration = Math.max(duration,
+                getResources().getInteger(R.integer.config_dropAnimMinDuration));
+
+        animate()
+                .translationX(toTouchX - mRegistrationX)
+                .translationY(toTouchY - mRegistrationY)
+                .scaleX(mScaleOnDrop)
+                .scaleY(mScaleOnDrop)
+                .withEndAction(onAnimationEnd)
+                .setDuration(duration)
+                .start();
+    }
 
     public void animateShift(final int shiftX, final int shiftY) {
         if (mShiftAnim.isStarted()) return;

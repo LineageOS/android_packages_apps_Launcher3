@@ -22,8 +22,7 @@ import android.platform.test.flag.junit.SetFlagsRule
 import android.view.DragEvent
 import androidx.test.filters.SmallTest
 import com.android.launcher3.Flags.FLAG_ENABLE_SYSTEM_DRAG
-import com.android.launcher3.dragndrop.DragController
-import com.android.launcher3.testutil.rule.LazyInitRule.Companion.lazyRule
+import com.android.launcher3.dragndrop.DragController.SystemDragHandler
 import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.ReflectionHelpers
 import com.android.launcher3.util.TestActivityContext
@@ -35,7 +34,6 @@ import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.spy
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 
@@ -44,58 +42,35 @@ import org.mockito.kotlin.whenever
 @RunWith(LauncherMultivalentJUnit::class)
 class BaseDragLayerTest {
 
-    @get:Rule val flags: SetFlagsRule = SetFlagsRule()
-    @get:Rule val mockito = MockitoJUnit.rule()
-    @get:Rule val contextSpy = lazyRule { spy(TestActivityContext()) }
+    @get:Rule(order = 0) val flags: SetFlagsRule = SetFlagsRule()
+    @get:Rule(order = 1) val mockito = MockitoJUnit.rule()
+    @get:Rule(order = 2) val context = TestActivityContext()
 
-    @Mock private lateinit var mockDragController: DragController<*>
     @Mock private lateinit var mockDragEvent: DragEvent
-
-    private val context: TestActivityContext by contextSpy
-    private lateinit var dragLayer: TestDragLayer
+    @Mock private lateinit var systemDragHandler: SystemDragHandler
 
     @Before
     fun setUp() {
-        // Initialize drag layer.
-        dragLayer = TestDragLayer(context)
-        doReturn(dragLayer).whenever(context).getDragLayer()
+        context.getDragController().addSystemDragHandler(systemDragHandler)
 
         // Initialize drag event.
         // NOTE: Reflection is necessary because `ViewGroup` inspects the `DragEvent.mAction` field
         // during event dispatching rather than using the mockable `DragEvent.getAction()` method.
         ReflectionHelpers.setField(mockDragEvent, "mAction", DragEvent.ACTION_DRAG_STARTED)
+        doReturn(DragEvent.ACTION_DRAG_STARTED).whenever(mockDragEvent).action
     }
 
     @Test
     @EnableFlags(FLAG_ENABLE_SYSTEM_DRAG)
     fun testDispatchingDragEventsDelegatesToDragControllerIfPresent() {
-        doReturn(mockDragController).whenever(context).getDragController<DragController<*>>()
-        dragLayer.dispatchDragEvent(mockDragEvent)
-        verify(mockDragController).onDragEvent(mockDragEvent)
-    }
-
-    @Test
-    @EnableFlags(FLAG_ENABLE_SYSTEM_DRAG)
-    fun testDispatchingDragEventsWontCrashWhenDragControllerIsAbsent() {
-        doReturn(null).whenever(context).getDragController<DragController<*>>()
-        dragLayer.dispatchDragEvent(mockDragEvent)
-        verifyNoInteractions(mockDragController)
+        context.dragLayer.dispatchDragEvent(mockDragEvent)
+        verify(systemDragHandler).onDrag(mockDragEvent)
     }
 
     @Test
     @DisableFlags(FLAG_ENABLE_SYSTEM_DRAG)
     fun testDispatchingDragEventsWontDelegateToDragControllerWhenFlagIsDisabled() {
-        doReturn(mockDragController).whenever(context).getDragController<DragController<*>>()
-        dragLayer.dispatchDragEvent(mockDragEvent)
-        verifyNoInteractions(mockDragController)
-
-        doReturn(null).whenever(context).getDragController<DragController<*>>()
-        dragLayer.dispatchDragEvent(mockDragEvent)
-        verifyNoInteractions(mockDragController)
-    }
-
-    private class TestDragLayer(context: TestActivityContext) :
-        BaseDragLayer<TestActivityContext>(context, /* attrs= */ null, /* alphaChannelCount= */ 0) {
-        override fun recreateControllers() {}
+        context.dragLayer.dispatchDragEvent(mockDragEvent)
+        verifyNoInteractions(systemDragHandler)
     }
 }
