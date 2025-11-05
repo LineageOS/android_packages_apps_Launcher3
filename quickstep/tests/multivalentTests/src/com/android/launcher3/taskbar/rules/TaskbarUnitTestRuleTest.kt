@@ -19,6 +19,7 @@ package com.android.launcher3.taskbar.rules
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.Utilities
 import com.android.launcher3.taskbar.TaskbarActivityContext
 import com.android.launcher3.taskbar.TaskbarKeyguardController
@@ -29,8 +30,6 @@ import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.ForceRtl
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.NavBarKidsMode
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.UserSetupMode
-import com.android.launcher3.util.LauncherMultivalentJUnit
-import com.android.launcher3.util.LauncherMultivalentJUnit.EmulatedDevices
 import com.android.wm.shell.Flags
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertThrows
@@ -40,8 +39,7 @@ import org.junit.runner.Description
 import org.junit.runner.RunWith
 import org.junit.runners.model.Statement
 
-@RunWith(LauncherMultivalentJUnit::class)
-@EmulatedDevices(["pixelFoldable2023", "pixelTablet2023"])
+@RunWith(AndroidJUnit4::class)
 class TaskbarUnitTestRuleTest {
 
     @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()

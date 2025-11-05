@@ -34,15 +34,17 @@ import com.android.launcher3.taskbar.TaskbarNavButtonController.TaskbarNavButton
 import com.android.launcher3.taskbar.TaskbarUIController
 import com.android.launcher3.taskbar.bubbles.BubbleControllers
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
+import com.android.launcher3.util.LauncherMultivalentJUnit.Companion.isRunningInRobolectric
 import com.android.launcher3.util.TestUtil
 import com.android.launcher3.util.coroutines.ProductionDispatchers
 import com.android.quickstep.AllAppsActionManager
 import com.android.quickstep.input.QuickstepKeyGestureEventsManager
+import com.google.common.truth.Truth.assertWithMessage
+import com.google.common.truth.TruthJUnit.assume
 import java.lang.reflect.Field
 import java.lang.reflect.ParameterizedType
 import java.util.Locale
 import java.util.Optional
-import org.junit.Assume.assumeTrue
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
@@ -102,10 +104,20 @@ class TaskbarUnitTestRule(
 
                 // Only run test when Taskbar is enabled.
                 instrumentation.runOnMainSync {
-                    assumeTrue(
-                        "Ignoring test because taskbar is not present",
-                        LauncherAppState.getIDP(context).getDeviceProfile(context).isTaskbarPresent,
-                    )
+                    val isTaskbarPresent =
+                        LauncherAppState.getIDP(context).getDeviceProfile(context).isTaskbarPresent
+                    if (isRunningInRobolectric) {
+                        // Fail if emulated device does not have a Taskbar.
+                        assertWithMessage("isTaskbarPresent is false due to device emulation issue")
+                            .that(isTaskbarPresent)
+                            .isTrue()
+                    } else {
+                        // Skip tests for devices that do not have a Taskbar (e.g. phones).
+                        assume()
+                            .withMessage("Ignoring test because isTaskbarPresent is false")
+                            .that(isTaskbarPresent)
+                            .isTrue()
+                    }
                 }
 
                 // Process secure setting annotations.

@@ -18,6 +18,7 @@ package com.android.launcher3.taskbar.overlay
 
 import android.app.ActivityManager.RunningTaskInfo
 import android.view.MotionEvent
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.AbstractFloatingView.TYPE_OPTIONS_POPUP
 import com.android.launcher3.AbstractFloatingView.TYPE_TASKBAR_ALL_APPS
@@ -29,8 +30,6 @@ import com.android.launcher3.taskbar.bubbles.BubbleActivityStarter
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
-import com.android.launcher3.util.LauncherMultivalentJUnit
-import com.android.launcher3.util.LauncherMultivalentJUnit.EmulatedDevices
 import com.android.launcher3.util.TestUtil.getOnUiThread
 import com.android.systemui.shared.system.TaskStackChangeListeners
 import com.android.wm.shell.shared.bubbles.logging.EntryPoint
@@ -40,8 +39,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 
-@RunWith(LauncherMultivalentJUnit::class)
-@EmulatedDevices(["pixelFoldable2023"])
+@RunWith(AndroidJUnit4::class)
 class TaskbarOverlayControllerTest {
 
     @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()

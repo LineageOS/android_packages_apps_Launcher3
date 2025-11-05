@@ -42,6 +42,7 @@ import com.android.launcher3.model.data.AppPairInfo
 import com.android.launcher3.model.data.CollectionInfo
 import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.model.data.TaskItemInfo.Companion.isSameItem
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.taskbar.ItemInfoWrapper
 import com.android.launcher3.taskbar.TaskbarActivityContext
@@ -100,13 +101,20 @@ constructor(
         layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT)
     }
 
-    fun updateIcons(itemInfos: Array<ItemInfo>) {
+    /**
+     * Updates container with [itemInfos] data.
+     *
+     * Any existing icons whose info instance has not changed are not rebound; changes within the
+     * existing item instances have already been bound when Taskbar's model callbacks updated them.
+     * But if [forceUpdate] is `true`, all icons are rebound.
+     */
+    fun updateIcons(itemInfos: Array<ItemInfo>, forceUpdate: Boolean) {
         traceSection("TaskbarIconsContainer#updateIcons") {
-            updateIconsInternal(itemInfos)
+            updateIconsInternal(itemInfos, forceUpdate)
         }
     }
 
-    private fun updateIconsInternal(itemInfos: Array<ItemInfo>) {
+    private fun updateIconsInternal(itemInfos: Array<ItemInfo>, forceUpdate: Boolean) {
         var numViewsAnimated = 0
         val numMaxIcons = activityContext.taskbarSpecsEvaluator.numShownHotseatIcons
         val hotseatLength = itemInfos.size
@@ -150,6 +158,13 @@ constructor(
                     break
                 }
             }
+
+            if (!forceUpdate && itemInfo.isSameItem(hotseatView?.tag)) {
+                // Might have been wrapped in TaskItemInfo by recents update.
+                hotseatView?.tag = itemInfo
+                return@forEachIcon
+            }
+
             if (hotseatView == null) {
                 if (isCollection) {
                     val collectionInfo = itemInfo as CollectionInfo

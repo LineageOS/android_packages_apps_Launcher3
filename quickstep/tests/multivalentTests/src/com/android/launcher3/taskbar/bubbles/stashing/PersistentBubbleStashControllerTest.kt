@@ -16,7 +16,6 @@
 
 package com.android.launcher3.taskbar.bubbles.stashing
 
-import android.animation.AnimatorTestRule
 import android.content.Context
 import android.widget.FrameLayout
 import androidx.test.core.app.ApplicationProvider
@@ -29,6 +28,7 @@ import com.android.launcher3.taskbar.TaskbarUiState
 import com.android.launcher3.taskbar.bubbles.BubbleBarView
 import com.android.launcher3.taskbar.bubbles.BubbleBarViewController
 import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController.BubbleLauncherState
+import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.util.MultiValueAlpha
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation
 import com.google.common.truth.Truth.assertThat
@@ -58,7 +58,7 @@ class PersistentBubbleStashControllerTest {
         const val TASK_BAR_STASHED_TRANSLATION_Y = 105f
     }
 
-    @get:Rule val animatorTestRule: AnimatorTestRule = AnimatorTestRule(this)
+    @get:Rule val animatorTestRule = TaskbarAnimatorTestRule(this)
 
     @get:Rule val rule: MockitoRule = MockitoJUnit.rule()
 
