@@ -201,7 +201,7 @@ public class TaskbarAllAppsSlideInView extends AbstractSlideInView<TaskbarOverla
         mAppsView.setOnInvalidateHeaderListener(this::invalidate);
 
         DeviceProfile dp = mActivityContext.getDeviceProfile();
-        setShiftRange(dp.allAppsShiftRange);
+        setShiftRange(dp.getAllAppsProfile().getShiftRange());
     }
 
     @Override
@@ -272,7 +272,7 @@ public class TaskbarAllAppsSlideInView extends AbstractSlideInView<TaskbarOverla
 
     @Override
     public void onDeviceProfileChanged(DeviceProfile dp) {
-        setShiftRange(dp.allAppsShiftRange);
+        setShiftRange(dp.getAllAppsProfile().getShiftRange());
         setTranslationShift(TRANSLATION_SHIFT_OPENED);
         mBlurRadius = mMaxBlurRadius;
     }

@@ -102,7 +102,7 @@ public class AddItemWidgetsBottomSheet extends AbstractSlideInView<AddItemActivi
         DeviceProfile deviceProfile = mActivityContext.getDeviceProfile();
         int widthUsed;
         if (deviceProfile.getDeviceProperties().isTablet()) {
-            int margin = deviceProfile.allAppsLeftRightMargin;
+            int margin = deviceProfile.getAllAppsProfile().getLeftRightMargin();
             widthUsed = Math.max(2 * margin, 2 * (mInsets.left + mInsets.right));
         } else if (mInsets.bottom > 0) {
             widthUsed = mInsets.left + mInsets.right;

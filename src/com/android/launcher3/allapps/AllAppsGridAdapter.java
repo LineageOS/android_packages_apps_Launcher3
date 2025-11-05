@@ -74,7 +74,8 @@ public class AllAppsGridAdapter extends BaseAllAppsAdapter {
         super(activityContext, inflater, apps, adapterProvider);
         mGridLayoutMgr = new AppsGridLayoutManager(mActivityContext.asContext());
         mGridLayoutMgr.setSpanSizeLookup(new GridSpanSizer());
-        setAppsPerRow(activityContext.getDeviceProfile().numShownAllAppsColumns);
+        setAppsPerRow(
+                activityContext.getDeviceProfile().getAllAppsProfile().getNumShownAllAppsColumns());
     }
 
     /**

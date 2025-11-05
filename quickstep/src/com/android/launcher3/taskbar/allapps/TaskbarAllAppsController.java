@@ -190,7 +190,7 @@ public final class TaskbarAllAppsController {
                     * dp.getDeviceProperties().getAvailableHeightPx());
             int allAppsHeight = (int) Math.ceil(dp.getAllAppsProfile().getCellHeightPx()
                     * mTaskbarAllAppsConnectedDisplayCustomHeightMultiple
-                    * dp.numShownAllAppsColumns);
+                    * dp.getAllAppsProfile().getNumShownAllAppsColumns());
 
             // If the desired height of all apps is greater than the limit then continue with
             // fullscreen all apps.

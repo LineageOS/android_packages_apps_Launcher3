@@ -49,8 +49,8 @@ public class AllAppsState extends LauncherState {
     @Override
     public int getTransitionDuration(ActivityContext context, boolean isToState) {
         return isToState
-                ? context.getDeviceProfile().allAppsOpenDuration
-                : context.getDeviceProfile().allAppsCloseDuration;
+                ? context.getDeviceProfile().getAllAppsProfile().getOpenDuration()
+                : context.getDeviceProfile().getAllAppsProfile().getCloseDuration();
     }
 
     @Override
@@ -138,13 +138,13 @@ public class AllAppsState extends LauncherState {
     @Override
     public int getFloatingSearchBarRestingMarginStart(Launcher launcher) {
         DeviceProfile dp = launcher.getDeviceProfile();
-        return dp.allAppsLeftRightMargin + dp.getAllAppsIconStartMargin(launcher);
+        return dp.getAllAppsProfile().getLeftRightMargin() + dp.getAllAppsIconStartMargin(launcher);
     }
 
     @Override
     public int getFloatingSearchBarRestingMarginEnd(Launcher launcher) {
         DeviceProfile dp = launcher.getDeviceProfile();
-        return dp.allAppsLeftRightMargin + dp.getAllAppsIconStartMargin(launcher);
+        return dp.getAllAppsProfile().getLeftRightMargin() + dp.getAllAppsIconStartMargin(launcher);
     }
 
     @Override
