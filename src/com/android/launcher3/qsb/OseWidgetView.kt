@@ -39,7 +39,6 @@ import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.LauncherAppWidgetInfo
 import com.android.launcher3.util.ComponentKey
-import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.RunnableList
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.views.OptionsPopupView
@@ -76,7 +75,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         // it is managed by OseWidgetManager and QsbAppWidgetHost.
 
         closeActions.add(
-            oseWidgetManager.providerInfo.forEach(MAIN_EXECUTOR) {
+            oseWidgetManager.providerInfo.forEach(activityContext.uiExecutor) {
                 setAppWidget(INVALID_APPWIDGET_ID, it)
                 // We will get valid updateAppWidget remoteview call from OseWidgetManager again.
                 // This is only for resetting the remoteviews using a broken remote view.
@@ -86,13 +85,10 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
             }::close
         )
         closeActions.add(
-            oseWidgetManager.views.forEach(
-                MAIN_EXECUTOR,
-                {
-                    updateAppWidget(it)
-                    Log.i(TAG, "updateAppWidget view= " + it)
-                },
-            )::close
+            oseWidgetManager.views.forEach(activityContext.uiExecutor) {
+                updateAppWidget(it)
+                Log.i(TAG, "updateAppWidget view= " + it)
+            }::close
         )
     }
 
