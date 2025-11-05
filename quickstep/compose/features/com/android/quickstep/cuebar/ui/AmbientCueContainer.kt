@@ -36,6 +36,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
@@ -279,7 +280,10 @@ private fun NavBarAmbientCue(
         }
 
     val scope = rememberCoroutineScope()
-
+    var touchableRegion by remember { mutableStateOf<Rect?>(null) }
+    LaunchedEffect(expanded, touchableRegion) {
+        onShouldInterceptTouches(true, if (expanded) null else touchableRegion)
+    }
     LaunchedEffect(expanded) { onShouldInterceptTouches(expanded, null) }
     ActionList(
         actions = actions,
@@ -302,7 +306,7 @@ private fun NavBarAmbientCue(
         visible = visible,
         expanded = expanded,
         showEducation = viewModel.showFirstTimeEducation,
-        modifier = modifier,
+        modifier = modifier.onGloballyPositioned { touchableRegion = it.boundsInWindow() },
         onClick = {
             if (actions.size == 1 && actions[0].oneTapEnabled) {
                 scope.launch {
@@ -316,6 +320,14 @@ private fun NavBarAmbientCue(
         onCloseClick = { viewModel.hide() },
         onCloseEducation = { viewModel.disableFirstTimeHint() },
         onAnimationStateChange = onAnimationStateChange,
+    )
+}
+
+private fun LayoutCoordinates.boundsInWindow(): Rect {
+    val positionInWindow = localToWindow(Offset.Zero)
+    return Rect(
+        offset = positionInWindow,
+        size = size.toSize()
     )
 }
 

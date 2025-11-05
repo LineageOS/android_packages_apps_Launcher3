@@ -16,6 +16,8 @@
 
 package com.android.launcher3.taskbar
 
+import android.graphics.Rect
+import android.graphics.Region
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
@@ -38,12 +40,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
 import java.io.PrintWriter
+import androidx.compose.ui.geometry.Rect as ComposeRect
 
 class CueBarController (
     private val activity: TaskbarActivityContext,
 ) : TaskbarControllers.LoggableTaskbarController {
 
     private lateinit var taskbarControllers: TaskbarControllers
+    private var pillBoundsInWindow: Rect? = null
     private var internalComposeView: ComposeView? = null
     private val coroutineScope = CoroutineScope(MAIN_EXECUTOR.asCoroutineDispatcher())
     private var mOverlayContext: TaskbarOverlayContext? = null
@@ -55,10 +59,12 @@ class CueBarController (
     private val ambientCueInteractor = AmbientCueInteractor(ambientCueRepository)
     private val lp = InsettableFrameLayout.LayoutParams(
         ViewGroup.LayoutParams.MATCH_PARENT,
-        ViewGroup.LayoutParams.MATCH_PARENT
+        ViewGroup.LayoutParams.WRAP_CONTENT
     ).apply {
         ignoreInsets = true
     }
+    val isExpanded: Boolean
+        get() = ambientCueViewModel.isExpanded
 
     private val ambientCueViewModel: AmbientCueViewModel = AmbientCueViewModel(
         ambientCueInteractor = ambientCueInteractor,
@@ -91,17 +97,33 @@ class CueBarController (
         val composeView = QuickstepComposeFacade.initComposeView(activity) as ComposeView
         val ambientCueJankMonitor =
             AmbientCueJankMonitor(InteractionJankMonitor.getInstance(), composeView)
-        cueBar = QuickstepComposeFacade.startCueBar(
-            view = composeView,
-            ambientCueViewModelFactory = viewModelFactory,
-            onShouldInterceptTouches = { _, _ -> },
-            onAnimationStateChange = { cujType, animationState ->
-                ambientCueJankMonitor.onAnimationStateChange(
-                    cujType,
-                    animationState,
-                )
-                handleAnimationStateChange(animationState)
-            })
+        cueBar =
+            QuickstepComposeFacade.startCueBar(
+                view = composeView,
+                ambientCueViewModelFactory = viewModelFactory,
+                onShouldInterceptTouches = { intercept, composeRect: ComposeRect? ->
+                    if (composeRect != null && !composeRect.isEmpty) {
+                        if (pillBoundsInWindow == null) {
+                            pillBoundsInWindow = Rect()
+                        }
+                        pillBoundsInWindow?.set(
+                            composeRect.left.toInt(),
+                            composeRect.top.toInt(),
+                            composeRect.right.toInt(),
+                            composeRect.bottom.toInt()
+                        )
+                    } else if (isExpanded){
+                        pillBoundsInWindow = null
+                    }
+                },
+                onAnimationStateChange = { cujType, animationState ->
+                    ambientCueJankMonitor.onAnimationStateChange(
+                        cujType,
+                        animationState,
+                    )
+                    handleAnimationStateChange(animationState)
+                },
+            )
     }
 
     private fun handleAnimationStateChange(state: AmbientCueAnimationState) {
@@ -173,20 +195,53 @@ class CueBarController (
                 Log.w(TAG, "CueBar parent is null. Window was likely destroyed. Re-requesting.")
                 ambientCueRepository.connectToSmartspace()
                 ambientCueViewModel.activate()
-                // Get a new or existing window context
-                mOverlayContext = taskbarControllers.taskbarOverlayController.requestWindow()
+                mOverlayContext = taskbarControllers.taskbarOverlayController.requestCueBarWindow()
                 createCueBar()
             }
             mOverlayContext?.dragLayer?.addView(cueBar)
             cueBar?.layoutParams = lp
             internalComposeView = cueBar as ComposeView
-            cueBar?.visibility = View.GONE
             // Set the persistent view to VISIBLE. The compose state will
             // automatically trigger the entry animation.
             cueBar?.visibility = View.VISIBLE
         } else {
             Log.d(TAG, "Marking CueBarView for hiding. Will set GONE after animation.")
             isHiding = true
+        }
+    }
+
+    /**
+     * Adds the touchable bounds of the CueBar to the given [region].
+     *
+     * If the CueBar is expanded, the entire ComposeView bounds are added. Otherwise, only the
+     * bounds of the pill-shaped CueBar are added.
+     *
+     * @param region The region to which the CueBar's touchable bounds will be added.
+     */
+    fun addTouchableRegion(region: Region) {
+        if (cueBar == null || cueBar?.visibility != View.VISIBLE) {
+            return
+        }
+        val boundsToUse = pillBoundsInWindow
+        // Add cueBar bounds to the provided touchable region
+        if (boundsToUse != null && !boundsToUse.isEmpty) {
+            region.op(boundsToUse, Region.Op.UNION)
+        } else if (isExpanded) {
+            // pillBoundsInWindow is null, but we are explicitly expanded.
+            // Makes the ComposeView (the fullscreen scrim) touchable.
+            val location = IntArray(2)
+            cueBar!!.getLocationInWindow(location)
+            val viewWidth = cueBar!!.width
+            val viewHeight = cueBar!!.height
+            val fullscreenBounds = Rect(
+                location[0],
+                location[1],
+                location[0] + viewWidth,
+                location[1] + viewHeight
+            )
+            if (!fullscreenBounds.isEmpty) {
+                region.op(fullscreenBounds, Region.Op.UNION)
+            }
         }
     }
 }
