@@ -42,8 +42,6 @@ interface TaskbarManager : DisplayDecorationListener {
 
     fun setRecentsViewContainer(recentsViewContainer: RecentsViewContainer)
 
-    fun recreateTaskbars()
-
     fun onSystemUiFlagsChanged(@SystemUiStateFlags systemUiStateFlags: Long, displayId: Int)
 
     fun onLongPressHomeEnabled(assistantLongPressEnabled: Boolean)
@@ -98,6 +96,8 @@ interface TaskbarManager : DisplayDecorationListener {
     fun debugPrimaryTaskbar(debugReason: String, verbose: Boolean)
 
     @VisibleForTesting fun getCurrentActivityContext(): TaskbarActivityContext?
+
+    @VisibleForTesting fun recreateTaskbars()
 
     @VisibleForTesting fun removeAllSystemUiBubbles()
 
