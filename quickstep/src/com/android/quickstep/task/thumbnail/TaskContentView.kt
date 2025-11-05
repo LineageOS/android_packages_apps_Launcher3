@@ -39,8 +39,11 @@ import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import com.android.launcher3.Flags.enableRefactorDigitalWellbeingToast
 import com.android.launcher3.R
+import com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT
+import com.android.launcher3.util.SplitConfigurationOptions.StagePosition
 import com.android.launcher3.util.ViewPool
 import com.android.quickstep.compose.QuickstepComposeFacade
+import com.android.quickstep.orientation.RecentsPagedOrientationHandler
 import com.android.quickstep.task.apptimer.TaskAppTimerUiState
 import com.android.quickstep.task.apptimer.TaskAppTimerUiState.Uninitialized
 import com.android.quickstep.task.apptimer.TaskAppTimerViewModel
@@ -49,7 +52,9 @@ import com.android.quickstep.util.BorderAnimator
 import com.android.quickstep.util.BorderAnimator.Companion.DEFAULT_BORDER_COLOR
 import com.android.quickstep.util.BorderAnimator.Companion.createSimpleBorderAnimator
 import com.android.quickstep.util.setActivityStarterClickListener
+import com.android.quickstep.views.RecentsViewContainer
 import com.android.quickstep.views.TaskHeaderView
+import com.android.wm.shell.shared.split.SplitBounds
 
 /**
  * TaskContentView is a wrapper around the TaskHeaderView, TaskThumbnailView and Digital wellbeing
@@ -72,12 +77,12 @@ class TaskContentView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     private var taskAppTimerToastCompose: View? = null
     private val taskAppTimerViewModel by lazy { TaskAppTimerViewModel() }
+    private val recentsViewContainer by
+        lazy<RecentsViewContainer> { RecentsViewContainer.containerFromContext(context) }
 
     private var timerTextHelper: TimerTextHelper? = null
     private var timerUiState: TaskAppTimerUiState = Uninitialized
     private var timerUsageAccessibilityAction: AccessibilityAction? = null
-    private val timerToastHeight =
-        context.resources.getDimensionPixelSize(R.dimen.digital_wellbeing_toast_height)
 
     private var onSizeChanged: ((width: Int, height: Int) -> Unit)? = null
 
@@ -340,6 +345,94 @@ class TaskContentView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     fun setTaskHeaderAlpha(alpha: Float) {
         taskHeaderView?.alpha = alpha
+    }
+
+    fun onTaskViewDisplayConfigChanged(
+        taskViewWidth: Int,
+        taskViewHeight: Int,
+        isGroupedTaskView: Boolean,
+        splitBounds: SplitBounds?,
+        orientationHandler: RecentsPagedOrientationHandler,
+        @StagePosition stagePosition: Int,
+    ) {
+        if (enableRefactorDigitalWellbeingToast()) {
+            updateTaskAppTimerOrientation(
+                taskViewWidth,
+                taskViewHeight,
+                isGroupedTaskView,
+                splitBounds,
+                orientationHandler,
+                stagePosition,
+            )
+        }
+    }
+
+    /**
+     * This method updates the orientation of the task app timer toast. Practically This is only
+     * needed while Recents(overview) relies on Fake Landscape/Seascape. This code may be removed
+     * when Recents in a window project is completed b/292269949
+     */
+    private fun updateTaskAppTimerOrientation(
+        taskViewWidth: Int,
+        taskViewHeight: Int,
+        isGroupedTaskView: Boolean,
+        splitBounds: SplitBounds?,
+        orientationHandler: RecentsPagedOrientationHandler,
+        @StagePosition stagePosition: Int,
+    ) {
+        val appTimer = if (useComposeTaskAppTimer) taskAppTimerToastCompose else taskAppTimerToast
+        if (appTimer == null) return
+
+        val (snapshotWidth, snapshotHeight) =
+            computeSnapshotDimensions(
+                splitBounds,
+                taskViewWidth,
+                taskViewHeight,
+                orientationHandler,
+                stagePosition,
+            )
+
+        orientationHandler.updateAppTimerLayout(
+            taskViewWidth,
+            taskViewHeight,
+            isGroupedTaskView,
+            recentsViewContainer.deviceProfile,
+            snapshotWidth,
+            snapshotHeight,
+            appTimer,
+        )
+    }
+
+    private fun computeSnapshotDimensions(
+        splitBounds: SplitBounds?,
+        taskViewWidth: Int,
+        taskViewHeight: Int,
+        pagedOrientationHandler: RecentsPagedOrientationHandler,
+        @StagePosition stagePosition: Int,
+    ): Pair<Int, Int> {
+        val snapshotWidth: Int
+        val snapshotHeight: Int
+        if (splitBounds == null) {
+            snapshotWidth = taskViewWidth
+            snapshotHeight = taskViewHeight
+        } else {
+            val groupedTaskSize =
+                pagedOrientationHandler.getGroupedTaskViewSizes(
+                    recentsViewContainer.deviceProfile,
+                    splitBounds,
+                    taskViewWidth,
+                    taskViewHeight,
+                )
+            if (stagePosition == STAGE_POSITION_TOP_OR_LEFT) {
+                snapshotWidth = groupedTaskSize.first.x
+                snapshotHeight = groupedTaskSize.first.y
+            } else {
+                snapshotWidth = groupedTaskSize.second.x
+                snapshotHeight = groupedTaskSize.second.y
+            }
+        }
+
+        return Pair(snapshotWidth, snapshotHeight)
     }
 
     private fun updateContentDescriptionWithTimer(state: TaskAppTimerUiState) {

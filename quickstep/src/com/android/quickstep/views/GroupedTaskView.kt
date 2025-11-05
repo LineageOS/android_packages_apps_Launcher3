@@ -253,6 +253,7 @@ class GroupedTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
         taskContainers.forEach {
             it.digitalWellBeingToast?.splitBounds = splitBoundsConfig
             it.digitalWellBeingToast?.initialize()
+            it.onTaskViewDisplayConfigChanged()
         }
         invalidate()
     }

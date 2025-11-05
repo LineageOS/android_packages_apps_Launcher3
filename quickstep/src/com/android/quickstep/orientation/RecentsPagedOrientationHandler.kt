@@ -293,6 +293,16 @@ interface RecentsPagedOrientationHandler : PagedOrientationHandler {
         banner: View,
     )
 
+    fun updateAppTimerLayout(
+        taskViewWidth: Int,
+        taskViewHeight: Int,
+        isGroupedTaskView: Boolean,
+        deviceProfile: DeviceProfile,
+        snapshotViewWidth: Int,
+        snapshotViewHeight: Int,
+        appTimerToast: View,
+    )
+
     /**
      * Calculates the translations where a Digital Wellbeing Banner should be apply on its parent
      * TaskView.

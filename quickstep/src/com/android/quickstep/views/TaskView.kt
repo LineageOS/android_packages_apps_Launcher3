@@ -1181,6 +1181,7 @@ constructor(
         taskContainers.forEach {
             it.overlay.updateOrientationState(orientationState)
             it.digitalWellBeingToast?.initialize()
+            it.onTaskViewDisplayConfigChanged()
         }
     }
 
