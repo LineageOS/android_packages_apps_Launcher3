@@ -1081,14 +1081,12 @@ public class TouchInteractionService extends Service {
         RecentsAnimationDeviceState deviceState = mDeviceStateRepository.get(displayId);
         if (deviceState == null) {
             Log.d(TAG, "RecentsAnimationDeviceState not available for displayId " + displayId);
-            ActiveGestureProtoLogProxy.logOnRecentsAnimationDeviceStateNotAvailable(displayId);
             return;
         }
 
         RotationTouchHelper rotationTouchHelper = mRotationTouchHelperRepository.get(displayId);
         if (rotationTouchHelper == null) {
             Log.d(TAG, "RotationTouchHelper not available for displayId " + displayId);
-            ActiveGestureProtoLogProxy.logOnRotationTouchHelperNotAvailable(displayId);
             return;
         }
 
@@ -1138,13 +1136,11 @@ public class TouchInteractionService extends Service {
         InputEventReceiver inputEventReceiver = getInputEventReceiver(displayId);
 
         if (inputMonitorCompat == null) {
-            Log.e(TAG, "InputMonitorCompat not available for displayId " + displayId);
-            ActiveGestureProtoLogProxy.logOnInputMonitorCompatNotAvailable(displayId);
+            Log.d(TAG, "InputMonitorCompat not available for displayId " + displayId);
             return;
         }
         if (inputEventReceiver == null) {
-            Log.e(TAG, "InputEventReceiver not available for displayId " + displayId);
-            ActiveGestureProtoLogProxy.logOnInputEventReceiverNotAvailable(displayId);
+            Log.d(TAG, "InputEventReceiver not available for displayId " + displayId);
             return;
         }
 
@@ -1597,7 +1593,7 @@ public class TouchInteractionService extends Service {
                     systemDecorationChangeObserver,
                     mDisplaysWithDecorationsRepositoryCompat,
                     mMainCoroutineDispatcher,
-                    /* debug= */ true);
+                    /* debug= */ false);
             initializeDisplays();
         }
 
