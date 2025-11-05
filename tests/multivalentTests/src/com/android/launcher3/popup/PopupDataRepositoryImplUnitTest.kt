@@ -19,7 +19,9 @@ package com.android.launcher3.popup
 import android.content.Context
 import android.net.Uri
 import android.os.Process
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.SetFlagsRule
 import android.util.SparseArray
 import android.view.View
 import androidx.test.core.app.ApplicationProvider
@@ -42,6 +44,8 @@ import com.android.launcher3.util.Executors
 import com.android.launcher3.util.TestUtil
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.views.BaseDragLayer
+import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -53,13 +57,22 @@ import org.mockito.kotlin.whenever
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class PopupDataRepositoryImplUnitTest {
+    @get:Rule val setFlagsRule = SetFlagsRule()
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val homeScreenRepository = HomeScreenRepository()
     private val lifeCycle: DaggerSingletonTracker = mock()
 
-    private val popupDataSource = PopupDataSource()
-    private val popupDataRepository =
-        PopupDataRepositoryImpl(popupDataSource, context, homeScreenRepository, lifeCycle)
+    private lateinit var popupDataSource: PopupDataSource
+    private lateinit var popupDataRepository: PopupDataRepository
+
+    @Before
+    fun setup() {
+        // Late initialization of `PopupDataSource` is required because some of the created
+        // `PopupData` use feature flags.
+        popupDataSource = PopupDataSource()
+        popupDataRepository =
+            PopupDataRepositoryImpl(popupDataSource, context, homeScreenRepository, lifeCycle)
+    }
 
     @Test
     @EnableFlags(Flags.FLAG_MODEL_REPOSITORY)
@@ -182,7 +195,18 @@ class PopupDataRepositoryImplUnitTest {
     }
 
     @Test
-    fun getPopupDataForFileSystemFileItem() {
+    @DisableFlags(Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING)
+    fun getPopupDataForFileSystemItemsWhenTrashingDisabled() {
+        testPopupDataForFileSystemItems(supportsTrashing = false)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING)
+    fun getPopupDataForFileSystemItemsWhenTrashingEnabled() {
+        testPopupDataForFileSystemItems(supportsTrashing = true)
+    }
+
+    private fun testPopupDataForFileSystemItems(supportsTrashing: Boolean) {
         testPopupDataForFileSystemItem(
             HomeScreenFile(
                 uri = Uri.parse("content://media/external_primary/file/1"),
@@ -190,12 +214,9 @@ class PopupDataRepositoryImplUnitTest {
                 mimeType = "image/png",
                 isDirectory = false,
                 user = Process.myUserHandle(),
-            )
+            ),
+            supportsTrashing,
         )
-    }
-
-    @Test
-    fun getPopupDataForFileSystemFolderItem() {
         testPopupDataForFileSystemItem(
             HomeScreenFile(
                 uri = Uri.parse("content://media/external_primary/file/1"),
@@ -203,11 +224,12 @@ class PopupDataRepositoryImplUnitTest {
                 mimeType = null,
                 isDirectory = true,
                 user = Process.myUserHandle(),
-            )
+            ),
+            supportsTrashing,
         )
     }
 
-    private fun testPopupDataForFileSystemItem(file: HomeScreenFile) {
+    private fun testPopupDataForFileSystemItem(file: HomeScreenFile, supportsTrashing: Boolean) {
         val activityContext = mock<ActivityContext>()
         val view = mock<View>()
         val item =
@@ -229,7 +251,13 @@ class PopupDataRepositoryImplUnitTest {
         with(popupData[1]) {
             assert(category == PopupCategory.SYSTEM_SHORTCUT_FIXED)
             assert(iconResId == R.drawable.ic_home_screen_files_context_menu_move_to_trash)
-            assert(labelResId == R.string.home_screen_files_context_menu_delete_permanently_label)
+            if (supportsTrashing) {
+                assert(labelResId == R.string.home_screen_files_context_menu_move_to_trash_label)
+            } else {
+                assert(
+                    labelResId == R.string.home_screen_files_context_menu_delete_permanently_label
+                )
+            }
 
             val dropTargetHandler = mock<DropTargetHandler>()
             whenever(activityContext.dragLayer).thenReturn(mock<BaseDragLayer<*>>())

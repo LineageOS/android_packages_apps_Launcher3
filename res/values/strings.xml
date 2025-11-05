@@ -261,6 +261,12 @@
     <string name="home_screen_files_context_menu_delete_permanently_label">
         Delete permanently
     </string>
+    <!-- Label for action to remove files or file system folders from home screen by moving the
+         backing file or folder to trash. The action can be shown in the item pop-up menu, or as a
+         drop target when dragging the item on home screen. [CHAR_LIMIT=20] -->
+    <string name="home_screen_files_context_menu_move_to_trash_label">
+        Move to trash
+    </string>
 
     <!-- Permissions: -->
     <skip />
