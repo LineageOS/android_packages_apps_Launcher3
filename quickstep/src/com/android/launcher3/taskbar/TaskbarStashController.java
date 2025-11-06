@@ -1429,7 +1429,7 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
         } else {
             mState &= ~flag;
         }
-        mTaskbarUiState.setStashStateRef(mState);
+        mTaskbarUiState.setTaskbarStashState(mState);
         return mState != oldState;
     }
 

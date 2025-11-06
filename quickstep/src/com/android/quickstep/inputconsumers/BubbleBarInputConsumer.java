@@ -219,7 +219,7 @@ public class BubbleBarInputConsumer implements InputConsumer {
 
     private boolean isBubbleStashed() {
         if (refactorTaskbarUiState()) {
-            boolean ret = mTaskbarUiState.getBubbleStashed();
+            boolean ret = mTaskbarUiState.isBubbleStashed();
             if (BuildConfig.IS_STUDIO_BUILD && ret != legacyIsBubbleStashed()) {
                 throw new IllegalStateException("isBubbleStashed() doesn't match ret=" + ret);
             }
@@ -236,7 +236,7 @@ public class BubbleBarInputConsumer implements InputConsumer {
 
     private boolean isBubbleBarVisible() {
         if (refactorTaskbarUiState()) {
-            boolean ret = mTaskbarUiState.getHasBubbles() && !mTaskbarUiState.getBubbleStashed();
+            boolean ret = mTaskbarUiState.getHasBubbles() && !mTaskbarUiState.isBubbleStashed();
             if (BuildConfig.IS_STUDIO_BUILD && ret != legacyIsBubbleBarViewVisible()) {
                 throw new IllegalStateException("isBubbleBarViewVisible() doesn't match ret="
                         + ret);
@@ -254,7 +254,7 @@ public class BubbleBarInputConsumer implements InputConsumer {
 
     private boolean isBubbleBarExpanded() {
         if (refactorTaskbarUiState()) {
-            boolean ret = mTaskbarUiState.getBubbleBarExpanded();
+            boolean ret = mTaskbarUiState.isBubbleBarExpanded();
             if (BuildConfig.IS_STUDIO_BUILD && ret != legacyIsBubbleBarExpanded()) {
                 throw new IllegalStateException("isBubbleBarExpanded() doesn't match ret=" + ret);
             }

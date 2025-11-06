@@ -854,7 +854,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             }
 
             private boolean newShouldShowEduOnAppLaunch() {
-                return mLauncher.getTaskbarUiState().getShouldShowEduOnAppLaunch();
+                return mLauncher.getTaskbarUiState().getShowTaskbarEduOnAppLaunch();
             }
         });
 

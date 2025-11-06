@@ -918,9 +918,9 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             return;
         }
         final Resources res = getResources();
-        mTaskbarUiState.setUnstashAreaSizePx(
+        mTaskbarUiState.setTaskbarUnstashAreaSizePx(
                 res.getDimensionPixelSize(R.dimen.taskbar_unstash_input_area));
-        mTaskbarUiState.setActionCornerPaddingPx(
+        mTaskbarUiState.setTaskbarActionCornerPaddingPx(
                 res.getDimensionPixelSize(R.dimen.transient_taskbar_action_corner_padding));
         if (mDeviceProfile != null) {
             mTaskbarUiState.setTaskbarNavThreshold(
