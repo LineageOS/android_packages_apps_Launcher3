@@ -35,6 +35,7 @@ import com.android.launcher3.taskbar.TaskbarInteractor
 import com.android.launcher3.taskbar.TaskbarManager
 import com.android.launcher3.taskbar.TaskbarUIController
 import com.android.launcher3.uioverrides.QuickstepLauncher
+import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
 import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.TestDispatcherProvider
@@ -126,7 +127,7 @@ class OverviewCommandHelperTest {
         whenever(launcher.getOverviewPanel<RecentsView<*, *>>()).thenReturn(recentView)
         whenever(containerInterface.createdContainer).thenReturn(launcher)
         whenever(containerInterface.taskbarInteractor).thenReturn(taskbarInteractor)
-        whenever(taskbarInteractor.launchFocusedTask().get())
+        whenever(taskbarUIController.launchFocusedTask())
             .thenReturn(REQUESTED_KEYBOARD_FOCUS_TASK_IDS)
         whenever(taskbarManager.getUIControllerForDisplay(anyInt())).thenReturn(taskbarUIController)
         whenever(stateManager.state).thenReturn(OVERVIEW)
@@ -698,6 +699,7 @@ class OverviewCommandHelperTest {
             val command = sut.addCommand(CommandType.SHOW_ALT_TAB, EXTERNAL_DISPLAY_ID)!!
             runCurrent()
             assertThat(command.status).isEqualTo(CommandStatus.COMPLETED)
+            TASKBAR_UI_THREAD.submit {}.get()
             verify(taskbarUIController).openQuickSwitchView()
             verify(recentView, never()).setKeyboardFocusTask(any())
         }
