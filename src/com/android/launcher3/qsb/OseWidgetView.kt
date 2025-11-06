@@ -34,6 +34,7 @@ import com.android.launcher3.BubbleTextView
 import com.android.launcher3.LauncherSettings.Favorites
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
+import com.android.launcher3.allapps.AllAppsStore
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.ItemInfo
@@ -57,6 +58,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     private val oseWidgetManager = context.appComponent.oseWidgetManager
     @VisibleForTesting var closeActions = RunnableList()
     private val activityContext: ActivityContext = ActivityContext.lookupContext(context)
+    private val mOnAppsUpdateListener = AllAppsStore.OnUpdateListener { this.onAppsUpdated() }
 
     init {
         activityContext.appWidgetHolder?.onViewCreationCallback?.accept(this)
@@ -71,9 +73,9 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     @VisibleForTesting
     fun attachedToWindow() {
         closeActions.executeAllAndClear()
+
         // We use INVALID_APPWIDGET_ID because appWidgetId is not tracked in OseWidgetView. Instead
         // it is managed by OseWidgetManager and QsbAppWidgetHost.
-
         closeActions.add(
             oseWidgetManager.providerInfo.forEach(activityContext.uiExecutor) {
                 setAppWidget(INVALID_APPWIDGET_ID, it)
@@ -102,6 +104,13 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         closeActions.executeAllAndClear()
     }
 
+    private fun onAppsUpdated() {
+        // This is only for resetting the remoteviews using a broken remote view since the app
+        // store got updated now.
+        // Refresh the error view with latest appInfo.
+        updateAppWidget(RemoteViews(context.packageName, 0))
+    }
+
     override fun shouldDelayChildPressedState(): Boolean {
         // Delay the ripple effect on the widget view when swiping up from home screen
         // to go to all apps.
@@ -118,11 +127,19 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
             }
         val appInfo =
             osePkg?.let {
+                val appStore = activityContext.activityComponent.appsStore
                 val componentKey = ComponentKey(ComponentName(osePkg, ""), myUserHandle())
-                activityContext.activityComponent.appsStore
-                    .getApp(componentKey, AppInfo.PACKAGE_KEY_COMPARATOR)
-                    ?.clone()
+                val info = appStore.getApp(componentKey, AppInfo.PACKAGE_KEY_COMPARATOR)?.clone()
+                if (info == null && isAttachedToWindow) {
+                    // when app install is pending/finished but the appstore is not updated.
+                    appStore.addUpdateListener(mOnAppsUpdateListener)
+                    closeActions.add { appStore.removeUpdateListener(mOnAppsUpdateListener) }
+                } else {
+                    appStore.removeUpdateListener(mOnAppsUpdateListener)
+                }
+                info
             }
+
         return appInfo?.run { showOseBubbleTextLayout(this, oseInfo.supportsSearchIntent) }
             ?: showDefaultOseLayout()
     }
