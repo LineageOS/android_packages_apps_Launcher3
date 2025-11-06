@@ -19,7 +19,6 @@ import static com.android.launcher3.LauncherModel.useModelRepositoryBinding;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_ALL_APPS_PREDICTION;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION;
-import static com.android.launcher3.taskbar.customization.TaskbarIconsContainer.TaskbarIconContainerLayoutParams;
 import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
 
 import android.view.View;
@@ -43,6 +42,7 @@ import com.android.launcher3.model.data.WorkspaceChangeEvent.RemoveEvent;
 import com.android.launcher3.model.data.WorkspaceChangeEvent.UpdateEvent;
 import com.android.launcher3.model.data.WorkspaceData;
 import com.android.launcher3.taskbar.TaskbarView.TaskbarLayoutParams;
+import com.android.launcher3.taskbar.customization.util.TaskbarIconContainerLayoutParams;
 import com.android.launcher3.taskbar.handoff.HandoffSuggestion;
 import com.android.launcher3.util.IntSparseArrayMap;
 import com.android.launcher3.util.ItemInfoMatcher;

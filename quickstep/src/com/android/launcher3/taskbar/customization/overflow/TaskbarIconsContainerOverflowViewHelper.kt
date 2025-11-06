@@ -40,13 +40,15 @@ private constructor(
         get() = taskbarContainerOverflowView in parentView
 
     // Index to remove view from parent view to add overflow view in place.
-    private val removeIndexForAddingOverflowView: Int =
-        // -1 means add view at the end of parent view
-        if (overflowIconPosition == OverflowIconPosition.END) parentView.childCount - 1 else 0
+    private val removeIndexForAddingOverflowView: Int
+        get() =
+            // -1 means add view at the end of parent view
+            if (overflowIconPosition == OverflowIconPosition.END) parentView.childCount - 1 else 0
 
-    private val addIndexForOverflowView: Int =
-        // -1 means add view at the end of parent view
-        if (overflowIconPosition == OverflowIconPosition.END) -1 else 0
+    private val addIndexForOverflowView: Int
+        get() =
+            // -1 means add view at the end of parent view
+            if (overflowIconPosition == OverflowIconPosition.END) -1 else 0
 
     fun setUpOverflowView(items: List<T>, itemMarginLeftRight: Int) {
         if (items.isNotEmpty()) {

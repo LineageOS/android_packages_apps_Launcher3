@@ -165,7 +165,7 @@ class TaskbarViewSubject(failureMetadata: FailureMetadata, private val view: Tas
                     view.taskbarDividerViewContainer -> DIVIDER
                     view.taskbarRecentsOverflowView -> OVERFLOW
                     view.taskbarPinnedOverflowView -> OVERFLOW
-                    view?.taskbarHotseatIconsContainer?.taskbarPinnedOverflowView -> OVERFLOW
+                    view?.taskbarHotseatIconsContainer?.overflowView -> OVERFLOW
                     else ->
                         when (it.tag) {
                             is ItemInfo -> HOTSEAT

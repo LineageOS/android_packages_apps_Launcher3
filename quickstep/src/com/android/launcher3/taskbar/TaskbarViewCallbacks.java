@@ -239,7 +239,7 @@ public class TaskbarViewCallbacks {
 
     protected void onOverflownAppsContainerClosed() {
         TaskbarOverflowView overflowView = mTaskbarView.getTaskbarHotseatIconsContainer() != null
-                ? mTaskbarView.getTaskbarHotseatIconsContainer().getTaskbarPinnedOverflowView()
+                ? mTaskbarView.getTaskbarHotseatIconsContainer().getOverflowView()
                 : mTaskbarView.getTaskbarPinnedOverflowView();
 
         if (overflowView != null) {
