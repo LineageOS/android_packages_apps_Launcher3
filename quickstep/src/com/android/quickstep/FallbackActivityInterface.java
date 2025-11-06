@@ -30,13 +30,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.dagger.LauncherAppSingleton;
 import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.taskbar.TaskbarInteractor;
-import com.android.launcher3.util.ThreadedAnimator;
+import com.android.launcher3.util.DaggerSingletonObject;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.JoinedAnimator;
+import com.android.launcher3.util.ThreadedAnimator;
 import com.android.launcher3.views.ScrimColors;
 import com.android.quickstep.GestureState.GestureEndTarget;
+import com.android.quickstep.dagger.QuickstepBaseAppComponent;
 import com.android.quickstep.fallback.RecentsState;
 import com.android.quickstep.orientation.RecentsPagedOrientationHandler;
 import com.android.quickstep.util.AnimatorControllerWithResistance;
@@ -46,17 +49,22 @@ import com.android.quickstep.views.RecentsView;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import javax.inject.Inject;
+
 /**
  * {@link BaseActivityInterface} for recents when the default launcher is different than the
  * currently running one and apps should interact with the {@link RecentsActivity} as opposed
  * to the in-launcher one.
  */
+@LauncherAppSingleton
 public final class FallbackActivityInterface extends
         BaseActivityInterface<RecentsState, RecentsActivity> {
 
-    public static final FallbackActivityInterface INSTANCE = new FallbackActivityInterface();
+    public static final DaggerSingletonObject<FallbackActivityInterface> INSTANCE =
+            new DaggerSingletonObject<>(QuickstepBaseAppComponent::getFallbackActivityInterface);
 
-    private FallbackActivityInterface() {
+    @Inject
+    public FallbackActivityInterface() {
         super(false, DEFAULT, BACKGROUND_APP);
     }
 

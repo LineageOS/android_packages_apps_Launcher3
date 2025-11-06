@@ -83,9 +83,9 @@ public abstract class BaseContainerInterface<STATE_TYPE extends BaseState<STATE_
         CONTAINER_TYPE extends RecentsViewContainer & StatefulContainer<STATE_TYPE>> {
 
     public boolean rotationSupportedByActivity = false;
-    protected final STATE_TYPE mBackgroundState;
+    @NonNull protected final STATE_TYPE mBackgroundState;
 
-    protected BaseContainerInterface(STATE_TYPE backgroundState) {
+    protected BaseContainerInterface(@NonNull STATE_TYPE backgroundState) {
         mBackgroundState = backgroundState;
     }
 

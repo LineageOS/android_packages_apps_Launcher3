@@ -30,7 +30,9 @@ import com.android.launcher3.taskbar.TaskbarUiStateMonitor;
 import com.android.launcher3.taskbar.TaskbarViewCallbacksFactory;
 import com.android.launcher3.taskbar.bubbles.BubbleActivityStarter;
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator;
+import com.android.quickstep.FallbackActivityInterface;
 import com.android.quickstep.FallbackWindowInterface;
+import com.android.quickstep.LauncherActivityInterface;
 import com.android.quickstep.OverviewCommandHelper;
 import com.android.quickstep.OverviewComponentObserver;
 import com.android.quickstep.RecentsAnimationDeviceState;
@@ -135,4 +137,8 @@ public interface QuickstepBaseAppComponent extends LauncherBaseAppComponent {
     DesktopModeCompatPolicy getDesktopModeCompatPolicy();
 
     RecentsComponent.Factory getRecentsComponentFactory();
+
+    FallbackActivityInterface getFallbackActivityInterface();
+
+    LauncherActivityInterface getLauncherActivityInterface();
 }

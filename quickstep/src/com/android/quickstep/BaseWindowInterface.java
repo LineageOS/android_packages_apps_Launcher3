@@ -20,6 +20,7 @@ import static com.android.quickstep.views.RecentsView.FULLSCREEN_PROGRESS;
 import static com.android.quickstep.views.RecentsView.RECENTS_SCALE_PROPERTY;
 import static com.android.quickstep.views.RecentsView.TASK_SECONDARY_TRANSLATION;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.Launcher;
@@ -48,10 +49,11 @@ public abstract class BaseWindowInterface extends
         BaseContainerInterface<RecentsState, RecentsWindowManager> {
 
     final String TAG = "BaseWindowInterface";
-    private RecentsState mTargetState;
+    @NonNull private RecentsState mTargetState;
 
 
-    protected BaseWindowInterface(RecentsState overviewState, RecentsState backgroundState) {
+    protected BaseWindowInterface(
+            @NonNull RecentsState overviewState, @NonNull RecentsState backgroundState) {
         super(backgroundState);
         mTargetState = overviewState;
     }

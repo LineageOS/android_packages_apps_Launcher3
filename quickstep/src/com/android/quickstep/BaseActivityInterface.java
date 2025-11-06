@@ -20,6 +20,7 @@ import static com.android.quickstep.views.RecentsView.FULLSCREEN_PROGRESS;
 import static com.android.quickstep.views.RecentsView.RECENTS_SCALE_PROPERTY;
 import static com.android.quickstep.views.RecentsView.TASK_SECONDARY_TRANSLATION;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.anim.AnimatorPlaybackController;
@@ -46,10 +47,12 @@ public abstract class BaseActivityInterface<STATE_TYPE extends BaseState<STATE_T
         ACTIVITY_TYPE extends StatefulActivity<STATE_TYPE> & RecentsViewContainer> extends
         BaseContainerInterface<STATE_TYPE, ACTIVITY_TYPE> {
 
-    private STATE_TYPE mTargetState;
+    @NonNull private STATE_TYPE mTargetState;
 
-    protected BaseActivityInterface(boolean rotationSupportedByActivity,
-            STATE_TYPE overviewState, STATE_TYPE backgroundState) {
+    protected BaseActivityInterface(
+            boolean rotationSupportedByActivity,
+            @NonNull STATE_TYPE overviewState,
+            @NonNull STATE_TYPE backgroundState) {
         super(backgroundState);
         this.rotationSupportedByActivity = rotationSupportedByActivity;
         mTargetState = overviewState;

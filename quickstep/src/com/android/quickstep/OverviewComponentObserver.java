@@ -81,6 +81,8 @@ public final class OverviewComponentObserver {
     private final SimpleBroadcastReceiver mOtherHomeAppUpdateReceiver;
 
     private final PerDisplayRepository<RecentsWindowManager> mRecentsWindowManagerRepository;
+    private final LauncherActivityInterface mLauncherActivityInterface;
+    private final FallbackActivityInterface mFallbackActivityInterface;
 
     private final Intent mCurrentPrimaryHomeIntent;
     private final Intent mMyPrimaryHomeIntent;
@@ -104,6 +106,8 @@ public final class OverviewComponentObserver {
     public OverviewComponentObserver(
             @ApplicationContext Context context,
             PerDisplayRepository<RecentsWindowManager> recentsWindowManagerRepository,
+            LauncherActivityInterface launcherActivityInterface,
+            FallbackActivityInterface fallbackActivityInterface,
             DaggerSingletonTracker lifecycleTracker) {
         mContext = context;
         mUserPreferenceChangeReceiver =
@@ -111,6 +115,8 @@ public final class OverviewComponentObserver {
         mOtherHomeAppUpdateReceiver =
                 new SimpleBroadcastReceiver(context, MAIN_EXECUTOR, this::updateOverviewTargets);
         mRecentsWindowManagerRepository = recentsWindowManagerRepository;
+        mLauncherActivityInterface = launcherActivityInterface;
+        mFallbackActivityInterface = fallbackActivityInterface;
         // Set up primary intents
         mCurrentPrimaryHomeIntent = createHomeIntent();
         mMyPrimaryHomeIntent = new Intent(mCurrentPrimaryHomeIntent).setPackage(
@@ -232,7 +238,7 @@ public final class OverviewComponentObserver {
                         recentsWindowManager != null ? recentsWindowManager.getContainerInterface()
                                 : null;
             } else {
-                mDefaultDisplayContainerInterface = LauncherActivityInterface.INSTANCE;
+                mDefaultDisplayContainerInterface = mLauncherActivityInterface;
             }
             mIsHomeAndOverviewSame = true;
             mOverviewIntent = mMyPrimaryHomeIntent;
@@ -249,7 +255,7 @@ public final class OverviewComponentObserver {
                         recentsWindowManager != null ? recentsWindowManager.getContainerInterface()
                                 : null;
             } else {
-                mDefaultDisplayContainerInterface = FallbackActivityInterface.INSTANCE;
+                mDefaultDisplayContainerInterface = mFallbackActivityInterface;
             }
             mIsHomeAndOverviewSame = false;
             mOverviewIntent = mFallbackIntent;
