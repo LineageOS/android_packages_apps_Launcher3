@@ -26,6 +26,7 @@ import com.android.launcher3.R
 import com.android.launcher3.Utilities.calculateTextHeight
 import com.android.launcher3.Utilities.getIconVisibleSizePx
 import com.android.launcher3.Utilities.pxFromSp
+import com.android.launcher3.icons.IconNormalizer
 import com.android.launcher3.responsive.CalculatedCellSpec
 import com.android.launcher3.responsive.CalculatedResponsiveSpec
 import com.android.launcher3.testing.shared.ResourceUtils.INVALID_RESOURCE_HANDLE
@@ -50,6 +51,8 @@ data class FolderProfile(
     val labelTextScale: Float,
     val numRows: Int,
     val numColumns: Int,
+    var folderIconSizePx: Int,
+    var folderIconOffsetYPx: Int,
 ) {
     companion object Factory {
 
@@ -65,6 +68,7 @@ data class FolderProfile(
             responsiveWorkspaceCellSpec: CalculatedCellSpec,
             responsiveFolderWidthSpec: CalculatedResponsiveSpec,
             iconSizeSteps: IconSizeSteps,
+            workspaceProfile: WorkspaceProfile,
         ): FolderProfile {
             val folderLabelTextScale = res.getFloat(R.dimen.folder_label_text_scale)
             val minLabelTextSize: Int = pxFromSp(MIN_FOLDER_TEXT_SIZE_SP, metrics, scale)
@@ -89,6 +93,8 @@ data class FolderProfile(
             folderChildIconSizePx = cellContentDimensions.iconSizePx
             folderChildDrawablePaddingPx = cellContentDimensions.iconDrawablePaddingPx
             folderChildTextSizePx = cellContentDimensions.iconTextSizePx
+            val folderIconSizePx =
+                Math.round(workspaceProfile.iconSizePx * IconNormalizer.ICON_VISIBLE_AREA_FACTOR)
             return FolderProfile(
                 labelTextSizePx =
                     max(minLabelTextSize, (folderChildTextSizePx * folderLabelTextScale).toInt()),
@@ -106,6 +112,8 @@ data class FolderProfile(
                 labelTextScale = folderLabelTextScale,
                 numRows = inv.numFolderRows[typeIndex],
                 numColumns = inv.numFolderColumns[typeIndex],
+                folderIconSizePx = folderIconSizePx,
+                folderIconOffsetYPx = (workspaceProfile.iconSizePx - folderIconSizePx) / 2,
             )
         }
 
@@ -139,6 +147,7 @@ data class FolderProfile(
             cellSize: Point,
             res: Resources,
             iconSizeSteps: IconSizeSteps,
+            workspaceProfile: WorkspaceProfile,
         ): FolderProfile {
             val minLabelTextSize: Int = pxFromSp(MIN_FOLDER_TEXT_SIZE_SP, metrics, scale)
             val folderLabelTextScale = res.getFloat(R.dimen.folder_label_text_scale)
@@ -223,6 +232,8 @@ data class FolderProfile(
             folderChildTextSizePx = cellContentDimensions.iconTextSizePx
             maxFolderChildTextLineCount = cellContentDimensions.maxLineCount
 
+            val folderIconSizePx =
+                Math.round(workspaceProfile.iconSizePx * IconNormalizer.ICON_VISIBLE_AREA_FACTOR)
             return FolderProfile(
                 labelTextSizePx = folderLabelTextSizePx,
                 childIconSizePx = folderChildIconSizePx,
@@ -238,6 +249,8 @@ data class FolderProfile(
                 labelTextScale = folderLabelTextScale,
                 numRows = inv.numFolderRows[typeIndex],
                 numColumns = inv.numFolderColumns[typeIndex],
+                folderIconSizePx = folderIconSizePx,
+                folderIconOffsetYPx = (workspaceProfile.iconSizePx - folderIconSizePx) / 2,
             )
         }
 
@@ -247,6 +260,7 @@ data class FolderProfile(
             inv: InvariantDeviceProfile,
             typeIndex: Int,
             res: Resources,
+            workspaceProfile: WorkspaceProfile,
         ): FolderProfile {
             val folderLabelTextScale = res.getFloat(R.dimen.folder_label_text_scale)
             val minLabelTextSize: Int = pxFromSp(MIN_FOLDER_TEXT_SIZE_SP, metrics, scale)
@@ -260,6 +274,8 @@ data class FolderProfile(
             val cellPaddingY =
                 (res.getDimensionPixelSize(R.dimen.folder_cell_y_padding) * scale).toInt()
             val folderCellHeightPx = folderChildIconSizePx + 2 * cellPaddingY + textHeight
+            val folderIconSizePx =
+                Math.round(workspaceProfile.iconSizePx * IconNormalizer.ICON_VISIBLE_AREA_FACTOR)
             return FolderProfile(
                 labelTextSizePx =
                     max(minLabelTextSize, (folderChildTextSizePx * folderLabelTextScale).toInt()),
@@ -288,6 +304,8 @@ data class FolderProfile(
                 labelTextScale = folderLabelTextScale,
                 numRows = inv.numFolderRows[typeIndex],
                 numColumns = inv.numFolderColumns[typeIndex],
+                folderIconSizePx = folderIconSizePx,
+                folderIconOffsetYPx = (workspaceProfile.iconSizePx - folderIconSizePx) / 2,
             )
         }
 
@@ -304,7 +322,7 @@ data class FolderProfile(
             responsiveWorkspaceCellSpec: CalculatedCellSpec?,
             responsiveFolderWidthSpec: CalculatedResponsiveSpec?,
             iconSizeSteps: IconSizeSteps,
-            cellSize: Point,
+            workspaceProfile: WorkspaceProfile,
         ): FolderProfile {
             return when {
                 (isResponsive &&
@@ -321,6 +339,7 @@ data class FolderProfile(
                         responsiveWorkspaceCellSpec,
                         responsiveFolderWidthSpec,
                         iconSizeSteps,
+                        workspaceProfile = workspaceProfile,
                     )
                 }
                 isScalable -> {
@@ -330,13 +349,21 @@ data class FolderProfile(
                         metrics,
                         inv,
                         typeIndex,
-                        cellSize,
+                        workspaceProfile.cellSize,
                         res,
                         iconSizeSteps,
+                        workspaceProfile = workspaceProfile,
                     )
                 }
                 else -> {
-                    createFolderProfileNonScalable(scale, metrics, inv, typeIndex, res)
+                    createFolderProfileNonScalable(
+                        scale,
+                        metrics,
+                        inv,
+                        typeIndex,
+                        res,
+                        workspaceProfile,
+                    )
                 }
             }
         }

@@ -73,7 +73,7 @@ data class ClipRevealData(
 
                 // Setup start and end area for revealing Folder Content
                 val extraRadius =
-                    ((deviceProfile.folderIconSizePx / initialFolderScale) *
+                    ((deviceProfile.folderProfile.folderIconSizePx / initialFolderScale) *
                             EXTRA_FOLDER_REVEAL_RADIUS_PERCENTAGE)
                         .toInt()
                 val contentStart =

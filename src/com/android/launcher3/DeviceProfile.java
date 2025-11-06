@@ -132,8 +132,6 @@ public class DeviceProfile {
     public WorkspaceProfile mWorkspaceProfile;
 
     private final FolderProfile mFolderProfile;
-    public int folderIconSizePx;
-    public int folderIconOffsetYPx;
 
     // Hotseat
     private final HotseatProfile hotseatProfile;
@@ -217,7 +215,8 @@ public class DeviceProfile {
         );
         hotseatProfile = new HotseatProfile(false, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         mTaskbarProfile = new TaskbarProfile(0, 0, 0, 0, 0, false, false);
-        mFolderProfile = new FolderProfile(0, 0, 0, 0, 0, new Point(), 0, 0, 0, 0, 0, 0, 0, 0);
+        mFolderProfile = new FolderProfile(0, 0, 0, 0, 0, new Point(), 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0);
         inv = null;
         mDisplayOptionSpec = null;
         mInfo = null;
@@ -528,7 +527,37 @@ public class DeviceProfile {
                     /* insets */ mInsets
             );
         }
-        updateIconSize();
+
+
+        final boolean isVerticalLayout = isVerticalBarLayout();
+        if (isVerticalLayout && !mIsResponsiveGrid) {
+            hideWorkspaceLabelsIfNotEnoughSpace();
+        }
+
+        if (inv.enableTwoLinesInAllApps
+                && !(mIsResponsiveGrid && getAllAppsProfile().getMaxAllAppsTextLineCount() == 2)) {
+            // Add extra textHeight to the existing allAppsCellHeight.
+            mAllAppsProfile = getAllAppsProfile().copyWithCellHeightPx(
+                    getAllAppsProfile().getCellHeightPx() + Utilities.calculateTextHeight(
+                            getAllAppsProfile().getIconTextSizePx())
+            );
+        }
+
+        updateHotseatSizes(getWorkspaceIconProfile().getIconSizePx());
+
+        // Update widget padding:
+        float minSpacing = pxFromDp(MIN_WIDGET_PADDING_DP, mMetrics);
+        if (getWorkspaceIconProfile().getCellLayoutBorderSpacePx().x < minSpacing
+                || getWorkspaceIconProfile().getCellLayoutBorderSpacePx().y < minSpacing) {
+            widgetPadding.left = widgetPadding.right =
+                    Math.round(max(0,
+                            minSpacing - getWorkspaceIconProfile().getCellLayoutBorderSpacePx().x));
+            widgetPadding.top = widgetPadding.bottom =
+                    Math.round(max(0,
+                            minSpacing - getWorkspaceIconProfile().getCellLayoutBorderSpacePx().y));
+        } else {
+            widgetPadding.setEmpty();
+        }
 
         mBottomSheetProfile = BottomSheetProfile.Factory.createBottomSheetProfile(
                 getDeviceProperties(),
@@ -832,49 +861,6 @@ public class DeviceProfile {
     }
 
     /**
-     * Updating the iconSize affects many aspects of the launcher layout, such as: iconSizePx,
-     * iconTextSizePx, iconDrawablePaddingPx, cellWidth/Height, allApps* variants,
-     * hotseat sizes, workspaceSpringLoadedShrinkFactor, folderIconSizePx, and folderIconOffsetYPx.
-     */
-    public void updateIconSize() {
-        // All apps
-        final boolean isVerticalLayout = isVerticalBarLayout();
-        if (isVerticalLayout && !mIsResponsiveGrid) {
-            hideWorkspaceLabelsIfNotEnoughSpace();
-        }
-
-        if (inv.enableTwoLinesInAllApps
-                && !(mIsResponsiveGrid && getAllAppsProfile().getMaxAllAppsTextLineCount() == 2)) {
-            // Add extra textHeight to the existing allAppsCellHeight.
-            mAllAppsProfile = getAllAppsProfile().copyWithCellHeightPx(
-                    getAllAppsProfile().getCellHeightPx() + Utilities.calculateTextHeight(
-                            getAllAppsProfile().getIconTextSizePx())
-            );
-        }
-
-        updateHotseatSizes(getWorkspaceIconProfile().getIconSizePx());
-
-        // Folder icon
-        folderIconSizePx = Math.round(
-                getWorkspaceIconProfile().getIconSizePx() * ICON_VISIBLE_AREA_FACTOR);
-        folderIconOffsetYPx = (getWorkspaceIconProfile().getIconSizePx() - folderIconSizePx) / 2;
-
-        // Update widget padding:
-        float minSpacing = pxFromDp(MIN_WIDGET_PADDING_DP, mMetrics);
-        if (getWorkspaceIconProfile().getCellLayoutBorderSpacePx().x < minSpacing
-                || getWorkspaceIconProfile().getCellLayoutBorderSpacePx().y < minSpacing) {
-            widgetPadding.left = widgetPadding.right =
-                    Math.round(max(0,
-                            minSpacing - getWorkspaceIconProfile().getCellLayoutBorderSpacePx().x));
-            widgetPadding.top = widgetPadding.bottom =
-                    Math.round(max(0,
-                            minSpacing - getWorkspaceIconProfile().getCellLayoutBorderSpacePx().y));
-        } else {
-            widgetPadding.setEmpty();
-        }
-    }
-
-    /**
      * This method calculates the space between the icons to achieve a certain width.
      */
     private int calculateHotseatBorderSpace(float hotseatWidthPx, int numExtraBorder) {
@@ -933,7 +919,7 @@ public class DeviceProfile {
                 mResponsiveWorkspaceCellSpec,
                 mResponsiveFolderWidthSpec,
                 mIconSizeSteps,
-                mWorkspaceProfile.getCellSize()
+                mWorkspaceProfile
         );
     }
 

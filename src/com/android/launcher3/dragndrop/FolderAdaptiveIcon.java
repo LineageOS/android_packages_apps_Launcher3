@@ -83,7 +83,7 @@ public class FolderAdaptiveIcon extends AdaptiveIconDrawable {
         int requestedSize = size.x;
 
         // Only use the size actually needed for drawing the folder icon
-        int drawingSize = activity.getDeviceProfile().folderIconSizePx;
+        int drawingSize = activity.getDeviceProfile().getFolderProfile().getFolderIconSizePx();
         int foregroundSize = Math.max(requestedSize, drawingSize);
         float shift = foregroundSize - requestedSize;
 
