@@ -30,6 +30,7 @@ import com.android.launcher3.model.data.ItemInfo
  */
 data class SystemDragParams(
     val clipData: ClipData?,
+    val closeAllOpenViews: Boolean,
     val dragImage: Drawable,
     val dragInfo: ItemInfo,
     val dragLayerX: Int,

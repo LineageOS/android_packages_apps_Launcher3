@@ -1862,6 +1862,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                                         /*label=*/ "",
                                         new String[] { file.getMimeType() },
                                         new ClipData.Item(file.getUri())),
+                                /*closeAllOpenViews=*/ false,
                                 requireNonNull(drawable),
                                 dragObject,
                                 dragLayerX,

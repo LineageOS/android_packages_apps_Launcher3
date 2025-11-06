@@ -18,6 +18,7 @@ package com.android.launcher3.dragndrop
 
 import android.content.ClipData
 import android.content.ClipDescription
+import android.content.Context
 import android.content.Intent
 import android.graphics.Point
 import android.graphics.Rect
@@ -25,10 +26,13 @@ import android.net.Uri
 import android.os.Looper
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
+import android.util.AttributeSet
 import android.view.DragAndDropPermissions
 import android.view.DragEvent
 import android.view.View
+import androidx.core.view.size
 import androidx.test.filters.SmallTest
+import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.DropTarget.DragObject
 import com.android.launcher3.Flags.FLAG_ENABLE_SYSTEM_DRAG
 import com.android.launcher3.Launcher
@@ -58,6 +62,7 @@ import org.mockito.kotlin.clearInvocations
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.mockingDetails
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
@@ -74,15 +79,16 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
         @Parameters(name = "{0}")
         fun getParams() =
             listOf(
-                arrayOf("WithItemInfoParams", createParams(mock<ItemInfo>())),
+                arrayOf("WithItemInfoParams", createParams(mock<ItemInfo>(), false)),
                 arrayOf("WithNullParams", createParams(null)),
                 arrayOf("WithSystemDragItemInfoParams", createParams(mock<SystemDragItemInfo>())),
             )
 
-        private fun createParams(itemInfo: ItemInfo?) =
+        private fun createParams(itemInfo: ItemInfo?, closeAllOpenViews: Boolean = true) =
             itemInfo?.let { dragInfo ->
                 SystemDragParams(
                     clipData = mock(),
+                    closeAllOpenViews = closeAllOpenViews,
                     dragImage = mock(),
                     draggableView = mock(),
                     dragLayerX = DRAG_LAYER_X,
@@ -111,6 +117,8 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
 
     @Mock private lateinit var mockDragEvent: DragEvent
     @Mock private lateinit var mockDragImage: FastBitmapDrawable
+    @Mock private lateinit var mockDragLayer: DragLayer
+    @Mock private lateinit var mockFloatingView: TestFloatingView
     @Mock private lateinit var mockIconCache: IconCache
     @Mock private lateinit var mockLauncher: Launcher
 
@@ -120,6 +128,8 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
     fun setUp() {
         initMock(mockDragEvent)
         initMock(mockDragImage)
+        initMock(mockDragLayer)
+        initMock(mockFloatingView)
         initMock(mockIconCache)
         initMock(mockLauncher)
 
@@ -149,6 +159,13 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
         listener.setCleanupCallback(callback)
         listener.onDropCompleted(mock<View>(), mock<DragObject>(), /* success= */ true)
         verify(callback).run()
+    }
+
+    @Test
+    fun testCloseAllOpenViews() {
+        val closeAllOpenViews = params?.closeAllOpenViews ?: true
+        val times = if (closeAllOpenViews) times(1) else times(0)
+        verify(mockFloatingView, times).close(any())
     }
 
     @Test
@@ -318,6 +335,15 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
         whenever(mockDragImage.intrinsicWidth).thenReturn(DRAG_IMAGE_INTRINSIC_WIDTH)
     }
 
+    private fun initMock(mockDragLayer: DragLayer) {
+        whenever(mockDragLayer.size).thenReturn(1)
+        whenever(mockDragLayer.getChildAt(0)).thenReturn(mockFloatingView)
+    }
+
+    private fun initMock(mockFloatingView: TestFloatingView) {
+        whenever(mockFloatingView.isOfType(AbstractFloatingView.TYPE_ALL)).thenReturn(true)
+    }
+
     private fun initMock(mockIconCache: IconCache) {
         val mockBitmapInfo = mock<BitmapInfo>()
         whenever(mockBitmapInfo.newIcon(any(), any(), anyOrNull())).thenReturn(mockDragImage)
@@ -326,7 +352,7 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
 
     private fun initMock(mockLauncher: Launcher) {
         whenever(mockLauncher.dragController).thenReturn(mock())
-        whenever(mockLauncher.dragLayer).thenReturn(mock())
+        whenever(mockLauncher.dragLayer).thenReturn(mockDragLayer)
         whenever(mockLauncher.intent).thenReturn(mock())
         whenever(mockLauncher.rotationHelper).thenReturn(mock())
         whenever(mockLauncher.stateManager).thenReturn(mock())
@@ -344,5 +370,11 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
         whenever(mockSystemDragItemInfo::uriList.setter.invoke(any())).thenAnswer {
             uriList.set(it.getArgument<List<Uri>?>(0))
         }
+    }
+
+    // NOTE: This sub-class exists only to increase visibility of [#isOfType()].
+    private abstract class TestFloatingView(context: Context, attrs: AttributeSet) :
+        AbstractFloatingView(context, attrs) {
+        public abstract override fun isOfType(@FloatingViewType type: Int): Boolean
     }
 }
