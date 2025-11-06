@@ -29,6 +29,7 @@
         android:ellipsize="end"
         android:textSize="@dimen/snackbar_max_text_size"
         android:textColor="@color/materialColorOnSurface"
+        android:accessibilityLiveRegion="polite"
         style="@style/TextTitle"/>
     <TextView
         android:id="@+id/action"

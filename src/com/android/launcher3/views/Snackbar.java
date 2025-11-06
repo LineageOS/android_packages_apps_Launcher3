@@ -18,6 +18,7 @@ package com.android.launcher3.views;
 
 import static android.view.accessibility.AccessibilityManager.FLAG_CONTENT_CONTROLS;
 import static android.view.accessibility.AccessibilityManager.FLAG_CONTENT_TEXT;
+import static android.view.accessibility.AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -177,6 +178,11 @@ public class Snackbar extends AbstractFloatingView {
                 .scaleY(1)
                 .setDuration(SHOW_DURATION_MS)
                 .setInterpolator(Interpolators.ACCELERATE_DECELERATE)
+                .withEndAction(() -> {
+                    if (actionView.getVisibility() == VISIBLE) {
+                        actionView.performAccessibilityAction(ACTION_ACCESSIBILITY_FOCUS, null);
+                    }
+                })
                 .start();
         int timeout = AccessibilityManagerCompat.getRecommendedTimeoutMillis(snackbar.getContext(),
                 TIMEOUT_DURATION_MS, FLAG_CONTENT_TEXT | FLAG_CONTENT_CONTROLS);
