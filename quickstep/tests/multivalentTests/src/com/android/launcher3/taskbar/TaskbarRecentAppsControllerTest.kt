@@ -630,6 +630,46 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
     }
 
     @Test
+    fun isReplacingPredictions_inDesktopMode_canShowRunningApps_returnsTrue() {
+        // In desktop mode, if we can show running apps, we should replace predictions.
+        setInDesktopMode(true)
+        recentAppsController.canShowRunningApps = true
+        recentAppsController.canShowRecentApps = false
+
+        assertThat(recentAppsController.isReplacingPredictions).isTrue()
+    }
+
+    @Test
+    fun isReplacingPredictions_inDesktopMode_cannotShowRunningApps_returnsFalse() {
+        // In desktop mode, if we can't show running apps, we should not replace predictions.
+        setInDesktopMode(true)
+        recentAppsController.canShowRunningApps = false
+        recentAppsController.canShowRecentApps = true
+
+        assertThat(recentAppsController.isReplacingPredictions).isFalse()
+    }
+
+    @Test
+    fun isReplacingPredictions_notInDesktopMode_canShowRecentApps_returnsTrue() {
+        // Outside of desktop mode, if we can show recent apps, we should replace predictions.
+        setInDesktopMode(false)
+        recentAppsController.canShowRunningApps = false
+        recentAppsController.canShowRecentApps = true
+
+        assertThat(recentAppsController.isReplacingPredictions).isTrue()
+    }
+
+    @Test
+    fun isReplacingPredictions_notInDesktopMode_cannotShowRecentApps_returnsFalse() {
+        // Outside of desktop mode, if we can't show recent apps, we should not replace predictions.
+        setInDesktopMode(false)
+        recentAppsController.canShowRunningApps = true
+        recentAppsController.canShowRecentApps = false
+
+        assertThat(recentAppsController.isReplacingPredictions).isFalse()
+    }
+
+    @Test
     fun updateHotseatItemInfos_cantShowRunning_inDesktopMode_returnsAllHotseatItems() {
         recentAppsController.canShowRunningApps = false
         setInDesktopMode(true)
