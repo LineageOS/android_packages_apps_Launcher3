@@ -123,7 +123,6 @@ import com.android.quickstep.window.RecentsWindowFlags;
 import com.android.quickstep.window.RecentsWindowManager;
 import com.android.quickstep.window.RecentsWindowSwipeHandler;
 import com.android.systemui.shared.recents.ILauncherProxy;
-import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.statusbar.phone.BarTransitions;
 import com.android.systemui.shared.system.InputChannelCompat.InputEventReceiver;
 import com.android.systemui.shared.system.InputConsumerController;
@@ -131,19 +130,7 @@ import com.android.systemui.shared.system.InputMonitorCompat;
 import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
-import com.android.systemui.shared.system.smartspace.ISysuiUnlockAnimationController;
-import com.android.systemui.unfold.progress.IUnfoldAnimation;
-import com.android.wm.shell.back.IBackAnimation;
-import com.android.wm.shell.bubbles.IBubbles;
-import com.android.wm.shell.common.pip.IPip;
-import com.android.wm.shell.desktopmode.IDesktopMode;
-import com.android.wm.shell.draganddrop.IDragAndDrop;
-import com.android.wm.shell.onehanded.IOneHanded;
-import com.android.wm.shell.recents.IRecentTasks;
-import com.android.wm.shell.shared.IShellTransitions;
 import com.android.wm.shell.shared.desktopmode.DesktopState;
-import com.android.wm.shell.splitscreen.ISplitScreen;
-import com.android.wm.shell.startingsurface.IStartingWindow;
 
 import kotlinx.coroutines.CoroutineDispatcher;
 
@@ -185,36 +172,8 @@ public class TouchInteractionService extends Service {
 
         @BinderThread
         public void onInitialize(Bundle bundle) {
-            ISystemUiProxy proxy = ISystemUiProxy.Stub.asInterface(
-                    bundle.getBinder(ISystemUiProxy.DESCRIPTOR));
-            IPip pip = IPip.Stub.asInterface(bundle.getBinder(IPip.DESCRIPTOR));
-            IBubbles bubbles = IBubbles.Stub.asInterface(bundle.getBinder(IBubbles.DESCRIPTOR));
-            ISplitScreen splitscreen = ISplitScreen.Stub.asInterface(bundle.getBinder(
-                    ISplitScreen.DESCRIPTOR));
-            IOneHanded onehanded = IOneHanded.Stub.asInterface(
-                    bundle.getBinder(IOneHanded.DESCRIPTOR));
-            IShellTransitions shellTransitions = IShellTransitions.Stub.asInterface(
-                    bundle.getBinder(IShellTransitions.DESCRIPTOR));
-            IStartingWindow startingWindow = IStartingWindow.Stub.asInterface(
-                    bundle.getBinder(IStartingWindow.DESCRIPTOR));
-            ISysuiUnlockAnimationController launcherUnlockAnimationController =
-                    ISysuiUnlockAnimationController.Stub.asInterface(
-                            bundle.getBinder(ISysuiUnlockAnimationController.DESCRIPTOR));
-            IRecentTasks recentTasks = IRecentTasks.Stub.asInterface(
-                    bundle.getBinder(IRecentTasks.DESCRIPTOR));
-            IBackAnimation backAnimation = IBackAnimation.Stub.asInterface(
-                    bundle.getBinder(IBackAnimation.DESCRIPTOR));
-            IDesktopMode desktopMode = IDesktopMode.Stub.asInterface(
-                    bundle.getBinder(IDesktopMode.DESCRIPTOR));
-            IUnfoldAnimation unfoldTransition = IUnfoldAnimation.Stub.asInterface(
-                    bundle.getBinder(IUnfoldAnimation.DESCRIPTOR));
-            IDragAndDrop dragAndDrop = IDragAndDrop.Stub.asInterface(
-                    bundle.getBinder(IDragAndDrop.DESCRIPTOR));
             MAIN_EXECUTOR.execute(() -> executeForTouchInteractionService(tis -> {
-                SystemUiProxy.INSTANCE.get(tis).setProxy(proxy, pip,
-                        bubbles, splitscreen, onehanded, shellTransitions, startingWindow,
-                        recentTasks, launcherUnlockAnimationController, backAnimation, desktopMode,
-                        unfoldTransition, dragAndDrop);
+                SystemUiProxy.INSTANCE.get(tis).setInitializationParams(bundle);
                 tis.initInputMonitor("TISBinder#onInitialize()");
                 ActivityPreloadUtil.preloadOverviewForTIS(tis, true /* fromInit */);
             }));

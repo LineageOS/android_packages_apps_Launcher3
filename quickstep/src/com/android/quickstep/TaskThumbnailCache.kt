@@ -19,10 +19,12 @@ import android.content.Context
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
 import com.android.launcher3.R
+import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.util.CancellableTask
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.Preconditions
 import com.android.launcher3.util.coroutines.DispatcherProvider
+import com.android.quickstep.TaskIconCache.Companion.TASK_IMAGE_CACHE_EXECUTOR
 import com.android.quickstep.task.thumbnail.data.TaskThumbnailDataSource
 import com.android.quickstep.util.TaskKeyByLastActiveTimeCache
 import com.android.quickstep.util.TaskKeyCache
@@ -32,6 +34,7 @@ import com.android.systemui.shared.recents.model.ThumbnailData
 import com.android.systemui.shared.system.ActivityManagerWrapper
 import java.util.concurrent.Executor
 import java.util.function.Consumer
+import javax.inject.Inject
 import kotlinx.coroutines.withContext
 
 class TaskThumbnailCache
@@ -46,13 +49,18 @@ internal constructor(
     private val enableTaskSnapshotPreloading =
         context.resources.getBoolean(R.bool.config_enableTaskSnapshotPreloading)
 
-    @JvmOverloads
+    @Inject
     constructor(
-        context: Context,
-        bgExecutor: Executor,
-        cacheSize: Int = context.resources.getInteger(R.integer.recentsThumbnailCacheSize),
+        @ApplicationContext context: Context,
         dispatcherProvider: DispatcherProvider,
-    ) : this(context, bgExecutor, TaskKeyByLastActiveTimeCache(cacheSize), dispatcherProvider)
+    ) : this(
+        context,
+        TASK_IMAGE_CACHE_EXECUTOR,
+        TaskKeyByLastActiveTimeCache(
+            context.resources.getInteger(R.integer.recentsThumbnailCacheSize)
+        ),
+        dispatcherProvider,
+    )
 
     /**
      * Synchronously fetches the thumbnail for the given task at the specified resolution level, and
