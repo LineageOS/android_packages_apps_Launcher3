@@ -39,6 +39,7 @@ class TaskbarUiState {
     @Volatile var isTaskbarStashed = false
     @Volatile var isTaskbarAllAppsOpen = false
     @Volatile var isTaskbarOnHome = false
+    @Volatile var isTaskbarStashedHandleViewVisible = true
     @Volatile var showTaskbarEduOnAppLaunch = false
     @Volatile var showDesktopTaskbarForFreeformDisplay = false
     @Volatile var showLockedTaskbarOnHome = false
@@ -59,9 +60,9 @@ class TaskbarUiState {
     @Volatile var hasBubbles = false
     @Volatile var isBubbleStashed = false
     @Volatile var isBubbleBarExpanded = false
+    @Volatile var isBubbleBarViewVisible = true
 
     @Volatile private var _isBubbleDragging = false
-    @Volatile private var _isBubbleBarViewVisible = true
     @Volatile private var _isBubbleBarStashedHandlerViewVisible = true
     @Volatile private var _stashedBubbleBarHeightPx = Int.MAX_VALUE
     @Volatile private var _bubbleBarViewRect = ImmutableRect.EMPTY_RECT
@@ -117,12 +118,8 @@ class TaskbarUiState {
         isTaskbarOrBubbleBarDraggingItem = _isBubbleDragging or _isTaskbarDragging
     }
 
-    fun setIsBubbleBarViewVisible(visible: Boolean) {
-        _isBubbleBarViewVisible = visible
-    }
-
-    private fun isEventOverBubbleBarView(e: MotionEvent) =
-        if (!_isBubbleBarViewVisible) {
+    fun isEventOverBubbleBarView(e: MotionEvent) =
+        if (!isBubbleBarViewVisible) {
             false
         } else {
             _bubbleBarViewRect.contains(e.x, e.y)
@@ -144,7 +141,7 @@ class TaskbarUiState {
         _bubbleBarStashedHandleViewRect = ImmutableRect.from(rect)
     }
 
-    private fun isEventOverBubbleBarStashedHandle(ev: MotionEvent): Boolean {
+    fun isEventOverBubbleBarStashedHandle(ev: MotionEvent): Boolean {
         if (!_isBubbleBarStashedHandlerViewVisible) {
             return false
         }
@@ -164,8 +161,7 @@ class TaskbarUiState {
         _navbarFloatingRotationButtonsBounds = ImmutableRect.from(rect)
     }
 
-    private fun isEventOnNavbar(ev: MotionEvent) =
-        _navbarFloatingRotationButtonsBounds.contains(ev.x, ev.y)
+    fun isEventOnNavbar(ev: MotionEvent) = _navbarFloatingRotationButtonsBounds.contains(ev.x, ev.y)
 
     // Combined event checks
     fun isEventOverAnyTaskbarItem(ev: MotionEvent) = isEventOnTaskbarView(ev) || isEventOnNavbar(ev)
