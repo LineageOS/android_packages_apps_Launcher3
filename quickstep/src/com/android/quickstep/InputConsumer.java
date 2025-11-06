@@ -93,7 +93,7 @@ public interface InputConsumer {
     /**
      * Returns true if the lifecycle of this input consumer is detached from the normal gesture
      * down/up flow. If so, it is the responsibility of the input consumer to call back to
-     * {@link TouchInteractionService#onConsumerInactive(InputConsumer)} after the consumer is
+     * {@link TouchInteractionHandler#onConsumerInactive(InputConsumer)} after the consumer is
      * finished.
      */
     default boolean isConsumerDetachedFromGesture() {

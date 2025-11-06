@@ -28,8 +28,8 @@ import androidx.annotation.Nullable;
 
 import com.android.launcher3.taskbar.TaskbarManager;
 import com.android.quickstep.OverviewCommandHelper;
+import com.android.quickstep.TouchInteractionHandler.TISBinder;
 import com.android.quickstep.TouchInteractionService;
-import com.android.quickstep.TouchInteractionService.TISBinder;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
