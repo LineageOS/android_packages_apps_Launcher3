@@ -35,6 +35,24 @@
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "e4d03d41_d3d0516b",
+        "filename": "src/com/android/launcher3/settings/SettingsActivity.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 29242
+      },
+      "writtenOn": "2025-11-06T06:11:43Z",
+      "side": 1,
+      "message": "Resolved in PS2",
+      "parentUuid": "4e9a6ff8_f5a4d03e",
+      "revId": "5051328a94e6fd19373c50e0e691e926659786de",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2bb9e594_923a0f35",
@@ -48,6 +66,24 @@
       "writtenOn": "2025-11-06T05:18:06Z",
       "side": 1,
       "message": "line length",
+      "revId": "5051328a94e6fd19373c50e0e691e926659786de",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "90c30724_b9d9a348",
+        "filename": "src/com/android/launcher3/states/RotationHelper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 29242
+      },
+      "writtenOn": "2025-11-06T06:11:43Z",
+      "side": 1,
+      "message": "Resolved in PS2",
+      "parentUuid": "2bb9e594_923a0f35",
       "revId": "5051328a94e6fd19373c50e0e691e926659786de",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
