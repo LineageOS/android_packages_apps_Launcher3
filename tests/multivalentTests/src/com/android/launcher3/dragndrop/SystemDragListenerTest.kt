@@ -82,6 +82,7 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
         private fun createParams(itemInfo: ItemInfo?) =
             itemInfo?.let { dragInfo ->
                 SystemDragParams(
+                    clipData = mock(),
                     dragImage = mock(),
                     draggableView = mock(),
                     dragLayerX = DRAG_LAYER_X,

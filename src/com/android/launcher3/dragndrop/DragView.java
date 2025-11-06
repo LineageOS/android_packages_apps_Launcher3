@@ -550,6 +550,14 @@ public abstract class DragView<T extends Context & ActivityContext> extends Fram
         return mBlurSizeOutline;
     }
 
+    public int getRegistrationX() {
+        return mRegistrationX;
+    }
+
+    public int getRegistrationY() {
+        return mRegistrationY;
+    }
+
     public float getInitialScale() {
         return mInitialScale;
     }
