@@ -37,6 +37,7 @@ import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.app.animation.Interpolators.LINEAR
+import com.android.app.displaylib.PerDisplayRepository
 import com.android.launcher3.AbstractFloatingView.TYPE_TASK_MENU
 import com.android.launcher3.AbstractFloatingView.getTopOpenViewWithType
 import com.android.launcher3.Flags.enableDesktopExplodedView
@@ -51,6 +52,8 @@ import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.window.WindowManagerProxy.DesktopVisibilityListener
 import com.android.quickstep.GestureState
 import com.android.quickstep.RemoteTargetGluer.RemoteTargetHandle
+import com.android.quickstep.TaskAnimationManager
+import com.android.quickstep.recents.di.DisplayId
 import com.android.quickstep.util.DesksUtils.Companion.areMultiDesksFlagsEnabled
 import com.android.quickstep.util.DesktopTask
 import com.android.quickstep.util.GroupTask
@@ -83,7 +86,10 @@ constructor(
     @Assisted private val recentsView: RecentsView<*, *>,
     private val displayController: DisplayController,
     private val desktopState: DesktopState,
+    @DisplayId private val displayId: Int,
+    taskAnimationManagerRepo: PerDisplayRepository<TaskAnimationManager>,
 ) : DesktopVisibilityListener {
+    private val taskAnimationManager = taskAnimationManagerRepo[displayId]
     val taskViews = TaskViewsIterable(recentsView)
 
     var keyboardFocusTask: KeyboardFocusTask = KeyboardFocusTask.Unfocused
@@ -235,9 +241,7 @@ constructor(
 
     /** Returns true if it is in desktop-first mode. Otherwise, returns false. */
     fun isInDesktopFirstMode() =
-        displayController
-            .getInfoForDisplay(recentsView.mContainer.displayId)
-            ?.isInDesktopFirstMode == true
+        displayController.getInfoForDisplay(displayId)?.isInDesktopFirstMode == true
 
     /**
      * Returns false if it is the last desktop on desktop-first when multi-desk enabled. Otherwise,
@@ -434,12 +438,9 @@ constructor(
     }
 
     override fun onDeskAdded(displayId: Int, deskId: Int) {
-        with(recentsView) {
-            // Ignore desk changes that don't belong to this display.
-            if (displayId != mContainer.displayId) {
-                return
-            }
+        if (displayId != this.displayId) return
 
+        with(recentsView) {
             if (getDesktopTaskViewForDeskId(deskId) != null) {
                 Log.e(TAG, "A task view for this desk has already been added.")
                 return
@@ -487,17 +488,30 @@ constructor(
     }
 
     override fun onDeskRemoved(displayId: Int, deskId: Int) {
-        with(recentsView) {
-            // Ignore desk changes that don't belong to this display.
-            if (displayId != mContainer.displayId) {
-                return
-            }
+        if (displayId != this.displayId) return
 
-            // We need to distinguish between desk removals that are triggered from outside of
-            // overview vs. the ones that were initiated from overview by dismissing the
-            // corresponding desktop task view.
-            getDesktopTaskViewForDeskId(deskId)?.let { dismissTaskView(it, /* removeTask= */ true) }
+        // We need to distinguish between desk removals that are triggered from outside of
+        // overview vs. the ones that were initiated from overview by dismissing the
+        // corresponding desktop task view.
+        getDesktopTaskViewForDeskId(deskId)?.let {
+            recentsView.dismissTaskView(it, /* removeTask= */ true)
         }
+    }
+
+    override fun onActiveDeskChanged(displayId: Int, newActiveDesk: Int, oldActiveDesk: Int) {
+        if (!isInDesktopFirstMode()) return
+        if (displayId != this.displayId) return
+        if (oldActiveDesk != INACTIVE_DESK_ID || newActiveDesk == INACTIVE_DESK_ID) return
+        // TaskAnimationManager.onTasksAppeared already handles desktop task launching.
+        if (taskAnimationManager?.isRecentsAnimationRunning == true) return
+        // Desktop launch will close Recents when tra]nsition is finished.
+        if (recentsView.desktopRecentsController?.isDesktopLaunchOngoing() == true) return
+
+        Log.d(
+            TAG,
+            "onActiveDeskChanged - closing RecentsView because desk $newActiveDesk is activated",
+        )
+        recentsView.stateManager.moveToRestState()
     }
 
     /**

@@ -825,10 +825,8 @@ public abstract class RecentsView<
 
     RecentsViewModel mRecentsViewModel;
     private final RecentsViewModelHelper mHelper;
-    protected final RecentsViewUtils mUtils = LauncherComponentProvider.get(
-            getContext()).getRecentsViewUtilsFactory().create(this);
-    protected final RecentsDismissUtils mDismissUtils = LauncherComponentProvider.get(
-            getContext()).getRecentsDismissUtilsFactory().create(this);
+    protected final RecentsViewUtils mUtils;
+    protected final RecentsDismissUtils mDismissUtils;
 
     private final Matrix mTmpMatrix = new Matrix();
 
@@ -853,6 +851,8 @@ public abstract class RecentsView<
                 .build(mContainer);
         mRecentsViewModel = mRecentsComponent.getRecentsViewModel();
         mHelper = mRecentsComponent.getRecentsViewModelHelper();
+        mUtils = mRecentsComponent.getRecentsViewUtilsFactory().create(this);
+        mDismissUtils = mRecentsComponent.getRecentsDismissUtilsFactory().create(this);
 
         mScrollHapticMinGapMillis = getResources()
                 .getInteger(R.integer.recentsScrollHapticMinGapMillis);
@@ -1306,6 +1306,9 @@ public abstract class RecentsView<
                 }
             });
             if (mUtils.isTaskLaunchingInFreeFromWindow(taskId, apps)) {
+                Log.d(TAG,
+                        "launchSideTaskInLiveTileMode - return to desktop due to freeform task "
+                                + "launching");
                 returnToDesktop();
             }
         } else {
