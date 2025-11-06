@@ -224,9 +224,19 @@ public class LauncherSettings {
                 case CONTAINER_DESKTOP: return "desktop";
                 case CONTAINER_HOTSEAT: return "hotseat";
                 case CONTAINER_ALL_APPS_PREDICTION: return "prediction";
+                case CONTAINER_WIDGETS_PREDICTION: return "widgets_prediction";
+                case CONTAINER_HOTSEAT_PREDICTION: return "hotseat_prediction";
                 case CONTAINER_ALL_APPS: return "all_apps";
                 case CONTAINER_WIDGETS_TRAY: return "widgets_tray";
+                case CONTAINER_BOTTOM_WIDGETS_TRAY: return "bottom_widgets_tray";
+                case CONTAINER_PIN_WIDGETS: return "pin_widgets";
+                case CONTAINER_WALLPAPERS: return "wallpapers";
                 case CONTAINER_SHORTCUTS: return "shortcuts";
+                case CONTAINER_SETTINGS: return "settings";
+                case CONTAINER_TASKSWITCHER: return "taskswitcher";
+                case CONTAINER_PRIVATESPACE: return "privatespace";
+                case EXTENDED_CONTAINERS: return "extended_containers";
+                case CONTAINER_UNKNOWN: return "unknown";
                 default: return String.valueOf(container);
             }
         }
