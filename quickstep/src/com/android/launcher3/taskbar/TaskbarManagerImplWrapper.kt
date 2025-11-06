@@ -155,9 +155,8 @@ class TaskbarManagerImplWrapper(private val impl: TaskbarManagerImpl) : TaskbarM
     override fun getPrimaryDisplayUiControllerStream(): ListenableStream<TaskbarUIController> =
         impl.primaryDisplayUiControllerStream
 
-    /* TODO(b/404636836): Evaluate API calls on returned TaskbarUIController */
-    override fun getUIControllerForDisplay(displayId: Int): TaskbarUIController? {
-        return impl.getUIControllerForDisplay(displayId)
+    override fun getTaskbarInteractor(displayId: Int): TaskbarInteractor? {
+        return impl.getUIControllerForDisplay(displayId)?.let { TaskbarInteractor(it) }
     }
 
     /* TODO(b/404636836): Evaluate API calls on returned TaskbarActivityContext */

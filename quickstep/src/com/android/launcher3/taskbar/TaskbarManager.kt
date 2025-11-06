@@ -84,7 +84,7 @@ interface TaskbarManager : DisplayDecorationListener {
 
     fun dumpLogs(prefix: String, pw: PrintWriter)
 
-    fun getUIControllerForDisplay(displayId: Int): TaskbarUIController?
+    fun getTaskbarInteractor(displayId: Int): TaskbarInteractor?
 
     fun getTaskbarForDisplay(displayId: Int): TaskbarActivityContext?
 

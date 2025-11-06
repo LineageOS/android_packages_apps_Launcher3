@@ -425,9 +425,7 @@ constructor(
             ) {
                 // When recentsViewContainer is not RecentsWindowManager, get TaskbarUiController
                 // from TaskbarManager as a workaround.
-                taskbarManager.getUIControllerForDisplay(command.displayId)?.let {
-                    TaskbarInteractor(it)
-                }
+                taskbarManager.getTaskbarInteractor(command.displayId)
             } else {
                 containerInterface.getTaskbarInteractor()
             }
