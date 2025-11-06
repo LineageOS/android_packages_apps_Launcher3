@@ -142,6 +142,7 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
         // NOTE: The system drag listener registers itself with the launcher's drag controller
         // during construction. Verify the expected registration but then clear invocations so that
         // tests below don't need to be mindful of constructor-related interactions.
+        verify(mockLauncher.dragController).addDragListener(listener)
         verify(mockLauncher.dragController).addSystemDragHandler(listener)
         clearInvocations(mockLauncher.dragController)
     }
@@ -166,6 +167,15 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
         val closeAllOpenViews = params?.closeAllOpenViews ?: true
         val times = if (closeAllOpenViews) times(1) else times(0)
         verify(mockFloatingView, times).close(any())
+    }
+
+    @Test
+    fun testDragEnd() {
+        val callback = mock<Runnable>()
+        listener.setCleanupCallback(callback)
+        listener.onDragEnd()
+        verify(callback).run()
+        verify(mockLauncher.dragController).removeDragListener(listener)
     }
 
     @Test
