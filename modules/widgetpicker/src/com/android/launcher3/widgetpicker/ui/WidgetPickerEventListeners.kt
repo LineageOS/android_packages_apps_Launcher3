@@ -25,6 +25,9 @@ import com.android.launcher3.widgetpicker.shared.model.WidgetPreview
  * picker.
  */
 interface WidgetPickerEventListeners {
+    /** Called while widget picker content is running opening animation / closing animation. */
+    fun onSheetProgress(progress: Float) {}
+
     /** Called when the widget picker is dismissed. */
     fun onClose()
 

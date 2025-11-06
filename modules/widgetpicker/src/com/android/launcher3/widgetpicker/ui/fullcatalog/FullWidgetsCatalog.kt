@@ -120,6 +120,7 @@ constructor(private val viewModelFactory: FullWidgetsCatalogViewModel.Factory) {
                 modifier = testTagModifier,
                 title = viewModel.title.takeIf { !isCompactHeight },
                 description = viewModel.description,
+                onSheetProgress = eventListeners::onSheetProgress,
                 onDismissSheet = onDismissSheet,
                 onSheetOpen = onSheetOpen,
             ) {
@@ -140,6 +141,7 @@ constructor(private val viewModelFactory: FullWidgetsCatalogViewModel.Factory) {
                 enableSwipeUpToDismiss = viewModel.enableSwipeUpToClose,
                 onDismissSheet = onDismissSheet,
                 onSheetOpen = onSheetOpen,
+                onSheetProgress = eventListeners::onSheetProgress,
             ) {
                 ActiveScreen(viewModel, isCompactWidth, eventListeners)
             }

@@ -191,6 +191,7 @@ class TitledBottomSheetTest {
                             },
                         closeBehavior = closeBehavior,
                         onSheetOpen = {},
+                        onSheetProgress = {},
                         onDismissSheet = { isClosed = true },
                     ) {
                         LazyColumn(modifier = Modifier.testTag(LIST_TEST_TAG)) {

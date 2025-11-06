@@ -64,6 +64,7 @@ import kotlinx.coroutines.launch
  * Use in combination with [dismissibleSheetContent] that's applied on the content.
  *
  * @param onSheetOpen callback invoked when sheet is fully opened first time.
+ * @param onSheetProgress callback invoked while sheet is opening / closing.
  * @param onDismissSheet final callback invoked when the sheet has settled animating after a gesture
  *   that led to dismissing the sheet.
  * @param maxHeight max height available for the sheet
@@ -73,6 +74,7 @@ import kotlinx.coroutines.launch
 fun Modifier.dismissibleSheet(
     sheetState: SheetDismissState,
     onSheetOpen: () -> Unit,
+    onSheetProgress: (Float) -> Unit,
     onDismissSheet: () -> Unit,
     maxHeight: Float,
     enableNestedScrolling: Boolean = true,
@@ -144,6 +146,16 @@ fun Modifier.dismissibleSheet(
                 }
                 previous = it
             }
+    }
+
+    LaunchedEffect(sheetState, maxHeight) {
+        if (maxHeight != 0f) {
+            snapshotFlow { sheetState.anchoredDraggableState.offset }
+                .collect { offset ->
+                    val progress = abs(offset - maxHeight) / maxHeight
+                    onSheetProgress(progress.coerceIn(0f, 1f))
+                }
+        }
     }
 
     PredictiveBackHandler { progress: Flow<BackEventCompat> ->
