@@ -75,7 +75,8 @@ constructor(
         val grid = activityContext.deviceProfile
         var targetCount =
             EXTRA_ICONS_COUNT +
-                (PREINFLATE_ICONS_ROW_COUNT + grid.maxAllAppsRowCount) * grid.numShownAllAppsColumns
+                (PREINFLATE_ICONS_ROW_COUNT + grid.maxAllAppsRowCount) *
+                    grid.allAppsProfile.numShownAllAppsColumns
 
         // Double the count if there is a work tab
         if (allAppsStore.apps.any { userCache.getUserInfo(it.user).isWork }) {

@@ -16,10 +16,14 @@
 
 package com.android.launcher3.deviceprofile
 
+import android.content.Context
 import android.content.res.Resources
+import android.content.res.TypedArray
 import android.graphics.Point
+import android.graphics.Rect
 import android.util.DisplayMetrics
 import com.android.launcher3.InvariantDeviceProfile
+import com.android.launcher3.InvariantDeviceProfile.DisplayOptionSpec
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
 import com.android.launcher3.Utilities.getIconVisibleSizePx
@@ -27,6 +31,7 @@ import com.android.launcher3.Utilities.getNormalizedIconDrawablePadding
 import com.android.launcher3.Utilities.pxFromSp
 import com.android.launcher3.responsive.CalculatedCellSpec
 import com.android.launcher3.responsive.CalculatedResponsiveSpec
+import com.android.launcher3.testing.shared.ResourceUtils
 import com.android.launcher3.testing.shared.ResourceUtils.pxFromDp
 import com.android.launcher3.util.CellContentDimensions
 import com.android.launcher3.util.IconSizeSteps
@@ -41,6 +46,12 @@ data class AllAppsProfile(
     val iconDrawablePaddingPx: Int,
     val maxAllAppsTextLineCount: Int,
     val cellWidthPx: Int,
+    val openDuration: Int,
+    val closeDuration: Int,
+    val leftRightMargin: Int,
+    val padding: Rect,
+    val shiftRange: Int,
+    val numShownAllAppsColumns: Int,
 ) {
 
     /**
@@ -68,11 +79,16 @@ data class AllAppsProfile(
             inv: InvariantDeviceProfile,
             metric: DisplayMetrics,
             typeIndex: Int,
-            scale: Float,
-            iconSizePx: Int,
-            iconDrawablePaddingOriginalPx: Int,
+            res: Resources,
+            context: Context,
+            allAppsTopPadding: Int,
+            workspaceProfile: WorkspaceProfile,
+            deviceProperties: DeviceProperties,
+            displayOptionSpec: DisplayOptionSpec,
+            insets: Rect,
         ): AllAppsProfile {
-            val allAppsBorderSpacePx = calculateAllAppsBorderSpacePx(inv, metric, typeIndex, scale)
+            val allAppsBorderSpacePx =
+                calculateAllAppsBorderSpacePx(inv, metric, typeIndex, workspaceProfile.scale)
             var allAppsCellHeightPx =
                 (pxFromDp(inv.allAppsCellSize[typeIndex].y, metric) + allAppsBorderSpacePx.y)
             var allAppsIconSizePx = pxFromDp(inv.allAppsIconSize[typeIndex], metric)
@@ -81,10 +97,12 @@ data class AllAppsProfile(
             val allAppsIconDrawablePaddingPx =
                 max(
                     0,
-                    (iconDrawablePaddingOriginalPx -
-                        ((iconSizePx - getIconVisibleSizePx(iconSizePx)) / 2)),
+                    (workspaceProfile.iconDrawablePaddingOriginalPx -
+                        ((workspaceProfile.iconSizePx -
+                            getIconVisibleSizePx(workspaceProfile.iconSizePx)) / 2)),
                 )
-            var allAppsCellWidthPx = pxFromDp(inv.allAppsCellSize[typeIndex].x, metric, scale)
+            var allAppsCellWidthPx =
+                pxFromDp(inv.allAppsCellSize[typeIndex].x, metric, workspaceProfile.scale)
 
             if (allAppsCellWidthPx < allAppsIconSizePx) {
                 // If allAppsCellWidth no longer fit allAppsIconSize, reduce allAppsBorderSpace to
@@ -116,6 +134,18 @@ data class AllAppsProfile(
                 allAppsCellHeightPx = cellContentHeight
             }
 
+            val numShownAllAppsColumns = displayOptionSpec.numAllAppsColumns
+
+            val allAppsPadding =
+                calculateNonResponsivePadding(
+                    deviceProperties = deviceProperties,
+                    workspaceProfile = workspaceProfile,
+                    borderSpacePx = allAppsBorderSpacePx,
+                    context = context,
+                    inv = inv,
+                    allAppsTopPadding = allAppsTopPadding,
+                )
+
             return AllAppsProfile(
                 borderSpacePx = allAppsBorderSpacePx,
                 cellHeightPx = allAppsCellHeightPx,
@@ -124,6 +154,55 @@ data class AllAppsProfile(
                 iconDrawablePaddingPx = allAppsIconDrawablePaddingPx,
                 maxAllAppsTextLineCount = 1,
                 cellWidthPx = allAppsCellWidthPx,
+                openDuration = res.getInteger(R.integer.config_allAppsOpenDuration),
+                closeDuration = res.getInteger(R.integer.config_allAppsCloseDuration),
+                leftRightMargin =
+                    calculateallAppsLeftRightMargin(
+                        allAppsCellWidthPx,
+                        numShownAllAppsColumns,
+                        allAppsBorderSpacePx,
+                        allAppsPadding,
+                        deviceProperties,
+                    ),
+                padding = allAppsPadding,
+                numShownAllAppsColumns = numShownAllAppsColumns,
+                shiftRange = deviceProperties.heightPx - allAppsTopPadding + insets.top,
+            )
+        }
+
+        fun calculateNonResponsivePadding(
+            deviceProperties: DeviceProperties,
+            workspaceProfile: WorkspaceProfile,
+            borderSpacePx: Point,
+            context: Context,
+            inv: InvariantDeviceProfile,
+            allAppsTopPadding: Int,
+        ): Rect {
+            val allAppsStyle: TypedArray =
+                context.obtainStyledAttributes(
+                    if (inv.allAppsStyle != ResourceUtils.INVALID_RESOURCE_HANDLE) inv.allAppsStyle
+                    else R.style.AllAppsStyleDefault,
+                    R.styleable.AllAppsStyle,
+                )
+            var leftAndRight =
+                allAppsStyle.getDimensionPixelSize(R.styleable.AllAppsStyle_horizontalPadding, 0)
+            if (!deviceProperties.isTablet) {
+                val cellLayoutHorizontalPadding: Int =
+                    (workspaceProfile.cellLayoutPaddingPx.left +
+                        workspaceProfile.cellLayoutPaddingPx.right) / 2
+                leftAndRight =
+                    max(
+                        0,
+                        workspaceProfile.desiredWorkspaceHorizontalMarginPx +
+                            cellLayoutHorizontalPadding - (borderSpacePx.x / 2),
+                    )
+            }
+            allAppsStyle.recycle()
+            return Rect(
+                /* left */ leftAndRight,
+                /* top */ allAppsTopPadding,
+                /* right */ leftAndRight,
+                /* bottom */ 0,
             )
         }
 
@@ -133,11 +212,30 @@ data class AllAppsProfile(
             metric: DisplayMetrics,
             typeIndex: Int,
             scale: Float,
+            deviceProperties: DeviceProperties,
+            displayOptionSpec: DisplayOptionSpec,
+            context: Context,
+            allAppsTopPadding: Int,
+            workspaceProfile: WorkspaceProfile,
+            insets: Rect,
         ): AllAppsProfile {
             val allAppsBorderSpacePx = calculateAllAppsBorderSpacePx(inv, metric, typeIndex, scale)
             val allAppsIconSizePx = max(1, pxFromDp(inv.allAppsIconSize[typeIndex], metric, scale))
             val allAppsIconDrawablePaddingPx =
                 res.getDimensionPixelSize(R.dimen.all_apps_icon_drawable_padding)
+            val cellWidthPx = allAppsIconSizePx + (2 * allAppsIconDrawablePaddingPx)
+            val numShownAllAppsColumns = displayOptionSpec.numAllAppsColumns
+
+            val allAppsPadding =
+                calculateNonResponsivePadding(
+                    deviceProperties = deviceProperties,
+                    workspaceProfile = workspaceProfile,
+                    borderSpacePx = allAppsBorderSpacePx,
+                    context = context,
+                    inv = inv,
+                    allAppsTopPadding = allAppsTopPadding,
+                )
+
             return AllAppsProfile(
                 borderSpacePx = allAppsBorderSpacePx,
                 // AllApps cells don't have real space between cells,
@@ -153,16 +251,53 @@ data class AllAppsProfile(
                         .toFloat(),
                 iconDrawablePaddingPx = allAppsIconDrawablePaddingPx,
                 maxAllAppsTextLineCount = 1,
-                cellWidthPx = allAppsIconSizePx + (2 * allAppsIconDrawablePaddingPx),
+                cellWidthPx = cellWidthPx,
+                openDuration = res.getInteger(R.integer.config_allAppsOpenDuration),
+                closeDuration = res.getInteger(R.integer.config_allAppsCloseDuration),
+                leftRightMargin =
+                    calculateallAppsLeftRightMargin(
+                        cellWidthPx,
+                        numShownAllAppsColumns,
+                        allAppsBorderSpacePx,
+                        allAppsPadding,
+                        deviceProperties,
+                    ),
+                numShownAllAppsColumns = numShownAllAppsColumns,
+                shiftRange = deviceProperties.heightPx - allAppsTopPadding + insets.top,
+                padding = allAppsPadding,
             )
         }
 
+        fun calculateallAppsLeftRightMargin(
+            cellWidthPx: Int,
+            numShownAllAppsColumns: Int,
+            borderSpacePx: Point,
+            allAppsPadding: Rect,
+            deviceProperties: DeviceProperties,
+        ): Int {
+            if (deviceProperties.isTablet) {
+                val usedWidth: Int =
+                    ((cellWidthPx * numShownAllAppsColumns) +
+                        (borderSpacePx.x * (numShownAllAppsColumns - 1)) +
+                        allAppsPadding.left +
+                        allAppsPadding.right)
+                return max(1, (deviceProperties.availableWidthPx - usedWidth) / 2)
+            } else {
+                return 0
+            }
+        }
+
         fun createAllAppsWithResponsive(
+            deviceProperties: DeviceProperties,
             responsiveAllAppsCellSpec: CalculatedCellSpec,
             responsiveAllAppsWidthSpec: CalculatedResponsiveSpec,
             responsiveAllAppsHeightSpec: CalculatedResponsiveSpec,
             iconSizeSteps: IconSizeSteps,
             isVerticalBarLayout: Boolean,
+            res: Resources,
+            displayOptionSpec: DisplayOptionSpec,
+            allAppsTopPadding: Int,
+            insets: Rect,
         ): AllAppsProfile {
             var allAppsIconSizePx = responsiveAllAppsCellSpec.iconSize
             var allAppsIconTextSizePx: Float = responsiveAllAppsCellSpec.iconTextSize.toFloat()
@@ -207,6 +342,19 @@ data class AllAppsProfile(
 
             allAppsCellHeightPx += responsiveAllAppsHeightSpec.gutterPx
 
+            val numShownAllAppsColumns = displayOptionSpec.numAllAppsColumns
+
+            // This workaround is needed to align AllApps icons with Workspace icons
+            // since AllApps doesn't have borders between cells
+            val halfBorder: Int = allAppsBorderSpacePx.x / 2
+            val allAppsPadding =
+                Rect(
+                    /* left */ responsiveAllAppsWidthSpec.startPaddingPx - halfBorder,
+                    /* top */ allAppsTopPadding,
+                    /* right */ responsiveAllAppsWidthSpec.endPaddingPx - halfBorder,
+                    /* bottom */ 0,
+                )
+
             val allAppsProfile =
                 AllAppsProfile(
                     borderSpacePx = allAppsBorderSpacePx,
@@ -216,6 +364,19 @@ data class AllAppsProfile(
                     iconDrawablePaddingPx = allAppsIconDrawablePaddingPx,
                     maxAllAppsTextLineCount = maxAllAppsTextLineCount,
                     cellWidthPx = allAppsCellWidthPx,
+                    openDuration = res.getInteger(R.integer.config_allAppsOpenDuration),
+                    closeDuration = res.getInteger(R.integer.config_allAppsCloseDuration),
+                    leftRightMargin =
+                        calculateallAppsLeftRightMargin(
+                            allAppsCellWidthPx,
+                            numShownAllAppsColumns,
+                            allAppsBorderSpacePx,
+                            allAppsPadding,
+                            deviceProperties,
+                        ),
+                    padding = allAppsPadding,
+                    shiftRange = deviceProperties.heightPx - allAppsTopPadding + insets.top,
+                    numShownAllAppsColumns = numShownAllAppsColumns,
                 )
 
             return when {
@@ -244,9 +405,12 @@ data class AllAppsProfile(
             metric: DisplayMetrics,
             isScalableGrid: Boolean,
             typeIndex: Int,
-            scale: Float,
-            iconSizePx: Int,
-            iconDrawablePaddingOriginalPx: Int,
+            workspaceProfile: WorkspaceProfile,
+            deviceProperties: DeviceProperties,
+            context: Context,
+            allAppsTopPadding: Int,
+            displayOptionSpec: DisplayOptionSpec,
+            insets: Rect,
         ) =
             when {
                 isScalableGrid -> {
@@ -254,14 +418,30 @@ data class AllAppsProfile(
                         inv = inv,
                         metric = metric,
                         typeIndex = typeIndex,
-                        scale = scale,
-                        iconSizePx = iconSizePx,
-                        iconDrawablePaddingOriginalPx = iconDrawablePaddingOriginalPx,
+                        res = res,
+                        context = context,
+                        allAppsTopPadding = allAppsTopPadding,
+                        workspaceProfile = workspaceProfile,
+                        deviceProperties = deviceProperties,
+                        displayOptionSpec = displayOptionSpec,
+                        insets = insets,
                     )
                 }
 
                 else -> {
-                    createAllAppsProfileNonScalable(res, inv, metric, typeIndex, scale)
+                    createAllAppsProfileNonScalable(
+                        res = res,
+                        inv = inv,
+                        metric = metric,
+                        typeIndex = typeIndex,
+                        scale = workspaceProfile.scale,
+                        deviceProperties = deviceProperties,
+                        context = context,
+                        allAppsTopPadding = allAppsTopPadding,
+                        workspaceProfile = workspaceProfile,
+                        displayOptionSpec = displayOptionSpec,
+                        insets = insets,
+                    )
                 }
             }
     }

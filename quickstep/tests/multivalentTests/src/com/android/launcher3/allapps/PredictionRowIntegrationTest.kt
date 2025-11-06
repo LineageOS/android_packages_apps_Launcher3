@@ -48,7 +48,8 @@ class PredictionRowIntegrationTest {
             Assert.assertTrue(
                 "The number of predicted apps is not the same as the number of all apps " +
                     "columns",
-                predictionRowView?.childCount == launcher.deviceProfile.numShownAllAppsColumns,
+                predictionRowView?.childCount ==
+                    launcher.deviceProfile.allAppsProfile.numShownAllAppsColumns,
             )
         }
     }

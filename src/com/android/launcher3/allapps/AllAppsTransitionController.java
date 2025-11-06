@@ -138,7 +138,7 @@ public class AllAppsTransitionController
         mNavScrimFlag = Themes.getAttrBoolean(l, R.attr.isMainColorDark)
                 ? FLAG_DARK_NAV : FLAG_LIGHT_NAV;
 
-        setShiftRange(dp.allAppsShiftRange);
+        setShiftRange(dp.getAllAppsProfile().getShiftRange());
         mAllAppScale.value = 1;
         mLauncher.addOnDeviceProfileChangeListener(this);
         mMSDLPlayerWrapper = MSDLPlayerWrapper.INSTANCE.get(mLauncher.getApplicationContext());
@@ -151,7 +151,7 @@ public class AllAppsTransitionController
     @Override
     public void onDeviceProfileChanged(DeviceProfile dp) {
         mIsVerticalLayout = dp.isVerticalBarLayout();
-        setShiftRange(dp.allAppsShiftRange);
+        setShiftRange(dp.getAllAppsProfile().getShiftRange());
 
         if (mIsVerticalLayout) {
             mLauncher.getHotseat().setTranslationY(0);
