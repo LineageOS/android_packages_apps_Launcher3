@@ -86,7 +86,7 @@ public class AllAppsTransitionController
     private static final float NAV_BAR_COLOR_FORCE_UPDATE_THRESHOLD = 0.1f;
 
     public static final FloatProperty<AllAppsTransitionController> ALL_APPS_PROGRESS =
-            new FloatProperty<AllAppsTransitionController>("allAppsProgress") {
+            new FloatProperty<>("allAppsProgress") {
                 @Override
                 public Float get(AllAppsTransitionController controller) {
                     return controller.mProgress;
@@ -168,6 +168,9 @@ public class AllAppsTransitionController
      * @see #setStateWithAnimation(LauncherState, StateAnimationConfig, PendingAnimation)
      */
     public void setProgress(float progress) {
+        if (Float.compare(mProgress, progress) == 0) {
+            return;
+        }
         mProgress = progress;
         boolean fromBackground =
                 mLauncher.getStateManager().getCurrentStableState() == BACKGROUND_APP;
@@ -347,6 +350,9 @@ public class AllAppsTransitionController
      * Updates the property for the provided state
      */
     public void setAlphas(LauncherState state, StateAnimationConfig config, PropertySetter setter) {
+        if (!isAllAppsRenderedByLauncher()) {
+            return;
+        }
         int visibleElements = state.getVisibleElements(mLauncher.getLauncherUiState());
         boolean hasAllAppsContent = (visibleElements & ALL_APPS_CONTENT) != 0;
 
@@ -369,12 +375,21 @@ public class AllAppsTransitionController
     public void setupViews(ScrimView scrimView, ActivityAllAppsContainerView<Launcher> appsView) {
         mScrimView = scrimView;
         mAppsView = appsView;
-        mAppsView.setScrimView(scrimView);
+        if (isAllAppsRenderedByLauncher()) {
+            mAppsView.setScrimView(scrimView);
+        } else {
+            appsView.setVisibility(View.GONE);
+        }
 
         mAppsViewAlpha = new MultiValueAlpha(mAppsView, APPS_VIEW_INDEX_COUNT, View.GONE);
         mAppsViewAlpha.setUpdateVisibility(true);
         mAppsViewTranslationY = new MultiPropertyFactory<>(
                 mAppsView, VIEW_TRANSLATE_Y, APPS_VIEW_INDEX_COUNT, Float::sum);
+    }
+
+    /** This might return {@code false} if All Apps is rendered in a separate window. */
+    private boolean isAllAppsRenderedByLauncher() {
+        return ALL_APPS.areElementsVisible(mLauncher.getLauncherUiState(), ALL_APPS_CONTENT);
     }
 
     /**

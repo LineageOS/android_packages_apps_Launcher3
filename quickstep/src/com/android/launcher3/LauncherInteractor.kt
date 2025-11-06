@@ -203,6 +203,17 @@ class LauncherInteractor(private val launcher: QuickstepLauncher) : ActivityInte
         executor.execute { launcher.launchSplitTasks(splitTask, remoteTransition) }
     }
 
+
+    @AnyThread
+    fun onTaskbarAllAppsClosed() {
+        executor.execute {
+            if (launcher.isResumed && launcher.stateManager.state == LauncherState.ALL_APPS) {
+                // TODO(b/414847564) - Connect swipe-to-close to state transition.
+                launcher.stateManager.goToState(LauncherState.NORMAL, /* animate= */ true)
+            }
+        }
+    }
+
     @AnyThread
     fun setBubbleBarLocation(location: BubbleBarLocation?) {
         executor.execute { launcher.setBubbleBarLocation(location) }
