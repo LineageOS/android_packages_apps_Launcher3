@@ -37,6 +37,7 @@ class TaplTaskbarPinningTest : AbstractTaplTestsTaskbar() {
     }
 
     override fun tearDown() {
+        mLauncher.goHome().switchToOverview().dismissAllTasks()
         mLauncher.clearLauncherData()
         super.tearDown()
     }

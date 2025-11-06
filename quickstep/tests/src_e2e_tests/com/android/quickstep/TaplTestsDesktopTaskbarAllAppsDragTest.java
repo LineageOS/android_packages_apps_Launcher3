@@ -66,7 +66,7 @@ public class TaplTestsDesktopTaskbarAllAppsDragTest extends AbstractTaplTestsTas
     }
 
     @Override
-    protected boolean startCalendarAppDuringSetup() {
+    protected boolean startCalculatorAppDuringSetup() {
         return false;
     }
 
