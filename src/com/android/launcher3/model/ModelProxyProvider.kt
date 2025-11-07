@@ -117,7 +117,7 @@ constructor(
         sortOrder: String?,
     ): Cursor =
         executeControllerTask(uri, selection, selectionArgs) { parsedWhere, parsedArgs ->
-            modelDbController.query(projection?.mapToNullable(), parsedWhere, parsedArgs, sortOrder)
+            modelDbController.query(projection?.asSubtype(), parsedWhere, parsedArgs, sortOrder)
         }
 
     override fun insert(uri: Uri, values: ContentValues): Uri? =
@@ -171,7 +171,7 @@ constructor(
 
     override fun update(
         uri: Uri,
-        values: ContentValues?,
+        values: ContentValues,
         selection: String?,
         selectionArgs: Array<out String>?,
         extras: Bundle?,
@@ -185,14 +185,14 @@ constructor(
         url: Uri,
         where: String? = null,
         args: Array<out String>? = null,
-        crossinline task: (String?, Array<String?>?) -> T,
+        crossinline task: (String?, Array<String>?) -> T,
     ): T {
         require(Binder.getCallingPid() != Process.myPid()) {
             "Same process should call model directly"
         }
         val (parsedWhere, parsedArgs) =
             when (url.pathSegments.size) {
-                1 -> where to args?.mapToNullable()
+                1 -> where to args?.asSubtype()
                 2 -> {
                     require(TextUtils.isEmpty(where)) { "WHERE clause not supported: $url" }
                     "_id=${ContentUris.parseId(url)}" to null
@@ -212,7 +212,7 @@ constructor(
         }
     }
 
-    private fun Array<out String>.mapToNullable(): Array<String?> = map { it }.toTypedArray()
+    private fun Array<out String>.asSubtype(): Array<String> = this as Array<String>
 
     /**
      * The caller must have the read or write permission for this content provider to access the
