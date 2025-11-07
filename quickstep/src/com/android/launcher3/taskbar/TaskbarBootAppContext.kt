@@ -26,6 +26,7 @@ import com.android.launcher3.compose.widgetpicker.LauncherWidgetPickerModule
 import com.android.launcher3.concurrent.ExecutorsModule
 import com.android.launcher3.dagger.ApiWrapperModule
 import com.android.launcher3.dagger.AppModule
+import com.android.launcher3.dagger.AutomationModule
 import com.android.launcher3.dagger.DesktopModule
 import com.android.launcher3.dagger.HomeScreenFilesModule
 import com.android.launcher3.dagger.LauncherAppComponent
@@ -35,7 +36,6 @@ import com.android.launcher3.dagger.PerDisplayModule
 import com.android.launcher3.dagger.SettingsModule
 import com.android.launcher3.dagger.StaticObjectModule
 import com.android.launcher3.dagger.SystemDragModule
-import com.android.launcher3.dagger.TaskAutomationModule
 import com.android.launcher3.dagger.TaskOverlayModule
 import com.android.launcher3.dagger.WidgetModule
 import com.android.launcher3.dagger.WindowManagerProxyModule
@@ -110,7 +110,7 @@ abstract class QsbWidgetModule {
             SettingsModule::class,
             SystemDragModule::class,
             QsbWidgetModule::class,
-            TaskAutomationModule::class,
+            AutomationModule::class,
             TaskOverlayModule::class,
         ]
 )

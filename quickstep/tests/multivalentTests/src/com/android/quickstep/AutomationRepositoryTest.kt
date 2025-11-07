@@ -22,6 +22,8 @@ import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.extensions.computercontrol.AutomatedPackageListener
 import com.android.extensions.computercontrol.ComputerControlExtensions
+import com.android.launcher3.automation.AutomationChange
+import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.Executors.IMMEDIATE_EXECUTOR
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -41,11 +43,17 @@ class AutomationRepositoryTest {
 
     private lateinit var automationRepo: AutomationRepositoryImpl
     private lateinit var automatedPackageListener: AutomatedPackageListener
+    private val lifeCycleTracker = mock<DaggerSingletonTracker>()
 
     @Before
     fun setup() {
         automationRepo =
-            AutomationRepositoryImpl(context, computerControlExtensions, IMMEDIATE_EXECUTOR)
+            AutomationRepositoryImpl(
+                context,
+                computerControlExtensions,
+                IMMEDIATE_EXECUTOR,
+                lifeCycleTracker,
+            )
 
         val automatedPackageListenerCaptor = argumentCaptor<AutomatedPackageListener>()
         verify(computerControlExtensions)
@@ -56,39 +64,245 @@ class AutomationRepositoryTest {
             )
         assertThat(automatedPackageListenerCaptor.lastValue).isNotNull()
         automatedPackageListener = automatedPackageListenerCaptor.lastValue
+    }
 
+    @Test
+    fun onAutomatedPackagesChanged_addPackage_dispatchesAutomationChange() {
+        val receivedChanges = mutableListOf<AutomationChange>()
+        // Given
+        automationRepo.automationChanges
+            .forEach(IMMEDIATE_EXECUTOR) { receivedChanges.add(it) }
+            .use {
+                // When
+                automatedPackageListener.onAutomatedPackagesChanged(
+                    AUTOMATING_PACKAGE,
+                    listOf(AUTOMATED_PACKAGE),
+                    USER_HANDLE,
+                )
+
+                // Then
+                assertThat(receivedChanges).hasSize(1)
+                receivedChanges.first().run {
+                    assertThat(userHandle).isEqualTo(USER_HANDLE)
+                    assertThat(addedPackages).isEqualTo(setOf(AUTOMATED_PACKAGE))
+                    assertThat(removedPackages).isEmpty()
+                }
+            }
+    }
+
+    @Test
+    fun onAutomatedPackagesChanged_removePackage_dispatchesAutomationChange() {
+        val receivedChanges = mutableListOf<AutomationChange>()
+        // Given
         automatedPackageListener.onAutomatedPackagesChanged(
             AUTOMATING_PACKAGE,
             listOf(AUTOMATED_PACKAGE),
             USER_HANDLE,
         )
+        automationRepo.automationChanges
+            .forEach(IMMEDIATE_EXECUTOR) { receivedChanges.add(it) }
+            .use {
+                // When
+                automatedPackageListener.onAutomatedPackagesChanged(
+                    AUTOMATING_PACKAGE,
+                    emptyList(),
+                    USER_HANDLE,
+                )
+
+                // Then
+                assertThat(receivedChanges).hasSize(1)
+                receivedChanges.first().run {
+                    assertThat(userHandle).isEqualTo(USER_HANDLE)
+                    assertThat(addedPackages).isEmpty()
+                    assertThat(removedPackages).isEqualTo(setOf(AUTOMATED_PACKAGE))
+                }
+            }
     }
 
     @Test
-    fun isPackageAutomated_automated_returnsTrue() {
-        assertThat(automationRepo.isPackageAutomated(AUTOMATED_PACKAGE)).isTrue()
-    }
-
-    @Test
-    fun isPackageAutomated_notAutomated_returnsFalse() {
-        assertThat(automationRepo.isPackageAutomated(NOT_AUTOMATED_PACKAGE)).isFalse()
-    }
-
-    @Test
-    fun isPackageAutomated_noLongerAutomated_returnsTrue() {
-        assertThat(automationRepo.isPackageAutomated(AUTOMATED_PACKAGE)).isTrue()
+    fun isPackageAutomated_automatedPkg_returnsTrue() {
+        // Given
         automatedPackageListener.onAutomatedPackagesChanged(
             AUTOMATING_PACKAGE,
-            listOf(),
+            listOf(AUTOMATED_PACKAGE),
             USER_HANDLE,
         )
-        assertThat(automationRepo.isPackageAutomated(AUTOMATED_PACKAGE)).isFalse()
+
+        // Then
+        assertThat(automationRepo.isPackageAutomated(USER_HANDLE, AUTOMATED_PACKAGE)).isTrue()
+        assertThat(automationRepo.isPackageAutomated(USER_ID, AUTOMATED_PACKAGE)).isTrue()
+    }
+
+    @Test
+    fun isPackageAutomated_notAutomatedPkg_returnsFalse() {
+        // Given
+        automatedPackageListener.onAutomatedPackagesChanged(
+            AUTOMATING_PACKAGE,
+            listOf(AUTOMATED_PACKAGE),
+            USER_HANDLE,
+        )
+
+        // Then
+        assertThat(automationRepo.isPackageAutomated(USER_HANDLE, NOT_AUTOMATED_PACKAGE)).isFalse()
+        assertThat(automationRepo.isPackageAutomated(USER_ID, NOT_AUTOMATED_PACKAGE)).isFalse()
+    }
+
+    @Test
+    fun isPackageAutomated_differentUser_returnsFalse() {
+        // Given
+        automatedPackageListener.onAutomatedPackagesChanged(
+            AUTOMATING_PACKAGE,
+            listOf(AUTOMATED_PACKAGE),
+            UserHandle(999),
+        )
+
+        // Then
+        assertThat(automationRepo.isPackageAutomated(USER_HANDLE, AUTOMATED_PACKAGE)).isFalse()
+        assertThat(automationRepo.isPackageAutomated(USER_ID, AUTOMATED_PACKAGE)).isFalse()
+    }
+
+    @Test
+    fun isPackageAutomated_differentAutomatingPkg_returnsTrue() {
+        // Given
+        automatedPackageListener.onAutomatedPackagesChanged(
+            AUTOMATING_PACKAGE,
+            listOf(AUTOMATED_PACKAGE),
+            USER_HANDLE,
+        )
+        automatedPackageListener.onAutomatedPackagesChanged(
+            "Other.Automating.Package",
+            listOf(AUTOMATED_PACKAGE),
+            USER_HANDLE,
+        )
+        automatedPackageListener.onAutomatedPackagesChanged(
+            AUTOMATING_PACKAGE,
+            emptyList(),
+            USER_HANDLE,
+        )
+
+        // Then
+        assertThat(automationRepo.isPackageAutomated(USER_HANDLE, AUTOMATED_PACKAGE)).isTrue()
+        assertThat(automationRepo.isPackageAutomated(USER_ID, AUTOMATED_PACKAGE)).isTrue()
+    }
+
+    @Test
+    fun onAutomatedPackagesChanged_alreadyAutomated_doesNotDispatchChange() {
+        val receivedChanges = mutableListOf<AutomationChange>()
+        // Given
+        automatedPackageListener.onAutomatedPackagesChanged(
+            AUTOMATING_PACKAGE,
+            listOf(AUTOMATED_PACKAGE),
+            USER_HANDLE,
+        )
+
+        automationRepo.automationChanges
+            .forEach(IMMEDIATE_EXECUTOR) { receivedChanges.add(it) }
+            .use {
+                // When
+                automatedPackageListener.onAutomatedPackagesChanged(
+                    "com.other.package",
+                    listOf(AUTOMATED_PACKAGE),
+                    USER_HANDLE,
+                )
+
+                // Then
+                assertThat(receivedChanges).isEmpty()
+            }
+    }
+
+    @Test
+    fun onAutomatedPackagesChanged_stillAutomatedByAnother_doesNotDispatchRemoved() {
+        val receivedChanges = mutableListOf<AutomationChange>()
+        // Given
+        automatedPackageListener.onAutomatedPackagesChanged(
+            AUTOMATING_PACKAGE,
+            listOf(AUTOMATED_PACKAGE),
+            USER_HANDLE,
+        )
+        automatedPackageListener.onAutomatedPackagesChanged(
+            "com.test.automating2",
+            listOf(AUTOMATED_PACKAGE),
+            USER_HANDLE,
+        )
+
+        automationRepo.automationChanges
+            .forEach(IMMEDIATE_EXECUTOR) { receivedChanges.add(it) }
+            .use {
+                // When
+                automatedPackageListener.onAutomatedPackagesChanged(
+                    AUTOMATING_PACKAGE,
+                    emptyList(),
+                    USER_HANDLE,
+                )
+
+                // Then
+                assertThat(receivedChanges).isEmpty()
+                assertThat(automationRepo.isPackageAutomated(USER_HANDLE, AUTOMATED_PACKAGE))
+                    .isTrue()
+                assertThat(automationRepo.isPackageAutomated(USER_ID, AUTOMATED_PACKAGE)).isTrue()
+            }
+    }
+
+    @Test
+    fun onAutomatedPackagesChanged_whenExistingEntryChanged_dispatchRemoveAndAdd() {
+        val receivedChanges = mutableListOf<AutomationChange>()
+
+        // Given
+        automatedPackageListener.onAutomatedPackagesChanged(
+            AUTOMATING_PACKAGE,
+            listOf(AUTOMATED_PACKAGE),
+            USER_HANDLE,
+        )
+        val otherAutomatedPackage = "com.test.automated2"
+        automationRepo.automationChanges
+            .forEach(IMMEDIATE_EXECUTOR) { receivedChanges.add(it) }
+            .use {
+
+                // When
+                automatedPackageListener.onAutomatedPackagesChanged(
+                    AUTOMATING_PACKAGE,
+                    listOf(otherAutomatedPackage),
+                    USER_HANDLE,
+                )
+
+                // Then
+                assertThat(receivedChanges).hasSize(1)
+                receivedChanges.first().run {
+                    assertThat(userHandle).isEqualTo(USER_HANDLE)
+                    assertThat(addedPackages).containsExactly(otherAutomatedPackage)
+                    assertThat(removedPackages).containsExactly(AUTOMATED_PACKAGE)
+                }
+            }
+    }
+
+    @Test
+    fun onAutomatedPackagesChanged_withEmptyList_removesPackageEntry() {
+        // Given
+        automatedPackageListener.onAutomatedPackagesChanged(
+            AUTOMATING_PACKAGE,
+            listOf(AUTOMATED_PACKAGE),
+            USER_HANDLE,
+        )
+        assertThat(automationRepo.isPackageAutomated(USER_HANDLE, AUTOMATED_PACKAGE)).isTrue()
+        assertThat(automationRepo.isPackageAutomated(USER_ID, AUTOMATED_PACKAGE)).isTrue()
+
+        // When
+        automatedPackageListener.onAutomatedPackagesChanged(
+            AUTOMATING_PACKAGE,
+            emptyList(),
+            USER_HANDLE,
+        )
+
+        // Then
+        assertThat(automationRepo.isPackageAutomated(USER_HANDLE, AUTOMATED_PACKAGE)).isFalse()
+        assertThat(automationRepo.isPackageAutomated(USER_ID, AUTOMATED_PACKAGE)).isFalse()
     }
 
     companion object {
-        private val USER_HANDLE = UserHandle(0)
+        private val USER_HANDLE = UserHandle.of(0)
+        private val USER_ID = USER_HANDLE.identifier
         private const val AUTOMATING_PACKAGE = "com.test.automating"
         private const val AUTOMATED_PACKAGE = "com.test.automated1"
-        private const val NOT_AUTOMATED_PACKAGE = "com.test.automated2"
+        private const val NOT_AUTOMATED_PACKAGE = "com.test.not.automated"
     }
 }

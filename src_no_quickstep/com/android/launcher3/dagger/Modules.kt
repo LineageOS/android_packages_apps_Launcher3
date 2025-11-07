@@ -17,6 +17,8 @@
 package com.android.launcher3.dagger
 
 import com.android.launcher3.AbstractFloatingViewHelper
+import com.android.launcher3.automation.AutomationNoOpRepository
+import com.android.launcher3.automation.AutomationRepository
 import com.android.launcher3.dragndrop.SystemDragController
 import com.android.launcher3.dragndrop.SystemDragControllerStub
 import com.android.launcher3.homescreenfiles.HomeScreenFilesNoOpProvider
@@ -97,5 +99,9 @@ object HomeScreenFilesModule {
 // This module is empty in the no_quickstep variant as task overlay is not supported.
 @Module object TaskOverlayModule
 
-// This module is empty in the no_quickstep variant as task automation is not supported.
-@Module object TaskAutomationModule
+// Bind no-op version in no_quickstep as automation not supported.
+@Module
+abstract class AutomationModule {
+    @Binds
+    abstract fun bindAutomationRepository(impl: AutomationNoOpRepository): AutomationRepository
+}

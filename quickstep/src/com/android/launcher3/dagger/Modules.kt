@@ -27,6 +27,7 @@ import com.android.internal.R
 import com.android.internal.policy.DesktopModeCompatPolicy
 import com.android.launcher3.AbstractFloatingViewHelper
 import com.android.launcher3.Flags.enableSystemDrag
+import com.android.launcher3.automation.AutomationRepository
 import com.android.launcher3.backuprestore.LauncherRestoreEventLogger
 import com.android.launcher3.concurrent.annotations.ThreadPool
 import com.android.launcher3.dragndrop.SystemDragController
@@ -60,7 +61,6 @@ import com.android.launcher3.util.window.RefreshRateTracker
 import com.android.launcher3.util.window.WindowManagerProxy
 import com.android.launcher3.widget.LauncherWidgetHolder.WidgetHolderFactory
 import com.android.quickstep.AspectRatioSystemShortcut
-import com.android.quickstep.AutomationRepository
 import com.android.quickstep.AutomationRepositoryImpl
 import com.android.quickstep.DesktopShortcut
 import com.android.quickstep.ExternalDisplayShortcut
@@ -272,7 +272,8 @@ object TaskOverlayModule {
         )
 }
 
+/** Used by both Recents and Launcher for package automation */
 @Module
-interface TaskAutomationModule {
+interface AutomationModule {
     @Binds fun bindAutomatedRepository(impl: AutomationRepositoryImpl): AutomationRepository
 }

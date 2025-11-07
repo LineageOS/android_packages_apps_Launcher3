@@ -39,6 +39,7 @@ import android.window.DesktopExperienceFlags;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.launcher3.automation.AutomationRepository;
 import com.android.launcher3.concurrent.annotations.Ui;
 import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.statehandlers.DesktopVisibilityController;
@@ -422,7 +423,7 @@ public class RecentTasksList {
         if (!hideAutomatedTasksInOverview()) {
             return false;
         }
-        return mAutomationRepository.isPackageAutomated(task.key.getPackageName());
+        return mAutomationRepository.isPackageAutomated(task.key.userId, task.key.getPackageName());
     }
 
     private Task createTask(TaskInfo taskInfo, Set<Integer> minimizedTaskIds) {

@@ -53,6 +53,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
+import com.android.launcher3.automation.AutomationRepository;
 import com.android.launcher3.util.DaggerSingletonTracker;
 import com.android.launcher3.util.Executors;
 import com.android.launcher3.util.LooperExecutor;
@@ -497,9 +498,11 @@ public class RecentTasksListTest {
         RecentTaskInfo recentTaskInfo = new RecentTaskInfo();
         recentTaskInfo.taskId = taskId;
         recentTaskInfo.displayId = displayId;
+        recentTaskInfo.userId = 10;
         String packageName = String.format("com.test.%d", taskId);
         recentTaskInfo.baseIntent = new Intent().setPackage(packageName);
-        when(mAutomationRepository.isPackageAutomated(packageName)).thenReturn(isAutomated);
+        when(mAutomationRepository.isPackageAutomated(recentTaskInfo.userId, packageName))
+                .thenReturn(isAutomated);
         return recentTaskInfo;
     }
 }
