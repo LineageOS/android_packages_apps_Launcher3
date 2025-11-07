@@ -193,6 +193,11 @@ public class BaseDepthControllerImpl<
         applyDepthAndBlur();
     }
 
+    protected boolean shouldBlur() {
+        boolean hasOpaqueBg = mContainer.getScrimView().isFullyOpaque();
+        return mCrossWindowBlursEnabled && !hasOpaqueBg && !mPauseBlurs;
+    }
+
     protected void onInvalidSurface() { }
 
     protected void applyDepthAndBlur() {
@@ -240,8 +245,7 @@ public class BaseDepthControllerImpl<
         SurfaceControl blurSurface = mBlurSurface != null ? mBlurSurface : mBaseSurface;
 
         int previousBlur = mCurrentBlur;
-        int newBlur = mCrossWindowBlursEnabled && !hasOpaqueBg && !mPauseBlurs ? (int) (blurAmount
-                * mMaxBlurRadius) : 0;
+        int newBlur = shouldBlur() ? (int) (blurAmount * mMaxBlurRadius) : 0;
         int delta = Math.abs(newBlur - previousBlur);
         if (skipSimilarBlur && delta < Utilities.dpToPx(1) && newBlur != 0 && previousBlur != 0
                 && blurAmount != 1f) {

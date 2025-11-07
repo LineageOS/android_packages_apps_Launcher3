@@ -520,6 +520,9 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
                                 mTaskbarInAppDisplayProgress.value));
             }
         }
+        if (Flags.allAppsSurface() && progressIndex == ALL_APPS_PAGE_PROGRESS_INDEX) {
+            mControllers.taskbarAllAppsController.setSlideInProgress(progress);
+        }
     }
 
     /** Returns true iff any in-app display progress > 0. */
@@ -583,6 +586,11 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
     }
 
     @Override
+    public void onTaskbarAllAppsClosed() {
+        mLauncher.onTaskbarAllAppsClosed();
+    }
+
+    @Override
     protected void toggleAllApps(boolean focusSearch) {
         final boolean canToggleHomeAllApps = isLauncherResumed()
                 && !mTaskbarLauncherStateController.isInOverviewUi()
@@ -616,6 +624,14 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
         } else {
             return mLauncher.isTopResumedActivity();
         }
+    }
+
+    @Override
+    public boolean isStateTransitionToAllAppsInProgress() {
+        if (!Flags.allAppsSurface()) {
+            return false;
+        }
+        return mTaskbarLauncherStateController.isStateTransitionToAllAppsInProgress();
     }
 
     @Override

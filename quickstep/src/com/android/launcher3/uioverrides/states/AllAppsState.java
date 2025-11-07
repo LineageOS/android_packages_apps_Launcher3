@@ -21,6 +21,7 @@ import android.graphics.Color;
 
 import com.android.internal.jank.Cuj;
 import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.Flags;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherState;
 import com.android.launcher3.LauncherUiState;
@@ -48,6 +49,10 @@ public class AllAppsState extends LauncherState {
 
     @Override
     public int getTransitionDuration(ActivityContext context, boolean isToState) {
+        if (Flags.allAppsSurface() && !isToState) {
+            // TODO(b/414847564): Temporary workaround for no state transition during the swipe.
+            return 100;
+        }
         return isToState
                 ? context.getDeviceProfile().getAllAppsProfile().getOpenDuration()
                 : context.getDeviceProfile().getAllAppsProfile().getCloseDuration();
@@ -127,7 +132,8 @@ public class AllAppsState extends LauncherState {
 
     @Override
     public int getVisibleElements(LauncherUiState launcherUiState) {
-        return ALL_APPS_CONTENT | FLOATING_SEARCH_BAR | HOTSEAT_ICONS;
+        return Flags.allAppsSurface() ? HOTSEAT_ICONS
+                : ALL_APPS_CONTENT | FLOATING_SEARCH_BAR | HOTSEAT_ICONS;
     }
 
     @Override
@@ -155,6 +161,10 @@ public class AllAppsState extends LauncherState {
 
     @Override
     public ScrimColors getWorkspaceScrimColor(Launcher launcher) {
+        if (Flags.allAppsSurface()) {
+            // No scrim.
+            return super.getWorkspaceScrimColor(launcher);
+        }
         int backgroundColor = Themes.getAttrColor(launcher, R.attr.allAppsScrimColor);
         return new ScrimColors(backgroundColor, /* foregroundColor */ Color.TRANSPARENT);
     }

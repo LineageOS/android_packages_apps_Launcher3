@@ -186,13 +186,17 @@ public abstract class AbstractSlideInView<T extends Context & ActivityContext>
      * @see #setUpOpenCloseAnimation(float, float, long)
      */
     protected final AnimatorPlaybackController setUpOpenAnimation(long duration) {
-        return setUpOpenCloseAnimation(
-                TRANSLATION_SHIFT_CLOSED, TRANSLATION_SHIFT_OPENED, duration);
+        boolean isTranslating = mTranslationShift != TRANSLATION_SHIFT_OPENED
+                && mTranslationShift != TRANSLATION_SHIFT_CLOSED;
+        return setUpOpenCloseAnimation(isTranslating ? mTranslationShift
+                : TRANSLATION_SHIFT_CLOSED, TRANSLATION_SHIFT_OPENED, duration);
     }
 
     private AnimatorPlaybackController setUpCloseAnimation(long duration) {
-        return setUpOpenCloseAnimation(
-                TRANSLATION_SHIFT_OPENED, TRANSLATION_SHIFT_CLOSED, duration);
+        boolean isTranslating = mTranslationShift != TRANSLATION_SHIFT_OPENED
+                && mTranslationShift != TRANSLATION_SHIFT_CLOSED;
+        return setUpOpenCloseAnimation(isTranslating ? mTranslationShift
+                : TRANSLATION_SHIFT_OPENED, TRANSLATION_SHIFT_CLOSED, duration);
     }
 
     /**
@@ -223,6 +227,12 @@ public abstract class AbstractSlideInView<T extends Context & ActivityContext>
 
         mOpenCloseAnimation = animation.createPlaybackController();
         return mOpenCloseAnimation;
+    }
+
+    protected void setScrimAlpha(float alpha) {
+        if (mColorScrim != null) {
+            mColorScrim.setAlpha(alpha);
+        }
     }
 
     /**
@@ -407,7 +417,7 @@ public abstract class AbstractSlideInView<T extends Context & ActivityContext>
         return getPopupContainer().isEventOverView(mContent, ev);
     }
 
-    private boolean isOpeningAnimationRunning() {
+    protected boolean isOpeningAnimationRunning() {
         return mIsOpen && mOpenCloseAnimation.getAnimationPlayer().isRunning();
     }
 

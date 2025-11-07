@@ -445,6 +445,13 @@ public class TaskbarUIController implements BubbleBarController.BubbleBarLocatio
         // Overridden
     }
 
+    /** Called when Taskbar's All Apps is closed. */
+    public void onTaskbarAllAppsClosed() { }
+
+    public boolean isStateTransitionToAllAppsInProgress() {
+        return false;
+    }
+
     /**
      * Refreshes the resumed state of this ui controller.
      */
