@@ -71,6 +71,8 @@ import com.android.wm.shell.shared.split.SplitBounds
 import com.android.wm.shell.shared.split.SplitScreenConstants
 import com.google.common.truth.Truth.assertThat
 import java.util.function.Consumer
+import org.junit.Assume.assumeFalse
+import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -243,11 +245,9 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
     }
 
     @Test
-    @EnableFlags(
-        com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX,
-        Flags.FLAG_ENABLE_TASKBAR_UI_THREAD,
-    )
+    @EnableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX)
     fun recentTasksChanged_duringGetTasksLoading_dontCallGetTasks() {
+        assumeTrue("Only run this test if enableTaskbarUiThread() is on", enableTaskbarUiThread())
         // getTasks() should have been called once from init().
         verify(mockRecentsModel, times(1)).getTasks(any(), any<Consumer<List<GroupTask>>>())
         // Override the mock answer for getTasks() so it doesn't call the callback immediately.
@@ -265,8 +265,8 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
 
     @Test
     @EnableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX)
-    @DisableFlags(Flags.FLAG_ENABLE_TASKBAR_UI_THREAD)
     fun recentTasksChanged_duringGetTasksLoading_dontCallGetTasks_disableFlags_taskbarUiThread() {
+        assumeFalse("Only run this test if enableTaskbarUiThread() is off", enableTaskbarUiThread())
         // getTasks() should have been called once from init().
         verify(mockRecentsModel, times(1)).getTasks(any(), any<Consumer<List<GroupTask>>>())
         // Override the mock answer for getTasks() so it doesn't call the callback immediately.
@@ -283,11 +283,9 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
     }
 
     @Test
-    @EnableFlags(
-        com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX,
-        Flags.FLAG_ENABLE_TASKBAR_UI_THREAD,
-    )
+    @EnableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX)
     fun recentTasksChanged_duringGetTasksLoading_getTasksCalledWhenLoadingDone() {
+        assumeTrue("Only run this test if enableTaskbarUiThread() is on", enableTaskbarUiThread())
         val callbackCaptor = argumentCaptor<Consumer<List<GroupTask>>>()
         // getTasks() should have been called once from init().
         verify(mockRecentsModel, times(1)).getTasks(any(), callbackCaptor.capture())
@@ -307,8 +305,8 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
 
     @Test
     @EnableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX)
-    @DisableFlags(Flags.FLAG_ENABLE_TASKBAR_UI_THREAD)
     fun recentTasksChanged_duringGetTasksLoading_getTasksCalledWhenLoadingDone_legacy() {
+        assumeFalse("Only run this test if enableTaskbarUiThread() is off", enableTaskbarUiThread())
         val callbackCaptor = argumentCaptor<Consumer<List<GroupTask>>>()
         // getTasks() should have been called once from init().
         verify(mockRecentsModel, times(1)).getTasks(any(), callbackCaptor.capture())
@@ -327,9 +325,9 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_TASKBAR_UI_THREAD)
     @DisableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX)
     fun recentTasksChanged_duringGetTasksLoading_flagDisabled_callGetTasks_flagEnabled_taskbarUiThread() {
+        assumeTrue("Only run this test if enableTaskbarUiThread() is on", enableTaskbarUiThread())
         // getTasks() should have been called once from init().
         verify(mockRecentsModel, times(1)).getTasks(any(), any<Consumer<List<GroupTask>>>())
         // Override the mock answer for getTasks() so it doesn't call the callback immediately.
@@ -346,11 +344,9 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
     }
 
     @Test
-    @DisableFlags(
-        com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX,
-        Flags.FLAG_ENABLE_TASKBAR_UI_THREAD,
-    )
+    @DisableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX)
     fun recentTasksChanged_duringGetTasksLoading_flagDisabled_callGetTasks_taskbarUiThread() {
+        assumeFalse("Only run this test if enableTaskbarUiThread() is off", enableTaskbarUiThread())
         // getTasks() should have been called once from init().
         verify(mockRecentsModel, times(1)).getTasks(any(), any<Consumer<List<GroupTask>>>())
         // Override the mock answer for getTasks() so it doesn't call the callback immediately.
@@ -367,9 +363,9 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_TASKBAR_UI_THREAD)
     @DisableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX)
     fun recentTasksChanged_duringGetTasksLoading_flagDisabled_getTasksNotCalledWhenLoadingDone_flagEnabled_taskbarUiThread() {
+        assumeTrue("Only run this test if enableTaskbarUiThread() is on", enableTaskbarUiThread())
         val callbackCaptor = argumentCaptor<Consumer<List<GroupTask>>>()
         // getTasks() should have been called once from init().
         verify(mockRecentsModel, times(1)).getTasks(any(), callbackCaptor.capture())
@@ -388,11 +384,9 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
     }
 
     @Test
-    @DisableFlags(
-        com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX,
-        Flags.FLAG_ENABLE_TASKBAR_UI_THREAD,
-    )
+    @DisableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX)
     fun recentTasksChanged_duringGetTasksLoading_flagDisabled_getTasksNotCalledWhenLoadingDone_taskbarUiThread() {
+        assumeFalse("Only run this test if enableTaskbarUiThread() is off", enableTaskbarUiThread())
         val callbackCaptor = argumentCaptor<Consumer<List<GroupTask>>>()
         // getTasks() should have been called once from init().
         verify(mockRecentsModel, times(1)).getTasks(any(), callbackCaptor.capture())
@@ -1096,9 +1090,9 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
         assertThat(shownPackages).isEqualTo(listOf(RECENT_PACKAGE_2))
     }
 
-    @EnableFlags(Flags.FLAG_ENABLE_TASKBAR_UI_THREAD)
     @Test
     fun onRecentTasksChanged_enterDesktopMode_shownTasks_onlyIncludesRunningTasks_enableFlags_taskbarUiThread() {
+        assumeTrue("Only run this test if enableTaskbarUiThread() is on", enableTaskbarUiThread())
         setInDesktopMode(false)
         val runningTask1 = createTask(id = 1, RUNNING_APP_PACKAGE_1)
         val runningTask2 = createTask(id = 2, RUNNING_APP_PACKAGE_2)
@@ -1116,9 +1110,9 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
         assertThat(shownPackages).containsExactly(RUNNING_APP_PACKAGE_1, RUNNING_APP_PACKAGE_2)
     }
 
-    @DisableFlags(Flags.FLAG_ENABLE_TASKBAR_UI_THREAD)
     @Test
     fun onRecentTasksChanged_enterDesktopMode_shownTasks_onlyIncludesRunningTasks_disableFlags_taskbarUiThread() {
+        assumeFalse("Only run this test if enableTaskbarUiThread() is off", enableTaskbarUiThread())
         setInDesktopMode(false)
         val runningTask1 = createTask(id = 1, RUNNING_APP_PACKAGE_1)
         val runningTask2 = createTask(id = 2, RUNNING_APP_PACKAGE_2)
@@ -1136,9 +1130,9 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
         assertThat(shownPackages).containsExactly(RUNNING_APP_PACKAGE_1, RUNNING_APP_PACKAGE_2)
     }
 
-    @EnableFlags(Flags.FLAG_ENABLE_TASKBAR_UI_THREAD)
     @Test
     fun onRecentTasksChanged_exitDesktopMode_shownTasks_onlyIncludesRecentTasks_enableFlag_taskbarUiThread() {
+        assumeTrue("Only run this test if enableTaskbarUiThread() is on", enableTaskbarUiThread())
         setInDesktopMode(true)
         val runningTask1 = createTask(id = 1, RUNNING_APP_PACKAGE_1)
         val runningTask2 = createTask(id = 2, RUNNING_APP_PACKAGE_2)
@@ -1156,9 +1150,9 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
         assertThat(shownPackages).containsExactlyElementsIn(expectedPackages)
     }
 
-    @DisableFlags(Flags.FLAG_ENABLE_TASKBAR_UI_THREAD)
     @Test
     fun onRecentTasksChanged_exitDesktopMode_shownTasks_onlyIncludesRecentTasks_disableFlag_taskbarUiThread() {
+        assumeFalse("Only run this test if enableTaskbarUiThread() is off", enableTaskbarUiThread())
         setInDesktopMode(true)
         val runningTask1 = createTask(id = 1, RUNNING_APP_PACKAGE_1)
         val runningTask2 = createTask(id = 2, RUNNING_APP_PACKAGE_2)
