@@ -27,6 +27,7 @@ import com.android.launcher3.DeviceProfile
 import com.android.launcher3.concurrent.annotations.LightweightBackground
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority.UI
 import com.android.launcher3.dagger.ApplicationContext
+import com.android.launcher3.dagger.DisplayId
 import com.android.quickstep.RecentsModel
 import com.android.quickstep.recents.data.AppTimersRepository
 import com.android.quickstep.recents.data.AppTimersRepositoryImpl
@@ -100,11 +101,6 @@ interface LauncherRecentsModule {
     ): RecentsDeviceProfileRepository
 
     companion object {
-        @RecentsSingleton
-        @Provides
-        @DisplayId
-        fun provideDisplayId(container: RecentsViewContainer): Int = container.asContext().displayId
-
         @RecentsSingleton
         @Provides
         fun provideTaskIconDataSource(model: RecentsModel): TaskIconDataSource = model.iconCache

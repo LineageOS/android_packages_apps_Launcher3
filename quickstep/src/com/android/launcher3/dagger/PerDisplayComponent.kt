@@ -1,0 +1,62 @@
+/*
+ * Copyright (C) 2025 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.launcher3.dagger
+
+import android.view.Display
+import com.android.quickstep.RecentsAnimationDeviceState
+import com.android.quickstep.RotationTouchHelper
+import com.android.quickstep.TaskAnimationManager
+import com.android.quickstep.recents.di.RecentsComponent
+import com.android.quickstep.window.RecentsWindowManager
+import com.android.quickstep.window.RecentsWindowTracker
+import dagger.BindsInstance
+import dagger.Lazy
+import dagger.Subcomponent
+
+/**
+ * A sub-component that host shared objects between multiple components that are bound to lifecycle
+ * of a display instance.
+ */
+@PerDisplaySingleton
+@PerDisplayScope
+@Subcomponent(modules = [PerDisplayObjectsModule::class])
+interface PerDisplayComponent {
+    // Factories for components like RecentsComponent that is bound to a specific display.
+    fun getRecentsComponentFactory(): RecentsComponent.Factory
+
+    // Factories for container objects that create components bound to a specific display.
+    // e.g. RecentsWindowManager for creating RecentsComponent.
+    fun getRecentsWindowManagerLazy(): Lazy<RecentsWindowManager>
+
+    // Shared components between multiple components like Recents and Gesture Nav.
+    // Ideally only interfaces should be provided.
+    fun getRecentsAnimationDeviceState(): RecentsAnimationDeviceState
+
+    fun getTaskAnimationManager(): TaskAnimationManager
+
+    fun getRotationTouchHelper(): RotationTouchHelper
+
+    fun getRecentsWindowTracker(): RecentsWindowTracker
+
+    // End Shared components.
+
+    @LauncherAppSingleton
+    @Subcomponent.Factory
+    interface Factory {
+        fun build(@BindsInstance display: Display): PerDisplayComponent
+    }
+}

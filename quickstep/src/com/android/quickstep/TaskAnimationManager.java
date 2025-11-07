@@ -46,6 +46,8 @@ import com.android.internal.util.ArrayUtils;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.dagger.ApplicationContext;
+import com.android.launcher3.dagger.DisplayId;
+import com.android.launcher3.dagger.PerDisplaySingleton;
 import com.android.launcher3.taskbar.TaskbarInteractor;
 import com.android.launcher3.util.DaggerSingletonObject;
 import com.android.launcher3.util.DisplayController;
@@ -61,10 +63,6 @@ import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 
-import dagger.assisted.Assisted;
-import dagger.assisted.AssistedFactory;
-import dagger.assisted.AssistedInject;
-
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -72,6 +70,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.inject.Inject;
+
+@PerDisplaySingleton
 public class TaskAnimationManager implements RecentsAnimationCallbacks.RecentsAnimationListener {
 
     private static final String TAG = "TaskAnimationManager";
@@ -129,10 +130,10 @@ public class TaskAnimationManager implements RecentsAnimationCallbacks.RecentsAn
         }
     };
 
-    @AssistedInject
+    @Inject
     public TaskAnimationManager(
             @ApplicationContext Context ctx,
-            @Assisted int displayId,
+            @DisplayId int displayId,
             DisplayController displayController,
             PerDisplayRepository<TaskAnimationManager> perDisplayRepository) {
         mCtx = ctx;
@@ -708,11 +709,4 @@ public class TaskAnimationManager implements RecentsAnimationCallbacks.RecentsAn
             mLastGestureState.dump(prefix + '\t', pw);
         }
     }
-
-    @AssistedFactory
-    public interface Factory {
-        /** Creates a new instance of [TaskAnimationManager] for a given [displayId]. */
-        TaskAnimationManager create(int displayId);
-    }
-
 }
