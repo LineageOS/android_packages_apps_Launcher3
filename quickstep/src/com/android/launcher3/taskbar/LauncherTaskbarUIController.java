@@ -383,15 +383,17 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
     public ThreadedAnimator getParallelAnimationToGestureEndTarget(
             GestureState.GestureEndTarget gestureEndTarget, long duration,
             RecentsAnimationCallbacks callbacks) {
+        LauncherActivityInterface activityInterface =
+                LauncherActivityInterface.INSTANCE.get(mControllers.taskbarActivityContext);
         return enableTaskbarUiThread() ?
                 new TaskbarAsyncAnimator(TASKBAR_UI_THREAD,
                         MAIN_EXECUTOR,
                         () -> mTaskbarLauncherStateController.createAnimToLauncher(
-                                LauncherActivityInterface.INSTANCE.stateFromGestureEndTarget(
+                                activityInterface.stateFromGestureEndTarget(
                                         gestureEndTarget), callbacks, duration))
                 : new ImmediateAnimator(
                         mTaskbarLauncherStateController.createAnimToLauncher(
-                                LauncherActivityInterface.INSTANCE.stateFromGestureEndTarget(
+                                activityInterface.stateFromGestureEndTarget(
                                         gestureEndTarget), callbacks, duration));
     }
 

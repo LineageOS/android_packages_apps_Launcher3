@@ -1708,7 +1708,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
 
     @Override
     public LauncherActivityInterface getContainerInterface() {
-        return LauncherActivityInterface.INSTANCE;
+        return LauncherActivityInterface.INSTANCE.get(this);
     }
 
     @Override
