@@ -129,7 +129,8 @@ class OverviewCommandHelperTest {
         whenever(containerInterface.taskbarInteractor).thenReturn(taskbarInteractor)
         whenever(taskbarUIController.launchFocusedTask())
             .thenReturn(REQUESTED_KEYBOARD_FOCUS_TASK_IDS)
-        whenever(taskbarManager.getUIControllerForDisplay(anyInt())).thenReturn(taskbarUIController)
+        whenever(taskbarManager.getTaskbarInteractor(any()))
+            .thenReturn(TaskbarInteractor(taskbarUIController))
         whenever(stateManager.state).thenReturn(OVERVIEW)
 
         sut =
