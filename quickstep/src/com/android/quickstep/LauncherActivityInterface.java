@@ -15,6 +15,8 @@
  */
 package com.android.quickstep;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import static com.android.app.animation.Interpolators.LINEAR;
 import static com.android.launcher3.LauncherState.ALL_APPS;
 import static com.android.launcher3.LauncherState.BACKGROUND_APP;
@@ -32,6 +34,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 
+import com.android.app.displaylib.PerDisplayRepository;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherAnimUtils;
@@ -50,7 +53,6 @@ import com.android.launcher3.util.ThreadedAnimator;
 import com.android.launcher3.views.ScrimColors;
 import com.android.quickstep.GestureState.GestureEndTarget;
 import com.android.quickstep.dagger.QuickstepBaseAppComponent;
-import com.android.quickstep.fallback.RecentsState;
 import com.android.quickstep.orientation.RecentsPagedOrientationHandler;
 import com.android.quickstep.util.AnimatorControllerWithResistance;
 import com.android.quickstep.util.ContextInitListener;
@@ -82,8 +84,9 @@ public final class LauncherActivityInterface extends
     public LauncherActivityInterface(
             @NonNull DesktopState desktopState,
             @NonNull TopTaskTracker topTaskTracker,
-            @NonNull SystemUiProxy systemUiProxy) {
-        super(true, OVERVIEW, BACKGROUND_APP);
+            @NonNull SystemUiProxy systemUiProxy,
+            @NonNull PerDisplayRepository<TaskAnimationManager> taskAnimationManagerRepo) {
+        super(true, OVERVIEW, BACKGROUND_APP, taskAnimationManagerRepo.get(DEFAULT_DISPLAY));
         mDesktopState = desktopState;
         mTopTaskTracker = topTaskTracker;
         mSystemUiProxy = systemUiProxy;
@@ -281,17 +284,6 @@ public final class LauncherActivityInterface extends
     @Override
     public Rect getOverviewWindowBounds(Rect homeBounds, RemoteAnimationTarget target) {
         return homeBounds;
-    }
-
-    @Override
-    public boolean isInLiveTileMode() {
-        QuickstepLauncher launcher = getCreatedContainer();
-
-        return launcher != null
-                && launcher.getStateManager().getState() == OVERVIEW
-                && launcher.isStarted()
-                && mTopTaskTracker.getCachedTopTask(false,
-                launcher.getDisplayId()).isHomeTask();
     }
 
     private boolean isInMinusOne() {

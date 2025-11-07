@@ -15,6 +15,8 @@
  */
 package com.android.quickstep;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import static com.android.launcher3.util.NavigationMode.NO_BUTTON;
 import static com.android.quickstep.fallback.RecentsState.BACKGROUND_APP;
 import static com.android.quickstep.fallback.RecentsState.DEFAULT;
@@ -29,6 +31,7 @@ import android.view.RemoteAnimationTarget;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.app.displaylib.PerDisplayRepository;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.dagger.LauncherAppSingleton;
 import com.android.launcher3.statemanager.StateManager;
@@ -64,8 +67,9 @@ public final class FallbackActivityInterface extends
             new DaggerSingletonObject<>(QuickstepBaseAppComponent::getFallbackActivityInterface);
 
     @Inject
-    public FallbackActivityInterface() {
-        super(false, DEFAULT, BACKGROUND_APP);
+    public FallbackActivityInterface(
+            @NonNull PerDisplayRepository<TaskAnimationManager> taskAnimationManagerRepo) {
+        super(false, DEFAULT, BACKGROUND_APP, taskAnimationManagerRepo.get(DEFAULT_DISPLAY));
     }
 
     /** 2 */
@@ -175,13 +179,6 @@ public final class FallbackActivityInterface extends
                         }
                     }
                 });
-    }
-
-    @Override
-    public boolean isInLiveTileMode() {
-        RecentsActivity activity = getCreatedContainer();
-        return activity != null && activity.getStateManager().getState() == DEFAULT &&
-                activity.isStarted();
     }
 
     @Override

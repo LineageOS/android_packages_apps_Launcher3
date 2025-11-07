@@ -53,8 +53,10 @@ public abstract class BaseWindowInterface extends
 
 
     protected BaseWindowInterface(
-            @NonNull RecentsState overviewState, @NonNull RecentsState backgroundState) {
-        super(backgroundState);
+            @NonNull RecentsState overviewState,
+            @NonNull RecentsState backgroundState,
+            @NonNull TaskAnimationManager taskAnimationManager) {
+        super(backgroundState, taskAnimationManager);
         mTargetState = overviewState;
     }
 
