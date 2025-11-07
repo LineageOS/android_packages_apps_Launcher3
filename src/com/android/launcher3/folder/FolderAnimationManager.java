@@ -255,8 +255,10 @@ public class FolderAnimationManager implements FolderAnimationCreator {
         }
         int left = page * lp.width;
 
-        int extraRadius = (int) ((mDeviceProfile.folderIconSizePx / initialScale)
-                * EXTRA_FOLDER_REVEAL_RADIUS_PERCENTAGE);
+        int extraRadius = (int) (
+                (mDeviceProfile.getFolderProfile().getFolderIconSizePx() / initialScale)
+                        * EXTRA_FOLDER_REVEAL_RADIUS_PERCENTAGE
+        );
         Rect contentStart = new Rect(
                 (int) (left + (startRect.left / initialScale)) - extraRadius,
                 (int) (startRect.top / initialScale) - extraRadius,
