@@ -18,6 +18,7 @@ package com.android.launcher3.model
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
+import android.database.SQLException
 import android.database.sqlite.SQLiteDatabase
 import android.net.Uri
 import android.net.Uri.Builder
@@ -38,21 +39,23 @@ import com.android.launcher3.LauncherPrefs.Companion.backedUpItem
 import com.android.launcher3.LauncherPrefs.Companion.get
 import com.android.launcher3.LauncherSettings.Favorites
 import com.android.launcher3.LauncherSettings.Favorites.*
+import com.android.launcher3.Utilities
 import com.android.launcher3.backuprestore.LauncherRestoreEventLogger
-import com.android.launcher3.backuprestore.LauncherRestoreEventLogger.RestoreError.Companion.GRID_MIGRATION_FAILURE
+import com.android.launcher3.backuprestore.LauncherRestoreEventLogger.RestoreError
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.logging.FileLog
 import com.android.launcher3.model.GridMigrationOption.Companion.from
 import com.android.launcher3.model.GridSizeMigrationDBController.needsToMigrate
+import com.android.launcher3.model.data.AppPairInfo
 import com.android.launcher3.pm.UserCache
 import com.android.launcher3.provider.LauncherDbUtils.SQLiteTransaction
+import com.android.launcher3.provider.LauncherDbUtils.queryIntArray
 import com.android.launcher3.provider.LauncherDbUtils.tableExists
 import com.android.launcher3.provider.RestoreDbTask
-import com.android.launcher3.provider.RestoreDbTask.Companion.sendMetricsForFailedMigration
-import com.android.launcher3.util.SQLiteTable
-import com.android.launcher3.util.WriteProtectedSQLiteTable
+import com.android.launcher3.util.IntArray
 import com.android.launcher3.widget.LauncherWidgetHolder
+import com.android.wm.shell.Flags
 import java.util.stream.Collectors
 import javax.inject.Inject
 import javax.inject.Provider
@@ -72,12 +75,11 @@ internal constructor(
     private val layoutParserFactory: LayoutParserFactory,
     private val migrationLogicFactory: Provider<GridSizeMigrationLogic>,
 ) {
-
-    private lateinit var openHelper: DatabaseHelper
+    private var openHelper: DatabaseHelper? = null
 
     @Synchronized
     private fun createDbIfNotExists() {
-        if (!::openHelper.isInitialized) {
+        if (openHelper == null) {
             // Initialize the restore task before opening the DB
             val restoreTask = RestoreDbTask.createRestoreTask(context)
             val dbFile = prefs.get(LauncherPrefs.DB_FILE).ifEmpty { idp.dbFile }
@@ -86,7 +88,7 @@ internal constructor(
         }
     }
 
-    private fun createDatabaseHelper(forMigration: Boolean, dbFile: String): DatabaseHelper {
+    protected fun createDatabaseHelper(forMigration: Boolean, dbFile: String): DatabaseHelper {
         // Set the flag for empty DB
         val onEmptyDbCreateCallback =
             if (forMigration) Runnable {}
@@ -115,37 +117,60 @@ internal constructor(
     /** Refer [SQLiteDatabase.query] */
     @WorkerThread
     fun query(
-        projection: Array<String>?,
+        projection: Array<String?>?,
         selection: String?,
-        selectionArgs: Array<String>?,
+        selectionArgs: Array<String?>?,
         sortOrder: String?,
-    ): Cursor =
-        getTable().query(projection, selection, selectionArgs, sortOrder).apply {
-            extras = Bundle().apply { putString(EXTRA_DB_NAME, openHelper.databaseName) }
-        }
+    ): Cursor {
+        createDbIfNotExists()
+        return openHelper!!
+            .writableDatabase
+            .query(
+                Favorites.TABLE_NAME,
+                projection,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                sortOrder,
+            )
+            .apply {
+                extras = Bundle().apply { putString(EXTRA_DB_NAME, openHelper!!.databaseName) }
+            }
+    }
 
     /** Refer [SQLiteDatabase.insert] */
     @WorkerThread
     fun insert(initialValues: ContentValues?): Int {
         createDbIfNotExists()
 
-        val db = openHelper.writableDatabase
-        val rowId = openHelper.dbInsertAndCheck(db, TABLE_NAME, initialValues)
-        if (rowId >= 0) openHelper.onAddOrDeleteOp()
+        val db = openHelper!!.writableDatabase
+        val rowId = openHelper!!.dbInsertAndCheck(db, Favorites.TABLE_NAME, initialValues)
+        if (rowId >= 0) {
+            onAddOrDeleteOp(db)
+        }
         return rowId
     }
 
     /** Refer [SQLiteDatabase.delete] */
     @WorkerThread
-    fun delete(selection: String?, selectionArgs: Array<String>?): Int =
-        getTable().delete(selection, selectionArgs).also {
-            if (it > 0) openHelper.onAddOrDeleteOp()
+    fun delete(selection: String?, selectionArgs: Array<String?>?): Int {
+        createDbIfNotExists()
+        val db = openHelper!!.writableDatabase
+
+        val count = db.delete(Favorites.TABLE_NAME, selection, selectionArgs)
+        if (count > 0) {
+            onAddOrDeleteOp(db)
         }
+        return count
+    }
 
     /** Refer [SQLiteDatabase.update] */
     @WorkerThread
-    fun update(values: ContentValues, selection: String?, selectionArgs: Array<String>?): Int =
-        getTable().update(values, selection, selectionArgs)
+    fun update(values: ContentValues?, selection: String?, selectionArgs: Array<String?>?): Int {
+        createDbIfNotExists()
+        return openHelper!!.writableDatabase.update(TABLE_NAME, values, selection, selectionArgs)
+    }
 
     /** Clears a previously set flag corresponding to empty db creation */
     @WorkerThread
@@ -158,7 +183,7 @@ internal constructor(
     @WorkerThread
     fun generateNewItemId(): Int {
         createDbIfNotExists()
-        return openHelper.generateNewItemId()
+        return openHelper!!.generateNewItemId()
     }
 
     /** Generates an id to be used for new workspace screen */
@@ -166,14 +191,14 @@ internal constructor(
     val newScreenId: Int
         get() {
             createDbIfNotExists()
-            return openHelper.newScreenId
+            return openHelper!!.newScreenId
         }
 
     /** Creates an empty DB clearing all existing data */
     @WorkerThread
     fun createEmptyDB() {
         createDbIfNotExists()
-        openHelper.createEmptyDB(openHelper.writableDatabase)
+        openHelper!!.createEmptyDB(openHelper!!.writableDatabase)
         prefs.putSync(emptyDbCreatedKey.to(true))
     }
 
@@ -181,30 +206,32 @@ internal constructor(
     @WorkerThread
     fun removeGhostWidgets() {
         createDbIfNotExists()
-        openHelper.removeGhostWidgets(openHelper.writableDatabase)
+        openHelper!!.removeGhostWidgets(openHelper!!.writableDatabase)
     }
 
     /** Returns a new [SQLiteTransaction] */
     @WorkerThread
     fun newTransaction(): SQLiteTransaction {
         createDbIfNotExists()
-        return SQLiteTransaction(openHelper.writableDatabase)
+        return SQLiteTransaction(openHelper!!.writableDatabase)
     }
 
     /** Refreshes the internal state corresponding to presence of hotseat table */
     @WorkerThread
     fun refreshHotseatRestoreTable() {
         createDbIfNotExists()
-        openHelper.mHotseatRestoreTableExists =
-            tableExists(openHelper.readableDatabase, Favorites.HYBRID_HOTSEAT_BACKUP_TABLE)
+        openHelper!!.mHotseatRestoreTableExists =
+            tableExists(openHelper!!.readableDatabase, Favorites.HYBRID_HOTSEAT_BACKUP_TABLE)
     }
 
     /** Resets the launcher DB if we should reset it. */
     private fun resetLauncherDb(restoreEventLogger: LauncherRestoreEventLogger?) {
-        restoreEventLogger?.sendMetricsForFailedMigration(getTable(), GRID_MIGRATION_FAILURE)
+        if (restoreEventLogger != null) {
+            sendMetricsForFailedMigration(restoreEventLogger, db)
+        }
         FileLog.d(TAG, "resetLauncherDb: Migration failed: resetting launcher database")
         createEmptyDB()
-        prefs.putSync(getEmptyDbCreatedKey(openHelper.databaseName).to(true))
+        prefs.putSync(getEmptyDbCreatedKey(openHelper!!.databaseName).to(true))
 
         // Write the grid state to avoid another migration
         DeviceGridState(idp).writeToPrefs(context)
@@ -222,7 +249,7 @@ internal constructor(
             return false
         }
         val targetDbName = DeviceGridState(idp).dbFile
-        val currentDbName = openHelper.databaseName
+        val currentDbName = openHelper!!.databaseName
         if (TextUtils.equals(targetDbName, currentDbName)) {
             FileLog.e(
                 TAG,
@@ -245,7 +272,7 @@ internal constructor(
             return
         }
 
-        val oldHelper = openHelper
+        val oldHelper = openHelper!!
 
         // We save the existing db's before creating the destination db helper so we know what logic
         // to run in grid migration based on if that grid already existed before migration or not.
@@ -280,7 +307,7 @@ internal constructor(
                 gridSizeMigrationLogic.migrateGrid(
                     srcDeviceState,
                     destDeviceState,
-                    openHelper,
+                    openHelper!!,
                     oldHelper.writableDatabase,
                     isDestNewDb,
                     modelDelegate,
@@ -304,19 +331,98 @@ internal constructor(
         }
     }
 
+    /**
+     * In case of migration failure, report metrics for the count of each itemType in the DB.
+     *
+     * @param restoreEventLogger logger used to report Launcher restore metrics
+     */
+    private fun sendMetricsForFailedMigration(
+        restoreEventLogger: LauncherRestoreEventLogger,
+        db: SQLiteDatabase,
+    ) {
+        try {
+            db.rawQuery("SELECT itemType, COUNT(*) AS count FROM favorites GROUP BY itemType", null)
+                .use { cursor ->
+                    if (cursor.moveToFirst()) {
+                        do {
+                            restoreEventLogger.logFavoritesItemsRestoreFailed(
+                                cursor.getInt(cursor.getColumnIndexOrThrow(Favorites.ITEM_TYPE)),
+                                cursor.getInt(cursor.getColumnIndexOrThrow("count")),
+                                RestoreError.GRID_MIGRATION_FAILURE,
+                            )
+                        } while (cursor.moveToNext())
+                    }
+                }
+        } catch (e: Exception) {
+            FileLog.e(TAG, "sendMetricsForFailedDb: Error reading from database", e)
+        }
+    }
+
     /** Returns the underlying model database */
-    @Deprecated("Use [getTable] instead")
     val db: SQLiteDatabase
         get() {
             createDbIfNotExists()
-            return openHelper.writableDatabase
+            return openHelper!!.writableDatabase
         }
 
-    /** Returns the underlying [SQLiteTable] for making persistent model changes */
-    fun getTable(): SQLiteTable {
-        createDbIfNotExists()
-        return WriteProtectedSQLiteTable(openHelper.writableDatabase, TABLE_NAME)
+    private fun onAddOrDeleteOp(db: SQLiteDatabase) {
+        openHelper!!.onAddOrDeleteOp(db)
     }
+
+    private fun deleteItemsBasedOnItemIdQuery(selection: String): IntArray? {
+        createDbIfNotExists()
+        val db = openHelper!!.writableDatabase
+        try {
+            SQLiteTransaction(db).use { t ->
+                val itemIds = queryIntArray(false, db, TABLE_NAME, _ID, selection, null, null)
+                if (!itemIds.isEmpty) {
+                    db.delete(TABLE_NAME, Utilities.createDbSelectionQuery(_ID, itemIds), null)
+                }
+                t.commit()
+                return itemIds
+            }
+        } catch (ex: SQLException) {
+            Log.e(TAG, ex.message, ex)
+            return null
+        }
+    }
+
+    /**
+     * Deletes any empty folder from the DB.
+     *
+     * @return Ids of deleted folders.
+     */
+    @WorkerThread
+    fun deleteEmptyFolders(): IntArray? =
+        deleteItemsBasedOnItemIdQuery(
+            "$ITEM_TYPE = $ITEM_TYPE_FOLDER AND $_ID NOT IN (SELECT $CONTAINER FROM $TABLE_NAME)"
+        )
+
+    /**
+     * Deletes any app group that contains an illegal number of member apps.
+     *
+     * @return Ids of deleted app groups.
+     */
+    @WorkerThread
+    fun deleteBadAppPairs(): IntArray? =
+        deleteItemsBasedOnItemIdQuery(
+            if (Flags.enable2x1Split()) {
+                "$ITEM_TYPE = $ITEM_TYPE_APP_GROUP AND $_ID NOT IN (SELECT $CONTAINER FROM $TABLE_NAME GROUP BY $CONTAINER HAVING COUNT BETWEEN ${AppPairInfo.MIN_ITEMS} AND ${AppPairInfo.MAX_ITEMS})"
+            } else {
+                "$ITEM_TYPE = $ITEM_TYPE_APP_GROUP AND $_ID NOT IN (SELECT $CONTAINER FROM $TABLE_NAME GROUP BY $CONTAINER HAVING COUNT(*) = 2)"
+            }
+        )
+
+    /**
+     * Deletes any app with a container id that doesn't exist.
+     *
+     * @return Ids of deleted apps.
+     */
+    @WorkerThread
+    fun deleteUnparentedApps(): IntArray? =
+        deleteItemsBasedOnItemIdQuery(
+            "$CONTAINER >= 0 AND $CONTAINER NOT IN (SELECT $_ID FROM $TABLE_NAME )"
+        )
 
     private fun clearFlagEmptyDbCreated() {
         prefs.removeSync(emptyDbCreatedKey)
@@ -339,10 +445,10 @@ internal constructor(
         if (prefs.get(emptyDbCreatedKey)) {
             Log.d(TAG, "loading default workspace")
 
-            val widgetHolder = openHelper.newLauncherWidgetHolder()
+            val widgetHolder = openHelper!!.newLauncherWidgetHolder()
             try {
                 var loader =
-                    layoutParserFactory.createExternalLayoutParser(widgetHolder, openHelper)
+                    layoutParserFactory.createExternalLayoutParser(widgetHolder, openHelper!!)
 
                 val usingExternallyProvidedLayout = loader != null
                 if (loader == null) {
@@ -351,16 +457,16 @@ internal constructor(
 
                 // There might be some partially restored DB items, due to buggy restore logic in
                 // previous versions of launcher.
-                openHelper.createEmptyDB(openHelper.writableDatabase)
+                openHelper!!.createEmptyDB(openHelper!!.writableDatabase)
                 // Populate favorites table with initial favorites
                 if (
-                    (openHelper.loadFavorites(openHelper.writableDatabase, loader) <= 0) &&
+                    (openHelper!!.loadFavorites(openHelper!!.writableDatabase, loader) <= 0) &&
                         usingExternallyProvidedLayout
                 ) {
                     // Unable to load external layout. Cleanup and load the internal layout.
-                    openHelper.createEmptyDB(openHelper.writableDatabase)
-                    openHelper.loadFavorites(
-                        openHelper.writableDatabase,
+                    openHelper!!.createEmptyDB(openHelper!!.writableDatabase)
+                    openHelper!!.loadFavorites(
+                        openHelper!!.writableDatabase,
                         getDefaultLayoutParser(widgetHolder),
                     )
                 }
@@ -384,7 +490,7 @@ internal constructor(
     }
 
     private val emptyDbCreatedKey: ConstantItem<Boolean>
-        get() = getEmptyDbCreatedKey(openHelper.databaseName)
+        get() = getEmptyDbCreatedKey(openHelper!!.databaseName)
 
     /**
      * Re-composite given key in respect to database. If the current db is

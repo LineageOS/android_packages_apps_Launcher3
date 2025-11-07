@@ -111,9 +111,9 @@ public class DatabaseHelper extends SQLiteOpenHelper implements
         mOnEmptyDbCreateCallback.run();
     }
 
-    public void onAddOrDeleteOp() {
+    public void onAddOrDeleteOp(SQLiteDatabase db) {
         if (mHotseatRestoreTableExists) {
-            dropTable(getWritableDatabase(), Favorites.HYBRID_HOTSEAT_BACKUP_TABLE);
+            dropTable(db, Favorites.HYBRID_HOTSEAT_BACKUP_TABLE);
             mHotseatRestoreTableExists = false;
         }
     }

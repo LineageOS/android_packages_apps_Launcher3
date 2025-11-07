@@ -23,7 +23,6 @@ import android.content.pm.LauncherApps
 import android.content.pm.LauncherApps.ShortcutQuery
 import android.content.pm.PackageInstaller
 import android.content.pm.ShortcutInfo
-import android.database.SQLException
 import android.net.Uri
 import android.text.TextUtils
 import android.util.Log
@@ -32,12 +31,6 @@ import com.android.launcher3.Flags
 import com.android.launcher3.Flags.enableFilesOnHomeScreenDecoupledInit
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherSettings.Favorites
-import com.android.launcher3.LauncherSettings.Favorites.CONTAINER
-import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE
-import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_GROUP
-import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FOLDER
-import com.android.launcher3.LauncherSettings.Favorites.TABLE_NAME
-import com.android.launcher3.LauncherSettings.Favorites._ID
 import com.android.launcher3.Utilities.qsbOnFirstScreen
 import com.android.launcher3.WorkspaceLayoutManager
 import com.android.launcher3.backuprestore.LauncherRestoreEventLogger.RestoreError
@@ -61,12 +54,12 @@ import com.android.launcher3.model.data.LauncherAppWidgetInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.pm.PackageInstallInfo
 import com.android.launcher3.pm.UserManagerState
-import com.android.launcher3.provider.LauncherDbUtils.asSequence
 import com.android.launcher3.shortcuts.ShortcutKey
 import com.android.launcher3.shortcuts.ShortcutRequest
 import com.android.launcher3.util.ApiWrapper
 import com.android.launcher3.util.ApplicationInfoWrapper
 import com.android.launcher3.util.ContentWriter
+import com.android.launcher3.util.IntArray
 import com.android.launcher3.util.IntSet
 import com.android.launcher3.util.IntSparseArrayMap
 import com.android.launcher3.util.PackageManagerHelper
@@ -776,6 +769,8 @@ class WorkspaceItemProcessor(
         }
     }
 
+    private fun removeItems(ids: IntArray?) = ids?.forEach { loadedItems.remove(it) }
+
     /**
      * Applies any queued update data update tasks and data sanity checks and returns the final set
      * of workspace data. This includes:
@@ -801,33 +796,15 @@ class WorkspaceItemProcessor(
         c.commitRestoredItems()
         if (itemsDeleted) {
             // Remove any empty folder
-            modelDbController.deleteItemsBasedOnItemIdQuery(EMPTY_FOLDER_QUERY)
+            removeItems(modelDbController.deleteEmptyFolders())
         }
         // Cleans up app pairs if they don't have the right number of member apps (2).
-        modelDbController.deleteItemsBasedOnItemIdQuery(BAD_APP_PAIR_QUERY)
-
-        // Deletes any app with a container id that doesn't exist.
-        modelDbController.deleteItemsBasedOnItemIdQuery(ORPHAN_APPS_QUERY)
+        removeItems(modelDbController.deleteBadAppPairs())
+        removeItems(modelDbController.deleteUnparentedApps())
 
         addRemainingFileSystemItems(modelDbController)
 
         return loadedItems
-    }
-
-    private fun ModelDbController.deleteItemsBasedOnItemIdQuery(selection: String) {
-        try {
-            val table = getTable()
-            table.newTransaction().use { t ->
-                val itemIds =
-                    table.query(arrayOf(_ID), selection) { asSequence().map { getInt(0) }.toList() }
-                if (itemIds.isNotEmpty()) table.delete("$_ID IN ( ${itemIds.joinToString()} )")
-                t.commit()
-                itemIds.forEach { loadedItems.remove(it) }
-            }
-        } catch (ex: SQLException) {
-            Log.e(TAG, ex.message, ex)
-            return
-        }
     }
 
     /** Adds provided items to data model */
@@ -837,18 +814,6 @@ class WorkspaceItemProcessor(
 
     companion object {
         private const val TAG = "WorkspaceItemProcessor"
-
-        // language=sql
-        private const val EMPTY_FOLDER_QUERY =
-            "$ITEM_TYPE = $ITEM_TYPE_FOLDER AND $_ID NOT IN (SELECT $CONTAINER FROM $TABLE_NAME)"
-        private const val ORPHAN_APPS_QUERY =
-            "$CONTAINER >= 0 AND $CONTAINER NOT IN (SELECT $_ID FROM $TABLE_NAME )"
-        private val BAD_APP_PAIR_QUERY =
-            if (com.android.wm.shell.Flags.enable2x1Split()) {
-                "$ITEM_TYPE = $ITEM_TYPE_APP_GROUP AND $_ID NOT IN (SELECT $CONTAINER FROM $TABLE_NAME GROUP BY $CONTAINER HAVING COUNT BETWEEN ${AppPairInfo.MIN_ITEMS} AND ${AppPairInfo.MAX_ITEMS})"
-            } else {
-                "$ITEM_TYPE = $ITEM_TYPE_APP_GROUP AND $_ID NOT IN (SELECT $CONTAINER FROM $TABLE_NAME GROUP BY $CONTAINER HAVING COUNT(*) = 2)"
-            }
 
         private fun logWidgetInfo(
             idp: InvariantDeviceProfile,

@@ -81,7 +81,6 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.RETURNS_MOCKS
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.times
 import org.mockito.Mockito.`when`
@@ -159,7 +158,6 @@ class LoaderTaskTest {
         `when`(launcherModel.modelDbController).thenReturn(modelDbController)
         doReturn(BitmapInfo.LOW_RES_INFO).whenever(iconCache).getDefaultIcon(any())
         doReturn(false).whenever(modelDbController).loadDefaultFavoritesIfNecessary()
-        whenever(modelDbController.getTable()).thenReturn(mock(defaultAnswer = RETURNS_MOCKS))
         doAnswer { i ->
                 inMemoryDb.query(
                     TABLE_NAME,
