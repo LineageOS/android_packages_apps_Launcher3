@@ -987,7 +987,10 @@ class WorkspaceItemProcessorTest {
         }
         val mockModelDelegate = mock<ModelDelegate>()
         val mockModelDbController =
-            mock<ModelDbController>().apply { whenever(generateNewItemId()).thenReturn(0, 1) }
+            mock<ModelDbController>().apply {
+                whenever(generateNewItemId()).thenReturn(0, 1)
+                whenever(getTable()).thenReturn(mock(defaultAnswer = Answers.RETURNS_MOCKS))
+            }
 
         // When
         itemProcessorUnderTest =
