@@ -17,6 +17,7 @@ package com.android.launcher3.dragndrop;
 
 import static com.android.launcher3.LauncherState.FLAG_WORKSPACE_ICONS_BEING_DRAGGED;
 
+import android.annotation.SuppressLint;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 
@@ -27,13 +28,16 @@ import com.android.launcher3.statemanager.StateManager;
 /**
  * A DragView drawn/used by the Launcher activity.
  */
-public class LauncherDragView extends DragView<Launcher>
+@SuppressLint("ViewConstructor")
+public class LauncherDragView extends DragView
         implements StateManager.StateListener<LauncherState> {
 
+    private final Launcher mLauncher;
     public LauncherDragView(Launcher launcher, Drawable drawable, int registrationX,
             int registrationY, float initialScale, float scaleOnDrop, float finalScaleDps) {
         super(launcher, drawable, registrationX, registrationY, initialScale, scaleOnDrop,
                 finalScaleDps);
+        mLauncher = launcher;
     }
 
     public LauncherDragView(Launcher launcher, View content, int width, int height,
@@ -41,18 +45,19 @@ public class LauncherDragView extends DragView<Launcher>
             float finalScaleDps) {
         super(launcher, content, width, height, registrationX, registrationY, initialScale,
                 scaleOnDrop, finalScaleDps);
+        mLauncher = launcher;
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mActivity.getStateManager().addStateListener(this);
+        mLauncher.getStateManager().addStateListener(this);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        mActivity.getStateManager().removeStateListener(this);
+        mLauncher.getStateManager().removeStateListener(this);
     }
 
     @Override
@@ -65,7 +70,7 @@ public class LauncherDragView extends DragView<Launcher>
     public void animateTo(int toTouchX, int toTouchY, Runnable onCompleteRunnable, int duration) {
         mTempLoc[0] = toTouchX - mRegistrationX;
         mTempLoc[1] = toTouchY - mRegistrationY;
-        mActivity.getDragLayer().animateViewIntoPosition(this, mTempLoc, 1f, mScaleOnDrop,
+        mLauncher.getDragLayer().animateViewIntoPosition(this, mTempLoc, 1f, mScaleOnDrop,
                 mScaleOnDrop, DragLayer.ANIMATION_END_DISAPPEAR, onCompleteRunnable, duration);
     }
 }

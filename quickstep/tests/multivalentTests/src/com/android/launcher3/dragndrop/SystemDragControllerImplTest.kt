@@ -227,7 +227,7 @@ class SystemDragControllerImplTest {
             controller.setLauncher(mockLauncher)
         }
 
-        val dragView = mock<DragView<*>>()
+        val dragView = mock<DragView>()
         val listener = mock<SystemDragListener>()
         val params =
             mock<SystemDragParams>().apply {

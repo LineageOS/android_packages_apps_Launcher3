@@ -287,7 +287,7 @@ public class SecondaryDragLayer extends BaseDragLayer<SecondaryDisplayLauncher> 
         options.preDragCondition = container.createPreDragCondition();
         if (options.preDragCondition == null) {
             options.preDragCondition = new DragOptions.PreDragCondition() {
-                private DragView<SecondaryDisplayLauncher> mDragView;
+                private DragView mDragView;
 
                 @Override
                 public boolean shouldStartDrag(double distanceDragged) {

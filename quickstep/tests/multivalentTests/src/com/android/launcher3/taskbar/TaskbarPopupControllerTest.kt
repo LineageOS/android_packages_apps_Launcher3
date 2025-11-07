@@ -187,8 +187,8 @@ class TaskbarPopupControllerTest {
 
     private fun hasTaskbarDragView(): Boolean {
         return getOnUiThread {
-            val dragView: DragView<*>? =
-                taskbarContext.dragLayer.findViewByPredicate { it is DragView<*> }
+            val dragView: DragView? =
+                taskbarContext.dragLayer.findViewByPredicate { it is DragView }
             dragView != null
         }
     }

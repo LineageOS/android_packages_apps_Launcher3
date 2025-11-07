@@ -274,8 +274,7 @@ class DragControllerTest {
         verifyNoMoreInteractions(mockSystemDragHandler2)
     }
 
-    private class TestDragController(context: TestActivityContext) :
-        DragController<TestActivityContext>(context) {
+    private class TestDragController(context: TestActivityContext) : DragController(context) {
         override fun exitDrag() {}
 
         override fun getDefaultDropTarget(dropCoordinates: IntArray?): DropTarget =
@@ -307,7 +306,7 @@ class DragControllerTest {
             initialDragViewScale: Float,
             dragViewScaleOnDrop: Float,
             options: DragOptions?,
-        ): DragView<*> =
+        ): DragView =
             mock(DragView::class.java).also { dv ->
                 mDragDriver = DragDriver.create(this, options) {}
                 mDragObject =

@@ -40,15 +40,17 @@ import java.util.function.Consumer;
 /**
  * Drag controller for Launcher activity
  */
-public class LauncherDragController extends DragController<Launcher> {
+public class LauncherDragController extends DragController {
 
     public static final String TAG = "LauncherDragController";
 
     private final FlingToDeleteHelper mFlingToDeleteHelper;
+    private final Launcher mLauncher;
 
     public LauncherDragController(Launcher launcher) {
         super(launcher);
         mFlingToDeleteHelper = new FlingToDeleteHelper(launcher);
+        mLauncher = launcher;
     }
 
     @Override
@@ -63,7 +65,7 @@ public class LauncherDragController extends DragController<Launcher> {
         final int registrationX = mMotionDown.x - dragLayerX;
         final int registrationY = mMotionDown.y - dragLayerY;
 
-        final Resources res = mActivity.getResources();
+        final Resources res = mLauncher.getResources();
         final float scalePx;
         if (originalView.getViewType() == DraggableView.DRAGGABLE_WIDGET) {
             scalePx = mIsInPreDrag ? 0f : getWidgetDragScalePx(drawable, view, dragInfo);
@@ -72,7 +74,7 @@ public class LauncherDragController extends DragController<Launcher> {
         }
         return drawable != null
                 ? new LauncherDragView(
-                mActivity,
+                mLauncher,
                 drawable,
                 registrationX,
                 registrationY,
@@ -80,7 +82,7 @@ public class LauncherDragController extends DragController<Launcher> {
                 dragViewScaleOnDrop,
                 scalePx)
                 : new LauncherDragView(
-                        mActivity,
+                        mLauncher,
                         view,
                         view.getMeasuredWidth(),
                         view.getMeasuredHeight(),
@@ -93,8 +95,8 @@ public class LauncherDragController extends DragController<Launcher> {
 
     @Override
     protected void onDragViewInitialized() {
-        mActivity.getDragLayer().performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-        if (!isItemPinnable() || (!mIsInPreDrag && !mActivity.isTouchInProgress()
+        mLauncher.getDragLayer().performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+        if (!isItemPinnable() || (!mIsInPreDrag && !mLauncher.isTouchInProgress()
                 && mOptions.simulatedDndStartPoint == null)) {
             // If it is an internal drag and the touch is already complete, cancel immediately
             MAIN_EXECUTOR.post(this::cancelDrag);
@@ -118,7 +120,7 @@ public class LauncherDragController extends DragController<Launcher> {
             draggedViewHeightPx = drawable.getIntrinsicHeight();
         }
 
-        return WidgetDragScaleUtils.getWidgetDragScalePx(mActivity, mActivity.getDeviceProfile(),
+        return WidgetDragScaleUtils.getWidgetDragScalePx(mLauncher, mLauncher.getDeviceProfile(),
                 draggedViewWidthPx, draggedViewHeightPx, dragInfo);
     }
 
@@ -129,8 +131,8 @@ public class LauncherDragController extends DragController<Launcher> {
 
     @Override
     protected void exitDrag() {
-        if (!mIsInPreDrag && !mActivity.isInState(EDIT_MODE)) {
-            mActivity.getStateManager().goToState(NORMAL, SPRING_LOADED_EXIT_DELAY);
+        if (!mIsInPreDrag && !mLauncher.isInState(EDIT_MODE)) {
+            mLauncher.getStateManager().goToState(NORMAL, SPRING_LOADED_EXIT_DELAY);
         }
     }
 
@@ -152,8 +154,8 @@ public class LauncherDragController extends DragController<Launcher> {
 
     @Override
     protected DropTarget getDefaultDropTarget(int[] dropCoordinates) {
-        mActivity.getDragLayer().mapCoordInSelfToDescendant(mActivity.getWorkspace(),
+        mLauncher.getDragLayer().mapCoordInSelfToDescendant(mLauncher.getWorkspace(),
                 dropCoordinates);
-        return mActivity.getWorkspace();
+        return mLauncher.getWorkspace();
     }
 }

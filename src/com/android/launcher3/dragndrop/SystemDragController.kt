@@ -54,7 +54,7 @@ sealed class SystemDragController {
      * @param params The parameters to use for the sequence.
      * @return The drag view for the sequence if started successfully.
      */
-    open fun startDrag(params: SystemDragParams): DragView<*>? = null
+    open fun startDrag(params: SystemDragParams): DragView? = null
 
     companion object {
         @JvmField
@@ -96,7 +96,7 @@ class SystemDragControllerImpl(private val systemDragListenerFactory: SystemDrag
         }
     }
 
-    override fun startDrag(params: SystemDragParams): DragView<*>? {
+    override fun startDrag(params: SystemDragParams): DragView? {
         val dragController = launcher?.dragController ?: return null
         params.dragOptions.simulatedDndStartPoint = dragController.downPoint
         return createSystemDragListener(params)?.startDrag()?.also { dragView ->
@@ -127,7 +127,7 @@ class SystemDragControllerImpl(private val systemDragListenerFactory: SystemDrag
                 createSystemDragListener()?.onDrag(event) == true
         }
 
-    private fun startSystemDrag(dragView: DragView<*>, params: SystemDragParams): Boolean =
+    private fun startSystemDrag(dragView: DragView, params: SystemDragParams): Boolean =
         launcher
             ?.dragLayer
             ?.startDragAndDrop(
