@@ -43,6 +43,7 @@ import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.popup.SystemShortcut
 import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
+import com.android.launcher3.taskbar.TaskbarControllerTestUtil.waitForIdleSync
 import com.android.launcher3.taskbar.TaskbarIconType.ALL_APPS
 import com.android.launcher3.taskbar.TaskbarIconType.HOTSEAT
 import com.android.launcher3.taskbar.TaskbarIconType.OVERFLOW
@@ -486,7 +487,7 @@ class TaskbarOverflowTest {
         // `keyboardQuickSwitchController.launchFocusedTask()` will post a task to activate target
         // desk to `UI_HELPER_EXECUTOR`. Flush the executor to make sure the task runs before
         // verifying mocks.
-        UI_HELPER_EXECUTOR.submit<Any?> { null }.get()
+        UI_HELPER_EXECUTOR.waitForIdleSync()
 
         val deskIdCaptor = argumentCaptor<Int>()
         val taskIdCaptor = argumentCaptor<Int>()
