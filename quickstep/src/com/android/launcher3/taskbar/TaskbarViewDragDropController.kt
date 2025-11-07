@@ -17,32 +17,34 @@
 package com.android.launcher3.taskbar
 
 import android.graphics.Rect
-import android.util.SparseArray
 import android.view.View
+import androidx.annotation.VisibleForTesting
+import androidx.core.util.size
 import com.android.launcher3.DropTarget
+import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.dragndrop.DragController
 import com.android.launcher3.dragndrop.DragOptions
-import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.ItemInfo
-import com.android.launcher3.views.ActivityContext
+import com.android.launcher3.model.data.WorkspaceItemFactory
+import com.android.launcher3.model.data.WorkspaceItemInfo
+import com.android.launcher3.util.IntSparseArrayMap
+import com.android.launcher3.util.ItemInfoMatcher
+import java.util.Collections
 
 /**
  * Manages the [DropTarget] implementations that handle drag and drop events over the taskbarView
  * location
  */
 class TaskbarViewDragDropController(
-    activityContext: ActivityContext,
-    pinnedAppsContainerDelegate: PinnedAppsContainerDelegate,
+    val activityContext: TaskbarActivityContext,
+    val pinnedAppsContainerDelegate: PinnedAppsContainerDelegate,
 ) {
-    val pinningDropTarget = PinningDropTarget(activityContext, pinnedAppsContainerDelegate)
-    val unpinDropTarget = UnpinDropTarget(activityContext, pinnedAppsContainerDelegate)
+    @VisibleForTesting val pinningDropTarget = PinningDropTarget()
+    @VisibleForTesting val unpinDropTarget = UnpinDropTarget()
+    private var modelCallbacks: TaskbarModelCallbacks? = null
 
-    fun setTaskbarInfoList(items: SparseArray<ItemInfo>?) {
-        pinningDropTarget.hotseatInfosList = items
-    }
-
-    fun setApps(items: Array<AppInfo>) {
-        pinningDropTarget.appInfosList = items
+    fun setUpCallbacks(callbacks: TaskbarModelCallbacks) {
+        modelCallbacks = callbacks
     }
 
     fun addDropTargets(dragController: DragController<*>) {
@@ -55,10 +57,11 @@ class TaskbarViewDragDropController(
         dragController.removeDropTarget(unpinDropTarget)
     }
 
-    class UnpinDropTarget(
-        private val activityContext: ActivityContext,
-        private val pinnedAppsContainerDelegate: PinnedAppsContainerDelegate,
-    ) : DropTarget {
+    /**
+     * Implementation of the [DropTarget] that handles drag and drop events over the recent apps
+     * area.
+     */
+    inner class UnpinDropTarget() : DropTarget {
 
         override fun isDropEnabled(): Boolean {
             return true
@@ -68,7 +71,17 @@ class TaskbarViewDragDropController(
             return null
         }
 
-        override fun onDrop(dragObject: DropTarget.DragObject?, options: DragOptions?) {}
+        override fun onDrop(dragObject: DropTarget.DragObject?, options: DragOptions?) {
+            val itemToUnpin = dragObject?.dragInfo ?: return
+
+            activityContext.modelWriter.deleteItemFromDatabase(
+                itemToUnpin,
+                "Unpin by taskbar drag and drop",
+            )
+            modelCallbacks?.bindWorkspaceComponentsRemoved(
+                ItemInfoMatcher.ofItems(Collections.singleton(itemToUnpin))
+            )
+        }
 
         override fun onDragEnter(dragObject: DropTarget.DragObject?) {}
 
@@ -92,23 +105,93 @@ class TaskbarViewDragDropController(
         }
     }
 
-    class PinningDropTarget(
-        private val activityContext: ActivityContext,
-        private val pinnedAppsContainerDelegate: PinnedAppsContainerDelegate,
-    ) : DropTarget {
+    /**
+     * Implementation of the [DropTarget] that handles drag and drop events over the hotseat items
+     * area.
+     */
+    inner class PinningDropTarget() : DropTarget {
 
-        var hotseatInfosList: SparseArray<ItemInfo>? = null
-        var appInfosList: Array<AppInfo> = AppInfo.EMPTY_ARRAY
+        private val canPinMoreItems: Boolean
+            get() {
+                val hotseatItems = modelCallbacks?.hotseatItems ?: return false
+                return hotseatItems.size < activityContext.taskbarSpecsEvaluator.maxPinnableCount
+            }
+
+        private fun extractItemInfoFromDragObject(dragObject: DropTarget.DragObject?): ItemInfo? {
+            return when (val dragItemInfo = dragObject?.dragInfo) {
+                is WorkspaceItemInfo -> dragItemInfo
+                is WorkspaceItemFactory -> dragItemInfo.makeWorkspaceItem(activityContext)
+                else -> null
+            }
+        }
+
+        /** Returns the screenId where the dragObject is dropped at. */
+        private fun findTargetScreenId(hotSeatItems: IntSparseArrayMap<ItemInfo>): Int {
+            // TODO(b/447444838): Using the last hotSeat screenId now. Need to calculate
+            // targetScreenId based on where the object was dropped and extract them into a util
+            // function.
+            return (hotSeatItems.lastOrNull()?.screenId ?: 0) + 1
+        }
 
         override fun isDropEnabled(): Boolean {
-            return true
+            // TODO(b/447444838): For now, only accept drops when the number of pinned items has
+            // not reached limit. This will probably be modified after dropping to hotseat overflow
+            // folder UX finalized.
+            return canPinMoreItems
         }
 
         override fun getDropView(): View? {
             return null
         }
 
-        override fun onDrop(dragObject: DropTarget.DragObject?, options: DragOptions?) {}
+        override fun onDrop(dragObject: DropTarget.DragObject?, options: DragOptions?) {
+            val newInfo = extractItemInfoFromDragObject(dragObject) ?: return
+            val hotseatItems = modelCallbacks?.hotseatItems ?: return
+            val existingInfo =
+                if (newInfo.id != ItemInfo.NO_ID && newInfo.container == CONTAINER_HOTSEAT) newInfo
+                else null
+            val targetScreenId = findTargetScreenId(hotseatItems)
+
+            // When the dragObject is from pinned items area and is moving right, shift items left
+            // to fill the gap left by the moved item.
+            val itemsToShift = mutableListOf<ItemInfo>()
+            var lastShiftedScreenId = targetScreenId - 1
+
+            if (existingInfo != null) {
+                for (i in 0..<hotseatItems.size) {
+                    val item = hotseatItems.valueAt(hotseatItems.size - i - 1) ?: continue
+
+                    if (item.screenId == lastShiftedScreenId && item != existingInfo) {
+                        itemsToShift.add(item)
+                        lastShiftedScreenId--
+                    } else if (item.screenId != targetScreenId) {
+                        break
+                    }
+                }
+            }
+
+            val writer = activityContext.modelWriter
+            for (item in itemsToShift) {
+                writer.addOrMoveItemInDatabase(
+                    item,
+                    CONTAINER_HOTSEAT,
+                    item.screenId - 1,
+                    item.screenId - 1,
+                    0,
+                )
+            }
+            modelCallbacks?.bindItemsUpdated(itemsToShift.toSet())
+
+            val newItemScreenId = targetScreenId - if (existingInfo != null) 1 else 0
+            writer.addOrMoveItemInDatabase(
+                newInfo,
+                CONTAINER_HOTSEAT,
+                newItemScreenId,
+                newItemScreenId,
+                0,
+            )
+            modelCallbacks?.bindItemsUpdated(hashSetOf(newInfo))
+        }
 
         override fun onDragEnter(dragObject: DropTarget.DragObject?) {}
 
@@ -117,7 +200,10 @@ class TaskbarViewDragDropController(
         override fun onDragExit(dragObject: DropTarget.DragObject?) {}
 
         override fun acceptDrop(dragObject: DropTarget.DragObject?): Boolean {
-            return true
+            // TODO(b/447444838): For now, only accept drops when the number of pinned items has
+            // not reached limit. This will probably be modified after dropping to hotseat overflow
+            // folder UX finalized.
+            return canPinMoreItems
         }
 
         override fun prepareAccessibilityDrop() {

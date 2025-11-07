@@ -293,7 +293,7 @@ public class TaskbarDragController extends DragController<BaseTaskbarContext> im
                 dragLayerY + dragOffset.y,
                 (View target, DropTarget.DragObject d, boolean success) ->
                         mIsDropHandledByDropTarget = success /* DragSource */,
-                btv.getTag() instanceof ItemInfo itemInfo ? itemInfo : null,
+                getItemInfoFromBubbleTextView(btv),
                 dragRect,
                 scale * iconScale,
                 scale,
@@ -337,6 +337,17 @@ public class TaskbarDragController extends DragController<BaseTaskbarContext> im
         return (mControllers.taskbarActivityContext.showDesktopTaskbarForFreeformDisplay()
                 || mControllers.taskbarActivityContext.showLockedTaskbarOnHome())
                 && mControllers.taskbarStashController.isOnHome();
+    }
+
+    private @Nullable ItemInfo getItemInfoFromBubbleTextView(BubbleTextView btv) {
+        Object tag = btv.getTag();
+        if (tag instanceof ItemInfo itemInfo) {
+            return itemInfo;
+        } else if (enableTaskbarDragAndDrop() && tag instanceof SingleTask singleTask) {
+            return singleTask.makeWorkspaceItem(mActivity);
+        } else {
+            return null;
+        }
     }
 
     @Override
