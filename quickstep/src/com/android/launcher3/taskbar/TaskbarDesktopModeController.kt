@@ -63,7 +63,11 @@ class TaskbarDesktopModeController(
     fun isInDesktopModeAndNotInOverview(displayId: Int) =
         desktopVisibilityController.isInDesktopModeAndNotInOverview(displayId)
 
-    override fun onTaskbarCornerRoundingUpdate(doesAnyTaskRequireTaskbarRounding: Boolean) {
+    override fun onTaskbarCornerRoundingUpdate(
+        doesAnyTaskRequireTaskbarRounding: Boolean,
+        displayId: Int,
+    ) {
+        // TODO (b/435317310): only update the corner roundness for the taskbar on the given display
         if (taskbarControllers.taskbarActivityContext.isDestroyed) return
         taskbarSharedState.showCornerRadiusInDesktopMode = doesAnyTaskRequireTaskbarRounding
         val cornerRadius = getTaskbarCornerRoundness(doesAnyTaskRequireTaskbarRounding)
