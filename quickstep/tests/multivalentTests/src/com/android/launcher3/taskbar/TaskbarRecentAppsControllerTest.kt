@@ -1106,6 +1106,7 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
 
         setInDesktopMode(true)
         recentTasksChangedCallback!!.invoke(null)
+        waitForTaskbarUiThreadSync()
         val shownPackages = recentAppsController.shownTasks.flatMap { it.packageNames }
         assertThat(shownPackages).containsExactly(RUNNING_APP_PACKAGE_1, RUNNING_APP_PACKAGE_2)
     }
@@ -1611,6 +1612,7 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
             recentTaskPackages = listOf(RECENT_PACKAGE_1, RECENT_PACKAGE_2, RECENT_PACKAGE_3),
         )
 
+        waitForTaskbarUiThreadSync()
         // Updated twice in total.
         verify(taskbarViewController, times(2)).onTaskUpdated(eq(task1), any())
     }
@@ -1700,6 +1702,7 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
             .getTasks(any(), any<Consumer<List<GroupTask>>>())
         if (enableTaskbarUiThread()) {
             recentTasksChangedCallback?.invoke(null)
+            waitForTaskbarUiThreadSync()
         } else {
             recentTasksChangedListener?.onRecentTasksChanged()
         }
@@ -1803,6 +1806,12 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
 
     private val GroupTask.packageNames: List<String>
         get() = tasks.map { task -> task.key.packageName }
+
+    private fun waitForTaskbarUiThreadSync() {
+        if (enableTaskbarUiThread()) {
+            TASKBAR_UI_THREAD.submit {}.get()
+        }
+    }
 
     private companion object {
         const val HOTSEAT_PACKAGE_1 = "hotseat1"
