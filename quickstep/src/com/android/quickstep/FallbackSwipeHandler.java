@@ -65,7 +65,7 @@ import com.android.launcher3.anim.SpringAnimationBuilder;
 import com.android.launcher3.states.StateAnimationConfig;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.MSDLPlayerWrapper;
-import com.android.quickstep.fallback.FallbackRecentsView;
+import com.android.quickstep.fallback.FallbackActivityRecentsView;
 import com.android.quickstep.fallback.RecentsState;
 import com.android.quickstep.util.ActiveGestureLog;
 import com.android.quickstep.util.RectFSpringAnim;
@@ -85,7 +85,7 @@ import java.util.function.Consumer;
  * Handles the navigation gestures when a 3rd party launcher is the default home activity.
  */
 public class FallbackSwipeHandler extends
-        AbsSwipeUpHandler<RecentsActivity, FallbackRecentsView<RecentsActivity>, RecentsState> {
+        AbsSwipeUpHandler<RecentsActivity, FallbackActivityRecentsView, RecentsState> {
 
     private static final String TAG = "FallbackSwipeHandler";
 

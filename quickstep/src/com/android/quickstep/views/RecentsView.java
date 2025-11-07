@@ -132,6 +132,7 @@ import androidx.annotation.AnyThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
+import androidx.annotation.VisibleForTesting;
 import androidx.core.graphics.ColorUtils;
 import androidx.core.view.ViewKt;
 import androidx.dynamicanimation.animation.SpringAnimation;
@@ -227,8 +228,8 @@ import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.wm.shell.common.pip.IPipAnimationListener;
 import com.android.wm.shell.common.pip.IPipAnimationListener.PipResources;
 import com.android.wm.shell.shared.GroupedTaskInfo;
-import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
+import com.android.wm.shell.shared.desktopmode.DesktopState;
 import com.android.wm.shell.shared.pip.PipFlags;
 import com.android.wm.shell.shared.split.SplitBounds;
 
@@ -247,6 +248,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+
+import javax.inject.Inject;
 
 /**
  * A list of recent tasks.
@@ -530,7 +533,6 @@ public abstract class RecentsView<
     private final RecentsComponent mRecentsComponent;
     private final float mFastFlingVelocity;
     private final int mScrollHapticMinGapMillis;
-    private final RecentsModel mModel;
     private final int mSplitPlaceholderSize;
     private final int mSplitPlaceholderInset;
     private final ClearAllButton mClearAllButton;
@@ -540,9 +542,6 @@ public abstract class RecentsView<
     private final Rect mTaskViewDeadZoneRect = new Rect();
     private final Rect mTopRowDeadZoneRect = new Rect();
     private final Rect mBottomRowDeadZoneRect = new Rect();
-
-    @Nullable
-    private DesktopVisibilityController mDesktopVisibilityController = null;
 
     /**
      * Reflects if Recents is currently in the middle of a gesture, and if so, which related
@@ -641,7 +640,7 @@ public abstract class RecentsView<
                         if (apkRemoved) {
                             dismissTask(taskId, /*animate=*/true, /*removeTask=*/false);
                         } else {
-                            mModel.isTaskRemoved(taskKey.id, taskRemoved -> {
+                            mRecentsModel.isTaskRemoved(taskKey.id, taskRemoved -> {
                                 if (taskRemoved) {
                                     dismissTask(taskId, /*animate=*/true, /*removeTask=*/false);
                                 }
@@ -822,10 +821,26 @@ public abstract class RecentsView<
      */
     protected boolean mAnyTaskHasBeenDismissed;
 
-    RecentsViewModel mRecentsViewModel;
-    private final RecentsViewModelHelper mHelper;
+    @Inject RecentsViewModel mRecentsViewModel;
+    @Inject RecentsViewModelHelper mHelper;
+    @Inject DesktopState mDesktopState;
+    @Inject DesktopVisibilityController mDesktopVisibilityController;
+    @Inject OverviewComponentObserver mOverviewComponentObserver;
+    @Inject RecentsModel mRecentsModel;
+    @Inject SystemUiProxy mSystemUiProxy;
+    @Inject TopTaskTracker mTopTaskTracker;
+    @Inject VibratorWrapper mVibratorWrapper;
+
+    // Package-private for Dagger only, should not use directly
+    @VisibleForTesting
+    @Inject RecentsViewUtils.Factory mUtilsFactory;
+    @VisibleForTesting
+    @Inject RecentsDismissUtils.Factory mDismissUtilsFactory;
+
     protected final RecentsViewUtils mUtils;
     protected final RecentsDismissUtils mDismissUtils;
+
+    private final boolean mIsMultipleDesktopFrontendEnabled;
 
     private final Matrix mTmpMatrix = new Matrix();
 
@@ -845,23 +860,22 @@ public abstract class RecentsView<
         mOrientationState.setRecentsRotation(rotation);
 
         mRecentsComponent = mContainer.getRecentsComponent();
-        mRecentsViewModel = mRecentsComponent.getRecentsViewModel();
-        mHelper = mRecentsComponent.getRecentsViewModelHelper();
-        mUtils = mRecentsComponent.getRecentsViewUtilsFactory().create(this);
-        mDismissUtils = mRecentsComponent.getRecentsDismissUtilsFactory().create(this);
+        initialiseInjectables(mRecentsComponent);
+        mUtils = mUtilsFactory.create(this);
+        mDismissUtils = mDismissUtilsFactory.create(this);
 
         mScrollHapticMinGapMillis = getResources()
                 .getInteger(R.integer.recentsScrollHapticMinGapMillis);
         mFastFlingVelocity = getResources()
                 .getDimensionPixelSize(R.dimen.recents_fast_fling_velocity);
-        mModel = RecentsModel.INSTANCE.get(context);
 
         mClearAllButton = (ClearAllButton) LayoutInflater.from(context)
                 .inflate(R.layout.overview_clear_all_button, this, false);
         mClearAllButton.setOnClickListener(this::dismissAllTasks);
 
-        if (DesktopModeStatus.isMultipleDesktopFrontendEnabledOnDisplay(mContext,
-                mContainer.getDisplay())) {
+        mIsMultipleDesktopFrontendEnabled = mDesktopState.isMultipleDesktopFrontendEnabledOnDisplay(
+                mContainer.getDisplay());
+        if (mIsMultipleDesktopFrontendEnabled) {
             mAddDesktopButton = (AddDesktopButton) LayoutInflater.from(context).inflate(
                     R.layout.overview_add_desktop_button, this, false);
             mAddDesktopButton.setOnClickListener(view -> {
@@ -872,7 +886,6 @@ public abstract class RecentsView<
                 });
             });
 
-            mDesktopVisibilityController = DesktopVisibilityController.INSTANCE.get(mContext);
             // Update its visibility based on whether we can create a desk or not.
             mUtils.onCanCreateDesksChanged(
                     mDesktopVisibilityController.getCanCreateDesks());
@@ -883,7 +896,7 @@ public abstract class RecentsView<
         int groupedViewPoolInitialSize = 2;
         mGroupedTaskViewPool = new ViewPool<>(context, this,
                 R.layout.task_grouped, 20 /* max size */, groupedViewPoolInitialSize);
-        int desktopViewPoolInitialSize = DesktopModeStatus.canEnterDesktopMode(mContext) ? 1 : 0;
+        int desktopViewPoolInitialSize = mDesktopState.canEnterDesktopMode() ? 1 : 0;
         mDesktopTaskViewPool = new ViewPool<>(context, this, R.layout.task_desktop,
                 5 /* max size */, desktopViewPoolInitialSize);
 
@@ -905,6 +918,8 @@ public abstract class RecentsView<
 
         mTintingColor = getForegroundScrimDimColor(context);
     }
+
+    protected abstract void initialiseInjectables(@NonNull RecentsComponent recentsComponent);
 
     public OverScroller getScroller() {
         return mScroller;
@@ -997,7 +1012,7 @@ public abstract class RecentsView<
             SurfaceTransactionApplier surfaceTransactionApplier,
             @Nullable ViewGroup emptyRecentsMessageView) {
         // OverviewActionsView related.
-        mIs3PLauncher = !OverviewComponentObserver.INSTANCE.get(mContext).isHomeAndOverviewSame();
+        mIs3PLauncher = !mOverviewComponentObserver.isHomeAndOverviewSame();
         mActionsView = actionsView;
         mActionsView.updateHiddenFlags(HIDDEN_NO_TASKS, !hasTaskViews());
         // Update flags for 1p/3p launchers
@@ -1055,18 +1070,18 @@ public abstract class RecentsView<
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         updateTaskStackListenerState();
-        mModel.getThumbnailCache().getHighResLoadingState().addCallback(this);
+        mRecentsModel.getThumbnailCache().getHighResLoadingState().addCallback(this);
         TaskStackChangeListeners.getInstance().registerTaskStackListener(mTaskStackListener);
         runActionOnRemoteHandles(remoteTargetHandle -> remoteTargetHandle.getTransformParams()
                 .setSyncTransactionApplier(mSyncTransactionApplier));
-        RecentsModel.INSTANCE.get(mContext).addThumbnailChangeListener(this);
+        mRecentsModel.addThumbnailChangeListener(this);
         mIPipAnimationListener.setActivityAndRecentsView(mContainer, this);
-        SystemUiProxy.INSTANCE.get(mContext).setPipAnimationListener(
+        mSystemUiProxy.setPipAnimationListener(
                 mIPipAnimationListener);
         mOrientationState.initListeners();
         mTaskOverlayFactory.initListeners();
         mSplitSelectStateController.registerSplitListener(mSplitSelectionListener);
-        if (mDesktopVisibilityController != null) {
+        if (mIsMultipleDesktopFrontendEnabled) {
             mDesktopVisibilityController.registerDesktopVisibilityListener(mUtils);
         }
     }
@@ -1076,19 +1091,19 @@ public abstract class RecentsView<
         super.onDetachedFromWindow();
 
         updateTaskStackListenerState();
-        mModel.getThumbnailCache().getHighResLoadingState().removeCallback(this);
+        mRecentsModel.getThumbnailCache().getHighResLoadingState().removeCallback(this);
         TaskStackChangeListeners.getInstance().unregisterTaskStackListener(mTaskStackListener);
         mSyncTransactionApplier = null;
         runActionOnRemoteHandles(remoteTargetHandle -> remoteTargetHandle.getTransformParams()
                 .setSyncTransactionApplier(null));
         executeSideTaskLaunchCallback();
-        RecentsModel.INSTANCE.get(mContext).removeThumbnailChangeListener(this);
-        SystemUiProxy.INSTANCE.get(mContext).setPipAnimationListener(null);
+        mRecentsModel.removeThumbnailChangeListener(this);
+        mSystemUiProxy.setPipAnimationListener(null);
         mIPipAnimationListener.setActivityAndRecentsView(null, null);
         mOrientationState.destroyListeners();
         mTaskOverlayFactory.removeListeners();
         mSplitSelectStateController.unregisterSplitListener(mSplitSelectionListener);
-        if (mDesktopVisibilityController != null) {
+        if (mIsMultipleDesktopFrontendEnabled) {
             mDesktopVisibilityController.unregisterDesktopVisibilityListener(mUtils);
         }
         mTaskLaunchListener = null;
@@ -1686,7 +1701,7 @@ public abstract class RecentsView<
         long now = SystemClock.uptimeMillis();
         if (now - mScrollLastHapticTimestamp > mScrollHapticMinGapMillis) {
             mScrollLastHapticTimestamp = now;
-            VibratorWrapper.INSTANCE.get(mContext).vibrate(SCROLL_VIBRATION_PRIMITIVE,
+            mVibratorWrapper.vibrate(SCROLL_VIBRATION_PRIMITIVE,
                     SCROLL_VIBRATION_PRIMITIVE_SCALE, SCROLL_VIBRATION_FALLBACK);
         }
     }
@@ -2287,7 +2302,7 @@ public abstract class RecentsView<
         }
 
         // Update the high res thumbnail loader state
-        mModel.getThumbnailCache().getHighResLoadingState().setFlingingFast(isFlingingFast);
+        mRecentsModel.getThumbnailCache().getHighResLoadingState().setFlingingFast(isFlingingFast);
         return scrolling;
     }
 
@@ -2381,7 +2396,7 @@ public abstract class RecentsView<
         // TODO(b/446013310) move this call to the RecentsView constructor
         // Preload cache so when user goes to overview, the task thumbnails appear without delay
         if (mRecentsViewModel.getVisibleTaskIds().isEmpty()) {
-            mModel.preloadCacheIfNeeded();
+            mRecentsModel.preloadCacheIfNeeded();
         }
     }
 
@@ -2545,8 +2560,8 @@ public abstract class RecentsView<
      * Reloads the view if anything in recents changed.
      */
     public void reloadIfNeeded() {
-        if (!mModel.isTaskListValid(mAppliedTaskListChangeId)) {
-            mModel.getTasks(
+        if (!mRecentsModel.isTaskListValid(mAppliedTaskListChangeId)) {
+            mRecentsModel.getTasks(
                     this::applyLoadPlan,
                     RecentsFilterState.getFilter(mContainer.getDisplayId()));
             Log.d(TAG, "reloadIfNeeded - getTasks: " + mAppliedTaskListChangeId);
@@ -4877,7 +4892,7 @@ public abstract class RecentsView<
         }
 
         boolean forDesktop;
-        if (DesktopModeStatus.enableMultipleDesktops(getContext())) {
+        if (mDesktopState.enableMultipleDesktops()) {
             forDesktop = mActiveGestureGroupedTaskInfo != null
                     && mActiveGestureGroupedTaskInfo.isBaseType(GroupedTaskInfo.TYPE_DESK);
         } else {
@@ -4971,9 +4986,8 @@ public abstract class RecentsView<
         if (sendUserLeaveHint && !PipFlags.isPip2ExperimentEnabled()) {
             // Notify the SysUI to use fade-in animation when entering PiP from live tile.
             // Note: PiP2 handles entering differently, so skip if enable_pip2=true.
-            final SystemUiProxy systemUiProxy = SystemUiProxy.INSTANCE.get(getContext());
-            systemUiProxy.setPipAnimationTypeToAlpha();
-            systemUiProxy.setShelfHeight(true, mContainer.getDeviceProfile().hotseatBarSizePx);
+            mSystemUiProxy.setPipAnimationTypeToAlpha();
+            mSystemUiProxy.setShelfHeight(true, mContainer.getDeviceProfile().hotseatBarSizePx);
             // Transaction to hide the task to avoid flicker for entering PiP from split-screen.
             // See also {@link AbsSwipeUpHandler#maybeFinishSwipeToHome}.
             PictureInPictureSurfaceTransaction tx =
@@ -4981,7 +4995,7 @@ public abstract class RecentsView<
                             .setAlpha(0f)
                             .build();
             tx.setShouldDisableCanAffectSystemUiFlags(false);
-            int[] taskIds = TopTaskTracker.INSTANCE.get(getContext()).getRunningSplitTaskIds();
+            int[] taskIds = mTopTaskTracker.getRunningSplitTaskIds();
             for (int taskId : taskIds) {
                 mRecentsAnimationController.setFinishTaskTransaction(taskId,
                         tx, null /* overlay */);
@@ -5820,7 +5834,7 @@ public abstract class RecentsView<
     public void moveTaskToDesktop(TaskContainer taskContainer,
             DesktopModeTransitionSource transitionSource,
             Runnable successCallback) {
-        if (!DesktopModeStatus.canEnterDesktopMode(mContext)) {
+        if (!mDesktopState.canEnterDesktopMode()) {
             return;
         }
         switchToScreenshot(() -> finishRecentsAnimation(/* toHome= */true, /* shouldPip= */false,
@@ -5846,7 +5860,7 @@ public abstract class RecentsView<
      */
     public void moveTaskToExternalDisplay(TaskContainer taskContainer,
             DesktopModeTransitionSource transitionSource, Runnable successCallback) {
-        if (!DesktopModeStatus.canEnterDesktopMode(mContext)) {
+        if (!mDesktopState.canEnterDesktopMode()) {
             return;
         }
         switchToScreenshot(() -> finishRecentsAnimation(/* toHome= */true, /* shouldPip= */false,

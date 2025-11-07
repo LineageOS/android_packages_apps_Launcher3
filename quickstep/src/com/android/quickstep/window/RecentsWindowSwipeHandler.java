@@ -76,7 +76,7 @@ import com.android.quickstep.RecentsAnimationDeviceState;
 import com.android.quickstep.RecentsAnimationTargets;
 import com.android.quickstep.RotationTouchHelper;
 import com.android.quickstep.TaskAnimationManager;
-import com.android.quickstep.fallback.FallbackRecentsView;
+import com.android.quickstep.fallback.FallbackWindowRecentsView;
 import com.android.quickstep.fallback.RecentsState;
 import com.android.quickstep.util.ActiveGestureLog;
 import com.android.quickstep.util.RectFSpringAnim;
@@ -97,7 +97,7 @@ import java.util.function.Consumer;
  * Bugs: b/365775417
  */
 public class RecentsWindowSwipeHandler extends AbsSwipeUpHandler<RecentsWindowManager,
-        FallbackRecentsView<RecentsWindowManager>, RecentsState> {
+        FallbackWindowRecentsView, RecentsState> {
 
     private static final String TAG = "RecentsWindowSwipeHandler";
 
