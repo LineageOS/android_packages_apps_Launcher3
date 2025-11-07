@@ -15,10 +15,6 @@
  */
 package com.android.launcher3.dragndrop;
 
-import static android.view.View.VISIBLE;
-
-import static com.android.launcher3.AbstractFloatingView.TYPE_DISCOVERY_BOUNCE;
-import static com.android.launcher3.Flags.removeAppsRefreshOnRightClick;
 import static com.android.launcher3.LauncherAnimUtils.SPRING_LOADED_EXIT_DELAY;
 import static com.android.launcher3.LauncherState.EDIT_MODE;
 import static com.android.launcher3.LauncherState.NORMAL;
@@ -33,17 +29,13 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
-import com.android.launcher3.AbstractFloatingView;
-import com.android.launcher3.DragSource;
 import com.android.launcher3.DropTarget;
-import com.android.launcher3.DropTarget.DragObject;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.R;
-import com.android.launcher3.accessibility.DragViewStateAnnouncer;
-import com.android.launcher3.dragndrop.DragOptions.PreDragCondition;
 import com.android.launcher3.model.data.ItemInfo;
-import com.android.launcher3.util.TouchUtil;
 import com.android.launcher3.widget.util.WidgetDragScaleUtils;
+
+import java.util.function.Consumer;
 
 /**
  * Drag controller for Launcher activity
@@ -52,11 +44,7 @@ public class LauncherDragController extends DragController<Launcher> {
 
     public static final String TAG = "LauncherDragController";
 
-    private static final boolean PROFILE_DRAWING_DURING_DRAG = false;
     private final FlingToDeleteHelper mFlingToDeleteHelper;
-
-    /** Whether or not the drag operation is triggered by mouse right click. */
-    private boolean mIsInMouseRightClick = false;
 
     public LauncherDragController(Launcher launcher) {
         super(launcher);
@@ -64,76 +52,25 @@ public class LauncherDragController extends DragController<Launcher> {
     }
 
     @Override
-    protected DragView startDrag(
-            @Nullable Drawable drawable,
-            @Nullable View view,
-            DraggableView originalView,
-            int dragLayerX,
-            int dragLayerY,
-            DragSource source,
-            ItemInfo dragInfo,
-            Rect dragRegion,
-            float initialDragViewScale,
-            float dragViewScaleOnDrop,
-            DragOptions options) {
-        if (PROFILE_DRAWING_DURING_DRAG) {
-            android.os.Debug.startMethodTracing("Launcher");
-        }
+    protected Consumer<MotionEvent> getSecondaryEventConsumer() {
+        return mFlingToDeleteHelper::recordMotionEvent;
+    }
 
-        if (removeAppsRefreshOnRightClick() && mIsInMouseRightClick
-                && options.preDragCondition == null
-                && originalView instanceof View v) {
-            options.preDragCondition = new PreDragCondition() {
-
-                @Override
-                public boolean shouldStartDrag(double distanceDragged) {
-                    return false;
-                }
-
-                @Override
-                public void onPreDragStart(DragObject dragObject) {
-                    // Set it to visible so the text of FolderIcon would not flash (avoid it from
-                    // being invisible and then visible)
-                    v.setVisibility(VISIBLE);
-                }
-
-                @Override
-                public void onPreDragEnd(DragObject dragObject, boolean dragStarted) { }
-            };
-        }
-
-        mActivity.hideKeyboard();
-        AbstractFloatingView.closeOpenViews(mActivity, false, TYPE_DISCOVERY_BOUNCE);
-
-        mOptions = options;
-        if (mOptions.simulatedDndStartPoint != null) {
-            mLastTouch.x = mMotionDown.x = mOptions.simulatedDndStartPoint.x;
-            mLastTouch.y = mMotionDown.y = mOptions.simulatedDndStartPoint.y;
-        }
-
+    @Override
+    protected DragView createDragView(@Nullable Drawable drawable, @Nullable View view,
+            DraggableView originalView, ItemInfo dragInfo, int dragLayerX, int dragLayerY,
+            Rect dragRegion, float initialDragViewScale, float dragViewScaleOnDrop) {
         final int registrationX = mMotionDown.x - dragLayerX;
         final int registrationY = mMotionDown.y - dragLayerY;
 
-        final int dragRegionLeft = dragRegion == null ? 0 : dragRegion.left;
-        final int dragRegionTop = dragRegion == null ? 0 : dragRegion.top;
-
-        mLastDropTarget = null;
-
-        mDragObject = new DropTarget.DragObject(mActivity.getApplicationContext());
-        mDragObject.originalView = originalView;
-
-        mIsInPreDrag = mOptions.preDragCondition != null
-                && !mOptions.preDragCondition.shouldStartDrag(0);
-
         final Resources res = mActivity.getResources();
-
         final float scalePx;
         if (originalView.getViewType() == DraggableView.DRAGGABLE_WIDGET) {
             scalePx = mIsInPreDrag ? 0f : getWidgetDragScalePx(drawable, view, dragInfo);
         } else {
             scalePx = mIsInPreDrag ? res.getDimensionPixelSize(R.dimen.pre_drag_view_scale) : 0f;
         }
-        final DragView dragView = mDragObject.dragView = drawable != null
+        return drawable != null
                 ? new LauncherDragView(
                 mActivity,
                 drawable,
@@ -152,66 +89,15 @@ public class LauncherDragController extends DragController<Launcher> {
                         initialDragViewScale,
                         dragViewScaleOnDrop,
                         scalePx);
-
-        dragView.setItemInfo(dragInfo);
-        mDragObject.dragComplete = false;
-
-        mDragObject.xOffset = mMotionDown.x - (dragLayerX + dragRegionLeft);
-        mDragObject.yOffset = mMotionDown.y - (dragLayerY + dragRegionTop);
-
-        mDragDriver = DragDriver.create(this, mOptions, mFlingToDeleteHelper::recordMotionEvent);
-        updateDescendantsAccessibility(dragView, /*accessible=*/ false);
-        if (!mOptions.isAccessibleDrag) {
-            mDragObject.stateAnnouncer = DragViewStateAnnouncer.createFor(dragView);
-        }
-
-        mDragObject.dragSource = source;
-        mDragObject.dragInfo = dragInfo;
-        mDragObject.originalDragInfo = mDragObject.dragInfo.makeShallowCopy();
-
-        if (mOptions.preDragCondition != null) {
-            dragView.setHasDragOffset(mOptions.preDragCondition.getDragOffset().x != 0 ||
-                    mOptions.preDragCondition.getDragOffset().y != 0);
-        }
-
-        if (dragRegion != null) {
-            dragView.setDragRegion(new Rect(dragRegion));
-        }
-
-        mActivity.getDragLayer().performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-        dragView.show(mLastTouch.x, mLastTouch.y);
-        mDistanceSinceScroll = 0;
-
-        if (!mIsInPreDrag) {
-            callOnDragStart();
-        } else if (mOptions.preDragCondition != null) {
-            mOptions.preDragCondition.onPreDragStart(mDragObject);
-        }
-
-        handleMoveEvent(mLastTouch.x, mLastTouch.y);
-
-        if (!isItemPinnable() || (!mIsInPreDrag && !mActivity.isTouchInProgress()
-                && options.simulatedDndStartPoint == null)) {
-            // If it is an internal drag and the touch is already complete, cancel immediately
-            MAIN_EXECUTOR.post(this::cancelDrag);
-        }
-        return dragView;
     }
 
-    /**
-     * During a drag, we don't want to expose the descendants of drag view to a11y users,
-     * since those descendants are not a valid position in the workspace.
-     * We need to go through the children because the view itself is important for
-     * accessibility, basically we are implementing:
-     * IMPORTANT_FOR_ACCESSIBILITY_YES_HIDE_DESCENDANTS when {@code accessible} is true and
-     * reversing it when false.
-     */
-    void updateDescendantsAccessibility(DragView dragView, boolean accessible) {
-        for (int i = 0; i < dragView.getChildCount(); i++) {
-            dragView.getChildAt(i).setImportantForAccessibility(
-                    accessible ? View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
-                            : View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
-            );
+    @Override
+    protected void onDragViewInitialized() {
+        mActivity.getDragLayer().performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+        if (!isItemPinnable() || (!mIsInPreDrag && !mActivity.isTouchInProgress()
+                && mOptions.simulatedDndStartPoint == null)) {
+            // If it is an internal drag and the touch is already complete, cancel immediately
+            MAIN_EXECUTOR.post(this::cancelDrag);
         }
     }
 
@@ -250,9 +136,6 @@ public class LauncherDragController extends DragController<Launcher> {
 
     @Override
     protected boolean endWithFlingAnimation() {
-        if (mDragObject != null && mDragObject.dragView != null) {
-            updateDescendantsAccessibility(mDragObject.dragView, /*accessible=*/ true);
-        }
         Runnable flingAnimation = mFlingToDeleteHelper.getFlingAnimation(mDragObject, mOptions);
         if (flingAnimation != null) {
             drop(mFlingToDeleteHelper.getDropTarget(), flingAnimation);
@@ -263,9 +146,6 @@ public class LauncherDragController extends DragController<Launcher> {
 
     @Override
     protected void endDrag() {
-        if (mDragObject != null && mDragObject.dragView != null) {
-            updateDescendantsAccessibility(mDragObject.dragView, /*accessible=*/ true);
-        }
         super.endDrag();
         mFlingToDeleteHelper.releaseVelocityTracker();
     }
@@ -275,14 +155,5 @@ public class LauncherDragController extends DragController<Launcher> {
         mActivity.getDragLayer().mapCoordInSelfToDescendant(mActivity.getWorkspace(),
                 dropCoordinates);
         return mActivity.getWorkspace();
-    }
-
-    /**
-     * Intercepts touch events from a drag source view.
-     */
-    @Override
-    public boolean onControllerInterceptTouchEvent(MotionEvent ev) {
-        mIsInMouseRightClick = TouchUtil.isMouseRightClickDownOrMove(ev);
-        return super.onControllerInterceptTouchEvent(ev);
     }
 }

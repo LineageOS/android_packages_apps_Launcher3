@@ -58,6 +58,10 @@ constructor(
         MAIN_EXECUTOR.submit<AllAppsView> { AllAppsView(this) }.get()
     }
 
+    private val myDragController: DragController<TestActivityContext> by lazy {
+        DragController<TestActivityContext>(this)
+    }
+
     private val myWidgetPickerDataProvider = WidgetPickerDataProvider()
 
     override fun getDragLayer() = myDragLayer
@@ -74,8 +78,7 @@ constructor(
     /** Override required to allow spying */
     override fun getAccessibilityDelegate() = super.getAccessibilityDelegate()
 
-    /** Override required to allow spying */
-    override fun <T : DragController<*>?> getDragController(): T = super.getDragController()
+    override fun getDragController(): DragController<TestActivityContext> = myDragController
 
     /** Override required to allow spying */
     override fun getModelWriter() = super.getModelWriter()

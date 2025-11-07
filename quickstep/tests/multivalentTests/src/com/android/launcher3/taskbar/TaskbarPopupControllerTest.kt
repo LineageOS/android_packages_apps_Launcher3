@@ -29,6 +29,7 @@ import com.android.launcher3.BubbleTextView
 import com.android.launcher3.Flags.FLAG_ENABLE_MULTI_INSTANCE_MENU_TASKBAR
 import com.android.launcher3.LauncherSettings
 import com.android.launcher3.R
+import com.android.launcher3.dragndrop.DragView
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
@@ -186,8 +187,8 @@ class TaskbarPopupControllerTest {
 
     private fun hasTaskbarDragView(): Boolean {
         return getOnUiThread {
-            val dragView: TaskbarDragView? =
-                taskbarContext.dragLayer.findViewByPredicate { it is TaskbarDragView }
+            val dragView: DragView<*>? =
+                taskbarContext.dragLayer.findViewByPredicate { it is DragView<*> }
             dragView != null
         }
     }

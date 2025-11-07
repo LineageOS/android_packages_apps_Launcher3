@@ -255,7 +255,7 @@ public interface ActivityContext extends SavedStateRegistryOwner {
     /**
      * Controller for supporting item drag-and-drop
      */
-    default <T extends DragController> T getDragController() {
+    default DragController getDragController() {
         return null;
     }
 

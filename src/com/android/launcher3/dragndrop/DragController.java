@@ -16,10 +16,15 @@
 
 package com.android.launcher3.dragndrop;
 
+import static android.view.View.VISIBLE;
+
+import static com.android.launcher3.AbstractFloatingView.TYPE_DISCOVERY_BOUNCE;
 import static com.android.launcher3.Flags.enableSystemDrag;
 import static com.android.launcher3.Flags.removeAppsRefreshOnRightClick;
 import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_NOT_PINNABLE;
 
+import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -32,26 +37,33 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.app.animation.Interpolators;
+import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.DragSource;
 import com.android.launcher3.DropTarget;
+import com.android.launcher3.DropTarget.DragObject;
 import com.android.launcher3.Flags;
+import com.android.launcher3.R;
+import com.android.launcher3.accessibility.DragViewStateAnnouncer;
+import com.android.launcher3.dragndrop.DragOptions.PreDragCondition;
 import com.android.launcher3.logging.InstanceId;
 import com.android.launcher3.model.data.AppPairInfo;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.ItemInfoWithIcon;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.util.TouchController;
+import com.android.launcher3.util.TouchUtil;
 import com.android.launcher3.views.ActivityContext;
 
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
  * Class for initiating a drag within a view or across multiple views.
  * @param <T>
  */
-public abstract class DragController<T extends ActivityContext>
+public class DragController<T extends Context & ActivityContext>
         implements DragDriver.EventListener, TouchController {
 
     /**
@@ -59,6 +71,8 @@ public abstract class DragController<T extends ActivityContext>
      * end a pre-drag. See {@link DragOptions.PreDragCondition#shouldStartDrag(double)}.
      */
     private static final int DEEP_PRESS_DISTANCE_FACTOR = 3;
+
+    private static final boolean PROFILE_DRAWING_DURING_DRAG = false;
 
     protected final T mActivity;
 
@@ -104,6 +118,9 @@ public abstract class DragController<T extends ActivityContext>
      * it's a long press and when it's false means that we are no longer in a long press.
      */
     protected boolean mIsInPreDrag;
+
+    /** Whether or not the drag operation is triggered by mouse right click. */
+    private boolean mIsInMouseRightClick = false;
 
     private final int DRAG_VIEW_SCALE_DURATION_MS = 500;
 
@@ -216,7 +233,7 @@ public abstract class DragController<T extends ActivityContext>
                 dragInfo, dragRegion, initialDragViewScale, dragViewScaleOnDrop, options);
     }
 
-    protected abstract DragView startDrag(
+    protected DragView startDrag(
             @Nullable Drawable drawable,
             @Nullable View view,
             DraggableView originalView,
@@ -227,7 +244,140 @@ public abstract class DragController<T extends ActivityContext>
             Rect dragRegion,
             float initialDragViewScale,
             float dragViewScaleOnDrop,
-            DragOptions options);
+            DragOptions options) {
+        if (PROFILE_DRAWING_DURING_DRAG) {
+            android.os.Debug.startMethodTracing("Launcher");
+        }
+
+        if (removeAppsRefreshOnRightClick() && mIsInMouseRightClick
+                && options.preDragCondition == null
+                && originalView instanceof View v) {
+            options.preDragCondition = new PreDragCondition() {
+
+                @Override
+                public boolean shouldStartDrag(double distanceDragged) {
+                    return false;
+                }
+
+                @Override
+                public void onPreDragStart(DragObject dragObject) {
+                    // Set it to visible so the text of FolderIcon would not flash (avoid it from
+                    // being invisible and then visible)
+                    v.setVisibility(VISIBLE);
+                }
+
+                @Override
+                public void onPreDragEnd(DragObject dragObject, boolean dragStarted) { }
+            };
+        }
+
+        mActivity.hideKeyboard();
+        AbstractFloatingView.closeOpenViews(mActivity, false, TYPE_DISCOVERY_BOUNCE);
+
+        mOptions = options;
+        if (mOptions.simulatedDndStartPoint != null) {
+            mLastTouch.x = mMotionDown.x = mOptions.simulatedDndStartPoint.x;
+            mLastTouch.y = mMotionDown.y = mOptions.simulatedDndStartPoint.y;
+        }
+
+        final int dragRegionLeft = dragRegion == null ? 0 : dragRegion.left;
+        final int dragRegionTop = dragRegion == null ? 0 : dragRegion.top;
+
+        mLastDropTarget = null;
+
+        mDragObject = new DropTarget.DragObject(mActivity.asContext().getApplicationContext());
+        mDragObject.originalView = originalView;
+
+        mIsInPreDrag = mOptions.preDragCondition != null
+                && !mOptions.preDragCondition.shouldStartDrag(0);
+
+        final DragView dragView = mDragObject.dragView = createDragView(
+                drawable, view, originalView, dragInfo, dragLayerX, dragLayerY, dragRegion,
+                initialDragViewScale, dragViewScaleOnDrop);
+        updateDescendantsAccessibility(dragView, /*accessible=*/ false);
+
+        if (dragInfo != null) {
+            dragView.setItemInfo(dragInfo);
+        }
+        mDragObject.dragComplete = false;
+
+        mDragObject.xOffset = mMotionDown.x - (dragLayerX + dragRegionLeft);
+        mDragObject.yOffset = mMotionDown.y - (dragLayerY + dragRegionTop);
+
+        mDragDriver = DragDriver.create(this, mOptions, getSecondaryEventConsumer());
+        if (!mOptions.isAccessibleDrag) {
+            mDragObject.stateAnnouncer = DragViewStateAnnouncer.createFor(dragView);
+        }
+
+        mDragObject.dragSource = source;
+        mDragObject.dragInfo = dragInfo;
+        mDragObject.originalDragInfo =
+                mDragObject.dragInfo != null ? mDragObject.dragInfo.makeShallowCopy() : null;
+
+        if (mOptions.preDragCondition != null) {
+            dragView.setHasDragOffset(mOptions.preDragCondition.getDragOffset().x != 0
+                    || mOptions.preDragCondition.getDragOffset().y != 0);
+        }
+
+        if (dragRegion != null) {
+            dragView.setDragRegion(new Rect(dragRegion));
+        }
+
+        dragView.show(mLastTouch.x, mLastTouch.y);
+        mDistanceSinceScroll = 0;
+
+        if (!mIsInPreDrag) {
+            callOnDragStart();
+        } else if (mOptions.preDragCondition != null) {
+            mOptions.preDragCondition.onPreDragStart(mDragObject);
+        }
+
+        handleMoveEvent(mLastTouch.x, mLastTouch.y);
+        onDragViewInitialized();
+        return dragView;
+    }
+
+    protected Consumer<MotionEvent> getSecondaryEventConsumer() {
+        return ev -> {};
+    }
+
+    protected DragView createDragView(
+            @Nullable Drawable drawable,
+            @Nullable View view,
+            DraggableView originalView,
+            ItemInfo dragInfo,
+            int dragLayerX, int dragLayerY,
+            Rect dragRegion,
+            float initialDragViewScale,
+            float dragViewScaleOnDrop) {
+        final int registrationX = mMotionDown.x - dragLayerX;
+        final int registrationY = mMotionDown.y - dragLayerY;
+
+        final Resources res = mActivity.asContext().getResources();
+        final float scaleDps = mIsInPreDrag
+                ? res.getDimensionPixelSize(R.dimen.pre_drag_view_scale) : 0f;
+        return drawable != null
+                ? new DragView<>(
+                mActivity,
+                drawable,
+                registrationX,
+                registrationY,
+                initialDragViewScale,
+                dragViewScaleOnDrop,
+                scaleDps)
+                : new DragView<>(
+                        mActivity,
+                        view,
+                        view.getMeasuredWidth(),
+                        view.getMeasuredHeight(),
+                        registrationX,
+                        registrationY,
+                        initialDragViewScale,
+                        dragViewScaleOnDrop,
+                        scaleDps);
+    }
+
+    protected void onDragViewInitialized() { }
 
     protected void callOnDragStart() {
         if (mOptions.preDragCondition != null) {
@@ -307,7 +457,7 @@ public abstract class DragController<T extends ActivityContext>
         mDragObject.dragSource.onDropCompleted(dropTarget, mDragObject, accepted);
     }
 
-    protected abstract void exitDrag();
+    protected void exitDrag() { }
 
     public void onAppsRemoved(Predicate<ItemInfo> matcher) {
         // Cancel the current drag if we are removing an app that we are dragging
@@ -321,6 +471,9 @@ public abstract class DragController<T extends ActivityContext>
     }
 
     protected void endDrag() {
+        if (mDragObject != null && mDragObject.dragView != null) {
+            updateDescendantsAccessibility(mDragObject.dragView, /*accessible=*/ true);
+        }
         if (isDragging()) {
             mDragDriver = null;
             boolean isDeferred = false;
@@ -436,6 +589,7 @@ public abstract class DragController<T extends ActivityContext>
             // Remember location of down touch
             mMotionDown.set(dragLayerPos.x,  dragLayerPos.y);
         }
+        mIsInMouseRightClick = TouchUtil.isMouseRightClickDownOrMove(ev);
 
         mLastTouchClassification = ev.getClassification();
         return mDragDriver != null && mDragDriver.onInterceptTouchEvent(ev);
@@ -458,8 +612,9 @@ public abstract class DragController<T extends ActivityContext>
     }
 
     /**
-     * Call this from {@link BaseDragLayer} to handle system drag events. This method identifies at
-     * most a single registered handler for the system drag sequence and dispatches events to it.
+     * Call this from {@link com.android.launcher3.views.BaseDragLayer} to handle system drag
+     * events. This method identifies at most a single registered handler for the system drag
+     * sequence and dispatches events to it.
      * Note that potential handlers are prioritized by reverse chronological registration time.
      */
     public boolean onDragEvent(DragEvent event) {
@@ -642,7 +797,9 @@ public abstract class DragController<T extends ActivityContext>
         return dropTarget;
     }
 
-    protected abstract DropTarget getDefaultDropTarget(int[] dropCoordinates);
+    protected DropTarget getDefaultDropTarget(int[] dropCoordinates) {
+        return null;
+    }
 
     /**
      * Sets the drag listener which will be notified when a drag starts or ends.
@@ -656,6 +813,10 @@ public abstract class DragController<T extends ActivityContext>
      */
     public void removeDragListener(DragListener l) {
         mListeners.remove(l);
+    }
+
+    @VisibleForTesting public ArrayList<DragListener> getListeners() {
+        return mListeners;
     }
 
     /**
@@ -701,6 +862,23 @@ public abstract class DragController<T extends ActivityContext>
             if (isDragging()) {
                 cancelDrag();
             }
+        }
+    }
+
+    /**
+     * During a drag, we don't want to expose the descendants of drag view to a11y users,
+     * since those descendants are not a valid position in the workspace.
+     * We need to go through the children because the view itself is important for
+     * accessibility, basically we are implementing:
+     * IMPORTANT_FOR_ACCESSIBILITY_YES_HIDE_DESCENDANTS when {@code accessible} is true and
+     * reversing it when false.
+     */
+    private void updateDescendantsAccessibility(DragView dragView, boolean accessible) {
+        for (int i = 0; i < dragView.getChildCount(); i++) {
+            dragView.getChildAt(i).setImportantForAccessibility(
+                    accessible ? View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
+                            : View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+            );
         }
     }
 }
