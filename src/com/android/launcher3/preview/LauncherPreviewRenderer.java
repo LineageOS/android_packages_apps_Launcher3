@@ -51,10 +51,12 @@ import androidx.lifecycle.LifecycleOwner;
 
 import com.android.launcher3.CellLayout;
 import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.Flags;
 import com.android.launcher3.Hotseat;
 import com.android.launcher3.InsettableFrameLayout;
 import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.LauncherModel;
+import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.R;
 import com.android.launcher3.Workspace;
 import com.android.launcher3.WorkspaceLayoutManager;
@@ -116,8 +118,17 @@ public class LauncherPreviewRenderer extends BaseContext
         super(context, themeRes);
         mUiHandler = new Handler(Looper.getMainLooper());
         mIdp = InvariantDeviceProfile.INSTANCE.get(context);
-        mDp = getDeviceProfileForPreview(context).toBuilder()
-                .setViewScaleProvider(new PreviewScaleProvider(this)).build();
+
+        DeviceProfile.Builder dpBuilder = getDeviceProfileForPreview(context)
+                .toBuilder();
+        if (Flags.workspaceHiddenLabels()) {
+            dpBuilder.setIsWorkspaceItemsLabelHidden(
+                    LauncherPrefs.WORKSPACE_ITEMS_LABEL_HIDDEN.get(context)
+            );
+        }
+        mDp = dpBuilder
+                .setViewScaleProvider(new PreviewScaleProvider(this))
+                .build();
         Rect insets = getInsets(context);
         mDp.updateInsets(insets);
         mWidgetHolder =

@@ -239,13 +239,21 @@ public class DeviceProfile {
                 new Rect(), 0, 0);
     }
 
-    DeviceProfile(InvariantDeviceProfile inv, Info info,
-            WindowManagerProxy wmProxy, WindowBounds windowBounds,
-            SparseArray<DotRenderer> dotRendererCache, boolean isExternalDisplay,
-            boolean transposeLayoutWithOrientation, boolean isMultiDisplay, boolean isGestureMode,
+    DeviceProfile(
+            InvariantDeviceProfile inv,
+            Info info,
+            WindowManagerProxy wmProxy,
+            WindowBounds windowBounds,
+            SparseArray<DotRenderer> dotRendererCache,
+            boolean isExternalDisplay,
+            boolean transposeLayoutWithOrientation,
+            boolean isMultiDisplay,
+            boolean isGestureMode,
+            boolean isWorkspaceItemsLabelHidden,
             @NonNull final ViewScaleProvider viewScaleProvider,
             @NonNull final Consumer<DeviceProfile> dimensionOverrideProvider,
-            DisplayOptionSpec displayOptionSpec) {
+            DisplayOptionSpec displayOptionSpec
+    ) {
 
         this.inv = inv;
 
@@ -495,8 +503,9 @@ public class DeviceProfile {
                 /*isSeascape*/ isSeascape(),
                 /*hotseatProfile*/ hotseatProfile,
                 /*hotseatBarBottomSpacePx*/ hotseatBarBottomSpacePx,
-                /*hotseatQsbSpace*/hotseatQsbSpace,
-                /*hotseatBarSizePx*/hotseatBarSizePx
+                /*hotseatQsbSpace*/ hotseatQsbSpace,
+                /*hotseatBarSizePx*/ hotseatBarSizePx,
+                /*isWorkspaceItemsLabelHidden*/ isWorkspaceItemsLabelHidden
         );
 
         if (mIsResponsiveGrid) {
@@ -850,7 +859,7 @@ public class DeviceProfile {
      */
     private void hideWorkspaceLabelsIfNotEnoughSpace() {
         // We want enough space so that the text is closer to its corresponding icon.
-        if (getWorkspaceIconProfile().isLabelHidden()) {
+        if (getWorkspaceIconProfile().isItemsLabelHidden()) {
             // TODO(420933882) Group all modifications of AllAppsProfile in one place
             mAllAppsProfile = AllAppsProfile.Factory.autoResizeAllAppsCells(getAllAppsProfile());
         }
@@ -1803,6 +1812,9 @@ public class DeviceProfile {
         private boolean mIsExternalDisplay = false;
         private Boolean mTransposeLayoutWithOrientation;
         private Boolean mIsGestureMode;
+
+        private Boolean mIsWorkspaceItemsLabelHidden = false;
+
         private ViewScaleProvider mViewScaleProvider = null;
 
         private SparseArray<DotRenderer> mDotRendererCache;
@@ -1839,6 +1851,14 @@ public class DeviceProfile {
 
         public Builder setTransposeLayoutWithOrientation(boolean transposeLayoutWithOrientation) {
             mTransposeLayoutWithOrientation = transposeLayoutWithOrientation;
+            return this;
+        }
+
+        /**
+         * Sets whether the DeviceProfile hides workspace app icon labels.
+         */
+        public Builder setIsWorkspaceItemsLabelHidden(boolean isWorkspaceItemsLabelHidden) {
+            mIsWorkspaceItemsLabelHidden = isWorkspaceItemsLabelHidden;
             return this;
         }
 
@@ -1904,11 +1924,21 @@ public class DeviceProfile {
                 mDisplayOptionSpec = createDefaultDisplayOptionSpec(mInfo, mWindowBounds,
                         mIsMultiDisplay, mInv);
             }
-            return new DeviceProfile(mInv, mInfo, mWMProxy,
-                    mWindowBounds, mDotRendererCache, mIsExternalDisplay,
-                    mTransposeLayoutWithOrientation, mIsMultiDisplay,
-                    mIsGestureMode, mViewScaleProvider, mOverrideProvider,
-                    mDisplayOptionSpec);
+            return new DeviceProfile(
+                    mInv,
+                    mInfo,
+                    mWMProxy,
+                    mWindowBounds,
+                    mDotRendererCache,
+                    mIsExternalDisplay,
+                    mTransposeLayoutWithOrientation,
+                    mIsMultiDisplay,
+                    mIsGestureMode,
+                    mIsWorkspaceItemsLabelHidden,
+                    mViewScaleProvider,
+                    mOverrideProvider,
+                    mDisplayOptionSpec
+            );
         }
 
         @VisibleForTesting
