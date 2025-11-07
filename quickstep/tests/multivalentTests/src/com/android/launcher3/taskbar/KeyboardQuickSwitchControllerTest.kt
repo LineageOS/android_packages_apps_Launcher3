@@ -32,6 +32,7 @@ import com.android.launcher3.Flags.FLAG_ENABLE_ALT_TAB_KQS_ON_CONNECTED_DISPLAYS
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
+import com.android.launcher3.taskbar.TaskbarControllerTestUtil.waitForIdleSync
 import com.android.launcher3.taskbar.rules.AllTaskbarSandboxModules
 import com.android.launcher3.taskbar.rules.MockedRecentsModelHelper
 import com.android.launcher3.taskbar.rules.MockedRecentsModelTestRule
@@ -365,6 +366,10 @@ class KeyboardQuickSwitchControllerTest {
     private fun triggerAltTabAndLaunchFocusedTask() {
         triggerAltTab()
         runOnMainSync { keyboardQuickSwitchController.launchFocusedTask() }
+        // `keyboardQuickSwitchController.launchFocusedTask()` will post a task to activate target
+        // desk to `UI_HELPER_EXECUTOR`. Flush the executor to make sure the task runs before
+        // verifying mocks.
+        UI_HELPER_EXECUTOR.waitForIdleSync()
     }
 
     private companion object {
