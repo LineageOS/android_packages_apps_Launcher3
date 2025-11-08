@@ -178,7 +178,7 @@ class OverflownAppsContainerControllerTest {
             iconView.dispatchGenericMotionEvent(
                 MotionEvent.obtain(0, 0, ACTION_HOVER_ENTER, 0f, 0f, 0)
             )
-            overflownController.toggleOverflownAppsView(overflowIcon, apps.toList()) {}
+            overflownController.toggleOverflownAppsView(overflowIcon, apps.toList())
             iconView.dispatchGenericMotionEvent(
                 MotionEvent.obtain(0, 0, ACTION_HOVER_EXIT, 0f, 0f, 0)
             )
@@ -221,7 +221,7 @@ class OverflownAppsContainerControllerTest {
     }
 
     private fun toggleOverflownAppsView(apps: List<ItemInfo>) {
-        runOnMainSync { overflownController.toggleOverflownAppsView(overflowIcon, apps) {} }
+        runOnMainSync { overflownController.toggleOverflownAppsView(overflowIcon, apps) }
         runOnMainSync {
             // Run an empty frame so that the taskbar drag layer can resize and show the overflown
             // container.

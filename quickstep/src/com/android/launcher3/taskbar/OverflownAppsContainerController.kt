@@ -29,20 +29,35 @@ class OverflownAppsContainerController(
 ) {
     private var overflownAppsViewController: OverflownAppsViewController? = null
     private lateinit var viewCallbacks: TaskbarViewCallbacks
+    private lateinit var onClosedCallback: Runnable
     val overflownApps: List<BubbleTextView>
         get() = overflownAppsViewController?.overflownApps ?: emptyList()
 
     fun init(callbacks: TaskbarViewCallbacks) {
         viewCallbacks = callbacks
+        onClosedCallback = Runnable { viewCallbacks.onOverflownAppsContainerClosed() }
     }
 
-    fun toggleOverflownAppsView(
-        overflowIcon: TaskbarOverflowView,
-        overflownApps: List<ItemInfo>,
-        onClosed: Runnable,
-    ) {
-        overflownAppsViewController?.let {
-            return it.close(true)
+    fun toggleOverflownAppsView(overflowIcon: TaskbarOverflowView) {
+        toggleOverflownAppsView(overflowIcon, overflowIcon.overflowInfoList)
+    }
+
+    fun toggleOverflownAppsView(overflowIcon: TaskbarOverflowView, overflownApps: List<ItemInfo>) {
+        if (overflownAppsViewController != null) {
+            closeOverflownAppsView()
+            return
+        }
+
+        openOverflownAppsView(overflowIcon, overflownApps)
+    }
+
+    fun openOverflownAppsView(overflowIcon: TaskbarOverflowView) {
+        openOverflownAppsView(overflowIcon, overflowIcon.overflowInfoList)
+    }
+
+    fun openOverflownAppsView(overflowIcon: TaskbarOverflowView, overflownApps: List<ItemInfo>) {
+        if (overflownAppsViewController != null) {
+            return
         }
 
         overflownAppsViewController =
@@ -53,8 +68,12 @@ class OverflownAppsContainerController(
                 overflowIcon,
             ) {
                 overflownAppsViewController = null
-                onClosed.run()
+                onClosedCallback.run()
             }
         overflownAppsViewController?.show(overflownApps)
+    }
+
+    private fun closeOverflownAppsView() {
+        overflownAppsViewController?.close(true)
     }
 }
