@@ -21,6 +21,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.SystemClock
 import android.view.CrossWindowBlurListeners
+import android.widget.ImageView
 import com.android.extensions.computercontrol.ComputerControlExtensions
 import com.android.internal.R
 import com.android.internal.policy.DesktopModeCompatPolicy
@@ -203,7 +204,7 @@ object SystemDragModule {
         if (enableSystemDrag())
             SystemDragControllerImpl(
                 systemDragListenerFactory.orElse { launcher, params ->
-                    SystemDragListener(launcher, iconCache, params)
+                    SystemDragListener(launcher, iconCache, ::ImageView, params)
                 }
             )
         else SystemDragControllerStub()
