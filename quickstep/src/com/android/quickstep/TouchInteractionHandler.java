@@ -46,10 +46,9 @@ import static com.android.quickstep.window.RecentsWindowFlags.enableOverviewOnCo
 import static com.android.systemui.shared.system.ActivityManagerWrapper.CLOSE_SYSTEM_WINDOWS_REASON_RECENTS;
 
 import android.app.ActivityManager;
-import android.app.Service;
 import android.app.contextualsearch.ContextualSearchConfig;
 import android.content.Context;
-import android.content.Intent;
+import android.content.ContextWrapper;
 import android.content.res.Configuration;
 import android.graphics.Region;
 import android.os.Bundle;
@@ -144,9 +143,7 @@ import java.util.function.Function;
 /**
  * Service connected by system-UI for handling touch interaction.
  */
-public class TouchInteractionService extends Service {
-
-    private static final String SUBSTRING_PREFIX = "; ";
+public class TouchInteractionHandler extends ContextWrapper {
 
     private static final String TAG = "TouchInteractionService";
 
@@ -164,9 +161,9 @@ public class TouchInteractionService extends Service {
      */
     public static class TISBinder extends ILauncherProxy.Stub {
 
-        private final WeakReference<TouchInteractionService> mTis;
+        private final WeakReference<TouchInteractionHandler> mTis;
 
-        private TISBinder(TouchInteractionService tis) {
+        private TISBinder(TouchInteractionHandler tis) {
             mTis = new WeakReference<>(tis);
         }
 
@@ -470,8 +467,8 @@ public class TouchInteractionService extends Service {
         }
 
         private void executeForTouchInteractionService(
-                @NonNull Consumer<TouchInteractionService> tisConsumer) {
-            TouchInteractionService tis = mTis.get();
+                @NonNull Consumer<TouchInteractionHandler> tisConsumer) {
+            TouchInteractionHandler tis = mTis.get();
             if (tis == null) return;
             tisConsumer.accept(tis);
         }
@@ -492,20 +489,20 @@ public class TouchInteractionService extends Service {
          */
         @Nullable
         public TaskbarManager getTaskbarManager() {
-            TouchInteractionService tis = mTis.get();
+            TouchInteractionHandler tis = mTis.get();
             if (tis == null) return null;
             return tis.mTaskbarManager;
         }
 
         /** Returns the primary service */
         @VisibleForTesting
-        public TouchInteractionService getService() {
+        public TouchInteractionHandler getService() {
             return mTis.get();
         }
 
         @VisibleForTesting
         public void injectFakeTrackpadForTesting() {
-            TouchInteractionService tis = mTis.get();
+            TouchInteractionHandler tis = mTis.get();
             if (tis == null) return;
             tis.mTrackpadsConnected.add(1000);
             tis.initInputMonitor("tapl testing");
@@ -513,7 +510,7 @@ public class TouchInteractionService extends Service {
 
         @VisibleForTesting
         public void ejectFakeTrackpadForTesting() {
-            TouchInteractionService tis = mTis.get();
+            TouchInteractionHandler tis = mTis.get();
             if (tis == null) return;
             tis.mTrackpadsConnected.clear();
             // This method destroys the current input monitor if set up, and only init a new one
@@ -538,7 +535,7 @@ public class TouchInteractionService extends Service {
          */
         @Nullable
         public OverviewCommandHelper getOverviewCommandHelper() {
-            TouchInteractionService tis = mTis.get();
+            TouchInteractionHandler tis = mTis.get();
             if (tis == null) return null;
             return tis.mOverviewCommandHelper;
         }
@@ -649,7 +646,7 @@ public class TouchInteractionService extends Service {
                     }
                     BaseContainerInterface<?, ?> defaultContainerInterface =
                             OverviewComponentObserver.INSTANCE.get(
-                                    TouchInteractionService.this).getContainerInterface(
+                                    TouchInteractionHandler.this).getContainerInterface(
                                     DEFAULT_DISPLAY);
                     if (defaultContainerInterface == null
                             || !(defaultContainerInterface.getCreatedContainer()
@@ -724,9 +721,8 @@ public class TouchInteractionService extends Service {
     private CoroutineDispatcher mMainCoroutineDispatcher;
     private DesktopState mDesktopState;
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
+    public TouchInteractionHandler(Context context) {
+        super(context);
         Log.d(TAG, "onCreate: user=" + getUserId()
                 + " instance=" + System.identityHashCode(this));
         // Initialize anything here that is needed in direct boot mode.
@@ -967,7 +963,6 @@ public class TouchInteractionService extends Service {
         }
     }
 
-    @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy: user=" + getUserId()
                 + " instance=" + System.identityHashCode(this));
@@ -1001,13 +996,9 @@ public class TouchInteractionService extends Service {
             TaskStackChangeListeners.getInstance().unregisterTaskStackListener(
                     mHomeIntentStartedListener);
         }
-        super.onDestroy();
     }
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        Log.d(TAG, "onBind: user=" + getUserId()
-                + " instance=" + System.identityHashCode(this));
+    public IBinder getBinder() {
         return mTISBinder;
     }
 
@@ -1359,7 +1350,6 @@ public class TouchInteractionService extends Service {
         }
     }
 
-    @Override
     public void onConfigurationChanged(Configuration newConfig) {
         if (!LockedUserState.get(this).isUserUnlocked()) {
             return;
@@ -1401,7 +1391,6 @@ public class TouchInteractionService extends Service {
         return config.smallestScreenWidthDp >= MIN_TABLET_WIDTH;
     }
 
-    @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] rawArgs) {
         // Dump everything
         if (LockedUserState.get(this).isUserUnlocked()) {
@@ -1525,7 +1514,6 @@ public class TouchInteractionService extends Service {
                 : DEFAULT_DISPLAY;
     }
 
-
     private OverviewGestureHandler createOverviewGestureHandler() {
         return new OverviewGestureHandler() {
             @Override
@@ -1576,8 +1564,8 @@ public class TouchInteractionService extends Service {
             inputMonitorCompat = new InputMonitorCompat("swipe-up", displayId);
             inputEventReceiver = inputMonitorCompat.getInputReceiver(
                     Looper.getMainLooper(),
-                    TouchInteractionService.this.mMainChoreographer,
-                    TouchInteractionService.this::onInputEvent);
+                    TouchInteractionHandler.this.mMainChoreographer,
+                    TouchInteractionHandler.this::onInputEvent);
         }
 
         @Override

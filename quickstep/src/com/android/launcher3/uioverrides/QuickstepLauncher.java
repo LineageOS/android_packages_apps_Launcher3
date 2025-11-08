@@ -201,7 +201,7 @@ import com.android.quickstep.OverviewComponentObserver.OverviewChangeListener;
 import com.android.quickstep.RecentsModel;
 import com.android.quickstep.SystemUiProxy;
 import com.android.quickstep.TaskUtils;
-import com.android.quickstep.TouchInteractionService.TISBinder;
+import com.android.quickstep.TouchInteractionHandler.TISBinder;
 import com.android.quickstep.fallback.RecentsState;
 import com.android.quickstep.fallback.RecentsStateUtilsKt;
 import com.android.quickstep.split.SplitSelectStateController;

@@ -96,7 +96,7 @@ class OverviewCommandHelperTest {
     private val stateManager: StateManager<LauncherState, StatefulActivity<LauncherState>> = mock()
     private val containerInterface: BaseActivityInterface<LauncherState, QuickstepLauncher> = mock()
     private val taskAnimationManager: TaskAnimationManager = mock()
-    private val touchInteractionService: TouchInteractionService = mock()
+    private val mTouchInteractionHandler: TouchInteractionHandler = mock()
     private val taskbarManager: TaskbarManager = mock()
     private val taskbarUIController: TaskbarUIController = mock()
     private val taskbarInteractor: TaskbarInteractor = TaskbarInteractor(taskbarUIController)
@@ -136,7 +136,7 @@ class OverviewCommandHelperTest {
         sut =
             spy(
                 OverviewCommandHelper(
-                    touchInteractionService = touchInteractionService,
+                    touchInteractionHandler = mTouchInteractionHandler,
                     overviewComponentObserver = overviewComponentObserver,
                     dispatcherProvider = TestDispatcherProvider(dispatcher),
                     displayRepository = displayRepository,
@@ -594,7 +594,7 @@ class OverviewCommandHelperTest {
 
             runCurrent()
             assertThat(command.status).isEqualTo(CommandStatus.PROCESSING)
-            verify(touchInteractionService, never()).startActivity(any())
+            verify(mTouchInteractionHandler, never()).startActivity(any())
             verify(swipeUpHandler).onGestureStarted(any())
             verify(newGestureState)
                 .setHandlingAtomicEvent(GestureState.GestureEndTarget.REJECT_HOME)
@@ -761,11 +761,11 @@ class OverviewCommandHelperTest {
         val swipeUpHandlerFactory = mock<AbsSwipeUpHandler.Factory>()
         val swipeUpHandler = mock<AbsSwipeUpHandler<*, *, *>>()
         val newGestureState = mock<GestureState>()
-        whenever(touchInteractionService.getSwipeUpHandlerFactory(any()))
+        whenever(mTouchInteractionHandler.getSwipeUpHandlerFactory(any()))
             .thenReturn(swipeUpHandlerFactory)
         whenever(swipeUpHandlerFactory.newHandler(any(), any())).thenReturn(swipeUpHandler)
         whenever(swipeUpHandler.getLaunchIntent()).thenReturn(Intent())
-        whenever(touchInteractionService.createGestureState(any(), any(), any()))
+        whenever(mTouchInteractionHandler.createGestureState(any(), any(), any()))
             .thenReturn(newGestureState)
         whenever(taskAnimationManager.isRecentsAnimationRunning).thenReturn(false)
         whenever(taskAnimationManager.startRecentsAnimation(any(), any(), any())).thenReturn(mock())
