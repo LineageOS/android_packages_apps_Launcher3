@@ -356,7 +356,7 @@ open class AddItemActivity :
     }
 
     /** Called when the cancel button is clicked. */
-    fun onCancelClick() {
+    fun onCancelClick(view: View) {
         logCommand(LauncherEvent.LAUNCHER_ADD_EXTERNAL_ITEM_CANCELLED)
         slideInView?.close(/* animate= */ true)
     }

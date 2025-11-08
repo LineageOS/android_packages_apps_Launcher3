@@ -163,8 +163,19 @@ public class RequestPinItemTest extends BaseLauncherActivityTest<Launcher> {
         }, command);
     }
 
-    private void runTest(String activityMethod, boolean isWidget, ItemOperator itemMatcher,
-            Intent... commandIntents) throws Throwable {
+    @Test
+    @SkipOnDeviceless
+    public void testPinCancel_canClick() throws Throwable {
+        // Command to set the shortcut id
+        initPinActivity("pinWidgetNoConfig");
+
+        BySelector selector = By.text(Pattern.compile("^Cancel$", CASE_INSENSITIVE))
+                .pkg(targetContext().getPackageName());
+        uiDevice.wait(device -> device.findObject(selector), TestUtil.DEFAULT_UI_TIMEOUT).click();
+    }
+
+    private void initPinActivity(String activityMethod, Intent... commandIntents)
+            throws InterruptedException {
         ModelTestExtensions.setEmptyModelLayout(targetContext());
         loadLauncherSync();
 
@@ -192,6 +203,11 @@ public class RequestPinItemTest extends BaseLauncherActivityTest<Launcher> {
         // call the requested method to start the flow
         targetContext().sendBroadcast(RequestPinItemActivity.getCommandIntent(
                 RequestPinItemActivity.class, activityMethod));
+    }
+
+    private void runTest(String activityMethod, boolean isWidget, ItemOperator itemMatcher,
+            Intent... commandIntents) throws Throwable {
+        initPinActivity(activityMethod, commandIntents);
 
         // Accept confirmation:
         BlockingBroadcastReceiver resultReceiver = new BlockingBroadcastReceiver(mCallbackAction);
