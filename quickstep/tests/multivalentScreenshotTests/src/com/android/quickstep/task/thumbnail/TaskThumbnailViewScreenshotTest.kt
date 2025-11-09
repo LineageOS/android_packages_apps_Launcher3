@@ -216,6 +216,15 @@ class TaskThumbnailViewScreenshotTest(emulationSpec: DeviceEmulationSpec) :
         }
     }
 
+    @Test
+    fun taskThumbnailView_appLocked() {
+        screenshotRule.screenshotTest("appLocked") { activity ->
+            createTaskThumbnailView(activity).apply {
+                setState(TaskThumbnailUiState.AppLocked(Color.YELLOW))
+            }
+        }
+    }
+
     private fun createTaskThumbnailView(context: Context): TaskThumbnailView {
         val taskThumbnailView =
             LayoutInflater.from(context).inflate(R.layout.task_thumbnail, null, false)

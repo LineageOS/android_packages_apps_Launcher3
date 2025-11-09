@@ -77,6 +77,8 @@ class TaskViewModelTest {
         whenever(getTaskUseCase.invoke(TASK_MODEL_3.id)).thenReturn(flow { emit(TASK_MODEL_3) })
         whenever(getTaskUseCase.invoke(TASK_MODEL_MINIMIZED.id))
             .thenReturn(flow { emit(TASK_MODEL_MINIMIZED) })
+        whenever(getTaskUseCase.invoke(TASK_MODEL_APP_LOCKED.id))
+            .thenReturn(flow { emit(TASK_MODEL_APP_LOCKED) })
         whenever(getTaskUseCase.invoke(INVALID_TASK_ID)).thenReturn(flow { emit(null) })
         recentsViewData.runningTaskIds.value = emptySet()
     }
@@ -350,6 +352,28 @@ class TaskViewModelTest {
         }
 
     @Test
+    fun isAppLocked_when_TaskIsAppLocked() =
+        testScope.runTest {
+            sut.bind(TaskViewType.SINGLE, TASK_MODEL_APP_LOCKED.id)
+
+            val state = sut.state.first()
+            val taskData = state.tasks.first() as TaskData.Data
+
+            assertThat(taskData.isAppLocked).isTrue()
+        }
+
+    @Test
+    fun isNotAppLocked_when_TaskIsNotAppLocked() =
+        testScope.runTest {
+            sut.bind(TaskViewType.SINGLE, TASK_MODEL_1.id)
+
+            val state = sut.state.first()
+            val taskData = state.tasks.first() as TaskData.Data
+
+            assertThat(taskData.isAppLocked).isFalse()
+        }
+
+    @Test
     fun shouldShowSplash_calls_useCase() {
         val splitBounds =
             SplitBounds(
@@ -390,6 +414,7 @@ class TaskViewModelTest {
             isLocked = isLocked,
             isLiveTile = isLiveTile,
             remainingAppTimerDuration = remainingAppDuration,
+            isAppLocked = isAppLocked,
         )
 
     private fun createTaskViewModel() =
@@ -424,6 +449,7 @@ class TaskViewModelTest {
                 isLocked = false,
                 isMinimized = false,
                 remainingAppDuration = Duration.ofMillis(30),
+                isAppLocked = false,
             )
         val TASK_MODEL_2 =
             TaskModel(
@@ -437,6 +463,7 @@ class TaskViewModelTest {
                 isLocked = true,
                 isMinimized = false,
                 remainingAppDuration = Duration.ofHours(5).plusMinutes(2),
+                isAppLocked = false,
             )
         val TASK_MODEL_3 =
             TaskModel(
@@ -450,6 +477,7 @@ class TaskViewModelTest {
                 isLocked = false,
                 isMinimized = false,
                 remainingAppDuration = null,
+                isAppLocked = false,
             )
         val TASK_MODEL_MINIMIZED =
             TaskModel(
@@ -463,6 +491,21 @@ class TaskViewModelTest {
                 isLocked = false,
                 isMinimized = true,
                 remainingAppDuration = null,
+                isAppLocked = false,
+            )
+        val TASK_MODEL_APP_LOCKED =
+            TaskModel(
+                5,
+                PACKAGE_NAME,
+                "Title 5",
+                "Content Description 5",
+                ShapeDrawable(),
+                ThumbnailData(appearance = APPEARANCE_LIGHT_THEME),
+                Color.GREEN,
+                isLocked = false,
+                isMinimized = false,
+                remainingAppDuration = null,
+                isAppLocked = true,
             )
     }
 }

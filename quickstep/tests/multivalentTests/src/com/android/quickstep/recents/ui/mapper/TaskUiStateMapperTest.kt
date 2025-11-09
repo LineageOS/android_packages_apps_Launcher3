@@ -92,6 +92,7 @@ class TaskUiStateMapperTest {
                 TASK_DATA.copy(isLiveTile = true, thumbnailData = null),
                 TASK_DATA.copy(isLiveTile = true, isLocked = true),
                 TASK_DATA.copy(isLiveTile = true, title = null),
+                TASK_DATA.copy(isLiveTile = true, isAppLocked = true),
             )
         val closeCallback = View.OnClickListener {}
         val expected =
@@ -172,6 +173,7 @@ class TaskUiStateMapperTest {
                 TASK_DATA.copy(isLiveTile = true),
                 TASK_DATA.copy(isLiveTile = true, thumbnailData = null),
                 TASK_DATA.copy(isLiveTile = true, isLocked = true),
+                TASK_DATA.copy(isLiveTile = true, isAppLocked = true),
             )
         inputs.forEach { input ->
             val result = TaskUiStateMapper.toTaskThumbnailUiState(taskData = input)
@@ -197,6 +199,67 @@ class TaskUiStateMapperTest {
         assertThat(result).isEqualTo(expected)
     }
 
+    @EnableFlags(android.security.Flags.FLAG_APP_LOCK_CORE)
+    @Test
+    fun taskData_isLocked_appLockCoreFlagEnabled_returns_AppLocked() {
+        val inputs =
+            listOf(
+                TASK_DATA.copy(isLocked = true),
+                TASK_DATA.copy(isLocked = true, isAppLocked = true),
+                TASK_DATA.copy(isLocked = true, thumbnailData = null),
+                TASK_DATA.copy(
+                    isLocked = true,
+                    thumbnailData = TASK_THUMBNAIL_DATA.copy(thumbnail = null),
+                ),
+            )
+        inputs.forEach { input ->
+            val result = TaskUiStateMapper.toTaskThumbnailUiState(taskData = input)
+
+            val expected = TaskThumbnailUiState.AppLocked(TASK_BACKGROUND_COLOR)
+            assertThat(result).isEqualTo(expected)
+        }
+    }
+
+    @DisableFlags(android.security.Flags.FLAG_APP_LOCK_CORE)
+    @Test
+    fun taskData_isLocked_appLockCoreFlagDisabled_returns_BackgroundOnly() {
+        val inputs =
+            listOf(
+                TASK_DATA.copy(isLocked = true),
+                TASK_DATA.copy(isLocked = true, isAppLocked = true),
+                TASK_DATA.copy(isLocked = true, thumbnailData = null),
+                TASK_DATA.copy(
+                    isLocked = true,
+                    thumbnailData = TASK_THUMBNAIL_DATA.copy(thumbnail = null),
+                ),
+            )
+        inputs.forEach { input ->
+            val result = TaskUiStateMapper.toTaskThumbnailUiState(taskData = input)
+
+            val expected = TaskThumbnailUiState.BackgroundOnly(TASK_BACKGROUND_COLOR)
+            assertThat(result).isEqualTo(expected)
+        }
+    }
+
+    @Test
+    fun taskData_isAppLocked_returns_AppLocked() {
+        val inputs =
+            listOf(
+                TASK_DATA.copy(isAppLocked = true),
+                TASK_DATA.copy(isAppLocked = true, thumbnailData = null),
+                TASK_DATA.copy(
+                    isAppLocked = true,
+                    thumbnailData = TASK_THUMBNAIL_DATA.copy(thumbnail = null),
+                ),
+            )
+        inputs.forEach { input ->
+            val result = TaskUiStateMapper.toTaskThumbnailUiState(taskData = input)
+
+            val expected = TaskThumbnailUiState.AppLocked(TASK_BACKGROUND_COLOR)
+            assertThat(result).isEqualTo(expected)
+        }
+    }
+
     @Test
     fun taskData_thumbnailDataIsNull_returns_BackgroundOnly() {
         val result =
@@ -215,15 +278,6 @@ class TaskUiStateMapperTest {
                 taskData =
                     TASK_DATA.copy(thumbnailData = TASK_THUMBNAIL_DATA.copy(thumbnail = null))
             )
-
-        val expected = TaskThumbnailUiState.BackgroundOnly(TASK_BACKGROUND_COLOR)
-        assertThat(result).isEqualTo(expected)
-    }
-
-    @Test
-    fun taskData_isLocked_returns_BackgroundOnly() {
-        val result =
-            TaskUiStateMapper.toTaskThumbnailUiState(taskData = TASK_DATA.copy(isLocked = true))
 
         val expected = TaskThumbnailUiState.BackgroundOnly(TASK_BACKGROUND_COLOR)
         assertThat(result).isEqualTo(expected)
@@ -377,6 +431,7 @@ class TaskUiStateMapperTest {
                 isLocked = false,
                 isLiveTile = false,
                 remainingAppTimerDuration = TASK_APP_TIMER_DURATION,
+                isAppLocked = false,
             )
         val CLOSE_CALLBACK = View.OnClickListener {}
     }
