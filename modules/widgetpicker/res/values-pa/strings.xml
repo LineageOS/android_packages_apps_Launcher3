@@ -39,10 +39,7 @@
     <string name="widget_search_bar_back_button_label" msgid="7028448831228587743">"ਪਿੱਛੇ"</string>
     <string name="widgets_list_no_widgets_available" msgid="6451723564588621540">"ਵਿਜੇਟ ਜਾਂ ਸ਼ਾਰਟਕੱਟ ਉਪਲਬਧ ਨਹੀਂ ਹਨ"</string>
     <string name="widgets_no_search_results" msgid="4336254967062545985">"ਕੋਈ ਵੀ ਵਿਜੇਟ ਜਾਂ ਸ਼ਾਰਟਕੱਟ ਨਹੀਂ ਮਿਲਿਆ"</string>
-    <!-- no translation found for widget_add_to_homescreen_button_label (5293968342564702338) -->
-    <skip />
-    <!-- no translation found for widget_cancel_pin_button_label (7548758841712339886) -->
-    <skip />
-    <!-- no translation found for widget_touch_hold_instruction (7360267776497592789) -->
-    <skip />
+    <string name="widget_add_to_homescreen_button_label" msgid="5293968342564702338">"ਹੋਮ ਸਕ੍ਰੀਨ \'ਤੇ ਸ਼ਾਮਲ ਕਰੋ"</string>
+    <string name="widget_cancel_pin_button_label" msgid="7548758841712339886">"ਰੱਦ ਕਰੋ"</string>
+    <string name="widget_touch_hold_instruction" msgid="7360267776497592789">"ਕਿਸੇ ਵਿਜੇਟ ਨੂੰ ਇੱਕ ਤੋਂ ਦੂਜੀ ਥਾਂ ਲਿਜਾਉਣ ਲਈ ਸਪਰਸ਼ ਕਰ ਕੇ ਰੱਖੋ।"</string>
 </resources>
