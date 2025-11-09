@@ -97,7 +97,7 @@
     <string name="allset_title_expressive_fallback" msgid="2829102990606405239">"המכשיר שלך \nמוכן!"</string>
     <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"הכול מוכן!"</string>
     <string name="allset_subtitle_expressive" msgid="419688197551192358">"מקווים שיהיה לך כיף עם ה<xliff:g id="DEVICE">%1$s</xliff:g> החדש שלך!"</string>
-    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"צריך להחליק למעלה כדי להתחיל להשתמש ב-<xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"צריך להחליק למעלה כדי להתחיל להשתמש ב<xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"כדי להתחיל להשתמש ב<xliff:g id="DEVICE">%1$s</xliff:g>, צריך ללחוץ"</string>
     <string name="allset_navigation_settings_expressive" msgid="3745595273748356"><annotation id="link">"בחירת אופן הניווט"</annotation></string>
     <string name="allset_hint_expressive" msgid="756856423510976261">"אפשר להחליק למעלה"</string>
