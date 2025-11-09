@@ -42,10 +42,11 @@ open class NavButtonLayoutterTest {
     val configuration = mock<Configuration>()
     val resources = mock<Resources> { on { configuration } doReturn configuration }
     val navButtonContainer = mock<LinearLayout> { on { context } doReturn context }
-    val endContextualContainer = mock<ViewGroup>()
-    val startContextualContainer = mock<ViewGroup>()
+    val endContextualContainer = mock<ViewGroup> { on { context } doReturn context }
+    val startContextualContainer = mock<ViewGroup> { on { context } doReturn context }
     val imeSwitcher = mock<ImageView>()
     val a11yButton = mock<ImageView>()
+    val moreOptionsButton = mock<ImageView>()
     val space = mock<Space>()
     val backButton = mock<ImageView>()
     val homeButton = mock<ImageView>()

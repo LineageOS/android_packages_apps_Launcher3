@@ -41,6 +41,7 @@ class NavButtonLayoutFactoryTest {
     private val mockHomeButton: ImageView = mock()
     private val mockImeSwitcher: ImageView = mock()
     private val mockA11yButton: ImageView = mock()
+    private val mockMoreOptionsButton: ImageView = mock()
     private val mockSpace: Space = mock()
     private val mockConfiguration: Configuration = mock()
 
@@ -212,6 +213,7 @@ class NavButtonLayoutFactoryTest {
             surfaceRotation = surfaceRotation,
             imeSwitcher = mockImeSwitcher,
             a11yButton = mockA11yButton,
+            moreOptionsButton = mockMoreOptionsButton,
             space = mockSpace,
         )
     }

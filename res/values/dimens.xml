@@ -475,6 +475,8 @@
     <dimen name="taskbar_button_space_inbetween_phone">0dp</dimen>
     <dimen name="taskbar_button_margin_split">0dp</dimen>
     <dimen name="taskbar_button_margin_6_5">0dp</dimen>
+    <dimen name="taskbar_a11y_more_options_pill_horizontal_margin">5dp</dimen>
+    <dimen name="taskbar_button_space_inbetween_a11y">10dp</dimen>
 
     <!--- The minimum insets size for the IME to be considered docked (placeholders to compile in
     Launcher3 without Quickstep). -->

@@ -44,6 +44,7 @@ class PhoneSeascapeNavLayoutterTest(private val order: SeascapeButtonOrder) :
             startContextualContainer,
             imeSwitcher,
             a11yButton,
+            moreOptionsButton,
             space,
             backButton,
             homeButton,
