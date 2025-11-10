@@ -46,11 +46,9 @@ import androidx.test.filters.SmallTest;
 
 import com.android.launcher3.Flags;
 import com.android.launcher3.R;
-import com.android.launcher3.graphics.ThemeManager;
 import com.android.launcher3.icons.IconChangeTracker;
 import com.android.launcher3.util.DaggerSingletonTracker;
 import com.android.launcher3.util.Executors;
-import com.android.launcher3.util.LockedUserState;
 import com.android.launcher3.util.MutableListenableStream;
 import com.android.launcher3.util.PackageUserKey;
 import com.android.launcher3.util.SafeCloseable;
@@ -96,12 +94,6 @@ public class RecentsModelTest {
 
     @Mock private IconChangeTracker mIconChangeTracker;
 
-    @Mock
-    private LockedUserState mLockedUserState;
-
-    @Mock
-    private ThemeManager mThemeManager;
-
     private RecentsModel mRecentsModel;
 
     private RecentTasksList.TaskLoadResult mTaskResult;
@@ -145,8 +137,6 @@ public class RecentsModelTest {
                 mock(TaskIconCache.class),
                 mThumbnailCache,
                 mock(TaskStackChangeListeners.class),
-                mLockedUserState,
-                () -> mThemeManager,
                 mock(DaggerSingletonTracker.class),
                 Executors.UI_HELPER_EXECUTOR,
                 mIconChangeTracker);
@@ -212,17 +202,6 @@ public class RecentsModelTest {
         // Assert update cache is never called
         verify(mRecentsModel.getThumbnailCache(), never())
                 .updateThumbnailInCache(any(), anyBoolean());
-    }
-
-    @Test
-    public void themeCallbackAttachedOnUnlock() {
-        verify(mThemeManager, never()).addChangeListener(any());
-
-        ArgumentCaptor<Runnable> callbackCaptor = ArgumentCaptor.forClass(Runnable.class);
-        verify(mLockedUserState).runOnUserUnlocked(callbackCaptor.capture());
-
-        callbackCaptor.getAllValues().forEach(Runnable::run);
-        verify(mThemeManager, times(1)).addChangeListener(any());
     }
 
     @Test

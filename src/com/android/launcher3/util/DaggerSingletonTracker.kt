@@ -17,6 +17,7 @@ package com.android.launcher3.util
 
 import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.dagger.LauncherAppSingleton
+import java.util.concurrent.Executor
 import javax.inject.Inject
 
 /**
@@ -30,12 +31,14 @@ class DaggerSingletonTracker
 @Inject
 internal constructor(@Ui private val mainExecutor: LooperExecutor) {
 
-    private val tasks = RunnableList()
+    private val tasks = ThreadSafeRunnableList()
 
     /** Adds a closable task to be performed when the dagger graph instance is destroyed */
-    fun addCloseable(closeable: SafeCloseable) {
-        mainExecutor.execute { tasks.add(closeable::close) }
-    }
+    fun addCloseable(closeable: SafeCloseable) = addCloseable(mainExecutor, closeable)
 
-    fun close() = mainExecutor.execute(tasks::executeAllAndDestroy)
+    /** Adds a closable task to be performed when the dagger graph instance is destroyed */
+    fun addCloseable(executor: Executor, closeable: SafeCloseable) =
+        tasks.addCloseable(executor, closeable)
+
+    fun close() = tasks.complete()
 }
