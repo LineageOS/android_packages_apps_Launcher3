@@ -24,6 +24,8 @@ import android.platform.test.flag.junit.FlagsParameterization.allCombinationsOf
 import android.platform.test.flag.junit.SetFlagsRule
 import android.view.View
 import androidx.core.view.children
+import androidx.core.view.get
+import androidx.core.view.size
 import com.android.launcher3.Flags.FLAG_ENABLE_TASKBAR_DRAG_AND_DROP
 import com.android.launcher3.Flags.FLAG_ENABLE_TASKBAR_ICON_CONTAINER
 import com.android.launcher3.R
@@ -50,6 +52,7 @@ import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.ForceRtl
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext.Companion.getDeviceParams
+import com.android.launcher3.util.TestUtil.getOnUiThread
 import com.android.window.flags.Flags.FLAG_ENABLE_OVERFLOW_BUTTON_FOR_TASKBAR_PINNED_ITEMS
 import com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_OVERFLOW
 import com.google.common.truth.Truth
@@ -1078,6 +1081,29 @@ class TaskbarViewTest(private val deviceName: String, flags: FlagsParameterizati
 
         runOnMainSync { taskbarView.updateItems(emptyArray(), listOf(recentTask), emptyList()) }
         verify(recentTask, times(1)).bitmapInfos // Icon is not generated a second time.
+    }
+
+    @Test
+    fun testUpdateItems_taskReplaced_reusesHoverListener() {
+        val callbacks =
+            spy(
+                getOnUiThread {
+                    TaskbarViewCallbacksFactory.newInstance(activityContext)
+                        .create(activityContext, activityContext.controllers, taskbarView)
+                }
+            )
+        taskbarView.init(callbacks)
+
+        val task1 = createRecentTask(id = 0)
+        runOnMainSync { taskbarView.updateItems(emptyArray(), listOf(task1), emptyList()) }
+        val icon1 = taskbarView[taskbarView.size - 1]
+
+        val task2 = createRecentTask(id = 1)
+        runOnMainSync { taskbarView.updateItems(emptyArray(), listOf(task2), emptyList()) }
+        val icon2 = taskbarView[taskbarView.size - 1]
+
+        assertThat(icon1).isSameInstanceAs(icon2)
+        verify(callbacks, times(1)).getIconOnHoverListener(icon1)
     }
 
     /** Returns the number of expected recents outside of the overflow based on [hotseatSize]. */

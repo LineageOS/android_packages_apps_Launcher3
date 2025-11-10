@@ -1218,7 +1218,12 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
      * Sets OnHoverListener for the given view.
      */
     private void setHoverListenerForIcon(View icon) {
+        if (Boolean.TRUE.equals(icon.getTag(R.id.taskbar_icon_has_hover_listener))) {
+            // Creating hover listener is expensive due to view inflation, so reuse if possible.
+            return;
+        }
         icon.setOnHoverListener(mControllerCallbacks.getIconOnHoverListener(icon));
+        icon.setTag(R.id.taskbar_icon_has_hover_listener, true);
     }
 
     /** Updates taskbar icons accordingly to the new bubble bar location. */
