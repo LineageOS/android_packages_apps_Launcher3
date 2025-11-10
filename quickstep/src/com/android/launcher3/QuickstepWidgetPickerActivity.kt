@@ -15,6 +15,7 @@
  */
 package com.android.launcher3
 
+import android.app.WallpaperManager
 import android.appwidget.AppWidgetManager
 import android.os.Bundle
 import android.os.UserHandle
@@ -23,20 +24,30 @@ import android.view.WindowInsets
 import android.window.BackEvent
 import android.window.OnBackAnimationCallback
 import android.window.OnBackInvokedDispatcher
+import com.android.app.animation.Interpolators
+import com.android.internal.graphics.drawable.BackgroundBlurDrawable
 import com.android.launcher3.dagger.LauncherComponentProvider
 import com.android.launcher3.util.DisplayController
+import com.android.launcher3.util.WindowBlurState
 import com.android.launcher3.widgetpicker.WidgetPickerActivity
 import com.android.launcher3.widgetpicker.WidgetPickerConfig
+import com.android.launcher3.widgetpicker.WidgetPickerProgressHandler
 import com.android.quickstep.util.TISBindHelper
 import com.android.systemui.animation.back.FlingOnBackAnimationCallback
 import java.util.regex.Pattern
 
 /** An Activity that can host Launcher's widget picker for additional surfaces. */
-open class QuickstepWidgetPickerActivity : WidgetPickerActivity() {
+open class QuickstepWidgetPickerActivity : WidgetPickerActivity(), WidgetPickerProgressHandler {
     private lateinit var tisBindHelper: TISBindHelper
+    private var wallpaperManager: WallpaperManager? = null
+    private var isBlurEnabled = false
+    private var blurRadius: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         tisBindHelper = TISBindHelper(this) { updateServiceState(isResumed) }
+        wallpaperManager = getSystemService(WallpaperManager::class.java)
+        isBlurEnabled = WindowBlurState.getInstance(this).value
+        blurRadius = resources.getDimensionPixelSize(R.dimen.max_depth_blur_radius_enhanced)
 
         widgetPickerConfig = parseIntentExtras()
         super.onCreate(savedInstanceState)
@@ -46,6 +57,35 @@ open class QuickstepWidgetPickerActivity : WidgetPickerActivity() {
                 ?.decorView
                 ?.windowInsetsController
                 ?.hide(WindowInsets.Type.navigationBars() + WindowInsets.Type.statusBars())
+        }
+    }
+
+    override fun onProgress(progress: Float) {
+        rootView.windowToken?.let { token ->
+            wallpaperManager?.setWallpaperZoomOut(token, progress)
+
+            if (isBlurEnabled) {
+                updateBlurBackground(progress)
+            }
+        }
+    }
+
+    private fun updateBlurBackground(progress: Float) {
+        window?.decorView?.viewRootImpl?.let {
+            if (rootView.background == null) {
+                val bgDrawable: BackgroundBlurDrawable = it.createBackgroundBlurDrawable()
+                rootView.background = bgDrawable
+            }
+            (rootView.background as BackgroundBlurDrawable).apply {
+                setBlurRadius(
+                    (Interpolators.clampToProgress(
+                            progress,
+                            /*lowerBound=*/ MIN_BACKGROUND_BLUR_FRACTION,
+                            /*upperBound=*/ MAX_BACKGROUND_BLUR_FRACTION,
+                        ) * blurRadius)
+                        .toInt()
+                )
+            }
         }
     }
 
@@ -183,5 +223,8 @@ open class QuickstepWidgetPickerActivity : WidgetPickerActivity() {
 
         /** User ids that should be filtered out of the widget lists created by this activity. */
         private const val EXTRA_USER_ID_FILTER = "filtered_user_ids"
+
+        private const val MIN_BACKGROUND_BLUR_FRACTION = 0f // At closed state, no blur
+        private const val MAX_BACKGROUND_BLUR_FRACTION = 0.3f // blur capped at 30%
     }
 }

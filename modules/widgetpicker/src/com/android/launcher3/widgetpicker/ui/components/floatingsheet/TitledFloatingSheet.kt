@@ -84,6 +84,7 @@ fun TitledFloatingSheet(
     description: String?,
     onDismissSheet: () -> Unit,
     onSheetOpen: () -> Unit,
+    onSheetProgress: (Float) -> Unit,
     content: @Composable () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -118,6 +119,7 @@ fun TitledFloatingSheet(
                     .dismissibleSheet(
                         sheetState = sheetState,
                         onSheetOpen = onSheetOpen,
+                        onSheetProgress = onSheetProgress,
                         onDismissSheet = onDismissSheet,
                         maxHeight = sheetHeight,
                         enableNestedScrolling = !accessibilityState.isEnabled,
