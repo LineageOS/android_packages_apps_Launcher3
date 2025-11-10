@@ -103,7 +103,7 @@
     <string name="install_drop_target_label" msgid="2539096853673231757">"安裝"</string>
     <string name="dismiss_prediction_label" msgid="3357562989568808658">"不要提供應用程式建議"</string>
     <string name="pin_prediction" msgid="4196423321649756498">"固定預測"</string>
-    <string name="bubble" msgid="3072951361014076670">"氣泡"</string>
+    <string name="bubble" msgid="3072951361014076670">"對話氣泡"</string>
     <string name="widget_settings" msgid="5280157748464495511">"設定"</string>
     <string name="pin_to_taskbar" msgid="5914002252642242332">"固定至工作列"</string>
     <string name="unpin_from_taskbar" msgid="1025883383457627426">"取消固定至工作列"</string>
@@ -202,16 +202,11 @@
     <string name="action_increase_height" msgid="459390020612501122">"增加高度"</string>
     <string name="action_decrease_width" msgid="1374549771083094654">"減少闊度"</string>
     <string name="action_decrease_height" msgid="282377193880900022">"減少高度"</string>
-    <!-- no translation found for resize_handle_start (431073846880883794) -->
-    <skip />
-    <!-- no translation found for resize_handle_top (280799523356834542) -->
-    <skip />
-    <!-- no translation found for resize_handle_end (8411240534474246075) -->
-    <skip />
-    <!-- no translation found for resize_handle_bottom (4217171801060928429) -->
-    <skip />
-    <!-- no translation found for tap_to_show_resize_buttons (964815552123289232) -->
-    <skip />
+    <string name="resize_handle_start" msgid="431073846880883794">"左側的調整大小控點"</string>
+    <string name="resize_handle_top" msgid="280799523356834542">"頂部的調整大小控點"</string>
+    <string name="resize_handle_end" msgid="8411240534474246075">"右側的調整大小控點"</string>
+    <string name="resize_handle_bottom" msgid="4217171801060928429">"底部的調整大小控點"</string>
+    <string name="tap_to_show_resize_buttons" msgid="964815552123289232">"顯示調整大小按鈕"</string>
     <string name="widget_resized" msgid="9130327887929620">"已調整小工具的大小至闊 <xliff:g id="NUMBER_0">%1$s</xliff:g> 高 <xliff:g id="NUMBER_1">%2$s</xliff:g>"</string>
     <string name="action_deep_shortcut" msgid="4766835855579976045">"快速鍵選單"</string>
     <string name="widget_frame_name" msgid="8782828448471444270">"「<xliff:g id="STRING">%1$s</xliff:g>」嘅小工具調整大小框架"</string>

@@ -103,7 +103,7 @@
     <string name="install_drop_target_label" msgid="2539096853673231757">"Namesti"</string>
     <string name="dismiss_prediction_label" msgid="3357562989568808658">"Ne predlagaj"</string>
     <string name="pin_prediction" msgid="4196423321649756498">"Predvidevanje pripenjanja"</string>
-    <string name="bubble" msgid="3072951361014076670">"Mehurček"</string>
+    <string name="bubble" msgid="3072951361014076670">"Oblaček"</string>
     <string name="widget_settings" msgid="5280157748464495511">"Nastavitve"</string>
     <string name="pin_to_taskbar" msgid="5914002252642242332">"Pripni v opravilno vrstico"</string>
     <string name="unpin_from_taskbar" msgid="1025883383457627426">"Odpni iz opravilne vrstice"</string>
@@ -202,16 +202,11 @@
     <string name="action_increase_height" msgid="459390020612501122">"Povečanje višine"</string>
     <string name="action_decrease_width" msgid="1374549771083094654">"Zmanjšanje širine"</string>
     <string name="action_decrease_height" msgid="282377193880900022">"Zmanjšanje višine"</string>
-    <!-- no translation found for resize_handle_start (431073846880883794) -->
-    <skip />
-    <!-- no translation found for resize_handle_top (280799523356834542) -->
-    <skip />
-    <!-- no translation found for resize_handle_end (8411240534474246075) -->
-    <skip />
-    <!-- no translation found for resize_handle_bottom (4217171801060928429) -->
-    <skip />
-    <!-- no translation found for tap_to_show_resize_buttons (964815552123289232) -->
-    <skip />
+    <string name="resize_handle_start" msgid="431073846880883794">"Leva ročica za spreminjanje velikosti"</string>
+    <string name="resize_handle_top" msgid="280799523356834542">"Zgornja ročica za spreminjanje velikosti"</string>
+    <string name="resize_handle_end" msgid="8411240534474246075">"Desna ročica za spreminjanje velikosti"</string>
+    <string name="resize_handle_bottom" msgid="4217171801060928429">"Spodnja ročica za spreminjanje velikosti"</string>
+    <string name="tap_to_show_resize_buttons" msgid="964815552123289232">"Prikaz gumbov za velikost"</string>
     <string name="widget_resized" msgid="9130327887929620">"Velikost pripomočka je bila spremenjena na <xliff:g id="NUMBER_0">%1$s</xliff:g> širine in <xliff:g id="NUMBER_1">%2$s</xliff:g> višine"</string>
     <string name="action_deep_shortcut" msgid="4766835855579976045">"Meni z bližnjicami"</string>
     <string name="widget_frame_name" msgid="8782828448471444270">"Okvir za spreminjanje velikosti pripomočka za aplikacijo <xliff:g id="STRING">%1$s</xliff:g>"</string>

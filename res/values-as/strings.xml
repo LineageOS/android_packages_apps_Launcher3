@@ -202,16 +202,11 @@
     <string name="action_increase_height" msgid="459390020612501122">"উচ্চতা বৃদ্ধি কৰক"</string>
     <string name="action_decrease_width" msgid="1374549771083094654">"প্ৰস্থ হ্ৰাস কৰক"</string>
     <string name="action_decrease_height" msgid="282377193880900022">"উচ্চতা হ্ৰাস কৰক"</string>
-    <!-- no translation found for resize_handle_start (431073846880883794) -->
-    <skip />
-    <!-- no translation found for resize_handle_top (280799523356834542) -->
-    <skip />
-    <!-- no translation found for resize_handle_end (8411240534474246075) -->
-    <skip />
-    <!-- no translation found for resize_handle_bottom (4217171801060928429) -->
-    <skip />
-    <!-- no translation found for tap_to_show_resize_buttons (964815552123289232) -->
-    <skip />
+    <string name="resize_handle_start" msgid="431073846880883794">"বাওঁফালৰ আকাৰ সলনি কৰা হেণ্ডেল"</string>
+    <string name="resize_handle_top" msgid="280799523356834542">"একেবাৰে ওপৰৰ আকাৰ সলনি কৰা হেণ্ডেল"</string>
+    <string name="resize_handle_end" msgid="8411240534474246075">"সোঁফালৰ আকাৰ সলনি কৰা হেণ্ডেল"</string>
+    <string name="resize_handle_bottom" msgid="4217171801060928429">"একেবাৰে তলৰ আকাৰ সলনি কৰা হেণ্ডেল"</string>
+    <string name="tap_to_show_resize_buttons" msgid="964815552123289232">"আকাৰ সলনি কৰাৰ বুটাম দেখুৱাওক"</string>
     <string name="widget_resized" msgid="9130327887929620">"ৱিজেটৰ আকাৰ সলনি কৰি প্ৰস্থ <xliff:g id="NUMBER_0">%1$s</xliff:g> আৰু উচ্চতা <xliff:g id="NUMBER_1">%2$s</xliff:g> কৰা হ’ল"</string>
     <string name="action_deep_shortcut" msgid="4766835855579976045">"শ্বৰ্টকাটৰ মেনু"</string>
     <string name="widget_frame_name" msgid="8782828448471444270">"<xliff:g id="STRING">%1$s</xliff:g>ৰ বাবে ৱিজেটৰ আকাৰ সলনি কৰা ফ্রে’ম"</string>

@@ -202,16 +202,11 @@
     <string name="action_increase_height" msgid="459390020612501122">"အမြင့်အား တိုးပါ"</string>
     <string name="action_decrease_width" msgid="1374549771083094654">"အကျယ်အား လျှော့ပါ"</string>
     <string name="action_decrease_height" msgid="282377193880900022">"အမြင့်အား လျှော့ပါ"</string>
-    <!-- no translation found for resize_handle_start (431073846880883794) -->
-    <skip />
-    <!-- no translation found for resize_handle_top (280799523356834542) -->
-    <skip />
-    <!-- no translation found for resize_handle_end (8411240534474246075) -->
-    <skip />
-    <!-- no translation found for resize_handle_bottom (4217171801060928429) -->
-    <skip />
-    <!-- no translation found for tap_to_show_resize_buttons (964815552123289232) -->
-    <skip />
+    <string name="resize_handle_start" msgid="431073846880883794">"ဘယ်ဘက် ဇယားကွက် အရွယ်ပြောင်း"</string>
+    <string name="resize_handle_top" msgid="280799523356834542">"ထိပ်ဆုံး ဇယားကွက် အရွယ်ပြောင်း"</string>
+    <string name="resize_handle_end" msgid="8411240534474246075">"ညာဘက် ဇယားကွက် အရွယ်ပြောင်း"</string>
+    <string name="resize_handle_bottom" msgid="4217171801060928429">"အောက်ခြေ ဇယားကွက် အရွယ်ပြောင်း"</string>
+    <string name="tap_to_show_resize_buttons" msgid="964815552123289232">"အရွယ်ပြင်ခလုတ်များ ပြပါ"</string>
     <string name="widget_resized" msgid="9130327887929620">"Widget အား အကျယ် <xliff:g id="NUMBER_0">%1$s</xliff:g> အမြင့် <xliff:g id="NUMBER_1">%2$s</xliff:g> အရွယ်အစားပြန်လည်ချိန်ညှိပြီး၏"</string>
     <string name="action_deep_shortcut" msgid="4766835855579976045">"ဖြတ်လမ်းလင့်ခ် မီနူး"</string>
     <string name="widget_frame_name" msgid="8782828448471444270">"<xliff:g id="STRING">%1$s</xliff:g> အတွက် ဝိဂျက်အရွယ်ပြင်ဖရိမ်"</string>
