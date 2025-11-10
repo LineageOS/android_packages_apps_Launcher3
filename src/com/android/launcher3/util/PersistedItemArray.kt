@@ -51,14 +51,11 @@ class PersistedItemArray<T : ItemInfo>(fileName: String) {
     @WorkerThread
     fun read(context: Context, factory: ItemFactory<T>): MutableList<T> {
         val userCache = UserCache.INSTANCE[context]
-        return store.read(context) { parser ->
+        return store.read(context) { element ->
             factory.createInfo(
-                itemType = parser.getAttributeValue(null, Favorites.ITEM_TYPE).toInt(),
-                user =
-                    userCache.getUserForSerialNumber(
-                        parser.getAttributeValue(null, Favorites.PROFILE_ID).toLong()
-                    ),
-                intent = Intent.parseUri(parser.getAttributeValue(null, Favorites.INTENT), 0),
+                itemType = element[Favorites.ITEM_TYPE]!!.toInt(),
+                user = userCache.getUserForSerialNumber(element[Favorites.PROFILE_ID]!!.toLong()),
+                intent = Intent.parseUri(element[Favorites.INTENT], 0),
             )
         }
     }

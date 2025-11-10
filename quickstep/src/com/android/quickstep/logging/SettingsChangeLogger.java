@@ -39,6 +39,7 @@ import static com.android.launcher3.shapes.ShapesProvider.SQUARE_KEY;
 import static com.android.launcher3.util.DisplayController.CHANGE_NAVIGATION_MODE;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.SettingsCache.NOTIFICATION_BADGING_URI;
+import static com.android.launcher3.util.XmlElement.getRootElement;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -46,7 +47,6 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.TypedArray;
 import android.util.ArrayMap;
 import android.util.Log;
-import android.util.Xml;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
@@ -73,6 +73,7 @@ import com.android.launcher3.util.DisplayController.Info;
 import com.android.launcher3.util.ListenableDiffAwareRef;
 import com.android.launcher3.util.NavigationMode;
 import com.android.launcher3.util.SettingsCache;
+import com.android.launcher3.util.XmlElement;
 import com.android.quickstep.dagger.QuickstepBaseAppComponent;
 
 import kotlin.Unit;
@@ -158,33 +159,18 @@ public class SettingsChangeLogger implements OnSharedPreferenceChangeListener {
         ArrayMap<String, LoggablePref> result = new ArrayMap<>();
 
         try {
-            // Move cursor to first tag because it could be
-            // androidx.preference.PreferenceScreen or PreferenceScreen
-            int eventType = parser.getEventType();
-            while (eventType != XmlPullParser.START_TAG
-                    && eventType != XmlPullParser.END_DOCUMENT) {
-                eventType = parser.next();
-            }
-            final int depth = parser.getDepth();
-            int type;
-            while (((type = parser.next()) != XmlPullParser.END_TAG
-                    || parser.getDepth() > depth) && type != XmlPullParser.END_DOCUMENT) {
-                if (type != XmlPullParser.START_TAG) {
-                    continue;
+            for (XmlElement el : getRootElement(parser).childIterator(BOOLEAN_PREF)) {
+                TypedArray a = el.obtainAttrs(context, R.styleable.LoggablePref);
+                String key = a.getString(R.styleable.LoggablePref_android_key);
+                LoggablePref pref = new LoggablePref();
+                pref.defaultValue =
+                        a.getBoolean(R.styleable.LoggablePref_android_defaultValue, true);
+                pref.eventIdOn = a.getInt(R.styleable.LoggablePref_logIdOn, 0);
+                pref.eventIdOff = a.getInt(R.styleable.LoggablePref_logIdOff, 0);
+                if (pref.eventIdOff > 0 && pref.eventIdOn > 0) {
+                    result.put(key, pref);
                 }
-                if (BOOLEAN_PREF.equals(parser.getName())) {
-                    TypedArray a = context.obtainStyledAttributes(
-                            Xml.asAttributeSet(parser), R.styleable.LoggablePref);
-                    String key = a.getString(R.styleable.LoggablePref_android_key);
-                    LoggablePref pref = new LoggablePref();
-                    pref.defaultValue =
-                            a.getBoolean(R.styleable.LoggablePref_android_defaultValue, true);
-                    pref.eventIdOn = a.getInt(R.styleable.LoggablePref_logIdOn, 0);
-                    pref.eventIdOff = a.getInt(R.styleable.LoggablePref_logIdOff, 0);
-                    if (pref.eventIdOff > 0 && pref.eventIdOn > 0) {
-                        result.put(key, pref);
-                    }
-                }
+                a.recycle();
             }
         } catch (XmlPullParserException | IOException e) {
             Log.e(TAG, "Error parsing preference xml", e);
