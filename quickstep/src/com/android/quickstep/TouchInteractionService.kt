@@ -19,17 +19,24 @@ import android.app.Service
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.IBinder
+import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
+import com.android.launcher3.util.ThreadSafeRunnableList
+import com.android.quickstep.dagger.SysUIConnectionComponent
 import java.io.FileDescriptor
 import java.io.PrintWriter
 
 /** Service connected by system-UI for handling touch interaction. */
 class TouchInteractionService : Service() {
 
+    private val cleanupTask = ThreadSafeRunnableList()
+    private lateinit var component: SysUIConnectionComponent
     private lateinit var handler: TouchInteractionHandler
 
     override fun onCreate() {
         super.onCreate()
-        handler = TouchInteractionHandler(this)
+        component =
+            appComponent.sysUIConnectionComponentBuilder.setConnectionCleaner(cleanupTask).build()
+        handler = component.touchInteractionHandler
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) =
@@ -38,7 +45,7 @@ class TouchInteractionService : Service() {
     override fun onBind(intent: Intent): IBinder = handler.binder
 
     override fun onDestroy() {
-        handler.onDestroy()
+        cleanupTask.complete()
         super.onDestroy()
     }
 

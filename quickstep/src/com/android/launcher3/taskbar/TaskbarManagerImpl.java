@@ -91,6 +91,7 @@ import com.android.launcher3.LauncherPrefChangeListener;
 import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.R;
 import com.android.launcher3.anim.AnimatorListeners;
+import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.statehandlers.DesktopVisibilityController;
 import com.android.launcher3.statemanager.StatefulActivity;
 import com.android.launcher3.taskbar.TaskbarNavButtonController.TaskbarNavButtonCallbacks;
@@ -104,6 +105,7 @@ import com.android.launcher3.util.Preconditions;
 import com.android.launcher3.util.SafeCloseable;
 import com.android.launcher3.util.SettingsCache;
 import com.android.launcher3.util.SimpleBroadcastReceiver;
+import com.android.launcher3.util.coroutines.ProductionDispatchers;
 import com.android.launcher3.util.window.WindowManagerProxy;
 import com.android.quickstep.AllAppsActionManager;
 import com.android.quickstep.BaseContainerInterface;
@@ -112,6 +114,7 @@ import com.android.quickstep.RecentsActivity;
 import com.android.quickstep.SystemDecorationChangeObserver;
 import com.android.quickstep.SystemUiProxy;
 import com.android.quickstep.TouchInteractionHandler;
+import com.android.quickstep.dagger.SysUIConnectionSingleton;
 import com.android.quickstep.util.ContextualSearchInvoker;
 import com.android.quickstep.util.SystemUiFlagUtils;
 import com.android.quickstep.views.RecentsViewContainer;
@@ -125,8 +128,6 @@ import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider;
 
 import kotlin.Unit;
 
-import kotlinx.coroutines.CoroutineDispatcher;
-
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
@@ -137,9 +138,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.function.IntConsumer;
 
+import javax.inject.Inject;
+
 /**
  * Class to manage taskbar lifecycle
  */
+@SysUIConnectionSingleton
 public class TaskbarManagerImpl implements DisplayDecorationListener {
     private static final String TAG = "TaskbarManager";
     private static final boolean DEBUG = false;
@@ -463,12 +467,13 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
      */
     @MainThread
     @SuppressLint("WrongConstant")
+    @Inject
     public TaskbarManagerImpl(
-            Context context,
+            @ApplicationContext Context context,
             AllAppsActionManager allAppsActionManager,
             TaskbarNavButtonCallbacks navCallbacks,
             DisplaysWithDecorationsRepositoryCompat displaysWithDecorationsRepositoryCompat,
-            CoroutineDispatcher dispatcher) {
+            ProductionDispatchers dispatchers) {
         mBaseContext = context;
         mBaseWindowManager = mBaseContext.getSystemService(WindowManager.class);
         mPrimaryDisplayId = mBaseContext.getDisplayId();
@@ -501,7 +506,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         if (DesktopExperienceFlags.ENABLE_SYS_DECORS_CALLBACKS_VIA_WM.isTrue()
                 && DesktopExperienceFlags.ENABLE_DISPLAY_CONTENT_MODE_MANAGEMENT.isTrue()) {
             displaysWithDecorationsRepositoryCompat
-                    .registerDisplayDecorationListener(this, dispatcher);
+                    .registerDisplayDecorationListener(this, dispatchers.getTaskbarUi());
         } else {
             SystemDecorationChangeObserver.getINSTANCE().get(mPrimaryWindowContext)
                     .registerDisplayDecorationListener(this);

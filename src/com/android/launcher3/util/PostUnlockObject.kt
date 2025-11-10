@@ -19,6 +19,7 @@ package com.android.launcher3.util
 import dagger.Lazy
 import java.util.concurrent.Executor
 import javax.inject.Inject
+import kotlin.reflect.KProperty
 
 /**
  * Utility class which makes it easier to inject objects that are available only after user is
@@ -55,4 +56,6 @@ constructor(private val item: Lazy<T>, private val lockedUserState: LockedUserSt
     fun getIfReady(): T? = if (lockedUserState.isUserUnlocked) get() else null
 
     override fun close() = cleanupItems.complete()
+
+    operator fun getValue(target: Any, property: KProperty<*>): T? = getIfReady()
 }

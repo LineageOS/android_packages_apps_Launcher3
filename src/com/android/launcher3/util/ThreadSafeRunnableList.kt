@@ -34,8 +34,8 @@ class ThreadSafeRunnableList {
         synchronized(lock) { tasks?.add(executor to task) ?: executor.execute(task) }
 
     @AnyThread
-    fun addCloseable(executor: Executor, closeable: SafeCloseable) =
-        addTask(executor, closeable::close)
+    fun addCloseable(executor: Executor, closeable: SafeCloseable?) =
+        closeable?.let { addTask(executor, closeable::close) }
 
     /** Tries to remove a previously added task if not already executed */
     @AnyThread
