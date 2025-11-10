@@ -96,3 +96,6 @@ object HomeScreenFilesModule {
 
 // This module is empty in the no_quickstep variant as task overlay is not supported.
 @Module object TaskOverlayModule
+
+// This module is empty in the no_quickstep variant as task automation is not supported.
+@Module object TaskAutomationModule

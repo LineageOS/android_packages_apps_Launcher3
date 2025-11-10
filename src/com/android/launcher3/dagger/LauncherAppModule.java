@@ -40,6 +40,7 @@ import dagger.Module;
                 SystemDragModule.class,
                 HomeScreenFilesModule.class,
                 DesktopModule.class,
+                TaskAutomationModule.class,
                 TaskOverlayModule.class,
         },
         subcomponents = ActivityContextComponent.class)
