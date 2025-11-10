@@ -2412,8 +2412,11 @@ public abstract class RecentsView<
             ? extends StatefulContainer<STATE_TYPE>> getStateManager();
 
     public void reset() {
+        // TODO(b/457591993): Removed the partial trace.
         Log.d(TAG, "reset - mEnableDrawingLiveTile: " + mEnableDrawingLiveTile
-                + ", mRecentsAnimationController: " + mRecentsAnimationController);
+                + ", mRecentsAnimationController: " + mRecentsAnimationController
+                + ", partial trace:\n"
+                + getTrimmedStackTrace("RecentsView.reset"));
         setCurrentTask(-1);
         mCurrentPageScrollDiff = 0;
         mIgnoreResetTaskId = -1;
