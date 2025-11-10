@@ -34,13 +34,10 @@ import androidx.annotation.Nullable;
 import com.android.launcher3.concurrent.annotations.Ui;
 import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.dagger.LauncherAppSingleton;
-import com.android.launcher3.graphics.ThemeManager;
-import com.android.launcher3.graphics.ThemeManager.ThemeChangeListener;
 import com.android.launcher3.icons.IconChangeTracker;
 import com.android.launcher3.util.DaggerSingletonObject;
 import com.android.launcher3.util.DaggerSingletonTracker;
 import com.android.launcher3.util.ListenableStream;
-import com.android.launcher3.util.LockedUserState;
 import com.android.launcher3.util.LooperExecutor;
 import com.android.launcher3.util.MutableListenableStream;
 import com.android.launcher3.util.SafeCloseable;
@@ -54,8 +51,6 @@ import com.android.systemui.shared.recents.model.ThumbnailData;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
-
-import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -72,8 +67,7 @@ import javax.inject.Inject;
 @TargetApi(Build.VERSION_CODES.O)
 @LauncherAppSingleton
 public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListener,
-        TaskVisualsChangeListener, TaskVisualsChangeNotifier,
-        ThemeChangeListener {
+        TaskVisualsChangeListener, TaskVisualsChangeNotifier {
 
     // We do not need any synchronization for this variable as its only written on UI thread.
     public static final DaggerSingletonObject<RecentsModel> INSTANCE =
@@ -98,8 +92,6 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
             TaskIconCache iconCache,
             TaskThumbnailCache thumbnailCache,
             TaskStackChangeListeners taskStackChangeListeners,
-            LockedUserState lockedUserState,
-            Lazy<ThemeManager> themeManagerLazy,
             DaggerSingletonTracker tracker,
             @Ui LooperExecutor uiExecutor,
             IconChangeTracker iconChangeTracker) {
@@ -140,21 +132,11 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
                     return null;
                 });
 
-        // Lazily inject the ThemeManager and access themeManager once the device is
-        // unlocked. See b/393248495 for details.
-        Runnable unlockCallback = () -> themeManagerLazy.get().addChangeListener(this);
-        lockedUserState.runOnUserUnlocked(unlockCallback);
-
         tracker.addCloseable(() -> {
             taskStackChangeListeners.unregisterTaskStackListener(this);
             mTaskList.unregisterRecentTasksChangedListener();
             iconChangeCloseable.close();
             mIconCache.removeTaskVisualsChangeListener();
-            if (lockedUserState.isUserUnlocked()) {
-                themeManagerLazy.get().removeChangeListener(this);
-            } else {
-                lockedUserState.removeOnUserUnlockedRunnable(unlockCallback);
-            }
         });
     }
 
@@ -321,11 +303,6 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
         for (TaskVisualsChangeListener listener : mThumbnailChangeListeners) {
             listener.onTaskIconChanged(taskId);
         }
-    }
-
-    @Override
-    public void onThemeChanged() {
-        mIconCache.clearCache();
     }
 
     /**
