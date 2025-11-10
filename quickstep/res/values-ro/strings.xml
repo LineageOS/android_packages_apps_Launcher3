@@ -102,7 +102,7 @@
     <string name="allset_navigation_settings_expressive" msgid="3745595273748356"><annotation id="link">"Alege cum să navighezi"</annotation></string>
     <string name="allset_hint_expressive" msgid="756856423510976261">"Glisează în sus"</string>
     <string name="allset_button_hint_expressive" msgid="667643693410494225">"Atinge butonul ecran de pornire"</string>
-    <string name="allset_device_type_tablet" msgid="2173392009787325894">"tabletă"</string>
+    <string name="allset_device_type_tablet" msgid="2173392009787325894">"tableta"</string>
     <string name="allset_device_type_phone" msgid="6842334562074507337">"telefon"</string>
     <string name="action_share" msgid="2648470652637092375">"Distribuie"</string>
     <string name="action_screenshot" msgid="8171125848358142917">"Captură de ecran"</string>
