@@ -52,7 +52,7 @@ class SystemDragListener(
     DragController.DragListener {
 
     private var cleanupCallback: Runnable? = null
-    private var dragView: DragView<*>? = null
+    private var dragView: DragView? = null
 
     init {
         val closeAllOpenViews = params?.closeAllOpenViews ?: true
@@ -85,7 +85,7 @@ class SystemDragListener(
      *
      * @return The drag view for the sequence if started successfully.
      */
-    fun startDrag(): DragView<*>? =
+    fun startDrag(): DragView? =
         params?.run {
             startDrag(
                 /*previewRect=*/ Rect(),

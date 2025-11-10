@@ -309,7 +309,7 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
 
     @Test
     fun testStartDrag() {
-        val dragView = mock<DragView<*>>()
+        val dragView = mock<DragView>()
 
         whenever(
                 mockLauncher.dragController.startDrag(

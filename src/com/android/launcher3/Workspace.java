@@ -1849,7 +1849,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             }
         }
 
-        DragView<?> dv = null;
+        DragView dv = null;
 
         // TODO(458058227): Move this entire code block to [DragController].
         if (enableSystemDragToOtherApps()

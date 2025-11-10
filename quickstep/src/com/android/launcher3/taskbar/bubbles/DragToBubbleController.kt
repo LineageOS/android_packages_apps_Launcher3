@@ -91,7 +91,7 @@ class DragToBubbleController(
     }
 
     /** Adds bubble bar locations drop zones to the drag controller. */
-    fun addBubbleBarDropTargets(dragController: DragController<*>) {
+    fun addBubbleBarDropTargets(dragController: DragController) {
         if (!BubbleAnythingFlagHelper.enableCreateAnyBubble()) {
             return
         }
@@ -101,7 +101,7 @@ class DragToBubbleController(
     }
 
     /** Removes bubble bar locations drop zones to the drag controller. */
-    fun removeBubbleBarDropTargets(dragController: DragController<*>) {
+    fun removeBubbleBarDropTargets(dragController: DragController) {
         dragController.removeDragListener(this)
         dragController.removeDropTarget(bubbleBarLeftDropTarget)
         dragController.removeDropTarget(bubbleBarRightDropTarget)

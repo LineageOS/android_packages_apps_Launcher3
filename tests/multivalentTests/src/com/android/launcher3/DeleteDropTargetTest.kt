@@ -59,7 +59,7 @@ class DeleteDropTargetTest {
     fun onDragEnter_performsMSDLSwipeThresholdFeedback() {
         buttonDropTarget.setMSDLPlayerWrapper(msdlPlayerWrapper)
         val target = DropTarget.DragObject(mContext)
-        target.dragView = mock<DragView<*>>()
+        target.dragView = mock<DragView>()
         buttonDropTarget.onDragEnter(target)
 
         verify(msdlPlayerWrapper, times(1)).playToken(eq(MSDLToken.SWIPE_THRESHOLD_INDICATOR))

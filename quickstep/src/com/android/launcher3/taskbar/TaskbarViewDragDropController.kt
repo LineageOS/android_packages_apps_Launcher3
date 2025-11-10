@@ -47,12 +47,12 @@ class TaskbarViewDragDropController(
         modelCallbacks = callbacks
     }
 
-    fun addDropTargets(dragController: DragController<*>) {
+    fun addDropTargets(dragController: DragController) {
         dragController.addDropTarget(pinningDropTarget)
         dragController.addDropTarget(unpinDropTarget)
     }
 
-    fun removeDropTargets(dragController: DragController<*>) {
+    fun removeDropTargets(dragController: DragController) {
         dragController.removeDropTarget(pinningDropTarget)
         dragController.removeDropTarget(unpinDropTarget)
     }

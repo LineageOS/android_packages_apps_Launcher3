@@ -1692,8 +1692,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         Drawable widgetPreviewDrawable = null;
         if (isActivityStarted) {
             View dropView = getDragLayer().getAnimatedView();
-            if (dropView instanceof DragView
-                    && ((DragView<?>) dropView).containsAppWidgetHostView()) {
+            if (dropView instanceof DragView dv && dv.containsAppWidgetHostView()) {
                 // Extracting Bitmap from dropView instead of its content view produces the correct
                 // bitmap.
                 if (Flags.fixWidgetDragRadiusLoss()) {

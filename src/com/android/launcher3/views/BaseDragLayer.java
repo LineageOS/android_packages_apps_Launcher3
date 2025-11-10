@@ -133,7 +133,7 @@ public abstract class BaseDragLayer<T extends Context & ActivityContext>
         if (enableSystemDrag()) {
             // Delegate handling of system drag events to the drag controller.
             super.setOnDragListener((view, event) -> {
-                final DragController<T> dragController = mContainer.getDragController();
+                final DragController dragController = mContainer.getDragController();
                 return dragController != null && dragController.onDragEvent(event);
             });
         }

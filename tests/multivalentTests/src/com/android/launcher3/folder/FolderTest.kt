@@ -82,7 +82,7 @@ class FolderTest {
     private lateinit var folder: Folder
 
     @Before
-    fun <T : DragController<*>> setUp() {
+    fun <T : DragController> setUp() {
         folder = spy(Folder(context, null))
     }
 
