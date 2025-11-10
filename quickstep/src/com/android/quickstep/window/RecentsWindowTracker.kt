@@ -17,11 +17,14 @@
 package com.android.quickstep.window
 
 import com.android.app.displaylib.PerDisplayRepository
+import com.android.launcher3.dagger.PerDisplaySingleton
 import com.android.launcher3.util.ContextTracker
 import com.android.launcher3.util.DaggerSingletonObject
 import com.android.quickstep.dagger.QuickstepBaseAppComponent
+import javax.inject.Inject
 
-class RecentsWindowTracker : ContextTracker<RecentsWindowManager?>() {
+@PerDisplaySingleton
+class RecentsWindowTracker @Inject constructor() : ContextTracker<RecentsWindowManager?>() {
 
     // Always return true since the recents window is meant to be agnostic of the launcher and
     // will not receive start callbacks.

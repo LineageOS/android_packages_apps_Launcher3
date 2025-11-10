@@ -65,6 +65,8 @@ import androidx.annotation.Nullable;
 
 import com.android.app.displaylib.PerDisplayRepository;
 import com.android.launcher3.dagger.ApplicationContext;
+import com.android.launcher3.dagger.DisplayId;
+import com.android.launcher3.dagger.PerDisplaySingleton;
 import com.android.launcher3.util.DaggerSingletonObject;
 import com.android.launcher3.util.DaggerSingletonTracker;
 import com.android.launcher3.util.DisplayController;
@@ -87,15 +89,14 @@ import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 
-import dagger.assisted.Assisted;
-import dagger.assisted.AssistedFactory;
-import dagger.assisted.AssistedInject;
-
 import java.io.PrintWriter;
+
+import javax.inject.Inject;
 
 /**
  * Manages the state of the system during a swipe up gesture.
  */
+@PerDisplaySingleton
 public class RecentsAnimationDeviceState implements ExclusionListener {
 
     public static final int RESET_TO_DEFAULT_GESTURAL_HEIGHT = -1;
@@ -148,11 +149,11 @@ public class RecentsAnimationDeviceState implements ExclusionListener {
     private boolean mExclusionListenerRegistered;
     private final int mDisplayId;
 
-    @AssistedInject
+    @Inject
     RecentsAnimationDeviceState(
             @ApplicationContext Context context,
-            @Assisted int displayId,
-            @Assisted RotationTouchHelper rotationTouchHelper,
+            @DisplayId int displayId,
+            RotationTouchHelper rotationTouchHelper,
             GestureExclusionManager exclusionManager,
             DisplayController displayController,
             ContextualSearchStateManager contextualSearchStateManager,
@@ -685,13 +686,6 @@ public class RecentsAnimationDeviceState implements ExclusionListener {
 
     public int getDisplayId() {
         return mDisplayId;
-    }
-
-    @AssistedFactory
-    public interface Factory {
-        /** Creates a new instance of [RecentsAnimationDeviceState] for a given [displayId] and
-         * [rotationTouchHelper]. */
-        RecentsAnimationDeviceState create(int displayId, RotationTouchHelper rotationTouchHelper);
     }
 
 }

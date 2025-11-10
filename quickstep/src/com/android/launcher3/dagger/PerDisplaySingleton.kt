@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.quickstep.recents.di
+package com.android.launcher3.dagger
 
-import javax.inject.Qualifier
+import javax.inject.Scope
 
-/** Qualifier for the current display id. */
-@MustBeDocumented @Retention(AnnotationRetention.RUNTIME) @Qualifier annotation class DisplayId
+/** Scope annotation for singleton items within a display. */
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+@Scope
+annotation class PerDisplaySingleton
