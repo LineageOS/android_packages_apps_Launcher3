@@ -42,6 +42,7 @@ import android.view.SurfaceControl.Transaction
 import android.view.SurfaceControlViewHost
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewStub
 import android.window.BackEvent
 import android.window.DesktopExperienceFlags
 import android.window.OnBackInvokedCallback
@@ -107,7 +108,7 @@ import com.android.quickstep.SystemUiProxy
 import com.android.quickstep.TaskViewUtils
 import com.android.quickstep.dagger.QuickstepBaseAppComponent
 import com.android.quickstep.fallback.FallbackRecentsStateController
-import com.android.quickstep.fallback.FallbackRecentsView
+import com.android.quickstep.fallback.FallbackWindowRecentsView
 import com.android.quickstep.fallback.RecentsDragLayer
 import com.android.quickstep.fallback.RecentsState
 import com.android.quickstep.fallback.RecentsState.Companion.BACKGROUND_APP
@@ -175,7 +176,7 @@ constructor(
     }
 
     private val recentsComponent = recentsComponentFactory.build(this)
-    private var recentsView: FallbackRecentsView<RecentsWindowManager>? = null
+    private var recentsView: FallbackWindowRecentsView? = null
     private var surfaceControlViewHost: SurfaceControlViewHost? = null
     private var layoutInflater: LayoutInflater = LayoutInflater.from(this).cloneInContext(this)
     private var stateManager: StateManager<RecentsState, RecentsWindowManager> =
@@ -338,7 +339,9 @@ constructor(
             val emptyRecentsMessageView =
                 it.findViewById<ViewGroup?>(R.id.empty_recents_message_view)
             recentsView =
-                it.findViewById<FallbackRecentsView<RecentsWindowManager>?>(R.id.overview_panel)
+                (it.findViewById<ViewStub>(R.id.overview_panel)
+                        .apply { layoutResource = R.layout.fallback_window_recents_view }
+                        .inflate() as? FallbackWindowRecentsView)
                     ?.apply {
                         init(
                             actionsView,

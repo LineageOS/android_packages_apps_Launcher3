@@ -49,6 +49,7 @@ import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl.Transaction;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.window.RemoteTransition;
 import android.window.SplashScreen;
 
@@ -86,8 +87,8 @@ import com.android.launcher3.util.SystemUiController;
 import com.android.launcher3.util.Themes;
 import com.android.launcher3.views.BaseDragLayer;
 import com.android.launcher3.views.ScrimView;
+import com.android.quickstep.fallback.FallbackActivityRecentsView;
 import com.android.quickstep.fallback.FallbackRecentsStateController;
-import com.android.quickstep.fallback.FallbackRecentsView;
 import com.android.quickstep.fallback.RecentsDragLayer;
 import com.android.quickstep.fallback.RecentsState;
 import com.android.quickstep.recents.di.RecentsComponent;
@@ -124,7 +125,7 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
 
     private RecentsDragLayer mDragLayer;
     private ScrimView mScrimView;
-    private FallbackRecentsView mFallbackRecentsView;
+    private FallbackActivityRecentsView mFallbackRecentsView;
     private OverviewActionsView<?> mActionsView;
     private TISBindHelper mTISBindHelper;
     private @Nullable TaskbarInteractor mTaskbarInteractor;
@@ -158,7 +159,9 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
         LauncherRootView rootView = getRootView();
         mDragLayer = rootView.findViewById(R.id.drag_layer);
         mScrimView = rootView.findViewById(R.id.scrim_view);
-        mFallbackRecentsView = rootView.findViewById(R.id.overview_panel);
+        ViewStub recentsViewStub = rootView.findViewById(R.id.overview_panel);
+        recentsViewStub.setLayoutResource(R.layout.fallback_activity_recents_view);
+        mFallbackRecentsView = (FallbackActivityRecentsView) recentsViewStub.inflate();
         mActionsView = rootView.findViewById(R.id.overview_actions_view);
         ViewGroup emptyRecentsMessageView = rootView.findViewById(R.id.empty_recents_message_view);
 
@@ -269,7 +272,7 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
     }
 
     @Override
-    public FallbackRecentsView getOverviewPanel() {
+    public FallbackActivityRecentsView getOverviewPanel() {
         return mFallbackRecentsView;
     }
 

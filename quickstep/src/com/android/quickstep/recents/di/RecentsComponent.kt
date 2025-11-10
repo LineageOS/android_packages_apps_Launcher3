@@ -17,13 +17,12 @@
 package com.android.quickstep.recents.di
 
 import com.android.launcher3.dagger.LauncherAppSingleton
-import com.android.quickstep.recents.viewmodel.RecentsViewModel
+import com.android.quickstep.fallback.FallbackActivityRecentsView
+import com.android.quickstep.fallback.FallbackWindowRecentsView
 import com.android.quickstep.views.DesktopTaskView
 import com.android.quickstep.views.GroupedTaskView
-import com.android.quickstep.views.RecentsDismissUtils
+import com.android.quickstep.views.LauncherRecentsView
 import com.android.quickstep.views.RecentsViewContainer
-import com.android.quickstep.views.RecentsViewModelHelper
-import com.android.quickstep.views.RecentsViewUtils
 import com.android.quickstep.views.TaskView
 import dagger.BindsInstance
 import dagger.Subcomponent
@@ -33,19 +32,17 @@ import dagger.Subcomponent
 @RecentsScope
 @Subcomponent(modules = [LauncherRecentsModule::class])
 interface RecentsComponent {
-    fun getRecentsViewUtilsFactory(): RecentsViewUtils.Factory
-
-    fun getRecentsDismissUtilsFactory(): RecentsDismissUtils.Factory
-
-    fun getRecentsViewModel(): RecentsViewModel
-
-    fun getRecentsViewModelHelper(): RecentsViewModelHelper
-
     fun inject(taskView: TaskView)
 
     fun inject(taskView: GroupedTaskView)
 
     fun inject(taskView: DesktopTaskView)
+
+    fun inject(recentsView: LauncherRecentsView)
+
+    fun inject(recentsView: FallbackActivityRecentsView)
+
+    fun inject(recentsView: FallbackWindowRecentsView)
 
     @LauncherAppSingleton
     @Subcomponent.Factory
