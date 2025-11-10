@@ -26,9 +26,14 @@ import android.util.Pair
 import android.view.Gravity
 import android.view.Surface
 import android.view.View
+import android.view.View.LAYOUT_DIRECTION_INHERIT
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID
+import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.UNSET
 import androidx.core.view.updateLayoutParams
 import com.android.launcher3.DeviceProfile
 import com.android.launcher3.LauncherAnimUtils
@@ -191,10 +196,41 @@ class PortraitPagedViewHandler : DefaultPagedViewHandler(), RecentsPagedOrientat
                         else Gravity.CENTER_HORIZONTAL)
                 width = snapshotViewWidth
             } else {
-                width = ViewGroup.LayoutParams.MATCH_PARENT
+                width = MATCH_PARENT
                 gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
             }
         }
+    }
+
+    override fun updateAppTimerLayout(
+        taskViewWidth: Int,
+        taskViewHeight: Int,
+        isGroupedTaskView: Boolean,
+        deviceProfile: DeviceProfile,
+        snapshotViewWidth: Int,
+        snapshotViewHeight: Int,
+        appTimerToast: View,
+    ) {
+        appTimerToast.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            appTimerToast.layoutDirection = LAYOUT_DIRECTION_INHERIT
+            startToStart = PARENT_ID
+            endToEnd = PARENT_ID
+            bottomToBottom = PARENT_ID
+            topToTop = UNSET
+            width =
+                if (isGroupedTaskView) {
+                    snapshotViewWidth
+                } else {
+                    MATCH_PARENT
+                }
+        }
+
+        appTimerToast.pivotX = 0f
+        appTimerToast.pivotY = 0f
+        appTimerToast.rotation = degreesRotated
+
+        appTimerToast.translationX = 0f
+        appTimerToast.translationY = 0f
     }
 
     override fun getDwbBannerTranslations(

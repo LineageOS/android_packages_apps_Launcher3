@@ -17,15 +17,13 @@
 package com.android.launcher3.taskbar.rules
 
 import android.hardware.display.DisplayManager
-import com.android.launcher3.util.LauncherMultivalentJUnit
-import com.android.launcher3.util.LauncherMultivalentJUnit.EmulatedDevices
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@RunWith(LauncherMultivalentJUnit::class)
-@EmulatedDevices(["pixelFoldable2023"])
+@RunWith(AndroidJUnit4::class)
 class TaskbarWindowSandboxContextTest {
 
     @get:Rule val context = TaskbarWindowSandboxContext.create()

@@ -16,16 +16,12 @@
 
 package com.android.quickstep
 
-import android.app.ActivityManager
 import android.app.ActivityTaskManager.INVALID_TASK_ID
 import android.app.TaskInfo
-import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
 import android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW
-import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import android.content.res.Resources
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
@@ -37,6 +33,7 @@ import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.statehandlers.DesktopVisibilityController.Companion.INACTIVE_DESK_ID
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.quickstep.TopTaskTracker.HISTORY_SIZE
+import com.android.quickstep.util.FakeTaskFactory
 import com.android.window.flags.Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND
 import com.android.window.flags.Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_FRONTEND
 import com.android.wm.shell.Flags.FLAG_ENABLE_SHELL_TOP_TASK_TRACKING
@@ -276,7 +273,7 @@ class TopTaskTrackerTest {
     @Test
     @DisableFlags(
         FLAG_ENABLE_SHELL_TOP_TASK_TRACKING,
-        "com.android.launcher3.enable_overview_on_connected_displays"
+        "com.android.launcher3.enable_overview_on_connected_displays",
     )
     fun handleTaskMovedToFront_nonDefaultDisplayTask_flagDisabled_keepsDefaultDisplayTaskOnTop() {
         // Arrange: Add a task on the default display.
@@ -332,7 +329,7 @@ class TopTaskTrackerTest {
     @Test
     @DisableFlags(
         FLAG_ENABLE_SHELL_TOP_TASK_TRACKING,
-        "com.android.launcher3.enable_overview_on_connected_displays"
+        "com.android.launcher3.enable_overview_on_connected_displays",
     )
     fun handleTaskMovedToFront_defaultDisplayTask_flagDisabled_noReorder() {
         // Arrange: Add a task on a secondary display.
@@ -360,14 +357,11 @@ class TopTaskTrackerTest {
         displayId: Int = DEFAULT_DISPLAY,
         windowingMode: Int = WINDOWING_MODE_FULLSCREEN,
     ) =
-        ActivityManager.RunningTaskInfo().apply {
-            this.taskId = taskId
-            this.displayId = displayId
-            this.baseIntent = Intent()
-            this.baseActivity = ComponentName("test", "test")
-            this.configuration.windowConfiguration.activityType = ACTIVITY_TYPE_STANDARD
-            this.configuration.windowConfiguration.windowingMode = windowingMode
-        }
+        FakeTaskFactory.newTaskInfo(
+            taskId = taskId,
+            displayId = displayId,
+            windowingMode = windowingMode,
+        )
 
     private fun createDesktopTaskInfo(taskId: Int, displayId: Int) =
         createTaskInfo(taskId, displayId, WINDOWING_MODE_FREEFORM)

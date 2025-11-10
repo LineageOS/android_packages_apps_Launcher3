@@ -39,4 +39,7 @@
     <string name="widget_search_bar_back_button_label" msgid="7028448831228587743">"უკან"</string>
     <string name="widgets_list_no_widgets_available" msgid="6451723564588621540">"ვიჯეტები და მალსახმობები ხელმისაწვდომი არ არის"</string>
     <string name="widgets_no_search_results" msgid="4336254967062545985">"ვიჯეტები ან მალსახმობები ვერ მოიძებნა"</string>
+    <string name="widget_add_to_homescreen_button_label" msgid="5293968342564702338">"მთავარ ეკრანზე დამატება"</string>
+    <string name="widget_cancel_pin_button_label" msgid="7548758841712339886">"გაუქმება"</string>
+    <string name="widget_touch_hold_instruction" msgid="7360267776497592789">"ხანგრძლივად შეეხეთ ვიჯეტის გადასაადგილებლად."</string>
 </resources>

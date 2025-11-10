@@ -23,6 +23,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.launcher3.Flags
 import com.android.launcher3.InvariantDeviceProfile
+import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.dagger.LauncherAppComponent
@@ -31,6 +32,7 @@ import com.android.launcher3.model.ModelDbController
 import com.android.launcher3.model.SerializedItemItem
 import com.android.launcher3.model.WorkspaceItemSerializer
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.model.tasks.BrowserIconMigrator.Companion.PREF_MIGRATION_PENDING
 import com.android.launcher3.util.AllModulesForTest
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import com.android.launcher3.util.FakePrefsModule
@@ -50,6 +52,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
@@ -75,6 +78,9 @@ class BrowserIconMigratorTest {
     private val idp: InvariantDeviceProfile
         get() = appComponent.idp
 
+    private val prefs: LauncherPrefs
+        get() = appComponent.prefs
+
     private lateinit var itemIdMap: IntSparseArrayMap<ItemInfo>
 
     @Before
@@ -82,6 +88,22 @@ class BrowserIconMigratorTest {
         context.initDaggerComponent(
             DaggerBrowserIconMigratorTest_TestComponent.builder().bindEvaluator(evaluator)
         )
+    }
+
+    @Test
+    fun testMigration_notNeeded_clearsPendingFlag() {
+        // Set the pending flag to true
+        prefs.put(PREF_MIGRATION_PENDING, true)
+        whenever(evaluator.evaluateSourceAndTarget()).thenReturn(null)
+
+        val changes = performMigration(mockEval = false)
+
+        // Verify no changes were made
+        assertThat(changes).isEqualTo(0)
+        // Verify the migration complete callback was not called
+        verify(evaluator, never()).notifyMigrationComplete(false)
+        // Verify the pending flag is cleared
+        assertThat(prefs.get(PREF_MIGRATION_PENDING)).isFalse()
     }
 
     @Test
@@ -93,11 +115,15 @@ class BrowserIconMigratorTest {
                 .atHotseat(0)
                 .putApp(browserPkg, null)
         )
+        // Set the pending flag to true
+        prefs.put(PREF_MIGRATION_PENDING, true)
 
         val changes = performMigration()
         // Nothing was changed
         assertThat(changes).isEqualTo(0)
         verify(evaluator).notifyMigrationComplete(false)
+        // Verify the pending flag is cleared
+        assertThat(prefs.get(PREF_MIGRATION_PENDING)).isFalse()
     }
 
     @Test
@@ -109,6 +135,8 @@ class BrowserIconMigratorTest {
                 .atWorkspace(0, -1, 0)
                 .putApp(browserPkg, null)
         )
+        // Set the pending flag to true
+        prefs.put(PREF_MIGRATION_PENDING, true)
 
         val changes = performMigration()
         verify(evaluator).notifyMigrationComplete(true)
@@ -129,6 +157,8 @@ class BrowserIconMigratorTest {
                 assertThat(container).isEqualTo(CONTAINER_HOTSEAT)
                 assertThat(screenId).isEqualTo(3)
             }
+        // Verify the pending flag is cleared
+        assertThat(prefs.get(PREF_MIGRATION_PENDING)).isFalse()
     }
 
     @Test
@@ -296,23 +326,25 @@ class BrowserIconMigratorTest {
             }
     }
 
-    private fun performMigration(): Int {
-        doAnswer {
-                var targetItemInfo: ItemInfo? = null
-                TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {
-                    targetItemInfo =
-                        appComponent.serializer.decode(
-                            SerializedItemItem(
-                                packageName = browserPkg,
-                                userHandle = Process.myUserHandle(),
+    private fun performMigration(mockEval: Boolean = true): Int {
+        if (mockEval) {
+            doAnswer {
+                    var targetItemInfo: ItemInfo? = null
+                    TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {
+                        targetItemInfo =
+                            appComponent.serializer.decode(
+                                SerializedItemItem(
+                                    packageName = browserPkg,
+                                    userHandle = Process.myUserHandle(),
+                                )
                             )
-                        )
-                }
+                    }
 
-                Pair(targetPkg, targetItemInfo!!)
-            }
-            .whenever(evaluator)
-            .evaluateSourceAndTarget()
+                    Pair(targetPkg, targetItemInfo!!)
+                }
+                .whenever(evaluator)
+                .evaluateSourceAndTarget()
+        }
 
         itemIdMap = IntSparseArrayMap()
         context.appComponent.testableModelState.dataModel.itemsIdMap.forEach {
@@ -335,6 +367,7 @@ class BrowserIconMigratorTest {
         val migratorFactory: BrowserIconMigratorFactory
         val serializer: WorkspaceItemSerializer
         val dbController: ModelDbController
+        val prefs: LauncherPrefs
 
         @Component.Builder
         interface Builder : LauncherAppComponent.Builder {

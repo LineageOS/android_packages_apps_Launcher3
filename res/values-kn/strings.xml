@@ -202,6 +202,11 @@
     <string name="action_increase_height" msgid="459390020612501122">"ಎತ್ತರವನ್ನು ಹೆಚ್ಚು ಮಾಡಿ"</string>
     <string name="action_decrease_width" msgid="1374549771083094654">"ಅಗಲವನ್ನು ಕಡಿಮೆ ಮಾಡಿ"</string>
     <string name="action_decrease_height" msgid="282377193880900022">"ಎತ್ತರವನ್ನು ಕಡಿಮೆ ಮಾಡಿ"</string>
+    <string name="resize_handle_start" msgid="431073846880883794">"ಎಡಭಾಗದ ರೀಸೈಜ್ ಹ್ಯಾಂಡಲ್"</string>
+    <string name="resize_handle_top" msgid="280799523356834542">"ಮೇಲಿನ ರೀಸೈಜ್ ಹ್ಯಾಂಡಲ್"</string>
+    <string name="resize_handle_end" msgid="8411240534474246075">"ಬಲಭಾಗದ ರೀಸೈಜ್ ಹ್ಯಾಂಡಲ್"</string>
+    <string name="resize_handle_bottom" msgid="4217171801060928429">"ಕೆಳಗಿನ ರೀಸೈಜ್ ಹ್ಯಾಂಡಲ್"</string>
+    <string name="tap_to_show_resize_buttons" msgid="964815552123289232">"ರೀಸೈಜ್ ಬಟನ್ ಅನ್ನು ತೋರಿಸಿ"</string>
     <string name="widget_resized" msgid="9130327887929620">"ವಿಜೆಟ್ ಅನ್ನು <xliff:g id="NUMBER_0">%1$s</xliff:g> ಅಗಲ <xliff:g id="NUMBER_1">%2$s</xliff:g> ಎತ್ತರಕ್ಕೆ ಮರುಗಾತ್ರಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="action_deep_shortcut" msgid="4766835855579976045">"ಶಾರ್ಟ್‌ಕಟ್ ಮೆನು"</string>
     <string name="widget_frame_name" msgid="8782828448471444270">"<xliff:g id="STRING">%1$s</xliff:g> ಗಾಗಿ ವಿಜೆಟ್ ಮರುಗಾತ್ರಗೊಳಿಸುವಿಕೆ ಫ್ರೇಮ್"</string>

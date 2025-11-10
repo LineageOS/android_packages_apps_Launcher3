@@ -615,6 +615,11 @@ public class TaskAnimationManager implements RecentsAnimationCallbacks.RecentsAn
         return mController != null;
     }
 
+
+    boolean hasOngoingGesture() {
+        return mLastGestureState != null;
+    }
+
     void onLauncherDestroyed() {
         if (!mRecentsAnimationStartPending) {
             return;

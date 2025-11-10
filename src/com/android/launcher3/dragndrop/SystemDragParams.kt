@@ -16,6 +16,7 @@
 
 package com.android.launcher3.dragndrop
 
+import android.content.ClipData
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import com.android.launcher3.DragSource
@@ -28,6 +29,8 @@ import com.android.launcher3.model.data.ItemInfo
  * sequence. See {@link DragController#startDrag()} for additional documentation.
  */
 data class SystemDragParams(
+    val clipData: ClipData?,
+    val closeAllOpenViews: Boolean,
     val dragImage: Drawable,
     val dragInfo: ItemInfo,
     val dragLayerX: Int,

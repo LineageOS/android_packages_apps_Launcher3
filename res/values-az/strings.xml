@@ -202,6 +202,11 @@
     <string name="action_increase_height" msgid="459390020612501122">"Hündürlüyü artırın"</string>
     <string name="action_decrease_width" msgid="1374549771083094654">"Eni azaldın"</string>
     <string name="action_decrease_height" msgid="282377193880900022">"Hündürlüyü azaldın"</string>
+    <string name="resize_handle_start" msgid="431073846880883794">"Soldakı ölçüdəyişmə dəstəyi"</string>
+    <string name="resize_handle_top" msgid="280799523356834542">"Yuxarıdakı ölçüdəyişmə dəstəyi"</string>
+    <string name="resize_handle_end" msgid="8411240534474246075">"Sağdakı ölçüdəyişmə dəstəyi"</string>
+    <string name="resize_handle_bottom" msgid="4217171801060928429">"Aşağıdakı ölçüdəyişmə dəstəyi"</string>
+    <string name="tap_to_show_resize_buttons" msgid="964815552123289232">"Ölçü dəyişmək düymələrini göstərin"</string>
     <string name="widget_resized" msgid="9130327887929620">"Vidcetin eni <xliff:g id="NUMBER_0">%1$s</xliff:g> hündürlüyü <xliff:g id="NUMBER_1">%2$s</xliff:g> kimi ölçüləndirildi"</string>
     <string name="action_deep_shortcut" msgid="4766835855579976045">"Qısayol menyusu"</string>
     <string name="widget_frame_name" msgid="8782828448471444270">"<xliff:g id="STRING">%1$s</xliff:g> üçün vidcet ölçüsünü dəyişdirmə çərçivəsi"</string>

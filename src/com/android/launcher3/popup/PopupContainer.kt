@@ -69,7 +69,7 @@ open class PopupContainer<T>(
     @CallSuper
     override fun closeComplete() {
         super.closeComplete()
-        mActivityContext?.getDragController<DragController<*>>()?.removeDragListener(this)
+        mActivityContext?.dragController?.removeDragListener(this)
         val openPopup = getOpen<T>(mActivityContext)
         if (openPopup == null || openPopup.originalView !== iconViewController) {
             iconViewController?.getFloatingViewTextAlpha()?.value = 1f

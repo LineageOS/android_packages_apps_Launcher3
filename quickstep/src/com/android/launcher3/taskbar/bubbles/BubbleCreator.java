@@ -23,6 +23,7 @@ import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED_BY
 
 import static com.android.launcher3.icons.BaseIconFactory.MODE_WITH_SHADOW;
 import static com.android.launcher3.icons.FastBitmapDrawable.WHITE_SCRIM_ALPHA;
+import static com.android.launcher3.taskbar.bubbles.utils.UserTypeExt.toUserIconInfoType;
 import static com.android.wm.shell.shared.bubbles.FlyoutDrawableLoader.loadFlyoutDrawable;
 
 import android.annotation.Nullable;
@@ -50,6 +51,7 @@ import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.launcher3.shortcuts.ShortcutRequest;
 import com.android.launcher3.taskbar.bubbles.flyout.BubbleBarFlyoutMessage;
 import com.android.launcher3.taskbar.bubbles.model.BubbleIcon;
+import com.android.launcher3.util.UserIconInfo;
 import com.android.wm.shell.shared.bubbles.BubbleInfo;
 import com.android.wm.shell.shared.bubbles.ParcelableFlyoutMessage;
 
@@ -134,10 +136,14 @@ public class BubbleCreator {
                     + " with shortcutId: " + info.getShortcutId());
         }
 
+        UserIconInfo userIconInfo = new UserIconInfo(
+                UserHandle.of(info.getUserId()), toUserIconInfoType(info.getUserType()));
+
         // Badged bubble image
-        BubbleIcon bubbleIcon = getBubbleIcon(context, info, appIcon, shortcutInfo, mIconFactory);
+        BubbleIcon bubbleIcon =
+                getBubbleIcon(context, info, appIcon, shortcutInfo, mIconFactory, userIconInfo);
         BitmapInfo badgeBitmapInfo = mIconFactory.getBadgeBitmap(
-                appIcon, new UserHandle(info.getUserId()), isImportantConvo);
+                appIcon, userIconInfo, isImportantConvo);
 
         int dotColor = ColorUtils.blendARGB(badgeBitmapInfo.color,
                 Color.WHITE, WHITE_SCRIM_ALPHA / 255f);
@@ -167,10 +173,10 @@ public class BubbleCreator {
     }
 
     private static BubbleIcon getBubbleIcon(Context context, BubbleInfo info, Drawable appIcon,
-            ShortcutInfo shortcutInfo, BubbleIconFactory iconFactory) {
+            ShortcutInfo shortcutInfo, BubbleIconFactory iconFactory, UserIconInfo userIconInfo) {
         if (info.isApp()) {
             return new BubbleIcon.AppIcon(
-                    iconFactory.getAppBubbleBitmapInfo(appIcon, UserHandle.of(info.getUserId())));
+                    iconFactory.getAppBubbleBitmapInfo(appIcon, userIconInfo));
         }
 
         Drawable bubbleDrawable =
@@ -219,5 +225,4 @@ public class BubbleCreator {
                         .setBitmapGenerationMode(MODE_WITH_SHADOW)
                         .setExtractedColor(Color.TRANSPARENT)).icon;
     }
-
 }

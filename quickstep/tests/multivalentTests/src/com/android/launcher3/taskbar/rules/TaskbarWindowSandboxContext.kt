@@ -28,9 +28,13 @@ import android.window.DesktopExperienceFlags
 import androidx.test.core.app.ApplicationProvider
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
+import com.android.launcher3.util.LauncherMultivalentJUnit.Companion.isRunningInRobolectric
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.SettingsCacheSandbox
 import com.android.launcher3.util.VirtualDisplaysRule
+import com.android.launcher3.util.launcheremulator.LauncherCustomizer
+import com.android.launcher3.util.launcheremulator.models.DeviceEmulationData
+import com.android.launcher3.util.launcheremulator.models.EmulationParams
 import com.android.quickstep.SystemUiProxy
 import org.junit.rules.ExternalResource
 import org.junit.rules.RuleChain
@@ -103,9 +107,27 @@ private constructor(
     }
 
     companion object {
-        /** Creates a [SandboxApplication] for Taskbar tests. */
-        fun create(params: SandboxParams = SandboxParams()): TaskbarWindowSandboxContext {
+        private const val DEFAULT_DEVICE = "pixelTablet2023"
+        private val ON_DEVICE_ONLY = listOf("onDevice")
+
+        /**
+         * Creates a [SandboxApplication] for Taskbar tests
+         *
+         * Specify [emulatedDeviceName] to mimic a device configuration in the deviceless
+         * environment. To run a test with multiple configurations, use a parameterized test runner
+         * with [getDeviceParams].
+         */
+        fun create(
+            emulatedDeviceName: String = DEFAULT_DEVICE,
+            params: SandboxParams = SandboxParams(),
+        ): TaskbarWindowSandboxContext {
             val base = ApplicationProvider.getApplicationContext<Context>()
+            if (isRunningInRobolectric) {
+                LauncherCustomizer.applyAll(
+                    base,
+                    EmulationParams(DeviceEmulationData.getDevice(emulatedDeviceName)),
+                )
+            }
             val virtualDisplaysRule = VirtualDisplaysRule(base)
             val defaultDisplay =
                 checkNotNull(
@@ -120,11 +142,22 @@ private constructor(
                 params,
             )
         }
+
+        /**
+         * Creates list of [deviceNames] to emulate for parameterized tests.
+         *
+         * Returns a dummy singleton list for on-device tests, where there is no emulation.
+         */
+        fun getDeviceParams(vararg deviceNames: String): List<String> {
+            return if (isRunningInRobolectric) deviceNames.toList() else ON_DEVICE_ONLY
+        }
     }
 }
 
 /** Include additional bindings when building a [TaskbarSandboxComponent]. */
 data class SandboxParams(
-    val systemUiProxyProvider: (Context) -> SystemUiProxy = { SystemUiProxy(it, MAIN_EXECUTOR, UI_HELPER_EXECUTOR) },
+    val systemUiProxyProvider: (Context) -> SystemUiProxy = {
+        SystemUiProxy(it, MAIN_EXECUTOR, UI_HELPER_EXECUTOR)
+    },
     val builderBase: TaskbarSandboxComponent.Builder = DaggerTaskbarSandboxComponent.builder(),
 )

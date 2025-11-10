@@ -85,7 +85,7 @@ import kotlinx.coroutines.withTimeout
 class OverviewCommandHelper
 @AssistedInject
 constructor(
-    @Assisted private val touchInteractionService: TouchInteractionService,
+    @Assisted private val touchInteractionHandler: TouchInteractionHandler,
     private val overviewComponentObserver: OverviewComponentObserver,
     private val dispatcherProvider: DispatcherProvider,
     private val displayRepository: DisplayRepository,
@@ -425,9 +425,7 @@ constructor(
             ) {
                 // When recentsViewContainer is not RecentsWindowManager, get TaskbarUiController
                 // from TaskbarManager as a workaround.
-                taskbarManager.getUIControllerForDisplay(command.displayId)?.let {
-                    TaskbarInteractor(it)
-                }
+                taskbarManager.getTaskbarInteractor(command.displayId)
             } else {
                 containerInterface.getTaskbarInteractor()
             }
@@ -565,7 +563,7 @@ constructor(
         }
 
         val gestureState =
-            touchInteractionService
+            touchInteractionHandler
                 .createGestureState(
                     command.displayId,
                     GestureState.DEFAULT_STATE,
@@ -588,7 +586,7 @@ constructor(
                     }
                 }
         val interactionHandler =
-            touchInteractionService
+            touchInteractionHandler
                 .getSwipeUpHandlerFactory(command.displayId)
                 .newHandler(gestureState, command.createTime)
         if (interactionHandler == null) {
@@ -841,7 +839,7 @@ constructor(
     @AssistedFactory
     interface Factory {
         fun create(
-            touchInteractionService: TouchInteractionService,
+            touchInteractionHandler: TouchInteractionHandler,
             taskbarManager: TaskbarManager,
             systemUiProxy: SystemUiProxy,
         ): OverviewCommandHelper

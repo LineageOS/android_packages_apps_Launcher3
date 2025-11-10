@@ -77,22 +77,23 @@ object LauncherCustomizer {
         // set those values using reflection
         val minSize = Math.min(device.width, device.height)
         val maxSize = Math.max(device.width, device.height)
-        val di = DisplayManagerGlobal.getInstance().getDisplayInfo(Display.DEFAULT_DISPLAY)
-        di.appWidth = if (isLandscape) maxSize else minSize
-        di.appHeight = if (isLandscape) minSize else maxSize
-        di.logicalHeight = di.appHeight
-        di.logicalWidth = di.appWidth
-        di.smallestNominalAppHeight = minSize
-        di.smallestNominalAppWidth = minSize
-        di.largestNominalAppHeight = maxSize
-        di.largestNominalAppWidth = maxSize
-        val dmGlobal: ShadowDisplayManagerGlobal = extract(DisplayManagerGlobal.getInstance())
-        ReflectionHelpers.callInstanceMethod<Void>(
-            dmGlobal,
-            "changeDisplay",
-            ReflectionHelpers.ClassParameter.from(Int::class.java, Display.DEFAULT_DISPLAY),
-            ReflectionHelpers.ClassParameter.from(DisplayInfo::class.java, di),
-        )
+        DisplayManagerGlobal.getInstance().getDisplayInfo(Display.DEFAULT_DISPLAY)?.run {
+            appWidth = if (isLandscape) maxSize else minSize
+            appHeight = if (isLandscape) minSize else maxSize
+            logicalHeight = appHeight
+            logicalWidth = appWidth
+            smallestNominalAppHeight = minSize
+            smallestNominalAppWidth = minSize
+            largestNominalAppHeight = maxSize
+            largestNominalAppWidth = maxSize
+            val dmGlobal: ShadowDisplayManagerGlobal = extract(DisplayManagerGlobal.getInstance())
+            ReflectionHelpers.callInstanceMethod<Void>(
+                dmGlobal,
+                "changeDisplay",
+                ReflectionHelpers.ClassParameter.from(Int::class.java, Display.DEFAULT_DISPLAY),
+                ReflectionHelpers.ClassParameter.from(DisplayInfo::class.java, this),
+            )
+        }
 
         DisplayController.INSTANCE[context].onConfigurationChanged(
             Configuration(context.resources.configuration)

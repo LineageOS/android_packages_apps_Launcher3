@@ -41,11 +41,13 @@ class AbstractFloatingViewHelperTest {
     private lateinit var folderView: AbstractFloatingView
     private lateinit var taskMenuView: AbstractFloatingView
 
-    private val abstractFloatingViewHelper = AbstractFloatingViewHelper()
+    private val abstractFloatingViewHelper = AbstractFloatingViewHelper
 
     private class FakeFolderView(context: Context) : AbstractFloatingView(context, null) {
         override fun isOfType(type: Int): Boolean = (type and TYPE_FOLDER) != 0
+
         override fun onControllerInterceptTouchEvent(ev: MotionEvent) = false
+
         override fun handleClose(animate: Boolean) {
             (parent as? ViewGroup)?.removeView(this)
         }
@@ -53,7 +55,9 @@ class AbstractFloatingViewHelperTest {
 
     private class FakeTaskMenuView(context: Context) : AbstractFloatingView(context, null) {
         override fun isOfType(type: Int): Boolean = (type and TYPE_TASK_MENU) != 0
+
         override fun onControllerInterceptTouchEvent(ev: MotionEvent) = false
+
         override fun handleClose(animate: Boolean) {
             (parent as? ViewGroup)?.removeView(this)
         }
@@ -73,7 +77,11 @@ class AbstractFloatingViewHelperTest {
 
     @Test
     fun closeOpenViews_all() {
-        abstractFloatingViewHelper.closeOpenViews(activityContext, false, AbstractFloatingView.TYPE_ALL)
+        abstractFloatingViewHelper.closeOpenViews(
+            activityContext,
+            false,
+            AbstractFloatingView.TYPE_ALL,
+        )
 
         assertThat(view.parent).isNotNull()
         assertThat(folderView.parent).isNull()
@@ -85,7 +93,7 @@ class AbstractFloatingViewHelperTest {
         abstractFloatingViewHelper.closeOpenViews(
             activityContext,
             false,
-            AbstractFloatingView.TYPE_TASK_MENU
+            AbstractFloatingView.TYPE_TASK_MENU,
         )
 
         assertThat(view.parent).isNotNull()
@@ -98,7 +106,7 @@ class AbstractFloatingViewHelperTest {
         abstractFloatingViewHelper.closeOpenViews(
             activityContext,
             false,
-            AbstractFloatingView.TYPE_PIN_IME_POPUP
+            AbstractFloatingView.TYPE_PIN_IME_POPUP,
         )
 
         assertThat(view.parent).isNotNull()
@@ -111,7 +119,7 @@ class AbstractFloatingViewHelperTest {
         abstractFloatingViewHelper.closeOpenViews(
             activityContext,
             false,
-            AbstractFloatingView.TYPE_FOLDER or AbstractFloatingView.TYPE_TASK_MENU
+            AbstractFloatingView.TYPE_FOLDER or AbstractFloatingView.TYPE_TASK_MENU,
         )
 
         assertThat(view.parent).isNotNull()

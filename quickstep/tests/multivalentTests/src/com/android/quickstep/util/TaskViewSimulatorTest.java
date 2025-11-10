@@ -210,7 +210,7 @@ public class TaskViewSimulatorTest {
             mDeviceProfile.updateInsets(mLauncherInsets);
 
             TaskViewSimulator tvs = new TaskViewSimulator(app,
-                    FallbackActivityInterface.INSTANCE, false, 0);
+                    FallbackActivityInterface.INSTANCE.get(app), false, 0);
             tvs.setDp(mDeviceProfile);
 
             int launcherRotation = info.rotation;

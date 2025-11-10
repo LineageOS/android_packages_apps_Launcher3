@@ -19,6 +19,7 @@ import android.app.ActivityManager
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
+import android.os.Process
 import android.os.UserHandle
 import android.util.SparseArray
 import androidx.annotation.WorkerThread
@@ -26,6 +27,7 @@ import androidx.core.graphics.drawable.toDrawable
 import com.android.launcher3.Flags.enableTaskbarRecentsThemedIcons
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
+import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.icons.BaseIconFactory
 import com.android.launcher3.icons.BaseIconFactory.IconOptions
 import com.android.launcher3.icons.BitmapInfo
@@ -35,8 +37,8 @@ import com.android.launcher3.pm.UserCache
 import com.android.launcher3.util.CancellableTask
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.DisplayController
-import com.android.launcher3.util.Executors
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
+import com.android.launcher3.util.Executors.SimpleThreadFactory
 import com.android.launcher3.util.FlagOp
 import com.android.launcher3.util.Preconditions
 import com.android.launcher3.util.coroutines.DispatcherProvider
@@ -48,17 +50,22 @@ import com.android.systemui.shared.recents.model.Task
 import com.android.systemui.shared.recents.model.Task.TaskKey
 import com.android.systemui.shared.system.PackageManagerWrapper
 import java.util.concurrent.Executor
+import java.util.concurrent.Executors.newSingleThreadExecutor
+import javax.inject.Inject
 import kotlinx.coroutines.withContext
 
 /** Manages the caching of task icons and related data. */
-class TaskIconCache(
-    private val context: Context,
-    private val bgExecutor: Executor,
-    private val iconProvider: IconProvider,
+class TaskIconCache
+@Inject
+constructor(
+    @ApplicationContext private val context: Context,
     displayController: DisplayController,
-    val dispatcherProvider: DispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
     daggerSingletonTracker: DaggerSingletonTracker,
 ) : TaskIconDataSource {
+    private val bgExecutor = TASK_IMAGE_CACHE_EXECUTOR
+    private val iconProvider = IconProvider(context)
+
     private val recentsIconCacheSize = context.resources.getInteger(R.integer.recentsIconCacheSize)
     private var iconCache: TaskKeyLruCache<TaskCacheEntry>? = null
     // TODO: b/431811298 - Make non-null when flag is cleaned up.
@@ -166,7 +173,7 @@ class TaskIconCache(
         val request =
             CancellableTask(
                 { getCacheEntry(task) },
-                Executors.MAIN_EXECUTOR,
+                MAIN_EXECUTOR,
                 { result: TaskCacheEntry ->
                     task.icon = result.icon
                     task.titleDescription = result.contentDescription
@@ -206,7 +213,7 @@ class TaskIconCache(
         val request =
             CancellableTask(
                 { getBitmapInfoCacheEntry(task) },
-                Executors.MAIN_EXECUTOR,
+                MAIN_EXECUTOR,
                 { result: TaskBitmapInfoCacheEntry ->
                     task.titleDescription = result.contentDescription
                     task.title = result.title
@@ -422,5 +429,12 @@ class TaskIconCache(
 
     private fun dispatchIconUpdate(taskId: Int) {
         taskVisualsChangeListener?.onTaskIconChanged(taskId)
+    }
+
+    companion object {
+        val TASK_IMAGE_CACHE_EXECUTOR: Executor =
+            newSingleThreadExecutor(
+                SimpleThreadFactory("TaskThumbnailIconCache-", Process.THREAD_PRIORITY_BACKGROUND)
+            )
     }
 }

@@ -872,7 +872,8 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
      */
     public int getFloatingSearchBarRestingMarginStart() {
         DeviceProfile dp = mActivityContext.getDeviceProfile();
-        return dp.allAppsLeftRightMargin + dp.getAllAppsIconStartMargin(mActivityContext);
+        return dp.getAllAppsProfile().getLeftRightMargin()
+                + dp.getAllAppsIconStartMargin(mActivityContext);
     }
 
     /**
@@ -885,7 +886,8 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
      */
     public int getFloatingSearchBarRestingMarginEnd() {
         DeviceProfile dp = mActivityContext.getDeviceProfile();
-        return dp.allAppsLeftRightMargin + dp.getAllAppsIconStartMargin(mActivityContext);
+        return dp.getAllAppsProfile().getLeftRightMargin()
+                + dp.getAllAppsIconStartMargin(mActivityContext);
     }
 
     private void layoutBelowSearchContainer(View v, boolean includeTabsMargin) {
@@ -1002,8 +1004,9 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
     @Override
     public void onDeviceProfileChanged(DeviceProfile dp) {
         for (AdapterHolder holder : mAH) {
-            holder.mAdapter.setAppsPerRow(dp.numShownAllAppsColumns);
-            holder.mAppsList.setNumAppsPerRowAllApps(dp.numShownAllAppsColumns);
+            holder.mAdapter.setAppsPerRow(dp.getAllAppsProfile().getNumShownAllAppsColumns());
+            holder.mAppsList.setNumAppsPerRowAllApps(
+                    dp.getAllAppsProfile().getNumShownAllAppsColumns());
             if (holder.mRecyclerView != null) {
                 // Remove all views and clear the pool, while keeping the data same. After this
                 // call, all the viewHolders will be recreated.
@@ -1179,8 +1182,9 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
         setLayoutParams(mlp);
 
         if (!grid.isVerticalBarLayout() || FeatureFlags.enableResponsiveWorkspace()) {
-            int topPadding = grid.allAppsPadding.top;
-            setPadding(grid.allAppsLeftRightMargin, topPadding, grid.allAppsLeftRightMargin, 0);
+            int topPadding = grid.getAllAppsProfile().getPadding().top;
+            setPadding(grid.getAllAppsProfile().getLeftRightMargin(), topPadding,
+                    grid.getAllAppsProfile().getLeftRightMargin(), 0);
         }
         InsettableFrameLayout.dispatchInsets(this, insets);
     }
@@ -1237,8 +1241,8 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
         int bottomPadding = Math.max(mInsets.bottom, mNavBarScrimHeight);
         mAH.forEach(adapterHolder -> {
             adapterHolder.mPadding.bottom = bottomPadding;
-            adapterHolder.mPadding.left = grid.allAppsPadding.left;
-            adapterHolder.mPadding.right = grid.allAppsPadding.right;
+            adapterHolder.mPadding.left = grid.getAllAppsProfile().getPadding().left;
+            adapterHolder.mPadding.right = grid.getAllAppsProfile().getPadding().right;
             adapterHolder.applyPadding();
         });
     }

@@ -179,6 +179,5 @@
     <string name="nudge_a11y_title" msgid="2126529303123687912">"ナッジ"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"閉じる"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"ナッジの画像"</string>
-    <!-- no translation found for running_app_description (1309281047289078871) -->
-    <skip />
+    <string name="running_app_description" msgid="1309281047289078871">"<xliff:g id="APP_TITLE">%1$s</xliff:g> <xliff:g id="RUNNING_STATE">%2$s</xliff:g>⁠"</string>
 </resources>

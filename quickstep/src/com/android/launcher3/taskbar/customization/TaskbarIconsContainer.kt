@@ -42,6 +42,7 @@ import com.android.launcher3.model.data.AppPairInfo
 import com.android.launcher3.model.data.CollectionInfo
 import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.model.data.TaskItemInfo.Companion.isSameItem
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.taskbar.ItemInfoWrapper
 import com.android.launcher3.taskbar.TaskbarActivityContext
@@ -69,21 +70,24 @@ constructor(
     // If a cache is shared, when a different container may tries to take this view from the cache,
     // there will be a crash.
     private val viewCache = ViewCache()
-    private var iconTouchSize = 0
     private var itemMarginLeftRight = 0
     private val translateDelegate = MultiTranslateDelegate(this)
     private var reorderBounceScale = DEFAULT_BOUNCE_SCALE
     private val isRtl = isRtl(resources)
 
-    private val taskbarIconViewSize =
+    override val taskbarIconViewSize =
         dpToPx(activityContext.taskbarSpecsEvaluator.taskbarIconTouchSize, activityContext)
+
+    override val taskbarIconViewPadding =
+        dpToPx(activityContext.taskbarSpecsEvaluator.taskbarIconPadding, activityContext)
+
 
     val taskbarPinnedOverflowView: TaskbarOverflowView =
         TaskbarOverflowView.inflateIcon(
             TaskbarOverflowView.OverflowType.PINNED,
             this,
             taskbarIconViewSize,
-            dpToPx(activityContext.taskbarSpecsEvaluator.taskbarIconPadding),
+            taskbarIconViewPadding,
         )
 
     val isOverflowViewShowing: Boolean
@@ -97,13 +101,20 @@ constructor(
         layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT)
     }
 
-    fun updateIcons(itemInfos: Array<ItemInfo>) {
+    /**
+     * Updates container with [itemInfos] data.
+     *
+     * Any existing icons whose info instance has not changed are not rebound; changes within the
+     * existing item instances have already been bound when Taskbar's model callbacks updated them.
+     * But if [forceUpdate] is `true`, all icons are rebound.
+     */
+    fun updateIcons(itemInfos: Array<ItemInfo>, forceUpdate: Boolean) {
         traceSection("TaskbarIconsContainer#updateIcons") {
-            updateIconsInternal(itemInfos)
+            updateIconsInternal(itemInfos, forceUpdate)
         }
     }
 
-    private fun updateIconsInternal(itemInfos: Array<ItemInfo>) {
+    private fun updateIconsInternal(itemInfos: Array<ItemInfo>, forceUpdate: Boolean) {
         var numViewsAnimated = 0
         val numMaxIcons = activityContext.taskbarSpecsEvaluator.numShownHotseatIcons
         val hotseatLength = itemInfos.size
@@ -147,6 +158,13 @@ constructor(
                     break
                 }
             }
+
+            if (!forceUpdate && itemInfo.isSameItem(hotseatView?.tag)) {
+                // Might have been wrapped in TaskItemInfo by recents update.
+                hotseatView?.tag = itemInfo
+                return@forEachIcon
+            }
+
             if (hotseatView == null) {
                 if (isCollection) {
                     val collectionInfo = itemInfo as CollectionInfo
@@ -193,8 +211,7 @@ constructor(
                     lp.marginEnd = itemMarginLeftRight
                 }
 
-                val padding = dpToPx(activityContext.taskbarSpecsEvaluator.taskbarIconPadding)
-                hotseatView.setPadding(padding)
+                hotseatView.setPadding(taskbarIconViewPadding)
                 addView(hotseatView, lp)
             } else if (hotseatView is FolderIcon) {
                 hotseatView.onItemsChanged(false)
@@ -313,9 +330,8 @@ constructor(
         // adding overflow view remove last hotseat item
         removeViewAt(childCount - 1)
         val lp = TaskbarIconContainerLayoutParams(taskbarIconViewSize, taskbarIconViewSize)
-        val padding = dpToPx(activityContext.taskbarSpecsEvaluator.taskbarIconPadding)
         lp.marginStart = itemMarginLeftRight
-        taskbarPinnedOverflowView.setPadding(padding)
+        taskbarPinnedOverflowView.setPadding(taskbarIconViewPadding)
         taskbarPinnedOverflowView.setOnClickListener(
             taskbarViewCallbacks.pinnedOverflowOnClickListener
         )
@@ -372,11 +388,9 @@ constructor(
         @JvmStatic
         fun create(
             context: Context,
-            iconTouchSize: Int,
             itemMarginLeftRight: Int,
         ): TaskbarIconsContainer {
             return TaskbarIconsContainer(context).apply {
-                this.iconTouchSize = iconTouchSize
                 this.itemMarginLeftRight = itemMarginLeftRight
                 // App icon views draw running state indicators outside of the icon view bounds, and
                 // thus outside the icons container bounds - don't clip the children so running

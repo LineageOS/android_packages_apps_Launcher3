@@ -370,7 +370,7 @@ public abstract class BaseWidgetSheet extends AbstractSlideInView<BaseActivity>
 
     /** Returns the horizontal margins to be applied to the widget sheet. **/
     protected int getTabletHorizontalMargin(DeviceProfile deviceProfile) {
-        return deviceProfile.allAppsLeftRightMargin;
+        return deviceProfile.getAllAppsProfile().getLeftRightMargin();
     }
 
     @Override

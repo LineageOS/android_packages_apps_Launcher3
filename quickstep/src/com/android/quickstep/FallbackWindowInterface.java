@@ -33,10 +33,10 @@ import com.android.app.displaylib.PerDisplayRepository;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.taskbar.TaskbarInteractor;
-import com.android.launcher3.util.ThreadedAnimator;
 import com.android.launcher3.util.DaggerSingletonObject;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.JoinedAnimator;
+import com.android.launcher3.util.ThreadedAnimator;
 import com.android.launcher3.views.ScrimColors;
 import com.android.quickstep.GestureState.GestureEndTarget;
 import com.android.quickstep.dagger.QuickstepBaseAppComponent;
@@ -48,10 +48,10 @@ import com.android.quickstep.views.RecentsView;
 import com.android.quickstep.window.RecentsWindowManager;
 import com.android.quickstep.window.RecentsWindowTracker;
 
-import dagger.assisted.AssistedInject;
-
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+
+import javax.inject.Inject;
 
 
 /**
@@ -68,7 +68,7 @@ public final class FallbackWindowInterface extends BaseWindowInterface {
     @NonNull private final RecentsWindowTracker mRecentsWindowTracker;
     @Nullable private RecentsWindowManager mRecentsWindowManager = null;
 
-    @AssistedInject
+    @Inject
     public FallbackWindowInterface(@NonNull RecentsWindowTracker recentsWindowTracker) {
         super(DEFAULT, BACKGROUND_APP);
         mRecentsWindowTracker = recentsWindowTracker;

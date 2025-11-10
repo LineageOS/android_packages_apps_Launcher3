@@ -126,8 +126,7 @@
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Informazioni sulla barra delle applicazioni"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Trascina un\'app di lato per usare due app contemporaneamente"</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"Trascina verso gli angoli inferiori per farlo fluttuare"</string>
-    <!-- no translation found for taskbar_edu_stashing (911857479758694381) -->
-    <skip />
+    <string name="taskbar_edu_stashing" msgid="911857479758694381">"Scorri lentamente in alto per mostrare la barra delle app"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Visualizza le app suggerite in base alla tua routine"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Premi a lungo sul divisore per fissare la barra delle app"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Fai di più con la barra delle app"</string>

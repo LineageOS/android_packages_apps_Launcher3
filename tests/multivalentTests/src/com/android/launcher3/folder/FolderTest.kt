@@ -30,7 +30,6 @@ import androidx.test.filters.SmallTest
 import com.android.launcher3.Alarm
 import com.android.launcher3.DragSource
 import com.android.launcher3.DropTarget.DragObject
-import com.android.launcher3.LauncherAppState
 import com.android.launcher3.LauncherSettings
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET
@@ -53,14 +52,12 @@ import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
-import com.android.launcher3.testutil.rule.LazyInitRule.Companion.lazyRule
-import com.android.launcher3.util.ModelTestExtensions.clearModelDb
+import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestActivityContext
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -79,23 +76,14 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidJUnit4::class)
 class FolderTest {
 
-    @get:Rule val contextSpy = lazyRule { spy(TestActivityContext()) }
-    private val context: TestActivityContext by contextSpy
+    @get:Rule val app = SandboxApplication()
+    @get:Rule val context = TestActivityContext(app)
 
-    private lateinit var dragController: DragController<*>
     private lateinit var folder: Folder
 
     @Before
     fun <T : DragController<*>> setUp() {
-        dragController = Mockito.mock(DragController::class.java)
-        doReturn(dragController).whenever(context).getDragController<T>()
-
         folder = spy(Folder(context, null))
-    }
-
-    @After
-    fun tearDown() {
-        LauncherAppState.getInstance(context).model.clearModelDb()
     }
 
     @Test
@@ -338,7 +326,7 @@ class FolderTest {
         folder.onDragEnd()
 
         verify(folder, times(1)).completeDragExit()
-        verify(dragController, times(1)).removeDragListener(folder)
+        assertEquals(0, context.dragController.listeners.size)
         assertFalse(folder.isDragInProgress)
     }
 
@@ -350,7 +338,7 @@ class FolderTest {
         folder.onDragEnd()
 
         verify(folder, times(0)).completeDragExit()
-        verify(dragController, times(1)).removeDragListener(folder)
+        assertEquals(0, context.dragController.listeners.size)
         assertFalse(folder.isDragInProgress)
     }
 

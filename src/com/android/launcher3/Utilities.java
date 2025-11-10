@@ -171,7 +171,7 @@ public final class Utilities {
         return nightMode == Configuration.UI_MODE_NIGHT_YES;
     }
 
-    private static boolean sIsRunningInTestHarness = ActivityManager.isRunningInTestHarness();
+    private static boolean sIsRunningInTestHarness = ActivityManager.isRunningInUserTestHarness();
 
     public static boolean isRunningInTestHarness() {
         return sIsRunningInTestHarness;

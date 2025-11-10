@@ -700,8 +700,33 @@ flag {
 }
 
 flag {
+    name: "workspace_hidden_labels"
+    namespace: "launcher"
+    description: "Gives the user the option to hide app icon labels on the workspace"
+    bug: "456634299"
+}
+
+flag {
   name: "enable_app_automation_indicator"
   namespace: "launcher"
   description: "Enables indicator for active app automation in Launcher"
   bug: "440353845"
 }
+
+flag {
+    name: "enable_swipe_up_magnetic_detach"
+    namespace: "launcher"
+    description: "Enables the magnetic detach effect to the swipe up from app gestures"
+    bug: "455552698"
+}
+
+flag {
+  name: "disable_system_level_drag_event_handling_in_button_drop_target"
+  namespace: "launcher"
+  description: "Disables system-level drag event handling in ButtonDropTarget as it may interfere with Launcher's own drag and drop."
+  bug: "456188853"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+

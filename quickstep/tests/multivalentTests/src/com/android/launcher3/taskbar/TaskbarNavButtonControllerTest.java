@@ -43,7 +43,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.launcher3.logging.StatsLogManager;
 import com.android.launcher3.taskbar.TaskbarNavButtonController.TaskbarNavButtonCallbacks;
 import com.android.quickstep.SystemUiProxy;
-import com.android.quickstep.TouchInteractionService;
+import com.android.quickstep.TouchInteractionHandler;
 import com.android.quickstep.util.ContextualSearchInvoker;
 import com.android.systemui.contextualeducation.GestureType;
 
@@ -68,7 +68,7 @@ public class TaskbarNavButtonControllerTest {
     SystemUiProxy mockSystemUiProxy;
 
     @Mock
-    TouchInteractionService mockService;
+    TouchInteractionHandler mockService;
     @Mock
     Handler mockHandler;
     @Mock

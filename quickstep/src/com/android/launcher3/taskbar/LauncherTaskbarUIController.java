@@ -383,15 +383,17 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
     public ThreadedAnimator getParallelAnimationToGestureEndTarget(
             GestureState.GestureEndTarget gestureEndTarget, long duration,
             RecentsAnimationCallbacks callbacks) {
+        LauncherActivityInterface activityInterface =
+                LauncherActivityInterface.INSTANCE.get(mControllers.taskbarActivityContext);
         return enableTaskbarUiThread() ?
                 new TaskbarAsyncAnimator(TASKBAR_UI_THREAD,
                         MAIN_EXECUTOR,
                         () -> mTaskbarLauncherStateController.createAnimToLauncher(
-                                LauncherActivityInterface.INSTANCE.stateFromGestureEndTarget(
+                                activityInterface.stateFromGestureEndTarget(
                                         gestureEndTarget), callbacks, duration))
                 : new ImmediateAnimator(
                         mTaskbarLauncherStateController.createAnimToLauncher(
-                                LauncherActivityInterface.INSTANCE.stateFromGestureEndTarget(
+                                activityInterface.stateFromGestureEndTarget(
                                         gestureEndTarget), callbacks, duration));
     }
 
@@ -469,11 +471,7 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
         }
         TaskbarEduTooltipController eduController = mControllers.taskbarEduTooltipController;
         if (Flags.tooltipEduCombinator()) {
-            boolean shouldShowFeaturesEdu = !eduController.getUserHasSeenFeaturesEdu();
-            boolean shouldShowPinningEduForTransient =
-                    mControllers.taskbarActivityContext.isTransientTaskbar()
-                            && !eduController.getUserHasSeenPinningEdu();
-            return shouldShowFeaturesEdu || shouldShowPinningEduForTransient;
+            return eduController.getHasFeaturesEduToShow();
         }
         // Persistent features EDU tooltip.
         if (!mControllers.taskbarActivityContext.isTransientTaskbar()) {
@@ -523,6 +521,9 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
                         c -> c.bubbleStashController.setInAppDisplayOverrideProgress(
                                 mTaskbarInAppDisplayProgress.value));
             }
+        }
+        if (Flags.allAppsSurface() && progressIndex == ALL_APPS_PAGE_PROGRESS_INDEX) {
+            mControllers.taskbarAllAppsController.setSlideInProgress(progress);
         }
     }
 
@@ -587,6 +588,11 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
     }
 
     @Override
+    public void onTaskbarAllAppsClosed() {
+        mLauncher.onTaskbarAllAppsClosed();
+    }
+
+    @Override
     protected void toggleAllApps(boolean focusSearch) {
         final boolean canToggleHomeAllApps = isLauncherResumed()
                 && !mTaskbarLauncherStateController.isInOverviewUi()
@@ -620,6 +626,14 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
         } else {
             return mLauncher.isTopResumedActivity();
         }
+    }
+
+    @Override
+    public boolean isStateTransitionToAllAppsInProgress() {
+        if (!Flags.allAppsSurface()) {
+            return false;
+        }
+        return mTaskbarLauncherStateController.isStateTransitionToAllAppsInProgress();
     }
 
     @Override

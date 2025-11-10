@@ -41,6 +41,7 @@ import android.window.OnBackInvokedDispatcher;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.Flags;
 import com.android.launcher3.Insettable;
 import com.android.launcher3.R;
 import com.android.launcher3.anim.AnimatorListeners;
@@ -125,35 +126,35 @@ public class TaskbarAllAppsSlideInView extends AbstractSlideInView<TaskbarOverla
             }
         }
         mAllAppsCallbacks.onAllAppsTransitionStart(true);
-        if (!animate) {
+
+        boolean isAnimatingToAllApps = mAllAppsCallbacks.isStateTransitionToAllAppsInProgress();
+        if (animate || isAnimatingToAllApps) {
+            // For any animation (potentially user-controlled), ensure the listeners are registered.
+            setUpOpenAnimation(mAllAppsCallbacks.getOpenDuration());
+        } else {
+            // If we are not animating, we can jump to the end state.
             mAllAppsCallbacks.onAllAppsTransitionEnd(true);
             setTranslationShift(TRANSLATION_SHIFT_OPENED);
             mBlurRadius = mMaxBlurRadius;
             return;
         }
 
-        setUpOpenAnimation(mAllAppsCallbacks.getOpenDuration());
-        Animator animator = mOpenCloseAnimation.getAnimationPlayer();
-        animator.setInterpolator(EMPHASIZED);
-        animator.addListener(AnimatorListeners.forEndCallback(() -> {
-            if (mIsOpen) {
-                mAllAppsCallbacks.onAllAppsTransitionEnd(true);
-            }
-        }));
-        animator.start();
+        // If an animation was requested, start it.
+        if (animate) {
+            Animator animator = mOpenCloseAnimation.getAnimationPlayer();
+            animator.setInterpolator(EMPHASIZED);
+            animator.addListener(AnimatorListeners.forEndCallback(() -> {
+                if (mIsOpen) {
+                    mAllAppsCallbacks.onAllAppsTransitionEnd(true);
+                }
+            }));
+            animator.start();
+        }
     }
 
     @Override
     protected void onOpenCloseAnimationPending(PendingAnimation animation) {
         final boolean isOpening = mToTranslationShift == TRANSLATION_SHIFT_OPENED;
-
-        Interpolator blurInterpolator = isOpening ? LINEAR : DECELERATED_EASE;
-        animation.addOnFrameListener(a -> {
-            float blurProgress =
-                    isOpening ? a.getAnimatedFraction() : 1 - a.getAnimatedFraction();
-            mBlurRadius = (int) (mMaxBlurRadius * blurInterpolator.getInterpolation(blurProgress));
-        });
-
         mAllAppsCallbacks.onAllAppsAnimationPending(animation, isOpening);
     }
 
@@ -201,7 +202,7 @@ public class TaskbarAllAppsSlideInView extends AbstractSlideInView<TaskbarOverla
         mAppsView.setOnInvalidateHeaderListener(this::invalidate);
 
         DeviceProfile dp = mActivityContext.getDeviceProfile();
-        setShiftRange(dp.allAppsShiftRange);
+        setShiftRange(dp.getAllAppsProfile().getShiftRange());
     }
 
     @Override
@@ -245,6 +246,17 @@ public class TaskbarAllAppsSlideInView extends AbstractSlideInView<TaskbarOverla
     }
 
     @Override
+    protected void setTranslationShift(float shift) {
+        super.setTranslationShift(shift);
+        mBlurRadius = (int) (mMaxBlurRadius * (1 - shift));
+        setScrimAlpha(1 - shift);
+    }
+
+    public void setAnimationPlayFraction(float progress) {
+        mOpenCloseAnimation.setPlayFraction(progress);
+    }
+
+    @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
         setTranslationShift(mTranslationShift);
@@ -272,7 +284,7 @@ public class TaskbarAllAppsSlideInView extends AbstractSlideInView<TaskbarOverla
 
     @Override
     public void onDeviceProfileChanged(DeviceProfile dp) {
-        setShiftRange(dp.allAppsShiftRange);
+        setShiftRange(dp.getAllAppsProfile().getShiftRange());
         setTranslationShift(TRANSLATION_SHIFT_OPENED);
         mBlurRadius = mMaxBlurRadius;
     }
@@ -289,6 +301,12 @@ public class TaskbarAllAppsSlideInView extends AbstractSlideInView<TaskbarOverla
     @Override
     protected boolean isEventOverContent(MotionEvent ev) {
         return getPopupContainer().isEventOverView(mAppsView.getVisibleContainerView(), ev);
+    }
+
+    @Override
+    protected boolean isOpeningAnimationRunning() {
+        return super.isOpeningAnimationRunning()
+                || mAllAppsCallbacks.isStateTransitionToAllAppsInProgress();
     }
 
     /**

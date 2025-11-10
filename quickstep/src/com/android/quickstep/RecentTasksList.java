@@ -38,6 +38,8 @@ import android.window.DesktopExperienceFlags;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.launcher3.concurrent.annotations.Ui;
+import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.statehandlers.DesktopVisibilityController;
 import com.android.launcher3.util.DaggerSingletonTracker;
 import com.android.launcher3.util.LooperExecutor;
@@ -68,6 +70,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import javax.inject.Inject;
 
 /**
  * Manages the recent task list from the system, caching it as necessary.
@@ -107,14 +111,17 @@ public class RecentTasksList {
         }
     };
 
-    public RecentTasksList(Context context, LooperExecutor mainThreadExecutor,
-            KeyguardManager keyguardManager, VirtualDeviceManager virtualDeviceManager,
-            SystemUiProxy sysUiProxy, TopTaskTracker topTaskTracker,
+    @Inject
+    public RecentTasksList(
+            @ApplicationContext Context context,
+            @Ui LooperExecutor mainThreadExecutor,
+            SystemUiProxy sysUiProxy,
+            TopTaskTracker topTaskTracker,
             DaggerSingletonTracker tracker) {
         mContext = context;
         mMainThreadExecutor = mainThreadExecutor;
-        mKeyguardManager = keyguardManager;
-        mVirtualDeviceManager = virtualDeviceManager;
+        mKeyguardManager = context.getSystemService(KeyguardManager.class);
+        mVirtualDeviceManager = context.getSystemService(VirtualDeviceManager.class);
         mChangeId = 1;
         mSysUiProxy = sysUiProxy;
         final IRecentTasksListener recentTasksListener = new IRecentTasksListener.Stub() {

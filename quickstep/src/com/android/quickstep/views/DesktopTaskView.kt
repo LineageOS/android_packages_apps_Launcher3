@@ -35,7 +35,6 @@ import android.view.View
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
-import com.android.internal.hidden_from_bootclasspath.com.android.window.flags.Flags.enableDesktopRecentsTransitionsCornersBugfix
 import com.android.launcher3.Flags.enableDesktopExplodedView
 import com.android.launcher3.Flags.enableRefactorTaskContentView
 import com.android.launcher3.R
@@ -364,34 +363,32 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
                 }
             }
 
-            if (enableDesktopRecentsTransitionsCornersBugfix()) {
-                // When exploded view is disabled, these scale factors will be 1.0. This secondary
-                // scale factor is needed because a scale transform is applied to the thumbnail.
-                val thumbnailScaleWidth =
-                    overviewTaskBounds.width().toFloat() / currentTaskBounds.width()
-                val thumbnailScaleHeight =
-                    overviewTaskBounds.height().toFloat() / currentTaskBounds.height()
-                val screenRect = getScreenRect()
-                val contentOutlineBounds =
-                    if (intersects(currentTaskBounds, screenRect))
-                        Rect(currentTaskBounds).apply {
-                            intersectUnchecked(screenRect)
-                            // Offset to 0,0 to transform into TaskThumbnailView's coordinate
-                            // system.
-                            offset(-currentTaskBounds.left, -currentTaskBounds.top)
-                            left = (left * widthScale * thumbnailScaleWidth).roundToInt()
-                            top = (top * heightScale * thumbnailScaleHeight).roundToInt()
-                            right = (right * widthScale * thumbnailScaleWidth).roundToInt()
-                            bottom = (bottom * heightScale * thumbnailScaleHeight).roundToInt()
-                        }
-                    else null
+            // When exploded view is disabled, these scale factors will be 1.0. This secondary
+            // scale factor is needed because a scale transform is applied to the thumbnail.
+            val thumbnailScaleWidth =
+                overviewTaskBounds.width().toFloat() / currentTaskBounds.width()
+            val thumbnailScaleHeight =
+                overviewTaskBounds.height().toFloat() / currentTaskBounds.height()
+            val screenRect = getScreenRect()
+            val contentOutlineBounds =
+                if (intersects(currentTaskBounds, screenRect))
+                    Rect(currentTaskBounds).apply {
+                        intersectUnchecked(screenRect)
+                        // Offset to 0,0 to transform into TaskThumbnailView's coordinate
+                        // system.
+                        offset(-currentTaskBounds.left, -currentTaskBounds.top)
+                        left = (left * widthScale * thumbnailScaleWidth).roundToInt()
+                        top = (top * heightScale * thumbnailScaleHeight).roundToInt()
+                        right = (right * widthScale * thumbnailScaleWidth).roundToInt()
+                        bottom = (bottom * heightScale * thumbnailScaleHeight).roundToInt()
+                    }
+                else null
 
-                if (enableRefactorTaskContentView()) {
-                    (taskContainer.taskContentView as TaskContentView).outlineBounds =
-                        contentOutlineBounds
-                } else {
-                    taskContainer.snapshotView.outlineBounds = contentOutlineBounds
-                }
+            if (enableRefactorTaskContentView()) {
+                (taskContainer.taskContentView as TaskContentView).outlineBounds =
+                    contentOutlineBounds
+            } else {
+                taskContainer.snapshotView.outlineBounds = contentOutlineBounds
             }
 
             val currentTaskLeft = currentTaskBounds.left * widthScale

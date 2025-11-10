@@ -35,6 +35,8 @@ import com.android.launcher3.widgetpicker.ui.LocalWidgetPickerCuiReporter
 import com.android.launcher3.widgetpicker.ui.WidgetInteractionSource
 import com.android.launcher3.widgetpicker.ui.WidgetPickerCuiReporter
 import com.android.launcher3.widgetpicker.ui.WidgetPickerEventListeners
+import com.android.launcher3.widgetpicker.ui.components.LocalWidgetPickerHostStateProvider
+import com.android.launcher3.widgetpicker.ui.components.WidgetPickerHostStateProvider
 import com.android.launcher3.widgetpicker.ui.components.WidgetsGrid
 import com.android.launcher3.widgetpicker.ui.components.bottomsheet.SheetSize
 import com.android.launcher3.widgetpicker.ui.components.bottomsheet.TitledBottomSheet
@@ -57,6 +59,7 @@ constructor(private val viewModelFactory: SingleAppWidgetsCatalogViewModel.Facto
         widgetAppId: WidgetAppId,
         eventListeners: WidgetPickerEventListeners,
         cuiReporter: WidgetPickerCuiReporter,
+        hostStateProvider: WidgetPickerHostStateProvider,
     ) {
         val viewModel: SingleAppWidgetsCatalogViewModel = rememberViewModel {
             viewModelFactory.create(widgetAppId)
@@ -66,6 +69,7 @@ constructor(private val viewModelFactory: SingleAppWidgetsCatalogViewModel.Facto
             viewModel = viewModel,
             cuiReporter = cuiReporter,
             eventListeners = eventListeners,
+            hostStateProvider = hostStateProvider,
         )
     }
 }
@@ -76,8 +80,12 @@ fun SingleAppWidgetsCatalogContent(
     viewModel: SingleAppWidgetsCatalogViewModel,
     cuiReporter: WidgetPickerCuiReporter,
     eventListeners: WidgetPickerEventListeners,
+    hostStateProvider: WidgetPickerHostStateProvider,
 ) {
-    CompositionLocalProvider(LocalWidgetPickerCuiReporter provides cuiReporter) {
+    CompositionLocalProvider(
+        LocalWidgetPickerCuiReporter provides cuiReporter,
+        LocalWidgetPickerHostStateProvider provides hostStateProvider,
+    ) {
         TitledBottomSheet(
             modifier =
                 Modifier.widgetPickerTestTagContainer().widgetPickerTestTag("app_widgets_catalog"),

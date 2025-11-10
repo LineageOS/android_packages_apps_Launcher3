@@ -21,6 +21,7 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.RectF
 import android.os.Process.myUserHandle
 import android.util.AttributeSet
@@ -33,12 +34,12 @@ import com.android.launcher3.BubbleTextView
 import com.android.launcher3.LauncherSettings.Favorites
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
+import com.android.launcher3.allapps.AllAppsStore
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.LauncherAppWidgetInfo
 import com.android.launcher3.util.ComponentKey
-import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.RunnableList
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.views.OptionsPopupView
@@ -57,6 +58,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     private val oseWidgetManager = context.appComponent.oseWidgetManager
     @VisibleForTesting var closeActions = RunnableList()
     private val activityContext: ActivityContext = ActivityContext.lookupContext(context)
+    private val mOnAppsUpdateListener = AllAppsStore.OnUpdateListener { this.onAppsUpdated() }
 
     init {
         activityContext.appWidgetHolder?.onViewCreationCallback?.accept(this)
@@ -71,11 +73,11 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     @VisibleForTesting
     fun attachedToWindow() {
         closeActions.executeAllAndClear()
+
         // We use INVALID_APPWIDGET_ID because appWidgetId is not tracked in OseWidgetView. Instead
         // it is managed by OseWidgetManager and QsbAppWidgetHost.
-
         closeActions.add(
-            oseWidgetManager.providerInfo.forEach(MAIN_EXECUTOR) {
+            oseWidgetManager.providerInfo.forEach(activityContext.uiExecutor) {
                 setAppWidget(INVALID_APPWIDGET_ID, it)
                 // We will get valid updateAppWidget remoteview call from OseWidgetManager again.
                 // This is only for resetting the remoteviews using a broken remote view.
@@ -85,13 +87,10 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
             }::close
         )
         closeActions.add(
-            oseWidgetManager.views.forEach(
-                MAIN_EXECUTOR,
-                {
-                    updateAppWidget(it)
-                    Log.i(TAG, "updateAppWidget view= " + it)
-                },
-            )::close
+            oseWidgetManager.views.forEach(activityContext.uiExecutor) {
+                updateAppWidget(it)
+                Log.i(TAG, "updateAppWidget view= " + it)
+            }::close
         )
     }
 
@@ -103,6 +102,13 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     @VisibleForTesting
     fun detachedFromWindow() {
         closeActions.executeAllAndClear()
+    }
+
+    private fun onAppsUpdated() {
+        // This is only for resetting the remoteviews using a broken remote view since the app
+        // store got updated now.
+        // Refresh the error view with latest appInfo.
+        updateAppWidget(RemoteViews(context.packageName, 0))
     }
 
     override fun shouldDelayChildPressedState(): Boolean {
@@ -121,11 +127,19 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
             }
         val appInfo =
             osePkg?.let {
+                val appStore = activityContext.activityComponent.appsStore
                 val componentKey = ComponentKey(ComponentName(osePkg, ""), myUserHandle())
-                activityContext.activityComponent.appsStore
-                    .getApp(componentKey, AppInfo.PACKAGE_KEY_COMPARATOR)
-                    ?.clone()
+                val info = appStore.getApp(componentKey, AppInfo.PACKAGE_KEY_COMPARATOR)?.clone()
+                if (info == null && isAttachedToWindow) {
+                    // when app install is pending/finished but the appstore is not updated.
+                    appStore.addUpdateListener(mOnAppsUpdateListener)
+                    closeActions.add { appStore.removeUpdateListener(mOnAppsUpdateListener) }
+                } else {
+                    appStore.removeUpdateListener(mOnAppsUpdateListener)
+                }
+                info
             }
+
         return appInfo?.run { showOseBubbleTextLayout(this, oseInfo.supportsSearchIntent) }
             ?: showDefaultOseLayout()
     }
@@ -151,11 +165,23 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         View.inflate(context, R.layout.ose_default_layout, null).apply {
             // Since we don't have a valid appInfo, just open the default browser
             // Set the data to a blank page uri
-            setOnClickIntent(Intent(Intent.ACTION_VIEW).setData("about:blank".toUri()))
+            setOnClickIntent(Intent(Intent.ACTION_VIEW).setData("http://".toUri()))
         }
 
     fun View.setOnClickIntent(intent: Intent) = setOnClickListener {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)
+        if (intent.action == Intent.ACTION_VIEW) {
+            // Browser Intent and set the default browser package.
+            val resolveInfo =
+                runCatching {
+                        context.packageManager.resolveActivity(
+                            intent,
+                            PackageManager.MATCH_DEFAULT_ONLY,
+                        )
+                    }
+                    .getOrNull()
+            resolveInfo?.activityInfo?.packageName.apply { intent.setPackage(this) }
+        }
         activityContext.startActivitySafely(
             this@OseWidgetView,
             intent,

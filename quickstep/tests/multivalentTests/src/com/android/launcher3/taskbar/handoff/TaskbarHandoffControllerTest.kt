@@ -20,6 +20,7 @@ import android.companion.Flags
 import android.companion.datatransfer.continuity.RemoteTask
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
 import com.android.launcher3.taskbar.rules.TaskbarModeRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.TRANSIENT
@@ -27,8 +28,6 @@ import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
-import com.android.launcher3.util.LauncherMultivalentJUnit
-import com.android.launcher3.util.LauncherMultivalentJUnit.EmulatedDevices
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -37,8 +36,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 
 /** Tests for [TaskbarHandoffController]. */
-@RunWith(LauncherMultivalentJUnit::class)
-@EmulatedDevices(["pixelTablet2023"])
+@RunWith(AndroidJUnit4::class)
 @EnableFlags(Flags.FLAG_TASK_CONTINUITY)
 class TaskbarHandoffControllerTest {
 
@@ -63,7 +61,7 @@ class TaskbarHandoffControllerTest {
 
         val suggestions = controller.suggestions
         assertThat(suggestions).hasSize(1)
-        assertThat(suggestions.map { it.deviceId }).containsExactly(2).inOrder()
+        assertThat(suggestions.map { it.associationId }).containsExactly(2).inOrder()
     }
 
     @Test
@@ -75,7 +73,7 @@ class TaskbarHandoffControllerTest {
         runOnMainSync { controller.onRemoteTasksChanged(listOf(task)) }
 
         assertThat(controller.suggestions).hasSize(1)
-        assertThat(controller.suggestions.first().deviceId).isEqualTo(1)
+        assertThat(controller.suggestions.first().associationId).isEqualTo(1)
 
         controller.onDestroy()
 
@@ -83,12 +81,11 @@ class TaskbarHandoffControllerTest {
     }
 
     private fun createRemoteTask(
-        deviceId: Int,
+        associationId: Int,
         label: String,
         lastUsedTimestampMillis: Long,
     ): RemoteTask {
-        return RemoteTask.Builder(1)
-            .setDeviceId(deviceId)
+        return RemoteTask.Builder(associationId, 1)
             .setLabel(label)
             .setLastUsedTimestampMillis(lastUsedTimestampMillis)
             .build()

@@ -559,9 +559,6 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             deviceProfile.mWorkspaceProfile = deviceProfile
                     .mWorkspaceProfile
                     .changeIconSize(deviceProfile.getTaskbarProfile().getIconSize());
-
-            // Update icon size
-            deviceProfile.updateIconSize(1f, this);
         };
         mDeviceProfile = originDeviceProfile.toBuilder()
                 .withDimensionsOverride(overrideProvider).build();
@@ -921,9 +918,9 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             return;
         }
         final Resources res = getResources();
-        mTaskbarUiState.setUnstashAreaSizePx(
+        mTaskbarUiState.setTaskbarUnstashAreaSizePx(
                 res.getDimensionPixelSize(R.dimen.taskbar_unstash_input_area));
-        mTaskbarUiState.setActionCornerPaddingPx(
+        mTaskbarUiState.setTaskbarActionCornerPaddingPx(
                 res.getDimensionPixelSize(R.dimen.transient_taskbar_action_corner_padding));
         if (mDeviceProfile != null) {
             mTaskbarUiState.setTaskbarNavThreshold(
@@ -1957,8 +1954,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         BubbleTextView.RunningAppState runningAppState =
                 mControllers.taskbarRecentAppsController.getRunningAppState(taskId);
         Log.d(TAG, "Task id=" + taskId + ", Running app state=" + runningAppState);
-        return runningAppState == RunningAppState.MINIMIZED
-                && DesktopModeFlags.ENABLE_DESKTOP_APP_LAUNCH_ALTTAB_TRANSITIONS_BUGFIX.isTrue();
+        return runningAppState == RunningAppState.MINIMIZED;
     }
 
     private RemoteTransition createDesktopAppLaunchRemoteTransition(
@@ -2115,9 +2111,6 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     }
 
     private boolean shouldLaunchInDesktop(int displayId, ItemInfo info) {
-        if (!DesktopModeFlags.ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX.isTrue()) {
-            return false;
-        }
         final SingleTask singleTask = mControllers.taskbarRecentAppsController.getSingleTask(info);
         final Task nonDesktopTask = enableDesktopFirstSplitscreenRefocusBugfix()
                 ? mControllers.taskbarRecentAppsController.getNonDesktopTask(info)
@@ -2137,8 +2130,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             }
         }
         // Always launch in freeform if in external display.
-        return (DesktopExperienceFlags.ENABLE_FREEFORM_DISPLAY_LAUNCH_PARAMS.isTrue()
-                && isExternalDisplay(displayId)) || isTaskbarShowingDesktopTasks();
+        return isExternalDisplay(displayId) || isTaskbarShowingDesktopTasks();
     }
 
     private void launchDesktopApp(Intent intent, ItemInfo info, int displayId) {

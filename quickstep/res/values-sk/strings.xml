@@ -126,8 +126,7 @@
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Panel vzdelávacích aplikácií"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Ak chcete používať dve aplikácie naraz, presuňte aplikáciu nabok"</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"Ak má byť plávajúca, presuňte ju do niektorého dolnéhu rohu"</string>
-    <!-- no translation found for taskbar_edu_stashing (911857479758694381) -->
-    <skip />
+    <string name="taskbar_edu_stashing" msgid="911857479758694381">"Panel aplikácií zobrazíte pomalým potiahnutím nahor"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Získavajte návrhy aplikácií na základe svojich zvykov"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Dlhým stlačením rozdeľovača panel aplikácií pripnete"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Panel aplikácií vám ponúka ďalšie možnosti"</string>
@@ -180,6 +179,5 @@
     <string name="nudge_a11y_title" msgid="2126529303123687912">"Posunúť"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"Zavrieť"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"Posunúť obrázok"</string>
-    <!-- no translation found for running_app_description (1309281047289078871) -->
-    <skip />
+    <string name="running_app_description" msgid="1309281047289078871">"<xliff:g id="APP_TITLE">%1$s</xliff:g> <xliff:g id="RUNNING_STATE">%2$s</xliff:g>"</string>
 </resources>

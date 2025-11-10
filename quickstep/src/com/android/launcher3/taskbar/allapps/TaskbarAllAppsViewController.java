@@ -45,6 +45,7 @@ final class TaskbarAllAppsViewController {
     private final TaskbarOverlayContext mContext;
     private final TaskbarAllAppsSlideInView mSlideInView;
     private final TaskbarAllAppsContainerView mAppsView;
+    private final TaskbarControllers mTaskbarControllers;
     private final TaskbarStashController mTaskbarStashController;
     private final NavbarButtonsViewController mNavbarButtonsViewController;
     private final TaskbarOverlayController mOverlayController;
@@ -62,6 +63,7 @@ final class TaskbarAllAppsViewController {
         mContext = context;
         mSlideInView = slideInView;
         mAppsView = mSlideInView.getAppsView();
+        mTaskbarControllers = taskbarControllers;
         mTaskbarStashController = taskbarControllers.taskbarStashController;
         mNavbarButtonsViewController = taskbarControllers.navbarButtonsViewController;
         mOverlayController = taskbarControllers.taskbarOverlayController;
@@ -123,6 +125,10 @@ final class TaskbarAllAppsViewController {
 
         int getCloseDuration() {
             return mOverlayController.getCloseDuration();
+        }
+
+        boolean isStateTransitionToAllAppsInProgress() {
+            return mTaskbarControllers.uiController.isStateTransitionToAllAppsInProgress();
         }
 
         @Override

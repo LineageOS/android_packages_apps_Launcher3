@@ -26,11 +26,13 @@ import android.platform.test.flag.junit.SetFlagsRule
 import android.view.Display.DEFAULT_DISPLAY
 import android.window.RemoteTransition
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.Flags.FLAG_ENABLE_ALT_TAB_KQS_FLATENNING
 import com.android.launcher3.Flags.FLAG_ENABLE_ALT_TAB_KQS_ON_CONNECTED_DISPLAYS
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
+import com.android.launcher3.taskbar.TaskbarControllerTestUtil.waitForIdleSync
 import com.android.launcher3.taskbar.rules.AllTaskbarSandboxModules
 import com.android.launcher3.taskbar.rules.MockedRecentsModelHelper
 import com.android.launcher3.taskbar.rules.MockedRecentsModelTestRule
@@ -41,8 +43,6 @@ import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
-import com.android.launcher3.util.LauncherMultivalentJUnit
-import com.android.launcher3.util.LauncherMultivalentJUnit.EmulatedDevices
 import com.android.launcher3.util.TestUtil.getOnUiThread
 import com.android.quickstep.RecentsModel
 import com.android.quickstep.SystemUiProxy
@@ -71,8 +71,7 @@ import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-@RunWith(LauncherMultivalentJUnit::class)
-@EmulatedDevices(["pixelTablet2023"])
+@RunWith(AndroidJUnit4::class)
 class KeyboardQuickSwitchControllerTest {
     private var systemUiProxySpy: SystemUiProxy? = null
     private var desktopTaskListener: IDesktopTaskListener? = null
@@ -84,25 +83,26 @@ class KeyboardQuickSwitchControllerTest {
     @get:Rule(order = 1)
     val context =
         TaskbarWindowSandboxContext.create(
-            SandboxParams(
-                {
-                    spy(
-                        SystemUiProxy(
-                            ApplicationProvider.getApplicationContext(),
-                            MAIN_EXECUTOR,
-                            UI_HELPER_EXECUTOR,
-                        )
-                    ) { proxy ->
-                        systemUiProxySpy = proxy
-                        doAnswer { desktopTaskListener = it.getArgument(0) }
-                            .whenever(proxy)
-                            .setDesktopTaskListener(anyOrNull())
-                    }
-                },
-                builderBase =
-                    DaggerKeyboardQuickSwitchControllerComponent.builder()
-                        .bindRecentsModel(mockRecentsModelHelper.mockRecentsModel),
-            )
+            params =
+                SandboxParams(
+                    {
+                        spy(
+                            SystemUiProxy(
+                                ApplicationProvider.getApplicationContext(),
+                                MAIN_EXECUTOR,
+                                UI_HELPER_EXECUTOR,
+                            )
+                        ) { proxy ->
+                            systemUiProxySpy = proxy
+                            doAnswer { desktopTaskListener = it.getArgument(0) }
+                                .whenever(proxy)
+                                .setDesktopTaskListener(anyOrNull())
+                        }
+                    },
+                    builderBase =
+                        DaggerKeyboardQuickSwitchControllerComponent.builder()
+                            .bindRecentsModel(mockRecentsModelHelper.mockRecentsModel),
+                )
         )
 
     @get:Rule(order = 2) val recentsModel = MockedRecentsModelTestRule(mockRecentsModelHelper)
@@ -366,6 +366,10 @@ class KeyboardQuickSwitchControllerTest {
     private fun triggerAltTabAndLaunchFocusedTask() {
         triggerAltTab()
         runOnMainSync { keyboardQuickSwitchController.launchFocusedTask() }
+        // `keyboardQuickSwitchController.launchFocusedTask()` will post a task to activate target
+        // desk to `UI_HELPER_EXECUTOR`. Flush the executor to make sure the task runs before
+        // verifying mocks.
+        UI_HELPER_EXECUTOR.waitForIdleSync()
     }
 
     private companion object {

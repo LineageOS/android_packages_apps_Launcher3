@@ -473,7 +473,7 @@ public class FloatingHeaderView extends LinearLayout implements
     @Override
     public void setInsets(Rect insets) {
         Rect allAppsPadding = ActivityContext.lookupContext(getContext())
-                .getDeviceProfile().allAppsPadding;
+                .getDeviceProfile().getAllAppsProfile().getPadding();
         setPadding(allAppsPadding.left, getPaddingTop(), allAppsPadding.right, getPaddingBottom());
     }
 

@@ -302,7 +302,7 @@ public class PredictedAppIcon extends DoubleShadowBubbleTextView {
 
     private int getOutlineOffsetY() {
         if (mDisplay != DISPLAY_TASKBAR) {
-            return getPaddingTop() + mDeviceProfile.folderIconOffsetYPx;
+            return getPaddingTop() + mDeviceProfile.getFolderProfile().getFolderIconOffsetYPx();
         }
         return (getMeasuredHeight() - mNormalizedIconSize) / 2;
     }

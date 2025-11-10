@@ -132,21 +132,22 @@ public abstract class SwipeUpAnimationLogic implements
         }
     }
 
+    protected float getShiftFromDisplacement(float displacement) {
+        if (displacement > mTransitionDragLength * mDragLengthFactor && mTransitionDragLength > 0) {
+            return mDragLengthFactor;
+        } else {
+            float translation = Math.max(displacement, 0);
+            return mTransitionDragLength == 0 ? 0 : translation / mTransitionDragLength;
+        }
+    }
+
     @UiThread
     public void updateDisplacement(float displacement) {
         // We are moving in the negative x/y direction
         displacement = overrideDisplacementForTransientTaskbar(-displacement);
         mCurrentDisplacement = displacement;
 
-        float shift;
-        if (displacement > mTransitionDragLength * mDragLengthFactor && mTransitionDragLength > 0) {
-            shift = mDragLengthFactor;
-        } else {
-            float translation = Math.max(displacement, 0);
-            shift = mTransitionDragLength == 0 ? 0 : translation / mTransitionDragLength;
-        }
-
-        mCurrentShift.updateValue(shift);
+        mCurrentShift.updateValue(getShiftFromDisplacement(displacement));
     }
 
     /**

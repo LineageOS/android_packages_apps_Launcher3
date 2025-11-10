@@ -18,6 +18,7 @@ package com.android.quickstep.inputconsumers;
 
 import static android.view.MotionEvent.INVALID_POINTER_ID;
 
+import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
 
 import android.content.Context;
@@ -28,8 +29,10 @@ import android.view.ViewConfiguration;
 
 import androidx.annotation.Nullable;
 
+import com.android.launcher3.BuildConfig;
 import com.android.launcher3.taskbar.NavbarButtonsViewController;
 import com.android.launcher3.taskbar.TaskbarActivityContext;
+import com.android.launcher3.taskbar.TaskbarUiState;
 import com.android.launcher3.taskbar.bubbles.BubbleBarSwipeController;
 import com.android.launcher3.taskbar.bubbles.BubbleBarViewController;
 import com.android.launcher3.taskbar.bubbles.BubbleControllers;
@@ -48,6 +51,7 @@ public class BubbleBarInputConsumer implements InputConsumer {
 
     private static final String TAG = "BubbleBarInputConsumer";
 
+    private final TaskbarUiState mTaskbarUiState;
     private final BubbleStashController mBubbleStashController;
     private final BubbleBarViewController mBubbleBarViewController;
     @Nullable
@@ -70,9 +74,11 @@ public class BubbleBarInputConsumer implements InputConsumer {
 
     public BubbleBarInputConsumer(
             Context context,
+            TaskbarUiState taskbarUiState,
             int displayId,
             BubbleControllers bubbleControllers,
             InputMonitorCompat inputMonitorCompat) {
+        mTaskbarUiState = taskbarUiState;
         mDisplayId = displayId;
         mBubbleStashController = bubbleControllers.bubbleStashController;
         mBubbleBarViewController = bubbleControllers.bubbleBarViewController;
@@ -102,7 +108,7 @@ public class BubbleBarInputConsumer implements InputConsumer {
                 mActivePointerId = ev.getPointerId(0);
                 mDownPos.set(ev.getX(), ev.getY());
                 mLastPos.set(mDownPos);
-                mStashedOrCollapsedOnDown = mBubbleStashController.isStashed() || isCollapsed();
+                mStashedOrCollapsedOnDown = isBubbleStashed() || isCollapsed();
                 Log.d(TAG,
                         "ACTION_DOWN stashedOrCollapsed=" + mStashedOrCollapsedOnDown + " downPos="
                                 + mDownPos);
@@ -179,8 +185,7 @@ public class BubbleBarInputConsumer implements InputConsumer {
     }
 
     private boolean isCollapsed() {
-        return mBubbleStashController.isBubbleBarVisible()
-                && !mBubbleBarViewController.isExpanded();
+        return isBubbleBarVisible() && !isBubbleBarExpanded();
     }
 
     /**
@@ -210,5 +215,57 @@ public class BubbleBarInputConsumer implements InputConsumer {
             }
         }
         return false;
+    }
+
+    private boolean isBubbleStashed() {
+        if (refactorTaskbarUiState()) {
+            boolean ret = mTaskbarUiState.isBubbleStashed();
+            if (BuildConfig.IS_STUDIO_BUILD && ret != legacyIsBubbleStashed()) {
+                throw new IllegalStateException("isBubbleStashed() doesn't match ret=" + ret);
+            }
+            return ret;
+        } else {
+            return legacyIsBubbleStashed();
+        }
+    }
+
+    @Deprecated
+    private boolean legacyIsBubbleStashed() {
+        return mBubbleStashController.isStashed();
+    }
+
+    private boolean isBubbleBarVisible() {
+        if (refactorTaskbarUiState()) {
+            boolean ret = mTaskbarUiState.getHasBubbles() && !mTaskbarUiState.isBubbleStashed();
+            if (BuildConfig.IS_STUDIO_BUILD && ret != legacyIsBubbleBarViewVisible()) {
+                throw new IllegalStateException("isBubbleBarViewVisible() doesn't match ret="
+                        + ret);
+            }
+            return ret;
+        } else {
+            return legacyIsBubbleBarViewVisible();
+        }
+    }
+
+    @Deprecated
+    private boolean legacyIsBubbleBarViewVisible() {
+        return mBubbleStashController.isBubbleBarVisible();
+    }
+
+    private boolean isBubbleBarExpanded() {
+        if (refactorTaskbarUiState()) {
+            boolean ret = mTaskbarUiState.isBubbleBarExpanded();
+            if (BuildConfig.IS_STUDIO_BUILD && ret != legacyIsBubbleBarExpanded()) {
+                throw new IllegalStateException("isBubbleBarExpanded() doesn't match ret=" + ret);
+            }
+            return ret;
+        } else {
+            return legacyIsBubbleBarExpanded();
+        }
+    }
+
+    @Deprecated
+    private boolean legacyIsBubbleBarExpanded() {
+        return mBubbleBarViewController.isExpanded();
     }
 }

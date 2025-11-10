@@ -55,7 +55,7 @@
     <string name="back_gesture_feedback_complete_with_overview_follow_up" msgid="9176400654037014471">"Vous savez revenir en arrière en balayant depuis la droite. Apprenez à passer d\'une appli à l\'autre."</string>
     <string name="back_gesture_feedback_complete_with_follow_up" msgid="8653374779579748392">"Vous avez appris le geste pour revenir en arrière. Apprenez ensuite à passer d\'une appli à l\'autre."</string>
     <string name="back_gesture_feedback_complete_without_follow_up" msgid="197189945858268342">"Vous connaissez maintenant le geste pour revenir en arrière"</string>
-    <string name="back_gesture_feedback_swipe_in_nav_bar" msgid="9157480023651452969">"Veillez à ne pas balayer l\'écran trop près du bas"</string>
+    <string name="back_gesture_feedback_swipe_in_nav_bar" msgid="9157480023651452969">"Veillez à ne pas balayer trop près du bas de l\'écran"</string>
     <string name="back_gesture_tutorial_confirm_subtitle" msgid="5181305411668713250">"Modifiez la sensibilité du geste retour dans les paramètres"</string>
     <string name="back_gesture_intro_title" msgid="19551256430224428">"Balayez l\'écran pour revenir en arrière"</string>
     <string name="back_gesture_intro_subtitle" msgid="7912576483031802797">"Pour revenir à l\'écran précédent, balayez l\'écran depuis le bord droit ou gauche jusqu\'au centre."</string>
@@ -179,6 +179,5 @@
     <string name="nudge_a11y_title" msgid="2126529303123687912">"Rappel automatique"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"Fermer"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"Image de rappel automatique"</string>
-    <!-- no translation found for running_app_description (1309281047289078871) -->
-    <skip />
+    <string name="running_app_description" msgid="1309281047289078871">"<xliff:g id="APP_TITLE">%1$s</xliff:g> <xliff:g id="RUNNING_STATE">%2$s</xliff:g>"</string>
 </resources>

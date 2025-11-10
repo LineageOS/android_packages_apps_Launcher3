@@ -202,6 +202,11 @@
     <string name="action_increase_height" msgid="459390020612501122">"Hoogte vergroten"</string>
     <string name="action_decrease_width" msgid="1374549771083094654">"Breedte verkleinen"</string>
     <string name="action_decrease_height" msgid="282377193880900022">"Hoogte verkleinen"</string>
+    <string name="resize_handle_start" msgid="431073846880883794">"Handgreep voor wijziging van het formaat links"</string>
+    <string name="resize_handle_top" msgid="280799523356834542">"Handgreep voor wijziging van het formaat bovenaan"</string>
+    <string name="resize_handle_end" msgid="8411240534474246075">"Handgreep voor wijziging van het formaat rechts"</string>
+    <string name="resize_handle_bottom" msgid="4217171801060928429">"Handgreep voor wijziging van het formaat onderaan"</string>
+    <string name="tap_to_show_resize_buttons" msgid="964815552123289232">"Knoppen voor formaat aanpassen tonen"</string>
     <string name="widget_resized" msgid="9130327887929620">"Formaat van widget gewijzigd in breedte <xliff:g id="NUMBER_0">%1$s</xliff:g> en hoogte <xliff:g id="NUMBER_1">%2$s</xliff:g>"</string>
     <string name="action_deep_shortcut" msgid="4766835855579976045">"Snelmenu"</string>
     <string name="widget_frame_name" msgid="8782828448471444270">"Frame voor widgetformaat aanpassen voor <xliff:g id="STRING">%1$s</xliff:g>"</string>

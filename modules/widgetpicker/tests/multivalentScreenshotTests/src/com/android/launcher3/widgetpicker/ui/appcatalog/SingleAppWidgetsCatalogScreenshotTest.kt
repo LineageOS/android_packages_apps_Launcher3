@@ -25,6 +25,7 @@ import com.android.launcher3.widgetpicker.shared.model.WidgetHostInfo
 import com.android.launcher3.widgetpicker.ui.NoOpWidgetPickerCuiReporter
 import com.android.launcher3.widgetpicker.ui.WidgetInteractionInfo
 import com.android.launcher3.widgetpicker.ui.WidgetPickerEventListeners
+import com.android.launcher3.widgetpicker.ui.components.NoOpWidgetPickerHostStateProvider
 import com.android.launcher3.widgetpicker.ui.testdata.ScreenshotTestData
 import com.android.launcher3.widgetpicker.ui.testdata.ScreenshotTestWidgetAppIconsRepository
 import com.android.launcher3.widgetpicker.ui.testdata.ScreenshotTestWidgetUsersRepository
@@ -111,6 +112,7 @@ class SingleAppWidgetsCatalogScreenshotTest(emulationSpec: DeviceEmulationSpec) 
                             widgetAppId = testAppId,
                             eventListeners = NoOpEventListener,
                             cuiReporter = NoOpWidgetPickerCuiReporter(),
+                            hostStateProvider = NoOpWidgetPickerHostStateProvider(),
                         )
                 }
             }

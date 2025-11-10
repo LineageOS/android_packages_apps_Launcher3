@@ -81,7 +81,7 @@ public class ExtendedEditText extends EditText {
 
     @Override
     public boolean onDragEvent(DragEvent event) {
-        // We don't want this view to interfere with Launcher own drag and drop.
+        // We don't want this view to interfere with Launcher's own drag and drop.
         return false;
     }
 

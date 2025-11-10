@@ -18,9 +18,9 @@ package com.android.launcher3.taskbar;
 import static com.android.app.animation.Interpolators.EMPHASIZED;
 import static com.android.app.animation.Interpolators.FINAL_FRAME;
 import static com.android.app.animation.Interpolators.INSTANT;
-import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.Hotseat.ALPHA_CHANNEL_TASKBAR_ALIGNMENT;
 import static com.android.launcher3.Hotseat.ALPHA_CHANNEL_TASKBAR_STASH;
+import static com.android.launcher3.LauncherState.ALL_APPS;
 import static com.android.launcher3.LauncherState.HOTSEAT_ICONS;
 import static com.android.launcher3.Utilities.isRtl;
 import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_APP;
@@ -50,6 +50,7 @@ import androidx.annotation.Nullable;
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.BuildConfig;
 import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.Flags;
 import com.android.launcher3.Hotseat.HotseatQsbAlphaId;
 import com.android.launcher3.LauncherInteractor;
 import com.android.launcher3.LauncherState;
@@ -224,6 +225,10 @@ public class TaskbarLauncherStateController {
 
                 @Override
                 public void onStateTransitionStart(LauncherState toState) {
+                    if (Flags.allAppsSurface() && toState == LauncherState.ALL_APPS) {
+                        mControllers.taskbarAllAppsController.show(
+                                /* animate = */ false, /* showKeyboard = */ false);
+                    }
                     if (toState != mLauncherState) {
                         // Treat FLAG_LAUNCHER_IN_STATE_TRANSITION as a changed flag even if a
                         // previous state transition was already running, so we update the new
@@ -284,7 +289,7 @@ public class TaskbarLauncherStateController {
     }
 
     private boolean hasLauncherBeenResumed() {
-        if (refactorTaskbarUiState()) {
+        if (Flags.refactorTaskbarUiState()) {
             final boolean ret = mLauncherUiState.isResumed();
             if (BuildConfig.IS_STUDIO_BUILD && ret != mLauncher.hasBeenResumed()) {
                 throw new IllegalStateException("hasBeenResumed doesn't match");
@@ -316,7 +321,7 @@ public class TaskbarLauncherStateController {
 
         resetIconAlignment();
 
-        if (!mControllers.taskbarActivityContext.isPhoneMode()) {
+        if (shouldReactToLauncherStateChange()) {
             mStateListenerClosable = mLauncher.addStateListener(mStateListener, TASKBAR_UI_THREAD);
             runForRecentsWindowManager(recentsWindowManager ->
                     recentsWindowManager.getStateManager().addStateListener(mRecentsStateListener));
@@ -489,6 +494,10 @@ public class TaskbarLauncherStateController {
         return (flags & flagMask) != 0;
     }
 
+    private boolean shouldReactToLauncherStateChange() {
+        return Flags.allAppsSurface() || !mControllers.taskbarActivityContext.isPhoneMode();
+    }
+
     public void applyState() {
         applyState(mControllers.taskbarStashController.getStashDuration());
     }
@@ -498,7 +507,7 @@ public class TaskbarLauncherStateController {
     }
 
     public Animator applyState(long duration, boolean start) {
-        if (mIsDestroyed || mControllers.taskbarActivityContext.isPhoneMode()) {
+        if (mIsDestroyed || !shouldReactToLauncherStateChange()) {
             return null;
         }
         Animator animator = null;
@@ -626,7 +635,9 @@ public class TaskbarLauncherStateController {
         }
 
         if (handleOpenFloatingViews && isInLauncher) {
-            AbstractFloatingView.closeAllOpenViews(mControllers.taskbarActivityContext);
+            // If the allAppsSurface() flag is enabled, don't animate if state transition is active.
+            boolean animate = !Flags.allAppsSurface() || !isStateTransitionToAllAppsInProgress();
+            AbstractFloatingView.closeAllOpenViews(mControllers.taskbarActivityContext, animate);
         }
 
         if (hasAnyFlag(changedFlags, FLAG_TASKBAR_HIDDEN) && !hasAnyFlag(FLAG_TASKBAR_HIDDEN)) {
@@ -1140,6 +1151,10 @@ public class TaskbarLauncherStateController {
                         toLauncherState(recentsWindowManager.getStateManager().getState()));
     }
 
+    public boolean isStateTransitionToAllAppsInProgress() {
+        return hasAnyFlag(FLAG_LAUNCHER_IN_STATE_TRANSITION) && mLauncherState == ALL_APPS;
+    }
+
     private final class TaskBarRecentsAnimationListener implements
             RecentsAnimationCallbacks.RecentsAnimationListener {
         private final RecentsAnimationCallbacks mCallbacks;
@@ -1239,7 +1254,7 @@ public class TaskbarLauncherStateController {
     }
 
     private boolean isOverlayShown() {
-        if (refactorTaskbarUiState()) {
+        if (Flags.refactorTaskbarUiState()) {
             final boolean ret = mLauncherUiState.isOverlayShown();
             if (BuildConfig.IS_STUDIO_BUILD && ret != legacyIsOverlayShown()) {
                 throw new IllegalStateException("isOverlayShown doesn't match");

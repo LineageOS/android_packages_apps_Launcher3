@@ -73,6 +73,7 @@ public class PreviewSurfaceRenderer {
     public static final String KEY_VIEW_WIDTH = "width";
     public static final String KEY_VIEW_HEIGHT = "height";
     public static final String KEY_DISPLAY_ID = "display_id";
+    private static final String KEY_WORKSPACE_ITEMS_LABELS_HIDDEN = "workspace_items_label_hidden";
     public static final String KEY_COLORS = "wallpaper_colors";
     public static final String KEY_COLOR_RESOURCE_IDS = "color_resource_ids";
     public static final String KEY_COLOR_VALUES = "color_values";
@@ -165,7 +166,9 @@ public class PreviewSurfaceRenderer {
                 gridName,
                 widgetHostId,
                 layoutXml,
-                mWorkspacePageId);
+                mWorkspacePageId,
+                bundle.getBoolean(KEY_WORKSPACE_ITEMS_LABELS_HIDDEN, false)
+        );
 
         mViewRoot = new FrameLayout(mPreviewContext);
         mAppComponent = (PreviewAppComponent) LauncherComponentProvider.get(mPreviewContext);

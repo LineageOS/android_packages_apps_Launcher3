@@ -30,7 +30,6 @@ import com.android.launcher3.statemanager.StateManager;
 public class LauncherDragView extends DragView<Launcher>
         implements StateManager.StateListener<LauncherState> {
 
-
     public LauncherDragView(Launcher launcher, Drawable drawable, int registrationX,
             int registrationY, float initialScale, float scaleOnDrop, float finalScaleDps) {
         super(launcher, drawable, registrationX, registrationY, initialScale, scaleOnDrop,

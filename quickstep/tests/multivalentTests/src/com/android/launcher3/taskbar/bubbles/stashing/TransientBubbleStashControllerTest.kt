@@ -17,7 +17,6 @@
 package com.android.launcher3.taskbar.bubbles.stashing
 
 import android.animation.AnimatorSet
-import android.animation.AnimatorTestRule
 import android.content.Context
 import android.view.View
 import android.widget.FrameLayout
@@ -36,6 +35,7 @@ import com.android.launcher3.taskbar.bubbles.BubbleBarViewController
 import com.android.launcher3.taskbar.bubbles.BubbleStashedHandleViewController
 import com.android.launcher3.taskbar.bubbles.BubbleView
 import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController.BubbleLauncherState
+import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.util.MultiValueAlpha
 import com.android.wm.shell.shared.animation.PhysicsAnimator
 import com.android.wm.shell.shared.animation.PhysicsAnimatorTestUtils
@@ -72,7 +72,7 @@ class TransientBubbleStashControllerTest {
         const val BUBBLE_BAR_STASHED_TRANSLATION_Y = -4.5f
     }
 
-    @get:Rule val animatorTestRule: AnimatorTestRule = AnimatorTestRule(this)
+    @get:Rule val animatorTestRule = TaskbarAnimatorTestRule(this)
 
     @get:Rule val rule: MockitoRule = MockitoJUnit.rule()
 
@@ -198,7 +198,7 @@ class TransientBubbleStashControllerTest {
             )
         }
         assertThat(mTransientBubbleStashController.isStashed).isTrue()
-        assertThat(taskbarUiState.bubbleStashed).isTrue()
+        assertThat(taskbarUiState.isBubbleStashed).isTrue()
 
         // Move to overview
         getInstrumentation().runOnMainSync {
@@ -206,7 +206,7 @@ class TransientBubbleStashControllerTest {
         }
         // No longer stashed in overview
         assertThat(mTransientBubbleStashController.isStashed).isFalse()
-        assertThat(taskbarUiState.bubbleStashed).isFalse()
+        assertThat(taskbarUiState.isBubbleStashed).isFalse()
     }
 
     @Test
@@ -233,7 +233,7 @@ class TransientBubbleStashControllerTest {
         verify(bubbleBarViewController).onStashStateChanging()
         // Bubble bar is stashed
         assertThat(mTransientBubbleStashController.isStashed).isTrue()
-        assertThat(taskbarUiState.bubbleStashed).isTrue()
+        assertThat(taskbarUiState.isBubbleStashed).isTrue()
         assertThat(bubbleBarView.translationY).isEqualTo(BUBBLE_BAR_STASHED_TRANSLATION_Y)
         assertThat(bubbleBarView.alpha).isEqualTo(0f)
         assertThat(bubbleBarView.scaleX).isEqualTo(mTransientBubbleStashController.getStashScaleX())
@@ -271,7 +271,7 @@ class TransientBubbleStashControllerTest {
         verify(bubbleBarViewController).onStashStateChanging()
         // Bubble bar is unstashed
         assertThat(mTransientBubbleStashController.isStashed).isFalse()
-        assertThat(taskbarUiState.bubbleStashed).isFalse()
+        assertThat(taskbarUiState.isBubbleStashed).isFalse()
         assertThat(bubbleBarView.translationY).isEqualTo(TASK_BAR_TRANSLATION_Y)
         assertThat(bubbleBarView.alpha).isEqualTo(1f)
         assertThat(bubbleBarView.scaleX).isEqualTo(1f)

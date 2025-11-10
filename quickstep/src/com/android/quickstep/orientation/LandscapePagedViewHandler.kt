@@ -29,12 +29,16 @@ import android.view.MotionEvent
 import android.view.Surface
 import android.view.VelocityTracker
 import android.view.View
+import android.view.View.LAYOUT_DIRECTION_INHERIT
 import android.view.View.MeasureSpec
 import android.view.ViewGroup
 import android.view.accessibility.AccessibilityEvent
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.annotation.VisibleForTesting
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID
+import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.UNSET
 import androidx.core.util.component1
 import androidx.core.util.component2
 import androidx.core.view.updateLayoutParams
@@ -232,6 +236,32 @@ open class LandscapePagedViewHandler : RecentsPagedOrientationHandler {
             gravity = Gravity.TOP or if (banner.isLayoutRtl) Gravity.END else Gravity.START
             width = if (isGroupedTaskView) snapshotViewHeight else taskViewHeight
         }
+    }
+
+    override fun updateAppTimerLayout(
+        taskViewWidth: Int,
+        taskViewHeight: Int,
+        isGroupedTaskView: Boolean,
+        deviceProfile: DeviceProfile,
+        snapshotViewWidth: Int,
+        snapshotViewHeight: Int,
+        appTimerToast: View,
+    ) {
+        appTimerToast.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            appTimerToast.layoutDirection = LAYOUT_DIRECTION_INHERIT
+            topToTop = PARENT_ID
+            bottomToBottom = UNSET
+            startToStart = if (appTimerToast.isLayoutRtl) UNSET else PARENT_ID
+            endToEnd = if (appTimerToast.isLayoutRtl) PARENT_ID else UNSET
+            width = if (isGroupedTaskView) snapshotViewHeight else taskViewHeight
+        }
+
+        appTimerToast.pivotX = 0f
+        appTimerToast.pivotY = 0f
+        appTimerToast.rotation = degreesRotated
+
+        appTimerToast.translationX = appTimerToast.height.toFloat()
+        appTimerToast.translationY = 0f
     }
 
     override fun getDwbBannerTranslations(

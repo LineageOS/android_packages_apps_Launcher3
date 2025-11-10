@@ -40,7 +40,7 @@ class HandoffSuggestionListTest {
 
         assertThat(result).isTrue()
         assertThat(suggestionList.suggestions).hasSize(1)
-        assertThat(suggestionList.suggestions.first().deviceId).isEqualTo(1)
+        assertThat(suggestionList.suggestions.first().associationId).isEqualTo(1)
     }
 
     @Test
@@ -51,7 +51,7 @@ class HandoffSuggestionListTest {
 
         assertThat(result).isTrue()
         assertThat(suggestionList.suggestions).hasSize(2)
-        assertThat(suggestionList.suggestions.map { it.deviceId }).containsExactly(1, 2)
+        assertThat(suggestionList.suggestions.map { it.associationId }).containsExactly(1, 2)
     }
 
     @Test
@@ -64,7 +64,7 @@ class HandoffSuggestionListTest {
 
         assertThat(result).isTrue()
         assertThat(suggestionList.suggestions).hasSize(1)
-        assertThat(suggestionList.suggestions.first().deviceId).isEqualTo(1)
+        assertThat(suggestionList.suggestions.first().associationId).isEqualTo(1)
     }
 
     @Test
@@ -78,7 +78,7 @@ class HandoffSuggestionListTest {
         assertThat(result).isFalse()
         val suggestions = suggestionList.suggestions
         assertThat(suggestions).hasSize(1)
-        assertThat(suggestions.first().deviceId).isEqualTo(1)
+        assertThat(suggestions.first().associationId).isEqualTo(1)
     }
 
     @Test
@@ -91,7 +91,7 @@ class HandoffSuggestionListTest {
 
         assertThat(result).isFalse()
         assertThat(suggestionList.suggestions).hasSize(1)
-        assertThat(suggestionList.suggestions.first().deviceId).isEqualTo(1)
+        assertThat(suggestionList.suggestions.first().associationId).isEqualTo(1)
     }
 
     @Test
@@ -104,6 +104,6 @@ class HandoffSuggestionListTest {
         assertThat(suggestionList.suggestions).isEmpty()
     }
 
-    private fun createRemoteTask(deviceId: Int, label: String): RemoteTask =
-        RemoteTask.Builder(1).setDeviceId(deviceId).setLabel(label).build()
+    private fun createRemoteTask(companionDeviceAssociationId: Int, label: String): RemoteTask =
+        RemoteTask.Builder(companionDeviceAssociationId, 1).setLabel(label).build()
 }

@@ -22,14 +22,14 @@ import android.graphics.drawable.Drawable
 /** A suggestion for a remote application that can be handed off to this device. */
 class HandoffSuggestion {
 
-    data class Metadata(val label: String, val icon: Drawable)
+    data class Metadata(val label: String?, val icon: Drawable)
 
     var remoteTask: RemoteTask
         private set
 
     /** The device ID of the remote device that this suggestion is for. */
-    val deviceId: Int
-        get() = remoteTask.deviceId
+    val associationId: Int
+        get() = remoteTask.companionDeviceAssociationId
 
     /** Metadata for this suggestion. This is `null` until it is loaded. */
     var metadata: Metadata? = null
@@ -46,7 +46,7 @@ class HandoffSuggestion {
      * needed.
      */
     fun updateRemoteTask(remoteTask: RemoteTask) {
-        if (remoteTask.id != this.remoteTask.id) {
+        if (remoteTask.taskId != this.remoteTask.taskId) {
             this.remoteTask = remoteTask
             this.metadata = null
         }
@@ -56,8 +56,8 @@ class HandoffSuggestion {
         if (this === other) return true
         if (other !is HandoffSuggestion) return false
 
-        return deviceId == other.deviceId
+        return associationId == other.associationId
     }
 
-    override fun hashCode(): Int = deviceId
+    override fun hashCode(): Int = associationId
 }

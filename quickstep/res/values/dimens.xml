@@ -162,6 +162,9 @@
     <dimen name="motion_pause_detector_speed_trackpad_somewhat_fast">0.7dp</dimen>
     <dimen name="motion_pause_detector_speed_fast">1.4dp</dimen>
     <dimen name="motion_pause_detector_min_displacement_from_app">36dp</dimen>
+    <!-- Note: gesture_nav_window_attach_threshold must always be greater than 0, and smaller than
+               motion_pause_detector_min_displacement_from_app  -->
+    <dimen name="gesture_nav_window_attach_threshold">35.99dp</dimen>
     <dimen name="quickstep_fling_threshold_speed">0.5dp</dimen>
 
     <!-- Launcher app transition -->

@@ -83,9 +83,9 @@ public abstract class BaseContainerInterface<STATE_TYPE extends BaseState<STATE_
         CONTAINER_TYPE extends RecentsViewContainer & StatefulContainer<STATE_TYPE>> {
 
     public boolean rotationSupportedByActivity = false;
-    protected final STATE_TYPE mBackgroundState;
+    @NonNull protected final STATE_TYPE mBackgroundState;
 
-    protected BaseContainerInterface(STATE_TYPE backgroundState) {
+    protected BaseContainerInterface(@NonNull STATE_TYPE backgroundState) {
         mBackgroundState = backgroundState;
     }
 
@@ -286,7 +286,7 @@ public abstract class BaseContainerInterface<STATE_TYPE extends BaseState<STATE_
         CONTAINER_TYPE container = getCreatedContainer();
         return container != null
                 && TaskbarUiStateMonitor.INSTANCE.get(container.asContext())
-                .getTaskbarUiState(displayId).isDraggingItem();
+                .getTaskbarUiState(displayId).isTaskbarOrBubbleBarDraggingItem();
     }
 
     public void runOnInitBackgroundStateUI(Runnable callback) {

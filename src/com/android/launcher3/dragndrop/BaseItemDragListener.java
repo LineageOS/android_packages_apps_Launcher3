@@ -76,7 +76,16 @@ public abstract class BaseItemDragListener implements DragController.SystemDragH
 
     @Override
     public boolean init(Launcher launcher, boolean isHomeStarted) {
-        AbstractFloatingView.closeAllOpenViews(launcher, /* animate= */ isHomeStarted);
+        initInternal(launcher, isHomeStarted, /* closeAllOpenViews= */ true);
+        return false;
+    }
+
+    protected void initInternal(Launcher launcher, boolean isHomeStarted,
+            boolean closeAllOpenViews) {
+        if (closeAllOpenViews) {
+            AbstractFloatingView.closeAllOpenViews(launcher, /* animate= */ isHomeStarted);
+        }
+
         launcher.getStateManager().goToState(NORMAL, /* animated= */ isHomeStarted);
         launcher.getRotationHelper().setStateHandlerRequest(REQUEST_LOCK);
 
@@ -88,8 +97,6 @@ public abstract class BaseItemDragListener implements DragController.SystemDragH
         } else if (mDragController != null) {
             mDragController.addSystemDragHandler(this);
         }
-
-        return false;
     }
 
     @Override

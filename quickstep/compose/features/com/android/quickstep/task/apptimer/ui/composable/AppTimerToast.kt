@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Placeable
@@ -63,6 +64,7 @@ private fun ActiveTimerToast(
     modifier: Modifier = Modifier,
     iconTextSpacing: Dp = 4.dp,
 ) {
+
     val view = LocalView.current
     Surface(
         modifier =
@@ -91,8 +93,12 @@ private fun CustomTimerToastLayout(
     iconTextSpacing: Dp,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
     val formattedDuration =
-        viewModel.getFormattedDuration(appTimerUiState.timeRemaining, LocalContext.current)
+        remember(appTimerUiState.timeRemaining, context) {
+            viewModel.getFormattedDuration(appTimerUiState.timeRemaining, context)
+        }
+
     Layout(
         content = {
             Icon(

@@ -16,12 +16,12 @@
 
 package com.android.launcher3.taskbar.bubbles
 
-import android.animation.AnimatorTestRule
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController
+import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.touch.OverScroll
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
@@ -57,7 +57,7 @@ class BubbleBarSwipeControllerTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
     @get:Rule(order = 0) val mockitoRule: MockitoRule = MockitoJUnit.rule()
-    @get:Rule(order = 1) val animatorTestRule: AnimatorTestRule = AnimatorTestRule(this)
+    @get:Rule(order = 1) val animatorTestRule = TaskbarAnimatorTestRule(this)
 
     private lateinit var bubbleBarSwipeController: BubbleBarSwipeController
 

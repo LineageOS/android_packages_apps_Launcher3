@@ -30,13 +30,14 @@ import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatWorkspaceI
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
-import com.android.launcher3.util.LauncherMultivalentJUnit
-import com.android.launcher3.util.LauncherMultivalentJUnit.EmulatedDevices
+import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext.Companion.getDeviceParams
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.whenever
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 private const val TEST_DESCRIPTION = "test description"
 
@@ -47,8 +48,6 @@ private val TEST_TASK =
         tasks.first().titleDescription = TEST_DESCRIPTION
     }
 
-@RunWith(LauncherMultivalentJUnit::class)
-@EmulatedDevices(["pixelFoldable2023", "pixelTablet2023"])
 /**
  * Legend for the comments below:
  * ```
@@ -64,9 +63,16 @@ private val TEST_TASK =
  * // Index of items relative to Hotseat: -1 -.5 012345
  * ```
  */
-class TaskbarViewControllerTest {
+@RunWith(ParameterizedAndroidJunit4::class)
+class TaskbarViewControllerTest(deviceName: String) {
 
-    @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<String> = getDeviceParams("pixelFoldable2023", "pixelTablet2023")
+    }
+
+    @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create(deviceName)
     @get:Rule(order = 1) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
 
     @InjectController lateinit var taskbarViewController: TaskbarViewController

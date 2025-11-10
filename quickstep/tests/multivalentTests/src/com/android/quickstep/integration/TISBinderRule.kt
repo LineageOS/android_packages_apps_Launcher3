@@ -22,7 +22,8 @@ import com.android.app.viewcapture.ViewCapture.MAIN_EXECUTOR
 import com.android.launcher3.LauncherPrefs.Companion.TASKBAR_PINNING
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.testutil.Wait
-import com.android.quickstep.TouchInteractionService.TISBinder
+import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
+import com.android.quickstep.TouchInteractionHandler.TISBinder
 import com.android.quickstep.util.TISBindHelper
 import java.util.concurrent.CompletableFuture
 import kotlin.annotation.AnnotationRetention.RUNTIME
@@ -79,7 +80,10 @@ class TISBinderRule : TestRule {
             { appComponent.taskbarModeUtil.isTransient == isTransient },
         )
 
-        withTISBinder { taskbarManager?.recreateTaskbars() }
+        withTISBinder {
+            taskbarManager?.recreateTaskbars()
+            waitForTaskbarUiThreadSync()
+        }
 
         // Wait for taskbar to be initialized
         Wait.atMost(
@@ -91,6 +95,10 @@ class TISBinderRule : TestRule {
         withTISBinder {
             taskbarManager?.getCurrentActivityContext()?.displayId?.let { service.reset(it) }
         }
+    }
+
+    private fun waitForTaskbarUiThreadSync() {
+        TASKBAR_UI_THREAD.submit {}.get()
     }
 
     /**

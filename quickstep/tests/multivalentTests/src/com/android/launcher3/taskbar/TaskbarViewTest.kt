@@ -16,7 +16,6 @@
 
 package com.android.launcher3.taskbar
 
-import android.animation.AnimatorTestRule
 import android.graphics.Rect
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
@@ -29,6 +28,7 @@ import com.android.launcher3.Flags.FLAG_ENABLE_TASKBAR_DRAG_AND_DROP
 import com.android.launcher3.Flags.FLAG_ENABLE_TASKBAR_ICON_CONTAINER
 import com.android.launcher3.R
 import com.android.launcher3.apppairs.AppPairIcon
+import com.android.launcher3.model.data.TaskItemInfo
 import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
 import com.android.launcher3.taskbar.TaskbarIconType.ALL_APPS
@@ -40,50 +40,51 @@ import com.android.launcher3.taskbar.TaskbarIconType.RECENT
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.assertThat
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHandoffSuggestions
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatItems
+import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatWorkspaceItem
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createRecentTask
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createRecents
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createSplitTask
+import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.ForceRtl
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
-import com.android.launcher3.util.LauncherMultivalentJUnit.Companion.isRunningInRobolectric
-import com.android.launcher3.util.LauncherMultivalentJUnit.EmulatedDevices
+import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext.Companion.getDeviceParams
 import com.android.window.flags.Flags.FLAG_ENABLE_OVERFLOW_BUTTON_FOR_TASKBAR_PINNED_ITEMS
 import com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_OVERFLOW
 import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.TruthJUnit.assume
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.never
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
 
 @RunWith(ParameterizedAndroidJunit4::class)
-@EmulatedDevices(["pixelFoldable2023", "pixelTablet2023"])
 @EnableFlags(FLAG_ENABLE_TASKBAR_OVERFLOW)
-class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
+class TaskbarViewTest(private val deviceName: String, flags: FlagsParameterization) {
 
     companion object {
         @JvmStatic
         @Parameters(name = "{0},{1}")
         fun getParams(): List<Array<Any>> {
-            val devices =
-                if (isRunningInRobolectric) {
-                    listOf("pixelFoldable2023", "pixelTablet2023")
-                } else {
-                    listOf("onDevice") // Unused.
-                }
+            val devices = getDeviceParams("pixelFoldable2023", "pixelTablet2023")
             val flags = allCombinationsOf(FLAG_ENABLE_TASKBAR_ICON_CONTAINER)
             return devices.flatMap { d -> flags.map { f -> arrayOf(d, f) } } // Cartesian product.
         }
     }
 
-    @get:Rule(order = 0) val animatorTestRule = AnimatorTestRule(this)
-    @get:Rule(order = 1) val setFlagsRule = SetFlagsRule()
-    @get:Rule(order = 2) val context = TaskbarWindowSandboxContext.create()
+    @get:Rule(order = 0) val animatorTestRule = TaskbarAnimatorTestRule(this)
+    @get:Rule(order = 1) val setFlagsRule = SetFlagsRule(flags)
+    @get:Rule(order = 2) val context = TaskbarWindowSandboxContext.create(deviceName)
     @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
 
     private val activityContext by taskbarUnitTestRule::activityContext
@@ -626,6 +627,18 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     }
 
     @Test
+    fun testUpdateItems_qsbInline_removesDividerWhenOnlyStaticViewsRemain() {
+        // This test runs only on devices with an inline QSB, like tablets.
+        assume().that(activityContext.deviceProfile.isQsbInline).isTrue()
+
+        runOnMainSync { taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList()) }
+        assertThat(taskbarView.taskbarDividerViewContainer?.parent).isNotNull()
+
+        runOnMainSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
+        assertThat(taskbarView.taskbarDividerViewContainer?.parent).isNull()
+    }
+
+    @Test
     fun testOnTaskUpdated_splitTask_bottomRightTaskTitleChanged_updatesTitle() {
         val splitTask = createSplitTask()
         val expectedTitle1 =
@@ -1020,6 +1033,51 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
         // Icon for Task 2 should be recycled from Task 0.
         assertThat(nextIcons.last()).isSameInstanceAs(prevIcons.first())
         assertThat(nextIcons.last().tag).isEqualTo(nextTasks.last())
+    }
+
+    @Test
+    fun testUpdateItems_hotseatItemUnchanged_iconNotRegenerated() {
+        val item = spy(createHotseatWorkspaceItem())
+        runOnMainSync { taskbarView.updateItems(arrayOf(item), emptyList(), emptyList()) }
+        verify(item, times(1)).newIcon(any(), any())
+
+        runOnMainSync { taskbarView.updateItems(arrayOf(item), emptyList(), emptyList()) }
+        verify(item, times(1)).newIcon(any(), any()) // Icon is not generated a second time.
+    }
+
+    @Test
+    fun testUpdateItems_hotseatItemIsOpened_tagUpdatedAndIconNotRegenerated() {
+        val item = spy(createHotseatWorkspaceItem())
+        runOnMainSync { taskbarView.updateItems(arrayOf(item), emptyList(), emptyList()) }
+        verify(item, times(1)).newIcon(any(), any())
+
+        val taskItem = spy(TaskItemInfo(0, item))
+        runOnMainSync { taskbarView.updateItems(arrayOf(taskItem), emptyList(), emptyList()) }
+
+        assertThat(taskbarView.iconViews.last().tag).isSameInstanceAs(taskItem)
+        verify(taskItem, never()).newIcon(any(), any()) // Icon is not regenerated from task.
+    }
+
+    @Test
+    fun testUpdateItems_hotseatTaskItemIsClosed_tagUpdatedAndIconNotRegenerated() {
+        val item = spy(createHotseatWorkspaceItem())
+        val taskItem = spy(TaskItemInfo(0, item))
+        runOnMainSync { taskbarView.updateItems(arrayOf(taskItem), emptyList(), emptyList()) }
+        verify(taskItem, times(1)).newIcon(any(), any())
+
+        runOnMainSync { taskbarView.updateItems(arrayOf(item), emptyList(), emptyList()) }
+        assertThat(taskbarView.iconViews.last().tag).isSameInstanceAs(item)
+        verify(item, never()).newIcon(any(), any()) // Icon is not regenerated from item.
+    }
+
+    @Test
+    fun testUpdateItems_recentTaskUnchanged_iconNotRegenerated() {
+        val recentTask = spy(createRecentTask())
+        runOnMainSync { taskbarView.updateItems(emptyArray(), listOf(recentTask), emptyList()) }
+        verify(recentTask, times(1)).bitmapInfos
+
+        runOnMainSync { taskbarView.updateItems(emptyArray(), listOf(recentTask), emptyList()) }
+        verify(recentTask, times(1)).bitmapInfos // Icon is not generated a second time.
     }
 
     /** Returns the number of expected recents outside of the overflow based on [hotseatSize]. */

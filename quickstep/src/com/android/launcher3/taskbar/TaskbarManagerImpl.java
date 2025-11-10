@@ -111,6 +111,7 @@ import com.android.quickstep.OverviewComponentObserver;
 import com.android.quickstep.RecentsActivity;
 import com.android.quickstep.SystemDecorationChangeObserver;
 import com.android.quickstep.SystemUiProxy;
+import com.android.quickstep.TouchInteractionHandler;
 import com.android.quickstep.util.ContextualSearchInvoker;
 import com.android.quickstep.util.SystemUiFlagUtils;
 import com.android.quickstep.views.RecentsViewContainer;
@@ -371,7 +372,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
 
                 @Override
                 public void onTaskbarCornerRoundingUpdate(
-                        boolean doesAnyTaskRequireTaskbarRounding) {
+                        boolean doesAnyTaskRequireTaskbarRounding, int displayId) {
                     //NO-OP
                 }
             };
@@ -454,7 +455,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
 
     /**
      * This constructor will be called on main thread by
-     * {@link com.android.quickstep.TouchInteractionService} to initialize properties (such as
+     * {@link TouchInteractionHandler} to initialize properties (such as
      * creating {@link android.window.WindowContext} and populating {@link #mRootLayouts}). Yet we
      * need to switch to {@link TASKBAR_UI_THREAD} to invoke
      * {@link #recreateTaskbarForDisplay(int, int)} which will add taskbar root layout to window so

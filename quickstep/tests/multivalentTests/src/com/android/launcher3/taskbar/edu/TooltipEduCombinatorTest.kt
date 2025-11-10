@@ -16,11 +16,18 @@
 
 package com.android.launcher3.taskbar.edu
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
 import com.android.launcher3.taskbar.TaskbarActivityContext
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.asProperty
 import com.android.launcher3.taskbar.TaskbarStashController
+import com.android.launcher3.taskbar.edu.TooltipEduCombinator.Companion.TASKBAR_BUBBLES_EDU_SEEN_FLAG
+import com.android.launcher3.taskbar.edu.TooltipEduCombinator.Companion.TASKBAR_PINNING_EDU_SEEN_FLAG
+import com.android.launcher3.taskbar.edu.TooltipEduCombinator.Companion.TASKBAR_SEARCH_EDU_SEEN_FLAG
+import com.android.launcher3.taskbar.edu.TooltipEduCombinator.Companion.TASKBAR_SPLIT_EDU_SEEN_FLAG
+import com.android.launcher3.taskbar.edu.TooltipEduCombinator.Companion.TASKBAR_SUGGESTIONS_EDU_SEEN_FLAG
+import com.android.launcher3.taskbar.edu.TooltipEduCombinator.Companion.TASKBAR_SWIPE_EDU_SEEN_FLAG
 import com.android.launcher3.taskbar.edu.TooltipsEduPage.DisplayLocation
 import com.android.launcher3.taskbar.rules.TaskbarModeRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.PINNED
@@ -30,8 +37,6 @@ import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
-import com.android.launcher3.util.LauncherMultivalentJUnit
-import com.android.launcher3.util.LauncherMultivalentJUnit.EmulatedDevices
 import com.android.launcher3.util.OnboardingPrefs
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
@@ -40,8 +45,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@RunWith(LauncherMultivalentJUnit::class)
-@EmulatedDevices(["pixelFoldable2023", "pixelTablet2023"])
+@RunWith(AndroidJUnit4::class)
 class TooltipEduCombinatorTest {
 
     @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()
@@ -60,14 +64,35 @@ class TooltipEduCombinatorTest {
     private val wasInTestHarness = Utilities.isRunningInTestHarness()
 
     private var tooltipStep by OnboardingPrefs.TASKBAR_EDU_TOOLTIP_STEP.prefItem.asProperty(context)
-    private var swipeEduSeen by OnboardingPrefs.TASKBAR_SWIPE_EDU_SEEN.asProperty(context)
-    private var featuresEduSeen by OnboardingPrefs.TASKBAR_FEATURES_EDU_SEEN.asProperty(context)
-    private var searchEduSeen by OnboardingPrefs.TASKBAR_SEARCH_EDU_SEEN.asProperty(context)
-    private var pinningEduSeen by OnboardingPrefs.TASKBAR_PINNING_EDU_SEEN.asProperty(context)
+    private var taskbarSeenEduFlags by OnboardingPrefs.TASKBAR_SEEN_EDU_FLAGS.asProperty(context)
+
+    private var swipeEduSeen: Boolean
+        get() = getFlag(TASKBAR_SWIPE_EDU_SEEN_FLAG)
+        set(value) = setFlag(TASKBAR_SWIPE_EDU_SEEN_FLAG, value)
+
+    private var splitEduSeen: Boolean
+        get() = getFlag(TASKBAR_SPLIT_EDU_SEEN_FLAG)
+        set(value) = setFlag(TASKBAR_SPLIT_EDU_SEEN_FLAG, value)
+
+    private var bubblesEduSeen: Boolean
+        get() = getFlag(TASKBAR_BUBBLES_EDU_SEEN_FLAG)
+        set(value) = setFlag(TASKBAR_BUBBLES_EDU_SEEN_FLAG, value)
+
+    private var suggestionsEduSeen: Boolean
+        get() = getFlag(TASKBAR_SUGGESTIONS_EDU_SEEN_FLAG)
+        set(value) = setFlag(TASKBAR_SUGGESTIONS_EDU_SEEN_FLAG, value)
+
+    private var pinningEduSeen: Boolean
+        get() = getFlag(TASKBAR_PINNING_EDU_SEEN_FLAG)
+        set(value) = setFlag(TASKBAR_PINNING_EDU_SEEN_FLAG, value)
+
+    private var searchEduSeen: Boolean
+        get() = getFlag(TASKBAR_SEARCH_EDU_SEEN_FLAG)
+        set(value) = setFlag(TASKBAR_SEARCH_EDU_SEEN_FLAG, value)
 
     @Before
     fun setUp() {
-        tooltipEduCombinator = TooltipEduCombinator(taskbarContext, taskbarStashController)
+        tooltipEduCombinator = TooltipEduCombinator(taskbarContext, taskbarStashController) { true }
         Utilities.disableRunningInTestHarnessForTests()
     }
 
@@ -114,6 +139,11 @@ class TooltipEduCombinatorTest {
     @Test
     @TaskbarMode(TRANSIENT)
     fun getFeaturesTooltipsEduPages_whenTransientMode_andAllTooltipsPresent_returnsCorrectPaginatedPages() {
+        assertThat(swipeEduSeen).isFalse()
+        assertThat(splitEduSeen).isFalse()
+        assertThat(bubblesEduSeen).isFalse()
+        assertThat(suggestionsEduSeen).isFalse()
+        assertThat(pinningEduSeen).isFalse()
         val eduPages = tooltipEduCombinator.getFeaturesTooltipsEduPages()!!
 
         // Should be split into 2 pages as there are 4 tooltips in total.
@@ -143,9 +173,11 @@ class TooltipEduCombinatorTest {
             location = DisplayLocation.SEARCH_DIVIDER,
         )
         // Check that the seen flags are updated.
-        assertThat(tooltipEduCombinator.userHasSeenFeaturesEdu).isTrue()
-        assertThat(tooltipEduCombinator.userHasSeenPinningEdu).isTrue()
-        assertThat(tooltipEduCombinator.userHasSeenSwipeEdu).isTrue()
+        assertThat(swipeEduSeen).isTrue()
+        assertThat(splitEduSeen).isTrue()
+        assertThat(bubblesEduSeen).isTrue()
+        assertThat(suggestionsEduSeen).isTrue()
+        assertThat(pinningEduSeen).isTrue()
     }
 
     @Test
@@ -171,9 +203,8 @@ class TooltipEduCombinatorTest {
             location = DisplayLocation.TASKBAR_CENTER,
         )
         // Check that the seen flags are updated.
-        assertThat(tooltipEduCombinator.userHasSeenFeaturesEdu).isTrue()
-        assertThat(tooltipEduCombinator.userHasSeenPinningEdu).isTrue()
-        assertThat(tooltipEduCombinator.userHasSeenSwipeEdu).isTrue()
+        assertThat(pinningEduSeen).isTrue()
+        assertThat(swipeEduSeen).isTrue()
     }
 
     @Test
@@ -199,9 +230,8 @@ class TooltipEduCombinatorTest {
             location = DisplayLocation.TASKBAR_CENTER,
         )
         // Check that the seen flags are updated.
-        assertThat(tooltipEduCombinator.userHasSeenFeaturesEdu).isTrue()
-        assertThat(tooltipEduCombinator.userHasSeenPinningEdu).isTrue()
-        assertThat(tooltipEduCombinator.userHasSeenSwipeEdu).isTrue()
+        assertThat(pinningEduSeen).isTrue()
+        assertThat(swipeEduSeen).isTrue()
     }
 
     @Test
@@ -212,23 +242,44 @@ class TooltipEduCombinatorTest {
 
     @Test
     @TaskbarMode(TRANSIENT)
-    fun getFeaturesTooltipsEduPages_whenFeaturesEduSeenBefore_returnsPinningEdu() {
-        featuresEduSeen = true
-        pinningEduSeen = false
+    fun getFeaturesTooltipsEduPages_allFeaturesExceptPinningEduSeenBefore_returnsPinningEdu() {
+        tooltipStep = 1
+        bubblesEduSeen = true
+        suggestionsEduSeen = true
 
         val eduPages = tooltipEduCombinator.getFeaturesTooltipsEduPages()!!
 
         assertThat(eduPages).hasSize(1)
-        val pinningPage = eduPages.first()
-
         checkEduPage(
-            eduPage = pinningPage,
+            eduPage = eduPages.first(),
             titleResId = R.string.taskbar_edu_pinning_title,
             canBeSkipped = true,
             tooltipCheckers = listOf { checkIfPinningTooltip(it, isStandAlone = true) },
             location = DisplayLocation.SEARCH_DIVIDER,
         )
-        assertThat(tooltipEduCombinator.userHasSeenPinningEdu).isTrue()
+        assertThat(pinningEduSeen).isTrue()
+    }
+
+    @Test
+    @TaskbarMode(TRANSIENT)
+    fun getFeaturesTooltipsEduPages_whenOldEduPinningSeenBefore_returnsCorrectPaginatedPages() {
+        tooltipStep = 2
+
+        val eduPages = tooltipEduCombinator.getFeaturesTooltipsEduPages()!!
+
+        assertThat(eduPages).hasSize(1)
+        checkEduPage(
+            eduPage = eduPages.first(),
+            titleResId = R.string.taskbar_edu_features,
+            actionButtonTextResId = R.string.taskbar_edu_done,
+            canBeSkipped = false,
+            tooltipCheckers =
+                listOf(
+                    { checkIfBubbleTooltip(it, isStandAlone = false) },
+                    { checkIfSuggestionsTooltip(it) },
+                ),
+            location = DisplayLocation.TASKBAR_CENTER,
+        )
     }
 
     @Test
@@ -258,7 +309,6 @@ class TooltipEduCombinatorTest {
     @Test
     @TaskbarMode(PINNED)
     fun getSearchEdu_whenPinnedTaskbar_returnsSearchEdu() {
-        tooltipEduCombinator.shouldShowSearchEduResolver = { true }
         val searchEdu = tooltipEduCombinator.getSearchEdu()
         checkEduPage(
             eduPage = searchEdu!!,
@@ -267,7 +317,7 @@ class TooltipEduCombinatorTest {
             tooltipCheckers = listOf { checkIfSearchTooltip(it) },
             location = DisplayLocation.SEARCH_ICON,
         )
-        assertThat(tooltipEduCombinator.userHasSeenSearchEdu).isTrue()
+        assertThat(searchEduSeen).isTrue()
     }
 
     @Test
@@ -280,14 +330,14 @@ class TooltipEduCombinatorTest {
     @TaskbarMode(PINNED)
     fun getSearchEdu_whenPinnedTaskbarSearchEduSeen_returnsNull() {
         searchEduSeen = true
-        tooltipEduCombinator.shouldShowSearchEduResolver = { true }
         assertThat(tooltipEduCombinator.getSearchEdu()).isNull()
     }
 
     @Test
     @TaskbarMode(PINNED)
     fun getSearchEdu_whenPinnedTaskbarShouldNotShowSearchEdu_returnsNull() {
-        tooltipEduCombinator.shouldShowSearchEduResolver = { false }
+        tooltipEduCombinator =
+            TooltipEduCombinator(taskbarContext, taskbarStashController) { false }
         assertThat(tooltipEduCombinator.getSearchEdu()).isNull()
     }
 
@@ -332,12 +382,12 @@ class TooltipEduCombinatorTest {
     private fun checkIfBubbleTooltip(
         tooltipInfo: TooltipInfo,
         isTransient: Boolean = true,
-        isStandAloe: Boolean = false,
+        isStandAlone: Boolean = false,
     ) =
         checkTooltip(
             tooltipInfo = tooltipInfo,
             messageResId =
-                if (isStandAloe) {
+                if (isStandAlone) {
                     R.string.taskbar_edu_bubbles_standalone
                 } else {
                     R.string.taskbar_edu_bubbles
@@ -387,6 +437,19 @@ class TooltipEduCombinatorTest {
         assertThat(tooltipInfo.animationResId).isEqualTo(animationResId)
         assertThat(tooltipInfo.animationDescription)
             .isEqualTo(context.getString(animationDescriptionResId))
+    }
+
+    private fun getFlag(flag: Int): Boolean {
+        return taskbarSeenEduFlags and flag == flag
+    }
+
+    private fun setFlag(flag: Int, seen: Boolean) {
+        taskbarSeenEduFlags =
+            if (seen) {
+                taskbarSeenEduFlags or flag
+            } else {
+                taskbarSeenEduFlags and flag.inv()
+            }
     }
 
     private fun setShownOldEdu() {

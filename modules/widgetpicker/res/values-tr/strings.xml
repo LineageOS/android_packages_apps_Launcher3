@@ -39,4 +39,10 @@
     <string name="widget_search_bar_back_button_label" msgid="7028448831228587743">"Geri"</string>
     <string name="widgets_list_no_widgets_available" msgid="6451723564588621540">"Widget\'lar ve kısayollar kullanılamıyor"</string>
     <string name="widgets_no_search_results" msgid="4336254967062545985">"Widget veya kısayol bulunamadı"</string>
+    <!-- no translation found for widget_add_to_homescreen_button_label (5293968342564702338) -->
+    <skip />
+    <!-- no translation found for widget_cancel_pin_button_label (7548758841712339886) -->
+    <skip />
+    <!-- no translation found for widget_touch_hold_instruction (7360267776497592789) -->
+    <skip />
 </resources>

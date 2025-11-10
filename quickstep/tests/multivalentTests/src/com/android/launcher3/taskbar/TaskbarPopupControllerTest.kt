@@ -23,11 +23,13 @@ import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.util.SparseArray
 import android.view.accessibility.AccessibilityNodeInfo
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.BubbleTextView
 import com.android.launcher3.Flags.FLAG_ENABLE_MULTI_INSTANCE_MENU_TASKBAR
 import com.android.launcher3.LauncherSettings
 import com.android.launcher3.R
+import com.android.launcher3.dragndrop.DragView
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
@@ -40,8 +42,6 @@ import com.android.launcher3.taskbar.TaskbarViewTestUtil.createTestWorkspaceItem
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
-import com.android.launcher3.util.LauncherMultivalentJUnit
-import com.android.launcher3.util.LauncherMultivalentJUnit.EmulatedDevices
 import com.android.launcher3.util.TestUtil.getOnUiThread
 import com.android.quickstep.util.GroupTask
 import com.android.window.flags.Flags.FLAG_ENABLE_PINNING_APP_WITH_CONTEXT_MENU
@@ -54,8 +54,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito
 import org.mockito.kotlin.whenever
 
-@RunWith(LauncherMultivalentJUnit::class)
-@EmulatedDevices(["pixelFoldable2023", "pixelTablet2023"])
+@RunWith(AndroidJUnit4::class)
 @DisableFlags(FLAG_ENABLE_MULTI_INSTANCE_MENU_TASKBAR)
 class TaskbarPopupControllerTest {
     @get:Rule(order = 0) val setFlagsRule = SetFlagsRule()
@@ -188,8 +187,8 @@ class TaskbarPopupControllerTest {
 
     private fun hasTaskbarDragView(): Boolean {
         return getOnUiThread {
-            val dragView: TaskbarDragView? =
-                taskbarContext.dragLayer.findViewByPredicate { it is TaskbarDragView }
+            val dragView: DragView<*>? =
+                taskbarContext.dragLayer.findViewByPredicate { it is DragView<*> }
             dragView != null
         }
     }

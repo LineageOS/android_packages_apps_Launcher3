@@ -33,7 +33,6 @@ import androidx.test.filters.SmallTest
 import com.android.launcher3.util.DisplayController
 import com.android.quickstep.SystemUiProxy
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_APP_LAUNCH_BUGFIX
-import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -72,23 +71,13 @@ class DesktopAppLaunchTransitionManagerTest {
     }
 
     @Test
-    @EnableFlags(FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX)
-    fun registerTransitions_appLaunchFlagEnabled_registersTransition() {
+    fun registerTransitions_registersTransition() {
         transitionManager.registerTransitions()
 
         verify(systemUiProxy, times(1)).registerRemoteTransition(any(), any())
     }
 
     @Test
-    @DisableFlags(FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX)
-    fun registerTransitions_appLaunchFlagDisabled_doesntRegisterTransition() {
-        transitionManager.registerTransitions()
-
-        verify(systemUiProxy, times(0)).registerRemoteTransition(any(), any())
-    }
-
-    @Test
-    @EnableFlags(FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX)
     @DisableFlags(FLAG_ENABLE_DESKTOP_APP_LAUNCH_BUGFIX)
     fun registerTransitions_usesCorrectFilter_flagDisabled() {
         transitionManager.registerTransitions()
@@ -109,10 +98,7 @@ class DesktopAppLaunchTransitionManagerTest {
     }
 
     @Test
-    @EnableFlags(
-        FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX,
-        FLAG_ENABLE_DESKTOP_APP_LAUNCH_BUGFIX,
-    )
+    @EnableFlags(FLAG_ENABLE_DESKTOP_APP_LAUNCH_BUGFIX)
     fun registerTransitions_usesCorrectFilter_flagEnabled() {
         transitionManager.registerTransitions()
         val filterArgumentCaptor = argumentCaptor<TransitionFilter>()

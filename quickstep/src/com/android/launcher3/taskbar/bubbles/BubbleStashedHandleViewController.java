@@ -118,7 +118,7 @@ public class BubbleStashedHandleViewController {
         mStashedBubbleBarHeight = resources.getDimensionPixelSize(
                 R.dimen.bubblebar_stashed_size);
         if (refactorTaskbarUiState()) {
-            mTaskbarUiState.setIsStashedHandlerViewVisible(
+            mTaskbarUiState.setIsBubbleBarStashedHandlerViewVisible(
                     mStashedHandleView.getVisibility() == VISIBLE);
             mTaskbarUiState.setStashedBubbleBarHeightPx(mStashedBubbleBarHeight);
         }
@@ -145,12 +145,12 @@ public class BubbleStashedHandleViewController {
                 }, Executors.TASKBAR_UI_THREAD, Executors.UI_HELPER_EXECUTOR);
 
         mStashedHandleView.addOnLayoutChangeListener((view, i, i1, i2, i3, i4, i5, i6, i7) -> {
-                    updateBounds(mBarViewController.getBubbleBarLocation());
-                    if (refactorTaskbarUiState()) {
-                        mTaskbarUiState.setIsStashedHandlerViewVisible(
-                                view.getVisibility() == VISIBLE);
-                    }
-                });
+            updateBounds(mBarViewController.getBubbleBarLocation());
+            if (refactorTaskbarUiState()) {
+                mTaskbarUiState.setIsBubbleBarStashedHandlerViewVisible(
+                        view.getVisibility() == VISIBLE);
+            }
+        });
     }
 
     /** Returns the [PhysicsAnimator] for the stashed handle view. */
@@ -178,7 +178,7 @@ public class BubbleStashedHandleViewController {
                 stashedCenterY + mStashedHandleHeight / 2
         );
         if (refactorTaskbarUiState() && mTaskbarUiState != null) {
-            mTaskbarUiState.setStashedHandlerViewRect(mStashedHandleBounds);
+            mTaskbarUiState.setBubbleBarStashedHandleViewRect(mStashedHandleBounds);
         }
         mStashedHandleView.updateSampledRegion(mStashedHandleBounds);
         mStashedHandleView.setPivotX(stashedCenterX);

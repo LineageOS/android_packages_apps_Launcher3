@@ -55,7 +55,7 @@
     <string name="back_gesture_feedback_complete_with_overview_follow_up" msgid="9176400654037014471">"Anda sudah belajar cara meleret dari kanan untuk kembali. Seterusnya, ketahui cara menukar apl."</string>
     <string name="back_gesture_feedback_complete_with_follow_up" msgid="8653374779579748392">"Anda telah melengkapkan gerak isyarat undur. Seterusnya, ketahui cara menukar apl."</string>
     <string name="back_gesture_feedback_complete_without_follow_up" msgid="197189945858268342">"Anda telah melengkapkan gerak isyarat untuk kembali"</string>
-    <string name="back_gesture_feedback_swipe_in_nav_bar" msgid="9157480023651452969">"Pastikan anda tidak meleret terlalu dekat dengan bahagian bawah skrin"</string>
+    <string name="back_gesture_feedback_swipe_in_nav_bar" msgid="9157480023651452969">"Jangan leret terlalu dekat dengan bahagian bawah skrin"</string>
     <string name="back_gesture_tutorial_confirm_subtitle" msgid="5181305411668713250">"Utk mengubah kepekaan gerak isyarat undur, pergi ke Tetapan"</string>
     <string name="back_gesture_intro_title" msgid="19551256430224428">"Leret untuk kembali"</string>
     <string name="back_gesture_intro_subtitle" msgid="7912576483031802797">"Untuk kembali ke skrin terakhir, leret dari tepi sebelah kiri atau kanan ke tengah skrin."</string>
@@ -179,6 +179,5 @@
     <string name="nudge_a11y_title" msgid="2126529303123687912">"Sigung"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"Tutup"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"Imej sigung"</string>
-    <!-- no translation found for running_app_description (1309281047289078871) -->
-    <skip />
+    <string name="running_app_description" msgid="1309281047289078871">"<xliff:g id="APP_TITLE">%1$s</xliff:g> <xliff:g id="RUNNING_STATE">%2$s</xliff:g>⁠"</string>
 </resources>

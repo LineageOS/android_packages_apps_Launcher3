@@ -20,6 +20,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.UserHandle
+import android.view.ContextThemeWrapper
 import android.window.OnBackAnimationCallback
 import android.window.OnBackInvokedDispatcher
 import androidx.activity.OnBackPressedDispatcher
@@ -29,10 +30,11 @@ import androidx.lifecycle.LifecycleOwner
 import com.android.launcher3.BaseActivity
 import com.android.launcher3.Flags
 import com.android.launcher3.R
-import com.android.launcher3.compose.ComposeFacade.isComposeAvailable
 import com.android.launcher3.dagger.LauncherComponentProvider
 import com.android.launcher3.dragndrop.SimpleDragLayer
 import com.android.launcher3.util.ScreenOnTracker
+import com.android.launcher3.util.SystemUiController
+import com.android.launcher3.util.Themes
 
 /**
  * Activity that shows widget picker UI; shows content only if `enableWidgetPickerRefactor` flag is
@@ -59,34 +61,45 @@ open class WidgetPickerActivity :
         _dragLayer = findViewById(R.id.drag_layer)
         checkNotNull(_dragLayer).recreateControllers()
 
+        updateStatusBarColor()
         checkNotNull(window)
             .decorView
             .setViewTreeOnBackPressedDispatcherOwner(onBackPressedDispatcherOwner = this)
 
-        if (Flags.enableWidgetPickerRefactor() && isComposeAvailable()) {
-            val appPackageName =
-                if (Flags.enableAppWidgetPickerRefactor()) {
-                    intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME)
-                } else {
-                    null
-                }
-
-            if (appPackageName != null) {
-                val userHandle =
-                    intent.getParcelableExtra(Intent.EXTRA_USER, UserHandle::class.java)
-
-                userHandle?.let {
-                    component.widgetPickerComposeWrapper.showWidgetsFor(
-                        packageName = appPackageName,
-                        userHandle = userHandle,
-                        activity = this,
-                        widgetPickerConfig = widgetPickerConfig,
-                    )
-                } ?: finish()
+        val appPackageName =
+            if (Flags.enableAppWidgetPickerRefactor()) {
+                intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME)
             } else {
-                component.widgetPickerComposeWrapper.showAllWidgets(this, widgetPickerConfig)
+                null
             }
+
+        if (appPackageName != null) {
+            val userHandle = intent.getParcelableExtra(Intent.EXTRA_USER, UserHandle::class.java)
+
+            userHandle?.let {
+                component.widgetPickerComposeWrapper.showWidgetsFor(
+                    packageName = appPackageName,
+                    userHandle = userHandle,
+                    activity = this,
+                    widgetPickerConfig = widgetPickerConfig,
+                )
+            } ?: finish()
+        } else {
+            component.widgetPickerComposeWrapper.showAllWidgets(this, widgetPickerConfig)
         }
+    }
+
+    private fun updateStatusBarColor() {
+        val contextTheme = ContextThemeWrapper(this, Themes.getActivityThemeRes(this))
+        val flags =
+            Themes.getAttrBoolean(contextTheme, R.attr.isWorkspaceDarkText).let { isLight ->
+                if (isLight) {
+                    SystemUiController.FLAG_LIGHT_STATUS
+                } else {
+                    SystemUiController.FLAG_DARK_STATUS
+                }
+            }
+        systemUiController?.updateUiState(SystemUiController.UI_STATE_WIDGET_BOTTOM_SHEET, flags)
     }
 
     override val onBackPressedDispatcher: OnBackPressedDispatcher

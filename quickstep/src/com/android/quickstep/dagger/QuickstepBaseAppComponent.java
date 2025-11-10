@@ -30,7 +30,9 @@ import com.android.launcher3.taskbar.TaskbarUiStateMonitor;
 import com.android.launcher3.taskbar.TaskbarViewCallbacksFactory;
 import com.android.launcher3.taskbar.bubbles.BubbleActivityStarter;
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator;
+import com.android.quickstep.FallbackActivityInterface;
 import com.android.quickstep.FallbackWindowInterface;
+import com.android.quickstep.LauncherActivityInterface;
 import com.android.quickstep.OverviewCommandHelper;
 import com.android.quickstep.OverviewComponentObserver;
 import com.android.quickstep.RecentsAnimationDeviceState;
@@ -50,8 +52,6 @@ import com.android.quickstep.recents.di.RecentsComponent;
 import com.android.quickstep.util.AsyncClockEventDelegate;
 import com.android.quickstep.util.ContextualSearchHapticManager;
 import com.android.quickstep.util.ContextualSearchStateManager;
-import com.android.quickstep.views.RecentsDismissUtils;
-import com.android.quickstep.views.RecentsViewUtils;
 import com.android.quickstep.window.RecentsWindowManager;
 import com.android.quickstep.window.RecentsWindowTracker;
 
@@ -99,10 +99,6 @@ public interface QuickstepBaseAppComponent extends LauncherBaseAppComponent {
 
     RecentsModel getRecentsModel();
 
-    RecentsViewUtils.Factory getRecentsViewUtilsFactory();
-
-    RecentsDismissUtils.Factory getRecentsDismissUtilsFactory();
-
     SettingsChangeLogger getSettingsChangeLogger();
 
     SimpleOrientationTouchTransformer getSimpleOrientationTouchTransformer();
@@ -135,4 +131,8 @@ public interface QuickstepBaseAppComponent extends LauncherBaseAppComponent {
     DesktopModeCompatPolicy getDesktopModeCompatPolicy();
 
     RecentsComponent.Factory getRecentsComponentFactory();
+
+    FallbackActivityInterface getFallbackActivityInterface();
+
+    LauncherActivityInterface getLauncherActivityInterface();
 }

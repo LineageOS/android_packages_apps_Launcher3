@@ -23,6 +23,7 @@ import android.os.SystemClock
 import android.view.CrossWindowBlurListeners
 import com.android.internal.R
 import com.android.internal.policy.DesktopModeCompatPolicy
+import com.android.launcher3.AbstractFloatingViewHelper
 import com.android.launcher3.Flags.enableSystemDrag
 import com.android.launcher3.backuprestore.LauncherRestoreEventLogger
 import com.android.launcher3.concurrent.annotations.ThreadPool
@@ -56,14 +57,19 @@ import com.android.launcher3.util.WindowBlurState.WINDOW_BLUR_STATE
 import com.android.launcher3.util.window.RefreshRateTracker
 import com.android.launcher3.util.window.WindowManagerProxy
 import com.android.launcher3.widget.LauncherWidgetHolder.WidgetHolderFactory
+import com.android.quickstep.AspectRatioSystemShortcut
+import com.android.quickstep.DesktopShortcut
+import com.android.quickstep.ExternalDisplayShortcut
 import com.android.quickstep.InstantAppResolverImpl
 import com.android.quickstep.LauncherRestoreEventLoggerImpl
+import com.android.quickstep.TaskShortcutFactory
 import com.android.quickstep.logging.StatsLogCompatManager.StatsLogCompatManagerFactory
 import com.android.quickstep.util.ChoreographerFrameRateTracker
 import com.android.quickstep.util.ContextualSearchStateManager
 import com.android.quickstep.util.GestureExclusionManager
 import com.android.quickstep.util.SystemWindowManagerProxy
 import com.android.systemui.shared.system.ActivityManagerWrapper
+import com.android.systemui.shared.system.TaskStackChangeListeners
 import com.android.wm.shell.shared.desktopmode.DesktopState
 import dagger.Binds
 import dagger.BindsOptionalOf
@@ -129,17 +135,18 @@ abstract class PluginManagerWrapperModule {
 object StaticObjectModule {
 
     @Provides
-    @JvmStatic
     fun provideGestureExclusionManager(): GestureExclusionManager = GestureExclusionManager.INSTANCE
 
+    @Provides fun provideRefreshRateTracker(): RefreshRateTracker = ChoreographerFrameRateTracker
+
     @Provides
-    @JvmStatic
-    fun provideRefreshRateTracker(): RefreshRateTracker = ChoreographerFrameRateTracker
+    fun provideActivityManagerWrapper(): ActivityManagerWrapper =
+        ActivityManagerWrapper.getInstance()
 
     @Provides
     @JvmStatic
-    fun provideActivityManagerWrapper(): ActivityManagerWrapper =
-        ActivityManagerWrapper.getInstance()
+    fun provideTaskStackChangeListeners(): TaskStackChangeListeners =
+        TaskStackChangeListeners.getInstance()
 
     @Provides
     @JvmStatic
@@ -167,6 +174,8 @@ object StaticObjectModule {
         lifecycle.addCloseable { blurListeners.removeListener(callback) }
         return value.asListenable()
     }
+
+    @Provides fun provideAbstractFloatingViewHelper() = AbstractFloatingViewHelper
 }
 
 @Module
@@ -224,7 +233,31 @@ object DesktopModule {
         DesktopModeCompatPolicy(context)
 
     @Provides
-    @JvmStatic
     fun provideDesktopState(@ApplicationContext context: Context): DesktopState =
         DesktopState.getInstance(context)
+}
+
+@Module
+object TaskOverlayModule {
+    @Provides
+    @LauncherAppSingleton
+    fun providePerTaskShortcutFactories(
+        desktopShortcutFactory: DesktopShortcut.Factory,
+        externalDisplayShortcutFactory: ExternalDisplayShortcut.Factory,
+        aspectRatioSystemShortcutFactory: AspectRatioSystemShortcut.Factory,
+    ): List<TaskShortcutFactory> =
+        listOf(
+            TaskShortcutFactory.APP_INFO,
+            TaskShortcutFactory.SPLIT_SELECT,
+            TaskShortcutFactory.PIN,
+            TaskShortcutFactory.INSTALL,
+            TaskShortcutFactory.FREE_FORM,
+            desktopShortcutFactory,
+            externalDisplayShortcutFactory,
+            aspectRatioSystemShortcutFactory,
+            TaskShortcutFactory.WELLBEING,
+            TaskShortcutFactory.SAVE_APP_PAIR,
+            TaskShortcutFactory.SCREENSHOT,
+            TaskShortcutFactory.MODAL,
+        )
 }

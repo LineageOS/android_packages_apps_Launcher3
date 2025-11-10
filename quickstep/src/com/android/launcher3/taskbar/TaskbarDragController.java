@@ -61,13 +61,10 @@ import com.android.app.animation.Interpolators;
 import com.android.internal.logging.InstanceId;
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.BubbleTextView;
-import com.android.launcher3.DragSource;
 import com.android.launcher3.DropTarget;
 import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.R;
-import com.android.launcher3.accessibility.DragViewStateAnnouncer;
 import com.android.launcher3.dragndrop.DragController;
-import com.android.launcher3.dragndrop.DragDriver;
 import com.android.launcher3.dragndrop.DragOptions;
 import com.android.launcher3.dragndrop.DragView;
 import com.android.launcher3.dragndrop.DraggableView;
@@ -296,7 +293,7 @@ public class TaskbarDragController extends DragController<BaseTaskbarContext> im
                 dragLayerY + dragOffset.y,
                 (View target, DropTarget.DragObject d, boolean success) ->
                         mIsDropHandledByDropTarget = success /* DragSource */,
-                btv.getTag() instanceof ItemInfo itemInfo ? itemInfo : null,
+                getItemInfoFromBubbleTextView(btv),
                 dragRect,
                 scale * iconScale,
                 scale,
@@ -304,31 +301,14 @@ public class TaskbarDragController extends DragController<BaseTaskbarContext> im
     }
 
     @Override
-    protected DragView startDrag(@Nullable Drawable drawable, @Nullable View view,
-            DraggableView originalView, int dragLayerX, int dragLayerY, DragSource source,
-            ItemInfo dragInfo, Rect dragRegion, float initialDragViewScale,
-            float dragViewScaleOnDrop, DragOptions options) {
-        mActivity.hideKeyboard();
-
-        mOptions = options;
-
+    protected DragView createDragView(@Nullable Drawable drawable, @Nullable View view,
+            DraggableView originalView, ItemInfo dragInfo, int dragLayerX, int dragLayerY,
+            Rect dragRegion, float initialDragViewScale, float dragViewScaleOnDrop) {
         mRegistrationX = mMotionDown.x - dragLayerX;
         mRegistrationY = mMotionDown.y - dragLayerY;
 
-        final int dragRegionLeft = dragRegion == null ? 0 : dragRegion.left;
-        final int dragRegionTop = dragRegion == null ? 0 : dragRegion.top;
-
-        mLastDropTarget = null;
-
-        mDragObject = new DropTarget.DragObject(mActivity.getApplicationContext());
-        mDragObject.originalView = originalView;
-        mDragObject.deferDragViewCleanupPostAnimation = false;
-
-        mIsInPreDrag = mOptions.preDragCondition != null
-                && !mOptions.preDragCondition.shouldStartDrag(0);
-
         float scalePx = mDragIconSize - dragRegion.width();
-        final DragView dragView = mDragObject.dragView = new TaskbarDragView(
+        return new DragView<>(
                 mActivity,
                 drawable,
                 mRegistrationX,
@@ -336,46 +316,12 @@ public class TaskbarDragController extends DragController<BaseTaskbarContext> im
                 initialDragViewScale,
                 dragViewScaleOnDrop,
                 scalePx);
-        if (dragInfo != null) {
-            dragView.setItemInfo(dragInfo);
-        }
-        mDragObject.dragComplete = false;
+    }
 
-        mDragObject.xOffset = mMotionDown.x - (dragLayerX + dragRegionLeft);
-        mDragObject.yOffset = mMotionDown.y - (dragLayerY + dragRegionTop);
-
-        mDragDriver = DragDriver.create(this, mOptions, /* secondaryEventConsumer = */ ev -> {});
-        if (!mOptions.isAccessibleDrag) {
-            mDragObject.stateAnnouncer = DragViewStateAnnouncer.createFor(dragView);
-        }
-
-        mDragObject.dragSource = source;
-        mDragObject.dragInfo = dragInfo;
-        mDragObject.originalDragInfo =
-                mDragObject.dragInfo != null ? mDragObject.dragInfo.makeShallowCopy() : null;
-
-        if (mOptions.preDragCondition != null) {
-            dragView.setHasDragOffset(mOptions.preDragCondition.getDragOffset().x != 0
-                    || mOptions.preDragCondition.getDragOffset().y != 0);
-        }
-
-        if (dragRegion != null) {
-            dragView.setDragRegion(new Rect(dragRegion));
-        }
-
-        dragView.show(mLastTouch.x, mLastTouch.y);
-        mDistanceSinceScroll = 0;
-
-        if (!mIsInPreDrag) {
-            callOnDragStart();
-        } else if (mOptions.preDragCondition != null) {
-            mOptions.preDragCondition.onPreDragStart(mDragObject);
-        }
-
-        handleMoveEvent(mLastTouch.x, mLastTouch.y);
-
+    @Override
+    protected void onDragViewInitialized() {
+        mDragObject.deferDragViewCleanupPostAnimation = false;
         updateIsDragging();
-        return dragView;
     }
 
     /** Invoked when an animation running as part of pre-drag finishes. */
@@ -391,6 +337,17 @@ public class TaskbarDragController extends DragController<BaseTaskbarContext> im
         return (mControllers.taskbarActivityContext.showDesktopTaskbarForFreeformDisplay()
                 || mControllers.taskbarActivityContext.showLockedTaskbarOnHome())
                 && mControllers.taskbarStashController.isOnHome();
+    }
+
+    private @Nullable ItemInfo getItemInfoFromBubbleTextView(BubbleTextView btv) {
+        Object tag = btv.getTag();
+        if (tag instanceof ItemInfo itemInfo) {
+            return itemInfo;
+        } else if (enableTaskbarDragAndDrop() && tag instanceof SingleTask singleTask) {
+            return singleTask.makeWorkspaceItem(mActivity);
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -859,11 +816,6 @@ public class TaskbarDragController extends DragController<BaseTaskbarContext> im
             return;
         }
         super.addDropTarget(target);
-    }
-
-    @Override
-    protected DropTarget getDefaultDropTarget(int[] dropCoordinates) {
-        return null;
     }
 
     interface TaskbarReturnPropertiesListener {

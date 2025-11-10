@@ -45,6 +45,9 @@ class DesktopRecentsTransitionController(
     private val appThread: IApplicationThread,
     private val depthController: DepthController<*, *>?,
 ) {
+    private var desktopLaunchRunner: RemoteDesktopLaunchTransitionRunner? = null
+
+    fun isDesktopLaunchOngoing() = desktopLaunchRunner != null
 
     /**
      * Launch desktop tasks from recents view and activate the new freeform task with id
@@ -56,14 +59,22 @@ class DesktopRecentsTransitionController(
         taskIdToReorderToFront: Int? = null,
         callback: Consumer<Boolean>? = null,
     ) {
+        if (desktopLaunchRunner != null) {
+            Log.d(TAG, "launchDesktopFromRecents - runner already exists: $desktopLaunchRunner")
+            callback?.accept(false)
+            return
+        }
         val animRunner =
             RemoteDesktopLaunchTransitionRunner(
-                desktopTaskView,
-                animated,
-                stateManager,
-                depthController,
-                callback,
-            )
+                    desktopTaskView,
+                    animated,
+                    stateManager,
+                    depthController,
+                ) { result ->
+                    this.desktopLaunchRunner = null
+                    callback?.accept(result)
+                }
+                .also { this.desktopLaunchRunner = it }
         val transition = RemoteTransition(animRunner, appThread, "RecentsToDesktop")
         if (areMultiDesksFlagsEnabled()) {
             systemUiProxy.activateDesk(
@@ -110,7 +121,7 @@ class DesktopRecentsTransitionController(
     ) : RemoteTransitionStub() {
 
         override fun onTransitionConsumed(transition: IBinder?, aborted: Boolean) {
-            Log.d(TAG, "onTransitionConsumed - aborted: $aborted")
+            Log.d(TAG, "onTransitionConsumed - aborted: $aborted - $this")
             if (aborted) {
                 // This transition can be consumed in the empty desk case when there are no windows
                 // to animate, which means the launcher won't animate to a NORMAL state. However in
@@ -119,6 +130,8 @@ class DesktopRecentsTransitionController(
                     stateManager.moveToRestState()
                     successCallback?.accept(true)
                 }
+            } else {
+                successCallback?.accept(true)
             }
         }
 
@@ -128,7 +141,7 @@ class DesktopRecentsTransitionController(
             t: SurfaceControl.Transaction,
             finishCallback: IRemoteTransitionFinishedCallback,
         ) {
-            Log.d(TAG, "startAnimation")
+            Log.d(TAG, "startAnimation - $this")
             val errorHandlingFinishCallback = Runnable {
                 try {
                     finishCallback.onTransitionFinished(null /* wct */, null /* sct */)
@@ -149,6 +162,7 @@ class DesktopRecentsTransitionController(
                         info,
                         t,
                     ) {
+                        Log.d(TAG, "finishedAnimation - $this")
                         errorHandlingFinishCallback.run()
                         successCallback?.accept(true)
                     }

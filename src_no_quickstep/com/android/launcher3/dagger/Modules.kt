@@ -16,6 +16,7 @@
 
 package com.android.launcher3.dagger
 
+import com.android.launcher3.AbstractFloatingViewHelper
 import com.android.launcher3.dragndrop.SystemDragController
 import com.android.launcher3.dragndrop.SystemDragControllerStub
 import com.android.launcher3.homescreenfiles.HomeScreenFilesNoOpProvider
@@ -48,8 +49,11 @@ abstract class WidgetModule {
 @Module abstract class PluginManagerWrapperModule
 
 @Module
-abstract class StaticObjectModule {
-    @Binds abstract fun bindRefreshRateTracker(tracker: RefreshRateTrackerImpl): RefreshRateTracker
+object StaticObjectModule {
+    @Provides
+    fun provideRefreshRateTracker(tracker: RefreshRateTrackerImpl): RefreshRateTracker = tracker
+
+    @Provides fun provideAbstractFloatingViewHelper() = AbstractFloatingViewHelper
 }
 
 @Module
@@ -87,4 +91,8 @@ object HomeScreenFilesModule {
     fun provideHomeScreenFilesProvider(): HomeScreenFilesProvider = HomeScreenFilesNoOpProvider()
 }
 
+// This module is empty in the no_quickstep variant as desktop mode is not supported.
 @Module object DesktopModule
+
+// This module is empty in the no_quickstep variant as task overlay is not supported.
+@Module object TaskOverlayModule

@@ -16,9 +16,9 @@
 
 package com.android.launcher3.taskbar
 
-import android.animation.AnimatorTestRule
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.Hotseat
 import com.android.launcher3.Launcher
@@ -29,13 +29,12 @@ import com.android.launcher3.SplitScreenUiState
 import com.android.launcher3.statemanager.StateManager
 import com.android.launcher3.taskbar.bubbles.BubbleControllers
 import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController
+import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.uioverrides.QuickstepLauncher
 import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
-import com.android.launcher3.util.LauncherMultivalentJUnit
-import com.android.launcher3.util.LauncherMultivalentJUnit.EmulatedDevices
 import com.android.launcher3.util.MutableListenableRef
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_AWAKE
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_WAKEFULNESS_TRANSITION
@@ -48,13 +47,14 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.whenever
 
-@RunWith(LauncherMultivalentJUnit::class)
-@EmulatedDevices(["pixel9profold", "pixelTablet2023"])
+@RunWith(AndroidJUnit4::class)
 class TaskbarLauncherStateControllerTest {
     @get:Rule(order = 0) val setFlagsRule = SetFlagsRule()
     @get:Rule(order = 1) val context = TaskbarWindowSandboxContext.create()
-    @get:Rule(order = 2) val animatorTestRule = AnimatorTestRule(this)
+    @get:Rule(order = 2) val animatorTestRule = TaskbarAnimatorTestRule(this)
     @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(testInstance = this, context)
 
     @InjectController lateinit var bubbleControllers: Optional<BubbleControllers>
@@ -127,7 +127,7 @@ class TaskbarLauncherStateControllerTest {
     private fun initForWakeTransitionWithBubbles(@SystemUiStateFlags sysUiStateFlags: Long) {
         val launcherStateManager =
             mock<StateManager<LauncherState, Launcher>> {
-                on { state } doReturn mock<LauncherState>()
+                on { state } doReturn LauncherState.NORMAL
             }
         val dp = taskbarUnitTestRule.activityContext.deviceProfile
         val mockedSplitScreenUiState =
@@ -146,11 +146,15 @@ class TaskbarLauncherStateControllerTest {
                 on { stateManager } doReturn launcherStateManager
                 on { launcherUiState } doReturn mockedLauncherUiState
             }
+        val launcherInteractor =
+            spy(LauncherInteractor(quickstepLauncher)) {
+                doReturn(dp).whenever(mock).getDeviceProfile()
+            }
         val controllers = taskbarUnitTestRule.activityContext.controllers
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             taskbarLauncherStateController.init(
                 controllers,
-                LauncherInteractor(quickstepLauncher),
+                launcherInteractor,
                 mockedLauncherUiState,
                 sysUiStateFlags,
                 TASKBAR_UI_THREAD,

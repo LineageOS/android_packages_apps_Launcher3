@@ -15,9 +15,26 @@
  */
 package com.android.launcher3.dagger
 
+import com.android.launcher3.Flags
+import com.android.launcher3.WorkspaceSelectionManager
+import com.android.launcher3.WorkspaceSelectionManagerImpl
+import com.android.launcher3.WorkspaceSelectionManagerStub
 import com.android.launcher3.views.ActivityContext
 import dagger.Module
+import dagger.Provides
 
 /** A Module that contains [ActivityContext] related bindings */
 @Module(includes = [ActivityContextModule::class, AppActivityContextModule::class])
-class LauncherActivityContextModule {}
+class LauncherActivityContextModule {
+    @Provides
+    @ActivityContextSingleton
+    fun provideWorkspaceSelectionManager(
+        activityContext: ActivityContext
+    ): WorkspaceSelectionManager {
+        return if (Flags.enableCursorDrivenWorkflows()) {
+            WorkspaceSelectionManagerImpl(activityContext)
+        } else {
+            WorkspaceSelectionManagerStub()
+        }
+    }
+}

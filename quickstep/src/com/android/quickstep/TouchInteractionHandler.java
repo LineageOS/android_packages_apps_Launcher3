@@ -46,10 +46,9 @@ import static com.android.quickstep.window.RecentsWindowFlags.enableOverviewOnCo
 import static com.android.systemui.shared.system.ActivityManagerWrapper.CLOSE_SYSTEM_WINDOWS_REASON_RECENTS;
 
 import android.app.ActivityManager;
-import android.app.Service;
 import android.app.contextualsearch.ContextualSearchConfig;
 import android.content.Context;
-import android.content.Intent;
+import android.content.ContextWrapper;
 import android.content.res.Configuration;
 import android.graphics.Region;
 import android.os.Bundle;
@@ -123,7 +122,6 @@ import com.android.quickstep.window.RecentsWindowFlags;
 import com.android.quickstep.window.RecentsWindowManager;
 import com.android.quickstep.window.RecentsWindowSwipeHandler;
 import com.android.systemui.shared.recents.ILauncherProxy;
-import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.statusbar.phone.BarTransitions;
 import com.android.systemui.shared.system.InputChannelCompat.InputEventReceiver;
 import com.android.systemui.shared.system.InputConsumerController;
@@ -131,19 +129,7 @@ import com.android.systemui.shared.system.InputMonitorCompat;
 import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
-import com.android.systemui.shared.system.smartspace.ISysuiUnlockAnimationController;
-import com.android.systemui.unfold.progress.IUnfoldAnimation;
-import com.android.wm.shell.back.IBackAnimation;
-import com.android.wm.shell.bubbles.IBubbles;
-import com.android.wm.shell.common.pip.IPip;
-import com.android.wm.shell.desktopmode.IDesktopMode;
-import com.android.wm.shell.draganddrop.IDragAndDrop;
-import com.android.wm.shell.onehanded.IOneHanded;
-import com.android.wm.shell.recents.IRecentTasks;
-import com.android.wm.shell.shared.IShellTransitions;
 import com.android.wm.shell.shared.desktopmode.DesktopState;
-import com.android.wm.shell.splitscreen.ISplitScreen;
-import com.android.wm.shell.startingsurface.IStartingWindow;
 
 import kotlinx.coroutines.CoroutineDispatcher;
 
@@ -157,9 +143,7 @@ import java.util.function.Function;
 /**
  * Service connected by system-UI for handling touch interaction.
  */
-public class TouchInteractionService extends Service {
-
-    private static final String SUBSTRING_PREFIX = "; ";
+public class TouchInteractionHandler extends ContextWrapper {
 
     private static final String TAG = "TouchInteractionService";
 
@@ -177,44 +161,16 @@ public class TouchInteractionService extends Service {
      */
     public static class TISBinder extends ILauncherProxy.Stub {
 
-        private final WeakReference<TouchInteractionService> mTis;
+        private final WeakReference<TouchInteractionHandler> mTis;
 
-        private TISBinder(TouchInteractionService tis) {
+        private TISBinder(TouchInteractionHandler tis) {
             mTis = new WeakReference<>(tis);
         }
 
         @BinderThread
         public void onInitialize(Bundle bundle) {
-            ISystemUiProxy proxy = ISystemUiProxy.Stub.asInterface(
-                    bundle.getBinder(ISystemUiProxy.DESCRIPTOR));
-            IPip pip = IPip.Stub.asInterface(bundle.getBinder(IPip.DESCRIPTOR));
-            IBubbles bubbles = IBubbles.Stub.asInterface(bundle.getBinder(IBubbles.DESCRIPTOR));
-            ISplitScreen splitscreen = ISplitScreen.Stub.asInterface(bundle.getBinder(
-                    ISplitScreen.DESCRIPTOR));
-            IOneHanded onehanded = IOneHanded.Stub.asInterface(
-                    bundle.getBinder(IOneHanded.DESCRIPTOR));
-            IShellTransitions shellTransitions = IShellTransitions.Stub.asInterface(
-                    bundle.getBinder(IShellTransitions.DESCRIPTOR));
-            IStartingWindow startingWindow = IStartingWindow.Stub.asInterface(
-                    bundle.getBinder(IStartingWindow.DESCRIPTOR));
-            ISysuiUnlockAnimationController launcherUnlockAnimationController =
-                    ISysuiUnlockAnimationController.Stub.asInterface(
-                            bundle.getBinder(ISysuiUnlockAnimationController.DESCRIPTOR));
-            IRecentTasks recentTasks = IRecentTasks.Stub.asInterface(
-                    bundle.getBinder(IRecentTasks.DESCRIPTOR));
-            IBackAnimation backAnimation = IBackAnimation.Stub.asInterface(
-                    bundle.getBinder(IBackAnimation.DESCRIPTOR));
-            IDesktopMode desktopMode = IDesktopMode.Stub.asInterface(
-                    bundle.getBinder(IDesktopMode.DESCRIPTOR));
-            IUnfoldAnimation unfoldTransition = IUnfoldAnimation.Stub.asInterface(
-                    bundle.getBinder(IUnfoldAnimation.DESCRIPTOR));
-            IDragAndDrop dragAndDrop = IDragAndDrop.Stub.asInterface(
-                    bundle.getBinder(IDragAndDrop.DESCRIPTOR));
             MAIN_EXECUTOR.execute(() -> executeForTouchInteractionService(tis -> {
-                SystemUiProxy.INSTANCE.get(tis).setProxy(proxy, pip,
-                        bubbles, splitscreen, onehanded, shellTransitions, startingWindow,
-                        recentTasks, launcherUnlockAnimationController, backAnimation, desktopMode,
-                        unfoldTransition, dragAndDrop);
+                SystemUiProxy.INSTANCE.get(tis).setInitializationParams(bundle);
                 tis.initInputMonitor("TISBinder#onInitialize()");
                 ActivityPreloadUtil.preloadOverviewForTIS(tis, true /* fromInit */);
             }));
@@ -511,8 +467,8 @@ public class TouchInteractionService extends Service {
         }
 
         private void executeForTouchInteractionService(
-                @NonNull Consumer<TouchInteractionService> tisConsumer) {
-            TouchInteractionService tis = mTis.get();
+                @NonNull Consumer<TouchInteractionHandler> tisConsumer) {
+            TouchInteractionHandler tis = mTis.get();
             if (tis == null) return;
             tisConsumer.accept(tis);
         }
@@ -533,20 +489,20 @@ public class TouchInteractionService extends Service {
          */
         @Nullable
         public TaskbarManager getTaskbarManager() {
-            TouchInteractionService tis = mTis.get();
+            TouchInteractionHandler tis = mTis.get();
             if (tis == null) return null;
             return tis.mTaskbarManager;
         }
 
         /** Returns the primary service */
         @VisibleForTesting
-        public TouchInteractionService getService() {
+        public TouchInteractionHandler getService() {
             return mTis.get();
         }
 
         @VisibleForTesting
         public void injectFakeTrackpadForTesting() {
-            TouchInteractionService tis = mTis.get();
+            TouchInteractionHandler tis = mTis.get();
             if (tis == null) return;
             tis.mTrackpadsConnected.add(1000);
             tis.initInputMonitor("tapl testing");
@@ -554,7 +510,7 @@ public class TouchInteractionService extends Service {
 
         @VisibleForTesting
         public void ejectFakeTrackpadForTesting() {
-            TouchInteractionService tis = mTis.get();
+            TouchInteractionHandler tis = mTis.get();
             if (tis == null) return;
             tis.mTrackpadsConnected.clear();
             // This method destroys the current input monitor if set up, and only init a new one
@@ -579,7 +535,7 @@ public class TouchInteractionService extends Service {
          */
         @Nullable
         public OverviewCommandHelper getOverviewCommandHelper() {
-            TouchInteractionService tis = mTis.get();
+            TouchInteractionHandler tis = mTis.get();
             if (tis == null) return null;
             return tis.mOverviewCommandHelper;
         }
@@ -688,37 +644,38 @@ public class TouchInteractionService extends Service {
                         // display.
                         return;
                     }
-                    if (mGestureState != DEFAULT_STATE) {
+                    BaseContainerInterface<?, ?> defaultContainerInterface =
+                            OverviewComponentObserver.INSTANCE.get(
+                                    TouchInteractionHandler.this).getContainerInterface(
+                                    DEFAULT_DISPLAY);
+                    if (defaultContainerInterface == null
+                            || !(defaultContainerInterface.getCreatedContainer()
+                            instanceof RecentsWindowManager recentsWindowManager)) {
+                        return;
+                    }
+                    TaskAnimationManager taskAnimationManager =
+                            mTaskAnimationManagerRepository.get(DEFAULT_DISPLAY);
+                    if (taskAnimationManager == null) {
+                        return;
+                    }
+                    if (taskAnimationManager.hasOngoingGesture()) {
                         // If there's an ongoing gesture, we shouldn't clean up the recents window
                         // since gestures will clean up the recents window when needed.
                         return;
                     }
-                    BaseContainerInterface<?, ?> defaultContainerInterface =
-                            OverviewComponentObserver.INSTANCE.get(
-                                    TouchInteractionService.this).getContainerInterface(
-                                    DEFAULT_DISPLAY);
-                    if (defaultContainerInterface != null
-                            && defaultContainerInterface.getCreatedContainer()
-                            instanceof RecentsWindowManager recentsWindowManager) {
-                        TaskAnimationManager taskAnimationManager =
-                                mTaskAnimationManagerRepository.get(DEFAULT_DISPLAY);
-                        if (taskAnimationManager == null) {
+                    if (taskAnimationManager.isRecentsAnimationRunning()) {
+                        RecentsState recentsState =
+                                recentsWindowManager.getStateManager().getState();
+                        if (!recentsState.isRecentsViewVisible()) {
+                            // If we're in a state where the recents view is visible, we can
+                            // ignore the recents animation running check, otherwise we should
+                            // wait for the recents animation to end.
                             return;
                         }
-                        if (taskAnimationManager.isRecentsAnimationRunning()) {
-                            RecentsState recentsState =
-                                    recentsWindowManager.getStateManager().getState();
-                            if (!recentsState.isRecentsViewVisible()) {
-                                // If we're in a state where the recents view is visible, we can
-                                // ignore the recents animation running check, otherwise we should
-                                // wait for the recents animation to end.
-                                return;
-                            }
-                        }
-                        if (recentsWindowManager.isStarted()) {
-                            recentsWindowManager.getStateManager().goToState(RecentsState.HOME,
-                                    true);
-                        }
+                    }
+                    if (recentsWindowManager.isStarted()) {
+                        recentsWindowManager.getStateManager().goToState(RecentsState.HOME,
+                                true);
                     }
                 }
             };
@@ -764,9 +721,8 @@ public class TouchInteractionService extends Service {
     private CoroutineDispatcher mMainCoroutineDispatcher;
     private DesktopState mDesktopState;
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
+    public TouchInteractionHandler(Context context) {
+        super(context);
         Log.d(TAG, "onCreate: user=" + getUserId()
                 + " instance=" + System.identityHashCode(this));
         // Initialize anything here that is needed in direct boot mode.
@@ -1007,7 +963,6 @@ public class TouchInteractionService extends Service {
         }
     }
 
-    @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy: user=" + getUserId()
                 + " instance=" + System.identityHashCode(this));
@@ -1041,13 +996,9 @@ public class TouchInteractionService extends Service {
             TaskStackChangeListeners.getInstance().unregisterTaskStackListener(
                     mHomeIntentStartedListener);
         }
-        super.onDestroy();
     }
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        Log.d(TAG, "onBind: user=" + getUserId()
-                + " instance=" + System.identityHashCode(this));
+    public IBinder getBinder() {
         return mTISBinder;
     }
 
@@ -1081,14 +1032,12 @@ public class TouchInteractionService extends Service {
         RecentsAnimationDeviceState deviceState = mDeviceStateRepository.get(displayId);
         if (deviceState == null) {
             Log.d(TAG, "RecentsAnimationDeviceState not available for displayId " + displayId);
-            ActiveGestureProtoLogProxy.logOnRecentsAnimationDeviceStateNotAvailable(displayId);
             return;
         }
 
         RotationTouchHelper rotationTouchHelper = mRotationTouchHelperRepository.get(displayId);
         if (rotationTouchHelper == null) {
             Log.d(TAG, "RotationTouchHelper not available for displayId " + displayId);
-            ActiveGestureProtoLogProxy.logOnRotationTouchHelperNotAvailable(displayId);
             return;
         }
 
@@ -1138,13 +1087,11 @@ public class TouchInteractionService extends Service {
         InputEventReceiver inputEventReceiver = getInputEventReceiver(displayId);
 
         if (inputMonitorCompat == null) {
-            Log.e(TAG, "InputMonitorCompat not available for displayId " + displayId);
-            ActiveGestureProtoLogProxy.logOnInputMonitorCompatNotAvailable(displayId);
+            Log.d(TAG, "InputMonitorCompat not available for displayId " + displayId);
             return;
         }
         if (inputEventReceiver == null) {
-            Log.e(TAG, "InputEventReceiver not available for displayId " + displayId);
-            ActiveGestureProtoLogProxy.logOnInputEventReceiverNotAvailable(displayId);
+            Log.d(TAG, "InputEventReceiver not available for displayId " + displayId);
             return;
         }
 
@@ -1403,7 +1350,6 @@ public class TouchInteractionService extends Service {
         }
     }
 
-    @Override
     public void onConfigurationChanged(Configuration newConfig) {
         if (!LockedUserState.get(this).isUserUnlocked()) {
             return;
@@ -1445,7 +1391,6 @@ public class TouchInteractionService extends Service {
         return config.smallestScreenWidthDp >= MIN_TABLET_WIDTH;
     }
 
-    @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] rawArgs) {
         // Dump everything
         if (LockedUserState.get(this).isUserUnlocked()) {
@@ -1569,7 +1514,6 @@ public class TouchInteractionService extends Service {
                 : DEFAULT_DISPLAY;
     }
 
-
     private OverviewGestureHandler createOverviewGestureHandler() {
         return new OverviewGestureHandler() {
             @Override
@@ -1597,7 +1541,7 @@ public class TouchInteractionService extends Service {
                     systemDecorationChangeObserver,
                     mDisplaysWithDecorationsRepositoryCompat,
                     mMainCoroutineDispatcher,
-                    /* debug= */ true);
+                    /* debug= */ false);
             initializeDisplays();
         }
 
@@ -1620,8 +1564,8 @@ public class TouchInteractionService extends Service {
             inputMonitorCompat = new InputMonitorCompat("swipe-up", displayId);
             inputEventReceiver = inputMonitorCompat.getInputReceiver(
                     Looper.getMainLooper(),
-                    TouchInteractionService.this.mMainChoreographer,
-                    TouchInteractionService.this::onInputEvent);
+                    TouchInteractionHandler.this.mMainChoreographer,
+                    TouchInteractionHandler.this::onInputEvent);
         }
 
         @Override

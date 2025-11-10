@@ -35,6 +35,7 @@ import com.android.launcher3.taskbar.TaskbarInteractor
 import com.android.launcher3.taskbar.TaskbarManager
 import com.android.launcher3.taskbar.TaskbarUIController
 import com.android.launcher3.uioverrides.QuickstepLauncher
+import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
 import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.TestDispatcherProvider
@@ -95,7 +96,7 @@ class OverviewCommandHelperTest {
     private val stateManager: StateManager<LauncherState, StatefulActivity<LauncherState>> = mock()
     private val containerInterface: BaseActivityInterface<LauncherState, QuickstepLauncher> = mock()
     private val taskAnimationManager: TaskAnimationManager = mock()
-    private val touchInteractionService: TouchInteractionService = mock()
+    private val mTouchInteractionHandler: TouchInteractionHandler = mock()
     private val taskbarManager: TaskbarManager = mock()
     private val taskbarUIController: TaskbarUIController = mock()
     private val taskbarInteractor: TaskbarInteractor = TaskbarInteractor(taskbarUIController)
@@ -126,15 +127,16 @@ class OverviewCommandHelperTest {
         whenever(launcher.getOverviewPanel<RecentsView<*, *>>()).thenReturn(recentView)
         whenever(containerInterface.createdContainer).thenReturn(launcher)
         whenever(containerInterface.taskbarInteractor).thenReturn(taskbarInteractor)
-        whenever(taskbarInteractor.launchFocusedTask().get())
+        whenever(taskbarUIController.launchFocusedTask())
             .thenReturn(REQUESTED_KEYBOARD_FOCUS_TASK_IDS)
-        whenever(taskbarManager.getUIControllerForDisplay(anyInt())).thenReturn(taskbarUIController)
+        whenever(taskbarManager.getTaskbarInteractor(any()))
+            .thenReturn(TaskbarInteractor(taskbarUIController))
         whenever(stateManager.state).thenReturn(OVERVIEW)
 
         sut =
             spy(
                 OverviewCommandHelper(
-                    touchInteractionService = touchInteractionService,
+                    touchInteractionHandler = mTouchInteractionHandler,
                     overviewComponentObserver = overviewComponentObserver,
                     dispatcherProvider = TestDispatcherProvider(dispatcher),
                     displayRepository = displayRepository,
@@ -592,7 +594,7 @@ class OverviewCommandHelperTest {
 
             runCurrent()
             assertThat(command.status).isEqualTo(CommandStatus.PROCESSING)
-            verify(touchInteractionService, never()).startActivity(any())
+            verify(mTouchInteractionHandler, never()).startActivity(any())
             verify(swipeUpHandler).onGestureStarted(any())
             verify(newGestureState)
                 .setHandlingAtomicEvent(GestureState.GestureEndTarget.REJECT_HOME)
@@ -698,6 +700,7 @@ class OverviewCommandHelperTest {
             val command = sut.addCommand(CommandType.SHOW_ALT_TAB, EXTERNAL_DISPLAY_ID)!!
             runCurrent()
             assertThat(command.status).isEqualTo(CommandStatus.COMPLETED)
+            TASKBAR_UI_THREAD.submit {}.get()
             verify(taskbarUIController).openQuickSwitchView()
             verify(recentView, never()).setKeyboardFocusTask(any())
         }
@@ -758,11 +761,11 @@ class OverviewCommandHelperTest {
         val swipeUpHandlerFactory = mock<AbsSwipeUpHandler.Factory>()
         val swipeUpHandler = mock<AbsSwipeUpHandler<*, *, *>>()
         val newGestureState = mock<GestureState>()
-        whenever(touchInteractionService.getSwipeUpHandlerFactory(any()))
+        whenever(mTouchInteractionHandler.getSwipeUpHandlerFactory(any()))
             .thenReturn(swipeUpHandlerFactory)
         whenever(swipeUpHandlerFactory.newHandler(any(), any())).thenReturn(swipeUpHandler)
         whenever(swipeUpHandler.getLaunchIntent()).thenReturn(Intent())
-        whenever(touchInteractionService.createGestureState(any(), any(), any()))
+        whenever(mTouchInteractionHandler.createGestureState(any(), any(), any()))
             .thenReturn(newGestureState)
         whenever(taskAnimationManager.isRecentsAnimationRunning).thenReturn(false)
         whenever(taskAnimationManager.startRecentsAnimation(any(), any(), any())).thenReturn(mock())

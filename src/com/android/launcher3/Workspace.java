@@ -60,6 +60,7 @@ import android.annotation.SuppressLint;
 import android.app.WallpaperManager;
 import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetProviderInfo;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
@@ -113,6 +114,7 @@ import com.android.launcher3.folder.Folder;
 import com.android.launcher3.folder.FolderIcon;
 import com.android.launcher3.folder.PreviewBackground;
 import com.android.launcher3.graphics.DragPreviewProvider;
+import com.android.launcher3.homescreenfiles.HomeScreenFile;
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider;
 import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils;
 import com.android.launcher3.homescreenfiles.HomeScreenFilesUtilsKt;
@@ -1849,20 +1851,29 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
         DragView<?> dv = null;
 
+        // TODO(458058227): Move this entire code block to [DragController].
         if (enableSystemDragToOtherApps()
                 && HomeScreenFilesUtilsKt.isFileSystemItem(dragObject)) {
-            dv = SystemDragController.INSTANCE.get(mLauncher).startDrag(
-                    new SystemDragParams(
-                            requireNonNull(drawable),
-                            dragObject,
-                            dragLayerX,
-                            dragLayerY,
-                            dragOptions,
-                            dragRect,
-                            source,
-                            /*dragViewScaleOnDrop=*/ scale,
-                            requireNonNull(draggableView),
-                            /*initialDragViewScale=*/ scale * iconScale));
+            final HomeScreenFile file = HomeScreenFilesUtilsKt.getHomeScreenFile(dragObject);
+            if (file != null) {
+                dv = SystemDragController.INSTANCE.get(mLauncher).startDrag(
+                        new SystemDragParams(
+                                new ClipData(
+                                        /*label=*/ "",
+                                        new String[] { file.getMimeType() },
+                                        new ClipData.Item(file.getUri())),
+                                /*closeAllOpenViews=*/ false,
+                                requireNonNull(drawable),
+                                dragObject,
+                                dragLayerX,
+                                dragLayerY,
+                                dragOptions,
+                                dragRect,
+                                source,
+                                /*dragViewScaleOnDrop=*/ scale,
+                                requireNonNull(draggableView),
+                                /*initialDragViewScale=*/ scale * iconScale));
+            }
         }
 
         if (dv == null) {
@@ -3566,6 +3577,18 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     @Override
     public View mapOverItems(@NonNull ItemOperator op) {
         return mapOverCellLayouts(getWorkspaceAndHotseatCellLayouts(), op);
+    }
+
+    @Override
+    public View mapOverVisibleItems(@NonNull ItemOperator op) {
+        IntSet visibleScreenIds = getVisiblePageIndices();
+        View result = mapOverItems((info, view) -> {
+            if (visibleScreenIds.contains(info.screenId)) {
+                return op.evaluate(info, view);
+            }
+            return false; // Continue iterating if not on a visible screen
+        });
+        return result;
     }
 
     /**

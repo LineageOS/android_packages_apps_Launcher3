@@ -37,6 +37,7 @@ import com.android.launcher3.dagger.LauncherModelModule
 import com.android.launcher3.dagger.SettingsModule
 import com.android.launcher3.dagger.StaticObjectModule
 import com.android.launcher3.dagger.SystemDragModule
+import com.android.launcher3.dagger.TaskOverlayModule
 import com.android.launcher3.dagger.WidgetModule
 import com.android.launcher3.dagger.WindowContext
 import com.android.launcher3.statehandlers.DesktopVisibilityController
@@ -101,6 +102,7 @@ interface TaskbarSandboxComponent : LauncherAppComponent {
             DesktopModule::class,
             SettingsModule::class,
             SystemDragModule::class,
+            TaskOverlayModule::class,
         ]
 )
 interface AllTaskbarSandboxModules

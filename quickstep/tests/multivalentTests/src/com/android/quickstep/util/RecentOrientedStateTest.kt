@@ -73,7 +73,7 @@ class RecentOrientedStateTest {
         spy(
             RecentsOrientedState(
                 ApplicationProvider.getApplicationContext(),
-                FallbackActivityInterface.INSTANCE,
+                FallbackActivityInterface.INSTANCE.get(ApplicationProvider.getApplicationContext()),
             )
         )
 

@@ -32,6 +32,8 @@ import com.android.launcher3.widgetpicker.ui.LocalWidgetPickerCuiReporter
 import com.android.launcher3.widgetpicker.ui.WidgetPickerCui
 import com.android.launcher3.widgetpicker.ui.WidgetPickerCuiReporter
 import com.android.launcher3.widgetpicker.ui.WidgetPickerEventListeners
+import com.android.launcher3.widgetpicker.ui.components.LocalWidgetPickerHostStateProvider
+import com.android.launcher3.widgetpicker.ui.components.WidgetPickerHostStateProvider
 import com.android.launcher3.widgetpicker.ui.components.accessibility.LocalAccessibilityState
 import com.android.launcher3.widgetpicker.ui.components.accessibility.produceAccessibilityState
 import com.android.launcher3.widgetpicker.ui.components.bottomsheet.SheetSize
@@ -58,7 +60,11 @@ class FullWidgetsCatalog
 @Inject
 constructor(private val viewModelFactory: FullWidgetsCatalogViewModel.Factory) {
     @Composable
-    fun Content(eventListeners: WidgetPickerEventListeners, cuiReporter: WidgetPickerCuiReporter) {
+    fun Content(
+        eventListeners: WidgetPickerEventListeners,
+        cuiReporter: WidgetPickerCuiReporter,
+        hostStateProvider: WidgetPickerHostStateProvider,
+    ) {
         val context = LocalContext.current
         val viewModel: FullWidgetsCatalogViewModel = rememberViewModel { viewModelFactory.create() }
 
@@ -73,6 +79,7 @@ constructor(private val viewModelFactory: FullWidgetsCatalogViewModel.Factory) {
         CompositionLocalProvider(
             LocalWidgetPickerCuiReporter provides cuiReporter,
             LocalAccessibilityState provides accessibilityState,
+            LocalWidgetPickerHostStateProvider provides hostStateProvider,
         ) {
             FullWidgetsCatalogContent(
                 viewModel = viewModel,

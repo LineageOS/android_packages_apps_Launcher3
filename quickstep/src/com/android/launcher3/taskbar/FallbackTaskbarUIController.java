@@ -108,14 +108,16 @@ public class FallbackTaskbarUIController
         if (mControllers.taskbarActivityContext.isPhoneMode()) {
             return null;
         }
+        FallbackActivityInterface activityInterface =
+                FallbackActivityInterface.INSTANCE.get(mControllers.taskbarActivityContext);
         if (enableTaskbarUiThread()) {
             return new TaskbarAsyncAnimator(TASKBAR_UI_THREAD, MAIN_EXECUTOR,
                     () -> createAnimToRecentsState(
-                            FallbackActivityInterface.INSTANCE.stateFromGestureEndTarget(endTarget),
+                            activityInterface.stateFromGestureEndTarget(endTarget),
                             duration));
         } else {
             Animator animator = createAnimToRecentsState(
-                    FallbackActivityInterface.INSTANCE.stateFromGestureEndTarget(endTarget),
+                    activityInterface.stateFromGestureEndTarget(endTarget),
                     duration);
             return animator != null ? new ImmediateAnimator(animator) : null;
         }

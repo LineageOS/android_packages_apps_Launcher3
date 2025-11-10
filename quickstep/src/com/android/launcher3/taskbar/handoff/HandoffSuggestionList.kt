@@ -36,24 +36,28 @@ class HandoffSuggestionList {
         Log.v(TAG, "Updating handoff suggestions.")
         var didChange = false
         for (remoteTask in remoteTasks) {
-            val suggestion = previousSuggestions[remoteTask.deviceId]
+            val suggestion = previousSuggestions[remoteTask.companionDeviceAssociationId]
             if (suggestion == null) {
-                previousSuggestions[remoteTask.deviceId] = HandoffSuggestion(remoteTask)
+                previousSuggestions[remoteTask.companionDeviceAssociationId] =
+                    HandoffSuggestion(remoteTask)
 
-                Log.v(TAG, "Adding new suggestion for deviceId ${remoteTask.deviceId}")
+                Log.v(
+                    TAG,
+                    "Adding new suggestion for id ${remoteTask.companionDeviceAssociationId}",
+                )
                 didChange = true
             } else {
-                Log.v(TAG, "Updating suggestion for deviceId ${remoteTask.deviceId}")
-                previousSuggestions[remoteTask.deviceId]?.updateRemoteTask(remoteTask)
+                Log.v(TAG, "Updating suggestion for id${remoteTask.companionDeviceAssociationId}")
+                previousSuggestions[remoteTask.companionDeviceAssociationId]?.updateRemoteTask(
+                    remoteTask
+                )
             }
         }
 
-        for (deviceId in previousSuggestions.keys) {
-            if (remoteTasks.none { it.deviceId == deviceId }) {
-                Log.v(TAG, "Removing suggestion for deviceId ${deviceId}")
-                previousSuggestions.remove(deviceId)
-                didChange = true
-            }
+        val remoteAssociationIds = remoteTasks.map { it.companionDeviceAssociationId }.toSet()
+        if (previousSuggestions.keys.retainAll(remoteAssociationIds)) {
+            Log.v(TAG, "Removing suggestions")
+            didChange = true
         }
 
         Log.v(TAG, "Finished updating handoff suggestions. didChange=$didChange")

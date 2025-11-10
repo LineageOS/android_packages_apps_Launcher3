@@ -256,7 +256,7 @@ public class TestInformationHandler {
 
             case TestProtocol.REQUEST_NUM_ALL_APPS_COLUMNS:
                 response.putInt(TestProtocol.TEST_INFO_RESPONSE_FIELD,
-                        mDeviceProfile.numShownAllAppsColumns);
+                        mDeviceProfile.getAllAppsProfile().getNumShownAllAppsColumns());
                 return response;
 
             case TestProtocol.REQUEST_IS_TRANSIENT_TASKBAR:

@@ -198,9 +198,6 @@ public class TransformParams {
 
     private void overrideFreeformChangeLeashCornerRadiusToZero(
             RemoteAnimationTarget app, SurfaceControl.Transaction transaction) {
-        if (!Flags.enableDesktopRecentsTransitionsCornersBugfix()) {
-            return;
-        }
         if (app.taskInfo == null || !app.taskInfo.isFreeform()) {
             return;
         }

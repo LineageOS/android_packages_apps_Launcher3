@@ -16,9 +16,9 @@
 
 package com.android.launcher3.taskbar.handoff
 
+import android.companion.Flags.taskContinuity
 import android.companion.datatransfer.continuity.RemoteTask
 import android.companion.datatransfer.continuity.TaskContinuityManager
-import android.companion.Flags.taskContinuity
 import android.os.Handler
 import android.util.Log
 import com.android.launcher3.taskbar.TaskbarActivityContext
@@ -96,7 +96,7 @@ class TaskbarHandoffController(val taskbarActivityContext: TaskbarActivityContex
             if (DEBUG) {
                 Log.d(
                     TAG,
-                    "HandoffSuggestion metadata updated for deviceId ${suggestion.deviceId}.",
+                    "HandoffSuggestion metadata updated for associationId ${suggestion.associationId}.",
                 )
             }
             taskbarControllers.taskbarViewController.onHandoffSuggestionUpdated(suggestion)

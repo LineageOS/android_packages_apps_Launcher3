@@ -19,10 +19,17 @@ package com.android.launcher3.taskbar
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.Flags
 import com.android.launcher3.Utilities
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.asProperty
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
+import com.android.launcher3.taskbar.edu.TooltipEduCombinator.Companion.TASKBAR_BUBBLES_EDU_SEEN_FLAG
+import com.android.launcher3.taskbar.edu.TooltipEduCombinator.Companion.TASKBAR_PINNING_EDU_SEEN_FLAG
+import com.android.launcher3.taskbar.edu.TooltipEduCombinator.Companion.TASKBAR_SEARCH_EDU_SEEN_FLAG
+import com.android.launcher3.taskbar.edu.TooltipEduCombinator.Companion.TASKBAR_SPLIT_EDU_SEEN_FLAG
+import com.android.launcher3.taskbar.edu.TooltipEduCombinator.Companion.TASKBAR_SUGGESTIONS_EDU_SEEN_FLAG
+import com.android.launcher3.taskbar.edu.TooltipEduCombinator.Companion.TASKBAR_SWIPE_EDU_SEEN_FLAG
 import com.android.launcher3.taskbar.rules.TaskbarModeRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.PINNED
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.THREE_BUTTONS
@@ -31,8 +38,6 @@ import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
-import com.android.launcher3.util.LauncherMultivalentJUnit
-import com.android.launcher3.util.LauncherMultivalentJUnit.EmulatedDevices
 import com.android.launcher3.util.OnboardingPrefs
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
@@ -41,8 +46,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@RunWith(LauncherMultivalentJUnit::class)
-@EmulatedDevices(["pixelFoldable2023", "pixelTablet2023"])
+@RunWith(AndroidJUnit4::class)
 class TaskbarEduTooltipControllerTest {
 
     @get:Rule(order = 0) val setFlagsRule = SetFlagsRule()
@@ -68,6 +72,7 @@ class TaskbarEduTooltipControllerTest {
     @Before
     fun setUp() {
         Utilities.disableRunningInTestHarnessForTests()
+        taskbarEduTooltipController.shouldShowSearchEduResolver = { true }
     }
 
     @After
@@ -115,7 +120,7 @@ class TaskbarEduTooltipControllerTest {
         tooltipStep = TOOLTIP_STEP_SWIPE
         assertThat(taskbarEduTooltipController.tooltipStep).isEqualTo(TOOLTIP_STEP_SWIPE)
         runOnMainSync { taskbarEduTooltipController.maybeShowSwipeEdu() }
-        assertThat(tooltipEduCombinator.userHasSeenSwipeEdu).isTrue()
+        assertThat(tooltipEduCombinator.getFlag(TASKBAR_SWIPE_EDU_SEEN_FLAG)).isTrue()
         assertThat(taskbarEduTooltipController.isTooltipOpen).isTrue()
     }
 
@@ -134,8 +139,10 @@ class TaskbarEduTooltipControllerTest {
     @TaskbarMode(TRANSIENT)
     @EnableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
     fun testMaybeShowFeaturesEdu_whenFeatureEduAlreadyShown_doesNotShowFeatureEdu_eduCombinator() {
-        tooltipEduCombinator.userHasSeenFeaturesEdu = true
-        tooltipEduCombinator.userHasSeenPinningEdu = true
+        tooltipEduCombinator.setFlag(TASKBAR_SPLIT_EDU_SEEN_FLAG)
+        tooltipEduCombinator.setFlag(TASKBAR_BUBBLES_EDU_SEEN_FLAG)
+        tooltipEduCombinator.setFlag(TASKBAR_SUGGESTIONS_EDU_SEEN_FLAG)
+        tooltipEduCombinator.setFlag(TASKBAR_PINNING_EDU_SEEN_FLAG)
         runOnMainSync { taskbarEduTooltipController.maybeShowFeaturesEdu() }
         assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
     }
@@ -156,8 +163,11 @@ class TaskbarEduTooltipControllerTest {
     @EnableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
     fun testMaybeShowFeaturesEdu_whenUserHasNotSeen_doesShowFeatureEdu_eduCombinator() {
         runOnMainSync { taskbarEduTooltipController.maybeShowFeaturesEdu() }
-        assertThat(tooltipEduCombinator.userHasSeenFeaturesEdu).isTrue()
-        assertThat(tooltipEduCombinator.userHasSeenPinningEdu).isTrue()
+        assertThat(tooltipEduCombinator.getFlag(TASKBAR_SWIPE_EDU_SEEN_FLAG)).isTrue()
+        assertThat(tooltipEduCombinator.getFlag(TASKBAR_SPLIT_EDU_SEEN_FLAG)).isTrue()
+        assertThat(tooltipEduCombinator.getFlag(TASKBAR_BUBBLES_EDU_SEEN_FLAG)).isTrue()
+        assertThat(tooltipEduCombinator.getFlag(TASKBAR_SUGGESTIONS_EDU_SEEN_FLAG)).isTrue()
+        assertThat(tooltipEduCombinator.getFlag(TASKBAR_PINNING_EDU_SEEN_FLAG)).isTrue()
         assertThat(taskbarEduTooltipController.isTooltipOpen).isTrue()
     }
 
@@ -176,8 +186,10 @@ class TaskbarEduTooltipControllerTest {
     @TaskbarMode(THREE_BUTTONS)
     @EnableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
     fun testMaybeShowPinningEdu_whenTaskbarIsInThreeButtonMode_doesNotShowPinningEdu_eduCombinator() {
-        tooltipEduCombinator.userHasSeenFeaturesEdu = true
-        tooltipEduCombinator.userHasSeenPinningEdu = false
+        tooltipEduCombinator.setFlag(TASKBAR_SPLIT_EDU_SEEN_FLAG)
+        tooltipEduCombinator.setFlag(TASKBAR_BUBBLES_EDU_SEEN_FLAG)
+        tooltipEduCombinator.setFlag(TASKBAR_SUGGESTIONS_EDU_SEEN_FLAG)
+        tooltipEduCombinator.setFlag(TASKBAR_PINNING_EDU_SEEN_FLAG)
         runOnMainSync { taskbarEduTooltipController.maybeShowFeaturesEdu() }
         assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
     }
@@ -199,10 +211,9 @@ class TaskbarEduTooltipControllerTest {
     @EnableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
     fun testMaybeShowPinningEdu_whenUserHasNotSeen_doesShowPinningEdu_eduCombinator() {
         // Test standalone pinning edu, where user has seen taskbar edu before, but not pinning edu.
-        tooltipEduCombinator.userHasSeenFeaturesEdu = true
-        tooltipEduCombinator.userHasSeenPinningEdu = false
+        tooltipEduCombinator.setFlag(TASKBAR_PINNING_EDU_SEEN_FLAG)
         runOnMainSync { taskbarEduTooltipController.maybeShowFeaturesEdu() }
-        assertThat(tooltipEduCombinator.userHasSeenPinningEdu).isTrue()
+        assertThat(tooltipEduCombinator.getFlag(TASKBAR_PINNING_EDU_SEEN_FLAG)).isTrue()
         assertThat(taskbarEduTooltipController.isTooltipOpen).isTrue()
     }
 
@@ -243,15 +254,40 @@ class TaskbarEduTooltipControllerTest {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
     @TaskbarMode(PINNED)
-    fun testMaybeShowSearchEdu_whenTaskbarIsPinnedAndUserHasSeenSearchEdu_shouldNotShowSearchEdu() {
-        searchEduSeen = true
+    fun testMaybeShowSearchEdu_whenTaskbarIsPinned_shouldShowSearchEdu() {
+        runOnMainSync { taskbarEduTooltipController.maybeShowSearchEdu() }
+        assertThat(taskbarEduTooltipController.isTooltipOpen).isTrue()
         assertThat(taskbarEduTooltipController.userHasSeenSearchEdu).isTrue()
-        runOnMainSync { taskbarEduTooltipController.hide() }
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
+    @TaskbarMode(PINNED)
+    fun testMaybeShowSearchEdu_whenTaskbarIsPinned_shouldShowSearchEdu_eduCombinator() {
+        runOnMainSync { taskbarEduTooltipController.maybeShowSearchEdu() }
+        assertThat(taskbarEduTooltipController.isTooltipOpen).isTrue()
+        assertThat(tooltipEduCombinator.getFlag(TASKBAR_SEARCH_EDU_SEEN_FLAG)).isTrue()
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
+    @TaskbarMode(PINNED)
+    fun testMaybeShowSearchEdu_whenTaskbarIsPinnedUserSeenSearch_noEduShown() {
+        searchEduSeen = true
+        runOnMainSync { taskbarEduTooltipController.maybeShowSearchEdu() }
         assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
-        runOnMainSync {
-            taskbarEduTooltipController.init(taskbarContext.controllers, TaskbarUiState())
-        }
+        assertThat(taskbarEduTooltipController.userHasSeenSearchEdu).isTrue()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
+    @TaskbarMode(PINNED)
+    fun testMaybeShowSearchEdu_whenTaskbarIsPinnedUserSeenSearch_noEduShown_eduCombinator() {
+        tooltipEduCombinator.setFlag(TASKBAR_SEARCH_EDU_SEEN_FLAG)
+        runOnMainSync { taskbarEduTooltipController.maybeShowSearchEdu() }
         assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
+        assertThat(tooltipEduCombinator.getFlag(TASKBAR_SEARCH_EDU_SEEN_FLAG)).isTrue()
     }
 }

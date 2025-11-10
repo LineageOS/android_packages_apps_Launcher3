@@ -95,10 +95,16 @@ constructor(
 ) : LoggableTaskbarController {
 
     protected val activityContext = activityContext as TaskbarActivityContext
+
+    @VisibleForTesting
+    /** Indicates whether the search educational tooltip should be shown. */
+    var shouldShowSearchEduResolver: () -> Boolean = {
+        ContextualSearchInvoker(this.activityContext)
+            .runContextualSearchInvocationChecksAndLogFailures()
+    }
+
     open val shouldShowSearchEdu: Boolean
-        get() =
-            ContextualSearchInvoker(activityContext)
-                .runContextualSearchInvocationChecksAndLogFailures()
+        get() = shouldShowSearchEduResolver.invoke()
 
     private val isTooltipEnabled: Boolean
         get() {
@@ -138,11 +144,8 @@ constructor(
             updateShouldShowEduOnAppLaunch()
         }
 
-    val userHasSeenFeaturesEdu: Boolean
-        get() = tooltipEduCombinator.userHasSeenFeaturesEdu
-
-    val userHasSeenPinningEdu: Boolean
-        get() = tooltipEduCombinator.userHasSeenPinningEdu
+    val hasFeaturesEduToShow: Boolean
+        get() = tooltipEduCombinator.hasFeaturesEduToShow()
 
     /** Controls setting the [FLAG_AUTOHIDE_SUSPEND_EDU_OPEN] flag to false on tooltip close */
     private var releaseTaskbarBlock = true
@@ -153,7 +156,9 @@ constructor(
         this.controllers = controllers
         this.taskbarUIState = taskbarUiState
         tooltipEduCombinator =
-            TooltipEduCombinator(activityContext, controllers.taskbarStashController)
+            TooltipEduCombinator(activityContext, controllers.taskbarStashController) {
+                shouldShowSearchEdu
+            }
         updateShouldShowEduOnAppLaunch()
         // We want to show the Search Edu right after pinning the taskbar, so we post it here
         activityContext.dragLayer.post { maybeShowSearchEdu() }
@@ -169,7 +174,7 @@ constructor(
         }
         val uiController = controllers.uiController
         if (uiController is LauncherTaskbarUIController) {
-            taskbarUIState.shouldShowEduOnAppLaunch = uiController.shouldShowEduOnAppLaunch()
+            taskbarUIState.showTaskbarEduOnAppLaunch = uiController.shouldShowEduOnAppLaunch()
         }
     }
 
@@ -569,10 +574,7 @@ constructor(
         pw?.println("$prefix\tisOpen=$isTooltipOpen")
         pw?.println("$prefix\ttooltipStep=$tooltipStep")
         if (Flags.tooltipEduCombinator()) {
-            pw?.println("$prefix\tisSwipeShown=${tooltipEduCombinator.userHasSeenSwipeEdu}")
-            pw?.println("$prefix\tisFeaturesShown=${tooltipEduCombinator.userHasSeenFeaturesEdu}")
-            pw?.println("$prefix\tisPinningShown=${tooltipEduCombinator.userHasSeenPinningEdu}")
-            pw?.println("$prefix\tisSearchShown=${tooltipEduCombinator.userHasSeenSearchEdu}")
+            tooltipEduCombinator.dumpLogs(prefix, pw)
         }
     }
 
@@ -678,6 +680,12 @@ constructor(
         } else {
             TypefaceUtils.setTypeface(eduDescription, FontFamily.GSF_BODY_MEDIUM)
             eduDescription.text = tooltipInfo.message
+            // Set a movement method only if the text is a SpannableString
+            if (tooltipInfo.message is SpannableString) {
+                eduDescription.movementMethod = LinkMovementMethod.getInstance()
+            } else {
+                eduDescription.movementMethod = null
+            }
         }
     }
 
