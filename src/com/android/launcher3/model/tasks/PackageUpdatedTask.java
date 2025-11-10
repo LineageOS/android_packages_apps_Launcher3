@@ -32,6 +32,7 @@ import android.os.UserHandle;
 import androidx.annotation.NonNull;
 
 import com.android.launcher3.LauncherModel.ModelUpdateTask;
+import com.android.launcher3.automation.AutomationRepository;
 import com.android.launcher3.icons.IconCache;
 import com.android.launcher3.logging.FileLog;
 import com.android.launcher3.model.AllAppsList;
@@ -183,7 +184,9 @@ public class PackageUpdatedTask implements ModelUpdateTask {
                             itemInfo, activityInfo,
                             UserCache.INSTANCE.get(context).getUserInfo(mUser),
                             ApiWrapper.INSTANCE.get(context),
-                            PackageManagerHelper.INSTANCE.get(context));
+                            PackageManagerHelper.INSTANCE.get(context),
+                            AutomationRepository.INSTANCE.get(context)
+                    );
                     iconCache.getTitleAndIcon(itemInfo, itemInfo.getMatchingLookupFlag());
 
                     if (itemInfo.id != ItemInfo.NO_ID) {

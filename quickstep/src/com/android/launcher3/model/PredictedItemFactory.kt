@@ -30,6 +30,7 @@ import androidx.annotation.VisibleForTesting
 import com.android.launcher3.LauncherModel
 import com.android.launcher3.LauncherModel.ModelUpdateTask
 import com.android.launcher3.LauncherSettings.Favorites
+import com.android.launcher3.automation.AutomationRepository
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.icons.IconCache
 import com.android.launcher3.icons.cache.CacheLookupFlag
@@ -58,6 +59,7 @@ constructor(
     private val userCache: UserCache,
     private val apiWrapper: ApiWrapper,
     private val iconCache: IconCache,
+    private val automationRepo: AutomationRepository,
     @Assisted private val maxItemCount: Int,
     @Assisted private val predictorState: PredictorState,
 ) : ItemFactory<ItemInfo> {
@@ -82,6 +84,7 @@ constructor(
                         userCache.userManagerState.getCachedInfo(user),
                         apiWrapper,
                         pmHelper,
+                        automationRepo,
                     )
                 info.container = predictorState.containerId
                 iconCache.getTitleAndIcon(info, lai, predictorState.lookupFlag)

@@ -63,6 +63,7 @@ import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.LauncherModel;
 import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.Utilities;
+import com.android.launcher3.automation.AutomationRepository;
 import com.android.launcher3.backuprestore.LauncherRestoreEventLogger;
 import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.folder.FolderNameInfos;
@@ -186,6 +187,7 @@ public class LoaderTask implements Runnable {
     private final SettingsCache mSettingsCache;
     private final BrowserIconMigratorFactory mBrowserIconMigratorFactory;
     private final LauncherPrefs mPrefs;
+    private final AutomationRepository mAutomationRepo;
 
     @AssistedInject
     protected LoaderTask(
@@ -212,7 +214,8 @@ public class LoaderTask implements Runnable {
             FirstScreenBroadcastHelper firstScreenBroadcastHelper,
             SettingsCache settingsCache,
             BrowserIconMigratorFactory browserIconMigratorFactory,
-            LauncherPrefs prefs) {
+            LauncherPrefs prefs,
+            AutomationRepository automationRepo) {
         mContext = context;
         mIDP = idp;
         mModel = model;
@@ -240,6 +243,7 @@ public class LoaderTask implements Runnable {
         mUserManagerState = mUserCache.getUserManagerState();
         mBrowserIconMigratorFactory = browserIconMigratorFactory;
         mPrefs = prefs;
+        mAutomationRepo = automationRepo;
 
         // NOTE: When files on home screen initialization is decoupled from the loader task we must
         // wait for the provider to become ready before querying for file system items.
@@ -522,7 +526,8 @@ public class LoaderTask implements Runnable {
                         mShortcutKeyToPinnedShortcuts, mContext, mIDP, mIconCache,
                         mIsSafeModeEnabled, installingPkgs, isSdCardReady, widgetInflater,
                         mPmHelper, mWorkspaceIconRequestInfos, unlockedUsers, allDeepShortcuts,
-                        mWidgetSizeHandler, mWorkspaceItemSpaceFinder, mHomeScreenFilesQueryResult);
+                        mWidgetSizeHandler, mWorkspaceItemSpaceFinder, mHomeScreenFilesQueryResult,
+                        mAutomationRepo);
 
                 if (mStopped) {
                     Log.w(TAG, "loadWorkspaceImpl: Loader stopped, skipping item processing");
@@ -686,7 +691,7 @@ public class LoaderTask implements Runnable {
             for (int i = 0; i < apps.size(); i++) {
                 LauncherActivityInfo app = apps.get(i);
                 AppInfo appInfo = new AppInfo(app, cachedUserInfo,
-                        ApiWrapper.INSTANCE.get(mContext), mPmHelper);
+                        ApiWrapper.INSTANCE.get(mContext), mPmHelper, mAutomationRepo);
                 if (Flags.enableSupportForArchiving() && app.getApplicationInfo().isArchived) {
                     // For archived apps, include progress info in case there is a pending
                     // install session post restart of device.

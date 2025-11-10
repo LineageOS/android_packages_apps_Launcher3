@@ -40,6 +40,7 @@ import com.android.launcher3.LauncherSettings.Favorites.TABLE_NAME
 import com.android.launcher3.LauncherSettings.Favorites._ID
 import com.android.launcher3.Utilities.qsbOnFirstScreen
 import com.android.launcher3.WorkspaceLayoutManager
+import com.android.launcher3.automation.AutomationRepository
 import com.android.launcher3.backuprestore.LauncherRestoreEventLogger.RestoreError
 import com.android.launcher3.folder.Folder
 import com.android.launcher3.folder.FolderGridOrganizer.createFolderGridOrganizer
@@ -56,6 +57,7 @@ import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.IconRequestInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.ItemInfoWithIcon
+import com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_AUTOMATED
 import com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_DISABLED_FILE_SYSTEM_NOT_READY
 import com.android.launcher3.model.data.LauncherAppWidgetInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
@@ -104,6 +106,7 @@ class WorkspaceItemProcessor(
     private val widgetSizeHandler: WidgetSizeHandler,
     private val workspaceItemSpaceFinder: WorkspaceItemSpaceFinder,
     private val homeScreenFiles: CompletableFuture<Map<Uri, HomeScreenFile>>,
+    private val automationRepo: AutomationRepository,
 ) {
 
     private val loadedItems = IntSparseArrayMap<ItemInfo>()
@@ -398,6 +401,14 @@ class WorkspaceItemProcessor(
                 info.runtimeStatusFlags =
                     info.runtimeStatusFlags or ItemInfoWithIcon.FLAG_DISABLED_SAFEMODE
             }
+            if (
+                Flags.enableAppAutomationIndicator() &&
+                    automationRepo.isPackageAutomated(info.user, targetPkg)
+            ) {
+                info.runtimeStatusFlags = info.runtimeStatusFlags or FLAG_AUTOMATED
+            } else {
+                info.runtimeStatusFlags = info.runtimeStatusFlags and FLAG_AUTOMATED.inv()
+            }
             val activityInfo = c.launcherActivityInfo
             if (activityInfo != null) {
                 AppInfo.updateRuntimeFlagsForActivityTarget(
@@ -406,6 +417,7 @@ class WorkspaceItemProcessor(
                     userManagerState.getUserInfo(c.user),
                     ApiWrapper.INSTANCE[context],
                     pmHelper,
+                    automationRepo,
                 )
             }
             if (
