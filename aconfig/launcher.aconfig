@@ -720,3 +720,9 @@ flag {
   }
 }
 
+flag {
+  name: "bind_model_using_repository"
+  namespace: "launcher"
+  description: "Change model binding to use repositories instead of model callbacks"
+  bug: "455016031"
+}
