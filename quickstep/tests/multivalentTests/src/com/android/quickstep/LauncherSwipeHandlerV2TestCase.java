@@ -71,7 +71,7 @@ public class LauncherSwipeHandlerV2TestCase extends AbsSwipeUpHandlerTestCase<
 
     @NonNull
     @Override
-    protected LauncherSwipeHandlerV2 createSwipeHandler(
+    protected LauncherSwipeHandlerV2 createSwipeHandlerInternal(
             long touchTimeMs, boolean continuingLastGesture) {
         return new LauncherSwipeHandlerV2(
                 mContext,

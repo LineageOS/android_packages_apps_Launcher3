@@ -42,7 +42,7 @@ public class RecentsWindowSwipeHandlerTestCase extends AbsSwipeUpHandlerTestCase
 
     @NonNull
     @Override
-    protected RecentsWindowSwipeHandler createSwipeHandler(long touchTimeMs,
+    protected RecentsWindowSwipeHandler createSwipeHandlerInternal(long touchTimeMs,
             boolean continuingLastGesture) {
         return new RecentsWindowSwipeHandler(
                 mContext,

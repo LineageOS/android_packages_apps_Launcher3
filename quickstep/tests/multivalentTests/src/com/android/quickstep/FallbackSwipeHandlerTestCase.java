@@ -39,8 +39,9 @@ public class FallbackSwipeHandlerTestCase extends AbsSwipeUpHandlerTestCase<
     @Mock private FallbackRecentsView<RecentsActivity> mRecentsView;
 
 
+    @NonNull
     @Override
-    protected FallbackSwipeHandler createSwipeHandler(
+    protected FallbackSwipeHandler createSwipeHandlerInternal(
             long touchTimeMs, boolean continuingLastGesture) {
         return new FallbackSwipeHandler(
                 mContext,
