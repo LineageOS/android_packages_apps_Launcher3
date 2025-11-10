@@ -17,7 +17,6 @@ package com.android.launcher3.taskbar;
 
 import static com.android.launcher3.Flags.enableTaskbarUiThread;
 import static com.android.launcher3.Flags.refactorTaskbarUiState;
-import static com.android.launcher3.Flags.syncAppLaunchWithTaskbarStash;
 import static com.android.launcher3.QuickstepTransitionManager.TASKBAR_TO_APP_DURATION;
 import static com.android.launcher3.QuickstepTransitionManager.TRANSIENT_TASKBAR_TRANSITION_DURATION;
 import static com.android.launcher3.QuickstepTransitionManager.getTaskbarToHomeDuration;
@@ -401,9 +400,6 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
      * Create Taskbar animation to be played alongside the Launcher app launch animation.
      */
     public @Nullable Animator createAnimToApp() {
-        if (!syncAppLaunchWithTaskbarStash()) {
-            return null;
-        }
         TaskbarStashController stashController = mControllers.taskbarStashController;
         stashController.updateStateForFlag(TaskbarStashController.FLAG_IN_APP, true);
         return stashController.createApplyStateAnimator(stashController.getStashDuration());
@@ -415,8 +411,7 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
      * app launch animation.
      */
     public void setIgnoreInAppFlagForSync(boolean enabled) {
-        if (syncAppLaunchWithTaskbarStash()
-                && mControllers != null
+        if (mControllers != null
                 && mControllers.taskbarStashController != null) {
             mControllers.taskbarStashController.updateStateForFlag(FLAG_IGNORE_IN_APP, enabled);
         }
