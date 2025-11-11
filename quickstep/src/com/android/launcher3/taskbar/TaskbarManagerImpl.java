@@ -677,7 +677,6 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         debugPrimaryTaskbar("onUserUnlocked: recreating all taskbars!");
 
         if (mBootAppContext != null) {
-            mExternalDeviceProfiles.clear(); // Need to be regenerated with actual app context.
             mBootAppContext.onDestroy();
         }
         mBootAppContext = null;
@@ -1468,15 +1467,14 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
      * @param displayId The ID of the display.
      */
     private void createExternalDeviceProfile(int displayId) {
-        if (!mUserUnlocked && mBootAppContext == null) {
-            return;
+        if (!mUserUnlocked) {
+            return; // External displays do not support direct boot.
         }
         if (displayId == mPrimaryDisplayId) {
             return;
         }
 
-        InvariantDeviceProfile idp = LauncherAppState.getIDP(
-                mBootAppContext != null ? mBootAppContext : mPrimaryWindowContext);
+        InvariantDeviceProfile idp = LauncherAppState.getIDP(mPrimaryWindowContext);
         if (idp == null) {
             return;
         }
@@ -1501,17 +1499,16 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
             return null;
         }
 
+        if (isExternalDisplay(displayId)) {
+            return mExternalDeviceProfiles.get(displayId);
+        }
+
         InvariantDeviceProfile idp = LauncherAppState.getIDP(
                 mBootAppContext != null ? mBootAppContext : mPrimaryWindowContext);
         if (idp == null) {
             return null;
         }
-
-        if (!isExternalDisplay(displayId)) {
-            return idp.getDeviceProfile(mPrimaryWindowContext);
-        }
-
-        return mExternalDeviceProfiles.get(displayId);
+        return idp.getDeviceProfile(mPrimaryWindowContext);
     }
 
     /**
