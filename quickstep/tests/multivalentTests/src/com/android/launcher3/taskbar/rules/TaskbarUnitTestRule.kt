@@ -17,8 +17,6 @@
 package com.android.launcher3.taskbar.rules
 
 import android.app.Instrumentation
-import android.app.PendingIntent
-import android.content.IIntentSender
 import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings.Secure.NAV_BAR_KIDS_MODE
@@ -29,6 +27,7 @@ import com.android.app.displaylib.DisplaysWithDecorationsRepositoryCompat
 import com.android.launcher3.LauncherAppState
 import com.android.launcher3.taskbar.TaskbarActivityContext
 import com.android.launcher3.taskbar.TaskbarControllers
+import com.android.launcher3.taskbar.TaskbarManager
 import com.android.launcher3.taskbar.TaskbarManagerImpl
 import com.android.launcher3.taskbar.TaskbarNavButtonController.TaskbarNavButtonCallbacks
 import com.android.launcher3.taskbar.TaskbarUIController
@@ -167,12 +166,12 @@ class TaskbarUnitTestRule(
                                     UI_HELPER_EXECUTOR,
                                     quickstepKeyGestureEventsManagerSpy,
                                 ) {
-                                    PendingIntent(IIntentSender.Default())
+                                    taskbarManager as TaskbarManager
                                 },
                                 object : TaskbarNavButtonCallbacks {},
                                 // VirtualDisplaysRule dispatches system decoration changes.
                                 mock<DisplaysWithDecorationsRepositoryCompat>(),
-                                ProductionDispatchers.INSTANCE[context].main,
+                                ProductionDispatchers.INSTANCE[context],
                             ) {
                             override fun recreateTaskbars() {
                                 super.recreateTaskbars()

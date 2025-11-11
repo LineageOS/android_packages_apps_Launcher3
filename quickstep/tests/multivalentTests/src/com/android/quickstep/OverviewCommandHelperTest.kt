@@ -136,7 +136,7 @@ class OverviewCommandHelperTest {
         sut =
             spy(
                 OverviewCommandHelper(
-                    touchInteractionHandler = mTouchInteractionHandler,
+                    touchInteractionHandler = { mTouchInteractionHandler },
                     overviewComponentObserver = overviewComponentObserver,
                     dispatcherProvider = TestDispatcherProvider(dispatcher),
                     displayRepository = displayRepository,
