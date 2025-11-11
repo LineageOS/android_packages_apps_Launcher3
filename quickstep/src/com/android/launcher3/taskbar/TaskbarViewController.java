@@ -255,8 +255,10 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         mTransientTaskbarProfile = mActivity.getTransientTaskbarProfile();
         mPersistentTaskbarProfile = mActivity.getPersistentTaskbarProfile();
 
-        mTransientIconSize = dpToPx(TaskbarIconSpecs.INSTANCE.getIconSize52dp().getSize());
-        mPersistentIconSize = dpToPx(TaskbarIconSpecs.INSTANCE.getIconSize40dp().getSize());
+        mTransientIconSize = dpToPx(
+                TaskbarIconSpecs.INSTANCE.getDefaultTransientIconSize().getSize(), mActivity);
+        mPersistentIconSize = dpToPx(
+                TaskbarIconSpecs.INSTANCE.getDefaultPersistentIconSize().getSize(), mActivity);
         mTaskbarView = taskbarView;
         mTaskbarUiState = taskbarUiState;
         mTaskbarIconAlpha = new MultiValueAlpha(mTaskbarView, NUM_ALPHA_CHANNELS);
@@ -742,7 +744,8 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         float scale = mTaskbarIconTranslationYForPinning.value;
         float taskbarIconTranslationYForPinningValue;
 
-        int transientIconSize = dpToPx(TaskbarIconSpecs.INSTANCE.getIconSize52dp().getSize());
+        int transientIconSize = dpToPx(
+                TaskbarIconSpecs.INSTANCE.getDefaultTransientIconSize().getSize(), mActivity);
 
         // transY is calculated here by adding/subtracting the taskbar bottom margin
         // aligning the icon bound to be at bottom of current taskbar view and then
@@ -1132,7 +1135,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
             Interpolator interpolator) {
         boolean isToHome = mControllers.uiController.isIconAlignedWithHotseat();
         float scaleUp = ((float) launcherDp.getWorkspaceIconProfile().getIconSizePx())
-                / taskbarDp.getTaskbarProfile().getIconSize();
+                / mTransientIconSize;
         int borderSpacing = launcherDp.hotseatBorderSpace;
         Rect hotseatPadding = launcherDp.getHotseatLayoutPadding(mActivity);
         int hotseatCellSize = DeviceProfile.calculateCellWidth(
