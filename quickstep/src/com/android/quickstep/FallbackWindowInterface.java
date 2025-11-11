@@ -61,11 +61,14 @@ import javax.inject.Inject;
 public final class FallbackWindowInterface extends BaseWindowInterface {
 
     @NonNull private final RecentsWindowTracker mRecentsWindowTracker;
+
     @Nullable private RecentsWindowManager mRecentsWindowManager = null;
 
     @Inject
-    public FallbackWindowInterface(@NonNull RecentsWindowTracker recentsWindowTracker) {
-        super(DEFAULT, BACKGROUND_APP);
+    public FallbackWindowInterface(
+            @NonNull RecentsWindowTracker recentsWindowTracker,
+            @NonNull TaskAnimationManager taskAnimationManager) {
+        super(DEFAULT, BACKGROUND_APP, taskAnimationManager);
         mRecentsWindowTracker = recentsWindowTracker;
     }
 
@@ -143,10 +146,10 @@ public final class FallbackWindowInterface extends BaseWindowInterface {
     @Override
     public <T extends RecentsView<?, ?>> T getVisibleRecentsView() {
         RecentsWindowManager manager = getCreatedContainer();
-        if (manager != null && (manager.isStarted() || isInLiveTileMode())) {
-            return manager.getOverviewPanel();
+        if (manager == null || !manager.isStarted()) {
+            return null;
         }
-        return null;
+        return manager.getOverviewPanel();
     }
 
     @Override
@@ -183,13 +186,6 @@ public final class FallbackWindowInterface extends BaseWindowInterface {
                         }
                     }
                 });
-    }
-
-    @Override
-    public boolean isInLiveTileMode() {
-        RecentsWindowManager windowManager = getCreatedContainer();
-        return windowManager != null && windowManager.getStateManager().getState() == DEFAULT &&
-                windowManager.isStarted();
     }
 
     @Override
