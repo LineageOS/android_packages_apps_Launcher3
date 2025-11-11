@@ -551,7 +551,7 @@ flag {
     name: "enable_system_drag_to_other_apps"
     namespace: "launcher"
     description: "Enables system-level drag-and-drop to other apps"
-    bug: "402183121"
+    bug: "440196110"
 }
 
 flag {
