@@ -17,6 +17,7 @@
 package com.android.launcher3.views;
 
 import static com.android.launcher3.icons.GraphicsUtils.setColorAlphaBound;
+import static com.android.launcher3.UtilitiesKt.drawWorkspaceItemSelectionHighlight;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -36,6 +37,8 @@ import androidx.annotation.RequiresApi;
 
 import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.R;
+import com.android.launcher3.apppairs.AppPairIcon;
+import com.android.launcher3.folder.FolderIcon;
 
 /**
  * Extension of {@link BubbleTextView} which draws two shadows on the text (ambient and key shadows}
@@ -105,6 +108,11 @@ public class DoubleShadowBubbleTextView extends BubbleTextView {
     public void onDraw(Canvas canvas) {
         if (shouldDrawAppContrastTile() && !TextUtils.isEmpty(getText())) {
             drawAppContrastTile(canvas);
+        }
+        // FolderIcons and AppPairIcons draw the workspace highlight themselves.
+        if (isSelected() && !(getParent() instanceof FolderIcon)
+                && !(getParent() instanceof AppPairIcon)) {
+            drawWorkspaceItemSelectionHighlight(canvas, this);
         }
         // If text is transparent or shadow alpha is 0, don't draw any shadow
         if (skipDoubleShadow()) {
