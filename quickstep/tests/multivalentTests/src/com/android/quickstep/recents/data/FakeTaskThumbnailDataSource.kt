@@ -46,6 +46,13 @@ class FakeTaskThumbnailDataSource : TaskThumbnailDataSource {
         )
     }
 
+    override suspend fun getThumbnail(
+        task: Task,
+        requestResolution: TaskThumbnailDataSource.RequestResolution,
+    ): ThumbnailData? {
+        TODO("Not yet implemented. See b/459710483")
+    }
+
     fun getNumberOfGetThumbnailCalls(taskId: Int): Int = getThumbnailCalls[taskId] ?: 0
 
     fun preventThumbnailLoad(taskId: Int) {

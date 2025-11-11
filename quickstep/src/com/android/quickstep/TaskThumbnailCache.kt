@@ -18,6 +18,7 @@ package com.android.quickstep
 import android.content.Context
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
+import com.android.launcher3.Flags.enableLowResThumbnailPreloading
 import com.android.launcher3.R
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.util.CancellableTask
@@ -26,6 +27,10 @@ import com.android.launcher3.util.Preconditions
 import com.android.launcher3.util.coroutines.DispatcherProvider
 import com.android.quickstep.TaskIconCache.Companion.TASK_IMAGE_CACHE_EXECUTOR
 import com.android.quickstep.task.thumbnail.data.TaskThumbnailDataSource
+import com.android.quickstep.task.thumbnail.data.TaskThumbnailDataSource.RequestResolution
+import com.android.quickstep.task.thumbnail.data.TaskThumbnailDataSource.RequestResolution.ANY_RES
+import com.android.quickstep.task.thumbnail.data.TaskThumbnailDataSource.RequestResolution.HIGH_RES
+import com.android.quickstep.task.thumbnail.data.TaskThumbnailDataSource.RequestResolution.LOW_RES
 import com.android.quickstep.util.TaskKeyByLastActiveTimeCache
 import com.android.quickstep.util.TaskKeyCache
 import com.android.systemui.shared.recents.model.Task
@@ -43,7 +48,8 @@ constructor(
     private val context: Context,
     private val bgExecutor: Executor,
     private val cache: TaskKeyCache<ThumbnailData>,
-    val dispatcherProvider: DispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
+    private val activityManagerWrapper: ActivityManagerWrapper,
 ) : TaskThumbnailDataSource {
     val highResLoadingState = HighResLoadingState()
     private val enableTaskSnapshotPreloading =
@@ -53,6 +59,7 @@ constructor(
     constructor(
         @ApplicationContext context: Context,
         dispatcherProvider: DispatcherProvider,
+        activityManagerWrapper: ActivityManagerWrapper,
     ) : this(
         context,
         TASK_IMAGE_CACHE_EXECUTOR,
@@ -60,6 +67,7 @@ constructor(
             context.resources.getInteger(R.integer.recentsThumbnailCacheSize)
         ),
         dispatcherProvider,
+        activityManagerWrapper,
     )
 
     /**
@@ -89,9 +97,20 @@ constructor(
      * Retrieves a thumbnail for the provided `task` on the current thread. This should not be
      * called from the main thread.
      */
+    @Deprecated(
+        "Should be removed with flag: enable_low_res_thumbnail_preloading." +
+            " Specify request resolution as 2nd param."
+    )
     @WorkerThread
     override suspend fun getThumbnail(task: Task): ThumbnailData? {
+        if (enableLowResThumbnailPreloading()) {
+            throw IllegalArgumentException(
+                "All calls of this method should specify request resolution as a" +
+                    " 2nd param when enableLowResThumbnailPreloading is enabled"
+            )
+        }
         val lowResolution: Boolean = !highResLoadingState.isEnabled
+
         // Check task for thumbnail
         val taskThumbnail: ThumbnailData? = task.thumbnail
         if (
@@ -111,8 +130,7 @@ constructor(
 
         return withContext(dispatcherProvider.ioBackground) {
             // Get thumbnail from system
-            var thumbnailData =
-                ActivityManagerWrapper.getInstance().getTaskThumbnail(task.key.id, lowResolution)
+            val thumbnailData = activityManagerWrapper.getTaskThumbnail(task.key.id, lowResolution)
 
             // Avoid an async timing issue that a low res entry replaces an existing high
             // res entry in high res enabled state, so we check before putting it to cache
@@ -124,6 +142,51 @@ constructor(
                     return@withContext newCachedThumbnail
                 }
             }
+            cache.put(task.key, thumbnailData)
+            return@withContext thumbnailData
+        }
+    }
+
+    // TODO(b/387496731): Add ensureActive() calls if they show performance benefit
+    /**
+     * Retrieves a thumbnail for the provided `task` on the current thread. This should not be
+     * called from the main thread.
+     */
+    @WorkerThread
+    override suspend fun getThumbnail(
+        task: Task,
+        requestResolution: RequestResolution,
+    ): ThumbnailData? {
+        if (!enableLowResThumbnailPreloading()) {
+            throw IllegalArgumentException(
+                "request resolution cannot be specified without enableLowResThumbnailPreloading " +
+                    "being enabled"
+            )
+        }
+        fun isCorrectResolution(thumbnailData: ThumbnailData) =
+            when (requestResolution) {
+                HIGH_RES -> !thumbnailData.reducedResolution
+                LOW_RES -> thumbnailData.reducedResolution
+                ANY_RES -> true
+            }
+
+        // Check task for thumbnail
+        val taskThumbnailData = task.thumbnail
+        if (taskThumbnailData?.thumbnail != null && isCorrectResolution(taskThumbnailData)) {
+            return taskThumbnailData
+        }
+
+        // Check cache for thumbnail
+        val cachedThumbnail: ThumbnailData? = cache.getAndInvalidateIfModified(task.key)
+        if (cachedThumbnail?.thumbnail != null && isCorrectResolution(cachedThumbnail)) {
+            return cachedThumbnail
+        }
+
+        return withContext(dispatcherProvider.ioBackground) {
+            // Get thumbnail from system
+            val lowResolution = requestResolution != HIGH_RES
+            val thumbnailData = activityManagerWrapper.getTaskThumbnail(task.key.id, lowResolution)
+
             cache.put(task.key, thumbnailData)
             return@withContext thumbnailData
         }
@@ -193,9 +256,9 @@ constructor(
             CancellableTask(
                 {
                     val thumbnailData =
-                        ActivityManagerWrapper.getInstance().getTaskThumbnail(key.id, lowResolution)
+                        activityManagerWrapper.getTaskThumbnail(key.id, lowResolution)
                     if (thumbnailData.thumbnail != null) thumbnailData
-                    else ActivityManagerWrapper.getInstance().takeTaskThumbnail(key.id)
+                    else activityManagerWrapper.takeTaskThumbnail(key.id)
                 },
                 Executors.MAIN_EXECUTOR,
                 Consumer { result: ThumbnailData ->
@@ -233,4 +296,8 @@ constructor(
 
     /** Returns Whether to enable background preloading of task thumbnails. */
     fun isPreloadingEnabled() = enableTaskSnapshotPreloading && highResLoadingState.visible
+
+    companion object {
+        const val TAG = "TaskThumbnailCache"
+    }
 }
