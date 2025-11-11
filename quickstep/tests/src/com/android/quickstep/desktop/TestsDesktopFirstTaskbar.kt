@@ -29,9 +29,9 @@ import com.android.launcher3.Flags.enableFallbackOverviewInWindow
 import com.android.launcher3.Flags.enableLauncherOverviewInWindow
 import com.android.launcher3.util.LauncherModelHelper
 import com.android.launcher3.util.rule.SetPropRule
-import com.android.launcher3.util.ui.PortraitLandscapeRunner.PortraitLandscape
-import com.android.quickstep.NavigationModeSwitchRule.NavigationModeSwitch
 import com.android.quickstep.integration.BaseTaskbarIntegrationTest
+import com.android.quickstep.taskbar.util.IntegrationNavigationModeSwitchRule
+import com.android.quickstep.taskbar.util.IntegrationNavigationModeSwitchRule.NavigationModeSwitch
 import com.android.quickstep.taskbar.util.IntegrationTaskbarModeSwitchRule.Mode
 import com.android.window.flags.Flags
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
@@ -77,12 +77,12 @@ class TestsDesktopFirstTaskbar : BaseTaskbarIntegrationTest() {
     @After
     override fun tearDown() {
         super.tearDown()
+        if (!deviceProfile.deviceProperties.isTablet) return
         if (mOriginalWindowingMode != WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
             setDisplayWindowingMode(mOriginalWindowingMode)
         }
-        // This is needed because the rule taskbarModeSwitchRule will try to set the Taskbar mode
-        // before tearDown has run and they conflict with each other since the Transient taskbar
-        // can't be set along  setDisplayWindowingMode(WindowConfiguration.WINDOWING_MODE_FREEFORM)
+        // We are not using the annotation and using the rule directly to avoid race conditions
+        // with setDisplayWindowingMode
         taskbarModeSwitchRule.setTaskbarMode(originalTaskbarMode)
     }
 
@@ -98,7 +98,6 @@ class TestsDesktopFirstTaskbar : BaseTaskbarIntegrationTest() {
     }
 
     @Test
-    @PortraitLandscape
     @NavigationModeSwitch
     fun testTaskbarOnHome() {
         // Go home - taskbar should be visible in desktop-first display context.
@@ -124,7 +123,12 @@ class TestsDesktopFirstTaskbar : BaseTaskbarIntegrationTest() {
     }
 
     @Test
-    @PortraitLandscape
+    @NavigationModeSwitch(mode = IntegrationNavigationModeSwitchRule.Mode.THREE_BUTTON)
+    fun testTaskbarOnHome_three_buttons() {
+        testTaskbarOnHome()
+    }
+
+    @Test
     @NavigationModeSwitch
     fun testTaskbarForFullscreenApp() {
         // TODO(b/377678992): revert ag/36346262 once NexusLauncherTests-OverviewInWindowEnabled is
@@ -156,8 +160,13 @@ class TestsDesktopFirstTaskbar : BaseTaskbarIntegrationTest() {
     }
 
     @Test
-    @PortraitLandscape
-    @NavigationModeSwitch
+    @NavigationModeSwitch(mode = IntegrationNavigationModeSwitchRule.Mode.THREE_BUTTON)
+    fun testTaskbarForFullscreenApp_three_buttons() {
+        testTaskbarForFullscreenApp()
+    }
+
+    @Test
+    @NavigationModeSwitch(mode = IntegrationNavigationModeSwitchRule.Mode.ZERO_BUTTON)
     fun testTaskbarForDesktopMode() {
         // TODO(b/377678992): revert ag/36346262 once NexusLauncherTests-OverviewInWindowEnabled is
         //  successfully blocking presubmit.
@@ -184,6 +193,12 @@ class TestsDesktopFirstTaskbar : BaseTaskbarIntegrationTest() {
         // Activating the running app icon on desktop-fist taskbar opens the app in desktop.
         assertAppInDesktop(CALCULATOR_APP_PACKAGE)
         waitForTaskbarVisible()
+    }
+
+    @Test
+    @NavigationModeSwitch(mode = IntegrationNavigationModeSwitchRule.Mode.THREE_BUTTON)
+    fun testTaskbarForDesktopMode_three_buttons() {
+        testTaskbarForDesktopMode()
     }
 
     private fun setDisplayWindowingMode(windowingMode: Int): Int {
