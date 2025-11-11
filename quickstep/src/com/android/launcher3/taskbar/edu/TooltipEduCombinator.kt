@@ -17,6 +17,7 @@
 package com.android.launcher3.taskbar.edu
 
 import android.content.Intent
+import android.os.UserManager
 import android.text.SpannableString
 import android.text.style.URLSpan
 import android.view.View
@@ -56,7 +57,8 @@ class TooltipEduCombinator(
         get() {
             return !Utilities.isRunningInTestHarness() &&
                 !context.isPhoneMode &&
-                !context.isTinyTaskbar
+                !context.isTinyTaskbar &&
+                !UserManager.isDeviceInDemoMode(context)
         }
 
     /** Indicates whether the user has seen the original educational flow for the taskbar. */

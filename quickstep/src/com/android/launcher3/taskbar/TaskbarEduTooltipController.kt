@@ -18,6 +18,7 @@ package com.android.launcher3.taskbar
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.UserManager
 import android.text.SpannableString
 import android.text.method.LinkMovementMethod
 import android.text.style.URLSpan
@@ -110,7 +111,8 @@ constructor(
         get() {
             return !Utilities.isRunningInTestHarness() &&
                 !activityContext.isPhoneMode &&
-                !activityContext.isTinyTaskbar
+                !activityContext.isTinyTaskbar &&
+                !UserManager.isDeviceInDemoMode(activityContext)
         }
 
     val isTooltipOpen: Boolean
