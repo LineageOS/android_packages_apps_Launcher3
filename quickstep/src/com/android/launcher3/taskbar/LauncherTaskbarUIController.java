@@ -292,6 +292,9 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
      */
     @Override
     public void onLauncherVisibilityChanged(boolean isVisible) {
+        if (mControllers == null) {
+            return;
+        }
         final TaskbarActivityContext taskbarContext = mControllers.taskbarActivityContext;
         if (taskbarContext.showLockedTaskbarOnHome()
                 && !taskbarContext.showDesktopTaskbarForFreeformDisplay()
