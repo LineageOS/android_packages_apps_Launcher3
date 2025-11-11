@@ -656,19 +656,14 @@ public class DeviceProfile {
                 getWorkspaceIconProfile().getIconSizePx());
         if (isQsbInline) {
             int columns = getPanelCount() * inv.numColumns;
-            return getIconToIconWidthForColumns(columns)
+            return mWorkspaceProfile.getIconToIconWidthForColumns(columns)
                     - getWorkspaceIconProfile().getIconSizePx() * numShownHotseatIcons
                     - hotseatBorderSpace * numShownHotseatIcons
                     - iconExtraSpacePx;
         } else {
-            return getIconToIconWidthForColumns(mHotseatColumnSpan) - iconExtraSpacePx;
+            return mWorkspaceProfile.getIconToIconWidthForColumns(mHotseatColumnSpan)
+                    - iconExtraSpacePx;
         }
-    }
-
-    private int getIconToIconWidthForColumns(int columns) {
-        return columns * getWorkspaceIconProfile().getCellSize().x
-                + (columns - 1) * getWorkspaceIconProfile().getCellLayoutBorderSpacePx().x
-                - getCellHorizontalSpace();
     }
 
     private int getHorizontalMarginPx(InvariantDeviceProfile idp, Resources res) {
@@ -724,7 +719,8 @@ public class DeviceProfile {
         }
         if (isQsbInline) {
             // If QSB is inline, reduce column span until it fits.
-            int maxHotseatWidthAllowedPx = getIconToIconWidthForColumns(numWorkspaceColumns);
+            int maxHotseatWidthAllowedPx = mWorkspaceProfile
+                    .getIconToIconWidthForColumns(numWorkspaceColumns);
             int minHotseatWidthRequiredPx =
                     getHotseatProfile().getMinQsbWidthPx() + hotseatBorderSpace + mHotseatWidthPx;
             while (minHotseatWidthRequiredPx > maxHotseatWidthAllowedPx
@@ -782,7 +778,7 @@ public class DeviceProfile {
 
     private void updateHotseatWidthAndBorderSpace(int columns) {
         mHotseatColumnSpan = columns;
-        mHotseatWidthPx = getIconToIconWidthForColumns(mHotseatColumnSpan);
+        mHotseatWidthPx = mWorkspaceProfile.getIconToIconWidthForColumns(mHotseatColumnSpan);
         hotseatBorderSpace = calculateHotseatBorderSpace(mHotseatWidthPx, /* numExtraBorder= */ 0);
     }
 
@@ -914,14 +910,6 @@ public class DeviceProfile {
      */
     public Rect getInsets() {
         return mInsets;
-    }
-
-    /**
-     * Returns the left and right space on the cell, which is the cell width - icon size
-     */
-    public int getCellHorizontalSpace() {
-        return getWorkspaceIconProfile().getCellSize().x
-                - getWorkspaceIconProfile().getIconSizePx();
     }
 
     /**
@@ -1096,7 +1084,8 @@ public class DeviceProfile {
         } else if (inv.isFixedLandscape) {
             // Center the QSB vertically with hotseat
             int hotseatBarBottomPadding = getHotseatBarBottomPadding();
-            int hotseatPlusQSBWidth = getIconToIconWidthForColumns(inv.numColumns);
+            int hotseatPlusQSBWidth = mWorkspaceProfile
+                    .getIconToIconWidthForColumns(inv.numColumns);
 
             // This is needed because of b/235886078 since QSB needs to span to the icon borders
             int iconExtraSpacePx = getWorkspaceIconProfile().getIconSizePx() - getIconVisibleSizePx(
