@@ -2147,18 +2147,14 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         }
         // There is no task associated with this launch - launch a new task through an intent
         ActivityOptionsWrapper opts = getActivityLaunchDesktopOptions();
-        if (DesktopModeFlags.ENABLE_START_LAUNCH_TRANSITION_FROM_TASKBAR_BUGFIX.isTrue()) {
-            PendingIntent pendingIntent = PendingIntent.getActivity(
-                    this,
-                    /* requestCode= */ 0,
-                    intent,
-                    PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_ONE_SHOT,
-                    /* options= */ null);
-            mSysUiProxy.startLaunchIntentTransition(pendingIntent, opts.options.toBundle(),
-                    displayId);
-        } else {
-            startActivity(intent, opts.options.toBundle());
-        }
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                this,
+                /* requestCode= */ 0,
+                intent,
+                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_ONE_SHOT,
+                /* options= */ null);
+        mSysUiProxy.startLaunchIntentTransition(pendingIntent, opts.options.toBundle(),
+                displayId);
     }
 
     /** Expands a folder icon when it is clicked */
