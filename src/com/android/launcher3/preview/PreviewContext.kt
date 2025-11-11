@@ -87,7 +87,7 @@ constructor(
         val prefs = ProxyPrefs(this, getSharedPreferences(mPrefName, MODE_PRIVATE))
         prefs.putOrRemove(LauncherPrefs.GRID_NAME, gridName)
         prefs.put(LauncherPrefs.FIXED_LANDSCAPE_MODE, false)
-        if (com.android.launcher3.Flags.workspaceHiddenLabels()) {
+        if (com.android.systemui.shared.Flags.workspaceItemsLabelHidden()) {
             prefs.put(LauncherPrefs.WORKSPACE_ITEMS_LABEL_HIDDEN, workspaceHideItemsLabel)
         }
 

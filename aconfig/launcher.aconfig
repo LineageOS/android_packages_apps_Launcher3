@@ -690,13 +690,6 @@ flag {
 }
 
 flag {
-    name: "workspace_hidden_labels"
-    namespace: "launcher"
-    description: "Gives the user the option to hide app icon labels on the workspace"
-    bug: "456634299"
-}
-
-flag {
   name: "enable_app_automation_indicator"
   namespace: "launcher"
   description: "Enables indicator for active app automation in Launcher"

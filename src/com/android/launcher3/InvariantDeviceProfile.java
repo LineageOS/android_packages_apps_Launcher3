@@ -325,7 +325,7 @@ public class InvariantDeviceProfile {
                     && enableTwoLinesInAllApps != prefs.get(ENABLE_TWOLINE_ALLAPPS_TOGGLE)) {
                 onConfigChanged();
             } else if (WORKSPACE_ITEMS_LABEL_HIDDEN.getSharedPrefKey().equals(key)
-                    && Flags.workspaceHiddenLabels()) {
+                    && com.android.systemui.shared.Flags.workspaceItemsLabelHidden()) {
                 onConfigChanged();
             }
         };
@@ -489,7 +489,7 @@ public class InvariantDeviceProfile {
                     .setIsMultiDisplay(deviceType == TYPE_MULTI_DISPLAY)
                     .setWindowBounds(bounds)
                     .setDotRendererCache(dotRendererCache);
-            if (Flags.workspaceHiddenLabels()) {
+            if (com.android.systemui.shared.Flags.workspaceItemsLabelHidden()) {
                 builder.setIsWorkspaceItemsLabelHidden(
                         LauncherPrefs.get(context).get(WORKSPACE_ITEMS_LABEL_HIDDEN)
                 );
