@@ -22,7 +22,6 @@ import static android.window.DesktopModeFlags.ENABLE_TASKBAR_OVERFLOW;
 
 import static com.android.launcher3.BubbleTextView.DISPLAY_TASKBAR;
 import static com.android.launcher3.Flags.enableLauncherIconShapes;
-import static com.android.launcher3.Flags.enableRecentsInTaskbar;
 import static com.android.launcher3.Flags.enableTaskbarRecentsThemedIcons;
 import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
@@ -32,6 +31,7 @@ import static com.android.launcher3.Utilities.dpToPx;
 import static com.android.launcher3.config.FeatureFlags.enableTaskbarPinning;
 import static com.android.launcher3.icons.BitmapInfo.FLAG_THEMED;
 import static com.android.launcher3.icons.IconNormalizer.ICON_VISIBLE_AREA_FACTOR;
+import static com.android.systemui.shared.Flags.enableRecentsInTaskbar;
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;

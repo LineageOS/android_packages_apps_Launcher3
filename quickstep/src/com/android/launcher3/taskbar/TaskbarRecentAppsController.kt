@@ -22,7 +22,6 @@ import androidx.annotation.VisibleForTesting
 import com.android.internal.policy.DesktopModeCompatPolicy
 import com.android.launcher3.BubbleTextView.RunningAppState
 import com.android.launcher3.Flags
-import com.android.launcher3.Flags.enableRecentsInTaskbar
 import com.android.launcher3.Flags.enableTaskbarRecentsThemedIcons
 import com.android.launcher3.Flags.enableTaskbarUiThread
 import com.android.launcher3.graphics.ThemeManager
@@ -43,6 +42,7 @@ import com.android.quickstep.util.DesktopTask
 import com.android.quickstep.util.GroupTask
 import com.android.quickstep.util.SingleTask
 import com.android.quickstep.util.SplitTask
+import com.android.systemui.shared.Flags.enableRecentsInTaskbar
 import com.android.systemui.shared.recents.model.Task
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import java.io.PrintWriter
