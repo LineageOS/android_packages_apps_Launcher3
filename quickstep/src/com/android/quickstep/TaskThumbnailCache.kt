@@ -39,7 +39,7 @@ import kotlinx.coroutines.withContext
 
 class TaskThumbnailCache
 @VisibleForTesting
-internal constructor(
+constructor(
     private val context: Context,
     private val bgExecutor: Executor,
     private val cache: TaskKeyCache<ThumbnailData>,
