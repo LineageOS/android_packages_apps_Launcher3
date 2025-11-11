@@ -31,7 +31,6 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.launcher3.tapl.LauncherInstrumentation.TrackpadGestureType;
 import com.android.launcher3.tapl.Workspace;
 import com.android.launcher3.util.rule.ShellCommandRule;
-import com.android.launcher3.util.ui.PortraitLandscapeRunner.PortraitLandscape;
 import com.android.quickstep.NavigationModeSwitchRule.NavigationModeSwitch;
 
 import org.junit.After;
@@ -63,7 +62,6 @@ public class TaplTestsTrackpad extends AbstractQuickStepTest {
     }
 
     @Test
-    @PortraitLandscape
     @NavigationModeSwitch
     public void goHome() throws Exception {
         assumeTrue("Ignoring test because device is not a tablet",
@@ -75,7 +73,6 @@ public class TaplTestsTrackpad extends AbstractQuickStepTest {
     }
 
     @Test
-    @PortraitLandscape
     // TODO(b/291944684): Support back in 3-button mode. It requires triggering the logic to enable
     //  trackpad gesture back in SysUI. Normally it's triggered by the attachment of a trackpad. We
     //  need to figure out a way to emulate that in the test, or bypass the logic altogether.
@@ -98,7 +95,6 @@ public class TaplTestsTrackpad extends AbstractQuickStepTest {
     }
 
     @Test
-    @PortraitLandscape
     @NavigationModeSwitch
     public void switchToOverview() throws Exception {
         assumeTrue("Ignoring test because device is not a tablet",
@@ -110,7 +106,6 @@ public class TaplTestsTrackpad extends AbstractQuickStepTest {
     }
 
     @Test
-    @PortraitLandscape
     @NavigationModeSwitch
     public void testAllAppsFromHome() throws Exception {
         assumeTrue("Ignoring test because device is not a tablet",
@@ -122,7 +117,6 @@ public class TaplTestsTrackpad extends AbstractQuickStepTest {
     }
 
     @Test
-    @PortraitLandscape
     @NavigationModeSwitch
     public void testQuickSwitchFromApp() throws Exception {
         assumeTrue("Ignoring test because device is not a tablet",
@@ -138,7 +132,6 @@ public class TaplTestsTrackpad extends AbstractQuickStepTest {
     }
 
     @Test
-    @PortraitLandscape
     @NavigationModeSwitch
     public void testQuickSwitchFromHome() throws Exception {
         assumeTrue("Ignoring test because device is not a tablet",
@@ -154,7 +147,6 @@ public class TaplTestsTrackpad extends AbstractQuickStepTest {
     }
 
     @Test
-    @PortraitLandscape
     @NavigationModeSwitch
     public void testNotificationsFromHome() throws Exception {
         assumeTrue("Ignoring test because device is not a tablet",
@@ -164,7 +156,6 @@ public class TaplTestsTrackpad extends AbstractQuickStepTest {
     }
 
     @Test
-    @PortraitLandscape
     @NavigationModeSwitch
     public void testNotificationsFromApp() throws Exception {
         assumeTrue("Ignoring test because device is not a tablet",
