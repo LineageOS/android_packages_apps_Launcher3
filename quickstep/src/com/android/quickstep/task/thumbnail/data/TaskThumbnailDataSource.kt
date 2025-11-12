@@ -20,5 +20,17 @@ import com.android.systemui.shared.recents.model.Task
 import com.android.systemui.shared.recents.model.ThumbnailData
 
 interface TaskThumbnailDataSource {
+    @Deprecated(
+        "Should be removed with flag: enable_low_res_thumbnail_preloading." +
+            " Specify request resolution as 2nd param."
+    )
     suspend fun getThumbnail(task: Task): ThumbnailData?
+
+    suspend fun getThumbnail(task: Task, requestResolution: RequestResolution): ThumbnailData?
+
+    enum class RequestResolution {
+        LOW_RES,
+        HIGH_RES,
+        ANY_RES,
+    }
 }
