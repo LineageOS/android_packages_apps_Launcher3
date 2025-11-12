@@ -31,6 +31,9 @@ public class DragOptions {
     /** Whether or not the drag operation is controlled by keyboard. */
     public boolean isKeyboardDrag = false;
 
+    /** Whether or not the drag operation is controlled by mouse. */
+    public boolean isMouseDrag = false;
+
     /**
      * Specifies the start location for a simulated DnD (like system drag or accessibility drag),
      * null when using internal DnD
