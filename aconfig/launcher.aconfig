@@ -726,3 +726,10 @@ flag {
   description: "Change model binding to use repositories instead of model callbacks"
   bug: "455016031"
 }
+
+flag {
+  name: "enable_home_screen_files_trashing"
+  namespace: "launcher"
+  description: "Replaces the 'Delete permanently' action with 'Move to trash' for home screen files"
+  bug: "424466974"
+}

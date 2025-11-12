@@ -1,5 +1,6 @@
 package com.android.launcher3
 
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -72,6 +73,18 @@ class DeleteDropTargetTest {
         verifyTextForItemInfo(
             ItemInfo().apply {
                 id = 1
+                itemType = Favorites.ITEM_TYPE_APPLICATION
+            },
+            "Remove",
+        )
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING)
+    fun setsTextForFileSystemItemsWhenTrashingDisabled() {
+        verifyTextForItemInfo(
+            ItemInfo().apply {
+                id = 1
                 itemType = Favorites.ITEM_TYPE_FILE_SYSTEM_FILE
             },
             "Delete permanently",
@@ -83,12 +96,24 @@ class DeleteDropTargetTest {
             },
             "Delete permanently",
         )
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING)
+    fun setsTextForFileSystemItemsWhenTrashingEnabled() {
         verifyTextForItemInfo(
             ItemInfo().apply {
                 id = 1
-                itemType = Favorites.ITEM_TYPE_APPLICATION
+                itemType = Favorites.ITEM_TYPE_FILE_SYSTEM_FILE
             },
-            "Remove",
+            "Move to trash",
+        )
+        verifyTextForItemInfo(
+            ItemInfo().apply {
+                id = 1
+                itemType = Favorites.ITEM_TYPE_FILE_SYSTEM_FOLDER
+            },
+            "Move to trash",
         )
     }
 

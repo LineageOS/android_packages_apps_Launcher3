@@ -17,9 +17,13 @@
 package com.android.launcher3.homescreenfiles
 
 import android.os.Environment
+import java.io.File
 import javax.inject.Inject
 
 class EnvironmentWrapper @Inject constructor() {
+
+    fun getExternalStorageDirectory(): File = Environment.getExternalStorageDirectory()
+
     fun isExternalStorageDirectoryMounted(): Boolean =
         Environment.getExternalStorageState(Environment.getExternalStorageDirectory()) ==
             Environment.MEDIA_MOUNTED
