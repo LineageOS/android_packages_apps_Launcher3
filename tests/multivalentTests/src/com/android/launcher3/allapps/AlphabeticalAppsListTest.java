@@ -121,7 +121,6 @@ public class AlphabeticalAppsListTest {
     @Test
     public void privateProfileEnabled_privateProfileAppsShownWithSeparator() {
         mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_PRIVATE_SPACE);
-        mSetFlagsRule.enableFlags(Flags.FLAG_PRIVATE_SPACE_SYS_APPS_SEPARATION);
         when(mAllAppsStore.getApps()).thenReturn(createAppInfoListForMainAndPrivateUser());
         when(mPrivateProfileManager.addPrivateSpaceHeader(any()))
                 .thenAnswer(answer(this::addPrivateSpaceHeader));
