@@ -875,7 +875,7 @@ public abstract class AbsSwipeUpHandlerTestCase<
     private SWIPE_HANDLER createSwipeHandler(
             long touchTimeMs, boolean continuingLastGesture) {
         try {
-            return  Executors.MAIN_EXECUTOR.submit(
+            return Executors.MAIN_EXECUTOR.submit(
                     () -> createSwipeHandlerInternal(touchTimeMs, continuingLastGesture)).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
