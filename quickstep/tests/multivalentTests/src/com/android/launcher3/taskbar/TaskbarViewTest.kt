@@ -70,7 +70,7 @@ import platform.test.runner.parameterized.Parameters
 
 @RunWith(ParameterizedAndroidJunit4::class)
 @EnableFlags(FLAG_ENABLE_TASKBAR_OVERFLOW)
-class TaskbarViewTest(private val deviceName: String, flags: FlagsParameterization) {
+class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     companion object {
         @JvmStatic
