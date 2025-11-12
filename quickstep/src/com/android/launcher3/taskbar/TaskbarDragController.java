@@ -356,6 +356,10 @@ public class TaskbarDragController extends DragController implements
     protected void callOnDragStart() {
         super.callOnDragStart();
         updateIsDragging();
+        if (enableTaskbarDragAndDrop()) {
+            mControllers.taskbarViewDragDropController.onTaskbarItemViewDragStart(
+                    (BubbleTextView) mDragObject.originalView);
+        }
         // TODO(297921594) clean it up when taskbar to desktop drag is implemented.
         // Pre-drag has ended, start the global system drag.
         if (mDisallowGlobalDrag
@@ -570,6 +574,10 @@ public class TaskbarDragController extends DragController implements
         updateIsDragging();
         if (!isDragging()) {
             ((BubbleTextView) mDragObject.originalView).setIconDisabled(false);
+            if (enableTaskbarDragAndDrop()) {
+                mControllers.taskbarViewDragDropController.onTaskbarItemViewDragEnd(
+                        (BubbleTextView) mDragObject.originalView);
+            }
             mControllers.taskbarAutohideSuspendController.updateFlag(
                     TaskbarAutohideSuspendController.FLAG_AUTOHIDE_SUSPEND_DRAGGING, false);
             mActivity.onDragEnd();
