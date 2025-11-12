@@ -29,6 +29,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.Flags;
+import com.android.launcher3.LauncherModel;
 import com.android.launcher3.LauncherSettings.Favorites;
 import com.android.launcher3.celllayout.CellInfo;
 import com.android.launcher3.model.BgDataModel;
@@ -307,6 +308,7 @@ public class TaskbarModelCallbacks implements
     @Override
     public void bindAllApplications(AppInfo[] apps, int flags,
             Map<PackageUserKey, Integer> packageUserKeytoUidMap) {
+        if (LauncherModel.useModelRepositoryBinding()) return;
         TASKBAR_UI_THREAD.execute(() -> {
             mContext.getActivityComponent().getAppsStore().setApps(
                     apps, flags, packageUserKeytoUidMap);

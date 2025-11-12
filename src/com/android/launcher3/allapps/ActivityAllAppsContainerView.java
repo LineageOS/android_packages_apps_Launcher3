@@ -83,11 +83,13 @@ import com.android.launcher3.keyboard.FocusedItemDecorator;
 import com.android.launcher3.keyboard.ViewGroupFocusHelper;
 import com.android.launcher3.model.StringCache;
 import com.android.launcher3.model.data.ItemInfo;
+import com.android.launcher3.model.repository.StringCacheRepository;
 import com.android.launcher3.pm.UserCache;
 import com.android.launcher3.recyclerview.AllAppsRecyclerViewPool;
 import com.android.launcher3.util.ItemInfoMatcher;
 import com.android.launcher3.util.Preconditions;
 import com.android.launcher3.util.Themes;
+import com.android.launcher3.util.ViewEx;
 import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.views.BaseDragLayer;
 import com.android.launcher3.views.RecyclerViewFastScroller;
@@ -95,6 +97,8 @@ import com.android.launcher3.views.ScrimView;
 import com.android.launcher3.views.SpringRelativeLayout;
 import com.android.launcher3.workprofile.PersonalWorkSlidingTabStrip;
 import com.android.systemui.plugins.AllAppsRow;
+
+import kotlin.Unit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -316,6 +320,8 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
                         : android.R.color.system_accent2_200);
 
         mSearchUiManager.initializeSearch(this);
+        ViewEx.registerLifecycleTask(this, () -> StringCacheRepository.getStringCache(getContext())
+                .forEach(mActivityContext.getUiExecutor(), c -> updateWorkUI()));
     }
 
     @Override
@@ -1021,8 +1027,6 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
         }
     }
 
-
-
     @VisibleForTesting
     public void onAppsUpdated() {
         Log.d(TAG, "onAppsUpdated; number of apps: " + mAllAppsStore.getApps().length);
@@ -1247,12 +1251,13 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
     }
 
     private void setDeviceManagementResources() {
-        if (mActivityContext.getStringCache() != null) {
+        StringCache cache = mActivityContext.getStringCache();
+        if (cache != null) {
             Button personalTab = findViewById(R.id.tab_personal);
-            personalTab.setText(mActivityContext.getStringCache().allAppsPersonalTab);
+            personalTab.setText(cache.allAppsPersonalTab);
 
             Button workTab = findViewById(R.id.tab_work);
-            workTab.setText(mActivityContext.getStringCache().allAppsWorkTab);
+            workTab.setText(cache.allAppsWorkTab);
         }
     }
 
@@ -1274,12 +1279,13 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
     }
 
     /** Called in Launcher#bindStringCache() to update the UI when cache is updated. */
-    public void updateWorkUI() {
+    public Unit updateWorkUI() {
         setDeviceManagementResources();
         if (mWorkManager.getWorkUtilityView() != null) {
             mWorkManager.getWorkUtilityView().updateStringFromCache();
         }
         inflateWorkCardsIfNeeded();
+        return Unit.INSTANCE;
     }
 
     private void inflateWorkCardsIfNeeded() {

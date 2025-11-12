@@ -181,6 +181,7 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
         flags: Int,
         packageUserKeytoUidMap: Map<PackageUserKey, Int>,
     ) {
+        if (LauncherModel.useModelRepositoryBinding()) return
         Preconditions.assertUIThread()
         val hadWorkApps = launcher.appsView.shouldShowTabs()
         launcher.activityComponent.appsStore.setApps(apps, flags, packageUserKeytoUidMap)
@@ -195,6 +196,7 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
     }
 
     override fun bindIncrementalDownloadProgressUpdated(app: AppInfo) {
+        if (LauncherModel.useModelRepositoryBinding()) return
         launcher.activityComponent.appsStore.updateProgressBar(app)
     }
 
@@ -374,6 +376,7 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
     }
 
     override fun bindStringCache(cache: StringCache) {
+        if (LauncherModel.useModelRepositoryBinding()) return
         stringCache = cache
         launcher.appsView.updateWorkUI()
     }
