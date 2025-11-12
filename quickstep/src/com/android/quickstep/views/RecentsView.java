@@ -1564,6 +1564,11 @@ public abstract class RecentsView<
     }
 
     @Override
+    protected boolean shouldIgnoreMouseClickAndDrag(MotionEvent ev) {
+        return !shouldAllowDrag(ev);
+    }
+
+    @Override
     public boolean onTouchEvent(MotionEvent ev) {
         super.onTouchEvent(ev);
 
