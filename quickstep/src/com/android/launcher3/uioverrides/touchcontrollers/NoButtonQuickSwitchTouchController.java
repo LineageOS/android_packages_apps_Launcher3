@@ -65,7 +65,6 @@ import android.animation.ValueAnimator;
 import android.graphics.PointF;
 import android.view.MotionEvent;
 import android.view.animation.Interpolator;
-import android.window.DesktopModeFlags;
 
 import com.android.internal.jank.Cuj;
 import com.android.launcher3.LauncherState;
@@ -188,8 +187,6 @@ public class NoButtonQuickSwitchTouchController implements TouchController,
             return mIsTrackpadSwipe;
         }
         if (DesktopModeStatus.canEnterDesktopMode(mLauncher)
-                //TODO(b/345296916): replace with dev option once in teamfood
-                && DesktopModeFlags.ENABLE_QUICKSWITCH_DESKTOP_SPLIT_BUGFIX.isTrue()
                 && mRecentsView.getNonDesktopTaskViewCount() < 1) {
             return false;
         }
