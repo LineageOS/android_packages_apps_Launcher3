@@ -56,6 +56,7 @@ import com.android.launcher3.deviceprofile.DeviceProperties;
 import com.android.launcher3.deviceprofile.DropTargetProfile;
 import com.android.launcher3.deviceprofile.FolderProfile;
 import com.android.launcher3.deviceprofile.HotseatProfile;
+import com.android.launcher3.deviceprofile.HotseatProfileInitialValues;
 import com.android.launcher3.deviceprofile.OverviewProfile;
 import com.android.launcher3.deviceprofile.TaskbarProfile;
 import com.android.launcher3.deviceprofile.WorkspaceProfile;
@@ -350,27 +351,31 @@ public class DeviceProfile {
                 mIsScalableGrid
         );
 
-        hotseatProfile = HotseatProfile.Factory.createHotseatProfile(
-                /*deviceProperties*/ getDeviceProperties(),
-                /*res*/ res,
-                /*inv*/ inv,
-                /*isTaskbarPresent*/ isTaskbarPresent,
-                /*shouldApplyWidePortraitDimens*/ shouldApplyWidePortraitDimens,
-                /*responsiveHotseatSpec*/ mResponsiveHotseatSpec,
-                /*insets*/ mInsets,
-                /*typeIndex*/ mTypeIndex,
-                /*metrics*/ mMetrics,
-                /*isVerticalBarLayout*/ isVerticalBarLayout(),
-                // TODO(431261051) HotseatProfile is calculated before the WorkspaceProfile hence
-                //  this variable needs to be manually set here. A better way to handle this is
-                //  necessary.
-                res.getDimensionPixelSize(R.dimen.workspace_page_indicator_height)
-        );
+        HotseatProfileInitialValues hotseatProfileInitialValues =
+                HotseatProfileInitialValues.Factory.createHotseatProfileInitialValues(
+                        /*deviceProperties*/ getDeviceProperties(),
+                        /*res*/ res,
+                        /*inv*/ inv,
+                        /*isTaskbarPresent*/ isTaskbarPresent,
+                        /*shouldApplyWidePortraitDimens*/ shouldApplyWidePortraitDimens,
+                        /*responsiveHotseatSpec*/ mResponsiveHotseatSpec,
+                        /*insets*/ mInsets,
+                        /*typeIndex*/ mTypeIndex,
+                        /*metrics*/ mMetrics,
+                        /*isVerticalBarLayout*/ isVerticalBarLayout(),
+                        res.getDimensionPixelSize(R.dimen.workspace_page_indicator_height)
+                );
 
         if (mIsResponsiveGrid) {
-            updateHotseatSizes(mResponsiveWorkspaceCellSpec.getIconSize());
+            updateHotseatSizes(
+                    mResponsiveWorkspaceCellSpec.getIconSize(),
+                    hotseatProfileInitialValues
+            );
         } else {
-            updateHotseatSizes(pxFromDp(inv.iconSize[mTypeIndex], mMetrics));
+            updateHotseatSizes(
+                    pxFromDp(inv.iconSize[mTypeIndex], mMetrics),
+                    hotseatProfileInitialValues
+            );
         }
 
         mBubbleBarSpaceThresholdPx =
@@ -473,9 +478,9 @@ public class DeviceProfile {
                 /*insets*/ mInsets,
                 /*isFirstPass*/ true,
                 /*isSeascape*/ isSeascape(),
-                /*hotseatProfile*/ hotseatProfile,
-                /*hotseatBarBottomSpacePx*/ hotseatProfile.getBarBottomSpacePx(),
-                /*hotseatQsbSpace*/ hotseatProfile.getQsbSpace(),
+                /*hotseatProfile*/ hotseatProfileInitialValues,
+                /*hotseatBarBottomSpacePx*/ hotseatProfileInitialValues.getBarBottomSpacePx(),
+                /*hotseatQsbSpace*/ hotseatProfileInitialValues.getQsbSpace(),
                 /*hotseatBarSizePx*/ hotseatBarSizePx,
                 /*isWorkspaceItemsLabelHidden*/ isWorkspaceItemsLabelHidden
         );
@@ -524,7 +529,9 @@ public class DeviceProfile {
             );
         }
 
-        updateHotseatSizes(getWorkspaceIconProfile().getIconSizePx());
+        hotseatProfile = HotseatProfile.Factory.createHotseatProfile(hotseatProfileInitialValues);
+
+        updateHotseatSizes(getWorkspaceIconProfile().getIconSizePx(), hotseatProfileInitialValues);
 
         // Update widget padding:
         float minSpacing = pxFromDp(MIN_WIDGET_PADDING_DP, mMetrics);
@@ -681,20 +688,23 @@ public class DeviceProfile {
     }
 
     /** Updates hotseatCellHeightPx and hotseatBarSizePx */
-    private void updateHotseatSizes(int hotseatIconSizePx) {
+    private void updateHotseatSizes(
+            int hotseatIconSizePx,
+            HotseatProfileInitialValues hotseatProfile
+    ) {
         // Ensure there is enough space for folder icons, which have a slightly larger radius.
         hotseatCellHeightPx = getIconSizeWithOverlap(hotseatIconSizePx);
 
         if (isVerticalBarLayout()) {
-            hotseatBarSizePx = hotseatIconSizePx + getHotseatProfile().getBarEdgePaddingPx()
-                    + getHotseatProfile().getBarWorkspaceSpacePx();
+            hotseatBarSizePx = hotseatIconSizePx + hotseatProfile.getBarEdgePaddingPx()
+                    + hotseatProfile.getBarWorkspaceSpacePx();
         } else if (isQsbInline) {
-            hotseatBarSizePx = max(hotseatIconSizePx, getHotseatProfile().getQsbVisualHeight())
+            hotseatBarSizePx = max(hotseatIconSizePx, hotseatProfile.getQsbVisualHeight())
                     + hotseatProfile.getBarBottomSpacePx();
         } else {
             hotseatBarSizePx = hotseatIconSizePx
                     + hotseatProfile.getQsbSpace()
-                    + getHotseatProfile().getQsbVisualHeight()
+                    + hotseatProfile.getQsbVisualHeight()
                     + hotseatProfile.getBarBottomSpacePx();
         }
     }
