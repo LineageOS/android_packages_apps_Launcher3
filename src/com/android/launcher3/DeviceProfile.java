@@ -130,7 +130,7 @@ public class DeviceProfile {
     public WorkspaceProfile mWorkspaceProfile;
     public final InvariantDeviceProfile inv;
     private final BottomSheetProfile mBottomSheetProfile;
-    private final FolderProfile mFolderProfile;
+    public FolderProfile mFolderProfile;
     private AllAppsProfile mAllAppsProfile;
     private final OverviewProfile overviewProfile;
 
@@ -850,7 +850,7 @@ public class DeviceProfile {
         return Math.min(hotseatBorderSpacePx, getHotseatProfile().getMaxIconSpacePx());
     }
 
-    private FolderProfile updateAvailableFolderCellDimensions(Resources res, Context context) {
+    public FolderProfile updateAvailableFolderCellDimensions(Resources res, Context context) {
         FolderProfile folderProfile = updateFolderCellSize(1f, res, context);
 
         // Responsive grid doesn't need to scale the folder

@@ -89,7 +89,6 @@ import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 import android.window.DesktopExperienceFlags;
-import android.window.DesktopModeFlags;
 import android.window.DesktopModeFlags.DesktopModeFlag;
 import android.window.RemoteTransition;
 
@@ -117,6 +116,7 @@ import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.dagger.LauncherComponentProvider;
 import com.android.launcher3.desktop.DesktopAppLaunchTransition;
 import com.android.launcher3.desktop.DesktopAppLaunchTransition.AppLaunchType;
+import com.android.launcher3.deviceprofile.TaskbarDeviceProfileFactory;
 import com.android.launcher3.deviceprofile.TaskbarProfile;
 import com.android.launcher3.folder.Folder;
 import com.android.launcher3.folder.FolderIcon;
@@ -549,17 +549,11 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
      * the icon size
      */
     private void applyDeviceProfile(DeviceProfile originDeviceProfile) {
-        //TODO(b/430382569) Keep DeviceProfile immutable.
-        Consumer<DeviceProfile> overrideProvider = deviceProfile -> {
-            // Taskbar should match the number of icons of hotseat
-            deviceProfile.numShownHotseatIcons = originDeviceProfile.numShownHotseatIcons;
-            // Same QSB width to have a smooth animation
-            deviceProfile.hotseatQsbWidth = originDeviceProfile.hotseatQsbWidth;
-
-            deviceProfile.mWorkspaceProfile = deviceProfile
-                    .mWorkspaceProfile
-                    .changeIconSize(deviceProfile.getTaskbarProfile().getIconSize());
-        };
+        Consumer<DeviceProfile> overrideProvider =
+                deviceProfile -> TaskbarDeviceProfileFactory.INSTANCE
+                        .createDeviceProfile(
+                                deviceProfile, this
+                        );
         mDeviceProfile = originDeviceProfile.toBuilder()
                 .withDimensionsOverride(overrideProvider).build();
         if (refactorTaskbarUiState()) {
