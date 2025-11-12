@@ -397,8 +397,7 @@ public class DragController implements DragDriver.EventListener, TouchController
     }
 
     protected boolean isItemPinnable() {
-        return !Flags.privateSpaceRestrictItemDrag()
-                || !(mDragObject.dragInfo instanceof ItemInfoWithIcon itemInfoWithIcon)
+        return !(mDragObject.dragInfo instanceof ItemInfoWithIcon itemInfoWithIcon)
                 || (itemInfoWithIcon.runtimeStatusFlags & FLAG_NOT_PINNABLE) == 0;
     }
 
