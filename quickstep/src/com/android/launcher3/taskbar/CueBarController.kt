@@ -83,7 +83,6 @@ class CueBarController (
             return
         }
         taskbarControllers = controllers
-        ambientCueRepository.connectToSmartspace()
         ambientCueViewModel.activate()
         createCueBar()
     }
@@ -154,7 +153,6 @@ class CueBarController (
         cleanUpOverlay()
         taskbarControllers.sharedState?.cueBarVisible = false
         ambientCueViewModel.deactivate()
-        ambientCueRepository.disconnectFromSmartspace()
         coroutineScope.cancel()
     }
 
@@ -193,7 +191,6 @@ class CueBarController (
 
             if (cueBar?.parent == null || mOverlayContext == null) {
                 Log.w(TAG, "CueBar parent is null. Window was likely destroyed. Re-requesting.")
-                ambientCueRepository.connectToSmartspace()
                 ambientCueViewModel.activate()
                 mOverlayContext = taskbarControllers.taskbarOverlayController.requestCueBarWindow()
                 createCueBar()
