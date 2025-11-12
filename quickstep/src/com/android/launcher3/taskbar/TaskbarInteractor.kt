@@ -153,6 +153,11 @@ class TaskbarInteractor(private val taskbarUIController: TaskbarUIController) {
     }
 
     @AnyThread
+    fun onNavigateHome() {
+        TASKBAR_UI_THREAD.execute { taskbarUIController.onNavigateHome() }
+    }
+
+    @AnyThread
     fun setIgnoreInAppFlagForSync(enabled: Boolean) {
         if (taskbarUIController is LauncherTaskbarUIController) {
             TASKBAR_UI_THREAD.execute { taskbarUIController.setIgnoreInAppFlagForSync(enabled) }
