@@ -1070,7 +1070,11 @@ public final class LauncherInstrumentation {
                     waitUntilSystemLauncherObjectGone(OVERVIEW_RES_ID);
                     waitUntilSystemLauncherObjectGone(SPLIT_PLACEHOLDER_RES_ID);
                     waitUntilLauncherObjectGone(KEYBOARD_QUICK_SWITCH_RES_ID);
-                    waitUntilSystemLauncherObjectGone(TASKBAR_RES_ID);
+                    if (isTaskbarShownOnHome()) {
+                        waitForSystemLauncherObject(TASKBAR_RES_ID);
+                    } else {
+                        waitUntilSystemLauncherObjectGone(TASKBAR_RES_ID);
+                    }
 
                     return waitForOneOfObjects(
                             getLauncherObjectSelector(WIDGETS_RES_ID),
@@ -1267,6 +1271,22 @@ public final class LauncherInstrumentation {
                 return null;
             }
         }
+    }
+
+    void executeAndWaitForLauncherToYieldFocus(Runnable command, String actionName) {
+        String messageToWait = isInDesktopFirstMode() && shouldShowHomeBehindDesktop()
+                ? TestProtocol.LAUNCHER_ACTIVITY_LOST_WINDOW_FOCUS_MESSAGE
+                : TestProtocol.LAUNCHER_ACTIVITY_STOPPED_MESSAGE;
+        String errorMessage = shouldShowHomeBehindDesktop()
+                ? "Launcher activity did not lose top resumed state"
+                : "Launcher activity didn't stop";
+        executeAndWaitForLauncherEvent(
+                command,
+                event -> messageToWait
+                        .equals(event.getClassName().toString()),
+                () -> errorMessage,
+                actionName,
+                isRecentsWindowEnabled() ? mTestLauncherPackage : null);
     }
 
     void executeAndWaitForLauncherStop(Runnable command, String actionName) {

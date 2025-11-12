@@ -28,6 +28,7 @@ import static com.android.launcher3.QuickstepTransitionManager.RECENTS_LAUNCH_DU
 import static com.android.launcher3.QuickstepTransitionManager.STATUS_BAR_TRANSITION_DURATION;
 import static com.android.launcher3.QuickstepTransitionManager.STATUS_BAR_TRANSITION_PRE_DELAY;
 import static com.android.launcher3.states.StateAnimationConfig.ANIM_OVERVIEW_FADE;
+import static com.android.launcher3.testing.shared.TestProtocol.LAUNCHER_ACTIVITY_LOST_WINDOW_FOCUS_MESSAGE;
 import static com.android.launcher3.testing.shared.TestProtocol.LAUNCHER_ACTIVITY_STOPPED_MESSAGE;
 import static com.android.launcher3.testing.shared.TestProtocol.OVERVIEW_STATE_ORDINAL;
 import static com.android.launcher3.util.WallpaperThemeManager.setWallpaperDependentTheme;
@@ -431,6 +432,15 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         outState.putInt(RUNTIME_STATE, mStateManager.getState().ordinal);
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (!hasFocus) {
+            AccessibilityManagerCompat.sendTestProtocolEventToTest(
+                    this, LAUNCHER_ACTIVITY_LOST_WINDOW_FOCUS_MESSAGE);
+        }
     }
 
     /**

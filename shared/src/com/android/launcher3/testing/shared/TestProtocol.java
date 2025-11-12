@@ -30,6 +30,8 @@ public final class TestProtocol {
     public static final String FOLDER_OPENED_MESSAGE = "TAPL_FOLDER_OPENED";
     public static final String SEARCH_RESULT_COMPLETE = "SEARCH_RESULT_COMPLETE";
     public static final String LAUNCHER_ACTIVITY_STOPPED_MESSAGE = "TAPL_LAUNCHER_ACTIVITY_STOPPED";
+    public static final String LAUNCHER_ACTIVITY_LOST_WINDOW_FOCUS_MESSAGE =
+            "TAPL_LAUNCHER_ACTIVITY_LOST_WINDOW_FOCUS";
     public static final String WALLPAPER_OPEN_ANIMATION_FINISHED_MESSAGE =
             "TAPL_WALLPAPER_OPEN_ANIMATION_FINISHED";
     public static final int NORMAL_STATE_ORDINAL = 0;

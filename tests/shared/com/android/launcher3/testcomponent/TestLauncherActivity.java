@@ -20,6 +20,7 @@ import static android.content.Intent.CATEGORY_LAUNCHER;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED;
 
+import static com.android.launcher3.testing.shared.TestProtocol.LAUNCHER_ACTIVITY_LOST_WINDOW_FOCUS_MESSAGE;
 import static com.android.launcher3.testing.shared.TestProtocol.LAUNCHER_ACTIVITY_STOPPED_MESSAGE;
 
 import android.app.LauncherActivity;
@@ -48,5 +49,21 @@ public class TestLauncherActivity extends LauncherActivity {
         e.setClassName(LAUNCHER_ACTIVITY_STOPPED_MESSAGE);
         e.setPackageName(getApplicationContext().getPackageName());
         accessibilityManager.sendAccessibilityEvent(e);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (!hasFocus) {
+            final AccessibilityManager accessibilityManager =
+                    getSystemService(AccessibilityManager.class);
+            if (accessibilityManager == null || !accessibilityManager.isEnabled()) return;
+
+            final AccessibilityEvent e = AccessibilityEvent.obtain(
+                    AccessibilityEvent.TYPE_ANNOUNCEMENT);
+            e.setClassName(LAUNCHER_ACTIVITY_LOST_WINDOW_FOCUS_MESSAGE);
+            e.setPackageName(getApplicationContext().getPackageName());
+            accessibilityManager.sendAccessibilityEvent(e);
+        }
     }
 }
