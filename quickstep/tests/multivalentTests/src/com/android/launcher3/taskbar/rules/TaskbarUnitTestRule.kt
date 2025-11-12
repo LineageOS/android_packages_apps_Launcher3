@@ -179,8 +179,12 @@ class TaskbarUnitTestRule(
                                 injectControllers()
                             }
 
-                            override fun recreateTaskbarForDisplay(displayId: Int, duration: Int) {
-                                super.recreateTaskbarForDisplay(displayId, duration)
+                            override fun recreateTaskbarForDisplay(
+                                displayId: Int,
+                                duration: Int,
+                                caller: String,
+                            ) {
+                                super.recreateTaskbarForDisplay(displayId, duration, caller)
                                 if (displayId == context.displayId) injectControllers()
                             }
                         }
