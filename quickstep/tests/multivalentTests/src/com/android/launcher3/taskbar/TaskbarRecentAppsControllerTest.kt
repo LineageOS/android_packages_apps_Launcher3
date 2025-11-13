@@ -52,6 +52,7 @@ import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.TaskItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.taskbar.TaskbarRecentAppsController.TaskState
+import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
 import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.ListenableStream
@@ -71,6 +72,7 @@ import com.android.wm.shell.shared.split.SplitBounds
 import com.android.wm.shell.shared.split.SplitScreenConstants
 import com.google.common.truth.Truth.assertThat
 import java.util.function.Consumer
+import org.junit.After
 import org.junit.Assume.assumeFalse
 import org.junit.Assume.assumeTrue
 import org.junit.Before
@@ -218,6 +220,13 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
         }
     }
 
+    @After
+    fun cleanUp() {
+        if (enableTaskbarUiThread()) {
+            TASKBAR_UI_THREAD.handler.removeCallbacksAndMessages(null)
+        }
+    }
+
     // See the TestWatcher rule at the top which sets canShowRunningAndRecentAppsAtInit = false.
     @Test
     fun canShowRunningAndRecentAppsAtInitIsFalse_getTasksNeverCalled() {
@@ -294,10 +303,13 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
             .whenever(mockRecentsModel)
             .getTasks(any(), any<Consumer<List<GroupTask>>>())
         recentTasksChangedCallback?.invoke(null)
+        waitForTaskbarUiThreadSync()
         // By not invoking the callback passed to getTasks() we here emulate getTasks() loading.
 
         recentTasksChangedCallback?.invoke(null)
+        waitForTaskbarUiThreadSync()
         callbackCaptor.lastValue.accept(emptyList())
+        waitForTaskbarUiThreadSync()
 
         // getTasks() is called again now that the first getTasks() call finished.
         verify(mockRecentsModel, times(3)).getTasks(any(), any<Consumer<List<GroupTask>>>())
@@ -1145,6 +1157,7 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
         )
         setInDesktopMode(false)
         recentTasksChangedCallback!!.invoke(null)
+        waitForTaskbarUiThreadSync()
         val shownPackages = recentAppsController.shownTasks.flatMap { it.packageNames }
         // Don't expect RECENT_PACKAGE_3 because it is currently running.
         val expectedPackages = listOf(RECENT_PACKAGE_1, RECENT_PACKAGE_2)
@@ -1575,7 +1588,11 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
             recentTaskPackages = listOf(RECENT_PACKAGE_1, RECENT_PACKAGE_3),
         )
         val task1 = recentAppsController.shownTasks.first().tasks.first()
-        verify(taskbarViewController, times(1)).onTaskUpdated(eq(task1), any())
+        waitForTaskbarUiThreadSync()
+        MAIN_EXECUTOR.post {
+            waitForTaskbarUiThreadSync()
+            verify(taskbarViewController, times(1)).onTaskUpdated(eq(task1), any())
+        }
 
         // New task.
         updateRecentTasks(
@@ -1583,9 +1600,13 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
             recentTaskPackages = listOf(RECENT_PACKAGE_1, RECENT_PACKAGE_2, RECENT_PACKAGE_3),
         )
         val task2 = recentAppsController.shownTasks.last().tasks.first()
-        verify(taskbarViewController, times(1)).onTaskUpdated(eq(task2), any())
-        // Not updated again.
-        verify(taskbarViewController, times(1)).onTaskUpdated(eq(task1), any())
+        waitForTaskbarUiThreadSync()
+        MAIN_EXECUTOR.post {
+            waitForTaskbarUiThreadSync()
+            verify(taskbarViewController, times(1)).onTaskUpdated(eq(task2), any())
+            // Not updated again.
+            verify(taskbarViewController, times(1)).onTaskUpdated(eq(task1), any())
+        }
     }
 
     @Test
@@ -1612,9 +1633,9 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
             recentTaskPackages = listOf(RECENT_PACKAGE_1, RECENT_PACKAGE_2, RECENT_PACKAGE_3),
         )
 
-        waitForTaskbarUiThreadSync()
         // Updated twice in total.
-        verify(taskbarViewController, times(2)).onTaskUpdated(eq(task1), any())
+        waitForTaskbarUiThreadSync()
+        verify(taskbarViewController, times(2)).commitRunningAppsToUI()
     }
 
     @Test
@@ -1630,8 +1651,12 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
         verify(mockThemeManager).addChangeListener(themeChangeListenerCaptor.capture())
         themeChangeListenerCaptor.lastValue.onThemeChanged()
 
-        // Called second time due to theme change.
-        verify(taskbarViewController, times(2)).onTaskUpdated(eq(task), any())
+        waitForTaskbarUiThreadSync()
+        MAIN_EXECUTOR.post {
+            // Called second time due to theme change.
+            waitForTaskbarUiThreadSync()
+            verify(taskbarViewController, times(2)).onTaskUpdated(eq(task), any())
+        }
     }
 
     @Test
@@ -1653,8 +1678,12 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
             )
         )
 
+        waitForTaskbarUiThreadSync()
         // Called second time due to icon shape change.
-        verify(taskbarViewController, times(2)).onTaskUpdated(eq(task), any())
+        MAIN_EXECUTOR.post {
+            waitForTaskbarUiThreadSync()
+            verify(taskbarViewController, times(2)).onTaskUpdated(eq(task), any())
+        }
     }
 
     private fun prepareHotseatAndRunningAndRecentApps(
