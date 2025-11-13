@@ -59,6 +59,7 @@ import com.android.launcher3.tapl.TestHelpers;
 import com.android.launcher3.testcomponent.TestCommandReceiver;
 import com.android.launcher3.util.TestUtil;
 import com.android.launcher3.util.rule.FailureWatcher;
+import com.android.launcher3.util.rule.RecentsWindowTestFilterRule.AllowInRecentsWindowTests;
 import com.android.launcher3.util.rule.SamplerRule;
 import com.android.launcher3.util.rule.ScreenRecordRule;
 import com.android.launcher3.util.rule.SkipAfterTimeOutRule;
@@ -90,6 +91,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @LargeTest
+@AllowInRecentsWindowTests
 @RunWith(AndroidJUnit4.class)
 public class FallbackRecentsTest {
 

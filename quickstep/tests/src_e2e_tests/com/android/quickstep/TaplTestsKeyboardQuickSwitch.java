@@ -26,12 +26,14 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.launcher3.Flags;
 import com.android.launcher3.tapl.KeyboardQuickSwitch;
 import com.android.launcher3.taskbar.KeyboardQuickSwitchController;
+import com.android.launcher3.util.rule.RecentsWindowTestFilterRule.AllowInRecentsWindowTests;
 
 import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @LargeTest
+@AllowInRecentsWindowTests
 @RunWith(AndroidJUnit4.class)
 public class TaplTestsKeyboardQuickSwitch extends AbstractQuickStepTest {
 

@@ -49,6 +49,7 @@ import com.android.launcher3.tapl.OverviewTask;
 import com.android.launcher3.tapl.SelectModeButtons;
 import com.android.launcher3.tapl.Workspace;
 import com.android.launcher3.util.TestUtil;
+import com.android.launcher3.util.rule.RecentsWindowTestFilterRule.AllowInRecentsWindowTests;
 import com.android.launcher3.util.rule.ScreenRecordRule;
 import com.android.launcher3.util.ui.PortraitLandscapeRunner.PortraitLandscape;
 import com.android.quickstep.NavigationModeSwitchRule.NavigationModeSwitch;
@@ -64,6 +65,7 @@ import java.util.Comparator;
 import java.util.Optional;
 
 @LargeTest
+@AllowInRecentsWindowTests
 @RunWith(AndroidJUnit4.class)
 public class TaplTestsQuickstep extends AbstractQuickStepTest {
 
