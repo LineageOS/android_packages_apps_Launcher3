@@ -22,25 +22,27 @@ import com.android.launcher3.model.data.WorkspaceChangeEvent.RemoveEvent
 import com.android.launcher3.model.data.WorkspaceChangeEvent.UpdateEvent
 import com.android.launcher3.model.data.WorkspaceData
 import com.android.launcher3.model.tasks.ModelRepoTestEx.TrackedUpdates
-import com.android.launcher3.util.Executors
+import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import com.android.launcher3.util.ListenableDiffAwareRef
 import com.android.launcher3.util.ListenableStream
 import com.android.launcher3.util.SafeCloseable
 import com.android.launcher3.util.TestUtil
 import com.google.common.truth.Truth.assertThat
+import java.util.concurrent.ExecutorService
 
 typealias TrackedWorkspaceUpdates = TrackedUpdates<WorkspaceData, WorkspaceChangeEvent?>
 
 object ModelRepoTestEx {
 
-    fun <T> ListenableStream<T>.trackUpdate() =
+    fun <T> ListenableStream<T>.trackUpdate(executor: ExecutorService = MODEL_EXECUTOR) =
         mutableListOf<T>().let { updates ->
-            TestUtil.runOnExecutorSync(Executors.MODEL_EXECUTOR) {}
-            TrackedChanges(updates, forEach(Executors.MODEL_EXECUTOR) { updates.add(it) })
+            TestUtil.runOnExecutorSync(executor) {}
+            TrackedChanges(updates, forEach(executor) { updates.add(it) })
         }
 
-    fun <T, R> ListenableDiffAwareRef<T, R>.trackUpdateAndChanges() =
-        TrackedUpdates(updates = trackUpdate(), changes = changes.trackUpdate())
+    fun <T, R> ListenableDiffAwareRef<T, R>.trackUpdateAndChanges(
+        executor: ExecutorService = MODEL_EXECUTOR
+    ) = TrackedUpdates(updates = trackUpdate(executor), changes = changes.trackUpdate(executor))
 
     /** Verifies that the update list contains an update operation, and returns the updated items */
     fun TrackedWorkspaceUpdates.verifyAndGetItemsUpdated(

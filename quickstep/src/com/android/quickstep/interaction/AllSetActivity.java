@@ -90,7 +90,7 @@ import com.android.launcher3.util.SafeCloseable;
 import com.android.quickstep.GestureState;
 import com.android.quickstep.OverviewComponentObserver;
 import com.android.quickstep.OverviewComponentObserver.OverviewChangeListener;
-import com.android.quickstep.TouchInteractionHandler.TISBinder;
+import com.android.quickstep.TISBinder;
 import com.android.quickstep.util.ActivityPreloadUtil;
 import com.android.quickstep.util.LottieAnimationColorUtils;
 import com.android.quickstep.util.TISBindHelper;
