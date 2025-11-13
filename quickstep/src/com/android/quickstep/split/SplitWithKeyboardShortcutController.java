@@ -145,6 +145,7 @@ public class SplitWithKeyboardShortcutController {
                     .getIconCache()
                     .getIconInBackground(
                             task,
+                            MAIN_EXECUTOR,
                             (icon, contentDescription, title) -> floatingTaskView.setIcon(icon));
             floatingTaskView.setAlpha(1);
             floatingTaskView.addStagingAnimation(anim, startingTaskRect, mTempRect,

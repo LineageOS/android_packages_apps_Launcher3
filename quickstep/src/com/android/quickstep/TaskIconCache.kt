@@ -22,6 +22,7 @@ import android.graphics.drawable.Drawable
 import android.os.Process
 import android.os.UserHandle
 import android.util.SparseArray
+import androidx.annotation.AnyThread
 import androidx.annotation.WorkerThread
 import androidx.core.graphics.drawable.toDrawable
 import com.android.launcher3.Flags.enableTaskbarRecentsThemedIcons
@@ -43,7 +44,6 @@ import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.SimpleThreadFactory
 import com.android.launcher3.util.FlagOp
 import com.android.launcher3.util.PostUnlockObject
-import com.android.launcher3.util.Preconditions
 import com.android.launcher3.util.coroutines.DispatcherProvider
 import com.android.quickstep.task.thumbnail.data.TaskIconDataSource
 import com.android.quickstep.util.IconLabelUtil.getBadgedContentDescription
@@ -68,7 +68,9 @@ constructor(
     @Ui private val uiExecutor: Executor,
     daggerSingletonTracker: DaggerSingletonTracker,
 ) : TaskIconDataSource {
-    private val bgExecutor = TASK_IMAGE_CACHE_EXECUTOR
+    // This bg executor executes thread-unsafe tasks like getBitmapInfoCacheEntry(), getCacheEntry()
+    // and createIconFactory(), thus it must be single threaded.
+    private val singleThreadedBgExecutor = TASK_IMAGE_CACHE_EXECUTOR
     private val iconProvider = IconProvider(context)
 
     private val recentsIconCacheSize = context.resources.getInteger(R.integer.recentsIconCacheSize)
@@ -160,16 +162,25 @@ constructor(
      *
      * Returns a [CancellableTask] to cancel the request.
      */
-    fun getIconInBackground(task: Task, callback: GetTaskIconCallback): CancellableTask<*>? {
-        Preconditions.assertUIThread()
+    @AnyThread
+    fun getIconInBackground(
+        task: Task,
+        callbackExecutor: Executor,
+        callback: GetTaskIconCallback,
+    ): CancellableTask<*>? {
         task.icon?.let {
             // Nothing to load, the icon is already loaded
-            callback.onTaskIconReceived(it, task.titleDescription ?: "", task.title ?: "")
+            callbackExecutor.execute {
+                callback.onTaskIconReceived(it, task.titleDescription ?: "", task.title ?: "")
+            }
             return null
         }
 
         if (enableTaskbarRecentsThemedIcons()) {
-            return getBitmapInfoInBackground(task) { bitmapInfo, title, contentDescription ->
+            return getBitmapInfoInBackground(task, callbackExecutor) {
+                bitmapInfo,
+                title,
+                contentDescription ->
                 val icon = bitmapInfo.newIcon(context)
                 task.icon = icon
                 callback.onTaskIconReceived(icon, title, contentDescription)
@@ -181,13 +192,15 @@ constructor(
             task.titleDescription = it.contentDescription
             task.title = it.title
 
-            callback.onTaskIconReceived(it.icon, it.contentDescription, it.title)
+            callbackExecutor.execute {
+                callback.onTaskIconReceived(it.icon, it.contentDescription, it.title)
+            }
             return null
         }
         val request =
             CancellableTask(
                 { getCacheEntry(task) },
-                MAIN_EXECUTOR,
+                callbackExecutor,
                 { result: TaskCacheEntry ->
                     task.icon = result.icon
                     task.titleDescription = result.contentDescription
@@ -201,7 +214,7 @@ constructor(
                     dispatchIconUpdate(task.key.id)
                 },
             )
-        bgExecutor.execute(request)
+        singleThreadedBgExecutor.execute(request)
         return request
     }
 
@@ -211,23 +224,25 @@ constructor(
      *
      * Returns a [CancellableTask] to cancel the request.
      */
+    @AnyThread
     fun getBitmapInfoInBackground(
         task: Task,
+        callbackExecutor: Executor,
         callback: GetTaskBitmapInfoCallback,
     ): CancellableTask<*>? {
-        Preconditions.assertUIThread()
-
         bitmapInfoCache?.getAndInvalidateIfModified(task.key)?.let {
             task.titleDescription = it.contentDescription
             task.title = it.title
-            callback.onBitmapInfoReceived(it.bitmapInfo, it.contentDescription, it.title)
+            callbackExecutor.execute {
+                callback.onBitmapInfoReceived(it.bitmapInfo, it.contentDescription, it.title)
+            }
             return null
         }
 
         val request =
             CancellableTask(
                 { getBitmapInfoCacheEntry(task) },
-                MAIN_EXECUTOR,
+                callbackExecutor,
                 { result: TaskBitmapInfoCacheEntry ->
                     task.titleDescription = result.contentDescription
                     task.title = result.title
@@ -239,7 +254,7 @@ constructor(
                     dispatchIconUpdate(task.key.id)
                 },
             )
-        bgExecutor.execute(request)
+        singleThreadedBgExecutor.execute(request)
         return request
     }
 
@@ -247,7 +262,7 @@ constructor(
     fun clearCache() {
         // Clear on caller and background thread. The cache clears are synchronized.
         resetFactory()
-        bgExecutor.execute { resetFactory() }
+        singleThreadedBgExecutor.execute { resetFactory() }
     }
 
     fun onTaskRemoved(taskKey: TaskKey) {
@@ -256,7 +271,7 @@ constructor(
     }
 
     fun invalidateCacheEntries(pkg: String, handle: UserHandle) {
-        bgExecutor.execute {
+        singleThreadedBgExecutor.execute {
             val keyCheck = { key: TaskKey ->
                 pkg == key.packageName && handle.identifier == key.userId
             }
