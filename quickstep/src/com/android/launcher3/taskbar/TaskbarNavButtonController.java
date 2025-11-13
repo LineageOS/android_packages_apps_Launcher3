@@ -21,6 +21,7 @@ import static android.view.KeyEvent.ACTION_UP;
 
 import static com.android.internal.app.AssistUtils.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS;
 import static com.android.internal.app.AssistUtils.INVOCATION_TYPE_KEY;
+import static com.android.systemui.shared.Flags.cueBarAceMigration;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_TASKBAR_A11Y_BUTTON_LONGPRESS;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_TASKBAR_A11Y_BUTTON_TAP;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_TASKBAR_BACK_BUTTON_LONGPRESS;
@@ -263,6 +264,9 @@ public class TaskbarNavButtonController implements TaskbarControllers.LoggableTa
      */
     public void onRecentsButtonLayoutChanged(Rect bounds) {
         mSystemUiProxy.notifyRecentsButtonPositionChanged(bounds);
+        if (cueBarAceMigration() && mControllers.cueBarController != null) {
+            mControllers.cueBarController.onRecentsButtonLayoutChanged(bounds);
+        }
     }
 
     private boolean backRecentsLongpress(@TaskbarButton int buttonType) {

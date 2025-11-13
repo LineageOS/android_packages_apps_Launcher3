@@ -172,6 +172,13 @@ class CueBarController (
         ambientCueRepository.isTaskBarVisible.dispatchValue(visible && !stashed)
     }
 
+    fun onRecentsButtonLayoutChanged(bounds: Rect) {
+        if (!cueBarAceMigration()) {
+            return
+        }
+        ambientCueRepository.recentsButtonPosition.dispatchValue(bounds)
+    }
+
     private fun onCueBarVisibilityChanged(isCueBarVisible: Boolean) {
         if (!cueBarAceMigration()) {
             return
