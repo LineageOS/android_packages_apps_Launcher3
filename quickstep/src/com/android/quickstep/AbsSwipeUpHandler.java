@@ -68,6 +68,7 @@ import static com.android.quickstep.TaskViewUtils.extractTargetsAndStates;
 import static com.android.quickstep.util.ActiveGestureErrorDetector.GestureEvent.EXPECTING_TASK_APPEARED;
 import static com.android.quickstep.views.RecentsView.UPDATE_SYSUI_FLAGS_THRESHOLD;
 import static com.android.systemui.shared.system.ActivityManagerWrapper.CLOSE_SYSTEM_WINDOWS_REASON_RECENTS;
+import static com.android.window.flags.Flags.betterDeskDeactivationInRecentsTransition;
 import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_CAN_HAND_OFF_ANIMATION;
 
 import android.animation.Animator;
@@ -2738,7 +2739,9 @@ public abstract class AbsSwipeUpHandler<
         });
         mTaskAnimationManager.enableLiveTileRestartListener();
 
-        SystemUiProxy.INSTANCE.get(mContext).onOverviewShown(false, TAG);
+        if (!betterDeskDeactivationInRecentsTransition()) {
+            SystemUiProxy.INSTANCE.get(mContext).onOverviewShown(false, TAG);
+        }
         doLogGesture(RECENTS, mRecentsView.getCurrentPageTaskView());
         reset();
     }

@@ -95,7 +95,7 @@ public class BackgroundAppState extends OverviewState {
     }
 
     @Override
-    public boolean showExplodedDesktopView() {
+    public boolean isInOverview() {
         return false;
     }
 

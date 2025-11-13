@@ -53,6 +53,7 @@ import com.android.launcher3.util.window.WindowManagerProxy.DesktopVisibilityLis
 import com.android.quickstep.GestureState
 import com.android.quickstep.RemoteTargetGluer.RemoteTargetHandle
 import com.android.quickstep.RotationTouchHelper
+import com.android.quickstep.SystemUiProxy
 import com.android.quickstep.TaskAnimationManager
 import com.android.quickstep.util.DesksUtils.Companion.areMultiDesksFlagsEnabled
 import com.android.quickstep.util.DesktopTask
@@ -66,6 +67,7 @@ import com.android.quickstep.views.RecentsView.TAG
 import com.android.quickstep.views.RecentsView.TASK_THUMBNAIL_SPLASH_ALPHA
 import com.android.systemui.shared.recents.model.Task
 import com.android.systemui.shared.recents.model.ThumbnailData
+import com.android.window.flags.Flags.betterDeskDeactivationInRecentsTransition
 import com.android.wm.shell.shared.GroupedTaskInfo
 import com.android.wm.shell.shared.desktopmode.DesktopState
 import dagger.assisted.Assisted
@@ -89,10 +91,13 @@ constructor(
     @DisplayId private val displayId: Int,
     private val taskAnimationManager: TaskAnimationManager,
     private val rotationTouchHelper: RotationTouchHelper,
+    private val systemUiProxy: SystemUiProxy,
 ) : DesktopVisibilityListener {
     val taskViews = TaskViewsIterable(recentsView)
 
     var keyboardFocusTask: KeyboardFocusTask = KeyboardFocusTask.Unfocused
+
+    private var isInOverview: Boolean = false
 
     /** Takes a screenshot of all [taskView] and return map of taskId to the screenshot */
     fun screenshotTasks(taskView: TaskView): Map<Int, ThumbnailData> {
@@ -917,6 +922,17 @@ constructor(
             rotationTouchHelper.currentActiveRotation,
             rotationTouchHelper.displayRotation,
         )
+    }
+
+    /** Called when a transition to a new state finishes. */
+    fun onStateTransitionComplete(finalState: BaseState<*>) {
+        if (!betterDeskDeactivationInRecentsTransition()) return
+        if (!isInOverview && finalState.isInOverview) {
+            systemUiProxy.onOverviewShown(displayId)
+        } else if (isInOverview && !finalState.isInOverview) {
+            systemUiProxy.onOverviewHidden(displayId)
+        }
+        isInOverview = finalState.isInOverview
     }
 
     companion object {
