@@ -419,4 +419,28 @@
 
     <!-- Content description for running app in desktop mode if it is active or minimized. [CHAR_LIMIT=NONE] -->
     <string name="running_app_description"><xliff:g id="app_title" example="Gmail">%1$s</xliff:g> <xliff:g id="running_state" example="Active or Minimized">%2$s</xliff:g></string>
+    <!-- Description of the icon on the educational tooltip. [CHAR LIMIT=NONE] -->
+    <string name="ambientcue_first_time_edu_icon_description">
+        Icon
+    </string>
+    <!-- Title of the first time usage tooltip of the "ambientcue" area. [CHAR LIMIT=NONE] -->
+    <string name="ambientcue_first_time_edu_title">
+        Get helpful suggestions
+    </string>
+    <!-- Text of the first time usage tooltip of the "ambientcue" area. [CHAR LIMIT=NONE] -->
+    <string name="ambientcue_first_time_edu_text">
+        We use AI to proactively suggest info and actions relevant to what you’re doing on screen
+    </string>
+    <!-- Description for the Underlay close button. The Underlay view appears on the bottom of the screen and shows some AI hints. The button will dismiss the underlay view. [CHAR LIMIT=NONE] -->
+    <string name="underlay_close_button_content_description">Close</string>
+    <!-- Description for the Ambient Cue accessibility action label for expanding. [CHAR LIMIT=NONE] -->
+    <string name="ambient_cue_expand_action">expand</string>
+    <!-- Description for the Ambient Cue Icon. The icon appears on the bottom of the screen with some AI hints. [CHAR LIMIT=NONE] -->
+    <string name="ambient_cue_icon_content_description">Ambient Suggestions Icon</string>
+    <!-- Tooltip suggesting that user can long press on a suggestion to see data sources. [CHAR LIMIT=NONE] -->
+    <string name="ambientcue_long_press_edu_text">
+        Touch &amp; hold to see how suggestions are generated
+    </string>
+    <!-- Description for the Ambient Cue accessibility action label for autofilling. [CHAR LIMIT=NONE] -->
+    <string name="ambient_cue_autofill_action">autofill</string>
 </resources>

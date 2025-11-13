@@ -17,6 +17,9 @@
 package com.android.quickstep.compose.core
 
 import android.view.View
+import androidx.compose.ui.geometry.Rect
+import com.android.quickstep.cuebar.ui.utils.AmbientCueAnimationState
+import com.android.quickstep.cuebar.ui.viewmodel.AmbientCueViewModel
 import com.android.quickstep.recents.ui.viewmodel.TaskViewModel
 import com.android.quickstep.task.apptimer.TaskAppTimerUiState
 import com.android.quickstep.task.apptimer.ViewModel
@@ -36,4 +39,12 @@ interface QuickstepComposeFeatures {
     fun enableCompositionTracing()
 
     fun disableCompositionTracing()
+
+    fun startCueBar(
+        view: View,
+        ambientCueViewModelFactory: AmbientCueViewModel.Factory,
+        onShouldInterceptTouches: (Boolean, Rect?) -> Unit,
+        onAnimationStateChange: (Int, AmbientCueAnimationState) -> Unit
+    ): View
+
 }

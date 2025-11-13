@@ -22,7 +22,7 @@ import androidx.compose.runtime.remember
 
 /** An interface defining general structure of a view model in widget picker. */
 // TODO(b/419844646): Once stable, introduce a reusable library.
-internal interface ViewModel {
+interface ViewModel {
     /**
      * Implement this function to initialize the state of viewmodel by binding to the flows from the
      * interactors.
