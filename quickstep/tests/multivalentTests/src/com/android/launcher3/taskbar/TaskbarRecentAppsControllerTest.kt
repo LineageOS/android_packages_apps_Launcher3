@@ -145,8 +145,8 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
         mockDeviceProfile.isTaskbarPresent = true
 
         whenever(mockRecentsModel.iconCache).thenReturn(mockIconCache)
-        whenever(mockIconCache.getBitmapInfoInBackground(any(), any())).thenAnswer {
-            it.getArgument<GetTaskBitmapInfoCallback>(1)
+        whenever(mockIconCache.getBitmapInfoInBackground(any(), any(), any())).thenAnswer {
+            it.getArgument<GetTaskBitmapInfoCallback>(2)
                 .onBitmapInfoReceived(BITMAP_INFO_1, TASK_DESCRIPTION, TASK_TITLE)
             null
         }
@@ -1600,8 +1600,8 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
         val task1 = recentAppsController.shownTasks.first().tasks.first()
 
         // Update info for task.
-        whenever(mockIconCache.getBitmapInfoInBackground(eq(task1), any())).thenAnswer {
-            it.getArgument<GetTaskBitmapInfoCallback>(1)
+        whenever(mockIconCache.getBitmapInfoInBackground(eq(task1), any(), any())).thenAnswer {
+            it.getArgument<GetTaskBitmapInfoCallback>(2)
                 .onBitmapInfoReceived(BITMAP_INFO_2, TASK_DESCRIPTION, TASK_TITLE)
             null
         }
