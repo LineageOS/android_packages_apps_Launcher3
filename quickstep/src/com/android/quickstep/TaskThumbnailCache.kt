@@ -16,6 +16,7 @@
 package com.android.quickstep
 
 import android.content.Context
+import android.content.res.Resources
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
 import com.android.launcher3.Flags.enableLowResThumbnailPreloading
@@ -151,6 +152,9 @@ constructor(
     /**
      * Retrieves a thumbnail for the provided `task` on the current thread. This should not be
      * called from the main thread.
+     *
+     * NOTE: if the system does not support low resolution thumbnails this method will only return
+     * high resolution thumbnails - ignoring [requestResolution].
      */
     @WorkerThread
     override suspend fun getThumbnail(
@@ -163,8 +167,11 @@ constructor(
                     "being enabled"
             )
         }
+        val sanitizedRequestResolution =
+            if (!supportsLowResThumbnails()) HIGH_RES else requestResolution
+
         fun isCorrectResolution(thumbnailData: ThumbnailData) =
-            when (requestResolution) {
+            when (sanitizedRequestResolution) {
                 HIGH_RES -> !thumbnailData.reducedResolution
                 LOW_RES -> thumbnailData.reducedResolution
                 ANY_RES -> true
@@ -184,7 +191,7 @@ constructor(
 
         return withContext(dispatcherProvider.ioBackground) {
             // Get thumbnail from system
-            val lowResolution = requestResolution != HIGH_RES
+            val lowResolution = sanitizedRequestResolution != HIGH_RES
             val thumbnailData = activityManagerWrapper.getTaskThumbnail(task.key.id, lowResolution)
 
             cache.put(task.key, thumbnailData)
@@ -296,6 +303,20 @@ constructor(
 
     /** Returns Whether to enable background preloading of task thumbnails. */
     fun isPreloadingEnabled() = enableTaskSnapshotPreloading && highResLoadingState.visible
+
+    /**
+     * Returns Whether device supports low-res thumbnails. Low-res files are an optimization for
+     * faster load times of snapshots. Devices can optionally disable low-res files so that they
+     * only store snapshots at high-res scale. The actual scale can be configured in frameworks/base
+     * config overlay.
+     */
+    private fun supportsLowResThumbnails(): Boolean {
+        val resources = context.resources
+        val resId = resources.getIdentifier("config_lowResTaskSnapshotScale", "dimen", "android")
+        if (resId == Resources.ID_NULL) return false
+
+        return resources.getFloat(resId) > 0
+    }
 
     companion object {
         const val TAG = "TaskThumbnailCache"
