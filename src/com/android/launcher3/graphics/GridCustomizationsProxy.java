@@ -133,6 +133,12 @@ public class GridCustomizationsProxy implements ProxyProvider {
     private static final String GET_ICON_THEMED = "/get_icon_themed";
     private static final String SET_ICON_THEMED = "/set_icon_themed";
     public static final String ICON_THEMED = "/icon_themed";
+
+    private static final String GET_WORKSPACE_ITEMS_LABEL_HIDDEN =
+            "/get_workspace_items_label_hidden";
+    private static final String SET_WORKSPACE_ITEMS_LABEL_HIDDEN =
+            "/set_workspace_items_label_hidden";
+    public static final String WORKSPACE_ITEMS_LABEL_HIDDEN = "/workspace_items_label_hidden";
     public static final String BOOLEAN_VALUE = "boolean_value";
 
     private static final String KEY_SURFACE_PACKAGE = "surface_package";
@@ -253,6 +259,16 @@ public class GridCustomizationsProxy implements ProxyProvider {
                 Log.d(TAG, "query: path=" + path + ", isMonoThemeEnabled=" + monoThemeEnabled);
                 return cursor;
             }
+            case GET_WORKSPACE_ITEMS_LABEL_HIDDEN:
+            case WORKSPACE_ITEMS_LABEL_HIDDEN:
+                if (!com.android.systemui.shared.Flags.workspaceItemsLabelHidden()) {
+                    return null;
+                }
+                MatrixCursor cursor = new MatrixCursor(new String[]{BOOLEAN_VALUE});
+                boolean isWorkspaceItemsLabelHidden =
+                        mPrefs.get(LauncherPrefs.WORKSPACE_ITEMS_LABEL_HIDDEN);
+                cursor.newRow().add(BOOLEAN_VALUE, isWorkspaceItemsLabelHidden ? 1 : 0);
+                return cursor;
             default: {
                 Log.d(TAG, "query: path=" + path + " not found, returning null.");
                 return null;
@@ -316,6 +332,13 @@ public class GridCustomizationsProxy implements ProxyProvider {
                 } else {
                     mThemePreference.setValue(null, MONO_THEME_VALUE::equals);
                 }
+                return UPDATE_SETTING_SUCCESS;
+            }
+            case SET_WORKSPACE_ITEMS_LABEL_HIDDEN: {
+                mPrefs.put(
+                        LauncherPrefs.WORKSPACE_ITEMS_LABEL_HIDDEN,
+                        values.getAsBoolean(BOOLEAN_VALUE)
+                );
                 return UPDATE_SETTING_SUCCESS;
             }
             default:
