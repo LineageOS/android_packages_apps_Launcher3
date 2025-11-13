@@ -20,6 +20,7 @@ import android.net.Uri
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.view.DragEvent
+import android.view.View.DRAG_FLAG_DISABLE_DEFAULT_POINTER_ICON
 import android.view.View.DRAG_FLAG_GLOBAL
 import android.view.View.DRAG_FLAG_GLOBAL_URI_READ
 import android.view.View.DRAG_FLAG_GLOBAL_URI_WRITE
@@ -242,7 +243,8 @@ class SystemDragControllerImplTest {
                     /*dragShadowBuilder=*/ any(),
                     /*localState=*/ isNull(),
                     eq(
-                        DRAG_FLAG_GLOBAL or
+                        DRAG_FLAG_DISABLE_DEFAULT_POINTER_ICON or
+                            DRAG_FLAG_GLOBAL or
                             DRAG_FLAG_GLOBAL_URI_READ or
                             DRAG_FLAG_GLOBAL_URI_WRITE or
                             DRAG_FLAG_OPAQUE
