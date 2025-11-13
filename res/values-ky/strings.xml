@@ -113,6 +113,7 @@
     <string name="remove_system_shortcut_label" msgid="3991201411148073972">"Өчүрүү"</string>
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"Ачуу"</string>
     <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"Биротоло өчүрүү"</string>
+    <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"Таштандыга ыргытуу"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"тез чакырмаларды орнотуу"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"Колдонмого колдонуучуга кайрылбастан тез чакырма кошууга уруксат берет."</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"үйдүн параметрлерин жана ыкчам баскычтарын окуу"</string>
@@ -202,11 +203,11 @@
     <string name="action_increase_height" msgid="459390020612501122">"Бийиктетүү"</string>
     <string name="action_decrease_width" msgid="1374549771083094654">"Ичкертүү"</string>
     <string name="action_decrease_height" msgid="282377193880900022">"Жапыздатуу"</string>
-    <string name="resize_handle_start" msgid="431073846880883794">"Сол жагын өзгөртүү маркери"</string>
-    <string name="resize_handle_top" msgid="280799523356834542">"Жогорку өлчөмүн өзгөртүү маркери"</string>
-    <string name="resize_handle_end" msgid="8411240534474246075">"Оң жагын өзгөртүү маркери"</string>
-    <string name="resize_handle_bottom" msgid="4217171801060928429">"Ылдыйкы өлчөмүн өзгөртүү маркери"</string>
-    <string name="tap_to_show_resize_buttons" msgid="964815552123289232">"Өлчөмүн өзгөртүү баскычтарын көрсөтүү"</string>
+    <string name="resize_handle_start" msgid="431073846880883794">"Сол жагын өлчөмдөөчү маркер"</string>
+    <string name="resize_handle_top" msgid="280799523356834542">"Өйдө жагын өлчөмдөөчү маркер"</string>
+    <string name="resize_handle_end" msgid="8411240534474246075">"Оң жагын өлчөмдөөчү маркер"</string>
+    <string name="resize_handle_bottom" msgid="4217171801060928429">"Ылдый жагын өлчөмдөөчү маркер"</string>
+    <string name="tap_to_show_resize_buttons" msgid="964815552123289232">"Өлчөмдөөчү баскычтарды көрүү"</string>
     <string name="widget_resized" msgid="9130327887929620">"Виджеттин кеңдиги <xliff:g id="NUMBER_0">%1$s</xliff:g> бийиктиги <xliff:g id="NUMBER_1">%2$s</xliff:g> болду"</string>
     <string name="action_deep_shortcut" msgid="4766835855579976045">"Ыкчам баскычтын менюсу"</string>
     <string name="widget_frame_name" msgid="8782828448471444270">"<xliff:g id="STRING">%1$s</xliff:g> үчүн виджеттин өлчөмүн өзгөртүү"</string>

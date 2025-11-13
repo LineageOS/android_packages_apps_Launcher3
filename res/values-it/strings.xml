@@ -113,6 +113,7 @@
     <string name="remove_system_shortcut_label" msgid="3991201411148073972">"Rimuovi"</string>
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"Apri"</string>
     <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"Elimina definitivamente"</string>
+    <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"Sposta nel cestino"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"Aggiunta di scorciatoie"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"Consente a un\'app di aggiungere scorciatoie automaticamente."</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"leggere le impostazioni e le scorciatoie nella schermata Home"</string>
