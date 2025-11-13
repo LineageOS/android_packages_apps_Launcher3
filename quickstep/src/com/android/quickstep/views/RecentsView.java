@@ -32,6 +32,7 @@ import static com.android.app.animation.Interpolators.clampToProgress;
 import static com.android.launcher3.AbstractFloatingView.TYPE_REBIND_SAFE;
 import static com.android.launcher3.BaseActivity.STATE_HANDLER_INVISIBILITY_FLAGS;
 import static com.android.launcher3.Flags.enableDesktopExplodedView;
+import static com.android.launcher3.Flags.enableLowResThumbnailPreloading;
 import static com.android.launcher3.Flags.enableOverviewPagination;
 import static com.android.launcher3.LauncherAnimUtils.SUCCESS_TRANSITION_PROGRESS;
 import static com.android.launcher3.LauncherAnimUtils.VIEW_BACKGROUND_COLOR;
@@ -1070,7 +1071,9 @@ public abstract class RecentsView<
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         updateTaskStackListenerState();
-        mRecentsModel.getThumbnailCache().getHighResLoadingState().addCallback(this);
+        if (!enableLowResThumbnailPreloading()) {
+            mRecentsModel.getThumbnailCache().getHighResLoadingState().addCallback(this);
+        }
         TaskStackChangeListeners.getInstance().registerTaskStackListener(mTaskStackListener);
         runActionOnRemoteHandles(remoteTargetHandle -> remoteTargetHandle.getTransformParams()
                 .setSyncTransactionApplier(mSyncTransactionApplier));
@@ -1091,7 +1094,9 @@ public abstract class RecentsView<
         super.onDetachedFromWindow();
 
         updateTaskStackListenerState();
-        mRecentsModel.getThumbnailCache().getHighResLoadingState().removeCallback(this);
+        if (!enableLowResThumbnailPreloading()) {
+            mRecentsModel.getThumbnailCache().getHighResLoadingState().removeCallback(this);
+        }
         TaskStackChangeListeners.getInstance().unregisterTaskStackListener(mTaskStackListener);
         mSyncTransactionApplier = null;
         runActionOnRemoteHandles(remoteTargetHandle -> remoteTargetHandle.getTransformParams()
@@ -2393,7 +2398,8 @@ public abstract class RecentsView<
 
     @Override
     public void onHighResLoadingStateChanged(boolean enabled) {
-        // TODO(b/446013310) move this call to the RecentsView constructor
+        if (enableLowResThumbnailPreloading()) return;
+
         // Preload cache so when user goes to overview, the task thumbnails appear without delay
         if (mRecentsViewModel.getVisibleTaskIds().isEmpty()) {
             mRecentsModel.preloadCacheIfNeeded();

@@ -42,6 +42,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -78,6 +79,13 @@ class TaskThumbnailCacheTest {
             testDispatcherProvider,
             activityManagerWrapper,
         )
+
+    @Before
+    fun setUp() {
+        whenever(resource.getIdentifier("config_lowResTaskSnapshotScale", "dimen", "android"))
+            .thenReturn(LOW_RES_RESOURCE_ID)
+        whenever(resource.getFloat(LOW_RES_RESOURCE_ID)).thenReturn(LOW_RES_SCALING)
+    }
 
     @Test
     fun increaseCacheSize() {
@@ -284,6 +292,53 @@ class TaskThumbnailCacheTest {
         }
 
     @Test
+    @EnableFlags(Flags.FLAG_ENABLE_LOW_RES_THUMBNAIL_PRELOADING)
+    fun getThumbnailWithLowRes_returnsHighRes_whenHighResAvailableInTaskAndLowResUnsupported() =
+        testScope.runTest {
+            setLowResUnsupported()
+
+            val task =
+                Task(createTaskKey(TASK_ID)).apply {
+                    thumbnail = ThumbnailData(thumbnail = mock(), reducedResolution = false)
+                }
+
+            assertThat(systemUnderTest.getThumbnail(task, RequestResolution.LOW_RES))
+                .isEqualTo(task.thumbnail)
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_LOW_RES_THUMBNAIL_PRELOADING)
+    fun getThumbnailWithLowRes_returnsHighRes_whenHighResAvailableInCacheAndLowResUnsupported() =
+        testScope.runTest {
+            setLowResUnsupported()
+
+            val taskKey = createTaskKey(TASK_ID)
+            val task = Task(taskKey)
+            val cachedThumbnailData = ThumbnailData(thumbnail = mock(), reducedResolution = false)
+            whenever(taskKeyCache.getAndInvalidateIfModified(taskKey))
+                .thenReturn(cachedThumbnailData)
+
+            assertThat(systemUnderTest.getThumbnail(task, RequestResolution.LOW_RES))
+                .isEqualTo(cachedThumbnailData)
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_LOW_RES_THUMBNAIL_PRELOADING)
+    fun getThumbnailWithLowRes_requestsHighRes_whenNoCachedValueAvailableAndLowResUnsupported() =
+        testScope.runTest {
+            setLowResUnsupported()
+
+            val highResThumbnail = ThumbnailData(thumbnail = mock(), reducedResolution = false)
+            val task = Task(createTaskKey(TASK_ID))
+
+            whenever(activityManagerWrapper.getTaskThumbnail(TASK_ID, false))
+                .thenReturn(highResThumbnail)
+
+            assertThat(systemUnderTest.getThumbnail(task, RequestResolution.LOW_RES))
+                .isEqualTo(highResThumbnail)
+        }
+
+    @Test
     @DisableFlags(Flags.FLAG_ENABLE_LOW_RES_THUMBNAIL_PRELOADING)
     fun getThumbnailWithRequestResolution_throwsException_whenFlagIsOff() =
         testScope.runTest {
@@ -312,7 +367,18 @@ class TaskThumbnailCacheTest {
     private fun createTaskKey(id: Int = 1) =
         TaskKey(id, 0, Intent().setPackage(""), ComponentName("", ""), 0, 0)
 
+    private fun setLowResUnsupported() {
+        whenever(resource.getIdentifier("config_lowResTaskSnapshotScale", "dimen", "android"))
+            .thenReturn(Resources.ID_NULL)
+        whenever(resource.getFloat(Resources.ID_NULL))
+            .thenThrow(IllegalArgumentException("Cannot get unknown value"))
+        whenever(resource.getFloat(LOW_RES_RESOURCE_ID))
+            .thenThrow(IllegalArgumentException("Cannot get unknown value"))
+    }
+
     private companion object {
         const val TASK_ID = 1
+        const val LOW_RES_RESOURCE_ID = 0x1234
+        const val LOW_RES_SCALING = 0.5f
     }
 }
