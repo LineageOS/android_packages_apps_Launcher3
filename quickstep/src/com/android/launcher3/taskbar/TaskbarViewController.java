@@ -16,7 +16,6 @@
 package com.android.launcher3.taskbar;
 
 import static android.animation.LayoutTransition.DISAPPEARING;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.DesktopModeFlags.ENABLE_TASKBAR_OVERFLOW;
 
 import static com.android.app.animation.Interpolators.EMPHASIZED;
@@ -842,7 +841,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         }
 
         if (!mControllers.taskbarDesktopModeController.shouldShowDesktopTasksInTaskbar(
-                DEFAULT_DISPLAY)) {
+                mActivity.getPrimaryDisplayId())) {
             btv.setContentDescription(tagDescription);
             return;
         }
