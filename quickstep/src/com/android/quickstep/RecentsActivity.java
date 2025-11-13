@@ -43,6 +43,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Trace;
+import android.util.Log;
 import android.view.Display;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
@@ -141,6 +142,10 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
     private DesktopRecentsTransitionController mDesktopRecentsTransitionController;
 
     private RecentsComponent mRecentsComponent;
+
+    // Tracks whether the current state should have RecentsView visible.
+    private boolean mIsInRecentsViewVisibleState = false;
+
 
     /**
      * Init drag layer and overview panel views.
@@ -461,6 +466,12 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
             AccessibilityManagerCompat.sendStateEventToTest(getBaseContext(),
                     OVERVIEW_STATE_ORDINAL);
         }
+
+        if (mIsInRecentsViewVisibleState && !state.isRecentsViewVisible() && !isFinishing()) {
+            Log.d(TAG, "onStateSetEnd - moveTaskToBack as Recents should no longer be visible");
+            moveTaskToBack(/*nonRoot=*/true);
+        }
+        mIsInRecentsViewVisibleState = state.isRecentsViewVisible();
     }
 
     @Override
