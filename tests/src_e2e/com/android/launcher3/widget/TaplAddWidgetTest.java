@@ -118,6 +118,6 @@ public class TaplAddWidgetTest extends AbstractLauncherUiTest<Launcher, View> {
                 .dragWidgetToWorkspace();
 
         assertNotNull("Widget resize frame not shown after widget add", resizeFrame);
-        resizeFrame.resize();
+        resizeFrame.resize(widgetInfo.getLabel());
     }
 }

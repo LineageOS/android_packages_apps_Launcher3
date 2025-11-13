@@ -25,6 +25,7 @@ import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import com.android.launcher3.AppWidgetResizeFrameBase
@@ -87,6 +88,8 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         isFocusableInTouchMode = true
         requestFocus()
     }
+
+    @VisibleForTesting fun getViewModelForTest() = viewModel
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(ev: MotionEvent?): Boolean {
