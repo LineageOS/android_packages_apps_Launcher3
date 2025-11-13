@@ -163,7 +163,7 @@
     <string name="quick_switch_task_with_position_in_parent" msgid="4968670948331508951">"<xliff:g id="TASK_DESCRIPTION">%1$s</xliff:g>, <xliff:g id="INDEX_IN_PARENT">%2$d</xliff:g>/<xliff:g id="TOTAL_TASKS">%3$d</xliff:g> öğe"</string>
     <string name="quick_switch_scroll_arrow_left" msgid="6527033155534184309">"Sola kaydır"</string>
     <string name="quick_switch_scroll_arrow_right" msgid="7319779291086916348">"Sağa kaydır"</string>
-    <string name="bubble_bar_bubble_fallback_description" msgid="7811684548953452009">"Balon"</string>
+    <string name="bubble_bar_bubble_fallback_description" msgid="7811684548953452009">"Baloncuk"</string>
     <string name="bubble_bar_overflow_description" msgid="8617628132733151708">"Taşma"</string>
     <string name="bubble_bar_bubble_description" msgid="1882466152448446446">"<xliff:g id="APP_NAME">%2$s</xliff:g> uygulamasından <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_bar_description_multiple_bubbles" msgid="3922207715357143648">"<xliff:g id="BUBBLE_BAR_BUBBLE_DESCRIPTION">%1$s</xliff:g> ve <xliff:g id="BUBBLE_COUNT">%2$d</xliff:g> tane daha"</string>

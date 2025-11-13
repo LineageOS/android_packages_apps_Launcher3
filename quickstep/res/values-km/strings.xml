@@ -95,7 +95,7 @@
     <string name="allset_navigation_settings" msgid="4713404605961476027"><annotation id="link">"ការកំណត់​ការរុករក​ប្រព័ន្ធ"</annotation></string>
     <string name="allset_title_expressive" msgid="474399969304146994">"អាចប្រើ <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក\nបានហើយ!"</string>
     <string name="allset_title_expressive_fallback" msgid="2829102990606405239">"អាចប្រើឧបករណ៍​របស់អ្នក\nបានហើយ!"</string>
-    <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"អ្នកអាចដាក់ចេញបានហើយ!"</string>
+    <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"អ្នកបានរៀបចំរួចរាល់ហើយ!"</string>
     <string name="allset_subtitle_expressive" msgid="419688197551192358">"រីករាយជាមួយ <xliff:g id="DEVICE">%1$s</xliff:g> ថ្មីរបស់អ្នក!"</string>
     <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"អូស​ឡើងលើ ដើម្បីចាប់ផ្ដើមប្រើ <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក"</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"ចុចដើម្បីចាប់ផ្ដើមប្រើ <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក"</string>

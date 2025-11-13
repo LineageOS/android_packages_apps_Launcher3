@@ -95,9 +95,9 @@
     <string name="allset_navigation_settings" msgid="4713404605961476027"><annotation id="link">"စနစ် လမ်းညွှန် ဆက်တင်များ"</annotation></string>
     <string name="allset_title_expressive" msgid="474399969304146994">"သင်၏ <xliff:g id="DEVICE">%1$s</xliff:g> \nအသင့်ဖြစ်ပါပြီ။"</string>
     <string name="allset_title_expressive_fallback" msgid="2829102990606405239">"သင်၏စက် \nအသင့်ဖြစ်ပါပြီ။"</string>
-    <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"လှိမ့်ရန် အသင့်ဖြစ်ပါပြီ။"</string>
+    <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"စတင်ရန် အသင့်ဖြစ်ပါပြီ။"</string>
     <string name="allset_subtitle_expressive" msgid="419688197551192358">"သင်၏ <xliff:g id="DEVICE">%1$s</xliff:g> အသစ်ကို အသုံးပြုလိုက်ပါ။"</string>
-    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"သင့် <xliff:g id="DEVICE">%1$s</xliff:g> ဖြင့် စတင်ရန် အပေါ်သို့ပွတ်ဆွဲပါ"</string>
+    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"သင့် <xliff:g id="DEVICE">%1$s</xliff:g> ကို စတင်အသုံးပြုရန် အပေါ်သို့ ပွတ်ဆွဲပါ။"</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"သင်၏ <xliff:g id="DEVICE">%1$s</xliff:g> ကို စသုံးရန် တို့ပါ"</string>
     <string name="allset_navigation_settings_expressive" msgid="3745595273748356"><annotation id="link">"ရွှေ့ကြည့်နည်း ရွေးရန်"</annotation></string>
     <string name="allset_hint_expressive" msgid="756856423510976261">"အပေါ်သို့ ပွတ်ဆွဲရန်"</string>

@@ -95,9 +95,9 @@
     <string name="allset_navigation_settings" msgid="4713404605961476027"><annotation id="link">"Настройки навигации в системе"</annotation></string>
     <string name="allset_title_expressive" msgid="474399969304146994">"Устройство (<xliff:g id="DEVICE">%1$s</xliff:g>)\nготово!"</string>
     <string name="allset_title_expressive_fallback" msgid="2829102990606405239">"Устройство\nготово!"</string>
-    <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"Всё готово к работе!"</string>
+    <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"Все готово!"</string>
     <string name="allset_subtitle_expressive" msgid="419688197551192358">"Начните использовать <xliff:g id="DEVICE">%1$s</xliff:g>."</string>
-    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"Проведите по экрану вверх, чтобы начать работу с устройством \"<xliff:g id="DEVICE">%1$s</xliff:g>\""</string>
+    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"Чтобы использовать <xliff:g id="DEVICE">%1$s</xliff:g>, проведите по экрану вверх."</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"Нажмите, чтобы начать использовать <xliff:g id="DEVICE">%1$s</xliff:g>."</string>
     <string name="allset_navigation_settings_expressive" msgid="3745595273748356"><annotation id="link">"Выбрать способ навигации"</annotation></string>
     <string name="allset_hint_expressive" msgid="756856423510976261">"Проведите по экрану вверх"</string>
