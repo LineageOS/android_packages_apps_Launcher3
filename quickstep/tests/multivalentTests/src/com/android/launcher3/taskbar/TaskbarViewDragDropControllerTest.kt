@@ -89,7 +89,7 @@ class TaskbarViewDragDropControllerTest {
     fun pinned_onDropWithNewAppInfo_addOrMoveItemInDatabase() {
         val dragObject = createDragObject(TEST_APP)
         controller.setUpCallbacks(modelCallbacks)
-        controller.pinningDropTarget.onDrop(dragObject, null)
+        controller.taskbarPinningDropTarget.onDrop(dragObject, null)
 
         verify(modelWriter)
             .addOrMoveItemInDatabase(
@@ -112,7 +112,7 @@ class TaskbarViewDragDropControllerTest {
 
         val dragObject = createDragObject(TEST_WORKSPACE_ITEM)
 
-        controller.pinningDropTarget.onDrop(dragObject, null)
+        controller.taskbarPinningDropTarget.onDrop(dragObject, null)
 
         verify(modelWriter)
             .addOrMoveItemInDatabase(

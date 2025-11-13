@@ -48,6 +48,17 @@ class OverflownAppsViewController(
                 TaskbarActivityContext.TASKBAR_WINDOW_ICON_TASKBAR_OVERFLOW,
             )
         }
+
+        val dragController = activityContext.dragController
+        val taskbarViewDragDropController =
+            activityContext.controllers.taskbarViewDragDropController
+        taskbarViewDragDropController.addOverflowDropTarget(
+            dragController,
+            overflownAppsContainerView,
+        )
+        overflownAppsContainerView.addOnCloseCallback {
+            taskbarViewDragDropController.removeOverflowDropTarget(dragController)
+        }
     }
 
     fun show(overflownApps: List<ItemInfo>) {

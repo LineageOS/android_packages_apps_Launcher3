@@ -249,12 +249,6 @@ public class TaskbarViewCallbacks {
                 FLAG_AUTOHIDE_SUSPEND_TASKBAR_OVERFLOW, false);
     }
 
-    protected void openOverflownContainer(
-            TaskbarOverflowView overflowView) {
-        mControllers.taskbarViewController.getOverflownAppsContainerController()
-                .openOverflownAppsView(overflowView);
-    }
-
     private float getDividerCenterX() {
         View divider = mTaskbarView.getTaskbarDividerViewContainer();
         if (divider == null) {

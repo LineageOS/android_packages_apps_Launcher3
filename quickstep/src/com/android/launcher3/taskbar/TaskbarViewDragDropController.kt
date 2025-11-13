@@ -24,6 +24,7 @@ import androidx.core.util.size
 import com.android.launcher3.Alarm
 import com.android.launcher3.DropTarget
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
+import com.android.launcher3.OnAlarmListener
 import com.android.launcher3.dragndrop.DragController
 import com.android.launcher3.dragndrop.DragOptions
 import com.android.launcher3.model.data.ItemInfo
@@ -38,44 +39,107 @@ import java.util.Collections
  * location
  */
 class TaskbarViewDragDropController(
-    val activityContext: TaskbarActivityContext,
-    val pinnedAppsContainerDelegate: PinnedAppsContainerDelegate,
+    private val activityContext: TaskbarActivityContext,
+    private val taskbarPinDelegate: PinnedAppsContainerDelegate,
 ) {
     companion object {
-        private const val OPEN_OVERFLOW = 800L
+        private const val OPEN_OVERFLOW_DELAY_MS = 800L
+        private const val CLOSE_OVERFLOW_DELAY_MS = OPEN_OVERFLOW_DELAY_MS
     }
 
-    @VisibleForTesting val pinningDropTarget = PinningDropTarget()
+    @VisibleForTesting val taskbarPinningDropTarget = PinningDropTarget(taskbarPinDelegate, false)
     @VisibleForTesting val unpinDropTarget = UnpinDropTarget()
     private var modelCallbacks: TaskbarModelCallbacks? = null
-    private val overflowContainerOpenAlarm = Alarm(Looper.getMainLooper())
+    private var overflowPinningDropTarget: PinningDropTarget? = null
+
+    private val overflowContainerAlarm = Alarm(Looper.getMainLooper())
+
+    private enum class AlarmState {
+        RUNNING_OPEN,
+        RUNNING_CLOSE,
+        IDLE,
+    }
+
+    private var overflowAlarmState = AlarmState.IDLE
+    private val openOnAlarmListener = OnAlarmListener {
+        overflowAlarmState = AlarmState.IDLE
+        activityContext.controllers.taskbarViewController.openOverflowContainer()
+    }
+    private val closeOnAlarmListener = OnAlarmListener {
+        overflowAlarmState = AlarmState.IDLE
+        activityContext.controllers.taskbarViewController.closeOverflowContainer()
+    }
 
     fun setUpCallbacks(callbacks: TaskbarModelCallbacks) {
         modelCallbacks = callbacks
     }
 
     fun addDropTargets(dragController: DragController) {
-        dragController.addDropTarget(pinningDropTarget)
+        dragController.addDropTarget(taskbarPinningDropTarget)
         dragController.addDropTarget(unpinDropTarget)
     }
 
     fun removeDropTargets(dragController: DragController) {
-        dragController.removeDropTarget(pinningDropTarget)
+        dragController.removeDropTarget(taskbarPinningDropTarget)
         dragController.removeDropTarget(unpinDropTarget)
     }
 
     fun onTaskbarItemViewDragStart(itemView: View) {
-        pinnedAppsContainerDelegate.updateItemViewVisibilityForDragState(
+        taskbarPinDelegate.updateItemViewVisibilityForDragState(
             itemView,
             /*isDragged */ true,
         )
+
+        // TODO("Handle overflow icon drag start")
     }
 
     fun onTaskbarItemViewDragEnd(itemView: View) {
-        pinnedAppsContainerDelegate.updateItemViewVisibilityForDragState(
+        taskbarPinDelegate.updateItemViewVisibilityForDragState(
             itemView,
             /*isDragged */ false,
         )
+
+        // TODO("Handle overflow icon drag end")
+    }
+
+    fun addOverflowDropTarget(
+        dragController: DragController,
+        delegate: PinnedAppsContainerDelegate,
+    ) {
+        overflowPinningDropTarget = PinningDropTarget(delegate, true)
+        dragController.addDropTarget(overflowPinningDropTarget)
+    }
+
+    fun removeOverflowDropTarget(dragController: DragController) {
+        dragController.removeDropTarget(overflowPinningDropTarget)
+        overflowPinningDropTarget = null
+    }
+
+    private fun startOpenOverflowAlarm() {
+        if (overflowAlarmState == AlarmState.RUNNING_OPEN) return
+
+        startOverflowAlarm(overflowContainerAlarm, openOnAlarmListener, OPEN_OVERFLOW_DELAY_MS)
+        overflowAlarmState = AlarmState.RUNNING_OPEN
+    }
+
+    private fun startCloseOverflowAlarm() {
+        if (overflowAlarmState == AlarmState.RUNNING_CLOSE) return
+
+        startOverflowAlarm(overflowContainerAlarm, closeOnAlarmListener, CLOSE_OVERFLOW_DELAY_MS)
+        overflowAlarmState = AlarmState.RUNNING_CLOSE
+    }
+
+    private fun startOverflowAlarm(alarm: Alarm, callback: OnAlarmListener, delay: Long) {
+        cancelOverflowAlarm()
+        alarm.setOnAlarmListener(callback)
+        alarm.setAlarm(delay)
+    }
+
+    private fun cancelOverflowAlarm() {
+        if (!overflowContainerAlarm.alarmPending()) return
+
+        overflowContainerAlarm.cancelAlarm()
+        overflowAlarmState = AlarmState.IDLE
     }
 
     /**
@@ -122,7 +186,7 @@ class TaskbarViewDragDropController(
             // TODO(b/447444838): For now, this makes recent apps section a drop target to unpin,
             // this should probably be updated to be a clear drop target for item removal
             // (pendng UX).
-            pinnedAppsContainerDelegate.getHitRectForUnpinRelativeToDragLayer(outRect)
+            taskbarPinDelegate.getHitRectForUnpinRelativeToDragLayer(outRect)
         }
     }
 
@@ -130,8 +194,10 @@ class TaskbarViewDragDropController(
      * Implementation of the [DropTarget] that handles drag and drop events over the hotseat items
      * area.
      */
-    inner class PinningDropTarget() : DropTarget {
-
+    inner class PinningDropTarget(
+        private val delegate: PinnedAppsContainerDelegate,
+        private val isOverflowDropTarget: Boolean,
+    ) : DropTarget {
         private var targetPinIndex = -1
         private var draggedInfo: ItemInfo? = null
         private val dragObjectVisualCenter = FloatArray(2)
@@ -220,40 +286,47 @@ class TaskbarViewDragDropController(
         }
 
         override fun onDragEnter(dragObject: DropTarget.DragObject?) {
+            if (isOverflowDropTarget) {
+                cancelOverflowAlarm()
+            }
+
             dragObject ?: return
             draggedInfo = extractItemInfoFromDragObject(dragObject)
             dragObject.getVisualCenter(dragObjectVisualCenter)
 
-            pinnedAppsContainerDelegate.reserveDropSlotForDragLocation(
-                dragObjectVisualCenter[0].toInt()
-            )
+            if (!isOverflowDropTarget) {
+                delegate.reserveDropSlotForDragLocation(
+                    dragObjectVisualCenter[0].toInt()
+                )
+            } else {
+                // TODO("Implement overflow drop target")
+            }
         }
 
         override fun onDragOver(dragObject: DropTarget.DragObject?) {
             dragObject ?: return
             dragObject.getVisualCenter(dragObjectVisualCenter)
 
-            if (pinnedAppsContainerDelegate.isPointOnOverflowIcon(dragObjectVisualCenter)) {
-                if (overflowContainerOpenAlarm.alarmPending()) {
-                    return
-                }
-                overflowContainerOpenAlarm.setOnAlarmListener { _ ->
-                    pinnedAppsContainerDelegate.openOverflowContainer()
-                }
-                overflowContainerOpenAlarm.setAlarm(OPEN_OVERFLOW)
+            if (isOverflowDropTarget) {
+                // TODO("Implement overflow drop target")
+                return
+            }
+
+            if (delegate.isPointOnOverflowIcon(dragObjectVisualCenter)) {
+                startOpenOverflowAlarm()
             } else {
-                if (overflowContainerOpenAlarm.alarmPending()) {
-                    overflowContainerOpenAlarm.cancelAlarm()
-                }
-                pinnedAppsContainerDelegate.reserveDropSlotForDragLocation(
+                startCloseOverflowAlarm()
+                delegate.reserveDropSlotForDragLocation(
                     dragObjectVisualCenter[0].toInt()
                 )
             }
         }
 
         override fun onDragExit(dragObject: DropTarget.DragObject?) {
-            targetPinIndex = pinnedAppsContainerDelegate.getPinIndex()
-            pinnedAppsContainerDelegate.releaseDropSlot()
+            startCloseOverflowAlarm()
+
+            targetPinIndex = taskbarPinDelegate.getPinIndex()
+            delegate.releaseDropSlot()
         }
 
         override fun acceptDrop(dragObject: DropTarget.DragObject?): Boolean {
@@ -268,7 +341,7 @@ class TaskbarViewDragDropController(
         }
 
         override fun getHitRectRelativeToDragLayer(outRect: Rect?) {
-            pinnedAppsContainerDelegate.getHitRectForPinRelativeToDragLayer(outRect)
+            delegate.getHitRectForPinRelativeToDragLayer(outRect)
         }
     }
 
@@ -296,9 +369,6 @@ class TaskbarViewDragDropController(
 
         /** Returns true if the given point is on the pinned overflow icon. */
         fun isPointOnOverflowIcon(point: FloatArray): Boolean
-
-        /** Opens the pinned overflow container. */
-        fun openOverflowContainer()
 
         /** Reserves the location with a placeholder indicating where the icon to be dropped. */
         fun reserveDropSlotForDragLocation(x: Int)
