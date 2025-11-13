@@ -79,8 +79,8 @@ class TaskbarScrimViewControllerTest {
     @InjectController lateinit var scrimViewController: TaskbarScrimViewController
 
     // Default animation duration.
-    private val animationDuration =
-        context.resources.getInteger(android.R.integer.config_mediumAnimTime).toLong()
+    private val animationDuration: Long
+        get() = context.resources.getInteger(android.R.integer.config_mediumAnimTime).toLong()
 
     private var backPressed = false
 

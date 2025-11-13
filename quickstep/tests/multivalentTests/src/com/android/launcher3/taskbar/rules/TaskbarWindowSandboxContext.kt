@@ -48,19 +48,60 @@ import org.mockito.kotlin.whenever
 /**
  * [SandboxApplication] for running Taskbar tests.
  *
+ * Tests needs to declare this [Context] as a [TestRule] for it to work. Context operations will
+ * fail before the rule's setup phase, because [base] will not be initialized and attached yet.
+ * Premature access will throw a [NullPointerException].
+ *
  * Tests need to run on a [VirtualDisplay] to avoid conflicting with Launcher's Taskbar on the
  * [DEFAULT_DISPLAY] (i.e. test is executing on a device).
  */
-class TaskbarWindowSandboxContext
-private constructor(
-    val base: SandboxApplication,
-    val virtualDisplayRule: VirtualDisplaysRule,
-    private val params: SandboxParams,
-) : ContextWrapper(base), TestRule {
-
+class TaskbarWindowSandboxContext private constructor(private val params: SandboxParams) :
+    ContextWrapper(null), TestRule {
+    lateinit var base: SandboxApplication
     val settingsCacheSandbox = SettingsCacheSandbox()
-    val windowManagerSpy = base.spyService(WindowManager::class.java)
+    lateinit var windowManagerSpy: WindowManager
     val taskContinuityManagerMock: TaskContinuityManager = mock<TaskContinuityManager>()
+
+    val virtualDisplayRule = VirtualDisplaysRule()
+
+    /**
+     * Initializes and attaches [base] to `this` wrapper.
+     *
+     * The wrapper does not initialize and attach [base] in its constructor, because [base] depends
+     * on [virtualDisplayRule] running for the display context.
+     */
+    private val attachBaseContextRule =
+        object : ExternalResource() {
+            override fun before() {
+                val app = ApplicationProvider.getApplicationContext<Context>()
+                val defaultDisplay =
+                    checkNotNull(
+                        app.resources.displayMetrics.let {
+                            virtualDisplayRule[
+                                virtualDisplayRule.add(
+                                    it.widthPixels,
+                                    it.heightPixels,
+                                    it.densityDpi,
+                                )]
+                        }
+                    )
+                base = SandboxApplication(app.createDisplayContext(defaultDisplay.display))
+                attachBaseContext(base)
+            }
+        }
+
+    /**
+     * Delegates to [base] at evaluation time, so that it is initialized when applied.
+     *
+     * [base] cannot be referenced in the [RuleChain] before initialization.
+     */
+    private val baseDelegateRule = TestRule { s, d ->
+        object : Statement() {
+            override fun evaluate() {
+                base.apply(s, d).evaluate()
+            }
+        }
+    }
 
     private val sandboxSpyServicesRule =
         object : ExternalResource() {
@@ -79,8 +120,9 @@ private constructor(
                     displays.filter { it.displayId != DEFAULT_DISPLAY }.toTypedArray()
                 }
 
-                // Have displays appear as if they support Taskbar.
+                windowManagerSpy = base.spyService(WindowManager::class.java)
                 if (!DesktopExperienceFlags.ENABLE_SYS_DECORS_CALLBACKS_VIA_WM.isTrue) {
+                    // Have displays appear as if they support Taskbar.
                     whenever(windowManagerSpy.shouldShowSystemDecors(any())).thenReturn(true)
                 }
             }
@@ -100,7 +142,8 @@ private constructor(
 
     override fun apply(statement: Statement, description: Description): Statement {
         return RuleChain.outerRule(virtualDisplayRule)
-            .around(base)
+            .around(attachBaseContextRule)
+            .around(baseDelegateRule)
             .around(sandboxSpyServicesRule)
             .around(singletonSetupRule)
             .apply(statement, description)
@@ -121,26 +164,13 @@ private constructor(
             emulatedDeviceName: String = DEFAULT_DEVICE,
             params: SandboxParams = SandboxParams(),
         ): TaskbarWindowSandboxContext {
-            val base = ApplicationProvider.getApplicationContext<Context>()
             if (isRunningInRobolectric) {
                 LauncherCustomizer.applyAll(
-                    base,
+                    ApplicationProvider.getApplicationContext(),
                     EmulationParams(DeviceEmulationData.getDevice(emulatedDeviceName)),
                 )
             }
-            val virtualDisplaysRule = VirtualDisplaysRule(base)
-            val defaultDisplay =
-                checkNotNull(
-                    base.resources.displayMetrics.let {
-                        virtualDisplaysRule[
-                            virtualDisplaysRule.add(it.widthPixels, it.heightPixels, it.densityDpi)]
-                    }
-                )
-            return TaskbarWindowSandboxContext(
-                SandboxApplication(base = base.createDisplayContext(defaultDisplay.display)),
-                virtualDisplaysRule,
-                params,
-            )
+            return TaskbarWindowSandboxContext(params)
         }
 
         /**

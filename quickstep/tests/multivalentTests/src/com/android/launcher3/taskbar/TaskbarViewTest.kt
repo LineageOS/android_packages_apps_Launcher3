@@ -91,10 +91,12 @@ class TaskbarViewTest(private val deviceName: String, flags: FlagsParameterizati
 
     @InjectController lateinit var viewController: TaskbarViewController
     private lateinit var taskbarView: TaskbarView
-    private val pinnedHitRectBuffer =
-        context.resources.getDimensionPixelSize(R.dimen.taskbar_pinned_hit_rect_buffer)
-    private var unpinnedHitRectBuffer =
-        context.resources.getDimensionPixelSize(R.dimen.taskbar_unpinned_hit_rect_buffer)
+
+    private val pinnedHitRectBuffer: Int
+        get() = context.resources.getDimensionPixelSize(R.dimen.taskbar_pinned_hit_rect_buffer)
+
+    private val unpinnedHitRectBuffer: Int
+        get() = context.resources.getDimensionPixelSize(R.dimen.taskbar_unpinned_hit_rect_buffer)
 
     private val iconViews: Array<View>
         get() = taskbarView.iconViews
