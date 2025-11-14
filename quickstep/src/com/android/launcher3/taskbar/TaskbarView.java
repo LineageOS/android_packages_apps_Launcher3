@@ -588,16 +588,18 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
     private void updateAllAppsDivider() {
         // Index where All Apps divider would be if it is already in Taskbar.
         final int expectedAllAppsDividerIndex = getExpectedAllAppsDividerIndex();
+        if (getChildAt(expectedAllAppsDividerIndex) == mTaskbarDividerContainer) {
+            // Already has divider.
+            boolean isOnlyAllAppsAndDividerVisible = getTotalNumberOfIcons() == 2;
+            if (isOnlyAllAppsAndDividerVisible) removeView(mTaskbarDividerContainer);
+            return;
+        }
+
         boolean hasAtLeastOneIcon = mHotseatIconsContainer == null
                 ? getChildCount() >= mNumStaticViews + 1
                 : getChildCount() - mNumStaticViews == 0
                         && mHotseatIconsContainer.getChildCount() > 0;
-        if (getChildAt(expectedAllAppsDividerIndex) == mTaskbarDividerContainer
-                && getTotalNumberOfIconsWithPossibleQsb() == mNumStaticViews) {
-            // Only static views with divider so remove divider.
-            removeView(mTaskbarDividerContainer);
-        } else if (getChildAt(expectedAllAppsDividerIndex) != mTaskbarDividerContainer
-                && hasAtLeastOneIcon) {
+        if (hasAtLeastOneIcon) {
             // Static views with at least one app icon so add divider. For RTL, add it after the
             // icon that is at the expected index.
             addView(
@@ -1452,13 +1454,6 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         actualBounds.top = getTop();
         actualBounds.bottom = getBottom();
         return actualBounds;
-    }
-
-    private int getTotalNumberOfIconsWithPossibleQsb() {
-        final int totalNumberOfIcons = getTotalNumberOfIcons();
-        return mActivityContext.getDeviceProfile().isQsbInline
-                ? totalNumberOfIcons + 1
-                : totalNumberOfIcons;
     }
 
     /** Returns the total number of icons in the taskbar. **/
