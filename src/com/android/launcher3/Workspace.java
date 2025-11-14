@@ -175,7 +175,8 @@ import java.util.function.Predicate;
 public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         implements DropTarget, DragSource, View.OnTouchListener, CellLayoutContainer,
         DragController.DragListener, Insettable, StateHandler<LauncherState>,
-        WorkspaceLayoutManager, LauncherBindableItemsContainer, LauncherOverlayCallbacks {
+        WorkspaceLayoutManager, LauncherBindableItemsContainer, LauncherOverlayCallbacks,
+        BoxSelectionHelper.BoxSelectionHost {
 
     /**
      * The value that {@link #mTransitionProgress} must be greater than for
@@ -1168,6 +1169,22 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     @Override
     protected void onDisallowSwipeToMinusOnePage() {
         mLauncher.getOverlayManager().onDisallowSwipeToMinusOnePage();
+    }
+
+    @Override
+    public ViewGroup getBoxSelectionHostContainer() {
+        if (shouldEnableCursorDrivenWorkflows(getContext())) {
+            return mLauncher.getDragLayer();
+        }
+        return null;
+    }
+
+    @Override
+    public void onBoxSelection(android.graphics.Rect selectionRect) {
+        if (shouldEnableCursorDrivenWorkflows(getContext())) {
+            mLauncher.getActivityComponent().getWorkspaceSelectionManager()
+                    .onBoxSelection(selectionRect);
+        }
     }
 
     /**
