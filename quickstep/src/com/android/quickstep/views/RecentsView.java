@@ -2427,11 +2427,8 @@ public abstract class RecentsView<
             ? extends StatefulContainer<STATE_TYPE>> getStateManager();
 
     public void reset() {
-        // TODO(b/457591993): Removed the partial trace.
         Log.d(TAG, "reset - mEnableDrawingLiveTile: " + mEnableDrawingLiveTile
-                + ", mRecentsAnimationController: " + mRecentsAnimationController
-                + ", partial trace:\n"
-                + getTrimmedStackTrace("RecentsView.reset"));
+                + ", mRecentsAnimationController: " + mRecentsAnimationController);
         setCurrentTask(-1);
         mCurrentPageScrollDiff = 0;
         mIgnoreResetTaskId = -1;
@@ -2449,7 +2446,13 @@ public abstract class RecentsView<
             finishRecentsAnimation(true /* toHome */, null);
         } else {
             // We don't own mRecentsAnimationController, just clear the reference.
-            mRecentsAnimationController = null;
+            if (mRecentsAnimationController != null) {
+                Log.d(TAG, "reset "
+                        + "- clean up mRecentsAnimationController: " + mRecentsAnimationController
+                        + ", partial trace:\n"
+                        + getTrimmedStackTrace("RecentsView.reset"));
+                mRecentsAnimationController = null;
+            }
             cleanupRemoteTargets();
         }
         setEnableDrawingLiveTile(false);
@@ -5590,6 +5593,9 @@ public abstract class RecentsView<
     }
 
     public void cleanupRemoteTargets() {
+        if (mRemoteTargetHandles == null) {
+            return;
+        }
         Log.d(TAG, "cleanupRemoteTargets - mRemoteTargetHandles: " + Arrays.toString(
                 mRemoteTargetHandles));
         mRemoteTargetHandles = null;
