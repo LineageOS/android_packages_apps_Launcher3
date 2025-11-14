@@ -650,6 +650,16 @@ flag {
 }
 
 flag {
+  name: "enable_new_touchpad_gestures"
+  namespace: "launcher"
+  description: "Update touchpad gestures to match 26Q2 spec."
+  bug: "460130854"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "orientation_enabled_desktop_grid_spec"
   namespace: "launcher"
   description: "Uses a desktop grid spec that specifies grid dimensions that look reasonably well when the device is used in portrait mode"
