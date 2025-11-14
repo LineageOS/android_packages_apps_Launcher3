@@ -24,10 +24,11 @@ import android.platform.test.rule.DeniedDevices
 import android.platform.test.rule.DeviceProduct
 import android.platform.test.rule.LimitDevicesRule
 import android.platform.uiautomatorhelpers.DeviceHelpers.context
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.unit.IntSize
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
-import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.CellLayout
 import com.android.launcher3.Flags
 import com.android.launcher3.Launcher
@@ -145,14 +146,19 @@ class IntegrationResizeWidgetsTest {
         }
         getInstrumentation().waitForIdleSync()
 
-        // Drag frame handle to resize the widget
-        val start = IntArray(2)
-        val end = IntArray(2)
+        val viewModel = resizeFrame.getViewModelForTest()
+        // Simulate a drag
         launcherActivity.executeOnLauncher {
-            identifyDragStartEndPositions(testCase, start, cellLayout, testCase.cellsToDrag, end)
+            val dragAmount = identifyDragOffset(testCase, cellLayout, testCase.cellsToDrag)
+            val handleCenterOffset = getHandleCenterOffset(resizeFrame, testCase.handle)
+            viewModel.onDragStart(
+                testCase.handle,
+                handleCenterOffset,
+                IntSize(resizeFrame.width, resizeFrame.height),
+            )
+            viewModel.onDrag(dragAmount)
+            viewModel.onDragEnd()
         }
-
-        performDrag(start[0], start[1], end[0], end[1])
         getInstrumentation().waitForIdleSync()
 
         // Close frame
@@ -164,65 +170,12 @@ class IntegrationResizeWidgetsTest {
         assertThat(expectedBoard.compareTo(finalBoard)).isEqualTo(0)
     }
 
-    private fun performDrag(startX: Int, startY: Int, endX: Int, endY: Int) {
-        val isLargeScreen =
-            launcherActivity.getFromLauncher { it.deviceProfile.deviceProperties.isTablet } ?: false
-
-        val steps = if (isLargeScreen) 10 else 20
-        UiDevice.getInstance(getInstrumentation()).drag(startX, startY, endX, endY, steps)
-    }
-
-    private fun identifyDragStartEndPositions(
+    private fun identifyDragOffset(
         testCase: ResizeTestCase,
-        start: IntArray,
         cl: CellLayout,
         cellsToDrag: Int,
-        end: IntArray,
-    ) {
-        val location = IntArray(2)
-        resizeFrame.getLocationOnScreen(location)
-
-        val frameX = location[0]
-        val frameY = location[1]
-        val frameWidth = resizeFrame.width
-        val frameHeight = resizeFrame.height
-
-        val widgetLeft = frameX + touchTargetSize
-        val widgetTop = frameY + touchTargetSize
-        val widgetRight = frameX + frameWidth - touchTargetSize
-        val widgetBottom = frameY + frameHeight - touchTargetSize
-        val widgetCenterX = frameX + frameWidth / 2
-        val widgetCenterY = frameY + frameHeight / 2
-
+    ): Offset {
         val handleEdge = testCase.handle
-        val startX: Int
-        val startY: Int
-
-        when (handleEdge) {
-            Edge.Left -> {
-                startX = widgetLeft
-                startY = widgetCenterY
-            }
-
-            Edge.Right -> {
-                startX = widgetRight
-                startY = widgetCenterY
-            }
-
-            Edge.Top -> {
-                startX = widgetCenterX
-                startY = widgetTop
-            }
-
-            Edge.Bottom -> {
-                startX = widgetCenterX
-                startY = widgetBottom
-            }
-        }
-
-        start[0] = startX
-        start[1] = startY
-
         // Identify how much is one cell's size
         val dp = getIDP(cl.context).getDeviceProfile(cl.context)
         val paddedCellWidth =
@@ -231,11 +184,35 @@ class IntegrationResizeWidgetsTest {
             (cl.cellHeight + dp.workspaceIconProfile.cellLayoutBorderSpacePx.y).toFloat()
 
         // We want to drag as much as the request number of cells
-        val dragX = (paddedCellWidth * cellsToDrag * handleEdge.expandDirX).toInt()
-        val dragY = (paddedCellHeight * cellsToDrag * handleEdge.expandDirY).toInt()
+        val dragX = (paddedCellWidth * cellsToDrag * handleEdge.expandDirX)
+        val dragY = (paddedCellHeight * cellsToDrag * handleEdge.expandDirY)
 
-        end[0] = startX + dragX
-        end[1] = startY + dragY
+        return Offset(dragX, dragY)
+    }
+
+    private fun getHandleCenterOffset(
+        resizeFrame: AppWidgetResizeFrameCompose,
+        handle: Edge,
+    ): Offset {
+        val frameWidth = resizeFrame.width.toFloat()
+        val frameHeight = resizeFrame.height.toFloat()
+        val touchTargetSize = this.touchTargetSize.toFloat()
+
+        val widgetLeft = touchTargetSize
+        val widgetTop = touchTargetSize
+        val widgetRight = frameWidth - touchTargetSize
+        val widgetBottom = frameHeight - touchTargetSize
+        val widgetCenterX = frameWidth / 2f
+        val widgetCenterY = frameHeight / 2f
+
+        val (offsetX, offsetY) =
+            when (handle) {
+                Edge.Left -> widgetLeft to widgetCenterY
+                Edge.Right -> widgetRight to widgetCenterY
+                Edge.Top -> widgetCenterX to widgetTop
+                Edge.Bottom -> widgetCenterX to widgetBottom
+            }
+        return Offset(offsetX, offsetY)
     }
 
     private fun addTestCase(
