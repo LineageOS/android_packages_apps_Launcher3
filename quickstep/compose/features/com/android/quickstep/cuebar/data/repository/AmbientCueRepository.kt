@@ -21,25 +21,17 @@ import android.app.ActivityOptions
 import android.app.ActivityTaskManager
 import android.app.BroadcastOptions
 import android.app.PendingIntent
-import android.app.assist.ActivityId
-import android.app.smartspace.SmartspaceConfig
-import android.app.smartspace.SmartspaceManager
-import android.app.smartspace.SmartspaceSession
-import android.app.smartspace.SmartspaceSession.OnTargetsAvailableListener
 import android.graphics.Rect
 import android.provider.Settings
 import android.util.Log
-import android.view.autofill.AutofillId
 import android.view.autofill.AutofillManager
 import androidx.annotation.VisibleForTesting
-import com.android.launcher3.R
 import com.android.launcher3.concurrent.annotations.Background
 import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.taskbar.TaskbarActivityContext
 import com.android.launcher3.util.ListenableRef
 import com.android.launcher3.util.MutableListenableRef
 import com.android.quickstep.cuebar.data.ActionModel
-import com.android.quickstep.cuebar.data.IconModel
 import com.android.quickstep.cuebar.logger.AmbientCueLogger
 import com.android.systemui.shared.system.TaskStackChangeListener
 import com.android.systemui.shared.system.TaskStackChangeListeners
@@ -89,8 +81,7 @@ interface AmbientCueRepository {
     val frontTaskPackageName: ListenableRef<String>
 
     fun updateActions(newActions: List<ActionModel>)
-    fun connectToSmartspace()
-    fun disconnectFromSmartspace()
+    fun unregisterListener()
     fun dump(pw: PrintWriter, prefix: String)
 }
 
@@ -103,8 +94,6 @@ class AmbientCueRepositoryImpl
 ) : AmbientCueRepository {
 
     private val backgroundScope = CoroutineScope(bgExecutor.asCoroutineDispatcher())
-    private val smartSpaceManager: SmartspaceManager? =
-        context.getSystemService(SmartspaceManager::class.java)
     private val autofillManager: AutofillManager? =
         context.getSystemService(AutofillManager::class.java)
 
@@ -130,9 +119,6 @@ class AmbientCueRepositoryImpl
 
     private val _ambientCueTimeoutMs = MutableListenableRef(getAmbientCueTimeoutMs())
     override val ambientCueTimeoutMs: ListenableRef<Int> = _ambientCueTimeoutMs
-
-    private var smartspaceSession: SmartspaceSession? = null
-    private var smartspaceJob: Job? = null
 
     private val _globallyFocusedTaskId = MutableListenableRef(INVALID_TASK_ID)
     override val globallyFocusedTaskId: ListenableRef<Int> = _globallyFocusedTaskId
@@ -164,106 +150,6 @@ class AmbientCueRepositoryImpl
         }
     }
 
-    init {
-        TaskStackChangeListeners.getInstance().registerTaskStackListener(taskStackListener)
-    }
-
-    private val smartspaceListener = OnTargetsAvailableListener { targets ->
-        Log.i(TAG, "Receiving SmartSpace targets # ${targets.size}")
-        if (targets.none { it.smartspaceTargetId == AMBIENT_CUE_SURFACE }) {
-            return@OnTargetsAvailableListener
-        }
-        val actions =
-            targets
-                .filter { it.smartspaceTargetId == AMBIENT_CUE_SURFACE }
-                .flatMap { target -> target.actionChips }
-                .mapNotNull { chip ->
-                    val title = chip.title.toString()
-                    val activityId = chip.extras?.getParcelable<ActivityId>(EXTRA_ACTIVITY_ID)
-                    val actionType = chip.extras?.getString(EXTRA_ACTION_TYPE)
-                    val oneTapEnabled = chip.extras?.getBoolean(EXTRA_ONE_TAP_ENABLED)
-                    val oneTapDelayMs =
-                        chip.extras?.getLong(
-                            EXTRA_ONE_TAP_DELAY_MS,
-                            DEFAULT_ONE_TAP_DELAY_MS,
-                        )
-                    ActionModel(
-                        icon =
-                            IconModel(
-                                small =
-                                    (chip.icon?.loadDrawable(context)
-                                        ?: context.getDrawable(
-                                            R.drawable.ic_paste_spark
-                                        )!!)
-                                        .mutate(),
-                            large =
-                                (chip.icon?.loadDrawable(context)
-                                    ?: context.getDrawable(
-                                        R.drawable.ic_paste_spark
-                                    )!!)
-                                    .mutate(),
-                            iconId = chip.icon?.resPackage + "#" + chip.icon?.resId,
-                        ),
-                        label = title,
-                        attribution = chip.subtitle?.toString(),
-                        onPerformAction = {
-                            val intent = chip.intent
-                            val pendingIntent = chip.pendingIntent
-                            val activityId =
-                                chip.extras?.getParcelable<ActivityId>(
-                                    EXTRA_ACTIVITY_ID
-                                )
-                            val autofillId =
-                                chip.extras?.getParcelable<AutofillId>(EXTRA_AUTOFILL_ID)
-                            val token = activityId?.token
-                            Log.i(
-                                TAG,
-                                "Performing action: $activityId, $autofillId, " +
-                                        "$pendingIntent, $intent",
-                            )
-                            if (token != null && autofillId != null) {
-                                autofillManager?.autofillRemoteApp(
-                                    autofillId,
-                                    title,
-                                    token,
-                                    activityId.taskId,
-                                )
-                            } else if (pendingIntent != null) {
-                                launchPendingIntent(pendingIntent)
-                            } else if (intent != null) {
-                                context.startActivity(intent)
-                            }
-                            if (actionType == MA_ACTION_TYPE_NAME) {
-                                ambientCueLogger.setFulfilledWithMaStatus()
-                            }
-                            if (actionType == MR_ACTION_TYPE_NAME) {
-                                ambientCueLogger.setFulfilledWithMrStatus()
-                            }
-                        },
-                        onPerformLongClick = {
-                            Log.i(TAG, "AmbientCueRepositoryImpl: onPerformLongClick")
-                            val pendingIntent =
-                                chip.extras?.getParcelable<PendingIntent>(
-                                    EXTRA_ATTRIBUTION_DIALOG_PENDING_INTENT
-                                )
-                            if (pendingIntent != null) {
-                                Log.i(TAG, "Performing long click: $pendingIntent")
-                                launchPendingIntent(pendingIntent)
-                            }
-                        },
-                        taskId = activityId?.taskId ?: -1,
-                        actionType = actionType,
-                        oneTapEnabled = oneTapEnabled == true,
-                        oneTapDelayMs = oneTapDelayMs ?: DEFAULT_ONE_TAP_DELAY_MS,
-                    )
-                }
-        Log.i(TAG, "SmartSpace actions $actions")
-        if (actions.isNotEmpty()) {
-            isDeactivated.dispatchValue(false)
-        }
-        updateActions(actions)
-    }
-
     private fun launchPendingIntent(pendingIntent: PendingIntent) {
         val options = BroadcastOptions.makeBasic()
         options.isInteractive = true
@@ -276,37 +162,8 @@ class AmbientCueRepositoryImpl
         }
     }
 
-    override fun connectToSmartspace() {
-        if (!isAmbientCueEnabled.value) {
-            Log.d(TAG, "Smartspace connection skipped: Ambient Cue setting is disabled.")
-            return
-        }
-        if (smartspaceSession != null) {
-            return
-        }
-        smartspaceJob = backgroundScope.launch {
-            if (smartSpaceManager == null) {
-                return@launch
-            }
-            val config = SmartspaceConfig.Builder(context, AMBIENT_CUE_SURFACE).build()
-            smartspaceSession = smartSpaceManager.createSmartspaceSession(config)
-            smartspaceSession?.addOnTargetsAvailableListener(uiExecutor, smartspaceListener)
-            smartspaceSession?.requestSmartspaceUpdate()
-        }
-    }
-
-    override fun disconnectFromSmartspace() {
-        smartspaceJob?.cancel()
-        smartspaceJob = null
-        try {
-            smartspaceSession?.removeOnTargetsAvailableListener(smartspaceListener)
-            smartspaceSession?.close()
-        } catch (e: Exception) {
-            Log.e(TAG, "Exception on closing Smartspace: $e", e)
-        }
-        smartspaceSession = null
+    override fun unregisterListener() {
         backgroundScope.cancel()
-        TaskStackChangeListeners.getInstance().unregisterTaskStackListener(taskStackListener)
     }
 
     override fun updateActions(newActions: List<ActionModel>) {
@@ -342,7 +199,6 @@ class AmbientCueRepositoryImpl
         pw.println("$prefix   actions: ${actions.value.size} actions")
         pw.println("$prefix   isAmbientCueEnabled: ${isAmbientCueEnabled.value}")
         pw.println("$prefix   ambientCueTimeoutMs: ${ambientCueTimeoutMs.value}")
-        pw.println("$prefix   Smartspace Session active: ${smartspaceSession != null}")
         pw.println("$prefix   globallyFocusedTaskId: ${globallyFocusedTaskId.value}")
         pw.println("$prefix  debounceTaskJob active: ${debounceTaskJob?.isActive == true}")
         pw.println("$prefix  frontTaskPackageName: ${frontTaskPackageName.value}")
