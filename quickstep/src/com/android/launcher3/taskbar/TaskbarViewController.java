@@ -1014,6 +1014,10 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         }
     }
 
+    public int getNumbersOfTaskbarIconsOverflowing() {
+        return mTaskbarView.getNumbersOfTaskbarIconsOverflowing();
+    }
+
     /**
      * Sets the Taskbar icon alignment relative to Launcher hotseat icons
      * @param alignmentRatio [0, 1]
