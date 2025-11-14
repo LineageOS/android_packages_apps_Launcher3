@@ -55,6 +55,10 @@ constructor(
         recentsViewData.overlayEnabled.value = isOverlayEnabled
     }
 
+    fun setHighResThumbnailsRequired(highResThumbnailsRequired: Boolean) {
+        recentsTasksRepository.setHighResThumbnailsRequired(highResThumbnailsRequired)
+    }
+
     suspend fun waitForThumbnailsToUpdate(updatedThumbnails: Map<Int, ThumbnailData>?) {
         val visibleThumbnails = updatedThumbnails?.filterKeys { it in visibleTaskIds }
         if (visibleThumbnails.isNullOrEmpty()) return

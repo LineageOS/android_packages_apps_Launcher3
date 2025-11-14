@@ -18,6 +18,7 @@ package com.android.quickstep.recents.data
 
 import android.os.UserHandle
 import android.util.Log
+import com.android.launcher3.Flags.enableLowResThumbnailPreloading
 import com.android.quickstep.HighResLoadingState.HighResLoadingStateChangedCallback
 import com.android.quickstep.recents.data.TaskVisualsChangedDelegate.TaskIconChangedCallback
 import com.android.quickstep.recents.data.TaskVisualsChangedDelegate.TaskThumbnailChangedCallback
@@ -95,6 +96,8 @@ constructor(
     }
 
     override fun onHighResLoadingStateChanged(enabled: Boolean) {
+        if (enableLowResThumbnailPreloading()) return
+
         Log.d(TAG, "onHighResLoadingStateChanged(enabled = $enabled)")
         taskThumbnailChangedCallbacks.values.forEach { (_, callback) ->
             callback.onHighResLoadingStateChanged(enabled)
