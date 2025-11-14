@@ -16,6 +16,55 @@
 
 package com.android.launcher3.taskbar.customization.util
 
+import androidx.annotation.VisibleForTesting
+import com.android.launcher3.taskbar.customization.enums.OverflowIconPosition
+import kotlin.math.max
+import kotlin.math.min
+
 object TaskbarIconContainerUtil {
     const val DEFAULT_BOUNCE_SCALE = 1f
+    @VisibleForTesting const val MINIMUM_ICONS_TO_SHOW_WITH_OVERFLOW = 3
+
+    /** Returns maximum amount of icons we show in a container */
+    fun getMaxIconCount(itemCount: Int, overflowingItems: Int): Int {
+        return if (itemCount <= MINIMUM_ICONS_TO_SHOW_WITH_OVERFLOW) {
+            itemCount
+        } else if (overflowingItems > 1) {
+            max(itemCount - overflowingItems, MINIMUM_ICONS_TO_SHOW_WITH_OVERFLOW)
+        } else if (overflowingItems == 1) {
+            // we need to subtract one since we need minimum of two icons in overflow.
+            max(itemCount - overflowingItems - 1, MINIMUM_ICONS_TO_SHOW_WITH_OVERFLOW)
+        } else {
+            itemCount
+        }
+    }
+
+    /** Returns lists of icons to show in taskbar and in overflow */
+    fun <T> getOverflowAndNonOverflowLists(
+        itemList: List<T>,
+        overflowIconPosition: OverflowIconPosition,
+        numMaxIcons: Int,
+    ): TaskbarContainerIconsBySection<T> {
+
+        return when (overflowIconPosition) {
+            OverflowIconPosition.END -> {
+                val startIdx = 0
+                val endIdx = min(itemList.size, numMaxIcons)
+                TaskbarContainerIconsBySection(
+                    itemList.subList(startIdx, endIdx),
+                    itemList.subList(endIdx, itemList.size),
+                )
+            }
+
+            OverflowIconPosition.START -> {
+                val startIdx = max(itemList.size - numMaxIcons, 0)
+                val endIdx = itemList.size
+                itemList.subList(startIdx, endIdx)
+                TaskbarContainerIconsBySection(
+                    itemList.subList(startIdx, endIdx),
+                    itemList.subList(0, startIdx),
+                )
+            }
+        }
+    }
 }
