@@ -210,10 +210,12 @@ class TaplTestsOverviewDesktop : AbstractQuickStepTest() {
         for (i in 0 until deskCount) {
             val task = currentOverview.currentTask
             assertTrue("Current task should be a desktop", task.isDesktop)
+            // Retrieving deskId before associated UiObject for task becomes stale.
+            val deskId = task.deskId
             val launchedDesk = task.open()
             assertEquals(
                 "Active desk ID doesn't match opened task's desk ID",
-                task.deskId,
+                deskId,
                 mLauncher.activeDeskId,
             )
             // Go back to overview and scroll the distance of one task for the next iteration
