@@ -201,9 +201,9 @@ import com.android.quickstep.LauncherActivityInterface;
 import com.android.quickstep.OverviewCommandHelper;
 import com.android.quickstep.OverviewComponentObserver;
 import com.android.quickstep.OverviewComponentObserver.OverviewChangeListener;
+import com.android.quickstep.RecentsAnimationDeviceState;
 import com.android.quickstep.RecentsModel;
 import com.android.quickstep.SystemUiProxy;
-import com.android.quickstep.TISBinder;
 import com.android.quickstep.TaskUtils;
 import com.android.quickstep.fallback.RecentsState;
 import com.android.quickstep.fallback.RecentsStateUtilsKt;
@@ -211,6 +211,7 @@ import com.android.quickstep.recents.di.RecentsComponent;
 import com.android.quickstep.split.SplitSelectStateController;
 import com.android.quickstep.split.SplitToWorkspaceController;
 import com.android.quickstep.split.SplitWithKeyboardShortcutController;
+import com.android.quickstep.sysuiconnection.TISBindHelper;
 import com.android.quickstep.util.ActiveGestureProtoLogProxy;
 import com.android.quickstep.util.AnimUtils;
 import com.android.quickstep.util.AsyncClockEventDelegate;
@@ -218,7 +219,6 @@ import com.android.quickstep.util.LauncherUnfoldAnimationController;
 import com.android.quickstep.util.QuickstepOnboardingPrefs;
 import com.android.quickstep.util.SplitTask;
 import com.android.quickstep.util.SurfaceTransactionApplier;
-import com.android.quickstep.util.TISBindHelper;
 import com.android.quickstep.util.unfold.LauncherUnfoldTransitionController;
 import com.android.quickstep.util.unfold.ProxyUnfoldTransitionProvider;
 import com.android.quickstep.views.FloatingTaskView;
@@ -285,6 +285,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     private BubbleBarLocation mBubbleBarLocation;
 
     private TaskbarUiState mTaskbarUiState;
+    private RecentsAnimationDeviceState mRecentsAnimationDeviceState;
 
     /**
      * If Launcher restarted while in the middle of an Overview split select, it needs this data to
@@ -298,8 +299,6 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     private SafeCloseable mViewCapture;
 
     private boolean mEnableWidgetDepth;
-
-    private boolean mIsPredictiveBackToHomeInProgress;
 
     private boolean mCanShowAllAppsEducationView;
 
@@ -379,6 +378,8 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         mAppTransitionManager.registerRemoteAnimations();
         mAppTransitionManager.registerRemoteTransitions();
 
+        mRecentsAnimationDeviceState = LauncherComponentProvider.get(this)
+                .getRecentsAnimationDeviceStateRepository().get(getDisplayId());
         mTISBindHelper = new TISBindHelper(this, this::onTISConnected);
 
         if (DesktopModeStatus.canEnterDesktopModeOrShowAppHandle(this)) {
@@ -672,7 +673,6 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
             mAppTransitionManager.onActivityDestroyed();
         }
         mAppTransitionManager = null;
-        mIsPredictiveBackToHomeInProgress = false;
 
         if (mUnfoldTransitionProgressProvider != null) {
             SystemUiProxy.INSTANCE.get(this).setUnfoldAnimationListener(null);
@@ -1194,12 +1194,11 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         }
     }
 
-    private void onTISConnected(TISBinder binder) {
+    private void onTISConnected(TISBindHelper helper) {
         TaskbarManager taskbarManager = mTISBindHelper.getTaskbarManager();
         if (taskbarManager != null) {
             taskbarManager.setActivity(this);
         }
-        mTISBindHelper.setPredictiveBackToHomeInProgress(mIsPredictiveBackToHomeInProgress);
     }
 
     @Override
@@ -1474,12 +1473,9 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
      * Sets flag whether a predictive back-to-home animation is in progress
      */
     public void setPredictiveBackToHomeInProgress(boolean isInProgress) {
-        mIsPredictiveBackToHomeInProgress = isInProgress;
-        mTISBindHelper.setPredictiveBackToHomeInProgress(isInProgress);
-    }
-
-    public boolean getPredictiveBackToHomeInProgress() {
-        return mIsPredictiveBackToHomeInProgress;
+        if (mRecentsAnimationDeviceState != null) {
+            mRecentsAnimationDeviceState.setPredictiveBackToHomeInProgress(isInProgress);
+        }
     }
 
     @Override

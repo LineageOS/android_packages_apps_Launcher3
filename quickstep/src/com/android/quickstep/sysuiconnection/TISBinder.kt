@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.quickstep
+package com.android.quickstep.sysuiconnection
 
 import android.app.contextualsearch.ContextualSearchConfig
 import android.content.Context
@@ -25,10 +25,7 @@ import android.util.Log
 import android.view.Display
 import androidx.annotation.BinderThread
 import androidx.annotation.UiThread
-import androidx.annotation.VisibleForTesting
 import com.android.app.displaylib.PerDisplayRepository
-import com.android.launcher3.Launcher
-import com.android.launcher3.anim.AnimatedFloat
 import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.taskbar.TaskbarDesktopExperienceFlags.enableAltTabKqsOnConnectedDisplays
@@ -38,25 +35,30 @@ import com.android.launcher3.testing.shared.TestProtocol
 import com.android.launcher3.util.LockedUserState
 import com.android.launcher3.util.PostUnlockObject
 import com.android.launcher3.util.ThreadSafeRunnableList
+import com.android.quickstep.OverviewCommandHelper
 import com.android.quickstep.OverviewCommandHelper.CommandType.HIDE_ALT_TAB
 import com.android.quickstep.OverviewCommandHelper.CommandType.SHOW_ALT_TAB
 import com.android.quickstep.OverviewCommandHelper.CommandType.TOGGLE
 import com.android.quickstep.OverviewCommandHelper.CommandType.TOGGLE_WITH_FOCUS
+import com.android.quickstep.OverviewComponentObserver
+import com.android.quickstep.RecentsAnimationDeviceState
+import com.android.quickstep.SystemDecorationChangeObserver
+import com.android.quickstep.SystemUiProxy
+import com.android.quickstep.TaskAnimationManager
+import com.android.quickstep.TaskUtils
+import com.android.quickstep.TouchInteractionHandler
 import com.android.quickstep.actioncorner.ActionCornerHandler
 import com.android.quickstep.dagger.CONNECTION_CLEANER
 import com.android.quickstep.dagger.SysUIConnectionSingleton
 import com.android.quickstep.input.QuickstepKeyGestureEventsManager
-import com.android.quickstep.util.ActiveTrackpadList
 import com.android.quickstep.util.ActivityPreloadUtil.preloadOverviewForTIS
 import com.android.quickstep.util.ContextualSearchInvoker
-import com.android.quickstep.window.RecentsWindowFlags.enableOverviewInWindow
 import com.android.quickstep.window.RecentsWindowFlags.enableOverviewOnConnectedDisplays
-import com.android.systemui.shared.recents.ILauncherProxy
+import com.android.systemui.shared.recents.ILauncherProxy.Stub
 import com.android.systemui.shared.statusbar.phone.BarTransitions.TransitionMode
 import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags
 import java.util.concurrent.Executor
-import java.util.function.Function
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
@@ -71,29 +73,8 @@ internal constructor(
     bindData: BindData,
     @Ui private val uiExecutor: Executor,
     @Named(CONNECTION_CLEANER) cleanupTasks: ThreadSafeRunnableList,
-) : ILauncherProxy.Stub() {
+) : Stub() {
     private var state: BindData? = bindData
-
-    /**
-     * Returns the [TaskbarManager].
-     *
-     * Returns `null` if TouchInteractionService is not connected
-     */
-    val taskbarManager: TaskbarManager?
-        get() = state?.taskbarManager
-
-    /** Returns the primary service */
-    @get:VisibleForTesting
-    val service: TouchInteractionHandler?
-        get() = state?.handler
-
-    /**
-     * Returns the [OverviewCommandHelper].
-     *
-     * Returns `null` if TouchInteractionService is not connected
-     */
-    val overviewCommandHelper: OverviewCommandHelper?
-        get() = state?.overviewCommandHelper
 
     private inline fun withState(task: BindData.() -> Unit) {
         state?.apply(task)
@@ -101,7 +82,8 @@ internal constructor(
 
     init {
         cleanupTasks.addTask(uiExecutor) {
-            // Perform unbind first as the remote-call for unbind is async and may not come before destroy()
+            // Perform unbind first as the remote-call for unbind is async and may not come before
+            // destroy()
             performUnbindOnUIThread()
             state = null
         }
@@ -150,7 +132,7 @@ internal constructor(
         if (deviceState != null && !deviceState.canStartOverviewCommand()) {
             Log.d(
                 TAG,
-                ("onOverviewShown ignored for display $displayId because the command is blocked"),
+                "onOverviewShown ignored for display $displayId because the command is blocked",
             )
             return
         }
@@ -165,22 +147,22 @@ internal constructor(
     }
 
     @BinderThread
-    override fun onOverviewHidden(triggeredFromAltTab: Boolean, triggeredFromHomeKey: Boolean) =
+    override fun onOverviewHidden(triggeredFromAltTab: Boolean, triggeredFromHomeKey: Boolean) {
+        if (!triggeredFromAltTab || triggeredFromHomeKey) return
         withState {
-            if (triggeredFromAltTab && !triggeredFromHomeKey) {
-                // onOverviewShownFromAltTab hides the overview and ends at the target app
-                val displayId = focusedDisplayIdForAltTabKqsOnConnectedDisplays()
-                val deviceState = deviceStateRepository[displayId]
-                if (deviceState != null && !deviceState.canStartOverviewCommand()) {
-                    Log.d(
-                        TAG,
-                        ("onOverviewHidden ignored for display $displayId because the command is blocked"),
-                    )
-                    return
-                }
-                overviewCommandHelper?.addCommand(HIDE_ALT_TAB, displayId)
+            // onOverviewShownFromAltTab hides the overview and ends at the target app
+            val displayId = focusedDisplayIdForAltTabKqsOnConnectedDisplays()
+            val deviceState = deviceStateRepository[displayId]
+            if (deviceState != null && !deviceState.canStartOverviewCommand()) {
+                Log.d(
+                    TAG,
+                    "onOverviewHidden ignored for display $displayId because the command is blocked",
+                )
+                return
             }
+            overviewCommandHelper?.addCommand(HIDE_ALT_TAB, displayId)
         }
+    }
 
     @BinderThread
     override fun onAssistantAvailable(available: Boolean, longPressHomeEnabled: Boolean) =
@@ -357,58 +339,6 @@ internal constructor(
     override fun onActionCornerActivated(action: Int, displayId: Int) =
         uiExecutor.execute { withState { actionCornerHandler?.handleAction(action, displayId) } }
 
-    @VisibleForTesting
-    fun injectFakeTrackpadForTesting() = withState {
-        activeTrackpadList.addInputDeviceUnchecked(1000)
-        handler.initInputMonitor("tapl testing")
-    }
-
-    @VisibleForTesting
-    fun ejectFakeTrackpadForTesting() = withState {
-        activeTrackpadList.onInputDeviceRemoved(1000)
-        // This method destroys the current input monitor if set up, and only init a new one
-        // in 3-button mode if {@code mTrackpadsConnected} is not empty. So in other words,
-        // it will destroy the input monitor.
-        handler.initInputMonitor("tapl testing")
-    }
-
-    /** Sets whether a predictive back-to-home animation is in progress in the device state */
-    fun setPredictiveBackToHomeInProgress(isInProgress: Boolean) = withState {
-        deviceStateRepository.forEach(createIfAbsent = true) {
-            it.isPredictiveBackToHomeInProgress = isInProgress
-        }
-    }
-
-    /** Sets a proxy to bypass swipe up behavior */
-    fun setSwipeUpProxy(proxy: Function<GestureState, AnimatedFloat?>?) = withState {
-        handler.mSwipeUpProxyProvider = proxy
-    }
-
-    /**
-     * Touches within this number of pixels from the bottom of the screen can get intercepted to
-     * handle gesture navigation. Passing a value less than 0 will revert to a default value.
-     */
-    fun setGesturalHeight(gesturalHeight: Int) = withState {
-        handler.setGesturalHeight(gesturalHeight)
-    }
-
-    /** Sets the task id where gestures should be blocked */
-    fun setGestureBlockedTaskId(taskId: Int) = withState {
-        deviceStateRepository.forEach(createIfAbsent = true) { it.setGestureBlockingTaskId(taskId) }
-    }
-
-    /** Refreshes the current overview target. */
-    @VisibleForTesting
-    fun refreshOverviewTargetForTest() = withState {
-        allAppsActionManager.onDestroy()
-        overviewComponentObserver?.dispatchOverviewState()
-
-        if (enableOverviewInWindow) {
-            val launcher = Launcher.ACTIVITY_TRACKER.getCreatedContext<Launcher>()
-            if (launcher != null) taskbarManager.setActivity(launcher)
-        }
-    }
-
     /**
      * Wrapper around all the objects inside the sysui connection graph. This is wrapped inside a
      * weak-reference as TISBinder can outlive sysUIConnection if the binder is held by another
@@ -426,9 +356,7 @@ internal constructor(
         val systemDecorationChangeObserver: SystemDecorationChangeObserver,
         val quickstepKeyGestureEventsHandler: QuickstepKeyGestureEventsManager,
         val taskAnimationManagerRepository: PerDisplayRepository<TaskAnimationManager>,
-        val allAppsActionManager: AllAppsActionManager,
         val lockedUserState: LockedUserState,
-        val activeTrackpadList: ActiveTrackpadList,
         overviewCommandHelper: PostUnlockObject<OverviewCommandHelper>,
         overviewComponentObserver: PostUnlockObject<OverviewComponentObserver>,
         actionCornerHandler: PostUnlockObject<ActionCornerHandler>,

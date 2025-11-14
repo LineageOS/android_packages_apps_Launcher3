@@ -17,6 +17,7 @@
 package com.android.launcher3.taskbar.rules
 
 import android.app.Instrumentation
+import android.hardware.input.InputManager
 import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings.Secure.NAV_BAR_KIDS_MODE
@@ -25,6 +26,7 @@ import android.provider.Settings.Secure.getUriFor
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.app.displaylib.DisplaysWithDecorationsRepositoryCompat
 import com.android.launcher3.LauncherAppState
+import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.taskbar.TaskbarActivityContext
 import com.android.launcher3.taskbar.TaskbarControllers
 import com.android.launcher3.taskbar.TaskbarManager
@@ -32,12 +34,12 @@ import com.android.launcher3.taskbar.TaskbarManagerImpl
 import com.android.launcher3.taskbar.TaskbarNavButtonController.TaskbarNavButtonCallbacks
 import com.android.launcher3.taskbar.TaskbarUIController
 import com.android.launcher3.taskbar.bubbles.BubbleControllers
+import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
 import com.android.launcher3.util.LauncherMultivalentJUnit.Companion.isRunningInRobolectric
 import com.android.launcher3.util.TestUtil
 import com.android.launcher3.util.coroutines.ProductionDispatchers
 import com.android.quickstep.AllAppsActionManager
-import com.android.quickstep.input.QuickstepKeyGestureEventsManager
 import com.google.common.truth.Truth.assertWithMessage
 import com.google.common.truth.TruthJUnit.assume
 import java.lang.reflect.Field
@@ -49,9 +51,7 @@ import org.junit.runner.Description
 import org.junit.runners.model.Statement
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
-import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.spy
 import org.mockito.kotlin.stub
 import org.mockito.kotlin.whenever
 
@@ -125,25 +125,11 @@ class TaskbarUnitTestRule(
                 context.settingsCacheSandbox[getUriFor(NAV_BAR_KIDS_MODE)] =
                     if (description.getAnnotation(NavBarKidsMode::class.java) != null) 1 else 0
 
-                val quickstepKeyGestureEventsManagerSpy =
-                    spy(
-                        QuickstepKeyGestureEventsManager(
-                            context,
-                            context.settingsCacheSandbox.cache,
-                        )
-                    )
-                doNothing()
-                    .whenever(quickstepKeyGestureEventsManagerSpy)
-                    .registerAllAppsKeyGestureEvent(any())
-                doNothing()
-                    .whenever(quickstepKeyGestureEventsManagerSpy)
-                    .unregisterAllAppsKeyGestureEvent()
-                doNothing()
-                    .whenever(quickstepKeyGestureEventsManagerSpy)
-                    .registerOverviewKeyGestureEvent(any())
-                doNothing()
-                    .whenever(quickstepKeyGestureEventsManagerSpy)
-                    .unregisterOverviewKeyGestureEvent()
+                // Mocks required for QuickstepKeyGestureEventsManager
+                context.base.spyService(InputManager::class.java).stub {
+                    doAnswer {}.whenever(mock).registerKeyGestureEventHandler(any(), any())
+                    doAnswer {}.whenever(mock).unregisterKeyGestureEventHandler(any())
+                }
 
                 val isUserUnlocked = description.getAnnotation(UserLocked::class.java) == null
                 context.base.spyService(UserManager::class.java).stub {
@@ -164,7 +150,7 @@ class TaskbarUnitTestRule(
                                 AllAppsActionManager(
                                     context,
                                     UI_HELPER_EXECUTOR,
-                                    quickstepKeyGestureEventsManagerSpy,
+                                    context.appComponent.quickstepKeyGestureEventsManager,
                                 ) {
                                     taskbarManager as TaskbarManager
                                 },

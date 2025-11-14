@@ -32,7 +32,6 @@ import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.SettingsCache
 import com.android.launcher3.util.SettingsCacheSandbox
 import com.android.launcher3.util.TestUtil
-import com.android.quickstep.input.QuickstepKeyGestureEventsManager
 import com.google.common.truth.Truth.assertThat
 import dagger.BindsInstance
 import dagger.Component
@@ -70,7 +69,7 @@ class AllAppsActionManagerTest {
         SettingsCacheSandbox().also { it[USER_SETUP_COMPLETE_URI] = 1 }
     private val quickstepKeyGestureEventsManager by
         lazy(LazyThreadSafetyMode.NONE) {
-            spy(QuickstepKeyGestureEventsManager(context, settingsCacheSandbox.cache))
+            spy(context.appComponent.quickstepKeyGestureEventsManager)
         }
 
     @Mock lateinit var taskbarManager: TaskbarManager

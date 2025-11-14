@@ -23,8 +23,8 @@ import com.android.launcher3.LauncherPrefs.Companion.TASKBAR_PINNING
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.testutil.Wait
 import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
-import com.android.quickstep.TISBinder
-import com.android.quickstep.util.TISBindHelper
+import com.android.quickstep.dagger.SysUIConnectionComponent
+import com.android.quickstep.sysuiconnection.TISBinder
 import java.util.concurrent.CompletableFuture
 import kotlin.annotation.AnnotationRetention.RUNTIME
 import kotlin.annotation.AnnotationTarget.CLASS
@@ -36,15 +36,12 @@ import org.junit.runners.model.Statement
 /** Test rule for providing interactions with [TISBinder] */
 class TISBinderRule : TestRule {
 
-    private lateinit var tisBindHelper: TISBindHelper
-
     override fun apply(base: Statement, description: Description): Statement {
 
         return object : Statement() {
 
             override fun evaluate() {
                 val context = getInstrumentation().targetContext
-                tisBindHelper = MAIN_EXECUTOR.submit { TISBindHelper(context) {} }.get()
                 val wasTransient = context.appComponent.taskbarModeUtil.isTransient
                 context.setTransientTaskbar(
                     description.getAnnotation(TaskbarMode::class.java)?.mode?.isTransient
@@ -60,7 +57,6 @@ class TISBinderRule : TestRule {
                     try {
                         // Revert original value
                         context.appComponent.launcherPrefs.put(TASKBAR_PINNING, !wasTransient)
-                        MAIN_EXECUTOR.submit { tisBindHelper.onDestroy() }.get()
                     } catch (t: Throwable) {
                         errors.add(t)
                     }
@@ -81,19 +77,20 @@ class TISBinderRule : TestRule {
         )
 
         withTISBinder {
-            taskbarManager?.recreateTaskbars()
+            taskbarManager.recreateTaskbars()
             waitForTaskbarUiThreadSync()
         }
 
         // Wait for taskbar to be initialized
-        Wait.atMost(
-            "Taskbar not initialized ",
-            { withTISBinder { taskbarManager?.getCurrentActivityContext() } != null },
-        )
+        Wait.atMost("Taskbar not initialized ") {
+            withTISBinder { taskbarManager.getCurrentActivityContext() } != null
+        }
 
         /** Reset any active input which may be caching the last activity context */
         withTISBinder {
-            taskbarManager?.getCurrentActivityContext()?.displayId?.let { service?.reset(it) }
+            taskbarManager.getCurrentActivityContext()?.displayId?.let {
+                touchInteractionHandler.reset(it)
+            }
         }
     }
 
@@ -105,14 +102,17 @@ class TISBinderRule : TestRule {
      * Runs the given command on the UI thread, after ensuring we are connected to
      * TouchInteractionService.
      */
-    fun <T : Any?> withTISBinder(block: TISBinder.() -> T): T {
+    fun <T : Any?> withTISBinder(block: SysUIConnectionComponent.() -> T): T {
         val result = CompletableFuture<T>()
-        MAIN_EXECUTOR.execute {
-            tisBindHelper.runOnBindToTouchInteractionService {
-                result.complete(block.invoke(tisBindHelper.binder!!))
+        getInstrumentation()
+            .targetContext
+            .appComponent
+            .sysUIConnectionTracker
+            .activeComponent
+            .forEach(MAIN_EXECUTOR) { if (it != null) result.complete(block.invoke(it)) }
+            .use {
+                return result.get()
             }
-        }
-        return result.get()
     }
 
     enum class Mode(internal val isTransient: Boolean) {

@@ -20,11 +20,12 @@ import com.android.launcher3.taskbar.TaskbarManager
 import com.android.launcher3.taskbar.TaskbarManagerImplWrapper
 import com.android.launcher3.taskbar.TaskbarNavButtonController.TaskbarNavButtonCallbacks
 import com.android.launcher3.taskbar.navbutton.TaskbarNavButtonCallbacksImpl
+import com.android.launcher3.util.PostUnlockObject
 import com.android.launcher3.util.ThreadSafeRunnableList
+import com.android.quickstep.AllAppsActionManager
 import com.android.quickstep.OverviewCommandHelper
-import com.android.quickstep.TISBinder
 import com.android.quickstep.TouchInteractionHandler
-import com.android.quickstep.actioncorner.ActionCornerHandler
+import com.android.quickstep.sysuiconnection.TISBinder
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Module
@@ -43,8 +44,8 @@ annotation class SysUIConnectionSingleton
 interface SysUIConnectionComponent {
 
     val touchInteractionHandler: TouchInteractionHandler
-    val overviewCommandHelper: OverviewCommandHelper
-    val actionCornerHandler: ActionCornerHandler
+    val overviewCommandHelper: PostUnlockObject<OverviewCommandHelper>
+    val allAppsActionManager: AllAppsActionManager
     val taskbarManager: TaskbarManager
     val binder: TISBinder
 

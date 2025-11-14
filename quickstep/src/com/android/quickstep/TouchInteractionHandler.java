@@ -68,7 +68,6 @@ import com.android.launcher3.ConstantItem;
 import com.android.launcher3.EncryptionType;
 import com.android.launcher3.Flags;
 import com.android.launcher3.LauncherPrefs;
-import com.android.launcher3.anim.AnimatedFloat;
 import com.android.launcher3.concurrent.annotations.Ui;
 import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.desktop.DesktopAppLaunchTransitionManager;
@@ -92,8 +91,6 @@ import com.android.launcher3.util.coroutines.DispatcherProvider;
 import com.android.quickstep.OverviewComponentObserver.OverviewChangeListener;
 import com.android.quickstep.dagger.SysUIConnectionSingleton;
 import com.android.quickstep.fallback.RecentsState;
-import com.android.quickstep.input.QuickstepKeyGestureEventsManager;
-import com.android.quickstep.input.QuickstepKeyGestureEventsManager.OverviewGestureHandler;
 import com.android.quickstep.inputconsumers.BubbleBarInputConsumer;
 import com.android.quickstep.inputconsumers.OneHandedModeInputConsumer;
 import com.android.quickstep.util.ActiveGestureLog;
@@ -121,11 +118,9 @@ import java.io.PrintWriter;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.Executor;
-import java.util.function.Function;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Provider;
 
 /**
  * Service connected by system-UI for handling touch interaction.
@@ -213,11 +208,9 @@ public class TouchInteractionHandler extends ContextWrapper {
 
     private final SystemDecorationChangeObserver mSystemDecorationChangeObserver;
     private final DisplayRepository mDisplayRepository;
-    private final QuickstepKeyGestureEventsManager mQuickstepKeyGestureEventsHandler;
     private final DisplaysWithDecorationsRepositoryCompat mDisplaysWithDecorationsRepositoryCompat;
     private final CoroutineDispatcher mMainCoroutineDispatcher;
     private final DesktopState mDesktopState;
-    private final Provider<TISBinder> mBinderProvider;
 
     // This needs to be a member to be queued and potentially removed later if the service is
     // destroyed before the user is unlocked
@@ -231,6 +224,7 @@ public class TouchInteractionHandler extends ContextWrapper {
 
     private final AllAppsActionManager mAllAppsActionManager;
     private final TaskbarManager mTaskbarManager;
+    private final ActiveTrackpadList mTrackpadsConnected;
 
     private @NonNull InputConsumer mUncheckedConsumer = InputConsumer.DEFAULT_NO_OP;
 
@@ -241,10 +235,6 @@ public class TouchInteractionHandler extends ContextWrapper {
     private InputMonitorDisplayModel mInputMonitorDisplayModel;
     private InputMonitorCompat mInputMonitorCompat;
     private InputEventReceiver mInputEventReceiver;
-
-    /** Set from TISBinder */
-    public Function<GestureState, AnimatedFloat> mSwipeUpProxyProvider = i -> null;
-    private ActiveTrackpadList mTrackpadsConnected;
 
     private final SparseArray<NavigationMode> mGestureStartNavMode = new SparseArray<>();
 
@@ -259,7 +249,6 @@ public class TouchInteractionHandler extends ContextWrapper {
             PerDisplayRepository<RotationTouchHelper> rotationTouchHelperRepository,
             PerDisplayRepository<RecentsWindowManager> recentsWindowManagerRepository,
             SystemDecorationChangeObserver systemDecorationChangeObserver,
-            QuickstepKeyGestureEventsManager quickstepKeyGestureEventsHandler,
             DispatcherProvider dispatcherProvider,
             DisplaysWithDecorationsRepositoryCompat displaysWithDecorationsRepositoryCompat,
             LockedUserState lockedUserState,
@@ -272,7 +261,6 @@ public class TouchInteractionHandler extends ContextWrapper {
             TaskbarManager taskbarManager,
             ActiveTrackpadList activeTrackpadList,
             @Ui Executor uiExecutor,
-            Provider<TISBinder> binderProvider,
             @Named(CONNECTION_CLEANER) ThreadSafeRunnableList cleanupTasks
     ) {
         super(context);
@@ -286,7 +274,6 @@ public class TouchInteractionHandler extends ContextWrapper {
         mRotationTouchHelperRepository = rotationTouchHelperRepository;
         mRecentsWindowManagerRepository = recentsWindowManagerRepository;
         mSystemDecorationChangeObserver = systemDecorationChangeObserver;
-        mQuickstepKeyGestureEventsHandler = quickstepKeyGestureEventsHandler;
         mMainCoroutineDispatcher = dispatcherProvider.getMain();
         mDisplaysWithDecorationsRepositoryCompat = displaysWithDecorationsRepositoryCompat;
         mLockedUserState = lockedUserState;
@@ -303,7 +290,6 @@ public class TouchInteractionHandler extends ContextWrapper {
                 new DesktopAppLaunchTransitionManager(this, systemUiProxy, displayController);
         mDesktopAppLaunchTransitionManager.registerTransitions();
         mInputConsumer = InputConsumerController.getRecentsAnimationInputConsumer();
-        mBinderProvider = binderProvider;
 
         mTrackpadsConnected = activeTrackpadList;
         cleanupTasks.addCloseable(uiExecutor, activeTrackpadList.getConnected().forEach(
@@ -433,10 +419,6 @@ public class TouchInteractionHandler extends ContextWrapper {
 
         mTaskbarManager.onUserUnlocked();
         mAllAppsActionManager.onUserUnlocked();
-        mQuickstepKeyGestureEventsHandler.registerOverviewKeyGestureEvent(
-                createOverviewGestureHandler());
-        mQuickstepKeyGestureEventsHandler.registerHomeKeyGestureEvent(
-                getOverviewCommandHelper());
     }
 
     public OverviewCommandHelper getOverviewCommandHelper() {
@@ -699,7 +681,6 @@ public class TouchInteractionHandler extends ContextWrapper {
                         this::onConsumerInactive,
                         inputEventReceiver,
                         mTaskbarManager,
-                        mSwipeUpProxyProvider,
                         mOverviewCommandHelper.get(),
                         event,
                         rotationTouchHelper,
@@ -913,20 +894,12 @@ public class TouchInteractionHandler extends ContextWrapper {
             // Since navBar gestural height are different between portrait and landscape,
             // can handle orientation changes and refresh navigation gestural region through
             // onOneHandedModeChanged()
-            setGesturalHeight(RESET_TO_DEFAULT_GESTURAL_HEIGHT);
+            mDeviceStateRepository.forEach(/* createIfAbsent= */ true, deviceState ->
+                    deviceState.setGesturalHeight(RESET_TO_DEFAULT_GESTURAL_HEIGHT));
             return;
         }
 
         ActivityPreloadUtil.preloadOverviewForTIS(this, false /* fromInit */);
-    }
-
-    /**
-     * Touches within this number of pixels from the bottom of the screen can get intercepted to
-     * handle gesture navigation. Passing a value less than 0 will revert to a default value.
-     */
-    public void setGesturalHeight(int newGesturalHeight) {
-        mDeviceStateRepository.forEach(/* createIfAbsent= */ true, deviceState ->
-                deviceState.setGesturalHeight(newGesturalHeight));
     }
 
     private static boolean isTablet(Configuration config) {
@@ -1042,23 +1015,6 @@ public class TouchInteractionHandler extends ContextWrapper {
                 rotationTouchHelper, recentsWindowManager, gestureState, touchTimeMs,
                 taskAnimationManager.isRecentsAnimationRunning(),
                 mInputConsumer, MSDLPlayerWrapper.INSTANCE.get(this));
-    }
-
-    private OverviewGestureHandler createOverviewGestureHandler() {
-        return new OverviewGestureHandler() {
-            @Override
-            public void showOverview(@NonNull OverviewType type) {
-                mBinderProvider.get()
-                        .onOverviewShown(/* triggeredFromAltTab= */ type == OverviewType.ALT_TAB);
-            }
-
-            @Override
-            public void hideOverview(@NonNull OverviewType type) {
-                mBinderProvider.get().onOverviewHidden(
-                        /* triggeredFromAltTab= */ type == OverviewType.ALT_TAB,
-                        /* triggeredFromHomeKey= */ type == OverviewType.HOME);
-            }
-        };
     }
 
     /**

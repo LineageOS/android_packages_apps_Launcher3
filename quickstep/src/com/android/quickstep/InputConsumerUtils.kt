@@ -22,7 +22,6 @@ import android.view.MotionEvent
 import android.view.ViewConfiguration
 import androidx.annotation.VisibleForTesting
 import com.android.launcher3.Utilities.shouldEnableMouseInteractionChanges
-import com.android.launcher3.anim.AnimatedFloat
 import com.android.launcher3.statemanager.BaseState
 import com.android.launcher3.statemanager.StatefulContainer
 import com.android.launcher3.taskbar.TaskbarDesktopExperienceFlags.enableAutoStashConnectedDisplayTaskbar
@@ -54,7 +53,6 @@ import com.android.systemui.shared.system.InputMonitorCompat
 import com.android.wm.shell.Flags
 import com.android.wm.shell.shared.desktopmode.DesktopState
 import java.util.function.Consumer
-import java.util.function.Function
 
 /** Utility class for creating input consumers. */
 object InputConsumerUtils {
@@ -75,7 +73,6 @@ object InputConsumerUtils {
         onCompleteCallback: Consumer<OtherActivityInputConsumer>,
         inputEventReceiver: InputChannelCompat.InputEventReceiver,
         taskbarManager: TaskbarManager,
-        swipeUpProxyProvider: Function<GestureState?, AnimatedFloat?>?,
         overviewCommandHelper: OverviewCommandHelper,
         event: MotionEvent,
         rotationTouchHelper: RotationTouchHelper,
@@ -99,7 +96,7 @@ object InputConsumerUtils {
             )
             return consumer
         }
-        val progressProxy = swipeUpProxyProvider?.apply(gestureState)
+        val progressProxy = deviceState.getSwipeUpProxy(gestureState)
         if (progressProxy != null) {
             val consumer: InputConsumer =
                 ProgressDelegateInputConsumer(

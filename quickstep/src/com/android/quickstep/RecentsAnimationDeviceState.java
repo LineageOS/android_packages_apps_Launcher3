@@ -64,6 +64,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.app.displaylib.PerDisplayRepository;
+import com.android.launcher3.anim.AnimatedFloat;
 import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.dagger.DisplayId;
 import com.android.launcher3.dagger.PerDisplaySingleton;
@@ -90,6 +91,7 @@ import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 
 import java.io.PrintWriter;
+import java.util.function.Function;
 
 import javax.inject.Inject;
 
@@ -148,6 +150,9 @@ public class RecentsAnimationDeviceState implements ExclusionListener {
     private @NonNull Region mExclusionRegion = GestureExclusionManager.EMPTY_REGION;
     private boolean mExclusionListenerRegistered;
     private final int mDisplayId;
+
+    @Nullable
+    private Function<GestureState, AnimatedFloat> mSwipeUpProxyProvider = null;
 
     @Inject
     RecentsAnimationDeviceState(
@@ -304,6 +309,20 @@ public class RecentsAnimationDeviceState implements ExclusionListener {
      */
     public void setGesturalHeight(int newGesturalHeight) {
         mRotationTouchHelper.setGesturalHeight(newGesturalHeight);
+    }
+
+    /** Sets a proxy to bypass swipe up behavior */
+    public void setSwipeUpProxy(Function<GestureState, AnimatedFloat> proxyProvider) {
+        mSwipeUpProxyProvider = proxyProvider;
+    }
+
+    /**
+     * Returns an AnimatedFloat which will receive all swipe up progress events instead of a
+     * standard gesture handling
+     */
+    public AnimatedFloat getSwipeUpProxy(GestureState state) {
+        Function<GestureState, AnimatedFloat> provider = mSwipeUpProxyProvider;
+        return provider == null ? null : provider.apply(state);
     }
 
     /**

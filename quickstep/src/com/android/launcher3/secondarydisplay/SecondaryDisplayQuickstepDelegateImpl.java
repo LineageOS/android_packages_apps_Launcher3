@@ -42,8 +42,7 @@ import com.android.launcher3.taskbar.TaskbarManager;
 import com.android.launcher3.views.ActivityContext;
 import com.android.quickstep.BaseContainerInterface;
 import com.android.quickstep.OverviewComponentObserver;
-import com.android.quickstep.TISBinder;
-import com.android.quickstep.util.TISBindHelper;
+import com.android.quickstep.sysuiconnection.TISBindHelper;
 import com.android.quickstep.views.RecentsViewContainer;
 import com.android.quickstep.window.RecentsWindowManager;
 
@@ -211,7 +210,7 @@ public final class SecondaryDisplayQuickstepDelegateImpl extends SecondaryDispla
         }
     }
 
-    private void onTISConnected(TISBinder binder) {
+    private void onTISConnected(TISBindHelper helper) {
         boolean isVisible = mActivityContext.getLifecycle().getCurrentState().isAtLeast(RESUMED);
         int displayId = mActivityContext.asContext().getDisplay().getDisplayId();
         updateStashControllerStateFlags(displayId, isVisible);

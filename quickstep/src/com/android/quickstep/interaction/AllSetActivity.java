@@ -83,6 +83,7 @@ import com.android.launcher3.R;
 import com.android.launcher3.RemoveAnimationSettingsTracker;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.anim.AnimatedFloat;
+import com.android.launcher3.dagger.LauncherComponentProvider;
 import com.android.launcher3.taskbar.StashedHandleViewControllerProxy;
 import com.android.launcher3.taskbar.TaskbarManager;
 import com.android.launcher3.util.Executors;
@@ -90,10 +91,10 @@ import com.android.launcher3.util.SafeCloseable;
 import com.android.quickstep.GestureState;
 import com.android.quickstep.OverviewComponentObserver;
 import com.android.quickstep.OverviewComponentObserver.OverviewChangeListener;
-import com.android.quickstep.TISBinder;
+import com.android.quickstep.RecentsAnimationDeviceState;
+import com.android.quickstep.sysuiconnection.TISBindHelper;
 import com.android.quickstep.util.ActivityPreloadUtil;
 import com.android.quickstep.util.LottieAnimationColorUtils;
-import com.android.quickstep.util.TISBindHelper;
 import com.android.quickstep.views.WallpaperScreenshotClipView;
 import com.android.wm.shell.shared.TypefaceUtils.FontFamily;
 
@@ -153,6 +154,7 @@ public class AllSetActivity extends Activity {
             modelPropertiesChanged -> updateTextForNavigationMode();
 
     private TISBindHelper mTISBindHelper;
+    private RecentsAnimationDeviceState mDeviceState;
 
     private BgDrawable mBackground;
     private View mRootView;
@@ -198,6 +200,8 @@ public class AllSetActivity extends Activity {
         initializeCommonViewsAndListeners();
         configureSystemUI(isDarkTheme);
 
+        mDeviceState = LauncherComponentProvider.get(this)
+                .getRecentsAnimationDeviceStateRepository().get(getDisplayId());
         mTISBindHelper = new TISBindHelper(this, this::onTISConnected);
         mVibrator = getSystemService(Vibrator.class);
         getIDP().addOnChangeListener(mOnIDPChangeListener);
@@ -549,29 +553,21 @@ public class AllSetActivity extends Activity {
     protected void onResume() {
         super.onResume();
         maybeResumeOrPauseBackgroundAnimation();
-        TISBinder binder = mTISBindHelper.getBinder();
-        if (binder != null) {
-            setSetupUIVisible(true);
-            binder.setSwipeUpProxy(this::createSwipeUpProxy);
-        }
+        setSetupUIVisible(true);
+        if (mDeviceState != null) mDeviceState.setSwipeUpProxy(this::createSwipeUpProxy);
         if (mIsExpressiveThemeEnabledInSUW) {
             getWindow().setBackgroundBlurRadius(WALLPAPER_BLUR_RADIUS);
-            if (binder != null) {
-                int height = getWindowManager().getCurrentWindowMetrics().getBounds().height();
-                binder.setGesturalHeight((int) (height * GESTURE_HEIGHT_RATIO_OF_WINDOW_HEIGHT));
+            int height = getWindowManager().getCurrentWindowMetrics().getBounds().height();
+            if (mDeviceState != null) {
+                mDeviceState.setGesturalHeight(
+                        (int) (height * GESTURE_HEIGHT_RATIO_OF_WINDOW_HEIGHT));
             }
         }
         listenForUiControllerChange();
     }
 
-    private void onTISConnected(TISBinder binder) {
+    private void onTISConnected(TISBindHelper helper) {
         setSetupUIVisible(isResumed());
-        binder.setSwipeUpProxy(isResumed() ? this::createSwipeUpProxy : null);
-        if (mIsExpressiveThemeEnabledInSUW && isResumed()) {
-            int height = getWindowManager().getCurrentWindowMetrics().getBounds().height();
-            binder.setGesturalHeight((int) (height * GESTURE_HEIGHT_RATIO_OF_WINDOW_HEIGHT));
-        }
-
         listenForUiControllerChange();
         onUiControllerChanged();
     }
@@ -626,12 +622,11 @@ public class AllSetActivity extends Activity {
     }
 
     private void clearBinderOverride() {
-        TISBinder binder = mTISBindHelper.getBinder();
-        if (binder != null) {
-            setSetupUIVisible(false);
-            binder.setSwipeUpProxy(null);
+        setSetupUIVisible(false);
+        if (mDeviceState != null) {
+            mDeviceState.setSwipeUpProxy(null);
             if (mIsExpressiveThemeEnabledInSUW) {
-                binder.setGesturalHeight(RESET_TO_DEFAULT_GESTURAL_HEIGHT);
+                mDeviceState.setGesturalHeight(RESET_TO_DEFAULT_GESTURAL_HEIGHT);
             }
         }
     }
