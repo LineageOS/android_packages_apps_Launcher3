@@ -97,7 +97,7 @@
     <string name="allset_title_expressive_fallback" msgid="2829102990606405239">"Peranti anda sudah \nsedia!"</string>
     <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"Anda sudah sedia!"</string>
     <string name="allset_subtitle_expressive" msgid="419688197551192358">"Nikmati <xliff:g id="DEVICE">%1$s</xliff:g> baharu anda!"</string>
-    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"Leret ke atas untuk bermula dengan <xliff:g id="DEVICE">%1$s</xliff:g> anda"</string>
+    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"Leret ke atas untuk mula menggunakan <xliff:g id="DEVICE">%1$s</xliff:g> anda"</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"Ketik untuk bermula dengan <xliff:g id="DEVICE">%1$s</xliff:g> anda"</string>
     <string name="allset_navigation_settings_expressive" msgid="3745595273748356"><annotation id="link">"Pilih cara menavigasi"</annotation></string>
     <string name="allset_hint_expressive" msgid="756856423510976261">"Leret ke atas"</string>

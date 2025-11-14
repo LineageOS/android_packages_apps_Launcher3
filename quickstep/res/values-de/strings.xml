@@ -95,9 +95,9 @@
     <string name="allset_navigation_settings" msgid="4713404605961476027"><annotation id="link">"Einstellungen für die Systemnavigation"</annotation></string>
     <string name="allset_title_expressive" msgid="474399969304146994">"Dein <xliff:g id="DEVICE">%1$s</xliff:g> ist \nbereit."</string>
     <string name="allset_title_expressive_fallback" msgid="2829102990606405239">"Dein Gerät ist \nbereit."</string>
-    <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"Du bist bereit."</string>
+    <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"Du kannst jetzt loslegen"</string>
     <string name="allset_subtitle_expressive" msgid="419688197551192358">"Viel Spaß mit deinem neuen <xliff:g id="DEVICE">%1$s</xliff:g>."</string>
-    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"Nach oben wischen, um dein <xliff:g id="DEVICE">%1$s</xliff:g> zu verwenden"</string>
+    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"Wische nach oben, um dein <xliff:g id="DEVICE">%1$s</xliff:g> zu verwenden"</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"Tippen, um dein Gerät (<xliff:g id="DEVICE">%1$s</xliff:g>) zu verwenden"</string>
     <string name="allset_navigation_settings_expressive" msgid="3745595273748356"><annotation id="link">"Navigationsmethode auswählen"</annotation></string>
     <string name="allset_hint_expressive" msgid="756856423510976261">"Nach oben wischen"</string>

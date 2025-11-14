@@ -95,9 +95,9 @@
     <string name="allset_navigation_settings" msgid="4713404605961476027"><annotation id="link">"システム ナビゲーションの設定"</annotation></string>
     <string name="allset_title_expressive" msgid="474399969304146994">"<xliff:g id="DEVICE">%1$s</xliff:g> の準備が\n完了しました"</string>
     <string name="allset_title_expressive_fallback" msgid="2829102990606405239">"デバイスの準備が\n完了しました"</string>
-    <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"準備できました"</string>
+    <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"準備ができました"</string>
     <string name="allset_subtitle_expressive" msgid="419688197551192358">"新しい <xliff:g id="DEVICE">%1$s</xliff:g> をご利用いただけます"</string>
-    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"<xliff:g id="DEVICE">%1$s</xliff:g> で使ってみるには上にスワイプしてください"</string>
+    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"上にスワイプして<xliff:g id="DEVICE">%1$s</xliff:g>を使ってみましょう"</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"<xliff:g id="DEVICE">%1$s</xliff:g> を利用するにはタップしてください"</string>
     <string name="allset_navigation_settings_expressive" msgid="3745595273748356"><annotation id="link">"ナビゲーション方法を選択"</annotation></string>
     <string name="allset_hint_expressive" msgid="756856423510976261">"上にスワイプ"</string>

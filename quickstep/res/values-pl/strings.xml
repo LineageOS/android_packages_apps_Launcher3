@@ -95,7 +95,7 @@
     <string name="allset_navigation_settings" msgid="4713404605961476027"><annotation id="link">"Ustawienia nawigacji w systemie"</annotation></string>
     <string name="allset_title_expressive" msgid="474399969304146994">"Twój <xliff:g id="DEVICE">%1$s</xliff:g> jest \ngotowy."</string>
     <string name="allset_title_expressive_fallback" msgid="2829102990606405239">"Urządzenie jest \ngotowe."</string>
-    <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"Wszystko jest gotowe."</string>
+    <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"Wszystko jest gotowe"</string>
     <string name="allset_subtitle_expressive" msgid="419688197551192358">"Nowy <xliff:g id="DEVICE">%1$s</xliff:g> jest już gotowy do użycia."</string>
     <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"Przesuń palcem w górę, aby zacząć korzystać z urządzenia <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"Kliknij, aby zacząć poznawać <xliff:g id="DEVICE">%1$s</xliff:g>"</string>

@@ -97,7 +97,7 @@
     <string name="allset_title_expressive_fallback" msgid="2829102990606405239">"თქვენი მოწყობილობა \nმზადაა"</string>
     <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"დასაწყებად მზად ხართ!"</string>
     <string name="allset_subtitle_expressive" msgid="419688197551192358">"ისიამოვნეთ თქვენი ახალი <xliff:g id="DEVICE">%1$s</xliff:g>-ით!"</string>
-    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"თქვენი <xliff:g id="DEVICE">%1$s</xliff:g>-ის დასაწყებად გადაფურცლეთ ზემოთ"</string>
+    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"თქვენი <xliff:g id="DEVICE">%1$s</xliff:g>ს დასაწყებად გადაფურცლეთ ზემოთ"</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"შეეხეთ თქვენი <xliff:g id="DEVICE">%1$s</xliff:g>-ის გამოყენების დასაწყებად"</string>
     <string name="allset_navigation_settings_expressive" msgid="3745595273748356"><annotation id="link">"აირჩიეთ ნავიგაციის ხერხი"</annotation></string>
     <string name="allset_hint_expressive" msgid="756856423510976261">"ზემოთ გადაფურცვლა"</string>

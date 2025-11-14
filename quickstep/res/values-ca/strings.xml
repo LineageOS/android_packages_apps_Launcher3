@@ -95,9 +95,9 @@
     <string name="allset_navigation_settings" msgid="4713404605961476027"><annotation id="link">"Configuració de navegació del sistema"</annotation></string>
     <string name="allset_title_expressive" msgid="474399969304146994">"El teu <xliff:g id="DEVICE">%1$s</xliff:g> està \na punt"</string>
     <string name="allset_title_expressive_fallback" msgid="2829102990606405239">"El teu dispositiu està \na punt"</string>
-    <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"Ja està tot a punt."</string>
+    <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"Ja està tot a punt"</string>
     <string name="allset_subtitle_expressive" msgid="419688197551192358">"Gaudeix del teu nou <xliff:g id="DEVICE">%1$s</xliff:g>!"</string>
-    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"Llisca cap amunt per començar a utilitzar el teu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"Llisca cap amunt per començar a utilitzar aquest dispositiu: <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"Toca per començar a utilitzar el teu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="allset_navigation_settings_expressive" msgid="3745595273748356"><annotation id="link">"Tria com vols navegar"</annotation></string>
     <string name="allset_hint_expressive" msgid="756856423510976261">"Llisca cap amunt"</string>
@@ -124,7 +124,7 @@
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"Animació que mostra com es pot accedir a les aplicacions suggerides al dispositiu"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"Animació que mostra com es pot cercar un element a la pantalla mantenint premuda la tecla d\'acció i seleccionant l\'àrea on es troba l\'element"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Informació sobre Barra de tasques"</string>
-    <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Arrossega una aplicació al costat per utilitzar-ne dues alhora"</string>
+    <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Arrossega una app cap al costat per utilitzar-ne dues alhora"</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"Arrossega fins als extrems inferiors perquè sigui flotant"</string>
     <string name="taskbar_edu_stashing" msgid="911857479758694381">"Llisca lentament cap amunt per mostrar la Barra de tasques"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Obtén suggeriments d\'aplicacions basats en la teva rutina"</string>
