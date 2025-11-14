@@ -1108,6 +1108,41 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
         verify(callbacks, times(1)).getIconOnHoverListener(icon1)
     }
 
+    @Test
+    @EnableFlags(FLAG_ENABLE_OVERFLOW_BUTTON_FOR_TASKBAR_PINNED_ITEMS)
+    fun testIsPointOnOverflowIcon() {
+        assertThat(taskbarView.isOverflowViewShowing).isFalse()
+        assertThat(taskbarView.isPointOnOverflowIcon(floatArrayOf(0f, 0f))).isFalse()
+
+        val numHotseatIcons = activityContext.deviceProfile.inv.numShownHotseatIcons
+        runOnMainSync {
+            taskbarView.updateItems(
+                createHotseatItems(numHotseatIcons + 1),
+                emptyList(),
+                emptyList(),
+            )
+        }
+
+        forceLayoutUpdate()
+        val overflowIcon = taskbarView.getTaskbarPinnedOverflowView()
+        assertThat(taskbarView.isOverflowViewShowing).isTrue()
+        val overflowRect = Rect()
+        activityContext.dragLayer.getDescendantRectRelativeToSelf(overflowIcon, overflowRect)
+
+        // Point inside the overflow icon
+        val pointInside =
+            floatArrayOf(overflowRect.centerX().toFloat(), overflowRect.centerY().toFloat())
+        assertThat(taskbarView.isPointOnOverflowIcon(pointInside)).isTrue()
+
+        // Point outside the overflow icon
+        val pointOutside = floatArrayOf(overflowRect.right + 1F, overflowRect.bottom + 1F)
+        assertThat(taskbarView.isPointOnOverflowIcon(pointOutside)).isFalse()
+
+        // Point on the edge of the overflow icon
+        val pointOnEdge = floatArrayOf(overflowRect.left.toFloat(), overflowRect.top.toFloat())
+        assertThat(taskbarView.isPointOnOverflowIcon(pointOnEdge)).isTrue()
+    }
+
     /** Returns the number of expected recents outside of the overflow based on [hotseatSize]. */
     private fun getExpectedNumRecentsWithOverflow(hotseatSize: Int = 0): Int {
         return 0.coerceAtLeast(maxShownRecents - hotseatSize - 1)

@@ -805,10 +805,10 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         traceEnd(TRACE_TAG_APP);
     }
 
-    private boolean isOverflowViewShowing() {
-        if (mTaskbarPinnedOverflowView == null) return false;
+    @VisibleForTesting
+    boolean isOverflowViewShowing() {
         if (mHotseatIconsContainer != null) {
-            return mHotseatIconsContainer.indexOfChild(mTaskbarPinnedOverflowView) != -1;
+            return mHotseatIconsContainer.isOverflowViewShowing();
         }
         return indexOfChild(mTaskbarPinnedOverflowView) != -1;
     }
@@ -1574,6 +1574,9 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
      */
     @Nullable
     public TaskbarOverflowView getTaskbarPinnedOverflowView() {
+        if (mHotseatIconsContainer != null) {
+            return mHotseatIconsContainer.getTaskbarPinnedOverflowView();
+        }
         return mTaskbarPinnedOverflowView;
     }
 
@@ -1764,6 +1767,27 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                 outRect.right = outRect.left + mUnpinnedHitRectBuffer;
             }
         }
+    }
+
+    @Override
+    public boolean isPointOnOverflowIcon(@NonNull float[] point) {
+        TaskbarOverflowView overflowIcon = getTaskbarPinnedOverflowView();
+        if (overflowIcon == null) {
+            return false;
+        }
+        final Rect overflowIconRect = new Rect();
+        mActivityContext.getDragLayer().getDescendantRectRelativeToSelf(overflowIcon,
+                overflowIconRect);
+        return overflowIconRect.contains(Math.round(point[0]), Math.round(point[1]));
+    }
+
+    @Override
+    public void openOverflowContainer() {
+        TaskbarOverflowView overflowIcon = getTaskbarPinnedOverflowView();
+        if (overflowIcon == null) {
+            return;
+        }
+        mControllerCallbacks.openOverflownContainer(overflowIcon);
     }
 
     public static class TaskbarLayoutParams extends FrameLayout.LayoutParams {
