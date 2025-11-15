@@ -1073,7 +1073,7 @@ public class SplitSelectStateController {
                         null, launcherDesktopSplitEvent);
 
                 if (mRecentsWindowManager != null) {
-                    mRecentsWindowManager.createWindowView();
+                    mRecentsWindowManager.showRecentsWindow(null);
                 }
 
                 final SurfaceTransactionApplier surfaceApplier =
