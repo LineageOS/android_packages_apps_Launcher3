@@ -46,7 +46,8 @@ constructor(@param:ApplicationContext private val appContext: Context) :
                 /*flags*/ PackageManager.MATCH_SYSTEM_ONLY,
             )
 
-        return resolveInfos.firstOrNull { it.activityInfo != null }?.activityInfo?.componentName
+        val activityInfo = resolveInfos.firstOrNull { it.activityInfo != null }?.activityInfo
+        return activityInfo?.let { ComponentName(it.packageName, it.name) }
     }
 
     companion object {

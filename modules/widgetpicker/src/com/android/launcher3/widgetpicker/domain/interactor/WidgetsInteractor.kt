@@ -87,6 +87,9 @@ constructor(
     suspend fun getWidgetPreview(widgetId: WidgetId): WidgetPreview =
         widgetsRepository.getWidgetPreview(widgetId)
 
+    /** Returns a widget that is customizable for various use-cases (if exists). */
+    fun getCustomWidget(): PickableWidget? = widgetsRepository.getCustomWidget()
+
     /** Returns widgets that can be featured in the widget picker. */
     fun getFeaturedWidgets(): Flow<List<PickableWidget>> =
         combine(
