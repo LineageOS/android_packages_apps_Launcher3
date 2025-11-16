@@ -641,7 +641,7 @@ public class DisplayController {
      * Returns the given binary flags as a human-readable string.
      * @see #CHANGE_ALL
      */
-    public String getChangeFlagsString(int change) {
+    public static String getChangeFlagsString(int change) {
         StringJoiner result = new StringJoiner("|");
         appendFlag(result, change, CHANGE_ACTIVE_SCREEN, "CHANGE_ACTIVE_SCREEN");
         appendFlag(result, change, CHANGE_ROTATION, "CHANGE_ROTATION");
