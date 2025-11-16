@@ -180,4 +180,12 @@
     <string name="nudge_a11y_close" msgid="4513937143817625570">"બંધ કરો"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"છબી નજ કરો"</string>
     <string name="running_app_description" msgid="1309281047289078871">"<xliff:g id="APP_TITLE">%1$s</xliff:g> <xliff:g id="RUNNING_STATE">%2$s</xliff:g>⁠"</string>
+    <string name="ambientcue_first_time_edu_icon_description" msgid="899917821554299010">"આઇકન"</string>
+    <string name="ambientcue_first_time_edu_title" msgid="2018548669156363447">"મદદરૂપ સૂચનો મેળવો"</string>
+    <string name="ambientcue_first_time_edu_text" msgid="4645551981871066999">"તમે સ્ક્રીન પર જે કરી રહ્યાં છો, તેની સાથે સંબંધિત માહિતી અને ઍક્શન સક્રિય રીતે સૂચવવા માટે અમે AI નો ઉપયોગ કરીએ છીએ"</string>
+    <string name="underlay_close_button_content_description" msgid="5386282762373529057">"બંધ કરો"</string>
+    <string name="ambient_cue_expand_action" msgid="3718141784327417087">"મોટું કરો"</string>
+    <string name="ambient_cue_icon_content_description" msgid="6470228671884918485">"ઍમ્બિઅન્ટ સૂચનોનું આઇકન"</string>
+    <string name="ambientcue_long_press_edu_text" msgid="2399090372677751105">"સૂચનો કેવી રીતે જનરેટ થાય છે તે જોવા માટે ટચ કરીને થોડીવાર દબાવી રાખો"</string>
+    <string name="ambient_cue_autofill_action" msgid="5880997492149716614">"ઑટોમૅટિક રીતે ભરવાની સુવિધા"</string>
 </resources>

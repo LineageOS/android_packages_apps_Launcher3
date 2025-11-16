@@ -95,7 +95,7 @@
     <string name="allset_navigation_settings" msgid="4713404605961476027"><annotation id="link">"ಸಿಸ್ಟಂ ನ್ಯಾವಿಗೇಶನ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</annotation></string>
     <string name="allset_title_expressive" msgid="474399969304146994">"ನಿಮ್ಮ <xliff:g id="DEVICE">%1$s</xliff:g> \nಸಿದ್ದವಾಗಿದೆ!"</string>
     <string name="allset_title_expressive_fallback" msgid="2829102990606405239">"ನಿಮ್ಮ ಸಾಧನವು \nಸಿದ್ದವಾಗಿದೆ!"</string>
-    <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"ನೀವು ರೋಲ್ ಮಾಡಲು ಸಿದ್ಧರಿದ್ದೀರಿ!"</string>
+    <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"ಇದನ್ನು ಬಳಸಲು ಸಿದ್ಧರಿದ್ದೀರಿ!"</string>
     <string name="allset_subtitle_expressive" msgid="419688197551192358">"ನಿಮ್ಮ ಹೊಸ <xliff:g id="DEVICE">%1$s</xliff:g> ಅನ್ನು ಆನಂದಿಸಿ!"</string>
     <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"<xliff:g id="DEVICE">%1$s</xliff:g> ಮೂಲಕ ಪ್ರಾರಂಭಿಸಲು ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"ನಿಮ್ಮ <xliff:g id="DEVICE">%1$s</xliff:g> ನ ಬಳಕೆಯನ್ನು ಪ್ರಾರಂಭಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
@@ -180,4 +180,12 @@
     <string name="nudge_a11y_close" msgid="4513937143817625570">"ಮುಚ್ಚಿರಿ"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"ಚಿತ್ರವನ್ನು ನಡ್ಜ್ ಮಾಡಿ"</string>
     <string name="running_app_description" msgid="1309281047289078871">"<xliff:g id="APP_TITLE">%1$s</xliff:g> <xliff:g id="RUNNING_STATE">%2$s</xliff:g>⁠"</string>
+    <string name="ambientcue_first_time_edu_icon_description" msgid="899917821554299010">"ಐಕಾನ್"</string>
+    <string name="ambientcue_first_time_edu_title" msgid="2018548669156363447">"ಉಪಯುಕ್ತ ಸಲಹೆಗಳನ್ನು ಪಡೆಯಿರಿ"</string>
+    <string name="ambientcue_first_time_edu_text" msgid="4645551981871066999">"ನೀವು ಸ್ಕ್ರೀನ್ ಮೇಲೆ ಏನು ಮಾಡುತ್ತಿದ್ದೀರಿ ಎಂಬುದಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಮಾಹಿತಿ ಮತ್ತು ಕ್ರಿಯೆಗಳನ್ನು ಪೂರ್ವಭಾವಿಯಾಗಿ ಸೂಚಿಸಲು ನಾವು AI ಅನ್ನು ಬಳಸುತ್ತೇವೆ"</string>
+    <string name="underlay_close_button_content_description" msgid="5386282762373529057">"ಮುಚ್ಚಿರಿ"</string>
+    <string name="ambient_cue_expand_action" msgid="3718141784327417087">"ವಿಸ್ತೃತಗೊಳಿಸಿ"</string>
+    <string name="ambient_cue_icon_content_description" msgid="6470228671884918485">"ಆ್ಯಂಬಿಯೆಂಟ್ ಸಲಹೆಗಳ ಐಕಾನ್"</string>
+    <string name="ambientcue_long_press_edu_text" msgid="2399090372677751105">"ಸಲಹೆಗಳನ್ನು ಹೇಗೆ ಜನರೇಟ್ ಮಾಡಲಾಗಿದೆ ಎಂಬುದನ್ನು ನೋಡಲು ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಹೋಲ್ಡ್‌ ಮಾಡಿ"</string>
+    <string name="ambient_cue_autofill_action" msgid="5880997492149716614">"ಆಟೋಫಿಲ್ ಮಾಡಿ"</string>
 </resources>

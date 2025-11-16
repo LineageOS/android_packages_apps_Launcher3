@@ -180,4 +180,12 @@
     <string name="nudge_a11y_close" msgid="4513937143817625570">"關閉"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"提醒圖片"</string>
     <string name="running_app_description" msgid="1309281047289078871">"<xliff:g id="APP_TITLE">%1$s</xliff:g> <xliff:g id="RUNNING_STATE">%2$s</xliff:g>"</string>
+    <string name="ambientcue_first_time_edu_icon_description" msgid="899917821554299010">"圖示"</string>
+    <string name="ambientcue_first_time_edu_title" msgid="2018548669156363447">"取得實用建議"</string>
+    <string name="ambientcue_first_time_edu_text" msgid="4645551981871066999">"針對你在螢幕上的操作，我們會運用 AI 主動建議相關資訊和動作"</string>
+    <string name="underlay_close_button_content_description" msgid="5386282762373529057">"關閉"</string>
+    <string name="ambient_cue_expand_action" msgid="3718141784327417087">"展開"</string>
+    <string name="ambient_cue_icon_content_description" msgid="6470228671884918485">"「背景建議」圖示"</string>
+    <string name="ambientcue_long_press_edu_text" msgid="2399090372677751105">"按住即可查看建議生成方式"</string>
+    <string name="ambient_cue_autofill_action" msgid="5880997492149716614">"自動填入"</string>
 </resources>

@@ -95,7 +95,7 @@
     <string name="allset_navigation_settings" msgid="4713404605961476027"><annotation id="link">"Paramètres de navigation du système"</annotation></string>
     <string name="allset_title_expressive" msgid="474399969304146994">"Votre appareil <xliff:g id="DEVICE">%1$s</xliff:g> est \nprêt!"</string>
     <string name="allset_title_expressive_fallback" msgid="2829102990606405239">"Votre appareil est \nprêt!"</string>
-    <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"Tout est prêt pour que vous puissiez commencer!"</string>
+    <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"Tout est prêt!"</string>
     <string name="allset_subtitle_expressive" msgid="419688197551192358">"Profitez de votre nouvel appareil <xliff:g id="DEVICE">%1$s</xliff:g>!"</string>
     <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"Balayez vers le haut pour commencer à utiliser votre <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"Touchez pour commencer à utiliser votre <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
@@ -180,4 +180,12 @@
     <string name="nudge_a11y_close" msgid="4513937143817625570">"Fermer"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"Coup de coude sur l\'image"</string>
     <string name="running_app_description" msgid="1309281047289078871">"<xliff:g id="APP_TITLE">%1$s</xliff:g> <xliff:g id="RUNNING_STATE">%2$s</xliff:g>"</string>
+    <string name="ambientcue_first_time_edu_icon_description" msgid="899917821554299010">"Icône"</string>
+    <string name="ambientcue_first_time_edu_title" msgid="2018548669156363447">"Obtenir des suggestions utiles"</string>
+    <string name="ambientcue_first_time_edu_text" msgid="4645551981871066999">"Nous utilisons l\'IA pour suggérer de manière proactive des informations et des actions pertinentes par rapport à ce que vous faites à l\'écran"</string>
+    <string name="underlay_close_button_content_description" msgid="5386282762373529057">"Fermer"</string>
+    <string name="ambient_cue_expand_action" msgid="3718141784327417087">"Développer"</string>
+    <string name="ambient_cue_icon_content_description" msgid="6470228671884918485">"Icône de suggestions d\'ambiance"</string>
+    <string name="ambientcue_long_press_edu_text" msgid="2399090372677751105">"Maintenir le doigt sur l\'affichage pour voir comment les suggestions sont générées"</string>
+    <string name="ambient_cue_autofill_action" msgid="5880997492149716614">"Remplir automatiquement"</string>
 </resources>

@@ -97,7 +97,7 @@
     <string name="allset_title_expressive_fallback" msgid="2829102990606405239">"Naprava je \npripravljena"</string>
     <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"Pripravljeni ste!"</string>
     <string name="allset_subtitle_expressive" msgid="419688197551192358">"Uživajte v novi napravi <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
-    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"Povlecite navzgor, če želite začeti uporabljati napravo: <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"Povlecite navzgor, če želite začeti uporabljati <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"Dotaknite se, če želite začeti uporabljati napravo: <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="allset_navigation_settings_expressive" msgid="3745595273748356"><annotation id="link">"Izbira načina pomikanja"</annotation></string>
     <string name="allset_hint_expressive" msgid="756856423510976261">"Povlecite navzgor"</string>
@@ -180,4 +180,12 @@
     <string name="nudge_a11y_close" msgid="4513937143817625570">"Zapri"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"Dregni sliko"</string>
     <string name="running_app_description" msgid="1309281047289078871">"<xliff:g id="APP_TITLE">%1$s</xliff:g> <xliff:g id="RUNNING_STATE">%2$s</xliff:g>⁠"</string>
+    <string name="ambientcue_first_time_edu_icon_description" msgid="899917821554299010">"Ikona"</string>
+    <string name="ambientcue_first_time_edu_title" msgid="2018548669156363447">"Prejemanje koristnih predlogov"</string>
+    <string name="ambientcue_first_time_edu_text" msgid="4645551981871066999">"Uporabljamo umetno inteligenco, da proaktivno predlagamo ustrezne informacije in dejanja na podlagi tega, kar počnete na zaslonu"</string>
+    <string name="underlay_close_button_content_description" msgid="5386282762373529057">"Zapri"</string>
+    <string name="ambient_cue_expand_action" msgid="3718141784327417087">"razširitev"</string>
+    <string name="ambient_cue_icon_content_description" msgid="6470228671884918485">"Ikona ambientalnih predlogov"</string>
+    <string name="ambientcue_long_press_edu_text" msgid="2399090372677751105">"Dotaknite se in pridržite, če si želite ogledati, kako se generirajo predlogi"</string>
+    <string name="ambient_cue_autofill_action" msgid="5880997492149716614">"samodejno izpolnjevanje"</string>
 </resources>
