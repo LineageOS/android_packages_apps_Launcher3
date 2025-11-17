@@ -38,7 +38,7 @@ import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.R;
 import com.android.launcher3.logging.StatsLogManager;
-import com.android.quickstep.TISBinder;
+import com.android.quickstep.TouchInteractionHandler.TISBinder;
 import com.android.quickstep.interaction.TutorialController.TutorialType;
 import com.android.quickstep.util.LayoutUtils;
 import com.android.quickstep.util.TISBindHelper;

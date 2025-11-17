@@ -42,7 +42,7 @@ import com.android.launcher3.taskbar.TaskbarManager;
 import com.android.launcher3.views.ActivityContext;
 import com.android.quickstep.BaseContainerInterface;
 import com.android.quickstep.OverviewComponentObserver;
-import com.android.quickstep.TISBinder;
+import com.android.quickstep.TouchInteractionHandler.TISBinder;
 import com.android.quickstep.util.TISBindHelper;
 import com.android.quickstep.views.RecentsViewContainer;
 import com.android.quickstep.window.RecentsWindowManager;

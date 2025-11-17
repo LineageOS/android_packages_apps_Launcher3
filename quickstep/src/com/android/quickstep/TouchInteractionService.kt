@@ -42,7 +42,7 @@ class TouchInteractionService : Service() {
     override fun onConfigurationChanged(newConfig: Configuration) =
         handler.onConfigurationChanged(newConfig)
 
-    override fun onBind(intent: Intent): IBinder = component.binder
+    override fun onBind(intent: Intent): IBinder = handler.binder
 
     override fun onDestroy() {
         cleanupTask.complete()

@@ -22,7 +22,6 @@ import com.android.launcher3.taskbar.TaskbarNavButtonController.TaskbarNavButton
 import com.android.launcher3.taskbar.navbutton.TaskbarNavButtonCallbacksImpl
 import com.android.launcher3.util.ThreadSafeRunnableList
 import com.android.quickstep.OverviewCommandHelper
-import com.android.quickstep.TISBinder
 import com.android.quickstep.TouchInteractionHandler
 import com.android.quickstep.actioncorner.ActionCornerHandler
 import dagger.Binds
@@ -46,7 +45,6 @@ interface SysUIConnectionComponent {
     val overviewCommandHelper: OverviewCommandHelper
     val actionCornerHandler: ActionCornerHandler
     val taskbarManager: TaskbarManager
-    val binder: TISBinder
 
     @Subcomponent.Builder
     interface Builder {

@@ -275,14 +275,6 @@ public final class OverviewComponentObserver {
                         ACTION_PACKAGE_ADDED, ACTION_PACKAGE_CHANGED, ACTION_PACKAGE_REMOVED));
             }
         }
-        dispatchOverviewState();
-    }
-
-    /**
-     * Updates all change listeners with the current overview state
-     */
-    @UiThread
-    public void dispatchOverviewState() {
         mOverviewChangeListeners.forEach(l -> l.onOverviewTargetChange(mIsHomeAndOverviewSame));
     }
 
