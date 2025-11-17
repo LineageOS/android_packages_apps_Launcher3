@@ -21,8 +21,6 @@ import android.view.View
 import com.android.launcher3.compose.ComposeFacade
 import com.android.launcher3.compose.core.BaseComposeFacade
 import com.android.quickstep.compose.core.QuickstepComposeFeatures
-import com.android.quickstep.recents.ui.viewmodel.TaskViewModel
-import com.android.quickstep.views.IconAppChipView
 
 object QuickstepComposeFacade : BaseComposeFacade, QuickstepComposeFeatures {
 
@@ -31,19 +29,6 @@ object QuickstepComposeFacade : BaseComposeFacade, QuickstepComposeFeatures {
     override fun initComposeView(appContext: Context) = ComposeFacade.initComposeView(appContext)
 
     override fun disposeComposition(view: View) = ComposeFacade.disposeComposition(view)
-
-    override fun startIconAppChip(
-        composeView: IconAppChipView,
-        viewModel: TaskViewModel,
-        taskId: Int,
-        onClick: () -> Unit,
-        onLongClick: () -> Unit,
-    ): View {
-        error(
-            "Compose is not available. Make sure to check isComposeAvailable() before calling any" +
-                " other function on ComposeFacade."
-        )
-    }
 
     override fun disableCompositionTracing() {
         error(

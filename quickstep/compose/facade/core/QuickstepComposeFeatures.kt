@@ -21,14 +21,6 @@ import com.android.quickstep.recents.ui.viewmodel.TaskViewModel
 import com.android.quickstep.views.IconAppChipView
 
 interface QuickstepComposeFeatures {
-    fun startIconAppChip(
-        composeView: IconAppChipView,
-        viewModel: TaskViewModel,
-        taskId: Int,
-        onClick: () -> Unit = {},
-        onLongClick: () -> Unit = {},
-    ): View
-
     fun enableCompositionTracing()
 
     fun disableCompositionTracing()

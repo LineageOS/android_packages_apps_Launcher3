@@ -19,17 +19,12 @@ package com.android.quickstep.compose
 import android.content.Context
 import android.os.Trace
 import android.view.View
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composer
 import androidx.compose.runtime.CompositionTracer
 import androidx.compose.runtime.InternalComposeTracingApi
-import androidx.compose.ui.platform.ComposeView
 import com.android.launcher3.compose.ComposeFacade
 import com.android.launcher3.compose.core.BaseComposeFacade
 import com.android.quickstep.compose.core.QuickstepComposeFeatures
-import com.android.quickstep.recents.ui.composable.TaskAppChip
-import com.android.quickstep.recents.ui.viewmodel.TaskViewModel
-import com.android.quickstep.views.IconAppChipView
 
 object QuickstepComposeFacade : BaseComposeFacade, QuickstepComposeFeatures {
     override fun isComposeAvailable() = ComposeFacade.isComposeAvailable()
@@ -37,17 +32,6 @@ object QuickstepComposeFacade : BaseComposeFacade, QuickstepComposeFeatures {
     override fun initComposeView(appContext: Context) = ComposeFacade.initComposeView(appContext)
 
     override fun disposeComposition(view: View) = ComposeFacade.disposeComposition(view)
-
-    override fun startIconAppChip(
-        composeView: IconAppChipView,
-        viewModel: TaskViewModel,
-        taskId: Int,
-        onClick: () -> Unit,
-        onLongClick: () -> Unit,
-    ): View =
-        (composeView as ComposeView).apply {
-            setContent { MaterialTheme { TaskAppChip(viewModel, taskId, onClick, onLongClick) } }
-        }
 
     @OptIn(InternalComposeTracingApi::class)
     override fun enableCompositionTracing() {

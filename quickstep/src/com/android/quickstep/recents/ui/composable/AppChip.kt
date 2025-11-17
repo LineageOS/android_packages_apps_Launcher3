@@ -17,6 +17,7 @@
 package com.android.quickstep.recents.ui.composable
 
 import android.graphics.drawable.Drawable
+import android.view.View
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
@@ -67,6 +68,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.vectorResource
@@ -91,7 +93,19 @@ import com.android.quickstep.recents.ui.composable.AppChip.IconSizeExpanded
 import com.android.quickstep.recents.ui.viewmodel.TaskData
 import com.android.quickstep.recents.ui.viewmodel.TaskTileUiState
 import com.android.quickstep.recents.ui.viewmodel.TaskViewModel
+import com.android.quickstep.views.IconAppChipView
 import kotlinx.coroutines.flow.map
+
+fun startIconAppChip(
+    composeView: IconAppChipView,
+    viewModel: TaskViewModel,
+    taskId: Int,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+): View =
+    (composeView as ComposeView).apply {
+        setContent { MaterialTheme { TaskAppChip(viewModel, taskId, onClick, onLongClick) } }
+    }
 
 private data class AppChipInfo(val title: String, val icon: Drawable, val expanded: Boolean)
 
