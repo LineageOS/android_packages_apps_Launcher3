@@ -15,7 +15,6 @@
  */
 package com.android.launcher3.secondarydisplay;
 
-import static com.android.launcher3.LauncherModel.useModelRepositoryBinding;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_ALL_APPS_PREDICTION;
 import static com.android.launcher3.util.WallpaperThemeManager.setWallpaperDependentTheme;
 
@@ -229,7 +228,6 @@ public class SecondaryDisplayLauncher extends BaseActivity
 
     @Override
     public void bindIncrementalDownloadProgressUpdated(AppInfo app) {
-        if (LauncherModel.useModelRepositoryBinding()) return;
         mAppsView.getAppsStore().updateProgressBar(app);
     }
 
@@ -285,7 +283,6 @@ public class SecondaryDisplayLauncher extends BaseActivity
     @Override
     public void bindAllApplications(AppInfo[] apps, int flags,
             Map<PackageUserKey, Integer> packageUserKeytoUidMap) {
-        if (LauncherModel.useModelRepositoryBinding()) return;
         Preconditions.assertUIThread();
         AllAppsStore appsStore = mAppsView.getAppsStore();
         appsStore.setApps(apps, flags, packageUserKeytoUidMap);
@@ -312,7 +309,6 @@ public class SecondaryDisplayLauncher extends BaseActivity
 
     @Override
     public StringCache getStringCache() {
-        if (useModelRepositoryBinding()) return super.getStringCache();
         return mStringCache;
     }
 

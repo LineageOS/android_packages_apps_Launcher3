@@ -43,7 +43,6 @@ import com.android.internal.logging.InstanceId;
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.Flags;
-import com.android.launcher3.LauncherModel;
 import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.ItemInfo;
@@ -358,9 +357,6 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
     public AppInfo getApp(ComponentKey key) {
         if (key == null) {
             return null;
-        }
-        if (LauncherModel.useModelRepositoryBinding()) {
-            return mContext.getActivityComponent().getAppsStore().getApp(key);
         }
         AppInfo tempInfo = new AppInfo();
         tempInfo.componentName = key.componentName;
