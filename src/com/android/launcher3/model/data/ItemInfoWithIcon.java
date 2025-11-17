@@ -143,6 +143,11 @@ public abstract class ItemInfoWithIcon extends ItemInfo {
             | FLAG_DISABLED_VERSION_LOWER | FLAG_DISABLED_FILE_SYSTEM_NOT_READY;
 
     /**
+     * Indicates that the package is currently being automated.
+     */
+    public static final int FLAG_AUTOMATED = 1 << 18;
+
+    /**
      * Status associated with the system state of the underlying item. This is calculated every
      * time a new info is created and not persisted on the disk.
      */
