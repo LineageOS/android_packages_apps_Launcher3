@@ -17,39 +17,14 @@
 package com.android.quickstep.compose
 
 import android.content.Context
-import android.os.Trace
 import android.view.View
-import androidx.compose.runtime.Composer
-import androidx.compose.runtime.CompositionTracer
-import androidx.compose.runtime.InternalComposeTracingApi
 import com.android.launcher3.compose.ComposeFacade
 import com.android.launcher3.compose.core.BaseComposeFacade
-import com.android.quickstep.compose.core.QuickstepComposeFeatures
 
-object QuickstepComposeFacade : BaseComposeFacade, QuickstepComposeFeatures {
+object QuickstepComposeFacade : BaseComposeFacade {
     override fun isComposeAvailable() = ComposeFacade.isComposeAvailable()
 
     override fun initComposeView(appContext: Context) = ComposeFacade.initComposeView(appContext)
 
     override fun disposeComposition(view: View) = ComposeFacade.disposeComposition(view)
-
-    @OptIn(InternalComposeTracingApi::class)
-    override fun enableCompositionTracing() {
-        Composer.setTracer(
-            object : CompositionTracer {
-                override fun traceEventStart(key: Int, dirty1: Int, dirty2: Int, info: String) {
-                    Trace.traceBegin(Trace.TRACE_TAG_APP, info)
-                }
-
-                override fun traceEventEnd() = Trace.traceEnd(Trace.TRACE_TAG_APP)
-
-                override fun isTraceInProgress(): Boolean = Trace.isEnabled()
-            }
-        )
-    }
-
-    @OptIn(InternalComposeTracingApi::class)
-    override fun disableCompositionTracing() {
-        Composer.setTracer(null)
-    }
 }
