@@ -90,6 +90,14 @@ class TopTaskTrackerTest {
     }
 
     @Test
+    @DisableFlags(FLAG_ENABLE_SHELL_TOP_TASK_TRACKING)
+    fun getPlaceholderGroupedTaskInfo_shellTopTaskTrackingDisabled_withoutTopTask_withSplitTasks() {
+        val cachedTaskInfo = TopTaskTracker.CachedTaskInfo(null)
+        val result = cachedTaskInfo.getPlaceholderGroupedTaskInfo(intArrayOf(1, 2))
+        assertThat(result).isNull()
+    }
+
+    @Test
     @EnableFlags(FLAG_ENABLE_SHELL_TOP_TASK_TRACKING)
     fun getPlaceholderGroupedTaskInfo_shellTopTaskTrackingEnabled_withVisibleTasks() {
         val taskInfo = createTaskInfo(1, DEFAULT_DISPLAY)

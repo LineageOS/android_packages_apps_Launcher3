@@ -584,10 +584,10 @@ public class TopTaskTracker extends ISplitScreenListener.Stub implements TaskSta
          * enableShellTopTaskTracking() is disabled.
          */
         private TaskInfo[] getSplitPlaceholderTasksInfo(int[] splitTaskIds) {
-            if (mTopTask == null) {
-                return new TaskInfo[0];
-            }
             TaskInfo[] result = new TaskInfo[splitTaskIds.length];
+            if (mTopTask == null) {
+                return result;
+            }
             for (int i = 0; i < splitTaskIds.length; i++) {
                 final int index = i;
                 int taskId = splitTaskIds[i];
