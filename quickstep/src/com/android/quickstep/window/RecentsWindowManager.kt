@@ -29,7 +29,6 @@ import android.content.pm.ActivityInfo.CONFIG_ORIENTATION
 import android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE
 import android.content.res.Configuration
 import android.os.Bundle
-import android.os.IBinder
 import android.util.Log
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.KeyEvent
@@ -46,6 +45,7 @@ import android.view.ViewStub
 import android.window.BackEvent
 import android.window.DesktopExperienceFlags
 import android.window.OnBackInvokedCallback
+import android.window.OnBackInvokedDispatcher
 import android.window.RemoteTransition
 import android.window.SplashScreen
 import android.window.TransitionInfo
@@ -187,7 +187,7 @@ constructor(
     private var homeOverlay: SurfaceControl? = null
     private var dragLayer: RecentsDragLayer<RecentsWindowManager>? = null
     private var windowRootView = RecentsWindowRootView(this)
-    private var windowView: View? = null
+    private var windowView: LauncherRootView? = null
     private var actionsView: OverviewActionsView<*>? = null
     private var scrimView: ScrimView? = null
 
@@ -337,7 +337,8 @@ constructor(
         surfaceControlViewHost?.let { cleanUpSurfaceControlViewHost() }
 
         theme.applyStyle(R.style.OverviewBlurFallbackStyle, true)
-        windowView = layoutInflater.inflate(R.layout.fallback_recents_activity, null)
+        windowView =
+            layoutInflater.inflate(R.layout.fallback_recents_activity, null) as LauncherRootView
         windowView?.let {
             actionsView = it.findViewById(R.id.overview_actions_view)
             val emptyRecentsMessageView =
@@ -376,8 +377,13 @@ constructor(
 
             createSurfaceControlViewHost()
 
-            it.findOnBackInvokedDispatcher()
-                ?.registerSystemOnBackInvokedCallback(onBackInvokedCallback)
+            windowRootView
+                .findOnBackInvokedDispatcher()
+                ?.registerOnBackInvokedCallback(
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+                    onBackInvokedCallback,
+                )
+            updateDisallowBack()
 
             recentsWindowTracker.handleCreate(this)
             onViewCreated()
@@ -396,8 +402,8 @@ constructor(
             onViewDestroyed()
             hideRecentsWindow()
             cleanUpSurfaceControlViewHost()
-            windowView
-                ?.findOnBackInvokedDispatcher()
+            windowRootView
+                .findOnBackInvokedDispatcher()
                 ?.unregisterOnBackInvokedCallback(onBackInvokedCallback)
             callbacks?.removeListener(recentsAnimationListener)
             if (displayId == DEFAULT_DISPLAY) {
@@ -413,7 +419,9 @@ constructor(
 
     private fun createSurfaceControlViewHost() {
         if (surfaceControlViewHost != null) return
-        surfaceControlViewHost = SurfaceControlViewHost(this, display, null as IBinder?)
+        surfaceControlViewHost =
+            SurfaceControlViewHost(this, display, windowRootView.viewRootImpl?.inputToken)
+
         surfaceControlViewHost?.let { scvh ->
             scvh.setView(windowRootView, getWindowLayoutParams())
             scvh.surfacePackage?.let { surfacePackage ->
@@ -510,9 +518,14 @@ constructor(
         )
         dispatchDeviceProfileChanged()
 
-        (windowView as LauncherRootView?)?.dispatchInsets()
+        windowView?.dispatchInsets()
         getStateManager().reapplyState(true /* cancelCurrentAnimation */)
         dragLayer?.recreateControllers()
+        updateDisallowBack()
+    }
+
+    private fun updateDisallowBack() {
+        fallbackWindowInterface.updateDisallowBack()
     }
 
     private fun onDisplayInfoChanged() {
@@ -796,6 +809,7 @@ constructor(
         } else {
             hideRecentsWindow()
         }
+        updateDisallowBack()
     }
 
     override fun getSystemUiController(): SystemUiController? {
@@ -837,18 +851,27 @@ constructor(
 
     override fun onRootViewDispatchKeyEvent(event: KeyEvent?): Boolean {
         TestLogging.recordKeyEvent(SEQUENCE_MAIN, "Key event", event)
-        return if (
-            event?.action != KeyEvent.ACTION_DOWN || event.keyCode != KeyEvent.KEYCODE_ESCAPE
-        ) {
+        val isBackEvent =
+            event?.action == KeyEvent.ACTION_UP && event.keyCode == KeyEvent.KEYCODE_BACK
+        val isEscEvent =
+            event?.action == KeyEvent.ACTION_DOWN &&
+                event.keyCode == KeyEvent.KEYCODE_ESCAPE &&
+                event.hasNoModifiers()
+        return if (!isEscEvent && !isBackEvent) {
             super.onRootViewDispatchKeyEvent(event)
-        } else if (isInState(OVERVIEW_SPLIT_SELECT) || isInState(MODAL_TASK)) {
-            stateManager.goToState(DEFAULT, true)
-            true
-        } else if (isInState(DEFAULT)) {
-            stateManager.state.onBackInvoked(this@RecentsWindowManager)
-            true
+        } else if (isEscEvent) {
+            if (isInState(OVERVIEW_SPLIT_SELECT) || isInState(MODAL_TASK)) {
+                stateManager.goToState(DEFAULT, true)
+                true
+            } else if (isInState(DEFAULT)) {
+                stateManager.state.onBackInvoked(this@RecentsWindowManager)
+                true
+            } else {
+                super.onRootViewDispatchKeyEvent(event)
+            }
         } else {
-            super.onRootViewDispatchKeyEvent(event)
+            onBackInvokedCallback.onBackInvoked()
+            true
         }
     }
 

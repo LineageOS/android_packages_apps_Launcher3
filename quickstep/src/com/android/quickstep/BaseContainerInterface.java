@@ -153,6 +153,12 @@ public abstract class BaseContainerInterface<STATE_TYPE extends BaseState<STATE_
     @Nullable
     public abstract TaskbarInteractor getTaskbarInteractor();
 
+    public boolean shouldHandleBackGesture() {
+        return false;
+    }
+
+    public void updateDisallowBack() {}
+
     public interface AnimationFactory<STATE_TYPE extends BaseState<STATE_TYPE>,
             CONTAINER_TYPE extends RecentsViewContainer & StatefulContainer<STATE_TYPE>> {
 

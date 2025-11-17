@@ -1737,4 +1737,15 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     public RecentsComponent getRecentsComponent() {
         return mRecentsComponent;
     }
+
+    @Override
+    protected boolean shouldDisableBackGesture() {
+        BaseContainerInterface<?, ?> defaultDisplayContainerInterface =
+            OverviewComponentObserver.INSTANCE.get(this)
+                    .getContainerInterface(DEFAULT_DISPLAY);
+
+        return super.shouldDisableBackGesture()
+                && (defaultDisplayContainerInterface == null
+                || !defaultDisplayContainerInterface.shouldHandleBackGesture());
+    }
 }
