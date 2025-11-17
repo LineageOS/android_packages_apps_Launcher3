@@ -70,7 +70,7 @@ open class PopupContainer<T>(
     override fun closeComplete() {
         super.closeComplete()
         mActivityContext?.dragController?.removeDragListener(this)
-        val openPopup = getOpen(mActivityContext)
+        val openPopup = getOpen<T>(mActivityContext)
         if (openPopup == null || openPopup.originalView !== iconViewController) {
             iconViewController?.getFloatingViewTextAlpha()?.value = 1f
             iconViewController?.setForceHideDot(false)
@@ -191,15 +191,20 @@ open class PopupContainer<T>(
     companion object {
         /** Returns a PopupContainer which is already open or null */
         @JvmStatic
-        fun getOpen(context: ActivityContext): PopupContainer<*>? =
-            getOpenView(context, TYPE_ACTION_POPUP)
+        fun <T> getOpen(context: T): PopupContainer<*>? where T : Context?, T : ActivityContext? {
+            return getOpenView(context, TYPE_ACTION_POPUP)
+        }
 
         /** Dismisses the popup if it is no longer valid */
         @JvmStatic
-        fun dismissInvalidPopup(activity: ActivityContext) {
+        fun <T> dismissInvalidPopup(activity: T) where T : Context?, T : ActivityContext? {
             val popup = getOpen(activity)
-            val view = popup?.originalView ?: return
-            if (!view.isAttachedToWindow || !ShortcutUtil.supportsShortcuts(popup.itemInfo)) {
+            val originalView = popup?.originalView
+            if (
+                originalView != null &&
+                    (!originalView.isAttachedToWindow ||
+                        !ShortcutUtil.supportsShortcuts(popup.itemInfo))
+            ) {
                 popup.handleClose(/* animate */ true)
             }
         }

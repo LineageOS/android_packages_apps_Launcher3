@@ -18,7 +18,6 @@ package com.android.launcher3.views;
 import static android.window.SplashScreen.SPLASH_SCREEN_STYLE_SOLID_COLOR;
 
 import static com.android.launcher3.BuildConfig.WIDGETS_ENABLED;
-import static com.android.launcher3.LauncherModel.useModelRepositoryBinding;
 import static com.android.launcher3.LauncherSettings.Animation.DEFAULT_NO_ICON;
 import static com.android.launcher3.Utilities.allowBGLaunch;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_APP_LAUNCH_PENDING_INTENT;
@@ -77,7 +76,6 @@ import com.android.launcher3.model.ModelWriter;
 import com.android.launcher3.model.StringCache;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
-import com.android.launcher3.model.repository.StringCacheRepository;
 import com.android.launcher3.statehandlers.BaseDepthController;
 import com.android.launcher3.util.ActivityOptionsWrapper;
 import com.android.launcher3.util.ApplicationInfoWrapper;
@@ -353,11 +351,9 @@ public interface ActivityContext extends SavedStateRegistryOwner {
     default void startConfigActivity(@NonNull BaseActivity activity, int widgetId,
             int requestCode) {}
 
+
     @Nullable
     default StringCache getStringCache() {
-        if (useModelRepositoryBinding()) {
-            return StringCacheRepository.getStringCache(asContext()).getValue();
-        }
         return null;
     }
 
