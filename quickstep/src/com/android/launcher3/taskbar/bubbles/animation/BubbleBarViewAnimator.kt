@@ -60,6 +60,7 @@ constructor(
         }
 
     private var interceptedHandleAnimator = false
+    private var bubbleBarTranslationYAnimator: ObjectAnimator? = null
 
     private companion object {
         /** The time to show the flyout. */
@@ -485,14 +486,21 @@ constructor(
         }
 
         // animate the bubble bar up and start the spring back down animation when it ends.
-        ObjectAnimator.ofFloat(bubbleBarView, View.TRANSLATION_Y, ty - bubbleBarBounceDistanceInPx)
-            .withDuration(BUBBLE_BAR_BOUNCE_ANIMATION_DURATION_MS)
-            .withEndAction {
-                val animatingBubble = animatingBubble ?: return@withEndAction
-                springBackAnimation.start()
-                if (animatingBubble.expand) expandBubbleBar()
-            }
-            .start()
+        bubbleBarTranslationYAnimator =
+            ObjectAnimator.ofFloat(
+                    bubbleBarView,
+                    View.TRANSLATION_Y,
+                    ty - bubbleBarBounceDistanceInPx,
+                )
+                .withDuration(BUBBLE_BAR_BOUNCE_ANIMATION_DURATION_MS)
+                .withEndAction {
+                    val animatingBubble = animatingBubble ?: return@withEndAction
+                    springBackAnimation.start()
+                    if (animatingBubble.expand) expandBubbleBar()
+                    bubbleBarTranslationYAnimator = null
+                }
+                .withOnCancelAction { bubbleBarTranslationYAnimator = null }
+                .apply { start() }
     }
 
     private fun setupAndShowFlyout() {
@@ -549,16 +557,23 @@ constructor(
     /** Interrupts the animation due to the IME becoming visible. */
     fun interruptForIme() {
         cancelFlyout()
-        val hideAnimation = animatingBubble?.hideAnimation ?: return
+        val animatingBubble = this.animatingBubble ?: return
+        val hideAnimation = animatingBubble.hideAnimation
+        val shouldExpand = animatingBubble.expand
         scheduler.cancel(hideAnimation)
         clearAnimatingBubble()
         bubbleStashController.getStashedHandlePhysicsAnimator().cancelIfRunning()
+        bubbleBarTranslationYAnimator.cancelIfRunning()
         resetBubbleBarPropertiesOnInterrupt()
-        // stash the bubble bar since the IME is now visible
-        bubbleStashController.onNewBubbleAnimationInterrupted(
-            /* isStashed= */ true,
-            bubbleBarView.translationY,
-        )
+        if (shouldExpand) {
+            bubbleBarView.translationY = bubbleStashController.bubbleBarTranslationY
+            expandBubbleBar()
+        } else {
+            bubbleStashController.onNewBubbleAnimationInterrupted(
+                /* isStashed= */ true,
+                bubbleBarView.translationY,
+            )
+        }
     }
 
     fun expandedWhileAnimating() {
@@ -732,6 +747,10 @@ constructor(
         if (this?.isRunning() == true) cancel()
     }
 
+    private fun ObjectAnimator?.cancelIfRunning() {
+        if (this?.isRunning == true) cancel()
+    }
+
     private fun ObjectAnimator.withDuration(duration: Long): ObjectAnimator {
         setDuration(duration)
         return this
@@ -742,6 +761,17 @@ constructor(
             object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
                     endAction()
+                }
+            }
+        )
+        return this
+    }
+
+    private fun ObjectAnimator.withOnCancelAction(cancelAction: () -> Unit): ObjectAnimator {
+        addListener(
+            object : AnimatorListenerAdapter() {
+                override fun onAnimationCancel(animation: Animator) {
+                    cancelAction()
                 }
             }
         )
