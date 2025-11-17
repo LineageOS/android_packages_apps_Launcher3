@@ -151,7 +151,6 @@ import com.android.mechanics.spec.InputDirection;
 import com.android.mechanics.spec.MotionSpec;
 import com.android.mechanics.view.DistanceGestureContext;
 import com.android.mechanics.view.ViewMotionValue;
-import com.android.mechanics.view.ViewMotionValueListener;
 import com.android.quickstep.GestureState.GestureEndTarget;
 import com.android.quickstep.RemoteTargetGluer.RemoteTargetHandle;
 import com.android.quickstep.util.ActiveGestureErrorDetector;
@@ -487,12 +486,6 @@ public abstract class AbsSwipeUpHandler<
                     /* label= */ null,
                     /* stableThreshold= */ MotionValue.StableThresholdEffect);
             mMagneticEffectSpec = mMagneticEffectDisplacement.getSpec();
-            mMagneticEffectDisplacement.addUpdateCallback(new ViewMotionValueListener() {
-                @Override
-                public void onMotionValueUpdated(@NonNull ViewMotionValue motionValue) {
-                    applyScrollAndTransform();
-                }
-            });
         } else {
             mDistanceGestureContext = null;
             mMagneticEffectDisplacement = null;
