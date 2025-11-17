@@ -102,6 +102,10 @@ class TransientBubbleStashController(
             field = value
         }
 
+    /** Determines whether stashing is allowed. */
+    private val allowStashing: Boolean
+        get() = launcherState == BubbleLauncherState.IN_APP
+
     override var launcherState: BubbleLauncherState = BubbleLauncherState.IN_APP
         set(state) {
             if (field == state) return
@@ -233,6 +237,7 @@ class TransientBubbleStashController(
     }
 
     override fun stashBubbleBarImmediate() {
+        if (!allowStashing) return
         stashBubbleBarImmediateVisually()
         onIsStashedChanged()
     }
@@ -579,7 +584,7 @@ class TransientBubbleStashController(
             cancelAnimation()
             return
         }
-        val isStashed = stash && !isBubblesShowingOnHome && !isBubblesShowingOnOverview
+        val isStashed = stash && allowStashing
         if (this.isStashed != isStashed) {
             this.isStashed = isStashed
 
