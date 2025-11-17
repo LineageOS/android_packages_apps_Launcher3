@@ -15,6 +15,7 @@
  */
 package com.android.launcher3.allapps;
 
+import static com.android.launcher3.LauncherModel.useModelRepositoryBinding;
 import static com.android.launcher3.model.data.AppInfo.COMPONENT_KEY_COMPARATOR;
 import static com.android.launcher3.model.data.AppInfo.EMPTY_ARRAY;
 
@@ -31,10 +32,16 @@ import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.dagger.ActivityContextSingleton;
 import com.android.launcher3.icons.FastBitmapDrawable;
 import com.android.launcher3.model.data.AppInfo;
+import com.android.launcher3.model.data.AppsListData;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.ItemInfoWithIcon;
+import com.android.launcher3.model.repository.AppsListRepository;
+import com.android.launcher3.popup.PopupContainer;
 import com.android.launcher3.util.ComponentKey;
 import com.android.launcher3.util.PackageUserKey;
+import com.android.launcher3.views.ActivityContext;
+
+import kotlin.Unit;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -69,18 +76,33 @@ public class AllAppsStore {
 
     private final List<OnUpdateListener> mUpdateListeners = new CopyOnWriteArrayList<>();
     private final ArrayList<ViewGroup> mIconContainers = new ArrayList<>();
+    private final ActivityContext mActivityContext;
+
     private Map<PackageUserKey, Integer> mPackageUserKeytoUidMap = Collections.emptyMap();
     private int mModelFlags;
     private int mDeferUpdatesFlags = 0;
     private boolean mUpdatePending = false;
-
 
     public AppInfo[] getApps() {
         return mApps;
     }
 
     @Inject
-    AllAppsStore() { }
+    AllAppsStore(AppsListRepository repo, ActivityContext context) {
+        mActivityContext = context;
+        if (useModelRepositoryBinding()) {
+            context.closeOnDestroy(repo.getAppsListStateRef()
+                    .forEach(context.getUiExecutor(), this::setAppsListData));
+            context.closeOnDestroy(repo.getIncrementalUpdates()
+                    .forEach(context.getUiExecutor(), this::updateProgressBar));
+        }
+    }
+
+    private Unit setAppsListData(AppsListData data) {
+        setApps(data.getApps(), data.getFlags(), data.getPackageUserKeyToUidMap());
+        PopupContainer.dismissInvalidPopup(mActivityContext);
+        return Unit.INSTANCE;
+    }
 
     /**
      * Sets the current set of apps and sets mapping for {@link PackageUserKey} to Uid for
@@ -211,12 +233,13 @@ public class AllAppsStore {
      *
      * If this app is fully downloaded, the app icon will be reapplied.
      */
-    public void updateProgressBar(AppInfo app) {
+    public Unit updateProgressBar(AppInfo app) {
         updateAllIcons((child) -> {
             if (child.getTag() == app) {
                 child.applyFromApplicationInfo(app);
             }
         });
+        return Unit.INSTANCE;
     }
 
     private void updateAllIcons(Consumer<BubbleTextView> action) {

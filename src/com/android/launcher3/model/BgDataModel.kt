@@ -420,6 +420,7 @@ constructor(
 
         fun bindWorkspaceComponentsRemoved(matcher: Predicate<ItemInfo?>) {}
 
+        // Migrated to repository
         /** Binds updated incremental download progress */
         fun bindIncrementalDownloadProgressUpdated(app: AppInfo) {}
 
@@ -429,12 +430,14 @@ constructor(
         /** Binds extra item provided any external source */
         fun bindExtraContainerItems(item: FixedContainerItems) {}
 
+        // Migrated to repository
         fun bindAllApplications(
             apps: Array<AppInfo>,
             flags: Int,
             packageUserKeytoUidMap: Map<PackageUserKey, Int>,
         ) {}
 
+        // Migrated to repository
         /** Binds the cache of string resources */
         fun bindStringCache(cache: StringCache) {}
     }
