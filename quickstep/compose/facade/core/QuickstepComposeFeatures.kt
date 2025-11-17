@@ -17,12 +17,7 @@
 package com.android.quickstep.compose.core
 
 import android.view.View
-import androidx.compose.ui.geometry.Rect
-import com.android.quickstep.cuebar.ui.utils.AmbientCueAnimationState
-import com.android.quickstep.cuebar.ui.viewmodel.AmbientCueViewModel
 import com.android.quickstep.recents.ui.viewmodel.TaskViewModel
-import com.android.quickstep.task.apptimer.TaskAppTimerUiState
-import com.android.quickstep.task.apptimer.ViewModel
 import com.android.quickstep.views.IconAppChipView
 
 interface QuickstepComposeFeatures {
@@ -33,8 +28,6 @@ interface QuickstepComposeFeatures {
         onClick: () -> Unit = {},
         onLongClick: () -> Unit = {},
     ): View
-
-    fun startTaskAppTimerToast(view: View, viewModel: ViewModel<TaskAppTimerUiState>): View
 
     fun enableCompositionTracing()
 
