@@ -411,5 +411,11 @@ constructor(
 
     companion object {
         const val TAG = "Launcher.Model"
+
+        @JvmStatic
+        fun useModelRepositoryBinding() =
+            Flags.bindModelUsingRepository() &&
+                Flags.modelRepository() &&
+                Flags.simplifiedLauncherModelBinding()
     }
 }
