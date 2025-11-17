@@ -133,8 +133,9 @@ public class FallbackSwipeHandler extends
 
     private void updateHomeActivityTransformDuringSwipeUp(SurfaceProperties builder,
             RemoteAnimationTarget app, TransformParams params) {
-        setHomeScaleAndAlpha(builder, app, mCurrentShift.value,
-                Utilities.boundToRange(1 - mCurrentShift.value, 0, 1));
+        float currentShift = getCurrentShiftValue();
+        setHomeScaleAndAlpha(builder, app, currentShift,
+                Utilities.boundToRange(1 - currentShift, 0, 1));
     }
 
     private void setHomeScaleAndAlpha(SurfaceProperties builder,
@@ -270,9 +271,10 @@ public class FallbackSwipeHandler extends
             mDuration = duration;
 
             if (mRunningOverHome) {
+                float currentShift = getCurrentShiftValue();
                 mHomeAlpha = new AnimatedFloat();
-                mHomeAlpha.value = Utilities.boundToRange(1 - mCurrentShift.value, 0, 1);
-                mVerticalShiftForScale.value = mCurrentShift.value;
+                mHomeAlpha.value = Utilities.boundToRange(1 - currentShift, 0, 1);
+                mVerticalShiftForScale.value = currentShift;
                 runActionOnRemoteHandles(remoteTargetHandle ->
                         remoteTargetHandle.getTransformParams().setHomeBuilderProxy(
                                 FallbackHomeAnimationFactory.this
