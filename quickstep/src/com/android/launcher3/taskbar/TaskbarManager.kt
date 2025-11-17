@@ -86,7 +86,7 @@ interface TaskbarManager : DisplayDecorationListener {
 
     fun getTaskbarInteractor(displayId: Int): TaskbarInteractor?
 
-    fun getTaskbarForDisplay(displayId: Int): TaskbarActivityContext?
+    fun getTaskbarForDisplay(displayId: Int): TaskbarApiProxy?
 
     fun createAllAppsPendingIntent(): PendingIntent
 

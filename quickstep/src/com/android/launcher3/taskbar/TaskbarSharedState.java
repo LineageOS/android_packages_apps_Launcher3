@@ -79,6 +79,8 @@ public class TaskbarSharedState {
 
     public boolean setupUIVisible = false;
 
+    public boolean cueBarVisible = false;
+
     public boolean wallpaperVisible = false;
 
     public boolean allAppsVisible = false;

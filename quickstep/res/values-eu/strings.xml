@@ -124,7 +124,7 @@
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"Animazioa: iradokitako aplikazioak gailuan atzitzea"</string>
     <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"Animazioa: pantailan elementu bat bilatzea, ekintza-tekla sakatuta edukita eta elementua daukan eremua haututa"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"Zereginen barra erabiltzeko argibideak"</string>
-    <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Bi aplikazio batera erabiltzeko, arrastatu bat albo batera"</string>
+    <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Aldi berean 2 aplik. erabiltzeko, arrastatu bat albo batera"</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"Arrastatu beheko izkinak gainerakorra izan dadin"</string>
     <string name="taskbar_edu_stashing" msgid="911857479758694381">"Pasatu hatza gora mantso, zereginen barra ikusteko"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Jaso aplikazioen iradokizunak erabileran oinarrituta"</string>

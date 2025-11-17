@@ -89,7 +89,6 @@ import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 import android.window.DesktopExperienceFlags;
-import android.window.DesktopModeFlags;
 import android.window.DesktopModeFlags.DesktopModeFlag;
 import android.window.RemoteTransition;
 
@@ -117,6 +116,7 @@ import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.dagger.LauncherComponentProvider;
 import com.android.launcher3.desktop.DesktopAppLaunchTransition;
 import com.android.launcher3.desktop.DesktopAppLaunchTransition.AppLaunchType;
+import com.android.launcher3.deviceprofile.TaskbarDeviceProfileFactory;
 import com.android.launcher3.deviceprofile.TaskbarProfile;
 import com.android.launcher3.folder.Folder;
 import com.android.launcher3.folder.FolderIcon;
@@ -450,6 +450,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                 bubbleControllersOptional,
                 new TaskbarDesktopModeController(this,
                         DesktopVisibilityController.INSTANCE.get(this)),
+                new CueBarController(this),
                 new NudgeController(this),
                 new NudgeViewController(this, nudgeView),
                 new TaskbarHandoffController(this),
@@ -549,17 +550,11 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
      * the icon size
      */
     private void applyDeviceProfile(DeviceProfile originDeviceProfile) {
-        //TODO(b/430382569) Keep DeviceProfile immutable.
-        Consumer<DeviceProfile> overrideProvider = deviceProfile -> {
-            // Taskbar should match the number of icons of hotseat
-            deviceProfile.numShownHotseatIcons = originDeviceProfile.numShownHotseatIcons;
-            // Same QSB width to have a smooth animation
-            deviceProfile.hotseatQsbWidth = originDeviceProfile.hotseatQsbWidth;
-
-            deviceProfile.mWorkspaceProfile = deviceProfile
-                    .mWorkspaceProfile
-                    .changeIconSize(deviceProfile.getTaskbarProfile().getIconSize());
-        };
+        Consumer<DeviceProfile> overrideProvider =
+                deviceProfile -> TaskbarDeviceProfileFactory.INSTANCE
+                        .createDeviceProfile(
+                                deviceProfile, this
+                        );
         mDeviceProfile = originDeviceProfile.toBuilder()
                 .withDimensionsOverride(overrideProvider).build();
         if (refactorTaskbarUiState()) {
@@ -979,10 +974,6 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     @Override
     public ModelWriter getModelWriter() {
         return mControllers.taskbarViewController.getModelWriter();
-    }
-
-    public NavbarButtonsViewController getNavBarButtonsViewController() {
-        return mControllers.navbarButtonsViewController;
     }
 
     @Nullable
@@ -1760,9 +1751,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                 mControllers.taskbarStashController.updateAndAnimateTransientTaskbar(true);
             }
         } else if (tag instanceof TaskItemInfo info) {
-            if (DesktopExperienceFlags.ENABLE_TASKBAR_RUNNING_TASKS_IN_SPLITSCREEN_SELECT_BUGFIX
-                        .isTrue()
-                    && recents != null && recents.isSplitSelectionActive()
+            if (recents != null && recents.isSplitSelectionActive()
                     && (getControllers().taskbarRecentAppsController.getDesktopTaskWithId(
                                 info.getTaskId())) != null) {
                 taskbarUIController.triggerSecondAppForSplit(info, info.intent, view, EMPTY_FILTER);
@@ -1916,8 +1905,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             TaskbarUIController taskbarUIController = mControllers.uiController;
             RecentsViewInteractor recents = taskbarUIController.getRecentsViewInteractor();
 
-            if (DesktopExperienceFlags.ENABLE_TASKBAR_RUNNING_TASKS_IN_SPLITSCREEN_SELECT_BUGFIX
-                    .isTrue() && recents != null && recents.isSplitSelectionActive()) {
+            if (recents != null && recents.isSplitSelectionActive()) {
                 return Pair.create(TASKBAR_UI_THREAD,
                         () -> taskbarUIController.moveRunningTaskToSplitSelection(
                                 singleTask.getTask(), null, startingView));
@@ -2151,18 +2139,14 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         }
         // There is no task associated with this launch - launch a new task through an intent
         ActivityOptionsWrapper opts = getActivityLaunchDesktopOptions();
-        if (DesktopModeFlags.ENABLE_START_LAUNCH_TRANSITION_FROM_TASKBAR_BUGFIX.isTrue()) {
-            PendingIntent pendingIntent = PendingIntent.getActivity(
-                    this,
-                    /* requestCode= */ 0,
-                    intent,
-                    PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_ONE_SHOT,
-                    /* options= */ null);
-            mSysUiProxy.startLaunchIntentTransition(pendingIntent, opts.options.toBundle(),
-                    displayId);
-        } else {
-            startActivity(intent, opts.options.toBundle());
-        }
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                this,
+                /* requestCode= */ 0,
+                intent,
+                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_ONE_SHOT,
+                /* options= */ null);
+        mSysUiProxy.startLaunchIntentTransition(pendingIntent, opts.options.toBundle(),
+                displayId);
     }
 
     /** Expands a folder icon when it is clicked */
@@ -2523,6 +2507,10 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
 
     boolean isIconAlignedWithHotseat() {
         return mControllers.uiController.isIconAlignedWithHotseat();
+    }
+
+    public int getNumbersOfTaskbarIconsOverflowing() {
+        return mControllers.taskbarViewController.getNumbersOfTaskbarIconsOverflowing();
     }
 
     // TODO(b/395061396): Remove `otherwise` when overview in widow is enabled.

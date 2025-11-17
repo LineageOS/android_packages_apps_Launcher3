@@ -36,12 +36,15 @@ import com.android.window.flags.Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_FRONTEND
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import java.util.function.Supplier
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
 /** Test Desktop windowing in Overview. */
-@AllowedDevices(allowed = [DeviceProduct.CF_TABLET, DeviceProduct.TANGORPRO, DeviceProduct.CF_DESKTOP])
+@AllowedDevices(
+    allowed = [DeviceProduct.CF_TABLET, DeviceProduct.TANGORPRO, DeviceProduct.CF_DESKTOP]
+)
 @IgnoreLimit(ignoreLimit = BuildConfig.IS_STUDIO_BUILD)
 class TaplTestsOverviewDesktop : AbstractQuickStepTest() {
     @Before
@@ -207,7 +210,14 @@ class TaplTestsOverviewDesktop : AbstractQuickStepTest() {
         for (i in 0 until deskCount) {
             val task = currentOverview.currentTask
             assertTrue("Current task should be a desktop", task.isDesktop)
+            // Retrieving deskId before associated UiObject for task becomes stale.
+            val deskId = task.deskId
             val launchedDesk = task.open()
+            assertEquals(
+                "Active desk ID doesn't match opened task's desk ID",
+                deskId,
+                mLauncher.activeDeskId,
+            )
             // Go back to overview and scroll the distance of one task for the next iteration
             if (i < deskCount - 1) {
                 currentOverview = launchedDesk.switchToOverview().scrollForwardByOneTask()

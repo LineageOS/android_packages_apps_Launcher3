@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.quickstep.recents.di
+package com.android.launcher3.taskbar.customization.overflow
 
-import javax.inject.Qualifier
+import com.android.launcher3.taskbar.TaskbarOverflowItem
 
-/** Qualifier for the current display id. */
-@MustBeDocumented @Retention(AnnotationRetention.RUNTIME) @Qualifier annotation class DisplayId
+/** Wrapper for taskbar item to [TaskbarOverflowItem]. */
+fun interface TaskbarOverflowIconWrapper<T> {
+    fun getTaskbarOverflowItemWrapper(item: T): TaskbarOverflowItem
+}

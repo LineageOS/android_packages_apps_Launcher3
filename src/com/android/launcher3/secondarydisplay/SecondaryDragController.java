@@ -30,10 +30,13 @@ import com.android.launcher3.dragndrop.DragOptions;
 /**
  * Drag controller for Secondary Launcher activity
  */
-public class SecondaryDragController extends DragController<SecondaryDisplayLauncher> {
+public class SecondaryDragController extends DragController {
+
+    private final SecondaryDisplayLauncher mActivity;
 
     public SecondaryDragController(SecondaryDisplayLauncher secondaryLauncher) {
         super(secondaryLauncher);
+        mActivity = secondaryLauncher;
     }
 
     @Override

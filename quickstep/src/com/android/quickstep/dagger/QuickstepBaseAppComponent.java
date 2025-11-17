@@ -23,6 +23,7 @@ import com.android.internal.policy.DesktopModeCompatPolicy;
 import com.android.launcher3.LifecycleTracker;
 import com.android.launcher3.dagger.LauncherAppComponent;
 import com.android.launcher3.dagger.LauncherBaseAppComponent;
+import com.android.launcher3.dagger.PerDisplayComponent;
 import com.android.launcher3.model.WellbeingModel;
 import com.android.launcher3.statehandlers.DesktopVisibilityController;
 import com.android.launcher3.taskbar.TaskbarModelCallbacksFactory;
@@ -31,9 +32,7 @@ import com.android.launcher3.taskbar.TaskbarViewCallbacksFactory;
 import com.android.launcher3.taskbar.bubbles.BubbleActivityStarter;
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator;
 import com.android.quickstep.FallbackActivityInterface;
-import com.android.quickstep.FallbackWindowInterface;
 import com.android.quickstep.LauncherActivityInterface;
-import com.android.quickstep.OverviewCommandHelper;
 import com.android.quickstep.OverviewComponentObserver;
 import com.android.quickstep.RecentsAnimationDeviceState;
 import com.android.quickstep.RecentsModel;
@@ -44,11 +43,9 @@ import com.android.quickstep.SystemUiProxy;
 import com.android.quickstep.TaskAnimationManager;
 import com.android.quickstep.TaskOverlayFactory;
 import com.android.quickstep.TopTaskTracker;
-import com.android.quickstep.actioncorner.ActionCornerHandler;
 import com.android.quickstep.input.QuickstepKeyGestureEventsManager;
 import com.android.quickstep.inputconsumers.NavHandleLongPressHandler;
 import com.android.quickstep.logging.SettingsChangeLogger;
-import com.android.quickstep.recents.di.RecentsComponent;
 import com.android.quickstep.util.AsyncClockEventDelegate;
 import com.android.quickstep.util.ContextualSearchHapticManager;
 import com.android.quickstep.util.ContextualSearchStateManager;
@@ -85,6 +82,8 @@ public interface QuickstepBaseAppComponent extends LauncherBaseAppComponent {
 
     ContextualSearchStateManager getContextualSearchStateManager();
 
+    PerDisplayRepository<PerDisplayComponent> getPerDisplayComponentRepository();
+
     PerDisplayRepository<RecentsAnimationDeviceState> getRecentsAnimationDeviceStateRepository();
 
     PerDisplayRepository<TaskAnimationManager> getTaskAnimationManagerRepository();
@@ -94,8 +93,6 @@ public interface QuickstepBaseAppComponent extends LauncherBaseAppComponent {
     PerDisplayRepository<RecentsWindowManager> getRecentsWindowManagerRepository();
 
     PerDisplayRepository<RecentsWindowTracker> getRecentsWindowTrackerRepository();
-
-    PerDisplayRepository<FallbackWindowInterface> getFallbackWindowInterfaceRepository();
 
     RecentsModel getRecentsModel();
 
@@ -107,10 +104,6 @@ public interface QuickstepBaseAppComponent extends LauncherBaseAppComponent {
 
     DisplayRepository getDisplayRepository();
     NavHandleLongPressHandler getNavHandleLongPressHandler();
-
-    ActionCornerHandler.Factory getActionCornerHandlerFactory();
-
-    OverviewCommandHelper.Factory getOverviewCommandHelperFactory();
 
     DisplaysWithDecorationsRepositoryCompat getDisplaysWithDecorationsRepositoryCompat();
 
@@ -130,9 +123,12 @@ public interface QuickstepBaseAppComponent extends LauncherBaseAppComponent {
 
     DesktopModeCompatPolicy getDesktopModeCompatPolicy();
 
-    RecentsComponent.Factory getRecentsComponentFactory();
-
     FallbackActivityInterface getFallbackActivityInterface();
 
     LauncherActivityInterface getLauncherActivityInterface();
+
+    PerDisplayComponent.Factory getPerDisplayComponentFactory();
+
+    /** Builder for creating a new SysUIConnectionComponent */
+    SysUIConnectionComponent.Builder getSysUIConnectionComponentBuilder();
 }

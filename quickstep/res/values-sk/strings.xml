@@ -97,7 +97,7 @@
     <string name="allset_title_expressive_fallback" msgid="2829102990606405239">"Vaše zariadenie je \npripravené."</string>
     <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"Všetko máte pripravené"</string>
     <string name="allset_subtitle_expressive" msgid="419688197551192358">"Užite si svoj nový <xliff:g id="DEVICE">%1$s</xliff:g>!"</string>
-    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"Ak chcete začať so zariadením <xliff:g id="DEVICE">%1$s</xliff:g>, potiahnite nahor"</string>
+    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"Ak chcete začať používať svoj <xliff:g id="DEVICE">%1$s</xliff:g>, potiahnite nahor"</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> začnite klepnutím"</string>
     <string name="allset_navigation_settings_expressive" msgid="3745595273748356"><annotation id="link">"Vybrať spôsob navigácie"</annotation></string>
     <string name="allset_hint_expressive" msgid="756856423510976261">"Potiahnite nahor"</string>
@@ -127,7 +127,7 @@
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"Ak chcete používať dve aplikácie naraz, presuňte aplikáciu nabok"</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"Ak má byť plávajúca, presuňte ju do niektorého dolnéhu rohu"</string>
     <string name="taskbar_edu_stashing" msgid="911857479758694381">"Panel aplikácií zobrazíte pomalým potiahnutím nahor"</string>
-    <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Získavajte návrhy aplikácií na základe svojich zvykov"</string>
+    <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Dostávajte návrhy aplikácií na základe svojich zvykov"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Dlhým stlačením rozdeľovača panel aplikácií pripnete"</string>
     <string name="taskbar_edu_features" msgid="3320337287472848162">"Panel aplikácií vám ponúka ďalšie možnosti"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"Vždy zobrazovať panel aplikácií"</string>

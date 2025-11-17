@@ -98,13 +98,14 @@ import java.util.function.Predicate;
 /**
  * Handles long click on Taskbar items to start a system drag and drop operation.
  */
-public class TaskbarDragController extends DragController<BaseTaskbarContext> implements
+public class TaskbarDragController extends DragController implements
         TaskbarControllers.LoggableTaskbarController {
     private static final String TAG = "TaskbarDragController";
 
     private static final boolean DEBUG_DRAG_SHADOW_SURFACE = false;
     private static final int ANIM_DURATION_RETURN_ICON_TO_TASKBAR = 300;
 
+    private final BaseTaskbarContext mActivity;
     private final int mDragIconSize;
     private final int[] mTempXY = new int[2];
 
@@ -133,6 +134,7 @@ public class TaskbarDragController extends DragController<BaseTaskbarContext> im
 
     public TaskbarDragController(BaseTaskbarContext activity) {
         super(activity);
+        mActivity = activity;
         Resources resources = mActivity.getResources();
         mDragIconSize = resources.getDimensionPixelSize(R.dimen.taskbar_icon_drag_icon_size);
     }
@@ -308,7 +310,7 @@ public class TaskbarDragController extends DragController<BaseTaskbarContext> im
         mRegistrationY = mMotionDown.y - dragLayerY;
 
         float scalePx = mDragIconSize - dragRegion.width();
-        return new DragView<>(
+        return new DragView(
                 mActivity,
                 drawable,
                 mRegistrationX,

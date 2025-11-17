@@ -28,6 +28,7 @@ import com.android.launcher3.concurrent.ExecutorsModule
 import com.android.launcher3.dagger.ApiWrapperModule
 import com.android.launcher3.dagger.AppModule
 import com.android.launcher3.dagger.ApplicationContext
+import com.android.launcher3.dagger.AutomationModule
 import com.android.launcher3.dagger.DesktopModule
 import com.android.launcher3.dagger.HomeScreenFilesModule
 import com.android.launcher3.dagger.LauncherAppComponent
@@ -86,7 +87,7 @@ constructor(
         val prefs = ProxyPrefs(this, getSharedPreferences(mPrefName, MODE_PRIVATE))
         prefs.putOrRemove(LauncherPrefs.GRID_NAME, gridName)
         prefs.put(LauncherPrefs.FIXED_LANDSCAPE_MODE, false)
-        if (com.android.launcher3.Flags.workspaceHiddenLabels()) {
+        if (com.android.systemui.shared.Flags.workspaceItemsLabelHidden()) {
             prefs.put(LauncherPrefs.WORKSPACE_ITEMS_LABEL_HIDDEN, workspaceHideItemsLabel)
         }
 
@@ -200,6 +201,7 @@ constructor(
                 DesktopModule::class,
                 SettingsModule::class,
                 SystemDragModule::class,
+                AutomationModule::class,
                 TaskOverlayModule::class,
             ]
     )

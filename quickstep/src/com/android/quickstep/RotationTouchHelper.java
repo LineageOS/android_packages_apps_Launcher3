@@ -37,6 +37,7 @@ import android.view.OrientationEventListener;
 
 import com.android.app.displaylib.PerDisplayRepository;
 import com.android.launcher3.concurrent.annotations.LightweightBackground;
+import com.android.launcher3.dagger.PerDisplaySingleton;
 import com.android.launcher3.dagger.WindowContext;
 import com.android.launcher3.testing.shared.TestProtocol;
 import com.android.launcher3.util.DaggerSingletonObject;
@@ -52,16 +53,15 @@ import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 
-import dagger.assisted.Assisted;
-import dagger.assisted.AssistedFactory;
-import dagger.assisted.AssistedInject;
-
 import java.io.PrintWriter;
 import java.util.concurrent.Executor;
+
+import javax.inject.Inject;
 
 /**
  * Helper class for transforming touch events
  */
+@PerDisplaySingleton
 public class RotationTouchHelper {
 
     public static final DaggerSingletonObject<PerDisplayRepository<RotationTouchHelper>>
@@ -142,9 +142,9 @@ public class RotationTouchHelper {
     private boolean mTaskListFrozen;
     private final Context mWindowContext;
 
-    @AssistedInject
+    @Inject
     RotationTouchHelper(
-            @Assisted Context windowContext,
+            @WindowContext Context windowContext,
             DisplayController displayController,
             SystemUiProxy systemUiProxy,
             DaggerSingletonTracker lifeCycle,
@@ -417,11 +417,5 @@ public class RotationTouchHelper {
 
     private boolean hasGestures(NavigationMode mode) {
         return mode.hasGestures || (mode == THREE_BUTTONS && Flags.threeButtonCornerSwipe());
-    }
-
-    @AssistedFactory
-    public interface Factory {
-        /** Creates a new instance of [RotationTouchHelper] for a given [context]. */
-        RotationTouchHelper create(@WindowContext Context context);
     }
 }

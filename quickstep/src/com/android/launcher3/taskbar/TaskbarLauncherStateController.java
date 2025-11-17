@@ -395,8 +395,15 @@ public class TaskbarLauncherStateController {
         animatorSet.play(applyState(duration, false));
 
         if (mTaskBarRecentsAnimationListener != null) {
+            // When enableTaskbarUiThread() is turned on, swipe up to exit app will call
+            // createAnimToLauncher() on TASKBAR_UI_THREAD, while recents animation will remain on
+            // MAIN thread. If TASKBAR_UI_THREAD is executed ahead of main thread,
+            // mTaskBarRecentsAnimationListener will be not-null here (as onRecentsAnimationFinished
+            // hasn't been triggered to clear it). In this case we should enforce
+            // finishedToApp=false (as launcehr state is not OVERVIEW) to ensure showing hotseat
+            // when UI is returned to home.
             mTaskBarRecentsAnimationListener.endGestureStateOverride(
-                    !isStateManagerInState(LauncherState.OVERVIEW), /* canceled= */ false);
+                    /* finishedToApp= */ false, /* canceled= */ false);
         }
         mTaskBarRecentsAnimationListener = new TaskBarRecentsAnimationListener(
                 callbacks, TASKBAR_UI_THREAD);

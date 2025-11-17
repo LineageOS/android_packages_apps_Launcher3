@@ -23,7 +23,6 @@ import static com.android.app.animation.Interpolators.INSTANT;
 import static com.android.app.animation.Interpolators.LINEAR;
 import static com.android.internal.jank.InteractionJankMonitor.Configuration;
 import static com.android.launcher3.Flags.refactorTaskbarUiState;
-import static com.android.launcher3.Flags.syncAppLaunchWithTaskbarStash;
 import static com.android.launcher3.QuickstepTransitionManager.PINNED_TASKBAR_TRANSITION_DURATION;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_TRANSIENT_TASKBAR_HIDE;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_TRANSIENT_TASKBAR_SHOW;
@@ -35,6 +34,7 @@ import static com.android.launcher3.util.FlagDebugUtils.appendFlag;
 import static com.android.launcher3.util.FlagDebugUtils.formatFlagChange;
 import static com.android.quickstep.util.SystemActionConstants.SYSTEM_ACTION_ID_TASKBAR;
 import static com.android.quickstep.util.SystemUiFlagUtils.isTaskbarHidden;
+import static com.android.systemui.shared.Flags.cueBarAceMigration;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DIALOG_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_VISIBLE;
@@ -1475,6 +1475,9 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
         mSystemUiProxy.notifyTaskbarStatus(visible, stashed);
         setUpTaskbarSystemAction(visible);
         mControllers.rotationButtonController.onTaskbarStateChange(visible, stashed);
+        if (cueBarAceMigration()) {
+            mControllers.cueBarController.onTaskbarStatusUpdated(visible, stashed);
+        }
     }
 
     private void updateTaskbarWindowForciblyShownFlag() {
@@ -1657,8 +1660,7 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
         @Nullable
         public Animator createSetStateAnimator(long flags, long duration) {
             // We do this when we want to synchronize the app launch and taskbar stash animations.
-            if (syncAppLaunchWithTaskbarStash()
-                    && hasAnyFlag(FLAG_IGNORE_IN_APP)
+            if (hasAnyFlag(FLAG_IGNORE_IN_APP)
                     && hasAnyFlag(flags, FLAG_IN_APP)) {
                 flags = flags & ~FLAG_IN_APP;
             }

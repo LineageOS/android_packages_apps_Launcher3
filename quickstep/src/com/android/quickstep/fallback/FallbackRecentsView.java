@@ -28,6 +28,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.desktop.DesktopRecentsTransitionController;
@@ -40,9 +41,10 @@ import com.android.launcher3.util.SplitConfigurationOptions;
 import com.android.launcher3.util.SplitConfigurationOptions.SplitSelectSource;
 import com.android.quickstep.GestureState;
 import com.android.quickstep.RemoteTargetGluer.RemoteTargetHandle;
+import com.android.quickstep.recents.di.RecentsComponent;
+import com.android.quickstep.split.SplitSelectStateController;
 import com.android.quickstep.util.GroupTask;
 import com.android.quickstep.util.SingleTask;
-import com.android.quickstep.split.SplitSelectStateController;
 import com.android.quickstep.util.SurfaceTransactionApplier;
 import com.android.quickstep.views.OverviewActionsView;
 import com.android.quickstep.views.RecentsDismissUtils;
@@ -60,21 +62,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class FallbackRecentsView<CONTAINER_TYPE extends Context & RecentsViewContainer
+public abstract class FallbackRecentsView<CONTAINER_TYPE extends Context & RecentsViewContainer
         & StatefulContainer<RecentsState>> extends RecentsView<CONTAINER_TYPE, RecentsState>
         implements StateListener<RecentsState> {
 
     @Nullable
     private Task mHomeTask;
 
-    public FallbackRecentsView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
-
     public FallbackRecentsView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         mContainer.getStateManager().addStateListener(this);
     }
+
+    @Override
+    protected abstract void initialiseInjectables(@NonNull RecentsComponent recentsComponent);
 
     @Override
     public void init(OverviewActionsView actionsView, SplitSelectStateController splitController,

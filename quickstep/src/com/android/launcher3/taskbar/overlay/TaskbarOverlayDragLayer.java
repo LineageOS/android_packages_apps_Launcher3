@@ -17,7 +17,6 @@ package com.android.launcher3.taskbar.overlay;
 
 import static android.view.KeyEvent.ACTION_UP;
 import static android.view.KeyEvent.KEYCODE_BACK;
-import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
 
 import android.content.Context;
 import android.graphics.Insets;
@@ -42,11 +41,12 @@ import java.util.List;
 
 /** Root drag layer for the Taskbar overlay window. */
 public class TaskbarOverlayDragLayer extends
-        BaseDragLayer<TaskbarOverlayContext> implements
-        ViewTreeObserver.OnComputeInternalInsetsListener {
+        BaseDragLayer<TaskbarOverlayContext> {
 
     private SafeCloseable mViewCaptureCloseable;
     private final List<TouchController> mTouchControllers = new ArrayList<>();
+    private final ViewTreeObserver.OnComputeInternalInsetsListener mTaskbarInsetsComputer =
+            this::onComputeTaskbarInsets;
 
     TaskbarOverlayDragLayer(Context context) {
         super(context, null, 1);
@@ -57,7 +57,7 @@ public class TaskbarOverlayDragLayer extends
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        getViewTreeObserver().addOnComputeInternalInsetsListener(this);
+        getViewTreeObserver().addOnComputeInternalInsetsListener(mTaskbarInsetsComputer);
         mViewCaptureCloseable = ViewCaptureFactory.getInstance(getContext())
                 .startCapture(getRootView(), ".TaskbarOverlay");
     }
@@ -65,7 +65,7 @@ public class TaskbarOverlayDragLayer extends
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
+        getViewTreeObserver().removeOnComputeInternalInsetsListener(mTaskbarInsetsComputer);
         mViewCaptureCloseable.close();
     }
 
@@ -105,12 +105,8 @@ public class TaskbarOverlayDragLayer extends
         return super.dispatchKeyEvent(event);
     }
 
-    @Override
-    public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo inoutInfo) {
-        if (mContainer.isAnySystemDragInProgress()) {
-            inoutInfo.touchableRegion.setEmpty();
-            inoutInfo.setTouchableInsets(TOUCHABLE_INSETS_REGION);
-        }
+    private void onComputeTaskbarInsets(ViewTreeObserver.InternalInsetsInfo inoutInfo) {
+        mContainer.getOverlayController().updateInsetsTouchability(inoutInfo);
     }
 
     @Override

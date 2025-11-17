@@ -33,7 +33,6 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SPLASH_SCREEN;
-import static android.window.TransitionFilter.CONTAINER_ORDER_TOP;
 
 import static com.android.app.animation.Interpolators.ACCELERATE_1_5;
 import static com.android.app.animation.Interpolators.AGGRESSIVE_EASE;
@@ -49,7 +48,6 @@ import static com.android.launcher3.BaseActivity.INVISIBLE_BY_PENDING_FLAGS;
 import static com.android.launcher3.BaseActivity.PENDING_INVISIBLE_BY_WALLPAPER_ANIMATION;
 import static com.android.launcher3.Flags.appLaunchBlur;
 import static com.android.launcher3.Flags.refactorTaskbarUiState;
-import static com.android.launcher3.Flags.syncAppLaunchWithTaskbarStash;
 import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
 import static com.android.launcher3.LauncherState.ALL_APPS;
 import static com.android.launcher3.LauncherState.BACKGROUND_APP;
@@ -383,8 +381,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         // Prepare taskbar for animation synchronization. This needs to happen here before any
         // app transition is created.
         TaskbarInteractor taskbarInteractor = mLauncher.getTaskbarInteractor();
-        if (syncAppLaunchWithTaskbarStash()
-                && mLauncher.getStateManager().getState() == NORMAL
+        if (mLauncher.getStateManager().getState() == NORMAL
                 && taskbarInteractor != null) {
             taskbarInteractor.setIgnoreInAppFlagForSync(true);
             mLauncher.addEventCallback(EVENT_DESTROYED, onEndCallback::executeAllAndDestroy);
@@ -1883,7 +1880,9 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
 
         boolean playWorkspaceReveal = true;
         boolean skipAllAppsScale = false;
-        if (!playFallBackAnimation) {
+        if (mLauncher.isInState(OVERVIEW)) {
+            playWorkspaceReveal = false;
+        } else if (!playFallBackAnimation) {
             rectFSpringAnim = getClosingWindowAnimators(
                     anim, appTargets, launcherView, new PointF(), startRect,
                     startWindowCornerRadius);
@@ -2084,14 +2083,12 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             }
 
             // Syncs the app launch animation and taskbar stash animation (if exists).
-            if (syncAppLaunchWithTaskbarStash()) {
-                TaskbarInteractor taskbarInteractor = mLauncher.getTaskbarInteractor();
-                if (taskbarInteractor != null) {
-                    taskbarInteractor.setIgnoreInAppFlagForSync(false);
+            TaskbarInteractor taskbarInteractor = mLauncher.getTaskbarInteractor();
+            if (taskbarInteractor != null) {
+                taskbarInteractor.setIgnoreInAppFlagForSync(false);
 
-                    if (launcherClosing) {
-                        taskbarInteractor.createAnimToAppAndPlay(anim);
-                    }
+                if (launcherClosing) {
+                    taskbarInteractor.createAnimToAppAndPlay(anim);
                 }
             }
 

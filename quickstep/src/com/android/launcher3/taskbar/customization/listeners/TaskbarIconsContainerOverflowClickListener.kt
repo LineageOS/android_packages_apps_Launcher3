@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.quickstep
+package com.android.launcher3.taskbar.customization.listeners
 
-import com.android.launcher3.util.DaggerSingletonObject
-import com.android.quickstep.dagger.QuickstepBaseAppComponent
+import android.view.View
 
-object LauncherDisplaysWithDecorationsRepositoryCompat {
-    @JvmStatic
-    val INSTANCE =
-        DaggerSingletonObject(QuickstepBaseAppComponent::getDisplaysWithDecorationsRepositoryCompat)
+/** Listeners for taskbar overflow icon. */
+interface TaskbarIconsContainerOverflowClickListeners {
+    val overflowIconClickListener: View.OnClickListener
+    val overflowIconLongClickListener: View.OnLongClickListener
 }

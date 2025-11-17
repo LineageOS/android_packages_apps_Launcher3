@@ -29,17 +29,15 @@ import android.view.SurfaceControl;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.app.displaylib.PerDisplayRepository;
 import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.dagger.PerDisplaySingleton;
 import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.taskbar.TaskbarInteractor;
-import com.android.launcher3.util.DaggerSingletonObject;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.JoinedAnimator;
 import com.android.launcher3.util.ThreadedAnimator;
 import com.android.launcher3.views.ScrimColors;
 import com.android.quickstep.GestureState.GestureEndTarget;
-import com.android.quickstep.dagger.QuickstepBaseAppComponent;
 import com.android.quickstep.fallback.RecentsState;
 import com.android.quickstep.orientation.RecentsPagedOrientationHandler;
 import com.android.quickstep.util.AnimatorControllerWithResistance;
@@ -59,18 +57,18 @@ import javax.inject.Inject;
  * currently running one and apps should interact with the {@link RecentsWindowManager} as opposed
  * to the in-launcher one.
  */
+@PerDisplaySingleton
 public final class FallbackWindowInterface extends BaseWindowInterface {
 
-    public static final DaggerSingletonObject<PerDisplayRepository<FallbackWindowInterface>>
-            REPOSITORY_INSTANCE = new DaggerSingletonObject<>(
-            QuickstepBaseAppComponent::getFallbackWindowInterfaceRepository);
-
     @NonNull private final RecentsWindowTracker mRecentsWindowTracker;
+
     @Nullable private RecentsWindowManager mRecentsWindowManager = null;
 
     @Inject
-    public FallbackWindowInterface(@NonNull RecentsWindowTracker recentsWindowTracker) {
-        super(DEFAULT, BACKGROUND_APP);
+    public FallbackWindowInterface(
+            @NonNull RecentsWindowTracker recentsWindowTracker,
+            @NonNull TaskAnimationManager taskAnimationManager) {
+        super(DEFAULT, BACKGROUND_APP, taskAnimationManager);
         mRecentsWindowTracker = recentsWindowTracker;
     }
 
@@ -148,10 +146,10 @@ public final class FallbackWindowInterface extends BaseWindowInterface {
     @Override
     public <T extends RecentsView<?, ?>> T getVisibleRecentsView() {
         RecentsWindowManager manager = getCreatedContainer();
-        if (manager != null && (manager.isStarted() || isInLiveTileMode())) {
-            return manager.getOverviewPanel();
+        if (manager == null || !manager.isStarted()) {
+            return null;
         }
-        return null;
+        return manager.getOverviewPanel();
     }
 
     @Override
@@ -188,13 +186,6 @@ public final class FallbackWindowInterface extends BaseWindowInterface {
                         }
                     }
                 });
-    }
-
-    @Override
-    public boolean isInLiveTileMode() {
-        RecentsWindowManager windowManager = getCreatedContainer();
-        return windowManager != null && windowManager.getStateManager().getState() == DEFAULT &&
-                windowManager.isStarted();
     }
 
     @Override

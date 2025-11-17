@@ -48,7 +48,7 @@ constructor(
     private val widgetWithSettingsSystemShortcuts =
         listOf(popupDataSource.removePopupData, popupDataSource.widgetSettingsPopupData)
     private val homeScreenFileShortcuts =
-        listOf(popupDataSource.openHomeScreenFile, popupDataSource.deletePermanently)
+        listOf(popupDataSource.openHomeScreenFile, popupDataSource.deleteFileSystemItem)
     private var popupData: Map<Int, List<PopupData>> = mapOf()
 
     init {

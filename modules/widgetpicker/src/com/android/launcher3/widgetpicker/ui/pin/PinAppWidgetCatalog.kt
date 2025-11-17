@@ -116,6 +116,7 @@ fun PinAppWidgetCatalogContent(
             description = sheetSubtitle,
             closeBehavior = viewModel.closeBehavior,
             enableSwipeUpToDismiss = viewModel.enableSwipeUpToClose,
+            onSheetProgress = eventListeners::onSheetProgress,
             onSheetOpen = onSheetOpen,
             onDismissSheet = onSheetClose,
         ) {

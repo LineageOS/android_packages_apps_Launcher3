@@ -97,10 +97,10 @@
     <string name="allset_title_expressive_fallback" msgid="2829102990606405239">"Vaš je uređaj \nspreman!"</string>
     <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"Spremni ste za početak!"</string>
     <string name="allset_subtitle_expressive" msgid="419688197551192358">"Uživajte u novom uređaju <xliff:g id="DEVICE">%1$s</xliff:g>!"</string>
-    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"Prijeđite prstom prema gore za početak upotrebe uređaja <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"Prijeđite prstom prema gore i počnite upotrebljavati <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"Dodirnite za početak upotrebe uređaja <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="allset_navigation_settings_expressive" msgid="3745595273748356"><annotation id="link">"Odaberite način kretanja"</annotation></string>
-    <string name="allset_hint_expressive" msgid="756856423510976261">"Prelazak prstom prema gore"</string>
+    <string name="allset_hint_expressive" msgid="756856423510976261">"Prijeđite prstom prema gore"</string>
     <string name="allset_button_hint_expressive" msgid="667643693410494225">"Dodirnite gumb početnog zaslona"</string>
     <string name="allset_device_type_tablet" msgid="2173392009787325894">"tablet"</string>
     <string name="allset_device_type_phone" msgid="6842334562074507337">"telefon"</string>
@@ -129,7 +129,7 @@
     <string name="taskbar_edu_stashing" msgid="911857479758694381">"Polako prijeđite prstom prema gore za traku sa zadacima"</string>
     <string name="taskbar_edu_suggestions" msgid="8215044496435527982">"Primajte prijedloge aplikacija na temelju svoje rutine"</string>
     <string name="taskbar_edu_pinning" msgid="6708550858580071558">"Dugo pritisnite razdjelnik da biste prikvačili alatnu traku"</string>
-    <string name="taskbar_edu_features" msgid="3320337287472848162">"Učinite više pomoću trake sa zadacima"</string>
+    <string name="taskbar_edu_features" msgid="3320337287472848162">"Napravite više pomoću trake sa zadacima"</string>
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"Uvijek prikazuj traku sa zadacima"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"Da bi se traka prikazivala, dodirnite i držite razdjelnik"</string>
     <string name="taskbar_edu_bubbles_standalone" msgid="4182824636656528043">"Povucite aplikaciju u kut da bi se prikazivala u plutajućem prozoru"</string>

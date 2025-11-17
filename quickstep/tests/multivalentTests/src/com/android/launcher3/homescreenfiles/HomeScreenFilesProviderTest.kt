@@ -370,22 +370,50 @@ class HomeScreenFilesProviderTest {
 
     @Test
     fun testMoveToTrash() {
-        val uri = Uri.parse("content://media/external_primary/file/1")
-        provider.delete(uri, permanent = false)
-
-        verify(contentResolver, times(1))
-            .update(
-                eq(uri),
-                argThat { x -> x.containsKey(IS_TRASHED) && x.get(IS_TRASHED) == "1" },
-                eq("$RELATIVE_PATH = ? AND $IS_TRASHED = ?"),
-                eq(arrayOf(HOME_SCREEN_FOLDER_RELATIVE_PATH, "0")),
+        whenever(environmentWrapper.getExternalStorageDirectory()).thenReturn(File("/test/"))
+        whenever(
+                contentProviderClient.call(
+                    eq(MediaStore.AUTHORITY),
+                    eq("mark_file_as_trashed"),
+                    anyOrNull(),
+                    argThat { x -> x.getString("file_path") == "/test/Home screen/file.png" },
+                )
             )
+            .thenAnswer { invocation ->
+                Bundle().apply {
+                    putString("file_path", invocation.getArgument<Bundle>(3).getString("file_path"))
+                }
+            }
+        whenever(contentResolver.acquireUnstableContentProviderClient(MediaStore.AUTHORITY))
+            .thenReturn(contentProviderClient)
+
+        val uri = Uri.parse("content://media/external_primary/file/1")
+        provider.delete(uri, "file.png", permanent = false)
+    }
+
+    @Test
+    fun testMoveToTrashHandlesException() {
+        whenever(environmentWrapper.getExternalStorageDirectory()).thenReturn(File("/test/"))
+        whenever(
+                contentProviderClient.call(
+                    eq(MediaStore.AUTHORITY),
+                    eq("mark_file_as_trashed"),
+                    anyOrNull(),
+                    argThat { x -> x.getString("file_path") == "/test/Home screen/file.png" },
+                )
+            )
+            .thenThrow(UnsupportedOperationException())
+        whenever(contentResolver.acquireUnstableContentProviderClient(MediaStore.AUTHORITY))
+            .thenReturn(contentProviderClient)
+
+        val uri = Uri.parse("content://media/external_primary/file/1")
+        provider.delete(uri, "file.png", permanent = false)
     }
 
     @Test
     fun testDeletePermanently() {
         val uri = Uri.parse("content://media/external_primary/file/1")
-        provider.delete(uri, permanent = true)
+        provider.delete(uri, "unused", permanent = true)
 
         verify(contentResolver, times(1))
             .delete(

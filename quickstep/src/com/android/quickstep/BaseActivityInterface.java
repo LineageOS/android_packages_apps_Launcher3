@@ -52,8 +52,9 @@ public abstract class BaseActivityInterface<STATE_TYPE extends BaseState<STATE_T
     protected BaseActivityInterface(
             boolean rotationSupportedByActivity,
             @NonNull STATE_TYPE overviewState,
-            @NonNull STATE_TYPE backgroundState) {
-        super(backgroundState);
+            @NonNull STATE_TYPE backgroundState,
+            @NonNull TaskAnimationManager taskAnimationManager) {
+        super(backgroundState, taskAnimationManager);
         this.rotationSupportedByActivity = rotationSupportedByActivity;
         mTargetState = overviewState;
     }

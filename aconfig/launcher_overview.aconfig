@@ -99,3 +99,10 @@ flag {
     bug:  "440355882"
 }
 
+flag {
+    name: "enable_low_res_thumbnail_preloading"
+    namespace: "launcher_overview"
+    description: "Enables usage of low resolution thumbnails in preloading to save memory."
+    bug: "446013310"
+}
+

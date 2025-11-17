@@ -27,6 +27,7 @@ import android.util.Log
 import android.util.Xml
 import com.android.launcher3.AutoInstallsLayout
 import com.android.launcher3.AutoInstallsLayout.SourceResources
+import com.android.launcher3.AutoInstallsLayout.TAG_WORKSPACE
 import com.android.launcher3.DefaultLayoutParser
 import com.android.launcher3.DefaultLayoutParser.RES_PARTNER_DEFAULT_LAYOUT
 import com.android.launcher3.LauncherSettings.Settings
@@ -35,6 +36,7 @@ import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.util.IOUtils
 import com.android.launcher3.util.Partner
 import com.android.launcher3.util.SafeCloseable
+import com.android.launcher3.util.XmlElement.Companion.getRootElement
 import com.android.launcher3.widget.LauncherWidgetHolder
 import java.io.StringReader
 import javax.inject.Inject
@@ -172,13 +174,8 @@ class LayoutParserFactory @Inject constructor(@ApplicationContext private val co
         val parser = Xml.newPullParser()
         parser.setInput(StringReader(xml))
 
-        return AutoInstallsLayout(
-            context,
-            widgetHolder,
-            openHelper,
-            res,
-            { parser },
-            AutoInstallsLayout.TAG_WORKSPACE,
-        )
+        return AutoInstallsLayout(context, widgetHolder, openHelper, res) {
+            parser.getRootElement(TAG_WORKSPACE)
+        }
     }
 }

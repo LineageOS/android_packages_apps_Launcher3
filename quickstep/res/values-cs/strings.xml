@@ -100,7 +100,7 @@
     <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"Přejetím prstem nahoru můžete <xliff:g id="DEVICE">%1$s</xliff:g> začít používat"</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"Klepnutím začněte <xliff:g id="DEVICE">%1$s</xliff:g> používat"</string>
     <string name="allset_navigation_settings_expressive" msgid="3745595273748356"><annotation id="link">"Vyberte, jak navigovat"</annotation></string>
-    <string name="allset_hint_expressive" msgid="756856423510976261">"Přejetí prstem nahoru"</string>
+    <string name="allset_hint_expressive" msgid="756856423510976261">"Přejeďte prstem nahoru"</string>
     <string name="allset_button_hint_expressive" msgid="667643693410494225">"Klepněte na tlačítko plochy"</string>
     <string name="allset_device_type_tablet" msgid="2173392009787325894">"tablet"</string>
     <string name="allset_device_type_phone" msgid="6842334562074507337">"telefon"</string>

@@ -113,6 +113,7 @@
     <string name="remove_system_shortcut_label" msgid="3991201411148073972">"برداشتن"</string>
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"باز کردن"</string>
     <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"حذف برای همیشه"</string>
+    <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"انتقال به حذف‌شده‌ها"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"نصب میان‌برها"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"به برنامه اجازه می‌دهد میان‌برها را بدون دخالت کاربر اضافه کند."</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"خواندن تنظیمات و میان‌برهای صفحه اصلی"</string>
@@ -202,16 +203,11 @@
     <string name="action_increase_height" msgid="459390020612501122">"افزایش ارتفاع"</string>
     <string name="action_decrease_width" msgid="1374549771083094654">"کاهش عرض"</string>
     <string name="action_decrease_height" msgid="282377193880900022">"کاهش ارتفاع"</string>
-    <!-- no translation found for resize_handle_start (431073846880883794) -->
-    <skip />
-    <!-- no translation found for resize_handle_top (280799523356834542) -->
-    <skip />
-    <!-- no translation found for resize_handle_end (8411240534474246075) -->
-    <skip />
-    <!-- no translation found for resize_handle_bottom (4217171801060928429) -->
-    <skip />
-    <!-- no translation found for tap_to_show_resize_buttons (964815552123289232) -->
-    <skip />
+    <string name="resize_handle_start" msgid="431073846880883794">"دسته تغییر اندازه چپ"</string>
+    <string name="resize_handle_top" msgid="280799523356834542">"دسته تغییر اندازه بالا"</string>
+    <string name="resize_handle_end" msgid="8411240534474246075">"دسته تغییر اندازه راست"</string>
+    <string name="resize_handle_bottom" msgid="4217171801060928429">"دسته تغییر اندازه پایین"</string>
+    <string name="tap_to_show_resize_buttons" msgid="964815552123289232">"نمایش دکمه‌های تغییر اندازه"</string>
     <string name="widget_resized" msgid="9130327887929620">"اندازه ابزاره به عرض <xliff:g id="NUMBER_0">%1$s</xliff:g> ارتفاع <xliff:g id="NUMBER_1">%2$s</xliff:g> تغییر کرد"</string>
     <string name="action_deep_shortcut" msgid="4766835855579976045">"منو میان‌بر"</string>
     <string name="widget_frame_name" msgid="8782828448471444270">"قاب تغییر اندازه ابزاره برای <xliff:g id="STRING">%1$s</xliff:g>"</string>

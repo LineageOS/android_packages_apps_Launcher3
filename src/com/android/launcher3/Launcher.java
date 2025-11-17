@@ -52,6 +52,7 @@ import static com.android.launcher3.LauncherConstants.TraceEvents.ON_NEW_INTENT_
 import static com.android.launcher3.LauncherConstants.TraceEvents.ON_RESUME_EVT;
 import static com.android.launcher3.LauncherConstants.TraceEvents.ON_START_EVT;
 import static com.android.launcher3.LauncherConstants.TraceEvents.SINGLE_TRACE_COOKIE;
+import static com.android.launcher3.LauncherModel.useModelRepositoryBinding;
 import static com.android.launcher3.LauncherPrefs.FIXED_LANDSCAPE_MODE;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_ALL_APPS;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_ALL_APPS_PREDICTION;
@@ -1692,8 +1693,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         Drawable widgetPreviewDrawable = null;
         if (isActivityStarted) {
             View dropView = getDragLayer().getAnimatedView();
-            if (dropView instanceof DragView
-                    && ((DragView<?>) dropView).containsAppWidgetHostView()) {
+            if (dropView instanceof DragView dv && dv.containsAppWidgetHostView()) {
                 // Extracting Bitmap from dropView instead of its content view produces the correct
                 // bitmap.
                 if (Flags.fixWidgetDragRadiusLoss()) {
@@ -2766,6 +2766,7 @@ public class Launcher extends StatefulActivity<LauncherState>
 
     @Override
     public StringCache getStringCache() {
+        if (useModelRepositoryBinding()) return super.getStringCache();
         return modelCallbacks.getStringCache();
     }
 

@@ -51,7 +51,6 @@ import androidx.lifecycle.LifecycleOwner;
 
 import com.android.launcher3.CellLayout;
 import com.android.launcher3.DeviceProfile;
-import com.android.launcher3.Flags;
 import com.android.launcher3.Hotseat;
 import com.android.launcher3.InsettableFrameLayout;
 import com.android.launcher3.InvariantDeviceProfile;
@@ -121,7 +120,7 @@ public class LauncherPreviewRenderer extends BaseContext
 
         DeviceProfile.Builder dpBuilder = getDeviceProfileForPreview(context)
                 .toBuilder();
-        if (Flags.workspaceHiddenLabels()) {
+        if (com.android.systemui.shared.Flags.workspaceItemsLabelHidden()) {
             dpBuilder.setIsWorkspaceItemsLabelHidden(
                     LauncherPrefs.WORKSPACE_ITEMS_LABEL_HIDDEN.get(context)
             );

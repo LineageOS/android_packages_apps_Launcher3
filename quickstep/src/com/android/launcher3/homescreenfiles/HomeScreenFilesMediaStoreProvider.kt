@@ -255,7 +255,7 @@ class HomeScreenFilesMediaStoreProvider(
         return success
     }
 
-    override fun delete(uri: Uri, permanent: Boolean) {
+    override fun delete(uri: Uri, name: String, permanent: Boolean) {
         runAsync(
                 {
                     if (permanent) {
@@ -265,12 +265,13 @@ class HomeScreenFilesMediaStoreProvider(
                             QUERY_DEFAULT_SELECTION_ARGS,
                         )
                     } else {
-                        context.contentResolver.update(
-                            uri,
-                            ContentValues().apply { put(IS_TRASHED, MEDIA_STORE_VALUE_TRUE) },
-                            QUERY_DEFAULT_SELECTION,
-                            QUERY_DEFAULT_SELECTION_ARGS,
-                        )
+                        val path =
+                            environmentWrapper
+                                .getExternalStorageDirectory()
+                                .resolve(HOME_SCREEN_FOLDER_RELATIVE_PATH)
+                                .resolve(name)
+                                .absolutePath
+                        MediaStore.trashFile(context.contentResolver, path)
                     }
                 },
                 executorService,
@@ -409,7 +410,6 @@ class HomeScreenFilesMediaStoreProvider(
 
     companion object {
         private const val MEDIA_STORE_VALUE_FALSE = "0"
-        private const val MEDIA_STORE_VALUE_TRUE = "1"
         private val QUERY_DEFAULT_PROJECTION = arrayOf(DISPLAY_NAME, MIME_TYPE, DATA)
         private const val QUERY_DEFAULT_SELECTION = "$RELATIVE_PATH = ? AND $IS_TRASHED = ?"
         private val QUERY_DEFAULT_SELECTION_ARGS =

@@ -19,6 +19,7 @@ package com.android.quickstep;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.launcher3.Flags.FLAG_ENABLE_LATER_IS_LOCKED_CHECK;
+import static com.android.launcher3.Flags.FLAG_HIDE_AUTOMATED_TASKS_IN_OVERVIEW;
 import static com.android.window.flags.Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -41,6 +42,7 @@ import android.app.KeyguardManager;
 import android.app.TaskInfo;
 import android.companion.virtual.VirtualDeviceManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.platform.test.annotations.DisableFlags;
@@ -51,11 +53,14 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
+import com.android.launcher3.automation.AutomationRepository;
 import com.android.launcher3.util.DaggerSingletonTracker;
 import com.android.launcher3.util.Executors;
 import com.android.launcher3.util.LooperExecutor;
 import com.android.quickstep.util.DesktopTask;
 import com.android.quickstep.util.GroupTask;
+import com.android.quickstep.util.SingleTask;
+import com.android.quickstep.util.SplitTask;
 import com.android.quickstep.views.TaskViewType;
 import com.android.systemui.shared.recents.model.Task;
 import com.android.wm.shell.shared.GroupedTaskInfo;
@@ -98,6 +103,8 @@ public class RecentTasksListTest {
     private KeyguardManager mKeyguardManager;
     @Mock
     private VirtualDeviceManager mVirtualDeviceManager;
+    @Mock
+    private AutomationRepository mAutomationRepository;
 
     // Class under test
     private RecentTasksList mRecentTasksList;
@@ -117,7 +124,8 @@ public class RecentTasksListTest {
                 .thenReturn(Context.DEVICE_ID_DEFAULT);
 
         mRecentTasksList = new RecentTasksList(mContext, mainThreadExecutor,
-                mSystemUiProxy, mTopTaskTracker, mock(DaggerSingletonTracker.class));
+                mSystemUiProxy, mTopTaskTracker, mock(DaggerSingletonTracker.class),
+                mAutomationRepository);
     }
 
     @Test
@@ -235,7 +243,7 @@ public class RecentTasksListTest {
         assertThat(actualFreeformTasksInDesk1.get(1).key.id).isEqualTo(4);
         assertThat(actualFreeformTasksInDesk1.get(1).isMinimized).isFalse();
         assertThat(((DesktopTask) taskList.get(2)).getDeskId()).isEqualTo(1);
-        assertThat(((DesktopTask) taskList.get(2)).getDisplayId()).isEqualTo(DEFAULT_DISPLAY);
+        assertThat(taskList.get(2).getDisplayId()).isEqualTo(DEFAULT_DISPLAY);
 
         assertThat(taskList.get(1).taskViewType).isEqualTo(TaskViewType.DESKTOP);
         List<Task> actualFreeformTasksInDesk2 = taskList.get(1).getTasks();
@@ -245,7 +253,7 @@ public class RecentTasksListTest {
         assertThat(actualFreeformTasksInDesk2.get(1).key.id).isEqualTo(3);
         assertThat(actualFreeformTasksInDesk2.get(1).isMinimized).isFalse();
         assertThat(((DesktopTask) taskList.get(1)).getDeskId()).isEqualTo(2);
-        assertThat(((DesktopTask) taskList.get(1)).getDisplayId()).isEqualTo(DEFAULT_DISPLAY);
+        assertThat(taskList.get(1).getDisplayId()).isEqualTo(DEFAULT_DISPLAY);
 
         assertThat(taskList.get(0).taskViewType).isEqualTo(TaskViewType.DESKTOP);
         List<Task> actualFreeformTasksInDesk3 = taskList.get(0).getTasks();
@@ -255,7 +263,7 @@ public class RecentTasksListTest {
         assertThat(actualFreeformTasksInDesk3.get(1).key.id).isEqualTo(6);
         assertThat(actualFreeformTasksInDesk3.get(1).isMinimized).isFalse();
         assertThat(((DesktopTask) taskList.get(0)).getDeskId()).isEqualTo(3);
-        assertThat(((DesktopTask) taskList.get(0)).getDisplayId()).isEqualTo(1);
+        assertThat(taskList.get(0).getDisplayId()).isEqualTo(1);
     }
 
     @Test
@@ -361,10 +369,140 @@ public class RecentTasksListTest {
         assertTrue(actualFreeformTasks.get(2).isMinimized);
     }
 
+    @Test
+    @EnableFlags({FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND, FLAG_HIDE_AUTOMATED_TASKS_IN_OVERVIEW})
+    public void loadTasksInBackground_desktopTask_filterOutAutomatedTasks() throws Exception {
+        List<TaskInfo> tasksInDefaultDesk1 = Arrays.asList(
+                createRecentTaskInfo(/* taskId = */ 1, DEFAULT_DISPLAY, /* isAutomated= */false),
+                createRecentTaskInfo(/* taskId = */ 2, DEFAULT_DISPLAY, /* isAutomated= */true));
+        GroupedTaskInfo recentTaskInfo1 = GroupedTaskInfo.forDeskTasks(/* deskId = */1,
+                DEFAULT_DISPLAY, tasksInDefaultDesk1, /* minimizedTaskIds = */
+                Collections.emptySet());
+        List<TaskInfo> tasksInDefaultDesk2 = Arrays.asList(
+                createRecentTaskInfo(/* taskId = */ 3, DEFAULT_DISPLAY, /* isAutomated= */true),
+                createRecentTaskInfo(/* taskId = */ 4, DEFAULT_DISPLAY, /* isAutomated= */true));
+        GroupedTaskInfo recentTaskInfo2 = GroupedTaskInfo.forDeskTasks(/* deskId = */2,
+                DEFAULT_DISPLAY, tasksInDefaultDesk2, /* minimizedTaskIds = */
+                Collections.emptySet());
+
+        when(mSystemUiProxy.getRecentTasks(anyInt(), anyInt())).thenReturn(
+                new ArrayList<>(Arrays.asList(recentTaskInfo1, recentTaskInfo2)));
+
+        List<GroupTask> taskList = mRecentTasksList.loadTasksInBackground(Integer.MAX_VALUE, -1,
+                false);
+
+        assertThat(taskList).hasSize(2);
+
+        GroupTask groupTask1 = taskList.get(1);
+        assertThat(groupTask1.taskViewType).isEqualTo(TaskViewType.DESKTOP);
+        List<Task> tasks1 = groupTask1.getTasks();
+        assertThat(tasks1).hasSize(1);
+        assertThat(tasks1.get(0).key.id).isEqualTo(1);
+
+        GroupTask groupTask2 = taskList.get(0);
+        assertThat(groupTask2.taskViewType).isEqualTo(TaskViewType.DESKTOP);
+        assertThat(groupTask2.getTasks()).isEmpty();
+    }
+
+
+    @Test
+    @EnableFlags({FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND, FLAG_HIDE_AUTOMATED_TASKS_IN_OVERVIEW})
+    public void loadTasksInBackground_splitTask_filterOutAutomatedTasks() throws Exception {
+        GroupedTaskInfo recentTaskInfo1 = GroupedTaskInfo.forSplitTasks(
+                createRecentTaskInfo(/* taskId = */ 1, DEFAULT_DISPLAY, /* isAutomated= */false),
+                createRecentTaskInfo(/* taskId = */ 2, DEFAULT_DISPLAY, /* isAutomated= */false),
+                new SplitBounds(
+                        /* leftTopBounds = */ new Rect(),
+                        /* rightBottomBounds = */ new Rect(),
+                        /* leftTopTaskId = */ 1,
+                        /* rightBottomTaskId = */ 2,
+                        /* snapPosition = */ SplitScreenConstants.SNAP_TO_2_50_50));
+        GroupedTaskInfo recentTaskInfo2 = GroupedTaskInfo.forSplitTasks(
+                createRecentTaskInfo(/* taskId = */ 3, DEFAULT_DISPLAY, /* isAutomated= */false),
+                createRecentTaskInfo(/* taskId = */ 4, DEFAULT_DISPLAY, /* isAutomated= */true),
+                new SplitBounds(
+                        /* leftTopBounds = */ new Rect(),
+                        /* rightBottomBounds = */ new Rect(),
+                        /* leftTopTaskId = */ 3,
+                        /* rightBottomTaskId = */ 4,
+                        /* snapPosition = */ SplitScreenConstants.SNAP_TO_2_50_50));
+        GroupedTaskInfo recentTaskInfo3 = GroupedTaskInfo.forSplitTasks(
+                createRecentTaskInfo(/* taskId = */ 5, DEFAULT_DISPLAY, /* isAutomated= */true),
+                createRecentTaskInfo(/* taskId = */ 6, DEFAULT_DISPLAY, /* isAutomated= */false),
+                new SplitBounds(
+                        /* leftTopBounds = */ new Rect(),
+                        /* rightBottomBounds = */ new Rect(),
+                        /* leftTopTaskId = */ 5,
+                        /* rightBottomTaskId = */ 6,
+                        /* snapPosition = */ SplitScreenConstants.SNAP_TO_2_50_50));
+        GroupedTaskInfo recentTaskInfo4 = GroupedTaskInfo.forSplitTasks(
+                createRecentTaskInfo(/* taskId = */ 7, DEFAULT_DISPLAY, /* isAutomated= */true),
+                createRecentTaskInfo(/* taskId = */ 8, DEFAULT_DISPLAY, /* isAutomated= */true),
+                new SplitBounds(
+                        /* leftTopBounds = */ new Rect(),
+                        /* rightBottomBounds = */ new Rect(),
+                        /* leftTopTaskId = */ 7,
+                        /* rightBottomTaskId = */ 8,
+                        /* snapPosition = */ SplitScreenConstants.SNAP_TO_2_50_50));
+
+        when(mSystemUiProxy.getRecentTasks(anyInt(), anyInt())).thenReturn(
+                new ArrayList<>(Arrays.asList(recentTaskInfo1, recentTaskInfo2, recentTaskInfo3,
+                        recentTaskInfo4)));
+
+        List<GroupTask> taskList = mRecentTasksList.loadTasksInBackground(Integer.MAX_VALUE, -1,
+                false);
+
+        assertThat(taskList).hasSize(3);
+
+        GroupTask groupTask3 = taskList.get(2);
+        assertThat(groupTask3.taskViewType).isEqualTo(TaskViewType.GROUPED);
+        assertThat(((SplitTask) groupTask3).getTopLeftTask().key.id).isEqualTo(1);
+        assertThat(((SplitTask) groupTask3).getBottomRightTask().key.id).isEqualTo(2);
+
+        GroupTask groupTask4 = taskList.get(1);
+        assertThat(groupTask4.taskViewType).isEqualTo(TaskViewType.SINGLE);
+        assertThat(((SingleTask) groupTask4).getTask().key.id).isEqualTo(3);
+
+        GroupTask groupTask5 = taskList.get(0);
+        assertThat(groupTask5.taskViewType).isEqualTo(TaskViewType.SINGLE);
+        assertThat(((SingleTask) groupTask5).getTask().key.id).isEqualTo(6);
+    }
+
+
+    @Test
+    @EnableFlags({FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND, FLAG_HIDE_AUTOMATED_TASKS_IN_OVERVIEW})
+    public void loadTasksInBackground_singleTask_filterOutAutomatedTasks() throws Exception {
+        GroupedTaskInfo recentTaskInfo1 = GroupedTaskInfo.forFullscreenTasks(
+                createRecentTaskInfo(/* taskId = */ 1, DEFAULT_DISPLAY, /* isAutomated= */false));
+        GroupedTaskInfo recentTaskInfo2 = GroupedTaskInfo.forFullscreenTasks(
+                createRecentTaskInfo(/* taskId = */ 2, DEFAULT_DISPLAY, /* isAutomated= */true));
+
+        when(mSystemUiProxy.getRecentTasks(anyInt(), anyInt())).thenReturn(
+                new ArrayList<>(Arrays.asList(recentTaskInfo1, recentTaskInfo2)));
+
+        List<GroupTask> taskList = mRecentTasksList.loadTasksInBackground(Integer.MAX_VALUE, -1,
+                false);
+
+        assertThat(taskList).hasSize(1);
+
+        GroupTask groupTask6 = taskList.get(0);
+        assertThat(groupTask6.taskViewType).isEqualTo(TaskViewType.SINGLE);
+        assertThat(((SingleTask) groupTask6).getTask().key.id).isEqualTo(1);
+    }
+
     private TaskInfo createRecentTaskInfo(int taskId, int displayId) {
+        return createRecentTaskInfo(taskId, displayId, /* isAutomated= */false);
+    }
+
+    private TaskInfo createRecentTaskInfo(int taskId, int displayId, boolean isAutomated) {
         RecentTaskInfo recentTaskInfo = new RecentTaskInfo();
         recentTaskInfo.taskId = taskId;
         recentTaskInfo.displayId = displayId;
+        recentTaskInfo.userId = 10;
+        String packageName = String.format("com.test.%d", taskId);
+        recentTaskInfo.baseIntent = new Intent().setPackage(packageName);
+        when(mAutomationRepository.isPackageAutomated(recentTaskInfo.userId, packageName))
+                .thenReturn(isAutomated);
         return recentTaskInfo;
     }
 }

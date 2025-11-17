@@ -34,6 +34,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.launcher3.R;
 import com.android.launcher3.taskbar.overlay.TaskbarOverlayContext;
 import com.android.launcher3.taskbar.overlay.TaskbarOverlayDragLayer;
+import com.android.launcher3.util.Preconditions;
 import com.android.launcher3.util.TouchController;
 import com.android.quickstep.RecentsFilterState;
 import com.android.quickstep.RecentsModel;
@@ -508,15 +509,14 @@ public final class KeyboardQuickSwitchController implements
         }
 
         void updateIconInBackground(Task task, Consumer<Task> callback) {
-            MAIN_EXECUTOR.execute(() -> mModel.getIconCache().getIconInBackground(
-                    task, (icon, contentDescription, title) ->
-                            TASKBAR_UI_THREAD.execute(() -> {
-                                task.icon = icon;
-                                task.titleDescription = contentDescription;
-                                task.title = title;
-                                callback.accept(task);
-                            }))
-            );
+            Preconditions.assertTaskbarUiThread();
+            mModel.getIconCache().getIconInBackground(
+                    task, TASKBAR_UI_THREAD, (icon, contentDescription, title) -> {
+                        task.icon = icon;
+                        task.titleDescription = contentDescription;
+                        task.title = title;
+                        callback.accept(task);
+                    });
         }
 
         void onCloseStarted() {

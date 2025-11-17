@@ -145,8 +145,8 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
         mockDeviceProfile.isTaskbarPresent = true
 
         whenever(mockRecentsModel.iconCache).thenReturn(mockIconCache)
-        whenever(mockIconCache.getBitmapInfoInBackground(any(), any())).thenAnswer {
-            it.getArgument<GetTaskBitmapInfoCallback>(1)
+        whenever(mockIconCache.getBitmapInfoInBackground(any(), any(), any())).thenAnswer {
+            it.getArgument<GetTaskBitmapInfoCallback>(2)
                 .onBitmapInfoReceived(BITMAP_INFO_1, TASK_DESCRIPTION, TASK_TITLE)
             null
         }
@@ -255,9 +255,11 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
             .whenever(mockRecentsModel)
             .getTasks(any(), any<Consumer<List<GroupTask>>>())
         recentTasksChangedCallback?.invoke(null)
+        waitForTaskbarUiThreadSync()
         // By not invoking the callback passed to getTasks() we here emulate getTasks() loading.
 
         recentTasksChangedCallback?.invoke(null)
+        waitForTaskbarUiThreadSync()
 
         // getTasks() is only called two times overall (init + once more).
         verify(mockRecentsModel, times(2)).getTasks(any(), any<Consumer<List<GroupTask>>>())
@@ -294,10 +296,13 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
             .whenever(mockRecentsModel)
             .getTasks(any(), any<Consumer<List<GroupTask>>>())
         recentTasksChangedCallback?.invoke(null)
+        waitForTaskbarUiThreadSync()
         // By not invoking the callback passed to getTasks() we here emulate getTasks() loading.
 
         recentTasksChangedCallback?.invoke(null)
+        waitForTaskbarUiThreadSync()
         callbackCaptor.lastValue.accept(emptyList())
+        waitForTaskbarUiThreadSync()
 
         // getTasks() is called again now that the first getTasks() call finished.
         verify(mockRecentsModel, times(3)).getTasks(any(), any<Consumer<List<GroupTask>>>())
@@ -1145,6 +1150,7 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
         )
         setInDesktopMode(false)
         recentTasksChangedCallback!!.invoke(null)
+        waitForTaskbarUiThreadSync()
         val shownPackages = recentAppsController.shownTasks.flatMap { it.packageNames }
         // Don't expect RECENT_PACKAGE_3 because it is currently running.
         val expectedPackages = listOf(RECENT_PACKAGE_1, RECENT_PACKAGE_2)
@@ -1574,6 +1580,7 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
             runningTasks = emptyList(),
             recentTaskPackages = listOf(RECENT_PACKAGE_1, RECENT_PACKAGE_3),
         )
+        waitForTaskbarUiThreadSync()
         val task1 = recentAppsController.shownTasks.first().tasks.first()
         verify(taskbarViewController, times(1)).onTaskUpdated(eq(task1), any())
 
@@ -1582,6 +1589,7 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
             runningTasks = emptyList(),
             recentTaskPackages = listOf(RECENT_PACKAGE_1, RECENT_PACKAGE_2, RECENT_PACKAGE_3),
         )
+        waitForTaskbarUiThreadSync()
         val task2 = recentAppsController.shownTasks.last().tasks.first()
         verify(taskbarViewController, times(1)).onTaskUpdated(eq(task2), any())
         // Not updated again.
@@ -1600,8 +1608,8 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
         val task1 = recentAppsController.shownTasks.first().tasks.first()
 
         // Update info for task.
-        whenever(mockIconCache.getBitmapInfoInBackground(eq(task1), any())).thenAnswer {
-            it.getArgument<GetTaskBitmapInfoCallback>(1)
+        whenever(mockIconCache.getBitmapInfoInBackground(eq(task1), any(), any())).thenAnswer {
+            it.getArgument<GetTaskBitmapInfoCallback>(2)
                 .onBitmapInfoReceived(BITMAP_INFO_2, TASK_DESCRIPTION, TASK_TITLE)
             null
         }
@@ -1612,8 +1620,8 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
             recentTaskPackages = listOf(RECENT_PACKAGE_1, RECENT_PACKAGE_2, RECENT_PACKAGE_3),
         )
 
-        waitForTaskbarUiThreadSync()
         // Updated twice in total.
+        waitForTaskbarUiThreadSync()
         verify(taskbarViewController, times(2)).onTaskUpdated(eq(task1), any())
     }
 
@@ -1630,6 +1638,7 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
         verify(mockThemeManager).addChangeListener(themeChangeListenerCaptor.capture())
         themeChangeListenerCaptor.lastValue.onThemeChanged()
 
+        waitForTaskbarUiThreadSync()
         // Called second time due to theme change.
         verify(taskbarViewController, times(2)).onTaskUpdated(eq(task), any())
     }
@@ -1653,6 +1662,7 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
             )
         )
 
+        waitForTaskbarUiThreadSync()
         // Called second time due to icon shape change.
         verify(taskbarViewController, times(2)).onTaskUpdated(eq(task), any())
     }

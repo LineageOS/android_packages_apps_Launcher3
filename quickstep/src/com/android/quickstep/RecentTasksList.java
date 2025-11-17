@@ -19,6 +19,7 @@ package com.android.quickstep;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 
 import static com.android.launcher3.Flags.enableLaterIsLockedCheck;
+import static com.android.launcher3.Flags.hideAutomatedTasksInOverview;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 import static com.android.wm.shell.shared.GroupedTaskInfo.TYPE_DESK;
 import static com.android.wm.shell.shared.GroupedTaskInfo.TYPE_SPLIT;
@@ -38,6 +39,7 @@ import android.window.DesktopExperienceFlags;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.launcher3.automation.AutomationRepository;
 import com.android.launcher3.concurrent.annotations.Ui;
 import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.statehandlers.DesktopVisibilityController;
@@ -85,6 +87,7 @@ public class RecentTasksList {
     private final VirtualDeviceManager mVirtualDeviceManager;
     private final LooperExecutor mMainThreadExecutor;
     private final SystemUiProxy mSysUiProxy;
+    private final AutomationRepository mAutomationRepository;
 
     // The list change id, increments as the task list changes in the system
     private int mChangeId;
@@ -117,13 +120,15 @@ public class RecentTasksList {
             @Ui LooperExecutor mainThreadExecutor,
             SystemUiProxy sysUiProxy,
             TopTaskTracker topTaskTracker,
-            DaggerSingletonTracker tracker) {
+            DaggerSingletonTracker tracker,
+            AutomationRepository automationRepository) {
         mContext = context;
         mMainThreadExecutor = mainThreadExecutor;
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
         mVirtualDeviceManager = context.getSystemService(VirtualDeviceManager.class);
         mChangeId = 1;
         mSysUiProxy = sysUiProxy;
+        mAutomationRepository = automationRepository;
         final IRecentTasksListener recentTasksListener = new IRecentTasksListener.Stub() {
             @Override
             public void onRecentTasksChanged() {
@@ -344,15 +349,23 @@ public class RecentTasksList {
                 final Task.TaskKey task1Key = createTaskKey(taskInfo1);
                 final Task task1 = Task.from(task1Key, taskInfo1,
                         tmpLockedUsers.get(task1Key.userId) /* isLocked */);
+                final boolean isTask1Automated = isTaskAutomated(task1);
 
                 if (rawTask.isBaseType(TYPE_SPLIT)) {
                     final TaskInfo taskInfo2 = rawTask.getBaseGroupedTask().getTaskInfo2();
                     final Task.TaskKey task2Key = createTaskKey(taskInfo2);
                     final Task task2 = Task.from(task2Key, taskInfo2,
                             tmpLockedUsers.get(task2Key.userId) /* isLocked */);
-                    allTasks.add(new SplitTask(task1, task2,
-                            rawTask.getBaseGroupedTask().getSplitBounds()));
-                } else {
+                    final boolean isTask2Automated = isTaskAutomated(task2);
+                    if (!isTask1Automated && !isTask2Automated) {
+                        allTasks.add(new SplitTask(task1, task2,
+                                rawTask.getBaseGroupedTask().getSplitBounds()));
+                    } else if (!isTask1Automated) {
+                        allTasks.add(new SingleTask(task1));
+                    } else if (!isTask2Automated) {
+                        allTasks.add(new SingleTask(task2));
+                    }
+                } else if (!isTask1Automated) {
                     allTasks.add(new SingleTask(task1));
                 }
             } else {
@@ -363,6 +376,7 @@ public class RecentTasksList {
                         ? new Task(task1Key)
                         : Task.from(task1Key, taskInfo1,
                                 tmpLockedUsers.get(task1Key.userId) /* isLocked */);
+                final boolean isTask1Automated = isTaskAutomated(task1);
                 Task task2 = null;
                 if (taskInfo2 != null) {
                     // Is split task
@@ -388,14 +402,28 @@ public class RecentTasksList {
                 }
                 if (task2 != null) {
                     Objects.requireNonNull(rawTask.getSplitBounds());
-                    allTasks.add(new SplitTask(task1, task2, rawTask.getSplitBounds()));
-                } else {
+                    boolean isTask2Automated = isTaskAutomated(task2);
+                    if (!isTask1Automated && !isTask2Automated) {
+                        allTasks.add(new SplitTask(task1, task2, rawTask.getSplitBounds()));
+                    } else if (!isTask1Automated) {
+                        allTasks.add(new SingleTask(task1));
+                    } else if (!isTask2Automated) {
+                        allTasks.add(new SingleTask(task2));
+                    }
+                } else if (!isTask1Automated) {
                     allTasks.add(new SingleTask(task1));
                 }
             }
         }
 
         return allTasks;
+    }
+
+    private boolean isTaskAutomated(Task task) {
+        if (!hideAutomatedTasksInOverview()) {
+            return false;
+        }
+        return mAutomationRepository.isPackageAutomated(task.key.userId, task.key.getPackageName());
     }
 
     private Task createTask(TaskInfo taskInfo, Set<Integer> minimizedTaskIds) {
@@ -442,6 +470,7 @@ public class RecentTasksList {
             final int displayId = recentTaskInfo.getDeskDisplayId();
             List<Task> tasks = CollectionsKt.map(recentTaskInfo.getTaskInfoList(),
                     it -> createTask(it, minimizedTaskIds));
+            tasks.removeIf(this::isTaskAutomated);
             return List.of(new DesktopTask(deskId, displayId, tasks));
         }
     }

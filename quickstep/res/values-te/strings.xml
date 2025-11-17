@@ -95,9 +95,9 @@
     <string name="allset_navigation_settings" msgid="4713404605961476027"><annotation id="link">"సిస్టమ్ నావిగేషన్ సెట్టింగ్‌లు"</annotation></string>
     <string name="allset_title_expressive" msgid="474399969304146994">"మీ <xliff:g id="DEVICE">%1$s</xliff:g> సిద్ధంగా \nఉంది!"</string>
     <string name="allset_title_expressive_fallback" msgid="2829102990606405239">"మీ డివైజ్ సిద్ధంగా \nఉంది!"</string>
-    <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"మీరు ఉపయోగించడానికి సిద్ధమైపోయారు!"</string>
+    <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"మీరు ప్రారంభించడానికి సిద్ధంగా ఉన్నారు!"</string>
     <string name="allset_subtitle_expressive" msgid="419688197551192358">"మీ కొత్త <xliff:g id="DEVICE">%1$s</xliff:g>‌ను ఉపయోగిస్తూ ఎంజాయ్ చేయండి!"</string>
-    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"మీ <xliff:g id="DEVICE">%1$s</xliff:g>తో ప్రారంభించడానికి పైకి స్వైప్ చేయండి"</string>
+    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"మీ <xliff:g id="DEVICE">%1$s</xliff:g>‌తో ప్రారంభించడానికి పైకి స్వైప్ చేయండి"</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"మీ <xliff:g id="DEVICE">%1$s</xliff:g>ను ప్రారంభించడానికి ట్యాప్ చేయండి"</string>
     <string name="allset_navigation_settings_expressive" msgid="3745595273748356"><annotation id="link">"ఎలా నావిగేట్ చేయాలో ఎంచుకోండి"</annotation></string>
     <string name="allset_hint_expressive" msgid="756856423510976261">"పైకి స్వైప్ చేయండి"</string>

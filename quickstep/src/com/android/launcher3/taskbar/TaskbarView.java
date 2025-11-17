@@ -112,6 +112,9 @@ import java.util.Set;
 public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconParent, Insettable,
         DeviceProfile.OnDeviceProfileChangeListener,
         TaskbarViewDragDropController.PinnedAppsContainerDelegate {
+    // The number of icons always present in the taskbar, including the All Apps button and the
+    // divider.
+    private static final int NUM_ALWAYS_VISIBLE_TASKBAR_ICONS = 2;
     private static final Rect sTmpRect = new Rect();
     private final int mUnpinnedHitRectBuffer;
     private final int mPinnedHitRectBuffer;
@@ -161,6 +164,9 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
     private int mNextViewIndex = 0;
     // Iterates within child views of mHotseatIconsContainer (if non-null)
     private int mNextHotseatIndex = 0;
+
+
+    private int mNumbersOfTaskbarIconsOverflowing = 0;
 
     public int getIgnoreTaskbarIconCount() {
         return mIgnoreTaskbarIconCount;
@@ -489,6 +495,10 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                 .filter(it -> it instanceof SingleTask || it instanceof SplitTask)
                 .toList();
 
+        mNumbersOfTaskbarIconsOverflowing = Math.min(
+                (hotseatItemInfos.length + recentTasks.size() + NUM_ALWAYS_VISIBLE_TASKBAR_ICONS)
+                        - mMaxNumIcons, 0);
+
         if (mNumStaticViews == 0) {
             mNumStaticViews = addStaticViews();
         }
@@ -550,6 +560,10 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         traceEnd(TRACE_TAG_APP);
     }
 
+    public int getNumbersOfTaskbarIconsOverflowing() {
+        return mNumbersOfTaskbarIconsOverflowing;
+    }
+
     public boolean isTaskbarInMinimalState() {
         return getIconViews().length <= 1;
     }
@@ -574,16 +588,18 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
     private void updateAllAppsDivider() {
         // Index where All Apps divider would be if it is already in Taskbar.
         final int expectedAllAppsDividerIndex = getExpectedAllAppsDividerIndex();
+        if (getChildAt(expectedAllAppsDividerIndex) == mTaskbarDividerContainer) {
+            // Already has divider.
+            boolean isOnlyAllAppsAndDividerVisible = getTotalNumberOfIcons() == 2;
+            if (isOnlyAllAppsAndDividerVisible) removeView(mTaskbarDividerContainer);
+            return;
+        }
+
         boolean hasAtLeastOneIcon = mHotseatIconsContainer == null
                 ? getChildCount() >= mNumStaticViews + 1
                 : getChildCount() - mNumStaticViews == 0
                         && mHotseatIconsContainer.getChildCount() > 0;
-        if (getChildAt(expectedAllAppsDividerIndex) == mTaskbarDividerContainer
-                && getTotalNumberOfIconsWithPossibleQsb() == mNumStaticViews) {
-            // Only static views with divider so remove divider.
-            removeView(mTaskbarDividerContainer);
-        } else if (getChildAt(expectedAllAppsDividerIndex) != mTaskbarDividerContainer
-                && hasAtLeastOneIcon) {
+        if (hasAtLeastOneIcon) {
             // Static views with at least one app icon so add divider. For RTL, add it after the
             // icon that is at the expected index.
             addView(
@@ -789,10 +805,10 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         traceEnd(TRACE_TAG_APP);
     }
 
-    private boolean isOverflowViewShowing() {
-        if (mTaskbarPinnedOverflowView == null) return false;
+    @VisibleForTesting
+    boolean isOverflowViewShowing() {
         if (mHotseatIconsContainer != null) {
-            return mHotseatIconsContainer.indexOfChild(mTaskbarPinnedOverflowView) != -1;
+            return mHotseatIconsContainer.isOverflowViewShowing();
         }
         return indexOfChild(mTaskbarPinnedOverflowView) != -1;
     }
@@ -1218,7 +1234,12 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
      * Sets OnHoverListener for the given view.
      */
     private void setHoverListenerForIcon(View icon) {
+        if (Boolean.TRUE.equals(icon.getTag(R.id.taskbar_icon_has_hover_listener))) {
+            // Creating hover listener is expensive due to view inflation, so reuse if possible.
+            return;
+        }
         icon.setOnHoverListener(mControllerCallbacks.getIconOnHoverListener(icon));
+        icon.setTag(R.id.taskbar_icon_has_hover_listener, true);
     }
 
     /** Updates taskbar icons accordingly to the new bubble bar location. */
@@ -1435,13 +1456,6 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         return actualBounds;
     }
 
-    private int getTotalNumberOfIconsWithPossibleQsb() {
-        final int totalNumberOfIcons = getTotalNumberOfIcons();
-        return mActivityContext.getDeviceProfile().isQsbInline
-                ? totalNumberOfIcons + 1
-                : totalNumberOfIcons;
-    }
-
     /** Returns the total number of icons in the taskbar. **/
     public int getTotalNumberOfIcons() {
         int numContainers = 0;
@@ -1560,6 +1574,9 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
      */
     @Nullable
     public TaskbarOverflowView getTaskbarPinnedOverflowView() {
+        if (mHotseatIconsContainer != null) {
+            return mHotseatIconsContainer.getTaskbarPinnedOverflowView();
+        }
         return mTaskbarPinnedOverflowView;
     }
 
@@ -1750,6 +1767,27 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                 outRect.right = outRect.left + mUnpinnedHitRectBuffer;
             }
         }
+    }
+
+    @Override
+    public boolean isPointOnOverflowIcon(@NonNull float[] point) {
+        TaskbarOverflowView overflowIcon = getTaskbarPinnedOverflowView();
+        if (overflowIcon == null) {
+            return false;
+        }
+        final Rect overflowIconRect = new Rect();
+        mActivityContext.getDragLayer().getDescendantRectRelativeToSelf(overflowIcon,
+                overflowIconRect);
+        return overflowIconRect.contains(Math.round(point[0]), Math.round(point[1]));
+    }
+
+    @Override
+    public void openOverflowContainer() {
+        TaskbarOverflowView overflowIcon = getTaskbarPinnedOverflowView();
+        if (overflowIcon == null) {
+            return;
+        }
+        mControllerCallbacks.openOverflownContainer(overflowIcon);
     }
 
     public static class TaskbarLayoutParams extends FrameLayout.LayoutParams {

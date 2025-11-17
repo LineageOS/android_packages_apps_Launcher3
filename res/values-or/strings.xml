@@ -113,6 +113,7 @@
     <string name="remove_system_shortcut_label" msgid="3991201411148073972">"କାଢ଼ି ଦିଅନ୍ତୁ"</string>
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"ଖୋଲନ୍ତୁ"</string>
     <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"ସ୍ଥାୟୀ ଭାବେ ଡିଲିଟ କର"</string>
+    <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"ଟ୍ରାସକୁ ମୁଭ କରନ୍ତୁ"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"ସର୍ଟକଟ୍‍ ଇନଷ୍ଟଲ୍‌ କରନ୍ତୁ"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"ୟୁଜରଙ୍କ ବିନା ହସ୍ତକ୍ଷେପରେ ଶର୍ଟକଟ୍‌ ଯୋଡ଼ିବାକୁ ଆପକୁ ଅନୁମତି ଦିଏ।"</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"ହୋମ ସେଟିଂସ ଏବଂ ସର୍ଟକଟଗୁଡ଼ିକୁ ପଢ଼ନ୍ତୁ"</string>
@@ -202,16 +203,11 @@
     <string name="action_increase_height" msgid="459390020612501122">"ଉଚ୍ଚତା ବଢ଼ାନ୍ତୁ"</string>
     <string name="action_decrease_width" msgid="1374549771083094654">"ଚଉଡ଼ା କମ୍‌ କରନ୍ତୁ"</string>
     <string name="action_decrease_height" msgid="282377193880900022">"ଉଚ୍ଚତା କମ୍‌ କରନ୍ତୁ"</string>
-    <!-- no translation found for resize_handle_start (431073846880883794) -->
-    <skip />
-    <!-- no translation found for resize_handle_top (280799523356834542) -->
-    <skip />
-    <!-- no translation found for resize_handle_end (8411240534474246075) -->
-    <skip />
-    <!-- no translation found for resize_handle_bottom (4217171801060928429) -->
-    <skip />
-    <!-- no translation found for tap_to_show_resize_buttons (964815552123289232) -->
-    <skip />
+    <string name="resize_handle_start" msgid="431073846880883794">"ବାମପଟର ରିସାଇଜ ହେଣ୍ଡେଲ"</string>
+    <string name="resize_handle_top" msgid="280799523356834542">"ଶୀର୍ଷର ରିସାଇଜ ହେଣ୍ଡେଲ"</string>
+    <string name="resize_handle_end" msgid="8411240534474246075">"ଡାହାଣପଟର ରିସାଇଜ ହେଣ୍ଡେଲ"</string>
+    <string name="resize_handle_bottom" msgid="4217171801060928429">"ନିମ୍ନର ରିସାଇଜ ହେଣ୍ଡେଲ"</string>
+    <string name="tap_to_show_resize_buttons" msgid="964815552123289232">"ରିସାଇଜ ବଟନ ଦେଖାନ୍ତୁ"</string>
     <string name="widget_resized" msgid="9130327887929620">"ୱିଜେଟକୁ <xliff:g id="NUMBER_0">%1$s</xliff:g> ଓସାର ଓ <xliff:g id="NUMBER_1">%2$s</xliff:g> ଉଚ୍ଚରେ ପୁନଃଆକାର ଦିଆଗଲା"</string>
     <string name="action_deep_shortcut" msgid="4766835855579976045">"ସର୍ଟକଟ ମେନୁ"</string>
     <string name="widget_frame_name" msgid="8782828448471444270">"<xliff:g id="STRING">%1$s</xliff:g> ପାଇଁ ୱିଜେଟ ରିସାଇଜ ଫ୍ରେମ"</string>

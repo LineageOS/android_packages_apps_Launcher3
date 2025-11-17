@@ -29,12 +29,14 @@ import com.android.launcher3.R
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppModule
 import com.android.launcher3.dagger.LauncherAppSingleton
+import com.android.launcher3.util.Executors
 import com.android.launcher3.util.MSDLPlayerWrapper
 import com.android.launcher3.util.SandboxApplication
 import com.android.systemui.contextualeducation.GestureType
 import com.android.systemui.shared.system.InputConsumerController
 import dagger.BindsInstance
 import dagger.Component
+import java.util.concurrent.ExecutionException
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -102,20 +104,28 @@ class LauncherSwipeHandlerV2Test {
                     0,
                 )
             )
-
-        underTest =
-            LauncherSwipeHandlerV2(
-                sandboxContext,
-                taskAnimationManager,
-                deviceState,
-                rotationTouchHelper,
-                gestureState,
-                0,
-                false,
-                inputConsumerController,
-                msdlPlayerWrapper,
-            )
-        underTest.onGestureStarted(/* isLikelyToStartNewTask= */ false)
+        try {
+            Executors.MAIN_EXECUTOR.submit {
+                    underTest =
+                        LauncherSwipeHandlerV2(
+                            sandboxContext,
+                            taskAnimationManager,
+                            deviceState,
+                            rotationTouchHelper,
+                            gestureState,
+                            0,
+                            false,
+                            inputConsumerController,
+                            msdlPlayerWrapper,
+                        )
+                    underTest.onGestureStarted(/* isLikelyToStartNewTask= */ false)
+                }
+                .get()
+        } catch (e: InterruptedException) {
+            throw RuntimeException(e)
+        } catch (e: ExecutionException) {
+            throw RuntimeException(e)
+        }
     }
 
     @Test

@@ -18,6 +18,8 @@ package com.android.launcher3;
 
 import static com.android.app.animation.Interpolators.SCROLL;
 import static com.android.launcher3.RemoveAnimationSettingsTracker.WINDOW_ANIMATION_SCALE_URI;
+import static com.android.launcher3.Utilities.shouldEnableMouseInteractionChanges;
+import static com.android.launcher3.MotionEventsUtils.isTrackpadMotionEvent;
 import static com.android.launcher3.compat.AccessibilityManagerCompat.isAccessibilityEnabled;
 import static com.android.launcher3.compat.AccessibilityManagerCompat.isObservedEventType;
 import static com.android.launcher3.testing.shared.TestProtocol.SCROLL_FINISHED_MESSAGE;
@@ -1061,8 +1063,22 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
         super.requestDisallowInterceptTouchEvent(disallowIntercept);
     }
 
+    /**
+     * Returns whether this PagedView should ignore mouse click-and-drag events for scrolling.
+     */
+    protected boolean shouldIgnoreMouseClickAndDrag(MotionEvent ev) {
+        return shouldEnableMouseInteractionChanges(getContext())
+                && !isTrackpadMotionEvent(ev) && ev.isFromSource(InputDevice.SOURCE_MOUSE);
+    }
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+        // Skip touch interception for mouse based click-and-drag scroll events, to allow mouse
+        // click-and-drag of items within the PagedView.
+        if (shouldIgnoreMouseClickAndDrag(ev)) {
+            return false;
+        }
+
         /*
          * This method JUST determines whether we want to intercept the motion.
          * If we return true, onTouchEvent will be called and we do the actual
@@ -1277,6 +1293,11 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        // Skip handling for mouse based click-and-drag scroll events.
+        if (shouldIgnoreMouseClickAndDrag(ev)) {
+            return false;
+        }
+
         // Skip touch handling if there are no pages to swipe
         if (getChildCount() <= 0) return false;
 

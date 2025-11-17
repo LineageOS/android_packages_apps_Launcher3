@@ -70,4 +70,16 @@ object QuickstepComposeFacade : BaseComposeFacade, QuickstepComposeFeatures {
                 " other function on ComposeFacade."
         )
     }
+
+    override fun startCueBar(
+        view: View,
+        ambientCueViewModelFactory: AmbientCueViewModel.Factory,
+        onShouldInterceptTouches: (Boolean, Rect?) -> Unit,
+        onAnimationStateChange: (Int, AmbientCueAnimationState) -> Unit
+    ): View {
+        error(
+            "Compose is not available. Make sure to check isComposeAvailable() before calling any" +
+                    " other function on ComposeFacade."
+        )
+    }
 }

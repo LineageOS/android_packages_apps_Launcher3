@@ -112,6 +112,33 @@ object ViewEx {
         return captureAsPicture()
     }
 
+    /**
+     * Registers the [task] to be called when the view is attached to the window. It is called
+     * immediately if the view is already attached. The returned [SafeCloseable] is called when the
+     * view is detached.
+     */
+    @JvmStatic
+    fun View.registerLifecycleTask(task: () -> SafeCloseable) {
+        val tracker = ViewLifecycleTracker(task)
+        addOnAttachStateChangeListener(tracker)
+        if (isAttachedToWindow) tracker.onViewAttachedToWindow(this)
+    }
+
+    internal class ViewLifecycleTracker(private val task: () -> SafeCloseable) :
+        View.OnAttachStateChangeListener {
+
+        private var pendingCleanupTask: SafeCloseable? = null
+
+        override fun onViewAttachedToWindow(v: View) = cleanup(task)
+
+        override fun onViewDetachedFromWindow(v: View) = cleanup { null }
+
+        inline fun cleanup(newValue: () -> SafeCloseable?) {
+            pendingCleanupTask?.close()
+            pendingCleanupTask = newValue.invoke()
+        }
+    }
+
     private const val TAG = "ViewEx"
     private const val VIEW_SNAPSHOT_CAPTURE_TIMEOUT_MS = 1000L
 }

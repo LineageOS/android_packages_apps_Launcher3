@@ -17,9 +17,11 @@
 package com.android.launcher3.taskbar
 
 import android.graphics.Rect
+import android.os.Looper
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import androidx.core.util.size
+import com.android.launcher3.Alarm
 import com.android.launcher3.DropTarget
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.dragndrop.DragController
@@ -39,20 +41,25 @@ class TaskbarViewDragDropController(
     val activityContext: TaskbarActivityContext,
     val pinnedAppsContainerDelegate: PinnedAppsContainerDelegate,
 ) {
+    companion object {
+        private const val OPEN_OVERFLOW = 800L
+    }
+
     @VisibleForTesting val pinningDropTarget = PinningDropTarget()
     @VisibleForTesting val unpinDropTarget = UnpinDropTarget()
     private var modelCallbacks: TaskbarModelCallbacks? = null
+    private val overflowContainerOpenAlarm = Alarm(Looper.getMainLooper())
 
     fun setUpCallbacks(callbacks: TaskbarModelCallbacks) {
         modelCallbacks = callbacks
     }
 
-    fun addDropTargets(dragController: DragController<*>) {
+    fun addDropTargets(dragController: DragController) {
         dragController.addDropTarget(pinningDropTarget)
         dragController.addDropTarget(unpinDropTarget)
     }
 
-    fun removeDropTargets(dragController: DragController<*>) {
+    fun removeDropTargets(dragController: DragController) {
         dragController.removeDropTarget(pinningDropTarget)
         dragController.removeDropTarget(unpinDropTarget)
     }
@@ -195,9 +202,30 @@ class TaskbarViewDragDropController(
 
         override fun onDragEnter(dragObject: DropTarget.DragObject?) {}
 
-        override fun onDragOver(dragObject: DropTarget.DragObject?) {}
+        override fun onDragOver(dragObject: DropTarget.DragObject?) {
+            val center = FloatArray(2)
+            dragObject?.getVisualCenter(center)
 
-        override fun onDragExit(dragObject: DropTarget.DragObject?) {}
+            if (pinnedAppsContainerDelegate.isPointOnOverflowIcon(center)) {
+                if (overflowContainerOpenAlarm.alarmPending()) {
+                    return
+                }
+                overflowContainerOpenAlarm.setOnAlarmListener { _ ->
+                    pinnedAppsContainerDelegate.openOverflowContainer()
+                }
+                overflowContainerOpenAlarm.setAlarm(OPEN_OVERFLOW)
+            } else {
+                if (overflowContainerOpenAlarm.alarmPending()) {
+                    overflowContainerOpenAlarm.cancelAlarm()
+                }
+            }
+        }
+
+        override fun onDragExit(dragObject: DropTarget.DragObject?) {
+            if (overflowContainerOpenAlarm.alarmPending()) {
+                overflowContainerOpenAlarm.cancelAlarm()
+            }
+        }
 
         override fun acceptDrop(dragObject: DropTarget.DragObject?): Boolean {
             // TODO(b/447444838): For now, only accept drops when the number of pinned items has
@@ -236,5 +264,11 @@ class TaskbarViewDragDropController(
          * calculated coordinates.
          */
         fun getHitRectForUnpinRelativeToDragLayer(outRect: Rect?)
+
+        /** Returns true if the given point is on the pinned overflow icon. */
+        fun isPointOnOverflowIcon(point: FloatArray): Boolean
+
+        /** Opens the pinned overflow container. */
+        fun openOverflowContainer()
     }
 }

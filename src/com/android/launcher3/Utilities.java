@@ -670,8 +670,9 @@ public final class Utilities {
     @SuppressLint("UseCompatLoadingForDrawables")
     @Nullable
     @WorkerThread
-    public static <T extends Context & ActivityContext> Pair<AdaptiveIconDrawable, Drawable>
-            getFullDrawable(T context, ItemInfo info, int width, int height, boolean useTheme) {
+    public static Pair<AdaptiveIconDrawable, Drawable> getFullDrawable(
+            ActivityContext activity, ItemInfo info, int width, int height, boolean useTheme) {
+        Context context = activity.asContext();
         LauncherAppState appState = LauncherAppState.getInstance(context);
         Drawable mainIcon = null;
 
@@ -718,7 +719,7 @@ public final class Utilities {
             }
         } else if (info.itemType == LauncherSettings.Favorites.ITEM_TYPE_FOLDER) {
             FolderAdaptiveIcon icon = FolderAdaptiveIcon.createFolderAdaptiveIcon(
-                    context, info.id, new Point(width, height));
+                    activity, info.id, new Point(width, height));
             if (icon == null) {
                 return null;
             }

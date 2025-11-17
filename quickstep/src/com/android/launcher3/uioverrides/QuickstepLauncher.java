@@ -139,6 +139,9 @@ import com.android.launcher3.anim.PendingAnimation;
 import com.android.launcher3.apppairs.AppPairIcon;
 import com.android.launcher3.appprediction.PredictionRowView;
 import com.android.launcher3.config.FeatureFlags;
+import com.android.launcher3.dagger.LauncherAppComponent;
+import com.android.launcher3.dagger.LauncherComponentProvider;
+import com.android.launcher3.dagger.PerDisplayComponent;
 import com.android.launcher3.desktop.DesktopRecentsTransitionController;
 import com.android.launcher3.hybridhotseat.HotseatPredictionController;
 import com.android.launcher3.logging.InstanceId;
@@ -200,10 +203,11 @@ import com.android.quickstep.OverviewComponentObserver;
 import com.android.quickstep.OverviewComponentObserver.OverviewChangeListener;
 import com.android.quickstep.RecentsModel;
 import com.android.quickstep.SystemUiProxy;
+import com.android.quickstep.TISBinder;
 import com.android.quickstep.TaskUtils;
-import com.android.quickstep.TouchInteractionHandler.TISBinder;
 import com.android.quickstep.fallback.RecentsState;
 import com.android.quickstep.fallback.RecentsStateUtilsKt;
+import com.android.quickstep.recents.di.RecentsComponent;
 import com.android.quickstep.split.SplitSelectStateController;
 import com.android.quickstep.split.SplitToWorkspaceController;
 import com.android.quickstep.split.SplitWithKeyboardShortcutController;
@@ -302,6 +306,8 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     private boolean mIsOverlayVisible;
 
     private final OverviewChangeListener mOverviewChangeListener = this::onOverviewTargetChanged;
+
+    private RecentsComponent mRecentsComponent;
 
     private final TaskViewRecentsTouchContext mTaskViewRecentsTouchContext =
             new TaskViewRecentsTouchContext() {
@@ -803,6 +809,10 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        LauncherAppComponent appComponent = LauncherComponentProvider.get(this);
+        PerDisplayComponent perDisplayComponent = Objects.requireNonNull(
+                appComponent.getPerDisplayComponentRepository().get(DEFAULT_DISPLAY));
+        mRecentsComponent = perDisplayComponent.getRecentsComponentFactory().build(this);
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
             mPendingSplitSelectInfo = ObjectWrapper.unwrap(
@@ -1721,5 +1731,10 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
             Animator.AnimatorListener listener) {
         getStateManager().goToState(RecentsStateUtilsKt.toLauncherState(recentsState), animated,
                 listener);
+    }
+
+    @Override
+    public RecentsComponent getRecentsComponent() {
+        return mRecentsComponent;
     }
 }

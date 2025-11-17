@@ -17,6 +17,7 @@ package com.android.quickstep;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.os.Trace.TRACE_TAG_APP;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 
@@ -42,12 +43,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Trace;
+import android.util.Log;
 import android.view.Display;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl.Transaction;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.window.RemoteTransition;
 import android.window.SplashScreen;
 
@@ -67,6 +70,9 @@ import com.android.launcher3.SplitScreenUiState;
 import com.android.launcher3.anim.AnimatorPlaybackController;
 import com.android.launcher3.anim.PendingAnimation;
 import com.android.launcher3.compat.AccessibilityManagerCompat;
+import com.android.launcher3.dagger.LauncherAppComponent;
+import com.android.launcher3.dagger.LauncherComponentProvider;
+import com.android.launcher3.dagger.PerDisplayComponent;
 import com.android.launcher3.desktop.DesktopRecentsTransitionController;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.statemanager.StateManager;
@@ -82,10 +88,11 @@ import com.android.launcher3.util.SystemUiController;
 import com.android.launcher3.util.Themes;
 import com.android.launcher3.views.BaseDragLayer;
 import com.android.launcher3.views.ScrimView;
+import com.android.quickstep.fallback.FallbackActivityRecentsView;
 import com.android.quickstep.fallback.FallbackRecentsStateController;
-import com.android.quickstep.fallback.FallbackRecentsView;
 import com.android.quickstep.fallback.RecentsDragLayer;
 import com.android.quickstep.fallback.RecentsState;
+import com.android.quickstep.recents.di.RecentsComponent;
 import com.android.quickstep.split.SplitSelectStateController;
 import com.android.quickstep.util.RecentsAtomicAnimationFactory;
 import com.android.quickstep.util.SurfaceTransactionApplier;
@@ -99,6 +106,7 @@ import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A recents activity that shows the recently launched tasks as swipable task cards.
@@ -118,7 +126,7 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
 
     private RecentsDragLayer mDragLayer;
     private ScrimView mScrimView;
-    private FallbackRecentsView mFallbackRecentsView;
+    private FallbackActivityRecentsView mFallbackRecentsView;
     private OverviewActionsView<?> mActionsView;
     private TISBindHelper mTISBindHelper;
     private @Nullable TaskbarInteractor mTaskbarInteractor;
@@ -132,6 +140,12 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
     private SplitSelectStateController mSplitSelectStateController;
     @Nullable
     private DesktopRecentsTransitionController mDesktopRecentsTransitionController;
+
+    private RecentsComponent mRecentsComponent;
+
+    // Tracks whether the current state should have RecentsView visible.
+    private boolean mIsInRecentsViewVisibleState = false;
+
 
     /**
      * Init drag layer and overview panel views.
@@ -150,7 +164,9 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
         LauncherRootView rootView = getRootView();
         mDragLayer = rootView.findViewById(R.id.drag_layer);
         mScrimView = rootView.findViewById(R.id.scrim_view);
-        mFallbackRecentsView = rootView.findViewById(R.id.overview_panel);
+        ViewStub recentsViewStub = rootView.findViewById(R.id.overview_panel);
+        recentsViewStub.setLayoutResource(R.layout.fallback_activity_recents_view);
+        mFallbackRecentsView = (FallbackActivityRecentsView) recentsViewStub.inflate();
         mActionsView = rootView.findViewById(R.id.overview_actions_view);
         ViewGroup emptyRecentsMessageView = rootView.findViewById(R.id.empty_recents_message_view);
 
@@ -171,7 +187,7 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
         mTISBindHelper = new TISBindHelper(this, this::onTISConnected);
     }
 
-    private void onTISConnected(TouchInteractionHandler.TISBinder binder) {
+    private void onTISConnected(TISBinder binder) {
         TaskbarManager taskbarManager = binder.getTaskbarManager();
         if (taskbarManager != null) {
             taskbarManager.setActivity(this);
@@ -256,7 +272,12 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
     }
 
     @Override
-    public FallbackRecentsView getOverviewPanel() {
+    public RecentsComponent getRecentsComponent() {
+        return mRecentsComponent;
+    }
+
+    @Override
+    public FallbackActivityRecentsView getOverviewPanel() {
         return mFallbackRecentsView;
     }
 
@@ -392,6 +413,10 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        LauncherAppComponent appComponent = LauncherComponentProvider.get(getApplication());
+        PerDisplayComponent perDisplayComponent = Objects.requireNonNull(
+                appComponent.getPerDisplayComponentRepository().get(DEFAULT_DISPLAY));
+        mRecentsComponent = perDisplayComponent.getRecentsComponentFactory().build(this);
         setWallpaperDependentTheme(this);
         mStateManager = new StateManager<>(this, RecentsState.BG_LAUNCHER);
 
@@ -441,6 +466,12 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
             AccessibilityManagerCompat.sendStateEventToTest(getBaseContext(),
                     OVERVIEW_STATE_ORDINAL);
         }
+
+        if (mIsInRecentsViewVisibleState && !state.isRecentsViewVisible() && !isFinishing()) {
+            Log.d(TAG, "onStateSetEnd - moveTaskToBack as Recents should no longer be visible");
+            moveTaskToBack(/*nonRoot=*/true);
+        }
+        mIsInRecentsViewVisibleState = state.isRecentsViewVisible();
     }
 
     @Override

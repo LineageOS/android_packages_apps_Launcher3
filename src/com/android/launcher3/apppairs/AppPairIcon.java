@@ -17,9 +17,11 @@
 package com.android.launcher3.apppairs;
 
 import static com.android.launcher3.BubbleTextView.DISPLAY_FOLDER;
+import static com.android.launcher3.UtilitiesKt.drawWorkspaceItemSelectionHighlight;
 
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -275,6 +277,16 @@ public class AppPairIcon extends FrameLayout implements DraggableView, Reorderab
             updateTitleAndA11yTitle();
             mIconGraphic.redraw();
         }
+    }
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        // Draw selection highlight before super.dispatchDraw() so that it appears behind the title
+        // text.
+        if (isSelected()) {
+            drawWorkspaceItemSelectionHighlight(canvas, this);
+        }
+        super.dispatchDraw(canvas);
     }
 
     /**

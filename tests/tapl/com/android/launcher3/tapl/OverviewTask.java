@@ -274,7 +274,6 @@ public final class OverviewTask {
             verifyActiveContainer();
             final boolean isDesktopTask = mType == TaskViewType.DESKTOP;
             final boolean hasDesktopTasks = hasDesktopTasks();
-            final int deskId = isDesktopTask ? getDeskId() : -1;
 
             mLauncher.executeAndWaitForLauncherStop(
                     () -> mLauncher.clickLauncherObject(mTask),
@@ -314,9 +313,6 @@ public final class OverviewTask {
                                         LauncherInstrumentation.WAIT_TIME_MS,
                                         LauncherInstrumentation.DEFAULT_POLL_INTERVAL));
                         }
-                        mLauncher.assertEquals(
-                                "Active desk ID doesn't match opened task's desk ID",
-                                deskId, mLauncher.getActiveDeskId());
                     }
                 }
                 return new LaunchedAppState(mLauncher, isDesktopTask);

@@ -38,11 +38,13 @@ import com.android.launcher3.taskbar.TaskbarView
 import com.android.launcher3.testutil.LauncherTestInteractions
 import com.android.launcher3.testutil.Wait.atMost
 import com.android.launcher3.testutil.rule.LayoutResource
+import com.android.launcher3.util.IntegrationLandscapeRule
 import com.android.launcher3.util.LauncherLayoutBuilder
 import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
 import com.android.launcher3.util.ModelTestExtensions.loadModelSync
 import com.android.launcher3.util.TestUtil
 import com.android.launcher3.views.DoubleShadowBubbleTextView
+import com.android.quickstep.taskbar.util.IntegrationNavigationModeSwitchRule
 import com.android.quickstep.taskbar.util.IntegrationTaskbarModeSwitchRule
 import java.io.IOException
 import junit.framework.TestCase.assertNotNull
@@ -62,9 +64,13 @@ open class BaseTaskbarIntegrationTest {
 
     val targetContext: Context = getInstrumentation().targetContext
 
+    @get:Rule val navigationModeSwitch = IntegrationNavigationModeSwitchRule()
+
     @get:Rule val layoutResource = LayoutResource(targetContext)
 
     @get:Rule val launcherActivity = LauncherActivityScenarioRule<Launcher>()
+
+    @get:Rule val mIntegrationLandscapeRule = IntegrationLandscapeRule(launcherActivity)
 
     var interactions = LauncherTestInteractions(launcherActivity)
 

@@ -20,7 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
 
 import com.android.launcher3.util.LauncherMultivalentJUnit;
-import com.android.quickstep.fallback.FallbackRecentsView;
+import com.android.quickstep.fallback.FallbackActivityRecentsView;
 import com.android.quickstep.fallback.RecentsState;
 
 import org.junit.runner.RunWith;
@@ -31,16 +31,17 @@ import org.mockito.Mock;
 public class FallbackSwipeHandlerTestCase extends AbsSwipeUpHandlerTestCase<
         RecentsState,
         RecentsActivity,
-        FallbackRecentsView<RecentsActivity>,
+        FallbackActivityRecentsView,
         FallbackSwipeHandler,
         FallbackActivityInterface> {
 
     @Mock private RecentsActivity mRecentsActivity;
-    @Mock private FallbackRecentsView<RecentsActivity> mRecentsView;
+    @Mock private FallbackActivityRecentsView mRecentsView;
 
 
+    @NonNull
     @Override
-    protected FallbackSwipeHandler createSwipeHandler(
+    protected FallbackSwipeHandler createSwipeHandlerInternal(
             long touchTimeMs, boolean continuingLastGesture) {
         return new FallbackSwipeHandler(
                 mContext,
@@ -62,7 +63,7 @@ public class FallbackSwipeHandlerTestCase extends AbsSwipeUpHandlerTestCase<
 
     @NonNull
     @Override
-    protected FallbackRecentsView<RecentsActivity> getRecentsView() {
+    protected FallbackActivityRecentsView getRecentsView() {
         return mRecentsView;
     }
 

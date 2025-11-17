@@ -83,6 +83,17 @@ data class WorkspaceProfile(
     val extraSpace: Int = 0,
 ) {
 
+    /**
+     * Return the size in pixels from the corner of one icon to the corner of the next icon after
+     * the given amount of columns.
+     */
+    fun getIconToIconWidthForColumns(columns: Int): Int =
+        (columns * cellSize.x + (columns - 1) * cellLayoutBorderSpacePx.x -
+            getCellHorizontalSpace())
+
+    /** Returns the left and right space on the cell, which is the cell width - icon size */
+    fun getCellHorizontalSpace(): Int = cellSize.x - iconSizePx
+
     fun getTotalWorkspacePadding(): Point =
         Point(
             workspacePadding.left + workspacePadding.right,
@@ -398,7 +409,9 @@ data class WorkspaceProfile(
 
             var iconDrawablePaddingPx: Int
 
-            if (isItemLabelHidden && Flags.workspaceHiddenLabels()) {
+            if (
+                isItemLabelHidden && com.android.systemui.shared.Flags.workspaceItemsLabelHidden()
+            ) {
                 iconDrawablePaddingPx = 0
                 iconTextSizePx = 0
                 maxIconTextLineCount = 0

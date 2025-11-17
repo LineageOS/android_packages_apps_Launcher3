@@ -16,7 +16,6 @@
 package com.android.launcher3.taskbar;
 
 import static android.animation.LayoutTransition.DISAPPEARING;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.DesktopModeFlags.ENABLE_TASKBAR_OVERFLOW;
 
 import static com.android.app.animation.Interpolators.EMPHASIZED;
@@ -255,8 +254,10 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         mTransientTaskbarProfile = mActivity.getTransientTaskbarProfile();
         mPersistentTaskbarProfile = mActivity.getPersistentTaskbarProfile();
 
-        mTransientIconSize = dpToPx(TaskbarIconSpecs.INSTANCE.getIconSize52dp().getSize());
-        mPersistentIconSize = dpToPx(TaskbarIconSpecs.INSTANCE.getIconSize40dp().getSize());
+        mTransientIconSize = dpToPx(
+                TaskbarIconSpecs.INSTANCE.getDefaultTransientIconSize().getSize(), mActivity);
+        mPersistentIconSize = dpToPx(
+                TaskbarIconSpecs.INSTANCE.getDefaultPersistentIconSize().getSize(), mActivity);
         mTaskbarView = taskbarView;
         mTaskbarUiState = taskbarUiState;
         mTaskbarIconAlpha = new MultiValueAlpha(mTaskbarView, NUM_ALPHA_CHANNELS);
@@ -742,7 +743,8 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         float scale = mTaskbarIconTranslationYForPinning.value;
         float taskbarIconTranslationYForPinningValue;
 
-        int transientIconSize = dpToPx(TaskbarIconSpecs.INSTANCE.getIconSize52dp().getSize());
+        int transientIconSize = dpToPx(
+                TaskbarIconSpecs.INSTANCE.getDefaultTransientIconSize().getSize(), mActivity);
 
         // transY is calculated here by adding/subtracting the taskbar bottom margin
         // aligning the icon bound to be at bottom of current taskbar view and then
@@ -839,7 +841,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         }
 
         if (!mControllers.taskbarDesktopModeController.shouldShowDesktopTasksInTaskbar(
-                DEFAULT_DISPLAY)) {
+                mActivity.getPrimaryDisplayId())) {
             btv.setContentDescription(tagDescription);
             return;
         }
@@ -1012,6 +1014,10 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         }
     }
 
+    public int getNumbersOfTaskbarIconsOverflowing() {
+        return mTaskbarView.getNumbersOfTaskbarIconsOverflowing();
+    }
+
     /**
      * Sets the Taskbar icon alignment relative to Launcher hotseat icons
      * @param alignmentRatio [0, 1]
@@ -1132,7 +1138,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
             Interpolator interpolator) {
         boolean isToHome = mControllers.uiController.isIconAlignedWithHotseat();
         float scaleUp = ((float) launcherDp.getWorkspaceIconProfile().getIconSizePx())
-                / taskbarDp.getTaskbarProfile().getIconSize();
+                / mTransientIconSize;
         int borderSpacing = launcherDp.hotseatBorderSpace;
         Rect hotseatPadding = launcherDp.getHotseatLayoutPadding(mActivity);
         int hotseatCellSize = DeviceProfile.calculateCellWidth(

@@ -17,83 +17,148 @@
 package com.android.launcher3.taskbar
 
 import android.content.res.Resources
-import androidx.annotation.AnyThread
 import com.android.launcher3.taskbar.TaskbarAutohideSuspendController.AutohideSuspendFlag
 import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
+import com.android.quickstep.NavHandle
+import javax.annotation.concurrent.ThreadSafe
 
 /**
  * Expose API of [TaskbarActivityContext] to TaskbarUnstashInputConsumer and BubbleBarInputConsumer
  * to ensure touches for taskbar are handled on taskbar UI thread.
  */
-class TaskbarApiProxy(private val taskbarActivityContext: TaskbarActivityContext) {
+@ThreadSafe
+class TaskbarApiProxy(private val delegate: TaskbarActivityContext) {
 
-    private val transitionCallback =
-        if (isTransient()) taskbarActivityContext.translationCallbacks else null
+    val taskbarUiState: TaskbarUiState = delegate.taskbarUiState
 
-    @AnyThread fun getTaskbarUiState(): TaskbarUiState = taskbarActivityContext.taskbarUiState
+    private val transitionCallback = if (isTransient()) delegate.translationCallbacks else null
 
-    @AnyThread
-    fun isTransient(): Boolean = taskbarActivityContext.taskbarFeatureEvaluator.isTransient
+    // TODO(b/404636836): Avoid exposing NavHandle although we use it to build
+    //  NavHandleLongPressInputConsumer
+    fun navHandle(): NavHandle = delegate.navHandle
 
-    @AnyThread
-    fun shouldAllowTaskbarToAutoStash(): Boolean =
-        taskbarActivityContext.shouldAllowTaskbarToAutoStash()
+    fun isBubbleBarSwipeGesture() =
+        delegate.bubbleControllers?.bubbleBarSwipeController?.orElse(null)?.isSwipeGesture()
+            ?: false
+
+    fun isInStashedLauncherState() = delegate.isInStashedLauncherState
+
+    fun isBubbleBarEnabled() = delegate.isBubbleBarEnabled
+
+    fun isPhoneMode() = delegate.isPhoneMode
+
+    fun isInApp() = delegate.isInApp
+
+    fun hasBubbleControllers() = delegate.bubbleControllers != null
+
+    fun isBubbleStashedHandleViewControllerPresent() =
+        delegate.bubbleControllers?.bubbleStashedHandleViewController?.isPresent ?: false
+
+    fun openTaskbarAllApps() {
+        TASKBAR_UI_THREAD.execute { delegate.openTaskbarAllApps() }
+    }
+
+    fun updateStashControllerLauncherStateFlag(isVisible: Boolean) {
+        TASKBAR_UI_THREAD.execute { delegate.updateStashControllerLauncherStateFlag(isVisible) }
+    }
+
+    fun startBubbleBarSwipeController() {
+        TASKBAR_UI_THREAD.execute {
+            delegate.bubbleControllers?.bubbleBarSwipeController?.orElse(null)?.start()
+        }
+    }
+
+    fun finishBubbleBarSwipeController() {
+        TASKBAR_UI_THREAD.execute {
+            delegate.bubbleControllers?.bubbleBarSwipeController?.orElse(null)?.finish()
+        }
+    }
+
+    fun showBubbleBar(expandBubbles: Boolean, bubbleBarGesture: Boolean) {
+        TASKBAR_UI_THREAD.execute {
+            delegate.bubbleControllers
+                ?.bubbleStashController
+                ?.showBubbleBar(expandBubbles, bubbleBarGesture)
+        }
+    }
+
+    fun swipeBubbleBarTo(dY: Float, taskToRun: Runnable) {
+        TASKBAR_UI_THREAD.execute {
+            delegate.bubbleControllers?.bubbleBarSwipeController?.orElse(null)?.let {
+                it.swipeTo(dY)
+                taskToRun.run()
+            }
+        }
+    }
+
+    fun isTransient(): Boolean = delegate.taskbarFeatureEvaluator.isTransient
+
+    fun shouldAllowTaskbarToAutoStash(): Boolean = delegate.shouldAllowTaskbarToAutoStash()
 
     /** Called only once during a gesture. Safe to post Runnable to TASKBAR_UI_THREAD. */
-    @AnyThread
     fun playTaskbarBackgroundAlphaAnimation() {
-        TASKBAR_UI_THREAD.execute { taskbarActivityContext.playTaskbarBackgroundAlphaAnimation() }
+        TASKBAR_UI_THREAD.execute { delegate.playTaskbarBackgroundAlphaAnimation() }
     }
 
     /**
      * Called on ACTION_DOWN, ACTION_UP and ACTION_CANCEL. Safe to post Runnable to
      * TASKBAR_UI_THREAD.
      */
-    @AnyThread
     fun setAutohideSuspendFlag(@AutohideSuspendFlag flag: Int, newValue: Boolean) {
-        TASKBAR_UI_THREAD.execute { taskbarActivityContext.setAutohideSuspendFlag(flag, newValue) }
+        TASKBAR_UI_THREAD.execute { delegate.setAutohideSuspendFlag(flag, newValue) }
     }
 
-    @AnyThread
     fun startTaskbarUnstashHint(isHovered: Boolean) {
-        TASKBAR_UI_THREAD.execute { taskbarActivityContext.startTaskbarUnstashHint(isHovered) }
+        TASKBAR_UI_THREAD.execute { delegate.startTaskbarUnstashHint(isHovered) }
     }
 
     /** Called once when ACTION_MOVE reach certain threshold. */
-    @AnyThread
     fun onSwipeToUnstashTaskbar(delayTaskbarBackground: Boolean) {
-        TASKBAR_UI_THREAD.execute {
-            taskbarActivityContext.onSwipeToUnstashTaskbar(delayTaskbarBackground)
-        }
+        TASKBAR_UI_THREAD.execute { delegate.onSwipeToUnstashTaskbar(delayTaskbarBackground) }
     }
 
     /** Called on ACTION_DOWN. */
-    @AnyThread
     fun onTransitionActionDown() {
         if (transitionCallback == null) return
         TASKBAR_UI_THREAD.execute { transitionCallback.onActionDown() }
     }
 
     /** Called on every ACTION_MOVE. */
-    @AnyThread
     fun onTransitionActionMove(dy: Float) {
         if (transitionCallback == null) return
         TASKBAR_UI_THREAD.execute { transitionCallback.onActionMove(dy) }
     }
 
     /** Called on ACTION_UP and ACTION_CANCEL */
-    @AnyThread
     fun onTransitionActionEnd() {
         if (transitionCallback == null) return
         TASKBAR_UI_THREAD.execute { transitionCallback.onActionEnd() }
     }
 
+    // TODO(b/404636836): Remove after launching refactorTaskbarUiState()
     @Deprecated("Should be removed once we turned on [refactorTaskbarUiState()] flag")
-    fun isTaskbarAllAppsOpen() = taskbarActivityContext.isTaskbarAllAppsOpen
+    fun isTaskbarAllAppsOpen() = delegate.isTaskbarAllAppsOpen
 
+    // TODO(b/404636836): Remove after launching refactorTaskbarUiState()
     @Deprecated("Should be removed once we turned on [refactorTaskbarUiState()] flag")
-    fun isTaskbarStashed() = taskbarActivityContext.isTaskbarStashed
+    fun isTaskbarStashed() = delegate.isTaskbarStashed
 
+    // TODO(b/404636836): Remove after launching refactorTaskbarUiState()
     @Deprecated("Should be removed once we turned on [refactorTaskbarUiState()] flag")
-    fun getResources(): Resources = taskbarActivityContext.resources
+    fun getResources(): Resources = delegate.resources
+
+    // TODO(b/404636836): Remove after launching refactorTaskbarUiState()
+    @Deprecated("Will be removed after launching refactorTaskbarUiState")
+    val isBubbleBarExpanded: Boolean =
+        delegate.bubbleControllers?.bubbleBarViewController?.isExpanded ?: false
+
+    // TODO(b/404636836): Remove after launching refactorTaskbarUiState()
+    @Deprecated("Will be removed after launching refactorTaskbarUiState")
+    val isBubbleBarVisible: Boolean =
+        delegate.bubbleControllers?.bubbleStashController?.isBubbleBarVisible() ?: false
+
+    // TODO(b/404636836): Remove after launching refactorTaskbarUiState()
+    @Deprecated("Will be removed after launching refactorTaskbarUiState")
+    val isBubbleBarStashed: Boolean =
+        delegate.bubbleControllers?.bubbleStashController?.isStashed ?: false
 }

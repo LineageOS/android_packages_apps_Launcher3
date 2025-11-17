@@ -16,6 +16,8 @@
 package com.android.launcher3.taskbar.overlay;
 
 import static android.os.Trace.TRACE_TAG_APP;
+import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
+import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_CONSUME_IME_INSETS;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -25,10 +27,12 @@ import static com.android.launcher3.AbstractFloatingView.TYPE_ALL;
 import static com.android.launcher3.AbstractFloatingView.TYPE_REBIND_SAFE;
 import static com.android.launcher3.LauncherState.ALL_APPS;
 import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
+import static com.android.systemui.shared.Flags.cueBarAceMigration;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.gui.EarlyWakeupInfo;
 import android.os.Binder;
 import android.os.Trace;
@@ -39,6 +43,7 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.ViewRootImpl;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 
@@ -56,6 +61,7 @@ import com.android.systemui.shared.system.BlurUtils;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 
+import java.io.PrintWriter;
 import java.util.Optional;
 
 /**
@@ -65,7 +71,8 @@ import java.util.Optional;
  * instance, they need to be below the notification tray. If there are multiple overlays open, the
  * same window is used.
  */
-public final class TaskbarOverlayController {
+public final class TaskbarOverlayController
+        implements TaskbarControllers.LoggableTaskbarController {
 
     private static final String TAG = "TaskbarOverlayController";
     private static final String WINDOW_TITLE = "Taskbar Overlay";
@@ -77,6 +84,8 @@ public final class TaskbarOverlayController {
     private final LayoutParams mLayoutParams;
     private final int mMaxBlurRadius;
     private final BubbleActivityStarter mBubbleBarActivityStarter;
+    private String mDebugTouchableReason = "";
+    private final Rect mDebugTouchableBounds = new Rect();
 
     private final Listener mBubbleShowListener = new Listener() {
         @Override
@@ -113,7 +122,14 @@ public final class TaskbarOverlayController {
                         /* stash = */ true,
                         /* shouldBubblesFollow = */ !mBubbleShowRequested
                 );
-                hideWindow();
+                boolean cueBarVisible = cueBarAceMigration()
+                        && (mControllers.getSharedState() != null
+                        && mControllers.getSharedState().cueBarVisible);
+                // Don't hide the window when cueBar is visible. This method can be invoked when
+                // cueBar is clicked due to onTaskMovedToFront() and hide the cueBar unexpectedly.
+                if (!cueBarVisible) {
+                    hideWindow();
+                }
             });
         }
     };
@@ -153,6 +169,20 @@ public final class TaskbarOverlayController {
      * context for the current overlay window.
      */
     public TaskbarOverlayContext requestWindow() {
+        return requestWindowInternal(mLayoutParams, /* shouldListenForBubbles= */ true);
+    }
+
+    @SuppressLint("WrongConstant")
+    public TaskbarOverlayContext requestCueBarWindow() {
+        LayoutParams cueBarParams = createLayoutParams();
+        cueBarParams.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+        cueBarParams.privateFlags &= ~PRIVATE_FLAG_CONSUME_IME_INSETS;
+        return requestWindowInternal(cueBarParams, /* shouldListenForBubbles= */ false);
+    }
+
+    private TaskbarOverlayContext requestWindowInternal(LayoutParams layoutParams,
+            boolean shouldListenForBubbles) {
         if (DEBUG) {
             Log.d(TAG, "requestWindow: " + Utilities.getTrimmedStackTrace("requestWindow"));
             Log.d(TAG, "requestWindow: Was window already present? " + (mOverlayContext != null));
@@ -160,14 +190,20 @@ public final class TaskbarOverlayController {
         if (mOverlayContext == null) {
             mOverlayContext =
                     new TaskbarOverlayContext(mWindowContext, mTaskbarContext, mControllers);
-            mBubbleBarActivityStarter.addListener(mBubbleShowListener);
+            if (shouldListenForBubbles) {
+                mBubbleBarActivityStarter.addListener(mBubbleShowListener);
+            }
         }
 
+        WindowManager wm = mOverlayContext.getSystemService(WindowManager.class);
         if (!mProxyView.isOpen()) {
             mProxyView.show();
-            Optional.ofNullable(mOverlayContext.getSystemService(WindowManager.class))
-                    .ifPresent(m -> m.addView(mOverlayContext.getDragLayer(), mLayoutParams));
+            if (wm != null) {
+                wm.addView(mOverlayContext.getDragLayer(), layoutParams);
+            }
             TaskStackChangeListeners.getInstance().registerTaskStackListener(mTaskStackListener);
+        } else if (wm != null) {
+            wm.updateViewLayout(mOverlayContext.getDragLayer(), layoutParams);
         }
 
         return mOverlayContext;
@@ -202,6 +238,9 @@ public final class TaskbarOverlayController {
         if (DEBUG) {
             Log.d(TAG, "onDestroy: " + Utilities.getTrimmedStackTrace("onDestroy"));
             Log.d(TAG, "onDestroy: Was window already present? " + (mOverlayContext != null));
+        }
+        if (cueBarAceMigration()) {
+            mControllers.cueBarController.cleanUpOverlay();
         }
         TaskStackChangeListeners.getInstance().unregisterTaskStackListener(mTaskStackListener);
         Optional.ofNullable(mOverlayContext).ifPresent(c -> {
@@ -252,7 +291,7 @@ public final class TaskbarOverlayController {
         layoutParams.setFitInsetsTypes(0); // Handled by container view.
         layoutParams.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         layoutParams.setSystemApplicationOverlay(true);
-        layoutParams.privateFlags = PRIVATE_FLAG_CONSUME_IME_INSETS;
+        layoutParams.privateFlags |= PRIVATE_FLAG_CONSUME_IME_INSETS;
         return layoutParams;
     }
 
@@ -332,6 +371,13 @@ public final class TaskbarOverlayController {
                 || mTaskbarContext.getDragController().isSystemDragInProgress();
     }
 
+    @Override
+    public void dumpLogs(String prefix, PrintWriter pw) {
+        pw.println(prefix + "TaskbarOverlayController:");
+        pw.println(prefix + "\tlast touchable reason=" + mDebugTouchableReason);
+        pw.println(prefix + "\tlast touchable bounds=" + mDebugTouchableBounds);
+    }
+
     /**
      * Proxy view connecting taskbar drag layer to the overlay window.
      *
@@ -381,5 +427,48 @@ public final class TaskbarOverlayController {
         public boolean onControllerInterceptTouchEvent(MotionEvent ev) {
             return false;
         }
+    }
+
+    public void updateInsetsTouchability(ViewTreeObserver.InternalInsetsInfo insetsInfo) {
+        if (mControllers == null || mControllers.getSharedState() == null) {
+            insetsInfo.touchableRegion.setEmpty();
+            insetsInfo.setTouchableInsets(TOUCHABLE_INSETS_REGION);
+            mDebugTouchableReason = "Controllers not initialized";
+            mDebugTouchableBounds.setEmpty();
+            return;
+        }
+        // Start with an empty region
+        insetsInfo.touchableRegion.setEmpty();
+        final String reason;
+        final int touchableInsets;
+        final boolean cueBarVisible = cueBarAceMigration()
+                && mControllers.getSharedState().cueBarVisible;
+        final boolean hasOpenFloatingViews = mOverlayContext != null
+                && AbstractFloatingView.hasOpenView(mOverlayContext, TYPE_ALL);
+        if (isAnySystemDragInProgress()) {
+            touchableInsets = TOUCHABLE_INSETS_REGION;
+            reason = "System drag in progress (empty region)";
+        } else if (hasOpenFloatingViews) {
+            // If all apps or another floating view is open, be modal (intercept all touches within
+            // the frame).
+            touchableInsets = TOUCHABLE_INSETS_FRAME;
+            reason = "Floating view open (modal FRAME)";
+        } else if (cueBarVisible) {
+            mControllers.cueBarController.addTouchableRegion(insetsInfo.touchableRegion);
+            if (mControllers.cueBarController.isExpanded()) {
+                touchableInsets = TOUCHABLE_INSETS_FRAME;
+                reason = "Cue bar is visible (expanded, modal FRAME)";
+            } else {
+                touchableInsets = TOUCHABLE_INSETS_REGION;
+                reason = "Cue bar is visible (pill region)";
+            }
+        } else {
+            // Default: Let touches pass through us (empty region).
+            touchableInsets = TOUCHABLE_INSETS_REGION;
+            reason = "Default (empty pass-through region)";
+        }
+        insetsInfo.setTouchableInsets(touchableInsets);
+        mDebugTouchableReason = reason;
+        mDebugTouchableBounds.set(insetsInfo.touchableRegion.getBounds());
     }
 }

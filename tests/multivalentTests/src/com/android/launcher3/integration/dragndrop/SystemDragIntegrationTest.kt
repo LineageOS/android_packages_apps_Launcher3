@@ -54,7 +54,7 @@ import com.android.launcher3.CellLayout
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FILE
 import com.android.launcher3.dragndrop.SystemDragController
-import com.android.launcher3.dragndrop.SystemDragControllerImpl
+import com.android.launcher3.dragndrop.SystemDragControllerStub
 import com.android.launcher3.homescreenfiles.HomeScreenFilesNoOpProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider.Companion.HOME_SCREEN_FOLDER_RELATIVE_PATH
@@ -171,7 +171,7 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
         // (c) the dropped payload solely contains external primary media store URIs.
         val expectWorkspaceItemCreated =
             HomeScreenFilesProvider.INSTANCE[context] !is HomeScreenFilesNoOpProvider &&
-                SystemDragController.INSTANCE[context] is SystemDragControllerImpl &&
+                SystemDragController.INSTANCE[context] !is SystemDragControllerStub &&
                 itemList.map(ClipData.Item::getUri).all(this::isExternalPrimaryMediaStoreUri)
 
         // Verify workspace item creation (or lack thereof).

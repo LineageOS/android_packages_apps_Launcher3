@@ -84,9 +84,13 @@ public abstract class BaseContainerInterface<STATE_TYPE extends BaseState<STATE_
 
     public boolean rotationSupportedByActivity = false;
     @NonNull protected final STATE_TYPE mBackgroundState;
+    @NonNull protected final TaskAnimationManager mTaskAnimationManager;
 
-    protected BaseContainerInterface(@NonNull STATE_TYPE backgroundState) {
+    protected BaseContainerInterface(
+            @NonNull STATE_TYPE backgroundState,
+            @NonNull TaskAnimationManager taskAnimationManager) {
         mBackgroundState = backgroundState;
+        mTaskAnimationManager = taskAnimationManager;
     }
 
     @UiThread
@@ -102,7 +106,14 @@ public abstract class BaseContainerInterface<STATE_TYPE extends BaseState<STATE_
     @Nullable
     protected Runnable mOnInitBackgroundStateUICallback = null;
 
-    public abstract boolean isInLiveTileMode();
+    public boolean isInLiveTileMode() {
+        CONTAINER_TYPE container = getCreatedContainer();
+
+        return container != null
+                && container.getStateManager().getState() == stateFromGestureEndTarget(RECENTS)
+                && container.isStarted()
+                && mTaskAnimationManager.isRecentsAnimationRunning();
+    }
 
     public abstract void onAssistantVisibilityChanged(float assistantVisibility);
 

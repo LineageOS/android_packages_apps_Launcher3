@@ -26,4 +26,7 @@
 
     <!-- Used to identify taskbar overflow view in tests -->
     <item type="id" name="taskbar_overflow_view" />
+
+    <!-- Whether taskbar icon has a hover listener. -->
+    <item type="id" name="taskbar_icon_has_hover_listener" />
 </resources>

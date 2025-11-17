@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.View
 import com.android.launcher3.BaseActivity.EVENT_RESUMED
 import com.android.launcher3.DropTarget.DragObject
+import com.android.launcher3.Flags.enableHomeScreenFilesTrashing
 import com.android.launcher3.LauncherConstants.ActivityCodes
 import com.android.launcher3.SecondaryDropTarget.DeferredOnComplete
 import com.android.launcher3.dragndrop.DragLayer
@@ -85,7 +86,11 @@ class DropTargetHandler(launcher: Launcher) {
         val onDismissed = Runnable {
             if (item.isFileSystemItem()) {
                 HomeScreenFilesProvider.INSTANCE.get(mLauncher.asContext())
-                    .delete(requireNotNull(requireNotNull(item.intent).data), permanent = true)
+                    .delete(
+                        uri = requireNotNull(requireNotNull(item.intent).data),
+                        name = item.title.toString(),
+                        permanent = !enableHomeScreenFilesTrashing(),
+                    )
             }
             mLauncher.modelWriter.commitDelete()
         }

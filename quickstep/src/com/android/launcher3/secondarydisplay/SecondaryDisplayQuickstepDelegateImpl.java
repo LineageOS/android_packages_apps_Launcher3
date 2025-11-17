@@ -37,12 +37,12 @@ import com.android.launcher3.appprediction.AppsDividerView;
 import com.android.launcher3.appprediction.PredictionRowView;
 import com.android.launcher3.dagger.ActivityContextSingleton;
 import com.android.launcher3.model.data.PredictedContainerInfo;
-import com.android.launcher3.taskbar.TaskbarActivityContext;
+import com.android.launcher3.taskbar.TaskbarApiProxy;
 import com.android.launcher3.taskbar.TaskbarManager;
 import com.android.launcher3.views.ActivityContext;
 import com.android.quickstep.BaseContainerInterface;
 import com.android.quickstep.OverviewComponentObserver;
-import com.android.quickstep.TouchInteractionHandler.TISBinder;
+import com.android.quickstep.TISBinder;
 import com.android.quickstep.util.TISBindHelper;
 import com.android.quickstep.views.RecentsViewContainer;
 import com.android.quickstep.window.RecentsWindowManager;
@@ -151,10 +151,10 @@ public final class SecondaryDisplayQuickstepDelegateImpl extends SecondaryDispla
         if (taskbarManager == null) {
             return;
         }
-        TaskbarActivityContext currentDisplayTaskbarContext =
+        TaskbarApiProxy currentDisplayTaskbarApiProxy =
                 taskbarManager.getTaskbarForDisplay(displayId);
-        if (currentDisplayTaskbarContext != null) {
-            currentDisplayTaskbarContext.openTaskbarAllApps();
+        if (currentDisplayTaskbarApiProxy != null) {
+            currentDisplayTaskbarApiProxy.openTaskbarAllApps();
         }
     }
 
@@ -169,12 +169,11 @@ public final class SecondaryDisplayQuickstepDelegateImpl extends SecondaryDispla
         if (taskbarManager == null) {
             return;
         }
-        TaskbarActivityContext tac =
-                taskbarManager.getTaskbarForDisplay(displayId);
-        if (tac == null) {
+        TaskbarApiProxy taskbarApiProxy = taskbarManager.getTaskbarForDisplay(displayId);
+        if (taskbarApiProxy == null) {
             return;
         }
-        tac.updateStashControllerLauncherStateFlag(isVisible);
+        taskbarApiProxy.updateStashControllerLauncherStateFlag(isVisible);
     }
 
     @Override

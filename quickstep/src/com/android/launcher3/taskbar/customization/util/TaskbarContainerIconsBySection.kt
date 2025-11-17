@@ -14,19 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.dagger;
+package com.android.launcher3.taskbar.customization.util
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
-import javax.inject.Qualifier;
-
-/**
- * Qualifier for per display context created using [createDisplayContext].
- */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Qualifier
-public @interface DisplayContext {
-}
+data class TaskbarContainerIconsBySection<T>(
+    val nonOverflownItems: List<T>,
+    val overFlownItems: List<T>,
+)

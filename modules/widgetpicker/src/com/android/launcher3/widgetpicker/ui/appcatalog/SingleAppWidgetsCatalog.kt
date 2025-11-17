@@ -94,6 +94,7 @@ fun SingleAppWidgetsCatalogContent(
             description = null,
             closeBehavior = viewModel.closeBehavior,
             enableSwipeUpToDismiss = viewModel.enableSwipeUpToClose,
+            onSheetProgress = eventListeners::onSheetProgress,
             onSheetOpen = { viewModel.onUiReady() },
             onDismissSheet = { eventListeners.onClose() },
         ) {

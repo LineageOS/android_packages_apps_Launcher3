@@ -53,6 +53,7 @@ import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestUtil
 import com.android.launcher3.util.UserIconInfo.Companion.TYPE_MAIN
 import com.android.launcher3.util.UserIconInfo.Companion.TYPE_WORK
+import com.android.launcher3.util.XmlElement.Companion.getRootElement
 import com.android.launcher3.util.rule.MockUsersRule
 import com.android.launcher3.util.rule.MockUsersRule.MockUser
 import com.android.launcher3.widget.LauncherWidgetHolder
@@ -206,9 +207,11 @@ class AutoInstallsLayoutTest {
             widgetHolder,
             callback,
             SourceResources.wrap(targetContext.resources),
-            { Xml.newPullParser().also { it.setInput(StringReader(build())) } },
-            TAG_WORKSPACE,
-        )
+        ) {
+            Xml.newPullParser()
+                .also { it.setInput(StringReader(build())) }
+                .getRootElement(TAG_WORKSPACE)
+        }
 
     class MyCallback : LayoutParserCallback {
 

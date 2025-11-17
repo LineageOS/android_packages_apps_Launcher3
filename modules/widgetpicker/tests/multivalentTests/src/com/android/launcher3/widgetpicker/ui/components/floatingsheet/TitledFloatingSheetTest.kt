@@ -137,6 +137,7 @@ class TitledFloatingSheetTest {
                             description = null,
                             onDismissSheet = { isClosed = true },
                             onSheetOpen = {},
+                            onSheetProgress = {},
                         ) {
                             LazyColumn(modifier = Modifier.testTag(LIST_TEST_TAG)) {
                                 item { Text(CONTENT_TEXT) }

@@ -16,7 +16,6 @@
 
 package com.android.launcher3.taskbar
 
-import android.view.Display.DEFAULT_DISPLAY
 import android.view.View
 import com.android.launcher3.BubbleTextView
 import com.android.launcher3.BubbleTextView.RunningAppState
@@ -35,6 +34,7 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.whenever
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
@@ -264,7 +264,7 @@ class TaskbarViewControllerTest(deviceName: String) {
 
     @Test
     fun testUpdateDescriptionWithRunningState_notRunningItem_noStateInDescription() {
-        whenever(desktopVisibilityController.isInDesktopMode(DEFAULT_DISPLAY)).thenReturn(true)
+        setPrimaryDisplayInDesktopMode(true)
         val btv = createTestBtv(TEST_ITEM, NOT_RUNNING)
         taskbarViewController.updateDescriptionWithRunningState(btv)
         assertThat(btv.contentDescription).isEqualTo(TEST_DESCRIPTION)
@@ -272,7 +272,7 @@ class TaskbarViewControllerTest(deviceName: String) {
 
     @Test
     fun testUpdateDescriptionWithRunningState_runningItem_stateInDescription() {
-        whenever(desktopVisibilityController.isInDesktopMode(DEFAULT_DISPLAY)).thenReturn(true)
+        setPrimaryDisplayInDesktopMode(true)
         val btv = createTestBtv(TEST_ITEM, RUNNING)
         taskbarViewController.updateDescriptionWithRunningState(btv)
         assertThat(btv.contentDescription.toString())
@@ -281,7 +281,7 @@ class TaskbarViewControllerTest(deviceName: String) {
 
     @Test
     fun testUpdateDescriptionWithRunningState_closeItem_removesStateFromDescription() {
-        whenever(desktopVisibilityController.isInDesktopMode(DEFAULT_DISPLAY)).thenReturn(true)
+        setPrimaryDisplayInDesktopMode(true)
         val btv = createTestBtv(TEST_ITEM, RUNNING)
         taskbarViewController.updateDescriptionWithRunningState(btv)
 
@@ -292,7 +292,7 @@ class TaskbarViewControllerTest(deviceName: String) {
 
     @Test
     fun testUpdateDescriptionWithRunningState_runningTask_stateInDescription() {
-        whenever(desktopVisibilityController.isInDesktopMode(DEFAULT_DISPLAY)).thenReturn(true)
+        setPrimaryDisplayInDesktopMode(true)
         val btv = createTestBtv(TEST_TASK, RUNNING)
         taskbarViewController.updateDescriptionWithRunningState(btv)
         assertThat(btv.contentDescription.toString())
@@ -301,7 +301,7 @@ class TaskbarViewControllerTest(deviceName: String) {
 
     @Test
     fun testUpdateDescriptionWithRunningState_minimizeTask_updatesStateInDescription() {
-        whenever(desktopVisibilityController.isInDesktopMode(DEFAULT_DISPLAY)).thenReturn(true)
+        setPrimaryDisplayInDesktopMode(true)
         val btv = createTestBtv(TEST_TASK, RUNNING)
         taskbarViewController.updateDescriptionWithRunningState(btv)
 
@@ -313,7 +313,7 @@ class TaskbarViewControllerTest(deviceName: String) {
 
     @Test
     fun testUpdateDescriptionWithRunningState_runningTaskOutsideDesktop_noStateInDescription() {
-        whenever(desktopVisibilityController.isInDesktopMode(DEFAULT_DISPLAY)).thenReturn(false)
+        setPrimaryDisplayInDesktopMode(false)
         val btv = createTestBtv(TEST_TASK, RUNNING)
         taskbarViewController.updateDescriptionWithRunningState(btv)
         assertThat(btv.contentDescription).isEqualTo(TEST_DESCRIPTION)
@@ -324,5 +324,13 @@ class TaskbarViewControllerTest(deviceName: String) {
             this.tag = tag
             this.runningAppState = runningAppState
         }
+    }
+
+    private fun setPrimaryDisplayInDesktopMode(isInDesktopMode: Boolean) {
+        whenever(
+            desktopVisibilityController.isInDesktopMode(
+                taskbarUnitTestRule.activityContext.primaryDisplayId
+            )
+        ) doReturn isInDesktopMode
     }
 }

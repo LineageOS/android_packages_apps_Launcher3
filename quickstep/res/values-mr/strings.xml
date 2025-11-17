@@ -97,7 +97,7 @@
     <string name="allset_title_expressive_fallback" msgid="2829102990606405239">"तुमचे डिव्हाइस \nतयार आहे!"</string>
     <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"तुमच्या वापरासाठी सज्ज आहे!"</string>
     <string name="allset_subtitle_expressive" msgid="419688197551192358">"तुमच्या नवीन <xliff:g id="DEVICE">%1$s</xliff:g> चा आनंद घ्या!"</string>
-    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"तुमचे <xliff:g id="DEVICE">%1$s</xliff:g> वापरणे सुरू करण्यासाठी स्‍वाइप करा"</string>
+    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"तुमचा <xliff:g id="DEVICE">%1$s</xliff:g> वापरणे सुरू करण्यासाठी स्‍वाइप करा"</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"तुमचे <xliff:g id="DEVICE">%1$s</xliff:g> वापरणे सुरू करण्यासाठी टॅप करा"</string>
     <string name="allset_navigation_settings_expressive" msgid="3745595273748356"><annotation id="link">"कसे नेव्हिगेट करायचे हे निवडा"</annotation></string>
     <string name="allset_hint_expressive" msgid="756856423510976261">"वर स्वाइप करा"</string>

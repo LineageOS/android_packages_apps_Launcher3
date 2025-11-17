@@ -16,8 +16,8 @@
 
 package com.android.quickstep.recents.viewmodel
 
+import com.android.launcher3.dagger.DisplayId
 import com.android.quickstep.recents.data.RecentTasksRepository
-import com.android.quickstep.recents.di.DisplayId
 import com.android.systemui.shared.recents.model.ThumbnailData
 import javax.inject.Inject
 import kotlinx.coroutines.flow.combine

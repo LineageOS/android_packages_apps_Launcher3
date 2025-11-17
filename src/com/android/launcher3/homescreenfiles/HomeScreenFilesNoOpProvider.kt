@@ -39,7 +39,7 @@ class HomeScreenFilesNoOpProvider : HomeScreenFilesProvider {
     override fun moveToHomeScreen(uriList: List<Uri>): List<CompletableFuture<Boolean>> =
         uriList.map { CompletableFuture.completedFuture(false) }
 
-    override fun delete(uri: Uri, permanent: Boolean) {}
+    override fun delete(uri: Uri, name: String, permanent: Boolean) {}
 
     override fun query(): CompletableFuture<Map<Uri, HomeScreenFile>> =
         CompletableFuture.completedFuture(emptyMap())

@@ -22,6 +22,7 @@ import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
+import com.android.launcher3.Flags.FLAG_ENABLE_TASKBAR_UI_THREAD
 import com.android.launcher3.LauncherState
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.quickstep.SystemUiProxy
@@ -31,6 +32,9 @@ import com.android.wm.shell.desktopmode.DisplayDeskState
 import com.android.wm.shell.desktopmode.IDesktopTaskListener
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.google.common.truth.Truth.assertThat
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -120,6 +124,73 @@ class DesktopVisibilityControllerTest {
 
         assertThat(desktopVisibilityController.isInDesktopModeAndNotInOverview(FIRST_DISPLAY_ID))
             .isTrue()
+    }
+
+    @Test
+    @EnableFlags(
+        FLAG_ENABLE_TASKBAR_UI_THREAD,
+        FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND,
+        FLAG_ENABLE_MULTIPLE_DESKTOPS_FRONTEND
+    )
+    fun concurrentAccess_whenUiThreadEnabled_doesNotCrash() {
+        val listener = listenerCaptor.lastValue!!
+        val executor = Executors.newFixedThreadPool(10)
+        val latch = CountDownLatch(10)
+        val errors = mutableListOf<Throwable>()
+
+        val firstDisplay =
+            DisplayDeskState().apply {
+                displayId = FIRST_DISPLAY_ID
+                activeDeskId = FIRST_DISPLAY_ACTIVE_DESK_ID
+                deskIds = FIRST_DISPLAY_DESK_IDS
+            }
+        val secondDisplay =
+            DisplayDeskState().apply {
+                displayId = SECOND_DISPLAY_ID
+                activeDeskId = SECOND_DISPLAY_ACTIVE_DESK_ID
+                deskIds = SECOND_DISPLAY_DESK_IDS
+            }
+        val states = arrayOf(firstDisplay, secondDisplay)
+        val emptyStates = arrayOf<DisplayDeskState>()
+
+        // 1 writer thread, which posts to the main thread.
+        executor.submit {
+            try {
+                repeat(100) {
+                    listener.onListenerConnected(states, true)
+                    listener.onListenerConnected(emptyStates, false)
+                }
+            } catch (t: Throwable) {
+                synchronized(errors) { errors.add(t) }
+            } finally {
+                latch.countDown()
+            }
+        }
+
+        // 9 reader threads
+        repeat(9) {
+            executor.submit {
+                try {
+                    repeat(100) {
+                        desktopVisibilityController.getActiveDeskId(FIRST_DISPLAY_ID)
+                        desktopVisibilityController.isInDesktopMode(SECOND_DISPLAY_ID)
+                        desktopVisibilityController.getActiveDeskId(NON_DESKTOP_DISPLAY_ID)
+                    }
+                } catch (t: Throwable) {
+                    synchronized(errors) { errors.add(t) }
+                } finally {
+                    latch.countDown()
+                }
+            }
+        }
+
+        latch.await(5, TimeUnit.SECONDS)
+        executor.shutdown()
+
+        // Wait for main thread execution to finish
+        getInstrumentation().waitForIdleSync()
+
+        assertThat(errors).isEmpty()
     }
 
     private fun connectTaskListener() {

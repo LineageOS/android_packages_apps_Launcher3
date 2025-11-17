@@ -100,7 +100,7 @@
     <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"Մատը սահեցրեք վերև՝ <xliff:g id="DEVICE">%1$s</xliff:g>ով աշխատանքը սկսելու համար"</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"Հպեք՝ ձեր <xliff:g id="DEVICE">%1$s</xliff:g>ի հետ աշխատանքը սկսելու համար"</string>
     <string name="allset_navigation_settings_expressive" msgid="3745595273748356"><annotation id="link">"Ընտրեք տեղաշարժման տեսակը"</annotation></string>
-    <string name="allset_hint_expressive" msgid="756856423510976261">"Թերթեք վերև"</string>
+    <string name="allset_hint_expressive" msgid="756856423510976261">"Սահեցրեք վերև"</string>
     <string name="allset_button_hint_expressive" msgid="667643693410494225">"Հպեք գլխավոր էկրանի կոճակին"</string>
     <string name="allset_device_type_tablet" msgid="2173392009787325894">"պլանշետ"</string>
     <string name="allset_device_type_phone" msgid="6842334562074507337">"հեռախոս"</string>

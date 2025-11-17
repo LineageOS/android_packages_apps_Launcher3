@@ -346,7 +346,7 @@ public class SettingsActivity extends FragmentActivity
                     );
                     return !info.isTablet(info.realBounds);
                 case WORKSPACE_ITEMS_LABEL_HIDDEN:
-                    return Flags.workspaceHiddenLabels();
+                    return com.android.systemui.shared.Flags.workspaceItemsLabelHidden();
             }
             return true;
         }

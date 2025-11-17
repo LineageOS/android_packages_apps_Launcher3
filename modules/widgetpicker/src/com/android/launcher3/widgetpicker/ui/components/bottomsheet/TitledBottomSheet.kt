@@ -17,6 +17,8 @@
 package com.android.launcher3.widgetpicker.ui.components.bottomsheet
 
 import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
@@ -70,6 +72,7 @@ import com.android.launcher3.widgetpicker.ui.components.SheetDismissState
 import com.android.launcher3.widgetpicker.ui.components.SheetHeader
 import com.android.launcher3.widgetpicker.ui.components.WidgetPickerHostStateEffect
 import com.android.launcher3.widgetpicker.ui.components.accessibility.LocalAccessibilityState
+import com.android.launcher3.widgetpicker.ui.components.bottomsheet.TitledBottomSheetAnimations.OpenCloseAnimationSpec
 import com.android.launcher3.widgetpicker.ui.components.bottomsheet.TitledBottomSheetDimens.SHEET_HEIGHT_CAP_RATIO
 import com.android.launcher3.widgetpicker.ui.components.bottomsheet.TitledBottomSheetDimens.SheetHeightCapBreakpoint
 import com.android.launcher3.widgetpicker.ui.components.bottomsheet.TitledBottomSheetDimens.TALL_ASPECT_RATIO_THRESHOLD
@@ -110,6 +113,7 @@ fun TitledBottomSheet(
     sheetSize: SheetSize,
     closeBehavior: CloseBehavior = CloseBehavior.DRAG_HANDLE,
     enableSwipeUpToDismiss: Boolean = false,
+    onSheetProgress: (Float) -> Unit,
     onSheetOpen: () -> Unit,
     onDismissSheet: () -> Unit,
     content: @Composable () -> Unit,
@@ -134,8 +138,7 @@ fun TitledBottomSheet(
                     .maxSheetWidth(sheetSize)
                     .windowInsetsPadding(sheetWindowInsets)
         ) {
-            val animSpec: AnimationSpec<Float> = MaterialTheme.motionScheme.slowSpatialSpec()
-            val sheetState = remember { SheetDismissState(expandCollapseAnimationSpec = animSpec) }
+            val sheetState = remember { SheetDismissState(OpenCloseAnimationSpec) }
 
             val scope = rememberCoroutineScope()
 
@@ -161,6 +164,7 @@ fun TitledBottomSheet(
                         .fillMaxSize()
                         .dismissibleSheet(
                             sheetState = sheetState,
+                            onSheetProgress = onSheetProgress,
                             onSheetOpen = onSheetOpen,
                             onDismissSheet = onDismissSheet,
                             maxHeight = with(density) { maxHeight.toPx() },
@@ -359,6 +363,11 @@ private object TitledBottomSheetDimens {
         @Composable
         get() =
             WindowInsets.safeDrawing.only(sides = WindowInsetsSides.Bottom + WindowInsetsSides.Top)
+}
+
+private object TitledBottomSheetAnimations {
+    val OpenCloseAnimationSpec: AnimationSpec<Float> =
+        tween(durationMillis = 500, easing = FastOutSlowInEasing)
 }
 
 /** Different size variations supported for a [TitledBottomSheet] component. */

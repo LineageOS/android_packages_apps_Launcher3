@@ -541,6 +541,10 @@ public class TaskbarUIController implements BubbleBarController.BubbleBarLocatio
     public void onSwipeToUnstashTaskbar() {
     }
 
+    /** Called when the user navigates home using the home button. */
+    public void onNavigateHome() {
+    }
+
     /**
      * Called at the end of a gesture (see {@link GestureState.GestureEndTarget}).
      * @param endTarget Where the gesture animation is going to.

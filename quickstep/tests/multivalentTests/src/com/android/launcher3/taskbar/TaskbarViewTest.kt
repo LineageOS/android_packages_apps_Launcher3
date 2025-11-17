@@ -24,6 +24,8 @@ import android.platform.test.flag.junit.FlagsParameterization.allCombinationsOf
 import android.platform.test.flag.junit.SetFlagsRule
 import android.view.View
 import androidx.core.view.children
+import androidx.core.view.get
+import androidx.core.view.size
 import com.android.launcher3.Flags.FLAG_ENABLE_TASKBAR_DRAG_AND_DROP
 import com.android.launcher3.Flags.FLAG_ENABLE_TASKBAR_ICON_CONTAINER
 import com.android.launcher3.R
@@ -50,6 +52,7 @@ import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.ForceRtl
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext.Companion.getDeviceParams
+import com.android.launcher3.util.TestUtil.getOnUiThread
 import com.android.window.flags.Flags.FLAG_ENABLE_OVERFLOW_BUTTON_FOR_TASKBAR_PINNED_ITEMS
 import com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_OVERFLOW
 import com.google.common.truth.Truth
@@ -70,7 +73,7 @@ import platform.test.runner.parameterized.Parameters
 
 @RunWith(ParameterizedAndroidJunit4::class)
 @EnableFlags(FLAG_ENABLE_TASKBAR_OVERFLOW)
-class TaskbarViewTest(private val deviceName: String, flags: FlagsParameterization) {
+class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     companion object {
         @JvmStatic
@@ -91,10 +94,12 @@ class TaskbarViewTest(private val deviceName: String, flags: FlagsParameterizati
 
     @InjectController lateinit var viewController: TaskbarViewController
     private lateinit var taskbarView: TaskbarView
-    private val pinnedHitRectBuffer =
-        context.resources.getDimensionPixelSize(R.dimen.taskbar_pinned_hit_rect_buffer)
-    private var unpinnedHitRectBuffer =
-        context.resources.getDimensionPixelSize(R.dimen.taskbar_unpinned_hit_rect_buffer)
+
+    private val pinnedHitRectBuffer: Int
+        get() = context.resources.getDimensionPixelSize(R.dimen.taskbar_pinned_hit_rect_buffer)
+
+    private val unpinnedHitRectBuffer: Int
+        get() = context.resources.getDimensionPixelSize(R.dimen.taskbar_unpinned_hit_rect_buffer)
 
     private val iconViews: Array<View>
         get() = taskbarView.iconViews
@@ -1078,6 +1083,64 @@ class TaskbarViewTest(private val deviceName: String, flags: FlagsParameterizati
 
         runOnMainSync { taskbarView.updateItems(emptyArray(), listOf(recentTask), emptyList()) }
         verify(recentTask, times(1)).bitmapInfos // Icon is not generated a second time.
+    }
+
+    @Test
+    fun testUpdateItems_taskReplaced_reusesHoverListener() {
+        val callbacks =
+            spy(
+                getOnUiThread {
+                    TaskbarViewCallbacksFactory.newInstance(activityContext)
+                        .create(activityContext, activityContext.controllers, taskbarView)
+                }
+            )
+        taskbarView.init(callbacks)
+
+        val task1 = createRecentTask(id = 0)
+        runOnMainSync { taskbarView.updateItems(emptyArray(), listOf(task1), emptyList()) }
+        val icon1 = taskbarView[taskbarView.size - 1]
+
+        val task2 = createRecentTask(id = 1)
+        runOnMainSync { taskbarView.updateItems(emptyArray(), listOf(task2), emptyList()) }
+        val icon2 = taskbarView[taskbarView.size - 1]
+
+        assertThat(icon1).isSameInstanceAs(icon2)
+        verify(callbacks, times(1)).getIconOnHoverListener(icon1)
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_OVERFLOW_BUTTON_FOR_TASKBAR_PINNED_ITEMS)
+    fun testIsPointOnOverflowIcon() {
+        assertThat(taskbarView.isOverflowViewShowing).isFalse()
+        assertThat(taskbarView.isPointOnOverflowIcon(floatArrayOf(0f, 0f))).isFalse()
+
+        val numHotseatIcons = activityContext.deviceProfile.inv.numShownHotseatIcons
+        runOnMainSync {
+            taskbarView.updateItems(
+                createHotseatItems(numHotseatIcons + 1),
+                emptyList(),
+                emptyList(),
+            )
+        }
+
+        forceLayoutUpdate()
+        val overflowIcon = taskbarView.getTaskbarPinnedOverflowView()
+        assertThat(taskbarView.isOverflowViewShowing).isTrue()
+        val overflowRect = Rect()
+        activityContext.dragLayer.getDescendantRectRelativeToSelf(overflowIcon, overflowRect)
+
+        // Point inside the overflow icon
+        val pointInside =
+            floatArrayOf(overflowRect.centerX().toFloat(), overflowRect.centerY().toFloat())
+        assertThat(taskbarView.isPointOnOverflowIcon(pointInside)).isTrue()
+
+        // Point outside the overflow icon
+        val pointOutside = floatArrayOf(overflowRect.right + 1F, overflowRect.bottom + 1F)
+        assertThat(taskbarView.isPointOnOverflowIcon(pointOutside)).isFalse()
+
+        // Point on the edge of the overflow icon
+        val pointOnEdge = floatArrayOf(overflowRect.left.toFloat(), overflowRect.top.toFloat())
+        assertThat(taskbarView.isPointOnOverflowIcon(pointOnEdge)).isTrue()
     }
 
     /** Returns the number of expected recents outside of the overflow based on [hotseatSize]. */

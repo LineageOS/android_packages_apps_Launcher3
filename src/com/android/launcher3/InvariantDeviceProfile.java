@@ -37,6 +37,7 @@ import static com.android.launcher3.util.DisplayController.CHANGE_SUPPORTED_BOUN
 import static com.android.launcher3.util.DisplayController.CHANGE_TASKBAR_PINNING;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.SimpleBroadcastReceiver.actionsFilter;
+import static com.android.launcher3.util.XmlElement.getRootElement;
 
 import android.content.Context;
 import android.content.Intent;
@@ -48,11 +49,9 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Trace;
 import android.text.TextUtils;
-import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
-import android.util.Xml;
 
 import androidx.annotation.DimenRes;
 import androidx.annotation.IntDef;
@@ -84,10 +83,10 @@ import com.android.launcher3.util.ResourceHelper;
 import com.android.launcher3.util.SimpleBroadcastReceiver;
 import com.android.launcher3.util.TaskbarModeUtil;
 import com.android.launcher3.util.WindowBounds;
+import com.android.launcher3.util.XmlElement;
 import com.android.launcher3.util.window.CachedDisplayInfo;
 import com.android.launcher3.util.window.WindowManagerProxy;
 
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
@@ -326,7 +325,7 @@ public class InvariantDeviceProfile {
                     && enableTwoLinesInAllApps != prefs.get(ENABLE_TWOLINE_ALLAPPS_TOGGLE)) {
                 onConfigChanged();
             } else if (WORKSPACE_ITEMS_LABEL_HIDDEN.getSharedPrefKey().equals(key)
-                    && Flags.workspaceHiddenLabels()) {
+                    && com.android.systemui.shared.Flags.workspaceItemsLabelHidden()) {
                 onConfigChanged();
             }
         };
@@ -490,7 +489,7 @@ public class InvariantDeviceProfile {
                     .setIsMultiDisplay(deviceType == TYPE_MULTI_DISPLAY)
                     .setWindowBounds(bounds)
                     .setDotRendererCache(dotRendererCache);
-            if (Flags.workspaceHiddenLabels()) {
+            if (com.android.systemui.shared.Flags.workspaceItemsLabelHidden()) {
                 builder.setIsWorkspaceItemsLabelHidden(
                         LauncherPrefs.get(context).get(WORKSPACE_ITEMS_LABEL_HIDDEN)
                 );
@@ -594,29 +593,19 @@ public class InvariantDeviceProfile {
         Context context = displayInfo.context;
 
         try (XmlResourceParser parser = context.getResources().getXml(R.xml.device_profiles)) {
-            final int depth = parser.getDepth();
-            int type;
-            while (((type = parser.next()) != XmlPullParser.END_TAG ||
-                    parser.getDepth() > depth) && type != XmlPullParser.END_DOCUMENT) {
-                if ((type == XmlPullParser.START_TAG)
-                        && GridOption.TAG_NAME.equals(parser.getName())) {
-                    GridOption gridOption = new GridOption(
-                            context, Xml.asAttributeSet(parser), displayInfo);
-                    if (firstGridFilter(gridOption, displayInfo.getDeviceType(), allowDisabledGrid,
-                            isFixedLandscapeMode)) {
-                        final int displayDepth = parser.getDepth();
-                        while (((type = parser.next()) != XmlPullParser.END_TAG
-                                || parser.getDepth() > displayDepth)
-                                && type != XmlPullParser.END_DOCUMENT) {
-                            if ((type == XmlPullParser.START_TAG) && "display-option".equals(
-                                    parser.getName())) {
-                                profiles.add(new DisplayOption(gridOption, context,
-                                        Xml.asAttributeSet(parser)));
-                            }
-                        }
-                    }
+            for (XmlElement element :
+                    getRootElement(parser).childIterator(GridOption.TAG_NAME)) {
+                GridOption gridOption = new GridOption(context, element, displayInfo);
+                if (!firstGridFilter(gridOption, displayInfo.getDeviceType(), allowDisabledGrid,
+                        isFixedLandscapeMode)) {
+                    continue;
+                }
+
+                for (XmlElement child : element.childIterator("display-option")) {
+                    profiles.add(new DisplayOption(gridOption, context, child));
                 }
             }
+
         } catch (IOException | XmlPullParserException e) {
             throw new RuntimeException(e);
         }
@@ -670,15 +659,8 @@ public class InvariantDeviceProfile {
                         ? displayInfo.getStableDensityScaleFactor() : 1.0f;
 
         try (XmlResourceParser parser = resourceHelper.getXml()) {
-            final int depth = parser.getDepth();
-            int type;
-            while (((type = parser.next()) != XmlPullParser.END_TAG
-                    || parser.getDepth() > depth) && type != XmlPullParser.END_DOCUMENT) {
-                if ((type == XmlPullParser.START_TAG)
-                        && "GridSize".equals(parser.getName())) {
-                    gridSizes.add(new GridSize(context, Xml.asAttributeSet(parser),
-                            stableDensityScale));
-                }
+            for (XmlElement gridSizeEl : getRootElement(parser).childIterator("GridSize")) {
+                gridSizes.add(new GridSize(context, gridSizeEl, stableDensityScale));
             }
         } catch (IOException | XmlPullParserException e) {
             throw new RuntimeException(e);
@@ -701,15 +683,8 @@ public class InvariantDeviceProfile {
                         ? displayInfo.getStableDensityScaleFactor() : 1.0f;
 
         try (XmlResourceParser parser = resourceHelper.getXml()) {
-            final int depth = parser.getDepth();
-            int type;
-            while (((type = parser.next()) != XmlPullParser.END_TAG
-                    || parser.getDepth() > depth) && type != XmlPullParser.END_DOCUMENT) {
-                if ((type == XmlPullParser.START_TAG)
-                        && "AllAppsSize".equals(parser.getName())) {
-                    allAppsSizes.add(new AllAppsSize(context, Xml.asAttributeSet(parser),
-                            stableDensityScale));
-                }
+            for (XmlElement appSizeEl : getRootElement(parser).childIterator("AllAppsSize")) {
+                allAppsSizes.add(new AllAppsSize(context, appSizeEl, stableDensityScale));
             }
         } catch (IOException | XmlPullParserException e) {
             throw new RuntimeException(e);
@@ -822,14 +797,9 @@ public class InvariantDeviceProfile {
     public static List<GridOption> parseAllDefinedGridOptions(Context context, Info displayInfo) {
         List<GridOption> result = new ArrayList<>();
         try (XmlResourceParser parser = context.getResources().getXml(R.xml.device_profiles)) {
-            final int depth = parser.getDepth();
-            int type;
-            while (((type = parser.next()) != XmlPullParser.END_TAG
-                    || parser.getDepth() > depth) && type != XmlPullParser.END_DOCUMENT) {
-                if ((type == XmlPullParser.START_TAG)
-                        && GridOption.TAG_NAME.equals(parser.getName())) {
-                    result.add(new GridOption(context, Xml.asAttributeSet(parser), displayInfo));
-                }
+            for (XmlElement gridOptionEl :
+                    getRootElement(parser).childIterator(GridOption.TAG_NAME)) {
+                result.add(new GridOption(context, gridOptionEl, displayInfo));
             }
         } catch (IOException | XmlPullParserException e) {
             Log.e(TAG, "Error parsing device profile", e);
@@ -1169,9 +1139,8 @@ public class InvariantDeviceProfile {
         // should be aligned with.
         private final int mAllAppsAlignedWithWorkspaceRow;
 
-        public GridOption(Context context, AttributeSet attrs, Info displayInfo) {
-            TypedArray a = context.obtainStyledAttributes(
-                    attrs, R.styleable.GridDisplayOption);
+        public GridOption(Context context, XmlElement el, Info displayInfo) {
+            TypedArray a = el.obtainAttrs(context, R.styleable.GridDisplayOption);
             name = a.getString(R.styleable.GridDisplayOption_name);
             gridTitle = a.getString(R.styleable.GridDisplayOption_gridTitle);
             gridIconId = a.getResourceId(
@@ -1404,8 +1373,8 @@ public class InvariantDeviceProfile {
         final String mDbFile;
         final int mDefaultLayoutId;
 
-        GridSize(Context context, AttributeSet attrs, float stableDensityScale) {
-            TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.GridSize);
+        GridSize(Context context, XmlElement el, float stableDensityScale) {
+            TypedArray a = el.obtainAttrs(context, R.styleable.GridSize);
 
             mNumRows = (int) a.getFloat(R.styleable.GridSize_numGridRows, 0);
             mNumColumns = (int) a.getFloat(R.styleable.GridSize_numGridColumns, 0);
@@ -1441,8 +1410,8 @@ public class InvariantDeviceProfile {
         // The minimum device pixel width to which the spec can be applied.
         final float mMinDeviceWidthPx;
 
-        AllAppsSize(Context context, AttributeSet attrs, float stableDensityScale) {
-            TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.AllAppsSize);
+        AllAppsSize(Context context, XmlElement el, float stableDensityScale) {
+            TypedArray a = el.obtainAttrs(context, R.styleable.AllAppsSize);
 
             mAlignWithWorkspaceRow =  a.getInt(R.styleable.AllAppsSize_alignWithWorkspaceRow, -1);
             mNumColumns = a.getInt(R.styleable.AllAppsSize_allAppsColumns, -1);
@@ -1480,16 +1449,14 @@ public class InvariantDeviceProfile {
 
         private final boolean[] startAlignTaskbar = new boolean[COUNT_SIZES];
 
-        DisplayOption(GridOption grid, Context context, AttributeSet attrs) {
+        DisplayOption(GridOption grid, Context context, XmlElement el) {
             this.grid = grid;
 
             Resources res = context.getResources();
 
-            TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ProfileDisplayOption);
-
+            TypedArray a = el.obtainAttrs(context, R.styleable.ProfileDisplayOption);
             minWidthDps = a.getFloat(R.styleable.ProfileDisplayOption_minWidthDps, 0);
             minHeightDps = a.getFloat(R.styleable.ProfileDisplayOption_minHeightDps, 0);
-
             canBeDefault = a.getBoolean(R.styleable.ProfileDisplayOption_canBeDefault, false);
 
             float x;

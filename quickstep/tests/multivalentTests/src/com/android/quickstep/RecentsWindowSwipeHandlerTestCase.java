@@ -20,7 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
 
 import com.android.launcher3.util.LauncherMultivalentJUnit;
-import com.android.quickstep.fallback.FallbackRecentsView;
+import com.android.quickstep.fallback.FallbackWindowRecentsView;
 import com.android.quickstep.fallback.RecentsState;
 import com.android.quickstep.window.RecentsWindowManager;
 import com.android.quickstep.window.RecentsWindowSwipeHandler;
@@ -33,16 +33,16 @@ import org.mockito.Mock;
 public class RecentsWindowSwipeHandlerTestCase extends AbsSwipeUpHandlerTestCase<
         RecentsState,
         RecentsWindowManager,
-        FallbackRecentsView<RecentsWindowManager>,
+        FallbackWindowRecentsView,
         RecentsWindowSwipeHandler,
         FallbackWindowInterface> {
 
-    @Mock private FallbackRecentsView<RecentsWindowManager> mRecentsView;
+    @Mock private FallbackWindowRecentsView mRecentsView;
     @Mock private RecentsWindowManager mRecentsWindowManager;
 
     @NonNull
     @Override
-    protected RecentsWindowSwipeHandler createSwipeHandler(long touchTimeMs,
+    protected RecentsWindowSwipeHandler createSwipeHandlerInternal(long touchTimeMs,
             boolean continuingLastGesture) {
         return new RecentsWindowSwipeHandler(
                 mContext,
@@ -65,7 +65,7 @@ public class RecentsWindowSwipeHandlerTestCase extends AbsSwipeUpHandlerTestCase
 
     @NonNull
     @Override
-    protected FallbackRecentsView<RecentsWindowManager> getRecentsView() {
+    protected FallbackWindowRecentsView getRecentsView() {
         return mRecentsView;
     }
 

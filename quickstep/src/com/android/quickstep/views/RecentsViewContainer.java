@@ -37,6 +37,7 @@ import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.views.ScrimView;
 import com.android.quickstep.BaseContainerInterface;
 import com.android.quickstep.fallback.RecentsState;
+import com.android.quickstep.recents.di.RecentsComponent;
 import com.android.quickstep.split.SplitSelectStateController;
 
 /**
@@ -222,4 +223,9 @@ public interface RecentsViewContainer extends ActivityContext, RecentsViewContai
      */
     void goToRecentsState(RecentsState recentsState, boolean animated,
             Animator.AnimatorListener listener);
+
+    /**
+     * Returns the Recents component
+     */
+    RecentsComponent getRecentsComponent();
 }

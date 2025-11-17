@@ -23,6 +23,7 @@ import android.view.View
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.AbstractFloatingViewHelper
 import com.android.launcher3.DropTargetHandler
+import com.android.launcher3.Flags.enableHomeScreenFilesTrashing
 import com.android.launcher3.LauncherConstants
 import com.android.launcher3.R
 import com.android.launcher3.SecondaryDropTarget
@@ -346,10 +347,13 @@ class PopupDataSource @Inject constructor() {
             category = PopupCategory.SYSTEM_SHORTCUT_FIXED,
         )
 
-    val deletePermanently =
+    val deleteFileSystemItem =
         PopupData(
             iconResId = R.drawable.ic_home_screen_files_context_menu_move_to_trash,
-            labelResId = R.string.home_screen_files_context_menu_delete_permanently_label,
+            labelResId =
+                if (enableHomeScreenFilesTrashing())
+                    R.string.home_screen_files_context_menu_move_to_trash_label
+                else R.string.home_screen_files_context_menu_delete_permanently_label,
             popupAction = handleRemove,
             category = PopupCategory.SYSTEM_SHORTCUT_FIXED,
         )

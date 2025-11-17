@@ -23,7 +23,7 @@ import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.ItemInfoWithIcon
 import com.android.quickstep.util.SingleTask
 
-internal interface TaskbarOverflowItem {
+interface TaskbarOverflowItem {
     /** The drawable icon for the item. */
     val drawableIcon: Drawable?
 

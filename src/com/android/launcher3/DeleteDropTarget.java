@@ -16,6 +16,7 @@
 
 package com.android.launcher3;
 
+import static com.android.launcher3.Flags.enableHomeScreenFilesTrashing;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_ITEM_DROPPED_ON_CANCEL;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_ITEM_DROPPED_ON_REMOVE;
 
@@ -93,15 +94,17 @@ public class DeleteDropTarget extends ButtonDropTarget {
     }
 
     /**
-     * Set the drop target's text to either "Remove", "Delete permanently" or "Cancel" depending on
-     * the drag item.
+     * Set the drop target's text to either "Remove", "Delete permanently", "Move to trash" or
+     * "Cancel" depending on the drag item.
      */
     private void setTextBasedOnDragSource(ItemInfo item) {
         if (!TextUtils.isEmpty(mText)) {
             int resId;
             if (canRemove(item)) {
                 if (HomeScreenFilesUtilsKt.isFileSystemItem(item)) {
-                    resId = R.string.home_screen_files_context_menu_delete_permanently_label;
+                    resId = enableHomeScreenFilesTrashing()
+                            ? R.string.home_screen_files_context_menu_move_to_trash_label
+                            : R.string.home_screen_files_context_menu_delete_permanently_label;
                 } else {
                     resId = R.string.remove_drop_target_label;
                 }

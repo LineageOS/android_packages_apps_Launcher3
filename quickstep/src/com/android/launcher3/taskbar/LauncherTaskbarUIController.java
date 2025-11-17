@@ -17,7 +17,6 @@ package com.android.launcher3.taskbar;
 
 import static com.android.launcher3.Flags.enableTaskbarUiThread;
 import static com.android.launcher3.Flags.refactorTaskbarUiState;
-import static com.android.launcher3.Flags.syncAppLaunchWithTaskbarStash;
 import static com.android.launcher3.QuickstepTransitionManager.TASKBAR_TO_APP_DURATION;
 import static com.android.launcher3.QuickstepTransitionManager.TRANSIENT_TASKBAR_TRANSITION_DURATION;
 import static com.android.launcher3.QuickstepTransitionManager.getTaskbarToHomeDuration;
@@ -130,6 +129,8 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
     // When overview-in-a-window is enabled, that window is the container, else it is mLauncher.
     private RecentsViewContainerInteractor mRecentsViewContainer;
     private @Nullable RecentsViewInteractor mRecentsViewInteractor;
+
+    private boolean mIgnoreOverlayUpdateOnHomePress = false;
 
     public LauncherTaskbarUIController(LauncherInteractor launcher) {
         mLauncher = launcher;
@@ -292,6 +293,9 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
      */
     @Override
     public void onLauncherVisibilityChanged(boolean isVisible) {
+        if (mControllers == null) {
+            return;
+        }
         final TaskbarActivityContext taskbarContext = mControllers.taskbarActivityContext;
         if (taskbarContext.showLockedTaskbarOnHome()
                 && !taskbarContext.showDesktopTaskbarForFreeformDisplay()
@@ -401,9 +405,6 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
      * Create Taskbar animation to be played alongside the Launcher app launch animation.
      */
     public @Nullable Animator createAnimToApp() {
-        if (!syncAppLaunchWithTaskbarStash()) {
-            return null;
-        }
         TaskbarStashController stashController = mControllers.taskbarStashController;
         stashController.updateStateForFlag(TaskbarStashController.FLAG_IN_APP, true);
         return stashController.createApplyStateAnimator(stashController.getStashDuration());
@@ -415,8 +416,7 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
      * app launch animation.
      */
     public void setIgnoreInAppFlagForSync(boolean enabled) {
-        if (syncAppLaunchWithTaskbarStash()
-                && mControllers != null
+        if (mControllers != null
                 && mControllers.taskbarStashController != null) {
             mControllers.taskbarStashController.updateStateForFlag(FLAG_IGNORE_IN_APP, enabled);
         }
@@ -500,6 +500,14 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
      *                 1 => use in-app layout
      */
     public void onTaskbarInAppDisplayProgressUpdate(float progress, int progressIndex) {
+        if (progressIndex == MINUS_ONE_PAGE_PROGRESS_INDEX && mIgnoreOverlayUpdateOnHomePress) {
+            // Once we settle back on home, reset to allow updates to the navigation bar again
+            if (progress == 0) {
+                mIgnoreOverlayUpdateOnHomePress = false;
+            } else {
+                return;
+            }
+        }
         mTaskbarInAppDisplayProgressMultiProp.get(progressIndex).setValue(progress);
         if (mControllers == null) {
             // This method can be called before init() is called.
@@ -587,6 +595,11 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
         return mTaskbarLauncherStateController.isInOverviewUi();
     }
 
+    private boolean isInMinusOneUi() {
+        return mTaskbarInAppDisplayProgressMultiProp.get(MINUS_ONE_PAGE_PROGRESS_INDEX).getValue()
+                == 1;
+    }
+
     @Override
     public void onTaskbarAllAppsClosed() {
         mLauncher.onTaskbarAllAppsClosed();
@@ -670,6 +683,8 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
                 "SYSUI_SURFACE_PROGRESS_INDEX",
                 "LAUNCHER_PAUSE_PROGRESS_INDEX");
         pw.println(String.format("%s\tmRecentsWindowContainer=%s", prefix, mRecentsViewContainer));
+        pw.println(String.format("%s\tmIgnoreOverlayUpdateOnHomePress=%b", prefix,
+                mIgnoreOverlayUpdateOnHomePress));
 
         mTaskbarLauncherStateController.dumpLogs(prefix + "\t", pw);
     }
@@ -729,5 +744,19 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
         // So in that case, treat the progress as 0 instead.
         float pauseProgress = isIconAlignedWithHotseat() ? mLauncherPauseProgress.value : 0;
         onTaskbarInAppDisplayProgressUpdate(pauseProgress, LAUNCHER_PAUSE_PROGRESS_INDEX);
+    }
+
+    /**
+     * Sets a flag to ignore the next scroll update from the -1 page (overlay).
+     * <p>
+     * The home button press triggers an immediate animation to the home screen, but
+     * the Workspace also starts its own scroll animation which sends conflicting progress
+     * updates. This flag ensures we ignore those updates, to prevent a jump in the nav bar.
+     */
+    @Override
+    public void onNavigateHome() {
+        if (isInMinusOneUi()) {
+            mIgnoreOverlayUpdateOnHomePress = true;
+        }
     }
 }

@@ -550,6 +550,7 @@ android_library {
         "protolog-group",
         "displaylib",
         "com.android.window.flags.window-aconfig-java",
+        "com.android.extensions.computercontrol",
     ],
     manifest: "quickstep/AndroidManifest.xml",
     min_sdk_version: "current",

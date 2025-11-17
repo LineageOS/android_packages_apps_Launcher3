@@ -16,6 +16,7 @@
 
 package com.android.launcher3.folder;
 
+import static com.android.launcher3.UtilitiesKt.drawWorkspaceItemSelectionHighlight;
 import static com.android.launcher3.folder.ClippedFolderIconLayoutRule.ICON_OVERLAP_FACTOR;
 import static com.android.launcher3.folder.ClippedFolderIconLayoutRule.MAX_NUM_ITEMS_IN_PREVIEW;
 import static com.android.launcher3.folder.FolderGridOrganizer.createFolderGridOrganizer;
@@ -592,6 +593,11 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
+        // Draw selection highlight before super.dispatchDraw() so that it appears behind the title
+        // text.
+        if (isSelected()) {
+            drawWorkspaceItemSelectionHighlight(canvas, this);
+        }
         super.dispatchDraw(canvas);
 
         if (!mBackgroundIsVisible) return;

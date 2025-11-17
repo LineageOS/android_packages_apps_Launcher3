@@ -37,13 +37,13 @@ import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.app.animation.Interpolators.LINEAR
-import com.android.app.displaylib.PerDisplayRepository
 import com.android.launcher3.AbstractFloatingView.TYPE_TASK_MENU
 import com.android.launcher3.AbstractFloatingView.getTopOpenViewWithType
 import com.android.launcher3.Flags.enableDesktopExplodedView
 import com.android.launcher3.PagedView.INVALID_PAGE
 import com.android.launcher3.R
 import com.android.launcher3.Utilities.getPivotsForScalingRectToRect
+import com.android.launcher3.dagger.DisplayId
 import com.android.launcher3.statehandlers.DesktopVisibilityController.Companion.INACTIVE_DESK_ID
 import com.android.launcher3.statemanager.BaseState
 import com.android.launcher3.util.DisplayController
@@ -52,8 +52,8 @@ import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.window.WindowManagerProxy.DesktopVisibilityListener
 import com.android.quickstep.GestureState
 import com.android.quickstep.RemoteTargetGluer.RemoteTargetHandle
+import com.android.quickstep.RotationTouchHelper
 import com.android.quickstep.TaskAnimationManager
-import com.android.quickstep.recents.di.DisplayId
 import com.android.quickstep.util.DesksUtils.Companion.areMultiDesksFlagsEnabled
 import com.android.quickstep.util.DesktopTask
 import com.android.quickstep.util.GroupTask
@@ -87,9 +87,9 @@ constructor(
     private val displayController: DisplayController,
     private val desktopState: DesktopState,
     @DisplayId private val displayId: Int,
-    taskAnimationManagerRepo: PerDisplayRepository<TaskAnimationManager>,
+    private val taskAnimationManager: TaskAnimationManager,
+    private val rotationTouchHelper: RotationTouchHelper,
 ) : DesktopVisibilityListener {
-    private val taskAnimationManager = taskAnimationManagerRepo[displayId]
     val taskViews = TaskViewsIterable(recentsView)
 
     var keyboardFocusTask: KeyboardFocusTask = KeyboardFocusTask.Unfocused
@@ -503,7 +503,7 @@ constructor(
         if (displayId != this.displayId) return
         if (oldActiveDesk != INACTIVE_DESK_ID || newActiveDesk == INACTIVE_DESK_ID) return
         // TaskAnimationManager.onTasksAppeared already handles desktop task launching.
-        if (taskAnimationManager?.isRecentsAnimationRunning == true) return
+        if (taskAnimationManager.isRecentsAnimationRunning) return
         // Desktop launch will close Recents when tra]nsition is finished.
         if (recentsView.desktopRecentsController?.isDesktopLaunchOngoing() == true) return
 
@@ -910,6 +910,13 @@ constructor(
     fun isTaskLaunchingInFreeFromWindow(taskId: Int, apps: Array<RemoteAnimationTarget>): Boolean {
         return apps.firstOrNull { it.taskId == taskId }?.windowConfiguration?.windowingMode ==
             WINDOWING_MODE_FREEFORM
+    }
+
+    fun reapplyActiveRotation() {
+        recentsView.setLayoutRotation(
+            rotationTouchHelper.currentActiveRotation,
+            rotationTouchHelper.displayRotation,
+        )
     }
 
     companion object {

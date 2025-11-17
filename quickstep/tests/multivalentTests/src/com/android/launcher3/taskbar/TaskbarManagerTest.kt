@@ -63,9 +63,21 @@ class TaskbarManagerTest {
 
     @Test
     @UserLocked
-    fun onUserUnlocked_directBootStage_taskbarRecreatedOutsideBootAppContext() {
+    fun userLocked_primaryDisplay_hasTaskbarInDirectBootSandbox() {
         assertThat(activityContext.applicationContext)
             .isInstanceOf(TaskbarBootAppContext::class.java)
+    }
+
+    @Test
+    @UserLocked
+    fun userLocked_externalDisplay_missingTaskbarInDirectBootStage() {
+        val displayId = context.virtualDisplayRule.add()
+        assertThat(taskbarManager.getTaskbarForDisplay(displayId)).isNull()
+    }
+
+    @Test
+    @UserLocked
+    fun onUserUnlocked_directBootStage_taskbarRecreatedOutsideBootAppContext() {
         taskbarUnitTestRule.unlockUser()
         assertThat(activityContext.applicationContext).isInstanceOf(SandboxApplication::class.java)
     }
@@ -74,25 +86,11 @@ class TaskbarManagerTest {
     @UserLocked
     fun onUserUnlocked_directBootStage_connectedDisplay_taskbarRecreatedOutsideBootAppContext() {
         val displayId = context.virtualDisplayRule.add()
-        var application =
-            checkNotNull(taskbarManager.getTaskbarForDisplay(displayId)).applicationContext
-        assertThat(application).isInstanceOf(TaskbarBootAppContext::class.java)
-
         taskbarUnitTestRule.unlockUser()
-        application =
+
+        val application =
             checkNotNull(taskbarManager.getTaskbarForDisplay(displayId)).applicationContext
         assertThat(application).isInstanceOf(SandboxApplication::class.java)
-    }
-
-    @Test
-    @UserLocked
-    fun onUserUnlocked_directBootStage_connectedDisplay_deviceProfileCacheCleared() {
-        val displayId = context.virtualDisplayRule.add()
-        val dp1 = checkNotNull(taskbarManager.getTaskbarForDisplay(displayId)).deviceProfile
-
-        taskbarUnitTestRule.unlockUser()
-        val dp2 = checkNotNull(taskbarManager.getTaskbarForDisplay(displayId)).deviceProfile
-        assertThat(dp1).isNotSameInstanceAs(dp2)
     }
 
     @Test

@@ -19,16 +19,23 @@ package com.android.quickstep.compose
 import android.content.Context
 import android.os.Trace
 import android.view.View
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composer
 import androidx.compose.runtime.CompositionTracer
 import androidx.compose.runtime.InternalComposeTracingApi
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import com.android.compose.theme.PlatformTheme
 import com.android.launcher3.compose.ComposeFacade
 import com.android.launcher3.compose.core.BaseComposeFacade
 import com.android.quickstep.compose.core.QuickstepComposeFeatures
+import com.android.quickstep.cuebar.ui.AmbientCueContainer
+import com.android.quickstep.cuebar.ui.utils.AmbientCueAnimationState
+import com.android.quickstep.cuebar.ui.viewmodel.AmbientCueViewModel
 import com.android.quickstep.recents.ui.composable.TaskAppChip
 import com.android.quickstep.recents.ui.viewmodel.TaskViewModel
 import com.android.quickstep.task.apptimer.TaskAppTimerUiState
@@ -84,5 +91,26 @@ object QuickstepComposeFacade : BaseComposeFacade, QuickstepComposeFeatures {
     @OptIn(InternalComposeTracingApi::class)
     override fun disableCompositionTracing() {
         Composer.setTracer(null)
+    }
+
+    override fun startCueBar(
+        view: View,
+        ambientCueViewModelFactory: AmbientCueViewModel.Factory,
+        onShouldInterceptTouches: (Boolean, Rect?) -> Unit,
+        onAnimationStateChange: (Int, AmbientCueAnimationState) -> Unit
+    ): View {
+        return (view as ComposeView).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                PlatformTheme {
+                    AmbientCueContainer(
+                        modifier = Modifier.fillMaxSize(),
+                        ambientCueViewModelFactory = ambientCueViewModelFactory,
+                        onShouldInterceptTouches = onShouldInterceptTouches,
+                        onAnimationStateChange = onAnimationStateChange,
+                    )
+                }
+            }
+        }
     }
 }

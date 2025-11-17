@@ -21,14 +21,12 @@ import android.util.AtomicFile
 import android.util.Log
 import android.util.Xml
 import androidx.annotation.WorkerThread
-import com.android.launcher3.AutoInstallsLayout.beginDocument
+import com.android.launcher3.util.XmlElement.Companion.getRootElement
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
-import org.xmlpull.v1.XmlPullParser
-import org.xmlpull.v1.XmlPullParserException
 import org.xmlpull.v1.XmlSerializer
 
 /** Utility class to store a list of items on disk */
@@ -69,33 +67,22 @@ class ListStore<T : Any>(private val fileName: String) {
 
     /** Reads the items from the disk */
     @WorkerThread
-    fun read(context: Context, factory: (XmlPullParser) -> T?): MutableList<T> =
+    fun read(context: Context, factory: (XmlElement) -> T?): MutableList<T> =
         mutableListOf<T>().apply {
             try {
                 getFile(context).openRead().use { fis ->
-                    val parser = Xml.newPullParser()
-                    parser.setInput(InputStreamReader(fis, StandardCharsets.UTF_8))
-
-                    beginDocument(parser, TAG_ROOT)
-                    val depth = parser.depth
-
-                    var type: Int
-                    while (
-                        ((parser.next().also { type = it }) != XmlPullParser.END_TAG ||
-                            parser.depth > depth) && type != XmlPullParser.END_DOCUMENT
-                    ) {
-                        if (type != XmlPullParser.START_TAG || TAG_ENTRY != parser.name) {
-                            continue
+                    Xml.newPullParser()
+                        .apply { setInput(InputStreamReader(fis, StandardCharsets.UTF_8)) }
+                        .getRootElement(TAG_ROOT)
+                        .children(TAG_ENTRY)
+                        .forEach { element ->
+                            runCatching { factory.invoke(element)?.let { add(it) } }
+                                .onFailure { Log.e(TAG, "Skipped reading item", it) }
                         }
-                        runCatching { factory.invoke(parser)?.let { add(it) } }
-                            .onFailure { Log.e(TAG, "Skipped reading item", it) }
-                    }
                 }
             } catch (e: FileNotFoundException) {
                 // Ignore
-            } catch (e: IOException) {
-                Log.e(TAG, "Unable to read items in $fileName.xml", e)
-            } catch (e: XmlPullParserException) {
+            } catch (e: Exception) {
                 Log.e(TAG, "Unable to read items in $fileName.xml", e)
             }
         }

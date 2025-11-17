@@ -23,7 +23,6 @@ import static com.android.launcher3.Flags.enableSystemDrag;
 import static com.android.launcher3.Flags.removeAppsRefreshOnRightClick;
 import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_NOT_PINNABLE;
 
-import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -61,10 +60,8 @@ import java.util.function.Predicate;
 
 /**
  * Class for initiating a drag within a view or across multiple views.
- * @param <T>
  */
-public class DragController<T extends Context & ActivityContext>
-        implements DragDriver.EventListener, TouchController {
+public class DragController implements DragDriver.EventListener, TouchController {
 
     /**
      * When a drag is started from a deep press, you need to drag this much farther than normal to
@@ -74,7 +71,7 @@ public class DragController<T extends Context & ActivityContext>
 
     private static final boolean PROFILE_DRAWING_DURING_DRAG = false;
 
-    protected final T mActivity;
+    private final ActivityContext mActivity;
 
     // temporaries to avoid gc thrash
     private final Rect mRectTemp = new Rect();
@@ -159,7 +156,7 @@ public class DragController<T extends Context & ActivityContext>
     /**
      * Used to create a new DragLayer from XML.
      */
-    public DragController(T activity) {
+    public DragController(ActivityContext activity) {
         mActivity = activity;
     }
 
@@ -357,7 +354,7 @@ public class DragController<T extends Context & ActivityContext>
         final float scaleDps = mIsInPreDrag
                 ? res.getDimensionPixelSize(R.dimen.pre_drag_view_scale) : 0f;
         return drawable != null
-                ? new DragView<>(
+                ? new DragView(
                 mActivity,
                 drawable,
                 registrationX,
@@ -365,7 +362,7 @@ public class DragController<T extends Context & ActivityContext>
                 initialDragViewScale,
                 dragViewScaleOnDrop,
                 scaleDps)
-                : new DragView<>(
+                : new DragView(
                         mActivity,
                         view,
                         view.getMeasuredWidth(),

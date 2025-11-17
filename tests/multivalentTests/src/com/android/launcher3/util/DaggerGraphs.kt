@@ -22,6 +22,7 @@ import com.android.launcher3.compose.core.widgetpicker.NoOpWidgetPickerModule
 import com.android.launcher3.concurrent.ExecutorsModule
 import com.android.launcher3.dagger.ApiWrapperModule
 import com.android.launcher3.dagger.AppModule
+import com.android.launcher3.dagger.AutomationModule
 import com.android.launcher3.dagger.DesktopModule
 import com.android.launcher3.dagger.HomeScreenFilesModule
 import com.android.launcher3.dagger.LauncherModelModule
@@ -58,6 +59,7 @@ abstract class FakePrefsModule {
             DesktopModule::class,
             SettingsModule::class,
             SystemDragModule::class,
+            AutomationModule::class,
             TaskOverlayModule::class,
         ]
 )

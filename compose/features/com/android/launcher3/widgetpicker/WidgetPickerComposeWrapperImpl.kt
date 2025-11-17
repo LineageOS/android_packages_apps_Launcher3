@@ -327,6 +327,12 @@ constructor(
             pinItemAddHandler: PinItemAddHandler?,
         ) =
             object : WidgetPickerEventListeners {
+                override fun onSheetProgress(progress: Float) {
+                    if (this@buildEventListeners is WidgetPickerProgressHandler) {
+                        this@buildEventListeners.onProgress(progress)
+                    }
+                }
+
                 override fun onClose() {
                     Log.d(TAG, "Closing widget picker")
                     finish()
@@ -479,4 +485,16 @@ constructor(
                 WidgetInteractionSource.PIN_WIDGET_PICKER -> Favorites.CONTAINER_PIN_WIDGETS
             }
     }
+}
+
+/**
+ * Interface for activities to perform an operation (e.g. background scrim animation) on while
+ * widget picker opens / closes.
+ */
+interface WidgetPickerProgressHandler {
+    /**
+     * Callback during opening / closing of widget picker. Progress is between 0-1 where 0 is fully
+     * closed and 1 is fully open.
+     */
+    fun onProgress(progress: Float) {} // NO-op
 }
