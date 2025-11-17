@@ -76,7 +76,7 @@ object InputConsumerUtils {
         onCompleteCallback: Consumer<OtherActivityInputConsumer>,
         inputEventReceiver: InputChannelCompat.InputEventReceiver,
         taskbarManager: TaskbarManager,
-        swipeUpProxyProvider: Function<GestureState?, AnimatedFloat?>,
+        swipeUpProxyProvider: Function<GestureState?, AnimatedFloat?>?,
         overviewCommandHelper: OverviewCommandHelper,
         event: MotionEvent,
         rotationTouchHelper: RotationTouchHelper,
@@ -99,7 +99,7 @@ object InputConsumerUtils {
             )
             return consumer
         }
-        val progressProxy = swipeUpProxyProvider.apply(gestureState)
+        val progressProxy = swipeUpProxyProvider?.apply(gestureState)
         if (progressProxy != null) {
             val consumer: InputConsumer =
                 ProgressDelegateInputConsumer(
