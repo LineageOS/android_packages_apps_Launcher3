@@ -37,7 +37,7 @@ import com.android.launcher3.appprediction.AppsDividerView;
 import com.android.launcher3.appprediction.PredictionRowView;
 import com.android.launcher3.dagger.ActivityContextSingleton;
 import com.android.launcher3.model.data.PredictedContainerInfo;
-import com.android.launcher3.taskbar.TaskbarApiProxy;
+import com.android.launcher3.taskbar.TaskbarActivityContext;
 import com.android.launcher3.taskbar.TaskbarManager;
 import com.android.launcher3.views.ActivityContext;
 import com.android.quickstep.BaseContainerInterface;
@@ -151,10 +151,10 @@ public final class SecondaryDisplayQuickstepDelegateImpl extends SecondaryDispla
         if (taskbarManager == null) {
             return;
         }
-        TaskbarApiProxy currentDisplayTaskbarApiProxy =
+        TaskbarActivityContext currentDisplayTaskbarContext =
                 taskbarManager.getTaskbarForDisplay(displayId);
-        if (currentDisplayTaskbarApiProxy != null) {
-            currentDisplayTaskbarApiProxy.openTaskbarAllApps();
+        if (currentDisplayTaskbarContext != null) {
+            currentDisplayTaskbarContext.openTaskbarAllApps();
         }
     }
 
@@ -169,11 +169,12 @@ public final class SecondaryDisplayQuickstepDelegateImpl extends SecondaryDispla
         if (taskbarManager == null) {
             return;
         }
-        TaskbarApiProxy taskbarApiProxy = taskbarManager.getTaskbarForDisplay(displayId);
-        if (taskbarApiProxy == null) {
+        TaskbarActivityContext tac =
+                taskbarManager.getTaskbarForDisplay(displayId);
+        if (tac == null) {
             return;
         }
-        taskbarApiProxy.updateStashControllerLauncherStateFlag(isVisible);
+        tac.updateStashControllerLauncherStateFlag(isVisible);
     }
 
     @Override

@@ -161,8 +161,9 @@ class TaskbarManagerImplWrapper @Inject constructor(private val impl: TaskbarMan
         return impl.getUIControllerForDisplay(displayId)?.let { TaskbarInteractor(it) }
     }
 
-    override fun getTaskbarForDisplay(displayId: Int): TaskbarApiProxy? {
-        return impl.getTaskbarForDisplay(displayId)?.let { TaskbarApiProxy(it) }
+    /* TODO(b/404636836): Evaluate API calls on returned TaskbarActivityContext */
+    override fun getTaskbarForDisplay(displayId: Int): TaskbarActivityContext? {
+        return impl.getTaskbarForDisplay(displayId)
     }
 
     override fun createAllAppsPendingIntent(): PendingIntent {
