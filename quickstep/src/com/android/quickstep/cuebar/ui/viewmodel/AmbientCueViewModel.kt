@@ -15,6 +15,7 @@
  */
 
 package com.android.quickstep.cuebar.ui.viewmodel
+
 import android.app.ActivityTaskManager
 import android.os.SystemClock
 import android.util.Log
@@ -36,16 +37,16 @@ import com.android.quickstep.cuebar.logger.AmbientCueLogger
 import com.android.systemui.shared.Flags.cueBarAceMigration
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import java.io.PrintWriter
+import java.util.concurrent.Executor
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.PrintWriter
-import java.util.concurrent.Executor
-import kotlin.time.Duration.Companion.days
-import kotlin.time.Duration.Companion.milliseconds
 
 class AmbientCueViewModel
 @AssistedInject
@@ -54,28 +55,36 @@ constructor(
     private val launcherPrefs: LauncherPrefs,
     private val ambientCueLogger: AmbientCueLogger,
     private val scope: CoroutineScope,
-    @Ui private val uiExecutor: Executor
+    @Ui private val uiExecutor: Executor,
 ) : ViewModel {
     var isVisible: Boolean by mutableStateOf(false)
         private set
+
     var isExpanded: Boolean by mutableStateOf(false)
         private set
+
     var showFirstTimeEducation: Boolean by mutableStateOf(false)
         private set
+
     var showLongPressEducation: Boolean by mutableStateOf(false)
         private set
+
     var pillStyle: PillStyleViewModel by mutableStateOf(PillStyleViewModel.Uninitialized)
         private set
+
     var actions: List<ActionViewModel> by mutableStateOf(emptyList())
         private set
+
     var targetTaskId: Int by mutableIntStateOf(INVALID_TASK_ID)
         private set
+
     var onVisibilityChanged: (Boolean) -> Unit = {}
     private var isSessionStarted = false
 
     private val prefListener = LauncherPrefChangeListener { key ->
-        if (key == AMBIENT_CUE_FIRST_TIME_SHOWN_AT.sharedPrefKey
-            || key == AMBIENT_CUE_LONG_PRESS_SEEN.sharedPrefKey
+        if (
+            key == AMBIENT_CUE_FIRST_TIME_SHOWN_AT.sharedPrefKey ||
+                key == AMBIENT_CUE_LONG_PRESS_SEEN.sharedPrefKey
         ) {
             recalculateStates()
         }
@@ -111,37 +120,33 @@ constructor(
     private var actionUpdateJob: Job? = null
 
     init {
-        if (cueBarAceMigration())  {
+        if (cueBarAceMigration()) {
             registerListeners()
         }
     }
 
     private fun registerListeners() {
         // Recalculate everything whenever any of the source states change.
-        listeners.add(ambientCueInteractor.isImeVisible.forEach(uiExecutor) {
-            recalculateStates()
-        })
-        listeners.add(ambientCueInteractor.isOccludedBySystemUi.forEach(uiExecutor) {
-            recalculateStates()
-        })
-        listeners.add(ambientCueInteractor.isDeactivated.forEach(uiExecutor) {
-            recalculateStates()
-        })
-        listeners.add(ambientCueInteractor.isAmbientCueEnabled.forEach(uiExecutor) {
-            recalculateStates()
-        })
-        listeners.add(ambientCueInteractor.isGestureNav.forEach(uiExecutor) {
-            recalculateStates()
-        })
-        listeners.add(ambientCueInteractor.isTaskBarVisible.forEach(uiExecutor) {
-            recalculateStates()
-        })
-        listeners.add(ambientCueInteractor.recentsButtonPosition.forEach(uiExecutor) {
-            recalculateStates()
-        })
-        listeners.add(ambientCueInteractor.globallyFocusedTaskId.forEach(uiExecutor) {
-            recalculateStates()
-        })
+        listeners.add(ambientCueInteractor.isImeVisible.forEach(uiExecutor) { recalculateStates() })
+        listeners.add(
+            ambientCueInteractor.isOccludedBySystemUi.forEach(uiExecutor) { recalculateStates() }
+        )
+        listeners.add(
+            ambientCueInteractor.isDeactivated.forEach(uiExecutor) { recalculateStates() }
+        )
+        listeners.add(
+            ambientCueInteractor.isAmbientCueEnabled.forEach(uiExecutor) { recalculateStates() }
+        )
+        listeners.add(ambientCueInteractor.isGestureNav.forEach(uiExecutor) { recalculateStates() })
+        listeners.add(
+            ambientCueInteractor.isTaskBarVisible.forEach(uiExecutor) { recalculateStates() }
+        )
+        listeners.add(
+            ambientCueInteractor.recentsButtonPosition.forEach(uiExecutor) { recalculateStates() }
+        )
+        listeners.add(
+            ambientCueInteractor.globallyFocusedTaskId.forEach(uiExecutor) { recalculateStates() }
+        )
         // Handle actions separately for debouncing
         listeners.add(ambientCueInteractor.actions.forEach(uiExecutor, ::onActionsChange))
         launcherPrefs.addListener(prefListener, AMBIENT_CUE_FIRST_TIME_SHOWN_AT)
@@ -154,7 +159,8 @@ constructor(
         }
         val oldVisibility = isVisible
         val globallyFocusedTaskId = ambientCueInteractor.globallyFocusedTaskId.value
-        val isRootAttached = ambientCueInteractor.actions.value.isNotEmpty() &&
+        val isRootAttached =
+            ambientCueInteractor.actions.value.isNotEmpty() &&
                 ambientCueInteractor.isAmbientCueEnabled.value &&
                 !ambientCueInteractor.isDeactivated.value &&
                 globallyFocusedTaskId == targetTaskId
@@ -180,18 +186,20 @@ constructor(
             ambientCueLogger.clear()
             isSessionStarted = false
         }
-        isVisible = isRootAttached &&
+        isVisible =
+            isRootAttached &&
                 !ambientCueInteractor.isImeVisible.value &&
                 !ambientCueInteractor.isOccludedBySystemUi.value
         val isGestureNav = ambientCueInteractor.isGestureNav.value
         val isTaskBarVisible = ambientCueInteractor.isTaskBarVisible.value
-        pillStyle = if (isGestureNav && !isTaskBarVisible) {
-            PillStyleViewModel.NavBarPillStyle
-        } else {
-            val position = if (isGestureNav) null else
-                ambientCueInteractor.recentsButtonPosition.value
-            PillStyleViewModel.ShortPillStyle(position?.toComposeRect())
-        }
+        pillStyle =
+            if (isGestureNav && !isTaskBarVisible) {
+                PillStyleViewModel.NavBarPillStyle
+            } else {
+                val position =
+                    if (isGestureNav) null else ambientCueInteractor.recentsButtonPosition.value
+                PillStyleViewModel.ShortPillStyle(position?.toComposeRect())
+            }
         // Handle timeout activation
         if (isRootAttached) {
             scope.launch { delayAndDeactivateCueBar() }
@@ -203,10 +211,12 @@ constructor(
         showFirstTimeEducation = firstTimeShown == -1L
 
         val shouldShowLongPress = launcherPrefs.get(AMBIENT_CUE_LONG_PRESS_SEEN)
-        val firstTimeSeenAtMs = (if (firstTimeShown == -1L) SystemClock.elapsedRealtime() else
-            firstTimeShown).milliseconds
-        showLongPressEducation = firstTimeSeenAtMs + ONBOARDING_DELAY <
-                System.currentTimeMillis().milliseconds && shouldShowLongPress
+        val firstTimeSeenAtMs =
+            (if (firstTimeShown == -1L) SystemClock.elapsedRealtime() else firstTimeShown)
+                .milliseconds
+        showLongPressEducation =
+            firstTimeSeenAtMs + ONBOARDING_DELAY < System.currentTimeMillis().milliseconds &&
+                shouldShowLongPress
         if (oldVisibility != isVisible) {
             onVisibilityChanged(isVisible)
         }
@@ -218,14 +228,15 @@ constructor(
         if (newActions.isEmpty()) {
             // If the list is empty, DEBOUNCE it.
             // We only launch a coroutine if we need to delay.
-            actionUpdateJob = scope.launch { // Use BG scope for delay
-                delay(ACTIONS_DEBOUNCE_MS)
-                withContext(uiExecutor.asCoroutineDispatcher()) {
-                    Log.d(TAG, "Debounced empty action: updating state")
-                    updateActionsState(newActions)
-                    recalculateStates()
+            actionUpdateJob =
+                scope.launch { // Use BG scope for delay
+                    delay(ACTIONS_DEBOUNCE_MS)
+                    withContext(uiExecutor.asCoroutineDispatcher()) {
+                        Log.d(TAG, "Debounced empty action: updating state")
+                        updateActionsState(newActions)
+                        recalculateStates()
+                    }
                 }
-            }
         } else {
             // If the list is NOT empty, update state IMMEDIATELY.
             // No coroutine needed, we are already on the main thread.
@@ -235,38 +246,44 @@ constructor(
     }
 
     private fun updateActionsState(modelActions: List<ActionModel>) {
-        targetTaskId = if (modelActions.isNotEmpty()) {
-            modelActions[0].taskId
-        } else {
-            INVALID_TASK_ID
-        }
-        actions = modelActions.map { action ->
-            ActionViewModel(
-                icon = IconViewModel(
-                    large = action.icon.large,
-                    small = action.icon.small,
-                    iconId = action.icon.iconId,
-                    repeatCount = 0,
-                ),
-                label = action.label,
-                attribution = action.attribution,
-                onClick = {
-                    action.onPerformAction()
-                    collapse()
-                },
-                onLongClick = {
-                    action.onPerformLongClick()
-                    launcherPrefs.put(AMBIENT_CUE_LONG_PRESS_SEEN, false)
-                },
-                actionType = when (action.actionType) {
-                    "ma" -> ActionType.MA
-                    "mr" -> ActionType.MR
-                    else -> ActionType.Unknown
-                },
-                oneTapEnabled = action.oneTapEnabled,
-                oneTapDelayMs = action.oneTapDelayMs,
-            )
-        }.toList()
+        targetTaskId =
+            if (modelActions.isNotEmpty()) {
+                modelActions[0].taskId
+            } else {
+                INVALID_TASK_ID
+            }
+        actions =
+            modelActions
+                .map { action ->
+                    ActionViewModel(
+                        icon =
+                            IconViewModel(
+                                large = action.icon.large,
+                                small = action.icon.small,
+                                iconId = action.icon.iconId,
+                                repeatCount = 0,
+                            ),
+                        label = action.label,
+                        attribution = action.attribution,
+                        onClick = {
+                            action.onPerformAction()
+                            collapse()
+                        },
+                        onLongClick = {
+                            action.onPerformLongClick()
+                            launcherPrefs.put(AMBIENT_CUE_LONG_PRESS_SEEN, false)
+                        },
+                        actionType =
+                            when (action.actionType) {
+                                "ma" -> ActionType.MA
+                                "mr" -> ActionType.MR
+                                else -> ActionType.Unknown
+                            },
+                        oneTapEnabled = action.oneTapEnabled,
+                        oneTapDelayMs = action.oneTapDelayMs,
+                    )
+                }
+                .toList()
     }
 
     fun cancelDeactivation() {
@@ -275,12 +292,13 @@ constructor(
 
     suspend fun delayAndDeactivateCueBar() {
         deactivateCueBarJob?.cancel()
-        deactivateCueBarJob = scope.launch {
-            delay(ambientCueInteractor.ambientCueTimeoutMs.value.milliseconds)
-            ambientCueInteractor.setDeactivated(true)
-            Log.i(TAG, "Cuebar deactivated due to timeout")
-            ambientCueLogger.setReachedTimeoutStatus()
-        }
+        deactivateCueBarJob =
+            scope.launch {
+                delay(ambientCueInteractor.ambientCueTimeoutMs.value.milliseconds)
+                ambientCueInteractor.setDeactivated(true)
+                Log.i(TAG, "Cuebar deactivated due to timeout")
+                ambientCueLogger.setReachedTimeoutStatus()
+            }
     }
 
     fun activate() {
@@ -304,7 +322,6 @@ constructor(
         }
     }
 
-
     private fun disableLongPressHint() {
         if (showLongPressEducation) {
             Log.i(TAG, "Suppressing long press tooltip")
@@ -322,10 +339,14 @@ constructor(
         pw.println("$prefix   actions: ${actions.size} actions")
         pw.println("$prefix   deactivateCueBarJob: $deactivateCueBarJob")
         pw.println("$prefix  targetTaskId: $targetTaskId")
-        pw.println("$prefix  frontTaskPackageName(source): ${ambientCueInteractor.frontTaskPackageName.value}")
+        pw.println(
+            "$prefix  frontTaskPackageName(source): ${ambientCueInteractor.frontTaskPackageName.value}"
+        )
         pw.println("$prefix  isSessionStarted: $isSessionStarted")
         pw.println("$prefix   isImeVisible(source): ${ambientCueInteractor.isImeVisible.value}")
-        pw.println("$prefix   isOccluded(source): ${ambientCueInteractor.isOccludedBySystemUi.value}")
+        pw.println(
+            "$prefix   isOccluded(source): ${ambientCueInteractor.isOccludedBySystemUi.value}"
+        )
     }
 
     @AssistedFactory

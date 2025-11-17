@@ -185,9 +185,9 @@ private fun TaskBarAnd3ButtonAmbientCue(
                     if (rotation == ROTATION_90) {
                         translationX =
                             screenWidthPx -
-                                    pillSize.width -
-                                    size.width -
-                                    LANDSCAPE_PADDING.dp.toPx()
+                                pillSize.width -
+                                size.width -
+                                LANDSCAPE_PADDING.dp.toPx()
                         translationY = pillCenter.y - pillSize.width
                     } else if (rotation == ROTATION_270) {
                         translationX = pillSize.width
@@ -231,10 +231,10 @@ private fun TaskBarAnd3ButtonAmbientCue(
                 }
             } else {
                 Modifier.graphicsLayer {
-                    translationX = pillCenter.x - size.width / 2
-                    translationY = pillCenter.y - size.height / 2
-                    pillSize = Size(pillPositionInWindow.width, pillPositionInWindow.height)
-                }
+                        translationX = pillCenter.x - size.width / 2
+                        translationY = pillCenter.y - size.height / 2
+                        pillSize = Size(pillPositionInWindow.width, pillPositionInWindow.height)
+                    }
                     .onGloballyPositioned { layoutCoordinates ->
                         layoutCoordinates.parentCoordinates?.let { parentCoordinates ->
                             pillCenter =
@@ -243,10 +243,10 @@ private fun TaskBarAnd3ButtonAmbientCue(
                                 Rect(
                                     offset =
                                         pillCenter -
-                                                Offset(
-                                                    layoutCoordinates.size.width / 2f,
-                                                    layoutCoordinates.size.height / 2f,
-                                                ),
+                                            Offset(
+                                                layoutCoordinates.size.width / 2f,
+                                                layoutCoordinates.size.height / 2f,
+                                            ),
                                     size = layoutCoordinates.size.toSize(),
                                 )
                         }
@@ -325,10 +325,7 @@ private fun NavBarAmbientCue(
 
 private fun LayoutCoordinates.boundsInWindow(): Rect {
     val positionInWindow = localToWindow(Offset.Zero)
-    return Rect(
-        offset = positionInWindow,
-        size = size.toSize()
-    )
+    return Rect(offset = positionInWindow, size = size.toSize())
 }
 
 private const val NAV_BAR_WIDTH_DP = 108 // R.dimen.taskbar_stashed_small_screen from Launcher

@@ -39,12 +39,4 @@ interface QuickstepComposeFeatures {
     fun enableCompositionTracing()
 
     fun disableCompositionTracing()
-
-    fun startCueBar(
-        view: View,
-        ambientCueViewModelFactory: AmbientCueViewModel.Factory,
-        onShouldInterceptTouches: (Boolean, Rect?) -> Unit,
-        onAnimationStateChange: (Int, AmbientCueAnimationState) -> Unit
-    ): View
-
 }

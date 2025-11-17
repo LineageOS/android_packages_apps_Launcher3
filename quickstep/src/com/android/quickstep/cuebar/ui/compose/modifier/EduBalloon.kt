@@ -68,7 +68,7 @@ fun Modifier.eduBalloon(
                             quadraticTo(
                                 0f,
                                 translationY + cornerRadius -
-                                        (arrowLegLength - cornerRadius) / translationX,
+                                    (arrowLegLength - cornerRadius) / translationX,
                                 tangentPointX,
                                 tangentPointY,
                             )

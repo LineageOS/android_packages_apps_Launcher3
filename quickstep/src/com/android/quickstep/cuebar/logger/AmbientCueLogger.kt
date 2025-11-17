@@ -104,9 +104,8 @@ interface AmbientCueLogger {
 }
 
 /** Implementation for logging UI events related to controls. */
-class AmbientCueLoggerImpl
-@Inject
-constructor(private val packageManager: PackageManager) : AmbientCueLogger {
+class AmbientCueLoggerImpl @Inject constructor(private val packageManager: PackageManager) :
+    AmbientCueLogger {
     private var report = AmbientCueEventReported()
     private var displayTimeMillis: Long = 0L
 

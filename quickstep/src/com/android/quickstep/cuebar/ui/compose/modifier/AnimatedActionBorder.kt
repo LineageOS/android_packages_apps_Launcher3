@@ -38,9 +38,9 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import com.android.quickstep.cuebar.ui.utils.AiColorUtils.boostChroma
-import kotlinx.coroutines.launch
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlinx.coroutines.launch
 
 @Composable
 fun Modifier.animatedActionBorder(

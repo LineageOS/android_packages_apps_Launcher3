@@ -34,7 +34,9 @@ import com.android.launcher3.util.MutableListenableRef
 import com.android.quickstep.cuebar.data.ActionModel
 import com.android.quickstep.cuebar.logger.AmbientCueLogger
 import com.android.systemui.shared.system.TaskStackChangeListener
-import com.android.systemui.shared.system.TaskStackChangeListeners
+import java.io.PrintWriter
+import java.util.concurrent.Executor
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -42,9 +44,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.PrintWriter
-import java.util.concurrent.Executor
-import javax.inject.Inject
 
 /** Source of truth for ambient actions and visibility of their system space. */
 interface AmbientCueRepository {
@@ -81,16 +80,19 @@ interface AmbientCueRepository {
     val frontTaskPackageName: ListenableRef<String>
 
     fun updateActions(newActions: List<ActionModel>)
+
     fun unregisterListener()
+
     fun dump(pw: PrintWriter, prefix: String)
 }
 
 class AmbientCueRepositoryImpl
-@Inject constructor(
+@Inject
+constructor(
     private val context: TaskbarActivityContext,
     private val ambientCueLogger: AmbientCueLogger,
     @Background private val bgExecutor: Executor,
-    @Ui private val uiExecutor: Executor
+    @Ui private val uiExecutor: Executor,
 ) : AmbientCueRepository {
 
     private val backgroundScope = CoroutineScope(bgExecutor.asCoroutineDispatcher())
@@ -134,21 +136,23 @@ class AmbientCueRepositoryImpl
      * display itself when the user is actually looking at the target app by checking
      * globallyFocusedTaskId == targetTaskId in the viewmodel.
      */
-    private val taskStackListener = object : TaskStackChangeListener {
-        override fun onTaskMovedToFront(runningTaskInfo: RunningTaskInfo) {
-            debounceTaskJob?.cancel()
-            debounceTaskJob = backgroundScope.launch {
-                delay(DEBOUNCE_DELAY_MS)
-                withContext(uiExecutor.asCoroutineDispatcher()) {
-                    _globallyFocusedTaskId.dispatchValue(runningTaskInfo.taskId)
-                    _frontTaskPackageName.dispatchValue(
-                        runningTaskInfo.baseIntent?.component?.packageName ?: ""
-                    )
-                    debounceTaskJob = null
-                }
+    private val taskStackListener =
+        object : TaskStackChangeListener {
+            override fun onTaskMovedToFront(runningTaskInfo: RunningTaskInfo) {
+                debounceTaskJob?.cancel()
+                debounceTaskJob =
+                    backgroundScope.launch {
+                        delay(DEBOUNCE_DELAY_MS)
+                        withContext(uiExecutor.asCoroutineDispatcher()) {
+                            _globallyFocusedTaskId.dispatchValue(runningTaskInfo.taskId)
+                            _frontTaskPackageName.dispatchValue(
+                                runningTaskInfo.baseIntent?.component?.packageName ?: ""
+                            )
+                            debounceTaskJob = null
+                        }
+                    }
             }
         }
-    }
 
     private fun launchPendingIntent(pendingIntent: PendingIntent) {
         val options = BroadcastOptions.makeBasic()
@@ -181,8 +185,11 @@ class AmbientCueRepositoryImpl
 
     private fun getAmbientCueTimeoutMs(): Int {
         return try {
-            val timeout = Settings.Secure.getInt(
-                context.contentResolver, Settings.Secure.ACCESSIBILITY_INTERACTIVE_UI_TIMEOUT_MS)
+            val timeout =
+                Settings.Secure.getInt(
+                    context.contentResolver,
+                    Settings.Secure.ACCESSIBILITY_INTERACTIVE_UI_TIMEOUT_MS,
+                )
             if (timeout == 0) AMBIENT_CUE_DEFAULT_TIMEOUT_MS else timeout
         } catch (e: Settings.SettingNotFoundException) {
             AMBIENT_CUE_DEFAULT_TIMEOUT_MS

@@ -16,7 +16,6 @@
 
 package com.android.quickstep.cuebar.domain.interactor
 
-
 import android.graphics.Rect
 import com.android.launcher3.util.ListenableRef
 import com.android.quickstep.cuebar.data.ActionModel
@@ -26,46 +25,34 @@ import javax.inject.Inject
 /**
  * Interactor for the Ambient Cue feature within Launcher.
  *
- * This class mediates between the ViewModel and the adapted AmbientCueRepository,
- * providing the necessary data flows and control functions.
+ * This class mediates between the ViewModel and the adapted AmbientCueRepository, providing the
+ * necessary data flows and control functions.
  */
-class AmbientCueInteractor @Inject constructor(
+class AmbientCueInteractor
+@Inject
+constructor(
     private val ambientCueRepository: AmbientCueRepository // Injects the Adapted Repository
 ) {
 
-    /**
-     * ListenableRef of actions to be displayed in the Cuebar.
-     */
+    /** ListenableRef of actions to be displayed in the Cuebar. */
     val actions: ListenableRef<List<ActionModel>> = ambientCueRepository.actions
 
-    /**
-     * ListenableRef indicating if the Input Method Editor (keyboard) is visible.
-     */
+    /** ListenableRef indicating if the Input Method Editor (keyboard) is visible. */
     val isImeVisible: ListenableRef<Boolean> = ambientCueRepository.isImeVisible
 
-    /**
-     * ListenableRef indicating if the Cuebar is occluded by other system UI elements.
-     */
+    /** ListenableRef indicating if the Cuebar is occluded by other system UI elements. */
     val isOccludedBySystemUi: ListenableRef<Boolean> = ambientCueRepository.isOccludedBySystemUi
 
-    /**
-     * ListenableRef providing the timeout duration for the Ambient Cue.
-     */
+    /** ListenableRef providing the timeout duration for the Ambient Cue. */
     val ambientCueTimeoutMs: ListenableRef<Int> = ambientCueRepository.ambientCueTimeoutMs
 
-    /**
-     * ListenableRef indicating if gesture navigation is enabled.
-     */
+    /** ListenableRef indicating if gesture navigation is enabled. */
     val isGestureNav: ListenableRef<Boolean> = ambientCueRepository.isGestureNav
 
-    /**
-     * ListenableRef indicating if the Taskbar is fully visible and not stashed.
-     */
+    /** ListenableRef indicating if the Taskbar is fully visible and not stashed. */
     val isTaskBarVisible: ListenableRef<Boolean> = ambientCueRepository.isTaskBarVisible
 
-    /**
-     * ListenableRef providing the position of the recents button (in 3-button nav).
-     */
+    /** ListenableRef providing the position of the recents button (in 3-button nav). */
     val recentsButtonPosition: ListenableRef<Rect?> = ambientCueRepository.recentsButtonPosition
 
     val isDeactivated: ListenableRef<Boolean> = ambientCueRepository.isDeactivated
