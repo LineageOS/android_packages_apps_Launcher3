@@ -23,7 +23,7 @@ import com.android.launcher3.LauncherPrefs.Companion.TASKBAR_PINNING
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.testutil.Wait
 import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
-import com.android.quickstep.TISBinder
+import com.android.quickstep.TouchInteractionHandler.TISBinder
 import com.android.quickstep.util.TISBindHelper
 import java.util.concurrent.CompletableFuture
 import kotlin.annotation.AnnotationRetention.RUNTIME
@@ -93,7 +93,7 @@ class TISBinderRule : TestRule {
 
         /** Reset any active input which may be caching the last activity context */
         withTISBinder {
-            taskbarManager?.getCurrentActivityContext()?.displayId?.let { service?.reset(it) }
+            taskbarManager?.getCurrentActivityContext()?.displayId?.let { service.reset(it) }
         }
     }
 
