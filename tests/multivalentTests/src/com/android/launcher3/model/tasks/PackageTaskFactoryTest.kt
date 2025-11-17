@@ -182,7 +182,7 @@ class PackageTaskFactoryTest {
         workspaceUpdates.verifyItemUpdated()
         verify(mockTaskController).bindUpdatedWorkspaceItems(listOf(expectedWorkspaceItem))
 
-        verify(modelState.appsList).updateDisabledFlags(any(), any())
+        verify(modelState.appsList).updateRuntimeFlags(any(), any())
         assertThat(modelState.appsList.getAndResetChangeFlag()).isTrue()
         assertThat(modelState.appsRepo.appsListStateRef.value.apps).isNotEmpty()
     }
@@ -200,7 +200,7 @@ class PackageTaskFactoryTest {
         verify(mockTaskController).bindUpdatedWorkspaceItems(emptyList())
         assertThat(workspaceUpdates.changes).isEmpty()
 
-        verify(modelState.appsList).updateDisabledFlags(any(), any())
+        verify(modelState.appsList).updateRuntimeFlags(any(), any())
         assertThat(modelState.appsList.getAndResetChangeFlag()).isFalse()
         assertThat(modelState.appsRepo.appsListStateRef.value.apps).isEmpty()
     }

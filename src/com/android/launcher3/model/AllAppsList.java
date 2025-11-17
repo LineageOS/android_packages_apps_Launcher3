@@ -228,9 +228,9 @@ public class AllAppsList {
     }
 
     /**
-     * Updates the disabled flags of apps matching {@param matcher} based on {@param op}.
+     * Updates the runtime flags of apps matching {@param matcher} based on {@param op}.
      */
-    public void updateDisabledFlags(Predicate<ItemInfo> matcher, FlagOp op) {
+    public void updateRuntimeFlags(Predicate<ItemInfo> matcher, FlagOp op) {
         final List<AppInfo> data = this.data;
         for (int i = data.size() - 1; i >= 0; i--) {
             AppInfo info = data.get(i);

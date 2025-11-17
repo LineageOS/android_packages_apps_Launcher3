@@ -86,7 +86,7 @@ object PackageTaskFactory {
         ModelUpdateTask { taskController, dataModel, apps ->
             val flagOp = FlagOp.NO_OP.addFlag(FLAG_DISABLED_SUSPENDED)
 
-            apps.updateDisabledFlags(ItemInfoMatcher.ofPackages(packages, user), flagOp)
+            apps.updateRuntimeFlags(ItemInfoMatcher.ofPackages(packages, user), flagOp)
             taskController.bindApplicationsIfNeeded()
 
             updateRuntimeStatus(taskController, dataModel, user, packages, flagOp)
@@ -97,7 +97,7 @@ object PackageTaskFactory {
         ModelUpdateTask { taskController, dataModel, apps ->
             val flagOp = FlagOp.NO_OP.removeFlag(FLAG_DISABLED_SUSPENDED)
 
-            apps.updateDisabledFlags(ItemInfoMatcher.ofPackages(packages, user), flagOp)
+            apps.updateRuntimeFlags(ItemInfoMatcher.ofPackages(packages, user), flagOp)
             taskController.bindApplicationsIfNeeded()
 
             updateRuntimeStatus(taskController, dataModel, user, packages, flagOp)
