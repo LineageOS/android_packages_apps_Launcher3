@@ -252,13 +252,9 @@ constructor(
     private fun mapActionableInsight(insight: ActionableInsight): List<ActionModel> {
         val display = insight.displayDetails
         val action = insight.actionDetails
-
-        // TODO: Understander need to supply the smartSpaceTargetAction.subtitle to
-        //  display.contentDescription? or use bundle extra for this
-        val attribution = display.contentDescription?.toString()
+        val attribution = display.subtitle?.toString()
         val iconDrawable = display.icon?.loadDrawable(context)
             ?: context.getDrawable(R.drawable.ic_paste_spark)!!
-
         val title = display.title.toString()
         val extras = action.createActionIntent()?.extras
         val activityId = extras?.getParcelable<ActivityId>(EXTRA_ACTIVITY_ID)
