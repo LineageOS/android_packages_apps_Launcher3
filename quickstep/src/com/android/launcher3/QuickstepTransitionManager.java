@@ -140,6 +140,7 @@ import com.android.launcher3.uioverrides.QuickstepLauncher;
 import com.android.launcher3.util.ActivityOptionsWrapper;
 import com.android.launcher3.util.RunnableList;
 import com.android.launcher3.util.StableViewInfo;
+import com.android.launcher3.util.TaskbarAsyncAnimator;
 import com.android.launcher3.views.FloatingIconView;
 import com.android.launcher3.widget.LauncherAppWidgetHostView;
 import com.android.quickstep.LauncherBackAnimationController;
@@ -2084,16 +2085,28 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
 
             // Syncs the app launch animation and taskbar stash animation (if exists).
             TaskbarInteractor taskbarInteractor = mLauncher.getTaskbarInteractor();
+            TaskbarAsyncAnimator taskbarStashAnimation = null;
             if (taskbarInteractor != null) {
                 taskbarInteractor.setIgnoreInAppFlagForSync(false);
 
                 if (launcherClosing) {
-                    taskbarInteractor.createAnimToAppAndPlay(anim);
+                    // If taskbar stash animation is played on main thread (same as app launch
+                    // animation), the stash animation will be added as child of launcher's app
+                    // launch animation. Otherwise a TaskbarAsyncAnimator will be returned and
+                    // launcher (on main thread) need to explicitly start taskbar stash animation
+                    // on taskbar ui thread.
+                    taskbarStashAnimation = taskbarInteractor.createAnimToApp(anim);
                 }
             }
 
             result.setAnimation(anim, mLauncher, mOnEndCallback::executeAllAndDestroy,
                     skipFirstFrame);
+            // If app launch animation is started and TaskbarAsyncAnimator is returned (meaning
+            // taskbar stash animation will be played on TASKBAR_UI_THREAD), launcher needs to
+            // explicitly trigger taskbar stash animation from main thread.
+            if (taskbarStashAnimation != null && anim.isStarted()) {
+                taskbarStashAnimation.start();
+            }
         }
 
         @Override
