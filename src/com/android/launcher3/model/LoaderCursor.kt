@@ -41,6 +41,7 @@ import com.android.launcher3.LauncherSettings.Favorites.RESTORED
 import com.android.launcher3.LauncherSettings.Favorites._ID
 import com.android.launcher3.Utilities
 import com.android.launcher3.Workspace
+import com.android.launcher3.automation.AutomationRepository
 import com.android.launcher3.backuprestore.LauncherRestoreEventLogger
 import com.android.launcher3.backuprestore.LauncherRestoreEventLogger.RestoreError
 import com.android.launcher3.dagger.ApplicationContext
@@ -80,6 +81,7 @@ constructor(
     private val idp: InvariantDeviceProfile,
     private val model: LauncherModel,
     private val pmHelper: PackageManagerHelper,
+    private val automationRepo: AutomationRepository,
 ) : ModelCursorWrapper(cursor) {
 
     private val itemsToRemove = IntArray()
@@ -230,6 +232,7 @@ constructor(
                 userIconInfo,
                 ApiWrapper.INSTANCE[context],
                 pmHelper,
+                automationRepo,
             )
         }
         loadWorkspaceTitleAndIcon(useLowResIcon, loadIcon, info)

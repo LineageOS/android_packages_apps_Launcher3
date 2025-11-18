@@ -32,6 +32,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.launcher3.Flags;
 import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.Utilities;
+import com.android.launcher3.automation.AutomationRepository;
 import com.android.launcher3.pm.PackageInstallInfo;
 import com.android.launcher3.pm.UserCache;
 import com.android.launcher3.pm.UserCache.CachedUserInfo;
@@ -91,11 +92,13 @@ public class AppInfo extends ItemInfoWithIcon implements WorkspaceItemFactory {
      */
     public AppInfo(Context context, LauncherActivityInfo info, UserHandle user) {
         this(info, UserCache.INSTANCE.get(context).getUserManagerState().getCachedInfo(user),
-                ApiWrapper.INSTANCE.get(context), PackageManagerHelper.INSTANCE.get(context));
+                ApiWrapper.INSTANCE.get(context), PackageManagerHelper.INSTANCE.get(context),
+                AutomationRepository.INSTANCE.get(context));
     }
 
     public AppInfo(LauncherActivityInfo info, CachedUserInfo cachedUserInfo,
-            ApiWrapper apiWrapper, PackageManagerHelper pmHelper) {
+            ApiWrapper apiWrapper, PackageManagerHelper pmHelper,
+            AutomationRepository automationRepo) {
         this.componentName = info.getComponentName();
         this.container = CONTAINER_ALL_APPS;
         this.user = cachedUserInfo.getIconInfo().user;
@@ -106,7 +109,7 @@ public class AppInfo extends ItemInfoWithIcon implements WorkspaceItemFactory {
         }
         uid = info.getApplicationInfo().uid;
         updateRuntimeFlagsForActivityTarget(
-                this, info, cachedUserInfo.getIconInfo(), apiWrapper, pmHelper);
+                this, info, cachedUserInfo.getIconInfo(), apiWrapper, pmHelper, automationRepo);
     }
 
     public AppInfo(AppInfo info) {
@@ -174,7 +177,8 @@ public class AppInfo extends ItemInfoWithIcon implements WorkspaceItemFactory {
      */
     public static boolean updateRuntimeFlagsForActivityTarget(
             ItemInfoWithIcon info, LauncherActivityInfo lai, UserIconInfo userIconInfo,
-            ApiWrapper apiWrapper, PackageManagerHelper pmHelper) {
+            ApiWrapper apiWrapper, PackageManagerHelper pmHelper,
+            AutomationRepository automationRepo) {
         final int oldProgressLevel = info.getProgressLevel();
         final int oldRuntimeStatusFlags = info.runtimeStatusFlags;
         final ActivityInfo activityInfo = lai.getActivityInfo();
@@ -191,6 +195,15 @@ public class AppInfo extends ItemInfoWithIcon implements WorkspaceItemFactory {
                 info.runtimeStatusFlags &= ~FLAG_ARCHIVED;
             }
         }
+
+        if (Flags.enableAppAutomationIndicator() && info.getTargetPackage() != null) {
+            if (automationRepo.isPackageAutomated(info.user, info.getTargetPackage())) {
+                info.runtimeStatusFlags |= FLAG_AUTOMATED;
+            } else if (!automationRepo.isPackageAutomated(info.user, info.getTargetPackage())) {
+                info.runtimeStatusFlags &= ~FLAG_AUTOMATED;
+            }
+        }
+
         info.runtimeStatusFlags |= appInfo.isSystem() ? FLAG_SYSTEM_YES : FLAG_SYSTEM_NO;
 
         if (Flags.privateSpaceRestrictAccessibilityDrag()) {

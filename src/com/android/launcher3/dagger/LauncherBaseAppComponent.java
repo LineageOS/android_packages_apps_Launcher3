@@ -28,6 +28,7 @@ import com.android.launcher3.LauncherAppState;
 import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.MainProcessInitializer;
 import com.android.launcher3.RemoveAnimationSettingsTracker;
+import com.android.launcher3.automation.AutomationRepository;
 import com.android.launcher3.backuprestore.LauncherRestoreEventLogger;
 import com.android.launcher3.compose.core.widgetpicker.WidgetPickerComposeWrapper;
 import com.android.launcher3.dragndrop.SystemDragController;
@@ -167,6 +168,9 @@ public interface LauncherBaseAppComponent {
 
     /** Returns the StringCacheRepoRepository */
     StringCacheRepository getStringCacheRepoRepository();
+
+    /**  Repository for automated packages information */
+    AutomationRepository getAutomationRepository();
 
     /** Builder for LauncherBaseAppComponent. */
     interface Builder {

@@ -61,6 +61,7 @@ import com.android.launcher3.LauncherSettings.Favorites.getColumnsToTypes
 import com.android.launcher3.Utilities.EMPTY_PERSON_ARRAY
 import com.android.launcher3.Utilities.qsbOnFirstScreen
 import com.android.launcher3.WorkspaceLayoutManager
+import com.android.launcher3.automation.AutomationRepository
 import com.android.launcher3.backuprestore.LauncherRestoreEventLogger.RestoreError
 import com.android.launcher3.homescreenfiles.HomeScreenFile
 import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils
@@ -120,8 +121,9 @@ class WorkspaceItemProcessorTest {
     private val realCursor = MatrixCursor(getColumnsToTypes(0L).keys.toTypedArray<String>())
     private val realCursorRow = realCursor.newRow()
 
+    private lateinit var workspaceInfo: WorkspaceItemInfo
+
     @Mock private lateinit var mockIconRequestInfo: IconRequestInfo<WorkspaceItemInfo>
-    @Mock private lateinit var mockWorkspaceInfo: WorkspaceItemInfo
     @Mock private lateinit var mockPmHelper: PackageManagerHelper
     @Mock private lateinit var mockWidgetInflater: WidgetInflater
     @Mock private lateinit var mockIconCache: IconCache
@@ -176,6 +178,13 @@ class WorkspaceItemProcessorTest {
         mAllDeepShortcuts = mutableListOf()
         mIconRequestInfos = mutableListOf()
         mPendingPackages = mutableSetOf()
+        workspaceInfo =
+            WorkspaceItemInfo().apply {
+                id = 1
+                cellX = 0
+                cellY = 0
+                runtimeStatusFlags = 0
+            }
     }
 
     /**
@@ -197,6 +206,7 @@ class WorkspaceItemProcessorTest {
         allDeepShortcuts: MutableList<CacheableShortcutInfo> = mAllDeepShortcuts,
         homeScreenFiles: CompletableFuture<Map<Uri, HomeScreenFile>> =
             CompletableFuture.completedFuture(mapOf()),
+        automationRepo: AutomationRepository = mContext.appComponent.automationRepository,
     ): WorkspaceItemProcessor {
         // Create the loader cursor after all the stubbing is set up as accessing the dagger graph
         // objects initiates the creation of the full tree which starts various API calls on
@@ -213,12 +223,11 @@ class WorkspaceItemProcessorTest {
                     idp = mContext.appComponent.idp,
                     model = mContext.appComponent.testableModelState.model,
                     pmHelper = mContext.appComponent.packageManagerHelper,
+                    automationRepo = automationRepo,
                 )
             )
 
-        doReturn(mockWorkspaceInfo)
-            .whenever(mockCursor)
-            .getAppShortcutInfo(any(), any(), any(), any())
+        doReturn(workspaceInfo).whenever(mockCursor).getAppShortcutInfo(any(), any(), any(), any())
         doReturn(mockIconRequestInfo).whenever(mockCursor).createIconRequestInfo(any(), any())
         doReturn(mockContentWriter).whenever(mockCursor).updater()
 
@@ -245,6 +254,7 @@ class WorkspaceItemProcessorTest {
             widgetSizeHandler = mContext.appComponent.widgetSizeHandler,
             workspaceItemSpaceFinder = mockWorkspaceItemSpaceFinder,
             homeScreenFiles = homeScreenFiles,
+            automationRepo = automationRepo,
         )
     }
 
@@ -306,7 +316,7 @@ class WorkspaceItemProcessorTest {
         // currently gets marked restored twice, although markRestore() has check for restoreFlag
         verify(mockCursor, times(2)).markRestored()
         assertThat(mIconRequestInfos).containsExactly(mockIconRequestInfo)
-        verify(mockCursor).checkAndAddItem(eq(mockWorkspaceInfo), any(), anyOrNull())
+        verify(mockCursor).checkAndAddItem(eq(workspaceInfo), any(), anyOrNull())
     }
 
     @Test
@@ -333,7 +343,7 @@ class WorkspaceItemProcessorTest {
             .isEqualTo(0)
         verify(mockCursor.updater().put(Favorites.INTENT, mIntent.toUri(0))).commit()
         assertThat(mIconRequestInfos).containsExactly(mockIconRequestInfo)
-        verify(mockCursor).checkAndAddItem(eq(mockWorkspaceInfo), any(), anyOrNull())
+        verify(mockCursor).checkAndAddItem(eq(workspaceInfo), any(), anyOrNull())
     }
 
     @Test
@@ -1037,6 +1047,43 @@ class WorkspaceItemProcessorTest {
             assertThat(intent!!.data).isEqualTo(uri2)
             assertThat(intent!!.type).isEqualTo(DocumentsContract.Document.MIME_TYPE_DIR)
         }
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_APP_AUTOMATION_INDICATOR)
+    fun whenAppAutomated_setFlagAutomated() {
+        // Given
+        val mockAutomationRepo = mock<AutomationRepository>()
+        whenever(mockAutomationRepo.isPackageAutomated(any<UserHandle>(), any())).thenReturn(true)
+
+        // When
+        itemProcessorUnderTest =
+            createWorkspaceItemProcessorUnderTest(automationRepo = mockAutomationRepo)
+        itemProcessorUnderTest.processItem()
+
+        // Then
+        verify(mockCursor).checkAndAddItem(eq(workspaceInfo), any(), anyOrNull())
+        assertThat(workspaceInfo.runtimeStatusFlags and ItemInfoWithIcon.FLAG_AUTOMATED)
+            .isNotEqualTo(0)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_APP_AUTOMATION_INDICATOR)
+    fun whenAppNotAutomated_unsetFlagAutomated() {
+        // Given
+        val mockAutomationRepo = mock<AutomationRepository>()
+        whenever(mockAutomationRepo.isPackageAutomated(any<UserHandle>(), any())).thenReturn(false)
+
+        // When
+        itemProcessorUnderTest =
+            createWorkspaceItemProcessorUnderTest(automationRepo = mockAutomationRepo)
+        itemProcessorUnderTest.processItem()
+
+        // Then
+        val itemCaptor = argumentCaptor<WorkspaceItemInfo>()
+        verify(mockCursor).checkAndAddItem(eq(workspaceInfo), any(), anyOrNull())
+        assertThat(workspaceInfo.runtimeStatusFlags and ItemInfoWithIcon.FLAG_AUTOMATED)
+            .isEqualTo(0)
     }
 
     @Test
