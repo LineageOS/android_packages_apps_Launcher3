@@ -107,6 +107,10 @@ public abstract class SwipeUpAnimationLogic implements
                 ));
     }
 
+    protected float getCurrentShiftValue() {
+        return mCurrentShift.value;
+    }
+
     protected void initTransitionEndpoints(DeviceProfile dp) {
         mDp = dp;
         mTransitionDragLength = mGestureState.getContainerInterface()

@@ -188,11 +188,12 @@ public class RecentsWindowSwipeHandler extends AbsSwipeUpHandler<RecentsWindowMa
         if (mActiveAnimationFactory != null) {
             return;
         }
+        float currentShift = getCurrentShiftValue();
         setHomeScaleAndAlpha(
                 builder,
                 app,
-                mCurrentShift.value,
-                mRunningOverHome ? Utilities.boundToRange(1 - mCurrentShift.value, 0, 1) : 0f);
+                currentShift,
+                mRunningOverHome ? Utilities.boundToRange(1 - currentShift, 0, 1) : 0f);
     }
 
     private void setHomeScaleAndAlpha(SurfaceProperties builder,
@@ -322,7 +323,7 @@ public class RecentsWindowSwipeHandler extends AbsSwipeUpHandler<RecentsWindowMa
             mDuration = duration;
 
             if (mRunningOverHome) {
-                mVerticalShiftForScale.value = mCurrentShift.value;
+                mVerticalShiftForScale.value = getCurrentShiftValue();
             }
             mRecentsAlpha.value = 1;
             mHomeAlpha.value = 0;
