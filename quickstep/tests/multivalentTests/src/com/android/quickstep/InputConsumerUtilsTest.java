@@ -31,6 +31,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.kotlin.StubberKt.doCallRealMethod;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Looper;
@@ -119,7 +120,7 @@ public class InputConsumerUtilsTest {
     private TaskAnimationManager mTaskAnimationManager;
     private InputChannelCompat.InputEventReceiver mInputEventReceiver;
     private boolean mUserUnlocked = true;
-    @NonNull private Function<GestureState, AnimatedFloat> mSwipeUpProxyProvider = (state) -> null;
+    @Nullable private Function<GestureState, AnimatedFloat> mSwipeUpProxyProvider = (state) -> null;
 
     @NonNull @Mock private TaskbarActivityContext mTaskbarActivityContext;
     @NonNull @Mock private TaskbarFeatureEvaluator mTaskbarFeatureEvaluator;
@@ -551,6 +552,13 @@ public class InputConsumerUtilsTest {
                 this::createInputConsumer,
                 ProgressDelegateInputConsumer.class,
                 InputConsumer.TYPE_PROGRESS_DELEGATE);
+    }
+
+    @Test
+    public void testNewConsumer_withNullSwipeUpProxyProvider_doesNotCrash() {
+        mSwipeUpProxyProvider = null;
+
+        runOnMainSync(this::createInputConsumer);
     }
 
     @Test
