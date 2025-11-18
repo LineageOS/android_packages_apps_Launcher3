@@ -78,6 +78,7 @@ import com.android.launcher3.model.data.AppPairInfo;
 import com.android.launcher3.model.data.CollectionInfo;
 import com.android.launcher3.model.data.FolderInfo;
 import com.android.launcher3.model.data.ItemInfo;
+import com.android.launcher3.model.data.ItemInfoWithIcon;
 import com.android.launcher3.model.data.TaskItemInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.taskbar.TaskbarOverflowView.OverflowType;
@@ -1022,12 +1023,9 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         BubbleTextView bubbleTextView,
         HandoffSuggestion handoffSuggestion) {
 
-        HandoffSuggestion.Metadata metadata = handoffSuggestion.getMetadata();
-        if (metadata != null) {
-            bubbleTextView.applyIconAndLabel(
-                metadata.getIcon(),
-                metadata.getLabel(),
-                metadata.getLabel());
+        ItemInfoWithIcon itemInfoWithIcon = handoffSuggestion.getItemInfoWithIcon();
+        if (itemInfoWithIcon != null) {
+            bubbleTextView.applyFromItemInfoWithIcon(itemInfoWithIcon);
         }
 
         bubbleTextView.setTag(handoffSuggestion);
