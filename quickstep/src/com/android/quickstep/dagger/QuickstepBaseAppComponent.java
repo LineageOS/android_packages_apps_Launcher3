@@ -31,6 +31,7 @@ import com.android.launcher3.taskbar.TaskbarUiStateMonitor;
 import com.android.launcher3.taskbar.TaskbarViewCallbacksFactory;
 import com.android.launcher3.taskbar.bubbles.BubbleActivityStarter;
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator;
+import com.android.launcher3.taskbar.handoff.HandoffSuggestionRepository;
 import com.android.quickstep.FallbackActivityInterface;
 import com.android.quickstep.LauncherActivityInterface;
 import com.android.quickstep.OverviewComponentObserver;
@@ -126,6 +127,8 @@ public interface QuickstepBaseAppComponent extends LauncherBaseAppComponent {
     FallbackActivityInterface getFallbackActivityInterface();
 
     LauncherActivityInterface getLauncherActivityInterface();
+
+    HandoffSuggestionRepository getHandoffSuggestionRepository();
 
     PerDisplayComponent.Factory getPerDisplayComponentFactory();
 

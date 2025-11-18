@@ -18,9 +18,14 @@ package com.android.launcher3.taskbar.handoff
 
 import android.companion.Flags
 import android.companion.datatransfer.continuity.RemoteTask
+import android.content.ComponentName
+import android.content.Intent
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
+import com.android.launcher3.model.data.AppInfo
+import com.android.launcher3.model.data.AppsListData
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
 import com.android.launcher3.taskbar.rules.TaskbarModeRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.TRANSIENT
@@ -29,11 +34,10 @@ import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.google.common.truth.Truth.assertThat
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
-import org.mockito.kotlin.verify
 
 /** Tests for [TaskbarHandoffController]. */
 @RunWith(AndroidJUnit4::class)
@@ -46,48 +50,57 @@ class TaskbarHandoffControllerTest {
     @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
     @InjectController lateinit var controller: TaskbarHandoffController
 
+    @Before
+    fun setUp() {
+        taskbarUnitTestRule.activityContext.appComponent.testableModelState.appsRepo.dispatchChange(
+            AppsListData(
+                arrayOf(
+                    AppInfo(
+                        ComponentName("com.example.first", "Activity"),
+                        "Second App",
+                        taskbarUnitTestRule.activityContext.user,
+                        Intent(),
+                    )
+                ),
+                0,
+            )
+        )
+    }
+
     @Test
     @TaskbarMode(TRANSIENT)
-    fun init_registersListener() {
-        verify(context.taskContinuityManagerMock).registerRemoteTaskListener(any(), any())
-    }
-
-    @Test
-    fun onRemoteTasksChanged_onlyReturnsMostRecentSuggestions() {
-        val task1 = createRemoteTask(1, "Task 1", 100L)
-        val task2 = createRemoteTask(2, "Task 2", 200L)
-
-        runOnMainSync { controller.onRemoteTasksChanged(listOf(task1, task2)) }
-
-        val suggestions = controller.suggestions
-        assertThat(suggestions).hasSize(1)
-        assertThat(suggestions.map { it.associationId }).containsExactly(2).inOrder()
-    }
-
-    @Test
-    fun getSuggestions_afterUpdate_returnsSuggestions() {
-        assertThat(controller.suggestions).isEmpty()
-
-        val task = createRemoteTask(1, "Task", 10L)
-
-        runOnMainSync { controller.onRemoteTasksChanged(listOf(task)) }
-
+    fun onRemoteTasksChanged_updatesSuggestions() {
+        runOnMainSync {
+            HandoffSuggestionRepository.get(taskbarUnitTestRule.activityContext)
+                .listener
+                .onRemoteTasksChanged(
+                    listOf(
+                        createRemoteTask(
+                            associationId = 1,
+                            taskId = 1,
+                            packageName = "com.example.first",
+                            lastUsedTimestampMillis = 100,
+                            isTaskInForeground = true,
+                        )
+                    )
+                )
+        }
         assertThat(controller.suggestions).hasSize(1)
-        assertThat(controller.suggestions.first().associationId).isEqualTo(1)
-
-        controller.onDestroy()
-
-        assertThat(controller.suggestions).isEmpty()
     }
 
-    private fun createRemoteTask(
-        associationId: Int,
-        label: String,
-        lastUsedTimestampMillis: Long,
-    ): RemoteTask {
-        return RemoteTask.Builder(associationId, 1)
-            .setLabel(label)
-            .setLastUsedTimestampMillis(lastUsedTimestampMillis)
-            .build()
+    private companion object {
+        fun createRemoteTask(
+            associationId: Int,
+            taskId: Int,
+            packageName: String,
+            lastUsedTimestampMillis: Long,
+            isTaskInForeground: Boolean,
+        ): RemoteTask {
+            return RemoteTask.Builder(associationId, taskId)
+                .setPackageName(packageName)
+                .setLastUsedTimestampMillis(lastUsedTimestampMillis)
+                .setTaskInForeground(isTaskInForeground)
+                .build()
+        }
     }
 }

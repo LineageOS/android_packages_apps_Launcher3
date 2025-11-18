@@ -35,7 +35,7 @@ class HandoffSuggestionLauncher(
             }
             taskContinuityManager.requestHandoff(
                 suggestion.associationId,
-                suggestion.remoteTask.taskId,
+                suggestion.taskId,
                 executor,
                 this,
             )
