@@ -19,12 +19,16 @@ package com.android.quickstep
 import android.graphics.PointF
 import android.hardware.display.DisplayManager
 import android.hardware.display.DisplayManagerGlobal
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.SetFlagsRule
 import android.view.Display
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS
 import android.view.DisplayInfo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.launcher3.Flags
 import com.android.launcher3.R
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppModule
@@ -72,6 +76,7 @@ class LauncherSwipeHandlerV2Test {
 
     @get:Rule val mockitoRule = MockitoJUnit.rule()
     @get:Rule val sandboxContext = SandboxApplication()
+    @get:Rule val setFlagsRule: SetFlagsRule = SetFlagsRule()
 
     private val flingSpeed =
         -(sandboxContext.resources.getDimension(R.dimen.quickstep_fling_threshold_speed) + 1)
@@ -129,11 +134,21 @@ class LauncherSwipeHandlerV2Test {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_ENABLE_NEW_TOUCHPAD_GESTURES)
     fun goHomeFromAppByTrackpad_updateEduStats() {
         gestureState.setTrackpadGestureType(GestureState.TrackpadGestureType.THREE_FINGER)
         underTest.onGestureEnded(flingSpeed, PointF(), /* horizontalTouchSlopPassed= */ false)
         verify(systemUiProxy)
             .updateContextualEduStats(/* isTrackpadGesture= */ eq(true), eq(GestureType.HOME))
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_NEW_TOUCHPAD_GESTURES)
+    fun goOverviewFromAppByTrackpad_updateEduStats() {
+        gestureState.setTrackpadGestureType(GestureState.TrackpadGestureType.THREE_FINGER)
+        underTest.onGestureEnded(flingSpeed, PointF(), /* horizontalTouchSlopPassed= */ false)
+        verify(systemUiProxy)
+            .updateContextualEduStats(/* isTrackpadGesture= */ eq(true), eq(GestureType.OVERVIEW))
     }
 
     @Test

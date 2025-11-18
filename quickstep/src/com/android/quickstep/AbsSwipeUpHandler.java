@@ -119,6 +119,7 @@ import com.android.internal.util.LatencyTracker;
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.BuildConfig;
 import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.Flags;
 import com.android.launcher3.LifecycleTracker;
 import com.android.launcher3.QuickstepTransitionManager;
 import com.android.launcher3.R;
@@ -1489,11 +1490,16 @@ public abstract class AbsSwipeUpHandler<
 
     @VisibleForTesting
     protected GestureEndTarget getHomeTarget() {
+        // Trackpad gesture will override Home end target with Recents per UX guidelines.
+        if (Flags.enableNewTouchpadGestures() && mGestureState.isTrackpadGesture()) {
+            return RECENTS;
+        }
+        if (displaySupportsHomeGesture(mGestureState.getDisplayId())) {
+            return HOME;
+        }
         // If the user is swiping up to go home but the gesture is on a secondary display, we
         // should reject the gesture and roll back any in-progress animations.
-        return displaySupportsHomeGesture(mGestureState.getDisplayId())
-                ? HOME
-                : REJECT_HOME;
+        return REJECT_HOME;
     }
 
     private GestureEndTarget calculateEndTargetForFlingY(
@@ -1708,9 +1714,9 @@ public abstract class AbsSwipeUpHandler<
                 if (!mGestureState.isHandlingAtomicEvent() || isScrolling) {
                     duration = Math.max(duration, mRecentsView.getScroller().getDuration());
                 }
-                SystemUiProxy.INSTANCE.get(mContext).updateContextualEduStats(
-                        mGestureState.isTrackpadGesture(), GestureType.OVERVIEW);
             }
+            SystemUiProxy.INSTANCE.get(mContext).updateContextualEduStats(
+                    mGestureState.isTrackpadGesture(), GestureType.OVERVIEW);
         } else if (endTarget == LAST_TASK && mRecentsView != null
                 && mRecentsView.getNextPage() != mRecentsView.getRunningTaskIndex()) {
             mRecentsView.snapToPage(mRecentsView.getRunningTaskIndex(), Math.toIntExact(duration));
