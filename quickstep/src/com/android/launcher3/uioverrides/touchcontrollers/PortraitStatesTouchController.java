@@ -20,6 +20,7 @@ import static com.android.launcher3.AbstractFloatingView.getTopOpenViewWithType;
 import static com.android.launcher3.LauncherState.ALL_APPS;
 import static com.android.launcher3.LauncherState.NORMAL;
 import static com.android.launcher3.LauncherState.OVERVIEW;
+import static com.android.window.flags.Flags.betterDeskDeactivationInRecentsTransition;
 
 import android.view.MotionEvent;
 
@@ -167,7 +168,8 @@ public class PortraitStatesTouchController extends AbstractStateChangeTouchContr
     protected void onSwipeInteractionCompleted(LauncherState targetState) {
         super.onSwipeInteractionCompleted(targetState);
         SystemUiProxy sysUIProxy = SystemUiProxy.INSTANCE.get(mLauncher);
-        if (mStartState == NORMAL && targetState == OVERVIEW) {
+        if (!betterDeskDeactivationInRecentsTransition()
+                && mStartState == NORMAL && targetState == OVERVIEW) {
             sysUIProxy.onOverviewShown(true, TAG);
         }
 

@@ -165,6 +165,7 @@ public class LauncherRecentsView extends RecentsView<QuickstepLauncher, Launcher
 
     @Override
     public void onStateTransitionComplete(LauncherState finalState) {
+        mUtils.onStateTransitionComplete(finalState);
         DesktopVisibilityController.INSTANCE.get(mContainer).onLauncherStateChanged(
                 mContainer.getDisplayId(), finalState);
         if (!finalState.displayOverviewTasksAsGrid(mContainer.getDeviceProfile())) {

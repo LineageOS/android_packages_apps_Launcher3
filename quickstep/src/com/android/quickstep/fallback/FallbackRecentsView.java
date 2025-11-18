@@ -270,6 +270,7 @@ public abstract class FallbackRecentsView<CONTAINER_TYPE extends Context & Recen
 
     @Override
     public void onStateTransitionComplete(RecentsState finalState) {
+        mUtils.onStateTransitionComplete(finalState);
         DesktopVisibilityController.INSTANCE.get(mContainer).onLauncherStateChanged(
                 mContainer.getDisplayId(), finalState);
         if (!finalState.displayOverviewTasksAsGrid(mContainer.getDeviceProfile())) {
