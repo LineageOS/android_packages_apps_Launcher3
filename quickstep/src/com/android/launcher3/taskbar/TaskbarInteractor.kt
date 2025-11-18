@@ -22,10 +22,13 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewRootImpl
 import androidx.annotation.AnyThread
+import com.android.launcher3.Flags.enableTaskbarUiThread
 import com.android.launcher3.LauncherState
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.util.AsyncView
+import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
+import com.android.launcher3.util.TaskbarAsyncAnimator
 import com.android.quickstep.GestureState
 import com.android.quickstep.RecentsAnimationCallbacks
 import com.android.quickstep.ViewUtils
@@ -164,13 +167,27 @@ class TaskbarInteractor(private val taskbarUIController: TaskbarUIController) {
         }
     }
 
+    /**
+     * Create taskbar stash animation. If enableTaskbarUiThread() is off, this animation is played
+     * on main thread so we can added it as child animation to [appLaunchAnimationSet] which is also
+     * played on main thread.
+     *
+     * If enableTaskbarUiThread() is on, this animation will be played on [TASKBAR_UI_THREAD] and we
+     * will return a thread safe [TaskbarAsyncAnimator] to Launcher, who will later need to manually
+     * start it with app launch animation.
+     */
     @AnyThread
-    fun createAnimToAppAndPlay(animatorSet: AnimatorSet) {
+    fun createAnimToApp(appLaunchAnimationSet: AnimatorSet): TaskbarAsyncAnimator? {
         if (taskbarUIController is LauncherTaskbarUIController) {
-            TASKBAR_UI_THREAD.execute {
-                taskbarUIController.createAnimToApp().let { animatorSet.play(it) }
+            if (enableTaskbarUiThread()) {
+                return TaskbarAsyncAnimator(TASKBAR_UI_THREAD, MAIN_EXECUTOR) {
+                    taskbarUIController.createAnimToApp()
+                }
+            } else {
+                appLaunchAnimationSet.play(taskbarUIController.createAnimToApp())
             }
         }
+        return null
     }
 
     @AnyThread
