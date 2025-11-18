@@ -22,6 +22,7 @@ import android.view.View
 import com.android.launcher3.AppWidgetResizeFrame
 import com.android.launcher3.R
 import com.android.launcher3.dragndrop.LauncherDragController
+import com.android.launcher3.logging.StatsLogManager.LauncherEvent.IGNORE
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.shortcuts.DeepShortcutView
 import com.android.launcher3.views.ActivityContext
@@ -88,6 +89,12 @@ class PopupControllerForExtraHomeScreenItems<T>(
 
             view.tag = systemShortcut
             view.setOnClickListener {
+                if (systemShortcut.eventId != IGNORE) {
+                    activityContext.statsLogManager
+                        .logger()
+                        .withItemInfo(itemInfo)
+                        .log(systemShortcut.eventId)
+                }
                 systemShortcut.popupAction.invoke(activityContext, itemInfo, itemView)
             }
         }

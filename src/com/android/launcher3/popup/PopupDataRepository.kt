@@ -17,6 +17,8 @@
 package com.android.launcher3.popup
 
 import android.view.View
+import com.android.launcher3.logging.StatsLogManager.EventEnum
+import com.android.launcher3.logging.StatsLogManager.LauncherEvent.IGNORE
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.views.ActivityContext
 
@@ -35,6 +37,7 @@ data class PopupData(
     val labelResId: Int,
     val popupAction: (context: ActivityContext, itemInfo: ItemInfo, view: View) -> Unit,
     val category: PopupCategory,
+    val eventId: EventEnum = IGNORE,
 )
 
 /** Repository to get all the popup data needed for the long press menu. */

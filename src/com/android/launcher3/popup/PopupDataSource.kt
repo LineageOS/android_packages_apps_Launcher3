@@ -132,10 +132,6 @@ class PopupDataSource @Inject constructor() {
                     .inflate(R.layout.widgets_bottom_sheet, activityContext.getDragLayer(), false)
                     as WidgetsBottomSheet
             widgetsBottomSheet.populateAndShow(itemInfo)
-            activityContext.statsLogManager
-                .logger()
-                .withItemInfo(itemInfo)
-                .log(LauncherEvent.LAUNCHER_SYSTEM_SHORTCUT_WIDGETS_TAP)
         }
 
     // Popup data for widgets shortcut.
@@ -145,6 +141,7 @@ class PopupDataSource @Inject constructor() {
             labelResId = R.string.widget_button_text,
             popupAction = handleWidgets,
             category = PopupCategory.SYSTEM_SHORTCUT_FIXED,
+            eventId = LauncherEvent.LAUNCHER_SYSTEM_SHORTCUT_WIDGETS_TAP,
         )
 
     // Handle action from tapping app info shortcut.
@@ -162,10 +159,6 @@ class PopupDataSource @Inject constructor() {
                 sourceBounds,
                 options.toBundle(),
             )
-            activityContext.statsLogManager
-                .logger()
-                .withItemInfo(itemInfo)
-                .log(LauncherEvent.LAUNCHER_SYSTEM_SHORTCUT_APP_INFO_TAP)
         }
 
     // Popup data for app info shortcut.
@@ -175,6 +168,7 @@ class PopupDataSource @Inject constructor() {
             labelResId = R.string.app_info_drop_target_label,
             popupAction = handleAppInfo,
             category = PopupCategory.SYSTEM_SHORTCUT,
+            eventId = LauncherEvent.LAUNCHER_SYSTEM_SHORTCUT_APP_INFO_TAP,
         )
 
     // Handle action from tapping private profile install shortcut.
@@ -189,10 +183,6 @@ class PopupDataSource @Inject constructor() {
                 )
             activityContext.startActivitySafely(view, intent, itemInfo)
             AbstractFloatingView.closeAllOpenViews(activityContext)
-            activityContext.statsLogManager
-                .logger()
-                .withItemInfo(itemInfo)
-                .log(LauncherEvent.LAUNCHER_PRIVATE_SPACE_INSTALL_SYSTEM_SHORTCUT_TAP)
         }
 
     // Popup data for private profile install shortcut.
@@ -202,6 +192,7 @@ class PopupDataSource @Inject constructor() {
             labelResId = R.string.remove_drop_target_label,
             popupAction = handlePrivateProfileInstall,
             category = PopupCategory.SYSTEM_SHORTCUT,
+            eventId = LauncherEvent.LAUNCHER_PRIVATE_SPACE_INSTALL_SYSTEM_SHORTCUT_TAP,
         )
 
     // Handles action from tapping install shortcut.
@@ -229,10 +220,6 @@ class PopupDataSource @Inject constructor() {
     private val handleDontSuggestApp =
         { activityContext: ActivityContext, itemInfo: ItemInfo, view: View ->
             dismissTaskMenuView(activityContext)
-            activityContext.statsLogManager
-                .logger()
-                .withItemInfo(itemInfo)
-                .log(LauncherEvent.LAUNCHER_SYSTEM_SHORTCUT_DONT_SUGGEST_APP_TAP)
             Snackbar.show(
                 activityContext,
                 view.context.getString(R.string.item_removed),
@@ -254,6 +241,7 @@ class PopupDataSource @Inject constructor() {
             labelResId = R.string.dismiss_prediction_label,
             popupAction = handleDontSuggestApp,
             category = PopupCategory.SYSTEM_SHORTCUT,
+            eventId = LauncherEvent.LAUNCHER_SYSTEM_SHORTCUT_DONT_SUGGEST_APP_TAP,
         )
 
     // Handles action when tapping uninstall app shortcut.
@@ -262,10 +250,7 @@ class PopupDataSource @Inject constructor() {
             dismissTaskMenuView(activityContext)
             val componentName = SecondaryDropTarget.getUninstallTarget(view.context, itemInfo)
             SecondaryDropTarget.performUninstall(view.context, componentName, itemInfo)
-            activityContext.statsLogManager
-                .logger()
-                .withItemInfo(itemInfo)
-                .log(LauncherEvent.LAUNCHER_PRIVATE_SPACE_UNINSTALL_SYSTEM_SHORTCUT_TAP)
+            Unit
         }
 
     // Popup data for uninstall app shortcut.
@@ -275,6 +260,7 @@ class PopupDataSource @Inject constructor() {
             labelResId = R.string.uninstall_private_system_shortcut_label,
             popupAction = handleUninstallApp,
             category = PopupCategory.SYSTEM_SHORTCUT,
+            eventId = LauncherEvent.LAUNCHER_PRIVATE_SPACE_UNINSTALL_SYSTEM_SHORTCUT_TAP,
         )
 
     // Handles action when tapping bubble shortcut.
@@ -345,6 +331,7 @@ class PopupDataSource @Inject constructor() {
                 activityContext.startActivitySafely(view, itemInfo.intent, itemInfo)
             },
             category = PopupCategory.SYSTEM_SHORTCUT_FIXED,
+            eventId = LauncherEvent.LAUNCHER_HOME_SCREEN_FILES_OPEN_VIA_CONTEXT_MENU,
         )
 
     val deleteFileSystemItem =
@@ -356,6 +343,7 @@ class PopupDataSource @Inject constructor() {
                 else R.string.home_screen_files_context_menu_delete_permanently_label,
             popupAction = handleRemove,
             category = PopupCategory.SYSTEM_SHORTCUT_FIXED,
+            eventId = LauncherEvent.LAUNCHER_HOME_SCREEN_FILES_DELETE_VIA_CONTEXT_MENU,
         )
 
     companion object {
