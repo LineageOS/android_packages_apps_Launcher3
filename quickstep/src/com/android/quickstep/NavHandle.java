@@ -44,11 +44,6 @@ public interface NavHandle {
         return false;
     }
 
-    /** @return {@code true} if this nav handle can currently accept long presses */
-    default boolean canNavHandleBeLongPressed() {
-        return true;
-    }
-
     /** @return the width of this nav handle, in pixels */
     default int getNavHandleWidth(Context context) {
         return context.getResources().getDimensionPixelSize(R.dimen.navigation_home_handle_width);

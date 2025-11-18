@@ -132,7 +132,6 @@ public class BubbleBarViewController {
                     v.getBoundsOnScreen(mTempRect);
                     if (mTaskbarUiState != null) {
                         mTaskbarUiState.setBubbleBarRect(mTempRect);
-                        mTaskbarUiState.setIsBubbleBarViewVisible(v.getVisibility() == VISIBLE);
                     }
                 }
             };
@@ -195,7 +194,6 @@ public class BubbleBarViewController {
             mBarView.addOnLayoutChangeListener(mBubbleBarViewOnLayoutChangeListener);
             mBarView.getBoundsOnScreen(mTempRect);
             mTaskbarUiState.setBubbleBarRect(mTempRect);
-            mTaskbarUiState.setIsBubbleBarViewVisible(mBarView.getVisibility() == VISIBLE);
         }
         mBubbleBarContainer = bubbleBarContainer;
         mSystemUiProxy = SystemUiProxy.INSTANCE.get(mActivity);
