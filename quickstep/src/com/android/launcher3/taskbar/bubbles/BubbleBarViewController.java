@@ -324,6 +324,15 @@ public class BubbleBarViewController {
         };
     }
 
+    /**
+     * Called when initial state from shell is applied and the initial state added bubbles.
+     */
+    public void onInitialBubblesAdded() {
+        // Default taskbar window size includes bubble bar size if bubbles are present.
+        // Bubbles are now added, make sure the taskbar window accounts for them.
+        mActivity.setTaskbarWindowSize(mActivity.getDefaultTaskbarWindowSize());
+    }
+
     /** Called when animations for new and updated bubbles ended. */
     private void onBubbleAnimationEnded() {
         ensureTaskbarWindowVisibilityForBubbles(isExpanded());
