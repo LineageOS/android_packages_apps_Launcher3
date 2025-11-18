@@ -267,7 +267,7 @@ fun ShortPill(
                                                 filteredActions.size == 1 &&
                                                     filteredActions[0].actionType ==
                                                         ActionType.MA &&
-                                                filteredActions[0].oneTapEnabled
+                                                    filteredActions[0].oneTapEnabled
                                             )
                                                 null
                                             else expandActionLabel,
@@ -300,8 +300,8 @@ fun ShortPill(
                                     )
                                 } else if (
                                     filteredActions.size == 1 &&
-                                    action.actionType == ActionType.MR &&
-                                    action.icon.repeatCount > 0
+                                        action.actionType == ActionType.MR &&
+                                        action.icon.repeatCount > 0
                                 ) {
                                     Text(
                                         text = action.label,
@@ -406,10 +406,10 @@ fun ShortPill(
             with(density) {
                 val offsetX =
                     pillContentPosition.x.toDp() + (pillContentSize.width.toDp() / 2) -
-                            (closeButtonTouchTargetSize / 2)
+                        (closeButtonTouchTargetSize / 2)
                 val offsetY =
                     pillContentPosition.y.toDp() + (pillContentSize.height.toDp() / 2) -
-                            (closeButtonTouchTargetSize / 2)
+                        (closeButtonTouchTargetSize / 2)
 
                 CloseButton(
                     onCloseClick = onCloseClick,

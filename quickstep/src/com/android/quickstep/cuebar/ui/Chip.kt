@@ -47,9 +47,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
+import com.android.launcher3.R
 import com.android.quickstep.cuebar.ui.viewmodel.ActionType
 import com.android.quickstep.cuebar.ui.viewmodel.ActionViewModel
-import com.android.launcher3.R
 
 @Composable
 fun Chip(action: ActionViewModel, modifier: Modifier = Modifier) {

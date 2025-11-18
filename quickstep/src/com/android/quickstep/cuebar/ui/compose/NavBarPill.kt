@@ -85,8 +85,8 @@ import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.util.lerp
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
 import com.android.launcher3.R
-import com.android.quickstep.cuebar.ui.utils.AmbientCueAnimationState
 import com.android.quickstep.cuebar.ui.compose.modifier.animatedActionBorder
+import com.android.quickstep.cuebar.ui.utils.AmbientCueAnimationState
 import com.android.quickstep.cuebar.ui.utils.FilterUtils
 import com.android.quickstep.cuebar.ui.viewmodel.ActionType
 import com.android.quickstep.cuebar.ui.viewmodel.ActionViewModel
@@ -245,16 +245,17 @@ fun NavBarPill(
             verticalAlignment = Alignment.CenterVertically,
             modifier =
                 Modifier.graphicsLayer {
-                    alpha = enterProgress * expansionAlpha
-                    scaleY = enterProgress
-                    scaleX =
-                        if (expandedSize.width != 0) {
-                            val initialScale = collapsedWidthPx / expandedSize.width
-                            lerp(initialScale, 1f, enterProgress)
-                        } else {
-                            1f
-                        }
-                }.padding(bottom = 4.dp),
+                        alpha = enterProgress * expansionAlpha
+                        scaleY = enterProgress
+                        scaleX =
+                            if (expandedSize.width != 0) {
+                                val initialScale = collapsedWidthPx / expandedSize.width
+                                lerp(initialScale, 1f, enterProgress)
+                            } else {
+                                1f
+                            }
+                    }
+                    .padding(bottom = 4.dp),
         ) {
             val closeButtonSize = 28.dp
             val closeButtonTouchTargetSize = 36.dp
@@ -279,9 +280,9 @@ fun NavBarPill(
                                         onClickLabel =
                                             if (
                                                 filteredActions.size == 1 &&
-                                                filteredActions[0].actionType ==
-                                                ActionType.MA &&
-                                                filteredActions[0].oneTapEnabled
+                                                    filteredActions[0].actionType ==
+                                                        ActionType.MA &&
+                                                    filteredActions[0].oneTapEnabled
                                             )
                                                 null
                                             else expandActionLabel
@@ -347,7 +348,7 @@ fun NavBarPill(
                                     )
                                     if (
                                         isMrAction &&
-                                        !(wasEverCollapsed && filteredActions.size > 1)
+                                            !(wasEverCollapsed && filteredActions.size > 1)
                                     ) {
                                         Text(
                                             text = action.label,
@@ -383,13 +384,13 @@ fun NavBarPill(
                                     contentDescription = action.label,
                                     modifier =
                                         Modifier.then(
-                                            when (index) {
-                                                0 -> Modifier.padding(start = 5.dp)
-                                                filteredActions.size - 1 ->
-                                                    Modifier.padding(end = 5.dp)
-                                                else -> Modifier
-                                            }
-                                        )
+                                                when (index) {
+                                                    0 -> Modifier.padding(start = 5.dp)
+                                                    filteredActions.size - 1 ->
+                                                        Modifier.padding(end = 5.dp)
+                                                    else -> Modifier
+                                                }
+                                            )
                                             .padding(horizontal = 3.dp, vertical = 4.dp)
                                             .size(16.dp)
                                             .then(iconBorder)

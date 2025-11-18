@@ -33,21 +33,24 @@ import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction
 import android.widget.TextView
 import androidx.annotation.IdRes
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.ComposeView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
+import com.android.compose.theme.PlatformTheme
 import com.android.launcher3.Flags.enableRefactorDigitalWellbeingToast
 import com.android.launcher3.R
 import com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT
 import com.android.launcher3.util.SplitConfigurationOptions.StagePosition
 import com.android.launcher3.util.ViewPool
-import com.android.quickstep.compose.QuickstepComposeFacade
 import com.android.quickstep.orientation.RecentsPagedOrientationHandler
 import com.android.quickstep.task.apptimer.TaskAppTimerUiState
 import com.android.quickstep.task.apptimer.TaskAppTimerUiState.Uninitialized
 import com.android.quickstep.task.apptimer.TaskAppTimerViewModel
 import com.android.quickstep.task.apptimer.TimerTextHelper
+import com.android.quickstep.task.apptimer.ui.composable.AppTimerToast
 import com.android.quickstep.util.BorderAnimator
 import com.android.quickstep.util.BorderAnimator.Companion.DEFAULT_BORDER_COLOR
 import com.android.quickstep.util.BorderAnimator.Companion.createSimpleBorderAnimator
@@ -70,7 +73,7 @@ class TaskContentView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     private var taskThumbnailView: TaskThumbnailView? = null
     private val useComposeTaskAppTimer
-        get() = QuickstepComposeFacade.isComposeAvailable() && enableRefactorDigitalWellbeingToast()
+        get() = enableRefactorDigitalWellbeingToast()
 
     @Deprecated("This toast is getting replaced by the compose version taskAppTimerToastCompose")
     private var taskAppTimerToast: TextView? = null
@@ -297,11 +300,11 @@ class TaskContentView @JvmOverloads constructor(context: Context, attrs: Attribu
             when {
                 useComposeTaskAppTimer && taskAppTimerToastCompose == null -> {
                     taskAppTimerToastCompose =
-                        QuickstepComposeFacade.initComposeView(context).let {
-                            QuickstepComposeFacade.startTaskAppTimerToast(
-                                view = it,
-                                taskAppTimerViewModel,
-                            )
+                        ComposeView(context).apply {
+                            setContent {
+                                val timerUiState by taskAppTimerViewModel.uiState
+                                PlatformTheme { AppTimerToast(timerUiState, taskAppTimerViewModel) }
+                            }
                         }
                     addAppTimerToastToLayout()
                 }

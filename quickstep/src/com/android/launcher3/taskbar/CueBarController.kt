@@ -21,30 +21,33 @@ import android.graphics.Region
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect as ComposeRect
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import com.android.compose.theme.PlatformTheme
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.launcher3.InsettableFrameLayout
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.taskbar.overlay.TaskbarOverlayContext
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.ORDERED_BG_EXECUTOR
-import com.android.quickstep.compose.QuickstepComposeFacade
 import com.android.quickstep.cuebar.data.repository.AmbientCueRepositoryImpl
 import com.android.quickstep.cuebar.domain.interactor.AmbientCueInteractor
 import com.android.quickstep.cuebar.logger.AmbientCueLoggerImpl
+import com.android.quickstep.cuebar.ui.AmbientCueContainer
 import com.android.quickstep.cuebar.ui.utils.AmbientCueAnimationState
 import com.android.quickstep.cuebar.ui.utils.AmbientCueJankMonitor
 import com.android.quickstep.cuebar.ui.viewmodel.AmbientCueViewModel
 import com.android.systemui.shared.Flags.cueBarAceMigration
+import java.io.PrintWriter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
-import java.io.PrintWriter
-import androidx.compose.ui.geometry.Rect as ComposeRect
 
-class CueBarController (
-    private val activity: TaskbarActivityContext,
-) : TaskbarControllers.LoggableTaskbarController {
+class CueBarController(private val activity: TaskbarActivityContext) :
+    TaskbarControllers.LoggableTaskbarController {
 
     private lateinit var taskbarControllers: TaskbarControllers
     private var pillBoundsInWindow: Rect? = null
@@ -54,29 +57,31 @@ class CueBarController (
     private var cueBar: View? = null
     private var isHiding = false
     private val ambientCueLogger = AmbientCueLoggerImpl(activity.packageManager)
-    private val ambientCueRepository = AmbientCueRepositoryImpl(activity, ambientCueLogger,
-        ORDERED_BG_EXECUTOR, MAIN_EXECUTOR)
+    private val ambientCueRepository =
+        AmbientCueRepositoryImpl(activity, ambientCueLogger, ORDERED_BG_EXECUTOR, MAIN_EXECUTOR)
     private val ambientCueInteractor = AmbientCueInteractor(ambientCueRepository)
-    private val lp = InsettableFrameLayout.LayoutParams(
-        ViewGroup.LayoutParams.MATCH_PARENT,
-        ViewGroup.LayoutParams.WRAP_CONTENT
-    ).apply {
-        ignoreInsets = true
-    }
+    private val lp =
+        InsettableFrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+            )
+            .apply { ignoreInsets = true }
     val isExpanded: Boolean
         get() = ambientCueViewModel.isExpanded
 
-    private val ambientCueViewModel: AmbientCueViewModel = AmbientCueViewModel(
-        ambientCueInteractor = ambientCueInteractor,
-        launcherPrefs = LauncherPrefs.get(activity),
-        scope = coroutineScope,
-        ambientCueLogger = ambientCueLogger,
-        uiExecutor = MAIN_EXECUTOR
-    ). apply {
-        onVisibilityChanged = { isCueBarVisible ->
-            onCueBarVisibilityChanged(isCueBarVisible)
-        }
-    }
+    private val ambientCueViewModel: AmbientCueViewModel =
+        AmbientCueViewModel(
+                ambientCueInteractor = ambientCueInteractor,
+                launcherPrefs = LauncherPrefs.get(activity),
+                scope = coroutineScope,
+                ambientCueLogger = ambientCueLogger,
+                uiExecutor = MAIN_EXECUTOR,
+            )
+            .apply {
+                onVisibilityChanged = { isCueBarVisible ->
+                    onCueBarVisibilityChanged(isCueBarVisible)
+                }
+            }
 
     fun init(controllers: TaskbarControllers) {
         if (!cueBarAceMigration()) {
@@ -87,41 +92,51 @@ class CueBarController (
     }
 
     private fun createCueBar() {
-        val viewModelFactory = object : AmbientCueViewModel.Factory {
-            override fun create(): AmbientCueViewModel {
-                return ambientCueViewModel
+        val viewModelFactory =
+            object : AmbientCueViewModel.Factory {
+                override fun create(): AmbientCueViewModel {
+                    return ambientCueViewModel
+                }
             }
-        }
-        val composeView = QuickstepComposeFacade.initComposeView(activity) as ComposeView
+        val composeView = ComposeView(activity)
         val ambientCueJankMonitor =
             AmbientCueJankMonitor(InteractionJankMonitor.getInstance(), composeView)
         cueBar =
-            QuickstepComposeFacade.startCueBar(
-                view = composeView,
-                ambientCueViewModelFactory = viewModelFactory,
-                onShouldInterceptTouches = { intercept, composeRect: ComposeRect? ->
-                    if (composeRect != null && !composeRect.isEmpty) {
-                        if (pillBoundsInWindow == null) {
-                            pillBoundsInWindow = Rect()
-                        }
-                        pillBoundsInWindow?.set(
-                            composeRect.left.toInt(),
-                            composeRect.top.toInt(),
-                            composeRect.right.toInt(),
-                            composeRect.bottom.toInt()
+            composeView.apply {
+                setViewCompositionStrategy(
+                    ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+                )
+                setContent {
+                    PlatformTheme {
+                        AmbientCueContainer(
+                            modifier = Modifier.fillMaxSize(),
+                            ambientCueViewModelFactory = viewModelFactory,
+                            onShouldInterceptTouches = { intercept, composeRect: ComposeRect? ->
+                                if (composeRect != null && !composeRect.isEmpty) {
+                                    if (pillBoundsInWindow == null) {
+                                        pillBoundsInWindow = Rect()
+                                    }
+                                    pillBoundsInWindow?.set(
+                                        composeRect.left.toInt(),
+                                        composeRect.top.toInt(),
+                                        composeRect.right.toInt(),
+                                        composeRect.bottom.toInt(),
+                                    )
+                                } else if (isExpanded) {
+                                    pillBoundsInWindow = null
+                                }
+                            },
+                            onAnimationStateChange = { cujType, animationState ->
+                                ambientCueJankMonitor.onAnimationStateChange(
+                                    cujType,
+                                    animationState,
+                                )
+                                handleAnimationStateChange(animationState)
+                            },
                         )
-                    } else if (isExpanded){
-                        pillBoundsInWindow = null
                     }
-                },
-                onAnimationStateChange = { cujType, animationState ->
-                    ambientCueJankMonitor.onAnimationStateChange(
-                        cujType,
-                        animationState,
-                    )
-                    handleAnimationStateChange(animationState)
-                },
-            )
+                }
+            }
     }
 
     private fun handleAnimationStateChange(state: AmbientCueAnimationState) {
@@ -136,7 +151,7 @@ class CueBarController (
     fun cleanUpOverlay() {
         internalComposeView?.disposeComposition()
         if (mOverlayContext == null) {
-            return;
+            return
         }
         isHiding = false
         mOverlayContext?.dragLayer?.removeView(internalComposeView)
@@ -186,12 +201,15 @@ class CueBarController (
         taskbarControllers.sharedState?.cueBarVisible = isCueBarVisible
 
         // Animate stashHandle alpha.
-        val stashedHandleAlpha = taskbarControllers.stashedHandleViewController
-            .stashedHandleAlpha
-            .get(StashedHandleViewController.ALPHA_INDEX_CUEBAR_HIDDEN)
+        val stashedHandleAlpha =
+            taskbarControllers.stashedHandleViewController.stashedHandleAlpha.get(
+                StashedHandleViewController.ALPHA_INDEX_CUEBAR_HIDDEN
+            )
         val targetAlpha = if (isCueBarVisible) 0f else 1f
-        stashedHandleAlpha.animateToValue(targetAlpha)
-            .setDuration(STASHED_HANDLE_ALPHA_ANIMATION_DURATION_MS).start()
+        stashedHandleAlpha
+            .animateToValue(targetAlpha)
+            .setDuration(STASHED_HANDLE_ALPHA_ANIMATION_DURATION_MS)
+            .start()
 
         if (isCueBarVisible) {
             isHiding = false // Cancel any pending hide
@@ -237,12 +255,8 @@ class CueBarController (
             cueBar!!.getLocationInWindow(location)
             val viewWidth = cueBar!!.width
             val viewHeight = cueBar!!.height
-            val fullscreenBounds = Rect(
-                location[0],
-                location[1],
-                location[0] + viewWidth,
-                location[1] + viewHeight
-            )
+            val fullscreenBounds =
+                Rect(location[0], location[1], location[0] + viewWidth, location[1] + viewHeight)
             if (!fullscreenBounds.isEmpty) {
                 region.op(fullscreenBounds, Region.Op.UNION)
             }

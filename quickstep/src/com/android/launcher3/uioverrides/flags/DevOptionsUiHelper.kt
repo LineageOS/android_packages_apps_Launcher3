@@ -62,7 +62,6 @@ import com.android.launcher3.util.OnboardingPrefs.TASKBAR_SEARCH_EDU_SEEN
 import com.android.launcher3.util.OnboardingPrefs.TASKBAR_SEEN_EDU_FLAGS
 import com.android.launcher3.util.PluginManagerWrapper
 import com.android.launcher3.util.StartActivityParams
-import com.android.quickstep.compose.QuickstepComposeFacade
 import com.android.quickstep.util.DeviceConfigHelper
 import com.android.quickstep.util.DeviceConfigHelper.Companion.NAMESPACE_LAUNCHER
 import com.android.quickstep.util.DeviceConfigHelper.DebugInfo
@@ -134,7 +133,7 @@ class DevOptionsUiHelper(c: Context, attr: AttributeSet?) : PreferenceGroup(c, a
                         isPersistent = true
                         key = COMPOSITION_TRACING_PREF_KEY
                         setDefaultValue(false)
-                        isEnabled = QuickstepComposeFacade.isComposeAvailable()
+                        isEnabled = true
                     }
                 )
             }

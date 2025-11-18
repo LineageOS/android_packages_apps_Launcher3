@@ -85,9 +85,9 @@ import com.android.launcher3.R
 import com.android.quickstep.cuebar.ui.compose.OverscrollEffect
 import com.android.quickstep.cuebar.ui.compose.modifier.eduBalloon
 import com.android.quickstep.cuebar.ui.viewmodel.ActionViewModel
-import kotlinx.coroutines.flow.drop
 import kotlin.math.abs
 import kotlin.math.max
+import kotlinx.coroutines.flow.drop
 
 @Composable
 fun ActionList(
@@ -172,7 +172,7 @@ fun ActionList(
         derivedStateOf {
             // We combine the anchor offset with the overscroll offset to animate
             abs(anchoredDraggableState.offset + overscrollEffect.offset.value) /
-                    max(1, containerHeightPx)
+                max(1, containerHeightPx)
         }
     }
     LaunchedEffect(progress) {
@@ -480,7 +480,7 @@ fun ActionList(
             LaunchedEffect(childHeights) {
                 appxColumnY =
                     childHeights.subList(index, childHeights.size).sum() +
-                            columnSpacingPx * max((childHeights.size - index - 1f), 0f)
+                        columnSpacingPx * max((childHeights.size - index - 1f), 0f)
             }
 
             var chipWidthPx by remember { mutableIntStateOf(0) }
@@ -489,16 +489,16 @@ fun ActionList(
                 action = action,
                 modifier =
                     Modifier.onSizeChanged {
-                        if (index < childHeights.size) {
-                            childHeights[index] = it.height
+                            if (index < childHeights.size) {
+                                childHeights[index] = it.height
+                            }
+                            chipWidthPx = it.width
                         }
-                        chipWidthPx = it.width
-                    }
                         .onGloballyPositioned { radius = max(radius, it.size.width / 2f) }
                         .graphicsLayer {
                             val chipsTotalHeightPx =
                                 childHeights.sum().toFloat() +
-                                        columnSpacingPx * (childHeights.size - 1)
+                                    columnSpacingPx * (childHeights.size - 1)
                             if (portrait || taskBarMode) {
                                 translationY = (1f - translation) * appxColumnY
                                 translationX = 0f
@@ -506,14 +506,14 @@ fun ActionList(
                                 if (rotation == ROTATION_90) {
                                     translationY =
                                         (1f - translation) *
-                                                (pillCenter.y - pillWidth - chipsTotalHeightPx +
-                                                        appxColumnY)
+                                            (pillCenter.y - pillWidth - chipsTotalHeightPx +
+                                                appxColumnY)
                                     translationX = (1f - translation) * chipWidthPx.toFloat()
                                 } else if (rotation == ROTATION_270) {
                                     translationY =
                                         (1f - translation) *
-                                                (pillCenter.y - pillWidth - chipsTotalHeightPx +
-                                                        appxColumnY)
+                                            (pillCenter.y - pillWidth - chipsTotalHeightPx +
+                                                appxColumnY)
                                     translationX = (translation - 1f) * chipWidthPx.toFloat()
                                 }
                             }
