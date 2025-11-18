@@ -180,4 +180,12 @@
     <string name="nudge_a11y_close" msgid="4513937143817625570">"மூடும்"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"படம் குறித்து நினைவூட்டும்"</string>
     <string name="running_app_description" msgid="1309281047289078871">"<xliff:g id="APP_TITLE">%1$s</xliff:g> <xliff:g id="RUNNING_STATE">%2$s</xliff:g>"</string>
+    <string name="ambientcue_first_time_edu_icon_description" msgid="899917821554299010">"ஐகான்"</string>
+    <string name="ambientcue_first_time_edu_title" msgid="2018548669156363447">"உதவிகரமான பரிந்துரைகளைப் பெறுங்கள்"</string>
+    <string name="ambientcue_first_time_edu_text" msgid="4645551981871066999">"திரையில் நீங்கள் செய்பவற்றுக்குப் பொருத்தமான தகவல்களையும் செயல்களையும் முன்கூட்டியே பரிந்துரைக்க AIயைப் பயன்படுத்துகிறோம்"</string>
+    <string name="underlay_close_button_content_description" msgid="5386282762373529057">"மூடும்"</string>
+    <string name="ambient_cue_expand_action" msgid="3718141784327417087">"விரிவாக்கும்"</string>
+    <string name="ambient_cue_icon_content_description" msgid="6470228671884918485">"சூழல் சார்ந்த பரிந்துரைகள் ஐகான்"</string>
+    <string name="ambientcue_long_press_edu_text" msgid="2399090372677751105">"பரிந்துரைகள் எப்படி உருவாகின்றன என்பதைப் பார்க்க தொட்டுப் பிடியுங்கள்"</string>
+    <string name="ambient_cue_autofill_action" msgid="5880997492149716614">"தானாக நிரப்பும்"</string>
 </resources>

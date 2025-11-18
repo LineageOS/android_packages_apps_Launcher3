@@ -100,7 +100,7 @@
     <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"لبدء استخدام <xliff:g id="DEVICE">%1$s</xliff:g>، يُرجى التمرير سريعًا للأعلى"</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"يُرجى النقر لبدء استخدام <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="allset_navigation_settings_expressive" msgid="3745595273748356"><annotation id="link">"اختيار طريقة التنقّل"</annotation></string>
-    <string name="allset_hint_expressive" msgid="756856423510976261">"يمكنك التمرير سريعًا للأعلى"</string>
+    <string name="allset_hint_expressive" msgid="756856423510976261">"مرّر سريعًا للأعلى"</string>
     <string name="allset_button_hint_expressive" msgid="667643693410494225">"يمكنك النقر على زر الشاشة الرئيسية"</string>
     <string name="allset_device_type_tablet" msgid="2173392009787325894">"جهاز لوحي"</string>
     <string name="allset_device_type_phone" msgid="6842334562074507337">"هاتف"</string>
@@ -180,4 +180,12 @@
     <string name="nudge_a11y_close" msgid="4513937143817625570">"إغلاق"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"صورة تذكير تلقائي"</string>
     <string name="running_app_description" msgid="1309281047289078871">"‫<xliff:g id="APP_TITLE">%1$s</xliff:g>: <xliff:g id="RUNNING_STATE">%2$s</xliff:g>"</string>
+    <string name="ambientcue_first_time_edu_icon_description" msgid="899917821554299010">"رمز"</string>
+    <string name="ambientcue_first_time_edu_title" msgid="2018548669156363447">"احصل على اقتراحات مفيدة"</string>
+    <string name="ambientcue_first_time_edu_text" msgid="4645551981871066999">"نستخدم الذكاء الاصطناعي لاقتراح معلومات وإجراءات بشكل استباقي متعلّقة بأنشطتك على الشاشة"</string>
+    <string name="underlay_close_button_content_description" msgid="5386282762373529057">"إغلاق"</string>
+    <string name="ambient_cue_expand_action" msgid="3718141784327417087">"توسيع"</string>
+    <string name="ambient_cue_icon_content_description" msgid="6470228671884918485">"رمز الاقتراحات السياقية"</string>
+    <string name="ambientcue_long_press_edu_text" msgid="2399090372677751105">"يُرجى النقر مع الاستمرار للاطّلاع على كيفية إنشاء الاقتراحات"</string>
+    <string name="ambient_cue_autofill_action" msgid="5880997492149716614">"الملء التلقائي"</string>
 </resources>

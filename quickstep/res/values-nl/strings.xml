@@ -180,4 +180,12 @@
     <string name="nudge_a11y_close" msgid="4513937143817625570">"Sluiten"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"Afbeelding verschuiven"</string>
     <string name="running_app_description" msgid="1309281047289078871">"<xliff:g id="APP_TITLE">%1$s</xliff:g> <xliff:g id="RUNNING_STATE">%2$s</xliff:g>"</string>
+    <string name="ambientcue_first_time_edu_icon_description" msgid="899917821554299010">"Icoon"</string>
+    <string name="ambientcue_first_time_edu_title" msgid="2018548669156363447">"Krijg nuttige suggesties"</string>
+    <string name="ambientcue_first_time_edu_text" msgid="4645551981871066999">"We gebruiken AI om proactief informatie en acties voor te stellen die relevant zijn voor wat je op het scherm doet"</string>
+    <string name="underlay_close_button_content_description" msgid="5386282762373529057">"Sluiten"</string>
+    <string name="ambient_cue_expand_action" msgid="3718141784327417087">"uitvouwen"</string>
+    <string name="ambient_cue_icon_content_description" msgid="6470228671884918485">"Icoon voor omgevingssuggesties"</string>
+    <string name="ambientcue_long_press_edu_text" msgid="2399090372677751105">"Houd ingedrukt om te zien hoe suggesties worden gegenereerd"</string>
+    <string name="ambient_cue_autofill_action" msgid="5880997492149716614">"automatisch invullen"</string>
 </resources>

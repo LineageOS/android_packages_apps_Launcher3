@@ -180,4 +180,12 @@
     <string name="nudge_a11y_close" msgid="4513937143817625570">"閉じる"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"ナッジの画像"</string>
     <string name="running_app_description" msgid="1309281047289078871">"<xliff:g id="APP_TITLE">%1$s</xliff:g> <xliff:g id="RUNNING_STATE">%2$s</xliff:g>⁠"</string>
+    <string name="ambientcue_first_time_edu_icon_description" msgid="899917821554299010">"アイコン"</string>
+    <string name="ambientcue_first_time_edu_title" msgid="2018548669156363447">"役に立つ提案を受け取る"</string>
+    <string name="ambientcue_first_time_edu_text" msgid="4645551981871066999">"AI を使用して、画面上での操作に関連する情報やアクションを積極的に提案します"</string>
+    <string name="underlay_close_button_content_description" msgid="5386282762373529057">"閉じる"</string>
+    <string name="ambient_cue_expand_action" msgid="3718141784327417087">"開く"</string>
+    <string name="ambient_cue_icon_content_description" msgid="6470228671884918485">"Ambient Suggestions のアイコン"</string>
+    <string name="ambientcue_long_press_edu_text" msgid="2399090372677751105">"長押しすると、提案がどのように生成されるかを確認できます"</string>
+    <string name="ambient_cue_autofill_action" msgid="5880997492149716614">"自動入力"</string>
 </resources>

@@ -103,7 +103,7 @@
     <string name="allset_hint_expressive" msgid="756856423510976261">"Glisează în sus"</string>
     <string name="allset_button_hint_expressive" msgid="667643693410494225">"Atinge butonul ecran de pornire"</string>
     <string name="allset_device_type_tablet" msgid="2173392009787325894">"tableta"</string>
-    <string name="allset_device_type_phone" msgid="6842334562074507337">"telefon"</string>
+    <string name="allset_device_type_phone" msgid="6842334562074507337">"telefonul"</string>
     <string name="action_share" msgid="2648470652637092375">"Distribuie"</string>
     <string name="action_screenshot" msgid="8171125848358142917">"Captură de ecran"</string>
     <string name="action_split" msgid="2098009717623550676">"Împărțit"</string>
@@ -180,4 +180,12 @@
     <string name="nudge_a11y_close" msgid="4513937143817625570">"Închide"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"Reafișează imaginea"</string>
     <string name="running_app_description" msgid="1309281047289078871">"<xliff:g id="APP_TITLE">%1$s</xliff:g> <xliff:g id="RUNNING_STATE">%2$s</xliff:g>⁠"</string>
+    <string name="ambientcue_first_time_edu_icon_description" msgid="899917821554299010">"Pictogramă"</string>
+    <string name="ambientcue_first_time_edu_title" msgid="2018548669156363447">"Primește sugestii utile"</string>
+    <string name="ambientcue_first_time_edu_text" msgid="4645551981871066999">"Folosim AI pentru a-ți sugera proactiv informații și acțiuni relevante pentru ceea ce faci pe ecran"</string>
+    <string name="underlay_close_button_content_description" msgid="5386282762373529057">"Închide"</string>
+    <string name="ambient_cue_expand_action" msgid="3718141784327417087">"extinde"</string>
+    <string name="ambient_cue_icon_content_description" msgid="6470228671884918485">"Pictograma pentru sugestii privind modul ambiental"</string>
+    <string name="ambientcue_long_press_edu_text" msgid="2399090372677751105">"Atinge lung ca să vezi cum sunt generate sugestiile"</string>
+    <string name="ambient_cue_autofill_action" msgid="5880997492149716614">"completarea automată"</string>
 </resources>
