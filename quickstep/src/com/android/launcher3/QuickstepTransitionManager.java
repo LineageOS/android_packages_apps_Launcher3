@@ -318,20 +318,43 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
     private void startCrossDisplayMoveAnimation(TransitionInfo info, SurfaceControl.Transaction t,
             IRemoteTransitionFinishedCallback finishCallback) {
         mHandler.post(() -> {
-            new CrossDisplayMoveTransition(mLauncher, APP_LAUNCH_DURATION,
-                    CLOSING_TRANSITION_DURATION_MS)
-                    .startCrossDisplayMoveAnimation(info, t, finishCallback);
+            // If launcher was destroyed between animation start and the post, don't give out a
+            // ref to that launcher, just finish the transition immediately.
+            if (mLauncher.isDestroyed()) {
+                try {
+                    finishCallback.onTransitionFinished(null /* wct */, null /* sct */);
+                } catch (RemoteException e) {
+                    // Ignore.
+                }
+            } else {
+                CrossDisplayMoveTransition.startCrossDisplayMoveAnimation(mLauncher,
+                        APP_LAUNCH_DURATION, CLOSING_TRANSITION_DURATION_MS, info, t,
+                        finishCallback);
+            }
         });
     }
 
     /**
      * A {@link RemoteTransitionStub} that handles cross display move animations.
      */
-    private class MoveDisplayChangeRunner extends RemoteTransitionStub {
+    private static class MoveDisplayChangeRunner extends RemoteTransitionStub {
+        private final java.lang.ref.WeakReference<QuickstepTransitionManager> mManagerRef;
+
+        MoveDisplayChangeRunner(QuickstepTransitionManager manager) {
+            // Ensure we don't use a strong to the manager; we don't want to extend its lifetime if
+            // the manager happens to be destroyed before the animation binder collects.
+            mManagerRef = new java.lang.ref.WeakReference<>(manager);
+        }
+
         @Override
         public void startAnimation(IBinder token, TransitionInfo info, SurfaceControl.Transaction t,
                 IRemoteTransitionFinishedCallback finishCallback) throws RemoteException {
-            startCrossDisplayMoveAnimation(info, t, finishCallback);
+            final QuickstepTransitionManager manager = mManagerRef.get();
+            if (manager != null) {
+                manager.startCrossDisplayMoveAnimation(info, t, finishCallback);
+            } else {
+                finishCallback.onTransitionFinished(null /* wct */, null /* sct */);
+            }
         }
     }
 
@@ -436,7 +459,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             return defaultAppLaunchTransition;
         }
 
-        IRemoteTransition crossDisplayMoveTransition = new MoveDisplayChangeRunner();
+        IRemoteTransition crossDisplayMoveTransition = new MoveDisplayChangeRunner(this);
         return new RemoteTransitionDelegate(
                 (info) -> {
                     if (CrossDisplayMoveTransition.isCrossDisplayMove(info)) {
@@ -1393,7 +1416,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
          * cross-display move via a remote transition.
          */
         if (com.android.window.flags.Flags.enableCrossDisplaysAppLaunchTransition()) {
-            mMoveDisplayTransition = new RemoteTransition(new MoveDisplayChangeRunner(),
+            mMoveDisplayTransition = new RemoteTransition(new MoveDisplayChangeRunner(this),
                     mLauncher.getIApplicationThread(), "QuickstepDisplayMove");
             TransitionFilter changeCheck = new TransitionFilter();
             changeCheck.mRequirements = new TransitionFilter.Requirement[]{

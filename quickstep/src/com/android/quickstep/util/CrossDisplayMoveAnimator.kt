@@ -40,7 +40,7 @@ import kotlin.math.roundToInt
  * @property dstFinalBounds The final bounds of the moving task on the destination display.
  * @property launchingTransitionDurationMs The duration of the launching animation.
  * @property unlaunchingTransitionDurationMs The duration of the unlaunching animation.
- * @property extraAnimators Any extra animators to play in parallel.
+ * @property launcherAnimators Any extra animators to play in parallel.
  * @property finishCallback The callback to invoke when the full transition is finished.
  */
 class CrossDisplayMoveAnimator(
@@ -50,7 +50,7 @@ class CrossDisplayMoveAnimator(
     private val dstFinalBounds: Rect,
     private val launchingTransitionDurationMs: Long,
     private val unlaunchingTransitionDurationMs: Long,
-    private val extraAnimators: AnimatorSet?,
+    private var launcherAnimators: AnimatorSet?,
     private val finishCallback: IRemoteTransitionFinishedCallback
 ) {
     companion object {
@@ -142,7 +142,7 @@ class CrossDisplayMoveAnimator(
         val animators = mutableListOf<Animator>()
         srcTaskLeash?.let { animators.add(createUnlaunchAnimation(it, srcFinalBounds)) }
         animators.add(createLaunchAnimation(dstTaskLeash, dstFinalBounds))
-        extraAnimators?.let { animators.add(it) }
+        launcherAnimators?.let { animators.add(it) }
 
         val animSet = AnimatorSet()
         animSet.playTogether(animators)
@@ -152,6 +152,10 @@ class CrossDisplayMoveAnimator(
             } catch (e: RemoteException) {
                 Log.e(TAG, "Failed to finish transition", e)
             }
+            // Remove our launcher references as soon as possible -- they're relatively heavy.
+            launcherAnimators?.childAnimations?.forEach { it.removeAllListeners() }
+            launcherAnimators?.removeAllListeners()
+            launcherAnimators = null
         }
         animSet.start()
     }
