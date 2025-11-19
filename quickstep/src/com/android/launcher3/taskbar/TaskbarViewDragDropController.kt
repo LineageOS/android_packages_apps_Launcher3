@@ -64,6 +64,20 @@ class TaskbarViewDragDropController(
         dragController.removeDropTarget(unpinDropTarget)
     }
 
+    fun onTaskbarItemViewDragStart(itemView: View) {
+        pinnedAppsContainerDelegate.updateItemViewVisibilityForDragState(
+            itemView,
+            /*isDragged */ true,
+        )
+    }
+
+    fun onTaskbarItemViewDragEnd(itemView: View) {
+        pinnedAppsContainerDelegate.updateItemViewVisibilityForDragState(
+            itemView,
+            /*isDragged */ false,
+        )
+    }
+
     /**
      * Implementation of the [DropTarget] that handles drag and drop events over the recent apps
      * area.
@@ -118,12 +132,17 @@ class TaskbarViewDragDropController(
      */
     inner class PinningDropTarget() : DropTarget {
 
+        private var targetPinIndex = -1
+        private var draggedInfo: ItemInfo? = null
+        private val dragObjectVisualCenter = FloatArray(2)
+
         private val canPinMoreItems: Boolean
             get() {
                 val hotseatItems = modelCallbacks?.hotseatItems ?: return false
                 return hotseatItems.size < activityContext.taskbarSpecsEvaluator.maxPinnableCount
             }
 
+        /** Returns the [ItemInfo] from the dragged object. */
         private fun extractItemInfoFromDragObject(dragObject: DropTarget.DragObject?): ItemInfo? {
             return when (val dragItemInfo = dragObject?.dragInfo) {
                 is WorkspaceItemInfo -> dragItemInfo
@@ -200,13 +219,21 @@ class TaskbarViewDragDropController(
             modelCallbacks?.bindItemsUpdated(hashSetOf(newInfo))
         }
 
-        override fun onDragEnter(dragObject: DropTarget.DragObject?) {}
+        override fun onDragEnter(dragObject: DropTarget.DragObject?) {
+            dragObject ?: return
+            draggedInfo = extractItemInfoFromDragObject(dragObject)
+            dragObject.getVisualCenter(dragObjectVisualCenter)
+
+            pinnedAppsContainerDelegate.reserveDropSlotForDragLocation(
+                dragObjectVisualCenter[0].toInt()
+            )
+        }
 
         override fun onDragOver(dragObject: DropTarget.DragObject?) {
-            val center = FloatArray(2)
-            dragObject?.getVisualCenter(center)
+            dragObject ?: return
+            dragObject.getVisualCenter(dragObjectVisualCenter)
 
-            if (pinnedAppsContainerDelegate.isPointOnOverflowIcon(center)) {
+            if (pinnedAppsContainerDelegate.isPointOnOverflowIcon(dragObjectVisualCenter)) {
                 if (overflowContainerOpenAlarm.alarmPending()) {
                     return
                 }
@@ -218,20 +245,22 @@ class TaskbarViewDragDropController(
                 if (overflowContainerOpenAlarm.alarmPending()) {
                     overflowContainerOpenAlarm.cancelAlarm()
                 }
+                pinnedAppsContainerDelegate.reserveDropSlotForDragLocation(
+                    dragObjectVisualCenter[0].toInt()
+                )
             }
         }
 
         override fun onDragExit(dragObject: DropTarget.DragObject?) {
-            if (overflowContainerOpenAlarm.alarmPending()) {
-                overflowContainerOpenAlarm.cancelAlarm()
-            }
+            targetPinIndex = pinnedAppsContainerDelegate.getPinIndex()
+            pinnedAppsContainerDelegate.releaseDropSlot()
         }
 
         override fun acceptDrop(dragObject: DropTarget.DragObject?): Boolean {
             // TODO(b/447444838): For now, only accept drops when the number of pinned items has
             // not reached limit. This will probably be modified after dropping to hotseat overflow
             // folder UX finalized.
-            return canPinMoreItems
+            return targetPinIndex >= 0 && canPinMoreItems
         }
 
         override fun prepareAccessibilityDrop() {
@@ -270,5 +299,20 @@ class TaskbarViewDragDropController(
 
         /** Opens the pinned overflow container. */
         fun openOverflowContainer()
+
+        /** Reserves the location with a placeholder indicating where the icon to be dropped. */
+        fun reserveDropSlotForDragLocation(x: Int)
+
+        /** Clears the reserved drop slot. */
+        fun releaseDropSlot()
+
+        /**
+         * Returns the index in the taskbar where the dragged item would be pinned if dropped at the
+         * current location.
+         */
+        fun getPinIndex(): Int
+
+        /** Updates the visibility of a Taskbar dragged item view based on its drag state. */
+        fun updateItemViewVisibilityForDragState(itemView: View, isDragged: Boolean)
     }
 }
