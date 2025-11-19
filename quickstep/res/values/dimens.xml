@@ -434,6 +434,8 @@
     <dimen name="taskbar_minimized_app_indicator_width">6dp</dimen>
     <dimen name="taskbar_line_indicator_width_spring">20dp</dimen>
     <dimen name="taskbar_app_translate_y_spring">4dp</dimen>
+    <!-- This should be set to a value larger than all possible drop targets, including abstract floating views and bubbles-->
+    <dimen name="taskbar_dragged_icon_elevation">5dp</dimen>
 
     <!-- Transient taskbar -->
     <dimen name="transient_taskbar_padding">12dp</dimen>

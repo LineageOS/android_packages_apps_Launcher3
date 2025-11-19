@@ -85,19 +85,13 @@ class TaskbarViewDragDropController(
     }
 
     fun onTaskbarItemViewDragStart(itemView: View) {
-        taskbarPinDelegate.updateItemViewVisibilityForDragState(
-            itemView,
-            /*isDragged */ true,
-        )
+        taskbarPinDelegate.updateItemViewVisibilityForDragState(itemView, /*isDragged */ true)
 
         // TODO("Handle overflow icon drag start")
     }
 
     fun onTaskbarItemViewDragEnd(itemView: View) {
-        taskbarPinDelegate.updateItemViewVisibilityForDragState(
-            itemView,
-            /*isDragged */ false,
-        )
+        taskbarPinDelegate.updateItemViewVisibilityForDragState(itemView, /*isDragged */ false)
 
         // TODO("Handle overflow icon drag end")
     }
@@ -295,9 +289,7 @@ class TaskbarViewDragDropController(
             dragObject.getVisualCenter(dragObjectVisualCenter)
 
             if (!isOverflowDropTarget) {
-                delegate.reserveDropSlotForDragLocation(
-                    dragObjectVisualCenter[0].toInt()
-                )
+                delegate.reserveDropSlotForDragLocation(dragObjectVisualCenter[0].toInt())
             } else {
                 // TODO("Implement overflow drop target")
             }
@@ -316,9 +308,7 @@ class TaskbarViewDragDropController(
                 startOpenOverflowAlarm()
             } else {
                 startCloseOverflowAlarm()
-                delegate.reserveDropSlotForDragLocation(
-                    dragObjectVisualCenter[0].toInt()
-                )
+                delegate.reserveDropSlotForDragLocation(dragObjectVisualCenter[0].toInt())
             }
         }
 

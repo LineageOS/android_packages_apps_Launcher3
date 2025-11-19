@@ -174,6 +174,7 @@ public class TaskbarDragController extends DragController implements
     /**
      * Attempts to start a system drag and drop operation for the given View, using its tag to
      * generate the ClipDescription and Intent.
+     *
      * @return Whether {@link View#startDragAndDrop} started successfully.
      */
     public boolean startDragOnLongClick(View view) {
@@ -310,7 +311,7 @@ public class TaskbarDragController extends DragController implements
         mRegistrationY = mMotionDown.y - dragLayerY;
 
         float scalePx = mDragIconSize - dragRegion.width();
-        return new DragView(
+        DragView dragView = new DragView(
                 mActivity,
                 drawable,
                 mRegistrationX,
@@ -318,6 +319,11 @@ public class TaskbarDragController extends DragController implements
                 initialDragViewScale,
                 dragViewScaleOnDrop,
                 scalePx);
+        // Set the elevation so that it is drawn above other views, including bubbles and
+        // overflow container.
+        dragView.setElevation(dragView.getResources().getDimension(
+                R.dimen.taskbar_dragged_icon_elevation));
+        return dragView;
     }
 
     @Override
@@ -364,7 +370,7 @@ public class TaskbarDragController extends DragController implements
         // Pre-drag has ended, start the global system drag.
         if (mDisallowGlobalDrag
                 || mControllers.taskbarDesktopModeController
-                    .isInDesktopModeAndNotInOverview(mActivity.getDisplayId())
+                .isInDesktopModeAndNotInOverview(mActivity.getDisplayId())
                 || isTaskbarShownOnHome()) {
             AbstractFloatingView.closeAllOpenViewsExcept(mActivity, TYPE_TASKBAR_ALL_APPS);
             return;
@@ -420,7 +426,7 @@ public class TaskbarDragController extends DragController implements
             ItemInfo item = (ItemInfo) tag;
             LauncherApps launcherApps = mActivity.getSystemService(LauncherApps.class);
             clipDescription = new ClipDescription(item.title,
-                    new String[] {
+                    new String[]{
                             item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT
                                     ? ClipDescription.MIMETYPE_APPLICATION_SHORTCUT
                                     : ClipDescription.MIMETYPE_APPLICATION_ACTIVITY
@@ -460,7 +466,7 @@ public class TaskbarDragController extends DragController implements
         } else if (tag instanceof SingleTask singleTask) {
             Task task = singleTask.getTask();
             clipDescription = new ClipDescription(task.titleDescription,
-                    new String[] {
+                    new String[]{
                             ClipDescription.MIMETYPE_APPLICATION_TASK
                     });
             intent = new Intent();
@@ -751,7 +757,7 @@ public class TaskbarDragController extends DragController implements
         ContainerInfo containerInfo = item.getContainerInfo();
         return containerInfo.getContainerCase() == EXTENDED_CONTAINERS
                 && containerInfo.getExtendedContainers().getContainerCase()
-                        == DEVICE_SEARCH_RESULT_CONTAINER;
+                == DEVICE_SEARCH_RESULT_CONTAINER;
     }
 
     private void setupReturnDragAnimator(float fromX, float fromY, View originalView,
@@ -780,6 +786,7 @@ public class TaskbarDragController extends DragController implements
             final FloatProp mDy = new FloatProp(fromY, toPosition[1]);
             final FloatProp mScale = new FloatProp(1f, toScale);
             final FloatProp mAlpha = new FloatProp(1f, toAlpha, Interpolators.ACCELERATE_2);
+
             @Override
             public void onUpdate(float percent, boolean initOnly) {
                 animListener.updateDragShadow(mDx.value, mDy.value, mScale.value, mAlpha.value);
