@@ -302,48 +302,6 @@ launcher_compose_tests_java_defaults {
     },
 }
 
-// Opt-in configuration for Launcher Quickstep code depending on Jetpack Compose.
-soong_config_module_type {
-    name: "quickstep_compose_java_defaults",
-    module_type: "java_defaults",
-    config_namespace: "ANDROID",
-    bool_variables: ["release_enable_compose_in_launcher"],
-    properties: [
-        "srcs",
-        "static_libs",
-    ],
-}
-
-quickstep_compose_java_defaults {
-    name: "quickstep_compose_defaults",
-    soong_config_variables: {
-        release_enable_compose_in_launcher: {
-            srcs: [
-                ":launcher-quickstep-compose-enabled-src",
-            ],
-
-            // Compose dependencies
-            static_libs: [
-                "androidx.compose.runtime_runtime",
-                "androidx.compose.material3_material3",
-                "androidx.compose.material_material-icons-extended",
-                "androidx.compose.ui_ui-tooling-preview",
-                "androidx.compose.ui_ui-tooling",
-                "PlatformComposeCore",
-            ],
-
-            // By default, Compose is disabled and we compile the ComposeFacade
-            // in compose/quickstep/facade/disabled/.
-            conditions_default: {
-                srcs: [
-                    ":launcher-quickstep-compose-disabled-src",
-                ],
-                static_libs: [],
-            },
-        },
-    },
-}
-
 // Build config for tapl library
 genrule {
     name: "launcher-tapl-build-config",
@@ -551,6 +509,13 @@ android_library {
         "displaylib",
         "com.android.window.flags.window-aconfig-java",
         "com.android.extensions.computercontrol",
+        // Compose dependencies
+        "androidx.compose.runtime_runtime",
+        "androidx.compose.material3_material3",
+        "androidx.compose.material_material-icons-extended",
+        "androidx.compose.ui_ui-tooling-preview",
+        "androidx.compose.ui_ui-tooling",
+        "PlatformComposeCore",
     ],
     manifest: "quickstep/AndroidManifest.xml",
     min_sdk_version: "current",
@@ -577,7 +542,6 @@ android_library {
     name: "Launcher3GoLib",
     defaults: [
         "launcher_compose_defaults",
-        "quickstep_compose_defaults",
     ],
     srcs: [
         ":launcher-src",
@@ -623,7 +587,6 @@ android_library {
     name: "Launcher3QuickStepLib",
     defaults: [
         "launcher_compose_defaults",
-        "quickstep_compose_defaults",
     ],
     srcs: [
         ":launcher-src",
