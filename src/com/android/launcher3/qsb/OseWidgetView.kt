@@ -16,6 +16,7 @@
 
 package com.android.launcher3.qsb
 
+import android.annotation.SuppressLint
 import android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID
 import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
@@ -41,6 +42,8 @@ import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.LauncherAppWidgetInfo
 import com.android.launcher3.util.ComponentKey
 import com.android.launcher3.util.RunnableList
+import com.android.launcher3.util.SafeCloseable
+import com.android.launcher3.util.ViewEx.registerLifecycleTask
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.views.OptionsPopupView
 import com.android.launcher3.views.OptionsPopupView.OptionItem
@@ -58,7 +61,6 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     private val oseWidgetManager = context.appComponent.oseWidgetManager
     @VisibleForTesting var closeActions = RunnableList()
     private val activityContext: ActivityContext = ActivityContext.lookupContext(context)
-    private val mOnAppsUpdateListener = AllAppsStore.OnUpdateListener { this.onAppsUpdated() }
 
     init {
         activityContext.appWidgetHolder?.onViewCreationCallback?.accept(this)
@@ -104,69 +106,71 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         closeActions.executeAllAndClear()
     }
 
-    private fun onAppsUpdated() {
-        // This is only for resetting the remoteviews using a broken remote view since the app
-        // store got updated now.
-        // Refresh the error view with latest appInfo.
-        updateAppWidget(RemoteViews(context.packageName, 0))
-    }
-
     override fun shouldDelayChildPressedState(): Boolean {
         // Delay the ripple effect on the widget view when swiping up from home screen
         // to go to all apps.
         return true
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     override fun getErrorView(): View {
-        val oseManager = context.appComponent.getOseManager()
-        val oseInfo = oseManager.oseInfo.value
+        val view =
+            View.inflate(context, R.layout.ose_default_bubbletext_layout, null) as BubbleTextView
+        val oseInfo = context.appComponent.getOseManager().oseInfo.value
         val osePkg: String? =
             when {
                 oseInfo.isOseConfigured -> oseInfo.pkg
                 else -> null
             }
-        val appInfo =
-            osePkg?.let {
-                val appStore = activityContext.activityComponent.appsStore
-                val componentKey = ComponentKey(ComponentName(osePkg, ""), myUserHandle())
-                val info = appStore.getApp(componentKey, AppInfo.PACKAGE_KEY_COMPARATOR)?.clone()
-                if (info == null && isAttachedToWindow) {
-                    // when app install is pending/finished but the appstore is not updated.
-                    appStore.addUpdateListener(mOnAppsUpdateListener)
-                    closeActions.add { appStore.removeUpdateListener(mOnAppsUpdateListener) }
+
+        val appsStore = activityContext.activityComponent.appsStore
+        val title = context.getText(R.string.abandoned_search)
+        val updateListener =
+            AllAppsStore.OnUpdateListener {
+                val appInfo =
+                    osePkg
+                        ?.let {
+                            appsStore.getApp(
+                                ComponentKey(ComponentName(osePkg, ""), myUserHandle()),
+                                AppInfo.PACKAGE_KEY_COMPARATOR,
+                            )
+                        }
+                        ?.clone()
+
+                if (appInfo == null) {
+                    view.tag = null
+                    view.applyIconAndLabel(
+                        context.getDrawable(R.drawable.ic_allapps_search)!!.mutate().apply {
+                            setTint(context.getColor(R.color.materialColorOnSurface))
+                        },
+                        title,
+                        null,
+                    )
+                    // Since we don't have a valid appInfo, just open the default browser
+                    // Set the data to a blank page uri
+                    view.setOnClickIntent(Intent(Intent.ACTION_VIEW).setData("http://".toUri()))
                 } else {
-                    appStore.removeUpdateListener(mOnAppsUpdateListener)
+                    appInfo.title = title
+                    view.applyFromApplicationInfo(appInfo)
+                    view.setOnClickIntent(
+                        when {
+                            // Launch search intent.
+                            oseInfo.supportsSearchIntent ->
+                                Intent(Intent.ACTION_SEARCH).setPackage(appInfo.targetPackage)
+                            // Launch main activity
+                            else -> appInfo.intent
+                        }
+                    )
                 }
-                info
             }
 
-        return appInfo?.run { showOseBubbleTextLayout(this, oseInfo.supportsSearchIntent) }
-            ?: showDefaultOseLayout()
-    }
-
-    fun showOseBubbleTextLayout(appInfo: AppInfo, launchSearchIntent: Boolean): View {
-        appInfo.title = context.resources.getString(R.string.abandoned_search)
-        return View.inflate(context, R.layout.ose_default_bubbletext_layout, null).apply {
-            val btv = this as BubbleTextView
-            btv.applyFromApplicationInfo(appInfo)
-            setOnClickIntent(
-                when {
-                    // Launch search intent.
-                    launchSearchIntent ->
-                        Intent(Intent.ACTION_SEARCH).setPackage(appInfo.targetPackage)
-                    // Launch main activity
-                    else -> appInfo.intent
-                }
-            )
+        updateListener.onAppsUpdated()
+        view.registerLifecycleTask {
+            appsStore.addUpdateListener(updateListener)
+            SafeCloseable { appsStore.removeUpdateListener(updateListener) }
         }
+        return view
     }
-
-    fun showDefaultOseLayout(): View =
-        View.inflate(context, R.layout.ose_default_layout, null).apply {
-            // Since we don't have a valid appInfo, just open the default browser
-            // Set the data to a blank page uri
-            setOnClickIntent(Intent(Intent.ACTION_VIEW).setData("http://".toUri()))
-        }
 
     fun View.setOnClickIntent(intent: Intent) = setOnClickListener {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)
