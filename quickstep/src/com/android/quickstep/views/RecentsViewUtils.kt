@@ -874,6 +874,32 @@ constructor(
                 recentsView.getTaskViewByTaskIds(keyboardFocusTask.taskIds.toIntArray())
         }
 
+    /**
+     * Handle when the Delete key is presses. It can be one of the three following cases:
+     * 1. If a [TaskView] is in focus, dismiss it;
+     * 2. If a [DesktopTaskView] is in the exploded view, dismiss the selected window;
+     * 3. otherwise, do nothing.
+     */
+    fun onDeleteKeyPressed() {
+        taskViews.forEach { taskView ->
+            if (taskView.isFocused) {
+                recentsView.dismissTaskView(taskView, true /*removeTask*/)
+                return
+            } else if (taskView is DesktopTaskView) {
+                val focusedTaskId =
+                    taskView.taskContainers
+                        .firstOrNull { it.taskContentView.isFocused }
+                        ?.task
+                        ?.key
+                        ?.id
+                if (focusedTaskId != null) {
+                    recentsView.dismissTask(focusedTaskId, true /*animate*/, true /*removeTask*/)
+                    return
+                }
+            }
+        }
+    }
+
     fun isKeyboardTaskFocusPending() = keyboardFocusTask !is KeyboardFocusTask.Unfocused
 
     fun getAlternatePageWithSameScroll(page: Int): Int {
