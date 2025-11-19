@@ -1596,7 +1596,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         float secondaryDimension = orientationHandler
                 .getSecondaryValue(dp.getDeviceProperties().getAvailableWidthPx(), dp.getDeviceProperties().getAvailableHeightPx());
         final float targetX = primaryDimension / 2f;
-        final float targetY = secondaryDimension - dp.hotseatBarSizePx;
+        final float targetY = secondaryDimension - dp.getHotseatProfile().getBarSizePx();
         return new RectF(targetX - halfIconSize, targetY - halfIconSize,
                 targetX + halfIconSize, targetY + halfIconSize);
     }

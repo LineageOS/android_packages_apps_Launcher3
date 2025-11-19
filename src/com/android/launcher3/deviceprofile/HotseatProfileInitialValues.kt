@@ -21,8 +21,10 @@ import android.graphics.Rect
 import android.util.DisplayMetrics
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.R
+import com.android.launcher3.responsive.CalculatedCellSpec
 import com.android.launcher3.responsive.CalculatedHotseatSpec
-import com.android.launcher3.testing.shared.ResourceUtils
+import com.android.launcher3.testing.shared.ResourceUtils.pxFromDp
+import kotlin.math.max
 
 /**
  * TODO(431261051): Either HotseatProfile depends on the icon size or the icon size depends on the
@@ -48,9 +50,30 @@ data class HotseatProfileInitialValues(
     val maxIconSpacePx: Int,
     val barBottomSpacePx: Int,
     val qsbSpace: Int,
+    val barSizePx: Int,
 ) {
 
     companion object Factory {
+
+        /** Updates hotseatCellHeightPx and hotseatBarSizePx */
+        fun calculateHotseatBarSizePx(
+            hotseatIconSizePx: Int,
+            barEdgePaddingPx: Int,
+            isVerticalBarLayout: Boolean,
+            barWorkspaceSpacePx: Int,
+            qsbVisualHeight: Int,
+            barBottomSpacePx: Int,
+            qsbSpace: Int,
+            isQsbInline: Boolean,
+        ): Int {
+            if (isVerticalBarLayout) {
+                return (hotseatIconSizePx + barEdgePaddingPx + barWorkspaceSpacePx)
+            } else if (isQsbInline) {
+                return (max(hotseatIconSizePx, qsbVisualHeight) + barBottomSpacePx)
+            } else {
+                return (hotseatIconSizePx + qsbSpace + qsbVisualHeight + barBottomSpacePx)
+            }
+        }
 
         fun createHotseatProfileInitialValues(
             deviceProperties: DeviceProperties,
@@ -64,9 +87,11 @@ data class HotseatProfileInitialValues(
             metrics: DisplayMetrics,
             isVerticalBarLayout: Boolean,
             workspacePageIndicatorHeight: Int,
+            responsiveWorkspaceCellSpec: CalculatedCellSpec?,
+            isQsbInline: Boolean,
         ): HotseatProfileInitialValues {
             return when {
-                responsiveHotseatSpec != null ->
+                responsiveHotseatSpec != null && responsiveWorkspaceCellSpec != null ->
                     createResponsiveHotseatProfileInitialValues(
                         deviceProperties = deviceProperties,
                         res = res,
@@ -75,6 +100,9 @@ data class HotseatProfileInitialValues(
                         shouldApplyWidePortraitDimens = shouldApplyWidePortraitDimens,
                         responsiveHotseatSpec = responsiveHotseatSpec,
                         insets = insets,
+                        responsiveWorkspaceCellSpec = responsiveWorkspaceCellSpec,
+                        isVerticalBarLayout = isVerticalBarLayout,
+                        isQsbInline = isQsbInline,
                     )
                 else ->
                     createNonResponsiveHotseatProfileInitialValues(
@@ -88,6 +116,7 @@ data class HotseatProfileInitialValues(
                         metrics = metrics,
                         isVerticalBarLayout = isVerticalBarLayout,
                         workspacePageIndicatorHeight = workspacePageIndicatorHeight,
+                        isQsbInline = isQsbInline,
                     )
             }
         }
@@ -100,6 +129,9 @@ data class HotseatProfileInitialValues(
             shouldApplyWidePortraitDimens: Boolean,
             responsiveHotseatSpec: CalculatedHotseatSpec,
             insets: Rect,
+            isVerticalBarLayout: Boolean,
+            responsiveWorkspaceCellSpec: CalculatedCellSpec,
+            isQsbInline: Boolean,
         ): HotseatProfileInitialValues {
             val areNavButtonsInline = isTaskbarPresent && !deviceProperties.isGestureMode
             var inlineNavButtonsEndSpacingPx = 0
@@ -149,6 +181,10 @@ data class HotseatProfileInitialValues(
                 barBottomSpacePx = hotseatBarBottomSpace
             }
 
+            // qsbVisualHeight is the total height of the QSB view, we leave some space at the top
+            // and bottom for shadows, similar to the icon shadows.
+            // This (2 * hotseatQsbShadowHeight) is to account for the top space and the bottom.
+            val qsbVisualHeight = hotseatQsbHeight - (2 * hotseatQsbShadowHeight)
             return HotseatProfileInitialValues(
                 areNavButtonsInline = areNavButtonsInline,
                 navButtonsLayoutWidthPx = navButtonsLayoutWidthPx,
@@ -159,7 +195,7 @@ data class HotseatProfileInitialValues(
                 barWorkspaceSpacePx = 0,
                 qsbHeight = hotseatQsbHeight,
                 qsbShadowHeight = hotseatQsbShadowHeight,
-                qsbVisualHeight = hotseatQsbHeight - 2 * hotseatQsbShadowHeight,
+                qsbVisualHeight = qsbVisualHeight,
                 minIconSpacePx = res.getDimensionPixelSize(R.dimen.min_hotseat_icon_space),
                 minQsbWidthPx = res.getDimensionPixelSize(R.dimen.min_hotseat_qsb_width),
                 maxIconSpacePx =
@@ -168,6 +204,17 @@ data class HotseatProfileInitialValues(
                     else Int.MAX_VALUE,
                 barBottomSpacePx = barBottomSpacePx,
                 qsbSpace = hotseatQsbSpace,
+                barSizePx =
+                    calculateHotseatBarSizePx(
+                        hotseatIconSizePx = responsiveWorkspaceCellSpec.iconSize,
+                        barEdgePaddingPx = 0,
+                        isVerticalBarLayout = isVerticalBarLayout,
+                        barWorkspaceSpacePx = 0,
+                        qsbVisualHeight = qsbVisualHeight,
+                        barBottomSpacePx = barBottomSpacePx,
+                        qsbSpace = hotseatQsbSpace,
+                        isQsbInline = isQsbInline,
+                    ),
             )
         }
 
@@ -182,6 +229,7 @@ data class HotseatProfileInitialValues(
             metrics: DisplayMetrics,
             isVerticalBarLayout: Boolean,
             workspacePageIndicatorHeight: Int,
+            isQsbInline: Boolean,
         ): HotseatProfileInitialValues {
             val areNavButtonsInline = isTaskbarPresent && !deviceProperties.isGestureMode
             var inlineNavButtonsEndSpacingPx = 0
@@ -213,9 +261,8 @@ data class HotseatProfileInitialValues(
             val hotseatQsbHeight = res.getDimensionPixelSize(R.dimen.qsb_widget_height)
             val hotseatQsbShadowHeight = res.getDimensionPixelSize(R.dimen.qsb_shadow_height)
 
-            var hotseatQsbSpace = ResourceUtils.pxFromDp(inv.hotseatQsbSpace[typeIndex], metrics)
-            var hotseatBarBottomSpace =
-                ResourceUtils.pxFromDp(inv.hotseatBarBottomSpace[typeIndex], metrics)
+            var hotseatQsbSpace = pxFromDp(inv.hotseatQsbSpace[typeIndex], metrics)
+            var hotseatBarBottomSpace = pxFromDp(inv.hotseatBarBottomSpace[typeIndex], metrics)
 
             var minQsbMargin = res.getDimensionPixelSize(R.dimen.min_qsb_margin)
 
@@ -241,20 +288,23 @@ data class HotseatProfileInitialValues(
 
             if (isVerticalBarLayout) {
                 barBottomSpacePx = 0
-                hotseatQsbSpace = ResourceUtils.pxFromDp(inv.hotseatQsbSpace[typeIndex], metrics)
+                hotseatQsbSpace = pxFromDp(inv.hotseatQsbSpace[typeIndex], metrics)
             }
 
+            val barEdgePaddingPx = hotseatBarEdgePaddingPx
+            val barWorkspaceSpacePx = hotseatBarWorkspaceSpacePx
+            val qsbVisualHeight = hotseatQsbHeight - 2 * hotseatQsbShadowHeight
             return HotseatProfileInitialValues(
                 areNavButtonsInline = areNavButtonsInline,
                 navButtonsLayoutWidthPx = navButtonsLayoutWidthPx,
                 inlineNavButtonsEndSpacingPx = inlineNavButtonsEndSpacingPx,
                 barEndOffset = barEndOffset,
                 springLoadedBarTopMarginPx = springLoadedHotseatBarTopMarginPx,
-                barEdgePaddingPx = hotseatBarEdgePaddingPx,
-                barWorkspaceSpacePx = hotseatBarWorkspaceSpacePx,
+                barEdgePaddingPx = barEdgePaddingPx,
+                barWorkspaceSpacePx = barWorkspaceSpacePx,
                 qsbHeight = hotseatQsbHeight,
                 qsbShadowHeight = hotseatQsbShadowHeight,
-                qsbVisualHeight = hotseatQsbHeight - 2 * hotseatQsbShadowHeight,
+                qsbVisualHeight = qsbVisualHeight,
                 minIconSpacePx = res.getDimensionPixelSize(R.dimen.min_hotseat_icon_space),
                 minQsbWidthPx = res.getDimensionPixelSize(R.dimen.min_hotseat_qsb_width),
                 maxIconSpacePx =
@@ -263,6 +313,17 @@ data class HotseatProfileInitialValues(
                     else Int.MAX_VALUE,
                 barBottomSpacePx = barBottomSpacePx,
                 qsbSpace = hotseatQsbSpace,
+                barSizePx =
+                    calculateHotseatBarSizePx(
+                        hotseatIconSizePx = pxFromDp(inv.iconSize[typeIndex], metrics),
+                        barEdgePaddingPx = barEdgePaddingPx,
+                        isVerticalBarLayout = isVerticalBarLayout,
+                        barWorkspaceSpacePx = barWorkspaceSpacePx,
+                        qsbVisualHeight = qsbVisualHeight,
+                        barBottomSpacePx = barBottomSpacePx,
+                        qsbSpace = hotseatQsbSpace,
+                        isQsbInline = isQsbInline,
+                    ),
             )
         }
     }

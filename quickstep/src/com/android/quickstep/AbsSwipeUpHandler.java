@@ -2311,19 +2311,28 @@ public abstract class AbsSwipeUpHandler<
         if (mDp.getDeviceProperties().isPhone()) {
             if (mDp.isSeascape()) {
                 // in seascape the Hotseat is on the left edge of the screen
-                keepClearArea = new Rect(0, 0, mDp.hotseatBarSizePx, heightPx);
+                keepClearArea = new Rect(
+                        0,
+                        0,
+                        mDp.getHotseatProfile().getBarSizePx(),
+                        heightPx
+                );
             } else if (mDp.getDeviceProperties().isLandscape()) {
                 // in landscape the Hotseat is on the right edge of the screen
-                keepClearArea = new Rect(widthPx - mDp.hotseatBarSizePx, 0,
+                keepClearArea = new Rect(widthPx - mDp.getHotseatProfile().getBarSizePx(), 0,
                         widthPx, heightPx);
             } else {
                 // in portrait mode the Hotseat is at the bottom of the screen
-                keepClearArea = new Rect(0, heightPx - mDp.hotseatBarSizePx,
-                        widthPx, heightPx);
+                keepClearArea = new Rect(
+                        0,
+                        heightPx - mDp.getHotseatProfile().getBarSizePx(),
+                        widthPx,
+                        heightPx
+                );
             }
         } else {
             // large screens have Hotseat always at the bottom of the screen
-            keepClearArea = new Rect(0, heightPx - mDp.hotseatBarSizePx,
+            keepClearArea = new Rect(0, heightPx - mDp.getHotseatProfile().getBarSizePx(),
                     widthPx, heightPx);
         }
         return keepClearArea;

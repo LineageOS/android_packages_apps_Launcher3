@@ -632,7 +632,8 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
                 && !profile.isVerticalBarLayout()
                 && !mIsOverlayVisible;
         SystemUiProxy.INSTANCE.get(this)
-                .setLauncherKeepClearAreaHeight(visible, profile.hotseatBarSizePx);
+                .setLauncherKeepClearAreaHeight(visible,
+                        profile.getHotseatProfile().getBarSizePx());
         if (state == NORMAL && !inTransition) {
             ((RecentsView) getOverviewPanel()).setSwipeDownShouldLaunchApp(false);
         }

@@ -260,10 +260,10 @@ public class Hotseat extends CellLayout implements Insettable {
             lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
             if (grid.isSeascape()) {
                 lp.gravity = Gravity.LEFT;
-                lp.width = grid.hotseatBarSizePx + insets.left;
+                lp.width = grid.getHotseatProfile().getBarSizePx() + insets.left;
             } else {
                 lp.gravity = Gravity.RIGHT;
-                lp.width = grid.hotseatBarSizePx + insets.right;
+                lp.width = grid.getHotseatProfile().getBarSizePx() + insets.right;
             }
         } else {
             mQsb.setVisibility(View.VISIBLE);
@@ -274,8 +274,8 @@ public class Hotseat extends CellLayout implements Insettable {
             // space in its parent (hotseat). If hotseatBarSizePx is less than that, we let it go
             // beyond and offset the content accordingly.
             int totalHeightForQsb = grid.getQsbOffsetY() + grid.getHotseatProfile().getQsbHeight();
-            topOverlap = Math.max(0, totalHeightForQsb - grid.hotseatBarSizePx);
-            lp.height = grid.hotseatBarSizePx + topOverlap;
+            topOverlap = Math.max(0, totalHeightForQsb - grid.getHotseatProfile().getBarSizePx());
+            lp.height = grid.getHotseatProfile().getBarSizePx() + topOverlap;
         }
 
         Rect padding = grid.getHotseatLayoutPadding(getContext());
