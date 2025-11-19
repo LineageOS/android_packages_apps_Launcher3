@@ -736,3 +736,10 @@ flag {
   description: "Replaces the 'Delete permanently' action with 'Move to trash' for home screen files"
   bug: "424466974"
 }
+
+flag {
+  name: "enable_all_apps_edu_for_overswipe"
+  namespace: "launcher"
+  description: "Enables all apps edu when over-swipe on the last workspace page"
+  bug: "441155632"
+}
