@@ -41,6 +41,7 @@ import com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_OVERVIEW
 import com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_STASHED_LAUNCHER_STATE
 import com.android.launcher3.taskbar.TaskbarStashController.FLAG_STASHED_DEVICE_LOCKED
 import com.android.launcher3.taskbar.TaskbarStashController.FLAG_STASHED_IME
+import com.android.launcher3.taskbar.TaskbarStashController.FLAG_STASHED_IN_OVERVIEW_FOR_TRANSLUCENT_APP
 import com.android.launcher3.taskbar.TaskbarStashController.FLAG_STASHED_IN_APP_AUTO
 import com.android.launcher3.taskbar.TaskbarStashController.FLAG_STASHED_SMALL_SCREEN
 import com.android.launcher3.taskbar.TaskbarStashController.FLAG_STASHED_SYSUI
@@ -265,6 +266,18 @@ class TaskbarStashControllerTest {
             stashController.updateStateForFlag(FLAG_IN_APP, false)
             stashController.updateStateForFlag(FLAG_IN_OVERVIEW, true)
             stashController.updateStateForFlag(FLAG_STASHED_IME, true)
+            stashController.applyState(0)
+        }
+        assertThat(stashController.isStashed).isTrue()
+    }
+
+    @Test
+    @TaskbarMode(PINNED)
+    fun testIsStashed_inOverviewForTranslucentApp_isStashed() {
+        getInstrumentation().runOnMainSync {
+            stashController.updateStateForFlag(FLAG_IN_APP, false)
+            stashController.updateStateForFlag(FLAG_IN_OVERVIEW, true)
+            stashController.updateStateForFlag(FLAG_STASHED_IN_OVERVIEW_FOR_TRANSLUCENT_APP, true)
             stashController.applyState(0)
         }
         assertThat(stashController.isStashed).isTrue()
