@@ -24,6 +24,7 @@ import static com.android.launcher3.BubbleTextView.RunningAppState.MINIMIZED;
 import static com.android.launcher3.BubbleTextView.RunningAppState.RUNNING;
 import static com.android.launcher3.Flags.enableContrastTiles;
 import static com.android.launcher3.Flags.enableScalabilityForDesktopExperience;
+import static com.android.launcher3.graphics.AutomatedIconDelegate.newAutomatedIcon;
 import static com.android.launcher3.graphics.PreloadIconDelegate.extractPreloadDelegate;
 import static com.android.launcher3.graphics.PreloadIconDelegate.hasPendingAnimationCompleted;
 import static com.android.launcher3.graphics.PreloadIconDelegate.newPendingIcon;
@@ -33,6 +34,7 @@ import static com.android.launcher3.icons.BitmapInfo.FLAG_THEMED;
 import static com.android.launcher3.icons.GraphicsUtils.setColorAlphaBound;
 import static com.android.launcher3.icons.IconNormalizer.ICON_VISIBLE_AREA_FACTOR;
 import static com.android.launcher3.icons.cache.CacheLookupFlag.DEFAULT_LOOKUP_FLAG;
+import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_AUTOMATED;
 import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_INCREMENTAL_DOWNLOAD_ACTIVE;
 import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_INSTALL_SESSION_ACTIVE;
 import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_SHOW_DOWNLOAD_PROGRESS_MASK;
@@ -545,11 +547,15 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     public void applyIconAndLabel(ItemInfoWithIcon info) {
         FastBitmapDrawable oldIcon = mIcon;
         // Check if we can reuse icon so that any animation is preserved
-        if (hasPendingAnimationCompleted(mIcon) || !mIcon.isSameInfo(info.bitmap)) {
-            setNonPendingIcon(info);
+        if (info.shouldShowPendingIcon() || !hasPendingAnimationCompleted(mIcon)) {
+            maybeApplyProgressLevel(info, oldIcon);
+        } else if (Flags.enableAppAutomationIndicator()
+                && (info.runtimeStatusFlags & FLAG_AUTOMATED) != 0)  {
+            setIcon(newAutomatedIcon(getContext(), info, getIconCreationFlagsForInfo(info)));
+        } else {
+            setStandardIcon(info);
         }
         applyLabel(info);
-        maybeApplyProgressLevel(info, oldIcon);
     }
 
     /**
@@ -565,12 +571,12 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
                 ? !wii.hasPromiseIconUi() : !info.isArchived();
         if (isNoLongerPending && info.getProgressLevel() == 100 && pendingIcon != null) {
             pendingIcon.maybePerformFinishedAnimation(oldIcon,
-                    () -> setNonPendingIcon(
+                    () -> setStandardIcon(
                             (getTag() instanceof ItemInfoWithIcon iiwi) ? iiwi : info));
         }
     }
 
-    private void setNonPendingIcon(ItemInfoWithIcon info) {
+    private void setStandardIcon(ItemInfoWithIcon info) {
         FastBitmapDrawable iconDrawable =
                 info.newIcon(getContext(), getIconCreationFlagsForInfo(info));
         if (mIsShowingMinimalPopup) {
