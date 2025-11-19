@@ -17,6 +17,7 @@
 package com.android.launcher3;
 
 import static com.android.launcher3.Flags.enableHomeScreenFilesTrashing;
+import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_HOME_SCREEN_FILES_DELETE_VIA_DRAG_AND_DROP;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_ITEM_DROPPED_ON_CANCEL;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_ITEM_DROPPED_ON_REMOVE;
 
@@ -143,6 +144,10 @@ public class DeleteDropTarget extends ButtonDropTarget {
     public void completeDrop(DragObject d) {
         ItemInfo item = d.dragInfo;
         if (canRemove(item)) {
+            if (HomeScreenFilesUtilsKt.isFileSystemItem(item)) {
+                mStatsLogManager.logger().withItemInfo(item).log(
+                        LAUNCHER_HOME_SCREEN_FILES_DELETE_VIA_DRAG_AND_DROP);
+            }
             mDropTargetHandler.onDeleteComplete(item, /* view */ null);
         } else if (mText == getResources().getText(R.string.remove_drop_target_label)) {
             Log.wtf("b/379606516", "If the drop target text is 'remove', then"

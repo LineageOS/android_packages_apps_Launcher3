@@ -649,6 +649,18 @@ open class StatsLogManager protected constructor(@JvmField protected val mContex
         LAUNCHER_TAP_TO_ADD_TO_HOME_SCREEN_FROM_ALL_APPS(2445),
         @UiEvent(doc = "User tapped to add a deep shortcut from the long press menu")
         LAUNCHER_TAP_TO_ADD_DEEP_SHORTCUT(2446),
+        @UiEvent(
+            doc =
+                "User opened the home screen file system item via its long-press/right-click context menu"
+        )
+        LAUNCHER_HOME_SCREEN_FILES_OPEN_VIA_CONTEXT_MENU(2542),
+        @UiEvent(
+            doc =
+                "User deleted the home screen file system item via its long-press/right-click context menu"
+        )
+        LAUNCHER_HOME_SCREEN_FILES_DELETE_VIA_CONTEXT_MENU(2543),
+        @UiEvent(doc = "User deleted the home screen file system item via drag-and-drop gesture")
+        LAUNCHER_HOME_SCREEN_FILES_DELETE_VIA_DRAG_AND_DROP(2544),
         // ADD MORE
     }
 
