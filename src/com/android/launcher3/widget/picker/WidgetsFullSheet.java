@@ -789,7 +789,7 @@ public class WidgetsFullSheet extends BaseWidgetSheet
     }
 
     private static int getWidgetSheetId(BaseActivity activity) {
-        boolean isTwoPane = activity.getDeviceProfile().getDeviceProperties().isTablet();
+        boolean isTwoPane = activity.getDeviceProfile().getDeviceProperties().isLargeScreen();
 
         return isTwoPane ? R.layout.widgets_two_pane_sheet : R.layout.widgets_full_sheet;
     }

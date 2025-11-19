@@ -512,14 +512,14 @@ public class InvariantDeviceProfile {
 
         int numMinShownHotseatIconsForTablet = supportedProfiles
                 .stream()
-                .filter(deviceProfile -> deviceProfile.getDeviceProperties().isTablet())
+                .filter(deviceProfile -> deviceProfile.getDeviceProperties().isLargeScreen())
                 .mapToInt(deviceProfile -> deviceProfile.numShownHotseatIcons)
                 .min()
                 .orElse(0);
 
         supportedProfiles
                 .stream()
-                .filter(deviceProfile -> deviceProfile.getDeviceProperties().isTablet())
+                .filter(deviceProfile -> deviceProfile.getDeviceProperties().isLargeScreen())
                 .forEach(deviceProfile -> {
                     deviceProfile.numShownHotseatIcons = numMinShownHotseatIconsForTablet;
                     deviceProfile.recalculateHotseatWidthAndBorderSpace();
@@ -866,13 +866,13 @@ public class InvariantDeviceProfile {
         int minWidthPx = Integer.MAX_VALUE;
         int minHeightPx = Integer.MAX_VALUE;
         for (WindowBounds bounds : displayInfo.supportedBounds) {
-            boolean isTablet = displayInfo.isTablet(bounds);
-            if (isTablet && deviceType == TYPE_MULTI_DISPLAY) {
+            boolean isLargeScreen = displayInfo.isLargeScreen(bounds);
+            if (isLargeScreen && deviceType == TYPE_MULTI_DISPLAY) {
                 // For split displays, take half width per page
                 minWidthPx = Math.min(minWidthPx, bounds.availableSize.x / 2);
                 minHeightPx = Math.min(minHeightPx, bounds.availableSize.y);
 
-            } else if (!isTablet && bounds.isLandscape()) {
+            } else if (!isLargeScreen && bounds.isLandscape()) {
                 // We will use transposed layout in this case
                 minWidthPx = Math.min(minWidthPx, bounds.availableSize.y);
                 minHeightPx = Math.min(minHeightPx, bounds.availableSize.x);

@@ -92,7 +92,7 @@ open class BaseTaskbarIntegrationTest {
     fun setup() {
         assumeTrue(
             "Ignoring test because device is not a tablet",
-            deviceProfile.deviceProperties.isTablet,
+            deviceProfile.deviceProperties.isLargeScreen,
         )
         layoutResource.set(
             LauncherLayoutBuilder()

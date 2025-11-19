@@ -180,7 +180,7 @@ public class OverviewState extends LauncherState {
 
     @Override
     public boolean displayOverviewTasksAsGrid(DeviceProfile deviceProfile) {
-        return deviceProfile.getDeviceProperties().isTablet();
+        return deviceProfile.getDeviceProperties().isLargeScreen();
     }
 
     @Override

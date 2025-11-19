@@ -155,7 +155,7 @@ public class TaskViewSimulator implements TransformParams.BuilderProxy {
         mDp = dp;
         mLayoutValid = false;
         mOrientationState.setDeviceProfile(dp);
-        mIsGridTask = dp.getDeviceProperties().isTablet() && !mIsDesktopTask;
+        mIsGridTask = dp.getDeviceProperties().isLargeScreen() && !mIsDesktopTask;
         calculateTaskSize();
     }
 
@@ -318,7 +318,7 @@ public class TaskViewSimulator implements TransformParams.BuilderProxy {
     public void addAppToCarouselAnim(PendingAnimation pa, Interpolator interpolator,
             boolean isHandlingAtomicEvent) {
         pa.addFloat(fullScreenProgress, AnimatedFloat.VALUE, 1, 0, interpolator);
-        if (mDp.getDeviceProperties().isTablet() && !isHandlingAtomicEvent) {
+        if (mDp.getDeviceProperties().isLargeScreen() && !isHandlingAtomicEvent) {
             mIsAnimatingToCarousel = true;
             carouselScale.value = mCarouselTaskSize.width() / (float) mFullTaskSize.width();
         }
@@ -451,7 +451,7 @@ public class TaskViewSimulator implements TransformParams.BuilderProxy {
             boolean isRtlEnabled = !mIsRecentsRtl;
             mPositionHelper.updateThumbnailMatrix(
                     mThumbnailPosition, mThumbnailData, mTaskRect.width(), mTaskRect.height(),
-                    mDp.getDeviceProperties().isTablet(),
+                    mDp.getDeviceProperties().isLargeScreen(),
                     mOrientationState.getRecentsActivityRotation(), isRtlEnabled,
                     mContext.getResources().getDisplayMetrics().densityDpi);
             mPositionHelper.getMatrix().invert(mInversePositionMatrix);

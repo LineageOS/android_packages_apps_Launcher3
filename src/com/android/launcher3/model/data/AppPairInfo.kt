@@ -88,7 +88,7 @@ class AppPairInfo() : CollectionInfo() {
             (ActivityContext.lookupContext(context) as ActivityContext)
                 .getDeviceProfile()
                 .deviceProperties
-                .isTablet
+                .isLargeScreen
         return Pair(
             isTablet || !getFirstApp().isNonResizeable,
             isTablet || !getSecondApp().isNonResizeable,

@@ -222,7 +222,8 @@ public class TestInformationHandler {
                 return response;
 
             case TestProtocol.REQUEST_IS_TABLET:
-                response.putBoolean(TestProtocol.TEST_INFO_RESPONSE_FIELD, mDeviceProfile.getDeviceProperties().isTablet());
+                response.putBoolean(TestProtocol.TEST_INFO_RESPONSE_FIELD,
+                        mDeviceProfile.getDeviceProperties().isLargeScreen());
                 return response;
             case TestProtocol.REQUEST_IS_PREDICTIVE_BACK_SWIPE_ENABLED:
                 response.putBoolean(TestProtocol.TEST_INFO_RESPONSE_FIELD,

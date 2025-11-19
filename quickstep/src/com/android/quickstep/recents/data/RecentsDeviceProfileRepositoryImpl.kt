@@ -33,7 +33,7 @@ constructor(
 
     override fun getRecentsDeviceProfile() =
         RecentsDeviceProfile(
-            isLargeScreen = deviceProfileGetter.get().deviceProperties.isTablet,
+            isLargeScreen = deviceProfileGetter.get().deviceProperties.isLargeScreen,
             canEnterDesktopMode = desktopState.canEnterDesktopMode,
         )
 }

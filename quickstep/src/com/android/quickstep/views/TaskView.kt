@@ -150,7 +150,7 @@ constructor(
 
     val isGridTask: Boolean
         /** Returns whether the task is part of overview grid and not being focused. */
-        get() = container.deviceProfile.deviceProperties.isTablet && !isLargeTile
+        get() = container.deviceProfile.deviceProperties.isLargeScreen && !isLargeTile
 
     val isRunningTask: Boolean
         get() = this === recentsView?.runningTaskView
@@ -711,7 +711,7 @@ constructor(
             pivotX = modalPivot.x
             pivotY = modalPivot.y
         } else {
-            if (container.deviceProfile.deviceProperties.isTablet) {
+            if (container.deviceProfile.deviceProperties.isLargeScreen) {
                 pivotX =
                     (if (layoutDirection == LAYOUT_DIRECTION_RTL) 0 else right - left).toFloat()
                 pivotY = 0f
@@ -1169,7 +1169,7 @@ constructor(
         val boxTranslationY: Float
         val expectedWidth: Int
         val expectedHeight: Int
-        if (container.deviceProfile.deviceProperties.isTablet) {
+        if (container.deviceProfile.deviceProperties.isLargeScreen) {
             val boxWidth: Int
             val boxHeight: Int
 
@@ -1579,7 +1579,9 @@ constructor(
             // Don't show menu when selecting second split screen app
             return true
         }
-        if (!container.deviceProfile.deviceProperties.isTablet && !recentsView.isClearAllHidden) {
+        if (
+            !container.deviceProfile.deviceProperties.isLargeScreen && !recentsView.isClearAllHidden
+        ) {
             recentsView.snapToPage(recentsView.indexOfChild(this))
             return false
         }

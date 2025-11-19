@@ -328,7 +328,7 @@ public class SettingsActivity extends FragmentActivity
                                 return true;
                             }
                     );
-                    return !info.isTablet(info.realBounds);
+                    return !info.isLargeScreen(info.realBounds);
                 case WORKSPACE_ITEMS_LABEL_HIDDEN:
                     return com.android.systemui.shared.Flags.workspaceItemsLabelHidden();
             }

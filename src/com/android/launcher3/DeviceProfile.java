@@ -278,7 +278,7 @@ public class DeviceProfile {
         boolean taskbarOrBubbleBarOnPhones = enableTinyTaskbar()
                 || (enableBubbleBar() && enableBubbleBarOnPhones());
         isTaskbarPresent =
-                (mDeviceProperties.isTablet() || (taskbarOrBubbleBarOnPhones && isGestureMode))
+                (mDeviceProperties.isLargeScreen() || (taskbarOrBubbleBarOnPhones && isGestureMode))
                         && wmProxy.isTaskbarDrawnInProcess();
 
         // Some more constants.
@@ -309,7 +309,7 @@ public class DeviceProfile {
 
         // Some foldable portrait modes are too wide in terms of aspect ratio so we need to tweak
         // the dimensions for edit state.
-        final boolean shouldApplyWidePortraitDimens = mDeviceProperties.isTablet()
+        final boolean shouldApplyWidePortraitDimens = mDeviceProperties.isLargeScreen()
                 && !mDeviceProperties.isLandscape()
                 && mDeviceProperties.getAspectRatio() < MAX_ASPECT_RATIO_FOR_ALTERNATE_EDIT_STATE;
         mDropTargetProfile = DropTargetProfile
@@ -574,7 +574,7 @@ public class DeviceProfile {
     private boolean isLandscapeOrientation()  {
         return inv.isFixedLandscape
                 || isVerticalBarLayout()
-                || (mDeviceProperties.isTablet() && mDeviceProperties.isLandscape());
+                || (mDeviceProperties.isLargeScreen() && mDeviceProperties.isLandscape());
     }
 
     public DisplayOptionSpec getDisplayOptionSpec() {
@@ -1307,7 +1307,7 @@ public class DeviceProfile {
 
     /** Gets the space that the overview actions will take, including bottom margin. */
     public int getOverviewActionsClaimedSpace() {
-        int overviewActionsSpace = mDeviceProperties.isTablet()
+        int overviewActionsSpace = mDeviceProperties.isLargeScreen()
                 ? 0
                 : (overviewProfile.getActionsTopMarginPx() + overviewProfile.getActionsHeight());
         return overviewActionsSpace + getOverviewActionsClaimedSpaceBelow();
@@ -1415,7 +1415,7 @@ public class DeviceProfile {
         writer.println(prefix + "DeviceProfile:");
         writer.println(prefix + "\t1 dp = " + mMetrics.density + " px");
 
-        writer.println(prefix + "\tisTablet:" + mDeviceProperties.isTablet());
+        writer.println(prefix + "\tisTablet:" + mDeviceProperties.isLargeScreen());
         writer.println(prefix + "\tisPhone:" + mDeviceProperties.isPhone());
         writer.println(prefix + "\ttransposeLayoutWithOrientation:"
                 + mDeviceProperties.getTransposeLayoutWithOrientation());
@@ -1682,7 +1682,7 @@ public class DeviceProfile {
 
     /** Returns a reduced representation of this DeviceProfile. */
     public String toSmallString() {
-        return "isTablet:" + mDeviceProperties.isTablet() + ", "
+        return "isTablet:" + mDeviceProperties.isLargeScreen() + ", "
                 + "mDeviceProperties.isMultiDisplay():" + mDeviceProperties.isMultiDisplay() + ", "
                 + "widthPx:" + mDeviceProperties.getWidthPx() + ", "
                 + "heightPx:" + mDeviceProperties.getHeightPx() + ", "
@@ -1879,7 +1879,7 @@ public class DeviceProfile {
             }
             if (mTransposeLayoutWithOrientation == null) {
                 mTransposeLayoutWithOrientation =
-                        !(mInfo.isTablet(mWindowBounds) || mInv.isFixedLandscape);
+                        !(mInfo.isLargeScreen(mWindowBounds) || mInv.isFixedLandscape);
             }
             if (mIsGestureMode == null) {
                 mIsGestureMode = mInfo.getNavigationMode().hasGestures;
@@ -1917,7 +1917,7 @@ public class DeviceProfile {
         @VisibleForTesting
         static DisplayOptionSpec createDefaultDisplayOptionSpec(DisplayController.Info info,
                 WindowBounds windowBounds, boolean isMultiDisplay, InvariantDeviceProfile inv) {
-            boolean isTwoPanels = info.isTablet(windowBounds) && isMultiDisplay;
+            boolean isTwoPanels = info.isLargeScreen(windowBounds) && isMultiDisplay;
             boolean isLandscape = windowBounds.isLandscape();
             return new DisplayOptionSpec(inv, isTwoPanels, isLandscape);
         }

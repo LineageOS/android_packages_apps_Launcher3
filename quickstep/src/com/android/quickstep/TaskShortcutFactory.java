@@ -334,7 +334,8 @@ public interface TaskShortcutFactory {
             DeviceProfile deviceProfile = container.getDeviceProfile();
             final TaskView taskView = taskContainer.getTaskView();
             final RecentsView recentsView = taskView.getRecentsView();
-            boolean isLargeTile = deviceProfile.getDeviceProperties().isTablet() && taskView.isLargeTile();
+            boolean isLargeTile = deviceProfile.getDeviceProperties().isLargeScreen()
+                    && taskView.isLargeTile();
             boolean isInExpectedScrollPosition =
                     recentsView.isTaskInExpectedScrollPosition(taskView);
             boolean shouldShowActionsButtonInstead =

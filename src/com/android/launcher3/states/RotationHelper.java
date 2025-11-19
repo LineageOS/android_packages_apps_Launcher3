@@ -98,12 +98,12 @@ public class RotationHelper implements DeviceProfile.OnDeviceProfileChangeListen
      * assuming that the delay is tolerable since it takes time to change to foreground.
      */
     private void onDisplayInfoChanged(DisplayController.Info info) {
-        onIgnoreAutoRotateChanged(info.isTablet(info.realBounds));
+        onIgnoreAutoRotateChanged(info.isLargeScreen(info.realBounds));
     }
 
     @Override
     public void onDeviceProfileChanged(DeviceProfile dp) {
-        onIgnoreAutoRotateChanged(dp.getDeviceProperties().isTablet());
+        onIgnoreAutoRotateChanged(dp.getDeviceProperties().isLargeScreen());
     }
 
     private void onIgnoreAutoRotateChanged(boolean ignoreAutoRotateSettings) {
@@ -156,7 +156,7 @@ public class RotationHelper implements DeviceProfile.OnDeviceProfileChangeListen
         mInitialized = true;
         DisplayController displayController = DisplayController.INSTANCE.get(mActivity);
         DisplayController.Info info = displayController.getInfo();
-        setIgnoreAutoRotateSettings(info.isTablet(info.realBounds));
+        setIgnoreAutoRotateSettings(info.isLargeScreen(info.realBounds));
         ListenableDiffAwareRef<DisplayController.Info, Integer> listenable =
                 displayController.getListenable();
         if (listenable != null) {

@@ -72,10 +72,11 @@ import kotlin.math.min
 
 open class RecentsAtomicAnimationFactory<CONTAINER, STATE_TYPE : BaseState<STATE_TYPE>>(
     protected val container: CONTAINER
-) : AtomicAnimationFactory<STATE_TYPE>(MY_ANIM_COUNT) where
-CONTAINER : Context,
-CONTAINER : RecentsViewContainer,
-CONTAINER : StatefulContainer<STATE_TYPE> {
+) : AtomicAnimationFactory<STATE_TYPE>(MY_ANIM_COUNT)
+    where
+        CONTAINER : Context,
+        CONTAINER : RecentsViewContainer,
+        CONTAINER : StatefulContainer<STATE_TYPE> {
 
     override fun createStateElementAnimation(index: Int, vararg values: Float): Animator =
         when (index) {
@@ -246,7 +247,7 @@ CONTAINER : StatefulContainer<STATE_TYPE> {
             AllAppsSwipeController.applyNormalToAllAppsAnimConfig(config)
         } else if (fromState == OVERVIEW && toState == OVERVIEW_SPLIT_SELECT) {
             val timings =
-                if (container.deviceProfile.deviceProperties.isTablet)
+                if (container.deviceProfile.deviceProperties.isLargeScreen)
                     SplitAnimationTimings.TABLET_OVERVIEW_TO_SPLIT
                 else SplitAnimationTimings.PHONE_OVERVIEW_TO_SPLIT
             config.setInterpolator(

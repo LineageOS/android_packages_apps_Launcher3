@@ -674,7 +674,7 @@ constructor(
 
     private fun shouldShowAltTabKqs(deviceProfile: DeviceProfile?, displayId: Int): Boolean =
         // Alt+Tab KQS is always shown on tablets (large screen devices).
-        deviceProfile?.deviceProperties?.isTablet == true ||
+        deviceProfile?.deviceProperties?.isLargeScreen == true ||
             // For small screen devices, it's only shown on connected displays.
             displayId != DEFAULT_DISPLAY
 

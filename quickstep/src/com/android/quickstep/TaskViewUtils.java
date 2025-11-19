@@ -350,8 +350,8 @@ public final class TaskViewUtils {
         }
 
         int taskIndex = recentsView.indexOfChild(taskView);
-        boolean parallaxCenterAndAdjacentTask =
-                !dp.getDeviceProperties().isTablet() && taskIndex != recentsView.getCurrentPage();
+        boolean parallaxCenterAndAdjacentTask = !dp.getDeviceProperties().isLargeScreen()
+                && taskIndex != recentsView.getCurrentPage();
         if (!skipViewChanges && parallaxCenterAndAdjacentTask && topMostSimulators != null) {
             out.addFloat(taskView, VIEW_ALPHA, 1, 0, clampToProgress(LINEAR, 0.2f, 0.4f));
 
@@ -859,7 +859,7 @@ public final class TaskViewUtils {
         }
         int scrollOffset = recentsView.getScrollOffset(
                 recentsView.indexOfChild(taskView));
-        int gridTranslationY = deviceProfile.getDeviceProperties().isTablet()
+        int gridTranslationY = deviceProfile.getDeviceProperties().isLargeScreen()
                 ? (int) taskView.getGridTranslationY() : 0;
 
         for (RemoteTargetHandle handle : handleList) {
