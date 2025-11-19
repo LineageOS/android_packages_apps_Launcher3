@@ -74,8 +74,9 @@ import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.desktop.DesktopAppLaunchTransitionManager;
 import com.android.launcher3.statehandlers.DesktopVisibilityController;
 import com.android.launcher3.statemanager.StatefulActivity;
-import com.android.launcher3.taskbar.TaskbarApiProxy;
+import com.android.launcher3.taskbar.TaskbarActivityContext;
 import com.android.launcher3.taskbar.TaskbarManager;
+import com.android.launcher3.taskbar.bubbles.BubbleControllers;
 import com.android.launcher3.testing.TestLogging;
 import com.android.launcher3.testing.shared.TestProtocol;
 import com.android.launcher3.util.DisplayController;
@@ -114,8 +115,6 @@ import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.wm.shell.shared.desktopmode.DesktopState;
 
-import kotlinx.coroutines.CoroutineDispatcher;
-
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Locale;
@@ -126,6 +125,8 @@ import java.util.function.Function;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
+
+import kotlinx.coroutines.CoroutineDispatcher;
 
 /**
  * Service connected by system-UI for handling touch interaction.
@@ -585,12 +586,11 @@ public class TouchInteractionHandler extends ContextWrapper {
         NavigationMode gestureStartNavMode = mGestureStartNavMode.get(displayId);
 
         // On CD, only consume input event if flag is on and taskbar is stashed.
-        TaskbarApiProxy taskbarApiProxy = mTaskbarManager.getTaskbarForDisplay(displayId);
+        TaskbarActivityContext tac = mTaskbarManager.getTaskbarForDisplay(displayId);
         boolean shouldConnectedDisplayConsumeEvent =
                 displayId != DEFAULT_DISPLAY
                 && enableAutoStashConnectedDisplayTaskbar.isTrue()
-                && taskbarApiProxy != null
-                        && taskbarApiProxy.getTaskbarUiState().isTaskbarStashed();
+                && tac != null && tac.isTaskbarStashed();
         if (gestureStartNavMode != null && gestureStartNavMode != currentNavMode) {
             ActiveGestureProtoLogProxy.logOnInputEventNavModeSwitched(
                     displayId, gestureStartNavMode.name(), currentNavMode.name());
@@ -651,8 +651,9 @@ public class TouchInteractionHandler extends ContextWrapper {
 
             boolean isOneHandedModeActive = deviceState.isOneHandedModeActive();
             boolean isInSwipeUpTouchRegion = rotationTouchHelper.isInSwipeUpTouchRegion(event);
-            boolean isOnBubbles = taskbarApiProxy.hasBubbleControllers()
-                    && BubbleBarInputConsumer.isEventOnBubbles(taskbarApiProxy, event);
+            BubbleControllers bubbleControllers = tac != null ? tac.getBubbleControllers() : null;
+            boolean isOnBubbles = bubbleControllers != null
+                    && BubbleBarInputConsumer.isEventOnBubbles(tac, event);
             if (deviceState.isButtonNavMode()
                     && deviceState.supportsAssistantGestureInButtonNav()) {
                 reasonString.append("in three button mode which supports Assistant gesture");
@@ -795,10 +796,9 @@ public class TouchInteractionHandler extends ContextWrapper {
     private boolean isHoverActionWithoutConsumer(MotionEvent event) {
         // Only process these events when taskbar is present.
         int displayId = event.getDisplayId();
-        TaskbarApiProxy taskbarApiProxy = mTaskbarManager.getTaskbarForDisplay(displayId);
-        boolean isTaskbarPresent = taskbarApiProxy != null
-                && taskbarApiProxy.getTaskbarUiState().getDeviceProfile().isTaskbarPresent
-                && !taskbarApiProxy.isPhoneMode();
+        TaskbarActivityContext tac = mTaskbarManager.getTaskbarForDisplay(displayId);
+        boolean isTaskbarPresent = tac != null && tac.getDeviceProfile().isTaskbarPresent
+                && !tac.isPhoneMode();
         return event.isHoverEvent() && (mUncheckedConsumer.getType() & TYPE_CURSOR_HOVER) == 0
                 && isTaskbarPresent;
     }

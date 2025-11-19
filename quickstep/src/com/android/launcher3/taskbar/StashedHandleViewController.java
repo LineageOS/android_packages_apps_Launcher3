@@ -19,7 +19,6 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 
 import static com.android.launcher3.EncryptionType.ENCRYPTED;
-import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.LauncherPrefs.nonRestorableItem;
 import static com.android.launcher3.taskbar.TaskbarDesktopExperienceFlags.enableAutoStashConnectedDisplayTaskbar;
 import static com.android.launcher3.taskbar.Utilities.getShapedTaskbarRadius;
@@ -132,14 +131,6 @@ public class StashedHandleViewController implements TaskbarControllers.LoggableT
         final Resources resources = mActivity.getResources();
         mStashedHandleHeight = resources.getDimensionPixelSize(
                 R.dimen.taskbar_stashed_handle_height);
-        if (refactorTaskbarUiState()) {
-            mStashedHandleView.addOnLayoutChangeListener(
-                    (v, left, top, right, bottom, oldLeft, oldTop,
-                            oldRight, oldBottom) -> {
-                        updateIsStashedHandleVisible();
-                    });
-            updateIsStashedHandleVisible();
-        }
     }
 
     public void init(TaskbarControllers controllers) {
@@ -376,11 +367,6 @@ public class StashedHandleViewController implements TaskbarControllers.LoggableT
         }
     }
 
-    private void updateIsStashedHandleVisible() {
-        mActivity.getTaskbarUiState().setTaskbarStashedHandleViewVisible(
-                mStashedHandleView.getVisibility() == View.VISIBLE);
-    }
-
     public boolean isStashedHandleVisible() {
         return mStashedHandleView.getVisibility() == View.VISIBLE;
     }
@@ -434,6 +420,11 @@ public class StashedHandleViewController implements TaskbarControllers.LoggableT
     @Override
     public boolean isNavHandleStashedTaskbar() {
         return true;
+    }
+
+    @Override
+    public boolean canNavHandleBeLongPressed() {
+        return isStashedHandleVisible();
     }
 
     @Override

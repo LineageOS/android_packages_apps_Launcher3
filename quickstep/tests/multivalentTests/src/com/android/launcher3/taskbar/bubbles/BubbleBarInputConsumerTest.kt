@@ -19,10 +19,7 @@ package com.android.launcher3.taskbar.bubbles
 import android.view.MotionEvent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.taskbar.TaskbarActivityContext
-import com.android.launcher3.taskbar.TaskbarApiProxy
-import com.android.launcher3.taskbar.TaskbarUiState
 import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController
-import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator
 import com.android.quickstep.inputconsumers.BubbleBarInputConsumer
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
@@ -48,7 +45,6 @@ class BubbleBarInputConsumerTest {
     @get:Rule var mockitoRule: MockitoRule = MockitoJUnit.rule()
 
     @Mock private lateinit var taskbarActivityContext: TaskbarActivityContext
-    @Mock private lateinit var taskbarFeatureEvaluator: TaskbarFeatureEvaluator
     @Mock private lateinit var bubbleBarController: BubbleBarController
     @Mock private lateinit var bubbleBarViewController: BubbleBarViewController
     @Mock private lateinit var bubbleStashController: BubbleStashController
@@ -58,18 +54,11 @@ class BubbleBarInputConsumerTest {
     @Mock private lateinit var bubbleBarSwipeController: BubbleBarSwipeController
     @Mock private lateinit var dragToBubbleController: DragToBubbleController
     @Mock private lateinit var bubbleCreator: BubbleCreator
-    @Mock private lateinit var taskbarUiState: TaskbarUiState
 
     @Mock private lateinit var motionEvent: MotionEvent
 
-    private lateinit var taskbarApiProxy: TaskbarApiProxy
-
     @Before
     fun setUp() {
-        whenever(taskbarActivityContext.taskbarUiState).thenReturn(taskbarUiState)
-        whenever(taskbarActivityContext.taskbarFeatureEvaluator).thenReturn(taskbarFeatureEvaluator)
-        whenever(taskbarFeatureEvaluator.isTransient).thenReturn(true)
-        taskbarApiProxy = TaskbarApiProxy(taskbarActivityContext)
         bubbleControllers =
             BubbleControllers(
                 bubbleBarController,
@@ -92,71 +81,78 @@ class BubbleBarInputConsumerTest {
     @Test
     fun testIsEventOnBubbles_bubblesNotEnabled() {
         whenever(taskbarActivityContext.isBubbleBarEnabled).thenReturn(false)
-        assertThat(BubbleBarInputConsumer.isEventOnBubbles(taskbarApiProxy, motionEvent)).isFalse()
+        assertThat(BubbleBarInputConsumer.isEventOnBubbles(taskbarActivityContext, motionEvent))
+            .isFalse()
     }
 
     @Test
     fun testIsEventOnBubbles_noBubbleControllers() {
         whenever(taskbarActivityContext.isBubbleBarEnabled).thenReturn(true)
         whenever(taskbarActivityContext.bubbleControllers).thenReturn(null)
-        assertThat(BubbleBarInputConsumer.isEventOnBubbles(taskbarApiProxy, motionEvent)).isFalse()
+        assertThat(BubbleBarInputConsumer.isEventOnBubbles(taskbarActivityContext, motionEvent))
+            .isFalse()
     }
 
     @Test
     fun testIsEventOnBubbles_noBubbles() {
         whenever(taskbarActivityContext.isBubbleBarEnabled).thenReturn(true)
         whenever(taskbarActivityContext.bubbleControllers).thenReturn(bubbleControllers)
-        whenever(taskbarUiState.hasBubbles).thenReturn(false)
-        assertThat(BubbleBarInputConsumer.isEventOnBubbles(taskbarApiProxy, motionEvent)).isFalse()
+        whenever(bubbleBarViewController.hasBubbles()).thenReturn(false)
+        assertThat(BubbleBarInputConsumer.isEventOnBubbles(taskbarActivityContext, motionEvent))
+            .isFalse()
     }
 
     @Test
     fun testIsEventOnBubbles_eventOnStashedHandle() {
         whenever(taskbarActivityContext.isBubbleBarEnabled).thenReturn(true)
         whenever(taskbarActivityContext.bubbleControllers).thenReturn(bubbleControllers)
-        whenever(taskbarUiState.hasBubbles).thenReturn(true)
+        whenever(bubbleBarViewController.hasBubbles()).thenReturn(true)
 
-        whenever(taskbarUiState.isBubbleStashed).thenReturn(true)
-        whenever(taskbarUiState.isEventOverBubbleBarStashedHandle(any())).thenReturn(true)
+        whenever(bubbleStashController.isStashed).thenReturn(true)
+        whenever(bubbleStashedHandleViewController.isEventOverHandle(any())).thenReturn(true)
 
-        assertThat(BubbleBarInputConsumer.isEventOnBubbles(taskbarApiProxy, motionEvent)).isTrue()
+        assertThat(BubbleBarInputConsumer.isEventOnBubbles(taskbarActivityContext, motionEvent))
+            .isTrue()
     }
 
     @Test
     fun testIsEventOnBubbles_eventNotOnStashedHandle() {
         whenever(taskbarActivityContext.isBubbleBarEnabled).thenReturn(true)
         whenever(taskbarActivityContext.bubbleControllers).thenReturn(bubbleControllers)
-        whenever(taskbarUiState.hasBubbles).thenReturn(true)
+        whenever(bubbleBarViewController.hasBubbles()).thenReturn(true)
 
-        whenever(taskbarUiState.isBubbleStashed).thenReturn(true)
-        whenever(taskbarUiState.isEventOverBubbleBarStashedHandle(any())).thenReturn(false)
+        whenever(bubbleStashController.isStashed).thenReturn(true)
+        whenever(bubbleStashedHandleViewController.isEventOverHandle(any())).thenReturn(false)
 
-        assertThat(BubbleBarInputConsumer.isEventOnBubbles(taskbarApiProxy, motionEvent)).isFalse()
+        assertThat(BubbleBarInputConsumer.isEventOnBubbles(taskbarActivityContext, motionEvent))
+            .isFalse()
     }
 
     @Test
     fun testIsEventOnBubbles_eventOnVisibleBubbleView() {
         whenever(taskbarActivityContext.isBubbleBarEnabled).thenReturn(true)
         whenever(taskbarActivityContext.bubbleControllers).thenReturn(bubbleControllers)
-        whenever(taskbarUiState.hasBubbles).thenReturn(true)
+        whenever(bubbleBarViewController.hasBubbles()).thenReturn(true)
 
-        whenever(taskbarUiState.isBubbleStashed).thenReturn(false)
-        whenever(taskbarUiState.isBubbleBarViewVisible).thenReturn(true)
-        whenever(taskbarUiState.isEventOverBubbleBarView(any())).thenReturn(true)
+        whenever(bubbleStashController.isStashed).thenReturn(false)
+        whenever(bubbleBarViewController.isBubbleBarVisible).thenReturn(true)
+        whenever(bubbleBarViewController.isEventOverBubbleBar(any())).thenReturn(true)
 
-        assertThat(BubbleBarInputConsumer.isEventOnBubbles(taskbarApiProxy, motionEvent)).isTrue()
+        assertThat(BubbleBarInputConsumer.isEventOnBubbles(taskbarActivityContext, motionEvent))
+            .isTrue()
     }
 
     @Test
     fun testIsEventOnBubbles_eventNotOnVisibleBubbleView() {
         whenever(taskbarActivityContext.isBubbleBarEnabled).thenReturn(true)
         whenever(taskbarActivityContext.bubbleControllers).thenReturn(bubbleControllers)
-        whenever(taskbarUiState.hasBubbles).thenReturn(true)
+        whenever(bubbleBarViewController.hasBubbles()).thenReturn(true)
 
-        whenever(taskbarUiState.isBubbleStashed).thenReturn(false)
-        whenever(taskbarUiState.isBubbleBarViewVisible).thenReturn(true)
-        whenever(taskbarUiState.isEventOverBubbleBarView(any())).thenReturn(false)
+        whenever(bubbleStashController.isStashed).thenReturn(false)
+        whenever(bubbleBarViewController.isBubbleBarVisible).thenReturn(true)
+        whenever(bubbleBarViewController.isEventOverBubbleBar(any())).thenReturn(false)
 
-        assertThat(BubbleBarInputConsumer.isEventOnBubbles(taskbarApiProxy, motionEvent)).isFalse()
+        assertThat(BubbleBarInputConsumer.isEventOnBubbles(taskbarActivityContext, motionEvent))
+            .isFalse()
     }
 }

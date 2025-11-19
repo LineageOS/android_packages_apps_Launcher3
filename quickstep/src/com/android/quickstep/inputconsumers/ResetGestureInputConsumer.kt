@@ -16,7 +16,7 @@
 package com.android.quickstep.inputconsumers
 
 import android.view.MotionEvent
-import com.android.launcher3.taskbar.TaskbarApiProxy
+import com.android.launcher3.taskbar.TaskbarActivityContext
 import com.android.quickstep.InputConsumer
 import com.android.quickstep.TaskAnimationManager
 import com.android.quickstep.util.ActiveGestureLog
@@ -26,7 +26,7 @@ import java.util.function.Supplier
 class ResetGestureInputConsumer(
     private val displayId: Int,
     private val taskAnimationManager: TaskAnimationManager,
-    private val activityContextSupplier: Supplier<TaskbarApiProxy?>,
+    private val activityContextSupplier: Supplier<TaskbarActivityContext?>,
 ) : InputConsumer {
     override fun getType() = InputConsumer.TYPE_RESET_GESTURE
 
@@ -38,7 +38,7 @@ class ResetGestureInputConsumer(
         ) {
             val tac = activityContextSupplier.get()
             taskAnimationManager.finishRunningRecentsAnimation(
-                /* toHome= */ tac != null && !tac.isInApp(),
+                /* toHome= */ tac != null && !tac.isInApp,
                 /* reason= */ ActiveGestureLog.CompoundString(
                     "ResetGestureInputConsumer: recents animation started"
                 ),
