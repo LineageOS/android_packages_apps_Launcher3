@@ -243,15 +243,6 @@ public class BubbleBarView extends FrameLayout {
 
     public void setTaskbarUiState(TaskbarUiState taskbarUiState) {
         mTaskbarUiState = taskbarUiState;
-        mTaskbarUiState.setBubbleBarViewVisible(getVisibility() == VISIBLE);
-    }
-
-    @Override
-    public void onVisibilityChanged(View v, int visibility) {
-        super.onVisibilityChanged(v, visibility);
-        if (mTaskbarUiState != null) {
-            mTaskbarUiState.setBubbleBarViewVisible(getVisibility() == VISIBLE);
-        }
     }
 
     /**

@@ -976,6 +976,10 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         return mControllers.taskbarViewController.getModelWriter();
     }
 
+    public NavbarButtonsViewController getNavBarButtonsViewController() {
+        return mControllers.navbarButtonsViewController;
+    }
+
     @Nullable
     public BubbleControllers getBubbleControllers() {
         return mControllers.bubbleControllers.orElse(null);
