@@ -18,5 +18,5 @@ package com.android.launcher3.taskbar.customization.util
 
 data class TaskbarContainerIconsBySection<T>(
     val nonOverflownItems: List<T>,
-    val overFlownItems: List<T>,
+    val overflownItems: List<T>,
 )

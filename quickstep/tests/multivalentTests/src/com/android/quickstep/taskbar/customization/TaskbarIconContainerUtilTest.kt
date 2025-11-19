@@ -26,30 +26,36 @@ import org.junit.runner.RunWith
 
 @RunWith(LauncherMultivalentJUnit::class)
 class TaskbarIconContainerUtilTest {
+
+    @Test
+    fun testGetMaxIconCount_whenOverflowDisabled_shouldReturnItemCount() {
+        assertThat(TaskbarIconContainerUtil.getMaxIconCount(10, 4, false)).isEqualTo(10)
+    }
+
     @Test
     fun testGetMaxIconCount_whenZeroOverflowingItems_shouldReturnItemCount() {
-        assertThat(TaskbarIconContainerUtil.getMaxIconCount(10, 0)).isEqualTo(10)
+        assertThat(TaskbarIconContainerUtil.getMaxIconCount(10, 0, true)).isEqualTo(10)
     }
 
     @Test
     fun testGetMaxIconCount_whenOverflowingItems_shouldReturnItemCountDueToNotEnoughItemsToOverflow() {
-        assertThat(TaskbarIconContainerUtil.getMaxIconCount(3, 1)).isEqualTo(3)
+        assertThat(TaskbarIconContainerUtil.getMaxIconCount(3, 1, true)).isEqualTo(3)
     }
 
     @Test
     fun testGetMaxIconCount_whenOverflowingItems_shouldReturnMinimumIconsToShowInContainer() {
-        assertThat(TaskbarIconContainerUtil.getMaxIconCount(4, 2))
+        assertThat(TaskbarIconContainerUtil.getMaxIconCount(4, 2, true))
             .isEqualTo(MINIMUM_ICONS_TO_SHOW_WITH_OVERFLOW)
     }
 
     @Test
     fun testGetMaxIconCount_whenOverflowingItems_shouldReturnItemCountMinusOverflownItemsAndExtraOne() {
-        assertThat(TaskbarIconContainerUtil.getMaxIconCount(10, 1)).isEqualTo(8)
+        assertThat(TaskbarIconContainerUtil.getMaxIconCount(10, 1, true)).isEqualTo(8)
     }
 
     @Test
     fun testGetMaxIconCount_whenOverflowingItems_shouldReturnItemCountMinusOverflownItems() {
-        assertThat(TaskbarIconContainerUtil.getMaxIconCount(10, 2)).isEqualTo(8)
+        assertThat(TaskbarIconContainerUtil.getMaxIconCount(10, 2, true)).isEqualTo(8)
     }
 
     @Test
@@ -63,7 +69,7 @@ class TaskbarIconContainerUtilTest {
             )
 
         assertThat(taskbarIconContainerLists.nonOverflownItems).hasSize(itemList.size)
-        assertThat(taskbarIconContainerLists.overFlownItems).isEmpty()
+        assertThat(taskbarIconContainerLists.overflownItems).isEmpty()
     }
 
     @Test
@@ -77,7 +83,7 @@ class TaskbarIconContainerUtilTest {
             )
 
         assertThat(taskbarIconContainerLists.nonOverflownItems).hasSize(itemList.size)
-        assertThat(taskbarIconContainerLists.overFlownItems).isEmpty()
+        assertThat(taskbarIconContainerLists.overflownItems).isEmpty()
     }
 
     @Test
@@ -91,7 +97,7 @@ class TaskbarIconContainerUtilTest {
             )
 
         assertThat(taskbarIconContainerLists.nonOverflownItems).hasSize(8)
-        assertThat(taskbarIconContainerLists.overFlownItems).hasSize(2)
+        assertThat(taskbarIconContainerLists.overflownItems).hasSize(2)
     }
 
     @Test
@@ -105,6 +111,6 @@ class TaskbarIconContainerUtilTest {
             )
 
         assertThat(taskbarIconContainerLists.nonOverflownItems).hasSize(8)
-        assertThat(taskbarIconContainerLists.overFlownItems).hasSize(2)
+        assertThat(taskbarIconContainerLists.overflownItems).hasSize(2)
     }
 }
