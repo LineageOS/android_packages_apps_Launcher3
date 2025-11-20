@@ -1544,6 +1544,91 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
     }
 
     @Test
+    fun getNonDesktopTask_nullItemInfo_returnsNull() {
+        // No setup needed, just call with null
+        assertThat(recentAppsController.getNonDesktopTask(null)).isNull()
+    }
+
+    @Test
+    fun getNonDesktopTask_itemInfoWithNoPackage_returnsNull() {
+        // No setup needed, just call with empty ItemInfo
+        assertThat(recentAppsController.getNonDesktopTask(ItemInfo())).isNull()
+    }
+
+    @Test
+    fun getNonDesktopTask_noRecentTasks_returnsNull() {
+        prepareHotseatAndRunningAndRecentApps(
+            hotseatPackages = emptyList(),
+            runningTasks = emptyList(),
+            recentTaskPackages = emptyList(),
+        )
+        val itemInfo = createItemInfo(RECENT_PACKAGE_1)
+        assertThat(recentAppsController.getNonDesktopTask(itemInfo)).isNull()
+    }
+
+    @Test
+    fun getNonDesktopTask_onlyDesktopTasks_returnsNull() {
+        val desktopTask = createTask(id = 1, RECENT_PACKAGE_1)
+        prepareHotseatAndRunningAndRecentApps(
+            hotseatPackages = emptyList(),
+            runningTasks = listOf(desktopTask),
+            recentTaskPackages = emptyList(),
+        )
+        val itemInfo = createItemInfo(RECENT_PACKAGE_1)
+        assertThat(recentAppsController.getNonDesktopTask(itemInfo)).isNull()
+    }
+
+    @Test
+    fun getNonDesktopTask_matchingSingleTask_returnsTask() {
+        prepareHotseatAndRunningAndRecentApps(
+            hotseatPackages = emptyList(),
+            runningTasks = emptyList(),
+            recentTaskPackages = listOf(RECENT_PACKAGE_1, RECENT_PACKAGE_2),
+        )
+        val itemInfo = createItemInfo(RECENT_PACKAGE_1)
+        val task = recentAppsController.getNonDesktopTask(itemInfo)
+        assertThat(task).isNotNull()
+        assertThat(task!!.key.packageName).isEqualTo(RECENT_PACKAGE_1)
+    }
+
+    @Test
+    fun getNonDesktopTask_matchingSplitTask_returnsTask() {
+        prepareHotseatAndRunningAndRecentApps(
+            hotseatPackages = emptyList(),
+            runningTasks = emptyList(),
+            recentTaskPackages = listOf(RECENT_SPLIT_PACKAGES_1, RECENT_PACKAGE_1),
+        )
+        // RECENT_SPLIT_PACKAGES_1 is "split1_split2"
+        val itemInfo = createItemInfo("split1")
+        val task = recentAppsController.getNonDesktopTask(itemInfo)
+        assertThat(task).isNotNull()
+        assertThat(task!!.key.packageName).isEqualTo("split1")
+    }
+
+    @Test
+    fun getNonDesktopTask_noMatchingTask_returnsNull() {
+        prepareHotseatAndRunningAndRecentApps(
+            hotseatPackages = emptyList(),
+            runningTasks = emptyList(),
+            recentTaskPackages = listOf(RECENT_PACKAGE_1),
+        )
+        val itemInfo = createItemInfo(RECENT_PACKAGE_2)
+        assertThat(recentAppsController.getNonDesktopTask(itemInfo)).isNull()
+    }
+
+    @Test
+    fun getNonDesktopTask_matchingPackageDifferentUser_returnsNull() {
+        prepareHotseatAndRunningAndRecentApps(
+            hotseatPackages = emptyList(),
+            runningTasks = emptyList(),
+            recentTaskPackages = listOf(RECENT_PACKAGE_1),
+        )
+        // RECENT_PACKAGE_1 is created with myUserHandle
+        val itemInfo = createItemInfo(RECENT_PACKAGE_1, USER_HANDLE_1)
+        assertThat(recentAppsController.getNonDesktopTask(itemInfo)).isNull()
+    }
+
+    @Test
     fun onRecentTasksChanged_inDesktopMode_transparentTask_isFilteredOut() {
         setInDesktopMode(true)
         val transparentTask = createTask(id = 1, "transparentPackage")
