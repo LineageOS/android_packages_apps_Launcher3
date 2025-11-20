@@ -958,6 +958,14 @@ public abstract class RecentsView<
         }
     }
 
+    @Override
+    protected boolean canScroll(float absVScroll, float absHScroll) {
+        if (isModal()) {
+            return false;
+        }
+        return super.canScroll(absVScroll, absHScroll);
+    }
+
     private float getUndampedOverScrollShift() {
         final int width = getWidth();
         final int height = getHeight();
