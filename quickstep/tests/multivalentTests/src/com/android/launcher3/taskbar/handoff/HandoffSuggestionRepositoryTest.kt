@@ -120,6 +120,7 @@ class HandoffSuggestionRepositoryTest {
             )
         repository.listener.onRemoteTasksChanged(listOf(remoteTask1, remoteTask2))
         assertSuggestionMatchesTask(repository.suggestion.value, remoteTask2)
+        assertSuggestionHasBadge(repository.suggestion.value)
     }
 
     @Test
@@ -152,6 +153,12 @@ class HandoffSuggestionRepositoryTest {
                 .setLastUsedTimestampMillis(lastUsedTimestampMillis)
                 .setTaskInForeground(isTaskInForeground)
                 .build()
+        }
+
+        fun assertSuggestionHasBadge(suggestion: HandoffSuggestion?) {
+            assertThat(suggestion).isNotNull()
+            assertThat(suggestion?.itemInfoWithIcon).isNotNull()
+            assertThat(suggestion?.itemInfoWithIcon?.bitmap?.badgeInfo).isNotNull()
         }
 
         fun assertSuggestionMatchesTask(

@@ -20,12 +20,17 @@ import android.companion.Flags.taskContinuity
 import android.companion.datatransfer.continuity.RemoteTask
 import android.companion.datatransfer.continuity.TaskContinuityManager
 import android.content.Context
+import android.os.Process
 import androidx.annotation.VisibleForTesting
+import com.android.launcher3.R
 import com.android.launcher3.concurrent.annotations.LightweightBackground
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority.UI
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
+import com.android.launcher3.icons.BaseIconFactory.IconOptions
+import com.android.launcher3.icons.BitmapInfo
+import com.android.launcher3.icons.LauncherIcons.IconPool
 import com.android.launcher3.model.repository.AppsListRepository
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.ListenableRef
@@ -42,6 +47,7 @@ constructor(
     private val appsListRepository: AppsListRepository,
     @LightweightBackground(priority = UI) private val executor: LooperExecutor,
     lifecycle: DaggerSingletonTracker,
+    private val iconPool: IconPool,
 ) {
 
     private val _suggestion = MutableListenableRef<HandoffSuggestion?>(null)
@@ -55,6 +61,14 @@ constructor(
                     ?.let { remoteTask -> getHandoffSuggestion(remoteTask) }
             )
         }
+    private val handoffSuggestionBadge: BitmapInfo by lazy {
+        iconPool.obtain().use {
+            it.createBadgedIconBitmap(
+                context.getDrawable(R.drawable.ic_handoff_suggestion_badge),
+                IconOptions().setUser(Process.myUserHandle()),
+            )
+        }
+    }
 
     val suggestion: ListenableRef<HandoffSuggestion?> = _suggestion.asListenable()
 
@@ -74,10 +88,13 @@ constructor(
                 it.targetPackage == packageName
             } ?: return null
 
+        val suggestionIconInfo = appInfo.clone()
+        suggestionIconInfo.bitmap = appInfo.bitmap.copy(badgeInfo = handoffSuggestionBadge)
+
         return HandoffSuggestion(
             remoteTask.companionDeviceAssociationId,
             remoteTask.taskId,
-            appInfo,
+            suggestionIconInfo,
         )
     }
 
