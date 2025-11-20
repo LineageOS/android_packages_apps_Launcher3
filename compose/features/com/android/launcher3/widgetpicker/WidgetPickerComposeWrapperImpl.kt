@@ -477,6 +477,7 @@ constructor(
             when (this) {
                 WidgetInteractionSource.FEATURED -> Favorites.CONTAINER_WIDGETS_PREDICTION
                 WidgetInteractionSource.SEARCH,
+                WidgetInteractionSource.CREATE_BUTTON,
                 WidgetInteractionSource.BROWSE -> Favorites.CONTAINER_WIDGETS_TRAY
 
                 WidgetInteractionSource.APP_SPECIFIC_PICKER ->

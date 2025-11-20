@@ -743,3 +743,10 @@ flag {
   description: "Enables all apps edu when over-swipe on the last workspace page"
   bug: "441155632"
 }
+
+flag {
+    name: "show_create_widget_btn_in_picker"
+    namespace: "launcher"
+    description: "Shows create widget button in widget picker"
+    bug: "459260964"
+}

@@ -34,6 +34,7 @@ class FakeWidgetsRepository : WidgetsRepository {
     private val _widgetApps = MutableStateFlow<List<WidgetApp>>(emptyList())
     private val _widgetPreviews = MutableStateFlow<Map<WidgetId, WidgetPreview>>(emptyMap())
     private var _featuredWidgetIds = MutableStateFlow(emptySet<WidgetId>())
+    private var _customWidgetId: WidgetId? = null
 
     fun seedWidgets(widgetApps: List<WidgetApp>) {
         _widgetApps.update { widgetApps }
@@ -45,6 +46,10 @@ class FakeWidgetsRepository : WidgetsRepository {
 
     fun seedFeaturedWidgets(widgetIds: Set<WidgetId>) {
         _featuredWidgetIds.update { widgetIds }
+    }
+
+    fun seedCustomWidget(widgetId: WidgetId) {
+        _customWidgetId = widgetId
     }
 
     override fun initialize(options: WidgetsRepository.InitializationOptions) {}
@@ -61,6 +66,19 @@ class FakeWidgetsRepository : WidgetsRepository {
         combine(_featuredWidgetIds, _widgetApps) { widgetIds, widgetApps ->
             widgetApps.flatMap { it.widgets }.filter { widgetIds.contains(it.id) }
         }
+
+    override fun getCustomWidget(): PickableWidget? {
+        if (_customWidgetId == null) return null
+
+        for (widgetApp in _widgetApps.value) {
+            val match = widgetApp.widgets.firstOrNull { it.id == _customWidgetId }
+            if (match != null) {
+                return match
+            }
+        }
+
+        return null
+    }
 
     override suspend fun searchWidgets(query: String): List<WidgetApp> =
         _widgetApps.value

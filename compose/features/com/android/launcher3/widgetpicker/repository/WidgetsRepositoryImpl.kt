@@ -17,6 +17,7 @@
 package com.android.launcher3.widgetpicker.repository
 
 import android.content.Context
+import android.os.Process
 import com.android.launcher3.DeviceProfile
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.concurrent.annotations.BackgroundContext
@@ -36,6 +37,7 @@ import com.android.launcher3.widgetpicker.data.repository.WidgetsRepository
 import com.android.launcher3.widgetpicker.data.repository.WidgetsRepository.InitializationOptions
 import com.android.launcher3.widgetpicker.data.repository.WidgetsRepository.InitializationOptions.Companion.getWidgetAppId
 import com.android.launcher3.widgetpicker.datasource.FeaturedWidgetsDataSource
+import com.android.launcher3.widgetpicker.datasource.WidgetCreatorAppPackageProvider
 import com.android.launcher3.widgetpicker.datasource.WidgetsSearchAlgorithm
 import com.android.launcher3.widgetpicker.shared.model.PickableWidget
 import com.android.launcher3.widgetpicker.shared.model.WidgetApp
@@ -69,12 +71,13 @@ import kotlinx.coroutines.withContext
 class WidgetsRepositoryImpl
 @Inject
 constructor(
-    @ApplicationContext private val appContext: Context,
+    @param:ApplicationContext private val appContext: Context,
     idp: InvariantDeviceProfile,
     private val widgetsModel: WidgetsModel,
     private val featuredWidgetsDataSource: FeaturedWidgetsDataSource,
     private val searchAlgorithm: WidgetsSearchAlgorithm,
-    @BackgroundContext private val backgroundContext: CoroutineContext,
+    private val widgetCreatorAppPackageProvider: WidgetCreatorAppPackageProvider,
+    @param:BackgroundContext private val backgroundContext: CoroutineContext,
 ) : WidgetsRepository {
     private val deviceProfile = idp.getDeviceProfile(appContext)
     private val backgroundScope =
@@ -113,6 +116,36 @@ constructor(
         _widgetItemsByPackage
             .map { apps -> apps.firstOrNull { it.id == widgetAppId } }
             .distinctUntilChanged()
+
+    override fun getCustomWidget(): PickableWidget? {
+        val widgetsMap = widgetsModel.widgetsByComponentKey
+        if (widgetsMap.isEmpty()) return null
+
+        val customWidgetAppPackage = widgetCreatorAppPackageProvider.get()?.packageName
+        if (!customWidgetAppPackage.isNullOrBlank()) {
+            val widget =
+                widgetsMap.entries
+                    .firstOrNull {
+                        it.value.widgetInfo != null &&
+                            it.value.widgetInfo.configure != null &&
+                            it.key.componentName.packageName == customWidgetAppPackage &&
+                            it.key.user == Process.myUserHandle()
+                    }
+                    ?.value
+
+            if (widget != null) {
+                val widgetAppId =
+                    WidgetAppId(
+                        packageName = widget.componentName.packageName,
+                        userHandle = widget.user,
+                        category = null,
+                    )
+
+                return widget.toPickableWidget(deviceProfile, widgetAppId)
+            }
+        }
+        return null
+    }
 
     override suspend fun getWidgetPreview(id: WidgetId): WidgetPreview {
         val componentKey = ComponentKey(id.componentName, id.userHandle)
@@ -180,61 +213,48 @@ constructor(
                 title = packageItemInfo.title,
                 widgets =
                     widgetItems.map { widgetItem ->
-                        val previewSize =
-                            WidgetSizes.getWidgetSizePx(
-                                deviceProfile,
-                                widgetItem.spanX,
-                                widgetItem.spanY,
-                            )
-                        val containerSpan =
-                            WidgetPreviewContainerSize.forItem(widgetItem, deviceProfile)
-                        val containerSize =
-                            WidgetSizes.getWidgetSizePx(
-                                deviceProfile,
-                                containerSpan.spanX,
-                                containerSpan.spanY,
-                            )
+                        widgetItem.toPickableWidget(deviceProfile, widgetAppId)
+                    },
+            )
+        }
 
-                        PickableWidget(
-                            id =
-                                WidgetId(
-                                    componentName = widgetItem.componentName,
-                                    userHandle = widgetItem.user,
-                                ),
-                            appId = widgetAppId,
-                            label = widgetItem.label,
-                            description = widgetItem.description,
-                            widgetInfo =
-                                if (widgetItem.widgetInfo != null) {
-                                    WidgetInfo.AppWidgetInfo(
-                                        appWidgetProviderInfo = widgetItem.widgetInfo.clone()
-                                    )
-                                } else if (
-                                    widgetItem.activityInfo is ShortcutConfigActivityInfoVO
-                                ) {
-                                    WidgetInfo.StaticShortcutInfo(
-                                        launcherActivityInfo = widgetItem.activityInfo.mInfo
-                                    )
-                                } else {
-                                    check(widgetItem.activityInfo is ShortcutConfigActivityInfo)
-                                    WidgetInfo.PinnedShortcutInfo(
-                                        componentName = widgetItem.activityInfo.component,
-                                        user = widgetItem.activityInfo.user,
-                                    )
-                                },
-                            sizeInfo =
-                                WidgetSizeInfo(
-                                    spanX = widgetItem.spanX,
-                                    spanY = widgetItem.spanY,
-                                    widthPx = previewSize.width,
-                                    heightPx = previewSize.height,
-                                    containerSpanX = containerSpan.spanX,
-                                    containerSpanY = containerSpan.spanY,
-                                    containerWidthPx = containerSize.width,
-                                    containerHeightPx = containerSize.height,
-                                ),
+        private fun WidgetItem.toPickableWidget(
+            deviceProfile: DeviceProfile,
+            widgetAppId: WidgetAppId,
+        ): PickableWidget {
+            val previewSize = WidgetSizes.getWidgetSizePx(deviceProfile, spanX, spanY)
+            val containerSpan = WidgetPreviewContainerSize.forItem(this, deviceProfile)
+            val containerSize =
+                WidgetSizes.getWidgetSizePx(deviceProfile, containerSpan.spanX, containerSpan.spanY)
+
+            return PickableWidget(
+                id = WidgetId(componentName = componentName, userHandle = user),
+                appId = widgetAppId,
+                label = label,
+                description = description,
+                widgetInfo =
+                    if (widgetInfo != null) {
+                        WidgetInfo.AppWidgetInfo(appWidgetProviderInfo = widgetInfo.clone())
+                    } else if (activityInfo is ShortcutConfigActivityInfoVO) {
+                        WidgetInfo.StaticShortcutInfo(launcherActivityInfo = activityInfo.mInfo)
+                    } else {
+                        check(activityInfo is ShortcutConfigActivityInfo)
+                        WidgetInfo.PinnedShortcutInfo(
+                            componentName = activityInfo.component,
+                            user = activityInfo.user,
                         )
                     },
+                sizeInfo =
+                    WidgetSizeInfo(
+                        spanX = spanX,
+                        spanY = spanY,
+                        widthPx = previewSize.width,
+                        heightPx = previewSize.height,
+                        containerSpanX = containerSpan.spanX,
+                        containerSpanY = containerSpan.spanY,
+                        containerWidthPx = containerSize.width,
+                        containerHeightPx = containerSize.height,
+                    ),
             )
         }
     }

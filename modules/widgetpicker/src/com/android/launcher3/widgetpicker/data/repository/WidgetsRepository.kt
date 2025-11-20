@@ -40,6 +40,9 @@ interface WidgetsRepository {
     /** Observe widgets available on the device from a specific app. */
     fun observeWidgetApp(widgetAppId: WidgetAppId): Flow<WidgetApp?>
 
+    /** Returns a widget that is customizable for various use-cases (if exists). */
+    fun getCustomWidget(): PickableWidget?
+
     /**
      * Loads a preview for an app widget. Returns a placeholder preview if the widget is not found.
      */
