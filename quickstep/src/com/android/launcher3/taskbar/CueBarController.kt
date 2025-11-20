@@ -87,6 +87,7 @@ class CueBarController(private val activity: TaskbarActivityContext) :
         if (!cueBarAceMigration()) {
             return
         }
+        ambientCueRepository.connectToAce()
         taskbarControllers = controllers
         createCueBar()
     }
@@ -167,7 +168,7 @@ class CueBarController(private val activity: TaskbarActivityContext) :
         cleanUpOverlay()
         taskbarControllers.sharedState?.cueBarVisible = false
         ambientCueViewModel.deactivate()
-        ambientCueRepository.unregisterListener()
+        ambientCueRepository.disconnectFromAce()
         coroutineScope.cancel()
     }
 
