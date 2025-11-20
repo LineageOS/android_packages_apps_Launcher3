@@ -259,7 +259,8 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         // Needed to draw folder leave-behind when opening one.
         setWillNotDraw(false);
 
-        mAllAppsButtonContainer = new TaskbarAllAppsButtonContainer(context);
+        mAllAppsButtonContainer = (TaskbarAllAppsButtonContainer) inflate(
+                R.layout.taskbar_all_apps_button_container);
         mAllAppsButtonTranslationOffset = (int) getResources().getDimension(
                 mAllAppsButtonContainer.getAllAppsButtonTranslationXOffset(
                         mActivityContext.isTransientTaskbar()));
