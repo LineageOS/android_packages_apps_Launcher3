@@ -623,6 +623,11 @@ public abstract class AbsSwipeUpHandler<
                 this::resetStateForAnimationCancel);
         mStateCallback.runOnceAtState(STATE_HANDLER_INVALIDATED | STATE_FINISH_WITH_NO_END,
                 this::resetStateForAnimationCancel);
+
+        mStateCallback.runOnceAtState(STATE_GESTURE_STARTED | STATE_GESTURE_COMPLETED,
+                this::finishMagneticEffect);
+        mStateCallback.runOnceAtState(STATE_GESTURE_STARTED | STATE_GESTURE_CANCELLED,
+                this::finishMagneticEffect);
     }
 
     protected boolean onActivityInit(Boolean isHomeStarted) {
@@ -1059,13 +1064,20 @@ public abstract class AbsSwipeUpHandler<
         return useHomeIntentForWindow ? getHomeIntent() : mGestureState.getOverviewIntent();
     }
 
+    private void finishMagneticEffect() {
+        mCurrentShift.updateValue(mMagneticEffectShiftValue);
+    }
+
+    private boolean isGestureOngoing() {
+        return mStateCallback.hasStates(STATE_GESTURE_STARTED)
+                && !mStateCallback.hasStates(STATE_GESTURE_COMPLETED)
+                && !mStateCallback.hasStates(STATE_GESTURE_CANCELLED);
+    }
+
     @Override
     protected float getCurrentShiftValue() {
         boolean shouldUseMagneticEffectShift = enableSwipeUpMagneticDetach()
-                && mStateCallback.hasStates(STATE_GESTURE_STARTED)
-                && !mStateCallback.hasStates(STATE_GESTURE_COMPLETED)
-                && !mStateCallback.hasStates(STATE_GESTURE_CANCELLED)
-                && !mCurrentShift.isAnimating()
+                && isGestureOngoing()
                 && (!mIsMotionPaused || !mMagneticEffectDisplacement.isStable());
 
         return shouldUseMagneticEffectShift
@@ -1076,7 +1088,7 @@ public abstract class AbsSwipeUpHandler<
     @Override
     public void updateDisplacement(float displacement) {
         super.updateDisplacement(displacement);
-        if (!enableSwipeUpMagneticDetach() || mCurrentShift.isAnimating()) {
+        if (!enableSwipeUpMagneticDetach() || !isGestureOngoing()) {
             return;
         }
         mDistanceGestureContext.setDragOffset(mCurrentDisplacement);
@@ -1922,14 +1934,9 @@ public abstract class AbsSwipeUpHandler<
             @Override
             public void onAnimationStart(Animator animation) {
                 super.onAnimationStart(animation);
-                if (!disableObsoleteSwipeHandlerLogic()) {
-                    // This is likely unnecessary, however adding this to prevent reintroducing any
-                    // forgotten bugs fixed by the previous implementation.
-                    mAnimationCanceled = false;
-                }
-                if (enableSwipeUpMagneticDetach()) {
-                    mMagneticEffectDisplacement.setSpec(IDENTITY_MOTION_SPEC);
-                }
+                // This is likely unnecessary, however adding this to prevent reintroducing any
+                // forgotten bugs fixed by the previous implementation.
+                mAnimationCanceled = false;
             }
         };
         if (mGestureState.getEndTarget() == HOME) {
@@ -2101,14 +2108,18 @@ public abstract class AbsSwipeUpHandler<
                 animatorSet.play(goingUpAnim);
                 animatorSet.play(goingDownAnim).after(goingUpAnim);
             }
-            animatorSet.addListener(shiftAnimationListener);
+            if (!disableObsoleteSwipeHandlerLogic()) {
+                animatorSet.addListener(shiftAnimationListener);
+            }
             animatorSet.setInterpolator(interpolator);
             animatorSet.start();
             mRunningWindowAnim = new RunningWindowAnim[]{RunningWindowAnim.wrap(animatorSet)};
         } else {
             AnimatorSet animatorSet = new AnimatorSet();
             ValueAnimator windowAnim = mCurrentShift.animateToValue(start, end);
-            windowAnim.addListener(shiftAnimationListener);
+            if (!disableObsoleteSwipeHandlerLogic()) {
+                windowAnim.addListener(shiftAnimationListener);
+            }
             windowAnim.addUpdateListener(valueAnimator -> {
                 computeRecentsScrollIfInvisible();
             });
