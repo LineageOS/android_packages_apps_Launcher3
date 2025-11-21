@@ -132,13 +132,17 @@ java_genrule {
         ":launcher-quickstep-unprocessed-protolog-src",
         ":launcher-quickstep_protolog-groups",
     ],
-    tools: ["protologtool"],
+    tools: [
+        "protologtool",
+        "soong_javac_wrapper",
+    ],
     cmd: "$(location protologtool) transform-protolog-calls " +
         "--protolog-class com.android.internal.protolog.common.ProtoLog " +
         "--loggroups-class com.android.quickstep.util.QuickstepProtoLogGroup " +
         "--loggroups-jar $(location :launcher-quickstep_protolog-groups) " +
         "--viewer-config-file-path /system_ext/etc/launcher.quickstep.protolog.pb " +
         "--output-srcjar $(out) " +
+        "--javac-wrapper-path $(location soong_javac_wrapper) " +
         "$(locations :launcher-quickstep-unprocessed-protolog-src)",
     out: ["launcher.quickstep.protolog.srcjar"],
 }
@@ -149,12 +153,16 @@ java_genrule {
         ":launcher-quickstep-unprocessed-protolog-src",
         ":launcher-quickstep_protolog-groups",
     ],
-    tools: ["protologtool"],
+    tools: [
+        "protologtool",
+        "soong_javac_wrapper",
+    ],
     cmd: "$(location protologtool) generate-viewer-config " +
         "--protolog-class com.android.internal.protolog.common.ProtoLog " +
         "--loggroups-class com.android.quickstep.util.QuickstepProtoLogGroup " +
         "--loggroups-jar $(location :launcher-quickstep_protolog-groups) " +
         "--viewer-config $(out) " +
+        "--javac-wrapper-path $(location soong_javac_wrapper) " +
         "$(locations :launcher-quickstep-unprocessed-protolog-src)",
     out: ["launcher.quickstep.protolog.pb"],
 }
