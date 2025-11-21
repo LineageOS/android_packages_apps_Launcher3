@@ -172,7 +172,7 @@ public class DeviceProfile {
     public final DotRenderer mDotRendererAllApps;
 
     // Taskbar
-    private final TaskbarProfile mTaskbarProfile;
+    public TaskbarProfile mTaskbarProfile;
     public boolean isTaskbarPresent;
     // Whether Taskbar will inset the bottom of apps by taskbarSize.
     public boolean isTaskbarPresentInApps;
@@ -858,6 +858,18 @@ public class DeviceProfile {
                 getWorkspaceIconProfile().getIconSizePx() * numShownHotseatIcons;
         int hotseatBorderSpacePx = (int) (hotseatWidthPx - hotseatIconsTotalPx) / numBorders;
         return Math.min(hotseatBorderSpacePx, getHotseatProfile().getMaxIconSpacePx());
+    }
+
+    public TaskbarProfile updateTaskbarProfile(Resources res) {
+        return TaskbarProfile.Factory.createTaskbarProfile(
+                res,
+                inv.taskbarModeUtil.isTransient(),
+                isTaskbarPresent,
+                mMetrics,
+                mDisplayOptionSpec,
+                mTypeIndex,
+                inv
+        );
     }
 
     public FolderProfile updateAvailableFolderCellDimensions(Resources res, Context context) {
