@@ -304,7 +304,7 @@ public class OverviewActionsView<T extends OverlayUICallbacks> extends FrameLayo
         assert mDp != null;
         // Update flags to see if split button should be hidden.
         updateSplitButtonHiddenFlags(FLAG_SMALL_SCREEN_HIDE_SPLIT,
-                !mDp.getDeviceProperties().isTablet()) ||
+                !mDp.getDeviceProperties().isTablet() ||
                 getContext().getSystemService(ActivityManager.class).isLowRamDevice());
         updateActionButtonsVisibility();
     }
