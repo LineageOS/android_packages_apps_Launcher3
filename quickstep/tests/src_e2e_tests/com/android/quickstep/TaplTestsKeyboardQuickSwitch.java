@@ -26,7 +26,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.launcher3.Flags;
 import com.android.launcher3.tapl.KeyboardQuickSwitch;
 import com.android.launcher3.taskbar.KeyboardQuickSwitchController;
-import com.android.launcher3.util.rule.RecentsWindowTestFilterRule.AllowInRecentsWindowTests;
+import com.android.launcher3.util.ui.BaseLauncherTaplTest.AllowInRecentsWindowTests;
 
 import org.junit.Assume;
 import org.junit.Test;
