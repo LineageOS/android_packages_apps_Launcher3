@@ -657,6 +657,9 @@ public class BubbleBarController {
     }
 
     private void onBubbleBarBoundsChanged(boolean forceUpdate) {
+        if (mBarView.getBubbleBarBounds().height() <= 0) {
+            return;
+        }
         int bubbleBarTopToScreenBottom = mBarView.getTopToScreenBottom();
         if (bubbleBarTopToScreenBottom != mLastSentBubbleBarTopToScreenBottom || forceUpdate) {
             mLastSentBubbleBarTopToScreenBottom = bubbleBarTopToScreenBottom;
