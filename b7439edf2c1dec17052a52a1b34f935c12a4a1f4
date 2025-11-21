@@ -18,6 +18,24 @@
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "cb19f715_e404e81d",
+        "filename": "quickstep/src/com/android/launcher3/taskbar/navbutton/PhoneLandscapeNavLayoutter.kt",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 4550
+      },
+      "writtenOn": "2025-11-21T10:50:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cf181da6_c140df8e",
+      "revId": "b7439edf2c1dec17052a52a1b34f935c12a4a1f4",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "a898d2a0_23c61e38",
@@ -31,6 +49,24 @@
       "writtenOn": "2025-11-21T05:23:51Z",
       "side": 1,
       "message": "```suggestion\nimport com.android.launcher3.taskbar.TaskbarManagerImpl.NAV_BAR_INVERSE\n```",
+      "revId": "b7439edf2c1dec17052a52a1b34f935c12a4a1f4",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b8b373df_704b1ad5",
+        "filename": "quickstep/src/com/android/launcher3/taskbar/navbutton/PhonePortraitNavLayoutter.kt",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 4550
+      },
+      "writtenOn": "2025-11-21T10:50:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a898d2a0_23c61e38",
       "revId": "b7439edf2c1dec17052a52a1b34f935c12a4a1f4",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     },
@@ -52,6 +88,24 @@
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5ed03476_4b00cca0",
+        "filename": "quickstep/src/com/android/launcher3/taskbar/navbutton/PhoneSeascapeNavLayoutter.kt",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 4550
+      },
+      "writtenOn": "2025-11-21T10:50:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "05d8a3ac_c60a750f",
+      "revId": "b7439edf2c1dec17052a52a1b34f935c12a4a1f4",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "eaf4a136_d125cc99",
@@ -65,6 +119,24 @@
       "writtenOn": "2025-11-21T05:23:51Z",
       "side": 1,
       "message": "```suggestion\nimport com.android.launcher3.taskbar.TaskbarManagerImpl.NAV_BAR_INVERSE\n```",
+      "revId": "b7439edf2c1dec17052a52a1b34f935c12a4a1f4",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f58ab1d8_f5a5510b",
+        "filename": "quickstep/src/com/android/launcher3/taskbar/navbutton/TaskbarNavLayoutter.kt",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 4550
+      },
+      "writtenOn": "2025-11-21T10:50:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "eaf4a136_d125cc99",
       "revId": "b7439edf2c1dec17052a52a1b34f935c12a4a1f4",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
