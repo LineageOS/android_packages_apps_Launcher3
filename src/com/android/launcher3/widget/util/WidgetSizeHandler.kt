@@ -23,10 +23,10 @@ import android.content.Context
 import android.graphics.Rect
 import android.os.Bundle
 import android.util.SizeF
+import com.android.launcher3.DeviceProfile
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
-import com.android.launcher3.dagger.LauncherComponentProvider.get
 import com.android.launcher3.util.Executors
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -56,10 +56,26 @@ constructor(
         spanY: Int,
         executor: Executor = Executors.UI_HELPER_EXECUTOR,
     ) {
+        updateSizeRangesAsyncInternal(widgetId, executor) { getWidgetSizeOptions(spanX, spanY) }
+    }
+
+    @JvmOverloads
+    open fun updateHotseatQsbSizeRangesAsync(
+        widgetId: Int,
+        executor: Executor = Executors.UI_HELPER_EXECUTOR,
+    ) {
+        updateSizeRangesAsyncInternal(widgetId, executor) { getHotseatQsbSizeOptions() }
+    }
+
+    private inline fun updateSizeRangesAsyncInternal(
+        widgetId: Int,
+        executor: Executor = Executors.UI_HELPER_EXECUTOR,
+        crossinline widgetSizeOptionsProvider: () -> Bundle,
+    ) {
         if (widgetId <= 0) return
         executor.execute {
             val widgetManager = AppWidgetManager.getInstance(context)
-            val sizeOptions = getWidgetSizeOptions(spanX, spanY)
+            val sizeOptions = widgetSizeOptionsProvider.invoke()
             if (
                 sizeOptions.getWidgetSizeList() !=
                     widgetManager.getAppWidgetOptions(widgetId).getWidgetSizeList()
@@ -68,15 +84,11 @@ constructor(
         }
     }
 
-    /** Returns the bundle to be used as the default options for a widget with provided size. */
-    fun getWidgetSizeOptions(spanX: Int, spanY: Int): Bundle {
-        val density = context.resources.displayMetrics.density
+    private inline fun getWidgetSizeOptionsInternal(
+        widgetSizeFromProfile: (DeviceProfile) -> SizeF
+    ): Bundle {
         val paddedSizes =
-            idp.supportedProfiles.mapTo(ArrayList()) {
-                val widgetSizePx = WidgetSizes.getWidgetSizePx(it, spanX, spanY)
-                SizeF(widgetSizePx.width / density, widgetSizePx.height / density)
-            }
-
+            idp.supportedProfiles.mapTo(ArrayList()) { widgetSizeFromProfile.invoke(it) }
         val rect = getMinMaxSizes(paddedSizes)
         val options = Bundle()
         options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, rect.left)
@@ -85,6 +97,26 @@ constructor(
         options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, rect.bottom)
         options.putParcelableArrayList(OPTION_APPWIDGET_SIZES, paddedSizes)
         return options
+    }
+
+    /** Returns the bundle to be used as the default options for a widget with provided size. */
+    fun getWidgetSizeOptions(spanX: Int, spanY: Int): Bundle {
+        return getWidgetSizeOptionsInternal { profile ->
+            val density = context.resources.displayMetrics.density
+            val widgetSizePx = WidgetSizes.getWidgetSizePx(profile, spanX, spanY)
+            SizeF(widgetSizePx.width / density, widgetSizePx.height / density)
+        }
+    }
+
+    /** Returns the bundle to be used as the default options for a QSB widget in hotseat. */
+    private fun getHotseatQsbSizeOptions(): Bundle {
+        return getWidgetSizeOptionsInternal { profile ->
+            val density = context.resources.displayMetrics.density
+            SizeF(
+                profile.hotseatQsbWidth / density,
+                profile.getHotseatProfile().qsbHeight / density,
+            )
+        }
     }
 
     companion object {

@@ -145,7 +145,7 @@ constructor(
     private fun updateWidgetSizeAsync() {
         val widgetId = widgetHost.getActiveWidgetId()
         if (widgetId != INVALID_APPWIDGET_ID) {
-            sizeHandler.updateSizeRangesAsync(widgetId, idp.numColumns, 1, executor)
+            sizeHandler.updateHotseatQsbSizeRangesAsync(widgetId, executor)
         }
     }
 
