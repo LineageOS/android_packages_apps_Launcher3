@@ -245,7 +245,6 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
     }
 
     @Test
-    @EnableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX)
     fun recentTasksChanged_duringGetTasksLoading_dontCallGetTasks() {
         assumeTrue("Only run this test if enableTaskbarUiThread() is on", enableTaskbarUiThread())
         // getTasks() should have been called once from init().
@@ -266,7 +265,6 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
     }
 
     @Test
-    @EnableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX)
     fun recentTasksChanged_duringGetTasksLoading_dontCallGetTasks_disableFlags_taskbarUiThread() {
         assumeFalse("Only run this test if enableTaskbarUiThread() is off", enableTaskbarUiThread())
         // getTasks() should have been called once from init().
@@ -285,7 +283,6 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
     }
 
     @Test
-    @EnableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX)
     fun recentTasksChanged_duringGetTasksLoading_getTasksCalledWhenLoadingDone() {
         assumeTrue("Only run this test if enableTaskbarUiThread() is on", enableTaskbarUiThread())
         val callbackCaptor = argumentCaptor<Consumer<List<GroupTask>>>()
@@ -309,7 +306,6 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
     }
 
     @Test
-    @EnableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX)
     fun recentTasksChanged_duringGetTasksLoading_getTasksCalledWhenLoadingDone_legacy() {
         assumeFalse("Only run this test if enableTaskbarUiThread() is off", enableTaskbarUiThread())
         val callbackCaptor = argumentCaptor<Consumer<List<GroupTask>>>()
@@ -326,86 +322,6 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
         callbackCaptor.lastValue.accept(emptyList())
 
         // getTasks() is called again now that the first getTasks() call finished.
-        verify(mockRecentsModel, times(3)).getTasks(any(), any<Consumer<List<GroupTask>>>())
-    }
-
-    @Test
-    @DisableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX)
-    fun recentTasksChanged_duringGetTasksLoading_flagDisabled_callGetTasks_flagEnabled_taskbarUiThread() {
-        assumeTrue("Only run this test if enableTaskbarUiThread() is on", enableTaskbarUiThread())
-        // getTasks() should have been called once from init().
-        verify(mockRecentsModel, times(1)).getTasks(any(), any<Consumer<List<GroupTask>>>())
-        // Override the mock answer for getTasks() so it doesn't call the callback immediately.
-        doAnswer { taskListChangeId }
-            .whenever(mockRecentsModel)
-            .getTasks(any(), any<Consumer<List<GroupTask>>>())
-        recentTasksChangedCallback?.invoke(null)
-        // By not invoking the callback passed to getTasks() we here emulate getTasks() loading.
-
-        recentTasksChangedCallback?.invoke(null)
-
-        // getTasks() is called once per onRecentTasksChanged() invocation (and once at init)
-        verify(mockRecentsModel, times(3)).getTasks(any(), any<Consumer<List<GroupTask>>>())
-    }
-
-    @Test
-    @DisableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX)
-    fun recentTasksChanged_duringGetTasksLoading_flagDisabled_callGetTasks_taskbarUiThread() {
-        assumeFalse("Only run this test if enableTaskbarUiThread() is off", enableTaskbarUiThread())
-        // getTasks() should have been called once from init().
-        verify(mockRecentsModel, times(1)).getTasks(any(), any<Consumer<List<GroupTask>>>())
-        // Override the mock answer for getTasks() so it doesn't call the callback immediately.
-        doAnswer { taskListChangeId }
-            .whenever(mockRecentsModel)
-            .getTasks(any(), any<Consumer<List<GroupTask>>>())
-        recentTasksChangedListener?.onRecentTasksChanged()
-        // By not invoking the callback passed to getTasks() we here emulate getTasks() loading.
-
-        recentTasksChangedListener?.onRecentTasksChanged()
-
-        // getTasks() is called once per onRecentTasksChanged() invocation (and once at init)
-        verify(mockRecentsModel, times(3)).getTasks(any(), any<Consumer<List<GroupTask>>>())
-    }
-
-    @Test
-    @DisableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX)
-    fun recentTasksChanged_duringGetTasksLoading_flagDisabled_getTasksNotCalledWhenLoadingDone_flagEnabled_taskbarUiThread() {
-        assumeTrue("Only run this test if enableTaskbarUiThread() is on", enableTaskbarUiThread())
-        val callbackCaptor = argumentCaptor<Consumer<List<GroupTask>>>()
-        // getTasks() should have been called once from init().
-        verify(mockRecentsModel, times(1)).getTasks(any(), callbackCaptor.capture())
-        // Override the mock answer for getTasks() so it doesn't call the callback immediately.
-        doAnswer { taskListChangeId }
-            .whenever(mockRecentsModel)
-            .getTasks(any(), any<Consumer<List<GroupTask>>>())
-        recentTasksChangedCallback?.invoke(null)
-        recentTasksChangedCallback?.invoke(null)
-        verify(mockRecentsModel, times(3)).getTasks(any(), any<Consumer<List<GroupTask>>>())
-
-        callbackCaptor.lastValue.accept(emptyList())
-
-        // getTasks() is called once per onRecentTasksChanged() invocation (and once at init)
-        verify(mockRecentsModel, times(3)).getTasks(any(), any<Consumer<List<GroupTask>>>())
-    }
-
-    @Test
-    @DisableFlags(com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX)
-    fun recentTasksChanged_duringGetTasksLoading_flagDisabled_getTasksNotCalledWhenLoadingDone_taskbarUiThread() {
-        assumeFalse("Only run this test if enableTaskbarUiThread() is off", enableTaskbarUiThread())
-        val callbackCaptor = argumentCaptor<Consumer<List<GroupTask>>>()
-        // getTasks() should have been called once from init().
-        verify(mockRecentsModel, times(1)).getTasks(any(), callbackCaptor.capture())
-        // Override the mock answer for getTasks() so it doesn't call the callback immediately.
-        doAnswer { taskListChangeId }
-            .whenever(mockRecentsModel)
-            .getTasks(any(), any<Consumer<List<GroupTask>>>())
-        recentTasksChangedListener!!.onRecentTasksChanged()
-        recentTasksChangedListener!!.onRecentTasksChanged()
-        verify(mockRecentsModel, times(3)).getTasks(any(), any<Consumer<List<GroupTask>>>())
-
-        callbackCaptor.lastValue.accept(emptyList())
-
-        // getTasks() is called once per onRecentTasksChanged() invocation (and once at init)
         verify(mockRecentsModel, times(3)).getTasks(any(), any<Consumer<List<GroupTask>>>())
     }
 

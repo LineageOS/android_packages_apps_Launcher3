@@ -17,7 +17,6 @@ package com.android.launcher3.taskbar
 
 import android.content.Context
 import android.util.Log
-import android.window.DesktopExperienceFlags
 import androidx.annotation.VisibleForTesting
 import com.android.internal.policy.DesktopModeCompatPolicy
 import com.android.launcher3.BubbleTextView.RunningAppState
@@ -72,9 +71,6 @@ class TaskbarRecentAppsController(
                 }
             }
         }
-
-    val enableRecentTasksThrottle =
-        DesktopExperienceFlags.ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX.isTrue
 
     // TODO(b/343532825): Add a setting to disable Recents even when the flag is on.
     var canShowRecentApps = enableRecentsInTaskbar()
@@ -358,14 +354,13 @@ class TaskbarRecentAppsController(
 
     private fun reloadRecentTasksIfNeeded() {
         if (recentsModel.isTaskListValid(taskListChangeId)) return
-        if (enableRecentTasksThrottle && loadingRecentsTasks) {
+        if (loadingRecentsTasks) {
             Log.v(TAG, "reloadRecentTasksIfNeeded: tried to reload while loading recents tasks")
             needsRecentsTasksReload = true
             return
         }
         Log.v(TAG, "reloadRecentTasksIfNeeded: load recents tasks")
-        // Only indicate that recents tasks are loading if the enableRecentTasksThrottle flag is on
-        loadingRecentsTasks = enableRecentTasksThrottle
+        loadingRecentsTasks = true
         taskListChangeId =
             recentsModel.getTasks(RecentsFilterState.EMPTY_FILTER) { tasks ->
                 TASKBAR_UI_THREAD.execute {
