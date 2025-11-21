@@ -78,11 +78,13 @@ import com.android.launcher3.model.StringCache;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.model.repository.StringCacheRepository;
+import com.android.launcher3.popup.SystemShortcut;
 import com.android.launcher3.statehandlers.BaseDepthController;
 import com.android.launcher3.util.ActivityOptionsWrapper;
 import com.android.launcher3.util.ApplicationInfoWrapper;
 import com.android.launcher3.util.LauncherBindableItemsContainer;
 import com.android.launcher3.util.LooperExecutor;
+import com.android.launcher3.util.PackageUserKey;
 import com.android.launcher3.util.PendingRequestArgs;
 import com.android.launcher3.util.Preconditions;
 import com.android.launcher3.util.RunnableList;
@@ -96,6 +98,7 @@ import com.android.launcher3.widget.LauncherWidgetHolder;
 import com.android.launcher3.widget.picker.model.WidgetPickerDataProvider;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * An interface to be used along with a context for various activities in Launcher. This allows a
@@ -222,6 +225,24 @@ public interface ActivityContext extends SavedStateRegistryOwner {
     default BaseDepthController getDepthController() {
         return null;
     }
+
+    /**
+     * Returns a stream of system shortcuts supported for the given item info.
+     *
+     * @param itemInfo The item info for which to retrieve supported shortcuts.
+     * @return A stream of system shortcuts.
+     */
+    default Stream<SystemShortcut.Factory> getSupportedShortcuts(ItemInfo itemInfo) {
+        return null;
+    }
+
+    /**
+     * Refreshes and binds widgets for a specific package and user.
+     *
+     * @param packageUser if null, refreshes all widgets and shortcuts, otherwise only
+     * refreshes the widgets and shortcuts associated with the given package/user
+     */
+    default void refreshAndBindWidgetsForPackageUser(@Nullable PackageUserKey packageUser) {}
 
     /** @return {@code true} if all apps background blur is enabled */
     default boolean isAllAppsBackgroundBlurEnabled() {
