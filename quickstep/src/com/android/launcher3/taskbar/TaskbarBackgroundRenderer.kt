@@ -29,7 +29,7 @@ import com.android.launcher3.Utilities
 import com.android.launcher3.Utilities.mapRange
 import com.android.launcher3.Utilities.mapToRange
 import com.android.launcher3.icons.GraphicsUtils.setColorAlphaBound
-import com.android.launcher3.taskbar.TaskbarManager.NAVIGATION_BAR_HINT
+import com.android.launcher3.taskbar.TaskbarManagerImpl.NAVIGATION_BAR_HINT
 import com.android.launcher3.taskbar.TaskbarPinningController.Companion.PINNING_PERSISTENT
 import com.android.launcher3.taskbar.TaskbarPinningController.Companion.PINNING_TRANSIENT
 import com.android.launcher3.taskbar.Utilities.getShapedTaskbarRadius

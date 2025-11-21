@@ -19,7 +19,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.launcher3.EncryptionType.ENCRYPTED;
 import static com.android.launcher3.LauncherPrefs.nonRestorableItem;
-import static com.android.launcher3.taskbar.TaskbarManager.NAVIGATION_BAR_HINT;
+import static com.android.launcher3.taskbar.TaskbarManagerImpl.NAVIGATION_BAR_HINT;
 import static com.android.launcher3.taskbar.Utilities.getShapedTaskbarRadius;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN;
 
