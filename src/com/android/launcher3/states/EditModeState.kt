@@ -29,7 +29,7 @@ class EditModeState(id: Int) : LauncherState(id, StatsLogManager.LAUNCHER_STATE_
         private val STATE_FLAGS =
             (FLAG_MULTI_PAGE or
                 FLAG_WORKSPACE_INACCESSIBLE or
-                FLAG_DISABLE_RESTORE or
+                FLAG_DISABLE_RESTORE_EXCEPT_UI_MODE_CHANGE or
                 FLAG_WORKSPACE_ICONS_CAN_BE_DRAGGED or
                 FLAG_WORKSPACE_HAS_BACKGROUNDS or
                 FLAG_WORKSPACE_ICONS_BEING_DRAGGED)

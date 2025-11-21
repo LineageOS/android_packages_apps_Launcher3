@@ -573,7 +573,6 @@ public class TaskAnimationManager implements RecentsAnimationCallbacks.RecentsAn
             @Nullable RecentsAnimationController controller,
             @NonNull ActiveGestureLog.CompoundString reason) {
         if (controller != null) {
-            ActiveGestureProtoLogProxy.logFinishRunningRecentsAnimation(toHome, reason);
             ActiveGestureLog.CompoundString reasonString = new ActiveGestureLog.CompoundString(
                     "TaskAnimationManager.finishRunningRecentsAnimation: ")
                     .append(reason);
@@ -622,6 +621,16 @@ public class TaskAnimationManager implements RecentsAnimationCallbacks.RecentsAn
     }
 
     void onLauncherDestroyed() {
+        if (mController != null) {
+            finishRunningRecentsAnimation(
+                    /* toHome= */ false,
+                    /* forceFinish= */ true,
+                    /* forceFinishCb= */ null,
+                    mController,
+                    /* reason= */ new ActiveGestureLog.CompoundString(
+                            "TaskAnimationManager.onLauncherDestroyed"));
+            return;
+        }
         if (!mRecentsAnimationStartPending) {
             return;
         }

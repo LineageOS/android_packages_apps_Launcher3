@@ -30,8 +30,9 @@ import com.android.quickstep.fallback.RecentsState;
  */
 public class OverviewModalTaskState extends OverviewState {
 
-    private static final int STATE_FLAGS =
-            FLAG_DISABLE_RESTORE | FLAG_RECENTS_VIEW_VISIBLE | FLAG_WORKSPACE_INACCESSIBLE;
+    private static final int STATE_FLAGS = FLAG_DISABLE_RESTORE_EXCEPT_UI_MODE_CHANGE
+            | FLAG_RECENTS_VIEW_VISIBLE
+            | FLAG_WORKSPACE_INACCESSIBLE;
 
     public OverviewModalTaskState(int id) {
         super(id, LAUNCHER_STATE_OVERVIEW, STATE_FLAGS);

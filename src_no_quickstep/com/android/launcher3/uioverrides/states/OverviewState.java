@@ -31,7 +31,7 @@ import com.android.launcher3.views.ScrimColors;
 public class OverviewState extends LauncherState {
 
     public OverviewState(int id) {
-        super(id, LAUNCHER_STATE_OVERVIEW, FLAG_DISABLE_RESTORE);
+        super(id, LAUNCHER_STATE_OVERVIEW, FLAG_DISABLE_RESTORE_EXCEPT_UI_MODE_CHANGE);
     }
 
     @Override
