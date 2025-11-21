@@ -275,7 +275,8 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                         mActivityContext.isTransientTaskbar()));
 
         if (enableTaskbarPinning() || enableRecentsInTaskbar()) {
-            mTaskbarDividerContainer = new TaskbarDividerContainer(context);
+            mTaskbarDividerContainer = (TaskbarDividerContainer) inflate(
+                    R.layout.taskbar_divider_button_container);
         }
 
         if (ENABLE_TASKBAR_OVERFLOW.isTrue()) {
