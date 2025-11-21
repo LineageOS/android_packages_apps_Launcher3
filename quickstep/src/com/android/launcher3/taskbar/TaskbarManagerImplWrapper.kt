@@ -45,6 +45,10 @@ class TaskbarManagerImplWrapper @Inject constructor(private val impl: TaskbarMan
         TASKBAR_UI_THREAD.execute(impl::onUserUnlocked)
     }
 
+    override fun updateTaskbarsVisibility() {
+        TASKBAR_UI_THREAD.execute { impl.updateTaskbarsVisibility() }
+    }
+
     override fun setActivity(activity: StatefulActivity<*>) {
         TASKBAR_UI_THREAD.execute {
             impl.setActivityInteractor(
