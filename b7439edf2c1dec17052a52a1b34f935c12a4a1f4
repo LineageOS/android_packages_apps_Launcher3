@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cf181da6_c140df8e",
+        "filename": "quickstep/src/com/android/launcher3/taskbar/navbutton/PhoneLandscapeNavLayoutter.kt",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 32811
+      },
+      "writtenOn": "2025-11-21T05:23:51Z",
+      "side": 1,
+      "message": "```suggestion\nimport com.android.launcher3.taskbar.TaskbarManagerImpl.NAV_BAR_INVERSE\n```",
+      "revId": "b7439edf2c1dec17052a52a1b34f935c12a4a1f4",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a898d2a0_23c61e38",
+        "filename": "quickstep/src/com/android/launcher3/taskbar/navbutton/PhonePortraitNavLayoutter.kt",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 32811
+      },
+      "writtenOn": "2025-11-21T05:23:51Z",
+      "side": 1,
+      "message": "```suggestion\nimport com.android.launcher3.taskbar.TaskbarManagerImpl.NAV_BAR_INVERSE\n```",
+      "revId": "b7439edf2c1dec17052a52a1b34f935c12a4a1f4",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "05d8a3ac_c60a750f",
+        "filename": "quickstep/src/com/android/launcher3/taskbar/navbutton/PhoneSeascapeNavLayoutter.kt",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 32811
+      },
+      "writtenOn": "2025-11-21T05:23:51Z",
+      "side": 1,
+      "message": "```suggestion\nimport com.android.launcher3.taskbar.TaskbarManagerImpl.NAV_BAR_INVERSE\n```",
+      "revId": "b7439edf2c1dec17052a52a1b34f935c12a4a1f4",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "eaf4a136_d125cc99",
+        "filename": "quickstep/src/com/android/launcher3/taskbar/navbutton/TaskbarNavLayoutter.kt",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 32811
+      },
+      "writtenOn": "2025-11-21T05:23:51Z",
+      "side": 1,
+      "message": "```suggestion\nimport com.android.launcher3.taskbar.TaskbarManagerImpl.NAV_BAR_INVERSE\n```",
+      "revId": "b7439edf2c1dec17052a52a1b34f935c12a4a1f4",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
