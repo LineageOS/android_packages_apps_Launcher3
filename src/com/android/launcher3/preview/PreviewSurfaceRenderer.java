@@ -16,7 +16,6 @@
 
 package com.android.launcher3.preview;
 
-import static android.app.WallpaperManager.FLAG_SYSTEM;
 import static android.content.res.Configuration.UI_MODE_NIGHT_NO;
 import static android.content.res.Configuration.UI_MODE_NIGHT_YES;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -29,7 +28,6 @@ import static com.android.launcher3.widget.LauncherWidgetHolder.APPWIDGET_HOST_I
 import static com.android.systemui.shared.Flags.extendibleThemeManager;
 
 import android.app.WallpaperColors;
-import android.app.WallpaperManager;
 import android.appwidget.AppWidgetHost;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -57,6 +55,7 @@ import com.android.launcher3.graphics.GridCustomizationsProxy;
 import com.android.launcher3.preview.PreviewContext.PreviewAppComponent;
 import com.android.launcher3.util.RunnableList;
 import com.android.launcher3.util.Themes;
+import com.android.launcher3.util.WallpaperColorHints;
 import com.android.launcher3.widget.LocalColorExtractor;
 
 import java.util.Objects;
@@ -324,8 +323,7 @@ public class PreviewSurfaceRenderer {
             wallpaperColorResources = localColorExtractor
                     .generateColorsOverride(mWallpaperColors);
         } else {
-            WallpaperColors wallpaperColors =
-                    WallpaperManager.getInstance(context).getWallpaperColors(FLAG_SYSTEM);
+            WallpaperColors wallpaperColors = WallpaperColorHints.get(context).getColors();
             wallpaperColorResources = wallpaperColors == null ? null
                     : localColorExtractor
                             .generateColorsOverride(wallpaperColors);
