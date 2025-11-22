@@ -24,6 +24,7 @@ import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.launcher3.Flags.FLAG_ENABLE_TASKBAR_UI_THREAD
 import com.android.launcher3.LauncherState
+import com.android.launcher3.statehandlers.DesktopVisibilityController.TaskbarDesktopModeListener
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.quickstep.SystemUiProxy
 import com.android.window.flags.Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND
@@ -39,7 +40,9 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.nullableArgumentCaptor
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -191,6 +194,43 @@ class DesktopVisibilityControllerTest {
         getInstrumentation().waitForIdleSync()
 
         assertThat(errors).isEmpty()
+    }
+
+    @EnableFlags(FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND, FLAG_ENABLE_MULTIPLE_DESKTOPS_FRONTEND)
+    fun taskbarCornerRoundingListener_isNotifiedWithCorrectDisplayId() {
+        // Arrange
+        val taskbarListener = mock<TaskbarDesktopModeListener>()
+        desktopVisibilityController.registerTaskbarDesktopModeListener(taskbarListener)
+        val desktopTaskListener = listenerCaptor.lastValue!!
+        val displayId1 = 10
+        val displayId2 = 20
+
+        // Act
+        desktopTaskListener.onTaskbarCornerRoundingUpdate(true, displayId1)
+        desktopTaskListener.onTaskbarCornerRoundingUpdate(false, displayId2)
+        getInstrumentation().waitForIdleSync()
+
+        // Assert
+        verify(taskbarListener).onTaskbarCornerRoundingUpdate(true, displayId1)
+        verify(taskbarListener).onTaskbarCornerRoundingUpdate(false, displayId2)
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND, FLAG_ENABLE_MULTIPLE_DESKTOPS_FRONTEND)
+    fun taskbarCornerRoundingListener_isNotCalledAfterUnregister() {
+        // Arrange
+        val taskbarListener = mock<TaskbarDesktopModeListener>()
+        desktopVisibilityController.registerTaskbarDesktopModeListener(taskbarListener)
+        desktopVisibilityController.unregisterTaskbarDesktopModeListener(taskbarListener)
+        val desktopTaskListener = listenerCaptor.lastValue!!
+        val displayId = 10
+
+        // Act
+        desktopTaskListener.onTaskbarCornerRoundingUpdate(true, displayId)
+        getInstrumentation().waitForIdleSync()
+
+        // Assert
+        verify(taskbarListener, never()).onTaskbarCornerRoundingUpdate(any(), any())
     }
 
     private fun connectTaskListener() {
