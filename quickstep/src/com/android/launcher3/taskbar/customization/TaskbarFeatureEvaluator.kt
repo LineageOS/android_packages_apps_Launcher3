@@ -18,7 +18,6 @@ package com.android.launcher3.taskbar.customization
 
 import android.content.Context
 import androidx.annotation.AnyThread
-import com.android.launcher3.Flags.enableRecentsInTaskbar
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.TASKBAR_PINNING
 import com.android.launcher3.LauncherPrefs.Companion.TASKBAR_PINNING_IN_DESKTOP_MODE
@@ -30,6 +29,7 @@ import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.util.DaggerSingletonObject
 import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.NavigationMode.*
+import com.android.systemui.shared.Flags.enableRecentsInTaskbar
 import javax.inject.Inject
 
 /** Evaluates all the features taskbar can have. */

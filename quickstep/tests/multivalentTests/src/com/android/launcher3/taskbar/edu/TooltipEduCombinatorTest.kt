@@ -16,6 +16,8 @@
 
 package com.android.launcher3.taskbar.edu
 
+import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
@@ -38,6 +40,7 @@ import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.util.OnboardingPrefs
+import com.android.systemui.shared.Flags.FLAG_ENABLE_RECENTS_IN_TASKBAR
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
@@ -46,13 +49,16 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
+@EnableFlags(FLAG_ENABLE_RECENTS_IN_TASKBAR)
 class TooltipEduCombinatorTest {
 
-    @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()
+    @get:Rule(order = 0) val setFlagsRule = SetFlagsRule()
 
-    @get:Rule(order = 1) val taskbarModeRule = TaskbarModeRule(context)
+    @get:Rule(order = 1) val context = TaskbarWindowSandboxContext.create()
 
-    @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
+    @get:Rule(order = 2) val taskbarModeRule = TaskbarModeRule(context)
+
+    @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
 
     @InjectController lateinit var taskbarStashController: TaskbarStashController
 
