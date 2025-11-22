@@ -1910,15 +1910,6 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         return overflowIconRect.contains(Math.round(point[0]), Math.round(point[1]));
     }
 
-    @Override
-    public void openOverflowContainer() {
-        TaskbarOverflowView overflowIcon = getTaskbarPinnedOverflowView();
-        if (overflowIcon == null) {
-            return;
-        }
-        mControllerCallbacks.openOverflownContainer(overflowIcon);
-    }
-
     public static class TaskbarLayoutParams extends FrameLayout.LayoutParams {
 
         @Nullable public CellInfo bindInfo;

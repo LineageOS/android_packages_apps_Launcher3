@@ -1464,6 +1464,18 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         return mOverflownAppsContainerController;
     }
 
+    void openOverflowContainer() {
+        TaskbarOverflowView overflowIcon = mTaskbarView.getTaskbarPinnedOverflowView();
+        if (overflowIcon == null) {
+            return;
+        }
+        mOverflownAppsContainerController.openOverflownAppsView(overflowIcon);
+    }
+
+    void closeOverflowContainer() {
+        mOverflownAppsContainerController.closeOverflownAppsView();
+    }
+
     @Override
     public void dumpLogs(String prefix, PrintWriter pw) {
         pw.println(prefix + "TaskbarViewController:");
