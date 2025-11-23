@@ -463,53 +463,69 @@ public class LauncherAccessibilityDelegate extends BaseAccessibilityDelegate<Lau
 
         final int[] coordinates = new int[2];
         final int screenId = findSpaceOnWorkspace(item, coordinates);
-        if (screenId == -1) {
+        final CellLayout layout = mContext.getWorkspace().getScreenWithId(screenId);
+        if (screenId == -1 || layout == null) {
             if (finishCallback != null) {
                 finishCallback.accept(false /*success*/);
             }
             return false;
         }
-        mContext.getStateManager().goToState(NORMAL, true, forSuccessCallback(() -> {
-            if (item instanceof WorkspaceItemFactory) {
-                WorkspaceItemInfo info = ((WorkspaceItemFactory) item).makeWorkspaceItem(mContext);
-                mContext.getModelWriter().addItemToDatabase(info,
-                        LauncherSettings.Favorites.CONTAINER_DESKTOP,
-                        screenId, coordinates[0], coordinates[1]);
+        layout.setDropPending(true);
+        @Nullable Consumer<Boolean> wrappedDropCallback = (success) -> {
+            layout.setDropPending(false);
+            if (finishCallback != null) {
+                finishCallback.accept(success);
+            }
+        };
 
-                bindItem(info, accessibility, finishCallback);
-            } else if (item instanceof PendingAddItemInfo) {
-                PendingAddItemInfo info = (PendingAddItemInfo) item;
-                if (info instanceof PendingAddWidgetInfo widgetInfo
-                        && widgetInfo.bindOptions == null) {
-                    widgetInfo.bindOptions = widgetInfo.getDefaultSizeOptions(mContext);
+        Runnable itemBindLogic = () -> {
+            switch (item) {
+                case WorkspaceItemFactory workspaceItemFactory -> {
+                    WorkspaceItemInfo info = workspaceItemFactory.makeWorkspaceItem(mContext);
+                    mContext.getModelWriter().addItemToDatabase(info,
+                            LauncherSettings.Favorites.CONTAINER_DESKTOP,
+                            screenId, coordinates[0], coordinates[1]);
+                    bindItem(info, accessibility, wrappedDropCallback);
                 }
-                Workspace<?> workspace = mContext.getWorkspace();
-                workspace.post(() -> {
-                    workspace.snapToPage(workspace.getPageIndexForScreenId(screenId));
-                    workspace.setOnPageTransitionEndCallback(() -> {
-                        mContext.addPendingItem(info, LauncherSettings.Favorites.CONTAINER_DESKTOP,
-                                screenId, coordinates, info.spanX, info.spanY);
-                        if (finishCallback != null) {
-                            finishCallback.accept(/* success= */ true);
-                        }
-                    });
-                });
-            } else if (item instanceof WorkspaceItemInfo) {
-                WorkspaceItemInfo info = ((WorkspaceItemInfo) item).clone();
-                mContext.getModelWriter().addItemToDatabase(info,
-                        LauncherSettings.Favorites.CONTAINER_DESKTOP,
-                        screenId, coordinates[0], coordinates[1]);
-                bindItem(info, accessibility, finishCallback);
-            } else if (item instanceof CollectionInfo ci) {
-                Workspace<?> workspace = mContext.getWorkspace();
-                workspace.snapToPage(workspace.getPageIndexForScreenId(screenId));
-                mContext.getModelWriter().addItemToDatabase(ci,
-                        LauncherSettings.Favorites.CONTAINER_DESKTOP, screenId, coordinates[0],
-                        coordinates[1]);
-                ci.getContents().forEach(member ->
-                        mContext.getModelWriter()
-                                .addItemToDatabase(member, ci.id, -1, -1, -1));
-                bindItem(ci, accessibility, finishCallback);
+                case PendingAddItemInfo info -> {
+                    if (info instanceof PendingAddWidgetInfo widgetInfo
+                            && widgetInfo.bindOptions == null) {
+                        widgetInfo.bindOptions = widgetInfo.getDefaultSizeOptions(mContext);
+                    }
+                    mContext.addPendingItem(info, LauncherSettings.Favorites.CONTAINER_DESKTOP,
+                            screenId, coordinates, info.spanX, info.spanY);
+                    // For PendingAddItemInfo, the wrappedDropCallback should be called directly
+                    // here as there is no subsequent bindItem call.
+                    wrappedDropCallback.accept(/* success= */ true);
+                }
+                case WorkspaceItemInfo workspaceItemInfo -> {
+                    WorkspaceItemInfo info = workspaceItemInfo.clone();
+                    mContext.getModelWriter().addItemToDatabase(info,
+                            LauncherSettings.Favorites.CONTAINER_DESKTOP,
+                            screenId, coordinates[0], coordinates[1]);
+                    bindItem(info, accessibility, wrappedDropCallback);
+                }
+                case CollectionInfo ci -> {
+                    mContext.getModelWriter().addItemToDatabase(ci,
+                            LauncherSettings.Favorites.CONTAINER_DESKTOP, screenId, coordinates[0],
+                            coordinates[1]);
+                    ci.getContents().forEach(member ->
+                            mContext.getModelWriter().addItemToDatabase(member, ci.id, -1, -1, -1));
+                    bindItem(ci, accessibility, wrappedDropCallback);
+                }
+                default -> {
+                }
+            }
+        };
+
+        mContext.getStateManager().goToState(NORMAL, true, forSuccessCallback(() -> {
+            Workspace<?> workspace = mContext.getWorkspace();
+            int pageIndex = workspace.getPageIndexForScreenId(screenId);
+            if (workspace.getCurrentPage() == pageIndex) {
+                itemBindLogic.run();
+            } else {
+                workspace.snapToPage(pageIndex);
+                workspace.setOnPageTransitionEndCallback(itemBindLogic);
             }
         }));
         return true;
