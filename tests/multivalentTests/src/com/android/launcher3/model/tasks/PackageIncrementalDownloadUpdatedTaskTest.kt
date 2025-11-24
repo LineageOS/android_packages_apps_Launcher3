@@ -108,8 +108,9 @@ class PackageIncrementalDownloadUpdatedTaskTest {
             // Only 2 items corresponding to test package got updated
             val update = workspaceUpdates[0] as UpdateEvent
             assertThat(update.items).hasSize(2)
-            assertThat(update.items[0].targetPackage).isEqualTo(TEST_PACKAGE)
-            assertThat(update.items[1].targetPackage).isEqualTo(TEST_PACKAGE)
+            val updatedItems = update.items.toList()
+            assertThat(updatedItems[0].targetPackage).isEqualTo(TEST_PACKAGE)
+            assertThat(updatedItems[1].targetPackage).isEqualTo(TEST_PACKAGE)
         }
     }
 }
