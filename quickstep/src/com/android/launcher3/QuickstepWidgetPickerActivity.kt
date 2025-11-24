@@ -27,24 +27,22 @@ import android.window.OnBackInvokedDispatcher
 import com.android.app.animation.Interpolators
 import com.android.internal.graphics.drawable.BackgroundBlurDrawable
 import com.android.launcher3.dagger.LauncherComponentProvider
+import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.WindowBlurState
 import com.android.launcher3.widgetpicker.WidgetPickerActivity
 import com.android.launcher3.widgetpicker.WidgetPickerConfig
 import com.android.launcher3.widgetpicker.WidgetPickerProgressHandler
-import com.android.quickstep.util.TISBindHelper
 import com.android.systemui.animation.back.FlingOnBackAnimationCallback
 import java.util.regex.Pattern
 
 /** An Activity that can host Launcher's widget picker for additional surfaces. */
 open class QuickstepWidgetPickerActivity : WidgetPickerActivity(), WidgetPickerProgressHandler {
-    private lateinit var tisBindHelper: TISBindHelper
     private var wallpaperManager: WallpaperManager? = null
     private var isBlurEnabled = false
     private var blurRadius: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        tisBindHelper = TISBindHelper(this) { updateServiceState(isResumed) }
         wallpaperManager = getSystemService(WallpaperManager::class.java)
         isBlurEnabled = WindowBlurState.getInstance(this).value
         blurRadius = resources.getDimensionPixelSize(R.dimen.max_depth_blur_radius_enhanced)
@@ -157,13 +155,13 @@ open class QuickstepWidgetPickerActivity : WidgetPickerActivity(), WidgetPickerP
             // user to return home in this case.
             return
         }
-        val binder = tisBindHelper.binder
-        binder?.setGestureBlockedTaskId(if (isEnabled) taskId else -1)
+        appComponent.recentsAnimationDeviceStateRepository[displayId]?.setGestureBlockingTaskId(
+            if (isEnabled) taskId else -1
+        )
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        tisBindHelper.onDestroy()
         updateServiceState(false)
     }
 

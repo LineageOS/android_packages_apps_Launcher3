@@ -119,11 +119,11 @@ import com.android.quickstep.fallback.RecentsState.Companion.OVERVIEW_SPLIT_SELE
 import com.android.quickstep.fallback.toLauncherStateOrdinal
 import com.android.quickstep.recents.di.RecentsComponent
 import com.android.quickstep.split.SplitSelectStateController
+import com.android.quickstep.sysuiconnection.TISBindHelper
 import com.android.quickstep.util.QuickstepProtoLogGroup
 import com.android.quickstep.util.RecentsAtomicAnimationFactory
 import com.android.quickstep.util.RecentsWindowProtoLogProxy
 import com.android.quickstep.util.SurfaceTransactionApplier
-import com.android.quickstep.util.TISBindHelper
 import com.android.quickstep.views.OverviewActionsView
 import com.android.quickstep.views.RecentsView
 import com.android.quickstep.views.RecentsViewContainer
@@ -899,7 +899,7 @@ constructor(
         eventCallbacks[event].remove(callback)
     }
 
-    override fun runOnBindToTouchInteractionService(r: Runnable?) {
+    override fun runOnBindToTouchInteractionService(r: Runnable) {
         tisBindHelper.runOnBindToTouchInteractionService(r)
     }
 

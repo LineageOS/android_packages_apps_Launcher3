@@ -97,9 +97,9 @@ import com.android.quickstep.fallback.RecentsDragLayer;
 import com.android.quickstep.fallback.RecentsState;
 import com.android.quickstep.recents.di.RecentsComponent;
 import com.android.quickstep.split.SplitSelectStateController;
+import com.android.quickstep.sysuiconnection.TISBindHelper;
 import com.android.quickstep.util.RecentsAtomicAnimationFactory;
 import com.android.quickstep.util.SurfaceTransactionApplier;
-import com.android.quickstep.util.TISBindHelper;
 import com.android.quickstep.views.OverviewActionsView;
 import com.android.quickstep.views.RecentsView;
 import com.android.quickstep.views.RecentsViewContainer;
@@ -190,8 +190,8 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
         mTISBindHelper = new TISBindHelper(this, this::onTISConnected);
     }
 
-    private void onTISConnected(TISBinder binder) {
-        TaskbarManager taskbarManager = binder.getTaskbarManager();
+    private void onTISConnected(TISBindHelper helper) {
+        TaskbarManager taskbarManager = helper.getTaskbarManager();
         if (taskbarManager != null) {
             taskbarManager.setActivity(this);
         }

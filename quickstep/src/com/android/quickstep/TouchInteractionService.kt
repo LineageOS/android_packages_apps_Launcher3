@@ -36,6 +36,7 @@ class TouchInteractionService : Service() {
         super.onCreate()
         component =
             appComponent.sysUIConnectionComponentBuilder.setConnectionCleaner(cleanupTask).build()
+        appComponent.sysUIConnectionTracker.setActiveComponent(component)
         handler = component.touchInteractionHandler
     }
 
@@ -45,6 +46,7 @@ class TouchInteractionService : Service() {
     override fun onBind(intent: Intent): IBinder = component.binder
 
     override fun onDestroy() {
+        appComponent.sysUIConnectionTracker.setActiveComponent(null)
         cleanupTask.complete()
         super.onDestroy()
     }

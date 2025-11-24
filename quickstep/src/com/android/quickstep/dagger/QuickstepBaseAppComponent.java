@@ -47,6 +47,7 @@ import com.android.quickstep.TopTaskTracker;
 import com.android.quickstep.input.QuickstepKeyGestureEventsManager;
 import com.android.quickstep.inputconsumers.NavHandleLongPressHandler;
 import com.android.quickstep.logging.SettingsChangeLogger;
+import com.android.quickstep.sysuiconnection.SysUIConnectionTracker;
 import com.android.quickstep.util.AsyncClockEventDelegate;
 import com.android.quickstep.util.ContextualSearchHapticManager;
 import com.android.quickstep.util.ContextualSearchStateManager;
@@ -134,4 +135,6 @@ public interface QuickstepBaseAppComponent extends LauncherBaseAppComponent {
 
     /** Builder for creating a new SysUIConnectionComponent */
     SysUIConnectionComponent.Builder getSysUIConnectionComponentBuilder();
+    /** Tracker for active SysUI connection */
+    SysUIConnectionTracker getSysUIConnectionTracker();
 }
