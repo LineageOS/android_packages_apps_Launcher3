@@ -38,12 +38,10 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Path;
-import android.graphics.Picture;
 import android.graphics.Rect;
 import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.PictureDrawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -521,16 +519,8 @@ public class DragView extends FrameLayout {
      */
     public void detachContentView(boolean reattachToPreviousParent) {
         if (mContent != null && mContentViewParent != null && mContentViewInParentViewIndex >= 0) {
-            Drawable snapshotDrawable;
-            if (Flags.fixWidgetDragRadiusLoss()) {
-                snapshotDrawable = ViewEx.captureSnapshotAsDrawable(mContent,
-                        /*debugString=*/ "DragViewDrop", mWidth, mHeight);
-            } else {
-                Picture picture = new Picture();
-                mContent.draw(picture.beginRecording(mWidth, mHeight));
-                picture.endRecording();
-                snapshotDrawable = new PictureDrawable(picture);
-            }
+            Drawable snapshotDrawable = ViewEx.captureSnapshotAsDrawable(mContent,
+                    /*debugString=*/ "DragViewDrop", mWidth, mHeight);
 
             View view = new View(mActivity.asContext());
             view.setBackground(snapshotDrawable);
