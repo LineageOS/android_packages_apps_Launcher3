@@ -1084,26 +1084,19 @@ public abstract class AbsSwipeUpHandler<
                 ? mMagneticEffectShiftValue : super.getCurrentShiftValue();
     }
 
-    @UiThread
-    @Override
-    public void updateDisplacement(float displacement) {
-        super.updateDisplacement(displacement);
-        if (!enableSwipeUpMagneticDetach() || !isGestureOngoing()) {
-            return;
-        }
-        mDistanceGestureContext.setDragOffset(mCurrentDisplacement);
-        mMagneticEffectDisplacement.setInput(mCurrentDisplacement);
-
-        mMagneticEffectShiftValue =
-                getShiftFromDisplacement(mMagneticEffectDisplacement.getOutput());
-    }
-
     /**
      * Called when the value of {@link #mCurrentShift} changes
      */
     @UiThread
     @Override
     public void onCurrentShiftUpdated() {
+        if (enableSwipeUpMagneticDetach() && isGestureOngoing()) {
+            mDistanceGestureContext.setDragOffset(mCurrentDisplacement);
+            mMagneticEffectDisplacement.setInput(mCurrentDisplacement);
+
+            mMagneticEffectShiftValue =
+                    getShiftFromDisplacement(mMagneticEffectDisplacement.getOutput());
+        }
         updateSysUiFlags(getCurrentShiftValue());
         applyScrollAndTransform();
 
