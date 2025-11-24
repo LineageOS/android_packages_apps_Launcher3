@@ -319,9 +319,10 @@ public final class LauncherInstrumentation {
         // Launcher package. As during inproc tests the tested launcher may not be selected as the
         // current launcher, choosing target package for inproc. For out-of-proc, use the installed
         // launcher package.
-        mLauncherPackage = testPackage.equals(targetPackage) || isGradleInstrumentation()
-                ? getLauncherPackageName()
-                : targetPackage;
+        mLauncherPackage =
+                (testPackage.equals(targetPackage) || isGradleInstrumentation() || !isLauncherTest)
+                        ? getLauncherPackageName()
+                        : targetPackage;
 
         String testProviderAuthority = mLauncherPackage + ".TestInfo";
         mTestProviderUri = new Uri.Builder()
