@@ -617,6 +617,8 @@ open class StatsLogManager protected constructor(@JvmField protected val mContex
             doc = "User tapped or long pressed on create new folder icon inside launcher settings."
         )
         LAUNCHER_CREATE_NEW_FOLDER_BUTTON_TAP_OR_LONGPRESS(2508),
+        @UiEvent(doc = "User attempts to swipe over the last page. Swipe left for LTR, swipe right for RTL.")
+        LAUNCHER_SWIPE_OVER_LAST_PAGE(2518),
 
         // One Grid Flags
         @UiEvent(doc = "User sets the device in Fixed Landscape")
