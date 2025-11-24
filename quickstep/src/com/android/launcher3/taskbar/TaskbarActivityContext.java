@@ -358,6 +358,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         TaskbarView taskbarView = mDragLayer.findViewById(R.id.taskbar_view);
         TaskbarScrimView taskbarScrimView = mDragLayer.findViewById(R.id.taskbar_scrim);
         NearestTouchFrame navButtonsView = mDragLayer.findViewById(R.id.navbuttons_view);
+        navButtonsView.initialize(isPrimaryDisplay);
         StashedHandleView stashedHandleView = mDragLayer.findViewById(R.id.stashed_handle);
         NudgeView nudgeView = mDragLayer.findViewById(R.id.nudge_icon);
         BubbleBarView bubbleBarView = mDragLayer.findViewById(R.id.taskbar_bubbles);
