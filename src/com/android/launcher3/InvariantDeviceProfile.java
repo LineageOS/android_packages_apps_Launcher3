@@ -1339,9 +1339,11 @@ public class InvariantDeviceProfile {
         public boolean filterByFlag(int deviceType, boolean isFixedLandscape) {
             if (deviceType == TYPE_DESKTOP) {
                 if (Flags.orientationEnabledDesktopGridSpec()) {
-                    return gridType == GRID_TYPE_DUAL_OPTIMIZED_GRID;
+                    return (gridType & GRID_TYPE_DUAL_OPTIMIZED_GRID)
+                            == GRID_TYPE_DUAL_OPTIMIZED_GRID;
                 }
-                return gridType == GRID_TYPE_LANDSCAPE_OPTIMIZED_GRID;
+                return (gridType & GRID_TYPE_LANDSCAPE_OPTIMIZED_GRID)
+                        == GRID_TYPE_LANDSCAPE_OPTIMIZED_GRID;
             }
 
             if (deviceType == TYPE_TABLET) {
