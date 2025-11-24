@@ -46,6 +46,7 @@ import com.android.launcher3.model.data.TaskItemInfo.Companion.isSameItem
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.taskbar.ItemInfoWrapper
 import com.android.launcher3.taskbar.TaskbarActivityContext
+import com.android.launcher3.taskbar.TaskbarDropTargetGhostView
 import com.android.launcher3.taskbar.TaskbarOverflowView
 import com.android.launcher3.taskbar.TaskbarPopupController
 import com.android.launcher3.taskbar.TaskbarViewCallbacks
@@ -75,12 +76,15 @@ constructor(
     private var reorderBounceScale = DEFAULT_BOUNCE_SCALE
     private val isRtl = isRtl(resources)
 
+    private var dropTargetGhostView: View? = null
+    private var indexOfChildHiddenForDrag = -1
+    private var dropSpotIndex = -1
+
     override val taskbarIconViewSize =
         dpToPx(activityContext.taskbarSpecsEvaluator.taskbarIconTouchSize, activityContext)
 
     override val taskbarIconViewPadding =
         dpToPx(activityContext.taskbarSpecsEvaluator.taskbarIconPadding, activityContext)
-
 
     val taskbarPinnedOverflowView: TaskbarOverflowView =
         TaskbarOverflowView.inflateIcon(
@@ -345,6 +349,56 @@ constructor(
         return viewCache.getView(layoutResId, activityContext, this)
     }
 
+    /** Reserves a spot for a drop event by inserting a ghost view. */
+    fun reserveDropSlot(index: Int) {
+        if (dropTargetGhostView != null && dropSpotIndex == index) {
+            return
+        }
+        // Remove old ghost and restore original item if position changed
+        releaseDropSlot()
+        dropSpotIndex = index
+
+        // If no valid drop index, just return
+        if (dropSpotIndex < 0) {
+            return
+        }
+
+        if (isOverflowViewShowing) {
+            dropSpotIndex = min(dropSpotIndex, indexOfChild(taskbarPinnedOverflowView) - 1)
+        }
+
+        if (dropTargetGhostView == null) {
+            dropTargetGhostView = TaskbarDropTargetGhostView(activityContext, taskbarIconViewSize)
+        }
+        val lp = TaskbarIconContainerLayoutParams(taskbarIconViewSize, taskbarIconViewSize)
+        lp.marginStart = itemMarginLeftRight
+        lp.marginEnd = itemMarginLeftRight
+        var insertionIndex = dropSpotIndex
+
+        if (indexOfChildHiddenForDrag != -1 && insertionIndex >= indexOfChildHiddenForDrag) {
+            insertionIndex++
+        }
+
+        addView(dropTargetGhostView, min(insertionIndex, childCount), lp)
+    }
+
+    fun updateItemViewVisibilityForDragState(itemView: View, isDragged: Boolean) {
+        val indexOfDraggedView = indexOfChild(itemView)
+        if (indexOfDraggedView < 0) {
+            indexOfChildHiddenForDrag = -1
+            return
+        }
+        indexOfChildHiddenForDrag = if (isDragged) indexOfDraggedView else -1
+        itemView.setVisibility(if (isDragged) View.GONE else View.VISIBLE)
+    }
+
+    /** Removes the ghost view and restores the original item if it was hidden. */
+    fun releaseDropSlot() {
+        dropSpotIndex = -1
+
+        dropTargetGhostView?.let { removeView(it) }
+    }
+
     class TaskbarIconContainerLayoutParams : LayoutParams {
         var bindInfo: CellInfo? = null
 
@@ -376,9 +430,17 @@ constructor(
     override fun getReorderBounceScale(): Float = reorderBounceScale
 
     override val spaceNeeded: Int
-        get() =
-            if (isEmpty()) 0
-            else (childCount * taskbarIconViewSize) + ((childCount - 1) * 2 * itemMarginLeftRight)
+        get() {
+            val visibleChildCount = getVisibleChildCount()
+            if (visibleChildCount == 0) return 0
+            return (visibleChildCount * taskbarIconViewSize) +
+                ((visibleChildCount - 1) * 2 * itemMarginLeftRight)
+        }
+
+    fun getVisibleChildCount(): Int {
+        if (isEmpty()) return 0
+        return childCount - if (indexOfChildHiddenForDrag >= 0) 1 else 0
+    }
 
     companion object {
         // effectively a no-op since we do not scale this container.
@@ -386,10 +448,7 @@ constructor(
 
         /** @return a new instance of [TaskbarIconsContainer]. */
         @JvmStatic
-        fun create(
-            context: Context,
-            itemMarginLeftRight: Int,
-        ): TaskbarIconsContainer {
+        fun create(context: Context, itemMarginLeftRight: Int): TaskbarIconsContainer {
             return TaskbarIconsContainer(context).apply {
                 this.itemMarginLeftRight = itemMarginLeftRight
                 // App icon views draw running state indicators outside of the icon view bounds, and

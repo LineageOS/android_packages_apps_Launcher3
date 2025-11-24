@@ -19,6 +19,7 @@ package com.android.launcher3.taskbar
 import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_HOVER_ENTER
 import android.view.MotionEvent.ACTION_HOVER_EXIT
+import android.widget.FrameLayout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.BubbleTextView
@@ -152,6 +153,42 @@ class TaskbarHoverToolTipControllerTest {
             iconView.dispatchGenericMotionEvent(HOVER_ENTER)
         }
         assertThat(isHoverToolTipOpen).isFalse()
+    }
+
+    @Test
+    fun onHover_withGenericViewGroup_revealsAndClosesTooltip() {
+        runOnMainSync {
+            // Create a generic ViewGroup to act as the container.
+            val container = FrameLayout(taskbarContext)
+            taskbarContext.dragLayer.addView(container)
+            // Position the container to verify position calculations.
+            container.y = 100f
+
+            // Create a view to be hovered over.
+            val hoverView = BubbleTextView(taskbarContext)
+            hoverView.text = "Test App"
+            container.addView(hoverView)
+
+            // Instantiate the controller with the generic container and hover view.
+            val controller = TaskbarHoverToolTipController(taskbarContext, container, hoverView)
+            hoverView.setOnHoverListener(controller)
+
+            // Simulate hover enter event.
+            hoverView.dispatchGenericMotionEvent(HOVER_ENTER)
+
+            // Verify that the tooltip is shown.
+            assertThat(isHoverToolTipOpen).isTrue()
+            // Also verify that autohide is suspended.
+            assertThat(autohideSuspendController.isTransientTaskbarStashingSuspended).isTrue()
+
+            // Simulate hover exit event.
+            hoverView.dispatchGenericMotionEvent(HOVER_EXIT)
+
+            // Verify that the tooltip is closed.
+            assertThat(isHoverToolTipOpen).isFalse()
+            // Also verify that autohide suspension is removed.
+            assertThat(autohideSuspendController.isTransientTaskbarStashingSuspended).isFalse()
+        }
     }
 
     companion object {

@@ -15,6 +15,7 @@
  */
 package com.android.launcher3.allapps;
 
+import static com.android.launcher3.LauncherModel.useModelRepositoryBinding;
 import static com.android.launcher3.model.data.AppInfo.COMPONENT_KEY_COMPARATOR;
 import static com.android.launcher3.model.data.AppInfo.EMPTY_ARRAY;
 
@@ -89,10 +90,12 @@ public class AllAppsStore {
     @Inject
     AllAppsStore(AppsListRepository repo, ActivityContext context) {
         mActivityContext = context;
-        context.closeOnDestroy(repo.getAppsListStateRef()
-                .forEach(context.getUiExecutor(), this::setAppsListData));
-        context.closeOnDestroy(repo.getIncrementalUpdates()
-                .forEach(context.getUiExecutor(), this::updateProgressBar));
+        if (useModelRepositoryBinding()) {
+            context.closeOnDestroy(repo.getAppsListStateRef()
+                    .forEach(context.getUiExecutor(), this::setAppsListData));
+            context.closeOnDestroy(repo.getIncrementalUpdates()
+                    .forEach(context.getUiExecutor(), this::updateProgressBar));
+        }
     }
 
     private Unit setAppsListData(AppsListData data) {

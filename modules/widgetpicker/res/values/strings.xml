@@ -85,6 +85,9 @@
      query. [CHAR_LIMIT=150] -->
     <string name="widgets_no_search_results">No widgets or shortcuts found</string>
 
+    <!-- Text shown for button to create a widget. [CHAR_LIMIT=30] -->
+    <string name="widget_create_button">Create</string>
+
     <!-- RequestPin(*) flow -->
     <!-- Button label to automatically add a widget to home screen [CHAR_LIMIT=50] -->
     <string name="widget_add_to_homescreen_button_label">Add to home screen</string>

@@ -140,6 +140,7 @@ import com.android.launcher3.uioverrides.QuickstepLauncher;
 import com.android.launcher3.util.ActivityOptionsWrapper;
 import com.android.launcher3.util.RunnableList;
 import com.android.launcher3.util.StableViewInfo;
+import com.android.launcher3.util.TaskbarAsyncAnimator;
 import com.android.launcher3.views.FloatingIconView;
 import com.android.launcher3.widget.LauncherAppWidgetHostView;
 import com.android.quickstep.LauncherBackAnimationController;
@@ -318,20 +319,43 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
     private void startCrossDisplayMoveAnimation(TransitionInfo info, SurfaceControl.Transaction t,
             IRemoteTransitionFinishedCallback finishCallback) {
         mHandler.post(() -> {
-            new CrossDisplayMoveTransition(mLauncher, APP_LAUNCH_DURATION,
-                    CLOSING_TRANSITION_DURATION_MS)
-                    .startCrossDisplayMoveAnimation(info, t, finishCallback);
+            // If launcher was destroyed between animation start and the post, don't give out a
+            // ref to that launcher, just finish the transition immediately.
+            if (mLauncher.isDestroyed()) {
+                try {
+                    finishCallback.onTransitionFinished(null /* wct */, null /* sct */);
+                } catch (RemoteException e) {
+                    // Ignore.
+                }
+            } else {
+                CrossDisplayMoveTransition.startCrossDisplayMoveAnimation(mLauncher,
+                        APP_LAUNCH_DURATION, CLOSING_TRANSITION_DURATION_MS, info, t,
+                        finishCallback);
+            }
         });
     }
 
     /**
      * A {@link RemoteTransitionStub} that handles cross display move animations.
      */
-    private class MoveDisplayChangeRunner extends RemoteTransitionStub {
+    private static class MoveDisplayChangeRunner extends RemoteTransitionStub {
+        private final java.lang.ref.WeakReference<QuickstepTransitionManager> mManagerRef;
+
+        MoveDisplayChangeRunner(QuickstepTransitionManager manager) {
+            // Ensure we don't use a strong to the manager; we don't want to extend its lifetime if
+            // the manager happens to be destroyed before the animation binder collects.
+            mManagerRef = new java.lang.ref.WeakReference<>(manager);
+        }
+
         @Override
         public void startAnimation(IBinder token, TransitionInfo info, SurfaceControl.Transaction t,
                 IRemoteTransitionFinishedCallback finishCallback) throws RemoteException {
-            startCrossDisplayMoveAnimation(info, t, finishCallback);
+            final QuickstepTransitionManager manager = mManagerRef.get();
+            if (manager != null) {
+                manager.startCrossDisplayMoveAnimation(info, t, finishCallback);
+            } else {
+                finishCallback.onTransitionFinished(null /* wct */, null /* sct */);
+            }
         }
     }
 
@@ -436,7 +460,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             return defaultAppLaunchTransition;
         }
 
-        IRemoteTransition crossDisplayMoveTransition = new MoveDisplayChangeRunner();
+        IRemoteTransition crossDisplayMoveTransition = new MoveDisplayChangeRunner(this);
         return new RemoteTransitionDelegate(
                 (info) -> {
                     if (CrossDisplayMoveTransition.isCrossDisplayMove(info)) {
@@ -1393,7 +1417,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
          * cross-display move via a remote transition.
          */
         if (com.android.window.flags.Flags.enableCrossDisplaysAppLaunchTransition()) {
-            mMoveDisplayTransition = new RemoteTransition(new MoveDisplayChangeRunner(),
+            mMoveDisplayTransition = new RemoteTransition(new MoveDisplayChangeRunner(this),
                     mLauncher.getIApplicationThread(), "QuickstepDisplayMove");
             TransitionFilter changeCheck = new TransitionFilter();
             changeCheck.mRequirements = new TransitionFilter.Requirement[]{
@@ -2084,16 +2108,28 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
 
             // Syncs the app launch animation and taskbar stash animation (if exists).
             TaskbarInteractor taskbarInteractor = mLauncher.getTaskbarInteractor();
+            TaskbarAsyncAnimator taskbarStashAnimation = null;
             if (taskbarInteractor != null) {
                 taskbarInteractor.setIgnoreInAppFlagForSync(false);
 
                 if (launcherClosing) {
-                    taskbarInteractor.createAnimToAppAndPlay(anim);
+                    // If taskbar stash animation is played on main thread (same as app launch
+                    // animation), the stash animation will be added as child of launcher's app
+                    // launch animation. Otherwise a TaskbarAsyncAnimator will be returned and
+                    // launcher (on main thread) need to explicitly start taskbar stash animation
+                    // on taskbar ui thread.
+                    taskbarStashAnimation = taskbarInteractor.createAnimToApp(anim);
                 }
             }
 
             result.setAnimation(anim, mLauncher, mOnEndCallback::executeAllAndDestroy,
                     skipFirstFrame);
+            // If app launch animation is started and TaskbarAsyncAnimator is returned (meaning
+            // taskbar stash animation will be played on TASKBAR_UI_THREAD), launcher needs to
+            // explicitly trigger taskbar stash animation from main thread.
+            if (taskbarStashAnimation != null && anim.isStarted()) {
+                taskbarStashAnimation.start();
+            }
         }
 
         @Override

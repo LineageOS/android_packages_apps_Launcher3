@@ -44,4 +44,6 @@ class ScreenshotTestWidgetsRepository(private val testData: ScreenshotTestData) 
         flowOf(testData.featuredWidgets())
 
     override suspend fun searchWidgets(query: String): List<WidgetApp> = emptyList()
+
+    override fun getCustomWidget(): PickableWidget? = null
 }

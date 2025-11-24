@@ -22,6 +22,7 @@ import android.view.View
 import com.android.launcher3.AppWidgetResizeFrame
 import com.android.launcher3.R
 import com.android.launcher3.dragndrop.LauncherDragController
+import com.android.launcher3.logging.StatsLogManager.LauncherEvent.IGNORE
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.shortcuts.DeepShortcutView
 import com.android.launcher3.views.ActivityContext
@@ -38,12 +39,12 @@ class PopupControllerForExtraHomeScreenItems<T>(
 ) : PopupController<T> where T : Context, T : ActivityContext {
     override fun show(view: View): Popup {
         val container: PopupContainer<T>
+        val activityContext: T = ActivityContext.lookupContext(view.context) as T
+        val itemInfo = view.tag as ItemInfo
         try {
             Trace.beginSection("showPopupMenu")
-            val itemInfo = view.tag as ItemInfo
-            val activityContext: ActivityContext = ActivityContext.lookupContext<T>(view.context)
             container =
-                PopupContainer.create<T>(
+                PopupContainer.create(
                     context = view.context,
                     originalView = view,
                     itemInfo = itemInfo,
@@ -53,6 +54,7 @@ class PopupControllerForExtraHomeScreenItems<T>(
             container.show()
             showResizeFrameIfNeeded(activityContext, itemInfo, view)
         } finally {
+            logEvent(activityContext.statsLogManager, itemInfo.itemType, PopupEvent.OPEN)
             Trace.endSection()
         }
         return container
@@ -88,12 +90,16 @@ class PopupControllerForExtraHomeScreenItems<T>(
 
             view.tag = systemShortcut
             view.setOnClickListener {
+                if (systemShortcut.eventId != IGNORE) {
+                    activityContext.statsLogManager
+                        .logger()
+                        .withItemInfo(itemInfo)
+                        .log(systemShortcut.eventId)
+                }
                 systemShortcut.popupAction.invoke(activityContext, itemInfo, itemView)
             }
         }
     }
 
-    override fun dismiss() {
-        TODO("Not yet implemented")
-    }
+    override fun dismiss() {}
 }

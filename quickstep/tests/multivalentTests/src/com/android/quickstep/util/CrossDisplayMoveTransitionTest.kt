@@ -53,8 +53,6 @@ class CrossDisplayMoveTransitionTest {
     private val mockTransaction = mock<SurfaceControl.Transaction>()
     private val mockFinishCallback = mock<IRemoteTransitionFinishedCallback>()
 
-    private lateinit var transition: CrossDisplayMoveTransition
-
     private inner class TransitionInfoBuilder(
         type: Int = WindowManager.TRANSIT_NONE,
         flags: Int = 0
@@ -140,11 +138,7 @@ class CrossDisplayMoveTransitionTest {
         fun build(): TransitionInfo = info
     }
 
-    @Before
-    fun setup() {
-        transition = CrossDisplayMoveTransition(mockLauncher,
-            LAUNCHING_TRANSITION_DURATION_MS, UNLAUNCHING_TRANSITION_DURATION_MS)
-    }
+
 
     @Test
     fun isCrossDisplayMove_withEmptyInfo_returnsFalse() {
@@ -161,7 +155,10 @@ class CrossDisplayMoveTransitionTest {
     @Test
     fun startAnimation_withEmptyInfo_doesNotCrash() {
         val info = TransitionInfoBuilder().build()
-        transition.startCrossDisplayMoveAnimation(
+        CrossDisplayMoveTransition.startCrossDisplayMoveAnimation(
+            mockLauncher,
+            LAUNCHING_TRANSITION_DURATION_MS,
+            UNLAUNCHING_TRANSITION_DURATION_MS,
             info,
             mockTransaction,
             mockFinishCallback
@@ -265,14 +262,14 @@ class CrossDisplayMoveTransitionTest {
         val info = builder.build()
         val moveInfo = CrossDisplayMoveTransitionInfo.create(info)!!
 
-        transition.setupInitialAnimationState(info, moveInfo, mockTransaction)
+        CrossDisplayMoveTransition.setupInitialAnimationState(info, moveInfo, mockTransaction)
 
         // Parenting and visibility should follow the following logic:
         //  - The task moving between displays should have 2 leashes, both visible, and each leash
         //    should be parented to the corresponding animation root.
         //  - The launcher should be visible.
         //
-        // If we're not in one of the above named cases, then we wan to ensure:
+        // If we're not in one of the above named cases, then we want to ensure:
         //  - Any TRANSIT_FRONT is visible.
         //  - Any TRANSIT_BACK is untouched (cross fade means we want to keep it as-is until the
         //    effect is played out)
@@ -304,7 +301,7 @@ class CrossDisplayMoveTransitionTest {
         val info = builder.build()
         val moveInfo = CrossDisplayMoveTransitionInfo.create(info)!!
 
-        transition.setupInitialAnimationState(info, moveInfo, mockTransaction)
+        CrossDisplayMoveTransition.setupInitialAnimationState(info, moveInfo, mockTransaction)
 
         // Verify reparenting
         verify(mockTransaction).reparent(moveInfo.dstTaskLeash, moveInfo.dstRoot.leash)

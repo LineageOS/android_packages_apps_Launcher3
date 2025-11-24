@@ -180,4 +180,12 @@
     <string name="nudge_a11y_close" msgid="4513937143817625570">"Жабу"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"Еске салғыш суреті"</string>
     <string name="running_app_description" msgid="1309281047289078871">"<xliff:g id="APP_TITLE">%1$s</xliff:g> <xliff:g id="RUNNING_STATE">%2$s</xliff:g>"</string>
+    <string name="ambientcue_first_time_edu_icon_description" msgid="899917821554299010">"Белгіше"</string>
+    <string name="ambientcue_first_time_edu_title" msgid="2018548669156363447">"Пайдалы ұсыныстар алыңыз"</string>
+    <string name="ambientcue_first_time_edu_text" msgid="4645551981871066999">"Экранда орындап жатқан әрекетіңізге сәйкес ақпарат пен әрекеттерді белсене ұсыну үшін жасанды интеллектіні пайдаланамыз"</string>
+    <string name="underlay_close_button_content_description" msgid="5386282762373529057">"Жабу"</string>
+    <string name="ambient_cue_expand_action" msgid="3718141784327417087">"жаю"</string>
+    <string name="ambient_cue_icon_content_description" msgid="6470228671884918485">"Қоршаған орта ұсыныстарының белгішесі"</string>
+    <string name="ambientcue_long_press_edu_text" msgid="2399090372677751105">"Ұсыныстар қалай жасалатынын көру үшін басып тұрыңыз"</string>
+    <string name="ambient_cue_autofill_action" msgid="5880997492149716614">"автотолтыру"</string>
 </resources>

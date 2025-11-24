@@ -21,11 +21,13 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 
+import static com.android.app.animation.Interpolators.FINAL_FRAME;
 import static com.android.launcher3.LauncherConstants.SavedInstanceKeys.RUNTIME_STATE;
 import static com.android.launcher3.LauncherConstants.SavedInstanceKeys.RUNTIME_STATE_RECREATE_TO_UPDATE_THEME;
 import static com.android.launcher3.QuickstepTransitionManager.RECENTS_LAUNCH_DURATION;
 import static com.android.launcher3.QuickstepTransitionManager.STATUS_BAR_TRANSITION_DURATION;
 import static com.android.launcher3.QuickstepTransitionManager.STATUS_BAR_TRANSITION_PRE_DELAY;
+import static com.android.launcher3.states.StateAnimationConfig.ANIM_OVERVIEW_FADE;
 import static com.android.launcher3.testing.shared.TestProtocol.LAUNCHER_ACTIVITY_STOPPED_MESSAGE;
 import static com.android.launcher3.testing.shared.TestProtocol.OVERVIEW_STATE_ORDINAL;
 import static com.android.launcher3.util.WallpaperThemeManager.setWallpaperDependentTheme;
@@ -79,6 +81,7 @@ import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.statemanager.StateManager.AtomicAnimationFactory;
 import com.android.launcher3.statemanager.StateManager.StateHandler;
 import com.android.launcher3.statemanager.StatefulActivity;
+import com.android.launcher3.states.StateAnimationConfig;
 import com.android.launcher3.taskbar.TaskbarInteractor;
 import com.android.launcher3.taskbar.TaskbarManager;
 import com.android.launcher3.util.ActivityOptionsWrapper;
@@ -531,9 +534,14 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
     private void startHomeInternal(@Nullable Runnable onHomeAnimationComplete) {
         RemoteAnimationFactory animationToHomeFactory =
                 (transit, appTargets, wallpaperTargets, nonAppTargets, result) -> {
+                    StateAnimationConfig config = new StateAnimationConfig();
+                    config.duration = HOME_APPEAR_DURATION;
+                    if (mFallbackRecentsView.hasTaskViews()) {
+                        config.setInterpolator(ANIM_OVERVIEW_FADE, FINAL_FRAME);
+                    }
                     AnimatorPlaybackController controller =
                             getStateManager().createAnimationToNewWorkspace(
-                                    RecentsState.BG_LAUNCHER, HOME_APPEAR_DURATION);
+                                    RecentsState.BG_LAUNCHER, config);
                     controller.dispatchOnStart();
 
                     RemoteAnimationTargets targets = new RemoteAnimationTargets(

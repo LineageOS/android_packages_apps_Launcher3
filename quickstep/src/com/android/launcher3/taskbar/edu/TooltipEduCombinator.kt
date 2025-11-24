@@ -24,7 +24,6 @@ import android.view.View
 import androidx.annotation.VisibleForTesting
 import androidx.core.net.toUri
 import androidx.core.text.HtmlCompat
-import com.android.launcher3.Flags.enableRecentsInTaskbar
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
@@ -36,6 +35,7 @@ import com.android.launcher3.taskbar.edu.TooltipsEduPage.DisplayLocation
 import com.android.launcher3.util.OnboardingPrefs.TASKBAR_EDU_TOOLTIP_STEP
 import com.android.launcher3.util.OnboardingPrefs.TASKBAR_SEEN_EDU_FLAGS
 import com.android.launcher3.views.ActivityContext
+import com.android.systemui.shared.Flags.enableRecentsInTaskbar
 import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper
 import java.io.PrintWriter
 

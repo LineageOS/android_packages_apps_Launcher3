@@ -122,7 +122,7 @@
     <string name="taskbar_edu_bubbles_animation_description" msgid="421866726938396813">"پویانمایی‌ای که نحوه ایجاد حبابک از نوار وظیفه بااستفاده از اشاره کشیدن را نشان می‌دهد"</string>
     <string name="taskbar_edu_split_screen_animation_description" msgid="371796444988899166">"پویانمایی‌ای که نحوه ایجاد صفحه دونیمه را ازطریق کشیدن و رها کردن برنامه از نوار وظیفه بالای یک برنامه باز نشان می‌دهد"</string>
     <string name="taskbar_edu_suggested_app_animation_description" msgid="3443453246478079085">"پویانمایی‌ای که نحوه دسترسی به برنامه‌های پیشنهادی در دستگاه را نشان می‌دهد"</string>
-    <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"پویانمایی‌ای که نحوه جستجو کردن یک مورد در صفحه را بااستفاده از لمس کردن و نگه داشتن دکمه کنش و انتخاب کردن ناحیه‌ای که مورد در آن است نشان می‌دهد"</string>
+    <string name="taskbar_edu_suggested_search_animation_description" msgid="1874284242557104818">"پویانمایی‌ای که نحوه جستجو کردن یک مورد در صفحه را بااستفاده از لمس کردن و نگه داشتن کلید کنش و انتخاب کردن ناحیه‌ای که مورد در آن است نشان می‌دهد"</string>
     <string name="taskbar_edu_a11y_title" msgid="5417986057866415355">"آموزش نوار وظیفه"</string>
     <string name="taskbar_edu_splitscreen" msgid="5605512479258053350">"برای استفاده هم‌زمان از ۲ برنامه، یک برنامه را به‌کنار بکشید"</string>
     <string name="taskbar_edu_bubbles" msgid="5179266214319135127">"با کشیدن به گوشه پایین، آن را شناور کنید"</string>
@@ -133,7 +133,7 @@
     <string name="taskbar_edu_pinning_title" msgid="210102174154211712">"همیشه نشان داده شدن «نوار وظیفه»"</string>
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"برای اینکه «نوار وظیفه» همیشه در پایین صفحه نشان داده شود، تقسیم‌کننده را لمس کنید و نگه دارید"</string>
     <string name="taskbar_edu_bubbles_standalone" msgid="4182824636656528043">"برای شناور کردن برنامه، آن را به گوشه بکشید"</string>
-    <string name="taskbar_search_edu_title" msgid="5569194922234364530">"برای جستجوی محتوای صفحه‌نمایش، دکمه کنش را لمس کنید و نگه دارید"</string>
+    <string name="taskbar_search_edu_title" msgid="5569194922234364530">"برای جستجوی محتوای صفحه‌نمایش، کلید کنش را لمس کنید و نگه دارید"</string>
     <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"‏این محصول از قسمت انتخاب‌شده صفحه‌نمایش شما برای جستجو استفاده می‌کند. <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>خط‌مشی رازداری<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> و <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>شرایط خدمات<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> Google اعمال می‌شود."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"بستن"</string>
     <string name="taskbar_edu_done" msgid="6880178093977704569">"تمام"</string>
@@ -180,4 +180,12 @@
     <string name="nudge_a11y_close" msgid="4513937143817625570">"بستن"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"تصویر یادآوری خودکار"</string>
     <string name="running_app_description" msgid="1309281047289078871">"‫<xliff:g id="APP_TITLE">%1$s</xliff:g> <xliff:g id="RUNNING_STATE">%2$s</xliff:g>⁠"</string>
+    <string name="ambientcue_first_time_edu_icon_description" msgid="899917821554299010">"نماد"</string>
+    <string name="ambientcue_first_time_edu_title" msgid="2018548669156363447">"دریافت کردن پیشنهادهای مفید"</string>
+    <string name="ambientcue_first_time_edu_text" msgid="4645551981871066999">"ما از هوش مصنوعی استفاده می‌کنیم تا به‌طور پیش‌نگرانه اطلاعات و کنش‌هایی مربوط به کاری که در صفحه‌نمایش انجام می‌دهید پیشنهاد دهیم"</string>
+    <string name="underlay_close_button_content_description" msgid="5386282762373529057">"بستن"</string>
+    <string name="ambient_cue_expand_action" msgid="3718141784327417087">"ازهم باز کردن"</string>
+    <string name="ambient_cue_icon_content_description" msgid="6470228671884918485">"نماد پیشنهادهای محیطی"</string>
+    <string name="ambientcue_long_press_edu_text" msgid="2399090372677751105">"لمس کنید و نگه دارید تا نحوه تولید پیشنهادها را ببینید"</string>
+    <string name="ambient_cue_autofill_action" msgid="5880997492149716614">"تکمیل خودکار"</string>
 </resources>

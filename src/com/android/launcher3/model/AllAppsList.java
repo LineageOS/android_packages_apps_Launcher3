@@ -32,6 +32,7 @@ import androidx.annotation.NonNull;
 
 import com.android.launcher3.AppFilter;
 import com.android.launcher3.Flags;
+import com.android.launcher3.automation.AutomationRepository;
 import com.android.launcher3.compat.AlphabeticIndexCompat;
 import com.android.launcher3.dagger.LauncherAppSingleton;
 import com.android.launcher3.icons.IconCache;
@@ -228,9 +229,9 @@ public class AllAppsList {
     }
 
     /**
-     * Updates the disabled flags of apps matching {@param matcher} based on {@param op}.
+     * Updates the runtime flags of apps matching {@param matcher} based on {@param op}.
      */
-    public void updateDisabledFlags(Predicate<ItemInfo> matcher, FlagOp op) {
+    public void updateRuntimeFlags(Predicate<ItemInfo> matcher, FlagOp op) {
         final List<AppInfo> data = this.data;
         for (int i = data.size() - 1; i >= 0; i--) {
             AppInfo info = data.get(i);
@@ -257,6 +258,7 @@ public class AllAppsList {
         final ApiWrapper apiWrapper = ApiWrapper.INSTANCE.get(context);
         final UserCache userCache = UserCache.getInstance(context);
         final PackageManagerHelper pmHelper = PackageManagerHelper.INSTANCE.get(context);
+        final AutomationRepository automationRepo = AutomationRepository.INSTANCE.get(context);
         final List<LauncherActivityInfo> matches = context.getSystemService(LauncherApps.class)
                 .getActivityList(packageName, user);
 
@@ -283,7 +285,7 @@ public class AllAppsList {
                     mIconCache.getTitleAndIcon(appInfo, lai, DEFAULT_LOOKUP_FLAG);
                     appInfo.sectionName = mIndex.computeSectionName(appInfo.title);
                     AppInfo.updateRuntimeFlagsForActivityTarget(appInfo, lai,
-                            userCache.getUserInfo(user), apiWrapper, pmHelper);
+                            userCache.getUserInfo(user), apiWrapper, pmHelper, automationRepo);
                 }
                 mDataChanged = true;
             }

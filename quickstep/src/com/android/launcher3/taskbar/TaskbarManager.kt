@@ -38,6 +38,8 @@ interface TaskbarManager : DisplayDecorationListener {
 
     fun onUserUnlocked()
 
+    fun updateTaskbarsVisibility()
+
     fun setActivity(activity: StatefulActivity<*>)
 
     fun setRecentsViewContainer(recentsViewContainer: RecentsViewContainer)
@@ -86,7 +88,7 @@ interface TaskbarManager : DisplayDecorationListener {
 
     fun getTaskbarInteractor(displayId: Int): TaskbarInteractor?
 
-    fun getTaskbarForDisplay(displayId: Int): TaskbarApiProxy?
+    fun getTaskbarForDisplay(displayId: Int): TaskbarActivityContext?
 
     fun createAllAppsPendingIntent(): PendingIntent
 

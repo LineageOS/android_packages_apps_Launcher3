@@ -306,6 +306,7 @@ public class TaskbarControllers {
         keyboardQuickSwitchController.onDestroy();
         taskbarStashController.onDestroy();
         taskbarHandoffController.onDestroy();
+        taskbarScrimViewController.onDestroy();
         bubbleControllers.ifPresent(controllers -> controllers.onDestroy());
         taskbarDesktopModeController.onDestroy();
         mControllersToLog = null;

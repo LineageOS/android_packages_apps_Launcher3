@@ -483,6 +483,7 @@ class TransientBubbleStashControllerTest {
     @Test
     fun stashBubbleBarImmediate() {
         // When
+        mTransientBubbleStashController.launcherState = BubbleLauncherState.IN_APP
         mTransientBubbleStashController.stashBubbleBarImmediate()
 
         // Then all property values are updated
@@ -497,6 +498,32 @@ class TransientBubbleStashControllerTest {
         verify(taskbarInsetsController).onTaskbarOrBubblebarWindowHeightOrInsetsChanged()
         // Bubble bar visibility updated
         verify(bubbleBarViewController).setHiddenForStashed(true)
+    }
+
+    @Test
+    fun stashBubbleBarImmediate_onHomeDoesNothing() {
+        // Given bubble bar is shown on home
+        whenever(bubbleBarViewController.isHiddenForNoBubbles).thenReturn(false)
+        getInstrumentation().runOnMainSync {
+            mTransientBubbleStashController.stashBubbleBarImmediate()
+            assertThat(mTransientBubbleStashController.isStashed).isTrue()
+            mTransientBubbleStashController.launcherState = BubbleLauncherState.HOME
+        }
+        advanceTimeBy(BubbleStashController.BAR_STASH_DURATION)
+        PhysicsAnimatorTestUtils.blockUntilAnimationsEnd(DynamicAnimation.TRANSLATION_Y)
+        assertThat(bubbleBarView.translationY).isEqualTo(HOTSEAT_TRANSLATION_Y)
+        assertThat(bubbleBarView.alpha).isEqualTo(1)
+        assertThat(mTransientBubbleStashController.isStashed).isFalse()
+
+        // When requesting to stash the bubble bar
+        mTransientBubbleStashController.stashBubbleBarImmediate()
+
+        // Then nothing is changed, since bubble bar should not be stashed on home
+        assertThat(mTransientBubbleStashController.isStashed).isFalse()
+        assertThat(bubbleBarView.translationY).isEqualTo(HOTSEAT_TRANSLATION_Y)
+        assertThat(bubbleBarView.alpha).isEqualTo(1)
+        // Handle is invisible
+        assertThat(stashedHandleView.alpha).isEqualTo(0)
     }
 
     @Test

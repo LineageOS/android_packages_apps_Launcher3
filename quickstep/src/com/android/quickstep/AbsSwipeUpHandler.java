@@ -68,6 +68,7 @@ import static com.android.quickstep.TaskViewUtils.extractTargetsAndStates;
 import static com.android.quickstep.util.ActiveGestureErrorDetector.GestureEvent.EXPECTING_TASK_APPEARED;
 import static com.android.quickstep.views.RecentsView.UPDATE_SYSUI_FLAGS_THRESHOLD;
 import static com.android.systemui.shared.system.ActivityManagerWrapper.CLOSE_SYSTEM_WINDOWS_REASON_RECENTS;
+import static com.android.window.flags.Flags.betterDeskDeactivationInRecentsTransition;
 import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_CAN_HAND_OFF_ANIMATION;
 
 import android.animation.Animator;
@@ -119,6 +120,7 @@ import com.android.internal.util.LatencyTracker;
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.BuildConfig;
 import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.Flags;
 import com.android.launcher3.LifecycleTracker;
 import com.android.launcher3.QuickstepTransitionManager;
 import com.android.launcher3.R;
@@ -151,7 +153,6 @@ import com.android.mechanics.spec.InputDirection;
 import com.android.mechanics.spec.MotionSpec;
 import com.android.mechanics.view.DistanceGestureContext;
 import com.android.mechanics.view.ViewMotionValue;
-import com.android.mechanics.view.ViewMotionValueListener;
 import com.android.quickstep.GestureState.GestureEndTarget;
 import com.android.quickstep.RemoteTargetGluer.RemoteTargetHandle;
 import com.android.quickstep.util.ActiveGestureErrorDetector;
@@ -415,6 +416,8 @@ public abstract class AbsSwipeUpHandler<
     private final ViewMotionValue mMagneticEffectDisplacement;
     private final MotionSpec mMagneticEffectSpec;
 
+    private float mMagneticEffectShiftValue;
+
     public AbsSwipeUpHandler(Context context,
             TaskAnimationManager taskAnimationManager, RecentsAnimationDeviceState deviceState,
             RotationTouchHelper rotationTouchHelper, GestureState gestureState,
@@ -487,12 +490,6 @@ public abstract class AbsSwipeUpHandler<
                     /* label= */ null,
                     /* stableThreshold= */ MotionValue.StableThresholdEffect);
             mMagneticEffectSpec = mMagneticEffectDisplacement.getSpec();
-            mMagneticEffectDisplacement.addUpdateCallback(new ViewMotionValueListener() {
-                @Override
-                public void onMotionValueUpdated(@NonNull ViewMotionValue motionValue) {
-                    applyScrollAndTransform();
-                }
-            });
         } else {
             mDistanceGestureContext = null;
             mMagneticEffectDisplacement = null;
@@ -626,6 +623,11 @@ public abstract class AbsSwipeUpHandler<
                 this::resetStateForAnimationCancel);
         mStateCallback.runOnceAtState(STATE_HANDLER_INVALIDATED | STATE_FINISH_WITH_NO_END,
                 this::resetStateForAnimationCancel);
+
+        mStateCallback.runOnceAtState(STATE_GESTURE_STARTED | STATE_GESTURE_COMPLETED,
+                this::finishMagneticEffect);
+        mStateCallback.runOnceAtState(STATE_GESTURE_STARTED | STATE_GESTURE_CANCELLED,
+                this::finishMagneticEffect);
     }
 
     protected boolean onActivityInit(Boolean isHomeStarted) {
@@ -820,7 +822,7 @@ public abstract class AbsSwipeUpHandler<
 
     private void setupRecentsViewUi() {
         if (mContinuingLastGesture) {
-            updateSysUiFlags(mCurrentShift.value);
+            updateSysUiFlags(getCurrentShiftValue());
             return;
         }
         notifyGestureAnimationStartToRecents();
@@ -1061,18 +1063,48 @@ public abstract class AbsSwipeUpHandler<
                 mContainerInterface.getCreatedContainer() instanceof RecentsWindowManager;
         return useHomeIntentForWindow ? getHomeIntent() : mGestureState.getOverviewIntent();
     }
+
+    private void finishMagneticEffect() {
+        mCurrentShift.updateValue(mMagneticEffectShiftValue);
+    }
+
+    private boolean isGestureOngoing() {
+        return mStateCallback.hasStates(STATE_GESTURE_STARTED)
+                && !mStateCallback.hasStates(STATE_GESTURE_COMPLETED)
+                && !mStateCallback.hasStates(STATE_GESTURE_CANCELLED);
+    }
+
+    @Override
+    protected float getCurrentShiftValue() {
+        boolean shouldUseMagneticEffectShift = enableSwipeUpMagneticDetach()
+                && isGestureOngoing()
+                && (!mIsMotionPaused || !mMagneticEffectDisplacement.isStable());
+
+        return shouldUseMagneticEffectShift
+                ? mMagneticEffectShiftValue : super.getCurrentShiftValue();
+    }
+
+    @UiThread
+    @Override
+    public void updateDisplacement(float displacement) {
+        super.updateDisplacement(displacement);
+        if (!enableSwipeUpMagneticDetach() || !isGestureOngoing()) {
+            return;
+        }
+        mDistanceGestureContext.setDragOffset(mCurrentDisplacement);
+        mMagneticEffectDisplacement.setInput(mCurrentDisplacement);
+
+        mMagneticEffectShiftValue =
+                getShiftFromDisplacement(mMagneticEffectDisplacement.getOutput());
+    }
+
     /**
      * Called when the value of {@link #mCurrentShift} changes
      */
     @UiThread
     @Override
     public void onCurrentShiftUpdated() {
-        if (enableSwipeUpMagneticDetach()) {
-            mDistanceGestureContext.setDragOffset(mCurrentDisplacement);
-            mMagneticEffectDisplacement.setInput(mCurrentDisplacement);
-        }
-
-        updateSysUiFlags(mCurrentShift.value);
+        updateSysUiFlags(getCurrentShiftValue());
         applyScrollAndTransform();
 
         updateLauncherTransitionProgress();
@@ -1086,7 +1118,7 @@ public abstract class AbsSwipeUpHandler<
         mLauncherTransitionController.setProgress(
                 // Immediately finish the grid transition
                 isKeyboardTaskFocusPending()
-                        ? 1f : Math.max(mCurrentShift.value, getScaleProgressDueToScroll()),
+                        ? 1f : Math.max(getCurrentShiftValue(), getScaleProgressDueToScroll()),
                 mDragLengthFactor);
     }
 
@@ -1489,11 +1521,16 @@ public abstract class AbsSwipeUpHandler<
 
     @VisibleForTesting
     protected GestureEndTarget getHomeTarget() {
+        // Trackpad gesture will override Home end target with Recents per UX guidelines.
+        if (Flags.enableNewTouchpadGestures() && mGestureState.isTrackpadGesture()) {
+            return RECENTS;
+        }
+        if (displaySupportsHomeGesture(mGestureState.getDisplayId())) {
+            return HOME;
+        }
         // If the user is swiping up to go home but the gesture is on a secondary display, we
         // should reject the gesture and roll back any in-progress animations.
-        return displaySupportsHomeGesture(mGestureState.getDisplayId())
-                ? HOME
-                : REJECT_HOME;
+        return REJECT_HOME;
     }
 
     private GestureEndTarget calculateEndTargetForFlingY(
@@ -1622,7 +1659,7 @@ public abstract class AbsSwipeUpHandler<
             boolean isCancel,
             boolean horizontalTouchSlopPassed) {
         long duration = MAX_SWIPE_DURATION;
-        float currentShift = mCurrentShift.value;
+        float currentShift = getCurrentShiftValue();
         final GestureEndTarget endTarget = calculateEndTarget(
                 velocityPxPerMs, endVelocityPxPerMs, isFling, isCancel, horizontalTouchSlopPassed);
         // Set the state, but don't notify until the animation completes
@@ -1708,9 +1745,9 @@ public abstract class AbsSwipeUpHandler<
                 if (!mGestureState.isHandlingAtomicEvent() || isScrolling) {
                     duration = Math.max(duration, mRecentsView.getScroller().getDuration());
                 }
-                SystemUiProxy.INSTANCE.get(mContext).updateContextualEduStats(
-                        mGestureState.isTrackpadGesture(), GestureType.OVERVIEW);
             }
+            SystemUiProxy.INSTANCE.get(mContext).updateContextualEduStats(
+                    mGestureState.isTrackpadGesture(), GestureType.OVERVIEW);
         } else if (endTarget == LAST_TASK && mRecentsView != null
                 && mRecentsView.getNextPage() != mRecentsView.getRunningTaskIndex()) {
             mRecentsView.snapToPage(mRecentsView.getRunningTaskIndex(), Math.toIntExact(duration));
@@ -1892,12 +1929,13 @@ public abstract class AbsSwipeUpHandler<
             }
         }
 
-        // This is likely unnecessary, however adding this to prevent reintroducing any forgotten
-        // bugs fixed by the previous implementation.
+
         AnimatorListenerAdapter shiftAnimationListener = new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
                 super.onAnimationStart(animation);
+                // This is likely unnecessary, however adding this to prevent reintroducing any
+                // forgotten bugs fixed by the previous implementation.
                 mAnimationCanceled = false;
             }
         };
@@ -2387,7 +2425,7 @@ public abstract class AbsSwipeUpHandler<
 
     private void setupWindowAnimationToHome(RectFSpringAnim[] anims) {
         anims[0].addOnUpdateListener((r, p) -> {
-            updateSysUiFlags(Math.max(p, mCurrentShift.value));
+            updateSysUiFlags(Math.max(p, getCurrentShiftValue()));
         });
         anims[0].addAnimatorListener(getWindowAnimationToHomeListener());
         if (mRecentsAnimationTargets != null) {
@@ -2559,7 +2597,7 @@ public abstract class AbsSwipeUpHandler<
         if (mLauncherTransitionController != null) {
             // End the animation, but stay at the same visual progress.
             mLauncherTransitionController.getNormalController().dispatchSetInterpolator(
-                    t -> Utilities.boundToRange(mCurrentShift.value, 0, 1));
+                    t -> Utilities.boundToRange(getCurrentShiftValue(), 0, 1));
             mLauncherTransitionController.getNormalController().getAnimationPlayer().end();
             mLauncherTransitionController = null;
         }
@@ -2738,7 +2776,9 @@ public abstract class AbsSwipeUpHandler<
         });
         mTaskAnimationManager.enableLiveTileRestartListener();
 
-        SystemUiProxy.INSTANCE.get(mContext).onOverviewShown(false, TAG);
+        if (!betterDeskDeactivationInRecentsTransition()) {
+            SystemUiProxy.INSTANCE.get(mContext).onOverviewShown(false, TAG);
+        }
         doLogGesture(RECENTS, mRecentsView.getCurrentPageTaskView());
         reset();
     }
@@ -3169,16 +3209,7 @@ public abstract class AbsSwipeUpHandler<
         boolean notSwipingToHome = mRecentsAnimationTargets != null
                 && mGestureState.getEndTarget() != HOME;
         boolean setRecentsScroll = shouldLinkRecentsViewScroll() && mRecentsView != null;
-        boolean shouldUseMagneticEffectShift = enableSwipeUpMagneticDetach()
-                && mStateCallback.hasStates(STATE_GESTURE_STARTED)
-                && !mStateCallback.hasStates(STATE_GESTURE_COMPLETED)
-                && !mStateCallback.hasStates(STATE_GESTURE_CANCELLED)
-                && (!mIsMotionPaused || !mMagneticEffectDisplacement.isStable());
-        float progress = Math.max(
-                shouldUseMagneticEffectShift
-                        ? getShiftFromDisplacement(mMagneticEffectDisplacement.getOutput())
-                        : mCurrentShift.value,
-                getScaleProgressDueToScroll());
+        float progress = Math.max(getCurrentShiftValue(), getScaleProgressDueToScroll());
 
         int scrollOffset = setRecentsScroll ? mRecentsView.getScrollOffset() : 0;
         if (!mStartMovingTasks && (progress > 0 || scrollOffset != 0)) {

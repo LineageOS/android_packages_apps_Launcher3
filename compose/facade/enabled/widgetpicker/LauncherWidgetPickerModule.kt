@@ -25,16 +25,16 @@ import com.android.launcher3.widgetpicker.data.repository.WidgetsRepository
 import com.android.launcher3.widgetpicker.datasource.ConfigResourceFeaturedWidgetsDataSource
 import com.android.launcher3.widgetpicker.datasource.FeaturedWidgetsDataSource
 import com.android.launcher3.widgetpicker.datasource.InMemoryWidgetSearchAlgorithm
+import com.android.launcher3.widgetpicker.datasource.WidgetCreatorAppPackageProvider
+import com.android.launcher3.widgetpicker.datasource.WidgetCreatorAppPackageProviderImpl
 import com.android.launcher3.widgetpicker.datasource.WidgetsSearchAlgorithm
-import com.android.launcher3.widgetpicker.repository.WidgetsRepositoryImpl
 import com.android.launcher3.widgetpicker.repository.WidgetAppIconsRepositoryImpl
 import com.android.launcher3.widgetpicker.repository.WidgetUsersRepositoryImpl
+import com.android.launcher3.widgetpicker.repository.WidgetsRepositoryImpl
 import dagger.Binds
 import dagger.Module
 
-/**
- * A module that installs widget picker for launcher.
- */
+/** A module that installs widget picker for launcher. */
 @Module(subcomponents = [WidgetPickerComponent::class])
 interface LauncherWidgetPickerModule {
     @Binds
@@ -42,11 +42,9 @@ interface LauncherWidgetPickerModule {
         impl: WidgetPickerComposeWrapperImpl
     ): WidgetPickerComposeWrapper
 
-    @Binds
-    fun bindWidgetUsersRepository(impl: WidgetUsersRepositoryImpl): WidgetUsersRepository
+    @Binds fun bindWidgetUsersRepository(impl: WidgetUsersRepositoryImpl): WidgetUsersRepository
 
-    @Binds
-    fun bindWidgetsRepository(impl: WidgetsRepositoryImpl): WidgetsRepository
+    @Binds fun bindWidgetsRepository(impl: WidgetsRepositoryImpl): WidgetsRepository
 
     @Binds
     fun bindWidgetAppIconsRepository(impl: WidgetAppIconsRepositoryImpl): WidgetAppIconsRepository
@@ -57,7 +55,10 @@ interface LauncherWidgetPickerModule {
     ): FeaturedWidgetsDataSource
 
     @Binds
-    fun bindWidgetsSearchAlgorithm(
-        impl: InMemoryWidgetSearchAlgorithm
-    ): WidgetsSearchAlgorithm
+    fun bindWidgetsSearchAlgorithm(impl: InMemoryWidgetSearchAlgorithm): WidgetsSearchAlgorithm
+
+    @Binds
+    fun bindWidgetCreatorAppPackageProvider(
+        impl: WidgetCreatorAppPackageProviderImpl
+    ): WidgetCreatorAppPackageProvider
 }

@@ -2460,16 +2460,21 @@ public class Launcher extends StatefulActivity<LauncherState>
         mBackPressedHandlers.remove(callback);
     }
 
-    private void updateDisallowBack() {
+    protected boolean shouldDisableBackGesture() {
+        boolean isSplitSelectionEnabled = isSplitSelectionActive();
+        View topOpenFloatingView = AbstractFloatingView.getTopOpenView(this);
+
+        return getStateManager().getState() == NORMAL
+                && (topOpenFloatingView == null || topOpenFloatingView instanceof ListenerView)
+                && !isSplitSelectionEnabled;
+    }
+
+    public void updateDisallowBack() {
         LauncherRootView rv = getRootView();
-        if (rv != null) {
-            boolean isSplitSelectionEnabled = isSplitSelectionActive();
-            View topOpenFloatingView = AbstractFloatingView.getTopOpenView(this);
-            boolean disableBack = getStateManager().getState() == NORMAL
-                    && (topOpenFloatingView == null || topOpenFloatingView instanceof ListenerView)
-                    && !isSplitSelectionEnabled;
-            rv.setDisallowBackGesture(disableBack);
+        if (rv == null) {
+            return;
         }
+        rv.setDisallowBackGesture(shouldDisableBackGesture());
     }
 
     /** To be overridden by subclasses */

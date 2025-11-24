@@ -20,7 +20,6 @@ import android.graphics.Color
 import androidx.annotation.FloatRange
 import com.android.app.animation.Interpolators
 import com.android.launcher3.DeviceProfile
-import com.android.launcher3.Flags
 import com.android.launcher3.LauncherState
 import com.android.launcher3.LauncherState.FLAG_CLOSE_POPUPS
 import com.android.launcher3.R
@@ -98,8 +97,7 @@ open class RecentsState(@JvmField val ordinal: Int, private val mFlags: Int) :
 
     override fun showTaskThumbnailSplash() = hasFlag(FLAG_TASK_THUMBNAIL_SPLASH)
 
-    override fun showExplodedDesktopView() =
-        hasFlag(FLAG_SHOW_EXPLODED_DESKTOP_VIEW) && Flags.enableDesktopExplodedView()
+    override fun isInOverview() = hasFlag(FLAG_IS_IN_OVERVIEW)
 
     /** True if the state has overview panel visible. */
     fun isRecentsViewVisible() = hasFlag(FLAG_RECENTS_VIEW_VISIBLE)
@@ -232,7 +230,7 @@ open class RecentsState(@JvmField val ordinal: Int, private val mFlags: Int) :
         private val FLAG_RECENTS_VIEW_VISIBLE = BaseState.getFlag(7)
         private val FLAG_TASK_THUMBNAIL_SPLASH = BaseState.getFlag(8)
         private val FLAG_ADD_DESK_BUTTON = BaseState.getFlag(9)
-        private val FLAG_SHOW_EXPLODED_DESKTOP_VIEW = BaseState.getFlag(10)
+        private val FLAG_IS_IN_OVERVIEW = BaseState.getFlag(10)
 
         private const val PREDICTIVE_BACK_DURATION = 1000L
         private const val PREDICTIVE_BACK_MAX_RECENTS_SCALE_LAUNCH = 1.1f
@@ -262,7 +260,7 @@ open class RecentsState(@JvmField val ordinal: Int, private val mFlags: Int) :
                     FLAG_LIVE_TILE or
                     FLAG_RECENTS_VIEW_VISIBLE or
                     FLAG_ADD_DESK_BUTTON or
-                    FLAG_SHOW_EXPLODED_DESKTOP_VIEW),
+                    FLAG_IS_IN_OVERVIEW),
             )
         @JvmField
         val MODAL_TASK: RecentsState =
@@ -275,7 +273,7 @@ open class RecentsState(@JvmField val ordinal: Int, private val mFlags: Int) :
                     FLAG_SCRIM or
                     FLAG_LIVE_TILE or
                     FLAG_RECENTS_VIEW_VISIBLE or
-                    FLAG_SHOW_EXPLODED_DESKTOP_VIEW),
+                    FLAG_IS_IN_OVERVIEW),
             )
         @JvmField
         val BACKGROUND_APP: RecentsState =
@@ -298,7 +296,7 @@ open class RecentsState(@JvmField val ordinal: Int, private val mFlags: Int) :
                     FLAG_RECENTS_VIEW_VISIBLE or
                     FLAG_CLOSE_POPUPS or
                     FLAG_DISABLE_RESTORE or
-                    FLAG_SHOW_EXPLODED_DESKTOP_VIEW),
+                    FLAG_IS_IN_OVERVIEW),
             )
 
         /** Returns the corresponding RecentsState from ordinal provided */

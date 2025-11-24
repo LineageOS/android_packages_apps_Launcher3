@@ -163,7 +163,7 @@
     <string name="quick_switch_task_with_position_in_parent" msgid="4968670948331508951">"<xliff:g id="TASK_DESCRIPTION">%1$s</xliff:g>, <xliff:g id="TOTAL_TASKS">%3$d</xliff:g>개 중 <xliff:g id="INDEX_IN_PARENT">%2$d</xliff:g>번째 항목"</string>
     <string name="quick_switch_scroll_arrow_left" msgid="6527033155534184309">"왼쪽으로 스크롤"</string>
     <string name="quick_switch_scroll_arrow_right" msgid="7319779291086916348">"오른쪽으로 스크롤"</string>
-    <string name="bubble_bar_bubble_fallback_description" msgid="7811684548953452009">"풍선"</string>
+    <string name="bubble_bar_bubble_fallback_description" msgid="7811684548953452009">"대화창"</string>
     <string name="bubble_bar_overflow_description" msgid="8617628132733151708">"더보기"</string>
     <string name="bubble_bar_bubble_description" msgid="1882466152448446446">"<xliff:g id="APP_NAME">%2$s</xliff:g>의 <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_bar_description_multiple_bubbles" msgid="3922207715357143648">"<xliff:g id="BUBBLE_BAR_BUBBLE_DESCRIPTION">%1$s</xliff:g> 외 <xliff:g id="BUBBLE_COUNT">%2$d</xliff:g>개"</string>
@@ -180,4 +180,12 @@
     <string name="nudge_a11y_close" msgid="4513937143817625570">"닫기"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"이미지를 조금씩 이동"</string>
     <string name="running_app_description" msgid="1309281047289078871">"<xliff:g id="APP_TITLE">%1$s</xliff:g> <xliff:g id="RUNNING_STATE">%2$s</xliff:g>"</string>
+    <string name="ambientcue_first_time_edu_icon_description" msgid="899917821554299010">"아이콘"</string>
+    <string name="ambientcue_first_time_edu_title" msgid="2018548669156363447">"유용한 추천 받기"</string>
+    <string name="ambientcue_first_time_edu_text" msgid="4645551981871066999">"Google은 AI를 활용하여 사용자가 화면에서 수행하는 작업과 관련된 정보 및 작업을 사전에 제안합니다."</string>
+    <string name="underlay_close_button_content_description" msgid="5386282762373529057">"닫기"</string>
+    <string name="ambient_cue_expand_action" msgid="3718141784327417087">"펼치기"</string>
+    <string name="ambient_cue_icon_content_description" msgid="6470228671884918485">"대기 모드 추천 아이콘"</string>
+    <string name="ambientcue_long_press_edu_text" msgid="2399090372677751105">"길게 터치하여 추천이 어떻게 생성되는지 확인하세요."</string>
+    <string name="ambient_cue_autofill_action" msgid="5880997492149716614">"자동 완성"</string>
 </resources>

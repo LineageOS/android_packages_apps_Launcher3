@@ -75,6 +75,7 @@ open class PopupContainer<T>(
             iconViewController?.getFloatingViewTextAlpha()?.value = 1f
             iconViewController?.setForceHideDot(false)
         }
+        logEvent(mActivityContext.statsLogManager, itemInfo.itemType, PopupEvent.CLOSE)
         Trace.endAsyncSection("dismissPopupMenu", hashCode())
     }
 

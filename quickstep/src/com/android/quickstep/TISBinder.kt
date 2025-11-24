@@ -24,6 +24,7 @@ import android.os.RemoteException
 import android.util.Log
 import android.view.Display
 import androidx.annotation.BinderThread
+import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import com.android.app.displaylib.PerDisplayRepository
 import com.android.launcher3.Launcher
@@ -99,7 +100,11 @@ internal constructor(
     }
 
     init {
-        cleanupTasks.addTask(uiExecutor) { state = null }
+        cleanupTasks.addTask(uiExecutor) {
+            // Perform unbind first as the remote-call for unbind is async and may not come before destroy()
+            performUnbindOnUIThread()
+            state = null
+        }
     }
 
     @BinderThread
@@ -331,19 +336,23 @@ internal constructor(
 
     override fun onUnbind(reply: IRemoteCallback) =
         uiExecutor.execute {
-            // Run everything in the same main thread block to ensure the cleanup happens before
-            // sending the reply.
-            withState {
-                taskbarManager.destroy()
-                quickstepKeyGestureEventsHandler.onDestroy()
-            }
-
+            performUnbindOnUIThread()
             try {
                 reply.sendResult(null)
             } catch (e: RemoteException) {
                 Log.w(TAG, "onUnbind: Failed to reply to LauncherProxyService", e)
             }
         }
+
+    @UiThread
+    private fun performUnbindOnUIThread() {
+        // Run everything in the same main thread block to ensure the cleanup happens before
+        // sending the reply.
+        withState {
+            taskbarManager.destroy()
+            quickstepKeyGestureEventsHandler.onDestroy()
+        }
+    }
 
     override fun onActionCornerActivated(action: Int, displayId: Int) =
         uiExecutor.execute { withState { actionCornerHandler?.handleAction(action, displayId) } }

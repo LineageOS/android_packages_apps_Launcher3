@@ -17,12 +17,12 @@
 package com.android.launcher3.taskbar.handoff
 
 import android.companion.Flags
-import android.companion.datatransfer.continuity.RemoteTask
 import android.companion.datatransfer.continuity.TaskContinuityManager
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.platform.app.InstrumentationRegistry
+import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.util.LauncherMultivalentJUnit
 import org.junit.Rule
 import org.junit.Test
@@ -50,7 +50,7 @@ class HandoffSuggestionLauncherTest {
         verify(mockTaskContinuityManager)
             .requestHandoff(
                 suggestion.associationId,
-                suggestion.remoteTask.taskId,
+                suggestion.taskId,
                 context.mainExecutor,
                 launcher,
             )
@@ -64,14 +64,13 @@ class HandoffSuggestionLauncherTest {
         verify(mockTaskContinuityManager, never())
             .requestHandoff(
                 suggestion.associationId,
-                suggestion.remoteTask.taskId,
+                suggestion.taskId,
                 context.mainExecutor,
                 launcher,
             )
     }
 
     private fun createSuggestion(): HandoffSuggestion {
-        val remoteTask = RemoteTask.Builder(1, 1).build()
-        return HandoffSuggestion(remoteTask)
+        return HandoffSuggestion(1, 1, AppInfo())
     }
 }

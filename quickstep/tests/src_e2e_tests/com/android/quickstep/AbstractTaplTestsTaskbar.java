@@ -17,7 +17,7 @@ package com.android.quickstep;
 
 import static androidx.test.InstrumentationRegistry.getInstrumentation;
 
-import static com.android.launcher3.Flags.enableRecentsInTaskbar;
+import static com.android.systemui.shared.Flags.enableRecentsInTaskbar;
 
 import static junit.framework.TestCase.assertEquals;
 

@@ -16,48 +16,22 @@
 
 package com.android.launcher3.taskbar.handoff
 
-import android.companion.datatransfer.continuity.RemoteTask
-import android.graphics.drawable.Drawable
+import com.android.launcher3.model.data.ItemInfoWithIcon
+import java.util.Objects
 
 /** A suggestion for a remote application that can be handed off to this device. */
-class HandoffSuggestion {
-
-    data class Metadata(val label: String?, val icon: Drawable)
-
-    var remoteTask: RemoteTask
-        private set
-
-    /** The device ID of the remote device that this suggestion is for. */
-    val associationId: Int
-        get() = remoteTask.companionDeviceAssociationId
-
-    /** Metadata for this suggestion. This is `null` until it is loaded. */
-    var metadata: Metadata? = null
-
-    constructor(remoteTask: RemoteTask) {
-        this.remoteTask = remoteTask
-    }
-
-    /**
-     * Updates the suggested application with the given remote task.
-     *
-     * If the remote task is the same as the previous remote task, this is a no-op. If the
-     * application has changed, the associated metadata is cleared to indicate that a reload is
-     * needed.
-     */
-    fun updateRemoteTask(remoteTask: RemoteTask) {
-        if (remoteTask.taskId != this.remoteTask.taskId) {
-            this.remoteTask = remoteTask
-            this.metadata = null
-        }
-    }
+class HandoffSuggestion(
+    val associationId: Int,
+    val taskId: Int,
+    val itemInfoWithIcon: ItemInfoWithIcon,
+) {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is HandoffSuggestion) return false
 
-        return associationId == other.associationId
+        return associationId == other.associationId && taskId == other.taskId
     }
 
-    override fun hashCode(): Int = associationId
+    override fun hashCode(): Int = Objects.hash(associationId, taskId)
 }

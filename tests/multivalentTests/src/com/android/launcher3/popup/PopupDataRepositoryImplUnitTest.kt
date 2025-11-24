@@ -35,6 +35,7 @@ import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_QSB
 import com.android.launcher3.R
 import com.android.launcher3.homescreenfiles.HomeScreenFile
 import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils
+import com.android.launcher3.logging.StatsLogManager.LauncherEvent
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceData.ImmutableWorkspaceData
 import com.android.launcher3.model.data.WorkspaceItemInfo
@@ -245,6 +246,7 @@ class PopupDataRepositoryImplUnitTest {
             assert(category == PopupCategory.SYSTEM_SHORTCUT_FIXED)
             assert(iconResId == R.drawable.ic_home_screen_files_context_menu_open_in_app)
             assert(labelResId == R.string.home_screen_files_context_menu_open_in_app_label)
+            assert(eventId == LauncherEvent.LAUNCHER_HOME_SCREEN_FILES_OPEN_VIA_CONTEXT_MENU)
             popupAction.invoke(activityContext, item, view)
             verify(activityContext, times(1)).startActivitySafely(view, item.intent, item)
         }
@@ -258,6 +260,7 @@ class PopupDataRepositoryImplUnitTest {
                     labelResId == R.string.home_screen_files_context_menu_delete_permanently_label
                 )
             }
+            assert(eventId == LauncherEvent.LAUNCHER_HOME_SCREEN_FILES_DELETE_VIA_CONTEXT_MENU)
 
             val dropTargetHandler = mock<DropTargetHandler>()
             whenever(activityContext.dragLayer).thenReturn(mock<BaseDragLayer<*>>())

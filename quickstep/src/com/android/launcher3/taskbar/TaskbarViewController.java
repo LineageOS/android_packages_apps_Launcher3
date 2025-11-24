@@ -554,6 +554,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
      * Applies scale properties for the taskbar icons
      */
     private void updateTaskbarIconsScale() {
+        if (mActivity.isThreeButtonNav()) return;
         float scale = mTaskbarIconScaleForPinning.value;
         View[] iconViews = mTaskbarView.getIconViews();
 
@@ -587,6 +588,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
     }
 
     void updateTaskbarIconTranslationXForPinning(boolean updateShiftXForBubbleBar) {
+        if (mActivity.isThreeButtonNav()) return;
         View[] iconViews = mTaskbarView.getIconViews();
         float scale = mTaskbarIconTranslationXForPinning.value;
         float transientTaskbarAllAppsOffset = mActivity.getResources().getDimension(
@@ -738,7 +740,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
      * Computes translation y for taskbar pinning.
      */
     private float getTaskbarIconTranslationYForPinningValue() {
-        if (mControllers.getSharedState() == null) return 0f;
+        if (mControllers.getSharedState() == null || mActivity.isThreeButtonNav()) return 0f;
 
         float scale = mTaskbarIconTranslationYForPinning.value;
         float taskbarIconTranslationYForPinningValue;
@@ -1460,6 +1462,18 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
 
     OverflownAppsContainerController getOverflownAppsContainerController() {
         return mOverflownAppsContainerController;
+    }
+
+    void openOverflowContainer() {
+        TaskbarOverflowView overflowIcon = mTaskbarView.getTaskbarPinnedOverflowView();
+        if (overflowIcon == null) {
+            return;
+        }
+        mOverflownAppsContainerController.openOverflownAppsView(overflowIcon);
+    }
+
+    void closeOverflowContainer() {
+        mOverflownAppsContainerController.closeOverflownAppsView();
     }
 
     @Override

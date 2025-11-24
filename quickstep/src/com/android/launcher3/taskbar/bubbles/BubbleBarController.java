@@ -515,6 +515,9 @@ public class BubbleBarController {
         }
         mBubbleStashedHandleViewController.ifPresent(
                 controller -> controller.setHiddenForBubbles(mBubbles.isEmpty()));
+        if (update.initialState && !mBubbles.isEmpty()) {
+            mBubbleBarViewController.onInitialBubblesAdded();
+        }
 
         if (mBubbles.isEmpty()) {
             // all bubbles were removed. clear the selected bubble

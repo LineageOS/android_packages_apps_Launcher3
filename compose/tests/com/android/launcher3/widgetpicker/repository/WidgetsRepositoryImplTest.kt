@@ -20,22 +20,28 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.appwidget.AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN
 import android.content.ComponentName
+import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
 import android.content.pm.LauncherActivityInfo
 import android.content.pm.LauncherApps
 import android.content.pm.LauncherApps.PinItemRequest
+import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import android.content.pm.ShortcutInfo
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.os.UserHandle
+import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.SetFlagsRule
 import android.widget.RemoteViews
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn
 import com.android.launcher3.AppFilter
+import com.android.launcher3.Flags
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherAppState
 import com.android.launcher3.R
@@ -57,6 +63,9 @@ import com.android.launcher3.widgetpicker.data.repository.WidgetsRepository
 import com.android.launcher3.widgetpicker.data.repository.WidgetsRepository.InitializationOptions
 import com.android.launcher3.widgetpicker.datasource.FeaturedWidgetsDataSource
 import com.android.launcher3.widgetpicker.datasource.InMemoryWidgetSearchAlgorithm
+import com.android.launcher3.widgetpicker.datasource.WidgetCreatorAppPackageProvider
+import com.android.launcher3.widgetpicker.datasource.WidgetCreatorAppPackageProviderImpl
+import com.android.launcher3.widgetpicker.datasource.WidgetCreatorAppPackageProviderImpl.Companion.WIDGET_CREATE_ACTION
 import com.android.launcher3.widgetpicker.shared.model.PickableWidget
 import com.android.launcher3.widgetpicker.shared.model.WidgetApp
 import com.android.launcher3.widgetpicker.shared.model.WidgetAppId
@@ -76,10 +85,12 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
@@ -89,7 +100,9 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidJUnit4::class)
 @MockUser(userType = UserIconInfo.TYPE_MAIN)
 @OptIn(ExperimentalCoroutinesApi::class)
+@EnableFlags(Flags.FLAG_SHOW_CREATE_WIDGET_BTN_IN_PICKER)
 class WidgetsRepositoryImplTest {
+    @get:Rule val setFlagsRule = SetFlagsRule()
     @get:Rule val mockitoRule: MockitoRule = MockitoJUnit.rule()
 
     @get:Rule val context = SandboxApplication()
@@ -119,11 +132,14 @@ class WidgetsRepositoryImplTest {
     private lateinit var launcherApps: LauncherApps
     private lateinit var generatedPreview: RemoteViews
 
+    private lateinit var mWidgetCreatorAppPackageProvider: WidgetCreatorAppPackageProvider
+
     private lateinit var underTest: WidgetsRepository
 
     @Before
     fun setup() {
         idp = InvariantDeviceProfile.INSTANCE[uiContext]
+        mWidgetCreatorAppPackageProvider = WidgetCreatorAppPackageProviderImpl(context)
 
         underTest =
             WidgetsRepositoryImpl(
@@ -133,6 +149,7 @@ class WidgetsRepositoryImplTest {
                 featuredWidgetsDataSource = FakeFeaturedDataSource,
                 searchAlgorithm = InMemoryWidgetSearchAlgorithm(testDispatcher),
                 backgroundContext = testDispatcher,
+                widgetCreatorAppPackageProvider = mWidgetCreatorAppPackageProvider,
             )
 
         generatedPreview = RemoteViews(context.packageName, GENERATED_PREVIEW_LAYOUT_ID)
@@ -383,6 +400,53 @@ class WidgetsRepositoryImplTest {
         }
 
     @Test
+    fun getCustomWidget_returnsPickableWidget() =
+        testScope.runTest {
+            context.packageManager.mockWidgetCreatorActivity(pkg = APP_1_PACKAGE_NAME)
+            underTest.initialize()
+            TestUtil.runOnExecutorSync(Executors.MODEL_EXECUTOR) {}
+
+            val result = underTest.getCustomWidget()
+
+            assertThat(result).isNotNull()
+            assertThat(result?.id).isEqualTo(WidgetId(App1Widget1ProviderName, user))
+        }
+
+    @Test
+    fun getCustomWidget_noWidgetInCreatorApp_returnsNull() =
+        testScope.runTest {
+            context.packageManager.mockWidgetCreatorActivity(pkg = "com.unknown")
+            underTest.initialize()
+            TestUtil.runOnExecutorSync(Executors.MODEL_EXECUTOR) {}
+
+            val result = underTest.getCustomWidget()
+
+            assertThat(result).isNull()
+        }
+
+    @Test
+    fun getCustomWidget_noMatchingActivity_returnsNull() =
+        testScope.runTest {
+            context.packageManager.mockWidgetCreatorActivity(pkg = null)
+            underTest.initialize()
+            TestUtil.runOnExecutorSync(Executors.MODEL_EXECUTOR) {}
+
+            val result = underTest.getCustomWidget()
+
+            assertThat(result).isNull()
+        }
+
+    @Test
+    fun getCustomWidget_noWidgetsInitialized_returnsNull() =
+        testScope.runTest {
+            TestUtil.runOnExecutorSync(Executors.MODEL_EXECUTOR) {}
+
+            val result = underTest.getCustomWidget()
+
+            assertThat(result).isNull()
+        }
+
+    @Test
     fun getWidgetPreview_widgetInfoNotAvailable_returnsPlaceholder() =
         testScope.runTest {
             underTest.initialize()
@@ -502,6 +566,7 @@ class WidgetsRepositoryImplTest {
         val App1Widget1ProviderInfo: AppWidgetProviderInfo =
             WidgetUtils.createAppWidgetProviderInfo(App1Widget1ProviderName).apply {
                 previewLayout = PREVIEW_LAYOUT_ID
+                configure = ComponentName.createRelative(APP_1_PACKAGE_NAME, "ConfigActivity")
             }
 
         val App1Shortcut1Name = ComponentName(APP_1_PACKAGE_NAME, SHORTCUT_1B_NAME)
@@ -533,5 +598,25 @@ class WidgetsRepositoryImplTest {
                     eligibleApps = emptyList()
                 }
             }
+    }
+
+    private fun PackageManager.mockWidgetCreatorActivity(pkg: String?) {
+        val resolveInfo =
+            pkg?.let {
+                ResolveInfo().apply {
+                    activityInfo =
+                        ActivityInfo().apply {
+                            packageName = pkg
+                            name = "ConfigActivity"
+                        }
+                }
+            } ?: return
+
+        doReturn(listOf(resolveInfo))
+            .whenever(this)
+            .queryIntentActivities(
+                argThat<Intent> { action == WIDGET_CREATE_ACTION },
+                ArgumentMatchers.eq(PackageManager.MATCH_SYSTEM_ONLY),
+            )
     }
 }

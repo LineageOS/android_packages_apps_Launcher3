@@ -132,7 +132,7 @@ public class BubbleBarViewController {
                     v.getBoundsOnScreen(mTempRect);
                     if (mTaskbarUiState != null) {
                         mTaskbarUiState.setBubbleBarRect(mTempRect);
-                        mTaskbarUiState.setBubbleBarViewVisible(v.getVisibility() == VISIBLE);
+                        mTaskbarUiState.setIsBubbleBarViewVisible(v.getVisibility() == VISIBLE);
                     }
                 }
             };
@@ -195,7 +195,7 @@ public class BubbleBarViewController {
             mBarView.addOnLayoutChangeListener(mBubbleBarViewOnLayoutChangeListener);
             mBarView.getBoundsOnScreen(mTempRect);
             mTaskbarUiState.setBubbleBarRect(mTempRect);
-            mTaskbarUiState.setBubbleBarViewVisible(mBarView.getVisibility() == VISIBLE);
+            mTaskbarUiState.setIsBubbleBarViewVisible(mBarView.getVisibility() == VISIBLE);
         }
         mBubbleBarContainer = bubbleBarContainer;
         mSystemUiProxy = SystemUiProxy.INSTANCE.get(mActivity);
@@ -322,6 +322,15 @@ public class BubbleBarViewController {
                 mBubbleBarController.updateBubbleBarLocation(location, source);
             }
         };
+    }
+
+    /**
+     * Called when initial state from shell is applied and the initial state added bubbles.
+     */
+    public void onInitialBubblesAdded() {
+        // Default taskbar window size includes bubble bar size if bubbles are present.
+        // Bubbles are now added, make sure the taskbar window accounts for them.
+        mActivity.setTaskbarWindowSize(mActivity.getDefaultTaskbarWindowSize());
     }
 
     /** Called when animations for new and updated bubbles ended. */

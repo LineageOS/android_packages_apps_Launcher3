@@ -40,7 +40,6 @@ import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.widgetpicker.TestUtils
 import com.android.launcher3.widgetpicker.TestUtils.PERSONAL_TEST_APPS
 import com.android.launcher3.widgetpicker.TestUtils.WORK_TEST_APPS
@@ -76,7 +75,6 @@ class LandingScreenTest {
 
     @OptIn(ExperimentalCoroutinesApi::class) private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
-    private val context = InstrumentationRegistry.getInstrumentation().context
 
     private lateinit var viewModel: LandingScreenViewModel
     private val widgetsRepository = FakeWidgetsRepository()

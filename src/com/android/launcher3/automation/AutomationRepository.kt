@@ -17,6 +17,8 @@
 package com.android.launcher3.automation
 
 import android.os.UserHandle
+import com.android.launcher3.dagger.LauncherAppComponent
+import com.android.launcher3.util.DaggerSingletonObject
 import com.android.launcher3.util.ListenableStream
 
 /** Repository to provide information related to automated apps */
@@ -30,6 +32,11 @@ interface AutomationRepository {
 
     /** Returns if the provided package is being automated for the provided user ID */
     fun isPackageAutomated(userId: Int, packageName: String): Boolean
+
+    companion object {
+        @JvmField
+        val INSTANCE = DaggerSingletonObject(LauncherAppComponent::getAutomationRepository)
+    }
 }
 
 /** Contains the delta of automated packages from an automation change for a given user. */

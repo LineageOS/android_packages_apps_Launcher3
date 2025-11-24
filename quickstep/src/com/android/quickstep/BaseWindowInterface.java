@@ -111,6 +111,23 @@ public abstract class BaseWindowInterface extends
         return launcher != null && launcher.getWorkspace().isOverlayShown();
     }
 
+    @Override
+    public void updateDisallowBack() {
+        super.updateDisallowBack();
+        Launcher launcher = Launcher.ACTIVITY_TRACKER.getCreatedContext();
+        if (launcher == null) {
+            return;
+        }
+        launcher.updateDisallowBack();
+    }
+
+    @Override
+    public boolean shouldHandleBackGesture() {
+        RecentsWindowManager windowManager = getCreatedContainer();
+
+        return windowManager != null && windowManager.isStarted();
+    }
+
     /**
      * todo: Create an abstract animation factory to handle both activity and window implementations
      * todo: move new factory into BaseContainerInterface and cleanup.

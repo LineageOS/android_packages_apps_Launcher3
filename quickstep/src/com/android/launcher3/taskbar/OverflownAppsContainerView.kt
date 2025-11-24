@@ -35,7 +35,8 @@ import com.android.launcher3.popup.RoundedArrowDrawable
 class OverflownAppsContainerView<T : TaskbarActivityContext>
 @JvmOverloads
 constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
-    ArrowPopup<T>(context, attrs, defStyleAttr) {
+    ArrowPopup<T>(context, attrs, defStyleAttr),
+    TaskbarViewDragDropController.PinnedAppsContainerDelegate {
     private lateinit var overflowIcon: TaskbarOverflowView
     private lateinit var viewCallbacks: TaskbarViewCallbacks
     private lateinit var content: LinearLayout
@@ -166,4 +167,32 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     }
 
     override fun requestFocusOnOpened() = true
+
+    override fun getHitRectForPinRelativeToDragLayer(outRect: Rect?) {
+        mActivityContext.dragLayer.getDescendantRectRelativeToSelf(this, outRect)
+    }
+
+    override fun getHitRectForUnpinRelativeToDragLayer(outRect: Rect?) {
+        // There is no area in the overflow container view can unpin a view.
+    }
+
+    // The overflow container view does not overlap with the icon.
+    override fun isPointOnOverflowIcon(point: FloatArray): Boolean = false
+
+    override fun reserveDropSlotForDragLocation(x: Int) {
+        // TODO("Not yet implemented")
+    }
+
+    override fun releaseDropSlot() {
+        // TODO("Not yet implemented")
+    }
+
+    override fun getPinIndex(): Int {
+        // TODO("Not yet implemented")
+        return -1
+    }
+
+    override fun updateItemViewVisibilityForDragState(itemView: View, isDragged: Boolean) {
+        // TODO("Not yet implemented")
+    }
 }

@@ -157,13 +157,6 @@ flag {
 }
 
 flag {
-    name: "enable_recents_in_taskbar"
-    namespace: "launcher"
-    description: "Replace hybrid hotseat app predictions with strictly Recent Apps"
-    bug: "315354060"
-}
-
-flag {
   name: "enable_first_screen_broadcast_archiving_extras"
   namespace: "launcher"
   description: "adds Extras to first screen broadcast for archived apps"
@@ -735,4 +728,18 @@ flag {
   namespace: "launcher"
   description: "Replaces the 'Delete permanently' action with 'Move to trash' for home screen files"
   bug: "424466974"
+}
+
+flag {
+  name: "enable_all_apps_edu_for_overswipe"
+  namespace: "launcher"
+  description: "Enables all apps edu when over-swipe on the last workspace page"
+  bug: "441155632"
+}
+
+flag {
+    name: "show_create_widget_btn_in_picker"
+    namespace: "launcher"
+    description: "Shows create widget button in widget picker"
+    bug: "459260964"
 }

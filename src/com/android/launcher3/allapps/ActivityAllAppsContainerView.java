@@ -16,6 +16,7 @@
 package com.android.launcher3.allapps;
 
 import static com.android.launcher3.Flags.enableExpandingPauseWorkButton;
+import static com.android.launcher3.LauncherModel.useModelRepositoryBinding;
 import static com.android.launcher3.allapps.ActivityAllAppsContainerView.AdapterHolder.MAIN;
 import static com.android.launcher3.allapps.ActivityAllAppsContainerView.AdapterHolder.SEARCH;
 import static com.android.launcher3.allapps.ActivityAllAppsContainerView.AdapterHolder.WORK;
@@ -320,8 +321,11 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
                         : android.R.color.system_accent2_200);
 
         mSearchUiManager.initializeSearch(this);
-        ViewEx.registerLifecycleTask(this, () -> StringCacheRepository.getStringCache(getContext())
-                .forEach(mActivityContext.getUiExecutor(), c -> updateWorkUI()));
+        if (useModelRepositoryBinding()) {
+            ViewEx.registerLifecycleTask(this,
+                    () -> StringCacheRepository.getStringCache(getContext())
+                            .forEach(mActivityContext.getUiExecutor(), c -> updateWorkUI()));
+        }
     }
 
     @Override

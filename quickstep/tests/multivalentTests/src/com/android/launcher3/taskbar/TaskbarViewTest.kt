@@ -985,7 +985,10 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
             )
         }
         val lastIcon = iconViews.last()
-        val iconsEnd = taskbarRectInDragLayer.left + lastIcon.right
+        var iconsEnd = taskbarRectInDragLayer.left + lastIcon.right
+        if (taskbarView.taskbarHotseatIconsContainer != null) {
+            iconsEnd += taskbarView.allAppsButtonContainer?.right ?: 0
+        }
 
         assertThat(outRect.top).isEqualTo(taskbarRectInDragLayer.top)
         assertThat(outRect.bottom).isEqualTo(taskbarRectInDragLayer.bottom)
@@ -1141,6 +1144,26 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
         // Point on the edge of the overflow icon
         val pointOnEdge = floatArrayOf(overflowRect.left.toFloat(), overflowRect.top.toFloat())
         assertThat(taskbarView.isPointOnOverflowIcon(pointOnEdge)).isTrue()
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_TASKBAR_DRAG_AND_DROP)
+    fun testReserveDropSlot_addsGhostView() {
+        runOnMainSync { taskbarView.updateItems(createHotseatItems(2), emptyList(), emptyList()) }
+        forceLayoutUpdate()
+
+        val hitRect = Rect()
+        runOnMainSync { taskbarView.getHitRectForPinRelativeToDragLayer(hitRect) }
+
+        val dragX = hitRect.centerX()
+        val container = taskbarView.taskbarHotseatIconsContainer ?: taskbarView
+        val initialChildCount = container.childCount
+
+        runOnMainSync { taskbarView.reserveDropSlotForDragLocation(dragX) }
+        assertThat(container.childCount).isEqualTo(initialChildCount + 1)
+
+        runOnMainSync { taskbarView.releaseDropSlot() }
+        assertThat(container.childCount).isEqualTo(initialChildCount)
     }
 
     /** Returns the number of expected recents outside of the overflow based on [hotseatSize]. */

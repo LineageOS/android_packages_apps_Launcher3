@@ -857,6 +857,49 @@ class BubbleBarViewAnimatorTest {
     }
 
     @Test
+    fun animateBubbleBarForCollapsed_interruptForIme() {
+        setUpBubbleBar()
+        bubbleStashController.launcherState = BubbleLauncherState.HOME
+
+        val barAnimator = PhysicsAnimator.getInstance(bubbleBarView)
+
+        val animator =
+            BubbleBarViewAnimator(
+                bubbleBarView,
+                bubbleStashController,
+                flyoutController,
+                bubbleBarParentViewController,
+                onExpanded = emptyRunnable,
+                onBubbleBarVisible = emptyRunnable,
+                onAnimationEnded = onAnimationEnded,
+                animatorScheduler,
+            )
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            animator.animateBubbleBarForCollapsed(bubble, isExpanding = true)
+        }
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {}
+        // verify we started animating
+        assertThat(animator.isAnimating).isTrue()
+        // advance the animation handler by the duration of the initial lift
+        InstrumentationRegistry.getInstrumentation().runOnMainSync { animator.interruptForIme() }
+
+        // verify that the show flyout was canceled
+        assertThat(animatorScheduler.pausedBlock).isNull()
+        // verify no longer animating
+        assertThat(animator.isAnimating).isFalse()
+
+        // PhysicsAnimatorTestUtils posts the cancellation to the main thread so we need to wait
+        // again
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+        barAnimator.assertIsNotRunning()
+        // Check bubble bar translation Y is restored and bubble bar expanded
+        assertThat(bubbleBarView.translationY).isEqualTo(BAR_TRANSLATION_Y_FOR_HOTSEAT)
+        assertThat(bubbleBarView.isExpanded).isTrue()
+    }
+
+    @Test
     fun animateBubbleBarForCollapsed_autoExpanding() {
         setUpBubbleBar()
         bubbleStashController.launcherState = BubbleLauncherState.HOME
@@ -1399,7 +1442,7 @@ class BubbleBarViewAnimatorTest {
     }
 
     @Test
-    fun interruptForIme() {
+    fun animateBubbleInForStashed_interruptForIme() {
         setUpBubbleBar()
 
         val handle = View(context)

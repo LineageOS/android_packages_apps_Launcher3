@@ -16,17 +16,34 @@
 
 package com.android.launcher3.widgetpicker.ui.fullcatalog.screens.landing
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import com.android.launcher3.widgetpicker.R
+import com.android.launcher3.widgetpicker.shared.model.PickableWidget
 import com.android.launcher3.widgetpicker.shared.model.WidgetAppId
 import com.android.launcher3.widgetpicker.ui.WidgetInteractionInfo
 import com.android.launcher3.widgetpicker.ui.WidgetInteractionSource
 import com.android.launcher3.widgetpicker.ui.components.WidgetsGrid
 import com.android.launcher3.widgetpicker.ui.components.WidgetsSearchBar
+import com.android.launcher3.widgetpicker.ui.fullcatalog.screens.landing.LandingScreenDimensions.CreateButtonHeight
+import com.android.launcher3.widgetpicker.ui.fullcatalog.screens.landing.LandingScreenDimensions.TopSearchRowItemSpacing
+import com.android.launcher3.widgetpicker.ui.fullcatalog.screens.landing.LandingScreenDimensions.WEIGHT_FILL_REMAINING_SPACE
+import com.android.launcher3.widgetpicker.ui.theme.WidgetPickerTheme
 
 /**
  * View displayed when user opens the full catalog of widgets in widget picker.
@@ -49,27 +66,22 @@ fun LandingScreen(
     val browseState = viewModel.browseWidgetsState
 
     if (browseState is BrowseWidgetsState.Data) {
-        val searchBar: @Composable () -> Unit = remember {
-            {
-                WidgetsSearchBar(
-                    text = "",
-                    isSearching = false,
-                    onSearch = {},
-                    onToggleSearchMode = { enter ->
-                        if (enter) {
-                            viewModel.resetSelections()
-                            onEnterSearchMode()
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                )
+        val topSearchRow: @Composable () -> Unit =
+            remember(viewModel.customWidget) {
+                {
+                    TopSearchRow(
+                        widget = viewModel.customWidget,
+                        resetSectionSelections = viewModel::resetSelections,
+                        onEnterSearchMode = onEnterSearchMode,
+                        onWidgetInteraction = onWidgetInteraction,
+                    )
+                }
             }
-        }
 
         LandingScreen(
             isCompact = isCompact,
             selectedSubSection = viewModel.selectedSubSection,
-            searchBarContent = searchBar,
+            searchBarContent = topSearchRow,
             featuredWidgetsState = viewModel.featuredWidgetsState,
             featuredWidgetPreviewsState = viewModel.featuredWidgetPreviewsState,
             widgetAppIconsState = viewModel.appIconsState,
@@ -84,6 +96,60 @@ fun LandingScreen(
             showDragShadow = showDragShadow,
             onSelectedSubSectionChange = viewModel::onSelectedSubSectionChange,
         )
+    }
+}
+
+@Composable
+private fun TopSearchRow(
+    widget: PickableWidget?,
+    resetSectionSelections: () -> Unit,
+    onEnterSearchMode: () -> Unit,
+    onWidgetInteraction: (WidgetInteractionInfo) -> Unit,
+) {
+    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Box(modifier = Modifier.weight(WEIGHT_FILL_REMAINING_SPACE)) {
+            WidgetsSearchBar(
+                text = "",
+                isSearching = false,
+                onSearch = {},
+                onToggleSearchMode = { enter ->
+                    if (enter) {
+                        resetSectionSelections()
+                        onEnterSearchMode()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        widget?.let {
+            Spacer(modifier = Modifier.width(TopSearchRowItemSpacing))
+            CreateButton(it, onWidgetInteraction)
+        }
+    }
+}
+
+@Composable
+private fun CreateButton(
+    widget: PickableWidget,
+    onWidgetInteraction: (WidgetInteractionInfo) -> Unit,
+) {
+    FilledTonalButton(
+        modifier = Modifier.height(CreateButtonHeight),
+        colors =
+            ButtonDefaults.buttonColors(
+                contentColor = WidgetPickerTheme.colors.addButtonContent,
+                containerColor = WidgetPickerTheme.colors.addButtonBackground,
+            ),
+        onClick = {
+            onWidgetInteraction(
+                WidgetInteractionInfo.WidgetAddInfo(
+                    source = WidgetInteractionSource.CREATE_BUTTON,
+                    widgetInfo = widget.widgetInfo,
+                )
+            )
+        },
+    ) {
+        Text(stringResource(R.string.widget_create_button))
     }
 }
 
@@ -163,4 +229,11 @@ private fun LandingScreen(
                 onSelectedSubSectionChange = onSelectedSubSectionChange,
             )
     }
+}
+
+private object LandingScreenDimensions {
+    val TopSearchRowItemSpacing = 8.dp
+    val CreateButtonHeight = 52.dp
+
+    const val WEIGHT_FILL_REMAINING_SPACE = 1f
 }

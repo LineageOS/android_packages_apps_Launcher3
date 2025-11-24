@@ -17,12 +17,10 @@ package com.android.launcher3.taskbar
 
 import android.content.Context
 import android.util.Log
-import android.window.DesktopExperienceFlags
 import androidx.annotation.VisibleForTesting
 import com.android.internal.policy.DesktopModeCompatPolicy
 import com.android.launcher3.BubbleTextView.RunningAppState
 import com.android.launcher3.Flags
-import com.android.launcher3.Flags.enableRecentsInTaskbar
 import com.android.launcher3.Flags.enableTaskbarRecentsThemedIcons
 import com.android.launcher3.Flags.enableTaskbarUiThread
 import com.android.launcher3.graphics.ThemeManager
@@ -43,6 +41,7 @@ import com.android.quickstep.util.DesktopTask
 import com.android.quickstep.util.GroupTask
 import com.android.quickstep.util.SingleTask
 import com.android.quickstep.util.SplitTask
+import com.android.systemui.shared.Flags.enableRecentsInTaskbar
 import com.android.systemui.shared.recents.model.Task
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import java.io.PrintWriter
@@ -72,9 +71,6 @@ class TaskbarRecentAppsController(
                 }
             }
         }
-
-    val enableRecentTasksThrottle =
-        DesktopExperienceFlags.ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX.isTrue
 
     // TODO(b/343532825): Add a setting to disable Recents even when the flag is on.
     var canShowRecentApps = enableRecentsInTaskbar()
@@ -358,14 +354,13 @@ class TaskbarRecentAppsController(
 
     private fun reloadRecentTasksIfNeeded() {
         if (recentsModel.isTaskListValid(taskListChangeId)) return
-        if (enableRecentTasksThrottle && loadingRecentsTasks) {
+        if (loadingRecentsTasks) {
             Log.v(TAG, "reloadRecentTasksIfNeeded: tried to reload while loading recents tasks")
             needsRecentsTasksReload = true
             return
         }
         Log.v(TAG, "reloadRecentTasksIfNeeded: load recents tasks")
-        // Only indicate that recents tasks are loading if the enableRecentTasksThrottle flag is on
-        loadingRecentsTasks = enableRecentTasksThrottle
+        loadingRecentsTasks = true
         taskListChangeId =
             recentsModel.getTasks(RecentsFilterState.EMPTY_FILTER) { tasks ->
                 TASKBAR_UI_THREAD.execute {

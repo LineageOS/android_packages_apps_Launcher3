@@ -31,6 +31,7 @@ import com.android.launcher3.InvariantDeviceProfile.OnIDPChangeListener
 import com.android.launcher3.LauncherModel
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.Utilities
+import com.android.launcher3.automation.AutomationRepository
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.graphics.ThemeManager
 import com.android.launcher3.graphics.ThemeManager.ThemeChangeListener
@@ -41,6 +42,7 @@ import com.android.launcher3.icons.IconCache
 import com.android.launcher3.icons.IconChangeTracker
 import com.android.launcher3.icons.LauncherIcons.IconPool
 import com.android.launcher3.logging.FileLog
+import com.android.launcher3.model.tasks.AutomationChangedTask
 import com.android.launcher3.model.tasks.PackageUpdatedTask
 import com.android.launcher3.model.tasks.ShortcutsChangedTask
 import com.android.launcher3.model.tasks.UserAvailabilityChangedTask
@@ -82,6 +84,7 @@ constructor(
     private val homeScreenFilesUpdateTask: HomeScreenFilesUpdateTask.Factory,
     private val iconChangeTracker: IconChangeTracker,
     private val prefs: LauncherPrefs,
+    private val automationRepo: AutomationRepository,
 ) {
 
     // only allow this once per reboot to reload work apps
@@ -196,6 +199,14 @@ constructor(
         lifeCycle.addCloseable(
             themeManager.iconShapeData.forEach(MAIN_EXECUTOR) { model.rebindCallbacks() }
         )
+
+        if (Flags.enableAppAutomationIndicator()) {
+            lifeCycle.addCloseable(
+                automationRepo.automationChanges.forEach(MODEL_EXECUTOR) { change ->
+                    model.enqueueModelUpdateTask(AutomationChangedTask(change))
+                }
+            )
+        }
 
         // Theme changes
         val themeChangeListener = ThemeChangeListener { refreshAndReloadLauncher() }

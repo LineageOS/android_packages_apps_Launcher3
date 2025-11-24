@@ -16,11 +16,14 @@
 
 package com.android.launcher3.uioverrides.states
 
+import android.os.Trace
+import androidx.compose.runtime.Composer
+import androidx.compose.runtime.CompositionTracer
+import androidx.compose.runtime.InternalComposeTracingApi
 import com.android.launcher3.LauncherPrefChangeListener
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.COMPOSITION_TRACING_PREF_KEY
 import com.android.launcher3.LauncherPrefs.Companion.ENABLE_COMPOSITION_TRACING
-import com.android.quickstep.compose.QuickstepComposeFacade
 
 class CompositionTracingState(private val launcherPrefs: LauncherPrefs) :
     LauncherPrefChangeListener {
@@ -37,6 +40,7 @@ class CompositionTracingState(private val launcherPrefs: LauncherPrefs) :
         launcherPrefs.removeListener(this, ENABLE_COMPOSITION_TRACING)
     }
 
+    @OptIn(InternalComposeTracingApi::class)
     override fun onPrefChanged(key: String?) {
         if (key == COMPOSITION_TRACING_PREF_KEY) {
             val wasCompositionTracingEnabled = isCompositionTracingEnabled
@@ -44,10 +48,25 @@ class CompositionTracingState(private val launcherPrefs: LauncherPrefs) :
 
             when {
                 isCompositionTracingEnabled && !wasCompositionTracingEnabled ->
-                    QuickstepComposeFacade.enableCompositionTracing()
+                    Composer.setTracer(
+                        object : CompositionTracer {
+                            override fun traceEventStart(
+                                key: Int,
+                                dirty1: Int,
+                                dirty2: Int,
+                                info: String,
+                            ) {
+                                Trace.traceBegin(Trace.TRACE_TAG_APP, info)
+                            }
+
+                            override fun traceEventEnd() = Trace.traceEnd(Trace.TRACE_TAG_APP)
+
+                            override fun isTraceInProgress(): Boolean = Trace.isEnabled()
+                        }
+                    )
 
                 !isCompositionTracingEnabled && wasCompositionTracingEnabled ->
-                    QuickstepComposeFacade.disableCompositionTracing()
+                    Composer.setTracer(null)
             }
         }
     }

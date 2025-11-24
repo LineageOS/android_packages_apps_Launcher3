@@ -395,7 +395,17 @@ constructor(
             { "Failed call onOverviewShown from: ${(if (fromHome) "home" else "app")}" },
             tag = tag,
         ) {
-            systemUiProxy?.onOverviewShown(fromHome)
+            systemUiProxy?.onOverviewShownDeprecated(fromHome)
+        }
+
+    fun onOverviewShown(displayId: Int, tag: String = TAG) =
+        executeWithErrorLog({ "Failed call onOverviewShown in displayId=$displayId" }, tag = tag) {
+            systemUiProxy?.onOverviewShown(displayId)
+        }
+
+    fun onOverviewHidden(displayId: Int, tag: String = TAG) =
+        executeWithErrorLog({ "Failed call onOverviewHidden in displayId=$displayId" }, tag = tag) {
+            systemUiProxy?.onOverviewHidden(displayId)
         }
 
     @MainThread

@@ -31,6 +31,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.kotlin.StubberKt.doCallRealMethod;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Looper;
@@ -40,7 +41,6 @@ import android.view.Display;
 import android.view.InputDevice;
 import android.view.MotionEvent;
 
-import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -53,7 +53,6 @@ import com.android.launcher3.dagger.LauncherAppComponent;
 import com.android.launcher3.dagger.LauncherAppModule;
 import com.android.launcher3.dagger.LauncherAppSingleton;
 import com.android.launcher3.taskbar.TaskbarActivityContext;
-import com.android.launcher3.taskbar.TaskbarApiProxy;
 import com.android.launcher3.taskbar.TaskbarManager;
 import com.android.launcher3.taskbar.TaskbarUiState;
 import com.android.launcher3.taskbar.bubbles.BubbleBarController;
@@ -119,10 +118,9 @@ public class InputConsumerUtilsTest {
             new InputMonitorCompat("", mDisplayId);
 
     private TaskAnimationManager mTaskAnimationManager;
-    private TaskbarApiProxy mTaskbarApiProxy;
     private InputChannelCompat.InputEventReceiver mInputEventReceiver;
     private boolean mUserUnlocked = true;
-    @NonNull private Function<GestureState, AnimatedFloat> mSwipeUpProxyProvider = (state) -> null;
+    @Nullable private Function<GestureState, AnimatedFloat> mSwipeUpProxyProvider = (state) -> null;
 
     @NonNull @Mock private TaskbarActivityContext mTaskbarActivityContext;
     @NonNull @Mock private TaskbarFeatureEvaluator mTaskbarFeatureEvaluator;
@@ -143,7 +141,6 @@ public class InputConsumerUtilsTest {
 
     @Rule
     public final MockitoRule mMockitoRule = MockitoJUnit.rule();
-
 
     @Before
     public void setupTaskAnimationManager() {
@@ -176,17 +173,16 @@ public class InputConsumerUtilsTest {
     public void setUpTaskbarActivityContext() {
         NavHandle navHandle = mock(NavHandle.class);
 
-        when(mTaskbarUiState.isTaskbarStashedHandleViewVisible()).thenReturn(true);
-        when(mTaskbarUiState.getDeviceProfile()).thenReturn(new DeviceProfile());
+        when(navHandle.canNavHandleBeLongPressed()).thenReturn(true);
+
+        when(mTaskbarActivityContext.getDeviceProfile()).thenReturn(new DeviceProfile());
         when(mTaskbarActivityContext.getNavHandle()).thenReturn(navHandle);
         when(mTaskbarActivityContext.getResources()).thenReturn(mContext.getResources());
-        when(mTaskbarActivityContext.getTaskbarUiState()).thenReturn(mTaskbarUiState);
-        when(mTaskbarActivityContext.getTaskbarFeatureEvaluator())
-                .thenReturn(mTaskbarFeatureEvaluator);
-        when(mTaskbarFeatureEvaluator.isTransient()).thenReturn(true);
+    }
 
-        mTaskbarApiProxy = new TaskbarApiProxy(mTaskbarActivityContext);
-        when(mTaskbarManager.getTaskbarForDisplay(mDisplayId)).thenReturn(mTaskbarApiProxy);
+    @Before
+    public void setUpTaskbarManager() {
+        when(mTaskbarManager.getTaskbarForDisplay(mDisplayId)).thenReturn(mTaskbarActivityContext);
     }
 
     @Before
@@ -445,24 +441,13 @@ public class InputConsumerUtilsTest {
     public void testNewConsumer_taskbarIsPresent_containsTaskbarUnstashInputConsumer() {
         DeviceProfile deviceProfile = new DeviceProfile();
         deviceProfile.isTaskbarPresent = true;
-        Resources res = ApplicationProvider.getApplicationContext().getResources();
-        when(mTaskbarUiState.getTaskbarUnstashAreaSizePx()).thenReturn(
-                res.getDimensionPixelSize(R.dimen.taskbar_unstash_input_area));
-        when(mTaskbarUiState.getTaskbarActionCornerPaddingPx()).thenReturn(
-                res.getDimensionPixelSize(R.dimen.transient_taskbar_action_corner_padding));
-        when(mTaskbarUiState.getTaskbarSlowVelocityYThreshold()).thenReturn(
-                res.getDimensionPixelSize(R.dimen.taskbar_slow_velocity_y_threshold));
-        when(mTaskbarUiState.getTaskbarStashedBelowHoverDeadzoneHeightPx()).thenReturn(
-                res.getDimensionPixelSize(
-                        R.dimen.taskbar_stashed_screen_edge_hover_deadzone_height));
-        when(mTaskbarUiState.getTaskbarStashedScreenEdgeHoverDeadzoneHeightPx()).thenReturn(
-                res.getDimensionPixelSize(
-                        R.dimen.taskbar_stashed_screen_edge_hover_deadzone_height));
-        when(mTaskbarUiState.getTaskbarStashedBelowHoverDeadzoneHeightPx()).thenReturn(
-                res.getDimensionPixelSize(R.dimen.taskbar_stashed_below_hover_deadzone_height));
         when(mTaskbarActivityContext.getDeviceProfile()).thenReturn(deviceProfile);
         when(mTaskbarUiState.getDeviceProfile()).thenReturn(deviceProfile);
         when(mTaskbarUiState.isTaskbarAllAppsOpen()).thenReturn(false);
+        when(mTaskbarActivityContext.getTaskbarFeatureEvaluator())
+                .thenReturn(mTaskbarFeatureEvaluator);
+        when(mTaskbarActivityContext.getTaskbarUiState()).thenReturn(mTaskbarUiState);
+        when(mTaskbarFeatureEvaluator.isTransient()).thenReturn(true);
 
         assertCorrectInputConsumer(
                 this::createInputConsumer,
@@ -535,8 +520,7 @@ public class InputConsumerUtilsTest {
 
     @Test
     public void testNewConsumer_onStashedBubbleBar_returnsBubbleBarInputConsumer() {
-        BubbleControllers bubbleControllers = createBubbleControllers(
-                /* isStashed= */ true, mTaskbarUiState);
+        BubbleControllers bubbleControllers = createBubbleControllers(/* isStashed= */ true);
 
         when(mTaskbarActivityContext.isBubbleBarEnabled()).thenReturn(true);
         when(mTaskbarActivityContext.getBubbleControllers()).thenReturn(bubbleControllers);
@@ -549,8 +533,7 @@ public class InputConsumerUtilsTest {
 
     @Test
     public void testNewConsumer_onVisibleBubbleBar_returnsBubbleBarInputConsumer() {
-        BubbleControllers bubbleControllers = createBubbleControllers(
-                /* isStashed= */ false, mTaskbarUiState);
+        BubbleControllers bubbleControllers = createBubbleControllers(/* isStashed= */ false);
 
         when(mTaskbarActivityContext.isBubbleBarEnabled()).thenReturn(true);
         when(mTaskbarActivityContext.getBubbleControllers()).thenReturn(bubbleControllers);
@@ -569,6 +552,13 @@ public class InputConsumerUtilsTest {
                 this::createInputConsumer,
                 ProgressDelegateInputConsumer.class,
                 InputConsumer.TYPE_PROGRESS_DELEGATE);
+    }
+
+    @Test
+    public void testNewConsumer_withNullSwipeUpProxyProvider_doesNotCrash() {
+        mSwipeUpProxyProvider = null;
+
+        runOnMainSync(this::createInputConsumer);
     }
 
     @Test
@@ -704,8 +694,7 @@ public class InputConsumerUtilsTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(runnable);
     }
 
-    private static BubbleControllers createBubbleControllers(boolean isStashed,
-            TaskbarUiState taskbarUiState) {
+    private static BubbleControllers createBubbleControllers(boolean isStashed) {
         BubbleBarController bubbleBarController = mock(BubbleBarController.class);
         BubbleBarViewController bubbleBarViewController = mock(BubbleBarViewController.class);
         BubbleStashController bubbleStashController = mock(BubbleStashController.class);
@@ -728,15 +717,10 @@ public class InputConsumerUtilsTest {
                 bubbleCreator);
 
         when(bubbleBarViewController.hasBubbles()).thenReturn(true);
-        when(taskbarUiState.getHasBubbles()).thenReturn(true);
         when(bubbleStashController.isStashed()).thenReturn(isStashed);
-        when(taskbarUiState.isBubbleStashed()).thenReturn(isStashed);
         when(bubbleStashedHandleViewController.isEventOverHandle(any())).thenReturn(true);
-        when(taskbarUiState.isEventOverBubbleBarStashedHandle(any())).thenReturn(true);
         when(bubbleBarViewController.isBubbleBarVisible()).thenReturn(!isStashed);
-        when(taskbarUiState.isBubbleBarViewVisible()).thenReturn(!isStashed);
         when(bubbleBarViewController.isEventOverBubbleBar(any())).thenReturn(true);
-        when(taskbarUiState.isEventOverBubbleBarView(any())).thenReturn(true);
 
         return bubbleControllers;
     }

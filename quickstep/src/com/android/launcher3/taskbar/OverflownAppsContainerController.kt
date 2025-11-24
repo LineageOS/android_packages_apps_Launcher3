@@ -55,7 +55,10 @@ class OverflownAppsContainerController(
         openOverflownAppsView(overflowIcon, overflowIcon.overflowInfoList)
     }
 
-    fun openOverflownAppsView(overflowIcon: TaskbarOverflowView, overflownApps: List<ItemInfo>) {
+    private fun openOverflownAppsView(
+        overflowIcon: TaskbarOverflowView,
+        overflownApps: List<ItemInfo>,
+    ) {
         if (overflownAppsViewController != null) {
             return
         }
@@ -73,7 +76,7 @@ class OverflownAppsContainerController(
         overflownAppsViewController?.show(overflownApps)
     }
 
-    private fun closeOverflownAppsView() {
+    fun closeOverflownAppsView() {
         overflownAppsViewController?.close(true)
     }
 }

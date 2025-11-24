@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<issues format="6" by="lint 8.4.0-alpha08" type="baseline" client="" dependencies="true" name="" variant="all" version="8.4.0-alpha08">
-
+<issues
+    format="6"
+    by="lint 8.4.0-alpha08"
+    type="baseline"
+    client=""
+    dependencies="true"
+    name=""
+    variant="all"
+    version="8.4.0-alpha08">
     <issue
         id="NewApi"
         message="Call requires API level 34 (current min is 31): `java.util.stream.Stream#toList`"
@@ -180,7 +187,7 @@
     <issue
         id="NewApi"
         message="`@android:color/system_on_primary_dark` requires API level 34 (current min is 31)"
-        errorLine1='    &lt;color name="home_settings_thumb_on_color"&gt;@android:color/system_on_primary_dark&lt;/color&gt;'
+        errorLine1="    &lt;color name=&quot;home_settings_thumb_on_color&quot;&gt;@android:color/system_on_primary_dark&lt;/color&gt;"
         errorLine2="                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="packages/apps/Launcher3/res/values-night-v31/colors.xml"
@@ -191,7 +198,7 @@
     <issue
         id="NewApi"
         message="`@android:color/system_surface_container_highest_dark` requires API level 34 (current min is 31)"
-        errorLine1='    &lt;color name="home_settings_thumb_off_color"&gt;@android:color/system_surface_container_highest_dark&lt;/color&gt;'
+        errorLine1="    &lt;color name=&quot;home_settings_thumb_off_color&quot;&gt;@android:color/system_surface_container_highest_dark&lt;/color&gt;"
         errorLine2="                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="packages/apps/Launcher3/res/values-night-v31/colors.xml"
@@ -202,7 +209,7 @@
     <issue
         id="NewApi"
         message="`@android:color/system_primary_dark` requires API level 34 (current min is 31)"
-        errorLine1='    &lt;color name="home_settings_track_on_color"&gt;@android:color/system_primary_dark&lt;/color&gt;'
+        errorLine1="    &lt;color name=&quot;home_settings_track_on_color&quot;&gt;@android:color/system_primary_dark&lt;/color&gt;"
         errorLine2="                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="packages/apps/Launcher3/res/values-night-v31/colors.xml"
@@ -213,7 +220,7 @@
     <issue
         id="NewApi"
         message="`@android:color/system_outline_dark` requires API level 34 (current min is 31)"
-        errorLine1='    &lt;color name="home_settings_track_off_color"&gt;@android:color/system_outline_dark&lt;/color&gt;'
+        errorLine1="    &lt;color name=&quot;home_settings_track_off_color&quot;&gt;@android:color/system_outline_dark&lt;/color&gt;"
         errorLine2="                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="packages/apps/Launcher3/res/values-night-v31/colors.xml"
@@ -224,7 +231,7 @@
     <issue
         id="NewApi"
         message="`@android:color/system_on_primary_light` requires API level 34 (current min is 31)"
-        errorLine1='    &lt;color name="home_settings_thumb_on_color"&gt;@android:color/system_on_primary_light&lt;/color&gt;'
+        errorLine1="    &lt;color name=&quot;home_settings_thumb_on_color&quot;&gt;@android:color/system_on_primary_light&lt;/color&gt;"
         errorLine2="                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="packages/apps/Launcher3/res/values-v31/colors.xml"
@@ -235,7 +242,7 @@
     <issue
         id="NewApi"
         message="`@android:color/system_surface_container_highest_light` requires API level 34 (current min is 31)"
-        errorLine1='    &lt;color name="home_settings_thumb_off_color"&gt;@android:color/system_surface_container_highest_light&lt;/color&gt;'
+        errorLine1="    &lt;color name=&quot;home_settings_thumb_off_color&quot;&gt;@android:color/system_surface_container_highest_light&lt;/color&gt;"
         errorLine2="                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="packages/apps/Launcher3/res/values-v31/colors.xml"
@@ -246,7 +253,7 @@
     <issue
         id="NewApi"
         message="`@android:color/system_primary_light` requires API level 34 (current min is 31)"
-        errorLine1='    &lt;color name="home_settings_track_on_color"&gt;@android:color/system_primary_light&lt;/color&gt;'
+        errorLine1="    &lt;color name=&quot;home_settings_track_on_color&quot;&gt;@android:color/system_primary_light&lt;/color&gt;"
         errorLine2="                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="packages/apps/Launcher3/res/values-v31/colors.xml"
@@ -257,12 +264,56 @@
     <issue
         id="NewApi"
         message="`@android:color/system_outline_light` requires API level 34 (current min is 31)"
-        errorLine1='    &lt;color name="home_settings_track_off_color"&gt;@android:color/system_outline_light&lt;/color&gt;'
+        errorLine1="    &lt;color name=&quot;home_settings_track_off_color&quot;&gt;@android:color/system_outline_light&lt;/color&gt;"
         errorLine2="                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="packages/apps/Launcher3/res/values-v31/colors.xml"
             line="63"
             column="49"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Class requires API level 34 (current min is 31): `android.window.OnBackAnimationCallback`"
+        errorLine1="    OnBackAnimationCallback,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="packages/apps/Launcher3/src/com/android/launcher3/dragndrop/AddItemActivity.kt"
+            line="93"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 33 (current min is 31): `android.app.Activity#getOnBackInvokedDispatcher`"
+        errorLine1="        onBackInvokedDispatcher.registerOnBackInvokedCallback("
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="packages/apps/Launcher3/src/com/android/launcher3/dragndrop/AddItemActivity.kt"
+            line="514"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 33 (current min is 31): `android.window.OnBackInvokedDispatcher#registerOnBackInvokedCallback`"
+        errorLine1="        onBackInvokedDispatcher.registerOnBackInvokedCallback("
+        errorLine2="                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="packages/apps/Launcher3/src/com/android/launcher3/dragndrop/AddItemActivity.kt"
+            line="514"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 33 (current min is 31): `android.os.Bundle#getParcelable`"
+        errorLine1="                            extras?.getParcelable("
+        errorLine2="                                    ~~~~~~~~~~~~~">
+        <location
+            file="packages/apps/Launcher3/compose/features/com/android/launcher3/widgetpicker/WidgetPickerComposeWrapperImpl.kt"
+            line="168"
+            column="37"/>
     </issue>
 
 </issues>

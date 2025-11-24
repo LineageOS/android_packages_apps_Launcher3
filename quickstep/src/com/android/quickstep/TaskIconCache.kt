@@ -21,7 +21,6 @@ import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.os.Process
 import android.os.UserHandle
-import android.util.SparseArray
 import androidx.annotation.AnyThread
 import androidx.annotation.WorkerThread
 import androidx.core.graphics.drawable.toDrawable
@@ -31,18 +30,16 @@ import com.android.launcher3.Utilities
 import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.graphics.ThemeManager
-import com.android.launcher3.icons.BaseIconFactory
 import com.android.launcher3.icons.BaseIconFactory.IconOptions
 import com.android.launcher3.icons.BitmapInfo
-import com.android.launcher3.icons.IconProvider
-import com.android.launcher3.icons.LauncherIcons
+import com.android.launcher3.icons.IconCache
+import com.android.launcher3.icons.cache.AppInfoCachingLogic
 import com.android.launcher3.pm.UserCache
 import com.android.launcher3.util.CancellableTask
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.SimpleThreadFactory
-import com.android.launcher3.util.FlagOp
 import com.android.launcher3.util.PostUnlockObject
 import com.android.launcher3.util.coroutines.DispatcherProvider
 import com.android.quickstep.task.thumbnail.data.TaskIconDataSource
@@ -65,28 +62,21 @@ constructor(
     displayController: DisplayController,
     private val dispatcherProvider: DispatcherProvider,
     themeManagerWrapper: PostUnlockObject<ThemeManager>,
+    private val launcherIconCache: PostUnlockObject<IconCache>,
     @Ui private val uiExecutor: Executor,
     daggerSingletonTracker: DaggerSingletonTracker,
 ) : TaskIconDataSource {
     // This bg executor executes thread-unsafe tasks like getBitmapInfoCacheEntry(), getCacheEntry()
     // and createIconFactory(), thus it must be single threaded.
     private val singleThreadedBgExecutor = TASK_IMAGE_CACHE_EXECUTOR
-    private val iconProvider = IconProvider(context)
+
+    private val appInfoCachingLogic =
+        AppInfoCachingLogic(pm = context.packageManager, instantAppResolver = { it.isInstantApp })
 
     private val recentsIconCacheSize = context.resources.getInteger(R.integer.recentsIconCacheSize)
     private var iconCache: TaskKeyLruCache<TaskCacheEntry>? = null
     // TODO: b/431811298 - Make non-null when flag is cleaned up.
     private var bitmapInfoCache: TaskKeyLruCache<TaskBitmapInfoCacheEntry>? = null
-
-    private val defaultIcons = SparseArray<BitmapInfo>()
-    private var defaultIconBase: BitmapInfo? = null
-
-    private var _iconFactory: BaseIconFactory? = null
-    @get:WorkerThread
-    private val iconFactory: BaseIconFactory
-        get() =
-            if (enableTaskbarRecentsThemedIcons()) LauncherIcons.obtain(context)
-            else createIconFactory()
 
     private var taskVisualsChangeListener: TaskVisualsChangeListener? = null
 
@@ -281,14 +271,6 @@ constructor(
     }
 
     @WorkerThread
-    private fun createIconFactory() =
-        BaseIconFactory(
-            context,
-            DisplayController.INSTANCE.get(context).info.densityDpi,
-            context.resources.getDimensionPixelSize(R.dimen.task_icon_cache_default_icon_size),
-        )
-
-    @WorkerThread
     private fun getCacheEntry(task: Task): TaskCacheEntry {
         val key = task.key
         val activityInfo =
@@ -344,78 +326,47 @@ constructor(
 
     @WorkerThread
     private fun getBitmapInfo(task: Task): BitmapInfo {
+        val ic = launcherIconCache.getIfReady() ?: return BitmapInfo.LOW_RES_INFO
         val desc = task.taskDescription
         val key = task.key
 
+        val user = UserHandle.of(key.userId)
+
         // Load icon
         val icon = getIcon(desc, key.userId)
-        return if (icon != null) {
-            getBitmapInfo(
-                icon.toDrawable(context.resources),
-                key.userId,
-                desc.primaryColor,
-                false, /* isInstantApp */
-            )
-        } else {
-            val activityInfo =
-                PackageManagerWrapper.getInstance().getActivityInfo(key.component, key.userId)
-            if (activityInfo != null) {
-                getBitmapInfo(
-                    iconProvider.getIcon(activityInfo),
-                    key.userId,
-                    desc.primaryColor,
-                    activityInfo.applicationInfo.isInstantApp,
+        val userInfo = UserCache.INSTANCE.get(context).getUserInfo(user)
+
+        if (icon != null) {
+            return ic.iconFactory.use {
+                it.createBadgedIconBitmap(
+                    icon.toDrawable(context.resources),
+                    IconOptions()
+                        .setUser(userInfo)
+                        .setExtractedColor(0)
+                        .setWrapperBackgroundColor(desc.primaryColor),
                 )
-            } else {
-                getDefaultBitmapInfo(key.userId)
             }
         }
-    }
 
-    @WorkerThread
-    private fun getDefaultBitmapInfo(userId: Int): BitmapInfo {
-        synchronized(defaultIcons) {
-            val defaultIconBase =
-                defaultIconBase ?: iconFactory.use { it.makeDefaultIcon(iconProvider) }
-            val index: Int = defaultIcons.indexOfKey(userId)
-            return if (index >= 0) {
-                defaultIcons.valueAt(index)
-            } else {
-                val info =
-                    defaultIconBase.withFlags(
-                        UserCache.INSTANCE.get(context)
-                            .getUserInfo(UserHandle.of(userId))
-                            .applyBitmapInfoFlags(FlagOp.NO_OP)
-                    )
-                defaultIcons[userId] = info
-                info
-            }
-        }
-    }
-
-    @WorkerThread
-    private fun getBitmapInfo(
-        drawable: Drawable,
-        userId: Int,
-        primaryColor: Int,
-        isInstantApp: Boolean,
-    ): BitmapInfo {
-        iconFactory.use { iconFactory ->
-            // User version code O, so that the icon is always wrapped in an adaptive icon container
-            return iconFactory.createBadgedIconBitmap(
-                drawable,
+        val activityInfo =
+            PackageManagerWrapper.getInstance().getActivityInfo(key.component, key.userId)
+                ?: return ic.getDefaultIcon(user)
+        val appInfo = activityInfo.applicationInfo
+        return ic.iconFactory.use {
+            it.createBadgedIconBitmap(
+                ic.getFullResIcon(activityInfo),
                 IconOptions()
-                    .setUser(UserCache.INSTANCE.get(context).getUserInfo(UserHandle.of(userId)))
-                    .setInstantApp(isInstantApp)
+                    .setUser(userInfo)
+                    .setInstantApp(appInfo.isInstantApp)
                     .setExtractedColor(0)
-                    .setWrapperBackgroundColor(primaryColor),
+                    .setWrapperBackgroundColor(desc.primaryColor)
+                    .setSourceHint(appInfoCachingLogic.getSourceHint(appInfo, ic)),
             )
         }
     }
 
     @WorkerThread
     private fun resetFactory() {
-        _iconFactory = null
         bitmapInfoCache?.evictAll()
         iconCache?.evictAll()
     }

@@ -47,6 +47,7 @@ public class TaskbarScrimViewController implements TaskbarControllers.LoggableTa
 
     private final TaskbarActivityContext mActivity;
     private final TaskbarScrimView mScrimView;
+    private ObjectAnimator mScrimAlphaAnimator;
     private boolean mTaskbarVisible;
     @SystemUiStateFlags
     private long mSysUiStateFlags;
@@ -68,6 +69,13 @@ public class TaskbarScrimViewController implements TaskbarControllers.LoggableTa
     public void init(TaskbarControllers controllers) {
         mControllers = controllers;
         onTaskbarVisibilityChanged(mControllers.taskbarViewController.getTaskbarVisibility());
+    }
+
+    /**
+     * Destroys the controller
+     */
+    public void onDestroy() {
+        cancelAlphaAnimationIfRunning();
     }
 
     /**
@@ -141,13 +149,21 @@ public class TaskbarScrimViewController implements TaskbarControllers.LoggableTa
     private void showScrim(boolean showScrim, float alpha, boolean skipAnim) {
         mScrimView.setOnClickListener(showScrim ? (view) -> onClick() : null);
         mScrimView.setClickable(showScrim);
+        cancelAlphaAnimationIfRunning();
         if (skipAnim) {
             mScrimAlpha.updateValue(alpha);
         } else {
-            ObjectAnimator anim = mScrimAlpha.animateToValue(showScrim ? alpha : 0);
-            anim.setInterpolator(showScrim ? SCRIM_ALPHA_IN : SCRIM_ALPHA_OUT);
-            anim.start();
+            mScrimAlphaAnimator = mScrimAlpha.animateToValue(showScrim ? alpha : 0);
+            mScrimAlphaAnimator.setInterpolator(showScrim ? SCRIM_ALPHA_IN : SCRIM_ALPHA_OUT);
+            mScrimAlphaAnimator.start();
         }
+    }
+
+    private void cancelAlphaAnimationIfRunning() {
+        if (mScrimAlphaAnimator != null && mScrimAlphaAnimator.isRunning()) {
+            mScrimAlphaAnimator.cancel();
+        }
+        mScrimAlphaAnimator = null;
     }
 
     private void updateScrimAlpha() {
@@ -191,4 +207,5 @@ public class TaskbarScrimViewController implements TaskbarControllers.LoggableTa
     float getScrimAlpha() {
         return mScrimAlpha.value;
     }
+
 }

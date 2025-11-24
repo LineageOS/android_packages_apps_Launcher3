@@ -180,4 +180,12 @@
     <string name="nudge_a11y_close" msgid="4513937143817625570">"Đóng"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"Dịch chuyển hình ảnh"</string>
     <string name="running_app_description" msgid="1309281047289078871">"<xliff:g id="APP_TITLE">%1$s</xliff:g> <xliff:g id="RUNNING_STATE">%2$s</xliff:g>"</string>
+    <string name="ambientcue_first_time_edu_icon_description" msgid="899917821554299010">"Biểu tượng"</string>
+    <string name="ambientcue_first_time_edu_title" msgid="2018548669156363447">"Nhận đề xuất hữu ích"</string>
+    <string name="ambientcue_first_time_edu_text" msgid="4645551981871066999">"Chúng tôi sử dụng AI để chủ động đề xuất thông tin và hành động phù hợp với những việc bạn đang làm trên màn hình"</string>
+    <string name="underlay_close_button_content_description" msgid="5386282762373529057">"Đóng"</string>
+    <string name="ambient_cue_expand_action" msgid="3718141784327417087">"mở rộng"</string>
+    <string name="ambient_cue_icon_content_description" msgid="6470228671884918485">"Biểu tượng đề xuất môi trường xung quanh"</string>
+    <string name="ambientcue_long_press_edu_text" msgid="2399090372677751105">"Chạm và giữ để xem cách tạo đề xuất"</string>
+    <string name="ambient_cue_autofill_action" msgid="5880997492149716614">"tự động điền"</string>
 </resources>

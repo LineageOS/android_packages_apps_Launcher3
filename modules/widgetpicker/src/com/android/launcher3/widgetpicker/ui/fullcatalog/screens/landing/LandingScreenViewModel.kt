@@ -25,6 +25,7 @@ import androidx.compose.runtime.snapshotFlow
 import com.android.launcher3.widgetpicker.WidgetPickerSingleton
 import com.android.launcher3.widgetpicker.domain.interactor.WidgetAppIconsInteractor
 import com.android.launcher3.widgetpicker.domain.interactor.WidgetsInteractor
+import com.android.launcher3.widgetpicker.shared.model.PickableWidget
 import com.android.launcher3.widgetpicker.shared.model.WidgetAppIcon
 import com.android.launcher3.widgetpicker.shared.model.WidgetAppId
 import com.android.launcher3.widgetpicker.shared.model.WidgetId
@@ -68,6 +69,10 @@ constructor(
 
     private var uiReady by mutableStateOf(false)
     private var pendingUpdate = AtomicReference<(() -> Unit)?>(null)
+
+    /** A widget that can be added directly from the button displayed at top of screen. */
+    var customWidget by mutableStateOf<PickableWidget?>(null)
+        private set
 
     /** Section within the landing screen that is currently showing. */
     var selectedSubSection by mutableStateOf(LandingScreenSubSection.FEATURED)
@@ -156,6 +161,10 @@ constructor(
                 if (personalEntry == null) {
                     BrowseWidgetsState.NoData
                 } else {
+                    if (customWidget == null) {
+                        customWidget = widgetsInteractor.getCustomWidget()
+                    }
+
                     BrowseWidgetsState.Data(
                         personalProfile = personalEntry.key,
                         personalWidgetApps =

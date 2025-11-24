@@ -26,6 +26,7 @@ import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 import android.app.ActivityManager;
 import android.content.ComponentName;
@@ -57,7 +58,6 @@ import com.android.launcher3.tapl.LauncherInstrumentation;
 import com.android.launcher3.tapl.TestHelpers;
 import com.android.launcher3.util.TestUtil;
 import com.android.launcher3.util.rule.FailureWatcher;
-import com.android.launcher3.util.rule.RecentsWindowTestFilterRule;
 import com.android.launcher3.util.rule.SamplerRule;
 import com.android.launcher3.util.rule.ScreenRecordRule;
 import com.android.launcher3.util.rule.ShellCommandRule;
@@ -73,6 +73,11 @@ import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -198,12 +203,14 @@ public abstract class BaseLauncherTaplTest {
     @Rule
     public LimitDevicesRule mlimitDevicesRule = new LimitDevicesRule();
 
-    @Rule
-    public RecentsWindowTestFilterRule mRecentsWindowTestFilterRule =
-            new RecentsWindowTestFilterRule();
-
     @Rule(order = -1000) // This should be the outermost rule
     public SkipAfterTimeOutRule mSkipAfterTimeOutRule = new SkipAfterTimeOutRule();
+
+    // TODO(b/377678992): revert ag/37092345 once NexusLauncherTests-OverviewInWindowEnabled is
+    //  successfully blocking presubmit.
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    public @interface AllowInRecentsWindowTests {}
 
     protected void performInitialization() {
         reinitializeLauncherData();
@@ -299,6 +306,14 @@ public abstract class BaseLauncherTaplTest {
         Log.d(TAG, "Available memory: before=" + mMemoryBefore
                 + "MB, after=" + memoryAfter
                 + "MB, delta=" + (memoryAfter - mMemoryBefore) + "MB");
+    }
+
+    @Before
+    public void checkTestInAllowlist() {
+        Annotation annotation = getClass().getDeclaredAnnotation(AllowInRecentsWindowTests.class);
+
+        assumeTrue("Skipping unannotated test because a recents window flag is enabled",
+                !mLauncher.isRecentsWindowEnabled() || annotation != null);
     }
 
     /** Method that should be called when a test starts. */

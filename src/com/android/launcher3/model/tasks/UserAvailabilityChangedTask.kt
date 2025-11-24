@@ -47,7 +47,7 @@ class UserAvailabilityChangedTask(private val user: UserHandle) : ModelUpdateTas
         val isUserQuiet = userInfo.isQuietModeEnabled
         val flagOp = FlagOp.NO_OP.setFlag(FLAG_DISABLED_QUIET_USER, isUserQuiet)
 
-        apps.updateDisabledFlags(ItemInfoMatcher.ofUser(user), flagOp)
+        apps.updateRuntimeFlags(ItemInfoMatcher.ofUser(user), flagOp)
 
         if (Flags.enablePrivateSpace()) {
             if (userInfo.iconInfo.isWork) {

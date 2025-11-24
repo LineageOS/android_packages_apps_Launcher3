@@ -95,9 +95,9 @@
     <string name="allset_navigation_settings" msgid="4713404605961476027"><annotation id="link">"Järjestelmän navigointiasetukset"</annotation></string>
     <string name="allset_title_expressive" msgid="474399969304146994">"<xliff:g id="DEVICE">%1$s</xliff:g> on\nvalmis!"</string>
     <string name="allset_title_expressive_fallback" msgid="2829102990606405239">"Laite on\nvalmis"</string>
-    <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"Kaikki valmista!"</string>
+    <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"Nyt mennään!"</string>
     <string name="allset_subtitle_expressive" msgid="419688197551192358">"Nauti uudesta laitteesta (<xliff:g id="DEVICE">%1$s</xliff:g>)!"</string>
-    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"Aloita laitteen (<xliff:g id="DEVICE">%1$s</xliff:g>) käyttö pyyhkäisemällä ylös"</string>
+    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"<xliff:g id="DEVICE">%1$s</xliff:g> on valmis käyttöön: aloita pyyhkäisemällä ylös"</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"Aloita laitteen (<xliff:g id="DEVICE">%1$s</xliff:g>) käyttö napauttamalla"</string>
     <string name="allset_navigation_settings_expressive" msgid="3745595273748356"><annotation id="link">"Valitse siirtymistapa"</annotation></string>
     <string name="allset_hint_expressive" msgid="756856423510976261">"Pyyhkäise ylös"</string>
@@ -180,4 +180,12 @@
     <string name="nudge_a11y_close" msgid="4513937143817625570">"Sulje"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"Tökkää kuvaa"</string>
     <string name="running_app_description" msgid="1309281047289078871">"<xliff:g id="APP_TITLE">%1$s</xliff:g> <xliff:g id="RUNNING_STATE">%2$s</xliff:g>"</string>
+    <string name="ambientcue_first_time_edu_icon_description" msgid="899917821554299010">"Kuvake"</string>
+    <string name="ambientcue_first_time_edu_title" msgid="2018548669156363447">"Hyödyllisiä ehdotuksia"</string>
+    <string name="ambientcue_first_time_edu_text" msgid="4645551981871066999">"Käytämme tekoälyä ehdottaaksemme oma-aloitteisesti tietoja ja toimintoja, jotka liittyvät näytöllä tekemiisi asioihin"</string>
+    <string name="underlay_close_button_content_description" msgid="5386282762373529057">"Sulje"</string>
+    <string name="ambient_cue_expand_action" msgid="3718141784327417087">"laajenna"</string>
+    <string name="ambient_cue_icon_content_description" msgid="6470228671884918485">"Taustailmoitusehdotusten kuvake"</string>
+    <string name="ambientcue_long_press_edu_text" msgid="2399090372677751105">"Katso, miten ehdotuksia luodaan, koskettamalla pitkään"</string>
+    <string name="ambient_cue_autofill_action" msgid="5880997492149716614">"automaattinen täyttö"</string>
 </resources>

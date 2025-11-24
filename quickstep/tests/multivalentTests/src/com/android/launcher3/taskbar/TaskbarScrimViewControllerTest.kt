@@ -170,6 +170,29 @@ class TaskbarScrimViewControllerTest {
     }
 
     @Test
+    @TaskbarMode(PINNED)
+    fun testOnTaskbarVisibilityChangedMultipleTimes_pinnedTaskbarWithBubbleMenu_darkerScrim() {
+        getInstrumentation().runOnMainSync {
+            scrimViewController.onTaskbarVisibilityChanged(VISIBLE)
+            // show scrim immediately
+            scrimViewController.updateStateForSysuiFlags(
+                SYSUI_STATE_BUBBLES_EXPANDED or SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED,
+                true,
+            )
+            // hide scrim with animation
+            scrimViewController.updateStateForSysuiFlags(0, false)
+            // show scrim immediately again
+            scrimViewController.updateStateForSysuiFlags(
+                SYSUI_STATE_BUBBLES_EXPANDED or SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED,
+                true,
+            )
+            // wait for animation completion
+            animatorTestRule.advanceTimeBy(animationDuration)
+        }
+        assertThat(scrimViewController.scrimAlpha).isGreaterThan(BUBBLE_BAR_EXPANDED_SCRIM_ALPHA)
+    }
+
+    @Test
     @TaskbarMode(TRANSIENT)
     fun testOnTaskbarVisibilityChanged_stashedTaskbarWithBubbles_noScrim() {
         getInstrumentation().runOnMainSync {

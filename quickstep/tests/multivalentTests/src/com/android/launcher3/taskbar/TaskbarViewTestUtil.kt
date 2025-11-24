@@ -16,7 +16,6 @@
 
 package com.android.launcher3.taskbar
 
-import android.companion.datatransfer.continuity.RemoteTask
 import android.content.ComponentName
 import android.content.Intent
 import android.graphics.Bitmap
@@ -25,6 +24,7 @@ import android.os.Process
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.icons.BitmapInfo
 import com.android.launcher3.icons.ThemedBitmap
+import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.AppPairInfo
 import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.ItemInfo
@@ -124,8 +124,7 @@ object TaskbarViewTestUtil {
     }
 
     fun createHandoffSuggestion(id: Int = 0): HandoffSuggestion {
-        val remoteTask = RemoteTask.Builder(1, id).build()
-        return HandoffSuggestion(remoteTask)
+        return HandoffSuggestion(id, id, AppInfo())
     }
 
     private fun createTask(id: Int): Task {

@@ -1133,6 +1133,18 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         mTaskbarInteractor.onTaskbarInAppDisplayProgressUpdate(progress, flag);
     }
 
+    @AnyThread
+    public boolean isShowingPostBootLoaderDialog() {
+        return false;
+    }
+
+    protected void updateTaskbarsVisibility() {
+        TaskbarManager taskbarManager = mTISBindHelper.getTaskbarManager();
+        if (taskbarManager != null) {
+            taskbarManager.updateTaskbarsVisibility();
+        }
+    }
+
     @Override
     public void startIntentSenderForResult(IntentSender intent, int requestCode,
             Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags, Bundle options) {
@@ -1736,5 +1748,16 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     @Override
     public RecentsComponent getRecentsComponent() {
         return mRecentsComponent;
+    }
+
+    @Override
+    protected boolean shouldDisableBackGesture() {
+        BaseContainerInterface<?, ?> defaultDisplayContainerInterface =
+            OverviewComponentObserver.INSTANCE.get(this)
+                    .getContainerInterface(DEFAULT_DISPLAY);
+
+        return super.shouldDisableBackGesture()
+                && (defaultDisplayContainerInterface == null
+                || !defaultDisplayContainerInterface.shouldHandleBackGesture());
     }
 }

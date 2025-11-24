@@ -26,8 +26,8 @@ object TaskbarIconContainerUtil {
     @VisibleForTesting const val MINIMUM_ICONS_TO_SHOW_WITH_OVERFLOW = 3
 
     /** Returns maximum amount of icons we show in a container */
-    fun getMaxIconCount(itemCount: Int, overflowingItems: Int): Int {
-        return if (itemCount <= MINIMUM_ICONS_TO_SHOW_WITH_OVERFLOW) {
+    fun getMaxIconCount(itemCount: Int, overflowingItems: Int, isOverflowEnabled: Boolean): Int {
+        return if (itemCount <= MINIMUM_ICONS_TO_SHOW_WITH_OVERFLOW || !isOverflowEnabled) {
             itemCount
         } else if (overflowingItems > 1) {
             max(itemCount - overflowingItems, MINIMUM_ICONS_TO_SHOW_WITH_OVERFLOW)

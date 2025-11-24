@@ -185,9 +185,22 @@ class DisplayControllerTest {
             WindowBounds(
                 Rect(0, 0, WindowManagerProxy.MIN_TABLET_WIDTH, 800),
                 Rect(),
-                Surface.ROTATION_0
+                Surface.ROTATION_0,
             )
-        val info = setupInfoForTabletTest(bounds, DEFAULT_DISPLAY, 160)
+        val info = setupInfoForTabletTest(bounds, DEFAULT_DISPLAY, 160, false)
+
+        assertThat(info.isTablet(bounds)).isTrue()
+    }
+
+    @Test
+    fun isTablet_desktopFormFactorTabletSize_returnsTrue() {
+        val bounds =
+            WindowBounds(
+                Rect(0, 0, WindowManagerProxy.MIN_TABLET_WIDTH, 800),
+                Rect(),
+                Surface.ROTATION_0,
+            )
+        val info = setupInfoForTabletTest(bounds, DEFAULT_DISPLAY, 160, true)
 
         assertThat(info.isTablet(bounds)).isTrue()
     }
@@ -195,9 +208,17 @@ class DisplayControllerTest {
     @Test
     fun isTablet_defaultDisplayPhoneSize_returnsFalse() {
         val bounds = WindowBounds(Rect(0, 0, 400, 800), Rect(), Surface.ROTATION_0)
-        val info = setupInfoForTabletTest(bounds, DEFAULT_DISPLAY, 160)
+        val info = setupInfoForTabletTest(bounds, DEFAULT_DISPLAY, 160, false)
 
         assertThat(info.isTablet(bounds)).isFalse()
+    }
+
+    @Test
+    fun isTablet_desktopFormFactorPhoneSize_returnsTrue() {
+        val bounds = WindowBounds(Rect(0, 0, 400, 800), Rect(), Surface.ROTATION_0)
+        val info = setupInfoForTabletTest(bounds, DEFAULT_DISPLAY, 160, true)
+
+        assertThat(info.isTablet(bounds)).isTrue()
     }
 
     @Test
@@ -207,9 +228,9 @@ class DisplayControllerTest {
             WindowBounds(
                 Rect(0, 0, WindowManagerProxy.MIN_TABLET_WIDTH, 800),
                 Rect(),
-                Surface.ROTATION_0
+                Surface.ROTATION_0,
             )
-        val info = setupInfoForTabletTest(bounds, externalDisplayId, 160)
+        val info = setupInfoForTabletTest(bounds, externalDisplayId, 160, false)
 
         assertThat(info.isTablet(bounds)).isTrue()
     }
@@ -218,7 +239,16 @@ class DisplayControllerTest {
     fun isTablet_externalDisplayPhoneSize_returnsTrue() {
         val externalDisplayId = DEFAULT_DISPLAY + 1
         val bounds = WindowBounds(Rect(0, 0, 400, 800), Rect(), Surface.ROTATION_0)
-        val info = setupInfoForTabletTest(bounds, externalDisplayId, 160)
+        val info = setupInfoForTabletTest(bounds, externalDisplayId, 160, false)
+
+        assertThat(info.isTablet(bounds)).isTrue()
+    }
+
+    @Test
+    fun isTablet_desktopFormFactor_externalDisplayPhoneSize_returnsTrue() {
+        val externalDisplayId = DEFAULT_DISPLAY + 1
+        val bounds = WindowBounds(Rect(0, 0, 400, 800), Rect(), Surface.ROTATION_0)
+        val info = setupInfoForTabletTest(bounds, externalDisplayId, 160, true)
 
         assertThat(info.isTablet(bounds)).isTrue()
     }
@@ -227,7 +257,8 @@ class DisplayControllerTest {
     private fun setupInfoForTabletTest(
         bounds: WindowBounds,
         displayId: Int,
-        densityDpi: Int
+        densityDpi: Int,
+        isDesktopFormFactor: Boolean,
     ): DisplayController.Info {
         val width = bounds.bounds.width()
         val height = bounds.bounds.height()
@@ -257,10 +288,10 @@ class DisplayControllerTest {
         // Create a new Info object with the mocked dependencies
         return DisplayController.Info(
             context,
-            false, // isDesktopFormFactor
+            isDesktopFormFactor,
             windowManagerProxy,
             windowManagerProxy.estimateInternalDisplayBounds(context),
-            DisplayMetrics.DENSITY_DEVICE_STABLE
+            DisplayMetrics.DENSITY_DEVICE_STABLE,
         )
     }
 }
