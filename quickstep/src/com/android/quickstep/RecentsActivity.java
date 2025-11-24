@@ -83,7 +83,6 @@ import com.android.launcher3.statemanager.StateManager.StateHandler;
 import com.android.launcher3.statemanager.StatefulActivity;
 import com.android.launcher3.states.StateAnimationConfig;
 import com.android.launcher3.taskbar.TaskbarInteractor;
-import com.android.launcher3.taskbar.TaskbarManager;
 import com.android.launcher3.util.ActivityOptionsWrapper;
 import com.android.launcher3.util.ContextTracker;
 import com.android.launcher3.util.RunnableList;
@@ -97,7 +96,7 @@ import com.android.quickstep.fallback.RecentsDragLayer;
 import com.android.quickstep.fallback.RecentsState;
 import com.android.quickstep.recents.di.RecentsComponent;
 import com.android.quickstep.split.SplitSelectStateController;
-import com.android.quickstep.sysuiconnection.TISBindHelper;
+import com.android.quickstep.sysuiconnection.SysUIConnectionTracker;
 import com.android.quickstep.util.RecentsAtomicAnimationFactory;
 import com.android.quickstep.util.SurfaceTransactionApplier;
 import com.android.quickstep.views.OverviewActionsView;
@@ -131,7 +130,7 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
     private ScrimView mScrimView;
     private FallbackActivityRecentsView mFallbackRecentsView;
     private OverviewActionsView<?> mActionsView;
-    private TISBindHelper mTISBindHelper;
+    private SysUIConnectionTracker mSysUIConnectionTracker;
     private @Nullable TaskbarInteractor mTaskbarInteractor;
 
     private StateManager<RecentsState, RecentsActivity> mStateManager;
@@ -187,19 +186,8 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
         rootView.getSysUiScrim().getSysUIProgress().updateValue(0);
         mDragLayer.recreateControllers();
 
-        mTISBindHelper = new TISBindHelper(this, this::onTISConnected);
-    }
-
-    private void onTISConnected(TISBindHelper helper) {
-        TaskbarManager taskbarManager = helper.getTaskbarManager();
-        if (taskbarManager != null) {
-            taskbarManager.setActivity(this);
-        }
-    }
-
-    @Override
-    public void runOnBindToTouchInteractionService(Runnable r) {
-        mTISBindHelper.runOnBindToTouchInteractionService(r);
+        mSysUIConnectionTracker = SysUIConnectionTracker.get(this);
+        mSysUIConnectionTracker.onConnected(this, c -> c.getTaskbarManager().setActivity(this));
     }
 
     @Override
@@ -516,7 +504,6 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
         ACTIVITY_TRACKER.onContextDestroyed(this);
         mActivityLaunchAnimationRunner = null;
         mSplitSelectStateController.onDestroy();
-        mTISBindHelper.onDestroy();
         InvariantDeviceProfile.INSTANCE.get(this).removeOnChangeListener(this);
     }
 
@@ -612,8 +599,12 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
     }
 
     public boolean canStartHomeSafely() {
-        OverviewCommandHelper overviewCommandHelper = mTISBindHelper.getOverviewCommandHelper();
-        return overviewCommandHelper == null || overviewCommandHelper.canStartHomeSafely();
+        var conn = mSysUIConnectionTracker.getActiveComponent().getValue();
+        if (conn != null) {
+            var overviewCommandHelper = conn.getOverviewCommandHelper().getIfReady();
+            return overviewCommandHelper == null || overviewCommandHelper.canStartHomeSafely();
+        }
+        return true;
     }
 
     @Override

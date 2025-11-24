@@ -70,6 +70,7 @@ import com.android.launcher3.anim.PendingAnimation
 import com.android.launcher3.compat.AccessibilityManagerCompat
 import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.dagger.LauncherAppSingleton
+import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.dagger.PerDisplayComponent
 import com.android.launcher3.dagger.WindowContext
 import com.android.launcher3.desktop.DesktopRecentsTransitionController
@@ -119,7 +120,6 @@ import com.android.quickstep.fallback.RecentsState.Companion.OVERVIEW_SPLIT_SELE
 import com.android.quickstep.fallback.toLauncherStateOrdinal
 import com.android.quickstep.recents.di.RecentsComponent
 import com.android.quickstep.split.SplitSelectStateController
-import com.android.quickstep.sysuiconnection.TISBindHelper
 import com.android.quickstep.util.QuickstepProtoLogGroup
 import com.android.quickstep.util.RecentsAtomicAnimationFactory
 import com.android.quickstep.util.RecentsWindowProtoLogProxy
@@ -198,7 +198,6 @@ constructor(
     private var oldConfiguration: Configuration? = null
     private var oldRotation: Int = -1
 
-    private val tisBindHelper: TISBindHelper = TISBindHelper(this) {}
     private val splitSelectStateController: SplitSelectStateController =
         SplitSelectStateController(
             /* container= */ this,
@@ -397,7 +396,6 @@ constructor(
         displayChangesSafeCloseable?.close()
         displayChangesSafeCloseable = null
         fallbackWindowInterface.setRecentsWindowManager(null)
-        tisBindHelper.onDestroy()
         uiExecutor.execute {
             onViewDestroyed()
             hideRecentsWindow()
@@ -765,7 +763,10 @@ constructor(
     override fun getComponentName() = ComponentName(this, RecentsWindowManager::class.java)
 
     override fun canStartHomeSafely(): Boolean {
-        val overviewCommandHelper = tisBindHelper.overviewCommandHelper
+        val overviewCommandHelper =
+            appComponent.sysUIConnectionTracker.activeComponent.value
+                ?.overviewCommandHelper
+                ?.getIfReady()
         return overviewCommandHelper == null ||
             overviewCommandHelper.canStartHomeSafely() ||
             displayId != DEFAULT_DISPLAY
@@ -897,10 +898,6 @@ constructor(
     /** Removes a previously added callback */
     override fun removeEventCallback(@BaseActivity.ActivityEvent event: Int, callback: Runnable?) {
         eventCallbacks[event].remove(callback)
-    }
-
-    override fun runOnBindToTouchInteractionService(r: Runnable) {
-        tisBindHelper.runOnBindToTouchInteractionService(r)
     }
 
     override fun returnToHomescreen() {

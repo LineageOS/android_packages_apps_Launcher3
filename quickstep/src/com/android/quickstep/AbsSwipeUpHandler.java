@@ -259,10 +259,6 @@ public abstract class AbsSwipeUpHandler<
             getNextStateFlag("STATE_LAUNCHER_STARTED");
     protected static final int STATE_LAUNCHER_DRAWN =
             getNextStateFlag("STATE_LAUNCHER_DRAWN");
-    // Called when the Launcher has connected to the touch interaction service (and the taskbar
-    // ui controller is initialized)
-    protected static final int STATE_LAUNCHER_BIND_TO_SERVICE =
-            getNextStateFlag("STATE_LAUNCHER_BIND_TO_SERVICE");
 
     // Internal initialization states
     private static final int STATE_APP_CONTROLLER_RECEIVED =
@@ -304,8 +300,7 @@ public abstract class AbsSwipeUpHandler<
             getNextStateFlag("STATE_REJECT_HOME");
 
     private static final int LAUNCHER_UI_STATES =
-            STATE_LAUNCHER_PRESENT | STATE_LAUNCHER_DRAWN | STATE_LAUNCHER_STARTED |
-                    STATE_LAUNCHER_BIND_TO_SERVICE;
+            STATE_LAUNCHER_PRESENT | STATE_LAUNCHER_DRAWN | STATE_LAUNCHER_STARTED;
 
     public static final long MAX_SWIPE_DURATION = 350;
 
@@ -702,7 +697,6 @@ public abstract class AbsSwipeUpHandler<
 
         setupRecentsViewUi();
         mRecentsView.runOnPageScrollsInitialized(this::linkRecentsViewScroll);
-        mContainer.runOnBindToTouchInteractionService(this::onLauncherBindToService);
         mContainer.addEventCallback(EVENT_DESTROYED, mLauncherOnDestroyCallback);
         return true;
     }
@@ -787,11 +781,6 @@ public abstract class AbsSwipeUpHandler<
 
         container.getRootView().setOnApplyWindowInsetsListener(this);
         mStateCallback.setState(STATE_LAUNCHER_STARTED);
-    }
-
-    private void onLauncherBindToService() {
-        mStateCallback.setState(STATE_LAUNCHER_BIND_TO_SERVICE);
-        flushOnRecentsAnimationAndLauncherBound();
     }
 
     private void onLauncherPresentAndGestureStarted() {
@@ -1196,7 +1185,12 @@ public abstract class AbsSwipeUpHandler<
         }
 
         // Notify when the animation starts
-        flushOnRecentsAnimationAndLauncherBound();
+        if (!mRecentsAnimationStartCallbacks.isEmpty()) {
+            for (Runnable action : new ArrayList<>(mRecentsAnimationStartCallbacks)) {
+                action.run();
+            }
+            mRecentsAnimationStartCallbacks.clear();
+        }
 
         // Only add the callback to enable the input consumer after we actually have the controller
         mStateCallback.runOnceAtState(STATE_APP_CONTROLLER_RECEIVED | STATE_GESTURE_STARTED,
@@ -1775,7 +1769,7 @@ public abstract class AbsSwipeUpHandler<
         }
         long finalDuration = duration;
         Interpolator finalInterpolator = interpolator;
-        runOnRecentsAnimationAndLauncherBound(() -> {
+        runOnRecentsAnimationStart(() -> {
             animateGestureEnd(
                 startShift, endShift, finalDuration, finalInterpolator, endTarget, velocityPxPerMs);
         });
@@ -2812,11 +2806,11 @@ public abstract class AbsSwipeUpHandler<
         SurfaceTransactionApplier applier = new SurfaceTransactionApplier(mRecentsView);
         runActionOnRemoteHandles(remoteTargetHandle -> remoteTargetHandle.getTransformParams()
                         .setSyncTransactionApplier(applier));
-        runOnRecentsAnimationAndLauncherBound(() ->
+        runOnRecentsAnimationStart(() ->
                 mRecentsAnimationTargets.addReleaseCheck(applier));
 
         mRecentsView.addOnScrollChangedListener(mOnRecentsScrollListener);
-        runOnRecentsAnimationAndLauncherBound(() -> {
+        runOnRecentsAnimationStart(() -> {
             if (mRecentsView == null) {
                 return;
             }
@@ -2910,26 +2904,14 @@ public abstract class AbsSwipeUpHandler<
     }
 
     /**
-     * Runs the given {@param action} if the recents animation has already started and Launcher has
-     * been created and bound to the TouchInteractionService, or queues it to be run when it this
-     * next happens.
+     * Runs the given {@param action} if the recents animation has already started, or queues it
+     * to be run when it this next happens.
      */
-    private void runOnRecentsAnimationAndLauncherBound(Runnable action) {
-        mRecentsAnimationStartCallbacks.add(action);
-        flushOnRecentsAnimationAndLauncherBound();
-    }
-
-    private void flushOnRecentsAnimationAndLauncherBound() {
-        if (mRecentsAnimationTargets == null ||
-                !mStateCallback.hasStates(STATE_LAUNCHER_BIND_TO_SERVICE)) {
-            return;
-        }
-
-        if (!mRecentsAnimationStartCallbacks.isEmpty()) {
-            for (Runnable action : new ArrayList<>(mRecentsAnimationStartCallbacks)) {
-                action.run();
-            }
-            mRecentsAnimationStartCallbacks.clear();
+    private void runOnRecentsAnimationStart(Runnable action) {
+        if (mRecentsAnimationTargets == null) {
+            mRecentsAnimationStartCallbacks.add(action);
+        } else {
+            action.run();
         }
     }
 

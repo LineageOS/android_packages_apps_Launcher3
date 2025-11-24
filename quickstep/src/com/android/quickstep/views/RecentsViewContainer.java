@@ -39,7 +39,6 @@ import com.android.quickstep.BaseContainerInterface;
 import com.android.quickstep.fallback.RecentsState;
 import com.android.quickstep.recents.di.RecentsComponent;
 import com.android.quickstep.split.SplitSelectStateController;
-import com.android.quickstep.sysuiconnection.TISBindHelper;
 
 /**
  * Interface to be implemented by the parent view of RecentsView
@@ -147,12 +146,6 @@ public interface RecentsViewContainer extends ActivityContext, RecentsViewContai
      * @param callback runnable to be executed upon event
      */
     void removeEventCallback(@BaseActivity.ActivityEvent int event, Runnable callback);
-
-    /**
-     * @see TISBindHelper#runOnBindToTouchInteractionService(Runnable)
-     * @param r runnable to be executed upon event
-     */
-    void runOnBindToTouchInteractionService(Runnable r);
 
     /**
      * Begins transition from overview back to homescreen
