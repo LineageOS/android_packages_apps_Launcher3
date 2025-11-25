@@ -72,7 +72,6 @@ import static com.android.launcher3.Workspace.mapOverCellLayouts;
 import static com.android.launcher3.anim.AnimatorListeners.forEndCallback;
 import static com.android.launcher3.config.FeatureFlags.FOLDABLE_SINGLE_PAGE;
 import static com.android.launcher3.config.FeatureFlags.MULTI_SELECT_EDIT_MODE;
-import static com.android.launcher3.icons.BitmapRenderer.createHardwareBitmap;
 import static com.android.launcher3.keyboard.KeyboardStateManager.KeyboardState.HIDE;
 import static com.android.launcher3.keyboard.KeyboardStateManager.KeyboardState.SHOW;
 import static com.android.launcher3.logging.StatsLogManager.EventEnum;
@@ -179,7 +178,6 @@ import com.android.launcher3.dragndrop.LauncherDragController;
 import com.android.launcher3.dragndrop.SystemDragController;
 import com.android.launcher3.folder.Folder;
 import com.android.launcher3.folder.FolderIcon;
-import com.android.launcher3.icons.FastBitmapDrawable;
 import com.android.launcher3.keyboard.ViewGroupFocusHelper;
 import com.android.launcher3.logger.LauncherAtom;
 import com.android.launcher3.logger.LauncherAtom.ContainerInfo;
@@ -1696,15 +1694,9 @@ public class Launcher extends StatefulActivity<LauncherState>
             if (dropView instanceof DragView dv && dv.containsAppWidgetHostView()) {
                 // Extracting Bitmap from dropView instead of its content view produces the correct
                 // bitmap.
-                if (Flags.fixWidgetDragRadiusLoss()) {
-                    widgetPreviewDrawable = ViewEx.captureSnapshotAsDrawable(
-                            dropView, /*debugString=*/ "NewWidgetWithConfigDrop",
-                            dropView.getWidth(), dropView.getHeight());
-                } else {
-                    widgetPreviewDrawable = new FastBitmapDrawable(
-                            createHardwareBitmap(dropView.getWidth(), dropView.getHeight(),
-                                    dropView::draw));
-                }
+                widgetPreviewDrawable = ViewEx.captureSnapshotAsDrawable(
+                        dropView, /*debugString=*/ "NewWidgetWithConfigDrop",
+                        dropView.getWidth(), dropView.getHeight());
             }
 
             getDragLayer().clearAnimatedView();

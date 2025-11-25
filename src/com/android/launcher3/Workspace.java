@@ -115,7 +115,6 @@ import com.android.launcher3.homescreenfiles.HomeScreenFile;
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider;
 import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils;
 import com.android.launcher3.homescreenfiles.HomeScreenFilesUtilsKt;
-import com.android.launcher3.icons.BitmapRenderer;
 import com.android.launcher3.icons.FastBitmapDrawable;
 import com.android.launcher3.logger.LauncherAtom;
 import com.android.launcher3.logging.InstanceId;
@@ -3154,15 +3153,8 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         int height = MeasureSpec.makeMeasureSpec(unScaledSize[1], MeasureSpec.EXACTLY);
         layout.measure(width, height);
         layout.layout(0, 0, unScaledSize[0], unScaledSize[1]);
-        Drawable widgetSnapshot;
-        if (Flags.fixWidgetDragRadiusLoss()) {
-            widgetSnapshot = ViewEx.captureSnapshotAsDrawable(layout,
-                    /*debugString=*/ "NewWidgetDrop", unScaledSize[0], unScaledSize[1]);
-        } else {
-            widgetSnapshot = new FastBitmapDrawable(
-                    BitmapRenderer.createHardwareBitmap(unScaledSize[0], unScaledSize[1],
-                            layout::draw));
-        }
+        Drawable widgetSnapshot = ViewEx.captureSnapshotAsDrawable(layout,
+                /*debugString=*/ "NewWidgetDrop", unScaledSize[0], unScaledSize[1]);
         layout.setVisibility(visibility);
         return widgetSnapshot;
     }
