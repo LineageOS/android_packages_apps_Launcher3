@@ -1378,6 +1378,13 @@ public abstract class AbsSwipeUpHandler<
                 if (mRecentsAnimationController != null) {
                     mRecentsAnimationController.detachNavigationBarFromApp(true);
                 }
+                hideDimLayer(/*immediate*/ true);
+                break;
+            case RECENTS:
+                hideDimLayer(/*immediate*/ false);
+                break;
+            case NEW_TASK:
+                hideDimLayer(/*immediate*/ true);
                 break;
         }
     }
@@ -1427,7 +1434,7 @@ public abstract class AbsSwipeUpHandler<
                     mStateCallback.setState(STATE_RESUME_LAST_TASK);
                 }
                 // Restore the divider as it resumes the last top-tasks.
-                setDividerShown(true);
+                setDividerShown(true /*showDivider*/);
                 break;
             case REJECT_HOME:
                 mStateCallback.setState(STATE_REJECT_HOME);
@@ -2346,7 +2353,7 @@ public abstract class AbsSwipeUpHandler<
         mRecentsAnimationController.enableInputConsumer();
 
         // Hide the divider as it starts intercepting touches in the app window.
-        setDividerShown(false);
+        setDividerShown(false /*showDivider*/);
     }
 
     private void computeRecentsScrollIfInvisible() {
@@ -3302,13 +3309,38 @@ public abstract class AbsSwipeUpHandler<
                 : mContainerInterface.getTaskbarInteractor().shouldAllowTaskbarToAutoStash();
     }
 
-    private void setDividerShown(boolean shown) {
-        if (mRecentsAnimationTargets == null || mIsDividerShown == shown) {
+    private void setDividerShown(boolean showDivider) {
+        if (mRecentsAnimationTargets == null || mIsDividerShown == showDivider) {
             return;
         }
-        mIsDividerShown = shown;
-        TaskViewUtils.createSplitAuxiliarySurfacesAnimator(
-                mRecentsAnimationTargets.nonApps, shown, null /* animatorHandler */);
+        mIsDividerShown = showDivider;
+        RemoteAnimationTarget[] nonApps = mRecentsAnimationTargets.nonApps;
+        if (nonApps.length == 0) {
+            return;
+        }
+
+        SplitRecentsAnimUtils splitRecentsAnimUtils = new SplitRecentsAnimUtils(nonApps);
+        if (showDivider) {
+            splitRecentsAnimUtils.fadeInDivider(/* immediate= */ true);
+        } else {
+            splitRecentsAnimUtils.fadeOutDivider(/* immediate= */ true);
+        }
+    }
+
+    /**
+     * Should only be called when foreground animating tasks in recents are in split screen.
+     * Starts an animator to fade away the split dim layer
+     */
+    private void hideDimLayer(boolean immediate) {
+        if (mRecentsAnimationTargets == null || mRecentsAnimationTargets.nonApps.length == 0) {
+            return;
+        }
+        RemoteAnimationTarget[] nonApps = mRecentsAnimationTargets.nonApps;
+        SplitRecentsAnimUtils splitRecentsAnimUtils = new SplitRecentsAnimUtils(nonApps);
+        Animator dimAnimator = splitRecentsAnimUtils.fadeOutDimLayer(immediate);
+        if (dimAnimator != null) {
+            dimAnimator.start();
+        }
     }
 
     public interface Factory {
