@@ -16,13 +16,6 @@ flag {
 }
 
 flag {
-    name: "private_space_sys_apps_separation"
-    namespace: "launcher_search"
-    description: "This flag enables showing system apps separate in Private Space container."
-    bug: "308054233"
-}
-
-flag {
     name: "private_space_restrict_accessibility_drag"
     namespace: "launcher_search"
     description: "This flag disables accessibility drag for Private Space Apps."

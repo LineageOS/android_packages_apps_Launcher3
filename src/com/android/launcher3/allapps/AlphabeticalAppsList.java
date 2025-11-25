@@ -416,13 +416,11 @@ public class AlphabeticalAppsList implements AllAppsStore.OnUpdateListener {
         // Add user installed apps
         position = addAppsWithSections(split.get(true), position);
         // Add system apps separator.
-        if (Flags.privateSpaceSysAppsSeparation()) {
-            position = mPrivateProviderManager.addSystemAppsDivider(mAdapterItems);
-            if (Flags.letterFastScroller()) {
-                FastScrollSectionInfo sectionInfo =
-                        new FastScrollSectionInfo(mPrivateProfileDividerBadge, position);
-                mFastScrollerSections.add(sectionInfo);
-            }
+        position = mPrivateProviderManager.addSystemAppsDivider(mAdapterItems);
+        if (Flags.letterFastScroller()) {
+            FastScrollSectionInfo sectionInfo =
+                    new FastScrollSectionInfo(mPrivateProfileDividerBadge, position);
+            mFastScrollerSections.add(sectionInfo);
         }
         // Add system apps.
         position = addAppsWithSections(split.get(false), position);
