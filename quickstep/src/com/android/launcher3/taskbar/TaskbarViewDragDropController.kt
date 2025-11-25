@@ -51,10 +51,10 @@ class TaskbarViewDragDropController(
     @VisibleForTesting val taskbarPinningDropTarget = PinningDropTarget(taskbarPinDelegate, false)
     @VisibleForTesting val unpinDropTarget = UnpinDropTarget()
     @VisibleForTesting var targetPinIndex = -1
+    @VisibleForTesting var overflowPinningDropTarget: PinningDropTarget? = null
     private var modelCallbacks: TaskbarModelCallbacks? = null
-    private var overflowPinningDropTarget: PinningDropTarget? = null
 
-    private val overflowContainerAlarm = Alarm(Looper.getMainLooper())
+    @VisibleForTesting val overflowContainerAlarm = Alarm(Looper.getMainLooper())
 
     private enum class AlarmState {
         RUNNING_OPEN,

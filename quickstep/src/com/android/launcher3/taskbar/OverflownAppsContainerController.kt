@@ -79,4 +79,6 @@ class OverflownAppsContainerController(
     fun closeOverflownAppsView() {
         overflownAppsViewController?.close(true)
     }
+
+    fun isOpen(): Boolean = overflownAppsViewController != null
 }
