@@ -18,6 +18,9 @@ package com.android.quickstep.recents.data
 
 import android.graphics.Bitmap
 import com.android.quickstep.task.thumbnail.data.TaskThumbnailDataSource
+import com.android.quickstep.task.thumbnail.data.TaskThumbnailDataSource.RequestResolution
+import com.android.quickstep.task.thumbnail.data.TaskThumbnailDataSource.RequestResolution.ANY_RES
+import com.android.quickstep.task.thumbnail.data.TaskThumbnailDataSource.RequestResolution.HIGH_RES
 import com.android.systemui.shared.recents.model.Task
 import com.android.systemui.shared.recents.model.ThumbnailData
 import kotlinx.coroutines.delay
@@ -25,35 +28,38 @@ import org.mockito.kotlin.mock
 
 class FakeTaskThumbnailDataSource : TaskThumbnailDataSource {
 
-    val taskIdToBitmap: MutableMap<Int, Bitmap> =
+    val taskIdToBitmap: MutableMap<Int, Bitmap?> =
         (0..10).associateWith { mock<Bitmap>() }.toMutableMap()
     private val completionPrevented: MutableSet<Int> = mutableSetOf()
-    private val getThumbnailCalls = mutableMapOf<Int, Int>()
+    private val getThumbnailCalls = mutableMapOf<Int, List<RequestResolution>>()
 
     var highResEnabled = true
 
     /** Retrieves and sets a thumbnail on [task] from [taskIdToBitmap]. */
-    override suspend fun getThumbnail(task: Task): ThumbnailData {
-        getThumbnailCalls[task.key.id] = (getThumbnailCalls[task.key.id] ?: 0) + 1
+    override suspend fun getThumbnail(task: Task): ThumbnailData? =
+        getThumbnail(task, if (highResEnabled) HIGH_RES else ANY_RES)
+
+    override suspend fun getThumbnail(
+        task: Task,
+        requestResolution: RequestResolution,
+    ): ThumbnailData? {
+        getThumbnailCalls[task.key.id] =
+            (getThumbnailCalls[task.key.id] ?: emptyList()) + requestResolution
 
         while (task.key.id in completionPrevented) {
             // yield doesn't work here with an UnconfinedTestDispatcher
             delay(1L)
         }
+        val isHighRes = requestResolution == HIGH_RES
         return ThumbnailData(
             thumbnail = taskIdToBitmap[task.key.id],
-            reducedResolution = !highResEnabled,
+            reducedResolution = !isHighRes,
         )
     }
 
-    override suspend fun getThumbnail(
-        task: Task,
-        requestResolution: TaskThumbnailDataSource.RequestResolution,
-    ): ThumbnailData? {
-        TODO("Not yet implemented. See b/459710483")
-    }
+    fun getNumberOfGetThumbnailCalls(taskId: Int): Int = getThumbnailCalls(taskId).size
 
-    fun getNumberOfGetThumbnailCalls(taskId: Int): Int = getThumbnailCalls[taskId] ?: 0
+    fun getThumbnailCalls(taskId: Int) = getThumbnailCalls[taskId] ?: emptyList()
 
     fun preventThumbnailLoad(taskId: Int) {
         completionPrevented.add(taskId)

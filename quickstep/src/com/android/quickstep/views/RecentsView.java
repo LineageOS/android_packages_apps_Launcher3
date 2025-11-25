@@ -2320,7 +2320,12 @@ public abstract class RecentsView<
         }
 
         // Update the high res thumbnail loader state
-        mRecentsModel.getThumbnailCache().getHighResLoadingState().setFlingingFast(isFlingingFast);
+        if (enableLowResThumbnailPreloading()) {
+            mRecentsViewModel.setHighResThumbnailsRequired(!isFlingingFast);
+        } else {
+            mRecentsModel.getThumbnailCache().getHighResLoadingState().setFlingingFast(
+                    isFlingingFast);
+        }
         return scrolling;
     }
 
