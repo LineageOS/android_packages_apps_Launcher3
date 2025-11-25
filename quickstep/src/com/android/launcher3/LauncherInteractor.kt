@@ -175,20 +175,6 @@ class LauncherInteractor(private val launcher: QuickstepLauncher) : ActivityInte
     }
 
     @AnyThread
-    fun postAdjustHotseatForBubbleBar(
-        isBubbleBarVisible: Boolean,
-        isTaskbarUiControllersSet: Boolean,
-    ) {
-        executor.execute {
-            launcher.hotseat.let {
-                if (isBubbleBarVisible && isTaskbarUiControllersSet) {
-                    it.post { it.adjustForBubbleBar(true) }
-                }
-            }
-        }
-    }
-
-    @AnyThread
     fun logAppLaunch(statsLogManager: StatsLogManager, info: ItemInfo, instanceId: InstanceId) {
         executor.execute { launcher.logAppLaunch(statsLogManager, info, instanceId) }
     }
@@ -202,7 +188,6 @@ class LauncherInteractor(private val launcher: QuickstepLauncher) : ActivityInte
     fun launchSplitTasks(splitTask: SplitTask, remoteTransition: RemoteTransition?) {
         executor.execute { launcher.launchSplitTasks(splitTask, remoteTransition) }
     }
-
 
     @AnyThread
     fun onTaskbarAllAppsClosed() {
