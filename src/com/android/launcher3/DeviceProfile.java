@@ -953,6 +953,17 @@ public class DeviceProfile {
     }
 
     /**
+     * Returns the total height of the drop target bar, including its top and bottom margins and
+     * the padding below it.
+     */
+    public float getDropTargetBarHeight() {
+        return getDropTargetProfile().getBarSizePx()
+                + getDropTargetProfile().getBarTopMarginPx()
+                + getDropTargetProfile().getBarBottomMarginPx()
+                + getDropTargetProfile().getButtonWorkspaceEdgeGapPx();
+    }
+
+    /**
      * Gets the scaled bottom of the workspace in px for the spring-loaded edit state.
      */
     public float getCellLayoutSpringLoadShrunkBottom(Context context) {

@@ -205,6 +205,13 @@ public abstract class LauncherState implements BaseState<LauncherState> {
     }
 
     /**
+     * Returns the vertical translation of the drop target bar in this state.
+     */
+    public float getDropTargetBarTranslationY(Launcher launcher) {
+        return 0;
+    }
+
+    /**
      * Returns an array of two elements.
      * The first specifies the scale for the overview
      * The second is the factor ([0, 1], 0 => center-screen; 1 => offscreen) by which overview
