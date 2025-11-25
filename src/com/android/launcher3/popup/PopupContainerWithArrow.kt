@@ -101,9 +101,8 @@ private constructor(
             LauncherPopupLiveUpdateHandler(launcher, this as PopupContainerWithArrow<Launcher>)
         )
         if (
-            !Flags.privateSpaceRestrictItemDrag() ||
-                (itemInfo !is ItemInfoWithIcon) ||
-                (itemInfo.runtimeStatusFlags and ItemInfoWithIcon.FLAG_NOT_PINNABLE) == 0
+            (itemInfo !is ItemInfoWithIcon) ||
+            (itemInfo.runtimeStatusFlags and ItemInfoWithIcon.FLAG_NOT_PINNABLE) == 0
         ) {
             itemDragHandler = LauncherPopupItemDragHandler(launcher, this)
         }
