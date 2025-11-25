@@ -16,9 +16,10 @@
 package com.android.quickstep.util;
 
 
+import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
-import static android.view.WindowManager.TRANSIT_TO_BACK;
+import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 
 import android.animation.AnimatorSet;
 import android.graphics.Rect;
@@ -32,8 +33,6 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.launcher3.uioverrides.QuickstepLauncher;
 import com.android.quickstep.util.ScalingWorkspaceRevealAnim;
-import com.android.quickstep.util.CrossDisplayMoveTransitionInfo;
-import com.android.quickstep.util.CrossDisplayMoveAnimator;
 
 /**
  * Handles the transition for a task moving between displays.
@@ -152,6 +151,12 @@ public final class CrossDisplayMoveTransition {
             final int mode = change.getMode();
             if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT) {
                 initializeLeashAsVisible(t, change.getEndAbsBounds(), change.getLeash());
+            } else if (mode == TRANSIT_CLOSE && isEmbeddedActivityInMovingTask(change, move)) {
+                // If the change is a closing Activity embedded under the moving task, the Activity
+                // doesn't have a dedicated space to be shown on the destination display and should
+                // not be shown.
+                Log.v(TAG, "Hiding closing ActivityEmbedding: " + change);
+                t.hide(change.getLeash());
             }
         }
 
@@ -185,5 +190,17 @@ public final class CrossDisplayMoveTransition {
         CrossDisplayMoveAnimator.applyLaunchState(t, move.dstTaskLeash,
                 move.dstBounds,
                 /* progress= */ 0f);
+    }
+
+    private static boolean isEmbeddedActivityInMovingTask(
+            TransitionInfo.Change change, CrossDisplayMoveTransitionInfo move) {
+        if (!change.hasFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY)) {
+            return false;
+        }
+        if (change.getParent() != null
+                && change.getParent().equals(move.taskMovingBetweenDisplays.getContainer())) {
+            return true;
+        }
+        return false;
     }
 }
