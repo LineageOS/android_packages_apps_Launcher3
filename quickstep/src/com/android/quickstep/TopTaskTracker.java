@@ -68,6 +68,8 @@ import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.wm.shell.shared.GroupedTaskInfo;
 import com.android.wm.shell.splitscreen.ISplitScreenListener;
 
+import kotlin.collections.CollectionsKt;
+
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collections;
@@ -77,8 +79,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
-
-import kotlin.collections.CollectionsKt;
 
 /**
  * This class tracked the top-most task and  some 'approximate' task history to allow faster
@@ -565,6 +565,11 @@ public class TopTaskTracker extends ISplitScreenListener.Stub implements TaskSta
             if (mTopTask == null
                     || (mTopTask.baseIntent.getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) == 0) {
                 // Not an excluded task.
+                return null;
+            }
+            if (mActiveDeskId != INACTIVE_DESK_ID) {
+                // Excluded overlays are handled by DesktopTaskView to be hidden in exploded view,
+                // so no need to return the underlying tasks here.
                 return null;
             }
             List<TaskInfo> visibleNonExcludedTasks = mAllCachedTasks.stream()

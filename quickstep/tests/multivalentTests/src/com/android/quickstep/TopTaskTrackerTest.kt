@@ -165,7 +165,7 @@ class TopTaskTrackerTest {
         doReturn(true)
             .whenever(mockResources)
             .getBoolean(eq(R.bool.config_canInternalDisplayHostDesktops))
-        val taskInfo = createDesktopTaskInfo(1, DEFAULT_DISPLAY)
+        val taskInfo = createTaskInfo(1, DEFAULT_DISPLAY, WINDOWING_MODE_FREEFORM)
         val tasks = listOf(taskInfo)
         val cachedTaskInfo =
             TopTaskTracker.CachedTaskInfo(tasks, mockContext, DEFAULT_DISPLAY, INACTIVE_DESK_ID)
@@ -187,7 +187,7 @@ class TopTaskTrackerTest {
             .whenever(mockResources)
             .getBoolean(eq(R.bool.config_canInternalDisplayHostDesktops))
         val activeDeskId = 10
-        val taskInfo = createDesktopTaskInfo(1, DEFAULT_DISPLAY)
+        val taskInfo = createTaskInfo(1, DEFAULT_DISPLAY, WINDOWING_MODE_FREEFORM)
         val tasks = listOf(taskInfo)
         val cachedTaskInfo =
             TopTaskTracker.CachedTaskInfo(tasks, mockContext, DEFAULT_DISPLAY, activeDeskId)
@@ -207,7 +207,7 @@ class TopTaskTrackerTest {
         doReturn(true)
             .whenever(mockResources)
             .getBoolean(eq(R.bool.config_canInternalDisplayHostDesktops))
-        val taskInfo = createDesktopTaskInfo(1, DEFAULT_DISPLAY)
+        val taskInfo = createTaskInfo(1, DEFAULT_DISPLAY, WINDOWING_MODE_FREEFORM)
         val tasks = listOf(taskInfo)
         val cachedTaskInfo =
             TopTaskTracker.CachedTaskInfo(tasks, mockContext, DEFAULT_DISPLAY, INACTIVE_DESK_ID)
@@ -217,6 +217,89 @@ class TopTaskTrackerTest {
         assertThat(result!!.isBaseType(TYPE_DESK)).isTrue()
         assertThat(result.deskId).isEqualTo(INACTIVE_DESK_ID)
         assertThat(result.taskInfo1).isEqualTo(taskInfo)
+    }
+
+    @Test
+    @DisableFlags(FLAG_ENABLE_SHELL_TOP_TASK_TRACKING)
+    fun getVisibleNonExcludedTask_deskInactive_withoutExcludedTasks() {
+        val displayId = 5
+        val excludedTask =
+            createTaskInfo(
+                1,
+                displayId,
+                WINDOWING_MODE_FULLSCREEN,
+                isExcluded = true,
+                isVisible = true,
+            )
+        val visibleTask1 =
+            createTaskInfo(
+                2,
+                displayId,
+                WINDOWING_MODE_FULLSCREEN,
+                isExcluded = false,
+                isVisible = true,
+            )
+        val visibleTask2 =
+            createTaskInfo(
+                3,
+                displayId,
+                WINDOWING_MODE_FULLSCREEN,
+                isExcluded = false,
+                isVisible = true,
+            )
+        val tasks = listOf(excludedTask, visibleTask1, visibleTask2)
+        val cachedTaskInfo =
+            TopTaskTracker.CachedTaskInfo(tasks, mockContext, displayId, INACTIVE_DESK_ID)
+
+        val result =
+            cachedTaskInfo.visibleNonExcludedTask?.getPlaceholderGroupedTaskInfo(
+                /* splitTaskIds= */ null
+            )
+
+        assertThat(result).isNotNull()
+        assertThat(result!!.isBaseType(TYPE_FULLSCREEN)).isTrue()
+        assertThat(result.taskInfo1).isEqualTo(visibleTask1)
+    }
+
+    @Test
+    @DisableFlags(FLAG_ENABLE_SHELL_TOP_TASK_TRACKING)
+    fun getVisibleNonExcludedTask_deskActive_null() {
+        val activeDeskId = 10
+        val displayId = 5
+        val excludedTask =
+            createTaskInfo(
+                1,
+                displayId,
+                WINDOWING_MODE_FREEFORM,
+                isExcluded = true,
+                isVisible = true,
+            )
+        val visibleTask1 =
+            createTaskInfo(
+                2,
+                displayId,
+                WINDOWING_MODE_FREEFORM,
+                isExcluded = false,
+                isVisible = true,
+            )
+        val visibleTask2 =
+            createTaskInfo(
+                3,
+                displayId,
+                WINDOWING_MODE_FREEFORM,
+                isExcluded = false,
+                isVisible = true,
+            )
+        val tasks = listOf(excludedTask, visibleTask1, visibleTask2)
+        val cachedTaskInfo =
+            TopTaskTracker.CachedTaskInfo(tasks, mockContext, displayId, activeDeskId)
+
+        val result =
+            cachedTaskInfo.visibleNonExcludedTask?.getPlaceholderGroupedTaskInfo(
+                /* splitTaskIds= */ null
+            )
+
+        assertThat(result).isNull()
     }
 
     @Test
@@ -364,15 +447,16 @@ class TopTaskTrackerTest {
         taskId: Int,
         displayId: Int = DEFAULT_DISPLAY,
         windowingMode: Int = WINDOWING_MODE_FULLSCREEN,
+        isExcluded: Boolean = false,
+        isVisible: Boolean = true,
     ) =
         FakeTaskFactory.newTaskInfo(
             taskId = taskId,
             displayId = displayId,
             windowingMode = windowingMode,
+            isExcluded = isExcluded,
+            isVisible = isVisible,
         )
-
-    private fun createDesktopTaskInfo(taskId: Int, displayId: Int) =
-        createTaskInfo(taskId, displayId, WINDOWING_MODE_FREEFORM)
 
     private fun createBubbleTaskInfo(
         taskId: Int,
