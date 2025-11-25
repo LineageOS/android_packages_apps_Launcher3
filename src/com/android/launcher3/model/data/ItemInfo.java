@@ -30,6 +30,8 @@ import static com.android.launcher3.LauncherSettings.Favorites.EXTENDED_CONTAINE
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT;
+import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FILE;
+import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FOLDER;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_TASK;
 import static com.android.launcher3.logger.LauncherAtom.ContainerInfo.ContainerCase.CONTAINER_NOT_SET;
 import static com.android.launcher3.shortcuts.ShortcutKey.EXTRA_SHORTCUT_ID;
@@ -442,6 +444,12 @@ public class ItemInfo {
                                         .setComponentName(component.flattenToShortString())
                                         .setIndex(screenId))
                                 .orElse(LauncherAtom.Task.newBuilder()));
+                break;
+            case ITEM_TYPE_FILE_SYSTEM_FILE:
+                itemBuilder.addItemAttributes(Attribute.FILE_SYSTEM_FILE_ITEM);
+                break;
+            case ITEM_TYPE_FILE_SYSTEM_FOLDER:
+                itemBuilder.addItemAttributes(Attribute.FILE_SYSTEM_FOLDER_ITEM);
                 break;
             default:
                 break;
