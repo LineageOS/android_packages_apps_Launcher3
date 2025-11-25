@@ -38,8 +38,6 @@ interface TaskbarManager : DisplayDecorationListener {
 
     fun onUserUnlocked()
 
-    fun updateTaskbarsVisibility()
-
     fun setActivity(activity: StatefulActivity<*>)
 
     fun setRecentsViewContainer(recentsViewContainer: RecentsViewContainer)

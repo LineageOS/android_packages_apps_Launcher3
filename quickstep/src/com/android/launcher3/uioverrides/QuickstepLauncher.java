@@ -1133,18 +1133,6 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         mTaskbarInteractor.onTaskbarInAppDisplayProgressUpdate(progress, flag);
     }
 
-    @AnyThread
-    public boolean isShowingPostBootLoaderDialog() {
-        return false;
-    }
-
-    protected void updateTaskbarsVisibility() {
-        TaskbarManager taskbarManager = mTISBindHelper.getTaskbarManager();
-        if (taskbarManager != null) {
-            taskbarManager.updateTaskbarsVisibility();
-        }
-    }
-
     @Override
     public void startIntentSenderForResult(IntentSender intent, int requestCode,
             Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags, Bundle options) {

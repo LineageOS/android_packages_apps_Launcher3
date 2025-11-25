@@ -83,8 +83,6 @@ class LauncherInteractor(private val launcher: QuickstepLauncher) : ActivityInte
         }
     }
 
-    @AnyThread fun isPostbootDialogVisible() = launcher.isShowingPostBootLoaderDialog
-
     /** Used to translate hotseat and QSB to make room for bubbles. */
     @MainThread
     private fun updateHotseatAndQsbTranslationXInternal(
@@ -204,6 +202,7 @@ class LauncherInteractor(private val launcher: QuickstepLauncher) : ActivityInte
     fun launchSplitTasks(splitTask: SplitTask, remoteTransition: RemoteTransition?) {
         executor.execute { launcher.launchSplitTasks(splitTask, remoteTransition) }
     }
+
 
     @AnyThread
     fun onTaskbarAllAppsClosed() {
