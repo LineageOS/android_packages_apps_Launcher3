@@ -18,22 +18,14 @@ package com.android.launcher3.widgetpicker.datasource
 
 import com.android.launcher3.widgetpicker.shared.model.WidgetApp
 
-/**
- * An interface representing algorithm used to search widgets for widget picker.
- */
+/** An interface representing algorithm used to search widgets for widget picker. */
 interface WidgetsSearchAlgorithm {
-    /**
-     * Perform any initializations here
-     */
+    /** Perform any initializations here */
     suspend fun initialize()
 
-    /**
-     * Returns apps and its widgets that match the given input string.
-     */
+    /** Returns apps and its widgets that match the given input string. */
     suspend fun searchWidgets(query: String, corpus: List<WidgetApp>): List<WidgetApp>
 
-    /**
-     * Clear any service bindings or state here.
-     */
+    /** Clear any service bindings or state here. */
     fun cleanup()
 }

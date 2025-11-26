@@ -19,22 +19,14 @@ package com.android.launcher3.widgetpicker.datasource
 import com.android.launcher3.widgetpicker.shared.model.PickableWidget
 import com.android.launcher3.widgetpicker.shared.model.WidgetApp
 
-/**
- * An interface representing a datasource that provides featured widgets.
- */
+/** An interface representing a datasource that provides featured widgets. */
 interface FeaturedWidgetsDataSource {
-    /**
-     * Perform any initializations here.
-     */
+    /** Perform any initializations here. */
     suspend fun initialize()
 
-    /**
-     * Provides widgets from the given list that can be featured in widget picker.
-     */
+    /** Provides widgets from the given list that can be featured in widget picker. */
     suspend fun getFeaturedWidgets(widgetApps: List<WidgetApp>): List<PickableWidget>
 
-    /**
-     * Clear any service bindings or state here.
-     */
+    /** Clear any service bindings or state here. */
     fun cleanup()
 }

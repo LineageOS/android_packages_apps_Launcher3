@@ -21,7 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import com.android.launcher3.widgetpicker.ui.theme.WidgetPickerTheme
 
-/**  Contains theme that launcher applies to the widget picker. */
+/** Contains theme that launcher applies to the widget picker. */
 @Composable
 fun LauncherWidgetPickerTheme(content: @Composable () -> Unit) {
     val widgetPickerColors =
@@ -34,7 +34,7 @@ fun LauncherWidgetPickerTheme(content: @Composable () -> Unit) {
     MaterialTheme {
         WidgetPickerTheme(
             colors = widgetPickerColors,
-            textStyles = launcherWidgetPickerTextStyles()
+            textStyles = launcherWidgetPickerTextStyles(),
         ) {
             content()
         }
