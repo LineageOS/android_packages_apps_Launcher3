@@ -419,18 +419,6 @@ public class ActiveGestureProtoLogProxy {
         }
     }
 
-    public static void logFinishRunningRecentsAnimation(boolean toHome,
-            @NonNull ActiveGestureLog.CompoundString reason) {
-        ActiveGestureLog.INSTANCE.addLog(new ActiveGestureLog.CompoundString(
-                "TaskAnimationManager.finishRunningRecentsAnimation: toHome=%b, reason=",
-                toHome).append(reason));
-        if (willProtoLog()) {
-            ProtoLog.d(PROTO_LOG_GROUP,
-                    "TaskAnimationManager.finishRunningRecentsAnimation: toHome=%b, reason=%s",
-                    toHome, reason.toString());
-        }
-    }
-
     public static void logOnRecentsAnimationStartCancelled() {
         ActiveGestureLog.INSTANCE.addLog("RecentsAnimationCallbacks.onAnimationStart (canceled): 0",
                 /* gestureEvent= */ ON_START_RECENTS_ANIMATION);

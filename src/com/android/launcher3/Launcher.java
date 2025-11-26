@@ -1151,10 +1151,10 @@ public class Launcher extends StatefulActivity<LauncherState>
         LauncherState state = stateValues[stateOrdinal];
 
         NonConfigInstance lastInstance = (NonConfigInstance) getLastNonConfigurationInstance();
-        boolean forceRestore = lastInstance != null
+        boolean isUiModeChange = lastInstance != null
                 && ((lastInstance.config.diff(mOldConfig) & CONFIG_UI_MODE) != 0
                 || savedState.getBoolean(RUNTIME_STATE_RECREATE_TO_UPDATE_THEME));
-        if (forceRestore || !state.shouldDisableRestore()) {
+        if (!state.shouldDisableRestore(isUiModeChange)) {
             mStateManager.goToState(state, false /* animated */);
         }
 

@@ -247,6 +247,57 @@ public class TaskAnimationManagerTest {
     }
 
     @Test
+    public void testLauncherDestroyed_afterRecentsAnimationStarted_finishesAnimation() {
+        final GestureState gestureState = buildMockGestureState();
+        final ArgumentCaptor<RecentsAnimationCallbacks> listenerCaptor =
+                ArgumentCaptor.forClass(RecentsAnimationCallbacks.class);
+        final RecentsAnimationControllerCompat controllerCompat =
+                mock(RecentsAnimationControllerCompat.class);
+        final RemoteAnimationTarget remoteAnimationTarget = new RemoteAnimationTarget(
+                /* taskId= */ 0,
+                /* mode= */ RemoteAnimationTarget.MODE_CLOSING,
+                /* leash= */ new SurfaceControl(),
+                /* isTranslucent= */ false,
+                /* clipRect= */ null,
+                /* contentInsets= */ null,
+                /* prefixOrderIndex= */ 0,
+                /* position= */ null,
+                /* localBounds= */ null,
+                /* screenSpaceBounds= */ null,
+                new Configuration().windowConfiguration,
+                /* isNotInRecents= */ false,
+                /* startLeash= */ null,
+                /* startBounds= */ null,
+                /* taskInfo= */ new ActivityManager.RunningTaskInfo(),
+                /* allowEnterPip= */ false);
+
+        when(mSystemUiProxy
+                .startRecentsTransition(any(), any(), listenerCaptor.capture(), anyBoolean(), any(),
+                        anyInt()))
+                .thenReturn(true);
+
+        runOnMainSync(() -> {
+            mTaskAnimationManager.startRecentsAnimation(
+                    gestureState,
+                    new Intent(),
+                    mock(RecentsAnimationCallbacks.RecentsAnimationListener.class));
+
+            listenerCaptor.getValue().onAnimationStart(
+                    controllerCompat,
+                    new RemoteAnimationTarget[] { remoteAnimationTarget },
+                    new RemoteAnimationTarget[] { remoteAnimationTarget },
+                    new Rect(),
+                    new Bundle(),
+                    new TransitionInfo(0, 0));
+            mTaskAnimationManager.onLauncherDestroyed();
+        });
+
+        // Verify checks that finish was only called once
+        runOnMainSync(() -> verify(controllerCompat)
+                .finish(/* toHome= */ eq(false), anyBoolean(), any()));
+    }
+
+    @Test
     public void testRecentsAnimationStartTimeout_cleansUpRecentsAnimation() {
         final GestureState gestureState = buildMockGestureState();
         when(mSystemUiProxy

@@ -31,7 +31,8 @@ import com.android.launcher3.views.ScrimColors;
  */
 public class HintState extends LauncherState {
 
-    private static final int STATE_FLAGS = FLAG_WORKSPACE_INACCESSIBLE | FLAG_DISABLE_RESTORE
+    private static final int STATE_FLAGS = FLAG_WORKSPACE_INACCESSIBLE
+            | FLAG_DISABLE_RESTORE_EXCEPT_UI_MODE_CHANGE
             | FLAG_HAS_SYS_UI_SCRIM;
 
     public static final float DEPTH_5_PERCENT = 0.05f;

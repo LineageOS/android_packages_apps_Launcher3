@@ -453,10 +453,11 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
             return;
         }
 
-        if (savedState.getBoolean(RUNTIME_STATE_RECREATE_TO_UPDATE_THEME)) {
-            // RecentsState is only restored after theme changes.
-            int stateOrdinal = savedState.getInt(RUNTIME_STATE, RecentsState.DEFAULT.ordinal);
-            RecentsState recentsState = RecentsState.stateFromOrdinal(stateOrdinal);
+        // RecentsState is only restored after theme changes.
+        int stateOrdinal = savedState.getInt(RUNTIME_STATE, RecentsState.DEFAULT.ordinal);
+        RecentsState recentsState = RecentsState.stateFromOrdinal(stateOrdinal);
+        boolean isUiModeChange = savedState.getBoolean(RUNTIME_STATE_RECREATE_TO_UPDATE_THEME);
+        if (!recentsState.shouldDisableRestore(isUiModeChange)) {
             mStateManager.goToState(recentsState, /*animated=*/false);
         }
     }
