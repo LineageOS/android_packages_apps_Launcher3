@@ -33,6 +33,7 @@ import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.waitForIdleSync
+import com.android.launcher3.taskbar.allapps.TaskbarAllAppsController
 import com.android.launcher3.taskbar.rules.AllTaskbarSandboxModules
 import com.android.launcher3.taskbar.rules.MockedRecentsModelHelper
 import com.android.launcher3.taskbar.rules.MockedRecentsModelTestRule
@@ -109,6 +110,7 @@ class KeyboardQuickSwitchControllerTest {
     @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
 
     @InjectController lateinit var keyboardQuickSwitchController: KeyboardQuickSwitchController
+    @InjectController lateinit var allAppsController: TaskbarAllAppsController
 
     private val isKqsShown: Boolean
         get() = getOnUiThread { keyboardQuickSwitchController.isShown }
@@ -309,6 +311,19 @@ class KeyboardQuickSwitchControllerTest {
         assertThat(taskIdCaptor.firstValue).isEqualTo(PREVIOUS_TASK_ID)
         assertThat(transitionCaptor.firstValue.remoteTransition)
             .isInstanceOf(SlideInRemoteTransition::class.java)
+    }
+
+    @Test
+    fun testOpenAllAppsClosesKeyboardQuickSwitchView() {
+        triggerAltTab()
+
+        assertThat(allAppsController.isOpen).isFalse()
+        assertThat(isKqsShown).isTrue()
+
+        runOnMainSync { allAppsController.toggle() }
+
+        assertThat(isKqsShown).isFalse()
+        assertThat(allAppsController.isOpen).isTrue()
     }
 
     private fun createSingleTask(taskId: Int) = SingleTask(createTask(taskId))
