@@ -25,6 +25,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Space
 import com.android.launcher3.R
+import com.android.launcher3.Utilities
 import com.android.launcher3.taskbar.TaskbarActivityContext
 
 open class PhoneLandscapeNavLayoutter(
@@ -35,6 +36,9 @@ open class PhoneLandscapeNavLayoutter(
     imeSwitcher: ImageView?,
     a11yButton: ImageView?,
     space: Space?,
+    backButton: ImageView?,
+    homeButton: ImageView?,
+    recentsButton: ImageView?,
 ) :
     AbstractNavButtonLayoutter(
         resources,
@@ -44,6 +48,9 @@ open class PhoneLandscapeNavLayoutter(
         imeSwitcher,
         a11yButton,
         space,
+        backButton,
+        homeButton,
+        recentsButton,
     ) {
 
     override val orientation = LinearLayout.VERTICAL
@@ -109,9 +116,12 @@ open class PhoneLandscapeNavLayoutter(
         repositionContextualButtons(contextualButtonHeight.toInt())
     }
 
-    /** Landscape flips the default order to account for rotation. */
     override fun shouldFlipButtonOrder(): Boolean {
-        return !super.shouldFlipButtonOrder()
+        // setting & config both flip the order, so xor operator makes them cancel each other out.
+        val settingOrConfiguration = isFlipEnabledBySetting() xor Utilities.isRtl(resources)
+
+        // Landscape default button order is reversed.
+        return !settingOrConfiguration
     }
 
     open fun repositionContextualButtons(buttonSize: Int) {

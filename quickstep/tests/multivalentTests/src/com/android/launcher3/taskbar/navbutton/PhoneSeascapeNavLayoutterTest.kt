@@ -17,7 +17,6 @@
 package com.android.launcher3.taskbar.navbutton
 
 import androidx.test.filters.SmallTest
-import com.android.launcher3.taskbar.TaskbarActivityContext
 import org.junit.Test
 import org.junit.runner.RunWith
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
@@ -25,12 +24,11 @@ import platform.test.runner.parameterized.Parameters
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
-class AbstractNavButtonLayoutterTest(private val order: AbstractButtonOrder) :
+class PhoneSeascapeNavLayoutterTest(private val order: SeascapeButtonOrder) :
     NavButtonLayoutterTest() {
-
     @Test
     fun addThreeButtons_expectedOrder() {
-        val layoutter = TestLayoutter()
+        val layoutter = createLayoutter()
 
         configureButtonOrder(order.flipSetting, order.rtlLocale)
         layoutter.addThreeButtons()
@@ -38,8 +36,8 @@ class AbstractNavButtonLayoutterTest(private val order: AbstractButtonOrder) :
         assertButtonOrder(order.isFlipOrderExpected)
     }
 
-    inner class TestLayoutter :
-        AbstractNavButtonLayoutter(
+    fun createLayoutter(): PhoneSeascapeNavLayoutter {
+        return PhoneSeascapeNavLayoutter(
             resources,
             navButtonContainer,
             endContextualContainer,
@@ -50,28 +48,23 @@ class AbstractNavButtonLayoutterTest(private val order: AbstractButtonOrder) :
             backButton,
             homeButton,
             recentsButton,
-        ) {
-
-        override fun layoutButtons(
-            context: TaskbarActivityContext,
-            isA11yButtonPersistent: Boolean,
-        ) {}
+        )
     }
 
     companion object {
-        enum class AbstractButtonOrder(
+        enum class SeascapeButtonOrder(
             val flipSetting: Boolean,
             val rtlLocale: Boolean,
             val isFlipOrderExpected: Boolean,
         ) {
             NO_FLIP_LTR(flipSetting = false, rtlLocale = false, isFlipOrderExpected = false),
-            NO_FLIP_RTL(flipSetting = false, rtlLocale = true, isFlipOrderExpected = false),
+            NO_FLIP_RTL(flipSetting = false, rtlLocale = true, isFlipOrderExpected = true),
             FLIP_LTR(flipSetting = true, rtlLocale = false, isFlipOrderExpected = true),
-            FLIP_RTL(flipSetting = true, rtlLocale = true, isFlipOrderExpected = true),
+            FLIP_RTL(flipSetting = true, rtlLocale = true, isFlipOrderExpected = false),
         }
 
         @JvmStatic
         @Parameters
-        fun testParameters(): List<AbstractButtonOrder> = AbstractButtonOrder.entries
+        fun testParameters(): List<SeascapeButtonOrder> = SeascapeButtonOrder.entries
     }
 }
