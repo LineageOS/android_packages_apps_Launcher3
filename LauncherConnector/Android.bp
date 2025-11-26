@@ -19,10 +19,22 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
+java_library_static {
+    name: "LauncherConnectorProtoLib",
+    srcs: [
+        "src/com/android/launcherconnector/**/*.proto",
+    ],
+    proto: {
+        type: "lite",
+        local_include_dirs: [
+            "src/com/android/launcherconnector",
+        ],
+    },
+}
+
 android_app {
     name: "LauncherConnector",
     certificate: "platform",
-    platform_apis: true,
     // TODO: b/463653293 - Confirm whether the app should be privileged.
     privileged: false,
     optimize: {
@@ -34,5 +46,12 @@ android_app {
     ],
     static_libs: [
         "androidx.appcompat_appcompat",
+        "LauncherConnectorProtoLib",
+        "grpc-java-api",
+        "grpc-java-binder",
+        "libprotobuf-java-lite",
+        "grpc-java-lite",
     ],
+    resource_dirs: ["res"],
+    platform_apis: true,
 }

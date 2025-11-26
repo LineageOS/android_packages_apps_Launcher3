@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package com.android.launcherconnector.proto;
+
+import "packages/apps/Launcher3/LauncherConnector/src/com/android/launcherconnector/proto/common/request_context.proto";
+
+option java_multiple_files = true;
+option java_package = "com.android.launcherconnector.proto";
+option java_outer_classname = "DeleteResultRequestOuterClass";
+
+message DeleteResultRequest {
+  // ID for the result to be deleted, as provided in the ID field of SearchResult#search_target.
+  string result_id = 1;
+
+  // Context for the request.
+  RequestContext request_context = 2;
+}

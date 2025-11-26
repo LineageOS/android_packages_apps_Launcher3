@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package com.android.launcherconnector.proto;
+
+option java_multiple_files = true;
+option java_package = "com.android.launcherconnector.proto";
+option java_outer_classname = "ReportResultResponseOuterClass";
+
+message ReportResultResponse {
+  // Empty message - success/failure will be signalled via RPC status.
+}

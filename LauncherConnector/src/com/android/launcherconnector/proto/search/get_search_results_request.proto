@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package com.android.launcherconnector.proto;
+
+import "packages/apps/Launcher3/LauncherConnector/src/com/android/launcherconnector/proto/common/request_context.proto";
+import "packages/apps/Launcher3/LauncherConnector/src/com/android/launcherconnector/proto/common/query_info.proto";
+
+option java_package = "com.android.launcherconnector.proto";
+option java_multiple_files = true;
+option java_outer_classname = "GetSearchResultsRequestOuterClass";
+
+message GetSearchResultsRequest {
+   // Info on the query for which results should be provided.
+   QueryInfo query_info = 1;
+
+   // Context for the request.
+   RequestContext request_context = 2;
+
+   // Width and height (in pixels) at which icons for results will be rendered.
+   int32 icon_size_px = 3;
+}
