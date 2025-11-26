@@ -869,6 +869,14 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         Trace.beginSection(traceNameTruncated);
         try {
             debugTaskbarManager("recreateTaskbarForDisplay: getting device profile", displayId);
+
+            // We update external display dp for given displayId. We will need to recreate and
+            // update. We do this because external display dp need to be recreated for adjusting
+            // display info changes.
+            if (isExternalDisplay(displayId)) {
+                createExternalDeviceProfile(displayId);
+            }
+
             // TODO (b/381113004): make this display-specific via getWindowContext()
             DeviceProfile dp = getDeviceProfile(displayId);
 
