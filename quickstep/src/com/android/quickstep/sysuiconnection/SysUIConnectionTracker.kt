@@ -16,9 +16,13 @@
 
 package com.android.quickstep.sysuiconnection
 
+import android.content.Context
 import com.android.launcher3.dagger.LauncherAppSingleton
+import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.util.MutableListenableRef
+import com.android.launcher3.views.ActivityContext
 import com.android.quickstep.dagger.SysUIConnectionComponent
+import java.util.function.Consumer
 import javax.inject.Inject
 
 /** Class to track active sysUI connection */
@@ -31,5 +35,21 @@ class SysUIConnectionTracker @Inject constructor() {
 
     fun setActiveComponent(component: SysUIConnectionComponent?) {
         _activeComponent.dispatchValue(component)
+    }
+
+    /**
+     * Calls the [callback] on [context]'s UI thread while the context is active and the sysUI is
+     * connected
+     */
+    fun onConnected(context: ActivityContext, callback: Consumer<SysUIConnectionComponent>) {
+        context.closeOnDestroy(
+            activeComponent.forEach(context.uiExecutor) { if (it != null) callback.accept(it) }
+        )
+    }
+
+    companion object {
+
+        @JvmStatic
+        fun get(ctx: Context): SysUIConnectionTracker = ctx.appComponent.sysUIConnectionTracker
     }
 }

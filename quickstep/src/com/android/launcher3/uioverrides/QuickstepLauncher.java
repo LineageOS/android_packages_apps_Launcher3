@@ -198,7 +198,6 @@ import com.android.launcher3.util.WindowBlurState;
 import com.android.launcher3.views.FloatingIconView;
 import com.android.quickstep.BaseContainerInterface;
 import com.android.quickstep.LauncherActivityInterface;
-import com.android.quickstep.OverviewCommandHelper;
 import com.android.quickstep.OverviewComponentObserver;
 import com.android.quickstep.OverviewComponentObserver.OverviewChangeListener;
 import com.android.quickstep.RecentsAnimationDeviceState;
@@ -211,7 +210,7 @@ import com.android.quickstep.recents.di.RecentsComponent;
 import com.android.quickstep.split.SplitSelectStateController;
 import com.android.quickstep.split.SplitToWorkspaceController;
 import com.android.quickstep.split.SplitWithKeyboardShortcutController;
-import com.android.quickstep.sysuiconnection.TISBindHelper;
+import com.android.quickstep.sysuiconnection.SysUIConnectionTracker;
 import com.android.quickstep.util.ActiveGestureProtoLogProxy;
 import com.android.quickstep.util.AnimUtils;
 import com.android.quickstep.util.AsyncClockEventDelegate;
@@ -273,7 +272,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     private QuickstepTransitionManager mAppTransitionManager;
 
     private OverviewActionsView<?> mActionsView;
-    private TISBindHelper mTISBindHelper;
+    private SysUIConnectionTracker mSysUIConnectionTracker;
     private @Nullable TaskbarInteractor mTaskbarInteractor;
     // Will be updated when dragging from taskbar.
     private @Nullable volatile UnfoldTransitionProgressProvider mUnfoldTransitionProgressProvider;
@@ -380,7 +379,8 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
 
         mRecentsAnimationDeviceState = LauncherComponentProvider.get(this)
                 .getRecentsAnimationDeviceStateRepository().get(getDisplayId());
-        mTISBindHelper = new TISBindHelper(this, this::onTISConnected);
+        mSysUIConnectionTracker = SysUIConnectionTracker.get(this);
+        mSysUIConnectionTracker.onConnected(this, c -> c.getTaskbarManager().setActivity(this));
 
         if (DesktopModeStatus.canEnterDesktopModeOrShowAppHandle(this)) {
             mSplitSelectStateController.initSplitFromDesktopController(this);
@@ -681,7 +681,6 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
 
         OverviewComponentObserver.INSTANCE.get(this)
                 .removeOverviewChangeListener(mOverviewChangeListener);
-        mTISBindHelper.onDestroy();
 
         if (mLauncherUnfoldAnimationController != null) {
             mLauncherUnfoldAnimationController.onDestroy();
@@ -971,9 +970,12 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     protected void onNewIntent(Intent intent) {
         boolean intentHasGnc = GestureNavContract.canBuildFromIntent(intent);
         super.onNewIntent(intent);
-        OverviewCommandHelper overviewCommandHelper = mTISBindHelper.getOverviewCommandHelper();
-        if (overviewCommandHelper != null) {
-            overviewCommandHelper.clearPendingCommands();
+        var conn = mSysUIConnectionTracker.getActiveComponent().getValue();
+        if (conn != null) {
+            var overviewCommandHelper = conn.getOverviewCommandHelper().getIfReady();
+            if (overviewCommandHelper != null) {
+                overviewCommandHelper.clearPendingCommands();
+            }
         }
         if (RecentsWindowFlags.getEnableOverviewInWindow() && !intentHasGnc) {
             BaseContainerInterface<?, ?> defaultDisplayContainerInterface =
@@ -1124,10 +1126,10 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     }
 
     private void onTaskbarInAppDisplayProgressUpdate(float progress, int flag) {
-        TaskbarManager taskbarManager = mTISBindHelper.getTaskbarManager();
-        if (taskbarManager == null
-                || !taskbarManager.hasCurrentActivityContext()
-                || mTaskbarInteractor == null) {
+        var conn = mSysUIConnectionTracker.getActiveComponent().getValue();
+        if (conn == null) return;
+        TaskbarManager taskbarManager = conn.getTaskbarManager();
+        if (!taskbarManager.hasCurrentActivityContext() || mTaskbarInteractor == null) {
             return;
         }
         mTaskbarInteractor.onTaskbarInAppDisplayProgressUpdate(progress, flag);
@@ -1139,9 +1141,9 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     }
 
     protected void updateTaskbarsVisibility() {
-        TaskbarManager taskbarManager = mTISBindHelper.getTaskbarManager();
-        if (taskbarManager != null) {
-            taskbarManager.updateTaskbarsVisibility();
+        var conn = mSysUIConnectionTracker.getActiveComponent().getValue();
+        if (conn != null) {
+            conn.getTaskbarManager().updateTaskbarsVisibility();
         }
     }
 
@@ -1204,18 +1206,6 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         if (transitionManager != null) {
             transitionManager.onOverviewTargetChange();
         }
-    }
-
-    private void onTISConnected(TISBindHelper helper) {
-        TaskbarManager taskbarManager = mTISBindHelper.getTaskbarManager();
-        if (taskbarManager != null) {
-            taskbarManager.setActivity(this);
-        }
-    }
-
-    @Override
-    public void runOnBindToTouchInteractionService(Runnable r) {
-        mTISBindHelper.runOnBindToTouchInteractionService(r);
     }
 
     private void initUnfoldTransitionProgressProvider() {
@@ -1508,9 +1498,10 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
                 getDeviceProfile().toSmallString());
         SystemUiProxy.INSTANCE.get(this).setLauncherAppIconSize(
                 mDeviceProfile.getWorkspaceIconProfile().getIconSizePx());
-        TaskbarManager taskbarManager = mTISBindHelper.getTaskbarManager();
-        if (taskbarManager != null) {
-            taskbarManager.debugPrimaryTaskbar("QuickstepLauncher#onDeviceProfileChanged",
+
+        var conn = mSysUIConnectionTracker.getActiveComponent().getValue();
+        if (conn != null) {
+            conn.getTaskbarManager().debugPrimaryTaskbar("QuickstepLauncher#onDeviceProfileChanged",
                     true);
         }
     }
@@ -1569,8 +1560,12 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     }
 
     public boolean canStartHomeSafely() {
-        OverviewCommandHelper overviewCommandHelper = mTISBindHelper.getOverviewCommandHelper();
-        return overviewCommandHelper == null || overviewCommandHelper.canStartHomeSafely();
+        var conn = mSysUIConnectionTracker.getActiveComponent().getValue();
+        if (conn != null) {
+            var overviewCommandHelper = conn.getOverviewCommandHelper().getIfReady();
+            return overviewCommandHelper == null || overviewCommandHelper.canStartHomeSafely();
+        }
+        return true;
     }
 
     @Override
