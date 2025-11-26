@@ -49,8 +49,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.widgetpicker.shared.model.CloseBehavior
 import com.android.launcher3.widgetpicker.ui.LocalWidgetPickerCuiReporter
 import com.android.launcher3.widgetpicker.ui.NoOpWidgetPickerCuiReporter
-import com.android.launcher3.widgetpicker.ui.components.LocalWidgetPickerHostStateProvider
-import com.android.launcher3.widgetpicker.ui.components.WidgetPickerHostStateProvider
 import com.android.launcher3.widgetpicker.ui.components.accessibility.AccessibilityState
 import com.android.launcher3.widgetpicker.ui.components.accessibility.LocalAccessibilityState
 import com.android.launcher3.widgetpicker.ui.theme.WidgetPickerTheme
@@ -68,8 +66,6 @@ class TitledBottomSheetTest {
     @get:Rule val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     private var accessibilityState = AccessibilityState(isEnabled = false)
-
-    private val topResumedChangedCallbacks: MutableList<(Boolean) -> Unit> = mutableListOf()
 
     @OptIn(ExperimentalTestApi::class)
     @Test
@@ -110,29 +106,6 @@ class TitledBottomSheetTest {
             .assertIsDisplayed()
             .performClick()
 
-        composeTestRule.onNode(hasText(CONTENT_TEXT)).assertDoesNotExist()
-        composeTestRule.onNode(hasText(CLOSED_TEXT)).assertExists()
-    }
-
-    @Test
-    fun closesIfHostActivityIsNotTopResumed() {
-        composeTestRule.setContent {
-            SheetTestContent(/* closeBehavior= */ CloseBehavior.CLOSE_BUTTON)
-        }
-        composeTestRule.waitForIdle()
-
-        composeTestRule.onNode(hasText(CONTENT_TEXT)).assertExists()
-        composeTestRule.onNode(hasText(CLOSED_TEXT)).assertDoesNotExist()
-
-        topResumedChangedCallbacks.forEach { it(true) }
-
-        // Remain open if the host activity is still top resumed.
-        composeTestRule.onNode(hasText(CONTENT_TEXT)).assertExists()
-        composeTestRule.onNode(hasText(CLOSED_TEXT)).assertDoesNotExist()
-
-        topResumedChangedCallbacks.forEach { it(false) }
-
-        // Remain open if the host activity becoming not top resumed closes the sheet.
         composeTestRule.onNode(hasText(CONTENT_TEXT)).assertDoesNotExist()
         composeTestRule.onNode(hasText(CLOSED_TEXT)).assertExists()
     }
@@ -206,22 +179,10 @@ class TitledBottomSheetTest {
 
     @Composable
     private fun TestContentWrapper(content: @Composable () -> Unit) {
-        val hostStateProvider =
-            object : WidgetPickerHostStateProvider {
-                override fun observeIsTopResumed(listener: (Boolean) -> Unit) {
-                    topResumedChangedCallbacks.add(listener)
-                }
-
-                override fun stopObservingIsTopResumed(listener: (Boolean) -> Unit) {
-                    topResumedChangedCallbacks.remove(listener)
-                }
-            }
-
         WidgetPickerTheme {
             CompositionLocalProvider(
                 LocalWidgetPickerCuiReporter provides NoOpWidgetPickerCuiReporter(),
                 LocalAccessibilityState provides accessibilityState,
-                LocalWidgetPickerHostStateProvider provides hostStateProvider,
             ) {
                 content()
             }
