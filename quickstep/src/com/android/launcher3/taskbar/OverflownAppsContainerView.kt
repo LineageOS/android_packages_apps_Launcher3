@@ -21,6 +21,7 @@ import android.util.AttributeSet
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.core.view.children
 import androidx.core.view.updatePadding
@@ -135,6 +136,10 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 
     override fun addArrow() {
         super.addArrow()
+        alignArrow()
+    }
+
+    private fun alignArrow() {
         // Center the arrow to the overflow icon.
         val overflowIconCenterX = mTempRect.centerX().toFloat()
         mArrow.x = overflowIconCenterX - (mArrowWidth / 2f)
@@ -173,26 +178,67 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     }
 
     override fun getHitRectForUnpinRelativeToDragLayer(outRect: Rect?) {
-        // There is no area in the overflow container view can unpin a view.
+        dragDelegate.getHitRectForUnpinRelativeToDragLayer(outRect)
     }
 
-    // The overflow container view does not overlap with the icon.
     override fun isPointOnOverflowIcon(point: FloatArray): Boolean = false
 
     override fun reserveDropSlotForDragLocation(x: Int) {
-        // TODO("Not yet implemented")
+        dragDelegate.reserveDropSlotForDragLocation(x)
     }
 
     override fun releaseDropSlot() {
-        // TODO("Not yet implemented")
+        dragDelegate.releaseDropSlot()
     }
 
     override fun getPinIndex(): Int {
-        // TODO("Not yet implemented")
-        return -1
+        return dragDelegate.getPinIndex()
     }
 
     override fun updateItemViewVisibilityForDragState(itemView: View, isDragged: Boolean) {
-        // TODO("Not yet implemented")
+        dragDelegate.updateItemViewVisibilityForDragState(itemView, isDragged)
+    }
+
+    private val dragDelegate by lazy {
+        object :
+            PinnedAppsDragHelper(
+                context,
+                content,
+                mActivityContext.taskbarSpecsEvaluator.taskbarIconTouchSize.toInt(),
+            ) {
+            override fun calculateGhostViewIndex(onScreenLocationX: Int): Int {
+                val tempRect = Rect()
+                mActivityContext.dragLayer.getDescendantRectRelativeToSelf(content, tempRect)
+                val relativeX = onScreenLocationX - tempRect.left
+                val itemWidth = iconSize + spacing
+
+                val clampedX = relativeX.coerceIn(0, tempRect.width())
+
+                val count = content.childCount
+                val isGhostPresent = dropSpotIndex != -1
+                val realCount = if (isGhostPresent) count - 1 else count
+                val maxIndex = if (hasHiddenChild()) realCount - 1 else realCount
+
+                return (clampedX / itemWidth).coerceAtMost(maxIndex)
+            }
+
+            override fun createGhostViewLayoutParams(iconSize: Int): ViewGroup.LayoutParams {
+                return LayoutParams(iconSize, iconSize).apply {
+                    marginStart = spacing / 2
+                    marginEnd = spacing / 2
+                }
+            }
+
+            override fun onDragStateChanged() {
+                orientAboutObject()
+                alignArrow()
+            }
+
+            override fun getHitRectForPinRelativeToDragLayer(outRect: Rect?) {}
+
+            override fun getHitRectForUnpinRelativeToDragLayer(outRect: Rect?) {}
+
+            override fun isPointOnOverflowIcon(point: FloatArray): Boolean = false
+        }
     }
 }

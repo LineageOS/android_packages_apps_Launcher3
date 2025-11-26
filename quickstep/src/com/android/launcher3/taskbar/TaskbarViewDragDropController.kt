@@ -362,11 +362,7 @@ class TaskbarViewDragDropController(
             draggedInfo = extractItemInfoFromDragObject(dragObject)
             dragObject.getVisualCenter(dragObjectVisualCenter)
 
-            if (!isOverflowDropTarget) {
-                delegate.reserveDropSlotForDragLocation(dragObjectVisualCenter[0].toInt())
-            } else {
-                // TODO("Implement overflow drop target")
-            }
+            delegate.reserveDropSlotForDragLocation(dragObjectVisualCenter[0].toInt())
         }
 
         override fun onDragOver(dragObject: DropTarget.DragObject?) {
@@ -374,12 +370,10 @@ class TaskbarViewDragDropController(
             dragObject.getVisualCenter(dragObjectVisualCenter)
 
             if (isOverflowDropTarget) {
-                // TODO("Implement overflow drop target")
-                return
-            }
-
-            if (delegate.isPointOnOverflowIcon(dragObjectVisualCenter)) {
+                delegate.reserveDropSlotForDragLocation(dragObjectVisualCenter[0].toInt())
+            } else if (delegate.isPointOnOverflowIcon(dragObjectVisualCenter)) {
                 startOpenOverflowAlarm()
+                delegate.releaseDropSlot()
             } else {
                 startCloseOverflowAlarm()
                 delegate.reserveDropSlotForDragLocation(dragObjectVisualCenter[0].toInt())
@@ -435,7 +429,7 @@ class TaskbarViewDragDropController(
         fun isPointOnOverflowIcon(point: FloatArray): Boolean
 
         /** Reserves the location with a placeholder indicating where the icon to be dropped. */
-        fun reserveDropSlotForDragLocation(x: Int)
+        fun reserveDropSlotForDragLocation(onScreenLocationX: Int)
 
         /** Clears the reserved drop slot. */
         fun releaseDropSlot()
@@ -446,7 +440,7 @@ class TaskbarViewDragDropController(
          */
         fun getPinIndex(): Int
 
-        /** Updates the visibility of a Taskbar dragged item view based on its drag state. */
+        /** Updates the visibility of the dragged Taskbar item view based on its drag state. */
         fun updateItemViewVisibilityForDragState(itemView: View, isDragged: Boolean)
     }
 }
