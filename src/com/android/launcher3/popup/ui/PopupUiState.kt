@@ -16,12 +16,11 @@
 
 package com.android.launcher3.popup.ui
 
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.android.launcher3.model.data.ItemInfoWithIcon
 import com.android.launcher3.popup.PopupCategory
 
 /** Data class which stores all the values we need to create a long press menu shortcut. */
-data class PopupDataUi(
+data class PopupItem(
     val iconResId: Int,
     val labelResId: Int,
     val popupAction: () -> Unit,
@@ -38,12 +37,12 @@ enum class MainSegmentsStyle {
 
 /** Represents the UI state of the popup menu. */
 data class PopupUiState(
-    /** icon only system shortcuts */
-    val compactSystemShortcuts: List<PopupDataUi>,
-    /** full size system shortcuts */
-    val standardSystemShortcuts: List<PopupDataUi>,
-    /** app shortcuts */
-    val deepShortcuts: SnapshotStateList<ItemInfoWithIcon?>,
-    /** style for displaying the main sections of non-compact shortcuts */
-    val mainSegmentsStyle: MainSegmentsStyle,
+    /** Icon only system shortcuts. */
+    val compactSystemShortcuts: List<PopupItem> = emptyList(),
+    /** Full size system shortcuts. */
+    val standardSystemShortcuts: List<PopupItem> = emptyList(),
+    /** App shortcuts. */
+    val deepShortcuts: List<ItemInfoWithIcon?> = emptyList(),
+    /** Style for displaying the main sections of non-compact shortcuts. */
+    val mainSegmentsStyle: MainSegmentsStyle = MainSegmentsStyle.LIST,
 )
