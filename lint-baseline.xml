@@ -316,4 +316,15 @@
             column="37"/>
     </issue>
 
+    <issue
+        id="NewApi"
+        message="Call requires API level 33 (current min is 31): `android.os.Bundle#getParcelable`"
+        errorLine1="                            extras?.getParcelable("
+        errorLine2="                                    ~~~~~~~~~~~~~">
+        <location
+            file="packages/apps/Launcher3/src/com/android/launcher3/widgetpicker/WidgetPickerComposeWrapperImpl.kt"
+            line="165"
+            column="37"/>
+    </issue>
+
 </issues>
