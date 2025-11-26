@@ -123,7 +123,7 @@ class LauncherInteractor(private val launcher: QuickstepLauncher) : ActivityInte
 
     @AnyThread
     fun synchronizeNextDraw(view: View) {
-        executor.execute { synchronizeNextDraw(launcher.hotseat, view, Runnable {}) }
+        synchronizeNextDraw(launcher.hotseat, view, Runnable {})
     }
 
     @AnyThread
