@@ -122,6 +122,7 @@ class LauncherSwipeHandlerV2Test {
                             false,
                             inputConsumerController,
                             msdlPlayerWrapper,
+                            sandboxContext.displayId,
                         )
                     underTest.onGestureStarted(/* isLikelyToStartNewTask= */ false)
                 }

@@ -28,6 +28,9 @@ import com.android.launcher3.taskbar.TaskbarActivityContext
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.bubbles.BubbleActivityStarter
+import com.android.launcher3.taskbar.rules.TaskbarModeRule
+import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.TRANSIENT
+import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
@@ -44,7 +47,8 @@ import org.mockito.kotlin.mock
 class TaskbarOverlayControllerTest {
 
     @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()
-    @get:Rule(order = 1) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
+    @get:Rule(order = 1) val taskbarModeRule = TaskbarModeRule(context)
+    @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
     @InjectController lateinit var overlayController: TaskbarOverlayController
 
     private val taskbarContext: TaskbarActivityContext
@@ -174,6 +178,7 @@ class TaskbarOverlayControllerTest {
     }
 
     @Test
+    @TaskbarMode(TRANSIENT)
     fun testTaskMovedToFront_stashesBubbleBar() {
         val bubbleBarControllers = taskbarContext.controllers.bubbleControllers.get()
         val bubbleStashController = bubbleBarControllers.bubbleStashController

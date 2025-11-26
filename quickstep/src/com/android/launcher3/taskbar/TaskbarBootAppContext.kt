@@ -20,24 +20,28 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.view.View
 import android.view.ViewGroup
+import com.android.app.displaylib.PerDisplayRepository
 import com.android.launcher3.InMemoryLauncherPrefs
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.concurrent.ExecutorsModule
 import com.android.launcher3.dagger.ApiWrapperModule
 import com.android.launcher3.dagger.AppModule
 import com.android.launcher3.dagger.AutomationModule
+import com.android.launcher3.dagger.BasePerDisplayModule
 import com.android.launcher3.dagger.DesktopModule
 import com.android.launcher3.dagger.HomeScreenFilesModule
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
+import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.dagger.LauncherModelModule
-import com.android.launcher3.dagger.PerDisplayModule
+import com.android.launcher3.dagger.PerDisplayRepositoriesModule
 import com.android.launcher3.dagger.SettingsModule
 import com.android.launcher3.dagger.StaticObjectModule
 import com.android.launcher3.dagger.TaskOverlayModule
 import com.android.launcher3.dagger.WidgetModule
 import com.android.launcher3.dagger.WindowManagerProxyModule
 import com.android.launcher3.qsb.QsbWidgetFactory
+import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator
 import com.android.launcher3.util.PluginManagerWrapper
 import com.android.launcher3.util.SandboxContext
 import com.android.launcher3.util.dagger.LauncherExecutorsModule
@@ -61,6 +65,9 @@ class TaskbarBootAppContext(base: Context) : SandboxContext(base) {
             DaggerTaskbarBootComponent.builder()
                 .bindPrefs(InMemoryLauncherPrefs(this))
                 .bindPluginManagerWrapper(PluginManagerWrapper())
+                .bindTaskbarFeatureEvaluatorRepo(
+                    base.appComponent.taskbarFeatureEvaluatorRepository
+                )
         )
     }
 
@@ -99,7 +106,8 @@ abstract class QsbWidgetModule {
             StaticObjectModule::class,
             WidgetModule::class,
             AppModule::class,
-            PerDisplayModule::class,
+            BasePerDisplayModule::class,
+            PerDisplayRepositoriesModule::class,
             ExecutorsModule::class,
             LauncherExecutorsModule::class,
             LauncherWidgetPickerModule::class,
@@ -118,6 +126,11 @@ interface TaskbarBootComponent : LauncherAppComponent {
         @BindsInstance fun bindPrefs(prefs: LauncherPrefs): Builder
 
         @BindsInstance fun bindPluginManagerWrapper(wrapper: PluginManagerWrapper): Builder
+
+        @BindsInstance
+        fun bindTaskbarFeatureEvaluatorRepo(
+            taskbarFeatureEvaluatorRepo: PerDisplayRepository<TaskbarFeatureEvaluator>
+        ): Builder
 
         override fun build(): TaskbarBootComponent
     }

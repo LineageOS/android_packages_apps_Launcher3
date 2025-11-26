@@ -134,7 +134,6 @@ import com.android.launcher3.remoteanimations.ContainerAnimationRunner;
 import com.android.launcher3.remoteanimations.StartingWindowListener;
 import com.android.launcher3.shortcuts.DeepShortcutView;
 import com.android.launcher3.taskbar.TaskbarInteractor;
-import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator;
 import com.android.launcher3.testing.shared.ResourceUtils;
 import com.android.launcher3.touch.PagedOrientationHandler;
 import com.android.launcher3.uioverrides.QuickstepLauncher;
@@ -1126,7 +1125,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
     }
 
     private boolean isTransientTaskbar() {
-        return TaskbarFeatureEvaluator.INSTANCE.get(mLauncher).isTransient();
+        return mLauncher.getActivityComponent().getTaskbarFeatureEvaluator().isTransient();
     }
 
     private Animator getOpeningWindowAnimatorsForWidget(LauncherAppWidgetHostView v,

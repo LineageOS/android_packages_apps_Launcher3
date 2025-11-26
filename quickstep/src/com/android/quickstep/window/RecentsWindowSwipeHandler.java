@@ -123,9 +123,9 @@ public class RecentsWindowSwipeHandler extends AbsSwipeUpHandler<RecentsWindowMa
             RecentsAnimationDeviceState deviceState, RotationTouchHelper rotationTouchHelper,
             RecentsWindowManager recentsWindowManager, GestureState gestureState, long touchTimeMs,
             boolean continuingLastGesture,  InputConsumerController inputConsumer,
-            MSDLPlayerWrapper msdlPlayerWrapper) {
+            MSDLPlayerWrapper msdlPlayerWrapper, int displayId) {
         super(context, taskAnimationManager, deviceState, rotationTouchHelper, gestureState,
-                touchTimeMs, continuingLastGesture, inputConsumer, msdlPlayerWrapper);
+                touchTimeMs, continuingLastGesture, inputConsumer, msdlPlayerWrapper, displayId);
 
         mRecentsWindowManager = recentsWindowManager;
         mRunningOverHome = mGestureState.getRunningTask() != null

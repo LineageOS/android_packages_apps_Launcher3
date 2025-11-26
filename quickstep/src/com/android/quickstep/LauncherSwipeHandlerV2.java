@@ -70,9 +70,10 @@ public class LauncherSwipeHandlerV2 extends AbsSwipeUpHandler<
     public LauncherSwipeHandlerV2(Context context, TaskAnimationManager taskAnimationManager,
             RecentsAnimationDeviceState deviceState, RotationTouchHelper rotationTouchHelper,
             GestureState gestureState, long touchTimeMs, boolean continuingLastGesture,
-            InputConsumerController inputConsumer, MSDLPlayerWrapper msdlPlayerWrapper) {
+            InputConsumerController inputConsumer, MSDLPlayerWrapper msdlPlayerWrapper,
+            int displayId) {
         super(context, taskAnimationManager, deviceState, rotationTouchHelper, gestureState,
-                touchTimeMs, continuingLastGesture, inputConsumer, msdlPlayerWrapper);
+                touchTimeMs, continuingLastGesture, inputConsumer, msdlPlayerWrapper, displayId);
     }
 
 

@@ -108,9 +108,9 @@ public class FallbackSwipeHandler extends
             RecentsAnimationDeviceState deviceState, RotationTouchHelper rotationTouchHelper,
             GestureState gestureState, long touchTimeMs,
             boolean continuingLastGesture, InputConsumerController inputConsumer,
-            MSDLPlayerWrapper msdlPlayerWrapper) {
+            MSDLPlayerWrapper msdlPlayerWrapper, int displayId) {
         super(context, taskAnimationManager, deviceState, rotationTouchHelper, gestureState,
-                touchTimeMs, continuingLastGesture, inputConsumer, msdlPlayerWrapper);
+                touchTimeMs, continuingLastGesture, inputConsumer, msdlPlayerWrapper, displayId);
 
         mRunningOverHome = mGestureState.getRunningTask() != null
                 && mGestureState.getRunningTask().isHomeTask();
