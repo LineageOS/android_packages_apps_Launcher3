@@ -69,6 +69,7 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.Display;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.window.DesktopExperienceFlags;
@@ -574,6 +575,23 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         }
     }
 
+    /**
+     * We should update taskbar visibility when 1) changing {@link mActivityInteractor} as it is
+     * source of truth of taskbar visibility 2) when post boot animation dialog is dismissed
+     * (in such case launcher will invoke this API directly).
+     */
+    public void updateTaskbarsVisibility() {
+        debugPrimaryTaskbar("updateTaskbarsVisibility");
+        for (Entry<Integer, TaskbarActivityContext> entry : new ArraySet<>(mTaskbars.entrySet())) {
+            int displayId = entry.getKey();
+            int visibility = getTaskbarVisibility(entry.getValue().isUserSetupComplete());
+            FrameLayout rootLayout = getTaskbarRootLayoutForDisplay(displayId);
+            if (rootLayout != null) {
+                rootLayout.setVisibility(visibility);
+            }
+        }
+    }
+
     private void destroyAllTaskbars() {
         debugPrimaryTaskbar("destroyAllTaskbars");
         for (Entry<Integer, TaskbarActivityContext> entry : new ArraySet<>(mTaskbars.entrySet())) {
@@ -719,6 +737,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         }
         removeActivityCallbacksAndListeners();
         mActivityInteractor = activityInteractor;
+        updateTaskbarsVisibility();
         mDebugActivityDeviceProfileChangedSafeCloseable =
                 mActivityInteractor.addOnDeviceProfileChangeListener(
                         dp -> debugPrimaryTaskbar(
@@ -1302,6 +1321,23 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         }
     }
 
+    private int getTaskbarVisibility(boolean isUserSetupComplete) {
+        if (!isUserSetupComplete) {
+            // Taskbar needs to be visible during SUW flow, otherwise SUW UI will not properly
+            // update after keyboard is dismissed.
+            return View.VISIBLE;
+        } else if (mActivityInteractor == null) {
+            // No need to show taskbar if launcher doesn't exist
+            return View.GONE;
+        } else if (mActivityInteractor instanceof LauncherInteractor launcherInteractor) {
+            // If post boot dialog is visible, hide taskbar
+            return launcherInteractor.isPostbootDialogVisible() ? View.INVISIBLE : View.VISIBLE;
+        } else {
+            // Show taskbar
+            return View.VISIBLE;
+        }
+    }
+
     private void addTaskbarRootViewToWindow(@NonNull TaskbarActivityContext taskbar) {
         int displayId = taskbar.getDisplayId();
         debugTaskbarManager("addTaskbarRootViewToWindow:", displayId);
@@ -1316,6 +1352,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
             WindowManager windowManager = getWindowManager(displayId);
             if (rootLayout != null && windowManager != null) {
                 windowManager.addView(rootLayout, taskbar.getWindowLayoutParams());
+                rootLayout.setVisibility(getTaskbarVisibility(taskbar.isUserSetupComplete()));
                 mAddedRootLayouts.put(displayId, true);
             } else {
                 String rootLayoutStatus =
