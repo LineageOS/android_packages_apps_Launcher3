@@ -28,6 +28,7 @@ import org.junit.rules.MethodRule
 import org.junit.rules.TestRule
 import org.junit.runners.model.FrameworkMethod
 import org.junit.runners.model.Statement
+import org.mockito.Mockito.CALLS_REAL_METHODS
 import org.mockito.Mockito.withSettings
 import org.mockito.stubbing.Answer
 
@@ -84,7 +85,12 @@ object RoboApiWrapper {
                         ExtendedMockito.mockitoSession()
                             .initMocks(target)
                             .apply {
-                                helpers.forEach { mockStatic(it.clazz, withSettings().lenient()) }
+                                helpers.forEach {
+                                    mockStatic(
+                                        it.clazz,
+                                        withSettings().lenient().defaultAnswer(CALLS_REAL_METHODS),
+                                    )
+                                }
                             }
                             .startMocking()
                     val error = kotlin.runCatching { base.evaluate() }.exceptionOrNull()
