@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.widgets.resize
+package com.android.launcher3.widget.resize
 
 import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.AnimatedVisibility
@@ -91,17 +91,17 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import com.android.launcher3.R
-import com.android.launcher3.util.testTag
-import com.android.launcher3.util.testTagContainer
-import com.android.launcher3.widgets.resize.ResizeFrameAnimations.lowBounceMediumLowStiffness
-import com.android.launcher3.widgets.resize.ResizeFrameAnimations.noBounceHighStiffness
-import com.android.launcher3.widgets.resize.ResizeFrameAnimations.noBounceMediumLowStiffness
-import com.android.launcher3.widgets.resize.ResizeFrameDimensions.BorderWidth
-import com.android.launcher3.widgets.resize.ResizeFrameDimensions.DotPadding
-import com.android.launcher3.widgets.resize.ResizeFrameDimensions.ResizeButtonContentSize
-import com.android.launcher3.widgets.resize.ResizeFrameDimensions.TouchTargetSize
-import com.android.launcher3.widgets.resize.ResizeFrameDimensions.resizeButtonPadding
-import com.android.launcher3.widgets.resize.ResizeFrameDimensions.resizeButtonShape
+import com.android.launcher3.util.compose.testTag
+import com.android.launcher3.util.compose.testTagContainer
+import com.android.launcher3.widget.resize.ResizeFrameAnimations.lowBounceMediumLowStiffness
+import com.android.launcher3.widget.resize.ResizeFrameAnimations.noBounceHighStiffness
+import com.android.launcher3.widget.resize.ResizeFrameAnimations.noBounceMediumLowStiffness
+import com.android.launcher3.widget.resize.ResizeFrameDimensions.BorderWidth
+import com.android.launcher3.widget.resize.ResizeFrameDimensions.DotPadding
+import com.android.launcher3.widget.resize.ResizeFrameDimensions.ResizeButtonContentSize
+import com.android.launcher3.widget.resize.ResizeFrameDimensions.TouchTargetSize
+import com.android.launcher3.widget.resize.ResizeFrameDimensions.resizeButtonPadding
+import com.android.launcher3.widget.resize.ResizeFrameDimensions.resizeButtonShape
 
 /**
  * A bordered frame that fills the available space and insets the border by touch target size.

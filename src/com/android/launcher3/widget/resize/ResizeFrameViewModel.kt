@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.widgets.resize
+package com.android.launcher3.widget.resize
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

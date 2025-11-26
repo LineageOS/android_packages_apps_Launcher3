@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.widgets.resize
+package com.android.launcher3.widget.resize
 
 import android.annotation.SuppressLint
 import android.content.Context

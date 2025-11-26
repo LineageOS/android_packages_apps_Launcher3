@@ -19,11 +19,7 @@ package com.android.launcher3.compose
 import android.content.Context
 import android.view.View
 import androidx.compose.ui.platform.ComposeView
-import com.android.launcher3.CellLayout
 import com.android.launcher3.compose.core.BaseComposeFacade
-import com.android.launcher3.views.ActivityContext
-import com.android.launcher3.widget.LauncherAppWidgetHostView
-import com.android.launcher3.widgets.resize.AppWidgetResizeFrameCompose
 
 object ComposeFacade : BaseComposeFacade {
     override fun isComposeAvailable(): Boolean = true
@@ -34,12 +30,4 @@ object ComposeFacade : BaseComposeFacade {
         (view as? ComposeView)?.disposeComposition()
     }
 
-    /** Displays a resize frame for the provided widget view. */
-    fun showResizeFrame(
-        activityContext: ActivityContext,
-        widgetView: LauncherAppWidgetHostView,
-        cellLayout: CellLayout,
-    ) {
-        AppWidgetResizeFrameCompose.show(activityContext, widgetView, cellLayout)
-    }
 }
