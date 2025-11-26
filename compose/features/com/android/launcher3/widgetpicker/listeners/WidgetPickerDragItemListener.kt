@@ -20,10 +20,12 @@ import android.graphics.Point
 import android.graphics.Rect
 import android.util.Log
 import android.view.View
+import com.android.launcher3.LauncherState
 import com.android.launcher3.PendingAddItemInfo
 import com.android.launcher3.dragndrop.BaseItemDragListener
 import com.android.launcher3.dragndrop.DragOptions
 import com.android.launcher3.pm.ShortcutConfigActivityInfo.ShortcutConfigActivityInfoVO
+import com.android.launcher3.statemanager.StateManager
 import com.android.launcher3.widget.DatabaseWidgetPreviewLoader.WidgetPreviewInfo
 import com.android.launcher3.widget.LauncherAppWidgetProviderInfo
 import com.android.launcher3.widget.PendingAddShortcutInfo
@@ -57,6 +59,9 @@ class WidgetPickerDragItemListener(
     previewRect: Rect,
     previewWidth: Int,
 ) : BaseItemDragListener(previewRect, previewWidth, previewWidth) {
+
+    private var dragStarted = false
+
     override fun getMimeType(): String = mimeType
 
     override fun startDrag(
@@ -66,6 +71,9 @@ class WidgetPickerDragItemListener(
         screenPos: Point,
         options: DragOptions,
     ) {
+        if (dragStarted) {
+            return
+        }
         val pendingAddItemInfo: PendingAddItemInfo =
             when (widgetInfo) {
                 is WidgetInfo.AppWidgetInfo -> {
@@ -76,12 +84,10 @@ class WidgetPickerDragItemListener(
                         )
                     PendingAddWidgetInfo(launcherProviderInfo, container)
                 }
-
                 is WidgetInfo.StaticShortcutInfo ->
                     PendingAddShortcutInfo(
                         ShortcutConfigActivityInfoVO(widgetInfo.launcherActivityInfo)
                     )
-
                 else -> {
                     // items such as pinned shortcuts don't go through normal drag and drop; they
                     // go through pin flow where config activity might be skipped; and use separate
@@ -94,23 +100,44 @@ class WidgetPickerDragItemListener(
                 }
             }
 
-        val view = View(mLauncher)
-        view.tag = pendingAddItemInfo
+        val dragRunnable = Runnable {
+            if (dragStarted) {
+                return@Runnable
+            }
+            dragStarted = true
 
-        val dragHelper = PendingItemDragHelper(view)
+            val view = View(mLauncher)
+            view.tag = pendingAddItemInfo
 
-        if (widgetInfo.isAppWidget()) {
-            setAppWidgetPreviewInfo(widgetPreview, widgetInfo, dragHelper)
-        } // shortcut preview is fetched by home screen.
+            val dragHelper = PendingItemDragHelper(view)
 
-        dragHelper.startDrag(
-            previewRect,
-            previewBitmapWidth,
-            previewViewWidth,
-            screenPos,
-            /*source=*/ this,
-            options,
-        )
+            if (widgetInfo.isAppWidget()) {
+                setAppWidgetPreviewInfo(widgetPreview, widgetInfo, dragHelper)
+            } // shortcut preview is fetched by home screen.
+
+            dragHelper.startDrag(
+                previewRect,
+                previewBitmapWidth,
+                previewViewWidth,
+                screenPos,
+                /*source=*/ this,
+                options,
+            )
+        }
+        if (mLauncher.stateManager.state == LauncherState.NORMAL) {
+            dragRunnable.run()
+        } else {
+            mLauncher.stateManager.addStateListener(
+                object : StateManager.StateListener<LauncherState> {
+                    override fun onStateTransitionComplete(finalState: LauncherState) {
+                        if (finalState == LauncherState.NORMAL) {
+                            dragRunnable.run()
+                            mLauncher.stateManager.removeStateListener(this)
+                        }
+                    }
+                }
+            )
+        }
     }
 
     private fun setAppWidgetPreviewInfo(
