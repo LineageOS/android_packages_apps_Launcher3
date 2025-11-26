@@ -85,9 +85,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.android.app.animation.Interpolators
 import com.android.launcher3.R
-import com.android.launcher3.util.FontScalePreviews
-import com.android.launcher3.util.painterResource
-import com.android.launcher3.util.toComposeEasing
+import com.android.launcher3.util.compose.FontScalePreviews
+import com.android.launcher3.util.compose.painterResource
+import com.android.launcher3.util.compose.toComposeEasing
 import com.android.quickstep.recents.ui.composable.AppChip.IconSize
 import com.android.quickstep.recents.ui.composable.AppChip.IconSizeExpanded
 import com.android.quickstep.recents.ui.viewmodel.TaskData

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.util
+package com.android.launcher3.util.compose
 
 import android.animation.TimeInterpolator
 import android.graphics.drawable.Drawable
@@ -49,10 +49,7 @@ fun painterResource(drawable: Drawable): Painter {
     return BitmapPainter(imageBitmap)
 }
 
-
-/**
- * A multi-preview annotation that displays the same Composable with different font scales.
- */
+/** A multi-preview annotation that displays the same Composable with different font scales. */
 @Preview(name = "normal font", group = "font scales", fontScale = 1f)
 @Preview(name = "large font", group = "font scales", fontScale = 2f)
 annotation class FontScalePreviews

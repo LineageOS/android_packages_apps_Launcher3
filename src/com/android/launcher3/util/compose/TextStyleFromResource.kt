@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.util
+package com.android.launcher3.util.compose
 
 import androidx.annotation.StyleRes
 import androidx.compose.runtime.Composable
@@ -50,22 +50,24 @@ fun textStyleFromResource(@StyleRes styleResId: Int): TextStyle {
 
     // -- Separate groups of similar typed attributes. --
 
-    theme.obtainStyledAttributes(styleResId, intArrayOf(android.R.attr.fontFamily))
-        .use { typedArray ->
-            if (typedArray.hasValue(0)) {
-                typedArray.getString(0)?.let { fontName ->
-                    fontFamily = FontFamily(
+    theme.obtainStyledAttributes(styleResId, intArrayOf(android.R.attr.fontFamily)).use { typedArray
+        ->
+        if (typedArray.hasValue(0)) {
+            typedArray.getString(0)?.let { fontName ->
+                fontFamily =
+                    FontFamily(
                         Font(DeviceFontFamilyName(fontName), weight = FontWeight.Medium),
                         Font(DeviceFontFamilyName(fontName), weight = FontWeight.Normal),
                     )
-                }
             }
         }
+    }
 
-    theme.obtainStyledAttributes(
-        styleResId,
-        intArrayOf(android.R.attr.textSize, android.R.attr.lineHeight)
-    )
+    theme
+        .obtainStyledAttributes(
+            styleResId,
+            intArrayOf(android.R.attr.textSize, android.R.attr.lineHeight),
+        )
         .use { typedArray ->
             if (typedArray.hasValue(0)) {
                 val textSizePx = typedArray.getDimensionPixelSize(0, 0)
@@ -81,10 +83,8 @@ fun textStyleFromResource(@StyleRes styleResId: Int): TextStyle {
             }
         }
 
-    theme.obtainStyledAttributes(
-        styleResId,
-        intArrayOf(android.R.attr.fontWeight)
-    ).use { typedArray ->
+    theme.obtainStyledAttributes(styleResId, intArrayOf(android.R.attr.fontWeight)).use { typedArray
+        ->
         if (typedArray.hasValue(0)) {
             val fontWeightInt = typedArray.getInt(0, -1)
             if (fontWeightInt != -1) {

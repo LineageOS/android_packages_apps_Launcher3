@@ -18,7 +18,7 @@ package com.android.launcher3.widgetpicker.theme
 
 import androidx.compose.runtime.Composable
 import com.android.launcher3.R
-import com.android.launcher3.util.textStyleFromResource
+import com.android.launcher3.util.compose.textStyleFromResource
 import com.android.launcher3.widgetpicker.ui.theme.WidgetPickerTextStyles
 
 /**

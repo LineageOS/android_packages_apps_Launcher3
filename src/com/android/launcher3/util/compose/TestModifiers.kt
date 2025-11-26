@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.util
+package com.android.launcher3.util.compose
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
