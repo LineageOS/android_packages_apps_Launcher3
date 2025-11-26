@@ -290,6 +290,7 @@ public class TaskbarControllers {
         rotationButtonController.onDestroy();
         taskbarDragLayerController.onDestroy();
         taskbarUnfoldAnimationController.onDestroy();
+        taskbarEduTooltipController.onDestroy();
         taskbarViewController.onDestroy();
         stashedHandleViewController.onDestroy();
         cueBarController.onDestroy();
