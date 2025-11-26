@@ -19,6 +19,7 @@ import static com.android.systemui.shared.system.ActivityManagerWrapper.CLOSE_SY
 
 import android.media.AudioManager;
 import android.media.session.MediaSessionManager;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -47,6 +48,8 @@ import com.android.systemui.shared.system.InputMonitorCompat;
 public class LauncherInputConsumer<S extends BaseState<S>,
         T extends RecentsViewContainer & StatefulContainer<S>>
         implements InputConsumer {
+
+    private static final String TAG = "LauncherInputConsumer";
 
     private final T mContainer;
     private final BaseContainerInterface<?, T> mContainerInterface;
@@ -113,6 +116,7 @@ public class LauncherInputConsumer<S extends BaseState<S>,
             }
             if (mInputMonitor != null) {
                 TestLogging.recordEvent(TestProtocol.SEQUENCE_PILFER, "pilferPointers");
+                Log.d(TAG, "onMotionEvent: pilfering pointers for touch controller");
                 mInputMonitor.pilferPointers();
             }
         }
