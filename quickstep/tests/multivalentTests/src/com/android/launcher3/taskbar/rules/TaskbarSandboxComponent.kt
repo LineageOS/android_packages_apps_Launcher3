@@ -22,7 +22,6 @@ import com.android.launcher3.Flags
 import com.android.launcher3.LauncherPrefChangeListener
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.TASKBAR_PINNING
-import com.android.launcher3.compose.core.widgetpicker.NoOpWidgetPickerModule
 import com.android.launcher3.concurrent.ExecutorsModule
 import com.android.launcher3.dagger.ApiWrapperModule
 import com.android.launcher3.dagger.AppModule
@@ -51,6 +50,7 @@ import com.android.launcher3.util.SettingsCache
 import com.android.launcher3.util.TaskbarModeUtil
 import com.android.launcher3.util.dagger.LauncherExecutorsModule
 import com.android.launcher3.util.window.WindowManagerProxy
+import com.android.launcher3.widgetpicker.NoOpWidgetPickerModule
 import com.android.quickstep.RecentsAnimationDeviceState
 import com.android.quickstep.RotationTouchHelper
 import com.android.quickstep.SystemUiProxy

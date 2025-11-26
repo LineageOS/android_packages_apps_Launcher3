@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.compose.widgetpicker
+package com.android.launcher3.widgetpicker
 
-import com.android.launcher3.compose.core.widgetpicker.WidgetPickerComposeWrapper
-import com.android.launcher3.widgetpicker.WidgetPickerComponent
-import com.android.launcher3.widgetpicker.WidgetPickerComposeWrapperImpl
 import com.android.launcher3.widgetpicker.data.repository.WidgetAppIconsRepository
 import com.android.launcher3.widgetpicker.data.repository.WidgetUsersRepository
 import com.android.launcher3.widgetpicker.data.repository.WidgetsRepository

@@ -36,7 +36,6 @@ import com.android.launcher3.BaseActivity
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherSettings.Favorites
 import com.android.launcher3.R
-import com.android.launcher3.compose.core.widgetpicker.WidgetPickerComposeWrapper
 import com.android.launcher3.concurrent.annotations.BackgroundContext
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dragndrop.PinItemAddHandler
@@ -64,10 +63,10 @@ import com.android.launcher3.widgetpicker.ui.WidgetInteractionInfo
 import com.android.launcher3.widgetpicker.ui.WidgetInteractionSource
 import com.android.launcher3.widgetpicker.ui.WidgetPickerEventListeners
 import com.android.launcher3.widgetpicker.ui.components.WidgetPickerHostStateProvider
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.launch
 
 /**
  * An helper that bootstraps widget picker UI (from [WidgetPickerComponent]) in to

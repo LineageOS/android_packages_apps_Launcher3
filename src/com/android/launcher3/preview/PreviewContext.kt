@@ -23,7 +23,6 @@ import com.android.launcher3.LauncherModel
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.ProxyPrefs
 import com.android.launcher3.WorkspaceLayoutManager
-import com.android.launcher3.compose.core.widgetpicker.NoOpWidgetPickerModule
 import com.android.launcher3.concurrent.ExecutorsModule
 import com.android.launcher3.dagger.ApiWrapperModule
 import com.android.launcher3.dagger.AppModule
@@ -52,6 +51,7 @@ import com.android.launcher3.widget.LauncherWidgetHolder
 import com.android.launcher3.widget.LauncherWidgetHolder.WidgetHolderFactory
 import com.android.launcher3.widget.LocalColorExtractor
 import com.android.launcher3.widget.util.WidgetSizeHandler
+import com.android.launcher3.widgetpicker.NoOpWidgetPickerModule
 import com.android.systemui.shared.Flags
 import dagger.Binds
 import dagger.BindsInstance

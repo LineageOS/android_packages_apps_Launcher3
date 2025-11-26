@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.compose.core.widgetpicker
+package com.android.launcher3.widgetpicker
 
 import android.content.pm.LauncherApps.PinItemRequest
 import android.os.UserHandle
 import com.android.launcher3.BaseActivity
 import com.android.launcher3.dragndrop.PinItemAddHandler
 import com.android.launcher3.util.PackageUserKey
-import com.android.launcher3.widgetpicker.WidgetPickerConfig
 import javax.inject.Inject
 
 /**

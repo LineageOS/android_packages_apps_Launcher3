@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.compose.core.widgetpicker
+package com.android.launcher3.widgetpicker
 
 import dagger.Binds
 import dagger.Module
 
 /**
- * A module that provides a no-op [WidgetPickerComposeWrapper] for dagger graph that doesn't
- * involve widget picker e.g. launcher preview OR when compose is disabled via build flag.
+ * A module that provides a no-op [WidgetPickerComposeWrapper] for dagger graph that doesn't involve
+ * widget picker e.g. launcher preview OR when compose is disabled via build flag.
  */
 @Module
 interface NoOpWidgetPickerModule {
