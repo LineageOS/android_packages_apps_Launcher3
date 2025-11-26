@@ -43,24 +43,6 @@ filegroup {
     ],
 }
 
-// Main Launcher source for compose, excluding the build config
-filegroup {
-    name: "launcher-compose-enabled-src",
-    srcs: [
-        "compose/facade/enabled/**/*.kt",
-        "compose/facade/core/**/*.kt",
-        "compose/features/**/*.kt",
-    ],
-}
-
-filegroup {
-    name: "launcher-compose-disabled-src",
-    srcs: [
-        "compose/facade/core/**/*.kt",
-        "compose/facade/disabled/**/*.kt",
-    ],
-}
-
 filegroup {
     name: "launcher-compose-test-helpers-src",
     srcs: [
