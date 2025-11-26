@@ -36,7 +36,6 @@ import com.android.launcher3.BaseActivity
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherSettings.Favorites
 import com.android.launcher3.R
-import com.android.launcher3.compose.ComposeFacade
 import com.android.launcher3.compose.core.widgetpicker.WidgetPickerComposeWrapper
 import com.android.launcher3.concurrent.annotations.BackgroundContext
 import com.android.launcher3.dagger.ApplicationContext
@@ -65,11 +64,10 @@ import com.android.launcher3.widgetpicker.ui.WidgetInteractionInfo
 import com.android.launcher3.widgetpicker.ui.WidgetInteractionSource
 import com.android.launcher3.widgetpicker.ui.WidgetPickerEventListeners
 import com.android.launcher3.widgetpicker.ui.components.WidgetPickerHostStateProvider
-import java.lang.Runnable
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
-import kotlinx.coroutines.launch
 
 /**
  * An helper that bootstraps widget picker UI (from [WidgetPickerComponent]) in to
@@ -206,7 +204,7 @@ constructor(
             )
         val uiEventsReporter = LauncherWidgetPickerCuiReporter(activity.statsLogManager)
 
-        val composeView = ComposeFacade.initComposeView(activity.asContext()) as ComposeView
+        val composeView = ComposeView(activity.asContext())
 
         composeView.apply {
             setContent {

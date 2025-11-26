@@ -49,7 +49,6 @@ import com.android.launcher3.LauncherAppState
 import com.android.launcher3.LauncherAppState.Companion.getInstance
 import com.android.launcher3.LauncherSettings
 import com.android.launcher3.R
-import com.android.launcher3.compose.ComposeFacade.isComposeAvailable
 import com.android.launcher3.dagger.LauncherComponentProvider
 import com.android.launcher3.logging.StatsLogManager
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent
@@ -112,7 +111,7 @@ open class AddItemActivity :
     private var mFinishOnPause = false
 
     private val showComposeView
-        get() = isComposeAvailable() && Flags.enableAppWidgetPickerRefactor()
+        get() = Flags.enableAppWidgetPickerRefactor()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
