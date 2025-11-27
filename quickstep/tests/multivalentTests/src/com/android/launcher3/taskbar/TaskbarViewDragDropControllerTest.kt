@@ -193,9 +193,9 @@ class TaskbarViewDragDropControllerTest {
     @Test
     fun pinned_onDrop_reorderRightToLeft_shiftsItemsRight() {
         // Setup: Items [A(0), B(1), C(2)]
-        val itemA = createHotseatItem(0)
-        val itemB = createHotseatItem(1)
-        val itemC = createHotseatItem(2)
+        val itemA = createHotseatItem(0, 0)
+        val itemB = createHotseatItem(1, 1)
+        val itemC = createHotseatItem(2, 2)
 
         val hotseatInfos = IntSparseArrayMap<ItemInfo>()
         hotseatInfos.append(0, itemA)
@@ -222,10 +222,10 @@ class TaskbarViewDragDropControllerTest {
     @Test
     fun pinned_onDrop_reorderRightToLeft_shiftsStopAtEmptyItems() {
         // Setup: Items [A(0), B(1), C(3), D(4)]
-        val itemA = createHotseatItem(0)
-        val itemB = createHotseatItem(1)
-        val itemC = createHotseatItem(3)
-        val itemD = createHotseatItem(4)
+        val itemA = createHotseatItem(0, 0)
+        val itemB = createHotseatItem(1, 1)
+        val itemC = createHotseatItem(3, 2)
+        val itemD = createHotseatItem(4, 3)
 
         val hotseatInfos = IntSparseArrayMap<ItemInfo>()
         hotseatInfos.append(0, itemA)
@@ -354,8 +354,8 @@ class TaskbarViewDragDropControllerTest {
             .addOrMoveItemInDatabase(eq(itemC), eq(CONTAINER_HOTSEAT), any(), any(), any())
     }
 
-    private fun createHotseatItem(screenId: Int): ItemInfo {
-        val item = TaskbarViewTestUtil.createHotseatWorkspaceItem()
+    private fun createHotseatItem(screenId: Int, id: Int = 0): ItemInfo {
+        val item = TaskbarViewTestUtil.createHotseatWorkspaceItem(id)
         item.screenId = screenId
         return item
     }
