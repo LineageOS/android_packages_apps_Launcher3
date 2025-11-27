@@ -222,8 +222,8 @@ class GroupedTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
                     splitBoundsConfig.rightBottomTaskPercent < MINIMUM_RATIO_TO_SHOW_ICON
             }
 
-            leftTopTaskContainer.iconView.setFlexSplitAlpha(if (hideLeftTopIcon) 0f else 1f)
-            rightBottomTaskContainer.iconView.setFlexSplitAlpha(if (hideRightBottomIcon) 0f else 1f)
+            leftTopTaskContainer.iconView.flexSplitAlpha = if (hideLeftTopIcon) 0f else 1f
+            rightBottomTaskContainer.iconView.flexSplitAlpha = if (hideRightBottomIcon) 0f else 1f
         }
 
         val isDeviceRtl = Utilities.isRtl(resources)
