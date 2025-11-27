@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package com.android.launcherconnector.proto;
+
+option java_multiple_files = true;
+option java_package = "com.android.launcherconnector.proto";
+option java_outer_classname = "QueryInfoOuterClass";
+
+message QueryInfo {
+  // The text of the query.
+  string text = 1;
+
+  // The time the query was issued by the user (e.g. the time of the user's last
+  // keypress) in milliseconds since device boot.
+  int64 query_timestamp_ms = 2;
+}

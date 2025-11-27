@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package com.android.launcherconnector.proto;
+
+import "packages/apps/Launcher3/LauncherConnector/src/com/android/launcherconnector/proto/common/request_context.proto";
+import "packages/apps/Launcher3/LauncherConnector/src/com/android/launcherconnector/proto/common/query_info.proto";
+
+option java_multiple_files = true;
+option java_package = "com.android.launcherconnector.proto";
+option java_outer_classname = "NotifyEventRequestOuterClass";
+
+message NotifyEventRequest {
+  enum Event {
+    EVENT_UNKNOWN = 0;
+    EVENT_SEARCH_SESSION_STARTED = 1;
+    EVENT_SEARCH_SESSION_ENDED = 2;
+    EVENT_RESULT_SELECTED = 3;
+  }
+  // The event.
+  Event event = 1;
+
+  // The time the event occurred in milliseconds since device boot.
+  int64 timestamp_ms = 2;
+
+  // ID for the result the event pertains to, if applicable,as provided in
+  // the ID field of SearchResult#search_target.
+  string result_id = 3;
+
+  // Info on the query for which result was fetched, if applicable.
+  QueryInfo query_info = 4;
+
+  // Context for the request.
+  RequestContext request_context = 5;
+}

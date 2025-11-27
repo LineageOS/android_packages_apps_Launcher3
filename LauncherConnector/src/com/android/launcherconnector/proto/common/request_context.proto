@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package com.android.launcherconnector;
+
+option java_package = "com.android.launcherconnector.proto";
+option java_multiple_files = true;
+option java_outer_classname = "RequestContextOuterClass";
+
+message RequestContext {
+  enum EntryPoint {
+    ENTRY_POINT_UNKNOWN = 0;
+    ENTRY_POINT_ALL_APPS = 1;
+    ENTRY_POINT_TASKBAR = 2;
+  }
+  // Search entry point the request pertains to.
+  EntryPoint entry_point = 1;
+
+  // Unique ID for the client sending the request.
+  string client_id = 2;
+}
