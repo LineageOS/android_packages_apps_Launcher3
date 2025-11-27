@@ -58,6 +58,7 @@ import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.app.animation.Interpolators;
+import com.android.launcher3.folder.ClippedFolderIconLayoutRule;
 import com.android.launcher3.Flags;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
@@ -75,6 +76,7 @@ import com.android.launcher3.views.BaseDragLayer;
 public class DragView extends FrameLayout {
 
     public static final int VIEW_ZOOM_DURATION = 150;
+    private static final int PARALLAX_MAX_IN_DP = 8;
 
     private final View mContent;
     // The following are only used for rendering mContent directly during drag-n-drop.
@@ -276,9 +278,20 @@ public class DragView extends FrameLayout {
                 Utilities.scaleRectAboutCenter(shrunkBounds, 0.98f);
                 adaptiveIcon.setBounds(shrunkBounds);
 
-                final Path mask = (adaptiveIcon instanceof FolderAdaptiveIcon
-                        ? themeManager.getFolderShape() : themeManager.getIconShape())
-                        .getPath(shrunkBounds);
+                final Path mask;
+                if (adaptiveIcon instanceof FolderAdaptiveIcon) {
+                    // In order to not clip preview icons, need to account for both parallax
+                    // as well padding for the icon overlap outside of the folder icon.
+                    Rect maskBounds = new Rect(shrunkBounds);
+                    Utilities.scaleRectAboutCenter(maskBounds,
+                            ClippedFolderIconLayoutRule.ICON_OVERLAP_FACTOR);
+                    final int maxParallax =
+                            (int) (getResources().getDisplayMetrics().density * PARALLAX_MAX_IN_DP);
+                    maskBounds.inset(-maxParallax, -maxParallax);
+                    mask = themeManager.getFolderShape().getPath(maskBounds);
+                } else {
+                    mask = themeManager.getIconShape().getPath(shrunkBounds);
+                }
 
                 mTranslateX = new SpringFloatValue(DragView.this,
                         w * AdaptiveIconDrawable.getExtraInsetFraction());
@@ -619,7 +632,6 @@ public class DragView extends FrameLayout {
         // Following three values are fine tuned with motion ux designer
         private static final int STIFFNESS = 4000;
         private static final float DAMPENING_RATIO = 1f;
-        private static final int PARALLAX_MAX_IN_DP = 8;
 
         private final View mView;
         private final SpringAnimation mSpring;
