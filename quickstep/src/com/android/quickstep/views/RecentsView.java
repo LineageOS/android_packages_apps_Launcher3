@@ -189,6 +189,7 @@ import com.android.quickstep.RecentsModel;
 import com.android.quickstep.RemoteAnimationTargets;
 import com.android.quickstep.RemoteTargetGluer;
 import com.android.quickstep.RemoteTargetGluer.RemoteTargetHandle;
+import com.android.quickstep.SplitRecentsAnimUtils;
 import com.android.quickstep.SplitSelectionListener;
 import com.android.quickstep.SystemUiProxy;
 import com.android.quickstep.TaskOverlayFactory;
@@ -4791,12 +4792,10 @@ public abstract class RecentsView<
                 if (taskView instanceof GroupedTaskView && hasAllValidTaskIds(taskView.getTaskIds())
                         && mRemoteTargetHandles != null) {
                     // TODO(b/194414938): make this part of the animations instead.
-                    TaskViewUtils.createSplitAuxiliarySurfacesAnimator(
-                            mRemoteTargetHandles[0].getTransformParams().getTargetSet().nonApps,
-                            true /*shown*/, (dividerAnimator) -> {
-                                dividerAnimator.start();
-                                dividerAnimator.end();
-                            });
+                    SplitRecentsAnimUtils splitRecentsAnimUtils = new SplitRecentsAnimUtils(
+                            mRemoteTargetHandles[0].getTransformParams().getTargetSet().nonApps);
+                    splitRecentsAnimUtils.fadeInDimLayer(/* immediate= */ true);
+                    splitRecentsAnimUtils.fadeInDivider(/* immediate= */ true);
                 }
                 if (taskView.isRunningTask()) {
                     finishRecentsAnimation(false /* toHome */, null);

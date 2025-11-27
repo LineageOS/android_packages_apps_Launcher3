@@ -409,8 +409,10 @@ public class TaskAnimationManager implements RecentsAnimationCallbacks.RecentsAn
                         ActiveGestureProtoLogProxy.logLaunchingSideTaskFailed();
                     }
                 } else if (nonAppTargets.length > 0) {
-                    TaskViewUtils.createSplitAuxiliarySurfacesAnimator(nonAppTargets /* nonApps */,
-                            true /*shown*/, null /* animatorHandler */);
+                    SplitRecentsAnimUtils splitRecentsAnimUtils =
+                            new SplitRecentsAnimUtils(nonAppTargets);
+                    splitRecentsAnimUtils.fadeInDimLayer(/* immediate= */ true);
+                    splitRecentsAnimUtils.fadeInDivider(/* immediate= */ true);
                 }
                 if (mController != null) {
                     mLastAppearedTaskTargets = appearedTaskTargets;
