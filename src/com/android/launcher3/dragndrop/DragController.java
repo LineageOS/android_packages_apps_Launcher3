@@ -20,7 +20,6 @@ import static android.view.View.VISIBLE;
 
 import static com.android.launcher3.AbstractFloatingView.TYPE_DISCOVERY_BOUNCE;
 import static com.android.launcher3.Flags.enableSystemDrag;
-import static com.android.launcher3.Flags.removeAppsRefreshOnRightClick;
 import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_NOT_PINNABLE;
 
 import android.content.res.Resources;
@@ -246,7 +245,7 @@ public class DragController implements DragDriver.EventListener, TouchController
             android.os.Debug.startMethodTracing("Launcher");
         }
 
-        if (removeAppsRefreshOnRightClick() && mIsInMouseRightClick
+        if (mIsInMouseRightClick
                 && options.preDragCondition == null
                 && originalView instanceof View v) {
             options.preDragCondition = new PreDragCondition() {
@@ -736,14 +735,7 @@ public class DragController implements DragDriver.EventListener, TouchController
 
         mDragObject.dragComplete = true;
         if (mIsInPreDrag) {
-            if (removeAppsRefreshOnRightClick()) {
-                mDragObject.cancelled = true;
-            } else {
-                if (dropTarget != null) {
-                    dropTarget.onDragExit(mDragObject);
-                }
-                return;
-            }
+            mDragObject.cancelled = true;
         }
 
         // Drop onto the target.

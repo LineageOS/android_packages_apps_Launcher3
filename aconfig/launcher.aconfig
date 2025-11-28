@@ -403,16 +403,6 @@ flag {
 }
 
 flag {
-  name: "remove_apps_refresh_on_right_click"
-  namespace: "launcher"
-  description: "Remove predicted apps refresh on right click"
-  bug: "343650193"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "enable_taskbar_ui_thread"
   namespace: "launcher"
   description: "Enable per-window thread for taskbar"
