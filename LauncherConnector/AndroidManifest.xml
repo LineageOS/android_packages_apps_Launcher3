@@ -18,6 +18,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.launcherconnector">
 
-    <application android:label="@string/app_label" />
+    <application android:label="@string/app_label">
 
+    <service
+        android:name=".LauncherConnectorService"
+        android:exported="true" />
+    </application>
 </manifest>

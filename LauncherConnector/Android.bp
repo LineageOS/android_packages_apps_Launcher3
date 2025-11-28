@@ -19,17 +19,58 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
+// Proto lite grpc
+// Generate gRPC client code
+LITE_PROTO_CMD = "mkdir -p $(genDir)/gen && " +
+    "$(location aprotoc) --java_opt=annotate_code=false " +
+    "-Iexternal/protobuf/src " +
+    "-Ipackages/apps/Launcher3/LauncherConnector/src/com/android/launcherconnector/proto " +
+    "--plugin=protoc-gen-grpc-java=$(location protoc-gen-grpc-java-plugin) " +
+    "--grpc-java_out=lite:$(genDir)/gen $(in) && " +
+    "$(location soong_zip) -o $(out) -C $(genDir)/gen -D $(genDir)/gen"
+
+genrule {
+    name: "launcherconnector-grpc-protos",
+    tools: [
+        "aprotoc",
+        "protoc-gen-grpc-java-plugin",
+        "soong_zip",
+    ],
+    cmd: LITE_PROTO_CMD,
+    srcs: [
+        "src/com/android/launcherconnector/proto/**/*.proto",
+    ],
+    out: [
+        "protos.srcjar",
+    ],
+}
+
 java_library_static {
     name: "LauncherConnectorProtoLib",
     srcs: [
-        "src/com/android/launcherconnector/**/*.proto",
+        ":launcherconnector-grpc-protos",
+        "src/com/android/launcherconnector/proto/**/*.proto",
     ],
     proto: {
         type: "lite",
         local_include_dirs: [
-            "src/com/android/launcherconnector",
+            "src/com/android/launcherconnector/proto",
         ],
     },
+    static_libs: [
+        "libprotobuf-java-lite",
+        "guava",
+        "javax_annotation-api_1.3.2",
+        "grpc-java-api",
+        "grpc-java-protobuf-lite",
+        "grpc-java-context",
+        "grpc-java-core",
+        "grpc-java-core-util",
+        "grpc-java-core-internal",
+        "grpc-java-stub",
+        "perfmark-api-lib",
+        "grpc-java-core-inprocess",
+    ],
 }
 
 android_app {
@@ -45,13 +86,11 @@ android_app {
         "src/**/*.java",
     ],
     static_libs: [
-        "androidx.appcompat_appcompat",
         "LauncherConnectorProtoLib",
-        "grpc-java-api",
+        "androidx.appcompat_appcompat",
         "grpc-java-binder",
-        "libprotobuf-java-lite",
-        "grpc-java-lite",
     ],
     resource_dirs: ["res"],
     platform_apis: true,
+    manifest: "AndroidManifest.xml",
 }
