@@ -393,6 +393,7 @@ constructor(
     }
 
     override fun destroy() {
+        Log.d(TAG, "destroy")
         super.destroy()
         displayChangesSafeCloseable?.close()
         displayChangesSafeCloseable = null
