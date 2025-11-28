@@ -44,6 +44,7 @@ import com.android.launcher3.LauncherAnimUtils.VIEW_TRANSLATE_Y
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
 import com.android.launcher3.util.MSDLPlayerWrapper
+import com.android.launcher3.util.MultiPropertyDelegate
 import com.android.launcher3.util.MultiPropertyFactory
 import com.android.launcher3.util.MultiPropertyFactory.FloatBiFunction
 import com.android.launcher3.util.MultiValueAlpha
@@ -123,7 +124,12 @@ constructor(
     private var animator: AnimatorSet? = null
 
     private val multiValueAlpha: MultiValueAlpha =
-        MultiValueAlpha(this, NUM_ALPHA_CHANNELS).apply { setUpdateVisibility(true) }
+        MultiValueAlpha(this, Alpha.entries.size).apply { setUpdateVisibility(true) }
+    var contentAlpha by MultiPropertyDelegate(multiValueAlpha, Alpha.Content)
+    var colorTintAlpha by MultiPropertyDelegate(multiValueAlpha, Alpha.ColorTint)
+    var modalAlpha by MultiPropertyDelegate(multiValueAlpha, Alpha.Modal)
+    var flexSplitAlpha by MultiPropertyDelegate(multiValueAlpha, Alpha.FlexSplit)
+    var settledProgressAlpha by MultiPropertyDelegate(multiValueAlpha, Alpha.SettledProgress)
 
     private val viewTranslationX: MultiPropertyFactory<View> =
         MultiPropertyFactory(this, VIEW_TRANSLATE_X, INDEX_COUNT_TRANSLATION, SUM_AGGREGATOR)
@@ -379,24 +385,6 @@ constructor(
             arrowSize -
             appNameHorizontalMarginExpanded -
             arrowMarginEnd
-
-    fun setIconColorTint(amount: Float) {
-        // RecentsView's COLOR_TINT animates between 0 and 0.5f, we want to hide the app chip menu.
-        val colorTintAlpha = Utilities.mapToRange(amount, 0f, 0.5f, 1f, 0f, Interpolators.LINEAR)
-        multiValueAlpha[INDEX_COLOR_FILTER_ALPHA].value = colorTintAlpha
-    }
-
-    fun setContentAlpha(alpha: Float) {
-        multiValueAlpha[INDEX_CONTENT_ALPHA].value = alpha
-    }
-
-    fun setModalAlpha(alpha: Float) {
-        multiValueAlpha[INDEX_MODAL_ALPHA].value = alpha
-    }
-
-    fun setFlexSplitAlpha(alpha: Float) {
-        multiValueAlpha[INDEX_MINIMUM_RATIO_ALPHA].value = alpha
-    }
 
     /** Gets the view split x-axis translation */
     fun getSplitTranslationX(): MultiPropertyFactory<View>.MultiProperty =
@@ -678,12 +666,14 @@ constructor(
 
         private const val Z_INDEX_FRONT = 10f
 
-        private const val NUM_ALPHA_CHANNELS = 4
-        private const val INDEX_CONTENT_ALPHA = 0
-        private const val INDEX_COLOR_FILTER_ALPHA = 1
-        private const val INDEX_MODAL_ALPHA = 2
-        /** Used to hide the app chip for 90:10 flex split. */
-        private const val INDEX_MINIMUM_RATIO_ALPHA = 3
+        private enum class Alpha {
+            Content,
+            ColorTint,
+            Modal,
+            /** Used to hide the app chip for 90:10 flex split. */
+            FlexSplit,
+            SettledProgress,
+        }
 
         private const val INDEX_SPLIT_TRANSLATION = 0
         private const val INDEX_MENU_TRANSLATION = 1
