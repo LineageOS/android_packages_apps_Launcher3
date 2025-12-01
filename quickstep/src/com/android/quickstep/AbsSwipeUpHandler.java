@@ -1054,6 +1054,7 @@ public abstract class AbsSwipeUpHandler<
     }
 
     private void finishMagneticEffect() {
+        if (!enableSwipeUpMagneticDetach()) return;
         mCurrentShift.updateValue(mMagneticEffectShiftValue);
     }
 
