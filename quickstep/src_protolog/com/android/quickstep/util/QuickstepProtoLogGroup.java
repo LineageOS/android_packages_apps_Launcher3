@@ -28,14 +28,13 @@ import java.util.UUID;
 /** Enums used to interface with the ProtoLog API. */
 public enum QuickstepProtoLogGroup implements IProtoLogGroup {
 
-    ACTIVE_GESTURE_LOG(true, true, Constants.DEBUG_ACTIVE_GESTURE, "ActiveGestureLog"),
-    RECENTS_WINDOW(true, true, Constants.DEBUG_RECENTS_WINDOW, "RecentsWindow"),
-    LAUNCHER_STATE_MANAGER(true, true, Constants.DEBUG_STATE_MANAGER, "LauncherStateManager"),
-    OVERVIEW_COMMAND_HELPER(true, true, Constants.DEBUG_OVERVIEW_COMMAND_HELPER,
+    ACTIVE_GESTURE_LOG(true, Constants.DEBUG_ACTIVE_GESTURE, "ActiveGestureLog"),
+    RECENTS_WINDOW(true, Constants.DEBUG_RECENTS_WINDOW, "RecentsWindow"),
+    LAUNCHER_STATE_MANAGER(true, Constants.DEBUG_STATE_MANAGER, "LauncherStateManager"),
+    OVERVIEW_COMMAND_HELPER(true, Constants.DEBUG_OVERVIEW_COMMAND_HELPER,
             "OverviewCommandHelper");
 
     private final boolean mEnabled;
-    private volatile boolean mLogToProto;
     private volatile boolean mLogToLogcat;
     private final @NonNull String mTag;
 
@@ -55,14 +54,11 @@ public enum QuickstepProtoLogGroup implements IProtoLogGroup {
      * @param enabled     set to false to exclude all log statements for this group from
      *                    compilation,
      *                    they will not be available in runtime.
-     * @param logToProto  enable binary logging for the group
      * @param logToLogcat enable text logging for the group
      * @param tag         name of the source of the logged message
      */
-    QuickstepProtoLogGroup(
-            boolean enabled, boolean logToProto, boolean logToLogcat, @NonNull String tag) {
+    QuickstepProtoLogGroup(boolean enabled, boolean logToLogcat, @NonNull String tag) {
         this.mEnabled = enabled;
-        this.mLogToProto = logToProto;
         this.mLogToLogcat = logToLogcat;
         this.mTag = tag;
     }
