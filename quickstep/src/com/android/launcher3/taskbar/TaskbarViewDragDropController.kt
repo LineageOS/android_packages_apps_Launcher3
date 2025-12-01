@@ -299,10 +299,10 @@ class TaskbarViewDragDropController(
         }
 
         override fun getHitRectRelativeToDragLayer(outRect: Rect?) {
-            // TODO(b/447444838): For now, this makes recent apps section a drop target to unpin,
-            // this should probably be updated to be a clear drop target for item removal
-            // (pendng UX).
-            taskbarPinDelegate.getHitRectForUnpinRelativeToDragLayer(outRect)
+            if (overflowPinningDropTarget == null) {
+                taskbarPinDelegate.getHitRectForPinRelativeToDragLayer(outRect)
+                outRect?.offset(0, -activityContext.deviceProfile.taskbarProfile.height)
+            }
         }
     }
 
@@ -429,13 +429,6 @@ class TaskbarViewDragDropController(
          * Returns a Rect object to be populated with the calculated coordinates.
          */
         fun getHitRectForPinRelativeToDragLayer(outRect: Rect?)
-
-        /**
-         * Calculates the hit rectangle for the unpinned icons, relative to the DragLayer. This area
-         * includes the unpinned icons area. Returns a Rect object to be populated with the
-         * calculated coordinates.
-         */
-        fun getHitRectForUnpinRelativeToDragLayer(outRect: Rect?)
 
         /** Returns true if the given point is on the pinned overflow icon. */
         fun isPointOnOverflowIcon(point: FloatArray): Boolean
