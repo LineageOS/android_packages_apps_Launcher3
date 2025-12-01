@@ -259,6 +259,7 @@ public class BubbleBarController {
 
         boolean sysuiLocked = (flags & MASK_SYSUI_LOCKED) != 0;
         mBubbleStashController.setSysuiLocked(sysuiLocked);
+        mBubbleBarViewController.setSysuiLocked(sysuiLocked);
         mIsImeVisible = (flags & SYSUI_STATE_IME_VISIBLE) != 0;
         if (mIsImeVisible) {
             mBubbleBarViewController.onImeVisible();
@@ -660,6 +661,9 @@ public class BubbleBarController {
     }
 
     private void onBubbleBarBoundsChanged(boolean forceUpdate) {
+        if (mBarView.getBubbleBarBounds().height() <= 0) {
+            return;
+        }
         int bubbleBarTopToScreenBottom = mBarView.getTopToScreenBottom();
         if (bubbleBarTopToScreenBottom != mLastSentBubbleBarTopToScreenBottom || forceUpdate) {
             mLastSentBubbleBarTopToScreenBottom = bubbleBarTopToScreenBottom;

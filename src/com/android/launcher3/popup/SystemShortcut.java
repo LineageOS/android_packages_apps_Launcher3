@@ -38,7 +38,6 @@ import com.android.launcher3.SecondaryDropTarget;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate;
 import com.android.launcher3.allapps.PrivateProfileManager;
-import com.android.launcher3.compose.ComposeFacade;
 import com.android.launcher3.logging.StatsLogManager;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.ItemInfoWithIcon;
@@ -168,10 +167,7 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
         @Override
         public void onClick(View view) {
             AbstractFloatingView.closeAllOpenViews(mTarget);
-            boolean useComposePicker = ComposeFacade.INSTANCE.isComposeAvailable()
-                    && Flags.enableAppWidgetPickerRefactor();
-
-            if (useComposePicker) {
+            if (Flags.enableAppWidgetPickerRefactor()) {
                 Context context = view.getContext();
                 Intent intent = new Intent(Intent.ACTION_PICK);
                 intent.putExtra(Intent.EXTRA_PACKAGE_NAME,

@@ -40,8 +40,6 @@ import static com.android.launcher3.Utilities.getDescendantCoordRelativeToAncest
 import static com.android.launcher3.util.MultiPropertyFactory.MULTI_PROPERTY_VALUE;
 import static com.android.quickstep.BaseContainerInterface.getTaskDimension;
 import static com.android.quickstep.util.AnimUtils.clampToDuration;
-import static com.android.wm.shell.shared.TransitionUtil.TYPE_SPLIT_SCREEN_DIM_LAYER;
-import static com.android.wm.shell.shared.split.SplitScreenConstants.DEFAULT_OFFSCREEN_DIM;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -102,7 +100,6 @@ import com.android.systemui.shared.system.InteractionJankMonitorWrapper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * Utility class for helpful methods related to {@link TaskView} objects and their tasks.
@@ -670,17 +667,19 @@ public final class TaskViewUtils {
                 wallpaperTargets, nonAppTargets, depthController, transitionInfo,
                 appearedTaskId, pa);
         if (launcherClosing) {
-            // TODO(b/182592057): differentiate between "restore split" vs "launch fullscreen app"
-            TaskViewUtils.createSplitAuxiliarySurfacesAnimator(nonAppTargets, true /*shown*/,
-                    (dividerAnimator) -> {
-                        // If split apps are launching, we want to delay showing the divider bar
-                        // until the very end once the apps are mostly in place. This is because we
-                        // aren't moving the divider leash in the relative position with the
-                        // launching apps.
-                        dividerAnimator.setStartDelay(pa.getDuration()
-                                - SPLIT_DIVIDER_ANIM_DURATION);
-                        pa.add(dividerAnimator);
-                    });
+            SplitRecentsAnimUtils splitRecentsAnimUtils = new SplitRecentsAnimUtils(nonAppTargets);
+            ValueAnimator dividerAnimator = splitRecentsAnimUtils
+                    .fadeInDivider(/* immediate= */ false);
+            if (dividerAnimator != null) {
+                dividerAnimator.setStartDelay(pa.getDuration() - SPLIT_DIVIDER_ANIM_DURATION);
+                pa.add(dividerAnimator);
+            }
+            ValueAnimator dimAnimator = splitRecentsAnimUtils
+                    .fadeInDimLayer(/* immediate= */ false);
+            if (dimAnimator != null) {
+                dimAnimator.setStartDelay(pa.getDuration() - SPLIT_DIVIDER_ANIM_DURATION);
+                pa.add(dimAnimator);
+            }
         }
 
         Animator childStateAnimation = null;
@@ -785,98 +784,6 @@ public final class TaskViewUtils {
         if (windowAnimEndListener != null) {
             anim.addListener(windowAnimEndListener);
         }
-    }
-
-    /**
-     * Creates an animation to show/hide the auxiliary surfaces (aka. divider bar), only calling
-     * {@param animatorHandler} if there are valid surfaces to animate.
-     * Passing null handler to apply the visibility immediately.
-     *
-     * @return the animator animating the surfaces
-     */
-    public static ValueAnimator createSplitAuxiliarySurfacesAnimator(
-            @Nullable RemoteAnimationTarget[] nonApps, boolean shown,
-            @Nullable Consumer<ValueAnimator> animatorHandler) {
-        if (nonApps == null || nonApps.length == 0) {
-            return null;
-        }
-
-        // Since dim layers need to animate to a different alpha, we separate them out here.
-        List<SurfaceControl> dividerSurfaces = new ArrayList<>();
-        List<SurfaceControl> dimLayerSurfaces = new ArrayList<>();
-        // For convenience, we also keep a pointer to all the divider + dim layer leashes together.
-        List<SurfaceControl> auxiliarySurfaces = new ArrayList<>();
-        for (RemoteAnimationTarget target : nonApps) {
-            final SurfaceControl leash = target.leash;
-            if (leash != null && leash.isValid()) {
-                if (target.windowType == TYPE_DOCK_DIVIDER) {
-                    dividerSurfaces.add(leash);
-                } else if (target.windowType == TYPE_SPLIT_SCREEN_DIM_LAYER) {
-                    dimLayerSurfaces.add(leash);
-                }
-                auxiliarySurfaces.add(leash);
-            }
-        }
-
-        if (auxiliarySurfaces.isEmpty()) {
-            return null;
-        }
-
-        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-        if (animatorHandler == null) {
-            // Apply the visibility directly without fade animation.
-            for (SurfaceControl leash : auxiliarySurfaces) {
-                t.setVisibility(leash, shown);
-            }
-            t.apply();
-            t.close();
-            return null;
-        }
-
-        ValueAnimator dockFadeAnimator = ValueAnimator.ofFloat(0f, 1f);
-        dockFadeAnimator.addUpdateListener(valueAnimator -> {
-            float progress = valueAnimator.getAnimatedFraction();
-            for (SurfaceControl leash : dividerSurfaces) {
-                if (leash != null && leash.isValid()) {
-                    t.setAlpha(leash, shown ? progress : 1 - progress);
-                }
-            }
-            for (SurfaceControl leash : dimLayerSurfaces) {
-                if (leash != null && leash.isValid()) {
-                    t.setAlpha(leash, (shown ? progress : 1 - progress) * DEFAULT_OFFSCREEN_DIM);
-                }
-            }
-            t.apply();
-        });
-        dockFadeAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-                if (shown) {
-                    for (SurfaceControl leash : auxiliarySurfaces) {
-                        t.setLayer(leash, Integer.MAX_VALUE);
-                        t.setAlpha(leash, 0);
-                        t.show(leash);
-                    }
-                    t.apply();
-                }
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                if (!shown) {
-                    for (SurfaceControl leash : auxiliarySurfaces) {
-                        if (leash != null && leash.isValid()) {
-                            t.hide(leash);
-                        }
-                    }
-                    t.apply();
-                }
-                t.close();
-            }
-        });
-        dockFadeAnimator.setDuration(SPLIT_DIVIDER_ANIM_DURATION);
-        animatorHandler.accept(dockFadeAnimator);
-        return dockFadeAnimator;
     }
 
     /**

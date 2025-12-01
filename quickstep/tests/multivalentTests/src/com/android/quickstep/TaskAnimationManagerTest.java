@@ -21,8 +21,10 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static com.android.quickstep.TaskAnimationManager.RECENTS_ANIMATION_START_TIMEOUT_MS;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -68,6 +70,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 
 @SmallTest
@@ -244,6 +247,57 @@ public class TaskAnimationManagerTest {
     }
 
     @Test
+    public void testLauncherDestroyed_afterRecentsAnimationStarted_finishesAnimation() {
+        final GestureState gestureState = buildMockGestureState();
+        final ArgumentCaptor<RecentsAnimationCallbacks> listenerCaptor =
+                ArgumentCaptor.forClass(RecentsAnimationCallbacks.class);
+        final RecentsAnimationControllerCompat controllerCompat =
+                mock(RecentsAnimationControllerCompat.class);
+        final RemoteAnimationTarget remoteAnimationTarget = new RemoteAnimationTarget(
+                /* taskId= */ 0,
+                /* mode= */ RemoteAnimationTarget.MODE_CLOSING,
+                /* leash= */ new SurfaceControl(),
+                /* isTranslucent= */ false,
+                /* clipRect= */ null,
+                /* contentInsets= */ null,
+                /* prefixOrderIndex= */ 0,
+                /* position= */ null,
+                /* localBounds= */ null,
+                /* screenSpaceBounds= */ null,
+                new Configuration().windowConfiguration,
+                /* isNotInRecents= */ false,
+                /* startLeash= */ null,
+                /* startBounds= */ null,
+                /* taskInfo= */ new ActivityManager.RunningTaskInfo(),
+                /* allowEnterPip= */ false);
+
+        when(mSystemUiProxy
+                .startRecentsTransition(any(), any(), listenerCaptor.capture(), anyBoolean(), any(),
+                        anyInt()))
+                .thenReturn(true);
+
+        runOnMainSync(() -> {
+            mTaskAnimationManager.startRecentsAnimation(
+                    gestureState,
+                    new Intent(),
+                    mock(RecentsAnimationCallbacks.RecentsAnimationListener.class));
+
+            listenerCaptor.getValue().onAnimationStart(
+                    controllerCompat,
+                    new RemoteAnimationTarget[] { remoteAnimationTarget },
+                    new RemoteAnimationTarget[] { remoteAnimationTarget },
+                    new Rect(),
+                    new Bundle(),
+                    new TransitionInfo(0, 0));
+            mTaskAnimationManager.onLauncherDestroyed();
+        });
+
+        // Verify checks that finish was only called once
+        runOnMainSync(() -> verify(controllerCompat)
+                .finish(/* toHome= */ eq(false), anyBoolean(), any()));
+    }
+
+    @Test
     public void testRecentsAnimationStartTimeout_cleansUpRecentsAnimation() {
         final GestureState gestureState = buildMockGestureState();
         when(mSystemUiProxy
@@ -267,6 +321,38 @@ public class TaskAnimationManagerTest {
 
         runOnMainSync(() -> assertNull("TaskAnimationManager was not cleaned up after the timeout:",
                 mTaskAnimationManager.getCurrentCallbacks()));
+    }
+
+    @Test
+    public void testHasOngoingGesture() {
+        // Initially, there should be no ongoing gesture.
+        assertFalse("hasOngoingGesture should be false initially",
+                mTaskAnimationManager.hasOngoingGesture());
+
+        // Start a recents animation to simulate an ongoing gesture.
+        final GestureState gestureState = buildMockGestureState();
+        final RecentsAnimationCallbacks.RecentsAnimationListener listener =
+                mock(RecentsAnimationCallbacks.RecentsAnimationListener.class);
+        final ArgumentCaptor<RecentsAnimationCallbacks> listenerCaptor =
+                ArgumentCaptor.forClass(RecentsAnimationCallbacks.class);
+        when(mSystemUiProxy
+                .startRecentsTransition(any(), any(), listenerCaptor.capture(), anyBoolean(), any(),
+                        anyInt()))
+                .thenReturn(true);
+
+        runOnMainSync(() ->
+                mTaskAnimationManager.startRecentsAnimation(gestureState, new Intent(), listener));
+
+        // Now, there should be an ongoing gesture.
+        assertTrue("hasOngoingGesture should be true during an animation",
+                mTaskAnimationManager.hasOngoingGesture());
+
+        // Simulate animation being canceled, which should clean up the gesture state.
+        runOnMainSync(() -> listenerCaptor.getValue().onAnimationCanceled(new HashMap<>()));
+
+        // After the animation is cleaned up, there should be no ongoing gesture.
+        assertFalse("hasOngoingGesture should be false after animation is canceled",
+                mTaskAnimationManager.hasOngoingGesture());
     }
 
     protected static void runOnMainSync(Runnable runnable) {

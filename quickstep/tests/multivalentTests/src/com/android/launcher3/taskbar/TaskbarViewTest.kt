@@ -354,6 +354,60 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     }
 
     @Test
+    fun testUpdateItems_addFirstHotseatItem_addsDivider() {
+        // GIVEN no items are present, so there is no divider
+        runOnMainSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
+        assertThat(taskbarView).hasIconTypes(ALL_APPS)
+
+        // WHEN the first hotseat item is added
+        runOnMainSync { taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList()) }
+
+        // THEN a divider is also added
+        assertThat(taskbarView).hasIconTypes(ALL_APPS, DIVIDER, HOTSEAT)
+    }
+
+    @Test
+    fun testUpdateItems_removeLastHotseatItem_removesDivider() {
+        // GIVEN a hotseat item is present, so there is a divider
+        runOnMainSync { taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList()) }
+        assertThat(taskbarView).hasIconTypes(ALL_APPS, DIVIDER, HOTSEAT)
+
+        // WHEN the last hotseat item is removed
+        runOnMainSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
+
+        // THEN the divider is also removed
+        assertThat(taskbarView).hasIconTypes(ALL_APPS)
+    }
+
+    @Test
+    @ForceRtl
+    fun testUpdateItems_rtl_addFirstHotseatItem_addsDivider() {
+        // GIVEN no items are present, so there is no divider
+        runOnMainSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
+        assertThat(taskbarView).hasIconTypes(ALL_APPS)
+
+        // WHEN the first hotseat item is added
+        runOnMainSync { taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList()) }
+
+        // THEN a divider is also added
+        assertThat(taskbarView).hasIconTypes(HOTSEAT, DIVIDER, ALL_APPS)
+    }
+
+    @Test
+    @ForceRtl
+    fun testUpdateItems_rtl_removeLastHotseatItem_removesDivider() {
+        // GIVEN a hotseat item is present, so there is a divider
+        runOnMainSync { taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList()) }
+        assertThat(taskbarView).hasIconTypes(HOTSEAT, DIVIDER, ALL_APPS)
+
+        // WHEN the last hotseat item is removed
+        runOnMainSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
+
+        // THEN the divider is also removed
+        assertThat(taskbarView).hasIconTypes(ALL_APPS)
+    }
+
+    @Test
     fun testUpdateItems_addRecentsItem_viewAddedOnRight() {
         runOnMainSync {
             taskbarView.updateItems(emptyArray(), createRecents(1), emptyList())

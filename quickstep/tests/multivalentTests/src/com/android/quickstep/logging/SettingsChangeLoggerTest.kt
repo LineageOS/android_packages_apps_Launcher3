@@ -35,8 +35,10 @@ import com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_NOTI
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_THEMED_ICON_DISABLED
 import com.android.launcher3.states.RotationHelper.ALLOW_ROTATION_PREFERENCE_KEY
 import com.android.launcher3.util.AllModulesMinusApiWrapper
+import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.FakePrefsModule
 import com.android.launcher3.util.SandboxApplication
+import com.android.launcher3.util.TestUtil
 import com.google.common.truth.Truth.assertThat
 import dagger.BindsInstance
 import dagger.Component
@@ -99,7 +101,11 @@ class SettingsChangeLoggerTest {
 
     @Test
     fun logSnapshot_defaultValue() {
-        SettingsChangeLogger.INSTANCE.get(context).logSnapshot(mInstanceId)
+        SettingsChangeLogger.INSTANCE.get(context).apply {
+            // Wait for all the states in SettingsChangeLogger to get initialized
+            TestUtil.runOnExecutorSync(MAIN_EXECUTOR) {}
+            logSnapshot(mInstanceId)
+        }
 
         verify(mMockLogger, atLeastOnce()).log(capture(mEventCaptor))
         val capturedEvents = mEventCaptor.allValues
@@ -114,7 +120,11 @@ class SettingsChangeLoggerTest {
         LauncherPrefs.get(context).put(item = ALLOW_ROTATION, value = true)
 
         // Create it after changing the launcher prefs so that mLoggablePrefs will be different
-        SettingsChangeLogger.INSTANCE.get(context).logSnapshot(mInstanceId)
+        SettingsChangeLogger.INSTANCE.get(context).apply {
+            // Wait for all the states in SettingsChangeLogger to get initialized
+            TestUtil.runOnExecutorSync(MAIN_EXECUTOR) {}
+            logSnapshot(mInstanceId)
+        }
 
         verify(mMockLogger, atLeastOnce()).log(capture(mEventCaptor))
         val capturedEvents = mEventCaptor.allValues

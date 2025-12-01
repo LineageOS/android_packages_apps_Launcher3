@@ -41,7 +41,6 @@ import com.android.launcher3.LauncherConstants.ActivityCodes
 import com.android.launcher3.LauncherPrefs.Companion.get
 import com.android.launcher3.accessibility.DragViewStateAnnouncer
 import com.android.launcher3.celllayout.CellLayoutLayoutParams
-import com.android.launcher3.compose.ComposeFacade
 import com.android.launcher3.dragndrop.DragController
 import com.android.launcher3.dragndrop.DragLayer
 import com.android.launcher3.dragndrop.DragOptions
@@ -58,6 +57,7 @@ import com.android.launcher3.views.BaseDragLayer
 import com.android.launcher3.widget.LauncherAppWidgetHostView
 import com.android.launcher3.widget.LauncherAppWidgetProviderInfo
 import com.android.launcher3.widget.PendingAppWidgetHostView
+import com.android.launcher3.widget.resize.AppWidgetResizeFrameCompose
 import com.android.launcher3.widget.util.WidgetSizeHandler.Companion.updateSizeRanges
 import kotlin.math.abs
 import kotlin.math.max
@@ -1044,8 +1044,8 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
                 if (widget == null || widget.parent == null) return
                 val activityContext = cellLayout.mActivity
 
-                if (ComposeFacade.isComposeAvailable() && Flags.fixWidgetSinglePtrResize()) {
-                    ComposeFacade.showResizeFrame(cellLayout.mActivity, widget, cellLayout)
+                if (Flags.fixWidgetSinglePtrResize()) {
+                    AppWidgetResizeFrameCompose.show(activityContext, widget, cellLayout)
                     return
                 }
 

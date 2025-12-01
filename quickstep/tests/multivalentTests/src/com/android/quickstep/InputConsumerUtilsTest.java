@@ -31,7 +31,6 @@ import static org.mockito.Mockito.when;
 import static org.mockito.kotlin.StubberKt.doCallRealMethod;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Looper;
@@ -103,7 +102,6 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 import java.util.Optional;
-import java.util.function.Function;
 
 import javax.inject.Provider;
 
@@ -120,7 +118,6 @@ public class InputConsumerUtilsTest {
     private TaskAnimationManager mTaskAnimationManager;
     private InputChannelCompat.InputEventReceiver mInputEventReceiver;
     private boolean mUserUnlocked = true;
-    @Nullable private Function<GestureState, AnimatedFloat> mSwipeUpProxyProvider = (state) -> null;
 
     @NonNull @Mock private TaskbarActivityContext mTaskbarActivityContext;
     @NonNull @Mock private TaskbarFeatureEvaluator mTaskbarFeatureEvaluator;
@@ -546,19 +543,12 @@ public class InputConsumerUtilsTest {
 
     @Test
     public void testNewConsumer_withSwipeUpProxyProvider_returnsProgressDelegateInputConsumer() {
-        mSwipeUpProxyProvider = (state) -> new AnimatedFloat();
+        doReturn(new AnimatedFloat()).when(mDeviceState).getSwipeUpProxy(any());
 
         assertCorrectInputConsumer(
                 this::createInputConsumer,
                 ProgressDelegateInputConsumer.class,
                 InputConsumer.TYPE_PROGRESS_DELEGATE);
-    }
-
-    @Test
-    public void testNewConsumer_withNullSwipeUpProxyProvider_doesNotCrash() {
-        mSwipeUpProxyProvider = null;
-
-        runOnMainSync(this::createInputConsumer);
     }
 
     @Test
@@ -604,7 +594,6 @@ public class InputConsumerUtilsTest {
                 otherActivityInputConsumer -> {},
                 mInputEventReceiver,
                 mTaskbarManager,
-                mSwipeUpProxyProvider,
                 mOverviewCommandHelper,
                 event,
                 mRotationTouchHelper,

@@ -29,6 +29,8 @@ object TaskbarDeviceProfileFactory {
         // Same QSB width to have a smooth animation
         deviceProfile.hotseatQsbWidth = originDeviceProfile.hotseatQsbWidth
 
+        deviceProfile.mTaskbarProfile = deviceProfile.updateTaskbarProfile(context.resources)
+
         deviceProfile.mWorkspaceProfile =
             deviceProfile.mWorkspaceProfile.changeIconSize(deviceProfile.taskbarProfile.iconSize)
 

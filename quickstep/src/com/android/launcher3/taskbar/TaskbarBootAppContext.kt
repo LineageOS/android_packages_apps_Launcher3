@@ -22,7 +22,6 @@ import android.view.View
 import android.view.ViewGroup
 import com.android.launcher3.InMemoryLauncherPrefs
 import com.android.launcher3.LauncherPrefs
-import com.android.launcher3.compose.widgetpicker.LauncherWidgetPickerModule
 import com.android.launcher3.concurrent.ExecutorsModule
 import com.android.launcher3.dagger.ApiWrapperModule
 import com.android.launcher3.dagger.AppModule
@@ -43,6 +42,7 @@ import com.android.launcher3.qsb.QsbWidgetFactory
 import com.android.launcher3.util.PluginManagerWrapper
 import com.android.launcher3.util.SandboxContext
 import com.android.launcher3.util.dagger.LauncherExecutorsModule
+import com.android.launcher3.widgetpicker.LauncherWidgetPickerModule
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component

@@ -68,7 +68,6 @@ import android.view.SurfaceControl;
 import android.view.ViewTreeObserver;
 
 import androidx.annotation.NonNull;
-import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.app.displaylib.fakes.FakePerDisplayRepository;
 import com.android.launcher3.DeviceProfile;
@@ -305,10 +304,6 @@ public abstract class AbsSwipeUpHandlerTestCase<
         when(mActivityInterface.prepareRecentsUI(anyBoolean(), any()))
                 .thenReturn(mAnimationFactory);
         doReturn(recentsContainer).when(mActivityInterface).getCreatedContainer();
-        doAnswer(answer -> {
-            answer.<Runnable>getArgument(0).run();
-            return this;
-        }).when(recentsContainer).runOnBindToTouchInteractionService(any());
 
         mStateManager = spy(new StateManager<>(recentsContainer, getBaseState()));
 
@@ -826,8 +821,8 @@ public abstract class AbsSwipeUpHandlerTestCase<
 
         float xVelocityPxPerMs = isQuickSwitch ? 100 : 0;
         float yVelocityPxPerMs = isQuickSwitch ? 0 : -100;
-        swipeHandler.onGestureEnded(
-                yVelocityPxPerMs, new PointF(xVelocityPxPerMs, yVelocityPxPerMs), isQuickSwitch);
+        runOnMainSync(() -> swipeHandler.onGestureEnded(
+                yVelocityPxPerMs, new PointF(xVelocityPxPerMs, yVelocityPxPerMs), isQuickSwitch));
         swipeHandler.onCalculateEndTarget();
         runOnMainSync(swipeHandler::onSettledOnEndTarget);
 
@@ -858,9 +853,8 @@ public abstract class AbsSwipeUpHandlerTestCase<
     }
 
     protected static void runOnMainSync(Runnable runnable) {
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(runnable);
         try {
-            Executors.MAIN_EXECUTOR.submit(() -> null).get();
+            Executors.MAIN_EXECUTOR.submit(runnable).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }

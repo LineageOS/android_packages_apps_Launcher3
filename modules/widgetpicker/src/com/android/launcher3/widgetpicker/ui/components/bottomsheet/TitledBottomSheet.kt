@@ -41,7 +41,6 @@ import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -67,10 +66,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import com.android.launcher3.widgetpicker.R
 import com.android.launcher3.widgetpicker.shared.model.CloseBehavior
-import com.android.launcher3.widgetpicker.ui.components.LocalWidgetPickerHostStateProvider
 import com.android.launcher3.widgetpicker.ui.components.SheetDismissState
 import com.android.launcher3.widgetpicker.ui.components.SheetHeader
-import com.android.launcher3.widgetpicker.ui.components.WidgetPickerHostStateEffect
 import com.android.launcher3.widgetpicker.ui.components.accessibility.LocalAccessibilityState
 import com.android.launcher3.widgetpicker.ui.components.bottomsheet.TitledBottomSheetAnimations.OpenCloseAnimationSpec
 import com.android.launcher3.widgetpicker.ui.components.bottomsheet.TitledBottomSheetDimens.SHEET_HEIGHT_CAP_RATIO
@@ -104,7 +101,6 @@ import kotlinx.coroutines.launch
  * @param onDismissSheet callback to be invoked when the bottom sheet is closed
  * @param content the content to be displayed below the [title] and [description]
  */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun TitledBottomSheet(
     modifier: Modifier = Modifier,
@@ -139,15 +135,7 @@ fun TitledBottomSheet(
                     .windowInsetsPadding(sheetWindowInsets)
         ) {
             val sheetState = remember { SheetDismissState(OpenCloseAnimationSpec) }
-
             val scope = rememberCoroutineScope()
-
-            WidgetPickerHostStateEffect(LocalWidgetPickerHostStateProvider.current) { isTopResumed
-                ->
-                if (!isTopResumed) {
-                    scope.launch { sheetState.collapse() }
-                }
-            }
 
             Surface(
                 modifier =

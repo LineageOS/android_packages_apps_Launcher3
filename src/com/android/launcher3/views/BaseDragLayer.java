@@ -216,7 +216,7 @@ public abstract class BaseDragLayer<T extends Context & ActivityContext>
             if (mActiveController != null) {
                 // Logging here won't show log on every touch event, only on the start of new
                 // gestures to prevent spamming the logcat with logs.
-                Log.i(TAG, mActiveController.dump());
+                Log.i(TAG, "findActiveController: mActiveController=" + mActiveController.dump());
             }
 
         }
@@ -348,6 +348,9 @@ public abstract class BaseDragLayer<T extends Context & ActivityContext>
                 && (actionMasked == ACTION_DOWN
                     || ((mTouchDispatchState & TOUCH_DISPATCHING_TO_VIEW_IN_PROGRESS) != 0));
 
+        Log.d(TAG, "proxyTouchEvent: allowViewDispatch=" + allowViewDispatch
+                + ", mProxyTouchController="
+                + (mProxyTouchController == null ? null : mProxyTouchController.dump()));
         if (allowViewDispatch) {
             mTouchDispatchState |= TOUCH_DISPATCHING_TO_VIEW_IN_PROGRESS;
             super.dispatchTouchEvent(ev);
@@ -374,6 +377,8 @@ public abstract class BaseDragLayer<T extends Context & ActivityContext>
                 if ((mTouchDispatchState & TOUCH_DISPATCHING_FROM_PROXY) != 0) {
                     mProxyTouchController = findControllerToHandleTouch(ev);
                 }
+                Log.d(TAG, "proxyTouchEvent: mProxyTouchController="
+                        + (mProxyTouchController == null ? null : mProxyTouchController.dump()));
                 handled = mProxyTouchController != null;
             }
             if (actionMasked == ACTION_UP || actionMasked == ACTION_CANCEL) {

@@ -145,6 +145,7 @@ import com.android.launcher3.views.FloatingIconView;
 import com.android.launcher3.widget.LauncherAppWidgetHostView;
 import com.android.quickstep.LauncherBackAnimationController;
 import com.android.quickstep.RemoteAnimationTargets;
+import com.android.quickstep.SplitRecentsAnimUtils;
 import com.android.quickstep.SystemUiProxy;
 import com.android.quickstep.TaskViewUtils;
 import com.android.quickstep.util.AlreadyStartedBackAnimState;
@@ -2052,7 +2053,9 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                     QuickStepContract.getWindowCornerRadius(mLauncher),
                     false /* fromPredictiveBack */);
 
-            TaskViewUtils.createSplitAuxiliarySurfacesAnimator(nonAppTargets, false, null);
+            SplitRecentsAnimUtils splitRecentsAnimUtils = new SplitRecentsAnimUtils(nonAppTargets);
+            splitRecentsAnimUtils.fadeOutDimLayer(/* immediate= */ true);
+            splitRecentsAnimUtils.fadeOutDivider(/* immediate= */ true);
             mLauncher.clearForceInvisibleFlag(INVISIBLE_ALL);
             bankAnimState.applyToAnimationResult(result, mLauncher);
         }

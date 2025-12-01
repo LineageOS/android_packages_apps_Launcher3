@@ -34,7 +34,6 @@ import androidx.test.uiautomator.BySelector;
 import androidx.test.uiautomator.Until;
 
 import com.android.launcher3.InvariantDeviceProfile;
-import static com.android.launcher3.InvariantDeviceProfile.TYPE_DESKTOP;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherState;
 import com.android.launcher3.Utilities;
@@ -304,7 +303,7 @@ public abstract class AbstractLauncherUiTest<LAUNCHER_TYPE extends Launcher,
         assertTrue("App didn't start: " + selector,
                 TestHelpers.wait(Until.hasObject(selector), TestUtil.DEFAULT_UI_TIMEOUT));
 
-        final LauncherInstrumentation launcherInstrumentation = new LauncherInstrumentation();
+        final LauncherInstrumentation launcherInstrumentation = new LauncherInstrumentation(true);
         if (!launcherInstrumentation.shouldShowHomeBehindDesktop()) {
             // Wait for the Launcher to stop.
             launcherInstrumentation.waitForCondition(

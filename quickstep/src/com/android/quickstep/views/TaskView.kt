@@ -891,11 +891,7 @@ constructor(
                             {
                                 // Update the layout UI to remove this task from the layout grid,
                                 // and remove the task from ActivityManager afterwards.
-                                recentsView?.dismissTask(
-                                    taskId,
-                                    /* animate= */ true,
-                                    /* removeTask= */ true,
-                                )
+                                recentsView?.dismissTask(taskId, /* removeTask= */ true)
                             }
                         } else {
                             null
@@ -1680,7 +1676,7 @@ constructor(
      * versa). Icons fade in, and DWB banners slide in with a "shift up" animation.
      */
     private fun onSettledProgressUpdated(settledProgress: Float) {
-        getTaskIcons().forEach { (icon, _) -> icon.setContentAlpha(settledProgress) }
+        getTaskIcons().forEach { (icon, _) -> icon.settledProgressAlpha = settledProgress }
         taskContainers.forEach {
             if (enableRefactorDigitalWellbeingToast() && it.taskContentView is TaskContentView) {
                 it.taskContentView.onParentAnimationProgress(settledProgress)
@@ -1714,7 +1710,9 @@ constructor(
 
     /** Set a color tint on the snapshot and supporting views. */
     open fun setColorTint(amount: Float, tintColor: Int) {
-        getTaskIcons().forEach { (icon, _) -> icon.setIconColorTint(amount) }
+        // RecentsView's COLOR_TINT animates between 0 and 0.5f, we want to hide the app chip menu.
+        val colorTintAlpha = Utilities.mapToRange(amount, 0f, 0.5f, 1f, 0f, Interpolators.LINEAR)
+        getTaskIcons().forEach { (icon, _) -> icon.colorTintAlpha = colorTintAlpha }
         taskContainers.forEach {
             it.updateTintAmount(amount)
             it.digitalWellBeingToast?.setColorTint(tintColor, amount)
@@ -1817,7 +1815,7 @@ constructor(
 
     private fun onModalnessUpdated(modalness: Float) {
         isClickable = modalness == 0f
-        getTaskIcons().forEach { (icon, _) -> icon.setModalAlpha(1f - modalness) }
+        getTaskIcons().forEach { (icon, _) -> icon.modalAlpha = 1f - modalness }
         taskContainers.forEach {
             if (enableRefactorDigitalWellbeingToast() && it.taskContentView is TaskContentView) {
                 it.taskContentView.onParentAnimationProgress(1f - modalness)
@@ -1884,6 +1882,11 @@ constructor(
 
     protected open fun getContainerForIconView(appChip: IconAppChipView) =
         taskContainers.firstOrNull { it.iconView === appChip }
+
+    override fun setAlpha(alpha: Float) {
+        super.setAlpha(alpha)
+        getTaskIcons().forEach { (icon, _) -> icon.contentAlpha = alpha }
+    }
 
     companion object {
         private const val TAG = "TaskView"

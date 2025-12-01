@@ -21,6 +21,7 @@ import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.Flags
+import com.android.launcher3.R
 import com.android.launcher3.Utilities
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.asProperty
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
@@ -65,6 +66,9 @@ class TaskbarEduTooltipControllerTest {
 
     private val taskbarContext: TaskbarActivityContext
         get() = taskbarUnitTestRule.activityContext
+
+    private val taskbarView: TaskbarView
+        get() = taskbarContext.dragLayer.findViewById(R.id.taskbar_view)
 
     private val wasInTestHarness = Utilities.isRunningInTestHarness()
 
@@ -248,6 +252,10 @@ class TaskbarEduTooltipControllerTest {
     @Test
     @TaskbarMode(TRANSIENT)
     fun testMaybeShowSearchEdu_whenTaskbarIsTransient_shouldNotShowSearchEdu() {
+        runOnMainSync { taskbarEduTooltipController.maybeShowSearchEdu() }
+        runOnMainSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
+        runOnMainSync { assertThat(taskbarView.allAppsButtonContainer.isAttachedToWindow).isTrue() }
+
         assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
         runOnMainSync {
             taskbarEduTooltipController.init(taskbarContext.controllers, TaskbarUiState())
@@ -260,7 +268,22 @@ class TaskbarEduTooltipControllerTest {
     @TaskbarMode(PINNED)
     fun testMaybeShowSearchEdu_whenTaskbarIsPinned_shouldShowSearchEdu() {
         runOnMainSync { taskbarEduTooltipController.maybeShowSearchEdu() }
-        assertThat(taskbarEduTooltipController.isTooltipOpen).isTrue()
+
+        runOnMainSync {
+            // The EDU tooltip should show only if all apps button is visible, otherwise it gets
+            // positioned incorrectly.
+            assertThat(taskbarEduTooltipController.isTooltipOpen)
+                .isEqualTo(taskbarView.allAppsButtonContainer.isAttachedToWindow)
+        }
+
+        // Updating items will ensure that all apps button gets shown - in response toolltip should
+        // show as well.
+        runOnMainSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
+        runOnMainSync {
+            assertThat(taskbarView.allAppsButtonContainer.isAttachedToWindow).isTrue()
+            assertThat(taskbarEduTooltipController.isTooltipOpen).isTrue()
+        }
+
         assertThat(taskbarEduTooltipController.userHasSeenSearchEdu).isTrue()
     }
 
@@ -269,7 +292,21 @@ class TaskbarEduTooltipControllerTest {
     @TaskbarMode(PINNED)
     fun testMaybeShowSearchEdu_whenTaskbarIsPinned_shouldShowSearchEdu_eduCombinator() {
         runOnMainSync { taskbarEduTooltipController.maybeShowSearchEdu() }
-        assertThat(taskbarEduTooltipController.isTooltipOpen).isTrue()
+        runOnMainSync {
+            // The EDU tooltip should show only if all apps button is visible, otherwise it gets
+            // positioned incorrectly.
+            assertThat(taskbarEduTooltipController.isTooltipOpen)
+                .isEqualTo(taskbarView.allAppsButtonContainer.isAttachedToWindow)
+        }
+
+        // Updating items will ensure that all apps button gets shown - in response toolltip should
+        // show as well.
+        runOnMainSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
+        runOnMainSync {
+            assertThat(taskbarView.allAppsButtonContainer.isAttachedToWindow).isTrue()
+            assertThat(taskbarEduTooltipController.isTooltipOpen).isTrue()
+        }
+
         assertThat(tooltipEduCombinator.getFlag(TASKBAR_SEARCH_EDU_SEEN_FLAG)).isTrue()
     }
 
@@ -279,7 +316,12 @@ class TaskbarEduTooltipControllerTest {
     fun testMaybeShowSearchEdu_whenTaskbarIsPinnedUserSeenSearch_noEduShown() {
         searchEduSeen = true
         runOnMainSync { taskbarEduTooltipController.maybeShowSearchEdu() }
-        assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
+        runOnMainSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
+        runOnMainSync {
+            assertThat(taskbarView.allAppsButtonContainer.isAttachedToWindow).isTrue()
+            assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
+        }
+
         assertThat(taskbarEduTooltipController.userHasSeenSearchEdu).isTrue()
     }
 
@@ -289,7 +331,13 @@ class TaskbarEduTooltipControllerTest {
     fun testMaybeShowSearchEdu_whenTaskbarIsPinnedUserSeenSearch_noEduShown_eduCombinator() {
         tooltipEduCombinator.setFlag(TASKBAR_SEARCH_EDU_SEEN_FLAG)
         runOnMainSync { taskbarEduTooltipController.maybeShowSearchEdu() }
-        assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
+
+        runOnMainSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
+        runOnMainSync {
+            assertThat(taskbarView.allAppsButtonContainer.isAttachedToWindow).isTrue()
+            assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
+        }
+
         assertThat(tooltipEduCombinator.getFlag(TASKBAR_SEARCH_EDU_SEEN_FLAG)).isTrue()
     }
 }

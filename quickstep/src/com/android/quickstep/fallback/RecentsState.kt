@@ -26,7 +26,8 @@ import com.android.launcher3.R
 import com.android.launcher3.anim.AnimatorPlaybackController
 import com.android.launcher3.anim.PendingAnimation
 import com.android.launcher3.statemanager.BaseState
-import com.android.launcher3.statemanager.BaseState.FLAG_DISABLE_RESTORE
+import com.android.launcher3.statemanager.BaseState.FLAG_DISABLE_RESTORE_ABSOLUTE
+import com.android.launcher3.statemanager.BaseState.FLAG_DISABLE_RESTORE_EXCEPT_UI_MODE_CHANGE
 import com.android.launcher3.util.Themes
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.views.ScrimColors
@@ -252,7 +253,7 @@ open class RecentsState(@JvmField val ordinal: Int, private val mFlags: Int) :
         val DEFAULT: RecentsState =
             RecentsState(
                 DEFAULT_STATE_ORDINAL,
-                (FLAG_DISABLE_RESTORE or
+                (FLAG_DISABLE_RESTORE_EXCEPT_UI_MODE_CHANGE or
                     FLAG_CLEAR_ALL_BUTTON or
                     FLAG_OVERVIEW_ACTIONS or
                     FLAG_SHOW_AS_GRID or
@@ -266,7 +267,7 @@ open class RecentsState(@JvmField val ordinal: Int, private val mFlags: Int) :
         val MODAL_TASK: RecentsState =
             ModalState(
                 MODAL_TASK_ORDINAL,
-                (FLAG_DISABLE_RESTORE or
+                (FLAG_DISABLE_RESTORE_EXCEPT_UI_MODE_CHANGE or
                     FLAG_OVERVIEW_ACTIONS or
                     FLAG_MODAL or
                     FLAG_SHOW_AS_GRID or
@@ -279,7 +280,7 @@ open class RecentsState(@JvmField val ordinal: Int, private val mFlags: Int) :
         val BACKGROUND_APP: RecentsState =
             BackgroundAppState(
                 BACKGROUND_APP_ORDINAL,
-                (FLAG_DISABLE_RESTORE or
+                (FLAG_DISABLE_RESTORE_ABSOLUTE or
                     BaseState.FLAG_NON_INTERACTIVE or
                     FLAG_FULL_SCREEN or
                     FLAG_RECENTS_VIEW_VISIBLE or
@@ -295,7 +296,7 @@ open class RecentsState(@JvmField val ordinal: Int, private val mFlags: Int) :
                     FLAG_SCRIM or
                     FLAG_RECENTS_VIEW_VISIBLE or
                     FLAG_CLOSE_POPUPS or
-                    FLAG_DISABLE_RESTORE or
+                    FLAG_DISABLE_RESTORE_EXCEPT_UI_MODE_CHANGE or
                     FLAG_IS_IN_OVERVIEW),
             )
 

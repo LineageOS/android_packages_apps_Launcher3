@@ -46,9 +46,6 @@ import com.android.quickstep.cuebar.data.InsightListener
 import com.android.quickstep.cuebar.logger.AmbientCueLogger
 import com.android.systemui.shared.system.TaskStackChangeListener
 import com.android.systemui.shared.system.TaskStackChangeListeners
-import java.io.PrintWriter
-import java.util.concurrent.Executor
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -56,6 +53,10 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.PrintWriter
+import java.lang.ref.WeakReference
+import java.util.concurrent.Executor
+import javax.inject.Inject
 
 /** Source of truth for ambient actions and visibility of their system space. */
 interface AmbientCueRepository {
@@ -141,29 +142,7 @@ constructor(
 
     private var debounceTaskJob: Job? = null
 
-    /**
-     * The [RunningTaskInfo] for the task that is currently in the foreground. Updated whenever a
-     * new task moves to the front. Used to derive the package name for logging and for CueBar to
-     * display itself when the user is actually looking at the target app by checking
-     * globallyFocusedTaskId == targetTaskId in the viewmodel.
-     */
-    private val taskStackListener =
-        object : TaskStackChangeListener {
-            override fun onTaskMovedToFront(runningTaskInfo: RunningTaskInfo) {
-                debounceTaskJob?.cancel()
-                debounceTaskJob =
-                    backgroundScope.launch {
-                        delay(DEBOUNCE_DELAY_MS)
-                        withContext(uiExecutor.asCoroutineDispatcher()) {
-                            _globallyFocusedTaskId.dispatchValue(runningTaskInfo.taskId)
-                            _frontTaskPackageName.dispatchValue(
-                                runningTaskInfo.baseIntent?.component?.packageName ?: ""
-                            )
-                            debounceTaskJob = null
-                        }
-                    }
-            }
-        }
+    private val taskStackListener = AmbientCueTaskStackListener(WeakReference(this), bgExecutor)
 
     private fun launchPendingIntent(pendingIntent: PendingIntent) {
         val options = BroadcastOptions.makeBasic()
@@ -175,6 +154,27 @@ constructor(
         } catch (e: PendingIntent.CanceledException) {
             Log.e(TAG, "pending intent of $pendingIntent was canceled", e)
         }
+    }
+
+    /**
+     * The [RunningTaskInfo] for the task that is currently in the foreground. Updated whenever a
+     * new task moves to the front. Used to derive the package name for logging and for CueBar to
+     * display itself when the user is actually looking at the target app by checking
+     * globallyFocusedTaskId == targetTaskId in the viewmodel.
+     */
+    internal fun onTaskMovedToFront(runningTaskInfo: RunningTaskInfo) {
+        debounceTaskJob?.cancel()
+        debounceTaskJob =
+            backgroundScope.launch {
+                delay(DEBOUNCE_DELAY_MS)
+                withContext(uiExecutor.asCoroutineDispatcher()) {
+                    _globallyFocusedTaskId.dispatchValue(runningTaskInfo.taskId)
+                    _frontTaskPackageName.dispatchValue(
+                        runningTaskInfo.baseIntent?.component?.packageName ?: ""
+                    )
+                    debounceTaskJob = null
+                }
+            }
     }
 
     override fun updateActions(newActions: List<ActionModel>) {
@@ -252,13 +252,9 @@ constructor(
     private fun mapActionableInsight(insight: ActionableInsight): List<ActionModel> {
         val display = insight.displayDetails
         val action = insight.actionDetails
-
-        // TODO: Understander need to supply the smartSpaceTargetAction.subtitle to
-        //  display.contentDescription? or use bundle extra for this
-        val attribution = display.contentDescription?.toString()
+        val attribution = display.subtitle?.toString()
         val iconDrawable = display.icon?.loadDrawable(context)
             ?: context.getDrawable(R.drawable.ic_paste_spark)!!
-
         val title = display.title.toString()
         val extras = action.createActionIntent()?.extras
         val activityId = extras?.getParcelable<ActivityId>(EXTRA_ACTIVITY_ID)
@@ -357,5 +353,26 @@ constructor(
         private const val AMBIENT_CUE_DEFAULT_TIMEOUT_MS = 30_000
         @VisibleForTesting const val MA_ACTION_TYPE_NAME = "ma"
         @VisibleForTesting const val MR_ACTION_TYPE_NAME = "mr"
+    }
+}
+
+/**
+ * Wrapper class to hold the TaskStackChangeListener logic outside of the AmbientCueRepositoryImpl
+ * instance, using a WeakReference to prevent the global TaskStackChangeListeners singleton
+ * from leaking the entire repository and its associated context.
+ */
+private class AmbientCueTaskStackListener(
+    private val repositoryRef: WeakReference<AmbientCueRepositoryImpl>,
+    private val bgExecutor: Executor,
+) : TaskStackChangeListener {
+
+    override fun onTaskMovedToFront(runningTaskInfo: RunningTaskInfo) {
+        val repository = repositoryRef.get() ?: return
+        // Defer to background executor to handle any non-UI work since TaskStackChangeListener
+        // can be called on a Binder thread. This then dispatches to the UI executor inside the
+        // repository.
+        bgExecutor.execute {
+                repository.onTaskMovedToFront(runningTaskInfo)
+        }
     }
 }

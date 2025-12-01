@@ -36,8 +36,11 @@ import com.android.quickstep.views.RecentsView;
  */
 public class BackgroundAppState extends OverviewState {
 
-    private static final int STATE_FLAGS = FLAG_DISABLE_RESTORE | FLAG_RECENTS_VIEW_VISIBLE
-            | FLAG_WORKSPACE_INACCESSIBLE | FLAG_NON_INTERACTIVE | FLAG_CLOSE_POPUPS
+    private static final int STATE_FLAGS = FLAG_DISABLE_RESTORE_ABSOLUTE
+            | FLAG_RECENTS_VIEW_VISIBLE
+            | FLAG_WORKSPACE_INACCESSIBLE
+            | FLAG_NON_INTERACTIVE
+            | FLAG_CLOSE_POPUPS
             | FLAG_SKIP_STATE_ANNOUNCEMENT;
 
     public BackgroundAppState(int id) {

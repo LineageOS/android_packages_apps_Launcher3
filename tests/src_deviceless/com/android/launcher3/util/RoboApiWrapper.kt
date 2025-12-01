@@ -27,6 +27,7 @@ import org.junit.runners.model.Statement
 import org.mockito.MockedStatic
 import org.mockito.MockedStatic.Verification
 import org.mockito.Mockito
+import org.mockito.Mockito.CALLS_REAL_METHODS
 import org.mockito.Mockito.mockStatic
 import org.mockito.Mockito.withSettings
 import org.mockito.quality.Strictness.LENIENT
@@ -74,7 +75,11 @@ object RoboApiWrapper {
         private lateinit var mockSession: MockedStatic<*>
 
         internal fun init() {
-            mockSession = mockStatic(clazz, withSettings().strictness(LENIENT))
+            mockSession =
+                mockStatic(
+                    clazz,
+                    withSettings().strictness(LENIENT).defaultAnswer(CALLS_REAL_METHODS),
+                )
         }
 
         fun whenever(method: Verification) = mockSession.`when`<Any?>(method)

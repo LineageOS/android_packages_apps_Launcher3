@@ -582,9 +582,9 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
      */
     public void updateTaskbarsVisibility() {
         debugPrimaryTaskbar("updateTaskbarsVisibility");
-        int visibility = getTaskbarVisibility();
         for (Entry<Integer, TaskbarActivityContext> entry : new ArraySet<>(mTaskbars.entrySet())) {
             int displayId = entry.getKey();
+            int visibility = getTaskbarVisibility(entry.getValue().isUserSetupComplete());
             FrameLayout rootLayout = getTaskbarRootLayoutForDisplay(displayId);
             if (rootLayout != null) {
                 rootLayout.setVisibility(visibility);
@@ -869,6 +869,14 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         Trace.beginSection(traceNameTruncated);
         try {
             debugTaskbarManager("recreateTaskbarForDisplay: getting device profile", displayId);
+
+            // We update external display dp for given displayId. We will need to recreate and
+            // update. We do this because external display dp need to be recreated for adjusting
+            // display info changes.
+            if (isExternalDisplay(displayId)) {
+                createExternalDeviceProfile(displayId);
+            }
+
             // TODO (b/381113004): make this display-specific via getWindowContext()
             DeviceProfile dp = getDeviceProfile(displayId);
 
@@ -1321,8 +1329,12 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         }
     }
 
-    private int getTaskbarVisibility() {
-        if (mActivityInteractor == null) {
+    private int getTaskbarVisibility(boolean isUserSetupComplete) {
+        if (!isUserSetupComplete) {
+            // Taskbar needs to be visible during SUW flow, otherwise SUW UI will not properly
+            // update after keyboard is dismissed.
+            return View.VISIBLE;
+        } else if (mActivityInteractor == null) {
             // No need to show taskbar if launcher doesn't exist
             return View.GONE;
         } else if (mActivityInteractor instanceof LauncherInteractor launcherInteractor) {
@@ -1348,7 +1360,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
             WindowManager windowManager = getWindowManager(displayId);
             if (rootLayout != null && windowManager != null) {
                 windowManager.addView(rootLayout, taskbar.getWindowLayoutParams());
-                rootLayout.setVisibility(getTaskbarVisibility());
+                rootLayout.setVisibility(getTaskbarVisibility(taskbar.isUserSetupComplete()));
                 mAddedRootLayouts.put(displayId, true);
             } else {
                 String rootLayoutStatus =

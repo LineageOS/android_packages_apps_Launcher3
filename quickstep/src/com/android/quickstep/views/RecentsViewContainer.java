@@ -148,12 +148,6 @@ public interface RecentsViewContainer extends ActivityContext, RecentsViewContai
     void removeEventCallback(@BaseActivity.ActivityEvent int event, Runnable callback);
 
     /**
-     * @see com.android.quickstep.util.TISBindHelper#runOnBindToTouchInteractionService(Runnable)
-     * @param r runnable to be executed upon event
-     */
-    void runOnBindToTouchInteractionService(Runnable r);
-
-    /**
      * Begins transition from overview back to homescreen
      */
     void returnToHomescreen();

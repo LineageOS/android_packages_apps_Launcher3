@@ -111,6 +111,15 @@ class RecentsViewModelTest {
     }
 
     @Test
+    fun setHighResThumbnailsRequired_passesSettingToTasksRepository() {
+        systemUnderTest.setHighResThumbnailsRequired(true)
+        assertThat(tasksRepository.getHighResThumbnailsRequired()).isTrue()
+
+        systemUnderTest.setHighResThumbnailsRequired(false)
+        assertThat(tasksRepository.getHighResThumbnailsRequired()).isFalse()
+    }
+
+    @Test
     fun waitForThumbnailsToUpdate_emptyMap() = runTest {
         systemUnderTest.waitForThumbnailsToUpdate(emptyMap())
     }

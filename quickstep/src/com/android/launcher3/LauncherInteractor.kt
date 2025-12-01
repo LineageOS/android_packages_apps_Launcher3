@@ -125,7 +125,7 @@ class LauncherInteractor(private val launcher: QuickstepLauncher) : ActivityInte
 
     @AnyThread
     fun synchronizeNextDraw(view: View) {
-        executor.execute { synchronizeNextDraw(launcher.hotseat, view, Runnable {}) }
+        synchronizeNextDraw(launcher.hotseat, view, Runnable {})
     }
 
     @AnyThread
@@ -174,20 +174,6 @@ class LauncherInteractor(private val launcher: QuickstepLauncher) : ActivityInte
     @AnyThread
     fun adjustHotseatForBubbleBar(isBubbleBarVisible: Boolean) {
         executor.execute { launcher.hotseat?.adjustForBubbleBar(isBubbleBarVisible) }
-    }
-
-    @AnyThread
-    fun postAdjustHotseatForBubbleBar(
-        isBubbleBarVisible: Boolean,
-        isTaskbarUiControllersSet: Boolean,
-    ) {
-        executor.execute {
-            launcher.hotseat.let {
-                if (isBubbleBarVisible && isTaskbarUiControllersSet) {
-                    it.post { it.adjustForBubbleBar(true) }
-                }
-            }
-        }
     }
 
     @AnyThread

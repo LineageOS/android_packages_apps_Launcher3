@@ -6,6 +6,7 @@ import static com.android.launcher3.taskbar.TaskbarThresholdUtils.getFromNavThre
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
@@ -14,26 +15,31 @@ import android.view.WindowInsets;
 
 import androidx.annotation.Nullable;
 
+import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.R;
 import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.statehandlers.DesktopVisibilityController;
+import com.android.launcher3.taskbar.TaskbarManager;
 import com.android.launcher3.testing.TestInformationHandler;
 import com.android.launcher3.testing.shared.TestProtocol;
+import com.android.quickstep.dagger.SysUIConnectionComponent;
+import com.android.quickstep.sysuiconnection.SysUIConnectionTracker;
+import com.android.quickstep.util.ActiveTrackpadList;
 import com.android.quickstep.util.GroupTask;
 import com.android.quickstep.util.LayoutUtils;
-import com.android.quickstep.util.TISBindHelper;
 import com.android.quickstep.views.DesktopTaskView;
 import com.android.quickstep.views.RecentsView;
 import com.android.quickstep.views.RecentsViewContainer;
 import com.android.quickstep.views.TaskView;
+import com.android.quickstep.window.RecentsWindowFlags;
 import com.android.systemui.shared.recents.model.Task;
 import com.android.wm.shell.shared.bubbles.DeviceConfig;
 import com.android.wm.shell.shared.desktopmode.DesktopState;
 
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -42,26 +48,32 @@ import javax.inject.Inject;
 
 public class QuickstepTestInformationHandler extends TestInformationHandler {
 
-    protected final Context mContext;
+    private final Context mContext;
     private final RecentsModel mRecentsModel;
     private final SystemUiProxy mSystemUiProxy;
-    private final  OverviewComponentObserver mOverviewComponentObserver;
+    private final OverviewComponentObserver mOverviewComponentObserver;
     private final DesktopVisibilityController mDesktopVisibilityController;
-
+    private final ActiveTrackpadList mActiveTrackpadList;
+    private final SysUIConnectionTracker mSysUIConnectionTracker;
 
     @Inject
     public QuickstepTestInformationHandler(@ApplicationContext Context context,
             RecentsModel recentsModel,
             SystemUiProxy systemUiProxy,
             OverviewComponentObserver overviewComponentObserver,
-            DesktopVisibilityController desktopVisibilityController) {
+            DesktopVisibilityController desktopVisibilityController,
+            ActiveTrackpadList activeTrackpadList,
+            SysUIConnectionTracker sysUIConnectionTracker) {
         mContext = context;
         mRecentsModel = recentsModel;
         mSystemUiProxy = systemUiProxy;
         mOverviewComponentObserver = overviewComponentObserver;
         mDesktopVisibilityController = desktopVisibilityController;
+        mActiveTrackpadList = activeTrackpadList;
+        mSysUIConnectionTracker = sysUIConnectionTracker;
     }
 
+    @SuppressLint("VisibleForTests")
     @Override
     public Bundle call(String method, String arg, @Nullable Bundle extras) {
         final Bundle response = new Bundle();
@@ -149,19 +161,11 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
             }
 
             case TestProtocol.REQUEST_UNSTASH_TASKBAR_IF_STASHED:
-                runOnTISBinder(tisBinder -> {
-                    // Allow null-pointer to catch illegal states.
-                    tisBinder.getTaskbarManager().unstashTaskbarIfStashed();
-                    waitForTaskbarUiThreadSync();
-                });
+                runOnTaskbar(TaskbarManager::unstashTaskbarIfStashed);
                 return response;
 
             case TestProtocol.REQUEST_COLLAPSE_BUBBLE_BAR:
-                runOnTISBinder(tisBinder -> {
-                    // Allow null-pointer to catch illegal states.
-                    tisBinder.getTaskbarManager().removeAllBubbles();
-                    waitForTaskbarUiThreadSync();
-                });
+                runOnTaskbar(TaskbarManager::removeAllBubbles);
                 return response;
 
             case TestProtocol.REQUEST_TASKBAR_FROM_NAV_THRESHOLD: {
@@ -172,42 +176,29 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
             }
 
             case TestProtocol.REQUEST_STASHED_TASKBAR_SCALE: {
-                runOnTISBinder(tisBinder -> {
-                    response.putFloat(TestProtocol.TEST_INFO_RESPONSE_FIELD,
-                            tisBinder.getTaskbarManager().getStashedTaskbarScale());
-                });
-                return response;
+                return getTaskbarProperty(Bundle::putFloat, TaskbarManager::getStashedTaskbarScale);
             }
 
             case TestProtocol.REQUEST_TASKBAR_ALL_APPS_TOP_PADDING: {
-                return getTISBinderUIProperty(Bundle::putInt, tisBinder ->
-                        tisBinder.getTaskbarManager()
-                                .getTaskbarAllAppsTopPadding());
+                return getTaskbarProperty(Bundle::putInt,
+                        TaskbarManager::getTaskbarAllAppsTopPadding);
             }
 
             case TestProtocol.REQUEST_TASKBAR_APPS_LIST_SCROLL_Y: {
-                return getTISBinderUIProperty(Bundle::putInt, tisBinder ->
-                        tisBinder.getTaskbarManager().getTaskbarAllAppsScroll());
+                return getTaskbarProperty(Bundle::putInt, TaskbarManager::getTaskbarAllAppsScroll);
             }
 
             case TestProtocol.REQUEST_LIMIT_MAX_TASKBAR_ICON_NUMBER: {
-                runOnTISBinder(tisBinder -> {
-                    tisBinder.getTaskbarManager().limitMaxTaskbarIconsNum(Integer.parseInt(arg));
-                    waitForTaskbarUiThreadSync();
-                });
+                runOnTaskbar(t -> t.limitMaxTaskbarIconsNum(Integer.parseInt(arg)));
                 return response;
             }
 
             case TestProtocol.REQUEST_ENABLE_BLOCK_TIMEOUT:
-                runOnTISBinder(tisBinder -> {
-                    enableBlockingTimeout(tisBinder, true);
-                });
+                runOnTaskbar(t -> t.enableBlockingTimeoutDuringTests(true));
                 return response;
 
             case TestProtocol.REQUEST_DISABLE_BLOCK_TIMEOUT:
-                runOnTISBinder(tisBinder -> {
-                    enableBlockingTimeout(tisBinder, false);
-                });
+                runOnTaskbar(t -> t.enableBlockingTimeoutDuringTests(false));
                 return response;
 
             case TestProtocol.REQUEST_ENABLE_TRANSIENT_TASKBAR:
@@ -224,40 +215,41 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
                 return response;
 
             case TestProtocol.REQUEST_REFRESH_OVERVIEW_TARGET:
-                runOnTISBinder(TISBinder::refreshOverviewTargetForTest);
+                runOnSysUIConnection(MAIN_EXECUTOR, c -> {
+                    c.getAllAppsActionManager().onDestroy();
+                    mOverviewComponentObserver.dispatchOverviewState();
+
+                    if (RecentsWindowFlags.getEnableOverviewInWindow()) {
+                        var launcher = Launcher.ACTIVITY_TRACKER.getCreatedContext();
+                        if (launcher != null) c.getTaskbarManager().setActivity(launcher);
+                        waitForTaskbarUiThreadSync();
+                    }
+                });
                 return response;
 
             case TestProtocol.REQUEST_RECREATE_TASKBAR:
-                // Allow null-pointer to catch illegal states.
-                runOnTISBinder(tisBinder -> {
-                    tisBinder.getTaskbarManager().recreateTaskbars();
-                    waitForTaskbarUiThreadSync();
-                });
+                runOnTaskbar(TaskbarManager::recreateTaskbars);
                 return response;
             case TestProtocol.REQUEST_TASKBAR_IME_DOCKED:
-                return getTISBinderUIProperty(Bundle::putBoolean, tisBinder ->
-                        tisBinder.getTaskbarManager().isImeDocked());
+                return getTaskbarProperty(Bundle::putBoolean, TaskbarManager::isImeDocked);
             case TestProtocol.REQUEST_UNSTASH_BUBBLE_BAR_IF_STASHED:
-                runOnTISBinder(tisBinder -> {
-                    // Allow null-pointer to catch illegal states.
-                    tisBinder.getTaskbarManager().unstashBubbleBarIfStashed();
-                    waitForTaskbarUiThreadSync();
-                });
+                runOnTaskbar(TaskbarManager::unstashBubbleBarIfStashed);
                 return response;
             case TestProtocol.REQUEST_REMOVE_ALL_BUBBLES:
-                runOnTISBinder(tisBinder -> {
-                    // Allow null-pointer to catch illegal states.
-                    tisBinder.getTaskbarManager().removeAllSystemUiBubbles();
-                    waitForTaskbarUiThreadSync();
-                });
+                runOnTaskbar(TaskbarManager::removeAllSystemUiBubbles);
                 return response;
             case TestProtocol.REQUEST_INJECT_FAKE_TRACKPAD:
-                runOnTISBinder(tisBinder -> tisBinder.injectFakeTrackpadForTesting());
+                runOnSysUIConnection(MAIN_EXECUTOR, c -> {
+                    mActiveTrackpadList.addInputDeviceUnchecked(1000);
+                    c.getTouchInteractionHandler().initInputMonitor("tapl testing");
+                });
                 return response;
             case TestProtocol.REQUEST_EJECT_FAKE_TRACKPAD:
-                runOnTISBinder(tisBinder -> tisBinder.ejectFakeTrackpadForTesting());
+                runOnSysUIConnection(MAIN_EXECUTOR, c -> {
+                    mActiveTrackpadList.onInputDeviceRemoved(1000);
+                    c.getTouchInteractionHandler().initInputMonitor("tapl testing");
+                });
                 return response;
-
             case TestProtocol.REQUEST_DISMISS_MAGNETIC_DETACH_THRESHOLD: {
                 final Resources resources = mContext.getResources();
                 response.putInt(TestProtocol.TEST_INFO_RESPONSE_FIELD,
@@ -280,8 +272,7 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
                 return response;
             }
             case TestProtocol.REQUEST_IS_TRANSIENT_TASKBAR:
-                return getTISBinderUIProperty(Bundle::putBoolean, tisBinder ->
-                        tisBinder.getTaskbarManager().isTransient());
+                return getTaskbarProperty(Bundle::putBoolean, TaskbarManager::isTransient);
             case TestProtocol.REQUEST_FLAG_ENABLE_MULTIPLE_DESKTOPS: {
                 response.putBoolean(TestProtocol.TEST_INFO_RESPONSE_FIELD,
                         DesktopState.fromContext(mContext)
@@ -348,44 +339,45 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
         return super.isLauncherInitialized() && mSystemUiProxy.isActive();
     }
 
-    private void enableBlockingTimeout(
-            TISBinder tisBinder, boolean enable) {
-        tisBinder.getTaskbarManager().enableBlockingTimeoutDuringTests(enable);
-        waitForTaskbarUiThreadSync();
-    }
-
     private void enableTransientTaskbar(boolean enable) {
         LauncherPrefs.get(mContext).put(LauncherPrefs.TASKBAR_PINNING, !enable);
     }
 
     /**
-     * Runs the given command on the UI thread, after ensuring we are connected to
-     * TouchInteractionService.
+     * Runs the given command on the provided executor, after ensuring that the sysui connection
+     * is set up
      */
-    protected void runOnTISBinder(Consumer<TISBinder> connectionCallback) {
-        try {
-            CountDownLatch countDownLatch = new CountDownLatch(1);
-            TISBindHelper helper = MAIN_EXECUTOR.submit(() ->
-                    new TISBindHelper(mContext, tisBinder -> {
-                        connectionCallback.accept(tisBinder);
+    private void runOnSysUIConnection(
+            Executor executor, Consumer<SysUIConnectionComponent> callback) {
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        try (var ignored = mSysUIConnectionTracker.getActiveComponent()
+                .forEach(executor, component -> {
+                    if (component != null && countDownLatch.getCount() > 0) {
+                        callback.accept(component);
                         countDownLatch.countDown();
-                    })).get();
+                    }
+                    return null;
+                })) {
             countDownLatch.await();
-            MAIN_EXECUTOR.execute(helper::onDestroy);
-        } catch (ExecutionException | InterruptedException e) {
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private <T> Bundle getTISBinderUIProperty(
-            BundleSetter<T> bundleSetter, Function<TISBinder, T> provider) {
-        Bundle response = new Bundle();
+    /**
+     * Runs the given command on Taskbar UI thread, after ensuring TaskbarManager is created
+     */
+    private void runOnTaskbar(Consumer<TaskbarManager> callback) {
+        runOnSysUIConnection(TASKBAR_UI_THREAD, c -> callback.accept(c.getTaskbarManager()));
+    }
 
-        runOnTISBinder(tisBinder -> bundleSetter.set(
+    private <T> Bundle getTaskbarProperty(
+            BundleSetter<T> bundleSetter, Function<TaskbarManager, T> provider) {
+        Bundle response = new Bundle();
+        runOnTaskbar(taskbarManager -> bundleSetter.set(
                 response,
                 TestProtocol.TEST_INFO_RESPONSE_FIELD,
-                provider.apply(tisBinder)));
-
+                provider.apply(taskbarManager)));
         return response;
     }
 

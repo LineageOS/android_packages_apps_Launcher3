@@ -108,7 +108,7 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
     private final DeviceProfile.OnDeviceProfileChangeListener mOnDeviceProfileChangeListener =
             dp -> {
                 onStashedInAppChanged(dp);
-                postAdjustHotseatForBubbleBar();
+                adjustHotseatForBubbleBar(isBubbleBarVisible());
                 if (mControllers != null && mControllers.taskbarViewController != null) {
                     mControllers.taskbarViewController.onRotationChanged(dp);
                 }
@@ -367,10 +367,6 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
     @Override
     public void adjustHotseatForBubbleBar(boolean isBubbleBarVisible) {
         mLauncher.adjustHotseatForBubbleBar(isBubbleBarVisible);
-    }
-
-    private void postAdjustHotseatForBubbleBar() {
-        mLauncher.postAdjustHotseatForBubbleBar(isBubbleBarVisible(), mControllers != null);
     }
 
     private boolean isBubbleBarVisible() {

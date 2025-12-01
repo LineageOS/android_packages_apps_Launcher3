@@ -21,6 +21,7 @@ import android.app.ActivityManager.TaskDescription
 import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
 import android.content.ComponentName
+import android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
 import android.view.Display.DEFAULT_DISPLAY
 import com.android.launcher3.model.data.AppInfo
 
@@ -34,11 +35,18 @@ object FakeTaskFactory {
         displayId: Int = DEFAULT_DISPLAY,
         windowingMode: Int = WINDOWING_MODE_FULLSCREEN,
         title: String = "Test",
+        isExcluded: Boolean = false,
+        isVisible: Boolean = true,
     ) =
         ActivityManager.RunningTaskInfo().apply {
             this.taskId = taskId
             this.displayId = displayId
-            this.baseIntent = AppInfo.makeLaunchIntent(componentName)
+            this.baseIntent =
+                AppInfo.makeLaunchIntent(componentName).apply {
+                    if (isExcluded) {
+                        flags = FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+                    }
+                }
             this.baseActivity = componentName
             this.origActivity = componentName
             this.realActivity = componentName
@@ -46,5 +54,6 @@ object FakeTaskFactory {
             this.taskDescription = TaskDescription(title)
             this.configuration.windowConfiguration.activityType = ACTIVITY_TYPE_STANDARD
             this.configuration.windowConfiguration.windowingMode = windowingMode
+            this.isVisible = isVisible
         }
 }

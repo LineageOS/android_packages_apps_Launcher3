@@ -46,8 +46,8 @@ import com.android.launcher3.util.ModelTestExtensions.clearModelDb
 import com.android.launcher3.util.ModelTestExtensions.setModelLayout
 import com.android.launcher3.widget.LauncherAppWidgetHostView
 import com.android.launcher3.widget.PendingAppWidgetHostView
-import com.android.launcher3.widgets.resize.AppWidgetResizeFrameCompose
-import com.android.launcher3.widgets.resize.Edge
+import com.android.launcher3.widget.resize.AppWidgetResizeFrameCompose
+import com.android.launcher3.widget.resize.Edge
 import com.google.common.truth.Truth.assertThat
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.test.runTest

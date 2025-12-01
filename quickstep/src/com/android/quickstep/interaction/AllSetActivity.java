@@ -72,6 +72,7 @@ import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.graphics.ColorUtils;
 
@@ -83,21 +84,24 @@ import com.android.launcher3.R;
 import com.android.launcher3.RemoveAnimationSettingsTracker;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.anim.AnimatedFloat;
+import com.android.launcher3.dagger.LauncherComponentProvider;
 import com.android.launcher3.taskbar.StashedHandleViewControllerProxy;
 import com.android.launcher3.taskbar.TaskbarManager;
 import com.android.launcher3.util.Executors;
-import com.android.launcher3.util.SafeCloseable;
+import com.android.launcher3.util.RunnableList;
 import com.android.quickstep.GestureState;
 import com.android.quickstep.OverviewComponentObserver;
 import com.android.quickstep.OverviewComponentObserver.OverviewChangeListener;
-import com.android.quickstep.TISBinder;
+import com.android.quickstep.RecentsAnimationDeviceState;
+import com.android.quickstep.sysuiconnection.SysUIConnectionTracker;
 import com.android.quickstep.util.ActivityPreloadUtil;
 import com.android.quickstep.util.LottieAnimationColorUtils;
-import com.android.quickstep.util.TISBindHelper;
 import com.android.quickstep.views.WallpaperScreenshotClipView;
 import com.android.wm.shell.shared.TypefaceUtils.FontFamily;
 
 import com.airbnb.lottie.LottieAnimationView;
+
+import kotlin.Unit;
 
 import java.net.URISyntaxException;
 import java.util.Map;
@@ -152,7 +156,10 @@ public class AllSetActivity extends Activity {
     private final InvariantDeviceProfile.OnIDPChangeListener mOnIDPChangeListener =
             modelPropertiesChanged -> updateTextForNavigationMode();
 
-    private TISBindHelper mTISBindHelper;
+    private RecentsAnimationDeviceState mDeviceState;
+    private SysUIConnectionTracker mSysUIConnectionTracker;
+    @Nullable private StashedHandleViewControllerProxy mStashedHandleViewControllerProxy;
+    private final RunnableList mSysUIConnectionCleanup = new RunnableList();
 
     private BgDrawable mBackground;
     private View mRootView;
@@ -173,9 +180,6 @@ public class AllSetActivity extends Activity {
     @Nullable private AnimatorSet mExpressiveAnimSet;
     @Nullable private WallpaperScreenshotClipView mWallpaperClipPath;
 
-    @Nullable private SafeCloseable mUiControllerChangeSafeCloseable;
-
-    @Nullable private StashedHandleViewControllerProxy mStashedHandleViewControllerProxy;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -198,7 +202,9 @@ public class AllSetActivity extends Activity {
         initializeCommonViewsAndListeners();
         configureSystemUI(isDarkTheme);
 
-        mTISBindHelper = new TISBindHelper(this, this::onTISConnected);
+        mDeviceState = LauncherComponentProvider.get(this)
+                .getRecentsAnimationDeviceStateRepository().get(getDisplayId());
+        mSysUIConnectionTracker = SysUIConnectionTracker.get(this);
         mVibrator = getSystemService(Vibrator.class);
         getIDP().addOnChangeListener(mOnIDPChangeListener);
         OverviewComponentObserver.INSTANCE.get(this)
@@ -372,7 +378,7 @@ public class AllSetActivity extends Activity {
             public void onAnimationUpdate(ValueAnimator animation) {
                 float transY = (float) animation.getAnimatedValue();
                 mWallpaperClipPath.setClipTranslationY(transY, animation.getAnimatedFraction());
-                StashedHandleViewControllerProxy proxy = getStashedHandleViewController();
+                StashedHandleViewControllerProxy proxy = mStashedHandleViewControllerProxy;
                 if (proxy != null) {
                     proxy.setTranslationYForSwipe(transY);
                 }
@@ -399,7 +405,7 @@ public class AllSetActivity extends Activity {
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 float alpha = (float) valueAnimator.getAnimatedValue();
                 mHintView.setAlpha(alpha);
-                StashedHandleViewControllerProxy proxy = getStashedHandleViewController();
+                StashedHandleViewControllerProxy proxy = mStashedHandleViewControllerProxy;
                 if (proxy != null) {
                     proxy.setStashedHandleAlpha(ALPHA_INDEX_ALL_SET_TRANSITION, alpha);
                 }
@@ -414,7 +420,7 @@ public class AllSetActivity extends Activity {
         as.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                StashedHandleViewControllerProxy proxy = getStashedHandleViewController();
+                StashedHandleViewControllerProxy proxy = mStashedHandleViewControllerProxy;
                 if (proxy != null) {
                     proxy.setTranslationYForSwipe(0);
                     proxy.setStashedHandleAlpha(ALPHA_INDEX_ALL_SET_TRANSITION, 1f);
@@ -422,20 +428,6 @@ public class AllSetActivity extends Activity {
             }
         });
         return as;
-    }
-
-    private @Nullable StashedHandleViewControllerProxy getStashedHandleViewController() {
-        if (mStashedHandleViewControllerProxy != null) {
-            return mStashedHandleViewControllerProxy;
-        }
-        if (mTISBindHelper == null) {
-            return null;
-        }
-        TaskbarManager taskbarManager = mTISBindHelper.getTaskbarManager();
-        if (taskbarManager != null) {
-            mStashedHandleViewControllerProxy = taskbarManager.getStashedHandleViewController();
-        }
-        return mStashedHandleViewControllerProxy;
     }
 
     @Override
@@ -539,67 +531,44 @@ public class AllSetActivity extends Activity {
         mAnimatedBackground.addAnimatorListener(mBackgroundAnimatorListener);
     }
 
-    private void setSetupUIVisible(boolean visible) {
-        TaskbarManager taskbarManager = mTISBindHelper.getTaskbarManager();
-        if (taskbarManager == null) return;
-        taskbarManager.setSetupUIVisible(visible);
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
         maybeResumeOrPauseBackgroundAnimation();
-        TISBinder binder = mTISBindHelper.getBinder();
-        if (binder != null) {
-            setSetupUIVisible(true);
-            binder.setSwipeUpProxy(this::createSwipeUpProxy);
-        }
+        if (mDeviceState != null) mDeviceState.setSwipeUpProxy(this::createSwipeUpProxy);
         if (mIsExpressiveThemeEnabledInSUW) {
             getWindow().setBackgroundBlurRadius(WALLPAPER_BLUR_RADIUS);
-            if (binder != null) {
-                int height = getWindowManager().getCurrentWindowMetrics().getBounds().height();
-                binder.setGesturalHeight((int) (height * GESTURE_HEIGHT_RATIO_OF_WINDOW_HEIGHT));
+            int height = getWindowManager().getCurrentWindowMetrics().getBounds().height();
+            if (mDeviceState != null) {
+                mDeviceState.setGesturalHeight(
+                        (int) (height * GESTURE_HEIGHT_RATIO_OF_WINDOW_HEIGHT));
             }
         }
-        listenForUiControllerChange();
-    }
 
-    private void onTISConnected(TISBinder binder) {
-        setSetupUIVisible(isResumed());
-        binder.setSwipeUpProxy(isResumed() ? this::createSwipeUpProxy : null);
-        if (mIsExpressiveThemeEnabledInSUW && isResumed()) {
-            int height = getWindowManager().getCurrentWindowMetrics().getBounds().height();
-            binder.setGesturalHeight((int) (height * GESTURE_HEIGHT_RATIO_OF_WINDOW_HEIGHT));
-        }
+        mSysUIConnectionCleanup.executeAllAndClear();
+        var connCleanup = mSysUIConnectionTracker.getActiveComponent().forEach(
+                MAIN_EXECUTOR, conn -> {
+                    if (conn == null) return null;
+                    var tb = conn.getTaskbarManager();
 
-        listenForUiControllerChange();
-        onUiControllerChanged();
-    }
-
-    private void listenForUiControllerChange() {
-        if (mUiControllerChangeSafeCloseable != null) {
-            return;
-        }
-        TaskbarManager taskbarManager = mTISBindHelper.getTaskbarManager();
-        if (taskbarManager == null) {
-            return;
-        }
-        mUiControllerChangeSafeCloseable = taskbarManager.getPrimaryDisplayUiControllerStream()
-                .forEach(MAIN_EXECUTOR, (c) -> {
-                    onUiControllerChanged();
+                    mStashedHandleViewControllerProxy = tb.getStashedHandleViewController();
+                    tb.setSetupUIVisible(isResumed());
+                    var displayCleanup = tb.getPrimaryDisplayUiControllerStream().forEach(
+                            MAIN_EXECUTOR, c -> onUiControllerChanged(tb));
+                    mSysUIConnectionCleanup.add(displayCleanup::close);
+                    onUiControllerChanged(tb);
                     return null;
                 });
+        mSysUIConnectionCleanup.add(connCleanup::close);
     }
 
-    private void onUiControllerChanged() {
-        TaskbarManager taskbarManager = mTISBindHelper.getTaskbarManager();
-        if (taskbarManager != null) {
-            mLauncherStartAnim = taskbarManager.createLauncherStartFromSuwAnim(MAX_SWIPE_DURATION);
-            if (mWallpaperClipPath != null) {
-                mWallpaperClipPath.setForceFallbackAnimation(
-                        taskbarManager.shouldForceAllSetFallbackAnimation());
-            }
+    private Unit onUiControllerChanged(@NonNull TaskbarManager taskbarManager) {
+        mLauncherStartAnim = taskbarManager.createLauncherStartFromSuwAnim(MAX_SWIPE_DURATION);
+        if (mWallpaperClipPath != null) {
+            mWallpaperClipPath.setForceFallbackAnimation(
+                    taskbarManager.shouldForceAllSetFallbackAnimation());
         }
+        return Unit.INSTANCE;
     }
 
     private void onOverviewTargetChange(boolean isHomeAndOverviewSame) {
@@ -615,24 +584,19 @@ public class AllSetActivity extends Activity {
             finishAndRemoveTask();
             dispatchLauncherAnimStartEnd();
         }
-        closeUiControllerChangeSafeCloseable();
-    }
-
-    private void closeUiControllerChangeSafeCloseable() {
-        if (mUiControllerChangeSafeCloseable != null) {
-            mUiControllerChangeSafeCloseable.close();
-            mUiControllerChangeSafeCloseable = null;
-        }
+        mSysUIConnectionCleanup.executeAllAndClear();
     }
 
     private void clearBinderOverride() {
-        TISBinder binder = mTISBindHelper.getBinder();
-        if (binder != null) {
-            setSetupUIVisible(false);
-            binder.setSwipeUpProxy(null);
+        if (mDeviceState != null) {
+            mDeviceState.setSwipeUpProxy(null);
             if (mIsExpressiveThemeEnabledInSUW) {
-                binder.setGesturalHeight(RESET_TO_DEFAULT_GESTURAL_HEIGHT);
+                mDeviceState.setGesturalHeight(RESET_TO_DEFAULT_GESTURAL_HEIGHT);
             }
+        }
+        var conn = mSysUIConnectionTracker.getActiveComponent().getValue();
+        if (conn != null) {
+            conn.getTaskbarManager().setSetupUIVisible(false);
         }
     }
 
@@ -653,8 +617,7 @@ public class AllSetActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         getIDP().removeOnChangeListener(mOnIDPChangeListener);
-        closeUiControllerChangeSafeCloseable();
-        mTISBindHelper.onDestroy();
+        mSysUIConnectionCleanup.executeAllAndDestroy();
         clearBinderOverride();
         if (mBackgroundAnimatorListener != null) {
             mAnimatedBackground.removeAnimatorListener(mBackgroundAnimatorListener);

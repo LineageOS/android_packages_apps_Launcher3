@@ -46,6 +46,7 @@ import com.android.launcher3.icons.LauncherIconProviderImpl
 import com.android.launcher3.logging.StatsLogManager.StatsLogManagerFactory
 import com.android.launcher3.secondarydisplay.SecondaryDisplayDelegate
 import com.android.launcher3.secondarydisplay.SecondaryDisplayQuickstepDelegateImpl
+import com.android.launcher3.testing.TestInformationHandler
 import com.android.launcher3.uioverrides.QuickstepWidgetHolder.QuickstepWidgetHolderFactory
 import com.android.launcher3.uioverrides.SystemApiWrapper
 import com.android.launcher3.uioverrides.plugins.PluginManagerWrapperImpl
@@ -66,6 +67,7 @@ import com.android.quickstep.DesktopShortcut
 import com.android.quickstep.ExternalDisplayShortcut
 import com.android.quickstep.InstantAppResolverImpl
 import com.android.quickstep.LauncherRestoreEventLoggerImpl
+import com.android.quickstep.QuickstepTestInformationHandler
 import com.android.quickstep.TaskShortcutFactory
 import com.android.quickstep.logging.StatsLogCompatManager.StatsLogCompatManagerFactory
 import com.android.quickstep.util.ChoreographerFrameRateTracker
@@ -120,6 +122,11 @@ abstract class ApiWrapperModule {
     abstract fun bindRestoreEventLogger(
         impl: LauncherRestoreEventLoggerImpl
     ): LauncherRestoreEventLogger
+
+    @Binds
+    abstract fun bindTestInformationHandler(
+        impl: QuickstepTestInformationHandler
+    ): TestInformationHandler
 }
 
 @Module

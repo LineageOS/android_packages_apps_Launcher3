@@ -189,6 +189,7 @@ import com.android.quickstep.RecentsModel;
 import com.android.quickstep.RemoteAnimationTargets;
 import com.android.quickstep.RemoteTargetGluer;
 import com.android.quickstep.RemoteTargetGluer.RemoteTargetHandle;
+import com.android.quickstep.SplitRecentsAnimUtils;
 import com.android.quickstep.SplitSelectionListener;
 import com.android.quickstep.SystemUiProxy;
 import com.android.quickstep.TaskOverlayFactory;
@@ -639,11 +640,11 @@ public abstract class RecentsView<
                     MAIN_EXECUTOR,
                     apkRemoved -> {
                         if (apkRemoved) {
-                            dismissTask(taskId, /*animate=*/true, /*removeTask=*/false);
+                            dismissTask(taskId, /* removeTask= */false);
                         } else {
                             mRecentsModel.isTaskRemoved(taskKey.id, taskRemoved -> {
                                 if (taskRemoved) {
-                                    dismissTask(taskId, /*animate=*/true, /*removeTask=*/false);
+                                    dismissTask(taskId, /* removeTask= */false);
                                 }
                             }, RecentsFilterState.getFilter(mContainer.getDisplayId()));
                         }
@@ -657,7 +658,7 @@ public abstract class RecentsView<
                 return;
             }
             if (newDisplayId != mContainer.getDisplayId()) {
-                dismissTask(taskId, /*animate=*/ true, /*removeTask=*/ false);
+                dismissTask(taskId, /* removeTask= */ false);
             }
         }
 
@@ -666,7 +667,7 @@ public abstract class RecentsView<
                 boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
             if (enableCreateAnyBubble() && task.isAppBubble && mHandleTaskStackChanges) {
                 // Remove task from recents if it moved to a bubble, but keep it running
-                dismissTask(task.taskId, /* animate= */ true, /* removeTask= */ false);
+                dismissTask(task.taskId, /* removeTask= */ false);
             }
         }
 
@@ -2320,7 +2321,12 @@ public abstract class RecentsView<
         }
 
         // Update the high res thumbnail loader state
-        mRecentsModel.getThumbnailCache().getHighResLoadingState().setFlingingFast(isFlingingFast);
+        if (enableLowResThumbnailPreloading()) {
+            mRecentsViewModel.setHighResThumbnailsRequired(!isFlingingFast);
+        } else {
+            mRecentsModel.getThumbnailCache().getHighResLoadingState().setFlingingFast(
+                    isFlingingFast);
+        }
         return scrolling;
     }
 
@@ -3482,23 +3488,8 @@ public abstract class RecentsView<
     }
 
     @UiThread
-    public void dismissTask(int taskId, boolean animate, boolean removeTask) {
-        TaskView taskView = getTaskViewByTaskId(taskId);
-        if (taskView == null) {
-            Log.d(TAG, "dismissTask: " + taskId + ",  no associated TaskView");
-            return;
-        }
-        Log.d(TAG, "dismissTask: " + taskId);
-
-        if (enableDesktopExplodedView() && taskView instanceof  DesktopTaskView desktopTaskView) {
-            desktopTaskView.removeTaskFromExplodedView(taskId, animate);
-
-            if (removeTask) {
-                ActivityManagerWrapper.getInstance().removeTask(taskId);
-            }
-        } else if (!taskView.isBeingDismissed()) {
-            dismissTaskView(taskView, removeTask);
-        }
+    public void dismissTask(int taskId, boolean removeTask) {
+        mDismissUtils.dismissTask(taskId, removeTask);
     }
 
     /** Dismisses the entire [taskView]. */
@@ -4801,12 +4792,10 @@ public abstract class RecentsView<
                 if (taskView instanceof GroupedTaskView && hasAllValidTaskIds(taskView.getTaskIds())
                         && mRemoteTargetHandles != null) {
                     // TODO(b/194414938): make this part of the animations instead.
-                    TaskViewUtils.createSplitAuxiliarySurfacesAnimator(
-                            mRemoteTargetHandles[0].getTransformParams().getTargetSet().nonApps,
-                            true /*shown*/, (dividerAnimator) -> {
-                                dividerAnimator.start();
-                                dividerAnimator.end();
-                            });
+                    SplitRecentsAnimUtils splitRecentsAnimUtils = new SplitRecentsAnimUtils(
+                            mRemoteTargetHandles[0].getTransformParams().getTargetSet().nonApps);
+                    splitRecentsAnimUtils.fadeInDimLayer(/* immediate= */ true);
+                    splitRecentsAnimUtils.fadeInDivider(/* immediate= */ true);
                 }
                 if (taskView.isRunningTask()) {
                     finishRecentsAnimation(false /* toHome */, null);

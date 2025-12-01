@@ -18,7 +18,6 @@ package com.android.launcher3.util
 
 import com.android.launcher3.FakeLauncherPrefs
 import com.android.launcher3.LauncherPrefs
-import com.android.launcher3.compose.core.widgetpicker.NoOpWidgetPickerModule
 import com.android.launcher3.concurrent.ExecutorsModule
 import com.android.launcher3.dagger.ApiWrapperModule
 import com.android.launcher3.dagger.AppModule
@@ -34,6 +33,7 @@ import com.android.launcher3.dagger.TaskOverlayModule
 import com.android.launcher3.dagger.WidgetModule
 import com.android.launcher3.dagger.WindowManagerProxyModule
 import com.android.launcher3.util.dagger.LauncherExecutorsModule
+import com.android.launcher3.widgetpicker.NoOpWidgetPickerModule
 import dagger.Binds
 import dagger.Module
 

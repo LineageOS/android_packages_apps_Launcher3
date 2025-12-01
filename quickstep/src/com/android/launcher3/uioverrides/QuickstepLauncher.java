@@ -198,12 +198,11 @@ import com.android.launcher3.util.WindowBlurState;
 import com.android.launcher3.views.FloatingIconView;
 import com.android.quickstep.BaseContainerInterface;
 import com.android.quickstep.LauncherActivityInterface;
-import com.android.quickstep.OverviewCommandHelper;
 import com.android.quickstep.OverviewComponentObserver;
 import com.android.quickstep.OverviewComponentObserver.OverviewChangeListener;
+import com.android.quickstep.RecentsAnimationDeviceState;
 import com.android.quickstep.RecentsModel;
 import com.android.quickstep.SystemUiProxy;
-import com.android.quickstep.TISBinder;
 import com.android.quickstep.TaskUtils;
 import com.android.quickstep.fallback.RecentsState;
 import com.android.quickstep.fallback.RecentsStateUtilsKt;
@@ -211,6 +210,7 @@ import com.android.quickstep.recents.di.RecentsComponent;
 import com.android.quickstep.split.SplitSelectStateController;
 import com.android.quickstep.split.SplitToWorkspaceController;
 import com.android.quickstep.split.SplitWithKeyboardShortcutController;
+import com.android.quickstep.sysuiconnection.SysUIConnectionTracker;
 import com.android.quickstep.util.ActiveGestureProtoLogProxy;
 import com.android.quickstep.util.AnimUtils;
 import com.android.quickstep.util.AsyncClockEventDelegate;
@@ -218,7 +218,6 @@ import com.android.quickstep.util.LauncherUnfoldAnimationController;
 import com.android.quickstep.util.QuickstepOnboardingPrefs;
 import com.android.quickstep.util.SplitTask;
 import com.android.quickstep.util.SurfaceTransactionApplier;
-import com.android.quickstep.util.TISBindHelper;
 import com.android.quickstep.util.unfold.LauncherUnfoldTransitionController;
 import com.android.quickstep.util.unfold.ProxyUnfoldTransitionProvider;
 import com.android.quickstep.views.FloatingTaskView;
@@ -273,7 +272,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     private QuickstepTransitionManager mAppTransitionManager;
 
     private OverviewActionsView<?> mActionsView;
-    private TISBindHelper mTISBindHelper;
+    private SysUIConnectionTracker mSysUIConnectionTracker;
     private @Nullable TaskbarInteractor mTaskbarInteractor;
     // Will be updated when dragging from taskbar.
     private @Nullable volatile UnfoldTransitionProgressProvider mUnfoldTransitionProgressProvider;
@@ -285,6 +284,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     private BubbleBarLocation mBubbleBarLocation;
 
     private TaskbarUiState mTaskbarUiState;
+    private RecentsAnimationDeviceState mRecentsAnimationDeviceState;
 
     /**
      * If Launcher restarted while in the middle of an Overview split select, it needs this data to
@@ -298,8 +298,6 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     private SafeCloseable mViewCapture;
 
     private boolean mEnableWidgetDepth;
-
-    private boolean mIsPredictiveBackToHomeInProgress;
 
     private boolean mCanShowAllAppsEducationView;
 
@@ -379,7 +377,10 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         mAppTransitionManager.registerRemoteAnimations();
         mAppTransitionManager.registerRemoteTransitions();
 
-        mTISBindHelper = new TISBindHelper(this, this::onTISConnected);
+        mRecentsAnimationDeviceState = LauncherComponentProvider.get(this)
+                .getRecentsAnimationDeviceStateRepository().get(getDisplayId());
+        mSysUIConnectionTracker = SysUIConnectionTracker.get(this);
+        mSysUIConnectionTracker.onConnected(this, c -> c.getTaskbarManager().setActivity(this));
 
         if (DesktopModeStatus.canEnterDesktopModeOrShowAppHandle(this)) {
             mSplitSelectStateController.initSplitFromDesktopController(this);
@@ -672,7 +673,6 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
             mAppTransitionManager.onActivityDestroyed();
         }
         mAppTransitionManager = null;
-        mIsPredictiveBackToHomeInProgress = false;
 
         if (mUnfoldTransitionProgressProvider != null) {
             SystemUiProxy.INSTANCE.get(this).setUnfoldAnimationListener(null);
@@ -681,7 +681,6 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
 
         OverviewComponentObserver.INSTANCE.get(this)
                 .removeOverviewChangeListener(mOverviewChangeListener);
-        mTISBindHelper.onDestroy();
 
         if (mLauncherUnfoldAnimationController != null) {
             mLauncherUnfoldAnimationController.onDestroy();
@@ -971,9 +970,12 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     protected void onNewIntent(Intent intent) {
         boolean intentHasGnc = GestureNavContract.canBuildFromIntent(intent);
         super.onNewIntent(intent);
-        OverviewCommandHelper overviewCommandHelper = mTISBindHelper.getOverviewCommandHelper();
-        if (overviewCommandHelper != null) {
-            overviewCommandHelper.clearPendingCommands();
+        var conn = mSysUIConnectionTracker.getActiveComponent().getValue();
+        if (conn != null) {
+            var overviewCommandHelper = conn.getOverviewCommandHelper().getIfReady();
+            if (overviewCommandHelper != null) {
+                overviewCommandHelper.clearPendingCommands();
+            }
         }
         if (RecentsWindowFlags.getEnableOverviewInWindow() && !intentHasGnc) {
             BaseContainerInterface<?, ?> defaultDisplayContainerInterface =
@@ -1124,10 +1126,10 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     }
 
     private void onTaskbarInAppDisplayProgressUpdate(float progress, int flag) {
-        TaskbarManager taskbarManager = mTISBindHelper.getTaskbarManager();
-        if (taskbarManager == null
-                || !taskbarManager.hasCurrentActivityContext()
-                || mTaskbarInteractor == null) {
+        var conn = mSysUIConnectionTracker.getActiveComponent().getValue();
+        if (conn == null) return;
+        TaskbarManager taskbarManager = conn.getTaskbarManager();
+        if (!taskbarManager.hasCurrentActivityContext() || mTaskbarInteractor == null) {
             return;
         }
         mTaskbarInteractor.onTaskbarInAppDisplayProgressUpdate(progress, flag);
@@ -1139,9 +1141,9 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     }
 
     protected void updateTaskbarsVisibility() {
-        TaskbarManager taskbarManager = mTISBindHelper.getTaskbarManager();
-        if (taskbarManager != null) {
-            taskbarManager.updateTaskbarsVisibility();
+        var conn = mSysUIConnectionTracker.getActiveComponent().getValue();
+        if (conn != null) {
+            conn.getTaskbarManager().updateTaskbarsVisibility();
         }
     }
 
@@ -1204,19 +1206,6 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         if (transitionManager != null) {
             transitionManager.onOverviewTargetChange();
         }
-    }
-
-    private void onTISConnected(TISBinder binder) {
-        TaskbarManager taskbarManager = mTISBindHelper.getTaskbarManager();
-        if (taskbarManager != null) {
-            taskbarManager.setActivity(this);
-        }
-        mTISBindHelper.setPredictiveBackToHomeInProgress(mIsPredictiveBackToHomeInProgress);
-    }
-
-    @Override
-    public void runOnBindToTouchInteractionService(Runnable r) {
-        mTISBindHelper.runOnBindToTouchInteractionService(r);
     }
 
     private void initUnfoldTransitionProgressProvider() {
@@ -1486,12 +1475,9 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
      * Sets flag whether a predictive back-to-home animation is in progress
      */
     public void setPredictiveBackToHomeInProgress(boolean isInProgress) {
-        mIsPredictiveBackToHomeInProgress = isInProgress;
-        mTISBindHelper.setPredictiveBackToHomeInProgress(isInProgress);
-    }
-
-    public boolean getPredictiveBackToHomeInProgress() {
-        return mIsPredictiveBackToHomeInProgress;
+        if (mRecentsAnimationDeviceState != null) {
+            mRecentsAnimationDeviceState.setPredictiveBackToHomeInProgress(isInProgress);
+        }
     }
 
     @Override
@@ -1512,9 +1498,10 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
                 getDeviceProfile().toSmallString());
         SystemUiProxy.INSTANCE.get(this).setLauncherAppIconSize(
                 mDeviceProfile.getWorkspaceIconProfile().getIconSizePx());
-        TaskbarManager taskbarManager = mTISBindHelper.getTaskbarManager();
-        if (taskbarManager != null) {
-            taskbarManager.debugPrimaryTaskbar("QuickstepLauncher#onDeviceProfileChanged",
+
+        var conn = mSysUIConnectionTracker.getActiveComponent().getValue();
+        if (conn != null) {
+            conn.getTaskbarManager().debugPrimaryTaskbar("QuickstepLauncher#onDeviceProfileChanged",
                     true);
         }
     }
@@ -1573,8 +1560,12 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     }
 
     public boolean canStartHomeSafely() {
-        OverviewCommandHelper overviewCommandHelper = mTISBindHelper.getOverviewCommandHelper();
-        return overviewCommandHelper == null || overviewCommandHelper.canStartHomeSafely();
+        var conn = mSysUIConnectionTracker.getActiveComponent().getValue();
+        if (conn != null) {
+            var overviewCommandHelper = conn.getOverviewCommandHelper().getIfReady();
+            return overviewCommandHelper == null || overviewCommandHelper.canStartHomeSafely();
+        }
+        return true;
     }
 
     @Override
