@@ -43,6 +43,7 @@ import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.popup.SystemShortcut
 import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
+import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.waitForIdleSync
 import com.android.launcher3.taskbar.TaskbarIconType.ALL_APPS
 import com.android.launcher3.taskbar.TaskbarIconType.HOTSEAT
@@ -66,7 +67,7 @@ import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
 import com.android.launcher3.util.Preconditions.assertNotNull
-import com.android.launcher3.util.TestUtil.getOnUiThread
+import com.android.launcher3.util.TestUtil.getOnTaskbarUiThread
 import com.android.quickstep.RecentsModel
 import com.android.quickstep.SystemUiProxy
 import com.android.quickstep.util.DesktopTask
@@ -175,12 +176,12 @@ class TaskbarOverflowTest {
 
     private var currentControllerInitCallback: () -> Unit = {}
         set(value) {
-            runOnMainSync { value.invoke() }
+            runOnTaskbarUiThreadSync { value.invoke() }
             field = value
         }
 
     private fun onControllersInitialized() {
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             if (!recentAppsController.canShowRunningApps) {
                 recentAppsController.onDestroy()
                 recentAppsController.canShowRunningApps = true
@@ -196,12 +197,12 @@ class TaskbarOverflowTest {
 
     @Before
     fun ensureRunningAppsShowing() {
-        runOnMainSync { recentsModel.resolvePendingTaskRequests() }
+        runOnTaskbarUiThreadSync { recentsModel.resolvePendingTaskRequests() }
     }
 
     @After
     fun resetForcedMaxIconCount() {
-        runOnMainSync { taskbarViewController.limitMaxTaskbarIconsNum(-1) }
+        runOnTaskbarUiThreadSync { taskbarViewController.limitMaxTaskbarIconsNum(-1) }
     }
 
     @Test
@@ -249,13 +250,15 @@ class TaskbarOverflowTest {
             taskbarUnitTestRule.activityContext.deviceProfile.numShownHotseatIcons
         val forcedMaxIconCount = numberOfHotseatApps + 2
 
-        runOnMainSync { taskbarViewController.limitMaxTaskbarIconsNum(forcedMaxIconCount) }
+        runOnTaskbarUiThreadSync {
+            taskbarViewController.limitMaxTaskbarIconsNum(forcedMaxIconCount)
+        }
 
         // Create two "recent" desktop tasks, and then add enough hotseat items so the taskbar
         // reaches max number of items with hotseat item icons, all apps and divider icons only.
         // I.e. so all desktop tasks are in taskbar overflow.
         createDesktopTask(2)
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             val taskbarView: TaskbarView =
                 taskbarUnitTestRule.activityContext.dragLayer.findViewById(R.id.taskbar_view)
             taskbarView.updateItems(
@@ -279,13 +282,15 @@ class TaskbarOverflowTest {
             taskbarUnitTestRule.activityContext.deviceProfile.numShownHotseatIcons
         val forcedMaxIconCount = numberOfHotseatApps + 2
 
-        runOnMainSync { taskbarViewController.limitMaxTaskbarIconsNum(forcedMaxIconCount) }
+        runOnTaskbarUiThreadSync {
+            taskbarViewController.limitMaxTaskbarIconsNum(forcedMaxIconCount)
+        }
 
         // Create a "recent" desktop task, and then add enough hotseat items so the taskbar
         // reaches max number of items with hotseat item icons, all apps and divider icons only.
         // I.e. so the single desktop tasks is in taskbar overflow.
         createDesktopTask(1)
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             val taskbarView: TaskbarView =
                 taskbarUnitTestRule.activityContext.dragLayer.findViewById(R.id.taskbar_view)
             val hotseatItems = createHotseatItems(forcedMaxIconCount - initialIconCount)
@@ -323,7 +328,7 @@ class TaskbarOverflowTest {
     fun testTaskbarWithPinAppsOverflow_pinned() {
         val numHotseatIcons = taskbarContext.deviceProfile.inv.numShownHotseatIcons
 
-        val taskbarView = getOnUiThread {
+        val taskbarView = getOnTaskbarUiThread {
             val view = taskbarContext.dragLayer.findViewById<TaskbarView>(R.id.taskbar_view)
             view.updateItems(createHotseatItems(numHotseatIcons + 2), emptyList(), emptyList())
             view
@@ -385,7 +390,7 @@ class TaskbarOverflowTest {
         val initialNumIcons = currentNumberOfTaskbarIcons
         val maxNumIconViews = addRunningAppsAndVerifyOverflowState(2)
 
-        runOnMainSync { bubbleStashController.stashBubbleBarImmediate() }
+        runOnTaskbarUiThreadSync { bubbleStashController.stashBubbleBarImmediate() }
         assertThat(maxNumberOfTaskbarIcons).isEqualTo(maxNumIconViews)
         assertThat(currentNumberOfTaskbarIcons).isEqualTo(maxNumIconViews)
         assertThat(taskbarOverflowIconIndex).isEqualTo(initialNumIcons.coerceAtLeast(2))
@@ -400,7 +405,7 @@ class TaskbarOverflowTest {
         val initialMaxNumIconViews = addRunningAppsAndVerifyOverflowState(5)
 
         currentControllerInitCallback = { bubbleBarViewController.setHiddenForBubbles(true) }
-        runOnMainSync { animatorTestRule.advanceTimeBy(150) }
+        runOnTaskbarUiThreadSync { animatorTestRule.advanceTimeBy(150) }
 
         val maxNumIconViews = maxNumberOfTaskbarIcons
         assertThat(maxNumIconViews).isGreaterThan(initialMaxNumIconViews)
@@ -419,7 +424,7 @@ class TaskbarOverflowTest {
         val initialMaxNumIconViews = addRunningAppsAndVerifyOverflowState(5)
 
         currentControllerInitCallback = { bubbleBarViewController.setHiddenForBubbles(true) }
-        runOnMainSync { animatorTestRule.advanceTimeBy(150) }
+        runOnTaskbarUiThreadSync { animatorTestRule.advanceTimeBy(150) }
 
         val maxNumIconViews = maxNumberOfTaskbarIcons
         assertThat(maxNumIconViews).isGreaterThan(initialMaxNumIconViews)
@@ -447,10 +452,11 @@ class TaskbarOverflowTest {
         tapOverflowIcon()
         // Keyboard quick switch view is shown only after list of recent task is asynchronously
         // retrieved from the recents model.
-        runOnMainSync { recentsModel.resolvePendingTaskRequests() }
+        runOnTaskbarUiThreadSync { recentsModel.resolvePendingTaskRequests() }
 
-        assertThat(getOnUiThread { keyboardQuickSwitchController.isShownFromTaskbar }).isTrue()
-        assertThat(getOnUiThread { keyboardQuickSwitchController.shownTaskIds() })
+        assertThat(getOnTaskbarUiThread { keyboardQuickSwitchController.isShownFromTaskbar })
+            .isTrue()
+        assertThat(getOnTaskbarUiThread { keyboardQuickSwitchController.shownTaskIds() })
             .containsExactlyElementsIn(0..targetOverflowSize)
         verifyOverflowIconTooltip(null)
 
@@ -476,13 +482,14 @@ class TaskbarOverflowTest {
         tapOverflowIcon()
         // Keyboard quick switch view is shown only after list of recent task is asynchronously
         // retrieved from the recents model.
-        runOnMainSync { recentsModel.resolvePendingTaskRequests() }
+        runOnTaskbarUiThreadSync { recentsModel.resolvePendingTaskRequests() }
 
-        assertThat(getOnUiThread { keyboardQuickSwitchController.isShownFromTaskbar }).isTrue()
-        assertThat(getOnUiThread { keyboardQuickSwitchController.shownTaskIds() })
+        assertThat(getOnTaskbarUiThread { keyboardQuickSwitchController.isShownFromTaskbar })
+            .isTrue()
+        assertThat(getOnTaskbarUiThread { keyboardQuickSwitchController.shownTaskIds() })
             .containsExactlyElementsIn(0..targetOverflowSize)
 
-        runOnMainSync { keyboardQuickSwitchController.launchFocusedTask() }
+        runOnTaskbarUiThreadSync { keyboardQuickSwitchController.launchFocusedTask() }
 
         // `keyboardQuickSwitchController.launchFocusedTask()` will post a task to activate target
         // desk to `UI_HELPER_EXECUTOR`. Flush the executor to make sure the task runs before
@@ -525,7 +532,7 @@ class TaskbarOverflowTest {
                 List(createdTasks - 2) { "fake" }
         )
 
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             val taskbarView: TaskbarView =
                 taskbarUnitTestRule.activityContext.dragLayer.findViewById(R.id.taskbar_view)
             taskbarView.updateItems(
@@ -559,7 +566,7 @@ class TaskbarOverflowTest {
                 List(createdTasks - 2) { "fake" }
         )
 
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             val taskbarView: TaskbarView =
                 taskbarUnitTestRule.activityContext.dragLayer.findViewById(R.id.taskbar_view)
             taskbarView.updateItems(
@@ -572,10 +579,11 @@ class TaskbarOverflowTest {
         tapOverflowIcon()
         // Keyboard quick switch view is shown only after list of recent task is asynchronously
         // retrieved from the recents model.
-        runOnMainSync { recentsModel.resolvePendingTaskRequests() }
+        runOnTaskbarUiThreadSync { recentsModel.resolvePendingTaskRequests() }
 
-        assertThat(getOnUiThread { keyboardQuickSwitchController.isShownFromTaskbar }).isTrue()
-        assertThat(getOnUiThread { keyboardQuickSwitchController.shownTaskIds() })
+        assertThat(getOnTaskbarUiThread { keyboardQuickSwitchController.isShownFromTaskbar })
+            .isTrue()
+        assertThat(getOnTaskbarUiThread { keyboardQuickSwitchController.shownTaskIds() })
             .containsExactlyElementsIn(listOf(0) + (2..targetOverflowSize + 1).toList())
     }
 
@@ -585,11 +593,11 @@ class TaskbarOverflowTest {
         val maxNumIconViews = maxNumberOfTaskbarIcons
         createDesktopTask(5)
 
-        runOnMainSync { taskbarUnitTestRule.activityContext.limitMaxTaskbarIconsNum(4) }
+        runOnTaskbarUiThreadSync { taskbarUnitTestRule.activityContext.limitMaxTaskbarIconsNum(4) }
         assertThat(maxNumberOfTaskbarIcons).isAtMost(4)
         assertThat(currentNumberOfTaskbarIcons).isAtMost(4)
 
-        runOnMainSync { taskbarUnitTestRule.activityContext.limitMaxTaskbarIconsNum(-1) }
+        runOnTaskbarUiThreadSync { taskbarUnitTestRule.activityContext.limitMaxTaskbarIconsNum(-1) }
         assertThat(maxNumberOfTaskbarIcons).isEqualTo(maxNumIconViews)
         assertThat(currentNumberOfTaskbarIcons).isGreaterThan(4)
     }
@@ -612,7 +620,7 @@ class TaskbarOverflowTest {
                 List(createdTasks - 2) { "fake" },
         )
 
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             val taskbarView: TaskbarView =
                 taskbarUnitTestRule.activityContext.dragLayer.findViewById(R.id.taskbar_view)
             taskbarView.updateItems(
@@ -625,13 +633,14 @@ class TaskbarOverflowTest {
         tapOverflowIcon()
         // Keyboard quick switch view is shown only after list of recent task is asynchronously
         // retrieved from the recents model.
-        runOnMainSync { recentsModel.resolvePendingTaskRequests() }
+        runOnTaskbarUiThreadSync { recentsModel.resolvePendingTaskRequests() }
 
-        assertThat(getOnUiThread { keyboardQuickSwitchController.isShownFromTaskbar }).isTrue()
+        assertThat(getOnTaskbarUiThread { keyboardQuickSwitchController.isShownFromTaskbar })
+            .isTrue()
         // Taskbar is in overflow by `targetOverflowSize`, so overflow UI should have
         // `targetOverflowSize + 1` items, to account for a spot in taskbar taken by the overflow
         // icon. Task IDs for running desktop apps start at 1 - 0 is used for fullscreen task.
-        assertThat(getOnUiThread { keyboardQuickSwitchController.shownTaskIds() })
+        assertThat(getOnTaskbarUiThread { keyboardQuickSwitchController.shownTaskIds() })
             .containsExactlyElementsIn(listOf(1) + (3..targetOverflowSize + 2).toList())
     }
 
@@ -644,7 +653,7 @@ class TaskbarOverflowTest {
         val hotseatItems = createHotseatItems(2)
         var shortcut: SystemShortcut<*>? = null
         var hotseatIcon: BubbleTextView? = null
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             val taskbarView = setUpTaskbarAndModelCallback(hotseatItems)
             hotseatIcon =
                 taskbarView.iconViews.filterIsInstance<BubbleTextView>().first {
@@ -658,13 +667,16 @@ class TaskbarOverflowTest {
                 ) as SystemShortcut<*>
         }
         assertNotNull(shortcut)
-        runOnMainSync { shortcut?.onClick(hotseatIcon) }
-        // After unpinning the first item, only the second app is left.
-        assertThat(modelCallback.hotseatItems.map { info -> info.title })
-            .isEqualTo(listOf("Test App 1"))
-        // The unpinned app doesn't have a task so the shown tasks won't change.
-        assertThat(recentAppsController.shownTasks.map { it.tasks[0].key.id })
-            .isEqualTo(listOf(0, 1))
+        runOnTaskbarUiThreadSync { shortcut?.onClick(hotseatIcon) }
+
+        runOnMainSync {
+            // After unpinning the first item, only the second app is left.
+            assertThat(modelCallback.hotseatItems.map { info -> info.title })
+                .isEqualTo(listOf("Test App 1"))
+            // The unpinned app doesn't have a task so the shown tasks won't change.
+            assertThat(recentAppsController.shownTasks.map { it.tasks[0].key.id })
+                .isEqualTo(listOf(0, 1))
+        }
     }
 
     @Test
@@ -677,7 +689,7 @@ class TaskbarOverflowTest {
         createDesktopTaskWithTasksFromPackages(hotseatItems.mapNotNull { it.targetPackage })
         var shortcut: SystemShortcut<*>? = null
         var hotseatIcon: BubbleTextView? = null
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             val taskbarView = setUpTaskbarAndModelCallback(hotseatItems.map { it }.toTypedArray())
             hotseatIcon =
                 taskbarView.iconViews.filterIsInstance<BubbleTextView>().first {
@@ -696,11 +708,14 @@ class TaskbarOverflowTest {
         assertThat(recentAppsController.shownTasks.map { it.tasks[0].key.id })
             .isEqualTo(emptyList<Int>())
         assertNotNull(shortcut)
-        runOnMainSync { shortcut?.onClick(hotseatIcon) }
+        runOnTaskbarUiThreadSync { shortcut?.onClick(hotseatIcon) }
         // After unpinning the app, app 0 is removed and its task is shown as a recent task.
-        assertThat(modelCallback.hotseatItems.map { info -> info.title })
-            .isEqualTo(listOf("Test App 1"))
-        assertThat(recentAppsController.shownTasks.map { it.tasks[0].key.id }).isEqualTo(listOf(0))
+        runOnMainSync {
+            assertThat(modelCallback.hotseatItems.map { info -> info.title })
+                .isEqualTo(listOf("Test App 1"))
+            assertThat(recentAppsController.shownTasks.map { it.tasks[0].key.id })
+                .isEqualTo(listOf(0))
+        }
     }
 
     @Test
@@ -713,7 +728,7 @@ class TaskbarOverflowTest {
 
         var shortcut: SystemShortcut<*>? = null
         var recentTaskIcon: BubbleTextView? = null
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             val taskbarView = setUpTaskbarAndModelCallback(hotseatItems)
             // Get the first recent task icon
             recentTaskIcon =
@@ -736,13 +751,16 @@ class TaskbarOverflowTest {
                 ) as SystemShortcut<*>
         }
         assertNotNull(shortcut)
-        runOnMainSync { shortcut?.onClick(recentTaskIcon) }
+        runOnTaskbarUiThreadSync { shortcut?.onClick(recentTaskIcon) }
 
-        // After pinning the recent task, it should be included in the hotseat items.
-        assertThat(modelCallback.hotseatItems.map { info -> info.title })
-            .isEqualTo(listOf("Test App 0", "Test App 1", "Test App 2"))
-        // As the task is pinned, the shown tasks should remove it from the list
-        assertThat(recentAppsController.shownTasks.map { it.tasks[0].key.id }).isEqualTo(listOf(1))
+        runOnMainSync {
+            // After pinning the recent task, it should be included in the hotseat items.
+            assertThat(modelCallback.hotseatItems.map { info -> info.title })
+                .isEqualTo(listOf("Test App 0", "Test App 1", "Test App 2"))
+            // As the task is pinned, the shown tasks should remove it from the list
+            assertThat(recentAppsController.shownTasks.map { it.tasks[0].key.id })
+                .isEqualTo(listOf(1))
+        }
     }
 
     @Test
@@ -753,7 +771,7 @@ class TaskbarOverflowTest {
         val hotseatItems = createHotseatItems(2)
 
         var shortcut: SystemShortcut<*>? = null
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             val taskbarView = setUpTaskbarAndModelCallback(hotseatItems)
             // Get the first recent task icon
             val recentTaskIcon =
@@ -787,7 +805,7 @@ class TaskbarOverflowTest {
         createDesktopTaskWithTasksFromPackages(hotseatItems.mapNotNull { it.targetPackage })
 
         var shortcut: SystemShortcut<*>? = null
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             val taskbarView = setUpTaskbarAndModelCallback(hotseatItems.map { it }.toTypedArray())
             val hotseatIcon =
                 taskbarView.iconViews.filterIsInstance<BubbleTextView>().first {
@@ -814,7 +832,7 @@ class TaskbarOverflowTest {
         )
 
         var shortcut: SystemShortcut<*>? = null
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             val taskbarView = setUpTaskbarAndModelCallback(hotseatItems.map { it }.toTypedArray())
             val hotseatIcon =
                 taskbarView.iconViews.filterIsInstance<BubbleTextView>().first {
@@ -836,7 +854,7 @@ class TaskbarOverflowTest {
         var hotseatItems = createHotseatItems(2)
 
         var shortcut: SystemShortcut<*>? = null
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             val taskbarView = setUpTaskbarAndModelCallback(hotseatItems.map { it }.toTypedArray())
             val hotseatIcon =
                 taskbarView.iconViews.filterIsInstance<BubbleTextView>().first {
@@ -910,7 +928,7 @@ class TaskbarOverflowTest {
         for (task in 1..desktopTasks.size) {
             desktopTaskListener?.onTasksVisibilityChanged(defaultDisplayId, task)
         }
-        runOnMainSync { recentsModel.resolvePendingTaskRequests() }
+        runOnTaskbarUiThreadSync { recentsModel.resolvePendingTaskRequests() }
     }
 
     private val navButtonEndSpacing: Int
@@ -922,20 +940,20 @@ class TaskbarOverflowTest {
 
     private val taskbarOverflowIconIndex: Int
         get() {
-            return getOnUiThread {
+            return getOnTaskbarUiThread {
                 taskbarViewController.iconViews.indexOfFirst { it is TaskbarOverflowView }
             }
         }
 
     private val maxNumberOfTaskbarIcons: Int
-        get() = getOnUiThread { taskbarViewController.maxNumIconViews }
+        get() = getOnTaskbarUiThread { taskbarViewController.maxNumIconViews }
 
     private val currentNumberOfTaskbarIcons: Int
-        get() = getOnUiThread { taskbarViewController.iconViews.size }
+        get() = getOnTaskbarUiThread { taskbarViewController.iconViews.size }
 
     private val taskbarIconsCentered: Boolean
         get() {
-            return getOnUiThread {
+            return getOnTaskbarUiThread {
                 val iconLayoutBounds =
                     taskbarViewController.transientTaskbarIconLayoutBoundsInParent
                 val availableWidth =
@@ -946,7 +964,7 @@ class TaskbarOverflowTest {
 
     private val taskbarEndMargin: Int
         get() {
-            return getOnUiThread {
+            return getOnTaskbarUiThread {
                 taskbarUnitTestRule.activityContext.deviceProfile.deviceProperties.widthPx -
                     taskbarViewController.transientTaskbarIconLayoutBoundsInParent.right
             }
@@ -954,7 +972,7 @@ class TaskbarOverflowTest {
 
     private val overflowItems: List<Int>
         get() {
-            return getOnUiThread {
+            return getOnTaskbarUiThread {
                 val overflowIcon =
                     taskbarViewController.iconViews.firstOrNull { it is TaskbarOverflowView }
 
@@ -967,7 +985,7 @@ class TaskbarOverflowTest {
         }
 
     private fun runningAppIconIndex(taskId: Int): Int {
-        return getOnUiThread {
+        return getOnTaskbarUiThread {
             taskbarViewController.iconViews.indexOfFirst {
                 it is BubbleTextView &&
                     it.tag is SingleTask &&
@@ -977,7 +995,7 @@ class TaskbarOverflowTest {
     }
 
     private fun tapOverflowIcon() {
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             val overflowIcon =
                 taskbarViewController.iconViews.firstOrNull { it is TaskbarOverflowView }
             assertThat(overflowIcon?.callOnClick()).isTrue()
@@ -989,7 +1007,7 @@ class TaskbarOverflowTest {
      * [expectedText], or verifies that the tooltip is not shown if [expectedText] is null.
      */
     private fun verifyOverflowIconTooltip(expectedText: String?) {
-        val overflowIcon = getOnUiThread {
+        val overflowIcon = getOnTaskbarUiThread {
             taskbarViewController.iconViews
                 .filterIsInstance<TaskbarOverflowView>()
                 .firstOrNull()
@@ -1010,11 +1028,11 @@ class TaskbarOverflowTest {
             assertThat(isPopupOpen).isFalse()
         } else {
             assertThat(isPopupOpen).isTrue()
-            val actualText = getOnUiThread { overflowIcon?.textForTooltipPopup }
+            val actualText = getOnTaskbarUiThread { overflowIcon?.textForTooltipPopup }
             assertThat(actualText).isEqualTo(expectedText)
         }
 
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             overflowIcon?.dispatchGenericMotionEvent(
                 MotionEvent.obtain(0, 0, ACTION_HOVER_EXIT, 0f, 0f, 0)
             )
@@ -1057,7 +1075,7 @@ class TaskbarOverflowTest {
             bindItemsAdded(itemIdMap.toList())
 
         override fun bindItemsAdded(items: List<ItemInfo>) {
-            runOnMainSync {
+            runOnTaskbarUiThreadSync {
                 items
                     .filter { item ->
                         item is WorkspaceItemInfo &&
@@ -1069,7 +1087,7 @@ class TaskbarOverflowTest {
         }
 
         override fun bindWorkspaceComponentsRemoved(matcher: Predicate<ItemInfo?>) {
-            runOnMainSync {
+            runOnTaskbarUiThreadSync {
                 for (i in hotseatItems.size - 1 downTo 0) {
                     if (matcher.test(hotseatItems[i])) {
                         hotseatItems.removeAt(i)

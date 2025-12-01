@@ -28,7 +28,7 @@ import com.android.launcher3.dot.DotInfo
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.notification.NotificationKeyData
-import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
+import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.overlay.TaskbarOverlayController
 import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
@@ -53,13 +53,13 @@ class TaskbarAllAppsControllerTest {
 
     @Test
     fun testToggle_once_showsAllApps() {
-        runOnMainSync { allAppsController.toggle() }
+        runOnTaskbarUiThreadSync { allAppsController.toggle() }
         assertThat(allAppsController.isOpen).isTrue()
     }
 
     @Test
     fun testToggle_twice_closesAllApps() {
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             allAppsController.toggle()
             allAppsController.toggle()
         }
@@ -68,7 +68,7 @@ class TaskbarAllAppsControllerTest {
 
     @Test
     fun testToggle_taskbarRecreated_allAppsReopened() {
-        runOnMainSync { allAppsController.toggle() }
+        runOnTaskbarUiThreadSync { allAppsController.toggle() }
         taskbarUnitTestRule.recreateTaskbar()
         assertThat(allAppsController.isOpen).isTrue()
     }
@@ -76,7 +76,7 @@ class TaskbarAllAppsControllerTest {
     @Test
     fun testSetApps_beforeOpened_cachesInfo() {
         val overlayContext =
-            TestUtil.getOnUiThread {
+            TestUtil.getOnTaskbarUiThread {
                 allAppsController.setApps(TEST_APPS, 0, emptyMap())
                 allAppsController.toggle()
                 overlayController.requestWindow()
@@ -88,7 +88,7 @@ class TaskbarAllAppsControllerTest {
     @Test
     fun testSetApps_afterOpened_updatesStore() {
         val overlayContext =
-            TestUtil.getOnUiThread {
+            TestUtil.getOnTaskbarUiThread {
                 allAppsController.toggle()
                 allAppsController.setApps(TEST_APPS, 0, emptyMap())
                 overlayController.requestWindow()
@@ -100,7 +100,7 @@ class TaskbarAllAppsControllerTest {
     @Test
     fun testSetPredictedApps_beforeOpened_cachesInfo() {
         val predictedApps =
-            TestUtil.getOnUiThread {
+            TestUtil.getOnTaskbarUiThread {
                 allAppsController.setPredictedApps(TEST_PREDICTED_APPS)
                 allAppsController.toggle()
 
@@ -118,7 +118,7 @@ class TaskbarAllAppsControllerTest {
     @Test
     fun testSetPredictedApps_afterOpened_cachesInfo() {
         val predictedApps =
-            TestUtil.getOnUiThread {
+            TestUtil.getOnTaskbarUiThread {
                 allAppsController.toggle()
                 allAppsController.setPredictedApps(TEST_PREDICTED_APPS)
 
@@ -135,7 +135,7 @@ class TaskbarAllAppsControllerTest {
 
     @Test
     fun testUpdateNotificationDots_appInfo_hasDot() {
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             allAppsController.setApps(TEST_APPS, 0, emptyMap())
             allAppsController.toggle()
             val key = PackageUserKey.fromItemInfo(TEST_APPS[0])!!
@@ -151,7 +151,7 @@ class TaskbarAllAppsControllerTest {
 
         // Ensure the recycler view fully inflates before trying to grab an icon.
         val btv =
-            TestUtil.getOnUiThread {
+            TestUtil.getOnTaskbarUiThread {
                 overlayController
                     .requestWindow()
                     .appsView
@@ -164,7 +164,7 @@ class TaskbarAllAppsControllerTest {
 
     @Test
     fun testUpdateNotificationDots_predictedApp_hasDot() {
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             allAppsController.setPredictedApps(TEST_PREDICTED_APPS)
             allAppsController.toggle()
             val key = PackageUserKey.fromItemInfo(TEST_PREDICTED_APPS[0])!!
@@ -179,7 +179,7 @@ class TaskbarAllAppsControllerTest {
         }
 
         val btv =
-            TestUtil.getOnUiThread {
+            TestUtil.getOnTaskbarUiThread {
                 overlayController
                     .requestWindow()
                     .appsView
@@ -192,12 +192,12 @@ class TaskbarAllAppsControllerTest {
 
     @Test
     fun testToggleSearch_searchEditTextFocused() {
-        runOnMainSync { allAppsController.toggleSearch() }
-        runOnMainSync {
+        runOnTaskbarUiThreadSync { allAppsController.toggleSearch() }
+        runOnTaskbarUiThreadSync {
             // All Apps is now attached to window. Open animation is posted but not started.
         }
 
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             // Animation has started. Advance to end of animation.
             animatorTestRule.advanceTimeBy(overlayController.openDuration.toLong())
         }

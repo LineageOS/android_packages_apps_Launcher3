@@ -17,7 +17,7 @@
 package com.android.launcher3.taskbar
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
+import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.UserLocked
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
@@ -47,7 +47,9 @@ class TaskbarManagerTest {
 
         assertThat(activityContext.displayId).isEqualTo(displayId)
         // Allow drag layer to attach before checking.
-        runOnMainSync { assertThat(activityContext.dragLayer.isAttachedToWindow).isTrue() }
+        runOnTaskbarUiThreadSync {
+            assertThat(activityContext.dragLayer.isAttachedToWindow).isTrue()
+        }
     }
 
     @Test
@@ -96,7 +98,7 @@ class TaskbarManagerTest {
     @Test
     fun toggleAllAppsSearch_deviceLocked_allAppsNotOpened() {
         SystemUiProxy.INSTANCE[context].focusState.focusedDisplayId = context.displayId
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             taskbarManager.onSystemUiFlagsChanged(
                 SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING,
                 context.displayId,
@@ -109,7 +111,7 @@ class TaskbarManagerTest {
     @Test
     fun toggleAllAppsSearch_deviceUnlocked_allAppsOpened() {
         SystemUiProxy.INSTANCE[context].focusState.focusedDisplayId = context.displayId
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             taskbarManager.onSystemUiFlagsChanged(
                 SYSUI_STATE_STATUS_BAR_KEYGUARD_GOING_AWAY,
                 context.displayId,
@@ -123,7 +125,7 @@ class TaskbarManagerTest {
     fun onSystemUiFlagsChanged_navBarDisabled_taskbarDestroyed() {
         assertThat(taskbarManager.currentActivityContext).isNotNull()
 
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             taskbarManager.onSystemUiFlagsChanged(
                 SYSUI_STATE_NAVIGATION_BAR_DISABLED,
                 context.displayId,
@@ -135,7 +137,7 @@ class TaskbarManagerTest {
 
     @Test
     fun onSystemUiFlagsChanged_navBarEnabled_taskbarCreated() {
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             // Start with taskbar disabled
             taskbarManager.onSystemUiFlagsChanged(
                 SYSUI_STATE_NAVIGATION_BAR_DISABLED,
@@ -144,7 +146,7 @@ class TaskbarManagerTest {
         }
         assertThat(taskbarManager.currentActivityContext).isNull()
 
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             // Then enable it
             taskbarManager.onSystemUiFlagsChanged(0, context.displayId)
         }
@@ -157,7 +159,7 @@ class TaskbarManagerTest {
         val displayId = context.virtualDisplayRule.add()
         assertThat(taskbarManager.getTaskbarForDisplay(displayId)).isNotNull()
 
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             taskbarManager.onSystemUiFlagsChanged(SYSUI_STATE_NAVIGATION_BAR_DISABLED, displayId)
         }
 
@@ -167,13 +169,13 @@ class TaskbarManagerTest {
     @Test
     fun onSystemUiFlagsChanged_connectedDisplay_navBarEnabled_taskbarCreated() {
         val displayId = context.virtualDisplayRule.add()
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             // Start with taskbar disabled
             taskbarManager.onSystemUiFlagsChanged(SYSUI_STATE_NAVIGATION_BAR_DISABLED, displayId)
         }
         assertThat(taskbarManager.getTaskbarForDisplay(displayId)).isNull()
 
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             // Then enable it
             taskbarManager.onSystemUiFlagsChanged(0, displayId)
         }
