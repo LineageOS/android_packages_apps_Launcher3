@@ -495,7 +495,6 @@ public abstract class RecentsView<
 
     private static final float FOREGROUND_SCRIM_TINT = 0.32f;
 
-    protected final RecentsOrientedState mOrientationState;
     protected final BaseContainerInterface<STATE_TYPE, ?> mContainerInterface;
     @Nullable
     protected RecentsAnimationController mRecentsAnimationController;
@@ -832,6 +831,7 @@ public abstract class RecentsView<
     @Inject SystemUiProxy mSystemUiProxy;
     @Inject TopTaskTracker mTopTaskTracker;
     @Inject VibratorWrapper mVibratorWrapper;
+    @Inject RecentsOrientedState mOrientationState;
 
     // Package-private for Dagger only, should not use directly
     @VisibleForTesting
@@ -856,15 +856,15 @@ public abstract class RecentsView<
 
         mContainer = RecentsViewContainer.containerFromContext(context);
         mContainerInterface = mContainer.getContainerInterface();
-        mOrientationState = new RecentsOrientedState(context, mContainerInterface);
-        mOrientationState.setRotationChangeListener(this::animateRecentsRotationInPlace);
-        final int rotation = mContainer.getDisplay().getRotation();
-        mOrientationState.setRecentsRotation(rotation);
 
         mRecentsComponent = mContainer.getRecentsComponent();
         initialiseInjectables(mRecentsComponent);
         mUtils = mUtilsFactory.create(this);
         mDismissUtils = mDismissUtilsFactory.create(this);
+
+        mOrientationState.setRotationChangeListener(this::animateRecentsRotationInPlace);
+        final int rotation = mContainer.getDisplay().getRotation();
+        mOrientationState.setRecentsRotation(rotation);
 
         mScrollHapticMinGapMillis = getResources()
                 .getInteger(R.integer.recentsScrollHapticMinGapMillis);
