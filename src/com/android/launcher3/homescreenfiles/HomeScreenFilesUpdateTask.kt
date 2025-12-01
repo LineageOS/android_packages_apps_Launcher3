@@ -16,6 +16,7 @@
 
 package com.android.launcher3.homescreenfiles
 
+import android.content.Context
 import android.net.Uri
 import android.os.UserHandle
 import com.android.launcher3.InvariantDeviceProfile
@@ -23,7 +24,10 @@ import com.android.launcher3.LauncherModel
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
 import com.android.launcher3.Utilities.qsbOnFirstScreen
 import com.android.launcher3.WorkspaceLayoutManager
+import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.icons.IconCache
+import com.android.launcher3.logging.StatsLogManager
+import com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_HOME_SCREEN_FILES_COUNT
 import com.android.launcher3.model.AllAppsList
 import com.android.launcher3.model.BgDataModel
 import com.android.launcher3.model.ModelTaskController
@@ -66,10 +70,12 @@ data class HomeScreenFilesUpdate(
 class HomeScreenFilesUpdateTask
 @AssistedInject
 constructor(
+    @ApplicationContext private val context: Context,
     private val iconCache: IconCache,
     private val idp: InvariantDeviceProfile,
     @Assisted private val update: HomeScreenFilesUpdate,
     private val workspaceItemSpaceFinder: WorkspaceItemSpaceFinder,
+    private val statsLogManagerFactory: StatsLogManager.StatsLogManagerFactory,
 ) : LauncherModel.ModelUpdateTask {
     override fun execute(
         taskController: ModelTaskController,
@@ -124,6 +130,19 @@ constructor(
                 processDeletedItems(deletedItems, taskController)
                 processAddedItems(addedItems, taskController)
             }
+
+        if (update.isDelayedInit) {
+            filesByUri.values
+                .count { it != null }
+                .takeIf { it > 0 }
+                ?.let { count ->
+                    statsLogManagerFactory
+                        .create(context)
+                        .logger()
+                        .withCardinality(count)
+                        .log(LAUNCHER_HOME_SCREEN_FILES_COUNT)
+                }
+        }
     }
 
     private fun processAddedItems(

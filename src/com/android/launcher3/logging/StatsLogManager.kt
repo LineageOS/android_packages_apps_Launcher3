@@ -683,6 +683,8 @@ open class StatsLogManager protected constructor(@JvmField protected val mContex
         LAUNCHER_CLOSE_FOLDER_LONG_PRESS_MENU(2548),
         @UiEvent(doc = "User closed the long press menu from a widget")
         LAUNCHER_CLOSE_WIDGET_LONG_PRESS_MENU(2549),
+        @UiEvent(doc = "The total number of file items the user placed on their home screen")
+        LAUNCHER_HOME_SCREEN_FILES_COUNT(2554),
         // ADD MORE
     }
 
