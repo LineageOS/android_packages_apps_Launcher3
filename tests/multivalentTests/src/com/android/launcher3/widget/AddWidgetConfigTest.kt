@@ -16,29 +16,35 @@
 package com.android.launcher3.widget
 
 import android.appwidget.AppWidgetManager
+import android.platform.test.rule.LimitDevicesRule
+import android.platform.test.rule.SkipOnDeviceless
 import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
-import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
+import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.Launcher
+import com.android.launcher3.LauncherAppState
 import com.android.launcher3.LauncherSettings.Favorites
+import com.android.launcher3.integration.util.LauncherActivityScenarioRule
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.LauncherAppWidgetInfo
 import com.android.launcher3.testcomponent.WidgetConfigActivity
 import com.android.launcher3.testutil.Wait
-import com.android.launcher3.util.BaseLauncherActivityTest
 import com.android.launcher3.util.BlockingBroadcastReceiver
 import com.android.launcher3.util.LauncherBindableItemsContainer.ItemOperator
+import com.android.launcher3.util.ModelTestExtensions.loadModelSync
 import com.android.launcher3.util.ModelTestExtensions.setEmptyModelLayout
+import com.android.launcher3.util.RoboApiWrapper.grantWidgetBindPermissionRule
 import com.android.launcher3.util.WidgetUtils
-import com.android.launcher3.util.rule.ShellCommandRule
 import com.android.launcher3.widgetpicker.listeners.WidgetPickerAddItemListener
 import com.android.launcher3.widgetpicker.shared.model.WidgetInfo
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 
 /**
@@ -47,11 +53,17 @@ import org.junit.runner.RunWith
  */
 @LargeTest
 @RunWith(AndroidJUnit4::class)
-class AddWidgetConfigTest : BaseLauncherActivityTest<Launcher>() {
-    @get:Rule val grantWidgetRule: ShellCommandRule = ShellCommandRule.grantWidgetBind()
+@SkipOnDeviceless
+class AddWidgetConfigTest {
+    @get:Rule val limitDevicesRule = LimitDevicesRule()
+    @get:Rule var mGrantWidgetRule: TestRule = grantWidgetBindPermissionRule()
+    @get:Rule var launcherActivity = LauncherActivityScenarioRule<Launcher>()
 
     private lateinit var widgetInfo: LauncherAppWidgetProviderInfo
     private lateinit var appWidgetManager: AppWidgetManager
+
+    private val targetContext = getInstrumentation().targetContext
+    @JvmField val uiDevice: UiDevice = UiDevice.getInstance(getInstrumentation())
 
     private var widgetId = 0
 
@@ -59,7 +71,7 @@ class AddWidgetConfigTest : BaseLauncherActivityTest<Launcher>() {
     @Throws(Exception::class)
     fun setUp() {
         widgetInfo = WidgetUtils.findWidgetProvider(/* hasConfigureScreen= */ true)
-        appWidgetManager = AppWidgetManager.getInstance(targetContext())
+        appWidgetManager = AppWidgetManager.getInstance(targetContext)
     }
 
     @Test
@@ -77,8 +89,9 @@ class AddWidgetConfigTest : BaseLauncherActivityTest<Launcher>() {
     /** @param acceptConfig accept the config activity */
     @Throws(Throwable::class)
     private fun runTest(acceptConfig: Boolean) {
-        targetContext().setEmptyModelLayout()
-        loadLauncherSync()
+        targetContext.setEmptyModelLayout()
+        LauncherAppState.getInstance(targetContext).model.loadModelSync()
+        launcherActivity.initializeActivity()
 
         // Add widget to home screen
         val monitor = WidgetConfigStartupMonitor()
@@ -117,7 +130,7 @@ class AddWidgetConfigTest : BaseLauncherActivityTest<Launcher>() {
     }
 
     private fun setResult(success: Boolean) {
-        InstrumentationRegistry.getInstrumentation()
+        getInstrumentation()
             .targetContext
             .sendBroadcast(
                 WidgetConfigActivity.getCommandIntent(

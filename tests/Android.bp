@@ -114,9 +114,6 @@ android_library {
 
 android_test {
     name: "Launcher3Tests",
-    defaults: [
-        "launcher_compose_tests_defaults",
-    ],
     srcs: [
         ":launcher-tests-src",
         ":launcher-non-quickstep-tests-src",
@@ -131,6 +128,9 @@ android_test {
         "Launcher3TestLib",
         "com_android_launcher3_flags_lib",
         "com_android_systemui_shared_flags_lib",
+        "androidx.compose.runtime_runtime",
+        "androidx.compose.ui_ui-test-junit4",
+        "androidx.compose.ui_ui-test-manifest",
     ],
     libs: [
         "android.test.base.stubs.system",
