@@ -117,11 +117,21 @@ class WorkspaceSelectionManagerImpl @Inject constructor(val activityContext: Act
     }
 
     override fun onBoxSelection(boxBounds: Rect) {
-        /**
-         * TODO: Implement box selection. Given a rect of [boxBounds], perform
-         *   [SelectionAction.NEW_SELECTION] or [SelectionAction.APPEND_SELECTION] on items
-         *   contained within the box.
-         */
+        val itemsToSelect =
+            getSelectableViews().filter { view ->
+                val viewLocation = IntArray(2)
+                view.getLocationInWindow(viewLocation)
+                val viewBounds =
+                    Rect(
+                        viewLocation[0],
+                        viewLocation[1],
+                        viewLocation[0] + view.width,
+                        viewLocation[1] + view.height,
+                    )
+                Rect.intersects(boxBounds, viewBounds)
+            }
+
+        performSelection(itemsToSelect, SelectionAction.NEW_SELECTION)
     }
 
     private enum class SelectionAction {
