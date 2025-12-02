@@ -20,7 +20,6 @@ import static android.view.View.VISIBLE;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 
-import static com.android.app.animation.Interpolators.ACCELERATE;
 import static com.android.app.animation.Interpolators.FAST_OUT_SLOW_IN;
 import static com.android.app.animation.Interpolators.LINEAR;
 import static com.android.app.animation.Interpolators.clampToProgress;
@@ -74,6 +73,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.core.graphics.ColorUtils;
 
 import com.android.launcher3.AsyncAnimatorPlaybackController;
@@ -151,7 +151,8 @@ public class AllSetActivity extends Activity {
 
     private boolean mIsTablet;
 
-    private final AnimatedFloat mSwipeProgress = new AnimatedFloat(this::onSwipeProgressUpdate);
+    @VisibleForTesting
+    final AnimatedFloat mSwipeProgress = new AnimatedFloat(this::onSwipeProgressUpdate);
 
     private final InvariantDeviceProfile.OnIDPChangeListener mOnIDPChangeListener =
             modelPropertiesChanged -> updateTextForNavigationMode();
@@ -660,9 +661,6 @@ public class AllSetActivity extends Activity {
 
     private void onSwipeProgressUpdate() {
         if (mIsExpressiveThemeEnabledInSUW) {
-            getWindow().setBackgroundBlurRadius((int) mapBoundToRange(
-                    mSwipeProgress.value, 0, HINT_BOTTOM_FACTOR, WALLPAPER_BLUR_RADIUS, 0,
-                    ACCELERATE));
             if (mExpressiveAnimSet != null) {
                 long progress = (long) mapToRange(
                         mSwipeProgress.value, 0, 1, 0, CLIP_ANIM_DURATION, LINEAR);
