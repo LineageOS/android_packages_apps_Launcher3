@@ -109,35 +109,38 @@ class PopupAddDeepShortcutTest {
 
     @Test
     fun testAddDeepShortcutToHomeScreen() {
+        val coordinates = IntArray(2)
         launcherActivity.executeOnLauncher { l: Launcher ->
             // Find where we'll be adding the deep shortcut.
-            val coordinates = IntArray(2)
             val container = l.workspace.getScreenWithId(0)
             container.findCellForSpan(coordinates, 1, 1)
 
             // Add to home screen.
             val popupControllerForAppIcons = createPopupController<Launcher>()
-            launcherActivity.executeOnLauncher { l: Launcher ->
-                val appView = BubbleTextView(l)
-                appView.tag = appItemInfo
-                val popup =
-                    popupControllerForAppIcons.show(appView) as PopupContainerWithArrow<Launcher>
-                val themedContext = ContextThemeWrapper(l, R.style.PopupItem)
-                val deepShortcutView =
-                    LayoutInflater.from(themedContext).inflate(R.layout.deep_shortcut, null, false)
-                        as DeepShortcutView
-                deepShortcutView.applyShortcutInfo(shortcutItemInfo, shortcutInfo, popup, l)
+            val appView = BubbleTextView(l)
+            appView.tag = appItemInfo
+            val popup =
+                popupControllerForAppIcons.show(appView) as PopupContainerWithArrow<Launcher>
+            val themedContext = ContextThemeWrapper(l, R.style.PopupItem)
+            val deepShortcutView =
+                LayoutInflater.from(themedContext).inflate(R.layout.deep_shortcut, null, false)
+                    as DeepShortcutView
+            deepShortcutView.applyShortcutInfo(shortcutItemInfo, shortcutInfo, popup, l)
 
-                deepShortcutView
-                    .findViewById<FrameLayout>(R.id.deep_shortcut_add_button)
-                    .callOnClick()
-                val itemInfo = container.getChildAt(coordinates[0], coordinates[1]).tag as ItemInfo
+            deepShortcutView.findViewById<FrameLayout>(R.id.deep_shortcut_add_button).callOnClick()
+        }
 
-                // Verify we added item to home screen.
-                assert(itemInfo.targetComponent == shortcutItemInfo.targetComponent)
-                assert(itemInfo.className() == shortcutItemInfo.className())
-                assert(itemInfo.itemType == ITEM_TYPE_DEEP_SHORTCUT)
+        val itemInfo =
+            launcherActivity.waitAndGet("Item was never added to workspace") { launcher ->
+                val container = launcher.workspace.getScreenWithId(0)
+                container.getChildAt(coordinates[0], coordinates[1])?.tag as? ItemInfo
             }
+
+        launcherActivity.executeOnLauncher {
+            // Verify we added item to home screen.
+            assert(itemInfo.targetComponent == shortcutItemInfo.targetComponent)
+            assert(itemInfo.className() == shortcutItemInfo.className())
+            assert(itemInfo.itemType == ITEM_TYPE_DEEP_SHORTCUT)
         }
     }
 }
