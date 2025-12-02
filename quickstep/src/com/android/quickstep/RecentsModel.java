@@ -107,7 +107,7 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
                     }
                 };
 
-        mTaskList.registerRecentTasksChangedListener(recentTasksListObserver);
+        mTaskList.setRecentTasksChangedListener(recentTasksListObserver);
         mIconCache = iconCache;
         mIconCache.registerTaskVisualsChangeListener(this);
         mThumbnailCache = thumbnailCache;
@@ -134,7 +134,7 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
 
         tracker.addCloseable(() -> {
             taskStackChangeListeners.unregisterTaskStackListener(this);
-            mTaskList.unregisterRecentTasksChangedListener();
+            mTaskList.clearRecentTasksChangedListener();
             iconChangeCloseable.close();
             mIconCache.removeTaskVisualsChangeListener();
         });

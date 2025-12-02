@@ -20,6 +20,8 @@ import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.launcher3.Flags.FLAG_ENABLE_LATER_IS_LOCKED_CHECK;
 import static com.android.launcher3.Flags.FLAG_HIDE_AUTOMATED_TASKS_IN_OVERVIEW;
+import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
+import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 import static com.android.window.flags.Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -43,7 +45,6 @@ import android.app.TaskInfo;
 import android.companion.virtual.VirtualDeviceManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Rect;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
@@ -52,11 +53,8 @@ import android.platform.test.flag.junit.SetFlagsRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.R;
 import com.android.launcher3.automation.AutomationRepository;
 import com.android.launcher3.util.DaggerSingletonTracker;
-import com.android.launcher3.util.Executors;
-import com.android.launcher3.util.LooperExecutor;
 import com.android.quickstep.util.DesktopTask;
 import com.android.quickstep.util.GroupTask;
 import com.android.quickstep.util.SingleTask;
@@ -64,6 +62,7 @@ import com.android.quickstep.util.SplitTask;
 import com.android.quickstep.views.TaskViewType;
 import com.android.systemui.shared.recents.model.Task;
 import com.android.wm.shell.shared.GroupedTaskInfo;
+import com.android.wm.shell.shared.desktopmode.FakeDesktopState;
 import com.android.wm.shell.shared.split.SplitBounds;
 import com.android.wm.shell.shared.split.SplitScreenConstants;
 
@@ -94,8 +93,6 @@ public class RecentTasksListTest {
     @Mock
     private Context mContext;
     @Mock
-    private Resources mResources;
-    @Mock
     private SystemUiProxy mSystemUiProxy;
     @Mock
     private TopTaskTracker mTopTaskTracker;
@@ -111,21 +108,17 @@ public class RecentTasksListTest {
 
     @Before
     public void setup() {
-        LooperExecutor mainThreadExecutor = Executors.MAIN_EXECUTOR;
-
-        // Set desktop mode supported
-        when(mContext.getResources()).thenReturn(mResources);
-        when(mResources.getBoolean(R.bool.config_isDesktopModeSupported)).thenReturn(true);
-        when(mResources.getBoolean(R.bool.config_canInternalDisplayHostDesktops))
-                .thenReturn(true);
         doReturn(mVirtualDeviceManager).when(mContext).getSystemService(VirtualDeviceManager.class);
         doReturn(mKeyguardManager).when(mContext).getSystemService(KeyguardManager.class);
         when(mVirtualDeviceManager.getDeviceIdForDisplayId(anyInt()))
                 .thenReturn(Context.DEVICE_ID_DEFAULT);
 
-        mRecentTasksList = new RecentTasksList(mContext, mainThreadExecutor,
+        FakeDesktopState desktopState = new FakeDesktopState();
+        desktopState.setCanEnterDesktopMode(true);
+
+        mRecentTasksList = new RecentTasksList(mContext, MAIN_EXECUTOR,
                 mSystemUiProxy, mTopTaskTracker, mock(DaggerSingletonTracker.class),
-                mAutomationRepository);
+                mAutomationRepository, UI_HELPER_EXECUTOR, desktopState);
     }
 
     @Test
@@ -203,7 +196,7 @@ public class RecentTasksListTest {
         RecentTasksList.TaskLoadResult taskList = mRecentTasksList.loadTasksInBackground(
                 Integer.MAX_VALUE, -1, false);
 
-        assertThat(taskList.mRequestId).isEqualTo(-1);
+        assertThat(taskList.getRequestId()).isEqualTo(-1);
         assertThat(taskList).isEmpty();
     }
 
