@@ -37,6 +37,7 @@ import static com.android.launcher3.taskbar.TaskbarPinningController.PINNING_PER
 import static com.android.launcher3.taskbar.TaskbarPinningController.PINNING_TRANSIENT;
 import static com.android.launcher3.taskbar.bubbles.BubbleBarView.FADE_IN_ANIM_ALPHA_DURATION_MS;
 import static com.android.launcher3.taskbar.bubbles.BubbleBarView.FADE_OUT_ANIM_POSITION_DURATION_MS;
+import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.MultiPropertyFactory.MULTI_PROPERTY_VALUE;
 import static com.android.launcher3.util.MultiTranslateDelegate.INDEX_BUBBLE_BAR_ANIM;
 import static com.android.launcher3.util.MultiTranslateDelegate.INDEX_NAV_BAR_ANIM;
@@ -326,8 +327,11 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         if (mActivity.isUserSetupComplete()
                 && !(mActivity.getApplicationContext() instanceof SandboxContext)) {
             // Only load the callbacks if user setup is completed
-            controllers.runAfterInit(() -> LauncherAppState.getInstance(mActivity).getModel()
-                    .addCallbacksAndLoad(mModelCallbacks));
+            // Adding callbacks to LauncherModel is synchronized and we should move it to main
+            // thread to avoid jank on taskbar ui thread.
+            controllers.runAfterInit(() -> MAIN_EXECUTOR.execute(
+                    () -> LauncherAppState.getInstance(mActivity).getModel()
+                            .addCallbacksAndLoad(mModelCallbacks)));
         }
         mTaskbarNavButtonTranslationY =
                 controllers.navbarButtonsViewController.getTaskbarNavButtonTranslationY();
@@ -441,7 +445,10 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         if (enableTaskbarPinning() || refactorTaskbarUiState()) {
             mTaskbarView.removeOnLayoutChangeListener(mTaskbarViewLayoutChangeListener);
         }
-        LauncherAppState.getInstance(mActivity).getModel().removeCallbacks(mModelCallbacks);
+        // Removing callback from LauncherModel is synchronized and we should move it to main thread
+        // to avoid blocking taskbar ui thread.
+        MAIN_EXECUTOR.execute(() -> LauncherAppState.getInstance(mActivity).getModel()
+                .removeCallbacks(mModelCallbacks));
         mActivity.removeOnDeviceProfileChangeListener(mDeviceProfileChangeListener);
         mRunningStateController.onDestroy();
     }
