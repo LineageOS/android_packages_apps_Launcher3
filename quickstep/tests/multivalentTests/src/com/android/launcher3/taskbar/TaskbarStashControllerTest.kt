@@ -41,8 +41,8 @@ import com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_OVERVIEW
 import com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_STASHED_LAUNCHER_STATE
 import com.android.launcher3.taskbar.TaskbarStashController.FLAG_STASHED_DEVICE_LOCKED
 import com.android.launcher3.taskbar.TaskbarStashController.FLAG_STASHED_IME
-import com.android.launcher3.taskbar.TaskbarStashController.FLAG_STASHED_IN_OVERVIEW_FOR_TRANSLUCENT_APP
 import com.android.launcher3.taskbar.TaskbarStashController.FLAG_STASHED_IN_APP_AUTO
+import com.android.launcher3.taskbar.TaskbarStashController.FLAG_STASHED_IN_OVERVIEW_FOR_TRANSLUCENT_APP
 import com.android.launcher3.taskbar.TaskbarStashController.FLAG_STASHED_SMALL_SCREEN
 import com.android.launcher3.taskbar.TaskbarStashController.FLAG_STASHED_SYSUI
 import com.android.launcher3.taskbar.TaskbarStashController.FLAG_TASKBAR_HIDDEN
@@ -64,17 +64,21 @@ import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.UserSetupMode
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.taskbar.rules.displayControllerSpy
+import com.android.launcher3.util.RoboApiWrapper.convertToSpy
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_VISIBLE
 import com.android.wm.shell.Flags.FLAG_ENABLE_BUBBLE_BAR
+import com.android.wm.shell.shared.desktopmode.DesktopState
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.reset
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.atLeastOnce
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
@@ -771,6 +775,24 @@ class TaskbarStashControllerTest {
         } finally {
             activityContext.setImeDockedOverrideForTest(null)
         }
+    }
+
+    @Test
+    @TaskbarMode(THREE_BUTTONS)
+    fun testThreeButtonsTaskbarOnHome_homeShownBehindDesktop_showsIconsAndBg() {
+        val desktopState = DesktopState.getInstance(activityContext)
+        desktopState.convertToSpy()
+        doReturn(true).whenever(desktopState).shouldShowHomeBehindDesktop
+        LauncherPrefs.get(context).put(TASKBAR_PINNING_IN_DESKTOP_MODE, false)
+
+        taskbarUnitTestRule.recreateTaskbar()
+
+        getInstrumentation().runOnMainSync {}
+        assertThat(stashController.isStashed).isFalse()
+        assertThat(viewController.areIconsVisible()).isTrue()
+        assertThat(dragLayerController.imeBgTaskbar.value).isEqualTo(1)
+
+        reset(desktopState)
     }
 
     @Test

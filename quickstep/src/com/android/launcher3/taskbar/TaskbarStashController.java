@@ -407,8 +407,10 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
         boolean desktopModeTaskbarPinned = LauncherPrefs.get(mActivity).get(
                 LauncherPrefs.TASKBAR_PINNING_IN_DESKTOP_MODE);
 
+        final boolean autoStashAllowed = shouldAllowTaskbarToAutoStash();
         updateStateForFlag(FLAG_AUTO_STASHED_ON_HOME,
-                mActivity.shouldShowHomeBehindDesktop() && !desktopModeTaskbarPinned);
+                autoStashAllowed && mActivity.shouldShowHomeBehindDesktop()
+                        && !desktopModeTaskbarPinned);
 
         updateStateForFlag(FLAG_STASHED_IN_OVERVIEW_FOR_TRANSLUCENT_APP, false);
         applyState(/* duration = */ 0);
@@ -423,7 +425,7 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
 
         mControllers.runAfterInit(() -> {
             // if taskbar should auto stash attempt to start timeout.
-            if (shouldAllowTaskbarToAutoStash()) {
+            if (autoStashAllowed) {
                 tryStartTaskbarTimeout();
             }
         });
