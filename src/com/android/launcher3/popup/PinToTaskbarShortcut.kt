@@ -55,7 +55,7 @@ constructor(
 ) :
     SystemShortcut<T>(
         if (isPin) R.drawable.ic_pin else R.drawable.ic_unpin,
-        if (isPin) R.string.pin_to_taskbar else R.string.unpin_from_taskbar,
+        if (isPin) R.string.add_to_taskbar else R.string.remove_from_taskbar,
         target,
         itemInfo,
         originalView,
