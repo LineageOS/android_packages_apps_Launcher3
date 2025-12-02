@@ -34,7 +34,6 @@ import com.android.launcher3.statemanager.StateManager
 import com.android.launcher3.statemanager.StatefulActivity
 import com.android.quickstep.RecentsModel
 import com.android.quickstep.SystemUiProxy
-import com.android.quickstep.split.SplitSelectStateController.SplitFromDesktopController
 import com.android.quickstep.util.GroupTask
 import com.android.quickstep.util.SplitTask
 import com.android.quickstep.views.RecentsView
@@ -71,7 +70,7 @@ class SplitSelectStateControllerTest {
     private val context: RecentsViewContainer = mock()
     private val recentsModel: RecentsModel = mock()
     private val pendingIntent: PendingIntent = mock()
-    private val splitFromDesktopController: SplitFromDesktopController = mock()
+    private val splitFromRunningTaskController: SplitFromRunningTaskController = mock()
     private val recentsView: RecentsView<*, *> = mock()
     private val splitScreenUiState: SplitScreenUiState = SplitScreenUiState()
 
@@ -101,6 +100,7 @@ class SplitSelectStateControllerTest {
                 recentsModel,
                 null, /*activityBackCallback*/
                 splitScreenUiState,
+                mock()
             )
     }
 
@@ -681,13 +681,13 @@ class SplitSelectStateControllerTest {
     @Test
     fun splitSelectStateControllerDestroyed_SplitFromDesktopControllerAlsoDestroyed() {
         // Initiate split from desktop controller
-        splitSelectStateController.initSplitFromDesktopController(splitFromDesktopController)
+        splitSelectStateController.initSplitFromRunningTaskController(splitFromRunningTaskController)
 
         // Simulate default controller being destroyed
         splitSelectStateController.onDestroy()
 
         // Verify desktop controller is also destroyed
-        verify(splitFromDesktopController).onDestroy()
+        verify(splitFromRunningTaskController).onDestroy()
     }
 
     @Test
