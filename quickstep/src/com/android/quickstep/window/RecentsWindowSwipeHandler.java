@@ -28,6 +28,7 @@ import static com.android.launcher3.GestureNavContract.EXTRA_ON_FINISH_CALLBACK;
 import static com.android.launcher3.GestureNavContract.EXTRA_REMOTE_CALLBACK;
 import static com.android.launcher3.anim.AnimatorListeners.forEndCallback;
 import static com.android.quickstep.OverviewComponentObserver.startHomeIntentSafely;
+import static com.android.quickstep.fallback.RecentsState.HIDDEN;
 
 import android.animation.Animator;
 import android.app.ActivityManager.RunningTaskInfo;
@@ -296,7 +297,9 @@ public class RecentsWindowSwipeHandler extends AbsSwipeUpHandler<RecentsWindowMa
             return mRecentsWindowManager
                     .getStateManager()
                     .createAnimationToNewWorkspace(
-                            RecentsState.HOME, accuracy, StateAnimationConfig.SKIP_ALL_ANIMATIONS);
+                            HIDDEN,
+                            accuracy,
+                            StateAnimationConfig.SKIP_ALL_ANIMATIONS);
         }
     }
 
@@ -352,7 +355,7 @@ public class RecentsWindowSwipeHandler extends AbsSwipeUpHandler<RecentsWindowMa
                 public void onAnimationSuccess(Animator animator) {
                     mRecentsWindowManager
                             .getStateManager()
-                            .goToState(RecentsState.HOME, false);
+                            .moveToRestState(/* isAnimated= */ false);
                 }
             });
             return pa.createPlaybackController();

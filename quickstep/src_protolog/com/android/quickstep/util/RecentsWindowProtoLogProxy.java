@@ -74,19 +74,22 @@ public class RecentsWindowProtoLogProxy {
         logToLogcatIfNeeded("onRepeatStateSetAborted: %s", stateName);
     }
 
-    public static void logStartRecentsWindow(boolean isShown, boolean windowViewIsNull) {
+    public static void logStartRecentsWindow(boolean isShowing, boolean windowViewIsNull) {
         if (willProtoLog()) {
-            ProtoLog.d(PROTO_LOG_GROUP, "Starting recents window: isShow= %b, windowViewIsNull=%b",
-                    isShown, windowViewIsNull);
+            ProtoLog.d(PROTO_LOG_GROUP,
+                    "Starting recents window: isShowing=%b, windowViewIsNull=%b",
+                    isShowing,
+                    windowViewIsNull);
         }
-        logToLogcatIfNeeded("Starting recents window: isShow= %b, windowViewIsNull=%b", isShown,
+        logToLogcatIfNeeded("Starting recents window: isShowing=%b, windowViewIsNull=%b",
+                isShowing,
                 windowViewIsNull);
     }
 
-    public static void logCleanup(boolean isShown) {
+    public static void logCleanup(boolean isShowing) {
         if (willProtoLog()) {
-            ProtoLog.d(PROTO_LOG_GROUP, "Cleaning up recents window: isShow= %b", isShown);
+            ProtoLog.d(PROTO_LOG_GROUP, "Cleaning up recents window: isShowing=%b", isShowing);
         }
-        logToLogcatIfNeeded("Cleaning up recents window: isShow= %b", isShown);
+        logToLogcatIfNeeded("Cleaning up recents window: isShowing=%b", isShowing);
     }
 }

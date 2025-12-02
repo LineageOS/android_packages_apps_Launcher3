@@ -113,8 +113,8 @@ import com.android.quickstep.fallback.FallbackWindowRecentsView
 import com.android.quickstep.fallback.RecentsDragLayer
 import com.android.quickstep.fallback.RecentsState
 import com.android.quickstep.fallback.RecentsState.Companion.BACKGROUND_APP
-import com.android.quickstep.fallback.RecentsState.Companion.BG_LAUNCHER
 import com.android.quickstep.fallback.RecentsState.Companion.DEFAULT
+import com.android.quickstep.fallback.RecentsState.Companion.HIDDEN
 import com.android.quickstep.fallback.RecentsState.Companion.MODAL_TASK
 import com.android.quickstep.fallback.RecentsState.Companion.OVERVIEW_SPLIT_SELECT
 import com.android.quickstep.fallback.toLauncherStateOrdinal
@@ -181,7 +181,7 @@ constructor(
     private var surfaceControlViewHost: SurfaceControlViewHost? = null
     private var layoutInflater: LayoutInflater = LayoutInflater.from(this).cloneInContext(this)
     private var stateManager: StateManager<RecentsState, RecentsWindowManager> =
-        StateManager<RecentsState, RecentsWindowManager>(this, BG_LAUNCHER)
+        StateManager<RecentsState, RecentsWindowManager>(this, HIDDEN)
     private var systemUiController: SystemUiController? = null
 
     private var overviewOverlay: SurfaceControl? = null
@@ -715,8 +715,7 @@ constructor(
                 result: LauncherAnimationRunner.AnimationResult? ->
                 result ?: return@RemoteAnimationFactory
                 val controller =
-                    getStateManager()
-                        .createAnimationToNewWorkspace(BG_LAUNCHER, HOME_APPEAR_DURATION)
+                    getStateManager().createAnimationToNewWorkspace(HIDDEN, HOME_APPEAR_DURATION)
                 controller.dispatchOnStart()
                 val targets =
                     RemoteAnimationTargets(
@@ -735,8 +734,7 @@ constructor(
                     anim,
                     this@RecentsWindowManager,
                     {
-                        getStateManager().goToState(BG_LAUNCHER, true)
-                        hideRecentsWindow()
+                        getStateManager().moveToRestState(/* isAnimated= */ true)
                         onHomeAnimationComplete?.run()
                     },
                     true, /* skipFirstFrame */
@@ -754,7 +752,6 @@ constructor(
             )
         options.launchDisplayId = displayId
         OverviewComponentObserver.startHomeIntentSafely(this, options.toBundle(), TAG, displayId)
-        stateManager.moveToRestState()
     }
 
     private fun isShowing() = windowView?.parent != null && windowRootView.isVisible
@@ -839,7 +836,7 @@ constructor(
     override fun goToRecentsState(
         recentsState: RecentsState,
         animated: Boolean,
-        listener: Animator.AnimatorListener,
+        listener: Animator.AnimatorListener?,
     ) {
         stateManager.goToState(recentsState, animated, listener)
     }

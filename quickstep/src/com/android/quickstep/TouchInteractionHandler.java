@@ -193,8 +193,8 @@ public class TouchInteractionHandler extends ContextWrapper {
                         }
                     }
                     if (recentsWindowManager.isStarted()) {
-                        recentsWindowManager.getStateManager().goToState(RecentsState.HOME,
-                                true);
+                        recentsWindowManager.getStateManager()
+                                .moveToRestState(/* isAnimated= */ true);
                     }
                 }
             };

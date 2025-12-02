@@ -18,7 +18,7 @@ package com.android.quickstep;
 import static com.android.launcher3.util.NavigationMode.NO_BUTTON;
 import static com.android.quickstep.fallback.RecentsState.BACKGROUND_APP;
 import static com.android.quickstep.fallback.RecentsState.DEFAULT;
-import static com.android.quickstep.fallback.RecentsState.HOME;
+import static com.android.quickstep.fallback.RecentsState.HIDDEN;
 
 import android.animation.Animator;
 import android.content.Context;
@@ -168,7 +168,7 @@ public final class FallbackWindowInterface extends BaseWindowInterface {
         RecentsWindowManager windowManager = getCreatedContainer();
         final StateManager<RecentsState, RecentsWindowManager> stateManager =
                 windowManager != null ? windowManager.getStateManager() : null;
-        if (stateManager == null || stateManager.getState() == HOME) {
+        if (stateManager == null || stateManager.getState() == HIDDEN) {
             exitRunnable.run();
             notifyRecentsOfOrientation();
             return;
@@ -179,7 +179,7 @@ public final class FallbackWindowInterface extends BaseWindowInterface {
                     @Override
                     public void onStateTransitionComplete(RecentsState toState) {
                         // Are we going from Recents to Workspace?
-                        if (toState == HOME) {
+                        if (toState == HIDDEN) {
                             exitRunnable.run();
                             notifyRecentsOfOrientation();
                             stateManager.removeStateListener(this);
@@ -202,7 +202,7 @@ public final class FallbackWindowInterface extends BaseWindowInterface {
         return switch (endTarget) {
             case RECENTS -> DEFAULT;
             case NEW_TASK, LAST_TASK -> BACKGROUND_APP;
-            default -> HOME;
+            default -> HIDDEN;
         };
     }
 
