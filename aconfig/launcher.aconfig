@@ -743,3 +743,13 @@ flag {
     description: "Shows create widget button in widget picker"
     bug: "459260964"
 }
+
+flag {
+    name: "center_spring_loaded_state_vertically"
+    namespace: "launcher"
+    description: "Vertically centers workspace grid and drop target buttons in spring loaded state"
+    bug: "443995425"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}

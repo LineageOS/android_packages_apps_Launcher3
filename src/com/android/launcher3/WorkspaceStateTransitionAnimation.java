@@ -21,6 +21,7 @@ import static androidx.dynamicanimation.animation.DynamicAnimation.MIN_VISIBLE_C
 import static com.android.app.animation.Interpolators.ACCELERATE_2;
 import static com.android.app.animation.Interpolators.LINEAR;
 import static com.android.app.animation.Interpolators.ZOOM_OUT;
+import static com.android.launcher3.Flags.centerSpringLoadedStateVertically;
 import static com.android.launcher3.LauncherAnimUtils.HOTSEAT_SCALE_PROPERTY_FACTORY;
 import static com.android.launcher3.LauncherAnimUtils.SCALE_INDEX_WORKSPACE_STATE;
 import static com.android.launcher3.LauncherAnimUtils.VIEW_ALPHA;
@@ -191,6 +192,12 @@ public class WorkspaceStateTransitionAnimation {
                 hotseatScaleAndTranslation.translationY, hotseatTranslationInterpolator);
         propertySetter.setFloat(mWorkspace.getPageIndicator(), VIEW_TRANSLATE_Y,
                 hotseatScaleAndTranslation.translationY, hotseatTranslationInterpolator);
+
+        if (centerSpringLoadedStateVertically()) {
+            DropTargetBar dropTargetBar = mLauncher.getDropTargetBar();
+            propertySetter.setFloat(dropTargetBar, VIEW_TRANSLATE_Y,
+                    state.getDropTargetBarTranslationY(mLauncher), translationInterpolator);
+        }
 
         if (!config.hasAnimationFlag(SKIP_SCRIM)) {
             setScrim(propertySetter, state, config);
