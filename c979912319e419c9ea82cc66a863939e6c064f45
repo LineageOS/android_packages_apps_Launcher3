@@ -22,6 +22,30 @@
       },
       "revId": "c979912319e419c9ea82cc66a863939e6c064f45",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ed989158_02d380aa",
+        "filename": "quickstep/res/xml/indexable_launcher_prefs.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 13648
+      },
+      "writtenOn": "2025-12-02T23:22:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "87637f2e_c79c9656",
+      "range": {
+        "startLine": 32,
+        "startChar": 5,
+        "endLine": 32,
+        "endChar": 21
+      },
+      "revId": "c979912319e419c9ea82cc66a863939e6c064f45",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
