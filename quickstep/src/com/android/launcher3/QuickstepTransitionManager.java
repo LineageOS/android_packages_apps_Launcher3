@@ -240,6 +240,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
     private final float mClosingFreeformWindowTransY;
     private final float mMaxShadowRadius;
     private final int mMaxBlurRadius;
+    private final boolean mIsAppLaunchBlurEnabled;
 
     private final StartingWindowListener mStartingWindowListener = new StartingWindowListener();
 
@@ -308,8 +309,10 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         mCoordinateTransfer = new RemoteAnimationCoordinateTransfer(mLauncher);
         mLatencyTracker = LatencyTracker.getInstance(launcher);
 
-        mMaxBlurRadius = launcher.getResources().getDimensionPixelSize(
+        mMaxBlurRadius = res.getDimensionPixelSize(
                 R.dimen.max_depth_blur_radius_enhanced);
+        mIsAppLaunchBlurEnabled = appLaunchBlur() && res.getBoolean(
+                com.android.internal.R.bool.config_enableAppLaunchBlur);
     }
 
     @Override
@@ -852,7 +855,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                 if (taskbarInteractor != null) {
                     taskbarInteractor.showEduOnAppLaunch();
                 }
-                if (appLaunchBlur()) {
+                if (mIsAppLaunchBlurEnabled) {
                     resetScrim(surfaceApplier, scrimLayer);
                 }
                 openingTargets.release();
@@ -1062,7 +1065,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                     }
                 }
 
-                if (appLaunchBlur() && scrimLayer != null && scrimLayer.isValid()) {
+                if (mIsAppLaunchBlurEnabled && scrimLayer != null && scrimLayer.isValid()) {
                     SurfaceProperties builder = transaction.forSurface(scrimLayer);
                     builder.setAlpha(percent * scrimAlpha);
                     builder.setBackgroundBlurRadius((int) (percent * mMaxBlurRadius));
@@ -1136,7 +1139,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         appAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                if (appLaunchBlur()) {
+                if (mIsAppLaunchBlurEnabled) {
                     resetScrim(surfaceApplier, scrimLayer);
                 }
                 openingTargets.release();
@@ -1218,7 +1221,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                     }
                 }
 
-                if (appLaunchBlur() && scrimLayer != null && scrimLayer.isValid()) {
+                if (mIsAppLaunchBlurEnabled && scrimLayer != null && scrimLayer.isValid()) {
                     SurfaceProperties builder = transaction.forSurface(scrimLayer);
                     builder.setAlpha(percent * scrimAlpha);
                     builder.setBackgroundBlurRadius((int) (percent * mMaxBlurRadius));
@@ -1240,7 +1243,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
 
     private SurfaceControl addScrimLayer(SurfaceTransactionApplier applier,
             RemoteAnimationTargets targets) {
-        if (!appLaunchBlur()) {
+        if (!mIsAppLaunchBlurEnabled) {
             return null;
         }
 
