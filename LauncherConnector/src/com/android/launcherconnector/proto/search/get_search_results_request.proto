@@ -18,4 +18,10 @@ message GetSearchResultsRequest {
 
    // Width and height (in pixels) at which icons for results will be rendered.
    int32 icon_size_px = 3;
+
+   // True if results of type WEB_SUGGEST should be included.
+   bool include_web_suggest = 4;
+
+   // True if the on-device search engine is set to Google.
+   bool is_ose_google = 5;
 }
