@@ -513,20 +513,6 @@ flag {
 }
 
 flag {
-    name: "first_page_pinned_widget_removal_toggle"
-    namespace: "launcher"
-    description: "Enable first page pinned widget removal toggle"
-    bug: "427478072"
-}
-
-flag {
-    name: "unpin_first_page_pinned_widget"
-    namespace: "launcher"
-    description: "Enable making the first page pinned widget movable"
-    bug: "427478072"
-}
-
-flag {
     name: "show_files_on_home_screen"
     namespace: "launcher"
     description: "Enables file and folder items on the home screen"
