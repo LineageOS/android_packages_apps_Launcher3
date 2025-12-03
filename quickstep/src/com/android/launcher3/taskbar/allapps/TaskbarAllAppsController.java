@@ -188,6 +188,9 @@ public final class TaskbarAllAppsController {
         if (mAppsView != null) {
             return;
         }
+        // Explicitly close the keyboard quick switch view to prevent it showing below the All
+        // apps view.
+        mControllers.keyboardQuickSwitchController.closeQuickSwitchView();
         mOverlayContext = mControllers.taskbarOverlayController.requestWindow();
 
         // Initialize search session for All Apps.

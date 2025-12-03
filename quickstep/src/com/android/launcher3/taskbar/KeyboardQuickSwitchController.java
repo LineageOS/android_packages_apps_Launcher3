@@ -398,7 +398,11 @@ public final class KeyboardQuickSwitchController implements
         }
     }
 
-    void closeQuickSwitchView() {
+    /**
+     * Closes the Keyboard Quick Switch view, usually in response to a specific action like tapping
+     * outside the view or pressing the Escape key.
+     */
+    public void closeQuickSwitchView() {
         closeQuickSwitchView(true);
     }
 
