@@ -87,12 +87,6 @@ CONTAINER : RecentsViewContainer {
                 false
             }
 
-            // Disable swiping if the task overlay is modal.
-            taskViewRecentsTouchContext.isRecentsModal -> {
-                debugLog(TAG, "Not intercepting touch in modal overlay.")
-                false
-            }
-
             // Do not allow launch while recents is scrolling.
             !recentsView.scroller.isFinished -> {
                 debugLog(TAG, "Not intercepting touch, recents scrolling.")
@@ -100,7 +94,7 @@ CONTAINER : RecentsViewContainer {
             }
 
             else ->
-                taskViewRecentsTouchContext.isRecentsInteractive.also { isRecentsInteractive ->
+                taskViewRecentsTouchContext.isTaskViewInteractive.also { isRecentsInteractive ->
                     if (!isRecentsInteractive) {
                         debugLog(TAG, "Not intercepting touch, recents not interactive.")
                     }

@@ -41,7 +41,6 @@ import static com.android.launcher3.LauncherState.HOTSEAT_ICONS;
 import static com.android.launcher3.LauncherState.NORMAL;
 import static com.android.launcher3.LauncherState.NO_OFFSET;
 import static com.android.launcher3.LauncherState.OVERVIEW;
-import static com.android.launcher3.LauncherState.OVERVIEW_MODAL_TASK;
 import static com.android.launcher3.LauncherState.OVERVIEW_SPLIT_SELECT;
 import static com.android.launcher3.Utilities.isRtl;
 import static com.android.launcher3.anim.AnimatorListeners.forEndCallback;
@@ -308,14 +307,10 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
 
     private final TaskViewRecentsTouchContext mTaskViewRecentsTouchContext =
             new TaskViewRecentsTouchContext() {
-                @Override
-                public boolean isRecentsInteractive() {
-                    return isInState(OVERVIEW) || isInState(OVERVIEW_MODAL_TASK);
-                }
 
                 @Override
-                public boolean isRecentsModal() {
-                    return isInState(OVERVIEW_MODAL_TASK);
+                public LauncherState getContainerState() {
+                    return getStateManager().getState();
                 }
 
                 @Override

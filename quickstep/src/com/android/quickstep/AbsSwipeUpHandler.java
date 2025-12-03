@@ -2390,31 +2390,12 @@ public abstract class AbsSwipeUpHandler<
     protected AnimationSuccessListener getWindowAnimationToHomeListener() {
         return new AnimationSuccessListener() {
 
-            @Nullable private TaskView runningTaskView;
-
-            @Override
-            public void onAnimationStart(Animator animation) {
-                super.onAnimationStart(animation);
-                runningTaskView = mRecentsView == null ? null : mRecentsView.getRunningTaskView();
-
-                if (runningTaskView != null) {
-                    runningTaskView.setClickable(false);
-                }
-            }
-
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                final View taskView = runningTaskView;
-                runningTaskView = null;
                 if (mRecentsView != null) {
                     final RECENTS_VIEW rv = mRecentsView;
-                    rv.post(() -> {
-                        rv.resetTaskVisuals();
-                        if (taskView != null) {
-                            taskView.setClickable(true);
-                        }
-                    });
+                    rv.post(rv::resetTaskVisuals);
                 }
             }
 
