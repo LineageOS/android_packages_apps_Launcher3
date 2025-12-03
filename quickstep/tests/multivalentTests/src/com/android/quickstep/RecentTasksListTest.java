@@ -138,7 +138,8 @@ public class RecentTasksListTest {
     @Test
     public void loadTasksInBackground_onlyKeys_noValidTaskDescription() throws Exception  {
         GroupedTaskInfo recentTaskInfos = GroupedTaskInfo.forSplitTasks(
-                new RecentTaskInfo(), new RecentTaskInfo(), new SplitBounds(
+                createRecentTaskInfo(/* taskId = */ 1), createRecentTaskInfo(/* taskId = */ 2),
+                new SplitBounds(
                         /* leftTopBounds = */ new Rect(),
                         /* rightBottomBounds = */ new Rect(),
                         /* leftTopTaskId = */ 1,
@@ -269,9 +270,9 @@ public class RecentTasksListTest {
     @Test
     public void loadTasksInBackground_moreThanKeys_hasValidTaskDescription() throws Exception  {
         String taskDescription = "Wheeee!";
-        RecentTaskInfo task1 = new RecentTaskInfo();
+        RecentTaskInfo task1 = createRecentTaskInfo(/* taskId = */ 1);
         task1.taskDescription = new ActivityManager.TaskDescription(taskDescription);
-        RecentTaskInfo task2 = new RecentTaskInfo();
+        RecentTaskInfo task2 = createRecentTaskInfo(/* taskId = */ 2);
         task2.taskDescription = new ActivityManager.TaskDescription();
         GroupedTaskInfo recentTaskInfos = GroupedTaskInfo.forSplitTasks(task1, task2,
                 new SplitBounds(
@@ -488,6 +489,11 @@ public class RecentTasksListTest {
         GroupTask groupTask6 = taskList.get(0);
         assertThat(groupTask6.taskViewType).isEqualTo(TaskViewType.SINGLE);
         assertThat(((SingleTask) groupTask6).getTask().key.id).isEqualTo(1);
+    }
+
+    private RecentTaskInfo createRecentTaskInfo(int taskId) {
+        return (RecentTaskInfo) createRecentTaskInfo(
+                taskId, DEFAULT_DISPLAY, /* isAutomated= */false);
     }
 
     private TaskInfo createRecentTaskInfo(int taskId, int displayId) {
