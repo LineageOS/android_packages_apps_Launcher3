@@ -255,7 +255,12 @@ public class BubbleBarViewController {
         mBarView.setController(new BubbleBarView.Controller() {
             @Override
             public float getBubbleBarTranslationY() {
-                return mBubbleStashController.getBubbleBarTranslationY();
+                if (mBubbleStashController.isInAppDisplayAnimationInProgress()) {
+                    // if animation is in progress we would like to get the target translation value
+                    return mBubbleStashController.getTargetTranslationYForState();
+                } else {
+                    return mBubbleStashController.getBubbleBarTranslationY();
+                }
             }
 
             @Override
