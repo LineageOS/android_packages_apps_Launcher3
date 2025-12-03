@@ -248,6 +248,46 @@ class OseWidgetManagerTest {
         verify(widgetHost).setActiveWidget(eq(INVALID_APPWIDGET_ID), isNull())
     }
 
+    @Test
+    fun onOseInfoUpdate_withSameWidget_updatesWidgetSize() {
+        // Arrange: A widget is already bound and is the correct one for the OSE package.
+        val widgetInfo = WidgetUtils.findWidgetProvider(false)
+        val currentWidgetId = 1
+        doReturn(listOf(widgetInfo))
+            .whenever(widgetManager)
+            .getInstalledProvidersForPackage(eq(TEST_PKG), any())
+        doReturn(widgetInfo).whenever(widgetManager).getAppWidgetInfo(eq(currentWidgetId))
+        doReturn(currentWidgetId).whenever(widgetHost).getBoundWidgetId()
+        doReturn(currentWidgetId).whenever(widgetHost).getActiveWidgetId()
+
+        // Act: Initialize the manager, which triggers the OSE info update.
+        createOseWidgetManager()
+        TestUtil.runOnExecutorSync(executor) {}
+
+        // Assert: The widget size is updated.
+        verify(sizeHandler).updateHotseatQsbSizeRangesAsync(eq(currentWidgetId), eq(executor))
+    }
+
+    @Test
+    fun onOseInfoUpdate_withNewWidget_updatesWidgetSize() {
+        // Arrange: No widget is currently bound. A new widget needs to be allocated and bound.
+        val widgetInfo = WidgetUtils.findWidgetProvider(false)
+        val newWidgetId = 2
+        doReturn(listOf(widgetInfo))
+            .whenever(widgetManager)
+            .getInstalledProvidersForPackage(eq(TEST_PKG), any())
+        doReturn(INVALID_APPWIDGET_ID).whenever(widgetHost).getBoundWidgetId()
+        doReturn(newWidgetId).whenever(widgetHost).allocateAppWidgetId()
+        doReturn(newWidgetId).whenever(widgetHost).getActiveWidgetId()
+
+        // Act: Initialize the manager, which triggers the OSE info update.
+        createOseWidgetManager()
+        TestUtil.runOnExecutorSync(executor) {}
+
+        // Assert: The widget size is updated for the newly bound widget.
+        verify(sizeHandler).updateHotseatQsbSizeRangesAsync(eq(newWidgetId), eq(executor))
+    }
+
     private fun createOseWidgetManager() =
         OseWidgetManager(
             context,
