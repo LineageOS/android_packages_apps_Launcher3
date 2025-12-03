@@ -19,6 +19,15 @@ package com.android.launcher3.popup.ui
 import com.android.launcher3.model.data.ItemInfoWithIcon
 import com.android.launcher3.popup.PopupCategory
 
+/** Sealed interface for the different types of click events in the popup menu. */
+sealed interface PopupClickEvent
+
+/** Represents a click on a system shortcut. */
+data class SystemShortcutClickEvent(val item: PopupItem) : PopupClickEvent
+
+/** Represents a click on a deep shortcut. */
+data class DeepShortcutClickEvent(val item: ItemInfoWithIcon?) : PopupClickEvent
+
 /** Data class which stores all the values we need to create a long press menu shortcut. */
 data class PopupItem(
     val iconResId: Int,

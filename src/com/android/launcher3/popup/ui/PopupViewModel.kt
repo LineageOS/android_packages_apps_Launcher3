@@ -21,7 +21,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.android.launcher3.model.data.ItemInfoWithIcon
 import com.android.launcher3.popup.PopupCategory
+import com.android.launcher3.popup.PopupPopulator
 import com.android.launcher3.popup.ui.PopupDisplayMode.*
+import kotlin.math.min
 
 /** Represents the currently expanded section within the collapsible popup menu. */
 enum class ExpandedSection {
@@ -104,8 +106,8 @@ class PopupViewModel {
 
         expandedSection = null
 
-        val deepShortcuts = List(deepShortcutCount) { null }
-        val displayMode = determineDisplayMode(systemShortcuts, deepShortcutCount)
+        val deepShortcuts = List(min(deepShortcutCount, PopupPopulator.MAX_SHORTCUTS)) { null }
+        val displayMode = determineDisplayMode(systemShortcuts, deepShortcuts.size)
 
         state =
             when (displayMode) {
@@ -156,16 +158,15 @@ class PopupViewModel {
 
         return when {
             // System shortcuts only.
-            deepShortcutCount == 0 && systemShortcuts.size < 6 -> PopupDisplayMode.SYSTEM_LIST_ONLY
+            deepShortcutCount == 0 && systemShortcuts.size < 6 -> SYSTEM_LIST_ONLY
             // System shortcuts with top bar.
-            deepShortcutCount == 0 -> PopupDisplayMode.SYSTEM_LIST_WITH_TOP_BAR
+            deepShortcutCount == 0 -> SYSTEM_LIST_WITH_TOP_BAR
             // System shortcuts and deep shortcuts, total count <= 7.
-            totalShortcutCount <= 7 -> PopupDisplayMode.COMBINED_LIST
+            totalShortcutCount <= 7 -> COMBINED_LIST
             // System shortcuts, deep shortcuts, and top bar, with standard/deep count <= 6.
-            totalShortcutCount - compactSystemShortcutSize <= 6 ->
-                PopupDisplayMode.COMBINED_LIST_WITH_TOP_BAR
+            totalShortcutCount - compactSystemShortcutSize <= 6 -> COMBINED_LIST_WITH_TOP_BAR
             // Accordion-style is needed.
-            else -> PopupDisplayMode.ACCORDION_SYSTEM_EXPANDED
+            else -> ACCORDION_SYSTEM_EXPANDED
         }
     }
 
