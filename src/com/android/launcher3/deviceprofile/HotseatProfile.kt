@@ -16,12 +16,14 @@
 
 package com.android.launcher3.deviceprofile
 
+import com.android.launcher3.deviceprofile.HotseatProfileInitialValues.Factory.calculateHotseatBarSizePx
+import com.android.launcher3.folder.ClippedFolderIconLayoutRule.ICON_OVERLAP_FACTOR
+import kotlin.math.ceil
+
 // Remaining hotseat properties
 //    int numShownHotseatIcons - updates multiple times
-//    int hotseatCellHeightPx - updates multiple times
 //    int mHotseatColumnSpan - updates multiple times
 //    int mHotseatWidthPx - updates multiple times
-//    int hotseatBarSizePx - updates multiple times
 //    int hotseatQsbWidth - updates multiple times
 //    int hotseatBorderSpace - updates multiple times
 
@@ -41,12 +43,17 @@ data class HotseatProfile(
     val maxIconSpacePx: Int,
     val barBottomSpacePx: Int,
     val qsbSpace: Int,
+    val cellHeightPx: Int,
+    val barSizePx: Int,
 ) {
 
     companion object Factory {
 
         fun createHotseatProfile(
-            hotseatProfileInitialValues: HotseatProfileInitialValues
+            hotseatProfileInitialValues: HotseatProfileInitialValues,
+            workspaceProfile: WorkspaceProfile,
+            isVerticalBarLayout: Boolean,
+            isQsbInline: Boolean,
         ): HotseatProfile {
             return HotseatProfile(
                 areNavButtonsInline = hotseatProfileInitialValues.areNavButtonsInline,
@@ -65,6 +72,18 @@ data class HotseatProfile(
                 maxIconSpacePx = hotseatProfileInitialValues.maxIconSpacePx,
                 barBottomSpacePx = hotseatProfileInitialValues.barBottomSpacePx,
                 qsbSpace = hotseatProfileInitialValues.qsbSpace,
+                cellHeightPx = ceil(workspaceProfile.iconSizePx * ICON_OVERLAP_FACTOR).toInt(),
+                barSizePx =
+                    calculateHotseatBarSizePx(
+                        hotseatIconSizePx = workspaceProfile.iconSizePx,
+                        barEdgePaddingPx = hotseatProfileInitialValues.barEdgePaddingPx,
+                        isVerticalBarLayout = isVerticalBarLayout,
+                        barWorkspaceSpacePx = hotseatProfileInitialValues.barWorkspaceSpacePx,
+                        qsbVisualHeight = hotseatProfileInitialValues.qsbVisualHeight,
+                        barBottomSpacePx = hotseatProfileInitialValues.barBottomSpacePx,
+                        qsbSpace = hotseatProfileInitialValues.qsbSpace,
+                        isQsbInline = isQsbInline,
+                    ),
             )
         }
     }

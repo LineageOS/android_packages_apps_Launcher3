@@ -5016,7 +5016,8 @@ public abstract class RecentsView<
             // Notify the SysUI to use fade-in animation when entering PiP from live tile.
             // Note: PiP2 handles entering differently, so skip if enable_pip2=true.
             mSystemUiProxy.setPipAnimationTypeToAlpha();
-            mSystemUiProxy.setShelfHeight(true, mContainer.getDeviceProfile().hotseatBarSizePx);
+            mSystemUiProxy.setShelfHeight(true,
+                    mContainer.getDeviceProfile().getHotseatProfile().getBarSizePx());
             // Transaction to hide the task to avoid flicker for entering PiP from split-screen.
             // See also {@link AbsSwipeUpHandler#maybeFinishSwipeToHome}.
             PictureInPictureSurfaceTransaction tx =

@@ -420,7 +420,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         // Set insets for page indicator
         lp.topMargin = lp.leftMargin = lp.rightMargin = 0;
         lp.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
-        lp.bottomMargin = grid.hotseatBarSizePx;
+        lp.bottomMargin = grid.getHotseatProfile().getBarSizePx();
         mPageIndicator.setLayoutParams(lp);
     }
 
