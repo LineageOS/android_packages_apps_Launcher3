@@ -16,6 +16,7 @@
 
 package com.android.launcher3.taskbar
 
+import android.service.personalcontext.RenderToken
 import android.service.personalcontext.insight.ContextInsight
 import android.service.personalcontext.renderer.InsightRendererService
 import android.service.personalcontext.renderer.RendererFilter
@@ -30,7 +31,7 @@ class CueBarInsightRendererService : InsightRendererService() {
         return RendererFilter.Builder().build()
     }
 
-    override fun onRender(insight: ContextInsight) {
+    override fun onRender(insight: ContextInsight, renderToken: RenderToken) {
         val listener = listenerRef?.get()
         if (listener != null) {
             // Forward the data to the custom listener (the Repository)
