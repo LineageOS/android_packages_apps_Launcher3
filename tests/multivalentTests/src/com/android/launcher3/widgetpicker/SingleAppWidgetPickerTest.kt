@@ -16,21 +16,24 @@
 
 package com.android.launcher3.widgetpicker
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Process
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
-import android.platform.test.rule.DisableAnimationsRule
+import android.platform.test.rule.LimitDevicesRule
+import android.platform.test.rule.SkipOnDeviceless
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.filters.LargeTest;
+import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.Flags
-import com.android.launcher3.helper.launchActivityWithIntent
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,8 +42,9 @@ import org.junit.runner.RunWith
 @LargeTest
 @RunWith(AndroidJUnit4::class)
 @EnableFlags(Flags.FLAG_ENABLE_APP_WIDGET_PICKER_REFACTOR)
+@SkipOnDeviceless
 class SingleAppWidgetPickerTest {
-    @get:Rule val disableAnimationsRule = DisableAnimationsRule()
+    @get:Rule val limitDevicesRule = LimitDevicesRule()
 
     @get:Rule val setFlagsRule: SetFlagsRule = SetFlagsRule()
 
@@ -73,5 +77,28 @@ class SingleAppWidgetPickerTest {
         val TestWidgets = listOf("With Dialog", "With Config")
         private const val WIDGET_PREVIEW_TEST_TAG =
             "com.android.launcher3.widgetpicker:id/widget_preview"
+
+        /**
+         * Wrapper for launching activity hosting composable content using the provided intent.
+         *
+         * Example:
+         * ```
+         * @get:Rule val composeRule = createEmptyComposeRule()
+         *
+         * @Test
+         * fum someTest() = composeRule.launchActivityWithIntent<MyActivity>(
+         *    intentProvider = this::buildMyActivityIntent
+         * ) {
+         *   composeRule.onNodeWithText("text).assertIsDisplayed()
+         * }
+         *
+         * ```
+         */
+        private inline fun <reified A : Activity> ComposeTestRule.launchActivityWithIntent(
+            intentProvider: () -> Intent,
+            runAssertions: ComposeTestRule.() -> Unit,
+        ) {
+            ActivityScenario.launch<A>(intentProvider()).use { runAssertions() }
+        }
     }
 }
