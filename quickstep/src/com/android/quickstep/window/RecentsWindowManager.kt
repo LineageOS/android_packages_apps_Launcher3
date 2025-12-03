@@ -626,7 +626,7 @@ constructor(
                                 addListener(
                                     onEnd = {
                                         recentsView.resetTaskVisuals()
-                                        stateManager.reapplyState()
+                                        stateManager.moveToRestState()
                                     }
                                 )
                             }
