@@ -1813,6 +1813,11 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
 
     @Override
     public int getPinIndex() {
+        // RTL in HotseatIconsContainer has different logic so the index starts from right to left.
+        if (mIsRtl && mHotseatIconsContainer != null && mDropSpotIndex != -1) {
+            return mHotseatIconsContainer.getVisibleChildCount() - mDropSpotIndex - 1;
+        }
+
         return mDropSpotIndex;
     }
 
