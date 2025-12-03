@@ -639,11 +639,11 @@ public abstract class RecentsView<
                     MAIN_EXECUTOR,
                     apkRemoved -> {
                         if (apkRemoved) {
-                            dismissTask(taskId, /* removeTask= */false);
+                            dismissTask(taskId, /*animate=*/true, /*removeTask=*/false);
                         } else {
                             mRecentsModel.isTaskRemoved(taskKey.id, taskRemoved -> {
                                 if (taskRemoved) {
-                                    dismissTask(taskId, /* removeTask= */false);
+                                    dismissTask(taskId, /*animate=*/true, /*removeTask=*/false);
                                 }
                             }, RecentsFilterState.getFilter(mContainer.getDisplayId()));
                         }
@@ -657,7 +657,7 @@ public abstract class RecentsView<
                 return;
             }
             if (newDisplayId != mContainer.getDisplayId()) {
-                dismissTask(taskId, /* removeTask= */ false);
+                dismissTask(taskId, /*animate=*/ true, /*removeTask=*/ false);
             }
         }
 
@@ -666,7 +666,7 @@ public abstract class RecentsView<
                 boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
             if (enableCreateAnyBubble() && task.isAppBubble && mHandleTaskStackChanges) {
                 // Remove task from recents if it moved to a bubble, but keep it running
-                dismissTask(task.taskId, /* removeTask= */ false);
+                dismissTask(task.taskId, /* animate= */ true, /* removeTask= */ false);
             }
         }
 
@@ -3488,8 +3488,23 @@ public abstract class RecentsView<
     }
 
     @UiThread
-    public void dismissTask(int taskId, boolean removeTask) {
-        mDismissUtils.dismissTask(taskId, removeTask);
+    public void dismissTask(int taskId, boolean animate, boolean removeTask) {
+        TaskView taskView = getTaskViewByTaskId(taskId);
+        if (taskView == null) {
+            Log.d(TAG, "dismissTask: " + taskId + ",  no associated TaskView");
+            return;
+        }
+        Log.d(TAG, "dismissTask: " + taskId);
+
+        if (enableDesktopExplodedView() && taskView instanceof  DesktopTaskView desktopTaskView) {
+            desktopTaskView.removeTaskFromExplodedView(taskId, animate);
+
+            if (removeTask) {
+                ActivityManagerWrapper.getInstance().removeTask(taskId);
+            }
+        } else if (!taskView.isBeingDismissed()) {
+            dismissTaskView(taskView, removeTask);
+        }
     }
 
     /** Dismisses the entire [taskView]. */

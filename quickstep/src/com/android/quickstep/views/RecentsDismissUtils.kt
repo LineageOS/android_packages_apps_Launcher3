@@ -18,7 +18,6 @@ package com.android.quickstep.views
 
 import android.animation.AnimatorSet
 import android.app.ActivityTaskManager.INVALID_TASK_ID
-import android.util.Log
 import android.view.View
 import androidx.core.animation.addListener
 import androidx.core.graphics.toRectF
@@ -28,7 +27,6 @@ import androidx.dynamicanimation.animation.FloatValueHolder
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.internal.jank.Cuj
-import com.android.launcher3.Flags.enableDesktopExplodedView
 import com.android.launcher3.PagedView
 import com.android.launcher3.R
 import com.android.launcher3.concurrent.annotations.LightweightBackground
@@ -40,7 +38,6 @@ import com.android.launcher3.views.ActivityContext
 import com.android.quickstep.SystemUiProxy
 import com.android.quickstep.util.TaskGridNavHelper
 import com.android.quickstep.views.RecentsView.RECENTS_SCALE_PROPERTY
-import com.android.quickstep.views.RecentsView.TAG
 import com.android.quickstep.views.TaskView.Companion.GRID_END_TRANSLATION_X
 import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.systemui.shared.system.InteractionJankMonitorWrapper
@@ -360,41 +357,6 @@ constructor(
                 }
             }
             .start()
-    }
-
-    fun dismissTask(taskId: Int, removeTask: Boolean) {
-        with(recentsView) {
-            val taskView = getTaskViewByTaskId(taskId)
-            if (taskView == null) {
-                Log.d(TAG, "dismissTask: $taskId,  no associated TaskView")
-                return
-            }
-            Log.d(TAG, "dismissTask: $taskId")
-
-            if (enableDesktopExplodedView() && taskView is DesktopTaskView) {
-                taskView.removeTaskFromExplodedView(taskId)
-
-                if (removeTask) {
-                    val removeTaskFromActivityManager = {
-                        activityManagerWrapper.removeTask(taskId)
-                    }
-
-                    if (taskView.isRunningTask) {
-                        switchToScreenshot {
-                            finishRecentsAnimation(
-                                /* toHome= */ true,
-                                /* shouldPip= */ false,
-                                removeTaskFromActivityManager,
-                            )
-                        }
-                    } else {
-                        removeTaskFromActivityManager()
-                    }
-                }
-            } else if (!taskView.isBeingDismissed) {
-                dismissTaskView(taskView, removeTask)
-            }
-        }
     }
 
     /** Bounce neighboring tasks due to a canceled dismiss or the reflow of tasks after dismiss. */
@@ -1008,7 +970,7 @@ constructor(
             }
 
             // Run the final page snapping and relayout
-            if (dismissedTaskView?.isRunningTask == true) {
+            if (enableDrawingLiveTile && dismissedTaskView?.isRunningTask == true) {
                 finishRecentsAnimation(/* toHome */ true, /* shouldPip */ false, onFinishComplete)
             } else {
                 onFinishComplete()

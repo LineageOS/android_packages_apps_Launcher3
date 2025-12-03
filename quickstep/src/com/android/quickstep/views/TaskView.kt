@@ -891,7 +891,11 @@ constructor(
                             {
                                 // Update the layout UI to remove this task from the layout grid,
                                 // and remove the task from ActivityManager afterwards.
-                                recentsView?.dismissTask(taskId, /* removeTask= */ true)
+                                recentsView?.dismissTask(
+                                    taskId,
+                                    /* animate= */ true,
+                                    /* removeTask= */ true,
+                                )
                             }
                         } else {
                             null
