@@ -38,6 +38,9 @@ class KidsNavLayoutter(
     imeSwitcher: ImageView?,
     a11yButton: ImageView?,
     space: Space?,
+    backButton: ImageView?,
+    homeButton: ImageView?,
+    recentsButton: ImageView?,
 ) :
     AbstractNavButtonLayoutter(
         resources,
@@ -47,6 +50,9 @@ class KidsNavLayoutter(
         imeSwitcher,
         a11yButton,
         space,
+        backButton,
+        homeButton,
+        recentsButton,
     ) {
 
     override fun layoutButtons(context: TaskbarActivityContext, isA11yButtonPersistent: Boolean) {

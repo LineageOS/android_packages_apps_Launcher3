@@ -44,6 +44,9 @@ class SetupNavLayoutter(
     imeSwitcher: ImageView?,
     a11yButton: ImageView?,
     space: Space?,
+    backButton: ImageView?,
+    homeButton: ImageView?,
+    recentsButton: ImageView?,
 ) :
     AbstractNavButtonLayoutter(
         resources,
@@ -53,6 +56,9 @@ class SetupNavLayoutter(
         imeSwitcher,
         a11yButton,
         space,
+        backButton,
+        homeButton,
+        recentsButton,
     ) {
     // mNearestTouchFrame is a ViewGroup that contains start, end, nav button ViewGroups
     private val mNearestTouchFrame = nearestTouchFrame
