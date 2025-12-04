@@ -400,7 +400,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         mShouldTryStartAlign = mActivityContext.shouldStartAlignTaskbar();
         ViewGroup.LayoutParams lp = mQsb.getLayoutParams();
         if (lp != null) {
-            lp.width = dp.hotseatQsbWidth;
+            lp.width = dp.getHotseatProfile().getQsbWidth();
             lp.height = dp.getHotseatProfile().getQsbHeight();
         }
     }
@@ -1404,10 +1404,10 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                 int qsbEnd;
                 if (layoutRtl) {
                     qsbStart = iconEnd + mItemMarginLeftRight;
-                    qsbEnd = qsbStart + deviceProfile.hotseatQsbWidth;
+                    qsbEnd = qsbStart + deviceProfile.getHotseatProfile().getQsbWidth();
                 } else {
                     qsbEnd = iconEnd - mItemMarginLeftRight;
-                    qsbStart = qsbEnd - deviceProfile.hotseatQsbWidth;
+                    qsbStart = qsbEnd - deviceProfile.getHotseatProfile().getQsbWidth();
                 }
                 int qsbTop = (bottom - top - deviceProfile.getHotseatProfile().getQsbHeight()) / 2;
                 int qsbBottom = qsbTop + deviceProfile.getHotseatProfile().getQsbHeight();

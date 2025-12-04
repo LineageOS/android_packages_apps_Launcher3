@@ -1149,14 +1149,14 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         boolean isToHome = mControllers.uiController.isIconAlignedWithHotseat();
         float scaleUp = ((float) launcherDp.getWorkspaceIconProfile().getIconSizePx())
                 / mTransientIconSize;
-        int borderSpacing = launcherDp.hotseatBorderSpace;
+        int borderSpacing = launcherDp.getHotseatProfile().getBorderSpace();
         Rect hotseatPadding = launcherDp.getHotseatLayoutPadding(mActivity);
         int hotseatCellSize = DeviceProfile.calculateCellWidth(
                 launcherDp.getDeviceProperties().getAvailableWidthPx()
                         - hotseatPadding.left
                         - hotseatPadding.right,
                 borderSpacing,
-                launcherDp.numShownHotseatIcons);
+                launcherDp.getHotseatProfile().getNumShownIcons());
 
         for (int i = 0; i < parent.getChildCount(); i++) {
             View child = parent.getChildAt(i);
@@ -1200,8 +1200,9 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
                 float hotseatIconCenter = isRtl
                         ? launcherDp.getDeviceProperties().getWidthPx()
                         - hotseatPadding.right + borderSpacing
-                        + launcherDp.hotseatQsbWidth / 2f
-                        : hotseatPadding.left - borderSpacing - launcherDp.hotseatQsbWidth / 2f;
+                        + launcherDp.getHotseatProfile().getQsbWidth() / 2f
+                        : hotseatPadding.left - borderSpacing
+                                - launcherDp.getHotseatProfile().getQsbWidth() / 2f;
                 if (taskbarDp.isQsbInline) {
                     hotseatIconCenter += hotseatNavBarTranslationX;
                 }
@@ -1211,7 +1212,8 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
                             INDEX_TASKBAR_PINNING_ANIM).getValue();
                 }
                 float halfQsbIconWidthDiff =
-                        (launcherDp.hotseatQsbWidth - taskbarDp.getTaskbarProfile().getIconSize())
+                        (launcherDp.getHotseatProfile().getQsbWidth()
+                                - taskbarDp.getTaskbarProfile().getIconSize())
                                 / 2f;
                 float scale = ((float) taskbarDp.getTaskbarProfile().getIconSize())
                         / launcherDp.getHotseatProfile().getQsbVisualHeight();
@@ -1251,7 +1253,8 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
                 }
                 recentTaskIndex = i - firstRecentTaskIndex;
             }
-            float positionInHotseat = getPositionInHotseat(taskbarDp.numShownHotseatIcons, child,
+            float positionInHotseat = getPositionInHotseat(
+                    taskbarDp.getHotseatProfile().getNumShownIcons(), child,
                     mIsRtl, isAllAppsButton, isTaskbarDividerView,
                     mTaskbarView.isDividerForRecents(), recentTaskIndex);
             if (positionInHotseat == ERROR_POSITION_IN_HOTSEAT_NOT_FOUND) continue;

@@ -264,7 +264,9 @@ public abstract class LauncherState implements BaseState<LauncherState> {
         DeviceProfile dp = launcher.getDeviceProfile();
         if (dp.isQsbInline) {
             int marginStart = getFloatingSearchBarRestingMarginStart(launcher);
-            return dp.getDeviceProperties().getWidthPx() - marginStart - dp.hotseatQsbWidth;
+            return dp.getDeviceProperties().getWidthPx()
+                    - marginStart
+                    - dp.getHotseatProfile().getQsbWidth();
         }
 
         boolean isRtl = Utilities.isRtl(launcher.getResources());
