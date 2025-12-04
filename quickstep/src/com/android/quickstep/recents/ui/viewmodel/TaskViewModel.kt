@@ -187,6 +187,7 @@ constructor(
                 isLocked = result.isLocked,
                 isLiveTile = isLiveTile && !result.isMinimized,
                 remainingAppTimerDuration = result.remainingAppDuration,
+                isAppLocked = result.isAppLocked,
             )
         } ?: TaskData.NoData(taskId)
 

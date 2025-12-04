@@ -44,6 +44,8 @@
     <dimen name="task_thumbnail_icon_drawable_size">44dp</dimen>
     <!--  The splash icon size on in Overview when a task is settled in the list -->
     <dimen name="task_thumbnail_splash_icon_size">52dp</dimen>
+    <!--  The lock icon size in Overview when a task belongs to a locked package -->
+    <dimen name="task_thumbnail_app_lock_icon_size">36dp</dimen>
     <!--  The space under the focused task icon  -->
     <dimen name="overview_task_margin">16dp</dimen>
     <!--  The horizontal space between tasks  -->
