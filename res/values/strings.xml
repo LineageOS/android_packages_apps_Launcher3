@@ -239,6 +239,10 @@
     <string name="pin_prediction">Pin Prediction</string>
     <!-- Label for bubbling a launcher item. [CHAR_LIMIT=20] -->
     <string name="bubble">Bubble</string>
+    <!-- Label for enabling App Lock for an app. [CHAR_LIMIT=20] -->
+    <string name="enable_app_lock">Lock app</string>
+    <!-- Label for disabling App Lock for an app. [CHAR_LIMIT=20] -->
+    <string name="disable_app_lock">Remove lock</string>
     <!-- Label for widget settings shows in the long press menu for widgets. [CHAR_LIMIT=20] -->
     <string name="widget_settings">Settings</string>
     <!-- Label for adding (pinning) an item to the taskbar. [CHAR_LIMIT=20] -->

@@ -194,6 +194,10 @@ open class StatsLogManager protected constructor(@JvmField protected val mContex
         @UiEvent(doc = "User tapped on pin system shortcut.") LAUNCHER_SYSTEM_SHORTCUT_PIN_TAP(522),
         @UiEvent(doc = "User tapped on don't suggest app system shortcut.")
         LAUNCHER_SYSTEM_SHORTCUT_DONT_SUGGEST_APP_TAP(1603),
+        @UiEvent(doc = "User tapped on system shortcut to enable App Lock")
+        LAUNCHER_SYSTEM_SHORTCUT_ENABLE_APP_LOCK_TAP(2510),
+        @UiEvent(doc = "User tapped on system shortcut to disable App Lock")
+        LAUNCHER_SYSTEM_SHORTCUT_DISABLE_APP_LOCK_TAP(2511),
         @UiEvent(doc = "User is shown All Apps education view.") LAUNCHER_ALL_APPS_EDU_SHOWN(523),
         @UiEvent(doc = "User opened a folder.") LAUNCHER_FOLDER_OPEN(551),
         @UiEvent(doc = "Hotseat education half sheet seen") LAUNCHER_HOTSEAT_EDU_SEEN(479),
@@ -617,7 +621,10 @@ open class StatsLogManager protected constructor(@JvmField protected val mContex
             doc = "User tapped or long pressed on create new folder icon inside launcher settings."
         )
         LAUNCHER_CREATE_NEW_FOLDER_BUTTON_TAP_OR_LONGPRESS(2508),
-        @UiEvent(doc = "User attempts to swipe over the last page. Swipe left for LTR, swipe right for RTL.")
+        @UiEvent(
+            doc =
+                "User attempts to swipe over the last page. Swipe left for LTR, swipe right for RTL."
+        )
         LAUNCHER_SWIPE_OVER_LAST_PAGE(2518),
 
         // One Grid Flags

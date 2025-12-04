@@ -739,3 +739,10 @@ flag {
       purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+  name: "enable_app_lock_shortcut"
+  namespace: "launcher"
+  description: "Enables App Lock system shortcut in Launcher"
+  bug: "415167460"
+}

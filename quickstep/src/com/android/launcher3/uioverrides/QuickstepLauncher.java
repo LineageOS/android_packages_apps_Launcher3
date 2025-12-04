@@ -54,6 +54,7 @@ import static com.android.launcher3.popup.PinToTaskbarShortcut.getPinShortcutFac
 import static com.android.launcher3.popup.QuickstepSystemShortcut.getSplitSelectShortcutByPosition;
 import static com.android.launcher3.popup.SystemShortcut.ADD_TO_HOME_SCREEN;
 import static com.android.launcher3.popup.SystemShortcut.APP_INFO;
+import static com.android.launcher3.popup.SystemShortcut.APP_LOCK;
 import static com.android.launcher3.popup.SystemShortcut.BUBBLE_SHORTCUT;
 import static com.android.launcher3.popup.SystemShortcut.DONT_SUGGEST_APP;
 import static com.android.launcher3.popup.SystemShortcut.INSTALL;
@@ -112,7 +113,6 @@ import android.window.RemoteTransition;
 import android.window.SplashScreen;
 
 import androidx.annotation.AnyThread;
-import androidx.annotation.BinderThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -567,6 +567,9 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         }
         if (BubbleAnythingFlagHelper.enableCreateAnyBubble()) {
             shortcuts.add(BUBBLE_SHORTCUT);
+        }
+        if (android.security.Flags.appLockApis() && Flags.enableAppLockShortcut()) {
+            shortcuts.add(APP_LOCK);
         }
         return shortcuts.stream();
     }

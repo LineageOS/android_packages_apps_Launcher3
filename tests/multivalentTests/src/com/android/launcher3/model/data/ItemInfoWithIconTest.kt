@@ -60,4 +60,26 @@ class ItemInfoWithIconTest {
         Truth.assertThat(itemInfoWithIcon.isDisabled).isFalse()
         Truth.assertThat(itemInfoWithIcon.isPendingDownload).isFalse()
     }
+
+    @Test
+    fun isAppLockSupported() {
+        itemInfoWithIcon.runtimeStatusFlags =
+            itemInfoWithIcon.runtimeStatusFlags or ItemInfoWithIcon.FLAG_APP_LOCK_SUPPORTED
+        Truth.assertThat(itemInfoWithIcon.isAppLockSupported).isTrue()
+
+        itemInfoWithIcon.runtimeStatusFlags =
+            itemInfoWithIcon.runtimeStatusFlags and ItemInfoWithIcon.FLAG_APP_LOCK_SUPPORTED.inv()
+        Truth.assertThat(itemInfoWithIcon.isAppLockSupported).isFalse()
+    }
+
+    @Test
+    fun isAppLockEnabled() {
+        itemInfoWithIcon.runtimeStatusFlags =
+            itemInfoWithIcon.runtimeStatusFlags or ItemInfoWithIcon.FLAG_APP_LOCK_ENABLED
+        Truth.assertThat(itemInfoWithIcon.isAppLockEnabled).isTrue()
+
+        itemInfoWithIcon.runtimeStatusFlags =
+            itemInfoWithIcon.runtimeStatusFlags and ItemInfoWithIcon.FLAG_APP_LOCK_ENABLED.inv()
+        Truth.assertThat(itemInfoWithIcon.isAppLockEnabled).isFalse()
+    }
 }

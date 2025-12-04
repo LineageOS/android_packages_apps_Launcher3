@@ -614,4 +614,19 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
             }
         }
     }
+
+    public static final Factory<ActivityContext> APP_LOCK =
+            (activity, itemInfo, originalView) -> {
+                if (!android.security.Flags.appLockApis()) {
+                    return null;
+                }
+                if (itemInfo instanceof ItemInfoWithIcon itemInfoWithIcon) {
+                    if (itemInfoWithIcon.isAppLockSupported()) {
+                        return AppLockShortcut.newInstance(activity, itemInfo, originalView,
+                                itemInfoWithIcon.isAppLockEnabled());
+                    }
+                }
+                // Don't show the shortcut for items without an icon or that don't support App Lock.
+                return null;
+            };
 }
