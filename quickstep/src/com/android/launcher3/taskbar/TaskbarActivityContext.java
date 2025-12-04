@@ -1538,7 +1538,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         int taskbarWindowSize;
         boolean shouldTreatAsTransient =
                 isTransientTaskbar() || (enableTaskbarPinning()
-                        && mTaskbarFeatureEvaluator.getSupportsTransitionToTransientTaskbar());
+                        && mTaskbarFeatureEvaluator.getSupportsTransitionToTransientTaskbar()
+                        && isPrimaryDisplay());
 
         int extraHeightForTaskbarTooltips = resources.getDimensionPixelSize(
                 R.dimen.arrow_toast_arrow_height)
@@ -1547,7 +1548,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                 resources.getDimensionPixelSize(R.dimen.arrow_toast_text_size));
 
         // Return transient taskbar window height when pinning feature is enabled, so taskbar view
-        // does not get cut off during pinning animation.
+        // does not get cut off during pinning animation. We should only do this on primary display.
         if (shouldTreatAsTransient) {
             TaskbarProfile transientTaskbarProfile = TaskbarProfile.Factory.createTaskbarProfile(
                     getResources(),
