@@ -131,7 +131,6 @@ class GridMigrationTest {
             dst.gridState,
             dst.dbHelper,
             src.dbHelper.readableDatabase,
-            true,
             modelDelegate,
         )
     }

@@ -33,7 +33,6 @@ import android.view.IWindowManager
 import android.view.Surface
 import android.view.WindowManagerGlobal
 import com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn
-import com.android.launcher3.Flags
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.InvariantDeviceProfile.OnIDPChangeListener
 import com.android.launcher3.LauncherAppState
@@ -127,17 +126,7 @@ object LauncherCustomizer {
     }
 
     private fun applyGridOption(context: Context, gridParam: String) {
-        var grid = gridParam
-        if (Flags.oneGridSpecs()) {
-            when (gridParam) {
-                "normal" -> grid = "medium"
-            }
-        } else {
-            when (gridParam) {
-                "medium" -> grid = "normal"
-            }
-        }
-        sendGridRequest(context, "default_grid", "name", grid)
+        sendGridRequest(context, "default_grid", "name", gridParam)
     }
 
     private fun applyIsThemed(context: Context, isThemed: Boolean) =

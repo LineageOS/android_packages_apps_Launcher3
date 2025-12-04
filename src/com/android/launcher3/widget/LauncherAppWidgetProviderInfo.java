@@ -14,7 +14,6 @@ import android.os.UserHandle;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.DeviceProfile;
-import com.android.launcher3.Flags;
 import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.LauncherAppState;
 import com.android.launcher3.icons.cache.BaseIconCache;
@@ -112,7 +111,7 @@ public class LauncherAppWidgetProviderInfo extends AppWidgetProviderInfo impleme
             // On phones we no longer support regular landscape, only fixed landscape for this
             // reason we don't need to take regular landscape into account in phones. Foldables
             // still support regular landscape when unfolded.
-            if (Flags.oneGridSpecs() && !dp.getDeviceProperties().isTablet()
+            if (!dp.getDeviceProperties().isTablet()
                     && dp.inv.isFixedLandscape != dp.getDeviceProperties().isLandscape()) {
                 continue;
             }

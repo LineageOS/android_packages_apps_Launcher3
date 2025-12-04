@@ -282,7 +282,6 @@ internal constructor(
                     destDeviceState,
                     openHelper,
                     oldHelper.writableDatabase,
-                    isDestNewDb,
                     modelDelegate,
                 )
             } else {

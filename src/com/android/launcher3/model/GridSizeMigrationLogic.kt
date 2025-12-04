@@ -66,7 +66,6 @@ constructor(
         destDeviceState: DeviceGridState,
         target: DatabaseHelper,
         source: SQLiteDatabase,
-        isDestNewDb: Boolean,
         modelDelegate: ModelDelegate,
     ) {
 
@@ -79,11 +78,11 @@ constructor(
         FileLog.d(
             TAG,
             "Begin grid migration. isAfterRestore: $isAfterRestore\nsrcDeviceState: " +
-                "$srcDeviceState\ndestDeviceState: $destDeviceState\nisDestNewDb: $isDestNewDb",
+                "$srcDeviceState\ndestDeviceState: $destDeviceState",
         )
 
         val shouldMigrateToStrtictlyTallerGrid =
-            shouldMigrateToStrictlyTallerGrid(isDestNewDb, srcDeviceState, destDeviceState)
+            shouldMigrateToStrictlyTallerGrid(srcDeviceState, destDeviceState)
         if (shouldMigrateToStrtictlyTallerGrid) {
             copyTable(source, TABLE_NAME, target.writableDatabase, TABLE_NAME, context)
         } else {
@@ -97,13 +96,12 @@ constructor(
                 // down.
                 if (shouldMigrateToStrtictlyTallerGrid) {
                     Log.d(TAG, "Migrating to strictly taller grid")
-                    if (Flags.oneGridSpecs()) {
-                        shiftWorkspaceByXCells(
-                            target.writableDatabase,
-                            (destDeviceState.rows - srcDeviceState.rows),
-                            TABLE_NAME,
-                        )
-                    }
+                    shiftWorkspaceByXCells(
+                        target.writableDatabase,
+                        (destDeviceState.rows - srcDeviceState.rows),
+                        TABLE_NAME,
+                    )
+
                     // Save current configuration, so that the migration does not run again.
                     destDeviceState.writeToPrefs(context)
                     t.commit()
@@ -398,12 +396,10 @@ constructor(
 
     /** Only migrate the grid in this manner if the target grid is taller and not wider. */
     private fun shouldMigrateToStrictlyTallerGrid(
-        isDestNewDb: Boolean,
         srcDeviceState: DeviceGridState,
         destDeviceState: DeviceGridState,
     ): Boolean {
-        return (Flags.oneGridSpecs() || isDestNewDb) &&
-            srcDeviceState.columns == destDeviceState.columns &&
+        return srcDeviceState.columns == destDeviceState.columns &&
             srcDeviceState.rows < destDeviceState.rows
     }
 

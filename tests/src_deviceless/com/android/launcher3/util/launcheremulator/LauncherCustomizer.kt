@@ -24,7 +24,6 @@ import android.hardware.display.DisplayManagerGlobal
 import android.net.Uri.Builder
 import android.view.Display
 import android.view.DisplayInfo
-import com.android.launcher3.Flags
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.get
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
@@ -107,16 +106,6 @@ object LauncherCustomizer {
     }
 
     private fun applyGridOption(context: Context, method: String, arg: String, paramArgValue: Any) {
-        var argValue: Any = paramArgValue
-        if (Flags.oneGridSpecs()) {
-            if (argValue is String && argValue.compareTo("normal") == 0) {
-                argValue = "medium"
-            }
-        } else {
-            if (argValue is String && argValue.compareTo("medium") == 0) {
-                argValue = "normal"
-            }
-        }
         val gridUri =
             Builder()
                 .scheme(ContentResolver.SCHEME_CONTENT)
@@ -127,7 +116,7 @@ object LauncherCustomizer {
             RESULT_SUCCESS,
             context.appComponent.gridCustomizationsProxy.update(
                 gridUri,
-                ContentValues().apply { putObject(arg, argValue) },
+                ContentValues().apply { putObject(arg, paramArgValue) },
                 null,
                 null,
                 null,
