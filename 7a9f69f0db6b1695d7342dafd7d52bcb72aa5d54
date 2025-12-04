@@ -34,6 +34,24 @@
       "parentUuid": "e2bae0c0_d3dc5fbb",
       "revId": "7a9f69f0db6b1695d7342dafd7d52bcb72aa5d54",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8e70e548_69a035c0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 4550
+      },
+      "writtenOn": "2025-12-04T17:48:56Z",
+      "side": 1,
+      "message": "If we apply the December ASB to QPR1 then it\u0027s applicable. Not sure if we want to do that though",
+      "parentUuid": "1425bf0a_0f958317",
+      "revId": "7a9f69f0db6b1695d7342dafd7d52bcb72aa5d54",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
