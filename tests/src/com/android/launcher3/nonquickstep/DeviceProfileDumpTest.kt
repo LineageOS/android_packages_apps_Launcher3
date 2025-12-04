@@ -18,9 +18,6 @@ package com.android.launcher3.nonquickstep
 import androidx.test.filters.SmallTest
 import com.android.launcher3.AbstractDeviceProfileTest
 import com.android.launcher3.DeviceProfile
-import com.android.launcher3.Flags
-import com.android.launcher3.util.rule.setFlags
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -32,11 +29,6 @@ class DeviceProfileDumpTest : AbstractDeviceProfileTest() {
     private val folderName: String = "DeviceProfileDumpTest"
 
     @Parameterized.Parameter lateinit var instance: TestCase
-
-    @Before
-    fun setUp() {
-        setFlagsRule.setFlags(false, Flags.FLAG_ONE_GRID_SPECS)
-    }
 
     @Test
     fun dumpPortraitGesture() {
