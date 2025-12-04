@@ -21,7 +21,7 @@ import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.AbstractFloatingView.TYPE_TASKBAR_PINNING_POPUP
 import com.android.launcher3.R
 import com.android.launcher3.popup.ArrowPopup.OPEN_DURATION_U
-import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
+import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatItems
 import com.android.launcher3.taskbar.customization.TaskbarDividerContainer
 import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
@@ -51,11 +51,9 @@ class TaskbarPinningControllerTest {
     @Before
     fun setup() {
         taskbarContext.controllers.uiController.init(taskbarContext.controllers)
-        runOnTaskbarUiThreadSync {
-            taskbarView = taskbarContext.dragLayer.findViewById(R.id.taskbar_view)
-        }
+        runOnMainSync { taskbarView = taskbarContext.dragLayer.findViewById(R.id.taskbar_view) }
 
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList())
             dividerIcon = requireNotNull(taskbarView.taskbarDividerViewContainer)
         }
@@ -64,8 +62,8 @@ class TaskbarPinningControllerTest {
     @Test
     fun showPinningView() {
         assertThat(hasPinningPopUp).isFalse()
-        runOnTaskbarUiThreadSync { pinningController.showPinningView(dividerIcon) }
-        runOnTaskbarUiThreadSync {
+        runOnMainSync { pinningController.showPinningView(dividerIcon) }
+        runOnMainSync {
             // Animation has started. Advance to end of animation.
             animatorTestRule.advanceTimeBy(OPEN_DURATION_U.toLong())
         }

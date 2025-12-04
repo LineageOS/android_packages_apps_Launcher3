@@ -16,7 +16,7 @@
 
 package com.android.launcher3.taskbar.rules
 
-import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
+import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
@@ -63,7 +63,7 @@ class TaskbarModeRule(private val context: TaskbarWindowSandboxContext) : TestRu
             override fun evaluate() {
                 val mode = taskbarMode.mode
 
-                runOnTaskbarUiThreadSync {
+                getInstrumentation().runOnMainSync {
                     TaskbarModeUtil.INSTANCE[context]?.stub {
                         doReturn(
                                 when (mode) {
@@ -119,7 +119,7 @@ class TaskbarModeRule(private val context: TaskbarWindowSandboxContext) : TestRu
                     }
                 }
 
-                runOnTaskbarUiThreadSync {
+                getInstrumentation().runOnMainSync {
                     DisplayController.INSTANCE[context].let {
                         if (it is DisplayControllerSpy) {
                             it.infoModifier = { info ->

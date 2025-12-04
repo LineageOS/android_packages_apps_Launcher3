@@ -32,7 +32,7 @@ import com.android.launcher3.R
 import com.android.launcher3.apppairs.AppPairIcon
 import com.android.launcher3.model.data.TaskItemInfo
 import com.android.launcher3.statehandlers.DesktopVisibilityController
-import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
+import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
 import com.android.launcher3.taskbar.TaskbarIconType.ALL_APPS
 import com.android.launcher3.taskbar.TaskbarIconType.DIVIDER
 import com.android.launcher3.taskbar.TaskbarIconType.HANDOFF_SUGGESTION
@@ -52,7 +52,7 @@ import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.ForceRtl
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext.Companion.getDeviceParams
-import com.android.launcher3.util.TestUtil.getOnTaskbarUiThread
+import com.android.launcher3.util.TestUtil.getOnUiThread
 import com.android.window.flags.Flags.FLAG_ENABLE_OVERFLOW_BUTTON_FOR_TASKBAR_PINNED_ITEMS
 import com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_OVERFLOW
 import com.google.common.truth.Truth
@@ -120,30 +120,26 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     @Test
     fun testUpdateItems_noItems_hasOnlyAllApps() {
-        runOnTaskbarUiThreadSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
+        runOnMainSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
         assertThat(taskbarView).hasIconTypes(ALL_APPS)
     }
 
     @Test
     fun testUpdateItems_hotseatItems_hasDividerBetweenAllAppsAndHotseat() {
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(createHotseatItems(2), emptyList(), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(createHotseatItems(2), emptyList(), emptyList()) }
         assertThat(taskbarView).hasIconTypes(ALL_APPS, DIVIDER, HOTSEAT, HOTSEAT)
     }
 
     @Test
     @ForceRtl
     fun testUpdateItems_rtlWithHotseatItems_hasDividerBetweenHotseatAndAllApps() {
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(createHotseatItems(2), emptyList(), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(createHotseatItems(2), emptyList(), emptyList()) }
         assertThat(taskbarView).hasIconTypes(HOTSEAT, HOTSEAT, DIVIDER, ALL_APPS)
     }
 
     @Test
     fun testUpdateItems_withNullHotseatItem_filtersNullItem() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(arrayOf(*createHotseatItems(2), null), emptyList(), emptyList())
         }
         assertThat(taskbarView).hasIconTypes(ALL_APPS, DIVIDER, HOTSEAT, HOTSEAT)
@@ -152,7 +148,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     @ForceRtl
     fun testUpdateItems_rtlWithNullHotseatItem_filtersNullItem() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(arrayOf(*createHotseatItems(2), null), emptyList(), emptyList())
         }
         assertThat(taskbarView).hasIconTypes(HOTSEAT, HOTSEAT, DIVIDER, ALL_APPS)
@@ -160,15 +156,13 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     @Test
     fun testUpdateItems_recentsItems_hasDividerBetweenAllAppsAndRecents() {
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(emptyArray(), createRecents(4), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(emptyArray(), createRecents(4), emptyList()) }
         assertThat(taskbarView).hasIconTypes(ALL_APPS, DIVIDER, *RECENT * 4)
     }
 
     @Test
     fun testUpdateItems_hotseatItemsAndRecents_hasDividerBetweenHotseatAndRecents() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(createHotseatItems(3), createRecents(2), emptyList())
         }
         assertThat(taskbarView).hasIconTypes(ALL_APPS, *HOTSEAT * 3, DIVIDER, *RECENT * 2)
@@ -176,7 +170,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     @Test
     fun testUpdateItems_addHotseatItem_updatesHotseat() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(
                 createHotseatItems(1),
                 createRecents(1),
@@ -194,7 +188,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     @Test
     fun testUpdateItems_removeHotseatItem_updatesHotseat() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(
                 createHotseatItems(2),
                 createRecents(1),
@@ -211,7 +205,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     @Test
     fun testUpdateItems_addRecentsItem_updatesRecents() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(
                 createHotseatItems(1),
                 createRecents(1),
@@ -229,7 +223,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     @Test
     fun testUpdateItems_removeRecentsItem_updatesRecents() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(
                 createHotseatItems(1),
                 createRecents(2),
@@ -246,7 +240,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     @Test
     fun testUpdateItems_addHandoffSuggestion_updatesHandoffSuggestions() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(createHotseatItems(1), createRecents(1), emptyList())
             taskbarView.updateItems(
                 createHotseatItems(1),
@@ -259,7 +253,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     @Test
     fun testUpdateItems_removeHandoffSuggestion_updatesHandoffSuggestions() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(
                 createHotseatItems(1),
                 createRecents(1),
@@ -272,7 +266,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     @Test
     fun testUpdateItem_addHotseatItemAfterRecentsItem_hotseatItemBeforeDivider() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(emptyArray(), createRecents(1), emptyList())
             taskbarView.updateItems(createHotseatItems(1), createRecents(1), emptyList())
         }
@@ -282,34 +276,28 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     @ForceRtl
     fun testUpdateItems_rtl_hotseatItems_hasDividerBetweenHotseatAndAllApps() {
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(createHotseatItems(2), emptyList(), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(createHotseatItems(2), emptyList(), emptyList()) }
         assertThat(taskbarView).hasIconTypes(*HOTSEAT * 2, DIVIDER, ALL_APPS)
     }
 
     @Test
     @ForceRtl
     fun testUpdateItems_rtl_recentsItems_hasDividerBetweenRecentsAndAllApps() {
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(emptyArray(), createRecents(4), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(emptyArray(), createRecents(4), emptyList()) }
         assertThat(taskbarView).hasIconTypes(*RECENT * 4, DIVIDER, ALL_APPS)
     }
 
     @Test
     @ForceRtl
     fun testUpdateItems_rtl_recentsItems_recentsAreReversed() {
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(emptyArray(), createRecents(4), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(emptyArray(), createRecents(4), emptyList()) }
         assertThat(taskbarView).hasRecentsOrder(startIndex = 0, expectedIds = listOf(3, 2, 1, 0))
     }
 
     @Test
     @ForceRtl
     fun testUpdateItems_rtl_hotseatItemsAndRecents_hasDividerBetweenRecentsAndHotseat() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(createHotseatItems(3), createRecents(2), emptyList())
         }
         assertThat(taskbarView).hasIconTypes(*RECENT * 2, DIVIDER, *HOTSEAT * 3, ALL_APPS)
@@ -318,7 +306,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     @ForceRtl
     fun testUpdateItems_rtl_addHotseatItemWithoutRecents_updatesHotseat() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList())
             taskbarView.updateItems(createHotseatItems(2), emptyList(), emptyList())
         }
@@ -328,7 +316,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     @ForceRtl
     fun testUpdateItems_rtl_addHotseatItemWithRecents_updatesHotseat() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(createHotseatItems(1), createRecents(1), emptyList())
             taskbarView.updateItems(createHotseatItems(2), createRecents(1), emptyList())
         }
@@ -338,7 +326,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     @ForceRtl
     fun testUpdateItems_rtl_removeHotseatItem_updatesHotseat() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(createHotseatItems(2), createRecents(1), emptyList())
             taskbarView.updateItems(createHotseatItems(1), createRecents(1), emptyList())
         }
@@ -348,7 +336,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     @ForceRtl
     fun testUpdateItems_rtl_addRecentsItem_updatesRecents() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(createHotseatItems(1), createRecents(1), emptyList())
             taskbarView.updateItems(createHotseatItems(1), createRecents(2), emptyList())
         }
@@ -358,7 +346,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     @ForceRtl
     fun testUpdateItems_rtl_removeRecentsItem_updatesRecents() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(createHotseatItems(1), createRecents(2), emptyList())
             taskbarView.updateItems(createHotseatItems(1), createRecents(1), emptyList())
         }
@@ -368,13 +356,11 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     fun testUpdateItems_addFirstHotseatItem_addsDivider() {
         // GIVEN no items are present, so there is no divider
-        runOnTaskbarUiThreadSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
+        runOnMainSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
         assertThat(taskbarView).hasIconTypes(ALL_APPS)
 
         // WHEN the first hotseat item is added
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList()) }
 
         // THEN a divider is also added
         assertThat(taskbarView).hasIconTypes(ALL_APPS, DIVIDER, HOTSEAT)
@@ -383,13 +369,11 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     fun testUpdateItems_removeLastHotseatItem_removesDivider() {
         // GIVEN a hotseat item is present, so there is a divider
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList()) }
         assertThat(taskbarView).hasIconTypes(ALL_APPS, DIVIDER, HOTSEAT)
 
         // WHEN the last hotseat item is removed
-        runOnTaskbarUiThreadSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
+        runOnMainSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
 
         // THEN the divider is also removed
         assertThat(taskbarView).hasIconTypes(ALL_APPS)
@@ -399,13 +383,11 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @ForceRtl
     fun testUpdateItems_rtl_addFirstHotseatItem_addsDivider() {
         // GIVEN no items are present, so there is no divider
-        runOnTaskbarUiThreadSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
+        runOnMainSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
         assertThat(taskbarView).hasIconTypes(ALL_APPS)
 
         // WHEN the first hotseat item is added
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList()) }
 
         // THEN a divider is also added
         assertThat(taskbarView).hasIconTypes(HOTSEAT, DIVIDER, ALL_APPS)
@@ -415,13 +397,11 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @ForceRtl
     fun testUpdateItems_rtl_removeLastHotseatItem_removesDivider() {
         // GIVEN a hotseat item is present, so there is a divider
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList()) }
         assertThat(taskbarView).hasIconTypes(HOTSEAT, DIVIDER, ALL_APPS)
 
         // WHEN the last hotseat item is removed
-        runOnTaskbarUiThreadSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
+        runOnMainSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
 
         // THEN the divider is also removed
         assertThat(taskbarView).hasIconTypes(ALL_APPS)
@@ -429,7 +409,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     @Test
     fun testUpdateItems_addRecentsItem_viewAddedOnRight() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(emptyArray(), createRecents(1), emptyList())
             val prevIconViews = iconViews
 
@@ -445,7 +425,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     @ForceRtl
     fun testUpdateItems_rtl_addRecentsItem_viewAddedOnLeft() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(emptyArray(), createRecents(1), emptyList())
             val prevIconViews = iconViews
 
@@ -460,7 +440,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     @Test
     fun testUpdateItems_removeFirstRecentsItem_correspondingViewRemoved() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             val recents = createRecents(2)
             taskbarView.updateItems(emptyArray(), recents, emptyList())
 
@@ -474,7 +454,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     @Test
     fun testUpdateItems_removeLastRecentsItem_correspondingViewRemoved() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             val recents = createRecents(2)
             taskbarView.updateItems(emptyArray(), recents, emptyList())
 
@@ -489,7 +469,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     @ForceRtl
     fun testUpdateItems_rtl_removeFirstRecentsItem_correspondingViewRemoved() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             val recents = createRecents(2)
             taskbarView.updateItems(emptyArray(), recents, emptyList())
 
@@ -504,7 +484,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     @ForceRtl
     fun testUpdateItems_rtl_removeLastRecentsItem_correspondingViewRemoved() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             val recents = createRecents(2)
             taskbarView.updateItems(emptyArray(), recents, emptyList())
 
@@ -519,23 +499,17 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     fun testUpdateItems_desktopMode_hotseatItem_noDivider() {
         whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList()) }
         assertThat(taskbarView).hasIconTypes(ALL_APPS, HOTSEAT)
     }
 
     @Test
     fun testUpdateItems_desktopMode_hotseatItem_noDividerAfterDesktopModeChange() {
         whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(false)
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList()) }
 
         whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(createHotseatItems(2), emptyList(), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(createHotseatItems(2), emptyList(), emptyList()) }
 
         assertThat(taskbarView).hasIconTypes(ALL_APPS, HOTSEAT, HOTSEAT)
     }
@@ -544,18 +518,14 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @ForceRtl
     fun testUpdateItems_rtlAndDesktopMode_hotseatItem_noDivider() {
         whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList()) }
         assertThat(taskbarView).hasIconTypes(HOTSEAT, ALL_APPS)
     }
 
     @Test
     fun testUpdateItems_desktopMode_recentItem_hasDivider() {
         whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(emptyArray(), createRecents(1), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(emptyArray(), createRecents(1), emptyList()) }
         assertThat(taskbarView).hasIconTypes(ALL_APPS, DIVIDER, RECENT)
     }
 
@@ -563,15 +533,13 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @ForceRtl
     fun testUpdateItems_rtlAndDesktopMode_recentItem_hasDivider() {
         whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(emptyArray(), createRecents(1), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(emptyArray(), createRecents(1), emptyList()) }
         assertThat(taskbarView).hasIconTypes(RECENT, DIVIDER, ALL_APPS)
     }
 
     @Test
     fun testUpdateItems_maxRecents_noOverflow() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(emptyArray(), createRecents(maxShownRecents), emptyList())
         }
         assertThat(taskbarView).hasIconTypes(ALL_APPS, DIVIDER, *RECENT * maxShownRecents)
@@ -580,7 +548,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     fun testUpdateItems_moreThanMaxRecents_overflowShownBeforeRecents() {
         val recentsSize = maxShownRecents + 2
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(emptyArray(), createRecents(recentsSize), emptyList())
         }
 
@@ -591,7 +559,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     fun testUpdateItems_clearAllRecentsAfterOverflow_recentsEmpty() {
         val recentsSize = maxShownRecents + 2
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(emptyArray(), createRecents(recentsSize), emptyList())
             taskbarView.updateItems(emptyArray(), emptyList(), emptyList())
         }
@@ -603,7 +571,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @ForceRtl
     fun testUpdateItems_rtl_moreThanMaxRecents_overflowShownAfterRecents() {
         val recentsSize = maxShownRecents + 2
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(emptyArray(), createRecents(recentsSize), emptyList())
         }
 
@@ -615,7 +583,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     fun testUpdateItems_moreThanMaxRecentsWithHotseat_fewerRecentsShown() {
         val hotseatSize = 4
         val recentsSize = maxShownRecents + 2
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(
                 createHotseatItems(hotseatSize),
                 createRecents(recentsSize),
@@ -633,7 +601,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     fun testUpdateItems_rtl_moreThanMaxRecentsWithHotseat_fewerRecentsShown() {
         val hotseatSize = 4
         val recentsSize = maxShownRecents + 2
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(
                 createHotseatItems(hotseatSize),
                 createRecents(recentsSize),
@@ -649,7 +617,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     fun testUpdateItems_moreThanMaxRecents_verifyShownRecentsOrder() {
         val recentsSize = maxShownRecents + 2
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(emptyArray(), createRecents(recentsSize), emptyList())
         }
 
@@ -665,7 +633,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @ForceRtl
     fun testUpdateItems_rtl_moreThanMaxRecents_verifyShownRecentsReversed() {
         val recentsSize = maxShownRecents + 2
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(emptyArray(), createRecents(recentsSize), emptyList())
         }
 
@@ -679,7 +647,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     @Test
     fun testUpdateItems_splitTask_addsAppPairIconToTaskbar() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(emptyArray(), listOf(createSplitTask()), emptyList())
         }
 
@@ -690,14 +658,10 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     fun testUpdateItems_withExistingSplitTask_appPairIconIsSameInstance() {
         val splitTask = createSplitTask()
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(emptyArray(), listOf(splitTask), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(emptyArray(), listOf(splitTask), emptyList()) }
         val appPairIcon1 = taskbarView.children.last()
 
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(emptyArray(), listOf(splitTask), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(emptyArray(), listOf(splitTask), emptyList()) }
         val appPairIcon2 = taskbarView.children.last()
 
         Truth.assertThat(appPairIcon1).isSameInstanceAs(appPairIcon2)
@@ -705,13 +669,13 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     @Test
     fun testUpdateItems_splitTaskReplaced_appPairIconReplaced() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(emptyArray(), listOf(createSplitTask(0)), emptyList())
         }
 
         val appPairIcon1 = taskbarView.children.last()
 
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(emptyArray(), listOf(createSplitTask(1)), emptyList())
         }
 
@@ -726,12 +690,10 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
         // This test runs only on devices with an inline QSB, like tablets.
         assume().that(activityContext.deviceProfile.isQsbInline).isTrue()
 
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList()) }
         assertThat(taskbarView.taskbarDividerViewContainer?.parent).isNotNull()
 
-        runOnTaskbarUiThreadSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
+        runOnMainSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
         assertThat(taskbarView.taskbarDividerViewContainer?.parent).isNull()
     }
 
@@ -744,9 +706,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
                 splitTask.topLeftTask.title,
                 splitTask.bottomRightTask.title,
             )
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(emptyArray(), listOf(splitTask), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(emptyArray(), listOf(splitTask), emptyList()) }
 
         val icon = taskbarView.children.last() as AppPairIcon
         Truth.assertThat(icon.titleTextView.text).isEqualTo(expectedTitle1)
@@ -760,16 +720,14 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
                 newTitle,
             )
 
-        runOnTaskbarUiThreadSync {
-            viewController.onTaskUpdated(splitTask.bottomRightTask, splitTask)
-        }
+        runOnMainSync { viewController.onTaskUpdated(splitTask.bottomRightTask, splitTask) }
         Truth.assertThat(icon.titleTextView.text).isEqualTo(expectedTitle2)
     }
 
     @Test
     @EnableFlags(FLAG_ENABLE_OVERFLOW_BUTTON_FOR_TASKBAR_PINNED_ITEMS)
     fun testUpdateItems_hotseatOverflow_noRecents() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(
                 createHotseatItems(maxShownHotseat + 1),
                 emptyList(),
@@ -784,7 +742,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @EnableFlags(FLAG_ENABLE_OVERFLOW_BUTTON_FOR_TASKBAR_PINNED_ITEMS)
     @ForceRtl
     fun testUpdateItems_rtl_hotseatOverflow_noRecents() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(
                 createHotseatItems(maxShownHotseat + 1),
                 emptyList(),
@@ -799,7 +757,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @EnableFlags(FLAG_ENABLE_OVERFLOW_BUTTON_FOR_TASKBAR_PINNED_ITEMS)
     fun testUpdateItems_hotseatAndRecentsOverflow() {
         val recentsSize = maxShownRecents + 2
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(
                 createHotseatItems(maxShownHotseat + 1),
                 createRecents(recentsSize),
@@ -822,7 +780,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @ForceRtl
     fun testUpdateItems_rtl_hotseatAndRecentsOverflow() {
         val recentsSize = maxShownRecents + 2
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(
                 createHotseatItems(maxShownHotseat + 1),
                 createRecents(recentsSize),
@@ -842,13 +800,13 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     @Test
     fun testAnimateToOverflowOnOverlay_triggersAnimationAndResetsState() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(emptyArray(), createRecents(maxShownRecents), emptyList())
             // Add one more recent app to trigger the overflow animation.
             taskbarView.updateItems(emptyArray(), createRecents(maxShownRecents + 1), emptyList())
         }
 
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             animatorTestRule.advanceTimeBy(TaskbarOverflowView.ITEM_ICON_SIZE_ANIMATION_DURATION)
         }
         assertThat(taskbarView.isRecentsOverflowViewFirstItemHiddenForAnimation).isFalse()
@@ -857,13 +815,13 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     @ForceRtl
     fun testAnimateToOverflowOnOverlay_rtl_triggersAnimationAndResetsState() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(emptyArray(), createRecents(maxShownRecents), emptyList())
             // Add one more recent app to trigger the overflow animation.
             taskbarView.updateItems(emptyArray(), createRecents(maxShownRecents + 1), emptyList())
         }
 
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             animatorTestRule.advanceTimeBy(TaskbarOverflowView.ITEM_ICON_SIZE_ANIMATION_DURATION)
         }
         assertThat(taskbarView.isRecentsOverflowViewFirstItemHiddenForAnimation).isFalse()
@@ -872,25 +830,21 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     fun testAnimateFromOverflowOnOverlay_triggersAnimationAndResetsState() {
         val initialRecents = createRecents(maxShownRecents + 1)
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(emptyArray(), initialRecents, emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(emptyArray(), initialRecents, emptyList()) }
 
         val taskThatWillAnimateIn = initialRecents[1]
         var iconToAnimate = taskbarView.iconViews.find { it.tag == taskThatWillAnimateIn }
         assertThat(iconToAnimate).isNull()
 
         val fewerRecents = initialRecents.dropLast(1)
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(emptyArray(), fewerRecents, emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(emptyArray(), fewerRecents, emptyList()) }
 
         iconToAnimate = taskbarView.iconViews.find { it.tag == taskThatWillAnimateIn }
         assertThat(iconToAnimate).isNotNull()
         forceLayoutUpdate()
         assertThat(iconToAnimate?.alpha).isEqualTo(0)
 
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             animatorTestRule.advanceTimeBy(TaskbarOverflowView.ITEM_ICON_SIZE_ANIMATION_DURATION)
         }
         assertThat(iconToAnimate?.alpha).isEqualTo(1f)
@@ -900,9 +854,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @ForceRtl
     fun testAnimateFromOverflowOnOverlay_rtl_triggersAnimationAndResetsState() {
         val initialRecents = createRecents(maxShownRecents + 1)
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(emptyArray(), initialRecents, emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(emptyArray(), initialRecents, emptyList()) }
 
         val taskThatWillAnimateIn = initialRecents[1]
 
@@ -910,16 +862,14 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
         assertThat(iconToAnimate).isNull()
 
         val fewerRecents = initialRecents.dropLast(1)
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(emptyArray(), fewerRecents, emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(emptyArray(), fewerRecents, emptyList()) }
 
         iconToAnimate = taskbarView.iconViews.find { it.tag == taskThatWillAnimateIn }
         assertThat(iconToAnimate).isNotNull()
         forceLayoutUpdate()
         assertThat(iconToAnimate?.alpha).isEqualTo(0)
 
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             animatorTestRule.advanceTimeBy(TaskbarOverflowView.ITEM_ICON_SIZE_ANIMATION_DURATION)
         }
         assertThat(iconToAnimate?.alpha).isEqualTo(1f)
@@ -928,15 +878,15 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     @EnableFlags(FLAG_ENABLE_TASKBAR_DRAG_AND_DROP, FLAG_ENABLE_TASKBAR_ICON_CONTAINER)
     fun testGetHitRect_withHotseatIconContainer_coversHotseatIconContainer() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(createHotseatItems(2), createRecents(1), emptyList())
         }
         forceLayoutUpdate()
 
         val outRect = Rect()
-        runOnTaskbarUiThreadSync { taskbarView.getHitRectForPinRelativeToDragLayer(outRect) }
+        runOnMainSync { taskbarView.getHitRectForPinRelativeToDragLayer(outRect) }
         val expectedRect = Rect()
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             activityContext.dragLayer.getDescendantRectRelativeToSelf(
                 taskbarView.taskbarHotseatIconsContainer!!,
                 expectedRect,
@@ -953,7 +903,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @EnableFlags(FLAG_ENABLE_TASKBAR_DRAG_AND_DROP)
     @DisableFlags(FLAG_ENABLE_TASKBAR_ICON_CONTAINER)
     fun testGetHitRect_withDivider_coversFromAllAppsToDivider() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(createHotseatItems(2), createRecents(1), emptyList())
         }
         forceLayoutUpdate()
@@ -961,9 +911,9 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
         val allAppsButtonContainer = taskbarView.allAppsButtonContainer
         val dividerContainer = taskbarView.taskbarDividerViewContainer!!
         val outRect = Rect()
-        runOnTaskbarUiThreadSync { taskbarView.getHitRectForPinRelativeToDragLayer(outRect) }
+        runOnMainSync { taskbarView.getHitRectForPinRelativeToDragLayer(outRect) }
         val taskbarRectInDragLayer = Rect()
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             activityContext.dragLayer.getDescendantRectRelativeToSelf(
                 taskbarView,
                 taskbarRectInDragLayer,
@@ -986,16 +936,14 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @DisableFlags(FLAG_ENABLE_TASKBAR_ICON_CONTAINER)
     fun testGetHitRect_noDivider_coversUpTohotseatIconsContainer() {
         whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(createHotseatItems(3), emptyList(), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(createHotseatItems(3), emptyList(), emptyList()) }
         forceLayoutUpdate()
 
         val allAppsButtonContainer = taskbarView.allAppsButtonContainer
         val outRect = Rect()
-        runOnTaskbarUiThreadSync { taskbarView.getHitRectForPinRelativeToDragLayer(outRect) }
+        runOnMainSync { taskbarView.getHitRectForPinRelativeToDragLayer(outRect) }
         val taskbarRectInDragLayer = Rect()
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             activityContext.dragLayer.getDescendantRectRelativeToSelf(
                 taskbarView,
                 taskbarRectInDragLayer,
@@ -1020,7 +968,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @DisableFlags(FLAG_ENABLE_TASKBAR_ICON_CONTAINER)
     @ForceRtl
     fun testGetHitRect_rtl_withDivider_coversFromDividerToAllApps() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(createHotseatItems(2), createRecents(1), emptyList())
         }
         forceLayoutUpdate()
@@ -1028,9 +976,9 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
         val allAppsButtonContainer = taskbarView.allAppsButtonContainer
         val dividerContainer = taskbarView.taskbarDividerViewContainer!!
         val outRect = Rect()
-        runOnTaskbarUiThreadSync { taskbarView.getHitRectForPinRelativeToDragLayer(outRect) }
+        runOnMainSync { taskbarView.getHitRectForPinRelativeToDragLayer(outRect) }
         val taskbarRectInDragLayer = Rect()
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             activityContext.dragLayer.getDescendantRectRelativeToSelf(
                 taskbarView,
                 taskbarRectInDragLayer,
@@ -1051,16 +999,16 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     @EnableFlags(FLAG_ENABLE_TASKBAR_DRAG_AND_DROP)
     fun testGetHitRectForUnpin_withDivider_coversAreaBetweenDividerAndLastIcon() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(createHotseatItems(2), createRecents(2), emptyList())
         }
         forceLayoutUpdate()
 
         val dividerContainer = taskbarView.taskbarDividerViewContainer!!
         val outRect = Rect()
-        runOnTaskbarUiThreadSync { taskbarView.getHitRectForUnpinRelativeToDragLayer(outRect) }
+        runOnMainSync { taskbarView.getHitRectForUnpinRelativeToDragLayer(outRect) }
         val taskbarRectInDragLayer = Rect()
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             activityContext.dragLayer.getDescendantRectRelativeToSelf(
                 taskbarView,
                 taskbarRectInDragLayer,
@@ -1078,15 +1026,13 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @EnableFlags(FLAG_ENABLE_TASKBAR_DRAG_AND_DROP)
     fun testGetHitRectForUnpin_noDivider_coversAreaAfterIcons() {
         whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(createHotseatItems(3), emptyList(), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(createHotseatItems(3), emptyList(), emptyList()) }
         forceLayoutUpdate()
 
         val outRect = Rect()
-        runOnTaskbarUiThreadSync { taskbarView.getHitRectForUnpinRelativeToDragLayer(outRect) }
+        runOnMainSync { taskbarView.getHitRectForUnpinRelativeToDragLayer(outRect) }
         val taskbarRectInDragLayer = Rect()
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             activityContext.dragLayer.getDescendantRectRelativeToSelf(
                 taskbarView,
                 taskbarRectInDragLayer,
@@ -1108,7 +1054,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @EnableFlags(FLAG_ENABLE_TASKBAR_DRAG_AND_DROP)
     @ForceRtl
     fun testGetHitRectForUnpin_rtl_withDivider_coversAreaBetweenStartAndDivider() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(createHotseatItems(2), createRecents(2), emptyList())
         }
         forceLayoutUpdate()
@@ -1116,9 +1062,9 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
         val dividerContainer = taskbarView.taskbarDividerViewContainer!!
 
         val outRect = Rect()
-        runOnTaskbarUiThreadSync { taskbarView.getHitRectForUnpinRelativeToDragLayer(outRect) }
+        runOnMainSync { taskbarView.getHitRectForUnpinRelativeToDragLayer(outRect) }
         val taskbarRectInDragLayer = Rect()
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             activityContext.dragLayer.getDescendantRectRelativeToSelf(
                 taskbarView,
                 taskbarRectInDragLayer,
@@ -1134,12 +1080,12 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     fun testUpdateItems_nonDesktopRecentsChange_viewForRemovedTaskIsRecycledForNewTask() {
         val prevTasks = listOf(createRecentTask(0), createRecentTask(1))
-        runOnTaskbarUiThreadSync { taskbarView.updateItems(emptyArray(), prevTasks, emptyList()) }
+        runOnMainSync { taskbarView.updateItems(emptyArray(), prevTasks, emptyList()) }
         val prevIcons = taskbarView.children.toList().takeLast(2)
 
         // Task 0 removed and Task 2 added.
         val nextTasks = listOf(createRecentTask(1), createRecentTask(2))
-        runOnTaskbarUiThreadSync { taskbarView.updateItems(emptyArray(), nextTasks, emptyList()) }
+        runOnMainSync { taskbarView.updateItems(emptyArray(), nextTasks, emptyList()) }
         val nextIcons = taskbarView.children.toList().takeLast(2)
 
         // Existing icon for Task 1 should shift left.
@@ -1154,29 +1100,21 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     fun testUpdateItems_hotseatItemUnchanged_iconNotRegenerated() {
         val item = spy(createHotseatWorkspaceItem())
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(arrayOf(item), emptyList(), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(arrayOf(item), emptyList(), emptyList()) }
         verify(item, times(1)).newIcon(any(), any())
 
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(arrayOf(item), emptyList(), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(arrayOf(item), emptyList(), emptyList()) }
         verify(item, times(1)).newIcon(any(), any()) // Icon is not generated a second time.
     }
 
     @Test
     fun testUpdateItems_hotseatItemIsOpened_tagUpdatedAndIconNotRegenerated() {
         val item = spy(createHotseatWorkspaceItem())
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(arrayOf(item), emptyList(), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(arrayOf(item), emptyList(), emptyList()) }
         verify(item, times(1)).newIcon(any(), any())
 
         val taskItem = spy(TaskItemInfo(0, item))
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(arrayOf(taskItem), emptyList(), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(arrayOf(taskItem), emptyList(), emptyList()) }
 
         assertThat(taskbarView.iconViews.last().tag).isSameInstanceAs(taskItem)
         verify(taskItem, never()).newIcon(any(), any()) // Icon is not regenerated from task.
@@ -1186,14 +1124,10 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     fun testUpdateItems_hotseatTaskItemIsClosed_tagUpdatedAndIconNotRegenerated() {
         val item = spy(createHotseatWorkspaceItem())
         val taskItem = spy(TaskItemInfo(0, item))
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(arrayOf(taskItem), emptyList(), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(arrayOf(taskItem), emptyList(), emptyList()) }
         verify(taskItem, times(1)).newIcon(any(), any())
 
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(arrayOf(item), emptyList(), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(arrayOf(item), emptyList(), emptyList()) }
         assertThat(taskbarView.iconViews.last().tag).isSameInstanceAs(item)
         verify(item, never()).newIcon(any(), any()) // Icon is not regenerated from item.
     }
@@ -1201,14 +1135,10 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     fun testUpdateItems_recentTaskUnchanged_iconNotRegenerated() {
         val recentTask = spy(createRecentTask())
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(emptyArray(), listOf(recentTask), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(emptyArray(), listOf(recentTask), emptyList()) }
         verify(recentTask, times(1)).bitmapInfos
 
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(emptyArray(), listOf(recentTask), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(emptyArray(), listOf(recentTask), emptyList()) }
         verify(recentTask, times(1)).bitmapInfos // Icon is not generated a second time.
     }
 
@@ -1216,7 +1146,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     fun testUpdateItems_taskReplaced_reusesHoverListener() {
         val callbacks =
             spy(
-                getOnTaskbarUiThread {
+                getOnUiThread {
                     TaskbarViewCallbacksFactory.newInstance(activityContext)
                         .create(activityContext, activityContext.controllers, taskbarView)
                 }
@@ -1224,15 +1154,11 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
         taskbarView.init(callbacks)
 
         val task1 = createRecentTask(id = 0)
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(emptyArray(), listOf(task1), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(emptyArray(), listOf(task1), emptyList()) }
         val icon1 = taskbarView[taskbarView.size - 1]
 
         val task2 = createRecentTask(id = 1)
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(emptyArray(), listOf(task2), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(emptyArray(), listOf(task2), emptyList()) }
         val icon2 = taskbarView[taskbarView.size - 1]
 
         assertThat(icon1).isSameInstanceAs(icon2)
@@ -1246,7 +1172,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
         assertThat(taskbarView.isPointOnOverflowIcon(floatArrayOf(0f, 0f))).isFalse()
 
         val numHotseatIcons = activityContext.deviceProfile.inv.numShownHotseatIcons
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.updateItems(
                 createHotseatItems(numHotseatIcons + 1),
                 emptyList(),
@@ -1277,22 +1203,20 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     @EnableFlags(FLAG_ENABLE_TASKBAR_DRAG_AND_DROP)
     fun testReserveDropSlot_addsGhostView() {
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(createHotseatItems(2), emptyList(), emptyList())
-        }
+        runOnMainSync { taskbarView.updateItems(createHotseatItems(2), emptyList(), emptyList()) }
         forceLayoutUpdate()
 
         val hitRect = Rect()
-        runOnTaskbarUiThreadSync { taskbarView.getHitRectForPinRelativeToDragLayer(hitRect) }
+        runOnMainSync { taskbarView.getHitRectForPinRelativeToDragLayer(hitRect) }
 
         val dragX = hitRect.centerX()
         val container = taskbarView.taskbarHotseatIconsContainer ?: taskbarView
         val initialChildCount = container.childCount
 
-        runOnTaskbarUiThreadSync { taskbarView.reserveDropSlotForDragLocation(dragX) }
+        runOnMainSync { taskbarView.reserveDropSlotForDragLocation(dragX) }
         assertThat(container.childCount).isEqualTo(initialChildCount + 1)
 
-        runOnTaskbarUiThreadSync { taskbarView.releaseDropSlot() }
+        runOnMainSync { taskbarView.releaseDropSlot() }
         assertThat(container.childCount).isEqualTo(initialChildCount)
     }
 
@@ -1306,7 +1230,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
      * correctly calculated.
      */
     private fun forceLayoutUpdate() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             taskbarView.measure(
                 View.MeasureSpec.makeMeasureSpec(taskbarView.width, View.MeasureSpec.EXACTLY),
                 View.MeasureSpec.makeMeasureSpec(taskbarView.height, View.MeasureSpec.EXACTLY),

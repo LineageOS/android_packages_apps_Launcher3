@@ -22,7 +22,7 @@ import android.hardware.display.VirtualDisplay
 import androidx.test.core.app.ApplicationProvider
 import com.android.app.displaylib.DisplayDecorationListener
 import com.android.app.displaylib.DisplaysWithDecorationsRepositoryCompat
-import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
+import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
 import org.junit.rules.ExternalResource
 
 /**
@@ -64,7 +64,7 @@ class VirtualDisplaysRule(context: Context = ApplicationProvider.getApplicationC
 
         val displayId = virtualDisplay.display.displayId
         virtualDisplays[displayId] = virtualDisplay
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             for (l in displayDecorationListeners) l.onDisplayAddSystemDecorations(displayId)
         }
 
@@ -82,7 +82,7 @@ class VirtualDisplaysRule(context: Context = ApplicationProvider.getApplicationC
                 ?: throw IllegalArgumentException("Display $displayId not added")
 
         val displayId = virtualDisplay.display.displayId
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             for (l in displayDecorationListeners) l.onDisplayRemoveSystemDecorations(displayId)
         }
 

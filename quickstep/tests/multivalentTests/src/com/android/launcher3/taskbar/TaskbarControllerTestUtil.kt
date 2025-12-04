@@ -20,7 +20,6 @@ import android.content.Context
 import com.android.launcher3.ConstantItem
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
-import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
 import com.android.launcher3.util.LooperExecutor
 import com.android.launcher3.util.TestUtil
 import java.util.concurrent.TimeUnit
@@ -30,10 +29,6 @@ import kotlin.reflect.KProperty
 object TaskbarControllerTestUtil {
 
     private const val TIME_OUT_SECONDS = 10L
-
-    inline fun runOnTaskbarUiThreadSync(crossinline runTest: () -> Unit) {
-        TestUtil.runOnExecutorSync(TASKBAR_UI_THREAD) { runTest() }
-    }
 
     inline fun runOnMainSync(crossinline runTest: () -> Unit) {
         TestUtil.runOnExecutorSync(MAIN_EXECUTOR) { runTest() }
@@ -58,7 +53,7 @@ object TaskbarControllerTestUtil {
         }
 
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
-            runOnTaskbarUiThreadSync { LauncherPrefs.get(context).put(item, value) }
+            runOnMainSync { LauncherPrefs.get(context).put(item, value) }
         }
     }
 }

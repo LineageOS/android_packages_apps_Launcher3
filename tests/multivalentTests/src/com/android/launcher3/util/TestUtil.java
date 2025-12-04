@@ -24,8 +24,6 @@ import static com.android.launcher3.LauncherSettings.Settings.LAYOUT_DIGEST_LABE
 import static com.android.launcher3.LauncherSettings.Settings.LAYOUT_DIGEST_TAG;
 import static com.android.launcher3.LauncherSettings.Settings.LAYOUT_PROVIDER_KEY;
 import static com.android.launcher3.LauncherSettings.Settings.createBlobProviderKey;
-import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
-import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
 
 import static org.junit.Assert.assertTrue;
 
@@ -192,42 +190,24 @@ public class TestUtil {
                 try {
                     task.run();
                 } catch (Exception e) {
-                    convertAndThrowRuntimeException(e);
+                    throw new RuntimeException(e);
                 }
             }).get();
         } catch (Exception e) {
-            convertAndThrowRuntimeException(e);
-        }
-    }
-
-    private static void convertAndThrowRuntimeException(Exception e) {
-        if (e.getCause() instanceof RuntimeException re) {
-            throw re;
-        } else if (e instanceof RuntimeException re) {
-            throw re;
-        } else {
             throw new RuntimeException(e);
         }
     }
 
-    /** Runs the callback on the MAIN thread and returns the result. */
-    public static <T> T getOnMainThread(final Callable<T> callback) {
-        return getOnUiThread(MAIN_EXECUTOR, callback);
-    }
-
-    /** Runs the callback on the TASKBAR_UI_THREAD and returns the result. */
-    public static <T> T getOnTaskbarUiThread(final Callable<T> callback) {
-        return getOnUiThread(TASKBAR_UI_THREAD, callback);
-    }
-
-    private static <T> T getOnUiThread(
-            LooperExecutor uiExecutor, final Callable<T> callback) {
+    /**
+     * Runs the callback on the UI thread and returns the result.
+     */
+    public static <T> T getOnUiThread(final Callable<T> callback) {
         try {
             FutureTask<T> task = new FutureTask<>(callback);
-            if (Looper.myLooper() == uiExecutor.getLooper()) {
+            if (Looper.myLooper() == Looper.getMainLooper()) {
                 task.run();
             } else {
-                new Handler(uiExecutor.getLooper()).post(task);
+                new Handler(Looper.getMainLooper()).post(task);
             }
             return task.get(DEFAULT_UI_TIMEOUT, TimeUnit.MILLISECONDS);
         } catch (TimeoutException e) {

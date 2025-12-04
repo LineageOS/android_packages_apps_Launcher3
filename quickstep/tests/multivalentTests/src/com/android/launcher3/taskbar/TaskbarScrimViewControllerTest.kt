@@ -23,7 +23,7 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
+import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController
 import com.android.launcher3.taskbar.rules.SandboxParams
 import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
@@ -87,7 +87,7 @@ class TaskbarScrimViewControllerTest {
     @Test
     @TaskbarMode(PINNED)
     fun testOnTaskbarVisibleChanged_onlyTaskbarVisible_noScrim() {
-        runOnTaskbarUiThreadSync {
+        getInstrumentation().runOnMainSync {
             scrimViewController.onTaskbarVisibilityChanged(VISIBLE)
             scrimViewController.updateStateForSysuiFlags(0, true)
         }
@@ -97,7 +97,7 @@ class TaskbarScrimViewControllerTest {
     @Test
     @TaskbarMode(PINNED)
     fun testOnTaskbarVisibilityChanged_pinnedTaskbarVisibleWithBubblesExpanded_showsScrim() {
-        runOnTaskbarUiThreadSync {
+        getInstrumentation().runOnMainSync {
             scrimViewController.updateStateForSysuiFlags(SYSUI_STATE_BUBBLES_EXPANDED, true)
             scrimViewController.onTaskbarVisibilityChanged(VISIBLE)
             animatorTestRule.advanceTimeBy(animationDuration)
@@ -110,13 +110,13 @@ class TaskbarScrimViewControllerTest {
     @DisableFlags(FLAG_ENABLE_BUBBLE_BAR)
     @TaskbarMode(PINNED)
     fun testOnTaskbarVisibilityChanged_pinnedTaskbarHiddenDuringScrim_hidesScrim() {
-        runOnTaskbarUiThreadSync {
+        getInstrumentation().runOnMainSync {
             scrimViewController.onTaskbarVisibilityChanged(VISIBLE)
             scrimViewController.updateStateForSysuiFlags(SYSUI_STATE_BUBBLES_EXPANDED, true)
         }
         assertThat(scrimViewController.scrimAlpha).isEqualTo(BUBBLE_BAR_EXPANDED_SCRIM_ALPHA)
 
-        runOnTaskbarUiThreadSync {
+        getInstrumentation().runOnMainSync {
             scrimViewController.onTaskbarVisibilityChanged(GONE)
             animatorTestRule.advanceTimeBy(animationDuration)
         }
@@ -127,7 +127,7 @@ class TaskbarScrimViewControllerTest {
     @EnableFlags(FLAG_ENABLE_BUBBLE_BAR)
     @TaskbarMode(PINNED)
     fun testOnTaskbarVisibilityChanged_pinnedTaskbarOnHomeHiddenDuringScrim_hidesScrim() {
-        runOnTaskbarUiThreadSync {
+        getInstrumentation().runOnMainSync {
             scrimViewController.onTaskbarVisibilityChanged(VISIBLE)
             taskbarUnitTestRule.activityContext.bubbleControllers!!
                 .bubbleStashController
@@ -136,7 +136,7 @@ class TaskbarScrimViewControllerTest {
         }
         assertThat(scrimViewController.scrimAlpha).isEqualTo(BUBBLE_BAR_EXPANDED_SCRIM_ALPHA)
 
-        runOnTaskbarUiThreadSync {
+        getInstrumentation().runOnMainSync {
             scrimViewController.onTaskbarVisibilityChanged(GONE)
             animatorTestRule.advanceTimeBy(animationDuration)
         }
@@ -146,7 +146,7 @@ class TaskbarScrimViewControllerTest {
     @Test
     @TaskbarMode(PINNED)
     fun testOnTaskbarVisibilityChanged_notificationsOverPinnedTaskbarAndBubbles_noScrim() {
-        runOnTaskbarUiThreadSync {
+        getInstrumentation().runOnMainSync {
             scrimViewController.updateStateForSysuiFlags(
                 SYSUI_STATE_BUBBLES_EXPANDED or SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE,
                 true,
@@ -159,7 +159,7 @@ class TaskbarScrimViewControllerTest {
     @Test
     @TaskbarMode(PINNED)
     fun testOnTaskbarVisibilityChanged_pinnedTaskbarWithBubbleMenu_darkerScrim() {
-        runOnTaskbarUiThreadSync {
+        getInstrumentation().runOnMainSync {
             scrimViewController.onTaskbarVisibilityChanged(VISIBLE)
             scrimViewController.updateStateForSysuiFlags(
                 SYSUI_STATE_BUBBLES_EXPANDED or SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED,
@@ -172,7 +172,7 @@ class TaskbarScrimViewControllerTest {
     @Test
     @TaskbarMode(PINNED)
     fun testOnTaskbarVisibilityChangedMultipleTimes_pinnedTaskbarWithBubbleMenu_darkerScrim() {
-        runOnTaskbarUiThreadSync {
+        getInstrumentation().runOnMainSync {
             scrimViewController.onTaskbarVisibilityChanged(VISIBLE)
             // show scrim immediately
             scrimViewController.updateStateForSysuiFlags(
@@ -195,7 +195,7 @@ class TaskbarScrimViewControllerTest {
     @Test
     @TaskbarMode(TRANSIENT)
     fun testOnTaskbarVisibilityChanged_stashedTaskbarWithBubbles_noScrim() {
-        runOnTaskbarUiThreadSync {
+        getInstrumentation().runOnMainSync {
             scrimViewController.updateStateForSysuiFlags(SYSUI_STATE_BUBBLES_EXPANDED, true)
             scrimViewController.onTaskbarVisibilityChanged(VISIBLE)
         }
@@ -205,20 +205,20 @@ class TaskbarScrimViewControllerTest {
     @Test
     @TaskbarMode(PINNED)
     fun testOnClick_scrimShown_performsSystemBack() {
-        runOnTaskbarUiThreadSync {
+        getInstrumentation().runOnMainSync {
             scrimViewController.updateStateForSysuiFlags(SYSUI_STATE_BUBBLES_EXPANDED, true)
             scrimViewController.onTaskbarVisibilityChanged(VISIBLE)
         }
         assertThat(scrimViewController.scrimView.isClickable).isTrue()
 
-        runOnTaskbarUiThreadSync { scrimViewController.scrimView.performClick() }
+        getInstrumentation().runOnMainSync { scrimViewController.scrimView.performClick() }
         assertThat(backPressed).isTrue()
     }
 
     @Test
     @TaskbarMode(TRANSIENT)
     fun testOnClick_scrimHidden_notClickable() {
-        runOnTaskbarUiThreadSync {
+        getInstrumentation().runOnMainSync {
             scrimViewController.updateStateForSysuiFlags(SYSUI_STATE_BUBBLES_EXPANDED, true)
             scrimViewController.onTaskbarVisibilityChanged(VISIBLE)
         }

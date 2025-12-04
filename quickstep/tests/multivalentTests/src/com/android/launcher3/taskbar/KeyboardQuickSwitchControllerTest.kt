@@ -31,7 +31,7 @@ import com.android.launcher3.Flags.FLAG_ENABLE_ALT_TAB_KQS_FLATENNING
 import com.android.launcher3.Flags.FLAG_ENABLE_ALT_TAB_KQS_ON_CONNECTED_DISPLAYS
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.statehandlers.DesktopVisibilityController
-import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
+import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.waitForIdleSync
 import com.android.launcher3.taskbar.rules.AllTaskbarSandboxModules
 import com.android.launcher3.taskbar.rules.MockedRecentsModelHelper
@@ -43,7 +43,7 @@ import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
-import com.android.launcher3.util.TestUtil.getOnTaskbarUiThread
+import com.android.launcher3.util.TestUtil.getOnUiThread
 import com.android.quickstep.RecentsModel
 import com.android.quickstep.SystemUiProxy
 import com.android.quickstep.util.DesktopTask
@@ -111,10 +111,10 @@ class KeyboardQuickSwitchControllerTest {
     @InjectController lateinit var keyboardQuickSwitchController: KeyboardQuickSwitchController
 
     private val isKqsShown: Boolean
-        get() = getOnTaskbarUiThread { keyboardQuickSwitchController.isShown }
+        get() = getOnUiThread { keyboardQuickSwitchController.isShown }
 
     private val shownTaskIds: List<Int>
-        get() = getOnTaskbarUiThread { keyboardQuickSwitchController.shownTaskIds() }
+        get() = getOnUiThread { keyboardQuickSwitchController.shownTaskIds() }
 
     @Test
     fun noRecentTasks_noShownTaskIds() {
@@ -355,17 +355,17 @@ class KeyboardQuickSwitchControllerTest {
 
     private fun updateRecentsModel(tasks: List<GroupTask>) {
         recentsModel.updateRecentTasks(tasks)
-        runOnTaskbarUiThreadSync { recentsModel.resolvePendingTaskRequests() }
+        runOnMainSync { recentsModel.resolvePendingTaskRequests() }
     }
 
-    private fun triggerAltTab() = runOnTaskbarUiThreadSync {
-        runOnTaskbarUiThreadSync { keyboardQuickSwitchController.openQuickSwitchView() }
+    private fun triggerAltTab() = runOnMainSync {
+        keyboardQuickSwitchController.openQuickSwitchView()
         recentsModel.resolvePendingTaskRequests()
     }
 
     private fun triggerAltTabAndLaunchFocusedTask() {
         triggerAltTab()
-        runOnTaskbarUiThreadSync { keyboardQuickSwitchController.launchFocusedTask() }
+        runOnMainSync { keyboardQuickSwitchController.launchFocusedTask() }
         // `keyboardQuickSwitchController.launchFocusedTask()` will post a task to activate target
         // desk to `UI_HELPER_EXECUTOR`. Flush the executor to make sure the task runs before
         // verifying mocks.
