@@ -20,7 +20,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
 import com.android.launcher3.taskbar.TaskbarActivityContext
-import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
+import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.rules.TaskbarModeRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.TRANSIENT
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
@@ -65,7 +65,7 @@ class NudgeControllerTest {
     @Test
     @TaskbarMode(TRANSIENT)
     fun testShow_doesShowNudge() {
-        runOnMainSync { showNudge() } // Then show it
+        runOnTaskbarUiThreadSync { showNudge() } // Then show it
         assertThat(nudgeController.isNudgeOpen).isTrue()
     }
 
@@ -73,9 +73,9 @@ class NudgeControllerTest {
     @TaskbarMode(TRANSIENT)
     fun testHide_whenNudgeIsOpen_shouldCloseNudge() {
         assertThat(nudgeController.isNudgeOpen).isFalse()
-        runOnMainSync { showNudge() }
+        runOnTaskbarUiThreadSync { showNudge() }
         assertThat(nudgeController.isNudgeOpen).isTrue()
-        runOnMainSync { nudgeController.hide() }
+        runOnTaskbarUiThreadSync { nudgeController.hide() }
         assertThat(nudgeController.isNudgeOpen).isFalse()
     }
 
@@ -83,7 +83,7 @@ class NudgeControllerTest {
     @TaskbarMode(TRANSIENT)
     fun testShow_whenTaskbarIsTransient_shouldNotShowNudge() {
         assertThat(nudgeController.isNudgeOpen).isFalse()
-        runOnMainSync { nudgeController.init(taskbarContext.controllers) }
+        runOnTaskbarUiThreadSync { nudgeController.init(taskbarContext.controllers) }
         assertThat(nudgeController.isNudgeOpen).isFalse()
     }
 
@@ -101,6 +101,6 @@ class NudgeControllerTest {
                 secondaryButton =
                     ButtonPayload(label = "Dismiss", actions = listOf(Action.Dismiss())),
             )
-        runOnMainSync { nudgeController.maybeShow(nudgePayload) }
+        runOnTaskbarUiThreadSync { nudgeController.maybeShow(nudgePayload) }
     }
 }

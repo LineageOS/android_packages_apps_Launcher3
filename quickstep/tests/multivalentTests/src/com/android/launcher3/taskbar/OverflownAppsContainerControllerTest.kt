@@ -26,12 +26,12 @@ import com.android.launcher3.BubbleTextView
 import com.android.launcher3.R
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
-import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
+import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatItems
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
-import com.android.launcher3.util.TestUtil.getOnUiThread
+import com.android.launcher3.util.TestUtil.getOnTaskbarUiThread
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
@@ -56,7 +56,7 @@ class OverflownAppsContainerControllerTest {
     @Before
     fun setUp() {
         overflownController = viewController.overflownAppsContainerController
-        overflowIcon = getOnUiThread { TaskbarOverflowView(taskbarActivityContext) }
+        overflowIcon = getOnTaskbarUiThread { TaskbarOverflowView(taskbarActivityContext) }
     }
 
     @Test
@@ -125,7 +125,7 @@ class OverflownAppsContainerControllerTest {
             .isTrue()
 
         // Simulate a click on the drag layer to close the container.
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             taskbarActivityContext.dragLayer.dispatchTouchEvent(
                 MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
             )
@@ -167,7 +167,7 @@ class OverflownAppsContainerControllerTest {
     @Test
     fun testOverflownAppsContainerDoesNotOverlapTaskbarAfterClosingTooltip() {
         val apps = createHotseatItems(numShownHotseatIcons + 3)
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             val taskbar: TaskbarView =
                 taskbarActivityContext.dragLayer.findViewById(R.id.taskbar_view)
             taskbar.updateItems(apps, emptyList(), emptyList())
@@ -183,7 +183,7 @@ class OverflownAppsContainerControllerTest {
                 MotionEvent.obtain(0, 0, ACTION_HOVER_EXIT, 0f, 0f, 0)
             )
         }
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             // Run an empty frame so that the taskbar drag layer can resize and show the overflown
             // container.
         }
@@ -192,7 +192,7 @@ class OverflownAppsContainerControllerTest {
     }
 
     private fun verifyOverflowViewDoesNotOverlapTaskbar() {
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             val container: AbstractFloatingView =
                 AbstractFloatingView.getOpenView(
                     taskbarActivityContext,
@@ -221,8 +221,8 @@ class OverflownAppsContainerControllerTest {
     }
 
     private fun toggleOverflownAppsView(apps: List<ItemInfo>) {
-        runOnMainSync { overflownController.toggleOverflownAppsView(overflowIcon, apps) }
-        runOnMainSync {
+        runOnTaskbarUiThreadSync { overflownController.toggleOverflownAppsView(overflowIcon, apps) }
+        runOnTaskbarUiThreadSync {
             // Run an empty frame so that the taskbar drag layer can resize and show the overflown
             // container.
         }
