@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e2bae0c0_d3dc5fbb",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 13648
+      },
+      "writtenOn": "2025-12-04T14:28:39Z",
+      "side": 1,
+      "message": "TODO: squash with https://review.lineageos.org/c/LineageOS/android_packages_apps_Launcher3/+/463263",
+      "revId": "7a9f69f0db6b1695d7342dafd7d52bcb72aa5d54",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
