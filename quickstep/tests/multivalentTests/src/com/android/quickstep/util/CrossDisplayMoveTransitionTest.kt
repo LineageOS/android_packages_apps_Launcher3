@@ -21,6 +21,7 @@ import android.content.ComponentName
 import android.view.SurfaceControl
 import android.view.WindowManager
 import android.view.WindowManager.TRANSIT_CLOSE
+import android.view.WindowManager.TRANSIT_TO_BACK
 import android.window.IRemoteTransitionFinishedCallback
 import android.window.TransitionInfo
 import android.window.TransitionInfo.Change
@@ -110,9 +111,10 @@ class CrossDisplayMoveTransitionTest {
         private fun addClosingActivityEmbeddingChange(
             parent: Change,
             leash: SurfaceControl,
+            mode: Int,
         ): Change =
             addChange(leash = leash) { change ->
-                change.mode = TRANSIT_CLOSE
+                change.mode = mode
                 change.flags = FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY
                 change.parent = parent.getContainer()
             }
@@ -140,11 +142,16 @@ class CrossDisplayMoveTransitionTest {
             hasSnapshot: Boolean = true,
             taskContainer: WindowContainerToken? = mock(),
             activityEmbeddingLeash: SurfaceControl = mock(),
+            activityEmbeddingTransitMode: Int = TRANSIT_CLOSE,
         ): TransitionInfoBuilder {
             crossDisplayTaskHasSnapshot = hasSnapshot
             val taskChange = addCrossDisplayTaskChange(hasSnapshot, taskContainer)
             crossDisplayTask = taskChange
-            addClosingActivityEmbeddingChange(parent = taskChange, leash = activityEmbeddingLeash)
+            addClosingActivityEmbeddingChange(
+                parent = taskChange,
+                leash = activityEmbeddingLeash,
+                mode = activityEmbeddingTransitMode,
+            )
             return this
         }
 
@@ -349,7 +356,26 @@ class CrossDisplayMoveTransitionTest {
             TransitionInfoBuilder()
                 .addRoot(isSrc = false)
                 .addCrossDisplayActivityEmbeddingTask(
-                    activityEmbeddingLeash = activityEmbeddingLeash
+                    activityEmbeddingLeash = activityEmbeddingLeash,
+                    activityEmbeddingTransitMode = TRANSIT_CLOSE,
+                )
+                .build()
+        val moveInfo = CrossDisplayMoveTransitionInfo.create(info)!!
+
+        CrossDisplayMoveTransition.setupInitialAnimationState(info, moveInfo, mockTransaction)
+
+        verify(mockTransaction).hide(activityEmbeddingLeash)
+    }
+
+    @Test
+    fun setupInitialAnimationState_toBackActivityEmbedding_hidesActivity() {
+        val activityEmbeddingLeash = mock<SurfaceControl>()
+        val info =
+            TransitionInfoBuilder()
+                .addRoot(isSrc = false)
+                .addCrossDisplayActivityEmbeddingTask(
+                    activityEmbeddingLeash = activityEmbeddingLeash,
+                    activityEmbeddingTransitMode = TRANSIT_TO_BACK,
                 )
                 .build()
         val moveInfo = CrossDisplayMoveTransitionInfo.create(info)!!
