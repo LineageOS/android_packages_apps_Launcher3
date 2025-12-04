@@ -630,7 +630,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
             }
     }
 
-    fun removeTaskFromExplodedView(taskId: Int, animate: Boolean) {
+    fun removeTaskFromExplodedView(taskId: Int) {
         if (!enableDesktopExplodedView()) {
             Log.e(
                 TAG,
