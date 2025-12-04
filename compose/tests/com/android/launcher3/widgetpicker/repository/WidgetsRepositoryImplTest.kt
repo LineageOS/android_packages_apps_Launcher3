@@ -35,12 +35,11 @@ import android.os.Build
 import android.os.UserHandle
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
-import android.platform.test.rule.LimitDevicesRule
-import android.platform.test.rule.SkipOnDeviceless
 import android.widget.RemoteViews
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
+import com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn
 import com.android.launcher3.AppFilter
 import com.android.launcher3.Flags
 import com.android.launcher3.InvariantDeviceProfile
@@ -52,7 +51,6 @@ import com.android.launcher3.model.WidgetsModel
 import com.android.launcher3.model.data.PackageItemInfo
 import com.android.launcher3.pm.ShortcutConfigActivityInfo
 import com.android.launcher3.util.Executors
-import com.android.launcher3.util.RoboApiWrapper.convertToSpy
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestActivityContext
 import com.android.launcher3.util.TestUtil
@@ -76,6 +74,7 @@ import com.android.launcher3.widgetpicker.shared.model.WidgetPreview
 import com.android.launcher3.widgetpicker.shared.model.isAppWidget
 import com.android.launcher3.widgetpicker.shared.model.isShortcut
 import com.google.common.truth.Truth.assertThat
+import kotlin.test.assertNotNull
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
@@ -102,9 +101,7 @@ import org.mockito.kotlin.whenever
 @MockUser(userType = UserIconInfo.TYPE_MAIN)
 @OptIn(ExperimentalCoroutinesApi::class)
 @EnableFlags(Flags.FLAG_SHOW_CREATE_WIDGET_BTN_IN_PICKER)
-@SkipOnDeviceless
 class WidgetsRepositoryImplTest {
-    @get:Rule val limitDevicesRule = LimitDevicesRule()
     @get:Rule val setFlagsRule = SetFlagsRule()
     @get:Rule val mockitoRule: MockitoRule = MockitoJUnit.rule()
 
@@ -206,12 +203,12 @@ class WidgetsRepositoryImplTest {
             .thenReturn(listOf(App2Widget1ProviderInfo))
 
         doAnswer { i ->
-            generatedPreview.takeIf {
-                i.arguments[0] == App2Widget1ProviderName &&
+                generatedPreview.takeIf {
+                    i.arguments[0] == App2Widget1ProviderName &&
                         i.arguments[1] == user &&
                         i.arguments[2] == WIDGET_CATEGORY_HOME_SCREEN
+                }
             }
-        }
             .whenever(appWidgetManager)
             .getWidgetPreview(any(), any(), any())
     }
@@ -235,7 +232,7 @@ class WidgetsRepositoryImplTest {
             .thenReturn(listOf())
 
         val iconCache = LauncherAppState.INSTANCE[context].iconCache
-        iconCache.convertToSpy()
+        spyOn(iconCache)
         doReturn(ShortcutPreviewDrawable).whenever(iconCache).getFullResIcon(any())
     }
 
@@ -258,39 +255,28 @@ class WidgetsRepositoryImplTest {
             val expectedShortcut1BId = WidgetId(App1Shortcut1Name, user)
             val expectedWidget2AId = WidgetId(App2Widget1ProviderName, user)
 
-            val app1 = widgetApps.find { it.id == expectedWidgetApp1Id }
-            assertThat(app1).isNotNull()
-            app1?.apply {
+            val app1 = assertNotNull(widgetApps.find { it.id == expectedWidgetApp1Id })
+            app1.apply {
                 assertThat(title).isEqualTo(APP_1)
                 assertThat(widgets).hasSize(2)
 
-                val widget1A = app1.widgets.find { it.id == expectedWidget1AId }
-                assertThat(widget1A).isNotNull()
-                widget1A?.apply {
-                    assertThat(widgetInfo.isAppWidget()).isTrue()
-                    assertThat(label).isEqualTo(WIDGET_1A_NAME)
-                }
+                val widget1A = assertNotNull(app1.widgets.find { it.id == expectedWidget1AId })
+                assertThat(widget1A.widgetInfo.isAppWidget()).isTrue()
+                assertThat(widget1A.label).isEqualTo(WIDGET_1A_NAME)
 
-                val shortcut1B = app1.widgets.find { it.id == expectedShortcut1BId }
-                assertThat(shortcut1B).isNotNull()
-                shortcut1B?.apply {
-                    assertThat(widgetInfo.isShortcut()).isTrue()
-                    assertThat(label).isEqualTo(SHORTCUT_1B_NAME)
-                }
+                val shortcut1B = assertNotNull(app1.widgets.find { it.id == expectedShortcut1BId })
+                assertThat(shortcut1B.widgetInfo.isShortcut()).isTrue()
+                assertThat(shortcut1B.label).isEqualTo(SHORTCUT_1B_NAME)
             }
 
-            val app2 = widgetApps.find { it.id == expectedWidgetApp2Id }
-            assertThat(app2).isNotNull()
-            app2?.apply {
+            val app2 = assertNotNull(widgetApps.find { it.id == expectedWidgetApp2Id })
+            app2.apply {
                 assertThat(app2.title).isEqualTo(APP_2)
                 assertThat(app2.widgets).hasSize(1)
 
-                val widget2A = app2.widgets.find { it.id == expectedWidget2AId }
-                assertThat(widget2A).isNotNull()
-                widget2A?.apply {
-                    assertThat(widgetInfo.isAppWidget()).isTrue()
-                    assertThat(label).isEqualTo(WIDGET_2A_NAME)
-                }
+                val widget2A = assertNotNull(app2.widgets.find { it.id == expectedWidget2AId })
+                assertThat(widget2A.widgetInfo.isAppWidget()).isTrue()
+                assertThat(widget2A.label).isEqualTo(WIDGET_2A_NAME)
             }
         }
 
@@ -311,20 +297,14 @@ class WidgetsRepositoryImplTest {
                 assertThat(widgets).hasSize(2)
 
                 val expectedWidget1AId = WidgetId(App1Widget1ProviderName, user)
-                val widget1A = widgets.find { it.id == expectedWidget1AId }
-                assertThat(widget1A).isNotNull()
-                widget1A?.apply {
-                    assertThat(widgetInfo.isAppWidget()).isTrue()
-                    assertThat(label).isEqualTo(WIDGET_1A_NAME)
-                }
+                val widget1A = assertNotNull(widgets.find { it.id == expectedWidget1AId })
+                assertThat(widget1A.widgetInfo.isAppWidget()).isTrue()
+                assertThat(widget1A.label).isEqualTo(WIDGET_1A_NAME)
 
                 val expectedShortcut1BId = WidgetId(App1Shortcut1Name, user)
-                val shortcut1B = widgets.find { it.id == expectedShortcut1BId }
-                assertThat(shortcut1B).isNotNull()
-                shortcut1B?.apply {
-                    assertThat(widgetInfo.isShortcut()).isTrue()
-                    assertThat(label).isEqualTo(SHORTCUT_1B_NAME)
-                }
+                val shortcut1B = assertNotNull(widgets.find { it.id == expectedShortcut1BId })
+                assertThat(shortcut1B.widgetInfo.isShortcut()).isTrue()
+                assertThat(shortcut1B.label).isEqualTo(SHORTCUT_1B_NAME)
             }
         }
 
@@ -345,13 +325,9 @@ class WidgetsRepositoryImplTest {
                 assertThat(widgets).hasSize(1)
 
                 val expectedWidget2AId = WidgetId(App2Widget1ProviderName, user)
-                val widget2A = widgets.find { it.id == expectedWidget2AId }
-                assertThat(widget2A).isNotNull()
-                widget2A?.apply {
-                    assertThat(widgetInfo.isAppWidget()).isTrue()
-                    assertThat(label).isEqualTo(WIDGET_2A_NAME)
-                }
-
+                val widget2A = assertNotNull(widgets.find { it.id == expectedWidget2AId })
+                assertThat(widget2A.widgetInfo.isAppWidget()).isTrue()
+                assertThat(widget2A.label).isEqualTo(WIDGET_2A_NAME)
             }
         }
 
@@ -502,8 +478,8 @@ class WidgetsRepositoryImplTest {
             assertThat(preview).isInstanceOf(WidgetPreview.ProviderInfoWidgetPreview::class.java)
             // Initial layout set as the preview layout.
             assertThat(
-                (preview as WidgetPreview.ProviderInfoWidgetPreview).providerInfo.initialLayout
-            )
+                    (preview as WidgetPreview.ProviderInfoWidgetPreview).providerInfo.initialLayout
+                )
                 .isEqualTo(PREVIEW_LAYOUT_ID)
         }
 

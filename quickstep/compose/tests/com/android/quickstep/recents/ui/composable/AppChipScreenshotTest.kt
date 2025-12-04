@@ -24,8 +24,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.key.KeyEvent
-import androidx.compose.ui.input.key.NativeKeyEvent
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotFocused
@@ -34,6 +32,7 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performKeyPress
 import androidx.compose.ui.unit.dp
 import androidx.test.platform.app.InstrumentationRegistry
+import com.android.launcher3.helper.NavigateDownTabEvent
 import com.android.launcher3.imagecomparison.ComposableBasedImageTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -118,9 +117,6 @@ class AppChipScreenshotTest(emulationSpec: DeviceEmulationSpec) :
         const val LONG_APP_NAME = "Very long name for the app"
         const val APP_ICON = "ic_super_g_color"
         val COLLAPSED_WIDTH_OFFSET = 156.dp + 6.dp
-
-        val NATIVE_TAB = NativeKeyEvent(NativeKeyEvent.ACTION_DOWN, NativeKeyEvent.KEYCODE_TAB)
-        val NavigateDownTabEvent = KeyEvent(NATIVE_TAB)
 
         @Parameters(name = "{0}")
         @JvmStatic

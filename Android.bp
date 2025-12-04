@@ -45,6 +45,24 @@ filegroup {
 }
 
 filegroup {
+    name: "launcher-compose-test-helpers-src",
+    srcs: [
+        "compose/tests/com/android/launcher3/helper/TestHelper.kt",
+    ],
+}
+
+// Tests for features that are enabled only when compose dependency is enabled & run as part of
+// Launcher3Tests
+filegroup {
+    name: "launcher-compose-unit-tests-src",
+    srcs: [
+        "compose/tests/com/android/launcher3/widgetpicker/SingleAppWidgetPickerTest.kt",
+        "compose/tests/com/android/launcher3/widget/AddWidgetConfigTest.kt",
+        "compose/tests/com/android/launcher3/widgetpicker/repository/WidgetsRepositoryImplTest.kt",
+    ],
+}
+
+filegroup {
     name: "launcher-compose-tests-src",
     srcs: [
         "compose/tests/**/*.kt",
@@ -60,6 +78,13 @@ filegroup {
     ],
     device_common_srcs: [
         ":launcher-quickstep-processed-protolog-src",
+    ],
+}
+
+filegroup {
+    name: "quickstep-compose-tests-src",
+    srcs: [
+        "quickstep/compose/tests/**/*.kt",
     ],
 }
 
@@ -194,6 +219,29 @@ soong_config_module_type {
         "srcs",
         "static_libs",
     ],
+}
+
+launcher_compose_tests_java_defaults {
+    name: "launcher_compose_tests_defaults",
+    soong_config_variables: {
+        release_enable_compose_in_launcher: {
+            srcs: [
+                ":launcher-compose-test-helpers-src",
+                ":launcher-compose-unit-tests-src",
+            ],
+            // Compose dependencies
+            static_libs: [
+                "androidx.compose.runtime_runtime",
+                "androidx.compose.ui_ui-test-junit4",
+                "androidx.compose.ui_ui-test-manifest",
+            ],
+
+            conditions_default: {
+                srcs: [],
+                static_libs: [],
+            },
+        },
+    },
 }
 
 // Build config for tapl library

@@ -32,11 +32,10 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.android.launcher3.helper.hasMinTouchArea
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -105,16 +104,5 @@ class AppChipTest {
     private companion object {
         const val APP_NAME = "Very long name for the app that won't fit in the chip"
         const val APP_ICON = "ic_super_g_color"
-
-        fun hasMinTouchArea(minWidth: Dp = 48.dp, minHeight: Dp = 48.dp): SemanticsMatcher =
-            SemanticsMatcher("touch area is smaller than $minWidth x $minHeight") { node ->
-                val density: Density = node.root?.density ?: error("root node not available!")
-                with(density) {
-                    val rect = node.touchBoundsInRoot
-                    val size = node.size
-                    (rect.width.toDp() >= minWidth && rect.height.toDp() >= minHeight) ||
-                            (size.width.toDp() >= minWidth && size.height.toDp() >= minHeight)
-                }
-            }
     }
 }
