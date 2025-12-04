@@ -92,12 +92,12 @@ public class SplitFromRunningTaskController {
     private static final String TAG = "SplitFromRunningTaskController";
     private static final boolean SPLIT_SELECT_ON_EXTERNAL_DISPLAY_ENABLED =
             DesktopExperienceFlags.ENABLE_NON_DEFAULT_DISPLAY_SPLIT_BUGFIX.isTrue();
-    private final QuickstepLauncher mLauncher;
-    private final RecentsWindowManager mRecentsWindowManager;
-    private final OverviewComponentObserver mOverviewComponentObserver;
+    private QuickstepLauncher mLauncher;
+    private RecentsWindowManager mRecentsWindowManager;
+    private OverviewComponentObserver mOverviewComponentObserver;
     private final int mSplitPlaceholderSize;
     private final int mSplitPlaceholderInset;
-    private final Context mContext;
+    private Context mContext;
     private SplitSelectStateController mSplitSelectStateController;
     private RecentsViewContainer mContainer;
     private ActivityManager.RunningTaskInfo mTaskInfo;
@@ -140,11 +140,16 @@ public class SplitFromRunningTaskController {
     }
 
     void onDestroy() {
+        Log.d("b/36737459", "SplitFromRunningTaskController#onDestroy()");
         SystemUiProxy.INSTANCE.get(mContext).unregisterSplitSelectListener(
                 mSplitSelectListener);
         mSplitSelectListener.release();
         mSplitSelectListener = null;
         mContainer = null;
+        mLauncher = null;
+        mRecentsWindowManager = null;
+        mContext = null;
+        mOverviewComponentObserver = null;
     }
 
     public ActivityManager.RunningTaskInfo getTaskInfo() {
