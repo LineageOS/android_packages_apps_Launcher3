@@ -16,6 +16,24 @@
       "message": "TODO: squash with https://review.lineageos.org/c/LineageOS/android_packages_apps_Launcher3/+/463263",
       "revId": "7a9f69f0db6b1695d7342dafd7d52bcb72aa5d54",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1425bf0a_0f958317",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 13648
+      },
+      "writtenOn": "2025-12-04T17:10:43Z",
+      "side": 1,
+      "message": "Not appblicable for QPR1. To be revisited for QPR2.",
+      "parentUuid": "e2bae0c0_d3dc5fbb",
+      "revId": "7a9f69f0db6b1695d7342dafd7d52bcb72aa5d54",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
