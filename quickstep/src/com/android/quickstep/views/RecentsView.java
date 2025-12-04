@@ -3377,6 +3377,7 @@ public abstract class RecentsView<
     }
 
     protected void removeGroupTaskInternal(@NonNull GroupTask groupTask) {
+        Log.d(TAG, "removeGroupTaskInternal: groupTask=" + groupTask);
         UI_HELPER_EXECUTOR
                 .getHandler()
                 .post(

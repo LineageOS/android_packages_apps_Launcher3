@@ -17,6 +17,7 @@ package com.android.launcher3.uioverrides.touchcontrollers
 
 import android.content.Context
 import android.graphics.Rect
+import android.util.Log
 import android.view.MotionEvent
 import androidx.dynamicanimation.animation.SpringAnimation
 import com.android.app.animation.Interpolators.DECELERATE
@@ -59,10 +60,8 @@ import kotlin.math.ceil
 class TaskViewDismissTouchController<CONTAINER, T : BaseState<T>>(
     private val container: CONTAINER,
     private val taskViewRecentsTouchContext: TaskViewRecentsTouchContext,
-) : TouchController, SingleAxisSwipeDetector.Listener where
-CONTAINER : Context,
-CONTAINER : RecentsViewContainer,
-CONTAINER : StatefulContainer<T> {
+) : TouchController, SingleAxisSwipeDetector.Listener
+    where CONTAINER : Context, CONTAINER : RecentsViewContainer, CONTAINER : StatefulContainer<T> {
     private val recentsView: RecentsView<*, *> = container.getOverviewPanel()
     private val detector: SingleAxisSwipeDetector =
         SingleAxisSwipeDetector(
@@ -316,6 +315,8 @@ CONTAINER : StatefulContainer<T> {
 
     override fun onDragEnd(velocity: Float) {
         val taskBeingDragged = taskBeingDragged ?: return
+
+        Log.d(TAG, "onDragEnd: committing task drag end for dismissal")
         taskDragDisplacementValue?.dispose()
         taskBeingDragged.isBeingDraggedForDismissal = false
 
