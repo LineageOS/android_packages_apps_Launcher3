@@ -60,14 +60,23 @@ interface HomeScreenFilesProvider {
      */
     fun canMoveToHomeScreen(uriList: List<Uri>?): Boolean
 
+    // NOTE: [@JvmOverloads] cannot be used with interfaces.
+    fun moveToHomeScreen(uriList: List<Uri>): List<CompletableFuture<Boolean>> =
+        moveToHomeScreen(uriList = uriList, relativeFolderPath = null)
+
     /**
      * Attempts to asynchronously move all URIs in the specified list to the home screen.
      *
      * @param uriList The list of URIs to move.
+     * @param relativeFolderPath If specified, URIs will be moved to
+     *   [HOME_SCREEN_FOLDER_RELATIVE_PATH]/{relativeFolderPath}.
      * @return List of futures indicating the success or failure of each move attempt. Futures are
      *   provided in the same order as the original list of URIs.
      */
-    fun moveToHomeScreen(uriList: List<Uri>): List<CompletableFuture<Boolean>>
+    fun moveToHomeScreen(
+        uriList: List<Uri>,
+        relativeFolderPath: String?,
+    ): List<CompletableFuture<Boolean>>
 
     /**
      * Deletes a single file or folder in the [HOME_SCREEN_FOLDER_RELATIVE_PATH] folder.

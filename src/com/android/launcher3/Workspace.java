@@ -18,6 +18,7 @@ package com.android.launcher3;
 
 import static com.android.launcher3.AbstractFloatingView.TYPE_WIDGET_RESIZE_FRAME;
 import static com.android.launcher3.BubbleTextView.DISPLAY_FOLDER;
+import static com.android.launcher3.Flags.enableFileSystemFoldersAsDropTargets;
 import static com.android.launcher3.Flags.enableSystemDragToOtherApps;
 import static com.android.launcher3.Flags.injectableModelItems;
 import static com.android.launcher3.Flags.refactorTaskbarUiState;
@@ -28,6 +29,8 @@ import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FILE;
+import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FOLDER;
+import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_SYSTEM_DRAG;
 import static com.android.launcher3.LauncherState.ALL_APPS;
 import static com.android.launcher3.LauncherState.DESKTOP_DRAG_MODE;
 import static com.android.launcher3.LauncherState.EDIT_MODE;
@@ -158,6 +161,7 @@ import com.android.systemui.plugins.shared.LauncherOverlayManager.LauncherOverla
 import com.google.android.msdl.data.model.MSDLToken;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -272,6 +276,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
     public static final int REORDER_TIMEOUT = 650;
     protected final Alarm mReorderAlarm = new Alarm();
+    private PreviewBackground mFolderAddBg;
     private PreviewBackground mFolderCreateBg;
     /** The underlying view that we are dragging something over. */
     private View mDragOverView = null;
@@ -2046,7 +2051,6 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         if (distance > target.getFolderCreationRadius(targetCell)) return false;
         View dropOverView = target.getChildAt(targetCell[0], targetCell[1]);
         return willAddToExistingUserFolder(dragInfo, dropOverView);
-
     }
 
     boolean willAddToExistingUserFolder(ItemInfo dragInfo, View dropOverView) {
@@ -2064,6 +2068,18 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                 return true;
             }
         }
+
+        if (enableFileSystemFoldersAsDropTargets()
+                && dropOverView != null
+                && dropOverView.getTag() instanceof ItemInfo dropOverInfo
+                && dropOverInfo.itemType == ITEM_TYPE_FILE_SYSTEM_FOLDER) {
+            final boolean hasMoved = mDragInfo == null || dropOverView != mDragInfo.cell;
+            if (hasMoved && (dragInfo.itemType == ITEM_TYPE_SYSTEM_DRAG
+                    || HomeScreenFilesUtilsKt.isFileSystemItem(dragInfo))) {
+                return true;
+            }
+        }
+
         return false;
     }
 
@@ -2132,6 +2148,10 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         if (!mAddToExistingFolderOnDrop) return false;
         mAddToExistingFolderOnDrop = false;
 
+        return addToExistingFolder(dropOverView, d, external);
+    }
+
+    boolean addToExistingFolder(View dropOverView, DragObject d, boolean external) {
         if (dropOverView instanceof FolderIcon) {
             FolderIcon fi = (FolderIcon) dropOverView;
             if (fi.acceptDrop(d.dragInfo)) {
@@ -2145,6 +2165,50 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                 return true;
             }
         }
+
+        if (enableFileSystemFoldersAsDropTargets()
+                && dropOverView != null
+                && dropOverView.getTag() instanceof ItemInfo dropOverInfo
+                && dropOverInfo.itemType == ITEM_TYPE_FILE_SYSTEM_FOLDER) {
+            final List<Uri> uriList;
+
+            if (d.originalDragInfo instanceof SystemDragItemInfo systemDragInfo) {
+                uriList = systemDragInfo.getUriList();
+            } else {
+                final HomeScreenFile file = HomeScreenFilesUtilsKt.getHomeScreenFile(d.dragInfo);
+                uriList = file != null ? Collections.singletonList(file.getUri()) : null;
+            }
+
+            if (uriList != null) {
+                final String relativeFolderPath =
+                        requireNonNull(HomeScreenFilesUtilsKt.getHomeScreenFile(dropOverInfo))
+                                .getDisplayName();
+
+                final CompletableFuture<Void> unused =
+                        HomeScreenFilesProvider.INSTANCE.get(mLauncher)
+                                .moveToHomeScreen(uriList, relativeFolderPath)
+                                .get(0)
+                                .handle((result, throwable) -> {
+                                    // TODO(b/463389684): Notify user on failure.
+                                    return null;
+                                });
+
+                if (mDragInfo != null) {
+                    getParentCellLayoutForView(mDragInfo.cell).removeView(mDragInfo.cell);
+                }
+
+                if (d.dragView != null) {
+                    mLauncher.getDragLayer().animateViewIntoPosition(
+                            d.dragView, /*pos=*/ new int[]{0, 0}, /*alpha=*/ 0.0f,
+                            /*scaleX=*/ 0.0f, /*scaleY=*/ 0.0f,
+                            DragLayer.ANIMATION_END_DISAPPEAR,
+                            /*onFinishRunnable=*/ null, /*duration=*/ 0);
+                }
+
+                return true;
+            }
+        }
+
         return false;
     }
 
@@ -2560,6 +2624,9 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             mDragOverFolderIcon.onDragExit();
             mDragOverFolderIcon = null;
         }
+        if (mFolderAddBg != null) {
+            mFolderAddBg.animateToRest();
+        }
     }
 
     protected void cleanupReorder(boolean cancelAlarm) {
@@ -2881,8 +2948,18 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
         boolean willAddToFolder = willAddToExistingUserFolder(info, mDragOverView);
         if (willAddToFolder && mDragMode == DRAG_MODE_NONE) {
-            mDragOverFolderIcon = ((FolderIcon) mDragOverView);
-            mDragOverFolderIcon.onDragEnter(info);
+            if (mDragOverView instanceof FolderIcon) {
+                mDragOverFolderIcon = ((FolderIcon) mDragOverView);
+                mDragOverFolderIcon.onDragEnter(info);
+            } else if (enableFileSystemFoldersAsDropTargets()) {
+                mFolderAddBg = new PreviewBackground(getContext());
+                mFolderAddBg.setup(
+                        mLauncher, mLauncher, /*invalidateDelegate=*/ null,
+                        mDragOverView.getMeasuredWidth(), mDragOverView.getPaddingTop());
+                mFolderAddBg.isClipping = false;
+                mFolderAddBg.animateToAccept(mDragTargetLayout, mTargetCell[0], mTargetCell[1]);
+            }
+
             if (mDragTargetLayout != null) {
                 mDragTargetLayout.clearDragOutlines();
             }
@@ -2976,7 +3053,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             final WorkspaceItemInfo info = new WorkspaceItemInfo();
             info.itemType = ITEM_TYPE_FILE_SYSTEM_FILE;
             info.intent = HomeScreenFilesUtils.Companion.buildLaunchIntent(
-                    requireNonNull(dragInfo.getUriList()).getFirst());
+                    requireNonNull(dragInfo.getUriList()).get(0));
 
             d.dragInfo = info;
         }
@@ -3135,9 +3212,10 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                 // NOTE: On failure to move the first dropped URI, we must explicitly remove its
                 // associated workspace item to keep launcher state in sync with file system state.
                 CompletableFuture<Void> unused =
-                        results.getFirst().handle((result, throwable) -> runOnUiThread(() -> {
+                        results.get(0).handle((result, throwable) -> runOnUiThread(() -> {
                             if (throwable != null || !result) {
                                 mLauncher.removeItem(firstItemView, firstItemInfo, true);
+                                // TODO(b/463389684): Notify user on failure.
                             }
                         }));
 

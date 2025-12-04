@@ -201,11 +201,16 @@ class HomeScreenFilesMediaStoreProvider(
     private fun canMoveToHomeScreen(uri: Uri): Boolean =
         isExternalStorageProviderUri(uri) || isExternalPrimaryMediaStoreUri(uri)
 
-    override fun moveToHomeScreen(uriList: List<Uri>): List<CompletableFuture<Boolean>> =
-        uriList.map { uri: Uri -> supplyAsync({ moveToHomeScreen(uri) }, executorService) }
+    override fun moveToHomeScreen(
+        uriList: List<Uri>,
+        relativeFolderPath: String?,
+    ): List<CompletableFuture<Boolean>> =
+        uriList.map { uri: Uri ->
+            supplyAsync({ moveToHomeScreen(uri, relativeFolderPath) }, executorService)
+        }
 
     @WorkerThread
-    private fun moveToHomeScreen(uri: Uri): Boolean {
+    private fun moveToHomeScreen(uri: Uri, relativeFolderPath: String?): Boolean {
         val mediaUri = getExternalPrimaryMediaStoreUri(context, uri)
         if (mediaUri == null) {
             Log.e(
@@ -228,14 +233,13 @@ class HomeScreenFilesMediaStoreProvider(
         try {
             // NOTE: The selection criteria below prevents moving a URI to a path it already
             // occupies; the media provider has additional protections to prevent recursive moves.
+            val relativePath = "$HOME_SCREEN_FOLDER_RELATIVE_PATH${relativeFolderPath ?: ""}"
             success =
                 (context.contentResolver.update(
                     /*uri=*/ mediaUri,
-                    /*contentValues=*/ ContentValues().apply {
-                        put(RELATIVE_PATH, HOME_SCREEN_FOLDER_RELATIVE_PATH)
-                    },
+                    /*contentValues=*/ ContentValues().apply { put(RELATIVE_PATH, relativePath) },
                     /*where=*/ "$RELATIVE_PATH != ?",
-                    /*selectionArgs=*/ arrayOf(HOME_SCREEN_FOLDER_RELATIVE_PATH),
+                    /*selectionArgs=*/ arrayOf(relativePath),
                 ) == 1)
             if (!success) {
                 Log.e(
