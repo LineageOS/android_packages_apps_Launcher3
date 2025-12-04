@@ -580,6 +580,16 @@ public class WindowManagerProxy {
          */
         default void onActiveDeskChanged(int displayId, int newActiveDesk, int oldActiveDesk) {}
 
+        /**
+         * Called when a task appears in a desk.
+         *
+         * @param taskId the ID of the task appearing.
+         * @param displayId the ID of the display in which the task is appearing
+         * @param deskId the ID of the desk in which the task is appearing
+         */
+        default void onTaskAppearingInDeskWithOverviewShowing(int taskId, int displayId,
+                int deskId) {}
+
         /** Called when the listener is initialised from shell. */
         default void onListenerInitializedFromShell() {}
     }

@@ -504,9 +504,30 @@ constructor(
     }
 
     override fun onActiveDeskChanged(displayId: Int, newActiveDesk: Int, oldActiveDesk: Int) {
+        if (betterDeskDeactivationInRecentsTransition()) return
         if (!isInDesktopFirstMode()) return
         if (displayId != this.displayId) return
         if (oldActiveDesk != INACTIVE_DESK_ID || newActiveDesk == INACTIVE_DESK_ID) return
+        // TaskAnimationManager.onTasksAppeared already handles desktop task launching.
+        if (taskAnimationManager.isRecentsAnimationRunning) return
+        // Desktop launch will close Recents when transition is finished.
+        if (recentsView.desktopRecentsController?.isDesktopLaunchOngoing() == true) return
+
+        Log.d(
+            TAG,
+            "onActiveDeskChanged - closing RecentsView because desk $newActiveDesk is activated",
+        )
+        recentsView.stateManager.moveToRestState()
+    }
+
+    override fun onTaskAppearingInDeskWithOverviewShowing(
+        taskId: Int,
+        displayId: Int,
+        deskId: Int,
+    ) {
+        if (!betterDeskDeactivationInRecentsTransition()) return
+        if (!isInDesktopFirstMode()) return
+        if (displayId != this.displayId) return
         // TaskAnimationManager.onTasksAppeared already handles desktop task launching.
         if (taskAnimationManager.isRecentsAnimationRunning) return
         // Desktop launch will close Recents when tra]nsition is finished.
@@ -514,7 +535,8 @@ constructor(
 
         Log.d(
             TAG,
-            "onActiveDeskChanged - closing RecentsView because desk $newActiveDesk is activated",
+            "onTaskAppearingInDeskWithOverviewShowing - " +
+                "closing RecentsView because taskId $taskId appeared in deskId $deskId",
         )
         recentsView.stateManager.moveToRestState()
     }

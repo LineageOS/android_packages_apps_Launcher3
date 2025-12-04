@@ -356,6 +356,24 @@ constructor(
         }
     }
 
+    private fun notifyOnTaskAppearingInDeskWithOverviewShowing(
+        taskId: Int,
+        displayId: Int,
+        deskId: Int,
+    ) {
+        if (DEBUG) {
+            Log.d(
+                TAG,
+                "notifyOnTaskAppearingInDeskWithOverviewShowing: " +
+                    "taskId=$taskId displayId=$displayId deskId=$deskId",
+            )
+        }
+
+        for (listener in desktopVisibilityListeners) {
+            listener.onTaskAppearingInDeskWithOverviewShowing(taskId, displayId, deskId)
+        }
+    }
+
     // Called when the DesktopTaskListener is first connected to WM.
     private fun onListenerConnected(
         displayDeskStates: Array<DisplayDeskState>,
@@ -480,6 +498,14 @@ constructor(
         if (newActiveDesk != oldActiveDesk) {
             notifyOnActiveDeskChanged(displayId, newActiveDesk, oldActiveDesk)
         }
+    }
+
+    private fun onTaskAppearingInDeskWithOverviewShowing(taskId: Int, displayId: Int, deskId: Int) {
+        if (!enableMultipleDesktops(context)) {
+            return
+        }
+
+        notifyOnTaskAppearingInDeskWithOverviewShowing(taskId, displayId, deskId)
     }
 
     fun dumpLogs(prefix: String, pw: PrintWriter) {
@@ -627,6 +653,18 @@ constructor(
         override fun onActiveDeskChanged(displayId: Int, newActiveDesk: Int, oldActiveDesk: Int) {
             MAIN_EXECUTOR.execute {
                 controller.get()?.onActiveDeskChanged(displayId, newActiveDesk, oldActiveDesk)
+            }
+        }
+
+        override fun onTaskAppearingInDeskWithOverviewShowing(
+            taskId: Int,
+            displayId: Int,
+            deskId: Int,
+        ) {
+            MAIN_EXECUTOR.execute {
+                controller
+                    .get()
+                    ?.onTaskAppearingInDeskWithOverviewShowing(taskId, displayId, deskId)
             }
         }
     }
