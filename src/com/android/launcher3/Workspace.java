@@ -2767,12 +2767,17 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     }
 
     private boolean shouldUseHotseatAsDropLayout(DragObject dragObject) {
-        if (mLauncher.getHotseat() == null
-                || mLauncher.getHotseat().getShortcutsAndWidgets() == null
-                || isDragWidget(dragObject)) {
+        Hotseat hotseat = mLauncher.getHotseat();
+        if (hotseat == null) {
             return false;
         }
-        View hotseatShortcuts = mLauncher.getHotseat().getShortcutsAndWidgets();
+
+        ShortcutAndWidgetContainer hotseatShortcuts = hotseat.getShortcutsAndWidgets();
+        if (hotseatShortcuts == null
+                || isDragWidget(dragObject)
+                || hotseatShortcuts.getVisibility() != View.VISIBLE) {
+            return false;
+        }
         getViewBoundsRelativeToWorkspace(hotseatShortcuts, mTempRect);
         return mTempRect.contains(dragObject.x, dragObject.y);
     }
