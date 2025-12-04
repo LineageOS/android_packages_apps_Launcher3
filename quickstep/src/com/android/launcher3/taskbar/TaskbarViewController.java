@@ -332,6 +332,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
             controllers.runAfterInit(() -> MAIN_EXECUTOR.execute(
                     () -> LauncherAppState.getInstance(mActivity).getModel()
                             .addCallbacksAndLoad(mModelCallbacks)));
+            controllers.runAfterInit(mModelCallbacks::bindWorkspaceRepository);
         }
         mTaskbarNavButtonTranslationY =
                 controllers.navbarButtonsViewController.getTaskbarNavButtonTranslationY();

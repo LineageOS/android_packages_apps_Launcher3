@@ -23,6 +23,7 @@ import static com.android.launcher3.Hotseat.ALPHA_CHANNEL_PREVIEW_RENDERER;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION;
 import static com.android.launcher3.Utilities.qsbOnFirstScreen;
 import static com.android.launcher3.model.ModelUtils.currentScreenContentFilter;
+import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 
 import static java.util.Comparator.comparingDouble;
 
@@ -66,6 +67,7 @@ import com.android.launcher3.dragndrop.SimpleDragLayer;
 import com.android.launcher3.graphics.FragmentWithPreview;
 import com.android.launcher3.model.BgDataModel;
 import com.android.launcher3.model.data.ItemInfo;
+import com.android.launcher3.model.data.WorkspaceChangeEvent.UpdateEvent;
 import com.android.launcher3.model.data.WorkspaceData;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.util.BaseContext;
@@ -202,6 +204,26 @@ public class LauncherPreviewRenderer extends BaseContext
                 mWidgetHolder.destroy();
             }
         });
+
+        if (LauncherModel.useModelRepositoryBinding()) {
+            var repo = LauncherComponentProvider.get(this).getHomeScreenRepository();
+            var state = repo.getWorkspaceState();
+
+            closeOnDestroy(state.getChanges().forEach(MAIN_EXECUTOR, ev -> {
+                // Add and remove events are rare on preview screen. We handle update event to apply
+                // only diff, and for everything else just redraw everything.
+                if (ev instanceof UpdateEvent ue) {
+                    updateContainerItems(ue.getItems(), this);
+                } else {
+                    bindCompleteUI(state.getValue());
+                }
+                return null;
+            }));
+
+            if (state.getValue().getVersion() > 0) {
+                bindCompleteUI(state.getValue());
+            }
+        }
     }
 
     @Nullable
@@ -340,8 +362,7 @@ public class LauncherPreviewRenderer extends BaseContext
         }
     }
 
-    @Override
-    public void bindCompleteModel(@NonNull WorkspaceData itemIdMap, boolean isBindingSync) {
+    private void bindCompleteUI(@NonNull WorkspaceData itemIdMap) {
         getAllLayouts().forEach(CellLayout::removeAllViews);
 
         // Separate the items that are on the current screen, and the other remaining items.
@@ -371,8 +392,16 @@ public class LauncherPreviewRenderer extends BaseContext
         initialRender.complete(mRootView);
     }
 
+
+    @Override
+    public void bindCompleteModel(@NonNull WorkspaceData itemIdMap, boolean isBindingSync) {
+        if (LauncherModel.useModelRepositoryBinding()) return;
+        bindCompleteUI(itemIdMap);
+    }
+
     @Override
     public void bindItemsUpdated(@NonNull Set<ItemInfo> updates) {
+        if (LauncherModel.useModelRepositoryBinding()) return;
         updateContainerItems(updates, this);
     }
 

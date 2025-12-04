@@ -190,7 +190,7 @@ constructor(
                 .get()
                 .dispatchWorkspaceDataChange(
                     mutableWorkspaceData.copy(),
-                    UpdateEvent(listOf(item), owner),
+                    UpdateEvent(setOf(item), owner),
                 )
         }
     }
@@ -201,7 +201,10 @@ constructor(
         if (Flags.modelRepository()) {
             repo
                 .get()
-                .dispatchWorkspaceDataChange(mutableWorkspaceData.copy(), UpdateEvent(items, owner))
+                .dispatchWorkspaceDataChange(
+                    mutableWorkspaceData.copy(),
+                    UpdateEvent(items.toSet(), owner),
+                )
         }
     }
 
@@ -406,18 +409,23 @@ constructor(
          * Does a complete model rebind. The callback can be called on any thread and it is up to
          * the client to move the executor to appropriate thread
          */
+        // Migrated to repository
         @AnyThread
         fun bindCompleteModelAsync(itemIdMap: WorkspaceData, isBindingSync: Boolean) {
             Executors.MAIN_EXECUTOR.execute { bindCompleteModel(itemIdMap, isBindingSync) }
         }
 
+        // Migrated to repository
         fun bindCompleteModel(itemIdMap: WorkspaceData, isBindingSync: Boolean) {}
 
+        // Migrated to repository
         fun bindItemsAdded(items: List<@JvmSuppressWildcards ItemInfo>) {}
 
+        // Migrated to repository
         /** Called when a runtime property of the ItemInfo is updated due to some system event */
         fun bindItemsUpdated(updates: Set<@JvmSuppressWildcards ItemInfo>) {}
 
+        // Migrated to repository
         fun bindWorkspaceComponentsRemoved(matcher: Predicate<ItemInfo?>) {}
 
         // Migrated to repository

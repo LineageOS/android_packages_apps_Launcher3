@@ -486,6 +486,7 @@ public class Launcher extends StatefulActivity<LauncherState>
                 mOnInitialBindListener = Boolean.FALSE::booleanValue;
             }
         }
+        modelCallbacks.bindWorkspaceDataModel();
 
         // For handling default keys
         setDefaultKeyMode(DEFAULT_KEYS_SEARCH_LOCAL);
