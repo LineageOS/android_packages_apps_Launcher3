@@ -3524,13 +3524,6 @@ public abstract class RecentsView<
         mContainer.getStatsLogManager().logger().log(LAUNCHER_TASK_CLEAR_ALL);
     }
 
-    private void dismissCurrentTask() {
-        TaskView taskView = getNextPageTaskView();
-        if (taskView != null) {
-            dismissTaskView(taskView, true /*removeTask*/);
-        }
-    }
-
     private void createDesk() {
         SystemUiProxy.INSTANCE
                 .get(getContext())
@@ -3566,12 +3559,12 @@ public abstract class RecentsView<
                         TaskGridNavHelper.TaskNavDirection.DOWN);
             case KeyEvent.KEYCODE_DEL:
             case KeyEvent.KEYCODE_FORWARD_DEL:
-                dismissCurrentTask();
+                mUtils.onDeleteKeyPressed();
                 return true;
             case KeyEvent.KEYCODE_NUMPAD_DOT:
                 if (event.isAltPressed()) {
                     // Numpad DEL pressed while holding Alt.
-                    dismissCurrentTask();
+                    mUtils.onDeleteKeyPressed();
                     return true;
                 }
         }
