@@ -584,7 +584,7 @@ flag {
   name: "enable_cursor_driven_workflows"
   namespace: "launcher"
   description: "Enables mouse based workflows for interacting with launcher"
-  bug: "388897603"
+  bug: "455891793"
 }
 
 flag {
