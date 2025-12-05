@@ -216,6 +216,10 @@ interface BubbleStashController {
      */
     var inAppDisplayOverrideProgress: Float
 
+    /** Return whether in app display animation is in progress. */
+    fun isInAppDisplayAnimationInProgress() =
+        inAppDisplayOverrideProgress > 0 && inAppDisplayOverrideProgress < 1
+
     /** Dumps the state of BubbleStashController. */
     fun dump(pw: PrintWriter) {
         pw.println("Bubble stash controller state:")
