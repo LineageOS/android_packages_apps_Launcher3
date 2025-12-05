@@ -305,6 +305,8 @@ open class RecentsState(@JvmField val ordinal: Int, private val mFlags: Int) :
         /** Returns the corresponding RecentsState from ordinal provided */
         @JvmStatic fun stateFromOrdinal(ordinal: Int) = sAllStates[ordinal]!!
 
+        @JvmStatic fun values() = sAllStates.copyOf(sAllStates.size)
+
         private const val NO_OFFSET = 0f
         private const val NO_SCALE = 1f
     }
