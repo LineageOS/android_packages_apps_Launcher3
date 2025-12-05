@@ -30,15 +30,15 @@ mpodolian@google.com
 
 # Overview eng team
 alexchau@google.com
-samcackett@google.com
 uwaisashraf@google.com
-vinayjoglekar@google.com
-willosborn@google.com
 jmokut@google.com
-
-# Physical Keyboard & Trackpad eng team
-patmanning@google.com
+magdi@google.com
+yyalan@google.com
 helencheuk@google.com
+
+# Context Engine team
+samcackett@google.com
+vinayjoglekar@google.com
 
 # Widget Picker team
 shamalip@google.com
@@ -69,6 +69,7 @@ jiuyu@google.com
 
 # Desktop Experiences team
 gsennton@google.com
+patmanning@google.com
 
 per-file FeatureFlags.java, globs = set noparent
 per-file FeatureFlags.java = sunnygoyal@google.com, winsonc@google.com, adamcohen@google.com, hyunyoungs@google.com, abegovic@google.com
