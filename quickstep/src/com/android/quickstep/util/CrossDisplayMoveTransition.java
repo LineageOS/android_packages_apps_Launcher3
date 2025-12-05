@@ -16,10 +16,10 @@
 package com.android.quickstep.util;
 
 
-import static android.view.WindowManager.TRANSIT_CLOSE;
-import static android.view.WindowManager.TRANSIT_OPEN;
-import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
+
+import static com.android.wm.shell.shared.TransitionUtil.isClosingMode;
+import static com.android.wm.shell.shared.TransitionUtil.isOpeningMode;
 
 import android.animation.AnimatorSet;
 import android.graphics.Rect;
@@ -89,6 +89,8 @@ public final class CrossDisplayMoveTransition {
             }
             return;
         }
+        Log.v(TAG, "starting cross-display move animation for "
+                + moveInfo.taskMovingBetweenDisplays);
         setupInitialAnimationState(info, moveInfo, t);
 
         // 2. Setup the launcher reveal, if needed.
@@ -149,9 +151,9 @@ public final class CrossDisplayMoveTransition {
         // 1. Set up the state of the animation to match the final state of the transition.
         for (TransitionInfo.Change change : info.getChanges()) {
             final int mode = change.getMode();
-            if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT) {
+            if (isOpeningMode(mode)) {
                 initializeLeashAsVisible(t, change.getEndAbsBounds(), change.getLeash());
-            } else if (mode == TRANSIT_CLOSE && isEmbeddedActivityInMovingTask(change, move)) {
+            } else if (isClosingMode(mode) && isEmbeddedActivityInMovingTask(change, move)) {
                 // If the change is a closing Activity embedded under the moving task, the Activity
                 // doesn't have a dedicated space to be shown on the destination display and should
                 // not be shown.
@@ -197,8 +199,12 @@ public final class CrossDisplayMoveTransition {
         if (!change.hasFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY)) {
             return false;
         }
-        if (change.getParent() != null
-                && change.getParent().equals(move.taskMovingBetweenDisplays.getContainer())) {
+        if (change.getParent() == null) {
+            return false;
+        }
+        Log.v(TAG, "isEmbeddedActivityInMovingTask, parent=" + change.getParent()
+                + ", moving task=" + move.taskMovingBetweenDisplays.getContainer());
+        if (change.getParent().equals(move.taskMovingBetweenDisplays.getContainer())) {
             return true;
         }
         return false;
