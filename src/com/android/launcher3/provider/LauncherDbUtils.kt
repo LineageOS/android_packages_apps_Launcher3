@@ -35,14 +35,11 @@ import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT
-import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FILE
-import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FOLDER
 import com.android.launcher3.LauncherSettings.Favorites.SCREEN
 import com.android.launcher3.LauncherSettings.Favorites.TABLE_NAME
 import com.android.launcher3.LauncherSettings.Favorites._ID
 import com.android.launcher3.Utilities
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
-import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils
 import com.android.launcher3.icons.GraphicsUtils
 import com.android.launcher3.icons.GraphicsUtils.flattenBitmap
 import com.android.launcher3.icons.IconCache
@@ -321,22 +318,6 @@ object LauncherDbUtils {
         fun commit() = db.setTransactionSuccessful()
 
         override fun close() = db.endTransaction()
-    }
-
-    /**
-     * Returns the sort order string for [com.android.launcher3.model.ModelDbController.query],
-     * which places file system items ([ITEM_TYPE_FILE_SYSTEM_FILE] and
-     * [ITEM_TYPE_FILE_SYSTEM_FOLDER]) at the end, allowing more time for the IPC call while still
-     * processing regular items.
-     */
-    @JvmStatic
-    fun getLoaderCursorQuerySortOrder(): String? {
-        if (HomeScreenFilesUtils.isFeatureEnabled) {
-            val inClause =
-                intArrayOf(ITEM_TYPE_FILE_SYSTEM_FILE, ITEM_TYPE_FILE_SYSTEM_FOLDER).joinToString()
-            return "CASE WHEN $ITEM_TYPE IN ($inClause) THEN 1 ELSE 0 END, $_ID"
-        }
-        return null
     }
 
     /** Utility method to simplify iterating over cursor */
