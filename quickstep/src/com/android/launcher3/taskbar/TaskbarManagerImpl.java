@@ -243,6 +243,19 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
                 @Override
                 public void onListenerInitializedFromShell() {
                     TASKBAR_UI_THREAD.execute(() -> {
+                        DesktopVisibilityController visibilityController =
+                                DesktopVisibilityController.INSTANCE.get(mBaseContext);
+                        if (getCurrentActivityContext() != null
+                                && visibilityController.isInDesktopMode(mPrimaryDisplayId)) {
+                            // Taskbar started in desktop mode. Until this callback is invoked,
+                            // Taskbar assumes that it isn't in desktop mode, so it now needs to be
+                            // recreated.
+                            onActiveDeskChanged(
+                                    mPrimaryDisplayId,
+                                    INACTIVE_DESK_ID,
+                                    visibilityController.getActiveDeskId(mPrimaryDisplayId));
+                        }
+
                         if (!enableAutoStashConnectedDisplayTaskbar.isTrue()) {
                             return;
                         }
