@@ -343,7 +343,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
                     R.dimen.search_row_small_icon_size);
         } else if (mDisplay == DISPLAY_TASKBAR) {
             float iconSize;
-            if (TaskbarModeUtil.INSTANCE.get(getContext()).isTransient()) {
+            if (mDeviceProfile.getTaskbarProfile().isTransientTaskbar()) {
                 iconSize = getResources().getDimension(R.dimen.transient_taskbar_icon_size);
             } else {
                 iconSize = getResources().getDimension(R.dimen.persistent_taskbar_icon_size);
