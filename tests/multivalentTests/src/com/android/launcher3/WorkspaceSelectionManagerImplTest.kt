@@ -17,6 +17,7 @@
 package com.android.launcher3
 
 import android.content.Context
+import android.graphics.Rect
 import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -62,6 +63,9 @@ class WorkspaceSelectionManagerImplTest {
             null
         }
         whenever(mockView.tag).thenReturn(ItemInfo())
+        whenever(mockView.getLocationInWindow(any())).thenAnswer {}
+        whenever(mockView.width).thenReturn(100)
+        whenever(mockView.height).thenReturn(100)
         return mockView
     }
 
@@ -75,6 +79,9 @@ class WorkspaceSelectionManagerImplTest {
             null
         }
         whenever(mockView.tag).thenReturn(ItemInfo())
+        whenever(mockView.getLocationInWindow(any())).thenAnswer {}
+        whenever(mockView.width).thenReturn(100)
+        whenever(mockView.height).thenReturn(100)
         return mockView
     }
 
@@ -145,5 +152,86 @@ class WorkspaceSelectionManagerImplTest {
         assertTrue(view1.isSelected)
         assertTrue(view2.isSelected)
         assertTrue(view3.isSelected)
+    }
+
+    @Test
+    fun testBoxSelection_selectsItemsInBounds() {
+        // Set view locations
+        doAnswer {
+                val location = it.arguments[0] as IntArray
+                location[0] = 0
+                location[1] = 0
+                null
+            }
+            .whenever(view1)
+            .getLocationInWindow(any())
+        doAnswer {
+                val location = it.arguments[0] as IntArray
+                location[0] = 200
+                location[1] = 200
+                null
+            }
+            .whenever(view2)
+            .getLocationInWindow(any())
+
+        selectionManager.startBoxSelection(isAppending = false)
+        selectionManager.updateBoxSelection(Rect(0, 0, 150, 150))
+        selectionManager.endBoxSelection()
+
+        assertTrue(view1.isSelected)
+        assertFalse(view2.isSelected)
+    }
+
+    @Test
+    fun testBoxSelection_withShiftPressed_appendsToSelection() {
+        // Initial state: view1 is selected
+        view1.isSelected = true
+
+        // Set view locations
+        doAnswer {
+                val location = it.arguments[0] as IntArray
+                location[0] = 0
+                location[1] = 0
+                null
+            }
+            .whenever(view1)
+            .getLocationInWindow(any())
+        doAnswer {
+                val location = it.arguments[0] as IntArray
+                location[0] = 200
+                location[1] = 200
+                null
+            }
+            .whenever(view2)
+            .getLocationInWindow(any())
+
+        selectionManager.startBoxSelection(isAppending = true)
+        selectionManager.updateBoxSelection(Rect(200, 200, 250, 250))
+        selectionManager.endBoxSelection()
+
+        assertTrue(view1.isSelected)
+        assertTrue(view2.isSelected)
+    }
+
+    @Test
+    fun testBoxSelection_dragEnds_selectionStateIsInactive() {
+        // Set view locations
+        doAnswer {
+                val location = it.arguments[0] as IntArray
+                location[0] = 0
+                location[1] = 0
+                null
+            }
+            .whenever(view1)
+            .getLocationInWindow(any())
+
+        selectionManager.startBoxSelection(isAppending = false)
+        selectionManager.updateBoxSelection(Rect(0, 0, 150, 150))
+        selectionManager.endBoxSelection()
+
+        // After drag end, another onBoxSelection should not change anything
+        selectionManager.updateBoxSelection(Rect(0, 0, 150, 150))
+
+        assertTrue(view1.isSelected)
     }
 }

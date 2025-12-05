@@ -59,18 +59,32 @@ sealed interface WorkspaceSelectionManager {
     fun updateItemSelection(view: View, itemSelectionType: ItemSelectionType)
 
     /**
+     * Handles the start of a box selection drag.
+     *
+     * @param isAppending True if the selection should append to the current selection.
+     */
+    fun startBoxSelection(isAppending: Boolean)
+
+    /**
      * Handles a box selection event.
      *
      * @param boxBounds The rectangle defining the selection area in window coordinates.
      */
-    fun onBoxSelection(boxBounds: Rect)
+    fun updateBoxSelection(boxBounds: Rect)
+
+    /** Handles the end of a box selection drag. */
+    fun endBoxSelection()
 }
 
 @ActivityContextSingleton
 class WorkspaceSelectionManagerStub @Inject constructor() : WorkspaceSelectionManager {
     override fun updateItemSelection(view: View, itemSelectionType: ItemSelectionType) = Unit
 
-    override fun onBoxSelection(boxBounds: Rect) = Unit
+    override fun startBoxSelection(isAppending: Boolean) = Unit
+
+    override fun updateBoxSelection(boxBounds: Rect) = Unit
+
+    override fun endBoxSelection() = Unit
 }
 
 @ActivityContextSingleton
@@ -100,6 +114,25 @@ class WorkspaceSelectionManagerImpl @Inject constructor(val activityContext: Act
      */
     private var anchorView: View? = null
 
+    private data class BoxSelectionState(
+        val preservedSelection: Set<View>,
+        val isAppending: Boolean,
+    )
+
+    private var boxSelectionState: BoxSelectionState? = null
+
+    override fun startBoxSelection(isAppending: Boolean) {
+        check(boxSelectionState == null) { "Box selection is already active" }
+
+        val preserved =
+            if (isAppending) {
+                getSelectableViews().filter { it.isSelected }.toSet()
+            } else {
+                emptySet()
+            }
+        boxSelectionState = BoxSelectionState(preserved, isAppending)
+    }
+
     override fun updateItemSelection(view: View, itemSelectionType: ItemSelectionType) {
         when (itemSelectionType) {
             ItemSelectionType.SELECT_SINGLE -> {
@@ -116,9 +149,26 @@ class WorkspaceSelectionManagerImpl @Inject constructor(val activityContext: Act
         anchorView = view
     }
 
-    override fun onBoxSelection(boxBounds: Rect) {
-        val itemsToSelect =
-            getSelectableViews().filter { view ->
+    override fun updateBoxSelection(boxBounds: Rect) {
+        val currentState = boxSelectionState
+        if (currentState !is BoxSelectionState) return
+
+        val itemsInBox = findIntersectingViews(boxBounds)
+
+        if (currentState.isAppending) {
+            handleAppendSelection(itemsInBox, currentState.preservedSelection)
+        } else {
+            handleNewSelection(itemsInBox)
+        }
+    }
+
+    override fun endBoxSelection() {
+        boxSelectionState = null
+    }
+
+    private fun findIntersectingViews(boxBounds: Rect): Set<View> {
+        return getSelectableViews()
+            .filter { view ->
                 val viewLocation = IntArray(2)
                 view.getLocationInWindow(viewLocation)
                 val viewBounds =
@@ -130,8 +180,25 @@ class WorkspaceSelectionManagerImpl @Inject constructor(val activityContext: Act
                     )
                 Rect.intersects(boxBounds, viewBounds)
             }
+            .toSet()
+    }
 
-        performSelection(itemsToSelect, SelectionAction.NEW_SELECTION)
+    private fun handleNewSelection(itemsInBox: Set<View>) {
+        performSelection(itemsInBox.toList(), SelectionAction.NEW_SELECTION)
+    }
+
+    private fun handleAppendSelection(itemsInBox: Set<View>, preservedSelection: Set<View>) {
+        val allSelectableViews = getSelectableViews()
+        for (view in allSelectableViews) {
+            val isInBox = itemsInBox.contains(view)
+            val wasPreserved = preservedSelection.contains(view)
+
+            if (isInBox || wasPreserved) {
+                setViewSelected(view, true)
+            } else {
+                setViewSelected(view, false)
+            }
+        }
     }
 
     private enum class SelectionAction {

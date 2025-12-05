@@ -18,6 +18,7 @@ package com.android.launcher3
 import android.graphics.Rect
 import android.graphics.RectF
 import android.view.InputDevice
+import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -32,7 +33,10 @@ import android.view.ViewGroup
  *
  * @param host The [BoxSelectionHost] that will respond to selection events.
  */
-class BoxSelectionHelper(private val host: BoxSelectionHost) {
+class BoxSelectionHelper(
+    private val host: BoxSelectionHost,
+    private val workspaceSelectionManager: WorkspaceSelectionManager,
+) {
     private val selectionRect = RectF()
     private var boxSelectionView: View? = null
 
@@ -44,13 +48,6 @@ class BoxSelectionHelper(private val host: BoxSelectionHost) {
     interface BoxSelectionHost {
         /** Returns the [ViewGroup] to which the selection overlay should be added. */
         fun getBoxSelectionHostContainer(): ViewGroup?
-
-        /**
-         * Called when the box selection rectangle changes.
-         *
-         * @param rect The selection rectangle in the coordinate space of the host container.
-         */
-        fun onBoxSelection(rect: Rect)
     }
 
     private fun isSelecting() = boxSelectionView != null
@@ -82,7 +79,7 @@ class BoxSelectionHelper(private val host: BoxSelectionHost) {
                 endSelection()
             }
             MotionEvent.ACTION_CANCEL -> {
-                host.onBoxSelection(Rect())
+                workspaceSelectionManager.updateBoxSelection(Rect())
                 endSelection()
             }
             else -> {
@@ -102,6 +99,8 @@ class BoxSelectionHelper(private val host: BoxSelectionHost) {
 
     private fun startSelection(ev: MotionEvent) {
         val hostContainer = host.getBoxSelectionHostContainer() ?: return
+
+        workspaceSelectionManager.startBoxSelection((ev.metaState and KeyEvent.META_SHIFT_ON) != 0)
 
         boxSelectionView =
             createBoxSelectionView().also {
@@ -134,13 +133,14 @@ class BoxSelectionHelper(private val host: BoxSelectionHost) {
             sortedRectF.round(resultRect)
 
             // Notify the host about the selection update.
-            host.onBoxSelection(resultRect)
+            workspaceSelectionManager.updateBoxSelection(resultRect)
         }
     }
 
     private fun endSelection() {
-        boxSelectionView?.let { host.getBoxSelectionHostContainer()?.removeView(it) }
+        host.getBoxSelectionHostContainer()?.removeView(boxSelectionView)
         boxSelectionView = null
+        workspaceSelectionManager.endBoxSelection()
     }
 
     private fun createBoxSelectionView(): View {

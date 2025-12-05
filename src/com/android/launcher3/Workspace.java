@@ -1179,14 +1179,6 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         return null;
     }
 
-    @Override
-    public void onBoxSelection(android.graphics.Rect selectionRect) {
-        if (shouldEnableCursorDrivenWorkflows(getContext())) {
-            mLauncher.getActivityComponent().getWorkspaceSelectionManager()
-                    .onBoxSelection(selectionRect);
-        }
-    }
-
     /**
      * Called directly from a CellLayout (not by the framework), after we've been added as a
      * listener via setOnInterceptTouchEventListener(). This allows us to tell the CellLayout

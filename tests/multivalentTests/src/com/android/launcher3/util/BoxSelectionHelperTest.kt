@@ -24,6 +24,8 @@ import android.view.ViewGroup
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.BoxSelectionHelper
+import com.android.launcher3.WorkspaceSelectionManager
+import com.android.launcher3.WorkspaceSelectionManagerStub
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -40,6 +42,7 @@ import org.mockito.kotlin.verify
 class BoxSelectionHelperTest {
 
     private lateinit var host: BoxSelectionHelper.BoxSelectionHost
+    private lateinit var workspaceSelectionManager: WorkspaceSelectionManager
     private lateinit var hostContainer: ViewGroup
     private lateinit var helper: BoxSelectionHelper
     private var capturedRect: Rect? = null
@@ -49,12 +52,15 @@ class BoxSelectionHelperTest {
     fun setUp() {
         MockitoAnnotations.openMocks(this)
         host = mock(BoxSelectionHelper.BoxSelectionHost::class.java)
+        workspaceSelectionManager = mock(WorkspaceSelectionManagerStub::class.java)
         hostContainer = mock(ViewGroup::class.java)
         Mockito.`when`(host.getBoxSelectionHostContainer()).thenReturn(hostContainer)
         Mockito.`when`(hostContainer.context).thenReturn(context)
-        Mockito.doAnswer { capturedRect = it.getArgument(0) }.`when`(host).onBoxSelection(any())
+        Mockito.doAnswer { capturedRect = it.getArgument(0) }
+            .`when`(workspaceSelectionManager)
+            .updateBoxSelection(any())
 
-        helper = BoxSelectionHelper(host)
+        helper = BoxSelectionHelper(host, workspaceSelectionManager)
     }
 
     @Test
