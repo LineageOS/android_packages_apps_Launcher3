@@ -116,12 +116,9 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
     private SafeCloseable mOnDeviceProfileChangeListenerClosable;
     private SafeCloseable mIsOnTopResumeActivityListenerClosable;
     private final HomeVisibilityState.VisibilityChangeListener mVisibilityChangeListener =
-            new HomeVisibilityState.VisibilityChangeListener() {
-        @Override
-        public void onHomeVisibilityChanged(boolean isVisible) {
-            TASKBAR_UI_THREAD.execute(() -> onLauncherVisibilityChanged(isVisible));
-        }
-    };
+            (isVisible, keyguardGoingAway) -> {
+                TASKBAR_UI_THREAD.execute(() -> onLauncherVisibilityChanged(isVisible));
+            };
 
     // Initialized in init.
     private final TaskbarLauncherStateController

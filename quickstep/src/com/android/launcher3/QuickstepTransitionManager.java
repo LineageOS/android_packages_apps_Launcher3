@@ -262,6 +262,15 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
     private final RemoteAnimationCoordinateTransfer mCoordinateTransfer;
     private final LatencyTracker mLatencyTracker;
 
+    // Preemptive animation run whenever Launcher reappears and its mode is NORMAL (unless coming
+    // from Keyguard). This animation is only triggered if another reveal animation is not already
+    // running, and is cancelled if another animation starts as part of transition handling. The
+    // reason for this backup is that sometimes the transition is animated by a different process
+    // (e.g. System UI), but we still want the contents of Launcher to animate instead of just
+    // popping in statically.
+    private ScalingWorkspaceRevealAnim mFallbackRevealAnimation;
+    private boolean mIsLauncherAnimating = false;
+
     private LauncherBackAnimationController mBackAnimationController;
     private final AnimatorListenerAdapter mForceInvisibleListener = new AnimatorListenerAdapter() {
         @Override
@@ -299,6 +308,32 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
 
         if (ENABLE_SHELL_STARTING_SURFACE) {
             mSystemUiProxy.setStartingWindowListener(mStartingWindowListener);
+        }
+
+        if (Flags.fallbackRevealAnimation()) {
+            // Make sure that we know whenever Launcher becomes visible AND is in its NORMAL state,
+            // so we can run the reveal animation.
+            mSystemUiProxy.getHomeVisibilityState().addListener(
+                    (isVisible, keyguardGoingAway) -> {
+                        if (isVisible && mLauncher.isInState(NORMAL) && !mIsLauncherAnimating
+                                && !keyguardGoingAway) {
+                            mIsLauncherAnimating = true;
+                            mFallbackRevealAnimation =
+                                    new ScalingWorkspaceRevealAnim(
+                                            mLauncher, null /* siblingAnimation */,
+                                            null /* windowTargetRect */, true /* playAlphaReveal */,
+                                            true /* playBlur */);
+                            mFallbackRevealAnimation.getAnimators().addListener(
+                                    new AnimatorListenerAdapter() {
+                                        @Override
+                                        public void onAnimationEnd(Animator animation) {
+                                            mIsLauncherAnimating = false;
+                                        }
+                                    });
+                            mFallbackRevealAnimation.start();
+                        }
+                    }
+            );
         }
 
         mOpeningXInterpolator = AnimationUtils.loadInterpolator(
@@ -1905,6 +1940,13 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
 
         boolean playWorkspaceReveal = true;
         boolean skipAllAppsScale = false;
+
+        if (Flags.fallbackRevealAnimation()) {
+            mFallbackRevealAnimation.cancelAnimations();
+            mFallbackRevealAnimation = null;
+            mIsLauncherAnimating = true;
+        }
+
         if (mLauncher.isInState(OVERVIEW)) {
             playWorkspaceReveal = false;
         } else if (!playFallBackAnimation) {
@@ -1933,6 +1975,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
+                mIsLauncherAnimating = false;
                 AccessibilityManagerCompat.sendTestProtocolEventToTest(
                         mLauncher, WALLPAPER_OPEN_ANIMATION_FINISHED_MESSAGE);
             }
