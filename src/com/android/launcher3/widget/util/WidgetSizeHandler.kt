@@ -112,10 +112,8 @@ constructor(
     private fun getHotseatQsbSizeOptions(): Bundle {
         return getWidgetSizeOptionsInternal { profile ->
             val density = context.resources.displayMetrics.density
-            SizeF(
-                profile.hotseatQsbWidth / density,
-                profile.getHotseatProfile().qsbHeight / density,
-            )
+            val widgetSizePx = WidgetSizes.getWidgetSizePx(profile, idp.numColumns, 1)
+            SizeF(widgetSizePx.width / density, profile.getHotseatProfile().qsbHeight / density)
         }
     }
 
