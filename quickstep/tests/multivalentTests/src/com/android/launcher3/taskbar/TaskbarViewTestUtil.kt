@@ -29,13 +29,13 @@ import com.android.launcher3.model.data.AppPairInfo
 import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
-import com.android.launcher3.taskbar.handoff.HandoffSuggestion
 import com.android.launcher3.taskbar.TaskbarIconType.ALL_APPS
 import com.android.launcher3.taskbar.TaskbarIconType.DIVIDER
 import com.android.launcher3.taskbar.TaskbarIconType.HANDOFF_SUGGESTION
 import com.android.launcher3.taskbar.TaskbarIconType.HOTSEAT
 import com.android.launcher3.taskbar.TaskbarIconType.OVERFLOW
 import com.android.launcher3.taskbar.TaskbarIconType.RECENT
+import com.android.launcher3.taskbar.handoff.HandoffSuggestion
 import com.android.quickstep.util.GroupTask
 import com.android.quickstep.util.SingleTask
 import com.android.quickstep.util.SplitTask
@@ -139,6 +139,15 @@ object TaskbarViewTestUtil {
                     Process.myUserHandle().identifier,
                     System.currentTimeMillis(),
                 )
+        }
+    }
+
+    fun createAppInfo(id: Int = 0): AppInfo {
+        return AppInfo().apply {
+            componentName = testComponent(id)
+            user = Process.myUserHandle()
+            intent = testIntent(id)
+            title = "Test App $id"
         }
     }
 }
