@@ -21,4 +21,7 @@ import android.view.MotionEvent
 interface CustomTouchDelegate {
     /** Handles touch events delegated from the View. Returns true if the event was consumed. */
     fun onDelegateTouchEvent(event: MotionEvent): Boolean
+
+    /** Listener for handling custom actions triggered by touch events. */
+    var customActionsListener: CustomActionsListener?
 }

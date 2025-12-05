@@ -24,7 +24,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import com.android.launcher3.Flags
-import com.android.launcher3.R
 import com.android.launcher3.touch.CustomActionsListener.Companion.ACTION_LAUNCH
 import com.android.launcher3.touch.CustomActionsListener.Companion.ACTION_POPUP_MENU
 import com.android.launcher3.touch.CustomActionsListener.Companion.ACTION_START_DRAG
@@ -36,12 +35,28 @@ import kotlin.math.abs
  * presses, and mouse-specific interactions like right clicks and drags.
  *
  * This class uses a [GestureDetector] to interpret touch events and delegates the actual action
- * handling to a [CustomActionsListener] attached to the view.
+ * handling to a [CustomActionsListener] attached to the view. If no [CustomActionsListener] is set,
+ * it will fall back to the [defaultTouchHandler].
+ *
+ * The [defaultTouchHandler] serves as a fallback, executing the view's standard touch processing
+ * logic (like `super.onTouchEvent`) when custom actions are not triggered. This ensures that
+ * existing touch behaviors are preserved when the custom handler doesn't consume the event.
+ *
+ * [shouldIgnoreTouchDown] determines whether a touch sequence starting with `ACTION_DOWN` should be
+ * ignored entirely. This is typically used to disregard touches in non-interactive areas, such as
+ * padding, preventing unwanted gesture detection or default handling.
  *
  * @property view The view to which this touch handler is attached.
+ * @property defaultTouchHandler The default touch handler to call if the custom events are not
+ *   handled.
+ * @property shouldIgnoreTouchDown A function to determine if the initial touch down event should be
+ *   ignored.
  */
-class CustomEventsTouchHandler(private val view: View) :
-    GestureDetector.SimpleOnGestureListener(), CustomTouchDelegate {
+class CustomEventsTouchHandler(
+    private val view: View,
+    private val defaultTouchHandler: (MotionEvent) -> Boolean,
+    private val shouldIgnoreTouchDown: (MotionEvent) -> Boolean,
+) : GestureDetector.SimpleOnGestureListener(), CustomTouchDelegate {
 
     private var downX = 0f
     private var downY = 0f
@@ -50,6 +65,8 @@ class CustomEventsTouchHandler(private val view: View) :
         GestureDetector(view.context, this, Handler(Looper.getMainLooper()))
 
     private var isRightClickActive = false
+
+    override var customActionsListener: CustomActionsListener? = null
 
     /**
      * Processes a touch event.
@@ -61,8 +78,12 @@ class CustomEventsTouchHandler(private val view: View) :
      * @return True if the event is handled by this handler, false otherwise.
      */
     override fun onDelegateTouchEvent(event: MotionEvent): Boolean {
-        if (!Flags.enableCursorDrivenWorkflows() || getCustomActionsListener() == null) {
+        if (event.actionMasked == MotionEvent.ACTION_DOWN && shouldIgnoreTouchDown(event)) {
             return false
+        }
+
+        if (!Flags.enableCursorDrivenWorkflows() || customActionsListener == null) {
+            return defaultTouchHandler(event)
         }
 
         // If a right click has been triggered onDown(), then consume all events.
@@ -104,12 +125,8 @@ class CustomEventsTouchHandler(private val view: View) :
         return true
     }
 
-    private fun getCustomActionsListener(): CustomActionsListener? {
-        return view.getTag(R.id.custom_actions_listener) as? CustomActionsListener
-    }
-
     private fun performActions(actionMask: Int) {
-        getCustomActionsListener()?.performActions(view, actionMask)
+        customActionsListener?.performActions(view, actionMask)
     }
 
     private fun shouldStartMouseDrag(event: MotionEvent): Boolean {
