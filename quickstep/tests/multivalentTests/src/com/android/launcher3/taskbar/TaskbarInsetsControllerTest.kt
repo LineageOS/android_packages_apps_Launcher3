@@ -18,7 +18,7 @@ package com.android.launcher3.taskbar
 
 import android.view.ViewTreeObserver
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
+import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.TaskbarInsetsController.DebugTouchableRegion.Companion.DEFAULT_TOUCH_REGION
 import com.android.launcher3.taskbar.TaskbarInsetsController.DebugTouchableRegion.Companion.FULLSCREEN_TASKBAR_WINDOW
 import com.android.launcher3.taskbar.TaskbarInsetsController.DebugTouchableRegion.Companion.ICONS_INVISIBLE
@@ -48,8 +48,10 @@ class TaskbarInsetsControllerTest {
 
     @Test
     fun imeShowing_taskbarWindowUntouchable() {
-        runOnMainSync { taskbarContext.updateSysuiStateFlags(SYSUI_STATE_IME_VISIBLE, false) }
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
+            taskbarContext.updateSysuiStateFlags(SYSUI_STATE_IME_VISIBLE, false)
+        }
+        runOnTaskbarUiThreadSync {
             assertThat(taskbarInsetsController.debugTouchableRegion.lastSetTouchableReason)
                 .isEqualTo(ICONS_INVISIBLE)
             assertThat(taskbarInsetsController.debugTouchableRegion.lastSetTouchableInsets)
@@ -62,12 +64,12 @@ class TaskbarInsetsControllerTest {
     @Test
     @TaskbarMode(TRANSIENT)
     fun imeShowing_transientTaskbarUnstashed_taskbarWindowTouchable() {
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             taskbarContext.updateSysuiStateFlags(SYSUI_STATE_IME_VISIBLE, true)
             taskbarStashController.updateAndAnimateTransientTaskbar(false)
             animatorTestRule.advanceTimeBy(taskbarStashController.stashDuration)
         }
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             assertThat(taskbarInsetsController.debugTouchableRegion.lastSetTouchableReason)
                 .isEqualTo(DEFAULT_TOUCH_REGION)
             assertThat(taskbarInsetsController.debugTouchableRegion.lastSetTouchableInsets)
@@ -80,8 +82,10 @@ class TaskbarInsetsControllerTest {
     @Test
     @TaskbarMode(TRANSIENT)
     fun imeShowing_transientTaskbarStashed_taskbarWindowUntouchable() {
-        runOnMainSync { taskbarContext.updateSysuiStateFlags(SYSUI_STATE_IME_VISIBLE, true) }
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
+            taskbarContext.updateSysuiStateFlags(SYSUI_STATE_IME_VISIBLE, true)
+        }
+        runOnTaskbarUiThreadSync {
             assertThat(taskbarInsetsController.debugTouchableRegion.lastSetTouchableReason)
                 .isEqualTo(ICONS_INVISIBLE)
             assertThat(taskbarInsetsController.debugTouchableRegion.lastSetTouchableInsets)
@@ -93,8 +97,8 @@ class TaskbarInsetsControllerTest {
 
     @Test
     fun windowFullscreen_entireTaskbarWindowTouchable() {
-        runOnMainSync { taskbarContext.setTaskbarWindowFullscreen(true, 1) }
-        runOnMainSync {
+        runOnTaskbarUiThreadSync { taskbarContext.setTaskbarWindowFullscreen(true, 1) }
+        runOnTaskbarUiThreadSync {
             assertThat(taskbarInsetsController.debugTouchableRegion.lastSetTouchableReason)
                 .isEqualTo(FULLSCREEN_TASKBAR_WINDOW)
             assertThat(taskbarInsetsController.debugTouchableRegion.lastSetTouchableInsets)
@@ -104,11 +108,11 @@ class TaskbarInsetsControllerTest {
 
     @Test
     fun windowFullscreen_imeShowing_entireTaskbarWindowTouchable() {
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             taskbarContext.setTaskbarWindowFullscreen(true, 1)
             taskbarContext.updateSysuiStateFlags(SYSUI_STATE_IME_VISIBLE, false)
         }
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             assertThat(taskbarInsetsController.debugTouchableRegion.lastSetTouchableReason)
                 .isEqualTo(FULLSCREEN_TASKBAR_WINDOW)
             assertThat(taskbarInsetsController.debugTouchableRegion.lastSetTouchableInsets)
