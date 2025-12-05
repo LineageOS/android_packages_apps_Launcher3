@@ -84,6 +84,7 @@ import com.android.launcher3.anim.AnimatedFloat;
 import com.android.launcher3.dot.DotInfo;
 import com.android.launcher3.dragndrop.DragOptions.PreDragCondition;
 import com.android.launcher3.dragndrop.DraggableView;
+import com.android.launcher3.graphics.AutomatedIconDelegate;
 import com.android.launcher3.graphics.PreloadIconDelegate;
 import com.android.launcher3.graphics.ThemeManager;
 import com.android.launcher3.icons.BitmapInfo.DrawableCreationFlags;
@@ -618,6 +619,10 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
                 info.newIcon(getContext(), getIconCreationFlagsForInfo(info));
         if (mIsShowingMinimalPopup) {
             iconDrawable.setAnimationEnabled(false);
+        }
+        if (getIcon() != null && getIcon().getDelegate() instanceof AutomatedIconDelegate aid) {
+            aid.startExitAnimation(() -> setIcon(iconDrawable));
+            return;
         }
         setIcon(iconDrawable);
     }

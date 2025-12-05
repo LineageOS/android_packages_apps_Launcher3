@@ -23,8 +23,10 @@ import static com.android.launcher3.folder.ClippedFolderIconLayoutRule.ENTER_IND
 import static com.android.launcher3.folder.ClippedFolderIconLayoutRule.EXIT_INDEX;
 import static com.android.launcher3.folder.ClippedFolderIconLayoutRule.MAX_NUM_ITEMS_IN_PREVIEW;
 import static com.android.launcher3.folder.FolderIcon.DROP_IN_ANIMATION_DURATION;
+import static com.android.launcher3.graphics.AutomatedIconDelegate.newAutomatedIcon;
 import static com.android.launcher3.graphics.PreloadIconDelegate.newPendingIcon;
 import static com.android.launcher3.icons.BitmapInfo.FLAG_THEMED;
+import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_AUTOMATED;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -44,11 +46,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.launcher3.BubbleTextView;
+import com.android.launcher3.Flags;
 import com.android.launcher3.LauncherAppState;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.apppairs.AppPairIcon;
 import com.android.launcher3.apppairs.AppPairIconDrawingParams;
 import com.android.launcher3.apppairs.AppPairIconGraphic;
+import com.android.launcher3.graphics.AutomatedIconDelegate;
+import com.android.launcher3.icons.FastBitmapDrawable;
 import com.android.launcher3.model.data.AppPairInfo;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.ItemInfoWithIcon;
@@ -455,7 +460,10 @@ public class PreviewItemManager {
         if (item instanceof WorkspaceItemInfo wii) {
             if (wii.shouldShowPendingIcon()) {
                 p.drawable = newPendingIcon(wii, mContext, FLAG_THEMED);
-            } else {
+            } else if (Flags.enableAppAutomationIndicator()
+                    && (wii.runtimeStatusFlags & FLAG_AUTOMATED) != 0) {
+                p.drawable = newAutomatedIcon(mContext, wii, FLAG_THEMED);
+            } else if (!maybeHandleAutomationExit(wii, p)) {
                 p.drawable = wii.newIcon(mContext, FLAG_THEMED);
             }
             p.drawable.setBounds(0, 0, mIconSize, mIconSize);
@@ -487,5 +495,22 @@ public class PreviewItemManager {
                         + " for " + info);
             }
         }
+    }
+
+    private boolean maybeHandleAutomationExit(WorkspaceItemInfo wii, PreviewItemDrawingParams p) {
+        if ((wii.runtimeStatusFlags & FLAG_AUTOMATED) == 0
+                && p.drawable instanceof FastBitmapDrawable fbd
+                && fbd.getDelegate() instanceof AutomatedIconDelegate aid) {
+            aid.startExitAnimation(() -> {
+                p.drawable = wii.newIcon(mContext, FLAG_THEMED);
+                if (p.drawable != null) {
+                    p.drawable.setBounds(0, 0, mIconSize, mIconSize);
+                    p.drawable.setCallback(mIcon);
+                }
+                mIcon.invalidate();
+            });
+            return true;
+        }
+        return false;
     }
 }
