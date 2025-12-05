@@ -26,7 +26,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.AppsListData
-import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
+import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
 import com.android.launcher3.taskbar.rules.TaskbarModeRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.TRANSIENT
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
@@ -70,7 +70,7 @@ class TaskbarHandoffControllerTest {
     @Test
     @TaskbarMode(TRANSIENT)
     fun onRemoteTasksChanged_updatesSuggestions() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             HandoffSuggestionRepository.get(taskbarUnitTestRule.activityContext)
                 .listener
                 .onRemoteTasksChanged(

@@ -19,7 +19,7 @@ package com.android.launcher3.taskbar
 import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.taskbar.NavbarButtonsViewController.ALPHA_INDEX_KEYGUARD_OR_DISABLE
-import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
+import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
 import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.THREE_BUTTONS
@@ -50,7 +50,7 @@ class NavbarButtonsViewControllerTest {
     @TaskbarMode(THREE_BUTTONS)
     @UserLocked
     fun userLocked_keyguardOccluded_homeButtonHidden() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             navbarButtonsViewController.setKeyguardVisible(
                 /* isKeyguardVisible = */ true,
                 /* isKeyguardOccluded = */ true,
@@ -65,7 +65,7 @@ class NavbarButtonsViewControllerTest {
     @Test
     @TaskbarMode(THREE_BUTTONS)
     fun userUnlocked_keyguardOccluded_homeButtonShown() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             navbarButtonsViewController.setKeyguardVisible(
                 /* isKeyguardVisible = */ true,
                 /* isKeyguardOccluded = */ true,
@@ -81,7 +81,7 @@ class NavbarButtonsViewControllerTest {
     @TaskbarMode(THREE_BUTTONS)
     @UserLocked
     fun userLocked_keyguardVisible_backButtonHidden() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             navbarButtonsViewController.setKeyguardVisible(
                 /* isKeyguardVisible = */ true,
                 /* isKeyguardOccluded = */ false,
@@ -97,7 +97,7 @@ class NavbarButtonsViewControllerTest {
     @TaskbarMode(THREE_BUTTONS)
     @UserLocked
     fun userLocked_keyguardBouncerVisible_backButtonShown() {
-        runOnTaskbarUiThreadSync {
+        runOnMainSync {
             navbarButtonsViewController.setKeyguardVisible(
                 /* isKeyguardVisible = */ true,
                 /* isKeyguardOccluded = */ false,

@@ -158,8 +158,8 @@ class TaskbarUnitTestRuleTest {
                 @InjectController lateinit var controller: BubbleBarController
             }
 
-        // We cannot use #assertThrows because we also catch an assumption violated exception
-        // when running #evaluate on devices that do not support Taskbar.
+        // We cannot use #assertThrows because we also catch an assumption violated exception when
+        // running #evaluate on devices that do not support Taskbar.
         val result =
             try {
                 TaskbarUnitTestRule(testClass, context)

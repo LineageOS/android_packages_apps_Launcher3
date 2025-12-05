@@ -19,6 +19,7 @@ package com.android.launcher3.taskbar
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.Hotseat
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherInteractor
@@ -26,7 +27,6 @@ import com.android.launcher3.LauncherState
 import com.android.launcher3.LauncherUiState
 import com.android.launcher3.SplitScreenUiState
 import com.android.launcher3.statemanager.StateManager
-import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.bubbles.BubbleControllers
 import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController
 import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
@@ -72,7 +72,7 @@ class TaskbarLauncherStateControllerTest {
     fun updateStateForSysuiFlags_singleTapPowerButton_stashTaskAndBubbleBarOnAnimationEnd() {
         initForWakeTransitionWithBubbles(SYSUI_STATE_AWAKE)
 
-        runOnTaskbarUiThreadSync {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
             bubbleBarStashController.showBubbleBar(expandBubbles = true)
             animatorTestRule.advanceTimeBy(BubbleStashController.BAR_STASH_DURATION)
         }
@@ -80,7 +80,7 @@ class TaskbarLauncherStateControllerTest {
         assertThat(bubbleBarStashController.isStashed).isFalse()
         assertThat(bubbleBarViewController.isExpanded).isTrue()
 
-        runOnTaskbarUiThreadSync {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
             // simulate the device going to sleep
             taskbarLauncherStateController.updateStateForSysuiFlags(
                 SYSUI_STATE_WAKEFULNESS_TRANSITION and SYSUI_STATE_AWAKE.inv()
@@ -100,7 +100,7 @@ class TaskbarLauncherStateControllerTest {
     fun updateStateForSysuiFlags_doubleTapPowerButton_doesNotStashTaskAndBubbleBarOnAnimationEnd() {
         initForWakeTransitionWithBubbles(SYSUI_STATE_AWAKE)
 
-        runOnTaskbarUiThreadSync {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
             bubbleBarStashController.showBubbleBar(expandBubbles = true)
             animatorTestRule.advanceTimeBy(BubbleStashController.BAR_STASH_DURATION)
         }
@@ -108,7 +108,7 @@ class TaskbarLauncherStateControllerTest {
         assertThat(bubbleBarStashController.isStashed).isFalse()
         assertThat(bubbleBarViewController.isExpanded).isTrue()
 
-        runOnTaskbarUiThreadSync {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
             // simulate double tap
             taskbarLauncherStateController.updateStateForSysuiFlags(
                 SYSUI_STATE_WAKEFULNESS_TRANSITION and SYSUI_STATE_AWAKE.inv()
@@ -151,7 +151,7 @@ class TaskbarLauncherStateControllerTest {
                 doReturn(dp).whenever(mock).getDeviceProfile()
             }
         val controllers = taskbarUnitTestRule.activityContext.controllers
-        runOnTaskbarUiThreadSync {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
             taskbarLauncherStateController.init(
                 controllers,
                 launcherInteractor,

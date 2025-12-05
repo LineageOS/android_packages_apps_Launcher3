@@ -22,7 +22,7 @@ import static com.android.launcher3.model.data.LauncherAppWidgetInfo.FLAG_RESTOR
 import static com.android.launcher3.provider.LauncherDbUtils.itemIdMatch;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
-import static com.android.launcher3.util.TestUtil.getOnMainThread;
+import static com.android.launcher3.util.TestUtil.getOnUiThread;
 import static com.android.launcher3.util.WidgetUtils.createWidgetInfo;
 import static com.android.launcher3.util.WidgetUtils.findWidgetProvider;
 
@@ -325,7 +325,7 @@ public class BindWidgetTest extends BaseLauncherActivityTest<Launcher> {
         int count = 0;
         String pkg = invalidPackage;
 
-        Set<String> activePackage = getOnMainThread(() -> {
+        Set<String> activePackage = getOnUiThread(() -> {
             Set<String> packages = new HashSet<>();
             InstallSessionHelper.INSTANCE.get(targetContext()).getActiveSessions()
                     .keySet().forEach(packageUserKey -> packages.add(packageUserKey.mPackageName));
