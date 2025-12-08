@@ -504,9 +504,30 @@ constructor(
     }
 
     override fun onActiveDeskChanged(displayId: Int, newActiveDesk: Int, oldActiveDesk: Int) {
+        if (betterDeskDeactivationInRecentsTransition()) return
         if (!isInDesktopFirstMode()) return
         if (displayId != this.displayId) return
         if (oldActiveDesk != INACTIVE_DESK_ID || newActiveDesk == INACTIVE_DESK_ID) return
+        // TaskAnimationManager.onTasksAppeared already handles desktop task launching.
+        if (taskAnimationManager.isRecentsAnimationRunning) return
+        // Desktop launch will close Recents when transition is finished.
+        if (recentsView.desktopRecentsController?.isDesktopLaunchOngoing() == true) return
+
+        Log.d(
+            TAG,
+            "onActiveDeskChanged - closing RecentsView because desk $newActiveDesk is activated",
+        )
+        recentsView.stateManager.moveToRestState()
+    }
+
+    override fun onTaskAppearingInDeskWithOverviewShowing(
+        taskId: Int,
+        displayId: Int,
+        deskId: Int,
+    ) {
+        if (!betterDeskDeactivationInRecentsTransition()) return
+        if (!isInDesktopFirstMode()) return
+        if (displayId != this.displayId) return
         // TaskAnimationManager.onTasksAppeared already handles desktop task launching.
         if (taskAnimationManager.isRecentsAnimationRunning) return
         // Desktop launch will close Recents when tra]nsition is finished.
@@ -514,7 +535,8 @@ constructor(
 
         Log.d(
             TAG,
-            "onActiveDeskChanged - closing RecentsView because desk $newActiveDesk is activated",
+            "onTaskAppearingInDeskWithOverviewShowing - " +
+                "closing RecentsView because taskId $taskId appeared in deskId $deskId",
         )
         recentsView.stateManager.moveToRestState()
     }
@@ -873,6 +895,32 @@ constructor(
             is KeyboardFocusTask.TaskViewWithIds ->
                 recentsView.getTaskViewByTaskIds(keyboardFocusTask.taskIds.toIntArray())
         }
+
+    /**
+     * Handle when the Delete key is presses. It can be one of the three following cases:
+     * 1. If a [TaskView] is in focus, dismiss it;
+     * 2. If a [DesktopTaskView] is in the exploded view, dismiss the selected window;
+     * 3. otherwise, do nothing.
+     */
+    fun onDeleteKeyPressed() {
+        taskViews.forEach { taskView ->
+            if (taskView.isFocused) {
+                recentsView.dismissTaskView(taskView, true /*removeTask*/)
+                return
+            } else if (taskView is DesktopTaskView) {
+                val focusedTaskId =
+                    taskView.taskContainers
+                        .firstOrNull { it.taskContentView.isFocused }
+                        ?.task
+                        ?.key
+                        ?.id
+                if (focusedTaskId != null) {
+                    recentsView.dismissTask(focusedTaskId, true /*animate*/, true /*removeTask*/)
+                    return
+                }
+            }
+        }
+    }
 
     fun isKeyboardTaskFocusPending() = keyboardFocusTask !is KeyboardFocusTask.Unfocused
 

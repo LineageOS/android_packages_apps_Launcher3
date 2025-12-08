@@ -480,7 +480,7 @@ public abstract class BaseLauncherTaplTest {
                 TestHelpers.wait(Until.hasObject(selector), DEFAULT_UI_TIMEOUT));
 
         // Wait for the Launcher to stop.
-        final LauncherInstrumentation launcherInstrumentation = new LauncherInstrumentation();
+        final LauncherInstrumentation launcherInstrumentation = new LauncherInstrumentation(true);
         launcherInstrumentation.waitForCondition(
                 "Launcher activity didn't stop",
                 DEFAULT_ACTIVITY_TIMEOUT,

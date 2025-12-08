@@ -119,6 +119,7 @@ import com.android.quickstep.fallback.RecentsState.Companion.MODAL_TASK
 import com.android.quickstep.fallback.RecentsState.Companion.OVERVIEW_SPLIT_SELECT
 import com.android.quickstep.fallback.toLauncherStateOrdinal
 import com.android.quickstep.recents.di.RecentsComponent
+import com.android.quickstep.split.SplitFromRunningTaskController
 import com.android.quickstep.split.SplitSelectStateController
 import com.android.quickstep.util.QuickstepProtoLogGroup
 import com.android.quickstep.util.RecentsAtomicAnimationFactory
@@ -198,6 +199,7 @@ constructor(
     private var oldConfiguration: Configuration? = null
     private var oldRotation: Int = -1
 
+    private val splitFromRunningTaskController = SplitFromRunningTaskController(this)
     private val splitSelectStateController: SplitSelectStateController =
         SplitSelectStateController(
             /* container= */ this,
@@ -208,6 +210,7 @@ constructor(
             recentsModel,
             /* activityBackCallback= */ null,
             SplitScreenUiState(),
+            splitFromRunningTaskController,
         )
 
     // Callback array that corresponds to events defined in @ActivityEvent
@@ -318,7 +321,8 @@ constructor(
                 displayId != DEFAULT_DISPLAY &&
                 desktopState.canEnterDesktopModeOrShowAppHandle
         ) {
-            splitSelectStateController.initSplitFromDesktopController(this)
+            splitSelectStateController.initSplitFromRunningTaskController(this)
+            splitFromRunningTaskController.init(splitSelectStateController)
         }
 
         displayController.getListenable(displayId)?.let {
@@ -392,6 +396,7 @@ constructor(
     }
 
     override fun destroy() {
+        Log.d(TAG, "destroy")
         super.destroy()
         displayChangesSafeCloseable?.close()
         displayChangesSafeCloseable = null
@@ -624,7 +629,7 @@ constructor(
                                 addListener(
                                     onEnd = {
                                         recentsView.resetTaskVisuals()
-                                        stateManager.reapplyState()
+                                        stateManager.moveToRestState()
                                     }
                                 )
                             }

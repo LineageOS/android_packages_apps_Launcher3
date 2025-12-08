@@ -15,11 +15,12 @@
  */
 package com.android.launcher3.taskbar;
 
+import static com.android.launcher3.LauncherModel.useModelRepositoryBinding;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_ALL_APPS_PREDICTION;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION;
-import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
 import static com.android.launcher3.taskbar.customization.TaskbarIconsContainer.TaskbarIconContainerLayoutParams;
+import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
 
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,15 +28,19 @@ import android.view.ViewGroup;
 import androidx.annotation.AnyThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.UiThread;
 
 import com.android.launcher3.Flags;
-import com.android.launcher3.LauncherModel;
 import com.android.launcher3.LauncherSettings.Favorites;
 import com.android.launcher3.celllayout.CellInfo;
+import com.android.launcher3.dagger.LauncherComponentProvider;
 import com.android.launcher3.model.BgDataModel;
 import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.PredictedContainerInfo;
+import com.android.launcher3.model.data.WorkspaceChangeEvent.AddEvent;
+import com.android.launcher3.model.data.WorkspaceChangeEvent.RemoveEvent;
+import com.android.launcher3.model.data.WorkspaceChangeEvent.UpdateEvent;
 import com.android.launcher3.model.data.WorkspaceData;
 import com.android.launcher3.taskbar.TaskbarView.TaskbarLayoutParams;
 import com.android.launcher3.taskbar.handoff.HandoffSuggestion;
@@ -82,30 +87,66 @@ public class TaskbarModelCallbacks implements
         mControllers = controllers;
     }
 
+    /** Starts listening for model repository changes to update the UI */
+    @UiThread
+    public void bindWorkspaceRepository() {
+        Preconditions.assertTaskbarUiThread();
+        var repo = LauncherComponentProvider.get(mContext).getHomeScreenRepository();
+        var state = repo.getWorkspaceState();
+
+        mContext.closeOnDestroy(state.getChanges().forEach(TASKBAR_UI_THREAD, ev -> {
+            if (ev == null) {
+                bindCompleteModel(state.getValue());
+                return null;
+            }
+            if (ev.isSource(mContext)) return null;
+            switch (ev) {
+                case AddEvent ae -> bindWorkspaceItemsAdded(ae.getItems());
+                case UpdateEvent ue -> bindWorkspaceItemsUpdated(ue.getItems());
+                case RemoveEvent re -> bindWorkspaceItemsRemoved(re.getItems());
+                default -> { }
+            }
+            return null;
+        }));
+        if (state.getValue().getVersion() > 0) {
+            bindCompleteModel(state.getValue());
+        }
+    }
+
     @AnyThread
     @Override
     public void bindCompleteModel(WorkspaceData itemIdMap, boolean isBindingSync) {
-        TASKBAR_UI_THREAD.execute(() -> {
-            mHotseatItems.clear();
-            mPredictedItems = itemIdMap.getPredictedContents(CONTAINER_HOTSEAT_PREDICTION);
-            handleItemsAdded(itemIdMap);
+        if (useModelRepositoryBinding()) return;
+        TASKBAR_UI_THREAD.execute(() -> bindCompleteModel(itemIdMap));
+    }
 
-            if (itemIdMap.get(CONTAINER_ALL_APPS_PREDICTION)
-                    instanceof PredictedContainerInfo pci) {
-                mControllers.taskbarAllAppsController.setPredictedApps(pci.getContents());
-            }
-            commitItemsToUI(/* forceUpdateHotseat = */ true);
-        });
+    @UiThread
+    private void bindCompleteModel(WorkspaceData itemIdMap) {
+        Preconditions.assertTaskbarUiThread();
+        mHotseatItems.clear();
+        mPredictedItems = itemIdMap.getPredictedContents(CONTAINER_HOTSEAT_PREDICTION);
+        handleItemsAdded(itemIdMap);
+
+        if (itemIdMap.get(CONTAINER_ALL_APPS_PREDICTION)
+                instanceof PredictedContainerInfo pci) {
+            mControllers.taskbarAllAppsController.setPredictedApps(pci.getContents());
+        }
+        commitItemsToUI(/* forceUpdateHotseat = */ true);
     }
 
     @AnyThread
     @Override
     public void bindItemsAdded(List<ItemInfo> items) {
-        TASKBAR_UI_THREAD.execute(() -> {
-            if (handleItemsAdded(items)) {
-                commitItemsToUI();
-            }
-        });
+        if (useModelRepositoryBinding()) return;
+        TASKBAR_UI_THREAD.execute(() -> bindWorkspaceItemsAdded(items));
+    }
+
+    @UiThread
+    private void bindWorkspaceItemsAdded(List<ItemInfo> items) {
+        Preconditions.assertTaskbarUiThread();
+        if (handleItemsAdded(items)) {
+            commitItemsToUI();
+        }
     }
 
     private boolean handleItemsAdded(Iterable<ItemInfo> items) {
@@ -123,28 +164,33 @@ public class TaskbarModelCallbacks implements
     @AnyThread
     @Override
     public void bindItemsUpdated(@NonNull Set<ItemInfo> updates) {
-        TASKBAR_UI_THREAD.execute(() -> {
-            Set<ItemInfo> itemsToRebind = updateContainerItems(updates, mContext);
-            boolean removed = handleItemsRemoved(ItemInfoMatcher.ofItems(itemsToRebind));
-            boolean added = handleItemsAdded(itemsToRebind);
+        if (useModelRepositoryBinding()) return;
+        TASKBAR_UI_THREAD.execute(() -> bindWorkspaceItemsUpdated(updates));
+    }
 
-            boolean predictionsUpdated = false;
-            for (ItemInfo update: updates) {
-                if (update instanceof PredictedContainerInfo pci) {
-                    if (pci.id == Favorites.CONTAINER_HOTSEAT_PREDICTION) {
-                        mPredictedItems = pci.getContents();
-                        predictionsUpdated = true;
-                    } else if (pci.id == CONTAINER_ALL_APPS_PREDICTION) {
-                        mControllers.taskbarAllAppsController.setPredictedApps(pci.getContents());
-                    }
+    @UiThread
+    private void bindWorkspaceItemsUpdated(@NonNull Set<ItemInfo> updates) {
+        Preconditions.assertTaskbarUiThread();
+        Set<ItemInfo> itemsToRebind = updateContainerItems(updates, mContext);
+        boolean removed = handleItemsRemoved(ItemInfoMatcher.ofItems(itemsToRebind));
+        boolean added = handleItemsAdded(itemsToRebind);
+
+        boolean predictionsUpdated = false;
+        for (ItemInfo update: updates) {
+            if (update instanceof PredictedContainerInfo pci) {
+                if (pci.id == Favorites.CONTAINER_HOTSEAT_PREDICTION) {
+                    mPredictedItems = pci.getContents();
+                    predictionsUpdated = true;
+                } else if (pci.id == CONTAINER_ALL_APPS_PREDICTION) {
+                    mControllers.taskbarAllAppsController.setPredictedApps(pci.getContents());
                 }
             }
-            if (removed || added || (predictionsUpdated
-                    // Avoid committing for prediction updates if they are not shown.
-                    && !mControllers.taskbarRecentAppsController.isReplacingPredictions())) {
-                commitItemsToUI();
-            }
-        });
+        }
+        if (removed || added || (predictionsUpdated
+                // Avoid committing for prediction updates if they are not shown.
+                && !mControllers.taskbarRecentAppsController.isReplacingPredictions())) {
+            commitItemsToUI();
+        }
     }
 
     @Nullable
@@ -182,11 +228,14 @@ public class TaskbarModelCallbacks implements
     @AnyThread
     @Override
     public void bindWorkspaceComponentsRemoved(Predicate<ItemInfo> matcher) {
-        TASKBAR_UI_THREAD.execute(() -> {
-            if (handleItemsRemoved(matcher)) {
-                commitItemsToUI();
-            }
-        });
+        if (useModelRepositoryBinding()) return;
+        TASKBAR_UI_THREAD.execute(() -> bindWorkspaceItemsRemoved(matcher));
+    }
+
+    @UiThread
+    private void bindWorkspaceItemsRemoved(Predicate<ItemInfo> matcher) {
+        Preconditions.assertTaskbarUiThread();
+        if (handleItemsRemoved(matcher)) commitItemsToUI();
     }
 
     private boolean handleItemsRemoved(Predicate<ItemInfo> matcher) {
@@ -308,7 +357,7 @@ public class TaskbarModelCallbacks implements
     @Override
     public void bindAllApplications(AppInfo[] apps, int flags,
             Map<PackageUserKey, Integer> packageUserKeytoUidMap) {
-        if (LauncherModel.useModelRepositoryBinding()) return;
+        if (useModelRepositoryBinding()) return;
         TASKBAR_UI_THREAD.execute(() -> {
             mContext.getActivityComponent().getAppsStore().setApps(
                     apps, flags, packageUserKeytoUidMap);

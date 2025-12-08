@@ -116,6 +116,7 @@ class GetTaskUseCaseTest {
                         isLocked = false,
                         isMinimized = false,
                         remainingAppDuration = ROUNDED_REMAINING_APP_DURATION,
+                        isAppLocked = false,
                     )
                 )
         }
@@ -142,6 +143,7 @@ class GetTaskUseCaseTest {
                         isLocked = false,
                         isMinimized = false,
                         remainingAppDuration = null,
+                        isAppLocked = false,
                     )
                 )
             verify(getRemainingAppTimerDurationUseCase, times(1))
@@ -169,6 +171,7 @@ class GetTaskUseCaseTest {
                         isLocked = false,
                         isMinimized = false,
                         remainingAppDuration = null,
+                        isAppLocked = false,
                     )
                 )
             verify(getRemainingAppTimerDurationUseCase, times(0))
@@ -185,6 +188,27 @@ class GetTaskUseCaseTest {
             val result = sut.invoke(TASK_1_ID).firstOrNull()
 
             assertThat(result!!.isLocked).isTrue()
+        }
+
+    @Test
+    fun taskIsAppLocked_isAppLockEnabled_returnsTrue() =
+        testScope.runTest {
+            tasksRepository.seedTasks(listOf(TASK_2_APP_LOCK_ENABLED))
+            tasksRepository.setVisibleTasks(DEFAULT_DISPLAY, setOf(TASK_2_APP_LOCK_ENABLED.key.id))
+
+            val result = sut.invoke(TASK_2_APP_LOCK_ENABLED.key.id).firstOrNull()
+
+            assertThat(result!!.isAppLocked).isTrue()
+        }
+
+    @Test
+    fun taskIsAppLocked_isAppLockNotEnabled_returnsFalse() =
+        testScope.runTest {
+            tasksRepository.setVisibleTasks(DEFAULT_DISPLAY, setOf(TASK_1_ID))
+
+            val result = sut.invoke(TASK_1_ID).firstOrNull()
+
+            assertThat(result!!.isAppLocked).isFalse()
         }
 
     private companion object {
@@ -215,6 +239,29 @@ class GetTaskUseCaseTest {
                     isLocked = false
                     isMinimized = false
                     topActivity = ComponentName(PACKAGE_1, "SomeClass")
+                    isAppLockEnabled = false
+                }
+        private val TASK_2_APP_LOCK_ENABLED =
+            Task(
+                    Task.TaskKey(
+                        /* id = */ 2,
+                        /* windowingMode = */ 0,
+                        /* intent = */ Intent(),
+                        /* sourceComponent = */ ComponentName("", ""),
+                        /* userId = */ USER_1,
+                        /* lastActiveTime = */ 2000,
+                    )
+                )
+                .apply {
+                    title = "Title 2"
+                    titleDescription = "Content Description 2"
+                    colorBackground = Color.BLUE
+                    icon = TASK_1_ICON
+                    thumbnail = null
+                    isLocked = false
+                    isMinimized = false
+                    topActivity = ComponentName(PACKAGE_1, "SomeOtherClass")
+                    isAppLockEnabled = true
                 }
     }
 }

@@ -12,11 +12,13 @@ import androidx.annotation.VisibleForTesting
 import com.android.launcher3.LauncherConstants.TraceEvents
 import com.android.launcher3.LauncherConstants.TraceEvents.DISPLAY_WORKSPACE_TRACE_METHOD_NAME
 import com.android.launcher3.LauncherConstants.TraceEvents.SINGLE_TRACE_COOKIE
+import com.android.launcher3.LauncherModel.Companion.useModelRepositoryBinding
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.WorkspaceLayoutManager.FIRST_SCREEN_ID
 import com.android.launcher3.allapps.AllAppsStore
 import com.android.launcher3.config.FeatureFlags
+import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.model.BgDataModel
 import com.android.launcher3.model.BgDataModel.FixedContainerItems
 import com.android.launcher3.model.ItemInstallQueue
@@ -26,6 +28,9 @@ import com.android.launcher3.model.StringCache
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.PredictedContainerInfo
+import com.android.launcher3.model.data.WorkspaceChangeEvent.AddEvent
+import com.android.launcher3.model.data.WorkspaceChangeEvent.RemoveEvent
+import com.android.launcher3.model.data.WorkspaceChangeEvent.UpdateEvent
 import com.android.launcher3.model.data.WorkspaceData
 import com.android.launcher3.popup.PopupContainer
 import com.android.launcher3.util.Executors
@@ -64,6 +69,39 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
     var hybridHotseatOrganizer: HybridHotseatOrganizer? = null
 
     val extraContainerCallbacks = SparseArray<Consumer<List<ItemInfo>>>()
+
+    fun bindWorkspaceDataModel() {
+        if (!useModelRepositoryBinding()) return
+
+        val repo = launcher.appComponent.homeScreenRepository
+        val workspaceState = repo.workspaceState
+
+        launcher.closeOnDestroy(
+            workspaceState.changes.forEach(MAIN_EXECUTOR) { ev ->
+                if (ev == null) {
+                    bindModelWithAsyncInflation(
+                        itemIdMap = workspaceState.value,
+                        isBindingSync = false,
+                    )
+                    return@forEach
+                }
+                // Ignore events which originated from our own UI
+                if (ev.isSource(launcher)) return@forEach
+
+                when (ev) {
+                    is AddEvent -> bindWorkspaceItemsAdded(ev.items)
+                    is RemoveEvent -> bindWorkspaceItemsRemoved(ev.items)
+                    is UpdateEvent -> bindWorkspaceItemsUpdated(ev.items)
+                }
+            }
+        )
+
+        if (workspaceState.value.version > 0) {
+            // If the data is already loaded, bind synchronously so that the first screen is shown
+            // immediately
+            bindModelWithAsyncInflation(itemIdMap = workspaceState.value, isBindingSync = true)
+        }
+    }
 
     /**
      * Refreshes the shortcuts shown on the workspace.
@@ -181,7 +219,7 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
         flags: Int,
         packageUserKeytoUidMap: Map<PackageUserKey, Int>,
     ) {
-        if (LauncherModel.useModelRepositoryBinding()) return
+        if (useModelRepositoryBinding()) return
         Preconditions.assertUIThread()
         val hadWorkApps = launcher.appsView.shouldShowTabs()
         launcher.activityComponent.appsStore.setApps(apps, flags, packageUserKeytoUidMap)
@@ -196,15 +234,20 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
     }
 
     override fun bindIncrementalDownloadProgressUpdated(app: AppInfo) {
-        if (LauncherModel.useModelRepositoryBinding()) return
+        if (useModelRepositoryBinding()) return
         launcher.activityComponent.appsStore.updateProgressBar(app)
+    }
+
+    override fun bindItemsUpdated(updates: Set<ItemInfo>) {
+        if (useModelRepositoryBinding()) return
+        bindWorkspaceItemsUpdated(updates)
     }
 
     /**
      * Update the state of a package, typically related to install state. Implementation of the
      * method from LauncherModel.Callbacks.
      */
-    override fun bindItemsUpdated(updates: Set<ItemInfo>) {
+    private fun bindWorkspaceItemsUpdated(updates: Set<ItemInfo>) {
         val workspace = launcher.workspace
         val itemsToRebind = workspace.updateContainerItems(updates, launcher)
         PopupContainer.dismissInvalidPopup(launcher)
@@ -225,13 +268,18 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
         workspace.stripEmptyScreens()
     }
 
+    override fun bindWorkspaceComponentsRemoved(matcher: Predicate<ItemInfo?>) {
+        if (useModelRepositoryBinding()) return
+        bindWorkspaceItemsRemoved(matcher)
+    }
+
     /**
      * A package was uninstalled/updated. We take both the super set of packageNames in addition to
      * specific applications to remove, the reason being that this can be called when a package is
      * updated as well. In that scenario, we only remove specific components from the workspace and
      * hotseat, where as package-removal should clear all items by package name.
      */
-    override fun bindWorkspaceComponentsRemoved(matcher: Predicate<ItemInfo?>) {
+    private fun bindWorkspaceItemsRemoved(matcher: Predicate<ItemInfo?>) {
         launcher.workspace.removeItemsByMatcher(matcher, true)
         launcher.dragController.onAppsRemoved(matcher)
         PopupContainer.dismissInvalidPopup(launcher)
@@ -298,6 +346,11 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
     }
 
     override fun bindItemsAdded(items: List<ItemInfo>) {
+        if (useModelRepositoryBinding()) return
+        bindWorkspaceItemsAdded(items)
+    }
+
+    private fun bindWorkspaceItemsAdded(items: List<ItemInfo>) {
         val newScreens = LIntSet()
         val nonAnimatedItems = mutableListOf<ItemInfo>()
         val animatedItems = mutableListOf<ItemInfo>()
@@ -392,6 +445,8 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
 
     @AnyThread
     override fun bindCompleteModelAsync(itemIdMap: WorkspaceData, isBindingSync: Boolean) {
+        if (useModelRepositoryBinding()) return
+
         if (Flags.simplifiedLauncherModelBinding()) {
             bindModelWithAsyncInflation(itemIdMap, isBindingSync)
             return

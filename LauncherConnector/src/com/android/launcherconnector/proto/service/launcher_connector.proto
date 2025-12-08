@@ -2,14 +2,14 @@ syntax = "proto3";
 
 package com.android.launcherconnector;
 
-import "packages/apps/Launcher3/LauncherConnector/src/com/android/launcherconnector/proto/delete/delete_result_request.proto";
-import "packages/apps/Launcher3/LauncherConnector/src/com/android/launcherconnector/proto/delete/delete_result_response.proto";
-import "packages/apps/Launcher3/LauncherConnector/src/com/android/launcherconnector/proto/event/notify_event_request.proto";
-import "packages/apps/Launcher3/LauncherConnector/src/com/android/launcherconnector/proto/event/notify_event_response.proto";
-import "packages/apps/Launcher3/LauncherConnector/src/com/android/launcherconnector/proto/report/report_result_request.proto";
-import "packages/apps/Launcher3/LauncherConnector/src/com/android/launcherconnector/proto/report/report_result_response.proto";
-import "packages/apps/Launcher3/LauncherConnector/src/com/android/launcherconnector/proto/search/get_search_results_request.proto";
-import "packages/apps/Launcher3/LauncherConnector/src/com/android/launcherconnector/proto/search/get_search_results_response.proto";
+import "delete/delete_result_request.proto";
+import "delete/delete_result_response.proto";
+import "event/notify_event_request.proto";
+import "event/notify_event_response.proto";
+import "report/report_result_request.proto";
+import "report/report_result_response.proto";
+import "search/get_search_results_request.proto";
+import "search/get_search_results_response.proto";
 
 option java_multiple_files = true;
 option java_package = "com.android.launcherconnector.proto";

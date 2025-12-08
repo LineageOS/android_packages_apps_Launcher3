@@ -214,6 +214,20 @@ public class AppInfo extends ItemInfoWithIcon implements WorkspaceItemFactory {
             }
         }
 
+        if (android.security.Flags.appLockApis()) {
+            if (appInfo.isAppLockSupported()) {
+                info.runtimeStatusFlags |= FLAG_APP_LOCK_SUPPORTED;
+            } else {
+                info.runtimeStatusFlags &= ~FLAG_APP_LOCK_SUPPORTED;
+            }
+
+            if (appInfo.isAppLockEnabled()) {
+                info.runtimeStatusFlags |= FLAG_APP_LOCK_ENABLED;
+            } else {
+                info.runtimeStatusFlags &= ~FLAG_APP_LOCK_ENABLED;
+            }
+        }
+
         // Sets the progress level, installation and incremental download flags.
         info.setProgressLevel(
                 PackageManagerHelper.getLoadingProgress(lai),

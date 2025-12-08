@@ -70,9 +70,9 @@ class PopupAddToHomeScreenTest {
 
     @Test
     fun testAddToHomeScreenShortcut() {
+        val coordinates = IntArray(2)
         launcherActivity.executeOnLauncher { l: Launcher ->
             // Find where we'll be adding the app.
-            val coordinates = IntArray(2)
             val container = l.workspace.getScreenWithId(0)
             container.findCellForSpan(coordinates, 1, 1)
 
@@ -82,12 +82,20 @@ class PopupAddToHomeScreenTest {
             val systemShortcut: SystemShortcut<*>? =
                 SystemShortcut.ADD_TO_HOME_SCREEN.getShortcut(l, appItemInfo, appView)
             systemShortcut?.onClick(appView)
-            val itemInfo = container.getChildAt(coordinates[0], coordinates[1]).tag as ItemInfo
+        }
 
+        val itemInfo =
+            launcherActivity.waitAndGet("Item was never added to workspace") { launcher ->
+                val container = launcher.workspace.getScreenWithId(0)
+                container.getChildAt(coordinates[0], coordinates[1])?.tag as? ItemInfo
+            }
+
+        launcherActivity.executeOnLauncher { l: Launcher ->
             // Verify we added item to home screen.
             assert(itemInfo.targetComponent == appItemInfo.targetComponent)
 
             // Clean-up.
+            val container = l.workspace.getScreenWithId(0)
             container.removeAllViews()
         }
     }

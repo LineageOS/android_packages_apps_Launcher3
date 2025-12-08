@@ -24,6 +24,7 @@ import android.view.Display
 import android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
 import android.view.WindowManagerGlobal
 import com.android.app.displaylib.DefaultDisplayOnlyInstanceRepositoryImpl
+import com.android.app.displaylib.DisplayInstanceLifecycleManager
 import com.android.app.displaylib.DisplayLibBackground
 import com.android.app.displaylib.DisplayLibComponent
 import com.android.app.displaylib.DisplayLibMainThread
@@ -53,6 +54,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.StateFlow
 
 @Module(includes = [BasePerDisplayModule::class, PerDisplayRepositoriesModule::class])
 interface PerDisplayModule
@@ -86,12 +88,18 @@ object PerDisplayRepositoriesModule {
         repositoryFactory: PerDisplayInstanceRepositoryImpl.Factory<PerDisplayComponent>,
         displayRepository: DisplayRepository,
         instanceFactory: PerDisplayComponent.Factory,
+        @DisplaysWithDecorations
+        displaysWithDecorationsLifecycleManager: DisplayInstanceLifecycleManager,
     ): PerDisplayRepository<PerDisplayComponent> {
         val instanceProvider = PerDisplayInstanceProvider { displayId ->
             displayRepository.getDisplay(displayId)?.let { instanceFactory.build(it) }
         }
         return if (enableOverviewOnConnectedDisplays()) {
-            repositoryFactory.create("PerDisplayComponentRepo", instanceProvider)
+            repositoryFactory.create(
+                "PerDisplayComponentRepo",
+                instanceProvider,
+                displaysWithDecorationsLifecycleManager,
+            )
         } else {
             DefaultDisplayOnlyInstanceRepositoryImpl("PerDisplayComponentRepo", instanceProvider)
         }
@@ -132,9 +140,15 @@ object PerDisplayRepositoriesModule {
     fun provideRecentsWindowManagerRepo(
         repositoryFactory: PerDisplayInstanceRepositoryImpl.Factory<RecentsWindowManager>,
         instanceProvider: RecentsWindowManagerInstanceProvider,
+        @DisplaysWithDecorations
+        displaysWithDecorationsLifecycleManager: DisplayInstanceLifecycleManager,
     ): PerDisplayRepository<RecentsWindowManager> {
         return if (enableOverviewOnConnectedDisplays()) {
-            repositoryFactory.create("RecentsWindowManagerRepo", instanceProvider)
+            repositoryFactory.create(
+                "RecentsWindowManagerRepo",
+                instanceProvider,
+                displaysWithDecorationsLifecycleManager,
+            )
         } else {
             DefaultDisplayOnlyInstanceRepositoryImpl("RecentsWindowManagerRepo", instanceProvider)
         }
@@ -149,6 +163,17 @@ object PerDisplayRepositoriesModule {
             "RecentsWindowTrackerRepo",
             PerDisplayComponent::getRecentsWindowTracker,
         )
+
+    @Provides
+    @LauncherAppSingleton
+    @DisplaysWithDecorations
+    fun provideDisplaysWithDecorationsLifecycleManager(
+        displaysWithDecorationsRepository: DisplaysWithDecorationsRepository
+    ) =
+        object : DisplayInstanceLifecycleManager {
+            override val displayIds: StateFlow<Set<Int>>
+                get() = displaysWithDecorationsRepository.displayIdsWithSystemDecorations
+        }
 }
 
 /**

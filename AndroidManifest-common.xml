@@ -45,6 +45,8 @@
     <uses-permission android:name="android.permission.ROTATE_SURFACE_FLINGER" />
     <uses-permission android:name="android.permission.WAKEUP_SURFACE_FLINGER" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.LOCK_APPS"
+                     android:featureFlag="android.security.app_lock_apis" />
 
     <permission
         android:name="${applicationId}.permission.GRID_CONTROL"

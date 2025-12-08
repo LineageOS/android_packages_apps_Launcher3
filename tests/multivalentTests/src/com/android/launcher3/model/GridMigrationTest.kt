@@ -16,16 +16,13 @@
 
 package com.android.launcher3.model
 
-import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.platform.test.rule.LimitDevicesRule
 import android.platform.test.rule.SkipOnDeviceless
 import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
-import com.android.launcher3.Flags
 import com.android.launcher3.GridType.Companion.GRID_TYPE_ANY
 import com.android.launcher3.InvariantDeviceProfile.TYPE_PHONE
 import com.android.launcher3.LauncherSettings.Favorites.TABLE_NAME
@@ -42,7 +39,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 
-private val phoneContext = InstrumentationRegistry.getInstrumentation().targetContext
+private val phoneContext = getInstrumentation().targetContext
 
 data class EntryData(
     val x: Int,
@@ -82,7 +79,6 @@ class GridMigrationData(dbFileName: String?, val gridState: DeviceGridState) {
 @SmallTest
 @SkipOnDeviceless // SQLite
 @RunWith(AndroidJUnit4::class)
-@EnableFlags(Flags.FLAG_ONE_GRID_SPECS)
 class GridMigrationTest {
     @Rule @JvmField val limitDevicesRule = LimitDevicesRule()
 
@@ -131,7 +127,6 @@ class GridMigrationTest {
             dst.gridState,
             dst.dbHelper,
             src.dbHelper.readableDatabase,
-            true,
             modelDelegate,
         )
     }

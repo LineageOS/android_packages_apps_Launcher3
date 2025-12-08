@@ -233,11 +233,9 @@ public class GridCustomizationsProxy implements ProxyProvider {
                     Log.d(TAG, "query: Found " + gridOptionList.size()
                             + " available grid options.");
                 }
-                if (com.android.launcher3.Flags.oneGridSpecs()) {
-                    gridOptionList.sort(Comparator
-                            .comparingInt((GridOption option) -> option.numColumns)
-                            .reversed());
-                }
+                gridOptionList.sort(Comparator
+                        .comparingInt((GridOption option) -> option.numColumns)
+                        .reversed());
                 for (GridOption gridOption : gridOptionList) {
                     cursor.newRow()
                             .add(KEY_NAME, gridOption.name)

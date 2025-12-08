@@ -67,6 +67,7 @@ constructor(
                 isLocked = isLocked,
                 isMinimized = task.isMinimized,
                 remainingAppDuration = remainingDuration,
+                isAppLocked = task.isAppLockEnabled,
             )
         }
 }

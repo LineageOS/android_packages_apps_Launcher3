@@ -119,6 +119,6 @@ sealed class WorkspaceData : Iterable<ItemInfo> {
     }
 
     companion object {
-        private val VERSION_COUNTER = AtomicInteger()
+        private val VERSION_COUNTER = AtomicInteger(1)
     }
 }

@@ -28,6 +28,7 @@ import com.android.launcher3.OnAlarmListener
 import com.android.launcher3.dragndrop.DragController
 import com.android.launcher3.dragndrop.DragOptions
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.model.data.TaskItemInfo.Companion.isSameItem
 import com.android.launcher3.model.data.WorkspaceItemFactory
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.util.IntSparseArrayMap
@@ -49,10 +50,11 @@ class TaskbarViewDragDropController(
 
     @VisibleForTesting val taskbarPinningDropTarget = PinningDropTarget(taskbarPinDelegate, false)
     @VisibleForTesting val unpinDropTarget = UnpinDropTarget()
+    @VisibleForTesting var targetPinIndex = -1
+    @VisibleForTesting var overflowPinningDropTarget: PinningDropTarget? = null
     private var modelCallbacks: TaskbarModelCallbacks? = null
-    private var overflowPinningDropTarget: PinningDropTarget? = null
 
-    private val overflowContainerAlarm = Alarm(Looper.getMainLooper())
+    @VisibleForTesting val overflowContainerAlarm = Alarm(Looper.getMainLooper())
 
     private enum class AlarmState {
         RUNNING_OPEN,
@@ -137,6 +139,126 @@ class TaskbarViewDragDropController(
     }
 
     /**
+     * Returns [targetScreenId] where the dragObject is dropped at, and [shouldShiftLeft] which is
+     * true if the dragged item's space can be made by shifting items before the dropped index to
+     * the left in the hotseat.
+     */
+    private fun getDropTargetState(
+        hotSeatItems: IntSparseArrayMap<ItemInfo>,
+        existingInfo: ItemInfo?,
+    ): Pair<Int, Boolean> {
+        var currentPinIndex = 0
+        var lastScreenId = -1
+        var shouldShiftLeft = false
+
+        for (i in 0 until hotSeatItems.size) {
+            val item = hotSeatItems.valueAt(i) ?: continue
+            if (item.isSameItem(existingInfo)) {
+                // The dragged item is already at the target position, nothing need to change.
+                if (currentPinIndex == targetPinIndex) {
+                    return Pair(item.screenId, true)
+                }
+                continue
+            }
+
+            if (item.screenId - lastScreenId > 1) {
+                shouldShiftLeft = true
+            }
+
+            lastScreenId = item.screenId
+
+            if (currentPinIndex == targetPinIndex) {
+                return Pair(
+                    if (shouldShiftLeft) lastScreenId - 1 else lastScreenId,
+                    shouldShiftLeft,
+                )
+            }
+
+            ++currentPinIndex
+        }
+
+        return Pair(if (shouldShiftLeft) lastScreenId else lastScreenId + 1, shouldShiftLeft)
+    }
+
+    /** Returns the list of items that need to shift left after reordering. */
+    private fun getItemsToShiftLeft(
+        hotseatItems: IntSparseArrayMap<ItemInfo>,
+        existingInfo: ItemInfo?,
+        targetScreenId: Int,
+    ): List<ItemInfo> {
+        val itemsToShift = mutableListOf<ItemInfo>()
+        var nextScreenIdToShift = targetScreenId
+        for (i in hotseatItems.size - 1 downTo 0) {
+            val item = hotseatItems.valueAt(i) ?: continue
+            if (item.screenId > targetScreenId) {
+                continue
+            }
+            if (!item.isSameItem(existingInfo) && item.screenId == nextScreenIdToShift) {
+                --nextScreenIdToShift
+                itemsToShift.add(item)
+            } else {
+                break
+            }
+        }
+
+        return itemsToShift
+    }
+
+    /** Returns the list of items that need to shift right after reordering. */
+    private fun getItemsToShiftRight(
+        hotseatItems: IntSparseArrayMap<ItemInfo>,
+        existingInfo: ItemInfo?,
+        targetScreenId: Int,
+    ): List<ItemInfo> {
+        val itemsToShift = mutableListOf<ItemInfo>()
+        var nextScreenIdToShift = targetScreenId
+        for (i in 0..<hotseatItems.size) {
+            val item = hotseatItems.valueAt(i) ?: continue
+
+            if (item.screenId < targetScreenId) {
+                continue
+            }
+
+            if (!item.isSameItem(existingInfo) && item.screenId == nextScreenIdToShift) {
+                itemsToShift.add(item)
+                ++nextScreenIdToShift
+            } else {
+                break
+            }
+        }
+        return itemsToShift
+    }
+
+    private fun addOrMoveItemInDatabase(
+        hotseatItems: IntSparseArrayMap<ItemInfo>,
+        newInfo: ItemInfo,
+        existingInfo: ItemInfo?,
+    ) {
+        val (targetScreenId, shouldShiftLeft) = getDropTargetState(hotseatItems, existingInfo)
+        if (existingInfo?.screenId == targetScreenId) return
+
+        val itemsToShift =
+            if (shouldShiftLeft) getItemsToShiftLeft(hotseatItems, existingInfo, targetScreenId)
+            else getItemsToShiftRight(hotseatItems, existingInfo, targetScreenId)
+
+        val writer = activityContext.modelWriter
+        for (item in itemsToShift) {
+            val newPosition = item.screenId + if (shouldShiftLeft) -1 else 1
+            writer.addOrMoveItemInDatabase(item, CONTAINER_HOTSEAT, newPosition, newPosition, 0)
+        }
+        modelCallbacks?.bindItemsUpdated(itemsToShift.toSet())
+
+        writer.addOrMoveItemInDatabase(
+            newInfo,
+            CONTAINER_HOTSEAT,
+            targetScreenId,
+            targetScreenId,
+            0,
+        )
+        modelCallbacks?.bindItemsUpdated(hashSetOf(newInfo))
+    }
+
+    /**
      * Implementation of the [DropTarget] that handles drag and drop events over the recent apps
      * area.
      */
@@ -192,7 +314,6 @@ class TaskbarViewDragDropController(
         private val delegate: PinnedAppsContainerDelegate,
         private val isOverflowDropTarget: Boolean,
     ) : DropTarget {
-        private var targetPinIndex = -1
         private var draggedInfo: ItemInfo? = null
         private val dragObjectVisualCenter = FloatArray(2)
 
@@ -209,14 +330,6 @@ class TaskbarViewDragDropController(
                 is WorkspaceItemFactory -> dragItemInfo.makeWorkspaceItem(activityContext)
                 else -> null
             }
-        }
-
-        /** Returns the screenId where the dragObject is dropped at. */
-        private fun findTargetScreenId(hotSeatItems: IntSparseArrayMap<ItemInfo>): Int {
-            // TODO(b/447444838): Using the last hotSeat screenId now. Need to calculate
-            // targetScreenId based on where the object was dropped and extract them into a util
-            // function.
-            return (hotSeatItems.lastOrNull()?.screenId ?: 0) + 1
         }
 
         override fun isDropEnabled(): Boolean {
@@ -236,47 +349,8 @@ class TaskbarViewDragDropController(
             val existingInfo =
                 if (newInfo.id != ItemInfo.NO_ID && newInfo.container == CONTAINER_HOTSEAT) newInfo
                 else null
-            val targetScreenId = findTargetScreenId(hotseatItems)
 
-            // When the dragObject is from pinned items area and is moving right, shift items left
-            // to fill the gap left by the moved item.
-            val itemsToShift = mutableListOf<ItemInfo>()
-            var lastShiftedScreenId = targetScreenId - 1
-
-            if (existingInfo != null) {
-                for (i in 0..<hotseatItems.size) {
-                    val item = hotseatItems.valueAt(hotseatItems.size - i - 1) ?: continue
-
-                    if (item.screenId == lastShiftedScreenId && item != existingInfo) {
-                        itemsToShift.add(item)
-                        lastShiftedScreenId--
-                    } else if (item.screenId != targetScreenId) {
-                        break
-                    }
-                }
-            }
-
-            val writer = activityContext.modelWriter
-            for (item in itemsToShift) {
-                writer.addOrMoveItemInDatabase(
-                    item,
-                    CONTAINER_HOTSEAT,
-                    item.screenId - 1,
-                    item.screenId - 1,
-                    0,
-                )
-            }
-            modelCallbacks?.bindItemsUpdated(itemsToShift.toSet())
-
-            val newItemScreenId = targetScreenId - if (existingInfo != null) 1 else 0
-            writer.addOrMoveItemInDatabase(
-                newInfo,
-                CONTAINER_HOTSEAT,
-                newItemScreenId,
-                newItemScreenId,
-                0,
-            )
-            modelCallbacks?.bindItemsUpdated(hashSetOf(newInfo))
+            addOrMoveItemInDatabase(hotseatItems, newInfo, existingInfo)
         }
 
         override fun onDragEnter(dragObject: DropTarget.DragObject?) {

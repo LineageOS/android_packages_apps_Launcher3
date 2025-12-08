@@ -495,7 +495,6 @@ public abstract class RecentsView<
 
     private static final float FOREGROUND_SCRIM_TINT = 0.32f;
 
-    protected final RecentsOrientedState mOrientationState;
     protected final BaseContainerInterface<STATE_TYPE, ?> mContainerInterface;
     @Nullable
     protected RecentsAnimationController mRecentsAnimationController;
@@ -640,11 +639,11 @@ public abstract class RecentsView<
                     MAIN_EXECUTOR,
                     apkRemoved -> {
                         if (apkRemoved) {
-                            dismissTask(taskId, /* removeTask= */false);
+                            dismissTask(taskId, /*animate=*/true, /*removeTask=*/false);
                         } else {
                             mRecentsModel.isTaskRemoved(taskKey.id, taskRemoved -> {
                                 if (taskRemoved) {
-                                    dismissTask(taskId, /* removeTask= */false);
+                                    dismissTask(taskId, /*animate=*/true, /*removeTask=*/false);
                                 }
                             }, RecentsFilterState.getFilter(mContainer.getDisplayId()));
                         }
@@ -658,7 +657,7 @@ public abstract class RecentsView<
                 return;
             }
             if (newDisplayId != mContainer.getDisplayId()) {
-                dismissTask(taskId, /* removeTask= */ false);
+                dismissTask(taskId, /*animate=*/ true, /*removeTask=*/ false);
             }
         }
 
@@ -667,7 +666,7 @@ public abstract class RecentsView<
                 boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
             if (enableCreateAnyBubble() && task.isAppBubble && mHandleTaskStackChanges) {
                 // Remove task from recents if it moved to a bubble, but keep it running
-                dismissTask(task.taskId, /* removeTask= */ false);
+                dismissTask(task.taskId, /* animate= */ true, /* removeTask= */ false);
             }
         }
 
@@ -832,6 +831,7 @@ public abstract class RecentsView<
     @Inject SystemUiProxy mSystemUiProxy;
     @Inject TopTaskTracker mTopTaskTracker;
     @Inject VibratorWrapper mVibratorWrapper;
+    @Inject RecentsOrientedState mOrientationState;
 
     // Package-private for Dagger only, should not use directly
     @VisibleForTesting
@@ -856,15 +856,15 @@ public abstract class RecentsView<
 
         mContainer = RecentsViewContainer.containerFromContext(context);
         mContainerInterface = mContainer.getContainerInterface();
-        mOrientationState = new RecentsOrientedState(context, mContainerInterface);
-        mOrientationState.setRotationChangeListener(this::animateRecentsRotationInPlace);
-        final int rotation = mContainer.getDisplay().getRotation();
-        mOrientationState.setRecentsRotation(rotation);
 
         mRecentsComponent = mContainer.getRecentsComponent();
         initialiseInjectables(mRecentsComponent);
         mUtils = mUtilsFactory.create(this);
         mDismissUtils = mDismissUtilsFactory.create(this);
+
+        mOrientationState.setRotationChangeListener(this::animateRecentsRotationInPlace);
+        final int rotation = mContainer.getDisplay().getRotation();
+        mOrientationState.setRecentsRotation(rotation);
 
         mScrollHapticMinGapMillis = getResources()
                 .getInteger(R.integer.recentsScrollHapticMinGapMillis);
@@ -3488,8 +3488,23 @@ public abstract class RecentsView<
     }
 
     @UiThread
-    public void dismissTask(int taskId, boolean removeTask) {
-        mDismissUtils.dismissTask(taskId, removeTask);
+    public void dismissTask(int taskId, boolean animate, boolean removeTask) {
+        TaskView taskView = getTaskViewByTaskId(taskId);
+        if (taskView == null) {
+            Log.d(TAG, "dismissTask: " + taskId + ",  no associated TaskView");
+            return;
+        }
+        Log.d(TAG, "dismissTask: " + taskId);
+
+        if (enableDesktopExplodedView() && taskView instanceof  DesktopTaskView desktopTaskView) {
+            desktopTaskView.removeTaskFromExplodedView(taskId, animate);
+
+            if (removeTask) {
+                ActivityManagerWrapper.getInstance().removeTask(taskId);
+            }
+        } else if (!taskView.isBeingDismissed()) {
+            dismissTaskView(taskView, removeTask);
+        }
     }
 
     /** Dismisses the entire [taskView]. */
@@ -3507,13 +3522,6 @@ public abstract class RecentsView<
         InteractionJankMonitorWrapper.begin(this, Cuj.CUJ_LAUNCHER_OVERVIEW_CLEAR_ALL);
         mDismissUtils.dismissAllTasks();
         mContainer.getStatsLogManager().logger().log(LAUNCHER_TASK_CLEAR_ALL);
-    }
-
-    private void dismissCurrentTask() {
-        TaskView taskView = getNextPageTaskView();
-        if (taskView != null) {
-            dismissTaskView(taskView, true /*removeTask*/);
-        }
     }
 
     private void createDesk() {
@@ -3551,12 +3559,12 @@ public abstract class RecentsView<
                         TaskGridNavHelper.TaskNavDirection.DOWN);
             case KeyEvent.KEYCODE_DEL:
             case KeyEvent.KEYCODE_FORWARD_DEL:
-                dismissCurrentTask();
+                mUtils.onDeleteKeyPressed();
                 return true;
             case KeyEvent.KEYCODE_NUMPAD_DOT:
                 if (event.isAltPressed()) {
                     // Numpad DEL pressed while holding Alt.
-                    dismissCurrentTask();
+                    mUtils.onDeleteKeyPressed();
                     return true;
                 }
         }
@@ -5001,7 +5009,8 @@ public abstract class RecentsView<
             // Notify the SysUI to use fade-in animation when entering PiP from live tile.
             // Note: PiP2 handles entering differently, so skip if enable_pip2=true.
             mSystemUiProxy.setPipAnimationTypeToAlpha();
-            mSystemUiProxy.setShelfHeight(true, mContainer.getDeviceProfile().hotseatBarSizePx);
+            mSystemUiProxy.setShelfHeight(true,
+                    mContainer.getDeviceProfile().getHotseatProfile().getBarSizePx());
             // Transaction to hide the task to avoid flicker for entering PiP from split-screen.
             // See also {@link AbsSwipeUpHandler#maybeFinishSwipeToHome}.
             PictureInPictureSurfaceTransaction tx =

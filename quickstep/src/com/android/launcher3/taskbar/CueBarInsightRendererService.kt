@@ -23,18 +23,18 @@ import android.util.Log
 import com.android.quickstep.cuebar.data.InsightListener
 import java.lang.ref.WeakReference
 
-class CueBarInsightRendererService  : InsightRendererService() {
+class CueBarInsightRendererService : InsightRendererService() {
 
-    override fun onRegistered(): RendererFilter {
+    override fun onInitializeFilter(): RendererFilter {
         Log.d(TAG, "Service registered")
         return RendererFilter.Builder().build()
     }
 
-    override fun onRender(insights: MutableList<ContextInsight>, isAvailable: Boolean) {
+    override fun onRender(insight: ContextInsight) {
         val listener = listenerRef?.get()
         if (listener != null) {
             // Forward the data to the custom listener (the Repository)
-            listener.onInsightReceived(insights.toList())
+            listener.onInsightReceived(listOf(insight))
         } else {
             Log.w(TAG, "Insights received but no listener registered.")
         }

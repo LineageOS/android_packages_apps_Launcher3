@@ -16,6 +16,7 @@
 
 package com.android.quickstep.recents.ui.mapper
 
+import android.security.Flags.appLockCore
 import android.util.Log
 import android.view.View.OnClickListener
 import com.android.launcher3.Flags.enableDesktopExplodedView
@@ -27,6 +28,7 @@ import com.android.quickstep.task.TaskDismissButtonState
 import com.android.quickstep.task.apptimer.TaskAppTimerUiState
 import com.android.quickstep.task.thumbnail.TaskHeaderUiState
 import com.android.quickstep.task.thumbnail.TaskThumbnailUiState
+import com.android.quickstep.task.thumbnail.TaskThumbnailUiState.AppLocked
 import com.android.quickstep.task.thumbnail.TaskThumbnailUiState.BackgroundOnly
 import com.android.quickstep.task.thumbnail.TaskThumbnailUiState.LiveTile
 import com.android.quickstep.task.thumbnail.TaskThumbnailUiState.Snapshot
@@ -77,11 +79,23 @@ object TaskUiStateMapper {
         when {
             taskData !is TaskData.Data -> Uninitialized
             taskData.isLiveTile -> LiveTile
-            taskData.isLocked || taskData.thumbnailData?.thumbnail == null ->
+            taskData.isLocked -> {
+                Log.d(
+                    "b/417220811",
+                    "Task id: ${taskData.taskId}, thumbnailData: ${taskData.thumbnailData}, isLocked: true",
+                )
+                if (appLockCore()) {
+                    AppLocked(taskData.backgroundColor)
+                } else {
+                    BackgroundOnly(taskData.backgroundColor)
+                }
+            }
+            taskData.isAppLocked -> AppLocked(taskData.backgroundColor)
+            taskData.thumbnailData?.thumbnail == null ->
                 BackgroundOnly(taskData.backgroundColor).also {
                     Log.d(
                         "b/417220811",
-                        "Task id: ${taskData.taskId}, thumbnailData: ${taskData.thumbnailData}, isLocked: ${taskData.isLocked}",
+                        "Task id: ${taskData.taskId}, thumbnailData: ${taskData.thumbnailData}, isLocked: false",
                     )
                 }
             else ->

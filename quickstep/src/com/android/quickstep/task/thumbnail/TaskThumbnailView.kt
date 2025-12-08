@@ -35,6 +35,7 @@ import com.android.launcher3.LauncherAnimUtils.VIEW_ALPHA
 import com.android.launcher3.R
 import com.android.launcher3.util.MultiPropertyFactory
 import com.android.launcher3.util.ViewPool
+import com.android.quickstep.task.thumbnail.TaskThumbnailUiState.AppLocked
 import com.android.quickstep.task.thumbnail.TaskThumbnailUiState.BackgroundOnly
 import com.android.quickstep.task.thumbnail.TaskThumbnailUiState.LiveTile
 import com.android.quickstep.task.thumbnail.TaskThumbnailUiState.Snapshot
@@ -48,6 +49,7 @@ class TaskThumbnailView : FrameLayout, ViewPool.Reusable {
     private val thumbnailView: FixedSizeImageView by lazy { findViewById(R.id.task_thumbnail) }
     private val splashBackground: View by lazy { findViewById(R.id.splash_background) }
     private val splashIcon: FixedSizeImageView by lazy { findViewById(R.id.splash_icon) }
+    private val appLockIcon: FixedSizeImageView by lazy { findViewById(R.id.app_lock_icon) }
     private val dimAlpha: MultiPropertyFactory<View> by lazy {
         MultiPropertyFactory(scrimView, VIEW_ALPHA, ScrimViewAlpha.entries.size, ::maxOf)
     }
@@ -142,6 +144,7 @@ class TaskThumbnailView : FrameLayout, ViewPool.Reusable {
             is LiveTile -> drawLiveWindow()
             is SnapshotSplash -> drawSnapshotSplash(state)
             is BackgroundOnly -> drawBackground(state.backgroundColor)
+            is AppLocked -> drawAppLocked(state.backgroundColor)
         }
     }
 
@@ -204,6 +207,7 @@ class TaskThumbnailView : FrameLayout, ViewPool.Reusable {
         splashBackground.setBackgroundColor(Color.TRANSPARENT)
         splashIcon.alpha = 0f
         splashIcon.setImageDrawable(null)
+        appLockIcon.isInvisible = true
         scrimView.alpha = 0f
         alpha = 1.0f
         setBackgroundColor(Color.TRANSPARENT)
@@ -215,6 +219,11 @@ class TaskThumbnailView : FrameLayout, ViewPool.Reusable {
 
     private fun drawLiveWindow() {
         liveTileView.isInvisible = false
+    }
+
+    private fun drawAppLocked(@ColorInt background: Int) {
+        drawBackground(background)
+        appLockIcon.isInvisible = false
     }
 
     private fun drawSnapshotSplash(snapshotSplash: SnapshotSplash) {

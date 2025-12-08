@@ -39,7 +39,7 @@ sealed class WorkspaceChangeEvent(actualOwner: ModificationSource) {
         WorkspaceChangeEvent(owner)
 
     /** Some properties of existing items changed */
-    class UpdateEvent(val items: List<ItemInfo>, owner: ModificationSource) :
+    class UpdateEvent(val items: Set<ItemInfo>, owner: ModificationSource) :
         WorkspaceChangeEvent(owner)
 
     /**

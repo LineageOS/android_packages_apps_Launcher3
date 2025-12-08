@@ -48,7 +48,7 @@ object ModelRepoTestEx {
     fun TrackedWorkspaceUpdates.verifyAndGetItemsUpdated(
         updateIndex: Int = 1,
         totalUpdates: Int = 2,
-    ): List<ItemInfo> {
+    ): Set<ItemInfo> {
         assertThat(updates).hasSize(totalUpdates)
         assertThat(changes).hasSize(totalUpdates - 1)
         val updates = changes[updateIndex - 1] as UpdateEvent

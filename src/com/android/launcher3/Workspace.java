@@ -175,7 +175,8 @@ import java.util.function.Predicate;
 public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         implements DropTarget, DragSource, View.OnTouchListener, CellLayoutContainer,
         DragController.DragListener, Insettable, StateHandler<LauncherState>,
-        WorkspaceLayoutManager, LauncherBindableItemsContainer, LauncherOverlayCallbacks {
+        WorkspaceLayoutManager, LauncherBindableItemsContainer, LauncherOverlayCallbacks,
+        BoxSelectionHelper.BoxSelectionHost {
 
     /**
      * The value that {@link #mTransitionProgress} must be greater than for
@@ -419,7 +420,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         // Set insets for page indicator
         lp.topMargin = lp.leftMargin = lp.rightMargin = 0;
         lp.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
-        lp.bottomMargin = grid.hotseatBarSizePx;
+        lp.bottomMargin = grid.getHotseatProfile().getBarSizePx();
         mPageIndicator.setLayoutParams(lp);
     }
 
@@ -1168,6 +1169,14 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     @Override
     protected void onDisallowSwipeToMinusOnePage() {
         mLauncher.getOverlayManager().onDisallowSwipeToMinusOnePage();
+    }
+
+    @Override
+    public ViewGroup getBoxSelectionHostContainer() {
+        if (shouldEnableCursorDrivenWorkflows(getContext())) {
+            return mLauncher.getDragLayer();
+        }
+        return null;
     }
 
     /**
@@ -2750,12 +2759,17 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     }
 
     private boolean shouldUseHotseatAsDropLayout(DragObject dragObject) {
-        if (mLauncher.getHotseat() == null
-                || mLauncher.getHotseat().getShortcutsAndWidgets() == null
-                || isDragWidget(dragObject)) {
+        Hotseat hotseat = mLauncher.getHotseat();
+        if (hotseat == null) {
             return false;
         }
-        View hotseatShortcuts = mLauncher.getHotseat().getShortcutsAndWidgets();
+
+        ShortcutAndWidgetContainer hotseatShortcuts = hotseat.getShortcutsAndWidgets();
+        if (hotseatShortcuts == null
+                || isDragWidget(dragObject)
+                || hotseatShortcuts.getVisibility() != View.VISIBLE) {
+            return false;
+        }
         getViewBoundsRelativeToWorkspace(hotseatShortcuts, mTempRect);
         return mTempRect.contains(dragObject.x, dragObject.y);
     }

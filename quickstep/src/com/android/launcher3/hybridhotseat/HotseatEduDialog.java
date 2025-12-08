@@ -143,7 +143,8 @@ public class HotseatEduDialog extends AbstractSlideInView<Launcher> implements I
             mHotseatWrapper.setPadding(mHotseatWrapper.getPaddingLeft(), getPaddingTop(),
                     mHotseatWrapper.getPaddingRight(), bottomInset);
             mHotseatWrapper.getLayoutParams().height =
-                    mActivityContext.getDeviceProfile().hotseatBarSizePx + insets.bottom;
+                    mActivityContext.getDeviceProfile().getHotseatProfile().getBarSizePx()
+                            + insets.bottom;
 
         } else {
             setPadding(0, getPaddingTop(), 0, 0);

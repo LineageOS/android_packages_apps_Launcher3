@@ -15,6 +15,7 @@
  */
 package com.android.launcher3.taskbar;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.os.Trace.TRACE_TAG_APP;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
@@ -1139,18 +1140,25 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         return makeDefaultActivityOptions(SPLASH_SCREEN_STYLE_UNDEFINED);
     }
 
+    private ActivityOptionsWrapper getSingleActivityLaunchOptions(@Nullable ItemInfo item) {
+        return getSingleActivityLaunchOptions(item,
+                shouldLaunchInDesktop(getDisplayId(), item) ? WINDOWING_MODE_FREEFORM
+                        : WINDOWING_MODE_FULLSCREEN);
+    }
+
+    private ActivityOptionsWrapper getFullscreenActivityLaunchOptions(@Nullable ItemInfo item) {
+        return getSingleActivityLaunchOptions(item, WINDOWING_MODE_FULLSCREEN);
+    }
+
     /**
      * Returns activity options for launching a single activity from the taskbar on the display
      * associated with the taskbar.
      */
-    private ActivityOptionsWrapper getSingleActivityLaunchOptions(@Nullable ItemInfo item) {
+    private ActivityOptionsWrapper getSingleActivityLaunchOptions(@Nullable ItemInfo item,
+            int windowingMode) {
         final ActivityOptionsWrapper opts = getActivityLaunchOptions(null, item);
         opts.options.setLaunchDisplayId(getDisplayId());
-        // Launch single non-desktop activities in fullscreen to match launches from the
-        // hotseat. This needs to be explicitly set to ensure that tasks in other windowing
-        // modes are moved to fullscreen as well (otherwise they are shown in their existing
-        // mode)
-        opts.options.setLaunchWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        opts.options.setLaunchWindowingMode(windowingMode);
         return opts;
     }
 
@@ -1538,7 +1546,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         int taskbarWindowSize;
         boolean shouldTreatAsTransient =
                 isTransientTaskbar() || (enableTaskbarPinning()
-                        && mTaskbarFeatureEvaluator.getSupportsTransitionToTransientTaskbar());
+                        && mTaskbarFeatureEvaluator.getSupportsTransitionToTransientTaskbar()
+                        && isPrimaryDisplay());
 
         int extraHeightForTaskbarTooltips = resources.getDimensionPixelSize(
                 R.dimen.arrow_toast_arrow_height)
@@ -1547,7 +1556,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                 resources.getDimensionPixelSize(R.dimen.arrow_toast_text_size));
 
         // Return transient taskbar window height when pinning feature is enabled, so taskbar view
-        // does not get cut off during pinning animation.
+        // does not get cut off during pinning animation. We should only do this on primary display.
         if (shouldTreatAsTransient) {
             TaskbarProfile transientTaskbarProfile = TaskbarProfile.Factory.createTaskbarProfile(
                     getResources(),
@@ -2094,7 +2103,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             if (shouldLaunchInDesktop(displayId, info)) {
                 launchDesktopApp(intent, info, displayId);
             } else {
-                startActivity(intent, getSingleActivityLaunchOptions(info).toBundle());
+                startActivity(intent, getFullscreenActivityLaunchOptions(info).toBundle());
             }
         } catch (NullPointerException | ActivityNotFoundException | SecurityException e) {
             Toast.makeText(this, R.string.activity_not_found, Toast.LENGTH_SHORT)

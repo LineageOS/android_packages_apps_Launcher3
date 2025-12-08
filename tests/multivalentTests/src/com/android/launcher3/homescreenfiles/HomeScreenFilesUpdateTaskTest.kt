@@ -16,6 +16,7 @@
 
 package com.android.launcher3.homescreenfiles
 
+import android.content.Context
 import android.net.Uri
 import android.os.UserHandle
 import com.android.launcher3.InvariantDeviceProfile
@@ -25,6 +26,7 @@ import com.android.launcher3.Utilities.qsbOnFirstScreen
 import com.android.launcher3.WorkspaceLayoutManager.FIRST_SCREEN_ID
 import com.android.launcher3.icons.BitmapInfo
 import com.android.launcher3.icons.IconCache
+import com.android.launcher3.logging.StatsLogManager
 import com.android.launcher3.model.AllAppsList
 import com.android.launcher3.model.BgDataModel
 import com.android.launcher3.model.ModelTaskController
@@ -46,6 +48,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Answers
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.any
@@ -55,6 +58,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
 
@@ -63,6 +67,7 @@ class HomeScreenFilesUpdateTaskTest {
 
     @get:Rule val mockito = MockitoJUnit.rule()
 
+    @Mock private lateinit var context: Context
     @Mock private lateinit var apps: AllAppsList
     @Mock private lateinit var dataModel: BgDataModel
     @Mock private lateinit var dataModelCallback: BgDataModel.Callbacks
@@ -72,6 +77,10 @@ class HomeScreenFilesUpdateTaskTest {
     @Mock private lateinit var taskController: ModelTaskController
     @Mock private lateinit var user: UserHandle
     @Mock private lateinit var workspaceItemSpaceFinder: WorkspaceItemSpaceFinder
+    @Mock private lateinit var statsLogManagerFactory: StatsLogManager.StatsLogManagerFactory
+    @Mock private lateinit var statsLogManager: StatsLogManager
+    @Mock(answer = Answers.RETURNS_SELF)
+    private lateinit var statsLogger: StatsLogManager.StatsLogger
 
     private val iconsByUri = mutableMapOf<Uri, BitmapInfo>()
     private val items = mutableListOf<ItemInfo>()
@@ -128,6 +137,10 @@ class HomeScreenFilesUpdateTaskTest {
         whenever(taskController.scheduleCallbackTask(any())).thenAnswer {
             it.getArgument<LauncherModel.CallbackTask>(0).execute(dataModelCallback)
         }
+
+        // Mock user event logging.
+        whenever(statsLogManagerFactory.create(context)).thenReturn(statsLogManager)
+        whenever(statsLogManager.logger()).thenReturn(statsLogger)
     }
 
     @Test
@@ -214,6 +227,10 @@ class HomeScreenFilesUpdateTaskTest {
             }
             verifyNoMoreInteractions(modelWriter)
         }
+
+        verify(statsLogger, times(1)).withCardinality(3)
+        verify(statsLogger, times(1))
+            .log(StatsLogManager.LauncherEvent.LAUNCHER_HOME_SCREEN_FILES_COUNT)
     }
 
     @Test
@@ -280,6 +297,8 @@ class HomeScreenFilesUpdateTaskTest {
             }
             verifyNoMoreInteractions(modelWriter)
         }
+
+        verifyNoInteractions(statsLogger)
     }
 
     @Test
@@ -301,6 +320,8 @@ class HomeScreenFilesUpdateTaskTest {
         // Verify expected data model modifications.
         assertThat(items).containsExactly(itemToIgnore)
         verifyNoMoreInteractions(modelWriter)
+
+        verifyNoInteractions(statsLogger)
     }
 
     @Test
@@ -329,6 +350,8 @@ class HomeScreenFilesUpdateTaskTest {
             verify(modelWriter).updateItemInDatabase(this)
         }
         verifyNoMoreInteractions(modelWriter)
+
+        verifyNoInteractions(statsLogger)
     }
 
     private fun createDelayedInit(filesByUri: Map<Uri, HomeScreenFile>) =
@@ -352,7 +375,14 @@ class HomeScreenFilesUpdateTaskTest {
         }
 
     private fun createTask(update: HomeScreenFilesUpdate) =
-        HomeScreenFilesUpdateTask(iconCache, idp, update, workspaceItemSpaceFinder)
+        HomeScreenFilesUpdateTask(
+            context,
+            iconCache,
+            idp,
+            update,
+            workspaceItemSpaceFinder,
+            statsLogManagerFactory,
+        )
 
     private fun createUpdate(
         filesByUri: Map<Uri, HomeScreenFile?>,

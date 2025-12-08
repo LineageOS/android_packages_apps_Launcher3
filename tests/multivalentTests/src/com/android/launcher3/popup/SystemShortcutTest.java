@@ -25,13 +25,19 @@ import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_DISMISS_PREDICTION_UNDO;
+import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_SYSTEM_SHORTCUT_DISABLE_APP_LOCK_TAP;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_SYSTEM_SHORTCUT_DONT_SUGGEST_APP_TAP;
+import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_SYSTEM_SHORTCUT_ENABLE_APP_LOCK_TAP;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_TAP_TO_ADD_TO_HOME_SCREEN_FROM_ALL_APPS;
+import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_APP_LOCK_ENABLED;
+import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_APP_LOCK_SUPPORTED;
 import static com.android.launcher3.model.data.WorkspaceItemInfo.FLAG_SUPPORTS_WEB_UI;
 import static com.android.launcher3.testutil.rule.LazyInitRule.lazyP;
 import static com.android.launcher3.testutil.rule.LazyInitRule.lazyRule;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
+import static com.android.launcher3.util.Executors.ORDERED_BG_EXECUTOR;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -40,21 +46,26 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
+import android.content.pm.PackageManager;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
+import android.security.Flags;
 import android.view.View;
 
 import androidx.test.annotation.UiThreadTest;
@@ -74,6 +85,7 @@ import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.testutil.rule.LazyInitRule;
 import com.android.launcher3.util.ComponentKey;
 import com.android.launcher3.util.LauncherMultivalentJUnit;
+import com.android.launcher3.util.RunnableList;
 import com.android.launcher3.util.SandboxApplication;
 import com.android.launcher3.util.TestActivityContext;
 import com.android.launcher3.util.TestUtil;
@@ -90,6 +102,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -125,6 +138,8 @@ public class SystemShortcutTest {
     @Mock StatsLogManager mStatsLogManager;
     @Mock(answer = Answers.RETURNS_SELF) StatsLogger mStatsLogger;
     @Mock LauncherAccessibilityDelegate mLauncherAccessibilityDelegate;
+    @Mock PackageManager mPackageManager;
+    @Mock PendingIntent mPendingIntent;
 
     @Before
     public void setUp() {
@@ -146,6 +161,8 @@ public class SystemShortcutTest {
 
         mPrivateProfileManager = spy(mTestContext.getAppsView().getPrivateProfileManager());
         mWidgetPickerDataProvider = spy(mTestContext.getWidgetPickerDataProvider());
+
+        doReturn(mPackageManager).when(mTestContext).getPackageManager();
     }
 
     @Test
@@ -429,5 +446,203 @@ public class SystemShortcutTest {
                 mTestContext, mAppInfo, mView);
 
         assertNull(systemShortcut);
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_APP_LOCK_APIS)
+    public void testAppLockShortcut_flagOff_isNull() {
+        // Not supported, not enabled
+        mAppInfo = createAppInfoWithAppLock(false, false);
+        assertNull(SystemShortcut.APP_LOCK.getShortcut(mTestContext, mAppInfo, mView));
+
+        // Not supported, enabled
+        mAppInfo = createAppInfoWithAppLock(false, true);
+        assertNull(SystemShortcut.APP_LOCK.getShortcut(mTestContext, mAppInfo, mView));
+
+        // Supported, not enabled
+        mAppInfo = createAppInfoWithAppLock(true, false);
+        assertNull(SystemShortcut.APP_LOCK.getShortcut(mTestContext, mAppInfo, mView));
+
+        // Supported, enabled
+        mAppInfo = createAppInfoWithAppLock(true, true);
+        assertNull(SystemShortcut.APP_LOCK.getShortcut(mTestContext, mAppInfo, mView));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_APP_LOCK_APIS)
+    public void testAppLockShortcut_appLockNotSupported_isNull() {
+        // Not supported, not enabled
+        mAppInfo = createAppInfoWithAppLock(false, false);
+        assertNull(SystemShortcut.APP_LOCK.getShortcut(mTestContext, mAppInfo, mView));
+
+        // Not supported, enabled
+        mAppInfo = createAppInfoWithAppLock(false, true);
+        assertNull(SystemShortcut.APP_LOCK.getShortcut(mTestContext, mAppInfo, mView));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_APP_LOCK_APIS)
+    public void testEnableAppLockShortcut_clickSucceeds_defersMenuDismiss() {
+        final AppLockTestStateBuilder.Result result = new AppLockTestStateBuilder()
+                .withAppLockDisabled()
+                .setupAndGetResult();
+        final SystemShortcut spyShortcut = result.mSpyShortcut;
+
+        assertNotNull(spyShortcut);
+        assertEquals(R.string.enable_app_lock, spyShortcut.mLabelResId);
+
+        TestUtil.runOnExecutorSync(ORDERED_BG_EXECUTOR, () -> spyShortcut.onClick(mView));
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+
+        verify(mStatsLogger).log(eq(LAUNCHER_SYSTEM_SHORTCUT_ENABLE_APP_LOCK_TAP));
+        verify(mTestContext).sendPendingIntentWithAnimation(eq(mView), eq(mPendingIntent),
+                eq(mAppInfo));
+        verify(spyShortcut, never()).dismissTaskMenuView();
+
+        ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(result.mSpyAnimationCallback).add(runnableCaptor.capture());
+        runnableCaptor.getValue().run();
+        verify(spyShortcut).dismissTaskMenuView();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_APP_LOCK_APIS)
+    public void testDisableAppLockShortcut_clickSucceeds_defersMenuDismiss() {
+        final AppLockTestStateBuilder.Result result = new AppLockTestStateBuilder()
+                .withAppLockEnabled()
+                .setupAndGetResult();
+        final SystemShortcut spyShortcut = result.mSpyShortcut;
+
+        assertNotNull(spyShortcut);
+        assertEquals(R.string.disable_app_lock, spyShortcut.mLabelResId);
+
+        TestUtil.runOnExecutorSync(ORDERED_BG_EXECUTOR, () -> spyShortcut.onClick(mView));
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+
+        verify(mStatsLogger).log(eq(LAUNCHER_SYSTEM_SHORTCUT_DISABLE_APP_LOCK_TAP));
+        verify(mTestContext).sendPendingIntentWithAnimation(eq(mView), eq(mPendingIntent),
+                eq(mAppInfo));
+        verify(spyShortcut, never()).dismissTaskMenuView();
+
+        ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(result.mSpyAnimationCallback).add(runnableCaptor.capture());
+        runnableCaptor.getValue().run();
+        verify(spyShortcut).dismissTaskMenuView();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_APP_LOCK_APIS)
+    public void testAppLockShortcut_intentRetrievalFails_clickDismissesMenuAndDoesNotSendIntent() {
+        final SystemShortcut spyShortcut = new AppLockTestStateBuilder()
+                .withAppLockDisabled()
+                .withIntentRetrievalFailing()
+                .setupAndGetResult()
+                .mSpyShortcut;
+        assertNotNull(spyShortcut);
+
+        TestUtil.runOnExecutorSync(ORDERED_BG_EXECUTOR, () -> spyShortcut.onClick(mView));
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+
+        verify(mStatsLogger).log(eq(LAUNCHER_SYSTEM_SHORTCUT_ENABLE_APP_LOCK_TAP));
+        verify(spyShortcut).dismissTaskMenuView();
+        verify(mTestContext, never()).sendPendingIntentWithAnimation(any(), any(), any());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_APP_LOCK_APIS)
+    public void testAppLockShortcut_intentSendFails_clickDismissesMenu() {
+        final SystemShortcut spyShortcut = new AppLockTestStateBuilder()
+                .withAppLockDisabled()
+                .withIntentSendFailing()
+                .setupAndGetResult()
+                .mSpyShortcut;
+        assertNotNull(spyShortcut);
+
+        TestUtil.runOnExecutorSync(ORDERED_BG_EXECUTOR, () -> spyShortcut.onClick(mView));
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+
+        verify(mStatsLogger).log(eq(LAUNCHER_SYSTEM_SHORTCUT_ENABLE_APP_LOCK_TAP));
+        verify(mTestContext).sendPendingIntentWithAnimation(eq(mView), eq(mPendingIntent),
+                eq(mAppInfo));
+        verify(spyShortcut).dismissTaskMenuView();
+    }
+
+    private AppInfo createAppInfoWithAppLock(boolean isAppLockSupported, boolean isAppLockEnabled) {
+        AppInfo appInfo = new AppInfo();
+        if (isAppLockSupported) {
+            appInfo.runtimeStatusFlags |= FLAG_APP_LOCK_SUPPORTED;
+        } else {
+            appInfo.runtimeStatusFlags &= ~FLAG_APP_LOCK_SUPPORTED;
+        }
+        if (isAppLockEnabled) {
+            appInfo.runtimeStatusFlags |= FLAG_APP_LOCK_ENABLED;
+        } else {
+            appInfo.runtimeStatusFlags &= ~FLAG_APP_LOCK_ENABLED;
+        }
+        appInfo.componentName = new ComponentName(mTestContext, getClass());
+        return appInfo;
+    }
+
+    /** A builder to set up the environment for testing the App Lock shortcut for supported apps. */
+    private class AppLockTestStateBuilder {
+        private boolean mIsAppLockEnabled = false;
+        private boolean mGetIntentReturnsNull = false;
+        private boolean mSendIntentReturnsNull = false;
+
+        // A simple data class to hold the results of the builder setup.
+        private static class Result {
+            final SystemShortcut mSpyShortcut;
+            final RunnableList mSpyAnimationCallback;
+
+            Result(SystemShortcut spyShortcut, RunnableList spyAnimationCallback) {
+                this.mSpyShortcut = spyShortcut;
+                this.mSpyAnimationCallback = spyAnimationCallback;
+            }
+        }
+
+        AppLockTestStateBuilder withAppLockDisabled() {
+            mIsAppLockEnabled = false;
+            return this;
+        }
+
+        AppLockTestStateBuilder withAppLockEnabled() {
+            mIsAppLockEnabled = true;
+            return this;
+        }
+
+        AppLockTestStateBuilder withIntentRetrievalFailing() {
+            mGetIntentReturnsNull = true;
+            return this;
+        }
+
+        AppLockTestStateBuilder withIntentSendFailing() {
+            mSendIntentReturnsNull = true;
+            return this;
+        }
+
+        /**
+         * Sets up all mocks based on the configured state and returns the results.
+         */
+        Result setupAndGetResult() {
+            mAppInfo = createAppInfoWithAppLock(/* isAppLockSupported= */ true, mIsAppLockEnabled);
+
+            PendingIntent intent = mGetIntentReturnsNull ? null : mPendingIntent;
+            when(mPackageManager.getEnableAppLockIntentForPackage(eq(mTestContext.getPackageName()),
+                    eq(!mIsAppLockEnabled))).thenReturn(intent);
+
+            RunnableList spyRunnableList = spy(new RunnableList());
+            if (!mGetIntentReturnsNull) {
+                doReturn(mSendIntentReturnsNull ? null : spyRunnableList)
+                        .when(mTestContext).sendPendingIntentWithAnimation(
+                                eq(mView), eq(mPendingIntent), eq(mAppInfo));
+            }
+
+            SystemShortcut shortcut = SystemShortcut.APP_LOCK.getShortcut(
+                    mTestContext, mAppInfo, mView);
+
+            SystemShortcut spyShortcut = spy(shortcut);
+            doNothing().when(spyShortcut).dismissTaskMenuView();
+            return new Result(spyShortcut, spyRunnableList);
+        }
     }
 }

@@ -19,10 +19,8 @@ package com.android.launcher3.desktop
 import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.content.Context
-import android.window.DesktopExperienceFlags
 import android.window.RemoteTransition
 import android.window.TransitionFilter
-import android.window.TransitionFilter.CONTAINER_ORDER_TOP
 import com.android.internal.jank.Cuj
 import com.android.launcher3.desktop.DesktopAppLaunchTransition.AppLaunchType
 import com.android.launcher3.util.DisplayController
@@ -86,9 +84,6 @@ class DesktopAppLaunchTransitionManager(
                     mWindowingMode = WINDOWING_MODE_FREEFORM
                     mModes = DesktopAppLaunchTransition.LAUNCH_CHANGE_MODES
                     mMustBeTask = true
-                    if (!DesktopExperienceFlags.ENABLE_DESKTOP_APP_LAUNCH_BUGFIX.isTrue) {
-                        mOrder = CONTAINER_ORDER_TOP
-                    }
                 }
             return TransitionFilter().apply {
                 mTypeSet = DesktopAppLaunchTransition.LAUNCH_CHANGE_MODES

@@ -2,7 +2,6 @@
 filegroup {
     name: "launcher-e2e-inproc-tests-only",
     srcs: [
-        "tapl/TaplUtilityTest.java",
         "widget/TaplAddWidgetTest.java",
     ],
 }
@@ -11,6 +10,7 @@ filegroup {
 filegroup {
     name: "launcher-oop-tests-only",
     srcs: [
+        "tapl/TaplUtilityTest.java",
         "allapps/TaplAllAppsIconsWorkingTest.java",
         "allapps/TaplOpenCloseAllAppsTest.java",
         "appiconmenu/TaplAppIconMenuTest.java",

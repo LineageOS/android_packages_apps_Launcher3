@@ -2,8 +2,8 @@ syntax = "proto3";
 
 package com.android.launcherconnector.proto;
 
-import "packages/apps/Launcher3/LauncherConnector/src/com/android/launcherconnector/proto/common/request_context.proto";
-import "packages/apps/Launcher3/LauncherConnector/src/com/android/launcherconnector/proto/common/query_info.proto";
+import "common/request_context.proto";
+import "common/query_info.proto";
 
 option java_multiple_files = true;
 option java_package = "com.android.launcherconnector.proto";

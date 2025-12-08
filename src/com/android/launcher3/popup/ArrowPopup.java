@@ -84,7 +84,7 @@ public abstract class ArrowPopup<T extends Context & ActivityContext>
     private static final int OPEN_CHILD_FADE_DURATION_U = 83;
     private static final int OPEN_OVERSHOOT_DURATION_U = 200;
 
-    private static final int CLOSE_DURATION_U  = 233;
+    @VisibleForTesting public static final int CLOSE_DURATION_U  = 233;
     private static final int CLOSE_FADE_START_DELAY_U = 150;
     private static final int CLOSE_FADE_DURATION_U = 83;
     private static final int CLOSE_CHILD_FADE_START_DELAY_U = 150;
