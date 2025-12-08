@@ -746,3 +746,10 @@ flag {
   description: "Enables App Lock system shortcut in Launcher"
   bug: "415167460"
 }
+
+flag {
+  name: "enable_transactional_model_writer"
+  namespace: "launcher"
+  description: "Enables the new transactional model writer for Launcher persistence."
+  bug: "457449059"
+}
