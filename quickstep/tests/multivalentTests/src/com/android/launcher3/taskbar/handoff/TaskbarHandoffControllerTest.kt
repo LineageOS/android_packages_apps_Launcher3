@@ -72,8 +72,7 @@ class TaskbarHandoffControllerTest {
     fun onRemoteTasksChanged_updatesSuggestions() {
         runOnMainSync {
             HandoffSuggestionRepository.get(taskbarUnitTestRule.activityContext)
-                .listener
-                .onRemoteTasksChanged(
+                .listener(
                     listOf(
                         createRemoteTask(
                             associationId = 1,

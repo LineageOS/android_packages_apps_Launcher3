@@ -68,7 +68,7 @@ class HandoffSuggestionRepositoryTest {
 
     @Test
     fun onRemoteTasksChanged_noTasks_setsSuggestionToNull() {
-        repository.listener.onRemoteTasksChanged(emptyList())
+        repository.listener(emptyList())
         assertThat(repository.suggestion.value).isNull()
     }
 
@@ -82,7 +82,7 @@ class HandoffSuggestionRepositoryTest {
                 lastUsedTimestampMillis = 100,
                 isTaskInForeground = false,
             )
-        repository.listener.onRemoteTasksChanged(listOf(remoteTask))
+        repository.listener(listOf(remoteTask))
         assertThat(repository.suggestion.value).isNull()
     }
 
@@ -96,7 +96,7 @@ class HandoffSuggestionRepositoryTest {
                 lastUsedTimestampMillis = 100,
                 isTaskInForeground = true,
             )
-        repository.listener.onRemoteTasksChanged(listOf(remoteTask))
+        repository.listener(listOf(remoteTask))
         assertThat(repository.suggestion.value).isNull()
     }
 
@@ -118,7 +118,7 @@ class HandoffSuggestionRepositoryTest {
                 lastUsedTimestampMillis = 200,
                 isTaskInForeground = true,
             )
-        repository.listener.onRemoteTasksChanged(listOf(remoteTask1, remoteTask2))
+        repository.listener(listOf(remoteTask1, remoteTask2))
         assertSuggestionMatchesTask(repository.suggestion.value, remoteTask2)
         assertSuggestionHasBadge(repository.suggestion.value)
     }
@@ -133,7 +133,7 @@ class HandoffSuggestionRepositoryTest {
                 lastUsedTimestampMillis = 100,
                 isTaskInForeground = true,
             )
-        repository.listener.onRemoteTasksChanged(listOf(remoteTask))
+        repository.listener(listOf(remoteTask))
         assertThat(repository.suggestion.value).isNull()
     }
 
