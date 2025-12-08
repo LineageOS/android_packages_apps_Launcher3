@@ -92,6 +92,9 @@ constructor(
         MODEL_EXECUTOR.execute {
             if (options is InitializationOptions.PinWidget) {
                 widgetsModel.updateForPinRequest(options.pinItemRequest)
+                _widgetItemsByPackage.update {
+                    widgetsModel.widgetsByPackageItem.toPickableWidgets(deviceProfile)
+                }
             } else {
                 val packageUserKeyOrAll =
                     options.getWidgetAppId()?.let {
@@ -99,9 +102,9 @@ constructor(
                         PackageUserKey(it.packageName, it.userHandle)
                     }
                 widgetsModel.update(/* packageUser= */ packageUserKeyOrAll)
-            }
-            _widgetItemsByPackage.update {
-                widgetsModel.widgetsByPackageItemForPicker.toPickableWidgets(deviceProfile)
+                _widgetItemsByPackage.update {
+                    widgetsModel.widgetsByPackageItemForPicker.toPickableWidgets(deviceProfile)
+                }
             }
         }
 
