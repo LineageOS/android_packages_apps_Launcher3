@@ -103,8 +103,6 @@ import com.android.launcher3.popup.PoppableType;
 import com.android.launcher3.popup.Popup;
 import com.android.launcher3.popup.PopupController;
 import com.android.launcher3.search.StringMatcherUtility;
-import com.android.launcher3.touch.CustomEventsTouchHandler;
-import com.android.launcher3.touch.CustomTouchDelegate;
 import com.android.launcher3.util.CancellableTask;
 import com.android.launcher3.util.IntArray;
 import com.android.launcher3.util.MultiPropertyFactory;
@@ -126,8 +124,7 @@ import java.util.Locale;
  * too aggressive.
  */
 public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
-        FloatingIconViewCompanion, DraggableView, Reorderable, Poppable, IconViewController,
-        CustomTouchDelegate {
+        FloatingIconViewCompanion, DraggableView, Reorderable, Poppable, IconViewController {
 
     public static final String TAG = "BubbleTextView";
 
@@ -179,7 +176,6 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     protected int mDisplay;
 
     private final CheckLongPressHelper mLongPressHelper;
-    private final CustomEventsTouchHandler mCustomEventsTouchHandler;
 
     private boolean mLayoutHorizontal;
     private final boolean mIsRtl;
@@ -262,11 +258,6 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     @Override
     public MultiPropertyFactory<AnimatedFloat>.MultiProperty getFloatingViewTextAlpha() {
         return mTextAlphaMultiPropertyFactory.get(TEXT_ALPHA_INDEX_TRANSITION);
-    }
-
-    @Override
-    public boolean onDelegateTouchEvent(@NonNull MotionEvent event) {
-        return mCustomEventsTouchHandler.onDelegateTouchEvent(event);
     }
 
     /**
@@ -367,7 +358,6 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         mRunningAppIndicatorPaint = new Paint();
 
         mLongPressHelper = new CheckLongPressHelper(this);
-        mCustomEventsTouchHandler = new CustomEventsTouchHandler(this);
 
         mDotParams = new DotRenderer.DrawParams();
         mDotParams.setDotColor(Themes.getAttrColor(context, R.attr.notificationDotColor));
@@ -756,11 +746,6 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
                 && shouldIgnoreTouchDown(event.getX(), event.getY())) {
             return false;
         }
-
-        if (onDelegateTouchEvent(event)) {
-            return true;
-        }
-
         if (isLongClickable()) {
             super.onTouchEvent(event);
             mLongPressHelper.onTouchEvent(event);

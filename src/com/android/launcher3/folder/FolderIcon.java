@@ -86,9 +86,6 @@ import com.android.launcher3.popup.IconViewController;
 import com.android.launcher3.popup.Poppable;
 import com.android.launcher3.popup.PoppableType;
 import com.android.launcher3.popup.PopupController;
-import com.android.launcher3.touch.CustomEventsTouchHandler;
-import com.android.launcher3.touch.CustomTouchDelegate;
-import com.android.launcher3.touch.WorkspaceItemCustomActionsListener;
 import com.android.launcher3.util.MultiPropertyFactory;
 import com.android.launcher3.util.MultiTranslateDelegate;
 import com.android.launcher3.util.Themes;
@@ -105,7 +102,7 @@ import java.util.function.Predicate;
  * An icon that can appear on in the workspace representing an {@link Folder}.
  */
 public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion,
-        DraggableView, Reorderable, Poppable, IconViewController, CustomTouchDelegate {
+        DraggableView, Reorderable, Poppable, IconViewController {
 
     private final MultiTranslateDelegate mTranslateDelegate = new MultiTranslateDelegate(this);
     @Thunk ActivityContext mActivity;
@@ -113,7 +110,6 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
     public FolderInfo mInfo;
 
     private final CheckLongPressHelper mLongPressHelper;
-    private final CustomEventsTouchHandler mCustomEventsTouchHandler;
 
     static final int DROP_IN_ANIMATION_DURATION = 400;
 
@@ -175,7 +171,6 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
         super(context, attrs);
 
         mLongPressHelper = new CheckLongPressHelper(this);
-        mCustomEventsTouchHandler = new CustomEventsTouchHandler(this);
         mPreviewLayoutRule = new ClippedFolderIconLayoutRule();
         mPreviewItemManager = new PreviewItemManager(this);
         mDotParams = new DotRenderer.DrawParams();
@@ -226,7 +221,6 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
 
         icon.setTag(folderInfo);
         icon.setOnClickListener(activity.getItemOnClickListener());
-        icon.setTag(R.id.custom_actions_listener, WorkspaceItemCustomActionsListener.INSTANCE);
         icon.mInfo = folderInfo;
         icon.mActivity = activity;
         icon.mDotRenderer = grid.mDotRendererWorkSpace;
@@ -721,10 +715,6 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
             return false;
         }
 
-        if (onDelegateTouchEvent(event)) {
-            return true;
-        }
-
         // Call the superclass onTouchEvent first, because sometimes it changes the state to
         // isPressed() on an ACTION_UP
         super.onTouchEvent(event);
@@ -832,11 +822,6 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
     @Override
     public MultiPropertyFactory<AnimatedFloat>.MultiProperty getFloatingViewTextAlpha() {
         return mFolderName.getFloatingViewTextAlpha();
-    }
-
-    @Override
-    public boolean onDelegateTouchEvent(@NonNull MotionEvent event) {
-        return mCustomEventsTouchHandler.onDelegateTouchEvent(event);
     }
 
     /**

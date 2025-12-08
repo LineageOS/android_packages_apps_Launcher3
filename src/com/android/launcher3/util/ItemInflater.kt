@@ -24,6 +24,7 @@ import android.view.View.OnClickListener
 import android.view.View.OnFocusChangeListener
 import android.view.ViewGroup
 import com.android.launcher3.BubbleTextView
+import com.android.launcher3.Flags.enableCursorDrivenWorkflows
 import com.android.launcher3.LauncherAppState
 import com.android.launcher3.LauncherSettings.Favorites
 import com.android.launcher3.R
@@ -37,7 +38,7 @@ import com.android.launcher3.model.data.ItemViewProvider
 import com.android.launcher3.model.data.LauncherAppWidgetInfo
 import com.android.launcher3.model.data.WorkspaceItemFactory
 import com.android.launcher3.model.data.WorkspaceItemInfo
-import com.android.launcher3.touch.WorkspaceItemCustomActionsListener
+import com.android.launcher3.touch.ItemMouseEventHandler
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.widget.LauncherWidgetHolder
 import com.android.launcher3.widget.PendingAppWidgetHostView
@@ -122,7 +123,9 @@ class ItemInflater<T>(
             LayoutInflater.from(parent.context).inflate(layout, parent, false) as BubbleTextView
         favorite.applyFromWorkspaceItem(info)
         favorite.setOnClickListener(clickListener)
-        favorite.setTag(R.id.custom_actions_listener, WorkspaceItemCustomActionsListener)
+        if (enableCursorDrivenWorkflows()) {
+            favorite.setOnTouchListener(ItemMouseEventHandler(context, favorite))
+        }
         favorite.onFocusChangeListener = focusListener
 
         // If the icon is directly being added on homescreen, verify the high resolution icon
