@@ -24,6 +24,7 @@ import android.view.WindowManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.launcher3.Flags
+import com.android.launcher3.Flags.enableTaskbarUiThread
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.TASKBAR_PINNING
 import com.android.launcher3.LauncherPrefs.Companion.TASKBAR_PINNING_IN_DESKTOP_MODE
@@ -35,6 +36,7 @@ import com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLAG_AUTOH
 import com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLAG_AUTOHIDE_SUSPEND_EDU_OPEN
 import com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLAG_AUTOHIDE_SUSPEND_GROWTH_NUDGE_OPEN
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.asProperty
+import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.TaskbarStashController.FLAG_AUTO_STASHED_ON_HOME
 import com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_APP
 import com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_OVERVIEW
@@ -64,6 +66,7 @@ import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.UserSetupMode
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.taskbar.rules.displayControllerSpy
+import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
 import com.android.launcher3.util.RoboApiWrapper.convertToSpy
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_VISIBLE
@@ -128,14 +131,14 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(PINNED)
     fun testSetSetupUiVisible_true_stashedInApp() {
-        getInstrumentation().runOnMainSync { stashController.setSetupUIVisible(true) }
+        runOnTaskbarUiThreadSync { stashController.setSetupUIVisible(true) }
         assertThat(stashController.isStashedInApp).isTrue()
     }
 
     @Test
     @TaskbarMode(PINNED)
     fun testSetSetupUiVisible_false_unstashedInApp() {
-        getInstrumentation().runOnMainSync { stashController.setSetupUIVisible(false) }
+        runOnTaskbarUiThreadSync { stashController.setSetupUIVisible(false) }
         assertThat(stashController.isStashedInApp).isFalse()
     }
 
@@ -153,7 +156,15 @@ class TaskbarStashControllerTest {
         activityContext.controllers.sharedState?.taskbarWasPinned = true
 
         isPinned = false
-        assertThat(stashController.timeoutAlarm.alarmPending()).isTrue()
+        if (enableTaskbarUiThread()) {
+            getInstrumentation().runOnMainSync {
+                TASKBAR_UI_THREAD.execute {
+                    assertThat(stashController.timeoutAlarm.alarmPending()).isTrue()
+                }
+            }
+        } else {
+            assertThat(stashController.timeoutAlarm.alarmPending()).isTrue()
+        }
     }
 
     @Test
@@ -195,7 +206,7 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(PINNED)
     fun testIsStashed_pinnedInApp_isUnstashed() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             stashController.updateStateForFlag(FLAG_IN_APP, true)
             stashController.applyState(0)
         }
@@ -205,7 +216,7 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(PINNED)
     fun testIsStashed_pinnedOnHome_isStashed() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             stashController.updateStateForFlag(FLAG_AUTO_STASHED_ON_HOME, true)
             stashController.applyState(0)
         }
@@ -215,7 +226,7 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(PINNED)
     fun testIsStashed_pinnedOnHome_unStashed() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             stashController.updateStateForFlag(FLAG_AUTO_STASHED_ON_HOME, false)
             stashController.applyState(0)
         }
@@ -225,7 +236,7 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(TRANSIENT)
     fun testIsStashed_transientInApp_isStashed() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             stashController.updateStateForFlag(FLAG_IN_APP, true)
             stashController.applyState(0)
         }
@@ -235,7 +246,7 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(TRANSIENT)
     fun testIsStashed_transientNotInApp_isUnstashed() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             stashController.updateStateForFlag(FLAG_IN_APP, false)
             stashController.applyState(0)
         }
@@ -244,7 +255,7 @@ class TaskbarStashControllerTest {
 
     @Test
     fun testIsStashed_stashedInLauncherState_isStashed() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             stashController.updateStateForFlag(FLAG_IN_APP, false)
             stashController.updateStateForFlag(FLAG_IN_STASHED_LAUNCHER_STATE, true)
             stashController.applyState(0)
@@ -255,7 +266,7 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(TRANSIENT)
     fun testIsStashed_transientInOverview_isUnstashed() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             stashController.updateStateForFlag(FLAG_IN_APP, false)
             stashController.updateStateForFlag(FLAG_IN_OVERVIEW, true)
             stashController.applyState(0)
@@ -266,7 +277,7 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(PINNED)
     fun testIsStashed_pinnedInOverviewWithIme_isStashed() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             stashController.updateStateForFlag(FLAG_IN_APP, false)
             stashController.updateStateForFlag(FLAG_IN_OVERVIEW, true)
             stashController.updateStateForFlag(FLAG_STASHED_IME, true)
@@ -278,7 +289,7 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(PINNED)
     fun testIsStashed_inOverviewForTranslucentApp_isStashed() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             stashController.updateStateForFlag(FLAG_IN_APP, false)
             stashController.updateStateForFlag(FLAG_IN_OVERVIEW, true)
             stashController.updateStateForFlag(FLAG_STASHED_IN_OVERVIEW_FOR_TRANSLUCENT_APP, true)
@@ -290,7 +301,7 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(PINNED)
     fun testIsStashed_pinnedTaskbarWithPinnedApp_isStashed() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             stashController.updateStateForFlag(FLAG_IN_APP, true)
             stashController.updateStateForFlag(FLAG_STASHED_SYSUI, true) // App pinned.
             stashController.applyState(0)
@@ -321,7 +332,7 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(PINNED)
     fun testIsTaskbarVisibleAndNotStashing_pinnedButNotVisible_false() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             viewController.taskbarIconAlpha.get(ALPHA_INDEX_STASH).value = 0f
         }
         assertThat(stashController.isTaskbarVisibleAndNotStashing).isFalse()
@@ -330,7 +341,7 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(TRANSIENT)
     fun testIsTaskbarVisibleAndNotStashing_visibleButStashed_false() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             viewController.taskbarIconAlpha.get(ALPHA_INDEX_STASH).value = 1f
         }
         assertThat(stashController.isTaskbarVisibleAndNotStashing).isFalse()
@@ -339,7 +350,7 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(PINNED)
     fun testIsTaskbarVisibleAndNotStashing_pinnedAndVisible_true() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             viewController.taskbarIconAlpha.get(ALPHA_INDEX_STASH).value = 1f
         }
         assertThat(stashController.isTaskbarVisibleAndNotStashing).isTrue()
@@ -354,7 +365,7 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(TRANSIENT)
     fun testGetTouchableHeight_unstashedTransientMode_heightAndBottomMargin() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             stashController.updateStateForFlag(FLAG_STASHED_IN_APP_AUTO, false)
             stashController.applyState(0)
         }
@@ -414,7 +425,7 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(PINNED)
     fun testGetContentHeightToReportToApps_pinnedModeButFolded_stashedHeight() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             stashedHandleViewController.stashedHandleAlpha.get(ALPHA_INDEX_STASHED).value = 1f
             stashController.updateStateForFlag(FLAG_STASHED_SMALL_SCREEN, true)
         }
@@ -425,7 +436,7 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(PINNED)
     fun testGetContentHeightToReportToApps_homeDisabledWhenFolded_zeroHeight() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             stashedHandleViewController.stashedHandleAlpha.get(ALPHA_INDEX_STASHED).value = 1f
             stashedHandleViewController.setIsHomeButtonDisabled(true)
             stashController.updateStateForFlag(FLAG_STASHED_SMALL_SCREEN, true)
@@ -449,16 +460,14 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(TRANSIENT)
     fun testUpdateAndAnimateTransientTaskbar_unstashTaskbar_updatesState() {
-        getInstrumentation().runOnMainSync {
-            stashController.updateAndAnimateTransientTaskbar(false)
-        }
+        runOnTaskbarUiThreadSync { stashController.updateAndAnimateTransientTaskbar(false) }
         assertThat(stashController.isStashed).isFalse()
     }
 
     @Test
     @TaskbarMode(TRANSIENT)
     fun testUpdateAndAnimateTransientTaskbar_runUnstashAnimation_startsTaskbarTimeout() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             stashController.updateAndAnimateTransientTaskbar(false)
             animatorTestRule.advanceTimeBy(stashController.stashDuration)
         }
@@ -501,7 +510,7 @@ class TaskbarStashControllerTest {
         LauncherPrefs.get(context).put(TASKBAR_PINNING_IN_DESKTOP_MODE, false)
         whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
 
-        getInstrumentation().runOnMainSync { stashController.toggleTaskbarStash() }
+        runOnTaskbarUiThreadSync { stashController.toggleTaskbarStash() }
 
         assertThat(stashController.isStashed).isTrue()
     }
@@ -509,13 +518,13 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(TRANSIENT)
     fun testUpdateAndAnimateTransientTaskbar_finishTaskbarTimeout_taskbarStashes() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             stashController.updateAndAnimateTransientTaskbar(false)
             animatorTestRule.advanceTimeBy(stashController.stashDuration)
         }
         assertThat(stashController.timeoutAlarm.alarmPending()).isTrue()
 
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             stashController.timeoutAlarm.finishAlarm()
             animatorTestRule.advanceTimeBy(stashController.stashDuration)
         }
@@ -525,12 +534,12 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(TRANSIENT)
     fun testUpdateAndAnimateTransientTaskbar_autoHideSuspendedForEdu_remainsUnstashed() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             stashController.updateAndAnimateTransientTaskbar(false)
             animatorTestRule.advanceTimeBy(stashController.stashDuration)
         }
 
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             autohideSuspendController.updateFlag(FLAG_AUTOHIDE_SUSPEND_EDU_OPEN, true)
             stashController.updateAndAnimateTransientTaskbar(true)
             animatorTestRule.advanceTimeBy(stashController.stashDuration)
@@ -541,7 +550,7 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(TRANSIENT)
     fun testUpdateAndAnimateTransientTaskbar_unstashTaskbarWithBubbles_bubbleBarUnstashes() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             bubbleBarViewController.setHiddenForBubbles(false)
             bubbleStashController.stashBubbleBarImmediate()
             stashController.updateAndAnimateTransientTaskbar(false, true)
@@ -552,7 +561,7 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(TRANSIENT)
     fun testUpdateAndAnimateTransientTaskbar_unstashTaskbarWithoutBubbles_bubbleBarStashed() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             bubbleBarViewController.setHiddenForBubbles(false)
             bubbleStashController.stashBubbleBarImmediate()
             stashController.updateAndAnimateTransientTaskbar(false, false)
@@ -563,7 +572,7 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(TRANSIENT)
     fun testUpdateAndAnimateTransientTaskbar_stashTaskbarWithBubbles_bubbleBarStashes() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             bubbleBarViewController.setHiddenForBubbles(false)
             bubbleStashController.showBubbleBarImmediate()
             stashController.updateAndAnimateTransientTaskbar(true, true)
@@ -574,7 +583,7 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(TRANSIENT)
     fun testUpdateAndAnimateTransientTaskbarInSplitCreation_stashTaskbarWithBubbles_bubbleBarStashes() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             stashController.updateStateForFlag(FLAG_IN_APP, false)
             stashController.updateStateForFlag(FLAG_TASKBAR_HIDDEN, false)
             stashController.updateStateForFlag(FLAG_STASHED_IN_APP_AUTO, true)
@@ -589,7 +598,7 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(TRANSIENT)
     fun testUpdateAndAnimateTransientTaskbar_stashTaskbarWithoutBubbles_bubbleBarUnstashed() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             bubbleBarViewController.setHiddenForBubbles(false)
             bubbleStashController.showBubbleBarImmediate()
             stashController.updateAndAnimateTransientTaskbar(true, false)
@@ -600,7 +609,7 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(TRANSIENT)
     fun testUpdateAndAnimateTransientTaskbar_bubbleBarExpandedBeforeTimeout_expandedAfterwards() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             bubbleBarViewController.setHiddenForBubbles(false)
             bubbleBarViewController.animateExpanded(true)
             stashController.updateAndAnimateTransientTaskbar(false)
@@ -608,7 +617,7 @@ class TaskbarStashControllerTest {
         }
         assertThat(stashController.timeoutAlarm.alarmPending()).isTrue()
 
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             stashController.timeoutAlarm.finishAlarm()
             animatorTestRule.advanceTimeBy(stashController.stashDuration)
         }
@@ -618,21 +627,21 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(PINNED)
     fun testToggleTaskbarStash_pinnedMode_doesNothing() {
-        getInstrumentation().runOnMainSync { stashController.toggleTaskbarStash() }
+        runOnTaskbarUiThreadSync { stashController.toggleTaskbarStash() }
         assertThat(stashController.isStashed).isFalse()
     }
 
     @Test
     @TaskbarMode(TRANSIENT)
     fun testToggleTaskbarStash_transientMode_unstashesTaskbar() {
-        getInstrumentation().runOnMainSync { stashController.toggleTaskbarStash() }
+        runOnTaskbarUiThreadSync { stashController.toggleTaskbarStash() }
         assertThat(stashController.isStashed).isFalse()
     }
 
     @Test
     @TaskbarMode(TRANSIENT)
     fun testToggleTaskbarStash_twiceInTransientMode_stashesTaskbar() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             stashController.toggleTaskbarStash()
             stashController.toggleTaskbarStash()
         }
@@ -642,7 +651,7 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(TRANSIENT)
     fun testToggleTaskbarStash_notInAppWithTransientMode_doesNothing() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             stashController.updateStateForFlag(FLAG_IN_APP, false)
             stashController.applyState(0)
             stashController.toggleTaskbarStash()
@@ -654,7 +663,7 @@ class TaskbarStashControllerTest {
     @TaskbarMode(TRANSIENT)
     fun testAnimateTransientTaskbar_bubblesShownInOverview_stashesTaskbar() {
         // Start in Overview. Should unstash Taskbar.
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             stashController.updateStateForFlag(FLAG_STASHED_IN_APP_AUTO, false)
             stashController.updateStateForFlag(FLAG_IN_APP, false)
             stashController.updateStateForFlag(FLAG_IN_OVERVIEW, true)
@@ -663,7 +672,7 @@ class TaskbarStashControllerTest {
         assertThat(stashController.isStashed).isFalse()
 
         // Expand bubbles. Should stash Taskbar.
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             stashController.updateStateForSysuiFlags(SYSUI_STATE_BUBBLES_EXPANDED, false)
             animatorTestRule.advanceTimeBy(TASKBAR_STASH_DURATION)
         }
@@ -675,7 +684,7 @@ class TaskbarStashControllerTest {
     fun testAnimatePinnedTaskbar_imeShown_replacesIconsWithHandle() {
         try {
             activityContext.setImeDockedOverrideForTest(true)
-            getInstrumentation().runOnMainSync {
+            runOnTaskbarUiThreadSync {
                 stashController.updateStateForSysuiFlags(SYSUI_STATE_IME_VISIBLE, false)
                 animatorTestRule.advanceTimeBy(TASKBAR_STASH_DURATION_FOR_IME)
             }
@@ -691,12 +700,12 @@ class TaskbarStashControllerTest {
     fun testAnimatePinnedTaskbar_imeHidden_replacesHandleWithIcons() {
         try {
             activityContext.setImeDockedOverrideForTest(true)
-            getInstrumentation().runOnMainSync {
+            runOnTaskbarUiThreadSync {
                 stashController.updateStateForSysuiFlags(SYSUI_STATE_IME_VISIBLE, true)
                 animatorTestRule.advanceTimeBy(0)
             }
 
-            getInstrumentation().runOnMainSync {
+            runOnTaskbarUiThreadSync {
                 stashController.updateStateForSysuiFlags(0, true)
                 animatorTestRule.advanceTimeBy(0)
             }
@@ -713,13 +722,13 @@ class TaskbarStashControllerTest {
         try {
             activityContext.setImeDockedOverrideForTest(true)
             // Start with IME shown.
-            getInstrumentation().runOnMainSync {
+            runOnTaskbarUiThreadSync {
                 stashController.updateStateForSysuiFlags(SYSUI_STATE_IME_VISIBLE, true)
                 animatorTestRule.advanceTimeBy(0)
             }
 
             // Hide IME with animation.
-            getInstrumentation().runOnMainSync {
+            runOnTaskbarUiThreadSync {
                 stashController.updateStateForSysuiFlags(0, false)
                 // Fast forward without start delay.
                 animatorTestRule.advanceTimeBy(TASKBAR_STASH_DURATION_FOR_IME)
@@ -728,7 +737,7 @@ class TaskbarStashControllerTest {
             assertThat(viewController.areIconsVisible()).isFalse()
 
             // Advance by start delay retroactively. Animation should complete.
-            getInstrumentation().runOnMainSync {
+            runOnTaskbarUiThreadSync {
                 animatorTestRule.advanceTimeBy(stashController.taskbarStashStartDelayForIme)
             }
             assertThat(viewController.areIconsVisible()).isTrue()
@@ -742,7 +751,7 @@ class TaskbarStashControllerTest {
     fun testAnimateThreeButtonsTaskbar_imeShown_hidesIconsAndBg() {
         try {
             activityContext.setImeDockedOverrideForTest(true)
-            getInstrumentation().runOnMainSync {
+            runOnTaskbarUiThreadSync {
                 stashController.updateStateForSysuiFlags(SYSUI_STATE_IME_VISIBLE, false)
                 animatorTestRule.advanceTimeBy(TASKBAR_STASH_DURATION_FOR_IME)
             }
@@ -759,12 +768,12 @@ class TaskbarStashControllerTest {
     fun testAnimateThreeButtonsTaskbar_imeHidden_showsIconsAndBg() {
         try {
             activityContext.setImeDockedOverrideForTest(true)
-            getInstrumentation().runOnMainSync {
+            runOnTaskbarUiThreadSync {
                 stashController.updateStateForSysuiFlags(SYSUI_STATE_IME_VISIBLE, false)
                 animatorTestRule.advanceTimeBy(TASKBAR_STASH_DURATION_FOR_IME)
             }
 
-            getInstrumentation().runOnMainSync {
+            runOnTaskbarUiThreadSync {
                 stashController.updateStateForSysuiFlags(0, false)
                 animatorTestRule.advanceTimeBy(
                     TASKBAR_STASH_DURATION_FOR_IME + stashController.taskbarStashStartDelayForIme
@@ -800,7 +809,7 @@ class TaskbarStashControllerTest {
     fun testSysuiStateImeShowingInApp_imeNotDocked_notStashedForIme() {
         try {
             activityContext.setImeDockedOverrideForTest(false)
-            getInstrumentation().runOnMainSync {
+            runOnTaskbarUiThreadSync {
                 stashController.updateStateForFlag(FLAG_IN_APP, true)
                 stashController.updateStateForSysuiFlags(SYSUI_STATE_IME_VISIBLE, true)
             }
@@ -814,13 +823,13 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(PINNED)
     fun testUnlockTransition_pinnedMode_fadesOutHandle() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             stashController.updateStateForFlag(FLAG_STASHED_DEVICE_LOCKED, true)
             stashController.applyState(0)
         }
         assertThat(stashedHandleViewController.isStashedHandleVisible).isTrue()
 
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             stashController.updateStateForFlag(FLAG_STASHED_DEVICE_LOCKED, false)
             stashController.applyState()
             animatorTestRule.advanceTimeBy(stashController.stashDuration)
@@ -831,14 +840,14 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(TRANSIENT)
     fun testUnlockTransition_transientMode_fadesOutHandleEarly() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             stashController.updateStateForFlag(FLAG_IN_APP, false)
             stashController.updateStateForFlag(FLAG_STASHED_DEVICE_LOCKED, true)
             stashController.applyState(0)
         }
         assertThat(stashedHandleViewController.isStashedHandleVisible).isTrue()
 
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             stashController.updateStateForFlag(FLAG_STASHED_DEVICE_LOCKED, false)
             stashController.applyState()
             // Time it takes for just the handle to hide (full stash animation is longer).
@@ -851,7 +860,7 @@ class TaskbarStashControllerTest {
     @TaskbarMode(TRANSIENT)
     fun unstashTaskbar_inApp_navBarForciblyShown() {
         val wmLayoutParamsCaptor = argumentCaptor<WindowManager.LayoutParams>()
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             stashController.updateStateForFlag(FLAG_IN_APP, true)
             stashController.applyState(0)
             stashController.updateAndAnimateTransientTaskbar(false)
@@ -870,7 +879,7 @@ class TaskbarStashControllerTest {
     @TaskbarMode(TRANSIENT)
     fun stashTaskbar_inApp_withBubbleBarExpanded_navBarForciblyShown() {
         val wmLayoutParamsCaptor = argumentCaptor<WindowManager.LayoutParams>()
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             // unstash taskbar in an app
             stashController.updateStateForFlag(FLAG_IN_APP, true)
             stashController.applyState(0)
@@ -895,7 +904,7 @@ class TaskbarStashControllerTest {
             .isTrue()
 
         // unsuspend auto hide and verify that the nav bar window is no longer forcibly shown
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             autohideSuspendController.updateFlag(FLAG_AUTOHIDE_SUSPEND_BUBBLES, false)
         }
         verify(context.windowManagerSpy, atLeastOnce())
@@ -908,7 +917,7 @@ class TaskbarStashControllerTest {
     @TaskbarMode(TRANSIENT)
     fun stashTaskbar_taskbarAutohideSuspended_withForceShow_navBarForciblyShown() {
         val wmLayoutParamsCaptor = argumentCaptor<WindowManager.LayoutParams>()
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             // stash taskbar in an app
             stashController.updateStateForFlag(FLAG_IN_APP, true)
             stashController.applyState(0)
@@ -925,7 +934,7 @@ class TaskbarStashControllerTest {
             .isFalse()
 
         // suspend auto hide for bubbles and verify that the nav bar window is forcibly shown
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             autohideSuspendController.updateFlag(FLAG_AUTOHIDE_SUSPEND_BUBBLES, true)
         }
         verify(context.windowManagerSpy, atLeastOnce())
@@ -938,7 +947,7 @@ class TaskbarStashControllerTest {
     @TaskbarMode(TRANSIENT)
     fun stashTaskbar_taskbarAutohideSuspended_withoutForceShow_navBarNotForciblyShown() {
         val wmLayoutParamsCaptor = argumentCaptor<WindowManager.LayoutParams>()
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             // stash taskbar in an app
             stashController.updateStateForFlag(FLAG_IN_APP, true)
             stashController.applyState(0)
@@ -956,7 +965,7 @@ class TaskbarStashControllerTest {
 
         // suspend auto hide in a way that does not force show taskbar and verify that the nav bar
         // window is not forcibly shown
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             autohideSuspendController.updateFlag(FLAG_AUTOHIDE_SUSPEND_GROWTH_NUDGE_OPEN, true)
         }
         verify(context.windowManagerSpy, atLeastOnce())
