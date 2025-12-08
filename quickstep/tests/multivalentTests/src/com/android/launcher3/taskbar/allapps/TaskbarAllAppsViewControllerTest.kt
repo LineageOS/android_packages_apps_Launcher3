@@ -110,16 +110,17 @@ class TaskbarAllAppsViewControllerTest {
         val viewController = createViewController()
         runOnTaskbarUiThreadSync { viewController.show(false) }
 
-        val appsView = overlayController.requestWindow().appsView
-        runOnTaskbarUiThreadSync {
-            appsView.floatingHeaderView
-                .findFixedRowByType(PredictionRowView::class.java)
-                .setPredictedApps(TEST_PREDICTED_APPS)
-        }
-
-        val dividerView =
-            appsView.floatingHeaderView.findFixedRowByType(AppsDividerView::class.java)
-        assertThat(dividerView.dividerType).isEqualTo(DividerType.ALL_APPS_LABEL)
+        val dividerType =
+            getOnTaskbarUiThread {
+                val appsView = overlayController.requestWindow().appsView
+                appsView.floatingHeaderView
+                    .findFixedRowByType(PredictionRowView::class.java)
+                    .setPredictedApps(TEST_PREDICTED_APPS)
+                appsView.floatingHeaderView
+                    .findFixedRowByType(AppsDividerView::class.java)
+                    .dividerType
+            }
+        assertThat(dividerType).isEqualTo(DividerType.ALL_APPS_LABEL)
     }
 
     @Test
@@ -128,16 +129,17 @@ class TaskbarAllAppsViewControllerTest {
         val viewController = createViewController()
         runOnTaskbarUiThreadSync { viewController.show(false) }
 
-        val appsView = overlayController.requestWindow().appsView
-        runOnTaskbarUiThreadSync {
-            appsView.floatingHeaderView
-                .findFixedRowByType(PredictionRowView::class.java)
-                .setPredictedApps(TEST_PREDICTED_APPS)
-        }
-
-        val dividerView =
-            appsView.floatingHeaderView.findFixedRowByType(AppsDividerView::class.java)
-        assertThat(dividerView.dividerType).isEqualTo(DividerType.LINE)
+        val dividerType =
+            getOnTaskbarUiThread {
+                val appsView = overlayController.requestWindow().appsView
+                appsView.floatingHeaderView
+                    .findFixedRowByType(PredictionRowView::class.java)
+                    .setPredictedApps(TEST_PREDICTED_APPS)
+                appsView.floatingHeaderView
+                    .findFixedRowByType(AppsDividerView::class.java)
+                    .dividerType
+            }
+        assertThat(dividerType).isEqualTo(DividerType.LINE)
     }
 
     private fun createViewController(): TaskbarAllAppsViewController {
