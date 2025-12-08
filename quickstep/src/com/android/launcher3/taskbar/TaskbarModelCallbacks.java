@@ -90,6 +90,7 @@ public class TaskbarModelCallbacks implements
     /** Starts listening for model repository changes to update the UI */
     @UiThread
     public void bindWorkspaceRepository() {
+        if (!useModelRepositoryBinding()) return;
         Preconditions.assertTaskbarUiThread();
         var repo = LauncherComponentProvider.get(mContext).getHomeScreenRepository();
         var state = repo.getWorkspaceState();
