@@ -1173,7 +1173,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
     @Override
     public ViewGroup getBoxSelectionHostContainer() {
-        if (shouldEnableCursorDrivenWorkflows(getContext())) {
+        if (Flags.enableWorkspaceSelection()) {
             return mLauncher.getDragLayer();
         }
         return null;

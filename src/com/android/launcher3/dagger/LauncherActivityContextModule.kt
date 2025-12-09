@@ -31,7 +31,7 @@ class LauncherActivityContextModule {
     fun provideWorkspaceSelectionManager(
         activityContext: ActivityContext
     ): WorkspaceSelectionManager {
-        return if (Flags.enableCursorDrivenWorkflows()) {
+        return if (Flags.enableWorkspaceSelection()) {
             WorkspaceSelectionManagerImpl(activityContext)
         } else {
             WorkspaceSelectionManagerStub()
