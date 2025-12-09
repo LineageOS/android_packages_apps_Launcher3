@@ -16,18 +16,17 @@
 
 package com.android.launcher3.taskbar.rules
 
-import android.app.Instrumentation
 import android.hardware.input.InputManager
 import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings.Secure.NAV_BAR_KIDS_MODE
 import android.provider.Settings.Secure.USER_SETUP_COMPLETE
 import android.provider.Settings.Secure.getUriFor
-import androidx.test.platform.app.InstrumentationRegistry
 import com.android.app.displaylib.DisplaysWithDecorationsRepositoryCompat
 import com.android.launcher3.LauncherAppState
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.taskbar.TaskbarActivityContext
+import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.TaskbarControllers
 import com.android.launcher3.taskbar.TaskbarManager
 import com.android.launcher3.taskbar.TaskbarManagerImpl
@@ -69,8 +68,8 @@ import org.mockito.kotlin.whenever
  *
  * `@UiThreadTest` is incompatible with this rule. The annotation causes this rule to run on the
  * main thread, but it needs to be run on the test thread for it to work properly. Instead, only run
- * code that requires the main thread using something like [Instrumentation.runOnMainSync] or
- * [TestUtil.getOnUiThread].
+ * code that requires the main thread using something like [runOnTaskbarUiThreadSync] or
+ * [TestUtil.getOnTaskbarUiThread].
  *
  * ```
  * @Test
@@ -87,8 +86,6 @@ class TaskbarUnitTestRule(
     private val controllerInjectionCallback: () -> Unit = {},
 ) : TestRule {
 
-    private val instrumentation = InstrumentationRegistry.getInstrumentation()
-
     lateinit var taskbarManager: TaskbarManagerImpl
 
     val activityContext: TaskbarActivityContext
@@ -102,7 +99,7 @@ class TaskbarUnitTestRule(
             override fun evaluate() {
 
                 // Only run test when Taskbar is enabled.
-                instrumentation.runOnMainSync {
+                runOnTaskbarUiThreadSync {
                     val isTaskbarPresent =
                         LauncherAppState.getIDP(context).getDeviceProfile(context).isTaskbarPresent
                     if (isRunningInRobolectric) {
@@ -143,7 +140,7 @@ class TaskbarUnitTestRule(
                 }
 
                 taskbarManager =
-                    TestUtil.getOnUiThread {
+                    TestUtil.getOnTaskbarUiThread {
                         object :
                             TaskbarManagerImpl(
                                 context,
@@ -190,7 +187,7 @@ class TaskbarUnitTestRule(
                     if (isUserUnlocked) unlockUser()
                     base.evaluate()
                 } finally {
-                    instrumentation.runOnMainSync { taskbarManager.destroy() }
+                    runOnTaskbarUiThreadSync { taskbarManager.destroy() }
                     context.displayControllerSpy?.cleanup()
                 }
             }
@@ -198,10 +195,14 @@ class TaskbarUnitTestRule(
     }
 
     /** Simulates Taskbar recreation lifecycle. */
-    fun recreateTaskbar() = instrumentation.runOnMainSync { taskbarManager.recreateTaskbars() }
+    fun recreateTaskbar() {
+        runOnTaskbarUiThreadSync { taskbarManager.recreateTaskbars() }
+    }
 
     /** Simulates unlocking the user for the first time. */
-    fun unlockUser() = instrumentation.runOnMainSync { taskbarManager.onUserUnlocked() }
+    fun unlockUser() {
+        runOnTaskbarUiThreadSync { taskbarManager.onUserUnlocked() }
+    }
 
     // Don't use TaskbarManager property, because the function can be called before initialization.
     private fun TaskbarManagerImpl.injectControllers() {

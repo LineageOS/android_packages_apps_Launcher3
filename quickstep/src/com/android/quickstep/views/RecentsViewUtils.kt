@@ -905,7 +905,7 @@ constructor(
     fun onDeleteKeyPressed() {
         taskViews.forEach { taskView ->
             if (taskView.isFocused) {
-                recentsView.dismissTaskView(taskView, true /*removeTask*/)
+                recentsView.dismissTaskView(taskView, /* removeTask= */true)
                 return
             } else if (taskView is DesktopTaskView) {
                 val focusedTaskId =
@@ -915,7 +915,7 @@ constructor(
                         ?.key
                         ?.id
                 if (focusedTaskId != null) {
-                    recentsView.dismissTask(focusedTaskId, true /*animate*/, true /*removeTask*/)
+                    recentsView.dismissTask(focusedTaskId, /* removeTask= */true)
                     return
                 }
             }

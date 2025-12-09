@@ -40,7 +40,7 @@ import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.util.IntSparseArrayMap
-import com.android.launcher3.util.TestUtil.getOnUiThread
+import com.android.launcher3.util.TestUtil.getOnTaskbarUiThread
 import com.google.common.truth.Truth.assertThat
 import dagger.BindsInstance
 import dagger.Component
@@ -466,7 +466,7 @@ class TaskbarViewDragDropControllerTest {
     }
 
     private fun setUpPinnedOverflow(): TaskbarOverflowView {
-        val taskbarView = getOnUiThread {
+        val taskbarView = getOnTaskbarUiThread {
             val view = activityContext.dragLayer.findViewById<TaskbarView>(R.id.taskbar_view)
             view.updateItems(
                 createHotseatItems(activityContext.deviceProfile.inv.numShownHotseatIcons + 2),
@@ -476,7 +476,7 @@ class TaskbarViewDragDropControllerTest {
             view
         }
         assertThat(taskbarView.taskbarPinnedOverflowView).isNotNull()
-        val overflowIcon = getOnUiThread {
+        val overflowIcon = getOnTaskbarUiThread {
             val overflowIcon = requireNotNull(taskbarView.taskbarPinnedOverflowView)
             overflowIcon.measure(
                 MeasureSpec.makeMeasureSpec(overflowIconRect.width(), MeasureSpec.EXACTLY),

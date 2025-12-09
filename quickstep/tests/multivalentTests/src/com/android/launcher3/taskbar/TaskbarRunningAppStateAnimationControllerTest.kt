@@ -22,7 +22,7 @@ import com.android.launcher3.BubbleTextView.RunningAppState.MINIMIZED
 import com.android.launcher3.BubbleTextView.RunningAppState.NOT_RUNNING
 import com.android.launcher3.BubbleTextView.RunningAppState.RUNNING
 import com.android.launcher3.model.data.TaskItemInfo
-import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
+import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.TaskbarRunningAppStateAnimationController.Companion.LINE_ANIM_DURATION
 import com.android.launcher3.taskbar.TaskbarRunningAppStateAnimationController.Companion.UNPINNED_APP_LINE_ANIM_DELAY
 import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
@@ -56,7 +56,7 @@ class TaskbarRunningAppStateAnimationControllerTest {
     @Test
     fun updateRunningState_minimizeApp_verifyCancelEndState() {
         startStateChange(start = RUNNING, end = MINIMIZED)
-        runOnMainSync { controller.onDestroy() }
+        runOnTaskbarUiThreadSync { controller.onDestroy() }
         verifyStateSettled(state = MINIMIZED)
     }
 
@@ -77,7 +77,7 @@ class TaskbarRunningAppStateAnimationControllerTest {
     fun updateRunningState_openUnpinnedApp_verifyStartDelay() {
         btv.tag = UNPINNED_APP
         startStateChange(start = NOT_RUNNING, end = RUNNING)
-        runOnMainSync { animatorTestRule.advanceTimeBy(UNPINNED_APP_LINE_ANIM_DELAY) }
+        runOnTaskbarUiThreadSync { animatorTestRule.advanceTimeBy(UNPINNED_APP_LINE_ANIM_DELAY) }
         verifyLineIndicator(state = NOT_RUNNING)
     }
 
@@ -85,7 +85,7 @@ class TaskbarRunningAppStateAnimationControllerTest {
     fun updateRunningState_openUnpinnedApp_verifyEndState() {
         btv.tag = UNPINNED_APP
         startStateChange(start = NOT_RUNNING, end = RUNNING)
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             animatorTestRule.advanceTimeBy(UNPINNED_APP_LINE_ANIM_DELAY + LINE_ANIM_DURATION)
         }
 
@@ -96,21 +96,21 @@ class TaskbarRunningAppStateAnimationControllerTest {
     fun updateRunningState_openUnpinnedApp_verifyCancelEndState() {
         btv.tag = UNPINNED_APP
         startStateChange(start = NOT_RUNNING, end = RUNNING)
-        runOnMainSync { controller.onDestroy() }
+        runOnTaskbarUiThreadSync { controller.onDestroy() }
         verifyStateSettled(state = RUNNING)
     }
 
     @Test
     fun updateRunningState_closeApp_verifyEndState() {
         startStateChange(start = RUNNING, end = NOT_RUNNING)
-        runOnMainSync { animatorTestRule.advanceTimeBy(LINE_ANIM_DURATION) }
+        runOnTaskbarUiThreadSync { animatorTestRule.advanceTimeBy(LINE_ANIM_DURATION) }
         verifyStateSettled(state = NOT_RUNNING)
     }
 
     @Test
     fun updateRunningState_repeatUpdateDuringAnimation_animationNotCanceled() {
         startStateChange(start = MINIMIZED, end = RUNNING)
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             animatorTestRule.advanceTimeBy(FRAME_TIME_MS)
             controller.updateRunningState(btv, RUNNING, animate = false)
         }
@@ -120,7 +120,7 @@ class TaskbarRunningAppStateAnimationControllerTest {
     @Test
     fun updateRunningState_minimizedDuringOpen_verifyMinimizedEndState() {
         startStateChange(start = NOT_RUNNING, end = RUNNING)
-        runOnMainSync { controller.updateRunningState(btv, MINIMIZED, animate = true) }
+        runOnTaskbarUiThreadSync { controller.updateRunningState(btv, MINIMIZED, animate = true) }
         verifySpringAnimationEnd(MINIMIZED)
     }
 
@@ -130,7 +130,7 @@ class TaskbarRunningAppStateAnimationControllerTest {
         val btv2 = BubbleTextView(context)
         startStateChange(btv = btv2, start = RUNNING, end = MINIMIZED)
 
-        runOnMainSync { controller.onDestroy() }
+        runOnTaskbarUiThreadSync { controller.onDestroy() }
         verifyStateSettled(state = MINIMIZED)
         verifyStateSettled(btv = btv2, state = MINIMIZED)
     }
@@ -140,7 +140,7 @@ class TaskbarRunningAppStateAnimationControllerTest {
         start: RunningAppState,
         end: RunningAppState,
     ) {
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             controller.updateRunningState(btv, start, animate = false)
             controller.updateRunningState(btv, end, animate = true)
         }
@@ -151,7 +151,7 @@ class TaskbarRunningAppStateAnimationControllerTest {
     /** Verifies [btv] spring animation ends at [state]. */
     private fun verifySpringAnimationEnd(state: RunningAppState) {
         while (controller.isAnimationRunning(btv)) {
-            runOnMainSync { animatorTestRule.advanceTimeBy(FRAME_TIME_MS) }
+            runOnTaskbarUiThreadSync { animatorTestRule.advanceTimeBy(FRAME_TIME_MS) }
         }
         verifyStateSettled(state = state)
     }

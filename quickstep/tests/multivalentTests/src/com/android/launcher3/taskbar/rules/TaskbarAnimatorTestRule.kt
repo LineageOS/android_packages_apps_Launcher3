@@ -19,7 +19,7 @@ package com.android.launcher3.taskbar.rules
 import android.animation.AnimatorTestRule
 import android.view.animation.AnimationUtils.currentAnimationTimeMillis
 import com.android.launcher3.util.LauncherMultivalentJUnit.Companion.isRunningInRobolectric
-import com.android.launcher3.util.TestUtil.getOnUiThread
+import com.android.launcher3.util.TestUtil.getOnTaskbarUiThread
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
@@ -37,7 +37,7 @@ class TaskbarAnimatorTestRule(private val test: Any) : TestRule {
     override fun apply(base: Statement, description: Description): Statement {
         animatorTestRule =
             if (isRunningInRobolectric) {
-                getOnUiThread { AnimatorTestRule(this, currentAnimationTimeMillis()) }
+                getOnTaskbarUiThread { AnimatorTestRule(this, currentAnimationTimeMillis()) }
             } else {
                 AnimatorTestRule(this)
             }
