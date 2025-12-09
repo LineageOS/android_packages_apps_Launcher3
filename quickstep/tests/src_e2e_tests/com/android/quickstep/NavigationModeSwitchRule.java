@@ -28,10 +28,12 @@ import android.content.pm.PackageManager;
 import android.os.Process;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.test.uiautomator.UiDevice;
 
 import com.android.launcher3.tapl.LauncherInstrumentation;
 import com.android.launcher3.util.TestUtil;
+import com.android.launcher3.util.rule.FailureWatcher;
 import com.android.launcher3.util.ui.AbstractLauncherUiTest;
 import com.android.systemui.shared.system.QuickStepContract;
 
@@ -88,11 +90,11 @@ public class NavigationModeSwitchRule implements TestRule {
                         mLauncher.getNavigationModel();
                 try {
                     if (mode == ZERO_BUTTON || mode == ALL) {
-                        activateZeroButtons();
+                        activateZeroButtons(description);
                         base.evaluate();
                     }
                     if (mode == THREE_BUTTON || mode == ALL) {
-                        activateThreeButtons();
+                        activateThreeButtons(description);
                         base.evaluate();
                     }
                 } catch (Throwable e) {
@@ -100,7 +102,7 @@ public class NavigationModeSwitchRule implements TestRule {
                     throw e;
                 } finally {
                     Log.d(TAG, "In Finally block");
-                    setActiveOverlay(mLauncher, prevOverlayPkg, originalMode);
+                    setActiveOverlay(mLauncher, prevOverlayPkg, originalMode, description);
                 }
             }
         };
@@ -109,22 +111,24 @@ public class NavigationModeSwitchRule implements TestRule {
     /**
      * Set gesture nav to be Zero Buttons.
      */
-    public void activateZeroButtons() throws Exception {
+    public void activateZeroButtons(Description description) throws Exception {
         setActiveOverlay(
                 mLauncher,
                 NAV_BAR_MODE_GESTURAL_OVERLAY,
-                LauncherInstrumentation.NavigationModel.ZERO_BUTTON
+                LauncherInstrumentation.NavigationModel.ZERO_BUTTON,
+                description
         );
     }
 
     /**
      * Set gesture nav to be Three Buttons.
      */
-    public void activateThreeButtons() throws Exception {
+    public void activateThreeButtons(Description description) throws Exception {
         setActiveOverlay(
                 mLauncher,
                 NAV_BAR_MODE_3BUTTON_OVERLAY,
-                LauncherInstrumentation.NavigationModel.THREE_BUTTON
+                LauncherInstrumentation.NavigationModel.THREE_BUTTON,
+                description
         );
     }
 
@@ -134,8 +138,19 @@ public class NavigationModeSwitchRule implements TestRule {
                 : NAV_BAR_MODE_3BUTTON_OVERLAY;
     }
 
-    public static void setActiveOverlay(LauncherInstrumentation launcher, String overlayPackage,
+    public static void setActiveOverlay(
+            LauncherInstrumentation launcher,
+            String overlayPackage,
             LauncherInstrumentation.NavigationModel expectedMode)
+            throws Exception {
+        setActiveOverlay(launcher, overlayPackage, expectedMode, null);
+    }
+
+    public static void setActiveOverlay(
+            LauncherInstrumentation launcher,
+            String overlayPackage,
+            LauncherInstrumentation.NavigationModel expectedMode,
+            @Nullable Description description)
             throws Exception {
         if (!packageExists(overlayPackage)) {
             throw new RuntimeException(
@@ -143,23 +158,31 @@ public class NavigationModeSwitchRule implements TestRule {
             );
         }
 
-        Log.d(TAG, "setActiveOverlay: " + overlayPackage + "...");
-        UiDevice.getInstance(getInstrumentation())
-                .executeShellCommand(
-                        String.format(
-                                "cmd overlay enable-exclusive --user %d --category %s",
-                                Process.myUserHandle().getIdentifier(), overlayPackage
-                        )
-                );
+        try {
+            Log.d(TAG, "setActiveOverlay: " + overlayPackage + "...");
+            UiDevice.getInstance(getInstrumentation())
+                    .executeShellCommand(
+                            String.format(
+                                    "cmd overlay enable-exclusive --user %d --category %s",
+                                    Process.myUserHandle().getIdentifier(), overlayPackage
+                            )
+                    );
 
-        launcher.waitForCondition("Couldn't switch to " + overlayPackage,
-                TestUtil.DEFAULT_UI_TIMEOUT, () -> launcher.getNavigationModel() == expectedMode);
+            launcher.waitForCondition("Couldn't switch to " + overlayPackage,
+                    TestUtil.DEFAULT_UI_TIMEOUT,
+                    () -> launcher.getNavigationModel() == expectedMode);
 
-        launcher.waitForCondition(
-                () -> "Switching nav mode: " + launcher.getNavigationModeMismatchError(false),
-                TestUtil.DEFAULT_UI_TIMEOUT,
-                () -> launcher.getNavigationModeMismatchError(false) == null);
-        AbstractLauncherUiTest.checkDetectedLeaks(launcher);
+            launcher.waitForCondition(
+                    () -> "Switching nav mode: " + launcher.getNavigationModeMismatchError(false),
+                    TestUtil.DEFAULT_UI_TIMEOUT,
+                    () -> launcher.getNavigationModeMismatchError(false) == null);
+            AbstractLauncherUiTest.checkDetectedLeaks(launcher);
+        } catch (Exception e) {
+            if (description != null) {
+                FailureWatcher.onError(launcher, description);
+            }
+            throw e;
+        }
     }
 
     private static boolean packageExists(String packageName) {
