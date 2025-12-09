@@ -697,6 +697,19 @@ public abstract class AbsSwipeUpHandlerTestCase<
         });
     }
 
+    @Test
+    public void testTaskViewOnlyInteractiveInOverviewState() {
+        for (STATE_TYPE state : getAllStates()) {
+            if (state == getOverviewState()) {
+                assertTrue("Overview state does not allow interactive TaskViews: state=" + state,
+                        state.isTaskViewInteractive());
+            } else {
+                assertFalse("Non-overview state allows interactive TaskViews: state=" + state,
+                        state.isTaskViewInteractive());
+            }
+        }
+    }
+
     /**
      * Verifies that RecentsAnimationController#finish() is called, and captures and runs any
      * callback that was passed to it. This ensures that STATE_CURRENT_TASK_FINISHED is correctly
@@ -810,6 +823,12 @@ public abstract class AbsSwipeUpHandlerTestCase<
 
     @NonNull
     protected abstract STATE_TYPE getBaseState();
+
+    @NonNull
+    protected abstract STATE_TYPE[] getAllStates();
+
+    @NonNull
+    protected abstract STATE_TYPE getOverviewState();
 
     protected TopTaskTracker.CachedTaskInfo getTaskInfo() {
         return new TopTaskTracker.CachedTaskInfo(
