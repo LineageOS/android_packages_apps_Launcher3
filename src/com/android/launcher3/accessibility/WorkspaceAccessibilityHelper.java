@@ -16,6 +16,11 @@
 
 package com.android.launcher3.accessibility;
 
+import static com.android.launcher3.Flags.enableFileSystemFoldersAsDropTargets;
+import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FOLDER;
+
+import static java.util.Objects.requireNonNull;
+
 import android.content.Context;
 import android.text.TextUtils;
 import android.view.View;
@@ -125,7 +130,13 @@ public class WorkspaceAccessibilityHelper extends DragAndDropAccessibilityDelega
 
     public static String getDescriptionForDropOver(View overChild, Context context) {
         ItemInfo info = (ItemInfo) overChild.getTag();
-        if (info instanceof WorkspaceItemInfo) {
+        if (enableFileSystemFoldersAsDropTargets()
+                && info.itemType == ITEM_TYPE_FILE_SYSTEM_FOLDER) {
+            return context.getString(
+                    R.string.add_to_folder,
+                    requireNonNull(HomeScreenFilesUtilsKt.getHomeScreenFile(info))
+                            .getDisplayName());
+        } else if (info instanceof WorkspaceItemInfo) {
             return context.getString(R.string.create_folder_with, info.title);
         } else if (info instanceof FolderInfo) {
             if (TextUtils.isEmpty(info.title)) {

@@ -266,9 +266,13 @@ public class OptionsPopupView<T extends Context & ActivityContext> extends Arrow
     }
 
     private static boolean createNewFolder(View view) {
-        CompletableFuture<Boolean> unused =
+        CompletableFuture<Void> unused =
                 HomeScreenFilesProvider.INSTANCE.get(Launcher.getLauncher(view.getContext()))
-                        .createNewFolder();
+                        .createNewFolder()
+                        .handle((result, throwable) -> {
+                            // TODO(b/463389684): Notify user on failure.
+                            return null;
+                        });
         return true;
     }
 
