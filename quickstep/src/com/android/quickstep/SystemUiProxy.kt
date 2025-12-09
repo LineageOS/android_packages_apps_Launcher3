@@ -834,8 +834,7 @@ constructor(
             DesktopExperienceFlags.ENABLE_NON_DEFAULT_DISPLAY_SPLIT_BUGFIX.isTrue &&
                 listener != null
         ) {
-            val removeSuccess = splitSelectListeners.remove(listener)
-            Log.d("b/36737459", "removed splitSelectListener? $removeSuccess")
+            splitSelectListeners.remove(listener)
             if (splitSelectListeners.isEmpty()) {
                 executeWithErrorLog({ "Failed call unregisterSplitSelectListener" }) {
                     splitScreen?.unregisterSplitSelectListener(splitSelectListenerTracker)
