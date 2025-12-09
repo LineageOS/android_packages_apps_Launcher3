@@ -41,7 +41,6 @@ import com.android.launcher3.testing.TestLogging;
 import com.android.launcher3.testing.shared.TestProtocol;
 import com.android.quickstep.InputConsumer;
 import com.android.systemui.shared.system.InputMonitorCompat;
-import com.android.wm.shell.Flags;
 
 /**
  * Listens for touch events on the bubble bar.
@@ -203,16 +202,12 @@ public class BubbleBarInputConsumer implements InputConsumer {
                 && controllers.bubbleStashedHandleViewController.isPresent()) {
             return controllers.bubbleStashedHandleViewController.get().isEventOverHandle(ev);
         } else if (controllers.bubbleBarViewController.isBubbleBarVisible()) {
-            if (Flags.bugRotationButtonCoverBubble()) {
-                NavbarButtonsViewController navbarButtonsViewController =
-                        tac.getNavBarButtonsViewController();
-                boolean isBlockedByRotationButton = navbarButtonsViewController != null
-                        && navbarButtonsViewController.isEventOverAnyItem(ev);
-                return !isBlockedByRotationButton
-                        && controllers.bubbleBarViewController.isEventOverBubbleBar(ev);
-            } else {
-                return controllers.bubbleBarViewController.isEventOverBubbleBar(ev);
-            }
+            NavbarButtonsViewController navbarButtonsViewController =
+                    tac.getNavBarButtonsViewController();
+            boolean isBlockedByRotationButton = navbarButtonsViewController != null
+                    && navbarButtonsViewController.isEventOverAnyItem(ev);
+            return !isBlockedByRotationButton
+                    && controllers.bubbleBarViewController.isEventOverBubbleBar(ev);
         }
         return false;
     }
