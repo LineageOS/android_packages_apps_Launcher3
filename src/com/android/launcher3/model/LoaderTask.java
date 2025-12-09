@@ -16,7 +16,6 @@
 
 package com.android.launcher3.model;
 
-import static com.android.launcher3.Flags.enableFilesOnHomeScreenDecoupledInit;
 import static com.android.launcher3.Flags.enableLauncherBrMetricsFixed;
 import static com.android.launcher3.LauncherPrefs.IS_FIRST_LOAD_AFTER_RESTORE;
 import static com.android.launcher3.icons.CacheableShortcutInfo.convertShortcutsToCacheableShortcuts;
@@ -245,15 +244,12 @@ public class LoaderTask implements Runnable {
         mPrefs = prefs;
         mAutomationRepo = automationRepo;
 
-        // NOTE: When files on home screen initialization is decoupled from the loader task we must
-        // wait for the provider to become ready before querying for file system items.
+        // NOTE: Wait for the provider to become ready before querying for file system items.
         mHomeScreenFilesQueryResult =
-                enableFilesOnHomeScreenDecoupledInit()
-                        ? homeScreenFilesProvider.onReady()
-                            .thenCompose((unused) -> mStopped
-                                    ? CompletableFuture.completedFuture(Collections.emptyMap())
-                                    : homeScreenFilesProvider.query())
-                        : homeScreenFilesProvider.query();
+                homeScreenFilesProvider.onReady()
+                    .thenCompose((unused) -> mStopped
+                            ? CompletableFuture.completedFuture(Collections.emptyMap())
+                            : homeScreenFilesProvider.query());
     }
 
     protected synchronized void waitForIdle() {
@@ -329,17 +325,15 @@ public class LoaderTask implements Runnable {
         // NOTE: Model task must be enqueued after the loader has finished. Since MODEL_EXECUTOR
         // runs the task immediately if the caller is on the same thread, using a different executor
         // (THREAD_POOL_EXECUTOR) ensures the task runs after the current code-block is complete.
-        if (enableFilesOnHomeScreenDecoupledInit()) {
-            final CompletableFuture<Void> unused =
-                    mHomeScreenFilesQueryResult.thenRunAsync(() ->
-                        mModel.enqueueModelUpdateTask(
-                                mHomeScreenFilesUpdateTask.create(
-                                        new HomeScreenFilesUpdate(
-                                                mHomeScreenFilesQueryResult,
-                                                Process.myUserHandle(),
-                                                /*isDelayedInit=*/true))),
-                        THREAD_POOL_EXECUTOR);
-        }
+        final CompletableFuture<Void> unused =
+                mHomeScreenFilesQueryResult.thenRunAsync(() ->
+                    mModel.enqueueModelUpdateTask(
+                            mHomeScreenFilesUpdateTask.create(
+                                    new HomeScreenFilesUpdate(
+                                            mHomeScreenFilesQueryResult,
+                                            Process.myUserHandle(),
+                                            /*isDelayedInit=*/true))),
+                    THREAD_POOL_EXECUTOR);
 
         if (!mParams.getLoadNonWorkspaceItems()) {
             logASplit("Skipping remaining items");
