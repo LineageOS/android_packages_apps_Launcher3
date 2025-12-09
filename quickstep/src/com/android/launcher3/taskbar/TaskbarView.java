@@ -84,8 +84,8 @@ import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.taskbar.TaskbarOverflowView.OverflowType;
 import com.android.launcher3.taskbar.customization.TaskbarAllAppsButtonContainer;
 import com.android.launcher3.taskbar.customization.TaskbarDividerContainer;
-import com.android.launcher3.taskbar.customization.TaskbarIconsContainer;
 import com.android.launcher3.taskbar.customization.TaskbarSpecsEvaluator;
+import com.android.launcher3.taskbar.customization.containers.TaskbarPinnedAppIconContainer;
 import com.android.launcher3.taskbar.handoff.HandoffSuggestion;
 import com.android.launcher3.util.LauncherBindableItemsContainer.ItemOperator;
 import com.android.launcher3.util.Themes;
@@ -148,7 +148,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
     @Nullable private TaskbarDividerContainer mTaskbarDividerContainer;
 
     // Only non-null when taskbar customization is enabled.
-    @Nullable private TaskbarIconsContainer mHotseatIconsContainer;
+    @Nullable private TaskbarPinnedAppIconContainer mHotseatIconsContainer;
 
     // Only non-null when device supports having a Taskbar Overflow button for pinned items.
     @Nullable private TaskbarOverflowView mTaskbarPinnedOverflowView;
@@ -250,7 +250,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
 
         if (Flags.enableTaskbarIconContainer()) {
             mHotseatIconsContainer =
-                    TaskbarIconsContainer.create(context, mItemMarginLeftRight);
+                    TaskbarPinnedAppIconContainer.create(context, mItemMarginLeftRight);
         }
 
         mItemPadding = dpToPx(specsEvaluator.getTaskbarIconPadding(), mActivityContext);
@@ -592,7 +592,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         } else if (mHotseatIconsContainer == null) {
             updateHotseatItems(hotseatItemInfos, forceUpdateHotseat);
         } else {
-            mHotseatIconsContainer.updateIcons(hotseatItemInfos, forceUpdateHotseat);
+            mHotseatIconsContainer.updateIcons(Arrays.asList(hotseatItemInfos), forceUpdateHotseat);
         }
 
 
@@ -606,7 +606,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         if (mIsRtl && mHotseatIconsContainer == null) {
             updateHotseatItems(hotseatItemInfos, forceUpdateHotseat);
         } else if (mIsRtl && mHotseatIconsContainer != null) {
-            mHotseatIconsContainer.updateIcons(hotseatItemInfos, forceUpdateHotseat);
+            mHotseatIconsContainer.updateIcons(Arrays.asList(hotseatItemInfos), forceUpdateHotseat);
         } else {
             updateRecents(recentTasks, hotseatItemLength);
             updateHandoffSuggestions(handoffSuggestions);
@@ -1232,7 +1232,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         final int itemCount = parent.getChildCount();
         for (int itemIdx = 0; itemIdx < itemCount; itemIdx++) {
             View item = parent.getChildAt(itemIdx);
-            if (item instanceof TaskbarIconsContainer tic) {
+            if (item instanceof TaskbarPinnedAppIconContainer tic) {
                 mapOverItems(tic, op);
             }
             if (item.getTag() instanceof ItemInfo itemInfo && op.evaluate(itemInfo, item)) {
@@ -1432,7 +1432,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                 int iconStart = iconEnd - mTaskbarDividerContainer.getSpaceNeeded();
                 child.layout(iconStart, mIconLayoutBounds.top, iconEnd, mIconLayoutBounds.bottom);
                 iconEnd = iconStart + mItemMarginLeftRight;
-            } else if (child instanceof TaskbarIconsContainer tic) {
+            } else if (child instanceof TaskbarPinnedAppIconContainer tic) {
                 iconEnd -= mItemMarginLeftRight;
                 int iconStart = iconEnd - tic.getSpaceNeeded();
                 child.layout(iconStart, mIconLayoutBounds.top, iconEnd, mIconLayoutBounds.bottom);
@@ -1527,7 +1527,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         int numContainers = 0;
         int numIconsInContainers = 0;
         for (int i = getChildCount() - 1; i >= 0; --i) {
-            if (getChildAt(i) instanceof TaskbarIconsContainer tic) {
+            if (getChildAt(i) instanceof TaskbarPinnedAppIconContainer tic) {
                 numContainers++;
                 numIconsInContainers += tic.getChildCount();
             }
@@ -1598,7 +1598,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         int insertionPoint = 0;
         for (int i = 0; i < count; i++) {
             if (getChildAt(i) == mQsb) continue;
-            if (getChildAt(i) instanceof TaskbarIconsContainer tic) {
+            if (getChildAt(i) instanceof TaskbarPinnedAppIconContainer tic) {
                 int ticCount = tic.getChildCount();
                 if (mIsRtl) {
                     for (int j = ticCount - 1; j >= 0; j--) {
@@ -1656,7 +1656,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
     @Nullable
     public TaskbarOverflowView getTaskbarPinnedOverflowView() {
         if (mHotseatIconsContainer != null) {
-            return mHotseatIconsContainer.getTaskbarPinnedOverflowView();
+            return mHotseatIconsContainer.getOverflowView();
         }
         return mTaskbarPinnedOverflowView;
     }
@@ -1665,7 +1665,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
      * Returns the taskbar overflow view for pinned apps in the taskbar.
      */
     @Nullable
-    public TaskbarIconsContainer getTaskbarHotseatIconsContainer() {
+    public TaskbarPinnedAppIconContainer getTaskbarHotseatIconsContainer() {
         return mHotseatIconsContainer;
     }
 
