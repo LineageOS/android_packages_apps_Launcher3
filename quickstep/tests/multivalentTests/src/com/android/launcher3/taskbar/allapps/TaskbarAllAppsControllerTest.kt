@@ -201,8 +201,11 @@ class TaskbarAllAppsControllerTest {
             // Animation has started. Advance to end of animation.
             animatorTestRule.advanceTimeBy(overlayController.openDuration.toLong())
         }
-        val editText = overlayController.requestWindow().appsView.searchUiManager.editText
-        assertThat(editText?.hasFocus()).isTrue()
+        val hasFocus =
+            TestUtil.getOnTaskbarUiThread {
+                overlayController.requestWindow().appsView.searchUiManager.editText?.hasFocus()
+            }
+        assertThat(hasFocus).isTrue()
     }
 
     companion object {
