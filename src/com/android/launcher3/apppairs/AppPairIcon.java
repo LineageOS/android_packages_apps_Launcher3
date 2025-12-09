@@ -27,6 +27,7 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
@@ -49,6 +50,9 @@ import com.android.launcher3.popup.IconViewController;
 import com.android.launcher3.popup.Poppable;
 import com.android.launcher3.popup.PoppableType;
 import com.android.launcher3.popup.PopupController;
+import com.android.launcher3.touch.CustomEventsTouchHandler;
+import com.android.launcher3.touch.CustomTouchDelegate;
+import com.android.launcher3.touch.WorkspaceItemCustomActionsListener;
 import com.android.launcher3.util.MultiPropertyFactory;
 import com.android.launcher3.util.MultiTranslateDelegate;
 import com.android.launcher3.views.ActivityContext;
@@ -63,7 +67,7 @@ import java.util.function.Predicate;
  * member apps are set into these rectangles.
  */
 public class AppPairIcon extends FrameLayout implements DraggableView, Reorderable, Poppable,
-        IconViewController {
+        IconViewController, CustomTouchDelegate {
     private static final String TAG = "AppPairIcon";
 
     // The duration of the scaling animation on hover enter/exit.
@@ -95,6 +99,9 @@ public class AppPairIcon extends FrameLayout implements DraggableView, Reorderab
     // The containing element that holds this icon: workspace, taskbar, folder, etc. Affects certain
     // aspects of how the icon is drawn.
     private int mContainer;
+
+    private final CustomEventsTouchHandler mCustomEventsTouchHandler = new CustomEventsTouchHandler(
+            this);
 
     // Required for Reorderable -- handles translation and bouncing movements
     private final MultiTranslateDelegate mTranslateDelegate = new MultiTranslateDelegate(this);
@@ -130,6 +137,7 @@ public class AppPairIcon extends FrameLayout implements DraggableView, Reorderab
 
         icon.setTag(appPairInfo);
         icon.setOnClickListener(activity.getItemOnClickListener());
+        icon.setTag(R.id.custom_actions_listener, WorkspaceItemCustomActionsListener.INSTANCE);
         icon.mInfo = appPairInfo;
         icon.mContainer = container;
 
@@ -195,6 +203,15 @@ public class AppPairIcon extends FrameLayout implements DraggableView, Reorderab
                 getInfo().shouldReportDisabled(getContext())
                         ? getContext().getString(R.string.disabled_app_label, a11yTitle)
                         : a11yTitle);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (onDelegateTouchEvent(event)) {
+            return true;
+        }
+
+        return super.onTouchEvent(event);
     }
 
     // Required for DraggableView
@@ -331,5 +348,10 @@ public class AppPairIcon extends FrameLayout implements DraggableView, Reorderab
     @Override
     public MultiPropertyFactory<AnimatedFloat>.MultiProperty getFloatingViewTextAlpha() {
         return mAppPairName.getFloatingViewTextAlpha();
+    }
+
+    @Override
+    public boolean onDelegateTouchEvent(@NonNull MotionEvent event) {
+        return mCustomEventsTouchHandler.onDelegateTouchEvent(event);
     }
 }
