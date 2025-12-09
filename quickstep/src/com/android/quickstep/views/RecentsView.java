@@ -656,7 +656,8 @@ public abstract class RecentsView<
             if (!mHandleTaskStackChanges) {
                 return;
             }
-            if (newDisplayId != mContainer.getDisplayId()) {
+            final int mappedDisplayId = mRecentsModel.getRecentsDisplayId(newDisplayId);
+            if (mappedDisplayId != mContainer.getDisplayId()) {
                 dismissTask(taskId, /* removeTask= */ false);
             }
         }
