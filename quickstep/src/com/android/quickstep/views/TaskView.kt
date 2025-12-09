@@ -54,6 +54,7 @@ import com.android.launcher3.Flags.enableRefactorDigitalWellbeingToast
 import com.android.launcher3.Flags.enableRefactorTaskContentView
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
+import com.android.launcher3.Utilities.getTrimmedStackTrace
 import com.android.launcher3.concurrent.annotations.LightweightBackground
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority
 import com.android.launcher3.concurrent.annotations.Ui
@@ -1287,6 +1288,19 @@ constructor(
 
     private fun onClick() {
         if (confirmSecondSplitSelectApp()) {
+            Log.d(
+                TAG,
+                "${taskIds.contentToString()} - onClick - ignoring click: " +
+                    "this task click selected the second app in split selection",
+            )
+            return
+        }
+        if (recentsView?.stateManager?.state?.isTaskViewInteractive != true) {
+            Log.d(
+                TAG,
+                "${taskIds.contentToString()} - onClick - ignoring click: the state manager is " +
+                    "not in an interactive state (state=${recentsView?.stateManager?.state})",
+            )
             return
         }
         launchWithAnimation()
@@ -1298,6 +1312,11 @@ constructor(
 
     /** Launch of the current task (both live and inactive tasks) with an animation. */
     fun launchWithAnimation(): RunnableList? {
+        Log.d(
+            TAG,
+            "${taskIds.contentToString()} - launchWithAnimation - initiating launch, " +
+                "partial trace: ${getTrimmedStackTrace("TaskView.launchWithAnimation")}",
+        )
         return if (isRunningTask && recentsView?.remoteTargetHandles != null) {
                 launchAsLiveTile(recentsView?.remoteTargetHandles!!)
             } else {
@@ -1814,7 +1833,6 @@ constructor(
     }
 
     private fun onModalnessUpdated(modalness: Float) {
-        isClickable = modalness == 0f
         getTaskIcons().forEach { (icon, _) -> icon.modalAlpha = 1f - modalness }
         taskContainers.forEach {
             if (enableRefactorDigitalWellbeingToast() && it.taskContentView is TaskContentView) {
