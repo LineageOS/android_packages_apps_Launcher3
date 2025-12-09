@@ -113,7 +113,6 @@ object LauncherCustomizer {
 
     private fun applyFixedLandscape(isFixedLandscape: Boolean) {
         val idp = InvariantDeviceProfile.INSTANCE[context]
-        get(context).put(LauncherPrefs.ALLOW_ROTATION, !isFixedLandscape)
         if (idp.isFixedLandscape == isFixedLandscape) return
         val latch = CountDownLatch(1)
         val listener = OnIDPChangeListener {

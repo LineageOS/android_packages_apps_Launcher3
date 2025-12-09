@@ -274,10 +274,6 @@ open class StatsLogManager protected constructor(@JvmField protected val mContex
         LAUNCHER_ADD_NEW_APPS_TO_HOME_SCREEN_ENABLED(613),
         @UiEvent(doc = "For new apps, add app icons to home screen disabled.")
         LAUNCHER_ADD_NEW_APPS_TO_HOME_SCREEN_DISABLED(614),
-        @UiEvent(doc = "Home screen rotation is enabled when phone is rotated.")
-        LAUNCHER_HOME_SCREEN_ROTATION_ENABLED(615),
-        @UiEvent(doc = "Home screen rotation is disabled when phone is rotated.")
-        LAUNCHER_HOME_SCREEN_ROTATION_DISABLED(616),
         @UiEvent(doc = "Suggestions in all apps list enabled.")
         LAUNCHER_ALL_APPS_SUGGESTIONS_ENABLED(619),
         @UiEvent(doc = "Suggestions in all apps list disabled.")
