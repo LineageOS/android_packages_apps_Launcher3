@@ -104,9 +104,15 @@
     <string name="dismiss_prediction_label" msgid="3357562989568808658">"Nu sugera aplicația"</string>
     <string name="pin_prediction" msgid="4196423321649756498">"Fixează predicția"</string>
     <string name="bubble" msgid="3072951361014076670">"Balon"</string>
+    <!-- no translation found for enable_app_lock (9190316880781005775) -->
+    <skip />
+    <!-- no translation found for disable_app_lock (9071912028491244470) -->
+    <skip />
     <string name="widget_settings" msgid="5280157748464495511">"Setări"</string>
-    <string name="pin_to_taskbar" msgid="5914002252642242332">"Fixează în Bara de activități"</string>
-    <string name="unpin_from_taskbar" msgid="1025883383457627426">"Anulează fixarea în Bara de activități"</string>
+    <!-- no translation found for add_to_taskbar (1442306985857150792) -->
+    <skip />
+    <!-- no translation found for remove_from_taskbar (5817026706030273018) -->
+    <skip />
     <string name="no_room_in_taskbar" msgid="6885243748717395469">"Nu mai este loc în Bara de activități"</string>
     <string name="app_added_to_taskbar" msgid="6348755169793615171">"Aplicația a fost adăugată în Bara de activități"</string>
     <string name="app_removed_from_taskbar" msgid="3471754847898675396">"Aplicația a fost eliminată din Bara de activități"</string>
