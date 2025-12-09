@@ -39,7 +39,7 @@ import org.mockito.Mock;
 
 @SmallTest
 @RunWith(LauncherMultivalentJUnit.class)
-@Ignore
+@Ignore("b/467431341")
 public class LauncherSwipeHandlerV2TestCase extends AbsSwipeUpHandlerTestCase<
         LauncherState,
         QuickstepLauncher,
