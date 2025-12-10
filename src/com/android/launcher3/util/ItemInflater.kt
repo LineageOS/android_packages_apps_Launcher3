@@ -122,7 +122,8 @@ class ItemInflater<T>(
             LayoutInflater.from(parent.context).inflate(layout, parent, false) as BubbleTextView
         favorite.applyFromWorkspaceItem(info)
         favorite.setOnClickListener(clickListener)
-        favorite.setTag(R.id.custom_actions_listener, WorkspaceItemCustomActionsListener)
+
+        favorite.customActionsListener = WorkspaceItemCustomActionsListener
         favorite.onFocusChangeListener = focusListener
 
         // If the icon is directly being added on homescreen, verify the high resolution icon

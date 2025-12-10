@@ -50,6 +50,7 @@ import com.android.launcher3.popup.IconViewController;
 import com.android.launcher3.popup.Poppable;
 import com.android.launcher3.popup.PoppableType;
 import com.android.launcher3.popup.PopupController;
+import com.android.launcher3.touch.CustomActionsListener;
 import com.android.launcher3.touch.CustomEventsTouchHandler;
 import com.android.launcher3.touch.CustomTouchDelegate;
 import com.android.launcher3.touch.WorkspaceItemCustomActionsListener;
@@ -100,8 +101,10 @@ public class AppPairIcon extends FrameLayout implements DraggableView, Reorderab
     // aspects of how the icon is drawn.
     private int mContainer;
 
+    // TODO(b/465247812): Remove this and overridden functions in favor of Kotlin interface
+    //  delegation, upon file conversion to Kotlin.
     private final CustomEventsTouchHandler mCustomEventsTouchHandler = new CustomEventsTouchHandler(
-            this);
+            this, super::onTouchEvent, (event) -> false);
 
     // Required for Reorderable -- handles translation and bouncing movements
     private final MultiTranslateDelegate mTranslateDelegate = new MultiTranslateDelegate(this);
@@ -137,7 +140,7 @@ public class AppPairIcon extends FrameLayout implements DraggableView, Reorderab
 
         icon.setTag(appPairInfo);
         icon.setOnClickListener(activity.getItemOnClickListener());
-        icon.setTag(R.id.custom_actions_listener, WorkspaceItemCustomActionsListener.INSTANCE);
+        icon.setCustomActionsListener(WorkspaceItemCustomActionsListener.INSTANCE);
         icon.mInfo = appPairInfo;
         icon.mContainer = container;
 
@@ -207,11 +210,7 @@ public class AppPairIcon extends FrameLayout implements DraggableView, Reorderab
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (onDelegateTouchEvent(event)) {
-            return true;
-        }
-
-        return super.onTouchEvent(event);
+        return onDelegateTouchEvent(event);
     }
 
     // Required for DraggableView
@@ -354,4 +353,16 @@ public class AppPairIcon extends FrameLayout implements DraggableView, Reorderab
     public boolean onDelegateTouchEvent(@NonNull MotionEvent event) {
         return mCustomEventsTouchHandler.onDelegateTouchEvent(event);
     }
+
+    @Nullable
+    @Override
+    public CustomActionsListener getCustomActionsListener() {
+        return mCustomEventsTouchHandler.getCustomActionsListener();
+    }
+
+    @Override
+    public void setCustomActionsListener(@Nullable CustomActionsListener customActionsListener) {
+        mCustomEventsTouchHandler.setCustomActionsListener(customActionsListener);
+    }
+
 }
