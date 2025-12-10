@@ -82,6 +82,7 @@ object PerDisplayObjectsModule {
 
 @Module
 object PerDisplayRepositoriesModule {
+
     @Provides
     @LauncherAppSingleton
     fun providePerDisplayComponent(

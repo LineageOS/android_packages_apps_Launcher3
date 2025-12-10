@@ -216,6 +216,8 @@ public final class TestProtocol {
     public static final String REQUEST_ENABLE_REGISTER_EVENT_NOT_FROM_TEST =
             "enable_register_event_not_from_test";
 
+    public static final String REQUEST_INFO_DISPLAY_ID = "display_id";
+
     /** Logs {@link Log#d(String, String)} if {@link #sDebugTracing} is true. */
     public static void testLogD(String tag, String message) {
         if (!sDebugTracing) {

@@ -3,6 +3,7 @@ package com.android.quickstep;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.launcher3.taskbar.TaskbarThresholdUtils.getFromNavThreshold;
+import static com.android.launcher3.testing.shared.TestProtocol.REQUEST_INFO_DISPLAY_ID;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.getTaskbarUiThread;
 
@@ -15,6 +16,9 @@ import android.view.WindowInsets;
 
 import androidx.annotation.Nullable;
 
+import com.android.app.displaylib.PerDisplayRepository;
+import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.R;
@@ -38,6 +42,8 @@ import com.android.wm.shell.shared.bubbles.DeviceConfig;
 import com.android.wm.shell.shared.desktopmode.DesktopState;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -55,6 +61,8 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
     private final DesktopVisibilityController mDesktopVisibilityController;
     private final ActiveTrackpadList mActiveTrackpadList;
     private final SysUIConnectionTracker mSysUIConnectionTracker;
+    private final PerDisplayRepository<Context> mDisplayContextRepository;
+    private final Map<Integer, DeviceProfile> mDisplayDeviceProfile = new HashMap();
 
     @Inject
     public QuickstepTestInformationHandler(@ApplicationContext Context context,
@@ -63,7 +71,8 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
             OverviewComponentObserver overviewComponentObserver,
             DesktopVisibilityController desktopVisibilityController,
             ActiveTrackpadList activeTrackpadList,
-            SysUIConnectionTracker sysUIConnectionTracker) {
+            SysUIConnectionTracker sysUIConnectionTracker,
+            PerDisplayRepository<Context> displayContextRepository) {
         mContext = context;
         mRecentsModel = recentsModel;
         mSystemUiProxy = systemUiProxy;
@@ -71,12 +80,15 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
         mDesktopVisibilityController = desktopVisibilityController;
         mActiveTrackpadList = activeTrackpadList;
         mSysUIConnectionTracker = sysUIConnectionTracker;
+        mDisplayContextRepository = displayContextRepository;
     }
 
     @SuppressLint("VisibleForTests")
     @Override
     public Bundle call(String method, String arg, @Nullable Bundle extras) {
         final Bundle response = new Bundle();
+        final int displayId = getDisplayIdForRequest(extras);
+
         switch (method) {
             case TestProtocol.REQUEST_RECENT_TASKS_LIST: {
                 ArrayList<String> taskBaseIntentComponents = new ArrayList<>();
@@ -102,13 +114,14 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
 
             case TestProtocol.REQUEST_HOME_TO_OVERVIEW_SWIPE_HEIGHT: {
                 final float swipeHeight =
-                        LayoutUtils.getDefaultSwipeHeight(mContext, mDeviceProfile);
+                        LayoutUtils.getDefaultSwipeHeight(mContext, getDeviceProfile(displayId));
                 response.putInt(TestProtocol.TEST_INFO_RESPONSE_FIELD, (int) swipeHeight);
                 return response;
             }
 
             case TestProtocol.REQUEST_BACKGROUND_TO_OVERVIEW_SWIPE_HEIGHT: {
-                final float swipeHeight = mDeviceProfile.getDeviceProperties().getHeightPx() / 2f;
+                final float swipeHeight =
+                        getDeviceProfile(displayId).getDeviceProperties().getHeightPx() / 2f;
                 response.putInt(TestProtocol.TEST_INFO_RESPONSE_FIELD, (int) swipeHeight);
                 return response;
             }
@@ -131,7 +144,7 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
 
             case TestProtocol.REQUEST_GET_OVERVIEW_PAGE_SPACING: {
                 response.putInt(TestProtocol.TEST_INFO_RESPONSE_FIELD,
-                        mDeviceProfile.getOverviewProfile().getPageSpacing());
+                        getDeviceProfile(displayId).getOverviewProfile().getPageSpacing());
                 return response;
             }
 
@@ -171,7 +184,7 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
             case TestProtocol.REQUEST_TASKBAR_FROM_NAV_THRESHOLD: {
                 final Resources resources = mContext.getResources();
                 response.putInt(TestProtocol.TEST_INFO_RESPONSE_FIELD,
-                        getFromNavThreshold(resources, mDeviceProfile));
+                        getFromNavThreshold(resources, getDeviceProfile(displayId)));
                 return response;
             }
 
@@ -385,5 +398,28 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
         try {
             getTaskbarUiThread().submit(() -> null).get();
         } catch (Exception ignored) { }
+    }
+
+    @Override
+    protected DeviceProfile getDeviceProfile(int displayId) {
+        if (displayId == DEFAULT_DISPLAY) {
+            return getDeviceProfile();
+        } else {
+            return mDisplayDeviceProfile.computeIfAbsent(displayId,
+                    id -> InvariantDeviceProfile
+                            .INSTANCE
+                            .get(mContext)
+                            .createDeviceProfileForSecondaryDisplay(
+                                    mDisplayContextRepository.get(id)
+                            ));
+        }
+    }
+
+    private int getDisplayIdForRequest(@Nullable Bundle extras) {
+        if (extras == null || !extras.containsKey(REQUEST_INFO_DISPLAY_ID)) {
+            return DEFAULT_DISPLAY;
+        } else {
+            return extras.getInt(REQUEST_INFO_DISPLAY_ID);
+        }
     }
 }
