@@ -243,6 +243,7 @@ public class BubbleBarView extends FrameLayout {
 
     public void setTaskbarUiState(TaskbarUiState taskbarUiState) {
         mTaskbarUiState = taskbarUiState;
+        mTaskbarUiState.setBubbleBarExpanded(mIsBarExpanded);
     }
 
     /**
