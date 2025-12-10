@@ -53,7 +53,6 @@ import com.android.launcher3.provider.RestoreDbTask.Companion.sendMetricsForFail
 import com.android.launcher3.util.SQLiteTable
 import com.android.launcher3.util.WriteProtectedSQLiteTable
 import com.android.launcher3.widget.LauncherWidgetHolder
-import java.util.stream.Collectors
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -247,20 +246,11 @@ internal constructor(
 
         val oldHelper = openHelper
 
-        // We save the existing db's before creating the destination db helper so we know what logic
-        // to run in grid migration based on if that grid already existed before migration or not.
-        val existingDBs =
-            LauncherFiles.GRID_DB_FILES.stream()
-                .filter { dbName: String? -> context.getDatabasePath(dbName).exists() }
-                .collect(Collectors.toList())
-
         try {
             // This is the current grid we have, given by the mContext
             val srcDeviceState = DeviceGridState(context)
             // This is the state we want to migrate to that is given by the idp
             val destDeviceState = DeviceGridState(idp)
-
-            val isDestNewDb = !existingDBs.contains(destDeviceState.dbFile)
 
             val isAfterRestore = get(context).get(LauncherPrefs.IS_FIRST_LOAD_AFTER_RESTORE)
             val gridSizeMigrationLogic = migrationLogicFactory.get()

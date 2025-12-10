@@ -108,8 +108,9 @@ constructor(
 
                     if (isOneGridMigration(srcDeviceState, destDeviceState)) {
                         statsLogManager.logger().log(LAUNCHER_ROW_SHIFT_ONE_GRID_MIGRATION)
+                    } else {
+                        statsLogManager.logger().log(LAUNCHER_ROW_SHIFT_GRID_MIGRATION)
                     }
-                    statsLogManager.logger().log(LAUNCHER_ROW_SHIFT_GRID_MIGRATION)
 
                     return
                 }
@@ -140,11 +141,11 @@ constructor(
 
                 dropTable(t.db, TMP_TABLE)
                 t.commit()
-
                 if (isOneGridMigration(srcDeviceState, destDeviceState)) {
                     statsLogManager.logger().log(LAUNCHER_STANDARD_ONE_GRID_MIGRATION)
+                } else {
+                    statsLogManager.logger().log(LAUNCHER_STANDARD_GRID_MIGRATION)
                 }
-                statsLogManager.logger().log(LAUNCHER_STANDARD_GRID_MIGRATION)
             }
         } catch (e: Exception) {
             FileLog.e(TAG, "Error during grid migration", e)

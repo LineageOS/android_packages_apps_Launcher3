@@ -461,10 +461,6 @@ class RestoreDbTask {
                 return Consumer { c: ModelDbController? -> }
             }
 
-            // Obtain InvariantDeviceProfile first before setting pending to false, so
-            // InvariantDeviceProfile won't switch to new grid when initializing.
-            val idp = InvariantDeviceProfile.INSTANCE[context]
-
             // Perform any disk updates before accessing the actual database.
             val deviceGridState = DeviceGridState(context)
             FileLog.d(TAG, "restoreIfNeeded: deviceGridState from context: $deviceGridState")

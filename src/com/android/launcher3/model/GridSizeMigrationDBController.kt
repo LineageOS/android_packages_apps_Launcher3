@@ -21,7 +21,7 @@ import android.database.DatabaseUtils
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 import androidx.annotation.VisibleForTesting
-import com.android.launcher3.GridType
+import com.android.launcher3.GridType.Companion.GRID_TYPE_STANDARD
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherSettings
 import com.android.launcher3.Utilities
@@ -65,8 +65,8 @@ object GridSizeMigrationDBController {
         destDeviceState: DeviceGridState,
     ): Boolean =
         srcDeviceState.deviceType != InvariantDeviceProfile.TYPE_TABLET &&
-            srcDeviceState.gridType == GridType.GRID_TYPE_NON_ONE_GRID &&
-            destDeviceState.gridType == GridType.GRID_TYPE_ONE_GRID
+            srcDeviceState.gridType != GRID_TYPE_STANDARD &&
+            destDeviceState.gridType == GRID_TYPE_STANDARD
 
     fun insertEntryInDb(
         helper: DatabaseHelper,
