@@ -40,6 +40,10 @@ class WorkspaceDragHelper(private val launcherRule: LauncherActivityScenarioRule
 
     fun flingBackward() = snapToPage { panelCount: Int -> -panelCount }
 
+    fun swipeFlingForward() = horizontalFling(forward = true) // Right to left.
+
+    fun swipeFlingBackward() = horizontalFling(forward = false) // Left to right.
+
     fun getWorkspaceAppIcon(className: String) = getAppIcon(CONTAINER_DESKTOP, className)
 
     fun getHotseatAppIcon(className: String) = getAppIcon(CONTAINER_HOTSEAT, className)
@@ -116,6 +120,37 @@ class WorkspaceDragHelper(private val launcherRule: LauncherActivityScenarioRule
         )
         UiDevice.getInstance(getInstrumentation()).waitForIdle()
         return targetPage
+    }
+
+    private fun horizontalFling(forward: Boolean) {
+        val uiDevice = UiDevice.getInstance(getInstrumentation())
+        uiDevice.waitForIdle()
+
+        val workspaceMetrics =
+            launcherRule.getFromLauncher { launcher ->
+                val workspace = launcher.workspace
+                val location = kotlin.IntArray(2)
+                workspace.getLocationOnScreen(location)
+                object {
+                    val x = location[0]
+                    val y = location[1]
+                    val width = workspace.width
+                    val height = workspace.height
+                }
+            }!!
+
+        val startX = if (forward) workspaceMetrics.width * 0.8f else workspaceMetrics.width * 0.2f
+        val endX = if (forward) workspaceMetrics.width * 0.2f else workspaceMetrics.width * 0.8f
+        val y = workspaceMetrics.height / 2f
+
+        uiDevice.swipe(
+            (workspaceMetrics.x + startX).toInt(),
+            (workspaceMetrics.y + y).toInt(),
+            (workspaceMetrics.x + endX).toInt(),
+            (workspaceMetrics.y + y).toInt(),
+            20,
+        )
+        uiDevice.waitForIdle()
     }
 
     companion object {
