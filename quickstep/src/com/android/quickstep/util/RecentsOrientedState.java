@@ -23,7 +23,6 @@ import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
-import static com.android.launcher3.LauncherPrefs.ALLOW_ROTATION;
 import static com.android.launcher3.LauncherPrefs.FIXED_LANDSCAPE_MODE;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
@@ -47,7 +46,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.DeviceProfile;
-import com.android.launcher3.Flags;
 import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.LauncherPrefChangeListener;
 import com.android.launcher3.LauncherPrefs;
@@ -97,8 +95,6 @@ public class RecentsOrientedState implements LauncherPrefChangeListener {
     private static final int FLAG_MULTIPLE_ORIENTATION_SUPPORTED_BY_ACTIVITY = 1 << 0;
     // Multiple orientation is only supported if density is < 600
     private static final int FLAG_MULTIPLE_ORIENTATION_SUPPORTED_BY_DENSITY = 1 << 1;
-    // Shared prefs for rotation, only if activity supports it
-    private static final int FLAG_HOME_ROTATION_ALLOWED_IN_PREFS = 1 << 2;
     // If the user has enabled system rotation
     private static final int FLAG_SYSTEM_ROTATION_ALLOWED = 1 << 3;
     // 1 << 4 is deprecated
@@ -314,9 +310,6 @@ public class RecentsOrientedState implements LauncherPrefChangeListener {
 
     @Override
     public void onPrefChanged(String s) {
-        if (LauncherPrefs.ALLOW_ROTATION.getSharedPrefKey().equals(s)) {
-            updateHomeRotationSetting();
-        }
         if (LauncherPrefs.FIXED_LANDSCAPE_MODE.getSharedPrefKey().equals(s)) {
             updateFixedLandscapeSetting();
         }
@@ -328,18 +321,13 @@ public class RecentsOrientedState implements LauncherPrefChangeListener {
     }
 
     private void updateFixedLandscapeSetting() {
-        if (Flags.oneGridSpecs()) {
-            setFlag(
-                    FLAG_HOME_FIXED_LANDSCAPE_PREFS,
-                    LauncherPrefs.get(mContext).get(FIXED_LANDSCAPE_MODE)
-            );
-        }
-    }
-
-    private void updateHomeRotationSetting() {
-        boolean homeRotationEnabled = LauncherPrefs.get(mContext).get(ALLOW_ROTATION);
-        setFlag(FLAG_HOME_ROTATION_ALLOWED_IN_PREFS, homeRotationEnabled);
-        SystemUiProxy.INSTANCE.get(mContext).setHomeRotationEnabled(homeRotationEnabled);
+        SystemUiProxy.INSTANCE.get(mContext).setHomeRotationEnabled(
+                !LauncherPrefs.get(mContext).get(FIXED_LANDSCAPE_MODE)
+        );
+        setFlag(
+                FLAG_HOME_FIXED_LANDSCAPE_PREFS,
+                LauncherPrefs.get(mContext).get(FIXED_LANDSCAPE_MODE)
+        );
     }
 
     private void initFlags() {
@@ -347,18 +335,17 @@ public class RecentsOrientedState implements LauncherPrefChangeListener {
 
         // initialize external flags
         updateAutoRotateSetting();
-        updateHomeRotationSetting();
         updateFixedLandscapeSetting();
     }
 
     private void initMultipleOrientationListeners() {
-        LauncherPrefs.get(mContext).addListener(this, ALLOW_ROTATION);
+        LauncherPrefs.get(mContext).addListener(this, FIXED_LANDSCAPE_MODE);
         mRotationChangeSafeCloseable = mSettingsCache.getListenableRef(ROTATION_SETTING_URI)
                 .forEach(MAIN_EXECUTOR, (v) -> updateAutoRotateSetting());
     }
 
     private void destroyMultipleOrientationListeners() {
-        LauncherPrefs.get(mContext).removeListener(this, ALLOW_ROTATION);
+        LauncherPrefs.get(mContext).removeListener(this, FIXED_LANDSCAPE_MODE);
         if (mRotationChangeSafeCloseable != null) {
             mRotationChangeSafeCloseable.close();
             mRotationChangeSafeCloseable = null;
@@ -438,7 +425,6 @@ public class RecentsOrientedState implements LauncherPrefChangeListener {
         return ((mFlags & MASK_MULTIPLE_ORIENTATION_SUPPORTED_BY_DEVICE)
                 != MASK_MULTIPLE_ORIENTATION_SUPPORTED_BY_DEVICE)
                 || (mFlags & (FLAG_IGNORE_ALLOW_HOME_ROTATION_PREF
-                | FLAG_HOME_ROTATION_ALLOWED_IN_PREFS
                 | FLAG_HOME_ROTATION_FORCE_ENABLED_FOR_TESTING)) != 0;
     }
 

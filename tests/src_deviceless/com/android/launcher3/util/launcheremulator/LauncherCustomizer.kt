@@ -98,7 +98,6 @@ object LauncherCustomizer {
             Configuration(context.resources.configuration)
         )
 
-        get(context).put(LauncherPrefs.ALLOW_ROTATION, !params.isFixedLandscape)
         get(context).put(LauncherPrefs.FIXED_LANDSCAPE_MODE, params.isFixedLandscape)
 
         applyGridOption(context, "default_grid", "name", params.grid)

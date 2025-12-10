@@ -23,7 +23,6 @@ import android.database.MatrixCursor
 import android.os.Build
 import android.provider.SearchIndexablesContract
 import android.provider.SearchIndexablesProvider
-import com.android.launcher3.Flags
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.InvariantDeviceProfile.TYPE_TABLET
 import com.android.launcher3.R
@@ -73,9 +72,7 @@ class LauncherSearchIndexablesProvider : SearchIndexablesProvider() {
 
     override fun queryNonIndexableKeys(projection: Array<String>): Cursor {
         val cursor = MatrixCursor(SearchIndexablesContract.NON_INDEXABLES_KEYS_COLUMNS)
-        if (Flags.oneGridSpecs() && !isDeviceTablet()) {
-            cursor.addRow(arrayOf(ALLOW_ROTATION_KEY))
-        } else {
+        if (isDeviceTablet()) {
             cursor.addRow(arrayOf(FIXED_LANDSCAPE_KEY))
         }
         val ctx = context!!
@@ -94,7 +91,6 @@ class LauncherSearchIndexablesProvider : SearchIndexablesProvider() {
     }
 
     companion object {
-        private const val ALLOW_ROTATION_KEY = "pref_allowRotation"
         private const val FIXED_LANDSCAPE_KEY = "pref_fixed_landscape_mode"
     }
 }
