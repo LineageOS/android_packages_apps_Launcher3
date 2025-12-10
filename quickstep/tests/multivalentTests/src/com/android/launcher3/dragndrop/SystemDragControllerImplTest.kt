@@ -240,6 +240,10 @@ class SystemDragControllerImplTest {
                 whenever(clipData).thenReturn(mock())
                 whenever(dragImage).thenReturn(mock())
                 whenever(dragOptions).thenReturn(mock())
+                whenever(extraDragFlags)
+                    .thenReturn(
+                        DRAG_FLAG_GLOBAL or DRAG_FLAG_GLOBAL_URI_READ or DRAG_FLAG_GLOBAL_URI_WRITE
+                    )
             }
 
         whenever(

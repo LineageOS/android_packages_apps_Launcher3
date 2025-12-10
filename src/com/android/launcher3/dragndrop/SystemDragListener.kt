@@ -164,6 +164,7 @@ class SystemDragListener(
                         .let { dragImage ->
                             SystemDragParams(
                                 clipData = null,
+                                extraDragFlags = 0,
                                 closeAllOpenViews = true,
                                 dragImage = dragImage,
                                 dragInfo = SystemDragItemInfo(),
