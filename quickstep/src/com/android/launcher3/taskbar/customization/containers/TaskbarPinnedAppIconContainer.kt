@@ -18,6 +18,7 @@ package com.android.launcher3.taskbar.customization.containers
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Canvas
 import android.util.AttributeSet
 import android.view.Gravity.CENTER_VERTICAL
 import android.view.InputDevice
@@ -37,6 +38,7 @@ import com.android.launcher3.Utilities.dpToPx
 import com.android.launcher3.Utilities.isRtl
 import com.android.launcher3.celllayout.CellInfo
 import com.android.launcher3.folder.FolderIcon
+import com.android.launcher3.folder.PreviewBackground
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.TaskItemInfo.Companion.isSameItem
 import com.android.launcher3.model.data.WorkspaceItemInfo
@@ -57,9 +59,11 @@ import com.android.launcher3.taskbar.customization.util.TaskbarIconContainerUtil
 import com.android.launcher3.taskbar.customization.util.TaskbarIconContainerUtil.DEFAULT_BOUNCE_SCALE
 import com.android.launcher3.taskbar.customization.viewfactory.TaskbarPinnedAppsIconsViewFactory
 import com.android.launcher3.util.MultiTranslateDelegate
+import com.android.launcher3.util.Themes
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.views.PredictedAppIcon
 import kotlin.math.min
+import androidx.core.graphics.withTranslation
 
 /** Taskbar container which hosts its pinned apps. */
 class TaskbarPinnedAppIconContainer(context: Context) :
@@ -67,7 +71,8 @@ class TaskbarPinnedAppIconContainer(context: Context) :
     Reorderable,
     TaskbarContainer,
     TaskbarIconsContainerHoverListener,
-    TaskbarIconsContainerOverflowClickListeners {
+    TaskbarIconsContainerOverflowClickListeners,
+    FolderIcon.FolderIconParent {
 
     private var itemMarginLeftRight = 0
     private val activityContext: TaskbarActivityContext = ActivityContext.lookupContext(context)
@@ -112,6 +117,11 @@ class TaskbarPinnedAppIconContainer(context: Context) :
         get() = overflowView in this
 
     private lateinit var taskbarViewCallbacks: TaskbarViewCallbacks
+
+    private var leaveBehindFolderIcon: FolderIcon? = null
+
+    private val folderLeaveBehindColor: Int =
+        Themes.getAttrColor(activityContext, android.R.attr.textColorTertiary)
 
     init {
         orientation = HORIZONTAL
@@ -342,6 +352,30 @@ class TaskbarPinnedAppIconContainer(context: Context) :
     }
     override fun getHoverListener(icon: View): OnHoverListener =
         taskbarViewCallbacks.getIconOnHoverListener(icon)
+
+    override fun drawFolderLeaveBehindForIcon(child: FolderIcon) {
+        leaveBehindFolderIcon = child
+        invalidate()
+    }
+
+    override fun clearFolderLeaveBehind(child: FolderIcon) {
+        leaveBehindFolderIcon = null
+        invalidate()
+    }
+
+    override fun dispatchDraw(canvas: Canvas) {
+        super.dispatchDraw(canvas)
+        val folderIcon = leaveBehindFolderIcon
+        if (folderIcon != null) {
+            canvas.withTranslation(
+                folderIcon.left + folderIcon.translationX,
+                folderIcon.top.toFloat()
+            ) {
+                val previewBackground: PreviewBackground = folderIcon.folderBackground
+                previewBackground.drawLeaveBehind(this, folderLeaveBehindColor)
+            }
+        }
+    }
 
     companion object {
         /** Returns a new instance of [TaskbarPinnedAppIconContainer]. */
