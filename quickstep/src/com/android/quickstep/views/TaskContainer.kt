@@ -23,7 +23,6 @@ import android.view.View.OnClickListener
 import androidx.core.view.isVisible
 import com.android.app.tracing.traceSection
 import com.android.launcher3.Flags.enableRefactorDigitalWellbeingToast
-import com.android.launcher3.Flags.enableRefactorTaskContentView
 import com.android.launcher3.model.data.TaskViewItemInfo
 import com.android.launcher3.util.SplitConfigurationOptions
 import com.android.launcher3.util.TransformingTouchDelegate
@@ -41,8 +40,7 @@ import com.android.systemui.shared.recents.model.ThumbnailData
 class TaskContainer(
     val taskView: TaskView,
     val task: Task,
-    // TODO(b/409248525): Upon flag cleanup, use the `TaskContentView` type
-    val taskContentView: View,
+    val taskContentView: TaskContentView,
     val snapshotView: TaskThumbnailView,
     val iconView: IconAppChipView,
     /**
@@ -60,11 +58,6 @@ class TaskContainer(
     val overlay: TaskOverlayFactory.TaskOverlay<*> = taskOverlayFactory.createOverlay(this)
     var thumbnailPosition: ThumbnailPosition? = null
     private var overlayEnabledStatus = false
-
-    init {
-        if (enableRefactorTaskContentView()) require(taskContentView is TaskContentView)
-        else require(taskContentView is TaskThumbnailView)
-    }
 
     internal var thumbnailData: ThumbnailData? = null
         private set
@@ -124,10 +117,7 @@ class TaskContainer(
 
     fun addChildForAccessibility(outChildren: ArrayList<View>) {
         addAccessibleChildToList(iconView, outChildren)
-        addAccessibleChildToList(
-            if (enableRefactorTaskContentView()) taskContentView else snapshotView,
-            outChildren,
-        )
+        addAccessibleChildToList(taskContentView, outChildren)
         digitalWellBeingToast?.let { addAccessibleChildToList(it, outChildren) }
         overlay.addChildForAccessibility(outChildren)
     }
@@ -139,19 +129,12 @@ class TaskContainer(
         clickCloseListener: OnClickListener?,
     ) =
         traceSection("TaskContainer.setState") {
-            if (enableRefactorTaskContentView()) {
-                (taskContentView as TaskContentView).setState(
-                    TaskUiStateMapper.toTaskHeaderState(state, hasHeader, clickCloseListener),
-                    TaskUiStateMapper.toTaskThumbnailUiState(state),
-                    TaskUiStateMapper.toTaskAppTimerUiState(canShowAppTimer, stagePosition, state),
-                    state?.taskId,
-                )
-            } else {
-                snapshotView.setState(
-                    TaskUiStateMapper.toTaskThumbnailUiState(state),
-                    state?.taskId,
-                )
-            }
+            taskContentView.setState(
+                TaskUiStateMapper.toTaskHeaderState(state, hasHeader, clickCloseListener),
+                TaskUiStateMapper.toTaskThumbnailUiState(state),
+                TaskUiStateMapper.toTaskAppTimerUiState(canShowAppTimer, stagePosition, state),
+                state?.taskId,
+            )
             thumbnailData = if (state is TaskData.Data) state.thumbnailData else null
             overlay.setThumbnailState(thumbnailData)
         }
@@ -192,21 +175,19 @@ class TaskContainer(
     }
 
     fun onTaskViewDisplayConfigChanged() {
-        if (enableRefactorTaskContentView()) {
-            (taskContentView as? TaskContentView)?.onTaskViewDisplayConfigChanged(
-                taskView.layoutParams.width,
-                taskView.layoutParams.height,
-                taskView is GroupedTaskView,
-                (taskView as? GroupedTaskView)?.splitBoundsConfig,
-                taskView.pagedOrientationHandler,
-                stagePosition,
-            )
-        }
+        taskContentView.onTaskViewDisplayConfigChanged(
+            taskView.layoutParams.width,
+            taskView.layoutParams.height,
+            taskView is GroupedTaskView,
+            (taskView as? GroupedTaskView)?.splitBoundsConfig,
+            taskView.pagedOrientationHandler,
+            stagePosition,
+        )
     }
 
     fun digitalWellBeingBannerHeight(): Int {
-        if (enableRefactorTaskContentView() && enableRefactorDigitalWellbeingToast()) {
-            return (taskContentView as? TaskContentView)?.getTaskAppTimerToastHeight() ?: 0
+        if (enableRefactorDigitalWellbeingToast()) {
+            return taskContentView.getTaskAppTimerToastHeight() ?: 0
         }
 
         if (digitalWellBeingToast?.isVisible == true) {

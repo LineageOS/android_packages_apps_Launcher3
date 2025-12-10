@@ -51,7 +51,6 @@ import com.android.app.tracing.traceSection
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.Flags.enableDesktopExplodedView
 import com.android.launcher3.Flags.enableRefactorDigitalWellbeingToast
-import com.android.launcher3.Flags.enableRefactorTaskContentView
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
 import com.android.launcher3.Utilities.getTrimmedStackTrace
@@ -146,7 +145,7 @@ constructor(
     val snapshotViews: Array<View>
         get() = taskContainers.map { it.snapshotView }.toTypedArray()
 
-    val taskContentViews: Array<View>
+    val taskContentViews: Array<TaskContentView>
         get() = taskContainers.map { it.taskContentView }.toTypedArray()
 
     val isGridTask: Boolean
@@ -780,10 +779,7 @@ constructor(
 
                 // Add DWB accessibility action at the end of the list
                 taskContainers.forEach {
-                    if (
-                        enableRefactorDigitalWellbeingToast() &&
-                            it.taskContentView is TaskContentView
-                    ) {
+                    if (enableRefactorDigitalWellbeingToast()) {
                         it.taskContentView.getSupportedAccessibilityActions().forEach(::addAction)
                     } else {
                         it.digitalWellBeingToast?.getDWBAccessibilityAction()?.let(::addAction)
@@ -809,7 +805,7 @@ constructor(
     override fun performAccessibilityAction(action: Int, arguments: Bundle?): Boolean {
         // TODO(b/343708271): Add support for multiple tasks per action.
         taskContainers.forEach {
-            if (enableRefactorDigitalWellbeingToast() && it.taskContentView is TaskContentView) {
+            if (enableRefactorDigitalWellbeingToast()) {
                 if (it.taskContentView.handleAccessibilityAction(action)) {
                     return true
                 }
@@ -844,11 +840,8 @@ constructor(
     protected open fun inflateViewStubs() {
         findViewById<ViewStub>(R.id.task_content_view)
             ?.apply {
-                inflatedId =
-                    if (enableRefactorTaskContentView()) R.id.task_content_view else R.id.snapshot
-                layoutResource =
-                    if (enableRefactorTaskContentView()) R.layout.task_content_view
-                    else R.layout.task_thumbnail
+                inflatedId = R.id.task_content_view
+                layoutResource = R.layout.task_content_view
             }
             ?.inflate()
 
@@ -1079,20 +1072,10 @@ constructor(
 
             taskContainers.forEach { container ->
                 container.bind()
-                if (enableRefactorTaskContentView()) {
-                    (container.taskContentView as TaskContentView).apply {
-                        cornerRadius = thumbnailFullscreenParams.currentCornerRadius
-                        taskCornerRadius = thumbnailFullscreenParams.taskCornerRadius
-                        doOnSizeChange { width, height ->
-                            updateThumbnailValidity(container)
-                            val thumbnailPosition = updateThumbnailMatrix(container, width, height)
-                            container.refreshOverlay(thumbnailPosition)
-                        }
-                    }
-                } else {
-                    container.snapshotView.cornerRadius =
-                        thumbnailFullscreenParams.currentCornerRadius
-                    container.snapshotView.doOnSizeChange { width, height ->
+                container.taskContentView.apply {
+                    cornerRadius = thumbnailFullscreenParams.currentCornerRadius
+                    taskCornerRadius = thumbnailFullscreenParams.taskCornerRadius
+                    doOnSizeChange { width, height ->
                         updateThumbnailValidity(container)
                         val thumbnailPosition = updateThumbnailMatrix(container, width, height)
                         container.refreshOverlay(thumbnailPosition)
@@ -1127,15 +1110,8 @@ constructor(
     ): TaskContainer =
         traceSection("TaskView.createTaskContainer") {
             val iconView = findViewById<IconAppChipView>(iconViewId)
-            val taskContentView =
-                if (enableRefactorTaskContentView()) findViewById<View>(taskContentViewId)
-                else findViewById(thumbnailViewId)
-            val snapshotView =
-                if (enableRefactorTaskContentView()) {
-                    taskContentView.findViewById(thumbnailViewId)
-                } else {
-                    taskContentView as TaskThumbnailView
-                }
+            val taskContentView = findViewById<TaskContentView>(taskContentViewId)
+            val snapshotView = taskContentView.findViewById<TaskThumbnailView>(thumbnailViewId)!!
 
             val digitalWellBeingToast: DigitalWellBeingToast? =
                 if (enableRefactorDigitalWellbeingToast()) {
@@ -1697,7 +1673,7 @@ constructor(
     private fun onSettledProgressUpdated(settledProgress: Float) {
         getTaskIcons().forEach { (icon, _) -> icon.settledProgressAlpha = settledProgress }
         taskContainers.forEach {
-            if (enableRefactorDigitalWellbeingToast() && it.taskContentView is TaskContentView) {
+            if (enableRefactorDigitalWellbeingToast()) {
                 it.taskContentView.onParentAnimationProgress(settledProgress)
             } else {
                 it.digitalWellBeingToast?.bannerOffsetPercentage = 1f - settledProgress
@@ -1818,12 +1794,7 @@ constructor(
     protected open fun updateFullscreenParams() {
         updateFullscreenParams(thumbnailFullscreenParams)
         taskContainers.forEach {
-            if (enableRefactorTaskContentView()) {
-                (it.taskContentView as TaskContentView).cornerRadius =
-                    thumbnailFullscreenParams.currentCornerRadius
-            } else {
-                it.snapshotView.cornerRadius = thumbnailFullscreenParams.currentCornerRadius
-            }
+            it.taskContentView.cornerRadius = thumbnailFullscreenParams.currentCornerRadius
             it.overlay.setFullscreenParams(thumbnailFullscreenParams)
         }
     }
@@ -1835,7 +1806,7 @@ constructor(
     private fun onModalnessUpdated(modalness: Float) {
         getTaskIcons().forEach { (icon, _) -> icon.modalAlpha = 1f - modalness }
         taskContainers.forEach {
-            if (enableRefactorDigitalWellbeingToast() && it.taskContentView is TaskContentView) {
+            if (enableRefactorDigitalWellbeingToast()) {
                 it.taskContentView.onParentAnimationProgress(1f - modalness)
             } else {
                 it.digitalWellBeingToast?.bannerOffsetPercentage = modalness

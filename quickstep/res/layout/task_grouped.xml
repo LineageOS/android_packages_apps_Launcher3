@@ -40,6 +40,7 @@
 
     <ViewStub
         android:id="@+id/bottomright_task_content_view"
+        android:inflatedId="@+id/bottomright_task_content_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

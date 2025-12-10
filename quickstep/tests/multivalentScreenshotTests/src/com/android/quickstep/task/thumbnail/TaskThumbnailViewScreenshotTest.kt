@@ -21,17 +21,14 @@ import android.graphics.Matrix
 import android.graphics.drawable.BitmapDrawable
 import android.view.LayoutInflater
 import android.view.Surface.ROTATION_0
-import com.android.launcher3.Flags
 import com.android.launcher3.R
 import com.android.launcher3.imagecomparison.ViewBasedImageTest
-import com.android.launcher3.util.rule.setFlags
 import com.android.quickstep.task.thumbnail.SplashHelper.createBitmap
 import com.android.quickstep.task.thumbnail.SplashHelper.createSplash
 import com.android.quickstep.task.thumbnail.TaskThumbnailUiState.BackgroundOnly
 import com.android.quickstep.task.thumbnail.TaskThumbnailUiState.Snapshot
 import com.android.quickstep.task.thumbnail.TaskThumbnailUiState.SnapshotSplash
 import com.android.quickstep.task.thumbnail.TaskThumbnailUiState.Uninitialized
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
@@ -43,11 +40,6 @@ import platform.test.screenshot.Displays
 @RunWith(ParameterizedAndroidJunit4::class)
 class TaskThumbnailViewScreenshotTest(emulationSpec: DeviceEmulationSpec) :
     ViewBasedImageTest(emulationSpec) {
-
-    @Before
-    fun setUp() {
-        setFlagsRule.setFlags(false, Flags.FLAG_ENABLE_REFACTOR_TASK_CONTENT_VIEW)
-    }
 
     @Test
     fun taskThumbnailView_uninitializedByDefault() {

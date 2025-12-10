@@ -30,7 +30,6 @@ import android.view.ViewOutlineProvider
 import android.widget.FrameLayout
 import androidx.annotation.ColorInt
 import androidx.core.view.isInvisible
-import com.android.launcher3.Flags.enableRefactorTaskContentView
 import com.android.launcher3.LauncherAnimUtils.VIEW_ALPHA
 import com.android.launcher3.R
 import com.android.launcher3.util.MultiPropertyFactory
@@ -128,9 +127,6 @@ class TaskThumbnailView : FrameLayout, ViewPool.Reusable {
     override fun onRecycle() {
         uiState = Uninitialized
         outlineBounds = null
-        if (!enableRefactorTaskContentView()) {
-            onSizeChanged = null
-        }
         resetViews()
     }
 
@@ -167,36 +163,11 @@ class TaskThumbnailView : FrameLayout, ViewPool.Reusable {
         splashIcon.alpha = value
     }
 
-    fun doOnSizeChange(action: (width: Int, height: Int) -> Unit) {
-        if (enableRefactorTaskContentView()) {
-            return
-        }
-        onSizeChanged = action
-    }
-
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         onSizeChanged?.invoke(width, height)
         bounds.set(0, 0, w, h)
         invalidateOutline()
-    }
-
-    override fun setScaleX(scaleX: Float) {
-        if (enableRefactorTaskContentView()) {
-            return
-        }
-        super.setScaleX(scaleX)
-        // Splash icon should ignore scale on TTV
-        splashIcon.scaleX = 1 / scaleX
-    }
-
-    override fun setScaleY(scaleY: Float) {
-        if (enableRefactorTaskContentView()) {
-            return
-        }
-        super.setScaleY(scaleY)
-        // Splash icon should ignore scale on TTV
-        splashIcon.scaleY = 1 / scaleY
     }
 
     private fun resetViews() {
