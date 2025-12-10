@@ -19,6 +19,8 @@ package com.android.launcher3.widgetpicker.repository
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.appwidget.AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN
+import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_HIDE_FROM_PICKER
+import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_RECONFIGURABLE
 import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.ActivityInfo
@@ -338,7 +340,7 @@ class WidgetsRepositoryImplTest {
                 WidgetAppId(packageName = APP_1_PACKAGE_NAME, userHandle = user, category = -1)
             whenever(mockPinRequest.requestType).thenReturn(PinItemRequest.REQUEST_TYPE_APPWIDGET)
             whenever(mockPinRequest.getAppWidgetProviderInfo(any()))
-                .thenReturn(App1Widget1ProviderInfo)
+                .thenReturn(App1Widget1ProviderInfoHideFromPicker) // even if its hide from picker
 
             underTest.initialize(InitializationOptions.PinWidget(mockPinRequest))
             TestUtil.runOnExecutorSync(Executors.MODEL_EXECUTOR) {}
@@ -567,6 +569,12 @@ class WidgetsRepositoryImplTest {
             WidgetUtils.createAppWidgetProviderInfo(App1Widget1ProviderName).apply {
                 previewLayout = PREVIEW_LAYOUT_ID
                 configure = ComponentName.createRelative(APP_1_PACKAGE_NAME, "ConfigActivity")
+            }
+        val App1Widget1ProviderInfoHideFromPicker: AppWidgetProviderInfo =
+            WidgetUtils.createAppWidgetProviderInfo(App1Widget1ProviderName).apply {
+                previewLayout = PREVIEW_LAYOUT_ID
+                configure = ComponentName.createRelative(APP_1_PACKAGE_NAME, "ConfigActivity")
+                widgetFeatures = WIDGET_FEATURE_RECONFIGURABLE or WIDGET_FEATURE_HIDE_FROM_PICKER
             }
 
         val App1Shortcut1Name = ComponentName(APP_1_PACKAGE_NAME, SHORTCUT_1B_NAME)

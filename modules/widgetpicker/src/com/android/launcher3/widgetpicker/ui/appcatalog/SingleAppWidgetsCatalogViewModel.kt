@@ -16,6 +16,7 @@
 
 package com.android.launcher3.widgetpicker.ui.appcatalog
 
+import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -63,7 +64,7 @@ constructor(
     private suspend fun initWidgetApp() {
         widgetsInteractor.getWidgetApp(widgetAppId).collect { app ->
             app?.let {
-                val displayableWidgetApp = DisplayableWidgetApp.fromWidgetApp(it)
+                widgetApp = DisplayableWidgetApp.fromWidgetApp(it)
 
                 val previewsState =
                     PreviewsState(
@@ -71,8 +72,6 @@ constructor(
                             widget.id to widgetsInteractor.getWidgetPreview(widget.id)
                         }
                     )
-
-                widgetApp = displayableWidgetApp
 
                 postUpdateOnUiReady { widgetsPreviewsState = previewsState }
             }
@@ -95,6 +94,11 @@ constructor(
         pendingUpdate?.invoke()
         pendingUpdate = null
         uiReady = true
+    }
+
+    @VisibleForTesting
+    fun clearPreviews() {
+        widgetsPreviewsState = PreviewsState()
     }
 
     @AssistedFactory
