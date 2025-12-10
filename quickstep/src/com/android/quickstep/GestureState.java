@@ -36,7 +36,6 @@ import android.os.SystemClock;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.RemoteAnimationTarget;
-import android.window.DesktopExperienceFlags;
 import android.window.TransitionInfo;
 
 import androidx.annotation.NonNull;
@@ -246,11 +245,8 @@ public class GestureState implements RecentsAnimationCallbacks.RecentsAnimationL
     }
 
     public static boolean displaySupportsHomeGesture(int displayId) {
-        if (DesktopExperienceFlags.ENABLE_REJECT_HOME_TRANSITION.isTrue()
-                && displayId != DEFAULT_DISPLAY) {
-            return false;
-        }
-        return true;
+        // The reject home transition runs if home is invoked on a display which lacks a home.
+        return displayId == DEFAULT_DISPLAY;
     }
 
     /**
