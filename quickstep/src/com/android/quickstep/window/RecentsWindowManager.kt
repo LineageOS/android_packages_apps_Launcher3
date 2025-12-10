@@ -285,6 +285,9 @@ constructor(
                 if (!useInputReportedFocusForAccessibility()) {
                     return
                 }
+                if (recentsView?.keyboardFocusTaskView == null) {
+                    return
+                }
                 recentsView?.post { requestInputFocus(focused = true) }
             }
 
@@ -468,7 +471,6 @@ constructor(
         if (isShowing()) {
             return
         }
-
         createWindowView()
         windowRootView.visibility = View.VISIBLE
 
@@ -483,7 +485,6 @@ constructor(
             AbstractFloatingView.closeAllOpenViews(this, /* animate= */ false)
             recentsView?.viewRootImpl?.touchModeChanged(true)
             windowRootView.visibility = View.GONE
-            requestInputFocus(focused = false)
             AccessibilityManagerCompat.sendTestProtocolEventToTest(
                 this,
                 LAUNCHER_ACTIVITY_STOPPED_MESSAGE,
@@ -554,7 +555,7 @@ constructor(
         return homeOverlay
     }
 
-    private fun requestInputFocus(focused: Boolean) {
+    fun requestInputFocus(focused: Boolean) {
         if (!useInputReportedFocusForAccessibility()) {
             return
         }
