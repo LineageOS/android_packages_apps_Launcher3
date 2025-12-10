@@ -75,7 +75,6 @@ import android.widget.FrameLayout;
 import android.window.DesktopExperienceFlags;
 
 import androidx.annotation.AnyThread;
-import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -83,6 +82,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.app.displaylib.DisplayDecorationListener;
 import com.android.app.displaylib.DisplaysWithDecorationsRepositoryCompat;
 import com.android.internal.util.LatencyTracker;
+import com.android.internal.util.ToBooleanFunction;
 import com.android.launcher3.ActivityInteractor;
 import com.android.launcher3.AsyncAnimatorPlaybackController;
 import com.android.launcher3.DeviceProfile;
@@ -115,7 +115,6 @@ import com.android.quickstep.OverviewComponentObserver;
 import com.android.quickstep.RecentsActivity;
 import com.android.quickstep.SystemDecorationChangeObserver;
 import com.android.quickstep.SystemUiProxy;
-import com.android.quickstep.TouchInteractionHandler;
 import com.android.quickstep.dagger.SysUIConnectionSingleton;
 import com.android.quickstep.util.ContextualSearchInvoker;
 import com.android.quickstep.util.SystemUiFlagUtils;
@@ -471,14 +470,9 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
     private @Nullable SafeCloseable mNavBarKidsModeSafeCloseable;
 
     /**
-     * This constructor will be called on main thread by
-     * {@link TouchInteractionHandler} to initialize properties (such as
-     * creating {@link android.window.WindowContext} and populating {@link #mRootLayouts}). Yet we
-     * need to switch to {@link TASKBAR_UI_THREAD} to invoke
-     * {@link #recreateTaskbarForDisplay(int, int)} which will add taskbar root layout to window so
-     * that {@link TASKBAR_UI_THREAD} becomes the ui thread for taskbar.
+     * This constructor will be called on TaskbarUI thread via TaskbarManagerImplWrapper.
+     * Callers should not inject it directly, and instead inject TaskbarManager.
      */
-    @MainThread
     @SuppressLint("WrongConstant")
     @Inject
     public TaskbarManagerImpl(
@@ -487,6 +481,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
             TaskbarNavButtonCallbacks navCallbacks,
             DisplaysWithDecorationsRepositoryCompat displaysWithDecorationsRepositoryCompat,
             ProductionDispatchers dispatchers) {
+        Preconditions.assertTaskbarUiThread();
         mBaseContext = context;
         mBaseWindowManager = mBaseContext.getSystemService(WindowManager.class);
         mPrimaryDisplayId = mBaseContext.getDisplayId();
@@ -511,11 +506,11 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         createAndRegisterComponentCallbacks(mPrimaryDisplayId);
 
         mUserSetupCompleteSafeCloseable = SettingsCache.INSTANCE.get(mPrimaryWindowContext)
-                .getListenableRef(USER_SETUP_COMPLETE_URI).forEach(
-                        TASKBAR_UI_THREAD, (v) -> onSettingChanged());
+                .getListenableRef(USER_SETUP_COMPLETE_URI).forEach(TASKBAR_UI_THREAD,
+                        (v) -> onSettingChanged(v, TaskbarActivityContext::isUserSetupComplete));
         mNavBarKidsModeSafeCloseable = SettingsCache.INSTANCE.get(mPrimaryWindowContext)
-                .getListenableRef(NAV_BAR_KIDS_MODE).forEach(
-                        TASKBAR_UI_THREAD, (v) -> onSettingChanged());
+                .getListenableRef(NAV_BAR_KIDS_MODE).forEach(TASKBAR_UI_THREAD,
+                        (v) -> onSettingChanged(v, TaskbarActivityContext::isInKidsMode));
         if (DesktopExperienceFlags.ENABLE_SYS_DECORS_CALLBACKS_VIA_WM.isTrue()
                 && DesktopExperienceFlags.ENABLE_DISPLAY_CONTENT_MODE_MANAGEMENT.isTrue()) {
             displaysWithDecorationsRepositoryCompat
@@ -568,9 +563,16 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         return mPrimaryDisplayUiControllerStream;
     }
 
-    private Unit onSettingChanged() {
+    private Unit onSettingChanged(boolean newValue,
+            ToBooleanFunction<TaskbarActivityContext> oldValue) {
         debugPrimaryTaskbar("Settings changed! Recreating Taskbar!");
-        recreateTaskbars();
+        // Iterate using a copy, since the entries for mTaskbars can change during the iteration
+        new HashMap<>(mTaskbars).forEach((displayId, activity) -> {
+            if (activity != null && oldValue.apply(activity) != newValue) {
+                debugTaskbarManager("onSettingChanged", displayId);
+                recreateTaskbarForDisplay(displayId, 0, "onSettingChanged");
+            }
+        });
         return null;
     }
 

@@ -30,7 +30,6 @@ import static androidx.annotation.VisibleForTesting.PACKAGE_PRIVATE;
 
 import static com.android.app.animation.Interpolators.LINEAR;
 import static com.android.launcher3.AbstractFloatingView.TYPE_ON_BOARD_POPUP;
-import static com.android.launcher3.AbstractFloatingView.TYPE_REBIND_SAFE;
 import static com.android.launcher3.AbstractFloatingView.TYPE_TASKBAR_OVERLAY_PROXY;
 import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.Utilities.calculateTextHeight;
@@ -281,12 +280,10 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     private Boolean mImeDockedOverrideForTest;
 
     private final boolean mIsSafeModeEnabled;
-    private boolean mIsUserSetupComplete;
-    private boolean mIsNavBarForceVisible;
-    private boolean mIsNavBarKidsMode;
+    private final boolean mIsUserSetupComplete;
+    private final boolean mIsNavBarKidsMode;
 
     private boolean mIsDestroyed = false;
-    private boolean mAddedWindow = false;
 
     // The bounds of the taskbar items relative to TaskbarDragLayer
     private final Rect mTransientTaskbarBounds = new Rect();
@@ -336,6 +333,10 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         mSysUiProxy = sysUiProxy;
         mPrimaryDisplayId = primaryDisplayId;
         mWindowContext = windowContext;
+        SettingsCache settingsCache = SettingsCache.INSTANCE.get(this);
+        mIsUserSetupComplete = settingsCache.getValue(URI_USER_SETUP_COMPLETE);
+        mIsNavBarKidsMode = settingsCache.getValue(URI_NAV_BAR_KIDS_MODE);
+
         applyDeviceProfile(launcherDp);
         mTaskbarSpecsEvaluator = new TaskbarSpecsEvaluator(
                 this,
@@ -462,22 +463,6 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         onViewCreated();
     }
 
-    /** Updates {@link DeviceProfile} instances for any Taskbar windows. */
-    public void updateDeviceProfile(DeviceProfile launcherDp) {
-        applyDeviceProfile(launcherDp);
-        mControllers.taskbarOverlayController.updateLauncherDeviceProfile(launcherDp);
-        mControllers.bubbleControllers.ifPresent(bubbleControllers -> {
-            int bubbleBarVerticalCenter = launcherDp.getBubbleBarVerticalCenterForHome();
-            bubbleControllers.bubbleStashController
-                    .setBubbleBarVerticalCenterForHome(bubbleBarVerticalCenter);
-        });
-        AbstractFloatingView.closeAllOpenViewsExcept(this, false, TYPE_REBIND_SAFE);
-        // Reapply fullscreen to take potential new screen size into account.
-        setTaskbarWindowFullscreenInternal(mTaskbarFullscreenFlags != 0);
-
-        dispatchDeviceProfileChanged();
-    }
-
     public final int getPrimaryDisplayId() {
         return mPrimaryDisplayId;
     }
@@ -588,10 +573,6 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         mNavMode = getNavigationMode();
         mTaskbarUiState.setNavigationMode(mNavMode);
 
-        SettingsCache settingsCache = SettingsCache.INSTANCE.get(this);
-        mIsUserSetupComplete = settingsCache.getValue(URI_USER_SETUP_COMPLETE);
-        mIsNavBarKidsMode = settingsCache.getValue(URI_NAV_BAR_KIDS_MODE);
-        mIsNavBarForceVisible = mIsNavBarKidsMode;
         if (mControllers != null) {
             mControllers.taskbarEduTooltipController.updateShouldShowEduOnAppLaunch();
         }
@@ -2344,6 +2325,10 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         return mIsUserSetupComplete;
     }
 
+    public boolean isInKidsMode() {
+        return mIsNavBarKidsMode;
+    }
+
     /**
      * Checks if the simple view mode is enabled.
      *
@@ -2362,7 +2347,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
 
     @VisibleForTesting(otherwise = PROTECTED)
     public boolean isNavBarForceVisible() {
-        return mIsNavBarForceVisible;
+        return mIsNavBarKidsMode;
     }
 
     /**

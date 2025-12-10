@@ -26,11 +26,13 @@ import com.android.launcher3.uioverrides.QuickstepLauncher
 import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
 import com.android.launcher3.util.ListenableStream
 import com.android.quickstep.SystemUiProxy
+import com.android.quickstep.dagger.SysUIConnectionSingleton
 import com.android.quickstep.views.RecentsViewContainer
 import java.io.PrintWriter
 import java.util.concurrent.Callable
 import javax.annotation.concurrent.ThreadSafe
 import javax.inject.Inject
+import javax.inject.Provider
 
 /**
  * Wrapper of [TaskbarManagerImpl], this class controls which thread the invocation happens. The
@@ -38,8 +40,15 @@ import javax.inject.Inject
  * rendering taskbar in per-window ui thread.
  */
 @ThreadSafe
-class TaskbarManagerImplWrapper @Inject constructor(private val impl: TaskbarManagerImpl) :
+@SysUIConnectionSingleton
+class TaskbarManagerImplWrapper @Inject constructor(implProvider: Provider<TaskbarManagerImpl>) :
     TaskbarManager {
+
+    private lateinit var impl: TaskbarManagerImpl
+
+    init {
+        TASKBAR_UI_THREAD.execute { impl = implProvider.get() }
+    }
 
     override fun onUserUnlocked() {
         TASKBAR_UI_THREAD.execute(impl::onUserUnlocked)
