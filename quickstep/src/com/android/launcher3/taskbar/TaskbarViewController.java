@@ -86,7 +86,7 @@ import com.android.launcher3.taskbar.bubbles.BubbleBarController;
 import com.android.launcher3.taskbar.bubbles.BubbleBarViewController;
 import com.android.launcher3.taskbar.bubbles.BubbleControllers;
 import com.android.launcher3.taskbar.customization.TaskbarIconSpecs;
-import com.android.launcher3.taskbar.customization.TaskbarIconsContainer;
+import com.android.launcher3.taskbar.customization.containers.TaskbarPinnedAppIconContainer;
 import com.android.launcher3.taskbar.handoff.HandoffSuggestion;
 import com.android.launcher3.util.ItemInfoMatcher;
 import com.android.launcher3.util.LauncherBindableItemsContainer;
@@ -956,7 +956,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         for (int i = parent.getChildCount() - 1; i >= 0; i--) {
             View child = parent.getChildAt(i);
             boolean isQsb = child == mTaskbarView.getQsb();
-            if (child instanceof TaskbarIconsContainer tic) {
+            if (child instanceof TaskbarPinnedAppIconContainer tic) {
                 animateIconsForReveal(tic, reveal, as, isStashed, totalNumIcons, duration,
                         stashedBounds, dispatchOnAnimationStart);
                 continue;
@@ -1167,7 +1167,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
             // TODO(b/343522351): show recents on the home screen.
             final boolean isRecentsInHotseat = false;
 
-            if (child instanceof TaskbarIconsContainer tic) {
+            if (child instanceof TaskbarPinnedAppIconContainer tic) {
                 animateChildViews(tic, setter, launcherDp, taskbarDp, hotseatNavBarTranslationX,
                         interpolator);
                 continue;
@@ -1272,7 +1272,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
             }
             hotseatIconCenter += hotseatNavBarTranslationX;
             float childCenter = (child.getLeft() + child.getRight()) / 2f;
-            if (parent instanceof TaskbarIconsContainer  tic) {
+            if (parent instanceof TaskbarPinnedAppIconContainer  tic) {
                 childCenter += tic.getLeft();
             }
             childCenter += ((Reorderable) child).getTranslateDelegate().getTranslationX(

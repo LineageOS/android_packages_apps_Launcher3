@@ -566,33 +566,6 @@ public abstract class AbsSwipeUpHandlerTestCase<
     }
 
     @Test
-    public void testWindowAnimationToHome_setsAndResetsTaskViewClickableState_whenSuccessful() {
-        SWIPE_HANDLER swipeHandler = createSwipeHandler();
-        ArgumentCaptor<Runnable> callbackCaptor = ArgumentCaptor.forClass(Runnable.class);
-
-        // Call onActivityInit to set RecentsView
-        swipeHandler.onActivityInit(/* isHomeStarted= */ false);
-
-        AnimationSuccessListener listener = swipeHandler.getWindowAnimationToHomeListener();
-
-        runOnMainSync(() -> {
-            listener.onAnimationStart(new AnimatorSet());
-
-            verify(mCurrentPageTaskView, times(1)).setClickable(eq(false));
-            verify(mCurrentPageTaskView, never()).setClickable(eq(true));
-
-            listener.onAnimationEnd(new AnimatorSet());
-
-            verify(getRecentsView()).post(callbackCaptor.capture());
-
-            callbackCaptor.getValue().run();
-
-            verify(mCurrentPageTaskView, times(1)).setClickable(eq(false));
-            verify(mCurrentPageTaskView, times(1)).setClickable(eq(true));
-        });
-    }
-
-    @Test
     public void testWindowAnimationToHome_afterContainerDestroyed_doesNotThrowException() {
         SWIPE_HANDLER swipeHandler = createSwipeHandler();
         ArgumentCaptor<Runnable> callbackCaptor = ArgumentCaptor.forClass(Runnable.class);
@@ -612,56 +585,6 @@ public abstract class AbsSwipeUpHandlerTestCase<
             onContainerDestroyed();
 
             callbackCaptor.getValue().run();
-        });
-    }
-
-    @Test
-    public void testWindowAnimationToHome_setsAndResetsTaskViewClickableState_whenCanceled() {
-        SWIPE_HANDLER swipeHandler = createSwipeHandler();
-        ArgumentCaptor<Runnable> callbackCaptor = ArgumentCaptor.forClass(Runnable.class);
-
-        // Call onActivityInit to set RecentsView
-        swipeHandler.onActivityInit(/* isHomeStarted= */ false);
-
-        AnimationSuccessListener listener = swipeHandler.getWindowAnimationToHomeListener();
-
-        runOnMainSync(() -> {
-            listener.onAnimationStart(new AnimatorSet());
-
-            verify(mCurrentPageTaskView, times(1)).setClickable(eq(false));
-            verify(mCurrentPageTaskView, never()).setClickable(eq(true));
-
-            listener.onAnimationCancel(new AnimatorSet());
-            listener.onAnimationEnd(new AnimatorSet());
-
-            verify(getRecentsView()).post(callbackCaptor.capture());
-
-            callbackCaptor.getValue().run();
-
-            verify(mCurrentPageTaskView, times(1)).setClickable(eq(false));
-            verify(mCurrentPageTaskView, times(1)).setClickable(eq(true));
-        });
-    }
-
-    @Test
-    public void testWindowAnimationToHome_neverSetsTaskViewClickableState_ifNeverStarted() {
-        SWIPE_HANDLER swipeHandler = createSwipeHandler();
-        ArgumentCaptor<Runnable> callbackCaptor = ArgumentCaptor.forClass(Runnable.class);
-
-        // Call onActivityInit to set RecentsView
-        swipeHandler.onActivityInit(/* isHomeStarted= */ false);
-
-        AnimationSuccessListener listener = swipeHandler.getWindowAnimationToHomeListener();
-
-        runOnMainSync(() -> {
-            listener.onAnimationEnd(new AnimatorSet());
-
-            verify(getRecentsView()).post(callbackCaptor.capture());
-
-            callbackCaptor.getValue().run();
-
-            verify(mCurrentPageTaskView, never()).setClickable(eq(false));
-            verify(mCurrentPageTaskView, never()).setClickable(eq(true));
         });
     }
 
@@ -772,6 +695,19 @@ public abstract class AbsSwipeUpHandlerTestCase<
             verify(recentsView).onGestureAnimationEnd();
             verify(recentsView).removeOnScrollChangedListener(any());
         });
+    }
+
+    @Test
+    public void testTaskViewOnlyInteractiveInOverviewState() {
+        for (STATE_TYPE state : getAllStates()) {
+            if (state == getOverviewState()) {
+                assertTrue("Overview state does not allow interactive TaskViews: state=" + state,
+                        state.isTaskViewInteractive());
+            } else {
+                assertFalse("Non-overview state allows interactive TaskViews: state=" + state,
+                        state.isTaskViewInteractive());
+            }
+        }
     }
 
     /**
@@ -887,6 +823,12 @@ public abstract class AbsSwipeUpHandlerTestCase<
 
     @NonNull
     protected abstract STATE_TYPE getBaseState();
+
+    @NonNull
+    protected abstract STATE_TYPE[] getAllStates();
+
+    @NonNull
+    protected abstract STATE_TYPE getOverviewState();
 
     protected TopTaskTracker.CachedTaskInfo getTaskInfo() {
         return new TopTaskTracker.CachedTaskInfo(

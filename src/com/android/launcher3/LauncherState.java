@@ -149,7 +149,8 @@ public abstract class LauncherState implements BaseState<LauncherState> {
     public static final LauncherState HINT_STATE_TWO_BUTTON = new HintState(
             HINT_STATE_TWO_BUTTON_ORDINAL, LAUNCHER_STATE_OVERVIEW);
 
-    public static final LauncherState OVERVIEW = new OverviewState(OVERVIEW_STATE_ORDINAL);
+    public static final LauncherState OVERVIEW = OverviewState.newOverviewState(
+            OVERVIEW_STATE_ORDINAL);
     public static final LauncherState OVERVIEW_MODAL_TASK = OverviewState.newModalTaskState(
             OVERVIEW_MODAL_TASK_STATE_ORDINAL);
     /**

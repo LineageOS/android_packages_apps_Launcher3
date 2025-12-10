@@ -113,11 +113,11 @@ public class RecentsModelTest {
         doAnswer(invocation -> {
             mRegisteredTaskListListener = invocation.getArgument(0);
             return null;
-        }).when(mTasksList).registerRecentTasksChangedListener(any());
+        }).when(mTasksList).setRecentTasksChangedListener(any());
         doAnswer(invocation -> {
             mRegisteredTaskListListener = null;
             return null;
-        }).when(mTasksList).unregisterRecentTasksChangedListener();
+        }).when(mTasksList).clearRecentTasksChangedListener();
         doAnswer(invocation -> {
             if (mRegisteredTaskListListener != null) {
                 mRegisteredTaskListListener.onRecentTasksChanged();

@@ -72,4 +72,16 @@ public class FallbackSwipeHandlerTestCase extends AbsSwipeUpHandlerTestCase<
     protected RecentsState getBaseState() {
         return RecentsState.BG_LAUNCHER;
     }
+
+    @NonNull
+    @Override
+    protected RecentsState[] getAllStates() {
+        return RecentsState.values();
+    }
+
+    @NonNull
+    @Override
+    protected RecentsState getOverviewState() {
+        return RecentsState.DEFAULT;
+    }
 }

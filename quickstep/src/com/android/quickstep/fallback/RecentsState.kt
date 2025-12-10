@@ -28,6 +28,7 @@ import com.android.launcher3.anim.PendingAnimation
 import com.android.launcher3.statemanager.BaseState
 import com.android.launcher3.statemanager.BaseState.FLAG_DISABLE_RESTORE_ABSOLUTE
 import com.android.launcher3.statemanager.BaseState.FLAG_DISABLE_RESTORE_EXCEPT_UI_MODE_CHANGE
+import com.android.launcher3.statemanager.BaseState.FLAG_IS_TASK_VIEW_INTERACTIVE
 import com.android.launcher3.util.Themes
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.views.ScrimColors
@@ -261,7 +262,8 @@ open class RecentsState(@JvmField val ordinal: Int, private val mFlags: Int) :
                     FLAG_LIVE_TILE or
                     FLAG_RECENTS_VIEW_VISIBLE or
                     FLAG_ADD_DESK_BUTTON or
-                    FLAG_IS_IN_OVERVIEW),
+                    FLAG_IS_IN_OVERVIEW or
+                    FLAG_IS_TASK_VIEW_INTERACTIVE),
             )
         @JvmField
         val MODAL_TASK: RecentsState =
@@ -302,6 +304,8 @@ open class RecentsState(@JvmField val ordinal: Int, private val mFlags: Int) :
 
         /** Returns the corresponding RecentsState from ordinal provided */
         @JvmStatic fun stateFromOrdinal(ordinal: Int) = sAllStates[ordinal]!!
+
+        @JvmStatic fun values() = sAllStates.copyOf(sAllStates.size)
 
         private const val NO_OFFSET = 0f
         private const val NO_SCALE = 1f

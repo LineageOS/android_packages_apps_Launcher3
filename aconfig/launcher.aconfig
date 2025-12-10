@@ -588,6 +588,13 @@ flag {
 }
 
 flag {
+  name: "enable_workspace_selection"
+  namespace: "launcher"
+  description: "Enables item selection workflows in the workspace"
+  bug: "430287769"
+}
+
+flag {
   name: "migrate_browser_icon_on_setup"
   namespace: "launcher"
   description: "Migrates browser icon to user choice during user setup"

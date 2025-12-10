@@ -37,7 +37,7 @@ import com.android.app.animation.Interpolators.LINEAR
 import com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY
 import com.android.launcher3.Reorderable
 import com.android.launcher3.Utilities
-import com.android.launcher3.taskbar.customization.TaskbarIconsContainer
+import com.android.launcher3.taskbar.customization.containers.TaskbarPinnedAppIconContainer
 import com.android.launcher3.util.MultiPropertyFactory
 import com.android.launcher3.util.MultiTranslateDelegate.INDEX_TASKBAR_PINNING_ANIM
 
@@ -114,7 +114,7 @@ class TaskbarLayoutTransitionFactory(private vararg val transitionListeners: Tra
                     "containerIconsTranslateXPinning",
                 ) {
                 override fun get(view: View): FloatArray {
-                    return if (view is TaskbarIconsContainer) {
+                    return if (view is TaskbarPinnedAppIconContainer) {
                         view.children.map { it.pinningTranslationX.value }.toList().toFloatArray()
                     } else {
                         FloatArray(0)
@@ -122,7 +122,7 @@ class TaskbarLayoutTransitionFactory(private vararg val transitionListeners: Tra
                 }
 
                 override fun set(view: View, values: FloatArray) {
-                    if (view is TaskbarIconsContainer) {
+                    if (view is TaskbarPinnedAppIconContainer) {
                         for ((i, v) in values.withIndex()) view[i].pinningTranslationX.value = v
                     }
                 }

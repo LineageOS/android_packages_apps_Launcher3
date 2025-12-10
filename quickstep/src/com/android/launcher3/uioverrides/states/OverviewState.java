@@ -58,7 +58,7 @@ public class OverviewState extends LauncherState {
             | FLAG_WORKSPACE_INACCESSIBLE
             | FLAG_CLOSE_POPUPS;
 
-    public OverviewState(int id) {
+    protected OverviewState(int id) {
         this(id, STATE_FLAGS);
     }
 
@@ -267,5 +267,9 @@ public class OverviewState extends LauncherState {
      */
     public static OverviewState newSplitSelectState(int id) {
         return new SplitScreenSelectState(id);
+    }
+
+    public static OverviewState newOverviewState(int id) {
+        return new OverviewState(id, STATE_FLAGS | FLAG_IS_TASK_VIEW_INTERACTIVE);
     }
 }

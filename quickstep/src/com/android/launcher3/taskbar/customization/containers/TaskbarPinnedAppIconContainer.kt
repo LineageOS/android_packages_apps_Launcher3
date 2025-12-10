@@ -38,9 +38,11 @@ import com.android.launcher3.Utilities.isRtl
 import com.android.launcher3.celllayout.CellInfo
 import com.android.launcher3.folder.FolderIcon
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.model.data.TaskItemInfo.Companion.isSameItem
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.taskbar.ItemInfoWrapper
 import com.android.launcher3.taskbar.TaskbarActivityContext
+import com.android.launcher3.taskbar.TaskbarDropTargetGhostView
 import com.android.launcher3.taskbar.TaskbarOverflowView
 import com.android.launcher3.taskbar.TaskbarPopupController
 import com.android.launcher3.taskbar.TaskbarViewCallbacks
@@ -53,11 +55,11 @@ import com.android.launcher3.taskbar.customization.overflow.TaskbarOverflowIconW
 import com.android.launcher3.taskbar.customization.util.TaskbarIconContainerLayoutParams
 import com.android.launcher3.taskbar.customization.util.TaskbarIconContainerUtil
 import com.android.launcher3.taskbar.customization.util.TaskbarIconContainerUtil.DEFAULT_BOUNCE_SCALE
-import com.android.launcher3.taskbar.customization.util.TaskbarIconContainerUtil.getMaxIconCount
 import com.android.launcher3.taskbar.customization.viewfactory.TaskbarPinnedAppsIconsViewFactory
 import com.android.launcher3.util.MultiTranslateDelegate
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.views.PredictedAppIcon
+import kotlin.math.min
 
 /** Taskbar container which hosts its pinned apps. */
 class TaskbarPinnedAppIconContainer(context: Context) :
@@ -73,17 +75,21 @@ class TaskbarPinnedAppIconContainer(context: Context) :
     private var reorderBounceScale = DEFAULT_BOUNCE_SCALE
     private val isRtl = isRtl(activityContext.resources)
 
+    private var dropTargetGhostView: View? = null
+    private var indexOfChildHiddenForDrag = -1
+    private var dropSpotIndex = -1
+
     override val taskbarIconViewSize =
         dpToPx(activityContext.taskbarSpecsEvaluator.taskbarIconTouchSize, activityContext)
 
     override val taskbarIconViewPadding =
         dpToPx(activityContext.taskbarSpecsEvaluator.taskbarIconPadding, activityContext)
 
-    override val overflowIconClickListener: OnClickListener =
-        taskbarViewCallbacks.pinnedOverflowOnClickListener
+    override val overflowIconClickListener: OnClickListener
+        get() = taskbarViewCallbacks.pinnedOverflowOnClickListener
 
-    override val overflowIconLongClickListener: OnLongClickListener =
-        taskbarViewCallbacks.pinnedOverflowOnLongClickListener
+    override val overflowIconLongClickListener: OnLongClickListener
+        get() = taskbarViewCallbacks.pinnedOverflowOnLongClickListener
 
     private val itemViewFactory = TaskbarPinnedAppsIconsViewFactory(activityContext, this)
 
@@ -102,6 +108,9 @@ class TaskbarPinnedAppIconContainer(context: Context) :
     val overflowView: TaskbarOverflowView =
         taskbarIconsContainerOverflowHelper.taskbarContainerOverflowView
 
+    val isOverflowViewShowing: Boolean
+        get() = overflowView in this
+
     private lateinit var taskbarViewCallbacks: TaskbarViewCallbacks
 
     init {
@@ -112,25 +121,21 @@ class TaskbarPinnedAppIconContainer(context: Context) :
 
     fun setUpCallbacks(taskbarViewCallbacks: TaskbarViewCallbacks) {
         this.taskbarViewCallbacks = taskbarViewCallbacks
-        taskbarIconsContainerOverflowHelper.setUpCallbacks(
-            hoverListener = this,
-            overflowClickListeners = this,
-        )
     }
 
-    fun updateIcons(itemInfos: List<ItemInfo>) {
-        traceSection("TaskbarPinnedAppIconContainer#updateIcons") { updateIconsInternal(itemInfos) }
+    fun updateIcons(itemInfos: List<ItemInfo>, forceUpdate: Boolean) {
+        traceSection("TaskbarPinnedAppIconContainer#updateIcons") {
+            updateIconsInternal(itemInfos, forceUpdate)
+        }
     }
 
-    private fun updateIconsInternal(itemInfos: List<ItemInfo>) {
+    private fun updateIconsInternal(itemInfos: List<ItemInfo>, forceUpdate: Boolean) {
         var numViewsAnimated = 0
         val itemCount = itemInfos.size
-        val numMaxIcons =
-            getMaxIconCount(
-                itemCount,
-                activityContext.numbersOfTaskbarIconsOverflowing,
-                isOverflowEnabled,
-            )
+
+        // TODO: Migrate this logic to overflow logic when recent app container is ready.
+        //  We currently cannot refactor test until recents container is ready.
+        val numMaxIcons = activityContext.taskbarSpecsEvaluator.numShownHotseatIcons
         var itemList = itemInfos
         if (isRtl) itemList = itemList.reversed()
 
@@ -144,8 +149,17 @@ class TaskbarPinnedAppIconContainer(context: Context) :
         forEachIcon(taskbarContainerIconsBySection.nonOverflownItems) { index, item ->
             val itemView = itemViewFactory.getView(item, index)
             itemView.setPadding(taskbarIconViewPadding)
+
+            if (!forceUpdate && item.isSameItem(itemView.tag) && itemView in this) {
+                // Might have been wrapped in TaskItemInfo by recents update.
+                itemView.tag = item
+                return@forEachIcon
+            }
+
             if (itemView !in this) {
                 addView(itemView, getLayoutParams(index, itemCount))
+            } else {
+                itemView.layoutParams = getLayoutParams(index, itemCount)
             }
 
             if (itemView is FolderIcon) {
@@ -172,7 +186,7 @@ class TaskbarPinnedAppIconContainer(context: Context) :
             setClickAndLongClickListenersForIcon(itemView)
             if (itemView.getTag(R.id.taskbar_icon_has_hover_listener) == true) {
                 // Creating hover listener is expensive due to view inflation, so reuse if possible.
-                return
+                return@forEachIcon
             }
             itemView.setOnHoverListener(taskbarViewCallbacks.getIconOnHoverListener(itemView))
             itemView.setTag(R.id.taskbar_icon_has_hover_listener, true)
@@ -182,10 +196,14 @@ class TaskbarPinnedAppIconContainer(context: Context) :
             itemViewFactory.removeAndRecycle(this[childCount - 1])
         }
 
-        if (!isOverflowEnabled) {
+        if (isOverflowEnabled) {
             taskbarIconsContainerOverflowHelper.setUpOverflowView(
                 taskbarContainerIconsBySection.overflownItems,
                 itemMarginLeftRight,
+            )
+            taskbarIconsContainerOverflowHelper.setUpCallbacks(
+                hoverListener = this,
+                overflowClickListeners = this,
             )
         }
     }
@@ -234,6 +252,55 @@ class TaskbarPinnedAppIconContainer(context: Context) :
         }
     }
 
+    /** Reserves a spot for a drop event by inserting a ghost view. */
+    fun reserveDropSlot(index: Int) {
+        if (dropTargetGhostView != null && dropSpotIndex == index) {
+            return
+        }
+        // Remove old ghost and restore original item if position changed
+        releaseDropSlot()
+        dropSpotIndex = index
+
+        // If no valid drop index, just return
+        if (dropSpotIndex < 0) {
+            return
+        }
+
+        if (isOverflowViewShowing) {
+            dropSpotIndex = min(dropSpotIndex, indexOfChild(overflowView) - 1)
+        }
+
+        if (dropTargetGhostView == null) {
+            dropTargetGhostView = TaskbarDropTargetGhostView(activityContext, taskbarIconViewSize)
+        }
+        val lp = TaskbarIconContainerLayoutParams(taskbarIconViewSize, taskbarIconViewSize)
+        lp.marginStart = itemMarginLeftRight
+        lp.marginEnd = itemMarginLeftRight
+        var insertionIndex = dropSpotIndex
+
+        if (indexOfChildHiddenForDrag != -1 && insertionIndex >= indexOfChildHiddenForDrag) {
+            insertionIndex++
+        }
+
+        addView(dropTargetGhostView, min(insertionIndex, childCount), lp)
+    }
+
+    fun updateItemViewVisibilityForDragState(itemView: View, isDragged: Boolean) {
+        val indexOfDraggedView = indexOfChild(itemView)
+        if (indexOfDraggedView < 0) {
+            indexOfChildHiddenForDrag = -1
+            return
+        }
+        indexOfChildHiddenForDrag = if (isDragged) indexOfDraggedView else -1
+        itemView.visibility = if (isDragged) GONE else VISIBLE
+    }
+
+    /** Removes the ghost view and restores the original item if it was hidden. */
+    fun releaseDropSlot() {
+        dropSpotIndex = -1
+        dropTargetGhostView?.let { removeView(it) }
+    }
+
     /** Applies and traces [body] for each [icons] instance. */
     private inline fun forEachIcon(icons: List<ItemInfo>, body: (Int, ItemInfo) -> Unit) {
         for ((index, icon) in icons.withIndex()) {
@@ -262,10 +329,17 @@ class TaskbarPinnedAppIconContainer(context: Context) :
     override fun getReorderBounceScale(): Float = reorderBounceScale
 
     override val spaceNeeded: Int
-        get() =
-            if (isEmpty()) 0
-            else (childCount * taskbarIconViewSize) + ((childCount - 1) * 2 * itemMarginLeftRight)
+        get() {
+            val visibleChildCount = getVisibleChildCount()
+            if (visibleChildCount == 0) return 0
+            return (visibleChildCount * taskbarIconViewSize) +
+                    ((visibleChildCount - 1) * 2 * itemMarginLeftRight)
+        }
 
+    fun getVisibleChildCount(): Int {
+        if (isEmpty()) return 0
+        return childCount - if (indexOfChildHiddenForDrag >= 0) 1 else 0
+    }
     override fun getHoverListener(icon: View): OnHoverListener =
         taskbarViewCallbacks.getIconOnHoverListener(icon)
 

@@ -104,9 +104,11 @@
     <string name="dismiss_prediction_label" msgid="3357562989568808658">"ຢ່າແນະນຳແອັບ"</string>
     <string name="pin_prediction" msgid="4196423321649756498">"ປັກໝຸດການຄາດເດົາ"</string>
     <string name="bubble" msgid="3072951361014076670">"ຟອງ"</string>
+    <string name="enable_app_lock" msgid="9190316880781005775">"ລັອກແອັບ"</string>
+    <string name="disable_app_lock" msgid="9071912028491244470">"ລຶບລັອກອອກ"</string>
     <string name="widget_settings" msgid="5280157748464495511">"ການຕັ້ງຄ່າ"</string>
-    <string name="pin_to_taskbar" msgid="5914002252642242332">"ປັກໝຸດໄປໃສ່ແຖບໜ້າວຽກ"</string>
-    <string name="unpin_from_taskbar" msgid="1025883383457627426">"ຖອດປັກໝຸດຈາກແຖບໜ້າວຽກ"</string>
+    <string name="add_to_taskbar" msgid="1442306985857150792">"ເພີ່ມໃສ່ແຖບໜ້າວຽກ"</string>
+    <string name="remove_from_taskbar" msgid="5817026706030273018">"ລຶບອອກຈາກແຖບໜ້າວຽກ"</string>
     <string name="no_room_in_taskbar" msgid="6885243748717395469">"ບໍ່ມີພື້ນທີ່ຫວ່າງໃນແຖບໜ້າວຽກ"</string>
     <string name="app_added_to_taskbar" msgid="6348755169793615171">"ເພີ່ມແອັບໃສ່ແຖບໜ້າວຽກແລ້ວ"</string>
     <string name="app_removed_from_taskbar" msgid="3471754847898675396">"ລຶບແອັບອອກຈາກແຖບໜ້າວຽກແລ້ວ"</string>

@@ -104,9 +104,13 @@
     <string name="dismiss_prediction_label" msgid="3357562989568808658">"యాప్ సూచించకు"</string>
     <string name="pin_prediction" msgid="4196423321649756498">"సూచనను పిన్ చేయండి"</string>
     <string name="bubble" msgid="3072951361014076670">"బబుల్"</string>
+    <!-- no translation found for enable_app_lock (9190316880781005775) -->
+    <skip />
+    <!-- no translation found for disable_app_lock (9071912028491244470) -->
+    <skip />
     <string name="widget_settings" msgid="5280157748464495511">"సెట్టింగ్‌లు"</string>
-    <string name="pin_to_taskbar" msgid="5914002252642242332">"టాస్క్‌బార్‌కు పిన్"</string>
-    <string name="unpin_from_taskbar" msgid="1025883383457627426">"టాస్క్‌బార్ అన్‌పిన్"</string>
+    <string name="add_to_taskbar" msgid="1442306985857150792">"టాస్క్‌బార్‌కు జోడించండి"</string>
+    <string name="remove_from_taskbar" msgid="5817026706030273018">"టాస్క్‌బార్ నుండి తీసివేయండి"</string>
     <string name="no_room_in_taskbar" msgid="6885243748717395469">"టాస్క్‌బార్‌లో రూమ్ లేదు"</string>
     <string name="app_added_to_taskbar" msgid="6348755169793615171">"టాస్క్‌బార్‌కు యాప్‌ను జోడించడం జరిగింది"</string>
     <string name="app_removed_from_taskbar" msgid="3471754847898675396">"టాస్క్‌బార్ నుండి యాప్‌ను తీసివేయడం జరిగింది"</string>

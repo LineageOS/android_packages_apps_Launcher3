@@ -97,7 +97,7 @@ public class ClippedFolderIconLayoutRule {
         float transX;
         float transY;
 
-        if (numItemsInPage <= MAX_NUM_ITEMS_IN_PREVIEW) {
+        if (numItemsInPage <= MAX_NUM_ITEMS_IN_PREVIEW && page == 0) {
             getPosition(index, numItemsInPage, mTmpPoint);
         } else {
             getGridPosition(index / numFolderColumns, index % numFolderColumns, mTmpPoint);

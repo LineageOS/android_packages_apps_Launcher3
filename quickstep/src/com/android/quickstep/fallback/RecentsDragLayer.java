@@ -15,8 +15,6 @@
  */
 package com.android.quickstep.fallback;
 
-import static com.android.quickstep.fallback.RecentsState.MODAL_TASK;
-
 import android.content.Context;
 import android.util.AttributeSet;
 
@@ -37,14 +35,8 @@ public class RecentsDragLayer<T extends Context & RecentsViewContainer
     private final TaskViewRecentsTouchContext mTaskViewRecentsTouchContext =
             new TaskViewRecentsTouchContext() {
                 @Override
-                public boolean isRecentsInteractive() {
-                    return mContainer.getRootView().hasWindowFocus()
-                            || mContainer.getStateManager().getState().hasLiveTile();
-                }
-
-                @Override
-                public boolean isRecentsModal() {
-                    return mContainer.isInState(MODAL_TASK);
+                public RecentsState getContainerState() {
+                    return mContainer.getStateManager().getState();
                 }
             };
 

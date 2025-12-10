@@ -32,10 +32,12 @@ public interface BaseState<T> {
     // Flag to disable restoring the StatefulContainer to this state, expect when the
     // StatefulContainer is restarting due to a UI mode change
     int FLAG_DISABLE_RESTORE_EXCEPT_UI_MODE_CHANGE = 1 << 2;
+    // Flag to enable interacting a TaskView
+    int FLAG_IS_TASK_VIEW_INTERACTIVE = 1 << 3;
 
     static int getFlag(int index) {
         // reserve few spots to base flags
-        return 1 << (index + 3);
+        return 1 << (index + 4);
     }
 
     /**
@@ -63,6 +65,10 @@ public interface BaseState<T> {
         return isUiModeChange
                 ? hasFlag(FLAG_DISABLE_RESTORE_ABSOLUTE)
                 : hasFlag(FLAG_DISABLE_RESTORE_ABSOLUTE | FLAG_DISABLE_RESTORE_EXCEPT_UI_MODE_CHANGE);
+    }
+
+    default boolean isTaskViewInteractive() {
+        return hasFlag(FLAG_IS_TASK_VIEW_INTERACTIVE);
     }
 
     /**

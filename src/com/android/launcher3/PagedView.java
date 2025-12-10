@@ -1463,7 +1463,7 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
                                 () -> snapToPageWithVelocity(finalPage, velocity));
                     } else if (((isSignificantMove && isDeltaLeft && !isFling) ||
                             (isFling && isVelocityLeft)) &&
-                            mCurrentPage < getChildCount() - 1) {
+                            mCurrentPage < (getChildCount() - getPanelCount())) {
                         finalPage = returnToOriginalPage
                                 ? mCurrentPage : mCurrentPage + getPanelCount();
                         runOnPageScrollsInitialized(

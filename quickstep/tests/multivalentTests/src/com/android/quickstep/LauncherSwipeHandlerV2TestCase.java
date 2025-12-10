@@ -102,4 +102,16 @@ public class LauncherSwipeHandlerV2TestCase extends AbsSwipeUpHandlerTestCase<
     protected LauncherState getBaseState() {
         return LauncherState.NORMAL;
     }
+
+    @NonNull
+    @Override
+    protected LauncherState[] getAllStates() {
+        return LauncherState.values();
+    }
+
+    @NonNull
+    @Override
+    protected LauncherState getOverviewState() {
+        return LauncherState.OVERVIEW;
+    }
 }
