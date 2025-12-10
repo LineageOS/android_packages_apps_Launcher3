@@ -34,7 +34,6 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.AbstractFloatingViewHelper
-import com.android.launcher3.Flags.enableRefactorTaskContentView
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.R
 import com.android.launcher3.logging.StatsLogManager
@@ -253,10 +252,7 @@ class AspectRatioSystemShortcutTest {
         TaskContainer(
             taskView,
             task,
-            when {
-                enableRefactorTaskContentView() -> mock<TaskContentView>()
-                else -> mock<TaskThumbnailView>()
-            },
+            mock<TaskContentView>(),
             mock<TaskThumbnailView>(),
             mock<IconAppChipView>(),
             mock<TransformingTouchDelegate>(),

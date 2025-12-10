@@ -43,11 +43,7 @@ class TaskContentViewScreenshotTest(emulationSpec: DeviceEmulationSpec) :
 
     @Before
     fun setUp() {
-        setFlagsRule.setFlags(
-            true,
-            Flags.FLAG_ENABLE_REFACTOR_TASK_CONTENT_VIEW,
-            Flags.FLAG_ENABLE_REFACTOR_DIGITAL_WELLBEING_TOAST,
-        )
+        setFlagsRule.setFlags(true, Flags.FLAG_ENABLE_REFACTOR_DIGITAL_WELLBEING_TOAST)
     }
 
     @Test
