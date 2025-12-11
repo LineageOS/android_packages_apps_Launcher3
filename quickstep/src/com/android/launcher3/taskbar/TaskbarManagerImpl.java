@@ -1343,13 +1343,11 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
     }
 
     private int getTaskbarVisibility(boolean isUserSetupComplete) {
-        if (!isUserSetupComplete) {
-            // Taskbar needs to be visible during SUW flow, otherwise SUW UI will not properly
-            // update after keyboard is dismissed.
+        if (!isUserSetupComplete || mActivityInteractor == null) {
+            // Taskbar needs to be visible 1) during SUW flow, otherwise SUW UI will not properly
+            // update after keyboard is dismissed 2) if 3p taskbar is used where mActivityInteractor
+            // is not set
             return View.VISIBLE;
-        } else if (mActivityInteractor == null) {
-            // No need to show taskbar if launcher doesn't exist
-            return View.GONE;
         } else if (mActivityInteractor instanceof LauncherInteractor launcherInteractor) {
             // If post boot dialog is visible, hide taskbar
             return launcherInteractor.isPostbootDialogVisible() ? View.INVISIBLE : View.VISIBLE;
