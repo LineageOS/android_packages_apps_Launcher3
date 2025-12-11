@@ -50,6 +50,7 @@ import com.android.launcher3.anim.AnimatedFloat;
 import com.android.launcher3.anim.AnimatorListeners;
 import com.android.launcher3.celllayout.CellLayoutLayoutParams;
 import com.android.launcher3.celllayout.DelegatedCellDrawing;
+import com.android.launcher3.graphics.AutomatedIconDelegate;
 import com.android.launcher3.graphics.ThemeManager;
 import com.android.launcher3.icons.FastBitmapDrawable;
 import com.android.launcher3.icons.IconShape;
@@ -146,13 +147,14 @@ public class PredictedAppIcon extends DoubleShadowBubbleTextView {
     public void onDraw(Canvas canvas) {
         int count = canvas.save();
         boolean isSlotMachineAnimRunning = mSlotMachineIcon != null;
+        float ringInsetRatio = getRingInsetRatio();
         if (!mIsPinned) {
-            drawRingEffect(canvas);
+            drawRingEffect(canvas, ringInsetRatio);
             if (isSlotMachineAnimRunning) {
                 // Clip to to outside of the ring during the slot machine animation.
                 canvas.clipPath(mRingPath);
             }
-            canvas.scale(1 - 2f * RING_EFFECT_RATIO, 1 - 2f * RING_EFFECT_RATIO,
+            canvas.scale(1 - 2f * ringInsetRatio, 1 - 2f * ringInsetRatio,
                     getWidth() * .5f, getHeight() * .5f);
             if (isSlotMachineAnimRunning) {
                 canvas.translate(0, mSlotMachineIconTranslationY);
@@ -165,16 +167,31 @@ public class PredictedAppIcon extends DoubleShadowBubbleTextView {
         canvas.restoreToCount(count);
     }
 
+    /**
+     * @return The amount to inset the icon for applying the ring effect,
+     * as a ratio of the icon's size. If 0 then we should not scale down the icon.
+     */
+    private float getRingInsetRatio() {
+        if (isUsingAutomatedIcon()) return 0f;
+        return RING_EFFECT_RATIO;
+    }
+
     private float getSlotMachineIconPlusSpacingSize() {
         return getIconSize() + getOutlineOffsetY();
+    }
+
+    private boolean isUsingAutomatedIcon() {
+        FastBitmapDrawable icon = getIcon();
+        return icon != null && icon.getDelegate() instanceof AutomatedIconDelegate;
     }
 
     @Override
     protected void drawDotIfNecessary(Canvas canvas) {
         mIsDrawingDot = true;
         int count = canvas.save();
-        canvas.translate(-getWidth() * RING_EFFECT_RATIO, -getHeight() * RING_EFFECT_RATIO);
-        canvas.scale(1 + 2 * RING_EFFECT_RATIO, 1 + 2 * RING_EFFECT_RATIO);
+        float ringInsetRatio = getRingInsetRatio();
+        canvas.translate(-getWidth() * ringInsetRatio, -getHeight() * ringInsetRatio);
+        canvas.scale(1 + 2 * ringInsetRatio, 1 + 2 * ringInsetRatio);
         super.drawDotIfNecessary(canvas);
         canvas.restoreToCount(count);
         mIsDrawingDot = false;
@@ -281,7 +298,7 @@ public class PredictedAppIcon extends DoubleShadowBubbleTextView {
     public void getIconBounds(Rect outBounds) {
         super.getIconBounds(outBounds);
         if (!mIsPinned && !mIsDrawingDot) {
-            int predictionInset = (int) (getIconSize() * RING_EFFECT_RATIO);
+            int predictionInset = (int) (getIconSize() * getRingInsetRatio());
             outBounds.inset(predictionInset, predictionInset);
         }
     }
@@ -332,8 +349,8 @@ public class PredictedAppIcon extends DoubleShadowBubbleTextView {
 
         FastBitmapDrawable icon = getIcon();
         if (icon != null && icon.getBadge() != null && !Flags.enableLauncherIconShapes()) {
-            float outlineSize = mNormalizedIconSize * RING_EFFECT_RATIO;
-            float iconSize = getIconSize() * (1 - 2 * RING_EFFECT_RATIO);
+            float outlineSize = mNormalizedIconSize * getRingInsetRatio();
+            float iconSize = getIconSize() * (1 - 2 * getRingInsetRatio());
             float badgeSize = LauncherIcons.getBadgeSizeForIconSize((int) iconSize) + outlineSize;
             float scale = badgeSize / mNormalizedIconSize;
             mTmpMatrix.postTranslate(mNormalizedIconSize, mNormalizedIconSize);
@@ -391,7 +408,7 @@ public class PredictedAppIcon extends DoubleShadowBubbleTextView {
         mRingScaleAnim.start();
     }
 
-    private void drawRingEffect(Canvas canvas) {
+    private void drawRingEffect(Canvas canvas, float ringInsetRatio) {
         // Don't draw ring effect if item is about to be dragged or if the icon is not visible.
         if (mDrawForDrag || !mIsIconVisible || mForceHideRing) {
             return;
@@ -403,8 +420,8 @@ public class PredictedAppIcon extends DoubleShadowBubbleTextView {
             // Scale canvas properly to for ring to be inner stroke and not exceed bounds.
             // Since STROKE draws half on either side of Path, scale canvas down by 1x stroke ratio.
             canvas.scale(
-                    mRingScale * (1f - RING_EFFECT_RATIO),
-                    mRingScale * (1f - RING_EFFECT_RATIO),
+                    mRingScale * (1f - ringInsetRatio),
+                    mRingScale * (1f - ringInsetRatio),
                     getWidth() / 2f,
                     getHeight() / 2f);
         } else if (Float.compare(1, mRingScale) != 0) {
@@ -414,7 +431,7 @@ public class PredictedAppIcon extends DoubleShadowBubbleTextView {
         canvas.drawPath(mRingPath, mIconRingPaint);
         mIconRingPaint.setColor(mPlateColor.currentColor);
         if (Flags.enableLauncherIconShapes()) {
-            mIconRingPaint.setStrokeWidth(getWidth() * RING_EFFECT_RATIO);
+            mIconRingPaint.setStrokeWidth(getWidth() * ringInsetRatio);
             // Using FILL_AND_STROKE as there is still some gap to fill,
             // between inner curve of ring / outer curve of icon.
             mIconRingPaint.setStyle(Paint.Style.FILL_AND_STROKE);
@@ -442,7 +459,7 @@ public class PredictedAppIcon extends DoubleShadowBubbleTextView {
     public void getSourceVisualDragBounds(Rect bounds) {
         super.getSourceVisualDragBounds(bounds);
         if (!mIsPinned) {
-            int internalSize = (int) (bounds.width() * RING_EFFECT_RATIO);
+            int internalSize = (int) (bounds.width() * getRingInsetRatio());
             bounds.inset(internalSize, internalSize);
         }
     }
