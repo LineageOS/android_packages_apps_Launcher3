@@ -95,6 +95,12 @@ class ScalingWorkspaceRevealAnim(
         SurfaceTransactionApplier(launcher.dragLayer)
 
     init {
+        // Interrupt the current animations, if any.
+        cancelAnimations()
+
+        val workspace = launcher.workspace
+        val hotseat = launcher.hotseat
+
         // Make sure the starting state is right for the animation.
         val setupConfig = StateAnimationConfig()
         setupConfig.animFlags = SKIP_OVERVIEW.or(SKIP_DEPTH_CONTROLLER).or(SKIP_SCRIM)
@@ -105,7 +111,7 @@ class ScalingWorkspaceRevealAnim(
         launcher
             .getOverviewPanel<RecentsView<QuickstepLauncher, LauncherState>>()
             .forceFinishScroller()
-        launcher.workspace.stateTransitionAnimation.setScrim(
+        workspace.stateTransitionAnimation.setScrim(
             PropertySetter.NO_ANIM_PROPERTY_SETTER,
             LauncherState.BACKGROUND_APP,
             setupConfig,
@@ -113,13 +119,6 @@ class ScalingWorkspaceRevealAnim(
         if (playBlur) {
             addBlurLayer()
         }
-
-        val workspace = launcher.workspace
-        val hotseat = launcher.hotseat
-
-        // Interrupt the current animation, if any.
-        Animations.cancelOngoingAnimation(workspace)
-        Animations.cancelOngoingAnimation(hotseat)
 
         val fromSize =
             if (workspace.scaleX != MAX_SIZE) {
@@ -305,6 +304,12 @@ class ScalingWorkspaceRevealAnim(
         Animations.setOngoingAnimation(launcher.hotseat, animators)
         launcher.stateManager.setCurrentAnimation(animators, LauncherState.NORMAL)
         animators.start()
+    }
+
+    /** Interrupt the currently running animation, if any. */
+    fun cancelAnimations() {
+        Animations.cancelOngoingAnimation(launcher.workspace)
+        Animations.cancelOngoingAnimation(launcher.hotseat)
     }
 
     private fun addBlurLayer() {

@@ -673,6 +673,13 @@ flag {
 }
 
 flag {
+    name: "fallback_reveal_animation"
+    namespace: "launcher"
+    description: "Introduces a Launcher reveal animation that runs as a backup when a different process takes care of the overall transition animation."
+    bug: "202516970"
+}
+
+flag {
     name: "enable_swipe_up_magnetic_detach"
     namespace: "launcher"
     description: "Enables the magnetic detach effect to the swipe up from app gestures"

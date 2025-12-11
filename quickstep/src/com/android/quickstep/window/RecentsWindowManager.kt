@@ -257,7 +257,10 @@ constructor(
     private val homeVisibilityState = systemUiProxy.homeVisibilityState
     private val homeVisibilityListener =
         object : HomeVisibilityState.VisibilityChangeListener {
-            override fun onHomeVisibilityChanged(isHomeVisible: Boolean) {
+            override fun onHomeVisibilityChanged(
+                isHomeVisible: Boolean,
+                keyguardGoingAway: Boolean,
+            ) {
                 if (fallbackWindowInterface.isInLiveTileMode || isHomeVisible) {
                     return
                 }
