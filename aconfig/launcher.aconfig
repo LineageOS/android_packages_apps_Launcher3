@@ -719,3 +719,13 @@ flag {
     description: "Enables file system folders as drop targets for other file system type items"
     bug: "457783085"
 }
+
+flag {
+  name: "enable_hotseat_drop_target_validity_checks"
+  namespace: "launcher"
+  description: "Enables hotseat drop target validity checks rather than blindly handling all drag events"
+  bug: "456188504"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

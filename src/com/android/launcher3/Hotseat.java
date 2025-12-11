@@ -41,6 +41,7 @@ import com.android.launcher3.ShortcutAndWidgetContainer.TranslationProvider;
 import com.android.launcher3.celllayout.CellLayoutLayoutParams;
 import com.android.launcher3.dagger.LauncherComponentProvider;
 import com.android.launcher3.model.data.ItemInfo;
+import com.android.launcher3.model.data.LauncherAppWidgetInfo;
 import com.android.launcher3.util.HorizontalInsettableView;
 import com.android.launcher3.util.LauncherBindableItemsContainer.ItemOperator;
 import com.android.launcher3.util.MultiPropertyFactory;
@@ -48,6 +49,7 @@ import com.android.launcher3.util.MultiPropertyFactory.MultiProperty;
 import com.android.launcher3.util.MultiTranslateDelegate;
 import com.android.launcher3.util.MultiValueAlpha;
 import com.android.launcher3.views.ActivityContext;
+import com.android.launcher3.widget.PendingAddWidgetInfo;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -148,6 +150,14 @@ public class Hotseat extends CellLayout implements Insettable {
 
     boolean isHasVerticalHotseat() {
         return mHasVerticalHotseat;
+    }
+
+    /** Returns whether the hotseat is a valid drop target for the specified drag object. */
+    public boolean isValidDropTarget(DropTarget.DragObject dragObject) {
+        final ShortcutAndWidgetContainer shortcutAndWidgetContainer = getShortcutsAndWidgets();
+        return shortcutAndWidgetContainer != null
+                && shortcutAndWidgetContainer.getVisibility() == View.VISIBLE
+                && !isDragWidget(dragObject);
     }
 
     public void resetLayout(boolean hasVerticalHotseat) {
@@ -409,6 +419,11 @@ public class Hotseat extends CellLayout implements Insettable {
                 "ALPHA_CHANNEL_PREVIEW_RENDERER",
                 "ALPHA_CHANNEL_TASKBAR_STASH"
         );
+    }
+
+    private boolean isDragWidget(DropTarget.DragObject d) {
+        return (d.dragInfo instanceof LauncherAppWidgetInfo
+                || d.dragInfo instanceof PendingAddWidgetInfo);
     }
 
 }
