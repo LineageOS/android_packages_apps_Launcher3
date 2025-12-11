@@ -352,6 +352,9 @@ public class SettingsActivity extends FragmentActivity
                             == TYPE_TABLET) {
                         return false;
                     }
+                    preference.setDefaultValue(
+                           getContext().getResources().getBoolean(R.bool.config_fixedLandscapeDefault));
+
                     // When the setting changes rotate the screen accordingly to showcase the result
                     // of the setting
                     preference.setOnPreferenceChangeListener(
