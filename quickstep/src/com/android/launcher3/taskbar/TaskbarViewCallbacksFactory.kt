@@ -49,6 +49,7 @@ open class TaskbarViewCallbacksFactory @Inject constructor() {
                 val contextualSearchInvoked =
                     ContextualSearchInvoker(activity).show(ENTRYPOINT_LONG_PRESS_META, config)
                 if (contextualSearchInvoked) {
+                    activity.toggleTaskbarStash()
                     val runningPackage =
                         TopTaskTracker.INSTANCE[activity].getCachedTopTask(
                                 /* filterOnlyVisibleRecents */ true,
