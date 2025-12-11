@@ -104,15 +104,11 @@
     <string name="dismiss_prediction_label" msgid="3357562989568808658">"பரிந்துரைக்காதே"</string>
     <string name="pin_prediction" msgid="4196423321649756498">"கணிக்கப்பட்டதைப் பின் செய்"</string>
     <string name="bubble" msgid="3072951361014076670">"குமிழ்"</string>
-    <!-- no translation found for enable_app_lock (9190316880781005775) -->
-    <skip />
-    <!-- no translation found for disable_app_lock (9071912028491244470) -->
-    <skip />
+    <string name="enable_app_lock" msgid="9190316880781005775">"ஆப்ஸைப் பூட்டு"</string>
+    <string name="disable_app_lock" msgid="9071912028491244470">"பூட்டை அகற்று"</string>
     <string name="widget_settings" msgid="5280157748464495511">"அமைப்புகள்"</string>
-    <!-- no translation found for add_to_taskbar (1442306985857150792) -->
-    <skip />
-    <!-- no translation found for remove_from_taskbar (5817026706030273018) -->
-    <skip />
+    <string name="add_to_taskbar" msgid="1442306985857150792">"செயல் பட்டியில் சேர்"</string>
+    <string name="remove_from_taskbar" msgid="5817026706030273018">"இங்கிருந்து அகற்று"</string>
     <string name="no_room_in_taskbar" msgid="6885243748717395469">"செயல் பட்டியில் இடம் இல்லை"</string>
     <string name="app_added_to_taskbar" msgid="6348755169793615171">"செயல் பட்டியில் ஆப்ஸ் சேர்க்கப்பட்டது"</string>
     <string name="app_removed_from_taskbar" msgid="3471754847898675396">"செயல் பட்டியில் இருந்து ஆப்ஸ் அகற்றப்பட்டது"</string>
@@ -156,7 +152,6 @@
     <string name="edit_home_screen" msgid="8947858375782098427">"முகப்புத் திரையில் மாற்று"</string>
     <string name="settings_button_text" msgid="8873672322605444408">"முகப்பு அமைப்புகள்"</string>
     <string name="msg_disabled_by_admin" msgid="6898038085516271325">"உங்கள் நிர்வாகி முடக்கியுள்ளார்"</string>
-    <string name="allow_rotation_title" msgid="7222049633713050106">"முகப்புத் திரை சுழற்சியை அனுமதித்தல்"</string>
     <string name="allow_rotation_desc" msgid="8662546029078692509">"மொபைலைச் சுழற்றும் போது"</string>
     <string name="compose_developer_options_section" msgid="8211460486549952595">"Jetpack Compose"</string>
     <string name="enable_composition_tracing_title" msgid="8989606591739368424">"காட்சியமைப்பை டிரேஸ் செய்வதை இயக்குங்கள்"</string>
