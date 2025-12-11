@@ -501,7 +501,9 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
             public void getHitRectForUnpinRelativeToDragLayer(@Nullable Rect outRect) {}
 
             @Override
-            public void getHitRectForPinRelativeToDragLayer(@Nullable Rect outRect) {}
+            public void getHitRectForPinRelativeToDragLayer(@Nullable Rect outRect) {
+                TaskbarView.this.getHitRectForPinRelativeToDragLayer(outRect);
+            }
         };
     }
 
