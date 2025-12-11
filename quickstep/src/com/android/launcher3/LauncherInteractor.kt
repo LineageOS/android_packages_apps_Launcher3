@@ -18,7 +18,6 @@ package com.android.launcher3
 
 import android.animation.AnimatorSet
 import android.view.View
-import android.window.RemoteTransition
 import androidx.annotation.AnyThread
 import androidx.annotation.MainThread
 import com.android.app.animation.Interpolators
@@ -37,7 +36,6 @@ import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.SafeCloseable
 import com.android.quickstep.SystemUiProxy
 import com.android.quickstep.util.ScalingWorkspaceRevealAnim
-import com.android.quickstep.util.SplitTask
 import com.android.systemui.animation.ViewRootSync.synchronizeNextDraw
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation
@@ -184,11 +182,6 @@ class LauncherInteractor(private val launcher: QuickstepLauncher) : ActivityInte
     @AnyThread
     fun toggleAllApps(focusSearch: Boolean) {
         executor.execute { launcher.toggleAllApps(focusSearch) }
-    }
-
-    @AnyThread
-    fun launchSplitTasks(splitTask: SplitTask, remoteTransition: RemoteTransition?) {
-        executor.execute { launcher.launchSplitTasks(splitTask, remoteTransition) }
     }
 
     @AnyThread

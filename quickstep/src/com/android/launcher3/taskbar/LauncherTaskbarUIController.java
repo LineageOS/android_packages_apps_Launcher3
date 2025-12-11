@@ -36,9 +36,7 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.os.SystemProperties;
-import android.window.RemoteTransition;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.app.animation.Interpolators;
@@ -69,7 +67,6 @@ import com.android.quickstep.HomeVisibilityState;
 import com.android.quickstep.LauncherActivityInterface;
 import com.android.quickstep.OverviewComponentObserver;
 import com.android.quickstep.RecentsAnimationCallbacks;
-import com.android.quickstep.util.SplitTask;
 import com.android.quickstep.views.RecentsViewContainerInteractor;
 import com.android.quickstep.window.RecentsWindowManager;
 import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
@@ -650,12 +647,6 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
         mRecentsViewInteractor =
                 mRecentsViewContainer.getRecentsViewInteractor(mRecentsViewInteractor);
         return mRecentsViewInteractor;
-    }
-
-    @Override
-    public void launchSplitTasks(
-            @NonNull SplitTask splitTask, @Nullable RemoteTransition remoteTransition) {
-        mLauncher.launchSplitTasks(splitTask, remoteTransition);
     }
 
     @Override

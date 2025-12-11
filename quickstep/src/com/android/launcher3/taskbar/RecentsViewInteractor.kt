@@ -21,6 +21,7 @@ import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.os.UserHandle
 import android.view.View
+import android.window.RemoteTransition
 import androidx.annotation.AnyThread
 import com.android.launcher3.Flags.enableTaskbarUiThread
 import com.android.launcher3.apppairs.AppPairIcon
@@ -32,10 +33,13 @@ import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
 import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.SplitConfigurationOptions
+import com.android.quickstep.split.SplitSelectStateController
 import com.android.quickstep.util.GroupTask
+import com.android.quickstep.util.SplitTask
 import com.android.quickstep.views.RecentsView
 import com.android.quickstep.views.TaskView
 import com.android.systemui.shared.recents.model.Task
+import com.android.wm.shell.shared.split.SplitScreenConstants
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executor
 import java.util.function.Consumer
@@ -110,6 +114,26 @@ class RecentsViewInteractor(private val recentsView: RecentsView<*, *>) {
             recentsView.splitSelectController
                 ?.appPairsController
                 ?.handleAppPairLaunchInApp(launchingIconView, itemInfos)
+        }
+    }
+
+    @AnyThread
+    fun launchSplitTask(splitTask: SplitTask, remoteTransition: RemoteTransition?) {
+        mainExecutor.execute {
+            val splitSelectStateController: SplitSelectStateController =
+                recentsView.splitSelectController ?: return@execute
+
+            splitSelectStateController.launchExistingSplitPair(
+                null, /* launchingTaskView */
+                splitTask.topLeftTask.key.id,
+                splitTask.bottomRightTask.key.id,
+                SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT,
+                /* callback= */ { success: Boolean? -> splitSelectStateController.resetState() },
+                /* freezeTaskList= */ false,
+                if (splitTask.splitBounds == null) SplitScreenConstants.SNAP_TO_2_50_50
+                else splitTask.splitBounds.snapPosition,
+                remoteTransition,
+            )
         }
     }
 
