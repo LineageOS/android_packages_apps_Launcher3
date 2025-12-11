@@ -1134,6 +1134,7 @@ public abstract class RecentsView<
         mDesktopTaskViewPool.cancelOngoingInitializations();
         mOrientationState.setRotationChangeListener(null);
         mHelper.onDestroy();
+        mUtils.destroy();
     }
 
     @Override
