@@ -58,26 +58,33 @@ public class FallbackTaskbarUIController
             new StateManager.StateListener<RecentsState>() {
                 @Override
                 public void onStateTransitionStart(RecentsState toState) {
-                    animateToRecentsState(toState);
+                    TASKBAR_UI_THREAD.execute(() -> {
+                        animateToRecentsState(toState);
 
-                    RecentsViewInteractor recentsViewInteractor = getRecentsViewInteractor();
-                    if (recentsViewInteractor == null) {
-                        return;
-                    }
-                    // Handle tapping on live tile.
-                    recentsViewInteractor.setTaskLaunchListener(toState == RecentsState.DEFAULT
-                            ? (() -> animateToRecentsState(RecentsState.BACKGROUND_APP)) : null);
+                        RecentsViewInteractor recentsViewInteractor = getRecentsViewInteractor();
+                        if (recentsViewInteractor == null) {
+                            return;
+                        }
+                        // Handle tapping on live tile.
+                        recentsViewInteractor.setTaskLaunchListener(toState == RecentsState.DEFAULT
+                                ? (() -> animateToRecentsState(RecentsState.BACKGROUND_APP))
+                                : null);
+                    });
                 }
 
                 @Override
                 public void onStateTransitionComplete(RecentsState finalState) {
-                    boolean finalStateDefault = finalState == RecentsState.DEFAULT;
-                    // TODO(b/268120202) Taskbar shows up on 3P home, currently we don't go to
-                    //  overview from 3P home. Either implement that or it'll change w/ contextual?
-                    boolean disallowLongClick = finalState == RecentsState.OVERVIEW_SPLIT_SELECT;
-                    Utilities.setOverviewDragState(mControllers,
-                            finalStateDefault /*disallowGlobalDrag*/, disallowLongClick,
-                            finalStateDefault /*allowInitialSplitSelection*/);
+                    TASKBAR_UI_THREAD.execute(() -> {
+                        boolean finalStateDefault = finalState == RecentsState.DEFAULT;
+                        // TODO(b/268120202) Taskbar shows up on 3P home, currently we don't go to
+                        //  overview from 3P home. Either implement that or it'll change w/
+                        //  contextual?
+                        boolean disallowLongClick =
+                                finalState == RecentsState.OVERVIEW_SPLIT_SELECT;
+                        Utilities.setOverviewDragState(mControllers,
+                                finalStateDefault /*disallowGlobalDrag*/, disallowLongClick,
+                                finalStateDefault /*allowInitialSplitSelection*/);
+                    });
                 }
             };
 
