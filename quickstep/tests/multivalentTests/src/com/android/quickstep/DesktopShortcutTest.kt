@@ -28,7 +28,6 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.android.internal.policy.DesktopModeCompatPolicy
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.AbstractFloatingViewHelper
-import com.android.launcher3.Flags.enableRefactorTaskContentView
 import com.android.launcher3.logging.StatsLogManager
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent
 import com.android.launcher3.model.data.TaskViewItemInfo
@@ -217,10 +216,7 @@ class DesktopShortcutTest {
         TaskContainer(
             taskView,
             task,
-            when {
-                enableRefactorTaskContentView() -> mock<TaskContentView>()
-                else -> mock<TaskThumbnailView>()
-            },
+            mock<TaskContentView>(),
             mock<TaskThumbnailView>(),
             mock<IconAppChipView>(),
             mock<TransformingTouchDelegate>(),

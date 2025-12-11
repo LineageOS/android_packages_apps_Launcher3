@@ -287,7 +287,8 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
 
         int itemsToShow = Math.min(mItems.size(), MAX_ITEMS_IN_PREVIEW);
         for (int i = itemsToShow - 1; i >= 0; --i) {
-            Drawable icon = mItems.get(mItems.size() - i - 1).getDrawableIcon();
+            int indexDrawn = mOverflowType == OverflowType.PINNED ? i : itemsToShow - i - 1;
+            Drawable icon = mItems.get(indexDrawn).getDrawableIcon();
             if (icon == null) {
                 continue;
             }
@@ -526,9 +527,22 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
     }
 
     private float getItemXOffset(float baseOffset, boolean isRtl, int itemIndex, int itemCount) {
+        // Both RTL and the type of overflow result in reverse x position of the apps in the icon.
+        // Determining the position by calculating an operator.
+        int orderOperator = (isRtl ^ mOverflowType.equals(OverflowType.PINNED)) ? 1 : -1;
+
+        /*
+         * Icon illustration with 4 items in LTR:
+         *        Pinned overflow view           Recents overflow view
+         *             | 0 | 1 |                       | 1 | 0 |
+         *             | 3 | 2 |                       | 2 | 3 |
+         *
+         * Comments below are for LTR Recents overflow view, where the orderOperator is -1.
+         */
+
         // Item with index 1 is on the left in all cases.
         if (itemIndex == 1) {
-            return (isRtl ? 1 : -1) * baseOffset;
+            return orderOperator * baseOffset;
         }
 
         // First item is centered if total number of items shown is 3, on the right otherwise.
@@ -536,16 +550,16 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
             if (itemCount == 3) {
                 return 0;
             }
-            return (isRtl ? -1 : 1) * baseOffset;
+            return -orderOperator * baseOffset;
         }
 
         // Last item is on the right when there are more than 2 items (case which is already handled
         // as `itemIndex == 1`).
         if (itemIndex == itemCount - 1) {
-            return (isRtl ? -1 : 1) * baseOffset;
+            return -orderOperator * baseOffset;
         }
 
-        return (isRtl ? 1 : -1) * baseOffset;
+        return orderOperator * baseOffset;
     }
 
     private float getItemYOffset(float baseOffset, int itemIndex, int itemCount) {

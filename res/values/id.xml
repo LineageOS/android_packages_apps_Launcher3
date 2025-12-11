@@ -101,7 +101,4 @@
     <!-- View tag key used to store SpringAnimation data. -->
     <item type="id" name="spring_animation_tag" />
 
-    <!-- View tag key used to store a CustomActionsListener. -->
-    <item type="id" name="custom_actions_listener" />
-
 </resources>

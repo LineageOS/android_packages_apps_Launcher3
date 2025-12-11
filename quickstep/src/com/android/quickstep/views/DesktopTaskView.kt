@@ -36,7 +36,6 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import com.android.launcher3.Flags.enableDesktopExplodedView
-import com.android.launcher3.Flags.enableRefactorTaskContentView
 import com.android.launcher3.R
 import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.testing.TestLogging
@@ -95,25 +94,14 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     private val contentViewFullscreenParams = FullscreenDrawParams(context)
 
-    private val taskThumbnailViewPool =
-        ViewPool<TaskThumbnailView>(
+    private val taskContentViewPool =
+        ViewPool<TaskContentView>(
             context,
             this,
-            R.layout.task_thumbnail,
+            R.layout.task_content_view,
             VIEW_POOL_MAX_SIZE,
             VIEW_POOL_INITIAL_SIZE,
         )
-
-    private val taskContentViewPool =
-        if (enableRefactorTaskContentView()) {
-            ViewPool<TaskContentView>(
-                context,
-                this,
-                R.layout.task_content_view,
-                VIEW_POOL_MAX_SIZE,
-                VIEW_POOL_INITIAL_SIZE,
-            )
-        } else null
 
     private val tempPointF = PointF()
     private val lastComputedTaskSize = Rect()
@@ -197,6 +185,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
         val (widthScale, heightScale) = getScreenScaleFactors()
         taskContainers.forEach { taskContainer ->
             val taskId = taskContainer.task.key.id
+            val taskContentView = taskContainer.taskContentView
             val fullscreenTaskBounds =
                 desktopTaskViewModel.fullscreenTaskPositions
                     .firstOrNull { it.taskId == taskId }
@@ -307,13 +296,13 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
                     remoteTargetHandle.transformParams.setTargetAlpha(targetAlpha)
                 }
 
-                (taskContainer.taskContentView as? TaskContentView)?.setTaskHeaderAlpha(
+                taskContentView.setTaskHeaderAlpha(
                     if (shouldBeDisplayedInOverview) explodeProgress else 0f
                 )
 
                 val isMinimized = taskContainer.task.isMinimized
 
-                taskContainer.taskContentView.alpha =
+                taskContentView.alpha =
                     when {
                         !isMinimized && !shouldBeDisplayedInOverview ->
                             // Non-minimized windows should fade out if it they should not show in
@@ -342,7 +331,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
 
             if (updateLayout) {
                 // Position the task to the same position as it would be on the desktop
-                taskContainer.taskContentView.updateLayoutParams<LayoutParams> {
+                taskContentView.updateLayoutParams<LayoutParams> {
                     gravity = Gravity.LEFT or Gravity.TOP
                     width = overviewTaskWidth.toInt()
                     height = overviewTaskHeight.toInt()
@@ -350,11 +339,10 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
                     topMargin = overviewTaskTop.toInt()
                 }
 
-                if (enableDesktopExplodedView() && enableRefactorTaskContentView()) {
+                if (enableDesktopExplodedView()) {
                     // The taskContentView and its descendant close button should only be focusable
                     // if the task is actually visible. Note that disabling the view also makes
                     // it not hoverable.
-                    val taskContentView = taskContainer.taskContentView as TaskContentView
                     taskContentView.isHoverable = shouldBeDisplayedInOverview
                     taskContentView.isFocusable = shouldBeDisplayedInOverview
                     taskContentView.descendantFocusability =
@@ -384,12 +372,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
                     }
                 else null
 
-            if (enableRefactorTaskContentView()) {
-                (taskContainer.taskContentView as TaskContentView).outlineBounds =
-                    contentOutlineBounds
-            } else {
-                taskContainer.snapshotView.outlineBounds = contentOutlineBounds
-            }
+            taskContentView.outlineBounds = contentOutlineBounds
 
             val currentTaskLeft = currentTaskBounds.left * widthScale
             val currentTaskTop = currentTaskBounds.top * heightScale
@@ -397,7 +380,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
             val currentTaskHeight = currentTaskBounds.height() * heightScale
             // During the animation, apply translation and scale such that the view is transformed
             // to where we want, without triggering layout.
-            taskContainer.taskContentView.apply {
+            taskContentView.apply {
                 pivotX = 0.0f
                 pivotY = 0.0f
                 translationX = currentTaskLeft - overviewTaskLeft
@@ -448,21 +431,16 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
         val backgroundViewIndex = contentView.indexOfChild(backgroundView)
         taskContainers =
             tasks.map { task ->
-                val taskContentView =
-                    if (enableRefactorTaskContentView()) taskContentViewPool!!.view
-                    else taskThumbnailViewPool.view
+                val taskContentView = taskContentViewPool.view
                 contentView.addView(taskContentView, backgroundViewIndex + 1)
                 val snapshotView = findViewById<TaskThumbnailView>(R.id.snapshot)
                 if (enableDesktopExplodedView()) {
                     taskContentView.setOnClickListener {
                         launchTaskWithDesktopController(animated = true, task.key.id)
                     }
-                    if (taskContentView is TaskContentView) {
-                        // Desktop tasks should have their own accessibility nodes so specific
-                        // actions can be performed on them.
-                        taskContentView.importantForAccessibility =
-                            View.IMPORTANT_FOR_ACCESSIBILITY_YES
-                    }
+                    // Desktop tasks should have their own accessibility nodes so specific
+                    // actions can be performed on them.
+                    taskContentView.importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
                 }
 
                 TaskContainer(
@@ -681,11 +659,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     private fun removeAndRecycleThumbnailView(taskContainer: TaskContainer) {
         contentView.removeView(taskContainer.taskContentView)
-        if (enableRefactorTaskContentView()) {
-            taskContentViewPool!!.recycle(taskContainer.taskContentView as TaskContentView)
-        } else {
-            taskThumbnailViewPool!!.recycle(taskContainer.taskContentView as TaskThumbnailView)
-        }
+        taskContentViewPool.recycle(taskContainer.taskContentView)
     }
 
     private fun updateTaskPositions(dismissedTaskId: Int? = null) {

@@ -36,8 +36,10 @@ class HomeScreenFilesNoOpProvider : HomeScreenFilesProvider {
 
     override fun canMoveToHomeScreen(uriList: List<Uri>?) = false
 
-    override fun moveToHomeScreen(uriList: List<Uri>): List<CompletableFuture<Boolean>> =
-        uriList.map { CompletableFuture.completedFuture(false) }
+    override fun moveToHomeScreen(
+        uriList: List<Uri>,
+        relativeFolderPath: String?,
+    ): List<CompletableFuture<Boolean>> = uriList.map { CompletableFuture.completedFuture(false) }
 
     override fun delete(uri: Uri, name: String, permanent: Boolean) {}
 

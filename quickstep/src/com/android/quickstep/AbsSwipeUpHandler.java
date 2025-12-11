@@ -77,7 +77,6 @@ import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
 import android.app.TaskInfo;
-import android.app.WindowConfiguration;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -2238,16 +2237,6 @@ public abstract class AbsSwipeUpHandler<
             // No destination bounds returned from SystemUI, bail early.
             return null;
         }
-        final Rect appBounds = new Rect();
-        final WindowConfiguration winConfig = taskInfo.configuration.windowConfiguration;
-        // Adjust the appBounds for TaskBar by using the calculated window crop Rect
-        // from TaskViewSimulator and fallback to the bounds in TaskInfo when it's originated
-        // from windowing modes other than full-screen.
-        if (winConfig.getWindowingMode() == WindowConfiguration.WINDOWING_MODE_FULLSCREEN) {
-            mRemoteTargetHandles[0].getTaskViewSimulator().getCurrentCropRect().round(appBounds);
-        } else {
-            appBounds.set(winConfig.getBounds());
-        }
         final SwipePipToHomeAnimator.Builder builder = new SwipePipToHomeAnimator.Builder()
                 .setContext(mContext)
                 .setTaskId(runningTaskTarget.taskId)
@@ -2256,7 +2245,7 @@ public abstract class AbsSwipeUpHandler<
                 .setLeash(fadeOutTarget != null ? fadeOutTarget.leash : runningTaskTarget.leash)
                 .setSourceRectHint(
                         runningTaskTarget.taskInfo.pictureInPictureParams.getSourceRectHint())
-                .setAppBounds(appBounds)
+                .setAppBounds(taskInfo.configuration.windowConfiguration.getBounds())
                 .setHomeToWindowPositionMap(homeToWindowPositionMap)
                 .setStartBounds(startRect)
                 .setDestinationBounds(destinationBounds)

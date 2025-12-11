@@ -86,6 +86,7 @@ import com.android.launcher3.popup.IconViewController;
 import com.android.launcher3.popup.Poppable;
 import com.android.launcher3.popup.PoppableType;
 import com.android.launcher3.popup.PopupController;
+import com.android.launcher3.touch.CustomActionsListener;
 import com.android.launcher3.touch.CustomEventsTouchHandler;
 import com.android.launcher3.touch.CustomTouchDelegate;
 import com.android.launcher3.touch.WorkspaceItemCustomActionsListener;
@@ -113,6 +114,8 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
     public FolderInfo mInfo;
 
     private final CheckLongPressHelper mLongPressHelper;
+    // TODO(b/465247812): Remove this and overridden functions in favor of Kotlin interface
+    //  delegation, upon file conversion to Kotlin.
     private final CustomEventsTouchHandler mCustomEventsTouchHandler;
 
     static final int DROP_IN_ANIMATION_DURATION = 400;
@@ -175,7 +178,14 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
         super(context, attrs);
 
         mLongPressHelper = new CheckLongPressHelper(this);
-        mCustomEventsTouchHandler = new CustomEventsTouchHandler(this);
+        mCustomEventsTouchHandler = new CustomEventsTouchHandler(this, (event) -> {
+            // Call the superclass onTouchEvent first, because sometimes it changes the state to
+            // isPressed() on an ACTION_UP
+            super.onTouchEvent(event);
+            mLongPressHelper.onTouchEvent(event);
+            // Keep receiving the rest of the events
+            return true;
+        }, this::shouldIgnoreTouchDown);
         mPreviewLayoutRule = new ClippedFolderIconLayoutRule();
         mPreviewItemManager = new PreviewItemManager(this);
         mDotParams = new DotRenderer.DrawParams();
@@ -226,7 +236,7 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
 
         icon.setTag(folderInfo);
         icon.setOnClickListener(activity.getItemOnClickListener());
-        icon.setTag(R.id.custom_actions_listener, WorkspaceItemCustomActionsListener.INSTANCE);
+        icon.setCustomActionsListener(WorkspaceItemCustomActionsListener.INSTANCE);
         icon.mInfo = folderInfo;
         icon.mActivity = activity;
         icon.mDotRenderer = grid.mDotRendererWorkSpace;
@@ -716,30 +726,16 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_DOWN
-                && shouldIgnoreTouchDown(event.getX(), event.getY())) {
-            return false;
-        }
-
-        if (onDelegateTouchEvent(event)) {
-            return true;
-        }
-
-        // Call the superclass onTouchEvent first, because sometimes it changes the state to
-        // isPressed() on an ACTION_UP
-        super.onTouchEvent(event);
-        mLongPressHelper.onTouchEvent(event);
-        // Keep receiving the rest of the events
-        return true;
+        return onDelegateTouchEvent(event);
     }
 
     /**
      * Returns true if the touch down at the provided position be ignored
      */
-    protected boolean shouldIgnoreTouchDown(float x, float y) {
+    protected boolean shouldIgnoreTouchDown(MotionEvent event) {
         mTouchArea.set(getPaddingLeft(), getPaddingTop(), getWidth() - getPaddingRight(),
                 getHeight() - getPaddingBottom());
-        return !mTouchArea.contains((int) x, (int) y);
+        return !mTouchArea.contains((int) event.getX(), (int) event.getY());
     }
 
     @Override
@@ -837,6 +833,17 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
     @Override
     public boolean onDelegateTouchEvent(@NonNull MotionEvent event) {
         return mCustomEventsTouchHandler.onDelegateTouchEvent(event);
+    }
+
+    @Nullable
+    @Override
+    public CustomActionsListener getCustomActionsListener() {
+        return mCustomEventsTouchHandler.getCustomActionsListener();
+    }
+
+    @Override
+    public void setCustomActionsListener(@Nullable CustomActionsListener listener) {
+        mCustomEventsTouchHandler.setCustomActionsListener(listener);
     }
 
     /**

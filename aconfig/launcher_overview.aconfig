@@ -40,13 +40,6 @@ flag {
 }
 
 flag {
-    name: "enable_refactor_task_content_view"
-    namespace: "launcher_overview"
-    description: "Enables refactor wrapping TaskThumbnailView in a TaskContentView."
-    bug: "408971730"
-}
-
-flag {
     name: "enable_simultaneous_overview_trigger_on_extended_desktop"
     namespace: "launcher_overview"
     description: "Enable Overview to launch and exit simultaneously on default and external displays wherever it was triggered or quit from"

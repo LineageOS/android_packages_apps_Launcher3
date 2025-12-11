@@ -221,6 +221,10 @@ public class RecentsModel implements RecentTasksDataSource, TaskStackChangeListe
         }, filter);
     }
 
+    public int getRecentsDisplayId(int displayId) {
+        return mTaskList.getRecentsDisplayId(displayId);
+    }
+
     @Override
     public void onTaskStackChangedBackground() {
         if (!mThumbnailCache.isPreloadingEnabled()) {

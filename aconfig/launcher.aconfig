@@ -403,16 +403,6 @@ flag {
 }
 
 flag {
-  name: "remove_apps_refresh_on_right_click"
-  namespace: "launcher"
-  description: "Remove predicted apps refresh on right click"
-  bug: "343650193"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "enable_taskbar_ui_thread"
   namespace: "launcher"
   description: "Enable per-window thread for taskbar"
@@ -752,4 +742,18 @@ flag {
   namespace: "launcher"
   description: "Enables App Lock system shortcut in Launcher"
   bug: "415167460"
+}
+
+flag {
+  name: "enable_transactional_model_writer"
+  namespace: "launcher"
+  description: "Enables the new transactional model writer for Launcher persistence."
+  bug: "457449059"
+}
+
+flag {
+    name: "enable_file_system_folders_as_drop_targets"
+    namespace: "launcher"
+    description: "Enables file system folders as drop targets for other file system type items"
+    bug: "457783085"
 }

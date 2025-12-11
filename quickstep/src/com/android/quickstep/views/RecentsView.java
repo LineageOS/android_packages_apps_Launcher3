@@ -656,7 +656,8 @@ public abstract class RecentsView<
             if (!mHandleTaskStackChanges) {
                 return;
             }
-            if (newDisplayId != mContainer.getDisplayId()) {
+            final int mappedDisplayId = mRecentsModel.getRecentsDisplayId(newDisplayId);
+            if (mappedDisplayId != mContainer.getDisplayId()) {
                 dismissTask(taskId, /* removeTask= */ false);
             }
         }
@@ -4151,7 +4152,6 @@ public abstract class RecentsView<
         initiateSplitSelect(taskContainer, defaultSplitPosition, LAUNCHER_OVERVIEW_ACTIONS_SPLIT);
     }
 
-    /** TODO(b/266477929): Consolidate this call w/ the one below */
     public void initiateSplitSelect(TaskContainer taskContainer,
             @StagePosition int stagePosition,
             StatsLogManager.EventEnum splitEvent) {

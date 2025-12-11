@@ -28,7 +28,6 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.launcher3.Flags.FLAG_ENABLE_CURSOR_DRIVEN_WORKFLOWS
-import com.android.launcher3.R
 import com.android.launcher3.touch.CustomActionsListener.Companion.ACTION_LAUNCH
 import com.android.launcher3.touch.CustomActionsListener.Companion.ACTION_POPUP_MENU
 import com.android.launcher3.touch.CustomActionsListener.Companion.ACTION_START_DRAG
@@ -45,6 +44,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @EnableFlags(FLAG_ENABLE_CURSOR_DRIVEN_WORKFLOWS)
@@ -62,8 +62,8 @@ class CustomEventsTouchHandlerTest {
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
         view = View(context)
-        view.setTag(R.id.custom_actions_listener, mockListener)
-        touchHandler = CustomEventsTouchHandler(view)
+        touchHandler = CustomEventsTouchHandler(view, { false }, { false })
+        touchHandler.customActionsListener = mockListener
     }
 
     @After
@@ -93,9 +93,53 @@ class CustomEventsTouchHandlerTest {
     }
 
     @Test
-    fun onTouchEvent_withoutListener_notHandled() {
-        view.setTag(R.id.custom_actions_listener, null)
-        assertFalse(touchHandler.onDelegateTouchEvent(obtainTouchEvent(MotionEvent.ACTION_DOWN)))
+    fun onTouchEvent_withoutListener_callsDefaultHandler() {
+        val mockDefaultHandler = mock<(MotionEvent) -> Boolean>()
+        whenever(mockDefaultHandler.invoke(any())).thenReturn(false)
+
+        touchHandler = CustomEventsTouchHandler(view, mockDefaultHandler) { false }
+        touchHandler.customActionsListener = null
+
+        val event = obtainTouchEvent(MotionEvent.ACTION_DOWN)
+        touchHandler.onDelegateTouchEvent(event)
+        verify(mockDefaultHandler).invoke(event)
+    }
+
+    @Test
+    fun onTouchEvent_shouldIgnoreTouchDownTrue_eventIgnored() {
+        touchHandler = CustomEventsTouchHandler(view, { true }, { true }) // Ignore the event
+        touchHandler.customActionsListener = mockListener
+
+        val downEvent = obtainTouchEvent(MotionEvent.ACTION_DOWN)
+        val result = touchHandler.onDelegateTouchEvent(downEvent)
+
+        assertFalse(result)
+        verify(mockListener, never()).performActions(any(), any())
+    }
+
+    @Test
+    fun onTouchEvent_shouldIgnoreTouchDownTrue_subsequentEventsIgnored() {
+        touchHandler = CustomEventsTouchHandler(view, { true }, { true }) // Ignore the event
+        touchHandler.customActionsListener = mockListener
+
+        // Simulate a complete gesture stream
+        touchHandler.onDelegateTouchEvent(obtainTouchEvent(MotionEvent.ACTION_DOWN))
+        touchHandler.onDelegateTouchEvent(obtainTouchEvent(MotionEvent.ACTION_MOVE))
+        touchHandler.onDelegateTouchEvent(obtainTouchEvent(MotionEvent.ACTION_UP))
+
+        verify(mockListener, never()).performActions(any(), any())
+    }
+
+    @Test
+    fun onTouchEvent_shouldIgnoreTouchDownFalse_eventProcessed() {
+        touchHandler = CustomEventsTouchHandler(view, { true }, { false }) // Don't ignore the event
+        touchHandler.customActionsListener = mockListener
+
+        // Simulate a complete tap
+        touchHandler.onDelegateTouchEvent(obtainTouchEvent(MotionEvent.ACTION_DOWN))
+        touchHandler.onDelegateTouchEvent(obtainTouchEvent(MotionEvent.ACTION_UP))
+
+        verify(mockListener).performActions(view, ACTION_LAUNCH)
     }
 
     @Test

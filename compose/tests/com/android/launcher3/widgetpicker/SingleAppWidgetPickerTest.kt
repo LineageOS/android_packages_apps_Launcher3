@@ -27,7 +27,7 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.filters.LargeTest;
+import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.Flags
 import com.android.launcher3.helper.launchActivityWithIntent
@@ -52,7 +52,7 @@ class SingleAppWidgetPickerTest {
         composeRule.launchActivityWithIntent<WidgetPickerActivity>(
             intentProvider = this::buildSingleAppWidgetPickerIntent
         ) {
-            composeRule.waitUntilAtLeastOneExists(hasTestTag(WIDGET_PREVIEW_TEST_TAG))
+            composeRule.waitUntilAtLeastOneExists(hasTestTag(WIDGET_PREVIEW_TEST_TAG), TEST_TIMEOUT)
             TestWidgets.forEach {
                 composeRule.onNodeWithText(it, substring = true).assertIsDisplayed()
             }
@@ -73,5 +73,7 @@ class SingleAppWidgetPickerTest {
         val TestWidgets = listOf("With Dialog", "With Config")
         private const val WIDGET_PREVIEW_TEST_TAG =
             "com.android.launcher3.widgetpicker:id/widget_preview"
+
+        private const val TEST_TIMEOUT = 5_000L
     }
 }

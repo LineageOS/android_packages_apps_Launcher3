@@ -404,11 +404,18 @@ constructor(
         }
 
     private fun createTaskKey(taskInfo: TaskInfo): TaskKey {
-        val displayId =
-            if (virtualDeviceDisplays[taskInfo.displayId]) Display.DEFAULT_DISPLAY
-            else taskInfo.displayId
+        val displayId = getRecentsDisplayId(taskInfo.displayId)
         return TaskKey(taskInfo, displayId)
     }
+
+    /**
+     * If the display id belongs to a virtual device, it should be treated as if it is running on
+     * the default display.
+     *
+     * @return The mapped display id of the given display id
+     */
+    fun getRecentsDisplayId(displayId: Int) =
+        if (virtualDeviceDisplays[displayId]) Display.DEFAULT_DISPLAY else displayId
 
     private fun createDesktopTasks(recentTaskInfo: GroupedTaskInfo): List<DesktopTask> {
         val minimizedTaskIdArray = recentTaskInfo.minimizedTaskIds

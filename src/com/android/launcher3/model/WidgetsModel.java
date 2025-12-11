@@ -152,6 +152,18 @@ public class WidgetsModel {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
+    /** Returns widgets grouped by the package item that they should belong to. */
+    public synchronized Map<PackageItemInfo, List<WidgetItem>> getWidgetsByPackageItem() {
+        if (!WIDGETS_ENABLED) {
+            return Collections.emptyMap();
+        }
+
+        return mWidgetsByPackageItem
+                .entrySet().stream()
+                .filter(entry -> !entry.getValue().isEmpty())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
     /**
      * @param packageUser If null, all widgets and shortcuts are updated and returned, otherwise
      *                    only widgets and shortcuts associated with the package/user are.

@@ -235,7 +235,8 @@ constructor(
         }
     }
 
-    private fun mapInsightToActions(insight: ContextInsight): List<ActionModel> {
+    @VisibleForTesting
+    fun mapInsightToActions(insight: ContextInsight): List<ActionModel> {
         Log.i(TAG, "insight: $insight")
         val hintToMap = insight.originHints.firstOrNull { hint ->
             when (val contextHint = hint.contextHint) {
@@ -250,7 +251,8 @@ constructor(
         return mapContextInsightToAction(insight, hintToMap.contextHint)
     }
 
-    private fun mapContextInsightToAction(insight: ContextInsight, contextHint: ContextHint):
+    @VisibleForTesting
+    fun mapContextInsightToAction(insight: ContextInsight, contextHint: ContextHint):
             List<ActionModel> {
         val display = when (insight) {
             is ActionableInsight -> insight.displayDetails
@@ -377,7 +379,7 @@ constructor(
         private const val EXTRA_ONE_TAP_ENABLED = "oneTapEnabled"
         private const val EXTRA_ONE_TAP_DELAY_MS = "oneTapDelayMs"
         private const val DEFAULT_ONE_TAP_DELAY_MS = 200L
-        private const val RENDER_IN_CUE_BAR = "renderInCueBar"
+        const val RENDER_IN_CUE_BAR = "renderInCueBar"
 
         // Timeout to hide cuebar if it wasn't interacted with
         private const val TAG = "AmbientCueRepository"

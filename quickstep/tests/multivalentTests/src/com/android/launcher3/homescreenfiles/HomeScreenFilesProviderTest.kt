@@ -303,6 +303,17 @@ class HomeScreenFilesProviderTest {
 
     @Test
     fun testMoveToHomeScreen() {
+        testMoveToHomeScreen(relativeFolderPath = null)
+    }
+
+    @Test
+    fun testMoveToHomeScreenFolder() {
+        testMoveToHomeScreen(relativeFolderPath = "Folder")
+    }
+
+    private fun testMoveToHomeScreen(relativeFolderPath: String?) {
+        val relativePath = "$HOME_SCREEN_FOLDER_RELATIVE_PATH${relativeFolderPath ?: ""}"
+
         val espUri = createExternalStorageProviderUri("externalRelativePath", "externalDisplayName")
         val mediaStoreUri = createExternalPrimaryMediaStoreUri(1L)
         val mediaStoreUriResolvedFromEsp = createExternalPrimaryMediaStoreUri(2L)
@@ -337,12 +348,10 @@ class HomeScreenFilesProviderTest {
                 contentResolver.update(
                     /*uri=*/ anyOrNull(),
                     /*contentValues=*/ eq(
-                        ContentValues().apply {
-                            put(RELATIVE_PATH, HOME_SCREEN_FOLDER_RELATIVE_PATH)
-                        }
+                        ContentValues().apply { put(RELATIVE_PATH, relativePath) }
                     ),
                     /*where=*/ eq("$RELATIVE_PATH != ?"),
-                    /*selectionArgs=*/ eq(arrayOf(HOME_SCREEN_FOLDER_RELATIVE_PATH)),
+                    /*selectionArgs=*/ eq(arrayOf(relativePath)),
                 )
             )
             .thenAnswer { invocation ->
@@ -363,7 +372,10 @@ class HomeScreenFilesProviderTest {
                 /*expectedTestUriResult=*/ false,
             ),
             provider
-                .moveToHomeScreen(listOf(espUri, mediaStoreUri, mediaStoreUri, testUri))
+                .moveToHomeScreen(
+                    listOf(espUri, mediaStoreUri, mediaStoreUri, testUri),
+                    relativeFolderPath,
+                )
                 .map(CompletableFuture<Boolean>::get),
         )
     }
