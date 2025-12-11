@@ -26,6 +26,7 @@ import com.android.launcher3.Flags.FLAG_ENABLE_TASKBAR_UI_THREAD
 import com.android.launcher3.LauncherState
 import com.android.launcher3.statehandlers.DesktopVisibilityController.TaskbarDesktopModeListener
 import com.android.launcher3.util.DaggerSingletonTracker
+import com.android.launcher3.util.window.WindowManagerProxy.DesktopVisibilityListener
 import com.android.quickstep.SystemUiProxy
 import com.android.window.flags.Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND
 import com.android.window.flags.Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_FRONTEND
@@ -231,6 +232,53 @@ class DesktopVisibilityControllerTest {
 
         // Assert
         verify(taskbarListener, never()).onTaskbarCornerRoundingUpdate(any(), any())
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND, FLAG_ENABLE_MULTIPLE_DESKTOPS_FRONTEND)
+    fun onTaskAppearingInDeskWithOverviewShowing_notifiesListener() {
+        // Arrange: Register a mock listener to observe notifications.
+        val desktopVisibilityListener = mock<DesktopVisibilityListener>()
+        desktopVisibilityController.registerDesktopVisibilityListener(desktopVisibilityListener)
+        val desktopTaskListener = listenerCaptor.lastValue!!
+        val taskId = 123
+        val displayId = 456
+        val deskId = 789
+
+        // Act: Trigger the callback from the shell listener.
+        desktopTaskListener.onTaskAppearingInDeskWithOverviewShowing(taskId, displayId, deskId)
+        getInstrumentation().waitForIdleSync()
+
+        // Assert: Verify the listener was called with the correct parameters.
+        verify(desktopVisibilityListener).onTaskAppearingInDeskWithOverviewShowing(
+            taskId,
+            displayId,
+            deskId
+        )
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND, FLAG_ENABLE_MULTIPLE_DESKTOPS_FRONTEND)
+    fun onTaskAppearingInDeskWithOverviewShowing_whenMultipleDesktopsDisabled_doesNotNotifyListener() {
+        // Arrange: Disable the multiple desktops feature and register a listener.
+        whenever(DesktopModeStatus.enableMultipleDesktops(context)).thenReturn(false)
+        val desktopVisibilityListener = mock<DesktopVisibilityListener>()
+        desktopVisibilityController.registerDesktopVisibilityListener(desktopVisibilityListener)
+        val desktopTaskListener = listenerCaptor.lastValue!!
+        val taskId = 123
+        val displayId = 456
+        val deskId = 789
+
+        // Act: Trigger the callback from the shell listener.
+        desktopTaskListener.onTaskAppearingInDeskWithOverviewShowing(taskId, displayId, deskId)
+        getInstrumentation().waitForIdleSync()
+
+        // Assert: Verify the listener was not called, as the feature is disabled.
+        verify(desktopVisibilityListener, never()).onTaskAppearingInDeskWithOverviewShowing(
+            any(),
+            any(),
+            any()
+        )
     }
 
     private fun connectTaskListener() {
