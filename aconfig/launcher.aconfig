@@ -486,16 +486,6 @@ flag {
 }
 
 flag {
-  name: "enable_taskbar_recents_themed_icons"
-  namespace: "launcher"
-  description: "Have recent icons in Taskbar respect icon theme preferences"
-  bug: "407950127"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "enable_taskbar_drag_and_drop"
   namespace: "launcher"
   description: "Enable dragging and dropping app icons on the taskbar."
