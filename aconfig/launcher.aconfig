@@ -225,21 +225,6 @@ flag {
     }
 }
 
-
-flag {
-    name: "one_grid_specs"
-    namespace: "launcher"
-    description: "Defines the new specs for grids based on OneGrid"
-    bug: "364711064"
-}
-
-flag {
-    name: "one_grid_mounted_mode"
-    namespace: "launcher"
-    description: "Support a fixed landscape mode for handheld devices"
-    bug: "364711735"
-}
-
 flag {
     name: "one_grid_rotation_handling"
     namespace: "launcher"
