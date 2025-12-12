@@ -417,6 +417,7 @@ public class IconCacheTest {
             builder.setExtras(extras);
         }
         ShortcutInfo info = builder.build();
-        return MODEL_EXECUTOR.submit(() -> mIconCache.getShortcutInfoBadgeItem(info)).get();
+        return MODEL_EXECUTOR.submit(
+                () -> mIconCache.getShortcutInfoBadgeItem(info, DEFAULT_LOOKUP_FLAG)).get();
     }
 }
