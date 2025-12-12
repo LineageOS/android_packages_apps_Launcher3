@@ -72,7 +72,7 @@ public class RecentsWindowSwipeHandlerTestCase extends AbsSwipeUpHandlerTestCase
     @NonNull
     @Override
     protected RecentsState getBaseState() {
-        return RecentsState.BG_LAUNCHER;
+        return RecentsState.HIDDEN;
     }
 
     @NonNull

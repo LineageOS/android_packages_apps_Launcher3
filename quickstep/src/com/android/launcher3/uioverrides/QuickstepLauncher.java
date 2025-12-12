@@ -983,8 +983,9 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
                             DEFAULT_DISPLAY);
             if (defaultDisplayContainerInterface != null
                     && defaultDisplayContainerInterface.getCreatedContainer()
-                    instanceof RecentsWindowManager defaultRecentsWindowManager) {
-                defaultRecentsWindowManager.hideRecentsWindow();
+                            instanceof RecentsWindowManager recentsWindowManager
+                    && recentsWindowManager.isStarted()) {
+                recentsWindowManager.getStateManager().moveToRestState(/* isAnimated= */ true);
             }
         }
     }
