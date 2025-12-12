@@ -317,7 +317,7 @@ public abstract class AbstractStateChangeTouchController
             // snap to top or bottom using the release velocity
         } else {
             float successTransitionProgress = SUCCESS_TRANSITION_PROGRESS;
-            if (mLauncher.getDeviceProfile().getDeviceProperties().isTablet()
+            if (mLauncher.getDeviceProfile().getDeviceProperties().isLargeScreen()
                     && (mToState == ALL_APPS || mFromState == ALL_APPS)) {
                 successTransitionProgress = TABLET_BOTTOM_SHEET_SUCCESS_TRANSITION_PROGRESS;
             }

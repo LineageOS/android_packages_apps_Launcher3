@@ -342,7 +342,7 @@ constructor(
             if (desktopTaskView != null) return recentsView.indexOfChild(desktopTaskView)
         }
         val firstTaskViewIndex = recentsView.indexOfChild(getFirstTaskView())
-        return if (getDeviceProfile().deviceProperties.isTablet) {
+        return if (getDeviceProfile().deviceProperties.isLargeScreen) {
             var index = firstTaskViewIndex
             if (runningTaskView !is DesktopTaskView) {
                 // For fullsreen tasks, skip over Desktop tasks in its section
@@ -637,7 +637,7 @@ constructor(
         outTopRowRect: Rect,
         outBottomRowRect: Rect,
     ) {
-        if (!getDeviceProfile().deviceProperties.isTablet) {
+        if (!getDeviceProfile().deviceProperties.isLargeScreen) {
             getRowRect(getFirstTaskView(), getLastTaskView(), outTaskViewRowRect)
             return
         }
@@ -703,7 +703,7 @@ constructor(
 
         val centralTaskIds: Set<Int> =
             when {
-                getDeviceProfile().deviceProperties.isTablet -> emptySet()
+                getDeviceProfile().deviceProperties.isLargeScreen -> emptySet()
                 isInExpectedScrollPosition(currentPageTaskView) -> currentPageTaskView!!.taskIdSet
                 else -> emptySet()
             }
@@ -905,7 +905,7 @@ constructor(
     fun onDeleteKeyPressed() {
         taskViews.forEach { taskView ->
             if (taskView.isFocused) {
-                recentsView.dismissTaskView(taskView, /* removeTask= */true)
+                recentsView.dismissTaskView(taskView, /* removeTask= */ true)
                 return
             } else if (taskView is DesktopTaskView) {
                 val focusedTaskId =
@@ -915,7 +915,7 @@ constructor(
                         ?.key
                         ?.id
                 if (focusedTaskId != null) {
-                    recentsView.dismissTask(focusedTaskId, /* removeTask= */true)
+                    recentsView.dismissTask(focusedTaskId, /* removeTask= */ true)
                     return
                 }
             }

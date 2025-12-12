@@ -673,7 +673,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             final View appsView = mLauncher.getAppsView();
             final float startAlpha = appsView.getAlpha();
             final float startScale = SCALE_PROPERTY.get(appsView);
-            if (mDeviceProfile.getDeviceProperties().isTablet()) {
+            if (mDeviceProfile.getDeviceProperties().isLargeScreen()) {
 
                 // AllApps should not fade at all in tablets.
                 alphas = new float[]{1, 1};

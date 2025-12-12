@@ -1170,7 +1170,7 @@ constructor(
                         !(mContainer as ActivityContext)
                             .getDeviceProfile()
                             .deviceProperties
-                            .isTablet
+                            .isLargeScreen
                 ) {
                     actionsView.updateDisabledFlags(OverviewActionsView.DISABLED_SCROLLING, false)
                 }

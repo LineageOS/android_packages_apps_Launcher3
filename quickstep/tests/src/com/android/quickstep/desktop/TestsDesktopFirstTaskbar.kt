@@ -77,7 +77,7 @@ class TestsDesktopFirstTaskbar : BaseTaskbarIntegrationTest() {
     @After
     override fun tearDown() {
         super.tearDown()
-        if (!deviceProfile.deviceProperties.isTablet) return
+        if (!deviceProfile.deviceProperties.isLargeScreen) return
         if (mOriginalWindowingMode != WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
             setDisplayWindowingMode(mOriginalWindowingMode)
         }

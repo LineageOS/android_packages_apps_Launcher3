@@ -288,7 +288,7 @@ class SplitAnimationController(val splitSelectStateController: SplitSelectStateC
             container.asContext().resources.getColor(R.color.taskbar_background_dark)
         )
         val timings =
-            AnimUtils.getDeviceSplitToConfirmTimings(dp.deviceProperties.isTablet)
+            AnimUtils.getDeviceSplitToConfirmTimings(dp.deviceProperties.isLargeScreen)
                 as SplitToConfirmTimings
         pendingAnimation.setViewAlpha(
             scrim,
@@ -393,7 +393,7 @@ class SplitAnimationController(val splitSelectStateController: SplitSelectStateC
         splitSelectStateController.splitInstructionsView = splitInstructionsView
         val timings =
             AnimUtils.getDeviceOverviewToSplitTimings(
-                container.deviceProfile.deviceProperties.isTablet
+                container.deviceProfile.deviceProperties.isLargeScreen
             )
         val anim = PendingAnimation(100 /*duration */)
         splitInstructionsView.alpha = 0f
@@ -437,9 +437,9 @@ class SplitAnimationController(val splitSelectStateController: SplitSelectStateC
     ) {
         val stagedTaskView = view as FloatingTaskView
 
-        val isTablet: Boolean = container.deviceProfile.deviceProperties.isTablet
+        val isLargeScreen: Boolean = container.deviceProfile.deviceProperties.isLargeScreen
         val duration =
-            if (isTablet) SplitAnimationTimings.TABLET_CONFIRM_DURATION
+            if (isLargeScreen) SplitAnimationTimings.TABLET_CONFIRM_DURATION
             else SplitAnimationTimings.PHONE_CONFIRM_DURATION
 
         val pendingAnimation = PendingAnimation(duration.toLong())
@@ -872,7 +872,7 @@ class SplitAnimationController(val splitSelectStateController: SplitSelectStateC
         rootCandidate: Change,
     ): ValueAnimator {
         val progressUpdater = ValueAnimator.ofFloat(0f, 1f)
-        val timings = AnimUtils.getDeviceAppPairLaunchTimings(dp.deviceProperties.isTablet)
+        val timings = AnimUtils.getDeviceAppPairLaunchTimings(dp.deviceProperties.isLargeScreen)
         progressUpdater.setDuration(timings.getDuration().toLong())
         progressUpdater.interpolator = Interpolators.LINEAR
 

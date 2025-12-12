@@ -44,9 +44,9 @@ import com.android.launcher3.taskbar.TaskbarActivityContext;
 import com.android.launcher3.util.SplitConfigurationOptions;
 import com.android.launcher3.views.BaseDragLayer;
 import com.android.quickstep.orientation.RecentsPagedOrientationHandler;
+import com.android.quickstep.split.SplitAnimationTimings;
 import com.android.quickstep.util.AnimUtils;
 import com.android.quickstep.util.MultiValueUpdateListener;
-import com.android.quickstep.split.SplitAnimationTimings;
 import com.android.quickstep.util.TaskCornerRadius;
 import com.android.systemui.shared.system.QuickStepContract;
 
@@ -258,13 +258,13 @@ public class FloatingTaskView extends FrameLayout {
      */
     public void addStagingAnimation(PendingAnimation animation, RectF startingBounds,
             Rect endBounds, boolean fadeWithThumbnail, boolean isStagedTask) {
-        boolean isTablet = mContainer.getDeviceProfile().getDeviceProperties().isTablet();
+        boolean isLargeScreen = mContainer.getDeviceProfile().getDeviceProperties().isLargeScreen();
         boolean splittingFromOverview = fadeWithThumbnail;
         SplitAnimationTimings timings;
 
-        if (isTablet && splittingFromOverview) {
+        if (isLargeScreen && splittingFromOverview) {
             timings = SplitAnimationTimings.TABLET_OVERVIEW_TO_SPLIT;
-        } else if (!isTablet && splittingFromOverview) {
+        } else if (!isLargeScreen && splittingFromOverview) {
             timings = SplitAnimationTimings.PHONE_OVERVIEW_TO_SPLIT;
         } else {
             // Splitting from Home is currently only available on tablets
@@ -281,8 +281,8 @@ public class FloatingTaskView extends FrameLayout {
      */
     public void addConfirmAnimation(PendingAnimation animation, RectF startingBounds,
             Rect endBounds, boolean fadeWithThumbnail, boolean isStagedTask) {
-        SplitAnimationTimings timings =
-                AnimUtils.getDeviceSplitToConfirmTimings(mContainer.getDeviceProfile().getDeviceProperties().isTablet());
+        SplitAnimationTimings timings = AnimUtils.getDeviceSplitToConfirmTimings(
+                mContainer.getDeviceProfile().getDeviceProperties().isLargeScreen());
 
         addAnimation(animation, startingBounds, endBounds, fadeWithThumbnail, isStagedTask,
                 timings);

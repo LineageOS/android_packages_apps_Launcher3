@@ -45,7 +45,7 @@ data class BottomSheetProfile(
             // In large screens, in portrait mode, a bottom sheet can appear too elongated, so, we
             // apply additional padding.
             val applyExtraTopPadding =
-                deviceProperties.isTablet &&
+                deviceProperties.isLargeScreen &&
                     !deviceProperties.isLandscape &&
                     (deviceProperties.aspectRatio > MIN_ASPECT_RATIO_FOR_EXTRA_TOP_PADDING)
             val derivedTopPadding: Int = deviceProperties.heightPx / 6
@@ -75,7 +75,7 @@ data class BottomSheetProfile(
                 insets.top + // statusbar height
                     (if (applyExtraTopPadding) derivedTopPadding else 0) +
                     // phones need edgeMarginPx additional padding
-                    (if (deviceProperties.isTablet) 0 else edgeMarginPx).toInt()
+                    (if (deviceProperties.isLargeScreen) 0 else edgeMarginPx).toInt()
             return BottomSheetProfile(
                 bottomSheetTopPadding = bottomSheetTopPadding,
                 bottomSheetOpenDuration = res.getInteger(R.integer.config_bottomSheetOpenDuration),

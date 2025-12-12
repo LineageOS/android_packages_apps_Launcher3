@@ -97,7 +97,7 @@ public class DropTargetBar extends FrameLayout
         int tooltipLocation = TOOLTIP_DEFAULT;
 
         int horizontalMargin;
-        if (deviceProfile.getDeviceProperties().isTablet()) {
+        if (deviceProfile.getDeviceProperties().isLargeScreen()) {
             // XXX: If the icon size changes across orientations, we will have to take
             //      that into account here too.
             horizontalMargin = ((widthPx - 2 * deviceProfile.mWorkspaceProfile.getEdgeMarginPx()

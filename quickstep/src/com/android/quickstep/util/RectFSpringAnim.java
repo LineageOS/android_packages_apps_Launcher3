@@ -457,7 +457,8 @@ public class RectFSpringAnim extends ReleaseCheck {
             // Increase the stiffness for devices where we want the window size to transform
             // quicker.
             boolean shouldUseHigherStiffness = deviceProfile != null
-                    && (deviceProfile.getDeviceProperties().isLandscape() || deviceProfile.getDeviceProperties().isTablet());
+                    && (deviceProfile.getDeviceProperties().isLandscape()
+                    || deviceProfile.getDeviceProperties().isLargeScreen());
             rectStiffness = shouldUseHigherStiffness
                     ? rp.getFloat(R.dimen.swipe_up_rect_scale_higher_stiffness)
                     : rp.getFloat(R.dimen.swipe_up_rect_scale_stiffness);

@@ -49,8 +49,8 @@ class UtilitiesTest {
 
     private val mockDeviceProperties = mock(DeviceProperties::class.java)
 
-    private fun mockDeviceIsTablet(isTablet: Boolean) {
-        `when`(mockDeviceProperties!!.isTablet).thenReturn(isTablet)
+    private fun mockDeviceIsTablet(isLargeScreen: Boolean) {
+        `when`(mockDeviceProperties!!.isLargeScreen).thenReturn(isLargeScreen)
     }
 
     private fun mockDeviceIsLandscape(isLandscape: Boolean) {

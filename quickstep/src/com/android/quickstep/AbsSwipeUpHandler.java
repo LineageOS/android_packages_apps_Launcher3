@@ -3202,7 +3202,8 @@ public abstract class AbsSwipeUpHandler<
 
     // Scaling of RecentsView during quick switch based on amount of recents scroll
     private float getScaleProgressDueToScroll() {
-        if (mContainer == null || !mContainer.getDeviceProfile().getDeviceProperties().isTablet() || mRecentsView == null
+        if (mContainer == null || mRecentsView == null
+                || !mContainer.getDeviceProfile().getDeviceProperties().isLargeScreen()
                 || !shouldLinkRecentsViewScroll()) {
             return 0;
         }

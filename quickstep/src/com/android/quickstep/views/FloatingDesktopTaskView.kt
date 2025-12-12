@@ -32,8 +32,8 @@ import com.android.launcher3.Utilities
 import com.android.launcher3.anim.PendingAnimation
 import com.android.launcher3.uioverrides.QuickstepLauncher
 import com.android.launcher3.views.BaseDragLayer
-import com.android.quickstep.util.MultiValueUpdateListener
 import com.android.quickstep.split.SplitAnimationTimings
+import com.android.quickstep.util.MultiValueUpdateListener
 import com.android.systemui.shared.system.QuickStepContract
 
 /**
@@ -122,7 +122,7 @@ class FloatingDesktopTaskView(context: Context, attrs: AttributeSet?, defStyleAt
         }
 
         val timings =
-            if (recentsViewContainer.deviceProfile.deviceProperties.isTablet) {
+            if (recentsViewContainer.deviceProfile.deviceProperties.isLargeScreen) {
                 SplitAnimationTimings.TABLET_OVERVIEW_TO_SPLIT
             } else {
                 SplitAnimationTimings.PHONE_OVERVIEW_TO_SPLIT

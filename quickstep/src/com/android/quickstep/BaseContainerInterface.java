@@ -405,7 +405,7 @@ public abstract class BaseContainerInterface<STATE_TYPE extends BaseState<STATE_
 
     public final void calculateTaskSize(Context context, DeviceProfile dp, Rect outRect,
             RecentsPagedOrientationHandler orientationHandler) {
-        if (dp.getDeviceProperties().isTablet()) {
+        if (dp.getDeviceProperties().isLargeScreen()) {
             calculateLargeTileSize(context, dp, outRect);
         } else {
             Resources res = context.getResources();
@@ -504,7 +504,7 @@ public abstract class BaseContainerInterface<STATE_TYPE extends BaseState<STATE_
     public static void getTaskDimension(DeviceProfile dp, PointF out) {
         out.x = dp.getDeviceProperties().getWidthPx();
         out.y = dp.getDeviceProperties().getHeightPx();
-        if (dp.getDeviceProperties().isTablet()
+        if (dp.getDeviceProperties().isLargeScreen()
                 && !dp.getTaskbarProfile().isTransientTaskbar()) {
             out.y -= dp.getTaskbarProfile().getHeight();
         }
@@ -552,7 +552,7 @@ public abstract class BaseContainerInterface<STATE_TYPE extends BaseState<STATE_
             RecentsPagedOrientationHandler orientationHandler) {
         calculateTaskSize(context, dp, outRect, orientationHandler);
         int minimumHorizontalPadding = 0;
-        if (!dp.getDeviceProperties().isTablet()) {
+        if (!dp.getDeviceProperties().isLargeScreen()) {
             float maxScale = context.getResources().getFloat(R.dimen.overview_modal_max_scale);
             minimumHorizontalPadding =
                     Math.round((dp.getDeviceProperties().getAvailableWidthPx() - outRect.width() * maxScale) / 2);
@@ -561,7 +561,7 @@ public abstract class BaseContainerInterface<STATE_TYPE extends BaseState<STATE_
                 context,
                 dp,
                 dp.getOverviewProfile().getTaskMarginPx(),
-                getModalClaimedSpaceBelow(dp, outRect, dp.getDeviceProperties().isTablet()),
+                getModalClaimedSpaceBelow(dp, outRect, dp.getDeviceProperties().isLargeScreen()),
                 minimumHorizontalPadding,
                 1f /*maxScale*/,
                 Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM,

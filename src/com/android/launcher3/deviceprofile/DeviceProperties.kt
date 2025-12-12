@@ -30,7 +30,7 @@ data class DeviceProperties(
     val availableWidthPx: Int,
     val availableHeightPx: Int,
     val aspectRatio: Float,
-    val isTablet: Boolean,
+    val isLargeScreen: Boolean,
     val isPhone: Boolean,
     val transposeLayoutWithOrientation: Boolean,
     val isMultiDisplay: Boolean,
@@ -49,7 +49,7 @@ data class DeviceProperties(
             isExternalDisplay: Boolean,
             isGestureMode: Boolean,
         ): DeviceProperties {
-            val isTablet = info.isTablet(windowBounds)
+            val isLargeScreen = info.isLargeScreen(windowBounds)
             val windowX = windowBounds.bounds.left
             val windowY = windowBounds.bounds.top
             val rotationHint = windowBounds.rotationHint
@@ -66,11 +66,11 @@ data class DeviceProperties(
                 availableWidthPx = availableWidthPx,
                 availableHeightPx = availableHeightPx,
                 aspectRatio = max(widthPx, heightPx).toFloat() / min(widthPx, heightPx).toFloat(),
-                isTablet = isTablet,
-                isPhone = !isTablet,
+                isLargeScreen = isLargeScreen,
+                isPhone = !isLargeScreen,
                 transposeLayoutWithOrientation = transposeLayoutWithOrientation,
                 isMultiDisplay = isMultiDisplay,
-                isTwoPanels = isTablet && isMultiDisplay,
+                isTwoPanels = isLargeScreen && isMultiDisplay,
                 isLandscape = windowBounds.isLandscape,
                 isExternalDisplay = isExternalDisplay,
                 isGestureMode = isGestureMode,

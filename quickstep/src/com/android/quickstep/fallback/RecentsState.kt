@@ -96,7 +96,7 @@ open class RecentsState(@JvmField val ordinal: Int, private val mFlags: Int) :
 
     /** For this state, whether tasks should layout as a grid rather than a list. */
     override fun displayOverviewTasksAsGrid(deviceProfile: DeviceProfile) =
-        hasFlag(FLAG_SHOW_AS_GRID) && deviceProfile.deviceProperties.isTablet
+        hasFlag(FLAG_SHOW_AS_GRID) && deviceProfile.deviceProperties.isLargeScreen
 
     override fun showTaskThumbnailSplash() = hasFlag(FLAG_TASK_THUMBNAIL_SPLASH)
 

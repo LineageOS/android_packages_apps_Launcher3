@@ -78,7 +78,7 @@ private constructor(
                 // Only available when the feature flag is on.
                 !universalResizableByDefault() -> null
                 // The option is only shown on sw600dp+ screens (checked by isTablet)
-                !viewContainer.deviceProfile.deviceProperties.isTablet -> null
+                !viewContainer.deviceProfile.deviceProperties.isLargeScreen -> null
                 else -> {
                     listOf(
                         AspectRatioSystemShortcut(

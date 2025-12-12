@@ -111,7 +111,7 @@ public class LauncherAppWidgetProviderInfo extends AppWidgetProviderInfo impleme
             // On phones we no longer support regular landscape, only fixed landscape for this
             // reason we don't need to take regular landscape into account in phones. Foldables
             // still support regular landscape when unfolded.
-            if (!dp.getDeviceProperties().isTablet()
+            if (!dp.getDeviceProperties().isLargeScreen()
                     && dp.inv.isFixedLandscape != dp.getDeviceProperties().isLandscape()) {
                 continue;
             }

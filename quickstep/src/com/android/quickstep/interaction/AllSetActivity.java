@@ -149,7 +149,7 @@ public class AllSetActivity extends Activity {
     private static final String KEY_BACKGROUND_ANIMATION_TOGGLED_ON =
             "background_animation_toggled_on";
 
-    private boolean mIsTablet;
+    private boolean mIsLargeScreen;
 
     private final AnimatedFloat mSwipeProgress = new AnimatedFloat(this::onSwipeProgressUpdate);
 
@@ -189,7 +189,7 @@ public class AllSetActivity extends Activity {
         if (mIsExpressiveThemeEnabledInSUW) setTheme(R.style.AllSetTheme_Expressive);
 
         super.onCreate(savedInstanceState);
-        mIsTablet = getDP().getDeviceProperties().isTablet()
+        mIsLargeScreen = getDP().getDeviceProperties().isLargeScreen()
                     && !getDP().getDeviceProperties().isTwoPanels();
         boolean isDarkTheme =
                 (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)
@@ -293,7 +293,7 @@ public class AllSetActivity extends Activity {
             mBackgroundAnimationToggledOn = !mBackgroundAnimationToggledOn;
             maybeResumeOrPauseBackgroundAnimation();
         });
-        setUpBackgroundAnimation(getDP().getDeviceProperties().isTablet());
+        setUpBackgroundAnimation(getDP().getDeviceProperties().isLargeScreen());
     }
 
     private void setupExpressiveTheme() {
@@ -455,7 +455,7 @@ public class AllSetActivity extends Activity {
             hintTextResId = isGestureMode
                     ? R.string.allset_hint_expressive
                     : R.string.allset_button_hint_expressive;
-            String deviceName = getString(mIsTablet
+            String deviceName = getString(mIsLargeScreen
                     ? R.string.allset_device_type_tablet
                     : R.string.allset_device_type_phone);
             int subtitleFormatResId = isGestureMode

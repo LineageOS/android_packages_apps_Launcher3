@@ -186,7 +186,7 @@ data class AllAppsProfile(
                 )
             var leftAndRight =
                 allAppsStyle.getDimensionPixelSize(R.styleable.AllAppsStyle_horizontalPadding, 0)
-            if (!deviceProperties.isTablet) {
+            if (!deviceProperties.isLargeScreen) {
                 val cellLayoutHorizontalPadding: Int =
                     (workspaceProfile.cellLayoutPaddingPx.left +
                         workspaceProfile.cellLayoutPaddingPx.right) / 2
@@ -275,7 +275,7 @@ data class AllAppsProfile(
             allAppsPadding: Rect,
             deviceProperties: DeviceProperties,
         ): Int {
-            if (deviceProperties.isTablet) {
+            if (deviceProperties.isLargeScreen) {
                 val usedWidth: Int =
                     ((cellWidthPx * numShownAllAppsColumns) +
                         (borderSpacePx.x * (numShownAllAppsColumns - 1)) +

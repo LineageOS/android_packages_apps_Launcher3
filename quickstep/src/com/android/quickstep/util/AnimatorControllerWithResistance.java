@@ -256,7 +256,7 @@ public class AnimatorControllerWithResistance {
             this.scaleProperty = scaleProperty;
             this.translationTarget = translationTarget;
             this.translationProperty = translationProperty;
-            if (dp.getDeviceProperties().isTablet()) {
+            if (dp.getDeviceProperties().isLargeScreen()) {
                 resistanceParams = RecentsResistanceParams.FROM_APP_TABLET;
             } else {
                 resistanceParams = RecentsResistanceParams.FROM_APP;
