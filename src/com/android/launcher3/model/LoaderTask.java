@@ -101,7 +101,6 @@ import com.android.launcher3.util.ApiWrapper;
 import com.android.launcher3.util.IOUtils;
 import com.android.launcher3.util.IntArray;
 import com.android.launcher3.util.IntSet;
-import com.android.launcher3.util.LooperIdleLock;
 import com.android.launcher3.util.PackageManagerHelper;
 import com.android.launcher3.util.PackageUserKey;
 import com.android.launcher3.util.SettingsCache;
@@ -255,16 +254,6 @@ public class LoaderTask implements Runnable {
                         : homeScreenFilesProvider.query();
     }
 
-    protected synchronized void waitForIdle() {
-        // Wait until the either we're stopped or the other threads are done.
-        // This way we don't start loading all apps until the workspace has settled
-        // down.
-        LooperIdleLock idleLock = mLauncherBinder.newIdleLock(this);
-        // Just in case mFlushingWorkerThread changes but we aren't woken up,
-        // wait no longer than 1sec at a time
-        while (!mStopped && idleLock.awaitLocked(1000));
-    }
-
     private synchronized void verifyNotStopped() throws CancellationException {
         if (mStopped) {
             throw new CancellationException("Loader stopped");
@@ -349,8 +338,6 @@ public class LoaderTask implements Runnable {
         // Notify the installer packages of packages with active installs on the first screen.
         sendFirstScreenActiveInstallsBroadcast();
 
-        // Take a break
-        waitForIdle();
         logASplit("step 1 loading workspace complete");
         verifyNotStopped();
 
@@ -381,8 +368,6 @@ public class LoaderTask implements Runnable {
         updateHandler.updateIcons(allShortcuts, CacheableShortcutCachingLogic.INSTANCE,
                 mModel::onPackageIconsUpdated);
 
-        // Take a break
-        waitForIdle();
         logASplit("step 2 loading AllApps complete");
         verifyNotStopped();
 
@@ -397,8 +382,6 @@ public class LoaderTask implements Runnable {
                 CacheableShortcutCachingLogic.INSTANCE,
                 (pkgs, user) -> { });
 
-        // Take a break
-        waitForIdle();
         logASplit("step 3 loading all shortcuts complete");
         verifyNotStopped();
 
