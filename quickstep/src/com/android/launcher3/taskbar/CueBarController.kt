@@ -23,7 +23,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Rect as ComposeRect
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import com.android.compose.theme.PlatformTheme
@@ -41,10 +40,13 @@ import com.android.quickstep.cuebar.ui.utils.AmbientCueAnimationState
 import com.android.quickstep.cuebar.ui.utils.AmbientCueJankMonitor
 import com.android.quickstep.cuebar.ui.viewmodel.AmbientCueViewModel
 import com.android.systemui.shared.Flags.cueBarAceMigration
-import java.io.PrintWriter
+import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_VISIBLE
+import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
+import java.io.PrintWriter
+import androidx.compose.ui.geometry.Rect as ComposeRect
 
 class CueBarController(private val activity: TaskbarActivityContext) :
     TaskbarControllers.LoggableTaskbarController {
@@ -221,6 +223,7 @@ class CueBarController(private val activity: TaskbarActivityContext) :
                 mOverlayContext = taskbarControllers.taskbarOverlayController.requestCueBarWindow()
                 createCueBar()
             }
+            (cueBar?.parent as? ViewGroup)?.removeView(cueBar)
             mOverlayContext?.dragLayer?.addView(cueBar)
             cueBar?.layoutParams = lp
             internalComposeView = cueBar as ComposeView
@@ -234,12 +237,26 @@ class CueBarController(private val activity: TaskbarActivityContext) :
     }
 
     /**
+     * Updates the CueBar repository values based on the current [systemUiStateFlags].
+     */
+    fun updateStateForSysuiFlags(systemUiStateFlags: Long) {
+        if (!cueBarAceMigration()) {
+            return
+        }
+        val isImeVisible = (systemUiStateFlags and SYSUI_STATE_IME_VISIBLE) != 0L
+        ambientCueRepository.isImeVisible.dispatchValue(isImeVisible)
+        // Note: TaskbarActivityContext.ENABLE_TASKBAR_BEHIND_SHADE is not used here, assuming
+        // the notification panel always occludes the CueBar.
+        val isNotificationPanelVisible = (systemUiStateFlags and
+                SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE) != 0L
+        ambientCueRepository.isOccludedBySystemUi.dispatchValue(isNotificationPanelVisible)
+    }
+
+    /**
      * Adds the touchable bounds of the CueBar to the given [region].
      *
      * If the CueBar is expanded, the entire ComposeView bounds are added. Otherwise, only the
-     * bounds of the pill-shaped CueBar are added.
-     *
-     * @param region The region to which the CueBar's touchable bounds will be added.
+     * bounds of the pill-shaped CueBar are added to the [region].
      */
     fun addTouchableRegion(region: Region) {
         if (cueBar == null || cueBar?.visibility != View.VISIBLE) {

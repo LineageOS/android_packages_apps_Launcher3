@@ -126,10 +126,10 @@ constructor(
 
     // IME and Occlusion are hard to track from Launcher for other apps.
     private val _isImeVisible = MutableListenableRef(false)
-    override val isImeVisible: ListenableRef<Boolean> = _isImeVisible
+    override val isImeVisible: MutableListenableRef<Boolean> = _isImeVisible
 
     private val _isOccludedBySystemUi = MutableListenableRef(false)
-    override val isOccludedBySystemUi: ListenableRef<Boolean> = _isOccludedBySystemUi
+    override val isOccludedBySystemUi: MutableListenableRef<Boolean> = _isOccludedBySystemUi
 
     private val _isAmbientCueEnabled = MutableListenableRef(isAmbientCueSettingEnabled())
     override val isAmbientCueEnabled: ListenableRef<Boolean> = _isAmbientCueEnabled
