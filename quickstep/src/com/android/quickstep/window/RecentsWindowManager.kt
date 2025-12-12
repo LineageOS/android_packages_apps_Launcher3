@@ -257,7 +257,10 @@ constructor(
     private val homeVisibilityState = systemUiProxy.homeVisibilityState
     private val homeVisibilityListener =
         object : HomeVisibilityState.VisibilityChangeListener {
-            override fun onHomeVisibilityChanged(isHomeVisible: Boolean) {
+            override fun onHomeVisibilityChanged(
+                isHomeVisible: Boolean,
+                keyguardGoingAway: Boolean,
+            ) {
                 if (fallbackWindowInterface.isInLiveTileMode || isHomeVisible) {
                     return
                 }
@@ -283,6 +286,9 @@ constructor(
                 // therefore also need to post this request onto the recents view.
                 // (see OverviewCommandHelper#updateRecentsViewFocus)
                 if (!useInputReportedFocusForAccessibility()) {
+                    return
+                }
+                if (recentsView?.keyboardFocusTaskView == null) {
                     return
                 }
                 recentsView?.post { requestInputFocus(focused = true) }
@@ -468,7 +474,6 @@ constructor(
         if (isShowing()) {
             return
         }
-
         createWindowView()
         windowRootView.visibility = View.VISIBLE
 
@@ -483,7 +488,6 @@ constructor(
             AbstractFloatingView.closeAllOpenViews(this, /* animate= */ false)
             recentsView?.viewRootImpl?.touchModeChanged(true)
             windowRootView.visibility = View.GONE
-            requestInputFocus(focused = false)
             AccessibilityManagerCompat.sendTestProtocolEventToTest(
                 this,
                 LAUNCHER_ACTIVITY_STOPPED_MESSAGE,
@@ -554,7 +558,7 @@ constructor(
         return homeOverlay
     }
 
-    private fun requestInputFocus(focused: Boolean) {
+    fun requestInputFocus(focused: Boolean) {
         if (!useInputReportedFocusForAccessibility()) {
             return
         }

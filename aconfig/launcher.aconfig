@@ -486,16 +486,6 @@ flag {
 }
 
 flag {
-  name: "enable_taskbar_recents_themed_icons"
-  namespace: "launcher"
-  description: "Have recent icons in Taskbar respect icon theme preferences"
-  bug: "407950127"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "enable_taskbar_drag_and_drop"
   namespace: "launcher"
   description: "Enable dragging and dropping app icons on the taskbar."
@@ -680,6 +670,13 @@ flag {
   namespace: "launcher"
   description: "Enables indicator for active app automation in Launcher"
   bug: "440353845"
+}
+
+flag {
+    name: "fallback_reveal_animation"
+    namespace: "launcher"
+    description: "Introduces a Launcher reveal animation that runs as a backup when a different process takes care of the overall transition animation."
+    bug: "202516970"
 }
 
 flag {

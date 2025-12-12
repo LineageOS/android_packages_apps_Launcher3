@@ -154,6 +154,7 @@ public class DeviceGridState implements Comparable<DeviceGridState> {
                 + ", mNumHotseat=" + mNumHotseat
                 + ", mDeviceType=" + mDeviceType
                 + ", mDbFile=" + mDbFile
+                + ", mGridType=" + mGridType
                 + '}';
     }
 

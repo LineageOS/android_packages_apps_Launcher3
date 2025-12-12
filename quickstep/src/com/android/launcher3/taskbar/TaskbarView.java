@@ -22,7 +22,6 @@ import static android.window.DesktopModeFlags.ENABLE_TASKBAR_OVERFLOW;
 
 import static com.android.launcher3.BubbleTextView.DISPLAY_TASKBAR;
 import static com.android.launcher3.Flags.enableLauncherIconShapes;
-import static com.android.launcher3.Flags.enableTaskbarRecentsThemedIcons;
 import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_GROUP;
@@ -1253,22 +1252,14 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         // TODO(b/344038728): use FastBitmapDrawable instead of Drawable, to get disabled state
         //  while dragging.
         BitmapInfo bitmapInfo = groupTask.getBitmapInfos().get(0);
-        final Drawable taskIcon;
-        if (enableTaskbarRecentsThemedIcons()) {
-            ThemeManager themeManager = ThemeManager.INSTANCE.get(mActivityContext);
-            @DrawableCreationFlags int creationFlags =
-                    themeManager.isIconThemeEnabled() ? FLAG_THEMED : 0;
-            @Nullable IconShape iconShape =
-                    enableLauncherIconShapes() ? themeManager.getIconShapeData().getValue() : null;
-            taskIcon = Optional.ofNullable(bitmapInfo)
-                    .map(bi -> bi.newIcon(mActivityContext, creationFlags, iconShape))
-                    .orElse(null);
-        } else {
-            taskIcon = Optional.ofNullable(task.icon)
-                    .map(Drawable::getConstantState)
-                    .map(cs -> cs.newDrawable().mutate())
-                    .orElse(null);
-        }
+        ThemeManager themeManager = ThemeManager.INSTANCE.get(mActivityContext);
+        @DrawableCreationFlags int creationFlags =
+                themeManager.isIconThemeEnabled() ? FLAG_THEMED : 0;
+        @Nullable IconShape iconShape =
+                enableLauncherIconShapes() ? themeManager.getIconShapeData().getValue() : null;
+        final Drawable taskIcon = Optional.ofNullable(bitmapInfo)
+                .map(bi -> bi.newIcon(mActivityContext, creationFlags, iconShape))
+                .orElse(null);
 
         btv.applyIconAndLabel(taskIcon, task.title, task.titleDescription);
         btv.setTag(singleTask);

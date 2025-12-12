@@ -21,7 +21,6 @@ import androidx.annotation.VisibleForTesting
 import com.android.internal.policy.DesktopModeCompatPolicy
 import com.android.launcher3.BubbleTextView.RunningAppState
 import com.android.launcher3.Flags
-import com.android.launcher3.Flags.enableTaskbarRecentsThemedIcons
 import com.android.launcher3.Flags.enableTaskbarUiThread
 import com.android.launcher3.graphics.ThemeManager
 import com.android.launcher3.graphics.ThemeManager.ThemeChangeListener
@@ -269,19 +268,15 @@ class TaskbarRecentAppsController(
             }
 
             controllers.runAfterInit { reloadRecentTasksIfNeeded() }
-            if (enableTaskbarRecentsThemedIcons()) {
-                // Both callbacks force an icon fetch, because these changes may affect how icons
-                // are generated from BitmapInfo.
-                iconShapeDataCloseable =
-                    themeManager.iconShapeData.forEach(TASKBAR_UI_THREAD) {
-                        fetchIcons(forceUpdate = true)
-                    }
-                themeChangeListener =
-                    ThemeChangeListener {
-                            TASKBAR_UI_THREAD.execute { fetchIcons(forceUpdate = true) }
-                        }
-                        .also { themeManager.addChangeListener(it) }
-            }
+            // Both callbacks force an icon fetch, because these changes may affect how icons
+            // are generated from BitmapInfo.
+            iconShapeDataCloseable =
+                themeManager.iconShapeData.forEach(TASKBAR_UI_THREAD) {
+                    fetchIcons(forceUpdate = true)
+                }
+            themeChangeListener =
+                ThemeChangeListener { TASKBAR_UI_THREAD.execute { fetchIcons(forceUpdate = true) } }
+                    .also { themeManager.addChangeListener(it) }
         }
     }
 
@@ -433,34 +428,22 @@ class TaskbarRecentAppsController(
         for (groupTask in shownTasks) {
             for ((i, task) in groupTask.tasks.withIndex()) {
                 val cancellableTask =
-                    if (enableTaskbarRecentsThemedIcons()) {
-                        recentsModel.iconCache.getBitmapInfoInBackground(task, TASKBAR_UI_THREAD) {
-                            bi,
-                            d,
-                            t ->
-                            if (
-                                !forceUpdate &&
-                                    bi === groupTask.bitmapInfos[i] &&
-                                    d == task.titleDescription &&
-                                    t == task.title
-                            ) {
-                                return@getBitmapInfoInBackground
-                            }
-                            groupTask.bitmapInfos[i] = bi
-                            task.titleDescription = d
-                            task.title = t
-                            controllers.taskbarViewController.onTaskUpdated(task, groupTask)
+                    recentsModel.iconCache.getBitmapInfoInBackground(task, TASKBAR_UI_THREAD) {
+                        bi,
+                        d,
+                        t ->
+                        if (
+                            !forceUpdate &&
+                                bi === groupTask.bitmapInfos[i] &&
+                                d == task.titleDescription &&
+                                t == task.title
+                        ) {
+                            return@getBitmapInfoInBackground
                         }
-                    } else {
-                        recentsModel.iconCache.getIconInBackground(task, TASKBAR_UI_THREAD) {
-                            ic,
-                            d,
-                            t ->
-                            task.icon = ic
-                            task.titleDescription = d
-                            task.title = t
-                            controllers.taskbarViewController.onTaskUpdated(task, groupTask)
-                        }
+                        groupTask.bitmapInfos[i] = bi
+                        task.titleDescription = d
+                        task.title = t
+                        controllers.taskbarViewController.onTaskUpdated(task, groupTask)
                     }
                 if (cancellableTask != null) {
                     iconLoadRequests.add(cancellableTask)

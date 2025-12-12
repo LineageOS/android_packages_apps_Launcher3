@@ -18,6 +18,8 @@ package com.android.quickstep.fallback
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.View
+import androidx.core.view.isVisible
 import com.android.quickstep.recents.di.RecentsComponent
 import com.android.quickstep.window.RecentsWindowManager
 
@@ -27,5 +29,12 @@ constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int = 0) :
     FallbackRecentsView<RecentsWindowManager>(context, attrs, defStyleAttr) {
     override fun initialiseInjectables(recentsComponent: RecentsComponent) {
         recentsComponent.inject(this)
+    }
+
+    override fun onVisibilityChanged(changedView: View, visibility: Int) {
+        super.onVisibilityChanged(changedView, visibility)
+        if (changedView === this) {
+            mContainer.requestInputFocus(focused = isVisible)
+        }
     }
 }

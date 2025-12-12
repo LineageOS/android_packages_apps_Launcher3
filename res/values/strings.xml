@@ -371,8 +371,6 @@
     <string name="msg_disabled_by_admin">Disabled by your admin</string>
 
     <!-- Strings for settings -->
-    <!-- Title for Allow Rotation setting. [CHAR LIMIT=50] -->
-    <string name="allow_rotation_title">Allow home screen rotation</string>
     <!-- Text explaining when the home screen will get rotated. [CHAR LIMIT=100] -->
     <string name="allow_rotation_desc">When phone is rotated</string>
     <!-- Title for Compose settings  [CHAR LIMIT=50] -->

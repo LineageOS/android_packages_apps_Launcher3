@@ -48,7 +48,6 @@ import androidx.lifecycle.LifecycleOwner;
 import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.CellLayout;
 import com.android.launcher3.DeviceProfile;
-import com.android.launcher3.Flags;
 import com.android.launcher3.Hotseat;
 import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.Launcher;
@@ -299,8 +298,7 @@ public class TestInformationHandler {
                 return response;
 
             case TestProtocol.REQUEST_ENABLE_FIXED_LANDSCAPE: {
-                boolean enable = Flags.oneGridSpecs()
-                        && Boolean.parseBoolean(arg)
+                boolean enable = Boolean.parseBoolean(arg)
                         && DisplayController.INSTANCE.get(mContext).getInfo()
                                 .getDeviceType() == TYPE_PHONE;
                 LauncherPrefs.INSTANCE.get(mContext).put(FIXED_LANDSCAPE_MODE, enable);
