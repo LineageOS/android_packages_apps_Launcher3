@@ -107,6 +107,7 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
 
     private final DeviceProfile.OnDeviceProfileChangeListener mOnDeviceProfileChangeListener =
             dp -> {
+                adjustBubbleBarVerticalCenterForHome(dp.getBubbleBarVerticalCenterForHome());
                 onStashedInAppChanged(dp);
                 adjustHotseatForBubbleBar(isBubbleBarVisible());
                 if (mControllers != null && mControllers.taskbarViewController != null) {
@@ -426,6 +427,12 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
     @Override
     protected void onStashedInAppChanged() {
         onStashedInAppChanged(getDeviceProfile());
+    }
+
+    private void adjustBubbleBarVerticalCenterForHome(int bubbleBarYForHome) {
+        mControllers.bubbleControllers.ifPresent(bubbleControllers ->
+                bubbleControllers.bubbleStashController
+                        .setBubbleBarVerticalCenterForHome(bubbleBarYForHome));
     }
 
     private void onStashedInAppChanged(DeviceProfile deviceProfile) {
