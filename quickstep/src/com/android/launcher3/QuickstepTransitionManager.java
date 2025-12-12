@@ -1945,8 +1945,10 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         boolean skipAllAppsScale = false;
 
         if (Flags.fallbackRevealAnimation()) {
-            mFallbackRevealAnimation.cancelAnimations();
-            mFallbackRevealAnimation = null;
+            if (mFallbackRevealAnimation != null) {
+                mFallbackRevealAnimation.cancelAnimations();
+                mFallbackRevealAnimation = null;
+            }
             mIsLauncherAnimating = true;
         }
 
