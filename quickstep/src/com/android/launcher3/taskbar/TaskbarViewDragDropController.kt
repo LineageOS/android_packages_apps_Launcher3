@@ -145,7 +145,7 @@ class TaskbarViewDragDropController(
      */
     private fun getDropTargetState(
         hotSeatItems: IntSparseArrayMap<ItemInfo>,
-        existingInfo: ItemInfo?,
+        draggedInfo: ItemInfo,
     ): Pair<Int, Boolean> {
         var currentPinIndex = 0
         var lastScreenId = -1
@@ -153,7 +153,7 @@ class TaskbarViewDragDropController(
 
         for (i in 0 until hotSeatItems.size) {
             val item = hotSeatItems.valueAt(i) ?: continue
-            if (item.isSameItem(existingInfo)) {
+            if (item.isSameItem(draggedInfo)) {
                 // The dragged item is already at the target position, nothing need to change.
                 if (currentPinIndex == targetPinIndex) {
                     return Pair(item.screenId, true)
@@ -183,7 +183,7 @@ class TaskbarViewDragDropController(
     /** Returns the list of items that need to shift left after reordering. */
     private fun getItemsToShiftLeft(
         hotseatItems: IntSparseArrayMap<ItemInfo>,
-        existingInfo: ItemInfo?,
+        draggedInfo: ItemInfo,
         targetScreenId: Int,
     ): List<ItemInfo> {
         val itemsToShift = mutableListOf<ItemInfo>()
@@ -193,7 +193,7 @@ class TaskbarViewDragDropController(
             if (item.screenId > targetScreenId) {
                 continue
             }
-            if (!item.isSameItem(existingInfo) && item.screenId == nextScreenIdToShift) {
+            if (!item.isSameItem(draggedInfo) && item.screenId == nextScreenIdToShift) {
                 --nextScreenIdToShift
                 itemsToShift.add(item)
             } else {
@@ -207,7 +207,7 @@ class TaskbarViewDragDropController(
     /** Returns the list of items that need to shift right after reordering. */
     private fun getItemsToShiftRight(
         hotseatItems: IntSparseArrayMap<ItemInfo>,
-        existingInfo: ItemInfo?,
+        draggedInfo: ItemInfo,
         targetScreenId: Int,
     ): List<ItemInfo> {
         val itemsToShift = mutableListOf<ItemInfo>()
@@ -219,7 +219,7 @@ class TaskbarViewDragDropController(
                 continue
             }
 
-            if (!item.isSameItem(existingInfo) && item.screenId == nextScreenIdToShift) {
+            if (!item.isSameItem(draggedInfo) && item.screenId == nextScreenIdToShift) {
                 itemsToShift.add(item)
                 ++nextScreenIdToShift
             } else {
@@ -231,15 +231,15 @@ class TaskbarViewDragDropController(
 
     private fun addOrMoveItemInDatabase(
         hotseatItems: IntSparseArrayMap<ItemInfo>,
-        newInfo: ItemInfo,
-        existingInfo: ItemInfo?,
+        draggedInfo: ItemInfo,
+        hotseatItemsContainDraggedInfo: Boolean,
     ) {
-        val (targetScreenId, shouldShiftLeft) = getDropTargetState(hotseatItems, existingInfo)
-        if (existingInfo?.screenId == targetScreenId) return
+        val (targetScreenId, shouldShiftLeft) = getDropTargetState(hotseatItems, draggedInfo)
+        if (hotseatItemsContainDraggedInfo && draggedInfo.screenId == targetScreenId) return
 
         val itemsToShift =
-            if (shouldShiftLeft) getItemsToShiftLeft(hotseatItems, existingInfo, targetScreenId)
-            else getItemsToShiftRight(hotseatItems, existingInfo, targetScreenId)
+            if (shouldShiftLeft) getItemsToShiftLeft(hotseatItems, draggedInfo, targetScreenId)
+            else getItemsToShiftRight(hotseatItems, draggedInfo, targetScreenId)
 
         val writer = activityContext.modelWriter
         for (item in itemsToShift) {
@@ -249,13 +249,13 @@ class TaskbarViewDragDropController(
         modelCallbacks?.bindItemsUpdated(itemsToShift.toSet())
 
         writer.addOrMoveItemInDatabase(
-            newInfo,
+            draggedInfo,
             CONTAINER_HOTSEAT,
             targetScreenId,
             targetScreenId,
             0,
         )
-        modelCallbacks?.bindItemsUpdated(hashSetOf(newInfo))
+        modelCallbacks?.bindItemsUpdated(hashSetOf(draggedInfo))
     }
 
     /**
@@ -344,13 +344,25 @@ class TaskbarViewDragDropController(
         }
 
         override fun onDrop(dragObject: DropTarget.DragObject?, options: DragOptions?) {
-            val newInfo = extractItemInfoFromDragObject(dragObject) ?: return
+            var newInfo = extractItemInfoFromDragObject(dragObject) ?: return
             val hotseatItems = modelCallbacks?.hotseatItems ?: return
-            val existingInfo =
-                if (newInfo.id != ItemInfo.NO_ID && newInfo.container == CONTAINER_HOTSEAT) newInfo
-                else null
 
-            addOrMoveItemInDatabase(hotseatItems, newInfo, existingInfo)
+            var hotseatItemsContainDraggedInfo = false
+            // Check if the dragged item already exists in the model.
+            // If it does, use the one from the Model's instance, to avoid failing the ModelWriter
+            // itemInfo check.
+            if (newInfo.id != ItemInfo.NO_ID && newInfo.container == CONTAINER_HOTSEAT) {
+                for (i in 0 until hotseatItems.size) {
+                    val item = hotseatItems.valueAt(i) ?: continue
+                    if (item.id != ItemInfo.NO_ID && item.id == newInfo.id) {
+                        newInfo = item
+                        hotseatItemsContainDraggedInfo = true
+                        break
+                    }
+                }
+            }
+
+            addOrMoveItemInDatabase(hotseatItems, newInfo, hotseatItemsContainDraggedInfo)
         }
 
         override fun onDragEnter(dragObject: DropTarget.DragObject?) {
