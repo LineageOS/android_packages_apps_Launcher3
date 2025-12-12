@@ -338,7 +338,8 @@ class TaskbarOverflowTest {
             .hasIconTypes(ALL_APPS, *HOTSEAT * (numHotseatIcons - 1), OVERFLOW)
         assertThat(taskbarOverflowIconIndex).isEqualTo(numHotseatIcons)
         verifyOverflowIconTooltip("Other apps")
-        assertThat(overflowItems).containsExactlyElementsIn(numHotseatIcons..numHotseatIcons + 1)
+        assertThat(overflowItems)
+            .containsExactlyElementsIn(numHotseatIcons - 1..numHotseatIcons + 1)
     }
 
     @Test
