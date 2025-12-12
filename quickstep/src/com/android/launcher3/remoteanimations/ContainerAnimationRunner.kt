@@ -20,6 +20,7 @@ import android.app.TaskInfo
 import android.graphics.Color
 import android.view.IRemoteAnimationFinishedCallback
 import android.view.RemoteAnimationTarget
+import android.view.SurfaceControl
 import android.view.View
 import android.window.WindowAnimationState
 import androidx.core.graphics.ColorUtils
@@ -98,7 +99,9 @@ class ContainerAnimationRunner(
                         },
                     listener =
                         object : Listener {
-                            override fun onTransitionAnimationEnd() {
+                            override fun onTransitionAnimationEnd(
+                                transaction: SurfaceControl.Transaction
+                            ) {
                                 onEndCallback.executeAllAndDestroy()
                             }
                         },
