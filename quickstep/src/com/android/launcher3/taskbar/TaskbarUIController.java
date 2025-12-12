@@ -409,7 +409,14 @@ public class TaskbarUIController implements BubbleBarController.BubbleBarLocatio
      * Launches the given task in split-screen.
      */
     public void launchSplitTasks(
-            @NonNull SplitTask splitTask, @Nullable RemoteTransition remoteTransition) { }
+            @NonNull SplitTask splitTask, @Nullable RemoteTransition remoteTransition) {
+        RecentsViewInteractor recentsViewInteractor = getRecentsViewInteractor();
+        if (recentsViewInteractor == null) {
+            return;
+        }
+
+        recentsViewInteractor.launchSplitTask(splitTask, remoteTransition);
+    }
 
     /**
      * Returns the matching view (if any) in the taskbar.

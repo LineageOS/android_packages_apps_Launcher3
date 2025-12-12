@@ -21,19 +21,15 @@ import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_APP;
 import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_STASHED_LAUNCHER_STATE;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
-import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_50_50;
 
 import android.animation.Animator;
-import android.window.RemoteTransition;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.popup.SystemShortcut;
 import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.statemanager.StatefulContainer;
 import com.android.launcher3.util.ImmediateAnimator;
-import com.android.launcher3.util.SplitConfigurationOptions;
 import com.android.launcher3.util.TaskbarAsyncAnimator;
 import com.android.launcher3.util.ThreadedAnimator;
 import com.android.quickstep.FallbackActivityInterface;
@@ -41,8 +37,6 @@ import com.android.quickstep.GestureState;
 import com.android.quickstep.RecentsAnimationCallbacks;
 import com.android.quickstep.TopTaskTracker;
 import com.android.quickstep.fallback.RecentsState;
-import com.android.quickstep.split.SplitSelectStateController;
-import com.android.quickstep.util.SplitTask;
 import com.android.quickstep.views.RecentsViewContainer;
 
 import java.io.PrintWriter;
@@ -155,27 +149,6 @@ public class FallbackTaskbarUIController
         if (anim != null) {
             anim.start();
         }
-    }
-
-    @Override
-    public void launchSplitTasks(
-            @NonNull SplitTask splitTask, @Nullable RemoteTransition remoteTransition) {
-        SplitSelectStateController splitSelectStateController =
-                mRecentsContainer.getSplitSelectStateController();
-        if (splitSelectStateController == null) {
-            return;
-        }
-
-        splitSelectStateController.launchExistingSplitPair(null /* launchingTaskView */,
-                splitTask.getTopLeftTask().key.id,
-                splitTask.getBottomRightTask().key.id,
-                SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT,
-                /* callback= */ success -> splitSelectStateController.resetState(),
-                /* freezeTaskList= */ false,
-                splitTask.getSplitBounds() == null
-                        ? SNAP_TO_2_50_50
-                        : splitTask.getSplitBounds().snapPosition,
-                remoteTransition);
     }
 
     @Override
