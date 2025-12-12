@@ -604,13 +604,10 @@ flag {
 }
 
 flag {
-  name: "orientation_enabled_desktop_grid_spec"
+  name: "orientation_friendly_desktop_grid_spec"
   namespace: "launcher"
   description: "Uses a desktop grid spec that specifies grid dimensions that look reasonably well when the device is used in portrait mode"
   bug: "444244391"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
 }
 
 flag {
