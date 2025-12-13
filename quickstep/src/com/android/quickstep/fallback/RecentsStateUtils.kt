@@ -25,9 +25,10 @@ fun RecentsState.toLauncherState(): LauncherState {
         RecentsState.DEFAULT_STATE_ORDINAL -> LauncherState.OVERVIEW
         RecentsState.MODAL_TASK_ORDINAL -> LauncherState.OVERVIEW_MODAL_TASK
         RecentsState.BACKGROUND_APP_ORDINAL -> LauncherState.BACKGROUND_APP
-        RecentsState.HOME_STATE_ORDINAL -> LauncherState.NORMAL
-        RecentsState.BG_LAUNCHER_ORDINAL -> LauncherState.NORMAL
         RecentsState.OVERVIEW_SPLIT_SELECT_ORDINAL -> LauncherState.OVERVIEW_SPLIT_SELECT
+        RecentsState.HOME_STATE_ORDINAL,
+        RecentsState.BG_LAUNCHER_ORDINAL,
+        RecentsState.HIDDEN_ORDINAL -> LauncherState.NORMAL
         else -> LauncherState.NORMAL
     }
 }

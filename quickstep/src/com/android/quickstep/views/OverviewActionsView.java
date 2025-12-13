@@ -301,7 +301,8 @@ public class OverviewActionsView<T extends OverlayUICallbacks> extends FrameLayo
     private void updateForIsTablet() {
         assert mDp != null;
         // Update flags to see if split button should be hidden.
-        updateSplitButtonHiddenFlags(FLAG_SMALL_SCREEN_HIDE_SPLIT, !mDp.getDeviceProperties().isTablet());
+        updateSplitButtonHiddenFlags(FLAG_SMALL_SCREEN_HIDE_SPLIT,
+                !mDp.getDeviceProperties().isLargeScreen());
         updateActionButtonsVisibility();
     }
 
@@ -310,7 +311,8 @@ public class OverviewActionsView<T extends OverlayUICallbacks> extends FrameLayo
             return;
         }
         boolean showSingleTaskActions = !mIsGroupedTask;
-        boolean showGroupActions = mIsGroupedTask && mDp.getDeviceProperties().isTablet() && mCanSaveAppPair;
+        boolean showGroupActions = mIsGroupedTask && mDp.getDeviceProperties().isLargeScreen()
+                && mCanSaveAppPair;
         Log.d(TAG, "updateActionButtonsVisibility() called: showSingleTaskActions = ["
                 + showSingleTaskActions + "], showGroupActions = [" + showGroupActions + "]");
         getActionsAlphas().get(INDEX_GROUPED_ALPHA).setValue(showSingleTaskActions ? 1 : 0);
@@ -412,7 +414,7 @@ public class OverviewActionsView<T extends OverlayUICallbacks> extends FrameLayo
             return 0;
         }
 
-        if (mDp.getDeviceProperties().isTablet()) {
+        if (mDp.getDeviceProperties().isLargeScreen()) {
             int modalTaskbarHeight = mDp.getTaskbarProfile().isTransientTaskbar()
                     ? mDp.getTaskbarProfile().getStashedTaskbarHeight()
                     : mDp.getTaskbarProfile().getHeight();

@@ -240,7 +240,7 @@ class RecentsViewStateController(private val launcher: QuickstepLauncher) :
 
         val timings =
             AnimUtils.getDeviceOverviewToSplitTimings(
-                launcher.deviceProfile.getDeviceProperties().isTablet
+                launcher.deviceProfile.getDeviceProperties().isLargeScreen
             )
         if (!goingToOverviewFromWorkspaceContextual) {
             // This animation is already done for the contextual case, don't redo it

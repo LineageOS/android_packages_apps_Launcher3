@@ -324,7 +324,7 @@ public class TaskOverlayFactory {
 
             RecentsViewContainer container = containerFromContext(
                     getTaskView().getContext());
-            int bottomInset = container.getDeviceProfile().getDeviceProperties().isTablet()
+            int bottomInset = container.getDeviceProfile().getDeviceProperties().isLargeScreen()
                     ? Math.round(bitmapRect.bottom - boundsInBitmapSpace.bottom) : 0;
             return Insets.of(0, 0, 0, bottomInset);
         }

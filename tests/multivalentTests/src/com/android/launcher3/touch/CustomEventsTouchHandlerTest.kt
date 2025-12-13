@@ -18,6 +18,7 @@ package com.android.launcher3.touch
 
 import android.content.Context
 import android.os.Looper
+import android.os.SystemClock
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.view.InputDevice
@@ -55,6 +56,7 @@ class CustomEventsTouchHandlerTest {
     private lateinit var view: View
     private lateinit var touchHandler: CustomEventsTouchHandler
     private val mockListener: CustomActionsListener = mock()
+    private var downTime: Long = SystemClock.uptimeMillis()
 
     @get:Rule val flags: SetFlagsRule = SetFlagsRule()
 
@@ -76,15 +78,16 @@ class CustomEventsTouchHandlerTest {
         buttonState: Int,
         x: Float = 10f,
         y: Float = 10f,
+        customDownTime: Long = downTime,
     ): MotionEvent {
-        return MotionEvent.obtain(0, System.currentTimeMillis(), action, x, y, 0).apply {
+        return MotionEvent.obtain(customDownTime, customDownTime, action, x, y, 0).apply {
             source = InputDevice.SOURCE_MOUSE
             setButtonState(buttonState)
         }
     }
 
-    private fun obtainTouchEvent(action: Int): MotionEvent {
-        return MotionEvent.obtain(0, 0, action, 10f, 10f, 0)
+    private fun obtainTouchEvent(action: Int, customDownTime: Long = downTime): MotionEvent {
+        return MotionEvent.obtain(customDownTime, customDownTime, action, 10f, 10f, 0)
     }
 
     @Test
@@ -216,7 +219,12 @@ class CustomEventsTouchHandlerTest {
 
     @Test
     fun onLongPress_touch_triggersPopupAndDrag() {
-        val downEvent = obtainTouchEvent(MotionEvent.ACTION_DOWN)
+        // Start the down event at a time long enough ago to schedule a long press. Then wait for
+        // the long press to trigger.
+        val longPressDownTime = downTime - ViewConfiguration.getLongPressTimeout() - 100
+
+        val downEvent =
+            obtainTouchEvent(MotionEvent.ACTION_DOWN, customDownTime = longPressDownTime)
         touchHandler.onDelegateTouchEvent(downEvent)
         RoboApiWrapper.waitForLooperSync(Looper.getMainLooper())
 
@@ -225,7 +233,15 @@ class CustomEventsTouchHandlerTest {
 
     @Test
     fun onLongPress_mouse_isIgnored() {
-        val downEvent = obtainMouseEvent(MotionEvent.ACTION_DOWN, MotionEvent.BUTTON_PRIMARY)
+        // Start the down event at a time long enough ago to schedule a long press. Then wait for
+        // the long press to trigger, to ensure no action is performed.
+        val longPressDownTime = downTime - ViewConfiguration.getLongPressTimeout() - 100
+        val downEvent =
+            obtainMouseEvent(
+                MotionEvent.ACTION_DOWN,
+                MotionEvent.BUTTON_PRIMARY,
+                customDownTime = longPressDownTime,
+            )
         touchHandler.onDelegateTouchEvent(downEvent)
         RoboApiWrapper.waitForLooperSync(Looper.getMainLooper())
 

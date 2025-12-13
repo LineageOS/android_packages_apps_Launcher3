@@ -1060,7 +1060,7 @@ public final class Utilities {
      */
     public static boolean calculateIsLeftRightSplit(boolean allowLeftRightSplitInPortrait,
             DeviceProperties deviceProperties, boolean isExternalDisplay) {
-        if (allowLeftRightSplitInPortrait && deviceProperties.isTablet()) {
+        if (allowLeftRightSplitInPortrait && deviceProperties.isLargeScreen()) {
             if (!isExternalDisplay || !enableNonDefaultDisplaySplitBugfix()) {
                 return !deviceProperties.isLandscape();
             } else {

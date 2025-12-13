@@ -1537,7 +1537,7 @@ public abstract class RecentsView<
     @Override
     protected void onPageBeginTransition() {
         super.onPageBeginTransition();
-        if (!mContainer.getDeviceProfile().getDeviceProperties().isTablet()) {
+        if (!mContainer.getDeviceProfile().getDeviceProperties().isLargeScreen()) {
             mActionsView.updateDisabledFlags(OverviewActionsView.DISABLED_SCROLLING, true);
         }
         if (mOverviewStateEnabled) { // only when in overview
@@ -1549,7 +1549,7 @@ public abstract class RecentsView<
     protected void onPageEndTransition() {
         super.onPageEndTransition();
         ActiveGestureProtoLogProxy.logOnPageEndTransition(getNextPage());
-        if (!mContainer.getDeviceProfile().getDeviceProperties().isTablet()) {
+        if (!mContainer.getDeviceProfile().getDeviceProperties().isLargeScreen()) {
             mActionsView.updateDisabledFlags(OverviewActionsView.DISABLED_SCROLLING, false);
         }
         if (getNextPage() > 0) {
@@ -1561,7 +1561,7 @@ public abstract class RecentsView<
     @Override
     protected boolean isSignificantMove(float absoluteDelta, int pageOrientedSize) {
         DeviceProfile deviceProfile = mContainer.getDeviceProfile();
-        if (!deviceProfile.getDeviceProperties().isTablet()) {
+        if (!deviceProfile.getDeviceProperties().isLargeScreen()) {
             return super.isSignificantMove(absoluteDelta, pageOrientedSize);
         }
 
@@ -2121,7 +2121,8 @@ public abstract class RecentsView<
         DeviceProfile dp = mContainer.getDeviceProfile();
         setOverviewGridEnabled(
                 getStateManager().getState().displayOverviewTasksAsGrid(dp));
-        mActionsView.updateHiddenFlags(HIDDEN_ACTIONS_IN_MENU, dp.getDeviceProperties().isTablet());
+        mActionsView.updateHiddenFlags(HIDDEN_ACTIONS_IN_MENU,
+                dp.getDeviceProperties().isLargeScreen());
         setPageSpacing(dp.getOverviewProfile().getPageSpacing());
 
         // Propagate DeviceProfile change event.
@@ -2270,7 +2271,7 @@ public abstract class RecentsView<
      */
     private float getTaskAlignmentTranslationY() {
         DeviceProfile deviceProfile = mContainer.getDeviceProfile();
-        if (deviceProfile.getDeviceProperties().isTablet()) {
+        if (deviceProfile.getDeviceProperties().isLargeScreen()) {
             return deviceProfile.getOverviewProfile().getRowSpacing();
         }
         return 0f;
@@ -2373,7 +2374,7 @@ public abstract class RecentsView<
 
     @Override
     protected int getDestinationPage(int scaledScroll) {
-        if (!mContainer.getDeviceProfile().getDeviceProperties().isTablet()) {
+        if (!mContainer.getDeviceProfile().getDeviceProperties().isLargeScreen()) {
             return super.getDestinationPage(scaledScroll);
         }
         if (!isPageScrollsInitialized()) {
@@ -3256,8 +3257,8 @@ public abstract class RecentsView<
         getPagedOrientationHandler().getInitialSplitPlaceholderBounds(mSplitPlaceholderSize,
                 mSplitPlaceholderInset, mContainer.getDeviceProfile(),
                 mSplitSelectStateController.getActiveSplitStagePosition(), mTempRect);
-        SplitAnimationTimings timings =
-                AnimUtils.getDeviceOverviewToSplitTimings(mContainer.getDeviceProfile().getDeviceProperties().isTablet());
+        SplitAnimationTimings timings = AnimUtils.getDeviceOverviewToSplitTimings(
+                mContainer.getDeviceProfile().getDeviceProperties().isLargeScreen());
 
         RectF startingTaskRect = new RectF();
         safeRemoveDragLayerView(mSplitSelectStateController.getFirstFloatingTaskView());
@@ -4198,7 +4199,7 @@ public abstract class RecentsView<
             return;
         }
         SplitAnimationTimings timings = AnimUtils.getDeviceOverviewToSplitTimings(
-                mContainer.getDeviceProfile().getDeviceProperties().isTablet());
+                mContainer.getDeviceProfile().getDeviceProperties().isLargeScreen());
         getTaskViews().forEachWithIndexInParent((index, taskView) -> {
             if (taskView instanceof DesktopTaskView) {
                 // Setting pivot to scale down from screen centre.
@@ -4289,7 +4290,7 @@ public abstract class RecentsView<
         builder.addOnFrameListener((animator) -> {
             SplitAnimationTimings splitTimings =
                     AnimUtils.getDeviceOverviewToSplitTimings(
-                            mContainer.getDeviceProfile().getDeviceProperties().isTablet());
+                            mContainer.getDeviceProfile().getDeviceProperties().isLargeScreen());
             if (animator.getAnimatedFraction() > splitTimings.getGridSlideStartOffset()
                     && !hasRunDismiss.get()) {
                 RecentsDismissUtils.SpringSet dismissSpringSet =
@@ -4361,8 +4362,8 @@ public abstract class RecentsView<
         Rect firstTaskStartingBounds = new Rect();
         Rect firstTaskEndingBounds = mTempRect;
 
-        boolean isTablet = mContainer.getDeviceProfile().getDeviceProperties().isTablet();
-        SplitAnimationTimings timings = AnimUtils.getDeviceSplitToConfirmTimings(isTablet);
+        boolean isLargeScreen = mContainer.getDeviceProfile().getDeviceProperties().isLargeScreen();
+        SplitAnimationTimings timings = AnimUtils.getDeviceSplitToConfirmTimings(isLargeScreen);
         PendingAnimation pendingAnimation = new PendingAnimation(timings.getDuration());
 
         int halfDividerSize = getResources()
@@ -4449,7 +4450,7 @@ public abstract class RecentsView<
         if (mSplitHiddenTaskViewIndex == -1) {
             return;
         }
-        if (!mContainer.getDeviceProfile().getDeviceProperties().isTablet()) {
+        if (!mContainer.getDeviceProfile().getDeviceProperties().isLargeScreen()) {
             int pageToSnapTo = mCurrentPage;
             if (mSplitHiddenTaskViewIndex <= pageToSnapTo) {
                 pageToSnapTo += 1;
@@ -4499,7 +4500,7 @@ public abstract class RecentsView<
         int direction = orientationHandler.getSplitTranslationDirectionFactor(
                 splitPosition, deviceProfile);
 
-        if (deviceProfile.getDeviceProperties().isTablet() && deviceProfile.isLeftRightSplit) {
+        if (deviceProfile.getDeviceProperties().isLargeScreen() && deviceProfile.isLeftRightSplit) {
             // Only shift TaskViews if there is not enough space on the side of
             // mLastComputedTaskSize to minimize motion.
             int sideSpace = mIsRtl

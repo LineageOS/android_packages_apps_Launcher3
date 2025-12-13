@@ -302,7 +302,7 @@ class PortraitPagedViewHandler : DefaultPagedViewHandler(), RecentsPagedOrientat
 
     override fun getSplitPositionOptions(dp: DeviceProfile): List<SplitPositionOption> =
         when {
-            dp.deviceProperties.isTablet -> {
+            dp.deviceProperties.isLargeScreen -> {
                 Utilities.getSplitPositionOptions(dp)
             }
 
@@ -728,7 +728,8 @@ class PortraitPagedViewHandler : DefaultPagedViewHandler(), RecentsPagedOrientat
                         .toInt()
                 secondaryAppChipView.setSplitTranslationY(
                     (primarySnapshotHeight +
-                            (if (deviceProfile.deviceProperties.isTablet) 0 else dividerThickness))
+                            (if (deviceProfile.deviceProperties.isLargeScreen) 0
+                            else dividerThickness))
                         .toFloat()
                 )
             }
@@ -739,7 +740,7 @@ class PortraitPagedViewHandler : DefaultPagedViewHandler(), RecentsPagedOrientat
     }
 
     override fun getDefaultSplitPosition(deviceProfile: DeviceProfile): Int {
-        check(deviceProfile.deviceProperties.isTablet) {
+        check(deviceProfile.deviceProperties.isLargeScreen) {
             "Default position available only for large screens"
         }
         return if (deviceProfile.isLeftRightSplit) {

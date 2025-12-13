@@ -109,7 +109,7 @@ abstract class FakeInvariantDeviceProfileTest {
                 ),
             )
 
-        doReturn(false).whenever(info).isTablet(any())
+        doReturn(false).whenever(info).isLargeScreen(any())
         doReturn(420).whenever(info).getDensityDpi()
         doReturn(411f).whenever(info).smallestSizeDp(any())
 
@@ -201,7 +201,7 @@ abstract class FakeInvariantDeviceProfileTest {
 
         windowBounds = WindowBounds(Rect(0, 0, x, y), Rect(0, 104, 0, 0))
 
-        doReturn(true).whenever(info).isTablet(any())
+        doReturn(true).whenever(info).isLargeScreen(any())
         doReturn(320).whenever(info).getDensityDpi()
         doReturn(800f).whenever(info).smallestSizeDp(any())
 
@@ -296,7 +296,7 @@ abstract class FakeInvariantDeviceProfileTest {
 
         windowBounds = WindowBounds(Rect(0, 0, x, y), Rect(0, 110, 0, 0))
 
-        doReturn(true).whenever(info).isTablet(any())
+        doReturn(true).whenever(info).isLargeScreen(any())
         doReturn(420).whenever(info).getDensityDpi()
         doReturn(700f).whenever(info).smallestSizeDp(any())
 

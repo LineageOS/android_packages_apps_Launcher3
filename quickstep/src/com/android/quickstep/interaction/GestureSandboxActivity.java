@@ -147,7 +147,7 @@ public class GestureSandboxActivity extends FragmentActivity {
     private void correctUserOrientation() {
         DeviceProfile deviceProfile = InvariantDeviceProfile.INSTANCE.get(
                 getApplicationContext()).getDeviceProfile(this);
-        if (deviceProfile.getDeviceProperties().isTablet()) {
+        if (deviceProfile.getDeviceProperties().isLargeScreen()) {
             // The tutorial will work in either orientation if the height and width are similar
             boolean showRotationPrompt = !LayoutUtils.isAspectRatioSquare(deviceProfile.getDeviceProperties().getAspectRatio())
                     && getResources().getConfiguration().orientation

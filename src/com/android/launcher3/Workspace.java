@@ -3795,7 +3795,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     @Override
     protected boolean isSignificantMove(float absoluteDelta, int pageOrientedSize) {
         DeviceProfile deviceProfile = mLauncher.getDeviceProfile();
-        if (!deviceProfile.getDeviceProperties().isTablet()) {
+        if (!deviceProfile.getDeviceProperties().isLargeScreen()) {
             return super.isSignificantMove(absoluteDelta, pageOrientedSize);
         }
 

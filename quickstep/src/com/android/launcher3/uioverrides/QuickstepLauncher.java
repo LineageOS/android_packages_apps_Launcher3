@@ -598,7 +598,8 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     }
 
     private List<SystemShortcut.Factory<QuickstepLauncher>> getSplitShortcuts() {
-        if (!mDeviceProfile.getDeviceProperties().isTablet() || mSplitSelectStateController.isSplitSelectActive()) {
+        if (!mDeviceProfile.getDeviceProperties().isLargeScreen()
+                || mSplitSelectStateController.isSplitSelectActive()) {
             return Collections.emptyList();
         }
         if (getDisplayId() != DEFAULT_DISPLAY
@@ -983,8 +984,9 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
                             DEFAULT_DISPLAY);
             if (defaultDisplayContainerInterface != null
                     && defaultDisplayContainerInterface.getCreatedContainer()
-                    instanceof RecentsWindowManager defaultRecentsWindowManager) {
-                defaultRecentsWindowManager.hideRecentsWindow();
+                            instanceof RecentsWindowManager recentsWindowManager
+                    && recentsWindowManager.isStarted()) {
+                recentsWindowManager.getStateManager().moveToRestState(/* isAnimated= */ true);
             }
         }
     }

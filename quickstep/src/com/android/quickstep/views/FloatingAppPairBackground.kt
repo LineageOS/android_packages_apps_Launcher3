@@ -81,7 +81,7 @@ open class FloatingAppPairBackground(
         // Set up timings and interpolators
         val timings =
             AnimUtils.getDeviceAppPairLaunchTimings(
-                container.deviceProfile.deviceProperties.isTablet
+                container.deviceProfile.deviceProperties.isLargeScreen
             )
         expandXInterpolator =
             Interpolators.clampToProgress(

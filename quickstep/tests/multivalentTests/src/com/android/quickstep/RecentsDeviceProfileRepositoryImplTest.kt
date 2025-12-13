@@ -74,7 +74,7 @@ class RecentsDeviceProfileRepositoryImplTest {
                 availableWidthPx = 1080,
                 availableHeightPx = 1920,
                 aspectRatio = 1f,
-                isTablet = isTablet,
+                isLargeScreen = isTablet,
                 isPhone = false,
                 transposeLayoutWithOrientation = false,
                 isMultiDisplay = false,

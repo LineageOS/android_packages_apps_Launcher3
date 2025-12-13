@@ -552,7 +552,7 @@ public class DisplayController {
         /**
          * Returns {@code true} if the bounds represent a tablet.
          */
-        public boolean isTablet(WindowBounds bounds) {
+        public boolean isLargeScreen(WindowBounds bounds) {
             return mIsDesktopFormFactor || smallestSizeDp(bounds) >= MIN_TABLET_WIDTH
                     // External displays should always be considered tablet.
                     || context.getDisplay().getDisplayId() != DEFAULT_DISPLAY;
@@ -600,7 +600,7 @@ public class DisplayController {
             int flagTablet = 1 << 1;
 
             int type = supportedBounds.stream()
-                    .mapToInt(bounds -> isTablet(bounds) ? flagTablet : flagPhone)
+                    .mapToInt(bounds -> isLargeScreen(bounds) ? flagTablet : flagPhone)
                     .reduce(0, (a, b) -> a | b);
             if (type == (flagPhone | flagTablet)) {
                 // device has profiles supporting both phone and tablet modes
