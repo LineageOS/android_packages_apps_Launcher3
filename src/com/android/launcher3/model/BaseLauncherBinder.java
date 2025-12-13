@@ -31,7 +31,6 @@ import com.android.launcher3.model.BgDataModel.FixedContainerItems;
 import com.android.launcher3.model.data.AppsListData;
 import com.android.launcher3.model.data.WorkspaceData;
 import com.android.launcher3.util.LooperExecutor;
-import com.android.launcher3.util.LooperIdleLock;
 import com.android.launcher3.widget.model.WidgetsListBaseEntriesBuilder;
 import com.android.launcher3.widget.model.WidgetsListBaseEntry;
 
@@ -147,17 +146,6 @@ public class BaseLauncherBinder {
         });
     }
 
-    /**
-     * Only used in LoaderTask.
-     */
-    public LooperIdleLock newIdleLock(Object lock) {
-        LooperIdleLock idleLock = new LooperIdleLock(lock, mUiExecutor.getLooper());
-        // If we are not binding or if the main looper is already idle, there is no reason to wait
-        if (mUiExecutor.getLooper().getQueue().isIdle()) {
-            idleLock.queueIdle();
-        }
-        return idleLock;
-    }
     @AssistedFactory
     public interface BaseLauncherBinderFactory {
         BaseLauncherBinder createBinder(Callbacks[] callbacks);

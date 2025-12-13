@@ -58,7 +58,6 @@ import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY3
 import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY4
 import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY5
 import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
-import com.android.launcher3.util.LooperIdleLock
 import com.android.launcher3.util.ModelTestExtensions.setModelLayout
 import com.android.launcher3.util.MutableListenableRef
 import com.android.launcher3.util.SandboxApplication
@@ -125,7 +124,6 @@ class LoaderTaskTest {
 
     @Mock private lateinit var launcherBinder: BaseLauncherBinder
     @Mock private lateinit var transaction: LoaderTransaction
-    @Mock private lateinit var idleLock: LooperIdleLock
     @Mock private lateinit var iconCacheUpdateHandler: IconCacheUpdateHandler
     @Mock private lateinit var settingsCache: SettingsCache
 
@@ -175,8 +173,6 @@ class LoaderTaskTest {
             .query(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
 
         `when`(launcherModel.modelDelegate).thenReturn(modelDelegate)
-        `when`(launcherBinder.newIdleLock(any())).thenReturn(idleLock)
-        `when`(idleLock.awaitLocked(1000)).thenReturn(false)
         `when`(iconCache.getUpdateHandler()).thenReturn(iconCacheUpdateHandler)
 
         val listenableRef = MutableListenableRef(false)

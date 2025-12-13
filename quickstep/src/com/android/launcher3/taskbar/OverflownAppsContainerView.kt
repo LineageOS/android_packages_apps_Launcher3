@@ -191,10 +191,6 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         mActivityContext.dragLayer.getDescendantRectRelativeToSelf(this, outRect)
     }
 
-    override fun getHitRectForUnpinRelativeToDragLayer(outRect: Rect?) {
-        dragDelegate.getHitRectForUnpinRelativeToDragLayer(outRect)
-    }
-
     override fun isPointOnOverflowIcon(point: FloatArray): Boolean = false
 
     override fun reserveDropSlotForDragLocation(x: Int) {
@@ -249,8 +245,6 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
             }
 
             override fun getHitRectForPinRelativeToDragLayer(outRect: Rect?) {}
-
-            override fun getHitRectForUnpinRelativeToDragLayer(outRect: Rect?) {}
 
             override fun isPointOnOverflowIcon(point: FloatArray): Boolean = false
         }

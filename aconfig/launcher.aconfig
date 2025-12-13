@@ -225,21 +225,6 @@ flag {
     }
 }
 
-
-flag {
-    name: "one_grid_specs"
-    namespace: "launcher"
-    description: "Defines the new specs for grids based on OneGrid"
-    bug: "364711064"
-}
-
-flag {
-    name: "one_grid_mounted_mode"
-    namespace: "launcher"
-    description: "Support a fixed landscape mode for handheld devices"
-    bug: "364711735"
-}
-
 flag {
     name: "one_grid_rotation_handling"
     namespace: "launcher"
@@ -619,13 +604,10 @@ flag {
 }
 
 flag {
-  name: "orientation_enabled_desktop_grid_spec"
+  name: "orientation_friendly_desktop_grid_spec"
   namespace: "launcher"
   description: "Uses a desktop grid spec that specifies grid dimensions that look reasonably well when the device is used in portrait mode"
   bug: "444244391"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
 }
 
 flag {

@@ -24,6 +24,7 @@ import static com.android.launcher3.folder.ClippedFolderIconLayoutRule.ICON_OVER
 import static com.android.launcher3.graphics.ShapeDelegate.DEFAULT_PATH_SIZE;
 import static com.android.launcher3.icons.BitmapInfo.FLAG_THEMED;
 import static com.android.launcher3.icons.IconNormalizer.ICON_VISIBLE_AREA_FACTOR;
+import static com.android.launcher3.icons.cache.CacheLookupFlag.DEFAULT_LOOKUP_FLAG;
 import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT;
 import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_TYPE_MAIN;
@@ -709,7 +710,8 @@ public final class Utilities {
                 // Only fetch badge if the icon is on workspace
                 if (info.id != ItemInfo.NO_ID && badge == null) {
                     ThemeManager themeManager = ThemeManager.INSTANCE.get(context);
-                    BitmapInfo badgeInfo = appState.getIconCache().getShortcutInfoBadge(si);
+                    BitmapInfo badgeInfo = appState.getIconCache()
+                            .getShortcutInfoBadge(si, DEFAULT_LOOKUP_FLAG.withThemeIcon(useTheme));
                     IconShape shape = themeManager.getIconShapeData().getValue();
 
                     int flags = ThemeManager.INSTANCE.get(context).isIconThemeEnabled()

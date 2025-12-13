@@ -21,19 +21,15 @@ import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_APP;
 import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_STASHED_LAUNCHER_STATE;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
-import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_50_50;
 
 import android.animation.Animator;
-import android.window.RemoteTransition;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.popup.SystemShortcut;
 import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.statemanager.StatefulContainer;
 import com.android.launcher3.util.ImmediateAnimator;
-import com.android.launcher3.util.SplitConfigurationOptions;
 import com.android.launcher3.util.TaskbarAsyncAnimator;
 import com.android.launcher3.util.ThreadedAnimator;
 import com.android.quickstep.FallbackActivityInterface;
@@ -41,8 +37,6 @@ import com.android.quickstep.GestureState;
 import com.android.quickstep.RecentsAnimationCallbacks;
 import com.android.quickstep.TopTaskTracker;
 import com.android.quickstep.fallback.RecentsState;
-import com.android.quickstep.split.SplitSelectStateController;
-import com.android.quickstep.util.SplitTask;
 import com.android.quickstep.views.RecentsViewContainer;
 
 import java.io.PrintWriter;
@@ -64,26 +58,33 @@ public class FallbackTaskbarUIController
             new StateManager.StateListener<RecentsState>() {
                 @Override
                 public void onStateTransitionStart(RecentsState toState) {
-                    animateToRecentsState(toState);
+                    TASKBAR_UI_THREAD.execute(() -> {
+                        animateToRecentsState(toState);
 
-                    RecentsViewInteractor recentsViewInteractor = getRecentsViewInteractor();
-                    if (recentsViewInteractor == null) {
-                        return;
-                    }
-                    // Handle tapping on live tile.
-                    recentsViewInteractor.setTaskLaunchListener(toState == RecentsState.DEFAULT
-                            ? (() -> animateToRecentsState(RecentsState.BACKGROUND_APP)) : null);
+                        RecentsViewInteractor recentsViewInteractor = getRecentsViewInteractor();
+                        if (recentsViewInteractor == null) {
+                            return;
+                        }
+                        // Handle tapping on live tile.
+                        recentsViewInteractor.setTaskLaunchListener(toState == RecentsState.DEFAULT
+                                ? (() -> animateToRecentsState(RecentsState.BACKGROUND_APP))
+                                : null);
+                    });
                 }
 
                 @Override
                 public void onStateTransitionComplete(RecentsState finalState) {
-                    boolean finalStateDefault = finalState == RecentsState.DEFAULT;
-                    // TODO(b/268120202) Taskbar shows up on 3P home, currently we don't go to
-                    //  overview from 3P home. Either implement that or it'll change w/ contextual?
-                    boolean disallowLongClick = finalState == RecentsState.OVERVIEW_SPLIT_SELECT;
-                    Utilities.setOverviewDragState(mControllers,
-                            finalStateDefault /*disallowGlobalDrag*/, disallowLongClick,
-                            finalStateDefault /*allowInitialSplitSelection*/);
+                    TASKBAR_UI_THREAD.execute(() -> {
+                        boolean finalStateDefault = finalState == RecentsState.DEFAULT;
+                        // TODO(b/268120202) Taskbar shows up on 3P home, currently we don't go to
+                        //  overview from 3P home. Either implement that or it'll change w/
+                        //  contextual?
+                        boolean disallowLongClick =
+                                finalState == RecentsState.OVERVIEW_SPLIT_SELECT;
+                        Utilities.setOverviewDragState(mControllers,
+                                finalStateDefault /*disallowGlobalDrag*/, disallowLongClick,
+                                finalStateDefault /*allowInitialSplitSelection*/);
+                    });
                 }
             };
 
@@ -155,27 +156,6 @@ public class FallbackTaskbarUIController
         if (anim != null) {
             anim.start();
         }
-    }
-
-    @Override
-    public void launchSplitTasks(
-            @NonNull SplitTask splitTask, @Nullable RemoteTransition remoteTransition) {
-        SplitSelectStateController splitSelectStateController =
-                mRecentsContainer.getSplitSelectStateController();
-        if (splitSelectStateController == null) {
-            return;
-        }
-
-        splitSelectStateController.launchExistingSplitPair(null /* launchingTaskView */,
-                splitTask.getTopLeftTask().key.id,
-                splitTask.getBottomRightTask().key.id,
-                SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT,
-                /* callback= */ success -> splitSelectStateController.resetState(),
-                /* freezeTaskList= */ false,
-                splitTask.getSplitBounds() == null
-                        ? SNAP_TO_2_50_50
-                        : splitTask.getSplitBounds().snapPosition,
-                remoteTransition);
     }
 
     @Override

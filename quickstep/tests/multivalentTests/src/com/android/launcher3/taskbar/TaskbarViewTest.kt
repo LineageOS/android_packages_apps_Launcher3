@@ -98,9 +98,6 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     private val pinnedHitRectBuffer: Int
         get() = context.resources.getDimensionPixelSize(R.dimen.taskbar_pinned_hit_rect_buffer)
 
-    private val unpinnedHitRectBuffer: Int
-        get() = context.resources.getDimensionPixelSize(R.dimen.taskbar_unpinned_hit_rect_buffer)
-
     private val iconViews: Array<View>
         get() = taskbarView.iconViews
 
@@ -1046,89 +1043,6 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
                 taskbarRectInDragLayer.left + allAppsButtonContainer.right + pinnedHitRectBuffer -
                     taskbarView.allAppsButtonTranslationXOffsetUsedForLayout
             )
-    }
-
-    @Test
-    @EnableFlags(FLAG_ENABLE_TASKBAR_DRAG_AND_DROP)
-    fun testGetHitRectForUnpin_withDivider_coversAreaBetweenDividerAndLastIcon() {
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(createHotseatItems(2), createRecents(2), emptyList())
-        }
-        forceLayoutUpdate()
-
-        val dividerContainer = taskbarView.taskbarDividerViewContainer!!
-        val outRect = Rect()
-        runOnTaskbarUiThreadSync { taskbarView.getHitRectForUnpinRelativeToDragLayer(outRect) }
-        val taskbarRectInDragLayer = Rect()
-        runOnTaskbarUiThreadSync {
-            activityContext.dragLayer.getDescendantRectRelativeToSelf(
-                taskbarView,
-                taskbarRectInDragLayer,
-            )
-        }
-        val lastIcon = iconViews.last()
-
-        assertThat(outRect.top).isEqualTo(taskbarRectInDragLayer.top)
-        assertThat(outRect.bottom).isEqualTo(taskbarRectInDragLayer.bottom)
-        assertThat(outRect.left).isEqualTo(taskbarRectInDragLayer.left + dividerContainer.right)
-        assertThat(outRect.right).isEqualTo(taskbarRectInDragLayer.left + lastIcon.right)
-    }
-
-    @Test
-    @EnableFlags(FLAG_ENABLE_TASKBAR_DRAG_AND_DROP)
-    fun testGetHitRectForUnpin_noDivider_coversAreaAfterIcons() {
-        whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(createHotseatItems(3), emptyList(), emptyList())
-        }
-        forceLayoutUpdate()
-
-        val outRect = Rect()
-        runOnTaskbarUiThreadSync { taskbarView.getHitRectForUnpinRelativeToDragLayer(outRect) }
-        val taskbarRectInDragLayer = Rect()
-        runOnTaskbarUiThreadSync {
-            activityContext.dragLayer.getDescendantRectRelativeToSelf(
-                taskbarView,
-                taskbarRectInDragLayer,
-            )
-        }
-        val lastIcon = iconViews.last()
-        var iconsEnd = taskbarRectInDragLayer.left + lastIcon.right
-        if (taskbarView.taskbarHotseatIconsContainer != null) {
-            iconsEnd += taskbarView.allAppsButtonContainer?.right ?: 0
-        }
-
-        assertThat(outRect.top).isEqualTo(taskbarRectInDragLayer.top)
-        assertThat(outRect.bottom).isEqualTo(taskbarRectInDragLayer.bottom)
-        assertThat(outRect.left).isEqualTo(iconsEnd)
-        assertThat(outRect.right).isEqualTo(iconsEnd + unpinnedHitRectBuffer)
-    }
-
-    @Test
-    @EnableFlags(FLAG_ENABLE_TASKBAR_DRAG_AND_DROP)
-    @ForceRtl
-    fun testGetHitRectForUnpin_rtl_withDivider_coversAreaBetweenStartAndDivider() {
-        runOnTaskbarUiThreadSync {
-            taskbarView.updateItems(createHotseatItems(2), createRecents(2), emptyList())
-        }
-        forceLayoutUpdate()
-
-        val dividerContainer = taskbarView.taskbarDividerViewContainer!!
-
-        val outRect = Rect()
-        runOnTaskbarUiThreadSync { taskbarView.getHitRectForUnpinRelativeToDragLayer(outRect) }
-        val taskbarRectInDragLayer = Rect()
-        runOnTaskbarUiThreadSync {
-            activityContext.dragLayer.getDescendantRectRelativeToSelf(
-                taskbarView,
-                taskbarRectInDragLayer,
-            )
-        }
-
-        assertThat(outRect.top).isEqualTo(taskbarRectInDragLayer.top)
-        assertThat(outRect.bottom).isEqualTo(taskbarRectInDragLayer.bottom)
-        assertThat(outRect.left).isEqualTo(taskbarRectInDragLayer.left)
-        assertThat(outRect.right).isEqualTo(taskbarRectInDragLayer.left + dividerContainer.left)
     }
 
     @Test

@@ -497,9 +497,6 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
             }
 
             @Override
-            public void getHitRectForUnpinRelativeToDragLayer(@Nullable Rect outRect) {}
-
-            @Override
             public void getHitRectForPinRelativeToDragLayer(@Nullable Rect outRect) {
                 TaskbarView.this.getHitRectForPinRelativeToDragLayer(outRect);
             }
@@ -1841,43 +1838,6 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         // Adding a padding to the left and right bound for dropping leftmost/rightmost to reorder.
         outRect.left -= mPinnedHitRectBuffer;
         outRect.right += mPinnedHitRectBuffer;
-    }
-
-    @Override
-    public void getHitRectForUnpinRelativeToDragLayer(Rect outRect) {
-        // Use the recent apps (unpin) area as the bounds.
-        mActivityContext.getDragLayer().getDescendantRectRelativeToSelf(this, outRect);
-        int taskbarLeftInDragLayer = outRect.left;
-
-        if (mIsRtl) {
-            // Unpin area is from the start of the taskbar to the divider.
-            if (mAddedDividerForRecents && mTaskbarDividerContainer != null) {
-                outRect.right = taskbarLeftInDragLayer + mTaskbarDividerContainer.getLeft();
-            } else {
-                // No recent apps. Create a buffer area to the left of the pinned icons.
-                outRect.right = taskbarLeftInDragLayer + mUnpinnedHitRectBuffer;
-            }
-        } else {
-            View[] iconViews = getIconViews();
-            int iconsEnd = taskbarLeftInDragLayer
-                    + (iconViews.length > 0
-                            ? iconViews[iconViews.length - 1].getRight()
-                            : 0);
-
-            if (mAddedDividerForRecents && mTaskbarDividerContainer != null) {
-                // Use the area between Divider and right end of the last icon as the bound.
-                outRect.left += mTaskbarDividerContainer.getRight();
-                outRect.right = iconsEnd;
-            } else {
-                // No recent apps. Create a buffer area to the left of the pinned icons.
-                outRect.left = iconsEnd;
-                if (mHotseatIconsContainer != null) {
-                    outRect.left += mAllAppsButtonTranslationOffset
-                            + mAllAppsButtonContainer.getRight();
-                }
-                outRect.right = outRect.left + mUnpinnedHitRectBuffer;
-            }
-        }
     }
 
     @Override
