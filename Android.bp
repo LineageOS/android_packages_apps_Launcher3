@@ -487,6 +487,7 @@ prebuilt_etc {
 android_app {
     name: "Launcher3",
     defaults: [
+        "SettingsLibDefaults",
         "launcher-non-platform-apis-defaults",
         "launcher_compose_defaults",
     ],
@@ -568,6 +569,7 @@ android_library {
 android_library {
     name: "Launcher3GoLib",
     defaults: [
+        "SettingsLibDefaults",
         "launcher_compose_defaults",
         "quickstep_compose_defaults",
     ],
@@ -610,6 +612,7 @@ android_library {
 android_library {
     name: "Launcher3QuickStepLib",
     defaults: [
+        "SettingsLibDefaults",
         "launcher_compose_defaults",
         "quickstep_compose_defaults",
     ],
