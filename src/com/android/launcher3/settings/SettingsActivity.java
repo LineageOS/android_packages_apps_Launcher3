@@ -31,6 +31,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.LauncherApps;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -64,6 +65,8 @@ import com.android.launcher3.lineage.trust.TrustAppsActivity;
 import com.android.launcher3.states.RotationHelper;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.SettingsCache;
+import com.android.settingslib.widget.SettingsBasePreferenceFragment;
+import com.android.settingslib.widget.SettingsThemeHelper;
 
 /**
  * Settings activity for Launcher. Currently implements the following setting: Allow rotation
@@ -173,10 +176,21 @@ public class SettingsActivity extends FragmentActivity
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public Resources.Theme getTheme() {
+        Resources.Theme theme = super.getTheme();
+        if (SettingsThemeHelper.isExpressiveTheme(this)) {
+            theme.applyStyle(
+                    com.android.settingslib.widget.theme.R.style.Theme_SubSettingsBase_Expressive,
+                    true);
+        }
+        return theme;
+    }
+
     /**
      * This fragment shows the launcher preferences.
      */
-    public static class LauncherSettingsFragment extends PreferenceFragmentCompat implements
+    public static class LauncherSettingsFragment extends SettingsBasePreferenceFragment implements
             SettingsCache.OnChangeListener {
 
         protected boolean mDeveloperOptionsEnabled = false;
