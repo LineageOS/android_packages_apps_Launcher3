@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ccbd29cc_fbc939b6",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 4550
+      },
+      "writtenOn": "2025-12-14T19:53:28Z",
+      "side": 1,
+      "message": "oneGridSpecs flag is enabled now, so this has no effect. To be revisited when we want to fix launcher rotation ability",
+      "revId": "1251324dd9b36fdfac89fddc51c0a97230748cbe",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
