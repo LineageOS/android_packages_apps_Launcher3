@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b1fe4f33_7c78d755",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 10
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 4550
+      },
+      "writtenOn": "2025-12-14T22:32:59Z",
+      "side": 1,
+      "message": "From what I can tell, this was fixed in a large refactor in QPR2, not worth backporting stuff",
+      "revId": "a85b720624ea869e6e02280380f22d566aa92bc8",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
