@@ -570,6 +570,7 @@ android_library {
 android_library {
     name: "Launcher3GoLib",
     defaults: [
+        "SettingsLibDefaults",
         "launcher_compose_defaults",
         "quickstep_compose_defaults",
     ],
@@ -612,6 +613,7 @@ android_library {
 android_library {
     name: "Launcher3QuickStepLib",
     defaults: [
+        "SettingsLibDefaults",
         "launcher_compose_defaults",
         "quickstep_compose_defaults",
     ],
