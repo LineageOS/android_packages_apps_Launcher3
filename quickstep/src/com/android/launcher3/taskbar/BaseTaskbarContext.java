@@ -36,6 +36,7 @@ import com.android.launcher3.dagger.LauncherComponentProvider;
 import com.android.launcher3.popup.SystemShortcut;
 import com.android.launcher3.taskbar.bubbles.BubbleActivityStarter;
 import com.android.launcher3.util.BaseContext;
+import com.android.launcher3.util.LifecycleRegistryWrapper;
 import com.android.launcher3.util.LooperExecutor;
 import com.android.launcher3.util.NavigationMode;
 import com.android.launcher3.util.Themes;
@@ -63,10 +64,11 @@ public abstract class BaseTaskbarContext extends BaseContext
                 Themes.getActivityThemeRes(windowContext),
                 /* destroyOnDetach= */ true,
                 /* lifecycleRegistryProvider= */
-                (owner) -> enableTaskbarUiThread()
-                        ? LifecycleRegistry.createUnsafe(owner) : new LifecycleRegistry(owner),
-                /* savedStateRegistryExecutor= */
-                TASKBAR_UI_THREAD);
+                (owner, uiExecutor) ->
+                        enableTaskbarUiThread()
+                                ? new LifecycleRegistryWrapper(owner, uiExecutor)
+                                : new LifecycleRegistryWrapper(owner)
+        );
         mDisplayId = displayId;
         mIsPrimaryDisplay = isPrimaryDisplay;
         mLayoutInflater = LayoutInflater.from(this).cloneInContext(this);
