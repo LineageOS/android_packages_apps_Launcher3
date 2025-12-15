@@ -55,6 +55,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doReturn
 import java.util.concurrent.Executor
 
@@ -201,7 +202,7 @@ class AmbientCueRepositoryTest {
 
         actionModel.onPerformAction.invoke()
 
-        verify(insight.actionDetails.remoteAction?.actionIntent)?.send()
+        verify(insight.actionDetails.remoteAction?.actionIntent)?.send(any<Bundle>())
         verify(mockAmbientCueLogger).setFulfilledWithMaStatus()
         verify(mockAmbientCueLogger, never()).setFulfilledWithMrStatus()
     }
