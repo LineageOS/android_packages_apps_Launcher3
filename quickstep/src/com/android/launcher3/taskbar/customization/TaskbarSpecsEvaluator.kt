@@ -48,7 +48,7 @@ class TaskbarSpecsEvaluator(
         get() =
             if (TaskbarPopupController.canPinAppsOverflow())
                 taskbarActivityContext.deviceProfile.inv.numShownHotseatIcons
-            else taskbarActivityContext.deviceProfile.numShownHotseatIcons
+            else taskbarActivityContext.deviceProfile.hotseatProfile.numShownIcons
 
     val maxPinnableCount
         get() =

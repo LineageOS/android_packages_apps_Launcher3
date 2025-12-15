@@ -513,17 +513,20 @@ public class InvariantDeviceProfile {
         int numMinShownHotseatIconsForTablet = supportedProfiles
                 .stream()
                 .filter(deviceProfile -> deviceProfile.getDeviceProperties().isLargeScreen())
-                .mapToInt(deviceProfile -> deviceProfile.numShownHotseatIcons)
+                .mapToInt(
+                        deviceProfile -> deviceProfile.getHotseatProfile().getNumShownIcons()
+                )
                 .min()
                 .orElse(0);
 
         supportedProfiles
                 .stream()
                 .filter(deviceProfile -> deviceProfile.getDeviceProperties().isLargeScreen())
-                .forEach(deviceProfile -> {
-                    deviceProfile.numShownHotseatIcons = numMinShownHotseatIconsForTablet;
-                    deviceProfile.recalculateHotseatWidthAndBorderSpace();
-                });
+                .forEach(deviceProfile ->
+                    deviceProfile.recalculateHotseatWidthAndBorderSpace(
+                            numMinShownHotseatIconsForTablet
+                    )
+                );
     }
 
     DeviceProfile.Builder newDPBuilder(Info info) {

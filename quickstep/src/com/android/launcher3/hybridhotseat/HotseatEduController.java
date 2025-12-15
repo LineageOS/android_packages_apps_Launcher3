@@ -96,7 +96,8 @@ public class HotseatEduController {
             pageId = mLauncher.getModel().getModelDbController().getNewScreenId();
         }
         boolean isPortrait = !mLauncher.getDeviceProfile().isVerticalBarLayout();
-        int hotseatItemsNum = mLauncher.getDeviceProfile().numShownHotseatIcons;
+        int hotseatItemsNum =
+                mLauncher.getDeviceProfile().getHotseatProfile().getNumShownIcons();
         for (int i = 0; i < hotseatItemsNum; i++) {
             int x = isPortrait ? i : 0;
             int y = isPortrait ? 0 : hotseatItemsNum - i - 1;
@@ -124,7 +125,7 @@ public class HotseatEduController {
 
     void showDimissTip() {
         if (mHotseat.getShortcutsAndWidgets().getChildCount()
-                < mLauncher.getDeviceProfile().numShownHotseatIcons) {
+                < mLauncher.getDeviceProfile().getHotseatProfile().getNumShownIcons()) {
             Snackbar.show(mLauncher, R.string.hotseat_tip_gaps_filled,
                     R.string.hotseat_prediction_settings, null,
                     () -> mLauncher.startActivity(getSettingsIntent()));

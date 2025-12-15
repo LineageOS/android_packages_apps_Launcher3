@@ -92,7 +92,7 @@ public class HotseatEduDialog extends AbstractSlideInView<Launcher> implements I
         Rect padding = dp.getHotseatLayoutPadding(context);
 
         mSampleHotseat.getLayoutParams().height = dp.getWorkspaceIconProfile().getCellHeightPx();
-        mSampleHotseat.setGridSize(dp.numShownHotseatIcons, 1);
+        mSampleHotseat.setGridSize(dp.getHotseatProfile().getNumShownIcons(), 1);
         mSampleHotseat.setPadding(padding.left, 0, padding.right, 0);
 
         Button turnOnBtn = findViewById(R.id.turn_predictions_on);
@@ -183,7 +183,8 @@ public class HotseatEduDialog extends AbstractSlideInView<Launcher> implements I
     }
 
     private void populatePreview(List<WorkspaceItemInfo> predictions) {
-        for (int i = 0; i < mActivityContext.getDeviceProfile().numShownHotseatIcons; i++) {
+        for (int i = 0; i < mActivityContext.getDeviceProfile().getHotseatProfile()
+                        .getNumShownIcons(); i++) {
             WorkspaceItemInfo info = predictions.get(i);
             View icon = mActivityContext.getItemInflater().inflateItem(info, mSampleHotseat);
             icon.setEnabled(false);
@@ -197,8 +198,8 @@ public class HotseatEduDialog extends AbstractSlideInView<Launcher> implements I
      * Opens User education dialog with a list of suggested apps
      */
     public void show(List<WorkspaceItemInfo> predictions) {
-        if (getParent() != null
-                || predictions.size() < mActivityContext.getDeviceProfile().numShownHotseatIcons
+        if (getParent() != null || predictions.size()
+                < mActivityContext.getDeviceProfile().getHotseatProfile().getNumShownIcons()
                 || mHotseatEduController == null) {
             return;
         }

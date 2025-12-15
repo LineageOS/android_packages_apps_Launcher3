@@ -40,8 +40,8 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
         dp.isTaskbarPresentInApps = true
 
         assertThat(dp.hotseatProfile.barEndOffset).isEqualTo(0)
-        assertThat(dp.numShownHotseatIcons).isEqualTo(6)
-        assertThat(dp.hotseatBorderSpace).isEqualTo(145)
+        assertThat(dp.hotseatProfile.numShownIcons).isEqualTo(6)
+        assertThat(dp.hotseatProfile.borderSpace).isEqualTo(145)
         assertThat(dp.hotseatColumnSpan).isEqualTo(6)
         assertThat(dp.hotseatWidthPx).isEqualTo(1445)
 
@@ -49,7 +49,7 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
         assertThat(dp.getHotseatLayoutPadding(context).right).isEqualTo(177)
 
         assertThat(dp.isQsbInline).isFalse()
-        assertThat(dp.hotseatQsbWidth).isEqualTo(1435)
+        assertThat(dp.hotseatProfile.qsbWidth).isEqualTo(1435)
     }
 
     /**
@@ -64,8 +64,8 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
         dp.isTaskbarPresentInApps = true
 
         assertThat(dp.hotseatProfile.barEndOffset).isEqualTo(0)
-        assertThat(dp.numShownHotseatIcons).isEqualTo(6)
-        assertThat(dp.hotseatBorderSpace).isEqualTo(72)
+        assertThat(dp.hotseatProfile.numShownIcons).isEqualTo(6)
+        assertThat(dp.hotseatProfile.borderSpace).isEqualTo(72)
         assertThat(dp.hotseatColumnSpan).isEqualTo(6)
         assertThat(dp.hotseatWidthPx).isEqualTo(1080)
 
@@ -73,7 +73,7 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
         assertThat(dp.getHotseatLayoutPadding(context).right).isEqualTo(110)
 
         assertThat(dp.isQsbInline).isFalse()
-        assertThat(dp.hotseatQsbWidth).isEqualTo(1070)
+        assertThat(dp.hotseatProfile.qsbWidth).isEqualTo(1070)
     }
 
     /**
@@ -87,8 +87,8 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
         dp.isTaskbarPresentInApps = true
 
         assertThat(dp.hotseatProfile.barEndOffset).isEqualTo(0)
-        assertThat(dp.numShownHotseatIcons).isEqualTo(6)
-        assertThat(dp.hotseatBorderSpace).isEqualTo(104)
+        assertThat(dp.hotseatProfile.numShownIcons).isEqualTo(6)
+        assertThat(dp.hotseatProfile.borderSpace).isEqualTo(104)
         assertThat(dp.hotseatColumnSpan).isEqualTo(6)
         assertThat(dp.hotseatWidthPx).isEqualTo(1468)
 
@@ -96,7 +96,7 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
         assertThat(dp.getHotseatLayoutPadding(context).right).isEqualTo(370)
 
         assertThat(dp.isQsbInline).isFalse()
-        assertThat(dp.hotseatQsbWidth).isEqualTo(1455)
+        assertThat(dp.hotseatProfile.qsbWidth).isEqualTo(1455)
     }
 
     /**
@@ -111,8 +111,8 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
         dp.isTaskbarPresentInApps = true
 
         assertThat(dp.hotseatProfile.barEndOffset).isEqualTo(0)
-        assertThat(dp.numShownHotseatIcons).isEqualTo(6)
-        assertThat(dp.hotseatBorderSpace).isEqualTo(248)
+        assertThat(dp.hotseatProfile.numShownIcons).isEqualTo(6)
+        assertThat(dp.hotseatProfile.borderSpace).isEqualTo(248)
         assertThat(dp.hotseatColumnSpan).isEqualTo(6)
         assertThat(dp.hotseatWidthPx).isEqualTo(1960)
 
@@ -120,7 +120,7 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
         assertThat(dp.getHotseatLayoutPadding(context).right).isEqualTo(300)
 
         assertThat(dp.isQsbInline).isFalse()
-        assertThat(dp.hotseatQsbWidth).isEqualTo(1950)
+        assertThat(dp.hotseatProfile.qsbWidth).isEqualTo(1950)
     }
 
     /** This is a case when after setting the hotseat, the QSB width needs to be changed to fit */
@@ -132,8 +132,8 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
         dp.isTaskbarPresentInApps = true
 
         assertThat(dp.hotseatProfile.barEndOffset).isEqualTo(0)
-        assertThat(dp.numShownHotseatIcons).isEqualTo(6)
-        assertThat(dp.hotseatBorderSpace).isEqualTo(233)
+        assertThat(dp.hotseatProfile.numShownIcons).isEqualTo(6)
+        assertThat(dp.hotseatProfile.borderSpace).isEqualTo(233)
         assertThat(dp.hotseatColumnSpan).isEqualTo(6)
         assertThat(dp.hotseatWidthPx).isEqualTo(1885)
 
@@ -141,7 +141,7 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
         assertThat(dp.getHotseatLayoutPadding(context).right).isEqualTo(287)
 
         assertThat(dp.isQsbInline).isFalse()
-        assertThat(dp.hotseatQsbWidth).isEqualTo(1875)
+        assertThat(dp.hotseatProfile.qsbWidth).isEqualTo(1875)
     }
 
     /**
@@ -156,8 +156,8 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
         dp.isTaskbarPresentInApps = true
 
         assertThat(dp.hotseatProfile.barEndOffset).isEqualTo(0)
-        assertThat(dp.numShownHotseatIcons).isEqualTo(6)
-        assertThat(dp.hotseatBorderSpace).isEqualTo(205)
+        assertThat(dp.hotseatProfile.numShownIcons).isEqualTo(6)
+        assertThat(dp.hotseatProfile.borderSpace).isEqualTo(205)
         assertThat(dp.hotseatColumnSpan).isEqualTo(6)
         assertThat(dp.hotseatWidthPx).isEqualTo(1745)
 
@@ -165,7 +165,7 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
         assertThat(dp.getHotseatLayoutPadding(context).right).isEqualTo(257)
 
         assertThat(dp.isQsbInline).isFalse()
-        assertThat(dp.hotseatQsbWidth).isEqualTo(1735)
+        assertThat(dp.hotseatProfile.qsbWidth).isEqualTo(1735)
     }
 
     @Test
@@ -180,12 +180,12 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
             val dp = newDP()
             dp.isTaskbarPresentInApps = true
 
-            assertThat(dp.numShownHotseatIcons).isEqualTo(numHotseatIcons)
-            assertThat(dp.hotseatBorderSpace).isEqualTo(0)
+            assertThat(dp.hotseatProfile.numShownIcons).isEqualTo(numHotseatIcons)
+            assertThat(dp.hotseatProfile.borderSpace).isEqualTo(0)
 
             assertThat(dp.getHotseatLayoutPadding(context).left).isEqualTo(177)
             assertThat(dp.getHotseatLayoutPadding(context).right).isEqualTo(177)
-            assertThat(dp.hotseatQsbWidth).isEqualTo(1435)
+            assertThat(dp.hotseatProfile.qsbWidth).isEqualTo(1435)
         }
     }
 
@@ -196,8 +196,8 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
         dp.isTaskbarPresentInApps = true
 
         assertThat(dp.hotseatProfile.barEndOffset).isEqualTo(0)
-        assertThat(dp.numShownHotseatIcons).isEqualTo(6)
-        assertThat(dp.hotseatBorderSpace).isEqualTo(112)
+        assertThat(dp.hotseatProfile.numShownIcons).isEqualTo(6)
+        assertThat(dp.hotseatProfile.borderSpace).isEqualTo(112)
         assertThat(dp.hotseatColumnSpan).isEqualTo(8)
         assertThat(dp.hotseatWidthPx).isEqualTo(1383)
 
@@ -205,6 +205,6 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
         assertThat(dp.getHotseatLayoutPadding(context).right).isEqualTo(228)
 
         assertThat(dp.isQsbInline).isFalse()
-        assertThat(dp.hotseatQsbWidth).isEqualTo(1372)
+        assertThat(dp.hotseatProfile.qsbWidth).isEqualTo(1372)
     }
 }

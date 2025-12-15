@@ -204,7 +204,8 @@ constructor(
     private fun getCellCoordinates(targetIdx: Int): Pair<Int, Int> {
         val dp: DeviceProfile = requireNotNull(mTarget).deviceProfile
         val cellX = if (dp.isVerticalBarLayout) 0 else targetIdx
-        val cellY = if (dp.isVerticalBarLayout) (dp.numShownHotseatIcons - (targetIdx + 1)) else 0
+        val cellY =
+            if (dp.isVerticalBarLayout) (dp.hotseatProfile.numShownIcons - (targetIdx + 1)) else 0
 
         return Pair(cellX, cellY)
     }

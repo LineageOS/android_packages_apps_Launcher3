@@ -400,8 +400,8 @@ public class CellLayout extends ViewGroup {
                         deviceProfile.getFolderProfile().getCellLayoutBorderSpacePx());
                 break;
             case HOTSEAT:
-                mBorderSpace = new Point(deviceProfile.hotseatBorderSpace,
-                        deviceProfile.hotseatBorderSpace);
+                mBorderSpace = new Point(deviceProfile.getHotseatProfile().getBorderSpace(),
+                        deviceProfile.getHotseatProfile().getBorderSpace());
                 break;
             case WORKSPACE:
             default:
