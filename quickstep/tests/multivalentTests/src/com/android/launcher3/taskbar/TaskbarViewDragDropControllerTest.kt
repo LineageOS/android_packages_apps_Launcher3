@@ -30,7 +30,7 @@ import com.android.launcher3.dragndrop.DragView
 import com.android.launcher3.model.ModelWriter
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.popup.ArrowPopup.CLOSE_DURATION_U
-import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
+import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatItems
 import com.android.launcher3.taskbar.rules.AllTaskbarSandboxModules
 import com.android.launcher3.taskbar.rules.SandboxParams
@@ -398,7 +398,7 @@ class TaskbarViewDragDropControllerTest {
 
         // Simulate dragging out of the overflow icon.
         dragObject.x = -100
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             taskbarViewDragDropController.taskbarPinningDropTarget.onDragOver(dragObject)
             assertThat(taskbarViewDragDropController.overflowContainerAlarm.alarmPending()).isTrue()
             taskbarViewDragDropController.overflowContainerAlarm.finishAlarm()
@@ -419,7 +419,7 @@ class TaskbarViewDragDropControllerTest {
         assertThat(taskbarViewController.isOverflowContainerShowing).isTrue()
 
         // Then simulate dragging into the overflow container.
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             taskbarViewDragDropController.taskbarPinningDropTarget.onDragExit(dragObject)
             assertThat(taskbarViewDragDropController.overflowContainerAlarm.alarmPending()).isTrue()
             dragViewIntoOverflowContainer(dragObject)
@@ -442,7 +442,7 @@ class TaskbarViewDragDropControllerTest {
         assertThat(taskbarViewController.isOverflowContainerShowing).isTrue()
 
         // Simulate dragging into the overflow container and then dragging out from it.
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             taskbarViewDragDropController.taskbarPinningDropTarget.onDragExit(dragObject)
             dragViewIntoOverflowContainer(dragObject)
             assertThat(taskbarViewDragDropController.overflowContainerAlarm.alarmPending())
@@ -506,7 +506,7 @@ class TaskbarViewDragDropControllerTest {
         mockDragViewDragRegionToViewBounds(dragObject, overflowIcon)
 
         // Simulate dragging on the overflow icon to open the container.
-        runOnMainSync {
+        runOnTaskbarUiThreadSync {
             taskbarViewDragDropController.taskbarPinningDropTarget.onDragEnter(dragObject)
             taskbarViewDragDropController.taskbarPinningDropTarget.onDragOver(dragObject)
             assertThat(taskbarViewDragDropController.overflowContainerAlarm.alarmPending()).isTrue()
