@@ -25,7 +25,6 @@ import android.util.Log
 import androidx.annotation.WorkerThread
 import com.android.launcher3.BuildConfig
 import com.android.launcher3.Flags
-import com.android.launcher3.Flags.enableFilesOnHomeScreenDecoupledInit
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.InvariantDeviceProfile.OnIDPChangeListener
 import com.android.launcher3.LauncherModel
@@ -35,7 +34,6 @@ import com.android.launcher3.automation.AutomationRepository
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.graphics.ThemeManager
 import com.android.launcher3.graphics.ThemeManager.ThemeChangeListener
-import com.android.launcher3.homescreenfiles.HomeScreenFilesChangedTask
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesUpdateTask
 import com.android.launcher3.icons.IconCache
@@ -80,7 +78,6 @@ constructor(
     private val installSessionHelper: InstallSessionHelper,
     private val homeScreenFilesProvider: HomeScreenFilesProvider,
     private val lifeCycle: DaggerSingletonTracker,
-    private val homeScreenFilesChangedTask: HomeScreenFilesChangedTask.Factory,
     private val homeScreenFilesUpdateTask: HomeScreenFilesUpdateTask.Factory,
     private val iconChangeTracker: IconChangeTracker,
     private val prefs: LauncherPrefs,
@@ -166,19 +163,11 @@ constructor(
         lifeCycle.addCloseable(installSessionHelper.registerInstallTracker(modelCallbacks))
 
         // Monitor changes to files shown on home screen.
-        if (enableFilesOnHomeScreenDecoupledInit()) {
-            lifeCycle.addCloseable(
-                homeScreenFilesProvider.updates.forEach(MODEL_EXECUTOR) {
-                    model.enqueueModelUpdateTask(homeScreenFilesUpdateTask.create(it))
-                }
-            )
-        } else {
-            lifeCycle.addCloseable(
-                homeScreenFilesProvider.fileChanges.forEach(MODEL_EXECUTOR) {
-                    model.enqueueModelUpdateTask(homeScreenFilesChangedTask.create(it))
-                }
-            )
-        }
+        lifeCycle.addCloseable(
+            homeScreenFilesProvider.updates.forEach(MODEL_EXECUTOR) {
+                model.enqueueModelUpdateTask(homeScreenFilesUpdateTask.create(it))
+            }
+        )
     }
 
     fun initializeDisplayEvents(model: LauncherModel) {

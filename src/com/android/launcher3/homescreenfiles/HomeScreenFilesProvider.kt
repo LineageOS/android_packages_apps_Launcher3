@@ -16,9 +16,6 @@
 
 package com.android.launcher3.homescreenfiles
 
-import android.content.ContentResolver.NOTIFY_DELETE
-import android.content.ContentResolver.NOTIFY_INSERT
-import android.content.ContentResolver.NOTIFY_UPDATE
 import android.net.Uri
 import android.os.UserHandle
 import androidx.annotation.VisibleForTesting
@@ -26,7 +23,6 @@ import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.util.DaggerSingletonObject
 import com.android.launcher3.util.ListenableStream
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.Future
 
 /** Represents a single file or folder item queried by [HomeScreenFilesProvider]. */
 data class HomeScreenFile(
@@ -90,27 +86,6 @@ interface HomeScreenFilesProvider {
 
     /** Returns all eligible file items to be shown on the home screen. */
     fun query(): CompletableFuture<Map<Uri, HomeScreenFile>>
-
-    /**
-     * Information about a change to a file item shown on the home screen.
-     *
-     * @param uri The URI of the item that was changed.
-     * @param flags The bitmask describing the type of the file change (one of [NOTIFY_INSERT],
-     *   [NOTIFY_UPDATE], [NOTIFY_DELETE]).
-     * @param file Complete information about the file that is being changed.
-     * @param uriAlias An alias for the URI of the item that was changed, possibly in a different
-     *   content provider authority. Note that an alias will only be available if the URI was moved
-     *   via call to [#moveToHomeScreen()].
-     */
-    data class FileChange(
-        val uri: Uri,
-        val flags: Int,
-        val file: Future<HomeScreenFile?>,
-        val uriAlias: Uri?,
-    )
-
-    /** A stream of changes to file items shown on the home screen. */
-    val fileChanges: ListenableStream<FileChange>
 
     companion object {
         @JvmField
