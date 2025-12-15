@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6b08f576_1438252a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 13648
+      },
+      "writtenOn": "2025-12-15T00:08:42Z",
+      "side": 1,
+      "message": "Launcher3QuickStep tested on real device.\nLauncher3QuickStepGo only compile tested.",
+      "revId": "c40bd2bb8f8d75f2d19a486aa8f2428e9020c408",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
