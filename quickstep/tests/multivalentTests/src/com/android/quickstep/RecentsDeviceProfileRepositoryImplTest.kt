@@ -16,6 +16,7 @@
 
 package com.android.quickstep
 
+import android.graphics.Rect
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.DeviceProfile
 import com.android.launcher3.deviceprofile.DeviceProperties
@@ -82,6 +83,7 @@ class RecentsDeviceProfileRepositoryImplTest {
                 isLandscape = false,
                 isExternalDisplay = false,
                 isGestureMode = false,
+                insets = Rect(0, 0, 0, 0),
             )
 
         val deviceProfile = mock<DeviceProfile>()

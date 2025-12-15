@@ -85,7 +85,6 @@ data class AllAppsProfile(
             workspaceProfile: WorkspaceProfile,
             deviceProperties: DeviceProperties,
             displayOptionSpec: DisplayOptionSpec,
-            insets: Rect,
         ): AllAppsProfile {
             val allAppsBorderSpacePx =
                 calculateAllAppsBorderSpacePx(inv, metric, typeIndex, workspaceProfile.scale)
@@ -166,7 +165,8 @@ data class AllAppsProfile(
                     ),
                 padding = allAppsPadding,
                 numShownAllAppsColumns = numShownAllAppsColumns,
-                shiftRange = deviceProperties.heightPx - allAppsTopPadding + insets.top,
+                shiftRange =
+                    deviceProperties.heightPx - allAppsTopPadding + deviceProperties.insets.top,
             )
         }
 
@@ -217,7 +217,6 @@ data class AllAppsProfile(
             context: Context,
             allAppsTopPadding: Int,
             workspaceProfile: WorkspaceProfile,
-            insets: Rect,
         ): AllAppsProfile {
             val allAppsBorderSpacePx = calculateAllAppsBorderSpacePx(inv, metric, typeIndex, scale)
             val allAppsIconSizePx = max(1, pxFromDp(inv.allAppsIconSize[typeIndex], metric, scale))
@@ -263,7 +262,8 @@ data class AllAppsProfile(
                         deviceProperties,
                     ),
                 numShownAllAppsColumns = numShownAllAppsColumns,
-                shiftRange = deviceProperties.heightPx - allAppsTopPadding + insets.top,
+                shiftRange =
+                    deviceProperties.heightPx - allAppsTopPadding + deviceProperties.insets.top,
                 padding = allAppsPadding,
             )
         }
@@ -297,7 +297,6 @@ data class AllAppsProfile(
             res: Resources,
             displayOptionSpec: DisplayOptionSpec,
             allAppsTopPadding: Int,
-            insets: Rect,
         ): AllAppsProfile {
             var allAppsIconSizePx = responsiveAllAppsCellSpec.iconSize
             var allAppsIconTextSizePx: Float = responsiveAllAppsCellSpec.iconTextSize.toFloat()
@@ -375,7 +374,8 @@ data class AllAppsProfile(
                             deviceProperties,
                         ),
                     padding = allAppsPadding,
-                    shiftRange = deviceProperties.heightPx - allAppsTopPadding + insets.top,
+                    shiftRange =
+                        deviceProperties.heightPx - allAppsTopPadding + deviceProperties.insets.top,
                     numShownAllAppsColumns = numShownAllAppsColumns,
                 )
 
@@ -410,7 +410,6 @@ data class AllAppsProfile(
             context: Context,
             allAppsTopPadding: Int,
             displayOptionSpec: DisplayOptionSpec,
-            insets: Rect,
         ) =
             when {
                 isScalableGrid -> {
@@ -424,7 +423,6 @@ data class AllAppsProfile(
                         workspaceProfile = workspaceProfile,
                         deviceProperties = deviceProperties,
                         displayOptionSpec = displayOptionSpec,
-                        insets = insets,
                     )
                 }
 
@@ -440,7 +438,6 @@ data class AllAppsProfile(
                         allAppsTopPadding = allAppsTopPadding,
                         workspaceProfile = workspaceProfile,
                         displayOptionSpec = displayOptionSpec,
-                        insets = insets,
                     )
                 }
             }
