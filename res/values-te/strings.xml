@@ -104,10 +104,8 @@
     <string name="dismiss_prediction_label" msgid="3357562989568808658">"యాప్ సూచించకు"</string>
     <string name="pin_prediction" msgid="4196423321649756498">"సూచనను పిన్ చేయండి"</string>
     <string name="bubble" msgid="3072951361014076670">"బబుల్"</string>
-    <!-- no translation found for enable_app_lock (9190316880781005775) -->
-    <skip />
-    <!-- no translation found for disable_app_lock (9071912028491244470) -->
-    <skip />
+    <string name="enable_app_lock" msgid="9190316880781005775">"యాప్‌ను లాక్ చేయండి"</string>
+    <string name="disable_app_lock" msgid="9071912028491244470">"లాక్‌ను తీసివేయండి"</string>
     <string name="widget_settings" msgid="5280157748464495511">"సెట్టింగ్‌లు"</string>
     <string name="add_to_taskbar" msgid="1442306985857150792">"టాస్క్‌బార్‌కు జోడించండి"</string>
     <string name="remove_from_taskbar" msgid="5817026706030273018">"టాస్క్‌బార్ నుండి తీసివేయండి"</string>
@@ -154,7 +152,6 @@
     <string name="edit_home_screen" msgid="8947858375782098427">"మొదటి స్క్రీన్‌ను ఎడిట్ చేయండి"</string>
     <string name="settings_button_text" msgid="8873672322605444408">"మొదటి స్క్రీన్ సెట్టింగ్‌లు"</string>
     <string name="msg_disabled_by_admin" msgid="6898038085516271325">"మీ నిర్వాహకులు నిలిపివేసారు"</string>
-    <string name="allow_rotation_title" msgid="7222049633713050106">"మొదటి స్క్రీన్ రొటేషన్‌ను అనుమతించండి"</string>
     <string name="allow_rotation_desc" msgid="8662546029078692509">"ఫోన్‌‌ను తిప్పినప్పుడు"</string>
     <string name="compose_developer_options_section" msgid="8211460486549952595">"Jetpack Compose"</string>
     <string name="enable_composition_tracing_title" msgid="8989606591739368424">"కంపోజిషన్ ట్రేసింగ్‌ను ఎనేబుల్ చేయండి"</string>

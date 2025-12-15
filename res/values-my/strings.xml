@@ -104,10 +104,8 @@
     <string name="dismiss_prediction_label" msgid="3357562989568808658">"အက်ပ်အကြံမပြုပါနှင့်"</string>
     <string name="pin_prediction" msgid="4196423321649756498">"ခန့်မှန်းချက်ကို ပင်ထိုးရန်"</string>
     <string name="bubble" msgid="3072951361014076670">"ပူဖောင်းကွက်"</string>
-    <!-- no translation found for enable_app_lock (9190316880781005775) -->
-    <skip />
-    <!-- no translation found for disable_app_lock (9071912028491244470) -->
-    <skip />
+    <string name="enable_app_lock" msgid="9190316880781005775">"အက်ပ်ကို လော့ခ်ချရန်"</string>
+    <string name="disable_app_lock" msgid="9071912028491244470">"လော့ခ်ကို ဖယ်ရှားရန်"</string>
     <string name="widget_settings" msgid="5280157748464495511">"ဆက်တင်များ"</string>
     <string name="add_to_taskbar" msgid="1442306985857150792">"Taskbar တွင် ထည့်ရန်"</string>
     <string name="remove_from_taskbar" msgid="5817026706030273018">"Taskbar မှ ဖယ်ရန်"</string>
@@ -154,7 +152,6 @@
     <string name="edit_home_screen" msgid="8947858375782098427">"ပင်မစာမျက်နှာ တည်းဖြတ်ရန်"</string>
     <string name="settings_button_text" msgid="8873672322605444408">"ပင်မဆက်တင်များ"</string>
     <string name="msg_disabled_by_admin" msgid="6898038085516271325">"သင့်စီမံခန့်ခွဲသူက ပိတ်လိုက်ပါသည်"</string>
-    <string name="allow_rotation_title" msgid="7222049633713050106">"ပင်မစာမျက်နှာလှည့်ခြင်းကို ခွင့်ပြုခြင်း"</string>
     <string name="allow_rotation_desc" msgid="8662546029078692509">"ဖုန်းကိုလှည့်ထားစဉ်"</string>
     <string name="compose_developer_options_section" msgid="8211460486549952595">"Jetpack Compose"</string>
     <string name="enable_composition_tracing_title" msgid="8989606591739368424">"ပေါင်းစပ်မှုခြေရာခံခြင်း ဖွင့်ပါ"</string>
