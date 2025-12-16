@@ -28,6 +28,7 @@ import android.service.personalcontext.insight.ActionableInsight
 import android.service.personalcontext.insight.ContextInsight
 import android.service.personalcontext.insight.DisplayInsight
 import android.service.personalcontext.insight.InsightActionDetails
+import android.service.personalcontext.insight.InsightCollection
 import android.service.personalcontext.insight.InsightDisplayDetails
 import android.view.autofill.AutofillManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -232,6 +233,28 @@ class AmbientCueRepositoryTest {
 
         verify(repository, never()).mapContextInsightToAction(any(), any())
         assertThat(result).isEmpty()
+    }
+
+    @Test
+    fun mapContextInsightToAction_nestedInsightCollection_flattensAndMapsChildren() {
+        val actionableInsight = mockActionableInsight()
+        val displayInsight = mockDisplayInsight()
+        val nestedCollection = InsightCollection.Builder()
+            .addInsight(displayInsight)
+            .build()
+        val rootCollection = InsightCollection.Builder()
+            .addInsight(actionableInsight)
+            .addInsight(nestedCollection)
+            .build()
+        val conversationHint = mock(ConversationHint::class.java).apply {
+            `when`(conversationEvent).thenReturn(mock(ConversationEvent::class.java))
+        }
+
+        val result = repository.mapContextInsightToAction(rootCollection, conversationHint)
+
+        assertThat(result).hasSize(2)
+        assertThat(result[0].actionType).isEqualTo(MA_ACTION_TYPE_NAME)
+        assertThat(result[1].actionType).isEqualTo(MR_ACTION_TYPE_NAME)
     }
 
     private companion object {

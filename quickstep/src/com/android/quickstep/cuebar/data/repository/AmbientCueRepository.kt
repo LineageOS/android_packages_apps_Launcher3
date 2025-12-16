@@ -33,6 +33,7 @@ import android.service.personalcontext.insight.ActionableInsight
 import android.service.personalcontext.insight.ContextInsight
 import android.service.personalcontext.insight.DisplayInsight
 import android.service.personalcontext.insight.InsightActionDetails
+import android.service.personalcontext.insight.InsightCollection
 import android.util.Log
 import android.view.autofill.AutofillManager
 import androidx.annotation.VisibleForTesting
@@ -221,13 +222,22 @@ constructor(
         pw.println("$prefix  frontTaskPackageName: ${frontTaskPackageName.value}")
     }
 
+    private fun ContextInsight.flatten(): List<ContextInsight> {
+        return if (this is InsightCollection) {
+            this.insights.flatMap { it.flatten() }
+        } else {
+            listOf(this)
+        }
+    }
+
     override fun onInsightReceived(insight: List<ContextInsight>) {
         uiExecutor.execute {
             if (insight.isEmpty()) {
                 updateActions(emptyList())
                 return@execute
             }
-            val actions = insight.flatMap { mapInsightToActions(it) }
+            val actions = insight.flatMap { it.flatten() }
+                .flatMap { mapInsightToActions(it) }
             if (actions.isNotEmpty()) {
                 isDeactivated.dispatchValue(false)
             }
@@ -254,6 +264,12 @@ constructor(
     @VisibleForTesting
     fun mapContextInsightToAction(insight: ContextInsight, contextHint: ContextHint):
             List<ActionModel> {
+        // Keep check here in case this method is called independently like in tests.
+        if (insight is InsightCollection) {
+            return insight.insights.flatMap { child ->
+                mapContextInsightToAction(child, contextHint)
+            }
+        }
         val display = when (insight) {
             is ActionableInsight -> insight.displayDetails
             is DisplayInsight -> insight.details
