@@ -56,6 +56,7 @@ import com.android.launcher3.taskbar.edu.TooltipsEduPage
 import com.android.launcher3.taskbar.edu.TooltipsEduPage.DisplayLocation
 import com.android.launcher3.util.OnboardingPrefs.TASKBAR_EDU_TOOLTIP_STEP
 import com.android.launcher3.util.OnboardingPrefs.TASKBAR_SEARCH_EDU_SEEN
+import com.android.launcher3.util.Preconditions
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.views.BaseDragLayer
 import com.android.quickstep.util.ContextualSearchInvoker
@@ -196,6 +197,7 @@ constructor(
     }
 
     private fun handleEduAnimation(animationView: LottieAnimationView) {
+        Preconditions.assertTaskbarUiThread()
         if (removeAnimationSettingsTracker.isRemoveAnimationEnabled()) {
             animationView.pauseAnimation()
         } else {
@@ -211,6 +213,7 @@ constructor(
      * click listener to allow user to play or pause animations.
      */
     fun handleEduAnimations(animationViews: List<LottieAnimationView>) {
+        Preconditions.assertTaskbarUiThread()
         for (animationView in animationViews) {
             handleEduAnimation(animationView)
         }
@@ -233,6 +236,7 @@ constructor(
         tooltipStep = TOOLTIP_STEP_FEATURES
         inflateTooltip(R.layout.taskbar_edu_swipe)
         tooltip?.run {
+            Preconditions.assertTaskbarUiThread()
             TypefaceUtils.setTypeface(
                 requireViewById(R.id.taskbar_edu_title),
                 FontFamily.GSF_HEADLINE_SMALL_EMPHASIZED,
@@ -253,6 +257,7 @@ constructor(
      * swipe up is necessary to show this step.
      */
     fun maybeShowFeaturesEdu() {
+        Preconditions.assertTaskbarUiThread()
         if (Flags.tooltipEduCombinator()) {
             showTooltipPages(tooltipEduCombinator.getFeaturesTooltipsEduPages())
             return
@@ -266,6 +271,7 @@ constructor(
         tooltipStep = TOOLTIP_STEP_NONE
         inflateTooltip(R.layout.taskbar_edu_features)
         tooltip?.run {
+            Preconditions.assertTaskbarUiThread()
             allowTouchDismissal = false
             val splitscreenAnim = requireViewById<LottieAnimationView>(R.id.splitscreen_animation)
             splitscreenAnim.contentDescription =
@@ -368,6 +374,7 @@ constructor(
         inflateTooltip(R.layout.taskbar_edu_pinning)
 
         tooltip?.run {
+            Preconditions.assertTaskbarUiThread()
             allowTouchDismissal = true
             TypefaceUtils.setTypeface(
                 requireViewById(R.id.taskbar_edu_title),
@@ -413,6 +420,7 @@ constructor(
      * taskbar
      */
     fun maybeShowSearchEdu() {
+        Preconditions.assertTaskbarUiThread()
         if (isDestroyed || isTooltipOpen) {
             return
         }
@@ -458,6 +466,7 @@ constructor(
         userHasSeenSearchEdu = true
         inflateTooltip(R.layout.taskbar_edu_search)
         tooltip?.run {
+            Preconditions.assertTaskbarUiThread()
             allowTouchDismissal = true
             val searchEdu = requireViewById<LottieAnimationView>(R.id.search_edu_animation)
             searchEdu.contentDescription =
@@ -664,6 +673,7 @@ constructor(
                 inflateTooltip(R.layout.taskbar_edu_multipane)
             }
         tooltipView.run {
+            Preconditions.assertTaskbarUiThread()
             allowTouchDismissal = tooltipPage.canBeSkipped
             bindTitle(tooltipPage)
             bindActionButton(tooltipPage, onActionButtonClick)
@@ -810,6 +820,7 @@ private val DARK_TO_LIGHT_COLORS =
     )
 
 private fun LottieAnimationView.supportLightTheme() {
+    Preconditions.assertTaskbarUiThread()
     if (Utilities.isDarkTheme(context)) {
         return
     }

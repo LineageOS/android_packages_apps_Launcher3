@@ -36,6 +36,7 @@ constructor(
 ) : BroadcastReceiver(), SafeCloseable {
 
     override fun onReceive(context: Context, intent: Intent) {
+        Preconditions.assertThreadOnExecutor(callbackExecutor)
         intentConsumer.accept(intent)
     }
 

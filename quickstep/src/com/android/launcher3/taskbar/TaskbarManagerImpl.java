@@ -651,6 +651,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
      * Show Taskbar upon receiving broadcast
      */
     private void showTaskbarFromBroadcast(Intent intent, int displayId) {
+        Preconditions.assertTaskbarUiThread();
         debugTaskbarManager("destroyTaskbarForDisplay", displayId);
         TaskbarActivityContext taskbar = getTaskbarForDisplay(displayId);
         if (ACTION_SHOW_TASKBAR.equals(intent.getAction()) && taskbar != null) {
