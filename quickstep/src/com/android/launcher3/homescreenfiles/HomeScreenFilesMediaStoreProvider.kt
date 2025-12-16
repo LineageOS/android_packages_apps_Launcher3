@@ -243,33 +243,53 @@ class HomeScreenFilesMediaStoreProvider(
         return success
     }
 
-    override fun delete(uri: Uri, name: String, permanent: Boolean) {
+    override fun deletePermanently(uri: Uri) {
         runAsync(
                 {
-                    if (permanent) {
-                        context.contentResolver.delete(
-                            uri,
-                            QUERY_DEFAULT_SELECTION,
-                            QUERY_DEFAULT_SELECTION_ARGS,
-                        )
-                    } else {
-                        val path =
-                            environmentWrapper
-                                .getExternalStorageDirectory()
-                                .resolve(HOME_SCREEN_FOLDER_RELATIVE_PATH)
-                                .resolve(name)
-                                .absolutePath
-                        MediaStore.trashFile(context.contentResolver, path)
-                    }
+                    context.contentResolver.delete(
+                        uri,
+                        QUERY_DEFAULT_SELECTION,
+                        QUERY_DEFAULT_SELECTION_ARGS,
+                    )
                 },
                 executorService,
             )
             .exceptionally {
-                val message =
-                    if (permanent) "Unable to permanently delete a single file or folder"
-                    else "Unable to move a single file or folder to trash"
-                Log.e(TAG, message, it)
+                Log.e(TAG, "Unable to permanently delete a single file or folder", it)
                 null
+            }
+    }
+
+    override fun moveToTrash(name: String): CompletableFuture<String?> {
+        return supplyAsync(
+                {
+                    val path =
+                        environmentWrapper
+                            .getExternalStorageDirectory()
+                            .resolve(HOME_SCREEN_FOLDER_RELATIVE_PATH)
+                            .resolve(name)
+                            .absolutePath
+                    MediaStore.trashFile(context.contentResolver, path)
+                },
+                executorService,
+            )
+            .exceptionally {
+                Log.e(TAG, "Unable to move a single file or folder to trash", it)
+                null
+            }
+    }
+
+    override fun restoreFromTrash(trashPath: String): CompletableFuture<Boolean> {
+        return supplyAsync(
+                {
+                    MediaStore.restoreFileFromTrash(context.contentResolver, trashPath, null)
+                    true
+                },
+                executorService,
+            )
+            .exceptionally {
+                Log.e(TAG, "Unable to restore a single file or folder from trash", it)
+                false
             }
     }
 

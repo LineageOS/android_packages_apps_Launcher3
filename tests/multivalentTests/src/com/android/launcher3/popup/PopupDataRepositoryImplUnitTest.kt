@@ -266,7 +266,7 @@ class PopupDataRepositoryImplUnitTest {
             whenever(activityContext.dragLayer).thenReturn(mock<BaseDragLayer<*>>())
             whenever(activityContext.dropTargetHandler).thenReturn(dropTargetHandler)
             popupAction.invoke(activityContext, item, view)
-            verify(dropTargetHandler, times(1)).prepareToUndoDelete()
+            verify(dropTargetHandler, times(1)).prepareToUndoDelete(item)
             verify(dropTargetHandler, times(1)).onDeleteComplete(item, view)
         }
     }

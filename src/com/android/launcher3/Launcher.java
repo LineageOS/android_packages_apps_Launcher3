@@ -1633,7 +1633,9 @@ public class Launcher extends StatefulActivity<LauncherState>
 
     @Override
     public DropTargetHandler getDropTargetHandler() {
-        return new DropTargetHandler(this);
+        return new DropTargetHandler(this,
+                LauncherComponentProvider.get(this).getHomeScreenFilesProvider(),
+                this.getMainExecutor());
     }
 
     @Override

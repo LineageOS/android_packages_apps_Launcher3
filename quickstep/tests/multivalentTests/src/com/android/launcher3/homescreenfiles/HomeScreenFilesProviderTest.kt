@@ -384,16 +384,12 @@ class HomeScreenFilesProviderTest {
                     argThat { x -> x.getString("file_path") == "/test/Home screen/file.png" },
                 )
             )
-            .thenAnswer { invocation ->
-                Bundle().apply {
-                    putString("file_path", invocation.getArgument<Bundle>(3).getString("file_path"))
-                }
-            }
+            .thenReturn(Bundle().apply { putString("file_path", "/new/path/in/trash") })
         whenever(contentResolver.acquireUnstableContentProviderClient(MediaStore.AUTHORITY))
             .thenReturn(contentProviderClient)
 
-        val uri = Uri.parse("content://media/external_primary/file/1")
-        provider.delete(uri, "file.png", permanent = false)
+        val future = provider.moveToTrash("file.png")
+        assertThat(future.get()).isEqualTo("/new/path/in/trash")
     }
 
     @Test
@@ -411,14 +407,54 @@ class HomeScreenFilesProviderTest {
         whenever(contentResolver.acquireUnstableContentProviderClient(MediaStore.AUTHORITY))
             .thenReturn(contentProviderClient)
 
-        val uri = Uri.parse("content://media/external_primary/file/1")
-        provider.delete(uri, "file.png", permanent = false)
+        val future = provider.moveToTrash("file.png")
+        assertThat(future.get()).isNull()
+    }
+
+    @Test
+    fun testRestoreFromTrash() {
+        whenever(
+                contentProviderClient.call(
+                    eq(MediaStore.AUTHORITY),
+                    eq("mark_file_as_restored"),
+                    anyOrNull(),
+                    argThat { x -> x.getString("file_path") == "/path/in/trash" },
+                )
+            )
+            .thenAnswer { invocation ->
+                Bundle().apply {
+                    putString("file_path", invocation.getArgument<Bundle>(3).getString("file_path"))
+                }
+            }
+        whenever(contentResolver.acquireUnstableContentProviderClient(MediaStore.AUTHORITY))
+            .thenReturn(contentProviderClient)
+
+        val future = provider.restoreFromTrash("/path/in/trash")
+        assertThat(future.get()).isTrue()
+    }
+
+    @Test
+    fun testRestoreFromTrashHandlesException() {
+        whenever(
+                contentProviderClient.call(
+                    eq(MediaStore.AUTHORITY),
+                    eq("mark_file_as_restored"),
+                    anyOrNull(),
+                    argThat { x -> x.getString("file_path") == "/path/in/trash" },
+                )
+            )
+            .thenThrow(UnsupportedOperationException())
+        whenever(contentResolver.acquireUnstableContentProviderClient(MediaStore.AUTHORITY))
+            .thenReturn(contentProviderClient)
+
+        val future = provider.restoreFromTrash("/path/in/trash")
+        assertThat(future.get()).isFalse()
     }
 
     @Test
     fun testDeletePermanently() {
         val uri = Uri.parse("content://media/external_primary/file/1")
-        provider.delete(uri, "unused", permanent = true)
+        provider.deletePermanently(uri)
 
         verify(contentResolver, times(1))
             .delete(
