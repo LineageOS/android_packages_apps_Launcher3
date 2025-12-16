@@ -51,7 +51,7 @@ class TaskbarManagerImplWrapper @Inject constructor(implProvider: Provider<Taskb
     }
 
     override fun onUserUnlocked() {
-        getTaskbarUiThread().execute(impl::onUserUnlocked)
+        getTaskbarUiThread().execute { impl.onUserUnlocked() }
     }
 
     override fun updateTaskbarsVisibility() {
