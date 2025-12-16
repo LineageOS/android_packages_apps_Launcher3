@@ -144,8 +144,38 @@ class BoxSelectionHelper(
     }
 
     private fun createBoxSelectionView(): View {
-        return View(host.getBoxSelectionHostContainer()?.context).apply {
-            setBackgroundColor(0x40FFFFFF) // Semi-transparent white
+        val context = host.getBoxSelectionHostContainer()?.context
+        return View(context).apply {
+            // Set background to opaque white and use view's alpha for opacity.
+            setBackgroundColor(BACKGROUND_COLOR)
+            alpha = BACKGROUND_ALPHA
+
+            val radius =
+                if (context != null) {
+                    android.util.TypedValue.applyDimension(
+                        android.util.TypedValue.COMPLEX_UNIT_DIP,
+                        CORNER_RADIUS_DP,
+                        context.resources.displayMetrics,
+                    )
+                } else {
+                    // Default to a small radius if context is not available.
+                    DEFAULT_CORNER_RADIUS_PX
+                }
+
+            outlineProvider =
+                object : android.view.ViewOutlineProvider() {
+                    override fun getOutline(view: View, outline: android.graphics.Outline) {
+                        outline.setRoundRect(0, 0, view.width, view.height, radius)
+                    }
+                }
+            clipToOutline = true
         }
+    }
+
+    companion object {
+        private const val BACKGROUND_COLOR = 0xFFFFFFFF.toInt()
+        private const val BACKGROUND_ALPHA = 0.25f
+        private const val CORNER_RADIUS_DP = 2f
+        private const val DEFAULT_CORNER_RADIUS_PX = 4f
     }
 }
