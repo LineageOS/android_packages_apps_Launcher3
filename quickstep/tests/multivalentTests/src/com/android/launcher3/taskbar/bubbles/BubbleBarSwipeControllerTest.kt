@@ -20,6 +20,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
+import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController
 import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.touch.OverScroll
@@ -135,7 +136,7 @@ class BubbleBarSwipeControllerTest {
     // region Test that translation on views is reset on finish
 
     private fun testViewsTranslationResetOnFinish(swipe: Float) {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             bubbleBarSwipeController.start()
             bubbleBarSwipeController.swipeTo(swipe)
             bubbleBarSwipeController.finish()

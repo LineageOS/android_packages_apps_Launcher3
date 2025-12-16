@@ -23,6 +23,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.launcher3.anim.AnimatedFloat
+import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.TaskbarInsetsController
 import com.android.launcher3.taskbar.TaskbarUiState
 import com.android.launcher3.taskbar.bubbles.BubbleBarView
@@ -459,7 +460,7 @@ class PersistentBubbleStashControllerTest {
     @Test
     fun setStashedInPersistentTaskBar_passingTrue_bubbleBarIsStashed() {
         // When setStashedInPersistentTaskBar is called with true
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             persistentTaskBarStashController.setStashedInPersistentTaskBar(true)
             animatorTestRule.advanceTimeBy(BubbleStashController.BAR_TRANSLATION_DURATION)
         }
@@ -473,7 +474,7 @@ class PersistentBubbleStashControllerTest {
     @Test
     fun noCallsToStashedInPersistentTaskBar_stashingTaskbarCallsDoesNotStashBubbleBar() {
         // Given bubble bar is IN_APP and has bubbles
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             persistentTaskBarStashController.launcherState = BubbleLauncherState.HOME
             whenever(bubbleBarViewController.hasBubbles()).thenReturn(true)
             persistentTaskBarStashController.launcherState = BubbleLauncherState.IN_APP
@@ -491,7 +492,7 @@ class PersistentBubbleStashControllerTest {
     @Test
     fun setStashedInPersistentTaskBar_passingTrue_unlocksOtherStashCalls() {
         // Given stashing is unlocked and bubble bar is unstashed
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             persistentTaskBarStashController.setStashedInPersistentTaskBar(true)
             animatorTestRule.advanceTimeBy(BubbleStashController.BAR_TRANSLATION_DURATION)
             persistentTaskBarStashController.showBubbleBarImmediate()
@@ -502,7 +503,7 @@ class PersistentBubbleStashControllerTest {
         assertThat(bubbleBarView.translationY).isEqualTo(TASK_BAR_TRANSLATION_Y)
 
         // When calling to stash
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             persistentTaskBarStashController.stashBubbleBar()
             animatorTestRule.advanceTimeBy(BubbleStashController.BAR_TRANSLATION_DURATION)
         }
@@ -515,11 +516,11 @@ class PersistentBubbleStashControllerTest {
 
     private fun advanceTimeBy(advanceMs: Long) {
         // Advance animator for on-device tests
-        getInstrumentation().runOnMainSync { animatorTestRule.advanceTimeBy(advanceMs) }
+        runOnTaskbarUiThreadSync { animatorTestRule.advanceTimeBy(advanceMs) }
     }
 
     private fun setUpBubbleBarView() {
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             bubbleBarView = BubbleBarView(context)
             bubbleBarView.layoutParams = FrameLayout.LayoutParams(0, 0)
             bubbleBarView.setController(

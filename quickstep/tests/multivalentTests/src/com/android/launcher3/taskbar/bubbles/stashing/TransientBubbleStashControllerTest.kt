@@ -27,6 +27,7 @@ import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.launcher3.anim.AnimatedFloat
 import com.android.launcher3.taskbar.StashedHandleView
+import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.TaskbarInsetsController
 import com.android.launcher3.taskbar.TaskbarStashController
 import com.android.launcher3.taskbar.TaskbarUiState
@@ -587,7 +588,7 @@ class TransientBubbleStashControllerTest {
 
     private fun advanceTimeBy(advanceMs: Long) {
         // Advance animator for on-device tests
-        getInstrumentation().runOnMainSync { animatorTestRule.advanceTimeBy(advanceMs) }
+        runOnTaskbarUiThreadSync { animatorTestRule.advanceTimeBy(advanceMs) }
     }
 
     private fun setUpBubbleBarView() {
