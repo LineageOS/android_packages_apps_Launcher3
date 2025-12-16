@@ -17,14 +17,11 @@
 package com.android.launcher3.homescreenfiles
 
 import android.net.Uri
-import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider.FileChange
 import com.android.launcher3.util.MutableListenableStream
 import java.util.concurrent.CompletableFuture
 
 /** No-op implementation of [HomeScreenFilesProvider]. */
 class HomeScreenFilesNoOpProvider : HomeScreenFilesProvider {
-    override val fileChanges = MutableListenableStream<FileChange>()
-
     override val updates = MutableListenableStream<HomeScreenFilesUpdate>()
 
     override fun onReady(): CompletableFuture<Void> = CompletableFuture.completedFuture(null)

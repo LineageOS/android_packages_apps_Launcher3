@@ -152,7 +152,6 @@
     <string name="edit_home_screen" msgid="8947858375782098427">"ແກ້ໄຂໂຮມສະກຣີນ"</string>
     <string name="settings_button_text" msgid="8873672322605444408">"ການຕັ້ງຄ່າໜ້າຫຼັກ"</string>
     <string name="msg_disabled_by_admin" msgid="6898038085516271325">"ຖືກປິດການນຳໃຊ້ໂດຍຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານ"</string>
-    <string name="allow_rotation_title" msgid="7222049633713050106">"ອະນຸຍາດໃຫ້ໝຸນໜ້າຈໍຢູ່ໂຮມສະກຣີນໄດ້"</string>
     <string name="allow_rotation_desc" msgid="8662546029078692509">"ເມື່ອໝຸນໂທລະສັບ"</string>
     <string name="compose_developer_options_section" msgid="8211460486549952595">"Jetpack Compose"</string>
     <string name="enable_composition_tracing_title" msgid="8989606591739368424">"ເປີດໃຊ້ການຕິດຕາມການຂຽນ"</string>

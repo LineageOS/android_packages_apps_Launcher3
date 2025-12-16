@@ -29,13 +29,10 @@ import android.os.UserHandle
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
-import android.provider.DocumentsContract
 import android.util.LongSparseArray
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.Flags
 import com.android.launcher3.Flags.FLAG_ENABLE_SUPPORT_FOR_ARCHIVING
-import com.android.launcher3.Flags.enableFilesOnHomeScreenDecoupledInit
-import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherSettings.Favorites
 import com.android.launcher3.LauncherSettings.Favorites.APPWIDGET_ID
 import com.android.launcher3.LauncherSettings.Favorites.APPWIDGET_PROVIDER
@@ -59,13 +56,10 @@ import com.android.launcher3.LauncherSettings.Favorites.TITLE
 import com.android.launcher3.LauncherSettings.Favorites._ID
 import com.android.launcher3.LauncherSettings.Favorites.getColumnsToTypes
 import com.android.launcher3.Utilities.EMPTY_PERSON_ARRAY
-import com.android.launcher3.Utilities.qsbOnFirstScreen
-import com.android.launcher3.WorkspaceLayoutManager
 import com.android.launcher3.automation.AutomationRepository
 import com.android.launcher3.backuprestore.LauncherRestoreEventLogger.RestoreError
 import com.android.launcher3.homescreenfiles.HomeScreenFile
 import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils
-import com.android.launcher3.icons.BitmapInfo
 import com.android.launcher3.icons.CacheableShortcutInfo
 import com.android.launcher3.icons.IconCache
 import com.android.launcher3.model.data.FolderInfo
@@ -73,7 +67,6 @@ import com.android.launcher3.model.data.IconRequestInfo
 import com.android.launcher3.model.data.ItemInfoWithIcon
 import com.android.launcher3.model.data.LauncherAppWidgetInfo
 import com.android.launcher3.model.data.LauncherAppWidgetInfo.FLAG_UI_NOT_READY
-import com.android.launcher3.model.data.WorkspaceItemCoordinates
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo.FLAG_DISABLED_FILE_SYSTEM_NOT_READY
 import com.android.launcher3.model.data.WorkspaceItemInfo.FLAG_RESTORED_ICON
@@ -100,7 +93,6 @@ import org.mockito.Mockito
 import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
@@ -915,7 +907,7 @@ class WorkspaceItemProcessorTest {
                     assertThat(flags).isEqualTo(HomeScreenFilesUtils.LAUNCH_INTENT_DEFAULT_FLAGS)
                 }
                 val disabled = (runtimeStatusFlags and FLAG_DISABLED_FILE_SYSTEM_NOT_READY) != 0
-                val expectedDisabled = enableFilesOnHomeScreenDecoupledInit() && !isFileSystemReady
+                val expectedDisabled = !isFileSystemReady
                 assertThat(disabled).isEqualTo(expectedDisabled)
             }
         }
@@ -947,106 +939,6 @@ class WorkspaceItemProcessorTest {
                 RestoreError.FILE_SYSTEM_ITEM_NO_LONGER_EXISTS,
             )
         verify(mockCursor, times(0)).checkAndAddItem(any(), any(), anyOrNull())
-    }
-
-    @Test
-    fun addsRemainingFileSystemItemsThatWereNotPartOfRestore() {
-        // Given
-        val uri1 = Uri.parse("content://media/external_primary/file/1")
-        val uri2 = Uri.parse("content://media/external_primary/file/2")
-        val homeScreenFiles =
-            CompletableFuture.completedFuture(
-                mapOf(
-                    uri1 to
-                        HomeScreenFile(
-                            uri = uri1,
-                            displayName = "file.png",
-                            mimeType = "image/png",
-                            isDirectory = false,
-                            user = Process.myUserHandle(),
-                        ),
-                    uri2 to
-                        HomeScreenFile(
-                            uri = uri2,
-                            displayName = "folder_a",
-                            mimeType = null,
-                            isDirectory = true,
-                            user = Process.myUserHandle(),
-                        ),
-                )
-            )
-        val maybeReservesSpaceForQsb: (ArrayList<WorkspaceItemInfo>) -> Boolean = { addItemsFinal ->
-            val idp = InvariantDeviceProfile.INSTANCE.get(mContext)
-            !qsbOnFirstScreen() ||
-                addItemsFinal.any {
-                    with(it) {
-                        cellX == 0 &&
-                            cellY == 0 &&
-                            container == CONTAINER_DESKTOP &&
-                            screenId == WorkspaceLayoutManager.FIRST_SCREEN_ID &&
-                            spanX == idp.numSearchContainerColumns &&
-                            spanY == 1
-                    }
-                }
-        }
-        mockIconCache.apply { whenever(getDefaultIcon(any())).thenReturn(BitmapInfo.LOW_RES_INFO) }
-        mockWorkspaceItemSpaceFinder.apply {
-            whenever(findSpaceForItem(argThat(maybeReservesSpaceForQsb), any(), any(), any()))
-                .thenAnswer { WorkspaceItemCoordinates(0, 0, 0) }
-                .thenAnswer { WorkspaceItemCoordinates(0, 1, 1) }
-        }
-        val mockModelDelegate = mock<ModelDelegate>()
-        val mockModelDbController =
-            mock<ModelDbController>().apply {
-                whenever(generateNewItemId()).thenReturn(0, 1)
-                whenever(getTable()).thenReturn(mock(defaultAnswer = Answers.RETURNS_MOCKS))
-            }
-
-        // When
-        itemProcessorUnderTest =
-            createWorkspaceItemProcessorUnderTest(homeScreenFiles = homeScreenFiles)
-        val items = itemProcessorUnderTest.finalizeData(mockModelDelegate, mockModelDbController)
-
-        // Then
-        if (enableFilesOnHomeScreenDecoupledInit()) {
-            assertThat(items.size()).isEqualTo(0)
-            return
-        }
-
-        assertThat(items.size()).isEqualTo(2)
-
-        with(items.get(0)) {
-            assertThat(id).isEqualTo(0)
-            assertThat(title).isEqualTo("file.png")
-            assertThat(itemType).isEqualTo(ITEM_TYPE_FILE_SYSTEM_FILE)
-            assertThat(container).isEqualTo(CONTAINER_DESKTOP)
-            assertThat(spanX).isEqualTo(1)
-            assertThat(spanY).isEqualTo(1)
-            assertThat(screenId).isEqualTo(0)
-            assertThat(cellX).isEqualTo(0)
-            assertThat(cellY).isEqualTo(0)
-            assertThat(intent).isNotNull()
-            assertThat(intent!!.action).isEqualTo(Intent.ACTION_VIEW)
-            assertThat(intent!!.flags).isEqualTo(HomeScreenFilesUtils.LAUNCH_INTENT_DEFAULT_FLAGS)
-            assertThat(intent!!.data).isEqualTo(uri1)
-            assertThat(intent!!.type).isEqualTo("image/png")
-        }
-
-        with(items.get(1)) {
-            assertThat(id).isEqualTo(1)
-            assertThat(title).isEqualTo("folder_a")
-            assertThat(itemType).isEqualTo(ITEM_TYPE_FILE_SYSTEM_FOLDER)
-            assertThat(container).isEqualTo(CONTAINER_DESKTOP)
-            assertThat(spanX).isEqualTo(1)
-            assertThat(spanY).isEqualTo(1)
-            assertThat(screenId).isEqualTo(0)
-            assertThat(cellX).isEqualTo(1)
-            assertThat(cellY).isEqualTo(1)
-            assertThat(intent!!.action).isEqualTo(Intent.ACTION_VIEW)
-            assertThat(intent!!.flags).isEqualTo(HomeScreenFilesUtils.LAUNCH_INTENT_DEFAULT_FLAGS)
-            assertThat(intent!!.data).isEqualTo(uri2)
-            assertThat(intent!!.type).isEqualTo(DocumentsContract.Document.MIME_TYPE_DIR)
-        }
     }
 
     @Test

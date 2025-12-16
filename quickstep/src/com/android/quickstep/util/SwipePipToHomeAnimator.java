@@ -29,6 +29,7 @@ import android.util.Log;
 import android.util.Rational;
 import android.view.Surface;
 import android.view.SurfaceControl;
+import android.view.SyncRtSurfaceTransactionApplier;
 import android.view.View;
 import android.window.PictureInPictureSurfaceTransaction;
 
@@ -36,11 +37,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.jank.Cuj;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.launcher3.anim.AnimationSuccessListener;
 import com.android.launcher3.icons.IconProvider;
 import com.android.quickstep.TaskAnimationManager;
 import com.android.systemui.shared.pip.PipSurfaceTransactionHelper;
-import com.android.systemui.shared.system.InteractionJankMonitorWrapper;
 import com.android.wm.shell.common.pip.IPipAnimationListener.PipResources;
 import com.android.wm.shell.shared.pip.PipContentOverlay;
 
@@ -64,6 +65,8 @@ public class SwipePipToHomeAnimator extends RectFSpringAnim {
     private final Rect mCurrentBounds = new Rect();
     private final Rect mDestinationBounds = new Rect();
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
+    private final SyncRtSurfaceTransactionApplier mSyncRtSurfaceTransactionApplier;
+    private final InteractionJankMonitor mInteractionJankMonitor;
     private final boolean mFadeOut;
 
     /**
@@ -138,6 +141,8 @@ public class SwipePipToHomeAnimator extends RectFSpringAnim {
         mFromRotation = fromRotation;
         mDestinationBoundsTransformed.set(destinationBoundsTransformed);
         mSurfaceTransactionHelper = new PipSurfaceTransactionHelper(pipRes);
+        mSyncRtSurfaceTransactionApplier = new SyncRtSurfaceTransactionApplier(view);
+        mInteractionJankMonitor = InteractionJankMonitor.getInstance();
         mFadeOut = fadeOut;
 
         final Rational aspectRatio = new Rational(
@@ -195,19 +200,20 @@ public class SwipePipToHomeAnimator extends RectFSpringAnim {
         addAnimatorListener(new AnimationSuccessListener() {
             @Override
             public void onAnimationStart(Animator animation) {
-                InteractionJankMonitorWrapper.begin(view, Cuj.CUJ_LAUNCHER_APP_CLOSE_TO_PIP);
+                mInteractionJankMonitor.begin(mLeash, context, view.getHandler(),
+                        Cuj.CUJ_LAUNCHER_APP_CLOSE_TO_PIP);
                 super.onAnimationStart(animation);
             }
 
             @Override
             public void onAnimationCancel(Animator animation) {
                 super.onAnimationCancel(animation);
-                InteractionJankMonitorWrapper.cancel(Cuj.CUJ_LAUNCHER_APP_CLOSE_TO_PIP);
+                mInteractionJankMonitor.cancel(Cuj.CUJ_LAUNCHER_APP_CLOSE_TO_PIP);
             }
 
             @Override
             public void onAnimationSuccess(Animator animator) {
-                InteractionJankMonitorWrapper.end(Cuj.CUJ_LAUNCHER_APP_CLOSE_TO_PIP);
+                mInteractionJankMonitor.end(Cuj.CUJ_LAUNCHER_APP_CLOSE_TO_PIP);
             }
 
             @Override
@@ -242,11 +248,13 @@ public class SwipePipToHomeAnimator extends RectFSpringAnim {
 
     private void onAnimationUpdate(RectF currentRect, float progress) {
         if (mHasAnimationEnded) return;
-        final SurfaceControl.Transaction tx =
-                PipSurfaceTransactionHelper.newSurfaceControlTransaction();
+        final SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
         mHomeToWindowPositionMap.mapRect(mCurrentBoundsF, currentRect);
         onAnimationUpdate(tx, mCurrentBoundsF, progress);
-        tx.apply();
+        SyncRtSurfaceTransactionApplier.SurfaceParams surfaceParams =
+                new SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(mLeash)
+                        .withMergeTransaction(tx).build();
+        mSyncRtSurfaceTransactionApplier.scheduleApply(surfaceParams);
     }
 
     private PictureInPictureSurfaceTransaction onAnimationUpdate(SurfaceControl.Transaction tx,

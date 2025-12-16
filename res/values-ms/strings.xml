@@ -104,10 +104,8 @@
     <string name="dismiss_prediction_label" msgid="3357562989568808658">"Jangan cadangkan apl"</string>
     <string name="pin_prediction" msgid="4196423321649756498">"Sematkan Ramalan"</string>
     <string name="bubble" msgid="3072951361014076670">"Gelembung"</string>
-    <!-- no translation found for enable_app_lock (9190316880781005775) -->
-    <skip />
-    <!-- no translation found for disable_app_lock (9071912028491244470) -->
-    <skip />
+    <string name="enable_app_lock" msgid="9190316880781005775">"Kunci apl"</string>
+    <string name="disable_app_lock" msgid="9071912028491244470">"Alih keluar kunci"</string>
     <string name="widget_settings" msgid="5280157748464495511">"Tetapan"</string>
     <string name="add_to_taskbar" msgid="1442306985857150792">"Tambahkan pada Bar Tugas"</string>
     <string name="remove_from_taskbar" msgid="5817026706030273018">"Alih keluar daripada Bar Tugas"</string>
@@ -154,7 +152,6 @@
     <string name="edit_home_screen" msgid="8947858375782098427">"Edit Skrin Utama"</string>
     <string name="settings_button_text" msgid="8873672322605444408">"Tetapan skrin utama"</string>
     <string name="msg_disabled_by_admin" msgid="6898038085516271325">"Dilumpuhkan oleh pentadbir anda"</string>
-    <string name="allow_rotation_title" msgid="7222049633713050106">"Benarkan putaran skrin utama"</string>
     <string name="allow_rotation_desc" msgid="8662546029078692509">"Apabila telefon diputar"</string>
     <string name="compose_developer_options_section" msgid="8211460486549952595">"Jetpack Compose"</string>
     <string name="enable_composition_tracing_title" msgid="8989606591739368424">"Dayakan penyurihan komposisi"</string>

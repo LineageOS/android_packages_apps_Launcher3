@@ -135,7 +135,8 @@ public class Executors {
                 UI_HELPER_EXECUTOR,
                 DATA_HELPER_EXECUTOR,
                 THREAD_POOL_EXECUTOR,
-                ORDERED_BG_EXECUTOR
+                ORDERED_BG_EXECUTOR,
+                TASKBAR_UI_THREAD
         );
     }
 

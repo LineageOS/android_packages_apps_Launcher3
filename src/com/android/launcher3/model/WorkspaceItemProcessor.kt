@@ -29,7 +29,6 @@ import android.text.TextUtils
 import android.util.Log
 import android.util.LongSparseArray
 import com.android.launcher3.Flags
-import com.android.launcher3.Flags.enableFilesOnHomeScreenDecoupledInit
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherSettings.Favorites
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER
@@ -38,15 +37,12 @@ import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_GROUP
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FOLDER
 import com.android.launcher3.LauncherSettings.Favorites.TABLE_NAME
 import com.android.launcher3.LauncherSettings.Favorites._ID
-import com.android.launcher3.Utilities.qsbOnFirstScreen
-import com.android.launcher3.WorkspaceLayoutManager
 import com.android.launcher3.automation.AutomationRepository
 import com.android.launcher3.backuprestore.LauncherRestoreEventLogger.RestoreError
 import com.android.launcher3.folder.Folder
 import com.android.launcher3.folder.FolderGridOrganizer.createFolderGridOrganizer
 import com.android.launcher3.homescreenfiles.HomeScreenFile
 import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils
-import com.android.launcher3.homescreenfiles.isFileSystemItem
 import com.android.launcher3.icons.CacheableShortcutInfo
 import com.android.launcher3.icons.IconCache
 import com.android.launcher3.icons.cache.CacheLookupFlag.Companion.DEFAULT_LOOKUP_FLAG
@@ -68,8 +64,6 @@ import com.android.launcher3.shortcuts.ShortcutKey
 import com.android.launcher3.shortcuts.ShortcutRequest
 import com.android.launcher3.util.ApiWrapper
 import com.android.launcher3.util.ApplicationInfoWrapper
-import com.android.launcher3.util.ContentWriter
-import com.android.launcher3.util.IntSet
 import com.android.launcher3.util.IntSparseArrayMap
 import com.android.launcher3.util.PackageManagerHelper
 import com.android.launcher3.util.PackageUserKey
@@ -665,11 +659,11 @@ class WorkspaceItemProcessor(
                     }
             }
 
-        // NOTE: File system items may not yet be available when initialization is decoupled from
-        // the loader task. When that is the case, it signals that the file system is not yet ready
-        // and so any file item shortcuts should be disabled. Once the file system is ready a model
-        // update task is enqueued to reconcile file system and workspace item states.
-        val isDelayedInit = enableFilesOnHomeScreenDecoupledInit() && !homeScreenFiles.isDone
+        // NOTE: File system items may not yet be available. When that is the case, it signals that
+        // the file system is not yet ready and so any file item shortcuts should be disabled. Once
+        // the file system is ready a model update task is enqueued to reconcile file system and
+        // workspace item states.
+        val isDelayedInit = !homeScreenFiles.isDone
         if (isDelayedInit) {
             item.runtimeStatusFlags = item.runtimeStatusFlags or FLAG_DISABLED_FILE_SYSTEM_NOT_READY
         }
@@ -682,76 +676,6 @@ class WorkspaceItemProcessor(
                 "File system item ${c.title} no longer exists",
                 RestoreError.FILE_SYSTEM_ITEM_NO_LONGER_EXISTS,
             )
-        }
-    }
-
-    /**
-     * Creates remaining file system items presented in [homeScreenFiles] that were not part of the
-     * restore in [processFileSystemItem].
-     */
-    private fun addRemainingFileSystemItems(modelDbController: ModelDbController) {
-        // NOTE: When file items on home screen initialization is decoupled from the loader task,
-        // any remaining file system items will be restored in a model update task that is scheduled
-        // once the file system is ready.
-        if (enableFilesOnHomeScreenDecoupledInit()) {
-            return
-        }
-
-        val knownDesktopContainerItems =
-            ArrayList(loadedItems.filter { it.container == Favorites.CONTAINER_DESKTOP })
-        val alreadyRestoredFileSystemItems =
-            knownDesktopContainerItems
-                .filter(ItemInfo::isFileSystemItem)
-                .map { requireNotNull(it.intent).data }
-                .toSet()
-        val excludedScreens = IntSet()
-
-        if (qsbOnFirstScreen()) {
-            // Reserve layout space for the search container. Note that this is not required when
-            // [Flags.FLAG_INJECTABLE_MODEL_ITEMS] is enabled as injected items will already be
-            // accounted for in [knownDesktopContainerItems].
-            knownDesktopContainerItems.add(
-                WorkspaceItemInfo().apply {
-                    cellX = 0
-                    cellY = 0
-                    container = Favorites.CONTAINER_DESKTOP
-                    screenId = WorkspaceLayoutManager.FIRST_SCREEN_ID
-                    spanX = idp.numSearchContainerColumns
-                    spanY = 1
-                }
-            )
-        }
-
-        for ((uri, file) in homeScreenFiles.get()) {
-            if (alreadyRestoredFileSystemItems.contains(uri)) {
-                continue
-            }
-
-            val item = WorkspaceItemInfo()
-            item.id = modelDbController.generateNewItemId()
-            item.title = file.displayName
-            item.container = Favorites.CONTAINER_DESKTOP
-            item.itemType = HomeScreenFilesUtils.buildItemType(file)
-            item.intent = HomeScreenFilesUtils.buildLaunchIntent(uri, file)
-
-            val coords =
-                workspaceItemSpaceFinder.findSpaceForItem(
-                    knownDesktopContainerItems,
-                    item.spanX,
-                    item.spanY,
-                    excludedScreens,
-                )
-            item.screenId = coords.screenId
-            item.cellX = coords.cellX
-            item.cellY = coords.cellY
-
-            val writer = ContentWriter(context)
-            item.onAddToDatabase(writer)
-            writer.put(Favorites._ID, item.id)
-            modelDbController.insert(writer.getValues(context))
-
-            knownDesktopContainerItems.add(item)
-            loadedItems.put(item.id, item)
         }
     }
 
@@ -820,8 +744,6 @@ class WorkspaceItemProcessor(
 
         // Deletes any app with a container id that doesn't exist.
         modelDbController.deleteItemsBasedOnItemIdQuery(ORPHAN_APPS_QUERY)
-
-        addRemainingFileSystemItems(modelDbController)
 
         return loadedItems
     }

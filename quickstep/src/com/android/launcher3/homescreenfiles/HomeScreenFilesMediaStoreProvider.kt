@@ -36,20 +36,16 @@ import android.provider.MediaStore.VOLUME_EXTERNAL_PRIMARY
 import android.util.Log
 import androidx.annotation.WorkerThread
 import androidx.core.database.getStringOrNull
-import com.android.launcher3.Flags.enableFilesOnHomeScreenDecoupledInit
 import com.android.launcher3.R
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider.Companion.HOME_SCREEN_FOLDER_RELATIVE_PATH
-import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider.FileChange
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.MutableListenableStream
 import java.io.File
-import java.util.concurrent.Callable
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.runAsync
 import java.util.concurrent.CompletableFuture.supplyAsync
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
-import java.util.concurrent.TimeUnit
 
 /** MediaStore-based implementation of [HomeScreenFilesProvider]. */
 class HomeScreenFilesMediaStoreProvider(
@@ -59,8 +55,6 @@ class HomeScreenFilesMediaStoreProvider(
     private val environmentWrapper: EnvironmentWrapper,
     lifecycle: DaggerSingletonTracker,
 ) : HomeScreenFilesProvider {
-    override val fileChanges = MutableListenableStream<FileChange>()
-
     override val updates = MutableListenableStream<HomeScreenFilesUpdate>()
 
     // Future that completes when the external storage directory mounts.
@@ -94,29 +88,19 @@ class HomeScreenFilesMediaStoreProvider(
                         return
                     }
 
-                    if (enableFilesOnHomeScreenDecoupledInit()) {
-                        val uriAlias = inProgressMoveToHomeScreenUriAliases.remove(uri)
-                        updates.dispatchValue(
-                            HomeScreenFilesUpdate(
-                                query(uri).thenApply { file ->
-                                    buildMap {
-                                        put(uri, file)
-                                        uriAlias?.run { put(this, file) }
-                                    }
-                                },
-                                Process.myUserHandle(),
-                            )
+                    val uriAlias = inProgressMoveToHomeScreenUriAliases.remove(uri)
+
+                    updates.dispatchValue(
+                        HomeScreenFilesUpdate(
+                            query(uri).thenApply { file ->
+                                buildMap {
+                                    put(uri, file)
+                                    uriAlias?.run { put(this, file) }
+                                }
+                            },
+                            Process.myUserHandle(),
                         )
-                    } else {
-                        fileChanges.dispatchValue(
-                            FileChange(
-                                uri,
-                                flags,
-                                query(uri),
-                                inProgressMoveToHomeScreenUriAliases.remove(uri),
-                            )
-                        )
-                    }
+                    )
                 }
             }
 
@@ -291,77 +275,55 @@ class HomeScreenFilesMediaStoreProvider(
 
     /** Returns all file items presented in [HOME_SCREEN_FOLDER_RELATIVE_PATH]. */
     override fun query(): CompletableFuture<Map<Uri, HomeScreenFile>> {
-        val query: Callable<Map<Uri, HomeScreenFile>> = Callable {
-            val result = mutableMapOf<Uri, HomeScreenFile>()
-            try {
-                context.contentResolver
-                    .query(
-                        MediaStore.Files.getContentUri(VOLUME_EXTERNAL_PRIMARY),
-                        arrayOf(_ID).plus(QUERY_DEFAULT_PROJECTION),
-                        QUERY_DEFAULT_SELECTION,
-                        QUERY_DEFAULT_SELECTION_ARGS,
-                        null,
-                        null,
-                    )
-                    ?.use {
-                        val idColumnIndex = it.getColumnIndex(_ID)
-                        val displayNameColumnIndex = it.getColumnIndex(DISPLAY_NAME)
-                        val mimeTypeColumnIndex = it.getColumnIndex(MIME_TYPE)
-                        val dataColumnIndex = it.getColumnIndex(DATA)
-                        val user = Process.myUserHandle()
+        return supplyAsync(
+            {
+                val result = mutableMapOf<Uri, HomeScreenFile>()
+                try {
+                    context.contentResolver
+                        .query(
+                            MediaStore.Files.getContentUri(VOLUME_EXTERNAL_PRIMARY),
+                            arrayOf(_ID).plus(QUERY_DEFAULT_PROJECTION),
+                            QUERY_DEFAULT_SELECTION,
+                            QUERY_DEFAULT_SELECTION_ARGS,
+                            null,
+                            null,
+                        )
+                        ?.use {
+                            val idColumnIndex = it.getColumnIndex(_ID)
+                            val displayNameColumnIndex = it.getColumnIndex(DISPLAY_NAME)
+                            val mimeTypeColumnIndex = it.getColumnIndex(MIME_TYPE)
+                            val dataColumnIndex = it.getColumnIndex(DATA)
+                            val user = Process.myUserHandle()
 
-                        while (it.moveToNext()) {
-                            val id = it.getLong(idColumnIndex)
-                            val uri = MediaStore.Files.getContentUri(VOLUME_EXTERNAL_PRIMARY, id)
-                            val mimeType = it.getStringOrNull(mimeTypeColumnIndex)
-                            result[uri] =
-                                HomeScreenFile(
-                                    uri = uri,
-                                    displayName = it.getString(displayNameColumnIndex),
-                                    mimeType = mimeType,
-                                    isDirectory =
-                                        fileFactory.invoke(it.getString(dataColumnIndex)).let { f ->
-                                            // Defer to [mimeType] when the file does not yet exist.
-                                            (f.exists() && f.isDirectory) ||
-                                                (mimeType == MIME_TYPE_DIR)
-                                        },
-                                    user = user,
-                                )
+                            while (it.moveToNext()) {
+                                val id = it.getLong(idColumnIndex)
+                                val uri =
+                                    MediaStore.Files.getContentUri(VOLUME_EXTERNAL_PRIMARY, id)
+                                val mimeType = it.getStringOrNull(mimeTypeColumnIndex)
+                                result[uri] =
+                                    HomeScreenFile(
+                                        uri = uri,
+                                        displayName = it.getString(displayNameColumnIndex),
+                                        mimeType = mimeType,
+                                        isDirectory =
+                                            fileFactory.invoke(it.getString(dataColumnIndex)).let {
+                                                file ->
+                                                // Defer to [mimeType] when the file does not yet
+                                                // exist.
+                                                (file.exists() && file.isDirectory) ||
+                                                    (mimeType == MIME_TYPE_DIR)
+                                            },
+                                        user = user,
+                                    )
+                            }
                         }
-                    }
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to query '$HOME_SCREEN_FOLDER_RELATIVE_PATH'", e)
-            }
-            return@Callable result
-        }
-
-        // NOTE: When home screen files initialization is decoupled, we don't need to wait for the
-        // external storage directory to be mounted as [#query()] will not be called until the
-        // home screen files provider is ready to interact with the MediaStore.
-        if (enableFilesOnHomeScreenDecoupledInit()) {
-            return supplyAsync(query::call, executorService)
-        }
-
-        // TODO(b/444563784): Implement more robust solution that doesn't block loader task thread.
-        // NOTE: The external storage directory may not have been mounted when [#query()] is called
-        // since it is called early in the both the user session and application lifecycles. Giving
-        // the directory an opportunity to mount is a temporary solution which has the potential to
-        // block the loader task thread, though the clock starts when the loader task is created,
-        // not when it is run. This will be replaced with a more robust solution that does not block
-        // the loader task prior to feature launch.
-        return externalStorageDirectoryMountedFuture
-            .orTimeout(500, TimeUnit.MILLISECONDS)
-            .handleAsync(
-                { _, throwable ->
-                    if (throwable != null) {
-                        Log.e(TAG, "External storage directory not mounted", throwable)
-                        emptyMap()
-                    } else {
-                        query.call()
-                    }
-                },
-                executorService,
-            )
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to query '$HOME_SCREEN_FOLDER_RELATIVE_PATH'", e)
+                }
+                result
+            },
+            executorService,
+        )
     }
 
     /** Queries a single file from MediaStore by its URI. */

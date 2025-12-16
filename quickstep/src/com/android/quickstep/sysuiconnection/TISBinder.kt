@@ -239,6 +239,14 @@ internal constructor(
         }
 
     @BinderThread
+    override fun enterStageSplitFromRunningApp(displayId: Int, leftOrTop: Boolean) = withState {
+        overviewComponentObserver
+            ?.getContainerInterface(displayId)
+            ?.createdContainer
+            ?.enterStageSplitFromRunningApp(leftOrTop, displayId)
+    }
+
+    @BinderThread
     override fun onDisplayAddSystemDecorations(displayId: Int) = withState {
         systemDecorationChangeObserver.notifyAddSystemDecorations(displayId)
     }
