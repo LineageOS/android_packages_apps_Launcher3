@@ -53,12 +53,12 @@ class DesktopAppLaunchTransitionManager(
                     Cuj.CUJ_DESKTOP_MODE_APP_LAUNCH_FROM_INTENT,
                     MAIN_EXECUTOR,
                 ),
+                null /* appThread */,
                 "DesktopWindowLimitUnminimize",
+                buildAppLaunchFilter()
             )
         systemUiProxy.registerRemoteTransition(
-            remoteWindowLimitUnminimizeTransition,
-            buildAppLaunchFilter(),
-        )
+            remoteWindowLimitUnminimizeTransition)
     }
 
     /**

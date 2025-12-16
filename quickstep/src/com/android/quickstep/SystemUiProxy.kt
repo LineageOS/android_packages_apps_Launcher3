@@ -186,7 +186,7 @@ constructor(
     private var recentTasksListener: IRecentTasksListener? = null
     private var unfoldAnimationListener: IUnfoldTransitionListener? = null
     private var desktopTaskListener: IDesktopTaskListener? = null
-    private val remoteTransitions = LinkedHashMap<RemoteTransition, TransitionFilter>()
+    private val remoteTransitions = LinkedHashSet<RemoteTransition>()
 
     // Save bubble bar state in case service is not bound yet when it is updated. SysUI relies on
     // this to suppress the floating bubbles UI.
@@ -337,9 +337,7 @@ constructor(
             launcherActivityClass,
             launcherUnlockAnimationController,
         )
-        LinkedHashMap(remoteTransitions).forEach { (remoteTransition, filter) ->
-            registerRemoteTransition(remoteTransition, filter)
-        }
+        LinkedHashSet(remoteTransitions).forEach { registerRemoteTransition(it) }
         setupTransactionQueue()
         registerRecentTasksListener(recentTasksListener)
         setBackToLauncherCallback(backToLauncherCallback, backToLauncherRunner)
@@ -997,12 +995,12 @@ constructor(
     //
     // Remote transitions
     //
-    fun registerRemoteTransition(remoteTransition: RemoteTransition?, filter: TransitionFilter) {
+    fun registerRemoteTransition(remoteTransition: RemoteTransition?) {
         remoteTransition ?: return
         executeWithErrorLog({ "Failed call registerRemoteTransition" }) {
-            shellTransitions?.registerRemote(filter, remoteTransition)
+            shellTransitions?.registerRemote(remoteTransition)
         }
-        remoteTransitions.putIfAbsent(remoteTransition, filter)
+        remoteTransitions.add(remoteTransition)
     }
 
     fun unregisterRemoteTransition(remoteTransition: RemoteTransition?) {
