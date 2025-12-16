@@ -1131,7 +1131,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         options.setSplashScreenStyle(splashScreenStyle);
         options.setPendingIntentBackgroundActivityStartMode(
                 ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
-        IRemoteCallback endCallback = completeRunnableListCallback(callbacks, this);
+        IRemoteCallback endCallback = completeRunnableListCallback(
+                callbacks, this, TASKBAR_UI_THREAD);
         options.setOnAnimationAbortListener(endCallback);
         options.setOnAnimationFinishedListener(endCallback);
 
