@@ -102,6 +102,7 @@ class MockUsersRule(private val app: SandboxApplication) : TestRule {
                 .getPreInstalledSystemPackages(user)
 
             doReturn(mockUser.isUserUnlocked).whenever(userManager).isUserUnlocked(user)
+            doReturn(mockUser.isUserUnlocked).whenever(userManager).isUserUnlockingOrUnlocked(user)
             doReturn(mockUser.isQuietModeEnabled).whenever(userManager).isQuietModeEnabled(user)
 
             generatedUsers.add(

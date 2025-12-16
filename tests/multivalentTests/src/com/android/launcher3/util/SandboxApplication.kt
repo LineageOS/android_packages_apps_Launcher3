@@ -28,6 +28,7 @@ import android.content.res.Configuration
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.os.IBinder
+import android.os.Process
 import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings.Global
@@ -69,8 +70,9 @@ class SandboxApplication private constructor(private val base: SandboxApplicatio
     SandboxContext(base), TestRule {
 
     private val mockResolver = MockContentResolver()
-    private val manuallyNamedServices = ArrayMap<Class<*>, String>()
     private val spiedServices = ArrayMap<String, Any>()
+    internal val spiedServicesForChildren = ArrayMap<String, Any>()
+    internal val manuallyNamedServices = ArrayMap<Class<*>, String>()
     private val packageManager = spy(baseContext.packageManager)
     private val dbDir = File(cacheDir, UUID.randomUUID().toString()).apply { deleteRecursively() }
 
@@ -174,6 +176,14 @@ class SandboxApplication private constructor(private val base: SandboxApplicatio
 
     inline fun <reified T : Any> spyService() = spyService(T::class.java)
 
+    /** Similar to [spyService] but also forces the same spy for child contexts */
+    fun <T> spyServiceForChildren(tClass: Class<T>, provider: (T?) -> T = { spy(it!!) }): T =
+        spyService(tClass, provider).apply {
+            spiedServicesForChildren[getSystemServiceName(tClass)] = this
+        }
+
+    inline fun <reified T : Any> spyServiceForChildren() = spyServiceForChildren(T::class.java)
+
     fun setupProvider(authority: String, proxy: ProxyProvider) {
         val providerInfo = ProviderInfo()
         providerInfo.authority = authority
@@ -211,6 +221,14 @@ class SandboxApplication private constructor(private val base: SandboxApplicatio
 
 private class SandboxApplicationWrapper(base: Context, var app: Context? = null) :
     ContextWrapper(base) {
+
+    override fun getSystemServiceName(tClass: Class<*>): String? =
+        (app as? SandboxApplication)?.manuallyNamedServices?.get(tClass)
+            ?: super.getSystemServiceName(tClass)
+
+    override fun getSystemService(name: String): Any? =
+        (app as? SandboxApplication)?.spiedServicesForChildren?.get(name)
+            ?: super.getSystemService(name)
 
     override fun getApplicationContext(): Context {
         return checkNotNull(app) { "SandboxApplication accessed before #init() was called." }
@@ -310,7 +328,7 @@ private class SandboxApplicationWrapper(base: Context, var app: Context? = null)
 private fun Context.checkUnlockedIfCredentialProtectedStorage() {
     if (!isCredentialProtectedStorage) return
     val userManager = checkNotNull(applicationContext.getSystemService(UserManager::class.java))
-    if (!userManager.isUserUnlockingOrUnlocked(UserHandle.myUserId())) {
+    if (!userManager.isUserUnlockingOrUnlocked(Process.myUserHandle())) {
         throw IllegalStateException("Encrypted SharedPreferences accessed while locked")
     }
 }

@@ -487,9 +487,7 @@ public class InvariantDeviceProfile {
                     .setWindowBounds(bounds)
                     .setDotRendererCache(dotRendererCache);
             if (com.android.systemui.shared.Flags.workspaceItemsLabelHidden()) {
-                builder.setIsWorkspaceItemsLabelHidden(
-                        LauncherPrefs.get(context).get(WORKSPACE_ITEMS_LABEL_HIDDEN)
-                );
+                builder.setIsWorkspaceItemsLabelHidden(mPrefs.get(WORKSPACE_ITEMS_LABEL_HIDDEN));
             }
             localSupportedProfiles.add(builder.build());
 
