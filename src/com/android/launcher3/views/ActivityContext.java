@@ -82,6 +82,7 @@ import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.model.repository.StringCacheRepository;
 import com.android.launcher3.popup.SystemShortcut;
 import com.android.launcher3.statehandlers.BaseDepthController;
+import com.android.launcher3.touch.CustomActionsListener;
 import com.android.launcher3.util.ActivityOptionsWrapper;
 import com.android.launcher3.util.ApiWrapper;
 import com.android.launcher3.util.ApplicationInfoWrapper;
@@ -336,6 +337,11 @@ public interface ActivityContext extends SavedStateRegistryOwner {
     /** Long-click callback used for All Apps items. */
     default View.OnLongClickListener getAllAppsItemLongClickListener() {
         return v -> false;
+    }
+
+    /** Custom actions listener used for All Apps items. */
+    default CustomActionsListener getAllAppsItemCustomActionsListener() {
+        return null;
     }
 
     default DotInfo getDotInfoForItem(ItemInfo info) {

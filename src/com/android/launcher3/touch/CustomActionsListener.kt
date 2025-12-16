@@ -17,7 +17,10 @@
 package com.android.launcher3.touch
 
 import android.view.View
+import com.android.launcher3.BubbleTextView
+import com.android.launcher3.DropTarget.DragObject
 import com.android.launcher3.Launcher
+import com.android.launcher3.dragndrop.DragController
 import com.android.launcher3.dragndrop.DragOptions
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.touch.CustomActionsListener.Companion.ACTION_LAUNCH
@@ -84,6 +87,50 @@ object WorkspaceItemCustomActionsListener : CustomActionsListener {
                     // ItemLongClickListener path.
                     ItemLongClickListener.beginDrag(view, launcher, view.tag as ItemInfo, options)
                 }
+            }
+        }
+    }
+}
+
+/** Implementation of [CustomActionsListener] for AllApps items. */
+object AllAppsItemCustomActionsListener : CustomActionsListener {
+    override fun performActions(view: View, actionMask: Int) {
+        when {
+            hasFlags(actionMask, ACTION_POPUP_MENU or ACTION_START_DRAG) -> {
+                view.performLongClick()
+            }
+
+            hasFlags(actionMask, ACTION_LAUNCH) -> {
+                view.performClick()
+            }
+
+            hasFlags(actionMask, ACTION_POPUP_MENU) -> {
+                val launcher = Launcher.getLauncher(view.context)
+                if (view is BubbleTextView) {
+                    launcher.popupControllerForAppIcons.show(view)
+                }
+            }
+
+            hasFlags(actionMask, ACTION_START_DRAG) -> {
+                val launcher = Launcher.getLauncher(view.context)
+                if (!ItemLongClickListener.canStartAllAppsItemDrag(launcher)) return
+
+                val dragController: DragController = launcher.dragController
+                dragController.addDragListener(
+                    object : DragController.DragListener {
+                        override fun onDragStart(dragObject: DragObject, options: DragOptions) {
+                            view.visibility = View.INVISIBLE
+                        }
+
+                        override fun onDragEnd() {
+                            view.visibility = View.VISIBLE
+                            dragController.removeDragListener(this)
+                        }
+                    }
+                )
+
+                val dragOptions = DragOptions().apply { isMouseDrag = true }
+                launcher.workspace.beginDragShared(view, launcher.appsView, dragOptions)
             }
         }
     }

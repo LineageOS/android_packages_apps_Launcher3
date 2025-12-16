@@ -220,10 +220,30 @@ public class TaskbarDragController extends DragController implements
             return false;
         }
         TestLogging.recordEvent(TestProtocol.SEQUENCE_MAIN, "onTaskbarItemLongClick");
-        BubbleTextView btv = (BubbleTextView) view;
+        return startDragWithOptions((BubbleTextView) view, dragPreviewProvider, iconShift,
+                new DragOptions());
+    }
+
+    /**
+     * Initiates a drag operation for the given View, specifically for a mouse-driven drag.
+     * This method sets up the drag options to indicate a mouse drag and then proceeds with
+     * the internal drag start process.
+     *
+     * @param view The View to be dragged, expected to be a BubbleTextView.
+     */
+    public boolean startDragWithMouse(BubbleTextView view) {
+        DragOptions dragOptions = new DragOptions();
+        dragOptions.isMouseDrag = true;
+        return startDragWithOptions(view, null, null, dragOptions);
+    }
+
+    private boolean startDragWithOptions(BubbleTextView btv,
+            @Nullable DragPreviewProvider dragPreviewProvider,
+            @Nullable Point iconShift,
+            DragOptions dragOptions) {
         mActivity.onDragStart();
         btv.post(() -> {
-            DragView dragView = startInternalDrag(btv, dragPreviewProvider);
+            DragView dragView = startInternalDrag(btv, dragPreviewProvider, dragOptions);
             if (iconShift != null) {
                 dragView.animateShift(-iconShift.x, -iconShift.y);
             }
@@ -236,7 +256,8 @@ public class TaskbarDragController extends DragController implements
     }
 
     private DragView startInternalDrag(
-            BubbleTextView btv, @Nullable DragPreviewProvider dragPreviewProvider) {
+            BubbleTextView btv, @Nullable DragPreviewProvider dragPreviewProvider,
+            DragOptions dragOptions) {
         // TODO(b/344038728): null check is only necessary because Recents doesn't use
         //  FastBitmapDrawable
         float iconScale = btv.getIcon() == null ? 1f : btv.getIcon().getAnimatedScale();
@@ -257,12 +278,11 @@ public class TaskbarDragController extends DragController implements
         btv.getSourceVisualDragBounds(dragRect);
         dragLayerY += dragRect.top;
 
-        DragOptions dragOptions = new DragOptions();
         // First, see if view is a search result that needs custom pre-drag conditions.
         dragOptions.preDragCondition =
                 mControllers.taskbarAllAppsController.createPreDragConditionForSearch(btv);
 
-        if (dragOptions.preDragCondition == null) {
+        if (dragOptions.preDragCondition == null && !dragOptions.isMouseDrag) {
             // See if view supports a popup container.
             PopupContainerWithArrow<BaseTaskbarContext> popupContainer =
                     (PopupContainerWithArrow<BaseTaskbarContext>)
