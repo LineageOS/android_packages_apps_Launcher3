@@ -232,8 +232,7 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
         ItemInfo itemInfo = null;
         if (icon.getTag() instanceof ItemInfo item && ShortcutUtil.supportsShortcuts(item)) {
             itemInfo = item;
-        } else if (canPinAppWithContextMenu(mContext)
-                && icon.getTag() instanceof SingleTask task) {
+        } else if (icon.getTag() instanceof SingleTask task) {
             Task.TaskKey key = task.getTask().getKey();
             AppInfo appInfo = getApp(
                     new ComponentKey(key.getComponent(), UserHandle.of(key.userId)));
