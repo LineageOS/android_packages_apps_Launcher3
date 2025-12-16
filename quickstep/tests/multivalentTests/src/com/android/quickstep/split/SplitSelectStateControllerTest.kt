@@ -52,13 +52,12 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.any
-import org.mockito.Mockito.doReturn
-import org.mockito.Mockito.spy
-import org.mockito.Mockito.`when`
+import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -91,9 +90,9 @@ class SplitSelectStateControllerTest {
 
     @Before
     fun setup() {
-        `when`(statsLogManager.logger()).thenReturn(statsLogger)
-        `when`(statsLogger.withInstanceId(any())).thenReturn(statsLogger)
-        `when`(statsLogger.withItemInfo(any())).thenReturn(statsLogger)
+        whenever(statsLogManager.logger()).thenReturn(statsLogger)
+        whenever(statsLogger.withInstanceId(any())).thenReturn(statsLogger)
+        whenever(statsLogger.withItemInfo(any())).thenReturn(statsLogger)
         splitSelectStateController =
             SplitSelectStateController(
                 context,
@@ -559,7 +558,7 @@ class SplitSelectStateControllerTest {
                         false /* findExactPairMatch */,
                         taskConsumer,
                     )
-                    verify(recentsModel).getTasks(any(), capture())
+                    verify(recentsModel).getTasks(any<Predicate<GroupTask>>(), capture())
                 }
                 .lastValue
 
