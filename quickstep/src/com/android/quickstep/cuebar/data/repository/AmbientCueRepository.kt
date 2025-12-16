@@ -280,7 +280,7 @@ constructor(
                     when {
                         // 1. Remote Action Send
                         action.hasActionType(InsightActionDetails.ACTION_TYPE_REMOTE_ACTION) -> {
-                            action.remoteAction?.actionIntent?.send()
+                            action.remoteAction?.actionIntent?.let { launchPendingIntent(it) }
                         }
                         // 2. Start Activity Intent
                         action.hasActionType(InsightActionDetails.ACTION_TYPE_INTENT) -> {
