@@ -89,8 +89,6 @@ private constructor(
 
         taskbarContainerOverflowView.setPadding(taskbarIconPadding)
 
-        // Adding overflow view remove last item
-        parentView.removeViewAt(removeIndexForAddingOverflowView)
         parentView.addView(taskbarContainerOverflowView, addIndexForOverflowView, lp)
     }
 
