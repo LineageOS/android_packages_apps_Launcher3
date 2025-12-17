@@ -119,6 +119,7 @@ import com.android.quickstep.fallback.RecentsState.Companion.MODAL_TASK
 import com.android.quickstep.fallback.RecentsState.Companion.OVERVIEW_SPLIT_SELECT
 import com.android.quickstep.fallback.toLauncherStateOrdinal
 import com.android.quickstep.recents.di.RecentsComponent
+import com.android.quickstep.split.SplitScreenAppResolver
 import com.android.quickstep.split.SplitSelectStateController
 import com.android.quickstep.util.QuickstepProtoLogGroup
 import com.android.quickstep.util.RecentsAtomicAnimationFactory
@@ -208,6 +209,7 @@ constructor(
             recentsModel,
             /* activityBackCallback= */ null,
             SplitScreenUiState(),
+            SplitScreenAppResolver(this),
         )
 
     // Callback array that corresponds to events defined in @ActivityEvent

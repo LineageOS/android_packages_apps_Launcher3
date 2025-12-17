@@ -208,6 +208,7 @@ import com.android.quickstep.TaskUtils;
 import com.android.quickstep.fallback.RecentsState;
 import com.android.quickstep.fallback.RecentsStateUtilsKt;
 import com.android.quickstep.recents.di.RecentsComponent;
+import com.android.quickstep.split.SplitScreenAppResolver;
 import com.android.quickstep.split.SplitSelectStateController;
 import com.android.quickstep.split.SplitToWorkspaceController;
 import com.android.quickstep.split.SplitWithKeyboardShortcutController;
@@ -352,7 +353,8 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
                 new SplitSelectStateController(this, getStateManager(),
                         getDepthController(), getStatsLogManager(),
                         systemUiProxy, RecentsModel.INSTANCE.get(this),
-                        () -> onStateBack(), mLauncherUiState.getSplitScreenUiState());
+                        () -> onStateBack(), mLauncherUiState.getSplitScreenUiState(),
+                        new SplitScreenAppResolver(this));
         if (DesktopModeStatus.canEnterDesktopMode(this)) {
             mDesktopRecentsTransitionController = new DesktopRecentsTransitionController(
                     getStateManager(), systemUiProxy, getIApplicationThread(),
