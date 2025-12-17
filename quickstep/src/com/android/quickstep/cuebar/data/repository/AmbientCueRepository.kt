@@ -342,8 +342,12 @@ constructor(
             }
         }
         val attribution = display.subtitle?.toString()
-        val iconDrawable = display.icon?.loadDrawable(context)
-            ?: context.getDrawable(R.drawable.ic_paste_spark)!!
+        val iconDrawable = try {
+            display.icon?.loadDrawable(context)
+        } catch (e: Exception) {
+            Log.e(TAG, "Resource loading failed for ID: ${display.icon?.resId}", e)
+            null
+        } ?: context.getDrawable(R.drawable.ic_paste_spark)!!
         val oneTapEnabled = extras?.getBoolean(EXTRA_ONE_TAP_ENABLED)
         val oneTapDelayMs = extras?.getLong(
             EXTRA_ONE_TAP_DELAY_MS,
