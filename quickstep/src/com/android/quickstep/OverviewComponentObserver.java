@@ -27,7 +27,6 @@ import static com.android.launcher3.util.SimpleBroadcastReceiver.actionsFilter;
 import static com.android.launcher3.util.SimpleBroadcastReceiver.packageFilter;
 import static com.android.quickstep.window.RecentsWindowFlags.enableFallbackOverviewInWindow;
 import static com.android.quickstep.window.RecentsWindowFlags.enableLauncherOverviewInWindow;
-import static com.android.quickstep.window.RecentsWindowFlags.enableOverviewOnConnectedDisplays;
 import static com.android.systemui.shared.system.PackageManagerWrapper.ACTION_PREFERRED_ACTIVITY_CHANGED;
 
 import android.content.ActivityNotFoundException;
@@ -366,7 +365,7 @@ public final class OverviewComponentObserver {
      */
     @Nullable
     public BaseContainerInterface<?, ?> getContainerInterface(int displayId) {
-        if (enableOverviewOnConnectedDisplays() && displayId != DEFAULT_DISPLAY) {
+        if (displayId != DEFAULT_DISPLAY) {
             RecentsWindowManager recentsWindowManager = mRecentsWindowManagerRepository.get(
                     displayId);
             return recentsWindowManager != null ? recentsWindowManager.getContainerInterface()

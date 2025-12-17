@@ -18,7 +18,6 @@ package com.android.launcher3.taskbar.rules
 
 import android.content.Context
 import com.android.app.displaylib.PerDisplayRepository
-import com.android.launcher3.Flags
 import com.android.launcher3.LauncherPrefChangeListener
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.TASKBAR_PINNING
@@ -163,26 +162,11 @@ constructor(
     // When overview on CD is enabled, DisplayController queries getInfoForDisplay instead of
     // getInfo for the primary (virtual) display used in tests. So, override it to get info from the
     // default display.
-    private val defaultInfoModifierForDisplay: ((Info?) -> Info?)? =
-        if (Flags.enableOverviewOnConnectedDisplays()) {
-            { _ -> info }
-        } else {
-            null
-        }
+    private val defaultInfoModifierForDisplay: ((Info?) -> Info?) = { _ -> info }
 
     var infoModifierForDisplay: ((Info?) -> Info?)? = defaultInfoModifierForDisplay
 
     private var prefListener: LauncherPrefChangeListener? = null
-
-    init {
-        // When overview on CD is disabled, DisplayController only adds the info associated with
-        // the DEFAULT_DISPLAY. So, instead of changing the production code of DisplayController to
-        // use display from context we manually add the info associated with the virtual display.
-        if (!Flags.enableOverviewOnConnectedDisplays()) {
-            getOrCreatePerDisplayInfo(context.display)
-            lifecycle.addCloseable { removePerDisplayInfo(context.displayId) }
-        }
-    }
 
     override fun getInfo(): Info = infoModifier?.invoke(super.getInfo()) ?: super.getInfo()
 

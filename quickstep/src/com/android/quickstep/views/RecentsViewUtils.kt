@@ -65,7 +65,6 @@ import com.android.quickstep.TaskAnimationManager
 import com.android.quickstep.util.DesktopTask
 import com.android.quickstep.util.GroupTask
 import com.android.quickstep.util.TaskGridNavHelper
-import com.android.quickstep.util.isExternalDisplay
 import com.android.quickstep.views.RecentsView.DESKTOP_CAROUSEL_DETACH_PROGRESS
 import com.android.quickstep.views.RecentsView.RECENTS_GRID_PROGRESS
 import com.android.quickstep.views.RecentsView.RUNNING_TASK_ATTACH_ALPHA
@@ -165,12 +164,6 @@ constructor(
         // Desk IDs of newer desks are larger than those of older desks, hence we can use them
         // to sort desks from old to new.
         return otherTasks + desktopTasks.sortedBy { (it as DesktopTask).deskId }
-    }
-
-    fun sortExternalDisplayTasksToFront(tasks: List<GroupTask>): List<GroupTask> {
-        val (externalDisplayTasks, otherTasks) =
-            tasks.partition { it.tasks.firstOrNull().isExternalDisplay }
-        return otherTasks + externalDisplayTasks
     }
 
     open class TaskViewsIterable(val recentsView: RecentsView<*, *>) : Iterable<TaskView> {

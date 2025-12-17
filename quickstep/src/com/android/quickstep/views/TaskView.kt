@@ -107,7 +107,6 @@ import com.android.quickstep.views.IconAppChipView.AppChipStatus
 import com.android.quickstep.views.OverviewActionsView.DISABLED_NO_THUMBNAIL
 import com.android.quickstep.views.OverviewActionsView.DISABLED_ROTATED
 import com.android.quickstep.views.RecentsView.UNBOUND_TASK_VIEW_ID
-import com.android.quickstep.window.RecentsWindowFlags.enableOverviewOnConnectedDisplays
 import com.android.systemui.shared.recents.model.Task
 import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.wm.shell.shared.split.SplitScreenConstants
@@ -165,9 +164,7 @@ constructor(
         get() = displayId.isExternalDisplay
 
     val isLargeTile: Boolean
-        get() =
-            type == TaskViewType.DESKTOP ||
-                (isExternalDisplay && !enableOverviewOnConnectedDisplays())
+        get() = type == TaskViewType.DESKTOP
 
     val recentsView: RecentsView<*, *>?
         get() = parent as? RecentsView<*, *>
