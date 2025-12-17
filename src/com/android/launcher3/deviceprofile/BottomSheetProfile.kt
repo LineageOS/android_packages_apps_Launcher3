@@ -17,7 +17,6 @@
 package com.android.launcher3.deviceprofile
 
 import android.content.res.Resources
-import android.graphics.Rect
 import com.android.app.animation.Interpolators.LINEAR
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
@@ -36,7 +35,6 @@ data class BottomSheetProfile(
 
         fun createBottomSheetProfile(
             deviceProperties: DeviceProperties,
-            insets: Rect,
             res: Resources,
             edgeMarginPx: Int,
             workspaceProfile: WorkspaceProfile,
@@ -72,7 +70,7 @@ data class BottomSheetProfile(
                     }
                 }
             val bottomSheetTopPadding =
-                insets.top + // statusbar height
+                deviceProperties.insets.top + // statusbar height
                     (if (applyExtraTopPadding) derivedTopPadding else 0) +
                     // phones need edgeMarginPx additional padding
                     (if (deviceProperties.isLargeScreen) 0 else edgeMarginPx).toInt()

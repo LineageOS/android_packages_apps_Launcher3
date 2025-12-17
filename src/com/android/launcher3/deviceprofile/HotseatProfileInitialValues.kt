@@ -17,7 +17,6 @@
 package com.android.launcher3.deviceprofile
 
 import android.content.res.Resources
-import android.graphics.Rect
 import android.util.DisplayMetrics
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.R
@@ -82,7 +81,6 @@ data class HotseatProfileInitialValues(
             isTaskbarPresent: Boolean,
             shouldApplyWidePortraitDimens: Boolean,
             responsiveHotseatSpec: CalculatedHotseatSpec?,
-            insets: Rect,
             typeIndex: Int,
             metrics: DisplayMetrics,
             isVerticalBarLayout: Boolean,
@@ -99,7 +97,6 @@ data class HotseatProfileInitialValues(
                         isTaskbarPresent = isTaskbarPresent,
                         shouldApplyWidePortraitDimens = shouldApplyWidePortraitDimens,
                         responsiveHotseatSpec = responsiveHotseatSpec,
-                        insets = insets,
                         responsiveWorkspaceCellSpec = responsiveWorkspaceCellSpec,
                         isVerticalBarLayout = isVerticalBarLayout,
                         isQsbInline = isQsbInline,
@@ -111,7 +108,6 @@ data class HotseatProfileInitialValues(
                         inv = inv,
                         isTaskbarPresent = isTaskbarPresent,
                         shouldApplyWidePortraitDimens = shouldApplyWidePortraitDimens,
-                        insets = insets,
                         typeIndex = typeIndex,
                         metrics = metrics,
                         isVerticalBarLayout = isVerticalBarLayout,
@@ -128,7 +124,6 @@ data class HotseatProfileInitialValues(
             isTaskbarPresent: Boolean,
             shouldApplyWidePortraitDimens: Boolean,
             responsiveHotseatSpec: CalculatedHotseatSpec,
-            insets: Rect,
             isVerticalBarLayout: Boolean,
             responsiveWorkspaceCellSpec: CalculatedCellSpec,
             isQsbInline: Boolean,
@@ -163,8 +158,9 @@ data class HotseatProfileInitialValues(
 
             var barBottomSpacePx = 0
             // Have a little space between the inset and the QSB
-            if (insets.bottom + minQsbMargin > hotseatBarBottomSpace) {
-                val availableSpace: Int = hotseatQsbSpace - (insets.bottom - hotseatBarBottomSpace)
+            if (deviceProperties.insets.bottom + minQsbMargin > hotseatBarBottomSpace) {
+                val availableSpace: Int =
+                    hotseatQsbSpace - (deviceProperties.insets.bottom - hotseatBarBottomSpace)
 
                 // Only change the spaces if there is space
                 if (availableSpace > 0) {
@@ -176,7 +172,7 @@ data class HotseatProfileInitialValues(
                         hotseatQsbSpace -= minQsbMargin
                     }
                 }
-                barBottomSpacePx = insets.bottom + minQsbMargin
+                barBottomSpacePx = deviceProperties.insets.bottom + minQsbMargin
             } else {
                 barBottomSpacePx = hotseatBarBottomSpace
             }
@@ -224,7 +220,6 @@ data class HotseatProfileInitialValues(
             inv: InvariantDeviceProfile,
             isTaskbarPresent: Boolean,
             shouldApplyWidePortraitDimens: Boolean,
-            insets: Rect,
             typeIndex: Int,
             metrics: DisplayMetrics,
             isVerticalBarLayout: Boolean,
@@ -268,8 +263,9 @@ data class HotseatProfileInitialValues(
 
             var barBottomSpacePx = 0
             // Have a little space between the inset and the QSB
-            if (insets.bottom + minQsbMargin > hotseatBarBottomSpace) {
-                val availableSpace: Int = hotseatQsbSpace - (insets.bottom - hotseatBarBottomSpace)
+            if (deviceProperties.insets.bottom + minQsbMargin > hotseatBarBottomSpace) {
+                val availableSpace: Int =
+                    hotseatQsbSpace - (deviceProperties.insets.bottom - hotseatBarBottomSpace)
 
                 // Only change the spaces if there is space
                 if (availableSpace > 0) {
@@ -281,7 +277,7 @@ data class HotseatProfileInitialValues(
                         hotseatQsbSpace -= minQsbMargin
                     }
                 }
-                barBottomSpacePx = insets.bottom + minQsbMargin
+                barBottomSpacePx = deviceProperties.insets.bottom + minQsbMargin
             } else {
                 barBottomSpacePx = hotseatBarBottomSpace
             }
