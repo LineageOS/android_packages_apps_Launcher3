@@ -1505,12 +1505,6 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
                 getDeviceProfile().toSmallString());
         SystemUiProxy.INSTANCE.get(this).setLauncherAppIconSize(
                 mDeviceProfile.getWorkspaceIconProfile().getIconSizePx());
-
-        var conn = mSysUIConnectionTracker.getActiveComponent().getValue();
-        if (conn != null) {
-            conn.getTaskbarManager().debugPrimaryTaskbar("QuickstepLauncher#onDeviceProfileChanged",
-                    true);
-        }
     }
 
     @Override

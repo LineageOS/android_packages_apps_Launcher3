@@ -25,6 +25,7 @@ import android.provider.Settings.Secure.getUriFor
 import com.android.app.displaylib.DisplaysWithDecorationsRepositoryCompat
 import com.android.launcher3.LauncherAppState
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
+import com.android.launcher3.taskbar.PerDisplayTaskbarResource
 import com.android.launcher3.taskbar.TaskbarActivityContext
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.TaskbarControllers
@@ -162,12 +163,12 @@ class TaskbarUnitTestRule(
                             }
 
                             override fun recreateTaskbarForDisplay(
-                                displayId: Int,
+                                resource: PerDisplayTaskbarResource,
                                 duration: Int,
                                 caller: String,
                             ) {
-                                super.recreateTaskbarForDisplay(displayId, duration, caller)
-                                if (displayId == context.displayId) injectControllers()
+                                super.recreateTaskbarForDisplay(resource, duration, caller)
+                                if (resource.displayId == context.displayId) injectControllers()
                             }
                         }
                     }
