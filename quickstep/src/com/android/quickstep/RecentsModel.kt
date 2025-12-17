@@ -23,6 +23,7 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.os.Process
 import android.os.UserHandle
+import com.android.launcher3.Flags.enableLowResThumbnailPreloading
 import com.android.launcher3.Flags.enableTaskbarUiThread
 import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.dagger.ApplicationContext
@@ -91,6 +92,9 @@ constructor(
         val componentCallbacks =
             object : ComponentCallbacks {
                 override fun onConfigurationChanged(configuration: Configuration) {
+                    // Cache update happens in RecentsViewModelHelper now
+                    if (enableLowResThumbnailPreloading()) return
+
                     updateCacheSizeAndPreloadIfNeeded()
                 }
 
@@ -182,6 +186,9 @@ constructor(
     fun getRecentsDisplayId(displayId: Int) = taskList.getRecentsDisplayId(displayId)
 
     override fun onTaskStackChangedBackground() {
+        // Preloading is handled in PreloadThumbnailUseCase when this flag is enabled
+        if (enableLowResThumbnailPreloading()) return
+
         // Skip if we aren't preloading
         if (!thumbnailCache.isPreloadingEnabled()) return
 
@@ -285,6 +292,9 @@ constructor(
 
     /** Preloads cache if reloading is enabled and highResLoadingState is enabled. */
     fun preloadCacheIfNeeded() {
+        // Preloading is handled in PreloadThumbnailUseCase when this flag is enabled
+        if (enableLowResThumbnailPreloading()) return
+
         if (!isPreloadCacheNeeded()) return
 
         taskList.getTaskKeys(thumbnailCache.getCacheSize()) { taskGroups ->

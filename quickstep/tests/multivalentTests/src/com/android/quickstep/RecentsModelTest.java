@@ -146,9 +146,10 @@ public class RecentsModelTest {
         when(mContext.getResources()).thenReturn(mResource);
     }
 
+    @DisableFlags(Flags.FLAG_ENABLE_LOW_RES_THUMBNAIL_PRELOADING)
     @Test
     @UiThreadTest
-    public void preloadOnHighResolutionEnabled() {
+    public void preloadOnHighResolutionEnabled_withFlagOff() {
         mRecentsModel.preloadCacheIfNeeded();
 
         ArgumentCaptor<Task> taskArgs = ArgumentCaptor.forClass(Task.class);
@@ -162,6 +163,16 @@ public class RecentsModelTest {
         for (int i = 0; i < expectedTasks.size(); ++i) {
             assertThat(taskArgsValues.get(i)).isEqualTo(expectedTasks.get(i));
         }
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_LOW_RES_THUMBNAIL_PRELOADING)
+    @Test
+    public void noPreloadOnHighResolutionEnabled_withFlagOn() {
+        when(mHighResLoadingState.isEnabled()).thenReturn(true);
+        when(mThumbnailCache.isPreloadingEnabled()).thenReturn(true);
+        mRecentsModel.preloadCacheIfNeeded();
+        verify(mRecentsModel.getThumbnailCache(), never())
+                .updateThumbnailInCache(any(), anyBoolean());
     }
 
     @Test
@@ -182,8 +193,9 @@ public class RecentsModelTest {
 
     }
 
+    @DisableFlags(Flags.FLAG_ENABLE_LOW_RES_THUMBNAIL_PRELOADING)
     @Test
-    public void increaseCacheSizeAndPreload() {
+    public void increaseCacheSizeAndPreload_withFlagOff() {
         // Mock to return preload is needed
         when(mThumbnailCache.updateCacheSizeAndRemoveExcess()).thenReturn(true);
         // Update cache size

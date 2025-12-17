@@ -667,6 +667,12 @@ public abstract class RecentsView<
             }
         }
 
+        @Override
+        public void onTaskStackChangedBackground() {
+            if (!mOverviewStateEnabled) {
+                mHelper.startPreloading();
+            }
+        }
     };
 
     private final PinnedStackAnimationListener mIPipAnimationListener =
@@ -846,6 +852,12 @@ public abstract class RecentsView<
     private int mTaskViewCount = 0;
 
     protected final BlurUtils mBlurUtils = new BlurUtils(this);
+
+    private final Runnable mPreloadRunnable = () -> {
+        if (!mOverviewStateEnabled) {
+            mHelper.startPreloading();
+        }
+    };
 
     public RecentsView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
@@ -1087,6 +1099,8 @@ public abstract class RecentsView<
         mIPipAnimationListener.setActivityAndRecentsView(mContainer, this);
         mSystemUiProxy.setPipAnimationListener(
                 mIPipAnimationListener);
+        // Late initializer for SystemUiProxy
+        mSystemUiProxy.addOnStateChangeListener(mPreloadRunnable);
         mOrientationState.initListeners();
         mTaskOverlayFactory.initListeners();
         mSplitSelectStateController.registerSplitListener(mSplitSelectionListener);
@@ -1110,6 +1124,7 @@ public abstract class RecentsView<
         executeSideTaskLaunchCallback();
         mRecentsModel.removeThumbnailChangeListener(this);
         mSystemUiProxy.setPipAnimationListener(null);
+        mSystemUiProxy.removeOnStateChangeListener(mPreloadRunnable);
         mIPipAnimationListener.setActivityAndRecentsView(null, null);
         mOrientationState.destroyListeners();
         mTaskOverlayFactory.removeListeners();
@@ -1496,6 +1511,9 @@ public abstract class RecentsView<
     }
 
     public void setOverviewStateEnabled(boolean enabled) {
+        if (mOverviewStateEnabled && !enabled) {
+            mHelper.startPreloading();
+        }
         mOverviewStateEnabled = enabled;
         updateTaskStackListenerState();
         mOrientationState.setRotationWatcherEnabled(enabled);
@@ -3641,6 +3659,9 @@ public abstract class RecentsView<
         updateRecentsRotation();
         onOrientationChanged();
         updateEmptyMessageConfiguration();
+        if (enableLowResThumbnailPreloading()) {
+            mHelper.updateCacheSizeAndPreload(/* shouldPreloadIfNeeded= */ !mOverviewStateEnabled);
+        }
     }
 
     /**

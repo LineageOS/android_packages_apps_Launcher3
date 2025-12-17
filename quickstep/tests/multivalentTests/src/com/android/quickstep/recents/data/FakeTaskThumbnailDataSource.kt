@@ -34,6 +34,7 @@ class FakeTaskThumbnailDataSource : TaskThumbnailDataSource {
     private val getThumbnailCalls = mutableMapOf<Int, List<RequestResolution>>()
 
     var highResEnabled = true
+    private var cacheSize = taskIdToBitmap.size
 
     /** Retrieves and sets a thumbnail on [task] from [taskIdToBitmap]. */
     override suspend fun getThumbnail(task: Task): ThumbnailData? =
@@ -55,6 +56,23 @@ class FakeTaskThumbnailDataSource : TaskThumbnailDataSource {
             thumbnail = taskIdToBitmap[task.key.id],
             reducedResolution = !isHighRes,
         )
+    }
+
+    override fun getCacheSize(): Int = cacheSize
+
+    override fun updateCacheSizeAndRemoveExcess(): Boolean {
+        if (cacheSize < taskIdToBitmap.size) {
+            val newCache = taskIdToBitmap.filter { it.key < cacheSize }
+            taskIdToBitmap.clear()
+            taskIdToBitmap.putAll(newCache)
+            return true
+        }
+
+        return false
+    }
+
+    fun setCacheSize(cacheSize: Int) {
+        this.cacheSize = cacheSize
     }
 
     fun getNumberOfGetThumbnailCalls(taskId: Int): Int = getThumbnailCalls(taskId).size

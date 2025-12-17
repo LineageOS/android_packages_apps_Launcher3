@@ -28,6 +28,7 @@ import com.android.launcher3.concurrent.annotations.LightweightBackground
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority.UI
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.DisplayId
+import com.android.quickstep.RecentTasksList
 import com.android.quickstep.RecentsModel
 import com.android.quickstep.recents.data.AppTimersRepository
 import com.android.quickstep.recents.data.AppTimersRepositoryImpl
@@ -37,6 +38,7 @@ import com.android.quickstep.recents.data.InputManagerWrapper
 import com.android.quickstep.recents.data.PointerRepository
 import com.android.quickstep.recents.data.PointerRepositoryImpl
 import com.android.quickstep.recents.data.RecentTasksDataSource
+import com.android.quickstep.recents.data.RecentTasksKeysDataSource
 import com.android.quickstep.recents.data.RecentTasksRepository
 import com.android.quickstep.recents.data.RecentsDeviceProfileRepository
 import com.android.quickstep.recents.data.RecentsDeviceProfileRepositoryImpl
@@ -99,6 +101,8 @@ interface LauncherRecentsModule {
     fun bindRecentsDeviceProfileRepository(
         impl: RecentsDeviceProfileRepositoryImpl
     ): RecentsDeviceProfileRepository
+
+    @Binds fun bindRecentTasksKeysDataSource(impl: RecentTasksList): RecentTasksKeysDataSource
 
     companion object {
         @RecentsSingleton

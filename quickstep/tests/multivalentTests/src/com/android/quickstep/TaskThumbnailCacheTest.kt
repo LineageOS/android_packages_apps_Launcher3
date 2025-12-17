@@ -26,8 +26,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.launcher3.Flags
 import com.android.launcher3.R
-import com.android.launcher3.util.TestDispatcherProvider
-import com.android.launcher3.util.coroutines.DispatcherProvider
 import com.android.quickstep.task.thumbnail.data.TaskThumbnailDataSource.RequestResolution
 import com.android.quickstep.util.TaskKeyCache
 import com.android.systemui.shared.recents.model.Task
@@ -69,14 +67,12 @@ class TaskThumbnailCacheTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
-    private val testDispatcherProvider: DispatcherProvider = TestDispatcherProvider(testDispatcher)
-
     val systemUnderTest =
         TaskThumbnailCache(
             context,
             mock<Executor>(),
             taskKeyCache,
-            testDispatcherProvider,
+            testDispatcher,
             activityManagerWrapper,
         )
 
@@ -117,6 +113,14 @@ class TaskThumbnailCacheTest {
         // Preload is not needed when it has the same cache size
         assertThat(systemUnderTest.updateCacheSizeAndRemoveExcess()).isFalse()
         verify(taskKeyCache, never()).updateCacheSizeAndRemoveExcess(anyInt())
+    }
+
+    @Test
+    fun getCacheSize_getsValueFromCache() {
+        val expectedCacheSize = 10
+        whenever(taskKeyCache.getMaxSize()).thenReturn(expectedCacheSize)
+
+        assertThat(systemUnderTest.getCacheSize()).isEqualTo(expectedCacheSize)
     }
 
     @Test
