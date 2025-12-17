@@ -19,13 +19,6 @@ flag {
 }
 
 flag {
-    name: "enable_overview_on_connected_displays"
-    namespace: "launcher_overview"
-    description: "Enable overview on connected displays."
-    bug: "363251602"
-}
-
-flag {
     name: "enable_overview_desktop_tile_wallpaper_background"
     namespace: "launcher_overview"
     description: "Enable wallpaper background for desktop tasks in overview."
