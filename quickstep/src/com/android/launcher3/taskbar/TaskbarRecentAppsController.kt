@@ -209,16 +209,11 @@ class TaskbarRecentAppsController(
             ) {
                 return emptySet()
             }
-            val multipleDesktopsEnabled = DesktopModeStatus.enableMultipleDesktops(context)
-            // When multi-desks is enabled, the indicator only indicates whether the window is
-            // minimized or not. This means an opened window inside an inactive desk will still
-            // have long app indicator inside the taskbar.
+            // The indicator only indicates whether the window is minimized or not. This means an
+            // opened window inside an inactive desk will still have long app indicator inside the
+            // taskbar.
             return desktopTasks
-                .filter { task ->
-                    val shouldKeep =
-                        if (multipleDesktopsEnabled) task.isMinimized else !task.isVisible
-                    shouldKeep
-                }
+                .filter { task -> task.isMinimized }
                 .map { task -> task.key.id }
                 .toSet()
         }

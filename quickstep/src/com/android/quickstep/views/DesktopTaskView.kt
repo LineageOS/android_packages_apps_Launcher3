@@ -66,7 +66,6 @@ import com.android.quickstep.task.thumbnail.TaskThumbnailView
 import com.android.quickstep.util.DesktopTask
 import com.android.quickstep.util.RecentsOrientedState
 import com.android.quickstep.util.getRemoteTargetHandle
-import com.android.wm.shell.shared.desktopmode.DesktopModeStatus.enableMultipleDesktops
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
@@ -154,12 +153,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
         }
 
     override val displayId: Int
-        get() =
-            if (enableMultipleDesktops(context)) {
-                desktopTask?.displayId ?: INVALID_DISPLAY
-            } else {
-                super.displayId
-            }
+        get() = desktopTask?.displayId ?: INVALID_DISPLAY
 
     override fun initialiseInjectables(recentsComponent: RecentsComponent) {
         recentsComponent.inject(this)
@@ -527,9 +521,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
                 endCallback.executeAllAndDestroy()
             }
         }
-        if (
-            enableMultipleDesktops(context) && desktopTask?.tasks?.none { !it.isMinimized } == true
-        ) {
+        if (desktopTask?.tasks?.none { !it.isMinimized } == true) {
             recentsView.switchToScreenshot {
                 recentsView.finishRecentsAnimation(
                     /* toHome= */ true,

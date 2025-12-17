@@ -19,10 +19,8 @@ import android.content.Context
 import android.util.Log
 import android.util.SparseArray
 import android.util.SparseBooleanArray
-import android.view.Display.DEFAULT_DISPLAY
 import androidx.annotation.AnyThread
 import androidx.core.util.set
-import com.android.internal.util.LatencyTracker
 import com.android.launcher3.Flags.enableTaskbarUiThread
 import com.android.launcher3.LauncherState
 import com.android.launcher3.dagger.ApplicationContext
@@ -37,7 +35,6 @@ import com.android.quickstep.SystemUiProxy
 import com.android.quickstep.fallback.RecentsState
 import com.android.wm.shell.desktopmode.DisplayDeskState
 import com.android.wm.shell.desktopmode.IDesktopTaskListener.Stub
-import com.android.wm.shell.shared.desktopmode.DesktopModeStatus.enableMultipleDesktops
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus.useRoundedCorners
 import java.io.PrintWriter
 import java.lang.ref.WeakReference
@@ -89,54 +86,15 @@ constructor(
     private val taskbarDesktopModeListeners: MutableSet<TaskbarDesktopModeListener> =
         ConcurrentHashMap.newKeySet()
 
-    // This simply indicates that user is currently in desktop mode or not.
-    @Deprecated("Does not work with multi-desks") private var isInDesktopModeDeprecated = false
-
     // to let launcher hold off on notifying desktop visibility listeners.
     var launcherAnimationRunning = false
-
-    // TODO: b/394387739 - Deprecate this and replace it with something that tracks the count per
-    //  desk.
-    /**
-     * Number of visible desktop windows in desktop mode. This can be > 0 when user goes to overview
-     * from desktop window mode.
-     */
-    @Deprecated("Does not work with multi-desks")
-    var visibleDesktopTasksCountDeprecated: Int = 0
-        /**
-         * Sets the number of desktop windows that are visible and updates launcher visibility based
-         * on it.
-         */
-        set(visibleTasksCount) {
-            if (enableMultipleDesktops(context)) {
-                return
-            }
-            if (DEBUG) {
-                Log.d(
-                    TAG,
-                    ("setVisibleDesktopTasksCount: visibleTasksCount=" +
-                        visibleTasksCount +
-                        " currentValue=" +
-                        field),
-                )
-            }
-
-            if (visibleTasksCount != field) {
-                if (visibleDesktopTasksCountDeprecated == 0 && visibleTasksCount == 1) {
-                    isInDesktopModeDeprecated = true
-                }
-                if (visibleDesktopTasksCountDeprecated == 1 && visibleTasksCount == 0) {
-                    isInDesktopModeDeprecated = false
-                }
-            }
-        }
 
     private var inOverviewStateMap = SparseBooleanArray()
 
     private var desktopTaskListener: DesktopTaskListenerImpl?
 
     init {
-        desktopTaskListener = DesktopTaskListenerImpl(this, context)
+        desktopTaskListener = DesktopTaskListenerImpl(this)
         systemUiProxy.setDesktopTaskListener(desktopTaskListener)
 
         lifecycleTracker.addCloseable {
@@ -150,22 +108,12 @@ constructor(
      * [INACTIVE_DESK_ID] if no desk is currently active or the multiple desks feature is disabled.
      */
     fun getActiveDeskId(displayId: Int): Int {
-        if (!enableMultipleDesktops(context)) {
-            // When the multiple desks feature is disabled, callers should not rely on the concept
-            // of a desk ID.
-            return INACTIVE_DESK_ID
-        }
-
         return getDisplayDeskConfig(displayId)?.activeDeskId ?: INACTIVE_DESK_ID
     }
 
     /** Returns whether a desk is currently active on the display with the given [displayId]. */
     @AnyThread
     fun isInDesktopMode(displayId: Int): Boolean {
-        if (!enableMultipleDesktops(context)) {
-            return isInDesktopModeDeprecated
-        }
-
         val activeDeskId = getDisplayDeskConfig(displayId)?.activeDeskId ?: INACTIVE_DESK_ID
         val isInDesktopMode = activeDeskId != INACTIVE_DESK_ID
         if (DEBUG) {
@@ -179,9 +127,6 @@ constructor(
      * Overview is not active.
      */
     fun isInDesktopModeAndNotInOverview(displayId: Int): Boolean {
-        if (!enableMultipleDesktops(context)) {
-            return areDesktopTasksVisibleAndNotInOverview(displayId)
-        }
         val inOverviewState = inOverviewStateMap[displayId]
         if (DEBUG) {
             Log.d(
@@ -190,20 +135,6 @@ constructor(
             )
         }
         return isInDesktopMode(displayId) && !inOverviewState
-    }
-
-    /** Whether desktop tasks are visible in desktop mode. */
-    private fun areDesktopTasksVisibleAndNotInOverview(displayId: Int): Boolean {
-        val desktopTasksVisible: Boolean = visibleDesktopTasksCountDeprecated > 0
-        val inOverviewState = inOverviewStateMap[displayId]
-        if (DEBUG) {
-            Log.d(
-                TAG,
-                ("areDesktopTasksVisible: displayId=$displayId desktopVisible=$desktopTasksVisible" +
-                    " overview=$inOverviewState"),
-            )
-        }
-        return desktopTasksVisible && !inOverviewState
     }
 
     /** Registers a listener for Taskbar changes in Desktop Mode. */
@@ -232,7 +163,7 @@ constructor(
      * Desktop Windowing Mode. if there is any pending notification please notify desktop visibility
      * listeners.
      */
-    fun onLauncherAnimationFromDesktopEnd(displayId: Int) {
+    fun onLauncherAnimationFromDesktopEnd() {
         launcherAnimationRunning = false
     }
 
@@ -305,24 +236,6 @@ constructor(
         }
     }
 
-    private fun notifyTaskbarDesktopModeListenersForEntry(displayId: Int, duration: Int) {
-        if (DEBUG) {
-            Log.d(TAG, "notifyTaskbarDesktopModeListenersForEntry: duration=" + duration)
-        }
-        for (listener in taskbarDesktopModeListeners) {
-            listener.onEnterDesktopMode(duration)
-        }
-    }
-
-    private fun notifyTaskbarDesktopModeListenersForExit(displayId: Int, duration: Int) {
-        if (DEBUG) {
-            Log.d(TAG, "notifyTaskbarDesktopModeListenersForExit: duration=" + duration)
-        }
-        for (listener in taskbarDesktopModeListeners) {
-            listener.onExitDesktopMode(duration)
-        }
-    }
-
     private fun notifyOnDeskAdded(displayId: Int, deskId: Int) {
         if (DEBUG) {
             Log.d(TAG, "notifyOnDeskAdded: displayId=$displayId, deskId=$deskId")
@@ -379,10 +292,6 @@ constructor(
         displayDeskStates: Array<DisplayDeskState>,
         canCreateDesks: Boolean,
     ) {
-        if (!enableMultipleDesktops(context)) {
-            return
-        }
-
         clearDisplaysDesksConfigsMap()
 
         displayDeskStates.forEach { displayDeskState ->
@@ -433,18 +342,10 @@ constructor(
     }
 
     private fun onCanCreateDesksChanged(canCreateDesks: Boolean) {
-        if (!enableMultipleDesktops(context)) {
-            return
-        }
-
         this.canCreateDesks = canCreateDesks
     }
 
     private fun onDeskAdded(displayId: Int, deskId: Int) {
-        if (!enableMultipleDesktops(context)) {
-            return
-        }
-
         // Add the config for the desk if there is nothing yet, as the display can start without any
         // desks.
         if (getDisplayDeskConfig(displayId) == null) {
@@ -464,10 +365,6 @@ constructor(
     }
 
     private fun onDeskRemoved(displayId: Int, deskId: Int) {
-        if (!enableMultipleDesktops(context)) {
-            return
-        }
-
         getDisplayDeskConfig(displayId)?.also {
             check(it.deskIds.remove(deskId)) {
                 "Removing non-existing desk Id: $deskId on display: $displayId"
@@ -481,10 +378,6 @@ constructor(
     }
 
     private fun onActiveDeskChanged(displayId: Int, newActiveDesk: Int, oldActiveDesk: Int) {
-        if (!enableMultipleDesktops(context)) {
-            return
-        }
-
         getDisplayDeskConfig(displayId)?.also {
             check(oldActiveDesk == it.activeDeskId) {
                 "Mismatch between the Shell's oldActiveDesk: $oldActiveDesk, and Launcher's: ${it.activeDeskId}"
@@ -501,10 +394,6 @@ constructor(
     }
 
     private fun onTaskAppearingInDeskWithOverviewShowing(taskId: Int, displayId: Int, deskId: Int) {
-        if (!enableMultipleDesktops(context)) {
-            return
-        }
-
         notifyOnTaskAppearingInDeskWithOverviewShowing(taskId, displayId, deskId)
     }
 
@@ -512,7 +401,6 @@ constructor(
         pw.println(prefix + "DesktopVisibilityController:")
 
         pw.println("$prefix\tdesktopVisibilityListeners=$desktopVisibilityListeners")
-        pw.println("$prefix\tvisibleDesktopTasksCount=$visibleDesktopTasksCountDeprecated")
         pw.println("$prefix\tinOverviewState=$inOverviewStateMap")
         pw.println("$prefix\tdesktopTaskListener=$desktopTaskListener")
         pw.println("$prefix\tcontext=$context")
@@ -530,12 +418,8 @@ constructor(
      * Wrapper for the IDesktopTaskListener stub to prevent lingering references to the launcher
      * activity via the controller.
      */
-    private class DesktopTaskListenerImpl(
-        controller: DesktopVisibilityController,
-        @ApplicationContext private val context: Context,
-    ) : Stub() {
+    private class DesktopTaskListenerImpl(controller: DesktopVisibilityController) : Stub() {
         private val controller = WeakReference(controller)
-        private val displayId = context.displayId
 
         override fun onListenerConnected(
             displayDeskStates: Array<DisplayDeskState>,
@@ -546,23 +430,9 @@ constructor(
             }
         }
 
-        @Deprecated("Not needed by multi-desks")
-        override fun onTasksVisibilityChanged(displayId: Int, visibleTasksCount: Int) {
-            if (enableMultipleDesktops(context)) return
-            if (displayId != this.displayId) return
-            MAIN_EXECUTOR.execute {
-                controller.get()?.apply {
-                    if (DEBUG) {
-                        Log.d(TAG, "desktop visible tasks count changed=$visibleTasksCount")
-                    }
-                    visibleDesktopTasksCountDeprecated = visibleTasksCount
-                }
-            }
-        }
+        override fun onTasksVisibilityChanged(displayId: Int, visibleTasksCount: Int) {}
 
-        override fun onStashedChanged(displayId: Int, stashed: Boolean) {
-            Log.w(TAG, "DesktopTaskListenerImpl: onStashedChanged is deprecated")
-        }
+        override fun onStashedChanged(displayId: Int, stashed: Boolean) {}
 
         override fun onTaskbarCornerRoundingUpdate(
             doesAnyTaskRequireTaskbarRounding: Boolean,
@@ -583,60 +453,12 @@ constructor(
             }
         }
 
-        @Deprecated("Not needed by multi-desks")
-        override fun onEnterDesktopModeTransitionStarted(transitionDuration: Int) {
-            if (enableMultipleDesktops(context)) return
-            val controller = controller.get() ?: return
-            MAIN_EXECUTOR.execute {
-                Log.d(
-                    TAG,
-                    ("DesktopTaskListenerImpl: onEnterDesktopModeTransitionStarted with " +
-                        "duration= " +
-                        transitionDuration),
-                )
-                if (!controller.isInDesktopModeDeprecated) {
-                    controller.isInDesktopModeDeprecated = true
-                    controller.notifyTaskbarDesktopModeListenersForEntry(
-                        DEFAULT_DISPLAY,
-                        transitionDuration,
-                    )
-                }
-            }
-        }
+        override fun onEnterDesktopModeTransitionStarted(transitionDuration: Int) {}
 
-        @Deprecated("Not needed by multi-desks")
         override fun onExitDesktopModeTransitionStarted(
             transitionDuration: Int,
             shouldEndUpAtHome: Boolean,
-        ) {
-            if (enableMultipleDesktops(context)) return
-            val controller = controller.get() ?: return
-            MAIN_EXECUTOR.execute {
-                Log.d(
-                    TAG,
-                    ("DesktopTaskListenerImpl: onExitDesktopModeTransitionStarted with " +
-                        "duration= " +
-                        transitionDuration),
-                )
-                // If shouldEndUpAtHome is true, desktop mode is ending from the user
-                // closing/minimizing the last open window. If it's false, the display is
-                // probably transitioning to an app's full screen mode instead so this metric
-                // should not be logged.
-                if (shouldEndUpAtHome) {
-                    LatencyTracker.getInstance(context)
-                        .onActionStart(
-                            LatencyTracker.ACTION_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE
-                        )
-                }
-                if (controller.isInDesktopModeDeprecated) {
-                    controller.isInDesktopModeDeprecated = false
-                    controller.notifyTaskbarDesktopModeListenersForExit(
-                        DEFAULT_DISPLAY,
-                        transitionDuration,
-                    )
-                }
-            }
-        }
+        ) {}
 
         override fun onCanCreateDesksChanged(canCreateDesks: Boolean) {
             MAIN_EXECUTOR.execute { controller.get()?.onCanCreateDesksChanged(canCreateDesks) }

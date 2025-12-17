@@ -34,8 +34,6 @@ import com.android.launcher3.statehandlers.DesktopVisibilityController.Companion
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.quickstep.TopTaskTracker.HISTORY_SIZE
 import com.android.quickstep.util.FakeTaskFactory
-import com.android.window.flags.Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND
-import com.android.window.flags.Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_FRONTEND
 import com.android.wm.shell.Flags.FLAG_ENABLE_SHELL_TOP_TASK_TRACKING
 import com.android.wm.shell.shared.GroupedTaskInfo
 import com.android.wm.shell.shared.GroupedTaskInfo.TYPE_DESK
@@ -159,7 +157,6 @@ class TopTaskTrackerTest {
 
     @Test
     @DisableFlags(FLAG_ENABLE_SHELL_TOP_TASK_TRACKING)
-    @EnableFlags(FLAG_ENABLE_MULTIPLE_DESKTOPS_FRONTEND, FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
     fun getPlaceholderGroupedTaskInfo_shellTopTaskTrackingDisabled_withDesktopEnabled_noActiveDesk() {
         doReturn(true).whenever(mockResources).getBoolean(eq(R.bool.config_isDesktopModeSupported))
         doReturn(true)
@@ -180,7 +177,6 @@ class TopTaskTrackerTest {
 
     @Test
     @DisableFlags(FLAG_ENABLE_SHELL_TOP_TASK_TRACKING)
-    @EnableFlags(FLAG_ENABLE_MULTIPLE_DESKTOPS_FRONTEND, FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
     fun getPlaceholderGroupedTaskInfo_shellTopTaskTrackingDisabled_withDesktopEnabled_withActiveDesk() {
         doReturn(true).whenever(mockResources).getBoolean(eq(R.bool.config_isDesktopModeSupported))
         doReturn(true)
@@ -198,25 +194,6 @@ class TopTaskTrackerTest {
         assertThat(result!!.isBaseType(TYPE_DESK)).isTrue()
         assertThat(result.deskId).isEqualTo(activeDeskId)
         assertThat(result.getTaskInfoList()).isEqualTo(tasks)
-    }
-
-    @Test
-    @DisableFlags(FLAG_ENABLE_SHELL_TOP_TASK_TRACKING, FLAG_ENABLE_MULTIPLE_DESKTOPS_FRONTEND)
-    fun getPlaceholderGroupedTaskInfo_shellTopTaskTrackingDisabled_withDesktopDisabled_withActiveDesk() {
-        doReturn(true).whenever(mockResources).getBoolean(eq(R.bool.config_isDesktopModeSupported))
-        doReturn(true)
-            .whenever(mockResources)
-            .getBoolean(eq(R.bool.config_canInternalDisplayHostDesktops))
-        val taskInfo = createTaskInfo(1, DEFAULT_DISPLAY, WINDOWING_MODE_FREEFORM)
-        val tasks = listOf(taskInfo)
-        val cachedTaskInfo =
-            TopTaskTracker.CachedTaskInfo(tasks, mockContext, DEFAULT_DISPLAY, INACTIVE_DESK_ID)
-        val result = cachedTaskInfo.getPlaceholderGroupedTaskInfo(null)
-
-        assertThat(result).isNotNull()
-        assertThat(result!!.isBaseType(TYPE_DESK)).isTrue()
-        assertThat(result.deskId).isEqualTo(INACTIVE_DESK_ID)
-        assertThat(result.taskInfo1).isEqualTo(taskInfo)
     }
 
     @Test

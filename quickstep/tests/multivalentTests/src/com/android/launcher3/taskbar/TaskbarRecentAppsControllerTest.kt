@@ -65,7 +65,6 @@ import com.android.quickstep.util.GroupTask
 import com.android.quickstep.util.SingleTask
 import com.android.quickstep.util.SplitTask
 import com.android.systemui.shared.recents.model.Task
-import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.shared.split.SplitBounds
 import com.android.wm.shell.shared.split.SplitScreenConstants
 import com.google.common.truth.Truth.assertThat
@@ -823,7 +822,6 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
     @Test
     fun minimizedTaskIds_multipleDesktopsEnabled_returnsMinimizedTasks() {
         setInDesktopMode(true)
-        whenever(DesktopModeStatus.enableMultipleDesktops(mockContext)).thenReturn(true)
 
         val task1Minimized =
             createTask(id = 1, RUNNING_APP_PACKAGE_1, isMinimized = true, isVisible = false)
@@ -838,25 +836,6 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
             recentTaskPackages = emptyList(),
         )
         assertThat(recentAppsController.minimizedTaskIds).containsExactly(1, 3)
-    }
-
-    @Test
-    fun minimizedTaskIds_multipleDesktopsDisabled_returnsInvisibleTasks() {
-        setInDesktopMode(true)
-        whenever(DesktopModeStatus.enableMultipleDesktops(mockContext)).thenReturn(false)
-        val task1Invisible =
-            createTask(id = 1, RUNNING_APP_PACKAGE_1, isMinimized = true, isVisible = false)
-        val task2InVisible =
-            createTask(id = 2, RUNNING_APP_PACKAGE_2, isMinimized = false, isVisible = false)
-        val task3Invisible =
-            createTask(id = 3, RUNNING_APP_PACKAGE_3, isMinimized = true, isVisible = false)
-        val runningTasks = listOf(task1Invisible, task2InVisible, task3Invisible)
-        prepareHotseatAndRunningAndRecentApps(
-            hotseatPackages = emptyList(),
-            runningTasks = runningTasks,
-            recentTaskPackages = emptyList(),
-        )
-        assertThat(recentAppsController.minimizedTaskIds).containsExactly(1, 2, 3)
     }
 
     @Test

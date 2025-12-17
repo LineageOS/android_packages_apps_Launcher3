@@ -273,11 +273,10 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
             }
             case TestProtocol.REQUEST_IS_TRANSIENT_TASKBAR:
                 return getTaskbarProperty(Bundle::putBoolean, TaskbarManager::isTransient);
-            case TestProtocol.REQUEST_FLAG_ENABLE_MULTIPLE_DESKTOPS: {
+            case TestProtocol.REQUEST_FLAG_IS_DESKTOP_MODE_SUPPORTED: {
                 response.putBoolean(TestProtocol.TEST_INFO_RESPONSE_FIELD,
-                        DesktopState.fromContext(mContext)
-                                .isMultipleDesktopFrontendEnabledOnDisplay(
-                                        Integer.parseInt(arg)));
+                        DesktopState.fromContext(mContext).isDesktopModeSupportedOnDisplay(
+                                Integer.parseInt(arg)));
                 return response;
             }
             case TestProtocol.REQUEST_GET_ACTIVE_DESK_ID: {

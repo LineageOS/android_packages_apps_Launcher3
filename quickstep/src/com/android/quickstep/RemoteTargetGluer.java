@@ -16,7 +16,6 @@
 
 package com.android.quickstep;
 
-import static com.android.wm.shell.shared.desktopmode.DesktopModeStatus.enableMultipleDesktops;
 import static com.android.wm.shell.shared.split.SplitBounds.KEY_EXTRA_SPLIT_BOUNDS;
 
 import android.app.WindowConfiguration;
@@ -28,7 +27,6 @@ import android.window.TransitionInfo;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.launcher3.statehandlers.DesktopVisibilityController;
 import com.android.quickstep.util.AnimatorControllerWithResistance;
 import com.android.quickstep.util.TaskViewSimulator;
 import com.android.quickstep.util.TransformParams;
@@ -70,24 +68,12 @@ public class RemoteTargetGluer {
      */
     public RemoteTargetGluer(Context context, BaseContainerInterface sizingStrategy,
             @Nullable GroupedTaskInfo groupedTaskInfo) {
-        if (enableMultipleDesktops(context)) {
-            if (groupedTaskInfo != null && groupedTaskInfo.isBaseType(GroupedTaskInfo.TYPE_DESK)) {
-                // Allocate +1 to account for the DesktopWallpaperActivity added to the desk.
-                int numHandles = groupedTaskInfo.getTaskInfoList().size() + 1;
-                mRemoteTargetHandles = createHandles(context, sizingStrategy,
-                        /* forDesktop =  */ true, numHandles);
-                return;
-            }
-        } else {
-            int visibleTasksCount = DesktopVisibilityController.INSTANCE.get(context)
-                    .getVisibleDesktopTasksCountDeprecated();
-            if (visibleTasksCount > 0) {
-                // Allocate +1 to account for the DesktopWallpaperActivity added to the desk.
-                int numHandles = visibleTasksCount + 1;
-                mRemoteTargetHandles = createHandles(context, sizingStrategy,
-                        /* forDesktop = */ true, numHandles);
-                return;
-            }
+        if (groupedTaskInfo != null && groupedTaskInfo.isBaseType(GroupedTaskInfo.TYPE_DESK)) {
+            // Allocate +1 to account for the DesktopWallpaperActivity added to the desk.
+            int numHandles = groupedTaskInfo.getTaskInfoList().size() + 1;
+            mRemoteTargetHandles = createHandles(context, sizingStrategy,
+                    /* forDesktop =  */ true, numHandles);
+            return;
         }
 
         // Assume 2 handles needed for split, scale down as needed later on when we actually
