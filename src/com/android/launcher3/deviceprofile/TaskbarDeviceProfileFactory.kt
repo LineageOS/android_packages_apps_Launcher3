@@ -23,11 +23,13 @@ object TaskbarDeviceProfileFactory {
     // TODO(b/430382569) Keep DeviceProfile immutable.
     fun createDeviceProfile(originDeviceProfile: DeviceProfile, context: Context): DeviceProfile {
         val deviceProfile = originDeviceProfile
-        // Taskbar should match the number of icons of hotseat
-        deviceProfile.numShownHotseatIcons = originDeviceProfile.numShownHotseatIcons
-
-        // Same QSB width to have a smooth animation
-        deviceProfile.hotseatQsbWidth = originDeviceProfile.hotseatQsbWidth
+        deviceProfile.hotseatProfile =
+            deviceProfile.hotseatProfile.copy(
+                // Taskbar should match the number of icons of hotseat
+                numShownIcons = originDeviceProfile.hotseatProfile.numShownIcons,
+                // Same QSB width to have a smooth animation
+                qsbWidth = originDeviceProfile.hotseatProfile.qsbWidth,
+            )
 
         deviceProfile.mTaskbarProfile = deviceProfile.updateTaskbarProfile(context.resources)
 

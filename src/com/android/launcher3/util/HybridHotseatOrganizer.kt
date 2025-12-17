@@ -126,7 +126,7 @@ class HybridHotseatOrganizer(
             return
         }
 
-        val hotseatCount = activity.getDeviceProfile().numShownHotseatIcons
+        val hotseatCount = activity.getDeviceProfile().getHotseatProfile().numShownIcons
 
         pauseFlags = pauseFlags or FLAG_FILL_IN_PROGRESS
         for (rank in 0..<hotseatCount) {

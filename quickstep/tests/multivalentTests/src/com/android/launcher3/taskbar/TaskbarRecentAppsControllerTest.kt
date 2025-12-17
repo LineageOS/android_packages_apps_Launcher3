@@ -30,7 +30,6 @@ import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.ColorDrawable
 import android.os.Process
 import android.os.UserHandle
-import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.view.Display.DEFAULT_DISPLAY
@@ -79,7 +78,6 @@ import org.junit.Test
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
@@ -110,7 +108,7 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
 
     @Mock private lateinit var mockIconCache: TaskIconCache
     @Mock private lateinit var mockRecentsModel: RecentsModel
-    @Mock private lateinit var mockTaskChangesListenable: ListenableStream<Void>
+    @Mock private lateinit var mockTaskChangesListenable: ListenableStream<Void?>
     @Mock private lateinit var mockTaskChangesSafeClosable: SafeCloseable
     @Mock private lateinit var mockThemeManager: ThemeManager
     @Mock private lateinit var mockContext: Context
@@ -199,11 +197,10 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
         } else {
             recentTasksChangedListener =
                 if (canShowRunningAndRecentAppsAtInit) {
-                    val listenerCaptor =
-                        ArgumentCaptor.forClass(RecentTasksChangedListener::class.java)
+                    val listenerCaptor = argumentCaptor<RecentTasksChangedListener>()
                     verify(mockRecentsModel)
                         .registerRecentTasksChangedListener(listenerCaptor.capture())
-                    listenerCaptor.value
+                    listenerCaptor.lastValue
                 } else {
                     verify(mockRecentsModel, never()).registerRecentTasksChangedListener(any())
                     null

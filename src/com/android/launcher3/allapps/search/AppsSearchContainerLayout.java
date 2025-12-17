@@ -104,7 +104,8 @@ public class AppsSearchContainerLayout extends ExtendedEditText
                 - mAppsView.getActiveRecyclerView().getPaddingRight();
 
         int cellWidth = DeviceProfile.calculateCellWidth(rowWidth,
-                dp.getWorkspaceIconProfile().getCellLayoutBorderSpacePx().x, dp.numShownHotseatIcons);
+                dp.getWorkspaceIconProfile().getCellLayoutBorderSpacePx().x,
+                dp.getHotseatProfile().getNumShownIcons());
         int iconVisibleSize =
                 Math.round(ICON_VISIBLE_AREA_FACTOR * dp.getWorkspaceIconProfile().getIconSizePx());
         int iconPadding = cellWidth - iconVisibleSize;

@@ -38,7 +38,7 @@ class MockedRecentsModelHelper {
     private val mockThumbnailCache: TaskThumbnailCache = mock()
     private val argumentCaptor = argumentCaptor<(Void?) -> Unit>()
     private val safeClosable: SafeCloseable = mock()
-    private val mockTaskChangeListenable: ListenableStream<Void> = mock {
+    private val mockTaskChangeListenable: ListenableStream<Void?> = mock {
         on { forEach(any(), argumentCaptor.capture()) } doAnswer
             {
                 onTaskChangeCallback = argumentCaptor.lastValue
@@ -70,7 +70,7 @@ class MockedRecentsModelHelper {
 
         on { tasksChanges } doReturn mockTaskChangeListenable
 
-        on { getTasks(anyOrNull<BiConsumer<List<GroupTask>, Int>>(), anyOrNull()) } doAnswer
+        on { getTasks(any<BiConsumer<List<GroupTask>, Int>>(), anyOrNull()) } doAnswer
             {
                 val request = it.getArgument<BiConsumer<List<GroupTask>, Int>?>(0)
                 if (request != null) {

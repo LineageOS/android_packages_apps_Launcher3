@@ -247,7 +247,7 @@ class TaskbarOverflowTest {
         val initialIconCount = currentNumberOfTaskbarIcons.coerceAtLeast(2)
 
         val numberOfHotseatApps =
-            taskbarUnitTestRule.activityContext.deviceProfile.numShownHotseatIcons
+            taskbarUnitTestRule.activityContext.deviceProfile.hotseatProfile.numShownIcons
         val forcedMaxIconCount = numberOfHotseatApps + 2
 
         runOnTaskbarUiThreadSync {
@@ -279,7 +279,7 @@ class TaskbarOverflowTest {
         val initialIconCount = currentNumberOfTaskbarIcons.coerceAtLeast(2)
 
         val numberOfHotseatApps =
-            taskbarUnitTestRule.activityContext.deviceProfile.numShownHotseatIcons
+            taskbarUnitTestRule.activityContext.deviceProfile.hotseatProfile.numShownIcons
         val forcedMaxIconCount = numberOfHotseatApps + 2
 
         runOnTaskbarUiThreadSync {
