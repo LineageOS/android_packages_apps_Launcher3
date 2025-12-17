@@ -325,6 +325,16 @@ constructor(@ApplicationContext private val encryptedContext: Context) {
         val RECONFIGURABLE_WIDGET_EDUCATION_TIP_SEEN =
             backedUpItem("launcher.reconfigurable_widget_education_tip_seen", false)
 
+        // Preferences for Launcher statistics
+        /* Format: a string converted from List<Long>. Sorted descendingly (latest to earliest). */
+        @JvmField
+        val ALL_APPS_TIP_SHOWN_TIMESTAMPS =
+            backedUpItem("launcher.all_apps_tip_shown_timestamps", "")
+
+        @JvmField val ALL_APPS_OPEN_UP_COUNT = backedUpItem("launcher.all_apps_open_up_count", 0)
+
+        @JvmField val INITIAL_TIMESTAMP = backedUpItem("launcher.initial_timestamp", 0L)
+
         @JvmStatic
         fun <T> backedUpItem(
             sharedPrefKey: String,

@@ -386,7 +386,7 @@ public class Launcher extends StatefulActivity<LauncherState>
     // User actions within AllApps state are logged with this InstanceId, to recreate AllApps
     // session on the server side.
     protected InstanceId mAllAppsSessionLogId;
-    private LauncherState mPrevLauncherState;
+    protected LauncherState mPrevLauncherState;
     private CellPosMapper mCellPosMapper = CellPosMapper.DEFAULT;
 
     private final CannedAnimationCoordinator mAnimationCoordinator =
