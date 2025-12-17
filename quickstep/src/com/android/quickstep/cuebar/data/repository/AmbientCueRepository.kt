@@ -21,6 +21,7 @@ import android.app.ActivityOptions
 import android.app.ActivityTaskManager
 import android.app.BroadcastOptions
 import android.app.PendingIntent
+import android.app.assist.ActivityId
 import android.content.Intent
 import android.graphics.Rect
 import android.os.Bundle
@@ -276,10 +277,12 @@ constructor(
             else -> return emptyList()
         }
         val actionType: String
-        val activityId =
+        var activityId =
             if (contextHint is ConversationHint) {
                 val conversationEvent = contextHint.conversationEvent
                 (conversationEvent as? ConversationUpdateEvent)?.conversationData?.activityId
+            } else if (contextHint is BundleHint){
+                contextHint.dataBundle.getParcelable<ActivityId>(EXTRA_ACTIVITY_ID)
             } else {
                 null
             }
@@ -292,6 +295,9 @@ constructor(
                 val action = insight.actionDetails
                 val actionIntent = action.createActionIntent()
                 extras = actionIntent?.extras
+                if (activityId == null) {
+                    activityId = extras?.getParcelable(EXTRA_ACTIVITY_ID)
+                }
                 onPerformAction = {
                     when {
                         // 1. Remote Action Send
