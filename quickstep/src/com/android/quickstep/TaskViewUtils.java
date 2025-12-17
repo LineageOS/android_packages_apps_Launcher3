@@ -680,17 +680,6 @@ public final class TaskViewUtils {
                 dimAnimator.setStartDelay(pa.getDuration() - SPLIT_DIVIDER_ANIM_DURATION);
                 pa.add(dimAnimator);
             }
-            pa.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationStart(Animator animation) {
-                    if (dividerAnimator != null) {
-                        dividerAnimator.cancel();
-                    }
-                    if (dimAnimator != null) {
-                        dimAnimator.cancel();
-                    }
-                }
-            });
         }
 
         Animator childStateAnimation = null;
