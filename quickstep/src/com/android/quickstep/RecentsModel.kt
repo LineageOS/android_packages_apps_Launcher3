@@ -33,6 +33,7 @@ import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.ListenableStream
 import com.android.launcher3.util.LooperExecutor
 import com.android.launcher3.util.MutableListenableStream
+import com.android.quickstep.RecentsFilterState.EMPTY_FILTER
 import com.android.quickstep.RecentsModel.RecentTasksChangedListener
 import com.android.quickstep.TaskUtils.checkCurrentOrManagedUserId
 import com.android.quickstep.dagger.QuickstepBaseAppComponent
@@ -124,7 +125,7 @@ constructor(
      * @return the request id associated with this call.
      */
     override fun getTasks(callback: Consumer<List<GroupTask>>?) =
-        taskList.getTasks(loadKeysOnly = false, callback, RecentsFilterState.getDesktopTaskFilter())
+        taskList.getTasks(loadKeysOnly = false, callback, EMPTY_FILTER)
 
     /**
      * Fetches the list of recent tasks, based on a filter

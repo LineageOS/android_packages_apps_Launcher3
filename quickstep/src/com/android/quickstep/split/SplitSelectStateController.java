@@ -29,6 +29,7 @@ import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCH
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.quickstep.RecentsFilterState.EMPTY_FILTER;
 import static com.android.quickstep.split.SplitSelectDataHolder.SPLIT_PENDINGINTENT_PENDINGINTENT;
 import static com.android.quickstep.split.SplitSelectDataHolder.SPLIT_PENDINGINTENT_TASK;
 import static com.android.quickstep.split.SplitSelectDataHolder.SPLIT_SHORTCUT_TASK;
@@ -101,7 +102,6 @@ import com.android.quickstep.OverviewComponentObserver;
 import com.android.quickstep.RecentsAnimationCallbacks;
 import com.android.quickstep.RecentsAnimationController;
 import com.android.quickstep.RecentsAnimationTargets;
-import com.android.quickstep.RecentsFilterState;
 import com.android.quickstep.RecentsModel;
 import com.android.quickstep.RemoteAnimationTargets;
 import com.android.quickstep.SplitSelectionListener;
@@ -277,8 +277,8 @@ public class SplitSelectStateController {
     public void findLastActiveTasksAndRunCallback(
             @Nullable List<ResolvedTargetInfo> resolvedTargetInfos, boolean findExactPairMatch,
             Consumer<Task[]> callback) {
-        findLastActiveTasksAndRunCallback(RecentsFilterState.getDesktopTaskFilter(),
-                resolvedTargetInfos, findExactPairMatch, callback);
+        findLastActiveTasksAndRunCallback(EMPTY_FILTER, resolvedTargetInfos, findExactPairMatch,
+                callback);
     }
 
     /**

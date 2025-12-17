@@ -15,16 +15,11 @@
  */
 package com.android.quickstep;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 
-import android.app.WindowConfiguration;
-import android.content.Context;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.RemoteAnimationTarget;
-
-import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 
 import java.io.PrintWriter;
 
@@ -45,25 +40,6 @@ public class RecentsAnimationTargets extends RemoteAnimationTargets {
 
     public boolean hasTargets() {
         return unfilteredApps.length != 0;
-    }
-
-    /**
-     * Check if target apps contain desktop tasks which have windowing mode set to {@link
-     * WindowConfiguration#WINDOWING_MODE_FREEFORM}
-     *
-     * @return {@code true} if at least one target app is a desktop task
-     */
-    // TODO: b/362720309 - Remove this function once multi-desks is fully launched.
-    public boolean hasDesktopTasks(Context context) {
-        if (!DesktopModeStatus.canEnterDesktopMode(context)) {
-            return false;
-        }
-        for (RemoteAnimationTarget target : apps) {
-            if (target.windowConfiguration.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override

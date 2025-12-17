@@ -57,7 +57,6 @@ import static com.android.launcher3.util.MultiPropertyFactory.MULTI_PROPERTY_VAL
 import static com.android.launcher3.util.SystemUiController.UI_STATE_FULLSCREEN_TASK;
 import static com.android.quickstep.BaseContainerInterface.getTaskDimension;
 import static com.android.quickstep.TaskUtils.checkCurrentOrManagedUserId;
-import static com.android.quickstep.util.DesksUtils.areMultiDesksFlagsEnabled;
 import static com.android.quickstep.util.ExternalDisplaysKt.isExternalDisplay;
 import static com.android.quickstep.util.LogUtils.splitFailureMessage;
 import static com.android.quickstep.views.OverviewActionsView.HIDDEN_ACTIONS_IN_MENU;
@@ -125,7 +124,6 @@ import android.widget.ListView;
 import android.widget.OverScroller;
 import android.widget.Toast;
 import android.window.DesktopExperienceFlags;
-import android.window.DesktopModeFlags;
 import android.window.PictureInPictureSurfaceTransaction;
 import android.window.TransitionInfo;
 
@@ -645,7 +643,7 @@ public abstract class RecentsView<
                                 if (taskRemoved) {
                                     dismissTask(taskId, /* removeTask= */false);
                                 }
-                            }, RecentsFilterState.getFilter(mContainer.getDisplayId()));
+                            }, RecentsFilterState.getDisplayIdFilter(mContainer.getDisplayId()));
                         }
                     }));
         }
@@ -876,7 +874,7 @@ public abstract class RecentsView<
                 .inflate(R.layout.overview_clear_all_button, this, false);
         mClearAllButton.setOnClickListener(this::dismissAllTasks);
 
-        mIsMultipleDesktopFrontendEnabled = mDesktopState.isMultipleDesktopFrontendEnabledOnDisplay(
+        mIsMultipleDesktopFrontendEnabled = mDesktopState.isDesktopModeSupportedOnDisplay(
                 mContainer.getDisplay());
         if (mIsMultipleDesktopFrontendEnabled) {
             mAddDesktopButton = (AddDesktopButton) LayoutInflater.from(context).inflate(
@@ -1821,8 +1819,7 @@ public abstract class RecentsView<
         // Track the current DesktopTaskView through [deskId] as a desk can be empty without any
         // tasks.
         int currentTaskViewDeskId = INACTIVE_DESK_ID;
-        if (areMultiDesksFlagsEnabled()
-                && currentTaskView instanceof DesktopTaskView desktopTaskView) {
+        if (currentTaskView instanceof DesktopTaskView desktopTaskView) {
             currentTaskViewDeskId = desktopTaskView.getDeskId();
         } else if (currentTaskView != null) {
             currentTaskIds = currentTaskView.getTaskIds();
@@ -1839,8 +1836,7 @@ public abstract class RecentsView<
 
         // Track the running TaskView through [deskId] as a desk can be empty without any tasks.
         int runningTaskViewDeskId = INACTIVE_DESK_ID;
-        if (areMultiDesksFlagsEnabled()
-                && runningTaskView instanceof DesktopTaskView desktopTaskView) {
+        if (runningTaskView instanceof DesktopTaskView desktopTaskView) {
             runningTaskViewDeskId = desktopTaskView.getDeskId();
         } else if (runningTaskView != null) {
             runningTaskIds = runningTaskView.getTaskIds();
@@ -2596,7 +2592,7 @@ public abstract class RecentsView<
         if (!mRecentsModel.isTaskListValid(mAppliedTaskListChangeId)) {
             mRecentsModel.getTasks(
                     this::applyLoadPlan,
-                    RecentsFilterState.getFilter(mContainer.getDisplayId()));
+                    RecentsFilterState.getDisplayIdFilter(mContainer.getDisplayId()));
             Log.d(TAG, "reloadIfNeeded - getTasks: " + mAppliedTaskListChangeId);
             mRecentsViewModel.refreshAllTaskData();
         } else {
@@ -3385,19 +3381,10 @@ public abstract class RecentsView<
                 .post(
                         () -> {
                             if (groupTask instanceof DesktopTask desktopTask) {
-                                if (areMultiDesksFlagsEnabled()) {
-                                    SystemUiProxy.INSTANCE
-                                            .get(getContext())
-                                            .removeDesk(desktopTask.getDeskId(),
-                                                    DesktopModeTransitionSource.RECENTS);
-                                } else if (DesktopModeFlags
-                                        .ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()) {
-                                    SystemUiProxy.INSTANCE
-                                            .get(getContext())
-                                            .removeDefaultDeskInDisplay(
-                                                    mContainer.getDisplay().getDisplayId(),
-                                                    DesktopModeTransitionSource.RECENTS);
-                                }
+                                SystemUiProxy.INSTANCE
+                                        .get(getContext())
+                                        .removeDesk(desktopTask.getDeskId(),
+                                                DesktopModeTransitionSource.RECENTS);
                             } else {
                                 for (Task task : groupTask.getTasks()) {
                                     ActivityManagerWrapper.getInstance().removeTask(task.key.id);
@@ -3870,7 +3857,7 @@ public abstract class RecentsView<
                 ? getHorizontalOffsetSize(midpoint - 1, midpoint, offset)
                 : 0;
         int rightOffsetReferenceIndex;
-        if (areMultiDesksFlagsEnabled() && midpoint == INVALID_PAGE) {
+        if (midpoint == INVALID_PAGE) {
             rightOffsetReferenceIndex = getFirstViewIndex();
         } else {
             rightOffsetReferenceIndex = midpoint + 1;
@@ -4900,13 +4887,8 @@ public abstract class RecentsView<
             return;
         }
 
-        boolean forDesktop;
-        if (mDesktopState.enableMultipleDesktops()) {
-            forDesktop = mActiveGestureGroupedTaskInfo != null
-                    && mActiveGestureGroupedTaskInfo.isBaseType(GroupedTaskInfo.TYPE_DESK);
-        } else {
-            forDesktop = recentsAnimationTargets.hasDesktopTasks(mContext);
-        }
+        boolean forDesktop = mActiveGestureGroupedTaskInfo != null
+                && mActiveGestureGroupedTaskInfo.isBaseType(GroupedTaskInfo.TYPE_DESK);
         RemoteTargetGluer gluer = new RemoteTargetGluer(getContext(), getContainerInterface(),
                 recentsAnimationTargets, forDesktop);
         if (forDesktop) {

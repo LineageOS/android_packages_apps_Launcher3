@@ -22,14 +22,12 @@ import static com.android.launcher3.Flags.FLAG_ENABLE_LATER_IS_LOCKED_CHECK;
 import static com.android.launcher3.Flags.FLAG_HIDE_AUTOMATED_TASKS_IN_OVERVIEW;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
-import static com.android.window.flags.Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.TestCase.assertNull;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
@@ -46,7 +44,6 @@ import android.companion.virtual.VirtualDeviceManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
-import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 
@@ -201,7 +198,6 @@ public class RecentTasksListTest {
     }
 
     @Test
-    @EnableFlags(FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
     public void loadTasksInBackground_freeformTask_multiDesksInMultiDisplays() throws Exception {
         List<TaskInfo> tasksInDefaultDesk1 = Arrays.asList(
                 createRecentTaskInfo(/* taskId = */ 1, DEFAULT_DISPLAY),
@@ -301,40 +297,6 @@ public class RecentTasksListTest {
     }
 
     @Test
-    @DisableFlags(FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
-    public void loadTasksInBackground_freeformTask_createsDesktopTaskPerDisplay() throws Exception {
-        List<TaskInfo> tasks = Arrays.asList(
-                createRecentTaskInfo(1 /* taskId */, DEFAULT_DISPLAY),
-                createRecentTaskInfo(4 /* taskId */, DEFAULT_DISPLAY),
-                createRecentTaskInfo(5 /* taskId */, 1 /* displayId */),
-                createRecentTaskInfo(6 /* taskId */, 1 /* displayId */));
-        GroupedTaskInfo recentTaskInfos = GroupedTaskInfo.forDeskTasks(
-                0 /* deskId */, DEFAULT_DISPLAY, tasks,
-                Collections.emptySet() /* minimizedTaskIds */);
-        when(mSystemUiProxy.getRecentTasks(anyInt(), anyInt()))
-                .thenReturn(new ArrayList<>(Collections.singletonList(recentTaskInfos)));
-
-        List<GroupTask> taskList = mRecentTasksList.loadTasksInBackground(
-                Integer.MAX_VALUE /* numTasks */, -1 /* requestId */, false /* loadKeysOnly */);
-
-        assertEquals(2, taskList.size());
-        assertEquals(TaskViewType.DESKTOP, taskList.get(0).taskViewType);
-        List<Task> actualFreeformTasksDefaultDisplay = taskList.get(0).getTasks();
-        assertEquals(2, actualFreeformTasksDefaultDisplay.size());
-        assertEquals(1, actualFreeformTasksDefaultDisplay.get(0).key.id);
-        assertFalse(actualFreeformTasksDefaultDisplay.get(0).isMinimized);
-        assertEquals(4, actualFreeformTasksDefaultDisplay.get(1).key.id);
-        assertFalse(actualFreeformTasksDefaultDisplay.get(1).isMinimized);
-
-        List<Task> actualFreeformTasksExternalDisplay = taskList.get(1).getTasks();
-        assertEquals(2, actualFreeformTasksExternalDisplay.size());
-        assertEquals(5, actualFreeformTasksExternalDisplay.get(0).key.id);
-        assertFalse(actualFreeformTasksExternalDisplay.get(0).isMinimized);
-        assertEquals(6, actualFreeformTasksExternalDisplay.get(1).key.id);
-        assertFalse(actualFreeformTasksExternalDisplay.get(1).isMinimized);
-    }
-
-    @Test
     public void loadTasksInBackground_freeformTask_onlyMinimizedTasks_createDesktopTask()
             throws Exception {
         List<TaskInfo> tasks = Arrays.asList(
@@ -364,7 +326,7 @@ public class RecentTasksListTest {
     }
 
     @Test
-    @EnableFlags({FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND, FLAG_HIDE_AUTOMATED_TASKS_IN_OVERVIEW})
+    @EnableFlags(FLAG_HIDE_AUTOMATED_TASKS_IN_OVERVIEW)
     public void loadTasksInBackground_desktopTask_filterOutAutomatedTasks() throws Exception {
         List<TaskInfo> tasksInDefaultDesk1 = Arrays.asList(
                 createRecentTaskInfo(/* taskId = */ 1, DEFAULT_DISPLAY, /* isAutomated= */false),
@@ -400,7 +362,7 @@ public class RecentTasksListTest {
 
 
     @Test
-    @EnableFlags({FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND, FLAG_HIDE_AUTOMATED_TASKS_IN_OVERVIEW})
+    @EnableFlags(FLAG_HIDE_AUTOMATED_TASKS_IN_OVERVIEW)
     public void loadTasksInBackground_splitTask_filterOutAutomatedTasks() throws Exception {
         GroupedTaskInfo recentTaskInfo1 = GroupedTaskInfo.forSplitTasks(
                 createRecentTaskInfo(/* taskId = */ 1, DEFAULT_DISPLAY, /* isAutomated= */false),
@@ -464,7 +426,7 @@ public class RecentTasksListTest {
 
 
     @Test
-    @EnableFlags({FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND, FLAG_HIDE_AUTOMATED_TASKS_IN_OVERVIEW})
+    @EnableFlags(FLAG_HIDE_AUTOMATED_TASKS_IN_OVERVIEW)
     public void loadTasksInBackground_singleTask_filterOutAutomatedTasks() throws Exception {
         GroupedTaskInfo recentTaskInfo1 = GroupedTaskInfo.forFullscreenTasks(
                 createRecentTaskInfo(/* taskId = */ 1, DEFAULT_DISPLAY, /* isAutomated= */false));

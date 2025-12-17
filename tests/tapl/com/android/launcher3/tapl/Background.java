@@ -139,7 +139,7 @@ public abstract class Background extends LauncherInstrumentation.VisibleContaine
                                                         != TaskViewType.DESKTOP)
                                                 .allMatch(t -> t.getVisibleBounds().right
                                                         < centerTask.getVisibleBounds().left));
-                                if (!mLauncher.areMultiDesksFlagsEnabled()) {
+                                if (!mLauncher.isDesktopModeSupported()) {
                                     mLauncher.assertTrue(
                                             "DesktopTask(s) found to the left of the swiped task",
                                             tasks.stream()

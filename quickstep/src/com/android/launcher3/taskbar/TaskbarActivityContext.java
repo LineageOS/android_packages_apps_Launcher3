@@ -183,7 +183,6 @@ import com.android.launcher3.util.VibratorWrapper;
 import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.views.BaseDragLayer;
 import com.android.quickstep.NavHandle;
-import com.android.quickstep.RecentsFilterState;
 import com.android.quickstep.RecentsModel;
 import com.android.quickstep.SystemUiProxy;
 import com.android.quickstep.util.DesktopTask;
@@ -1776,7 +1775,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                 if (recents != null && recents.isSplitSelectionActive()) {
                     // If we are selecting a second app for split, launch the split tasks
                     taskbarUIController.triggerSecondAppForSplit(info, info.intent, view,
-                            RecentsFilterState.getDesktopTaskFilter());
+                            EMPTY_FILTER);
                 } else {
                     // Else launch the selected task
                     Intent intent = new Intent(info.getIntent())
@@ -1838,7 +1837,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             if (recents != null && recents.isSplitSelectionActive()) {
                 // If we are selecting a second app for split, launch the split tasks
                 taskbarUIController.triggerSecondAppForSplit(info, info.intent, view,
-                        RecentsFilterState.getDesktopTaskFilter());
+                        EMPTY_FILTER);
             } else {
                 launchFromTaskbar(recents, view, Collections.singletonList(info));
             }
@@ -2017,7 +2016,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         List<ResolvedTargetInfo> resolvedTargetInfo =
                 itemInfos.stream().map(ItemInfo::getResolvedTargetInfo).toList();
         recents.findLastActiveTasksAndRunCallback(
-                RecentsFilterState.getDesktopTaskFilter(),
+                EMPTY_FILTER,
                 resolvedTargetInfo,
                 isLaunchingAppPair,
                 foundTasks -> {

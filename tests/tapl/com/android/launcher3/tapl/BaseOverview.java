@@ -661,7 +661,7 @@ public class BaseOverview extends LauncherInstrumentation.VisibleContainer {
 
     protected boolean isAddDesktopButtonExpected() {
         UiObject2 rightMostTask = getRightMostTaskOnScreen();
-        return mLauncher.areMultiDesksFlagsEnabled() && rightMostTask != null
+        return mLauncher.isDesktopModeSupported() && rightMostTask != null
                 && isFirstTask(rightMostTask) && mLauncher.canCreateDesks();
     }
 

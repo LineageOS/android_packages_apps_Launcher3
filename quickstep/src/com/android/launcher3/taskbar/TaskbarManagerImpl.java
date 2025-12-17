@@ -44,7 +44,6 @@ import static com.android.launcher3.util.SimpleBroadcastReceiver.actionsFilter;
 import static com.android.quickstep.util.SystemActionConstants.ACTION_SHOW_TASKBAR;
 import static com.android.quickstep.util.SystemActionConstants.SYSTEM_ACTION_ID_TASKBAR;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAVIGATION_BAR_DISABLED;
-import static com.android.wm.shell.shared.desktopmode.DesktopModeStatus.enableMultipleDesktops;
 
 import android.animation.AnimatorSet;
 import android.annotation.SuppressLint;
@@ -350,10 +349,8 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
                 }
 
                 private void onExitDesktopModeInternal(int duration) {
-                    if (enableMultipleDesktops(mBaseContext)) {
-                        LatencyTracker.getInstance(mBaseContext).onActionStart(
-                                LatencyTracker.ACTION_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE);
-                    }
+                    LatencyTracker.getInstance(mBaseContext).onActionStart(
+                            LatencyTracker.ACTION_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE);
 
                     TaskbarActivityContext taskbarActivityContext = getCurrentActivityContext();
                     if (taskbarActivityContext != null
