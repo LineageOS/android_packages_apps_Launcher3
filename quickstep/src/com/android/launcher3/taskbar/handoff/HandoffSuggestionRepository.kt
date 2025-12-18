@@ -53,13 +53,14 @@ constructor(
     private val _suggestion = MutableListenableRef<HandoffSuggestion?>(null)
 
     @VisibleForTesting
-    val listener: (List<RemoteTask>?) -> Unit = {
-        _suggestion.dispatchValue(
-            it?.filter { remoteTask -> remoteTask.isTaskInForeground }
-                ?.maxByOrNull { remoteTask -> remoteTask.lastUsedTimestampMillis }
-                ?.let { remoteTask -> getHandoffSuggestion(remoteTask) }
-        )
-    }
+    val listener =
+        TaskContinuityManager.RemoteTaskListener {
+            _suggestion.dispatchValue(
+                it.filter { remoteTask -> remoteTask.isTaskInForeground }
+                    .maxByOrNull { remoteTask -> remoteTask.lastUsedTimestampMillis }
+                    ?.let { remoteTask -> getHandoffSuggestion(remoteTask) }
+            )
+        }
     private val handoffSuggestionBadge: BitmapInfo by lazy {
         iconPool.obtain().use {
             it.createBadgedIconBitmap(
