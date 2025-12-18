@@ -20,18 +20,16 @@ import static android.view.MotionEvent.INVALID_POINTER_ID;
 import static android.view.RoundedCorner.POSITION_BOTTOM_LEFT;
 import static android.view.RoundedCorner.POSITION_BOTTOM_RIGHT;
 
-import static com.android.launcher3.Flags.enableTaskbarUiThread;
 import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.MotionEventsUtils.isTrackpadMotionEvent;
 import static com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLAG_AUTOHIDE_SUSPEND_TOUCHING;
-import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
+import static com.android.launcher3.util.Executors.getTaskbarUiThread;
 import static com.android.systemui.shared.Flags.cursorHotCorner;
 
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
-import android.os.Looper;
 import android.view.Display;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -47,7 +45,6 @@ import com.android.launcher3.taskbar.TaskbarApiProxy;
 import com.android.launcher3.taskbar.TaskbarThresholdUtils;
 import com.android.launcher3.taskbar.TaskbarUiState;
 import com.android.launcher3.touch.OverScroll;
-import com.android.launcher3.util.LooperExecutor;
 import com.android.quickstep.GestureState;
 import com.android.quickstep.InputConsumer;
 import com.android.quickstep.OverviewCommandHelper;
@@ -65,10 +62,7 @@ public class TaskbarUnstashInputConsumer extends DelegateInputConsumer {
 
     private static final int NUM_MOTION_MOVE_THRESHOLD = 3;
 
-    private static final Handler sUnstashHandler = new Handler(
-            enableTaskbarUiThread()
-                    ? ((LooperExecutor) TASKBAR_UI_THREAD).getLooper()
-                    : Looper.getMainLooper());
+    private static final Handler sUnstashHandler = new Handler(getTaskbarUiThread().getLooper());
 
     private final TaskbarApiProxy mTaskbarApiProxy;
     private final TaskbarUiState mTaskbarUiState;

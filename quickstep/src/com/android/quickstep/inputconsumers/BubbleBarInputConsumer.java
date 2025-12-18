@@ -19,7 +19,7 @@ package com.android.quickstep.inputconsumers;
 import static android.view.MotionEvent.INVALID_POINTER_ID;
 
 import static com.android.launcher3.Flags.refactorTaskbarUiState;
-import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
+import static com.android.launcher3.util.Executors.getTaskbarUiThread;
 
 import android.content.Context;
 import android.graphics.PointF;
@@ -112,7 +112,7 @@ public class BubbleBarInputConsumer implements InputConsumer {
                         "ACTION_DOWN stashedOrCollapsed=" + mStashedOrCollapsedOnDown + " downPos="
                                 + mDownPos);
                 if (mBubbleBarSwipeController != null) {
-                    TASKBAR_UI_THREAD.execute(mBubbleBarSwipeController::start);
+                    getTaskbarUiThread().execute(mBubbleBarSwipeController::start);
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -132,7 +132,7 @@ public class BubbleBarInputConsumer implements InputConsumer {
                     }
                 }
                 if (mBubbleBarSwipeController != null) {
-                    TASKBAR_UI_THREAD.execute(() -> {
+                    getTaskbarUiThread().execute(() -> {
                         mBubbleBarSwipeController.swipeTo(dY);
                         if (!mPilfered && mBubbleBarSwipeController.isSwipeGesture()) {
                             Log.d(TAG, "ACTION_MOVE swipe gesture, pilfering");
@@ -158,7 +158,7 @@ public class BubbleBarInputConsumer implements InputConsumer {
                         && mStashedOrCollapsedOnDown) {
                     Log.d(TAG, "ACTION_UP showing bubble bar");
                     // Taps on the handle / collapsed state should open the bar
-                    TASKBAR_UI_THREAD.execute(() -> mBubbleStashController.showBubbleBar(
+                    getTaskbarUiThread().execute(() -> mBubbleStashController.showBubbleBar(
                             /* expandBubbles= */ true, /* bubbleBarGesture= */ true));
                 } else {
                     Log.d(TAG, "ACTION_UP nothing to do");
@@ -176,7 +176,7 @@ public class BubbleBarInputConsumer implements InputConsumer {
     private void cleanupAfterMotionEvent() {
         Log.d(TAG, "cleaning up passedSlop=" + mPassedTouchSlop + " pilfered=" + mPilfered);
         if (mBubbleBarSwipeController != null) {
-            TASKBAR_UI_THREAD.execute(mBubbleBarSwipeController::finish);
+            getTaskbarUiThread().execute(mBubbleBarSwipeController::finish);
         }
         mPassedTouchSlop = false;
         mPilfered = false;

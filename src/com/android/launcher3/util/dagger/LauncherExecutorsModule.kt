@@ -24,6 +24,7 @@ import com.android.launcher3.concurrent.annotations.ThreadPool
 import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.util.Executors
+import com.android.launcher3.util.Executors.getTaskbarUiThread
 import com.android.launcher3.util.LooperExecutor
 import com.android.launcher3.util.coroutines.DispatcherProvider
 import com.android.launcher3.util.coroutines.ProductionDispatchers
@@ -82,7 +83,7 @@ abstract class LauncherExecutorsModule {
         @LauncherAppSingleton
         @TaskbarUi
         fun provideTaskbarUiLooperExecutor(): LooperExecutor {
-            return Executors.TASKBAR_UI_THREAD
+            return getTaskbarUiThread()
         }
 
         @Provides

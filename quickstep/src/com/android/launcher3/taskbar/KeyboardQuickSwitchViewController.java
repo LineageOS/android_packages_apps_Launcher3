@@ -19,8 +19,8 @@ import static android.window.DesktopModeFlags.ENABLE_TASKBAR_OVERFLOW;
 
 import static com.android.launcher3.desktop.DesktopAppLaunchTransition.AppLaunchType.UNMINIMIZE;
 import static com.android.launcher3.taskbar.TaskbarDesktopExperienceFlags.enableAltTabKqsFlatenning;
-import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
+import static com.android.launcher3.util.Executors.getTaskbarUiThread;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -345,7 +345,7 @@ public class KeyboardQuickSwitchViewController {
                         DisplayController.INSTANCE.get(mControllers.taskbarActivityContext),
                         UNMINIMIZE,
                         Cuj.CUJ_DESKTOP_MODE_KEYBOARD_QUICK_SWITCH_APP_LAUNCH,
-                        TASKBAR_UI_THREAD
+                        getTaskbarUiThread()
                 ),
                 "DesktopKeyboardQuickSwitchUnminimize");
     }

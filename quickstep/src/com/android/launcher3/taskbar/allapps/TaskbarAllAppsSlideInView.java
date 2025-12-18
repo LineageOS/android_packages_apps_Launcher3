@@ -17,10 +17,8 @@ package com.android.launcher3.taskbar.allapps;
 
 import static android.os.Trace.TRACE_TAG_APP;
 
-import static com.android.app.animation.Interpolators.DECELERATED_EASE;
 import static com.android.app.animation.Interpolators.EMPHASIZED;
-import static com.android.app.animation.Interpolators.LINEAR;
-import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
+import static com.android.launcher3.util.Executors.getTaskbarUiThread;
 
 import android.animation.Animator;
 import android.content.Context;
@@ -41,7 +39,6 @@ import android.window.OnBackInvokedDispatcher;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.DeviceProfile;
-import com.android.launcher3.Flags;
 import com.android.launcher3.Insettable;
 import com.android.launcher3.R;
 import com.android.launcher3.anim.AnimatorListeners;
@@ -216,7 +213,8 @@ public class TaskbarAllAppsSlideInView extends AbstractSlideInView<TaskbarOverla
             dispatcher.registerOnBackInvokedCallback(
                     OnBackInvokedDispatcher.PRIORITY_DEFAULT, this);
         }
-        CrossWindowBlurListeners.getInstance().addListener(TASKBAR_UI_THREAD, mWindowBlurListener);
+        CrossWindowBlurListeners.getInstance()
+                .addListener(getTaskbarUiThread(), mWindowBlurListener);
     }
 
     @Override

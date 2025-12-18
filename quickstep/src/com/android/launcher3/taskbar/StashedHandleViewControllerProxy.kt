@@ -16,16 +16,16 @@
 
 package com.android.launcher3.taskbar
 
-import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
+import com.android.launcher3.util.Executors.getTaskbarUiThread
 
-/** Wrap [StashedHandleViewController] and dispatch API calls to [TASKBAR_UI_THREAD]. */
+/** Wrap [StashedHandleViewController] and dispatch API calls to taskbar's ui thread. */
 class StashedHandleViewControllerProxy(private val delegate: StashedHandleViewController) {
 
     fun setTranslationYForSwipe(transY: Float) {
-        TASKBAR_UI_THREAD.execute { delegate.setTranslationYForSwipe(transY) }
+        getTaskbarUiThread().execute { delegate.setTranslationYForSwipe(transY) }
     }
 
     fun setStashedHandleAlpha(alphaIndex: Int, alpha: Float) {
-        TASKBAR_UI_THREAD.execute { delegate.stashedHandleAlpha.get(alphaIndex).setValue(alpha) }
+        getTaskbarUiThread().execute { delegate.stashedHandleAlpha.get(alphaIndex).setValue(alpha) }
     }
 }

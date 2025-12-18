@@ -27,7 +27,7 @@ import com.android.launcher3.LauncherState
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.util.AsyncView
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
-import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
+import com.android.launcher3.util.Executors.getTaskbarUiThread
 import com.android.launcher3.util.TaskbarAsyncAnimator
 import com.android.quickstep.GestureState
 import com.android.quickstep.RecentsAnimationCallbacks
@@ -55,39 +55,39 @@ class TaskbarInteractor(private val taskbarUIController: TaskbarUIController) {
 
     @AnyThread
     fun setUserIsNotGoingHome(isNotGoingHome: Boolean) {
-        TASKBAR_UI_THREAD.execute { taskbarUIController.setUserIsNotGoingHome(isNotGoingHome) }
+        getTaskbarUiThread().execute { taskbarUIController.setUserIsNotGoingHome(isNotGoingHome) }
     }
 
     @AnyThread
     fun hideOverlayWindow() {
-        TASKBAR_UI_THREAD.execute { taskbarUIController.hideOverlayWindow() }
+        getTaskbarUiThread().execute { taskbarUIController.hideOverlayWindow() }
     }
 
     @AnyThread
     fun startTranslationSpring() {
-        TASKBAR_UI_THREAD.execute { taskbarUIController.startTranslationSpring() }
+        getTaskbarUiThread().execute { taskbarUIController.startTranslationSpring() }
     }
 
     @AnyThread
     fun onExpandPip() {
-        TASKBAR_UI_THREAD.execute { taskbarUIController.onExpandPip() }
+        getTaskbarUiThread().execute { taskbarUIController.onExpandPip() }
     }
 
     @AnyThread
     fun onLauncherVisibilityChanged(visible: Boolean) {
-        TASKBAR_UI_THREAD.execute { taskbarUIController.onLauncherVisibilityChanged(visible) }
+        getTaskbarUiThread().execute { taskbarUIController.onLauncherVisibilityChanged(visible) }
     }
 
     @AnyThread
     fun onStateTransitionCompletedAfterSwipeToHome(finalState: LauncherState) {
-        TASKBAR_UI_THREAD.execute {
+        getTaskbarUiThread().execute {
             taskbarUIController.onStateTransitionCompletedAfterSwipeToHome(finalState)
         }
     }
 
     @AnyThread
     fun notifyRenderer(reason: String) {
-        TASKBAR_UI_THREAD.execute {
+        getTaskbarUiThread().execute {
             val rootViewImpl: ViewRootImpl = taskbarUIController.rootView.viewRootImpl
             rootViewImpl.notifyRendererOfExpensiveFrame()
             rootViewImpl.notifyRendererForGpuLoadUp(reason)
@@ -97,7 +97,7 @@ class TaskbarInteractor(private val taskbarUIController: TaskbarUIController) {
     @AnyThread
     fun onTaskbarInAppDisplayProgressUpdate(progress: Float, flag: Int) {
         if (taskbarUIController is LauncherTaskbarUIController) {
-            TASKBAR_UI_THREAD.execute {
+            getTaskbarUiThread().execute {
                 taskbarUIController.onTaskbarInAppDisplayProgressUpdate(progress, flag)
             }
         }
@@ -106,7 +106,7 @@ class TaskbarInteractor(private val taskbarUIController: TaskbarUIController) {
     @AnyThread
     fun setShouldDelayLauncherStateAnim(shouldDelayLauncherStateAnim: Boolean) {
         if (taskbarUIController is LauncherTaskbarUIController) {
-            TASKBAR_UI_THREAD.execute {
+            getTaskbarUiThread().execute {
                 taskbarUIController.setShouldDelayLauncherStateAnim(shouldDelayLauncherStateAnim)
             }
         }
@@ -115,55 +115,55 @@ class TaskbarInteractor(private val taskbarUIController: TaskbarUIController) {
     @AnyThread
     fun showEduOnAppLaunch() {
         if (taskbarUIController is LauncherTaskbarUIController) {
-            TASKBAR_UI_THREAD.execute { taskbarUIController.showEduOnAppLaunch() }
+            getTaskbarUiThread().execute { taskbarUIController.showEduOnAppLaunch() }
         }
     }
 
     @AnyThread
     fun openQuickSwitchView() {
-        TASKBAR_UI_THREAD.execute { taskbarUIController.openQuickSwitchView() }
+        getTaskbarUiThread().execute { taskbarUIController.openQuickSwitchView() }
     }
 
     @AnyThread
     fun refreshResumedState() {
-        TASKBAR_UI_THREAD.execute { taskbarUIController.refreshResumedState() }
+        getTaskbarUiThread().execute { taskbarUIController.refreshResumedState() }
     }
 
     @AnyThread
     fun setSkipLauncherVisibilityChange(skip: Boolean) {
-        TASKBAR_UI_THREAD.execute { taskbarUIController.setSkipLauncherVisibilityChange(skip) }
+        getTaskbarUiThread().execute { taskbarUIController.setSkipLauncherVisibilityChange(skip) }
     }
 
     @AnyThread
     fun onLauncherResume() {
         if (taskbarUIController is LauncherTaskbarUIController) {
-            TASKBAR_UI_THREAD.execute { taskbarUIController.onLauncherResume() }
+            getTaskbarUiThread().execute { taskbarUIController.onLauncherResume() }
         }
     }
 
     @AnyThread
     fun onLauncherPause() {
         if (taskbarUIController is LauncherTaskbarUIController) {
-            TASKBAR_UI_THREAD.execute { taskbarUIController.onLauncherPause() }
+            getTaskbarUiThread().execute { taskbarUIController.onLauncherPause() }
         }
     }
 
     @AnyThread
     fun onLauncherStop() {
         if (taskbarUIController is LauncherTaskbarUIController) {
-            TASKBAR_UI_THREAD.execute { taskbarUIController.onLauncherStop() }
+            getTaskbarUiThread().execute { taskbarUIController.onLauncherStop() }
         }
     }
 
     @AnyThread
     fun onNavigateHome() {
-        TASKBAR_UI_THREAD.execute { taskbarUIController.onNavigateHome() }
+        getTaskbarUiThread().execute { taskbarUIController.onNavigateHome() }
     }
 
     @AnyThread
     fun setIgnoreInAppFlagForSync(enabled: Boolean) {
         if (taskbarUIController is LauncherTaskbarUIController) {
-            TASKBAR_UI_THREAD.execute { taskbarUIController.setIgnoreInAppFlagForSync(enabled) }
+            getTaskbarUiThread().execute { taskbarUIController.setIgnoreInAppFlagForSync(enabled) }
         }
     }
 
@@ -172,7 +172,7 @@ class TaskbarInteractor(private val taskbarUIController: TaskbarUIController) {
      * on main thread so we can added it as child animation to [appLaunchAnimationSet] which is also
      * played on main thread.
      *
-     * If enableTaskbarUiThread() is on, this animation will be played on [TASKBAR_UI_THREAD] and we
+     * If enableTaskbarUiThread() is on, this animation will be played on taskbar's ui thread and we
      * will return a thread safe [TaskbarAsyncAnimator] to Launcher, who will later need to manually
      * start it with app launch animation.
      */
@@ -180,7 +180,7 @@ class TaskbarInteractor(private val taskbarUIController: TaskbarUIController) {
     fun createAnimToApp(appLaunchAnimationSet: AnimatorSet): TaskbarAsyncAnimator? {
         if (taskbarUIController is LauncherTaskbarUIController) {
             if (enableTaskbarUiThread()) {
-                return TaskbarAsyncAnimator(TASKBAR_UI_THREAD, MAIN_EXECUTOR) {
+                return TaskbarAsyncAnimator(getTaskbarUiThread(), MAIN_EXECUTOR) {
                     taskbarUIController.createAnimToApp()
                 }
             } else {
@@ -193,7 +193,9 @@ class TaskbarInteractor(private val taskbarUIController: TaskbarUIController) {
     @AnyThread
     fun updateTaskbarLauncherStateGoingHome() {
         if (taskbarUIController is LauncherTaskbarUIController) {
-            TASKBAR_UI_THREAD.execute { taskbarUIController.updateTaskbarLauncherStateGoingHome() }
+            getTaskbarUiThread().execute {
+                taskbarUIController.updateTaskbarLauncherStateGoingHome()
+            }
         }
     }
 
@@ -211,14 +213,14 @@ class TaskbarInteractor(private val taskbarUIController: TaskbarUIController) {
     fun launchFocusedTask(): Future<Set<Int>?> =
         CompletableFuture.supplyAsync(
             { taskbarUIController.launchFocusedTask() },
-            TASKBAR_UI_THREAD,
+            getTaskbarUiThread(),
         )
 
     @AnyThread
     fun postOnRootViewDraw(callback: Runnable, callbackExecutor: Executor): Boolean {
         val rootView = taskbarUIController.rootView
         return if (rootView != null) {
-            TASKBAR_UI_THREAD.execute {
+            getTaskbarUiThread().execute {
                 ViewUtils.postFrameDrawn(rootView) { callbackExecutor.execute(callback) }
             }
             true
@@ -232,7 +234,7 @@ class TaskbarInteractor(private val taskbarUIController: TaskbarUIController) {
 
     @AnyThread
     fun findMatchingAsyncView(v: View): AsyncView<View> {
-        return AsyncView(TASKBAR_UI_THREAD) { taskbarUIController.findMatchingView(v) }
+        return AsyncView(getTaskbarUiThread()) { taskbarUIController.findMatchingView(v) }
     }
 
     @AnyThread

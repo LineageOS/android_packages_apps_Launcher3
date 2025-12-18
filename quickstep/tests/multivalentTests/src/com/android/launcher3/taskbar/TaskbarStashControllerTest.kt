@@ -66,7 +66,7 @@ import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.UserSetupMode
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.taskbar.rules.displayControllerSpy
-import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
+import com.android.launcher3.util.Executors.getTaskbarUiThread
 import com.android.launcher3.util.RoboApiWrapper.convertToSpy
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_VISIBLE
@@ -158,7 +158,7 @@ class TaskbarStashControllerTest {
         isPinned = false
         if (enableTaskbarUiThread()) {
             getInstrumentation().runOnMainSync {
-                TASKBAR_UI_THREAD.execute {
+                getTaskbarUiThread().execute {
                     assertThat(stashController.timeoutAlarm.alarmPending()).isTrue()
                 }
             }

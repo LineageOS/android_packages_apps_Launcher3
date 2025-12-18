@@ -30,7 +30,7 @@ import com.android.launcher3.model.data.ResolvedTargetInfo
 import com.android.launcher3.util.AsyncView
 import com.android.launcher3.util.Executors.IMMEDIATE_EXECUTOR
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
-import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
+import com.android.launcher3.util.Executors.getTaskbarUiThread
 import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.SplitConfigurationOptions
 import com.android.quickstep.split.SplitSelectStateController
@@ -78,7 +78,9 @@ class RecentsViewInteractor(private val recentsView: RecentsView<*, *>) {
 
     @AnyThread
     fun addSideTaskLaunchCallback(callback: RunnableList) {
-        val wrapperRunnable = Runnable { TASKBAR_UI_THREAD.execute(callback::executeAllAndDestroy) }
+        val wrapperRunnable = Runnable {
+            getTaskbarUiThread().execute(callback::executeAllAndDestroy)
+        }
         mainExecutor.execute { recentsView.addSideTaskLaunchCallback(wrapperRunnable) }
     }
 
@@ -87,7 +89,7 @@ class RecentsViewInteractor(private val recentsView: RecentsView<*, *>) {
         val wrapperListener =
             if (taskLaunchListener != null)
                 RecentsView.TaskLaunchListener {
-                    TASKBAR_UI_THREAD.execute { taskLaunchListener.onTaskLaunched() }
+                    getTaskbarUiThread().execute { taskLaunchListener.onTaskLaunched() }
                 }
             else null
         mainExecutor.execute { recentsView.setTaskLaunchListener(wrapperListener) }
@@ -97,7 +99,7 @@ class RecentsViewInteractor(private val recentsView: RecentsView<*, *>) {
     fun setTaskLaunchCancelledRunnable(onTaskLaunchCancelledRunnable: Runnable?) {
         val wrapperRunnable =
             if (onTaskLaunchCancelledRunnable != null)
-                Runnable { TASKBAR_UI_THREAD.execute(onTaskLaunchCancelledRunnable) }
+                Runnable { getTaskbarUiThread().execute(onTaskLaunchCancelledRunnable) }
             else null
         mainExecutor.execute { recentsView.setTaskLaunchCancelledRunnable(wrapperRunnable) }
     }

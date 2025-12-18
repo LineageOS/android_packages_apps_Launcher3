@@ -51,7 +51,7 @@ import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.TaskItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.taskbar.TaskbarRecentAppsController.TaskState
-import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
+import com.android.launcher3.util.Executors.getTaskbarUiThread
 import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.ListenableStream
 import com.android.launcher3.util.MutableListenableRef
@@ -187,7 +187,7 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
                 if (canShowRunningAndRecentAppsAtInit) {
                     val listenerCaptor = argumentCaptor<(Void?) -> Unit>()
                     verify(mockTaskChangesListenable)
-                        .forEach(same(TASKBAR_UI_THREAD), listenerCaptor.capture())
+                        .forEach(same(getTaskbarUiThread()), listenerCaptor.capture())
                     listenerCaptor.lastValue
                 } else {
                     verify(mockTaskChangesListenable, never()).forEach(any(), any())
@@ -1796,7 +1796,7 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
 
     private fun waitForTaskbarUiThreadSync() {
         if (enableTaskbarUiThread()) {
-            TASKBAR_UI_THREAD.submit {}.get()
+            getTaskbarUiThread().submit {}.get()
         }
     }
 

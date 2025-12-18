@@ -30,8 +30,8 @@ import static com.android.launcher3.taskbar.TaskbarDesktopExperienceFlags.enable
 import static com.android.launcher3.taskbar.growth.GrowthConstants.BROADCAST_SHOW_NUDGE;
 import static com.android.launcher3.taskbar.growth.GrowthConstants.GROWTH_NUDGE_PERMISSION;
 import static com.android.launcher3.util.DisplayController.getChangeFlagsString;
-import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
+import static com.android.launcher3.util.Executors.getTaskbarUiThread;
 import static com.android.launcher3.util.FlagDebugUtils.formatFlagChange;
 import static com.android.launcher3.util.SimpleBroadcastReceiver.actionsFilter;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAVIGATION_BAR_DISABLED;
@@ -175,7 +175,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
                 public void onPrefChanged(String key) {
                     boolean isTaskbarPinningChanged = TASKBAR_PINNING_KEY.equals(key);
                     if (isTaskbarPinningChanged) {
-                        TASKBAR_UI_THREAD.execute(() -> {
+                        getTaskbarUiThread().execute(() -> {
                             recreateTaskbars();
                         });
                     }
@@ -187,7 +187,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
 
                 @Override
                 public void onListenerInitializedFromShell() {
-                    TASKBAR_UI_THREAD.execute(() -> {
+                    getTaskbarUiThread().execute(() -> {
                         DesktopVisibilityController visibilityController =
                                 DesktopVisibilityController.INSTANCE.get(mBaseContext);
                         if (getCurrentActivityContext() != null
@@ -218,7 +218,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
                 @Override
                 public void onActiveDeskChanged(int displayId, int newActiveDesk,
                         int oldActiveDesk) {
-                    TASKBAR_UI_THREAD.execute(() ->
+                    getTaskbarUiThread().execute(() ->
                             onActiveDeskChangedInternal(displayId, newActiveDesk, oldActiveDesk));
                 }
 
@@ -258,7 +258,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
             new DesktopVisibilityController.TaskbarDesktopModeListener() {
                 @Override
                 public void onExitDesktopMode(int duration) {
-                    TASKBAR_UI_THREAD.execute(() -> onExitDesktopModeInternal(duration));
+                    getTaskbarUiThread().execute(() -> onExitDesktopModeInternal(duration));
                 }
 
                 private void onExitDesktopModeInternal(int duration) {
@@ -280,7 +280,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
 
                 @Override
                 public void onEnterDesktopMode(int duration) {
-                    TASKBAR_UI_THREAD.execute(() -> onEnterDesktopModeInternal(duration));
+                    getTaskbarUiThread().execute(() -> onEnterDesktopModeInternal(duration));
                 }
 
                 private void onEnterDesktopModeInternal(int duration) {
@@ -407,10 +407,10 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
                 mTaskbarDesktopModeListener);
 
         mUserSetupCompleteSafeCloseable = SettingsCache.INSTANCE.get(mPrimaryWindowContext)
-                .getListenableRef(USER_SETUP_COMPLETE_URI).forEach(TASKBAR_UI_THREAD,
+                .getListenableRef(USER_SETUP_COMPLETE_URI).forEach(getTaskbarUiThread(),
                         (v) -> onSettingChanged(v, TaskbarActivityContext::isUserSetupComplete));
         mNavBarKidsModeSafeCloseable = SettingsCache.INSTANCE.get(mPrimaryWindowContext)
-                .getListenableRef(NAV_BAR_KIDS_MODE).forEach(TASKBAR_UI_THREAD,
+                .getListenableRef(NAV_BAR_KIDS_MODE).forEach(getTaskbarUiThread(),
                         (v) -> onSettingChanged(v, TaskbarActivityContext::isInKidsMode));
         if (DesktopExperienceFlags.ENABLE_SYS_DECORS_CALLBACKS_VIA_WM.isTrue()
                 && DesktopExperienceFlags.ENABLE_DISPLAY_CONTENT_MODE_MANAGEMENT.isTrue()) {
@@ -424,7 +424,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         mShutdownReceiver = new SimpleBroadcastReceiver(
                 mPrimaryWindowContext,
                 UI_HELPER_EXECUTOR,
-                TASKBAR_UI_THREAD,
+                getTaskbarUiThread(),
                 i -> destroyAllTaskbars());
 
         mShutdownReceiver.register(actionsFilter(Intent.ACTION_SHUTDOWN));
@@ -433,7 +433,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
             mGrowthBroadcastReceiver = new SimpleBroadcastReceiver(
                     mPrimaryWindowContext,
                     UI_HELPER_EXECUTOR,
-                    TASKBAR_UI_THREAD,
+                    getTaskbarUiThread(),
                     this::showGrowthNudge);
             mGrowthBroadcastReceiver.register(
                     actionsFilter(BROADCAST_SHOW_NUDGE),
@@ -587,7 +587,8 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         return taskbar == null
                 ? null
                 : new AsyncAnimatorPlaybackController(
-                        TASKBAR_UI_THREAD, () -> taskbar.createLauncherStartFromSuwAnim(duration));
+                        getTaskbarUiThread(),
+                        () -> taskbar.createLauncherStartFromSuwAnim(duration));
     }
 
     /**
@@ -634,9 +635,9 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
         mPrimaryResource.debugMsg(
                 "setActivityInteractor: registering activity lifecycle callbacks.");
         mActivityOnDestroySafeCloseable = mActivityInteractor.addEventCallback(
-                EVENT_DESTROYED, mActivityOnDestroyCallback, TASKBAR_UI_THREAD);
+                EVENT_DESTROYED, mActivityOnDestroyCallback, getTaskbarUiThread());
         mUnfoldTransitionProgressSafeCloseable = mActivityInteractor.addUnfoldTransitionCallback(
-                mUnfoldTransitionProgressListener, TASKBAR_UI_THREAD);
+                mUnfoldTransitionProgressListener, getTaskbarUiThread());
         mUnfoldProgressProvider.setSourceProvider(
                 mActivityInteractor.getUnfoldTransitionProvider());
 

@@ -31,7 +31,7 @@ import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.taskbar.TaskbarControllers.LoggableTaskbarController
 import com.android.launcher3.taskbar.TaskbarPopupController.canPinAppWithContextMenu
 import com.android.launcher3.util.CancellableTask
-import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
+import com.android.launcher3.util.Executors.getTaskbarUiThread
 import com.android.launcher3.util.Preconditions
 import com.android.launcher3.util.SafeCloseable
 import com.android.quickstep.RecentsFilterState
@@ -255,7 +255,7 @@ class TaskbarRecentAppsController(
             if (enableTaskbarUiThread()) {
                 recentTasksChangedListenerClosable?.close()
                 recentTasksChangedListenerClosable =
-                    recentsModel.tasksChanges.forEach(TASKBAR_UI_THREAD) {
+                    recentsModel.tasksChanges.forEach(getTaskbarUiThread()) {
                         reloadRecentTasksIfNeeded()
                     }
             } else {
@@ -266,11 +266,13 @@ class TaskbarRecentAppsController(
             // Both callbacks force an icon fetch, because these changes may affect how icons
             // are generated from BitmapInfo.
             iconShapeDataCloseable =
-                themeManager.iconShapeData.forEach(TASKBAR_UI_THREAD) {
+                themeManager.iconShapeData.forEach(getTaskbarUiThread()) {
                     fetchIcons(forceUpdate = true)
                 }
             themeChangeListener =
-                ThemeChangeListener { TASKBAR_UI_THREAD.execute { fetchIcons(forceUpdate = true) } }
+                ThemeChangeListener {
+                        getTaskbarUiThread().execute { fetchIcons(forceUpdate = true) }
+                    }
                     .also { themeManager.addChangeListener(it) }
         }
     }
@@ -353,7 +355,7 @@ class TaskbarRecentAppsController(
         loadingRecentsTasks = true
         taskListChangeId =
             recentsModel.getTasks(RecentsFilterState.EMPTY_FILTER) { tasks ->
-                TASKBAR_UI_THREAD.execute {
+                getTaskbarUiThread().execute {
                     loadingRecentsTasks = false
                     recentTasksLoaded = true
                     allRecentTasks = tasks
@@ -423,7 +425,7 @@ class TaskbarRecentAppsController(
         for (groupTask in shownTasks) {
             for ((i, task) in groupTask.tasks.withIndex()) {
                 val cancellableTask =
-                    recentsModel.iconCache.getBitmapInfoInBackground(task, TASKBAR_UI_THREAD) {
+                    recentsModel.iconCache.getBitmapInfoInBackground(task, getTaskbarUiThread()) {
                         bi,
                         d,
                         t ->

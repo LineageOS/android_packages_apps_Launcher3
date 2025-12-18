@@ -34,7 +34,7 @@ import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.uioverrides.QuickstepLauncher
-import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
+import com.android.launcher3.util.Executors.getTaskbarUiThread
 import com.android.launcher3.util.MutableListenableRef
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_AWAKE
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_WAKEFULNESS_TRANSITION
@@ -157,7 +157,7 @@ class TaskbarLauncherStateControllerTest {
                 launcherInteractor,
                 mockedLauncherUiState,
                 sysUiStateFlags,
-                TASKBAR_UI_THREAD,
+                getTaskbarUiThread(),
             )
             taskbarStashController.toggleTaskbarStash() // Un-stashing the taskbar.
             bubbleBarViewController.setHiddenForBubbles(false) // Show the bubble bar.

@@ -21,7 +21,7 @@ import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.launcher3.LauncherPrefs.Companion.TASKBAR_PINNING
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.testutil.Wait
-import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
+import com.android.launcher3.util.Executors.getTaskbarUiThread
 import com.android.quickstep.dagger.SysUIConnectionComponent
 import com.android.quickstep.sysuiconnection.TISBinder
 import java.util.concurrent.CompletableFuture
@@ -94,7 +94,7 @@ class TISBinderRule : TestRule {
     }
 
     private fun waitForTaskbarUiThreadSync() {
-        TASKBAR_UI_THREAD.submit {}.get()
+        getTaskbarUiThread().submit {}.get()
     }
 
     /**
@@ -108,7 +108,7 @@ class TISBinderRule : TestRule {
             .appComponent
             .sysUIConnectionTracker
             .activeComponent
-            .forEach(TASKBAR_UI_THREAD) { if (it != null) result.complete(block.invoke(it)) }
+            .forEach(getTaskbarUiThread()) { if (it != null) result.complete(block.invoke(it)) }
             .use {
                 return result.get()
             }

@@ -19,7 +19,7 @@ import static com.android.launcher3.LauncherModel.useModelRepositoryBinding;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_ALL_APPS_PREDICTION;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION;
-import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
+import static com.android.launcher3.util.Executors.getTaskbarUiThread;
 
 import android.view.View;
 import android.view.ViewGroup;
@@ -95,7 +95,7 @@ public class TaskbarModelCallbacks implements
         var repo = LauncherComponentProvider.get(mContext).getHomeScreenRepository();
         var state = repo.getWorkspaceState();
 
-        mContext.closeOnDestroy(state.getChanges().forEach(TASKBAR_UI_THREAD, ev -> {
+        mContext.closeOnDestroy(state.getChanges().forEach(getTaskbarUiThread(), ev -> {
             if (ev == null) {
                 bindCompleteModel(state.getValue());
                 return null;
@@ -118,7 +118,7 @@ public class TaskbarModelCallbacks implements
     @Override
     public void bindCompleteModel(WorkspaceData itemIdMap, boolean isBindingSync) {
         if (useModelRepositoryBinding()) return;
-        TASKBAR_UI_THREAD.execute(() -> bindCompleteModel(itemIdMap));
+        getTaskbarUiThread().execute(() -> bindCompleteModel(itemIdMap));
     }
 
     @UiThread
@@ -139,7 +139,7 @@ public class TaskbarModelCallbacks implements
     @Override
     public void bindItemsAdded(List<ItemInfo> items) {
         if (useModelRepositoryBinding()) return;
-        TASKBAR_UI_THREAD.execute(() -> bindWorkspaceItemsAdded(items));
+        getTaskbarUiThread().execute(() -> bindWorkspaceItemsAdded(items));
     }
 
     @UiThread
@@ -166,7 +166,7 @@ public class TaskbarModelCallbacks implements
     @Override
     public void bindItemsUpdated(@NonNull Set<ItemInfo> updates) {
         if (useModelRepositoryBinding()) return;
-        TASKBAR_UI_THREAD.execute(() -> bindWorkspaceItemsUpdated(updates));
+        getTaskbarUiThread().execute(() -> bindWorkspaceItemsUpdated(updates));
     }
 
     @UiThread
@@ -230,7 +230,7 @@ public class TaskbarModelCallbacks implements
     @Override
     public void bindWorkspaceComponentsRemoved(Predicate<ItemInfo> matcher) {
         if (useModelRepositoryBinding()) return;
-        TASKBAR_UI_THREAD.execute(() -> bindWorkspaceItemsRemoved(matcher));
+        getTaskbarUiThread().execute(() -> bindWorkspaceItemsRemoved(matcher));
     }
 
     @UiThread
@@ -359,7 +359,7 @@ public class TaskbarModelCallbacks implements
     public void bindAllApplications(AppInfo[] apps, int flags,
             Map<PackageUserKey, Integer> packageUserKeytoUidMap) {
         if (useModelRepositoryBinding()) return;
-        TASKBAR_UI_THREAD.execute(() -> {
+        getTaskbarUiThread().execute(() -> {
             mContext.getActivityComponent().getAppsStore().setApps(
                     apps, flags, packageUserKeytoUidMap);
             mControllers.taskbarAllAppsController.setApps(apps, flags, packageUserKeytoUidMap);
