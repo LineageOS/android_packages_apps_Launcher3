@@ -31,8 +31,6 @@ import com.android.launcher3.util.TestUtil
 import com.android.launcher3.util.ui.PortraitLandscapeRunner.PortraitLandscape
 import com.android.quickstep.AbstractTaplTestsTaskbar.CALCULATOR_APP_NAME
 import com.android.quickstep.AbstractTaplTestsTaskbar.CALCULATOR_APP_PACKAGE
-import com.android.window.flags.Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND
-import com.android.window.flags.Flags.FLAG_ENABLE_MULTIPLE_DESKTOPS_FRONTEND
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import java.util.function.Supplier
@@ -153,7 +151,6 @@ class TaplTestsOverviewDesktop : AbstractQuickStepTest() {
 
     @Test
     @PortraitLandscape
-    @EnableFlags(FLAG_ENABLE_MULTIPLE_DESKTOPS_FRONTEND, FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
     fun testCreateMultiDesktopsViaAddDesktopButton() {
         // Tap add desk button to create a desk.
         val overview = mLauncher.workspace.switchToOverview().createDeskViaClickAddDesktopButton()
@@ -164,7 +161,6 @@ class TaplTestsOverviewDesktop : AbstractQuickStepTest() {
 
     @Test
     @PortraitLandscape
-    @EnableFlags(FLAG_ENABLE_MULTIPLE_DESKTOPS_FRONTEND, FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
     fun testEmptyDesk() {
         mLauncher.workspace
             .switchToOverview()
@@ -190,7 +186,6 @@ class TaplTestsOverviewDesktop : AbstractQuickStepTest() {
 
     @Test
     @PortraitLandscape
-    @EnableFlags(FLAG_ENABLE_MULTIPLE_DESKTOPS_FRONTEND, FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
     fun testSwitchMultiDesktopsViaOverview() {
         val overview =
             mLauncher.workspace
@@ -227,7 +222,6 @@ class TaplTestsOverviewDesktop : AbstractQuickStepTest() {
 
     @Test
     @PortraitLandscape
-    @EnableFlags(FLAG_ENABLE_MULTIPLE_DESKTOPS_FRONTEND, FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
     fun testQuickSwitchBetweenDesksForwardAndBackward() {
         // Create two empty desks and 1 non-empty desk, and keep record of deskId.
         var overview =
@@ -285,7 +279,6 @@ class TaplTestsOverviewDesktop : AbstractQuickStepTest() {
 
     @Test
     @PortraitLandscape
-    @EnableFlags(FLAG_ENABLE_MULTIPLE_DESKTOPS_FRONTEND, FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
     fun testDismissMultipleDesksViaSwipeUpGesture() {
         var overview =
             mLauncher.workspace
@@ -306,7 +299,6 @@ class TaplTestsOverviewDesktop : AbstractQuickStepTest() {
 
     @Test
     @PortraitLandscape
-    @EnableFlags(FLAG_ENABLE_MULTIPLE_DESKTOPS_FRONTEND, FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND)
     fun testDismissDeskViaTaskMenuClearButton() {
         var overview =
             mLauncher.workspace

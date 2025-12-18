@@ -26,7 +26,6 @@ import android.os.Process
 import android.util.Log
 import android.util.SparseBooleanArray
 import android.view.Display
-import android.window.DesktopExperienceFlags
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.getSystemService
 import com.android.launcher3.Flags.enableLaterIsLockedCheck
@@ -36,7 +35,6 @@ import com.android.launcher3.concurrent.annotations.LightweightBackground
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority.UI
 import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.dagger.ApplicationContext
-import com.android.launcher3.statehandlers.DesktopVisibilityController.Companion.INACTIVE_DESK_ID
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.LooperExecutor
 import com.android.quickstep.RecentsModel.RecentTasksChangedListener
@@ -45,7 +43,6 @@ import com.android.quickstep.util.DesktopTask
 import com.android.quickstep.util.GroupTask
 import com.android.quickstep.util.SingleTask
 import com.android.quickstep.util.SplitTask
-import com.android.quickstep.util.safeDisplayId
 import com.android.systemui.shared.recents.model.Task
 import com.android.systemui.shared.recents.model.Task.TaskKey
 import com.android.wm.shell.Flags.enableShellTopTaskTracking
@@ -420,29 +417,13 @@ constructor(
     private fun createDesktopTasks(recentTaskInfo: GroupedTaskInfo): List<DesktopTask> {
         val minimizedTaskIdArray = recentTaskInfo.minimizedTaskIds
         val minimizedTaskIds = minimizedTaskIdArray?.toSet() ?: emptySet()
-
-        if (!DesktopExperienceFlags.ENABLE_MULTIPLE_DESKTOPS_BACKEND.isTrue) {
-            // This code is not needed when the multiple desktop feature is enabled, since Shell
-            // will send a single `GroupedTaskInfo` for each desk with a unique `deskId` across
-            // all displays.
-            val perDisplayTasks = mutableMapOf<Int, MutableList<Task>>()
-            recentTaskInfo.taskInfoList.forEach { taskInfo ->
-                val task = createTask(taskInfo, minimizedTaskIds)
-                val tasks = perDisplayTasks.getOrPut(task.safeDisplayId) { mutableListOf() }
-                tasks.add(task)
-            }
-            // When the multiple desktop feature is disabled, there can only be up to a single desk
-            // on each display, The desk ID doesn't matter and should not be used.
-            return perDisplayTasks.map { DesktopTask(INACTIVE_DESK_ID, it.key, it.value) }
-        } else {
-            val deskId = recentTaskInfo.deskId
-            val displayId = recentTaskInfo.deskDisplayId
-            val tasks =
-                recentTaskInfo.taskInfoList
-                    .map { createTask(it, minimizedTaskIds) }
-                    .filterNot(::isTaskAutomated)
-            return listOf(DesktopTask(deskId, displayId, tasks))
-        }
+        val deskId = recentTaskInfo.deskId
+        val displayId = recentTaskInfo.deskDisplayId
+        val tasks =
+            recentTaskInfo.taskInfoList
+                .map { createTask(it, minimizedTaskIds) }
+                .filterNot(::isTaskAutomated)
+        return listOf(DesktopTask(deskId, displayId, tasks))
     }
 
     fun dump(prefix: String, writer: PrintWriter) {

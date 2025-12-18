@@ -19,7 +19,6 @@ package com.android.launcher3.taskbar.customization.util
 import androidx.annotation.VisibleForTesting
 import com.android.launcher3.taskbar.customization.enums.OverflowIconPosition
 import kotlin.math.max
-import kotlin.math.min
 
 object TaskbarIconContainerUtil {
     const val DEFAULT_BOUNCE_SCALE = 1f
@@ -45,11 +44,10 @@ object TaskbarIconContainerUtil {
         overflowIconPosition: OverflowIconPosition,
         numMaxIcons: Int,
     ): TaskbarContainerIconsBySection<T> {
-
         return when (overflowIconPosition) {
             OverflowIconPosition.END -> {
                 val startIdx = 0
-                val endIdx = min(itemList.size, numMaxIcons)
+                val endIdx = if (itemList.size > numMaxIcons) numMaxIcons - 1 else itemList.size
                 TaskbarContainerIconsBySection(
                     itemList.subList(startIdx, endIdx),
                     itemList.subList(endIdx, itemList.size),
@@ -57,7 +55,10 @@ object TaskbarIconContainerUtil {
             }
 
             OverflowIconPosition.START -> {
-                val startIdx = max(itemList.size - numMaxIcons, 0)
+                if (itemList.size <= numMaxIcons)
+                    return TaskbarContainerIconsBySection(itemList, emptyList())
+
+                val startIdx = itemList.size - numMaxIcons + 1
                 val endIdx = itemList.size
                 itemList.subList(startIdx, endIdx)
                 TaskbarContainerIconsBySection(

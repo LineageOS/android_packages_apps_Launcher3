@@ -21,6 +21,7 @@ import android.app.ActivityOptions
 import android.app.ActivityTaskManager
 import android.app.BroadcastOptions
 import android.app.PendingIntent
+import android.app.assist.ActivityId
 import android.content.Intent
 import android.graphics.Rect
 import android.os.Bundle
@@ -33,6 +34,7 @@ import android.service.personalcontext.insight.ActionableInsight
 import android.service.personalcontext.insight.ContextInsight
 import android.service.personalcontext.insight.DisplayInsight
 import android.service.personalcontext.insight.InsightActionDetails
+import android.service.personalcontext.insight.InsightCollection
 import android.util.Log
 import android.view.autofill.AutofillManager
 import androidx.annotation.VisibleForTesting
@@ -221,13 +223,22 @@ constructor(
         pw.println("$prefix  frontTaskPackageName: ${frontTaskPackageName.value}")
     }
 
+    private fun ContextInsight.flatten(): List<ContextInsight> {
+        return if (this is InsightCollection) {
+            this.insights.flatMap { it.flatten() }
+        } else {
+            listOf(this)
+        }
+    }
+
     override fun onInsightReceived(insight: List<ContextInsight>) {
         uiExecutor.execute {
             if (insight.isEmpty()) {
                 updateActions(emptyList())
                 return@execute
             }
-            val actions = insight.flatMap { mapInsightToActions(it) }
+            val actions = insight.flatMap { it.flatten() }
+                .flatMap { mapInsightToActions(it) }
             if (actions.isNotEmpty()) {
                 isDeactivated.dispatchValue(false)
             }
@@ -254,16 +265,24 @@ constructor(
     @VisibleForTesting
     fun mapContextInsightToAction(insight: ContextInsight, contextHint: ContextHint):
             List<ActionModel> {
+        // Keep check here in case this method is called independently like in tests.
+        if (insight is InsightCollection) {
+            return insight.insights.flatMap { child ->
+                mapContextInsightToAction(child, contextHint)
+            }
+        }
         val display = when (insight) {
             is ActionableInsight -> insight.displayDetails
             is DisplayInsight -> insight.details
             else -> return emptyList()
         }
         val actionType: String
-        val activityId =
+        var activityId =
             if (contextHint is ConversationHint) {
                 val conversationEvent = contextHint.conversationEvent
                 (conversationEvent as? ConversationUpdateEvent)?.conversationData?.activityId
+            } else if (contextHint is BundleHint){
+                contextHint.dataBundle.getParcelable<ActivityId>(EXTRA_ACTIVITY_ID)
             } else {
                 null
             }
@@ -276,6 +295,9 @@ constructor(
                 val action = insight.actionDetails
                 val actionIntent = action.createActionIntent()
                 extras = actionIntent?.extras
+                if (activityId == null) {
+                    activityId = extras?.getParcelable(EXTRA_ACTIVITY_ID)
+                }
                 onPerformAction = {
                     when {
                         // 1. Remote Action Send
@@ -320,8 +342,12 @@ constructor(
             }
         }
         val attribution = display.subtitle?.toString()
-        val iconDrawable = display.icon?.loadDrawable(context)
-            ?: context.getDrawable(R.drawable.ic_paste_spark)!!
+        val iconDrawable = try {
+            display.icon?.loadDrawable(context)
+        } catch (e: Exception) {
+            Log.e(TAG, "Resource loading failed for ID: ${display.icon?.resId}", e)
+            null
+        } ?: context.getDrawable(R.drawable.ic_paste_spark)!!
         val oneTapEnabled = extras?.getBoolean(EXTRA_ONE_TAP_ENABLED)
         val oneTapDelayMs = extras?.getLong(
             EXTRA_ONE_TAP_DELAY_MS,

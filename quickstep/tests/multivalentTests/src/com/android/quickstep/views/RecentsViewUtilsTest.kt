@@ -26,7 +26,6 @@ import com.android.quickstep.TaskAnimationManager
 import com.android.quickstep.fallback.RecentsState.Companion.BACKGROUND_APP
 import com.android.quickstep.fallback.RecentsState.Companion.DEFAULT
 import com.android.window.flags.Flags
-import com.android.wm.shell.shared.desktopmode.FakeDesktopState
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -55,7 +54,6 @@ class RecentsViewUtilsTest {
             RecentsViewUtils(
                 recentsView,
                 displayController,
-                FakeDesktopState(),
                 DISPLAY_ID,
                 taskAnimationManager,
                 rotationTouchHelper,

@@ -88,9 +88,9 @@ import com.android.wm.shell.bubbles.IBubbles
 import com.android.wm.shell.bubbles.IBubblesListener
 import com.android.wm.shell.common.pip.IPip
 import com.android.wm.shell.common.pip.IPipAnimationListener
-import com.android.wm.shell.desktopmode.IDesktopMode
 import com.android.wm.shell.desktopmode.IDesktopTaskListener
 import com.android.wm.shell.desktopmode.IMoveToDesktopCallback
+import com.android.wm.shell.desktopmode.api.IDesktopMode
 import com.android.wm.shell.draganddrop.IDragAndDrop
 import com.android.wm.shell.onehanded.IOneHanded
 import com.android.wm.shell.onehanded.IOneHanded.Stub

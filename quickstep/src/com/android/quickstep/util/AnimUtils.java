@@ -17,7 +17,6 @@
 package com.android.quickstep.util;
 
 import static com.android.app.animation.Interpolators.clampToProgress;
-import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -37,6 +36,7 @@ import com.android.launcher3.logging.StatsLogManager;
 import com.android.launcher3.statemanager.BaseState;
 import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.states.StateAnimationConfig;
+import com.android.launcher3.util.LooperExecutor;
 import com.android.launcher3.util.RunnableList;
 import com.android.launcher3.views.ActivityContext;
 import com.android.quickstep.split.SplitAnimationController;
@@ -118,25 +118,25 @@ public class AnimUtils {
      * is destroyed
      */
     public static IRemoteCallback completeRunnableListCallback(
-            RunnableList list, ActivityContext owner) {
+            RunnableList list, ActivityContext owner, LooperExecutor uiExecutor) {
         DefaultLifecycleObserver destroyObserver = new DefaultLifecycleObserver() {
             @Override
             public void onDestroy(@NonNull LifecycleOwner owner) {
                 list.executeAllAndClear();
             }
         };
-        MAIN_EXECUTOR.execute(() -> owner.getLifecycle().addObserver(destroyObserver));
+        uiExecutor.execute(() -> owner.getLifecycle().addObserver(destroyObserver));
         list.add(() -> owner.getLifecycle().removeObserver(destroyObserver));
 
         return new IRemoteCallback.Stub() {
             @Override
             public void sendResult(Bundle bundle) {
-                MAIN_EXECUTOR.execute(list::executeAllAndDestroy);
+                uiExecutor.execute(list::executeAllAndDestroy);
             }
 
             @Override
             public IBinder asBinder() {
-                return BinderUtils.wrapLifecycle(this, owner.getOwnerCleanupSet());
+                return BinderUtils.wrapLifecycle(this, owner.getOwnerCleanupSet(), uiExecutor);
             }
         };
     }

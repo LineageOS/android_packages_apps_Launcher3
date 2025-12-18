@@ -202,7 +202,7 @@ class TaskbarPinnedAppIconContainer(context: Context) :
             itemView.setTag(R.id.taskbar_icon_has_hover_listener, true)
         }
         // Recycle the remaining view if view count is more than items to show
-        while (childCount > itemCount) {
+        while (childCount > taskbarContainerIconsBySection.nonOverflownItems.size) {
             itemViewFactory.removeAndRecycle(this[childCount - 1])
         }
 
@@ -343,13 +343,14 @@ class TaskbarPinnedAppIconContainer(context: Context) :
             val visibleChildCount = getVisibleChildCount()
             if (visibleChildCount == 0) return 0
             return (visibleChildCount * taskbarIconViewSize) +
-                    ((visibleChildCount - 1) * 2 * itemMarginLeftRight)
+                ((visibleChildCount - 1) * 2 * itemMarginLeftRight)
         }
 
     fun getVisibleChildCount(): Int {
         if (isEmpty()) return 0
         return childCount - if (indexOfChildHiddenForDrag >= 0) 1 else 0
     }
+
     override fun getHoverListener(icon: View): OnHoverListener =
         taskbarViewCallbacks.getIconOnHoverListener(icon)
 

@@ -108,7 +108,7 @@ public abstract class BaseActivity extends Activity implements ActivityContext {
     private final SavedStateRegistryController mSavedStateRegistryController =
             SavedStateRegistryController.create(this);
     private final LifecycleRegistry mLifecycleRegistry = new LifecycleRegistry(this);
-    private final WeakCleanupSet mCleanupSet = new WeakCleanupSet(this);
+    private final WeakCleanupSet mCleanupSet = new WeakCleanupSet(this, getUiExecutor());
 
     protected volatile DeviceProfile mDeviceProfile;
     protected SystemUiController mSystemUiController;

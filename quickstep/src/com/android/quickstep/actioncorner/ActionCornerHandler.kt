@@ -24,6 +24,7 @@ import com.android.launcher3.Flags.enableReversibleHomeActionCorner
 import com.android.launcher3.concurrent.annotations.LightweightBackground
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.util.ActivityOptionsWrapper
+import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.SplitConfigurationOptions
 import com.android.quickstep.OverviewCommandHelper
@@ -204,7 +205,8 @@ constructor(
         )
 
         val recentsViewContainer = getRecentsViewContainer(displayId) ?: return null
-        val endCallback = AnimUtils.completeRunnableListCallback(callbacks, recentsViewContainer)
+        val endCallback =
+            AnimUtils.completeRunnableListCallback(callbacks, recentsViewContainer, MAIN_EXECUTOR)
         options.setOnAnimationAbortListener(endCallback)
         options.setOnAnimationFinishedListener(endCallback)
         return ActivityOptionsWrapper(options, callbacks).options

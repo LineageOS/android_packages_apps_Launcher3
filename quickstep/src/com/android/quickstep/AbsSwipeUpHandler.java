@@ -1139,7 +1139,6 @@ public abstract class AbsSwipeUpHandler<
             RecentsAnimationTargets targets, @Nullable TransitionInfo transitionInfo) {
         super.onRecentsAnimationStart(controller, targets, transitionInfo);
         boolean forDesktop;
-        if (DesktopModeStatus.enableMultipleDesktops(mContext)) {
             GroupedTaskInfo groupedTaskInfo;
             if (mGestureState.getRunningTask() != null
                     && (groupedTaskInfo =
@@ -1149,9 +1148,6 @@ public abstract class AbsSwipeUpHandler<
             } else {
                 forDesktop = false;
             }
-        } else {
-            forDesktop = targets.hasDesktopTasks(mContext);
-        }
         if (forDesktop) {
             mRemoteTargetHandles = mTargetGluer.assignTargetsForDesktop(targets, transitionInfo);
         } else {
@@ -1912,8 +1908,7 @@ public abstract class AbsSwipeUpHandler<
                         // Swipe to home animation finished, notify DesktopVisibilityController
                         // to recreate Taskbar
                         if (isInDesktopMode && mGestureState.getEndTarget() == HOME) {
-                            desktopVisibilityController.onLauncherAnimationFromDesktopEnd(
-                                    mGestureState.getDisplayId());
+                            desktopVisibilityController.onLauncherAnimationFromDesktopEnd();
                         }
                     }
                 });

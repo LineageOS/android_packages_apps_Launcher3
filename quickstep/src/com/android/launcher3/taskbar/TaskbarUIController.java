@@ -20,6 +20,7 @@ import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION;
 import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_APP;
+import static com.android.quickstep.RecentsFilterState.EMPTY_FILTER;
 
 import android.content.Intent;
 import android.util.SparseArray;
@@ -45,7 +46,6 @@ import com.android.launcher3.util.SplitConfigurationOptions;
 import com.android.launcher3.util.ThreadedAnimator;
 import com.android.quickstep.GestureState;
 import com.android.quickstep.RecentsAnimationCallbacks;
-import com.android.quickstep.RecentsFilterState;
 import com.android.quickstep.util.GroupTask;
 import com.android.quickstep.util.SplitTask;
 import com.android.quickstep.views.TaskContainer;
@@ -284,7 +284,7 @@ public class TaskbarUIController implements BubbleBarController.BubbleBarLocatio
         }
 
         recentsView.findLastActiveTasksAndRunCallback(
-                RecentsFilterState.getDesktopTaskFilter(),
+                EMPTY_FILTER,
                 Collections.singletonList(splitSelectSource.getItemInfo().getResolvedTargetInfo()),
                 false /* findExactPairMatch */,
                 foundTasks -> {

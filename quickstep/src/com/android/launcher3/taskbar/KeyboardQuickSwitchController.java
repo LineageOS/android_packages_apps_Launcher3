@@ -171,9 +171,7 @@ public final class KeyboardQuickSwitchController implements
                 if (!mModel.isTaskListValid(mTaskListChangeId) || !taskIdsToExclude.equals(
                         mExcludedTaskIds)) {
                     mExcludedTaskIds = taskIdsToExclude;
-                    mTaskListChangeId = mModel.getTasks(
-                            shouldShowDesktopTasks ? RecentsFilterState.EMPTY_FILTER
-                                    : RecentsFilterState.getDesktopTaskFilter(),
+                    mTaskListChangeId = mModel.getTasks(RecentsFilterState.EMPTY_FILTER,
                             (tasks) -> TASKBAR_UI_THREAD.execute(() -> {
                                 processLoadedTasks(
                                         wasOpenedFromTaskbar,
@@ -231,9 +229,7 @@ public final class KeyboardQuickSwitchController implements
         }
 
         mExcludedTaskIds = taskIdsToExclude;
-        mTaskListChangeId = mModel.getTasks(
-                shouldShowDesktopTasks ? RecentsFilterState.EMPTY_FILTER
-                        : RecentsFilterState.getDesktopTaskFilter(),
+        mTaskListChangeId = mModel.getTasks(RecentsFilterState.EMPTY_FILTER,
                 (tasks) -> TASKBAR_UI_THREAD.execute(() -> {
                     processLoadedTasks(
                             wasOpenedFromTaskbar, shouldShowDesktopTasks, tasks, taskIdsToExclude);

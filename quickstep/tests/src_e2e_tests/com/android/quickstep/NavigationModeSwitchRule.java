@@ -177,7 +177,7 @@ public class NavigationModeSwitchRule implements TestRule {
                     TestUtil.DEFAULT_UI_TIMEOUT,
                     () -> launcher.getNavigationModeMismatchError(false) == null);
             AbstractLauncherUiTest.checkDetectedLeaks(launcher);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             if (description != null) {
                 FailureWatcher.onError(launcher, description);
             }

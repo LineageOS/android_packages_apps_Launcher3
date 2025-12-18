@@ -182,7 +182,7 @@ public final class TestProtocol {
 
     public static final String PERMANENT_DIAG_TAG = "TaplTarget";
 
-    public static final String REQUEST_FLAG_ENABLE_MULTIPLE_DESKTOPS = "enable-multiple-desks";
+    public static final String REQUEST_FLAG_IS_DESKTOP_MODE_SUPPORTED = "is-desktop-mode-supported";
 
     public static final String REQUEST_GET_ACTIVE_DESK_ID = "get-active-desk-id";
 

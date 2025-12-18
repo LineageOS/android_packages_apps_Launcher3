@@ -56,6 +56,7 @@ import static com.android.launcher3.LauncherState.OVERVIEW;
 import static com.android.launcher3.Utilities.mapBoundToRange;
 import static com.android.launcher3.config.FeatureFlags.SEPARATE_RECENTS_ACTIVITY;
 import static com.android.launcher3.testing.shared.TestProtocol.WALLPAPER_OPEN_ANIMATION_FINISHED_MESSAGE;
+import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.MultiPropertyFactory.MULTI_PROPERTY_VALUE;
 import static com.android.launcher3.util.window.RefreshRateTracker.getSingleFrameMs;
 import static com.android.launcher3.views.FloatingIconView.SHAPE_PROGRESS_DURATION;
@@ -436,7 +437,8 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
               new RemoteAnimationAdapter(appLaunchRunner, duration, statusBarTransitionDelay),
               new RemoteTransition(appLaunchRemoteTransition, mLauncher.getIApplicationThread(),
                     "QuickstepLaunch"));
-        IRemoteCallback endCallback = completeRunnableListCallback(onEndCallback, mLauncher);
+        IRemoteCallback endCallback = completeRunnableListCallback(
+                onEndCallback, mLauncher, MAIN_EXECUTOR);
         options.setOnAnimationAbortListener(endCallback);
         options.setOnAnimationFinishedListener(endCallback);
         options.setLaunchCookie(StableViewInfo.toLaunchCookie(itemInfo));

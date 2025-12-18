@@ -90,6 +90,13 @@ class TransientBubbleStashController(
 
     private var animator: AnimatorSet? = null
     override var bubbleBarVerticalCenterForHome: Int = 0
+        set(centerY) {
+            if (centerY == field) return
+            field = centerY
+            if (launcherState == BubbleLauncherState.HOME) {
+                animateBubbleBarYToHotseat()
+            }
+        }
 
     override var isStashed: Boolean = false
         @VisibleForTesting

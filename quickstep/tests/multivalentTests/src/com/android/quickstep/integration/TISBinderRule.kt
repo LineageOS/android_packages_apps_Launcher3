@@ -18,7 +18,6 @@ package com.android.quickstep.integration
 
 import android.content.Context
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
-import com.android.app.viewcapture.ViewCapture.MAIN_EXECUTOR
 import com.android.launcher3.LauncherPrefs.Companion.TASKBAR_PINNING
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.testutil.Wait
@@ -109,7 +108,7 @@ class TISBinderRule : TestRule {
             .appComponent
             .sysUIConnectionTracker
             .activeComponent
-            .forEach(MAIN_EXECUTOR) { if (it != null) result.complete(block.invoke(it)) }
+            .forEach(TASKBAR_UI_THREAD) { if (it != null) result.complete(block.invoke(it)) }
             .use {
                 return result.get()
             }

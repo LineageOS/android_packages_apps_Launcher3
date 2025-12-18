@@ -16,6 +16,7 @@
 
 package com.android.launcher3.deviceprofile
 
+import android.graphics.Rect
 import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.WindowBounds
 import kotlin.math.max
@@ -38,6 +39,7 @@ data class DeviceProperties(
     val isLandscape: Boolean,
     val isExternalDisplay: Boolean,
     val isGestureMode: Boolean,
+    val insets: Rect,
 ) {
     companion object Factory {
         // b/419264328 adding here all the improvements/cleanup for this class
@@ -74,6 +76,7 @@ data class DeviceProperties(
                 isLandscape = windowBounds.isLandscape,
                 isExternalDisplay = isExternalDisplay,
                 isGestureMode = isGestureMode,
+                insets = windowBounds.insets,
             )
         }
     }

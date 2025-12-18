@@ -51,6 +51,13 @@ class PersistentBubbleStashController(
     private lateinit var bubbleBarScaleAnimator: AnimatedFloat
     private lateinit var controllersAfterInitAction: ControllersAfterInitAction
     override var bubbleBarVerticalCenterForHome: Int = 0
+        set(centerY) {
+            if (centerY == field) return
+            field = centerY
+            if (launcherState == BubbleLauncherState.HOME) {
+                animateBubbleBarY()
+            }
+        }
 
     override var launcherState: BubbleLauncherState = BubbleLauncherState.IN_APP
         set(state) {

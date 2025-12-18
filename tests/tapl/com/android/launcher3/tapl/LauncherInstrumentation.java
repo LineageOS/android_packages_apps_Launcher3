@@ -2270,8 +2270,8 @@ public final class LauncherInstrumentation {
     /**
      * returns if multi-desks feature is enabled or not.
      */
-    public boolean areMultiDesksFlagsEnabled() {
-        Bundle bundle = getTestInfo(TestProtocol.REQUEST_FLAG_ENABLE_MULTIPLE_DESKTOPS,
+    public boolean isDesktopModeSupported() {
+        Bundle bundle = getTestInfo(TestProtocol.REQUEST_FLAG_IS_DESKTOP_MODE_SUPPORTED,
                 String.valueOf(mDisplayId));
         return bundle != null && bundle.getBoolean(
                 TestProtocol.TEST_INFO_RESPONSE_FIELD);

@@ -96,8 +96,8 @@ class TaskbarIconContainerUtilTest {
                 8,
             )
 
-        assertThat(taskbarIconContainerLists.nonOverflownItems).hasSize(8)
-        assertThat(taskbarIconContainerLists.overflownItems).hasSize(2)
+        assertThat(taskbarIconContainerLists.nonOverflownItems).hasSize(7)
+        assertThat(taskbarIconContainerLists.overflownItems).hasSize(3)
     }
 
     @Test
@@ -110,7 +110,7 @@ class TaskbarIconContainerUtilTest {
                 8,
             )
 
-        assertThat(taskbarIconContainerLists.nonOverflownItems).hasSize(8)
-        assertThat(taskbarIconContainerLists.overflownItems).hasSize(2)
+        assertThat(taskbarIconContainerLists.nonOverflownItems).hasSize(7)
+        assertThat(taskbarIconContainerLists.overflownItems).hasSize(3)
     }
 }
