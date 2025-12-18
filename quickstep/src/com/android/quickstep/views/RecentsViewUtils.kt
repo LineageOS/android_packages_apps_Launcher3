@@ -21,6 +21,7 @@ import android.animation.ObjectAnimator
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.graphics.PointF
 import android.graphics.Rect
+import android.os.UserHandle
 import android.util.FloatProperty
 import android.util.Log
 import android.util.Property
@@ -37,18 +38,24 @@ import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.app.animation.Interpolators.LINEAR
+import com.android.internal.annotations.VisibleForTesting
 import com.android.launcher3.AbstractFloatingView.TYPE_TASK_MENU
 import com.android.launcher3.AbstractFloatingView.getTopOpenViewWithType
 import com.android.launcher3.Flags.enableDesktopExplodedView
+import com.android.launcher3.Flags.hideAutomatedTasksInOverview
 import com.android.launcher3.PagedView.INVALID_PAGE
 import com.android.launcher3.R
 import com.android.launcher3.Utilities.getPivotsForScalingRectToRect
+import com.android.launcher3.automation.AutomationChange
+import com.android.launcher3.automation.AutomationRepository
+import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.dagger.DisplayId
 import com.android.launcher3.statehandlers.DesktopVisibilityController.Companion.INACTIVE_DESK_ID
 import com.android.launcher3.statemanager.BaseState
 import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.IntArray
 import com.android.launcher3.util.RunnableList
+import com.android.launcher3.util.SafeCloseable
 import com.android.launcher3.util.window.WindowManagerProxy.DesktopVisibilityListener
 import com.android.quickstep.GestureState
 import com.android.quickstep.RemoteTargetGluer.RemoteTargetHandle
@@ -71,6 +78,7 @@ import com.android.wm.shell.shared.GroupedTaskInfo
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import java.util.concurrent.Executor
 import java.util.function.BiConsumer
 import kotlin.math.max
 import kotlin.math.min
@@ -89,12 +97,52 @@ constructor(
     private val taskAnimationManager: TaskAnimationManager,
     private val rotationTouchHelper: RotationTouchHelper,
     private val systemUiProxy: SystemUiProxy,
+    private val automationRepository: AutomationRepository,
+    @Ui uiExecutor: Executor,
 ) : DesktopVisibilityListener {
     val taskViews = TaskViewsIterable(recentsView)
 
     var keyboardFocusTask: KeyboardFocusTask = KeyboardFocusTask.Unfocused
 
     private var isInOverview: Boolean = false
+
+    private var automationChangesClosable: SafeCloseable? = null
+
+    init {
+        if (hideAutomatedTasksInOverview()) {
+            automationChangesClosable =
+                automationRepository.automationChanges.forEach(uiExecutor) {
+                    dismissAutomatedTasks(it)
+                }
+        }
+    }
+
+    private fun dismissAutomatedTasks(change: AutomationChange) {
+        val addedPackages = change.addedPackages
+        if (addedPackages.isEmpty()) {
+            return
+        }
+        getTaskIdsByPackageNamesAndUserHandle(taskViews, addedPackages, change.userHandle).forEach {
+            recentsView.dismissTask(it, /* removeTask= */ false)
+        }
+    }
+
+    @VisibleForTesting
+    fun getTaskIdsByPackageNamesAndUserHandle(
+        taskViews: Iterable<TaskView>,
+        packages: Set<String>,
+        userHandle: UserHandle,
+    ) =
+        taskViews
+            .flatMap { it.taskContainers }
+            .map { it.task.key }
+            .filter { it.userId == userHandle.identifier && it.packageName in packages }
+            .map { it.id }
+
+    fun destroy() {
+        automationChangesClosable?.close()
+        automationChangesClosable = null
+    }
 
     /** Takes a screenshot of all [taskView] and return map of taskId to the screenshot */
     fun screenshotTasks(taskView: TaskView): Map<Int, ThumbnailData> {
