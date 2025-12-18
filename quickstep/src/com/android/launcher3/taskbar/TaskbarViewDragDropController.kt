@@ -25,6 +25,7 @@ import com.android.launcher3.Alarm
 import com.android.launcher3.DropTarget
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.OnAlarmListener
+import com.android.launcher3.R
 import com.android.launcher3.dragndrop.DragController
 import com.android.launcher3.dragndrop.DragOptions
 import com.android.launcher3.model.data.ItemInfo
@@ -53,7 +54,7 @@ class TaskbarViewDragDropController(
     @VisibleForTesting var targetPinIndex = -1
     @VisibleForTesting var overflowPinningDropTarget: PinningDropTarget? = null
     private var modelCallbacks: TaskbarModelCallbacks? = null
-
+    @VisibleForTesting val tooltipController = TaskbarDragViewTooltip(activityContext)
     @VisibleForTesting val overflowContainerAlarm = Alarm(Looper.getMainLooper())
 
     private enum class AlarmState {
@@ -258,6 +259,15 @@ class TaskbarViewDragDropController(
         modelCallbacks?.bindItemsUpdated(hashSetOf(draggedInfo))
     }
 
+    /** Returns the [ItemInfo] from the dragged object. */
+    private fun extractItemInfoFromDragObject(dragObject: DropTarget.DragObject?): ItemInfo? {
+        return when (val dragItemInfo = dragObject?.dragInfo) {
+            is WorkspaceItemInfo -> dragItemInfo
+            is WorkspaceItemFactory -> dragItemInfo.makeWorkspaceItem(activityContext)
+            else -> null
+        }
+    }
+
     /**
      * Implementation of the [DropTarget] that handles drag and drop events over the recent apps
      * area.
@@ -273,6 +283,7 @@ class TaskbarViewDragDropController(
         }
 
         override fun onDrop(dragObject: DropTarget.DragObject?, options: DragOptions?) {
+            tooltipController.hide()
             val itemToUnpin = dragObject?.dragInfo ?: return
 
             activityContext.modelWriter.deleteItemFromDatabase(
@@ -284,11 +295,25 @@ class TaskbarViewDragDropController(
             )
         }
 
-        override fun onDragEnter(dragObject: DropTarget.DragObject?) {}
+        override fun onDragEnter(dragObject: DropTarget.DragObject?) {
+            dragObject ?: return
+            val draggedInfo = extractItemInfoFromDragObject(dragObject) ?: return
+            if (draggedInfo.id != ItemInfo.NO_ID && draggedInfo.container == CONTAINER_HOTSEAT) {
+                if (tooltipController.isActive()) {
+                    tooltipController.hide()
+                }
+                tooltipController.show(calculateTooltipTargetPosition(dragObject))
+            }
+        }
 
-        override fun onDragOver(dragObject: DropTarget.DragObject?) {}
+        override fun onDragOver(dragObject: DropTarget.DragObject?) {
+            dragObject ?: return
+            tooltipController.updatePosition(calculateTooltipTargetPosition(dragObject))
+        }
 
-        override fun onDragExit(dragObject: DropTarget.DragObject?) {}
+        override fun onDragExit(dragObject: DropTarget.DragObject?) {
+            tooltipController.hide()
+        }
 
         override fun acceptDrop(dragObject: DropTarget.DragObject?): Boolean {
             return true
@@ -303,6 +328,17 @@ class TaskbarViewDragDropController(
                 taskbarPinDelegate.getHitRectForPinRelativeToDragLayer(outRect)
                 outRect?.offset(0, -activityContext.deviceProfile.taskbarProfile.height)
             }
+        }
+
+        /** Calculates the tooltip target position based on visual center coordinates. */
+        private fun calculateTooltipTargetPosition(dragObject: DropTarget.DragObject): FloatArray {
+            val targetLocation = FloatArray(2)
+            dragObject.getVisualCenter(targetLocation)
+            val yOffset =
+                activityContext.resources.getDimensionPixelSize(R.dimen.taskbar_tooltip_y_offset)
+            targetLocation[1] -= (dragObject.dragView.measuredHeight / 2f) + yOffset
+
+            return targetLocation
         }
     }
 
@@ -322,15 +358,6 @@ class TaskbarViewDragDropController(
                 val hotseatItems = modelCallbacks?.hotseatItems ?: return false
                 return hotseatItems.size < activityContext.taskbarSpecsEvaluator.maxPinnableCount
             }
-
-        /** Returns the [ItemInfo] from the dragged object. */
-        private fun extractItemInfoFromDragObject(dragObject: DropTarget.DragObject?): ItemInfo? {
-            return when (val dragItemInfo = dragObject?.dragInfo) {
-                is WorkspaceItemInfo -> dragItemInfo
-                is WorkspaceItemFactory -> dragItemInfo.makeWorkspaceItem(activityContext)
-                else -> null
-            }
-        }
 
         override fun isDropEnabled(): Boolean {
             // TODO(b/447444838): For now, only accept drops when the number of pinned items has

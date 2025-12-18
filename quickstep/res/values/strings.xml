@@ -345,6 +345,8 @@
     <string name="taskbar_recents_overflow_a11y_title">Other recent apps</string>
     <!-- Accessibility title for the Taskbar Overflow icon. [CHAR_LIMIT=NONE] -->
     <string name="taskbar_pinned_overflow_a11y_title">Other apps</string>
+    <!-- Title of the tooltip that appears when the user drags an item to the unpin area of the taskbar. [CHAR LIMIT=NONE]-->
+    <string name="taskbar_drag_to_unpin_title">Remove</string>
 
     <!-- Label for moving drop target to the top or left side of the screen, depending on orientation (from the Taskbar only). -->
     <string name="move_drop_target_top_or_left">Move to top&#47;left</string>
