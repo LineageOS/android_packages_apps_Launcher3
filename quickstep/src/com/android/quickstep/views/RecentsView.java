@@ -2438,8 +2438,23 @@ public abstract class RecentsView<
             }
             return;
         }
-        mContainer.startHome(animated, onHomeAnimationComplete);
-        AbstractFloatingView.closeAllOpenViews(mContainer, mContainer.isStarted());
+        try {
+            if (mUtils.isInDesktopFirstMode()) {
+                // Always attempt to return to desktop in desktop-first mode, and fallback to
+                // startHome if it cannot be performed.
+                RunnableList runnableList = returnToDesktop();
+                if (runnableList != null) {
+                    if (onHomeAnimationComplete != null) {
+                        runnableList.add(onHomeAnimationComplete);
+                    }
+                    return;
+                }
+            }
+
+            mContainer.startHome(animated, onHomeAnimationComplete);
+        } finally {
+            AbstractFloatingView.closeAllOpenViews(mContainer, mContainer.isStarted());
+        }
     }
 
     /** Returns whether user can start home based on state in {@link OverviewCommandHelper}. */

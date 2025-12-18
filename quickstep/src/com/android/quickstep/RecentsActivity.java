@@ -278,8 +278,8 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
     }
 
     @Override
-    public void returnToHomescreen() {
-        // TODO(b/137318995) This should go home, but doing so removes freeform windows
+    public void returnToHomescreenAfterFreeformShortcut() {
+        // No-op
     }
 
     /**
