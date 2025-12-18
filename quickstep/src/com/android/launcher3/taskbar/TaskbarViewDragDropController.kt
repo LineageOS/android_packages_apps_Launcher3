@@ -41,13 +41,14 @@ import java.util.Collections
  */
 class TaskbarViewDragDropController(
     private val activityContext: TaskbarActivityContext,
-    private val taskbarPinDelegate: PinnedAppsContainerDelegate,
+    private val taskbarView: TaskbarView,
 ) {
     companion object {
         private const val OPEN_OVERFLOW_DELAY_MS = 800L
         private const val CLOSE_OVERFLOW_DELAY_MS = OPEN_OVERFLOW_DELAY_MS
     }
 
+    private val taskbarPinDelegate = taskbarView
     @VisibleForTesting val taskbarPinningDropTarget = PinningDropTarget(taskbarPinDelegate, false)
     @VisibleForTesting val unpinDropTarget = UnpinDropTarget()
     @VisibleForTesting var targetPinIndex = -1
@@ -94,7 +95,7 @@ class TaskbarViewDragDropController(
 
     fun onTaskbarItemViewDragEnd(itemView: View) {
         taskbarPinDelegate.updateItemViewVisibilityForDragState(itemView, /*isDragged */ false)
-
+        taskbarView.rearrangeItemsForDrag()
         // TODO("Handle overflow icon drag end")
     }
 

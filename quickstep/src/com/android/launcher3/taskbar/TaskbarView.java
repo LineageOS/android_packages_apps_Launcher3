@@ -85,6 +85,7 @@ import com.android.launcher3.taskbar.customization.TaskbarAllAppsButtonContainer
 import com.android.launcher3.taskbar.customization.TaskbarDividerContainer;
 import com.android.launcher3.taskbar.customization.TaskbarSpecsEvaluator;
 import com.android.launcher3.taskbar.customization.containers.TaskbarPinnedAppIconContainer;
+import com.android.launcher3.taskbar.customization.viewfactory.TaskbarPinnedAppsIconsViewFactory;
 import com.android.launcher3.taskbar.handoff.HandoffSuggestion;
 import com.android.launcher3.util.LauncherBindableItemsContainer.ItemOperator;
 import com.android.launcher3.util.Themes;
@@ -157,6 +158,8 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
 
     // Only non-null when there is an ongoing task icon in animation.
     @Nullable private Animator mOngoingRecentIconAnimation;
+
+    private final TaskbarPinnedAppsIconsViewFactory mItemViewFactory;
 
     private int mMaxNumIconsLimitForTest = -1;
 
@@ -265,6 +268,8 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         mAllAppsButtonTranslationOffset = (int) getResources().getDimension(
                 mAllAppsButtonContainer.getAllAppsButtonTranslationXOffset(
                         mActivityContext.isTransientTaskbar()));
+
+        mItemViewFactory = new TaskbarPinnedAppsIconsViewFactory(mActivityContext, this);
 
         if (enableTaskbarPinning() || enableRecentsInTaskbar()) {
             mTaskbarDividerContainer = (TaskbarDividerContainer) inflate(
@@ -486,9 +491,15 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                     int index = calculateGhostViewIndex(onScreenLocationX);
                     mHotseatIconsContainer.reserveDropSlot(index);
                     setDropSpotIndex(index);
+                    onDragStateChanged();
                     return;
                 }
                 super.reserveDropSlotForDragLocation(onScreenLocationX);
+            }
+
+            @Override
+            public void onDragStateChanged() {
+                rearrangeItemsForDrag();
             }
 
             @Override
@@ -501,6 +512,75 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                 TaskbarView.this.getHitRectForPinRelativeToDragLayer(outRect);
             }
         };
+    }
+
+    protected void rearrangeItemsForDrag() {
+        if (mHotseatIconsContainer != null) {
+            mHotseatIconsContainer.rearrangeItemsForDrag();
+            return;
+        }
+
+        if (getNumOfVisibleIconsInPinnedSection()
+                == mActivityContext.getTaskbarSpecsEvaluator().getNumShownHotseatIcons()) {
+            return;
+        }
+
+        if (getNumOfVisibleIconsInPinnedSection()
+                > mActivityContext.getTaskbarSpecsEvaluator().getNumShownHotseatIcons()) {
+            TaskbarOverflowView overflowView = getTaskbarPinnedOverflowView();
+            if (overflowView == null || !isOverflowViewShowing()) {
+                // TODO: Group the extra icons to an overflow view.
+                return;
+            }
+
+            int overflowIdx = indexOfChild(overflowView);
+            View viewToMove = null;
+            for (int i = overflowIdx - 1; i >= 0; i--) {
+                View child = getChildAt(i);
+                if (child.getVisibility() == View.VISIBLE
+                        && !(child instanceof TaskbarDropTargetGhostView)) {
+                    viewToMove = child;
+                    break;
+                }
+            }
+
+            List<ItemInfo> newOverflowItems = new ArrayList<>(overflowView.getOverflowInfoList());
+            if (viewToMove != null && viewToMove.getTag() instanceof ItemInfo) {
+                newOverflowItems.addFirst((ItemInfo) viewToMove.getTag());
+                removeAndRecycle(viewToMove);
+            }
+            overflowView.setItems(newOverflowItems.stream().map(
+                    item -> new ItemInfoWrapper(item, mActivityContext)).toList());
+        } else {
+            TaskbarOverflowView overflowView = getTaskbarPinnedOverflowView();
+            if (overflowView == null || !isOverflowViewShowing()) {
+                return;
+            }
+
+            List<ItemInfo> overflowItems = overflowView.getOverflowInfoList();
+            if (overflowItems.isEmpty()) {
+                return;
+            }
+
+            // Update the Taskbar pinned overflow view.
+            List<ItemInfo> newOverflowItems = new ArrayList<>(overflowItems);
+            ItemInfo itemToMove = newOverflowItems.removeFirst();
+            overflowView.setItems(newOverflowItems.stream().map(
+                    item -> new ItemInfoWrapper(item, mActivityContext)).toList());
+
+            // Create the view for the item to move.
+            int index = indexOfChild(overflowView);
+            View newView = mItemViewFactory.getView(itemToMove, index);
+            if (newView instanceof BubbleTextView btv
+                    && itemToMove instanceof WorkspaceItemInfo wii) {
+                btv.applyFromWorkspaceItem(wii);
+            }
+
+            // Move the first icon in the overflow icon to the end of the pinned section.
+            TaskbarLayoutParams lp = new TaskbarLayoutParams(mIconTouchSize, mIconTouchSize);
+            newView.setPadding(mItemPadding, mItemPadding, mItemPadding, mItemPadding);
+            addView(newView, index, lp);
+        }
     }
 
     void updatePinningPopupEventHandlers() {
@@ -1606,6 +1686,26 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         return icons;
     }
 
+    private int getNumOfVisibleIconsInPinnedSection() {
+        ViewGroup parent = this;
+        if (mHotseatIconsContainer != null) {
+            parent = mHotseatIconsContainer;
+        }
+        final int totalChild = parent.getChildCount();
+        int count = 0;
+        for (int i = 0; i < totalChild; i++) {
+            View icon = parent.getChildAt(i);
+            if (icon.getVisibility() == View.GONE) {
+                continue;
+            }
+            if (icon instanceof TaskbarDropTargetGhostView || icon.getTag() instanceof ItemInfo
+                    || icon instanceof TaskbarOverflowView) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     /**
      * The max number of icon views the taskbar can have when taskbar overflow is enabled.
      */
@@ -1780,6 +1880,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
     public void releaseDropSlot() {
         if (mHotseatIconsContainer != null) {
             mHotseatIconsContainer.releaseDropSlot();
+            mDragDelegate.onDragStateChanged();
             return;
         }
         mDragDelegate.releaseDropSlot();
