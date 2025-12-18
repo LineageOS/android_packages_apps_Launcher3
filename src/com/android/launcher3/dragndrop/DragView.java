@@ -51,6 +51,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import androidx.annotation.FloatRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.dynamicanimation.animation.FloatPropertyCompat;
@@ -58,10 +59,10 @@ import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.app.animation.Interpolators;
-import com.android.launcher3.folder.ClippedFolderIconLayoutRule;
 import com.android.launcher3.Flags;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
+import com.android.launcher3.folder.ClippedFolderIconLayoutRule;
 import com.android.launcher3.graphics.ThemeManager;
 import com.android.launcher3.icons.FastBitmapDrawable;
 import com.android.launcher3.icons.IconNormalizer;
@@ -70,6 +71,10 @@ import com.android.launcher3.util.RunnableList;
 import com.android.launcher3.util.ViewEx;
 import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.views.BaseDragLayer;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Consumer;
 
 /** A custom view for rendering an icon, folder, shortcut or widget during drag-n-drop. */
 @SuppressLint("ViewConstructor")
@@ -122,6 +127,8 @@ public class DragView extends FrameLayout {
     private Path mScaledMaskPath;
     private Drawable mBadge;
     private int mItemType;
+
+    private final Set<Consumer<Float>> mOnAlphaChangeListeners = new HashSet<>();
 
     public DragView(ActivityContext launcher, Drawable drawable, int registrationX,
             int registrationY, final float initialScale, final float scaleOnDrop,
@@ -611,6 +618,31 @@ public class DragView extends FrameLayout {
     /** Return true if {@link #mContent} is a {@link AppWidgetHostView}. */
     public boolean containsAppWidgetHostView() {
         return mContent instanceof AppWidgetHostView;
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        mOnAlphaChangeListeners.clear();
+    }
+
+    @Override
+    public void setAlpha(@FloatRange(from = 0.0, to = 1.0) float alpha) {
+        final float oldAlpha = getAlpha();
+        super.setAlpha(alpha);
+        if (oldAlpha != alpha) {
+            for (final Consumer<Float> listener : mOnAlphaChangeListeners) {
+                listener.accept(alpha);
+            }
+        }
+    }
+
+    /**
+     * Registers a listener to be notified of alpha change events. Note that listeners are
+     * automatically removed in {@link #onDetachedFromWindow()}.
+     */
+    public void addOnAlphaChangeListener(Consumer<Float> listener) {
+        mOnAlphaChangeListeners.add(listener);
     }
 
     private static class SpringFloatValue {
