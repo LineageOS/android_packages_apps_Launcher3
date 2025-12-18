@@ -192,10 +192,6 @@ class TaskbarManagerImplWrapper @Inject constructor(implProvider: Provider<Taskb
         impl.dumpLogs(prefix, pw)
     }
 
-    override fun debugPrimaryTaskbar(debugReason: String, verbose: Boolean) {
-        TASKBAR_UI_THREAD.execute { impl.debugPrimaryTaskbar(debugReason, verbose) }
-    }
-
     @VisibleForTesting
     override fun getCurrentActivityContext(): TaskbarActivityContext? {
         return impl.currentActivityContext

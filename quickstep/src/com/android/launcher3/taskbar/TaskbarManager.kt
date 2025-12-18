@@ -94,8 +94,6 @@ interface TaskbarManager : DisplayDecorationListener {
 
     fun getPrimaryDisplayId(): Int
 
-    fun debugPrimaryTaskbar(debugReason: String, verbose: Boolean)
-
     @VisibleForTesting fun getCurrentActivityContext(): TaskbarActivityContext?
 
     @VisibleForTesting fun recreateTaskbars()
