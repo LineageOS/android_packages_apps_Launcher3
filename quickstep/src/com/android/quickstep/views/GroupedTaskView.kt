@@ -24,7 +24,6 @@ import android.view.View
 import android.view.ViewStub
 import com.android.internal.jank.Cuj
 import com.android.launcher3.Flags.enableRefactorDigitalWellbeingToast
-import com.android.launcher3.Flags.showCloseButtonOnTaskviewHover
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
 import com.android.launcher3.util.RunnableList
@@ -178,7 +177,7 @@ class GroupedTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
     }
 
     private fun calculateSpaceForTaskDismissButton() =
-        if (showCloseButtonOnTaskviewHover() && groupedTaskViewModel.showTaskDismissButton()) {
+        if (groupedTaskViewModel.showTaskDismissButton()) {
             val taskDismissBtnWidth =
                 resources.getDimensionPixelSize(R.dimen.task_dismiss_button_width)
             val taskDismissBtnMargin =
