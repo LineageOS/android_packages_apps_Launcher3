@@ -18,6 +18,7 @@ package com.android.launcher3.taskbar;
 import static com.android.app.animation.Interpolators.EMPHASIZED;
 import static com.android.launcher3.taskbar.TaskbarPinningController.PINNING_PERSISTENT;
 import static com.android.launcher3.taskbar.TaskbarPinningController.PINNING_TRANSIENT;
+import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
@@ -28,6 +29,8 @@ import android.graphics.Rect;
 import android.os.SystemProperties;
 import android.view.MotionEvent;
 import android.view.ViewTreeObserver;
+
+import androidx.annotation.AnyThread;
 
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.R;
@@ -294,9 +297,11 @@ public class TaskbarDragLayerController implements TaskbarControllers.LoggableTa
      * Sets the width percentage to inset the transient taskbar's background from the left and from
      * the right.
      */
+    @AnyThread
     public void setBackgroundHorizontalInsets(float insetPercentage) {
-        mTaskbarDragLayer.setBackgroundHorizontalInsets(insetPercentage);
-
+        TASKBAR_UI_THREAD.execute(() -> {
+            mTaskbarDragLayer.setBackgroundHorizontalInsets(insetPercentage);
+        });
     }
 
     @Override
