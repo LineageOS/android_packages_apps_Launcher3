@@ -54,6 +54,7 @@ import com.android.quickstep.RecentsAnimationDeviceState
 import com.android.quickstep.RotationTouchHelper
 import com.android.quickstep.SystemUiProxy
 import com.android.quickstep.TaskAnimationManager
+import com.android.quickstep.dagger.SysUIConnectionComponent.Builder
 import com.android.quickstep.window.RecentsWindowManager
 import com.android.quickstep.window.RecentsWindowTracker
 import dagger.Binds
@@ -68,6 +69,8 @@ import org.mockito.kotlin.spy
 @LauncherAppSingleton
 @Component(modules = [AllTaskbarSandboxModules::class])
 interface TaskbarSandboxComponent : LauncherAppComponent {
+
+    override fun getSysUIConnectionComponentBuilder(): TaskbarSysUIConnectionComponent.Builder
 
     @Component.Builder
     interface Builder : LauncherAppComponent.Builder {
