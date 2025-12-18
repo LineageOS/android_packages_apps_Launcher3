@@ -32,6 +32,8 @@ import android.os.Bundle
 import android.os.Flags.allowPrivateProfile
 import android.os.IBinder
 import android.os.UserHandle
+import android.view.DragAndDropPermissions
+import android.view.DragEvent
 import android.view.SurfaceControlViewHost
 import android.widget.Toast
 import android.window.RemoteTransition
@@ -185,4 +187,7 @@ open class SystemApiWrapper @Inject constructor(@ApplicationContext context: Con
             )
             .asBitmap()
             .copy(Bitmap.Config.ARGB_8888, true)
+
+    override fun requestDragAndDropPermissions(event: DragEvent): DragAndDropPermissions? =
+        DragAndDropPermissions.obtain(event)
 }

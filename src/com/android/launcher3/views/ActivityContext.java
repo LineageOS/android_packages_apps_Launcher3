@@ -41,6 +41,8 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.util.Log;
 import android.view.Display;
+import android.view.DragAndDropPermissions;
+import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.AccessibilityDelegate;
@@ -81,6 +83,7 @@ import com.android.launcher3.model.repository.StringCacheRepository;
 import com.android.launcher3.popup.SystemShortcut;
 import com.android.launcher3.statehandlers.BaseDepthController;
 import com.android.launcher3.util.ActivityOptionsWrapper;
+import com.android.launcher3.util.ApiWrapper;
 import com.android.launcher3.util.ApplicationInfoWrapper;
 import com.android.launcher3.util.LauncherBindableItemsContainer;
 import com.android.launcher3.util.LooperExecutor;
@@ -565,6 +568,16 @@ public interface ActivityContext extends SavedStateRegistryOwner {
                 closeable.close();
             }
         }));
+    }
+
+    /** Returns permissions obtained from the specified drag event. */
+    default @Nullable DragAndDropPermissions requestDragAndDropPermissions(DragEvent event) {
+        final ApiWrapper api = ApiWrapper.INSTANCE.get(asContext());
+        final DragAndDropPermissions permissions = api.requestDragAndDropPermissions(event);
+        if (permissions != null) {
+            closeOnDestroy(permissions::release);
+        }
+        return permissions;
     }
 
     /**

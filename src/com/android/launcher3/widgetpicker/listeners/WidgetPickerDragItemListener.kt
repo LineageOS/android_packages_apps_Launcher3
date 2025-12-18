@@ -20,6 +20,7 @@ import android.graphics.Point
 import android.graphics.Rect
 import android.util.Log
 import android.view.View
+import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherState
 import com.android.launcher3.PendingAddItemInfo
 import com.android.launcher3.dragndrop.BaseItemDragListener
@@ -58,7 +59,7 @@ class WidgetPickerDragItemListener(
     private val widgetPreview: WidgetPreview,
     previewRect: Rect,
     previewWidth: Int,
-) : BaseItemDragListener(previewRect, previewWidth, previewWidth) {
+) : BaseItemDragListener<Launcher>(previewRect, previewWidth, previewWidth) {
 
     private var dragStarted = false
 
@@ -79,7 +80,7 @@ class WidgetPickerDragItemListener(
                 is WidgetInfo.AppWidgetInfo -> {
                     val launcherProviderInfo =
                         LauncherAppWidgetProviderInfo.fromProviderInfo(
-                            mLauncher,
+                            mContext,
                             widgetInfo.appWidgetProviderInfo,
                         )
                     PendingAddWidgetInfo(launcherProviderInfo, container)
@@ -106,7 +107,7 @@ class WidgetPickerDragItemListener(
             }
             dragStarted = true
 
-            val view = View(mLauncher)
+            val view = View(mContext)
             view.tag = pendingAddItemInfo
 
             val dragHelper = PendingItemDragHelper(view)
@@ -124,15 +125,15 @@ class WidgetPickerDragItemListener(
                 options,
             )
         }
-        if (mLauncher.stateManager.state == LauncherState.NORMAL) {
+        if (mContext.stateManager.state == LauncherState.NORMAL) {
             dragRunnable.run()
         } else {
-            mLauncher.stateManager.addStateListener(
+            mContext.stateManager.addStateListener(
                 object : StateManager.StateListener<LauncherState> {
                     override fun onStateTransitionComplete(finalState: LauncherState) {
                         if (finalState == LauncherState.NORMAL) {
                             dragRunnable.run()
-                            mLauncher.stateManager.removeStateListener(this)
+                            mContext.stateManager.removeStateListener(this)
                         }
                     }
                 }
