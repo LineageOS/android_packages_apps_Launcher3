@@ -21,8 +21,8 @@ import android.view.WindowManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
-import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
+import com.android.launcher3.util.Executors.getTaskbarUiThread
 import com.android.launcher3.util.LockedUserState
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestUtil
@@ -103,7 +103,7 @@ class TouchInteractionHandlerTest {
         TestUtil.runOnExecutorSync(MAIN_EXECUTOR) {}
         TestUtil.runOnExecutorSync(UI_HELPER_EXECUTOR) {}
         TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {}
-        TestUtil.runOnExecutorSync(TASKBAR_UI_THREAD) {}
+        TestUtil.runOnExecutorSync(getTaskbarUiThread()) {}
         TestUtil.runOnExecutorSync(MAIN_EXECUTOR) {}
     }
 }

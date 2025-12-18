@@ -31,7 +31,8 @@ import android.widget.FrameLayout
 import com.android.app.tracing.TraceUtils
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.util.DisplayController
-import com.android.launcher3.util.Executors
+import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
+import com.android.launcher3.util.Executors.getTaskbarUiThread
 import com.android.launcher3.util.Preconditions
 import com.android.launcher3.util.SafeCloseable
 import com.android.launcher3.util.SimpleBroadcastReceiver
@@ -80,11 +81,7 @@ class PerDisplayTaskbarResource(
         }
 
     private val showTaskbarReceiver =
-        SimpleBroadcastReceiver(
-                windowContext,
-                Executors.UI_HELPER_EXECUTOR,
-                Executors.TASKBAR_UI_THREAD,
-            ) {
+        SimpleBroadcastReceiver(windowContext, UI_HELPER_EXECUTOR, getTaskbarUiThread()) {
                 Preconditions.assertTaskbarUiThread()
                 debugMsg("showTaskbarFromBroadcast")
                 taskbar?.showTaskbarFromBroadcast()
@@ -117,9 +114,7 @@ class PerDisplayTaskbarResource(
     private val componentCallbacks =
         object : ComponentCallbacks {
                 override fun onConfigurationChanged(newConfig: Configuration) {
-                    Executors.TASKBAR_UI_THREAD.execute {
-                        onConfigurationChangedInternal(newConfig)
-                    }
+                    getTaskbarUiThread().execute { onConfigurationChangedInternal(newConfig) }
                 }
 
                 private fun onConfigurationChangedInternal(newConfig: Configuration) {
@@ -162,7 +157,7 @@ class PerDisplayTaskbarResource(
         displayChangeSafeClosable?.close()
         displayChangeSafeClosable =
             windowContext.appComponent.displayController.getListenable(displayId)?.forEachChange(
-                Executors.TASKBAR_UI_THREAD
+                getTaskbarUiThread()
             ) { _, flags ->
                 if ((flags and DisplayController.CHANGE_DENSITY) != 0) {
                     debugMsg("onDisplayInfoChanged: Display density changed")

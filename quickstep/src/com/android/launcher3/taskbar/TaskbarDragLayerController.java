@@ -18,7 +18,7 @@ package com.android.launcher3.taskbar;
 import static com.android.app.animation.Interpolators.EMPHASIZED;
 import static com.android.launcher3.taskbar.TaskbarPinningController.PINNING_PERSISTENT;
 import static com.android.launcher3.taskbar.TaskbarPinningController.PINNING_TRANSIENT;
-import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
+import static com.android.launcher3.util.Executors.getTaskbarUiThread;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
@@ -299,9 +299,8 @@ public class TaskbarDragLayerController implements TaskbarControllers.LoggableTa
      */
     @AnyThread
     public void setBackgroundHorizontalInsets(float insetPercentage) {
-        TASKBAR_UI_THREAD.execute(() -> {
-            mTaskbarDragLayer.setBackgroundHorizontalInsets(insetPercentage);
-        });
+        getTaskbarUiThread().execute(() ->
+                mTaskbarDragLayer.setBackgroundHorizontalInsets(insetPercentage));
     }
 
     @Override

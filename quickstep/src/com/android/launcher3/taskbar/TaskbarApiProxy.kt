@@ -19,7 +19,7 @@ package com.android.launcher3.taskbar
 import android.content.res.Resources
 import androidx.annotation.AnyThread
 import com.android.launcher3.taskbar.TaskbarAutohideSuspendController.AutohideSuspendFlag
-import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
+import com.android.launcher3.util.Executors.getTaskbarUiThread
 
 /**
  * Expose API of [TaskbarActivityContext] to TaskbarUnstashInputConsumer and BubbleBarInputConsumer
@@ -39,30 +39,34 @@ class TaskbarApiProxy(private val taskbarActivityContext: TaskbarActivityContext
     fun shouldAllowTaskbarToAutoStash(): Boolean =
         taskbarActivityContext.shouldAllowTaskbarToAutoStash()
 
-    /** Called only once during a gesture. Safe to post Runnable to TASKBAR_UI_THREAD. */
+    /** Called only once during a gesture. Safe to post Runnable to taskbar's ui thread. */
     @AnyThread
     fun playTaskbarBackgroundAlphaAnimation() {
-        TASKBAR_UI_THREAD.execute { taskbarActivityContext.playTaskbarBackgroundAlphaAnimation() }
+        getTaskbarUiThread().execute {
+            taskbarActivityContext.playTaskbarBackgroundAlphaAnimation()
+        }
     }
 
     /**
-     * Called on ACTION_DOWN, ACTION_UP and ACTION_CANCEL. Safe to post Runnable to
-     * TASKBAR_UI_THREAD.
+     * Called on ACTION_DOWN, ACTION_UP and ACTION_CANCEL. Safe to post Runnable to taskbar's ui
+     * thread.
      */
     @AnyThread
     fun setAutohideSuspendFlag(@AutohideSuspendFlag flag: Int, newValue: Boolean) {
-        TASKBAR_UI_THREAD.execute { taskbarActivityContext.setAutohideSuspendFlag(flag, newValue) }
+        getTaskbarUiThread().execute {
+            taskbarActivityContext.setAutohideSuspendFlag(flag, newValue)
+        }
     }
 
     @AnyThread
     fun startTaskbarUnstashHint(isHovered: Boolean) {
-        TASKBAR_UI_THREAD.execute { taskbarActivityContext.startTaskbarUnstashHint(isHovered) }
+        getTaskbarUiThread().execute { taskbarActivityContext.startTaskbarUnstashHint(isHovered) }
     }
 
     /** Called once when ACTION_MOVE reach certain threshold. */
     @AnyThread
     fun onSwipeToUnstashTaskbar(delayTaskbarBackground: Boolean) {
-        TASKBAR_UI_THREAD.execute {
+        getTaskbarUiThread().execute {
             taskbarActivityContext.onSwipeToUnstashTaskbar(delayTaskbarBackground)
         }
     }
@@ -71,21 +75,21 @@ class TaskbarApiProxy(private val taskbarActivityContext: TaskbarActivityContext
     @AnyThread
     fun onTransitionActionDown() {
         if (transitionCallback == null) return
-        TASKBAR_UI_THREAD.execute { transitionCallback.onActionDown() }
+        getTaskbarUiThread().execute { transitionCallback.onActionDown() }
     }
 
     /** Called on every ACTION_MOVE. */
     @AnyThread
     fun onTransitionActionMove(dy: Float) {
         if (transitionCallback == null) return
-        TASKBAR_UI_THREAD.execute { transitionCallback.onActionMove(dy) }
+        getTaskbarUiThread().execute { transitionCallback.onActionMove(dy) }
     }
 
     /** Called on ACTION_UP and ACTION_CANCEL */
     @AnyThread
     fun onTransitionActionEnd() {
         if (transitionCallback == null) return
-        TASKBAR_UI_THREAD.execute { transitionCallback.onActionEnd() }
+        getTaskbarUiThread().execute { transitionCallback.onActionEnd() }
     }
 
     @Deprecated("Should be removed once we turned on [refactorTaskbarUiState()] flag")

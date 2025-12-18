@@ -20,7 +20,7 @@ import static com.android.launcher3.Utilities.isRunningInTestHarness;
 import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_APP;
 import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_STASHED_LAUNCHER_STATE;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
-import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
+import static com.android.launcher3.util.Executors.getTaskbarUiThread;
 
 import android.animation.Animator;
 
@@ -58,7 +58,7 @@ public class FallbackTaskbarUIController
             new StateManager.StateListener<RecentsState>() {
                 @Override
                 public void onStateTransitionStart(RecentsState toState) {
-                    TASKBAR_UI_THREAD.execute(() -> {
+                    getTaskbarUiThread().execute(() -> {
                         animateToRecentsState(toState);
 
                         RecentsViewInteractor recentsViewInteractor = getRecentsViewInteractor();
@@ -74,7 +74,7 @@ public class FallbackTaskbarUIController
 
                 @Override
                 public void onStateTransitionComplete(RecentsState finalState) {
-                    TASKBAR_UI_THREAD.execute(() -> {
+                    getTaskbarUiThread().execute(() -> {
                         boolean finalStateDefault = finalState == RecentsState.DEFAULT;
                         // TODO(b/268120202) Taskbar shows up on 3P home, currently we don't go to
                         //  overview from 3P home. Either implement that or it'll change w/
@@ -118,7 +118,7 @@ public class FallbackTaskbarUIController
         FallbackActivityInterface activityInterface =
                 FallbackActivityInterface.INSTANCE.get(mControllers.taskbarActivityContext);
         if (enableTaskbarUiThread()) {
-            return new TaskbarAsyncAnimator(TASKBAR_UI_THREAD, MAIN_EXECUTOR,
+            return new TaskbarAsyncAnimator(getTaskbarUiThread(), MAIN_EXECUTOR,
                     () -> createAnimToRecentsState(
                             activityInterface.stateFromGestureEndTarget(endTarget),
                             duration));

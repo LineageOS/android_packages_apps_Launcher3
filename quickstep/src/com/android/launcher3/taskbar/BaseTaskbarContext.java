@@ -16,7 +16,7 @@
 package com.android.launcher3.taskbar;
 
 import static com.android.launcher3.Flags.enableTaskbarUiThread;
-import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
+import static com.android.launcher3.util.Executors.getTaskbarUiThread;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -75,7 +75,7 @@ public abstract class BaseTaskbarContext extends BaseContext
     }
 
     /**
-     * For taskbar the "main" thread should be TASKBAR_UI_THREAD obtained from
+     * For taskbar the "main" thread should be taskbar's ui thread obtained from
      * [ActivityContext.getUiExecutor]
      */
     @Override
@@ -100,7 +100,7 @@ public abstract class BaseTaskbarContext extends BaseContext
 
     @Override
     public LooperExecutor getUiExecutor() {
-        return TASKBAR_UI_THREAD;
+        return getTaskbarUiThread();
     }
 
     /**

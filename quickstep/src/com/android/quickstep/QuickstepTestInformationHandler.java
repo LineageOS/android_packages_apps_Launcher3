@@ -4,7 +4,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.launcher3.taskbar.TaskbarThresholdUtils.getFromNavThreshold;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
-import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
+import static com.android.launcher3.util.Executors.getTaskbarUiThread;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -367,7 +367,8 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
      * Runs the given command on Taskbar UI thread, after ensuring TaskbarManager is created
      */
     private void runOnTaskbar(Consumer<TaskbarManager> callback) {
-        runOnSysUIConnection(TASKBAR_UI_THREAD, c -> callback.accept(c.getTaskbarManager()));
+        runOnSysUIConnection(
+                getTaskbarUiThread(), c -> callback.accept(c.getTaskbarManager()));
     }
 
     private <T> Bundle getTaskbarProperty(
@@ -382,7 +383,7 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
 
     private void waitForTaskbarUiThreadSync() {
         try {
-            TASKBAR_UI_THREAD.submit(() -> null).get();
+            getTaskbarUiThread().submit(() -> null).get();
         } catch (Exception ignored) { }
     }
 }

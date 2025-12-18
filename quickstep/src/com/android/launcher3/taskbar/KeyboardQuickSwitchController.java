@@ -20,7 +20,7 @@ import static android.window.DesktopModeFlags.ENABLE_TASKBAR_OVERFLOW;
 import static com.android.launcher3.taskbar.TaskbarDesktopExperienceFlags.enableAltTabKqsFlatenning;
 import static com.android.launcher3.taskbar.TaskbarDesktopExperienceFlags.enableAltTabKqsOnConnectedDisplays;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
-import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
+import static com.android.launcher3.util.Executors.getTaskbarUiThread;
 
 import android.app.ActivityManager;
 import android.content.ComponentName;
@@ -172,7 +172,7 @@ public final class KeyboardQuickSwitchController implements
                         mExcludedTaskIds)) {
                     mExcludedTaskIds = taskIdsToExclude;
                     mTaskListChangeId = mModel.getTasks(RecentsFilterState.EMPTY_FILTER,
-                            (tasks) -> TASKBAR_UI_THREAD.execute(() -> {
+                            (tasks) -> getTaskbarUiThread().execute(() -> {
                                 processLoadedTasks(
                                         wasOpenedFromTaskbar,
                                         shouldShowDesktopTasks,
@@ -230,7 +230,7 @@ public final class KeyboardQuickSwitchController implements
 
         mExcludedTaskIds = taskIdsToExclude;
         mTaskListChangeId = mModel.getTasks(RecentsFilterState.EMPTY_FILTER,
-                (tasks) -> TASKBAR_UI_THREAD.execute(() -> {
+                (tasks) -> getTaskbarUiThread().execute(() -> {
                     processLoadedTasks(
                             wasOpenedFromTaskbar, shouldShowDesktopTasks, tasks, taskIdsToExclude);
                     // Check if the first task is running after the recents model has updated so
@@ -502,7 +502,7 @@ public final class KeyboardQuickSwitchController implements
 
         void updateThumbnailInBackground(Task task, Consumer<ThumbnailData> callback) {
             MAIN_EXECUTOR.execute(() -> mModel.getThumbnailCache().getThumbnailInBackground(task,
-                    thumbnailData -> TASKBAR_UI_THREAD.execute(() -> {
+                    thumbnailData -> getTaskbarUiThread().execute(() -> {
                         task.thumbnail = thumbnailData;
                         callback.accept(thumbnailData);
                     })));
@@ -511,7 +511,7 @@ public final class KeyboardQuickSwitchController implements
         void updateIconInBackground(Task task, Consumer<Task> callback) {
             Preconditions.assertTaskbarUiThread();
             mModel.getIconCache().getIconInBackground(
-                    task, TASKBAR_UI_THREAD, (icon, contentDescription, title) -> {
+                    task, getTaskbarUiThread(), (icon, contentDescription, title) -> {
                         task.icon = icon;
                         task.titleDescription = contentDescription;
                         task.title = title;

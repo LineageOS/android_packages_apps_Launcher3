@@ -17,7 +17,7 @@ package com.android.launcher3.taskbar.bubbles;
 
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 
-import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
+import static com.android.launcher3.util.Executors.getTaskbarUiThread;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_VISIBLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
@@ -303,11 +303,11 @@ public class BubbleBarController {
                     }
                     viewUpdate.currentBubbles = currentBubbles;
                 }
-                TASKBAR_UI_THREAD.execute(() -> applyViewChanges(viewUpdate));
+                getTaskbarUiThread().execute(() -> applyViewChanges(viewUpdate));
             });
         } else {
             // No bubbles to load, immediately apply the changes.
-            TASKBAR_UI_THREAD.execute(() -> applyViewChanges(viewUpdate));
+            getTaskbarUiThread().execute(() -> applyViewChanges(viewUpdate));
         }
     }
 
@@ -634,7 +634,7 @@ public class BubbleBarController {
     }
 
     public void animateBubbleBarLocation(BubbleBarLocation bubbleBarLocation) {
-        TASKBAR_UI_THREAD.execute(
+        getTaskbarUiThread().execute(
                 () -> {
                     mBubbleBarViewController.animateBubbleBarLocation(bubbleBarLocation);
                     mBubbleBarLocationListener.onBubbleBarLocationAnimated(bubbleBarLocation);
@@ -642,7 +642,7 @@ public class BubbleBarController {
     }
 
     private void showBubbleBarDropTargetAt(@Nullable BubbleBarLocation location) {
-        TASKBAR_UI_THREAD.execute(
+        getTaskbarUiThread().execute(
                 () -> mBubbleBarViewController.showBubbleBarDropTargetAt(location));
     }
 

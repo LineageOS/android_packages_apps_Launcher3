@@ -26,7 +26,7 @@ import static android.window.DesktopModeFlags.ENABLE_TASKBAR_OVERFLOW;
 import static com.android.launcher3.AbstractFloatingView.TYPE_ALL;
 import static com.android.launcher3.AbstractFloatingView.TYPE_REBIND_SAFE;
 import static com.android.launcher3.LauncherState.ALL_APPS;
-import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
+import static com.android.launcher3.util.Executors.getTaskbarUiThread;
 import static com.android.systemui.shared.Flags.cueBarAceMigration;
 
 import android.annotation.SuppressLint;
@@ -98,12 +98,12 @@ public final class TaskbarOverlayController
         @Override
         public void onTaskMovedToFront(int taskId) {
             // New front task will be below existing overlay, so move out of the way.
-            TASKBAR_UI_THREAD.execute(this::hideWindowOnTaskStackChange);
+            getTaskbarUiThread().execute(this::hideWindowOnTaskStackChange);
         }
 
         @Override
         public void onTaskStackChanged() {
-            TASKBAR_UI_THREAD.execute(() -> {
+            getTaskbarUiThread().execute(() -> {
                 // The other callbacks are insufficient for All Apps, because there are many cases
                 // where it can relaunch the same task already behind it. However, this callback
                 // needs to be a no-op when only EDU is shown, because going between the EDU steps
@@ -116,7 +116,7 @@ public final class TaskbarOverlayController
         }
 
         private void hideWindowOnTaskStackChange() {
-            TASKBAR_UI_THREAD.execute(() -> {
+            getTaskbarUiThread().execute(() -> {
                 // A task was launched while overlay window was open, so stash Taskbar.
                 mControllers.taskbarStashController.updateAndAnimateTransientTaskbar(
                         /* stash = */ true,
