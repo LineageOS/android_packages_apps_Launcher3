@@ -400,12 +400,16 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         mDotParams.setDotColor(Themes.getAttrColor(context, R.attr.notificationDotColor));
 
         if (mDisplay == DISPLAY_ALL_APPS) {
-            mDotRenderer = mActivity.getDeviceProfile().mDotRendererAllApps;
+            mDotRenderer = new DotRenderer(
+                    mActivity.getDeviceProfile().getAllAppsProfile().getIconSizePx()
+            );
 
             // Do not use normalized info, as we account for normalization in iconBounds
             mDotParams.shapeInfo = IconShapeInfo.DEFAULT;
         } else {
-            mDotRenderer = mActivity.getDeviceProfile().mDotRendererWorkSpace;
+            mDotRenderer = new DotRenderer(
+                    mActivity.getDeviceProfile().getWorkspaceIconProfile().getIconSizePx()
+            );
             mDotParams.shapeInfo = ThemeManager.INSTANCE.get(context)
                     .getIconState().getIconShapeInfo();
         }

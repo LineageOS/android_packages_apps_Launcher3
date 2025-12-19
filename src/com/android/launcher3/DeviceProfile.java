@@ -154,10 +154,6 @@ public class DeviceProfile {
     // the widgetView, such that the actual view size is same as the widget size.
     public final Rect widgetPadding = new Rect();
 
-    // Notification dots
-    public final DotRenderer mDotRendererWorkSpace;
-    public final DotRenderer mDotRendererAllApps;
-
     // Taskbar
     public TaskbarProfile mTaskbarProfile;
     public boolean isTaskbarPresent;
@@ -219,8 +215,6 @@ public class DeviceProfile {
         mDropTargetProfile = new DropTargetProfile(0, 0, 0, 0, 0, 0, 0, 0, 0);
         mBubbleBarSpaceThresholdPx = 0;
         mViewScaleProvider = null;
-        mDotRendererWorkSpace = null;
-        mDotRendererAllApps = null;
         mAllAppsProfile = new AllAppsProfile(new Point(0, 0), 0, 0, 0f, 0, 0, 0, 0, 0, 0,
                 new Rect(), 0, 0);
     }
@@ -230,7 +224,6 @@ public class DeviceProfile {
             Info info,
             WindowManagerProxy wmProxy,
             WindowBounds windowBounds,
-            SparseArray<DotRenderer> dotRendererCache,
             boolean isExternalDisplay,
             boolean transposeLayoutWithOrientation,
             boolean isMultiDisplay,
@@ -548,12 +541,6 @@ public class DeviceProfile {
         mViewScaleProvider = viewScaleProvider;
 
         dimensionOverrideProvider.accept(this);
-
-        // This is done last, after iconSizePx is calculated above.
-        mDotRendererWorkSpace = createDotRenderer(
-                getWorkspaceIconProfile().getIconSizePx(), dotRendererCache);
-        mDotRendererAllApps = createDotRenderer(
-                getAllAppsProfile().getIconSizePx(), dotRendererCache);
     }
 
     private boolean isLandscapeOrientation()  {
@@ -663,15 +650,10 @@ public class DeviceProfile {
         bounds.bounds.offsetTo(mDeviceProperties.getWindowX(), mDeviceProperties.getWindowY());
         bounds.insets.set(mDeviceProperties.getInsets());
 
-        SparseArray<DotRenderer> dotRendererCache = new SparseArray<>();
-        dotRendererCache.put(getWorkspaceIconProfile().getIconSizePx(), mDotRendererWorkSpace);
-        dotRendererCache.put(getAllAppsProfile().getIconSizePx(), mDotRendererAllApps);
-
         return inv.newDPBuilder(mInfo)
                 .setWindowBounds(bounds)
                 .setIsMultiDisplay(mDeviceProperties.isMultiDisplay())
                 .setExternalDisplay(mDeviceProperties.isExternalDisplay())
-                .setDotRendererCache(dotRendererCache)
                 .setGestureMode(mDeviceProperties.isGestureMode())
                 .setDisplayOptionSpec(mDisplayOptionSpec);
     }
@@ -1706,8 +1688,6 @@ public class DeviceProfile {
 
         private ViewScaleProvider mViewScaleProvider = null;
 
-        private SparseArray<DotRenderer> mDotRendererCache;
-
         private Consumer<DeviceProfile> mOverrideProvider;
 
         private DisplayOptionSpec mDisplayOptionSpec;
@@ -1725,11 +1705,6 @@ public class DeviceProfile {
 
         public Builder setIsMultiDisplay(boolean isMultiDisplay) {
             mIsMultiDisplay = isMultiDisplay;
-            return this;
-        }
-
-        public Builder setDotRendererCache(SparseArray<DotRenderer> dotRendererCache) {
-            mDotRendererCache = dotRendererCache;
             return this;
         }
 
@@ -1800,9 +1775,6 @@ public class DeviceProfile {
             if (mIsGestureMode == null) {
                 mIsGestureMode = mInfo.getNavigationMode().hasGestures;
             }
-            if (mDotRendererCache == null) {
-                mDotRendererCache = new SparseArray<>();
-            }
             if (mViewScaleProvider == null) {
                 mViewScaleProvider = DEFAULT_PROVIDER;
             }
@@ -1818,7 +1790,6 @@ public class DeviceProfile {
                     mInfo,
                     mWMProxy,
                     mWindowBounds,
-                    mDotRendererCache,
                     mIsExternalDisplay,
                     mTransposeLayoutWithOrientation,
                     mIsMultiDisplay,
