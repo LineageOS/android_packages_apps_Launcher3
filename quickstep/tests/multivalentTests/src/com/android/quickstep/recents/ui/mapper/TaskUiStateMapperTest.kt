@@ -373,19 +373,6 @@ class TaskUiStateMapperTest {
         assertThat(result).isEqualTo(expected)
     }
 
-    @DisableFlags(Flags.FLAG_SHOW_CLOSE_BUTTON_ON_TASKVIEW_HOVER)
-    @Test
-    fun toTaskDismissButtonState_flagDisabled_hideDismissButton() {
-        val result =
-            TaskUiStateMapper.toTaskDismissButtonState(
-                isDesktopTaskView = false,
-                clickCloseListener = CLOSE_CALLBACK,
-            )
-
-        assertThat(result).isEqualTo(TaskDismissButtonState.Disabled)
-    }
-
-    @EnableFlags(Flags.FLAG_SHOW_CLOSE_BUTTON_ON_TASKVIEW_HOVER)
     @Test
     fun toTaskDismissButtonState_showDismissButton() {
         val result =
@@ -397,7 +384,6 @@ class TaskUiStateMapperTest {
         assertThat(result).isEqualTo(TaskDismissButtonState.Enabled(CLOSE_CALLBACK))
     }
 
-    @EnableFlags(Flags.FLAG_SHOW_CLOSE_BUTTON_ON_TASKVIEW_HOVER)
     @Test
     fun toTaskDismissButtonState_isDesktopTaskView_hideDismissButton() {
         val result =
