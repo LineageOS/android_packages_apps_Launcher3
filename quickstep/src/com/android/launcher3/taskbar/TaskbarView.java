@@ -1365,8 +1365,8 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
             icon.setOnTouchListener((v, event) -> {
                 if (event.isFromSource(InputDevice.SOURCE_MOUSE)
                         && (event.getButtonState() & MotionEvent.BUTTON_SECONDARY) != 0
-                        && v instanceof BubbleTextView) {
-                    mActivityContext.showPopupMenuForIcon((BubbleTextView) v);
+                        && (v instanceof BubbleTextView || v instanceof FolderIcon)) {
+                    mActivityContext.showPopupMenuForIcon(v);
                     return true;
                 }
                 return false;
