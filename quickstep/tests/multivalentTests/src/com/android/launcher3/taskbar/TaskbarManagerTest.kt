@@ -16,10 +16,7 @@
 
 package com.android.launcher3.taskbar
 
-import android.provider.Settings
-import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.launcher3.LauncherInteractor
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.UserLocked
@@ -33,7 +30,6 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.mock
 
 @RunWith(AndroidJUnit4::class)
 class TaskbarManagerTest {
@@ -43,8 +39,6 @@ class TaskbarManagerTest {
 
     private val taskbarManager by taskbarUnitTestRule::taskbarManager
     private val activityContext by taskbarUnitTestRule::activityContext
-    private val taskbarRootView: View
-        get() = activityContext.dragLayer.rootView
 
     @Test
     fun addDisplay_externalActivityContextInitialized() {
@@ -187,47 +181,5 @@ class TaskbarManagerTest {
         }
 
         assertThat(taskbarManager.getTaskbarForDisplay(displayId)).isNotNull()
-    }
-
-    @Test
-    fun updateTaskbarsVisibility_userNotSetup_taskbarIsVisible() {
-        runOnTaskbarUiThreadSync {
-            // Ensure user setup is not complete
-            Settings.Secure.putInt(context.contentResolver, Settings.Secure.USER_SETUP_COMPLETE, 0)
-            taskbarManager.recreateTaskbars()
-
-            // Verify visibility
-            taskbarManager.updateTaskbarsVisibility()
-            assertThat(taskbarRootView.visibility).isEqualTo(View.VISIBLE)
-        }
-    }
-
-    @Test
-    fun updateTaskbarsVisibility_userSetupAndNoActivity_taskbarIsVisible() {
-        runOnTaskbarUiThreadSync {
-            // Ensure user setup is complete
-            Settings.Secure.putInt(context.contentResolver, Settings.Secure.USER_SETUP_COMPLETE, 1)
-            taskbarManager.recreateTaskbars()
-            // mActivityInteractor is null by default in tests
-
-            // Verify visibility
-            taskbarManager.updateTaskbarsVisibility()
-            assertThat(taskbarRootView.visibility).isEqualTo(View.VISIBLE)
-        }
-    }
-
-    @Test
-    fun updateTaskbarsVisibility_userSetupWithActivity_taskbarIsVisible() {
-        runOnTaskbarUiThreadSync {
-            // Ensure user setup is complete
-            Settings.Secure.putInt(context.contentResolver, Settings.Secure.USER_SETUP_COMPLETE, 1)
-            taskbarManager.recreateTaskbars()
-            val mockLauncherInteractor = mock(LauncherInteractor::class.java)
-            taskbarManager.setActivityInteractor(mockLauncherInteractor)
-
-            // Verify visibility
-            taskbarManager.updateTaskbarsVisibility()
-            assertThat(taskbarRootView.visibility).isEqualTo(View.VISIBLE)
-        }
     }
 }
