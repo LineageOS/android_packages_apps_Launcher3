@@ -32,7 +32,6 @@ import com.android.quickstep.views.DesktopTaskView;
 import com.android.quickstep.views.RecentsView;
 import com.android.quickstep.views.RecentsViewContainer;
 import com.android.quickstep.views.TaskView;
-import com.android.quickstep.window.RecentsWindowFlags;
 import com.android.systemui.shared.recents.model.Task;
 import com.android.wm.shell.shared.bubbles.DeviceConfig;
 import com.android.wm.shell.shared.desktopmode.DesktopState;
@@ -219,11 +218,9 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
                     c.getAllAppsActionManager().onDestroy();
                     mOverviewComponentObserver.dispatchOverviewState();
 
-                    if (RecentsWindowFlags.getEnableOverviewInWindow()) {
-                        var launcher = Launcher.ACTIVITY_TRACKER.getCreatedContext();
-                        if (launcher != null) c.getTaskbarManager().setActivity(launcher);
-                        waitForTaskbarUiThreadSync();
-                    }
+                    var launcher = Launcher.ACTIVITY_TRACKER.getCreatedContext();
+                    if (launcher != null) c.getTaskbarManager().setActivity(launcher);
+                    waitForTaskbarUiThreadSync();
                 });
                 return response;
 

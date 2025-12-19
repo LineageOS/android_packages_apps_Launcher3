@@ -98,7 +98,6 @@ import com.android.quickstep.util.ActiveTrackpadList;
 import com.android.quickstep.util.ActivityPreloadUtil;
 import com.android.quickstep.util.ContextualSearchStateManager;
 import com.android.quickstep.views.RecentsViewContainer;
-import com.android.quickstep.window.RecentsWindowFlags;
 import com.android.quickstep.window.RecentsWindowManager;
 import com.android.quickstep.window.RecentsWindowSwipeHandler;
 import com.android.systemui.shared.system.InputChannelCompat.InputEventReceiver;
@@ -109,6 +108,8 @@ import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.wm.shell.shared.desktopmode.DesktopState;
 
+import kotlinx.coroutines.CoroutineDispatcher;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Locale;
@@ -117,8 +118,6 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import kotlinx.coroutines.CoroutineDispatcher;
 
 /**
  * Service connected by system-UI for handling touch interaction.
@@ -409,16 +408,14 @@ public class TouchInteractionHandler extends ContextWrapper {
                 mTaskbarManager.setRecentsViewContainer(newOverviewContainer);
             }
         }
-        if (RecentsWindowFlags.getEnableOverviewInWindow()) {
-            mRecentsWindowManagerRepository.forEach(
-                    /* createIfAbsent= */ false, RecentsWindowManager::onOverviewTargetChanged);
-            if (isHomeAndOverviewSame) {
-                TaskStackChangeListeners.getInstance().unregisterTaskStackListener(
-                        mHomeIntentStartedListener);
-            } else {
-                TaskStackChangeListeners.getInstance().registerTaskStackListener(
-                        mHomeIntentStartedListener);
-            }
+        mRecentsWindowManagerRepository.forEach(
+                /* createIfAbsent= */ false, RecentsWindowManager::onOverviewTargetChanged);
+        if (isHomeAndOverviewSame) {
+            TaskStackChangeListeners.getInstance().unregisterTaskStackListener(
+                    mHomeIntentStartedListener);
+        } else {
+            TaskStackChangeListeners.getInstance().registerTaskStackListener(
+                    mHomeIntentStartedListener);
         }
     }
 
@@ -472,10 +469,8 @@ public class TouchInteractionHandler extends ContextWrapper {
         }
         mDesktopAppLaunchTransitionManager = null;
         mLockedUserState.removeOnUserUnlockedRunnable(mUserUnlockedRunnable);
-        if (RecentsWindowFlags.getEnableOverviewInWindow()) {
-            TaskStackChangeListeners.getInstance().unregisterTaskStackListener(
-                    mHomeIntentStartedListener);
-        }
+        TaskStackChangeListeners.getInstance().unregisterTaskStackListener(
+                mHomeIntentStartedListener);
     }
 
     protected void onScreenOnChanged(boolean isOn) {

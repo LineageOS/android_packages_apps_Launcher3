@@ -35,21 +35,4 @@ object RecentsWindowFlags {
             false,
             Flags.FLAG_ENABLE_FALLBACK_OVERVIEW_IN_WINDOW,
         )
-
-    @JvmField
-    val enableOverviewOnConnectedDisplays: DesktopExperienceFlag =
-        DesktopExperienceFlag(
-            Flags::enableOverviewOnConnectedDisplays,
-            true,
-            Flags.FLAG_ENABLE_OVERVIEW_ON_CONNECTED_DISPLAYS,
-        )
-
-    @JvmStatic
-    val enableOverviewInWindow
-        get() =
-            enableLauncherOverviewInWindow.isTrue ||
-                enableFallbackOverviewInWindow.isTrue ||
-                enableOverviewOnConnectedDisplays.isTrue
-
-    @JvmStatic fun enableOverviewOnConnectedDisplays() = enableOverviewOnConnectedDisplays.isTrue
 }

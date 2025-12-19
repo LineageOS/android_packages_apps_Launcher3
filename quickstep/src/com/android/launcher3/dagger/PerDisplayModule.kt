@@ -23,7 +23,6 @@ import android.util.Log
 import android.view.Display
 import android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
 import android.view.WindowManagerGlobal
-import com.android.app.displaylib.DefaultDisplayOnlyInstanceRepositoryImpl
 import com.android.app.displaylib.DisplayInstanceLifecycleManager
 import com.android.app.displaylib.DisplayLibBackground
 import com.android.app.displaylib.DisplayLibComponent
@@ -42,7 +41,6 @@ import com.android.launcher3.util.LooperExecutor
 import com.android.quickstep.RecentsAnimationDeviceState
 import com.android.quickstep.RotationTouchHelper
 import com.android.quickstep.TaskAnimationManager
-import com.android.quickstep.window.RecentsWindowFlags.enableOverviewOnConnectedDisplays
 import com.android.quickstep.window.RecentsWindowManager
 import com.android.quickstep.window.RecentsWindowManagerInstanceProvider
 import com.android.quickstep.window.RecentsWindowTracker
@@ -94,15 +92,11 @@ object PerDisplayRepositoriesModule {
         val instanceProvider = PerDisplayInstanceProvider { displayId ->
             displayRepository.getDisplay(displayId)?.let { instanceFactory.build(it) }
         }
-        return if (enableOverviewOnConnectedDisplays()) {
-            repositoryFactory.create(
-                "PerDisplayComponentRepo",
-                instanceProvider,
-                displaysWithDecorationsLifecycleManager,
-            )
-        } else {
-            DefaultDisplayOnlyInstanceRepositoryImpl("PerDisplayComponentRepo", instanceProvider)
-        }
+        return repositoryFactory.create(
+            "PerDisplayComponentRepo",
+            instanceProvider,
+            displaysWithDecorationsLifecycleManager,
+        )
     }
 
     @Provides
@@ -142,17 +136,12 @@ object PerDisplayRepositoriesModule {
         instanceProvider: RecentsWindowManagerInstanceProvider,
         @DisplaysWithDecorations
         displaysWithDecorationsLifecycleManager: DisplayInstanceLifecycleManager,
-    ): PerDisplayRepository<RecentsWindowManager> {
-        return if (enableOverviewOnConnectedDisplays()) {
-            repositoryFactory.create(
-                "RecentsWindowManagerRepo",
-                instanceProvider,
-                displaysWithDecorationsLifecycleManager,
-            )
-        } else {
-            DefaultDisplayOnlyInstanceRepositoryImpl("RecentsWindowManagerRepo", instanceProvider)
-        }
-    }
+    ): PerDisplayRepository<RecentsWindowManager> =
+        repositoryFactory.create(
+            "RecentsWindowManagerRepo",
+            instanceProvider,
+            displaysWithDecorationsLifecycleManager,
+        )
 
     @Provides
     @LauncherAppSingleton

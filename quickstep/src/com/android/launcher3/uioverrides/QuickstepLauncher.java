@@ -225,7 +225,6 @@ import com.android.quickstep.views.OverviewActionsView;
 import com.android.quickstep.views.RecentsView;
 import com.android.quickstep.views.RecentsViewContainer;
 import com.android.quickstep.views.TaskView;
-import com.android.quickstep.window.RecentsWindowFlags;
 import com.android.quickstep.window.RecentsWindowManager;
 import com.android.systemui.animation.back.FlingOnBackAnimationCallback;
 import com.android.systemui.shared.recents.model.Task;
@@ -973,7 +972,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
 
     @Override
     protected void onNewIntent(Intent intent) {
-        boolean intentHasGnc = GestureNavContract.canBuildFromIntent(intent);
+        boolean intentHasGestureNavContract = GestureNavContract.canBuildFromIntent(intent);
         super.onNewIntent(intent);
         var conn = mSysUIConnectionTracker.getActiveComponent().getValue();
         if (conn != null) {
@@ -982,7 +981,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
                 overviewCommandHelper.clearPendingCommands();
             }
         }
-        if (RecentsWindowFlags.getEnableOverviewInWindow() && !intentHasGnc) {
+        if (!intentHasGestureNavContract) {
             BaseContainerInterface<?, ?> defaultDisplayContainerInterface =
                     OverviewComponentObserver.INSTANCE.get(this).getContainerInterface(
                             DEFAULT_DISPLAY);
@@ -1018,9 +1017,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
 
     @Override
     protected void handleGestureContract(Intent intent) {
-        if (GestureNavContract.isContractEnabled(intent)
-                && (FeatureFlags.SEPARATE_RECENTS_ACTIVITY.get()
-                || RecentsWindowFlags.getEnableOverviewInWindow())) {
+        if (GestureNavContract.isContractEnabled(intent)) {
             super.handleGestureContract(intent);
         }
     }

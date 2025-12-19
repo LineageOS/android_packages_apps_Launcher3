@@ -16,14 +16,12 @@
 
 package com.android.launcher3.taskbar
 
-import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.view.WindowInsets
 import android.view.WindowManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
-import com.android.launcher3.Flags
 import com.android.launcher3.Flags.enableTaskbarUiThread
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.TASKBAR_PINNING
@@ -65,7 +63,6 @@ import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.UserSetupMode
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
-import com.android.launcher3.taskbar.rules.displayControllerSpy
 import com.android.launcher3.util.Executors.getTaskbarUiThread
 import com.android.launcher3.util.RoboApiWrapper.convertToSpy
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED
@@ -140,14 +137,6 @@ class TaskbarStashControllerTest {
     fun testSetSetupUiVisible_false_unstashedInApp() {
         runOnTaskbarUiThreadSync { stashController.setSetupUIVisible(false) }
         assertThat(stashController.isStashedInApp).isFalse()
-    }
-
-    @Test
-    @DisableFlags(Flags.FLAG_ENABLE_OVERVIEW_ON_CONNECTED_DISPLAYS)
-    fun testRecreateAsTransient_withoutOverviewOnConnectedDisplays_timeoutStarted() {
-        context.displayControllerSpy?.setupTaskbarPinningPrefListener(context.displayId)
-
-        testRecreateAsTransient_timeoutStarted()
     }
 
     private fun testRecreateAsTransient_timeoutStarted() {

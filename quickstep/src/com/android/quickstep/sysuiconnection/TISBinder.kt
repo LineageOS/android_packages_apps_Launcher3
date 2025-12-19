@@ -53,7 +53,6 @@ import com.android.quickstep.dagger.SysUIConnectionSingleton
 import com.android.quickstep.input.QuickstepKeyGestureEventsManager
 import com.android.quickstep.util.ActivityPreloadUtil.preloadOverviewForTIS
 import com.android.quickstep.util.ContextualSearchInvoker
-import com.android.quickstep.window.RecentsWindowFlags.enableOverviewOnConnectedDisplays
 import com.android.systemui.shared.recents.ILauncherProxy.Stub
 import com.android.systemui.shared.statusbar.phone.BarTransitions.TransitionMode
 import com.android.systemui.shared.system.ActivityManagerWrapper
@@ -204,7 +203,6 @@ internal constructor(
 
     @BinderThread
     override fun onSystemUiStateChanged(@SystemUiStateFlags stateFlags: Long, displayId: Int) {
-        if (!enableOverviewOnConnectedDisplays() && displayId != Display.DEFAULT_DISPLAY) return
         uiExecutor.execute {
             withState {
                 val deviceState = deviceStateRepository[displayId] ?: return@execute
@@ -366,8 +364,7 @@ internal constructor(
         val actionCornerHandler: ActionCornerHandler? by actionCornerHandler
 
         fun focusedDisplayIdForOverviewOnConnectedDisplays() =
-            if (enableOverviewOnConnectedDisplays()) sysUIProxy.focusState.focusedDisplayId
-            else Display.DEFAULT_DISPLAY
+            sysUIProxy.focusState.focusedDisplayId
 
         fun focusedDisplayIdForAltTabKqsOnConnectedDisplays() =
             if (enableAltTabKqsOnConnectedDisplays.isTrue) sysUIProxy.focusState.focusedDisplayId
