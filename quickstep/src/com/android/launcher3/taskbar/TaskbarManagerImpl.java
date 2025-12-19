@@ -169,20 +169,6 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
     private @Nullable ActivityInteractor mActivityInteractor;
     private @Nullable RecentsViewContainerInteractor mRecentsViewContainerInteractor;
 
-    private final InvariantDeviceProfile.OnIDPChangeListener mOnIDPChangeListener =
-            new InvariantDeviceProfile.OnIDPChangeListener() {
-                @Override
-                public void onIdpChanged(boolean modelPropertiesChanged) {
-                    TaskbarActivityContext activityContext = getTaskbarForDisplay(
-                            mPrimaryDisplayId);
-                    if (activityContext != null
-                            && activityContext.getDeviceProfile() != LauncherAppState.getIDP(
-                            mPrimaryWindowContext).getDeviceProfile(mPrimaryWindowContext)) {
-                        recreateTaskbars();
-                    }
-                }
-            };
-
     private final LauncherPrefChangeListener mTaskbarPinningPreferenceChangeListener =
             new LauncherPrefChangeListener() {
                 @Override
@@ -630,8 +616,6 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
             resource.debugMsg("recreateTaskbars");
             recreateTaskbarForDisplay(resource, 0, "recreateTaskbars");
         }
-
-        LauncherAppState.getIDP(mPrimaryWindowContext).addOnChangeListener(mOnIDPChangeListener);
     }
 
     /**
@@ -1135,10 +1119,6 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
                 TASKBAR_PINNING,
                 TASKBAR_PINNING_IN_DESKTOP_MODE);
 
-        if (mUserUnlocked) {
-            LauncherAppState.getIDP(mPrimaryWindowContext).removeOnChangeListener(
-                    mOnIDPChangeListener);
-        }
         removeActivityCallbacksAndListeners();
         if (mGrowthBroadcastReceiver != null) {
             mGrowthBroadcastReceiver.close();
