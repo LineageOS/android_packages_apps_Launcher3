@@ -89,10 +89,8 @@ class SystemDragControllerImpl(private val systemDragListenerFactory: SystemDrag
         }
 
     private fun startSystemDrag(dragView: DragView, params: SystemDragParams): Boolean =
-        launcher
-            ?.dragLayer
-            ?.startDragAndDrop(
-                params.clipData,
+        launcher?.dragLayer?.let { dragLayer ->
+            val dragShadow =
                 object : View.DragShadowBuilder() {
                     val h = (params.dragImage.intrinsicHeight * params.initialDragViewScale).toInt()
                     val w = (params.dragImage.intrinsicWidth * params.initialDragViewScale).toInt()
@@ -105,9 +103,12 @@ class SystemDragControllerImpl(private val systemDragListenerFactory: SystemDrag
                         }
 
                     override fun onDrawShadow(canvas: Canvas) {
+                        val oldAlpha = params.dragImage.alpha
                         val oldBounds = params.dragImage.copyBounds()
+                        params.dragImage.alpha = (dragView.alpha * 0xFF).toInt()
                         params.dragImage.bounds = Rect(0, 0, w, h)
                         params.dragImage.draw(canvas)
+                        params.dragImage.alpha = oldAlpha
                         params.dragImage.bounds = oldBounds
                     }
 
@@ -118,12 +119,26 @@ class SystemDragControllerImpl(private val systemDragListenerFactory: SystemDrag
                         outShadowSize.set(w, h)
                         outShadowTouchPoint.set(touch.x, touch.y)
                     }
-                },
-                /*localState=*/ null,
-                /*flags=*/ DRAG_FLAG_DISABLE_DEFAULT_POINTER_ICON or
-                    DRAG_FLAG_GLOBAL or
-                    DRAG_FLAG_GLOBAL_URI_READ or
-                    DRAG_FLAG_GLOBAL_URI_WRITE or
-                    DRAG_FLAG_OPAQUE,
-            ) == true
+                }
+
+            dragLayer
+                .startDragAndDrop(
+                    params.clipData,
+                    dragShadow,
+                    /*localState=*/ null,
+                    /*flags=*/ DRAG_FLAG_DISABLE_DEFAULT_POINTER_ICON or
+                        DRAG_FLAG_GLOBAL or
+                        DRAG_FLAG_GLOBAL_URI_READ or
+                        DRAG_FLAG_GLOBAL_URI_WRITE or
+                        DRAG_FLAG_OPAQUE,
+                )
+                .also { result ->
+                    if (result) {
+                        // Synchronize system-level drag shadow opacity with that of the launcher's
+                        // internal drag view. The launcher reduces the internal drag view's opacity
+                        // when dragging over button drop targets.
+                        dragView.addOnAlphaChangeListener { dragLayer.updateDragShadow(dragShadow) }
+                    }
+                }
+        } == true
 }
