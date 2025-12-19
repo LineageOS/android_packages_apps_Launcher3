@@ -278,11 +278,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     private @Nullable LauncherUnfoldAnimationController mLauncherUnfoldAnimationController;
 
     private SplitSelectStateController mSplitSelectStateController;
-//<<<<<<< HEAD
-//    private SplitFromRunningTaskController mSplitFromRunningTaskController;
-//=======
     private SplitWithKeyboardShortcutController mSplitWithKeyboardShortcutController;
-//>>>>>>> 08abca23fa (Revert "Consolidate keyboard shortcut paths from desktop and ful...")
     private SplitToWorkspaceController mSplitToWorkspaceController;
     private BubbleBarLocation mBubbleBarLocation;
 
