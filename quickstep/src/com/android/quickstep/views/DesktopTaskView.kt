@@ -582,38 +582,33 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
         taskContainer.destroy()
         taskContainers = taskContainers.filterNot { it == taskContainer }
 
-        // Dismiss the current DesktopTaskView if all its windows are closed.
-        if (taskContainers.isEmpty()) {
-            recentsView?.dismissTaskView(this, /* removeTask= */ true)
-        } else {
-            // If this task has a live window, then hide it.
-            // TODO(b/413120214) The dismissed view should fade out.
-            remoteTargetHandles?.getRemoteTargetHandle(taskId)?.let {
-                it.taskViewSimulator.setTaskRectTransform(Matrix().apply { postScale(0.0f, 0.0f) })
-                it.taskViewSimulator.apply(it.transformParams)
+        // If this task has a live window, then hide it.
+        // TODO(b/413120214) The dismissed view should fade out.
+        remoteTargetHandles?.getRemoteTargetHandle(taskId)?.let {
+            it.taskViewSimulator.setTaskRectTransform(Matrix().apply { postScale(0.0f, 0.0f) })
+            it.taskViewSimulator.apply(it.transformParams)
+        }
+
+        // TODO(b/413130378) Nicer handling of multiple quick task dismissals.
+        taskRemoveAnimator?.cancel()
+        taskRemoveAnimator =
+            ObjectAnimator.ofFloat(this, TASK_REMOVE_PROGRESS, 0f, 1f).apply {
+                addListener(
+                    object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animator: Animator) {
+                            previousOrganizedDesktopTaskVisibilityDataMap = null
+                            taskRemoveAnimator = null
+                        }
+                    }
+                )
+                start()
             }
 
-            // TODO(b/413130378) Nicer handling of multiple quick task dismissals.
-            taskRemoveAnimator?.cancel()
-            taskRemoveAnimator =
-                ObjectAnimator.ofFloat(this, TASK_REMOVE_PROGRESS, 0f, 1f).apply {
-                    addListener(
-                        object : AnimatorListenerAdapter() {
-                            override fun onAnimationEnd(animator: Animator) {
-                                previousOrganizedDesktopTaskVisibilityDataMap = null
-                                taskRemoveAnimator = null
-                            }
-                        }
-                    )
-                    start()
-                }
-
-            // Store the current organized positions before computing new ones. This allows us to
-            // animate from the current layout to the new.
-            previousOrganizedDesktopTaskVisibilityDataMap =
-                desktopTaskViewModel.organizedDesktopTaskVisibilityDataMap
-            updateTaskPositions(taskId)
-        }
+        // Store the current organized positions before computing new ones. This allows us to
+        // animate from the current layout to the new.
+        previousOrganizedDesktopTaskVisibilityDataMap =
+            desktopTaskViewModel.organizedDesktopTaskVisibilityDataMap
+        updateTaskPositions(taskId)
     }
 
     private fun removeAndRecycleThumbnailView(taskContainer: TaskContainer) {
