@@ -191,6 +191,32 @@ public class WorkspaceIntegrationTest extends BaseLauncherActivityTest<Launcher>
     }
 
     @Test
+    public void testDragToAndFromHotseat() {
+        WorkspaceDragHelper workspaceDragHelper = new WorkspaceDragHelper(getLauncherActivity());
+
+        assertFalse(workspaceDragHelper.appIconExists(CONTAINER_DESKTOP, TEST_ACTIVITY));
+        assertTrue(workspaceDragHelper.appIconExists(CONTAINER_HOTSEAT, TEST_ACTIVITY));
+
+        // Drag from hotseat.
+        workspaceDragHelper.dragIcon(
+                workspaceDragHelper.getHotseatAppIcon(TEST_ACTIVITY),
+                /*pageDelta=*/ 0,
+                CONTAINER_DESKTOP);
+
+        assertTrue(workspaceDragHelper.appIconExists(CONTAINER_DESKTOP, TEST_ACTIVITY));
+        assertFalse(workspaceDragHelper.appIconExists(CONTAINER_HOTSEAT, TEST_ACTIVITY));
+
+        // Drag to hotseat.
+        workspaceDragHelper.dragIcon(
+                workspaceDragHelper.getWorkspaceAppIcon(TEST_ACTIVITY),
+                /*pageDelta=*/ 0,
+                CONTAINER_HOTSEAT);
+
+        assertFalse(workspaceDragHelper.appIconExists(CONTAINER_DESKTOP, TEST_ACTIVITY));
+        assertTrue(workspaceDragHelper.appIconExists(CONTAINER_HOTSEAT, TEST_ACTIVITY));
+    }
+
+    @Test
     @EnableFlags(Flags.FLAG_ENABLE_ALL_APPS_EDU_FOR_OVERSWIPE)
     public void testSwitchPageAttemptListener() {
         WorkspaceDragHelper workspace = new WorkspaceDragHelper(getLauncherActivity());
