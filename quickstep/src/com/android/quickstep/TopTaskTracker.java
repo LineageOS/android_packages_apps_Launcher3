@@ -26,7 +26,6 @@ import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
-import static com.android.quickstep.window.RecentsWindowFlags.enableOverviewOnConnectedDisplays;
 import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT;
 import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_TYPE_A;
 import static com.android.wm.shell.Flags.enableShellTopTaskTracking;
@@ -166,20 +165,6 @@ public class TopTaskTracker extends ISplitScreenListener.Stub implements TaskSta
                 }
                 info.isVisible = false;
                 info.isVisibleRequested = false;
-            }
-        }
-
-        if (!enableOverviewOnConnectedDisplays()) {
-            // Keep the home display's top running task in the first while adding a non-home
-            // display's task to the list, to avoid showing non-home display's task upon going to
-            // Recents animation.
-            if (taskInfo.displayId != DEFAULT_DISPLAY) {
-                final TaskInfo topTaskOnHomeDisplay = mOrderedTaskList.stream()
-                        .filter(rto -> rto.displayId == DEFAULT_DISPLAY).findFirst().orElse(null);
-                if (topTaskOnHomeDisplay != null) {
-                    mOrderedTaskList.removeIf(rto -> rto.taskId == topTaskOnHomeDisplay.taskId);
-                    mOrderedTaskList.addFirst(topTaskOnHomeDisplay);
-                }
             }
         }
 
@@ -371,14 +356,9 @@ public class TopTaskTracker extends ISplitScreenListener.Stub implements TaskSta
                     tasks = new TaskInfo[0];
                 }
 
-                if (enableOverviewOnConnectedDisplays()) {
-                    return new CachedTaskInfo(Arrays.stream(tasks).filter(
-                            info -> ExternalDisplaysKt.getSafeDisplayId(info)
-                                    == displayId).toList(), mContext, displayId, activeDeskId);
-                } else {
-                    return new CachedTaskInfo(Arrays.asList(tasks), mContext,
-                            displayId, activeDeskId);
-                }
+                return new CachedTaskInfo(Arrays.stream(tasks).filter(
+                        info -> ExternalDisplaysKt.getSafeDisplayId(info)
+                                == displayId).toList(), mContext, displayId, activeDeskId);
             }
 
             if (mOrderedTaskList.isEmpty()) {
@@ -391,10 +371,8 @@ public class TopTaskTracker extends ISplitScreenListener.Stub implements TaskSta
             Stream<TaskInfo> taskStream = mOrderedTaskList.stream()
                     // Strip the pinned task and recents task.
                     .filter(t -> t.taskId != mPinnedTaskId && !isRecentsTask(t));
-            if (enableOverviewOnConnectedDisplays()) {
-                taskStream = taskStream.filter(
-                        info -> ExternalDisplaysKt.getSafeDisplayId(info) == displayId);
-            }
+            taskStream = taskStream.filter(
+                    info -> ExternalDisplaysKt.getSafeDisplayId(info) == displayId);
             taskStream = taskStream.takeWhile(
                     taskInfo -> !DesksUtils.isDesktopWallpaperTask(taskInfo));
             taskStream = taskStream.filter(taskInfo -> !isBubbleTask(taskInfo));

@@ -151,36 +151,34 @@ public class DisplayController {
         FileLog.i(TAG, "(CTOR) perDisplayBounds: "
                 + defaultPerDisplayInfo.mInfo.getValue().mPerDisplayBounds);
 
-        if (mWMProxy.enableOverviewOnConnectedDisplays()) {
-            final DisplayManager.DisplayListener displayListener =
-                    new DisplayManager.DisplayListener() {
-                        @Override
-                        public void onDisplayAdded(int displayId) {
-                            Display display = displayManager.getDisplay(displayId);
-                            if (display != null) {
-                                getOrCreatePerDisplayInfo(display);
-                            }
+        final DisplayManager.DisplayListener displayListener =
+                new DisplayManager.DisplayListener() {
+                    @Override
+                    public void onDisplayAdded(int displayId) {
+                        Display display = displayManager.getDisplay(displayId);
+                        if (display != null) {
+                            getOrCreatePerDisplayInfo(display);
                         }
+                    }
 
-                        @Override
-                        public void onDisplayChanged(int displayId) {
-                        }
+                    @Override
+                    public void onDisplayChanged(int displayId) {
+                    }
 
-                        @Override
-                        public void onDisplayRemoved(int displayId) {
-                            removePerDisplayInfo(displayId);
-                        }
-                    };
-            displayManager.registerDisplayListener(displayListener, MAIN_EXECUTOR.getHandler());
-            lifecycle.addCloseable(() -> {
-                displayManager.unregisterDisplayListener(displayListener);
-            });
-            // Add any PerDisplayInfos for already-connected displays.
-            Arrays.stream(displayManager.getDisplays())
-                    .forEach((it) ->
-                            getOrCreatePerDisplayInfo(
-                                    displayManager.getDisplay(it.getDisplayId())));
-        }
+                    @Override
+                    public void onDisplayRemoved(int displayId) {
+                        removePerDisplayInfo(displayId);
+                    }
+                };
+        displayManager.registerDisplayListener(displayListener, MAIN_EXECUTOR.getHandler());
+        lifecycle.addCloseable(() -> {
+            displayManager.unregisterDisplayListener(displayListener);
+        });
+        // Add any PerDisplayInfos for already-connected displays.
+        Arrays.stream(displayManager.getDisplays())
+                .forEach((it) ->
+                        getOrCreatePerDisplayInfo(
+                                displayManager.getDisplay(it.getDisplayId())));
 
         lifecycle.addCloseable(() -> {
             mDestroyed = true;
@@ -223,13 +221,11 @@ public class DisplayController {
     // if it is not associated with a display.
     private static Info getInfo(Context context) {
         DisplayController controller = INSTANCE.get(context);
-        if (controller.mWMProxy.enableOverviewOnConnectedDisplays()) {
-            Display display = controller.mWMProxy.getDisplay(context);
-            int displayId = display.getDisplayId();
-            Info info = controller.getInfoForDisplay(displayId);
-            if (info != null) {
-                return info;
-            }
+        Display display = controller.mWMProxy.getDisplay(context);
+        int displayId = display.getDisplayId();
+        Info info = controller.getInfoForDisplay(displayId);
+        if (info != null) {
+            return info;
         }
         return controller.getInfo();
     }
@@ -289,15 +285,11 @@ public class DisplayController {
 
     @AnyThread
     public @Nullable Info getInfoForDisplay(int displayId) {
-        if (mWMProxy.enableOverviewOnConnectedDisplays()) {
-            PerDisplayInfo perDisplayInfo = getPerDisplayInfoById(displayId);
-            if (perDisplayInfo != null) {
-                return perDisplayInfo.mInfo.getValue();
-            } else {
-                return null;
-            }
+        PerDisplayInfo perDisplayInfo = getPerDisplayInfoById(displayId);
+        if (perDisplayInfo != null) {
+            return perDisplayInfo.mInfo.getValue();
         } else {
-            return getInfo();
+            return null;
         }
     }
 

@@ -16,15 +16,13 @@
 
 package com.android.launcher3.taskbar.navbutton
 
-import android.view.Display
-import com.android.launcher3.taskbar.TaskbarNavButtonController.TaskbarNavButtonCallbacks
 import com.android.launcher3.taskbar.TaskbarManager
+import com.android.launcher3.taskbar.TaskbarNavButtonController.TaskbarNavButtonCallbacks
 import com.android.launcher3.util.PostUnlockObject
 import com.android.quickstep.OverviewCommandHelper
 import com.android.quickstep.OverviewCommandHelper.CommandType.HIDE_ALT_TAB
 import com.android.quickstep.OverviewCommandHelper.CommandType.HOME
 import com.android.quickstep.OverviewCommandHelper.CommandType.TOGGLE
-import com.android.quickstep.window.RecentsWindowFlags.enableOverviewOnConnectedDisplays
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -32,26 +30,23 @@ class TaskbarNavButtonCallbacksImpl
 @Inject
 constructor(
     commandHelperProvider: PostUnlockObject<OverviewCommandHelper>,
-    private val taskbarManagerProvider: Provider<TaskbarManager>
+    private val taskbarManagerProvider: Provider<TaskbarManager>,
 ) : TaskbarNavButtonCallbacks {
 
     private val commandHelper: OverviewCommandHelper? by commandHelperProvider
 
     override fun onNavigateHome(displayId: Int) {
-        commandHelper?.addCommand(HOME, displayId.toAllowedDisplay())
+        commandHelper?.addCommand(HOME, displayId)
         val taskbarManager = taskbarManagerProvider.get()
         val taskbarInteractor = taskbarManager?.getTaskbarInteractor(displayId)
         taskbarInteractor?.onNavigateHome()
     }
 
     override fun onToggleOverview(displayId: Int) {
-        commandHelper?.addCommand(TOGGLE, displayId.toAllowedDisplay())
+        commandHelper?.addCommand(TOGGLE, displayId)
     }
 
     override fun onHideOverview(displayId: Int) {
-        commandHelper?.addCommand(HIDE_ALT_TAB, displayId.toAllowedDisplay())
+        commandHelper?.addCommand(HIDE_ALT_TAB, displayId)
     }
-
-    private fun Int.toAllowedDisplay(): Int =
-        if (enableOverviewOnConnectedDisplays()) this else Display.DEFAULT_DISPLAY
 }

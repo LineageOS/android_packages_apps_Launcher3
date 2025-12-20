@@ -348,9 +348,6 @@ public abstract class BaseDragLayer<T extends Context & ActivityContext>
                 && (actionMasked == ACTION_DOWN
                     || ((mTouchDispatchState & TOUCH_DISPATCHING_TO_VIEW_IN_PROGRESS) != 0));
 
-        Log.d(TAG, "proxyTouchEvent: allowViewDispatch=" + allowViewDispatch
-                + ", mProxyTouchController="
-                + (mProxyTouchController == null ? null : mProxyTouchController.dump()));
         if (allowViewDispatch) {
             mTouchDispatchState |= TOUCH_DISPATCHING_TO_VIEW_IN_PROGRESS;
             super.dispatchTouchEvent(ev);
@@ -376,9 +373,12 @@ public abstract class BaseDragLayer<T extends Context & ActivityContext>
                 }
                 if ((mTouchDispatchState & TOUCH_DISPATCHING_FROM_PROXY) != 0) {
                     mProxyTouchController = findControllerToHandleTouch(ev);
+                    if (mProxyTouchController != null) {
+                        // Logging here won't show log on every touch event, only on the start of
+                        // new gestures to prevent spamming the logcat with logs.
+                        Log.i(TAG, "found mProxyTouchController=" + mProxyTouchController.dump());
+                    }
                 }
-                Log.d(TAG, "proxyTouchEvent: mProxyTouchController="
-                        + (mProxyTouchController == null ? null : mProxyTouchController.dump()));
                 handled = mProxyTouchController != null;
             }
             if (actionMasked == ACTION_UP || actionMasked == ACTION_CANCEL) {
@@ -545,7 +545,14 @@ public abstract class BaseDragLayer<T extends Context & ActivityContext>
         if (mActiveController != null) {
             writer.println(prefix + "\tactiveController: " + mActiveController);
             writer.println(prefix + "\t" + mActiveController.dump());
-
+        } else {
+            writer.println(prefix + "\tactiveController: null");
+        }
+        if (mProxyTouchController != null) {
+            writer.println(prefix + "\tproxyController: " + mProxyTouchController);
+            writer.println(prefix + "\t" + mProxyTouchController.dump());
+        } else {
+            writer.println(prefix + "\tproxyController: null");
         }
         writer.println(prefix + "\tdragLayerAlpha : " + mMultiValueAlpha );
     }

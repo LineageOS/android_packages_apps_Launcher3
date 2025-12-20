@@ -16,9 +16,8 @@
 
 package com.android.launcher3.util;
 
-import static com.android.launcher3.Flags.enableTaskbarUiThread;
 import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
-import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
+import static com.android.launcher3.util.Executors.getTaskbarUiThread;
 
 import android.os.Looper;
 
@@ -58,14 +57,8 @@ public class Preconditions {
         if (!BuildConfig.IS_STUDIO_BUILD) {
             return;
         }
-        if (enableTaskbarUiThread()) {
-            if (!isSameLooper(TASKBAR_UI_THREAD.getLooper())) {
-                throw new IllegalStateException();
-            }
-        } else {
-            if (!isSameLooper(Looper.getMainLooper())) {
-                throw new IllegalStateException();
-            }
+        if (!isSameLooper(getTaskbarUiThread().getLooper())) {
+            throw new IllegalStateException();
         }
     }
 

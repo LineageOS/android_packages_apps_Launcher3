@@ -30,7 +30,7 @@ import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_STASH
 import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_STASHED_FOR_BUBBLES;
 import static com.android.launcher3.taskbar.TaskbarStashController.UNLOCK_TRANSITION_MEMOIZATION_MS;
 import static com.android.launcher3.taskbar.TaskbarViewController.ALPHA_INDEX_HOME;
-import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
+import static com.android.launcher3.util.Executors.getTaskbarUiThread;
 import static com.android.launcher3.util.FlagDebugUtils.appendFlag;
 import static com.android.launcher3.util.FlagDebugUtils.formatFlagChange;
 import static com.android.quickstep.fallback.RecentsStateUtilsKt.toLauncherState;
@@ -323,7 +323,8 @@ public class TaskbarLauncherStateController {
         resetIconAlignment();
 
         if (shouldReactToLauncherStateChange()) {
-            mStateListenerClosable = mLauncher.addStateListener(mStateListener, TASKBAR_UI_THREAD);
+            mStateListenerClosable =
+                    mLauncher.addStateListener(mStateListener, getTaskbarUiThread());
             runForRecentsWindowManager(recentsWindowManager ->
                     recentsWindowManager.getStateManager().addStateListener(mRecentsStateListener));
         }
@@ -397,8 +398,8 @@ public class TaskbarLauncherStateController {
 
         if (mTaskBarRecentsAnimationListener != null) {
             // When enableTaskbarUiThread() is turned on, swipe up to exit app will call
-            // createAnimToLauncher() on TASKBAR_UI_THREAD, while recents animation will remain on
-            // MAIN thread. If TASKBAR_UI_THREAD is executed ahead of main thread,
+            // createAnimToLauncher() on taskbar's ui thread, while recents animation will remain
+            // on MAIN thread. If taskbar's ui thread is executed ahead of main thread,
             // mTaskBarRecentsAnimationListener will be not-null here (as onRecentsAnimationFinished
             // hasn't been triggered to clear it). In this case we should enforce
             // finishedToApp=false (as launcehr state is not OVERVIEW) to ensure showing hotseat
@@ -407,7 +408,7 @@ public class TaskbarLauncherStateController {
                     /* finishedToApp= */ false, /* canceled= */ false);
         }
         mTaskBarRecentsAnimationListener = new TaskBarRecentsAnimationListener(
-                callbacks, TASKBAR_UI_THREAD);
+                callbacks, getTaskbarUiThread());
         callbacks.addListener(mTaskBarRecentsAnimationListener);
         RecentsViewInteractor recentsView = mControllers.uiController.getRecentsViewInteractor();
         if (recentsView != null) {

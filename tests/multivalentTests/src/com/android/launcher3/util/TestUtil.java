@@ -25,7 +25,7 @@ import static com.android.launcher3.LauncherSettings.Settings.LAYOUT_DIGEST_TAG;
 import static com.android.launcher3.LauncherSettings.Settings.LAYOUT_PROVIDER_KEY;
 import static com.android.launcher3.LauncherSettings.Settings.createBlobProviderKey;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
-import static com.android.launcher3.util.Executors.TASKBAR_UI_THREAD;
+import static com.android.launcher3.util.Executors.getTaskbarUiThread;
 
 import static org.junit.Assert.assertTrue;
 
@@ -215,9 +215,9 @@ public class TestUtil {
         return getOnUiThread(MAIN_EXECUTOR, callback);
     }
 
-    /** Runs the callback on the TASKBAR_UI_THREAD and returns the result. */
+    /** Runs the callback on the taskbar's ui thread and returns the result. */
     public static <T> T getOnTaskbarUiThread(final Callable<T> callback) {
-        return getOnUiThread(TASKBAR_UI_THREAD, callback);
+        return getOnUiThread(getTaskbarUiThread(), callback);
     }
 
     private static <T> T getOnUiThread(

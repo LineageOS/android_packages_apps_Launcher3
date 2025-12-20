@@ -2178,7 +2178,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             result.setAnimation(anim, mLauncher, mOnEndCallback::executeAllAndDestroy,
                     skipFirstFrame);
             // If app launch animation is started and TaskbarAsyncAnimator is returned (meaning
-            // taskbar stash animation will be played on TASKBAR_UI_THREAD), launcher needs to
+            // taskbar stash animation will be played on taskbar's ui thread), launcher needs to
             // explicitly trigger taskbar stash animation from main thread.
             if (taskbarStashAnimation != null && anim.isStarted()) {
                 taskbarStashAnimation.start();

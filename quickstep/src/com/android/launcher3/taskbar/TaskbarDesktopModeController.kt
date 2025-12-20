@@ -21,7 +21,7 @@ import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.statehandlers.DesktopVisibilityController.TaskbarDesktopModeListener
 import com.android.launcher3.taskbar.TaskbarBackgroundRenderer.Companion.MAX_ROUNDNESS
 import com.android.launcher3.util.DisplayController
-import com.android.launcher3.util.Executors.TASKBAR_UI_THREAD
+import com.android.launcher3.util.Executors.getTaskbarUiThread
 import com.android.launcher3.util.SafeCloseable
 
 /** Handles Taskbar in Desktop Windowing mode. */
@@ -51,7 +51,7 @@ class TaskbarDesktopModeController(
         if (refactorTaskbarUiState()) {
             displayInfoChangeSafeCloseable =
                 DisplayController.INSTANCE.get(taskbarActivityContext).listenable?.forEach(
-                    TASKBAR_UI_THREAD
+                    getTaskbarUiThread()
                 ) { _ ->
                     updateTaskbarUiState()
                 }
