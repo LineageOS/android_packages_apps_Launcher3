@@ -47,13 +47,6 @@ flag {
 }
 
 flag {
-    name: "show_close_button_on_taskview_hover"
-    namespace: "launcher_overview"
-    description: "Enables showing a button to close the task in Overview when the TaskView is hovered."
-    bug: "426125944"
-}
-
-flag {
     name: "enable_overview_pagination"
     namespace: "launcher_overview"
     description: "Allows the user to scroll overview with a mouse click."

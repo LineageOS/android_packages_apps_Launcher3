@@ -272,6 +272,13 @@
         Move to trash
     </string>
 
+    <!-- Label for expanding system shortcuts in popup menu-->
+    <string name="actions_popup_menu_button">Actions</string>
+    <!-- Label for expanding app shortcuts in popup menu-->
+    <string name="shortcuts_popup_menu_button">Shortcuts</string>
+    <!-- Description for loading app shortcuts-->
+    <string name="loading_shortcut">Loading shortcut</string>
+
     <!-- Permissions: -->
     <skip />
     <!-- Permission short label -->

@@ -2663,11 +2663,6 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         }
     }
 
-    private boolean isDragWidget(DragObject d) {
-        return (d.dragInfo instanceof LauncherAppWidgetInfo ||
-                d.dragInfo instanceof PendingAddWidgetInfo);
-    }
-
     public void onDragOver(DragObject d) {
         handleLauncherStateForDrag(d);
 
@@ -2827,17 +2822,10 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
     private boolean shouldUseHotseatAsDropLayout(DragObject dragObject) {
         Hotseat hotseat = mLauncher.getHotseat();
-        if (hotseat == null) {
+        if (hotseat == null || !hotseat.isValidDropTarget(dragObject)) {
             return false;
         }
-
-        ShortcutAndWidgetContainer hotseatShortcuts = hotseat.getShortcutsAndWidgets();
-        if (hotseatShortcuts == null
-                || isDragWidget(dragObject)
-                || hotseatShortcuts.getVisibility() != View.VISIBLE) {
-            return false;
-        }
-        getViewBoundsRelativeToWorkspace(hotseatShortcuts, mTempRect);
+        getViewBoundsRelativeToWorkspace(hotseat.getShortcutsAndWidgets(), mTempRect);
         return mTempRect.contains(dragObject.x, dragObject.y);
     }
 

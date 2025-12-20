@@ -20,7 +20,6 @@ import android.security.Flags.appLockCore
 import android.util.Log
 import android.view.View.OnClickListener
 import com.android.launcher3.Flags.enableDesktopExplodedView
-import com.android.launcher3.Flags.showCloseButtonOnTaskviewHover
 import com.android.launcher3.R
 import com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_BOTTOM_OR_RIGHT
 import com.android.quickstep.recents.ui.viewmodel.TaskData
@@ -143,7 +142,7 @@ object TaskUiStateMapper {
         }
 
     fun toTaskDismissButtonState(isDesktopTaskView: Boolean, clickCloseListener: OnClickListener) =
-        if (showCloseButtonOnTaskviewHover() && !isDesktopTaskView) {
+        if (!isDesktopTaskView) {
             TaskDismissButtonState.Enabled(clickCloseListener)
         } else TaskDismissButtonState.Disabled
 }
