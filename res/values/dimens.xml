@@ -601,4 +601,9 @@
     <!-- App Title Pill -->
     <dimen name="app_title_pill_horizontal_padding">4dp</dimen>
     <dimen name="app_title_pill_round_rect_padding">2dp</dimen>
+
+    <!-- Automated Icons -->
+    <dimen name="automated_icon_stroke_width">3dp</dimen>
+    <dimen name="automated_icon_glow_radius">5dp</dimen>
+    <dimen name="automated_icon_glow_padding">15dp</dimen>
 </resources>
