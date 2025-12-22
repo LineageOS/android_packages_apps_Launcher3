@@ -349,7 +349,7 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
         return mItems.stream().map(TaskbarOverflowItem::getItemId).toList();
     }
 
-    List<ItemInfo> getOverflowInfoList() {
+    public List<ItemInfo> getOverflowInfoList() {
         return mItems.stream().map(item -> ((ItemInfoWrapper) item).getItemInfo()).toList();
     }
 

@@ -17,6 +17,7 @@
 package com.android.launcher3.taskbar.customization.viewfactory
 
 import android.view.View
+import android.view.ViewGroup
 import androidx.core.view.get
 import com.android.launcher3.BubbleTextView
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_GROUP
@@ -29,13 +30,12 @@ import com.android.launcher3.model.data.CollectionInfo
 import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.taskbar.TaskbarActivityContext
-import com.android.launcher3.taskbar.customization.containers.TaskbarPinnedAppIconContainer
 import com.android.launcher3.util.ViewCache
 
 /** View factory for each taskbar icon in pinned container. */
 class TaskbarPinnedAppsIconsViewFactory(
     private val activityContext: TaskbarActivityContext,
-    private val parentView: TaskbarPinnedAppIconContainer,
+    private val parentView: ViewGroup,
 ) : TaskbarIconsViewFactory<ItemInfo> {
 
     private val viewCache = ViewCache()
