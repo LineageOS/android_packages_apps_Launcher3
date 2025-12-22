@@ -36,15 +36,18 @@ import com.android.launcher3.DragSource;
 import com.android.launcher3.DropTarget.DragObject;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.util.ContextTracker.SchedulerCallback;
+import com.android.launcher3.views.ActivityContext;
 
 import java.util.UUID;
 
 /**
  * {@link DragSource} for handling drop from a different window.
+ *
+ * @param <T> The type for the context associated with the sequence.
  */
-public abstract class BaseItemDragListener implements DragController.SystemDragHandler,
-        View.OnDragListener, DragSource,
-        DragOptions.PreDragCondition, SchedulerCallback<Launcher> {
+public abstract class BaseItemDragListener<T extends ActivityContext>
+        implements DragController.SystemDragHandler, View.OnDragListener, DragSource,
+        DragOptions.PreDragCondition, SchedulerCallback<T> {
 
     private static final String TAG = "BaseItemDragListener";
 
@@ -60,7 +63,7 @@ public abstract class BaseItemDragListener implements DragController.SystemDragH
     // Randomly generated id used to verify the drag event.
     private final String mId;
 
-    protected Launcher mLauncher;
+    protected T mContext;
     private DragController mDragController;
 
     public BaseItemDragListener(Rect previewRect, int previewBitmapWidth, int previewViewWidth) {
@@ -75,25 +78,26 @@ public abstract class BaseItemDragListener implements DragController.SystemDragH
     }
 
     @Override
-    public boolean init(Launcher launcher, boolean isHomeStarted) {
-        initInternal(launcher, isHomeStarted, /* closeAllOpenViews= */ true);
+    public boolean init(T context, boolean isHomeStarted) {
+        initInternal(context, isHomeStarted, /* closeAllOpenViews= */ true);
         return false;
     }
 
-    protected void initInternal(Launcher launcher, boolean isHomeStarted,
-            boolean closeAllOpenViews) {
+    protected void initInternal(T context, boolean isHomeStarted, boolean closeAllOpenViews) {
         if (closeAllOpenViews) {
-            AbstractFloatingView.closeAllOpenViews(launcher, /* animate= */ isHomeStarted);
+            AbstractFloatingView.closeAllOpenViews(context, /* animate= */ isHomeStarted);
         }
 
-        launcher.getStateManager().goToState(NORMAL, /* animated= */ isHomeStarted);
-        launcher.getRotationHelper().setStateHandlerRequest(REQUEST_LOCK);
+        if (context instanceof Launcher launcher) {
+            launcher.getStateManager().goToState(NORMAL, /* animated= */ isHomeStarted);
+            launcher.getRotationHelper().setStateHandlerRequest(REQUEST_LOCK);
+        }
 
-        mLauncher = launcher;
-        mDragController = launcher.getDragController();
+        mContext = context;
+        mDragController = context.getDragController();
 
         if (!enableSystemDrag()) {
-            launcher.getDragLayer().setOnDragListener(this);
+            mContext.getDragLayer().setOnDragListener(this);
         } else if (mDragController != null) {
             mDragController.addSystemDragHandler(this);
         }
@@ -101,7 +105,7 @@ public abstract class BaseItemDragListener implements DragController.SystemDragH
 
     @Override
     public boolean onDrag(DragEvent event) {
-        if (mLauncher == null || mDragController == null) {
+        if (mContext == null || mDragController == null) {
             postCleanup();
             return false;
         }
@@ -155,7 +159,7 @@ public abstract class BaseItemDragListener implements DragController.SystemDragH
     @Override
     public boolean shouldStartDrag(double distanceDragged) {
         // Stay in pre-drag mode, if workspace is locked.
-        return !mLauncher.isWorkspaceLocked();
+        return !(mContext instanceof Launcher launcher) || !launcher.isWorkspaceLocked();
     }
 
     @Override
@@ -163,7 +167,7 @@ public abstract class BaseItemDragListener implements DragController.SystemDragH
         // The predrag starts when the workspace is not yet loaded. In some cases we set
         // the dragLayer alpha to 0 to have a nice fade-in animation. But that will prevent the
         // dragView from being visible. Instead just skip the fade-in animation here.
-        mLauncher.getDragLayer().setAlpha(1);
+        mContext.getDragLayer().setAlpha(1);
         dragObject.dragView.setAlpha(.5f);
     }
 
@@ -180,11 +184,11 @@ public abstract class BaseItemDragListener implements DragController.SystemDragH
     }
 
     protected void postCleanup() {
-        if (mLauncher != null) {
+        if (mContext instanceof Launcher launcher) {
             // Remove any drag params from the launcher intent since the drag operation is complete.
-            Intent newIntent = new Intent(mLauncher.getIntent());
+            Intent newIntent = new Intent(launcher.getIntent());
             newIntent.removeExtra(EXTRA_PIN_ITEM_DRAG_LISTENER);
-            mLauncher.setIntent(newIntent);
+            launcher.setIntent(newIntent);
         }
 
         new Handler(Looper.getMainLooper()).post(this::removeListener);
@@ -193,10 +197,12 @@ public abstract class BaseItemDragListener implements DragController.SystemDragH
     public void removeListener() {
         final boolean enableSystemDrag = enableSystemDrag();
 
-        if (mLauncher != null) {
-            mLauncher.getRotationHelper().setStateHandlerRequest(REQUEST_NONE);
+        if (mContext != null) {
+            if (mContext instanceof Launcher launcher) {
+                launcher.getRotationHelper().setStateHandlerRequest(REQUEST_NONE);
+            }
             if (!enableSystemDrag) {
-                mLauncher.getDragLayer().setOnDragListener(null);
+                mContext.getDragLayer().setOnDragListener(null);
             }
         }
 
