@@ -100,7 +100,7 @@
     <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"Csúsztasson felfelé a(z) <xliff:g id="DEVICE">%1$s</xliff:g> használatának megkezdéséhez"</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"Koppintson a(z) <xliff:g id="DEVICE">%1$s</xliff:g> használatának megkezdéséhez"</string>
     <string name="allset_navigation_settings_expressive" msgid="3745595273748356"><annotation id="link">"Válassza ki a navigálás módját"</annotation></string>
-    <string name="allset_hint_expressive" msgid="756856423510976261">"Csúsztatás gyorsan felfelé"</string>
+    <string name="allset_hint_expressive" msgid="756856423510976261">"Csúsztasson felfelé"</string>
     <string name="allset_button_hint_expressive" msgid="667643693410494225">"Koppintson a Kezdőképernyő gombra"</string>
     <string name="allset_device_type_tablet" msgid="2173392009787325894">"táblagép"</string>
     <string name="allset_device_type_phone" msgid="6842334562074507337">"telefon"</string>
@@ -152,6 +152,8 @@
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Feladatsáv-elválasztó"</string>
     <string name="taskbar_recents_overflow_a11y_title" msgid="8005941062446304304">"További legutóbbi alkalmazások"</string>
     <string name="taskbar_pinned_overflow_a11y_title" msgid="2314810718333302626">"Egyéb alkalmazások"</string>
+    <!-- no translation found for taskbar_drag_to_unpin_title (7652941692376783721) -->
+    <skip />
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Mozgatás felülre vagy a bal oldalra"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Mozgatás alulra vagy a jobb oldalra"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"Alkalmazás megnyitása buborékként"</string>
