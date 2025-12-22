@@ -16,6 +16,7 @@
 package com.android.launcher3.taskbar
 
 import android.content.Context
+import android.os.UserHandle
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.android.internal.policy.DesktopModeCompatPolicy
@@ -40,6 +41,7 @@ import com.android.quickstep.util.DesktopTask
 import com.android.quickstep.util.GroupTask
 import com.android.quickstep.util.SingleTask
 import com.android.quickstep.util.SplitTask
+import com.android.quickstep.util.TaskVisualsChangeListener
 import com.android.systemui.shared.Flags.enableRecentsInTaskbar
 import com.android.systemui.shared.recents.model.Task
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
@@ -221,6 +223,21 @@ class TaskbarRecentAppsController(
     private val recentTasksChangedListener =
         RecentsModel.RecentTasksChangedListener { reloadRecentTasksIfNeeded() }
 
+    private val taskVisualsChangeListener =
+        object : TaskVisualsChangeListener {
+            override fun onTaskIconChanged(pkg: String, user: UserHandle) {
+                getTaskbarUiThread().execute {
+                    for (groupTask in shownTasks) {
+                        for ((i, task) in groupTask.tasks.withIndex()) {
+                            if (task.key.packageName == pkg && task.key.userId == user.identifier) {
+                                fetchIconForTask(groupTask, i, forceUpdate = true)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
     private val iconLoadRequests: MutableSet<CancellableTask<*>> = HashSet()
 
     private var recentTasksChangedListenerClosable: SafeCloseable? = null
@@ -261,6 +278,7 @@ class TaskbarRecentAppsController(
             } else {
                 recentsModel.registerRecentTasksChangedListener(recentTasksChangedListener)
             }
+            recentsModel.addThumbnailChangeListener(taskVisualsChangeListener)
 
             controllers.runAfterInit { reloadRecentTasksIfNeeded() }
             // Both callbacks force an icon fetch, because these changes may affect how icons
@@ -286,6 +304,7 @@ class TaskbarRecentAppsController(
         if (orderedRunningTaskIds.isNotEmpty()) {
             controllers.sharedState?.recentOrderedRunningTaskIds?.addAll(orderedRunningTaskIds)
         }
+        recentsModel.removeThumbnailChangeListener(taskVisualsChangeListener)
         if (enableTaskbarUiThread()) {
             recentTasksChangedListenerClosable?.close()
             recentTasksChangedListenerClosable = null
@@ -423,29 +442,34 @@ class TaskbarRecentAppsController(
         }
 
         for (groupTask in shownTasks) {
-            for ((i, task) in groupTask.tasks.withIndex()) {
-                val cancellableTask =
-                    recentsModel.iconCache.getBitmapInfoInBackground(task, getTaskbarUiThread()) {
-                        bi,
-                        d,
-                        t ->
-                        if (
-                            !forceUpdate &&
-                                bi === groupTask.bitmapInfos[i] &&
-                                d == task.titleDescription &&
-                                t == task.title
-                        ) {
-                            return@getBitmapInfoInBackground
-                        }
-                        groupTask.bitmapInfos[i] = bi
-                        task.titleDescription = d
-                        task.title = t
-                        controllers.taskbarViewController.onTaskUpdated(task, groupTask)
-                    }
-                if (cancellableTask != null) {
-                    iconLoadRequests.add(cancellableTask)
-                }
+            for (i in groupTask.tasks.indices) {
+                fetchIconForTask(groupTask, i, forceUpdate)
             }
+        }
+    }
+
+    private fun fetchIconForTask(groupTask: GroupTask, index: Int, forceUpdate: Boolean = false) {
+        val task = groupTask.tasks[index]
+        val cancellableTask =
+            recentsModel.iconCache.getBitmapInfoInBackground(task, getTaskbarUiThread()) {
+                bi,
+                d,
+                t ->
+                if (
+                    !forceUpdate &&
+                        bi === groupTask.bitmapInfos[index] &&
+                        d == task.titleDescription &&
+                        t == task.title
+                ) {
+                    return@getBitmapInfoInBackground
+                }
+                groupTask.bitmapInfos[index] = bi
+                task.titleDescription = d
+                task.title = t
+                controllers.taskbarViewController.onTaskUpdated(task, groupTask)
+            }
+        if (cancellableTask != null) {
+            iconLoadRequests.add(cancellableTask)
         }
     }
 
