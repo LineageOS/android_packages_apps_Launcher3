@@ -294,8 +294,8 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
     private int calculateMaxNumIcons() {
         DeviceProfile deviceProfile = mActivityContext.getDeviceProfile();
         int availableWidth = deviceProfile.getDeviceProperties().getWidthPx();
-        int defaultEdgeMargin =
-                (int) getResources().getDimension(deviceProfile.inv.inlineNavButtonsEndSpacing);
+        int defaultEdgeMargin = getResources().getDimensionPixelSize(
+                deviceProfile.inv.inlineNavButtonsEndSpacing);
         int spaceForBubbleBar =
                 Math.round(mControllerCallbacks.getBubbleBarMaxCollapsedWidthIfVisible());
 

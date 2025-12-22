@@ -182,6 +182,22 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
                 }
             };
 
+    private final InvariantDeviceProfile.OnIDPChangeListener mOnIDPChangeListener =
+            new InvariantDeviceProfile.OnIDPChangeListener() {
+                @Override
+                public void onIdpChanged(boolean modelPropertiesChanged) {
+                    getTaskbarUiThread().execute(() -> {
+                        TaskbarActivityContext activityContext = getTaskbarForDisplay(
+                                mPrimaryDisplayId);
+                        if (activityContext != null
+                                && activityContext.getDeviceProfile() != LauncherAppState.getIDP(
+                                mBaseContext).getDeviceProfile(mBaseContext)) {
+                            recreateTaskbars();
+                        }
+                    });
+                }
+            };
+
     private final WindowManagerProxy.DesktopVisibilityListener mDesktopVisibilityListener =
             new WindowManagerProxy.DesktopVisibilityListener() {
 
@@ -617,6 +633,7 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
             resource.debugMsg("recreateTaskbars");
             recreateTaskbarForDisplay(resource, 0, "recreateTaskbars");
         }
+        LauncherAppState.getIDP(mBaseContext).addOnChangeListener(mOnIDPChangeListener);
     }
 
     /**
@@ -1108,6 +1125,11 @@ public class TaskbarManagerImpl implements DisplayDecorationListener {
             mBootAppContext.onDestroy();
         }
         mBootAppContext = null;
+
+        if (mUserUnlocked) {
+            LauncherAppState.getIDP(mBaseContext).removeOnChangeListener(
+                    mOnIDPChangeListener);
+        }
 
         mPrimaryResource.debugMsg("destroy: removing activity callbacks");
         DesktopVisibilityController.INSTANCE.get(
