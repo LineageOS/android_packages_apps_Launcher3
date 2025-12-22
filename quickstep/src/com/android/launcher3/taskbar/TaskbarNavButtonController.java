@@ -44,6 +44,7 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
+import android.view.SoundEffectConstants;
 import android.view.View;
 
 import androidx.annotation.IntDef;
@@ -200,42 +201,46 @@ public class TaskbarNavButtonController implements TaskbarControllers.LoggableTa
             return false;
         }
 
+        boolean playHapticAndSound = false;
+
         switch (buttonType) {
             case BUTTON_HOME:
                 logEvent(LAUNCHER_TASKBAR_HOME_BUTTON_LONGPRESS);
                 onLongPressHome(view);
-                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS,
-                        HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
-                return true;
+                playHapticAndSound = true;
+                break;
             case BUTTON_A11Y:
                 logEvent(LAUNCHER_TASKBAR_A11Y_BUTTON_LONGPRESS);
                 notifyA11yClick(true /* longClick */);
-                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS,
-                        HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
-                return true;
+                playHapticAndSound = true;
+                break;
             case BUTTON_BACK:
                 logEvent(LAUNCHER_TASKBAR_BACK_BUTTON_LONGPRESS);
                 if (backRecentsLongpress(buttonType)) {
-                    view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS,
-                            HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+                    playHapticAndSound = true;
                 }
-                return true;
+                break;
             case BUTTON_RECENTS:
                 logEvent(LAUNCHER_TASKBAR_OVERVIEW_BUTTON_LONGPRESS);
                 if (backRecentsLongpress(buttonType)) {
-                    view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS,
-                            HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+                    playHapticAndSound = true;
                 }
-                return true;
+                break;
             case BUTTON_IME_SWITCH:
                 logEvent(LAUNCHER_TASKBAR_IME_SWITCHER_BUTTON_LONGPRESS);
                 onImeSwitcherLongPress();
-                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS,
-                        HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
-                return true;
+                playHapticAndSound = true;
+                break;
             default:
                 return false;
         }
+
+        if (playHapticAndSound) {
+            view.playSoundEffect(SoundEffectConstants.CLICK);
+            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS,
+                    HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+        }
+        return true;
     }
 
     public @StringRes int getButtonContentDescription(@TaskbarButton int buttonType) {

@@ -22,6 +22,5 @@
     android:focusable="false"
     android:scaleType="center"
     android:hapticFeedbackEnabled="false"
-    android:soundEffectsEnabled="false"
     android:tint="@color/taskbar_nav_icon_light_color"
     tools:ignore="UseAppTint" />
