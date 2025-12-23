@@ -303,8 +303,8 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
             }
         }
 
-        TaskbarViewCallbacks viewCallbacks = TaskbarViewCallbacksFactory.newInstance(
-                mActivity).create(mActivity, mControllers, mTaskbarView);
+        TaskbarViewCallbacks viewCallbacks = new TaskbarViewCallbacks(
+                mActivity, mControllers, mTaskbarView);
         mTaskbarView.init(viewCallbacks);
         // Pinning popup feature availability depends on taskbar controllers, wait for the
         // controllers state initialization before evaluating the feature.

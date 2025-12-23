@@ -107,8 +107,7 @@ public class ContextualSearchStateManager  {
         mSystemUiProxy = systemUiProxy;
         mTopTaskTracker = topTaskTracker;
 
-        if (areAllContextualSearchFlagsDisabled()
-                || !context.getPackageManager().hasSystemFeature(FEATURE_CONTEXTUAL_SEARCH)) {
+        if (!context.getPackageManager().hasSystemFeature(FEATURE_CONTEXTUAL_SEARCH)) {
             // If we had previously registered a SystemAction which is no longer valid, we need to
             // unregister it here.
             unregisterSearchScreenSystemAction();
@@ -204,11 +203,6 @@ public class ContextualSearchStateManager  {
     /** Whether Contextual Search is allowed to be invoked over split screen apps. */
     protected boolean isInvocationAllowedInSplitscreen() {
         return true;
-    }
-
-    @CallSuper
-    protected boolean areAllContextualSearchFlagsDisabled() {
-        return !DeviceConfigWrapper.get().getEnableLongPressNavHandle();
     }
 
     @CallSuper
