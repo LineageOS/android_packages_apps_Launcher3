@@ -19,14 +19,9 @@ package com.android.launcher3.taskbar
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
+import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.UserLocked
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
-import com.android.launcher3.testutil.rule.LazyInitRule.Companion.lazyRule
-import com.android.launcher3.util.Executors.getTaskbarUiThread
 import com.android.launcher3.util.SandboxApplication
-import com.android.launcher3.util.TestUtil
-import com.android.launcher3.util.UserIconInfo
-import com.android.launcher3.util.rule.MockUsersRule
-import com.android.launcher3.util.rule.MockUsersRule.MockUser
 import com.android.quickstep.SystemUiProxy
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAVIGATION_BAR_DISABLED
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_GOING_AWAY
@@ -40,10 +35,7 @@ import org.junit.runner.RunWith
 class TaskbarManagerTest {
 
     @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()
-    @get:Rule(order = 1) val mockUsers = lazyRule { MockUsersRule(context.base) }
-    @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
-
-    private val mockerUserRule: MockUsersRule by mockUsers
+    @get:Rule(order = 1) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
 
     private val taskbarManager by taskbarUnitTestRule::taskbarManager
     private val activityContext by taskbarUnitTestRule::activityContext
@@ -72,34 +64,31 @@ class TaskbarManagerTest {
     }
 
     @Test
-    @MockUser(userType = UserIconInfo.TYPE_MAIN, isUserUnlocked = false)
+    @UserLocked
     fun userLocked_primaryDisplay_hasTaskbarInDirectBootSandbox() {
         assertThat(activityContext.applicationContext)
             .isInstanceOf(TaskbarBootAppContext::class.java)
     }
 
     @Test
-    @MockUser(userType = UserIconInfo.TYPE_MAIN, isUserUnlocked = false)
+    @UserLocked
     fun userLocked_externalDisplay_missingTaskbarInDirectBootStage() {
         val displayId = context.virtualDisplayRule.add()
         assertThat(taskbarManager.getTaskbarForDisplay(displayId)).isNull()
     }
 
     @Test
-    @MockUser(userType = UserIconInfo.TYPE_MAIN, isUserUnlocked = false)
+    @UserLocked
     fun onUserUnlocked_directBootStage_taskbarRecreatedOutsideBootAppContext() {
-        mockerUserRule.unlockMainUser()
-        TestUtil.runOnExecutorSync(getTaskbarUiThread()) {}
-
+        taskbarUnitTestRule.unlockUser()
         assertThat(activityContext.applicationContext).isInstanceOf(SandboxApplication::class.java)
     }
 
     @Test
-    @MockUser(userType = UserIconInfo.TYPE_MAIN, isUserUnlocked = false)
+    @UserLocked
     fun onUserUnlocked_directBootStage_connectedDisplay_taskbarRecreatedOutsideBootAppContext() {
         val displayId = context.virtualDisplayRule.add()
-        mockerUserRule.unlockMainUser()
-        TestUtil.runOnExecutorSync(getTaskbarUiThread()) {}
+        taskbarUnitTestRule.unlockUser()
 
         val application =
             checkNotNull(taskbarManager.getTaskbarForDisplay(displayId)).applicationContext

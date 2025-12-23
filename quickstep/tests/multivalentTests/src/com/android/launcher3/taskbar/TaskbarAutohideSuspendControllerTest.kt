@@ -93,8 +93,6 @@ class TaskbarAutohideSuspendControllerTest {
 
     @Test
     fun testUpdateFlag_resetsAlreadyUnsetFlag_noNotifyUnsuspend() {
-        // Reset flag as it might have been set by a previous controller.onDestroy
-        latestSuspendNotification = null
         runOnTaskbarUiThreadSync {
             autohideSuspendController.updateFlag(FLAG_AUTOHIDE_SUSPEND_DRAGGING, false)
         }
