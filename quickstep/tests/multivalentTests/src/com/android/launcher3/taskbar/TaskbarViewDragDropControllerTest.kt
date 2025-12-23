@@ -546,17 +546,22 @@ class TaskbarViewDragDropControllerTest {
         return overflowIcon
     }
 
-    private fun mockDragViewDragRegionToViewBounds(dragObject: DropTarget.DragObject, view: View) {
+    private fun mockDragViewToOverViewBounds(dragObject: DropTarget.DragObject, view: View) {
         val iconBounds = Rect()
         activityContext.dragLayer.getDescendantRectRelativeToSelf(view, iconBounds)
-        whenever(dragObject.dragView.dragRegion).thenReturn(iconBounds)
+        whenever(dragObject.dragView.dragRegion)
+            .thenReturn(Rect(0, 0, iconBounds.width(), iconBounds.height()))
+        dragObject.x = iconBounds.left
+        dragObject.y = iconBounds.top
+        dragObject.xOffset = iconBounds.width() / 2
+        dragObject.yOffset = iconBounds.height() / 2
     }
 
     private fun dragViewOntoOverflowIconToOpenContainer(
         dragObject: DropTarget.DragObject,
         overflowIcon: TaskbarOverflowView,
     ) {
-        mockDragViewDragRegionToViewBounds(dragObject, overflowIcon)
+        mockDragViewToOverViewBounds(dragObject, overflowIcon)
 
         // Simulate dragging on the overflow icon to open the container.
         runOnTaskbarUiThreadSync {
@@ -574,7 +579,7 @@ class TaskbarViewDragDropControllerTest {
                 AbstractFloatingView.TYPE_TASKBAR_OVERFLOW,
             )
         assertThat(overflowContainer).isNotNull()
-        mockDragViewDragRegionToViewBounds(dragObject, overflowContainer)
+        mockDragViewToOverViewBounds(dragObject, overflowContainer)
         requireNotNull(taskbarViewDragDropController.overflowPinningDropTarget)
             .onDragEnter(dragObject)
     }

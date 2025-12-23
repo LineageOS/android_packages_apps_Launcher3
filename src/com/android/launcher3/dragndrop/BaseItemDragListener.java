@@ -17,6 +17,10 @@
 package com.android.launcher3.dragndrop;
 
 import static com.android.launcher3.Flags.enableSystemDrag;
+import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION;
+import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_GROUP;
+import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT;
+import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FOLDER;
 import static com.android.launcher3.LauncherState.NORMAL;
 import static com.android.launcher3.states.RotationHelper.REQUEST_LOCK;
 import static com.android.launcher3.states.RotationHelper.REQUEST_NONE;
@@ -31,10 +35,13 @@ import android.util.Log;
 import android.view.DragEvent;
 import android.view.View;
 
+import androidx.annotation.Nullable;
+
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.DragSource;
 import com.android.launcher3.DropTarget.DragObject;
 import com.android.launcher3.Launcher;
+import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.util.ContextTracker.SchedulerCallback;
 import com.android.launcher3.views.ActivityContext;
 
@@ -51,8 +58,38 @@ public abstract class BaseItemDragListener<T extends ActivityContext>
 
     private static final String TAG = "BaseItemDragListener";
 
+    /** Mime type for a deep shortcut dragged within Launcher, e.g. between Home and Taskbar. */
+    public static final String MIME_TYPE_INTERNAL_APP_SHORTCUT =
+            "vnd.android.launcher3/app-shortcut";
+
+    /** Mime type for an app folder dragged within Launcher, e.g. between Home and Taskbar. */
+    public static final String MIME_TYPE_INTERNAL_FOLDER =
+            "vnd.android.launcher3/app-folder";
+
+    /** Mime type for an app group item dragged within Launcher, e.g. between Home and Taskbar. */
+    public static final String MIME_TYPE_INTERNAL_APP_GROUP =
+            "vnd.android.launcher3/app-group";
+
+    /** Mime type for an app dragged within Launcher , e.g. between Home and Taskbar. */
+    public static final String MIME_TYPE_INTERNAL_APP_ACTIVITY = "vnd.android.launcher3/app-item";
+
     private static final String MIME_TYPE_PREFIX = "com.android.launcher3.drag_and_drop/";
     public static final String EXTRA_PIN_ITEM_DRAG_LISTENER = "pin_item_drag_listener";
+
+    /** Key for an Extra ItemInfo wrapped by {@link com.android.launcher3.util.ObjectWrapper}. */
+    public static final String EXTRA_WRAPPED_ITEM_INFO = "wrapped_item_info";
+
+    /** Returns an internal MIME type that should be used as drag clip description for an item. */
+    @Nullable
+    public static String getInternalMimeTypeForItem(ItemInfo item) {
+        return switch (item.itemType) {
+            case ITEM_TYPE_APPLICATION -> MIME_TYPE_INTERNAL_APP_ACTIVITY;
+            case ITEM_TYPE_DEEP_SHORTCUT -> MIME_TYPE_INTERNAL_APP_SHORTCUT;
+            case ITEM_TYPE_FOLDER -> MIME_TYPE_INTERNAL_FOLDER;
+            case ITEM_TYPE_APP_GROUP -> MIME_TYPE_INTERNAL_APP_GROUP;
+            default -> null;
+        };
+    }
 
     // Position of preview relative to the touch location
     private final Rect mPreviewRect;

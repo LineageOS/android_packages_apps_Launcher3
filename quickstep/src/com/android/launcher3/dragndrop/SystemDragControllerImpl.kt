@@ -22,9 +22,6 @@ import android.graphics.Rect
 import android.view.DragEvent
 import android.view.View
 import android.view.View.DRAG_FLAG_DISABLE_DEFAULT_POINTER_ICON
-import android.view.View.DRAG_FLAG_GLOBAL
-import android.view.View.DRAG_FLAG_GLOBAL_URI_READ
-import android.view.View.DRAG_FLAG_GLOBAL_URI_WRITE
 import android.view.View.DRAG_FLAG_OPAQUE
 import com.android.launcher3.views.ActivityContext
 import kotlin.math.roundToInt
@@ -127,10 +124,8 @@ class SystemDragControllerImpl(private val systemDragListenerFactory: SystemDrag
                     dragShadow,
                     /*localState=*/ null,
                     /*flags=*/ DRAG_FLAG_DISABLE_DEFAULT_POINTER_ICON or
-                        DRAG_FLAG_GLOBAL or
-                        DRAG_FLAG_GLOBAL_URI_READ or
-                        DRAG_FLAG_GLOBAL_URI_WRITE or
-                        DRAG_FLAG_OPAQUE,
+                        DRAG_FLAG_OPAQUE or
+                        params.extraDragFlags,
                 )
                 .also { result ->
                     if (result) {

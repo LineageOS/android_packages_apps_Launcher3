@@ -39,7 +39,6 @@ import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.DragSource;
 import com.android.launcher3.DropTarget;
 import com.android.launcher3.DropTarget.DragObject;
-import com.android.launcher3.Flags;
 import com.android.launcher3.R;
 import com.android.launcher3.accessibility.DragViewStateAnnouncer;
 import com.android.launcher3.dragndrop.DragOptions.PreDragCondition;
@@ -93,7 +92,7 @@ public class DragController implements DragDriver.EventListener, TouchController
 
     protected final Point mTmpPoint = new Point();
 
-    @VisibleForTesting
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     public DropTarget.DragObject mDragObject;
 
     /** Who can receive drop events */

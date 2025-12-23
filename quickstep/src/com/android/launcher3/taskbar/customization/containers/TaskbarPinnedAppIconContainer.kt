@@ -279,7 +279,11 @@ class TaskbarPinnedAppIconContainer(context: Context) :
         }
 
         if (isOverflowViewShowing) {
-            dropSpotIndex = min(dropSpotIndex, indexOfChild(overflowView) - 1)
+            dropSpotIndex =
+                min(
+                    dropSpotIndex,
+                    indexOfChild(overflowView) - if (indexOfChildHiddenForDrag != -1) 1 else 0,
+                )
         }
 
         if (dropTargetGhostView == null) {
