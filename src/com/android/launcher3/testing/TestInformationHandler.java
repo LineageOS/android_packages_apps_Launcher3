@@ -104,11 +104,12 @@ public class TestInformationHandler {
     private static int sActivitiesCreatedCount = 0;
 
     protected Context mContext;
-    protected DeviceProfile mDeviceProfile;
+    private DeviceProfile mPrimaryDeviceProfile;
 
     public void init(Context context) {
         mContext = context;
-        mDeviceProfile = InvariantDeviceProfile.INSTANCE.get(context).getDeviceProfile(context);
+        mPrimaryDeviceProfile =
+                InvariantDeviceProfile.INSTANCE.get(context).getDeviceProfile(context);
         if (sActivityLifecycleCallbacks == null) {
             sActivityLifecycleCallbacks = new ActivityLifecycleCallbacksAdapter() {
                 @Override
@@ -196,8 +197,12 @@ public class TestInformationHandler {
             }
 
             case TestProtocol.REQUEST_CELL_LAYOUT_BOARDER_HEIGHT: {
-                response.putInt(TestProtocol.TEST_INFO_RESPONSE_FIELD,
-                        mDeviceProfile.getWorkspaceIconProfile().getCellLayoutBorderSpacePx().y);
+                response.putInt(
+                        TestProtocol.TEST_INFO_RESPONSE_FIELD,
+                        mPrimaryDeviceProfile
+                                .getWorkspaceIconProfile()
+                                .getCellLayoutBorderSpacePx()
+                                .y);
                 return response;
             }
 
@@ -213,7 +218,7 @@ public class TestInformationHandler {
 
             case TestProtocol.REQUEST_ICON_HEIGHT: {
                 response.putInt(TestProtocol.TEST_INFO_RESPONSE_FIELD,
-                        mDeviceProfile.getAllAppsProfile().getCellHeightPx());
+                        mPrimaryDeviceProfile.getAllAppsProfile().getCellHeightPx());
                 return response;
             }
 
@@ -223,11 +228,11 @@ public class TestInformationHandler {
 
             case TestProtocol.REQUEST_IS_TABLET:
                 response.putBoolean(TestProtocol.TEST_INFO_RESPONSE_FIELD,
-                        mDeviceProfile.getDeviceProperties().isLargeScreen());
+                        mPrimaryDeviceProfile.getDeviceProperties().isLargeScreen());
                 return response;
             case TestProtocol.REQUEST_IS_PREDICTIVE_BACK_SWIPE_ENABLED:
                 response.putBoolean(TestProtocol.TEST_INFO_RESPONSE_FIELD,
-                        mDeviceProfile.isPredictiveBackSwipe);
+                        mPrimaryDeviceProfile.isPredictiveBackSwipe);
                 return response;
 
             case TestProtocol.REQUEST_TASKBAR_SHOWN_ON_HOME: {
@@ -256,7 +261,7 @@ public class TestInformationHandler {
 
             case TestProtocol.REQUEST_NUM_ALL_APPS_COLUMNS:
                 response.putInt(TestProtocol.TEST_INFO_RESPONSE_FIELD,
-                        mDeviceProfile.getAllAppsProfile().getNumShownAllAppsColumns());
+                        mPrimaryDeviceProfile.getAllAppsProfile().getNumShownAllAppsColumns());
                 return response;
 
             case TestProtocol.REQUEST_IS_TRANSIENT_TASKBAR:
@@ -266,7 +271,8 @@ public class TestInformationHandler {
 
             case TestProtocol.REQUEST_IS_TWO_PANELS:
                 response.putBoolean(TestProtocol.TEST_INFO_RESPONSE_FIELD,
-                        FOLDABLE_SINGLE_PAGE.get() ? false : mDeviceProfile.getDeviceProperties().isTwoPanels());
+                        !FOLDABLE_SINGLE_PAGE.get()
+                                && mPrimaryDeviceProfile.getDeviceProperties().isTwoPanels());
                 return response;
 
             case TestProtocol.REQUEST_GET_HAD_NONTEST_EVENTS:
@@ -622,5 +628,13 @@ public class TestInformationHandler {
                 }
             }
         };
+    }
+
+    protected DeviceProfile getDeviceProfile(int displayId) {
+        return mPrimaryDeviceProfile;
+    }
+
+    protected DeviceProfile getDeviceProfile() {
+        return mPrimaryDeviceProfile;
     }
 }
