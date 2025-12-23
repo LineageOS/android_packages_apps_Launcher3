@@ -15,207 +15,185 @@
  */
 package com.android.launcher3.allapps;
 
-import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
-
 import static com.android.launcher3.LauncherPrefs.WORK_EDU_STEP;
-import static com.android.launcher3.LauncherState.ALL_APPS;
-import static com.android.launcher3.allapps.AllAppsStore.DEFER_UPDATES_TEST;
-import static com.android.launcher3.util.TestUtil.installDummyAppForUser;
-import static com.android.launcher3.util.rule.TestStabilityRule.LOCAL;
-import static com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT;
+import static com.android.launcher3.allapps.BaseAllAppsAdapter.VIEW_TYPE_WORK_DISABLED_CARD;
+import static com.android.launcher3.allapps.BaseAllAppsAdapter.VIEW_TYPE_WORK_EDU_CARD;
+import static com.android.launcher3.allapps.UserProfileManager.STATE_DISABLED;
+import static com.android.launcher3.allapps.UserProfileManager.STATE_ENABLED;
+import static com.android.launcher3.model.data.AppsListData.FLAG_WORK_PROFILE_QUIET_MODE_ENABLED;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
-import android.os.Process;
-import android.platform.test.rule.LimitDevicesRule;
-import android.platform.test.rule.SkipOnDeviceless;
-import android.util.Log;
-import android.view.View;
+import android.content.Context;
+import android.os.UserHandle;
+import android.os.UserManager;
 
-import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import androidx.test.filters.LargeTest;
-import androidx.test.uiautomator.UiDevice;
 
-import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherPrefs;
-import com.android.launcher3.R;
-import com.android.launcher3.util.BaseLauncherActivityTest;
-import com.android.launcher3.util.TestUtil;
+import com.android.launcher3.allapps.BaseAllAppsAdapter.AdapterItem;
+import com.android.launcher3.logging.StatsLogManager;
+import com.android.launcher3.model.data.AppInfo;
+import com.android.launcher3.pm.UserCache;
+import com.android.launcher3.util.SandboxApplication;
+import com.android.launcher3.util.TestActivityContext;
+import com.android.launcher3.util.UserIconInfo;
+import com.android.launcher3.util.rule.MockUsersRule;
+import com.android.launcher3.util.rule.MockUsersRule.MockUser;
 import com.android.launcher3.util.rule.TestStabilityRule;
-import com.android.launcher3.util.rule.TestStabilityRule.Stability;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
-import java.util.function.Predicate;
+import java.util.ArrayList;
 
-@LargeTest
-/*
- * The test uses  executeShellCommand to setup WorkProfile, adb command doesn't work on Robolectric.
- */
-@SkipOnDeviceless
 @RunWith(AndroidJUnit4.class)
-public class WorkProfileTest extends BaseLauncherActivityTest<Launcher> {
+@MockUser(userType = UserIconInfo.TYPE_MAIN)
+@MockUser(userType = UserIconInfo.TYPE_WORK)
+public class WorkProfileTest {
 
-    private static final int WORK_PAGE = ActivityAllAppsContainerView.AdapterHolder.WORK;
-    public static final int WAIT_TIME_MS = 30000;
-    @Rule
-    public TestStabilityRule mTestStabilityRule = new TestStabilityRule();
+    @Rule public TestRule testStabilityRule = new TestStabilityRule();
+    @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
+    @Rule public SandboxApplication app = new SandboxApplication().withModelDependency();
+    @Rule public MockUsersRule mockUserRule = new MockUsersRule(app);
+    @Rule public TestActivityContext context = new TestActivityContext(app);
 
-    @Rule
-    public LimitDevicesRule mlimitDevicesRule = new LimitDevicesRule();
+    private UserHandle mWorkUser;
+    private WorkProfileManager mWorkProfileManager;
+    private AllAppsStore mAllAppsStore;
+    private UserManager mUserManager;
+    private LauncherPrefs mLauncherPrefs;
 
-    private int mProfileUserId;
-    private boolean mWorkProfileSetupSuccessful;
-    private static final String TAG = "WorkProfileTest";
+    @Mock private StatsLogManager mStatsLogManager;
 
     @Before
     public void setUp() throws Exception {
-        String output = UiDevice
-                .getInstance(getInstrumentation())
-                .executeShellCommand(
-                        String.format(
-                                "pm create-user --profileOf %d --managed TestProfile",
-                                Process.myUserHandle().getIdentifier()
-                        )
-                );
-        updateWorkProfileSetupSuccessful("pm create-user", output);
+        mWorkUser = mockUserRule.findUser(UserIconInfo::isWork);
+        ActivityAllAppsContainerView<?> activityAllAppsContainerView =
+                new ActivityAllAppsContainerView<>(context);
+        mAllAppsStore = context.getActivityComponent().getAppsStore();
+        mLauncherPrefs = LauncherPrefs.get(context);
+        // Ensure a clean state for edu preference
+        mLauncherPrefs.remove(WORK_EDU_STEP);
 
-        String[] tokens = output.split("\\s+");
-        mProfileUserId = Integer.parseInt(tokens[tokens.length - 1]);
-        StringBuilder logStr = new StringBuilder().append("profileId: ").append(mProfileUserId);
-        for (String str : tokens) {
-            logStr.append(str).append("\n");
-        }
-        installDummyAppForUser(mProfileUserId);
-        updateWorkProfileSetupSuccessful("am start-user", output);
+        mUserManager = app.spyService(UserManager.class);
+        doReturn(true).when(mUserManager).requestQuietModeEnabled(anyBoolean(), eq(mWorkUser));
 
-        if (!mWorkProfileSetupSuccessful) {
-            return; // no need to setup launcher since all tests will skip.
-        }
-
-        loadLauncherSync();
-        getLauncherActivity().goToState(ALL_APPS);
+        mWorkProfileManager = spy(new WorkProfileManager(
+                activityAllAppsContainerView,
+                mStatsLogManager,
+                UserCache.getInstance(app)));
     }
 
-    @After
-    public void removeWorkProfile() throws Exception {
-        TestUtil.uninstallDummyApp();
-        UiDevice.getInstance(getInstrumentation())
-                .executeShellCommand("pm remove-user --wait " + mProfileUserId);
-    }
-
-    private void waitForWorkTabSetup() {
-        waitForLauncherCondition("Work tab not setup", launcher -> {
-            if (launcher.getAppsView().getContentView() instanceof AllAppsPagedView) {
-                launcher.getAppsView().getAppsStore().enableDeferUpdates(DEFER_UPDATES_TEST);
-                return true;
-            }
-            return false;
-        }, WAIT_TIME_MS);
+    private void setWorkProfileQuietMode(boolean quietMode) {
+        int flags = quietMode ? FLAG_WORK_PROFILE_QUIET_MODE_ENABLED : 0;
+        // Set apps to trigger flag update, an empty array is fine.
+        mAllAppsStore.setApps(AppInfo.EMPTY_ARRAY, flags, null);
+        doReturn(quietMode).when(mUserManager).isQuietModeEnabled(eq(mWorkUser));
+        mWorkProfileManager.reset();
     }
 
     @Test
-    public void workTabExists() {
-        assumeTrue(mWorkProfileSetupSuccessful);
-        waitForWorkTabSetup();
-        waitForLauncherCondition("Personal tab is missing",
-                launcher -> launcher.getAppsView().isPersonalTabVisible(),
-                WAIT_TIME_MS);
-        waitForLauncherCondition("Work tab is missing",
-                launcher -> launcher.getAppsView().isWorkTabVisible(),
-                WAIT_TIME_MS);
-    }
+    public void initialState_workEnabled() {
+        setWorkProfileQuietMode(false);
 
-    // Staging; will be promoted to presubmit if stable
-    @Stability(flavors = LOCAL | PLATFORM_POSTSUBMIT)
-    @Test
-    public void toggleWorks() {
-        assumeTrue(mWorkProfileSetupSuccessful);
-        waitForWorkTabSetup();
-        getLauncherActivity().executeOnLauncher(launcher -> {
-            AllAppsPagedView pagedView = (AllAppsPagedView) launcher.getAppsView().getContentView();
-            pagedView.setCurrentPage(WORK_PAGE);
-        });
+        assertEquals(STATE_ENABLED, mWorkProfileManager.getCurrentState());
 
-        WorkProfileManager manager = getLauncherActivity().getFromLauncher(
-                l -> l.getAppsView().getWorkManager()
-        );
-
-        waitForLauncherCondition("work profile initial state check failed", launcher ->
-                        manager.getWorkUtilityView() != null
-                                && manager.getCurrentState() == WorkProfileManager.STATE_ENABLED
-                                && manager.getWorkUtilityView().isEnabled(),
-                WAIT_TIME_MS);
-
-        //start work profile toggle OFF test
-        getLauncherActivity().executeOnLauncher(l -> {
-            // Ensure updates are not deferred so notification happens when apps pause.
-            l.getAppsView().getAppsStore().disableDeferUpdates(DEFER_UPDATES_TEST);
-            l.getAppsView().getWorkManager().getWorkUtilityView().getWorkFAB().performClick();
-        });
-
-        waitForLauncherCondition("Work profile toggle OFF failed", launcher -> {
-            manager.reset(); // pulls current state from system
-            return manager.getCurrentState() == WorkProfileManager.STATE_DISABLED;
-        }, WAIT_TIME_MS);
-
-        waitForWorkCard("Work paused card not shown", view -> view instanceof WorkPausedCard);
-
-        // start work profile toggle ON test
-        getLauncherActivity().executeOnLauncher(l -> {
-            ActivityAllAppsContainerView<?> allApps = l.getAppsView();
-            assertEquals("Work tab is not focused", allApps.getCurrentPage(), WORK_PAGE);
-            View workPausedCard = allApps.getActiveRecyclerView()
-                    .findViewHolderForAdapterPosition(0).itemView;
-            workPausedCard.findViewById(R.id.enable_work_apps).performClick();
-        });
-        waitForLauncherCondition("Work profile toggle ON failed", launcher -> {
-            manager.reset(); // pulls current state from system
-            return manager.getCurrentState() == WorkProfileManager.STATE_ENABLED;
-        }, WAIT_TIME_MS);
-
+        assertTrue(mWorkProfileManager.shouldShowWorkApps());
     }
 
     @Test
-    public void testEdu() {
-        assumeTrue(mWorkProfileSetupSuccessful);
-        waitForWorkTabSetup();
-        getLauncherActivity().executeOnLauncher(l -> {
-            LauncherPrefs.get(l).putSync(WORK_EDU_STEP.to(0));
-            ((AllAppsPagedView) l.getAppsView().getContentView()).setCurrentPage(WORK_PAGE);
-            l.getAppsView().getWorkManager().reset();
-        });
+    public void initialState_workDisabled() {
+        setWorkProfileQuietMode(true);
 
-        waitForWorkCard("Work profile education not shown", view -> view instanceof WorkEduCard);
+        assertEquals(STATE_DISABLED, mWorkProfileManager.getCurrentState());
+
+        assertFalse(mWorkProfileManager.shouldShowWorkApps());
     }
 
-    private void waitForWorkCard(String message, Predicate<View> workCardCheck) {
-        waitForLauncherCondition(message, l -> {
-            l.getAppsView().getAppsStore().disableDeferUpdates(DEFER_UPDATES_TEST);
-            ViewHolder holder = l.getAppsView().getActiveRecyclerView()
-                    .findViewHolderForAdapterPosition(0);
-            try {
-                return holder != null && workCardCheck.test(holder.itemView);
-            } finally {
-                l.getAppsView().getAppsStore().enableDeferUpdates(DEFER_UPDATES_TEST);
-            }
-        }, WAIT_TIME_MS);
+    @Test
+    public void setWorkProfileEnabled_false_invokesSetQuietModeTrue() {
+        setWorkProfileQuietMode(false); // Start enabled
+
+        mWorkProfileManager.setWorkProfileEnabled(false);
+
+        verify(mWorkProfileManager).setQuietMode(eq(true), any(Context.class));
     }
 
-    private void updateWorkProfileSetupSuccessful(String cli, String output) {
-        Log.d(TAG, "updateWorkProfileSetupSuccessful, cli=" + cli + " " + "output=" + output);
-        if (output.startsWith("Success")) {
-            assertTrue(output, output.startsWith("Success"));
-            mWorkProfileSetupSuccessful = true;
-        } else {
-            mWorkProfileSetupSuccessful = false;
-        }
+    @Test
+    public void setWorkProfileEnabled_true_invokesSetQuietModeFalse() {
+        setWorkProfileQuietMode(true); // Start disabled
+
+        mWorkProfileManager.setWorkProfileEnabled(true);
+
+        verify(mWorkProfileManager).setQuietMode(eq(false), any(Context.class));
+    }
+
+    @Test
+    public void addWorkItems_whenDisabled_addsDisabledCard() {
+        setWorkProfileQuietMode(true);
+        ArrayList<AdapterItem> items = new ArrayList<>();
+
+        mWorkProfileManager.addWorkItems(items);
+
+        assertEquals(1, items.size());
+        assertEquals(VIEW_TYPE_WORK_DISABLED_CARD, items.get(0).viewType);
+    }
+
+    @Test
+    public void addWorkItems_whenEnabled_eduNotSeen_addsEduCard() {
+        setWorkProfileQuietMode(false);
+        mLauncherPrefs.put(WORK_EDU_STEP.to(0)); // Edu not seen
+        ArrayList<AdapterItem> items = new ArrayList<>();
+
+        mWorkProfileManager.addWorkItems(items);
+
+        assertEquals(1, items.size());
+        assertEquals(VIEW_TYPE_WORK_EDU_CARD, items.get(0).viewType);
+    }
+
+    @Test
+    public void addWorkItems_whenEnabled_eduSeen_addsNoSpecialCard() {
+        setWorkProfileQuietMode(false);
+        mLauncherPrefs.put(WORK_EDU_STEP.to(1)); // Edu seen
+        ArrayList<AdapterItem> items = new ArrayList<>();
+
+        mWorkProfileManager.addWorkItems(items);
+
+        assertTrue(items.isEmpty());
+    }
+
+    @Test
+    public void hasWorkApps_trueWhenWorkAppsPresent() {
+        AppInfo workApp = new AppInfo();
+        workApp.user = mWorkUser;
+
+        mAllAppsStore.setApps(new AppInfo[]{workApp}, 0, null);
+
+        assertTrue(mWorkProfileManager.hasWorkApps());
+    }
+
+    @Test
+    public void hasWorkApps_falseWhenNoWorkAppsPresent() {
+        AppInfo personalApp = new AppInfo();
+        personalApp.user = mockUserRule.findUser(UserIconInfo::isMain);
+
+        mAllAppsStore.setApps(new AppInfo[]{personalApp}, 0, null);
+
+        assertFalse(mWorkProfileManager.hasWorkApps());
     }
 }
