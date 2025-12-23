@@ -41,7 +41,7 @@ class DisplayModelTest {
     private val displayId = Display.DEFAULT_DISPLAY
     private val invalidDisplayId = -1
 
-    class TestableResource : DisplayModel.DisplayResource {
+    class TestableResource : DisplayModel.DisplayResource() {
         var isCleanupCalled = false
 
         override fun cleanup() {
@@ -54,8 +54,30 @@ class DisplayModelTest {
     }
 
     private val testableDisplayModel =
-        DisplayModel(context, systemDecorationChangeObserver, displayRepositoryCompat, dispatcher) {
-            TestableResource()
+        object :
+            DisplayModel<TestableResource>(
+                context,
+                systemDecorationChangeObserver,
+                displayRepositoryCompat,
+                dispatcher,
+            ) {
+            override fun createDisplayResource(display: Display): TestableResource {
+                return TestableResource()
+            }
+        }
+
+    private val testableDisplayModelWithDebug =
+        object :
+            DisplayModel<TestableResource>(
+                context,
+                systemDecorationChangeObserver,
+                displayRepositoryCompat,
+                dispatcher,
+                debug = true,
+            ) {
+            override fun createDisplayResource(display: Display): TestableResource {
+                return TestableResource()
+            }
         }
 
     @Test
@@ -77,46 +99,46 @@ class DisplayModelTest {
 
     @Test
     fun testDebug_getDisplayResource_doesNotCrash() {
-        assertNull(testableDisplayModel.getDisplayResource(displayId))
+        assertNull(testableDisplayModelWithDebug.getDisplayResource(displayId))
     }
 
     @Test
     fun testDebug_storeDisplayResource_doesNotCrash() {
-        testableDisplayModel.storeDisplayResource(displayId)
-        assertNotNull(testableDisplayModel.getDisplayResource(displayId))
+        testableDisplayModelWithDebug.storeDisplayResource(displayId)
+        assertNotNull(testableDisplayModelWithDebug.getDisplayResource(displayId))
     }
 
     @Test
     fun testDebug_onDisplayAddSystemDecorations_doesNotCrash() {
-        testableDisplayModel.storeDisplayResource(displayId)
-        testableDisplayModel.onDisplayAddSystemDecorations(displayId)
-        assertNotNull(testableDisplayModel.getDisplayResource(displayId))
+        testableDisplayModelWithDebug.storeDisplayResource(displayId)
+        testableDisplayModelWithDebug.onDisplayAddSystemDecorations(displayId)
+        assertNotNull(testableDisplayModelWithDebug.getDisplayResource(displayId))
     }
 
     @Test
     fun testDebug_deleteDisplayResource_doesNotCrash() {
-        testableDisplayModel.storeDisplayResource(displayId)
-        testableDisplayModel.deleteDisplayResource(displayId)
-        assertNull(testableDisplayModel.getDisplayResource(displayId))
+        testableDisplayModelWithDebug.storeDisplayResource(displayId)
+        testableDisplayModelWithDebug.deleteDisplayResource(displayId)
+        assertNull(testableDisplayModelWithDebug.getDisplayResource(displayId))
     }
 
     @Test
     fun testDebug_onDisplayRemoved_doesNotCrash() {
-        testableDisplayModel.storeDisplayResource(displayId)
-        testableDisplayModel.onDisplayRemoved(displayId)
-        assertNull(testableDisplayModel.getDisplayResource(displayId))
+        testableDisplayModelWithDebug.storeDisplayResource(displayId)
+        testableDisplayModelWithDebug.onDisplayRemoved(displayId)
+        assertNull(testableDisplayModelWithDebug.getDisplayResource(displayId))
     }
 
     @Test
     fun testDebug_onDisplayRemoveSystemDecorations_doesNotCrash() {
-        testableDisplayModel.storeDisplayResource(displayId)
-        testableDisplayModel.onDisplayRemoveSystemDecorations(displayId)
-        assertNull(testableDisplayModel.getDisplayResource(displayId))
+        testableDisplayModelWithDebug.storeDisplayResource(displayId)
+        testableDisplayModelWithDebug.onDisplayRemoveSystemDecorations(displayId)
+        assertNull(testableDisplayModelWithDebug.getDisplayResource(displayId))
     }
 
     @Test
     fun testDebug_storeInvalidDisplayResource_doesNotCrash() {
-        testableDisplayModel.storeDisplayResource(invalidDisplayId)
-        assertNull(testableDisplayModel.getDisplayResource(invalidDisplayId))
+        testableDisplayModelWithDebug.storeDisplayResource(invalidDisplayId)
+        assertNull(testableDisplayModelWithDebug.getDisplayResource(invalidDisplayId))
     }
 }

@@ -20,33 +20,27 @@ import android.content.Context
 import android.hardware.display.DisplayManager
 import android.util.Log
 import android.util.SparseArray
+import android.view.Display
 import android.window.DesktopExperienceFlags
 import androidx.core.util.valueIterator
 import com.android.app.displaylib.DisplayDecorationListener
 import com.android.app.displaylib.DisplaysWithDecorationsRepositoryCompat
-import com.android.launcher3.dagger.ApplicationContext
 import com.android.quickstep.DisplayModel.DisplayResource
-import com.android.quickstep.dagger.SysUIConnectionTestableModule.TESTABLE_DISPLAY_PROVIDER
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import java.io.PrintWriter
-import java.util.function.Consumer
-import java.util.function.IntFunction
-import javax.inject.Named
 import kotlinx.coroutines.CoroutineDispatcher
 
 /** data model for managing resources with lifecycles that match that of the connected display */
-class DisplayModel<RESOURCE_TYPE : DisplayResource>
-@AssistedInject
-constructor(
-    @ApplicationContext private val context: Context,
+abstract class DisplayModel<RESOURCE_TYPE : DisplayResource>(
+    val context: Context,
     private val systemDecorationChangeObserver: SystemDecorationChangeObserver,
-    @Named(TESTABLE_DISPLAY_PROVIDER)
     private val displaysWithDecorationsRepositoryCompat: DisplaysWithDecorationsRepositoryCompat,
-    @Assisted private val dispatcher: CoroutineDispatcher,
-    @Assisted private val resourceFactory: IntFunction<RESOURCE_TYPE?>,
+    private val dispatcher: CoroutineDispatcher,
+    private val debug: Boolean = false,
 ) : DisplayDecorationListener {
+
+    companion object {
+        private const val TAG = "DisplayModel"
+    }
 
     private val displayManager = context.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
     private val displayResourceArray = SparseArray<RESOURCE_TYPE>()
@@ -55,36 +49,34 @@ constructor(
             DesktopExperienceFlags.ENABLE_DISPLAY_CONTENT_MODE_MANAGEMENT.isTrue()
 
     override fun onDisplayAddSystemDecorations(displayId: Int) {
-        if (DEBUG) Log.d(TAG, "onDisplayAdded: displayId=$displayId")
+        if (debug) Log.d(TAG, "onDisplayAdded: displayId=$displayId")
         storeDisplayResource(displayId)
     }
 
     override fun onDisplayRemoved(displayId: Int) {
-        if (DEBUG) Log.d(TAG, "onDisplayRemoved: displayId=$displayId")
+        if (debug) Log.d(TAG, "onDisplayRemoved: displayId=$displayId")
         deleteDisplayResource(displayId)
     }
 
     override fun onDisplayRemoveSystemDecorations(displayId: Int) {
-        if (DEBUG) Log.d(TAG, "onDisplayRemoveSystemDecorations: displayId=$displayId")
+        if (debug) Log.d(TAG, "onDisplayRemoveSystemDecorations: displayId=$displayId")
         deleteDisplayResource(displayId)
     }
 
-    fun initializeDisplays() {
+    protected abstract fun createDisplayResource(display: Display): RESOURCE_TYPE
+
+    protected fun initializeDisplays() {
         if (useDisplayDecorationListener) {
             displaysWithDecorationsRepositoryCompat.registerDisplayDecorationListener(
                 this,
                 dispatcher,
             )
         } else {
-            systemDecorationChangeObserver.registerDisplayDecorationListener(this, dispatcher)
+            systemDecorationChangeObserver.registerDisplayDecorationListener(this)
         }
         displayManager.displays
             .filter { getDisplayResource(it.displayId) == null }
             .forEach { storeDisplayResource(it.displayId) }
-    }
-
-    fun forEach(callback: Consumer<RESOURCE_TYPE>) {
-        displayResourceArray.valueIterator().forEach { callback.accept(it) }
     }
 
     fun destroy() {
@@ -100,12 +92,12 @@ constructor(
     }
 
     fun getDisplayResource(displayId: Int): RESOURCE_TYPE? {
-        if (DEBUG) Log.d(TAG, Log.getStackTraceString(Throwable("get: displayId=$displayId")))
+        if (debug) Log.d(TAG, Log.getStackTraceString(Throwable("get: displayId=$displayId")))
         return displayResourceArray[displayId]
     }
 
     fun deleteDisplayResource(displayId: Int) {
-        if (DEBUG) Log.d(TAG, "delete: displayId=$displayId")
+        if (debug) Log.d(TAG, "delete: displayId=$displayId")
         getDisplayResource(displayId)?.let {
             it.cleanup()
             displayResourceArray.remove(displayId)
@@ -113,13 +105,13 @@ constructor(
     }
 
     fun storeDisplayResource(displayId: Int) {
-        if (DEBUG) Log.d(TAG, "store: displayId=$displayId")
+        if (debug) Log.d(TAG, "store: displayId=$displayId")
         getDisplayResource(displayId)?.let {
             return
         }
         val display = displayManager.getDisplay(displayId)
         if (display == null) {
-            if (DEBUG)
+            if (debug)
                 Log.w(
                     TAG,
                     "storeDisplayResource: could not create display for displayId=$displayId",
@@ -127,7 +119,7 @@ constructor(
                 )
             return
         }
-        resourceFactory.apply(displayId)?.let { displayResourceArray[displayId] = it }
+        displayResourceArray[displayId] = createDisplayResource(display)
     }
 
     fun dump(prefix: String, writer: PrintWriter) {
@@ -139,24 +131,9 @@ constructor(
         writer.println("${prefix}]")
     }
 
-    interface DisplayResource {
-        fun cleanup()
+    abstract class DisplayResource {
+        abstract fun cleanup()
 
-        fun dump(prefix: String, writer: PrintWriter)
-    }
-
-    @AssistedFactory
-    interface Factory<RESOURCE_TYPE : DisplayResource> {
-
-        fun newModel(
-            @Assisted dispatcher: CoroutineDispatcher,
-            @Assisted resourceFactory: IntFunction<RESOURCE_TYPE?>,
-        ): DisplayModel<RESOURCE_TYPE>
-    }
-
-    companion object {
-        private const val TAG = "DisplayModel"
-
-        private const val DEBUG = false
+        abstract fun dump(prefix: String, writer: PrintWriter)
     }
 }

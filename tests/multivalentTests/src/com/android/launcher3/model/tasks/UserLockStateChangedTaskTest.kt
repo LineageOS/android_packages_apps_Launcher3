@@ -72,12 +72,6 @@ class UserLockStateChangedTaskTest {
     @Before
     fun setup() {
         launcherApps = context.spyService(LauncherApps::class.java)
-        whenever(mockShortcut.id).thenReturn(SHORTCUT_ID)
-        whenever(mockShortcut.`package`).thenReturn(TEST_PACKAGE)
-        whenever(mockShortcut.userHandle).thenReturn(user)
-        whenever(mockShortcut.activity).thenReturn(ComponentName(TEST_PACKAGE, TEST_ACTIVITY))
-        doReturn(listOf(mockShortcut)).whenever(launcherApps).getShortcuts(any(), eq(user))
-
         layout.set(
             LauncherLayoutBuilder()
                 .atHotseat(1)
@@ -87,6 +81,11 @@ class UserLockStateChangedTaskTest {
         )
 
         assertEquals(2, modelState.dataModel.itemsIdMap.countPersistedModelItems())
+
+        whenever(mockShortcut.id).thenReturn(SHORTCUT_ID)
+        whenever(mockShortcut.`package`).thenReturn(TEST_PACKAGE)
+        whenever(mockShortcut.userHandle).thenReturn(user)
+        whenever(mockShortcut.activity).thenReturn(ComponentName(TEST_PACKAGE, TEST_ACTIVITY))
     }
 
     private fun executeTask(isUserUnlocked: Boolean, hasShortcuts: Boolean = true) {

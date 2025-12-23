@@ -52,7 +52,7 @@ constructor(@ApplicationContext private val encryptedContext: Context) {
             .getSharedPreferences(BOOT_AWARE_PREFS_KEY, MODE_PRIVATE)
     }
 
-    protected open fun getSharedPrefs(item: Item): SharedPreferences =
+    open protected fun getSharedPrefs(item: Item): SharedPreferences =
         item.run {
             if (encryptionType == EncryptionType.DEVICE_PROTECTED) deviceProtectedSharedPrefs
             else encryptedContext.getSharedPreferences(sharedPrefFile, MODE_PRIVATE)

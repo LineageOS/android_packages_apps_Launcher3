@@ -33,7 +33,6 @@ import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.UserSetupMode
 import com.android.wm.shell.Flags
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertThrows
-import org.junit.Assert.fail
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.Description
@@ -106,14 +105,17 @@ class TaskbarUnitTestRuleTest {
                 @InjectController lateinit var manager: TaskbarManager // Not a controller.
             }
 
-        // We cannot use #assertThrows because we also catch an assumption violated exception
-        // when running #evaluate on devices that do not support Taskbar.
-        try {
-            TaskbarUnitTestRule(testClass, context).apply(EMPTY_STATEMENT, DESCRIPTION).evaluate()
-            fail("No error was thrown")
-        } catch (e: Exception) {
-            if (!checkCause(e)) throw e
-        }
+        // We cannot use #assertThrows because we also catch an assumption violated exception when
+        // running #evaluate on devices that do not support Taskbar.
+        val result =
+            try {
+                TaskbarUnitTestRule(testClass, context)
+                    .apply(EMPTY_STATEMENT, DESCRIPTION)
+                    .evaluate()
+            } catch (e: NoSuchElementException) {
+                e
+            }
+        assertThat(result).isInstanceOf(NoSuchElementException::class.java)
     }
 
     @Test
@@ -148,11 +150,6 @@ class TaskbarUnitTestRuleTest {
         }
     }
 
-    private fun checkCause(e: Exception): Boolean {
-        if (e is NoSuchElementException) return true
-        return e.cause?.let { if (it is Exception) checkCause(it) else false } ?: false
-    }
-
     @DisableFlags(Flags.FLAG_ENABLE_BUBBLE_BAR)
     @Test
     fun testInjectBubbleController_bubbleFlagOff_exceptionThrown() {
@@ -163,12 +160,15 @@ class TaskbarUnitTestRuleTest {
 
         // We cannot use #assertThrows because we also catch an assumption violated exception
         // when running #evaluate on devices that do not support Taskbar.
-        try {
-            TaskbarUnitTestRule(testClass, context).apply(EMPTY_STATEMENT, DESCRIPTION).evaluate()
-            fail("No error was thrown")
-        } catch (e: Exception) {
-            if (!checkCause(e)) throw e
-        }
+        val result =
+            try {
+                TaskbarUnitTestRule(testClass, context)
+                    .apply(EMPTY_STATEMENT, DESCRIPTION)
+                    .evaluate()
+            } catch (e: NoSuchElementException) {
+                e
+            }
+        assertThat(result).isInstanceOf(NoSuchElementException::class.java)
     }
 
     @Test

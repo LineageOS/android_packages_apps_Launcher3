@@ -37,10 +37,8 @@ import com.android.launcher3.util.Preconditions
 import com.android.launcher3.util.SafeCloseable
 import com.android.launcher3.util.SimpleBroadcastReceiver
 import com.android.launcher3.util.SimpleBroadcastReceiver.Companion.actionsFilter
-import com.android.quickstep.DisplayModel
 import com.android.quickstep.util.SystemActionConstants
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAVIGATION_BAR_DISABLED
-import java.io.PrintWriter
 import java.util.function.IntConsumer
 
 /**
@@ -55,7 +53,7 @@ class PerDisplayTaskbarResource(
     val navButtonController: TaskbarNavButtonController,
     val isExternalDisplay: Boolean,
     private val configChangeCallback: (PerDisplayTaskbarResource, configDiff: Int) -> Unit,
-) : DisplayModel.DisplayResource {
+) {
 
     private val windowManager =
         requireNotNull(windowContext.getSystemService(WindowManager::class.java)) {
@@ -227,7 +225,7 @@ class PerDisplayTaskbarResource(
         }
     }
 
-    override fun cleanup() {
+    fun destroy() {
         debugMsg("destroy removeTaskbarRootViewFromWindow")
         removeTaskbarRootViewFromWindow()
 
@@ -239,12 +237,6 @@ class PerDisplayTaskbarResource(
 
         debugMsg("destroy taskbarReceiver")
         showTaskbarReceiver.close()
-    }
-
-    override fun dump(prefix: String, writer: PrintWriter) {
-        writer.println("$prefix\tTaskbar at display $displayId:")
-        taskbar?.dumpLogs(prefix + "\t\t", writer)
-            ?: run { writer.println("$prefix\t\tTaskbarActivityContext: null") }
     }
 
     /**
