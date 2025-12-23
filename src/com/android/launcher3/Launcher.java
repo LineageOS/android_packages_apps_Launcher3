@@ -457,7 +457,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         mWidgetPickerDataProvider = new WidgetPickerDataProvider();
         PillColorProvider.getInstance(mWorkspace.getContext()).registerObserver();
 
-        SystemDragController.INSTANCE.get(this).setLauncher(this);
+        SystemDragController.INSTANCE.get(this).setContext(this);
         ItemInstallQueue.INSTANCE.get(this).setIconUISurface(this);
 
         boolean internalStateHandled = ACTIVITY_TRACKER.handleCreate(this);

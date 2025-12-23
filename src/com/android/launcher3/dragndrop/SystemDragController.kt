@@ -16,9 +16,9 @@
 
 package com.android.launcher3.dragndrop
 
-import com.android.launcher3.Launcher
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.util.DaggerSingletonObject
+import com.android.launcher3.views.ActivityContext
 
 /** Controller for system-level drag-and-drop. */
 sealed class SystemDragController {
@@ -32,11 +32,11 @@ sealed class SystemDragController {
     open fun acceptDrop(itemInfo: SystemDragItemInfo) = false
 
     /**
-     * Sets the launcher for which to handle system-level drag-and-drop.
+     * Sets the context for which to handle system-level drag-and-drop.
      *
-     * @param launcher The launcher for which to handle system-level drag-and-drop.
+     * @param context The context for which to handle system-level drag-and-drop.
      */
-    open fun setLauncher(launcher: Launcher) {}
+    open fun setContext(context: ActivityContext) {}
 
     /**
      * Starts a system-level drag-and-drop sequence.
