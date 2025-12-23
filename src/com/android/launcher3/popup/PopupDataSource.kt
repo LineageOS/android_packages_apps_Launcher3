@@ -53,7 +53,7 @@ class PopupDataSource @Inject constructor() {
     private val handleRemove = { activityContext: ActivityContext, itemInfo: ItemInfo, view: View ->
         AbstractFloatingView.closeAllOpenViews(activityContext)
         val dropTargetHandler: DropTargetHandler = activityContext.dropTargetHandler
-        dropTargetHandler.prepareToUndoDelete()
+        dropTargetHandler.prepareToUndoDelete(itemInfo)
         dropTargetHandler.onDeleteComplete(itemInfo, view)
     }
 

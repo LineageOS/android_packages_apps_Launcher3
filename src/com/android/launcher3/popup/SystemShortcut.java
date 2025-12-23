@@ -276,7 +276,7 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
             AbstractFloatingView.closeAllOpenViewsExcept(mTarget, TYPE_FOLDER);
             DropTargetHandler dropTargetHandler =
                     ActivityContext.lookupContext(view.getContext()).getDropTargetHandler();
-            dropTargetHandler.prepareToUndoDelete();
+            dropTargetHandler.prepareToUndoDelete(mItemInfo);
             dropTargetHandler.onDeleteComplete(mItemInfo, mOriginalView);
         }
     }

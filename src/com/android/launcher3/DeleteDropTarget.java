@@ -133,7 +133,7 @@ public class DeleteDropTarget extends ButtonDropTarget {
     @Override
     public void onDrop(DragObject d, DragOptions options) {
         if (canRemove(d.dragInfo)) {
-            mDropTargetHandler.prepareToUndoDelete();
+            mDropTargetHandler.prepareToUndoDelete(d.dragInfo);
         }
         super.onDrop(d, options);
         mStatsLogManager.logger().withInstanceId(d.logInstanceId)

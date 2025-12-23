@@ -271,6 +271,15 @@
     <string name="home_screen_files_context_menu_move_to_trash_label">
         Move to trash
     </string>
+    <string name="home_screen_files_moved_to_trash_message">
+        <xliff:g id="item_name" example="file.png">%1$s</xliff:g> moved to trash
+    </string>
+    <string name="home_screen_files_move_to_trash_error_message">
+        Can\'t move to trash. Something went wrong.
+    </string>
+    <string name="home_screen_files_restore_from_trash_error_message">
+        Can\'t undo. Go to Files app to restore.
+    </string>
 
     <!-- Label for expanding system shortcuts in popup menu-->
     <string name="actions_popup_menu_button">Actions</string>
