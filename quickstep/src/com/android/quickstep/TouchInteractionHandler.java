@@ -49,7 +49,6 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.Choreographer;
-import android.view.Display;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.MotionEvent;
@@ -60,7 +59,6 @@ import androidx.annotation.UiThread;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.app.displaylib.DisplayRepository;
-import com.android.app.displaylib.DisplaysWithDecorationsRepositoryCompat;
 import com.android.app.displaylib.PerDisplayRepository;
 import com.android.launcher3.ConstantItem;
 import com.android.launcher3.EncryptionType;
@@ -85,7 +83,6 @@ import com.android.launcher3.util.SafeCloseable;
 import com.android.launcher3.util.ScreenOnTracker;
 import com.android.launcher3.util.ThreadSafeRunnableList;
 import com.android.launcher3.util.TraceHelper;
-import com.android.launcher3.util.coroutines.DispatcherProvider;
 import com.android.quickstep.OverviewComponentObserver.OverviewChangeListener;
 import com.android.quickstep.dagger.SysUIConnectionSingleton;
 import com.android.quickstep.fallback.RecentsState;
@@ -199,10 +196,9 @@ public class TouchInteractionHandler extends ContextWrapper {
     private final InputConsumerController mInputConsumer;
     private final Choreographer mMainChoreographer;
 
-    private final SystemDecorationChangeObserver mSystemDecorationChangeObserver;
+    private final DisplayModel.Factory<InputResource> mDisplayModelFactory;
+    private final CoroutineDispatcher mUiCoroutineDispatcher;
     private final DisplayRepository mDisplayRepository;
-    private final DisplaysWithDecorationsRepositoryCompat mDisplaysWithDecorationsRepositoryCompat;
-    private final CoroutineDispatcher mMainCoroutineDispatcher;
     private final DesktopState mDesktopState;
 
     // This needs to be a member to be queued and potentially removed later if the service is
@@ -221,7 +217,7 @@ public class TouchInteractionHandler extends ContextWrapper {
 
     private boolean mUserUnlocked = false;
 
-    @Nullable private InputResourceDisplayModel mInputResourceDisplayModel;
+    @Nullable private DisplayModel<InputResource> mInputResourceDisplayModel;
 
     private DesktopAppLaunchTransitionManager mDesktopAppLaunchTransitionManager;
 
@@ -233,9 +229,7 @@ public class TouchInteractionHandler extends ContextWrapper {
             PerDisplayRepository<TaskAnimationManager> taskAnimationManagerRepository,
             PerDisplayRepository<RotationTouchHelper> rotationTouchHelperRepository,
             PerDisplayRepository<RecentsWindowManager> recentsWindowManagerRepository,
-            SystemDecorationChangeObserver systemDecorationChangeObserver,
-            DispatcherProvider dispatcherProvider,
-            DisplaysWithDecorationsRepositoryCompat displaysWithDecorationsRepositoryCompat,
+            @Ui CoroutineDispatcher uiCoroutineDispatcher,
             LockedUserState lockedUserState,
             ScreenOnTracker screenOnTracker,
             SystemUiProxy systemUiProxy,
@@ -245,6 +239,7 @@ public class TouchInteractionHandler extends ContextWrapper {
             AllAppsActionManager allAppsActionManager,
             TaskbarManager taskbarManager,
             ActiveTrackpadList activeTrackpadList,
+            DisplayModel.Factory<InputResource> displayModelFactory,
             @Ui Executor uiExecutor,
             @Named(CONNECTION_CLEANER) ThreadSafeRunnableList cleanupTasks
     ) {
@@ -258,9 +253,8 @@ public class TouchInteractionHandler extends ContextWrapper {
         mTaskAnimationManagerRepository = taskAnimationManagerRepository;
         mRotationTouchHelperRepository = rotationTouchHelperRepository;
         mRecentsWindowManagerRepository = recentsWindowManagerRepository;
-        mSystemDecorationChangeObserver = systemDecorationChangeObserver;
-        mMainCoroutineDispatcher = dispatcherProvider.getMain();
-        mDisplaysWithDecorationsRepositoryCompat = displaysWithDecorationsRepositoryCompat;
+        mDisplayModelFactory = displayModelFactory;
+        mUiCoroutineDispatcher = uiCoroutineDispatcher;
         mLockedUserState = lockedUserState;
         mSystemUiProxy = systemUiProxy;
         mOverviewCommandHelper = overviewCommandHelper;
@@ -332,8 +326,9 @@ public class TouchInteractionHandler extends ContextWrapper {
                 && (!mTrackpadsConnected.getConnected().getValue())) {
             return;
         }
-        mInputResourceDisplayModel = new InputResourceDisplayModel(
-                this, mSystemDecorationChangeObserver);
+        mInputResourceDisplayModel =
+                mDisplayModelFactory.newModel(mUiCoroutineDispatcher, InputResource::new);
+        mInputResourceDisplayModel.initializeDisplays();
 
         mRotationTouchHelperRepository.get(DEFAULT_DISPLAY).updateGestureTouchRegions();
     }
@@ -370,7 +365,6 @@ public class TouchInteractionHandler extends ContextWrapper {
         mOverviewComponentObserver.get().addOverviewChangeListener(mOverviewChangeListener);
         onOverviewTargetChanged(mOverviewComponentObserver.get().isHomeAndOverviewSame());
 
-        mTaskbarManager.onUserUnlocked();
         mAllAppsActionManager.onUserUnlocked();
     }
 
@@ -974,29 +968,7 @@ public class TouchInteractionHandler extends ContextWrapper {
                 mInputConsumer, MSDLPlayerWrapper.INSTANCE.get(this));
     }
 
-    /**
-     * Helper class that keeps track of external displays and prepares input monitors for each.
-     */
-    private class InputResourceDisplayModel extends DisplayModel<InputResource> {
-
-        private InputResourceDisplayModel(
-                Context context, SystemDecorationChangeObserver systemDecorationChangeObserver) {
-            super(context,
-                    systemDecorationChangeObserver,
-                    mDisplaysWithDecorationsRepositoryCompat,
-                    mMainCoroutineDispatcher,
-                    /* debug= */ false);
-            initializeDisplays();
-        }
-
-        @NonNull
-        @Override
-        public InputResource createDisplayResource(@NonNull Display display) {
-            return new InputResource(display.getDisplayId());
-        }
-    }
-
-    private class InputResource extends DisplayModel.DisplayResource {
+    public class InputResource implements DisplayModel.DisplayResource {
 
         private final int displayId;
         private @NonNull final InputMonitorCompat inputMonitorCompat;

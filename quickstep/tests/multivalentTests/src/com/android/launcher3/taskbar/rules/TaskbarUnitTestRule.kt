@@ -17,29 +17,25 @@
 package com.android.launcher3.taskbar.rules
 
 import android.hardware.input.InputManager
-import android.os.UserHandle
-import android.os.UserManager
 import android.provider.Settings.Secure.NAV_BAR_KIDS_MODE
 import android.provider.Settings.Secure.USER_SETUP_COMPLETE
 import android.provider.Settings.Secure.getUriFor
-import com.android.app.displaylib.DisplaysWithDecorationsRepositoryCompat
-import com.android.launcher3.LauncherAppState
+import android.view.View
+import android.view.ViewGroup.OnHierarchyChangeListener
+import androidx.core.view.isNotEmpty
+import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
-import com.android.launcher3.taskbar.PerDisplayTaskbarResource
 import com.android.launcher3.taskbar.TaskbarActivityContext
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.TaskbarControllers
 import com.android.launcher3.taskbar.TaskbarManager
 import com.android.launcher3.taskbar.TaskbarManagerImpl
-import com.android.launcher3.taskbar.TaskbarNavButtonController.TaskbarNavButtonCallbacks
 import com.android.launcher3.taskbar.TaskbarUIController
 import com.android.launcher3.taskbar.bubbles.BubbleControllers
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
-import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
 import com.android.launcher3.util.LauncherMultivalentJUnit.Companion.isRunningInRobolectric
 import com.android.launcher3.util.TestUtil
-import com.android.launcher3.util.coroutines.ProductionDispatchers
-import com.android.quickstep.AllAppsActionManager
+import com.android.launcher3.util.ThreadSafeRunnableList
 import com.google.common.truth.Truth.assertWithMessage
 import com.google.common.truth.TruthJUnit.assume
 import java.lang.reflect.Field
@@ -87,7 +83,10 @@ class TaskbarUnitTestRule(
     private val controllerInjectionCallback: () -> Unit = {},
 ) : TestRule {
 
-    lateinit var taskbarManager: TaskbarManagerImpl
+    private lateinit var sysUIConnection: TaskbarSysUIConnectionComponent
+
+    val taskbarManager: TaskbarManagerImpl
+        get() = sysUIConnection.taskbarImpl
 
     val activityContext: TaskbarActivityContext
         get() {
@@ -101,8 +100,11 @@ class TaskbarUnitTestRule(
 
                 // Only run test when Taskbar is enabled.
                 runOnTaskbarUiThreadSync {
+                    val targetContext = InstrumentationRegistry.getInstrumentation().targetContext
                     val isTaskbarPresent =
-                        LauncherAppState.getIDP(context).getDeviceProfile(context).isTaskbarPresent
+                        targetContext.appComponent.idp
+                            .getDeviceProfile(targetContext)
+                            .isTaskbarPresent
                     if (isRunningInRobolectric) {
                         // Fail if emulated device does not have a Taskbar.
                         assertWithMessage("isTaskbarPresent is false due to device emulation issue")
@@ -129,50 +131,41 @@ class TaskbarUnitTestRule(
                     doAnswer {}.whenever(mock).unregisterKeyGestureEventHandler(any())
                 }
 
-                val isUserUnlocked = description.getAnnotation(UserLocked::class.java) == null
-                context.base.spyService(UserManager::class.java).stub {
-                    doAnswer { isUserUnlocked }.whenever(mock).isUserUnlocked(any<Int>())
-                    doAnswer { isUserUnlocked }.whenever(mock).isUserUnlockingOrUnlocked(any<Int>())
-                    // Needed because the Robolectric version does not overload to the ID method.
-                    doAnswer { isUserUnlocked }.whenever(mock).isUserUnlocked(any<UserHandle>())
-                    doAnswer { isUserUnlocked }
-                        .whenever(mock)
-                        .isUserUnlockingOrUnlocked(any<UserHandle>())
-                }
+                val cleanup = ThreadSafeRunnableList()
+                val builder =
+                    context.base.appComponent.sysUIConnectionComponentBuilder
+                        as TaskbarSysUIConnectionComponent.Builder
 
-                taskbarManager =
-                    TestUtil.getOnTaskbarUiThread {
-                        object :
-                            TaskbarManagerImpl(
-                                context,
-                                AllAppsActionManager(
-                                    context,
-                                    UI_HELPER_EXECUTOR,
-                                    context.appComponent.quickstepKeyGestureEventsManager,
-                                ) {
-                                    taskbarManager as TaskbarManager
-                                },
-                                object : TaskbarNavButtonCallbacks {},
-                                // VirtualDisplaysRule dispatches system decoration changes.
-                                mock<DisplaysWithDecorationsRepositoryCompat>(),
-                                ProductionDispatchers.INSTANCE[context],
-                            ) {
-                            override fun recreateTaskbars() {
-                                super.recreateTaskbars()
-                                injectControllers()
+                sysUIConnection =
+                    builder
+                        .bindDisplayDecorationProvider(
+                            mock {
+                                doAnswer {
+                                        context.virtualDisplayRule
+                                            .registerDisplayDecorationListener(it.getArgument(0))
+                                    }
+                                    .whenever(it)
+                                    .registerDisplayDecorationListener(any(), any())
                             }
+                        )
+                        .setConnectionCleaner(cleanup)
+                        .build() as TaskbarSysUIConnectionComponent
 
-                            override fun recreateTaskbarForDisplay(
-                                resource: PerDisplayTaskbarResource,
-                                duration: Int,
-                                caller: String,
-                            ) {
-                                super.recreateTaskbarForDisplay(resource, duration, caller)
-                                if (resource.displayId == context.displayId) injectControllers()
+                TestUtil.getOnTaskbarUiThread {
+                    sysUIConnection.taskbarImpl.apply {
+                        val root = primaryResource.rootLayout
+                        root.setOnHierarchyChangeListener(
+                            object : OnHierarchyChangeListener {
+                                override fun onChildViewAdded(p0: View, p1: View) {
+                                    injectControllers()
+                                }
+
+                                override fun onChildViewRemoved(p0: View, p1: View) {}
                             }
-                        }
+                        )
+                        if (root.isNotEmpty()) injectControllers()
                     }
-                context.virtualDisplayRule.registerDisplayDecorationListener(taskbarManager)
+                }
 
                 if (description.getAnnotation(ForceRtl::class.java) != null) {
                     // Needs to be set on window context instead of sandbox context, because it does
@@ -182,14 +175,15 @@ class TaskbarUnitTestRule(
                     taskbarManager.primaryWindowContext.resources.configuration.setLayoutDirection(
                         RTL_LOCALE
                     )
+                    runOnTaskbarUiThreadSync { taskbarManager.recreateTaskbars() }
                 }
 
                 try {
-                    if (isUserUnlocked) unlockUser()
                     base.evaluate()
                 } finally {
                     runOnTaskbarUiThreadSync { taskbarManager.destroy() }
                     context.displayControllerSpy?.cleanup()
+                    cleanup.complete()
                 }
             }
         }
@@ -198,11 +192,6 @@ class TaskbarUnitTestRule(
     /** Simulates Taskbar recreation lifecycle. */
     fun recreateTaskbar() {
         runOnTaskbarUiThreadSync { taskbarManager.recreateTaskbars() }
-    }
-
-    /** Simulates unlocking the user for the first time. */
-    fun unlockUser() {
-        runOnTaskbarUiThreadSync { taskbarManager.onUserUnlocked() }
     }
 
     // Don't use TaskbarManager property, because the function can be called before initialization.
@@ -271,11 +260,6 @@ class TaskbarUnitTestRule(
     @Retention(AnnotationRetention.RUNTIME)
     @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
     annotation class ForceRtl
-
-    /** Simulate direct boot for tests, where the user is still locked. */
-    @Retention(AnnotationRetention.RUNTIME)
-    @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
-    annotation class UserLocked
 }
 
 private val RTL_LOCALE = Locale.of("ar", "XB")

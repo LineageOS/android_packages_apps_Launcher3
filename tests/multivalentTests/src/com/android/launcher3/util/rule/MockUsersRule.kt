@@ -16,6 +16,7 @@
 
 package com.android.launcher3.util.rule
 
+import android.content.Intent
 import android.content.pm.LauncherApps
 import android.content.pm.LauncherUserInfo
 import android.os.UserHandle
@@ -23,13 +24,14 @@ import android.os.UserManager
 import android.os.UserManager.USER_TYPE_PROFILE_CLONE
 import android.os.UserManager.USER_TYPE_PROFILE_MANAGED
 import android.os.UserManager.USER_TYPE_PROFILE_PRIVATE
+import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.SandboxApplication
+import com.android.launcher3.util.TestUtil
 import com.android.launcher3.util.UserIconInfo
 import com.android.launcher3.util.UserIconInfo.Companion.TYPE_CLONED
 import com.android.launcher3.util.UserIconInfo.Companion.TYPE_PRIVATE
 import com.android.launcher3.util.UserIconInfo.Companion.TYPE_WORK
 import com.android.launcher3.util.UserIconInfo.UserType
-import com.android.launcher3.util.rule.MockUsersRule.MockUser
 import kotlin.annotation.AnnotationRetention.RUNTIME
 import kotlin.annotation.AnnotationTarget.CLASS
 import kotlin.annotation.AnnotationTarget.FUNCTION
@@ -38,6 +40,7 @@ import org.junit.runner.Description
 import org.junit.runners.model.Statement
 import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.mock
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.whenever
 
 /**
@@ -47,7 +50,7 @@ import org.mockito.kotlin.whenever
  */
 class MockUsersRule(private val app: SandboxApplication) : TestRule {
 
-    private val generatedUsers = mutableListOf<UserIconInfo>()
+    private val generatedUsers = mutableListOf<GeneratedUserState>()
 
     override fun apply(base: Statement, description: Description): Statement {
         val users = getMockUsers(description)
@@ -62,7 +65,18 @@ class MockUsersRule(private val app: SandboxApplication) : TestRule {
     }
 
     fun findUser(predicate: (UserIconInfo) -> Boolean): UserHandle =
-        generatedUsers.find(predicate)!!.user
+        generatedUsers.find { predicate(it.info) }!!.info.user
+
+    fun unlockMainUser() {
+        val genInfo = generatedUsers.find { it.info.isMain }!!
+        genInfo.isUserUnlocked = true
+        TestUtil.runOnExecutorSync(MAIN_EXECUTOR) {
+            app.appComponent.lockedUserState.userUnlockedReceiver.onReceive(
+                app,
+                Intent(Intent.ACTION_USER_UNLOCKED),
+            )
+        }
+    }
 
     private fun getMockUsers(description: Description): List<MockUser> =
         description.getAnnotation<MockUsers>()?.value?.toList()
@@ -101,18 +115,31 @@ class MockUsersRule(private val app: SandboxApplication) : TestRule {
                 .whenever(launcherApps)
                 .getPreInstalledSystemPackages(user)
 
-            doReturn(mockUser.isUserUnlocked).whenever(userManager).isUserUnlocked(user)
-            doReturn(mockUser.isUserUnlocked).whenever(userManager).isUserUnlockingOrUnlocked(user)
+            val generatedState =
+                GeneratedUserState(
+                    info =
+                        UserIconInfo(
+                            user = user,
+                            type = mockUser.userType,
+                            userSerial = serial.toLong(),
+                        ),
+                    isUserUnlocked = mockUser.isUserUnlocked,
+                )
+
+            doAnswer { generatedState.isUserUnlocked }.whenever(userManager).isUserUnlocked(user)
+            doAnswer { generatedState.isUserUnlocked }
+                .whenever(userManager)
+                .isUserUnlockingOrUnlocked(user)
             doReturn(mockUser.isQuietModeEnabled).whenever(userManager).isQuietModeEnabled(user)
 
-            generatedUsers.add(
-                UserIconInfo(user = user, type = mockUser.userType, userSerial = serial.toLong())
-            )
+            generatedUsers.add(generatedState)
             userList.add(user)
         }
 
         doReturn(userList).whenever(userManager).userProfiles
     }
+
+    private class GeneratedUserState(val info: UserIconInfo, var isUserUnlocked: Boolean)
 
     /** Interface to indicate a mock user */
     @Retention(RUNTIME)
