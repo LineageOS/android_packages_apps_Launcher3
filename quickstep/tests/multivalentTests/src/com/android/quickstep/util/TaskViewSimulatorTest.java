@@ -37,9 +37,9 @@ import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.dagger.LauncherAppComponent;
 import com.android.launcher3.dagger.LauncherAppSingleton;
+import com.android.launcher3.display.LauncherDisplayInfo;
 import com.android.launcher3.util.AllModulesMinusWMProxy;
 import com.android.launcher3.util.DisplayController;
-import com.android.launcher3.util.DisplayController.Info;
 import com.android.launcher3.util.NavigationMode;
 import com.android.launcher3.util.RotationUtils;
 import com.android.launcher3.util.SandboxApplication;
@@ -201,8 +201,8 @@ public class TaskViewSimulatorTest {
             configuration.densityDpi = mDensityDpi;
             Context configurationContext = app.createConfigurationContext(configuration);
 
-            DisplayController.Info info = new Info(
-                    configurationContext, false, wmProxy, perDisplayBoundsCache, mDensityDpi);
+            LauncherDisplayInfo info = new LauncherDisplayInfo(
+                    configurationContext, wmProxy, false, perDisplayBoundsCache, mDensityDpi);
             when(mockController.getInfo()).thenReturn(info);
 
             mDeviceProfile = InvariantDeviceProfile.INSTANCE.get(app)

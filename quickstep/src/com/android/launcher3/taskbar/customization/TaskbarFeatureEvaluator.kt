@@ -56,8 +56,8 @@ constructor(
             if (
                 displayController.info.navigationMode != NO_BUTTON ||
                     desktopVisibilityController.isInDesktopMode(primaryDisplayId) ||
-                    displayController.info.showDesktopTaskbarForFreeformDisplay() ||
-                    (displayController.info.showLockedTaskbarOnHome() &&
+                    displayController.info.showDesktopTaskbarForFreeformDisplay ||
+                    (displayController.info.showLockedTaskbarOnHome &&
                         displayController.info.isHomeVisible)
             ) {
                 false
@@ -71,7 +71,7 @@ constructor(
         get() =
             if (
                 desktopVisibilityController.isInDesktopModeAndNotInOverview(primaryDisplayId) ||
-                    displayController.info.showDesktopTaskbarForFreeformDisplay()
+                    displayController.info.showDesktopTaskbarForFreeformDisplay
             ) {
                 true
             } else if (desktopVisibilityController.isInDesktopMode(primaryDisplayId)) {

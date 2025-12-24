@@ -28,6 +28,7 @@ import com.android.launcher3.R
 import com.android.launcher3.Utilities
 import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.dagger.ApplicationContext
+import com.android.launcher3.display.LauncherDisplayInfo
 import com.android.launcher3.graphics.ThemeManager
 import com.android.launcher3.icons.BaseIconFactory.IconOptions
 import com.android.launcher3.icons.BitmapInfo
@@ -97,7 +98,7 @@ constructor(
     }
 
     private fun onDisplayInfoChanged(flags: Int) {
-        if ((flags and DisplayController.CHANGE_DENSITY) != 0) {
+        if ((flags and LauncherDisplayInfo.CHANGE_DENSITY) != 0) {
             clearCache()
         }
     }

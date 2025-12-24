@@ -27,7 +27,6 @@ import android.view.SurfaceControl.Transaction
 import android.view.WindowManager.TRANSIT_CLOSE
 import android.view.WindowManager.TRANSIT_OPEN
 import android.view.WindowManager.TRANSIT_TO_BACK
-import android.window.DesktopModeFlags
 import android.window.TransitionInfo
 import android.window.TransitionInfo.Change
 import androidx.core.animation.addListener
@@ -158,14 +157,12 @@ class DesktopAppLaunchAnimatorHelper(
             }
         val clipRect = Rect(change.endAbsBounds).apply { offsetTo(0, 0) }
         transaction.setCrop(change.leash, clipRect)
-        val displayContext = displayController.getInfoForDisplay(change.endDisplayId)?.getContext()
+        val displayContext = displayController.getInfoForDisplay(change.endDisplayId)?.context
         val animatorContext = displayContext ?: context
         val taskCornerRadiusInPx =
-            animatorContext.resources
-                .getDimensionPixelSize(
-                    R.dimen.desktop_windowing_freeform_task_rounded_corner_radius
-                )
-                .toFloat()
+            animatorContext.resources.getDimension(
+                R.dimen.desktop_windowing_freeform_task_rounded_corner_radius
+            )
         transaction.setCornerRadius(change.leash, taskCornerRadiusInPx)
         return AnimatorSet().apply {
             interactionJankMonitor.begin(change.leash, context, context.mainThreadHandler, cujType)

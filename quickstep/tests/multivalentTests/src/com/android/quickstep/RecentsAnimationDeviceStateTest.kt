@@ -4,10 +4,10 @@ import android.view.Display.DEFAULT_DISPLAY
 import androidx.test.annotation.UiThreadTest
 import androidx.test.filters.SmallTest
 import com.android.launcher3.dagger.LauncherComponentProvider
-import com.android.launcher3.util.DisplayController.CHANGE_DENSITY
-import com.android.launcher3.util.DisplayController.CHANGE_NAVIGATION_MODE
-import com.android.launcher3.util.DisplayController.CHANGE_ROTATION
-import com.android.launcher3.util.DisplayController.Info
+import com.android.launcher3.display.LauncherDisplayInfo
+import com.android.launcher3.display.LauncherDisplayInfo.Companion.CHANGE_DENSITY
+import com.android.launcher3.display.LauncherDisplayInfo.Companion.CHANGE_NAVIGATION_MODE
+import com.android.launcher3.display.LauncherDisplayInfo.Companion.CHANGE_ROTATION
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
 import com.android.launcher3.util.LauncherMultivalentJUnit
@@ -52,7 +52,7 @@ class RecentsAnimationDeviceStateTest {
     @get:Rule var mockitoRule: MockitoRule = MockitoJUnit.rule()
 
     @Mock private lateinit var exclusionManager: GestureExclusionManager
-    @Mock private lateinit var info: Info
+    @Mock private lateinit var info: LauncherDisplayInfo
     @Mock private lateinit var rotationTouchHelper: RotationTouchHelper
 
     private lateinit var underTest: RecentsAnimationDeviceState
@@ -119,7 +119,7 @@ class RecentsAnimationDeviceStateTest {
 
     @Test
     fun onDisplayInfoChanged_noButton_registerExclusionListener() {
-        doReturn(NavigationMode.NO_BUTTON).whenever(info).getNavigationMode()
+        doReturn(NavigationMode.NO_BUTTON).whenever(info).navigationMode
 
         underTest.onDisplayInfoChanged(info, CHANGE_ROTATION or CHANGE_NAVIGATION_MODE)
 
@@ -129,7 +129,7 @@ class RecentsAnimationDeviceStateTest {
     @Test
     fun onDisplayInfoChanged_twoButton_unregisterExclusionListener() {
         underTest.registerExclusionListener()
-        whenever(info.getNavigationMode()).thenReturn(NavigationMode.TWO_BUTTONS)
+        whenever(info.navigationMode).thenReturn(NavigationMode.TWO_BUTTONS)
         reset(exclusionManager)
 
         underTest.onDisplayInfoChanged(info, CHANGE_ROTATION or CHANGE_NAVIGATION_MODE)
@@ -140,7 +140,7 @@ class RecentsAnimationDeviceStateTest {
     @Test
     fun onDisplayInfoChanged_changeDensity_noOp() {
         underTest.registerExclusionListener()
-        whenever(info.getNavigationMode()).thenReturn(NavigationMode.NO_BUTTON)
+        whenever(info.navigationMode).thenReturn(NavigationMode.NO_BUTTON)
         reset(exclusionManager)
 
         underTest.onDisplayInfoChanged(info, CHANGE_DENSITY)

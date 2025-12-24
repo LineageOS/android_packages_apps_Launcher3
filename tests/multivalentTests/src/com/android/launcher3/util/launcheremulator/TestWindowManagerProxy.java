@@ -25,7 +25,7 @@ import android.util.ArrayMap;
 import android.view.DisplayInfo;
 import android.view.WindowInsets;
 
-import com.android.launcher3.util.DisplayController.Info;
+import com.android.launcher3.display.LauncherDisplayInfo;
 import com.android.launcher3.util.NavigationMode;
 import com.android.launcher3.util.SandboxApplication;
 import com.android.launcher3.util.WindowBounds;
@@ -55,8 +55,8 @@ public class TestWindowManagerProxy extends WindowManagerProxy {
      * DisplayController
      */
     public TestWindowManagerProxy(Context context) {
-        this(DeviceEmulationData.Companion.getCurrentDeviceData(context, new Info(context,
-                new WindowManagerProxy())));
+        this(DeviceEmulationData.Companion.getCurrentDeviceData(context,
+                new LauncherDisplayInfo(context, new WindowManagerProxy())));
     }
 
     public TestWindowManagerProxy(DeviceEmulationData device) {

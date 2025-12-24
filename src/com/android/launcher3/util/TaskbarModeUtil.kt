@@ -49,7 +49,7 @@ constructor(
             } else if (enableTaskbarPinning()) {
                 // If Launcher is visible on the freeform display, ensure the taskbar is pinned.
                 if (
-                    displayController.info.showLockedTaskbarOnHome() &&
+                    displayController.info.showLockedTaskbarOnHome &&
                         displayController.info.isHomeVisible
                 ) {
                     false

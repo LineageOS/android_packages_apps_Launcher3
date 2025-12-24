@@ -60,6 +60,7 @@ import com.android.launcher3.ShortcutAndWidgetContainer;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.Workspace;
 import com.android.launcher3.dagger.LauncherComponentProvider;
+import com.android.launcher3.display.LauncherDisplayInfo;
 import com.android.launcher3.dragndrop.DragLayer;
 import com.android.launcher3.icons.ClockDrawableWrapper;
 import com.android.launcher3.testing.shared.TestProtocol;
@@ -236,10 +237,10 @@ public class TestInformationHandler {
                 return response;
 
             case TestProtocol.REQUEST_TASKBAR_SHOWN_ON_HOME: {
-                DisplayController.Info displayInfo = DisplayController.INSTANCE.get(
+                LauncherDisplayInfo displayInfo = DisplayController.INSTANCE.get(
                         mContext).getInfoForDisplay(Integer.parseInt(arg));
                 response.putBoolean(TEST_INFO_RESPONSE_FIELD,
-                        displayInfo != null && displayInfo.showLockedTaskbarOnHome());
+                        displayInfo != null && displayInfo.showLockedTaskbarOnHome);
                 return response;
             }
 
@@ -252,10 +253,10 @@ public class TestInformationHandler {
             }
 
             case TestProtocol.REQUEST_IS_IN_DESKTOP_FIRST_MODE: {
-                DisplayController.Info displayInfo = DisplayController.INSTANCE.get(
+                LauncherDisplayInfo displayInfo = DisplayController.INSTANCE.get(
                         mContext).getInfoForDisplay(Integer.parseInt(arg));
                 response.putBoolean(TEST_INFO_RESPONSE_FIELD,
-                        displayInfo != null && displayInfo.isInDesktopFirstMode());
+                        displayInfo != null && displayInfo.isInDesktopFirstMode);
                 return response;
             }
 

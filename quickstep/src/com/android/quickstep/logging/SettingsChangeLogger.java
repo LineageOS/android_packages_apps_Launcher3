@@ -16,6 +16,7 @@
 
 package com.android.quickstep.logging;
 
+import static com.android.launcher3.display.LauncherDisplayInfo.CHANGE_NAVIGATION_MODE;
 import static com.android.launcher3.graphics.ThemeManager.ICON_FACTORY_DAGGER_KEY;
 import static com.android.launcher3.graphics.ThemeManager.PREF_ICON_SHAPE;
 import static com.android.launcher3.graphics.theme.ThemePreference.MONO_THEME_VALUE;
@@ -36,7 +37,6 @@ import static com.android.launcher3.shapes.ShapesProvider.CIRCLE_KEY;
 import static com.android.launcher3.shapes.ShapesProvider.FOUR_SIDED_COOKIE_KEY;
 import static com.android.launcher3.shapes.ShapesProvider.SEVEN_SIDED_COOKIE_KEY;
 import static com.android.launcher3.shapes.ShapesProvider.SQUARE_KEY;
-import static com.android.launcher3.util.DisplayController.CHANGE_NAVIGATION_MODE;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.SettingsCache.NOTIFICATION_BADGING_URI;
 import static com.android.launcher3.util.XmlElement.getRootElement;
@@ -56,6 +56,7 @@ import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.R;
 import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.dagger.LauncherAppSingleton;
+import com.android.launcher3.display.LauncherDisplayInfo;
 import com.android.launcher3.graphics.ThemeManager;
 import com.android.launcher3.graphics.ThemeManager.ThemeChangeListener;
 import com.android.launcher3.graphics.theme.IconThemeFactory;
@@ -69,7 +70,6 @@ import com.android.launcher3.model.DeviceGridState;
 import com.android.launcher3.util.DaggerSingletonObject;
 import com.android.launcher3.util.DaggerSingletonTracker;
 import com.android.launcher3.util.DisplayController;
-import com.android.launcher3.util.DisplayController.Info;
 import com.android.launcher3.util.ListenableDiffAwareRef;
 import com.android.launcher3.util.NavigationMode;
 import com.android.launcher3.util.SettingsCache;
@@ -132,7 +132,8 @@ public class SettingsChangeLogger implements OnSharedPreferenceChangeListener {
         mThemePreference = themePreference;
         mThemeFactoryMap = themeFactoryMap;
 
-        ListenableDiffAwareRef<Info, Integer> listenable = displayController.getListenable();
+        ListenableDiffAwareRef<LauncherDisplayInfo, Integer> listenable =
+                displayController.getListenable();
         if (listenable != null) {
             tracker.addCloseable(
                     listenable.forEachChange(MAIN_EXECUTOR, this::onDisplayInfoChanged));
@@ -191,7 +192,7 @@ public class SettingsChangeLogger implements OnSharedPreferenceChangeListener {
         return null;
     }
 
-    private void onDisplayInfoChanged(Info info, int flags) {
+    private void onDisplayInfoChanged(LauncherDisplayInfo info, int flags) {
         if ((flags & CHANGE_NAVIGATION_MODE) != 0) {
             mNavMode = info.getNavigationMode();
             mStatsLogManager.logger().log(mNavMode.launcherEvent);
