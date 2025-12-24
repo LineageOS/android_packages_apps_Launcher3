@@ -26,6 +26,7 @@ import android.view.Display.DEFAULT_DISPLAY
 import android.view.WindowManager
 import android.window.DesktopExperienceFlags
 import androidx.test.core.app.ApplicationProvider
+import com.android.launcher3.testutil.rule.LazyInitRule.Companion.lazyRule
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
 import com.android.launcher3.util.LauncherMultivalentJUnit.Companion.isRunningInRobolectric
@@ -90,19 +91,6 @@ class TaskbarWindowSandboxContext private constructor(private val params: Sandbo
             }
         }
 
-    /**
-     * Delegates to [base] at evaluation time, so that it is initialized when applied.
-     *
-     * [base] cannot be referenced in the [RuleChain] before initialization.
-     */
-    private val baseDelegateRule = TestRule { s, d ->
-        object : Statement() {
-            override fun evaluate() {
-                base.apply(s, d).evaluate()
-            }
-        }
-    }
-
     private val sandboxSpyServicesRule =
         object : ExternalResource() {
             override fun before() {
@@ -143,7 +131,7 @@ class TaskbarWindowSandboxContext private constructor(private val params: Sandbo
     override fun apply(statement: Statement, description: Description): Statement {
         return RuleChain.outerRule(virtualDisplayRule)
             .around(attachBaseContextRule)
-            .around(baseDelegateRule)
+            .around(lazyRule { base })
             .around(sandboxSpyServicesRule)
             .around(singletonSetupRule)
             .apply(statement, description)

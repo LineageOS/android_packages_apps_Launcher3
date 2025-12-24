@@ -729,3 +729,10 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+    name: "enable_taskbar_a11y_more_options_button"
+    namespace: "launcher"
+    description: "Enables the 'More Options' button for accessibility features in the Taskbar"
+    bug: "440427169"
+}

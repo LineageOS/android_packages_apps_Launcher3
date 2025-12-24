@@ -484,8 +484,7 @@ public class InvariantDeviceProfile {
         for (WindowBounds bounds : displayInfo.supportedBounds) {
             DeviceProfile.Builder builder = newDPBuilder(displayInfo)
                     .setIsMultiDisplay(deviceType == TYPE_MULTI_DISPLAY)
-                    .setWindowBounds(bounds)
-                    .setDotRendererCache(dotRendererCache);
+                    .setWindowBounds(bounds);
             if (com.android.systemui.shared.Flags.workspaceItemsLabelHidden()) {
                 builder.setIsWorkspaceItemsLabelHidden(mPrefs.get(WORKSPACE_ITEMS_LABEL_HIDDEN));
             }

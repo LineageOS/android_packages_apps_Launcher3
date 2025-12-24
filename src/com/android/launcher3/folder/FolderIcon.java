@@ -239,7 +239,9 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
         icon.setCustomActionsListener(WorkspaceItemCustomActionsListener.INSTANCE);
         icon.mInfo = folderInfo;
         icon.mActivity = activity;
-        icon.mDotRenderer = grid.mDotRendererWorkSpace;
+        icon.mDotRenderer = new DotRenderer(
+                grid.getWorkspaceIconProfile().getIconSizePx()
+        );
 
         icon.updateDotInfo();
         icon.setContentDescription(icon.getAccessiblityTitle(folderInfo.title));

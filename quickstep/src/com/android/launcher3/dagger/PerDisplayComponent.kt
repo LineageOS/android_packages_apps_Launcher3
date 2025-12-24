@@ -16,6 +16,7 @@
 
 package com.android.launcher3.dagger
 
+import android.content.Context
 import android.view.Display
 import com.android.quickstep.RecentsAnimationDeviceState
 import com.android.quickstep.RotationTouchHelper
@@ -51,6 +52,8 @@ interface PerDisplayComponent {
     fun getRotationTouchHelper(): RotationTouchHelper
 
     fun getRecentsWindowTracker(): RecentsWindowTracker
+
+    @WindowContext fun getWindowContext(): Context
 
     // End Shared components.
 

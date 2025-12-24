@@ -22,6 +22,7 @@ import android.net.Uri
 import android.os.SystemClock
 import android.view.CrossWindowBlurListeners
 import android.widget.ImageView
+import com.android.app.displaylib.PerDisplayRepository
 import com.android.extensions.computercontrol.ComputerControlExtensions
 import com.android.internal.R
 import com.android.internal.policy.DesktopModeCompatPolicy
@@ -127,6 +128,15 @@ abstract class ApiWrapperModule {
     abstract fun bindTestInformationHandler(
         impl: QuickstepTestInformationHandler
     ): TestInformationHandler
+
+    companion object {
+        @Provides
+        @LauncherAppSingleton
+        fun provideRecentsWindowContextRepo(
+            repositoryFactory: PerDisplayComponentRepository.Factory<Context>
+        ): PerDisplayRepository<Context> =
+            repositoryFactory.create("WindowContext", PerDisplayComponent::getWindowContext)
+    }
 }
 
 @Module

@@ -26,9 +26,12 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import androidx.core.graphics.withTranslation
+import androidx.core.view.children
 import androidx.core.view.contains
 import androidx.core.view.get
 import androidx.core.view.isEmpty
+import androidx.core.view.isVisible
 import androidx.core.view.setPadding
 import com.android.app.tracing.traceSection
 import com.android.launcher3.BubbleTextView
@@ -63,7 +66,6 @@ import com.android.launcher3.util.Themes
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.views.PredictedAppIcon
 import kotlin.math.min
-import androidx.core.graphics.withTranslation
 
 /** Taskbar container which hosts its pinned apps. */
 class TaskbarPinnedAppIconContainer(context: Context) :
@@ -370,12 +372,63 @@ class TaskbarPinnedAppIconContainer(context: Context) :
         if (folderIcon != null) {
             canvas.withTranslation(
                 folderIcon.left + folderIcon.translationX,
-                folderIcon.top.toFloat()
+                folderIcon.top.toFloat(),
             ) {
                 val previewBackground: PreviewBackground = folderIcon.folderBackground
                 previewBackground.drawLeaveBehind(this, folderLeaveBehindColor)
             }
         }
+    }
+
+    fun rearrangeItemsForDrag() {
+        val visibleCount = getVisibleChildCount()
+        val maxIcons = activityContext.taskbarSpecsEvaluator.numShownHotseatIcons
+        if (visibleCount == maxIcons) return
+
+        if (visibleCount > maxIcons) {
+            if (!isOverflowViewShowing) {
+                // TODO: Group the extra icons to an overflow view.
+                return
+            }
+
+            indexOfChild(overflowView)
+            val viewToMove =
+                children.toList().lastOrNull {
+                    it.isVisible && it !is TaskbarDropTargetGhostView && it != overflowView
+                } ?: return
+
+            val newOverflowItems = overflowView.overflowInfoList.toMutableList()
+            newOverflowItems.add(0, viewToMove.tag as ItemInfo)
+            overflowView.setItems(newOverflowItems.map { ItemInfoWrapper(it, activityContext) })
+            itemViewFactory.removeAndRecycle(viewToMove)
+            return
+        }
+
+        // visibleCount < maxIcons
+        if (!isOverflowViewShowing) {
+            return
+        }
+
+        val overflowItems = overflowView.overflowInfoList
+        if (overflowItems.isEmpty()) {
+            return
+        }
+
+        // Update the Taskbar pinned overflow view.
+        val newOverflowItems = overflowItems.toMutableList()
+        val itemToMove = newOverflowItems.removeFirst()
+        overflowView.setItems(newOverflowItems.map { ItemInfoWrapper(it, activityContext) })
+
+        // Create the view for the item to move.
+        val index = indexOfChild(overflowView)
+        val newView: View = itemViewFactory.getView(itemToMove, childCount)
+        if (newView is BubbleTextView && itemToMove is WorkspaceItemInfo) {
+            newView.applyFromWorkspaceItem(itemToMove)
+        }
+
+        // Move the first icon in the overflow icon to the end of the pinned section.
+        val lp = getLayoutParams(index, getVisibleChildCount())
+        addView(newView, index, lp)
     }
 
     companion object {
