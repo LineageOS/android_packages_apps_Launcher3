@@ -50,10 +50,6 @@ class TaskbarManagerImplWrapper @Inject constructor(implProvider: Provider<Taskb
         getTaskbarUiThread().execute { impl = implProvider.get() }
     }
 
-    override fun onUserUnlocked() {
-        getTaskbarUiThread().execute { impl.onUserUnlocked() }
-    }
-
     override fun updateTaskbarsVisibility() {
         getTaskbarUiThread().execute { impl.updateTaskbarsVisibility() }
     }
@@ -133,18 +129,6 @@ class TaskbarManagerImplWrapper @Inject constructor(implProvider: Provider<Taskb
 
     override fun onNavigationBarLumaSamplingEnabled(displayId: Int, enable: Boolean) {
         getTaskbarUiThread().execute { impl.onNavigationBarLumaSamplingEnabled(displayId, enable) }
-    }
-
-    override fun onDisplayAddSystemDecorations(displayId: Int) {
-        getTaskbarUiThread().execute { impl.onDisplayAddSystemDecorations(displayId) }
-    }
-
-    override fun onDisplayRemoved(displayId: Int) {
-        getTaskbarUiThread().execute { impl.onDisplayRemoved(displayId) }
-    }
-
-    override fun onDisplayRemoveSystemDecorations(displayId: Int) {
-        getTaskbarUiThread().execute { impl.onDisplayRemoveSystemDecorations(displayId) }
     }
 
     override fun destroy() {
