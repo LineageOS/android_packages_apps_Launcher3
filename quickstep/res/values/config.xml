@@ -79,4 +79,7 @@
         <item>image/heic</item>
         <item>image/avif</item>
     </string-array>
+
+    <!-- Indicates that the color overrides set for widget picker are suitable for blur -->
+    <bool name="config_widgetPickerSupportsBlurTokens">true</bool>
 </resources>

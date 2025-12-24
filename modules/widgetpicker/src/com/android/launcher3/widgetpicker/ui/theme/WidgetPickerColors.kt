@@ -27,6 +27,10 @@ import androidx.compose.ui.graphics.Color
  * Color tokens corresponding to specific UI elements in widget picker.
  *
  * @param sheetBackground background color of the widget picker bottom sheet.
+ * @param sheetBackgroundScrim scrim behind the widget picker sheet; useful for implementing blur
+ *   layers.
+ * @param sheetBackgroundBottomLayer another color layer below the [sheetBackground]; useful when
+ *   implementing blur.
  * @param dragHandle color of the drag handle shown in the widget picker bottom sheet.
  * @param sheetTitle color of the title of entire bottom sheet
  * @param sheetDescription color of long description displayed below the title of the bottom sheet.
@@ -94,6 +98,8 @@ import androidx.compose.ui.graphics.Color
 data class WidgetPickerColors(
     // Titled bottom sheet
     val sheetBackground: Color,
+    val sheetBackgroundScrim: Color = Color.Transparent,
+    val sheetBackgroundBottomLayer: Color = Color.Transparent,
     val dragHandle: Color,
     val sheetTitle: Color,
     val sheetDescription: Color,
@@ -178,6 +184,8 @@ fun defaultWidgetPickerColors() =
     WidgetPickerColors(
         // Titled bottom sheet
         sheetBackground = MaterialTheme.colorScheme.surfaceContainer,
+        sheetBackgroundScrim = Color.Transparent,
+        sheetBackgroundBottomLayer = Color.Transparent,
         dragHandle = MaterialTheme.colorScheme.outline,
         sheetTitle = MaterialTheme.colorScheme.onSurface,
         sheetDescription = MaterialTheme.colorScheme.onSurfaceVariant,

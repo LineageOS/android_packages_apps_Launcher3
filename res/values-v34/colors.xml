@@ -17,20 +17,6 @@
 */
 -->
 <resources  xmlns:android="http://schemas.android.com/apk/res/android">
-    <color name="widget_picker_secondary_surface_color_light">
-        @android:color/system_surface_bright_light</color>
-    <color name="widget_picker_header_app_title_color_light">
-        @android:color/system_on_surface_light</color>
-    <color name="widget_picker_header_app_subtitle_color_light">
-        @android:color/system_on_surface_variant_light</color>
-    <color name="widget_cell_title_color_light">
-        @android:color/system_on_surface_light</color>
-    <color name="widget_cell_subtitle_color_light">
-        @android:color/system_on_surface_variant_light</color>
-    <color name="widget_picker_menu_options_color_light">
-        @android:color/system_on_surface_variant_light
-    </color>
-
     <color name="system_background_light">@android:color/system_background_light</color>
     <color name="system_control_activated_light">@android:color/system_control_activated_light</color>
     <color name="system_control_highlight_light">@android:color/system_control_highlight_light</color>

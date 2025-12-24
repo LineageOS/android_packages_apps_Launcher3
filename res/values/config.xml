@@ -210,4 +210,6 @@
     <string-array name="grid_control_known_signers" translatable="false" />
 
     <string-array name="supported_overlay_apps" translatable="false"/>
+
+    <bool name="config_widgetPickerSupportsBlurTokens">false</bool>
 </resources>
