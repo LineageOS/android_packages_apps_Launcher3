@@ -75,14 +75,28 @@ interface HomeScreenFilesProvider {
     ): List<CompletableFuture<Boolean>>
 
     /**
-     * Deletes a single file or folder in the [HOME_SCREEN_FOLDER_RELATIVE_PATH] folder.
+     * Permanently deletes a single file or folder in the [HOME_SCREEN_FOLDER_RELATIVE_PATH] folder.
      *
      * @param uri The URI of the item to be deleted.
-     * @param name The name of the item to be deleted.
-     * @param permanent If `true`, the item is deleted permanently and cannot be restored. If
-     *   `false`, the item is moved to trash and can be restored later.
      */
-    fun delete(uri: Uri, name: String, permanent: Boolean)
+    fun deletePermanently(uri: Uri)
+
+    /**
+     * Moves a single file or folder in the [HOME_SCREEN_FOLDER_RELATIVE_PATH] folder to trash.
+     *
+     * @param name The name of the item to be deleted.
+     * @return The new path of the item after being moved to trash, or `null` if the operation
+     *   failed.
+     */
+    fun moveToTrash(name: String): CompletableFuture<String?>
+
+    /**
+     * Restores a single file or folder from trash to its original location.
+     *
+     * @param trashPath The path of the item in trash.
+     * @return The flag indicating if the operation succeeded (true) or failed (false).
+     */
+    fun restoreFromTrash(trashPath: String): CompletableFuture<Boolean>
 
     /** Returns all eligible file items to be shown on the home screen. */
     fun query(): CompletableFuture<Map<Uri, HomeScreenFile>>

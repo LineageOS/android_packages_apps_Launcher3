@@ -39,11 +39,14 @@ import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+import android.os.IBinder;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Pair;
@@ -64,12 +67,15 @@ import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.DropTarget;
 import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.R;
+import com.android.launcher3.dragndrop.BaseItemDragListener;
 import com.android.launcher3.dragndrop.DragController;
 import com.android.launcher3.dragndrop.DragOptions;
 import com.android.launcher3.dragndrop.DragView;
 import com.android.launcher3.dragndrop.DraggableView;
+import com.android.launcher3.dragndrop.SystemDragItemInfo;
 import com.android.launcher3.folder.Folder;
 import com.android.launcher3.graphics.DragPreviewProvider;
+import com.android.launcher3.icons.FastBitmapDrawable;
 import com.android.launcher3.logger.LauncherAtom.ContainerInfo;
 import com.android.launcher3.logging.StatsLogManager;
 import com.android.launcher3.model.data.ItemInfo;
@@ -82,6 +88,7 @@ import com.android.launcher3.testing.TestLogging;
 import com.android.launcher3.testing.shared.TestProtocol;
 import com.android.launcher3.util.IntSet;
 import com.android.launcher3.util.ItemInfoMatcher;
+import com.android.launcher3.util.ObjectWrapper;
 import com.android.launcher3.views.BubbleTextHolder;
 import com.android.quickstep.util.LogUtils;
 import com.android.quickstep.util.MultiValueUpdateListener;
@@ -132,6 +139,9 @@ public class TaskbarDragController extends DragController implements
     private @Nullable DragController.SystemDragHandler mSystemDragHandler;
     private @Nullable View.OnDragListener mSystemDragListener;
 
+    private final SystemDragHandler mExternalSystemDragHandler = enableTaskbarDragAndDrop()
+            ? new ExternalSystemDragHandler() : null;
+
     public TaskbarDragController(BaseTaskbarContext activity) {
         super(activity);
         mActivity = activity;
@@ -150,6 +160,7 @@ public class TaskbarDragController extends DragController implements
                         }));
         if (enableTaskbarDragAndDrop()) {
             mControllers.taskbarViewDragDropController.addDropTargets(this);
+            addSystemDragHandler(mExternalSystemDragHandler);
         }
         mTaskbarUiState = taskbarUiState;
     }
@@ -160,6 +171,7 @@ public class TaskbarDragController extends DragController implements
                 c -> c.dragToBubbleController.removeBubbleBarDropTargets(this));
         if (enableTaskbarDragAndDrop()) {
             mControllers.taskbarViewDragDropController.removeDropTargets(this);
+            removeSystemDragHandler(mExternalSystemDragHandler);
         }
     }
 
@@ -362,10 +374,19 @@ public class TaskbarDragController extends DragController implements
     protected void callOnDragStart() {
         super.callOnDragStart();
         updateIsDragging();
-        if (enableTaskbarDragAndDrop()) {
-            mControllers.taskbarViewDragDropController.onTaskbarItemViewDragStart(
-                    (BubbleTextView) mDragObject.originalView);
+
+        if (enableTaskbarDragAndDrop()
+                && mDragObject.originalView instanceof BubbleTextView originalView) {
+            mControllers.taskbarViewDragDropController.onTaskbarItemViewDragStart(originalView);
         }
+
+        // Don't start new system drag when already handling a system drag from another window.
+        // Don't update visibility state of abstract floating views when external system drag enters
+        // taskbar (if needed, these views should be closed when the drag starts).
+        if (mDragObject.dragInfo instanceof SystemDragItemInfo) {
+            return;
+        }
+
         // TODO(297921594) clean it up when taskbar to desktop drag is implemented.
         // Pre-drag has ended, start the global system drag.
         if (mDisallowGlobalDrag
@@ -579,11 +600,14 @@ public class TaskbarDragController extends DragController implements
         // change, we should update mIsTaskbarDragging before checking the value.
         updateIsDragging();
         if (!isDragging()) {
-            ((BubbleTextView) mDragObject.originalView).setIconDisabled(false);
-            if (enableTaskbarDragAndDrop()) {
-                mControllers.taskbarViewDragDropController.onTaskbarItemViewDragEnd(
-                        (BubbleTextView) mDragObject.originalView);
+            if (mDragObject.originalView instanceof BubbleTextView originalView) {
+                originalView.setIconDisabled(false);
+                if (enableTaskbarDragAndDrop()) {
+                    mControllers.taskbarViewDragDropController.onTaskbarItemViewDragEnd(
+                            originalView);
+                }
             }
+
             mControllers.taskbarAutohideSuspendController.updateFlag(
                     TaskbarAutohideSuspendController.FLAG_AUTOHIDE_SUSPEND_DRAGGING, false);
             mActivity.onDragEnd();
@@ -837,6 +861,99 @@ public class TaskbarDragController extends DragController implements
 
     interface TaskbarReturnPropertiesListener {
         void updateDragShadow(float x, float y, float scale, float alpha);
+    }
+
+    /**
+     * System drag handler that handles drag events from other Launcher windows on a taskbar drag
+     * layer. The handler initiates internal drag and drop sequence when drag enters the drag enter,
+     * and extracts dragged item info from the event ClipData during drop.
+     */
+    private class ExternalSystemDragHandler implements SystemDragHandler {
+        @Override
+        public boolean onDrag(DragEvent event) {
+            switch (event.getAction()) {
+                case DragEvent.ACTION_DRAG_STARTED -> {
+                    return supportsDragEvent(event.getClipDescription());
+                }
+                case DragEvent.ACTION_DRAG_ENTERED -> {
+                    if (isDragging()) {
+                        return true;
+                    }
+                    Point downPos = new Point((int) event.getX(), (int) event.getY());
+                    DragOptions options = new DragOptions();
+                    options.simulatedDndStartPoint = downPos;
+
+                    // Initiate internal drag sequence to mimic handled system drag events.
+                    startDrag(
+                            new FastBitmapDrawable(
+                                    Bitmap.createBitmap(mDragIconSize, mDragIconSize,
+                                            Bitmap.Config.ARGB_8888)),
+                            null,
+                            DraggableView.ofType(DraggableView.DRAGGABLE_ICON),
+                            downPos.x,
+                            downPos.y,
+                            (target, d, success) -> {},
+                            new SystemDragItemInfo(),
+                            new Rect(),
+                            1f,
+                            1f,
+                            options);
+                    mControllers.taskbarAutohideSuspendController.updateFlag(
+                            TaskbarAutohideSuspendController.FLAG_AUTOHIDE_SUSPEND_DRAGGING, true);
+                    mControllers.taskbarStashController.updateAndAnimateTransientTaskbar(false);
+                    return true;
+                }
+                case DragEvent.ACTION_DROP -> {
+                    // Extract dragged item info from clip data, and use it as drag object drag info
+                    // for drop. Actual drop logic will be handled by drag driver set in
+                    // `startDrag()` called when handling `ACTION_DRAG_ENTER`.
+                    mDragObject.dragInfo = extractItemInfoFromClipData(event.getClipData());
+                    return mDragObject.dragInfo != null;
+                }
+            }
+            // NOTE: The rest of events get handled by forwardng them to the drag driver set in
+            // `startDrag()` called when handling `ACTION_DRAG_ENTER`.
+            return true;
+        }
+
+        @Nullable
+        private ItemInfo extractItemInfoFromClipData(@Nullable ClipData clipData) {
+            if (clipData == null) {
+                return null;
+            }
+
+            Intent intent = null;
+            for (int i = 0; i < clipData.getItemCount(); ++i) {
+                ClipData.Item item = clipData.getItemAt(i);
+                if (item == null) {
+                    continue;
+                }
+                intent = item.getIntent();
+                if (intent != null) {
+                    break;
+                }
+            }
+            if (intent == null) {
+                return null;
+            }
+            Bundle wrappedItemBundle =
+                    intent.getBundleExtra(BaseItemDragListener.EXTRA_WRAPPED_ITEM_INFO);
+            if (wrappedItemBundle == null) {
+                return null;
+            }
+            IBinder wrappedItem = wrappedItemBundle.getBinder(
+                    BaseItemDragListener.EXTRA_WRAPPED_ITEM_INFO);
+            return ObjectWrapper.unwrap(wrappedItem);
+        }
+
+        private boolean supportsDragEvent(ClipDescription description) {
+            if (description == null) {
+                return false;
+            }
+            return description.hasMimeType(BaseItemDragListener.MIME_TYPE_INTERNAL_APP_SHORTCUT)
+                    || description.hasMimeType(
+                    BaseItemDragListener.MIME_TYPE_INTERNAL_APP_ACTIVITY);
+        }
     }
 
     @Override

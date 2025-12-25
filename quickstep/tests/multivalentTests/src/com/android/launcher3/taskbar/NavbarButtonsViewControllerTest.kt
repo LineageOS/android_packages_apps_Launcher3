@@ -26,8 +26,11 @@ import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.THREE_BUTTONS
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
-import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.UserLocked
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
+import com.android.launcher3.testutil.rule.LazyInitRule.Companion.lazyRule
+import com.android.launcher3.util.UserIconInfo
+import com.android.launcher3.util.rule.MockUsersRule
+import com.android.launcher3.util.rule.MockUsersRule.MockUser
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -41,14 +44,15 @@ class NavbarButtonsViewControllerTest {
     @get:Rule(order = 0) val animatorTestRule = TaskbarAnimatorTestRule(this)
     @get:Rule(order = 1) val setFlagsRule = SetFlagsRule()
     @get:Rule(order = 2) val context = TaskbarWindowSandboxContext.create()
-    @get:Rule(order = 3) val taskbarModeRule = TaskbarModeRule(context)
-    @get:Rule(order = 4) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
+    @get:Rule(order = 3) val mockUsers = lazyRule { MockUsersRule(context.base) }
+    @get:Rule(order = 4) val taskbarModeRule = TaskbarModeRule(context)
+    @get:Rule(order = 5) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
 
     @InjectController lateinit var navbarButtonsViewController: NavbarButtonsViewController
 
     @Test
     @TaskbarMode(THREE_BUTTONS)
-    @UserLocked
+    @MockUser(userType = UserIconInfo.TYPE_MAIN, isUserUnlocked = false)
     fun userLocked_keyguardOccluded_homeButtonHidden() {
         runOnTaskbarUiThreadSync {
             navbarButtonsViewController.setKeyguardVisible(
@@ -79,7 +83,7 @@ class NavbarButtonsViewControllerTest {
 
     @Test
     @TaskbarMode(THREE_BUTTONS)
-    @UserLocked
+    @MockUser(userType = UserIconInfo.TYPE_MAIN, isUserUnlocked = false)
     fun userLocked_keyguardVisible_backButtonHidden() {
         runOnTaskbarUiThreadSync {
             navbarButtonsViewController.setKeyguardVisible(
@@ -95,7 +99,7 @@ class NavbarButtonsViewControllerTest {
 
     @Test
     @TaskbarMode(THREE_BUTTONS)
-    @UserLocked
+    @MockUser(userType = UserIconInfo.TYPE_MAIN, isUserUnlocked = false)
     fun userLocked_keyguardBouncerVisible_backButtonShown() {
         runOnTaskbarUiThreadSync {
             navbarButtonsViewController.setKeyguardVisible(

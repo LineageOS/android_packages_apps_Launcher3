@@ -147,11 +147,13 @@
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"Config. rápidas"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"Barra de tarefas"</string>
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"Barra de navegação"</string>
-    <string name="always_show_taskbar" msgid="3608801276107751229">"Sempre mostrar a Barra de tarefas"</string>
+    <string name="always_show_taskbar" msgid="3608801276107751229">"Sempre mostrar a Barra de Tarefas"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"Mudar o modo de navegação"</string>
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"Separador da Barra de tarefas"</string>
     <string name="taskbar_recents_overflow_a11y_title" msgid="8005941062446304304">"Outros apps recentes"</string>
     <string name="taskbar_pinned_overflow_a11y_title" msgid="2314810718333302626">"Outros apps"</string>
+    <!-- no translation found for taskbar_drag_to_unpin_title (7652941692376783721) -->
+    <skip />
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"Mover para cima/para a esquerda"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"Mover para baixo/para a direita"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"Abrir o app como um balão"</string>

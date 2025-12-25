@@ -81,10 +81,6 @@ public class NavHandleLongPressHandler {
         return LauncherComponentProvider.get(context).getNavHandleLongPressHandler();
     }
 
-    protected boolean isContextualSearchEntrypointEnabled(NavHandle navHandle) {
-        return DeviceConfigWrapper.get().getEnableLongPressNavHandle();
-    }
-
     /**
      * Called when nav handle is long pressed to get the Runnable that should be executed by the
      * caller to invoke long press behavior. If null is returned that means long press couldn't be
@@ -99,12 +95,6 @@ public class NavHandleLongPressHandler {
     @Nullable
     @VisibleForTesting
     final Runnable getLongPressRunnable(NavHandle navHandle, int displayId) {
-        if (!isContextualSearchEntrypointEnabled(navHandle)) {
-            Log.i(TAG, "Contextual Search invocation failed: entry point disabled");
-            mVibratorWrapper.cancelVibrate();
-            return null;
-        }
-
         if (!mContextualSearchInvoker.runContextualSearchInvocationChecksAndLogFailures()) {
             Log.i(TAG, "Contextual Search invocation failed: precondition not satisfied");
             mVibratorWrapper.cancelVibrate();
@@ -151,8 +141,7 @@ public class NavHandleLongPressHandler {
     @VisibleForTesting
     final void onTouchStarted(NavHandle navHandle) {
         mPendingInvocation = false;
-        if (isContextualSearchEntrypointEnabled(navHandle)
-                && mContextualSearchInvoker.runContextualSearchInvocationChecksAndLogFailures()) {
+        if (mContextualSearchInvoker.runContextualSearchInvocationChecksAndLogFailures()) {
             Log.i(TAG, "Contextual Search invocation: touch started");
             startNavBarAnimation(navHandle);
         }

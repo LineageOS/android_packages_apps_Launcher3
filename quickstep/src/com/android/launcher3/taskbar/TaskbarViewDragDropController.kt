@@ -29,6 +29,7 @@ import com.android.launcher3.R
 import com.android.launcher3.dragndrop.DragController
 import com.android.launcher3.dragndrop.DragOptions
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.model.data.ItemInfo.NO_ID
 import com.android.launcher3.model.data.TaskItemInfo.Companion.isSameItem
 import com.android.launcher3.model.data.WorkspaceItemFactory
 import com.android.launcher3.model.data.WorkspaceItemInfo
@@ -140,6 +141,12 @@ class TaskbarViewDragDropController(
         overflowAlarmState = AlarmState.IDLE
     }
 
+    private fun endDrag(delegate: PinnedAppsContainerDelegate) {
+        startCloseOverflowAlarm()
+        delegate.releaseDropSlot()
+        targetPinIndex = -1
+    }
+
     /**
      * Returns [targetScreenId] where the dragObject is dropped at, and [shouldShiftLeft] which is
      * true if the dragged item's space can be made by shifting items before the dropped index to
@@ -231,17 +238,31 @@ class TaskbarViewDragDropController(
         return itemsToShift
     }
 
-    private fun addOrMoveItemInDatabase(
-        hotseatItems: IntSparseArrayMap<ItemInfo>,
-        draggedInfo: ItemInfo,
-        hotseatItemsContainDraggedInfo: Boolean,
-    ) {
-        val (targetScreenId, shouldShiftLeft) = getDropTargetState(hotseatItems, draggedInfo)
-        if (hotseatItemsContainDraggedInfo && draggedInfo.screenId == targetScreenId) return
+    private fun addOrMoveItemInDatabase(draggedItem: ItemInfo) {
+        val hotseatItems = modelCallbacks?.hotseatItems ?: return
+
+        var hotseatItemsContainDraggedInfo = false
+        var itemToUpdate = draggedItem
+        // Check if the dragged item already exists in the model.
+        // If it does, use the one from the Model's instance, to avoid failing the ModelWriter
+        // itemInfo check.
+        if (draggedItem.id != NO_ID && draggedItem.container == CONTAINER_HOTSEAT) {
+            for (i in 0 until hotseatItems.size) {
+                val item = hotseatItems.valueAt(i) ?: continue
+                if (item.id != NO_ID && item.id == draggedItem.id) {
+                    itemToUpdate = item
+                    hotseatItemsContainDraggedInfo = true
+                    break
+                }
+            }
+        }
+
+        val (targetScreenId, shouldShiftLeft) = getDropTargetState(hotseatItems, itemToUpdate)
+        if (hotseatItemsContainDraggedInfo && itemToUpdate.screenId == targetScreenId) return
 
         val itemsToShift =
-            if (shouldShiftLeft) getItemsToShiftLeft(hotseatItems, draggedInfo, targetScreenId)
-            else getItemsToShiftRight(hotseatItems, draggedInfo, targetScreenId)
+            if (shouldShiftLeft) getItemsToShiftLeft(hotseatItems, itemToUpdate, targetScreenId)
+            else getItemsToShiftRight(hotseatItems, itemToUpdate, targetScreenId)
 
         val writer = activityContext.modelWriter
         for (item in itemsToShift) {
@@ -251,13 +272,13 @@ class TaskbarViewDragDropController(
         modelCallbacks?.bindItemsUpdated(itemsToShift.toSet())
 
         writer.addOrMoveItemInDatabase(
-            draggedInfo,
+            itemToUpdate,
             CONTAINER_HOTSEAT,
             targetScreenId,
             targetScreenId,
             0,
         )
-        modelCallbacks?.bindItemsUpdated(hashSetOf(draggedInfo))
+        modelCallbacks?.bindItemsUpdated(hashSetOf(itemToUpdate))
     }
 
     /** Returns the [ItemInfo] from the dragged object. */
@@ -372,25 +393,10 @@ class TaskbarViewDragDropController(
         }
 
         override fun onDrop(dragObject: DropTarget.DragObject?, options: DragOptions?) {
-            var newInfo = extractItemInfoFromDragObject(dragObject) ?: return
-            val hotseatItems = modelCallbacks?.hotseatItems ?: return
+            val newInfo = extractItemInfoFromDragObject(dragObject) ?: return
 
-            var hotseatItemsContainDraggedInfo = false
-            // Check if the dragged item already exists in the model.
-            // If it does, use the one from the Model's instance, to avoid failing the ModelWriter
-            // itemInfo check.
-            if (newInfo.id != ItemInfo.NO_ID && newInfo.container == CONTAINER_HOTSEAT) {
-                for (i in 0 until hotseatItems.size) {
-                    val item = hotseatItems.valueAt(i) ?: continue
-                    if (item.id != ItemInfo.NO_ID && item.id == newInfo.id) {
-                        newInfo = item
-                        hotseatItemsContainDraggedInfo = true
-                        break
-                    }
-                }
-            }
-
-            addOrMoveItemInDatabase(hotseatItems, newInfo, hotseatItemsContainDraggedInfo)
+            addOrMoveItemInDatabase(newInfo)
+            endDrag(delegate)
         }
 
         override fun onDragEnter(dragObject: DropTarget.DragObject?) {
@@ -411,20 +417,20 @@ class TaskbarViewDragDropController(
 
             if (isOverflowDropTarget) {
                 delegate.reserveDropSlotForDragLocation(dragObjectVisualCenter[0].toInt())
+                targetPinIndex = delegate.getPinIndex()
             } else if (delegate.isPointOnOverflowIcon(dragObjectVisualCenter)) {
                 startOpenOverflowAlarm()
-                delegate.releaseDropSlot()
             } else {
                 startCloseOverflowAlarm()
                 delegate.reserveDropSlotForDragLocation(dragObjectVisualCenter[0].toInt())
+                targetPinIndex = delegate.getPinIndex()
             }
         }
 
         override fun onDragExit(dragObject: DropTarget.DragObject?) {
-            startCloseOverflowAlarm()
-
-            targetPinIndex = taskbarPinDelegate.getPinIndex()
-            delegate.releaseDropSlot()
+            if (dragObject?.dragComplete != true || dragObject.cancelled) {
+                endDrag(delegate)
+            }
         }
 
         override fun acceptDrop(dragObject: DropTarget.DragObject?): Boolean {

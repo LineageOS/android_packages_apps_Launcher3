@@ -89,6 +89,12 @@ class ShortcutsChangedTaskTest {
     @Before
     fun setup() {
         launcherApps = context.spyService(LauncherApps::class.java)
+        whenever(mockShortcut.id).thenReturn(SHORTCUT_ID)
+        whenever(mockShortcut.`package`).thenReturn(TEST_PACKAGE)
+        whenever(mockShortcut.userHandle).thenReturn(user)
+        whenever(mockShortcut.activity).thenReturn(ComponentName(TEST_PACKAGE, TEST_ACTIVITY))
+        doReturn(listOf(mockShortcut)).whenever(launcherApps).getShortcuts(any(), eq(user))
+
         layout
             .withCallbacks(mockCallbacks)
             .set(
@@ -102,21 +108,13 @@ class ShortcutsChangedTaskTest {
         assertEquals(2, modelState.dataModel.itemsIdMap.countPersistedModelItems())
     }
 
-    private fun setupMockLauncherApps(callback: (ApplicationInfo, ShortcutInfo) -> Unit) {
+    private fun setupMockLauncherApps(callback: (ApplicationInfo) -> Unit) {
         val appInfo = ApplicationInfo(getInstrumentation().context.applicationInfo)
-
-        whenever(mockShortcut.id).thenReturn(SHORTCUT_ID)
-        whenever(mockShortcut.`package`).thenReturn(TEST_PACKAGE)
-        whenever(mockShortcut.userHandle).thenReturn(user)
-        whenever(mockShortcut.activity).thenReturn(ComponentName(TEST_PACKAGE, TEST_ACTIVITY))
-
-        callback.invoke(appInfo, mockShortcut)
+        callback.invoke(appInfo)
 
         doReturn(appInfo)
             .whenever(launcherApps)
             .getApplicationInfo(eq(TEST_PACKAGE), any(), eq(user))
-
-        doReturn(listOf(mockShortcut)).whenever(launcherApps).getShortcuts(any(), eq(user))
 
         // Clear any previous callback updates
         TestUtil.runOnExecutorSync(MAIN_EXECUTOR) {}
@@ -178,11 +176,11 @@ class ShortcutsChangedTaskTest {
     @EnableFlags(Flags.FLAG_MODEL_REPOSITORY)
     fun `When installed pinned shortcut is found then keep in workspace`() {
         TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {
-            setupMockLauncherApps { ai, si ->
+            whenever(mockShortcut.isPinned).thenReturn(true)
+            setupMockLauncherApps { ai ->
                 ai.enabled = true
                 ai.flags = ai.flags or FLAG_INSTALLED
                 ai.isArchived = false
-                whenever(si.isPinned).thenReturn(true)
             }
             executeTask()
             verifyCallbacks(itemUpdated = true, itemRemoved = false)
@@ -194,11 +192,11 @@ class ShortcutsChangedTaskTest {
     @EnableFlags(Flags.FLAG_MODEL_REPOSITORY)
     fun `When installed unpinned shortcut is found with Flag off then remove from workspace`() {
         TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {
-            setupMockLauncherApps { ai, si ->
+            whenever(mockShortcut.isPinned).thenReturn(false)
+            setupMockLauncherApps { ai ->
                 ai.enabled = true
                 ai.flags = ai.flags or FLAG_INSTALLED
                 ai.isArchived = false
-                whenever(si.isPinned).thenReturn(false)
             }
             executeTask()
             verifyCallbacks(itemUpdated = false, itemRemoved = true)
@@ -210,11 +208,11 @@ class ShortcutsChangedTaskTest {
     fun `When installed unpinned shortcut is found with Flag on then keep in workspace`() {
         TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {
             // Given
-            setupMockLauncherApps { ai, si ->
+            whenever(mockShortcut.isPinned).thenReturn(false)
+            setupMockLauncherApps { ai ->
                 ai.enabled = true
                 ai.flags = ai.flags or FLAG_INSTALLED
                 ai.isArchived = false
-                whenever(si.isPinned).thenReturn(false)
             }
             executeTask()
             verifyCallbacks(itemUpdated = true, itemRemoved = false)
@@ -225,11 +223,11 @@ class ShortcutsChangedTaskTest {
     @EnableFlags(Flags.FLAG_MODEL_REPOSITORY)
     fun `When shortcut app is uninstalled then skip handling`() {
         TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {
-            setupMockLauncherApps { ai, si ->
+            whenever(mockShortcut.isPinned).thenReturn(true)
+            setupMockLauncherApps { ai ->
                 ai.enabled = true
                 ai.flags = ai.flags and FLAG_INSTALLED.inv()
                 ai.isArchived = false
-                whenever(si.isPinned).thenReturn(true)
             }
             executeTask()
             verifyCallbacks(itemUpdated = false, itemRemoved = false)
@@ -241,11 +239,11 @@ class ShortcutsChangedTaskTest {
     @EnableFlags(Flags.FLAG_MODEL_REPOSITORY)
     fun `When archived pinned shortcut is found with flag off then keep in workspace`() {
         TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {
-            setupMockLauncherApps { ai, si ->
+            whenever(mockShortcut.isPinned).thenReturn(true)
+            setupMockLauncherApps { ai ->
                 ai.enabled = true
                 ai.flags = ai.flags or FLAG_INSTALLED
                 ai.isArchived = true
-                whenever(si.isPinned).thenReturn(true)
             }
             executeTask()
             verifyCallbacks(itemUpdated = true, itemRemoved = false)
@@ -257,12 +255,11 @@ class ShortcutsChangedTaskTest {
     @EnableFlags(Flags.FLAG_MODEL_REPOSITORY)
     fun `When archived unpinned shortcut is found with flag off then keep in workspace`() {
         TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {
-            setupMockLauncherApps { ai, si ->
+            whenever(mockShortcut.isPinned).thenReturn(true)
+            setupMockLauncherApps { ai ->
                 ai.enabled = true
                 ai.flags = ai.flags or FLAG_INSTALLED
                 ai.isArchived = true
-                whenever(si.isPinned).thenReturn(true)
-                whenever(si.id).thenReturn(SHORTCUT_ID)
             }
             executeTask()
             verifyCallbacks(itemUpdated = true, itemRemoved = false)
@@ -274,12 +271,11 @@ class ShortcutsChangedTaskTest {
     fun `When updateIdMap true then trigger deep shortcut binding`() {
         TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {
             val expectedKey = ComponentKey(ComponentName(TEST_PACKAGE, "expectedClass"), user)
+            whenever(mockShortcut.isEnabled).thenReturn(true)
+            whenever(mockShortcut.isDeclaredInManifest).thenReturn(true)
+            whenever(mockShortcut.activity).thenReturn(expectedKey.componentName)
 
-            setupMockLauncherApps { _, si ->
-                whenever(si.isEnabled).thenReturn(true)
-                whenever(si.isDeclaredInManifest).thenReturn(true)
-                whenever(si.activity).thenReturn(expectedKey.componentName)
-            }
+            setupMockLauncherApps {}
 
             executeTask(listOf(mockShortcut), true)
 
@@ -294,12 +290,11 @@ class ShortcutsChangedTaskTest {
         TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {
             val expectedKey = ComponentKey(ComponentName(TEST_PACKAGE, "expectedClass"), user)
 
-            setupMockLauncherApps { _, si ->
-                whenever(si.isEnabled).thenReturn(true)
-                whenever(si.isDeclaredInManifest).thenReturn(true)
-                whenever(si.activity).thenReturn(expectedKey.componentName)
-                whenever(si.userHandle).thenReturn(user)
-            }
+            whenever(mockShortcut.isEnabled).thenReturn(true)
+            whenever(mockShortcut.isDeclaredInManifest).thenReturn(true)
+            whenever(mockShortcut.activity).thenReturn(expectedKey.componentName)
+
+            setupMockLauncherApps {}
             executeTask(listOf(mockShortcut), false)
 
             // Verify that repository was not updated
@@ -311,11 +306,11 @@ class ShortcutsChangedTaskTest {
     @EnableFlags(Flags.FLAG_RESTORE_ARCHIVED_SHORTCUTS, Flags.FLAG_MODEL_REPOSITORY)
     fun `When restoring archived shortcut with flag on then skip handling`() {
         TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {
-            setupMockLauncherApps { ai, si ->
+            whenever(mockShortcut.isPinned).thenReturn(true)
+            setupMockLauncherApps { ai ->
                 ai.enabled = true
                 ai.flags = ai.flags or FLAG_INSTALLED
                 ai.isArchived = true
-                whenever(si.isPinned).thenReturn(true)
             }
             executeTask()
             verifyCallbacks(itemUpdated = false, itemRemoved = false)

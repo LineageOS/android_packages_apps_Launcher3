@@ -1131,8 +1131,11 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
         val callbacks =
             spy(
                 getOnTaskbarUiThread {
-                    TaskbarViewCallbacksFactory.newInstance(activityContext)
-                        .create(activityContext, activityContext.controllers, taskbarView)
+                    TaskbarViewCallbacks(
+                        activityContext,
+                        activityContext.controllers,
+                        taskbarView,
+                    )
                 }
             )
         taskbarView.init(callbacks)

@@ -92,6 +92,7 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
             itemInfo?.let { dragInfo ->
                 SystemDragParams(
                     clipData = mock(),
+                    extraDragFlags = 0,
                     closeAllOpenViews = closeAllOpenViews,
                     dragImage = mock(),
                     draggableView = mock(),

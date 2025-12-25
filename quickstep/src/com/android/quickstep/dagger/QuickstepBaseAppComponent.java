@@ -28,7 +28,6 @@ import com.android.launcher3.model.WellbeingModel;
 import com.android.launcher3.statehandlers.DesktopVisibilityController;
 import com.android.launcher3.taskbar.TaskbarModelCallbacksFactory;
 import com.android.launcher3.taskbar.TaskbarUiStateMonitor;
-import com.android.launcher3.taskbar.TaskbarViewCallbacksFactory;
 import com.android.launcher3.taskbar.bubbles.BubbleActivityStarter;
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator;
 import com.android.launcher3.taskbar.handoff.HandoffSuggestionRepository;
@@ -110,8 +109,6 @@ public interface QuickstepBaseAppComponent extends LauncherBaseAppComponent {
     DisplaysWithDecorationsRepositoryCompat getDisplaysWithDecorationsRepositoryCompat();
 
     TaskbarModelCallbacksFactory getTaskbarModelCallbacksFactory();
-
-    TaskbarViewCallbacksFactory getTaskbarViewCallbacksFactory();
 
     TaskOverlayFactory getTaskOverlayFactory();
 
