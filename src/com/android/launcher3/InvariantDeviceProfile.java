@@ -27,12 +27,10 @@ import static com.android.launcher3.LauncherPrefs.GRID_NAME;
 import static com.android.launcher3.LauncherPrefs.NON_FIXED_LANDSCAPE_GRID_NAME;
 import static com.android.launcher3.LauncherPrefs.WORKSPACE_ITEMS_LABEL_HIDDEN;
 import static com.android.launcher3.Utilities.dpiFromPx;
+import static com.android.launcher3.display.LauncherDisplayInfo.CHANGE_DENSITY;
+import static com.android.launcher3.display.LauncherDisplayInfo.CHANGE_NAVIGATION_MODE;
+import static com.android.launcher3.display.LauncherDisplayInfo.CHANGE_SUPPORTED_BOUNDS;
 import static com.android.launcher3.testing.shared.ResourceUtils.INVALID_RESOURCE_HANDLE;
-import static com.android.launcher3.util.DisplayController.CHANGE_DENSITY;
-import static com.android.launcher3.util.DisplayController.CHANGE_DESKTOP_MODE;
-import static com.android.launcher3.util.DisplayController.CHANGE_NAVIGATION_MODE;
-import static com.android.launcher3.util.DisplayController.CHANGE_SUPPORTED_BOUNDS;
-import static com.android.launcher3.util.DisplayController.CHANGE_TASKBAR_PINNING;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.SimpleBroadcastReceiver.actionsFilter;
 import static com.android.launcher3.util.XmlElement.getRootElement;
@@ -64,6 +62,7 @@ import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.dagger.LauncherAppComponent;
 import com.android.launcher3.dagger.LauncherAppSingleton;
+import com.android.launcher3.display.LauncherDisplayInfo;
 import com.android.launcher3.graphics.ThemeManager;
 import com.android.launcher3.icons.DotRenderer;
 import com.android.launcher3.logging.FileLog;
@@ -72,7 +71,6 @@ import com.android.launcher3.testing.shared.ResourceUtils;
 import com.android.launcher3.util.DaggerSingletonObject;
 import com.android.launcher3.util.DaggerSingletonTracker;
 import com.android.launcher3.util.DisplayController;
-import com.android.launcher3.util.DisplayController.Info;
 import com.android.launcher3.util.ListenableDiffAwareRef;
 import com.android.launcher3.util.LooperExecutor;
 import com.android.launcher3.util.Partner;
@@ -166,7 +164,7 @@ public class InvariantDeviceProfile {
     public int iconBitmapSize;
     public int fillResIconDpi;
     public @DeviceType int deviceType;
-    public Info displayInfo;
+    public LauncherDisplayInfo displayInfo;
 
     public PointF[] minCellSize;
 
@@ -295,12 +293,11 @@ public class InvariantDeviceProfile {
         initGrid(gridName);
         mThemeManager.generateIconShape(iconBitmapSize);
 
-        ListenableDiffAwareRef<Info, Integer> listenable = dc.getListenable();
+        ListenableDiffAwareRef<LauncherDisplayInfo, Integer> listenable = dc.getListenable();
         if (listenable != null) {
             lifeCycle.addCloseable(listenable.getChanges().forEach(MAIN_EXECUTOR, (flags) -> {
                 if ((flags & (CHANGE_DENSITY | CHANGE_SUPPORTED_BOUNDS
-                        | CHANGE_NAVIGATION_MODE | CHANGE_TASKBAR_PINNING
-                        | CHANGE_DESKTOP_MODE)) != 0) {
+                        | CHANGE_NAVIGATION_MODE)) != 0) {
                     onConfigChanged();
                 }
                 return null;
@@ -337,7 +334,7 @@ public class InvariantDeviceProfile {
     }
 
     private void initGrid(String gridName) {
-        Info displayInfo = mDisplayController.getInfo();
+        LauncherDisplayInfo displayInfo = mDisplayController.getInfo();
         List<DisplayOption> allOptions = getPredefinedDeviceProfiles(
                 displayInfo,
                 gridName,
@@ -384,7 +381,8 @@ public class InvariantDeviceProfile {
         initGrid(mPrefs.get(GRID_NAME));
     }
 
-    private void initGridForDisplayOption(Info displayInfo, DisplayOption displayOption) {
+    private void initGridForDisplayOption(
+            LauncherDisplayInfo displayInfo, DisplayOption displayOption) {
         Context context = displayInfo.context;
         enableTwoLinesInAllApps = Flags.enableTwolineToggle()
                 && Utilities.isEnglishLanguage(context)
@@ -526,7 +524,7 @@ public class InvariantDeviceProfile {
                 );
     }
 
-    DeviceProfile.Builder newDPBuilder(Info info) {
+    DeviceProfile.Builder newDPBuilder(LauncherDisplayInfo info) {
         return new DeviceProfile.Builder(this, info, mWMProxy);
     }
 
@@ -581,7 +579,7 @@ public class InvariantDeviceProfile {
     }
 
     private static List<DisplayOption> getPredefinedDeviceProfiles(
-            @NonNull Info displayInfo,
+            @NonNull LauncherDisplayInfo displayInfo,
             @Nullable String gridName,
             boolean allowDisabledGrid,
             boolean isFixedLandscapeMode
@@ -639,7 +637,7 @@ public class InvariantDeviceProfile {
      * @return the result of {@link #findBestGridSize(List, int, int)}.
      */
     private static GridSize getGridSize(ResourceHelper resourceHelper, Context context,
-            Info displayInfo) {
+            LauncherDisplayInfo displayInfo) {
         ArrayList<GridSize> gridSizes = new ArrayList<>();
 
         // Difference between grid sizes available for different display size breakpoints is more
@@ -670,7 +668,7 @@ public class InvariantDeviceProfile {
     }
 
     private static AllAppsSize getAllAppsSize(ResourceHelper resourceHelper, Context context,
-            Info displayInfo) {
+            LauncherDisplayInfo displayInfo) {
         ArrayList<AllAppsSize> allAppsSizes = new ArrayList<>();
 
         boolean matchAgainstDefaultDpSize = displayInfo.getDeviceType() == TYPE_DESKTOP
@@ -729,7 +727,7 @@ public class InvariantDeviceProfile {
         return selectedGridSize;
     }
 
-    private static int[] findMinWidthAndHeightPxForDevice(Info displayInfo) {
+    private static int[] findMinWidthAndHeightPxForDevice(LauncherDisplayInfo displayInfo) {
         int minDisplayWidthPx = Integer.MAX_VALUE;
         int minDisplayHeightPx = Integer.MAX_VALUE;
         for (CachedDisplayInfo display: displayInfo.getAllDisplays()) {
@@ -791,7 +789,8 @@ public class InvariantDeviceProfile {
     /**
      * @return all the grid options that can be shown on the device
      */
-    public static List<GridOption> parseAllDefinedGridOptions(Context context, Info displayInfo) {
+    public static List<GridOption> parseAllDefinedGridOptions(
+            Context context, LauncherDisplayInfo displayInfo) {
         List<GridOption> result = new ArrayList<>();
         try (XmlResourceParser parser = context.getResources().getXml(R.xml.device_profiles)) {
             for (XmlElement gridOptionEl :
@@ -862,7 +861,8 @@ public class InvariantDeviceProfile {
     }
 
     private static DisplayOption invDistWeightedInterpolate(
-            Info displayInfo, List<DisplayOption> points, @DeviceType int deviceType) {
+            LauncherDisplayInfo displayInfo, List<DisplayOption> points,
+            @DeviceType int deviceType) {
         int minWidthPx = Integer.MAX_VALUE;
         int minHeightPx = Integer.MAX_VALUE;
         for (WindowBounds bounds : displayInfo.supportedBounds) {
@@ -918,7 +918,7 @@ public class InvariantDeviceProfile {
 
     public DeviceProfile createDeviceProfileForSecondaryDisplay(Context displayContext) {
         // Disable transpose layout and use external display so that the icons are scaled properly
-        return newDPBuilder(new Info(displayContext, mWMProxy))
+        return newDPBuilder(new LauncherDisplayInfo(displayContext, mWMProxy))
                 .setIsMultiDisplay(false)
                 .setExternalDisplay(true)
                 .setWindowBounds(mWMProxy.getRealBounds(
@@ -1001,7 +1001,8 @@ public class InvariantDeviceProfile {
     }
 
     /** Returns {@link DisplayOptionSpec} for the provided displayInfo. */
-    static DisplayOptionSpec createDisplayOptionSpec(Info displayInfo, boolean isLandscape) {
+    static DisplayOptionSpec createDisplayOptionSpec(
+            LauncherDisplayInfo displayInfo, boolean isLandscape) {
         // Get predefined profiles for provided displayInfo without using any main device's pref.
         List<DisplayOption> allOptions = getPredefinedDeviceProfiles(displayInfo,
                 /* gridName= */ null,
@@ -1136,7 +1137,7 @@ public class InvariantDeviceProfile {
         // should be aligned with.
         private final int mAllAppsAlignedWithWorkspaceRow;
 
-        public GridOption(Context context, XmlElement el, Info displayInfo) {
+        public GridOption(Context context, XmlElement el, LauncherDisplayInfo displayInfo) {
             TypedArray a = el.obtainAttrs(context, R.styleable.GridDisplayOption);
             name = a.getString(R.styleable.GridDisplayOption_name);
             gridTitle = a.getString(R.styleable.GridDisplayOption_gridTitle);

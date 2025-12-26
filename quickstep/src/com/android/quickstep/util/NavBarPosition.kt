@@ -16,7 +16,7 @@
 package com.android.quickstep.util
 
 import android.view.Surface
-import com.android.launcher3.util.DisplayController.Info
+import com.android.launcher3.display.LauncherDisplayInfo
 import com.android.launcher3.util.NavigationMode
 import com.android.launcher3.util.NavigationMode.NO_BUTTON
 
@@ -28,7 +28,7 @@ data class NavBarPosition(
 ) {
     constructor(
         mode: NavigationMode,
-        info: Info,
+        info: LauncherDisplayInfo,
     ) : this(info.isLargeScreen(info.realBounds), info.rotation, mode)
 
     val isRightEdge: Boolean

@@ -31,9 +31,10 @@ import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.TASKBAR_PINNING
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
+import com.android.launcher3.display.LauncherDisplayInfo
+import com.android.launcher3.display.LauncherDisplayInfo.Companion.CHANGE_DENSITY
+import com.android.launcher3.display.LauncherDisplayInfo.Companion.CHANGE_ROTATION
 import com.android.launcher3.testutil.rule.LazyInitRule.Companion.lazyRule
-import com.android.launcher3.util.DisplayController.CHANGE_DENSITY
-import com.android.launcher3.util.DisplayController.CHANGE_ROTATION
 import com.android.launcher3.util.Executors.IMMEDIATE_EXECUTOR
 import com.android.launcher3.util.window.CachedDisplayInfo
 import com.android.launcher3.util.window.WindowManagerProxy
@@ -259,7 +260,7 @@ class DisplayControllerTest {
         displayId: Int,
         densityDpi: Int,
         isDesktopFormFactor: Boolean,
-    ): DisplayController.Info {
+    ): LauncherDisplayInfo {
         val width = bounds.bounds.width()
         val height = bounds.bounds.height()
 
@@ -286,10 +287,10 @@ class DisplayControllerTest {
         whenever(windowManagerProxy.getRealBounds(any(), any())).thenReturn(bounds)
 
         // Create a new Info object with the mocked dependencies
-        return DisplayController.Info(
+        return LauncherDisplayInfo(
             context,
-            isDesktopFormFactor,
             windowManagerProxy,
+            isDesktopFormFactor,
             windowManagerProxy.estimateInternalDisplayBounds(context),
             DisplayMetrics.DENSITY_DEVICE_STABLE,
         )

@@ -118,6 +118,7 @@ import com.android.launcher3.desktop.DesktopAppLaunchTransition;
 import com.android.launcher3.desktop.DesktopAppLaunchTransition.AppLaunchType;
 import com.android.launcher3.deviceprofile.TaskbarDeviceProfileFactory;
 import com.android.launcher3.deviceprofile.TaskbarProfile;
+import com.android.launcher3.display.LauncherDisplayInfo;
 import com.android.launcher3.folder.Folder;
 import com.android.launcher3.folder.FolderIcon;
 import com.android.launcher3.graphics.ThemeManager;
@@ -2108,9 +2109,9 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                 // Keep the fullscreen mode in desktop-first mode.
                 return false;
             }
-            final DisplayController.Info currentDisplayInfo = DisplayController.INSTANCE.get(this)
+            final LauncherDisplayInfo currentDisplayInfo = DisplayController.INSTANCE.get(this)
                     .getInfoForDisplay(nonDesktopTask.getKey().displayId);
-            if (currentDisplayInfo != null && currentDisplayInfo.isInDesktopFirstMode()) {
+            if (currentDisplayInfo != null && currentDisplayInfo.isInDesktopFirstMode) {
                 // Keep the fullscreen mode if both current and target displays are in desktop-first
                 // mode.
                 return false;

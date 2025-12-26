@@ -74,6 +74,7 @@ import com.android.launcher3.anim.AnimatedFloat;
 import com.android.launcher3.anim.AnimationSuccessListener;
 import com.android.launcher3.anim.AnimatorPlaybackController;
 import com.android.launcher3.anim.PendingAnimation;
+import com.android.launcher3.display.LauncherDisplayInfo;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.statehandlers.DepthController;
 import com.android.launcher3.statemanager.StateManager;
@@ -835,7 +836,7 @@ public final class TaskViewUtils {
         // RecentsView never updates the display rotation until swipe-up so the value may
         // be stale. Use the display value instead.
         int displayId = taskView.getDisplayId();
-        DisplayController.Info infoForDisplay =
+        LauncherDisplayInfo infoForDisplay =
                 DisplayController.INSTANCE.get(taskView.getContext()).getInfoForDisplay(displayId);
         final int displayRotation;
         if (infoForDisplay != null) {

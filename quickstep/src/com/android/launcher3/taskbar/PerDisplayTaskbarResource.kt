@@ -30,7 +30,7 @@ import android.view.WindowManager
 import android.widget.FrameLayout
 import com.android.app.tracing.TraceUtils
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
-import com.android.launcher3.util.DisplayController
+import com.android.launcher3.display.LauncherDisplayInfo
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
 import com.android.launcher3.util.Executors.getTaskbarUiThread
 import com.android.launcher3.util.Preconditions
@@ -161,24 +161,18 @@ class PerDisplayTaskbarResource(
             windowContext.appComponent.displayController.getListenable(displayId)?.forEachChange(
                 getTaskbarUiThread()
             ) { _, flags ->
-                if ((flags and DisplayController.CHANGE_DENSITY) != 0) {
+                if ((flags and LauncherDisplayInfo.CHANGE_DENSITY) != 0) {
                     debugMsg("onDisplayInfoChanged: Display density changed")
                 }
-                if ((flags and DisplayController.CHANGE_NAVIGATION_MODE) != 0) {
+                if ((flags and LauncherDisplayInfo.CHANGE_NAVIGATION_MODE) != 0) {
                     debugMsg("onDisplayInfoChanged: Navigation mode changed")
                 }
-                if ((flags and DisplayController.CHANGE_DESKTOP_MODE) != 0) {
-                    debugMsg("onDisplayInfoChanged: Desktop mode changed")
-                }
-                if ((flags and DisplayController.CHANGE_TASKBAR_PINNING) != 0) {
-                    debugMsg("onDisplayInfoChanged: Taskbar pinning changed")
-                }
-                if ((flags and DisplayController.CHANGE_ROTATION) != 0) {
+                if ((flags and LauncherDisplayInfo.CHANGE_ROTATION) != 0) {
                     debugMsg("onDisplayInfoChanged: Rotation changed")
                 }
                 val change = flags and RELEVANT_DISPLAY_CHANGES
                 if (change != 0) {
-                    if ((flags and DisplayController.CHANGE_SHOW_LOCKED_TASKBAR) != 0) {
+                    if ((flags and LauncherDisplayInfo.CHANGE_SHOW_LOCKED_TASKBAR) != 0) {
                         debugMsg("onDisplayInfoChanged: show locked taskbar changed!")
                     }
                     callback.accept(change)
@@ -275,9 +269,9 @@ class PerDisplayTaskbarResource(
                 ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE
 
         private const val RELEVANT_DISPLAY_CHANGES =
-            DisplayController.CHANGE_DENSITY or
-                DisplayController.CHANGE_NAVIGATION_MODE or
-                DisplayController.CHANGE_SHOW_LOCKED_TASKBAR or
-                DisplayController.CHANGE_ROTATION
+            LauncherDisplayInfo.CHANGE_DENSITY or
+                LauncherDisplayInfo.CHANGE_NAVIGATION_MODE or
+                LauncherDisplayInfo.CHANGE_SHOW_LOCKED_TASKBAR or
+                LauncherDisplayInfo.CHANGE_ROTATION
     }
 }

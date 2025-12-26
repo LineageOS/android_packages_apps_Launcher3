@@ -45,6 +45,8 @@ import static com.android.launcher3.LauncherState.OVERVIEW_SPLIT_SELECT;
 import static com.android.launcher3.Utilities.isRtl;
 import static com.android.launcher3.anim.AnimatorListeners.forEndCallback;
 import static com.android.launcher3.compat.AccessibilityManagerCompat.sendCustomAccessibilityEvent;
+import static com.android.launcher3.display.LauncherDisplayInfo.CHANGE_ACTIVE_SCREEN;
+import static com.android.launcher3.display.LauncherDisplayInfo.CHANGE_NAVIGATION_MODE;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_APP_LAUNCH_TAP;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_SPLIT_SELECTION_EXIT_HOME;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_SPLIT_SELECTION_EXIT_INTERRUPTED;
@@ -68,8 +70,6 @@ import static com.android.launcher3.testing.shared.TestProtocol.HINT_STATE_ORDIN
 import static com.android.launcher3.testing.shared.TestProtocol.HINT_STATE_TWO_BUTTON_ORDINAL;
 import static com.android.launcher3.testing.shared.TestProtocol.OVERVIEW_STATE_ORDINAL;
 import static com.android.launcher3.testing.shared.TestProtocol.QUICK_SWITCH_STATE_ORDINAL;
-import static com.android.launcher3.util.DisplayController.CHANGE_ACTIVE_SCREEN;
-import static com.android.launcher3.util.DisplayController.CHANGE_NAVIGATION_MODE;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 import static com.android.quickstep.split.SplitAnimationTimings.TABLET_HOME_TO_SPLIT;
 import static com.android.quickstep.util.AnimUtils.completeRunnableListCallback;
@@ -143,6 +143,7 @@ import com.android.launcher3.dagger.LauncherAppComponent;
 import com.android.launcher3.dagger.LauncherComponentProvider;
 import com.android.launcher3.dagger.PerDisplayComponent;
 import com.android.launcher3.desktop.DesktopRecentsTransitionController;
+import com.android.launcher3.display.LauncherDisplayInfo;
 import com.android.launcher3.hybridhotseat.HotseatPredictionController;
 import com.android.launcher3.logging.InstanceId;
 import com.android.launcher3.logging.StatsLogManager;
@@ -1404,7 +1405,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     }
 
     @Override
-    public void onDisplayInfoChanged(DisplayController.Info info, int flags) {
+    public void onDisplayInfoChanged(LauncherDisplayInfo info, int flags) {
         super.onDisplayInfoChanged(info, flags);
         // When changing screens, force moving to rest state similar to StatefulActivity.onStop, as
         // StatefulActivity isn't called consistently.

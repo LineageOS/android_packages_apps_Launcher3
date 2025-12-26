@@ -313,12 +313,13 @@ class HybridHotseatOrganizer(
                 ((view.getTag() as? WorkspaceItemInfo)?.container ==
                     Favorites.CONTAINER_HOTSEAT_PREDICTION)
 
-        private fun getStateString(flags: Int): String {
-            val str = StringJoiner("|")
-            appendFlag(str, flags, FLAG_DRAG_IN_PROGRESS, "FLAG_DRAG_IN_PROGRESS")
-            appendFlag(str, flags, FLAG_FILL_IN_PROGRESS, "FLAG_FILL_IN_PROGRESS")
-            appendFlag(str, flags, FLAG_REMOVING_PREDICTED_ICON, "FLAG_REMOVING_PREDICTED_ICON")
-            return str.toString()
-        }
+        private fun getStateString(flags: Int): String =
+            StringJoiner("|")
+                .apply {
+                    appendFlag(flags, FLAG_DRAG_IN_PROGRESS, "FLAG_DRAG_IN_PROGRESS")
+                    appendFlag(flags, FLAG_FILL_IN_PROGRESS, "FLAG_FILL_IN_PROGRESS")
+                    appendFlag(flags, FLAG_REMOVING_PREDICTED_ICON, "FLAG_REMOVING_PREDICTED_ICON")
+                }
+                .toString()
     }
 }

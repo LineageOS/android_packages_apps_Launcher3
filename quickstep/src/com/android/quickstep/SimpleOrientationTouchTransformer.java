@@ -17,14 +17,15 @@ package com.android.quickstep;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static com.android.launcher3.util.DisplayController.CHANGE_ACTIVE_SCREEN;
-import static com.android.launcher3.util.DisplayController.CHANGE_ALL;
-import static com.android.launcher3.util.DisplayController.CHANGE_ROTATION;
+import static com.android.launcher3.display.LauncherDisplayInfo.CHANGE_ACTIVE_SCREEN;
+import static com.android.launcher3.display.LauncherDisplayInfo.CHANGE_ALL;
+import static com.android.launcher3.display.LauncherDisplayInfo.CHANGE_ROTATION;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 
 import android.view.MotionEvent;
 
 import com.android.launcher3.dagger.LauncherAppSingleton;
+import com.android.launcher3.display.LauncherDisplayInfo;
 import com.android.launcher3.util.DaggerSingletonObject;
 import com.android.launcher3.util.DaggerSingletonTracker;
 import com.android.launcher3.util.DisplayController;
@@ -51,21 +52,21 @@ public class SimpleOrientationTouchTransformer {
         // TODO (b/398195845): make sure non-default displays don't get affected by default display
         // changes.
         mDisplayId = DEFAULT_DISPLAY;
-        ListenableDiffAwareRef<DisplayController.Info, Integer> listenable =
+        ListenableDiffAwareRef<LauncherDisplayInfo, Integer> listenable =
                 displayController.getListenable(mDisplayId);
         if (listenable != null) {
             tracker.addCloseable(listenable.forEachChange(
                     MAIN_EXECUTOR, this::onDisplayInfoChanged));
         }
 
-        DisplayController.Info displayInfo = displayController.getInfoForDisplay(mDisplayId);
+        LauncherDisplayInfo displayInfo = displayController.getInfoForDisplay(mDisplayId);
         if (displayInfo != null) {
             onDisplayInfoChanged(displayInfo, CHANGE_ALL);
         }
     }
 
 
-    private void onDisplayInfoChanged(DisplayController.Info info, int flags) {
+    private void onDisplayInfoChanged(LauncherDisplayInfo info, int flags) {
         if ((flags & (CHANGE_ROTATION | CHANGE_ACTIVE_SCREEN)) == 0) {
             return;
         }

@@ -17,7 +17,7 @@
 package com.android.launcher3.deviceprofile
 
 import android.graphics.Rect
-import com.android.launcher3.util.DisplayController
+import com.android.launcher3.display.LauncherDisplayInfo
 import com.android.launcher3.util.WindowBounds
 import kotlin.math.max
 import kotlin.math.min
@@ -44,7 +44,7 @@ data class DeviceProperties(
     companion object Factory {
         // b/419264328 adding here all the improvements/cleanup for this class
         fun createDeviceProperties(
-            info: DisplayController.Info,
+            info: LauncherDisplayInfo,
             windowBounds: WindowBounds,
             transposeLayoutWithOrientation: Boolean,
             isMultiDisplay: Boolean,

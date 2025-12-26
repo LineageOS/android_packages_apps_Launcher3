@@ -48,6 +48,7 @@ import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.dagger.DisplayId;
 import com.android.launcher3.dagger.PerDisplaySingleton;
+import com.android.launcher3.display.LauncherDisplayInfo;
 import com.android.launcher3.taskbar.TaskbarInteractor;
 import com.android.launcher3.util.DaggerSingletonObject;
 import com.android.launcher3.util.DisplayController;
@@ -371,7 +372,7 @@ public class TaskAnimationManager implements RecentsAnimationCallbacks.RecentsAn
                 RemoteAnimationTarget appearedTaskTarget = appearedTaskTargets[0];
                 BaseContainerInterface containerInterface =
                         mLastGestureState.getContainerInterface();
-                DisplayController.Info displayInfo = mDisplayController.getInfoForDisplay(
+                LauncherDisplayInfo displayInfo = mDisplayController.getInfoForDisplay(
                         mDisplayId);
                 for (RemoteAnimationTarget compat : appearedTaskTargets) {
                     if (compat.windowConfiguration.getActivityType() == ACTIVITY_TYPE_HOME
