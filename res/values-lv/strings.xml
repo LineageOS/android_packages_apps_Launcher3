@@ -116,6 +116,12 @@
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"Atvērt"</string>
     <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"Neatgriezeniski dzēst"</string>
     <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"Pārvietot uz atkritni"</string>
+    <!-- no translation found for home_screen_files_moved_to_trash_message (381256565590274395) -->
+    <skip />
+    <!-- no translation found for home_screen_files_move_to_trash_error_message (3836240816166417826) -->
+    <skip />
+    <!-- no translation found for home_screen_files_restore_from_trash_error_message (994941644161090497) -->
+    <skip />
     <!-- no translation found for actions_popup_menu_button (2442187572711557413) -->
     <skip />
     <!-- no translation found for shortcuts_popup_menu_button (766598805805882499) -->

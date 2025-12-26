@@ -116,12 +116,15 @@
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"उघडा"</string>
     <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"कायमस्‍वरूपी हटवा"</string>
     <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"ट्रॅशमध्ये हलवा"</string>
-    <!-- no translation found for actions_popup_menu_button (2442187572711557413) -->
+    <!-- no translation found for home_screen_files_moved_to_trash_message (381256565590274395) -->
     <skip />
-    <!-- no translation found for shortcuts_popup_menu_button (766598805805882499) -->
+    <!-- no translation found for home_screen_files_move_to_trash_error_message (3836240816166417826) -->
     <skip />
-    <!-- no translation found for loading_shortcut (2638272014233830958) -->
+    <!-- no translation found for home_screen_files_restore_from_trash_error_message (994941644161090497) -->
     <skip />
+    <string name="actions_popup_menu_button" msgid="2442187572711557413">"कृती"</string>
+    <string name="shortcuts_popup_menu_button" msgid="766598805805882499">"शॉर्टकट"</string>
+    <string name="loading_shortcut" msgid="2638272014233830958">"शॉर्टकट लोड करत आहे"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"शॉर्टकट इंस्टॉल करा"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"वापरकर्ता हस्तक्षेपाशिवाय शॉर्टकट जोडण्यास अ‍ॅप ला अनुमती देते."</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"होम सेटिंग्ज आणि शॉर्टकट वाचा"</string>
