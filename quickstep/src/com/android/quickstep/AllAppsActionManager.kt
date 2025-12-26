@@ -17,6 +17,7 @@
 package com.android.quickstep
 
 import android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS
+import android.app.PendingIntent
 import android.app.RemoteAction
 import android.content.Context
 import android.graphics.drawable.Icon
@@ -26,7 +27,7 @@ import android.view.accessibility.AccessibilityManager
 import com.android.launcher3.R
 import com.android.launcher3.concurrent.annotations.LightweightBackground
 import com.android.launcher3.dagger.ApplicationContext
-import com.android.launcher3.taskbar.TaskbarManager
+import com.android.launcher3.taskbar.TaskbarManagerImpl
 import com.android.launcher3.util.SafeCloseable
 import com.android.launcher3.util.SettingsCache
 import com.android.quickstep.dagger.SysUIConnectionSingleton
@@ -52,7 +53,7 @@ constructor(
     @ApplicationContext private val context: Context,
     @LightweightBackground private val bgExecutor: Executor,
     private val quickstepKeyGestureEventsManager: QuickstepKeyGestureEventsManager,
-    private val taskbarManager: Provider<TaskbarManager>,
+    private val allAppsIntentSenderProvider: Provider<TaskbarManagerImpl.AllAppsIntentSender>,
 ) {
 
     private var onSettingsChangeSafeCloseable: SafeCloseable? = null
@@ -123,7 +124,7 @@ constructor(
                 val accessibilityManager =
                     context.getSystemService(AccessibilityManager::class.java) ?: return@execute
                 if (shouldRegisterAction) {
-                    val allAppsPendingIntent = taskbarManager.get().createAllAppsPendingIntent()
+                    val allAppsPendingIntent = PendingIntent(allAppsIntentSenderProvider.get())
                     accessibilityManager.registerSystemAction(
                         RemoteAction(
                             Icon.createWithResource(context, R.drawable.ic_apps),
