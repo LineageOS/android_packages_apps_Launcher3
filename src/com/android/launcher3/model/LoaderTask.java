@@ -153,7 +153,7 @@ public class LoaderTask implements Runnable {
     private final WidgetSizeHandler mWidgetSizeHandler;
 
     private final ModelDelegate mModelDelegate;
-    private boolean mIsRestoreFromBackup;
+    private final boolean mIsRestoreFromBackup;
 
     @NonNull
     private final BaseLauncherBinder mLauncherBinder;
@@ -242,6 +242,7 @@ public class LoaderTask implements Runnable {
         mPrefs = prefs;
         mAutomationRepo = automationRepo;
 
+        mIsRestoreFromBackup = mPrefs.get(IS_FIRST_LOAD_AFTER_RESTORE);
         // NOTE: Wait for the provider to become ready before querying for file system items.
         mHomeScreenFilesQueryResult =
                 homeScreenFilesProvider.onReady()
@@ -415,7 +416,6 @@ public class LoaderTask implements Runnable {
         TraceHelper.INSTANCE.beginSection(TAG);
         MODEL_EXECUTOR.elevatePriority(CALLER_LOADER_TASK);
         LoaderMemoryLogger memoryLogger = new LoaderMemoryLogger();
-        mIsRestoreFromBackup = mPrefs.get(IS_FIRST_LOAD_AFTER_RESTORE);
         LauncherRestoreEventLogger restoreEventLogger = null;
         if (enableLauncherBrMetricsFixed()) {
             restoreEventLogger = mRestoreEventLoggerProvider.get();
@@ -426,7 +426,6 @@ public class LoaderTask implements Runnable {
             transaction.commit();
             memoryLogger.clearLogs();
             if (mIsRestoreFromBackup) {
-                mIsRestoreFromBackup = false;
                 mPrefs.putSync(IS_FIRST_LOAD_AFTER_RESTORE.to(false));
                 if (restoreEventLogger != null) {
                     restoreEventLogger.reportLauncherRestoreResults();
