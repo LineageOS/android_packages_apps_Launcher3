@@ -41,7 +41,6 @@ import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatWorkspaceI
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createRecents
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createTestWorkspaceItem
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
-import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.util.TestUtil.getOnTaskbarUiThread
 import com.android.quickstep.util.GroupTask
@@ -62,9 +61,9 @@ class TaskbarPopupControllerTest {
 
     @get:Rule(order = 1) val context = TaskbarWindowSandboxContext.create()
 
-    @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
+    @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    @InjectController lateinit var popupController: TaskbarPopupController
+    val popupController by taskbarUnitTestRule.delegate { it.taskbarPopupController }
 
     private val taskbarContext: TaskbarActivityContext
         get() = taskbarUnitTestRule.activityContext

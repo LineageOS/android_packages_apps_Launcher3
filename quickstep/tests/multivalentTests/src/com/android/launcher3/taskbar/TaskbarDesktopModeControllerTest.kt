@@ -29,10 +29,10 @@ import org.junit.runner.RunWith
 class TaskbarDesktopModeControllerTest {
 
     @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()
-    @get:Rule(order = 1) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
+    @get:Rule(order = 1) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    @TaskbarUnitTestRule.InjectController
-    lateinit var taskbarDesktopModeController: TaskbarDesktopModeController
+    val taskbarDesktopModeController by
+        taskbarUnitTestRule.delegate { it.taskbarDesktopModeController }
 
     @Test
     fun whenTaskbarRequiresCornerRoundness_shouldReturnDefaultCornerRoundness() {

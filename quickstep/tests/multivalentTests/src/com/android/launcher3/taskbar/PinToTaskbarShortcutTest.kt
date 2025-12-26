@@ -56,7 +56,7 @@ class PinToTaskbarShortcutTest {
 
     @get:Rule(order = 1) val context = TaskbarWindowSandboxContext.create()
 
-    @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
+    @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
     private val taskbarActivityContext: TaskbarActivityContext
         get() = taskbarUnitTestRule.activityContext

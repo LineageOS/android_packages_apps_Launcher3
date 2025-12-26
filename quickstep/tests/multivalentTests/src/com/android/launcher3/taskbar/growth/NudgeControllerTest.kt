@@ -25,7 +25,6 @@ import com.android.launcher3.taskbar.rules.TaskbarModeRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.TRANSIENT
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
-import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
@@ -41,9 +40,9 @@ class NudgeControllerTest {
 
     @get:Rule(order = 1) val taskbarModeRule = TaskbarModeRule(context)
 
-    @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
+    @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    @InjectController lateinit var nudgeController: NudgeController
+    val nudgeController by taskbarUnitTestRule.delegate { it.nudgeController }
 
     private val taskbarContext: TaskbarActivityContext
         get() = taskbarUnitTestRule.activityContext

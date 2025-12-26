@@ -23,17 +23,14 @@ import com.android.launcher3.appprediction.AppsDividerView.DividerType
 import com.android.launcher3.appprediction.PredictionRowView
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.asProperty
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
-import com.android.launcher3.taskbar.TaskbarStashController
 import com.android.launcher3.taskbar.TaskbarStashController.FLAG_STASHED_IN_APP_AUTO
 import com.android.launcher3.taskbar.TaskbarUiState
 import com.android.launcher3.taskbar.allapps.TaskbarAllAppsControllerTest.Companion.TEST_PREDICTED_APPS
-import com.android.launcher3.taskbar.overlay.TaskbarOverlayController
 import com.android.launcher3.taskbar.rules.TaskbarModeRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.PINNED
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.TRANSIENT
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
-import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.util.OnboardingPrefs.ALL_APPS_VISITED_COUNT
 import com.android.launcher3.util.TestUtil.getOnTaskbarUiThread
@@ -49,10 +46,10 @@ class TaskbarAllAppsViewControllerTest {
 
     @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()
     @get:Rule(order = 1) val taskbarModeRule = TaskbarModeRule(context)
-    @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
+    @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    @InjectController lateinit var overlayController: TaskbarOverlayController
-    @InjectController lateinit var stashController: TaskbarStashController
+    val overlayController by taskbarUnitTestRule.delegate { it.taskbarOverlayController }
+    val stashController by taskbarUnitTestRule.delegate { it.taskbarStashController }
 
     private var allAppsVisitedCount by ALL_APPS_VISITED_COUNT.prefItem.asProperty(context)
     lateinit private var searchSessionController: TaskbarSearchSessionController
@@ -110,16 +107,13 @@ class TaskbarAllAppsViewControllerTest {
         val viewController = createViewController()
         runOnTaskbarUiThreadSync { viewController.show(false) }
 
-        val dividerType =
-            getOnTaskbarUiThread {
-                val appsView = overlayController.requestWindow().appsView
-                appsView.floatingHeaderView
-                    .findFixedRowByType(PredictionRowView::class.java)
-                    .setPredictedApps(TEST_PREDICTED_APPS)
-                appsView.floatingHeaderView
-                    .findFixedRowByType(AppsDividerView::class.java)
-                    .dividerType
-            }
+        val dividerType = getOnTaskbarUiThread {
+            val appsView = overlayController.requestWindow().appsView
+            appsView.floatingHeaderView
+                .findFixedRowByType(PredictionRowView::class.java)
+                .setPredictedApps(TEST_PREDICTED_APPS)
+            appsView.floatingHeaderView.findFixedRowByType(AppsDividerView::class.java).dividerType
+        }
         assertThat(dividerType).isEqualTo(DividerType.ALL_APPS_LABEL)
     }
 
@@ -129,16 +123,13 @@ class TaskbarAllAppsViewControllerTest {
         val viewController = createViewController()
         runOnTaskbarUiThreadSync { viewController.show(false) }
 
-        val dividerType =
-            getOnTaskbarUiThread {
-                val appsView = overlayController.requestWindow().appsView
-                appsView.floatingHeaderView
-                    .findFixedRowByType(PredictionRowView::class.java)
-                    .setPredictedApps(TEST_PREDICTED_APPS)
-                appsView.floatingHeaderView
-                    .findFixedRowByType(AppsDividerView::class.java)
-                    .dividerType
-            }
+        val dividerType = getOnTaskbarUiThread {
+            val appsView = overlayController.requestWindow().appsView
+            appsView.floatingHeaderView
+                .findFixedRowByType(PredictionRowView::class.java)
+                .setPredictedApps(TEST_PREDICTED_APPS)
+            appsView.floatingHeaderView.findFixedRowByType(AppsDividerView::class.java).dividerType
+        }
         assertThat(dividerType).isEqualTo(DividerType.LINE)
     }
 

@@ -31,7 +31,6 @@ import com.android.launcher3.taskbar.rules.TaskbarModeRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.TRANSIENT
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
-import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -47,8 +46,8 @@ class TaskbarHandoffControllerTest {
     @get:Rule(order = 0) val setFlagsRule = SetFlagsRule()
     @get:Rule(order = 1) val context = TaskbarWindowSandboxContext.create()
     @get:Rule(order = 2) val taskbarModeRule = TaskbarModeRule(context)
-    @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
-    @InjectController lateinit var controller: TaskbarHandoffController
+    @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
+    val controller by taskbarUnitTestRule.delegate { it.taskbarHandoffController }
 
     @Before
     fun setUp() {

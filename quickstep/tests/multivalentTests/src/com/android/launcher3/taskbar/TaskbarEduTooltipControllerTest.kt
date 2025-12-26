@@ -37,7 +37,6 @@ import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.THREE_BUTTONS
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.TRANSIENT
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
-import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.util.OnboardingPrefs
 import com.android.systemui.shared.Flags.FLAG_ENABLE_RECENTS_IN_TASKBAR
@@ -58,9 +57,10 @@ class TaskbarEduTooltipControllerTest {
 
     @get:Rule(order = 2) val taskbarModeRule = TaskbarModeRule(context)
 
-    @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
+    @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    @InjectController lateinit var taskbarEduTooltipController: TaskbarEduTooltipController
+    val taskbarEduTooltipController by
+        taskbarUnitTestRule.delegate { it.taskbarEduTooltipController }
     private val tooltipEduCombinator
         get() = taskbarEduTooltipController.tooltipEduCombinator
 

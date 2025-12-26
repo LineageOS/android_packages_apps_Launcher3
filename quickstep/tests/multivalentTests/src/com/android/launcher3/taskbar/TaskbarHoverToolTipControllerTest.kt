@@ -32,7 +32,6 @@ import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatAppPairsIt
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatFolderItem
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatWorkspaceItem
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
-import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -44,10 +43,11 @@ import org.junit.runner.RunWith
 class TaskbarHoverToolTipControllerTest {
 
     @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()
-    @get:Rule(order = 1) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
+    @get:Rule(order = 1) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    @InjectController lateinit var autohideSuspendController: TaskbarAutohideSuspendController
-    @InjectController lateinit var popupController: TaskbarPopupController
+    val autohideSuspendController by
+        taskbarUnitTestRule.delegate { it.taskbarAutohideSuspendController }
+    val popupController by taskbarUnitTestRule.delegate { it.taskbarPopupController }
 
     private val taskbarContext: TaskbarActivityContext by taskbarUnitTestRule::activityContext
 
