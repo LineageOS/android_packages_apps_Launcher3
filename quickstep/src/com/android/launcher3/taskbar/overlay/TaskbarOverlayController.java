@@ -444,7 +444,8 @@ public final class TaskbarOverlayController
         final boolean cueBarVisible = cueBarAceMigration()
                 && mControllers.getSharedState().cueBarVisible;
         final boolean hasOpenFloatingViews = mOverlayContext != null
-                && AbstractFloatingView.hasOpenView(mOverlayContext, TYPE_ALL);
+                && (AbstractFloatingView.hasOpenView(mOverlayContext, TYPE_ALL)
+                || mControllers.keyboardQuickSwitchController.isShown());
         if (isAnySystemDragInProgress()) {
             touchableInsets = TOUCHABLE_INSETS_REGION;
             reason = "System drag in progress (empty region)";
