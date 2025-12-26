@@ -67,10 +67,10 @@ import com.android.app.displaylib.PerDisplayRepository;
 import com.android.launcher3.anim.AnimatedFloat;
 import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.dagger.DisplayId;
+import com.android.launcher3.dagger.PerDisplayCleanupTask;
 import com.android.launcher3.dagger.PerDisplaySingleton;
 import com.android.launcher3.display.LauncherDisplayInfo;
 import com.android.launcher3.util.DaggerSingletonObject;
-import com.android.launcher3.util.DaggerSingletonTracker;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.ListenableDiffAwareRef;
 import com.android.launcher3.util.NavigationMode;
@@ -163,7 +163,7 @@ public class RecentsAnimationDeviceState implements ExclusionListener {
             DisplayController displayController,
             ContextualSearchStateManager contextualSearchStateManager,
             SettingsCache settingsCache,
-            DaggerSingletonTracker lifeCycle) {
+            PerDisplayCleanupTask lifeCycle) {
         mContext = context;
         mDisplayId = displayId;
         mDisplayController = displayController;

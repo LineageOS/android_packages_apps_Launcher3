@@ -1,9 +1,11 @@
 package com.android.quickstep
 
+import android.hardware.display.DisplayManager
 import android.view.Display.DEFAULT_DISPLAY
 import androidx.test.annotation.UiThreadTest
 import androidx.test.filters.SmallTest
 import com.android.launcher3.dagger.LauncherComponentProvider
+import com.android.launcher3.dagger.PerDisplayComponent
 import com.android.launcher3.display.LauncherDisplayInfo
 import com.android.launcher3.display.LauncherDisplayInfo.Companion.CHANGE_DENSITY
 import com.android.launcher3.display.LauncherDisplayInfo.Companion.CHANGE_NAVIGATION_MODE
@@ -55,11 +57,16 @@ class RecentsAnimationDeviceStateTest {
     @Mock private lateinit var info: LauncherDisplayInfo
     @Mock private lateinit var rotationTouchHelper: RotationTouchHelper
 
+    private lateinit var perDisplayComponent: PerDisplayComponent
     private lateinit var underTest: RecentsAnimationDeviceState
 
     @Before
     fun setup() {
         val component = LauncherComponentProvider.get(context)
+        perDisplayComponent =
+            component.perDisplayComponentFactory.build(
+                context.getSystemService(DisplayManager::class.java)!!.getDisplay(DEFAULT_DISPLAY)
+            )
         underTest =
             RecentsAnimationDeviceState(
                 context,
@@ -69,12 +76,13 @@ class RecentsAnimationDeviceStateTest {
                 component.displayController,
                 component.contextualSearchStateManager,
                 component.settingsCache,
-                component.daggerSingletonTracker,
+                perDisplayComponent.cleanupTasks,
             )
     }
 
     @After
     fun tearDown() {
+        perDisplayComponent.cleanupTasks.close()
         UI_HELPER_EXECUTOR.submit {}.get()
         MAIN_EXECUTOR.submit {}.get()
     }

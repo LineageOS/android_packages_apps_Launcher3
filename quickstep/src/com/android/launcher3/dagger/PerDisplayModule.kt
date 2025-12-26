@@ -30,7 +30,7 @@ import com.android.app.displaylib.DisplayLibMainThread
 import com.android.app.displaylib.DisplayRepository
 import com.android.app.displaylib.DisplaysWithDecorationsRepository
 import com.android.app.displaylib.DisplaysWithDecorationsRepositoryCompat
-import com.android.app.displaylib.PerDisplayInstanceProvider
+import com.android.app.displaylib.PerDisplayInstanceProviderWithTeardown
 import com.android.app.displaylib.PerDisplayInstanceRepositoryImpl
 import com.android.app.displaylib.PerDisplayRepository
 import com.android.app.displaylib.createDisplayLibComponent
@@ -90,9 +90,14 @@ object PerDisplayRepositoriesModule {
         @DisplaysWithDecorations
         displaysWithDecorationsLifecycleManager: DisplayInstanceLifecycleManager,
     ): PerDisplayRepository<PerDisplayComponent> {
-        val instanceProvider = PerDisplayInstanceProvider { displayId ->
-            displayRepository.getDisplay(displayId)?.let { instanceFactory.build(it) }
-        }
+        val instanceProvider =
+            object : PerDisplayInstanceProviderWithTeardown<PerDisplayComponent> {
+                override fun destroyInstance(instance: PerDisplayComponent) =
+                    instance.cleanupTasks.close()
+
+                override fun createInstance(displayId: Int): PerDisplayComponent? =
+                    displayRepository.getDisplay(displayId)?.let { instanceFactory.build(it) }
+            }
         return repositoryFactory.create(
             "PerDisplayComponentRepo",
             instanceProvider,
@@ -105,30 +110,21 @@ object PerDisplayRepositoriesModule {
     fun provideRecentsAnimationDeviceStateRepo(
         repositoryFactory: PerDisplayComponentRepository.Factory<RecentsAnimationDeviceState>
     ): PerDisplayRepository<RecentsAnimationDeviceState> =
-        repositoryFactory.create(
-            "TaskAnimationManagerRepo",
-            PerDisplayComponent::getRecentsAnimationDeviceState,
-        )
+        repositoryFactory.create("TaskAnimationManagerRepo") { it.recentsAnimationDeviceState }
 
     @Provides
     @LauncherAppSingleton
     fun provideTaskAnimationManagerRepo(
         repositoryFactory: PerDisplayComponentRepository.Factory<TaskAnimationManager>
     ): PerDisplayRepository<TaskAnimationManager> =
-        repositoryFactory.create(
-            "TaskAnimationManagerRepo",
-            PerDisplayComponent::getTaskAnimationManager,
-        )
+        repositoryFactory.create("TaskAnimationManagerRepo") { it.taskAnimationManager }
 
     @Provides
     @LauncherAppSingleton
     fun provideRotationTouchHandlerRepo(
         repositoryFactory: PerDisplayComponentRepository.Factory<RotationTouchHelper>
     ): PerDisplayRepository<RotationTouchHelper> =
-        repositoryFactory.create(
-            "RotationTouchHelperRepo",
-            PerDisplayComponent::getRotationTouchHelper,
-        )
+        repositoryFactory.create("RotationTouchHelperRepo") { it.rotationTouchHelper }
 
     @Provides
     @LauncherAppSingleton
@@ -149,10 +145,7 @@ object PerDisplayRepositoriesModule {
     fun provideRecentsWindowTrackerRepo(
         repositoryFactory: PerDisplayComponentRepository.Factory<RecentsWindowTracker>
     ): PerDisplayRepository<RecentsWindowTracker> =
-        repositoryFactory.create(
-            "RecentsWindowTrackerRepo",
-            PerDisplayComponent::getRecentsWindowTracker,
-        )
+        repositoryFactory.create("RecentsWindowTrackerRepo") { it.recentsWindowTracker }
 
     @Provides
     @LauncherAppSingleton
