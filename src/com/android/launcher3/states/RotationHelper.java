@@ -32,6 +32,7 @@ import androidx.annotation.WorkerThread;
 
 import com.android.launcher3.BaseActivity;
 import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.display.LauncherDisplayInfo;
 import com.android.launcher3.util.ContextTracker;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.ListenableDiffAwareRef;
@@ -97,7 +98,7 @@ public class RotationHelper implements DeviceProfile.OnDeviceProfileChangeListen
      * the foreground. When in the background, we can still rely on onDisplayInfoChanged to update,
      * assuming that the delay is tolerable since it takes time to change to foreground.
      */
-    private void onDisplayInfoChanged(DisplayController.Info info) {
+    private void onDisplayInfoChanged(LauncherDisplayInfo info) {
         onIgnoreAutoRotateChanged(info.isLargeScreen(info.realBounds));
     }
 
@@ -155,9 +156,9 @@ public class RotationHelper implements DeviceProfile.OnDeviceProfileChangeListen
         if (mInitialized) return;
         mInitialized = true;
         DisplayController displayController = DisplayController.INSTANCE.get(mActivity);
-        DisplayController.Info info = displayController.getInfo();
+        LauncherDisplayInfo info = displayController.getInfo();
         setIgnoreAutoRotateSettings(info.isLargeScreen(info.realBounds));
-        ListenableDiffAwareRef<DisplayController.Info, Integer> listenable =
+        ListenableDiffAwareRef<LauncherDisplayInfo, Integer> listenable =
                 displayController.getListenable();
         if (listenable != null) {
             mDisplayInfoChangesSafeCloseable =

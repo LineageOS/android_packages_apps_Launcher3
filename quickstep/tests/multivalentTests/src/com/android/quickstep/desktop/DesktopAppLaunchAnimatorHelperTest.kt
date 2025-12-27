@@ -24,25 +24,23 @@ import android.app.WindowConfiguration
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.res.Resources
-import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
-import android.util.DisplayMetrics
 import android.view.SurfaceControl
 import android.view.WindowManager
 import android.window.TransitionInfo
 import android.window.TransitionInfo.Change
 import androidx.core.util.Supplier
+import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.internal.runner.junit4.statement.UiThreadStatement.runOnUiThread
 import com.android.app.animation.Interpolators
 import com.android.internal.jank.Cuj
+import com.android.launcher3.R
 import com.android.launcher3.desktop.DesktopAppLaunchAnimatorHelper
 import com.android.launcher3.desktop.DesktopAppLaunchTransition.AppLaunchType
+import com.android.launcher3.display.LauncherDisplayInfo
 import com.android.launcher3.util.DisplayController
-import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.LauncherMultivalentJUnit
-import com.android.window.flags.Flags
+import com.android.launcher3.util.window.WindowManagerProxy
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
@@ -50,7 +48,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
@@ -59,28 +59,20 @@ class DesktopAppLaunchAnimatorHelperTest {
 
     @get:Rule val setFlagsRule = SetFlagsRule()
 
-    private val context = mock<Context>()
-    private val resources = mock<Resources>()
-    private val displayContext = mock<Context>()
-    private val displayResources = mock<Resources>()
+    private val context = createContextWithSizeOverride(CONTEXT_CORNER_RADIUS)
+    private val displayContext = createContextWithSizeOverride(DISPLAY_CONTEXT_CORNER_RADIUS)
 
     private val displayController = mock<DisplayController>()
-    private val displayInfo = mock<DisplayController.Info>()
     private val transaction = mock<SurfaceControl.Transaction>()
     private val transactionSupplier = mock<Supplier<SurfaceControl.Transaction>>()
 
+    private lateinit var displayInfo: LauncherDisplayInfo
     private lateinit var helper: DesktopAppLaunchAnimatorHelper
 
     @Before
     fun setUp() {
-        whenever(context.resources).thenReturn(resources)
-        whenever(resources.getDimensionPixelSize(any())).thenReturn(CONTEXT_CORNER_RADIUS)
-
+        displayInfo = LauncherDisplayInfo(displayContext, WindowManagerProxy())
         whenever(displayController.getInfoForDisplay(any())).thenReturn(displayInfo)
-        whenever(displayInfo.getContext()).thenReturn(displayContext)
-        whenever(displayContext.resources).thenReturn(displayResources)
-        whenever(displayResources.getDimensionPixelSize(any()))
-            .thenReturn(DISPLAY_CONTEXT_CORNER_RADIUS)
 
         helper =
             DesktopAppLaunchAnimatorHelper(
@@ -97,9 +89,6 @@ class DesktopAppLaunchAnimatorHelperTest {
         whenever(transaction.setPosition(any(), any(), any())).thenReturn(transaction)
         whenever(transaction.setAlpha(any(), any())).thenReturn(transaction)
         whenever(transaction.setFrameTimeline(any())).thenReturn(transaction)
-
-        whenever(resources.displayMetrics).thenReturn(DisplayMetrics())
-        whenever(context.mainThreadHandler).thenReturn(MAIN_EXECUTOR.handler)
     }
 
     @Test
@@ -208,7 +197,6 @@ class DesktopAppLaunchAnimatorHelperTest {
     fun createLaunchAnimator_usesDisplayContextResources() = runOnUiThread {
         whenever(displayController.getInfoForDisplay(OPEN_CHANGE.endDisplayId))
             .thenReturn(displayInfo)
-        whenever(displayInfo.getContext()).thenReturn(displayContext)
         val transitionInfo = createTransitionInfo(listOf(OPEN_CHANGE))
 
         helper.createAnimators(transitionInfo, finishCallback = {})
@@ -220,18 +208,6 @@ class DesktopAppLaunchAnimatorHelperTest {
     @Test
     fun createLaunchAnimator_displayInfoNull_usesFallbackContextResources() = runOnUiThread {
         whenever(displayController.getInfoForDisplay(OPEN_CHANGE.endDisplayId)).thenReturn(null)
-        val transitionInfo = createTransitionInfo(listOf(OPEN_CHANGE))
-
-        helper.createAnimators(transitionInfo, finishCallback = {})
-
-        verify(transaction).setCornerRadius(OPEN_CHANGE.leash, CONTEXT_CORNER_RADIUS.toFloat())
-    }
-
-    @Test
-    fun createLaunchAnimator_displayContextNull_usesFallbackContextResources() = runOnUiThread {
-        whenever(displayController.getInfoForDisplay(OPEN_CHANGE.endDisplayId))
-            .thenReturn(displayInfo)
-        whenever(displayInfo.getContext()).thenReturn(null)
         val transitionInfo = createTransitionInfo(listOf(OPEN_CHANGE))
 
         helper.createAnimators(transitionInfo, finishCallback = {})
@@ -285,6 +261,19 @@ class DesktopAppLaunchAnimatorHelperTest {
         val transitionInfo = TransitionInfo(WindowManager.TRANSIT_NONE, 0)
         changes.forEach { transitionInfo.addChange(it) }
         return transitionInfo
+    }
+
+    private fun createContextWithSizeOverride(sizeOverride: Int): Context {
+        val realContext = getApplicationContext<Context>()
+
+        val mockResources = spy(realContext.resources)
+        doReturn(sizeOverride.toFloat())
+            .whenever(mockResources)
+            .getDimension(R.dimen.desktop_windowing_freeform_task_rounded_corner_radius)
+
+        val result = spy(realContext)
+        doReturn(mockResources).whenever(result).resources
+        return result
     }
 
     private companion object {

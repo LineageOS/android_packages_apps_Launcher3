@@ -20,9 +20,9 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
 import static com.android.launcher3.MotionEventsUtils.isTrackpadScroll;
-import static com.android.launcher3.util.DisplayController.CHANGE_ALL;
-import static com.android.launcher3.util.DisplayController.CHANGE_NAVIGATION_MODE;
-import static com.android.launcher3.util.DisplayController.CHANGE_ROTATION;
+import static com.android.launcher3.display.LauncherDisplayInfo.CHANGE_ALL;
+import static com.android.launcher3.display.LauncherDisplayInfo.CHANGE_NAVIGATION_MODE;
+import static com.android.launcher3.display.LauncherDisplayInfo.CHANGE_ROTATION;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.NavigationMode.NO_BUTTON;
 import static com.android.launcher3.util.NavigationMode.THREE_BUTTONS;
@@ -68,10 +68,10 @@ import com.android.launcher3.anim.AnimatedFloat;
 import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.dagger.DisplayId;
 import com.android.launcher3.dagger.PerDisplaySingleton;
+import com.android.launcher3.display.LauncherDisplayInfo;
 import com.android.launcher3.util.DaggerSingletonObject;
 import com.android.launcher3.util.DaggerSingletonTracker;
 import com.android.launcher3.util.DisplayController;
-import com.android.launcher3.util.DisplayController.Info;
 import com.android.launcher3.util.ListenableDiffAwareRef;
 import com.android.launcher3.util.NavigationMode;
 import com.android.launcher3.util.SafeCloseable;
@@ -176,12 +176,13 @@ public class RecentsAnimationDeviceState implements ExclusionListener {
         lifeCycle.addCloseable(this::unregisterExclusionListener);
 
         // Register for display changes changes
-        ListenableDiffAwareRef<Info, Integer> listenable = mDisplayController.getListenable();
+        ListenableDiffAwareRef<LauncherDisplayInfo, Integer> listenable =
+                mDisplayController.getListenable();
         if (listenable != null) {
             lifeCycle.addCloseable(
                     listenable.forEachChange(MAIN_EXECUTOR, this::onDisplayInfoChanged));
         }
-        Info displayInfo = mDisplayController.getInfoForDisplay(mDisplayId);
+        LauncherDisplayInfo displayInfo = mDisplayController.getInfoForDisplay(mDisplayId);
         if (displayInfo != null) {
             onDisplayInfoChanged(displayInfo, CHANGE_ALL);
         }
@@ -247,7 +248,7 @@ public class RecentsAnimationDeviceState implements ExclusionListener {
      */
     @Nullable
     public SafeCloseable addDisplayInfoChangeCallback(int changeFlag, Runnable callback) {
-        ListenableDiffAwareRef<Info, Integer> listenable =
+        ListenableDiffAwareRef<LauncherDisplayInfo, Integer> listenable =
                 mDisplayController.getListenable();
         if (listenable == null) {
             return null;
@@ -260,7 +261,7 @@ public class RecentsAnimationDeviceState implements ExclusionListener {
         });
     }
 
-    void onDisplayInfoChanged(Info info, int flags) {
+    void onDisplayInfoChanged(LauncherDisplayInfo info, int flags) {
         if ((flags & (CHANGE_ROTATION | CHANGE_NAVIGATION_MODE)) != 0) {
             mMode = info.getNavigationMode();
             ActiveGestureLog.INSTANCE.setIsFullyGesturalNavMode(isFullyGesturalNavMode());
@@ -621,7 +622,8 @@ public class RecentsAnimationDeviceState implements ExclusionListener {
         }
 
         if (mIsOneHandedModeEnabled) {
-            final Info displayInfo = mDisplayController.getInfoForDisplay(mDisplayId);
+            final LauncherDisplayInfo displayInfo =
+                    mDisplayController.getInfoForDisplay(mDisplayId);
             return (mRotationTouchHelper.touchInOneHandedModeRegion(ev)
                     && (displayInfo != null
                     && displayInfo.currentSize.x < displayInfo.currentSize.y));

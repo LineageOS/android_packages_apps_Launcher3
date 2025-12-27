@@ -16,11 +16,21 @@
 
 package com.android.quickstep
 
+import android.content.Context
+import android.graphics.Rect
+import android.util.DisplayMetrics
+import android.util.Size
+import android.view.Surface
+import androidx.test.core.app.ApplicationProvider
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
+import com.android.launcher3.display.LauncherDisplayInfo
 import com.android.launcher3.util.AllModulesMinusWMProxy
+import com.android.launcher3.util.launcheremulator.TestWindowManagerProxy
+import com.android.launcher3.util.launcheremulator.models.DeviceEmulationData
 import dagger.BindsInstance
 import dagger.Component
+import dagger.Component.Builder
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
@@ -45,4 +55,32 @@ object TaskViewTestDIHelpers {
         whenever(recentsModel.iconCache).thenReturn(mock())
         return recentsModel
     }
+
+    @JvmStatic
+    @JvmOverloads
+    fun fakeLauncherDisplayInfo(size: Size, rotation: Int = Surface.ROTATION_0) =
+        LauncherDisplayInfo(
+            context = ApplicationProvider.getApplicationContext(),
+            wmProxy =
+                object :
+                    TestWindowManagerProxy(
+                        DeviceEmulationData(
+                            name = "fake_display",
+                            width = size.width,
+                            height = size.height,
+                            density = DisplayMetrics.DENSITY_DEFAULT,
+                            densityMaxScale = 1f,
+                            densityMinScale = 1f,
+                            densityMinScaleInterval = 0f,
+                            cutout = Rect(),
+                            defaultGrid = "medium",
+                            resourceOverrides = emptyMap(),
+                            secondDisplay = null,
+                            supportsFixedLandscape = true,
+                        )
+                    ) {
+
+                    override fun getRotation(displayInfoContext: Context?): Int = rotation
+                },
+        )
 }

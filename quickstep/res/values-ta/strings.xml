@@ -152,8 +152,7 @@
     <string name="taskbar_divider_a11y_title" msgid="6608690309720242080">"செயல் பட்டிப் பிரிப்பான்"</string>
     <string name="taskbar_recents_overflow_a11y_title" msgid="8005941062446304304">"பிற சமீபத்திய ஆப்ஸ்"</string>
     <string name="taskbar_pinned_overflow_a11y_title" msgid="2314810718333302626">"பிற ஆப்ஸ்"</string>
-    <!-- no translation found for taskbar_drag_to_unpin_title (7652941692376783721) -->
-    <skip />
+    <string name="taskbar_drag_to_unpin_title" msgid="7652941692376783721">"அகற்றும்"</string>
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"மேலே/இடதுபுறம் நகர்த்தும்"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"கீழே/வலதுபுறம் நகர்த்தும்"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"ஆப்ஸைக் குமிழாகத் திற"</string>

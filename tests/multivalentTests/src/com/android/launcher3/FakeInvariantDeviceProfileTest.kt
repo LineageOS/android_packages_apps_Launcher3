@@ -24,8 +24,8 @@ import android.platform.test.rule.LimitDevicesRule
 import com.android.launcher3.DeviceProfile.Builder.createDefaultDisplayOptionSpec
 import com.android.launcher3.DeviceProfile.DEFAULT_DIMENSION_PROVIDER
 import com.android.launcher3.DeviceProfile.DEFAULT_PROVIDER
+import com.android.launcher3.display.LauncherDisplayInfo
 import com.android.launcher3.testing.shared.ResourceUtils.INVALID_RESOURCE_HANDLE
-import com.android.launcher3.util.DisplayController.Info
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.WindowBounds
 import java.io.PrintWriter
@@ -50,7 +50,7 @@ abstract class FakeInvariantDeviceProfileTest {
     @get:Rule val context = SandboxApplication()
 
     protected lateinit var inv: InvariantDeviceProfile
-    protected val info = spy(Info(context, context.appComponent.wmProxy))
+    protected val info = spy(LauncherDisplayInfo(context, context.appComponent.wmProxy))
     protected lateinit var windowBounds: WindowBounds
     private var transposeLayoutWithOrientation = false
     private var useTwoPanels = false
@@ -108,7 +108,7 @@ abstract class FakeInvariantDeviceProfileTest {
             )
 
         doReturn(false).whenever(info).isLargeScreen(any())
-        doReturn(420).whenever(info).getDensityDpi()
+        doReturn(420).whenever(info).densityDpi
         doReturn(411f).whenever(info).smallestSizeDp(any())
 
         this.isGestureMode = isGestureMode
@@ -200,7 +200,7 @@ abstract class FakeInvariantDeviceProfileTest {
         windowBounds = WindowBounds(Rect(0, 0, x, y), Rect(0, 104, 0, 0))
 
         doReturn(true).whenever(info).isLargeScreen(any())
-        doReturn(320).whenever(info).getDensityDpi()
+        doReturn(320).whenever(info).densityDpi
         doReturn(800f).whenever(info).smallestSizeDp(any())
 
         this.isGestureMode = isGestureMode
@@ -295,7 +295,7 @@ abstract class FakeInvariantDeviceProfileTest {
         windowBounds = WindowBounds(Rect(0, 0, x, y), Rect(0, 110, 0, 0))
 
         doReturn(true).whenever(info).isLargeScreen(any())
-        doReturn(420).whenever(info).getDensityDpi()
+        doReturn(420).whenever(info).densityDpi
         doReturn(700f).whenever(info).smallestSizeDp(any())
 
         this.isGestureMode = isGestureMode

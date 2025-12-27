@@ -20,11 +20,11 @@ import static android.view.Surface.ROTATION_0;
 import static com.android.launcher3.MotionEventsUtils.isTrackpadMultiFingerSwipe;
 import static com.android.launcher3.MotionEventsUtils.isTrackpadScroll;
 import static com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority.UI;
-import static com.android.launcher3.util.DisplayController.CHANGE_ACTIVE_SCREEN;
-import static com.android.launcher3.util.DisplayController.CHANGE_ALL;
-import static com.android.launcher3.util.DisplayController.CHANGE_NAVIGATION_MODE;
-import static com.android.launcher3.util.DisplayController.CHANGE_ROTATION;
-import static com.android.launcher3.util.DisplayController.CHANGE_SUPPORTED_BOUNDS;
+import static com.android.launcher3.display.LauncherDisplayInfo.CHANGE_ACTIVE_SCREEN;
+import static com.android.launcher3.display.LauncherDisplayInfo.CHANGE_ALL;
+import static com.android.launcher3.display.LauncherDisplayInfo.CHANGE_NAVIGATION_MODE;
+import static com.android.launcher3.display.LauncherDisplayInfo.CHANGE_ROTATION;
+import static com.android.launcher3.display.LauncherDisplayInfo.CHANGE_SUPPORTED_BOUNDS;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.NavigationMode.THREE_BUTTONS;
 
@@ -39,11 +39,11 @@ import com.android.app.displaylib.PerDisplayRepository;
 import com.android.launcher3.concurrent.annotations.LightweightBackground;
 import com.android.launcher3.dagger.PerDisplaySingleton;
 import com.android.launcher3.dagger.WindowContext;
+import com.android.launcher3.display.LauncherDisplayInfo;
 import com.android.launcher3.testing.shared.TestProtocol;
 import com.android.launcher3.util.DaggerSingletonObject;
 import com.android.launcher3.util.DaggerSingletonTracker;
 import com.android.launcher3.util.DisplayController;
-import com.android.launcher3.util.DisplayController.Info;
 import com.android.launcher3.util.ListenableDiffAwareRef;
 import com.android.launcher3.util.NavigationMode;
 import com.android.quickstep.dagger.QuickstepBaseAppComponent;
@@ -161,13 +161,13 @@ public class RotationTouchHelper {
                 () -> QuickStepContract.getWindowCornerRadius(mWindowContext));
 
         // Register for navigation mode and rotation changes
-        ListenableDiffAwareRef<Info, Integer> listenable =
+        ListenableDiffAwareRef<LauncherDisplayInfo, Integer> listenable =
                 mDisplayController.getListenable(mDisplayId);
         if (listenable != null) {
             lifeCycle.addCloseable(listenable.forEachChange(
                     MAIN_EXECUTOR, this::onDisplayInfoChanged));
         }
-        DisplayController.Info info = mDisplayController.getInfoForDisplay(mDisplayId);
+        LauncherDisplayInfo info = mDisplayController.getInfoForDisplay(mDisplayId);
         if (info != null) {
             onDisplayInfoChanged(info, CHANGE_ALL);
         } else {
@@ -221,7 +221,7 @@ public class RotationTouchHelper {
             return;
         }
 
-        DisplayController.Info info = mDisplayController.getInfoForDisplay(mDisplayId);
+        LauncherDisplayInfo info = mDisplayController.getInfoForDisplay(mDisplayId);
         if (info != null) {
             mOrientationTouchTransformer.createOrAddTouchRegion(info,
                     "RTH.updateGestureTouchRegions");
@@ -252,7 +252,7 @@ public class RotationTouchHelper {
                 event.getY(pointerIndex));
     }
 
-    private void onDisplayInfoChanged(@NonNull Info displayInfo, int flags) {
+    private void onDisplayInfoChanged(@NonNull LauncherDisplayInfo displayInfo, int flags) {
         if ((flags & (CHANGE_ROTATION | CHANGE_ACTIVE_SCREEN | CHANGE_NAVIGATION_MODE
                 | CHANGE_SUPPORTED_BOUNDS)) != 0) {
             mDisplayRotation = displayInfo.rotation;
@@ -304,7 +304,7 @@ public class RotationTouchHelper {
      * handle gesture navigation. Passing a value less than 0 will revert to a default value.
      */
     void setGesturalHeight(int newGesturalHeight) {
-        Info displayInfo = mDisplayController.getInfoForDisplay(mDisplayId);
+        LauncherDisplayInfo displayInfo = mDisplayController.getInfoForDisplay(mDisplayId);
         if (displayInfo != null) {
             mOrientationTouchTransformer.setGesturalHeight(
                     newGesturalHeight, displayInfo, mWindowContext.getResources());
@@ -324,7 +324,7 @@ public class RotationTouchHelper {
     }
 
     private void enableMultipleRegions(boolean enable) {
-        Info displayInfo = mDisplayController.getInfoForDisplay(mDisplayId);
+        LauncherDisplayInfo displayInfo = mDisplayController.getInfoForDisplay(mDisplayId);
         if (displayInfo != null) {
             mOrientationTouchTransformer.enableMultipleRegions(enable, displayInfo);
         }
@@ -391,7 +391,7 @@ public class RotationTouchHelper {
      * notifies system UI of the primary rotation the user is interacting with
      */
     private void toggleSecondaryNavBarsForRotation() {
-        Info displayInfo = mDisplayController.getInfoForDisplay(mDisplayId);
+        LauncherDisplayInfo displayInfo = mDisplayController.getInfoForDisplay(mDisplayId);
         if (displayInfo != null) {
             mOrientationTouchTransformer.setSingleActiveRegion(displayInfo);
         } else {

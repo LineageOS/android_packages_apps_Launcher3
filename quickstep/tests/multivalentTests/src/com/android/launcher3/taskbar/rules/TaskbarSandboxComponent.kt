@@ -39,6 +39,7 @@ import com.android.launcher3.dagger.SystemDragModule
 import com.android.launcher3.dagger.TaskOverlayModule
 import com.android.launcher3.dagger.WidgetModule
 import com.android.launcher3.dagger.WindowContext
+import com.android.launcher3.display.LauncherDisplayInfo
 import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator
 import com.android.launcher3.util.DaggerSingletonTracker
@@ -158,22 +159,27 @@ constructor(
     wmProxy: WindowManagerProxy,
     private val prefs: LauncherPrefs,
     lifecycle: DaggerSingletonTracker,
-) : DisplayController(context, wmProxy, prefs, lifecycle) {
+) : DisplayController(context, wmProxy, lifecycle) {
 
-    var infoModifier: ((Info) -> Info)? = null
+    var infoModifier: ((LauncherDisplayInfo) -> LauncherDisplayInfo)? = null
 
     // When overview on CD is enabled, DisplayController queries getInfoForDisplay instead of
     // getInfo for the primary (virtual) display used in tests. So, override it to get info from the
     // default display.
-    private val defaultInfoModifierForDisplay: ((Info?) -> Info?) = { _ -> info }
+    private val defaultInfoModifierForDisplay: ((LauncherDisplayInfo?) -> LauncherDisplayInfo?) =
+        { _ ->
+            info
+        }
 
-    var infoModifierForDisplay: ((Info?) -> Info?)? = defaultInfoModifierForDisplay
+    var infoModifierForDisplay: ((LauncherDisplayInfo?) -> LauncherDisplayInfo?)? =
+        defaultInfoModifierForDisplay
 
     private var prefListener: LauncherPrefChangeListener? = null
 
-    override fun getInfo(): Info = infoModifier?.invoke(super.getInfo()) ?: super.getInfo()
+    override fun getInfo(): LauncherDisplayInfo =
+        infoModifier?.invoke(super.getInfo()) ?: super.getInfo()
 
-    override fun getInfoForDisplay(displayId: Int): Info? =
+    override fun getInfoForDisplay(displayId: Int): LauncherDisplayInfo? =
         infoModifierForDisplay?.invoke(super.getInfoForDisplay(displayId))
             ?: super.getInfoForDisplay(displayId)
 

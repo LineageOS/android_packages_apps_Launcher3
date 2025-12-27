@@ -59,6 +59,7 @@ import com.android.launcher3.deviceprofile.HotseatProfileInitialValues;
 import com.android.launcher3.deviceprofile.OverviewProfile;
 import com.android.launcher3.deviceprofile.TaskbarProfile;
 import com.android.launcher3.deviceprofile.WorkspaceProfile;
+import com.android.launcher3.display.LauncherDisplayInfo;
 import com.android.launcher3.icons.DotRenderer;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.responsive.CalculatedCellSpec;
@@ -70,7 +71,6 @@ import com.android.launcher3.responsive.ResponsiveSpec.Companion.ResponsiveSpecT
 import com.android.launcher3.responsive.ResponsiveSpec.DimensionType;
 import com.android.launcher3.responsive.ResponsiveSpecsProvider;
 import com.android.launcher3.util.DisplayController;
-import com.android.launcher3.util.DisplayController.Info;
 import com.android.launcher3.util.IconSizeSteps;
 import com.android.launcher3.util.ResourceHelper;
 import com.android.launcher3.util.WindowBounds;
@@ -98,7 +98,7 @@ public class DeviceProfile {
 
 
     private final DisplayOptionSpec mDisplayOptionSpec;
-    private final Info mInfo;
+    private final LauncherDisplayInfo mInfo;
     private final DisplayMetrics mMetrics;
     private final IconSizeSteps mIconSizeSteps;
 
@@ -221,7 +221,7 @@ public class DeviceProfile {
 
     DeviceProfile(
             InvariantDeviceProfile inv,
-            Info info,
+            LauncherDisplayInfo info,
             WindowManagerProxy wmProxy,
             WindowBounds windowBounds,
             boolean isExternalDisplay,
@@ -630,7 +630,7 @@ public class DeviceProfile {
         );
     }
 
-    public Info getDisplayInfo() {
+    public LauncherDisplayInfo getDisplayInfo() {
         return mInfo;
     }
 
@@ -1588,7 +1588,8 @@ public class DeviceProfile {
                 + "rotationHint:" + mDeviceProperties.getRotationHint();
     }
 
-    private static Context getContext(Info info, int orientation, WindowBounds bounds) {
+    private static Context getContext(
+            LauncherDisplayInfo info, int orientation, WindowBounds bounds) {
         Configuration config = new Configuration(info.context.getResources().getConfiguration());
         config.orientation = orientation;
         config.densityDpi = info.getDensityDpi();
@@ -1674,7 +1675,7 @@ public class DeviceProfile {
 
     public static class Builder {
         private final InvariantDeviceProfile mInv;
-        private final Info mInfo;
+        private final LauncherDisplayInfo mInfo;
         private final WindowManagerProxy mWMProxy;
 
         private WindowBounds mWindowBounds;
@@ -1692,7 +1693,8 @@ public class DeviceProfile {
 
         private DisplayOptionSpec mDisplayOptionSpec;
 
-        public Builder(InvariantDeviceProfile inv, Info info, WindowManagerProxy wmProxy) {
+        public Builder(
+                InvariantDeviceProfile inv, LauncherDisplayInfo info, WindowManagerProxy wmProxy) {
             mInv = inv;
             mInfo = info;
             mWMProxy = wmProxy;
@@ -1802,7 +1804,7 @@ public class DeviceProfile {
         }
 
         @VisibleForTesting
-        static DisplayOptionSpec createDefaultDisplayOptionSpec(DisplayController.Info info,
+        static DisplayOptionSpec createDefaultDisplayOptionSpec(LauncherDisplayInfo info,
                 WindowBounds windowBounds, boolean isMultiDisplay, InvariantDeviceProfile inv) {
             boolean isTwoPanels = info.isLargeScreen(windowBounds) && isMultiDisplay;
             boolean isLandscape = windowBounds.isLandscape();
