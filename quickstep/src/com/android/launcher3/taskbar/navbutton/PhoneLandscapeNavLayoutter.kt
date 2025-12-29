@@ -117,23 +117,23 @@ open class PhoneLandscapeNavLayoutter(
         // Swap recents and back button
         if (Utilities.isRtl(resources)) {
             if (SettingsCache.INSTANCE.get(homeButton!!.context).getValue(NAV_BAR_INVERSE, 0)) {
-                navButtonContainer.addView(backButton)
-                navButtonContainer.addView(homeButton)
                 navButtonContainer.addView(recentsButton)
+                navButtonContainer.addView(homeButton)
+                navButtonContainer.addView(backButton)
             } else {
-                navButtonContainer.addView(recentsButton)
-                navButtonContainer.addView(homeButton)
                 navButtonContainer.addView(backButton)
+                navButtonContainer.addView(homeButton)
+                navButtonContainer.addView(recentsButton)
             }
         } else {
             if (SettingsCache.INSTANCE.get(homeButton!!.context).getValue(NAV_BAR_INVERSE, 0)) {
-                navButtonContainer.addView(recentsButton)
-                navButtonContainer.addView(homeButton)
                 navButtonContainer.addView(backButton)
+                navButtonContainer.addView(homeButton)
+                navButtonContainer.addView(recentsButton)
             } else {
-                navButtonContainer.addView(backButton)
-                navButtonContainer.addView(homeButton)
                 navButtonContainer.addView(recentsButton)
+                navButtonContainer.addView(homeButton)
+                navButtonContainer.addView(backButton)
             }
         }
     }
