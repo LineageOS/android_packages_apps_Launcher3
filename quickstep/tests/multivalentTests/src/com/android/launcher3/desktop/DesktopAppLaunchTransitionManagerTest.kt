@@ -27,7 +27,7 @@ import android.window.TransitionFilter
 import android.window.TransitionFilter.CONTAINER_ORDER_ANY
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.launcher3.util.DisplayController
+import com.android.launcher3.display.DisplayController
 import com.android.quickstep.SystemUiProxy
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.google.common.truth.Truth.assertThat

@@ -22,6 +22,7 @@ import com.android.launcher3.config.FeatureFlags.enableTaskbarPinning
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
+import com.android.launcher3.display.DisplayController
 import com.android.launcher3.util.window.WindowManagerProxy
 import javax.inject.Inject
 

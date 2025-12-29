@@ -16,18 +16,22 @@
 
 package com.android.launcher3.taskbar.rules
 
+import android.view.Display.DEFAULT_DISPLAY
+import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
+import com.android.launcher3.display.DisplayController
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
-import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.NavigationMode
+import com.android.launcher3.util.RoboApiWrapper.convertToSpy
 import com.android.launcher3.util.TaskbarModeUtil
+import com.android.launcher3.util.launcheremulator.TestWindowManagerProxy
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
+import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.spy
 import org.mockito.kotlin.stub
 import org.mockito.kotlin.whenever
 
@@ -120,20 +124,20 @@ class TaskbarModeRule(private val context: TaskbarWindowSandboxContext) : TestRu
                 }
 
                 runOnTaskbarUiThreadSync {
-                    DisplayController.INSTANCE[context].let {
-                        if (it is DisplayControllerSpy) {
-                            it.infoModifier = { info ->
-                                spy(info) {
-                                    on { navigationMode } doReturn
-                                        when (mode) {
-                                            Mode.TRANSIENT,
-                                            Mode.PINNED -> NavigationMode.NO_BUTTON
-                                            Mode.THREE_BUTTONS -> NavigationMode.THREE_BUTTONS
-                                        }
-                                }
-                            }
+                    val navMode =
+                        when (mode) {
+                            Mode.TRANSIENT,
+                            Mode.PINNED -> NavigationMode.NO_BUTTON
+                            Mode.THREE_BUTTONS -> NavigationMode.THREE_BUTTONS
                         }
+                    val wmProxy = context.appComponent.wmProxy
+                    if (wmProxy is TestWindowManagerProxy) {
+                        wmProxy.setNavigationMode(navMode)
+                    } else {
+                        wmProxy.convertToSpy()
+                        doReturn(navMode).whenever(wmProxy).getNavigationMode(any())
                     }
+                    context.appComponent.displayController.notifyConfigChange(DEFAULT_DISPLAY)
                 }
 
                 base.evaluate()

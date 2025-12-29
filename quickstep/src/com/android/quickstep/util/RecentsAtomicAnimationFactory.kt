@@ -42,6 +42,7 @@ import com.android.launcher3.LauncherState.OVERVIEW
 import com.android.launcher3.LauncherState.OVERVIEW_SPLIT_SELECT
 import com.android.launcher3.QuickstepTransitionManager
 import com.android.launcher3.anim.SpringAnimationBuilder
+import com.android.launcher3.display.DisplayController
 import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.statemanager.BaseState
 import com.android.launcher3.statemanager.StateManager.AtomicAnimationFactory
@@ -62,7 +63,6 @@ import com.android.launcher3.states.StateAnimationConfig.ANIM_WORKSPACE_SCALE
 import com.android.launcher3.states.StateAnimationConfig.ANIM_WORKSPACE_TRANSLATE
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator
 import com.android.launcher3.touch.AllAppsSwipeController
-import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.NavigationMode
 import com.android.quickstep.split.SplitAnimationTimings
 import com.android.quickstep.views.RecentsView

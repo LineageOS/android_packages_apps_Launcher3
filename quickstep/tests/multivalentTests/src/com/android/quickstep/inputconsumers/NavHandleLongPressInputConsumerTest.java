@@ -54,9 +54,9 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.launcher3.dagger.LauncherAppComponent;
 import com.android.launcher3.dagger.LauncherAppSingleton;
+import com.android.launcher3.display.DisplayController;
 import com.android.launcher3.logging.StatsLogManager;
 import com.android.launcher3.util.AllModulesForTest;
-import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.SandboxContext;
 import com.android.quickstep.DeviceConfigWrapper;
 import com.android.quickstep.GestureState;

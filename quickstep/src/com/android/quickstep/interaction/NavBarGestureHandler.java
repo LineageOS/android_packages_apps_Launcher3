@@ -34,8 +34,8 @@ import android.view.View.OnTouchListener;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.display.DisplayController;
 import com.android.launcher3.testing.shared.ResourceUtils;
-import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.NavigationMode;
 import com.android.launcher3.util.VibratorWrapper;
 import com.android.quickstep.util.MotionPauseDetector;

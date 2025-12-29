@@ -182,7 +182,6 @@ class TaskbarUnitTestRule(
                     base.evaluate()
                 } finally {
                     runOnTaskbarUiThreadSync { taskbarManager.destroy() }
-                    context.displayControllerSpy?.cleanup()
                     cleanup.complete()
                 }
             }

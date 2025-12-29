@@ -26,6 +26,7 @@ import com.android.internal.jank.Cuj
 import com.android.launcher3.LauncherAppState
 import com.android.launcher3.LauncherSettings.Favorites
 import com.android.launcher3.Utilities
+import com.android.launcher3.display.DisplayController
 import com.android.launcher3.logger.LauncherAtom
 import com.android.launcher3.logger.LauncherAtom.ContainerInfo
 import com.android.launcher3.logger.LauncherAtom.ContainerInfo.ContainerCase.ALL_APPS_CONTAINER
@@ -79,7 +80,6 @@ import com.android.launcher3.logging.StatsLogManager.StatsLatencyLogger.LatencyT
 import com.android.launcher3.logging.StatsLogManager.StatsLatencyLogger.LatencyType.UNKNOWN
 import com.android.launcher3.model.data.CollectionInfo
 import com.android.launcher3.model.data.ItemInfo
-import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.LogConfig
 import com.android.launcher3.views.ActivityContext
@@ -267,10 +267,7 @@ class StatsLogCompatManager private constructor(context: Context) : StatsLogMana
                     InteractionJankMonitorWrapper.end(Cuj.CUJ_LAUNCHER_WORK_UTILITY_VIEW_SHRINK)
 
                 LAUNCHER_WIDGET_PICKER_OPEN_ANIMATION_BEGIN ->
-                    InteractionJankMonitorWrapper.begin(
-                        view,
-                        Cuj.CUJ_LAUNCHER_WIDGET_PICKER_OPEN,
-                    )
+                    InteractionJankMonitorWrapper.begin(view, Cuj.CUJ_LAUNCHER_WIDGET_PICKER_OPEN)
                 LAUNCHER_WIDGET_PICKER_OPEN_ANIMATION_END ->
                     InteractionJankMonitorWrapper.end(Cuj.CUJ_LAUNCHER_WIDGET_PICKER_OPEN)
 

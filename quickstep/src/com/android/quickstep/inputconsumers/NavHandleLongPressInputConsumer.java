@@ -31,9 +31,9 @@ import android.view.ViewConfiguration;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.launcher3.Utilities;
+import com.android.launcher3.display.DisplayController;
 import com.android.launcher3.logging.InstanceIdSequence;
 import com.android.launcher3.logging.StatsLogManager;
-import com.android.launcher3.util.DisplayController;
 import com.android.quickstep.DeviceConfigWrapper;
 import com.android.quickstep.GestureState;
 import com.android.quickstep.InputConsumer;

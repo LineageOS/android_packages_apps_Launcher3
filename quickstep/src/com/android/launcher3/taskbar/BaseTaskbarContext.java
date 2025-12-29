@@ -160,12 +160,6 @@ public abstract class BaseTaskbarContext extends BaseContext
      */
     public abstract int getDisplayHeight();
 
-    /**
-     * Notifies the context that the configuration has changed.
-     */
-    public abstract void notifyConfigChanged();
-
-
     @Override
     public final LayoutInflater getLayoutInflater() {
         return mLayoutInflater;
