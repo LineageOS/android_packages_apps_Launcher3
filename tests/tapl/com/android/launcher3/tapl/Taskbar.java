@@ -150,6 +150,7 @@ public final class Taskbar {
         try (LauncherInstrumentation.Closable c = mLauncher.addContextLayer(
                 "want to open taskbar divider menu and toggle always show taskbar option");
              LauncherInstrumentation.Closable e = mLauncher.eventsCheck()) {
+            mLauncher.showTaskbarIfHidden();
             mLauncher.waitForObjectInContainer(
                     mLauncher.waitForSystemLauncherObject(TASKBAR_RES_ID),
                     getDividerButtonSelector()).longClick();
