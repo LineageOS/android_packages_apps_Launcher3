@@ -24,24 +24,13 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.CallSuper
-import androidx.annotation.Px
-import androidx.compose.ui.platform.ComposeView
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.DragSource
 import com.android.launcher3.DropTarget.DragObject
-import com.android.launcher3.Launcher
 import com.android.launcher3.R
-import com.android.launcher3.accessibility.LauncherAccessibilityDelegate
 import com.android.launcher3.dragndrop.DragController
 import com.android.launcher3.dragndrop.DragOptions
-import com.android.launcher3.folder.Folder
-import com.android.launcher3.logging.StatsLogManager.LauncherEvent
 import com.android.launcher3.model.data.ItemInfo
-import com.android.launcher3.popup.ui.ComposePopup
-import com.android.launcher3.popup.ui.DeepShortcutClickEvent
-import com.android.launcher3.popup.ui.PopupItem
-import com.android.launcher3.popup.ui.PopupViewModel
-import com.android.launcher3.popup.ui.SystemShortcutClickEvent
 import com.android.launcher3.util.ShortcutUtil
 import com.android.launcher3.views.ActivityContext
 
@@ -70,81 +59,6 @@ open class PopupContainer<T>(
         )
 
     private val iconViewController: IconViewController? = originalView as? IconViewController
-
-    val viewModel = PopupViewModel()
-
-    open fun showComposePopup(systemShortcuts: List<PopupItem>, deepShortcutCount: Int = 0) {
-        mIsOpen = true
-        popupContainer.addView(this)
-        visibility = GONE
-        val lp = layoutParams
-        lp.width = LayoutParams.WRAP_CONTENT
-        lp.height = LayoutParams.WRAP_CONTENT
-        layoutParams = lp
-
-        viewModel.init(systemShortcuts, deepShortcutCount)
-
-        val composePopup =
-            ComposeView(context).apply {
-                setContent {
-                    ComposePopup(
-                        viewModel = viewModel,
-                        onClickListener = { clickedItem ->
-                            when (clickedItem) {
-                                is SystemShortcutClickEvent -> {
-                                    clickedItem.item.popupAction()
-                                }
-                                is DeepShortcutClickEvent -> {
-                                    (mActivityContext as? Launcher)?.startActivitySafely(
-                                        originalView,
-                                        clickedItem.item?.intent,
-                                        clickedItem.item,
-                                    )
-                                }
-                            }
-                            close(true)
-                            // Handle click events from the Compose UI
-                        },
-                        onAddIconClick = { clickedItem ->
-                            val accessibilityDelegate = mActivityContext?.accessibilityDelegate
-                            if (accessibilityDelegate is LauncherAccessibilityDelegate) {
-                                accessibilityDelegate.addToWorkspace(
-                                    /* itemInfo */ clickedItem,
-                                    /* accessibility= */ false,
-                                )
-                                /*finishCallback=*/ {
-                                    mActivityContext.statsLogManager
-                                        .logger()
-                                        .withItemInfo(clickedItem)
-                                        .log(LauncherEvent.LAUNCHER_TAP_TO_ADD_DEEP_SHORTCUT)
-                                }
-                                Unit
-                            }
-
-                            // If we have an open folder, don't animate the popup closing.
-                            val folder = getOpenView<Folder>(mActivityContext, TYPE_FOLDER)
-                            close(folder == null)
-                            folder?.close(true)
-                        },
-                        onDeepShortcutLongPress = { itemInfoWithIcon
-                            -> // TODO: implement long press on deep shortcuts
-                        },
-                        onMaxHeightMeasured = { maxHeightPx -> positionAndShow(maxHeightPx) },
-                    )
-                }
-            }
-
-        addView(composePopup)
-    }
-
-    private fun positionAndShow(@Px maxHeightPx: Int) {
-        orientAboutObject(maxHeightPx)
-        assignMarginsAndBackgrounds(this)
-        if (shouldAddArrow()) {
-            addArrow()
-        }
-        animateOpen()
-    }
 
     @CallSuper
     override fun handleClose(animate: Boolean) {

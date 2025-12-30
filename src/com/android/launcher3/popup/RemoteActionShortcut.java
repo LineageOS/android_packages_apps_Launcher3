@@ -44,11 +44,11 @@ public class RemoteActionShortcut<T extends Context & ActivityContext> extends S
     private static final String TAG = "RemoteActionShortcut";
     private static final boolean DEBUG = Utilities.IS_DEBUG_DEVICE;
 
-    public final RemoteAction mAction;
+    private final RemoteAction mAction;
 
     public RemoteActionShortcut(RemoteAction action,
             T context, ItemInfo itemInfo, View originalView) {
-        super(R.drawable.hourglass_24px, R.string.pause_app_label, context, itemInfo, originalView);
+        super(0, R.id.action_remote_action_shortcut, context, itemInfo, originalView);
         mAction = action;
     }
 

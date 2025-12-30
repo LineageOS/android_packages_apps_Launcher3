@@ -113,15 +113,6 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
         mIsCollapsible = isCollapsible;
     }
 
-    /** @return the resource id of the icon **/
-    public int getIconResId() {
-        return mIconResId;
-    }
-
-    /** @return the resource id of the label **/
-    public int getLabelResId() {
-        return mLabelResId;
-    }
     public void setIconAndLabelFor(View iconView, TextView labelView) {
         iconView.setBackgroundResource(mIconResId);
         labelView.setText(mLabelResId);

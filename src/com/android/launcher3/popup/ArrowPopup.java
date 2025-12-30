@@ -43,7 +43,6 @@ import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
 
-import androidx.annotation.Px;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.launcher3.AbstractFloatingView;
@@ -390,10 +389,6 @@ public abstract class ArrowPopup<T extends Context & ActivityContext>
      */
     protected abstract void getTargetObjectLocation(Rect outPos);
 
-    protected void orientAboutObject(@Px int maxHeightPx) {
-        orientAboutObject(/* allowAlignLeft */ true, /* allowAlignRight */ true, maxHeightPx);
-    }
-
     /**
      * Orients this container above or below the given icon, aligning with the left or right.
      *
@@ -407,7 +402,7 @@ public abstract class ArrowPopup<T extends Context & ActivityContext>
      * and align above if there is enough vertical space.
      */
     protected void orientAboutObject() {
-        orientAboutObject(/* allowAlignLeft */ true, /* allowAlignRight */ true, /* maxHeight */ 0);
+        orientAboutObject(true /* allowAlignLeft */, true /* allowAlignRight */);
     }
 
     /**
@@ -415,12 +410,9 @@ public abstract class ArrowPopup<T extends Context & ActivityContext>
      *
      * @param allowAlignLeft Set to false if we already tried aligning left and didn't have room.
      * @param allowAlignRight Set to false if we already tried aligning right and didn't have room.
-     * @param maxHeightPx is used for expandable popup menu, otherwise it is 0 and we use measured
-     *      height.
      * TODO: Can we test this with all permutations of widths/heights and icon locations + RTL?
      */
-    private void orientAboutObject(boolean allowAlignLeft, boolean allowAlignRight,
-            @Px int maxHeightPx) {
+    private void orientAboutObject(boolean allowAlignLeft, boolean allowAlignRight) {
         measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
 
         int extraVerticalSpace = mArrowHeight + mArrowOffsetVertical + getExtraVerticalOffset();
@@ -463,7 +455,7 @@ public abstract class ArrowPopup<T extends Context & ActivityContext>
             if (!alignmentStillValid) {
                 // Try again, but don't allow this alignment we already know won't work.
                 orientAboutObject(allowAlignLeft && !mIsLeftAligned /* allowAlignLeft */,
-                        allowAlignRight && mIsLeftAligned /* allowAlignRight */, maxHeightPx);
+                        allowAlignRight && mIsLeftAligned /* allowAlignRight */);
                 return;
             }
         }
@@ -471,8 +463,7 @@ public abstract class ArrowPopup<T extends Context & ActivityContext>
         // Open above icon if there is room.
         int iconHeight = mTempRect.height();
         int y = mTempRect.top - height;
-        mIsAboveIcon = (maxHeightPx == 0 ? y
-                : (mTempRect.top - maxHeightPx)) > dragLayer.getTop() + insets.top;
+        mIsAboveIcon = y > dragLayer.getTop() + insets.top;
         if (!mIsAboveIcon) {
             y = mTempRect.top + iconHeight + extraVerticalSpace;
             height -= extraVerticalSpace;

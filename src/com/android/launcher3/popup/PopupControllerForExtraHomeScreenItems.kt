@@ -20,12 +20,10 @@ import android.content.Context
 import android.os.Trace
 import android.view.View
 import com.android.launcher3.AppWidgetResizeFrame
-import com.android.launcher3.Flags
 import com.android.launcher3.R
 import com.android.launcher3.dragndrop.LauncherDragController
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent.IGNORE
 import com.android.launcher3.model.data.ItemInfo
-import com.android.launcher3.popup.ui.PopupItem
 import com.android.launcher3.shortcuts.DeepShortcutView
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.widget.LauncherAppWidgetHostView
@@ -52,24 +50,8 @@ class PopupControllerForExtraHomeScreenItems<T>(
                     itemInfo = itemInfo,
                 )
             dragController.addDragListener(container)
-            if (Flags.expandableLongPressMenu()) {
-                popupDataRepository
-                    .getPopupDataByItemInfo(itemInfo)
-                    ?.map { popupData ->
-                        PopupItem(
-                            iconResId = popupData.iconResId,
-                            labelResId = popupData.labelResId,
-                            popupAction = {
-                                popupData.popupAction.invoke(activityContext, itemInfo, view)
-                            },
-                            category = popupData.category,
-                        )
-                    }
-                    ?.let { container.showComposePopup(systemShortcuts = it) }
-            } else {
-                addSystemShortcuts(container, itemInfo, itemView = view, activityContext)
-                container.show()
-            }
+            addSystemShortcuts(container, itemInfo, itemView = view, activityContext)
+            container.show()
             showResizeFrameIfNeeded(activityContext, itemInfo, view)
         } finally {
             logEvent(activityContext.statsLogManager, itemInfo.itemType, PopupEvent.OPEN)
