@@ -1442,8 +1442,10 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         homeCheck.mRequirements[2].mMustBeTask = true;
         homeCheck.mRequirements[2].mMustBeIndependent = true;
 
+        mLauncherOpenTransition.setFilter(homeCheck);
+
         SystemUiProxy.INSTANCE.get(mLauncher)
-                .registerRemoteTransition(mLauncherOpenTransition, homeCheck);
+                .registerRemoteTransition(mLauncherOpenTransition);
         if (mBackAnimationController != null) {
             mBackAnimationController.registerComponentCallbacks();
             if (isHomeRoleHeld()) {
@@ -1469,8 +1471,11 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             changeCheck.mRequirements[0].mMustBeIndependent = false;
             changeCheck.mRequirements[0].mActivityType = ACTIVITY_TYPE_STANDARD;
             changeCheck.mRequirements[0].mIsCrossDisplayMove = true;
+
+            mMoveDisplayTransition.setFilter(changeCheck);
+
             SystemUiProxy.INSTANCE.get(mLauncher)
-                    .registerRemoteTransition(mMoveDisplayTransition, changeCheck);
+                    .registerRemoteTransition(mMoveDisplayTransition);
         }
     }
 
