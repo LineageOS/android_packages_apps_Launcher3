@@ -176,7 +176,27 @@ private fun ComposePopupContent(
                     expandPopupMenuButtonHeight + systemShortcutsHeight + spacerHeight
                 max(heightDeepExpanded, heightSystemExpanded).toInt()
             } else { // MainSegmentsStyle.LIST
-                0
+                var systemShortcutsHeight = 0f
+                if (targetState.compactSystemShortcuts.isNotEmpty()) {
+                    systemShortcutsHeight += popupMenuItemHeight.toPx()
+                }
+                if (
+                    targetState.compactSystemShortcuts.isNotEmpty() &&
+                        targetState.standardSystemShortcuts.isNotEmpty()
+                ) {
+                    systemShortcutsHeight += ComposePopupDimens.popupContentSpacerHeight.toPx()
+                }
+                systemShortcutsHeight +=
+                    targetState.standardSystemShortcuts.size * popupMenuItemHeight.toPx()
+
+                val deepShortcutsHeight =
+                    targetState.deepShortcuts.size * popupMenuItemHeight.toPx()
+
+                if (deepShortcutsHeight > 0) {
+                    systemShortcutsHeight += ComposePopupDimens.systemShortcutsDividerHeight.toPx()
+                }
+
+                (systemShortcutsHeight + deepShortcutsHeight + spacerHeight).toInt()
             }
         }
     }
@@ -375,23 +395,27 @@ fun ExpandableHybridPopup(
             },
             transition = systemTransition,
         )
-        Spacer(modifier = Modifier.height(ComposePopupDimens.popupContentSpacerHeight))
-        ExpandableContainer(
-            collapsedContent = {
-                ExpandDeepShortcutsMenuButton(
-                    onShowDeepShortcuts = { onToggle(ExpandedSection.DEEP) }
-                )
-            },
-            expandedContent = {
-                DeepShortcutsContent(
-                    standardDeepShortcuts,
-                    onClickListener,
-                    onAddButtonClick,
-                    onDeepShortcutLongPress,
-                )
-            },
-            transition = deepTransition,
-        )
+        if (standardSystemShortcuts.isNotEmpty() && standardDeepShortcuts.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(ComposePopupDimens.popupContentSpacerHeight))
+        }
+        if (standardDeepShortcuts.isNotEmpty()) {
+            ExpandableContainer(
+                collapsedContent = {
+                    ExpandDeepShortcutsMenuButton(
+                        onShowDeepShortcuts = { onToggle(ExpandedSection.DEEP) }
+                    )
+                },
+                expandedContent = {
+                    DeepShortcutsContent(
+                        standardDeepShortcuts,
+                        onClickListener,
+                        onAddButtonClick,
+                        onDeepShortcutLongPress,
+                    )
+                },
+                transition = deepTransition,
+            )
+        }
     }
 }
 

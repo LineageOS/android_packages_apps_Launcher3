@@ -288,6 +288,9 @@
     <!-- Description for loading app shortcuts-->
     <string name="loading_shortcut">Loading shortcut</string>
 
+    <!-- Label for pausing an app [CHAR_LIMIT=20] -->
+    <string name="pause_app_label">Pause app</string>
+
     <!-- Permissions: -->
     <skip />
     <!-- Permission short label -->

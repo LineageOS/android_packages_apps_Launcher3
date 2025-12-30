@@ -25,6 +25,7 @@ import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.annotation.CallSuper
 import androidx.annotation.LayoutRes
 import com.android.launcher3.BubbleTextView
 import com.android.launcher3.DragSource
@@ -35,6 +36,7 @@ import com.android.launcher3.Utilities
 import com.android.launcher3.dragndrop.DragController
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.ItemInfoWithIcon
+import com.android.launcher3.popup.ui.PopupItem
 import com.android.launcher3.shortcuts.DeepShortcutTextView
 import com.android.launcher3.shortcuts.DeepShortcutView
 import com.android.launcher3.util.Executors
@@ -51,7 +53,7 @@ import kotlin.math.max
  */
 class PopupContainerWithArrow<T>
 private constructor(
-    context: Context?,
+    context: Context,
     originalView: View,
     itemInfo: ItemInfo,
     updateIconUi: Boolean,
@@ -108,6 +110,15 @@ private constructor(
         launcher.dragController.addDragListener(this)
     }
 
+    @CallSuper
+    override fun showComposePopup(systemShortcuts: List<PopupItem>, deepShortcutCount: Int) {
+        super.showComposePopup(systemShortcuts, deepShortcutCount)
+        // TODO(b/469125127): UI views should not be triggering deep shortcut population.
+        if (ShortcutUtil.supportsDeepShortcuts(itemInfo)) {
+            loadAppShortcuts(itemInfo)
+        }
+    }
+
     /**
      * Populate and show shortcuts for the Launcher U app shortcut design. Will inflate the
      * container and shortcut View instances for the popup container.
@@ -152,16 +163,29 @@ private constructor(
         accessibilityPaneTitle = context.getString(R.string.action_deep_shortcut)
         // All views are added. Animate layout from now on.
         layoutTransition = LayoutTransition()
-        // Load the shortcuts on a background thread and update the container as it animates.
-        Executors.MODEL_EXECUTOR.handler.postAtFrontOfQueue(
-            PopupPopulator.createUpdateRunnable(
-                mActivityContext,
-                originalItemInfo,
-                Handler(context.mainLooper),
-                this,
-                deepShortcuts,
+
+        if (Flags.expandableLongPressMenu()) {
+            // Load the shortcuts on a background thread and update the container as it animates.
+            Executors.MODEL_EXECUTOR.handler.postAtFrontOfQueue(
+                PopupPopulator.createUpdateRunnable(
+                    mActivityContext,
+                    originalItemInfo,
+                    Handler(context.mainLooper),
+                    viewModel::onDeepShortcutsLoaded,
+                )
             )
-        )
+        } else {
+            // Load the shortcuts on a background thread and update the container as it animates.
+            Executors.MODEL_EXECUTOR.handler.postAtFrontOfQueue(
+                PopupPopulator.createUpdateRunnable(
+                    mActivityContext,
+                    originalItemInfo,
+                    Handler(context.mainLooper),
+                    this,
+                    deepShortcuts,
+                )
+            )
+        }
     }
 
     /**
@@ -388,7 +412,11 @@ private constructor(
 
             val container =
                 create<Launcher>(context = icon.context, originalView = icon, itemInfo = item)
-            container.populateAndShowRows(deepShortcutCount, emptyList())
+            if (Flags.expandableLongPressMenu()) {
+                container.showComposePopup(emptyList(), deepShortcutCount)
+            } else {
+                container.populateAndShowRows(deepShortcutCount, emptyList())
+            }
             container.requestFocus()
         }
 
