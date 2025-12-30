@@ -45,7 +45,6 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.os.Looper;
 import android.os.Trace;
 import android.text.InputType;
 import android.text.Selection;
@@ -186,10 +185,10 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
         return o instanceof ItemInfo info && willAcceptItemType(info.itemType);
     }
 
-    private Alarm mReorderAlarm = new Alarm(Looper.getMainLooper());
-    private Alarm mOnExitAlarm = new Alarm(Looper.getMainLooper());
-    private Alarm mOnScrollHintAlarm = new Alarm(Looper.getMainLooper());
-    private Alarm mScrollPauseAlarm = new Alarm(Looper.getMainLooper());
+    private Alarm mReorderAlarm = new Alarm(getContext().getMainLooper());
+    private Alarm mOnExitAlarm = new Alarm(getContext().getMainLooper());
+    private Alarm mOnScrollHintAlarm = new Alarm(getContext().getMainLooper());
+    private Alarm mScrollPauseAlarm = new Alarm(getContext().getMainLooper());
 
     final ArrayList<View> mItemsInReadingOrder = new ArrayList<View>();
 

@@ -16,7 +16,6 @@
 
 package com.android.launcher3.taskbar
 
-import android.app.PendingIntent
 import androidx.annotation.VisibleForTesting
 import com.android.launcher3.AsyncAnimatorPlaybackController
 import com.android.launcher3.statemanager.StatefulActivity
@@ -86,8 +85,6 @@ interface TaskbarManager {
     fun getTaskbarInteractor(displayId: Int): TaskbarInteractor?
 
     fun getTaskbarForDisplay(displayId: Int): TaskbarActivityContext?
-
-    fun createAllAppsPendingIntent(): PendingIntent
 
     fun getPrimaryDisplayId(): Int
 
