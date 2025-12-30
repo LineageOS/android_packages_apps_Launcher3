@@ -572,8 +572,8 @@ public class WidgetCell extends LinearLayout {
                     mItem.componentName.getPackageName(),
                     mItem.user);
             mIconLoadRequest = LauncherAppState.getInstance(getContext()).getIconCache()
-                    .updateIconInBackground(this::reapplyIconInfo, tmpPackageItem,
-                            DEFAULT_LOOKUP_FLAG);
+                    .updateIconInBackground(getContext().getMainExecutor(), this::reapplyIconInfo,
+                            tmpPackageItem, DEFAULT_LOOKUP_FLAG);
         }
     }
 

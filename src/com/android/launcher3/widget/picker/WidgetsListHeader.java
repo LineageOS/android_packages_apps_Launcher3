@@ -247,7 +247,8 @@ public final class WidgetsListHeader extends LinearLayout implements ItemInfoUpd
         }
         if (getTag() instanceof ItemInfoWithIcon info && info.getMatchingLookupFlag().useLowRes()) {
             mIconLoadRequest = LauncherAppState.getInstance(getContext()).getIconCache()
-                    .updateIconInBackground(this, info, DEFAULT_LOOKUP_FLAG);
+                    .updateIconInBackground(
+                            getContext().getMainExecutor(), this, info, DEFAULT_LOOKUP_FLAG);
         }
     }
 }

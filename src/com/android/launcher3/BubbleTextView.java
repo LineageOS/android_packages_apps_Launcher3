@@ -1479,7 +1479,8 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
                 mIconLoadRequest.cancel();
             }
             mIconLoadRequest = LauncherAppState.getInstance(getContext()).getIconCache()
-                    .updateIconInBackground(BubbleTextView.this, info, expectedFlag);
+                    .updateIconInBackground(getContext().getMainExecutor(), BubbleTextView.this,
+                            info, expectedFlag);
         }
     }
 

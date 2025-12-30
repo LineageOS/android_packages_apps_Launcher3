@@ -115,7 +115,6 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 /**
  * Class to manage taskbar lifecycle
@@ -1211,9 +1210,9 @@ public class TaskbarManagerImpl {
         private WeakReference<TaskbarManagerImpl> mWeakTaskbarManager;
 
         @Inject
-        AllAppsIntentSender(Provider<TaskbarManagerImpl> taskbarManagerProvider) {
+        AllAppsIntentSender(TaskbarManagerImpl taskbarManager) {
             getTaskbarUiThread().execute(() -> {
-                mWeakTaskbarManager = new WeakReference<>(taskbarManagerProvider.get());
+                mWeakTaskbarManager = new WeakReference<>(taskbarManager);
             });
         }
 

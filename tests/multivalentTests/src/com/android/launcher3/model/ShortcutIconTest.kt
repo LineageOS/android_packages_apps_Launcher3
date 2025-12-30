@@ -36,6 +36,7 @@ import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.shortcuts.ShortcutKey
 import com.android.launcher3.testutil.rule.LayoutResource
 import com.android.launcher3.util.Executors
+import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.LauncherLayoutBuilder
 import com.android.launcher3.util.LauncherModelHelper.SHORTCUT_ID
 import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
@@ -130,6 +131,7 @@ class ShortcutIconTest {
         }
         val updateLock = CountDownLatch(1)
         state.iconCache.updateIconInBackground(
+            MAIN_EXECUTOR,
             { updateLock.countDown() },
             getPinnedInfo(),
             DEFAULT_LOOKUP_FLAG.withThemeIcon(),
