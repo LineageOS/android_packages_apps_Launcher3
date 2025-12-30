@@ -107,7 +107,7 @@ private fun HighResAppIcon(
     Box(modifier = Modifier.size(size.iconSize)) {
         Icon(
             bitmap = icon.bitmap.asImageBitmap(),
-            modifier = Modifier.fillMaxSize().then(clipModifier).fadeInWhenVisible("WidgetAppIcon"),
+            modifier = Modifier.fillMaxSize().fadeInWhenVisible("WidgetAppIcon").then(clipModifier),
             contentDescription = null,
             tint = Color.Unspecified,
         )
@@ -162,13 +162,13 @@ private fun BoxScope.DrawableAppIconBadge(
             Modifier.offset { scaleOffset }
                 .align(alignment = Alignment.BottomEnd)
                 .size(size.badgeSize)
+                .fadeInWhenVisible("WidgetAppIcon")
                 .shadow(
                     elevation = ShadowElevation,
                     shape = badgeShape,
                     ambientColor = ShadowAmbientColor,
                 )
-                .background(color = Color.White, shape = badgeShape)
-                .fadeInWhenVisible("WidgetAppIcon"),
+                .background(color = Color.White, shape = badgeShape),
         contentDescription = null,
         tint = colorResource(badge.tintColor),
     )

@@ -51,6 +51,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -114,6 +115,8 @@ fun TitledBottomSheet(
     onDismissSheet: () -> Unit,
     content: @Composable () -> Unit,
 ) {
+    var scrimAlpha by remember { mutableFloatStateOf(0f) }
+
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
         val density = LocalDensity.current
         val accessibilityState = LocalAccessibilityState.current
@@ -122,6 +125,13 @@ fun TitledBottomSheet(
             with(density) {
                 LocalWindowInfo.current.containerSize.let { it.width.toDp() to it.height.toDp() }
             }
+
+        Box( // scrim
+            modifier =
+                Modifier.fillMaxSize()
+                    .alpha(scrimAlpha)
+                    .background(WidgetPickerTheme.colors.sheetBackgroundScrim)
+        )
 
         BoxWithConstraints(
             modifier =
@@ -152,11 +162,18 @@ fun TitledBottomSheet(
                         .fillMaxSize()
                         .dismissibleSheet(
                             sheetState = sheetState,
-                            onSheetProgress = onSheetProgress,
+                            onSheetProgress = { progress ->
+                                onSheetProgress(progress)
+                                scrimAlpha = progress
+                            },
                             onSheetOpen = onSheetOpen,
                             onDismissSheet = onDismissSheet,
                             maxHeight = with(density) { maxHeight.toPx() },
                             enableNestedScrolling = !accessibilityState.isEnabled,
+                        )
+                        .background(
+                            color = WidgetPickerTheme.colors.sheetBackgroundBottomLayer,
+                            shape = sheetShape,
                         ),
                 color = WidgetPickerTheme.colors.sheetBackground,
                 shape = sheetShape,

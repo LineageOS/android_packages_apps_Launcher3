@@ -19,6 +19,7 @@ package com.android.launcher3.widgetpicker.theme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.res.colorResource
 import com.android.launcher3.R
 import com.android.launcher3.widgetpicker.ui.theme.WidgetPickerColors
@@ -28,10 +29,30 @@ import com.android.launcher3.widgetpicker.ui.theme.WidgetPickerColors
  * [WidgetPickerColors] accepted by the widget picker module.
  */
 @Composable
-fun darkWidgetPickerColors() =
-    WidgetPickerColors(
+fun darkWidgetPickerColors(
+    supportsBlurTokens: Boolean,
+    isBlurEnabled: Boolean,
+): WidgetPickerColors {
+    val sheetBackgroundBottomLayer =
+        when {
+            supportsBlurTokens && isBlurEnabled -> {
+                val layerFg = colorResource(R.color.widget_picker_blur_fg_dark)
+                val layerBg = colorResource(R.color.widget_picker_blur_bg_dark)
+                layerFg.compositeOver(layerBg)
+            }
+
+            supportsBlurTokens && !isBlurEnabled ->
+                colorResource(R.color.widget_picker_blur_fallback_dark)
+
+            else -> Color.Transparent
+        }
+
+    return WidgetPickerColors(
         // Bottom Sheet
         sheetBackground = colorResource(R.color.widget_picker_primary_surface_color_dark),
+        sheetBackgroundBottomLayer = sheetBackgroundBottomLayer,
+        sheetBackgroundScrim =
+            colorResource(R.color.widget_picker_sheet_background_bottom_layer_dark),
         dragHandle = colorResource(R.color.widget_picker_collapse_handle_color_dark),
         sheetTitle = colorResource(R.color.widget_picker_title_color_dark),
         sheetDescription = colorResource(R.color.widget_picker_description_color_dark),
@@ -108,16 +129,37 @@ fun darkWidgetPickerColors() =
         searchBarCursor = colorResource(R.color.widget_picker_search_cursor_color_dark),
         focusOutline = colorResource(R.color.widget_picker_focus_outline_color_dark),
     )
+}
 
 /**
  * An adapter that maps the resource tokens for widget picker light colors to the
  * [WidgetPickerColors] accepted by the widget picker module
  */
 @Composable
-fun lightWidgetPickerColors() =
-    WidgetPickerColors(
+fun lightWidgetPickerColors(
+    supportsBlurTokens: Boolean,
+    isBlurEnabled: Boolean,
+): WidgetPickerColors {
+    val sheetBackgroundBottomLayer =
+        when {
+            supportsBlurTokens && isBlurEnabled -> {
+                val layerFg = colorResource(R.color.widget_picker_blur_fg_light)
+                val layerBg = colorResource(R.color.widget_picker_blur_bg_light)
+                layerFg.compositeOver(layerBg)
+            }
+
+            supportsBlurTokens && !isBlurEnabled ->
+                colorResource(R.color.widget_picker_blur_fallback_light)
+
+            else -> Color.Transparent
+        }
+
+    return WidgetPickerColors(
         // Bottom Sheet
         sheetBackground = colorResource(R.color.widget_picker_primary_surface_color_light),
+        sheetBackgroundBottomLayer = sheetBackgroundBottomLayer,
+        sheetBackgroundScrim =
+            colorResource(R.color.widget_picker_sheet_background_bottom_layer_light),
         dragHandle = colorResource(R.color.widget_picker_collapse_handle_color_light),
         sheetTitle = colorResource(R.color.widget_picker_title_color_light),
         sheetDescription = colorResource(R.color.widget_picker_description_color_light),
@@ -197,3 +239,4 @@ fun lightWidgetPickerColors() =
         searchBarCursor = colorResource(R.color.widget_picker_search_cursor_color_light),
         focusOutline = colorResource(R.color.widget_picker_focus_outline_color_light),
     )
+}

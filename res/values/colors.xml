@@ -104,12 +104,20 @@
     <color name="blur_shade_panel_bg">#1AFFFFFF</color>
     <color name="work_turn_on_stroke">?android:attr/colorAccent</color>
 
+    <color name="widget_picker_secondary_surface_color_light">
+        @color/system_surface_bright_light</color>
+    <color name="widget_picker_menu_options_color_light">
+        @color/system_on_surface_variant_light
+    </color>
+
+    <color name="widget_picker_blur_fg_light">@color/blur_shade_panel_fg</color>
+    <color name="widget_picker_blur_bg_light">@color/blur_shade_panel_bg</color>
+    <color name="widget_picker_blur_fallback_light">@android:color/system_accent2_200</color>
     <color name="widget_picker_focus_outline_color_light">@color/system_secondary_light</color>
     <color name="widget_picker_primary_surface_color_light">@color/system_surface_container_light</color>
-    <color name="widget_picker_secondary_surface_color_light">#FAF9F8</color>
+    <color name="widget_picker_sheet_background_bottom_layer_light">@android:color/transparent</color>
     <color name="widget_picker_title_color_light">@color/system_on_surface_light</color>
     <color name="widget_picker_description_color_light">@color/system_on_surface_variant_light</color>
-    <color name="widget_picker_menu_options_color_light">@color/system_on_surface_variant_light</color>
     <color name="widget_picker_header_app_title_color_light">@color/system_on_surface_light</color>
     <color name="widget_picker_header_app_subtitle_color_light">@color/system_on_surface_variant_light</color>
     <color name="widget_picker_selected_header_app_title_color_light">@color/system_on_secondary_container_light</color>
@@ -186,8 +194,12 @@
     <color name="widget_cell_subtitle_color_light">@color/system_on_surface_variant_light</color>
 
     <color name="widget_picker_focus_outline_color_dark">@color/system_secondary_dark</color>
+    <color name="widget_picker_blur_fg_dark">@color/blur_shade_panel_fg</color>
+    <color name="widget_picker_blur_bg_dark">@color/blur_shade_panel_bg</color>
+    <color name="widget_picker_blur_fallback_dark">@android:color/system_accent2_800</color>
     <color name="widget_picker_primary_surface_color_dark">@color/system_surface_container_dark</color>
-    <color name="widget_picker_secondary_surface_color_dark">#393939</color>
+    <color name="widget_picker_sheet_background_bottom_layer_dark">@android:color/transparent</color>
+    <color name="widget_picker_secondary_surface_color_dark">@color/system_surface_bright_dark</color>
     <color name="widget_picker_title_color_dark">@color/system_on_surface_dark</color>
     <color name="widget_picker_description_color_dark">@color/system_on_surface_variant_dark</color>
     <color name="widget_picker_menu_options_color_dark">@color/system_on_surface_variant_dark</color>
