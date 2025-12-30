@@ -32,6 +32,7 @@ import org.junit.runner.Description
 import org.junit.runners.model.Statement
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mockingDetails
 import org.mockito.kotlin.stub
 import org.mockito.kotlin.whenever
 
@@ -134,7 +135,9 @@ class TaskbarModeRule(private val context: TaskbarWindowSandboxContext) : TestRu
                     if (wmProxy is TestWindowManagerProxy) {
                         wmProxy.setNavigationMode(navMode)
                     } else {
-                        wmProxy.convertToSpy()
+                        if (!mockingDetails(wmProxy).run { isMock || isSpy }) {
+                            wmProxy.convertToSpy()
+                        }
                         doReturn(navMode).whenever(wmProxy).getNavigationMode(any())
                     }
                     context.appComponent.displayController.notifyConfigChange(DEFAULT_DISPLAY)

@@ -150,7 +150,7 @@ open class QuickstepWidgetPickerActivity : WidgetPickerActivity(), WidgetPickerP
     }
 
     private fun updateServiceState(isEnabled: Boolean) {
-        if (DisplayController.showDesktopTaskbarForFreeformDisplay(this)) {
+        if (DisplayController.getInfo(this).showDesktopTaskbarForFreeformDisplay) {
             // Avoid blocking gestures when taskbar is always shown. Gestures should still allow
             // user to return home in this case.
             return
