@@ -50,9 +50,9 @@ import com.android.launcher3.automation.AutomationChange
 import com.android.launcher3.automation.AutomationRepository
 import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.dagger.DisplayId
+import com.android.launcher3.display.DisplayController
 import com.android.launcher3.statehandlers.DesktopVisibilityController.Companion.INACTIVE_DESK_ID
 import com.android.launcher3.statemanager.BaseState
-import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.IntArray
 import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.SafeCloseable

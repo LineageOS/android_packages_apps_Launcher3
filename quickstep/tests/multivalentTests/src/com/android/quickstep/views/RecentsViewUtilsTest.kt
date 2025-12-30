@@ -24,7 +24,7 @@ import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.automation.AutomationRepository
-import com.android.launcher3.util.DisplayController
+import com.android.launcher3.display.DisplayController
 import com.android.launcher3.util.MutableListenableStream
 import com.android.launcher3.util.SplitConfigurationOptions
 import com.android.launcher3.util.TransformingTouchDelegate

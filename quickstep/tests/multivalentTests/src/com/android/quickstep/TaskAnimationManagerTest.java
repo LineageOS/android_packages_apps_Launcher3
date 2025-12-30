@@ -55,8 +55,8 @@ import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.app.displaylib.fakes.FakePerDisplayRepository;
+import com.android.launcher3.display.DisplayController;
 import com.android.launcher3.uioverrides.QuickstepLauncher;
-import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.Executors;
 import com.android.quickstep.views.RecentsView;
 import com.android.systemui.shared.system.RecentsAnimationControllerCompat;

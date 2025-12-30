@@ -31,6 +31,7 @@ import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.TASKBAR_PINNING
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
+import com.android.launcher3.display.DisplayController
 import com.android.launcher3.display.LauncherDisplayInfo
 import com.android.launcher3.display.LauncherDisplayInfo.Companion.CHANGE_DENSITY
 import com.android.launcher3.display.LauncherDisplayInfo.Companion.CHANGE_ROTATION

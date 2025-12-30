@@ -74,6 +74,7 @@ import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.dagger.PerDisplayComponent
 import com.android.launcher3.dagger.WindowContext
 import com.android.launcher3.desktop.DesktopRecentsTransitionController
+import com.android.launcher3.display.DisplayController
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.statemanager.StateManager
 import com.android.launcher3.statemanager.StateManager.AtomicAnimationFactory
@@ -84,7 +85,6 @@ import com.android.launcher3.testing.shared.TestProtocol.LAUNCHER_ACTIVITY_STOPP
 import com.android.launcher3.testing.shared.TestProtocol.SEQUENCE_MAIN
 import com.android.launcher3.util.ActivityOptionsWrapper
 import com.android.launcher3.util.DaggerSingletonObject
-import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.LooperExecutor
 import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.SafeCloseable

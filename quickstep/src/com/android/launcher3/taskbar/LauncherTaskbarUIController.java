@@ -49,12 +49,12 @@ import com.android.launcher3.LauncherUiState;
 import com.android.launcher3.LauncherUiStateUtil;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.anim.AnimatedFloat;
+import com.android.launcher3.display.DisplayController;
 import com.android.launcher3.logging.InstanceId;
 import com.android.launcher3.logging.InstanceIdSequence;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.taskbar.bubbles.BubbleBarController;
 import com.android.launcher3.taskbar.bubbles.BubbleControllers;
-import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.ImmediateAnimator;
 import com.android.launcher3.util.MultiPropertyFactory;
 import com.android.launcher3.util.OnboardingPrefs;
@@ -295,7 +295,8 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
         if (taskbarContext.showLockedTaskbarOnHome()
                 && !taskbarContext.showDesktopTaskbarForFreeformDisplay()
                 && taskbarContext.isPrimaryDisplay()) {
-            DisplayController.INSTANCE.get(taskbarContext).notifyConfigChange();
+            DisplayController.INSTANCE.get(taskbarContext)
+                    .notifyConfigChange(taskbarContext.getDisplayId());
         }
 
         if (android.view.accessibility.Flags.launcherAppDisplayProgressUpdateOnVisibilityChange()) {

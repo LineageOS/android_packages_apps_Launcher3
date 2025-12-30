@@ -22,9 +22,9 @@ import android.os.Build
 import android.util.ArrayMap
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.InvariantDeviceProfile.DeviceType
+import com.android.launcher3.display.DisplayController
 import com.android.launcher3.display.LauncherDisplayInfo
 import com.android.launcher3.testing.shared.ResourceUtils
-import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.window.WindowManagerProxy.MIN_TABLET_WIDTH
 import java.util.Locale
 import kotlin.math.min

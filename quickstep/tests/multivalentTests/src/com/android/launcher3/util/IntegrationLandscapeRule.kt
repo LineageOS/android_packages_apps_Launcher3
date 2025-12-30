@@ -22,6 +22,7 @@ import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherPrefs
+import com.android.launcher3.display.DisplayController
 import com.android.launcher3.integration.util.LauncherActivityScenarioRule
 import org.junit.rules.TestRule
 import org.junit.runner.Description

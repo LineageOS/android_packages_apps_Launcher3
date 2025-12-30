@@ -29,7 +29,7 @@ import android.window.TransitionInfo
 import androidx.core.util.Supplier
 import com.android.app.animation.Interpolators
 import com.android.internal.jank.Cuj
-import com.android.launcher3.util.DisplayController
+import com.android.launcher3.display.DisplayController
 import com.android.quickstep.RemoteRunnable
 import com.android.wm.shell.shared.animation.WindowAnimator
 import java.util.concurrent.Executor

@@ -60,12 +60,12 @@ import com.android.launcher3.ShortcutAndWidgetContainer;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.Workspace;
 import com.android.launcher3.dagger.LauncherComponentProvider;
+import com.android.launcher3.display.DisplayController;
 import com.android.launcher3.display.LauncherDisplayInfo;
 import com.android.launcher3.dragndrop.DragLayer;
 import com.android.launcher3.icons.ClockDrawableWrapper;
 import com.android.launcher3.testing.shared.TestProtocol;
 import com.android.launcher3.util.ActivityLifecycleCallbacksAdapter;
-import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.TaskbarModeUtil;
 import com.android.launcher3.widget.picker.WidgetsFullSheet;
 

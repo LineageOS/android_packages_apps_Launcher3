@@ -28,6 +28,7 @@ import com.android.launcher3.R
 import com.android.launcher3.Utilities
 import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.dagger.ApplicationContext
+import com.android.launcher3.display.DisplayController
 import com.android.launcher3.display.LauncherDisplayInfo
 import com.android.launcher3.graphics.ThemeManager
 import com.android.launcher3.icons.BaseIconFactory.IconOptions
@@ -37,7 +38,6 @@ import com.android.launcher3.icons.cache.AppInfoCachingLogic
 import com.android.launcher3.pm.UserCache
 import com.android.launcher3.util.CancellableTask
 import com.android.launcher3.util.DaggerSingletonTracker
-import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.SimpleThreadFactory
 import com.android.launcher3.util.PostUnlockObject

@@ -23,7 +23,7 @@ import android.window.RemoteTransition
 import android.window.TransitionFilter
 import com.android.internal.jank.Cuj
 import com.android.launcher3.desktop.DesktopAppLaunchTransition.AppLaunchType
-import com.android.launcher3.util.DisplayController
+import com.android.launcher3.display.DisplayController
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.quickstep.SystemUiProxy
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
