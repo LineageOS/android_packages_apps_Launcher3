@@ -22,6 +22,7 @@ import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import com.android.launcher3.views.ActivityContext
 
 /**
  * A helper class that enables box selection within a [ViewGroup].
@@ -34,23 +35,19 @@ import android.view.ViewGroup
  * @param host The [BoxSelectionHost] that will respond to selection events.
  */
 class BoxSelectionHelper(
-    private val host: BoxSelectionHost,
-    private val workspaceSelectionManager: WorkspaceSelectionManager,
+    private val activityContext: ActivityContext,
+    private val targetView: View,
 ) {
-    private val selectionRect = RectF()
     private var boxSelectionView: View? = null
 
     // Coordinates where the touch down event occurred.
     private var downX = 0f
     private var downY = 0f
 
-    /** Interface for listening to box selection events. */
-    interface BoxSelectionHost {
-        /** Returns the [ViewGroup] to which the selection overlay should be added. */
-        fun getBoxSelectionHostContainer(): ViewGroup?
-    }
-
     private fun isSelecting() = boxSelectionView != null
+
+    private fun workspaceSelectionManager() =
+        activityContext.activityComponent.workspaceSelectionManager
 
     /**
      * Handles touch events for initiating and managing box selection.
@@ -79,7 +76,7 @@ class BoxSelectionHelper(
                 endSelection()
             }
             MotionEvent.ACTION_CANCEL -> {
-                workspaceSelectionManager.updateBoxSelection(Rect())
+                workspaceSelectionManager().updateBoxSelection(Rect())
                 endSelection()
             }
             else -> {
@@ -98,13 +95,12 @@ class BoxSelectionHelper(
     }
 
     private fun startSelection(ev: MotionEvent) {
-        val hostContainer = host.getBoxSelectionHostContainer() ?: return
-
-        workspaceSelectionManager.startBoxSelection((ev.metaState and KeyEvent.META_SHIFT_ON) != 0)
+        workspaceSelectionManager()
+            .startBoxSelection((ev.metaState and KeyEvent.META_SHIFT_ON) != 0)
 
         boxSelectionView =
             createBoxSelectionView().also {
-                hostContainer.addView(it)
+                activityContext.getDragLayer().addView(it)
                 it.visibility = View.VISIBLE
             }
         downX = ev.x
@@ -115,36 +111,44 @@ class BoxSelectionHelper(
     }
 
     private fun updateSelection(ev: MotionEvent) {
-        boxSelectionView?.let { view ->
-            selectionRect.set(downX, downY, ev.x, ev.y)
-
-            // Create a sorted rect for drawing and selection.
-            val sortedRectF = RectF(selectionRect)
+        boxSelectionView?.let { boxView ->
+            // selectionRect is in the local coordinate space of 'view' (the Folder or Workspace)
+            val sortedRectF = RectF(downX, downY, ev.x, ev.y)
             sortedRectF.sort()
 
-            view.x = sortedRectF.left
-            view.y = sortedRectF.top
-            val lp = view.layoutParams ?: ViewGroup.LayoutParams(0, 0)
+            // Clip the selection rectangle to the bounds of the view itself.
+            sortedRectF.left = sortedRectF.left.coerceAtLeast(0f)
+            sortedRectF.top = sortedRectF.top.coerceAtLeast(0f)
+            sortedRectF.right = sortedRectF.right.coerceAtMost(targetView.width.toFloat())
+            sortedRectF.bottom = sortedRectF.bottom.coerceAtMost(targetView.height.toFloat())
+
+            // Translate the clipped, local coordinates to the host container's (DragLayer)
+            // coordinates.
+            boxView.x = sortedRectF.left + targetView.x
+            boxView.y = sortedRectF.top + targetView.y
+            val lp = boxView.layoutParams ?: ViewGroup.LayoutParams(0, 0)
             lp.width = sortedRectF.width().toInt()
             lp.height = sortedRectF.height().toInt()
-            view.layoutParams = lp
+            boxView.layoutParams = lp
 
             val resultRect = Rect()
-            sortedRectF.round(resultRect)
+            val screenRectF =
+                RectF(boxView.x, boxView.y, boxView.x + lp.width, boxView.y + lp.height)
+            screenRectF.round(resultRect)
 
             // Notify the host about the selection update.
-            workspaceSelectionManager.updateBoxSelection(resultRect)
+            workspaceSelectionManager().updateBoxSelection(resultRect)
         }
     }
 
     private fun endSelection() {
-        host.getBoxSelectionHostContainer()?.removeView(boxSelectionView)
+        activityContext.getDragLayer().removeView(boxSelectionView)
         boxSelectionView = null
-        workspaceSelectionManager.endBoxSelection()
+        workspaceSelectionManager().endBoxSelection()
     }
 
     private fun createBoxSelectionView(): View {
-        val context = host.getBoxSelectionHostContainer()?.context
+        val context = activityContext as android.content.Context
         return View(context).apply {
             // Set background to opaque white and use view's alpha for opacity.
             setBackgroundColor(BACKGROUND_COLOR)

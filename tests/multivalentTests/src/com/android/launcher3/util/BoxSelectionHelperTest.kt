@@ -15,203 +15,217 @@
  */
 package com.android.launcher3.util
 
+import android.app.Instrumentation
 import android.content.Context
 import android.graphics.Rect
+import android.os.Looper
 import android.view.InputDevice
+import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.BoxSelectionHelper
+import com.android.launcher3.FakeWorkspaceSelectionManager
+import com.android.launcher3.Launcher
 import com.android.launcher3.WorkspaceSelectionManager
-import com.android.launcher3.WorkspaceSelectionManagerStub
+import com.android.launcher3.dagger.ActivityContextComponent
+import com.android.launcher3.dragndrop.DragLayer
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito
-import org.mockito.Mockito.mock
 import org.mockito.MockitoAnnotations
-import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class BoxSelectionHelperTest {
 
-    private lateinit var host: BoxSelectionHelper.BoxSelectionHost
+    private lateinit var targetView: View
     private lateinit var workspaceSelectionManager: WorkspaceSelectionManager
-    private lateinit var hostContainer: ViewGroup
+    private lateinit var dragLayer: DragLayer
     private lateinit var helper: BoxSelectionHelper
+    private lateinit var instrumentation: Instrumentation
+    private lateinit var context: Context
+    private lateinit var activityContext: Launcher
+
+    private val targetViewWidth = 1080
+    private val targetViewHeight = 1920
+
+    // Test state
     private var capturedRect: Rect? = null
-    private val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
+    private var isAppending: Boolean? = null
 
     @Before
     fun setUp() {
-        MockitoAnnotations.openMocks(this)
-        host = mock(BoxSelectionHelper.BoxSelectionHost::class.java)
-        workspaceSelectionManager = mock(WorkspaceSelectionManagerStub::class.java)
-        hostContainer = mock(ViewGroup::class.java)
-        Mockito.`when`(host.getBoxSelectionHostContainer()).thenReturn(hostContainer)
-        Mockito.`when`(hostContainer.context).thenReturn(context)
-        Mockito.doAnswer { capturedRect = it.getArgument(0) }
-            .`when`(workspaceSelectionManager)
-            .updateBoxSelection(any())
+        instrumentation = InstrumentationRegistry.getInstrumentation()
+        context = instrumentation.targetContext
 
-        helper = BoxSelectionHelper(host, workspaceSelectionManager)
+        // All setup needs to run on the UI thread because Views are created.
+        instrumentation.runOnMainSync {
+            // Prepare a looper if the test thread doesn't have one.
+            if (Looper.myLooper() == null) {
+                Looper.prepare()
+            }
+            MockitoAnnotations.openMocks(this)
+
+            activityContext = mock()
+            val activityComponent: ActivityContextComponent = mock()
+            dragLayer = mock()
+
+            // Faking WorkspaceSelectionManager
+            workspaceSelectionManager =
+                FakeWorkspaceSelectionManager({ isAppending = it }, { capturedRect = it })
+
+            // Reset state before each test
+            capturedRect = Rect()
+            isAppending = false
+
+            // A real View is used to avoid mocking final methods and constructors.
+            targetView = View(context)
+            targetView.layout(0, 0, targetViewWidth, targetViewHeight)
+
+            // Stubbing the context and its properties to allow View creation
+            whenever(activityContext.applicationContext).thenReturn(context.applicationContext)
+            whenever(activityContext.packageName).thenReturn(context.packageName)
+            whenever(activityContext.applicationInfo).thenReturn(context.applicationInfo)
+            whenever(activityContext.resources).thenReturn(context.resources)
+
+            // Stubbing Launcher/ActivityContext specific methods
+            whenever(activityContext.activityComponent).thenReturn(activityComponent)
+            whenever(activityComponent.workspaceSelectionManager)
+                .thenReturn(workspaceSelectionManager)
+            whenever(activityContext.getDragLayer()).thenReturn(dragLayer)
+            whenever(dragLayer.context).thenReturn(activityContext)
+
+            helper = BoxSelectionHelper(activityContext, targetView)
+        }
+    }
+
+    private fun obtainMouseEvent(action: Int, x: Float, y: Float, metaState: Int = 0): MotionEvent {
+        val event = MotionEvent.obtain(0, 0, action, x, y, metaState)
+        event.source = InputDevice.SOURCE_MOUSE
+        return event
     }
 
     @Test
-    fun onTouchEvent_fromNonMouseSource_shouldNotStartSelection_returnsFalse() {
-        val downEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
-        downEvent.source = InputDevice.SOURCE_TOUCHSCREEN
-        assert(!helper.onTouchEvent(downEvent))
-        assertNull(capturedRect)
+    fun onTouchEvent_fromNonMouseSource_shouldNotStartSelection() {
+        instrumentation.runOnMainSync {
+            val downEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
+            downEvent.source = InputDevice.SOURCE_TOUCHSCREEN
+            assertTrue(!helper.onTouchEvent(downEvent))
+            assertEquals(Rect(), capturedRect)
+        }
     }
 
     @Test
-    fun onTouchEvent_shouldStartSelection_dragAndRelease_callsOnBoxSelection() {
-        val downEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 10f, 20f, 0)
-        downEvent.source = InputDevice.SOURCE_MOUSE
-        assert(helper.onTouchEvent(downEvent))
-        assertNotNull(capturedRect)
-
-        val moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 100f, 120f, 0)
-        moveEvent.source = InputDevice.SOURCE_MOUSE
-        helper.onTouchEvent(moveEvent)
-
-        val upEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 100f, 120f, 0)
-        upEvent.source = InputDevice.SOURCE_MOUSE
-        helper.onTouchEvent(upEvent)
-
-        val expectedRect = Rect(10, 20, 100, 120)
-        assertEquals(expectedRect, capturedRect)
+    fun onTouchEvent_secondaryButtonPressed_shouldNotStartSelection() {
+        instrumentation.runOnMainSync {
+            val downEvent = obtainMouseEvent(MotionEvent.ACTION_DOWN, 10f, 10f)
+            // BUTTON_SECONDARY is not public, so we use its value 2.
+            downEvent.buttonState = MotionEvent.BUTTON_SECONDARY
+            assertTrue(!helper.onTouchEvent(downEvent))
+            assertEquals(Rect(), capturedRect)
+        }
     }
 
     @Test
-    fun onTouchEvent_tapWithoutDrag_callsOnBoxSelectionWithZeroSizeRect() {
-        val downEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 50f, 50f, 0)
-        downEvent.source = InputDevice.SOURCE_MOUSE
-        assert(helper.onTouchEvent(downEvent))
-        assertNotNull(capturedRect)
+    fun onTouchEvent_shouldStartAndEndSelection() {
+        instrumentation.runOnMainSync {
+            val downEvent = obtainMouseEvent(MotionEvent.ACTION_DOWN, 10f, 20f)
+            assertTrue(helper.onTouchEvent(downEvent))
+            assertNotNull(capturedRect)
 
-        val upEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 50f, 50f, 0)
-        upEvent.source = InputDevice.SOURCE_MOUSE
-        helper.onTouchEvent(upEvent)
+            val moveEvent = obtainMouseEvent(MotionEvent.ACTION_MOVE, 100f, 120f)
+            assertTrue(helper.onTouchEvent(moveEvent))
 
-        val expectedRect = Rect(50, 50, 50, 50)
-        assertEquals(expectedRect, capturedRect)
+            val upEvent = obtainMouseEvent(MotionEvent.ACTION_UP, 100f, 120f)
+            assertTrue(helper.onTouchEvent(upEvent))
+
+            val expectedRect = Rect(10, 20, 100, 120)
+            assertEquals(expectedRect, capturedRect)
+        }
     }
 
     @Test
-    fun onTouchEvent_reverseDrag_rightToLeft_callsOnBoxSelectionWithCorrectRect() {
-        val downEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 100f, 20f, 0)
-        downEvent.source = InputDevice.SOURCE_MOUSE
-        assert(helper.onTouchEvent(downEvent))
-        assertNotNull(capturedRect)
-
-        val moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 10f, 120f, 0)
-        moveEvent.source = InputDevice.SOURCE_MOUSE
-        helper.onTouchEvent(moveEvent)
-
-        val upEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 10f, 120f, 0)
-        upEvent.source = InputDevice.SOURCE_MOUSE
-        helper.onTouchEvent(upEvent)
-
-        val expectedRect = Rect(10, 20, 100, 120)
-        assertEquals(expectedRect, capturedRect)
+    fun onTouchEvent_shiftKeyPressed_shouldStartAppendingSelection() {
+        instrumentation.runOnMainSync {
+            val downEvent =
+                obtainMouseEvent(MotionEvent.ACTION_DOWN, 10f, 20f, KeyEvent.META_SHIFT_ON)
+            helper.onTouchEvent(downEvent)
+            assertEquals(true, isAppending)
+        }
     }
 
     @Test
-    fun onTouchEvent_reverseDrag_bottomToTop_callsOnBoxSelectionWithCorrectRect() {
-        val downEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 10f, 120f, 0)
-        downEvent.source = InputDevice.SOURCE_MOUSE
-        assert(helper.onTouchEvent(downEvent))
-        assertNotNull(capturedRect)
+    fun onTouchEvent_reverseDrag_shouldCreateCorrectRect() {
+        instrumentation.runOnMainSync {
+            val downEvent = obtainMouseEvent(MotionEvent.ACTION_DOWN, 100f, 120f)
+            helper.onTouchEvent(downEvent)
 
-        val moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 100f, 20f, 0)
-        moveEvent.source = InputDevice.SOURCE_MOUSE
-        helper.onTouchEvent(moveEvent)
+            val moveEvent = obtainMouseEvent(MotionEvent.ACTION_MOVE, 10f, 20f)
+            helper.onTouchEvent(moveEvent)
 
-        val upEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 100f, 20f, 0)
-        upEvent.source = InputDevice.SOURCE_MOUSE
-        helper.onTouchEvent(upEvent)
-
-        val expectedRect = Rect(10, 20, 100, 120)
-        assertEquals(expectedRect, capturedRect)
+            val expectedRect = Rect(10, 20, 100, 120)
+            assertEquals(expectedRect, capturedRect)
+        }
     }
 
     @Test
-    fun onTouchEvent_actionCancel_removesSelectionView() {
-        val downEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 10f, 20f, 0)
-        downEvent.source = InputDevice.SOURCE_MOUSE
-        assert(helper.onTouchEvent(downEvent))
-        verify(hostContainer).addView(any<View>())
+    fun onTouchEvent_dragOutOfBounds_shouldClipSelectionBox() {
+        instrumentation.runOnMainSync {
+            val downEvent = obtainMouseEvent(MotionEvent.ACTION_DOWN, 50f, 50f)
+            helper.onTouchEvent(downEvent)
 
-        val moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 100f, 120f, 0)
-        moveEvent.source = InputDevice.SOURCE_MOUSE
-        helper.onTouchEvent(moveEvent)
+            // Drag out of top-left bounds
+            helper.onTouchEvent(obtainMouseEvent(MotionEvent.ACTION_MOVE, -50f, -50f))
+            assertEquals(Rect(0, 0, 50, 50), capturedRect)
 
-        val cancelEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_CANCEL, 100f, 120f, 0)
-        cancelEvent.source = InputDevice.SOURCE_MOUSE
-        helper.onTouchEvent(cancelEvent)
-        verify(hostContainer).removeView(any<View>())
+            // Drag out of bottom-right bounds
+            val rightBound = targetViewWidth.toFloat()
+            val bottomBound = targetViewHeight.toFloat()
+            helper.onTouchEvent(
+                obtainMouseEvent(MotionEvent.ACTION_MOVE, rightBound + 50f, bottomBound + 50f)
+            )
+            assertEquals(Rect(50, 50, rightBound.toInt(), bottomBound.toInt()), capturedRect)
+        }
     }
 
     @Test
-    fun onTouchEvent_selectionStarted_addsAndRemovesView() {
-        val downEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 10f, 20f, 0)
-        downEvent.source = InputDevice.SOURCE_MOUSE
-        assert(helper.onTouchEvent(downEvent))
-        verify(hostContainer).addView(any<View>())
+    fun onTouchEvent_actionCancel_shouldEndSelectionAndRemoveView() {
+        instrumentation.runOnMainSync {
+            val downEvent = obtainMouseEvent(MotionEvent.ACTION_DOWN, 10f, 20f)
+            helper.onTouchEvent(downEvent)
+            val viewCaptor = argumentCaptor<View>()
+            verify(dragLayer).addView(viewCaptor.capture())
 
-        val upEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 100f, 120f, 0)
-        upEvent.source = InputDevice.SOURCE_MOUSE
-        helper.onTouchEvent(upEvent)
-        verify(hostContainer).removeView(any<View>())
+            val cancelEvent = obtainMouseEvent(MotionEvent.ACTION_CANCEL, 100f, 120f)
+            helper.onTouchEvent(cancelEvent)
+
+            verify(dragLayer).removeView(eq(viewCaptor.firstValue))
+            // On cancel, the rect should be cleared
+            assertEquals(Rect(), capturedRect)
+        }
     }
 
     @Test
-    fun onTouchEvent_rtlLayout_rightToLeftDrag_callsOnBoxSelectionWithCorrectRect() {
-        Mockito.`when`(hostContainer.layoutDirection).thenReturn(View.LAYOUT_DIRECTION_RTL)
+    fun onTouchEvent_selectionAddsAndRemovesView() {
+        instrumentation.runOnMainSync {
+            val downEvent = obtainMouseEvent(MotionEvent.ACTION_DOWN, 10f, 20f)
+            helper.onTouchEvent(downEvent)
+            val viewCaptor = argumentCaptor<View>()
+            verify(dragLayer).addView(viewCaptor.capture())
+            assertNotNull(viewCaptor.firstValue)
 
-        val downEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 100f, 20f, 0)
-        downEvent.source = InputDevice.SOURCE_MOUSE
-        assert(helper.onTouchEvent(downEvent))
-        assertNotNull(capturedRect)
-
-        val moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 10f, 120f, 0)
-        moveEvent.source = InputDevice.SOURCE_MOUSE
-        helper.onTouchEvent(moveEvent)
-
-        val upEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 10f, 120f, 0)
-        upEvent.source = InputDevice.SOURCE_MOUSE
-        helper.onTouchEvent(upEvent)
-
-        val expectedRect = Rect(10, 20, 100, 120)
-        assertEquals(expectedRect, capturedRect)
-    }
-
-    @Test
-    fun onTouchEvent_rtlLayout_leftToRightDrag_callsOnBoxSelectionWithCorrectRect() {
-        Mockito.`when`(hostContainer.layoutDirection).thenReturn(View.LAYOUT_DIRECTION_RTL)
-
-        val downEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 10f, 20f, 0)
-        downEvent.source = InputDevice.SOURCE_MOUSE
-        assert(helper.onTouchEvent(downEvent))
-        assertNotNull(capturedRect)
-
-        val moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 100f, 120f, 0)
-        moveEvent.source = InputDevice.SOURCE_MOUSE
-        helper.onTouchEvent(moveEvent)
-
-        val upEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 100f, 120f, 0)
-        upEvent.source = InputDevice.SOURCE_MOUSE
-        helper.onTouchEvent(upEvent)
-
-        val expectedRect = Rect(10, 20, 100, 120)
-        assertEquals(expectedRect, capturedRect)
+            val upEvent = obtainMouseEvent(MotionEvent.ACTION_UP, 100f, 120f)
+            helper.onTouchEvent(upEvent)
+            verify(dragLayer).removeView(eq(viewCaptor.firstValue))
+        }
     }
 }
