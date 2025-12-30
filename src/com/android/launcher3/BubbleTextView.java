@@ -624,7 +624,11 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         if (mIsShowingMinimalPopup) {
             iconDrawable.setAnimationEnabled(false);
         }
-        if (getIcon() != null && getIcon().getDelegate() instanceof AutomatedIconDelegate aid) {
+
+        // views may be recycled (Ex. folder items) and have stale ItemInfo so avoid animating.
+        boolean isRecycled = getTag() != info;
+        if (!isRecycled && getIcon() != null
+                && getIcon().getDelegate() instanceof AutomatedIconDelegate aid) {
             aid.startExitAnimation(() -> setIcon(iconDrawable));
             return;
         }
