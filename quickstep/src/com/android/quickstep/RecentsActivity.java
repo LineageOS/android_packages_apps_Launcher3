@@ -95,6 +95,7 @@ import com.android.quickstep.fallback.FallbackRecentsStateController;
 import com.android.quickstep.fallback.RecentsDragLayer;
 import com.android.quickstep.fallback.RecentsState;
 import com.android.quickstep.recents.di.RecentsComponent;
+import com.android.quickstep.split.SplitScreenAppResolver;
 import com.android.quickstep.split.SplitSelectStateController;
 import com.android.quickstep.sysuiconnection.SysUIConnectionTracker;
 import com.android.quickstep.util.RecentsAtomicAnimationFactory;
@@ -160,7 +161,8 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
                 new SplitSelectStateController(this, getStateManager(),
                         null /* depthController */, getStatsLogManager(),
                         systemUiProxy, RecentsModel.INSTANCE.get(this),
-                        null /*activityBackCallback*/, new SplitScreenUiState());
+                        null /*activityBackCallback*/, new SplitScreenUiState(),
+                        new SplitScreenAppResolver(this));
         // Setup root and child views
         inflateRootView(R.layout.fallback_recents_activity);
         LauncherRootView rootView = getRootView();
