@@ -39,7 +39,6 @@ import static java.util.Objects.requireNonNull;
 
 import android.animation.AnimatorSet;
 import android.annotation.SuppressLint;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
@@ -114,9 +113,9 @@ import kotlinx.coroutines.CoroutineDispatcher;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
-import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 /**
  * Class to manage taskbar lifecycle
@@ -1204,32 +1203,30 @@ public class TaskbarManagerImpl {
                 + " mPrimaryDisplayId=" + mPrimaryDisplayId);
     }
 
-    /** Creates a {@link PendingIntent} for showing / hiding the all apps UI. */
-    public PendingIntent createAllAppsPendingIntent(Executor uiExecutor) {
-        return new PendingIntent(new AllAppsIntentSender(uiExecutor, this));
-    }
-
     private @Nullable SafeCloseable mDebugActivityDeviceProfileChangedSafeCloseable;
 
     /** Use weak reference to avoid leaking TIS via {@link TaskbarManagerImpl} */
-    private static class AllAppsIntentSender extends IIntentSender.Stub {
+    @SysUIConnectionSingleton
+    public static class AllAppsIntentSender extends IIntentSender.Stub {
+        private WeakReference<TaskbarManagerImpl> mWeakTaskbarManager;
 
-        private final Executor mUiExecutor;
-        private final WeakReference<TaskbarManagerImpl> mWeakTaskbarManager;
-
-        AllAppsIntentSender(Executor uiExecutor, TaskbarManagerImpl taskbarManager) {
-            mUiExecutor = uiExecutor;
-            mWeakTaskbarManager = new WeakReference<>(taskbarManager);
+        @Inject
+        AllAppsIntentSender(Provider<TaskbarManagerImpl> taskbarManagerProvider) {
+            getTaskbarUiThread().execute(() -> {
+                mWeakTaskbarManager = new WeakReference<>(taskbarManagerProvider.get());
+            });
         }
 
         @Override
         public void send(int i, Intent intent, String s, IBinder iBinder,
                 IIntentReceiver iIntentReceiver, String s1, Bundle bundle) {
-            TaskbarManagerImpl taskbarManager = mWeakTaskbarManager.get();
-            if (taskbarManager == null) {
-                return;
-            }
-            mUiExecutor.execute(taskbarManager::toggleAllAppsSearch);
+            getTaskbarUiThread().execute(() -> {
+                TaskbarManagerImpl taskbarManager = mWeakTaskbarManager.get();
+                if (taskbarManager == null) {
+                    return;
+                }
+                taskbarManager.toggleAllAppsSearch();
+            });
         }
     }
 }

@@ -37,7 +37,7 @@ import dagger.Subcomponent
 @Subcomponent(modules = [PerDisplayObjectsModule::class])
 interface PerDisplayComponent {
     // Factories for components like RecentsComponent that is bound to a specific display.
-    fun getRecentsComponentFactory(): RecentsComponent.Factory
+    val recentsComponentFactory: RecentsComponent.Factory
 
     // Factories for container objects that create components bound to a specific display.
     // e.g. RecentsWindowManager for creating RecentsComponent.
@@ -45,15 +45,14 @@ interface PerDisplayComponent {
 
     // Shared components between multiple components like Recents and Gesture Nav.
     // Ideally only interfaces should be provided.
-    fun getRecentsAnimationDeviceState(): RecentsAnimationDeviceState
-
-    fun getTaskAnimationManager(): TaskAnimationManager
-
-    fun getRotationTouchHelper(): RotationTouchHelper
-
-    fun getRecentsWindowTracker(): RecentsWindowTracker
+    val recentsAnimationDeviceState: RecentsAnimationDeviceState
+    val taskAnimationManager: TaskAnimationManager
+    val rotationTouchHelper: RotationTouchHelper
+    val recentsWindowTracker: RecentsWindowTracker
 
     @WindowContext fun getWindowContext(): Context
+
+    val cleanupTasks: PerDisplayCleanupTask
 
     // End Shared components.
 

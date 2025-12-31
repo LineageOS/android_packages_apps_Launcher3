@@ -17,6 +17,7 @@
 package com.android.launcher3.widgetpicker.ui.components.floatingsheet
 
 import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,12 +37,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.dimensionResource
@@ -90,6 +93,7 @@ fun TitledFloatingSheet(
     val scope = rememberCoroutineScope()
     val animSpec: AnimationSpec<Float> = MaterialTheme.motionScheme.slowSpatialSpec()
     val sheetState = remember { SheetDismissState(expandCollapseAnimationSpec = animSpec) }
+    var scrimAlpha by remember { mutableFloatStateOf(0f) }
 
     WidgetPickerHostStateEffect(LocalWidgetPickerHostStateProvider.current) { isTopResumed ->
         if (!isTopResumed) {
@@ -109,6 +113,13 @@ fun TitledFloatingSheet(
         val accessibilityState = LocalAccessibilityState.current
         var sheetHeight by remember { mutableStateOf(0f) }
 
+        Box( // scrim
+            modifier =
+                Modifier.fillMaxSize()
+                    .alpha(scrimAlpha)
+                    .background(WidgetPickerTheme.colors.sheetBackgroundScrim)
+        )
+
         Surface(
             modifier =
                 Modifier.padding(bottom = sheetBottomPadding)
@@ -119,10 +130,17 @@ fun TitledFloatingSheet(
                     .dismissibleSheet(
                         sheetState = sheetState,
                         onSheetOpen = onSheetOpen,
-                        onSheetProgress = onSheetProgress,
+                        onSheetProgress = { progress ->
+                            onSheetProgress(progress)
+                            scrimAlpha = progress
+                        },
                         onDismissSheet = onDismissSheet,
                         maxHeight = sheetHeight,
                         enableNestedScrolling = !accessibilityState.isEnabled,
+                    )
+                    .background(
+                        color = WidgetPickerTheme.colors.sheetBackgroundBottomLayer,
+                        shape = sheetShape,
                     )
                     // Consume clicks on the sheet itself, preventing them from
                     // passing through to the parent Box and dismissing the sheet.

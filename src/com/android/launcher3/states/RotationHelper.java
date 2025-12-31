@@ -32,9 +32,9 @@ import androidx.annotation.WorkerThread;
 
 import com.android.launcher3.BaseActivity;
 import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.display.DisplayController;
 import com.android.launcher3.display.LauncherDisplayInfo;
 import com.android.launcher3.util.ContextTracker;
-import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.ListenableDiffAwareRef;
 import com.android.launcher3.util.SafeCloseable;
 

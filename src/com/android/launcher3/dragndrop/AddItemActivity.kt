@@ -176,15 +176,23 @@ open class AddItemActivity :
         if (showComposeView) {
             window?.decorView?.setViewTreeOnBackPressedDispatcherOwner(this)
 
-            LauncherComponentProvider.get(this)
-                .widgetPickerComposeWrapper
-                .showWidgetsForPinRequest(
-                    activity = this,
-                    targetApp = targetApp.toPackageUserKey(),
-                    pinItemRequest = pinItemRequest,
-                    widgetPickerConfig = WidgetPickerConfig(),
-                    pinItemAddHandler = this,
-                )
+            // Wait for activity slide in to happen before starting sheet open animation.
+            // Otherwise, the activity background also appears as if it slides in.
+            // This is since we use background dim (in styles.xml) for activity.
+            dragLayer.postDelayed(
+                {
+                    LauncherComponentProvider.get(this)
+                        .widgetPickerComposeWrapper
+                        .showWidgetsForPinRequest(
+                            activity = this,
+                            targetApp = targetApp.toPackageUserKey(),
+                            pinItemRequest = pinItemRequest,
+                            widgetPickerConfig = WidgetPickerConfig(),
+                            pinItemAddHandler = this,
+                        )
+                },
+                ACTIVITY_SLIDE_IN_DURATION_MS,
+            )
             return
         }
 
@@ -521,6 +529,7 @@ open class AddItemActivity :
     }
 
     companion object {
+        private const val ACTIVITY_SLIDE_IN_DURATION_MS = 150L // config_activityShortDur
         private const val SHADOW_SIZE = 10
 
         private const val REQUEST_BIND_APPWIDGET = 1

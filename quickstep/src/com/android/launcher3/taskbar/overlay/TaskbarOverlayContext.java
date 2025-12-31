@@ -206,11 +206,6 @@ public class TaskbarOverlayContext extends BaseTaskbarContext {
     }
 
     @Override
-    public void notifyConfigChanged() {
-        mTaskbarContext.notifyConfigChanged();
-    }
-
-    @Override
     public void onDragStart() {
         mDragToBubbleController.ifPresent(c -> {
             setupBubbleBarDropViewContainer();

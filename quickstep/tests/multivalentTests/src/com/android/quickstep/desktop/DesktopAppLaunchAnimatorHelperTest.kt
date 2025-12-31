@@ -37,8 +37,8 @@ import com.android.internal.jank.Cuj
 import com.android.launcher3.R
 import com.android.launcher3.desktop.DesktopAppLaunchAnimatorHelper
 import com.android.launcher3.desktop.DesktopAppLaunchTransition.AppLaunchType
+import com.android.launcher3.display.DisplayController
 import com.android.launcher3.display.LauncherDisplayInfo
-import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.window.WindowManagerProxy
 import com.google.common.truth.Truth.assertThat

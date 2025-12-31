@@ -28,7 +28,7 @@ import com.android.app.animation.Interpolators
 import com.android.internal.graphics.drawable.BackgroundBlurDrawable
 import com.android.launcher3.dagger.LauncherComponentProvider
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
-import com.android.launcher3.util.DisplayController
+import com.android.launcher3.display.DisplayController
 import com.android.launcher3.util.WindowBlurState
 import com.android.launcher3.widgetpicker.WidgetPickerActivity
 import com.android.launcher3.widgetpicker.WidgetPickerConfig

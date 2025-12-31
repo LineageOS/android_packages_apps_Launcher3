@@ -23,12 +23,22 @@ import com.android.launcher3.widgetpicker.ui.theme.WidgetPickerTheme
 
 /** Contains theme that launcher applies to the widget picker. */
 @Composable
-fun LauncherWidgetPickerTheme(content: @Composable () -> Unit) {
+fun LauncherWidgetPickerTheme(
+    supportsBlurTokens: Boolean = false,
+    isBlurEnabled: Boolean = false,
+    content: @Composable () -> Unit,
+) {
     val widgetPickerColors =
         if (isSystemInDarkTheme()) {
-            darkWidgetPickerColors()
+            darkWidgetPickerColors(
+                supportsBlurTokens = supportsBlurTokens,
+                isBlurEnabled = isBlurEnabled,
+            )
         } else {
-            lightWidgetPickerColors()
+            lightWidgetPickerColors(
+                supportsBlurTokens = supportsBlurTokens,
+                isBlurEnabled = isBlurEnabled,
+            )
         }
 
     MaterialTheme {

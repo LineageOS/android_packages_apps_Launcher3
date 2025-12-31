@@ -25,10 +25,10 @@ import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import android.view.MotionEvent;
 
 import com.android.launcher3.dagger.LauncherAppSingleton;
+import com.android.launcher3.display.DisplayController;
 import com.android.launcher3.display.LauncherDisplayInfo;
 import com.android.launcher3.util.DaggerSingletonObject;
 import com.android.launcher3.util.DaggerSingletonTracker;
-import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.ListenableDiffAwareRef;
 import com.android.quickstep.dagger.QuickstepBaseAppComponent;
 

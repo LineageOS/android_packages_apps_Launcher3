@@ -18,11 +18,11 @@ package com.android.launcher3.taskbar.rules
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.InvariantDeviceProfile
+import com.android.launcher3.display.DisplayController
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.PINNED
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.THREE_BUTTONS
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.TRANSIENT
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
-import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.NavigationMode
 import com.android.launcher3.util.TaskbarModeUtil
 import com.google.common.truth.Truth.assertThat

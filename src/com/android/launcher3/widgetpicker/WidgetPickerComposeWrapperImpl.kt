@@ -33,6 +33,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalView
 import com.android.launcher3.BaseActivity
+import com.android.launcher3.Flags
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherSettings.Favorites
 import com.android.launcher3.R
@@ -42,6 +43,7 @@ import com.android.launcher3.dragndrop.PinItemAddHandler
 import com.android.launcher3.dragndrop.PinItemDragListener
 import com.android.launcher3.util.ApiWrapper
 import com.android.launcher3.util.PackageUserKey
+import com.android.launcher3.util.WindowBlurState
 import com.android.launcher3.widgetpicker.WidgetPickerConfig.Companion.EXTRA_IS_PENDING_WIDGET_DRAG
 import com.android.launcher3.widgetpicker.data.repository.WidgetAppIconsRepository
 import com.android.launcher3.widgetpicker.data.repository.WidgetUsersRepository
@@ -205,12 +207,23 @@ constructor(
 
         val composeView = ComposeView(activity.asContext())
 
+        val supportsBlurTokens =
+            Flags.enableWidgetPickerBlur() &&
+                activity
+                    .asContext()
+                    .resources
+                    .getBoolean(R.bool.config_widgetPickerSupportsBlurTokens)
+        val isBlurEnabled = WindowBlurState.getInstance(activity.asContext()).value
+
         composeView.apply {
             setContent {
                 val scope = rememberCoroutineScope()
                 val view = LocalView.current
 
-                LauncherWidgetPickerTheme {
+                LauncherWidgetPickerTheme(
+                    supportsBlurTokens = supportsBlurTokens,
+                    isBlurEnabled = isBlurEnabled,
+                ) {
                     val eventListeners = remember { callbacks }
                     content(eventListeners, uiEventsReporter)
                 }

@@ -16,7 +16,6 @@
 
 package com.android.launcher3.taskbar
 
-import android.app.PendingIntent
 import androidx.annotation.VisibleForTesting
 import com.android.launcher3.ActivityInteractor
 import com.android.launcher3.AsyncAnimatorPlaybackController
@@ -165,10 +164,6 @@ class TaskbarManagerImplWrapper @Inject constructor(implProvider: Provider<Taskb
     /* TODO(b/404636836): Evaluate API calls on returned TaskbarActivityContext */
     override fun getTaskbarForDisplay(displayId: Int): TaskbarActivityContext? {
         return impl.getTaskbarForDisplay(displayId)
-    }
-
-    override fun createAllAppsPendingIntent(): PendingIntent {
-        return impl.createAllAppsPendingIntent(getTaskbarUiThread())
     }
 
     override fun getPrimaryDisplayId(): Int {

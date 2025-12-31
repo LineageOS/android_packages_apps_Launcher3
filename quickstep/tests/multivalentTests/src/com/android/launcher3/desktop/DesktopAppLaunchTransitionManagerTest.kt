@@ -23,11 +23,12 @@ import android.content.res.Resources
 import android.platform.test.flag.junit.SetFlagsRule
 import android.view.WindowManager.TRANSIT_OPEN
 import android.view.WindowManager.TRANSIT_TO_FRONT
+import android.window.RemoteTransition
 import android.window.TransitionFilter
 import android.window.TransitionFilter.CONTAINER_ORDER_ANY
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.launcher3.util.DisplayController
+import com.android.launcher3.display.DisplayController
 import com.android.quickstep.SystemUiProxy
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.google.common.truth.Truth.assertThat
@@ -70,22 +71,25 @@ class DesktopAppLaunchTransitionManagerTest {
     fun registerTransitions_registersTransition() {
         transitionManager.registerTransitions()
 
-        verify(systemUiProxy, times(1)).registerRemoteTransition(any(), any())
+        verify(systemUiProxy, times(1)).registerRemoteTransition(any())
     }
 
     @Test
     fun registerTransitions_usesCorrectFilter() {
         transitionManager.registerTransitions()
-        val filterArgumentCaptor = argumentCaptor<TransitionFilter>()
+        val transitionArgumentCaptor = argumentCaptor<RemoteTransition>()
 
-        verify(systemUiProxy, times(1))
-            .registerRemoteTransition(any(), filterArgumentCaptor.capture())
+        verify(systemUiProxy)
+            .registerRemoteTransition(transitionArgumentCaptor.capture())
 
-        assertThat(filterArgumentCaptor.lastValue).isNotNull()
-        assertThat(filterArgumentCaptor.lastValue.mTypeSet)
+        assertThat(transitionArgumentCaptor.lastValue).isNotNull()
+
+        val filter = transitionArgumentCaptor.lastValue.filter ?: TransitionFilter()
+        assertThat(filter.mTypeSet)
             .isEqualTo(intArrayOf(TRANSIT_OPEN, TRANSIT_TO_FRONT))
-        assertThat(filterArgumentCaptor.lastValue.mRequirements).hasLength(1)
-        val launchRequirement = filterArgumentCaptor.lastValue.mRequirements!![0]
+
+        assertThat(filter.mRequirements).hasLength(1)
+        val launchRequirement = filter.mRequirements!![0]
         assertThat(launchRequirement.mModes).isEqualTo(intArrayOf(TRANSIT_OPEN, TRANSIT_TO_FRONT))
         assertThat(launchRequirement.mActivityType).isEqualTo(ACTIVITY_TYPE_STANDARD)
         assertThat(launchRequirement.mWindowingMode).isEqualTo(WINDOWING_MODE_FREEFORM)

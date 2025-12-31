@@ -118,6 +118,7 @@ import com.android.launcher3.desktop.DesktopAppLaunchTransition;
 import com.android.launcher3.desktop.DesktopAppLaunchTransition.AppLaunchType;
 import com.android.launcher3.deviceprofile.TaskbarDeviceProfileFactory;
 import com.android.launcher3.deviceprofile.TaskbarProfile;
+import com.android.launcher3.display.DisplayController;
 import com.android.launcher3.display.LauncherDisplayInfo;
 import com.android.launcher3.folder.Folder;
 import com.android.launcher3.folder.FolderIcon;
@@ -170,7 +171,6 @@ import com.android.launcher3.util.ActivityOptionsWrapper;
 import com.android.launcher3.util.ApiWrapper;
 import com.android.launcher3.util.ApplicationInfoWrapper;
 import com.android.launcher3.util.AsyncView;
-import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.Executors;
 import com.android.launcher3.util.FlagDebugUtils;
 import com.android.launcher3.util.LauncherBindableItemsContainer;
@@ -518,11 +518,6 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     @Override
     public int getDisplayHeight() {
         return DisplayController.INSTANCE.get(this).getInfo().currentSize.y;
-    }
-
-    @Override
-    public void notifyConfigChanged() {
-        DisplayController.INSTANCE.get(this).notifyConfigChange();
     }
 
     /**

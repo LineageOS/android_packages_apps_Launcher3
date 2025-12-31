@@ -25,10 +25,11 @@ import com.android.launcher3.config.FeatureFlags.enableTaskbarPinning
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
+import com.android.launcher3.display.DisplayController
 import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.util.DaggerSingletonObject
-import com.android.launcher3.util.DisplayController
-import com.android.launcher3.util.NavigationMode.*
+import com.android.launcher3.util.NavigationMode.NO_BUTTON
+import com.android.launcher3.util.NavigationMode.THREE_BUTTONS
 import com.android.systemui.shared.Flags.enableRecentsInTaskbar
 import javax.inject.Inject
 

@@ -37,13 +37,13 @@ import android.view.OrientationEventListener;
 
 import com.android.app.displaylib.PerDisplayRepository;
 import com.android.launcher3.concurrent.annotations.LightweightBackground;
+import com.android.launcher3.dagger.PerDisplayCleanupTask;
 import com.android.launcher3.dagger.PerDisplaySingleton;
 import com.android.launcher3.dagger.WindowContext;
+import com.android.launcher3.display.DisplayController;
 import com.android.launcher3.display.LauncherDisplayInfo;
 import com.android.launcher3.testing.shared.TestProtocol;
 import com.android.launcher3.util.DaggerSingletonObject;
-import com.android.launcher3.util.DaggerSingletonTracker;
-import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.ListenableDiffAwareRef;
 import com.android.launcher3.util.NavigationMode;
 import com.android.quickstep.dagger.QuickstepBaseAppComponent;
@@ -147,7 +147,7 @@ public class RotationTouchHelper {
             @WindowContext Context windowContext,
             DisplayController displayController,
             SystemUiProxy systemUiProxy,
-            DaggerSingletonTracker lifeCycle,
+            PerDisplayCleanupTask lifeCycle,
             @LightweightBackground(priority = UI) Executor lightweightBackgroundExecutor
         ) {
         mWindowContext = windowContext;

@@ -27,7 +27,7 @@ import android.view.DisplayInfo
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.get
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
-import com.android.launcher3.util.DisplayController
+import com.android.launcher3.display.DisplayController
 import com.android.launcher3.util.launcheremulator.models.EmulationParams
 import com.android.launcher3.util.launcheremulator.models.LauncherOrientation
 import com.android.launcher3.util.window.WindowManagerProxy

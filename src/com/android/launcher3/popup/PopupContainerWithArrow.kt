@@ -20,7 +20,6 @@ import android.content.Context
 import android.graphics.PointF
 import android.graphics.Typeface
 import android.os.Handler
-import android.os.Looper
 import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnClickListener
@@ -158,7 +157,7 @@ private constructor(
             PopupPopulator.createUpdateRunnable(
                 mActivityContext,
                 originalItemInfo,
-                Handler(Looper.getMainLooper()),
+                Handler(context.mainLooper),
                 this,
                 deepShortcuts,
             )

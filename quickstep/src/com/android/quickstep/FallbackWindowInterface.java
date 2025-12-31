@@ -31,9 +31,9 @@ import androidx.annotation.Nullable;
 
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.dagger.PerDisplaySingleton;
+import com.android.launcher3.display.DisplayController;
 import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.taskbar.TaskbarInteractor;
-import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.JoinedAnimator;
 import com.android.launcher3.util.ThreadedAnimator;
 import com.android.launcher3.views.ScrimColors;

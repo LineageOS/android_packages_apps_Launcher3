@@ -736,3 +736,14 @@ flag {
     description: "Enables the 'More Options' button for accessibility features in the Taskbar"
     bug: "440427169"
 }
+
+flag {
+  name: "enable_widget_picker_blur"
+  namespace: "launcher"
+  description: "Enables blur in the widget picker"
+  bug: "436344835"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

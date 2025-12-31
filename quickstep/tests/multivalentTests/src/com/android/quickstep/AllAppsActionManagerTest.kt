@@ -16,8 +16,6 @@
 
 package com.android.quickstep
 
-import android.app.PendingIntent
-import android.content.IIntentSender
 import android.hardware.input.InputManager
 import android.provider.Settings
 import android.provider.Settings.Secure.USER_SETUP_COMPLETE
@@ -25,7 +23,7 @@ import androidx.test.annotation.UiThreadTest
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
-import com.android.launcher3.taskbar.TaskbarManager
+import com.android.launcher3.taskbar.TaskbarManagerImpl
 import com.android.launcher3.util.AllModulesForTest
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
 import com.android.launcher3.util.SandboxApplication
@@ -49,7 +47,6 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doNothing
-import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.whenever
 
 private const val TIMEOUT = 5L
@@ -72,13 +69,13 @@ class AllAppsActionManagerTest {
             spy(context.appComponent.quickstepKeyGestureEventsManager)
         }
 
-    @Mock lateinit var taskbarManager: TaskbarManager
+    @Mock lateinit var allAppsIntentSenderProvider: TaskbarManagerImpl.AllAppsIntentSender
 
     private val allAppsActionManager by
         lazy(LazyThreadSafetyMode.NONE) {
             AllAppsActionManager(context, bgExecutor, quickstepKeyGestureEventsManager) {
                 callbackSemaphore.release()
-                taskbarManager
+                allAppsIntentSenderProvider
             }
         }
 
@@ -91,9 +88,6 @@ class AllAppsActionManagerTest {
 
         doNothing().whenever(inputManager).registerKeyGestureEventHandler(any(), any())
         doNothing().whenever(inputManager).unregisterKeyGestureEventHandler(any())
-        doReturn(PendingIntent(IIntentSender.Default()))
-            .whenever(taskbarManager)
-            .createAllAppsPendingIntent()
 
         // Trigger any property access to initialize allAppsActionManager
         allAppsActionManager.isActionRegistered
