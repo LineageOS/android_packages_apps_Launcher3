@@ -530,7 +530,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
                 APP_INFO, WellbeingModel.SHORTCUT_FACTORY, mHotseatPredictionController));
         int container = itemInfo.container;
         if (canPinAppWithContextMenu()
-                && DisplayController.showDesktopTaskbarForFreeformDisplay(this)
+                && DisplayController.getInfo(this).getShowDesktopTaskbarForFreeformDisplay()
                 && (container == CONTAINER_ALL_APPS
                 || container == CONTAINER_ALL_APPS_PREDICTION)) {
             int maxPinnableCount =

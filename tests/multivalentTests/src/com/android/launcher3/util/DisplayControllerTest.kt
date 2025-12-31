@@ -165,7 +165,7 @@ class DisplayControllerTest {
             }
         whenever(resources.configuration).thenReturn(configuration)
 
-        displayController.onConfigurationChanged(configuration)
+        displayController.notifyConfigChange(DEFAULT_DISPLAY)
 
         verify(displayInfoChangeListener).invoke(eq(CHANGE_ROTATION))
     }
@@ -176,7 +176,7 @@ class DisplayControllerTest {
         val configuration = Configuration(configuration).apply { fontScale = 1.2f }
         whenever(resources.configuration).thenReturn(configuration)
 
-        displayController.onConfigurationChanged(configuration)
+        displayController.notifyConfigChange(DEFAULT_DISPLAY)
 
         verify(displayInfoChangeListener).invoke(eq(CHANGE_DENSITY))
     }

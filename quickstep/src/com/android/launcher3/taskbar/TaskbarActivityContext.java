@@ -502,12 +502,12 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
 
     @Override
     public boolean showLockedTaskbarOnHome() {
-        return DisplayController.showLockedTaskbarOnHome(this);
+        return DisplayController.getInfo(this).showLockedTaskbarOnHome;
     }
 
     @Override
     public boolean showDesktopTaskbarForFreeformDisplay() {
-        return DisplayController.showDesktopTaskbarForFreeformDisplay(this);
+        return DisplayController.getInfo(this).getShowDesktopTaskbarForFreeformDisplay();
     }
 
     @Override
@@ -2099,7 +2099,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                 ? mControllers.taskbarRecentAppsController.getNonDesktopTask(info)
                 : (singleTask == null ? null : singleTask.getTask());
         if (DesktopExperienceFlags.ENABLE_DESKTOP_FIRST_FULLSCREEN_REFOCUS_BUGFIX.isTrue()
-                && DisplayController.isInDesktopFirstMode(this) && nonDesktopTask != null) {
+                && DisplayController.getInfo(this).isInDesktopFirstMode && nonDesktopTask != null) {
             if (!DesktopExperienceFlags.ENABLE_DESKTOP_FIRST_POLICY_IN_LPM.isTrue()) {
                 // Keep the fullscreen mode in desktop-first mode.
                 return false;

@@ -17,7 +17,6 @@
 package com.android.launcher3.taskbar.rules
 
 import android.content.Context
-import android.view.Display.DEFAULT_DISPLAY
 import com.android.app.displaylib.PerDisplayRepository
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.concurrent.ExecutorsModule
@@ -56,12 +55,10 @@ import com.android.quickstep.TaskAnimationManager
 import com.android.quickstep.dagger.SysUIConnectionComponent.Builder
 import com.android.quickstep.window.RecentsWindowManager
 import com.android.quickstep.window.RecentsWindowTracker
-import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
 import dagger.Module
 import dagger.Provides
-import javax.inject.Inject
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 
@@ -93,7 +90,6 @@ interface TaskbarSandboxComponent : LauncherAppComponent {
             LauncherExecutorsModule::class,
             FakePrefsModule::class,
             TaskbarModule::class,
-            DisplayControllerModule::class,
             SandboxWmProxyModule::class,
             TaskbarPerDisplayReposModule::class,
             DesktopVisibilityControllerModule::class,
@@ -108,11 +104,6 @@ interface TaskbarSandboxComponent : LauncherAppComponent {
         ]
 )
 interface AllTaskbarSandboxModules
-
-@Module
-abstract class DisplayControllerModule {
-    @Binds abstract fun bindDisplayController(controller: DisplayControllerSpy): DisplayController
-}
 
 @Module
 object TaskbarModule {
@@ -147,26 +138,6 @@ object TaskbarModule {
         )
     }
 }
-
-/** A wrapper over display controller which allows modifying the underlying info */
-@LauncherAppSingleton
-class DisplayControllerSpy
-@Inject
-constructor(
-    @ApplicationContext context: Context,
-    wmProxy: WindowManagerProxy,
-    lifecycle: DaggerSingletonTracker,
-) : DisplayController(context, wmProxy, lifecycle) {
-
-    // When overview on CD is enabled, DisplayController queries getInfoForDisplay instead of
-    // getInfo for the primary (virtual) display used in tests. So, override it to get info from the
-    // default display.
-    override fun getInfoForDisplay(displayId: Int) = super.getInfoForDisplay(DEFAULT_DISPLAY)
-}
-
-/** Convenient extension to access [DisplayControllerSpy] from [TaskbarWindowSandboxContext]. */
-val TaskbarWindowSandboxContext.displayControllerSpy: DisplayControllerSpy?
-    get() = DisplayController.INSTANCE[this] as? DisplayControllerSpy
 
 @Module
 object DesktopVisibilityControllerModule {
