@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2018-2019 The LineageOS Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources>
+    <string name="settings_lock_layout_title">Bloca sa dispositzione</string>
+    <string name="settings_lock_layout_summary_on">No est possìbile agiùnghere, bogare e mòvere iconas e trastos a s\'ischermu printzipale</string>
+    <string name="settings_lock_layout_summary_off">Est possìbile agiùnghere, bogare e mòvere iconas e trastos a s\'ischermu printzipale</string>
+    <string name="settings_edit_widgets_error">No est possìbile agiùnghere trastos a s\'ischermu printzipale</string>
+    <string name="title_show_google_app">Mustra s\'aplicatzione de Google</string>
+    <string name="msg_minus_one_on_left">Cando iscurres a dereta dae s\'ischermu printzipale initziale</string>
+    <string name="msg_minus_one_on_right">Cando iscurres a manca dae s\'ischermu printzipale initziale</string>
+    <string name="pref_themed_icons_title">Imprea iconas temàticas in su calàsciu</string>
+    <string name="pref_themed_icons_summary">Sighi is iconas temàticas impreadas in sa pàgina printzipale</string>
+    <string name="desktop_show_labels">Mustra etichetas de icona in s\'iscrivania</string>
+    <string name="drawer_show_labels">Mustra etichetas de icona in su calàsciu</string>
+    <string name="drawer_open_keyboard_title">Iscurre pro cumintzare sa chirca</string>
+    <string name="drawer_open_keyboard_summary">Aberi su tecladu semper chi su calàsciu de aplicatziones siat visìbile</string>
+    <string name="trust_apps_manager_name">Aplicatziones cuadas e amparadas</string>
+    <string name="trust_apps_auth_manager">Isbloca pro gestire is aplicatziones cuadas e amparadas</string>
+    <string name="trust_apps_auth_open_app">Autèntica·ti pro abèrrere %1$s</string>
+    <string name="trust_apps_loading">Carrighende\u2026</string>
+    <string name="trust_apps_no_lock_error">Cunfigura un\'ischermu de blocu seguru pro limitare s\'atzessu a is aplicatziones</string>
+    <string name="trust_apps_help">Agiudu</string>
+    <string name="trust_apps_info_hidden">Is aplicatziones cuadas e is trastos suos ant a èssere cuados dae su calàsciu</string>
+    <string name="trust_apps_info_protected">Is aplicatziones amparadas ant a rechèdere autenticatzione in antis de èssere abertas dae s\'aviadore</string>
+    <string name="pref_suggestions_title">Cussìgios</string>
+    <string name="pref_suggestions_summary">Pro otènnere is cussìgios de su calàsciu de aplicatziones e de s\'ischermu printzipale</string>
+</resources>
