@@ -20,6 +20,7 @@ import com.android.launcher3.icons.BitmapInfo
 import com.android.launcher3.icons.IconCache
 import com.android.launcher3.icons.cache.CacheLookupFlag
 import com.android.launcher3.model.data.PackageItemInfo
+import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.widgetpicker.data.repository.WidgetAppIconsRepository
 import com.android.launcher3.widgetpicker.shared.model.AppIcon
 import com.android.launcher3.widgetpicker.shared.model.AppIconBadge
@@ -49,6 +50,7 @@ class WidgetAppIconsRepositoryImpl @Inject constructor(private val iconCache: Ic
             }
 
         iconCache.updateIconInBackground(
+            MAIN_EXECUTOR,
             { itemInfoWithIcon ->
                 itemInfoWithIcon?.let {
                     if (itemInfoWithIcon.bitmap.isLowRes) {

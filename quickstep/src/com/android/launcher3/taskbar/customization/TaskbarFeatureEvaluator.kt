@@ -90,7 +90,7 @@ constructor(
     val supportsTransitionToTransientTaskbar: Boolean
         get() =
             !hasNavButtons &&
-                !DisplayController.showDesktopTaskbarForFreeformDisplay(context) &&
+                !DisplayController.getInfo(context).showDesktopTaskbarForFreeformDisplay &&
                 !desktopVisibilityController.isInDesktopMode(primaryDisplayId)
 
     companion object {

@@ -652,16 +652,6 @@ flag {
 }
 
 flag {
-  name: "disable_system_level_drag_event_handling_in_button_drop_target"
-  namespace: "launcher"
-  description: "Disables system-level drag event handling in ButtonDropTarget as it may interfere with Launcher's own drag and drop."
-  bug: "456188853"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "bind_model_using_repository"
   namespace: "launcher"
   description: "Change model binding to use repositories instead of model callbacks"

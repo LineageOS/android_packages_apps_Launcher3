@@ -161,7 +161,7 @@ open class BaseTaskbarIntegrationTest {
     protected fun waitForTaskbarManagerCondition(
         message: String,
         condition: (TaskbarManager) -> Boolean,
-        timeout: Long = WorkProfileTest.WAIT_TIME_MS.toLong(),
+        timeout: Long = 30000L,
     ) = atMost(message, timeout) { getFromTaskManager(condition)!! }
 
     protected fun waitForTaskbarVisible() {

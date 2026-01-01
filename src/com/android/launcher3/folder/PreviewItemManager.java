@@ -484,6 +484,7 @@ public class PreviewItemManager {
                 && info.getMatchingLookupFlag().isVisuallyLessThan(DESKTOP_ICON_FLAG)) {
             if (loadHighResIcon) {
                 LauncherAppState.getInstance(mContext).getIconCache().updateIconInBackground(
+                        mContext.getMainExecutor(),
                         newInfo -> {
                             if (p.item == newInfo) {
                                 setDrawableInternal(p, newInfo, false /* loadHighResIcon */);

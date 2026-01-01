@@ -19,10 +19,10 @@ package com.android.launcher3.util.launcheremulator
 import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Context
-import android.content.res.Configuration
 import android.hardware.display.DisplayManagerGlobal
 import android.net.Uri.Builder
 import android.view.Display
+import android.view.Display.DEFAULT_DISPLAY
 import android.view.DisplayInfo
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.get
@@ -94,9 +94,7 @@ object LauncherCustomizer {
             )
         }
 
-        DisplayController.INSTANCE[context].onConfigurationChanged(
-            Configuration(context.resources.configuration)
-        )
+        DisplayController.INSTANCE[context].notifyConfigChange(DEFAULT_DISPLAY)
 
         get(context).put(LauncherPrefs.FIXED_LANDSCAPE_MODE, params.isFixedLandscape)
 

@@ -21,7 +21,6 @@ import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 
 import static com.android.internal.jank.Cuj.CUJ_LAUNCHER_LAUNCH_APP_PAIR_FROM_TASKBAR;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_APP_PAIR_LAUNCH;
-import static com.android.launcher3.model.data.AppInfo.PACKAGE_KEY_COMPARATOR;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
 import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_BOTTOM_OR_RIGHT;
@@ -45,7 +44,6 @@ import com.android.internal.jank.Cuj;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherAppState;
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate;
-import com.android.launcher3.allapps.AllAppsStore;
 import com.android.launcher3.apppairs.AppPairIcon;
 import com.android.launcher3.icons.IconCache;
 import com.android.launcher3.logging.InstanceId;
@@ -101,22 +99,20 @@ public class AppPairsController {
     private ActivityContext mContext;
     private final SplitSelectStateController mSplitSelectStateController;
     private final StatsLogManager mStatsLogManager;
+
+    private final SplitScreenAppResolver mSplitScreenAppResolver;
     public AppPairsController(ActivityContext context,
             SplitSelectStateController splitSelectStateController,
             StatsLogManager statsLogManager) {
         mContext = context;
         mSplitSelectStateController = splitSelectStateController;
         mStatsLogManager = statsLogManager;
+        mSplitScreenAppResolver = new SplitScreenAppResolver(mContext);
     }
 
     void onDestroy() {
         mContext = null;
-    }
-
-    private Launcher getLauncher() {
-        return mContext == null || !OverviewComponentObserver.INSTANCE.get(mContext.asContext())
-                .isHomeAndOverviewSame()
-                ? null : Launcher.ACTIVITY_TRACKER.getCreatedContext();
+        mSplitScreenAppResolver.destroy();
     }
 
     /**
@@ -149,8 +145,10 @@ public class AppPairsController {
                 groupedTaskView.getLeftTopTaskContainer().getTask().key);
         ComponentKey rightBottomComponentKey = TaskUtils.getLaunchComponentKeyForTask(
                 groupedTaskView.getRightBottomTaskContainer().getTask().key);
-        AppInfo leftTopAppInfo = resolveAppInfoByComponent(leftTopComponentKey);
-        AppInfo rightBottomAppInfo = resolveAppInfoByComponent(rightBottomComponentKey);
+        AppInfo leftTopAppInfo = mSplitScreenAppResolver
+                .resolveAppInfoByComponent(leftTopComponentKey);
+        AppInfo rightBottomAppInfo = mSplitScreenAppResolver
+                .resolveAppInfoByComponent(rightBottomComponentKey);
 
         if (leftTopAppInfo == null || rightBottomAppInfo == null) {
             // Disallow saving app pairs for apps that don't have a front-door in Launcher
@@ -227,7 +225,7 @@ public class AppPairsController {
                 iconCache.getTitleAndIcon(member, member.getMatchingLookupFlag());
             });
             MAIN_EXECUTOR.execute(() -> {
-                Launcher launcher = getLauncher();
+                Launcher launcher = mSplitScreenAppResolver.getLauncher();
                 LauncherAccessibilityDelegate delegate = launcher == null
                         ? null : launcher.getAccessibilityDelegate();
                 if (delegate == null) {
@@ -317,28 +315,6 @@ public class AppPairsController {
     }
 
     /**
-     * Returns an AppInfo associated with the app for the given ComponentKey, or null if no such
-     * package exists in the AllAppsStore.
-     */
-    @Nullable
-    private AppInfo resolveAppInfoByComponent(@NonNull ComponentKey key) {
-        Launcher launcher = getLauncher();
-        if (launcher == null) {
-            return null;
-        }
-        AllAppsStore appsStore = launcher.getAppsView().getAppsStore();
-
-        // First look up the app info in order of:
-        // - The exact activity for the recent task
-        // - The first(?) loaded activity from the package
-        AppInfo appInfo = appsStore.getApp(key);
-        if (appInfo == null) {
-            appInfo = appsStore.getApp(key, PACKAGE_KEY_COMPARATOR);
-        }
-        return appInfo;
-    }
-
-    /**
      * Creates a new launchable WorkspaceItemInfo of itemType=ITEM_TYPE_APPLICATION by looking the
      * ComponentKey up in the AllAppsStore. If no app is found, attempts a lookup by package
      * instead. If that lookup fails, returns null.
@@ -347,7 +323,8 @@ public class AppPairsController {
     private WorkspaceItemInfo resolveAppPairWorkspaceInfo(
             @NonNull WorkspaceItemInfo recentTaskInfo) {
         // ComponentKey should never be null (see TaskView#getItemInfo)
-        AppInfo appInfo = resolveAppInfoByComponent(recentTaskInfo.getComponentKey());
+        AppInfo appInfo = mSplitScreenAppResolver
+                .resolveAppInfoByComponent(recentTaskInfo.getComponentKey());
         if (appInfo == null) {
             return null;
         }

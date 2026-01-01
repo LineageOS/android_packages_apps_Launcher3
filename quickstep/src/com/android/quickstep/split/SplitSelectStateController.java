@@ -87,6 +87,7 @@ import com.android.launcher3.anim.PendingAnimation;
 import com.android.launcher3.apppairs.AppPairIcon;
 import com.android.launcher3.icons.IconProvider;
 import com.android.launcher3.logging.StatsLogManager;
+import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.ResolvedTargetInfo;
 import com.android.launcher3.statehandlers.DepthController;
@@ -125,7 +126,6 @@ import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.system.InteractionJankMonitorWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.wm.shell.Flags;
-import com.android.wm.shell.shared.ActivityDestinationPackageResolver;
 import com.android.wm.shell.shared.split.SplitScreenConstants.PersistentSnapPosition;
 import com.android.wm.shell.splitscreen.ISplitSelectListener;
 
@@ -215,10 +215,13 @@ public class SplitSelectStateController {
         }
     };
 
+    private SplitScreenAppResolver mSplitScreenAppResolver;
+
     public SplitSelectStateController(RecentsViewContainer container,
             StateManager<?, ?> stateManager, @Nullable DepthController<?, ?> depthController,
             StatsLogManager statsLogManager, SystemUiProxy systemUiProxy, RecentsModel recentsModel,
-            @Nullable Runnable activityBackCallback, SplitScreenUiState splitScreenUiState) {
+            @Nullable Runnable activityBackCallback, SplitScreenUiState splitScreenUiState,
+            SplitScreenAppResolver splitScreenAppResolver) {
         mContainer = container;
         mStatsLogManager = statsLogManager;
         mSystemUiProxy = systemUiProxy;
@@ -230,6 +233,7 @@ public class SplitSelectStateController {
         mAppPairsController = new AppPairsController(mContainer, this, statsLogManager);
         mSplitSelectDataHolder = new SplitSelectDataHolder(
                 mContainer.asContext(), splitScreenUiState);
+        mSplitScreenAppResolver = splitScreenAppResolver;
     }
 
     public void onDestroy() {
@@ -241,6 +245,7 @@ public class SplitSelectStateController {
         if (mSplitFromDesktopController != null) {
             mSplitFromDesktopController.onDestroy();
         }
+        mSplitScreenAppResolver.destroy();
     }
 
     /**
@@ -322,6 +327,7 @@ public class SplitSelectStateController {
             } else {
                 // For each key we are looking for, add to lastActiveTasks with the corresponding
                 // Task (or do nothing if not found).
+                boolean foundLastActiveTask = false;
                 for (int i = 0; i < resolvedTargetInfos.size(); i++) {
                     final ResolvedTargetInfo resolvedTargetInfo = resolvedTargetInfos.get(i);
                     final ComponentKey key = resolvedTargetInfo.getTargetComponentKey();
@@ -329,12 +335,6 @@ public class SplitSelectStateController {
                         Log.e(TAG, "findLastActiveTasksAndRunCallback ComponentKey is null");
                         callback.accept(new Task[]{});
                         return;
-                    }
-                    final String resolvedDestinationPackage;
-                    if (resolveTrampolineDestinationPackages()) {
-                        resolvedDestinationPackage = getResolvedDestinationPackage(key);
-                    } else {
-                        resolvedDestinationPackage = null;
                     }
                     Task lastActiveTask = null;
                     // Loop through tasks in reverse, since they are ordered with recent tasks last
@@ -347,23 +347,19 @@ public class SplitSelectStateController {
                                 lastActiveTask = task;
                                 break;
                             }
-
-                            if (resolveTrampolineDestinationPackages()
-                                    && resolvedDestinationPackage != null) {
-                                if (isInstanceFromSamePackage(
-                                        task, resolvedDestinationPackage, key.user.getIdentifier())
-                                        && !Arrays.asList(lastActiveTasks).contains(task)) {
-                                    lastActiveTask = task;
-                                    break;
-                                }
-                            }
                         }
                         if (lastActiveTask != null) {
+                            foundLastActiveTask = true;
                             break;
                         }
                     }
 
                     lastActiveTasks[i] = lastActiveTask;
+                }
+
+                if (!foundLastActiveTask && Flags.resolveTrampolineDestinationPackages()) {
+                    resolveTasksFromTrampolinePackages(resolvedTargetInfos, taskGroups,
+                            lastActiveTasks);
                 }
             }
 
@@ -372,40 +368,77 @@ public class SplitSelectStateController {
     }
 
     /**
-     * Checks if the resolveTrampolineDestinationPackages is enabled.
+     * Attempts to resolve tasks by looking up their destination packages if the initial component
+     * key lookup fails. This is useful for cases where an app uses a trampoline activity.
      *
-     * @return {@code true} if resolveTrampolineDestinationPackages is enabled;
-     * {@code false} otherwise.
+     * @param resolvedTargetInfos The list of the target Activity information.
+     * @param taskGroups The list of active task groups from RecentsModel.
+     * @param lastActiveTasks The array to populate with the found tasks.
+     *                        It must not contains a task.
      */
-    @VisibleForTesting
-    public boolean resolveTrampolineDestinationPackages() {
-        return Flags.resolveTrampolineDestinationPackages();
-    }
+    private void resolveTasksFromTrampolinePackages(
+            @NonNull List<ResolvedTargetInfo> resolvedTargetInfos,
+            @NonNull List<GroupTask> taskGroups, @NonNull Task[] lastActiveTasks) {
+        for (int i = 0; i < resolvedTargetInfos.size(); i++) {
+            final ResolvedTargetInfo resolvedTargetInfo = resolvedTargetInfos.get(i);
+            final ComponentKey resolvedTargetComponentKey =
+                    resolvedTargetInfo.getTargetComponentKey();
+            if (resolvedTargetComponentKey == null) {
+                break;
+            }
+            final String resolvedDestinationPackage =
+                    mSplitScreenAppResolver.getResolvedDestinationPackage(
+                            ActivityTaskManager.getService(),
+                            resolvedTargetComponentKey.componentName);
+            Log.d(TAG, "findLastActiveTasksAndRunCallback originalPackageName="
+                    + resolvedTargetComponentKey.componentName
+                    + " DestinationPackage=" +  resolvedDestinationPackage);
+            if (resolvedDestinationPackage == null) {
+                continue;
+            }
 
-    /**
-     * Gets the destination package name associated with the given component key.
-     *
-     * @param key The {@link ComponentKey} representing the component.
-     * @return The resolved destination package name.
-     */
-    @VisibleForTesting
-    public String getResolvedDestinationPackage(ComponentKey key) {
-        final String resolvedDestinationPackage = ActivityDestinationPackageResolver
-                .getDestinationPackage(
-                        ActivityTaskManager.getService(),
-                        key.componentName.getPackageName());
-        Log.d(TAG, "findLastActiveTasksAndRunCallback originalPackageName="
-                + key.componentName.getPackageName()
-                + "DestinationPackage: "
-                + resolvedDestinationPackage);
-        return resolvedDestinationPackage;
+            Task lastActiveTask = null;
+            List<Task> lastActiveTasksList = Arrays.asList(lastActiveTasks);
+            // Loop through tasks in reverse, since they are ordered with recent tasks last
+            for (int j = taskGroups.size() - 1; j >= 0; j--) {
+                GroupTask groupTask = taskGroups.get(j);
+                for (Task task : groupTask.getTasks()) {
+                    if (lastActiveTasksList.contains(task)) {
+                        break;
+                    }
+
+                    final AppInfo appInfo;
+                    if (task == null) {
+                        appInfo = null;
+                    } else {
+                        final ComponentKey componentKey =
+                                new ComponentKey(task.key.getComponent(),
+                                        UserHandle.of(task.key.userId));
+                        appInfo = mSplitScreenAppResolver.resolveAppInfoByComponent(componentKey);
+                    }
+
+                    final int initialTaskId = mSplitSelectDataHolder.getInitialTaskId();
+                    final int userId = resolvedTargetComponentKey.user.getIdentifier();
+                    if (mSplitScreenAppResolver.isTaskAppSingleInstance(task, initialTaskId,
+                            appInfo, resolvedDestinationPackage, userId)) {
+                        lastActiveTask = task;
+                        break;
+                    }
+                }
+                if (lastActiveTask != null) {
+                    break;
+                }
+            }
+
+            lastActiveTasks[i] = lastActiveTask;
+        }
     }
 
     /**
      * Checks if a given Task is the most recently-active Task of type componentName. Used for
      * selecting already-running Tasks for splitscreen.
      */
-    public boolean isInstanceOfComponent(@Nullable Task task,
+    private boolean isInstanceOfComponent(@Nullable Task task,
             @NonNull ResolvedTargetInfo resolvedTargetInfo) {
         // Exclude the task that is already staged
         if (task == null || task.key.id == mSplitSelectDataHolder.getInitialTaskId()) {
@@ -417,31 +450,10 @@ public class SplitSelectStateController {
     }
 
     /**
-     * Determines if a given task and component are instances of the same app
-     * and belong to the same user.
-     */
-    private boolean isInstanceFromSamePackage(@Nullable Task task,
-            @NonNull String packageName, int userId) {
-        if (task == null || task.key.id == mSplitSelectDataHolder.getInitialTaskId()) {
-            return false;
-        }
-        if (userId != task.key.userId) {
-            return false;
-        }
-
-        final String taskPackageName = task.key.getPackageName();
-        if (taskPackageName == null) {
-            return false;
-        }
-
-        return taskPackageName.equals(packageName);
-    }
-
-    /**
      * Checks if a given GroupTask is a pair of apps that matches two given ComponentKeys. We check
      * both permutations because task order is not guaranteed in GroupTasks.
      */
-    public boolean isInstanceOfAppPair(GroupTask groupTask,
+    private boolean isInstanceOfAppPair(GroupTask groupTask,
             @NonNull ResolvedTargetInfo resolvedTargetInfo1,
             @NonNull ResolvedTargetInfo resolvedTargetInfo2) {
         if (groupTask instanceof SplitTask splitTask) {

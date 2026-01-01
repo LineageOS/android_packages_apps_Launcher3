@@ -18,8 +18,6 @@ package com.android.launcher3;
 
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
-import static com.android.launcher3.Flags.disableSystemLevelDragEventHandlingInButtonDropTarget;
-
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Paint;
@@ -113,8 +111,7 @@ public abstract class ButtonDropTarget extends TextView
     @Override
     public boolean onDragEvent(DragEvent event) {
         // We don't want this view to interfere with Launcher's own drag and drop.
-        if (disableSystemLevelDragEventHandlingInButtonDropTarget()) return false;
-        return super.onDragEvent(event);
+        return false;
     }
 
     @Override

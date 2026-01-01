@@ -103,7 +103,7 @@ class PreviewItemManagerTest {
 
         iconCache = LauncherAppState.INSTANCE[context].iconCache
         iconCache.convertToSpy()
-        doReturn(null).whenever(iconCache).updateIconInBackground(any(), any(), any())
+        doReturn(null).whenever(iconCache).updateIconInBackground(any(), any(), any(), any())
 
         previewItemManager = PreviewItemManager(folderIcon)
 
@@ -259,7 +259,12 @@ class PreviewItemManagerTest {
 
         val callbackCaptor = argumentCaptor<ItemInfoUpdateReceiver>()
         verify(iconCache)
-            .updateIconInBackground(callbackCaptor.capture(), eq(folderItems[3]), any())
+            .updateIconInBackground(
+                eq(context.mainExecutor),
+                callbackCaptor.capture(),
+                eq(folderItems[3]),
+                any(),
+            )
 
         // Restore high-res icon
         folderItems[3].bitmap = originalBitmap
@@ -284,12 +289,17 @@ class PreviewItemManagerTest {
         previewItemManager.setDrawable(drawingParams, folderItems[3])
         val callbackCaptor = argumentCaptor<ItemInfoUpdateReceiver>()
         verify(iconCache)
-            .updateIconInBackground(callbackCaptor.capture(), eq(folderItems[3]), any())
+            .updateIconInBackground(
+                eq(context.mainExecutor),
+                callbackCaptor.capture(),
+                eq(folderItems[3]),
+                any(),
+            )
 
         reset(iconCache)
         callbackCaptor.firstValue.reapplyItemInfo(folderItems[3])
         // Verify that no new update calls are made, if the cache returns the same low-res icon
-        verify(iconCache, never()).updateIconInBackground(any(), any(), any())
+        verify(iconCache, never()).updateIconInBackground(any(), any(), any(), any())
     }
 
     private fun profileFlagOp(type: Int) =

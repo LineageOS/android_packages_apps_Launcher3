@@ -36,6 +36,7 @@ import com.android.launcher3.util.NavigationMode
 import com.android.launcher3.util.WindowBounds
 import com.android.launcher3.util.window.CachedDisplayInfo
 import com.android.launcher3.util.window.WindowManagerProxy
+import java.io.PrintWriter
 import java.util.Collections
 import java.util.StringJoiner
 import kotlin.math.min
@@ -196,6 +197,18 @@ constructor(
                 if (DEBUG) Log.d(TAG, "handleInfoChange - change: ${getChangeFlagsString(change)}")
             }
             .change
+
+    fun dump(pw: PrintWriter) {
+        pw.println("  normalizedDisplayInfo=$normalizedDisplayInfo")
+        pw.println("  rotation=$rotation")
+        pw.println("  fontScale=$fontScale")
+        pw.println("  densityDpi=$densityDpi")
+        pw.println("  navigationMode=" + navigationMode.name)
+        pw.println("  isInDesktopFirstMode=$isInDesktopFirstMode")
+        pw.println("  showLockedTaskbarOnHome=$showLockedTaskbarOnHome")
+        pw.println("  currentSize=$currentSize")
+        perDisplayBounds.forEach { (key, value) -> pw.println("  perDisplayBounds - $key: $value") }
+    }
 
     @JvmInline
     private value class DiffHelper(val change: Int) {

@@ -87,8 +87,7 @@ public class WorkspaceTouchListener extends GestureDetector.SimpleOnGestureListe
         mTouchSlop = 2 * ViewConfiguration.get(launcher).getScaledTouchSlop();
         mGestureDetector = new GestureDetector(workspace.getContext(), this);
         mBoxSelectionHelper = enableWorkspaceSelection()
-                ? new BoxSelectionHelper(workspace,
-                        launcher.getActivityComponent().getWorkspaceSelectionManager())
+                ? new BoxSelectionHelper(launcher, workspace)
                 : null;
     }
 

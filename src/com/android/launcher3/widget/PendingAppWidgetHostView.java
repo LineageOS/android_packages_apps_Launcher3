@@ -120,7 +120,8 @@ public class PendingAppWidgetHostView extends LauncherAppWidgetHostView
             info.pendingItemInfo = new PackageItemInfo(info.providerName.getPackageName(),
                     info.user);
             LauncherAppState.getInstance(context).getIconCache()
-                    .updateIconInBackground(this, info.pendingItemInfo, DEFAULT_LOOKUP_FLAG);
+                    .updateIconInBackground(getContext().getMainExecutor(), this,
+                            info.pendingItemInfo, DEFAULT_LOOKUP_FLAG);
         } else {
             reapplyItemInfo(info.pendingItemInfo);
         }

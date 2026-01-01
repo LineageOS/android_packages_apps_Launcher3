@@ -30,6 +30,8 @@ import com.android.launcher3.statemanager.BaseState
 import com.android.launcher3.util.DaggerSingletonObject
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
+import com.android.launcher3.util.Executors.getTaskbarUiThread
+import com.android.launcher3.util.Preconditions
 import com.android.launcher3.util.window.WindowManagerProxy.DesktopVisibilityListener
 import com.android.quickstep.SystemUiProxy
 import com.android.quickstep.fallback.RecentsState
@@ -222,6 +224,7 @@ constructor(
         doesAnyTaskRequireTaskbarRounding: Boolean,
         displayId: Int,
     ) {
+        Preconditions.assertTaskbarUiThread()
         if (DEBUG) {
             Log.d(
                 TAG,
@@ -439,7 +442,7 @@ constructor(
             displayId: Int,
         ) {
             if (!useRoundedCorners()) return
-            MAIN_EXECUTOR.execute {
+            getTaskbarUiThread().execute {
                 controller.get()?.apply {
                     Log.d(
                         TAG,
@@ -494,7 +497,8 @@ constructor(
     /** A listener for Taskbar in Desktop Mode. */
     interface TaskbarDesktopModeListener {
         /**
-         * Callback for when task is resized in desktop mode.
+         * Callback for when task is resized in desktop mode. This callback is executed on taskbar
+         * ui thread.
          *
          * @param doesAnyTaskRequireTaskbarRounding whether task requires taskbar corner roundness.
          */
