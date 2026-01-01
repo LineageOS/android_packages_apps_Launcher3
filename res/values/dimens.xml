@@ -606,10 +606,4 @@
     <dimen name="automated_icon_stroke_width">3dp</dimen>
     <dimen name="automated_icon_glow_radius">5dp</dimen>
     <dimen name="automated_icon_glow_padding">15dp</dimen>
-
-    <!-- Widget Pin Sheet -->
-    <item name="add_item_activity_background_dim_amount"
-        android:featureFlag="!com.android.launcher3.enable_widget_picker_blur" format="float" type="dimen">0.6</item>
-    <item name="add_item_activity_background_dim_amount"
-        android:featureFlag="com.android.launcher3.enable_widget_picker_blur" format="float" type="dimen">0.0</item>
 </resources>
