@@ -57,6 +57,9 @@ public class DragOptions {
     /** Scale of the icons over the workspace icon size. */
     public float intrinsicIconScaleFactor = 1f;
 
+    /** Whether or not the drag operation is controlled by the SystemDragController. */
+    public boolean isSystemDrag = false;
+
     public boolean isFlingToDelete;
 
     /**

@@ -34,17 +34,18 @@ public class LauncherDragView extends DragView
 
     private final Launcher mLauncher;
     public LauncherDragView(Launcher launcher, Drawable drawable, int registrationX,
-            int registrationY, float initialScale, float scaleOnDrop, float finalScaleDps) {
+            int registrationY, float initialScale, float scaleOnDrop, float finalScaleDps,
+            boolean allowSpringDrawable) {
         super(launcher, drawable, registrationX, registrationY, initialScale, scaleOnDrop,
-                finalScaleDps);
+                finalScaleDps, allowSpringDrawable);
         mLauncher = launcher;
     }
 
     public LauncherDragView(Launcher launcher, View content, int width, int height,
             int registrationX, int registrationY, float initialScale, float scaleOnDrop,
-            float finalScaleDps) {
+            float finalScaleDps, boolean allowSpringDrawable) {
         super(launcher, content, width, height, registrationX, registrationY, initialScale,
-                scaleOnDrop, finalScaleDps);
+                scaleOnDrop, finalScaleDps, allowSpringDrawable);
         mLauncher = launcher;
     }
 

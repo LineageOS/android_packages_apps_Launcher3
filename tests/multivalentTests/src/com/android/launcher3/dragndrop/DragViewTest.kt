@@ -57,6 +57,7 @@ class DragViewTest {
                 /*registrationY=*/ 1.0f,
                 /*scaleOnDrop=*/ 1.0f,
                 /*finalScaleDps=*/ 1.0f,
+                /*allowSpringDrawable=*/ true,
             )
     }
 

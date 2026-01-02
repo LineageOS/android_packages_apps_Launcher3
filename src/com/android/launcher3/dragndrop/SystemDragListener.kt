@@ -206,7 +206,7 @@ class SystemDragListener(
                     params.dragRegion,
                     params.initialDragViewScale,
                     params.dragViewScaleOnDrop,
-                    params.dragOptions,
+                    params.dragOptions.also { it.isSystemDrag = true },
                 )
         }
     }

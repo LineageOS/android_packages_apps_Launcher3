@@ -286,9 +286,13 @@ public class DragController implements DragDriver.EventListener, TouchController
         mIsInPreDrag = mOptions.preDragCondition != null
                 && !mOptions.preDragCondition.shouldStartDrag(0);
 
+        // NOTE: If the internal drag is started to shadow a system drag, prevent drag view from
+        // drawing item's spring animated drawable (generally supported if the item has an adaptive
+        // icon) - the drag will use system drag shadow instead.
         final DragView dragView = mDragObject.dragView = createDragView(
                 drawable, view, originalView, dragInfo, dragLayerX, dragLayerY, dragRegion,
-                initialDragViewScale, dragViewScaleOnDrop);
+                initialDragViewScale, dragViewScaleOnDrop,
+                /*allowSpringDrawable=*/ !options.isSystemDrag);
         updateDescendantsAccessibility(dragView, /*accessible=*/ false);
 
         if (dragInfo != null) {
@@ -344,7 +348,8 @@ public class DragController implements DragDriver.EventListener, TouchController
             int dragLayerX, int dragLayerY,
             Rect dragRegion,
             float initialDragViewScale,
-            float dragViewScaleOnDrop) {
+            float dragViewScaleOnDrop,
+            boolean allowSpringDrawable) {
         final int registrationX = mMotionDown.x - dragLayerX;
         final int registrationY = mMotionDown.y - dragLayerY;
 
@@ -359,7 +364,8 @@ public class DragController implements DragDriver.EventListener, TouchController
                 registrationY,
                 initialDragViewScale,
                 dragViewScaleOnDrop,
-                scaleDps)
+                scaleDps,
+                allowSpringDrawable)
                 : new DragView(
                         mActivity,
                         view,
@@ -369,7 +375,8 @@ public class DragController implements DragDriver.EventListener, TouchController
                         registrationY,
                         initialDragViewScale,
                         dragViewScaleOnDrop,
-                        scaleDps);
+                        scaleDps,
+                        allowSpringDrawable);
     }
 
     protected void onDragViewInitialized() { }
