@@ -20,7 +20,9 @@ import android.content.Intent
 import android.window.RemoteTransition
 import androidx.compose.ui.input.key.key
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.SplitConfigurationOptions
+import com.android.launcher3.util.TestUtil
 import com.android.quickstep.split.SplitSelectStateController
 import com.android.quickstep.util.SplitTask
 import com.android.quickstep.views.RecentsView
@@ -66,17 +68,19 @@ class RecentsViewInteractorTest : TaskbarBaseTestCase() {
 
         recentsViewInteractor.launchSplitTask(splitTask, remoteTransition)
 
-        verify(splitSelectStateController)
-            .launchExistingSplitPair(
-                eq(null), // launchingTaskView
-                eq(task1.key.id), // firstTaskId
-                eq(task2.key.id), // secondTaskId
-                eq(SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT), // stagePosition
-                any(), // callback
-                eq(false), // freezeTaskList
-                eq(SplitScreenConstants.SNAP_TO_2_50_50), // snapPosition
-                eq(remoteTransition), // remoteTransition
-            )
+        TestUtil.runOnExecutorSync(MAIN_EXECUTOR) {
+            verify(splitSelectStateController)
+                .launchExistingSplitPair(
+                    eq(null), // launchingTaskView
+                    eq(task1.key.id), // firstTaskId
+                    eq(task2.key.id), // secondTaskId
+                    eq(SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT), // stagePosition
+                    any(), // callback
+                    eq(false), // freezeTaskList
+                    eq(SplitScreenConstants.SNAP_TO_2_50_50), // snapPosition
+                    eq(remoteTransition), // remoteTransition
+                )
+        }
     }
 
     @Test
@@ -92,17 +96,19 @@ class RecentsViewInteractorTest : TaskbarBaseTestCase() {
 
         recentsViewInteractor.launchSplitTask(splitTask, null)
 
-        verify(splitSelectStateController)
-            .launchExistingSplitPair(
-                eq(null), // launchingTaskView
-                eq(task1.key.id), // firstTaskId
-                eq(task2.key.id), // secondTaskId
-                eq(SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT), // stagePosition
-                any(), // callback
-                eq(false), // freezeTaskList
-                eq(SplitScreenConstants.SNAP_TO_2_50_50), // snapPosition
-                eq(null), // remoteTransition
-            )
+        TestUtil.runOnExecutorSync(MAIN_EXECUTOR) {
+            verify(splitSelectStateController)
+                .launchExistingSplitPair(
+                    eq(null), // launchingTaskView
+                    eq(task1.key.id), // firstTaskId
+                    eq(task2.key.id), // secondTaskId
+                    eq(SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT), // stagePosition
+                    any(), // callback
+                    eq(false), // freezeTaskList
+                    eq(SplitScreenConstants.SNAP_TO_2_50_50), // snapPosition
+                    eq(null), // remoteTransition
+                )
+        }
     }
 
     @Test
@@ -118,7 +124,9 @@ class RecentsViewInteractorTest : TaskbarBaseTestCase() {
 
         recentsViewInteractor.launchSplitTask(splitTask, remoteTransition)
 
-        verify(splitSelectStateController, never())
-            .launchExistingSplitPair(any(), any(), any(), any(), any(), any(), any(), any())
+        TestUtil.runOnExecutorSync(MAIN_EXECUTOR) {
+            verify(splitSelectStateController, never())
+                .launchExistingSplitPair(any(), any(), any(), any(), any(), any(), any(), any())
+        }
     }
 }
