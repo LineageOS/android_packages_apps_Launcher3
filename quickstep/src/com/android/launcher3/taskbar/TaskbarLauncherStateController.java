@@ -412,8 +412,12 @@ public class TaskbarLauncherStateController {
         callbacks.addListener(mTaskBarRecentsAnimationListener);
         RecentsViewInteractor recentsView = mControllers.uiController.getRecentsViewInteractor();
         if (recentsView != null) {
-            recentsView.setTaskLaunchListener(() -> mTaskBarRecentsAnimationListener
-                    .endGestureStateOverride(/* finishedToApp= */ true, /* canceled= */ false));
+            recentsView.setTaskLaunchListener(() -> {
+                if (mTaskBarRecentsAnimationListener != null) {
+                    mTaskBarRecentsAnimationListener.endGestureStateOverride(
+                            /* finishedToApp= */ true, /* canceled= */ false);
+                }
+            });
             recentsView.setTaskLaunchCancelledRunnable(() -> {
                 updateStateForUserFinishedToApp(/* finishedToApp= */ false);
             });

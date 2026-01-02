@@ -142,7 +142,8 @@ class TaskbarManagerImplWrapper @Inject constructor(implProvider: Provider<Taskb
         return impl.shouldForceAllSetFallbackAnimation()
     }
 
-    override fun hasCurrentActivityContext() = impl.currentActivityContext != null
+    override fun hasCurrentActivityContext() =
+        ::impl.isInitialized && impl.currentActivityContext != null
 
     override fun toggleTaskbarStash() {
         getTaskbarUiThread().execute { impl.currentActivityContext?.toggleTaskbarStash() }
