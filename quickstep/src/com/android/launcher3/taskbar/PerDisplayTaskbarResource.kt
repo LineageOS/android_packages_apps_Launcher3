@@ -172,8 +172,8 @@ class PerDisplayTaskbarResource(
                 }
                 val change = flags and RELEVANT_DISPLAY_CHANGES
                 if (change != 0) {
-                    if ((flags and LauncherDisplayInfo.CHANGE_SHOW_LOCKED_TASKBAR) != 0) {
-                        debugMsg("onDisplayInfoChanged: show locked taskbar changed!")
+                    if ((flags and LauncherDisplayInfo.CHANGE_SHOW_DESKTOP_FIRST_TASKBAR) != 0) {
+                        debugMsg("onDisplayInfoChanged: show desktop-first taskbar changed")
                     }
                     callback.accept(change)
                 }
@@ -271,7 +271,7 @@ class PerDisplayTaskbarResource(
         private const val RELEVANT_DISPLAY_CHANGES =
             LauncherDisplayInfo.CHANGE_DENSITY or
                 LauncherDisplayInfo.CHANGE_NAVIGATION_MODE or
-                LauncherDisplayInfo.CHANGE_SHOW_LOCKED_TASKBAR or
+                LauncherDisplayInfo.CHANGE_SHOW_DESKTOP_FIRST_TASKBAR or
                 LauncherDisplayInfo.CHANGE_ROTATION
     }
 }

@@ -38,10 +38,8 @@ class TaskbarUiState {
     // Taskbar ui states
     @Volatile var isTaskbarStashed = false
     @Volatile var isTaskbarAllAppsOpen = false
-    @Volatile var isTaskbarOnHome = false
     @Volatile var showTaskbarEduOnAppLaunch = false
     @Volatile var showDesktopTaskbarForFreeformDisplay = false
-    @Volatile var showLockedTaskbarOnHome = false
     @Volatile var taskbarUnstashAreaSizePx: Int = 0
     @Volatile var taskbarActionCornerPaddingPx: Int = 0
     @Volatile var taskbarNavThreshold: Int = 0
@@ -100,9 +98,6 @@ class TaskbarUiState {
 
     fun setTaskbarStashState(state: Long) {
         _taskbarStashState = state
-        isTaskbarOnHome =
-            (_taskbarStashState and TaskbarStashController.FLAG_IN_OVERVIEW.toLong()) == 0L &&
-                (_taskbarStashState and TaskbarStashController.FLAG_IN_APP.toLong()) == 0L
     }
 
     fun setTaskbarIconsActualBounds(rect: Rect) {

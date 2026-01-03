@@ -501,11 +501,6 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     }
 
     @Override
-    public boolean showLockedTaskbarOnHome() {
-        return DisplayController.getInfo(this).showLockedTaskbarOnHome;
-    }
-
-    @Override
     public boolean showDesktopTaskbarForFreeformDisplay() {
         return DisplayController.getInfo(this).getShowDesktopTaskbarForFreeformDisplay();
     }

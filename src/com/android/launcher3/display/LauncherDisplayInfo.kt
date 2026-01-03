@@ -84,8 +84,6 @@ constructor(
     @JvmField val isInDesktopFirstMode: Boolean = wmProxy.isDisplayDesktopFirst(context)
 
     /** Returns whether the taskbar is forced to be pinned when home is visible. */
-    @JvmField val showLockedTaskbarOnHome: Boolean = wmProxy.showLockedTaskbarOnHome(context)
-    @JvmField val isHomeVisible: Boolean = wmProxy.isHomeVisible
     private val mIsDesktopFormFactor: Boolean = isDesktopFormFactor
 
     /**
@@ -191,7 +189,9 @@ constructor(
             .comp(CHANGE_NAVIGATION_MODE, this, other) { it.navigationMode }
             .comp(CHANGE_SUPPORTED_BOUNDS, this, other) { it.perDisplayBounds }
             .comp(CHANGE_SUPPORTED_BOUNDS, this, other) { it.supportedBounds }
-            .comp(CHANGE_SHOW_LOCKED_TASKBAR, this, other) { it.showLockedTaskbarOnHome }
+            .comp(CHANGE_SHOW_DESKTOP_FIRST_TASKBAR, this, other) {
+                it.showDesktopTaskbarForFreeformDisplay
+            }
             .comp(CHANGE_NIGHT_MODE, this, other) { it.isNightModeActive }
             .apply {
                 if (DEBUG) Log.d(TAG, "handleInfoChange - change: ${getChangeFlagsString(change)}")
@@ -205,7 +205,7 @@ constructor(
         pw.println("  densityDpi=$densityDpi")
         pw.println("  navigationMode=" + navigationMode.name)
         pw.println("  isInDesktopFirstMode=$isInDesktopFirstMode")
-        pw.println("  showLockedTaskbarOnHome=$showLockedTaskbarOnHome")
+        pw.println("  showDesktopFirstTaskbar=$showDesktopTaskbarForFreeformDisplay")
         pw.println("  currentSize=$currentSize")
         perDisplayBounds.forEach { (key, value) -> pw.println("  perDisplayBounds - $key: $value") }
     }
@@ -226,7 +226,7 @@ constructor(
         const val CHANGE_DENSITY: Int = 1 shl 2
         const val CHANGE_SUPPORTED_BOUNDS: Int = 1 shl 3
         const val CHANGE_NAVIGATION_MODE: Int = 1 shl 4
-        const val CHANGE_SHOW_LOCKED_TASKBAR: Int = 1 shl 5
+        const val CHANGE_SHOW_DESKTOP_FIRST_TASKBAR: Int = 1 shl 5
         const val CHANGE_NIGHT_MODE: Int = 1 shl 6
 
         const val CHANGE_ALL: Int =
@@ -235,7 +235,7 @@ constructor(
                 CHANGE_DENSITY or
                 CHANGE_SUPPORTED_BOUNDS or
                 CHANGE_NAVIGATION_MODE or
-                CHANGE_SHOW_LOCKED_TASKBAR or
+                CHANGE_SHOW_DESKTOP_FIRST_TASKBAR or
                 CHANGE_NIGHT_MODE)
 
         /**
@@ -252,7 +252,11 @@ constructor(
                     appendFlag(change, CHANGE_DENSITY, "CHANGE_DENSITY")
                     appendFlag(change, CHANGE_SUPPORTED_BOUNDS, "CHANGE_SUPPORTED_BOUNDS")
                     appendFlag(change, CHANGE_NAVIGATION_MODE, "CHANGE_NAVIGATION_MODE")
-                    appendFlag(change, CHANGE_SHOW_LOCKED_TASKBAR, "CHANGE_SHOW_LOCKED_TASKBAR")
+                    appendFlag(
+                        change,
+                        CHANGE_SHOW_DESKTOP_FIRST_TASKBAR,
+                        "CHANGE_SHOW_DESKTOP_FIRST_TASKBAR",
+                    )
                     appendFlag(change, CHANGE_NIGHT_MODE, "CHANGE_NIGHT_MODE")
                 }
                 .toString()

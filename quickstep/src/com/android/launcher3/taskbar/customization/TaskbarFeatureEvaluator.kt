@@ -57,9 +57,7 @@ constructor(
             if (
                 displayController.info.navigationMode != NO_BUTTON ||
                     desktopVisibilityController.isInDesktopMode(primaryDisplayId) ||
-                    displayController.info.showDesktopTaskbarForFreeformDisplay ||
-                    (displayController.info.showLockedTaskbarOnHome &&
-                        displayController.info.isHomeVisible)
+                    displayController.info.showDesktopTaskbarForFreeformDisplay
             ) {
                 false
             } else if (enableTaskbarPinning()) {

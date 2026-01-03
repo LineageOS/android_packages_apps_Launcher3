@@ -65,8 +65,7 @@ public class TaskbarViewCallbacks {
         InteractionJankMonitorWrapper.begin(v, Cuj.CUJ_LAUNCHER_OPEN_ALL_APPS,
                 /* tag= */ "TASKBAR_BUTTON");
         mActivity.getStatsLogManager().logger().log(LAUNCHER_TASKBAR_ALLAPPS_BUTTON_TAP);
-        if (mActivity.showLockedTaskbarOnHome()
-                || mActivity.showDesktopTaskbarForFreeformDisplay()) {
+        if (mActivity.showDesktopTaskbarForFreeformDisplay()) {
             // If the taskbar can be shown on the home screen, use mAllAppsToggler to toggle all
             // apps, which will toggle the launcher activity all apps when on home screen.
             // TODO(b/395913143): Reconsider this if a gap in taskbar all apps functionality that
