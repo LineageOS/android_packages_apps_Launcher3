@@ -22,17 +22,15 @@ import android.provider.Settings.Secure.USER_SETUP_COMPLETE
 import androidx.test.annotation.UiThreadTest
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.dagger.LauncherAppComponent
-import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.taskbar.TaskbarManagerImpl
-import com.android.launcher3.util.AllModulesForTest
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.SettingsCache
 import com.android.launcher3.util.SettingsCacheSandbox
 import com.android.launcher3.util.TestUtil
+import com.android.tools.dagger.mutation.annotations.BindValue
+import com.android.tools.dagger.mutation.annotations.MutatedComponent
 import com.google.common.truth.Truth.assertThat
-import dagger.BindsInstance
-import dagger.Component
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit.SECONDS
 import org.junit.After
@@ -54,6 +52,7 @@ private val USER_SETUP_COMPLETE_URI = Settings.Secure.getUriFor(USER_SETUP_COMPL
 
 @RunWith(AndroidJUnit4::class)
 @UiThreadTest
+@MutatedComponent(target = LauncherAppComponent::class)
 class AllAppsActionManagerTest {
     private val callbackSemaphore = Semaphore(0)
     private val bgExecutor = UI_HELPER_EXECUTOR
@@ -79,12 +78,13 @@ class AllAppsActionManagerTest {
             }
         }
 
+    @BindValue
+    val settingsCache: SettingsCache
+        get() = settingsCacheSandbox.cache
+
     @Before
     fun initDaggerGraphAndWaitForSettingUpdate() {
-        context.initDaggerComponent(
-            DaggerAllAppsActionManagerTestComponent.builder()
-                .bindSettingsCache(settingsCacheSandbox.cache)
-        )
+        context.initDaggerComponent(mutatedComponentBuilder())
 
         doNothing().whenever(inputManager).registerKeyGestureEventHandler(any(), any())
         doNothing().whenever(inputManager).unregisterKeyGestureEventHandler(any())
@@ -198,17 +198,5 @@ class AllAppsActionManagerTest {
         allAppsActionManager.onDestroy()
 
         verify(quickstepKeyGestureEventsManager).unregisterAllAppsKeyGestureEvent()
-    }
-}
-
-@LauncherAppSingleton
-@Component(modules = [AllModulesForTest::class])
-interface AllAppsActionManagerTestComponent : LauncherAppComponent {
-
-    @Component.Builder
-    interface Builder : LauncherAppComponent.Builder {
-        @BindsInstance fun bindSettingsCache(settingsCache: SettingsCache): Builder
-
-        override fun build(): AllAppsActionManagerTestComponent
     }
 }

@@ -498,10 +498,10 @@ constructor(
     @AssistedFactory
     interface LoaderCursorFactory {
         fun createLoaderCursor(
-            cursor: Cursor?,
-            userManagerState: UserManagerState?,
+            cursor: Cursor,
+            userManagerState: UserManagerState,
             restoreEventLogger: LauncherRestoreEventLogger?,
-        ): LoaderCursor?
+        ): LoaderCursor
     }
 
     companion object {

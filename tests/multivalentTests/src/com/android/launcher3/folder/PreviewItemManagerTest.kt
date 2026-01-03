@@ -25,7 +25,6 @@ import androidx.test.filters.SmallTest
 import com.android.launcher3.LauncherAppState
 import com.android.launcher3.LauncherSettings.Favorites.DESKTOP_ICON_FLAG
 import com.android.launcher3.dagger.LauncherAppComponent
-import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.graphics.PreloadIconDelegate
 import com.android.launcher3.graphics.theme.ThemePreference.Companion.MONO_THEME_VALUE
 import com.android.launcher3.icons.BitmapInfo
@@ -39,7 +38,6 @@ import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_ARCHIVED
 import com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_INSTALL_SESSION_ACTIVE
 import com.android.launcher3.model.data.WorkspaceItemInfo
-import com.android.launcher3.util.AllModulesForTest
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import com.android.launcher3.util.FakePrefsModule
@@ -54,8 +52,8 @@ import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestActivityContext
 import com.android.launcher3.util.TestUtil
 import com.android.launcher3.util.UserIconInfo
+import com.android.tools.dagger.mutation.annotations.MutatedComponent
 import com.google.common.truth.Truth.assertThat
-import dagger.Component
 import kotlin.annotation.AnnotationRetention.RUNTIME
 import kotlin.annotation.AnnotationTarget.FUNCTION
 import kotlin.annotation.AnnotationTarget.PROPERTY_GETTER
@@ -80,6 +78,7 @@ import org.mockito.kotlin.whenever
 /** Tests for [PreviewItemManager] */
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@MutatedComponent(target = LauncherAppComponent::class, installModules = [FakePrefsModule::class])
 class PreviewItemManagerTest {
 
     @get:Rule val context = SandboxApplication().withModelDependency()
@@ -95,7 +94,7 @@ class PreviewItemManagerTest {
 
     @Before
     fun setup() {
-        context.initDaggerComponent(DaggerPreviewItemManagerTestComponent.builder())
+        context.initDaggerComponent(mutatedComponentBuilder())
         theseStateRule.themeState?.let {
             context.appComponent.themePreference.setValue(if (it) MONO_THEME_VALUE else null)
         }
@@ -333,13 +332,3 @@ class ThemeStateRule : TestRule {
 @Retention(RUNTIME)
 @Target(FUNCTION, PROPERTY_GETTER, PROPERTY_SETTER)
 annotation class MonoThemeEnabled(val value: Boolean = false)
-
-@LauncherAppSingleton
-@Component(modules = [AllModulesForTest::class, FakePrefsModule::class])
-interface PreviewItemManagerTestComponent : LauncherAppComponent {
-
-    @Component.Builder
-    interface Builder : LauncherAppComponent.Builder {
-        override fun build(): PreviewItemManagerTestComponent
-    }
-}

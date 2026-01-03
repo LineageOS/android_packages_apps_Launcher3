@@ -25,7 +25,7 @@ import dagger.multibindings.IntoSet
 import javax.inject.Named
 
 @Module
-class SettingsModule {
+object SettingsModule {
 
     @Provides
     @IntoSet

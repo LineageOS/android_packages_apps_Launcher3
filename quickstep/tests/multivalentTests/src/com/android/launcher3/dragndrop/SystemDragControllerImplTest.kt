@@ -69,7 +69,8 @@ class SystemDragControllerImplTest {
     @Mock private lateinit var mockDragEvent: DragEvent
     @Mock private lateinit var mockItemInfo: SystemDragItemInfo
     @Mock private lateinit var mockSystemDragListener: SystemDragListener
-    @Mock private lateinit var mockSystemDragListenerFactory: SystemDragListenerFactory
+
+    @Mock lateinit var mockSystemDragListenerFactory: SystemDragListenerFactory
     @Mock private lateinit var mockUri: Uri
 
     private lateinit var controller: SystemDragControllerImpl
@@ -217,7 +218,7 @@ class SystemDragControllerImplTest {
             )
             .thenReturn(withStartSystemDragSuccess)
 
-        whenever(mockSystemDragListenerFactory.invoke(mockContext, params))
+        whenever(mockSystemDragListenerFactory.get(mockContext, params))
             .thenReturn(systemDragListener)
         whenever(systemDragListener.startDrag()).thenReturn(dragView)
 
@@ -251,7 +252,7 @@ class SystemDragControllerImplTest {
     }
 
     private fun initMock(mockSystemDragListenerFactory: SystemDragListenerFactory) {
-        whenever(mockSystemDragListenerFactory.invoke(any(), anyOrNull())).thenAnswer {
+        whenever(mockSystemDragListenerFactory.get(any(), anyOrNull())).thenAnswer {
             mockSystemDragListener
         }
     }
