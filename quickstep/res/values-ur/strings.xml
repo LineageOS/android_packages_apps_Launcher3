@@ -95,7 +95,7 @@
     <string name="allset_navigation_settings" msgid="4713404605961476027"><annotation id="link">"سسٹم نیویگیشن کی ترتیبات"</annotation></string>
     <string name="allset_title_expressive" msgid="474399969304146994">"آپ کا <xliff:g id="DEVICE">%1$s</xliff:g> \nتیار ہے!"</string>
     <string name="allset_title_expressive_fallback" msgid="2829102990606405239">"آپ کا آلہ \nتیار ہے!"</string>
-    <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"آپ رول کرنے کے لئے تیار ہیں!"</string>
+    <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"آپ شروع کرنے کے لئے تیار ہیں!"</string>
     <string name="allset_subtitle_expressive" msgid="419688197551192358">"اپنے نئے <xliff:g id="DEVICE">%1$s</xliff:g> کا لطف اٹھائیں!"</string>
     <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"اپنے <xliff:g id="DEVICE">%1$s</xliff:g> کے ساتھ شروع کرنے کے لیے سوائپ کریں"</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"اپنے <xliff:g id="DEVICE">%1$s</xliff:g> کے ساتھ شروع کرنے کے لیے تھپتھپائیں"</string>
