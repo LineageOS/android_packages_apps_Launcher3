@@ -116,15 +116,14 @@
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"ತೆರೆಯಿರಿ"</string>
     <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"ಶಾಶ್ವತವಾಗಿ ಅಳಿಸಿ"</string>
     <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"ಟ್ರ್ಯಾಶ್‌ಗೆ ಸರಿಸಿ"</string>
-    <!-- no translation found for home_screen_files_moved_to_trash_message (381256565590274395) -->
-    <skip />
-    <!-- no translation found for home_screen_files_move_to_trash_error_message (3836240816166417826) -->
-    <skip />
-    <!-- no translation found for home_screen_files_restore_from_trash_error_message (994941644161090497) -->
-    <skip />
+    <string name="home_screen_files_moved_to_trash_message" msgid="381256565590274395">"<xliff:g id="ITEM_NAME">%1$s</xliff:g> ಟ್ರ್ಯಾಶ್‌ಗೆ ಸರಿಸಲಾಗಿದೆ"</string>
+    <string name="home_screen_files_move_to_trash_error_message" msgid="3836240816166417826">"ಟ್ರ್ಯಾಶ್‌ಗೆ ಸರಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ ಏನೋ ತಪ್ಪಾಗಿದೆ."</string>
+    <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"ರದ್ದುಗೊಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ ಮರುಸ್ಥಾಪಿಸಲು Files ಆ್ಯಪ್‌ಗೆ ಹೋಗಿ."</string>
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"ಕ್ರಿಯೆಗಳು"</string>
     <string name="shortcuts_popup_menu_button" msgid="766598805805882499">"ಶಾರ್ಟ್‌ಕಟ್‌ಗಳು"</string>
     <string name="loading_shortcut" msgid="2638272014233830958">"ಶಾರ್ಟ್‌ಕಟ್ ಅನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
+    <!-- no translation found for pause_app_label (6796255881727695791) -->
+    <skip />
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ಸ್ಥಾಪಿಸಿ"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"ಬಳಕೆದಾರರ ಹಸ್ತಕ್ಷೇಪವಿಲ್ಲದೆ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ಸೇರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"ಹೋಮ್ ಸ್ಕ್ರೀನ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಮತ್ತು ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ಓದಿ"</string>

@@ -116,17 +116,13 @@
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"Atvērt"</string>
     <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"Neatgriezeniski dzēst"</string>
     <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"Pārvietot uz atkritni"</string>
-    <!-- no translation found for home_screen_files_moved_to_trash_message (381256565590274395) -->
-    <skip />
-    <!-- no translation found for home_screen_files_move_to_trash_error_message (3836240816166417826) -->
-    <skip />
-    <!-- no translation found for home_screen_files_restore_from_trash_error_message (994941644161090497) -->
-    <skip />
-    <!-- no translation found for actions_popup_menu_button (2442187572711557413) -->
-    <skip />
-    <!-- no translation found for shortcuts_popup_menu_button (766598805805882499) -->
-    <skip />
-    <!-- no translation found for loading_shortcut (2638272014233830958) -->
+    <string name="home_screen_files_moved_to_trash_message" msgid="381256565590274395">"Vienums (<xliff:g id="ITEM_NAME">%1$s</xliff:g>) ir pārvietots uz atkritni."</string>
+    <string name="home_screen_files_move_to_trash_error_message" msgid="3836240816166417826">"Nevar pārvietot uz atkritni. Radās problēma."</string>
+    <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"Nevar atsaukt. Lai atjaunotu vienumu, pārejiet uz lietotni Files."</string>
+    <string name="actions_popup_menu_button" msgid="2442187572711557413">"Darbības"</string>
+    <string name="shortcuts_popup_menu_button" msgid="766598805805882499">"Saīsnes"</string>
+    <string name="loading_shortcut" msgid="2638272014233830958">"Notiek saīsnes ielāde"</string>
+    <!-- no translation found for pause_app_label (6796255881727695791) -->
     <skip />
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"instalēt saīsnes"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"Ļauj lietotnei pievienot saīsnes, nejautājot lietotājam."</string>

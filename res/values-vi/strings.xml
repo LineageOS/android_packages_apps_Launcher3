@@ -116,15 +116,14 @@
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"Mở"</string>
     <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"Xoá vĩnh viễn"</string>
     <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"Chuyển vào thùng rác"</string>
-    <!-- no translation found for home_screen_files_moved_to_trash_message (381256565590274395) -->
-    <skip />
-    <!-- no translation found for home_screen_files_move_to_trash_error_message (3836240816166417826) -->
-    <skip />
-    <!-- no translation found for home_screen_files_restore_from_trash_error_message (994941644161090497) -->
-    <skip />
+    <string name="home_screen_files_moved_to_trash_message" msgid="381256565590274395">"Đã chuyển <xliff:g id="ITEM_NAME">%1$s</xliff:g> mục vào thùng rác"</string>
+    <string name="home_screen_files_move_to_trash_error_message" msgid="3836240816166417826">"Không chuyển được vào thùng rác. Đã xảy ra lỗi."</string>
+    <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"Không huỷ được. Hãy chuyển đến ứng dụng Files để khôi phục."</string>
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"Thao tác"</string>
     <string name="shortcuts_popup_menu_button" msgid="766598805805882499">"Lối tắt"</string>
     <string name="loading_shortcut" msgid="2638272014233830958">"Đang tải lối tắt"</string>
+    <!-- no translation found for pause_app_label (6796255881727695791) -->
+    <skip />
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"cài đặt lối tắt"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"Cho phép ứng dụng thêm lối tắt mà không cần sự can thiệp của người dùng."</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"đọc lối tắt và các chế độ cài đặt trên màn hình chính"</string>

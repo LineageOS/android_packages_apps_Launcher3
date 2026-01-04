@@ -116,15 +116,14 @@
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"Abrir"</string>
     <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"Eliminar definitivamente"</string>
     <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"Mover para o lixo"</string>
-    <!-- no translation found for home_screen_files_moved_to_trash_message (381256565590274395) -->
-    <skip />
-    <!-- no translation found for home_screen_files_move_to_trash_error_message (3836240816166417826) -->
-    <skip />
-    <!-- no translation found for home_screen_files_restore_from_trash_error_message (994941644161090497) -->
-    <skip />
+    <string name="home_screen_files_moved_to_trash_message" msgid="381256565590274395">"<xliff:g id="ITEM_NAME">%1$s</xliff:g> movido para o lixo"</string>
+    <string name="home_screen_files_move_to_trash_error_message" msgid="3836240816166417826">"Não é possível mover para o lixo. Algo correu mal."</string>
+    <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"Não é possível anular. Aceda à app Files para restaurar."</string>
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"Ações"</string>
     <string name="shortcuts_popup_menu_button" msgid="766598805805882499">"Atalhos"</string>
     <string name="loading_shortcut" msgid="2638272014233830958">"A carregar atalho"</string>
+    <!-- no translation found for pause_app_label (6796255881727695791) -->
+    <skip />
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"instalar atalhos"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"Permite a uma app adicionar atalhos sem a intervenção do utilizador."</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"ler definições e atalhos do ecrã Principal"</string>
