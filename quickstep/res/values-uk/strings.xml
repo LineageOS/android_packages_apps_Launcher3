@@ -99,7 +99,7 @@
     <string name="allset_subtitle_expressive" msgid="419688197551192358">"Насолоджуйтеся своїм новим <xliff:g id="DEVICE">%1$s</xliff:g>ом!"</string>
     <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"Проведіть пальцем угору, щоб почати роботу з пристроєм \"<xliff:g id="DEVICE">%1$s</xliff:g>\""</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"Натисніть, щоб почати користуватися пристроєм (<xliff:g id="DEVICE">%1$s</xliff:g>)"</string>
-    <string name="allset_navigation_settings_expressive" msgid="3745595273748356"><annotation id="link">"Виберіть спосіб навігації"</annotation></string>
+    <string name="allset_navigation_settings_expressive" msgid="3745595273748356"><annotation id="link">"Вибрати спосіб навігації"</annotation></string>
     <string name="allset_hint_expressive" msgid="756856423510976261">"Проведіть пальцем угору"</string>
     <string name="allset_button_hint_expressive" msgid="667643693410494225">"Натисніть кнопку головного екрана"</string>
     <string name="allset_device_type_tablet" msgid="2173392009787325894">"планшет"</string>

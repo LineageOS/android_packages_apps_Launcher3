@@ -78,7 +78,7 @@
     <string name="overview_gesture_feedback_complete_without_follow_up" msgid="2903050864432331629">"మీరు \'యాప్‌ల మధ్య మారేందుకు సంజ్ఞ\' ట్యుటోరియల్‌ను పూర్తి చేశారు"</string>
     <string name="overview_gesture_intro_title" msgid="2902054412868489378">"యాప్‌ల మధ్య మార్చడం కోసం స్వైప్ చేయండి"</string>
     <string name="overview_gesture_intro_subtitle" msgid="4968091015637850859">"యాప్‌ల మధ్య మారడానికి, మీ స్క్రీన్ కింది వైపు నుండి పైకి స్వైప్ చేసి, పట్టుకుని, తర్వాత వదలండి."</string>
-    <string name="overview_gesture_tutorial_title" msgid="4125835002668708720">"యాప్‌ల మధ్య స్విచ్ అవ్వండి"</string>
+    <string name="overview_gesture_tutorial_title" msgid="4125835002668708720">"యాప్‌ల మధ్య మారండి"</string>
     <string name="overview_gesture_tutorial_subtitle" msgid="5253549754058973071">"మీ స్క్రీన్ కింది వైపు నుండి పైకి స్వైప్ చేసి, పట్టుకుని, తర్వాత వదలండి"</string>
     <string name="overview_gesture_tutorial_success" msgid="1910267697807973076">"చాలా బాగా చేశారు!"</string>
     <string name="gesture_tutorial_confirm_title" msgid="6201516182040074092">"అంతా సిద్ధంగా ఉంది"</string>
@@ -97,7 +97,7 @@
     <string name="allset_title_expressive_fallback" msgid="2829102990606405239">"మీ డివైజ్ సిద్ధంగా \nఉంది!"</string>
     <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"మీరు ప్రారంభించడానికి సిద్ధంగా ఉన్నారు!"</string>
     <string name="allset_subtitle_expressive" msgid="419688197551192358">"మీ కొత్త <xliff:g id="DEVICE">%1$s</xliff:g>‌ను ఉపయోగిస్తూ ఎంజాయ్ చేయండి!"</string>
-    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"మీ <xliff:g id="DEVICE">%1$s</xliff:g>‌తో ప్రారంభించడానికి పైకి స్వైప్ చేయండి"</string>
+    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"మీ <xliff:g id="DEVICE">%1$s</xliff:g>‌‌తో ప్రారంభించడానికి పైకి స్వైప్ చేయండి"</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"మీ <xliff:g id="DEVICE">%1$s</xliff:g>ను ప్రారంభించడానికి ట్యాప్ చేయండి"</string>
     <string name="allset_navigation_settings_expressive" msgid="3745595273748356"><annotation id="link">"ఎలా నావిగేట్ చేయాలో ఎంచుకోండి"</annotation></string>
     <string name="allset_hint_expressive" msgid="756856423510976261">"పైకి స్వైప్ చేయండి"</string>

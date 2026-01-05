@@ -95,7 +95,7 @@
     <string name="allset_navigation_settings" msgid="4713404605961476027"><annotation id="link">"تنظیمات پیمایش سیستم"</annotation></string>
     <string name="allset_title_expressive" msgid="474399969304146994">"‫<xliff:g id="DEVICE">%1$s</xliff:g> شما \nآماده است!"</string>
     <string name="allset_title_expressive_fallback" msgid="2829102990606405239">"دستگاهتان \nآماده است!"</string>
-    <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"آماده استفاده از دستگاهتان هستید!"</string>
+    <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"آماده‌اید که شروع کنید!"</string>
     <string name="allset_subtitle_expressive" msgid="419688197551192358">"از <xliff:g id="DEVICE">%1$s</xliff:g> جدیدتان لذت ببرید!"</string>
     <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"برای شروع کار با <xliff:g id="DEVICE">%1$s</xliff:g>، تند به‌بالا بکشید"</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"برای شروع کار با <xliff:g id="DEVICE">%1$s</xliff:g> خود، تک‌ضرب بزنید"</string>
