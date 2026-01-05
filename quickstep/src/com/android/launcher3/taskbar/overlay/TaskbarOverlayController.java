@@ -371,6 +371,16 @@ public final class TaskbarOverlayController
                 || mTaskbarContext.getDragController().isSystemDragInProgress();
     }
 
+    /**
+     * Returns {@code true} if either overlay or Taskbar windows are handlng a system drag for
+     * which Taskbar is a viable drop target.
+     */
+    public boolean taskbarIsViableTargetForSystemDrag() {
+        return (mOverlayContext != null
+                && mOverlayContext.getDragController().getTaskbarIsViableTargetForSystemDrag())
+                || mTaskbarContext.getDragController().getTaskbarIsViableTargetForSystemDrag();
+    }
+
     @Override
     public void dumpLogs(String prefix, PrintWriter pw) {
         pw.println(prefix + "TaskbarOverlayController:");

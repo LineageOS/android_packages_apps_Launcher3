@@ -65,7 +65,6 @@ import com.android.internal.logging.InstanceId;
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.DropTarget;
-import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.R;
 import com.android.launcher3.dragndrop.BaseItemDragListener;
 import com.android.launcher3.dragndrop.DragController;
@@ -124,6 +123,7 @@ public class TaskbarDragController extends DragController implements
     private int mRegistrationY;
 
     private boolean mIsSystemDragInProgress;
+    private boolean mTaskbarIsViableTargetForSystemDrag;
     private boolean mIsDropHandledByDropTarget;
 
     // Animation for the drag shadow back into position after an unsuccessful drag
@@ -408,21 +408,34 @@ public class TaskbarDragController extends DragController implements
             return;
         }
 
-        // TODO(297921594) clean it up when taskbar to desktop drag is implemented.
         // Pre-drag has ended, start the global system drag.
-        if (mDisallowGlobalDrag
-                || mControllers.taskbarDesktopModeController
-                .isInDesktopModeAndNotInOverview(mActivity.getDisplayId())
-                || isTaskbarShownOnHome()) {
+        boolean startedSystemDrag =
+                startSystemDragIfNeeded((BubbleTextView) mDragObject.originalView);
+        if (!startedSystemDrag) {
             AbstractFloatingView.closeAllOpenViewsExcept(mActivity, TYPE_TASKBAR_ALL_APPS);
-            return;
         }
-        startSystemDrag((BubbleTextView) mDragObject.originalView);
     }
 
-    private void startSystemDrag(BubbleTextView btv) {
-        View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(btv) {
+    @Nullable
+    private static ClipDescription createItemSystemDragClipDescription(
+            ItemInfo item, @Nullable String firstMimeType, @Nullable String secondMimeType) {
+        if (firstMimeType != null && secondMimeType != null) {
+            return new ClipDescription(item.title, new String[]{firstMimeType, secondMimeType});
+        }
 
+        if (firstMimeType != null) {
+            return new ClipDescription(item.title, new String[]{firstMimeType});
+        }
+
+        if (secondMimeType != null) {
+            return new ClipDescription(item.title, new String[]{secondMimeType});
+        }
+
+        return null;
+    }
+
+    private  View.DragShadowBuilder createSystemDragShadowBuilder(BubbleTextView btv) {
+        return  new View.DragShadowBuilder(btv) {
             @Override
             public void onProvideShadowMetrics(Point shadowSize, Point shadowTouchPoint) {
                 int iconSize = Math.max(mDragIconSize, btv.getWidth());
@@ -460,52 +473,91 @@ public class TaskbarDragController extends DragController implements
                 canvas.restore();
             }
         };
+    }
+
+    private boolean shouldStartSystemDragWithinLauncher(BubbleTextView originalView) {
+        if (originalView.getTag() instanceof ItemInfo item) {
+            return isItemFromAllApps(item) && enableTaskbarDragAndDrop();
+        }
+
+        return false;
+    }
+
+    private boolean shouldStartDragToWMShell() {
+        return !mDisallowGlobalDrag
+                // TODO(297921594) clean it up when taskbar to desktop drag is implemented.
+                && !mControllers.taskbarDesktopModeController.isInDesktopModeAndNotInOverview(
+                        mActivity.getDisplayId())
+                && !isTaskbarShownOnHome();
+    }
+
+    private boolean startSystemDragIfNeeded(BubbleTextView btv) {
+        boolean startSystemDragForLauncher = shouldStartSystemDragWithinLauncher(btv);
+        boolean startSystemDragToWMShell = shouldStartDragToWMShell();
 
         Object tag = btv.getTag();
         ClipDescription clipDescription = null;
         Intent intent = null;
         if (tag instanceof ItemInfo) {
             ItemInfo item = (ItemInfo) tag;
-            LauncherApps launcherApps = mActivity.getSystemService(LauncherApps.class);
-            clipDescription = new ClipDescription(item.title,
-                    new String[]{
-                            item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT
-                                    ? ClipDescription.MIMETYPE_APPLICATION_SHORTCUT
-                                    : ClipDescription.MIMETYPE_APPLICATION_ACTIVITY
-                    });
-            intent = new Intent();
-            if (item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT) {
-                String deepShortcutId = ((WorkspaceItemInfo) item).getDeepShortcutId();
-                intent.putExtra(ClipDescription.EXTRA_PENDING_INTENT,
-                        launcherApps.getShortcutIntent(
-                                item.getIntent().getPackage(),
-                                deepShortcutId,
-                                null,
-                                item.user));
-                intent.putExtra(Intent.EXTRA_PACKAGE_NAME, item.getIntent().getPackage());
-                intent.putExtra(Intent.EXTRA_SHORTCUT_ID, deepShortcutId);
-                ShortcutInfo shortcutInfo = ((WorkspaceItemInfo) item).getDeepShortcutInfo();
-                if (BubbleAnythingFlagHelper.enableCreateAnyBubble() && shortcutInfo != null) {
-                    intent.putExtra(DragAndDropConstants.EXTRA_SHORTCUT_INFO, shortcutInfo);
-                }
-            } else if (item.itemType == ITEM_TYPE_SEARCH_ACTION) {
-                // TODO(b/289261756): Buggy behavior when split opposite to an existing search pane.
-                intent.putExtra(
-                        ClipDescription.EXTRA_PENDING_INTENT,
-                        PendingIntent.getActivityAsUser(
-                                mActivity,
-                                /* requestCode= */ 0,
-                                item.getIntent(),
-                                PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT,
-                                /* options= */ null,
-                                item.user));
-            } else {
-                intent.putExtra(ClipDescription.EXTRA_PENDING_INTENT,
-                        launcherApps.getMainActivityLaunchIntent(item.getIntent().getComponent(),
-                                null, item.user));
+            String internalMimeType =
+                    startSystemDragForLauncher ? BaseItemDragListener.getInternalMimeTypeForItem(
+                            item) : null;
+            String pendingIntentMimeType =
+                    startSystemDragToWMShell ? (item.itemType == ITEM_TYPE_DEEP_SHORTCUT
+                            ? ClipDescription.MIMETYPE_APPLICATION_SHORTCUT
+                            : ClipDescription.MIMETYPE_APPLICATION_ACTIVITY) : null;
+            clipDescription = createItemSystemDragClipDescription(item, internalMimeType,
+                    pendingIntentMimeType);
+            if (clipDescription == null) {
+                return false;
             }
-            intent.putExtra(Intent.EXTRA_USER, item.user);
-        } else if (tag instanceof SingleTask singleTask) {
+
+            intent = new Intent();
+            if (pendingIntentMimeType != null) {
+                LauncherApps launcherApps = mActivity.getSystemService(LauncherApps.class);
+                if (item.itemType == ITEM_TYPE_DEEP_SHORTCUT) {
+                    String deepShortcutId = ((WorkspaceItemInfo) item).getDeepShortcutId();
+                    intent.putExtra(ClipDescription.EXTRA_PENDING_INTENT,
+                            launcherApps.getShortcutIntent(
+                                    item.getIntent().getPackage(),
+                                    deepShortcutId,
+                                    null,
+                                    item.user));
+                    intent.putExtra(Intent.EXTRA_PACKAGE_NAME, item.getIntent().getPackage());
+                    intent.putExtra(Intent.EXTRA_SHORTCUT_ID, deepShortcutId);
+                    ShortcutInfo shortcutInfo = ((WorkspaceItemInfo) item).getDeepShortcutInfo();
+                    if (BubbleAnythingFlagHelper.enableCreateAnyBubble() && shortcutInfo != null) {
+                        intent.putExtra(DragAndDropConstants.EXTRA_SHORTCUT_INFO, shortcutInfo);
+                    }
+                } else if (item.itemType == ITEM_TYPE_SEARCH_ACTION) {
+                    // TODO(b/289261756): Buggy behavior when split opposite to an existing search
+                    // pane.
+                    intent.putExtra(
+                            ClipDescription.EXTRA_PENDING_INTENT,
+                            PendingIntent.getActivityAsUser(
+                                    mActivity,
+                                    /* requestCode= */ 0,
+                                    item.getIntent(),
+                                    PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT,
+                                    /* options= */ null,
+                                    item.user));
+                } else {
+                    intent.putExtra(ClipDescription.EXTRA_PENDING_INTENT,
+                            launcherApps.getMainActivityLaunchIntent(
+                                    item.getIntent().getComponent(),
+                                    null, item.user));
+                }
+                intent.putExtra(Intent.EXTRA_USER, item.user);
+            }
+
+            if (internalMimeType != null) {
+                Bundle wrappedItem = new Bundle();
+                wrappedItem.putBinder(BaseItemDragListener.EXTRA_WRAPPED_ITEM_INFO,
+                        ObjectWrapper.wrap(item));
+                intent.putExtra(BaseItemDragListener.EXTRA_WRAPPED_ITEM_INFO, wrappedItem);
+            }
+        } else if (startSystemDragToWMShell && tag instanceof SingleTask singleTask) {
             Task task = singleTask.getTask();
             clipDescription = new ClipDescription(task.titleDescription,
                     new String[]{
@@ -514,15 +566,16 @@ public class TaskbarDragController extends DragController implements
             intent = new Intent();
             intent.putExtra(Intent.EXTRA_TASK_ID, task.key.id);
             intent.putExtra(Intent.EXTRA_USER, UserHandle.of(task.key.userId));
+        } else {
+            return false;
         }
 
-        if (clipDescription != null && intent != null) {
-            Pair<InstanceId, com.android.launcher3.logging.InstanceId> instanceIds =
-                    LogUtils.getShellShareableInstanceId();
+        Pair<InstanceId, com.android.launcher3.logging.InstanceId> instanceIds =
+                LogUtils.getShellShareableInstanceId();
+
+        if (startSystemDragToWMShell) {
             // Need to share the same InstanceId between launcher3 and WM Shell (internal).
             InstanceId internalInstanceId = instanceIds.first;
-            com.android.launcher3.logging.InstanceId launcherInstanceId = instanceIds.second;
-
             intent.putExtra(ClipDescription.EXTRA_LOGGING_INSTANCE_ID, internalInstanceId);
             if (mActivity.isTransientTaskbar()) {
                 // Tell WM Shell to ignore drag events in the provided transient taskbar region.
@@ -534,14 +587,21 @@ public class TaskbarDragController extends DragController implements
                 intent.putExtra(DragAndDropConstants.EXTRA_DISALLOW_HIT_REGION,
                         disallowExternalDropRegion);
             }
+        }
 
-            ClipData clipData = new ClipData(clipDescription, new ClipData.Item(intent));
-            if (btv.startDragAndDrop(clipData, shadowBuilder, null /* localState */,
-                    View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_OPAQUE
-                            | View.DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION)) {
-                notifyDragToBubbleController(/* dragInProgress = */ true);
-                onSystemDragStarted();
+        ClipData clipData = new ClipData(clipDescription, new ClipData.Item(intent));
+        // NOTE: Clip data containing app intent extras is handled by WMShell in such way that it
+        // won't be visible to other applications even if `DRAG_FLAG_GLOBAL` is used.
+        int globalDragFlag = startSystemDragToWMShell ? View.DRAG_FLAG_GLOBAL
+                : View.DRAG_FLAG_GLOBAL_SAME_APPLICATION;
+        if (btv.startDragAndDrop(clipData, createSystemDragShadowBuilder(btv),
+                null /* localState */, globalDragFlag | View.DRAG_FLAG_OPAQUE
+                        | View.DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION)) {
+            notifyDragToBubbleController(/* dragInProgress = */ true);
+            onSystemDragStarted(startSystemDragForLauncher);
 
+            if (startSystemDragToWMShell) {
+                com.android.launcher3.logging.InstanceId launcherInstanceId = instanceIds.second;
                 mActivity.getStatsLogManager().logger().withItemInfo(mDragObject.dragInfo)
                         .withInstanceId(launcherInstanceId)
                         .log(StatsLogManager.LauncherEvent.LAUNCHER_ITEM_DRAG_STARTED);
@@ -550,10 +610,12 @@ public class TaskbarDragController extends DragController implements
 
         // Wait to close until after system drag has started, if applicable.
         AbstractFloatingView.closeAllOpenViews(mActivity);
+        return true;
     }
 
-    private void onSystemDragStarted() {
+    private void onSystemDragStarted(boolean taskbarIsViableTarget) {
         mIsSystemDragInProgress = true;
+        mTaskbarIsViableTargetForSystemDrag = taskbarIsViableTarget;
         updateIsDragging();
 
         if (enableSystemDrag()) {
@@ -578,6 +640,7 @@ public class TaskbarDragController extends DragController implements
             }
             case DragEvent.ACTION_DRAG_ENDED -> {
                 mIsSystemDragInProgress = false;
+                mTaskbarIsViableTargetForSystemDrag = false;
                 updateIsDragging();
                 if (dragEvent.getResult()) {
                     maybeOnDragEnd();
@@ -613,6 +676,10 @@ public class TaskbarDragController extends DragController implements
     /** {@code true} if the system is currently handling the drag. */
     public boolean isSystemDragInProgress() {
         return mIsSystemDragInProgress;
+    }
+
+    public boolean getTaskbarIsViableTargetForSystemDrag() {
+        return mTaskbarIsViableTargetForSystemDrag;
     }
 
     @VisibleForTesting
@@ -774,9 +841,7 @@ public class TaskbarDragController extends DragController implements
 
         if (tag instanceof ItemInfo) {
             ItemInfo item = (ItemInfo) tag;
-            if (item.container == CONTAINER_ALL_APPS
-                    || item.container == CONTAINER_ALL_APPS_PREDICTION
-                    || isInSearchResultContainer(item)) {
+            if (isItemFromAllApps(item)) {
                 if (mDisallowGlobalDrag) {
                     // We're dragging in taskbarAllApps, we don't have folders or shortcuts
                     return iconView;
@@ -803,6 +868,12 @@ public class TaskbarDragController extends DragController implements
         return containerInfo.getContainerCase() == EXTENDED_CONTAINERS
                 && containerInfo.getExtendedContainers().getContainerCase()
                 == DEVICE_SEARCH_RESULT_CONTAINER;
+    }
+
+    private static boolean isItemFromAllApps(ItemInfo item) {
+        return item.container == CONTAINER_ALL_APPS
+                || item.container == CONTAINER_ALL_APPS_PREDICTION
+                || isInSearchResultContainer(item);
     }
 
     private void setupReturnDragAnimator(float fromX, float fromY, View originalView,
