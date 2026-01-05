@@ -116,15 +116,14 @@
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"खोल्नुहोस्"</string>
     <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"सदाका लागि मेटाउनुहोस्"</string>
     <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"ट्र्यासमा सार्नुहोस्"</string>
-    <!-- no translation found for home_screen_files_moved_to_trash_message (381256565590274395) -->
-    <skip />
-    <!-- no translation found for home_screen_files_move_to_trash_error_message (3836240816166417826) -->
-    <skip />
-    <!-- no translation found for home_screen_files_restore_from_trash_error_message (994941644161090497) -->
-    <skip />
+    <string name="home_screen_files_moved_to_trash_message" msgid="381256565590274395">"<xliff:g id="ITEM_NAME">%1$s</xliff:g> सारेर ट्र्यासमा लगिएको छ"</string>
+    <string name="home_screen_files_move_to_trash_error_message" msgid="3836240816166417826">"सारेर ट्र्यासमा लैजान सकिएन। कुनै समस्या आयो।"</string>
+    <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"अन्डू गर्न सकिएन। रिस्टोर गर्न Files एपमा जानुहोस्।"</string>
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"कारबाहीहरू"</string>
     <string name="shortcuts_popup_menu_button" msgid="766598805805882499">"सर्टकटहरू"</string>
     <string name="loading_shortcut" msgid="2638272014233830958">"सर्टकट लोड गरिँदै छ"</string>
+    <!-- no translation found for pause_app_label (6796255881727695791) -->
+    <skip />
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"सर्टकट स्थापना गर्नेहोस्"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"प्रयोगकर्ताको हस्तक्षेप बिना एउटा एपलाई सर्टकटमा थप्नको लागि अनुमति दिनुहोस्।"</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"होम स्क्रिनका सेटिङ र सर्टकटहरू रिड गर्नुहोस्"</string>
