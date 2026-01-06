@@ -43,7 +43,6 @@ import com.android.quickstep.RecentsAnimationDeviceState
 import com.android.quickstep.RotationTouchHelper
 import com.android.quickstep.TaskAnimationManager
 import com.android.quickstep.window.RecentsWindowManager
-import com.android.quickstep.window.RecentsWindowManagerInstanceProvider
 import com.android.quickstep.window.RecentsWindowTracker
 import dagger.Binds
 import dagger.Module
@@ -137,15 +136,12 @@ object PerDisplayRepositoriesModule {
     @Provides
     @LauncherAppSingleton
     fun provideRecentsWindowManagerRepo(
-        repositoryFactory: PerDisplayInstanceRepositoryImpl.Factory<RecentsWindowManager>,
-        instanceProvider: RecentsWindowManagerInstanceProvider,
-        @DisplaysWithDecorations
-        displaysWithDecorationsLifecycleManager: DisplayInstanceLifecycleManager,
+        repositoryFactory: PerDisplayComponentRepository.Factory<RecentsWindowManager>
     ): PerDisplayRepository<RecentsWindowManager> =
-        repositoryFactory.create(
+        repositoryFactory.createOptional(
             "RecentsWindowManagerRepo",
-            instanceProvider,
-            displaysWithDecorationsLifecycleManager,
+            objectGetter = { it.recentsWindowManager },
+            optionalObjectGetter = { it.recentsWindowManagerHolder.value },
         )
 
     @Provides

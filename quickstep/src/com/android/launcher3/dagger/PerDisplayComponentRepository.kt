@@ -27,7 +27,8 @@ class PerDisplayComponentRepository<T>
 @AssistedInject
 constructor(
     @Assisted override val debugName: String,
-    @Assisted private val objectGetter: (PerDisplayComponent) -> T,
+    @Assisted(REQUIRED_GETTER) private val objectGetter: (PerDisplayComponent) -> T,
+    @Assisted(OPTIONAL_GETTER) private val optionalObjectGetter: (PerDisplayComponent) -> T?,
     private val perDisplayComponentRepository: PerDisplayRepository<PerDisplayComponent>,
 ) : PerDisplayRepository<T> {
     override fun get(displayId: Int): T? =
@@ -37,14 +38,33 @@ constructor(
         objectGetter(perDisplayComponentRepository.getOrDefault(displayId))
 
     override fun forEach(createIfAbsent: Boolean, action: Consumer<T>) {
-        perDisplayComponentRepository.forEach(createIfAbsent) { action.accept(objectGetter(it)) }
+        if (createIfAbsent) {
+            perDisplayComponentRepository.forEach(createIfAbsent = true) {
+                action.accept(objectGetter(it))
+            }
+        } else {
+            perDisplayComponentRepository.forEach(createIfAbsent = false) {
+                optionalObjectGetter(it)?.let { item -> action.accept(item) }
+            }
+        }
     }
 
     @AssistedFactory
     interface Factory<T> {
+        fun createOptional(
+            @Assisted debugName: String,
+            @Assisted(REQUIRED_GETTER) objectGetter: (PerDisplayComponent) -> T,
+            @Assisted(OPTIONAL_GETTER) optionalObjectGetter: (PerDisplayComponent) -> T?,
+        ): PerDisplayComponentRepository<T>
+
         fun create(
             debugName: String,
             objectGetter: (PerDisplayComponent) -> T,
-        ): PerDisplayComponentRepository<T>
+        ): PerDisplayComponentRepository<T> = createOptional(debugName, objectGetter, objectGetter)
+    }
+
+    companion object {
+        const val OPTIONAL_GETTER = "OPTIONAL_GETTER"
+        const val REQUIRED_GETTER = "REQUIRED_GETTER"
     }
 }
