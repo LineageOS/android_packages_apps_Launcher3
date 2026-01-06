@@ -225,4 +225,9 @@ class TaskbarManagerImplWrapper @Inject constructor(implProvider: Provider<Taskb
     @VisibleForTesting
     override fun isTransient(): Boolean =
         impl.currentActivityContext?.taskbarFeatureEvaluator?.isTransient ?: false
+
+    @VisibleForTesting
+    override fun injectTestInsights() {
+        getTaskbarUiThread().execute(impl::injectTestInsights)
+    }
 }

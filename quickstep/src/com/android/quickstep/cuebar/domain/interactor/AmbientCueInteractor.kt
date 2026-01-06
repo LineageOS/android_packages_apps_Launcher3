@@ -59,6 +59,8 @@ constructor(
 
     val isAmbientCueEnabled: ListenableRef<Boolean> = ambientCueRepository.isAmbientCueEnabled
 
+    val isTestMode: ListenableRef<Boolean> = ambientCueRepository.isTestMode
+
     /**
      * Sets the deactivated state of the Ambient Cue.
      *
