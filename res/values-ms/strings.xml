@@ -116,15 +116,14 @@
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"Buka"</string>
     <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"Padam secara kekal"</string>
     <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"Alihkan ke sampah"</string>
-    <!-- no translation found for home_screen_files_moved_to_trash_message (381256565590274395) -->
-    <skip />
-    <!-- no translation found for home_screen_files_move_to_trash_error_message (3836240816166417826) -->
-    <skip />
-    <!-- no translation found for home_screen_files_restore_from_trash_error_message (994941644161090497) -->
-    <skip />
+    <string name="home_screen_files_moved_to_trash_message" msgid="381256565590274395">"<xliff:g id="ITEM_NAME">%1$s</xliff:g> dialihkan kepada sampah"</string>
+    <string name="home_screen_files_move_to_trash_error_message" msgid="3836240816166417826">"Tidak dapat mengalihkan item kepada sampah. Ada masalah."</string>
+    <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"Tidak dapat buat asal. Akses apl Files untuk membuat pemulihan."</string>
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"Tindakan"</string>
     <string name="shortcuts_popup_menu_button" msgid="766598805805882499">"Pintasan"</string>
     <string name="loading_shortcut" msgid="2638272014233830958">"Memuatkan pintasan"</string>
+    <!-- no translation found for pause_app_label (6796255881727695791) -->
+    <skip />
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"pasang pintasan"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"Membenarkan apl menambah pintasan tanpa campur tangan pengguna."</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"membaca tetapan dan pintasan skrin utama"</string>

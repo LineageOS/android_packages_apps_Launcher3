@@ -62,16 +62,6 @@ flag {
 }
 
 flag {
-    name: "enable_executor_based_dispatchers"
-    namespace: "launcher_overview"
-    description: "Enables executor based dispatchers for ProductionDispatchers."
-    bug:  "407594919"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "hide_automated_tasks_in_overview"
     namespace: "launcher_overview"
     description: "Hide a task from overview if it is being automated."

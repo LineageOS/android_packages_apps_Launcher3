@@ -75,7 +75,7 @@
     <string name="overview_gesture_feedback_home_detected" msgid="663432226180397138">"Пробајте да држите прозор дуже пре отпуштања"</string>
     <string name="overview_gesture_feedback_wrong_swipe_direction" msgid="1191055451018584958">"Обавезно превуците право нагоре, па застаните"</string>
     <string name="overview_gesture_feedback_complete_with_follow_up" msgid="3544611727467765026">"Научили сте како да користите покрете. Да бисте искључили покрете, идите на подешавања."</string>
-    <string name="overview_gesture_feedback_complete_without_follow_up" msgid="2903050864432331629">"Довршили сте покрет за промену апликација"</string>
+    <string name="overview_gesture_feedback_complete_without_follow_up" msgid="2903050864432331629">"Довршили сте покрет за прелазак на другу апликацију"</string>
     <string name="overview_gesture_intro_title" msgid="2902054412868489378">"Превуците да бисте заменили апликације"</string>
     <string name="overview_gesture_intro_subtitle" msgid="4968091015637850859">"За прелазак са једне апликације на другу превуците нагоре од дна екрана, задржите, па пустите."</string>
     <string name="overview_gesture_tutorial_title" msgid="4125835002668708720">"На другу апликацију"</string>

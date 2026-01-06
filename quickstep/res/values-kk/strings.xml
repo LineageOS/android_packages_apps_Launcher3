@@ -59,7 +59,7 @@
     <string name="back_gesture_tutorial_confirm_subtitle" msgid="5181305411668713250">"Артқа қайту қимылы сезгіштігін параметрлерден өзгертіңіз."</string>
     <string name="back_gesture_intro_title" msgid="19551256430224428">"Артқа қайту үшін сырғытыңыз"</string>
     <string name="back_gesture_intro_subtitle" msgid="7912576483031802797">"Соңғы ашылған экранға оралу үшін экранның сол немесе оң жақ шетінен ортасына қарай сырғытыңыз."</string>
-    <string name="back_gesture_tutorial_title" msgid="1944737946101059789">"Артқа"</string>
+    <string name="back_gesture_tutorial_title" msgid="1944737946101059789">"Артқа қайту"</string>
     <string name="back_gesture_tutorial_subtitle" msgid="6639993416000920142">"Экранның сол немесе оң жақ шетінен ортасына қарай сырғытыңыз."</string>
     <string name="home_gesture_feedback_swipe_too_far_from_edge" msgid="4816365433160895458">"Экранның төменгі шетінен жоғары қарай сырғытыңыз."</string>
     <string name="home_gesture_feedback_overview_detected" msgid="5177627157303895077">"Жіберер алдында кідіріс жасамаңыз."</string>

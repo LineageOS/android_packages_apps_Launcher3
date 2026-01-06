@@ -16,7 +16,6 @@
 
 package com.android.launcher3.util.coroutines
 
-import com.android.launcher3.Flags.enableExecutorBasedDispatchers
 import com.android.launcher3.concurrent.annotations.Background
 import com.android.launcher3.concurrent.annotations.LightweightBackground
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority
@@ -27,9 +26,7 @@ import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.util.DaggerSingletonObject
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.newFixedThreadPoolContext
 
 interface DispatcherProvider {
     /**
@@ -78,38 +75,16 @@ constructor(
     @Ui val uiDispatcher: CoroutineDispatcher,
     @TaskbarUi override val taskbarUi: CoroutineDispatcher,
 ) : DispatcherProvider {
-    override val ioBackground =
-        if (enableExecutorBasedDispatchers()) backgroundDispatcher
-        else bgDispatcher(nThreads = 1, threadName = "LauncherBgIO")
+    override val ioBackground = backgroundDispatcher
 
-    override val lightweightBackground =
-        if (enableExecutorBasedDispatchers()) lightweightBackgroundUiDispatcher
-        else bgDispatcher(nThreads = 1, threadName = "LauncherBgLight")
+    override val lightweightBackground = lightweightBackgroundUiDispatcher
 
-    override val main =
-        if (enableExecutorBasedDispatchers()) uiDispatcher else Dispatchers.Main.immediate
+    override val main = uiDispatcher
 
     override val unconfined = Dispatchers.Unconfined
 
     companion object {
         @JvmField
         val INSTANCE = DaggerSingletonObject(LauncherAppComponent::getProductionDispatchers)
-
-        /**
-         * Default Coroutine dispatcher for background operations.
-         *
-         * Note that this is explicitly limiting the number of threads. In the past, we used
-         * [Dispatchers.IO]. This caused >40 threads to be spawned, and a lot of thread list lock
-         * contention between then, eventually causing jank.
-         */
-        @OptIn(DelicateCoroutinesApi::class)
-        fun bgDispatcher(nThreads: Int, threadName: String): CoroutineDispatcher {
-            // Why a new ThreadPool instead of just using Dispatchers.IO with
-            // CoroutineDispatcher.limitedParallelism? Because, if we were to use Dispatchers.IO, we
-            // would share those threads with other dependencies using Dispatchers.IO.
-            // Using a dedicated thread pool we have guarantees only Launcher is able to schedule
-            // code on those.
-            return newFixedThreadPoolContext(nThreads = nThreads, name = threadName)
-        }
     }
 }

@@ -579,6 +579,15 @@ public class TaskbarManagerImpl {
     }
 
     /**
+     * Retrieve the corresponding resource based on displayId.
+     */
+    @VisibleForTesting
+    @Nullable
+    public PerDisplayTaskbarResource getPerDisplayResourceForTest(int displayId) {
+        return mResources.getDisplayResource(displayId);
+    }
+
+    /**
      * Displays a frame of the first Launcher reveal animation.
      *
      * This should be used to run a first Launcher reveal animation whose progress matches a swipe

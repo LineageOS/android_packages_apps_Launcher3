@@ -452,8 +452,7 @@ public final class KeyboardQuickSwitchController implements
         return isShown() && mQuickSwitchViewController.wasOpenedFromTaskbar();
     }
 
-    @VisibleForTesting
-    boolean isShown() {
+    public boolean isShown() {
         return mQuickSwitchViewController != null
                 && !mQuickSwitchViewController.isCloseAnimationRunning();
     }
