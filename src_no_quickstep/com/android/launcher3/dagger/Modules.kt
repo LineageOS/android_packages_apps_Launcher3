@@ -38,7 +38,7 @@ private object Modules
 
 @Module abstract class WindowManagerProxyModule
 
-@Module abstract class ActivityContextModule
+@Module(includes = [SystemDragModule::class]) abstract class ActivityContextModule
 
 @Module abstract class ApiWrapperModule
 
@@ -61,7 +61,7 @@ object StaticObjectModule {
 @Module
 object SystemDragModule {
     @Provides
-    @LauncherAppSingleton
+    @ActivityContextSingleton
     fun provideSystemDragController(): SystemDragController = SystemDragControllerStub()
 }
 

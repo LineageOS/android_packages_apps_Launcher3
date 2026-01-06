@@ -30,13 +30,15 @@ import kotlin.math.roundToInt
  * Production implementation of the controller for system-level drag-and-drop. Injected when {@link
  * com.android.launcher3.Flags.FLAG_ENABLE_SYSTEM_DRAG} is enabled.
  *
+ * @param context The context for which to handle system-level drag-and-drop.
  * @param systemDragListenerFactory The factory used to create listeners for system-level
  *   drag-and-drop. A unique listener instance is created per handled drag-and-drop sequence.
  */
-class SystemDragControllerImpl(private val systemDragListenerFactory: SystemDragListenerFactory) :
-    SystemDragController(), DragController.SystemDragHandler {
+class SystemDragControllerImpl(
+    private val context: ActivityContext,
+    private val systemDragListenerFactory: SystemDragListenerFactory,
+) : SystemDragController() {
 
-    private var context: ActivityContext? = null
     private var systemDragListener: SystemDragListener? = null
 
     // NOTE: Permissions must be obtained in order to accept a system-level drop. If permissions are
@@ -44,18 +46,10 @@ class SystemDragControllerImpl(private val systemDragListenerFactory: SystemDrag
     override fun acceptDrop(itemInfo: SystemDragItemInfo) =
         itemInfo.permissions != null && itemInfo.uriList?.isEmpty() == false
 
-    override fun onDrag(event: DragEvent): Boolean =
-        continueDrag(event) ?: startDrag(event) ?: false
-
-    override fun setContext(context: ActivityContext) {
-        if (this.context != context) {
-            this.context?.dragController?.removeSystemDragHandler(this)
-            this.context = context.also { it.dragController?.addSystemDragHandler(this) }
-        }
-    }
+    override fun onDrag(event: DragEvent): Boolean = continueDrag(event) ?: startDrag(event)
 
     override fun startDrag(params: SystemDragParams): DragView? {
-        val dragController = context?.dragController ?: return null
+        val dragController = context.dragController ?: return null
         params.dragOptions.simulatedDndStartPoint = dragController.downPoint
         return createSystemDragListener(params)?.startDrag()?.also { dragView ->
             if (!startSystemDrag(dragView, params)) {
@@ -66,27 +60,23 @@ class SystemDragControllerImpl(private val systemDragListenerFactory: SystemDrag
 
     private fun continueDrag(event: DragEvent): Boolean? = systemDragListener?.onDrag(event)
 
-    private fun createSystemDragListener(params: SystemDragParams? = null): SystemDragListener? =
-        context?.run {
-            systemDragListenerFactory(this, params).also { listener ->
-                systemDragListener = listener
-                listener.setCleanupCallback {
-                    if (systemDragListener == listener) {
-                        systemDragListener = null
-                    }
+    private fun createSystemDragListener(params: SystemDragParams? = null): SystemDragListener =
+        systemDragListenerFactory(context, params).also { listener ->
+            systemDragListener = listener
+            listener.setCleanupCallback {
+                if (systemDragListener == listener) {
+                    systemDragListener = null
                 }
             }
         }
 
-    private fun startDrag(event: DragEvent): Boolean? =
-        context?.run {
-            dragController?.isDragging == false &&
-                event.action == DragEvent.ACTION_DRAG_STARTED &&
-                createSystemDragListener()?.onDrag(event) == true
-        }
+    private fun startDrag(event: DragEvent): Boolean =
+        context.dragController?.isDragging == false &&
+            event.action == DragEvent.ACTION_DRAG_STARTED &&
+            createSystemDragListener().onDrag(event)
 
     private fun startSystemDrag(dragView: DragView, params: SystemDragParams): Boolean =
-        context?.dragLayer?.let { dragLayer ->
+        context.dragLayer?.let { dragLayer ->
             val dragShadow =
                 object : View.DragShadowBuilder() {
                     val h = (params.dragImage.intrinsicHeight * params.initialDragViewScale).toInt()

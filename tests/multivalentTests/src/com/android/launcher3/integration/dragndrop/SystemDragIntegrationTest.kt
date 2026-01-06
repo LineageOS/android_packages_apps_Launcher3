@@ -171,7 +171,7 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
         // (c) the dropped payload solely contains external primary media store URIs.
         val expectWorkspaceItemCreated =
             HomeScreenFilesProvider.INSTANCE[context] !is HomeScreenFilesNoOpProvider &&
-                SystemDragController.INSTANCE[context] !is SystemDragControllerStub &&
+                getSystemDragController("Controller not created") !is SystemDragControllerStub &&
                 itemList.map(ClipData.Item::getUri).all(this::isExternalPrimaryMediaStoreUri)
 
         // Verify workspace item creation (or lack thereof).
@@ -303,6 +303,11 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
                 itemInfo?.itemType == ITEM_TYPE_FILE_SYSTEM_FILE && itemInfo.intent?.data == uri
             }
         }
+
+    private fun getSystemDragController(message: String): SystemDragController =
+        launcherActivity.getOnceNotNull(message) { launcher ->
+            launcher.activityComponent.systemDragController
+        }!!
 
     private fun hasFileSystemItem(uri: Uri): Boolean =
         context.contentResolver

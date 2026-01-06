@@ -35,7 +35,6 @@ import com.android.launcher3.dragndrop.SystemDragController
 import com.android.launcher3.dragndrop.SystemDragControllerImpl
 import com.android.launcher3.dragndrop.SystemDragControllerStub
 import com.android.launcher3.dragndrop.SystemDragListener
-import com.android.launcher3.dragndrop.SystemDragListenerFactory
 import com.android.launcher3.homescreenfiles.EnvironmentWrapper
 import com.android.launcher3.homescreenfiles.HomeScreenFilesMediaStoreProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesNoOpProvider
@@ -46,7 +45,9 @@ import com.android.launcher3.icons.LauncherIconProvider
 import com.android.launcher3.icons.LauncherIconProviderImpl
 import com.android.launcher3.logging.StatsLogManager.StatsLogManagerFactory
 import com.android.launcher3.secondarydisplay.SecondaryDisplayDelegate
+import com.android.launcher3.secondarydisplay.SecondaryDisplayLauncher
 import com.android.launcher3.secondarydisplay.SecondaryDisplayQuickstepDelegateImpl
+import com.android.launcher3.taskbar.BaseTaskbarContext
 import com.android.launcher3.testing.TestInformationHandler
 import com.android.launcher3.uioverrides.QuickstepWidgetHolder.QuickstepWidgetHolderFactory
 import com.android.launcher3.uioverrides.SystemApiWrapper
@@ -61,6 +62,7 @@ import com.android.launcher3.util.PluginManagerWrapper
 import com.android.launcher3.util.WindowBlurState.WINDOW_BLUR_STATE
 import com.android.launcher3.util.window.RefreshRateTracker
 import com.android.launcher3.util.window.WindowManagerProxy
+import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.widget.LauncherWidgetHolder.WidgetHolderFactory
 import com.android.quickstep.AspectRatioSystemShortcut
 import com.android.quickstep.AutomationRepositoryImpl
@@ -79,13 +81,11 @@ import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.systemui.shared.system.TaskStackChangeListeners
 import com.android.wm.shell.shared.desktopmode.DesktopState
 import dagger.Binds
-import dagger.BindsOptionalOf
 import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ElementsIntoSet
 import java.io.File
-import java.util.Optional
 import java.util.concurrent.ExecutorService
 import java.util.function.Consumer
 import javax.inject.Named
@@ -97,7 +97,7 @@ abstract class WindowManagerProxyModule {
     @Binds abstract fun bindWindowManagerProxy(proxy: SystemWindowManagerProxy): WindowManagerProxy
 }
 
-@Module
+@Module(includes = [SystemDragModule::class])
 abstract class ActivityContextModule {
     @Binds
     abstract fun bindSecondaryDisplayDelegate(
@@ -206,25 +206,27 @@ object StaticObjectModule {
 }
 
 @Module
-interface SystemDragOptionalDependenciesModule {
-    @BindsOptionalOf fun bindSystemDragListenerFactory(): SystemDragListenerFactory
-}
-
-@Module(includes = [SystemDragOptionalDependenciesModule::class])
 object SystemDragModule {
     @Provides
-    @LauncherAppSingleton
+    @ActivityContextSingleton
     fun provideSystemDragController(
+        context: ActivityContext,
         iconCache: Lazy<IconCache>,
-        systemDragListenerFactory: Optional<SystemDragListenerFactory>,
     ): SystemDragController =
-        if (enableSystemDrag())
+        // TODO(b/456787959): Fix drop targets before enabling for secondary display launcher.
+        // TODO(b/456787959): Fix drop targets before enabling for taskbar.
+        if (
+            enableSystemDrag() &&
+                context !is BaseTaskbarContext &&
+                context !is SecondaryDisplayLauncher
+        ) {
             SystemDragControllerImpl(
-                systemDragListenerFactory.orElse { launcher, params ->
-                    SystemDragListener(launcher, iconCache, ::ImageView, params)
-                }
+                context,
+                { ctx, params -> SystemDragListener(ctx, iconCache, ::ImageView, params) },
             )
-        else SystemDragControllerStub()
+        } else {
+            SystemDragControllerStub()
+        }
 }
 
 /** A dagger module responsible for managing files on the home screen. */

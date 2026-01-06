@@ -34,7 +34,6 @@ import com.android.launcher3.dagger.LauncherModelModule
 import com.android.launcher3.dagger.PerDisplayModule
 import com.android.launcher3.dagger.SettingsModule
 import com.android.launcher3.dagger.StaticObjectModule
-import com.android.launcher3.dagger.SystemDragModule
 import com.android.launcher3.dagger.TaskOverlayModule
 import com.android.launcher3.dagger.WidgetModule
 import com.android.launcher3.dagger.WindowManagerProxyModule
@@ -108,7 +107,6 @@ abstract class QsbWidgetModule {
             HomeScreenFilesModule::class,
             DesktopModule::class,
             SettingsModule::class,
-            SystemDragModule::class,
             QsbWidgetModule::class,
             AutomationModule::class,
             TaskOverlayModule::class,

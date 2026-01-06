@@ -102,7 +102,8 @@ public class DragController implements DragDriver.EventListener, TouchController
     protected DropTarget mLastDropTarget;
 
     /** Who can handle system drag events. */
-    private final ArrayList<SystemDragHandler> mSystemDragHandlers = new ArrayList<>();
+    @VisibleForTesting
+    public final ArrayList<SystemDragHandler> mSystemDragHandlers = new ArrayList<>();
     private @Nullable SystemDragHandler mLastSystemDragHandler;
 
     private int mLastTouchClassification;
@@ -156,6 +157,9 @@ public class DragController implements DragDriver.EventListener, TouchController
      */
     public DragController(ActivityContext activity) {
         mActivity = activity;
+
+        // Register the default handler for system-level drag events.
+        addSystemDragHandler(mActivity.getActivityComponent().getSystemDragController());
     }
 
     /**

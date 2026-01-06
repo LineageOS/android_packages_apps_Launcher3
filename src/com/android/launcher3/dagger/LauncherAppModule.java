@@ -37,7 +37,6 @@ import dagger.Module;
                 LauncherWidgetPickerModule.class,
                 LauncherModelModule.class,
                 SettingsModule.class,
-                SystemDragModule.class,
                 HomeScreenFilesModule.class,
                 DesktopModule.class,
                 AutomationModule.class,
