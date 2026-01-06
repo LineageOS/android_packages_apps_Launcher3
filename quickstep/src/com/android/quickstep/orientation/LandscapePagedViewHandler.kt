@@ -396,7 +396,7 @@ open class LandscapePagedViewHandler : RecentsPagedOrientationHandler {
      * screen. But if the device already has a large inset (from cutouts etc), use that instead.
      */
     private fun getPlaceholderSizeAdjustment(dp: DeviceProfile?): Int =
-        max((dp!!.insets.top - dp.splitPlaceholderInset).toDouble(), 0.0).toInt()
+        max((dp!!.insets.top - dp.mSysuiProfile.splitPlaceholderInset).toDouble(), 0.0).toInt()
 
     override fun setSplitInstructionsParams(
         out: View,

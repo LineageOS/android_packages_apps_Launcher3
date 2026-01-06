@@ -438,7 +438,8 @@ class PortraitPagedViewHandler : DefaultPagedViewHandler(), RecentsPagedOrientat
             } else {
                 if (pinToRight) dp.insets.right else dp.insets.left
             }
-        return max((insetThickness - dp.splitPlaceholderInset).toDouble(), 0.0).toInt()
+        return max((insetThickness - dp.mSysuiProfile.splitPlaceholderInset).toDouble(), 0.0)
+            .toInt()
     }
 
     override fun setSplitInstructionsParams(
