@@ -254,7 +254,7 @@ public final class LauncherAppWidgetProviderInfoTest {
         Mockito.when(profile.getWorkspaceIconProfile()).thenReturn(workspaceProfile);
         Mockito.when(workspaceProfile.getCellSize()).thenReturn(new Point(CELL_SIZE, CELL_SIZE));
         profile.getWorkspaceIconProfile().getCellLayoutBorderSpacePx().set(SPACE_SIZE, SPACE_SIZE);
-        profile.widgetPadding.setEmpty();
+        profile.getWorkspaceIconProfile().getWidgetPadding().setEmpty();
 
         idp.supportedProfiles = Collections.singletonList(profile);
         idp.numColumns = NUM_OF_COLS;

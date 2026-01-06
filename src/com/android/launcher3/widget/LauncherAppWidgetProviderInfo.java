@@ -117,7 +117,7 @@ public class LauncherAppWidgetProviderInfo extends AppWidgetProviderInfo impleme
             }
 
             cellSize = dp.getWorkspaceIconProfile().getCellSize();
-            Rect widgetPadding = dp.widgetPadding;
+            Rect widgetPadding = dp.getWorkspaceIconProfile().getWidgetPadding();
 
             minSpanX = Math.max(minSpanX,
                     getSpanX(widgetPadding, minResizeWidth,
