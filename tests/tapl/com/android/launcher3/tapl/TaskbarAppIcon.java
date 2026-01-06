@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 public final class TaskbarAppIcon extends AppIcon implements SplitscreenDragSource,
         BubbleBarDragSource {
 
-    private static final Pattern LONG_CLICK_EVENT = Pattern.compile("onTaskbarItemLongClick");
+    static final Pattern LONG_CLICK_EVENT = Pattern.compile("onTaskbarItemLongClick");
     private static final Pattern RIGHT_CLICK_EVENT = Pattern.compile("onTaskbarItemRightClick");
 
     private final TaskbarLocation mTaskbarLocation;
