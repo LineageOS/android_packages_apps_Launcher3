@@ -35,6 +35,7 @@ import androidx.core.view.isVisible
 import androidx.core.view.setPadding
 import com.android.app.tracing.traceSection
 import com.android.launcher3.BubbleTextView
+import com.android.launcher3.Flags.enableCursorDrivenWorkflows
 import com.android.launcher3.R
 import com.android.launcher3.Reorderable
 import com.android.launcher3.Utilities.dpToPx
@@ -61,6 +62,7 @@ import com.android.launcher3.taskbar.customization.util.TaskbarIconContainerLayo
 import com.android.launcher3.taskbar.customization.util.TaskbarIconContainerUtil
 import com.android.launcher3.taskbar.customization.util.TaskbarIconContainerUtil.DEFAULT_BOUNCE_SCALE
 import com.android.launcher3.taskbar.customization.viewfactory.TaskbarPinnedAppsIconsViewFactory
+import com.android.launcher3.touch.CustomTouchDelegate
 import com.android.launcher3.util.MultiTranslateDelegate
 import com.android.launcher3.util.Themes
 import com.android.launcher3.views.ActivityContext
@@ -249,17 +251,22 @@ class TaskbarPinnedAppIconContainer(context: Context) :
     private fun setClickAndLongClickListenersForIcon(icon: View) {
         icon.setOnClickListener(taskbarViewCallbacks.iconOnClickListener)
         icon.onLongClickListener = taskbarViewCallbacks.iconOnLongClickListener
-        // Add right-click support to btv icons.
-        icon.setOnTouchListener { v, event ->
-            if (
-                event.isFromSource(InputDevice.SOURCE_MOUSE) &&
-                    (event.buttonState and MotionEvent.BUTTON_SECONDARY) != 0 &&
-                    v is BubbleTextView
-            ) {
-                activityContext.showPopupMenuForIcon(v)
-                true
-            } else {
-                false
+        if (enableCursorDrivenWorkflows()) {
+            (icon as? CustomTouchDelegate)?.customActionsListener =
+                taskbarViewCallbacks.iconCustomActionsListener
+        } else {
+            // Add right-click support to btv icons.
+            icon.setOnTouchListener { v, event ->
+                if (
+                    event.isFromSource(InputDevice.SOURCE_MOUSE) &&
+                        (event.buttonState and MotionEvent.BUTTON_SECONDARY) != 0 &&
+                        v is BubbleTextView
+                ) {
+                    activityContext.showPopupMenuForIcon(v)
+                    true
+                } else {
+                    false
+                }
             }
         }
     }

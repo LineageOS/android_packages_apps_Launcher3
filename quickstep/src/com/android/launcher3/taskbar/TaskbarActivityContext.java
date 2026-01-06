@@ -2412,6 +2412,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         }
     }
 
+    @Override
     public void showPopupMenuForIcon(BubbleTextView btv) {
         setTaskbarWindowFullscreen(true, TASKBAR_WINDOW_ICON_POPUP_MENU);
         btv.post(() -> mControllers.taskbarPopupController.show(btv));

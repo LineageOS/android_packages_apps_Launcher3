@@ -21,6 +21,7 @@ import static android.os.Trace.traceEnd;
 import static android.window.DesktopModeFlags.ENABLE_TASKBAR_OVERFLOW;
 
 import static com.android.launcher3.BubbleTextView.DISPLAY_TASKBAR;
+import static com.android.launcher3.Flags.enableCursorDrivenWorkflows;
 import static com.android.launcher3.Flags.enableLauncherIconShapes;
 import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
@@ -87,6 +88,7 @@ import com.android.launcher3.taskbar.customization.TaskbarSpecsEvaluator;
 import com.android.launcher3.taskbar.customization.containers.TaskbarPinnedAppIconContainer;
 import com.android.launcher3.taskbar.customization.viewfactory.TaskbarPinnedAppsIconsViewFactory;
 import com.android.launcher3.taskbar.handoff.HandoffSuggestion;
+import com.android.launcher3.touch.CustomTouchDelegate;
 import com.android.launcher3.util.LauncherBindableItemsContainer.ItemOperator;
 import com.android.launcher3.util.Themes;
 import com.android.launcher3.views.ActivityContext;
@@ -1351,16 +1353,23 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
     public void setClickAndLongClickListenersForIcon(View icon) {
         icon.setOnClickListener(mIconClickListener);
         icon.setOnLongClickListener(mIconLongClickListener);
-        // Add right-click support to btv icons.
-        icon.setOnTouchListener((v, event) -> {
-            if (event.isFromSource(InputDevice.SOURCE_MOUSE)
-                    && (event.getButtonState() & MotionEvent.BUTTON_SECONDARY) != 0
-                    && v instanceof BubbleTextView) {
-                mActivityContext.showPopupMenuForIcon((BubbleTextView) v);
-                return true;
+        if (enableCursorDrivenWorkflows()) {
+            if (icon instanceof CustomTouchDelegate customTouchDelegate) {
+                customTouchDelegate.setCustomActionsListener(
+                        mControllerCallbacks.getIconCustomActionsListener());
             }
-            return false;
-        });
+        } else {
+            // Add right-click support to btv icons.
+            icon.setOnTouchListener((v, event) -> {
+                if (event.isFromSource(InputDevice.SOURCE_MOUSE)
+                        && (event.getButtonState() & MotionEvent.BUTTON_SECONDARY) != 0
+                        && v instanceof BubbleTextView) {
+                    mActivityContext.showPopupMenuForIcon((BubbleTextView) v);
+                    return true;
+                }
+                return false;
+            });
+        }
     }
 
     /**

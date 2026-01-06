@@ -20,9 +20,8 @@ import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.launcher3.BubbleTextView
-import com.android.launcher3.taskbar.TaskbarAllAppsItemCustomActionsListener
 import com.android.launcher3.taskbar.TaskbarBaseTestCase
-import com.android.launcher3.taskbar.overlay.TaskbarOverlayContext
+import com.android.launcher3.taskbar.TaskbarCustomActionsListener
 import com.android.launcher3.touch.CustomActionsListener.Companion.ACTION_LAUNCH
 import com.android.launcher3.touch.CustomActionsListener.Companion.ACTION_POPUP_MENU
 import com.android.launcher3.touch.CustomActionsListener.Companion.ACTION_START_DRAG
@@ -37,21 +36,16 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidJUnit4::class)
 class TaskbarCustomActionsListenerTest : TaskbarBaseTestCase() {
 
-    @Mock private lateinit var taskbarOverlayContext: TaskbarOverlayContext
     @Mock private lateinit var bubbleTextView: BubbleTextView
     @Mock private lateinit var view: View
 
-    private lateinit var listener: TaskbarAllAppsItemCustomActionsListener
+    private lateinit var listener: TaskbarCustomActionsListener
 
     @Before
     override fun setup() {
         super.setup()
-
-        whenever(taskbarActivityContext.controllers).thenReturn(taskbarControllers)
-        whenever(taskbarOverlayContext.dragController).thenReturn(taskbarDragController)
-
-        listener =
-            TaskbarAllAppsItemCustomActionsListener(taskbarActivityContext, taskbarOverlayContext)
+        whenever(taskbarActivityContext.dragController).thenReturn(taskbarDragController)
+        listener = TaskbarCustomActionsListener(taskbarActivityContext)
     }
 
     @Test
@@ -69,7 +63,7 @@ class TaskbarCustomActionsListenerTest : TaskbarBaseTestCase() {
     @Test
     fun performActions_actionPopupMenu_showsPopup() {
         listener.performActions(bubbleTextView, ACTION_POPUP_MENU)
-        verify(taskbarPopupController).show(bubbleTextView)
+        verify(taskbarActivityContext).showPopupMenuForIcon(bubbleTextView)
     }
 
     @Test

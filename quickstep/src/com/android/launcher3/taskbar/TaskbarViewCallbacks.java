@@ -22,6 +22,8 @@ import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCH
 import static com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLAG_AUTOHIDE_SUSPEND_TASKBAR_OVERFLOW;
 
 import android.annotation.SuppressLint;
+import android.app.contextualsearch.ContextualSearchConfig;
+import android.app.contextualsearch.ContextualSearchManager;
 import android.content.Context;
 import android.graphics.Rect;
 import android.view.GestureDetector;
@@ -33,17 +35,15 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import android.app.contextualsearch.ContextualSearchConfig;
-import android.app.contextualsearch.ContextualSearchManager;
-
-import com.android.launcher3.testing.TestLogging;
-import com.android.launcher3.testing.shared.TestProtocol;
-import com.android.quickstep.TopTaskTracker;
-import com.android.quickstep.util.ContextualSearchInvoker;
 import com.android.internal.jank.Cuj;
 import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.logging.StatsLogManager;
 import com.android.launcher3.taskbar.bubbles.BubbleBarViewController;
+import com.android.launcher3.testing.TestLogging;
+import com.android.launcher3.testing.shared.TestProtocol;
+import com.android.launcher3.touch.CustomActionsListener;
+import com.android.quickstep.TopTaskTracker;
+import com.android.quickstep.util.ContextualSearchInvoker;
 import com.android.systemui.shared.system.InteractionJankMonitorWrapper;
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
 
@@ -57,6 +57,7 @@ public class TaskbarViewCallbacks {
     private final TaskbarView mTaskbarView;
     private final GestureDetector mGestureDetector;
     private final Rect mTempRect = new Rect();
+    private final CustomActionsListener mCustomActionsListener;
 
     public TaskbarViewCallbacks(TaskbarActivityContext activity, TaskbarControllers controllers,
             TaskbarView taskbarView) {
@@ -64,10 +65,15 @@ public class TaskbarViewCallbacks {
         mControllers = controllers;
         mTaskbarView = taskbarView;
         mGestureDetector = new GestureDetector(activity, new TaskbarViewGestureListener());
+        mCustomActionsListener = new TaskbarCustomActionsListener(mActivity);
     }
 
     public View.OnClickListener getIconOnClickListener() {
         return mActivity.getItemOnClickListener();
+    }
+
+    public CustomActionsListener getIconCustomActionsListener() {
+        return mCustomActionsListener;
     }
 
     /** Trigger All Apps button click action. */
