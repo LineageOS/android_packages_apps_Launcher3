@@ -28,6 +28,7 @@ import com.android.launcher3.OnAlarmListener
 import com.android.launcher3.R
 import com.android.launcher3.dragndrop.DragController
 import com.android.launcher3.dragndrop.DragOptions
+import com.android.launcher3.model.IModelWriter
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.ItemInfo.NO_ID
 import com.android.launcher3.model.data.TaskItemInfo.Companion.isSameItem
@@ -35,6 +36,7 @@ import com.android.launcher3.model.data.WorkspaceItemFactory
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.util.IntSparseArrayMap
 import com.android.launcher3.util.ItemInfoMatcher
+import com.android.launcher3.views.Snackbar
 import java.util.Collections
 
 /**
@@ -306,15 +308,17 @@ class TaskbarViewDragDropController(
 
         override fun onDrop(dragObject: DropTarget.DragObject?, options: DragOptions?) {
             tooltipController.hide()
-            val itemToUnpin = dragObject?.dragInfo ?: return
+            if (dragObject == null) return
 
-            activityContext.modelWriter.deleteItemFromDatabase(
-                itemToUnpin,
-                "Unpin by taskbar drag and drop",
-            )
+            val itemToUnpin = extractItemInfoFromDragObject(dragObject) ?: return
+            val modelWriter = activityContext.modelWriter
+            modelWriter.prepareToUndoDelete()
+            modelWriter.deleteItemFromDatabase(itemToUnpin, "Unpin by taskbar drag and drop")
+
             modelCallbacks?.bindWorkspaceComponentsRemoved(
                 ItemInfoMatcher.ofItems(Collections.singleton(itemToUnpin))
             )
+            showDeleteItemSnackbar(modelWriter)
         }
 
         override fun onDragEnter(dragObject: DropTarget.DragObject?) {
@@ -361,6 +365,25 @@ class TaskbarViewDragDropController(
             targetLocation[1] -= (dragObject.dragView.measuredHeight / 2f) + yOffset
 
             return targetLocation
+        }
+
+        /** Shows the snackbar after removing a pinned item from hotseat with undo action. */
+        private fun showDeleteItemSnackbar(modelWriter: IModelWriter) {
+            val onUndoClicked = Runnable { modelWriter.abortDelete() }
+
+            val onDismissed = Runnable { modelWriter.commitDelete() }
+
+            val overlayContext =
+                activityContext.controllers.taskbarOverlayController.requestWindow()
+            activityContext.getMainThreadHandler().post {
+                Snackbar.show(
+                    overlayContext,
+                    activityContext.getString(R.string.app_removed_from_taskbar),
+                    R.string.undo,
+                    onDismissed,
+                    onUndoClicked,
+                )
+            }
         }
     }
 
