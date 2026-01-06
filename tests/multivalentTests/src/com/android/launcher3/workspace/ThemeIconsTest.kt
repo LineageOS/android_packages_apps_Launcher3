@@ -18,20 +18,33 @@ package com.android.launcher3.workspace
 import android.content.ContentResolver
 import android.content.ContentValues
 import android.net.Uri
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.SetFlagsRule
 import android.platform.test.rule.LimitDevicesRule
 import android.platform.test.rule.SkipOnDeviceless
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
+import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.BubbleTextView
+import com.android.launcher3.Flags
 import com.android.launcher3.Launcher
+import com.android.launcher3.R
 import com.android.launcher3.Utilities
 import com.android.launcher3.dagger.LauncherComponentProvider.get
 import com.android.launcher3.icons.mono.ThemedIconDelegate
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.popup.ArrowPopup
+import com.android.launcher3.testutil.Wait.atMost
 import com.android.launcher3.util.BaseLauncherActivityTest
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.ModelTestExtensions.setEmptyModelLayout
@@ -53,7 +66,9 @@ class ThemeIconsTest : BaseLauncherActivityTest<Launcher>() {
      * This test can't run in Robolectric because APP_NAME and TEST_APP_NAME can't found when
      * running the test in Robolectric.
      */
-    @get:Rule var mlimitDevicesRule: LimitDevicesRule = LimitDevicesRule()
+    @get:Rule(order = 0) val flags: SetFlagsRule = SetFlagsRule()
+    @get:Rule(order = 1) var mlimitDevicesRule: LimitDevicesRule = LimitDevicesRule()
+    @get:Rule(order = 2) val composeTestRule = createEmptyComposeRule()
 
     @Test
     @SkipOnDeviceless
@@ -77,6 +92,7 @@ class ThemeIconsTest : BaseLauncherActivityTest<Launcher>() {
     @Test
     @SkipOnDeviceless
     @Throws(Exception::class)
+    @EnableFlags(Flags.FLAG_EXPANDABLE_LONG_PRESS_MENU)
     fun testShortcutIconWithoutTheme() {
         setThemeEnabled(false)
         targetContext().setEmptyModelLayout()
@@ -87,19 +103,37 @@ class ThemeIconsTest : BaseLauncherActivityTest<Launcher>() {
             launcherActivity.getFromLauncher { l: Launcher -> findBtv(TEST_APP_NAME, l.appsView) }
         TestUtil.runOnExecutorSync(Executors.MAIN_EXECUTOR) { btv!!.performLongClick() }
 
+        addShortcut()
+        launcherActivity.executeOnLauncher { l: Launcher ->
+            verifyIconTheme(SHORTCUT_NAME, l.workspace, false)
+        }
+    }
+
+    @Test
+    @SkipOnDeviceless
+    @Throws(Exception::class)
+    @DisableFlags(Flags.FLAG_EXPANDABLE_LONG_PRESS_MENU)
+    fun testShortcutIconWithoutTheme_old_popup() {
+        setThemeEnabled(false)
+        targetContext().setEmptyModelLayout()
+        loadLauncherSync()
+
+        scrollToAppIcon(TEST_APP_NAME)
+        val btv =
+            launcherActivity.getFromLauncher { l: Launcher -> findBtv(TEST_APP_NAME, l.appsView) }
+        TestUtil.runOnExecutorSync(Executors.MAIN_EXECUTOR) { btv!!.performLongClick() }
+
         val menuItem =
-            launcherActivity.getOnceNotNull(
-                "Popup menu not open",
-                { l: Launcher? ->
-                    val ap =
-                        AbstractFloatingView.getOpenView<AbstractFloatingView>(
-                            l,
-                            AbstractFloatingView.TYPE_ACTION_POPUP,
-                        )
-                    if (ap is ArrowPopup<*>) findBtv(SHORTCUT_NAME, ap) else null
-                },
-            )
+            launcherActivity.getOnceNotNull("Popup menu not open") { l: Launcher? ->
+                val ap =
+                    AbstractFloatingView.getOpenView<AbstractFloatingView>(
+                        l,
+                        AbstractFloatingView.TYPE_ACTION_POPUP,
+                    )
+                if (ap is ArrowPopup<*>) findBtv(SHORTCUT_NAME, ap) else null
+            }
         launcherTestInteractions.addToWorkspace(menuItem!!)
+
         launcherActivity.executeOnLauncher { l: Launcher ->
             verifyIconTheme(SHORTCUT_NAME, l.workspace, false)
         }
@@ -128,7 +162,28 @@ class ThemeIconsTest : BaseLauncherActivityTest<Launcher>() {
     @Test
     @SkipOnDeviceless
     @Throws(Exception::class)
+    @EnableFlags(Flags.FLAG_EXPANDABLE_LONG_PRESS_MENU)
     fun testShortcutIconWithTheme() {
+        setThemeEnabled(true)
+        loadLauncherSync()
+
+        scrollToAppIcon(TEST_APP_NAME)
+        val btv =
+            launcherActivity.getFromLauncher { l: Launcher -> findBtv(TEST_APP_NAME, l.appsView) }
+        TestUtil.runOnExecutorSync(Executors.MAIN_EXECUTOR) { btv!!.performLongClick() }
+
+        addShortcut()
+
+        launcherActivity.executeOnLauncher { l: Launcher ->
+            verifyIconTheme(SHORTCUT_NAME, l.workspace, true)
+        }
+    }
+
+    @Test
+    @SkipOnDeviceless
+    @Throws(Exception::class)
+    @DisableFlags(Flags.FLAG_EXPANDABLE_LONG_PRESS_MENU)
+    fun testShortcutIconWithTheme_old_popup() {
         setThemeEnabled(true)
         loadLauncherSync()
 
@@ -150,6 +205,7 @@ class ThemeIconsTest : BaseLauncherActivityTest<Launcher>() {
                 },
             )
         launcherTestInteractions.addToWorkspace(menuItem!!)
+
         launcherActivity.executeOnLauncher { l: Launcher ->
             verifyIconTheme(SHORTCUT_NAME, l.workspace, true)
         }
@@ -167,6 +223,20 @@ class ThemeIconsTest : BaseLauncherActivityTest<Launcher>() {
                 v.getContentDescription() != null &&
                 title == v.getContentDescription().toString()
         }
+    }
+
+    private fun addShortcut() {
+        val addButtonDescription = targetContext().getString(R.string.action_add_to_workspace)
+        val matcher =
+            hasContentDescription(addButtonDescription) and (hasAnyAncestor(hasText(SHORTCUT_NAME)))
+
+        atMost("Could not find add button for '$SHORTCUT_NAME'") {
+            composeTestRule.onAllNodes(matcher).fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNode(matcher).performClick()
+
+        composeTestRule.waitForIdle()
+        UiDevice.getInstance(getInstrumentation()).waitForIdle()
     }
 
     private fun verifyIconTheme(
