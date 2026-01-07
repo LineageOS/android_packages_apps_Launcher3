@@ -30,6 +30,9 @@ import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThr
 import com.android.launcher3.taskbar.bubbles.BubbleControllers
 import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController
 import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
+import com.android.launcher3.taskbar.rules.TaskbarModeRule
+import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.TRANSIENT
+import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
@@ -55,7 +58,8 @@ class TaskbarLauncherStateControllerTest {
     @get:Rule(order = 0) val setFlagsRule = SetFlagsRule()
     @get:Rule(order = 1) val context = TaskbarWindowSandboxContext.create()
     @get:Rule(order = 2) val animatorTestRule = TaskbarAnimatorTestRule(this)
-    @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(testInstance = this, context)
+    @get:Rule(order = 3) val taskbarModeRule = TaskbarModeRule(context)
+    @get:Rule(order = 4) val taskbarUnitTestRule = TaskbarUnitTestRule(testInstance = this, context)
 
     @InjectController lateinit var bubbleControllers: Optional<BubbleControllers>
     @InjectController lateinit var taskbarStashController: TaskbarStashController
@@ -69,6 +73,7 @@ class TaskbarLauncherStateControllerTest {
     private val taskbarLauncherStateController = TaskbarLauncherStateController()
 
     @Test
+    @TaskbarMode(TRANSIENT)
     fun updateStateForSysuiFlags_singleTapPowerButton_stashTaskAndBubbleBarOnAnimationEnd() {
         initForWakeTransitionWithBubbles(SYSUI_STATE_AWAKE)
 

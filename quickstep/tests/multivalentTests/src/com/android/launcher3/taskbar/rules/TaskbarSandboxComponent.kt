@@ -18,6 +18,7 @@ package com.android.launcher3.taskbar.rules
 
 import android.content.Context
 import com.android.app.displaylib.PerDisplayRepository
+import com.android.app.displaylib.fakes.FakePerDisplayRepository
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.concurrent.ExecutorsModule
 import com.android.launcher3.dagger.ApiWrapperModule
@@ -116,25 +117,6 @@ object TaskbarModule {
     ): TaskbarModeUtil {
         return spy(TaskbarModeUtil(context, displayController, windowManagerProxy, launcherPrefs))
     }
-
-    @JvmStatic
-    @Provides
-    @LauncherAppSingleton
-    fun provideTaskbarFeatureEvaluator(
-        @ApplicationContext context: Context,
-        displayController: DisplayController,
-        desktopVisibilityController: DesktopVisibilityController,
-        launcherPrefs: LauncherPrefs,
-    ): TaskbarFeatureEvaluator {
-        return spy(
-            TaskbarFeatureEvaluator(
-                context,
-                displayController,
-                desktopVisibilityController,
-                launcherPrefs,
-            )
-        )
-    }
 }
 
 @Module
@@ -173,6 +155,30 @@ object TaskbarPerDisplayReposModule {
     @Provides
     @LauncherAppSingleton
     fun provideRecentsWindowTrackerRepo(): PerDisplayRepository<RecentsWindowTracker> = mock()
+
+    @Provides
+    @LauncherAppSingleton
+    fun provideTaskbarFeatureEvaluatorRepo(
+        @ApplicationContext context: Context,
+        displayController: DisplayController,
+        desktopVisibilityController: DesktopVisibilityController,
+        launcherPrefs: LauncherPrefs,
+    ): PerDisplayRepository<TaskbarFeatureEvaluator> {
+
+        val repo = FakePerDisplayRepository { displayId ->
+            spy(
+                TaskbarFeatureEvaluator(
+                    displayId,
+                    context,
+                    displayController,
+                    desktopVisibilityController,
+                    launcherPrefs,
+                )
+            )
+        }
+
+        return repo
+    }
 
     @Provides
     @LauncherAppSingleton

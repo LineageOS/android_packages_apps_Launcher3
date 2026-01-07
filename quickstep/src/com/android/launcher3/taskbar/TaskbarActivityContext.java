@@ -322,7 +322,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             ScopedUnfoldTransitionProgressProvider unfoldTransitionProgressProvider,
             boolean isPrimaryDisplay, int primaryDisplayId, SystemUiProxy sysUiProxy) {
         super(windowContext, displayId, isPrimaryDisplay);
-        mTaskbarFeatureEvaluator = TaskbarFeatureEvaluator.INSTANCE.get(this);
+        mTaskbarFeatureEvaluator = getActivityComponent().getTaskbarFeatureEvaluator();
         mIsTransient = mTaskbarFeatureEvaluator.isTransient();
         mIsPinned = mTaskbarFeatureEvaluator.isPinned();
         mTaskbarUiState = TaskbarUiStateMonitor.INSTANCE.get(this).getTaskbarUiState(displayId);

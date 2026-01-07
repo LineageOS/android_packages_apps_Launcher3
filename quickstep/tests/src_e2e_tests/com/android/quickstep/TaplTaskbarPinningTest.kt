@@ -24,7 +24,9 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
 
-@AllowedDevices(allowed = [DeviceProduct.TANGORPRO, DeviceProduct.CF_TABLET, DeviceProduct.CF_DESKTOP])
+@AllowedDevices(
+    allowed = [DeviceProduct.TANGORPRO, DeviceProduct.CF_TABLET, DeviceProduct.CF_DESKTOP]
+)
 class TaplTaskbarPinningTest : AbstractTaplTestsTaskbar() {
 
     @get:Rule val screenRecordRule = ScreenRecordRule()
@@ -33,7 +35,8 @@ class TaplTaskbarPinningTest : AbstractTaplTestsTaskbar() {
 
     override fun setUp() {
         super.setUp()
-        taskbarFeatureEvaluator = TaskbarFeatureEvaluator.INSTANCE[mTargetContext]
+        taskbarFeatureEvaluator =
+            TaskbarFeatureEvaluator.INSTANCE[mTargetContext][mTargetContext.displayId]!!
     }
 
     override fun tearDown() {
@@ -44,7 +47,7 @@ class TaplTaskbarPinningTest : AbstractTaplTestsTaskbar() {
 
     @Test
     @TaskbarModeSwitch(mode = TaskbarModeSwitchRule.Mode.TRANSIENT)
-    @ScreenRecordRule.ScreenRecord //b/440078235
+    @ScreenRecordRule.ScreenRecord // b/440078235
     fun testPinningUnpinningTransientTaskbar_whenInOverview() {
         assertThat(taskbarFeatureEvaluator.isTransient).isTrue()
         mLauncher.goHome().switchToOverview()
@@ -66,7 +69,7 @@ class TaplTaskbarPinningTest : AbstractTaplTestsTaskbar() {
 
     @Test
     @TaskbarModeSwitch(mode = TaskbarModeSwitchRule.Mode.TRANSIENT)
-    @ScreenRecordRule.ScreenRecord //b/440078235
+    @ScreenRecordRule.ScreenRecord // b/440078235
     fun testPinningUnpinningTransientTaskbar_whenInApp() {
         startAppFast(TEST_APP_PACKAGE)
         assertThat(taskbarFeatureEvaluator.isTransient).isTrue()
@@ -91,7 +94,7 @@ class TaplTaskbarPinningTest : AbstractTaplTestsTaskbar() {
 
     @Test
     @TaskbarModeSwitch(mode = TaskbarModeSwitchRule.Mode.TRANSIENT)
-    @ScreenRecordRule.ScreenRecord //b/440078235
+    @ScreenRecordRule.ScreenRecord // b/440078235
     fun testPinningUnpinningTransientTaskbar_whenInDesktopMode() {
         startAppFast(CALCULATOR_APP_PACKAGE)
         assertThat(taskbarFeatureEvaluator.isTransient).isTrue()

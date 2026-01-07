@@ -52,7 +52,8 @@ public class FallbackSwipeHandlerTestCase extends AbsSwipeUpHandlerTestCase<
                 touchTimeMs,
                 continuingLastGesture,
                 mInputConsumerController,
-                mMSDLPlayerWrapper);
+                mMSDLPlayerWrapper,
+                mContext.getDisplayId());
     }
 
     @NonNull

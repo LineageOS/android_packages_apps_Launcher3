@@ -36,6 +36,8 @@ interface BaseActivityContextComponent {
 
     fun getOseWidgetOptionsProvider(): OseWidgetOptionsProvider
 
+    @DisplayId fun getDisplayId(): Int
+
     val appsStore: AllAppsStore
     val popupDataProvider: PopupDataProvider
     val sharedAppsPool: AllAppsRecyclerViewPool

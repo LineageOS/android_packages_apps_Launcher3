@@ -18,6 +18,7 @@ package com.android.launcher3.dagger
 
 import android.content.Context
 import android.view.Display
+import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator
 import com.android.quickstep.RecentsAnimationDeviceState
 import com.android.quickstep.RotationTouchHelper
 import com.android.quickstep.TaskAnimationManager
@@ -51,6 +52,8 @@ interface PerDisplayComponent {
     val recentsWindowTracker: RecentsWindowTracker
 
     @WindowContext fun getWindowContext(): Context
+
+    fun getTaskbarFeatureEvaluator(): TaskbarFeatureEvaluator
 
     val cleanupTasks: PerDisplayCleanupTask
 
