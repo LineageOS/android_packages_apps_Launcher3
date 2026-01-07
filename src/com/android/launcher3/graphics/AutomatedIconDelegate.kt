@@ -26,6 +26,8 @@ import android.graphics.Rect
 import android.graphics.RenderEffect
 import android.graphics.RenderNode
 import android.graphics.Shader
+import android.os.Looper
+import android.os.Process
 import androidx.core.animation.Animator
 import androidx.core.animation.AnimatorListenerAdapter
 import androidx.core.animation.ValueAnimator
@@ -47,6 +49,7 @@ import com.android.launcher3.icons.GraphicsUtils.resizeToContentSize
 import com.android.launcher3.icons.GraphicsUtils.transformed
 import com.android.launcher3.icons.IconShape
 import com.android.launcher3.model.data.ItemInfoWithIcon
+import com.android.launcher3.util.LooperExecutor
 
 class AutomatedIconDelegate(
     private val strokeWidthPx: Float,
@@ -60,6 +63,7 @@ class AutomatedIconDelegate(
     private val parentDelegate: FastBitmapDrawableDelegate,
 ) : FastBitmapDrawableDelegate by parentDelegate {
 
+    private var uiLooper: Looper? = null
     private var animationState: AnimationState = ENTER
     private var currentRotation = 0f
     private val currentIconScale: FloatValueHolder = FloatValueHolder(MAX_ICON_SCALE)
@@ -109,7 +113,7 @@ class AutomatedIconDelegate(
                     animator.cancel()
                     return@addUpdateListener
                 }
-                host.invalidateSelf()
+                safelyInvalidateHost()
             }
         }
 
@@ -124,7 +128,7 @@ class AutomatedIconDelegate(
                     animator.cancel()
                     return@addUpdateListener
                 }
-                host.invalidateSelf()
+                safelyInvalidateHost()
             }
             addListener(
                 object : AnimatorListenerAdapter() {
@@ -162,7 +166,7 @@ class AutomatedIconDelegate(
                     animation.cancel()
                     return@addUpdateListener
                 }
-                host.invalidateSelf()
+                safelyInvalidateHost()
             }
         }
 
@@ -232,7 +236,6 @@ class AutomatedIconDelegate(
         bounds: Rect,
         paint: Paint,
     ) {
-
         canvas.resizeToContentSize(bounds, iconShape.pathSize.toFloat()) {
             val center = iconShape.pathSize / 2f
             shaderMatrix.setRotate(currentRotation, center, center)
@@ -262,6 +265,7 @@ class AutomatedIconDelegate(
     override fun onVisibilityChanged(isVisible: Boolean) {
         super.onVisibilityChanged(isVisible)
         if (isVisible) {
+            uiLooper = Looper.myLooper()
             when (animationState) {
                 ENTER ->
                     if (!firstRotationAnimator.isRunning && !scaleAnimation.isRunning) {
@@ -284,6 +288,19 @@ class AutomatedIconDelegate(
         firstRotationAnimator.cancel()
         rotationAnimator.cancel()
         scaleAnimation.cancel()
+    }
+
+    private fun safelyInvalidateHost() {
+        uiLooper?.let {
+            if (Looper.myLooper() == it) {
+                host.invalidateSelf()
+            } else {
+                LooperExecutor(it, Process.THREAD_PRIORITY_DEFAULT).execute {
+                    host.invalidateSelf()
+                }
+            }
+            return
+        }
     }
 
     companion object {
