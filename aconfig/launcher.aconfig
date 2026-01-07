@@ -737,3 +737,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "move_to_rest_state_for_background_app"
+  namespace: "launcher"
+  description: "Move launcher to rest state if it is in background app state when starting back animation"
+  bug: "469834354"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
