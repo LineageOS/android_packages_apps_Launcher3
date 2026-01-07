@@ -28,11 +28,13 @@ import com.android.launcher3.DragSource
 import com.android.launcher3.DropTarget
 import com.android.launcher3.DropTarget.DragObject
 import com.android.launcher3.Flags.FLAG_ENABLE_SYSTEM_DRAG
+import com.android.launcher3.Flags.enableSystemDrag
 import com.android.launcher3.dragndrop.DragController.DragListener
 import com.android.launcher3.dragndrop.DragController.SystemDragHandler
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.TestActivityContext
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -69,6 +71,16 @@ class DragControllerTest {
     @Before
     fun setUp() {
         controller = TestDragController(context)
+    }
+
+    @Test
+    fun testConstructor() {
+        // NOTE: The constructor registers the default handler for system-level drag events.
+        assertEquals(
+            if (enableSystemDrag()) listOf(context.activityComponent.systemDragController)
+            else emptyList(),
+            controller.mSystemDragHandlers,
+        )
     }
 
     @Test

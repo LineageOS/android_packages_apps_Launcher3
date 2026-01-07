@@ -174,7 +174,6 @@ import com.android.launcher3.dagger.LauncherComponentProvider;
 import com.android.launcher3.dragndrop.DragLayer;
 import com.android.launcher3.dragndrop.DragView;
 import com.android.launcher3.dragndrop.LauncherDragController;
-import com.android.launcher3.dragndrop.SystemDragController;
 import com.android.launcher3.folder.Folder;
 import com.android.launcher3.folder.FolderIcon;
 import com.android.launcher3.keyboard.ViewGroupFocusHelper;
@@ -457,7 +456,6 @@ public class Launcher extends StatefulActivity<LauncherState>
         mWidgetPickerDataProvider = new WidgetPickerDataProvider();
         PillColorProvider.getInstance(mWorkspace.getContext()).registerObserver();
 
-        SystemDragController.INSTANCE.get(this).setContext(this);
         ItemInstallQueue.INSTANCE.get(this).setIconUISurface(this);
 
         boolean internalStateHandled = ACTIVITY_TRACKER.handleCreate(this);

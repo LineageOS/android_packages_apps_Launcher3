@@ -111,7 +111,6 @@ import com.android.launcher3.dragndrop.DragView;
 import com.android.launcher3.dragndrop.DraggableView;
 import com.android.launcher3.dragndrop.LauncherDragController;
 import com.android.launcher3.dragndrop.SpringLoadedDragController;
-import com.android.launcher3.dragndrop.SystemDragController;
 import com.android.launcher3.dragndrop.SystemDragItemInfo;
 import com.android.launcher3.dragndrop.SystemDragParams;
 import com.android.launcher3.folder.Folder;
@@ -1892,7 +1891,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         // TODO(458058227): Move this entire code block to [DragController].
         final ClipData systemDragClipData = getClipDataForSystemDrag(dragObject);
         if (systemDragClipData != null) {
-            dv = SystemDragController.INSTANCE.get(mLauncher).startDrag(
+            dv = mLauncher.getActivityComponent().getSystemDragController().startDrag(
                     new SystemDragParams(
                             systemDragClipData,
                             HomeScreenFilesUtilsKt.isFileSystemItem(dragObject)
@@ -1979,11 +1978,18 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             if (!transitionStateShouldAllowDrop()) return false;
 
             // Reject system-level drops if we cannot handle the payload.
-            if (d.dragInfo instanceof SystemDragItemInfo dragInfo
-                    && (!SystemDragController.INSTANCE.get(mLauncher).acceptDrop(dragInfo)
-                        || !HomeScreenFilesProvider.INSTANCE.get(mLauncher).canMoveToHomeScreen(
-                                dragInfo.getUriList()))) {
-                return false;
+            if (d.dragInfo instanceof SystemDragItemInfo dragInfo) {
+                if (!mLauncher
+                        .getActivityComponent()
+                        .getSystemDragController()
+                        .acceptDrop(dragInfo)) {
+                    return false;
+                }
+                if (!HomeScreenFilesProvider.INSTANCE
+                        .get(mLauncher)
+                        .canMoveToHomeScreen(dragInfo.getUriList())) {
+                    return false;
+                }
             }
 
             mDragViewVisualCenter = d.getVisualCenter(mDragViewVisualCenter);
