@@ -128,7 +128,8 @@ data class HotseatProfileInitialValues(
             responsiveWorkspaceCellSpec: CalculatedCellSpec,
             isQsbInline: Boolean,
         ): HotseatProfileInitialValues {
-            val areNavButtonsInline = isTaskbarPresent && !deviceProperties.isGestureMode
+            val areNavButtonsInline =
+                isTaskbarPresent && !deviceProperties.deviceConfiguration.isGestureMode
             var inlineNavButtonsEndSpacingPx = 0
             var navButtonsLayoutWidthPx = 0
             var barEndOffset = 0
@@ -226,7 +227,8 @@ data class HotseatProfileInitialValues(
             workspacePageIndicatorHeight: Int,
             isQsbInline: Boolean,
         ): HotseatProfileInitialValues {
-            val areNavButtonsInline = isTaskbarPresent && !deviceProperties.isGestureMode
+            val areNavButtonsInline =
+                isTaskbarPresent && !deviceProperties.deviceConfiguration.isGestureMode
             var inlineNavButtonsEndSpacingPx = 0
             var navButtonsLayoutWidthPx = 0
             var barEndOffset = 0

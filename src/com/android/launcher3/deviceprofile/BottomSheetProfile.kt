@@ -51,7 +51,7 @@ data class BottomSheetProfile(
                 when {
                     // TODO(b/259893832): Revert to use maxWallpaperScale to calculate
                     // bottomSheetDepth when screen recorder bug is fixed.
-                    deviceProperties.isMultiDisplay -> 0.3f
+                    deviceProperties.deviceConfiguration.isMultiDisplay -> 0.3f
                     // The goal is to set wallpaper to zoom at workspaceContentScale when in AllApps
                     // When depth is 0, wallpaper zoom is set to maxWallpaperScale.
                     // When depth is 1, wallpaper zoom is set to 1.

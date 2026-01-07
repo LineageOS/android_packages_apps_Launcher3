@@ -22,6 +22,14 @@ import com.android.launcher3.util.WindowBounds
 import kotlin.math.max
 import kotlin.math.min
 
+data class DeviceConfiguration(
+    val isExternalDisplay: Boolean,
+    val transposeLayoutWithOrientation: Boolean,
+    val isMultiDisplay: Boolean,
+    val isGestureMode: Boolean,
+    val isWorkspaceItemsLabelHidden: Boolean,
+)
+
 data class DeviceProperties(
     val windowX: Int,
     val windowY: Int,
@@ -33,23 +41,18 @@ data class DeviceProperties(
     val aspectRatio: Float,
     val isLargeScreen: Boolean,
     val isPhone: Boolean,
-    val transposeLayoutWithOrientation: Boolean,
-    val isMultiDisplay: Boolean,
     val isTwoPanels: Boolean,
     val isLandscape: Boolean,
-    val isExternalDisplay: Boolean,
-    val isGestureMode: Boolean,
     val insets: Rect,
+    val deviceConfiguration: DeviceConfiguration,
 ) {
+
     companion object Factory {
         // b/419264328 adding here all the improvements/cleanup for this class
         fun createDeviceProperties(
             info: LauncherDisplayInfo,
             windowBounds: WindowBounds,
-            transposeLayoutWithOrientation: Boolean,
-            isMultiDisplay: Boolean,
-            isExternalDisplay: Boolean,
-            isGestureMode: Boolean,
+            deviceConfiguration: DeviceConfiguration,
         ): DeviceProperties {
             val isLargeScreen = info.isLargeScreen(windowBounds)
             val windowX = windowBounds.bounds.left
@@ -70,13 +73,10 @@ data class DeviceProperties(
                 aspectRatio = max(widthPx, heightPx).toFloat() / min(widthPx, heightPx).toFloat(),
                 isLargeScreen = isLargeScreen,
                 isPhone = !isLargeScreen,
-                transposeLayoutWithOrientation = transposeLayoutWithOrientation,
-                isMultiDisplay = isMultiDisplay,
-                isTwoPanels = isLargeScreen && isMultiDisplay,
+                isTwoPanels = isLargeScreen && deviceConfiguration.isMultiDisplay,
                 isLandscape = windowBounds.isLandscape,
-                isExternalDisplay = isExternalDisplay,
-                isGestureMode = isGestureMode,
                 insets = windowBounds.insets,
+                deviceConfiguration = deviceConfiguration,
             )
         }
     }
