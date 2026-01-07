@@ -186,11 +186,6 @@ public class TaskbarOverlayContext extends BaseTaskbarContext {
     }
 
     @Override
-    public boolean showLockedTaskbarOnHome() {
-        return mTaskbarContext.showLockedTaskbarOnHome();
-    }
-
-    @Override
     public boolean showDesktopTaskbarForFreeformDisplay() {
         return mTaskbarContext.showDesktopTaskbarForFreeformDisplay();
     }

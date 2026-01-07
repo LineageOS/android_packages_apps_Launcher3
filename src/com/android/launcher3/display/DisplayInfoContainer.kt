@@ -48,7 +48,6 @@ class DisplayInfoContainer(
                 config.fontScale != info.fontScale ||
                 (info.screenSizeDp != from(config.screenHeightDp, config.screenWidthDp)) ||
                 windowContext.display.rotation != info.rotation ||
-                (wmProxy.showLockedTaskbarOnHome(windowContext) != info.showLockedTaskbarOnHome) ||
                 (wmProxy.showDesktopTaskbarForFreeformDisplay(windowContext) !=
                     info.showDesktopTaskbarForFreeformDisplay) ||
                 config.isNightModeActive != info.isNightModeActive

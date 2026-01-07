@@ -25,7 +25,6 @@ import android.view.DisplayCutout;
 import android.view.Surface;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
-import android.window.DesktopExperienceFlags;
 
 import com.android.internal.policy.SystemBarUtils;
 import com.android.launcher3.dagger.LauncherAppSingleton;
@@ -95,18 +94,6 @@ public class SystemWindowManagerProxy extends WindowManagerProxy {
     }
 
     @Override
-    public boolean showLockedTaskbarOnHome(Context displayInfoContext) {
-        if (!DesktopModeStatus.canEnterDesktopMode(displayInfoContext)) {
-            return false;
-        }
-        if (!DesktopModeStatus.enterDesktopByDefaultOnFreeformDisplay(displayInfoContext)) {
-            return false;
-        }
-
-        return isDisplayDesktopFirst(displayInfoContext);
-    }
-
-    @Override
     public boolean showDesktopTaskbarForFreeformDisplay(Context displayInfoContext) {
         if (!DesktopModeStatus.canEnterDesktopMode(displayInfoContext)) {
             return false;
@@ -116,16 +103,7 @@ public class SystemWindowManagerProxy extends WindowManagerProxy {
             return false;
         }
 
-        if (!DesktopExperienceFlags.ENABLE_DESKTOP_TASKBAR_ON_FREEFORM_DISPLAYS.isTrue()) {
-            return false;
-        }
-
         return isDisplayDesktopFirst(displayInfoContext);
-    }
-
-    @Override
-    public boolean isHomeVisible() {
-        return mSystemUiProxy.getHomeVisibilityState().isHomeVisible();
     }
 
     @Override

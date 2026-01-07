@@ -140,11 +140,6 @@ public abstract class BaseTaskbarContext extends BaseContext
     public abstract boolean isTaskbarShowingDesktopTasks();
 
     /**
-     * Returns whether the taskbar is forced to be pinned when home is visible.
-     */
-    public abstract  boolean showLockedTaskbarOnHome();
-
-    /**
      * Returns whether desktop taskbar (pinned taskbar that shows desktop tasks) is to be used on
      * the display because the display is a freeform display.
      */

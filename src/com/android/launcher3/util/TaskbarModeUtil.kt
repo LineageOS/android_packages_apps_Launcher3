@@ -48,15 +48,7 @@ constructor(
             if (displayController.info.navigationMode != NavigationMode.NO_BUTTON) {
                 false
             } else if (enableTaskbarPinning()) {
-                // If Launcher is visible on the freeform display, ensure the taskbar is pinned.
-                if (
-                    displayController.info.showLockedTaskbarOnHome &&
-                        displayController.info.isHomeVisible
-                ) {
-                    false
-                } else {
-                    !isPinned
-                }
+                !isPinned
             } else {
                 true
             }
@@ -64,7 +56,12 @@ constructor(
     val isPinned: Boolean
         get() =
             if (
-                windowManagerProxy.isInDesktopMode(windowManagerProxy.getDisplay(context).displayId)
+                displayController
+                    .getInfoForDisplay(windowManagerProxy.getDisplay(context).displayId)
+                    ?.showDesktopTaskbarForFreeformDisplay == true ||
+                    windowManagerProxy.isInDesktopMode(
+                        windowManagerProxy.getDisplay(context).displayId
+                    )
             ) {
                 true
             } else {

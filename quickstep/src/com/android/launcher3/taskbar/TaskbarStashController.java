@@ -281,8 +281,6 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
     private final long mTaskbarBackgroundDuration;
     private boolean mUserIsNotGoingHome = false;
 
-    private final boolean mInAppStateAffectsDesktopTasksVisibilityInTaskbar;
-
     // Evaluate whether the handle should be stashed
     private final StatePropertyHolder mStatePropertyHolder;
 
@@ -319,16 +317,6 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
                     || forceStashed
                     || stashedInAlDevice;
         });
-
-        // Taskbar, via `TaskbarDesktopModeController`, depends on `TaskbarStashController` state to
-        // determine whether desktop tasks should be shown because taskbar is pinned on the home
-        // screen for freeform windowing displays. In this case, list of items shown in the taskbar
-        // needs to be updated when in-app state changes.
-        // TODO(b/390665752): Feature to "lock" pinned taskbar to home screen will be superseded by
-        //     pinning, in other launcher states, at which point this variable can be removed.
-        mInAppStateAffectsDesktopTasksVisibilityInTaskbar =
-                !mActivity.showDesktopTaskbarForFreeformDisplay()
-                        && mActivity.showLockedTaskbarOnHome();
 
         mTaskbarBackgroundDuration = activity.getResources().getInteger(
                 R.integer.taskbar_background_duration);
@@ -776,9 +764,7 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
                 LauncherPrefs.TASKBAR_PINNING_IN_DESKTOP_MODE.get(mActivity);
         final boolean isTaskbarShowingDesktopTasks = DesktopVisibilityController.INSTANCE
                 .get(mActivity).isInDesktopMode(mActivity.getDisplayId())
-                        || mTaskbarUiState.getShowDesktopTaskbarForFreeformDisplay()
-                        || (mTaskbarUiState.getShowLockedTaskbarOnHome()
-                        && mTaskbarUiState.isTaskbarOnHome());
+                        || mTaskbarUiState.getShowDesktopTaskbarForFreeformDisplay();
         return !isTaskbarPinningOnInDesktopMode && isTaskbarShowingDesktopTasks;
     }
 
@@ -1465,10 +1451,6 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
         if (hasAnyFlag(changedFlags, FLAG_IN_OVERVIEW | FLAG_IN_APP)) {
             mControllers.runAfterInit(() -> mControllers.taskbarInsetsController
                     .onTaskbarOrBubblebarWindowHeightOrInsetsChanged());
-            if (mInAppStateAffectsDesktopTasksVisibilityInTaskbar) {
-                mControllers.runAfterInit(
-                        () -> mControllers.taskbarViewController.commitRunningAppsToUI());
-            }
         }
         updateTaskbarWindowForciblyShownFlag();
     }

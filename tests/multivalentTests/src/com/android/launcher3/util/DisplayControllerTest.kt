@@ -123,7 +123,6 @@ class DisplayControllerTest {
         whenever(windowManagerProxy.getRealBounds(any(), any())).thenAnswer { i ->
             bounds[i.getArgument<CachedDisplayInfo>(1).rotation]
         }
-        whenever(windowManagerProxy.showLockedTaskbarOnHome(any())).thenReturn(false)
 
         whenever(windowManagerProxy.getNavigationMode(any())).thenReturn(NavigationMode.NO_BUTTON)
         // Mock context

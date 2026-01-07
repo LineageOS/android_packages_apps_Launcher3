@@ -80,9 +80,7 @@ class TaskbarDesktopModeController(
 
     fun shouldShowDesktopTasksInTaskbar(displayId: Int): Boolean {
         return isInDesktopMode(displayId) ||
-            taskbarActivityContext.showDesktopTaskbarForFreeformDisplay() ||
-            (taskbarActivityContext.showLockedTaskbarOnHome() &&
-                taskbarControllers.taskbarStashController.isOnHome)
+            taskbarActivityContext.showDesktopTaskbarForFreeformDisplay()
     }
 
     fun getTaskbarCornerRoundness(doesAnyTaskRequireTaskbarRounding: Boolean): Float {
@@ -103,6 +101,5 @@ class TaskbarDesktopModeController(
         val info = DisplayController.getInfo(taskbarActivityContext)
         taskbarUiState.showDesktopTaskbarForFreeformDisplay =
             info.showDesktopTaskbarForFreeformDisplay
-        taskbarUiState.showLockedTaskbarOnHome = info.showLockedTaskbarOnHome
     }
 }
