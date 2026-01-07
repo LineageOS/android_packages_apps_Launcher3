@@ -71,8 +71,6 @@ public class SettingsActivity extends FragmentActivity
 
     public static final String FIXED_LANDSCAPE_MODE = "pref_fixed_landscape_mode";
 
-    public static final String WORKSPACE_ITEMS_LABEL_HIDDEN = "pref_workspace_items_label_hidden";
-
     private static final String NOTIFICATION_DOTS_PREFERENCE_KEY = "pref_icon_badging";
 
     public static final String EXTRA_FRAGMENT_ARGS = ":settings:fragment_args";
@@ -330,8 +328,6 @@ public class SettingsActivity extends FragmentActivity
                             }
                     );
                     return !info.isLargeScreen(info.realBounds);
-                case WORKSPACE_ITEMS_LABEL_HIDDEN:
-                    return com.android.systemui.shared.Flags.workspaceItemsLabelHidden();
             }
             return true;
         }
