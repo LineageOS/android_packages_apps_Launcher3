@@ -80,6 +80,7 @@ import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
@@ -1037,6 +1038,7 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
             }
             navButtonController.sendBackKeyEvent(KeyEvent.ACTION_UP, isCancelled);
             if (motionEventAction == MotionEvent.ACTION_UP && !isCancelled) {
+                buttonView.playSoundEffect(SoundEffectConstants.CLICK);
                 buttonView.performClick();
             }
             return false;

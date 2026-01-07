@@ -75,3 +75,9 @@ flag {
     bug: "446013310"
 }
 
+flag {
+    name: "enable_tasks_drag_and_drop_in_overview"
+    namespace: "launcher_overview"
+    description: "Allows the user to drag and drop tasks between desktops in overview."
+    bug: "434939081"
+}
