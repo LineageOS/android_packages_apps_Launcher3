@@ -23,6 +23,7 @@ import static com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLA
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Rect;
 import android.view.GestureDetector;
 import android.view.HapticFeedbackConstants;
 import android.view.InputDevice;
@@ -32,8 +33,14 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import android.app.contextualsearch.ContextualSearchConfig;
+import android.app.contextualsearch.ContextualSearchManager;
+
+import com.android.quickstep.TopTaskTracker;
+import com.android.quickstep.util.ContextualSearchInvoker;
 import com.android.internal.jank.Cuj;
 import com.android.launcher3.BubbleTextView;
+import com.android.launcher3.logging.StatsLogManager;
 import com.android.launcher3.taskbar.bubbles.BubbleBarViewController;
 import com.android.systemui.shared.system.InteractionJankMonitorWrapper;
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
@@ -47,6 +54,7 @@ public class TaskbarViewCallbacks {
     private final TaskbarControllers mControllers;
     private final TaskbarView mTaskbarView;
     private final GestureDetector mGestureDetector;
+    private final Rect mTempRect = new Rect();
 
     public TaskbarViewCallbacks(TaskbarActivityContext activity, TaskbarControllers controllers,
             TaskbarView taskbarView) {
@@ -80,11 +88,30 @@ public class TaskbarViewCallbacks {
     /** Trigger All Apps button long click action. */
     public void triggerAllAppsButtonLongClick() {
         mActivity.getStatsLogManager().logger().log(LAUNCHER_TASKBAR_ALLAPPS_BUTTON_LONG_PRESS);
+
+        mTaskbarView.getAllAppsButtonContainer().getBoundsOnScreen(mTempRect);
+        ContextualSearchConfig config = new ContextualSearchConfig.Builder()
+                .setSourceBounds(mTempRect)
+                .setDisplayId(mActivity.getDisplayId())
+                .build();
+        boolean contextualSearchInvoked = new ContextualSearchInvoker(mActivity)
+                .show(ContextualSearchManager.ENTRYPOINT_LONG_PRESS_META, config);
+        if (contextualSearchInvoked) {
+            mActivity.toggleTaskbarStash();
+            String runningPackage = TopTaskTracker.INSTANCE.get(mActivity).getCachedTopTask(
+                            /* filterOnlyVisibleRecents= */ true,
+                            mActivity.getDisplayId())
+                    .getPackageName();
+            mActivity.getStatsLogManager()
+                .logger()
+                .withPackageName(runningPackage)
+                .log(StatsLogManager.LauncherEvent.LAUNCHER_LAUNCH_OMNI_SUCCESSFUL_META);
+        }
     }
 
     /** @return true if haptic feedback should occur when long pressing the all apps button. */
     public boolean isAllAppsButtonHapticFeedbackEnabled(Context context) {
-        return false;
+        return true;
     }
 
     @SuppressLint("ClickableViewAccessibility")
