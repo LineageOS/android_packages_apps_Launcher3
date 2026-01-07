@@ -1999,9 +1999,6 @@ public class Launcher extends StatefulActivity<LauncherState>
         if (shouldShowHomeBehindDesktop()) {
             Runnable endAction = () -> {
                 closeOpenViews();
-                if (isInState(ALL_APPS)) {
-                    getStateManager().goToState(NORMAL);
-                }
             };
             if (result != null) {
                 result.add(endAction);
@@ -2894,6 +2891,13 @@ public class Launcher extends StatefulActivity<LauncherState>
     public void onTopResumedActivityChanged(boolean isTopResumed) {
         super.onTopResumedActivityChanged(isTopResumed);
         mLauncherUiState.setIsTopResumedActivity(isTopResumed);
+
+        // If Launcher is in a mode where it can show behind desktop windows, dismiss AllApps when
+        // another window becomes top-most to keep the background clear. In other cases,
+        // AllApps is kept in the back stack so users can return to it via back navigation.
+        if (shouldShowHomeBehindDesktop() && !isTopResumed && isInState(ALL_APPS)) {
+            getStateManager().goToState(NORMAL);
+        }
     }
 
     // End of Getters and Setters
