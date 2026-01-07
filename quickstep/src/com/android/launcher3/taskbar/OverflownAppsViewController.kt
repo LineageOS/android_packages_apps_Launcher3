@@ -58,6 +58,12 @@ class OverflownAppsViewController(
         )
         overflownAppsContainerView.addOnCloseCallback {
             taskbarViewDragDropController.removeOverflowDropTarget(dragController)
+            overflowIcon.setOnChangeListener(null)
+        }
+
+        overflowIcon.setOnChangeListener {
+            overflownAppsContainerView.setOverflownApps(overflowIcon.overflowInfoList)
+            updateRunningAppState()
         }
     }
 
