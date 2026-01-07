@@ -199,11 +199,15 @@ public class DefaultLayoutParser extends AutoInstallsLayout {
 
         @Override
         public int parseAndAdd(XmlElement element) {
+            int result = -1;
             for (XmlElement child: element.childIterator(TAG_FAVORITE)) {
-                int addedId = mChildParser.parseAndAdd(child);
-                if (addedId > -1) return addedId;
+                if (result == -1) {
+                    result = mChildParser.parseAndAdd(child);
+                }
+                // If result found, we still continue the loop until the end
+                // This allows the internal Parser in XmlElement to advance correctly
             }
-            return -1;
+            return result;
         }
     }
 
