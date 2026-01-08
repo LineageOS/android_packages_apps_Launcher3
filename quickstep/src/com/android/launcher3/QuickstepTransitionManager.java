@@ -143,6 +143,7 @@ import com.android.launcher3.util.StableViewInfo;
 import com.android.launcher3.util.TaskbarAsyncAnimator;
 import com.android.launcher3.views.FloatingIconView;
 import com.android.launcher3.widget.LauncherAppWidgetHostView;
+import com.android.quickstep.HomeVisibilityState;
 import com.android.quickstep.LauncherBackAnimationController;
 import com.android.quickstep.RemoteAnimationTargets;
 import com.android.quickstep.SplitRecentsAnimUtils;
@@ -291,6 +292,8 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
 
     private final SystemUiProxy mSystemUiProxy;
 
+    private HomeVisibilityState.VisibilityChangeListener mHomeVisibilityChangeListener;
+
     public QuickstepTransitionManager(QuickstepLauncher launcher) {
         mLauncher = launcher;
         mDragLayer = mLauncher.getDragLayer();
@@ -314,7 +317,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         if (Flags.fallbackRevealAnimation()) {
             // Make sure that we know whenever Launcher becomes visible AND is in its NORMAL state,
             // so we can run the reveal animation.
-            mSystemUiProxy.getHomeVisibilityState().addListener(
+            mHomeVisibilityChangeListener =
                     (isVisible, keyguardGoingAwayOrWaking) -> {
                         if (isVisible && mLauncher.isInState(NORMAL) && !mIsLauncherAnimating
                                 && !keyguardGoingAwayOrWaking) {
@@ -333,8 +336,8 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                                     });
                             mFallbackRevealAnimation.start();
                         }
-                    }
-            );
+                    };
+            mSystemUiProxy.getHomeVisibilityState().addListener(mHomeVisibilityChangeListener);
         }
 
         mOpeningXInterpolator = AnimationUtils.loadInterpolator(
@@ -1483,6 +1486,10 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         unregisterRemoteTransitions();
         mLauncher.removeOnDeviceProfileChangeListener(this);
         SystemUiProxy.INSTANCE.get(mLauncher).setStartingWindowListener(null);
+        if (Flags.fallbackRevealAnimation()) {
+            mSystemUiProxy.getHomeVisibilityState().removeListener(mHomeVisibilityChangeListener);
+            mHomeVisibilityChangeListener = null;
+        }
         if (BuildConfig.IS_STUDIO_BUILD && !mRegisteredTaskStackChangeListener.isEmpty()) {
             Log.e(TAG, "IllegalState: Failed to run onEndCallback created from"
                     + " getActivityLaunchOptions()");
