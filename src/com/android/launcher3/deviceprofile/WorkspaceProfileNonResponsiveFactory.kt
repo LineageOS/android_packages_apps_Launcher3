@@ -305,6 +305,8 @@ object WorkspaceProfileNonResponsiveFactory {
             panelCount = panelCount,
             cellSize = cellSize,
             scale = scale,
+            flingToDeleteThresholdVelocity =
+                res.getDimensionPixelSize(R.dimen.drag_flingToDeleteMinVelocity),
         )
     }
 
@@ -501,6 +503,8 @@ object WorkspaceProfileNonResponsiveFactory {
             panelCount = panelCount,
             cellSize = cellSize,
             scale = scale,
+            flingToDeleteThresholdVelocity =
+                res.getDimensionPixelSize(R.dimen.drag_flingToDeleteMinVelocity),
         )
     }
 

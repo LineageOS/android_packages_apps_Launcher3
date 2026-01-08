@@ -209,8 +209,6 @@ object LauncherCustomizer {
             doAnswer(answer).whenever(wmp).isTaskbarDrawnInProcess
             doAnswer(answer).whenever(wmp).estimateInternalDisplayBounds(any())
             doAnswer(answer).whenever(wmp).isInDesktopMode(any())
-            doAnswer(answer).whenever(wmp).showLockedTaskbarOnHome(any())
-            doAnswer(answer).whenever(wmp).isHomeVisible()
             doAnswer(answer).whenever(wmp).getRealBounds(any(), any())
             doAnswer(answer).whenever(wmp).normalizeWindowInsets(any(), any(), any())
             doAnswer(answer).whenever(wmp).getDisplayInfo(any())

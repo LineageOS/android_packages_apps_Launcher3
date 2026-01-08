@@ -23,7 +23,6 @@ import android.graphics.Rect
 import android.util.DisplayMetrics
 import com.android.launcher3.DevicePaddings
 import com.android.launcher3.DeviceProfile
-import com.android.launcher3.Flags
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.R
 import com.android.launcher3.Utilities.getIconSizeWithOverlap
@@ -81,6 +80,9 @@ data class WorkspaceProfile(
     val cellSize: Point,
     val scale: Float,
     val extraSpace: Int = 0,
+
+    // Drag and drop
+    val flingToDeleteThresholdVelocity: Int,
 ) {
 
     /**
@@ -545,6 +547,8 @@ data class WorkspaceProfile(
                 scale = 1f,
                 extraSpace = 0,
                 isItemsLabelHidden = isItemLabelHidden,
+                flingToDeleteThresholdVelocity =
+                    res.getDimensionPixelSize(R.dimen.drag_flingToDeleteMinVelocity),
             )
         }
 

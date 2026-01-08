@@ -161,9 +161,10 @@ class TaskbarInsetsController(val context: TaskbarActivityContext) : LoggableTas
             if (
                 taskbarStashController.isInApp ||
                     controllers.uiController.isInOverviewUi ||
-                    context.showLockedTaskbarOnHome()
+                    context.showDesktopTaskbarForFreeformDisplay()
             ) {
-                // only add the taskbar touch region if not on home
+                // only add the taskbar touch region if not on home, and when taskbar is not shown
+                // on home
                 val bottom = windowLayoutParams.height
                 val top = bottom - taskbarTouchableHeight
                 val right = context.deviceProfile.deviceProperties.widthPx

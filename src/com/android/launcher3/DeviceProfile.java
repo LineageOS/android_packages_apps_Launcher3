@@ -57,6 +57,7 @@ import com.android.launcher3.deviceprofile.FolderProfile;
 import com.android.launcher3.deviceprofile.HotseatProfile;
 import com.android.launcher3.deviceprofile.HotseatProfileInitialValues;
 import com.android.launcher3.deviceprofile.OverviewProfile;
+import com.android.launcher3.deviceprofile.SysuiProfile;
 import com.android.launcher3.deviceprofile.TaskbarProfile;
 import com.android.launcher3.deviceprofile.WorkspaceProfile;
 import com.android.launcher3.display.DisplayController;
@@ -96,7 +97,6 @@ public class DeviceProfile {
 
     public static final DeviceProfile DEFAULT_DEVICE_PROFILE = new DeviceProfile();
 
-
     private final DisplayOptionSpec mDisplayOptionSpec;
     private final LauncherDisplayInfo mInfo;
     private final DisplayMetrics mMetrics;
@@ -108,10 +108,6 @@ public class DeviceProfile {
 
     public boolean isPredictiveBackSwipe;
     public final boolean isQsbInline;
-
-    // Device properties in current orientation
-
-    public final boolean isLeftRightSplit;
     private final boolean mIsScalableGrid;
     private final int mTypeIndex;
 
@@ -137,13 +133,9 @@ public class DeviceProfile {
     // Hotseat
     public HotseatProfile hotseatProfile;
 
-
-    // Space required for the bubble bar between the hotseat and the edge of the screen. If there's
-    // not enough space, the hotseat will adjust itself for the bubble bar.
-    private final int mBubbleBarSpaceThresholdPx;
-
-    // Split staging
-    public int splitPlaceholderInset;
+    public final SysuiProfile mSysuiProfile;
+    // Device properties in current orientation
+    public final boolean isLeftRightSplit;
 
     // Widgets
     private final ViewScaleProvider mViewScaleProvider;
@@ -159,15 +151,13 @@ public class DeviceProfile {
     public boolean isTaskbarPresent;
     // Whether Taskbar will inset the bottom of apps by taskbarSize.
     public boolean isTaskbarPresentInApps;
-    // DragController
-    public int flingToDeleteThresholdVelocity;
 
     /** Used only as an alternative to mocking when null values cannot be used. */
     @VisibleForTesting
     public DeviceProfile() {
         mWorkspaceProfile = new WorkspaceProfile(0f, 0, 0, 0, 0f, 0, 0, new Point(), 0, 0, 0, false,
                 0, 0f, 0, 0, 0, 0, 0, 0, new Rect(), new Rect(), 0, 0, 0, 0, 0, false, 0, 0, 0,
-                new Point(0, 0), 0, 0);
+                new Point(0, 0), 0, 0, 0);
         mDeviceProperties = new DeviceProperties(
                 0, 0,
                 0,
@@ -213,10 +203,10 @@ public class DeviceProfile {
         mTypeIndex = 0;
         mIsResponsiveGrid = false;
         mDropTargetProfile = new DropTargetProfile(0, 0, 0, 0, 0, 0, 0, 0, 0);
-        mBubbleBarSpaceThresholdPx = 0;
         mViewScaleProvider = null;
         mAllAppsProfile = new AllAppsProfile(new Point(0, 0), 0, 0, 0f, 0, 0, 0, 0, 0, 0,
                 new Rect(), 0, 0);
+        mSysuiProfile = new SysuiProfile(0, 0);
     }
 
     DeviceProfile(
@@ -344,9 +334,6 @@ public class DeviceProfile {
                         /*isQsbInline*/ isQsbInline
                 );
 
-        mBubbleBarSpaceThresholdPx =
-                res.getDimensionPixelSize(R.dimen.bubblebar_hotseat_adjustment_threshold);
-
         int allAppsTopPadding = mDeviceProperties.getInsets().top;
 
         // Needs to be calculated after hotseatBarSizePx is correct,
@@ -412,8 +399,6 @@ public class DeviceProfile {
                     mResponsiveAllAppsHeightSpec.getAvailableSpace(),
                     mResponsiveWorkspaceCellSpec);
         }
-
-        splitPlaceholderInset = res.getDimensionPixelSize(R.dimen.split_placeholder_inset);
 
         // We need to use the full window bounds for split determination because on near-square
         // devices, the available bounds (bounds minus insets) may actually be in landscape while
@@ -535,8 +520,7 @@ public class DeviceProfile {
                 .Factory
                 .createDropTargetProfile(res, shouldApplyWidePortraitDimens);
 
-        flingToDeleteThresholdVelocity = res.getDimensionPixelSize(
-                R.dimen.drag_flingToDeleteMinVelocity);
+        mSysuiProfile = SysuiProfile.Factory.createSysuiProfile(res);
 
         mViewScaleProvider = viewScaleProvider;
 
@@ -921,7 +905,7 @@ public class DeviceProfile {
         if (isQsbInline) return false;
         Rect hotseatPadding = getHotseatLayoutPadding(context);
         int hotseatMinHorizontalPadding = Math.min(hotseatPadding.left, hotseatPadding.right);
-        return hotseatMinHorizontalPadding <= mBubbleBarSpaceThresholdPx;
+        return hotseatMinHorizontalPadding <= mSysuiProfile.mBubbleBarSpaceThresholdPx;
     }
 
     /**

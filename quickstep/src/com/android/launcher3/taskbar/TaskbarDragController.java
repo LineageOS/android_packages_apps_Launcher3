@@ -354,8 +354,7 @@ public class TaskbarDragController extends DragController implements
 
     /** Returns `true` when taskbar is shown and the home is visible. */
     private boolean isTaskbarShownOnHome() {
-        return (mControllers.taskbarActivityContext.showDesktopTaskbarForFreeformDisplay()
-                || mControllers.taskbarActivityContext.showLockedTaskbarOnHome())
+        return mControllers.taskbarActivityContext.showDesktopTaskbarForFreeformDisplay()
                 && mControllers.taskbarStashController.isOnHome();
     }
 

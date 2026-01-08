@@ -21,6 +21,7 @@ import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import com.android.launcher3.Insettable
 import com.android.launcher3.R
@@ -29,19 +30,21 @@ import com.android.launcher3.Utilities
 class PageIndicatorDotsWithArrows
 @JvmOverloads
 constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
-    LinearLayout(context, attrs, defStyleAttr), PageIndicator, Insettable {
+    FrameLayout(context, attrs, defStyleAttr), PageIndicator, Insettable {
 
     private var leftArrow: PaginationArrow
     private var rightArrow: PaginationArrow
     private var pageIndicator: PageIndicator
+    private var pageIndicatorContentContainer: LinearLayout
     private var markersCount: Int = 0
     private var activePage: Int = 0
 
     init {
         LayoutInflater.from(context).inflate(R.layout.page_indicator_dots_with_arrows, this, true)
-        leftArrow = findViewById(R.id.left_indicator_arrow)
-        rightArrow = findViewById(R.id.right_indicator_arrow)
-        pageIndicator = findViewById(R.id.page_indicator_dots)
+        pageIndicatorContentContainer = findViewById(R.id.page_indicator_content_container)
+        leftArrow = pageIndicatorContentContainer.findViewById(R.id.left_indicator_arrow)
+        rightArrow = pageIndicatorContentContainer.findViewById(R.id.right_indicator_arrow)
+        pageIndicator = pageIndicatorContentContainer.findViewById(R.id.page_indicator_dots)
     }
 
     override fun setScroll(currentScroll: Int, totalScroll: Int) =
@@ -82,6 +85,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 
     private fun setArrowsVisible(visible: Boolean) {
         val visibility = if (visible) View.VISIBLE else View.GONE
+        pageIndicatorContentContainer.visibility = visibility
         leftArrow.visibility = visibility
         rightArrow.visibility = visibility
     }

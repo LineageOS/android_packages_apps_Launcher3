@@ -123,24 +123,10 @@ public class WindowManagerProxy {
     }
 
     /**
-     * Returns if the pinned taskbar should be shown when home is visible.
-     */
-    public boolean showLockedTaskbarOnHome(Context displayInfoContext) {
-        return false;
-    }
-
-    /**
      * Returns whether the display is a freeform display for which taskbar should be pinned
      * and showing desktop tasks.
      */
     public boolean showDesktopTaskbarForFreeformDisplay(Context displayInfoContext) {
-        return false;
-    }
-
-    /**
-     * Returns if the home is visible.
-     */
-    public boolean isHomeVisible() {
         return false;
     }
 
@@ -155,8 +141,8 @@ public class WindowManagerProxy {
         // uses DisplayController instance to determine whether taskbar is shown on home, and this
         // method gets called while initializing DisaplayController.
         normalizeWindowInsets(displayInfoContext,
-                showLockedTaskbarOnHome(displayInfoContext) || showDesktopTaskbarForFreeformDisplay(
-                        displayInfoContext), windowMetrics.getWindowInsets(), insets);
+                showDesktopTaskbarForFreeformDisplay(displayInfoContext),
+                windowMetrics.getWindowInsets(), insets);
         return new WindowBounds(windowMetrics.getBounds(), insets, info.rotation);
     }
 
@@ -167,8 +153,7 @@ public class WindowManagerProxy {
             WindowInsets oldInsets,
             Rect outInsets) {
         LauncherDisplayInfo info = DisplayController.getInfo(context);
-        return normalizeWindowInsets(context,
-                info.showLockedTaskbarOnHome || info.getShowDesktopTaskbarForFreeformDisplay(),
+        return normalizeWindowInsets(context, info.getShowDesktopTaskbarForFreeformDisplay(),
                 oldInsets, outInsets);
     }
 

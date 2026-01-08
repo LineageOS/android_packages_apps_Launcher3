@@ -594,9 +594,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
             return false;
         }
         return DesktopVisibilityController.INSTANCE.get(this).isInDesktopMode(getDisplayId())
-                || mTaskbarUiState.getShowDesktopTaskbarForFreeformDisplay()
-                || (mTaskbarUiState.getShowLockedTaskbarOnHome()
-                && mTaskbarUiState.isTaskbarOnHome());
+                || mTaskbarUiState.getShowDesktopTaskbarForFreeformDisplay();
     }
 
     private List<SystemShortcut.Factory<QuickstepLauncher>> getSplitShortcuts() {

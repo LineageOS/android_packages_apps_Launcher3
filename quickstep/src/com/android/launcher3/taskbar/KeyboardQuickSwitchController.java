@@ -235,16 +235,19 @@ public final class KeyboardQuickSwitchController implements
                             wasOpenedFromTaskbar, shouldShowDesktopTasks, tasks, taskIdsToExclude);
                     // Check if the first task is running after the recents model has updated so
                     // that we use the correct index.
-                    mQuickSwitchViewController.openQuickSwitchView(
-                            mTasks,
-                            wasOpenedFromTaskbar ? 0 : mNumHiddenTasks,
-                            /* updateTasks= */ true,
-                            currentFocusedIndex == -1 && !mControllerCallbacks.isFirstTaskRunning()
-                                    ? 0 : currentFocusedIndex,
-                            shouldShowDesktopTasks,
-                            mHasDesktopTask,
-                            mWasDesktopTaskFilteredOut,
-                            wasOpenedFromTaskbar);
+                    if (mQuickSwitchViewController != null) {
+                        mQuickSwitchViewController.openQuickSwitchView(
+                                mTasks,
+                                wasOpenedFromTaskbar ? 0 : mNumHiddenTasks,
+                                /* updateTasks= */ true,
+                                currentFocusedIndex == -1
+                                        && !mControllerCallbacks.isFirstTaskRunning()
+                                        ? 0 : currentFocusedIndex,
+                                shouldShowDesktopTasks,
+                                mHasDesktopTask,
+                                mWasDesktopTaskFilteredOut,
+                                wasOpenedFromTaskbar);
+                    }
                 }));
     }
 

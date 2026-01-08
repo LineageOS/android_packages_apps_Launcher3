@@ -16,12 +16,11 @@
 
 package com.android.launcher3.dragndrop
 
-import com.android.launcher3.dagger.LauncherAppComponent
-import com.android.launcher3.util.DaggerSingletonObject
-import com.android.launcher3.views.ActivityContext
+import android.view.DragEvent
+import com.android.launcher3.dragndrop.DragController.SystemDragHandler
 
 /** Controller for system-level drag-and-drop. */
-sealed class SystemDragController {
+sealed class SystemDragController : SystemDragHandler {
 
     /**
      * Returns whether a drop of the specified item info should be accepted.
@@ -31,12 +30,8 @@ sealed class SystemDragController {
      */
     open fun acceptDrop(itemInfo: SystemDragItemInfo) = false
 
-    /**
-     * Sets the context for which to handle system-level drag-and-drop.
-     *
-     * @param context The context for which to handle system-level drag-and-drop.
-     */
-    open fun setContext(context: ActivityContext) {}
+    /** Return [false] to ignore all system-level drag events. */
+    override fun onDrag(event: DragEvent): Boolean = false
 
     /**
      * Starts a system-level drag-and-drop sequence.
@@ -45,11 +40,6 @@ sealed class SystemDragController {
      * @return The drag view for the sequence if started successfully.
      */
     open fun startDrag(params: SystemDragParams): DragView? = null
-
-    companion object {
-        @JvmField
-        val INSTANCE = DaggerSingletonObject(LauncherAppComponent::getSystemDragController)
-    }
 }
 
 /**

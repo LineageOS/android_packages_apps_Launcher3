@@ -240,7 +240,8 @@ public class TestInformationHandler {
                 LauncherDisplayInfo displayInfo = DisplayController.INSTANCE.get(
                         mContext).getInfoForDisplay(Integer.parseInt(arg));
                 response.putBoolean(TEST_INFO_RESPONSE_FIELD,
-                        displayInfo != null && displayInfo.showLockedTaskbarOnHome);
+                        displayInfo != null
+                                && displayInfo.getShowDesktopTaskbarForFreeformDisplay());
                 return response;
             }
 

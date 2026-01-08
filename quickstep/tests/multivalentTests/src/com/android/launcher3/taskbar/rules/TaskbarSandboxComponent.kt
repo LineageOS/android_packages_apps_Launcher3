@@ -33,7 +33,6 @@ import com.android.launcher3.dagger.LauncherModelModule
 import com.android.launcher3.dagger.PerDisplayComponent
 import com.android.launcher3.dagger.SettingsModule
 import com.android.launcher3.dagger.StaticObjectModule
-import com.android.launcher3.dagger.SystemDragModule
 import com.android.launcher3.dagger.TaskOverlayModule
 import com.android.launcher3.dagger.WidgetModule
 import com.android.launcher3.dagger.WindowContext
@@ -98,7 +97,6 @@ interface TaskbarSandboxComponent : LauncherAppComponent {
             HomeScreenFilesModule::class,
             DesktopModule::class,
             SettingsModule::class,
-            SystemDragModule::class,
             AutomationModule::class,
             TaskOverlayModule::class,
         ]

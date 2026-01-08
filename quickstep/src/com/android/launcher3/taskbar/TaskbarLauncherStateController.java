@@ -850,9 +850,6 @@ public class TaskbarLauncherStateController {
             return true;
         }
 
-        if (activityContext.showLockedTaskbarOnHome() && isInLauncher) {
-            return true;
-        }
         return !isInLauncher || isInOverview;
     }
 
@@ -939,10 +936,6 @@ public class TaskbarLauncherStateController {
      */
     public boolean isTaskbarAlignedWithHotseat() {
         if (mControllers.taskbarActivityContext.showDesktopTaskbarForFreeformDisplay()) {
-            return false;
-        }
-
-        if (mControllers.taskbarActivityContext.showLockedTaskbarOnHome() && isInLauncher()) {
             return false;
         }
 
@@ -1133,7 +1126,6 @@ public class TaskbarLauncherStateController {
         float targetAlpha = hotseatVisible ? 1 : 0;
         if ((mControllers.taskbarActivityContext.isTransientTaskbar()
                 && !mControllers.taskbarDesktopModeController.isLauncherAnimationRunning())
-                || mControllers.taskbarActivityContext.showLockedTaskbarOnHome()
                 || mControllers.taskbarActivityContext.showDesktopTaskbarForFreeformDisplay()) {
             mLauncher.setHotseatIconsAlpha(targetAlpha, alphaChannel);
             if (mIsQsbInline) {

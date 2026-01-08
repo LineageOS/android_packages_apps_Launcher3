@@ -16,45 +16,50 @@
 
 package com.android.launcher3.dragndrop
 
-import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.FlagsParameterization
 import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.filters.SmallTest
 import com.android.launcher3.Flags.FLAG_ENABLE_SYSTEM_DRAG
+import com.android.launcher3.Flags.enableSystemDrag
 import com.android.launcher3.dagger.DaggerLauncherAppComponent
-import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.SandboxApplication
+import com.android.launcher3.util.TestActivityContext
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 /** Tests for {@link SystemDragController}. */
 @SmallTest
-@RunWith(LauncherMultivalentJUnit::class)
-class SystemDragControllerTest {
+@RunWith(ParameterizedAndroidJunit4::class)
+class SystemDragControllerTest(flag: FlagsParameterization) {
 
-    @get:Rule val context = SandboxApplication()
-    @get:Rule val flags: SetFlagsRule = SetFlagsRule()
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams() = FlagsParameterization.allCombinationsOf(FLAG_ENABLE_SYSTEM_DRAG)
+    }
+
+    @get:Rule val app = SandboxApplication()
+    @get:Rule val context = TestActivityContext(app)
+    @get:Rule val flags: SetFlagsRule = SetFlagsRule(flag)
 
     private lateinit var controller: SystemDragController
 
     @Before
     fun setUp() {
-        context.initDaggerComponent(DaggerLauncherAppComponent.builder())
-        controller = SystemDragController.INSTANCE[context]
+        app.initDaggerComponent(DaggerLauncherAppComponent.builder())
+        controller = context.activityComponent.systemDragController
     }
 
     @Test
-    @DisableFlags(FLAG_ENABLE_SYSTEM_DRAG)
-    fun testInjection_withFlagDisabled() {
-        assertTrue(controller is SystemDragControllerStub)
-    }
-
-    @Test
-    @EnableFlags(FLAG_ENABLE_SYSTEM_DRAG)
-    fun testInjection_withFlagEnabled() {
-        assertTrue(controller is SystemDragControllerImpl)
+    fun testInjection() {
+        assertTrue(
+            if (enableSystemDrag()) controller is SystemDragControllerImpl
+            else controller is SystemDragControllerStub
+        )
     }
 }

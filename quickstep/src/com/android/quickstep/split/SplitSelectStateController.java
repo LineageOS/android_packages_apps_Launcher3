@@ -237,6 +237,9 @@ public class SplitSelectStateController {
     }
 
     public void onDestroy() {
+        if (mIsDestroyed) {
+            return;
+        }
         mContainer = null;
         mIsDestroyed = true;
         mActivityBackCallback = null;
@@ -1039,21 +1042,30 @@ public class SplitSelectStateController {
         }
 
         void onDestroy() {
-            SystemUiProxy.INSTANCE.get(mContext).unregisterSplitSelectListener(
-                    mSplitSelectListener);
-            mSplitSelectListener.release();
-            mSplitSelectListener = null;
+            if (mSplitSelectListener != null) {
+                SystemUiProxy.INSTANCE.get(mContext).unregisterSplitSelectListener(
+                        mSplitSelectListener);
+                mSplitSelectListener.release();
+                mSplitSelectListener = null;
+            }
         }
 
         /**
          * Return whether this instance of {@link SplitSelectStateController} is capable of running
-         * the animation for this {@link android.app.ActivityManager.RunningTaskInfo}. Certain
-         * controllers can only run animations for tasks on selected displays.
+         * the animation for this {@link android.app.ActivityManager.RunningTaskInfo}.
+         * <p>
+         * If the task is on the default display, it returns true if this controller is associated
+         * with the main Launcher activity ({@code mLauncher} is not null).
+         * If the task is on an external display, it returns true if the task's display ID matches
+         * the display ID of the context associated with this controller.
          */
         public boolean ableToStartSplitSelectAnimation(ActivityManager.RunningTaskInfo taskInfo) {
             int displayId = ExternalDisplaysKt.getSafeDisplayId(taskInfo);
-            return (displayId == DEFAULT_DISPLAY && mLauncher != null)
-                    || (displayId != DEFAULT_DISPLAY && mRecentsWindowManager != null);
+            if (displayId == DEFAULT_DISPLAY) {
+                return mLauncher != null;
+            } else {
+                return displayId == mContext.getDisplayId();
+            }
         }
 
         /**

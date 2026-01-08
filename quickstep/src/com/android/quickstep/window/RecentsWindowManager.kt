@@ -402,6 +402,7 @@ constructor(
     override fun destroy() {
         Log.d(TAG, "destroy")
         super.destroy()
+        splitSelectStateController.onDestroy()
         displayChangesSafeCloseable?.close()
         displayChangesSafeCloseable = null
         fallbackWindowInterface.setRecentsWindowManager(null)

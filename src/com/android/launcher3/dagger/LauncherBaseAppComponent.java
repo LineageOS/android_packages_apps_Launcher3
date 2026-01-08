@@ -31,7 +31,6 @@ import com.android.launcher3.RemoveAnimationSettingsTracker;
 import com.android.launcher3.automation.AutomationRepository;
 import com.android.launcher3.backuprestore.LauncherRestoreEventLogger;
 import com.android.launcher3.display.DisplayController;
-import com.android.launcher3.dragndrop.SystemDragController;
 import com.android.launcher3.folder.FolderNameSuggestionLoader;
 import com.android.launcher3.graphics.GridCustomizationsProxy;
 import com.android.launcher3.graphics.ThemeManager;
@@ -136,7 +135,6 @@ public interface LauncherBaseAppComponent {
     QsbAppWidgetHost getQsbAppWidgetHost();
     TestInformationHandler getTestInformationHandler();
     TaskbarModeUtil getTaskbarModeUtil();
-    SystemDragController getSystemDragController();
     ProductionDispatchers getProductionDispatchers();
 
     /** Utility class for importing/exporting launcher layout */
