@@ -72,6 +72,8 @@ constructor(
                     MONO_THEME_ENABLED,
                     ThemePreference.MONO_THEME_VALUE == themePreference.value,
                 )
+                // Used to disable the preview when qsb is masked in extreme battery saver mode.
+                putBoolean(USE_DISABLED_PREVIEW_WHEN_MASKED, true)
             }
         }
     }
@@ -89,7 +91,9 @@ constructor(
             if (
                 (sizeOptions.getWidgetSizeList() != widgetOptions.getWidgetSizeList()) ||
                     (sizeOptions.getBoolean(MONO_THEME_ENABLED) !=
-                        widgetOptions.getBoolean(MONO_THEME_ENABLED))
+                        widgetOptions.getBoolean(MONO_THEME_ENABLED)) ||
+                    (sizeOptions.getBoolean(USE_DISABLED_PREVIEW_WHEN_MASKED) !=
+                        widgetOptions.getBoolean(USE_DISABLED_PREVIEW_WHEN_MASKED))
             )
                 widgetManager.updateAppWidgetOptions(widgetId, sizeOptions)
         }
@@ -130,6 +134,7 @@ constructor(
 
     companion object {
         const val MONO_THEME_ENABLED = "monoThemeEnabled"
+        const val USE_DISABLED_PREVIEW_WHEN_MASKED = "useDisabledPreviewWhenMasked"
 
         fun Bundle.getWidgetSizeList() = getParcelableArrayList<SizeF>(OPTION_APPWIDGET_SIZES)
 
