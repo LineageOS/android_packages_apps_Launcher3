@@ -132,7 +132,8 @@ open class QuickstepWidgetPickerActivity : WidgetPickerActivity(), WidgetPickerP
             categoryInclusionFilter = inclusionFilter,
             categoryExclusionFilter = exclusionFilter,
             filteredUsers = filteredUsers,
-            enableSwipeUpToDismiss = deviceProfile.deviceProperties.isGestureMode,
+            enableSwipeUpToDismiss =
+                deviceProfile.deviceProperties.deviceConfiguration.isGestureMode,
             isDesktopFormFactor = Utilities.shouldEnableMouseInteractionChanges(applicationContext),
             enableCursorDrivenWorkflows =
                 Utilities.shouldEnableCursorDrivenWorkflows(applicationContext),

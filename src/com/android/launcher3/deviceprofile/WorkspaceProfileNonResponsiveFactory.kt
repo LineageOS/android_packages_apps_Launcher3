@@ -197,7 +197,7 @@ object WorkspaceProfileNonResponsiveFactory {
         if (
             iconDrawablePaddingPx > cellPaddingY &&
                 !isVerticalLayout &&
-                !deviceProperties.isExternalDisplay
+                !deviceProperties.deviceConfiguration.isExternalDisplay
         ) {
             // Ensures that the label is closer to its corresponding icon. This is not an issue
             // with vertical bar layout or external display mode since the issue is handled
