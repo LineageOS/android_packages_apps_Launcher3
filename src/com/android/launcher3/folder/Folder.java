@@ -18,6 +18,7 @@ package com.android.launcher3.folder;
 
 import static android.text.TextUtils.isEmpty;
 
+import static com.android.launcher3.Flags.enableWorkspaceSelection;
 import static com.android.launcher3.LauncherAnimUtils.SPRING_LOADED_EXIT_DELAY;
 import static com.android.launcher3.LauncherState.EDIT_MODE;
 import static com.android.launcher3.LauncherState.NORMAL;
@@ -75,6 +76,7 @@ import androidx.core.content.res.ResourcesCompat;
 
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.Alarm;
+import com.android.launcher3.BoxSelectionHelper;
 import com.android.launcher3.CellLayout;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.DragSource;
@@ -106,6 +108,9 @@ import com.android.launcher3.model.data.WorkspaceItemFactory;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.pageindicators.PageIndicatorDots;
 import com.android.launcher3.pageindicators.PaginationArrow;
+import com.android.launcher3.touch.CustomActionsListener;
+import com.android.launcher3.touch.CustomEventsTouchHandler;
+import com.android.launcher3.touch.CustomTouchDelegate;
 import com.android.launcher3.util.LauncherBindableItemsContainer;
 import com.android.launcher3.util.Thunk;
 import com.android.launcher3.views.ActivityContext;
@@ -130,7 +135,7 @@ import java.util.stream.Stream;
 public class Folder extends AbstractFloatingView implements ClipPathView, DragSource,
         View.OnLongClickListener, DropTarget, TextView.OnEditorActionListener,
         View.OnFocusChangeListener, DragListener, ExtendedEditText.OnBackKeyListener,
-        LauncherBindableItemsContainer {
+        LauncherBindableItemsContainer, CustomTouchDelegate {
     private static final String TAG = "Launcher.Folder";
     private static final boolean DEBUG = false;
 
@@ -265,6 +270,9 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
     private KeyboardInsetAnimationCallback mKeyboardInsetAnimationCallback;
 
     private final @NonNull GradientDrawable mBackground;
+    private final BoxSelectionHelper mBoxSelectionHelper;
+
+    private CustomEventsTouchHandler mCustomEventsTouchHandler;
 
     /**
      * Used to inflate the Workspace from XML.
@@ -290,6 +298,15 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
                 ResourcesCompat.getDrawable(getResources(),
                         R.drawable.round_rect_folder, getContext().getTheme()));
         mBackground.setCallback(this);
+        mBoxSelectionHelper = enableWorkspaceSelection()
+                ? new BoxSelectionHelper(mActivityContext, this)
+                : null;
+        mCustomEventsTouchHandler = new CustomEventsTouchHandler(this, (event) -> {
+            if (mBoxSelectionHelper != null && mBoxSelectionHelper.onTouchEvent(event)) {
+                return true;
+            }
+            return super.onTouchEvent(event);
+        }, (event) -> false);
     }
 
     @Override
@@ -376,6 +393,11 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
                 0 == mContent.getCurrentPage() ? DISABLED_ARROW_OPACITY : FULLY_OPAQUE);
         mRightArrow.setAlpha(mContent.getPageCount() == mContent.getCurrentPage() + 1
                 ? DISABLED_ARROW_OPACITY : FULLY_OPAQUE);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        return onDelegateTouchEvent(ev);
     }
 
     public boolean onLongClick(View v) {
@@ -1980,6 +2002,11 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
         mRearrangeOnClose = value;
     }
 
+    @VisibleForTesting
+    public void setCustomEventsTouchHandler(CustomEventsTouchHandler handler) {
+        mCustomEventsTouchHandler = handler;
+    }
+
     /** Returns the height of the current folder's bottom edge from the bottom of the screen. */
     private int getHeightFromBottom() {
         BaseDragLayer.LayoutParams layoutParams = (BaseDragLayer.LayoutParams) getLayoutParams();
@@ -2080,6 +2107,22 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
     int getScrollAreaOffset() {
         return mScrollAreaOffset;
     }
+
+    @Override
+    public boolean onDelegateTouchEvent(MotionEvent ev) {
+        return mCustomEventsTouchHandler.onDelegateTouchEvent(ev);
+    }
+
+    @Override
+    public void setCustomActionsListener(CustomActionsListener listener) {
+        mCustomEventsTouchHandler.setCustomActionsListener(listener);
+    }
+
+    @Override
+    public CustomActionsListener getCustomActionsListener() {
+        return mCustomEventsTouchHandler.getCustomActionsListener();
+    }
+
     /**
      * Adds the provided listener to the running list of Folder listeners
      * {@link #mOnFolderStateChangedListeners}

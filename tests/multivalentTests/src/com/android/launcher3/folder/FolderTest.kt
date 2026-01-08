@@ -21,6 +21,7 @@ import android.graphics.Point
 import android.os.Process
 import android.os.UserHandle
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
@@ -52,6 +53,7 @@ import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
+import com.android.launcher3.touch.CustomEventsTouchHandler
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestActivityContext
 import junit.framework.TestCase.assertEquals
@@ -69,6 +71,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
 /** Tests for [Folder] */
@@ -907,6 +910,20 @@ class FolderTest {
         folder.removeFolderContent(false, *items)
 
         verify(folder, times(1)).replaceFolderWithFinalItem()
+    }
+
+    @Test
+    fun `onTouchEvent should delegate to customEventsTouchHandler`() {
+        val mockCustomEventsTouchHandler = Mockito.mock(CustomEventsTouchHandler::class.java)
+        folder.setCustomEventsTouchHandler(mockCustomEventsTouchHandler)
+
+        val motionEvent = Mockito.mock(MotionEvent::class.java)
+        whenever(mockCustomEventsTouchHandler.onDelegateTouchEvent(motionEvent)).thenReturn(true)
+
+        val result = folder.onTouchEvent(motionEvent)
+
+        assertTrue(result)
+        verify(mockCustomEventsTouchHandler, times(1)).onDelegateTouchEvent(motionEvent)
     }
 
     fun createFolderInCell(folderPoint: FolderPoint, paramScreenId: Int): FolderInfo =
