@@ -258,7 +258,7 @@ constructor(
         object : HomeVisibilityState.VisibilityChangeListener {
             override fun onHomeVisibilityChanged(
                 isHomeVisible: Boolean,
-                keyguardGoingAway: Boolean,
+                keyguardGoingAwayOrWaking: Boolean,
             ) {
                 if (fallbackWindowInterface.isInLiveTileMode || isHomeVisible) {
                     return

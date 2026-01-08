@@ -53,12 +53,12 @@ class HomeVisibilityState {
                 object : Stub() {
                     override fun onHomeVisibilityChanged(
                         isVisible: Boolean,
-                        keyguardGoingAway: Boolean,
+                        keyguardGoingAwayOrWaking: Boolean,
                     ) {
                         Utilities.postAsyncCallback(Executors.MAIN_EXECUTOR.handler) {
                             isHomeVisible = isVisible
                             listeners.forEach {
-                                it.onHomeVisibilityChanged(isVisible, keyguardGoingAway)
+                                it.onHomeVisibilityChanged(isVisible, keyguardGoingAwayOrWaking)
                             }
                         }
                     }
@@ -85,7 +85,7 @@ class HomeVisibilityState {
     }
 
     interface VisibilityChangeListener {
-        fun onHomeVisibilityChanged(isVisible: Boolean, keyguardGoingAway: Boolean)
+        fun onHomeVisibilityChanged(isVisible: Boolean, keyguardGoingAwayOrWaking: Boolean)
     }
 
     override fun toString() = "{HomeVisibilityState isHomeVisible=$isHomeVisible}"
