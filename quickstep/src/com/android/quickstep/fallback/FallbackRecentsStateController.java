@@ -19,7 +19,6 @@ import static com.android.app.animation.Interpolators.AGGRESSIVE_EASE_IN_OUT;
 import static com.android.app.animation.Interpolators.FINAL_FRAME;
 import static com.android.app.animation.Interpolators.INSTANT;
 import static com.android.app.animation.Interpolators.LINEAR;
-import static com.android.launcher3.Flags.enableDesktopExplodedView;
 import static com.android.launcher3.states.StateAnimationConfig.ANIM_OVERVIEW_FADE;
 import static com.android.launcher3.states.StateAnimationConfig.ANIM_OVERVIEW_MODAL;
 import static com.android.launcher3.states.StateAnimationConfig.ANIM_OVERVIEW_SCALE;
@@ -132,11 +131,9 @@ public class FallbackRecentsStateController implements StateHandler<RecentsState
                 state.showTaskThumbnailSplash() ? 1f : 0f, getOverviewInterpolator(state));
         setter.setFloat(mRecentsView, DESKTOP_CAROUSEL_DETACH_PROGRESS,
                 state.detachDesktopCarousel() ? 1f : 0f, getOverviewInterpolator(state));
-        if (enableDesktopExplodedView()) {
-            setter.setFloat(mRecentsView, DESK_EXPLODE_PROGRESS,
-                    state.showExplodedDesktopView() ? 1f : 0f,
-                    getOverviewInterpolator(state));
-        }
+        setter.setFloat(mRecentsView, DESK_EXPLODE_PROGRESS,
+                state.showExplodedDesktopView() ? 1f : 0f,
+                getOverviewInterpolator(state));
 
         setter.setScrimColors(mRecentsViewContainer.getScrimView(),
                 state.getScrimColor(mRecentsViewContainer.asContext()),

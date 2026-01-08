@@ -20,7 +20,6 @@ import com.android.app.animation.Interpolators.AGGRESSIVE_EASE_IN_OUT
 import com.android.app.animation.Interpolators.FINAL_FRAME
 import com.android.app.animation.Interpolators.INSTANT
 import com.android.app.animation.Interpolators.LINEAR
-import com.android.launcher3.Flags.enableDesktopExplodedView
 import com.android.launcher3.LauncherState
 import com.android.launcher3.anim.AnimatedFloat
 import com.android.launcher3.anim.AnimatorListeners.forSuccessCallback
@@ -73,9 +72,7 @@ class RecentsViewStateController(private val launcher: QuickstepLauncher) :
             recentsView,
             if (state.displayOverviewTasksAsGrid(launcher.deviceProfile)) 1f else 0f,
         )
-        if (enableDesktopExplodedView()) {
-            DESK_EXPLODE_PROGRESS.set(recentsView, if (state.showExplodedDesktopView()) 1f else 0f)
-        }
+        DESK_EXPLODE_PROGRESS.set(recentsView, if (state.showExplodedDesktopView()) 1f else 0f)
 
         TASK_THUMBNAIL_SPLASH_ALPHA.set(
             recentsView,
@@ -160,14 +157,12 @@ class RecentsViewStateController(private val launcher: QuickstepLauncher) :
             getOverviewInterpolator(fromState, toState),
         )
 
-        if (enableDesktopExplodedView()) {
-            builder.setFloat(
-                recentsView,
-                DESK_EXPLODE_PROGRESS,
-                if (toState.showExplodedDesktopView()) 1f else 0f,
-                getOverviewInterpolator(fromState, toState),
-            )
-        }
+        builder.setFloat(
+            recentsView,
+            DESK_EXPLODE_PROGRESS,
+            if (toState.showExplodedDesktopView()) 1f else 0f,
+            getOverviewInterpolator(fromState, toState),
+        )
 
         builder.setFloat(
             recentsView,

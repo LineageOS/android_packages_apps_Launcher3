@@ -49,7 +49,6 @@ import androidx.core.view.updateLayoutParams
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.traceSection
 import com.android.launcher3.AbstractFloatingView
-import com.android.launcher3.Flags.enableDesktopExplodedView
 import com.android.launcher3.Flags.enableRefactorDigitalWellbeingToast
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
@@ -870,7 +869,7 @@ constructor(
             taskContainers.forEach { container ->
                 val taskId = container.task.key.id
                 val containerState = mapOfTasks[taskId]
-                val shouldHaveHeader = (type == TaskViewType.DESKTOP) && enableDesktopExplodedView()
+                val shouldHaveHeader = (type == TaskViewType.DESKTOP)
                 val shouldShowAppTimer =
                     (type == TaskViewType.SINGLE || type == TaskViewType.GROUPED)
                 container.setState(

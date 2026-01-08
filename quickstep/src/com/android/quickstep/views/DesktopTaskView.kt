@@ -35,7 +35,6 @@ import android.view.View
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
-import com.android.launcher3.Flags.enableDesktopExplodedView
 import com.android.launcher3.R
 import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.testing.TestLogging
@@ -119,8 +118,8 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
         null
 
     /**
-     * When enableDesktopExplodedView is enabled, this controls the gradual transition from the
-     * default positions to the organized non-overlapping positions.
+     * Controls the gradual transition from the default positions to the organized non-overlapping
+     * positions.
      */
     var explodeProgress = 0.0f
         set(value) {
@@ -129,8 +128,8 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
         }
 
     /**
-     * When enableDesktopExplodedView is enabled, and a task is removed, this controls the gradual
-     * transition from the previous organized task positions to the new.
+     * When a task is removed, this controls the gradual transition from the previous organized task
+     * positions to the new.
      */
     private var taskRemoveProgress = 0.0f
         set(value) {
@@ -186,137 +185,122 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
                     ?.bounds ?: return@forEach
 
             val organizedTaskVisibilityData: DesktopTaskVisibilityData? =
-                if (enableDesktopExplodedView()) {
-                    desktopTaskViewModel.organizedDesktopTaskVisibilityDataMap[taskId]
-                } else {
-                    null
-                }
+                desktopTaskViewModel.organizedDesktopTaskVisibilityDataMap[taskId]
 
             val shouldBeDisplayedInOverview: Boolean
             val overviewTaskBounds: Rect
             var isObscured = false
 
-            if (!enableDesktopExplodedView()) {
-                shouldBeDisplayedInOverview = true
-                overviewTaskBounds = fullscreenTaskBounds
-            } else {
-                when (organizedTaskVisibilityData) {
-                    is RenderedDesktopTaskVisibilityData -> {
-                        shouldBeDisplayedInOverview = true
-                        overviewTaskBounds = organizedTaskVisibilityData.bounds
-                        isObscured = organizedTaskVisibilityData.isObscured
-                    }
-                    is HiddenDesktopTaskVisibilityData -> {
-                        shouldBeDisplayedInOverview = false
-                        overviewTaskBounds =
-                            DesktopLayoutUtils.createPlaceholderBounds(getDesktopLayoutConfig())
-                    }
-                    null -> {
-                        shouldBeDisplayedInOverview = false
-                        // Skip the task for the edge case where [organizedTaskData] is null.
-                        return@forEach
-                    }
+            when (organizedTaskVisibilityData) {
+                is RenderedDesktopTaskVisibilityData -> {
+                    shouldBeDisplayedInOverview = true
+                    overviewTaskBounds = organizedTaskVisibilityData.bounds
+                    isObscured = organizedTaskVisibilityData.isObscured
+                }
+                is HiddenDesktopTaskVisibilityData -> {
+                    shouldBeDisplayedInOverview = false
+                    overviewTaskBounds =
+                        DesktopLayoutUtils.createPlaceholderBounds(getDesktopLayoutConfig())
+                }
+                null -> {
+                    shouldBeDisplayedInOverview = false
+                    // Skip the task for the edge case where [organizedTaskData] is null.
+                    return@forEach
                 }
             }
 
             val currentTaskBounds =
-                if (enableDesktopExplodedView()) {
-                    TEMP_OVERVIEW_TASK_POSITION.apply {
-                        // When removing a task, interpolate between its old organized bounds and
-                        // [overviewTaskBounds].
-                        val previousOrganizedTaskDataItem =
-                            previousOrganizedDesktopTaskVisibilityDataMap?.get(taskId)
+                TEMP_OVERVIEW_TASK_POSITION.apply {
+                    // When removing a task, interpolate between its old organized bounds and
+                    // [overviewTaskBounds].
+                    val previousOrganizedTaskDataItem =
+                        previousOrganizedDesktopTaskVisibilityDataMap?.get(taskId)
 
-                        if (previousOrganizedTaskDataItem is RenderedDesktopTaskVisibilityData) {
-                            lerpRect(
-                                previousOrganizedTaskDataItem.bounds,
-                                overviewTaskBounds,
-                                taskRemoveProgress,
-                            )
-                        } else {
-                            set(overviewTaskBounds)
-                        }
-
-                        // If the task is minimized but not being launched, we can just fade it in.
-                        // Otherwise, we need to translate it from its actual position on the
-                        // desktop.
-                        if (
-                            (!taskContainer.task.isMinimized && !isObscured) ||
-                                taskId == taskIdReorderToFront
-                        ) {
-                            lerpRect(fullscreenTaskBounds, this, explodeProgress)
-                        }
+                    if (previousOrganizedTaskDataItem is RenderedDesktopTaskVisibilityData) {
+                        lerpRect(
+                            previousOrganizedTaskDataItem.bounds,
+                            overviewTaskBounds,
+                            taskRemoveProgress,
+                        )
+                    } else {
+                        set(overviewTaskBounds)
                     }
-                } else {
-                    fullscreenTaskBounds
+
+                    // If the task is minimized but not being launched, we can just fade it in.
+                    // Otherwise, we need to translate it from its actual position on the
+                    // desktop.
+                    if (
+                        (!taskContainer.task.isMinimized && !isObscured) ||
+                            taskId == taskIdReorderToFront
+                    ) {
+                        lerpRect(fullscreenTaskBounds, this, explodeProgress)
+                    }
                 }
 
-            if (enableDesktopExplodedView()) {
-                remoteTargetHandles?.getRemoteTargetHandle(taskId)?.let { remoteTargetHandle ->
-                    val fromRect =
-                        TEMP_FROM_RECTF.apply {
-                            set(fullscreenTaskBounds)
-                            scale(widthScale)
-                            offset(
-                                lastComputedTaskSize.left.toFloat(),
-                                lastComputedTaskSize.top.toFloat(),
-                            )
-                        }
-                    val toRect =
-                        TEMP_TO_RECTF.apply {
-                            set(currentTaskBounds)
-                            scale(widthScale)
-                            offset(
-                                lastComputedTaskSize.left.toFloat(),
-                                lastComputedTaskSize.top.toFloat(),
-                            )
-                        }
-                    val transform = Matrix()
-                    transform.setRectToRect(fromRect, toRect, Matrix.ScaleToFit.FILL)
-                    remoteTargetHandle.taskViewSimulator.setTaskRectTransform(transform)
-                    remoteTargetHandle.taskViewSimulator.apply(remoteTargetHandle.transformParams)
+            remoteTargetHandles?.getRemoteTargetHandle(taskId)?.let { remoteTargetHandle ->
+                val fromRect =
+                    TEMP_FROM_RECTF.apply {
+                        set(fullscreenTaskBounds)
+                        scale(widthScale)
+                        offset(
+                            lastComputedTaskSize.left.toFloat(),
+                            lastComputedTaskSize.top.toFloat(),
+                        )
+                    }
+                val toRect =
+                    TEMP_TO_RECTF.apply {
+                        set(currentTaskBounds)
+                        scale(widthScale)
+                        offset(
+                            lastComputedTaskSize.left.toFloat(),
+                            lastComputedTaskSize.top.toFloat(),
+                        )
+                    }
+                val transform = Matrix()
+                transform.setRectToRect(fromRect, toRect, Matrix.ScaleToFit.FILL)
+                remoteTargetHandle.taskViewSimulator.setTaskRectTransform(transform)
+                remoteTargetHandle.taskViewSimulator.apply(remoteTargetHandle.transformParams)
 
-                    val targetAlpha =
-                        when {
-                            // Animate to hide a task window that should not show in the desktop
-                            // tile.
-                            !shouldBeDisplayedInOverview -> 1f - explodeProgress
-                            // Obscured windows should be treated similarly to minimized windows and
-                            // should fade in. Activated windows should stay visible however.
-                            isObscured && taskId != taskIdReorderToFront -> explodeProgress
-                            // Regular windows will stay opaque if they should be shown.
-                            else -> 1f
-                        }
-                    remoteTargetHandle.transformParams.setTargetAlpha(targetAlpha)
-                }
-
-                taskContentView.setTaskHeaderAlpha(
-                    if (shouldBeDisplayedInOverview) explodeProgress else 0f
-                )
-
-                val isMinimized = taskContainer.task.isMinimized
-
-                taskContentView.alpha =
+                val targetAlpha =
                     when {
-                        !isMinimized && !shouldBeDisplayedInOverview ->
-                            // Non-minimized windows should fade out if it they should not show in
-                            // the desktop tile.
-                            1f - explodeProgress
-                        !isMinimized && isObscured ->
-                            // Obscured windows should be treated similarly to minimized windows and
-                            // should fade in.
-                            explodeProgress
-                        !isMinimized || taskId == taskIdReorderToFront ->
-                            // Normal tasks stay opaque. If the task is being reordered to the
-                            // front, we also want it to stay at full opacity.
-                            1f
-                        shouldBeDisplayedInOverview ->
-                            // Minimized tasks are immediately placed in the exploded position and
-                            // then fade in during the course of EXPLODE_PROGRESS.
-                            explodeProgress
-                        else -> 0f
+                        // Animate to hide a task window that should not show in the desktop
+                        // tile.
+                        !shouldBeDisplayedInOverview -> 1f - explodeProgress
+                        // Obscured windows should be treated similarly to minimized windows and
+                        // should fade in. Activated windows should stay visible however.
+                        isObscured && taskId != taskIdReorderToFront -> explodeProgress
+                        // Regular windows will stay opaque if they should be shown.
+                        else -> 1f
                     }
+                remoteTargetHandle.transformParams.setTargetAlpha(targetAlpha)
             }
+
+            taskContentView.setTaskHeaderAlpha(
+                if (shouldBeDisplayedInOverview) explodeProgress else 0f
+            )
+
+            val isMinimized = taskContainer.task.isMinimized
+
+            taskContentView.alpha =
+                when {
+                    !isMinimized && !shouldBeDisplayedInOverview ->
+                        // Non-minimized windows should fade out if it they should not show in
+                        // the desktop tile.
+                        1f - explodeProgress
+                    !isMinimized && isObscured ->
+                        // Obscured windows should be treated similarly to minimized windows and
+                        // should fade in.
+                        explodeProgress
+                    !isMinimized || taskId == taskIdReorderToFront ->
+                        // Normal tasks stay opaque. If the task is being reordered to the
+                        // front, we also want it to stay at full opacity.
+                        1f
+                    shouldBeDisplayedInOverview ->
+                        // Minimized tasks are immediately placed in the exploded position and
+                        // then fade in during the course of EXPLODE_PROGRESS.
+                        explodeProgress
+                    else -> 0f
+                }
 
             val overviewTaskLeft = overviewTaskBounds.left * widthScale
             val overviewTaskTop = overviewTaskBounds.top * heightScale
@@ -333,16 +317,14 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
                     topMargin = overviewTaskTop.toInt()
                 }
 
-                if (enableDesktopExplodedView()) {
-                    // The taskContentView and its descendant close button should only be focusable
-                    // if the task is actually visible. Note that disabling the view also makes
-                    // it not hoverable.
-                    taskContentView.isHoverable = shouldBeDisplayedInOverview
-                    taskContentView.isFocusable = shouldBeDisplayedInOverview
-                    taskContentView.descendantFocusability =
-                        if (shouldBeDisplayedInOverview) FOCUS_BEFORE_DESCENDANTS
-                        else FOCUS_BLOCK_DESCENDANTS
-                }
+                // The taskContentView and its descendant close button should only be focusable
+                // if the task is actually visible. Note that disabling the view also makes
+                // it not hoverable.
+                taskContentView.isHoverable = shouldBeDisplayedInOverview
+                taskContentView.isFocusable = shouldBeDisplayedInOverview
+                taskContentView.descendantFocusability =
+                    if (shouldBeDisplayedInOverview) FOCUS_BEFORE_DESCENDANTS
+                    else FOCUS_BLOCK_DESCENDANTS
             }
 
             // When exploded view is disabled, these scale factors will be 1.0. This secondary
@@ -395,12 +377,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
         desktopTaskViewModel.bind(desktopTask)
         this.groupTask = desktopTask
         // Minimized tasks are shown in Overview when exploded view is enabled.
-        val tasks =
-            if (enableDesktopExplodedView()) {
-                desktopTask.tasks
-            } else {
-                desktopTask.tasks.filterNot { it.isMinimized }
-            }
+        val tasks = desktopTask.tasks
         if (DEBUG) {
             val sb = StringBuilder()
             sb.append("bind tasks=").append(tasks.size).append("\n")
@@ -428,14 +405,12 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
                 val taskContentView = taskContentViewPool.view
                 contentView.addView(taskContentView, backgroundViewIndex + 1)
                 val snapshotView = findViewById<TaskThumbnailView>(R.id.snapshot)
-                if (enableDesktopExplodedView()) {
-                    taskContentView.setOnClickListener {
-                        launchTaskWithDesktopController(animated = true, task.key.id)
-                    }
-                    // Desktop tasks should have their own accessibility nodes so specific
-                    // actions can be performed on them.
-                    taskContentView.importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
+                taskContentView.setOnClickListener {
+                    launchTaskWithDesktopController(animated = true, task.key.id)
                 }
+                // Desktop tasks should have their own accessibility nodes so specific
+                // actions can be performed on them.
+                taskContentView.importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
 
                 TaskContainer(
                     this,
@@ -601,14 +576,6 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
     }
 
     fun removeTaskFromExplodedView(taskId: Int) {
-        if (!enableDesktopExplodedView()) {
-            Log.e(
-                TAG,
-                "removeTaskFromExplodedView called when enableDesktopExplodedView flag is false",
-            )
-            return
-        }
-
         // Remove the task's [taskContainer] and its associated Views.
         val taskContainer = getTaskContainerById(taskId) ?: return
         removeAndRecycleThumbnailView(taskContainer)
@@ -655,10 +622,8 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
     }
 
     private fun updateTaskPositions(dismissedTaskId: Int? = null) {
-        if (enableDesktopExplodedView()) {
-            val layoutConfig = getDesktopLayoutConfig()
-            desktopTaskViewModel.organizeDesktopTasks(layoutConfig, dismissedTaskId)
-        }
+        val layoutConfig = getDesktopLayoutConfig()
+        desktopTaskViewModel.organizeDesktopTasks(layoutConfig, dismissedTaskId)
         positionTaskWindows(updateLayout = true)
     }
 

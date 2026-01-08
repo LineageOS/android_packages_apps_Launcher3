@@ -41,7 +41,6 @@ import com.android.app.animation.Interpolators.LINEAR
 import com.android.internal.annotations.VisibleForTesting
 import com.android.launcher3.AbstractFloatingView.TYPE_TASK_MENU
 import com.android.launcher3.AbstractFloatingView.getTopOpenViewWithType
-import com.android.launcher3.Flags.enableDesktopExplodedView
 import com.android.launcher3.Flags.hideAutomatedTasksInOverview
 import com.android.launcher3.PagedView.INVALID_PAGE
 import com.android.launcher3.R
@@ -840,17 +839,15 @@ constructor(
             val endState: BaseState<*> = mContainerInterface.stateFromGestureEndTarget(endTarget)
 
             // Starting the desk exploded animation when the gesture from an app is released.
-            if (enableDesktopExplodedView()) {
-                animatorSet.play(
-                    ObjectAnimator.ofFloat(
-                        this,
-                        DESK_EXPLODE_PROGRESS,
-                        if (endState.showExplodedDesktopView()) 1f else 0f,
-                    )
+            animatorSet.play(
+                ObjectAnimator.ofFloat(
+                    this,
+                    DESK_EXPLODE_PROGRESS,
+                    if (endState.showExplodedDesktopView()) 1f else 0f,
                 )
-                taskViews.filterIsInstance<DesktopTaskView>().forEach {
-                    it.remoteTargetHandles = remoteTargetHandles
-                }
+            )
+            taskViews.filterIsInstance<DesktopTaskView>().forEach {
+                it.remoteTargetHandles = remoteTargetHandles
             }
 
             if (endState.displayOverviewTasksAsGrid(getDeviceProfile())) {
