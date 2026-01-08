@@ -17,16 +17,24 @@
 package com.android.quickstep.split
 
 import android.app.ActivityManager
+import android.app.ActivityManager.RunningTaskInfo
 import android.app.PendingIntent
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.graphics.Rect
 import android.os.UserHandle
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
+import android.view.Display.DEFAULT_DISPLAY
+import android.view.LayoutInflater
+import androidx.compose.foundation.layout.add
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.launcher3.LauncherApplication
 import com.android.launcher3.LauncherState
 import com.android.launcher3.SplitScreenUiState
+import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.logging.StatsLogManager
 import com.android.launcher3.logging.StatsLogManager.StatsLogger
 import com.android.launcher3.model.data.AppInfo
@@ -35,7 +43,9 @@ import com.android.launcher3.model.data.ResolvedTargetInfo
 import com.android.launcher3.statehandlers.DepthController
 import com.android.launcher3.statemanager.StateManager
 import com.android.launcher3.statemanager.StatefulActivity
+import com.android.launcher3.uioverrides.QuickstepLauncher
 import com.android.launcher3.util.ComponentKey
+import com.android.quickstep.OverviewComponentObserver
 import com.android.quickstep.RecentsModel
 import com.android.quickstep.SystemUiProxy
 import com.android.quickstep.split.SplitSelectStateController.SplitFromDesktopController
@@ -43,6 +53,7 @@ import com.android.quickstep.util.GroupTask
 import com.android.quickstep.util.SplitTask
 import com.android.quickstep.views.RecentsView
 import com.android.quickstep.views.RecentsViewContainer
+import com.android.quickstep.window.RecentsWindowManager
 import com.android.systemui.shared.recents.model.Task
 import com.android.wm.shell.Flags.FLAG_RESOLVE_TRAMPOLINE_DESTINATION_PACKAGES
 import com.android.wm.shell.shared.split.SplitBounds
@@ -57,14 +68,17 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Answers
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.mockito.stubbing.Answer
 
 @RunWith(AndroidJUnit4::class)
 class SplitSelectStateControllerTest {
@@ -77,12 +91,20 @@ class SplitSelectStateControllerTest {
     private val statsLogger: StatsLogger = mock()
     private val stateManager: StateManager<LauncherState, StatefulActivity<LauncherState>> = mock()
     private val context: RecentsViewContainer = mock()
+
+    private val mockContext: Context = mock()
+    private val mockApp: LauncherApplication = mock()
+    private val mockAppComponent: LauncherAppComponent = mock()
+    private val mockResources: Resources = mock()
+    private val mockLayoutInflater: LayoutInflater = mock()
+
     private val recentsModel: RecentsModel = mock()
     private val pendingIntent: PendingIntent = mock()
     private val splitFromDesktopController: SplitFromDesktopController = mock()
     private val recentsView: RecentsView<*, *> = mock()
     private val splitScreenUiState: SplitScreenUiState = SplitScreenUiState()
     private val mSplitScreenAppResolver: SplitScreenAppResolver = mock()
+    private val mOverviewComponentObserver: OverviewComponentObserver = mock()
 
     private lateinit var splitSelectStateController: SplitSelectStateController
 
@@ -90,6 +112,13 @@ class SplitSelectStateControllerTest {
     private val nonPrimaryUserHandle = UserHandle(ActivityManager.RunningTaskInfo().userId + 10)
 
     private var taskIdCounter = 0
+
+    private val mockContextAnswer = Answer { invocation ->
+        if (invocation.method.name == "asContext") {
+            return@Answer invocation.mock
+        }
+        Answers.RETURNS_DEFAULTS.answer(invocation)
+    }
 
     private fun getUniqueId(): Int {
         return ++taskIdCounter
@@ -104,6 +133,28 @@ class SplitSelectStateControllerTest {
             .thenReturn(null)
         whenever(mSplitScreenAppResolver.isTaskAppSingleInstance(any(), any(), any(), any(), any()))
             .thenReturn(false)
+
+        // Setup the LauncherAppComponent chain
+        whenever(mockAppComponent.getSystemUiProxy()).thenReturn(systemUiProxy)
+        whenever(mockAppComponent.getOverviewComponentObserver())
+            .thenReturn(mOverviewComponentObserver)
+        whenever(mockApp.appComponent).thenReturn(mockAppComponent)
+
+        // Ensure mockContext returns the mockApp
+        whenever(mockContext.applicationContext).thenReturn(mockApp)
+        whenever(mockApp.applicationContext).thenReturn(mockApp)
+
+        // Ensure context.asContext() returns our special mockContext
+        whenever(context.asContext()).thenReturn(mockContext)
+
+        // Setup Resources mock
+        whenever(mockResources.getDimensionPixelSize(any())).thenReturn(100)
+        whenever(mockApp.resources).thenReturn(mockResources)
+
+        // Stub getSystemService for LayoutInflater on mockApp
+        whenever(mockApp.getSystemService(Context.LAYOUT_INFLATER_SERVICE))
+            .thenReturn(mockLayoutInflater)
+
         splitSelectStateController =
             SplitSelectStateController(
                 context,
@@ -969,5 +1020,121 @@ class SplitSelectStateControllerTest {
         taskInfo.baseIntent = intent
         task.key = Task.TaskKey(taskInfo)
         return task
+    }
+
+    @Test
+    fun ableToStartSplitSelectAnimation_launcherOnDefaultDisplay_taskOnDefaultDisplay_returnsTrue() {
+        val mockLauncher = mock<QuickstepLauncher>(defaultAnswer = mockContextAnswer)
+        doReturn(mockApp).whenever(mockLauncher).applicationContext
+        doReturn(mockResources).whenever(mockLauncher).resources
+        doReturn(mockLayoutInflater)
+            .whenever(mockLauncher)
+            .getSystemService(Context.LAYOUT_INFLATER_SERVICE)
+
+        // Instantiate the controller class with mock QuickstepLauncher
+        val controller = splitSelectStateController.SplitFromDesktopController(mockLauncher)
+
+        val taskInfo = RunningTaskInfo()
+        taskInfo.displayId = DEFAULT_DISPLAY
+
+        val result = controller.ableToStartSplitSelectAnimation(taskInfo)
+
+        assertTrue("Launcher on default display should handle tasks on default display", result)
+    }
+
+    @Test
+    fun ableToStartSplitSelectAnimation_launcherOnDefaultDisplay_taskOnSecondaryDisplay_returnsFalse() {
+        val mockLauncher = mock<QuickstepLauncher>(defaultAnswer = mockContextAnswer)
+        doReturn(mockApp).whenever(mockLauncher).applicationContext
+        doReturn(mockResources).whenever(mockLauncher).resources
+        doReturn(mockLayoutInflater)
+            .whenever(mockLauncher)
+            .getSystemService(Context.LAYOUT_INFLATER_SERVICE)
+
+        val controller = splitSelectStateController.SplitFromDesktopController(mockLauncher)
+
+        val taskInfo = RunningTaskInfo()
+        taskInfo.displayId = 2 // Secondary display
+
+        val result = controller.ableToStartSplitSelectAnimation(taskInfo)
+
+        assertFalse(
+            "Launcher on default display should NOT handle tasks on secondary display",
+            result,
+        )
+    }
+
+    @Test
+    fun ableToStartSplitSelectAnimation_rwmOnSecondaryDisplay_taskOnSameDisplay_returnsTrue() {
+        val secondaryDisplayId = 2
+        val mockRwm = mock<RecentsWindowManager>(defaultAnswer = mockContextAnswer)
+        doReturn(secondaryDisplayId).whenever(mockRwm).displayId
+
+        doReturn(mockApp).whenever(mockRwm).applicationContext
+        doReturn(mockResources).whenever(mockRwm).resources
+        doReturn(mockLayoutInflater)
+            .whenever(mockRwm)
+            .getSystemService(Context.LAYOUT_INFLATER_SERVICE)
+
+        // Instantiate the controller class RecentsWindowManager
+        val controller = splitSelectStateController.SplitFromDesktopController(mockRwm)
+
+        val taskInfo = RunningTaskInfo()
+        taskInfo.displayId = secondaryDisplayId
+
+        val result = controller.ableToStartSplitSelectAnimation(taskInfo)
+
+        assertTrue(
+            "RWM on display $secondaryDisplayId should handle tasks on display $secondaryDisplayId",
+            result,
+        )
+    }
+
+    @Test
+    fun ableToStartSplitSelectAnimation_rwmOnSecondaryDisplay_taskOnDifferentDisplay_returnsFalse() {
+        val secondaryDisplayId = 2
+        val otherDisplayId = 3
+        val mockRwm = mock<RecentsWindowManager>(defaultAnswer = mockContextAnswer)
+
+        doReturn(secondaryDisplayId).whenever(mockRwm).displayId
+        doReturn(mockApp).whenever(mockRwm).applicationContext
+        doReturn(mockResources).whenever(mockRwm).resources
+        doReturn(mockLayoutInflater)
+            .whenever(mockRwm)
+            .getSystemService(Context.LAYOUT_INFLATER_SERVICE)
+
+        val controller = splitSelectStateController.SplitFromDesktopController(mockRwm)
+
+        val taskInfo = RunningTaskInfo()
+        taskInfo.displayId = otherDisplayId
+
+        val result = controller.ableToStartSplitSelectAnimation(taskInfo)
+
+        assertFalse(
+            "RWM on display $secondaryDisplayId should NOT handle tasks on display $otherDisplayId",
+            result,
+        )
+    }
+
+    @Test
+    fun ableToStartSplitSelectAnimation_rwmOnSecondaryDisplay_taskOnDefaultDisplay_returnsFalse() {
+        val secondaryDisplayId = 2
+        val mockRwm = mock<RecentsWindowManager>(defaultAnswer = mockContextAnswer)
+
+        doReturn(secondaryDisplayId).whenever(mockRwm).displayId
+        doReturn(mockApp).whenever(mockRwm).applicationContext
+        doReturn(mockResources).whenever(mockRwm).resources
+        doReturn(mockLayoutInflater)
+            .whenever(mockRwm)
+            .getSystemService(Context.LAYOUT_INFLATER_SERVICE)
+
+        val controller = splitSelectStateController.SplitFromDesktopController(mockRwm)
+
+        val taskInfo = RunningTaskInfo()
+        taskInfo.displayId = DEFAULT_DISPLAY
+
+        val result = controller.ableToStartSplitSelectAnimation(taskInfo)
+
+        assertFalse("RWM on secondary display should NOT handle tasks on default display", result)
     }
 }
