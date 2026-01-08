@@ -171,8 +171,6 @@
     <string name="bubble_bar_action_move_left" msgid="3306922475737714758">"Liigu vasakule"</string>
     <string name="bubble_bar_action_move_right" msgid="3455099638571411251">"Liigu paremale"</string>
     <string name="bubble_bar_action_dismiss_all" msgid="3290722022983403060">"Loobu kõigist"</string>
-    <string name="bubble_bar_accessibility_announce_expand" msgid="1503192695527477102">"Toiminguriba <xliff:g id="BUBBLE_DESCRIPTION">%1$s</xliff:g> laiendamine"</string>
-    <string name="bubble_bar_accessibility_announce_collapse" msgid="928284600086798791">"Toiminguriba <xliff:g id="BUBBLE_DESCRIPTION">%1$s</xliff:g> ahendamine"</string>
     <string name="search_gesture_feature_title" msgid="1294044108313175306">"Ring otsimiseks"</string>
     <string name="header_app_icon_description" msgid="2184625881433608027">"Rakenduse ikoon"</string>
     <string name="header_default_app_title" msgid="8308052350689531566">"Rakenduse pealkiri"</string>

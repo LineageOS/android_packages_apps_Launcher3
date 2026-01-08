@@ -85,7 +85,7 @@
     <string name="gesture_tutorial_action_button_label" msgid="6249846312991332122">"Готово"</string>
     <string name="gesture_tutorial_action_button_label_settings" msgid="2923621047916486604">"Настройки"</string>
     <string name="gesture_tutorial_try_again" msgid="65962545858556697">"Попробуйте ещё раз"</string>
-    <string name="gesture_tutorial_nice" msgid="2936275692616928280">"Отлично!"</string>
+    <string name="gesture_tutorial_nice" msgid="2936275692616928280">"Очень хорошо!"</string>
     <string name="gesture_tutorial_step" msgid="1279786122817620968">"Руководство (шаг <xliff:g id="CURRENT">%1$d</xliff:g> из <xliff:g id="TOTAL">%2$d</xliff:g>)"</string>
     <string name="allset_title" msgid="5021126669778966707">"Готово!"</string>
     <string name="allset_hint" msgid="459504134589971527">"Чтобы перейти на главный экран, проведите вверх."</string>
@@ -171,8 +171,6 @@
     <string name="bubble_bar_action_move_left" msgid="3306922475737714758">"Переместить влево"</string>
     <string name="bubble_bar_action_move_right" msgid="3455099638571411251">"Переместить вправо"</string>
     <string name="bubble_bar_action_dismiss_all" msgid="3290722022983403060">"Закрыть все"</string>
-    <string name="bubble_bar_accessibility_announce_expand" msgid="1503192695527477102">"Развернуто: <xliff:g id="BUBBLE_DESCRIPTION">%1$s</xliff:g>"</string>
-    <string name="bubble_bar_accessibility_announce_collapse" msgid="928284600086798791">"Свернуто: <xliff:g id="BUBBLE_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="search_gesture_feature_title" msgid="1294044108313175306">"Обвести и найти"</string>
     <string name="header_app_icon_description" msgid="2184625881433608027">"Значок приложения"</string>
     <string name="header_default_app_title" msgid="8308052350689531566">"Название приложения"</string>

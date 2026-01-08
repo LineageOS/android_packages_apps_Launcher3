@@ -171,8 +171,6 @@
     <string name="bubble_bar_action_move_left" msgid="3306922475737714758">"ડાબે ખસેડો"</string>
     <string name="bubble_bar_action_move_right" msgid="3455099638571411251">"જમણે ખસેડો"</string>
     <string name="bubble_bar_action_dismiss_all" msgid="3290722022983403060">"તમામ છોડી દો"</string>
-    <string name="bubble_bar_accessibility_announce_expand" msgid="1503192695527477102">"<xliff:g id="BUBBLE_DESCRIPTION">%1$s</xliff:g> મોટો કરો"</string>
-    <string name="bubble_bar_accessibility_announce_collapse" msgid="928284600086798791">"<xliff:g id="BUBBLE_DESCRIPTION">%1$s</xliff:g> નાનો કરો"</string>
     <string name="search_gesture_feature_title" msgid="1294044108313175306">"શોધવા માટે વર્તુળ દોરો"</string>
     <string name="header_app_icon_description" msgid="2184625881433608027">"ઍપનું આઇકન"</string>
     <string name="header_default_app_title" msgid="8308052350689531566">"ઍપનું શીર્ષક"</string>
