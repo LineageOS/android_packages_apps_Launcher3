@@ -74,7 +74,6 @@ abstract class FakeInvariantDeviceProfileTest {
         DeviceProfile(
             inv,
             info,
-            context.appComponent.wmProxy,
             createDeviceProperties(
                 info = info,
                 windowBounds = windowBounds,
@@ -86,6 +85,7 @@ abstract class FakeInvariantDeviceProfileTest {
                         isGestureMode = isGestureMode,
                         isWorkspaceItemsLabelHidden = workspaceItemsLabelHidden,
                     ),
+                isTaskbarDrawnInProcess = context.appComponent.wmProxy.isTaskbarDrawnInProcess,
             ),
             DEFAULT_PROVIDER,
             DEFAULT_DIMENSION_PROVIDER,

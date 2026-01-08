@@ -461,8 +461,8 @@ public abstract class AbsSwipeUpHandler<
                 .getOrientationState().getLauncherDeviceProfile(gestureState.getDisplayId()));
         initStateCallbacks();
 
-        mIsTransientTaskbar = mDp.isTaskbarPresent && TaskbarFeatureEvaluator.INSTANCE.get(
-                context).get(displayId).isTransient();
+        mIsTransientTaskbar = mDp.getDeviceProperties().getTaskbarConfiguration().isTaskbarPresent()
+                && TaskbarFeatureEvaluator.INSTANCE.get(context).get(displayId).isTransient();
         mTaskbarAlreadyOpen = !isTaskbarStashed(context);
         mIsTaskbarAllAppsOpen = isTaskbarAllAppsOpen(context);
         mTaskbarAppWindowThreshold =
@@ -1701,7 +1701,10 @@ public abstract class AbsSwipeUpHandler<
                     == NavigationMode.THREE_BUTTONS;
             boolean isNotInDesktop = !DesktopVisibilityController.INSTANCE.get(
                     mContext).isInDesktopMode(mContext.getDisplayId());
-            duration = mContainer != null && mContainer.getDeviceProfile().isTaskbarPresent
+            duration = mContainer != null
+                    && mContainer.getDeviceProfile().getDeviceProperties()
+                    .getTaskbarConfiguration()
+                    .isTaskbarPresent()
                     ? QuickstepTransitionManager.getTaskbarToHomeDuration(
                     (isThreeButton || isPinnedTaskbar) && isNotInDesktop)
                     : StaggeredWorkspaceAnim.DURATION_MS;

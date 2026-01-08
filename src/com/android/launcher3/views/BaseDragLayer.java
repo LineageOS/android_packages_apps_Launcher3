@@ -594,7 +594,8 @@ public abstract class BaseDragLayer<T extends Context & ActivityContext>
         Insets gestureInsets = insets.getMandatorySystemGestureInsets();
         mSystemGestureRegion.set(gestureInsets.left, gestureInsets.top, gestureInsets.right,
                 gestureInsets.bottom);
-        if (mContainer.getDeviceProfile().isTaskbarPresent) {
+        if (mContainer.getDeviceProfile().getDeviceProperties()
+                .getTaskbarConfiguration().isTaskbarPresent()) {
             // Ignore taskbar gesture insets to avoid interfering with TouchControllers.
             mSystemGestureRegion.bottom = ResourceUtils.getNavbarSize(
                     ResourceUtils.NAVBAR_BOTTOM_GESTURE_SIZE, getResources());

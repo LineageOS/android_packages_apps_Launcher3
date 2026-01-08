@@ -231,7 +231,7 @@ object InputConsumerUtils {
             if (tac != null && base !is AssistantInputConsumer) {
                 // Present always on large screen or on small screen w/ flag
                 val useTaskbarConsumer =
-                    (tac.deviceProfile.isTaskbarPresent &&
+                    (tac.deviceProfile.deviceProperties.taskbarConfiguration.isTaskbarPresent &&
                         !tac.isPhoneMode &&
                         !tac.isInStashedLauncherState)
                 if (canStartSystemGesture && useTaskbarConsumer) {

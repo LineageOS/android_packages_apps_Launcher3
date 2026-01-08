@@ -312,7 +312,7 @@ public class LauncherPreviewRenderer extends BaseContext
      */
     @UiThread
     public void hideBottomRow(boolean hide) {
-        if (mDp.isTaskbarPresent) {
+        if (mDp.getDeviceProperties().getTaskbarConfiguration().isTaskbarPresent()) {
             // hotseat icons on bottom
             mHotseat.setIconsAlpha(hide ? 0 : 1, ALPHA_CHANNEL_PREVIEW_RENDERER);
             if (mDp.isQsbInline) {

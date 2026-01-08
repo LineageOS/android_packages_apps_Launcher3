@@ -599,7 +599,8 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
             // If the navigation bar is hidden in SUW, we can draw the SUW content lower so we avoid
             // reporting a higher inset
             if (hasAnyFlag(FLAG_STASHED_IN_APP_SETUP)
-                    && (dp.isTaskbarPresent || mActivity.isPhoneGestureNavMode())
+                    && (dp.getDeviceProperties().getTaskbarConfiguration().isTaskbarPresent()
+                    || mActivity.isPhoneGestureNavMode())
                     && !isNavbarHiddeninSUW()) {
                 // When we show the back button in SUW, the SUW layout may not be wide enough to
                 // support overlapping the nav bar with its content in portrait. So we send

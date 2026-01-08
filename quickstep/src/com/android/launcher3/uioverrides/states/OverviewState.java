@@ -126,7 +126,10 @@ public class OverviewState extends LauncherState {
             showFloatingSearch = !dp.getDeviceProperties().isLandscape();
         } else {
             // Only show search in tablet overview if taskbar is not visible.
-            showFloatingSearch = !dp.isTaskbarPresent || isTaskbarStashed(dp);
+            showFloatingSearch = !dp.getDeviceProperties()
+                    .getTaskbarConfiguration()
+                    .isTaskbarPresent()
+                    || isTaskbarStashed(dp);
         }
         if (showFloatingSearch) {
             elements |= FLOATING_SEARCH_BAR;

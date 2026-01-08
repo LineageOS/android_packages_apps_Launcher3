@@ -729,7 +729,11 @@ public class TouchInteractionHandler extends ContextWrapper {
         int displayId = event.getDisplayId();
         TaskbarActivityContext tac = mTaskbarManager.getTaskbarForDisplay(displayId);
         InputResource inputResource = getInputResource(displayId);
-        boolean isTaskbarPresent = tac != null && tac.getDeviceProfile().isTaskbarPresent
+        boolean isTaskbarPresent = tac != null
+                && tac.getDeviceProfile()
+                .getDeviceProperties()
+                .getTaskbarConfiguration()
+                .isTaskbarPresent()
                 && !tac.isPhoneMode();
         return event.isHoverEvent()
                 && inputResource != null

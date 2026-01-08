@@ -78,7 +78,6 @@ data class HotseatProfileInitialValues(
             deviceProperties: DeviceProperties,
             res: Resources,
             inv: InvariantDeviceProfile,
-            isTaskbarPresent: Boolean,
             shouldApplyWidePortraitDimens: Boolean,
             responsiveHotseatSpec: CalculatedHotseatSpec?,
             typeIndex: Int,
@@ -94,7 +93,6 @@ data class HotseatProfileInitialValues(
                         deviceProperties = deviceProperties,
                         res = res,
                         inv = inv,
-                        isTaskbarPresent = isTaskbarPresent,
                         shouldApplyWidePortraitDimens = shouldApplyWidePortraitDimens,
                         responsiveHotseatSpec = responsiveHotseatSpec,
                         responsiveWorkspaceCellSpec = responsiveWorkspaceCellSpec,
@@ -106,7 +104,6 @@ data class HotseatProfileInitialValues(
                         deviceProperties = deviceProperties,
                         res = res,
                         inv = inv,
-                        isTaskbarPresent = isTaskbarPresent,
                         shouldApplyWidePortraitDimens = shouldApplyWidePortraitDimens,
                         typeIndex = typeIndex,
                         metrics = metrics,
@@ -121,7 +118,6 @@ data class HotseatProfileInitialValues(
             deviceProperties: DeviceProperties,
             res: Resources,
             inv: InvariantDeviceProfile,
-            isTaskbarPresent: Boolean,
             shouldApplyWidePortraitDimens: Boolean,
             responsiveHotseatSpec: CalculatedHotseatSpec,
             isVerticalBarLayout: Boolean,
@@ -129,7 +125,8 @@ data class HotseatProfileInitialValues(
             isQsbInline: Boolean,
         ): HotseatProfileInitialValues {
             val areNavButtonsInline =
-                isTaskbarPresent && !deviceProperties.deviceConfiguration.isGestureMode
+                deviceProperties.taskbarConfiguration.isTaskbarPresent &&
+                    !deviceProperties.deviceConfiguration.isGestureMode
             var inlineNavButtonsEndSpacingPx = 0
             var navButtonsLayoutWidthPx = 0
             var barEndOffset = 0
@@ -219,7 +216,6 @@ data class HotseatProfileInitialValues(
             deviceProperties: DeviceProperties,
             res: Resources,
             inv: InvariantDeviceProfile,
-            isTaskbarPresent: Boolean,
             shouldApplyWidePortraitDimens: Boolean,
             typeIndex: Int,
             metrics: DisplayMetrics,
@@ -228,7 +224,8 @@ data class HotseatProfileInitialValues(
             isQsbInline: Boolean,
         ): HotseatProfileInitialValues {
             val areNavButtonsInline =
-                isTaskbarPresent && !deviceProperties.deviceConfiguration.isGestureMode
+                deviceProperties.taskbarConfiguration.isTaskbarPresent &&
+                    !deviceProperties.deviceConfiguration.isGestureMode
             var inlineNavButtonsEndSpacingPx = 0
             var navButtonsLayoutWidthPx = 0
             var barEndOffset = 0

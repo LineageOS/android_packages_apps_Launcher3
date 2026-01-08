@@ -375,7 +375,8 @@ public abstract class SwipeUpAnimationLogic implements
             startRect = new RectF(thumbnailBounds);
         }
 
-        boolean useTaskbarHotseatParams = mDp.isTaskbarPresent
+        boolean useTaskbarHotseatParams =
+                mDp.getDeviceProperties().getTaskbarConfiguration().isTaskbarPresent()
                 && homeAnimationFactory.isInHotseat();
         RectFSpringAnim anim = new RectFSpringAnim(useTaskbarHotseatParams
                 ? new TaskbarHotseatSpringConfig(mContext, startRect, targetRect)

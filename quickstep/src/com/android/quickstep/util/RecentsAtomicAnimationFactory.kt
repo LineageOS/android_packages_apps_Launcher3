@@ -164,7 +164,7 @@ open class RecentsAtomicAnimationFactory<CONTAINER, STATE_TYPE : BaseState<STATE
             config.duration = max(config.duration, scrollDuration.toLong())
 
             // Sync scroll so that it ends before or at the same time as the taskbar animation.
-            if (container.deviceProfile.isTaskbarPresent) {
+            if (container.deviceProfile.deviceProperties.taskbarConfiguration.isTaskbarPresent) {
                 config.duration =
                     min(
                         config.duration,
