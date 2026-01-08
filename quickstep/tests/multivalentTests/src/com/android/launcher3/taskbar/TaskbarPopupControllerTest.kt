@@ -44,7 +44,7 @@ import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.util.TestUtil.getOnTaskbarUiThread
-import com.android.quickstep.util.GroupTask
+import com.android.quickstep.util.SingleTask
 import com.android.window.flags.Flags.FLAG_ENABLE_PINNING_APP_WITH_CONTEXT_MENU
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert
@@ -99,7 +99,7 @@ class TaskbarPopupControllerTest {
                 }
             recentTaskIcon =
                 taskbarView.iconViews.filterIsInstance<BubbleTextView>().first {
-                    it.tag is GroupTask
+                    it.tag is SingleTask
                 }
         }
     }
@@ -115,6 +115,15 @@ class TaskbarPopupControllerTest {
     @EnableFlags(FLAG_ENABLE_PINNING_APP_WITH_CONTEXT_MENU)
     fun showForIcon_recentTask() {
         whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
+        assertThat(hasPopupMenu()).isFalse()
+        runOnTaskbarUiThreadSync { popupController.show(recentTaskIcon) }
+        assertThat(hasPopupMenu()).isTrue()
+    }
+
+    @Test
+    fun showForIcon_recentTask_notInDesktopMode() {
+        // Verifies popup menu is shown for recent tasks even when not in desktop mode.
+        whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(false)
         assertThat(hasPopupMenu()).isFalse()
         runOnTaskbarUiThreadSync { popupController.show(recentTaskIcon) }
         assertThat(hasPopupMenu()).isTrue()
@@ -139,6 +148,23 @@ class TaskbarPopupControllerTest {
     fun showForIconUsingA11yAction_recentTask() {
         assertThat(hasPopupMenu()).isFalse()
         whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
+
+        runOnTaskbarUiThreadSync {
+            recentTaskIcon.performAccessibilityAction(AccessibilityNodeInfo.ACTION_LONG_CLICK, null)
+        }
+        assertThat(hasPopupMenu()).isTrue()
+        assertThat(hasTaskbarDragView()).isFalse()
+
+        closePopupMenu()
+        assertThat(hasTaskbarDragView()).isFalse()
+    }
+
+    @Test
+    fun showForIconUsingA11yAction_recentTask_notInDesktopMode() {
+        // Verifies popup menu is shown for recent tasks via a11y action even when not in desktop
+        // mode.
+        assertThat(hasPopupMenu()).isFalse()
+        whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(false)
 
         runOnTaskbarUiThreadSync {
             recentTaskIcon.performAccessibilityAction(AccessibilityNodeInfo.ACTION_LONG_CLICK, null)
