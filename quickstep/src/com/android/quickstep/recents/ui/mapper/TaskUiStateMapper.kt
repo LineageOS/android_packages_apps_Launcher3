@@ -19,7 +19,6 @@ package com.android.quickstep.recents.ui.mapper
 import android.security.Flags.appLockCore
 import android.util.Log
 import android.view.View.OnClickListener
-import com.android.launcher3.Flags.enableDesktopExplodedView
 import com.android.launcher3.R
 import com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_BOTTOM_OR_RIGHT
 import com.android.quickstep.recents.ui.viewmodel.TaskData
@@ -53,10 +52,7 @@ object TaskUiStateMapper {
         clickCloseListener: OnClickListener?,
     ): TaskHeaderUiState =
         when {
-            taskData is TaskData.Data &&
-                hasHeader &&
-                enableDesktopExplodedView() &&
-                clickCloseListener != null -> {
+            taskData is TaskData.Data && hasHeader && clickCloseListener != null -> {
                 TaskHeaderUiState.ShowHeader(
                     TaskHeaderUiState.ThumbnailHeader(
                         taskData.icon,

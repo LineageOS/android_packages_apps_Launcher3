@@ -31,7 +31,6 @@ import static com.android.app.animation.Interpolators.LINEAR;
 import static com.android.app.animation.Interpolators.clampToProgress;
 import static com.android.launcher3.AbstractFloatingView.TYPE_REBIND_SAFE;
 import static com.android.launcher3.BaseActivity.STATE_HANDLER_INVISIBILITY_FLAGS;
-import static com.android.launcher3.Flags.enableDesktopExplodedView;
 import static com.android.launcher3.Flags.enableLowResThumbnailPreloading;
 import static com.android.launcher3.Flags.enableOverviewPagination;
 import static com.android.launcher3.LauncherAnimUtils.SUCCESS_TRANSITION_PROGRESS;
@@ -2716,11 +2715,9 @@ public abstract class RecentsView<
         animateActionsViewIn();
 
         if (mEnableDrawingLiveTile) {
-            if (enableDesktopExplodedView()) {
-                for (TaskView taskView : getTaskViews()) {
-                    if (taskView instanceof DesktopTaskView desktopTaskView) {
-                        desktopTaskView.setRemoteTargetHandles(mRemoteTargetHandles);
-                    }
+            for (TaskView taskView : getTaskViews()) {
+                if (taskView instanceof DesktopTaskView desktopTaskView) {
+                    desktopTaskView.setRemoteTargetHandles(mRemoteTargetHandles);
                 }
             }
             TaskView runningTaskView = getRunningTaskView();
@@ -4677,9 +4674,7 @@ public abstract class RecentsView<
         if (taskView instanceof DesktopTaskView) {
             anim.play(ObjectAnimator.ofArgb(mContainer.getScrimView(), VIEW_BACKGROUND_COLOR,
                     Color.TRANSPARENT));
-            if (enableDesktopExplodedView()) {
-                anim.play(ObjectAnimator.ofFloat(this, DESK_EXPLODE_PROGRESS, 1f, 0f));
-            }
+            anim.play(ObjectAnimator.ofFloat(this, DESK_EXPLODE_PROGRESS, 1f, 0f));
         }
         DepthController<?, ?> depthController = getDepthController();
         if (depthController != null) {

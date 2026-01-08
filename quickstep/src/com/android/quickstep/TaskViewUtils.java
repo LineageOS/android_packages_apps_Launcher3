@@ -23,7 +23,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static com.android.app.animation.Interpolators.LINEAR;
 import static com.android.app.animation.Interpolators.TOUCH_RESPONSE;
 import static com.android.app.animation.Interpolators.clampToProgress;
-import static com.android.launcher3.Flags.enableDesktopExplodedView;
 import static com.android.launcher3.LauncherAnimUtils.VIEW_ALPHA;
 import static com.android.launcher3.LauncherAnimUtils.VIEW_TRANSLATE_X;
 import static com.android.launcher3.LauncherAnimUtils.VIEW_TRANSLATE_Y;
@@ -204,8 +203,7 @@ public final class TaskViewUtils {
         if (taskView.isRunningTask() && recentsViewHandles != null) {
             // If we have a valid task ID to reorder to front, we need to check if its
             // RemoteTargetHandle exists for animations.
-            if (appearedTaskId != INVALID_TASK_ID && taskView instanceof DesktopTaskView
-                    && enableDesktopExplodedView()) {
+            if (appearedTaskId != INVALID_TASK_ID && taskView instanceof DesktopTaskView) {
                 // First, get the first (or null) RemoteTargetHandle associated with the ID.
                 RemoteTargetHandle activatedMinimizedHandle =
                         RemoteTargetHandleUtilKt.getRemoteTargetHandle(
@@ -248,9 +246,7 @@ public final class TaskViewUtils {
                     recentsView.getContainerInterface(), targets, forDesktop);
             if (forDesktop) {
                 remoteTargetHandles = gluer.assignTargetsForDesktop(targets, transitionInfo);
-                if (enableDesktopExplodedView()) {
-                    ((DesktopTaskView) taskView).setRemoteTargetHandles(remoteTargetHandles);
-                }
+                ((DesktopTaskView) taskView).setRemoteTargetHandles(remoteTargetHandles);
             } else if (taskView.containsMultipleTasks()) {
                 remoteTargetHandles = gluer.assignTargetsForSplitScreen(targets,
                         ((GroupedTaskView) taskView).getSplitBoundsConfig());
