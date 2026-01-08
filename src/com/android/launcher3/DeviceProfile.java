@@ -22,7 +22,6 @@ import static com.android.launcher3.InvariantDeviceProfile.INDEX_TWO_PANEL_LANDS
 import static com.android.launcher3.InvariantDeviceProfile.INDEX_TWO_PANEL_PORTRAIT;
 import static com.android.launcher3.InvariantDeviceProfile.createDisplayOptionSpec;
 import static com.android.launcher3.Utilities.dpiFromPx;
-import static com.android.launcher3.deviceprofile.DevicePropertiesKt.createWindowBounds;
 import static com.android.launcher3.icons.IconNormalizer.ICON_VISIBLE_AREA_FACTOR;
 import static com.android.launcher3.testing.shared.ResourceUtils.INVALID_RESOURCE_HANDLE;
 import static com.android.launcher3.testing.shared.ResourceUtils.pxFromDp;
@@ -217,12 +216,7 @@ public class DeviceProfile {
             InvariantDeviceProfile inv,
             LauncherDisplayInfo info,
             WindowManagerProxy wmProxy,
-            WindowBounds windowBounds,
-            boolean isExternalDisplay,
-            boolean transposeLayoutWithOrientation,
-            boolean isMultiDisplay,
-            boolean isGestureMode,
-            boolean isWorkspaceItemsLabelHidden,
+            DeviceProperties deviceProperties,
             @NonNull final ViewScaleProvider viewScaleProvider,
             @NonNull final Consumer<DeviceProfile> dimensionOverrideProvider,
             DisplayOptionSpec displayOptionSpec
@@ -230,17 +224,7 @@ public class DeviceProfile {
 
         this.inv = inv;
 
-        mDeviceProperties = DeviceProperties.Factory.createDeviceProperties(
-                info,
-                windowBounds,
-                new DeviceConfiguration(
-                        isExternalDisplay,
-                        transposeLayoutWithOrientation,
-                        isMultiDisplay,
-                        isGestureMode,
-                        isWorkspaceItemsLabelHidden
-                )
-        );
+        mDeviceProperties = deviceProperties;
 
         this.mDisplayOptionSpec = displayOptionSpec;
 
@@ -252,20 +236,26 @@ public class DeviceProfile {
                 && inv.workspaceCellSpecsId != INVALID_RESOURCE_HANDLE
                 && inv.allAppsCellSpecsId != INVALID_RESOURCE_HANDLE;
 
-        mIsScalableGrid = inv.isScalable && !isVerticalBarLayout() && !isExternalDisplay;
+        mIsScalableGrid = inv.isScalable
+                && !isVerticalBarLayout()
+                && !mDeviceProperties.getDeviceConfiguration().isExternalDisplay();
         // Determine device posture.
         mInfo = info;
         boolean taskbarOrBubbleBarOnPhones = enableTinyTaskbar()
                 || (enableBubbleBar() && enableBubbleBarOnPhones());
         isTaskbarPresent =
-                (mDeviceProperties.isLargeScreen() || (taskbarOrBubbleBarOnPhones && isGestureMode))
+                (mDeviceProperties.isLargeScreen()
+                        || (taskbarOrBubbleBarOnPhones
+                        && mDeviceProperties.getDeviceConfiguration().isGestureMode())
+                )
                         && wmProxy.isTaskbarDrawnInProcess();
 
         // Some more constants.
         Context context = getContext(info, isLandscapeOrientation()
                         ? Configuration.ORIENTATION_LANDSCAPE
                         : Configuration.ORIENTATION_PORTRAIT,
-                windowBounds);
+                mDeviceProperties.createWindowBounds());
+
         final Resources res = context.getResources();
 
         overviewProfile = OverviewProfile.Factory.createOverviewProfile(res);
@@ -279,7 +269,8 @@ public class DeviceProfile {
         // TODO: make TaskbarModeUtil displayId aware
         mTaskbarProfile = TaskbarProfile.Factory.createTaskbarProfile(
                 res,
-                inv.taskbarModeUtil.isTransient() && !isExternalDisplay,
+                inv.taskbarModeUtil.isTransient()
+                        && !mDeviceProperties.getDeviceConfiguration().isExternalDisplay(),
                 isTaskbarPresent,
                 mMetrics,
                 displayOptionSpec,
@@ -416,7 +407,10 @@ public class DeviceProfile {
                 leftRightSplitPortraitResId > 0
                         && res.getBoolean(leftRightSplitPortraitResId);
         isLeftRightSplit = Utilities.calculateIsLeftRightSplit(
-                allowLeftRightSplitInPortrait, mDeviceProperties, isExternalDisplay);
+                allowLeftRightSplitInPortrait,
+                mDeviceProperties,
+                mDeviceProperties.getDeviceConfiguration().isExternalDisplay()
+        );
 
         mWorkspaceProfile = WorkspaceProfile.Factory.createWorkspaceProfile(
                 /*context*/ context,
@@ -438,11 +432,7 @@ public class DeviceProfile {
                 /*iconSizePx*/ max(1, pxFromDp(inv.iconSize[mTypeIndex], mMetrics)),
                 /*isFirstPass*/ true,
                 /*isSeascape*/ isSeascape(),
-                /*hotseatProfile*/ hotseatProfileInitialValues,
-                /*hotseatBarBottomSpacePx*/ hotseatProfileInitialValues.getBarBottomSpacePx(),
-                /*hotseatQsbSpace*/ hotseatProfileInitialValues.getQsbSpace(),
-                /*hotseatBarSizePx*/ hotseatProfileInitialValues.getBarSizePx(),
-                /*isWorkspaceItemsLabelHidden*/ isWorkspaceItemsLabelHidden
+                /*hotseatProfile*/ hotseatProfileInitialValues
         );
 
         if (mIsResponsiveGrid) {
@@ -637,7 +627,7 @@ public class DeviceProfile {
 
     /** Creates a builder with the current properties filled in */
     public Builder toBuilder() {
-        WindowBounds bounds = createWindowBounds(mDeviceProperties);
+        WindowBounds bounds = mDeviceProperties.createWindowBounds();
         bounds.bounds.offsetTo(mDeviceProperties.getWindowX(), mDeviceProperties.getWindowY());
         bounds.insets.set(mDeviceProperties.getInsets());
 
@@ -1789,12 +1779,17 @@ public class DeviceProfile {
                     mInv,
                     mInfo,
                     mWMProxy,
-                    mWindowBounds,
-                    mIsExternalDisplay,
-                    mTransposeLayoutWithOrientation,
-                    mIsMultiDisplay,
-                    mIsGestureMode,
-                    mIsWorkspaceItemsLabelHidden,
+                    DeviceProperties.Factory.createDeviceProperties(
+                            mInfo,
+                            mWindowBounds,
+                            new DeviceConfiguration(
+                                    mIsExternalDisplay,
+                                    mTransposeLayoutWithOrientation,
+                                    mIsMultiDisplay,
+                                    mIsGestureMode,
+                                    mIsWorkspaceItemsLabelHidden
+                            )
+                    ),
                     mViewScaleProvider,
                     mOverrideProvider,
                     mDisplayOptionSpec

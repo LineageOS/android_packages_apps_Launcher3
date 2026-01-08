@@ -47,6 +47,9 @@ data class DeviceProperties(
     val deviceConfiguration: DeviceConfiguration,
 ) {
 
+    fun createWindowBounds() =
+        WindowBounds(widthPx, heightPx, availableWidthPx, availableHeightPx, rotationHint)
+
     companion object Factory {
         // b/419264328 adding here all the improvements/cleanup for this class
         fun createDeviceProperties(
