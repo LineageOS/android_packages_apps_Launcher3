@@ -61,7 +61,7 @@ class SystemDragControllerImpl(
     private fun continueDrag(event: DragEvent): Boolean? = systemDragListener?.onDrag(event)
 
     private fun createSystemDragListener(params: SystemDragParams? = null): SystemDragListener =
-        systemDragListenerFactory(context, params).also { listener ->
+        systemDragListenerFactory.get(context, params).also { listener ->
             systemDragListener = listener
             listener.setCleanupCallback {
                 if (systemDragListener == listener) {

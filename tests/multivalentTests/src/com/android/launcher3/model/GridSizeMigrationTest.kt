@@ -29,14 +29,13 @@ import com.android.launcher3.LauncherPrefs.Companion.WORKSPACE_SIZE
 import com.android.launcher3.LauncherSettings.Favorites.*
 import com.android.launcher3.WorkspaceLayoutManager.FIRST_SCREEN_ID
 import com.android.launcher3.dagger.LauncherAppComponent
-import com.android.launcher3.dagger.LauncherAppSingleton
+import com.android.launcher3.model.GridSizeMigrationTest.FirstRowModule
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.pm.UserCache
 import com.android.launcher3.provider.LauncherDbUtils
-import com.android.launcher3.util.AllModulesForTest
 import com.android.launcher3.util.SandboxApplication
+import com.android.tools.dagger.mutation.annotations.MutatedComponent
 import com.google.common.truth.Truth.assertThat
-import dagger.Component
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ElementsIntoSet
@@ -50,6 +49,7 @@ import org.junit.runner.RunWith
 /** Unit tests for [GridSizeMigrationDBController, GridSizeMigrationLogic] */
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@MutatedComponent(target = LauncherAppComponent::class, installModules = [FirstRowModule::class])
 class GridSizeMigrationTest {
 
     @get:Rule val context = SandboxApplication().withModelDependency()
@@ -70,7 +70,7 @@ class GridSizeMigrationTest {
 
     @Before
     fun setUp() {
-        context.initDaggerComponent(DaggerGridSizeMigrationTest_TestComponent.builder())
+        context.initDaggerComponent(mutatedComponentBuilder())
         dbHelper = DatabaseHelper(context, null) {}
         db = dbHelper.writableDatabase
 
@@ -996,16 +996,5 @@ class GridSizeMigrationTest {
                     }
                 }
                 .toSet()
-    }
-
-    @LauncherAppSingleton
-    @Component(modules = [AllModulesForTest::class, FirstRowModule::class])
-    interface TestComponent : LauncherAppComponent {
-
-        @Component.Builder
-        interface Builder : LauncherAppComponent.Builder {
-
-            override fun build(): TestComponent
-        }
     }
 }

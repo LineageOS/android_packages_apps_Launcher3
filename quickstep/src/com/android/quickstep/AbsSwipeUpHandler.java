@@ -416,7 +416,7 @@ public abstract class AbsSwipeUpHandler<
             RotationTouchHelper rotationTouchHelper, GestureState gestureState,
             long touchTimeMs, boolean continuingLastGesture,
             InputConsumerController inputConsumer,
-            MSDLPlayerWrapper msdlPlayerWrapper) {
+            MSDLPlayerWrapper msdlPlayerWrapper, int displayId) {
         super(context, gestureState, rotationTouchHelper);
         mContainerInterface = gestureState.getContainerInterface();
         mContextInitListener =
@@ -462,7 +462,7 @@ public abstract class AbsSwipeUpHandler<
         initStateCallbacks();
 
         mIsTransientTaskbar = mDp.isTaskbarPresent && TaskbarFeatureEvaluator.INSTANCE.get(
-                context).isTransient();
+                context).get(displayId).isTransient();
         mTaskbarAlreadyOpen = !isTaskbarStashed(context);
         mIsTaskbarAllAppsOpen = isTaskbarAllAppsOpen(context);
         mTaskbarAppWindowThreshold =

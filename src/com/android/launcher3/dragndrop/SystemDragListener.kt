@@ -35,10 +35,10 @@ import com.android.launcher3.views.ActivityContext
 import dagger.Lazy
 
 /** Factory used to create listeners for system-level drag-and-drop. */
-typealias SystemDragListenerFactory =
-    (
-        @JvmSuppressWildcards ActivityContext, @JvmSuppressWildcards SystemDragParams?,
-    ) -> SystemDragListener
+fun interface SystemDragListenerFactory {
+
+    fun get(ctx: ActivityContext, params: SystemDragParams?): SystemDragListener
+}
 
 /**
  * Listener for a single system-level drag-and-drop sequence.

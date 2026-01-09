@@ -15,14 +15,12 @@
  */
 package com.android.quickstep
 
-import android.platform.test.annotations.EnableFlags
 import android.platform.test.rule.AllowedDevices
 import android.platform.test.rule.DeviceProduct
 import android.platform.test.rule.IgnoreLimit
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
 import com.android.launcher3.BuildConfig
-import com.android.launcher3.Flags.FLAG_ENABLE_DESKTOP_EXPLODED_VIEW
 import com.android.launcher3.LauncherState
 import com.android.launcher3.tapl.BaseOverview
 import com.android.launcher3.tapl.LaunchedAppState
@@ -52,7 +50,6 @@ class TaplTestsOverviewDesktop : AbstractQuickStepTest() {
         mLauncher.goHome()
     }
 
-    @EnableFlags(FLAG_ENABLE_DESKTOP_EXPLODED_VIEW)
     @Test
     fun testAllTasksRemovalFromCloseButtonInExplodedView() {
         val desktopTaskView =
@@ -83,7 +80,6 @@ class TaplTestsOverviewDesktop : AbstractQuickStepTest() {
         )
     }
 
-    @EnableFlags(FLAG_ENABLE_DESKTOP_EXPLODED_VIEW)
     @Test
     fun testActivateIndividualTaskFromExplodedView() {
         var desktopTaskView =

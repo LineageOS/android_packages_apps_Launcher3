@@ -61,7 +61,6 @@ import com.android.launcher3.states.StateAnimationConfig.ANIM_SCRIM_FADE
 import com.android.launcher3.states.StateAnimationConfig.ANIM_WORKSPACE_FADE
 import com.android.launcher3.states.StateAnimationConfig.ANIM_WORKSPACE_SCALE
 import com.android.launcher3.states.StateAnimationConfig.ANIM_WORKSPACE_TRANSLATE
-import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator
 import com.android.launcher3.touch.AllAppsSwipeController
 import com.android.launcher3.util.NavigationMode
 import com.android.quickstep.split.SplitAnimationTimings
@@ -191,7 +190,7 @@ open class RecentsAtomicAnimationFactory<CONTAINER, STATE_TYPE : BaseState<STATE
         config: StateAnimationConfig,
     ) {
         val overview = container.getOverviewPanel<RecentsView<CONTAINER, STATE_TYPE>>()
-        val isPinnedTaskbar = TaskbarFeatureEvaluator.INSTANCE.get(container).isPinned
+        val isPinnedTaskbar = container.activityComponent.getTaskbarFeatureEvaluator().isPinned
         val isThreeButton =
             (DisplayController.getNavigationMode(container) == NavigationMode.THREE_BUTTONS)
         if ((fromState == OVERVIEW || fromState == OVERVIEW_SPLIT_SELECT) && toState == NORMAL) {

@@ -95,6 +95,8 @@ public interface QuickstepBaseAppComponent extends LauncherBaseAppComponent {
 
     PerDisplayRepository<RecentsWindowTracker> getRecentsWindowTrackerRepository();
 
+    PerDisplayRepository<TaskbarFeatureEvaluator> getTaskbarFeatureEvaluatorRepository();
+
     RecentsModel getRecentsModel();
 
     SettingsChangeLogger getSettingsChangeLogger();
@@ -114,7 +116,6 @@ public interface QuickstepBaseAppComponent extends LauncherBaseAppComponent {
 
     TaskbarUiStateMonitor getTaskbarUiStateMonitor();
 
-    TaskbarFeatureEvaluator getTaskbarFeatureEvaluator();
 
     Set<LifecycleTracker> getLifecycleTrackers();
 

@@ -19,6 +19,7 @@ package com.android.quickstep.dagger
 import com.android.launcher3.dagger.BaseActivityContextComponent
 import com.android.launcher3.taskbar.TaskbarEduTooltipController
 import com.android.launcher3.taskbar.allapps.TaskbarSearchSessionController
+import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator
 
 /** Activity Quickstep base component for Dagger injection. */
 interface QuickstepBaseActivityComponent : BaseActivityContextComponent {
@@ -26,4 +27,6 @@ interface QuickstepBaseActivityComponent : BaseActivityContextComponent {
     fun createTaskbarSearchSessionController(): TaskbarSearchSessionController
 
     fun createTaskbarEduTooltipController(): TaskbarEduTooltipController
+
+    fun getTaskbarFeatureEvaluator(): TaskbarFeatureEvaluator
 }

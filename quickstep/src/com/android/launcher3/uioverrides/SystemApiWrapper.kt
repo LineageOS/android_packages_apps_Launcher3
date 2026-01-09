@@ -29,7 +29,6 @@ import android.content.pm.ShortcutInfo
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.os.Bundle
-import android.os.Flags.allowPrivateProfile
 import android.os.IBinder
 import android.os.UserHandle
 import android.view.DragAndDropPermissions
@@ -70,7 +69,7 @@ open class SystemApiWrapper @Inject constructor(@ApplicationContext context: Con
         }
 
     override fun getAppMarketActivityIntent(packageName: String, user: UserHandle): Intent =
-        if (allowPrivateProfile() && enablePrivateSpace())
+        if (enablePrivateSpace())
             ProxyActivityStarter.getLaunchIntent(
                 mContext,
                 StartActivityParams(null as PendingIntent?, 0).apply {
@@ -91,7 +90,7 @@ open class SystemApiWrapper @Inject constructor(@ApplicationContext context: Con
 
     /** Returns an intent which can be used to open Private Space Settings. */
     override fun getPrivateSpaceSettingsIntent(): Intent? =
-        if (allowPrivateProfile() && enablePrivateSpace())
+        if (enablePrivateSpace())
             ProxyActivityStarter.getLaunchIntent(
                 mContext,
                 StartActivityParams(null as PendingIntent?, 0).apply {

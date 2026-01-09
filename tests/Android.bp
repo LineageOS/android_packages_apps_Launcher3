@@ -80,6 +80,7 @@ android_library {
         "androidx.test.uiautomator_uiautomator",
         "mockito-kotlin2",
         "mockito-target-extended-minus-junit4",
+        "mutable-dagger-annotations",
         "launcher_log_protos_lite",
         "truth",
         "kotlinx_coroutines_test",
@@ -150,11 +151,19 @@ android_test {
     platform_apis: true,
     test_config: "Launcher3Tests.xml",
     data: [":Launcher3"],
-    plugins: ["dagger2-compiler"],
+    enable_ksp: true,
+    plugins: [
+        "mutable-dagger-compiler",
+        "dagger2-compiler",
+    ],
     test_suites: ["general-tests"],
     lint: {
         baseline_filename: "lint-baseline.xml",
     },
+    kotlincflags: [
+        "-Xallow-no-source-files",
+        "-Xemit-jvm-type-parameters",
+    ],
 }
 
 filegroup {

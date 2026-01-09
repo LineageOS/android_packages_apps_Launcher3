@@ -30,7 +30,6 @@ import androidx.test.filters.SmallTest
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.TASKBAR_PINNING
 import com.android.launcher3.dagger.LauncherAppComponent
-import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.display.DisplayController
 import com.android.launcher3.display.LauncherDisplayInfo
 import com.android.launcher3.display.LauncherDisplayInfo.Companion.CHANGE_DENSITY
@@ -39,9 +38,9 @@ import com.android.launcher3.testutil.rule.LazyInitRule.Companion.lazyRule
 import com.android.launcher3.util.Executors.IMMEDIATE_EXECUTOR
 import com.android.launcher3.util.window.CachedDisplayInfo
 import com.android.launcher3.util.window.WindowManagerProxy
+import com.android.tools.dagger.mutation.annotations.BindValue
+import com.android.tools.dagger.mutation.annotations.MutatedComponent
 import com.google.common.truth.Truth.assertThat
-import dagger.BindsInstance
-import dagger.Component
 import kotlin.math.min
 import org.junit.After
 import org.junit.Before
@@ -62,13 +61,16 @@ import org.mockito.stubbing.Answer
 /** Unit tests for {@link DisplayController} */
 @SmallTest
 @RunWith(LauncherMultivalentJUnit::class)
+@MutatedComponent(target = LauncherAppComponent::class)
 class DisplayControllerTest {
 
     @get:Rule val contextSpy = lazyRule { spy(SandboxApplication()) }
 
     private val context: SandboxApplication by contextSpy
-    private val windowManagerProxy: MyWmProxy = mock()
-    private val launcherPrefs: LauncherPrefs = mock()
+
+    @BindValue val windowManagerProxy: WindowManagerProxy = mock()
+    @BindValue val launcherPrefs: LauncherPrefs = mock()
+
     private lateinit var displayManager: DisplayManager
     private val display: Display = mock()
     private val resources: Resources = mock()
@@ -99,11 +101,7 @@ class DisplayControllerTest {
                 screenHeightDp = (bounds[0].bounds.height() / density).toInt()
                 smallestScreenWidthDp = min(screenWidthDp, screenHeightDp)
             }
-        context.initDaggerComponent(
-            DaggerDisplayControllerTestComponent.builder()
-                .bindWMProxy(windowManagerProxy)
-                .bindLauncherPrefs(launcherPrefs)
-        )
+        context.initDaggerComponent(mutatedComponentBuilder())
         displayManager = context.spyService(DisplayManager::class.java)
 
         whenever(launcherPrefs.get(TASKBAR_PINNING)).thenReturn(false)
@@ -294,21 +292,5 @@ class DisplayControllerTest {
             windowManagerProxy.estimateInternalDisplayBounds(context),
             DisplayMetrics.DENSITY_DEVICE_STABLE,
         )
-    }
-}
-
-class MyWmProxy : WindowManagerProxy()
-
-@LauncherAppSingleton
-@Component(modules = [AllModulesMinusWMProxy::class])
-interface DisplayControllerTestComponent : LauncherAppComponent {
-
-    @Component.Builder
-    interface Builder : LauncherAppComponent.Builder {
-        @BindsInstance fun bindWMProxy(proxy: WindowManagerProxy): Builder
-
-        @BindsInstance fun bindLauncherPrefs(prefs: LauncherPrefs): Builder
-
-        override fun build(): DisplayControllerTestComponent
     }
 }

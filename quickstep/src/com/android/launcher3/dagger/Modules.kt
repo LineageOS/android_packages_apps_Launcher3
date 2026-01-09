@@ -48,6 +48,7 @@ import com.android.launcher3.secondarydisplay.SecondaryDisplayDelegate
 import com.android.launcher3.secondarydisplay.SecondaryDisplayLauncher
 import com.android.launcher3.secondarydisplay.SecondaryDisplayQuickstepDelegateImpl
 import com.android.launcher3.taskbar.BaseTaskbarContext
+import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator
 import com.android.launcher3.testing.TestInformationHandler
 import com.android.launcher3.uioverrides.QuickstepWidgetHolder.QuickstepWidgetHolderFactory
 import com.android.launcher3.uioverrides.SystemApiWrapper
@@ -103,6 +104,27 @@ abstract class ActivityContextModule {
     abstract fun bindSecondaryDisplayDelegate(
         impl: SecondaryDisplayQuickstepDelegateImpl
     ): SecondaryDisplayDelegate
+
+    companion object {
+        @JvmStatic
+        @Provides
+        @ActivityContextSingleton
+        @DisplayId
+        fun provideDisplayId(activityContext: ActivityContext): Int =
+            activityContext.asContext().displayId
+
+        @JvmStatic
+        @Provides
+        @ActivityContextSingleton
+        fun provideTaskbarFeatureEvaluator(
+            @DisplayId displayId: Int,
+            repository: PerDisplayRepository<TaskbarFeatureEvaluator>,
+        ): TaskbarFeatureEvaluator {
+            return checkNotNull(repository[displayId]) {
+                "no TaskbarFeatureEvaluator for display id : $displayId"
+            }
+        }
+    }
 }
 
 @Module

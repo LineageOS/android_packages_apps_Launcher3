@@ -82,7 +82,8 @@ public class LauncherSwipeHandlerV2TestCase extends AbsSwipeUpHandlerTestCase<
                 touchTimeMs,
                 continuingLastGesture,
                 mInputConsumerController,
-                mMSDLPlayerWrapper);
+                mMSDLPlayerWrapper,
+                mContext.getDisplayId());
     }
 
     @NonNull

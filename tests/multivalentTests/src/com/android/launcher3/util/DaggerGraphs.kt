@@ -73,7 +73,3 @@ class AllModulesForTest
 /** All modules except the WMProxy */
 @Module(includes = [ApiWrapperModule::class, CommonModulesForTest::class])
 class AllModulesMinusWMProxy
-
-/** All modules except the ApiWrapper */
-@Module(includes = [WindowManagerProxyModule::class, CommonModulesForTest::class])
-class AllModulesMinusApiWrapper

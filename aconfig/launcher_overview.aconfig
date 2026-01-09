@@ -12,13 +12,6 @@ flag {
 }
 
 flag {
-    name: "enable_desktop_exploded_view"
-    namespace: "launcher_overview"
-    description: "Enables the non-overlapping layout for desktop windows in Overview mode."
-    bug: "378011776"
-}
-
-flag {
     name: "enable_overview_desktop_tile_wallpaper_background"
     namespace: "launcher_overview"
     description: "Enable wallpaper background for desktop tasks in overview."

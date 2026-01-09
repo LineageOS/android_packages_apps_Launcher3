@@ -51,7 +51,6 @@ import com.android.launcher3.display.DisplayController;
 import com.android.launcher3.statehandlers.DesktopVisibilityController;
 import com.android.launcher3.statehandlers.LauncherDepthController;
 import com.android.launcher3.states.StateAnimationConfig;
-import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator;
 import com.android.launcher3.uioverrides.QuickstepLauncher;
 import com.android.launcher3.util.DynamicResource;
 import com.android.quickstep.views.RecentsView;
@@ -85,7 +84,7 @@ public class StaggeredWorkspaceAnim {
     public StaggeredWorkspaceAnim(QuickstepLauncher launcher, float velocity,
             boolean animateOverviewScrim, @Nullable View ignoredView, boolean staggerWorkspace) {
         boolean isPersistentTaskbarAndNotInDesktopMode =
-                (!TaskbarFeatureEvaluator.INSTANCE.get(launcher).isTransient()
+                (!launcher.getActivityComponent().getTaskbarFeatureEvaluator().isTransient()
                         || DisplayController.getNavigationMode(launcher) == THREE_BUTTONS)
                         && !DesktopVisibilityController.INSTANCE.get(launcher)
                         .isInDesktopMode(launcher.getDisplayId());

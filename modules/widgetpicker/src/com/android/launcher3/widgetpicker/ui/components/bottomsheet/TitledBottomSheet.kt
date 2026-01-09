@@ -275,7 +275,7 @@ private fun DecorativeDragHandle(modifier: Modifier) {
         modifier =
             modifier
                 .clip(MaterialTheme.shapes.medium)
-                .background(MaterialTheme.colorScheme.outline)
+                .background(WidgetPickerTheme.colors.dragHandle)
                 .size(
                     width = DragHandleDimens.dragHandleWidth,
                     height = DragHandleDimens.dragHandleHeight,

@@ -28,7 +28,6 @@ import androidx.dynamicanimation.animation.FloatValueHolder
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.internal.jank.Cuj
-import com.android.launcher3.Flags.enableDesktopExplodedView
 import com.android.launcher3.PagedView
 import com.android.launcher3.R
 import com.android.launcher3.concurrent.annotations.LightweightBackground
@@ -371,7 +370,7 @@ constructor(
             }
             Log.d(TAG, "dismissTask: $taskId")
 
-            if (enableDesktopExplodedView() && taskView is DesktopTaskView) {
+            if (taskView is DesktopTaskView) {
                 taskView.removeTaskFromExplodedView(taskId)
 
                 if (removeTask) {

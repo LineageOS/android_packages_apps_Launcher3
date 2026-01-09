@@ -15,7 +15,6 @@
  */
 package com.android.launcher3.statemanager;
 
-import static com.android.launcher3.Flags.enableDesktopExplodedView;
 
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.views.ActivityContext;
@@ -94,7 +93,7 @@ public interface BaseState<T> {
      * For this state, whether we should show desktop exploded view in Overview.
      */
     default boolean showExplodedDesktopView() {
-        return isInOverview() && enableDesktopExplodedView();
+        return isInOverview();
     }
 
     default boolean isInOverview() {

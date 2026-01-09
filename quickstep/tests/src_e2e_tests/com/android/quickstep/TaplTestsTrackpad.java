@@ -26,6 +26,7 @@ import android.platform.systemui_tapl.ui.Root;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -101,6 +102,7 @@ public class TaplTestsTrackpad extends AbstractQuickStepTest {
     }
 
     @Test
+    @FlakyTest(bugId = 460204501)
     @NavigationModeSwitch
     @DisableFlags(Flags.FLAG_ENABLE_NEW_TOUCHPAD_GESTURES)
     public void switchToOverview() throws Exception {

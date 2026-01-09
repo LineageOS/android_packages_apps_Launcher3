@@ -18,8 +18,8 @@ package com.android.quickstep.logging
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.SessionCommitReceiver.ADD_ICON_PREFERENCE_KEY
+import com.android.launcher3.dagger.ApiWrapperModule
 import com.android.launcher3.dagger.LauncherAppComponent
-import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.graphics.ThemeManager
 import com.android.launcher3.logging.InstanceId
 import com.android.launcher3.logging.StatsLogManager
@@ -29,14 +29,13 @@ import com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_HOME
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_NAVIGATION_MODE_GESTURE_BUTTON
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_NOTIFICATION_DOT_ENABLED
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_THEMED_ICON_DISABLED
-import com.android.launcher3.util.AllModulesMinusApiWrapper
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.FakePrefsModule
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestUtil
+import com.android.tools.dagger.mutation.annotations.BindValue
+import com.android.tools.dagger.mutation.annotations.MutatedComponent
 import com.google.common.truth.Truth.assertThat
-import dagger.BindsInstance
-import dagger.Component
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -53,6 +52,11 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
+@MutatedComponent(
+    target = LauncherAppComponent::class,
+    installModules = [FakePrefsModule::class],
+    uninstallModules = [ApiWrapperModule::class],
+)
 class SettingsChangeLoggerTest {
 
     @get:Rule val mockito = MockitoJUnit.rule()
@@ -63,7 +67,7 @@ class SettingsChangeLoggerTest {
     @Mock(answer = Answers.RETURNS_SELF)
     private lateinit var mMockLogger: StatsLogManager.StatsLogger
 
-    @Mock private lateinit var mStatsLogFactory: StatsLogManager.StatsLogManagerFactory
+    @BindValue @Mock lateinit var mStatsLogFactory: StatsLogManager.StatsLogManagerFactory
     @Mock private lateinit var mStatsLogManager: StatsLogManager
 
     @Captor private lateinit var mEventCaptor: ArgumentCaptor<StatsLogManager.EventEnum>
@@ -72,10 +76,7 @@ class SettingsChangeLoggerTest {
     fun setUp() {
         whenever(mStatsLogFactory.create(context)).doReturn(mStatsLogManager)
         whenever(mStatsLogManager.logger()).doReturn(mMockLogger)
-        context.initDaggerComponent(
-            DaggerSettingsChangeLoggerTest_TestComponent.builder()
-                .bindStatsLogManagerFactory(mStatsLogFactory)
-        )
+        context.initDaggerComponent(mutatedComponentBuilder())
 
         // To match the default value of THEMED_ICONS
         ThemeManager.INSTANCE.get(context).isMonoThemeEnabled = false
@@ -123,18 +124,5 @@ class SettingsChangeLoggerTest {
         private const val OVERVIEW_SUGGESTED_ACTIONS = "pref_overview_action_suggestions"
 
         private const val LAUNCHER_GOOGLE_APP_SWIPE_LEFT_ENABLED = 617
-    }
-
-    @LauncherAppSingleton
-    @Component(modules = [AllModulesMinusApiWrapper::class, FakePrefsModule::class])
-    interface TestComponent : LauncherAppComponent {
-
-        @Component.Builder
-        interface Builder : LauncherAppComponent.Builder {
-            @BindsInstance
-            fun bindStatsLogManagerFactory(factory: StatsLogManager.StatsLogManagerFactory): Builder
-
-            override fun build(): TestComponent
-        }
     }
 }

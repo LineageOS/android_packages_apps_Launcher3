@@ -930,7 +930,7 @@ public class TouchInteractionHandler extends ContextWrapper {
         return new LauncherSwipeHandlerV2(this, taskAnimationManager, deviceState,
                 rotationTouchHelper, gestureState, touchTimeMs,
                 taskAnimationManager.isRecentsAnimationRunning(),
-                mInputConsumer, MSDLPlayerWrapper.INSTANCE.get(this));
+                mInputConsumer, MSDLPlayerWrapper.INSTANCE.get(this), displayId);
     }
 
     private @Nullable AbsSwipeUpHandler<?, ?, ?> createFallbackSwipeHandler(
@@ -946,7 +946,7 @@ public class TouchInteractionHandler extends ContextWrapper {
         return new FallbackSwipeHandler(this, taskAnimationManager, deviceState,
                 rotationTouchHelper, gestureState, touchTimeMs,
                 taskAnimationManager.isRecentsAnimationRunning(),
-                mInputConsumer, MSDLPlayerWrapper.INSTANCE.get(this));
+                mInputConsumer, MSDLPlayerWrapper.INSTANCE.get(this), displayId);
     }
 
     private @Nullable AbsSwipeUpHandler<?, ?, ?> createRecentsWindowSwipeHandler(
@@ -965,7 +965,7 @@ public class TouchInteractionHandler extends ContextWrapper {
                 taskAnimationManager, deviceState,
                 rotationTouchHelper, recentsWindowManager, gestureState, touchTimeMs,
                 taskAnimationManager.isRecentsAnimationRunning(),
-                mInputConsumer, MSDLPlayerWrapper.INSTANCE.get(this));
+                mInputConsumer, MSDLPlayerWrapper.INSTANCE.get(this), displayId);
     }
 
     public class InputResource implements DisplayModel.DisplayResource {

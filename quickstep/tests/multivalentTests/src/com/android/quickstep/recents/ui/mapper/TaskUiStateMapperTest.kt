@@ -60,30 +60,6 @@ class TaskUiStateMapperTest {
         assertThat(result).isEqualTo(TaskHeaderUiState.HideHeader)
     }
 
-    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_EXPLODED_VIEW)
-    @Test
-    fun explodedFlagDisabled_returnsHideHeader() {
-        val inputs =
-            listOf(
-                TASK_DATA,
-                TASK_DATA.copy(thumbnailData = null),
-                TASK_DATA.copy(isLocked = true),
-                TASK_DATA.copy(title = null),
-            )
-        val closeCallback = View.OnClickListener {}
-        val expected = TaskHeaderUiState.HideHeader
-        inputs.forEach { taskData ->
-            val result =
-                TaskUiStateMapper.toTaskHeaderState(
-                    taskData = taskData,
-                    hasHeader = true,
-                    clickCloseListener = closeCallback,
-                )
-            assertThat(result).isEqualTo(expected)
-        }
-    }
-
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_EXPLODED_VIEW)
     @Test
     fun taskData_hasHeader_and_taskData_returnsShowHeader() {
         val inputs =
@@ -115,7 +91,6 @@ class TaskUiStateMapperTest {
         }
     }
 
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_EXPLODED_VIEW)
     @Test
     fun taskData_hasHeader_noIcon_returns_ShowHeader() {
         val closeCallback = View.OnClickListener {}
@@ -137,7 +112,6 @@ class TaskUiStateMapperTest {
         assertThat(result).isEqualTo(expected)
     }
 
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_EXPLODED_VIEW)
     @Test
     fun taskData_hasHeader_noTitle_returns_ShowHeader() {
         val closeCallback = View.OnClickListener {}
