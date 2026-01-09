@@ -122,8 +122,7 @@
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"कारबाहीहरू"</string>
     <string name="shortcuts_popup_menu_button" msgid="766598805805882499">"सर्टकटहरू"</string>
     <string name="loading_shortcut" msgid="2638272014233830958">"सर्टकट लोड गरिँदै छ"</string>
-    <!-- no translation found for pause_app_label (6796255881727695791) -->
-    <skip />
+    <string name="pause_app_label" msgid="6796255881727695791">"एप पज गर्नुहोस्"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"सर्टकट स्थापना गर्नेहोस्"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"प्रयोगकर्ताको हस्तक्षेप बिना एउटा एपलाई सर्टकटमा थप्नको लागि अनुमति दिनुहोस्।"</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"होम स्क्रिनका सेटिङ र सर्टकटहरू रिड गर्नुहोस्"</string>

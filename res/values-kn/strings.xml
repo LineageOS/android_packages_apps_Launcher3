@@ -122,8 +122,7 @@
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"ಕ್ರಿಯೆಗಳು"</string>
     <string name="shortcuts_popup_menu_button" msgid="766598805805882499">"ಶಾರ್ಟ್‌ಕಟ್‌ಗಳು"</string>
     <string name="loading_shortcut" msgid="2638272014233830958">"ಶಾರ್ಟ್‌ಕಟ್ ಅನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
-    <!-- no translation found for pause_app_label (6796255881727695791) -->
-    <skip />
+    <string name="pause_app_label" msgid="6796255881727695791">"ಆ್ಯಪ್ ವಿರಾಮಗೊಳಿಸಿ"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ಸ್ಥಾಪಿಸಿ"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"ಬಳಕೆದಾರರ ಹಸ್ತಕ್ಷೇಪವಿಲ್ಲದೆ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ಸೇರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"ಹೋಮ್ ಸ್ಕ್ರೀನ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಮತ್ತು ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ಓದಿ"</string>
@@ -183,7 +182,7 @@
     <string name="abandoned_promise_explanation" msgid="3990027586878167529">"ಈ ಐಕಾನ್ ಅಪ್ಲಿಕೇಶನ್ ಸ್ಥಾಪನೆಗೊಂಡಿಲ್ಲ. ನೀವು ಅದನ್ನು ತೆಗೆದುಹಾಕಬಹುದು ಅಥವಾ ಅಪ್ಲಿಕೇಶನ್ ಹುಡುಕಬಹುದು ಮತ್ತು ಹಸ್ತಚಾಲಿತವಾಗಿ ಅದನ್ನು ಸ್ಥಾಪಿಸಬಹುದು."</string>
     <string name="app_installing_title" msgid="5864044122733792085">"<xliff:g id="NAME">%1$s</xliff:g> ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲಾಗುತ್ತಿದೆ, <xliff:g id="PROGRESS">%2$s</xliff:g> ಪೂರ್ಣಗೊಂಡಿದೆ"</string>
     <string name="app_downloading_title" msgid="8336702962104482644">"<xliff:g id="NAME">%1$s</xliff:g> ಡೌನ್‌ಲೋಡ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ, <xliff:g id="PROGRESS">%2$s</xliff:g> ಪೂರ್ಣಗೊಂಡಿದೆ"</string>
-    <string name="app_waiting_download_title" msgid="7053938513995617849">"<xliff:g id="NAME">%1$s</xliff:g> ಸ್ಥಾಪಿಸಲು ಕಾಯಲಾಗುತ್ತಿದೆ"</string>
+    <string name="app_waiting_download_title" msgid="7053938513995617849">"<xliff:g id="NAME">%1$s</xliff:g> ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲು ಕಾಯುತ್ತಿದೆ"</string>
     <string name="app_archived_title" msgid="4548283110222420708">"<xliff:g id="NAME">%1$s</xliff:g> ಅನ್ನು ಆರ್ಕೈವ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="app_unarchiving_action" msgid="5736107006413929484">"ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ ಮತ್ತು ಮರುಸ್ಥಾಪಿಸಿ"</string>
     <string name="dialog_update_title" msgid="114234265740994042">"ಆ್ಯಪ್ ಅಪ್‌ಡೇಟ್ ಅಗತ್ಯವಿದೆ"</string>
