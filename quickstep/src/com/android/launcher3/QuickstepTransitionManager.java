@@ -315,9 +315,9 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             // Make sure that we know whenever Launcher becomes visible AND is in its NORMAL state,
             // so we can run the reveal animation.
             mSystemUiProxy.getHomeVisibilityState().addListener(
-                    (isVisible, keyguardGoingAway) -> {
+                    (isVisible, keyguardGoingAwayOrWaking) -> {
                         if (isVisible && mLauncher.isInState(NORMAL) && !mIsLauncherAnimating
-                                && !keyguardGoingAway) {
+                                && !keyguardGoingAwayOrWaking) {
                             mIsLauncherAnimating = true;
                             mFallbackRevealAnimation =
                                     new ScalingWorkspaceRevealAnim(
