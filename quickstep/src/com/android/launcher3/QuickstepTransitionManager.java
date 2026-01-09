@@ -49,6 +49,7 @@ import static com.android.launcher3.BaseActivity.PENDING_INVISIBLE_BY_WALLPAPER_
 import static com.android.launcher3.Flags.appLaunchBlur;
 import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
+import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET;
 import static com.android.launcher3.LauncherState.ALL_APPS;
 import static com.android.launcher3.LauncherState.BACKGROUND_APP;
 import static com.android.launcher3.LauncherState.NORMAL;
@@ -449,7 +450,9 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         // app transition is created.
         TaskbarInteractor taskbarInteractor = mLauncher.getTaskbarInteractor();
         if (mLauncher.getStateManager().getState() == NORMAL
-                && taskbarInteractor != null) {
+                && taskbarInteractor != null
+                // Disable synchronization for widgets due to issues with PendingIntent.
+                && itemInfo.itemType != ITEM_TYPE_APPWIDGET) {
             taskbarInteractor.setIgnoreInAppFlagForSync(true);
             mLauncher.addEventCallback(EVENT_DESTROYED, onEndCallback::executeAllAndDestroy);
             onEndCallback.add(() -> {
