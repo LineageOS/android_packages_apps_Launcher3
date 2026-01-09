@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "903eab51_3ef7f0ae",
+        "filename": "quickstep/src/com/android/launcher3/model/QuickstepModelDelegate.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 13648
+      },
+      "writtenOn": "2026-01-09T19:02:21Z",
+      "side": 1,
+      "message": "Move to constructor?",
+      "range": {
+        "startLine": 375,
+        "startChar": 0,
+        "endLine": 376,
+        "endChar": 91
+      },
+      "revId": "59df78e4b67da684d8dca501f9cd63f555c63610",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6f88aab8_efaea9c0",
+        "filename": "quickstep/src/com/android/launcher3/model/QuickstepModelDelegate.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 411,
+      "author": {
+        "id": 13648
+      },
+      "writtenOn": "2026-01-09T19:02:21Z",
+      "side": 1,
+      "message": "Then remove from here.",
+      "range": {
+        "startLine": 410,
+        "startChar": 0,
+        "endLine": 411,
+        "endChar": 91
+      },
+      "revId": "59df78e4b67da684d8dca501f9cd63f555c63610",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
