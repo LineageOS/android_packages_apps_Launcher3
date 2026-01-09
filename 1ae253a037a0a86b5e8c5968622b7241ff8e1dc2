@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "018d0106_053e3390",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 4550
+      },
+      "writtenOn": "2026-01-09T13:12:11Z",
+      "side": 1,
+      "message": "Long pressing on an app now has a \"Remove\" button which we should also disable",
+      "revId": "1ae253a037a0a86b5e8c5968622b7241ff8e1dc2",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
