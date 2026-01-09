@@ -26,6 +26,7 @@ import static com.android.quickstep.GestureState.STATE_RECENTS_ANIMATION_INITIAL
 import static com.android.quickstep.GestureState.STATE_RECENTS_ANIMATION_STARTED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED;
+import static com.android.wm.shell.Flags.sendBubbleRootTaskIdToLauncher;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
@@ -51,6 +52,7 @@ import com.android.launcher3.dagger.PerDisplaySingleton;
 import com.android.launcher3.display.DisplayController;
 import com.android.launcher3.display.LauncherDisplayInfo;
 import com.android.launcher3.taskbar.TaskbarInteractor;
+import com.android.launcher3.taskbar.bubbles.BubbleHelper;
 import com.android.launcher3.util.DaggerSingletonObject;
 import com.android.quickstep.dagger.QuickstepBaseAppComponent;
 import com.android.quickstep.util.ActiveGestureLog;
@@ -123,7 +125,13 @@ public class TaskAnimationManager implements RecentsAnimationCallbacks.RecentsAn
                 RecentsView recentsView = containerInterface.getCreatedContainer()
                         .getOverviewPanel();
                 if (recentsView != null) {
-                    recentsView.launchSideTaskInLiveTileModeForRestartedApp(task.taskId);
+                    if (sendBubbleRootTaskIdToLauncher()) {
+                        if (!BubbleHelper.isAppBubbleTask(task)) {
+                            recentsView.launchSideTaskInLiveTileModeForRestartedApp(task.taskId);
+                        }
+                    } else {
+                        recentsView.launchSideTaskInLiveTileModeForRestartedApp(task.taskId);
+                    }
                     TaskStackChangeListeners.getInstance().unregisterTaskStackListener(
                             mLiveTileRestartListener);
                 }
