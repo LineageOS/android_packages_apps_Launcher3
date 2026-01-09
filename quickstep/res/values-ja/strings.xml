@@ -171,8 +171,6 @@
     <string name="bubble_bar_action_move_left" msgid="3306922475737714758">"左に移動"</string>
     <string name="bubble_bar_action_move_right" msgid="3455099638571411251">"右に移動"</string>
     <string name="bubble_bar_action_dismiss_all" msgid="3290722022983403060">"すべて解除"</string>
-    <string name="bubble_bar_accessibility_announce_expand" msgid="1503192695527477102">"<xliff:g id="BUBBLE_DESCRIPTION">%1$s</xliff:g>を開きます"</string>
-    <string name="bubble_bar_accessibility_announce_collapse" msgid="928284600086798791">"<xliff:g id="BUBBLE_DESCRIPTION">%1$s</xliff:g>を閉じます"</string>
     <string name="search_gesture_feature_title" msgid="1294044108313175306">"かこって検索"</string>
     <string name="header_app_icon_description" msgid="2184625881433608027">"アプリのアイコン"</string>
     <string name="header_default_app_title" msgid="8308052350689531566">"アプリのタイトル"</string>
