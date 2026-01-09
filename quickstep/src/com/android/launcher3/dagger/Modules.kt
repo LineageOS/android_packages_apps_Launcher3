@@ -28,6 +28,7 @@ import com.android.internal.R
 import com.android.internal.policy.DesktopModeCompatPolicy
 import com.android.launcher3.AbstractFloatingViewHelper
 import com.android.launcher3.Flags.enableSystemDrag
+import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.automation.AutomationRepository
 import com.android.launcher3.backuprestore.LauncherRestoreEventLogger
 import com.android.launcher3.concurrent.annotations.ThreadPool
@@ -40,7 +41,6 @@ import com.android.launcher3.homescreenfiles.HomeScreenFilesMediaStoreProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesNoOpProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils
-import com.android.launcher3.icons.IconCache
 import com.android.launcher3.icons.LauncherIconProvider
 import com.android.launcher3.icons.LauncherIconProviderImpl
 import com.android.launcher3.logging.StatsLogManager.StatsLogManagerFactory
@@ -82,7 +82,6 @@ import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.systemui.shared.system.TaskStackChangeListeners
 import com.android.wm.shell.shared.desktopmode.DesktopState
 import dagger.Binds
-import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ElementsIntoSet
@@ -233,7 +232,7 @@ object SystemDragModule {
     @ActivityContextSingleton
     fun provideSystemDragController(
         context: ActivityContext,
-        iconCache: Lazy<IconCache>,
+        idp: InvariantDeviceProfile,
     ): SystemDragController =
         // TODO(b/456787959): Fix drop targets before enabling for secondary display launcher.
         // TODO(b/456787959): Fix drop targets before enabling for taskbar.
@@ -244,7 +243,7 @@ object SystemDragModule {
         ) {
             SystemDragControllerImpl(
                 context,
-                { ctx, params -> SystemDragListener(ctx, iconCache, ::ImageView, params) },
+                { ctx, params -> SystemDragListener(ctx, idp, ::ImageView, params) },
             )
         } else {
             SystemDragControllerStub()

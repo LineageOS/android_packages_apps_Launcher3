@@ -21,7 +21,7 @@ import android.content.Context
 import android.graphics.Point
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
-import android.os.Process
+import android.graphics.drawable.DrawableWrapper
 import android.util.Log
 import android.view.DragEvent
 import android.view.View.MeasureSpec.EXACTLY
@@ -30,9 +30,9 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.lifecycle.Lifecycle
 import com.android.launcher3.DropTarget.DragObject
-import com.android.launcher3.icons.IconCache
+import com.android.launcher3.InvariantDeviceProfile
+import com.android.launcher3.icons.BitmapInfo
 import com.android.launcher3.views.ActivityContext
-import dagger.Lazy
 
 /** Factory used to create listeners for system-level drag-and-drop. */
 fun interface SystemDragListenerFactory {
@@ -44,13 +44,13 @@ fun interface SystemDragListenerFactory {
  * Listener for a single system-level drag-and-drop sequence.
  *
  * @param context The context associated with the sequence.
- * @param iconCache The icon cache used to generate drag images.
+ * @param idp The invariant device profile used to generate drag images.
  * @param imageViewFactory The factory used to create image views.
  * @param params The parameters used for the sequence.
  */
 class SystemDragListener(
     context: ActivityContext,
-    private val iconCache: Lazy<IconCache>,
+    private val idp: InvariantDeviceProfile,
     private val imageViewFactory: (Context) -> ImageView,
     private var params: SystemDragParams?,
 ) :
@@ -216,9 +216,12 @@ class SystemDragListener(
         cleanupCallback?.run()
     }
 
-    // TODO(b/440196506): Use a more appropriate drag image.
     private fun createDragImage(): Drawable =
-        iconCache.get().getDefaultIcon(Process.myUserHandle()).newIcon(mContext.asContext())
+        object : DrawableWrapper(BitmapInfo.LOW_RES_INFO.newIcon(mContext.asContext())) {
+            override fun getIntrinsicHeight(): Int = idp.iconBitmapSize
+
+            override fun getIntrinsicWidth(): Int = idp.iconBitmapSize
+        }
 
     companion object {
         private const val TAG = "SystemDragListener"
