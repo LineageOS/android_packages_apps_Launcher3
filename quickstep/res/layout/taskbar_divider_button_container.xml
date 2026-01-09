@@ -12,4 +12,6 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<com.android.launcher3.taskbar.customization.TaskbarDividerContainer style="@style/BaseIcon.Workspace.Taskbar" />
+<com.android.launcher3.taskbar.customization.TaskbarDividerContainer style="@style/BaseIcon.Workspace.Taskbar"
+    android:id="@+id/taskbar_divider_container"
+    xmlns:android="http://schemas.android.com/apk/res/android" />
