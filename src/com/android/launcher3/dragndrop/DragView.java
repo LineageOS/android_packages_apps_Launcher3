@@ -123,6 +123,11 @@ public class DragView extends FrameLayout {
 
     // Below variable only needed IF FeatureFlags.LAUNCHER3_SPRING_ICONS is {@code true}
     private Drawable mBgSpringDrawable, mFgSpringDrawable;
+
+    // Indicates whether spring animated drawable should be hidden during the drag and drop
+    // sequence, for example, when a system drag shadow is used for the drag.
+    private final boolean mAllowSpringDrawable;
+
     private SpringFloatValue mTranslateX, mTranslateY;
     private Path mScaledMaskPath;
     private Drawable mBadge;
@@ -132,10 +137,11 @@ public class DragView extends FrameLayout {
 
     public DragView(ActivityContext launcher, Drawable drawable, int registrationX,
             int registrationY, final float initialScale, final float scaleOnDrop,
-            final float finalScaleDps) {
+            final float finalScaleDps, boolean allowSpringDrawable) {
         this(launcher, getViewFromDrawable(launcher, drawable),
                 drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(),
-                registrationX, registrationY, initialScale, scaleOnDrop, finalScaleDps);
+                registrationX, registrationY, initialScale, scaleOnDrop, finalScaleDps,
+                allowSpringDrawable);
     }
 
     /**
@@ -152,13 +158,15 @@ public class DragView extends FrameLayout {
      * @param registrationY The y coordinate of the registration point.
      * @param scaleOnDrop   the scale used in the drop animation.
      * @param finalScaleDps the scale used in the zoom out animation when the drag view is shown.
+     * @param allowSpringDrawable whether the spring animated drag image should be shown.
      */
     public DragView(ActivityContext activity, View content, int width, int height,
             int registrationX, int registrationY, final float initialScale, final float scaleOnDrop,
-            final float finalScaleDps) {
+            final float finalScaleDps, boolean allowSpringDrawable) {
         super(activity.asContext());
         mActivity = activity;
         mDragLayer = activity.getDragLayer();
+        mAllowSpringDrawable = allowSpringDrawable;
 
         mContent = content;
         mWidth = width;
@@ -258,6 +266,10 @@ public class DragView extends FrameLayout {
     @TargetApi(Build.VERSION_CODES.O)
     public void setItemInfo(final ItemInfo info) {
         mItemType = info.itemType;
+        if (!mAllowSpringDrawable) {
+            return;
+        }
+
         // Load the adaptive icon on a background thread and add the view in ui thread.
         MODEL_EXECUTOR.getHandler().postAtFrontOfQueue(() -> {
             ThemeManager themeManager = ThemeManager.INSTANCE.get(getContext());

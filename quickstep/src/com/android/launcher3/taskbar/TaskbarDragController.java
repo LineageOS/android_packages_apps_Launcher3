@@ -318,7 +318,8 @@ public class TaskbarDragController extends DragController implements
     @Override
     protected DragView createDragView(@Nullable Drawable drawable, @Nullable View view,
             DraggableView originalView, ItemInfo dragInfo, int dragLayerX, int dragLayerY,
-            Rect dragRegion, float initialDragViewScale, float dragViewScaleOnDrop) {
+            Rect dragRegion, float initialDragViewScale, float dragViewScaleOnDrop,
+            boolean allowSpringDrawable) {
         mRegistrationX = mMotionDown.x - dragLayerX;
         mRegistrationY = mMotionDown.y - dragLayerY;
 
@@ -330,7 +331,8 @@ public class TaskbarDragController extends DragController implements
                 mRegistrationY,
                 initialDragViewScale,
                 dragViewScaleOnDrop,
-                scalePx);
+                scalePx,
+                allowSpringDrawable);
         // Set the elevation so that it is drawn above other views, including bubbles and
         // overflow container.
         dragView.setElevation(dragView.getResources().getDimension(

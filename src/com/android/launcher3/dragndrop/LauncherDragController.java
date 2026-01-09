@@ -61,7 +61,8 @@ public class LauncherDragController extends DragController {
     @Override
     protected DragView createDragView(@Nullable Drawable drawable, @Nullable View view,
             DraggableView originalView, ItemInfo dragInfo, int dragLayerX, int dragLayerY,
-            Rect dragRegion, float initialDragViewScale, float dragViewScaleOnDrop) {
+            Rect dragRegion, float initialDragViewScale, float dragViewScaleOnDrop,
+            boolean allowSpringDrawable) {
         final int registrationX = mMotionDown.x - dragLayerX;
         final int registrationY = mMotionDown.y - dragLayerY;
 
@@ -80,7 +81,8 @@ public class LauncherDragController extends DragController {
                 registrationY,
                 initialDragViewScale,
                 dragViewScaleOnDrop,
-                scalePx)
+                scalePx,
+                allowSpringDrawable)
                 : new LauncherDragView(
                         mLauncher,
                         view,
@@ -90,7 +92,8 @@ public class LauncherDragController extends DragController {
                         registrationY,
                         initialDragViewScale,
                         dragViewScaleOnDrop,
-                        scalePx);
+                        scalePx,
+                        allowSpringDrawable);
     }
 
     @Override
