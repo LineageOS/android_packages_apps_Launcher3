@@ -21,6 +21,8 @@ import android.os.VibrationEffect.Composition.PRIMITIVE_LOW_TICK
 import android.os.VibrationEffect.Composition.PRIMITIVE_THUD
 import android.os.VibrationEffect.Composition.PRIMITIVE_TICK
 import android.os.Vibrator
+import android.service.personalcontext.hint.ContextHint
+import android.util.Log
 import android.view.Surface.ROTATION_270
 import android.view.Surface.ROTATION_90
 import androidx.compose.animation.AnimatedVisibility
@@ -49,6 +51,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -83,8 +87,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.android.cuebar.ui.viewmodel.ActionViewModel
 import com.android.launcher3.R
+import com.android.personalcontext.ace.client.clientsdk.state.AceEmbeddedOverlapBehavior.SetZOrderBehind
+import com.android.personalcontext.ace.client.clientsdk.ui.AceEmbeddedSurfaceView
+import com.android.personalcontext.ace.client.clientsdk.ui.rememberOverlapState
+import com.android.personalcontext.ace.client.clientsdk.ui.rememberSessionState
+import com.android.personalcontext.ace.client.prototype.PrototypeHintUtils.toContextHint
+import com.android.personalcontext.ace.client.prototype.example.ExampleEmbeddedHint
+import com.android.personalcontext.ace.client.prototype.grid.InsightGrid
 import com.android.quickstep.cuebar.ui.compose.OverscrollEffect
 import com.android.quickstep.cuebar.ui.compose.modifier.eduBalloon
+import com.android.systemui.shared.Flags.enableSage
 import kotlin.math.abs
 import kotlin.math.max
 import kotlinx.coroutines.flow.drop
@@ -461,6 +473,20 @@ fun ActionList(
             }
         }
 
+        if (enableSage() && expanded) {
+            var hints by remember {
+                mutableStateOf(
+                    setOf<ContextHint>(
+                        ExampleEmbeddedHint(
+                                totalSpanCapacity = InsightGrid.TOTAL_SPAN_CAPACITY_PHONE
+                            )
+                            .toContextHint()
+                    )
+                )
+            }
+            HelloWorldEmbeddedCard(hints)
+        }
+
         val childHeights = remember(actions) { MutableList(actions.size) { 0 } }
         actions.forEachIndexed { index, action ->
             val scale by
@@ -564,4 +590,21 @@ private fun EducationTooltip(horizontalAlignment: Alignment.Horizontal) {
             color = foregroundColor,
         )
     }
+}
+
+@Composable
+private fun HelloWorldEmbeddedCard(hints: Set<ContextHint>) {
+    Log.i("ActionList", "HelloWorldEmbeddedCard rendered")
+
+    val sessionState = rememberSessionState()
+    val overlapState = rememberOverlapState(SetZOrderBehind.NoFade)
+
+    AceEmbeddedSurfaceView(
+        sessionState = sessionState,
+        overlapState = overlapState,
+        hints = hints,
+        backgroundColor = MaterialTheme.colorScheme.surface,
+        constraintsModifier = Modifier.fillMaxWidth().height(250.dp),
+        errorContent = { Text("Error loading card") },
+    )
 }
