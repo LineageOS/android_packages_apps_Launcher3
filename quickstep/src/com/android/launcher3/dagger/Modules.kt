@@ -32,6 +32,8 @@ import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.automation.AutomationRepository
 import com.android.launcher3.backuprestore.LauncherRestoreEventLogger
 import com.android.launcher3.concurrent.annotations.ThreadPool
+import com.android.launcher3.display.DisplayController
+import com.android.launcher3.display.DisplayControllerImpl
 import com.android.launcher3.dragndrop.SystemDragController
 import com.android.launcher3.dragndrop.SystemDragControllerImpl
 import com.android.launcher3.dragndrop.SystemDragControllerStub
@@ -149,6 +151,8 @@ abstract class ApiWrapperModule {
     abstract fun bindTestInformationHandler(
         impl: QuickstepTestInformationHandler
     ): TestInformationHandler
+
+    @Binds abstract fun bindDisplayController(impl: DisplayControllerImpl): DisplayController
 
     companion object {
         @Provides
