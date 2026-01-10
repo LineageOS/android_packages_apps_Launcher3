@@ -27,6 +27,7 @@ import com.android.launcher3.DeviceProfile
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
+import com.android.launcher3.graphics.theme.ThemePreference
 import com.android.launcher3.util.Executors
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -37,6 +38,7 @@ open class WidgetSizeHandler
 constructor(
     @ApplicationContext private val context: Context,
     private val idp: InvariantDeviceProfile,
+    private val themePreference: ThemePreference,
 ) {
 
     /**
@@ -64,7 +66,14 @@ constructor(
         widgetId: Int,
         executor: Executor = Executors.UI_HELPER_EXECUTOR,
     ) {
-        updateSizeRangesAsyncInternal(widgetId, executor) { getHotseatQsbSizeOptions() }
+        updateSizeRangesAsyncInternal(widgetId, executor) {
+            getHotseatQsbSizeOptions().apply {
+                putBoolean(
+                    MONO_THEME_ENABLED,
+                    ThemePreference.MONO_THEME_VALUE == themePreference.value,
+                )
+            }
+        }
     }
 
     private inline fun updateSizeRangesAsyncInternal(
@@ -76,9 +85,11 @@ constructor(
         executor.execute {
             val widgetManager = AppWidgetManager.getInstance(context)
             val sizeOptions = widgetSizeOptionsProvider.invoke()
+            val widgetOptions = widgetManager.getAppWidgetOptions(widgetId)
             if (
-                sizeOptions.getWidgetSizeList() !=
-                    widgetManager.getAppWidgetOptions(widgetId).getWidgetSizeList()
+                (sizeOptions.getWidgetSizeList() != widgetOptions.getWidgetSizeList()) ||
+                    (sizeOptions.getBoolean(MONO_THEME_ENABLED) !=
+                        widgetOptions.getBoolean(MONO_THEME_ENABLED))
             )
                 widgetManager.updateAppWidgetOptions(widgetId, sizeOptions)
         }
@@ -118,6 +129,7 @@ constructor(
     }
 
     companion object {
+        const val MONO_THEME_ENABLED = "monoThemeEnabled"
 
         fun Bundle.getWidgetSizeList() = getParcelableArrayList<SizeF>(OPTION_APPWIDGET_SIZES)
 
