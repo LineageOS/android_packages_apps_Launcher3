@@ -18,9 +18,10 @@ package com.android.launcher3.tapl;
 import static android.view.KeyEvent.KEYCODE_META_RIGHT;
 
 import static com.android.launcher3.tapl.LauncherInstrumentation.KEYBOARD_QUICK_SWITCH_RES_ID;
-import static com.android.launcher3.tapl.LauncherInstrumentation.TASKBAR_DIVIDER_CONTENT_DESCRIPTION;
+import static com.android.launcher3.tapl.LauncherInstrumentation.TASKBAR_DIVIDER_CONTAINER_RES_ID;
 import static com.android.launcher3.tapl.LauncherInstrumentation.TASKBAR_PINNING_SWITCH_RES_ID;
 import static com.android.launcher3.tapl.LauncherInstrumentation.TASKBAR_RES_ID;
+import static com.android.launcher3.tapl.TaskbarAppIcon.LONG_CLICK_EVENT;
 
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -151,9 +152,9 @@ public final class Taskbar {
                 "want to open taskbar divider menu and toggle always show taskbar option");
              LauncherInstrumentation.Closable e = mLauncher.eventsCheck()) {
             mLauncher.showTaskbarIfHidden();
-            mLauncher.waitForObjectInContainer(
-                    mLauncher.waitForSystemLauncherObject(TASKBAR_RES_ID),
-                    getDividerButtonSelector()).longClick();
+            mLauncher.waitForSystemLauncherObject(TASKBAR_RES_ID);
+            mLauncher.clickAndGet(mLauncher.waitForLauncherObject(TASKBAR_DIVIDER_CONTAINER_RES_ID),
+                    "taskbar_divider_container_popup_menu", LONG_CLICK_EVENT);
             mLauncher.waitForLauncherObject(TASKBAR_PINNING_SWITCH_RES_ID).click();
         }
     }
@@ -246,11 +247,6 @@ public final class Taskbar {
     private static BySelector getAllAppsButtonSelector() {
         // Look for an icon with no text
         return By.clazz(TextView.class).text("");
-    }
-
-    private static BySelector getDividerButtonSelector() {
-        // Look for an icon with no content description
-        return By.clazz(TextView.class).desc(TASKBAR_DIVIDER_CONTENT_DESCRIPTION);
     }
 
     public Rect getVisibleBounds() {

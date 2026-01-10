@@ -36,6 +36,8 @@ import androidx.annotation.Nullable;
 import android.app.contextualsearch.ContextualSearchConfig;
 import android.app.contextualsearch.ContextualSearchManager;
 
+import com.android.launcher3.testing.TestLogging;
+import com.android.launcher3.testing.shared.TestProtocol;
 import com.android.quickstep.TopTaskTracker;
 import com.android.quickstep.util.ContextualSearchInvoker;
 import com.android.internal.jank.Cuj;
@@ -120,6 +122,7 @@ public class TaskbarViewCallbacks {
 
     public View.OnLongClickListener getTaskbarDividerLongClickListener() {
         return v -> {
+            TestLogging.recordEvent(TestProtocol.SEQUENCE_MAIN, "onTaskbarItemLongClick");
             mControllers.taskbarPinningController.showPinningView(v, getDividerCenterX());
             return true;
         };

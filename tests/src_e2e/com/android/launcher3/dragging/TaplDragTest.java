@@ -15,6 +15,7 @@
  */
 package com.android.launcher3.dragging;
 
+import static com.android.launcher3.Flags.FLAG_EXPANDABLE_LONG_PRESS_MENU;
 import static com.android.launcher3.util.TestConstants.AppNames.GMAIL_APP_NAME;
 import static com.android.launcher3.util.TestConstants.AppNames.MAPS_APP_NAME;
 import static com.android.launcher3.util.TestConstants.AppNames.PHOTOS_APP_NAME;
@@ -27,6 +28,7 @@ import static org.junit.Assert.assertTrue;
 
 import android.graphics.Point;
 import android.os.SystemClock;
+import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.PlatinumTest;
 import android.util.Log;
 import android.view.View;
@@ -117,6 +119,7 @@ public class TaplDragTest extends AbstractLauncherUiTest<Launcher, View> {
     @Test
     @PortraitLandscape
     @PlatinumTest(focusArea = "launcher")
+    @DisableFlags(FLAG_EXPANDABLE_LONG_PRESS_MENU)
     public void testDragShortcut() {
 
         final HomeAllApps allApps = mLauncher
@@ -147,6 +150,7 @@ public class TaplDragTest extends AbstractLauncherUiTest<Launcher, View> {
     @Test
     @PortraitLandscape
     @PlatinumTest(focusArea = "launcher")
+    @DisableFlags(FLAG_EXPANDABLE_LONG_PRESS_MENU)
     public void testDragShortcutToMultipleWorkspaceCells() {
         Point[] targets = TestUtil.getCornersAndCenterPositions(mLauncher);
 

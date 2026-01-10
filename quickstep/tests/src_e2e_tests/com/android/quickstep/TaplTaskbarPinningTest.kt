@@ -33,8 +33,11 @@ class TaplTaskbarPinningTest : AbstractTaplTestsTaskbar() {
 
     private lateinit var taskbarFeatureEvaluator: TaskbarFeatureEvaluator
 
+    override fun startCalculatorAppDuringSetup(): Boolean = false
+
     override fun setUp() {
         super.setUp()
+        startAppFast(CALCULATOR_APP_PACKAGE)
         taskbarFeatureEvaluator =
             TaskbarFeatureEvaluator.INSTANCE[mTargetContext][mTargetContext.displayId]!!
     }
@@ -52,7 +55,7 @@ class TaplTaskbarPinningTest : AbstractTaplTestsTaskbar() {
         assertThat(taskbarFeatureEvaluator.isTransient).isTrue()
         mLauncher.goHome().switchToOverview()
         // Pinning
-        taskbar.toggleAlwaysShowTaskbarOption()
+        mLauncher.launchedAppState.taskbar.toggleAlwaysShowTaskbarOption()
         mLauncher.goHome()
 
         assertThat(taskbarFeatureEvaluator.isTransient).isFalse()
@@ -60,7 +63,7 @@ class TaplTaskbarPinningTest : AbstractTaplTestsTaskbar() {
 
         // unpinning
         mLauncher.goHome().switchToOverview()
-        taskbar.toggleAlwaysShowTaskbarOption()
+        mLauncher.launchedAppState.taskbar.toggleAlwaysShowTaskbarOption()
         mLauncher.goHome()
 
         assertThat(taskbarFeatureEvaluator.isTransient).isTrue()
@@ -71,21 +74,18 @@ class TaplTaskbarPinningTest : AbstractTaplTestsTaskbar() {
     @TaskbarModeSwitch(mode = TaskbarModeSwitchRule.Mode.TRANSIENT)
     @ScreenRecordRule.ScreenRecord // b/440078235
     fun testPinningUnpinningTransientTaskbar_whenInApp() {
-        startAppFast(TEST_APP_PACKAGE)
         assertThat(taskbarFeatureEvaluator.isTransient).isTrue()
 
-        mLauncher.launchedAppState.assertTaskbarVisible()
-
         // Pinning
-        taskbar.toggleAlwaysShowTaskbarOption()
+        mLauncher.launchedAppState.taskbar.toggleAlwaysShowTaskbarOption()
         mLauncher.goHome()
 
         assertThat(taskbarFeatureEvaluator.isTransient).isFalse()
         assertThat(taskbarFeatureEvaluator.isPinned).isTrue()
 
         // unpinning
-        startAppFast(TEST_APP_PACKAGE)
-        taskbar.toggleAlwaysShowTaskbarOption()
+        startAppFast(CALCULATOR_APP_PACKAGE)
+        mLauncher.launchedAppState.taskbar.toggleAlwaysShowTaskbarOption()
         mLauncher.goHome()
 
         assertThat(taskbarFeatureEvaluator.isTransient).isTrue()
@@ -96,10 +96,8 @@ class TaplTaskbarPinningTest : AbstractTaplTestsTaskbar() {
     @TaskbarModeSwitch(mode = TaskbarModeSwitchRule.Mode.TRANSIENT)
     @ScreenRecordRule.ScreenRecord // b/440078235
     fun testPinningUnpinningTransientTaskbar_whenInDesktopMode() {
-        startAppFast(CALCULATOR_APP_PACKAGE)
         assertThat(taskbarFeatureEvaluator.isTransient).isTrue()
         mLauncher.goHome().switchToOverview().currentTask.tapMenu().tapDesktopMenuItem()
-        mLauncher.launchedAppState.assertTaskbarVisible()
         assertThat(taskbarFeatureEvaluator.isPinned).isTrue()
 
         // unpinning
