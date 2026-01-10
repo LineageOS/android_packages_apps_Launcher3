@@ -3,6 +3,75 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "81ebbc53_f1922edc",
+        "filename": "res/values/lineage_strings.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 35350
+      },
+      "writtenOn": "2026-01-10T19:31:34Z",
+      "side": 1,
+      "message": "Not a very clear description, maybe try this?\n```suggestion\n    \u003cstring name\u003d\"pref_sleep_gesture_summary\"\u003eDouble-tap an empty area to turn the screen off\u003c/string\u003e\n```",
+      "range": {
+        "startLine": 66,
+        "startChar": 4,
+        "endLine": 66,
+        "endChar": 95
+      },
+      "revId": "3661a340554d60d33f9c003c22dbe96d40b3826b",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0368839e_2ac04dad",
+        "filename": "res/xml/launcher_preferences.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 35350
+      },
+      "writtenOn": "2026-01-10T19:31:34Z",
+      "side": 1,
+      "message": "Doesn\u0027t seem to be needed.",
+      "range": {
+        "startLine": 73,
+        "startChar": 12,
+        "endLine": 73,
+        "endChar": 46
+      },
+      "revId": "3661a340554d60d33f9c003c22dbe96d40b3826b",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f42ff1aa_58b213a5",
+        "filename": "res/xml/launcher_preferences.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 35350
+      },
+      "writtenOn": "2026-01-10T19:31:34Z",
+      "side": 1,
+      "message": "Doesn\u0027t follow the rest of the files code style in spacing",
+      "range": {
+        "startLine": 67,
+        "startChar": 3,
+        "endLine": 74,
+        "endChar": 0
+      },
+      "revId": "3661a340554d60d33f9c003c22dbe96d40b3826b",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "8f6e340c_d50c7b3c",
         "filename": "src/com/android/launcher3/touch/WorkspaceTouchListener.java",
         "patchSetId": 2
