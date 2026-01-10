@@ -72,6 +72,52 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "30fbb4db_7003f98f",
+        "filename": "src/com/android/launcher3/touch/WorkspaceTouchListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 13648
+      },
+      "writtenOn": "2026-01-10T21:05:50Z",
+      "side": 1,
+      "message": "Remove",
+      "range": {
+        "startLine": 32,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 31
+      },
+      "revId": "3661a340554d60d33f9c003c22dbe96d40b3826b",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "186429df_085177ef",
+        "filename": "src/com/android/launcher3/touch/WorkspaceTouchListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 13648
+      },
+      "writtenOn": "2026-01-10T21:05:50Z",
+      "side": 1,
+      "message": "```suggestion\n    private final PowerManager mPowerManager;\n```",
+      "range": {
+        "startLine": 81,
+        "startChar": 34,
+        "endLine": 81,
+        "endChar": 35
+      },
+      "revId": "3661a340554d60d33f9c003c22dbe96d40b3826b",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "8f6e340c_d50c7b3c",
         "filename": "src/com/android/launcher3/touch/WorkspaceTouchListener.java",
         "patchSetId": 2
@@ -83,6 +129,52 @@
       "writtenOn": "2026-01-10T18:57:00Z",
       "side": 1,
       "message": "Switch to the newer method.",
+      "revId": "3661a340554d60d33f9c003c22dbe96d40b3826b",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "22095d92_3611d703",
+        "filename": "src/com/android/launcher3/touch/WorkspaceTouchListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 13648
+      },
+      "writtenOn": "2026-01-10T21:05:50Z",
+      "side": 1,
+      "message": "```suggestion\n        mPowerManager \u003d workspace.getContext().getSystemService(PowerManager.class);\n```",
+      "range": {
+        "startLine": 91,
+        "startChar": 14,
+        "endLine": 91,
+        "endChar": 92
+      },
+      "revId": "3661a340554d60d33f9c003c22dbe96d40b3826b",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9d845b78_55d2e6aa",
+        "filename": "src/com/android/launcher3/touch/WorkspaceTouchListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 13648
+      },
+      "writtenOn": "2026-01-10T21:05:50Z",
+      "side": 1,
+      "message": "```suggestion\n        if (LauncherPrefs.SLEEP_GESTURE.get(mWorkspace.getContext())) {\n            mPowerManager.goToSleep(event.getEventTime());\n        }\n```",
+      "range": {
+        "startLine": 243,
+        "startChar": 8,
+        "endLine": 244,
+        "endChar": 48
+      },
       "revId": "3661a340554d60d33f9c003c22dbe96d40b3826b",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
