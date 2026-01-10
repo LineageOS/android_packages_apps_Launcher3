@@ -116,9 +116,9 @@
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"Abrir"</string>
     <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"Eliminar definitivamente"</string>
     <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"Mover á papeleira"</string>
-    <string name="home_screen_files_moved_to_trash_message" msgid="381256565590274395">"Movéuse contido (<xliff:g id="ITEM_NAME">%1$s</xliff:g>) á papeleira"</string>
+    <string name="home_screen_files_moved_to_trash_message" msgid="381256565590274395">"Moveuse <xliff:g id="ITEM_NAME">%1$s</xliff:g> á papeleira"</string>
     <string name="home_screen_files_move_to_trash_error_message" msgid="3836240816166417826">"Non se puido mover o contido á papeleira. Produciuse un erro."</string>
-    <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"Non se puido desfacer a acción. Vai á aplicación Ficheiros para restaurar o contido."</string>
+    <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"Non se puido desfacer a acción. Vai á aplicación Files para restaurar o contido."</string>
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"Accións"</string>
     <string name="shortcuts_popup_menu_button" msgid="766598805805882499">"Atallos"</string>
     <string name="loading_shortcut" msgid="2638272014233830958">"Cargando atallo"</string>

@@ -122,8 +122,7 @@
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"Ações"</string>
     <string name="shortcuts_popup_menu_button" msgid="766598805805882499">"Atalhos"</string>
     <string name="loading_shortcut" msgid="2638272014233830958">"A carregar atalho"</string>
-    <!-- no translation found for pause_app_label (6796255881727695791) -->
-    <skip />
+    <string name="pause_app_label" msgid="6796255881727695791">"Pausar app"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"instalar atalhos"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"Permite a uma app adicionar atalhos sem a intervenção do utilizador."</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"ler definições e atalhos do ecrã Principal"</string>

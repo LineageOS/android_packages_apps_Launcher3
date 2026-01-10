@@ -24,6 +24,8 @@ import android.platform.test.rule.LimitDevicesRule
 import com.android.launcher3.DeviceProfile.Builder.createDefaultDisplayOptionSpec
 import com.android.launcher3.DeviceProfile.DEFAULT_DIMENSION_PROVIDER
 import com.android.launcher3.DeviceProfile.DEFAULT_PROVIDER
+import com.android.launcher3.deviceprofile.DeviceConfiguration
+import com.android.launcher3.deviceprofile.DeviceProperties.Factory.createDeviceProperties
 import com.android.launcher3.display.LauncherDisplayInfo
 import com.android.launcher3.testing.shared.ResourceUtils.INVALID_RESOURCE_HANDLE
 import com.android.launcher3.util.SandboxApplication
@@ -73,12 +75,18 @@ abstract class FakeInvariantDeviceProfileTest {
             inv,
             info,
             context.appComponent.wmProxy,
-            windowBounds,
-            /*isExternalDisplay=*/ false,
-            transposeLayoutWithOrientation,
-            useTwoPanels,
-            isGestureMode,
-            workspaceItemsLabelHidden,
+            createDeviceProperties(
+                info = info,
+                windowBounds = windowBounds,
+                deviceConfiguration =
+                    DeviceConfiguration(
+                        isExternalDisplay = false,
+                        transposeLayoutWithOrientation = transposeLayoutWithOrientation,
+                        isMultiDisplay = useTwoPanels,
+                        isGestureMode = isGestureMode,
+                        isWorkspaceItemsLabelHidden = workspaceItemsLabelHidden,
+                    ),
+            ),
             DEFAULT_PROVIDER,
             DEFAULT_DIMENSION_PROVIDER,
             createDefaultDisplayOptionSpec(

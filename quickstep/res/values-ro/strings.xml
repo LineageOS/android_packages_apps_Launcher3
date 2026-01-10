@@ -171,8 +171,6 @@
     <string name="bubble_bar_action_move_left" msgid="3306922475737714758">"Deplasează spre stânga"</string>
     <string name="bubble_bar_action_move_right" msgid="3455099638571411251">"Deplasează spre dreapta"</string>
     <string name="bubble_bar_action_dismiss_all" msgid="3290722022983403060">"Închide-le pe toate"</string>
-    <string name="bubble_bar_accessibility_announce_expand" msgid="1503192695527477102">"extinde <xliff:g id="BUBBLE_DESCRIPTION">%1$s</xliff:g>"</string>
-    <string name="bubble_bar_accessibility_announce_collapse" msgid="928284600086798791">"restrânge <xliff:g id="BUBBLE_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="search_gesture_feature_title" msgid="1294044108313175306">"Încercuiește și caută"</string>
     <string name="header_app_icon_description" msgid="2184625881433608027">"Pictograma aplicației"</string>
     <string name="header_default_app_title" msgid="8308052350689531566">"Titlul aplicației"</string>

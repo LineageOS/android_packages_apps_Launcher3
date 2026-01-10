@@ -18,7 +18,6 @@ package com.android.quickstep.logging
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.SessionCommitReceiver.ADD_ICON_PREFERENCE_KEY
-import com.android.launcher3.dagger.ApiWrapperModule
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.graphics.ThemeManager
 import com.android.launcher3.logging.InstanceId
@@ -52,11 +51,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
-@MutatedComponent(
-    target = LauncherAppComponent::class,
-    installModules = [FakePrefsModule::class],
-    uninstallModules = [ApiWrapperModule::class],
-)
+@MutatedComponent(target = LauncherAppComponent::class, installModules = [FakePrefsModule::class])
 class SettingsChangeLoggerTest {
 
     @get:Rule val mockito = MockitoJUnit.rule()

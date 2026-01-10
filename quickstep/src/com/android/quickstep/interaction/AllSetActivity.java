@@ -448,7 +448,10 @@ public class AllSetActivity extends Activity {
     }
 
     private void updateTextForNavigationMode() {
-        boolean isGestureMode = getDP().getDeviceProperties().isGestureMode();
+        boolean isGestureMode = getDP()
+                .getDeviceProperties()
+                .getDeviceConfiguration()
+                .isGestureMode();
         int hintTextResId;
         String subtitleText = null;
 

@@ -20,6 +20,8 @@ import android.content.Context
 import com.android.launcher3.AbstractFloatingViewHelper
 import com.android.launcher3.automation.AutomationNoOpRepository
 import com.android.launcher3.automation.AutomationRepository
+import com.android.launcher3.display.DisplayController
+import com.android.launcher3.display.DisplayControllerImpl
 import com.android.launcher3.dragndrop.SystemDragController
 import com.android.launcher3.dragndrop.SystemDragControllerStub
 import com.android.launcher3.homescreenfiles.HomeScreenFilesNoOpProvider
@@ -52,7 +54,11 @@ abstract class ActivityContextModule {
     }
 }
 
-@Module abstract class ApiWrapperModule
+@Module
+abstract class ApiWrapperModule {
+
+    @Binds abstract fun bindDisplayController(impl: DisplayControllerImpl): DisplayController
+}
 
 @Module
 abstract class WidgetModule {

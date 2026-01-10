@@ -122,8 +122,7 @@
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"작업"</string>
     <string name="shortcuts_popup_menu_button" msgid="766598805805882499">"단축키"</string>
     <string name="loading_shortcut" msgid="2638272014233830958">"바로가기 로드 중"</string>
-    <!-- no translation found for pause_app_label (6796255881727695791) -->
-    <skip />
+    <string name="pause_app_label" msgid="6796255881727695791">"앱 일시중지"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"바로가기 설치"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"앱이 사용자의 작업 없이 바로가기를 추가할 수 있도록 합니다."</string>
     <string name="permlab_read_settings" msgid="5136500343007704955">"홈 설정 및 바로가기 읽기"</string>

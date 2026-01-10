@@ -1790,7 +1790,7 @@ public abstract class AbsSwipeUpHandler<
     }
 
     private void doLogGesture(GestureEndTarget endTarget, @Nullable TaskView targetTaskView) {
-        if (mDp == null || !mDp.getDeviceProperties().isGestureMode()) {
+        if (mDp == null || !mDp.getDeviceProperties().getDeviceConfiguration().isGestureMode()) {
             // We probably never received an animation controller, skip logging.
             return;
         }

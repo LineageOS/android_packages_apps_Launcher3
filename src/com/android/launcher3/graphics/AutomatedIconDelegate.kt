@@ -35,6 +35,7 @@ import androidx.dynamicanimation.animation.FloatValueHolder
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.app.animation.InterpolatorsAndroidX
+import com.android.launcher3.Flags
 import com.android.launcher3.R
 import com.android.launcher3.graphics.AnimationState.ENTER
 import com.android.launcher3.graphics.AnimationState.EXIT
@@ -242,7 +243,7 @@ class AutomatedIconDelegate(
                 scale(currentIconScale.value, currentIconScale.value, center, center)
                 parentDelegate.drawContent(info, iconShape, canvas, fixedDelegateBounds, paint)
             }
-            if (canvas.isHardwareAccelerated) {
+            if (canvas.isHardwareAccelerated && !Flags.disableAppAutomationBlur()) {
                 val recordingCanvas = glowNode.beginRecording()
                 try {
                     recordingCanvas.translate(glowPadding.toFloat(), glowPadding.toFloat())

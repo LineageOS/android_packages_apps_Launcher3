@@ -19,6 +19,7 @@ package com.android.quickstep
 import android.graphics.Rect
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.DeviceProfile
+import com.android.launcher3.deviceprofile.DeviceConfiguration
 import com.android.launcher3.deviceprofile.DeviceProperties
 import com.android.quickstep.recents.data.RecentsDeviceProfile
 import com.android.quickstep.recents.data.RecentsDeviceProfileRepositoryImpl
@@ -77,12 +78,16 @@ class RecentsDeviceProfileRepositoryImplTest {
                 aspectRatio = 1f,
                 isLargeScreen = isTablet,
                 isPhone = false,
-                transposeLayoutWithOrientation = false,
-                isMultiDisplay = false,
                 isTwoPanels = false,
                 isLandscape = false,
-                isExternalDisplay = false,
-                isGestureMode = false,
+                deviceConfiguration =
+                    DeviceConfiguration(
+                        isExternalDisplay = false,
+                        transposeLayoutWithOrientation = false,
+                        isMultiDisplay = false,
+                        isGestureMode = false,
+                        isWorkspaceItemsLabelHidden = false,
+                    ),
                 insets = Rect(0, 0, 0, 0),
             )
 

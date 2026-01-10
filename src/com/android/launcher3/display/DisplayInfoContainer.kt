@@ -17,8 +17,10 @@ package com.android.launcher3.display
 
 import android.content.ComponentCallbacks
 import android.content.Context
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.util.DisplayMetrics
+import com.android.launcher3.Flags
 import com.android.launcher3.display.PortraitSize.Companion.from
 import com.android.launcher3.util.MutableDiffAwareRef
 import com.android.launcher3.util.WindowBounds
@@ -30,8 +32,11 @@ class DisplayInfoContainer(
     val displayId: Int,
     val windowContext: Context,
     private val wmProxy: WindowManagerProxy,
-    private val isDesktopFormFactor: Boolean,
 ) : ComponentCallbacks {
+
+    private val isDesktopFormFactor =
+        Flags.enableScalabilityForDesktopExperience() &&
+            windowContext.packageManager.hasSystemFeature(PackageManager.FEATURE_PC)
 
     private val _info: MutableDiffAwareRef<LauncherDisplayInfo, Int> =
         MutableDiffAwareRef(getNewInfo())

@@ -638,6 +638,16 @@ flag {
 }
 
 flag {
+  name: "disable_app_automation_blur"
+  namespace: "launcher"
+  description: "Disables usage of blur effect for rendering automated icons"
+  bug: "440353845"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "fallback_reveal_animation"
     namespace: "launcher"
     description: "Introduces a Launcher reveal animation that runs as a backup when a different process takes care of the overall transition animation."

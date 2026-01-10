@@ -23,6 +23,7 @@ import android.content.Intent
 import android.graphics.Point
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.DrawableWrapper
 import android.net.Uri
 import android.os.Looper
 import android.platform.test.annotations.EnableFlags
@@ -33,13 +34,14 @@ import android.view.DragEvent
 import android.view.View
 import android.widget.ImageView
 import androidx.core.view.size
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.filters.SmallTest
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.DropTarget.DragObject
 import com.android.launcher3.Flags.FLAG_ENABLE_SYSTEM_DRAG
+import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.icons.BitmapInfo
 import com.android.launcher3.icons.FastBitmapDrawable
-import com.android.launcher3.icons.IconCache
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.util.RoboApiWrapper
 import com.android.launcher3.views.ActivityContext
@@ -109,11 +111,10 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
 
         private const val DRAG_EVENT_X = 10.0f
         private const val DRAG_EVENT_Y = 20.0f
-        private const val DRAG_IMAGE_INTRINSIC_HEIGHT = 24
-        private const val DRAG_IMAGE_INTRINSIC_WIDTH = 48
         private const val DRAG_LAYER_X = 1
         private const val DRAG_LAYER_Y = 2
         private const val DRAG_VIEW_SCALE_ON_DROP = 3.0f
+        private const val IDP_ICON_BITMAP_SIZE = 24
         private const val INITIAL_DRAG_VIEW_SCALE = 4.0f
     }
 
@@ -122,10 +123,9 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
 
     @Mock private lateinit var mockContext: ActivityContext
     @Mock private lateinit var mockDragEvent: DragEvent
-    @Mock private lateinit var mockDragImage: FastBitmapDrawable
     @Mock private lateinit var mockDragLayer: DragLayer
     @Mock private lateinit var mockFloatingView: TestFloatingView
-    @Mock private lateinit var mockIconCache: IconCache
+    @Mock private lateinit var mockIdp: InvariantDeviceProfile
 
     private lateinit var listener: SystemDragListener
 
@@ -133,10 +133,9 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
     fun setUp() {
         initMock(mockContext)
         initMock(mockDragEvent)
-        initMock(mockDragImage)
         initMock(mockDragLayer)
         initMock(mockFloatingView)
-        initMock(mockIconCache)
+        initMock(mockIdp)
 
         if (params?.dragInfo is SystemDragItemInfo && mockingDetails(params.dragInfo).isMock) {
             initMock(params.dragInfo as SystemDragItemInfo)
@@ -145,7 +144,7 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
         listener =
             SystemDragListener(
                 mockContext,
-                { mockIconCache },
+                mockIdp,
                 { mock<ImageView>().apply(::initMock) },
                 params,
             )
@@ -247,8 +246,8 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
             assertEquals(params.dragInfo, dragInfoCaptor.firstValue)
         } else {
             val screenPos = Point(mockDragEvent.x.toInt(), mockDragEvent.y.toInt())
-            val dragLayerX = screenPos.x - (mockDragImage.intrinsicWidth / 2)
-            val dragLayerY = screenPos.y - (mockDragImage.intrinsicHeight / 2)
+            val dragLayerX = screenPos.x - (mockIdp.iconBitmapSize / 2)
+            val dragLayerY = screenPos.y - (mockIdp.iconBitmapSize / 2)
 
             verify(mockContext.dragController)
                 .startDrag(
@@ -266,7 +265,14 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
 
             with(dragImageCaptor.firstValue) {
                 assertEquals(0.0f, alpha)
-                assertEquals(mockDragImage, drawable)
+                with(drawable as DrawableWrapper) {
+                    assertEquals(mockIdp.iconBitmapSize, intrinsicHeight)
+                    assertEquals(mockIdp.iconBitmapSize, intrinsicWidth)
+                    assertEquals(
+                        BitmapInfo.LOW_RES_INFO,
+                        (drawable as? FastBitmapDrawable)?.bitmapInfo,
+                    )
+                }
             }
 
             assertTrue(dragInfoCaptor.firstValue is SystemDragItemInfo)
@@ -379,7 +385,7 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
         whenever(mockContext.lifecycle.currentState).thenReturn(mock())
         whenever(mockContext.dragController).thenReturn(mock())
         whenever(mockContext.dragLayer).thenReturn(mockDragLayer)
-        doReturn(mock<Context>()).whenever(mockContext).asContext()
+        doReturn(ApplicationProvider.getApplicationContext()).whenever(mockContext).asContext()
     }
 
     private fun initMock(mockDragEvent: DragEvent) {
@@ -388,11 +394,6 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
         whenever(mockDragEvent.clipDescription).thenReturn(mockClipDescription)
         whenever(mockDragEvent.x).thenReturn(DRAG_EVENT_X)
         whenever(mockDragEvent.y).thenReturn(DRAG_EVENT_Y)
-    }
-
-    private fun initMock(mockDragImage: FastBitmapDrawable) {
-        whenever(mockDragImage.intrinsicHeight).thenReturn(DRAG_IMAGE_INTRINSIC_HEIGHT)
-        whenever(mockDragImage.intrinsicWidth).thenReturn(DRAG_IMAGE_INTRINSIC_WIDTH)
     }
 
     private fun initMock(mockDragLayer: DragLayer) {
@@ -420,10 +421,8 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
         }
     }
 
-    private fun initMock(mockIconCache: IconCache) {
-        val mockBitmapInfo = mock<BitmapInfo>()
-        whenever(mockBitmapInfo.newIcon(any(), any(), anyOrNull())).thenReturn(mockDragImage)
-        whenever(mockIconCache.getDefaultIcon(any())).thenReturn(mockBitmapInfo)
+    private fun initMock(mockIdp: InvariantDeviceProfile) {
+        mockIdp.iconBitmapSize = IDP_ICON_BITMAP_SIZE
     }
 
     private fun initMock(mockSystemDragItemInfo: SystemDragItemInfo) {
