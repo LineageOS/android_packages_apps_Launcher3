@@ -71,6 +71,30 @@
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "bf5998a6_72cef3e0",
+        "filename": "res/xml/launcher_preferences.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 35436
+      },
+      "writtenOn": "2026-01-11T07:27:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0368839e_2ac04dad",
+      "range": {
+        "startLine": 73,
+        "startChar": 12,
+        "endLine": 73,
+        "endChar": 46
+      },
+      "revId": "3661a340554d60d33f9c003c22dbe96d40b3826b",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "f42ff1aa_58b213a5",
