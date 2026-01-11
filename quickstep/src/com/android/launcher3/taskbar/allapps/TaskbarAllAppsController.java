@@ -19,6 +19,7 @@ import static com.android.launcher3.model.data.AppInfo.EMPTY_ARRAY;
 import static com.android.launcher3.taskbar.TaskbarDesktopExperienceFlags.enableCustomHeightForAllAppsOnCd;
 
 import android.content.res.Resources;
+import android.graphics.Rect;
 import android.view.Gravity;
 import android.view.View;
 
@@ -221,7 +222,8 @@ public final class TaskbarAllAppsController {
             if (allAppsHeight <= maxAllAppsHeight) {
                 BaseDragLayer.LayoutParams lp =
                         (BaseDragLayer.LayoutParams) mSlideInView.getLayoutParams();
-                lp.height = allAppsHeight;
+                Rect padding = dp.getAllAppsProfile().getPadding();
+                lp.height = allAppsHeight + padding.top + padding.bottom;
                 lp.gravity = Gravity.BOTTOM;
             }
         }
