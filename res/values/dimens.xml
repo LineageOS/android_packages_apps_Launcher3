@@ -604,6 +604,4 @@
 
     <!-- Automated Icons -->
     <dimen name="automated_icon_stroke_width">3dp</dimen>
-    <dimen name="automated_icon_glow_radius">5dp</dimen>
-    <dimen name="automated_icon_glow_padding">15dp</dimen>
 </resources>
