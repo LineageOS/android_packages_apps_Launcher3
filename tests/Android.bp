@@ -116,9 +116,6 @@ android_library {
 
 android_test {
     name: "Launcher3Tests",
-    defaults: [
-        "launcher_compose_tests_defaults",
-    ],
     srcs: [
         ":launcher-tests-src",
         ":launcher-non-quickstep-tests-src",

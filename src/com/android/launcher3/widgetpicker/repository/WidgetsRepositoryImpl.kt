@@ -77,6 +77,7 @@ constructor(
     private val featuredWidgetsDataSource: FeaturedWidgetsDataSource,
     private val searchAlgorithm: WidgetsSearchAlgorithm,
     private val widgetCreatorAppPackageProvider: WidgetCreatorAppPackageProvider,
+    private val databaseWidgetPreviewLoader: DatabaseWidgetPreviewLoader,
     @param:BackgroundContext private val backgroundContext: CoroutineContext,
 ) : WidgetsRepository {
     private val deviceProfile = idp.getDeviceProfile(appContext)
@@ -84,7 +85,6 @@ constructor(
         CoroutineScope(SupervisorJob() + backgroundContext + CoroutineName("WidgetsRepository"))
 
     private val _widgetItemsByPackage = MutableStateFlow<List<WidgetApp>>(emptyList())
-    private val databaseWidgetPreviewLoader = DatabaseWidgetPreviewLoader(appContext, deviceProfile)
 
     override fun initialize(options: InitializationOptions) {
         // TODO(b/419495339): Remove the model executor requirement from widgets model and replace
