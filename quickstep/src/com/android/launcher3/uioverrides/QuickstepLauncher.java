@@ -468,6 +468,15 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     }
 
     @Override
+    protected void onScreenOnChanged(boolean isOn) {
+        if (!isOn && isRecentsViewVisible()) {
+            ((RecentsView) getOverviewPanel()).startHome();
+        } else {
+            super.onScreenOnChanged(isOn);
+        }
+    }
+
+    @Override
     public RunnableList startActivitySafely(View v, Intent intent, ItemInfo item) {
         PredictionRowView<?> predictionRowView =
                 getAppsView().getFloatingHeaderView().findFixedRowByType(PredictionRowView.class);
@@ -1710,7 +1719,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     }
 
     @Override
-    public void returnToHomescreen() {
+    public void returnToHomescreenAfterFreeformShortcut() {
         getStateManager().goToState(LauncherState.NORMAL);
     }
 

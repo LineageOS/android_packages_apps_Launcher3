@@ -199,7 +199,7 @@ public interface TaskShortcutFactory {
             RecentsView rv = mTarget.getOverviewPanel();
             rv.switchToScreenshot(() -> {
                 rv.finishRecentsAnimation(true /* toHome */, false /* shouldPip */, () -> {
-                    mTarget.returnToHomescreen();
+                    mTarget.returnToHomescreenAfterFreeformShortcut();
                     rv.getHandler().post(this::startActivity);
                 });
             });

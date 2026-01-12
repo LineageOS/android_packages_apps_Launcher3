@@ -305,9 +305,9 @@ constructor(
         }
 
     private val screenChangedListener = ScreenOnListener { isOn ->
-        if (!isOn) {
+        if (!isOn && isRecentsViewVisible()) {
             Log.d(TAG, "screen turned off")
-            recentsView?.returnToDesktop()
+            recentsView?.startHome()
         }
     }
 
@@ -905,7 +905,7 @@ constructor(
         eventCallbacks[event].remove(callback)
     }
 
-    override fun returnToHomescreen() {
+    override fun returnToHomescreenAfterFreeformShortcut() {
         startHomeWithRemoteAnimation()
     }
 
