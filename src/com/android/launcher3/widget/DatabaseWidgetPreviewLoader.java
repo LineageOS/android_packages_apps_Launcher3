@@ -40,10 +40,13 @@ import androidx.annotation.VisibleForTesting;
 import androidx.core.os.BuildCompat;
 
 import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.LauncherAppState;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
+import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.icons.BitmapRenderer;
+import com.android.launcher3.icons.IconCache;
 import com.android.launcher3.icons.LauncherIcons;
 import com.android.launcher3.model.WidgetItem;
 import com.android.launcher3.pm.ShortcutConfigActivityInfo;
@@ -52,8 +55,11 @@ import com.android.launcher3.util.Executors;
 import com.android.launcher3.util.LooperExecutor;
 import com.android.launcher3.widget.util.WidgetSizes;
 
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
+
+import javax.inject.Inject;
 
 /**
  * Utility class to generate widget previews
@@ -67,10 +73,22 @@ public class DatabaseWidgetPreviewLoader {
     private final Context mContext;
 
     private final DeviceProfile mDeviceProfile;
+    private final IconCache mIconCache;
 
+    @Deprecated // Inject this class instead
     public DatabaseWidgetPreviewLoader(Context context, DeviceProfile deviceProfile) {
         mContext = context;
         mDeviceProfile = deviceProfile;
+        mIconCache = LauncherAppState.getInstance(context).getIconCache();
+    }
+
+    @Inject
+    public DatabaseWidgetPreviewLoader(@ApplicationContext Context context,
+            InvariantDeviceProfile idp,
+            IconCache iconCache) {
+        mContext = context;
+        mDeviceProfile = idp.getDeviceProfile(context);
+        mIconCache = iconCache;
     }
 
     /**
@@ -249,8 +267,7 @@ public class DatabaseWidgetPreviewLoader {
 
                 // Draw icon in the center.
                 try {
-                    Drawable icon = info.getFullResIcon(
-                            LauncherAppState.getInstance(mContext).getIconCache());
+                    Drawable icon = info.getFullResIcon(mIconCache);
                     if (icon != null) {
                         int appIconSize = mDeviceProfile.getWorkspaceIconProfile().getIconSizePx();
                         int iconSize = (int) Math.min(appIconSize * scale,
@@ -281,8 +298,7 @@ public class DatabaseWidgetPreviewLoader {
         return BitmapRenderer.createHardwareBitmap(size, size, c -> {
             LauncherIcons li = LauncherIcons.obtain(mContext);
             Drawable icon = li.createBadgedIconBitmap(
-                    mutateOnMainThread(info.getFullResIcon(
-                            LauncherAppState.getInstance(mContext).getIconCache())))
+                    mutateOnMainThread(Objects.requireNonNull(info.getFullResIcon(mIconCache))))
                     .newIcon(mContext);
             li.recycle();
 
