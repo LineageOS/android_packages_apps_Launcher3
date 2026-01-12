@@ -63,7 +63,6 @@ class GroupedTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
     val rightBottomTaskContainer: TaskContainer
         get() = taskContainers[1]
 
-    // TODO(b/336612373): Support new TTV for GroupedTaskView
     var splitBoundsConfig: SplitBounds? = null
         private set
 
