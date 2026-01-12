@@ -23,6 +23,7 @@ import com.android.launcher3.concurrent.annotations.TaskbarUi
 import com.android.launcher3.concurrent.annotations.ThreadPool
 import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.dagger.LauncherAppSingleton
+import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.Executors.getTaskbarUiThread
 import com.android.launcher3.util.LooperExecutor
@@ -33,6 +34,9 @@ import com.google.common.util.concurrent.MoreExecutors
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import java.util.concurrent.Executor
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.cancel
 
 /** Module that provides the executors for Launcher3 as per the [ExecutorsModule] interface. */
 @Module
@@ -75,43 +79,76 @@ abstract class LauncherExecutorsModule {
         @Provides
         @LauncherAppSingleton
         @Ui
-        fun provideUiLooperExecutor(): LooperExecutor {
-            return Executors.MAIN_EXECUTOR
-        }
+        fun provideUiLooperExecutor(): LooperExecutor = Executors.MAIN_EXECUTOR
 
         @Provides
         @LauncherAppSingleton
         @TaskbarUi
-        fun provideTaskbarUiLooperExecutor(): LooperExecutor {
-            return getTaskbarUiThread()
-        }
+        fun provideTaskbarUiLooperExecutor(): LooperExecutor = getTaskbarUiThread()
 
         @Provides
         @LauncherAppSingleton
         @LightweightBackground(LightweightBackgroundPriority.UI)
-        fun provideUiHelperLooperExecutor(): LooperExecutor {
-            return Executors.UI_HELPER_EXECUTOR
-        }
+        fun provideUiHelperLooperExecutor(): LooperExecutor = Executors.UI_HELPER_EXECUTOR
 
         @Provides
         @LauncherAppSingleton
         @LightweightBackground(LightweightBackgroundPriority.DATA)
-        fun provideDataExecutorService(): ListeningExecutorService {
-            return Executors.DATA_HELPER_EXECUTOR
-        }
+        fun provideDataExecutorService(): ListeningExecutorService = Executors.DATA_HELPER_EXECUTOR
 
         @Provides
         @LauncherAppSingleton
         @Background
-        fun provideBackgroundLooperExecutor(): LooperExecutor {
-            return Executors.ORDERED_BG_EXECUTOR
-        }
+        fun provideBackgroundLooperExecutor(): LooperExecutor = Executors.ORDERED_BG_EXECUTOR
 
         @Provides
         @LauncherAppSingleton
         @ThreadPool
-        fun provideThreadPoolExecutorService(): ListeningExecutorService {
-            return MoreExecutors.listeningDecorator(Executors.THREAD_POOL_EXECUTOR)
-        }
+        fun provideThreadPoolExecutorService(): ListeningExecutorService =
+            MoreExecutors.listeningDecorator(Executors.THREAD_POOL_EXECUTOR)
+
+        // The following methods provide the CoroutineContext for the executors.
+        @Provides
+        @Ui
+        fun provideUiDispatcher(@Ui executor: Executor, lifecycle: DaggerSingletonTracker) =
+            executor.asDispatcherWithLifecycle(lifecycle)
+
+        @Provides
+        @TaskbarUi
+        fun provideTaskbarUiDispatcher(
+            @TaskbarUi executor: Executor,
+            lifecycle: DaggerSingletonTracker,
+        ) = executor.asDispatcherWithLifecycle(lifecycle)
+
+        @Provides
+        @LightweightBackground(LightweightBackgroundPriority.DATA)
+        fun provideDataLightweightDispatcher(
+            @LightweightBackground(LightweightBackgroundPriority.DATA) executor: Executor,
+            lifecycle: DaggerSingletonTracker,
+        ) = executor.asDispatcherWithLifecycle(lifecycle)
+
+        @Provides
+        @LightweightBackground(LightweightBackgroundPriority.UI)
+        fun provideUiLightweightDispatcher(
+            @LightweightBackground(LightweightBackgroundPriority.UI) executor: Executor,
+            lifecycle: DaggerSingletonTracker,
+        ) = executor.asDispatcherWithLifecycle(lifecycle)
+
+        @Provides
+        @Background
+        fun provideBackgroundDispatcher(
+            @Background executor: Executor,
+            lifecycle: DaggerSingletonTracker,
+        ) = executor.asDispatcherWithLifecycle(lifecycle)
+
+        @Provides
+        @ThreadPool
+        fun provideThreadPoolDispatcher(
+            @ThreadPool executor: Executor,
+            lifecycle: DaggerSingletonTracker,
+        ) = executor.asDispatcherWithLifecycle(lifecycle)
+
+        private fun Executor.asDispatcherWithLifecycle(lifecycle: DaggerSingletonTracker) =
+            asCoroutineDispatcher().also { lifecycle.addCloseable(this) { it.cancel() } }
     }
 }

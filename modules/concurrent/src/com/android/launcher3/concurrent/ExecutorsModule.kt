@@ -29,12 +29,10 @@ import com.android.launcher3.concurrent.annotations.UiContext
 import com.google.common.util.concurrent.ListeningExecutorService
 import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.asCoroutineDispatcher
 
 /**
  * Module that stipulates the executors that are usable by common launcher modules.
@@ -160,39 +158,4 @@ interface ExecutorsModule {
     fun provideThreadPoolContext(
         @ThreadPool threadPoolDispatcher: CoroutineDispatcher
     ): CoroutineContext
-
-    // The following methods provide the CoroutineContext for the executors.
-    companion object {
-
-        @Provides
-        @Ui
-        fun provideUiDispatcher(@Ui executor: Executor) = executor.asCoroutineDispatcher()
-
-        @Provides
-        @TaskbarUi
-        fun provideTaskbarUiDispatcher(@TaskbarUi executor: Executor) =
-            executor.asCoroutineDispatcher()
-
-        @Provides
-        @LightweightBackground(LightweightBackgroundPriority.DATA)
-        fun provideDataLightweightDispatcher(
-            @LightweightBackground(LightweightBackgroundPriority.DATA) executor: Executor
-        ) = executor.asCoroutineDispatcher()
-
-        @Provides
-        @LightweightBackground(LightweightBackgroundPriority.UI)
-        fun provideUiLightweightDispatcher(
-            @LightweightBackground(LightweightBackgroundPriority.UI) executor: Executor
-        ) = executor.asCoroutineDispatcher()
-
-        @Provides
-        @Background
-        fun provideBackgroundDispatcher(@Background executor: Executor) =
-            executor.asCoroutineDispatcher()
-
-        @Provides
-        @ThreadPool
-        fun provideThreadPoolDispatcher(@ThreadPool executor: Executor) =
-            executor.asCoroutineDispatcher()
-    }
 }
