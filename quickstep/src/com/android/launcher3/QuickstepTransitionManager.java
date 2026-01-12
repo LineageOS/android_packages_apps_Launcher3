@@ -450,7 +450,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         if (mLauncher.getStateManager().getState() == NORMAL
                 && taskbarInteractor != null
                 // Disable synchronization for widgets due to issues with PendingIntent.
-                && itemInfo.itemType != ITEM_TYPE_APPWIDGET) {
+                && (itemInfo != null && itemInfo.itemType != ITEM_TYPE_APPWIDGET)) {
             taskbarInteractor.setIgnoreInAppFlagForSync(true);
             mLauncher.addEventCallback(EVENT_DESTROYED, onEndCallback::executeAllAndDestroy);
             onEndCallback.add(() -> {
