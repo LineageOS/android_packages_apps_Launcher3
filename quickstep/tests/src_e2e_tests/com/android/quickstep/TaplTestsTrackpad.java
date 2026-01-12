@@ -34,6 +34,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.launcher3.Flags;
 import com.android.launcher3.tapl.LauncherInstrumentation.TrackpadGestureType;
 import com.android.launcher3.tapl.Workspace;
+import com.android.launcher3.util.rule.ScreenRecordRule;
 import com.android.launcher3.util.rule.ShellCommandRule;
 import com.android.quickstep.NavigationModeSwitchRule.NavigationModeSwitch;
 
@@ -105,6 +106,7 @@ public class TaplTestsTrackpad extends AbstractQuickStepTest {
     @FlakyTest(bugId = 460204501)
     @NavigationModeSwitch
     @DisableFlags(Flags.FLAG_ENABLE_NEW_TOUCHPAD_GESTURES)
+    @ScreenRecordRule.ScreenRecord  // b/460204501
     public void switchToOverview() throws Exception {
         assumeTrue("Ignoring test because device is not a tablet",
             mLauncher.isTablet());
