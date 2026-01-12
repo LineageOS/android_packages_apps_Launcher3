@@ -167,7 +167,7 @@ import com.android.quickstep.util.WorkspaceRevealAnim;
 import com.android.quickstep.views.FloatingWidgetView;
 import com.android.quickstep.views.RecentsView;
 import com.android.systemui.animation.RemoteAnimationRunnerCompat;
-import com.android.systemui.animation.RemoteTransitionDelegate;
+import com.android.systemui.animation.RemoteTransitionPickerDelegate;
 import com.android.systemui.shared.system.BlurUtils;
 import com.android.systemui.shared.system.InteractionJankMonitorWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -507,7 +507,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         }
 
         IRemoteTransition crossDisplayMoveTransition = new MoveDisplayChangeRunner(this);
-        return new RemoteTransitionDelegate(
+        return new RemoteTransitionPickerDelegate(
                 (info) -> {
                     if (CrossDisplayMoveTransition.isCrossDisplayMove(info)) {
                         Log.d(TAG, "Handling launch as a cross display move transition");
