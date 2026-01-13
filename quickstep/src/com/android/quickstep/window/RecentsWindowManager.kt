@@ -81,6 +81,7 @@ import com.android.launcher3.statemanager.StateManager.AtomicAnimationFactory
 import com.android.launcher3.statemanager.StatefulContainer
 import com.android.launcher3.taskbar.TaskbarInteractor
 import com.android.launcher3.testing.TestLogging
+import com.android.launcher3.testing.shared.TestProtocol.LAUNCHER_ACTIVITY_LOST_WINDOW_FOCUS_MESSAGE
 import com.android.launcher3.testing.shared.TestProtocol.LAUNCHER_ACTIVITY_STOPPED_MESSAGE
 import com.android.launcher3.testing.shared.TestProtocol.SEQUENCE_MAIN
 import com.android.launcher3.util.ActivityOptionsWrapper
@@ -305,9 +306,9 @@ constructor(
         }
 
     private val screenChangedListener = ScreenOnListener { isOn ->
-        if (!isOn) {
+        if (!isOn && isRecentsViewVisible()) {
             Log.d(TAG, "screen turned off")
-            recentsView?.returnToDesktop()
+            recentsView?.startHome()
         }
     }
 
@@ -487,6 +488,10 @@ constructor(
             AbstractFloatingView.closeAllOpenViews(this, /* animate= */ false)
             recentsView?.viewRootImpl?.touchModeChanged(true)
             windowRootView.visibility = View.GONE
+            AccessibilityManagerCompat.sendTestProtocolEventToTest(
+                this,
+                LAUNCHER_ACTIVITY_LOST_WINDOW_FOCUS_MESSAGE,
+            )
             AccessibilityManagerCompat.sendTestProtocolEventToTest(
                 this,
                 LAUNCHER_ACTIVITY_STOPPED_MESSAGE,
@@ -905,7 +910,7 @@ constructor(
         eventCallbacks[event].remove(callback)
     }
 
-    override fun returnToHomescreen() {
+    override fun returnToHomescreenAfterFreeformShortcut() {
         startHomeWithRemoteAnimation()
     }
 

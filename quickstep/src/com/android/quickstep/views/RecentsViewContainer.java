@@ -148,9 +148,9 @@ public interface RecentsViewContainer extends ActivityContext, RecentsViewContai
     void removeEventCallback(@BaseActivity.ActivityEvent int event, Runnable callback);
 
     /**
-     * Begins transition from overview back to homescreen
+     * Begins transition from overview back to homescreen after clicking freeform shortuct.
      */
-    void returnToHomescreen();
+    void returnToHomescreenAfterFreeformShortcut();
 
     /**
      * True if the overview panel is visible.

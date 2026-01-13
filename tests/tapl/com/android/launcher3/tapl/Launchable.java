@@ -63,7 +63,7 @@ public abstract class Launchable {
                         + mLauncher.getVisibleBounds(mObject));
 
                 if (launcherStopsAfterLaunch()) {
-                    mLauncher.executeAndWaitForLauncherStop(
+                    mLauncher.executeAndWaitForLauncherToYieldFocus(
                             () -> mLauncher.clickLauncherObject(mObject),
                             "clicking the launchable");
                 } else {

@@ -19,8 +19,6 @@ package com.android.launcher3.widgetpicker.repository
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.appwidget.AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN
-import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_HIDE_FROM_PICKER
-import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_RECONFIGURABLE
 import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.ActivityInfo
@@ -37,15 +35,15 @@ import android.os.Build
 import android.os.UserHandle
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
+import android.platform.test.rule.LimitDevicesRule
+import android.platform.test.rule.SkipOnDeviceless
 import android.widget.RemoteViews
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
-import com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn
 import com.android.launcher3.AppFilter
 import com.android.launcher3.Flags
 import com.android.launcher3.InvariantDeviceProfile
-import com.android.launcher3.LauncherAppState
 import com.android.launcher3.R
 import com.android.launcher3.icons.IconCache
 import com.android.launcher3.icons.cache.CachedObject
@@ -60,6 +58,7 @@ import com.android.launcher3.util.UserIconInfo
 import com.android.launcher3.util.WidgetUtils
 import com.android.launcher3.util.rule.MockUsersRule
 import com.android.launcher3.util.rule.MockUsersRule.MockUser
+import com.android.launcher3.widget.DatabaseWidgetPreviewLoader
 import com.android.launcher3.widget.LauncherAppWidgetProviderInfo
 import com.android.launcher3.widgetpicker.data.repository.WidgetsRepository
 import com.android.launcher3.widgetpicker.data.repository.WidgetsRepository.InitializationOptions
@@ -76,7 +75,6 @@ import com.android.launcher3.widgetpicker.shared.model.WidgetPreview
 import com.android.launcher3.widgetpicker.shared.model.isAppWidget
 import com.android.launcher3.widgetpicker.shared.model.isShortcut
 import com.google.common.truth.Truth.assertThat
-import kotlin.test.assertNotNull
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
@@ -103,30 +101,45 @@ import org.mockito.kotlin.whenever
 @MockUser(userType = UserIconInfo.TYPE_MAIN)
 @OptIn(ExperimentalCoroutinesApi::class)
 @EnableFlags(Flags.FLAG_SHOW_CREATE_WIDGET_BTN_IN_PICKER)
+@SkipOnDeviceless // Can't mock PinItemRequest in robolectric.
 class WidgetsRepositoryImplTest {
-    @get:Rule val setFlagsRule = SetFlagsRule()
-    @get:Rule val mockitoRule: MockitoRule = MockitoJUnit.rule()
+    @get:Rule
+    val limitDevicesRule = LimitDevicesRule()
+    @get:Rule
+    val setFlagsRule = SetFlagsRule()
+    @get:Rule
+    val mockitoRule: MockitoRule = MockitoJUnit.rule()
 
-    @get:Rule val context = SandboxApplication()
+    @get:Rule
+    val context = SandboxApplication()
 
-    @get:Rule val uiContext = TestActivityContext(context, R.style.WidgetContainerTheme)
+    @get:Rule
+    val uiContext = TestActivityContext(context, R.style.WidgetContainerTheme)
 
-    @get:Rule var mMockUsersRule: MockUsersRule = MockUsersRule(context)
+    @get:Rule
+    var mMockUsersRule: MockUsersRule = MockUsersRule(context)
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
-    @Mock private lateinit var iconCacheMock: IconCache
+    @Mock
+    private lateinit var iconCacheMock: IconCache
 
-    @Mock private lateinit var appFilterMock: AppFilter
+    @Mock
+    private lateinit var appFilterMock: AppFilter
 
-    @Mock lateinit var mockShortcutLauncherActivityInfo: LauncherActivityInfo
-    @Mock lateinit var mockPinRequest: PinItemRequest
-    @Mock lateinit var mockShortcutInfo: ShortcutInfo
+    @Mock
+    lateinit var mockShortcutLauncherActivityInfo: LauncherActivityInfo
+    @Mock
+    lateinit var mockPinRequest: PinItemRequest
+    @Mock
+    lateinit var mockShortcutInfo: ShortcutInfo
 
-    @Mock lateinit var mockActivityInfo: ActivityInfo
+    @Mock
+    lateinit var mockActivityInfo: ActivityInfo
 
-    @Mock lateinit var mockApplicationInfo: ApplicationInfo
+    @Mock
+    lateinit var mockApplicationInfo: ApplicationInfo
 
     private lateinit var user: UserHandle
     private lateinit var idp: InvariantDeviceProfile
@@ -152,6 +165,8 @@ class WidgetsRepositoryImplTest {
                 searchAlgorithm = InMemoryWidgetSearchAlgorithm(testDispatcher),
                 backgroundContext = testDispatcher,
                 widgetCreatorAppPackageProvider = mWidgetCreatorAppPackageProvider,
+                databaseWidgetPreviewLoader =
+                    DatabaseWidgetPreviewLoader(context, idp, iconCacheMock),
             )
 
         generatedPreview = RemoteViews(context.packageName, GENERATED_PREVIEW_LAYOUT_ID)
@@ -205,12 +220,12 @@ class WidgetsRepositoryImplTest {
             .thenReturn(listOf(App2Widget1ProviderInfo))
 
         doAnswer { i ->
-                generatedPreview.takeIf {
-                    i.arguments[0] == App2Widget1ProviderName &&
+            generatedPreview.takeIf {
+                i.arguments[0] == App2Widget1ProviderName &&
                         i.arguments[1] == user &&
                         i.arguments[2] == WIDGET_CATEGORY_HOME_SCREEN
-                }
             }
+        }
             .whenever(appWidgetManager)
             .getWidgetPreview(any(), any(), any())
     }
@@ -233,9 +248,7 @@ class WidgetsRepositoryImplTest {
         whenever(launcherApps.getShortcutConfigActivityList(eq(APP_2_PACKAGE_NAME), eq(user)))
             .thenReturn(listOf())
 
-        val iconCache = LauncherAppState.INSTANCE[context].iconCache
-        spyOn(iconCache)
-        doReturn(ShortcutPreviewDrawable).whenever(iconCache).getFullResIcon(any())
+        doReturn(ShortcutPreviewDrawable).whenever(iconCacheMock).getFullResIcon(any())
     }
 
     @Test
@@ -257,29 +270,30 @@ class WidgetsRepositoryImplTest {
             val expectedShortcut1BId = WidgetId(App1Shortcut1Name, user)
             val expectedWidget2AId = WidgetId(App2Widget1ProviderName, user)
 
-            val app1 = assertNotNull(widgetApps.find { it.id == expectedWidgetApp1Id })
-            app1.apply {
-                assertThat(title).isEqualTo(APP_1)
-                assertThat(widgets).hasSize(2)
+            val app1 = widgetApps.find { it.id == expectedWidgetApp1Id }
+            assertThat(app1).isNotNull()
+            assertThat(app1!!.title).isEqualTo(APP_1)
+            assertThat(app1.widgets).hasSize(2)
 
-                val widget1A = assertNotNull(app1.widgets.find { it.id == expectedWidget1AId })
-                assertThat(widget1A.widgetInfo.isAppWidget()).isTrue()
-                assertThat(widget1A.label).isEqualTo(WIDGET_1A_NAME)
+            val widget1A = app1.widgets.find { it.id == expectedWidget1AId }
+            assertThat(widget1A).isNotNull()
+            assertThat(widget1A!!.widgetInfo.isAppWidget()).isTrue()
+            assertThat(widget1A.label).isEqualTo(WIDGET_1A_NAME)
 
-                val shortcut1B = assertNotNull(app1.widgets.find { it.id == expectedShortcut1BId })
-                assertThat(shortcut1B.widgetInfo.isShortcut()).isTrue()
-                assertThat(shortcut1B.label).isEqualTo(SHORTCUT_1B_NAME)
-            }
+            val shortcut1B = app1.widgets.find { it.id == expectedShortcut1BId }
+            assertThat(shortcut1B).isNotNull()
+            assertThat(shortcut1B!!.widgetInfo.isShortcut()).isTrue()
+            assertThat(shortcut1B.label).isEqualTo(SHORTCUT_1B_NAME)
 
-            val app2 = assertNotNull(widgetApps.find { it.id == expectedWidgetApp2Id })
-            app2.apply {
-                assertThat(app2.title).isEqualTo(APP_2)
-                assertThat(app2.widgets).hasSize(1)
+            val app2 = widgetApps.find { it.id == expectedWidgetApp2Id }
+            assertThat(app2).isNotNull()
+            assertThat(app2!!.title).isEqualTo(APP_2)
+            assertThat(app2.widgets).hasSize(1)
 
-                val widget2A = assertNotNull(app2.widgets.find { it.id == expectedWidget2AId })
-                assertThat(widget2A.widgetInfo.isAppWidget()).isTrue()
-                assertThat(widget2A.label).isEqualTo(WIDGET_2A_NAME)
-            }
+            val widget2A = app2.widgets.find { it.id == expectedWidget2AId }
+            assertThat(widget2A).isNotNull()
+            assertThat(widget2A!!.widgetInfo.isAppWidget()).isTrue()
+            assertThat(widget2A.label).isEqualTo(WIDGET_2A_NAME)
         }
 
     @Test
@@ -294,20 +308,20 @@ class WidgetsRepositoryImplTest {
             val widgetApp = underTest.observeWidgetApp(widgetAppId = widgetAppId).first()
 
             assertThat(widgetApp).isNotNull()
-            widgetApp?.apply {
-                assertThat(title).isEqualTo(APP_1)
-                assertThat(widgets).hasSize(2)
+            assertThat(widgetApp!!.title).isEqualTo(APP_1)
+            assertThat(widgetApp.widgets).hasSize(2)
 
-                val expectedWidget1AId = WidgetId(App1Widget1ProviderName, user)
-                val widget1A = assertNotNull(widgets.find { it.id == expectedWidget1AId })
-                assertThat(widget1A.widgetInfo.isAppWidget()).isTrue()
-                assertThat(widget1A.label).isEqualTo(WIDGET_1A_NAME)
+            val expectedWidget1AId = WidgetId(App1Widget1ProviderName, user)
+            val widget1A = widgetApp.widgets.find { it.id == expectedWidget1AId }
+            assertThat(widget1A).isNotNull()
+            assertThat(widget1A!!.widgetInfo.isAppWidget()).isTrue()
+            assertThat(widget1A.label).isEqualTo(WIDGET_1A_NAME)
 
-                val expectedShortcut1BId = WidgetId(App1Shortcut1Name, user)
-                val shortcut1B = assertNotNull(widgets.find { it.id == expectedShortcut1BId })
-                assertThat(shortcut1B.widgetInfo.isShortcut()).isTrue()
-                assertThat(shortcut1B.label).isEqualTo(SHORTCUT_1B_NAME)
-            }
+            val expectedShortcut1BId = WidgetId(App1Shortcut1Name, user)
+            val shortcut1B = widgetApp.widgets.find { it.id == expectedShortcut1BId }
+            assertThat(shortcut1B).isNotNull()
+            assertThat(shortcut1B!!.widgetInfo.isShortcut()).isTrue()
+            assertThat(shortcut1B.label).isEqualTo(SHORTCUT_1B_NAME)
         }
 
     @Test
@@ -322,15 +336,14 @@ class WidgetsRepositoryImplTest {
             val widgetApp = underTest.observeWidgetApp(widgetAppId = widgetAppId).first()
 
             assertThat(widgetApp).isNotNull()
-            widgetApp?.apply {
-                assertThat(title).isEqualTo(APP_2)
-                assertThat(widgets).hasSize(1)
+            assertThat(widgetApp!!.title).isEqualTo(APP_2)
+            assertThat(widgetApp.widgets).hasSize(1)
 
-                val expectedWidget2AId = WidgetId(App2Widget1ProviderName, user)
-                val widget2A = assertNotNull(widgets.find { it.id == expectedWidget2AId })
-                assertThat(widget2A.widgetInfo.isAppWidget()).isTrue()
-                assertThat(widget2A.label).isEqualTo(WIDGET_2A_NAME)
-            }
+            val expectedWidget2AId = WidgetId(App2Widget1ProviderName, user)
+            val widget2A = widgetApp.widgets.find { it.id == expectedWidget2AId }
+            assertThat(widget2A).isNotNull()
+            assertThat(widget2A!!.widgetInfo.isAppWidget()).isTrue()
+            assertThat(widget2A.label).isEqualTo(WIDGET_2A_NAME)
         }
 
     @Test
@@ -347,13 +360,11 @@ class WidgetsRepositoryImplTest {
 
             val widgetApp = underTest.observeWidgetApp(widgetAppId = widgetAppId).first()
             assertThat(widgetApp).isNotNull()
-            widgetApp?.run {
-                assertThat(title).isEqualTo(APP_1)
-                assertThat(widgets).hasSize(1)
+            assertThat(widgetApp!!.title).isEqualTo(APP_1)
+            assertThat(widgetApp.widgets).hasSize(1)
 
-                val expectedWidget1AId = WidgetId(App1Widget1ProviderName, user)
-                assertThat(widgets.first().id).isEqualTo(expectedWidget1AId)
-            }
+            val expectedWidget1AId = WidgetId(App1Widget1ProviderName, user)
+            assertThat(widgetApp.widgets.first().id).isEqualTo(expectedWidget1AId)
         }
 
     @Test
@@ -376,14 +387,12 @@ class WidgetsRepositoryImplTest {
 
             val widgetApp = underTest.observeWidgetApp(widgetAppId = widgetAppId).first()
             assertThat(widgetApp).isNotNull()
-            widgetApp?.run {
-                assertThat(title).isEqualTo(APP_1)
-                assertThat(widgets).hasSize(1)
+            assertThat(widgetApp!!.title).isEqualTo(APP_1)
+            assertThat(widgetApp.widgets).hasSize(1)
 
-                val expectedWidget1AId =
-                    WidgetId(ComponentName(APP_1_PACKAGE_NAME, STUB_SHORTCUT_COMPONENT_CLASS), user)
-                assertThat(widgets.first().id).isEqualTo(expectedWidget1AId)
-            }
+            val expectedWidget1AId =
+                WidgetId(ComponentName(APP_1_PACKAGE_NAME, STUB_SHORTCUT_COMPONENT_CLASS), user)
+            assertThat(widgetApp.widgets.first().id).isEqualTo(expectedWidget1AId)
         }
 
     @Test
@@ -480,8 +489,8 @@ class WidgetsRepositoryImplTest {
             assertThat(preview).isInstanceOf(WidgetPreview.ProviderInfoWidgetPreview::class.java)
             // Initial layout set as the preview layout.
             assertThat(
-                    (preview as WidgetPreview.ProviderInfoWidgetPreview).providerInfo.initialLayout
-                )
+                (preview as WidgetPreview.ProviderInfoWidgetPreview).providerInfo.initialLayout
+            )
                 .isEqualTo(PREVIEW_LAYOUT_ID)
         }
 
@@ -574,7 +583,9 @@ class WidgetsRepositoryImplTest {
             WidgetUtils.createAppWidgetProviderInfo(App1Widget1ProviderName).apply {
                 previewLayout = PREVIEW_LAYOUT_ID
                 configure = ComponentName.createRelative(APP_1_PACKAGE_NAME, "ConfigActivity")
-                widgetFeatures = WIDGET_FEATURE_RECONFIGURABLE or WIDGET_FEATURE_HIDE_FROM_PICKER
+                widgetFeatures =
+                    AppWidgetProviderInfo.WIDGET_FEATURE_RECONFIGURABLE or
+                            AppWidgetProviderInfo.WIDGET_FEATURE_HIDE_FROM_PICKER
             }
 
         val App1Shortcut1Name = ComponentName(APP_1_PACKAGE_NAME, SHORTCUT_1B_NAME)

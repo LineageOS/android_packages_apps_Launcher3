@@ -342,7 +342,7 @@ public final class OverviewTask {
     }
 
     /** Returns the number of the thumbnail views in the desktop task view tile. */
-    public int getDesktopThumbnailViewCount() {
+    private int getDesktopThumbnailViewCount() {
         mLauncher.assertTrue("Current task is not desktop task", isDesktop());
         String thumbnailSelector = ":id/snapshot";
         return mLauncher.waitForObjectsInContainer(mTask,
@@ -351,11 +351,9 @@ public final class OverviewTask {
 
     /**
      * Closes the Task of [activityName] from the desktop task view tile.
-     * Returns void here since after the close operation, we can either end up staying in overview,
-     * or going to the home screen (if all tasks are closed).
      * @param activityName activity name to be used to find the thumbnail.
      */
-    public void tapCloseDesktopThumbnailView(String activityName) {
+    public OverviewTask tapCloseDesktopThumbnailView(String activityName) {
         mLauncher.assertTrue("Current task is not desktop task", isDesktop());
 
         int thumbnailViewCount = getDesktopThumbnailViewCount();
@@ -366,25 +364,21 @@ public final class OverviewTask {
              LauncherInstrumentation.Closable c = mLauncher.addContextLayer(
                      "wanted to tap the close button")) {
             UiObject2 thumbnailViewHeader = getDesktopThumbnailViewHeader(activityName);
-            final Runnable clickClose = () -> mLauncher.clickLauncherObject(
+            mLauncher.clickLauncherObject(
                     mLauncher.waitForObjectInContainer(
                             thumbnailViewHeader, DESKTOP_TASK_THUMBNAIL_VIEW_HEADER_CLOSE_BUTTON));
-
             if (thumbnailViewCount > 1) {
                 // There still should be other thumbnail views in the desktop task view, check its
                 // count.
-                clickClose.run();
                 int newThumbnailViewCount = getDesktopThumbnailViewCount();
                 mLauncher.assertEquals("Had " + thumbnailViewCount + " thumbnail views "
                                 + "before, now have "
                                 + newThumbnailViewCount + " thumbnail views after clicking close. ",
                         thumbnailViewCount - 1, newThumbnailViewCount);
             } else {
-                // State change from Overview to Home screen.
-                mLauncher.runToState(clickClose, NORMAL_STATE_ORDINAL,
-                        "clicking to close one thumbnail view and going to home");
-                new Workspace(mLauncher);
+                mLauncher.waitUntilOverviewObjectGone(":id/snapshot");
             }
+            return new OverviewTask(mLauncher, mTask, mOverview);
         }
     }
 
