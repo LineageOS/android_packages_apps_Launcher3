@@ -52,7 +52,6 @@ import android.window.TransitionInfo
 import androidx.annotation.UiThread
 import androidx.core.animation.addListener
 import androidx.core.view.isVisible
-import com.android.app.displaylib.PerDisplayInstanceProviderWithTeardown
 import com.android.app.displaylib.PerDisplayRepository
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.BaseActivity
@@ -69,9 +68,9 @@ import com.android.launcher3.SplitScreenUiState
 import com.android.launcher3.anim.PendingAnimation
 import com.android.launcher3.compat.AccessibilityManagerCompat
 import com.android.launcher3.concurrent.annotations.Ui
-import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
-import com.android.launcher3.dagger.PerDisplayComponent
+import com.android.launcher3.dagger.PerDisplayCleanupTask
+import com.android.launcher3.dagger.PerDisplaySingleton
 import com.android.launcher3.dagger.WindowContext
 import com.android.launcher3.desktop.DesktopRecentsTransitionController
 import com.android.launcher3.display.DisplayController
@@ -122,6 +121,7 @@ import com.android.quickstep.fallback.toLauncherStateOrdinal
 import com.android.quickstep.recents.di.RecentsComponent
 import com.android.quickstep.split.SplitScreenAppResolver
 import com.android.quickstep.split.SplitSelectStateController
+import com.android.quickstep.util.PerDisplayHolder
 import com.android.quickstep.util.QuickstepProtoLogGroup
 import com.android.quickstep.util.RecentsAtomicAnimationFactory
 import com.android.quickstep.util.RecentsWindowProtoLogProxy
@@ -145,6 +145,7 @@ import javax.inject.Inject
  * To add new protologs, see [RecentsWindowProtoLogProxy]. To enable logging to logcat, see
  * [QuickstepProtoLogGroup.Constants.DEBUG_RECENTS_WINDOW]
  */
+@PerDisplaySingleton
 class RecentsWindowManager
 @Inject
 constructor(
@@ -160,6 +161,8 @@ constructor(
     @Ui private val uiExecutor: LooperExecutor,
     invariantDeviceProfile: InvariantDeviceProfile,
     recentsComponentFactory: RecentsComponent.Factory,
+    propertyHolder: PerDisplayHolder<RecentsWindowManager>,
+    lifeCycle: PerDisplayCleanupTask,
 ) :
     RecentsWindowContext(windowContext, wallpaperColorHints.hints, invariantDeviceProfile),
     RecentsViewContainer,
@@ -334,6 +337,9 @@ constructor(
             displayChangesSafeCloseable =
                 it.changes.forEach(uiExecutor) { _ -> onDisplayInfoChanged() }
         }
+
+        lifeCycle.addTask { destroy() }
+        propertyHolder.value = this
     }
 
     @SuppressLint("InflateParams")
@@ -919,17 +925,4 @@ constructor(
 
     override fun createAtomicAnimationFactory(): AtomicAnimationFactory<RecentsState> =
         RecentsAtomicAnimationFactory(this)
-}
-
-@LauncherAppSingleton
-class RecentsWindowManagerInstanceProvider
-@Inject
-constructor(private val perDisplayComponentRepository: PerDisplayRepository<PerDisplayComponent>) :
-    PerDisplayInstanceProviderWithTeardown<RecentsWindowManager> {
-    override fun createInstance(displayId: Int) =
-        perDisplayComponentRepository[displayId]?.getRecentsWindowManagerLazy()?.get()
-
-    override fun destroyInstance(instance: RecentsWindowManager) {
-        instance.destroy()
-    }
 }
