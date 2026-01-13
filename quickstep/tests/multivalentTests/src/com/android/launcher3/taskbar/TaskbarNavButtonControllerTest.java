@@ -34,7 +34,9 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
+import android.view.SoundEffectConstants;
 import android.view.View;
 
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -156,6 +158,78 @@ public class TaskbarNavButtonControllerTest {
         verify(mockSystemUiProxy, never()).onImeSwitcherPressed();
         verify(mockStatsLogger, times(1)).log(LAUNCHER_TASKBAR_IME_SWITCHER_BUTTON_LONGPRESS);
         verify(mockSystemUiProxy, times(1)).onImeSwitcherLongPress();
+    }
+
+    @Test
+    public void testLongPressImeSwitcher_playsSoundAndHaptic() {
+        // Action: Long press the IME switcher button.
+        mNavButtonController.onButtonLongClick(BUTTON_IME_SWITCH, mockView);
+
+        // Verify: Sound and haptic feedback are triggered.
+        verify(mockView).playSoundEffect(SoundEffectConstants.CLICK);
+        verify(mockView).performHapticFeedback(HapticFeedbackConstants.LONG_PRESS,
+                HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+    }
+
+    @Test
+    public void testLongPressA11y_playsSoundAndHaptic() {
+        // Action: Long press the accessibility button.
+        mNavButtonController.onButtonLongClick(BUTTON_A11Y, mockView);
+
+        // Verify: Sound and haptic feedback are triggered.
+        verify(mockView).playSoundEffect(SoundEffectConstants.CLICK);
+        verify(mockView).performHapticFeedback(HapticFeedbackConstants.LONG_PRESS,
+                HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+    }
+
+    @Test
+    public void testLongPressHome_playsSoundAndHaptic() {
+        // Setup: Assistant long press is enabled.
+        mockSharedState.assistantLongPressEnabled = true;
+
+        // Action: Long press the home button.
+        mNavButtonController.onButtonLongClick(BUTTON_HOME, mockView);
+
+        // Verify: Sound and haptic feedback are triggered.
+        verify(mockView).playSoundEffect(SoundEffectConstants.CLICK);
+        verify(mockView).performHapticFeedback(HapticFeedbackConstants.LONG_PRESS,
+                HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+    }
+
+    @Test
+    public void testLongPressBackRecents_screenPinned_playsSoundAndHaptic() {
+        // Setup: Screen pinning is active.
+        mNavButtonController.updateSysuiFlags(SYSUI_STATE_SCREEN_PINNING);
+
+        // Action: Long press the recents button.
+        mNavButtonController.onButtonLongClick(BUTTON_RECENTS, mockView);
+
+        // Verify: Sound and haptic feedback are triggered once.
+        verify(mockView).playSoundEffect(SoundEffectConstants.CLICK);
+        verify(mockView).performHapticFeedback(HapticFeedbackConstants.LONG_PRESS,
+                HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+
+        // Action: Long press the back button to complete the screen unpinning combo.
+        mNavButtonController.onButtonLongClick(BUTTON_BACK, mockView);
+
+        // Verify: Sound and haptic feedback are triggered a second time.
+        verify(mockView, times(2)).playSoundEffect(SoundEffectConstants.CLICK);
+        verify(mockView, times(2)).performHapticFeedback(HapticFeedbackConstants.LONG_PRESS,
+                HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+    }
+
+    @Test
+    public void testLongPressBackRecents_screenNotPinned_noSoundAndHaptic() {
+        // Setup: Screen pinning is not active.
+        mNavButtonController.updateSysuiFlags(0);
+
+        // Action: Long press recents and back buttons.
+        mNavButtonController.onButtonLongClick(BUTTON_RECENTS, mockView);
+        mNavButtonController.onButtonLongClick(BUTTON_BACK, mockView);
+
+        // Verify: No sound or haptic feedback is triggered because there's no action.
+        verify(mockView, never()).playSoundEffect(anyInt());
+        verify(mockView, never()).performHapticFeedback(anyInt(), anyInt());
     }
 
     @Test
