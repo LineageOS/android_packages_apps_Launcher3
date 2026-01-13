@@ -141,7 +141,7 @@ constructor(
             settingsCache.getListenableRef(PRIVATE_SPACE_HIDE_WHEN_LOCKED_URI).forEach(
                 MAIN_EXECUTOR
             ) {
-                model.forceReload()
+                model.rebindCallbacks()
             }
         )
 
