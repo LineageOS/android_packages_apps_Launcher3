@@ -180,7 +180,9 @@ class CueBarController(private val activity: TaskbarActivityContext) :
     }
 
     override fun dumpLogs(prefix: String?, pw: PrintWriter?) {
-        pw?.println("$prefix CueBarController:")
+        pw ?: return
+        pw.println("$prefix CueBarController:")
+        ambientCueRepository.dump(pw, "$prefix  ")
     }
 
     fun onTaskbarStatusUpdated(visible: Boolean, stashed: Boolean) {
