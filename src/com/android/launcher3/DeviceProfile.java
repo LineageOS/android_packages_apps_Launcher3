@@ -256,11 +256,9 @@ public class DeviceProfile {
 
         mTypeIndex = displayOptionSpec.typeIndex;
 
-        // TODO: make TaskbarModeUtil displayId aware
         mTaskbarProfile = TaskbarProfile.Factory.createTaskbarProfile(
                 res,
-                inv.taskbarModeUtil.isTransient()
-                        && !mDeviceProperties.getDeviceConfiguration().isExternalDisplay(),
+                inv.taskbarModeUtil.isTransient(info),
                 mDeviceProperties.getTaskbarConfiguration().isTaskbarPresent(),
                 mMetrics,
                 displayOptionSpec,
@@ -664,8 +662,7 @@ public class DeviceProfile {
     public TaskbarProfile updateTaskbarProfile(Resources res) {
         return TaskbarProfile.Factory.createTaskbarProfile(
                 res,
-                inv.taskbarModeUtil.isTransient()
-                        && !mDeviceProperties.getDeviceConfiguration().isExternalDisplay(),
+                inv.taskbarModeUtil.isTransient(mInfo),
                 mDeviceProperties.getTaskbarConfiguration().isTaskbarPresent(),
                 mMetrics,
                 mDisplayOptionSpec,

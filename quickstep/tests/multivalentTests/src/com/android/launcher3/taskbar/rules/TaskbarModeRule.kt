@@ -76,7 +76,7 @@ class TaskbarModeRule(private val context: TaskbarWindowSandboxContext) : TestRu
                                 }
                             )
                             .whenever(it)
-                            .isPinned
+                            .isPinned(any())
 
                         doReturn(
                                 when (mode) {
@@ -86,7 +86,7 @@ class TaskbarModeRule(private val context: TaskbarWindowSandboxContext) : TestRu
                                 }
                             )
                             .whenever(it)
-                            .isTransient
+                            .isTransient(any())
                     }
 
                     TaskbarFeatureEvaluator.INSTANCE[context][context.displayId]?.stub {

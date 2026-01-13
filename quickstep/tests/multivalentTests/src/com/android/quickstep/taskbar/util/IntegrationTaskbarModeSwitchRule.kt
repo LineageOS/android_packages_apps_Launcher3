@@ -20,6 +20,8 @@ import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.get
+import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
+import com.android.launcher3.display.LauncherDisplayInfo
 import com.android.launcher3.testutil.Wait.atMost
 import com.android.launcher3.util.Executors.getTaskbarUiThread
 import com.android.launcher3.util.TaskbarModeUtil
@@ -43,7 +45,9 @@ class IntegrationTaskbarModeSwitchRule(val tisBinderRule: TISBinderRule) : TestR
     }
 
     fun currentMode(): Mode {
-        if (TaskbarModeUtil.INSTANCE[getInstrumentation().targetContext].isTransient) {
+        val info =
+            getInstrumentation().targetContext.applicationContext.appComponent.displayController.info
+        if (TaskbarModeUtil.INSTANCE[getInstrumentation().targetContext].isTransient(info)) {
             return Mode.TRANSIENT
         }
         return Mode.PERSISTENT

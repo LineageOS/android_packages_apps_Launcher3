@@ -18,7 +18,9 @@ package com.android.launcher3.taskbar.rules
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.InvariantDeviceProfile
+import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.display.DisplayController
+import com.android.launcher3.display.LauncherDisplayInfo
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.PINNED
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.THREE_BUTTONS
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.TRANSIENT
@@ -36,11 +38,13 @@ class TaskbarModeRuleTest {
     @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()
     @get:Rule(order = 1) val taskbarModeRule = TaskbarModeRule(context)
 
+    val info = context.base.appComponent.displayController.info
+
     @Test
     @TaskbarMode(TRANSIENT)
     fun testTaskbarMode_transient_overridesTaskbarUtil() {
-        assertThat(TaskbarModeUtil.INSTANCE.get(context).isTransient).isTrue()
-        assertThat(TaskbarModeUtil.INSTANCE.get(context).isPinned).isFalse()
+        assertThat(TaskbarModeUtil.INSTANCE.get(context).isTransient(info)).isTrue()
+        assertThat(TaskbarModeUtil.INSTANCE.get(context).isPinned(info)).isFalse()
         assertThat(DisplayController.getNavigationMode(context)).isEqualTo(NavigationMode.NO_BUTTON)
     }
 
@@ -55,8 +59,8 @@ class TaskbarModeRuleTest {
     @Test
     @TaskbarMode(PINNED)
     fun testTaskbarMode_pinned_overridesTaskbarUtil() {
-        assertThat(TaskbarModeUtil.INSTANCE.get(context).isTransient).isFalse()
-        assertThat(TaskbarModeUtil.INSTANCE.get(context).isPinned).isTrue()
+        assertThat(TaskbarModeUtil.INSTANCE.get(context).isTransient(info)).isFalse()
+        assertThat(TaskbarModeUtil.INSTANCE.get(context).isPinned(info)).isTrue()
         assertThat(DisplayController.getNavigationMode(context)).isEqualTo(NavigationMode.NO_BUTTON)
     }
 
@@ -71,8 +75,8 @@ class TaskbarModeRuleTest {
     @Test
     @TaskbarMode(THREE_BUTTONS)
     fun testTaskbarMode_threeButtons_overridesTaskbarUtil() {
-        assertThat(TaskbarModeUtil.INSTANCE.get(context).isTransient).isFalse()
-        assertThat(TaskbarModeUtil.INSTANCE.get(context).isPinned).isFalse()
+        assertThat(TaskbarModeUtil.INSTANCE.get(context).isTransient(info)).isFalse()
+        assertThat(TaskbarModeUtil.INSTANCE.get(context).isPinned(info)).isFalse()
         assertThat(DisplayController.getNavigationMode(context))
             .isEqualTo(NavigationMode.THREE_BUTTONS)
     }

@@ -21,13 +21,11 @@ import static com.android.systemui.shared.Flags.enableRecentsInTaskbar;
 
 import static junit.framework.TestCase.assertEquals;
 
-import android.content.Context;
 import android.content.Intent;
 
 import com.android.launcher3.tapl.Taskbar;
 import com.android.launcher3.tapl.TestHelpers;
 import com.android.launcher3.util.LauncherLayoutBuilder;
-import com.android.launcher3.util.TaskbarModeUtil;
 import com.android.launcher3.util.TestUtil;
 
 import org.junit.After;
@@ -73,10 +71,6 @@ public class AbstractTaplTestsTaskbar extends AbstractQuickStepTest {
         if (mLauncherLayout != null) {
             mLauncherLayout.close();
         }
-    }
-
-    protected static boolean isTaskbarInTransientMode(Context context) {
-        return TaskbarModeUtil.INSTANCE.get(context).isTransient();
     }
 
     protected boolean startCalculatorAppDuringSetup() {

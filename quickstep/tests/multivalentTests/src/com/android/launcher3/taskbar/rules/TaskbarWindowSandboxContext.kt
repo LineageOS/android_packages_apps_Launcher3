@@ -248,7 +248,7 @@ object TaskbarTestOverridesModule {
         windowManagerProxy: WindowManagerProxy,
         launcherPrefs: LauncherPrefs,
     ): TaskbarModeUtil {
-        return spy(TaskbarModeUtil(context, displayController, windowManagerProxy, launcherPrefs))
+        return spy(TaskbarModeUtil(windowManagerProxy, launcherPrefs))
     }
 
     @JvmStatic
