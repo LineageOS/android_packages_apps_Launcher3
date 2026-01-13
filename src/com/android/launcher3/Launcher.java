@@ -206,7 +206,9 @@ import com.android.launcher3.statemanager.StatefulActivity;
 import com.android.launcher3.states.RotationHelper;
 import com.android.launcher3.testing.TestLogging;
 import com.android.launcher3.testing.shared.TestProtocol;
+import com.android.launcher3.touch.AllAppsItemCustomActionsListener;
 import com.android.launcher3.touch.AllAppsSwipeController;
+import com.android.launcher3.touch.CustomActionsListener;
 import com.android.launcher3.touch.ItemClickHandler;
 import com.android.launcher3.touch.ItemLongClickListener;
 import com.android.launcher3.util.ActivityResultInfo;
@@ -2864,6 +2866,11 @@ public class Launcher extends StatefulActivity<LauncherState>
     @Override
     public View.OnLongClickListener getAllAppsItemLongClickListener() {
         return ItemLongClickListener.INSTANCE_ALL_APPS;
+    }
+
+    @Override
+    public CustomActionsListener getAllAppsItemCustomActionsListener() {
+        return AllAppsItemCustomActionsListener.INSTANCE;
     }
 
     @Override

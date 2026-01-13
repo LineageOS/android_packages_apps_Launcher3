@@ -33,7 +33,6 @@ import com.android.launcher3.DragSource;
 import com.android.launcher3.DropTarget;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.celllayout.CellInfo;
-import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.dragndrop.DragController;
 import com.android.launcher3.dragndrop.DragOptions;
 import com.android.launcher3.folder.Folder;
@@ -145,10 +144,7 @@ public class ItemLongClickListener {
                 ? ((BubbleTextHolder) view).getBubbleText()
                 : view;
         Launcher launcher = Launcher.getLauncher(v.getContext());
-        if (!canStartDrag(launcher)) return false;
-        // When we have exited all apps or are in transition, disregard long clicks
-        if (!launcher.isInState(ALL_APPS) && !launcher.isInState(OVERVIEW)) return false;
-        if (launcher.getWorkspace().isSwitchingState()) return false;
+        if (!canStartAllAppsItemDrag(launcher)) return false;
 
         StatsLogger logger = launcher.getStatsLogManager().logger();
         if (v.getTag() instanceof ItemInfo itemInfo) {
@@ -176,6 +172,14 @@ public class ItemLongClickListener {
 
         launcher.getWorkspace().beginDragShared(v, launcher.getAppsView(), new DragOptions());
         return false;
+    }
+
+    /**
+     * Returns true if an item drag can be started from All Apps.
+     */
+    public static boolean canStartAllAppsItemDrag(Launcher launcher) {
+        return canStartDrag(launcher) && (launcher.isInState(ALL_APPS) || launcher.isInState(
+                OVERVIEW)) && !launcher.getWorkspace().isSwitchingState();
     }
 
     public static boolean canStartDrag(Launcher launcher) {

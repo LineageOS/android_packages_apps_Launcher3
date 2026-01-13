@@ -30,12 +30,14 @@ import com.android.launcher3.R;
 import com.android.launcher3.popup.PopupDataProvider;
 import com.android.launcher3.taskbar.BaseTaskbarContext;
 import com.android.launcher3.taskbar.TaskbarActivityContext;
+import com.android.launcher3.taskbar.TaskbarAllAppsItemCustomActionsListener;
 import com.android.launcher3.taskbar.TaskbarControllers;
 import com.android.launcher3.taskbar.TaskbarDragController;
 import com.android.launcher3.taskbar.TaskbarUIController;
 import com.android.launcher3.taskbar.allapps.TaskbarAllAppsContainerView;
 import com.android.launcher3.taskbar.allapps.TaskbarSearchSessionController;
 import com.android.launcher3.taskbar.bubbles.DragToBubbleController;
+import com.android.launcher3.touch.CustomActionsListener;
 import com.android.launcher3.util.NavigationMode;
 import com.android.launcher3.util.SplitConfigurationOptions.SplitSelectSource;
 import com.android.launcher3.util.WindowBlurState;
@@ -153,6 +155,11 @@ public class TaskbarOverlayContext extends BaseTaskbarContext {
     @Override
     public View.OnLongClickListener getAllAppsItemLongClickListener() {
         return mDragController::startDragOnLongClick;
+    }
+
+    @Override
+    public CustomActionsListener getAllAppsItemCustomActionsListener() {
+        return new TaskbarAllAppsItemCustomActionsListener(mTaskbarContext, this);
     }
 
     @Override
