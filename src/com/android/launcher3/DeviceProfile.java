@@ -356,7 +356,8 @@ public class DeviceProfile {
                     DimensionType.WIDTH, displayOptionSpec.numAllAppsColumns,
                     mDeviceProperties.getAvailableWidthPx(),
                     mResponsiveWorkspaceWidthSpec);
-            if (inv.appListAlignedWithWorkspaceRow >= 0) {
+            if (!deviceProperties.getDeviceConfiguration().isExternalDisplay()
+                    && inv.appListAlignedWithWorkspaceRow >= 0) {
                 allAppsTopPadding += mResponsiveWorkspaceHeightSpec.getStartPaddingPx()
                         + inv.appListAlignedWithWorkspaceRow
                         * (mResponsiveWorkspaceHeightSpec.getCellSizePx()
