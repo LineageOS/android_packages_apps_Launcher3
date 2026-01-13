@@ -27,7 +27,6 @@ import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.taskbar.TaskbarViewController.DIVIDER_VIEW_POSITION_OFFSET
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatWorkspaceItem
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
-import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext.Companion.getDeviceParams
 import com.google.common.truth.Truth.assertThat
@@ -73,9 +72,9 @@ class TaskbarViewControllerTest(deviceName: String) {
     }
 
     @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create(deviceName)
-    @get:Rule(order = 1) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
+    @get:Rule(order = 1) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    @InjectController lateinit var taskbarViewController: TaskbarViewController
+    val taskbarViewController by taskbarUnitTestRule.delegate { it.taskbarViewController }
 
     private val desktopVisibilityController: DesktopVisibilityController
         get() = DesktopVisibilityController.INSTANCE[context]

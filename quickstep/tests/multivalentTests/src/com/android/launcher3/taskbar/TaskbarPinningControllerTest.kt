@@ -26,7 +26,6 @@ import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatItems
 import com.android.launcher3.taskbar.customization.TaskbarDividerContainer
 import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
-import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -37,10 +36,10 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class TaskbarPinningControllerTest {
     @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()
-    @get:Rule(order = 1) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
+    @get:Rule(order = 1) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
     @get:Rule(order = 2) val animatorTestRule = TaskbarAnimatorTestRule(this)
 
-    @InjectController lateinit var pinningController: TaskbarPinningController
+    val pinningController by taskbarUnitTestRule.delegate { it.taskbarPinningController }
 
     private val taskbarContext: TaskbarActivityContext
         get() = taskbarUnitTestRule.activityContext

@@ -31,17 +31,13 @@ import com.android.launcher3.taskbar.TaskbarControllers
 import com.android.launcher3.taskbar.TaskbarManager
 import com.android.launcher3.taskbar.TaskbarManagerImpl
 import com.android.launcher3.taskbar.TaskbarUIController
-import com.android.launcher3.taskbar.bubbles.BubbleControllers
-import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.util.LauncherMultivalentJUnit.Companion.isRunningInRobolectric
 import com.android.launcher3.util.TestUtil
 import com.android.launcher3.util.ThreadSafeRunnableList
 import com.google.common.truth.Truth.assertWithMessage
 import com.google.common.truth.TruthJUnit.assume
-import java.lang.reflect.Field
-import java.lang.reflect.ParameterizedType
 import java.util.Locale
-import java.util.Optional
+import kotlin.reflect.KProperty
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
@@ -54,10 +50,7 @@ import org.mockito.kotlin.whenever
 /**
  * Manages the Taskbar lifecycle for unit tests.
  *
- * Tests should pass in themselves as [testInstance]. They also need to provide their target
- * [context] through the constructor.
- *
- * See [InjectController] for grabbing controller(s) under test with minimal boilerplate.
+ * Tests should provide their target [context] through the constructor.
  *
  * The rule interacts with [TaskbarManager] on the main thread. A good rule of thumb for tests is
  * that code that is executed on the main thread in production should also happen on that thread
@@ -78,7 +71,6 @@ import org.mockito.kotlin.whenever
  * ```
  */
 class TaskbarUnitTestRule(
-    private val testInstance: Any,
     private val context: TaskbarWindowSandboxContext,
     private val controllerInjectionCallback: () -> Unit = {},
 ) : TestRule {
@@ -159,13 +151,13 @@ class TaskbarUnitTestRule(
                         root.setOnHierarchyChangeListener(
                             object : OnHierarchyChangeListener {
                                 override fun onChildViewAdded(p0: View, p1: View) {
-                                    injectControllers()
+                                    initCurrentActivity()
                                 }
 
                                 override fun onChildViewRemoved(p0: View, p1: View) {}
                             }
                         )
-                        if (root.isNotEmpty()) injectControllers()
+                        if (root.isNotEmpty()) initCurrentActivity()
                     }
                 }
 
@@ -196,56 +188,21 @@ class TaskbarUnitTestRule(
     }
 
     // Don't use TaskbarManager property, because the function can be called before initialization.
-    private fun TaskbarManagerImpl.injectControllers() {
+    private fun TaskbarManagerImpl.initCurrentActivity() {
         val activityContext = currentActivityContext ?: return
-
-        val bubbleControllerTypes =
-            BubbleControllers::class.java.fields.map { f ->
-                if (f.type == Optional::class.java) {
-                    (f.genericType as ParameterizedType).actualTypeArguments[0] as Class<*>
-                } else {
-                    f.type
-                }
-            }
-        testInstance.javaClass.fields
-            .filter { it.isAnnotationPresent(InjectController::class.java) }
-            .forEach {
-                val controllers: Any =
-                    if (it.type in bubbleControllerTypes) {
-                        activityContext.controllers.bubbleControllers.orElseThrow {
-                            NoSuchElementException("Bubble controllers are not initialized")
-                        }
-                    } else {
-                        activityContext.controllers
-                    }
-                injectController(it, testInstance, controllers)
-            }
 
         // TODO(b/346394875): we should test a non-default uiController.
         activityContext.setUIController(TaskbarUIController.DEFAULT)
         controllerInjectionCallback.invoke()
     }
 
-    private fun injectController(field: Field, testInstance: Any, controllers: Any) {
-        val controllerFieldsByType = controllers.javaClass.fields.associateBy { it.type }
-        field.set(
-            testInstance,
-            controllerFieldsByType[field.type]?.get(controllers)
-                ?: throw NoSuchElementException("Failed to find controller for ${field.type}"),
-        )
-    }
+    fun <T> delegate(provider: (TaskbarControllers) -> T) = ControllerDelegate(provider)
 
-    /**
-     * Annotates test controller fields to inject the corresponding controllers from the current
-     * [TaskbarControllers] instance.
-     *
-     * Controllers are injected during test setup and upon calling [recreateTaskbar].
-     *
-     * Multiple controllers can be injected if needed.
-     */
-    @Retention(AnnotationRetention.RUNTIME)
-    @Target(AnnotationTarget.FIELD)
-    annotation class InjectController
+    inner class ControllerDelegate<T>(private val provider: (TaskbarControllers) -> T) {
+
+        operator fun getValue(thisRef: Any?, property: KProperty<*>): T =
+            provider(activityContext.controllers)
+    }
 
     /** Overrides [USER_SETUP_COMPLETE] to be `false` for tests. */
     @Retention(AnnotationRetention.RUNTIME)

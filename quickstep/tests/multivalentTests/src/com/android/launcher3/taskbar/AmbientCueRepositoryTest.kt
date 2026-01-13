@@ -41,6 +41,7 @@ import com.android.quickstep.cuebar.data.repository.AmbientCueRepositoryImpl.Com
 import com.android.quickstep.cuebar.data.repository.AmbientCueRepositoryImpl.Companion.RENDER_IN_CUE_BAR
 import com.android.quickstep.cuebar.logger.AmbientCueLogger
 import com.google.common.truth.Truth.assertThat
+import java.util.concurrent.Executor
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -56,18 +57,17 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doReturn
-import java.util.concurrent.Executor
 
 @RunWith(AndroidJUnit4::class)
 class AmbientCueRepositoryTest {
 
     @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()
-    @get:Rule(order = 1) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
+    @get:Rule(order = 1) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
     private val taskbarActivityContext: TaskbarActivityContext
         get() = taskbarUnitTestRule.activityContext
+
     @Mock private lateinit var mockTaskbarContext: TaskbarActivityContext
     @Mock private lateinit var mockAmbientCueLogger: AmbientCueLogger
     @Mock private lateinit var mockBgExecutor: Executor
@@ -82,30 +82,44 @@ class AmbientCueRepositoryTest {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        repositoryImpl = AmbientCueRepositoryImpl(taskbarActivityContext, mockAmbientCueLogger,
-            mockBgExecutor, mockUiExecutor)
+        repositoryImpl =
+            AmbientCueRepositoryImpl(
+                taskbarActivityContext,
+                mockAmbientCueLogger,
+                mockBgExecutor,
+                mockUiExecutor,
+            )
         `when`(mockTaskbarContext.getSystemService(AutofillManager::class.java))
             .thenReturn(mockAutofillManager)
         `when`(mockDrawable.mutate()).thenReturn(mockMutatedDrawable)
         `when`(mockTaskbarContext.getDrawable(anyInt())).thenReturn(mockDrawable)
-        `when`(mockTaskbarContext.resources).thenReturn(
-            mock(android.content.res.Resources::class.java))
+        `when`(mockTaskbarContext.resources)
+            .thenReturn(mock(android.content.res.Resources::class.java))
         doNothing().`when`(mockTaskbarContext).startActivity(any())
         repository = spy(repositoryImpl)
-        doAnswer { invocation -> (invocation.getArgument(0) as Runnable).run(); null }
-            .`when`(mockBgExecutor).execute(any())
-        doAnswer { invocation -> (invocation.getArgument(0) as Runnable).run(); null }
-            .`when`(mockUiExecutor).execute(any())
+        doAnswer { invocation ->
+                (invocation.getArgument(0) as Runnable).run()
+                null
+            }
+            .`when`(mockBgExecutor)
+            .execute(any())
+        doAnswer { invocation ->
+                (invocation.getArgument(0) as Runnable).run()
+                null
+            }
+            .`when`(mockUiExecutor)
+            .execute(any())
     }
 
     /** Mocks a ContextInsight with the given ContextHints. */
     private fun mockInsight(vararg hints: ContextHint): ContextInsight {
         val insight = mock(ActionableInsight::class.java)
-        val originHintList = hints.map { contextHint ->
-            mock(ContextHintWithSignature::class.java).apply {
-                `when`(this.contextHint).thenReturn(contextHint)
+        val originHintList =
+            hints.map { contextHint ->
+                mock(ContextHintWithSignature::class.java).apply {
+                    `when`(this.contextHint).thenReturn(contextHint)
+                }
             }
-        }
         `when`(insight.originHints).thenReturn(originHintList.toSet())
         return insight
     }
@@ -153,8 +167,10 @@ class AmbientCueRepositoryTest {
     }
 
     /** Asserts the result list contains exactly one ActionModel and returns it. */
-    private fun getSingleActionModel(result: List<ActionModel>, expectedActionTypeName: String):
-            ActionModel {
+    private fun getSingleActionModel(
+        result: List<ActionModel>,
+        expectedActionTypeName: String,
+    ): ActionModel {
         assertThat(result).hasSize(1)
         val actionModel = result.first()
         assertThat(actionModel.actionType).isEqualTo(expectedActionTypeName)
@@ -164,12 +180,12 @@ class AmbientCueRepositoryTest {
     @Test
     fun mapInsightToActions_bundleHint_callsMapContextInsightToAction() {
         val bundle = Bundle().apply { putBoolean(RENDER_IN_CUE_BAR, true) }
-        val bundleHint = mock(BundleHint::class.java).apply {
-            `when`(dataBundle).thenReturn(bundle)
-        }
+        val bundleHint =
+            mock(BundleHint::class.java).apply { `when`(dataBundle).thenReturn(bundle) }
         val insight = mockInsight(bundleHint)
         doReturn(listOf(mock(ActionModel::class.java)))
-            .`when`(repository).mapContextInsightToAction(any(), any())
+            .`when`(repository)
+            .mapContextInsightToAction(any(), any())
 
         val result = repository.mapInsightToActions(insight)
 
@@ -179,12 +195,14 @@ class AmbientCueRepositoryTest {
 
     @Test
     fun mapInsightToActions_conversationHint_callsMapContextInsightToAction() {
-        val conversationHint = mock(ConversationHint::class.java).apply {
-            `when`(conversationEvent).thenReturn(mock(ConversationEvent::class.java))
-        }
+        val conversationHint =
+            mock(ConversationHint::class.java).apply {
+                `when`(conversationEvent).thenReturn(mock(ConversationEvent::class.java))
+            }
         val insight = mockInsight(conversationHint)
         doReturn(listOf(mock(ActionModel::class.java)))
-            .`when`(repository).mapContextInsightToAction(any(), any())
+            .`when`(repository)
+            .mapContextInsightToAction(any(), any())
 
         val result = repository.mapInsightToActions(insight)
 
@@ -195,9 +213,10 @@ class AmbientCueRepositoryTest {
     @Test
     fun mapContextInsightToAction_actionableInsight_remoteAction_createsMAModel() {
         val insight = mockActionableInsight()
-        val conversationHint = mock(ConversationHint::class.java).apply {
-            `when`(conversationEvent).thenReturn(mock(ConversationEvent::class.java))
-        }
+        val conversationHint =
+            mock(ConversationHint::class.java).apply {
+                `when`(conversationEvent).thenReturn(mock(ConversationEvent::class.java))
+            }
         val result = repository.mapContextInsightToAction(insight, conversationHint)
         val actionModel = getSingleActionModel(result, MA_ACTION_TYPE_NAME)
 
@@ -211,9 +230,10 @@ class AmbientCueRepositoryTest {
     @Test
     fun mapContextInsightToAction_displayInsight_conversationHint_createsMRModel() {
         val insight = mockDisplayInsight()
-        val conversationHint = mock(ConversationHint::class.java).apply {
-            `when`(conversationEvent).thenReturn(mock(ConversationEvent::class.java))
-        }
+        val conversationHint =
+            mock(ConversationHint::class.java).apply {
+                `when`(conversationEvent).thenReturn(mock(ConversationEvent::class.java))
+            }
         val result = repository.mapContextInsightToAction(insight, conversationHint)
         val actionModel = getSingleActionModel(result, MR_ACTION_TYPE_NAME)
 
@@ -228,7 +248,8 @@ class AmbientCueRepositoryTest {
         val irrelevantHint = mock(ContextHint::class.java)
         val insight = mockInsight(irrelevantHint)
         doReturn(emptyList<ActionModel>())
-            .`when`(repository).mapContextInsightToAction(any(), any())
+            .`when`(repository)
+            .mapContextInsightToAction(any(), any())
 
         val result = repository.mapInsightToActions(insight)
 
@@ -240,16 +261,16 @@ class AmbientCueRepositoryTest {
     fun mapContextInsightToAction_nestedInsightCollection_flattensAndMapsChildren() {
         val actionableInsight = mockActionableInsight()
         val displayInsight = mockDisplayInsight()
-        val nestedCollection = InsightCollection.Builder()
-            .addInsight(displayInsight)
-            .build()
-        val rootCollection = InsightCollection.Builder()
-            .addInsight(actionableInsight)
-            .addInsight(nestedCollection)
-            .build()
-        val conversationHint = mock(ConversationHint::class.java).apply {
-            `when`(conversationEvent).thenReturn(mock(ConversationEvent::class.java))
-        }
+        val nestedCollection = InsightCollection.Builder().addInsight(displayInsight).build()
+        val rootCollection =
+            InsightCollection.Builder()
+                .addInsight(actionableInsight)
+                .addInsight(nestedCollection)
+                .build()
+        val conversationHint =
+            mock(ConversationHint::class.java).apply {
+                `when`(conversationEvent).thenReturn(mock(ConversationEvent::class.java))
+            }
 
         val result = repository.mapContextInsightToAction(rootCollection, conversationHint)
 
