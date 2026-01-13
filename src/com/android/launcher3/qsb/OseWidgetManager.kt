@@ -36,6 +36,7 @@ import com.android.launcher3.LauncherConstants.ActivityCodes.REQUEST_RECONFIGURE
 import com.android.launcher3.R
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.LauncherAppSingleton
+import com.android.launcher3.graphics.theme.ThemePreference
 import com.android.launcher3.qsb.OSEManager.Companion.OSE_LOOPER
 import com.android.launcher3.qsb.OSEManager.OSEInfo
 import com.android.launcher3.qsb.QsbAppWidgetHost.Callbacks
@@ -61,6 +62,7 @@ constructor(
     private val sizeHandler: WidgetSizeHandler,
     private val idp: InvariantDeviceProfile,
     tracker: DaggerSingletonTracker,
+    private val themePreference: ThemePreference,
 ) {
 
     private val mutableProviderInfo = MutableListenableRef<AppWidgetProviderInfo?>(null)
@@ -87,6 +89,7 @@ constructor(
 
         val idpListener = OnIDPChangeListener { updateWidgetSizeAsync() }
         idp.addOnChangeListener(idpListener)
+        tracker.addCloseable(themePreference.forEach(executor) { updateWidgetSizeAsync() })
         tracker.addCloseable {
             idp.removeOnChangeListener(idpListener)
             widgetHost.stopListening()

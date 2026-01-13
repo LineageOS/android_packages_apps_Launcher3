@@ -40,6 +40,7 @@ import com.android.launcher3.dagger.SettingsModule
 import com.android.launcher3.dagger.StaticObjectModule
 import com.android.launcher3.dagger.TaskOverlayModule
 import com.android.launcher3.dagger.WindowManagerProxyModule
+import com.android.launcher3.graphics.theme.ThemePreference
 import com.android.launcher3.model.ModelInitializer
 import com.android.launcher3.model.data.LoaderParams
 import com.android.launcher3.provider.LauncherDbUtils.selectionForWorkspaceScreen
@@ -156,8 +157,11 @@ constructor(
 
     class NoOpWidgetSizeHandler
     @Inject
-    constructor(@ApplicationContext context: Context, idp: InvariantDeviceProfile) :
-        WidgetSizeHandler(context, idp) {
+    constructor(
+        @ApplicationContext context: Context,
+        idp: InvariantDeviceProfile,
+        themePreference: ThemePreference,
+    ) : WidgetSizeHandler(context, idp, themePreference) {
 
         override fun updateSizeRangesAsync(
             widgetId: Int,
@@ -165,6 +169,10 @@ constructor(
             spanY: Int,
             executor: Executor,
         ) {
+            // Ignore
+        }
+
+        override fun updateHotseatQsbSizeRangesAsync(widgetId: Int, executor: Executor) {
             // Ignore
         }
     }

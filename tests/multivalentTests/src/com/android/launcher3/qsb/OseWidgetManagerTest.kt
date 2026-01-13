@@ -27,6 +27,7 @@ import android.platform.test.rule.LimitDevicesRule
 import android.platform.test.rule.SkipOnDeviceless
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.launcher3.graphics.theme.ThemePreference
 import com.android.launcher3.qsb.OSEManager.Companion.OSE_LOOPER
 import com.android.launcher3.qsb.OSEManager.OSEInfo
 import com.android.launcher3.util.DaggerSingletonTracker
@@ -48,6 +49,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
@@ -65,6 +67,7 @@ class OseWidgetManagerTest {
     @Mock lateinit var sizeHandler: WidgetSizeHandler
     @Mock lateinit var tracker: DaggerSingletonTracker
     private lateinit var widgetManager: AppWidgetManager
+    private lateinit var themePreference: ThemePreference
 
     private val mockOseInfo = MutableListenableRef(OSEInfo(TEST_PKG))
     private val executor = OSE_LOOPER
@@ -72,6 +75,7 @@ class OseWidgetManagerTest {
     @Before
     fun setup() {
         widgetManager = context.spyService(AppWidgetManager::class.java)
+        themePreference = context.appComponent.themePreference
         doReturn(mockOseInfo).whenever(oseManager).oseInfo
         doReturn(true).whenever(widgetManager).bindAppWidgetIdIfAllowed(any(), any())
     }
@@ -265,7 +269,8 @@ class OseWidgetManagerTest {
         TestUtil.runOnExecutorSync(executor) {}
 
         // Assert: The widget size is updated.
-        verify(sizeHandler).updateHotseatQsbSizeRangesAsync(eq(currentWidgetId), eq(executor))
+        verify(sizeHandler, times(2))
+            .updateHotseatQsbSizeRangesAsync(eq(currentWidgetId), eq(executor))
     }
 
     @Test
@@ -285,7 +290,30 @@ class OseWidgetManagerTest {
         TestUtil.runOnExecutorSync(executor) {}
 
         // Assert: The widget size is updated for the newly bound widget.
-        verify(sizeHandler).updateHotseatQsbSizeRangesAsync(eq(newWidgetId), eq(executor))
+        verify(sizeHandler, times(2)).updateHotseatQsbSizeRangesAsync(eq(newWidgetId), eq(executor))
+    }
+
+    @Test
+    fun onThemeChanged_updatesWidgetOptions() {
+        val widgetInfo = WidgetUtils.findWidgetProvider(false)
+        val widgetId = 2
+        doReturn(listOf(widgetInfo))
+            .whenever(widgetManager)
+            .getInstalledProvidersForPackage(eq(TEST_PKG), any())
+        doReturn(INVALID_APPWIDGET_ID).whenever(widgetHost).getBoundWidgetId()
+        doReturn(widgetId).whenever(widgetHost).allocateAppWidgetId()
+        doReturn(widgetId).whenever(widgetHost).getActiveWidgetId()
+
+        themePreference.setValue(null)
+        createOseWidgetManager()
+        TestUtil.runOnExecutorSync(executor) {}
+        // Once each for handleOseInfoUpdate, initial value of themePreference,
+        verify(sizeHandler, times(2)).updateHotseatQsbSizeRangesAsync(eq(widgetId), eq(executor))
+        themePreference.setValue(ThemePreference.MONO_THEME_VALUE)
+        TestUtil.runOnExecutorSync(executor) {}
+
+        // themePreference change triggers to update widget options.
+        verify(sizeHandler, times(3)).updateHotseatQsbSizeRangesAsync(eq(widgetId), eq(executor))
     }
 
     private fun createOseWidgetManager() =
@@ -296,6 +324,7 @@ class OseWidgetManagerTest {
             sizeHandler,
             context.appComponent.idp,
             tracker,
+            themePreference,
         )
 
     companion object {
