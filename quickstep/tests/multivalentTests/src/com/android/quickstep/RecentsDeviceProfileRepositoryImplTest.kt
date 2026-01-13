@@ -21,6 +21,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.DeviceProfile
 import com.android.launcher3.deviceprofile.DeviceConfiguration
 import com.android.launcher3.deviceprofile.DeviceProperties
+import com.android.launcher3.deviceprofile.TaskbarConfiguration
 import com.android.quickstep.recents.data.RecentsDeviceProfile
 import com.android.quickstep.recents.data.RecentsDeviceProfileRepositoryImpl
 import com.android.wm.shell.shared.desktopmode.FakeDesktopState
@@ -89,6 +90,7 @@ class RecentsDeviceProfileRepositoryImplTest {
                         isWorkspaceItemsLabelHidden = false,
                     ),
                 insets = Rect(0, 0, 0, 0),
+                taskbarConfiguration = TaskbarConfiguration(isTaskbarPresent = false),
             )
 
         val deviceProfile = mock<DeviceProfile>()

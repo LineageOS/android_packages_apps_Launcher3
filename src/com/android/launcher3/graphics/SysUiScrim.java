@@ -171,7 +171,7 @@ public class SysUiScrim implements View.OnAttachStateChangeListener {
         mDrawTopScrim = insets.top > 0;
         mDrawBottomScrim = !dp.isVerticalBarLayout()
                 && !dp.getDeviceProperties().getDeviceConfiguration().isGestureMode()
-                && !dp.isTaskbarPresent;
+                && !dp.getDeviceProperties().getTaskbarConfiguration().isTaskbarPresent();
     }
 
     @Override

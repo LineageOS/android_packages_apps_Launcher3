@@ -26,8 +26,6 @@ import static com.android.launcher3.icons.IconNormalizer.ICON_VISIBLE_AREA_FACTO
 import static com.android.launcher3.testing.shared.ResourceUtils.INVALID_RESOURCE_HANDLE;
 import static com.android.launcher3.testing.shared.ResourceUtils.pxFromDp;
 import static com.android.wm.shell.Flags.enableBubbleBar;
-import static com.android.wm.shell.Flags.enableBubbleBarOnPhones;
-import static com.android.wm.shell.Flags.enableTinyTaskbar;
 
 import static java.lang.Math.max;
 
@@ -58,6 +56,7 @@ import com.android.launcher3.deviceprofile.HotseatProfile;
 import com.android.launcher3.deviceprofile.HotseatProfileInitialValues;
 import com.android.launcher3.deviceprofile.OverviewProfile;
 import com.android.launcher3.deviceprofile.SysuiProfile;
+import com.android.launcher3.deviceprofile.TaskbarConfiguration;
 import com.android.launcher3.deviceprofile.TaskbarProfile;
 import com.android.launcher3.deviceprofile.WorkspaceProfile;
 import com.android.launcher3.display.DisplayController;
@@ -148,7 +147,6 @@ public class DeviceProfile {
 
     // Taskbar
     public TaskbarProfile mTaskbarProfile;
-    public boolean isTaskbarPresent;
     // Whether Taskbar will inset the bottom of apps by taskbarSize.
     public boolean isTaskbarPresentInApps;
 
@@ -175,7 +173,8 @@ public class DeviceProfile {
                         false,
                         false,
                         false
-                )
+                ),
+                new TaskbarConfiguration(false)
         );
         mBottomSheetProfile = new BottomSheetProfile(0, 0, 0, 0f, 0f);
         overviewProfile = new OverviewProfile(
@@ -215,7 +214,6 @@ public class DeviceProfile {
     DeviceProfile(
             InvariantDeviceProfile inv,
             LauncherDisplayInfo info,
-            WindowManagerProxy wmProxy,
             DeviceProperties deviceProperties,
             @NonNull final ViewScaleProvider viewScaleProvider,
             @NonNull final Consumer<DeviceProfile> dimensionOverrideProvider,
@@ -241,14 +239,6 @@ public class DeviceProfile {
                 && !mDeviceProperties.getDeviceConfiguration().isExternalDisplay();
         // Determine device posture.
         mInfo = info;
-        boolean taskbarOrBubbleBarOnPhones = enableTinyTaskbar()
-                || (enableBubbleBar() && enableBubbleBarOnPhones());
-        isTaskbarPresent =
-                (mDeviceProperties.isLargeScreen()
-                        || (taskbarOrBubbleBarOnPhones
-                        && mDeviceProperties.getDeviceConfiguration().isGestureMode())
-                )
-                        && wmProxy.isTaskbarDrawnInProcess();
 
         // Some more constants.
         Context context = getContext(info, isLandscapeOrientation()
@@ -271,7 +261,7 @@ public class DeviceProfile {
                 res,
                 inv.taskbarModeUtil.isTransient()
                         && !mDeviceProperties.getDeviceConfiguration().isExternalDisplay(),
-                isTaskbarPresent,
+                mDeviceProperties.getTaskbarConfiguration().isTaskbarPresent(),
                 mMetrics,
                 displayOptionSpec,
                 mTypeIndex,
@@ -319,7 +309,6 @@ public class DeviceProfile {
                         /*deviceProperties*/ getDeviceProperties(),
                         /*res*/ res,
                         /*inv*/ inv,
-                        /*isTaskbarPresent*/ isTaskbarPresent,
                         /*shouldApplyWidePortraitDimens*/ shouldApplyWidePortraitDimens,
                         /*responsiveHotseatSpec*/ mResponsiveHotseatSpec,
                         /*typeIndex*/ mTypeIndex,
@@ -676,7 +665,7 @@ public class DeviceProfile {
                 res,
                 inv.taskbarModeUtil.isTransient()
                         && !mDeviceProperties.getDeviceConfiguration().isExternalDisplay(),
-                isTaskbarPresent,
+                mDeviceProperties.getTaskbarConfiguration().isTaskbarPresent(),
                 mMetrics,
                 mDisplayOptionSpec,
                 mTypeIndex,
@@ -967,7 +956,7 @@ public class DeviceProfile {
             } else {
                 hotseatBarPadding.left += qsbWidth;
             }
-        } else if (isTaskbarPresent) {
+        } else if (mDeviceProperties.getTaskbarConfiguration().isTaskbarPresent()) {
             // Center the QSB vertically with hotseat
             int hotseatBarBottomPadding = getHotseatBarBottomPadding();
             int hotseatBarTopPadding =
@@ -1095,7 +1084,7 @@ public class DeviceProfile {
             return getHotseatBarBottomPadding()
                     - ((getHotseatProfile().getQsbHeight()
                     - hotseatProfile.getCellHeightPx()) / 2);
-        } else if (isTaskbarPresent) { // QSB on top
+        } else if (mDeviceProperties.getTaskbarConfiguration().isTaskbarPresent()) { // QSB on top
             return hotseatProfile.getBarSizePx() - getHotseatProfile().getQsbHeight()
                     + getHotseatProfile().getQsbShadowHeight();
         } else {
@@ -1107,7 +1096,8 @@ public class DeviceProfile {
      * Returns the number of pixels the hotseat is translated from the bottom of the screen.
      */
     private int getHotseatBarBottomPadding() {
-        if (isTaskbarPresent || isQsbInline) { // QSB on top or inline
+        // QSB on top or inline
+        if (mDeviceProperties.getTaskbarConfiguration().isTaskbarPresent() || isQsbInline) {
             return hotseatProfile.getBarBottomSpacePx() - (Math.abs(
                     hotseatProfile.getCellHeightPx()
                             - getWorkspaceIconProfile().getIconSizePx()) / 2);
@@ -1158,7 +1148,7 @@ public class DeviceProfile {
 
     /** Returns the number of pixels required below OverviewActions. */
     public int getOverviewActionsClaimedSpaceBelow() {
-        return isTaskbarPresent
+        return mDeviceProperties.getTaskbarConfiguration().isTaskbarPresent()
                 ? getTaskbarProfile().getTransientTaskbarClaimedSpace()
                 : mDeviceProperties.getInsets().bottom;
     }
@@ -1203,7 +1193,7 @@ public class DeviceProfile {
             );
         } else {
             // Folders should only appear below the drop target bar and above the hotseat
-            int hotseatTop = isTaskbarPresent
+            int hotseatTop = mDeviceProperties.getTaskbarConfiguration().isTaskbarPresent()
                     ? getTaskbarProfile().getHeight()
                     : hotseatProfile.getBarSizePx();
             return new Rect(
@@ -1475,7 +1465,10 @@ public class DeviceProfile {
                 prefix + pxToDpStr("hotseatQsbWidth", hotseatProfile.getQsbWidth())
         );
 
-        writer.println(prefix + "\tisTaskbarPresent:" + isTaskbarPresent);
+        writer.println(
+                prefix + "\tisTaskbarPresent:"
+                        + mDeviceProperties.getTaskbarConfiguration().isTaskbarPresent()
+        );
         writer.println(prefix + "\tisTaskbarPresentInApps:" + isTaskbarPresentInApps);
         writer.println(prefix + pxToDpStr("taskbarHeight", getTaskbarProfile().getHeight()));
         writer.println(prefix + pxToDpStr("stashedTaskbarHeight",
@@ -1778,7 +1771,6 @@ public class DeviceProfile {
             return new DeviceProfile(
                     mInv,
                     mInfo,
-                    mWMProxy,
                     DeviceProperties.Factory.createDeviceProperties(
                             mInfo,
                             mWindowBounds,
@@ -1788,7 +1780,8 @@ public class DeviceProfile {
                                     mIsMultiDisplay,
                                     mIsGestureMode,
                                     mIsWorkspaceItemsLabelHidden
-                            )
+                            ),
+                            mWMProxy.isTaskbarDrawnInProcess()
                     ),
                     mViewScaleProvider,
                     mOverrideProvider,

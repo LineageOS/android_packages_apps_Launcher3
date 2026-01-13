@@ -150,7 +150,7 @@ class NavButtonLayoutFactory {
                         space,
                     )
                 }
-                deviceProfile.isTaskbarPresent -> {
+                deviceProfile.deviceProperties.taskbarConfiguration.isTaskbarPresent -> {
                     return when {
                         isKidsMode -> {
                             KidsNavLayoutter(

@@ -250,7 +250,8 @@ class TaskbarInsetsController(val context: TaskbarActivityContext) : LoggableTas
                         context.resources,
                     )
                 val isPinnedTaskbar =
-                    context.deviceProfile.isTaskbarPresent && !context.isTransientTaskbar
+                    context.deviceProfile.deviceProperties.taskbarConfiguration.isTaskbarPresent &&
+                        !context.isTransientTaskbar
                 val mandatoryGestureHeight = if (isPinnedTaskbar) contentHeight else gestureHeight
                 provider.insetsSize =
                     getInsetsForGravityWithCutout(mandatoryGestureHeight, gravity, endRotation)

@@ -70,7 +70,10 @@ constructor(
                     ?: return QuickStepContract.getWindowCornerRadius(context)
 
             return if (
-                activityContext.deviceProfile?.isTaskbarPresent == true &&
+                activityContext.deviceProfile
+                    ?.deviceProperties
+                    ?.taskbarConfiguration
+                    ?.isTaskbarPresent == true &&
                     activityContext.activityComponent.getTaskbarFeatureEvaluator().isTransient
             ) {
                 context.resources

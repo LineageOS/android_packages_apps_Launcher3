@@ -260,7 +260,11 @@ class TaskbarRecentAppsController(
 
     fun init(taskbarControllers: TaskbarControllers, previousShownTasks: List<GroupTask>) {
         controllers = taskbarControllers
-        if (!controllers.taskbarActivityContext.deviceProfile.isTaskbarPresent) return
+        if (
+            !controllers.taskbarActivityContext.deviceProfile.deviceProperties.taskbarConfiguration
+                .isTaskbarPresent
+        )
+            return
 
         if (previousShownTasks.isNotEmpty()) {
             shownTasks = previousShownTasks
@@ -451,10 +455,8 @@ class TaskbarRecentAppsController(
     private fun fetchIconForTask(groupTask: GroupTask, index: Int, forceUpdate: Boolean = false) {
         val task = groupTask.tasks[index]
         val cancellableTask =
-            recentsModel.iconCache.getBitmapInfoInBackground(task, getTaskbarUiThread()) {
-                bi,
-                d,
-                t ->
+            recentsModel.iconCache.getBitmapInfoInBackground(task, getTaskbarUiThread()) { bi, d, t
+                ->
                 if (
                     !forceUpdate &&
                         bi === groupTask.bitmapInfos[index] &&
