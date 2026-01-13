@@ -55,7 +55,6 @@ import com.android.launcher3.util.Executors.ORDERED_BG_EXECUTOR
 import com.android.launcher3.util.OnboardingPrefs.ALL_APPS_VISITED_COUNT
 import com.android.launcher3.util.OnboardingPrefs.HOME_BOUNCE_COUNT
 import com.android.launcher3.util.OnboardingPrefs.HOME_BOUNCE_SEEN
-import com.android.launcher3.util.OnboardingPrefs.HOTSEAT_DISCOVERY_TIP_COUNT
 import com.android.launcher3.util.OnboardingPrefs.HOTSEAT_LONGPRESS_TIP_SEEN
 import com.android.launcher3.util.OnboardingPrefs.TASKBAR_EDU_TOOLTIP_STEP
 import com.android.launcher3.util.OnboardingPrefs.TASKBAR_SEARCH_EDU_SEEN
@@ -390,11 +389,7 @@ class DevOptionsUiHelper(c: Context, attr: AttributeSet?) : PreferenceGroup(c, a
                 HOME_BOUNCE_SEEN.sharedPrefKey,
                 HOME_BOUNCE_COUNT.sharedPrefKey,
             )
-            addOnboardPref(
-                "Hybrid Hotseat Education",
-                HOTSEAT_DISCOVERY_TIP_COUNT.sharedPrefKey,
-                HOTSEAT_LONGPRESS_TIP_SEEN.sharedPrefKey,
-            )
+            addOnboardPref("Hybrid Hotseat Education", HOTSEAT_LONGPRESS_TIP_SEEN.sharedPrefKey)
             val taskbarEduKeys = mutableListOf(TASKBAR_EDU_TOOLTIP_STEP.sharedPrefKey)
             if (Flags.tooltipEduCombinator()) {
                 taskbarEduKeys.add(TASKBAR_SEEN_EDU_FLAGS.sharedPrefKey)

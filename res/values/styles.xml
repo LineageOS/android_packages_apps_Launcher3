@@ -78,7 +78,6 @@
         <item name="appPairSurfaceInFolder">@color/materialColorSurfaceContainerLowest</item>
         <item name="loadingIconColor">#CCFFFFFF</item>
         <item name="iconOnlyShortcutColor">@color/materialColorOnSurfaceVariant</item>
-        <item name="eduHalfSheetBGColor">?android:attr/colorAccent</item>
         <item name="workspaceAccentColor">@color/workspace_accent_color_light</item>
         <item name="workspaceSurfaceColor">@color/workspace_surface_color</item>
         <item name="dropTargetHoverTextColor">@color/drop_target_hover_text_color_light</item>
@@ -149,7 +148,6 @@
         <item name="isMainColorDark">true</item>
         <item name="loadingIconColor">#99FFFFFF</item>
         <item name="iconOnlyShortcutColor">#B3FFFFFF</item>
-        <item name="eduHalfSheetBGColor">#DD000000</item>
         <item name="overviewScrimColorFallback">@color/overview_scrim_dark</item>
         <item name="overviewScrimForegroundPrimaryBlur">@color/overview_scrim_foreground_primary_dark</item>
         <item name="overviewScrimForegroundSecondaryBlur">@color/overview_scrim_foreground_secondary_dark</item>

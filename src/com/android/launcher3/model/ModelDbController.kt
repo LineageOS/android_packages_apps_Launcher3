@@ -104,9 +104,6 @@ internal constructor(
                 true, /* optional */
             )
         }
-        databaseHelper.mHotseatRestoreTableExists =
-            tableExists(databaseHelper.readableDatabase, Favorites.HYBRID_HOTSEAT_BACKUP_TABLE)
-
         databaseHelper.initIds()
         return databaseHelper
     }
@@ -127,19 +124,13 @@ internal constructor(
     @WorkerThread
     fun insert(initialValues: ContentValues?): Int {
         createDbIfNotExists()
-
-        val db = openHelper.writableDatabase
-        val rowId = openHelper.dbInsertAndCheck(db, TABLE_NAME, initialValues)
-        if (rowId >= 0) openHelper.onAddOrDeleteOp()
-        return rowId
+        return openHelper.dbInsertAndCheck(openHelper.writableDatabase, TABLE_NAME, initialValues)
     }
 
     /** Refer [SQLiteDatabase.delete] */
     @WorkerThread
     fun delete(selection: String?, selectionArgs: Array<String>?): Int =
-        getTable().delete(selection, selectionArgs).also {
-            if (it > 0) openHelper.onAddOrDeleteOp()
-        }
+        getTable().delete(selection, selectionArgs)
 
     /** Refer [SQLiteDatabase.update] */
     @WorkerThread
@@ -188,14 +179,6 @@ internal constructor(
     fun newTransaction(): SQLiteTransaction {
         createDbIfNotExists()
         return SQLiteTransaction(openHelper.writableDatabase)
-    }
-
-    /** Refreshes the internal state corresponding to presence of hotseat table */
-    @WorkerThread
-    fun refreshHotseatRestoreTable() {
-        createDbIfNotExists()
-        openHelper.mHotseatRestoreTableExists =
-            tableExists(openHelper.readableDatabase, Favorites.HYBRID_HOTSEAT_BACKUP_TABLE)
     }
 
     /** Resets the launcher DB if we should reset it. */

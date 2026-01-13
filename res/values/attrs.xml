@@ -44,7 +44,6 @@
     <attr name="workspaceKeyShadowColor" format="color" />
     <attr name="widgetsTheme" format="reference" />
     <attr name="iconOnlyShortcutColor" format="color" />
-    <attr name="eduHalfSheetBGColor" format="color" />
     <attr name="overviewScrimColor" format="color" />
     <attr name="overviewScrimColorFallback" format="color" />
     <attr name="overviewScrimColorBlur" format="color" />

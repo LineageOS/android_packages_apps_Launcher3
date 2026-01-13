@@ -15,17 +15,14 @@
  */
 package com.android.launcher3.hybridhotseat;
 
-import static com.android.launcher3.Flags.migrateBrowserIconOnSetup;
 import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
-import static com.android.launcher3.LauncherState.NORMAL;
-import static com.android.launcher3.anim.AnimatorListeners.forSuccessCallback;
-import static com.android.launcher3.hybridhotseat.HotseatEduController.getSettingsIntent;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_HOTSEAT_PREDICTION_PINNED;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_HOTSEAT_RANKED;
 import static com.android.launcher3.util.OnboardingPrefs.HOTSEAT_LONGPRESS_TIP_SEEN;
 
 import android.animation.ObjectAnimator;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.view.HapticFeedbackConstants;
 import android.view.View;
 
@@ -57,7 +54,6 @@ import com.android.launcher3.views.PredictedAppIcon;
 import com.android.launcher3.views.Snackbar;
 
 import java.io.PrintWriter;
-import java.util.stream.Collectors;
 
 /**
  * Provides prediction ability for the hotseat. Fills gaps in hotseat with predicted items, allows
@@ -71,6 +67,9 @@ public class HotseatPredictionController implements
     private final Hotseat mHotseat;
 
     private boolean mEnableHotseatLongPressTipForTesting = true;
+
+    private static final String SETTINGS_ACTION =
+            "android.settings.ACTION_CONTENT_SUGGESTIONS_SETTINGS";
 
     public HotseatPredictionController(QuickstepLauncher launcher) {
         mLauncher = launcher;
@@ -113,34 +112,10 @@ public class HotseatPredictionController implements
     }
 
     /**
-     * Shows appropriate hotseat education based on prediction enabled and migration states.
-     */
-    public void showEdu() {
-        if (!migrateBrowserIconOnSetup()) return;
-        mLauncher.getStateManager().goToState(NORMAL, true, forSuccessCallback(() -> {
-            HotseatEduController eduController = new HotseatEduController(mLauncher);
-            eduController.setPredictedApps(mHotseatOrganizer.getPredictedItems().stream()
-                    .map(i -> (WorkspaceItemInfo) i)
-                    .collect(Collectors.toList()));
-            eduController.showEdu();
-        }));
-    }
-
-    /**
-     * Returns if hotseat client has predictions
-     */
-    public boolean hasPredictions() {
-        return !mHotseatOrganizer.getPredictedItems().isEmpty();
-    }
-
-    /**
      * Sets or updates the predicted items
      */
     public void setPredictedItems(PredictedContainerInfo items) {
         mHotseatOrganizer.setPredictedItems(items.getContents());
-        if (!migrateBrowserIconOnSetup() && items.getContents().isEmpty()) {
-            HotseatRestoreHelper.restoreBackup(mLauncher);
-        }
     }
 
     /**
@@ -253,5 +228,9 @@ public class HotseatPredictionController implements
 
     public void dump(String prefix, PrintWriter writer) {
         mHotseatOrganizer.dump(prefix, writer);
+    }
+
+    static Intent getSettingsIntent() {
+        return new Intent(SETTINGS_ACTION).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     }
 }

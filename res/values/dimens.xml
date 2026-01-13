@@ -440,9 +440,6 @@
     <dimen name="default_dialog_corner_radius">26dp</dimen>
     <dimen name="dialogCornerRadius">@dimen/default_dialog_corner_radius</dimen>
 
-    <!-- Onboarding bottomsheet related -->
-    <dimen name="bottom_sheet_edu_padding">24dp</dimen>
-
     <!-- Taskbar related (placeholders to compile in Launcher3 without Quickstep) -->
     <dimen name="taskbar_size">0dp</dimen>
     <dimen name="taskbar_phone_size">@*android:dimen/navigation_bar_frame_height</dimen>
