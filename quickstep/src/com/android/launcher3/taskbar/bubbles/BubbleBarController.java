@@ -29,6 +29,7 @@ import android.annotation.AnyThread;
 import android.annotation.BinderThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.graphics.Point;
 import android.os.Bundle;
@@ -274,6 +275,16 @@ public class BubbleBarController {
     private void onBubbleStateChange(Bundle bundle) {
         bundle.setClassLoader(BubbleBarUpdate.class.getClassLoader());
         BubbleBarUpdate update = bundle.getParcelable("update", BubbleBarUpdate.class);
+        if (update == null) {
+            Log.e(TAG, "Update info missing from bubble state change");
+            return;
+        }
+        if (Flags.sendBubbleRootTaskIdToLauncher()) {
+            if (update.bubbleRootTaskId != ActivityTaskManager.INVALID_TASK_ID) {
+                // Cache bubble root task id if it is set in the update
+                BubbleHelper.updateBubbleRootTaskId(update.bubbleRootTaskId);
+            }
+        }
         BubbleBarViewUpdate viewUpdate = new BubbleBarViewUpdate(update);
         if (update.addedBubble != null
                 || update.updatedBubble != null

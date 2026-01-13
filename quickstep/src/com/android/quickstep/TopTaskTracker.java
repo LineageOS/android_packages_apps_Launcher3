@@ -30,6 +30,7 @@ import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITIO
 import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_TYPE_A;
 import static com.android.wm.shell.Flags.enableShellTopTaskTracking;
 import static com.android.wm.shell.Flags.enableFlexibleSplit;
+import static com.android.wm.shell.Flags.sendBubbleRootTaskIdToLauncher;
 import static com.android.wm.shell.shared.GroupedTaskInfo.TYPE_DESK;
 import static com.android.wm.shell.shared.GroupedTaskInfo.TYPE_SPLIT;
 import static com.android.launcher3.statehandlers.DesktopVisibilityController.INACTIVE_DESK_ID;
@@ -48,6 +49,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.dagger.LauncherAppSingleton;
 import com.android.launcher3.statehandlers.DesktopVisibilityController;
+import com.android.launcher3.taskbar.bubbles.BubbleHelper;
 import com.android.launcher3.util.DaggerSingletonObject;
 import com.android.launcher3.util.DaggerSingletonTracker;
 import com.android.launcher3.util.SplitConfigurationOptions;
@@ -392,6 +394,9 @@ public class TopTaskTracker extends ISplitScreenListener.Stub implements TaskSta
     }
 
     private static boolean isBubbleTask(TaskInfo task) {
+        if (sendBubbleRootTaskIdToLauncher()) {
+            return BubbleHelper.isAppBubbleTask(task);
+        }
         if (task == null) return false;
         if (task.isAppBubble) return true;
         return task.getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW
