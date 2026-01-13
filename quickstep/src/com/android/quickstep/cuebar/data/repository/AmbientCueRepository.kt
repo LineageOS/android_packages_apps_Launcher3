@@ -210,17 +210,17 @@ constructor(
 
     override fun dump(pw: PrintWriter, prefix: String) {
         pw.println("$prefix AmbientCueRepositoryImpl:")
-        pw.println("$prefix   isDeactivated: ${isDeactivated.value}")
-        pw.println("$prefix   isImeVisible: ${isImeVisible.value} (STUBBED)")
-        pw.println("$prefix   isOccludedBySystemUi: ${isOccludedBySystemUi.value} (STUBBED)")
-        pw.println("$prefix   isTaskBarVisible: ${isTaskBarVisible.value}")
-        pw.println("$prefix   isGestureNav: ${isGestureNav.value}")
-        pw.println("$prefix   actions: ${actions.value.size} actions")
-        pw.println("$prefix   isAmbientCueEnabled: ${isAmbientCueEnabled.value}")
-        pw.println("$prefix   ambientCueTimeoutMs: ${ambientCueTimeoutMs.value}")
-        pw.println("$prefix   globallyFocusedTaskId: ${globallyFocusedTaskId.value}")
-        pw.println("$prefix  debounceTaskJob active: ${debounceTaskJob?.isActive == true}")
-        pw.println("$prefix  frontTaskPackageName: ${frontTaskPackageName.value}")
+        pw.println("$prefix isDeactivated: ${isDeactivated.value}")
+        pw.println("$prefix isImeVisible: ${isImeVisible.value}")
+        pw.println("$prefix isOccludedBySystemUi: ${isOccludedBySystemUi.value}")
+        pw.println("$prefix isTaskBarVisible: ${isTaskBarVisible.value}")
+        pw.println("$prefix isGestureNav: ${isGestureNav.value}")
+        pw.println("$prefix actions: ${actions.value.size} actions")
+        pw.println("$prefix isAmbientCueEnabled: ${isAmbientCueEnabled.value}")
+        pw.println("$prefix ambientCueTimeoutMs: ${ambientCueTimeoutMs.value}")
+        pw.println("$prefix globallyFocusedTaskId: ${globallyFocusedTaskId.value}")
+        pw.println("$prefix debounceTaskJob active: ${debounceTaskJob?.isActive == true}")
+        pw.println("$prefix frontTaskPackageName: ${frontTaskPackageName.value}")
     }
 
     private fun ContextInsight.flatten(): List<ContextInsight> {
