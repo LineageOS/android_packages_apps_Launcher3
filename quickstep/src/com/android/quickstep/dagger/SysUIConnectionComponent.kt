@@ -16,8 +16,9 @@
 
 package com.android.quickstep.dagger
 
-import com.android.app.displaylib.DisplaysWithDecorationsRepositoryCompat
+import androidx.annotation.VisibleForTesting
 import com.android.launcher3.taskbar.TaskbarManager
+import com.android.launcher3.taskbar.TaskbarManagerImpl
 import com.android.launcher3.taskbar.TaskbarManagerImplWrapper
 import com.android.launcher3.taskbar.TaskbarNavButtonController.TaskbarNavButtonCallbacks
 import com.android.launcher3.taskbar.navbutton.TaskbarNavButtonCallbacksImpl
@@ -30,7 +31,6 @@ import com.android.quickstep.sysuiconnection.TISBinder
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Module
-import dagger.Provides
 import dagger.Subcomponent
 import javax.inject.Named
 import javax.inject.Scope
@@ -42,7 +42,7 @@ import javax.inject.Scope
 annotation class SysUIConnectionSingleton
 
 @SysUIConnectionSingleton
-@Subcomponent(modules = [SysUIConnectionModule::class, SysUIConnectionTestableModule::class])
+@Subcomponent(modules = [SysUIConnectionModule::class])
 interface SysUIConnectionComponent {
 
     val touchInteractionHandler: TouchInteractionHandler
@@ -50,6 +50,8 @@ interface SysUIConnectionComponent {
     val allAppsActionManager: AllAppsActionManager
     val taskbarManager: TaskbarManager
     val binder: TISBinder
+
+    @VisibleForTesting val taskbarImpl: TaskbarManagerImpl
 
     @Subcomponent.Builder
     interface Builder {
@@ -72,20 +74,4 @@ abstract class SysUIConnectionModule {
     abstract fun bindTaskbarNavButtonCallbacks(
         impl: TaskbarNavButtonCallbacksImpl
     ): TaskbarNavButtonCallbacks
-}
-
-/**
- * This module provides additional redirect for globally bound objects, so that they can be
- * overridden in test
- */
-@Module
-object SysUIConnectionTestableModule {
-
-    const val TESTABLE_DISPLAY_PROVIDER = "TESTABLE_DISPLAY_PROVIDER"
-
-    @Provides
-    @Named(TESTABLE_DISPLAY_PROVIDER)
-    fun providesDisplaysWithDecorationsRepositoryCompat(
-        actual: DisplaysWithDecorationsRepositoryCompat
-    ): DisplaysWithDecorationsRepositoryCompat = actual
 }

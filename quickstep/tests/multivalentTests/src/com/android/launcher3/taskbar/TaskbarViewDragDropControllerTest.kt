@@ -25,24 +25,22 @@ import com.android.launcher3.DropTarget
 import com.android.launcher3.LauncherModel
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.R
-import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.dragndrop.DragView
 import com.android.launcher3.model.ModelWriter
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.popup.ArrowPopup.CLOSE_DURATION_U
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatItems
-import com.android.launcher3.taskbar.rules.AllTaskbarSandboxModules
 import com.android.launcher3.taskbar.rules.SandboxParams
 import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
-import com.android.launcher3.taskbar.rules.TaskbarSandboxComponent
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
+import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext_ModifiedComponent
 import com.android.launcher3.util.IntSparseArrayMap
 import com.android.launcher3.util.TestUtil.getOnTaskbarUiThread
+import com.android.tools.dagger.mutation.annotations.BindValue
+import com.android.tools.dagger.mutation.annotations.MutatedComponent
 import com.google.common.truth.Truth.assertThat
-import dagger.BindsInstance
-import dagger.Component
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -57,13 +55,15 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
+@MutatedComponent(target = TaskbarWindowSandboxContext_ModifiedComponent::class)
 class TaskbarViewDragDropControllerTest {
     private val TEST_APP = TaskbarViewTestUtil.createAppInfo(0)
     private val TEST_WORKSPACE_ITEM = TaskbarViewTestUtil.createHotseatWorkspaceItem(1)
     private val TEST_OPEN_ANIMATION_DURATION = 15L
 
     private val modelWriter: ModelWriter = mock()
-    private val launcherModel: LauncherModel = mock {
+    @BindValue
+    val launcherModel: LauncherModel = mock {
         on { getWriter(any(), any(), any()) } doReturn modelWriter
     }
     private val modelCallbacks: TaskbarModelCallbacks = mock {
@@ -73,12 +73,7 @@ class TaskbarViewDragDropControllerTest {
     @get:Rule(order = 0)
     val context =
         TaskbarWindowSandboxContext.create(
-            params =
-                SandboxParams(
-                    builderBase =
-                        DaggerTaskbarViewDragDropControllerComponent.builder()
-                            .bindLauncherModel(launcherModel)
-                )
+            params = SandboxParams(builderBase = mutatedComponentBuilder())
         )
     @get:Rule(order = 1) val animatorTestRule = TaskbarAnimatorTestRule(this)
     @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
@@ -582,17 +577,5 @@ class TaskbarViewDragDropControllerTest {
         mockDragViewToOverViewBounds(dragObject, overflowContainer)
         requireNotNull(taskbarViewDragDropController.overflowPinningDropTarget)
             .onDragEnter(dragObject)
-    }
-}
-
-@LauncherAppSingleton
-@Component(modules = [AllTaskbarSandboxModules::class])
-interface TaskbarViewDragDropControllerComponent : TaskbarSandboxComponent {
-
-    @Component.Builder
-    interface Builder : TaskbarSandboxComponent.Builder {
-        @BindsInstance fun bindLauncherModel(model: LauncherModel): Builder
-
-        override fun build(): TaskbarViewDragDropControllerComponent
     }
 }
