@@ -304,7 +304,10 @@ public interface TaskShortcutFactory {
                     recentsView.getPagedOrientationHandler();
 
             boolean notEnoughTasksToSplit =
-                    !deviceProfile.isTaskbarPresent && recentsView.getTaskViewCount() < 2;
+                    !deviceProfile.getDeviceProperties()
+                            .getTaskbarConfiguration()
+                            .isTaskbarPresent()
+                            && recentsView.getTaskViewCount() < 2;
             boolean isTaskSplitNotSupported = !task.isDockable ||
                     (intentFlags & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) != 0;
 

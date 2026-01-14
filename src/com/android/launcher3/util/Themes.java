@@ -182,7 +182,9 @@ public class Themes {
     /** Returns the desired navigation bar scrim color depending on the {@code DeviceProfile}. */
     @ColorInt
     public static <T extends Context & ActivityContext> int getNavBarScrimColor(T context) {
-        return context.getDeviceProfile().isTaskbarPresent
+        return context.getDeviceProfile().getDeviceProperties()
+                .getTaskbarConfiguration()
+                .isTaskbarPresent()
                 ? context.getColor(R.color.taskbar_background)
                 : Themes.getAttrColor(context, R.attr.allAppsNavBarScrimColor);
     }

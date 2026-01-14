@@ -14,6 +14,7 @@ import androidx.test.runner.AndroidJUnit4
 import com.android.launcher3.DeviceProfile
 import com.android.launcher3.R
 import com.android.launcher3.deviceprofile.DeviceProperties
+import com.android.launcher3.deviceprofile.TaskbarConfiguration
 import com.android.launcher3.taskbar.navbutton.LayoutResourceHelper.ID_END_CONTEXTUAL_BUTTONS
 import com.android.launcher3.taskbar.navbutton.LayoutResourceHelper.ID_END_NAV_BUTTONS
 import com.android.launcher3.taskbar.navbutton.LayoutResourceHelper.ID_START_CONTEXTUAL_BUTTONS
@@ -27,6 +28,8 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidJUnit4::class)
 class NavButtonLayoutFactoryTest {
 
+    private val mockDeviceProperties: DeviceProperties = mock()
+    private val mockDeviceTaskbarConfiguration: TaskbarConfiguration = mock()
     private val mockDeviceProfile: DeviceProfile = mock()
     private val mockParentButtonContainer: NearestTouchFrame = mock()
     private val mockNavLayout: LinearLayout = mock()
@@ -65,9 +68,16 @@ class NavButtonLayoutFactoryTest {
         whenever(mockConfiguration.layoutDirection).thenReturn(0)
     }
 
+    fun initializeIsTaskbarPresent(isTaskbarPresent: Boolean) {
+        whenever(mockDeviceProfile.deviceProperties).thenReturn(mockDeviceProperties)
+        whenever(mockDeviceProperties.taskbarConfiguration)
+            .thenReturn(mockDeviceTaskbarConfiguration)
+        whenever(mockDeviceTaskbarConfiguration.isTaskbarPresent).thenReturn(isTaskbarPresent)
+    }
+
     @Test
     fun getKidsLayoutter() {
-        mockDeviceProfile.isTaskbarPresent = true
+        initializeIsTaskbarPresent(true)
         val layoutter: NavButtonLayoutFactory.NavButtonLayoutter =
             getLayoutter(
                 isKidsMode = true,
@@ -81,7 +91,7 @@ class NavButtonLayoutFactoryTest {
 
     @Test
     fun getSetupLayoutter() {
-        mockDeviceProfile.isTaskbarPresent = true
+        initializeIsTaskbarPresent(true)
         val layoutter: NavButtonLayoutFactory.NavButtonLayoutter =
             getLayoutter(
                 isKidsMode = false,
@@ -95,7 +105,7 @@ class NavButtonLayoutFactoryTest {
 
     @Test
     fun getTaskbarNavLayoutter() {
-        mockDeviceProfile.isTaskbarPresent = true
+        initializeIsTaskbarPresent(true)
         val layoutter: NavButtonLayoutFactory.NavButtonLayoutter =
             getLayoutter(
                 isKidsMode = false,
@@ -109,7 +119,7 @@ class NavButtonLayoutFactoryTest {
 
     @Test
     fun noValidLayoutForLargeScreenTaskbarNotPresent() {
-        mockDeviceProfile.isTaskbarPresent = false
+        initializeIsTaskbarPresent(false)
         assertThrows(IllegalStateException::class.java) {
             getLayoutter(
                 isKidsMode = false,
@@ -123,7 +133,7 @@ class NavButtonLayoutFactoryTest {
 
     @Test
     fun getTaskbarPortraitLayoutter() {
-        mockDeviceProfile.isTaskbarPresent = false
+        initializeIsTaskbarPresent(false)
         val layoutter: NavButtonLayoutFactory.NavButtonLayoutter =
             getLayoutter(
                 isKidsMode = false,
@@ -137,7 +147,7 @@ class NavButtonLayoutFactoryTest {
 
     @Test
     fun getTaskbarLandscapeLayoutter() {
-        mockDeviceProfile.isTaskbarPresent = false
+        initializeIsTaskbarPresent(false)
         setDeviceProfileLandscape()
         val layoutter: NavButtonLayoutFactory.NavButtonLayoutter =
             getLayoutter(
@@ -152,7 +162,7 @@ class NavButtonLayoutFactoryTest {
 
     @Test
     fun getTaskbarSeascapeLayoutter() {
-        mockDeviceProfile.isTaskbarPresent = false
+        initializeIsTaskbarPresent(false)
         setDeviceProfileLandscape()
         val layoutter: NavButtonLayoutFactory.NavButtonLayoutter =
             getLayoutter(
@@ -167,7 +177,8 @@ class NavButtonLayoutFactoryTest {
 
     @Test
     fun getTaskbarPhoneGestureNavLayoutter() {
-        mockDeviceProfile.isTaskbarPresent = false
+        initializeIsTaskbarPresent(false)
+
         val layoutter: NavButtonLayoutFactory.NavButtonLayoutter =
             getLayoutter(
                 isKidsMode = false,

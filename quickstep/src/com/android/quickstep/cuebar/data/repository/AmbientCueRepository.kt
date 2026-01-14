@@ -51,6 +51,10 @@ import com.android.quickstep.cuebar.data.InsightListener
 import com.android.quickstep.cuebar.logger.AmbientCueLogger
 import com.android.systemui.shared.system.TaskStackChangeListener
 import com.android.systemui.shared.system.TaskStackChangeListeners
+import java.io.PrintWriter
+import java.lang.ref.WeakReference
+import java.util.concurrent.Executor
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -58,10 +62,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.PrintWriter
-import java.lang.ref.WeakReference
-import java.util.concurrent.Executor
-import javax.inject.Inject
 
 /** Source of truth for ambient actions and visibility of their system space. */
 interface AmbientCueRepository {
@@ -98,23 +98,30 @@ interface AmbientCueRepository {
     val frontTaskPackageName: ListenableRef<String>
 
     fun updateActions(newActions: List<ActionModel>)
+
     fun connectToAce()
+
     fun disconnectFromAce()
+
     fun dump(pw: PrintWriter, prefix: String)
 }
 
 class AmbientCueRepositoryImpl
 @Inject
 constructor(
-    private val context: TaskbarActivityContext,
+    taskbarActivityContext: TaskbarActivityContext,
     private val ambientCueLogger: AmbientCueLogger,
     @Background private val bgExecutor: Executor,
-    @Ui private val uiExecutor: Executor
+    @Ui private val uiExecutor: Executor,
 ) : AmbientCueRepository, InsightListener {
+
+    // Repository should not hold strong ref to TaskbarActivityContext to avoid leak.
+    private val appContext = taskbarActivityContext.applicationContext
+    private val weakTaskbarActivityContext = WeakReference(taskbarActivityContext)
 
     private val backgroundScope = CoroutineScope(bgExecutor.asCoroutineDispatcher())
     private val autofillManager: AutofillManager? =
-        context.getSystemService(AutofillManager::class.java)
+        taskbarActivityContext.getSystemService(AutofillManager::class.java)
 
     private val _actions = MutableListenableRef<List<ActionModel>>(emptyList())
     override val actions: MutableListenableRef<List<ActionModel>> = _actions
@@ -123,7 +130,7 @@ constructor(
 
     // These need to be updated from outside, e.g., by CuebarController
     override val isTaskBarVisible = MutableListenableRef(true)
-    override val isGestureNav = MutableListenableRef(context.isGestureNav)
+    override val isGestureNav = MutableListenableRef(taskbarActivityContext.isGestureNav)
     override val recentsButtonPosition = MutableListenableRef<Rect?>(null)
 
     // IME and Occlusion are hard to track from Launcher for other apps.
@@ -188,7 +195,8 @@ constructor(
 
     private fun isAmbientCueSettingEnabled(): Boolean {
         return try {
-            Settings.Secure.getInt(context.contentResolver, AMBIENT_CUE_SETTING) == OPTED_IN
+            Settings.Secure.getInt(appContext.contentResolver, AMBIENT_CUE_SETTING) ==
+                OPTED_IN
         } catch (e: Settings.SettingNotFoundException) {
             Log.w(TAG, "$AMBIENT_CUE_SETTING not found, feature disabled", e)
             false
@@ -199,7 +207,7 @@ constructor(
         return try {
             val timeout =
                 Settings.Secure.getInt(
-                    context.contentResolver,
+                    appContext.contentResolver,
                     Settings.Secure.ACCESSIBILITY_INTERACTIVE_UI_TIMEOUT_MS,
                 )
             if (timeout == 0) AMBIENT_CUE_DEFAULT_TIMEOUT_MS else timeout
@@ -210,17 +218,17 @@ constructor(
 
     override fun dump(pw: PrintWriter, prefix: String) {
         pw.println("$prefix AmbientCueRepositoryImpl:")
-        pw.println("$prefix   isDeactivated: ${isDeactivated.value}")
-        pw.println("$prefix   isImeVisible: ${isImeVisible.value} (STUBBED)")
-        pw.println("$prefix   isOccludedBySystemUi: ${isOccludedBySystemUi.value} (STUBBED)")
-        pw.println("$prefix   isTaskBarVisible: ${isTaskBarVisible.value}")
-        pw.println("$prefix   isGestureNav: ${isGestureNav.value}")
-        pw.println("$prefix   actions: ${actions.value.size} actions")
-        pw.println("$prefix   isAmbientCueEnabled: ${isAmbientCueEnabled.value}")
-        pw.println("$prefix   ambientCueTimeoutMs: ${ambientCueTimeoutMs.value}")
-        pw.println("$prefix   globallyFocusedTaskId: ${globallyFocusedTaskId.value}")
-        pw.println("$prefix  debounceTaskJob active: ${debounceTaskJob?.isActive == true}")
-        pw.println("$prefix  frontTaskPackageName: ${frontTaskPackageName.value}")
+        pw.println("$prefix isDeactivated: ${isDeactivated.value}")
+        pw.println("$prefix isImeVisible: ${isImeVisible.value}")
+        pw.println("$prefix isOccludedBySystemUi: ${isOccludedBySystemUi.value}")
+        pw.println("$prefix isTaskBarVisible: ${isTaskBarVisible.value}")
+        pw.println("$prefix isGestureNav: ${isGestureNav.value}")
+        pw.println("$prefix actions: ${actions.value.size} actions")
+        pw.println("$prefix isAmbientCueEnabled: ${isAmbientCueEnabled.value}")
+        pw.println("$prefix ambientCueTimeoutMs: ${ambientCueTimeoutMs.value}")
+        pw.println("$prefix globallyFocusedTaskId: ${globallyFocusedTaskId.value}")
+        pw.println("$prefix debounceTaskJob active: ${debounceTaskJob?.isActive == true}")
+        pw.println("$prefix frontTaskPackageName: ${frontTaskPackageName.value}")
     }
 
     private fun ContextInsight.flatten(): List<ContextInsight> {
@@ -237,8 +245,7 @@ constructor(
                 updateActions(emptyList())
                 return@execute
             }
-            val actions = insight.flatMap { it.flatten() }
-                .flatMap { mapInsightToActions(it) }
+            val actions = insight.flatMap { it.flatten() }.flatMap { mapInsightToActions(it) }
             if (actions.isNotEmpty()) {
                 isDeactivated.dispatchValue(false)
             }
@@ -249,39 +256,40 @@ constructor(
     @VisibleForTesting
     fun mapInsightToActions(insight: ContextInsight): List<ActionModel> {
         Log.i(TAG, "insight: $insight")
-        val hintToMap = insight.originHints.firstOrNull { hint ->
-            when (val contextHint = hint.contextHint) {
-                is BundleHint ->
-                    contextHint.dataBundle.getBoolean(RENDER_IN_CUE_BAR, false)
-                is ConversationHint ->
-                    true // ConversationHint always renders
-                else ->
-                    false
-            }
-        } ?: return emptyList()
+        val hintToMap =
+            insight.originHints.firstOrNull { hint ->
+                when (val contextHint = hint.contextHint) {
+                    is BundleHint -> contextHint.dataBundle.getBoolean(RENDER_IN_CUE_BAR, false)
+                    is ConversationHint -> true // ConversationHint always renders
+                    else -> false
+                }
+            } ?: return emptyList()
         return mapContextInsightToAction(insight, hintToMap.contextHint)
     }
 
     @VisibleForTesting
-    fun mapContextInsightToAction(insight: ContextInsight, contextHint: ContextHint):
-            List<ActionModel> {
+    fun mapContextInsightToAction(
+        insight: ContextInsight,
+        contextHint: ContextHint,
+    ): List<ActionModel> {
         // Keep check here in case this method is called independently like in tests.
         if (insight is InsightCollection) {
             return insight.insights.flatMap { child ->
                 mapContextInsightToAction(child, contextHint)
             }
         }
-        val display = when (insight) {
-            is ActionableInsight -> insight.displayDetails
-            is DisplayInsight -> insight.details
-            else -> return emptyList()
-        }
+        val display =
+            when (insight) {
+                is ActionableInsight -> insight.displayDetails
+                is DisplayInsight -> insight.details
+                else -> return emptyList()
+            }
         val actionType: String
         var activityId =
             if (contextHint is ConversationHint) {
                 val conversationEvent = contextHint.conversationEvent
                 (conversationEvent as? ConversationUpdateEvent)?.conversationData?.activityId
-            } else if (contextHint is BundleHint){
+            } else if (contextHint is BundleHint) {
                 contextHint.dataBundle.getParcelable<ActivityId>(EXTRA_ACTIVITY_ID)
             } else {
                 null
@@ -308,7 +316,7 @@ constructor(
                         action.hasActionType(InsightActionDetails.ACTION_TYPE_INTENT) -> {
                             actionIntent?.let { intent ->
                                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                context.startActivity(intent)
+                                appContext.startActivity(intent)
                             }
                         }
                     }
@@ -321,7 +329,8 @@ constructor(
                 val autofillId =
                     if (contextHint is ConversationHint) {
                         val conversationEvent = contextHint.conversationEvent
-                        (conversationEvent as? ConversationUpdateEvent)?.conversationData
+                        (conversationEvent as? ConversationUpdateEvent)
+                            ?.conversationData
                             ?.inputBoxAutofillId
                     } else {
                         null
@@ -329,8 +338,12 @@ constructor(
                 onPerformAction = {
                     val token = activityId?.token
                     if (token != null && autofillId != null) {
-                        autofillManager?.autofillRemoteApp(autofillId, title, token,
-                            activityId.taskId,)
+                        autofillManager?.autofillRemoteApp(
+                            autofillId,
+                            title,
+                            token,
+                            activityId.taskId,
+                        )
                     }
                     Log.d(TAG, "DisplayInsight ActionModel performed. Logging MR status.")
                     ambientCueLogger.setFulfilledWithMrStatus()
@@ -342,41 +355,44 @@ constructor(
             }
         }
         val attribution = display.subtitle?.toString()
-        val iconDrawable = try {
-            display.icon?.loadDrawable(context)
-        } catch (e: Exception) {
-            Log.e(TAG, "Resource loading failed for ID: ${display.icon?.resId}", e)
-            null
-        } ?: context.getDrawable(R.drawable.ic_paste_spark)!!
+        val iconDrawable =
+            try {
+                display.icon?.loadDrawable(weakTaskbarActivityContext.get())
+            } catch (e: Exception) {
+                Log.e(TAG, "Resource loading failed for ID: ${display.icon?.resId}", e)
+                null
+            } ?: weakTaskbarActivityContext.get()?.getDrawable(R.drawable.ic_paste_spark)!!
         val oneTapEnabled = extras?.getBoolean(EXTRA_ONE_TAP_ENABLED)
-        val oneTapDelayMs = extras?.getLong(
-            EXTRA_ONE_TAP_DELAY_MS,
-            DEFAULT_ONE_TAP_DELAY_MS,
+        val oneTapDelayMs = extras?.getLong(EXTRA_ONE_TAP_DELAY_MS, DEFAULT_ONE_TAP_DELAY_MS)
+        return listOf(
+            ActionModel(
+                icon =
+                    IconModel(
+                        small = iconDrawable.mutate(),
+                        large = iconDrawable.mutate(),
+                        iconId = display.icon?.resPackage + "#" + display.icon?.resId,
+                    ),
+                label = title,
+                attribution = attribution,
+                onPerformAction = onPerformAction,
+                onPerformLongClick = {
+                    Log.i(TAG, "AmbientCueRepositoryImpl: onPerformLongClick")
+                    // TODO: b/458508340 Proper design for attribution/feedback.
+                    val pendingIntent =
+                        extras?.getParcelable<PendingIntent>(
+                            EXTRA_ATTRIBUTION_DIALOG_PENDING_INTENT
+                        )
+                    if (pendingIntent != null) {
+                        Log.i(TAG, "Performing long click: $pendingIntent")
+                        launchPendingIntent(pendingIntent)
+                    }
+                },
+                taskId = activityId?.taskId ?: INVALID_TASK_ID,
+                actionType = actionType,
+                oneTapEnabled = oneTapEnabled == true,
+                oneTapDelayMs = oneTapDelayMs ?: DEFAULT_ONE_TAP_DELAY_MS,
+            )
         )
-        return listOf(ActionModel(
-            icon = IconModel(
-                small = iconDrawable.mutate(),
-                large = iconDrawable.mutate(),
-                iconId = display.icon?.resPackage + "#" + display.icon?.resId,
-            ),
-            label = title,
-            attribution = attribution,
-            onPerformAction = onPerformAction,
-            onPerformLongClick = {
-                Log.i(TAG, "AmbientCueRepositoryImpl: onPerformLongClick")
-                // TODO: b/458508340 Proper design for attribution/feedback.
-                val pendingIntent =
-                    extras?.getParcelable<PendingIntent>(EXTRA_ATTRIBUTION_DIALOG_PENDING_INTENT)
-                if (pendingIntent != null) {
-                    Log.i(TAG, "Performing long click: $pendingIntent")
-                    launchPendingIntent(pendingIntent)
-                }
-            },
-            taskId = activityId?.taskId ?: INVALID_TASK_ID,
-            actionType = actionType,
-            oneTapEnabled = oneTapEnabled == true,
-            oneTapDelayMs = oneTapDelayMs ?: DEFAULT_ONE_TAP_DELAY_MS,
-        ))
     }
 
     override fun connectToAce() {
@@ -422,8 +438,8 @@ constructor(
 
 /**
  * Wrapper class to hold the TaskStackChangeListener logic outside of the AmbientCueRepositoryImpl
- * instance, using a WeakReference to prevent the global TaskStackChangeListeners singleton
- * from leaking the entire repository and its associated context.
+ * instance, using a WeakReference to prevent the global TaskStackChangeListeners singleton from
+ * leaking the entire repository and its associated context.
  */
 private class AmbientCueTaskStackListener(
     private val repositoryRef: WeakReference<AmbientCueRepositoryImpl>,
@@ -435,8 +451,6 @@ private class AmbientCueTaskStackListener(
         // Defer to background executor to handle any non-UI work since TaskStackChangeListener
         // can be called on a Binder thread. This then dispatches to the UI executor inside the
         // repository.
-        bgExecutor.execute {
-                repository.onTaskMovedToFront(runningTaskInfo)
-        }
+        bgExecutor.execute { repository.onTaskMovedToFront(runningTaskInfo) }
     }
 }

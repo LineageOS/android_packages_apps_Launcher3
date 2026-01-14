@@ -102,14 +102,20 @@ public class StaggeredWorkspaceAnim {
                 .getDimensionPixelSize(R.dimen.swipe_up_max_workspace_trans_y);
 
         DeviceProfile grid = launcher.getDeviceProfile();
-        long duration = grid.isTaskbarPresent ? mTaskbarDurationInMs : DURATION_MS;
+        long duration =
+                grid.getDeviceProperties().getTaskbarConfiguration().isTaskbarPresent()
+                        ? mTaskbarDurationInMs : DURATION_MS;
         if (staggerWorkspace) {
             Workspace<?> workspace = launcher.getWorkspace();
             Hotseat hotseat = launcher.getHotseat();
 
-            boolean staggerHotseat = !grid.isVerticalBarLayout() && !grid.isTaskbarPresent;
-            boolean staggerQsb =
-                    !grid.isVerticalBarLayout() && !(grid.isTaskbarPresent && grid.isQsbInline);
+            boolean staggerHotseat = !grid.isVerticalBarLayout()
+                    && !grid.getDeviceProperties().getTaskbarConfiguration().isTaskbarPresent();
+            boolean staggerQsb = !grid.isVerticalBarLayout()
+                    && !(
+                    grid.getDeviceProperties().getTaskbarConfiguration().isTaskbarPresent()
+                            && grid.isQsbInline
+            );
             int totalRows = grid.inv.numRows + (staggerHotseat ? 1 : 0) + (staggerQsb ? 1 : 0);
 
             // Add animation for all the visible workspace pages
@@ -137,7 +143,7 @@ public class StaggeredWorkspaceAnim {
                 }
             } else {
                 final int hotseatRow, qsbRow;
-                if (grid.isTaskbarPresent) {
+                if (grid.getDeviceProperties().getTaskbarConfiguration().isTaskbarPresent()) {
                     if (grid.isQsbInline) {
                         qsbRow = grid.inv.numRows + 1;
                         hotseatRow = grid.inv.numRows + 1;

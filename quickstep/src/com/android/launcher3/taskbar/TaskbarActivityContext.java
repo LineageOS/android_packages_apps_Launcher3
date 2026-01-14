@@ -544,7 +544,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             mPersistentTaskbarProfile = TaskbarProfile.Factory.createTaskbarProfile(
                     getResources(),
                     false,
-                    mDeviceProfile.isTaskbarPresent,
+                    mDeviceProfile.getDeviceProperties().getTaskbarConfiguration()
+                            .isTaskbarPresent(),
                     getResources().getDisplayMetrics(),
                     mDeviceProfile.getDisplayOptionSpec(),
                     mDeviceProfile.getDisplayOptionSpec().typeIndex,
@@ -554,7 +555,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             mTransientTaskbarProfile = TaskbarProfile.Factory.createTaskbarProfile(
                     getResources(),
                     true,
-                    mDeviceProfile.isTaskbarPresent,
+                    mDeviceProfile.getDeviceProperties().getTaskbarConfiguration()
+                            .isTaskbarPresent(),
                     getResources().getDisplayMetrics(),
                     mDeviceProfile.getDisplayOptionSpec(),
                     mDeviceProfile.getDisplayOptionSpec().typeIndex,
@@ -645,7 +647,9 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
      * single window for taskbar and navbar.
      */
     public boolean isPhoneMode() {
-        return mDeviceProfile.getDeviceProperties().isPhone() && !mDeviceProfile.isTaskbarPresent;
+        return mDeviceProfile.getDeviceProperties().isPhone()
+                && !mDeviceProfile.getDeviceProperties().getTaskbarConfiguration()
+                .isTaskbarPresent();
     }
 
     public boolean isTaskbarInMinimalState() {
@@ -673,7 +677,10 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
 
     /** Returns {@code true} iff a tiny version of taskbar is shown on phone. */
     public boolean isTinyTaskbar() {
-        return enableTinyTaskbar() && mDeviceProfile.getDeviceProperties().isPhone() && mDeviceProfile.isTaskbarPresent;
+        return enableTinyTaskbar()
+                && mDeviceProfile.getDeviceProperties().isPhone()
+                && mDeviceProfile.getDeviceProperties().getTaskbarConfiguration()
+                .isTaskbarPresent();
     }
 
     public boolean isBubbleBarOnPhone() {
@@ -1537,7 +1544,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             TaskbarProfile transientTaskbarProfile = TaskbarProfile.Factory.createTaskbarProfile(
                     getResources(),
                     true,
-                    mDeviceProfile.isTaskbarPresent,
+                    mDeviceProfile.getDeviceProperties().getTaskbarConfiguration()
+                            .isTaskbarPresent(),
                     getResources().getDisplayMetrics(),
                     mDeviceProfile.getDisplayOptionSpec(),
                     mDeviceProfile.getDisplayOptionSpec().typeIndex,

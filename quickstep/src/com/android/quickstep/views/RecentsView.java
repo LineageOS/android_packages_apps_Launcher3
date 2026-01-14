@@ -67,6 +67,7 @@ import static com.android.quickstep.views.OverviewActionsView.HIDDEN_SPLIT_SELEC
 import static com.android.quickstep.views.RecentsViewUtils.DESK_EXPLODE_PROGRESS;
 import static com.android.quickstep.views.TaskView.SPLIT_ALPHA;
 import static com.android.wm.shell.Flags.enableCreateAnyBubble;
+import static com.android.wm.shell.Flags.sendBubbleRootTaskIdToLauncher;
 
 import static java.util.Objects.requireNonNull;
 
@@ -160,6 +161,7 @@ import com.android.launcher3.statehandlers.DesktopVisibilityController;
 import com.android.launcher3.statemanager.BaseState;
 import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.statemanager.StatefulContainer;
+import com.android.launcher3.taskbar.bubbles.BubbleHelper;
 import com.android.launcher3.testing.TestLogging;
 import com.android.launcher3.testing.shared.TestProtocol;
 import com.android.launcher3.touch.OverScroll;
@@ -661,9 +663,14 @@ public abstract class RecentsView<
         @Override
         public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
                 boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
-            if (enableCreateAnyBubble() && task.isAppBubble && mHandleTaskStackChanges) {
-                // Remove task from recents if it moved to a bubble, but keep it running
-                dismissTask(task.taskId, /* removeTask= */ false);
+            if (enableCreateAnyBubble()) {
+                boolean isAppBubble =
+                        sendBubbleRootTaskIdToLauncher() ? BubbleHelper.isAppBubbleTask(task)
+                                : task.isAppBubble;
+                if (isAppBubble && mHandleTaskStackChanges) {
+                    // Remove task from recents if it moved to a bubble, but keep it running
+                    dismissTask(task.taskId, /* removeTask= */ false);
+                }
             }
         }
 

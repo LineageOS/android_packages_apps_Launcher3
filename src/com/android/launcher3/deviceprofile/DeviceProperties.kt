@@ -19,6 +19,7 @@ package com.android.launcher3.deviceprofile
 import android.graphics.Rect
 import com.android.launcher3.display.LauncherDisplayInfo
 import com.android.launcher3.util.WindowBounds
+import com.android.wm.shell.Flags
 import kotlin.math.max
 import kotlin.math.min
 
@@ -29,6 +30,8 @@ data class DeviceConfiguration(
     val isGestureMode: Boolean,
     val isWorkspaceItemsLabelHidden: Boolean,
 )
+
+data class TaskbarConfiguration(val isTaskbarPresent: Boolean)
 
 data class DeviceProperties(
     val windowX: Int,
@@ -45,6 +48,7 @@ data class DeviceProperties(
     val isLandscape: Boolean,
     val insets: Rect,
     val deviceConfiguration: DeviceConfiguration,
+    val taskbarConfiguration: TaskbarConfiguration,
 ) {
 
     fun createWindowBounds() =
@@ -56,6 +60,7 @@ data class DeviceProperties(
             info: LauncherDisplayInfo,
             windowBounds: WindowBounds,
             deviceConfiguration: DeviceConfiguration,
+            isTaskbarDrawnInProcess: Boolean,
         ): DeviceProperties {
             val isLargeScreen = info.isLargeScreen(windowBounds)
             val windowX = windowBounds.bounds.left
@@ -65,6 +70,9 @@ data class DeviceProperties(
             val heightPx = windowBounds.bounds.height()
             val availableWidthPx = windowBounds.availableSize.x
             val availableHeightPx = windowBounds.availableSize.y
+            val taskbarOrBubbleBarOnPhones =
+                Flags.enableTinyTaskbar() ||
+                    (Flags.enableBubbleBar() && Flags.enableBubbleBarOnPhones())
             return DeviceProperties(
                 windowX = windowX,
                 windowY = windowY,
@@ -80,10 +88,14 @@ data class DeviceProperties(
                 isLandscape = windowBounds.isLandscape,
                 insets = windowBounds.insets,
                 deviceConfiguration = deviceConfiguration,
+                taskbarConfiguration =
+                    TaskbarConfiguration(
+                        isTaskbarPresent =
+                            (isLargeScreen ||
+                                (taskbarOrBubbleBarOnPhones &&
+                                    deviceConfiguration.isGestureMode)) && isTaskbarDrawnInProcess
+                    ),
             )
         }
     }
 }
-
-fun DeviceProperties.createWindowBounds() =
-    WindowBounds(widthPx, heightPx, availableWidthPx, availableHeightPx, rotationHint)

@@ -51,6 +51,8 @@ import com.android.launcher3.anim.AnimatedFloat;
 import com.android.launcher3.dagger.LauncherAppComponent;
 import com.android.launcher3.dagger.LauncherAppModule;
 import com.android.launcher3.dagger.LauncherAppSingleton;
+import com.android.launcher3.deviceprofile.DeviceProperties;
+import com.android.launcher3.deviceprofile.TaskbarConfiguration;
 import com.android.launcher3.display.DisplayController;
 import com.android.launcher3.taskbar.TaskbarActivityContext;
 import com.android.launcher3.taskbar.TaskbarManager;
@@ -135,6 +137,11 @@ public class InputConsumerUtilsTest {
     @NonNull @Mock private BaseContainerInterface<?, ?> mContainerInterface;
     @NonNull @Mock private BaseDragLayer<?> mBaseDragLayer;
     @NonNull @Mock private DesktopState mDesktopState;
+
+    @NonNull @Mock private DeviceProfile mDeviceProfile;
+    @NonNull @Mock private DeviceProperties mDeviceProperties;
+
+    @NonNull @Mock private TaskbarConfiguration mTaskbarConfiguration;
 
     @Rule
     public final MockitoRule mMockitoRule = MockitoJUnit.rule();
@@ -436,10 +443,14 @@ public class InputConsumerUtilsTest {
 
     @Test
     public void testNewConsumer_taskbarIsPresent_containsTaskbarUnstashInputConsumer() {
-        DeviceProfile deviceProfile = new DeviceProfile();
-        deviceProfile.isTaskbarPresent = true;
-        when(mTaskbarActivityContext.getDeviceProfile()).thenReturn(deviceProfile);
-        when(mTaskbarUiState.getDeviceProfile()).thenReturn(deviceProfile);
+
+        when(mTaskbarActivityContext.getDeviceProfile()).thenReturn(mDeviceProfile);
+        when(mTaskbarUiState.getDeviceProfile()).thenReturn(mDeviceProfile);
+
+        when(mDeviceProfile.getDeviceProperties()).thenReturn(mDeviceProperties);
+        when(mDeviceProperties.getTaskbarConfiguration()).thenReturn(mTaskbarConfiguration);
+        when(mTaskbarConfiguration.isTaskbarPresent()).thenReturn(true);
+
         when(mTaskbarUiState.isTaskbarAllAppsOpen()).thenReturn(false);
         when(mTaskbarActivityContext.getTaskbarFeatureEvaluator())
                 .thenReturn(mTaskbarFeatureEvaluator);

@@ -42,6 +42,8 @@ import com.android.launcher3.Flags
 import com.android.launcher3.Flags.enableTaskbarUiThread
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION
+import com.android.launcher3.deviceprofile.DeviceProperties
+import com.android.launcher3.deviceprofile.TaskbarConfiguration
 import com.android.launcher3.graphics.ThemeManager
 import com.android.launcher3.icons.BitmapInfo
 import com.android.launcher3.icons.IconShape
@@ -114,6 +116,8 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
     @Mock private lateinit var mockContext: Context
     @Mock private lateinit var mockResources: Resources
     @Mock private lateinit var mockDeviceProfile: DeviceProfile
+    @Mock private lateinit var mockDeviceProperties: DeviceProperties
+    @Mock private lateinit var mockDeviceTaskbarConfiguration: TaskbarConfiguration
     @Mock private lateinit var mockDesktopModeCompatPolicy: DesktopModeCompatPolicy
 
     private var taskListChangeId: Int = 1
@@ -141,7 +145,10 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
         whenever(mockContext.getResources()).thenReturn(mockResources)
         whenever(mockResources.getBoolean(R.bool.config_isDesktopModeSupported)).thenReturn(true)
         whenever(taskbarActivityContext.deviceProfile).thenReturn(mockDeviceProfile)
-        mockDeviceProfile.isTaskbarPresent = true
+        whenever(mockDeviceProfile.deviceProperties).thenReturn(mockDeviceProperties)
+        whenever(mockDeviceProperties.taskbarConfiguration)
+            .thenReturn(mockDeviceTaskbarConfiguration)
+        whenever(mockDeviceTaskbarConfiguration.isTaskbarPresent).thenReturn(true)
 
         whenever(mockRecentsModel.iconCache).thenReturn(mockIconCache)
 

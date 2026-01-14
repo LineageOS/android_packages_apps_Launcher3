@@ -104,6 +104,8 @@ class TaskbarUnitTestRule(
                     val isTaskbarPresent =
                         targetContext.appComponent.idp
                             .getDeviceProfile(targetContext)
+                            .deviceProperties
+                            .taskbarConfiguration
                             .isTaskbarPresent
                     if (isRunningInRobolectric) {
                         // Fail if emulated device does not have a Taskbar.

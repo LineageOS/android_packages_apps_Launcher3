@@ -23,10 +23,10 @@ import com.android.quickstep.RecentsAnimationDeviceState
 import com.android.quickstep.RotationTouchHelper
 import com.android.quickstep.TaskAnimationManager
 import com.android.quickstep.recents.di.RecentsComponent
+import com.android.quickstep.util.PerDisplayHolder
 import com.android.quickstep.window.RecentsWindowManager
 import com.android.quickstep.window.RecentsWindowTracker
 import dagger.BindsInstance
-import dagger.Lazy
 import dagger.Subcomponent
 
 /**
@@ -42,7 +42,8 @@ interface PerDisplayComponent {
 
     // Factories for container objects that create components bound to a specific display.
     // e.g. RecentsWindowManager for creating RecentsComponent.
-    fun getRecentsWindowManagerLazy(): Lazy<RecentsWindowManager>
+    val recentsWindowManager: RecentsWindowManager
+    val recentsWindowManagerHolder: PerDisplayHolder<RecentsWindowManager>
 
     // Shared components between multiple components like Recents and Gesture Nav.
     // Ideally only interfaces should be provided.

@@ -311,6 +311,7 @@ constructor(
         listeners.clear()
         cancelDeactivation()
         actionUpdateJob?.cancel()
+        onVisibilityChanged = {}
     }
 
     fun disableFirstTimeHint() {

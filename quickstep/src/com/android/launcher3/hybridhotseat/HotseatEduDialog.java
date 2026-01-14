@@ -105,7 +105,9 @@ public class HotseatEduDialog extends AbstractSlideInView<Launcher> implements I
         int adjustedMarginEnd =
                 dp.getHotseatProfile().getBarEndOffset() - buttonContainer.getPaddingEnd();
         if (InvariantDeviceProfile.INSTANCE.get(context)
-                .getDeviceProfile(context).isTaskbarPresent && adjustedMarginEnd > 0) {
+                .getDeviceProfile(
+                        context).getDeviceProperties().getTaskbarConfiguration().isTaskbarPresent()
+                && adjustedMarginEnd > 0) {
             ((LinearLayout.LayoutParams) buttonContainer.getLayoutParams()).setMarginEnd(
                     adjustedMarginEnd);
         }

@@ -26,6 +26,22 @@ import java.util.function.Predicate
 interface IModelWriter {
 
     /**
+     * A log of changes made to the model.
+     *
+     * @property itemsAdded A list of [ItemInfo] objects representing items added to the model.
+     * @property itemsModified A set of [ItemInfo] objects representing items modified in the model.
+     * @property itemsRemoved A list of [ItemInfo] objects representing items removed from the
+     *   model.
+     *
+     * TODO(b/457449059): Integrate with HomeScreenRepository changelog in the future.
+     */
+    data class ChangeLog(
+        val itemsAdded: MutableList<ItemInfo> = mutableListOf(),
+        val itemsModified: MutableSet<ItemInfo> = mutableSetOf(),
+        val itemsRemoved: MutableList<ItemInfo> = mutableListOf(),
+    )
+
+    /**
      * Schedules a block of code to be executed within a single database transaction on the
      * background model thread. This is the ONLY public way to mutate the model.
      *

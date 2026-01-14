@@ -780,7 +780,8 @@ public class TaskbarManagerImpl {
             }
 
             // All Apps action is unrelated to navbar unification, so we only need to check DP.
-            final boolean isLargeScreenTaskbar = dp != null && dp.isTaskbarPresent;
+            final boolean isLargeScreenTaskbar = dp != null
+                    && dp.getDeviceProperties().getTaskbarConfiguration().isTaskbarPresent();
             mAllAppsActionManager.setTaskbarPresent(isLargeScreenTaskbar);
             resource.debugMsg("recreateTaskbarForDisplay: destroying taskbar");
             resource.destroyTaskbarForDisplay();
@@ -790,7 +791,8 @@ public class TaskbarManagerImpl {
             resource.debugMsg("recreateTaskbarForDisplay: isTaskbarEnabled=" + isTaskbarEnabled
                     + " [dp != null]=" + (dp != null)
                     + " mUserUnlocked=" + mUserUnlocked
-                    + " dp.isTaskbarPresent=" + (dp == null ? "null" : dp.isTaskbarPresent)
+                    + " dp.isTaskbarPresent=" + (dp == null ? "null"
+                    : dp.getDeviceProperties().getTaskbarConfiguration().isTaskbarPresent())
                     + " isTaskbarEnabled=" + isTaskbarEnabled
                     + " displayExists=" + displayExists);
 
