@@ -18,6 +18,7 @@ package com.android.launcher3.popup
 
 import android.animation.AnimatorSet
 import android.content.Context
+import android.graphics.PointF
 import android.graphics.Rect
 import android.os.Trace
 import android.view.MotionEvent
@@ -29,7 +30,6 @@ import androidx.compose.ui.platform.ComposeView
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.DragSource
 import com.android.launcher3.DropTarget.DragObject
-import com.android.launcher3.Launcher
 import com.android.launcher3.R
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate
 import com.android.launcher3.dragndrop.DragController
@@ -59,6 +59,7 @@ open class PopupContainer<T>(
     val updateIconUi: Boolean,
 ) : ArrowPopup<T>(context), DragSource, DragController.DragListener, Popup
     where T : Context, T : ActivityContext {
+    var deepShortcutDragHandler: DeepShortcutDragHandler? = null
     /** Here we hold the system shortcuts that we show for the Popup. */
     // TODO b/441320297
     var systemShortcutContainer: ViewGroup? = null
@@ -95,15 +96,11 @@ open class PopupContainer<T>(
                                     clickedItem.item.popupAction()
                                 }
                                 is DeepShortcutClickEvent -> {
-                                    (mActivityContext as? Launcher)?.startActivitySafely(
-                                        originalView,
-                                        clickedItem.item?.intent,
-                                        clickedItem.item,
-                                    )
+                                    originalView.tag = clickedItem.item
+                                    mActivityContext.itemOnClickListener.onClick(originalView)
                                 }
                             }
                             close(true)
-                            // Handle click events from the Compose UI
                         },
                         onAddIconClick = { clickedItem ->
                             val accessibilityDelegate = mActivityContext?.accessibilityDelegate
@@ -126,8 +123,12 @@ open class PopupContainer<T>(
                             close(folder == null)
                             folder?.close(true)
                         },
-                        onDeepShortcutLongPress = { itemInfoWithIcon
-                            -> // TODO: implement long press on deep shortcuts
+                        onDeepShortcutLongPress = { itemInfoWithIcon, offset ->
+                            val touchPoint = PointF(offset.x, offset.y)
+                            deepShortcutDragHandler?.onDeepShortcutLongPress(
+                                itemInfoWithIcon,
+                                touchPoint,
+                            )
                         },
                         onMaxHeightMeasured = { maxHeightPx -> positionAndShow(maxHeightPx) },
                     )

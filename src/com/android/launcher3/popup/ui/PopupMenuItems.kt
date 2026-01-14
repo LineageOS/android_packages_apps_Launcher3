@@ -18,7 +18,7 @@ package com.android.launcher3.popup.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -30,15 +30,27 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.onLongClick
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.android.launcher3.R
@@ -76,18 +88,47 @@ fun PopupMenuItem(
     title: String,
     itemContentDescription: String,
     onClick: () -> Unit,
-    onLongClick: (() -> Unit)? = null,
+    onLongClick: ((Offset) -> Unit)? = null,
     trailingContent: @Composable (() -> Unit)? = null,
 ) {
+    var rowGlobalOffset by remember { mutableStateOf(Offset.Unspecified) }
+
     Box(modifier = modifier.height(popupMenuItemHeight), contentAlignment = Alignment.CenterStart) {
         Row(
             modifier =
                 Modifier.size(popupMenuItemWidth, popupMenuItemHeight)
-                    .combinedClickable(
-                        onClickLabel = itemContentDescription,
-                        onClick = onClick,
-                        onLongClick = onLongClick,
-                    )
+                    .onGloballyPositioned { coordinates ->
+                        rowGlobalOffset = coordinates.positionInWindow()
+                    }
+                    .pointerInput(onClick, onLongClick, rowGlobalOffset) {
+                        detectTapGestures(
+                            onTap = { onClick() },
+                            onLongPress = { localOffset ->
+                                onLongClick?.let { callback ->
+                                    if (rowGlobalOffset != Offset.Unspecified) {
+                                        val screenOffset = rowGlobalOffset + localOffset
+                                        callback(screenOffset)
+                                    } else {
+                                        callback(localOffset)
+                                    }
+                                }
+                            },
+                        )
+                    }
+                    // Add semantics for accessibility
+                    .semantics {
+                        contentDescription = itemContentDescription
+                        onClick(label = itemContentDescription) {
+                            onClick()
+                            true
+                        }
+                        if (onLongClick != null) {
+                            onLongClick(label = "Open context menu") {
+                                onLongClick(Offset.Unspecified)
+                                true
+                            }
+                        }
+                    }
                     .padding(
                         horizontal = popupMenuItemHorizontalPadding,
                         vertical = popupMenuItemVerticalPadding,
@@ -188,13 +229,13 @@ fun DeepShortcutMenuItem(
     onClick: (PopupClickEvent) -> Unit, // onClick for the whole item
     onAddButtonClick:
         (ItemInfoWithIcon) -> Unit, // New parameter for the right-aligned icon's click
-    onLongClick: (ItemInfoWithIcon) -> Unit,
+    onLongClick: (ItemInfoWithIcon, Offset) -> Unit,
 ) {
     val iconComposable: @Composable () -> Unit
     val itemTitle: String
     val itemContentDescription: String
     val itemOnClick: () -> Unit
-    val itemOnLongClick: (() -> Unit)?
+    val itemOnLongClick: ((Offset) -> Unit)?
     val itemTrailingContent: @Composable (() -> Unit)?
 
     if (shortcut != null) {
@@ -208,7 +249,7 @@ fun DeepShortcutMenuItem(
             )
         }
         itemOnClick = { onClick(DeepShortcutClickEvent(shortcut)) }
-        itemOnLongClick = { onLongClick(shortcut) }
+        itemOnLongClick = { screenOffset -> onLongClick(shortcut, screenOffset) }
         itemTrailingContent = {
             Box(
                 modifier =

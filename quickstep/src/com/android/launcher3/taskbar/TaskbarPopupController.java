@@ -51,12 +51,14 @@ import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.popup.PinToTaskbarShortcut;
 import com.android.launcher3.popup.Popup;
+import com.android.launcher3.popup.PopupCategory;
 import com.android.launcher3.popup.PopupContainer;
 import com.android.launcher3.popup.PopupContainerWithArrow;
 import com.android.launcher3.popup.PopupController;
 import com.android.launcher3.popup.PopupEvent;
 import com.android.launcher3.popup.PopupItemDragHandler;
 import com.android.launcher3.popup.SystemShortcut;
+import com.android.launcher3.popup.ui.PopupItem;
 import com.android.launcher3.shortcuts.DeepShortcutView;
 import com.android.launcher3.splitscreen.SplitShortcut;
 import com.android.launcher3.util.ComponentKey;
@@ -268,8 +270,27 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
         container = PopupContainerWithArrow.create(context, /* originalView */ icon,
                 /*itemInfo */ itemInfo,
                 /* updateIconUi */ false);
-        // TODO (b/198438631): configure for taskbar/context
-        container.populateAndShowRows(deepShortcutCount, systemShortcuts);
+        container.setDeepShortcutDragHandler(new TaskbarDeepShortcutDragHandler(context));
+        if (Flags.expandableLongPressMenu()) {
+            List<PopupItem> systemShortcutPopups =
+                    systemShortcuts.stream().map(shortcut -> new PopupItem(
+                            shortcut.getIconResId(),
+                            shortcut.getLabelResId(),
+                            () -> {
+                                shortcut.onClick(icon);
+                                return kotlin.Unit.INSTANCE;
+                            },
+                            shortcut.mIsCollapsible
+                                    ? PopupCategory.SYSTEM_SHORTCUT
+                                    : PopupCategory.SYSTEM_SHORTCUT_FIXED)
+                    ).toList();
+            container.showComposePopup(
+                    systemShortcutPopups,
+                    deepShortcutCount);
+        } else {
+            // TODO (b/198438631): configure for taskbar/context
+            container.populateAndShowRows(deepShortcutCount, systemShortcuts);
+        }
         container.setPopupItemDragHandler(new TaskbarPopupItemDragHandler());
         context.getDragController().addDragListener(container);
         container.requestFocus();
