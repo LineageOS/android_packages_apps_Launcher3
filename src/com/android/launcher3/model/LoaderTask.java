@@ -528,8 +528,7 @@ public class LoaderTask implements Runnable {
 
             var loadedItems =
                     itemProcessor.finalizeData(mModelDelegate, mModel.getModelDbController());
-            if (Flags.migrateBrowserIconOnSetup()
-                    && (mIsRestoreFromBackup || mPrefs.get(PREF_MIGRATION_PENDING))) {
+            if (mIsRestoreFromBackup || mPrefs.get(PREF_MIGRATION_PENDING)) {
                 mBrowserIconMigratorFactory
                         .createBrowserIconMigrator(loadedItems).performMigration();
             }
