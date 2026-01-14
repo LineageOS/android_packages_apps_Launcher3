@@ -31,15 +31,18 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.internal.R
 import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.statehandlers.DesktopVisibilityController.Companion.INACTIVE_DESK_ID
+import com.android.launcher3.taskbar.bubbles.BubbleHelper
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.quickstep.TopTaskTracker.HISTORY_SIZE
 import com.android.quickstep.util.FakeTaskFactory
 import com.android.wm.shell.Flags.FLAG_ENABLE_SHELL_TOP_TASK_TRACKING
+import com.android.wm.shell.Flags.FLAG_SEND_BUBBLE_ROOT_TASK_ID_TO_LAUNCHER
 import com.android.wm.shell.shared.GroupedTaskInfo
 import com.android.wm.shell.shared.GroupedTaskInfo.TYPE_DESK
 import com.android.wm.shell.shared.GroupedTaskInfo.TYPE_FULLSCREEN
 import com.android.wm.shell.shared.GroupedTaskInfo.TYPE_SPLIT
 import com.google.common.truth.Truth.assertThat
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -77,6 +80,11 @@ class TopTaskTrackerTest {
                 mockSystemUiProxy,
                 mockDesktopVisibilityController,
             )
+    }
+
+    @After
+    fun tearDown() {
+        BubbleHelper.updateBubbleRootTaskId(INVALID_TASK_ID)
     }
 
     @Test
@@ -280,10 +288,12 @@ class TopTaskTrackerTest {
     }
 
     @Test
+    @EnableFlags(FLAG_SEND_BUBBLE_ROOT_TASK_ID_TO_LAUNCHER)
     @DisableFlags(FLAG_ENABLE_SHELL_TOP_TASK_TRACKING)
     fun getCachedTopTask_filtersOutBubbleTask() {
-        val appBubbleTask = createBubbleTaskInfo(taskId = 100, appBubble = true)
-        val convoBubbleTask = createBubbleTaskInfo(taskId = 101, appBubble = false)
+        BubbleHelper.updateBubbleRootTaskId(5)
+        val appBubbleTask = createAppBubbleTaskInfo(taskId = 100, parentTaskId = 5)
+        val convoBubbleTask = createNotifBubbleTaskInfo(taskId = 101)
         val normalTask = createTaskInfo(taskId = 102)
 
         topTaskTracker.handleTaskMovedToFront(normalTask)
@@ -297,10 +307,12 @@ class TopTaskTrackerTest {
     }
 
     @Test
+    @EnableFlags(FLAG_SEND_BUBBLE_ROOT_TASK_ID_TO_LAUNCHER)
     @DisableFlags(FLAG_ENABLE_SHELL_TOP_TASK_TRACKING)
     fun getCachedTopTask_allBubbles_noTopTask() {
-        val convoBubbleTask = createBubbleTaskInfo(taskId = 100, appBubble = false)
-        val appBubbleTask = createBubbleTaskInfo(taskId = 101, appBubble = true)
+        BubbleHelper.updateBubbleRootTaskId(5)
+        val convoBubbleTask = createNotifBubbleTaskInfo(taskId = 100)
+        val appBubbleTask = createAppBubbleTaskInfo(taskId = 101, parentTaskId = 5)
 
         topTaskTracker.handleTaskMovedToFront(convoBubbleTask)
         topTaskTracker.handleTaskMovedToFront(appBubbleTask)
@@ -382,17 +394,20 @@ class TopTaskTrackerTest {
             isVisible = isVisible,
         )
 
-    private fun createBubbleTaskInfo(
+    private fun createNotifBubbleTaskInfo(taskId: Int, displayId: Int = DEFAULT_DISPLAY): TaskInfo {
+        val taskInfo = createTaskInfo(taskId, displayId)
+        taskInfo.configuration.windowConfiguration.windowingMode = WINDOWING_MODE_MULTI_WINDOW
+        taskInfo.configuration.windowConfiguration.isAlwaysOnTop = true
+        return taskInfo
+    }
+
+    private fun createAppBubbleTaskInfo(
         taskId: Int,
-        appBubble: Boolean,
+        parentTaskId: Int,
         displayId: Int = DEFAULT_DISPLAY,
     ): TaskInfo {
         val taskInfo = createTaskInfo(taskId, displayId)
-        taskInfo.isAppBubble = appBubble
-        if (!appBubble) {
-            taskInfo.configuration.windowConfiguration.windowingMode = WINDOWING_MODE_MULTI_WINDOW
-            taskInfo.configuration.windowConfiguration.isAlwaysOnTop = true
-        }
+        taskInfo.parentTaskId = parentTaskId
         return taskInfo
     }
 }

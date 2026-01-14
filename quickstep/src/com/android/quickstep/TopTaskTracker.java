@@ -395,7 +395,7 @@ public class TopTaskTracker extends ISplitScreenListener.Stub implements TaskSta
 
     private static boolean isBubbleTask(TaskInfo task) {
         if (sendBubbleRootTaskIdToLauncher()) {
-            return BubbleHelper.isAppBubbleTask(task);
+            return BubbleHelper.isBubbleTask(task);
         }
         if (task == null) return false;
         if (task.isAppBubble) return true;

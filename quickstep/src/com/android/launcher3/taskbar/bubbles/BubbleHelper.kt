@@ -18,6 +18,7 @@ package com.android.launcher3.taskbar.bubbles
 
 import android.app.ActivityTaskManager
 import android.app.TaskInfo
+import android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW
 
 /** Helper to determine bubbled task state from other components in Launcher. */
 object BubbleHelper {
@@ -37,10 +38,24 @@ object BubbleHelper {
         bubbleRootTaskId = taskId
     }
 
-    /** Returns true if the task is an app bubble. */
+    /** Returns true if the task is in a bubble */
     @JvmStatic
-    fun isAppBubbleTask(task: TaskInfo?): Boolean {
-        if (task?.isAppBubble == true) return true
-        return task != null && task.hasParentTask() && task.parentTaskId == bubbleRootTaskId
-    }
+    fun isBubbleTask(task: TaskInfo?): Boolean =
+        when {
+            task == null -> false
+            isAppBubbleTask(task) -> true
+            task.windowingMode == WINDOWING_MODE_MULTI_WINDOW &&
+                task.configuration.windowConfiguration.isAlwaysOnTop() -> true
+            else -> false
+        }
+
+    /** Returns true if the task is an app bubble */
+    @JvmStatic
+    fun isAppBubbleTask(task: TaskInfo?): Boolean =
+        when {
+            task == null -> false
+            task.isAppBubble -> true
+            task.hasParentTask() && task.parentTaskId == bubbleRootTaskId -> true
+            else -> false
+        }
 }
