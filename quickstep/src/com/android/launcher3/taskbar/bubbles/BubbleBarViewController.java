@@ -235,9 +235,6 @@ public class BubbleBarViewController {
         mBubbleClickListener = v -> onBubbleClicked((BubbleView) v);
         mBubbleDragController.setupBubbleBarView(mBarView);
         mOverflowBubble = bubbleControllers.bubbleCreator.createOverflow(mBarView);
-        if (!Flags.enableOptionalBubbleOverflow()) {
-            showOverflow(true);
-        }
         if (!mBubbleStashController.isTransientTaskBar()) {
             // TODO(b/380274085) for transient taskbar mode, the click is also handled by the input
             //  consumer. This check can be removed once b/380274085 is fixed.
@@ -319,6 +316,13 @@ public class BubbleBarViewController {
             }
 
             @Override
+            public void expand(BubbleView bubble) {
+                if (bubble.getBubble() != null) {
+                    mBubbleBarController.showAndSelectBubble(bubble.getBubble());
+                }
+            }
+
+            @Override
             public void collapse() {
                 collapseBubbleBar();
             }
@@ -329,6 +333,11 @@ public class BubbleBarViewController {
                 mBubbleBarController.updateBubbleBarLocation(location, source);
             }
         };
+
+        if (!Flags.enableOptionalBubbleOverflow()) {
+            // This should be called after mBubbleViewController is initialized
+            showOverflow(true);
+        }
     }
 
     /**
