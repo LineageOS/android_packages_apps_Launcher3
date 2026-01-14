@@ -26,11 +26,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.android.launcher3.widgetpicker.R
@@ -41,6 +43,7 @@ import com.android.launcher3.widgetpicker.ui.WidgetInteractionSource
 import com.android.launcher3.widgetpicker.ui.components.WidgetsGrid
 import com.android.launcher3.widgetpicker.ui.components.WidgetsSearchBar
 import com.android.launcher3.widgetpicker.ui.fullcatalog.screens.landing.LandingScreenDimensions.CreateButtonHeight
+import com.android.launcher3.widgetpicker.ui.fullcatalog.screens.landing.LandingScreenDimensions.CreateButtonIconTextSpacing
 import com.android.launcher3.widgetpicker.ui.fullcatalog.screens.landing.LandingScreenDimensions.TopSearchRowItemSpacing
 import com.android.launcher3.widgetpicker.ui.fullcatalog.screens.landing.LandingScreenDimensions.WEIGHT_FILL_REMAINING_SPACE
 import com.android.launcher3.widgetpicker.ui.theme.WidgetPickerTheme
@@ -149,6 +152,12 @@ private fun CreateButton(
             )
         },
     ) {
+        Icon(
+            painter = painterResource(R.drawable.widget_create_button),
+            contentDescription = null, // decorative
+            tint = WidgetPickerTheme.colors.addButtonContent,
+        )
+        Spacer(modifier = Modifier.width(CreateButtonIconTextSpacing))
         Text(stringResource(R.string.widget_create_button))
     }
 }
@@ -233,7 +242,9 @@ private fun LandingScreen(
 
 private object LandingScreenDimensions {
     val TopSearchRowItemSpacing = 8.dp
+
     val CreateButtonHeight = 52.dp
+    val CreateButtonIconTextSpacing = 8.dp
 
     const val WEIGHT_FILL_REMAINING_SPACE = 1f
 }
