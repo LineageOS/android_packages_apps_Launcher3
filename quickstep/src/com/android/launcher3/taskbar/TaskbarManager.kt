@@ -72,8 +72,6 @@ interface TaskbarManager {
 
     fun destroy()
 
-    fun hasCurrentActivityContext(): Boolean
-
     fun toggleTaskbarStash()
 
     fun getStashedHandleViewController(): StashedHandleViewControllerProxy?
@@ -85,8 +83,6 @@ interface TaskbarManager {
     fun getTaskbarInteractor(displayId: Int): TaskbarInteractor?
 
     fun getTaskbarForDisplay(displayId: Int): TaskbarActivityContext?
-
-    fun getPrimaryDisplayId(): Int
 
     @VisibleForTesting fun getCurrentActivityContext(): TaskbarActivityContext?
 
