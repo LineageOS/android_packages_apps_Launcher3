@@ -325,6 +325,20 @@ class KeyboardQuickSwitchControllerTest {
         assertThat(allAppsController.isOpen).isTrue()
     }
 
+    @Test
+    fun isShown_returnsCorrectState_whenOpenedAndClosed() {
+        // Verify KQS is not shown initially.
+        assertThat(isKqsShown).isFalse()
+
+        // Open KQS and verify it is shown.
+        triggerAltTab()
+        assertThat(isKqsShown).isTrue()
+
+        // Close KQS and verify it is not shown.
+        runOnTaskbarUiThreadSync { keyboardQuickSwitchController.closeQuickSwitchView() }
+        assertThat(isKqsShown).isFalse()
+    }
+
     private fun createSingleTask(taskId: Int) = SingleTask(createTask(taskId))
 
     private fun createSplitTask(taskIds: Pair<Int, Int>) =
