@@ -649,4 +649,8 @@
     <string name="create_new_folder_button_text">New folder</string>
     <!-- Default name for a newly created folder -->
     <string name="default_new_folder_name">New folder</string>
+
+    <!-- Strings for errors -->
+    <!-- Displayed when an error occurs but exact causality cannot be determined/communicated. -->
+    <string name="something_went_wrong">Something went wrong</string>
 </resources>

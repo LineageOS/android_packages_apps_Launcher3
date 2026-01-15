@@ -57,7 +57,6 @@ import com.android.launcher3.testing.shared.TestProtocol;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Popup shown on long pressing an empty space in launcher
@@ -266,13 +265,20 @@ public class OptionsPopupView<T extends Context & ActivityContext> extends Arrow
     }
 
     private static boolean createNewFolder(View view) {
-        CompletableFuture<Void> unused =
-                HomeScreenFilesProvider.INSTANCE.get(Launcher.getLauncher(view.getContext()))
-                        .createNewFolder()
-                        .handle((result, throwable) -> {
-                            // TODO(b/463389684): Notify user on failure.
-                            return null;
-                        });
+        final Launcher launcher = Launcher.getLauncher(view.getContext());
+
+        HomeScreenFilesProvider.INSTANCE.get(launcher)
+                .createNewFolder()
+                .whenComplete((result, throwable) -> {
+                    if (throwable != null || !result) {
+                        launcher.runOnUiThread(() ->
+                                Toast.makeText(
+                                        launcher,
+                                        R.string.something_went_wrong,
+                                        Toast.LENGTH_SHORT).show());
+                    }
+                });
+
         return true;
     }
 
