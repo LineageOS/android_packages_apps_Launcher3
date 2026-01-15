@@ -17,10 +17,9 @@
 package com.android.launcher3;
 
 import static com.android.app.animation.Interpolators.SCROLL;
-import static com.android.launcher3.Flags.enableAllAppsEduForOverswipe;
-import static com.android.launcher3.MotionEventsUtils.isTrackpadMotionEvent;
 import static com.android.launcher3.RemoveAnimationSettingsTracker.WINDOW_ANIMATION_SCALE_URI;
 import static com.android.launcher3.Utilities.shouldEnableMouseInteractionChanges;
+import static com.android.launcher3.MotionEventsUtils.isTrackpadMotionEvent;
 import static com.android.launcher3.compat.AccessibilityManagerCompat.isAccessibilityEnabled;
 import static com.android.launcher3.compat.AccessibilityManagerCompat.isObservedEventType;
 import static com.android.launcher3.testing.shared.TestProtocol.SCROLL_FINISHED_MESSAGE;
@@ -161,7 +160,6 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
     protected EdgeEffectCompat mEdgeGlowRight;
 
     private List<PageSwitchListener> mPageSwitchListeners = new ArrayList<>();
-    private List<PageSwitchAttemptListener> mPageSwitchAttemptListeners = new ArrayList<>();
 
     public PagedView(Context context) {
         this(context, null);
@@ -483,25 +481,6 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
         mPageSwitchListeners.remove(listener);
     }
 
-    private void onPageSwitchAttempt(int fromPage, int toPage) {
-        if (!enableAllAppsEduForOverswipe()) {
-            return;
-        }
-        for (PageSwitchAttemptListener listener : mPageSwitchAttemptListeners) {
-            listener.onPageSwitchAttempt(fromPage, toPage);
-        }
-    }
-
-    /** Add a callback that is triggered when the page switch is attempted. */
-    public void addPageSwitchAttemptListener(PageSwitchAttemptListener listener) {
-        mPageSwitchAttemptListeners.add(listener);
-    }
-
-    /** Remove a page switch attempt callback. */
-    public void removePageSwitchAttemptListener(PageSwitchAttemptListener listener) {
-        mPageSwitchAttemptListeners.remove(listener);
-    }
-
     private void updatePageIndicator() {
         if (mPageIndicator != null) {
             mPageIndicator.setActiveMarker(getNextPage());
@@ -755,7 +734,7 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
         setMeasuredDimension(widthSize, heightSize);
     }
 
-    /** Returns true if this PagedView's scroll amounts are initialized to each page index. */
+    /** Returns true iff this PagedView's scroll amounts are initialized to each page index. */
     protected boolean isPageScrollsInitialized() {
         return mPageScrolls != null && mPageScrolls.length == getChildCount();
     }
@@ -1471,7 +1450,6 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
                         returnToOriginalPage = true;
                     }
 
-                    int fromPage = mCurrentPage;
                     int finalPage;
                     // We give flings precedence over large moves, which is why we short-circuit our
                     // test for a large move if a fling has been registered. That is, a large
@@ -1482,27 +1460,16 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
                         finalPage = returnToOriginalPage
                                 ? mCurrentPage : mCurrentPage - getPanelCount();
                         runOnPageScrollsInitialized(
-                                () -> {
-                                    snapToPageWithVelocity(finalPage, velocity);
-                                    onPageSwitchAttempt(fromPage, finalPage);
-                                });
+                                () -> snapToPageWithVelocity(finalPage, velocity));
                     } else if (((isSignificantMove && isDeltaLeft && !isFling) ||
                             (isFling && isVelocityLeft)) &&
                             mCurrentPage < (getChildCount() - getPanelCount())) {
                         finalPage = returnToOriginalPage
                                 ? mCurrentPage : mCurrentPage + getPanelCount();
                         runOnPageScrollsInitialized(
-                                () -> {
-                                    snapToPageWithVelocity(finalPage, velocity);
-                                    onPageSwitchAttempt(fromPage, finalPage);
-                                });
+                                () -> snapToPageWithVelocity(finalPage, velocity));
                     } else {
-                        runOnPageScrollsInitialized(
-                                () -> {
-                                    snapToDestination();
-                                    // Stayed on the same page.
-                                    onPageSwitchAttempt(fromPage, fromPage);
-                                });
+                        runOnPageScrollsInitialized(this::snapToDestination);
                     }
                 } else {
                     if (!mScroller.isFinished()) {
@@ -2076,18 +2043,5 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
          * Called when the workspace page is switched.
          */
         void onPageSwitch();
-    }
-
-    /**
-     * Callback interface for page switch attempts.
-     *
-     * <p>Different from {@link PageSwitchListener}, this callback is invoked for ALL page switch
-     * attempts, including over-swipes (on the last page).
-     */
-    public interface PageSwitchAttemptListener {
-        /**
-         * Called when the workspace page switch attempt is detected.
-         */
-        void onPageSwitchAttempt(int fromPage, int toPage);
     }
 }
