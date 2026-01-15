@@ -90,9 +90,9 @@ class KeyboardQuickSwitchControllerTest {
 
     @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    val keyboardQuickSwitchController by
+    private val keyboardQuickSwitchController by
         taskbarUnitTestRule.delegate { it.keyboardQuickSwitchController }
-    val allAppsController by taskbarUnitTestRule.delegate { it.taskbarAllAppsController }
+    private val allAppsController by taskbarUnitTestRule.delegate { it.taskbarAllAppsController }
 
     private val isKqsShown: Boolean
         get() = getOnTaskbarUiThread { keyboardQuickSwitchController.isShown }

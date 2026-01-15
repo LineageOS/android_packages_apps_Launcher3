@@ -91,7 +91,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     private val activityContext by taskbarUnitTestRule::activityContext
 
-    val viewController by taskbarUnitTestRule.delegate { it.taskbarViewController }
+    private val viewController by taskbarUnitTestRule.delegate { it.taskbarViewController }
     private lateinit var taskbarView: TaskbarView
 
     private val pinnedHitRectBuffer: Int

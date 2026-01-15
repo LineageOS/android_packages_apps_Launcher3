@@ -63,7 +63,7 @@ class TaskbarPopupControllerTest {
 
     @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    val popupController by taskbarUnitTestRule.delegate { it.taskbarPopupController }
+    private val popupController by taskbarUnitTestRule.delegate { it.taskbarPopupController }
 
     private val taskbarContext: TaskbarActivityContext
         get() = taskbarUnitTestRule.activityContext

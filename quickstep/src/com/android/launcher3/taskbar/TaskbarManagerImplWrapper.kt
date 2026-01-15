@@ -174,6 +174,10 @@ class TaskbarManagerImplWrapper @Inject constructor(implProvider: Provider<Taskb
     }
 
     @VisibleForTesting
+    override fun <T> getFromImplSync(provider: (TaskbarManagerImpl) -> T): T =
+        getTaskbarUiThread().submit(Callable { provider(impl) }).get()
+
+    @VisibleForTesting
     override fun getCurrentActivityContext(): TaskbarActivityContext? {
         return impl.currentActivityContext
     }
@@ -221,21 +225,4 @@ class TaskbarManagerImplWrapper @Inject constructor(implProvider: Provider<Taskb
     @VisibleForTesting
     override fun isTransient(): Boolean =
         impl.currentActivityContext?.taskbarFeatureEvaluator?.isTransient ?: false
-
-    @VisibleForTesting
-    override fun getTaskbarAllAppsScroll(): Int {
-        return getTaskbarUiThread()
-            .submit(Callable { impl.currentActivityContext!!.taskbarAllAppsScroll })
-            .get()
-    }
-
-    @VisibleForTesting
-    override fun getTaskbarAllAppsTopPadding(): Int =
-        getTaskbarUiThread()
-            .submit(Callable { impl.currentActivityContext!!.taskbarAllAppsTopPadding })
-            .get()
-
-    @VisibleForTesting
-    override fun isImeDocked(): Boolean =
-        getTaskbarUiThread().submit(Callable { impl.currentActivityContext!!.isImeDocked }).get()
 }

@@ -31,7 +31,7 @@ class TaskbarDesktopModeControllerTest {
     @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()
     @get:Rule(order = 1) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    val taskbarDesktopModeController by
+    private val taskbarDesktopModeController by
         taskbarUnitTestRule.delegate { it.taskbarDesktopModeController }
 
     @Test

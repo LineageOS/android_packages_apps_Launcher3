@@ -67,13 +67,19 @@ import org.junit.runners.model.Statement
  */
 class TaskbarUnitTestRule(
     private val context: TaskbarWindowSandboxContext,
-    private val controllerInjectionCallback: () -> Unit = {},
+    private val activityInitializedCallback: () -> Unit = {},
 ) : TestRule {
 
-    private lateinit var sysUIConnection: SysUIConnectionComponent
+    private val cleanup = ThreadSafeRunnableList()
+    private val sysUIConnection: SysUIConnectionComponent by lazy {
+        context.base.appComponent.sysUIConnectionComponentBuilder
+            .setConnectionCleaner(cleanup)
+            .build()
+    }
 
-    val taskbarManager: TaskbarManagerImpl
-        get() = sysUIConnection.taskbarImpl
+    val taskbarManager: TaskbarManagerImpl by lazy {
+        sysUIConnection.taskbarManager.getFromImplSync { it }
+    }
 
     val activityContext: TaskbarActivityContext
         get() {
@@ -113,11 +119,6 @@ class TaskbarUnitTestRule(
                     if (description.getAnnotation(UserSetupMode::class.java) != null) 0 else 1
                 context.settingsCacheSandbox[getUriFor(NAV_BAR_KIDS_MODE)] =
                     if (description.getAnnotation(NavBarKidsMode::class.java) != null) 1 else 0
-
-                val cleanup = ThreadSafeRunnableList()
-                val builder = context.base.appComponent.sysUIConnectionComponentBuilder
-
-                sysUIConnection = builder.setConnectionCleaner(cleanup).build()
 
                 TestUtil.getOnTaskbarUiThread {
                     taskbarManager.apply {
@@ -167,7 +168,7 @@ class TaskbarUnitTestRule(
 
         // TODO(b/346394875): we should test a non-default uiController.
         activityContext.setUIController(TaskbarUIController.DEFAULT)
-        controllerInjectionCallback.invoke()
+        activityInitializedCallback.invoke()
     }
 
     fun <T> delegate(provider: (TaskbarControllers) -> T) = ControllerDelegate(provider)

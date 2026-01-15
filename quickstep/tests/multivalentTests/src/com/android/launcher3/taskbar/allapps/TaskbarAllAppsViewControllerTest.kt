@@ -48,8 +48,8 @@ class TaskbarAllAppsViewControllerTest {
     @get:Rule(order = 1) val taskbarModeRule = TaskbarModeRule(context)
     @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    val overlayController by taskbarUnitTestRule.delegate { it.taskbarOverlayController }
-    val stashController by taskbarUnitTestRule.delegate { it.taskbarStashController }
+    private val overlayController by taskbarUnitTestRule.delegate { it.taskbarOverlayController }
+    private val stashController by taskbarUnitTestRule.delegate { it.taskbarStashController }
 
     private var allAppsVisitedCount by ALL_APPS_VISITED_COUNT.prefItem.asProperty(context)
     lateinit private var searchSessionController: TaskbarSearchSessionController

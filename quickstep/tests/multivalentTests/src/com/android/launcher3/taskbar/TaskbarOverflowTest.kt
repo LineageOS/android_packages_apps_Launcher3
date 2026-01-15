@@ -138,13 +138,14 @@ class TaskbarOverflowTest {
     @get:Rule(order = 6)
     val taskbarUnitTestRule = TaskbarUnitTestRule(context, this::onControllersInitialized)
 
-    val taskbarViewController by taskbarUnitTestRule.delegate { it.taskbarViewController }
-    val recentAppsController by taskbarUnitTestRule.delegate { it.taskbarRecentAppsController }
-    val bubbleBarViewController by
+    private val taskbarViewController by taskbarUnitTestRule.delegate { it.taskbarViewController }
+    private val recentAppsController by
+        taskbarUnitTestRule.delegate { it.taskbarRecentAppsController }
+    private val bubbleBarViewController by
         taskbarUnitTestRule.delegate { it.bubbleControllers.orElseThrow().bubbleBarViewController }
-    val bubbleStashController by
+    private val bubbleStashController by
         taskbarUnitTestRule.delegate { it.bubbleControllers.orElseThrow().bubbleStashController }
-    val keyboardQuickSwitchController by
+    private val keyboardQuickSwitchController by
         taskbarUnitTestRule.delegate { it.keyboardQuickSwitchController }
 
     private val desktopVisibilityController: DesktopVisibilityController
