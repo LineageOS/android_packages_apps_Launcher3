@@ -105,6 +105,13 @@ class VirtualDisplaysRule(context: Context = ApplicationProvider.getApplicationC
         dispatcher: CoroutineDispatcher = Dispatchers.Main,
     ) {
         displayDecorationListeners += listener to dispatcher
+
+        runBlocking {
+            async(dispatcher) {
+                    virtualDisplays.forEach { listener.onDisplayAddSystemDecorations(it.key) }
+                }
+                .await()
+        }
     }
 
     /** Returns the [VirtualDisplay] for [displayId]. */
