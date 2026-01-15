@@ -1365,6 +1365,9 @@ public class BubbleBarView extends FrameLayout {
      */
     public void setSelectedBubble(BubbleView view) {
         BubbleView previouslySelectedBubble = mSelectedBubbleView;
+        if (previouslySelectedBubble != null) {
+            previouslySelectedBubble.setSelected(false);
+        }
         mSelectedBubbleView = view;
         mBubbleBarBackground.showArrow(view != null);
 
@@ -1373,6 +1376,7 @@ public class BubbleBarView extends FrameLayout {
             updateArrowForSelected(previouslySelectedBubble != null);
         }
         if (view != null) {
+            view.setSelected(true);
             if (isExpanded()) {
                 view.markSeen();
             } else {

@@ -73,6 +73,8 @@ public class BubbleView extends ConstraintLayout {
     private BubbleBarItem mBubble;
     private boolean mIsOverflow;
 
+    private boolean mSelected;
+
     @Nullable
     private Controller mController;
 
@@ -118,6 +120,13 @@ public class BubbleView extends ConstraintLayout {
         mBubbleSize = updatedBubbleSize;
         if (mBubble == null || mBubble instanceof BubbleBarOverflow) return;
         mDotRenderer = new DotRenderer(mBubbleSize);
+    }
+
+    /**
+     * Mark this bubble as the selected bubble.
+     */
+    public void setSelected(boolean selected) {
+        mSelected = selected;
     }
 
     /**
@@ -177,17 +186,24 @@ public class BubbleView extends ConstraintLayout {
     @Override
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.addAction(AccessibilityNodeInfo.ACTION_COLLAPSE);
-        if (mBubble instanceof BubbleBarBubble) {
-            info.addAction(AccessibilityNodeInfo.ACTION_DISMISS);
+        if (mSelected) {
+            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE);
+        } else {
+            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_EXPAND);
         }
-        if (mController != null) {
-            if (mController.getBubbleBarLocation().isOnLeft(isLayoutRtl())) {
-                info.addAction(new AccessibilityNodeInfo.AccessibilityAction(R.id.action_move_right,
-                        getResources().getString(R.string.bubble_bar_action_move_right)));
-            } else {
-                info.addAction(new AccessibilityNodeInfo.AccessibilityAction(R.id.action_move_left,
-                        getResources().getString(R.string.bubble_bar_action_move_left)));
+        if (mBubble instanceof BubbleBarBubble) {
+            // These actions only apply to bubbles
+            info.addAction(AccessibilityNodeInfo.ACTION_DISMISS);
+            if (mController != null) {
+                final AccessibilityNodeInfo.AccessibilityAction action;
+                if (mController.getBubbleBarLocation().isOnLeft(isLayoutRtl())) {
+                    action = new AccessibilityNodeInfo.AccessibilityAction(R.id.action_move_right,
+                            getResources().getString(R.string.bubble_bar_action_move_right));
+                } else {
+                    action = new AccessibilityNodeInfo.AccessibilityAction(R.id.action_move_left,
+                            getResources().getString(R.string.bubble_bar_action_move_left));
+                }
+                info.addAction(action);
             }
         }
     }
@@ -200,6 +216,12 @@ public class BubbleView extends ConstraintLayout {
         if (action == AccessibilityNodeInfo.ACTION_COLLAPSE) {
             if (mController != null) {
                 mController.collapse();
+            }
+            return true;
+        }
+        if (action == AccessibilityNodeInfo.ACTION_EXPAND) {
+            if (mController != null) {
+                mController.expand(this);
             }
             return true;
         }
@@ -458,6 +480,9 @@ public class BubbleView extends ConstraintLayout {
 
         /** This bubble should be dismissed */
         void dismiss(BubbleView bubble);
+
+        /** Select the given bubble */
+        void expand(BubbleView bubble);
 
         /** Collapse the bubble bar */
         void collapse();
