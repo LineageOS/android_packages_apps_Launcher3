@@ -201,19 +201,21 @@ constructor(
     }
 
     /**
-     * Asynchronously fetches the thumbnail for the given `task`.
+     * Asynchronously fetches the thumbnail for the given `task` defaulting to low resolution.
      *
      * @param callback The callback to receive the task after its data has been populated.
      * @return a cancelable handle to the request
      */
-    // TODO(b/469720207) - migrate usages to use a low res specific API
     fun getThumbnailInBackground(
         task: Task,
         callback: Consumer<ThumbnailData>,
     ): CancellableTask<ThumbnailData>? {
         Preconditions.assertUIThread()
 
-        val lowResolution = !highResLoadingState.isEnabled
+        // High resolution can be retrieved by specifying it in an alternate API
+        // Default to low resolution.
+        val lowResolution =
+            if (enableLowResThumbnailPreloading()) true else !highResLoadingState.isEnabled
         val taskThumbnail = task.thumbnail
         if (
             taskThumbnail?.thumbnail != null && (!taskThumbnail.reducedResolution || lowResolution)
@@ -224,7 +226,7 @@ constructor(
             return null
         }
 
-        return getThumbnailInBackground(task.key, !highResLoadingState.isEnabled, callback)
+        return getThumbnailInBackground(task.key, lowResolution, callback)
     }
 
     /**
