@@ -29,7 +29,6 @@ import androidx.test.uiautomator.Until
 import com.android.launcher3.DeviceProfile
 import com.android.launcher3.Launcher
 import com.android.launcher3.Utilities.findViewByPredicate
-import com.android.launcher3.allapps.WorkProfileTest
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.integration.util.LauncherActivityScenarioRule
 import com.android.launcher3.taskbar.TaskbarActivityContext
@@ -104,6 +103,8 @@ open class BaseTaskbarIntegrationTest {
         launcherActivity.initializeActivity()
         if (startCalendarAppDuringSetup()) interactions.startAppFast(CALCULATOR_APP_PACKAGE)
         executeOnTaskManager {
+            it.getFromImplSync {}
+
             it.getCurrentActivityContext()?.let { ctx ->
                 ctx.enableBlockingTimeoutDuringTests(true)
                 ctx.unstashTaskbarIfStashed()
@@ -112,10 +113,10 @@ open class BaseTaskbarIntegrationTest {
     }
 
     fun executeOnTaskManager(f: (TaskbarManager) -> Unit) =
-        tisBinderRule.withTISBinder { f(taskbarManager!!) }
+        tisBinderRule.withTISBinder { f(taskbarManager) }
 
     fun <T> getFromTaskManager(f: (TaskbarManager) -> T?): T? =
-        tisBinderRule.withTISBinder { f(taskbarManager!!) }
+        tisBinderRule.withTISBinder { f(taskbarManager) }
 
     @After
     open fun tearDown() {

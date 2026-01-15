@@ -42,8 +42,9 @@ class TaskbarInsetsControllerTest {
     @get:Rule(order = 2) val taskbarModeRule = TaskbarModeRule(context)
     @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    val taskbarInsetsController by taskbarUnitTestRule.delegate { it.taskbarInsetsController }
-    val taskbarStashController by taskbarUnitTestRule.delegate { it.taskbarStashController }
+    private val taskbarInsetsController by
+        taskbarUnitTestRule.delegate { it.taskbarInsetsController }
+    private val taskbarStashController by taskbarUnitTestRule.delegate { it.taskbarStashController }
 
     private val taskbarContext by taskbarUnitTestRule::activityContext
 

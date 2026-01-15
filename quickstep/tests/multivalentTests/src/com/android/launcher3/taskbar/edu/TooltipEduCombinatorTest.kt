@@ -58,7 +58,7 @@ class TooltipEduCombinatorTest {
 
     @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    val taskbarStashController by taskbarUnitTestRule.delegate { it.taskbarStashController }
+    private val taskbarStashController by taskbarUnitTestRule.delegate { it.taskbarStashController }
 
     private lateinit var tooltipEduCombinator: TooltipEduCombinator
 

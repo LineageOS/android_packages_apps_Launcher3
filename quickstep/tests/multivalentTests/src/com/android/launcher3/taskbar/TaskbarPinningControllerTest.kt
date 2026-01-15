@@ -39,7 +39,7 @@ class TaskbarPinningControllerTest {
     @get:Rule(order = 1) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
     @get:Rule(order = 2) val animatorTestRule = TaskbarAnimatorTestRule(this)
 
-    val pinningController by taskbarUnitTestRule.delegate { it.taskbarPinningController }
+    private val pinningController by taskbarUnitTestRule.delegate { it.taskbarPinningController }
 
     private val taskbarContext: TaskbarActivityContext
         get() = taskbarUnitTestRule.activityContext

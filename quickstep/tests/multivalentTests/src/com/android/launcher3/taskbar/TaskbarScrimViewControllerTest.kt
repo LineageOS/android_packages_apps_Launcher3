@@ -64,7 +64,8 @@ class TaskbarScrimViewControllerTest {
     @get:Rule(order = 3) val animatorTestRule = TaskbarAnimatorTestRule(this)
     @get:Rule(order = 4) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    val scrimViewController by taskbarUnitTestRule.delegate { it.taskbarScrimViewController }
+    private val scrimViewController by
+        taskbarUnitTestRule.delegate { it.taskbarScrimViewController }
 
     // Default animation duration.
     private val animationDuration: Long

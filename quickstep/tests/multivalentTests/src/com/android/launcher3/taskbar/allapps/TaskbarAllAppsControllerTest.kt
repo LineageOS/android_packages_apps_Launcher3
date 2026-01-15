@@ -46,8 +46,8 @@ class TaskbarAllAppsControllerTest {
     @get:Rule(order = 1) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
     @get:Rule(order = 2) val animatorTestRule = TaskbarAnimatorTestRule(this)
 
-    val allAppsController by taskbarUnitTestRule.delegate { it.taskbarAllAppsController }
-    val overlayController by taskbarUnitTestRule.delegate { it.taskbarOverlayController }
+    private val allAppsController by taskbarUnitTestRule.delegate { it.taskbarAllAppsController }
+    private val overlayController by taskbarUnitTestRule.delegate { it.taskbarOverlayController }
 
     @Test
     fun testToggle_once_showsAllApps() {

@@ -55,9 +55,9 @@ class TaskbarAutohideSuspendControllerTest {
     @get:Rule(order = 2) val taskbarModeRule = TaskbarModeRule(context)
     @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    val autohideSuspendController by
+    private val autohideSuspendController by
         taskbarUnitTestRule.delegate { it.taskbarAutohideSuspendController }
-    val stashController by taskbarUnitTestRule.delegate { it.taskbarStashController }
+    private val stashController by taskbarUnitTestRule.delegate { it.taskbarStashController }
 
     private var latestSuspendNotification: Boolean? = null
 

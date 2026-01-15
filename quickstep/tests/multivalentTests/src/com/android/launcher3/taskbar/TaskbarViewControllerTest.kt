@@ -74,7 +74,7 @@ class TaskbarViewControllerTest(deviceName: String) {
     @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create(deviceName)
     @get:Rule(order = 1) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    val taskbarViewController by taskbarUnitTestRule.delegate { it.taskbarViewController }
+    private val taskbarViewController by taskbarUnitTestRule.delegate { it.taskbarViewController }
 
     private val desktopVisibilityController: DesktopVisibilityController
         get() = DesktopVisibilityController.INSTANCE[context]

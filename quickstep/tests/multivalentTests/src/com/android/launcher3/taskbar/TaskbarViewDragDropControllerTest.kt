@@ -81,9 +81,9 @@ class TaskbarViewDragDropControllerTest {
     private val activityContext
         get() = taskbarUnitTestRule.activityContext
 
-    val taskbarViewController by taskbarUnitTestRule.delegate { it.taskbarViewController }
-    val taskbarDragController by taskbarUnitTestRule.delegate { it.taskbarDragController }
-    val taskbarViewDragDropController by
+    private val taskbarViewController by taskbarUnitTestRule.delegate { it.taskbarViewController }
+    private val taskbarDragController by taskbarUnitTestRule.delegate { it.taskbarDragController }
+    private val taskbarViewDragDropController by
         taskbarUnitTestRule.delegate { it.taskbarViewDragDropController }
 
     private val itemInfoCaptor = argumentCaptor<ItemInfo>()

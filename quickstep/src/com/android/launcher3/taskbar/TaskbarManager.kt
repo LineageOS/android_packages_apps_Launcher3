@@ -84,6 +84,8 @@ interface TaskbarManager {
 
     fun getTaskbarForDisplay(displayId: Int): TaskbarActivityContext?
 
+    @VisibleForTesting fun <T : Any?> getFromImplSync(provider: (TaskbarManagerImpl) -> T): T
+
     @VisibleForTesting fun getCurrentActivityContext(): TaskbarActivityContext?
 
     @VisibleForTesting fun recreateTaskbars()
@@ -103,10 +105,4 @@ interface TaskbarManager {
     @VisibleForTesting fun enableBlockingTimeoutDuringTests(enableBlockingTimeout: Boolean)
 
     @VisibleForTesting fun isTransient(): Boolean
-
-    @VisibleForTesting fun getTaskbarAllAppsScroll(): Int
-
-    @VisibleForTesting fun getTaskbarAllAppsTopPadding(): Int
-
-    @VisibleForTesting fun isImeDocked(): Boolean
 }

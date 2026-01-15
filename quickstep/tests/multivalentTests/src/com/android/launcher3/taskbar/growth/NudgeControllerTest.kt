@@ -42,7 +42,7 @@ class NudgeControllerTest {
 
     @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    val nudgeController by taskbarUnitTestRule.delegate { it.nudgeController }
+    private val nudgeController by taskbarUnitTestRule.delegate { it.nudgeController }
 
     private val taskbarContext: TaskbarActivityContext
         get() = taskbarUnitTestRule.activityContext

@@ -16,9 +16,7 @@
 
 package com.android.quickstep.dagger
 
-import androidx.annotation.VisibleForTesting
 import com.android.launcher3.taskbar.TaskbarManager
-import com.android.launcher3.taskbar.TaskbarManagerImpl
 import com.android.launcher3.taskbar.TaskbarManagerImplWrapper
 import com.android.launcher3.taskbar.TaskbarNavButtonController.TaskbarNavButtonCallbacks
 import com.android.launcher3.taskbar.navbutton.TaskbarNavButtonCallbacksImpl
@@ -50,8 +48,6 @@ interface SysUIConnectionComponent {
     val allAppsActionManager: AllAppsActionManager
     val taskbarManager: TaskbarManager
     val binder: TISBinder
-
-    @VisibleForTesting val taskbarImpl: TaskbarManagerImpl
 
     @Subcomponent.Builder
     interface Builder {

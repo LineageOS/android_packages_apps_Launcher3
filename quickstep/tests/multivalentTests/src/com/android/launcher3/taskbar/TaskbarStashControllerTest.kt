@@ -88,16 +88,17 @@ class TaskbarStashControllerTest {
     @get:Rule(order = 4) val animatorTestRule = TaskbarAnimatorTestRule(this)
     @get:Rule(order = 5) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    val stashController by taskbarUnitTestRule.delegate { it.taskbarStashController }
-    val viewController by taskbarUnitTestRule.delegate { it.taskbarViewController }
-    val stashedHandleViewController by
+    private val stashController by taskbarUnitTestRule.delegate { it.taskbarStashController }
+    private val viewController by taskbarUnitTestRule.delegate { it.taskbarViewController }
+    private val stashedHandleViewController by
         taskbarUnitTestRule.delegate { it.stashedHandleViewController }
-    val dragLayerController by taskbarUnitTestRule.delegate { it.taskbarDragLayerController }
-    val autohideSuspendController by
+    private val dragLayerController by
+        taskbarUnitTestRule.delegate { it.taskbarDragLayerController }
+    private val autohideSuspendController by
         taskbarUnitTestRule.delegate { it.taskbarAutohideSuspendController }
-    val bubbleBarViewController by
+    private val bubbleBarViewController by
         taskbarUnitTestRule.delegate { it.bubbleControllers.orElseThrow().bubbleBarViewController }
-    val bubbleStashController by
+    private val bubbleStashController by
         taskbarUnitTestRule.delegate { it.bubbleControllers.orElseThrow().bubbleStashController }
 
     private val desktopVisibilityController: DesktopVisibilityController

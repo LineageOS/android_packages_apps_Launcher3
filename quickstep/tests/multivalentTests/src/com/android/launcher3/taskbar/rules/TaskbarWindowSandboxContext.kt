@@ -62,6 +62,7 @@ import org.junit.runner.Description
 import org.junit.runners.model.Statement
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.stub
@@ -151,8 +152,8 @@ class TaskbarWindowSandboxContext private constructor(private val params: Sandbo
 
         // Mocks required for QuickstepKeyGestureEventsManager
         base.spyService(InputManager::class.java).stub {
-            doAnswer {}.whenever(mock).registerKeyGestureEventHandler(any(), any())
-            doAnswer {}.whenever(mock).unregisterKeyGestureEventHandler(any())
+            doNothing().whenever(mock).registerKeyGestureEventHandler(any(), any())
+            doNothing().whenever(mock).unregisterKeyGestureEventHandler(any())
         }
 
         systemUiProxy = spy(SystemUiProxy(this, MAIN_EXECUTOR, UI_HELPER_EXECUTOR))

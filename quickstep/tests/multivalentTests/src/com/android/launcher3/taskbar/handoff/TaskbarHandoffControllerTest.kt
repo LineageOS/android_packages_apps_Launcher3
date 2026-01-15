@@ -47,7 +47,7 @@ class TaskbarHandoffControllerTest {
     @get:Rule(order = 1) val context = TaskbarWindowSandboxContext.create()
     @get:Rule(order = 2) val taskbarModeRule = TaskbarModeRule(context)
     @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
-    val controller by taskbarUnitTestRule.delegate { it.taskbarHandoffController }
+    private val controller by taskbarUnitTestRule.delegate { it.taskbarHandoffController }
 
     @Before
     fun setUp() {

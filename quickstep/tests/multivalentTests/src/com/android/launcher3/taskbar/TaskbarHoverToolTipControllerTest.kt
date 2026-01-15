@@ -45,9 +45,9 @@ class TaskbarHoverToolTipControllerTest {
     @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()
     @get:Rule(order = 1) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    val autohideSuspendController by
+    private val autohideSuspendController by
         taskbarUnitTestRule.delegate { it.taskbarAutohideSuspendController }
-    val popupController by taskbarUnitTestRule.delegate { it.taskbarPopupController }
+    private val popupController by taskbarUnitTestRule.delegate { it.taskbarPopupController }
 
     private val taskbarContext: TaskbarActivityContext by taskbarUnitTestRule::activityContext
 

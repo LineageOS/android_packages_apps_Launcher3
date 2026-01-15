@@ -42,7 +42,7 @@ class OverflownAppsContainerControllerTest {
     @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()
     @get:Rule(order = 1) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    val viewController by taskbarUnitTestRule.delegate { it.taskbarViewController }
+    private val viewController by taskbarUnitTestRule.delegate { it.taskbarViewController }
     private lateinit var overflownController: OverflownAppsContainerController
 
     private lateinit var overflowIcon: TaskbarOverflowView

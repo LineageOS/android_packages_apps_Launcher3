@@ -59,7 +59,7 @@ class TaskbarEduTooltipControllerTest {
 
     @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    val taskbarEduTooltipController by
+    private val taskbarEduTooltipController by
         taskbarUnitTestRule.delegate { it.taskbarEduTooltipController }
     private val tooltipEduCombinator
         get() = taskbarEduTooltipController.tooltipEduCombinator
