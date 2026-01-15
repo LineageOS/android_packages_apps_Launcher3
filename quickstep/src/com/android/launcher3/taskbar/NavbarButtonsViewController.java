@@ -212,8 +212,6 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
             this::updateNavButtonTranslationY);
     private final AnimatedFloat mTaskbarNavButtonTranslationYForInAppDisplay = new AnimatedFloat(
             this::updateNavButtonTranslationY);
-    private final AnimatedFloat mTaskbarNavButtonTranslationYForIme = new AnimatedFloat(
-            this::updateNavButtonTranslationY);
     private float mLastSetNavButtonTranslationY;
     // Used for System UI state updates that should translate the nav button for in-app display.
     private final AnimatedFloat mNavButtonInAppDisplayProgressForSysui = new AnimatedFloat(
@@ -864,7 +862,6 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
             return;
         }
         final float normalTranslationY = mTaskbarNavButtonTranslationY.value;
-        final float imeAdjustmentTranslationY = mTaskbarNavButtonTranslationYForIme.value;
         TaskbarUIController uiController = mControllers.uiController;
         final float inAppDisplayAdjustmentTranslationY =
                 (uiController instanceof LauncherTaskbarUIController
@@ -872,7 +869,6 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
                         ? mTaskbarNavButtonTranslationYForInAppDisplay.value : 0;
 
         mLastSetNavButtonTranslationY = normalTranslationY
-                + imeAdjustmentTranslationY
                 + inAppDisplayAdjustmentTranslationY;
         mNavButtonsView.setTranslationY(mLastSetNavButtonTranslationY);
         notifyRecentsButtonPosition();
@@ -1253,8 +1249,6 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
                 + mTaskbarNavButtonTranslationY.value);
         pw.println(prefix + "\t\tmTaskbarNavButtonTranslationYForInAppDisplay="
                 + mTaskbarNavButtonTranslationYForInAppDisplay.value);
-        pw.println(prefix + "\t\tmTaskbarNavButtonTranslationYForIme="
-                + mTaskbarNavButtonTranslationYForIme.value);
         pw.println(prefix + "\t\tmTaskbarNavButtonDarkIntensity="
                 + mTaskbarNavButtonDarkIntensity.value);
         pw.println(prefix + "\t\tmSlideInViewVisibleNavButtonColorOverride="
