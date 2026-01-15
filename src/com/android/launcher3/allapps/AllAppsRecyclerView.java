@@ -15,6 +15,7 @@
  */
 package com.android.launcher3.allapps;
 
+import static com.android.launcher3.MotionEventsUtils.isTrackpadMotionEvent;
 import static com.android.launcher3.logger.LauncherAtom.ContainerInfo;
 import static com.android.launcher3.logger.LauncherAtom.SearchResultContainer;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_ALLAPPS_PERSONAL_SCROLLED_DOWN;
@@ -32,7 +33,9 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.InputDevice;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 
@@ -128,6 +131,42 @@ public class AllAppsRecyclerView extends FastScrollRecyclerView {
     public void onSearchResultsChanged() {
         // Always scroll the view to the top so the user can see the changed results
         scrollToTop();
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent event) {
+        if (!shouldIgnoreMouseClickAndDrag(event)) {
+            return super.onInterceptTouchEvent(event);
+        }
+
+        if (event.getAction() != MotionEvent.ACTION_DOWN) {
+            MotionEvent cancelEvent = MotionEvent.obtain(event);
+            cancelEvent.setAction(MotionEvent.ACTION_CANCEL);
+            super.onInterceptTouchEvent(cancelEvent);
+            cancelEvent.recycle();
+        }
+        // Don't intercept mouse click or drag, so it can be be handled by child views.
+        return false;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (!shouldIgnoreMouseClickAndDrag(event)) {
+            return super.onTouchEvent(event);
+        }
+        if (event.getAction() != MotionEvent.ACTION_DOWN) {
+            MotionEvent cancelEvent = MotionEvent.obtain(event);
+            cancelEvent.setAction(MotionEvent.ACTION_CANCEL);
+            super.onTouchEvent(cancelEvent);
+            cancelEvent.recycle();
+        }
+        // Consume mouse click and drag events to prevent them from propagating to scroll.
+        return true;
+    }
+
+    private boolean shouldIgnoreMouseClickAndDrag(MotionEvent ev) {
+        return Flags.enableCursorDrivenWorkflows() && !isTrackpadMotionEvent(ev)
+                && ev.isFromSource(InputDevice.SOURCE_MOUSE);
     }
 
     @Override
