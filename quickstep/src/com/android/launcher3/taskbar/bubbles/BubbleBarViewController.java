@@ -90,6 +90,8 @@ public class BubbleBarViewController {
     private final BubbleBarView mBarView;
     private int mIconSize;
     private int mBubbleBarPadding;
+    private int mExpandedSpacing;
+    private int mBackgroundMargin;
     private final int mDragElevation;
 
     // Initialized in init.
@@ -905,18 +907,27 @@ public class BubbleBarViewController {
     public void onBubbleBarConfigurationChanged(boolean animate) {
         int newIconSize;
         int newPadding;
+        int newExpandedSpacing;
+        int newBackgroundMargin;
         Resources res = mActivity.getResources();
         if (mBubbleStashController.isBubblesShowingOnHome()
                 || mBubbleStashController.isTransientTaskBar()) {
             newIconSize = getBubbleBarIconSizeFromDeviceProfile(res);
             newPadding = getBubbleBarPaddingFromDeviceProfile(res);
+            newExpandedSpacing = res.getDimensionPixelSize(R.dimen.bubblebar_expanded_icon_spacing);
+            newBackgroundMargin = 0;
         } else {
             // the bubble bar is shown inside the persistent task bar, use preset sizes
             newIconSize = res.getDimensionPixelSize(R.dimen.bubblebar_icon_size_persistent_taskbar);
             newPadding = res.getDimensionPixelSize(
                     R.dimen.bubblebar_icon_spacing_persistent_taskbar);
+            newExpandedSpacing = res.getDimensionPixelSize(
+                    R.dimen.bubblebar_expanded_icon_spacing_persistent_taskbar);
+            newBackgroundMargin = res.getDimensionPixelSize(
+                    R.dimen.bubblebar_background_margin_persistent_taskbar);
         }
-        updateBubbleBarIconSizeAndPadding(newIconSize, newPadding, animate);
+        updateBubbleBarDimensions(newIconSize, newPadding, newExpandedSpacing, newBackgroundMargin,
+                animate);
     }
 
     private int getBubbleBarIconSizeFromDeviceProfile(Resources res) {
@@ -957,14 +968,21 @@ public class BubbleBarViewController {
                 res.getDimensionPixelSize(R.dimen.bubblebar_icon_spacing);
     }
 
-    private void updateBubbleBarIconSizeAndPadding(int iconSize, int padding, boolean animate) {
-        if (mIconSize == iconSize && mBubbleBarPadding == padding) return;
+    private void updateBubbleBarDimensions(int iconSize, int padding, int expandedSpacing,
+            int backgroundMargin, boolean animate) {
+        if (mIconSize == iconSize && mBubbleBarPadding == padding
+                && mExpandedSpacing == expandedSpacing && mBackgroundMargin == backgroundMargin) {
+            return;
+        }
         mIconSize = iconSize;
         mBubbleBarPadding = padding;
+        mExpandedSpacing = expandedSpacing;
+        mBackgroundMargin = backgroundMargin;
         if (animate) {
-            mBarView.animateBubbleBarIconSize(iconSize, padding);
+            mBarView.animateBubbleBarDimensions(iconSize, padding, expandedSpacing,
+                    backgroundMargin);
         } else {
-            mBarView.setIconSizeAndPadding(iconSize, padding);
+            mBarView.setBubbleBarDimensions(iconSize, padding, expandedSpacing, backgroundMargin);
         }
     }
 
@@ -1015,7 +1033,18 @@ public class BubbleBarViewController {
         int transientPadding = getBubbleBarPaddingFromDeviceProfile(res,
                 mActivity.getTransientTaskbarProfile());
         float pinningPadding = mapRange(pinningProgress, transientPadding, persistentPadding);
-        mBarView.setIconSizeAndPaddingForPinning(pinningIconSize, pinningPadding);
+
+        int persistentSpacing = res.getDimensionPixelSize(
+                R.dimen.bubblebar_expanded_icon_spacing_persistent_taskbar);
+        int transientSpacing = res.getDimensionPixelSize(R.dimen.bubblebar_expanded_icon_spacing);
+        float pinningSpacing = mapRange(pinningProgress, transientSpacing, persistentSpacing);
+
+        int persistentMargin = res.getDimensionPixelSize(
+                R.dimen.bubblebar_background_margin_persistent_taskbar);
+        int transientMargin = 0;
+        float pinningMargin = mapRange(pinningProgress, transientMargin, persistentMargin);
+        mBarView.setDimensionsForPinning(pinningIconSize, pinningPadding, pinningSpacing,
+                pinningMargin);
     }
 
     /**

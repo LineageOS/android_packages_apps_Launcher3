@@ -538,8 +538,10 @@
     <dimen name="bubblebar_icon_overlap">12dp</dimen>
     <dimen name="bubblebar_icon_spacing">6dp</dimen>
     <dimen name="bubblebar_icon_spacing_large">8dp</dimen>
-    <dimen name="bubblebar_icon_spacing_persistent_taskbar">@dimen/bubblebar_icon_spacing</dimen>
+    <dimen name="bubblebar_icon_spacing_persistent_taskbar">10dp</dimen>
     <dimen name="bubblebar_expanded_icon_spacing">12dp</dimen>
+    <dimen name="bubblebar_expanded_icon_spacing_persistent_taskbar">20dp</dimen>
+    <dimen name="bubblebar_background_margin_persistent_taskbar">4dp</dimen>
     <dimen name="bubblebar_icon_elevation">1dp</dimen>
     <dimen name="bubblebar_transient_taskbar_min_distance">12dp</dimen>
 
