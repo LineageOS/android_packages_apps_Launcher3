@@ -170,6 +170,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -2221,14 +2222,17 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                         requireNonNull(HomeScreenFilesUtilsKt.getHomeScreenFile(dropOverInfo))
                                 .getDisplayName();
 
-                final CompletableFuture<Void> unused =
+                final List<CompletableFuture<Boolean>> results =
                         HomeScreenFilesProvider.INSTANCE.get(mLauncher)
-                                .moveToHomeScreen(uriList, relativeFolderPath)
-                                .get(0)
-                                .handle((result, throwable) -> {
-                                    // TODO(b/463389684): Notify user on failure.
-                                    return null;
-                                });
+                                .moveToHomeScreen(uriList, relativeFolderPath);
+
+                runOnFirstFailure(
+                        results,
+                        () -> mLauncher.runOnUiThread(() ->
+                                Toast.makeText(
+                                        mLauncher,
+                                        R.string.something_went_wrong,
+                                        Toast.LENGTH_SHORT).show()));
 
                 if (mDragInfo != null) {
                     getParentCellLayoutForView(mDragInfo.cell).removeView(mDragInfo.cell);
@@ -3234,21 +3238,29 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                 HomeScreenFilesProvider provider = HomeScreenFilesProvider.INSTANCE.get(mLauncher);
                 List<CompletableFuture<Boolean>> results = provider.moveToHomeScreen(uriList);
 
+                runOnFirstFailure(
+                        results,
+                        () -> mLauncher.runOnUiThread(() ->
+                                Toast.makeText(
+                                        mLauncher,
+                                        R.string.something_went_wrong,
+                                        Toast.LENGTH_SHORT).show()));
+
                 // NOTE: On failure to move the first dropped URI, we must explicitly remove its
                 // associated workspace item to keep launcher state in sync with file system state.
-                CompletableFuture<Void> unused =
-                        results.get(0).handle((result, throwable) -> runOnUiThread(() -> {
+                results.get(0).whenComplete((result, throwable) ->
+                        mLauncher.runOnUiThread(() -> {
                             if (throwable != null || !result) {
                                 mLauncher.removeItem(firstItemView, firstItemInfo, true);
-                                // TODO(b/463389684): Notify user on failure.
                             }
                         }));
 
                 // NOTE: On completion of all move attempts we can release any held URI permissions.
-                unused =
-                        CompletableFuture.allOf(results.toArray(new CompletableFuture[0])).handle(
-                                (result, throwable) -> runOnUiThread(() -> {
-                                    DragAndDropPermissions permissions = dragInfo.getPermissions();
+                CompletableFuture.allOf(results.toArray(new CompletableFuture[0]))
+                        .whenComplete((result, throwable) ->
+                                mLauncher.runOnUiThread(() -> {
+                                    final DragAndDropPermissions permissions =
+                                            dragInfo.getPermissions();
                                     if (permissions != null) {
                                         permissions.release();
                                     }
@@ -3870,9 +3882,15 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         }
     }
 
-    private Void runOnUiThread(Runnable runnable) {
-        mLauncher.runOnUiThread(runnable);
-        return null;
+    private void runOnFirstFailure(List<CompletableFuture<Boolean>> futures, Runnable runnable) {
+        final AtomicBoolean failure = new AtomicBoolean(false);
+        for (final CompletableFuture<Boolean> future : futures) {
+            future.whenComplete((result, throwable) -> {
+                if ((throwable != null || !result) && failure.compareAndSet(false, true)) {
+                    runnable.run();
+                }
+            });
+        }
     }
 
     /** Interface implemented by a view to indicate that it can scroll horizontally */
