@@ -254,7 +254,7 @@ object InputConsumerUtils {
                         )
                 }
             }
-            if (Flags.enableBubblesLongPressNavHandle()) {
+            if (Flags.fixBubblesLongPressNavHandle()) {
                 // Create bubbles input consumer before NavHandleLongPressInputConsumer.
                 // This allows for nav handle to fall back to bubbles.
                 if (deviceState.isBubblesExpanded) {
@@ -304,7 +304,7 @@ object InputConsumerUtils {
                     )
             }
 
-            if (!Flags.enableBubblesLongPressNavHandle()) {
+            if (!Flags.fixBubblesLongPressNavHandle()) {
                 // Continue overriding nav handle input consumer with bubbles
                 if (deviceState.isBubblesExpanded) {
                     reasonString =
