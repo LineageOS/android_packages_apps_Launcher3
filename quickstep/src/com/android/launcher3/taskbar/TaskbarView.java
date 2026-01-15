@@ -972,7 +972,9 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
 
     private void updateRecents(List<GroupTask> recentTasks, int hotseatSize) {
         traceBegin(TRACE_TAG_APP, "TaskbarView#updateRecents");
-        boolean supportsOverflow = ENABLE_TASKBAR_OVERFLOW.isTrue() && recentTasks.size() > 1;
+        boolean supportsOverflow = ENABLE_TASKBAR_OVERFLOW.isTrue()
+                && mActivityContext.isTaskbarShowingDesktopTasks()
+                && recentTasks.size() > 1;
         int overflowSize = 0;
         boolean hasOverflow = false;
         int indexOfIconInOverfow = 0;

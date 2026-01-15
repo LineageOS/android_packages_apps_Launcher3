@@ -575,6 +575,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     @Test
     fun testUpdateItems_moreThanMaxRecents_overflowShownBeforeRecents() {
+        whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
         val recentsSize = maxShownRecents + 2
         runOnTaskbarUiThreadSync {
             taskbarView.updateItems(emptyArray(), createRecents(recentsSize), emptyList())
@@ -598,6 +599,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     @ForceRtl
     fun testUpdateItems_rtl_moreThanMaxRecents_overflowShownAfterRecents() {
+        whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
         val recentsSize = maxShownRecents + 2
         runOnTaskbarUiThreadSync {
             taskbarView.updateItems(emptyArray(), createRecents(recentsSize), emptyList())
@@ -609,6 +611,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     @Test
     fun testUpdateItems_moreThanMaxRecentsWithHotseat_fewerRecentsShown() {
+        whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
         val hotseatSize = 4
         val recentsSize = maxShownRecents + 2
         runOnTaskbarUiThreadSync {
@@ -627,6 +630,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     @ForceRtl
     fun testUpdateItems_rtl_moreThanMaxRecentsWithHotseat_fewerRecentsShown() {
+        whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
         val hotseatSize = 4
         val recentsSize = maxShownRecents + 2
         runOnTaskbarUiThreadSync {
@@ -794,6 +798,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     @EnableFlags(FLAG_ENABLE_OVERFLOW_BUTTON_FOR_TASKBAR_PINNED_ITEMS)
     fun testUpdateItems_hotseatAndRecentsOverflow() {
+        whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
         val recentsSize = maxShownRecents + 2
         runOnTaskbarUiThreadSync {
             taskbarView.updateItems(
@@ -817,6 +822,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @EnableFlags(FLAG_ENABLE_OVERFLOW_BUTTON_FOR_TASKBAR_PINNED_ITEMS)
     @ForceRtl
     fun testUpdateItems_rtl_hotseatAndRecentsOverflow() {
+        whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
         val recentsSize = maxShownRecents + 2
         runOnTaskbarUiThreadSync {
             taskbarView.updateItems(
@@ -838,6 +844,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     @Test
     fun testAnimateToOverflowOnOverlay_triggersAnimationAndResetsState() {
+        whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
         runOnTaskbarUiThreadSync {
             taskbarView.updateItems(emptyArray(), createRecents(maxShownRecents), emptyList())
             // Add one more recent app to trigger the overflow animation.
@@ -867,6 +874,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     @Test
     fun testAnimateFromOverflowOnOverlay_triggersAnimationAndResetsState() {
+        whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
         val initialRecents = createRecents(maxShownRecents + 1)
         runOnTaskbarUiThreadSync {
             taskbarView.updateItems(emptyArray(), initialRecents, emptyList())
@@ -895,6 +903,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     @ForceRtl
     fun testAnimateFromOverflowOnOverlay_rtl_triggersAnimationAndResetsState() {
+        whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
         val initialRecents = createRecents(maxShownRecents + 1)
         runOnTaskbarUiThreadSync {
             taskbarView.updateItems(emptyArray(), initialRecents, emptyList())
