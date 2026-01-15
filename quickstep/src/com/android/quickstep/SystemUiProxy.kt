@@ -46,7 +46,6 @@ import android.window.DesktopExperienceFlags
 import android.window.IOnBackInvokedCallback
 import android.window.RemoteTransition
 import android.window.TaskSnapshot
-import android.window.TransitionFilter
 import android.window.TransitionInfo
 import android.window.WindowContainerTransaction
 import androidx.annotation.MainThread
@@ -99,6 +98,7 @@ import com.android.wm.shell.recents.IRecentTasksListener
 import com.android.wm.shell.recents.IRecentsAnimationController
 import com.android.wm.shell.recents.IRecentsAnimationRunner
 import com.android.wm.shell.shared.GroupedTaskInfo
+import com.android.wm.shell.shared.IOverviewOverlayLeashInvalidationCallback
 import com.android.wm.shell.shared.IShellTransitions
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation.UpdateSource
@@ -1030,6 +1030,20 @@ constructor(
             return shellTransitions?.getOverviewOverlayContainer(displayId)
         }
         return null
+    }
+
+    fun registerOverviewOverlayLeashInvalidationCallback(
+        displayId: Int,
+        callback: IOverviewOverlayLeashInvalidationCallback,
+    ) {
+        shellTransitions?.registerOverviewOverlayLeashInvalidationCallback(displayId, callback)
+    }
+
+    fun unregisterOverviewOverlayLeashInvalidationListener(
+        displayId: Int,
+        callback: IOverviewOverlayLeashInvalidationCallback,
+    ) {
+        shellTransitions?.unregisterOverviewOverlayLeashInvalidationCallback(displayId, callback)
     }
 
     /**

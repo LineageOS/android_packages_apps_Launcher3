@@ -405,7 +405,7 @@ public class TouchInteractionHandler extends ContextWrapper {
             }
         }
         mRecentsWindowManagerRepository.forEach(
-                /* createIfAbsent= */ false, RecentsWindowManager::onOverviewTargetChanged);
+                /* createIfAbsent= */ false, RecentsWindowManager::cleanUpSurfaceControlViewHost);
         if (isHomeAndOverviewSame) {
             TaskStackChangeListeners.getInstance().unregisterTaskStackListener(
                     mHomeIntentStartedListener);

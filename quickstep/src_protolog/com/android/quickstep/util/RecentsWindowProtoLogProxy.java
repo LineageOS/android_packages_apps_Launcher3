@@ -92,4 +92,18 @@ public class RecentsWindowProtoLogProxy {
         }
         logToLogcatIfNeeded("Cleaning up recents window: isShowing=%b", isShowing);
     }
+
+    public static void logOnOverviewOverlayLeashInvalidated() {
+        if (willProtoLog()) {
+            ProtoLog.d(PROTO_LOG_GROUP, "onOverviewOverlayLeashInvalidated");
+        }
+        logToLogcatIfNeeded("onOverviewOverlayLeashInvalidated");
+    }
+
+    public static void logCleanUpSurfaceControlViewHostInternal() {
+        if (willProtoLog()) {
+            ProtoLog.d(PROTO_LOG_GROUP, "cleanUpSurfaceControlViewHostInternal");
+        }
+        logToLogcatIfNeeded("cleanUpSurfaceControlViewHostInternal");
+    }
 }
