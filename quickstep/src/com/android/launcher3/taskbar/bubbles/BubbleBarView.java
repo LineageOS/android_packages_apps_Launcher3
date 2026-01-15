@@ -1604,6 +1604,20 @@ public class BubbleBarView extends FrameLayout {
         return super.onInterceptTouchEvent(ev);
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        // this touch event handler is in place to increase the touch targets around the bubbles for
+        // accessibility
+        if (isExpanded() && !isExpanding()) {
+            float iconAndPadding = mIconSize + mExpandedBarIconsSpacing;
+            int bubbleIndex = (int) (ev.getX() / iconAndPadding);
+            if (bubbleIndex < getChildCount()) {
+                return getChildAt(bubbleIndex).dispatchTouchEvent(ev);
+            }
+        }
+        return super.onTouchEvent(ev);
+    }
+
     private boolean hasOverflow() {
         // Overflow is always the last bubble
         View lastChild = getChildAt(getChildCount() - 1);

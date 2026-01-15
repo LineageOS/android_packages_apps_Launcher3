@@ -26,6 +26,7 @@ import static com.android.launcher3.taskbar.TaskbarPinningController.PINNING_TRA
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;
+import android.annotation.SuppressLint;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -1094,6 +1095,7 @@ public class BubbleBarViewController {
     }
 
     /** Shows or hides the overflow view. */
+    @SuppressLint("ClickableViewAccessibility")
     public void showOverflow(boolean showOverflow) {
         if (mOverflowAdded == showOverflow) return;
         mOverflowAdded = showOverflow;
@@ -1101,6 +1103,9 @@ public class BubbleBarViewController {
             mBarView.addBubble(mOverflowBubble.getView(), /* suppressAnimation= */ true);
             mOverflowBubble.getView().setOnClickListener(mBubbleClickListener);
             mOverflowBubble.getView().setController(mBubbleViewController);
+            // the drag controller sets up touch listener on the overflow so that click events
+            // dispatched from bubble bar view can trigger the click listener on the overflow
+            mBubbleDragController.setupBubbleView(mOverflowBubble.getView());
         } else {
             mBarView.removeBubble(mOverflowBubble.getView());
             mOverflowBubble.getView().setOnClickListener(null);
