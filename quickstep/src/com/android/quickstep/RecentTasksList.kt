@@ -27,6 +27,7 @@ import android.util.Log
 import android.util.SparseBooleanArray
 import android.view.Display
 import androidx.annotation.VisibleForTesting
+import androidx.annotation.WorkerThread
 import androidx.core.content.getSystemService
 import com.android.launcher3.Flags.enableLaterIsLockedCheck
 import com.android.launcher3.Flags.hideAutomatedTasksInOverview
@@ -35,10 +36,12 @@ import com.android.launcher3.concurrent.annotations.LightweightBackground
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority.UI
 import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.dagger.ApplicationContext
+import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.LooperExecutor
 import com.android.quickstep.RecentsModel.RecentTasksChangedListener
 import com.android.quickstep.SystemUiProxy.GetRecentTasksException
+import com.android.quickstep.recents.data.RecentTasksKeysDataSource
 import com.android.quickstep.util.DesktopTask
 import com.android.quickstep.util.GroupTask
 import com.android.quickstep.util.SingleTask
@@ -59,6 +62,7 @@ import java.util.function.Predicate
 import javax.inject.Inject
 
 /** Manages the recent task list from the system, caching it as necessary. */
+@LauncherAppSingleton
 class RecentTasksList
 @Inject
 constructor(
@@ -70,7 +74,7 @@ constructor(
     private val automationRepository: AutomationRepository,
     @LightweightBackground(UI) private val lightweightBackgroundExecutor: Executor,
     private val desktopState: DesktopState,
-) {
+) : RecentTasksKeysDataSource {
 
     private val keyguardManager: KeyguardManager? = context.getSystemService()
     private val virtualDeviceManager: VirtualDeviceManager? = context.getSystemService()
@@ -141,13 +145,18 @@ constructor(
     }
 
     /** Fetches the task keys skipping any local cache. */
-    fun getTaskKeys(numTasks: Int, callback: Consumer<ArrayList<GroupTask>>) {
+    fun getTaskKeys(numTasks: Int, callback: Consumer<List<GroupTask>>) {
         // Kick off task loading in the background
         lightweightBackgroundExecutor.execute {
-            val tasks = loadTasksInBackground(numTasks, -1, true /* loadKeysOnly */)
+            val tasks = getTaskKeys(numTasks)
             mainThreadExecutor.execute { callback.accept(tasks) }
         }
     }
+
+    /** Fetches the task keys skipping any local cache. */
+    @WorkerThread
+    override fun getTaskKeys(numTasks: Int): List<GroupTask> =
+        loadTasksInBackground(numTasks, requestId = -1, loadKeysOnly = true)
 
     /**
      * Asynchronously fetches the list of recent tasks, reusing cached list if available.

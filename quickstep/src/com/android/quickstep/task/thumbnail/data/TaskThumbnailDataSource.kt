@@ -28,6 +28,10 @@ interface TaskThumbnailDataSource {
 
     suspend fun getThumbnail(task: Task, requestResolution: RequestResolution): ThumbnailData?
 
+    fun getCacheSize(): Int
+
+    fun updateCacheSizeAndRemoveExcess(): Boolean
+
     enum class RequestResolution {
         LOW_RES,
         HIGH_RES,
