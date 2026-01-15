@@ -37,7 +37,6 @@ import com.android.launcher3.taskbar.rules.SandboxParams
 import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.taskbar.rules.TaskbarSandboxComponent
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
-import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.util.IntSparseArrayMap
 import com.android.launcher3.util.TestUtil.getOnTaskbarUiThread
@@ -82,14 +81,15 @@ class TaskbarViewDragDropControllerTest {
                 )
         )
     @get:Rule(order = 1) val animatorTestRule = TaskbarAnimatorTestRule(this)
-    @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
+    @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
     private val activityContext
         get() = taskbarUnitTestRule.activityContext
 
-    @InjectController lateinit var taskbarViewController: TaskbarViewController
-    @InjectController lateinit var taskbarDragController: TaskbarDragController
-    @InjectController lateinit var taskbarViewDragDropController: TaskbarViewDragDropController
+    val taskbarViewController by taskbarUnitTestRule.delegate { it.taskbarViewController }
+    val taskbarDragController by taskbarUnitTestRule.delegate { it.taskbarDragController }
+    val taskbarViewDragDropController by
+        taskbarUnitTestRule.delegate { it.taskbarViewDragDropController }
 
     private val itemInfoCaptor = argumentCaptor<ItemInfo>()
 

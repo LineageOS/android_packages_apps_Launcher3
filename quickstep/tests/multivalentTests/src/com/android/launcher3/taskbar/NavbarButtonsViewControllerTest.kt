@@ -25,7 +25,6 @@ import com.android.launcher3.taskbar.rules.TaskbarModeRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.THREE_BUTTONS
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
-import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.testutil.rule.LazyInitRule.Companion.lazyRule
 import com.android.launcher3.util.UserIconInfo
@@ -46,9 +45,10 @@ class NavbarButtonsViewControllerTest {
     @get:Rule(order = 2) val context = TaskbarWindowSandboxContext.create()
     @get:Rule(order = 3) val mockUsers = lazyRule { MockUsersRule(context.base) }
     @get:Rule(order = 4) val taskbarModeRule = TaskbarModeRule(context)
-    @get:Rule(order = 5) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
+    @get:Rule(order = 5) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    @InjectController lateinit var navbarButtonsViewController: NavbarButtonsViewController
+    val navbarButtonsViewController by
+        taskbarUnitTestRule.delegate { it.navbarButtonsViewController }
 
     @Test
     @TaskbarMode(THREE_BUTTONS)

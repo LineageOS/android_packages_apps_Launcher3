@@ -81,8 +81,6 @@ public class DatabaseHelper extends SQLiteOpenHelper implements
     private final Runnable mOnEmptyDbCreateCallback;
     private final AtomicInteger mMaxItemId = new AtomicInteger(-1);
 
-    public boolean mHotseatRestoreTableExists;
-
     /**
      * Constructor used in tests and for restore.
      */
@@ -109,13 +107,6 @@ public class DatabaseHelper extends SQLiteOpenHelper implements
         // Fresh and clean launcher DB.
         mMaxItemId.set(initializeMaxItemId(db));
         mOnEmptyDbCreateCallback.run();
-    }
-
-    public void onAddOrDeleteOp() {
-        if (mHotseatRestoreTableExists) {
-            dropTable(getWritableDatabase(), Favorites.HYBRID_HOTSEAT_BACKUP_TABLE);
-            mHotseatRestoreTableExists = false;
-        }
     }
 
     private long getDefaultUserSerial() {

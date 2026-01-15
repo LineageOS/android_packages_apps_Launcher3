@@ -181,11 +181,6 @@ public class LauncherSettings {
         public static final String TABLE_NAME = "favorites";
 
         /**
-         * Backup table created when user hotseat is moved to workspace for hybrid hotseat
-         */
-        public static final String HYBRID_HOTSEAT_BACKUP_TABLE = "hotseat_restore_backup";
-
-        /**
          * Temporary table used specifically for multi-db grid migrations
          */
         public static final String TMP_TABLE = "favorites_tmp";

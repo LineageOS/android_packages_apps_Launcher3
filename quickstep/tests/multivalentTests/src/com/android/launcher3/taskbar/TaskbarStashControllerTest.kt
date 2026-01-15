@@ -51,8 +51,6 @@ import com.android.launcher3.taskbar.TaskbarStashController.TASKBAR_STASH_DURATI
 import com.android.launcher3.taskbar.TaskbarStashController.TRANSIENT_TASKBAR_STASH_ALPHA_DURATION
 import com.android.launcher3.taskbar.TaskbarStashController.TRANSIENT_TASKBAR_STASH_DURATION
 import com.android.launcher3.taskbar.TaskbarViewController.ALPHA_INDEX_STASH
-import com.android.launcher3.taskbar.bubbles.BubbleBarViewController
-import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController
 import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.PINNED
@@ -60,7 +58,6 @@ import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.THREE_BUTTONS
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.TRANSIENT
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
-import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.UserSetupMode
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.util.Executors.getTaskbarUiThread
@@ -89,15 +86,19 @@ class TaskbarStashControllerTest {
     @get:Rule(order = 1) val context = TaskbarWindowSandboxContext.create()
     @get:Rule(order = 2) val taskbarModeRule = TaskbarModeRule(context)
     @get:Rule(order = 4) val animatorTestRule = TaskbarAnimatorTestRule(this)
-    @get:Rule(order = 5) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
+    @get:Rule(order = 5) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    @InjectController lateinit var stashController: TaskbarStashController
-    @InjectController lateinit var viewController: TaskbarViewController
-    @InjectController lateinit var stashedHandleViewController: StashedHandleViewController
-    @InjectController lateinit var dragLayerController: TaskbarDragLayerController
-    @InjectController lateinit var autohideSuspendController: TaskbarAutohideSuspendController
-    @InjectController lateinit var bubbleBarViewController: BubbleBarViewController
-    @InjectController lateinit var bubbleStashController: BubbleStashController
+    val stashController by taskbarUnitTestRule.delegate { it.taskbarStashController }
+    val viewController by taskbarUnitTestRule.delegate { it.taskbarViewController }
+    val stashedHandleViewController by
+        taskbarUnitTestRule.delegate { it.stashedHandleViewController }
+    val dragLayerController by taskbarUnitTestRule.delegate { it.taskbarDragLayerController }
+    val autohideSuspendController by
+        taskbarUnitTestRule.delegate { it.taskbarAutohideSuspendController }
+    val bubbleBarViewController by
+        taskbarUnitTestRule.delegate { it.bubbleControllers.orElseThrow().bubbleBarViewController }
+    val bubbleStashController by
+        taskbarUnitTestRule.delegate { it.bubbleControllers.orElseThrow().bubbleStashController }
 
     private val desktopVisibilityController: DesktopVisibilityController
         get() = DesktopVisibilityController.INSTANCE[context]

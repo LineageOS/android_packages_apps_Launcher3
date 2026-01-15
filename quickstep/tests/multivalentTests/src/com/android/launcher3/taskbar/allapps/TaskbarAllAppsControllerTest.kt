@@ -29,10 +29,8 @@ import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.notification.NotificationKeyData
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
-import com.android.launcher3.taskbar.overlay.TaskbarOverlayController
 import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
-import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.util.PackageUserKey
 import com.android.launcher3.util.TestUtil
@@ -45,11 +43,11 @@ import org.junit.runner.RunWith
 class TaskbarAllAppsControllerTest {
 
     @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()
-    @get:Rule(order = 1) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
+    @get:Rule(order = 1) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
     @get:Rule(order = 2) val animatorTestRule = TaskbarAnimatorTestRule(this)
 
-    @InjectController lateinit var allAppsController: TaskbarAllAppsController
-    @InjectController lateinit var overlayController: TaskbarOverlayController
+    val allAppsController by taskbarUnitTestRule.delegate { it.taskbarAllAppsController }
+    val overlayController by taskbarUnitTestRule.delegate { it.taskbarOverlayController }
 
     @Test
     fun testToggle_once_showsAllApps() {

@@ -29,7 +29,6 @@ import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatItems
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
-import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.util.TestUtil.getOnTaskbarUiThread
 import com.google.common.truth.Truth.assertThat
@@ -41,9 +40,9 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class OverflownAppsContainerControllerTest {
     @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()
-    @get:Rule(order = 1) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
+    @get:Rule(order = 1) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    @InjectController lateinit var viewController: TaskbarViewController
+    val viewController by taskbarUnitTestRule.delegate { it.taskbarViewController }
     private lateinit var overflownController: OverflownAppsContainerController
 
     private lateinit var overflowIcon: TaskbarOverflowView

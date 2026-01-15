@@ -49,7 +49,6 @@ import com.android.launcher3.taskbar.TaskbarViewTestUtil.createSplitTask
 import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.ForceRtl
-import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext.Companion.getDeviceParams
 import com.android.launcher3.util.TestUtil.getOnTaskbarUiThread
@@ -88,11 +87,11 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @get:Rule(order = 0) val animatorTestRule = TaskbarAnimatorTestRule(this)
     @get:Rule(order = 1) val setFlagsRule = SetFlagsRule(flags)
     @get:Rule(order = 2) val context = TaskbarWindowSandboxContext.create(deviceName)
-    @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
+    @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
     private val activityContext by taskbarUnitTestRule::activityContext
 
-    @InjectController lateinit var viewController: TaskbarViewController
+    val viewController by taskbarUnitTestRule.delegate { it.taskbarViewController }
     private lateinit var taskbarView: TaskbarView
 
     private val pinnedHitRectBuffer: Int
@@ -1131,11 +1130,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
         val callbacks =
             spy(
                 getOnTaskbarUiThread {
-                    TaskbarViewCallbacks(
-                        activityContext,
-                        activityContext.controllers,
-                        taskbarView,
-                    )
+                    TaskbarViewCallbacks(activityContext, activityContext.controllers, taskbarView)
                 }
             )
         taskbarView.init(callbacks)

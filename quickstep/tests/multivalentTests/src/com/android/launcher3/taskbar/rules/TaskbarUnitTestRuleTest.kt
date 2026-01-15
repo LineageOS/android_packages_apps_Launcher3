@@ -16,24 +16,15 @@
 
 package com.android.launcher3.taskbar.rules
 
-import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.Utilities
 import com.android.launcher3.taskbar.TaskbarActivityContext
-import com.android.launcher3.taskbar.TaskbarKeyguardController
-import com.android.launcher3.taskbar.TaskbarManager
-import com.android.launcher3.taskbar.TaskbarStashController
-import com.android.launcher3.taskbar.bubbles.BubbleBarController
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.ForceRtl
-import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.NavBarKidsMode
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.UserSetupMode
-import com.android.wm.shell.Flags
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertThrows
-import org.junit.Assert.fail
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.Description
@@ -63,112 +54,9 @@ class TaskbarUnitTestRuleTest {
 
     @Test
     fun testTeardown_taskbarDestroyed() {
-        val testRule = TaskbarUnitTestRule(this, context)
+        val testRule = TaskbarUnitTestRule(context)
         testRule.apply(EMPTY_STATEMENT, DESCRIPTION).evaluate()
         assertThrows(RuntimeException::class.java) { testRule.activityContext }
-    }
-
-    @Test
-    fun testInjectController_validControllerType_isInjected() {
-        val testClass =
-            object {
-                @InjectController lateinit var controller: TaskbarStashController
-                val isInjected: Boolean
-                    get() = ::controller.isInitialized
-            }
-
-        TaskbarUnitTestRule(testClass, context).apply(EMPTY_STATEMENT, DESCRIPTION).evaluate()
-
-        onSetup(TaskbarUnitTestRule(testClass, context)) {
-            assertThat(testClass.isInjected).isTrue()
-        }
-    }
-
-    @Test
-    fun testInjectController_multipleControllers_areInjected() {
-        val testClass =
-            object {
-                @InjectController lateinit var controller1: TaskbarStashController
-                @InjectController lateinit var controller2: TaskbarKeyguardController
-                val areInjected: Boolean
-                    get() = ::controller1.isInitialized && ::controller2.isInitialized
-            }
-
-        onSetup(TaskbarUnitTestRule(testClass, context)) {
-            assertThat(testClass.areInjected).isTrue()
-        }
-    }
-
-    @Test
-    fun testInjectController_invalidControllerType_exceptionThrown() {
-        val testClass =
-            object {
-                @InjectController lateinit var manager: TaskbarManager // Not a controller.
-            }
-
-        // We cannot use #assertThrows because we also catch an assumption violated exception
-        // when running #evaluate on devices that do not support Taskbar.
-        try {
-            TaskbarUnitTestRule(testClass, context).apply(EMPTY_STATEMENT, DESCRIPTION).evaluate()
-            fail("No error was thrown")
-        } catch (e: Exception) {
-            if (!checkCause(e)) throw e
-        }
-    }
-
-    @Test
-    fun testInjectController_recreateTaskbar_controllerChanged() {
-        val testClass =
-            object {
-                @InjectController lateinit var controller: TaskbarStashController
-            }
-
-        onSetup(TaskbarUnitTestRule(testClass, context)) {
-            val controller1 = testClass.controller
-            recreateTaskbar()
-            val controller2 = testClass.controller
-            assertThat(controller1).isNotSameInstanceAs(controller2)
-        }
-    }
-
-    @EnableFlags(Flags.FLAG_ENABLE_BUBBLE_BAR)
-    @Test
-    fun testInjectBubbleController_bubbleFlagOn_isInjected() {
-        val testClass =
-            object {
-                @InjectController lateinit var controller: BubbleBarController
-                val isInjected: Boolean
-                    get() = ::controller.isInitialized
-            }
-
-        TaskbarUnitTestRule(testClass, context).apply(EMPTY_STATEMENT, DESCRIPTION).evaluate()
-
-        onSetup(TaskbarUnitTestRule(testClass, context)) {
-            assertThat(testClass.isInjected).isTrue()
-        }
-    }
-
-    private fun checkCause(e: Exception): Boolean {
-        if (e is NoSuchElementException) return true
-        return e.cause?.let { if (it is Exception) checkCause(it) else false } ?: false
-    }
-
-    @DisableFlags(Flags.FLAG_ENABLE_BUBBLE_BAR)
-    @Test
-    fun testInjectBubbleController_bubbleFlagOff_exceptionThrown() {
-        val testClass =
-            object {
-                @InjectController lateinit var controller: BubbleBarController
-            }
-
-        // We cannot use #assertThrows because we also catch an assumption violated exception
-        // when running #evaluate on devices that do not support Taskbar.
-        try {
-            TaskbarUnitTestRule(testClass, context).apply(EMPTY_STATEMENT, DESCRIPTION).evaluate()
-            fail("No error was thrown")
-        } catch (e: Exception) {
-            if (!checkCause(e)) throw e
-        }
     }
 
     @Test
@@ -211,7 +99,7 @@ class TaskbarUnitTestRuleTest {
      * A [description] can also be provided to mimic annotating a test or test class.
      */
     private fun onSetup(
-        testRule: TaskbarUnitTestRule = TaskbarUnitTestRule(this, context),
+        testRule: TaskbarUnitTestRule = TaskbarUnitTestRule(context),
         description: Description = DESCRIPTION,
         runTest: TaskbarUnitTestRule.() -> Unit,
     ) {

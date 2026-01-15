@@ -66,8 +66,8 @@ interface DisplayController {
         fun getInfo(context: Context): LauncherDisplayInfo {
             val appComponent = context.appComponent
             val controller = appComponent.displayController
-            return controller.getInfoForDisplay(appComponent.wmProxy.getDisplay(context).displayId)
-                ?: controller.info
+            val displayId = appComponent.wmProxy.getDisplay(context)?.displayId
+            return displayId?.let { controller.getInfoForDisplay(it) } ?: controller.info
         }
     }
 }

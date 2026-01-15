@@ -553,16 +553,6 @@ flag {
 }
 
 flag {
-  name: "migrate_browser_icon_on_setup"
-  namespace: "launcher"
-  description: "Migrates browser icon to user choice during user setup"
-  bug: "446663428"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "app_launch_blur"
   namespace: "launcher"
   description: "Enable background blur at app launch"
@@ -703,7 +693,7 @@ flag {
   name: "enable_app_lock_shortcut"
   namespace: "launcher"
   description: "Enables App Lock system shortcut in Launcher"
-  bug: "415167460"
+  bug: "475598044"
 }
 
 flag {

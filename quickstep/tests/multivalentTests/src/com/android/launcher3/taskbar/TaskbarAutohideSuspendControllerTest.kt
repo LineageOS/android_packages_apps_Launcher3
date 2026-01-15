@@ -30,7 +30,6 @@ import com.android.launcher3.taskbar.rules.TaskbarModeRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.TRANSIENT
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
-import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
@@ -67,10 +66,11 @@ class TaskbarAutohideSuspendControllerTest {
         )
     @get:Rule(order = 1) val animatorTestRule = TaskbarAnimatorTestRule(this)
     @get:Rule(order = 2) val taskbarModeRule = TaskbarModeRule(context)
-    @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
+    @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    @InjectController lateinit var autohideSuspendController: TaskbarAutohideSuspendController
-    @InjectController lateinit var stashController: TaskbarStashController
+    val autohideSuspendController by
+        taskbarUnitTestRule.delegate { it.taskbarAutohideSuspendController }
+    val stashController by taskbarUnitTestRule.delegate { it.taskbarStashController }
 
     private var latestSuspendNotification: Boolean? = null
 

@@ -41,7 +41,7 @@ class TaskbarManagerTest {
 
     @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()
     @get:Rule(order = 1) val mockUsers = lazyRule { MockUsersRule(context.base) }
-    @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
+    @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
     private val mockerUserRule: MockUsersRule by mockUsers
 
@@ -202,16 +202,17 @@ class TaskbarManagerTest {
         val initialDeviceProfile = initialActivityContext.deviceProfile
 
         // Get the PerDisplayTaskbarResource for the external display.
-        val perDisplayResource = checkNotNull(taskbarManager.getPerDisplayResourceForTest(displayId)) {
-            "PerDisplayTaskbarResource not found for displayId: $displayId"
-        }
+        val perDisplayResource =
+            checkNotNull(taskbarManager.getPerDisplayResourceForTest(displayId)) {
+                "PerDisplayTaskbarResource not found for displayId: $displayId"
+            }
 
         // Recreate the taskbar for the external display.
         runOnTaskbarUiThreadSync {
             taskbarManager.recreateTaskbarForDisplay(
                 perDisplayResource,
                 0 /* duration */,
-                "recreateTaskbar_forExternalDisplay_recreatesDeviceProfile"
+                "recreateTaskbar_forExternalDisplay_recreatesDeviceProfile",
             )
         }
 

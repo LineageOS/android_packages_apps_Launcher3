@@ -32,7 +32,6 @@ import com.android.launcher3.taskbar.rules.TaskbarModeRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.TRANSIENT
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
-import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.util.TestUtil.getOnTaskbarUiThread
 import com.android.systemui.shared.system.TaskStackChangeListeners
@@ -48,8 +47,9 @@ class TaskbarOverlayControllerTest {
 
     @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()
     @get:Rule(order = 1) val taskbarModeRule = TaskbarModeRule(context)
-    @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(this, context)
-    @InjectController lateinit var overlayController: TaskbarOverlayController
+    @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
+
+    val overlayController by taskbarUnitTestRule.delegate { it.taskbarOverlayController }
 
     private val taskbarContext: TaskbarActivityContext
         get() = taskbarUnitTestRule.activityContext

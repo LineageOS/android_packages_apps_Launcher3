@@ -54,19 +54,22 @@ constructor(
             }
 
     val isPinned: Boolean
-        get() =
-            if (
+        get() {
+            val displayId =
+                windowManagerProxy.getDisplay(context)?.displayId
+                    ?: return launcherPrefs.get(TASKBAR_PINNING)
+
+            return if (
                 displayController
-                    .getInfoForDisplay(windowManagerProxy.getDisplay(context).displayId)
+                    .getInfoForDisplay(displayId)
                     ?.showDesktopTaskbarForFreeformDisplay == true ||
-                    windowManagerProxy.isInDesktopMode(
-                        windowManagerProxy.getDisplay(context).displayId
-                    )
+                    windowManagerProxy.isInDesktopMode(displayId)
             ) {
                 true
             } else {
                 launcherPrefs.get(TASKBAR_PINNING)
             }
+        }
 
     companion object {
         @JvmField val INSTANCE = DaggerSingletonObject(LauncherAppComponent::getTaskbarModeUtil)

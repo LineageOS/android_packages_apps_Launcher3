@@ -210,6 +210,8 @@ public final class LauncherInstrumentation {
     private static final String ASSISTANT_PACKAGE = "com.google.android.googlequicksearchbox";
     private static final String ASSISTANT_GO_HOME_RES_ID = "home_icon";
 
+    private static final String TEST_AUTHORITY_STRING_FORMAT = "%s.TestInfo";
+
     private static final SparseArray<WeakReference<VisibleContainer>> sActiveContainer =
             new SparseArray<>(1);
 
@@ -299,6 +301,26 @@ public final class LauncherInstrumentation {
         this(displayId, instrumentation, false);
     }
 
+    private static ProviderInfo getProviderInfo(String launcherPackage) {
+        String testProviderAuthority = String.format(TEST_AUTHORITY_STRING_FORMAT, launcherPackage);
+        PackageManager pm = InstrumentationRegistry.getInstrumentation()
+                .getContext().getPackageManager();
+        return pm.resolveContentProvider(
+                testProviderAuthority, MATCH_ALL | MATCH_DISABLED_COMPONENTS);
+    }
+
+    /**
+     * Checks if the launcher package has a content provider and thus that
+     * LauncherInstrumentation can be initialized without error.
+     *
+     * For example, this is useful for tests that are run on the headless system user (HSU).
+     * The HSU uses the Login App as its launcher, which does not have a content
+     * provider.
+     */
+    public static boolean isAvailable(String launcherPackage) {
+        return getProviderInfo(launcherPackage) != null;
+    }
+
     private LauncherInstrumentation(int displayId, Instrumentation instrumentation,
             boolean isLauncherTest) {
         mDisplayId = displayId;
@@ -325,7 +347,8 @@ public final class LauncherInstrumentation {
                         ? getLauncherPackageName()
                         : targetPackage;
 
-        String testProviderAuthority = mLauncherPackage + ".TestInfo";
+        String testProviderAuthority =
+                String.format(TEST_AUTHORITY_STRING_FORMAT, mLauncherPackage);
         mTestProviderUri = new Uri.Builder()
                 .scheme(ContentResolver.SCHEME_CONTENT)
                 .authority(testProviderAuthority)
@@ -335,8 +358,7 @@ public final class LauncherInstrumentation {
                 testPackage, "android.permission.WRITE_SECURE_SETTINGS");
 
         PackageManager pm = getContext().getPackageManager();
-        ProviderInfo pi = pm.resolveContentProvider(
-                testProviderAuthority, MATCH_ALL | MATCH_DISABLED_COMPONENTS);
+        ProviderInfo pi = getProviderInfo(mLauncherPackage);
         assertNotNull("Cannot find content provider for " + testProviderAuthority, pi);
         ComponentName cn = new ComponentName(pi.packageName, pi.name);
 

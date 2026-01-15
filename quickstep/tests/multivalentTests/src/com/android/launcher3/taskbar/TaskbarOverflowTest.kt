@@ -49,8 +49,6 @@ import com.android.launcher3.taskbar.TaskbarIconType.ALL_APPS
 import com.android.launcher3.taskbar.TaskbarIconType.HOTSEAT
 import com.android.launcher3.taskbar.TaskbarIconType.OVERFLOW
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatItems
-import com.android.launcher3.taskbar.bubbles.BubbleBarViewController
-import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController
 import com.android.launcher3.taskbar.rules.AllTaskbarSandboxModules
 import com.android.launcher3.taskbar.rules.MockedRecentsModelHelper
 import com.android.launcher3.taskbar.rules.MockedRecentsModelTestRule
@@ -62,7 +60,6 @@ import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.TRANSIENT
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
 import com.android.launcher3.taskbar.rules.TaskbarSandboxComponent
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
-import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.InjectController
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
@@ -157,13 +154,16 @@ class TaskbarOverflowTest {
     @get:Rule(order = 5) val animatorTestRule = TaskbarAnimatorTestRule(this)
 
     @get:Rule(order = 6)
-    val taskbarUnitTestRule = TaskbarUnitTestRule(this, context, this::onControllersInitialized)
+    val taskbarUnitTestRule = TaskbarUnitTestRule(context, this::onControllersInitialized)
 
-    @InjectController lateinit var taskbarViewController: TaskbarViewController
-    @InjectController lateinit var recentAppsController: TaskbarRecentAppsController
-    @InjectController lateinit var bubbleBarViewController: BubbleBarViewController
-    @InjectController lateinit var bubbleStashController: BubbleStashController
-    @InjectController lateinit var keyboardQuickSwitchController: KeyboardQuickSwitchController
+    val taskbarViewController by taskbarUnitTestRule.delegate { it.taskbarViewController }
+    val recentAppsController by taskbarUnitTestRule.delegate { it.taskbarRecentAppsController }
+    val bubbleBarViewController by
+        taskbarUnitTestRule.delegate { it.bubbleControllers.orElseThrow().bubbleBarViewController }
+    val bubbleStashController by
+        taskbarUnitTestRule.delegate { it.bubbleControllers.orElseThrow().bubbleStashController }
+    val keyboardQuickSwitchController by
+        taskbarUnitTestRule.delegate { it.keyboardQuickSwitchController }
 
     private val desktopVisibilityController: DesktopVisibilityController
         get() = DesktopVisibilityController.INSTANCE[context]
