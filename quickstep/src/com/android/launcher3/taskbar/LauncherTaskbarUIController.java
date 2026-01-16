@@ -86,8 +86,9 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
     public static final int WIDGETS_PAGE_PROGRESS_INDEX = 2;
     public static final int SYSUI_SURFACE_PROGRESS_INDEX = 3;
     public static final int LAUNCHER_PAUSE_PROGRESS_INDEX = 4;
+    public static final int IME_PROGRESS_INDEX = 5;
 
-    public static final int DISPLAY_PROGRESS_COUNT = 5;
+    public static final int DISPLAY_PROGRESS_COUNT = 6;
 
     private final AnimatedFloat mTaskbarInAppDisplayProgress = new AnimatedFloat(
             this::onInAppDisplayProgressChanged);
@@ -511,7 +512,7 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
                 mControllers.navbarButtonsViewController
                         .getOnTaskbarBackgroundNavButtonColorOverride().updateValue(progress);
             }
-            if (isBubbleBarEnabled()) {
+            if (isBubbleBarEnabled() && progressIndex != IME_PROGRESS_INDEX) {
                 mControllers.bubbleControllers.ifPresent(
                         c -> c.bubbleStashController.setInAppDisplayOverrideProgress(
                                 mTaskbarInAppDisplayProgress.value));
