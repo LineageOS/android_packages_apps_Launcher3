@@ -151,7 +151,7 @@ class BoxSelectionHelper(
         val context = activityContext as android.content.Context
         return View(context).apply {
             // Set background to opaque white and use view's alpha for opacity.
-            setBackgroundColor(BACKGROUND_COLOR)
+            setBackgroundColor(context.getColor(R.color.materialColorPrimaryFixed))
             alpha = BACKGROUND_ALPHA
 
             val radius =
@@ -177,7 +177,6 @@ class BoxSelectionHelper(
     }
 
     companion object {
-        private const val BACKGROUND_COLOR = 0xFFFFFFFF.toInt()
         private const val BACKGROUND_ALPHA = 0.25f
         private const val CORNER_RADIUS_DP = 2f
         private const val DEFAULT_CORNER_RADIUS_PX = 4f
