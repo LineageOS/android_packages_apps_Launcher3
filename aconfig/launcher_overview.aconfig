@@ -74,3 +74,10 @@ flag {
     description: "Allows the user to drag and drop tasks between desktops in overview."
     bug: "434939081"
 }
+
+flag {
+    name: "enable_text_selection_view"
+    namespace: "launcher_overview"
+    description: "Creates views for selected texts to enable accessible traversal."
+    bug: "447292419"
+}
