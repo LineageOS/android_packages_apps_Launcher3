@@ -245,8 +245,13 @@ public class BubbleView extends ConstraintLayout {
         }
         String appName = bubble.getInfo().getAppName();
         if (!TextUtils.isEmpty(appName)) {
-            contentDesc = getResources().getString(R.string.bubble_bar_bubble_description,
-                    contentDesc, appName);
+            if (bubble.getInfo().isChat()) {
+                contentDesc = getResources().getString(
+                        R.string.bubble_bar_bubble_description,
+                        contentDesc, appName);
+            } else {
+                contentDesc = appName;
+            }
         }
         setContentDescription(contentDesc);
     }

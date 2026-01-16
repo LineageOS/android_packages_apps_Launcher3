@@ -79,6 +79,7 @@ class BubbleViewTest {
                     false,
                     null,
                     false,
+                    false,
                     UserType.MAIN,
                 )
             bubbleView = inflater.inflate(R.layout.bubblebar_item_view, null, false) as BubbleView

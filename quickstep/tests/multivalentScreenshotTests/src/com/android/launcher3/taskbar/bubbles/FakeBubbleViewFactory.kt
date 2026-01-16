@@ -58,6 +58,7 @@ object FakeBubbleViewFactory {
                 false,
                 null,
                 false,
+                false,
                 UserType.MAIN,
             )
         return BubbleCreator(context)
