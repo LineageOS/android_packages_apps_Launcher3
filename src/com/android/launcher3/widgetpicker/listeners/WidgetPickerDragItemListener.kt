@@ -65,6 +65,11 @@ class WidgetPickerDragItemListener(
 
     override fun getMimeType(): String = mimeType
 
+    override fun init(context: Launcher, isHomeStarted: Boolean): Boolean =
+        super.init(context, isHomeStarted).also {
+            context.stateManager.goToState(LauncherState.NORMAL, /* animated= */ isHomeStarted)
+        }
+
     override fun startDrag(
         previewRect: Rect,
         previewBitmapWidth: Int,
