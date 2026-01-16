@@ -18,22 +18,24 @@ package com.android.launcher3.dragndrop
 
 import android.platform.test.flag.junit.FlagsParameterization
 import android.platform.test.flag.junit.SetFlagsRule
-import androidx.test.filters.SmallTest
+import androidx.test.filters.LargeTest
 import com.android.launcher3.Flags.FLAG_ENABLE_SYSTEM_DRAG
 import com.android.launcher3.Flags.enableSystemDrag
-import com.android.launcher3.dagger.DaggerLauncherAppComponent
+import com.android.launcher3.Launcher
+import com.android.launcher3.integration.util.LauncherActivityScenarioRule
+import com.android.launcher3.testutil.rule.ApplicationOverrideRule
 import com.android.launcher3.util.SandboxApplication
-import com.android.launcher3.util.TestActivityContext
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.junit.MockitoJUnit
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
 
 /** Tests for {@link SystemDragController}. */
-@SmallTest
+@LargeTest
 @RunWith(ParameterizedAndroidJunit4::class)
 class SystemDragControllerTest(flag: FlagsParameterization) {
 
@@ -43,16 +45,20 @@ class SystemDragControllerTest(flag: FlagsParameterization) {
         fun getParams() = FlagsParameterization.allCombinationsOf(FLAG_ENABLE_SYSTEM_DRAG)
     }
 
-    @get:Rule val app = SandboxApplication()
-    @get:Rule val context = TestActivityContext(app)
     @get:Rule val flags: SetFlagsRule = SetFlagsRule(flag)
+    @get:Rule val mockito = MockitoJUnit.rule()
+    @get:Rule val app = SandboxApplication().withModelDependency()
+    @get:Rule val appOverride = ApplicationOverrideRule(app, mockito)
+    @get:Rule val launcherActivity = LauncherActivityScenarioRule<Launcher>()
 
     private lateinit var controller: SystemDragController
 
     @Before
     fun setUp() {
-        app.initDaggerComponent(DaggerLauncherAppComponent.builder())
-        controller = context.activityComponent.systemDragController
+        controller =
+            launcherActivity.getFromLauncher { launcher ->
+                launcher.activityComponent.systemDragController
+            }!!
     }
 
     @Test

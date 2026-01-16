@@ -29,6 +29,7 @@ import com.android.internal.policy.DesktopModeCompatPolicy
 import com.android.launcher3.AbstractFloatingViewHelper
 import com.android.launcher3.Flags.enableSystemDrag
 import com.android.launcher3.InvariantDeviceProfile
+import com.android.launcher3.Launcher
 import com.android.launcher3.automation.AutomationRepository
 import com.android.launcher3.backuprestore.LauncherRestoreEventLogger
 import com.android.launcher3.concurrent.annotations.ThreadPool
@@ -47,9 +48,7 @@ import com.android.launcher3.icons.LauncherIconProvider
 import com.android.launcher3.icons.LauncherIconProviderImpl
 import com.android.launcher3.logging.StatsLogManager.StatsLogManagerFactory
 import com.android.launcher3.secondarydisplay.SecondaryDisplayDelegate
-import com.android.launcher3.secondarydisplay.SecondaryDisplayLauncher
 import com.android.launcher3.secondarydisplay.SecondaryDisplayQuickstepDelegateImpl
-import com.android.launcher3.taskbar.BaseTaskbarContext
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator
 import com.android.launcher3.testing.TestInformationHandler
 import com.android.launcher3.uioverrides.QuickstepWidgetHolder.QuickstepWidgetHolderFactory
@@ -238,13 +237,8 @@ object SystemDragModule {
         context: ActivityContext,
         idp: InvariantDeviceProfile,
     ): SystemDragController =
-        // TODO(b/456787959): Fix drop targets before enabling for secondary display launcher.
-        // TODO(b/456787959): Fix drop targets before enabling for taskbar.
-        if (
-            enableSystemDrag() &&
-                context !is BaseTaskbarContext &&
-                context !is SecondaryDisplayLauncher
-        ) {
+        // TODO(b/456787959): Fix drop targets and enable for other contexts.
+        if (enableSystemDrag() && context is Launcher) {
             SystemDragControllerImpl(
                 context,
                 { ctx, params -> SystemDragListener(ctx, idp, ::ImageView, params) },
