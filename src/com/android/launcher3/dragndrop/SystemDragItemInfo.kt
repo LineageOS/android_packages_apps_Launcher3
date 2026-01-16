@@ -27,13 +27,35 @@ import com.android.launcher3.model.data.WorkspaceItemInfo
  */
 class SystemDragItemInfo : WorkspaceItemInfo() {
 
-    /** The permissions for the URIs that were dropped in a system-level drag-and-drop sequence. */
-    var permissions: DragAndDropPermissions? = null
-
-    /** The list of URIs that were dropped in a system-level drag-and-drop sequence. */
-    var uriList: List<Uri>? = null
+    /** The payload that was dropped in a system-level drag-and-drop sequence. */
+    var payload: Payload = EmptyPayload
 
     init {
         itemType = ITEM_TYPE_SYSTEM_DRAG
+    }
+
+    /** Represents a payload that was dropped in a system-level drag-and-drop sequence. */
+    sealed class Payload {
+        /** Returns whether a payload is suitable to be accepted during drop handling. */
+        abstract fun isAcceptable(): Boolean
+    }
+
+    /** Represents an empty payload that was dropped in a system-level drag-and-drop sequence. */
+    data object EmptyPayload : Payload() {
+        override fun isAcceptable(): Boolean = false
+    }
+
+    /**
+     * Represents a payload of URIs that were dropped in a system-level drag-and-drop sequence.
+     *
+     * @param permissions The permissions for the URIs that were dropped.
+     * @param uriList The list of URIs that were dropped.
+     */
+    data class UriListPayload(val permissions: DragAndDropPermissions?, val uriList: List<Uri>?) :
+        Payload() {
+        // NOTE: Permissions must be obtained in order to accept a system-level drop of URIs. If
+        // permissions are not checked, a bad actor could piggy-back on the permissions that
+        // Launcher already has.
+        override fun isAcceptable(): Boolean = permissions != null && uriList?.isNotEmpty() == true
     }
 }

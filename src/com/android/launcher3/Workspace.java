@@ -1980,15 +1980,15 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
             // Reject system-level drops if we cannot handle the payload.
             if (d.dragInfo instanceof SystemDragItemInfo dragInfo) {
-                if (!mLauncher
-                        .getActivityComponent()
-                        .getSystemDragController()
-                        .acceptDrop(dragInfo)) {
+                final SystemDragItemInfo.Payload payload = dragInfo.getPayload();
+                if (!payload.isAcceptable()) {
                     return false;
                 }
-                if (!HomeScreenFilesProvider.INSTANCE
-                        .get(mLauncher)
-                        .canMoveToHomeScreen(dragInfo.getUriList())) {
+                // NOTE: Workspace currently only supports dropping URIs.
+                if (!(payload instanceof SystemDragItemInfo.UriListPayload uriListPayload)
+                        || !HomeScreenFilesProvider.INSTANCE
+                                .get(mLauncher)
+                                .canMoveToHomeScreen(uriListPayload.getUriList())) {
                     return false;
                 }
             }
@@ -2210,8 +2210,9 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                 && dropOverInfo.itemType == ITEM_TYPE_FILE_SYSTEM_FOLDER) {
             final List<Uri> uriList;
 
-            if (d.originalDragInfo instanceof SystemDragItemInfo systemDragInfo) {
-                uriList = systemDragInfo.getUriList();
+            if (d.originalDragInfo instanceof SystemDragItemInfo dragInfo
+                    && dragInfo.getPayload() instanceof SystemDragItemInfo.UriListPayload payload) {
+                uriList = payload.getUriList();
             } else {
                 final HomeScreenFile file = HomeScreenFilesUtilsKt.getHomeScreenFile(d.dragInfo);
                 uriList = file != null ? Collections.singletonList(file.getUri()) : null;
@@ -3066,7 +3067,8 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         final int container = mLauncher.isHotseatLayout(cellLayout)
                 ? CONTAINER_HOTSEAT
                 : CONTAINER_DESKTOP;
-        Optional<SystemDragItemInfo> systemDragItemInfo = Optional.empty();
+
+        Optional<SystemDragItemInfo.UriListPayload> systemDragUriListPayload = Optional.empty();
 
         if (d.dragInfo instanceof PendingAddShortcutInfo) {
             WorkspaceItemInfo si = ((PendingAddShortcutInfo) d.dragInfo)
@@ -3075,14 +3077,17 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                 d.dragInfo = si;
                 si.container = container;
             }
-        } else if (d.dragInfo instanceof SystemDragItemInfo dragInfo) {
-            systemDragItemInfo = Optional.of(dragInfo);
+        } else if (d.dragInfo instanceof SystemDragItemInfo dragInfo
+                && dragInfo.getPayload() instanceof SystemDragItemInfo.UriListPayload payload) {
+            systemDragUriListPayload = Optional.of(payload);
 
-            // TODO(b/440195101): Differentiate files from folders.
+            // NOTE: If necessary, the [itemType] for the created item will be updated to
+            // [ITEM_TYPE_FILE_SYSTEM_FOLDER] during the resulting [HomeScreenFilesUpdateTask] which
+            // is privy to more information about the underlying file system metadata.
             final WorkspaceItemInfo info = new WorkspaceItemInfo();
             info.itemType = ITEM_TYPE_FILE_SYSTEM_FILE;
             info.intent = HomeScreenFilesUtils.Companion.buildLaunchIntent(
-                    requireNonNull(dragInfo.getUriList()).get(0));
+                    requireNonNull(payload.getUriList()).get(0));
 
             d.dragInfo = info;
         }
@@ -3227,14 +3232,14 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
             final View firstItemView = view;
             final ItemInfo firstItemInfo = info;
-            systemDragItemInfo.ifPresent((dragInfo) -> {
+            systemDragUriListPayload.ifPresent((payload) -> {
 
                 // After having created the workspace item for the first URI dropped in a system-
                 // level drag-and-drop sequence, attempt to move all dropped URIs to the home screen
                 // folder in the local file system. This will result in:
                 // (1) an update to the created workspace item for the first dropped URI, and
                 // (2) the creation of new workspace items for any additionally dropped URIs.
-                List<Uri> uriList = requireNonNull(dragInfo.getUriList());
+                List<Uri> uriList = requireNonNull(payload.getUriList());
                 HomeScreenFilesProvider provider = HomeScreenFilesProvider.INSTANCE.get(mLauncher);
                 List<CompletableFuture<Boolean>> results = provider.moveToHomeScreen(uriList);
 
@@ -3260,7 +3265,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                         .whenComplete((result, throwable) ->
                                 mLauncher.runOnUiThread(() -> {
                                     final DragAndDropPermissions permissions =
-                                            dragInfo.getPermissions();
+                                            payload.getPermissions();
                                     if (permissions != null) {
                                         permissions.release();
                                     }
