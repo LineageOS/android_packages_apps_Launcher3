@@ -54,9 +54,9 @@ import com.android.quickstep.TaskOverlayFactory
 import com.android.quickstep.ViewUtils.addAccessibleChildToList
 import com.android.quickstep.recents.di.RecentsComponent
 import com.android.quickstep.recents.domain.model.DesktopLayoutConfig
-import com.android.quickstep.recents.domain.model.DesktopTaskVisibilityData
-import com.android.quickstep.recents.domain.model.DesktopTaskVisibilityData.HiddenDesktopTaskVisibilityData
-import com.android.quickstep.recents.domain.model.DesktopTaskVisibilityData.RenderedDesktopTaskVisibilityData
+import com.android.quickstep.recents.domain.model.OverviewPosition
+import com.android.quickstep.recents.domain.model.OverviewPosition.Hidden
+import com.android.quickstep.recents.domain.model.OverviewPosition.Rendered
 import com.android.quickstep.recents.domain.usecase.DesktopLayoutUtils
 import com.android.quickstep.recents.ui.viewmodel.DesktopTaskViewModel
 import com.android.quickstep.recents.ui.viewmodel.TaskData
@@ -113,9 +113,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
      * Map from task IDs to previous organized task positions. This is used to animate between two
      * sets of organized task positions when a task is being dismissed.
      */
-    private var previousOrganizedDesktopTaskVisibilityDataMap:
-        Map<Int, DesktopTaskVisibilityData>? =
-        null
+    private var previousOverviewTaskPositions: Map<Int, OverviewPosition>? = null
 
     /**
      * Controls the gradual transition from the default positions to the organized non-overlapping
@@ -179,25 +177,22 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
         taskContainers.forEach { taskContainer ->
             val taskId = taskContainer.task.key.id
             val taskContentView = taskContainer.taskContentView
-            val fullscreenTaskBounds =
-                desktopTaskViewModel.fullscreenTaskPositions
-                    .firstOrNull { it.taskId == taskId }
-                    ?.bounds ?: return@forEach
+            val fullscreenTaskPosition =
+                desktopTaskViewModel.fullscreenTaskPositions[taskId] ?: return@forEach
 
-            val organizedTaskVisibilityData: DesktopTaskVisibilityData? =
-                desktopTaskViewModel.organizedDesktopTaskVisibilityDataMap[taskId]
+            val overviewTaskPosition: OverviewPosition? =
+                desktopTaskViewModel.overviewTaskPositions[taskId]
 
             val shouldBeDisplayedInOverview: Boolean
             val overviewTaskBounds: Rect
-            var isObscured = false
+            val isObscured = fullscreenTaskPosition.isObscured
 
-            when (organizedTaskVisibilityData) {
-                is RenderedDesktopTaskVisibilityData -> {
+            when (overviewTaskPosition) {
+                is Rendered -> {
                     shouldBeDisplayedInOverview = true
-                    overviewTaskBounds = organizedTaskVisibilityData.bounds
-                    isObscured = organizedTaskVisibilityData.isObscured
+                    overviewTaskBounds = overviewTaskPosition.bounds
                 }
-                is HiddenDesktopTaskVisibilityData -> {
+                is Hidden -> {
                     shouldBeDisplayedInOverview = false
                     overviewTaskBounds =
                         DesktopLayoutUtils.createPlaceholderBounds(getDesktopLayoutConfig())
@@ -213,10 +208,9 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
                 TEMP_OVERVIEW_TASK_POSITION.apply {
                     // When removing a task, interpolate between its old organized bounds and
                     // [overviewTaskBounds].
-                    val previousOrganizedTaskDataItem =
-                        previousOrganizedDesktopTaskVisibilityDataMap?.get(taskId)
+                    val previousOrganizedTaskDataItem = previousOverviewTaskPositions?.get(taskId)
 
-                    if (previousOrganizedTaskDataItem is RenderedDesktopTaskVisibilityData) {
+                    if (previousOrganizedTaskDataItem is Rendered) {
                         lerpRect(
                             previousOrganizedTaskDataItem.bounds,
                             overviewTaskBounds,
@@ -233,14 +227,14 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
                         (!taskContainer.task.isMinimized && !isObscured) ||
                             taskId == taskIdReorderToFront
                     ) {
-                        lerpRect(fullscreenTaskBounds, this, explodeProgress)
+                        lerpRect(fullscreenTaskPosition.bounds, this, explodeProgress)
                     }
                 }
 
             remoteTargetHandles?.getRemoteTargetHandle(taskId)?.let { remoteTargetHandle ->
                 val fromRect =
                     TEMP_FROM_RECTF.apply {
-                        set(fullscreenTaskBounds)
+                        set(fullscreenTaskPosition.bounds)
                         scale(widthScale)
                         offset(
                             lastComputedTaskSize.left.toFloat(),
@@ -438,7 +432,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
         super.onRecycle()
         explodeProgress = 0.0f
         taskRemoveProgress = 0.0f
-        previousOrganizedDesktopTaskVisibilityDataMap = null
+        previousOverviewTaskPositions = null
         visibility = VISIBLE
         taskContainers.forEach { removeAndRecycleThumbnailView(it) }
         remoteTargetHandles = null
@@ -596,7 +590,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
                 addListener(
                     object : AnimatorListenerAdapter() {
                         override fun onAnimationEnd(animator: Animator) {
-                            previousOrganizedDesktopTaskVisibilityDataMap = null
+                            previousOverviewTaskPositions = null
                             taskRemoveAnimator = null
                         }
                     }
@@ -606,8 +600,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
 
         // Store the current organized positions before computing new ones. This allows us to
         // animate from the current layout to the new.
-        previousOrganizedDesktopTaskVisibilityDataMap =
-            desktopTaskViewModel.organizedDesktopTaskVisibilityDataMap
+        previousOverviewTaskPositions = desktopTaskViewModel.overviewTaskPositions
         updateTaskPositions(taskId)
     }
 

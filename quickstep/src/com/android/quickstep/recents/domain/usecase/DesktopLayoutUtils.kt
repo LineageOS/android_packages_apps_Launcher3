@@ -19,7 +19,6 @@ package com.android.quickstep.recents.domain.usecase
 import android.graphics.Rect
 import android.view.Gravity
 import com.android.quickstep.recents.domain.model.DesktopLayoutConfig
-import com.android.quickstep.recents.domain.model.DesktopTaskBoundsData.RenderedDesktopTaskBoundsData
 
 /** Utility functions for desktop layout calculations. */
 object DesktopLayoutUtils {
@@ -31,14 +30,14 @@ object DesktopLayoutUtils {
      * This ensures that when tasks are scaled to a minimum width, they are still tall enough to be
      * recognizable and interactable, based on their original proportions.
      *
-     * @param taskBounds The list of tasks with their original bounds.
+     * @param taskBounds The list of original bounds of the tasks.
      * @param layoutConfig The layout configuration containing minimum task width and padding.
      * @return The maximum height calculated across all tasks when scaled to `minTaskWidth`, or
      *   `layoutConfig.verticalPaddingBetweenTasks` if `minTaskWidth` is not positive or no valid
      *   task dimensions are found.
      */
     fun getRequiredHeightForMinWidth(
-        taskBounds: List<RenderedDesktopTaskBoundsData>,
+        taskBounds: List<Rect>,
         layoutConfig: DesktopLayoutConfig,
     ): Int {
         val defaultMinHeight = layoutConfig.verticalPaddingBetweenTasks
@@ -47,8 +46,8 @@ object DesktopLayoutUtils {
         }
 
         val maxCalculatedHeight =
-            taskBounds.maxOfOrNull { taskData ->
-                with(taskData.bounds) {
+            taskBounds.maxOfOrNull { bound ->
+                with(bound) {
                     if (width() > 0 && height() > 0) {
                         val aspectRatio = height().toFloat() / width().toFloat()
                         (layoutConfig.minTaskWidth.toFloat() * aspectRatio).toInt()
