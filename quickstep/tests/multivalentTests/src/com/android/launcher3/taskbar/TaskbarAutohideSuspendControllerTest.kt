@@ -16,7 +16,6 @@
 
 package com.android.launcher3.taskbar
 
-import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLAG_AUTOHIDE_SUSPEND_BUBBLES
 import com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLAG_AUTOHIDE_SUSPEND_DRAGGING
@@ -31,16 +30,12 @@ import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.TRANSIENT
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
-import com.android.launcher3.util.Executors.MAIN_EXECUTOR
-import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
-import com.android.quickstep.SystemUiProxy
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doAnswer
-import org.mockito.kotlin.spy
 import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
@@ -50,27 +45,19 @@ class TaskbarAutohideSuspendControllerTest {
     val context =
         TaskbarWindowSandboxContext.create(
             params =
-                SandboxParams({
-                    spy(
-                        SystemUiProxy(
-                            ApplicationProvider.getApplicationContext(),
-                            MAIN_EXECUTOR,
-                            UI_HELPER_EXECUTOR,
-                        )
-                    ) { proxy ->
-                        doAnswer { latestSuspendNotification = it.getArgument(0) }
-                            .whenever(proxy)
-                            .notifyTaskbarAutohideSuspend(anyOrNull())
-                    }
-                })
+                SandboxParams {
+                    doAnswer { i -> latestSuspendNotification = i.getArgument(0) }
+                        .whenever(it.systemUiProxy)
+                        .notifyTaskbarAutohideSuspend(anyOrNull())
+                }
         )
     @get:Rule(order = 1) val animatorTestRule = TaskbarAnimatorTestRule(this)
     @get:Rule(order = 2) val taskbarModeRule = TaskbarModeRule(context)
     @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    val autohideSuspendController by
+    private val autohideSuspendController by
         taskbarUnitTestRule.delegate { it.taskbarAutohideSuspendController }
-    val stashController by taskbarUnitTestRule.delegate { it.taskbarStashController }
+    private val stashController by taskbarUnitTestRule.delegate { it.taskbarStashController }
 
     private var latestSuspendNotification: Boolean? = null
 

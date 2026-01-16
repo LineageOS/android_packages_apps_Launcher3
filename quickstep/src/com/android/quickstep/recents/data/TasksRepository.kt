@@ -204,9 +204,9 @@ constructor(
     private suspend fun fetchThumbnail(task: Task) {
         if (enableLowResThumbnailPreloading()) {
             val thumbnailFromDataSource = getThumbnailFromDataSource(task, ANY_RES)
-            val thumbnailIsHighRes = thumbnailFromDataSource?.reducedResolution == false
             updateThumbnail(task.key.id, thumbnailFromDataSource)
 
+            val thumbnailIsHighRes = thumbnailFromDataSource?.reducedResolution == false
             if (highResThumbnailsRequired && !thumbnailIsHighRes) {
                 updateThumbnail(task.key.id, getThumbnailFromDataSource(task, HIGH_RES))
             } else if (!thumbnailIsHighRes) {

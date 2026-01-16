@@ -47,7 +47,7 @@ class NavbarButtonsViewControllerTest {
     @get:Rule(order = 4) val taskbarModeRule = TaskbarModeRule(context)
     @get:Rule(order = 5) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    val navbarButtonsViewController by
+    private val navbarButtonsViewController by
         taskbarUnitTestRule.delegate { it.navbarButtonsViewController }
 
     @Test

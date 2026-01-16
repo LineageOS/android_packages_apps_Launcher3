@@ -26,14 +26,12 @@ import com.android.app.displaylib.DisplayDecorationListener
 import com.android.app.displaylib.DisplaysWithDecorationsRepositoryCompat
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.quickstep.DisplayModel.DisplayResource
-import com.android.quickstep.dagger.SysUIConnectionTestableModule.TESTABLE_DISPLAY_PROVIDER
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import java.io.PrintWriter
 import java.util.function.Consumer
 import java.util.function.IntFunction
-import javax.inject.Named
 import kotlinx.coroutines.CoroutineDispatcher
 
 /** data model for managing resources with lifecycles that match that of the connected display */
@@ -42,7 +40,6 @@ class DisplayModel<RESOURCE_TYPE : DisplayResource>
 constructor(
     @ApplicationContext private val context: Context,
     private val systemDecorationChangeObserver: SystemDecorationChangeObserver,
-    @Named(TESTABLE_DISPLAY_PROVIDER)
     private val displaysWithDecorationsRepositoryCompat: DisplaysWithDecorationsRepositoryCompat,
     @Assisted private val dispatcher: CoroutineDispatcher,
     @Assisted private val resourceFactory: IntFunction<RESOURCE_TYPE?>,

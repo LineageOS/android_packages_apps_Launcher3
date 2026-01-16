@@ -16,19 +16,19 @@
 
 package com.android.launcher3.util
 
-import android.hardware.display.VirtualDisplay
+import android.content.Context
+import android.platform.test.rule.LimitDevicesRule
+import android.platform.test.rule.SkipOnDeviceless
+import android.view.WindowManager
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.app.displaylib.DisplayDecorationListener
-import com.android.launcher3.dagger.LauncherAppComponent
-import com.android.launcher3.dagger.LauncherAppSingleton
 import com.google.common.truth.Truth.assertThat
-import dagger.Component
+import org.junit.After
 import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.Description
 import org.junit.runner.RunWith
-import org.junit.runners.model.Statement
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -36,12 +36,19 @@ import org.mockito.kotlin.verify
 @RunWith(AndroidJUnit4::class)
 class VirtualDisplaysRuleTest {
 
-    @get:Rule val virtualDisplaysRule = VirtualDisplaysRule()
+    @get:Rule val limitDeviceRule = LimitDevicesRule()
+
+    private val virtualDisplaysRule = VirtualDisplaysRule()
 
     private val decorationListener =
         mock<DisplayDecorationListener> {
             virtualDisplaysRule.registerDisplayDecorationListener(mock)
         }
+
+    @After
+    fun cleanup() {
+        virtualDisplaysRule.cleanup()
+    }
 
     @Test
     fun testAdd_decorationChangeObserved() {
@@ -69,9 +76,7 @@ class VirtualDisplaysRuleTest {
         val display = virtualDisplaysRule.add()
         virtualDisplaysRule.remove(display)
 
-        assertThrows(IllegalArgumentException::class.java) {
-            virtualDisplaysRule.remove(display)
-        }
+        assertThrows(IllegalArgumentException::class.java) { virtualDisplaysRule.remove(display) }
     }
 
     @Test
@@ -89,30 +94,22 @@ class VirtualDisplaysRuleTest {
 
     @Test
     fun testTeardown_multipleDisplays_areReleased() {
-        val virtualDisplaysRule = VirtualDisplaysRule()
-        lateinit var display1: VirtualDisplay
-        lateinit var display2: VirtualDisplay
+        val display1 = checkNotNull(virtualDisplaysRule[virtualDisplaysRule.add()])
+        val display2 = checkNotNull(virtualDisplaysRule[virtualDisplaysRule.add()])
 
-        // Simulate evaluating rule.
-        virtualDisplaysRule
-            .apply(
-                object : Statement() {
-                    override fun evaluate() {
-                        display1 = checkNotNull(virtualDisplaysRule[virtualDisplaysRule.add()])
-                        display2 = checkNotNull(virtualDisplaysRule[virtualDisplaysRule.add()])
-                    }
-                },
-                Description.createSuiteDescription(javaClass),
-            )
-            .evaluate()
+        virtualDisplaysRule.cleanup()
 
         assertThat(display1.token).isNull()
         assertThat(display2.token).isNull()
     }
-}
 
-@LauncherAppSingleton
-@Component(modules = [AllModulesMinusWMProxy::class, SandboxWmProxyModule::class])
-interface VirtualDisplaysRuleTestComponent : LauncherAppComponent {
-    @Component.Builder interface Builder : LauncherAppComponent.Builder
+    @SkipOnDeviceless
+    @Test
+    fun virtualDisplays_shouldShowSystemDecors_isFalse() {
+        val wm =
+            ApplicationProvider.getApplicationContext<Context>()
+                .getSystemService(WindowManager::class.java)!!
+        val displayId = virtualDisplaysRule.add()
+        assertThat(wm.shouldShowSystemDecors(displayId)).isFalse()
+    }
 }

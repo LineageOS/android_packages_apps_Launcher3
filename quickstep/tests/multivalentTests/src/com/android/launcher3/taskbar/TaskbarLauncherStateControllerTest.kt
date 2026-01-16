@@ -58,8 +58,8 @@ class TaskbarLauncherStateControllerTest {
     @get:Rule(order = 3) val taskbarModeRule = TaskbarModeRule(context)
     @get:Rule(order = 4) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    val bubbleControllers by taskbarUnitTestRule.delegate { it.bubbleControllers }
-    val taskbarStashController by taskbarUnitTestRule.delegate { it.taskbarStashController }
+    private val bubbleControllers by taskbarUnitTestRule.delegate { it.bubbleControllers }
+    private val taskbarStashController by taskbarUnitTestRule.delegate { it.taskbarStashController }
 
     private val bubbleBarViewController by lazy {
         bubbleControllers.orElseThrow().bubbleBarViewController

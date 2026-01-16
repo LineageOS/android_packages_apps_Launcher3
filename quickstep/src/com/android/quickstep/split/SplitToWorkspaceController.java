@@ -49,7 +49,6 @@ import com.android.launcher3.uioverrides.QuickstepLauncher;
 import com.android.quickstep.util.AnimUtils;
 import com.android.quickstep.views.FloatingTaskView;
 import com.android.quickstep.views.RecentsView;
-import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.system.InteractionJankMonitorWrapper;
 
 import java.util.Collections;
@@ -149,9 +148,8 @@ public class SplitToWorkspaceController {
                 Collections.singletonList(((ItemInfo) tag).getResolvedTargetInfo()),
                 false /* findExactPairMatch */,
                 foundTasks -> {
-                    Task foundTask = foundTasks[0];
-                    if (foundTask != null) {
-                        mController.setSecondTask(foundTask, (ItemInfo) tag);
+                    if (foundTasks.length > 0 && foundTasks[0] != null) {
+                        mController.setSecondTask(foundTasks[0], (ItemInfo) tag);
                     } else {
                         mController.setSecondTask(intent, user, (ItemInfo) tag);
                     }

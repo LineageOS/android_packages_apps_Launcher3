@@ -24,6 +24,7 @@ import com.android.launcher3.statemanager.StatefulActivity
 import com.android.launcher3.uioverrides.QuickstepLauncher
 import com.android.launcher3.util.Executors.getTaskbarUiThread
 import com.android.launcher3.util.ListenableStream
+import com.android.launcher3.util.Preconditions
 import com.android.quickstep.SystemUiProxy
 import com.android.quickstep.dagger.SysUIConnectionSingleton
 import com.android.quickstep.views.RecentsViewContainer
@@ -142,21 +143,21 @@ class TaskbarManagerImplWrapper @Inject constructor(implProvider: Provider<Taskb
         return impl.shouldForceAllSetFallbackAnimation()
     }
 
-    override fun hasCurrentActivityContext() =
-        ::impl.isInitialized && impl.currentActivityContext != null
-
     override fun toggleTaskbarStash() {
         getTaskbarUiThread().execute { impl.currentActivityContext?.toggleTaskbarStash() }
     }
 
     override fun getStashedHandleViewController(): StashedHandleViewControllerProxy? {
+        Preconditions.assertTaskbarUiThread()
         return impl.currentActivityContext?.controllers?.stashedHandleViewController?.let {
             StashedHandleViewControllerProxy(it)
         }
     }
 
-    override fun getPrimaryDisplayUiControllerStream(): ListenableStream<TaskbarUIController> =
-        impl.primaryDisplayUiControllerStream
+    override fun getPrimaryDisplayUiControllerStream(): ListenableStream<TaskbarUIController> {
+        Preconditions.assertTaskbarUiThread()
+        return impl.primaryDisplayUiControllerStream
+    }
 
     override fun getTaskbarInteractor(displayId: Int): TaskbarInteractor? {
         return impl.getUIControllerForDisplay(displayId)?.let { TaskbarInteractor(it) }
@@ -167,14 +168,14 @@ class TaskbarManagerImplWrapper @Inject constructor(implProvider: Provider<Taskb
         return impl.getTaskbarForDisplay(displayId)
     }
 
-    override fun getPrimaryDisplayId(): Int {
-        return impl.primaryDisplayId
-    }
-
     override fun dumpLogs(prefix: String, pw: PrintWriter) {
         // Stay on caller thread because PrinterWriter is not thread safe.
         impl.dumpLogs(prefix, pw)
     }
+
+    @VisibleForTesting
+    override fun <T> getFromImplSync(provider: (TaskbarManagerImpl) -> T): T =
+        getTaskbarUiThread().submit(Callable { provider(impl) }).get()
 
     @VisibleForTesting
     override fun getCurrentActivityContext(): TaskbarActivityContext? {
@@ -224,21 +225,4 @@ class TaskbarManagerImplWrapper @Inject constructor(implProvider: Provider<Taskb
     @VisibleForTesting
     override fun isTransient(): Boolean =
         impl.currentActivityContext?.taskbarFeatureEvaluator?.isTransient ?: false
-
-    @VisibleForTesting
-    override fun getTaskbarAllAppsScroll(): Int {
-        return getTaskbarUiThread()
-            .submit(Callable { impl.currentActivityContext!!.taskbarAllAppsScroll })
-            .get()
-    }
-
-    @VisibleForTesting
-    override fun getTaskbarAllAppsTopPadding(): Int =
-        getTaskbarUiThread()
-            .submit(Callable { impl.currentActivityContext!!.taskbarAllAppsTopPadding })
-            .get()
-
-    @VisibleForTesting
-    override fun isImeDocked(): Boolean =
-        getTaskbarUiThread().submit(Callable { impl.currentActivityContext!!.isImeDocked }).get()
 }

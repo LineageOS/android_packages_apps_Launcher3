@@ -16,6 +16,7 @@
 
 package com.android.launcher3.taskbar.rules
 
+import com.android.launcher3.Flags.enableTaskbarUiThread
 import com.android.launcher3.util.ListenableStream
 import com.android.launcher3.util.SafeCloseable
 import com.android.quickstep.RecentsModel
@@ -25,6 +26,7 @@ import com.android.quickstep.TaskThumbnailCache
 import com.android.quickstep.util.GroupTask
 import java.util.function.BiConsumer
 import java.util.function.Consumer
+import kotlin.reflect.KProperty
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
@@ -99,4 +101,27 @@ class MockedRecentsModelHelper {
 
         on { isTaskListValid(any()) } doAnswer { taskListId == it.getArgument(0) }
     }
+
+    private var recentTasks: List<GroupTask> = emptyList()
+
+    // NOTE: For the update to take effect, `resolvePendingTaskRequests()` needs to be called, so
+    // calbacks to any pending `RecentsModel.getTasks()` get called with the updated task list.
+    fun updateRecentTasks(tasks: List<GroupTask>) {
+        ++taskListId
+        recentTasks = tasks
+        if (enableTaskbarUiThread()) {
+            onTaskChangeCallback?.invoke(null)
+        } else {
+            recentTasksChangedListener?.onRecentTasksChanged()
+        }
+    }
+
+    fun resolvePendingTaskRequests() {
+        val requests = mutableListOf<(List<GroupTask>) -> Unit>()
+        requests.addAll(taskRequests)
+        taskRequests.clear()
+        requests.forEach { it(recentTasks) }
+    }
+
+    operator fun getValue(source: Any, property: KProperty<*>): RecentsModel = mockRecentsModel
 }

@@ -27,13 +27,11 @@ import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_HOVER_ENTER
 import android.view.MotionEvent.ACTION_HOVER_EXIT
 import android.window.RemoteTransition
-import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.BubbleTextView
 import com.android.launcher3.Flags.FLAG_ENABLE_MULTI_INSTANCE_MENU_TASKBAR
 import com.android.launcher3.R
-import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.model.BgDataModel
 import com.android.launcher3.model.data.ItemInfo
@@ -49,19 +47,16 @@ import com.android.launcher3.taskbar.TaskbarIconType.ALL_APPS
 import com.android.launcher3.taskbar.TaskbarIconType.HOTSEAT
 import com.android.launcher3.taskbar.TaskbarIconType.OVERFLOW
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatItems
-import com.android.launcher3.taskbar.rules.AllTaskbarSandboxModules
 import com.android.launcher3.taskbar.rules.MockedRecentsModelHelper
-import com.android.launcher3.taskbar.rules.MockedRecentsModelTestRule
 import com.android.launcher3.taskbar.rules.SandboxParams
 import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.PINNED
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.TRANSIENT
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
-import com.android.launcher3.taskbar.rules.TaskbarSandboxComponent
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
-import com.android.launcher3.util.Executors.MAIN_EXECUTOR
+import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext_ModifiedComponent
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
 import com.android.launcher3.util.Preconditions.assertNotNull
 import com.android.launcher3.util.TestUtil.getOnTaskbarUiThread
@@ -73,6 +68,8 @@ import com.android.quickstep.util.SingleTask
 import com.android.quickstep.util.SingleTask.Companion.createTaskItemInfo
 import com.android.quickstep.util.SlideInRemoteTransition
 import com.android.systemui.shared.recents.model.Task
+import com.android.tools.dagger.mutation.annotations.BindValue
+import com.android.tools.dagger.mutation.annotations.MutatedComponent
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE
 import com.android.window.flags.Flags.FLAG_ENABLE_OVERFLOW_BUTTON_FOR_TASKBAR_PINNED_ITEMS
 import com.android.window.flags.Flags.FLAG_ENABLE_PINNING_APP_WITH_CONTEXT_MENU
@@ -81,8 +78,6 @@ import com.android.wm.shell.Flags.FLAG_ENABLE_BUBBLE_BAR
 import com.android.wm.shell.desktopmode.IDesktopTaskListener
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource
 import com.google.common.truth.Truth.assertThat
-import dagger.BindsInstance
-import dagger.Component
 import java.util.function.Predicate
 import org.junit.After
 import org.junit.Before
@@ -94,7 +89,6 @@ import org.junit.runners.model.Statement
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doAnswer
-import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
@@ -105,10 +99,12 @@ import org.mockito.kotlin.whenever
     FLAG_ENABLE_TASKBAR_OVERFLOW,
 )
 @DisableFlags(FLAG_ENABLE_MULTI_INSTANCE_MENU_TASKBAR)
+@MutatedComponent(target = TaskbarWindowSandboxContext_ModifiedComponent::class)
 class TaskbarOverflowTest {
     @get:Rule(order = 0) val setFlagsRule = SetFlagsRule()
 
-    val mockRecentsModelHelper: MockedRecentsModelHelper = MockedRecentsModelHelper()
+    private val mockRecentsModelHelper: MockedRecentsModelHelper = MockedRecentsModelHelper()
+    @BindValue val recentsModel: RecentsModel by mockRecentsModelHelper
 
     private var systemUiProxySpy: SystemUiProxy? = null
 
@@ -116,27 +112,13 @@ class TaskbarOverflowTest {
     val context =
         TaskbarWindowSandboxContext.create(
             params =
-                SandboxParams(
-                    {
-                        spy(
-                            SystemUiProxy(
-                                ApplicationProvider.getApplicationContext(),
-                                MAIN_EXECUTOR,
-                                UI_HELPER_EXECUTOR,
-                            )
-                        ) { proxy ->
-                            systemUiProxySpy = proxy
-                            doAnswer { desktopTaskListener = it.getArgument(0) }
-                                .whenever(proxy)
-                                .setDesktopTaskListener(anyOrNull())
-                        }
-                    },
-                    DaggerTaskbarOverflowComponent.builder()
-                        .bindRecentsModel(mockRecentsModelHelper.mockRecentsModel),
-                )
+                SandboxParams(builderBase = mutatedComponentBuilder()) {
+                    systemUiProxySpy = it.systemUiProxy
+                    doAnswer { i -> desktopTaskListener = i.getArgument(0) }
+                        .whenever(it.systemUiProxy)
+                        .setDesktopTaskListener(anyOrNull())
+                }
         )
-
-    @get:Rule(order = 2) val recentsModel = MockedRecentsModelTestRule(mockRecentsModelHelper)
 
     @get:Rule(order = 3) val taskbarModeRule = TaskbarModeRule(context)
 
@@ -156,13 +138,14 @@ class TaskbarOverflowTest {
     @get:Rule(order = 6)
     val taskbarUnitTestRule = TaskbarUnitTestRule(context, this::onControllersInitialized)
 
-    val taskbarViewController by taskbarUnitTestRule.delegate { it.taskbarViewController }
-    val recentAppsController by taskbarUnitTestRule.delegate { it.taskbarRecentAppsController }
-    val bubbleBarViewController by
+    private val taskbarViewController by taskbarUnitTestRule.delegate { it.taskbarViewController }
+    private val recentAppsController by
+        taskbarUnitTestRule.delegate { it.taskbarRecentAppsController }
+    private val bubbleBarViewController by
         taskbarUnitTestRule.delegate { it.bubbleControllers.orElseThrow().bubbleBarViewController }
-    val bubbleStashController by
+    private val bubbleStashController by
         taskbarUnitTestRule.delegate { it.bubbleControllers.orElseThrow().bubbleStashController }
-    val keyboardQuickSwitchController by
+    private val keyboardQuickSwitchController by
         taskbarUnitTestRule.delegate { it.keyboardQuickSwitchController }
 
     private val desktopVisibilityController: DesktopVisibilityController
@@ -197,7 +180,7 @@ class TaskbarOverflowTest {
 
     @Before
     fun ensureRunningAppsShowing() {
-        runOnTaskbarUiThreadSync { recentsModel.resolvePendingTaskRequests() }
+        runOnTaskbarUiThreadSync { mockRecentsModelHelper.resolvePendingTaskRequests() }
     }
 
     @After
@@ -452,7 +435,7 @@ class TaskbarOverflowTest {
         tapOverflowIcon()
         // Keyboard quick switch view is shown only after list of recent task is asynchronously
         // retrieved from the recents model.
-        runOnTaskbarUiThreadSync { recentsModel.resolvePendingTaskRequests() }
+        runOnTaskbarUiThreadSync { mockRecentsModelHelper.resolvePendingTaskRequests() }
 
         assertThat(getOnTaskbarUiThread { keyboardQuickSwitchController.isShownFromTaskbar })
             .isTrue()
@@ -482,7 +465,7 @@ class TaskbarOverflowTest {
         tapOverflowIcon()
         // Keyboard quick switch view is shown only after list of recent task is asynchronously
         // retrieved from the recents model.
-        runOnTaskbarUiThreadSync { recentsModel.resolvePendingTaskRequests() }
+        runOnTaskbarUiThreadSync { mockRecentsModelHelper.resolvePendingTaskRequests() }
 
         assertThat(getOnTaskbarUiThread { keyboardQuickSwitchController.isShownFromTaskbar })
             .isTrue()
@@ -579,7 +562,7 @@ class TaskbarOverflowTest {
         tapOverflowIcon()
         // Keyboard quick switch view is shown only after list of recent task is asynchronously
         // retrieved from the recents model.
-        runOnTaskbarUiThreadSync { recentsModel.resolvePendingTaskRequests() }
+        runOnTaskbarUiThreadSync { mockRecentsModelHelper.resolvePendingTaskRequests() }
 
         assertThat(getOnTaskbarUiThread { keyboardQuickSwitchController.isShownFromTaskbar })
             .isTrue()
@@ -633,7 +616,7 @@ class TaskbarOverflowTest {
         tapOverflowIcon()
         // Keyboard quick switch view is shown only after list of recent task is asynchronously
         // retrieved from the recents model.
-        runOnTaskbarUiThreadSync { recentsModel.resolvePendingTaskRequests() }
+        runOnTaskbarUiThreadSync { mockRecentsModelHelper.resolvePendingTaskRequests() }
 
         assertThat(getOnTaskbarUiThread { keyboardQuickSwitchController.isShownFromTaskbar })
             .isTrue()
@@ -922,13 +905,13 @@ class TaskbarOverflowTest {
                 )
             })
 
-        recentsModel.updateRecentTasks(
+        mockRecentsModelHelper.updateRecentTasks(
             tasks + listOf(DesktopTask(deskId = 0, defaultDisplayId, desktopTasks))
         )
         for (task in 1..desktopTasks.size) {
             desktopTaskListener?.onTasksVisibilityChanged(defaultDisplayId, task)
         }
-        runOnTaskbarUiThreadSync { recentsModel.resolvePendingTaskRequests() }
+        runOnTaskbarUiThreadSync { mockRecentsModelHelper.resolvePendingTaskRequests() }
     }
 
     private val navButtonEndSpacing: Int
@@ -1096,18 +1079,5 @@ class TaskbarOverflowTest {
                 recentAppsController?.updateHotseatItemInfos(hotseatItems.toTypedArray())
             }
         }
-    }
-}
-
-/** TaskbarOverflowComponent used to bind the RecentsModel. */
-@LauncherAppSingleton
-@Component(modules = [AllTaskbarSandboxModules::class])
-interface TaskbarOverflowComponent : TaskbarSandboxComponent {
-
-    @Component.Builder
-    interface Builder : TaskbarSandboxComponent.Builder {
-        @BindsInstance fun bindRecentsModel(model: RecentsModel): Builder
-
-        override fun build(): TaskbarOverflowComponent
     }
 }

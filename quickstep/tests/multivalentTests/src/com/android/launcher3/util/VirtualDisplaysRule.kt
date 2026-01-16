@@ -22,8 +22,11 @@ import android.hardware.display.VirtualDisplay
 import androidx.test.core.app.ApplicationProvider
 import com.android.app.displaylib.DisplayDecorationListener
 import com.android.app.displaylib.DisplaysWithDecorationsRepositoryCompat
-import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
-import org.junit.rules.ExternalResource
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.runBlocking
 
 /**
  * Manages multiple displays at runtime.
@@ -34,13 +37,13 @@ import org.junit.rules.ExternalResource
  *
  * All [virtualDisplays] are released upon teardown.
  */
-class VirtualDisplaysRule(context: Context = ApplicationProvider.getApplicationContext()) :
-    ExternalResource() {
+class VirtualDisplaysRule(context: Context = ApplicationProvider.getApplicationContext()) {
 
     private val displayManager =
         requireNotNull(context.getSystemService(DisplayManager::class.java))
     private val virtualDisplays = mutableMapOf<Int, VirtualDisplay>()
-    private val displayDecorationListeners = mutableListOf<DisplayDecorationListener>()
+    private val displayDecorationListeners =
+        mutableListOf<Pair<DisplayDecorationListener, CoroutineDispatcher>>()
 
     /**
      * Adds a display with the provided parameters, and notifies system decorations addition.
@@ -64,10 +67,14 @@ class VirtualDisplaysRule(context: Context = ApplicationProvider.getApplicationC
 
         val displayId = virtualDisplay.display.displayId
         virtualDisplays[displayId] = virtualDisplay
-        runOnTaskbarUiThreadSync {
-            for (l in displayDecorationListeners) l.onDisplayAddSystemDecorations(displayId)
-        }
 
+        runBlocking {
+            displayDecorationListeners
+                .map { (decorator, dispatcher) ->
+                    async(dispatcher) { decorator.onDisplayAddSystemDecorations(displayId) }
+                }
+                .awaitAll()
+        }
         return displayId
     }
 
@@ -82,21 +89,28 @@ class VirtualDisplaysRule(context: Context = ApplicationProvider.getApplicationC
                 ?: throw IllegalArgumentException("Display $displayId not added")
 
         val displayId = virtualDisplay.display.displayId
-        runOnTaskbarUiThreadSync {
-            for (l in displayDecorationListeners) l.onDisplayRemoveSystemDecorations(displayId)
+        runBlocking {
+            displayDecorationListeners
+                .map { (decorator, dispatcher) ->
+                    async(dispatcher) { decorator.onDisplayRemoveSystemDecorations(displayId) }
+                }
+                .awaitAll()
         }
 
         virtualDisplay.release()
     }
 
-    fun registerDisplayDecorationListener(listener: DisplayDecorationListener) {
-        displayDecorationListeners += listener
+    fun registerDisplayDecorationListener(
+        listener: DisplayDecorationListener,
+        dispatcher: CoroutineDispatcher = Dispatchers.Main,
+    ) {
+        displayDecorationListeners += listener to dispatcher
     }
 
     /** Returns the [VirtualDisplay] for [displayId]. */
     operator fun get(displayId: Int): VirtualDisplay? = virtualDisplays[displayId]
 
-    override fun after() {
+    fun cleanup() {
         for (v in virtualDisplays.values) v.release()
         displayDecorationListeners.clear()
     }

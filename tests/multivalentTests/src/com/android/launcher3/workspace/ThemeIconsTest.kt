@@ -38,7 +38,6 @@ import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.BubbleTextView
 import com.android.launcher3.Flags
 import com.android.launcher3.Launcher
-import com.android.launcher3.R
 import com.android.launcher3.Utilities
 import com.android.launcher3.dagger.LauncherComponentProvider.get
 import com.android.launcher3.icons.mono.ThemedIconDelegate
@@ -226,7 +225,7 @@ class ThemeIconsTest : BaseLauncherActivityTest<Launcher>() {
     }
 
     private fun addShortcut() {
-        val addButtonDescription = targetContext().getString(R.string.action_add_to_workspace)
+        val addButtonDescription = "Add to home screen"
         val matcher =
             hasContentDescription(addButtonDescription) and (hasAnyAncestor(hasText(SHORTCUT_NAME)))
 

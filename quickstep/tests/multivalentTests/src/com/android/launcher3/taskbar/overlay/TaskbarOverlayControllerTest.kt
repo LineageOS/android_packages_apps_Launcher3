@@ -49,7 +49,7 @@ class TaskbarOverlayControllerTest {
     @get:Rule(order = 1) val taskbarModeRule = TaskbarModeRule(context)
     @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    val overlayController by taskbarUnitTestRule.delegate { it.taskbarOverlayController }
+    private val overlayController by taskbarUnitTestRule.delegate { it.taskbarOverlayController }
 
     private val taskbarContext: TaskbarActivityContext
         get() = taskbarUnitTestRule.activityContext

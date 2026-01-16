@@ -22,12 +22,12 @@ import android.content.res.Resources
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.annotation.UiThreadTest
 import androidx.test.filters.SmallTest
 import com.android.launcher3.Flags
 import com.android.launcher3.R
-import com.android.launcher3.util.TestDispatcherProvider
-import com.android.launcher3.util.coroutines.DispatcherProvider
+import com.android.launcher3.util.Executors.MAIN_EXECUTOR
+import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.quickstep.task.thumbnail.data.TaskThumbnailDataSource.RequestResolution
 import com.android.quickstep.util.TaskKeyCache
 import com.android.systemui.shared.recents.model.Task
@@ -47,6 +47,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
@@ -55,7 +57,7 @@ import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(AndroidJUnit4::class)
+@RunWith(LauncherMultivalentJUnit::class)
 class TaskThumbnailCacheTest {
     @get:Rule val setFlagsRule = SetFlagsRule()
 
@@ -69,14 +71,12 @@ class TaskThumbnailCacheTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
-    private val testDispatcherProvider: DispatcherProvider = TestDispatcherProvider(testDispatcher)
-
     val systemUnderTest =
         TaskThumbnailCache(
             context,
             mock<Executor>(),
             taskKeyCache,
-            testDispatcherProvider,
+            testDispatcher,
             activityManagerWrapper,
         )
 
@@ -117,6 +117,43 @@ class TaskThumbnailCacheTest {
         // Preload is not needed when it has the same cache size
         assertThat(systemUnderTest.updateCacheSizeAndRemoveExcess()).isFalse()
         verify(taskKeyCache, never()).updateCacheSizeAndRemoveExcess(anyInt())
+    }
+
+    @Test
+    fun getCacheSize_getsValueFromCache() {
+        val expectedCacheSize = 10
+        whenever(taskKeyCache.getMaxSize()).thenReturn(expectedCacheSize)
+
+        assertThat(systemUnderTest.getCacheSize()).isEqualTo(expectedCacheSize)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_LOW_RES_THUMBNAIL_PRELOADING)
+    @UiThreadTest
+    fun getThumbnailInBackground_defaultsToRequestingLowRes() {
+        val thumbnailData = ThumbnailData(thumbnail = mock(), reducedResolution = true)
+        val task = Task(createTaskKey(TASK_ID))
+        whenever(activityManagerWrapper.getTaskThumbnail(TASK_ID, true)).thenReturn(thumbnailData)
+
+        val cancellableTask = systemUnderTest.getThumbnailInBackground(task) {}
+        MAIN_EXECUTOR.execute(cancellableTask!!)
+
+        verify(activityManagerWrapper).getTaskThumbnail(TASK_ID, true)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_LOW_RES_THUMBNAIL_PRELOADING)
+    @UiThreadTest
+    fun getThumbnailInBackground_returnsLowResThumbnailIfInTaskObject() {
+        val task = Task(createTaskKey(TASK_ID))
+        val expectedTaskThumbnail = ThumbnailData(thumbnail = mock(), reducedResolution = true)
+        task.thumbnail = expectedTaskThumbnail
+
+        var actualTaskThumbnail: ThumbnailData? = null
+        systemUnderTest.getThumbnailInBackground(task) { actualTaskThumbnail = it }
+
+        verify(activityManagerWrapper, never()).getTaskThumbnail(eq(TASK_ID), any())
+        assertThat(actualTaskThumbnail).isEqualTo(expectedTaskThumbnail)
     }
 
     @Test

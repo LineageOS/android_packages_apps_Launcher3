@@ -551,16 +551,22 @@ public class AllSetActivity extends Activity {
 
         mSysUIConnectionCleanup.executeAllAndClear();
         var connCleanup = mSysUIConnectionTracker.getActiveComponent().forEach(
-                MAIN_EXECUTOR, conn -> {
+                Executors.getTaskbarUiThread(), conn -> {
                     if (conn == null) return null;
                     var tb = conn.getTaskbarManager();
+                    var startHandleProxy = tb.getStashedHandleViewController();
+                    var displayStream = tb.getPrimaryDisplayUiControllerStream();
 
-                    mStashedHandleViewControllerProxy = tb.getStashedHandleViewController();
-                    tb.setSetupUIVisible(isResumed());
-                    var displayCleanup = tb.getPrimaryDisplayUiControllerStream().forEach(
-                            MAIN_EXECUTOR, c -> onUiControllerChanged(tb));
-                    mSysUIConnectionCleanup.add(displayCleanup::close);
-                    onUiControllerChanged(tb);
+                    MAIN_EXECUTOR.execute(() -> {
+                        mStashedHandleViewControllerProxy = startHandleProxy;
+                        tb.setSetupUIVisible(isResumed());
+
+                        var displayCleanup = displayStream.forEach(
+                                MAIN_EXECUTOR, c -> onUiControllerChanged(tb));
+                        mSysUIConnectionCleanup.add(displayCleanup::close);
+                        onUiControllerChanged(tb);
+
+                    });
                     return null;
                 });
         mSysUIConnectionCleanup.add(connCleanup::close);

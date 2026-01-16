@@ -16,7 +16,6 @@
 
 package com.android.launcher3.taskbar.rules
 
-import android.hardware.input.InputManager
 import android.provider.Settings.Secure.NAV_BAR_KIDS_MODE
 import android.provider.Settings.Secure.USER_SETUP_COMPLETE
 import android.provider.Settings.Secure.getUriFor
@@ -34,6 +33,7 @@ import com.android.launcher3.taskbar.TaskbarUIController
 import com.android.launcher3.util.LauncherMultivalentJUnit.Companion.isRunningInRobolectric
 import com.android.launcher3.util.TestUtil
 import com.android.launcher3.util.ThreadSafeRunnableList
+import com.android.quickstep.dagger.SysUIConnectionComponent
 import com.google.common.truth.Truth.assertWithMessage
 import com.google.common.truth.TruthJUnit.assume
 import java.util.Locale
@@ -41,11 +41,6 @@ import kotlin.reflect.KProperty
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
-import org.mockito.kotlin.any
-import org.mockito.kotlin.doAnswer
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.stub
-import org.mockito.kotlin.whenever
 
 /**
  * Manages the Taskbar lifecycle for unit tests.
@@ -72,13 +67,19 @@ import org.mockito.kotlin.whenever
  */
 class TaskbarUnitTestRule(
     private val context: TaskbarWindowSandboxContext,
-    private val controllerInjectionCallback: () -> Unit = {},
+    private val activityInitializedCallback: () -> Unit = {},
 ) : TestRule {
 
-    private lateinit var sysUIConnection: TaskbarSysUIConnectionComponent
+    private val cleanup = ThreadSafeRunnableList()
+    private val sysUIConnection: SysUIConnectionComponent by lazy {
+        context.base.appComponent.sysUIConnectionComponentBuilder
+            .setConnectionCleaner(cleanup)
+            .build()
+    }
 
-    val taskbarManager: TaskbarManagerImpl
-        get() = sysUIConnection.taskbarImpl
+    val taskbarManager: TaskbarManagerImpl by lazy {
+        sysUIConnection.taskbarManager.getFromImplSync { it }
+    }
 
     val activityContext: TaskbarActivityContext
         get() {
@@ -119,34 +120,8 @@ class TaskbarUnitTestRule(
                 context.settingsCacheSandbox[getUriFor(NAV_BAR_KIDS_MODE)] =
                     if (description.getAnnotation(NavBarKidsMode::class.java) != null) 1 else 0
 
-                // Mocks required for QuickstepKeyGestureEventsManager
-                context.base.spyService(InputManager::class.java).stub {
-                    doAnswer {}.whenever(mock).registerKeyGestureEventHandler(any(), any())
-                    doAnswer {}.whenever(mock).unregisterKeyGestureEventHandler(any())
-                }
-
-                val cleanup = ThreadSafeRunnableList()
-                val builder =
-                    context.base.appComponent.sysUIConnectionComponentBuilder
-                        as TaskbarSysUIConnectionComponent.Builder
-
-                sysUIConnection =
-                    builder
-                        .bindDisplayDecorationProvider(
-                            mock {
-                                doAnswer {
-                                        context.virtualDisplayRule
-                                            .registerDisplayDecorationListener(it.getArgument(0))
-                                    }
-                                    .whenever(it)
-                                    .registerDisplayDecorationListener(any(), any())
-                            }
-                        )
-                        .setConnectionCleaner(cleanup)
-                        .build() as TaskbarSysUIConnectionComponent
-
                 TestUtil.getOnTaskbarUiThread {
-                    sysUIConnection.taskbarImpl.apply {
+                    taskbarManager.apply {
                         val root = primaryResource.rootLayout
                         root.setOnHierarchyChangeListener(
                             object : OnHierarchyChangeListener {
@@ -193,7 +168,7 @@ class TaskbarUnitTestRule(
 
         // TODO(b/346394875): we should test a non-default uiController.
         activityContext.setUIController(TaskbarUIController.DEFAULT)
-        controllerInjectionCallback.invoke()
+        activityInitializedCallback.invoke()
     }
 
     fun <T> delegate(provider: (TaskbarControllers) -> T) = ControllerDelegate(provider)
