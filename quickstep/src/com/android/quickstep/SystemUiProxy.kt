@@ -1338,6 +1338,15 @@ constructor(
             desktopMode?.onDesktopSplitSelectChoice(taskInfo)
         }
 
+    /**
+     * Perform any necessary cleanup transactions after split select animation is started in desktop
+     * windowing by dragging task to split.
+     */
+    fun onSplitSelectAnimationStarted(taskId: Int) =
+        executeWithErrorLog({ "Failed call onSplitSelectAnimationStarted" }) {
+            desktopMode?.onSplitSelectAnimationStarted(taskId)
+        }
+
     /** Call shell to move a task with given `taskId` to desktop */
     fun moveToDesktop(
         taskId: Int,

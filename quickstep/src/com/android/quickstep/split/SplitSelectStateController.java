@@ -1196,6 +1196,8 @@ public class SplitSelectStateController {
                     public void onAnimationStart(Animator animation) {
                         InteractionJankMonitorWrapper.begin(
                                 floatingTaskView, CUJ_DESKTOP_MODE_MOVE_TO_SPLIT_SCREEN);
+                        SystemUiProxy.INSTANCE.get(mContext)
+                                .onSplitSelectAnimationStarted(mTaskInfo.taskId);
                         if (targets == null) {
                             return;
                         }
