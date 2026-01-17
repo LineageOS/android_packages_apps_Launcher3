@@ -26,6 +26,7 @@ import static com.android.launcher3.taskbar.TaskbarPinningController.PINNING_TRA
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;
+import android.annotation.SuppressLint;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -235,9 +236,6 @@ public class BubbleBarViewController {
         mBubbleClickListener = v -> onBubbleClicked((BubbleView) v);
         mBubbleDragController.setupBubbleBarView(mBarView);
         mOverflowBubble = bubbleControllers.bubbleCreator.createOverflow(mBarView);
-        if (!Flags.enableOptionalBubbleOverflow()) {
-            showOverflow(true);
-        }
         if (!mBubbleStashController.isTransientTaskBar()) {
             // TODO(b/380274085) for transient taskbar mode, the click is also handled by the input
             //  consumer. This check can be removed once b/380274085 is fixed.
@@ -319,6 +317,13 @@ public class BubbleBarViewController {
             }
 
             @Override
+            public void expand(BubbleView bubble) {
+                if (bubble.getBubble() != null) {
+                    mBubbleBarController.showAndSelectBubble(bubble.getBubble());
+                }
+            }
+
+            @Override
             public void collapse() {
                 collapseBubbleBar();
             }
@@ -329,6 +334,11 @@ public class BubbleBarViewController {
                 mBubbleBarController.updateBubbleBarLocation(location, source);
             }
         };
+
+        if (!Flags.enableOptionalBubbleOverflow()) {
+            // This should be called after mBubbleViewController is initialized
+            showOverflow(true);
+        }
     }
 
     /**
@@ -1094,6 +1104,7 @@ public class BubbleBarViewController {
     }
 
     /** Shows or hides the overflow view. */
+    @SuppressLint("ClickableViewAccessibility")
     public void showOverflow(boolean showOverflow) {
         if (mOverflowAdded == showOverflow) return;
         mOverflowAdded = showOverflow;
@@ -1101,6 +1112,9 @@ public class BubbleBarViewController {
             mBarView.addBubble(mOverflowBubble.getView(), /* suppressAnimation= */ true);
             mOverflowBubble.getView().setOnClickListener(mBubbleClickListener);
             mOverflowBubble.getView().setController(mBubbleViewController);
+            // the drag controller sets up touch listener on the overflow so that click events
+            // dispatched from bubble bar view can trigger the click listener on the overflow
+            mBubbleDragController.setupBubbleView(mOverflowBubble.getView());
         } else {
             mBarView.removeBubble(mOverflowBubble.getView());
             mOverflowBubble.getView().setOnClickListener(null);

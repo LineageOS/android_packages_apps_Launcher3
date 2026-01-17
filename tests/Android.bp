@@ -97,8 +97,6 @@ android_library {
         "systemui-tapl",
         "Launcher3TestResources",
         "android.security.flags-aconfig-java",
-        "androidx.compose.ui_ui-test-junit4",
-        "androidx.compose.ui_ui-test-manifest",
     ],
     package_name: "com.android.launcher3.tests",
     platform_apis: true,

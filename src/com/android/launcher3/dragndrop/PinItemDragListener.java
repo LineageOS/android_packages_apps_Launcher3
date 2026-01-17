@@ -36,6 +36,7 @@ import androidx.annotation.Nullable;
 
 import com.android.launcher3.DragSource;
 import com.android.launcher3.Launcher;
+import com.android.launcher3.LauncherState;
 import com.android.launcher3.PendingAddItemInfo;
 import com.android.launcher3.widget.LauncherAppWidgetProviderInfo;
 import com.android.launcher3.widget.PendingAddShortcutInfo;
@@ -91,6 +92,13 @@ public class PinItemDragListener extends BaseItemDragListener<Launcher> {
     @Override
     public String getMimeType() {
         return mMimeType != null ? mMimeType : super.getMimeType();
+    }
+
+    @Override
+    public boolean init(Launcher context, boolean isHomeStarted) {
+        final boolean result = super.init(context, isHomeStarted);
+        context.getStateManager().goToState(LauncherState.NORMAL, /* animated= */ isHomeStarted);
+        return result;
     }
 
     @Override

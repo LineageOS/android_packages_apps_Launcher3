@@ -1365,6 +1365,9 @@ public class BubbleBarView extends FrameLayout {
      */
     public void setSelectedBubble(BubbleView view) {
         BubbleView previouslySelectedBubble = mSelectedBubbleView;
+        if (previouslySelectedBubble != null) {
+            previouslySelectedBubble.setSelected(false);
+        }
         mSelectedBubbleView = view;
         mBubbleBarBackground.showArrow(view != null);
 
@@ -1373,6 +1376,7 @@ public class BubbleBarView extends FrameLayout {
             updateArrowForSelected(previouslySelectedBubble != null);
         }
         if (view != null) {
+            view.setSelected(true);
             if (isExpanded()) {
                 view.markSeen();
             } else {
@@ -1602,6 +1606,20 @@ public class BubbleBarView extends FrameLayout {
             return true;
         }
         return super.onInterceptTouchEvent(ev);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        // this touch event handler is in place to increase the touch targets around the bubbles for
+        // accessibility
+        if (isExpanded() && !isExpanding()) {
+            float iconAndPadding = mIconSize + mExpandedBarIconsSpacing;
+            int bubbleIndex = (int) (ev.getX() / iconAndPadding);
+            if (bubbleIndex < getChildCount()) {
+                return getChildAt(bubbleIndex).dispatchTouchEvent(ev);
+            }
+        }
+        return super.onTouchEvent(ev);
     }
 
     private boolean hasOverflow() {

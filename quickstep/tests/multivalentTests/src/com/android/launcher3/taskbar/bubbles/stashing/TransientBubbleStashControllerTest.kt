@@ -586,6 +586,76 @@ class TransientBubbleStashControllerTest {
         assertThat(alphaProperty).isNull()
     }
 
+    @Test
+    fun bubbleBarVerticalCenterForHome_updatedWhileOnHome_animatesToNewPosition() {
+        // Given bubble bar is on home and has bubbles
+        whenever(bubbleBarViewController.hasBubbles()).thenReturn(true)
+        getInstrumentation().runOnMainSync {
+            mTransientBubbleStashController.launcherState = BubbleLauncherState.HOME
+        }
+        // Wait for initial animation to finish
+        advanceTimeBy(BubbleStashController.BAR_TRANSLATION_DURATION)
+        PhysicsAnimatorTestUtils.blockUntilAnimationsEnd(DynamicAnimation.TRANSLATION_Y)
+        assertThat(bubbleBarView.translationY).isEqualTo(HOTSEAT_TRANSLATION_Y)
+
+        // When the vertical center for home is updated
+        val newCenterY = HOTSEAT_VERTICAL_CENTER + 20
+        val expectedY = -newCenterY + BUBBLE_BAR_HEIGHT / 2f
+        getInstrumentation().runOnMainSync {
+            mTransientBubbleStashController.bubbleBarVerticalCenterForHome = newCenterY
+        }
+
+        // Then the bubble bar animates to the new position
+        assertThat(barTranslationY.isAnimating).isTrue()
+        advanceTimeBy(BubbleStashController.BAR_TRANSLATION_DURATION)
+        PhysicsAnimatorTestUtils.blockUntilAnimationsEnd(DynamicAnimation.TRANSLATION_Y)
+        assertThat(barTranslationY.isAnimating).isFalse()
+        assertThat(bubbleBarView.translationY).isEqualTo(expectedY)
+        verify(taskbarInsetsController, atLeastOnce())
+            .onTaskbarOrBubblebarWindowHeightOrInsetsChanged()
+    }
+
+    @Test
+    fun bubbleBarVerticalCenterForHome_updatedWhileNotInHome_doesNotAnimate() {
+        // Given bubble bar is in-app (not on home)
+        whenever(bubbleBarViewController.hasBubbles()).thenReturn(true)
+        getInstrumentation().runOnMainSync {
+            mTransientBubbleStashController.launcherState = BubbleLauncherState.IN_APP
+        }
+        val initialTranslationY = bubbleBarView.translationY
+
+        // When the vertical center for home is updated
+        val newCenterY = HOTSEAT_VERTICAL_CENTER + 20
+        getInstrumentation().runOnMainSync {
+            mTransientBubbleStashController.bubbleBarVerticalCenterForHome = newCenterY
+        }
+
+        // Then the bubble bar does not animate and its position doesn't change
+        assertThat(barTranslationY.isAnimating).isFalse()
+        assertThat(bubbleBarView.translationY).isEqualTo(initialTranslationY)
+    }
+
+    @Test
+    fun bubbleBarVerticalCenterForHome_updatedWithSameValue_doesNotAnimate() {
+        // Given bubble bar is on home and has bubbles
+        whenever(bubbleBarViewController.hasBubbles()).thenReturn(true)
+        getInstrumentation().runOnMainSync {
+            mTransientBubbleStashController.launcherState = BubbleLauncherState.HOME
+        }
+        // Wait for initial animation to finish
+        advanceTimeBy(BubbleStashController.BAR_TRANSLATION_DURATION)
+        PhysicsAnimatorTestUtils.blockUntilAnimationsEnd(DynamicAnimation.TRANSLATION_Y)
+        assertThat(barTranslationY.isAnimating).isFalse()
+
+        // When the vertical center for home is updated with the same value
+        getInstrumentation().runOnMainSync {
+            mTransientBubbleStashController.bubbleBarVerticalCenterForHome = HOTSEAT_VERTICAL_CENTER
+        }
+
+        // Then the bubble bar does not animate
+        assertThat(barTranslationY.isAnimating).isFalse()
+    }
+
     private fun advanceTimeBy(advanceMs: Long) {
         // Advance animator for on-device tests
         runOnTaskbarUiThreadSync { animatorTestRule.advanceTimeBy(advanceMs) }

@@ -21,7 +21,6 @@ import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICA
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_GROUP;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FOLDER;
-import static com.android.launcher3.LauncherState.NORMAL;
 import static com.android.launcher3.states.RotationHelper.REQUEST_LOCK;
 import static com.android.launcher3.states.RotationHelper.REQUEST_NONE;
 
@@ -126,7 +125,6 @@ public abstract class BaseItemDragListener<T extends ActivityContext>
         }
 
         if (context instanceof Launcher launcher) {
-            launcher.getStateManager().goToState(NORMAL, /* animated= */ isHomeStarted);
             launcher.getRotationHelper().setStateHandlerRequest(REQUEST_LOCK);
         }
 

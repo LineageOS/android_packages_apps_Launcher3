@@ -24,6 +24,7 @@ import static com.android.launcher3.BubbleTextView.RunningAppState.MINIMIZED;
 import static com.android.launcher3.BubbleTextView.RunningAppState.RUNNING;
 import static com.android.launcher3.Flags.enableContrastTiles;
 import static com.android.launcher3.Flags.enableScalabilityForDesktopExperience;
+import static com.android.launcher3.UtilitiesKt.drawWorkspaceItemSelectionHighlight;
 import static com.android.launcher3.graphics.AutomatedIconDelegate.newAutomatedIcon;
 import static com.android.launcher3.graphics.PreloadIconDelegate.extractPreloadDelegate;
 import static com.android.launcher3.graphics.PreloadIconDelegate.hasPendingAnimationCompleted;
@@ -81,9 +82,11 @@ import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 
 import com.android.launcher3.accessibility.BaseAccessibilityDelegate;
 import com.android.launcher3.anim.AnimatedFloat;
+import com.android.launcher3.apppairs.AppPairIcon;
 import com.android.launcher3.dot.DotInfo;
 import com.android.launcher3.dragndrop.DragOptions.PreDragCondition;
 import com.android.launcher3.dragndrop.DraggableView;
+import com.android.launcher3.folder.FolderIcon;
 import com.android.launcher3.graphics.AutomatedIconDelegate;
 import com.android.launcher3.graphics.PreloadIconDelegate;
 import com.android.launcher3.graphics.ThemeManager;
@@ -911,9 +914,19 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
 
     @Override
     public void onDraw(Canvas canvas) {
+        drawSelectedBackgroundIfNecessary(canvas);
+
         super.onDraw(canvas);
         drawDotIfNecessary(canvas);
         drawRunningAppIndicatorIfNecessary(canvas);
+    }
+
+    protected void drawSelectedBackgroundIfNecessary(Canvas canvas) {
+        // FolderIcons and AppPairIcons draw the workspace highlight themselves.
+        if (isSelected() && !(getParent() instanceof FolderIcon)
+                && !(getParent() instanceof AppPairIcon)) {
+            drawWorkspaceItemSelectionHighlight(canvas, this);
+        }
     }
 
     /**

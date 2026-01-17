@@ -24,6 +24,7 @@ import static com.android.launcher3.LauncherAnimUtils.ROTATION_DRAWABLE_PERCENT;
 import static com.android.launcher3.LauncherAnimUtils.VIEW_TRANSLATE_X;
 import static com.android.launcher3.Utilities.getDescendantCoordRelativeToAncestor;
 import static com.android.launcher3.anim.AnimatorListeners.forEndCallback;
+import static com.android.launcher3.taskbar.LauncherTaskbarUIController.IME_PROGRESS_INDEX;
 import static com.android.launcher3.taskbar.LauncherTaskbarUIController.SYSUI_SURFACE_PROGRESS_INDEX;
 import static com.android.launcher3.taskbar.TaskbarDesktopExperienceFlags.enableAutoStashConnectedDisplayTaskbar;
 import static com.android.launcher3.taskbar.TaskbarNavButtonController.BUTTON_A11Y;
@@ -216,6 +217,9 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
     // Used for System UI state updates that should translate the nav button for in-app display.
     private final AnimatedFloat mNavButtonInAppDisplayProgressForSysui = new AnimatedFloat(
             this::updateNavButtonInAppDisplayProgressForSysui);
+    private final AnimatedFloat mNavButtonInAppDisplayProgressForIme = new AnimatedFloat(
+            this::updateNavButtonInAppDisplayProgressForIme);
+
     /**
      * Expected nav button dark intensity piped down from {@code LightBarController} in framework
      * via {@code TaskbarDelegate}.
@@ -369,10 +373,15 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
         // - VoiceInteractionWindow (assistant) is showing
         // - Keyboard shortcuts helper is showing
         if (!isPhoneMode) {
-            int flagsToRemoveTranslation = FLAG_NOTIFICATION_SHADE_EXPANDED | FLAG_IME_VISIBLE
+            int flagsToRemoveTranslation = FLAG_NOTIFICATION_SHADE_EXPANDED
                     | FLAG_VOICE_INTERACTION_WINDOW_SHOWING | FLAG_KEYBOARD_SHORTCUT_HELPER_SHOWING;
             mPropertyHolders.add(new StatePropertyHolder(mNavButtonInAppDisplayProgressForSysui,
                     flags -> (flags & flagsToRemoveTranslation) != 0, AnimatedFloat.VALUE,
+                    1, 0));
+
+            int flagsToRemoveImeTranslation = FLAG_IME_VISIBLE;
+            mPropertyHolders.add(new StatePropertyHolder(mNavButtonInAppDisplayProgressForIme,
+                    flags -> (flags & flagsToRemoveImeTranslation) != 0, AnimatedFloat.VALUE,
                     1, 0));
 
             mPropertyHolders.add(new StatePropertyHolder(
@@ -854,6 +863,14 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
         }
     }
 
+    private void updateNavButtonInAppDisplayProgressForIme() {
+        TaskbarUIController uiController = mControllers.uiController;
+        if (uiController instanceof LauncherTaskbarUIController) {
+            ((LauncherTaskbarUIController) uiController).onTaskbarInAppDisplayProgressUpdate(
+                    mNavButtonInAppDisplayProgressForIme.value, IME_PROGRESS_INDEX);
+        }
+    }
+
     /**
      * Sets the translationY of the nav buttons based on the current device state.
      */
@@ -1251,6 +1268,10 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
                 + mTaskbarNavButtonTranslationYForInAppDisplay.value);
         pw.println(prefix + "\t\tmTaskbarNavButtonDarkIntensity="
                 + mTaskbarNavButtonDarkIntensity.value);
+        pw.println(prefix + "\t\tmNavButtonInAppDisplayProgressForSysui="
+                + mNavButtonInAppDisplayProgressForSysui.value);
+        pw.println(prefix + "\t\tmNavButtonInAppDisplayProgressForIme="
+                + mNavButtonInAppDisplayProgressForIme.value);
         pw.println(prefix + "\t\tmSlideInViewVisibleNavButtonColorOverride="
                 + mSlideInViewVisibleNavButtonColorOverride.value);
         pw.println(prefix + "\t\tmOnTaskbarBackgroundNavButtonColorOverride="
