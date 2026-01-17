@@ -23,6 +23,7 @@ import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.provider.DocumentsContract.Document.MIME_TYPE_DIR
+import android.view.DragAndDropPermissions
 import android.view.View
 import androidx.core.net.toUri
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -238,7 +239,15 @@ class WorkspaceTest {
     private fun createWorkspaceItemInfo(itemType: Int, uri: Uri? = null): WorkspaceItemInfo {
         return when (itemType) {
             ITEM_TYPE_SYSTEM_DRAG ->
-                SystemDragItemInfo().apply { if (uri != null) uriList = listOf(uri) }
+                SystemDragItemInfo().apply {
+                    if (uri != null) {
+                        payload =
+                            SystemDragItemInfo.UriListPayload(
+                                permissions = mock<DragAndDropPermissions>(),
+                                uriList = listOf(uri),
+                            )
+                    }
+                }
             else ->
                 WorkspaceItemInfo().apply {
                     if (uri != null) intent = Intent().apply { data = uri }

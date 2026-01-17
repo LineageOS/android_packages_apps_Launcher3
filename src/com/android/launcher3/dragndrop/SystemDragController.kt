@@ -22,14 +22,6 @@ import com.android.launcher3.dragndrop.DragController.SystemDragHandler
 /** Controller for system-level drag-and-drop. */
 sealed class SystemDragController : SystemDragHandler {
 
-    /**
-     * Returns whether a drop of the specified item info should be accepted.
-     *
-     * @param itemInfo The item info for which to determine acceptability.
-     * @return Whether a drop should be accepted.
-     */
-    open fun acceptDrop(itemInfo: SystemDragItemInfo) = false
-
     /** Return [false] to ignore all system-level drag events. */
     override fun onDrag(event: DragEvent): Boolean = false
 

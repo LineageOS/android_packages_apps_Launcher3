@@ -49,7 +49,6 @@ import java.util.concurrent.atomic.AtomicReference
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -296,9 +295,10 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
         testDragLocation(dragImageCaptor, dragInfoCaptor)
         clearInvocations(mockContext.dragController)
 
-        val systemDragItemInfo = dragInfoCaptor.firstValue as? SystemDragItemInfo
-
-        assertNull(systemDragItemInfo?.uriList)
+        val systemDragItemInfo =
+            (dragInfoCaptor.firstValue as? SystemDragItemInfo)?.also {
+                assertEquals(SystemDragItemInfo.EmptyPayload, it.payload)
+            }
 
         val mockUri1 = mock<Uri>()
         val mockUri2 = mock<Uri>()
@@ -337,11 +337,12 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
 
             with(systemDragItemInfo) {
                 if (throwExceptionWhenRequestingPermissions) {
-                    assertNull(permissions)
-                    assertNull(uriList)
+                    assertEquals(SystemDragItemInfo.EmptyPayload, payload)
                 } else {
-                    assertNotNull(permissions)
-                    assertEquals(listOf(mockUri1, mockUri2), uriList)
+                    with(payload as SystemDragItemInfo.UriListPayload) {
+                        assertNotNull(permissions)
+                        assertEquals(listOf(mockUri1, mockUri2), uriList)
+                    }
                 }
             }
         }
@@ -426,16 +427,10 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
     }
 
     private fun initMock(mockSystemDragItemInfo: SystemDragItemInfo) {
-        val permissions = AtomicReference<DragAndDropPermissions?>(null)
-        whenever(mockSystemDragItemInfo.permissions).thenAnswer { permissions.get() }
-        whenever(mockSystemDragItemInfo::permissions.setter.invoke(any())).thenAnswer {
-            permissions.set(it.getArgument<DragAndDropPermissions?>(0))
-        }
-
-        val uriList = AtomicReference<List<Uri>?>(null)
-        whenever(mockSystemDragItemInfo.uriList).thenAnswer { uriList.get() }
-        whenever(mockSystemDragItemInfo::uriList.setter.invoke(any())).thenAnswer {
-            uriList.set(it.getArgument<List<Uri>?>(0))
+        val payload = AtomicReference<SystemDragItemInfo.Payload>(SystemDragItemInfo.EmptyPayload)
+        whenever(mockSystemDragItemInfo.payload).thenAnswer { payload.get() }
+        whenever(mockSystemDragItemInfo::payload.setter.invoke(any())).thenAnswer {
+            payload.set(it.getArgument<SystemDragItemInfo.Payload>(0))
         }
     }
 

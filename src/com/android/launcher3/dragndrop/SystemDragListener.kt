@@ -114,14 +114,17 @@ class SystemDragListener(
             if (action == DragEvent.ACTION_DROP) {
                 try {
                     (params?.dragInfo as? SystemDragItemInfo)?.apply {
-                        permissions = mContext.requestDragAndDropPermissions(event)
-                        uriList =
-                            clipData?.let { clipData ->
-                                (0 until clipData.itemCount)
-                                    .mapNotNull(clipData::getItemAt)
-                                    .mapNotNull(ClipData.Item::getUri)
-                                    .distinct()
-                            }
+                        payload =
+                            SystemDragItemInfo.UriListPayload(
+                                permissions = mContext.requestDragAndDropPermissions(event),
+                                uriList =
+                                    clipData?.let { clipData ->
+                                        (0 until clipData.itemCount)
+                                            .mapNotNull(clipData::getItemAt)
+                                            .mapNotNull(ClipData.Item::getUri)
+                                            .distinct()
+                                    },
+                            )
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Unable to obtain URI permissions", e)

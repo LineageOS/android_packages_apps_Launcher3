@@ -16,7 +16,6 @@
 
 package com.android.launcher3.dragndrop
 
-import android.net.Uri
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.view.DragEvent
@@ -67,11 +66,8 @@ class SystemDragControllerImplTest {
 
     @Mock private lateinit var mockContext: ActivityContext
     @Mock private lateinit var mockDragEvent: DragEvent
-    @Mock private lateinit var mockItemInfo: SystemDragItemInfo
     @Mock private lateinit var mockSystemDragListener: SystemDragListener
-
-    @Mock lateinit var mockSystemDragListenerFactory: SystemDragListenerFactory
-    @Mock private lateinit var mockUri: Uri
+    @Mock private lateinit var mockSystemDragListenerFactory: SystemDragListenerFactory
 
     private lateinit var controller: SystemDragControllerImpl
 
@@ -82,34 +78,6 @@ class SystemDragControllerImplTest {
         initMock(mockSystemDragListenerFactory)
 
         controller = SystemDragControllerImpl(mockContext, mockSystemDragListenerFactory)
-    }
-
-    @Test
-    fun testAcceptDropWhenUriListIsEmpty() {
-        whenever(mockItemInfo.permissions).thenReturn(mock())
-        whenever(mockItemInfo.uriList).thenReturn(emptyList())
-        assertFalse(controller.acceptDrop(mockItemInfo))
-    }
-
-    @Test
-    fun testAcceptDropWhenUriListIsNull() {
-        whenever(mockItemInfo.permissions).thenReturn(mock())
-        whenever(mockItemInfo.uriList).thenReturn(null)
-        assertFalse(controller.acceptDrop(mockItemInfo))
-    }
-
-    @Test
-    fun testAcceptDropWhenUriListIsPopulated() {
-        whenever(mockItemInfo.permissions).thenReturn(mock())
-        whenever(mockItemInfo.uriList).thenReturn(listOf(mockUri))
-        assertTrue(controller.acceptDrop(mockItemInfo))
-    }
-
-    @Test
-    fun testAcceptDropWhenUriListIsPopulatedButPermissionsAreNotObtained() {
-        whenever(mockItemInfo.permissions).thenReturn(null)
-        whenever(mockItemInfo.uriList).thenReturn(listOf(mockUri))
-        assertFalse(controller.acceptDrop(mockItemInfo))
     }
 
     @Test

@@ -68,16 +68,19 @@ constructor(
 
     fun initializeDisplays() {
         if (useDisplayDecorationListener) {
+            // NOTE: `registerDisplayDecorationListener` will invoke the listener immediately for
+            // eligible displays (which will end up storing resources for those displays).
             displaysWithDecorationsRepositoryCompat.registerDisplayDecorationListener(
                 this,
                 dispatcher,
             )
         } else {
             systemDecorationChangeObserver.registerDisplayDecorationListener(this, dispatcher)
+
+            displayManager.displays
+                .filter { getDisplayResource(it.displayId) == null }
+                .forEach { storeDisplayResource(it.displayId) }
         }
-        displayManager.displays
-            .filter { getDisplayResource(it.displayId) == null }
-            .forEach { storeDisplayResource(it.displayId) }
     }
 
     fun forEach(callback: Consumer<RESOURCE_TYPE>) {
