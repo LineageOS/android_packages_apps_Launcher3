@@ -375,6 +375,15 @@ class TaskbarViewDragDropController(
         private var draggedInfo: ItemInfo? = null
         private val dragObjectVisualCenter = FloatArray(2)
 
+        private val startingIndex: Int
+            get() =
+                if (isOverflowDropTarget) {
+                    val pinnedCount = taskbarView.getNumOfVisibleIconsInPinnedSection()
+                    val overflowAdjustment =
+                        if (taskbarView.getTaskbarPinnedOverflowView() != null) 1 else 0
+                    pinnedCount - overflowAdjustment
+                } else 0
+
         private val canPinMoreItems: Boolean
             get() {
                 val hotseatItems = modelCallbacks?.hotseatItems ?: return false
@@ -417,13 +426,13 @@ class TaskbarViewDragDropController(
 
             if (isOverflowDropTarget) {
                 delegate.reserveDropSlotForDragLocation(dragObjectVisualCenter[0].toInt())
-                targetPinIndex = delegate.getPinIndex()
+                targetPinIndex = delegate.getPinIndex(startingIndex)
             } else if (delegate.isPointOnOverflowIcon(dragObjectVisualCenter)) {
                 startOpenOverflowAlarm()
             } else {
                 startCloseOverflowAlarm()
                 delegate.reserveDropSlotForDragLocation(dragObjectVisualCenter[0].toInt())
-                targetPinIndex = delegate.getPinIndex()
+                targetPinIndex = delegate.getPinIndex(startingIndex)
             }
         }
 
@@ -477,7 +486,7 @@ class TaskbarViewDragDropController(
          * Returns the index in the taskbar where the dragged item would be pinned if dropped at the
          * current location.
          */
-        fun getPinIndex(): Int
+        fun getPinIndex(startingIndex: Int): Int
 
         /** Updates the visibility of the dragged Taskbar item view based on its drag state. */
         fun updateItemViewVisibilityForDragState(itemView: View, isDragged: Boolean)
