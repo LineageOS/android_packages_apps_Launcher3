@@ -135,7 +135,8 @@ public class ShortcutAndWidgetContainer extends ViewGroup implements FolderIcon.
             DeviceProfile profile = mActivity.getDeviceProfile();
             final PointF appWidgetScale = profile.getAppWidgetScale((ItemInfo) child.getTag());
             lp.setup(mCellWidth, mCellHeight, invertLayoutHorizontally(), mCountX, mCountY,
-                    appWidgetScale.x, appWidgetScale.y, mBorderSpace, profile.widgetPadding);
+                    appWidgetScale.x, appWidgetScale.y, mBorderSpace,
+                    profile.getWorkspaceIconProfile().getWidgetPadding());
         } else {
             lp.setup(mCellWidth, mCellHeight, invertLayoutHorizontally(), mCountX, mCountY,
                     mBorderSpace);
@@ -159,7 +160,8 @@ public class ShortcutAndWidgetContainer extends ViewGroup implements FolderIcon.
         if (child instanceof NavigableAppWidgetHostView) {
             final PointF appWidgetScale = dp.getAppWidgetScale((ItemInfo) child.getTag());
             lp.setup(mCellWidth, mCellHeight, invertLayoutHorizontally(), mCountX, mCountY,
-                    appWidgetScale.x, appWidgetScale.y, mBorderSpace, dp.widgetPadding);
+                    appWidgetScale.x, appWidgetScale.y, mBorderSpace,
+                    dp.getWorkspaceIconProfile().getWidgetPadding());
         } else if (isChildQsb(child)) {
             lp.setup(mCellWidth, mCellHeight, invertLayoutHorizontally(), mCountX, mCountY,
                     mBorderSpace);

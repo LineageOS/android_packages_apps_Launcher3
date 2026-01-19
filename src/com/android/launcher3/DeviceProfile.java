@@ -86,8 +86,6 @@ import javax.inject.Inject;
 @SuppressLint("NewApi")
 public class DeviceProfile {
 
-    private static final float MIN_WIDGET_PADDING_DP = 6f;
-
     private static final float MAX_ASPECT_RATIO_FOR_ALTERNATE_EDIT_STATE = 1.5f;
 
     public static final PointF DEFAULT_SCALE = new PointF(1.0f, 1.0f);
@@ -141,10 +139,6 @@ public class DeviceProfile {
 
     private final DropTargetProfile mDropTargetProfile;
 
-    // Additional padding added to the widget inside its cellSpace. It is applied outside
-    // the widgetView, such that the actual view size is same as the widget size.
-    public final Rect widgetPadding = new Rect();
-
     // Taskbar
     public TaskbarProfile mTaskbarProfile;
     // Whether Taskbar will inset the bottom of apps by taskbarSize.
@@ -155,7 +149,7 @@ public class DeviceProfile {
     public DeviceProfile() {
         mWorkspaceProfile = new WorkspaceProfile(0f, 0, 0, 0, 0f, 0, 0, new Point(), 0, 0, 0, false,
                 0, 0f, 0, 0, 0, 0, 0, 0, new Rect(), new Rect(), 0, 0, 0, 0, 0, false, 0, 0, 0,
-                new Point(0, 0), 0, 0, 0);
+                new Point(0, 0), 0, 0, 0, new Rect(0, 0, 0, 0));
         mDeviceProperties = new DeviceProperties(
                 0, 0,
                 0,
@@ -465,20 +459,6 @@ public class DeviceProfile {
                     getAllAppsProfile().getCellHeightPx()
                             + Utilities.calculateTextHeight(getAllAppsProfile().getIconTextSizePx())
             );
-        }
-
-        // Update widget padding:
-        float minSpacing = pxFromDp(MIN_WIDGET_PADDING_DP, mMetrics);
-        if (getWorkspaceIconProfile().getCellLayoutBorderSpacePx().x < minSpacing
-                || getWorkspaceIconProfile().getCellLayoutBorderSpacePx().y < minSpacing) {
-            widgetPadding.left = widgetPadding.right =
-                    Math.round(max(0,
-                            minSpacing - getWorkspaceIconProfile().getCellLayoutBorderSpacePx().x));
-            widgetPadding.top = widgetPadding.bottom =
-                    Math.round(max(0,
-                            minSpacing - getWorkspaceIconProfile().getCellLayoutBorderSpacePx().y));
-        } else {
-            widgetPadding.setEmpty();
         }
 
         mBottomSheetProfile = BottomSheetProfile.Factory.createBottomSheetProfile(

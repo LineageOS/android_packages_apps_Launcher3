@@ -3305,7 +3305,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         if (info.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET) {
             DeviceProfile profile = mLauncher.getDeviceProfile();
             if (finalView instanceof NavigableAppWidgetHostView) {
-                Rect widgetPadding = profile.widgetPadding;
+                Rect widgetPadding = profile.getWorkspaceIconProfile().getWidgetPadding();
                 r.left -= widgetPadding.left;
                 r.right += widgetPadding.right;
                 r.top -= widgetPadding.top;
