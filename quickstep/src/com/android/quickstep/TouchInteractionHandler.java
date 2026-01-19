@@ -166,24 +166,18 @@ public class TouchInteractionHandler extends ContextWrapper {
                     if (taskAnimationManager == null) {
                         return;
                     }
-                    if (taskAnimationManager.hasOngoingGesture()) {
-                        // If there's an ongoing gesture, we shouldn't clean up the recents window
-                        // since gestures will clean up the recents window when needed.
+                    if (taskAnimationManager.hasOngoingGesture()
+                            && !defaultContainerInterface.isInLiveTileMode()) {
+                        // We start the home intent for gestures, so we shouldn't hide the recents
+                        // surface prematurely. Otherwise, the gesture will appear to stop
+                        // responding. However, taskAnimationManager.hasOngoingGesture() will still
+                        // return true if the home intent is started through KEYCODE_HOME in
+                        // live-tile mode.
                         return;
-                    }
-                    if (taskAnimationManager.isRecentsAnimationRunning()) {
-                        RecentsState recentsState =
-                                recentsWindowManager.getStateManager().getState();
-                        if (!recentsState.isRecentsViewVisible()) {
-                            // If we're in a state where the recents view is visible, we can
-                            // ignore the recents animation running check, otherwise we should
-                            // wait for the recents animation to end.
-                            return;
-                        }
                     }
                     if (!recentsWindowManager.isInState(RecentsState.HIDDEN)) {
                         // Forcibly reset state so the recents surface doesn't get stuck in
-                        // background app state
+                        // background app state (see StateManager.moveToRestState())
                         recentsWindowManager.getStateManager().goToState(
                                 RecentsState.HIDDEN, /* animated= */ true);
                     }
