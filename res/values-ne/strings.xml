@@ -258,4 +258,5 @@
     <string name="arch_shape_title" msgid="2213843822192871318">"आर्क"</string>
     <string name="create_new_folder_button_text" msgid="4037052463794735069">"नयाँ फोल्डर"</string>
     <string name="default_new_folder_name" msgid="8821062664729412079">"नयाँ फोल्डर"</string>
+    <string name="something_went_wrong" msgid="1492883246069060632">"कुनै समस्या आयो"</string>
 </resources>
