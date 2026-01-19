@@ -25,8 +25,6 @@ import android.view.WindowManagerGlobal
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.launcher3.Flags.enableFallbackOverviewInWindow
-import com.android.launcher3.Flags.enableLauncherOverviewInWindow
 import com.android.launcher3.util.LauncherModelHelper
 import com.android.launcher3.util.rule.SetPropRule
 import com.android.quickstep.integration.BaseTaskbarIntegrationTest
@@ -37,7 +35,6 @@ import com.android.window.flags.Flags
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import org.junit.After
 import org.junit.Assume
-import org.junit.Assume.assumeFalse
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -131,12 +128,6 @@ class TestsDesktopFirstTaskbar : BaseTaskbarIntegrationTest() {
     @Test
     @NavigationModeSwitch
     fun testTaskbarForFullscreenApp() {
-        // TODO(b/377678992): revert ag/36346262 once NexusLauncherTests-OverviewInWindowEnabled is
-        //  successfully blocking presubmit.
-        assumeFalse(
-            "Skipping test because overview in window flags are enabled",
-            enableLauncherOverviewInWindow() || enableFallbackOverviewInWindow(),
-        )
         clearAllRecentTasks()
         uiDevice.pressHome()
         launcherActivity.waitForResumed()
@@ -168,12 +159,6 @@ class TestsDesktopFirstTaskbar : BaseTaskbarIntegrationTest() {
     @Test
     @NavigationModeSwitch(mode = IntegrationNavigationModeSwitchRule.Mode.ZERO_BUTTON)
     fun testTaskbarForDesktopMode() {
-        // TODO(b/377678992): revert ag/36346262 once NexusLauncherTests-OverviewInWindowEnabled is
-        //  successfully blocking presubmit.
-        assumeFalse(
-            "Skipping test because overview in window flags are enabled",
-            enableLauncherOverviewInWindow() || enableFallbackOverviewInWindow(),
-        )
         clearAllRecentTasks()
         uiDevice.pressHome()
         launcherActivity.waitForResumed()
