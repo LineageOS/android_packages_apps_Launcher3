@@ -192,7 +192,10 @@ public final class TestProtocol {
 
     public static final String REQUEST_GET_DESK_COUNT = "get-desk-count";
 
-    public static final String REQUEST_IS_RECENTS_WINDOW_ENABLED = "recents-window-enabled";
+    public static final String REQUEST_IS_LAUNCHER_RECENTS_WINDOW_ENABLED =
+            "launcher-recents-window-enabled";
+    public static final String REQUEST_IS_FALLBACK_RECENTS_WINDOW_ENABLED =
+            "fallback-recents-window-enabled";
 
     public static final String REQUEST_UNSTASH_BUBBLE_BAR_IF_STASHED =
             "unstash-bubble-bar-if-stashed";
