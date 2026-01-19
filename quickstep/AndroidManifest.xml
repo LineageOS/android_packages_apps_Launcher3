@@ -44,6 +44,7 @@
     <uses-permission android:name="android.permission.REQUEST_TASK_HANDOFF"/>
 
     <uses-permission android:name="android.permission.SYSTEM_APPLICATION_OVERLAY" />
+    <uses-permission android:name="android.permission.EXECUTE_APP_FUNCTIONS_SYSTEM"/>
 
     <!--
     Permission required to access profiles which are otherwise hidden
