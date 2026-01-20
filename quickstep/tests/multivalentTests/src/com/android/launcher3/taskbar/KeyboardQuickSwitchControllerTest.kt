@@ -322,6 +322,32 @@ class KeyboardQuickSwitchControllerTest {
         assertThat(isKqsShown).isFalse()
     }
 
+    @Test
+    fun openQuickSwitchView_closedBeforeTasksLoad_doesNotCrash() {
+        // Setup some tasks to be loaded.
+        updateRecentsModel(
+            listOf(createSingleTask(PREVIOUS_TASK_ID), createSingleTask(RUNNING_TASK_ID))
+        )
+
+        // 1. Trigger KQS opening, which will request tasks from RecentsModel asynchronously.
+        //    DO NOT resolve the pending task request yet.
+        runOnTaskbarUiThreadSync { keyboardQuickSwitchController.openQuickSwitchView() }
+
+        // Sanity check: the view is in the process of being shown.
+        assertThat(isKqsShown).isTrue()
+
+        // 2. Close the view *before* the tasks have been loaded and passed to the view.
+        runOnTaskbarUiThreadSync { keyboardQuickSwitchController.closeQuickSwitchView() }
+        assertThat(isKqsShown).isFalse()
+
+        // 3. Now, simulate the tasks being loaded and the callback firing.
+        //    Without the null-check fix, this would cause a NullPointerException.
+        mockRecentsModelHelper.resolvePendingTaskRequests()
+
+        // 4. Assert that the view remains closed and no crash occurred.
+        assertThat(isKqsShown).isFalse()
+    }
+
     private fun createSingleTask(taskId: Int) = SingleTask(createTask(taskId))
 
     private fun createSplitTask(taskIds: Pair<Int, Int>) =
