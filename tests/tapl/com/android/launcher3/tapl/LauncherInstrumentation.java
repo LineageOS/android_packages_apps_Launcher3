@@ -1210,8 +1210,15 @@ public final class LauncherInstrumentation {
     }
 
     public boolean isRecentsWindowEnabled() {
-        return getTestInfo(TestProtocol.REQUEST_IS_RECENTS_WINDOW_ENABLED)
-                .getBoolean(TestProtocol.TEST_INFO_RESPONSE_FIELD);
+        if (mDisplayId != DEFAULT_DISPLAY) {
+            // The recents window is always enabled on connected displays
+            return true;
+        }
+        Bundle testInfo = is3PLauncher()
+                ? getTestInfo(TestProtocol.REQUEST_IS_FALLBACK_RECENTS_WINDOW_ENABLED)
+                : getTestInfo(TestProtocol.REQUEST_IS_LAUNCHER_RECENTS_WINDOW_ENABLED);
+
+        return testInfo.getBoolean(TestProtocol.TEST_INFO_RESPONSE_FIELD);
     }
 
     // TODO(b/377678992): update access modifier once ag/37092345 is reverted
