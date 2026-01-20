@@ -76,7 +76,7 @@ flag {
 }
 
 flag {
-    name: "enable_text_selection_view"
+    name: "enable_overview_select_text_view"
     namespace: "launcher_overview"
     description: "Creates views for selected texts to enable accessible traversal."
     bug: "447292419"
