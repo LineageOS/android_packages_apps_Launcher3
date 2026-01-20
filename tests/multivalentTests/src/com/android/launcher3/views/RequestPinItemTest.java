@@ -223,7 +223,7 @@ public class RequestPinItemTest extends BaseLauncherActivityTest<Launcher> {
 
         // Reload activity, so that the activity is focused
         getLauncherActivity().close();
-        loadLauncherSync();
+        getLauncherActivity().initializeActivity();
         getLauncherActivity().getOnceNotNull(
                 "",
                 l -> l.getWorkspace().getFirstMatch(itemMatcher)
