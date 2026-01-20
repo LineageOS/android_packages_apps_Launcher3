@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d7f2ef5b_2626ac34",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 9
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 6360
+      },
+      "writtenOn": "2026-01-20T14:49:35Z",
+      "side": 1,
+      "message": "Converting to platform app -- may require some sepolicy denial fixes. Watch out for that.",
+      "revId": "b38e019248e98450378b6cf228de268c987b9d94",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
