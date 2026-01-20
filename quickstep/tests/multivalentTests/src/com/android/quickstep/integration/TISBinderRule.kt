@@ -20,6 +20,7 @@ import android.content.Context
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.launcher3.LauncherPrefs.Companion.TASKBAR_PINNING
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
+import com.android.launcher3.display.LauncherDisplayInfo
 import com.android.launcher3.testutil.Wait
 import com.android.launcher3.util.Executors.getTaskbarUiThread
 import com.android.quickstep.dagger.SysUIConnectionComponent
@@ -41,7 +42,8 @@ class TISBinderRule : TestRule {
 
             override fun evaluate() {
                 val context = getInstrumentation().targetContext
-                val wasTransient = context.appComponent.taskbarModeUtil.isTransient
+                val info = context.appComponent.displayController.info
+                val wasTransient = context.appComponent.taskbarModeUtil.isTransient(info)
                 context.setTransientTaskbar(
                     description.getAnnotation(TaskbarMode::class.java)?.mode?.isTransient
                         ?: wasTransient
@@ -70,9 +72,10 @@ class TISBinderRule : TestRule {
 
     private fun Context.setTransientTaskbar(isTransient: Boolean) {
         appComponent.launcherPrefs.put(TASKBAR_PINNING, !isTransient)
+        val info = appComponent.displayController.info
         Wait.atMost(
             "Taskbar mode did not change",
-            { appComponent.taskbarModeUtil.isTransient == isTransient },
+            { appComponent.taskbarModeUtil.isTransient(info) == isTransient },
         )
 
         withTISBinder {

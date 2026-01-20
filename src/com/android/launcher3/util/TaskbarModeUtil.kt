@@ -15,14 +15,13 @@
  */
 package com.android.launcher3.util
 
-import android.content.Context
+import androidx.annotation.VisibleForTesting
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.TASKBAR_PINNING
 import com.android.launcher3.config.FeatureFlags.enableTaskbarPinning
-import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
-import com.android.launcher3.display.DisplayController
+import com.android.launcher3.display.LauncherDisplayInfo
 import com.android.launcher3.util.window.WindowManagerProxy
 import javax.inject.Inject
 
@@ -38,40 +37,37 @@ import javax.inject.Inject
 class TaskbarModeUtil
 @Inject
 constructor(
-    @ApplicationContext private val context: Context,
-    private val displayController: DisplayController,
     private val windowManagerProxy: WindowManagerProxy,
     private val launcherPrefs: LauncherPrefs,
 ) {
-    val isTransient: Boolean
-        get() =
-            if (displayController.info.navigationMode != NavigationMode.NO_BUTTON) {
-                false
-            } else if (enableTaskbarPinning()) {
-                !isPinned
-            } else {
-                true
-            }
 
-    val isPinned: Boolean
-        get() {
-            val displayId =
-                windowManagerProxy.getDisplay(context)?.displayId
-                    ?: return launcherPrefs.get(TASKBAR_PINNING)
-
-            return if (
-                displayController
-                    .getInfoForDisplay(displayId)
-                    ?.showDesktopTaskbarForFreeformDisplay == true ||
-                    windowManagerProxy.isInDesktopMode(displayId)
-            ) {
-                true
-            } else {
-                launcherPrefs.get(TASKBAR_PINNING)
-            }
+    fun isTransient(info: LauncherDisplayInfo): Boolean {
+        return if (info.navigationMode != NavigationMode.NO_BUTTON) {
+            false
+        } else if (enableTaskbarPinning()) {
+            !isPinned(info)
+        } else {
+            true
         }
+    }
+
+    @VisibleForTesting
+    fun isPinned(info: LauncherDisplayInfo): Boolean {
+        val displayId =
+            windowManagerProxy.getDisplay(info.context)?.displayId
+                ?: return launcherPrefs.get(TASKBAR_PINNING)
+        return if (
+            info.showDesktopTaskbarForFreeformDisplay ||
+            windowManagerProxy.isInDesktopMode(displayId)
+        ) {
+            true
+        } else {
+            launcherPrefs.get(TASKBAR_PINNING)
+        }
+    }
 
     companion object {
-        @JvmField val INSTANCE = DaggerSingletonObject(LauncherAppComponent::getTaskbarModeUtil)
+        @JvmField
+        val INSTANCE = DaggerSingletonObject(LauncherAppComponent::getTaskbarModeUtil)
     }
 }

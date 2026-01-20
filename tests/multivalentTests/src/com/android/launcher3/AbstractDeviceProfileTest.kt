@@ -325,7 +325,7 @@ abstract class AbstractDeviceProfileTest {
         setFlagsRule.setFlags(true, Flags.FLAG_ENABLE_TWOLINE_TOGGLE)
         val windowsBounds = perDisplayBoundsCache[displayInfo]!!
         val realBounds = windowsBounds[rotation]
-        whenever(mTaskbarModeUtil.isTransient).thenReturn(isGestureMode)
+        whenever(mTaskbarModeUtil.isTransient(any())).thenReturn(isGestureMode)
         whenever(windowManagerProxy.getDisplayInfo(any())).thenReturn(displayInfo)
         whenever(windowManagerProxy.getRealBounds(any(), any())).thenReturn(realBounds)
         whenever(windowManagerProxy.getCurrentBounds(any())).thenReturn(realBounds.bounds)

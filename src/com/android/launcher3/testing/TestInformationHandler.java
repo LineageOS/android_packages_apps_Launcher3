@@ -267,8 +267,10 @@ public class TestInformationHandler {
                 return response;
 
             case TestProtocol.REQUEST_IS_TRANSIENT_TASKBAR:
+                LauncherDisplayInfo displayInfo = DisplayController.INSTANCE.get(
+                        mContext).getInfoForDisplay(Integer.parseInt(arg));
                 response.putBoolean(TestProtocol.TEST_INFO_RESPONSE_FIELD,
-                        TaskbarModeUtil.INSTANCE.get(mContext).isTransient());
+                        TaskbarModeUtil.INSTANCE.get(mContext).isTransient(displayInfo));
                 return response;
 
             case TestProtocol.REQUEST_IS_TWO_PANELS:
