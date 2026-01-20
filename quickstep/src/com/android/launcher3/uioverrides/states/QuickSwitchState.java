@@ -53,7 +53,7 @@ public class QuickSwitchState extends BackgroundAppState {
 
     @Override
     public boolean isTaskbarStashed(DeviceProfile deviceProfile) {
-        return !deviceProfile.isTaskbarPresentInApps;
+        return !deviceProfile.getTaskbarProfile().isTaskbarPresentInApps();
     }
 
     @Override
