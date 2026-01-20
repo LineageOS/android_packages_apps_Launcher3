@@ -105,4 +105,6 @@ interface TaskbarManager {
     @VisibleForTesting fun enableBlockingTimeoutDuringTests(enableBlockingTimeout: Boolean)
 
     @VisibleForTesting fun isTransient(): Boolean
+
+    @VisibleForTesting fun injectTestInsights()
 }

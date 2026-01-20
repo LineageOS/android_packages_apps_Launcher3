@@ -28,6 +28,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.service.personalcontext.hint.BundleHint
 import android.service.personalcontext.hint.ContextHint
+import android.service.personalcontext.hint.ContextHintWithSignature
 import android.service.personalcontext.hint.ConversationEvent.ConversationUpdateEvent
 import android.service.personalcontext.hint.ConversationHint
 import android.service.personalcontext.insight.ActionableInsight
@@ -35,6 +36,7 @@ import android.service.personalcontext.insight.ContextInsight
 import android.service.personalcontext.insight.DisplayInsight
 import android.service.personalcontext.insight.InsightActionDetails
 import android.service.personalcontext.insight.InsightCollection
+import android.service.personalcontext.insight.InsightDisplayDetails
 import android.util.Log
 import android.view.autofill.AutofillManager
 import androidx.annotation.VisibleForTesting
@@ -51,10 +53,11 @@ import com.android.quickstep.cuebar.data.InsightListener
 import com.android.quickstep.cuebar.logger.AmbientCueLogger
 import com.android.systemui.shared.system.TaskStackChangeListener
 import com.android.systemui.shared.system.TaskStackChangeListeners
+import dagger.assisted.AssistedInject
 import java.io.PrintWriter
 import java.lang.ref.WeakReference
 import java.util.concurrent.Executor
-import javax.inject.Inject
+import javax.crypto.spec.SecretKeySpec
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -97,6 +100,8 @@ interface AmbientCueRepository {
     /** The package name of the task that is in the foreground. */
     val frontTaskPackageName: ListenableRef<String>
 
+    val isTestMode: ListenableRef<Boolean>
+
     fun updateActions(newActions: List<ActionModel>)
 
     fun connectToAce()
@@ -104,10 +109,13 @@ interface AmbientCueRepository {
     fun disconnectFromAce()
 
     fun dump(pw: PrintWriter, prefix: String)
+
+    /** Triggers a dummy insight for TAPL/Scenario testing. */
+    @VisibleForTesting fun injectTestInsightForCueBar()
 }
 
 class AmbientCueRepositoryImpl
-@Inject
+@AssistedInject
 constructor(
     taskbarActivityContext: TaskbarActivityContext,
     private val ambientCueLogger: AmbientCueLogger,
@@ -132,6 +140,9 @@ constructor(
     override val isTaskBarVisible = MutableListenableRef(true)
     override val isGestureNav = MutableListenableRef(taskbarActivityContext.isGestureNav)
     override val recentsButtonPosition = MutableListenableRef<Rect?>(null)
+
+    private val _isTestMode = MutableListenableRef(false)
+    override val isTestMode: ListenableRef<Boolean> = _isTestMode
 
     // IME and Occlusion are hard to track from Launcher for other apps.
     private val _isImeVisible = MutableListenableRef(false)
@@ -190,13 +201,13 @@ constructor(
     }
 
     override fun updateActions(newActions: List<ActionModel>) {
+        Log.d(TAG, "updateActions: DISPATCHING: $newActions")
         _actions.dispatchValue(newActions)
     }
 
     private fun isAmbientCueSettingEnabled(): Boolean {
         return try {
-            Settings.Secure.getInt(appContext.contentResolver, AMBIENT_CUE_SETTING) ==
-                OPTED_IN
+            Settings.Secure.getInt(appContext.contentResolver, AMBIENT_CUE_SETTING) == OPTED_IN
         } catch (e: Settings.SettingNotFoundException) {
             Log.w(TAG, "$AMBIENT_CUE_SETTING not found, feature disabled", e)
             false
@@ -409,6 +420,28 @@ constructor(
         CueBarInsightRendererService.unregisterListener(this)
         backgroundScope.cancel()
         TaskStackChangeListeners.getInstance().unregisterTaskStackListener(taskStackListener)
+    }
+
+    @VisibleForTesting
+    override fun injectTestInsightForCueBar() {
+        // In test, the listeners are not registered upon start up.
+        CueBarInsightRendererService.registerListener(this)
+        TaskStackChangeListeners.getInstance().registerTaskStackListener(taskStackListener)
+        val testTitle = "Test Title"
+        val testSubtitle = "Test Subtitle"
+        _isTestMode.dispatchValue(true)
+        val displayDetails =
+            InsightDisplayDetails.Builder(testTitle).setSubtitle(testSubtitle).build()
+        val mockInsightBuilder = DisplayInsight.Builder(displayDetails)
+
+        val bundle = Bundle().apply { putBoolean(RENDER_IN_CUE_BAR, true) }
+        val hint = BundleHint.Builder().setDataBundle(bundle).build()
+
+        val signedHint =
+            ContextHintWithSignature.Builder(hint, SecretKeySpec(ByteArray(16), "HmacSHA256"))
+                .build()
+        val mockInsight = mockInsightBuilder.addOriginHint(signedHint).build()
+        onInsightReceived(listOf(mockInsight))
     }
 
     companion object {

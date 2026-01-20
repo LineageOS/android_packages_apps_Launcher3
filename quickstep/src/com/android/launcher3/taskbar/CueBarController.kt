@@ -59,7 +59,7 @@ class CueBarController(private val activity: TaskbarActivityContext) :
     private var cueBar: View? = null
     private var isHiding = false
     private val ambientCueLogger = AmbientCueLoggerImpl(activity.packageManager)
-    private val ambientCueRepository =
+    val ambientCueRepository =
         AmbientCueRepositoryImpl(activity, ambientCueLogger, ORDERED_BG_EXECUTOR, MAIN_EXECUTOR)
     private val ambientCueInteractor = AmbientCueInteractor(ambientCueRepository)
     private val lp =

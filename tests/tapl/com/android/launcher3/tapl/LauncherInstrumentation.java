@@ -2712,6 +2712,10 @@ public final class LauncherInstrumentation {
         getTestInfo(TestProtocol.REQUEST_EJECT_FAKE_TRACKPAD);
     }
 
+    public void injectTestInsights() {
+        getTestInfo(TestProtocol.INJECT_TEST_INSIGHTS);
+    }
+
     /** Blocks the taskbar from automatically stashing based on time. */
     public void enableBlockTimeout(boolean enable) {
         getTestInfo(enable
