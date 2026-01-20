@@ -41,6 +41,7 @@ object FakeTaskFactory {
     ) =
         ActivityManager.RunningTaskInfo().apply {
             this.taskId = taskId
+            this.userId = userId
             this.displayId = displayId
             this.baseIntent =
                 AppInfo.makeLaunchIntent(componentName).apply {
