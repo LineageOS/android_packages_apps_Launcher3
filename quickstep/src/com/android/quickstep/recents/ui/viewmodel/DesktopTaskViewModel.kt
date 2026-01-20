@@ -16,17 +16,15 @@
 
 package com.android.quickstep.recents.ui.viewmodel
 
-import android.graphics.Rect
 import androidx.annotation.VisibleForTesting
 import com.android.internal.policy.DesktopModeCompatPolicy
 import com.android.quickstep.recents.domain.model.DesktopLayoutConfig
-import com.android.quickstep.recents.domain.model.DesktopTaskBoundsData
-import com.android.quickstep.recents.domain.model.DesktopTaskBoundsData.HiddenDesktopTaskBoundsData
-import com.android.quickstep.recents.domain.model.DesktopTaskBoundsData.RenderedDesktopTaskBoundsData
-import com.android.quickstep.recents.domain.model.DesktopTaskVisibilityData
-import com.android.quickstep.recents.domain.model.DesktopTaskVisibilityData.HiddenDesktopTaskVisibilityData
-import com.android.quickstep.recents.domain.model.DesktopTaskVisibilityData.RenderedDesktopTaskVisibilityData
-import com.android.quickstep.recents.domain.usecase.GetObscuredDesktopTaskIdsUseCase
+import com.android.quickstep.recents.domain.model.FullscreenPosition
+import com.android.quickstep.recents.domain.model.OverviewPosition
+import com.android.quickstep.recents.domain.model.OverviewPosition.Hidden
+import com.android.quickstep.recents.domain.model.OverviewPosition.Rendered
+import com.android.quickstep.recents.domain.model.TaskId
+import com.android.quickstep.recents.domain.usecase.GetDesktopTaskFullscreenPositionUseCase
 import com.android.quickstep.recents.domain.usecase.OrganizeDesktopTasksUseCase
 import com.android.quickstep.util.DesktopTask
 import javax.inject.Inject
@@ -36,106 +34,62 @@ class DesktopTaskViewModel
 @Inject
 constructor(
     private val organizeDesktopTasksUseCase: OrganizeDesktopTasksUseCase,
-    private val getObscuredDesktopTaskIdsUseCase: GetObscuredDesktopTaskIdsUseCase,
+    private val getDesktopTaskFullscreenPositionUseCase: GetDesktopTaskFullscreenPositionUseCase,
     private val desktopModeCompatPolicy: DesktopModeCompatPolicy,
 ) {
-    data class TaskPosition(val taskId: Int, val isMinimized: Boolean, val bounds: Rect)
-
-    /** Map of desktop task IDs to positions and obscurity states. */
-    var organizedDesktopTaskVisibilityDataMap = emptyMap<Int, DesktopTaskVisibilityData>()
-        @VisibleForTesting set
-
     private var desktopTask: DesktopTask? = null
 
+    /** Map of desktop task IDs to calculated layout positions in Overview. */
+    var overviewTaskPositions = emptyMap<TaskId, OverviewPosition>()
+        @VisibleForTesting set
+
     /** Holds the default (user placed) positions of task windows. */
-    var fullscreenTaskPositions: List<TaskPosition> = emptyList()
+    var fullscreenTaskPositions: Map<TaskId, FullscreenPosition> = emptyMap()
         private set
 
     fun bind(desktopTask: DesktopTask?) {
         this.desktopTask = desktopTask
-        fullscreenTaskPositions =
-            desktopTask?.tasks?.mapNotNull { task ->
-                task.appBounds?.let { appBounds ->
-                    TaskPosition(
-                        taskId = task.key.id,
-                        isMinimized = task.isMinimized,
-                        bounds = appBounds,
-                    )
-                }
-            } ?: emptyList()
     }
 
     /**
      * Computes new task positions using [organizeDesktopTasksUseCase] and obscured states using
-     * [getObscuredDesktopTaskIdsUseCase]. The result is stored in
-     * [organizedDesktopTaskVisibilityDataMap]. This is used for the exploded desktop view where the
-     * use case will scale and translate tasks so that they don't overlap.
+     * [getDesktopTaskFullscreenPositionUseCase]. The layout results are stored in
+     * [overviewTaskPositions], and original window states are stored in [fullscreenTaskPositions].
+     * This is used for the exploded desktop view where the use case will scale and translate tasks
+     * so that they don't overlap.
      *
      * @param layoutConfig the pre-scaled dimension configuration for the desktop layout.
      * @param dismissedTaskId Optional ID of a task being dismissed. If provided, the use case will
      *   decide whether to reflow or fully reorganize.
      */
     fun organizeDesktopTasks(layoutConfig: DesktopLayoutConfig, dismissedTaskId: Int? = null) {
-        val transparentTaskIds =
-            desktopTask
-                ?.tasks
-                ?.filter {
-                    desktopModeCompatPolicy.isTransparentOverlay(
-                        it.key.isActivityStackTransparent,
-                        it.key.numActivities,
-                        it.key.windowingMode,
-                    )
-                }
-                ?.map { it.key.id } ?: emptyList()
-        val defaultPositions = fullscreenTaskPositions.filterNot { it.taskId in transparentTaskIds }
-        val obscuredWindowIds =
-            getObscuredDesktopTaskIdsUseCase(
-                defaultPositions.filterNot { it.taskId == dismissedTaskId }
-            )
+        val tasks = desktopTask?.tasks.orEmpty()
+        val (transparentOverlayTasks, normalTasks) =
+            tasks.partition {
+                desktopModeCompatPolicy.isTransparentOverlay(
+                    it.key.isActivityStackTransparent,
+                    it.key.numActivities,
+                    it.key.windowingMode,
+                )
+            }
+        fullscreenTaskPositions =
+            getDesktopTaskFullscreenPositionUseCase(
+                    tasks.filterNot { it.key.id == dismissedTaskId }
+                )
+                .associateBy { it.taskId }
 
-        // Map task IDs and DesktopTaskVisibilityData to DesktopTaskBoundsData, as the
-        // organizeDesktopTasksUseCase does not need the obscured state information.
-        val oldOrganizedDesktopTaskBoundsData =
-            organizedDesktopTaskVisibilityDataMap.toDesktopTaskBoundsData()
+        val oldOverviewTaskPositions = overviewTaskPositions.values.toList()
 
-        val newOrganizedDesktopTaskBoundsData =
+        // TODO(b/456480920) change allCurrentOriginalTaskBounds to be map of id and bounds
+        val newOverviewTaskPositions =
             organizeDesktopTasksUseCase(
                 allCurrentOriginalTaskBounds =
-                    defaultPositions.map { RenderedDesktopTaskBoundsData(it.taskId, it.bounds) },
+                    normalTasks.map { Rendered(it.key.id, it.appBounds) },
                 layoutConfig = layoutConfig,
-                taskPositionsHint = oldOrganizedDesktopTaskBoundsData,
+                taskPositionsHint = oldOverviewTaskPositions,
                 dismissedTaskId = dismissedTaskId,
-            ) + transparentTaskIds.map { HiddenDesktopTaskBoundsData(taskId = it) }
+            ) + transparentOverlayTasks.map { Hidden(taskId = it.key.id) }
 
-        // Convert DesktopTaskBoundsData back to pairs of task IDs and DesktopTaskVisibilityData by
-        // adding the new obscured state information to the new task bounds data.
-        organizedDesktopTaskVisibilityDataMap =
-            newOrganizedDesktopTaskBoundsData.toDesktopTaskVisibilityDataMap(obscuredWindowIds)
-    }
-
-    private fun Map<Int, DesktopTaskVisibilityData>.toDesktopTaskBoundsData():
-        List<DesktopTaskBoundsData> = map {
-        when (val visibilityData = it.value) {
-            is RenderedDesktopTaskVisibilityData ->
-                RenderedDesktopTaskBoundsData(taskId = it.key, bounds = visibilityData.bounds)
-            is HiddenDesktopTaskVisibilityData -> HiddenDesktopTaskBoundsData(it.key)
-        }
-    }
-
-    private fun List<DesktopTaskBoundsData>.toDesktopTaskVisibilityDataMap(
-        obscuredWindowIds: Set<Int>
-    ): Map<Int, DesktopTaskVisibilityData> = associate {
-        it.taskId to
-            when (it) {
-                is RenderedDesktopTaskBoundsData ->
-                    RenderedDesktopTaskVisibilityData(
-                        isObscured = obscuredWindowIds.contains(it.taskId),
-                        bounds = it.bounds,
-                    )
-                is HiddenDesktopTaskBoundsData ->
-                    HiddenDesktopTaskVisibilityData(
-                        isObscured = obscuredWindowIds.contains(it.taskId)
-                    )
-            }
+        overviewTaskPositions = newOverviewTaskPositions.associateBy { it.taskId }
     }
 }
