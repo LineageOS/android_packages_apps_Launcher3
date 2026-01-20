@@ -178,6 +178,9 @@ public class DragView extends FrameLayout {
             mContentViewParent.removeView(mContent);
         }
 
+        // During a drag, we don't want to expose the descendants of drag view to a11y users,
+        // as those descendants are not a valid position in the workspace.
+        content.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
         addView(content, new LayoutParams(width, height));
 
         // If there is already a scale set on the content, we don't want to clip the children.
@@ -413,6 +416,8 @@ public class DragView extends FrameLayout {
         // We need to fill the ImageView with the content, otherwise the shapes of the final view
         // and the drag view might not match exactly
         newContent.setScaleType(ImageView.ScaleType.FIT_XY);
+        newContent.setImportantForAccessibility(
+                View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
         newContent.measure(makeMeasureSpec(mWidth, EXACTLY), makeMeasureSpec(mHeight, EXACTLY));
         newContent.layout(0, 0, mWidth, mHeight);
         addViewInLayout(newContent, 0, new LayoutParams(mWidth, mHeight));
@@ -561,6 +566,7 @@ public class DragView extends FrameLayout {
                     mContent.getRight(), mContent.getBottom());
             setClipToOutline(mContent.getClipToOutline());
             setOutlineProvider(mContent.getOutlineProvider());
+            view.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
             addViewInLayout(view, indexOfChild(mContent), mContent.getLayoutParams(), true);
 
             removeViewInLayout(mContent);
@@ -569,6 +575,7 @@ public class DragView extends FrameLayout {
             if (reattachToPreviousParent) {
                 mContentViewParent.addView(mContent, mContentViewInParentViewIndex);
             }
+            mContent.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
             mContentViewParent = null;
             mContentViewInParentViewIndex = -1;
         }
