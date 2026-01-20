@@ -16,6 +16,7 @@
 
 package com.android.launcher3.dragndrop
 
+import android.content.ClipDescription
 import android.graphics.Canvas
 import android.graphics.Point
 import android.graphics.Rect
@@ -41,7 +42,8 @@ class SystemDragControllerImpl(
 
     private var systemDragListener: SystemDragListener? = null
 
-    override fun onDrag(event: DragEvent): Boolean = continueDrag(event) ?: startDrag(event)
+    override fun onDrag(event: DragEvent): Boolean =
+        continueDrag(event) ?: (acceptDrag(event) && startDrag(event))
 
     override fun startDrag(params: SystemDragParams): DragView? {
         val dragController = context.dragController ?: return null
@@ -52,6 +54,18 @@ class SystemDragControllerImpl(
             }
         }
     }
+
+    // NOTE: Drops for these mime types are not currently supported so ignore related drag events to
+    // avoid giving the user the impression that they are.
+    private fun acceptDrag(event: DragEvent): Boolean =
+        !(event.clipDescription?.hasMimeType(
+            arrayOf(
+                ClipDescription.MIMETYPE_APPLICATION_ACTIVITY,
+                ClipDescription.MIMETYPE_APPLICATION_SHORTCUT,
+                ClipDescription.MIMETYPE_APPLICATION_TASK,
+                ClipDescription.MIMETYPE_TEXT_INTENT,
+            )
+        ) ?: false)
 
     private fun continueDrag(event: DragEvent): Boolean? = systemDragListener?.onDrag(event)
 
