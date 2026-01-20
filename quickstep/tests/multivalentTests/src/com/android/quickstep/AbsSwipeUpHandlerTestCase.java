@@ -436,35 +436,22 @@ public abstract class AbsSwipeUpHandlerTestCase<
     }
 
     @Test
-    @EnableFlags({com.android.window.flags.Flags.FLAG_ENABLE_REJECT_HOME_TRANSITION})
-    public void getHomeTarget_onSecondaryDisplay_withFlagEnabled() {
+    public void getHomeTarget_onSecondaryDisplay() {
         mDisplayId = DEFAULT_DISPLAY + 1; // Simulate a secondary display
         SWIPE_HANDLER handler = createSwipeHandler();
 
         GestureState.GestureEndTarget target = handler.getHomeTarget();
-        assertEquals("Expected REJECT_HOME on secondary display when reject home is enabled",
+        assertEquals("Expected REJECT_HOME on secondary display",
                 GestureState.GestureEndTarget.REJECT_HOME, target);
     }
 
     @Test
-    @EnableFlags({com.android.window.flags.Flags.FLAG_ENABLE_REJECT_HOME_TRANSITION})
-    public void getHomeTarget_onDefaultDisplay_withFlagEnabled() {
+    public void getHomeTarget_onDefaultDisplay() {
         mDisplayId = DEFAULT_DISPLAY;
         SWIPE_HANDLER handler = createSwipeHandler();
 
         GestureState.GestureEndTarget target = handler.getHomeTarget();
         assertEquals("Expected HOME on default display",
-                GestureState.GestureEndTarget.HOME, target);
-    }
-
-    @Test
-    @DisableFlags({com.android.window.flags.Flags.FLAG_ENABLE_REJECT_HOME_TRANSITION})
-    public void getHomeTarget_onSecondaryDisplay_withFlagDisabled() {
-        mDisplayId = DEFAULT_DISPLAY + 1; // Simulate a secondary display
-        SWIPE_HANDLER handler = createSwipeHandler();
-
-        GestureState.GestureEndTarget target = handler.getHomeTarget();
-        assertEquals("Expected HOME on secondary display when reject home is disabled",
                 GestureState.GestureEndTarget.HOME, target);
     }
 
