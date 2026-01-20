@@ -133,6 +133,7 @@ import com.android.quickstep.views.TaskView
 import com.android.systemui.animation.back.FlingOnBackAnimationCallback
 import com.android.systemui.shared.recents.model.ThumbnailData
 import com.android.window.flags.Flags.useInputReportedFocusForAccessibility
+import com.android.wm.shell.shared.IOverviewOverlayLeashInvalidationCallback
 import com.android.wm.shell.shared.desktopmode.DesktopState
 import javax.inject.Inject
 
@@ -260,6 +261,7 @@ constructor(
     private val homeVisibilityState = systemUiProxy.homeVisibilityState
     private val homeVisibilityListener =
         object : HomeVisibilityState.VisibilityChangeListener {
+
             override fun onHomeVisibilityChanged(
                 isHomeVisible: Boolean,
                 keyguardGoingAwayOrWaking: Boolean,
@@ -315,6 +317,14 @@ constructor(
         }
     }
 
+    private val overviewOverlayLeashInvalidationCallback =
+        object : IOverviewOverlayLeashInvalidationCallback.Stub() {
+            override fun onOverviewOverlayLeashInvalidated() {
+                RecentsWindowProtoLogProxy.logOnOverviewOverlayLeashInvalidated()
+                cleanUpSurfaceControlViewHost()
+            }
+        }
+
     private var activityLaunchAnimationRunner: RemoteAnimationFactory? = null
 
     private var displayChangesSafeCloseable: SafeCloseable? = null
@@ -343,12 +353,13 @@ constructor(
     }
 
     @SuppressLint("InflateParams")
+    @UiThread
     fun createWindowView() {
         if (windowView != null) {
             createSurfaceControlViewHost()
             return
         }
-        surfaceControlViewHost?.let { cleanUpSurfaceControlViewHost() }
+        surfaceControlViewHost?.let { cleanUpSurfaceControlViewHostInternal() }
 
         theme.applyStyle(R.style.OverviewBlurFallbackStyle, true)
         windowView =
@@ -416,7 +427,7 @@ constructor(
         uiExecutor.execute {
             onViewDestroyed()
             hideRecentsWindow()
-            cleanUpSurfaceControlViewHost()
+            cleanUpSurfaceControlViewHostInternal()
             windowRootView
                 .findOnBackInvokedDispatcher()
                 ?.unregisterOnBackInvokedCallback(onBackInvokedCallback)
@@ -461,13 +472,21 @@ constructor(
         }
     }
 
-    private fun cleanUpSurfaceControlViewHost() {
+    @UiThread
+    private fun cleanUpSurfaceControlViewHostInternal() {
+        RecentsWindowProtoLogProxy.logCleanUpSurfaceControlViewHostInternal()
         surfaceControlViewHost?.let {
             it.surfacePackage?.let { surfacePackage ->
                 Transaction().hide(surfacePackage.surfaceControl).apply(true)
                 surfacePackage.release()
             }
             it.release()
+        }
+        overviewOverlay?.let {
+            systemUiProxy.unregisterOverviewOverlayLeashInvalidationListener(
+                displayId,
+                overviewOverlayLeashInvalidationCallback,
+            )
         }
         homeOverlay = null
         overviewOverlay = null
@@ -509,10 +528,12 @@ constructor(
         screenOnTracker.removeListener(screenChangedListener)
     }
 
-    fun onOverviewTargetChanged() {
-        hideRecentsWindow()
+    fun cleanUpSurfaceControlViewHost() {
+        uiExecutor.execute {
+            stateManager.moveToRestState()
 
-        cleanUpSurfaceControlViewHost()
+            cleanUpSurfaceControlViewHostInternal()
+        }
     }
 
     override fun handleConfigurationChanged(newConfiguration: Configuration?) {
@@ -553,6 +574,12 @@ constructor(
     fun getOverviewOverlay(): SurfaceControl? {
         if (overviewOverlay == null) {
             overviewOverlay = systemUiProxy.getOverviewOverlayContainer(displayId)
+            overviewOverlay?.let {
+                systemUiProxy.registerOverviewOverlayLeashInvalidationCallback(
+                    displayId,
+                    overviewOverlayLeashInvalidationCallback,
+                )
+            }
         }
         return overviewOverlay
     }
