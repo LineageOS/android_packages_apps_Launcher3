@@ -24,15 +24,17 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
 
+import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.InsettableFrameLayout.LayoutParams;
 import com.android.launcher3.R;
 import com.android.launcher3.popup.PopupDataProvider;
 import com.android.launcher3.taskbar.BaseTaskbarContext;
 import com.android.launcher3.taskbar.TaskbarActivityContext;
-import com.android.launcher3.taskbar.TaskbarAllAppsItemCustomActionsListener;
 import com.android.launcher3.taskbar.TaskbarControllers;
+import com.android.launcher3.taskbar.TaskbarCustomActionsListener;
 import com.android.launcher3.taskbar.TaskbarDragController;
+import com.android.launcher3.taskbar.TaskbarPopupController;
 import com.android.launcher3.taskbar.TaskbarUIController;
 import com.android.launcher3.taskbar.allapps.TaskbarAllAppsContainerView;
 import com.android.launcher3.taskbar.allapps.TaskbarSearchSessionController;
@@ -59,6 +61,7 @@ public class TaskbarOverlayContext extends BaseTaskbarContext {
     private final TaskbarOverlayDragLayer mDragLayer;
     private FrameLayout mBubbleBarDropViewContainer;
     private final Optional<DragToBubbleController> mDragToBubbleController;
+    private final TaskbarPopupController mPopupController;
 
     private final int mStashedTaskbarHeight;
     private final TaskbarUIController mUiController;
@@ -73,6 +76,7 @@ public class TaskbarOverlayContext extends BaseTaskbarContext {
         mTaskbarContext = taskbarContext;
         mOverlayController = controllers.taskbarOverlayController;
         mDragToBubbleController = controllers.bubbleControllers.map(c -> c.dragToBubbleController);
+        mPopupController = controllers.taskbarPopupController;
         mDragController = new TaskbarDragController(this);
         // We don't query isDragging from DragController attached to TaskbarOverlayContext. Instead
         // we only query it from DragController attached to TaskbarControllers. Thus we don't pass
@@ -159,7 +163,7 @@ public class TaskbarOverlayContext extends BaseTaskbarContext {
 
     @Override
     public CustomActionsListener getAllAppsItemCustomActionsListener() {
-        return new TaskbarAllAppsItemCustomActionsListener(mTaskbarContext, this);
+        return new TaskbarCustomActionsListener(this);
     }
 
     @Override
@@ -223,6 +227,11 @@ public class TaskbarOverlayContext extends BaseTaskbarContext {
 
     @Override
     public void onPopupVisibilityChanged(boolean isVisible) {}
+
+    @Override
+    public void showPopupMenuForIcon(BubbleTextView btv) {
+        mPopupController.show(btv);
+    }
 
     @Override
     public void onSplitScreenMenuButtonClicked() {
