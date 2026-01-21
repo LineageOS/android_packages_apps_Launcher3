@@ -175,12 +175,8 @@ public class TouchInteractionHandler extends ContextWrapper {
                         // live-tile mode.
                         return;
                     }
-                    if (!recentsWindowManager.isInState(RecentsState.HIDDEN)) {
-                        // Forcibly reset state so the recents surface doesn't get stuck in
-                        // background app state (see StateManager.moveToRestState())
-                        recentsWindowManager.getStateManager().goToState(
-                                RecentsState.HIDDEN, /* animated= */ true);
-                    }
+                    recentsWindowManager.getStateManager().moveToRestState(
+                            /* isAnimated= */ recentsWindowManager.isStarted());
                 }
             };
 
