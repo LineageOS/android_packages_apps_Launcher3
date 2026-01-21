@@ -255,7 +255,7 @@ public final class WidgetsTableUtilsTest {
 
         mTestDeviceProfile.getWorkspaceIconProfile().getCellLayoutBorderSpacePx()
                 .set(SPACE_SIZE, SPACE_SIZE);
-        mTestDeviceProfile.widgetPadding.setEmpty();
+        mTestDeviceProfile.getWorkspaceIconProfile().getWidgetPadding().setEmpty();
     }
 
     private void initTestWidgets() {

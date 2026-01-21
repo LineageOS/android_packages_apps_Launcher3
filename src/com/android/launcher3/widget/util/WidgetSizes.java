@@ -35,7 +35,7 @@ public final class WidgetSizes {
                 * profile.getWorkspaceIconProfile().getCellLayoutBorderSpacePx().y;
 
         Point cellSize = profile.getWorkspaceIconProfile().getCellSize();
-        Rect padding = profile.widgetPadding;
+        Rect padding = profile.getWorkspaceIconProfile().getWidgetPadding();
 
         return new Size(
                 (spanX * cellSize.x) + hBorderSpacing - padding.left - padding.right,

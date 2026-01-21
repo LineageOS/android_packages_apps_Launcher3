@@ -35,6 +35,7 @@ import com.android.launcher3.util.CellContentDimensions
 import com.android.launcher3.util.IconSizeSteps
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 /**
  * All the variables that visually define the Workspace and are dependant on the device
@@ -83,6 +84,10 @@ data class WorkspaceProfile(
 
     // Drag and drop
     val flingToDeleteThresholdVelocity: Int,
+
+    // Additional padding added to the widget inside its cellSpace. It is applied outside
+    // the widgetView, such that the actual view size is same as the widget size.
+    val widgetPadding: Rect = Rect(),
 ) {
 
     /**
@@ -203,6 +208,8 @@ data class WorkspaceProfile(
     }
 
     companion object Factory {
+
+        const val MIN_WIDGET_PADDING_DP: Float = 6f
 
         // TODO: the first time we use this, cellLayoutPadding and totalWorkspacePadding are zero
         // but it doesn't make sense to do that, and other variables depend on those values, we need
@@ -375,6 +382,7 @@ data class WorkspaceProfile(
             hotseatProfile: HotseatProfileInitialValues,
             panelCount: Int,
             isItemLabelHidden: Boolean,
+            metrics: DisplayMetrics,
         ): WorkspaceProfile {
 
             val cellLayoutBorderSpacePx =
@@ -489,6 +497,19 @@ data class WorkspaceProfile(
                         ),
                 )
 
+            // Update widget padding:
+            val minSpacing: Float = ResourceUtils.pxFromDp(MIN_WIDGET_PADDING_DP, metrics).toFloat()
+            val widgetPadding = Rect()
+            if (cellLayoutBorderSpacePx.x < minSpacing || cellLayoutBorderSpacePx.y < minSpacing) {
+                widgetPadding.right = max(0f, minSpacing - cellLayoutBorderSpacePx.x).roundToInt()
+
+                widgetPadding.left = widgetPadding.right
+                widgetPadding.bottom = max(0f, minSpacing - cellLayoutBorderSpacePx.y).roundToInt()
+                widgetPadding.top = widgetPadding.bottom
+            } else {
+                widgetPadding.setEmpty()
+            }
+
             return WorkspaceProfile(
                 // Workspace icons
                 iconScale = iconScale,
@@ -544,6 +565,7 @@ data class WorkspaceProfile(
                 isItemsLabelHidden = isItemLabelHidden,
                 flingToDeleteThresholdVelocity =
                     res.getDimensionPixelSize(R.dimen.drag_flingToDeleteMinVelocity),
+                widgetPadding = widgetPadding,
             )
         }
 
@@ -596,6 +618,7 @@ data class WorkspaceProfile(
                         panelCount = panelCount,
                         isItemLabelHidden =
                             deviceProperties.deviceConfiguration.isWorkspaceItemsLabelHidden,
+                        metrics = metrics,
                     )
 
                 else ->

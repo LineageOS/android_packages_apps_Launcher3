@@ -379,9 +379,15 @@ public class TestInformationHandler {
                                 + l.getAppsView().getActiveRecyclerView().getPaddingBottom());
             }
 
-            case TestProtocol.REQUEST_IS_RECENTS_WINDOW_ENABLED: {
+            case TestProtocol.REQUEST_IS_LAUNCHER_RECENTS_WINDOW_ENABLED: {
                 response.putBoolean(TestProtocol.TEST_INFO_RESPONSE_FIELD,
-                        enableLauncherOverviewInWindow() || enableFallbackOverviewInWindow());
+                        enableLauncherOverviewInWindow());
+                return response;
+            }
+
+            case TestProtocol.REQUEST_IS_FALLBACK_RECENTS_WINDOW_ENABLED: {
+                response.putBoolean(TestProtocol.TEST_INFO_RESPONSE_FIELD,
+                        enableFallbackOverviewInWindow());
                 return response;
             }
 

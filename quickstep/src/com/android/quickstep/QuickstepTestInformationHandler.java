@@ -239,7 +239,9 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
                     waitForTaskbarUiThreadSync();
                 });
                 return response;
-
+            case TestProtocol.INJECT_TEST_INSIGHTS:
+                runOnTaskbar(TaskbarManager::injectTestInsights);
+                return response;
             case TestProtocol.REQUEST_RECREATE_TASKBAR:
                 runOnTaskbar(TaskbarManager::recreateTaskbars);
                 return response;

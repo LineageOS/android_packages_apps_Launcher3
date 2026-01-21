@@ -19,8 +19,8 @@ package com.android.quickstep.recents.domain.usecase
 import android.graphics.Rect
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.quickstep.recents.domain.model.DesktopLayoutConfig
-import com.android.quickstep.recents.domain.model.DesktopTaskBoundsData.HiddenDesktopTaskBoundsData
-import com.android.quickstep.recents.domain.model.DesktopTaskBoundsData.RenderedDesktopTaskBoundsData
+import com.android.quickstep.recents.domain.model.OverviewPosition.Hidden
+import com.android.quickstep.recents.domain.model.OverviewPosition.Rendered
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -33,7 +33,7 @@ class OrganizeDesktopTasksUseCaseTest {
 
     @Test
     fun test_emptyTaskBounds_returnsEmptyList() {
-        val taskBounds = emptyList<RenderedDesktopTaskBoundsData>()
+        val taskBounds = emptyList<Rendered>()
 
         val result = useCase.invoke(taskBounds, TEST_LAYOUT_CONFIG)
 
@@ -43,8 +43,8 @@ class OrganizeDesktopTasksUseCaseTest {
     @Test
     fun test_emptyDesktopBounds_returnsHiddenTaskData() {
         val desktopBounds = Rect(0, 0, 0, 0)
-        val taskBounds = listOf(RenderedDesktopTaskBoundsData(1, Rect(0, 0, 100, 100)))
-        val expected = listOf(HiddenDesktopTaskBoundsData(1))
+        val taskBounds = listOf(Rendered(1, Rect(0, 0, 100, 100)))
+        val expected = listOf(Hidden(1))
         val layoutConfig = TEST_LAYOUT_CONFIG.copy(desktopBounds = desktopBounds)
 
         val result = useCase.invoke(taskBounds, layoutConfig)
@@ -55,12 +55,12 @@ class OrganizeDesktopTasksUseCaseTest {
     @Test
     fun test_singleTask_isCenteredAndScaled() {
         val originalAppRect = Rect(0, 0, 800, 1200)
-        val taskBounds = listOf(RenderedDesktopTaskBoundsData(1, originalAppRect))
+        val taskBounds = listOf(Rendered(1, originalAppRect))
 
         val result = useCase.invoke(taskBounds, TEST_LAYOUT_CONFIG)
 
         assertThat(result).hasSize(1)
-        val renderedTask = result[0] as RenderedDesktopTaskBoundsData
+        val renderedTask = result[0] as Rendered
         val resultBounds = renderedTask.bounds
         assertThat(resultBounds.width()).isGreaterThan(0)
         assertThat(resultBounds.height()).isGreaterThan(0)
@@ -73,28 +73,22 @@ class OrganizeDesktopTasksUseCaseTest {
         // availableLayoutBounds will be Rect(20, 20, 980, 1980) after subtracting the margins.
         // Check if the task is centered within effective layout bounds
         val expectedTaskRect = Rect(25, 287, 975, 1713)
-        assertThat(result)
-            .isEqualTo(listOf(RenderedDesktopTaskBoundsData(taskId = 1, bounds = expectedTaskRect)))
+        assertThat(result).isEqualTo(listOf(Rendered(taskId = 1, bounds = expectedTaskRect)))
     }
 
     @Test
     fun test_multiTasks_formRows() {
         // Make tasks wide enough so they likely won't all fit in one row
         val taskRect = Rect(0, 0, 600, 400)
-        val taskBounds =
-            listOf(
-                RenderedDesktopTaskBoundsData(1, taskRect),
-                RenderedDesktopTaskBoundsData(2, taskRect),
-                RenderedDesktopTaskBoundsData(3, taskRect),
-            )
+        val taskBounds = listOf(Rendered(1, taskRect), Rendered(2, taskRect), Rendered(3, taskRect))
 
         val result = useCase.invoke(taskBounds, TEST_LAYOUT_CONFIG)
         assertThat(result).hasSize(3)
-        val bounds1 = (result[0] as RenderedDesktopTaskBoundsData).bounds
+        val bounds1 = (result[0] as Rendered).bounds
 
         // Basic checks: positive dimensions, aspect ratio
         result.forEachIndexed { index, data ->
-            val renderedData = data as RenderedDesktopTaskBoundsData
+            val renderedData = data as Rendered
             assertThat(renderedData.bounds.width()).isGreaterThan(0)
             assertThat(renderedData.bounds.height()).isGreaterThan(0)
             val originalAspectRatio = taskRect.width().toFloat() / taskRect.height()
@@ -110,9 +104,9 @@ class OrganizeDesktopTasksUseCaseTest {
         val expectedTask3Bounds = Rect(20, 1330, 980, 1970)
         val expectedResult =
             listOf(
-                RenderedDesktopTaskBoundsData(1, expectedTask1Bounds),
-                RenderedDesktopTaskBoundsData(2, expectedTask2Bounds),
-                RenderedDesktopTaskBoundsData(3, expectedTask3Bounds),
+                Rendered(1, expectedTask1Bounds),
+                Rendered(2, expectedTask2Bounds),
+                Rendered(3, expectedTask3Bounds),
             )
         assertThat(result).isEqualTo(expectedResult)
     }
@@ -121,12 +115,7 @@ class OrganizeDesktopTasksUseCaseTest {
     fun test_maxRows_limitsNumberOfRowsEffectively() {
         val desktopBounds = Rect(0, 0, 1000, 550) // Height is somewhat constrained
         val taskRect = Rect(0, 0, 200, 100) // Aspect ratio 2:1
-        val tasks =
-            listOf(
-                RenderedDesktopTaskBoundsData(1, taskRect),
-                RenderedDesktopTaskBoundsData(2, taskRect),
-                RenderedDesktopTaskBoundsData(3, taskRect),
-            )
+        val tasks = listOf(Rendered(1, taskRect), Rendered(2, taskRect), Rendered(3, taskRect))
 
         // For simplicity, configure maxRows = 1.
         // Effective layout height for multi-row (or single-row if margins are same):
@@ -174,18 +163,13 @@ class OrganizeDesktopTasksUseCaseTest {
 
         val result = useCase.invoke(tasks, config)
 
-        val expected =
-            listOf(
-                RenderedDesktopTaskBoundsData(1, Rect(25, 37, 975, 513)),
-                HiddenDesktopTaskBoundsData(2),
-                HiddenDesktopTaskBoundsData(3),
-            )
+        val expected = listOf(Rendered(1, Rect(25, 37, 975, 513)), Hidden(2), Hidden(3))
         assertThat(result).isEqualTo(expected)
     }
 
     @Test
     fun removeTask_fromEmptyLayout_returnsEmptyList_merged() {
-        val currentLayout = emptyList<RenderedDesktopTaskBoundsData>()
+        val currentLayout = emptyList<Rendered>()
         val taskIdToRemove = 1
 
         val result =
@@ -200,7 +184,7 @@ class OrganizeDesktopTasksUseCaseTest {
 
     @Test
     fun removeTask_whenTaskNotFoundInSingleItemLayout_returnsOriginalLayout_merged() {
-        val currentLayout = listOf(RenderedDesktopTaskBoundsData(1, Rect(0, 0, 100, 200)))
+        val currentLayout = listOf(Rendered(1, Rect(0, 0, 100, 200)))
         val taskIdToRemove = 2 // Task not in currentLayout
 
         val result =
@@ -229,9 +213,9 @@ class OrganizeDesktopTasksUseCaseTest {
     fun removeFirstRow_fromLayoutWithThreeRowsSingleColumn_rebalancesRemainingTwo_merged() {
         val currentLayout =
             listOf(
-                RenderedDesktopTaskBoundsData(1, Rect(0, 0, 100, 200)),
-                RenderedDesktopTaskBoundsData(2, Rect(0, 210, 100, 410)),
-                RenderedDesktopTaskBoundsData(3, Rect(0, 420, 100, 620)),
+                Rendered(1, Rect(0, 0, 100, 200)),
+                Rendered(2, Rect(0, 210, 100, 410)),
+                Rendered(3, Rect(0, 420, 100, 620)),
             )
         val taskIdToRemove = 1
 
@@ -244,10 +228,7 @@ class OrganizeDesktopTasksUseCaseTest {
             )
 
         val expectedResult =
-            listOf(
-                RenderedDesktopTaskBoundsData(2, Rect(0, 105, 100, 305)),
-                RenderedDesktopTaskBoundsData(3, Rect(0, 315, 100, 515)),
-            )
+            listOf(Rendered(2, Rect(0, 105, 100, 305)), Rendered(3, Rect(0, 315, 100, 515)))
         assertThat(result).isEqualTo(expectedResult)
     }
 
@@ -262,9 +243,9 @@ class OrganizeDesktopTasksUseCaseTest {
     fun removeMiddleRow_fromLayoutWithThreeRowsSingleColumn_rebalancesRemainingTwo_merged() {
         val currentLayout =
             listOf(
-                RenderedDesktopTaskBoundsData(1, Rect(0, 0, 100, 200)),
-                RenderedDesktopTaskBoundsData(2, Rect(0, 210, 100, 410)),
-                RenderedDesktopTaskBoundsData(3, Rect(0, 420, 100, 620)),
+                Rendered(1, Rect(0, 0, 100, 200)),
+                Rendered(2, Rect(0, 210, 100, 410)),
+                Rendered(3, Rect(0, 420, 100, 620)),
             )
         val taskIdToRemove = 2
 
@@ -277,10 +258,7 @@ class OrganizeDesktopTasksUseCaseTest {
             )
 
         val expectedResult =
-            listOf(
-                RenderedDesktopTaskBoundsData(1, Rect(0, 105, 100, 305)),
-                RenderedDesktopTaskBoundsData(3, Rect(0, 315, 100, 515)),
-            )
+            listOf(Rendered(1, Rect(0, 105, 100, 305)), Rendered(3, Rect(0, 315, 100, 515)))
         assertThat(result).isEqualTo(expectedResult)
     }
 
@@ -295,9 +273,9 @@ class OrganizeDesktopTasksUseCaseTest {
     fun removeLastRow_fromLayoutWithThreeRowsSingleColumn_rebalancesRemainingTwo_merged() {
         val currentLayout =
             listOf(
-                RenderedDesktopTaskBoundsData(1, Rect(0, 0, 100, 200)),
-                RenderedDesktopTaskBoundsData(2, Rect(0, 210, 100, 410)),
-                RenderedDesktopTaskBoundsData(3, Rect(0, 420, 100, 620)),
+                Rendered(1, Rect(0, 0, 100, 200)),
+                Rendered(2, Rect(0, 210, 100, 410)),
+                Rendered(3, Rect(0, 420, 100, 620)),
             )
         val taskIdToRemove = 3
 
@@ -310,10 +288,7 @@ class OrganizeDesktopTasksUseCaseTest {
             )
 
         val expectedResult =
-            listOf(
-                RenderedDesktopTaskBoundsData(1, Rect(0, 105, 100, 305)),
-                RenderedDesktopTaskBoundsData(2, Rect(0, 315, 100, 515)),
-            )
+            listOf(Rendered(1, Rect(0, 105, 100, 305)), Rendered(2, Rect(0, 315, 100, 515)))
         assertThat(result).isEqualTo(expectedResult)
     }
 
@@ -328,11 +303,11 @@ class OrganizeDesktopTasksUseCaseTest {
     fun removeMiddleRowWithSingleTask_fromLayoutWithThreeRowsMixedColumns_rebalancesRemainingTwoRows_merged() {
         val currentLayout =
             listOf(
-                RenderedDesktopTaskBoundsData(1, Rect(0, 0, 100, 200)),
-                RenderedDesktopTaskBoundsData(2, Rect(110, 0, 210, 200)),
-                RenderedDesktopTaskBoundsData(3, Rect(0, 210, 100, 410)),
-                RenderedDesktopTaskBoundsData(4, Rect(0, 420, 100, 620)),
-                RenderedDesktopTaskBoundsData(5, Rect(110, 420, 210, 620)),
+                Rendered(1, Rect(0, 0, 100, 200)),
+                Rendered(2, Rect(110, 0, 210, 200)),
+                Rendered(3, Rect(0, 210, 100, 410)),
+                Rendered(4, Rect(0, 420, 100, 620)),
+                Rendered(5, Rect(110, 420, 210, 620)),
             )
         val taskIdToRemove = 3
 
@@ -346,10 +321,10 @@ class OrganizeDesktopTasksUseCaseTest {
 
         val expectedResult =
             listOf(
-                RenderedDesktopTaskBoundsData(1, Rect(0, 105, 100, 305)),
-                RenderedDesktopTaskBoundsData(2, Rect(110, 105, 210, 305)),
-                RenderedDesktopTaskBoundsData(4, Rect(0, 315, 100, 515)),
-                RenderedDesktopTaskBoundsData(5, Rect(110, 315, 210, 515)),
+                Rendered(1, Rect(0, 105, 100, 305)),
+                Rendered(2, Rect(110, 105, 210, 305)),
+                Rendered(4, Rect(0, 315, 100, 515)),
+                Rendered(5, Rect(110, 315, 210, 515)),
             )
         assertThat(result).isEqualTo(expectedResult)
     }
@@ -362,9 +337,9 @@ class OrganizeDesktopTasksUseCaseTest {
     fun removeFirstTask_fromLayoutWithSingleRowThreeColumns_rebalancesRemainingTwo_merged() {
         val currentLayout =
             listOf(
-                RenderedDesktopTaskBoundsData(1, Rect(0, 0, 100, 200)),
-                RenderedDesktopTaskBoundsData(2, Rect(110, 0, 210, 200)),
-                RenderedDesktopTaskBoundsData(3, Rect(220, 0, 320, 200)),
+                Rendered(1, Rect(0, 0, 100, 200)),
+                Rendered(2, Rect(110, 0, 210, 200)),
+                Rendered(3, Rect(220, 0, 320, 200)),
             )
         val taskIdToRemove = 1
 
@@ -377,10 +352,7 @@ class OrganizeDesktopTasksUseCaseTest {
             )
 
         val expectedResult =
-            listOf(
-                RenderedDesktopTaskBoundsData(2, Rect(55, 0, 155, 200)),
-                RenderedDesktopTaskBoundsData(3, Rect(165, 0, 265, 200)),
-            )
+            listOf(Rendered(2, Rect(55, 0, 155, 200)), Rendered(3, Rect(165, 0, 265, 200)))
         assertThat(result).isEqualTo(expectedResult)
     }
 
@@ -392,9 +364,9 @@ class OrganizeDesktopTasksUseCaseTest {
     fun removeMiddleTask_fromLayoutWithSingleRowThreeColumns_rebalancesRemainingTwo_merged() {
         val currentLayout =
             listOf(
-                RenderedDesktopTaskBoundsData(1, Rect(0, 0, 100, 200)),
-                RenderedDesktopTaskBoundsData(2, Rect(110, 0, 210, 200)),
-                RenderedDesktopTaskBoundsData(3, Rect(220, 0, 320, 200)),
+                Rendered(1, Rect(0, 0, 100, 200)),
+                Rendered(2, Rect(110, 0, 210, 200)),
+                Rendered(3, Rect(220, 0, 320, 200)),
             )
         val taskIdToRemove = 2
 
@@ -407,10 +379,7 @@ class OrganizeDesktopTasksUseCaseTest {
             )
 
         val expectedResult =
-            listOf(
-                RenderedDesktopTaskBoundsData(1, Rect(55, 0, 155, 200)),
-                RenderedDesktopTaskBoundsData(3, Rect(165, 0, 265, 200)),
-            )
+            listOf(Rendered(1, Rect(55, 0, 155, 200)), Rendered(3, Rect(165, 0, 265, 200)))
         assertThat(result).isEqualTo(expectedResult)
     }
 
@@ -422,9 +391,9 @@ class OrganizeDesktopTasksUseCaseTest {
     fun removeLastTask_fromLayoutWithSingleRowThreeColumns_rebalancesRemainingTwo_merged() {
         val currentLayout =
             listOf(
-                RenderedDesktopTaskBoundsData(1, Rect(0, 0, 100, 200)),
-                RenderedDesktopTaskBoundsData(2, Rect(110, 0, 210, 200)),
-                RenderedDesktopTaskBoundsData(3, Rect(220, 0, 320, 200)),
+                Rendered(1, Rect(0, 0, 100, 200)),
+                Rendered(2, Rect(110, 0, 210, 200)),
+                Rendered(3, Rect(220, 0, 320, 200)),
             )
         val taskIdToRemove = 3
 
@@ -437,19 +406,16 @@ class OrganizeDesktopTasksUseCaseTest {
             )
 
         val expectedResult =
-            listOf(
-                RenderedDesktopTaskBoundsData(1, Rect(55, 0, 155, 200)),
-                RenderedDesktopTaskBoundsData(2, Rect(165, 0, 265, 200)),
-            )
+            listOf(Rendered(1, Rect(55, 0, 155, 200)), Rendered(2, Rect(165, 0, 265, 200)))
         assertThat(result).isEqualTo(expectedResult)
     }
 
     // Helper for creating RenderedDesktopTaskBoundsData
     private fun createRenderedData(taskId: Int, l: Int, t: Int, r: Int, b: Int) =
-        RenderedDesktopTaskBoundsData(taskId, Rect(l, t, r, b))
+        Rendered(taskId, Rect(l, t, r, b))
 
     // Helper for creating HiddenDesktopTaskBoundsData
-    private fun createHiddenData(taskId: Int) = HiddenDesktopTaskBoundsData(taskId)
+    private fun createHiddenData(taskId: Int) = Hidden(taskId)
 
     @Test
     fun dismissOnlyTask_resultsInEmptyLayout() {
@@ -569,7 +535,7 @@ class OrganizeDesktopTasksUseCaseTest {
 
         assertThat(result).isEqualTo(expectedResultByFullOrganization)
         // Additionally, verify that T3 is now rendered.
-        assertThat(result.any { it.taskId == 3 && it is RenderedDesktopTaskBoundsData }).isTrue()
+        assertThat(result.any { it.taskId == 3 && it is Rendered }).isTrue()
     }
 
     @Test
@@ -625,12 +591,7 @@ class OrganizeDesktopTasksUseCaseTest {
     fun layoutWithHiddenTasks_relayoutsVisibleTasksOptimally() {
         val taskRect = Rect(0, 0, 200, 100) // Same size for all tasks
 
-        val tasks =
-            listOf(
-                RenderedDesktopTaskBoundsData(1, taskRect),
-                RenderedDesktopTaskBoundsData(2, taskRect),
-                RenderedDesktopTaskBoundsData(3, taskRect),
-            )
+        val tasks = listOf(Rendered(1, taskRect), Rendered(2, taskRect), Rendered(3, taskRect))
 
         val constrainedConfig =
             TEST_LAYOUT_CONFIG.copy(desktopBounds = Rect(0, 0, 1000, 400), maxRows = 1)
@@ -645,14 +606,12 @@ class OrganizeDesktopTasksUseCaseTest {
         val resultVisibleOnly = useCase.invoke(visibleTasks, constrainedConfig)
 
         // 3. Filter out the hidden task from the first result
-        val renderedTasksFromResultWithHidden =
-            resultWithHidden.filterIsInstance<RenderedDesktopTaskBoundsData>()
+        val renderedTasksFromResultWithHidden = resultWithHidden.filterIsInstance<Rendered>()
 
         // 4. Assert that the layouts are the same
         assertThat(renderedTasksFromResultWithHidden).isEqualTo(resultVisibleOnly)
         // Also assert that task 3 was indeed hidden
-        assertThat(resultWithHidden.find { it.taskId == 3 })
-            .isInstanceOf(HiddenDesktopTaskBoundsData::class.java)
+        assertThat(resultWithHidden.find { it.taskId == 3 }).isInstanceOf(Hidden::class.java)
     }
 
     companion object {

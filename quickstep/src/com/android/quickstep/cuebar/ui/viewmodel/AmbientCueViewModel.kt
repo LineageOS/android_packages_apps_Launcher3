@@ -37,16 +37,16 @@ import com.android.quickstep.cuebar.logger.AmbientCueLogger
 import com.android.systemui.shared.Flags.cueBarAceMigration
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import java.io.PrintWriter
-import java.util.concurrent.Executor
-import kotlin.time.Duration.Companion.days
-import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.PrintWriter
+import java.util.concurrent.Executor
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.milliseconds
 
 class AmbientCueViewModel
 @AssistedInject
@@ -159,11 +159,11 @@ constructor(
         }
         val oldVisibility = isVisible
         val globallyFocusedTaskId = ambientCueInteractor.globallyFocusedTaskId.value
-        val isRootAttached =
-            ambientCueInteractor.actions.value.isNotEmpty() &&
-                ambientCueInteractor.isAmbientCueEnabled.value &&
-                !ambientCueInteractor.isDeactivated.value &&
-                globallyFocusedTaskId == targetTaskId
+        val isRootAttached = ambientCueInteractor.isTestMode.value
+                || ambientCueInteractor.actions.value.isNotEmpty()
+                && ambientCueInteractor.isAmbientCueEnabled.value
+                && !ambientCueInteractor.isDeactivated.value
+                && globallyFocusedTaskId == targetTaskId
         if (isRootAttached && !isSessionStarted) {
             isSessionStarted = true
             var maCount = 0
@@ -223,6 +223,7 @@ constructor(
     }
 
     fun onActionsChange(newActions: List<ActionModel>) {
+        Log.d(TAG, "onActionsChange: onActionsChange: $newActions")
         // Cancel any pending debounced (empty) action job
         actionUpdateJob?.cancel()
         if (newActions.isEmpty()) {

@@ -126,6 +126,7 @@ public final class TestProtocol {
     public static final String REQUEST_REINITIALIZE_DATA = "reinitialize-data";
     public static final String REQUEST_CLEAR_DATA = "clear-data";
     public static final String REQUEST_HOTSEAT_ICON_NAMES = "get-hotseat-icon-names";
+    public static final String INJECT_TEST_INSIGHTS = "inject-test-insights";
     public static final String REQUEST_SHOULD_SHOW_HOME_BEHIND_DESKTOP =
             "should-show-home-behind-desktop";
     public static final String REQUEST_IS_TABLET = "is-tablet";
@@ -192,7 +193,10 @@ public final class TestProtocol {
 
     public static final String REQUEST_GET_DESK_COUNT = "get-desk-count";
 
-    public static final String REQUEST_IS_RECENTS_WINDOW_ENABLED = "recents-window-enabled";
+    public static final String REQUEST_IS_LAUNCHER_RECENTS_WINDOW_ENABLED =
+            "launcher-recents-window-enabled";
+    public static final String REQUEST_IS_FALLBACK_RECENTS_WINDOW_ENABLED =
+            "fallback-recents-window-enabled";
 
     public static final String REQUEST_UNSTASH_BUBBLE_BAR_IF_STASHED =
             "unstash-bubble-bar-if-stashed";

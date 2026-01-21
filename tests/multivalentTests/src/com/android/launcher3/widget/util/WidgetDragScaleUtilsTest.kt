@@ -55,7 +55,7 @@ class WidgetDragScaleUtilsTest {
             deviceProfile.workspaceIconProfile.copy(
                 cellLayoutBorderSpacePx = Point(CELL_SPACING, CELL_SPACING)
             )
-        deviceProfile.widgetPadding.setEmpty()
+        deviceProfile.workspaceIconProfile.widgetPadding.setEmpty()
     }
 
     @Test

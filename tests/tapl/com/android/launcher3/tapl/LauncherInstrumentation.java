@@ -1209,13 +1209,19 @@ public final class LauncherInstrumentation {
         }
     }
 
-    // TODO(b/377678992): revert ag/36346262 once NexusLauncherTests-OverviewInWindowEnabled is
-    //  successfully blocking presubmit.
     public boolean isRecentsWindowEnabled() {
-        return getTestInfo(TestProtocol.REQUEST_IS_RECENTS_WINDOW_ENABLED)
-                .getBoolean(TestProtocol.TEST_INFO_RESPONSE_FIELD);
+        if (mDisplayId != DEFAULT_DISPLAY) {
+            // The recents window is always enabled on connected displays
+            return true;
+        }
+        Bundle testInfo = is3PLauncher()
+                ? getTestInfo(TestProtocol.REQUEST_IS_FALLBACK_RECENTS_WINDOW_ENABLED)
+                : getTestInfo(TestProtocol.REQUEST_IS_LAUNCHER_RECENTS_WINDOW_ENABLED);
+
+        return testInfo.getBoolean(TestProtocol.TEST_INFO_RESPONSE_FIELD);
     }
 
+    // TODO(b/377678992): update access modifier once ag/37092345 is reverted
     public void waitForModelQueueCleared() {
         getTestInfo(TestProtocol.REQUEST_MODEL_QUEUE_CLEARED);
     }
@@ -2711,6 +2717,10 @@ public final class LauncherInstrumentation {
 
     public void ejectFakeTrackpad() {
         getTestInfo(TestProtocol.REQUEST_EJECT_FAKE_TRACKPAD);
+    }
+
+    public void injectTestInsights() {
+        getTestInfo(TestProtocol.INJECT_TEST_INSIGHTS);
     }
 
     /** Blocks the taskbar from automatically stashing based on time. */
