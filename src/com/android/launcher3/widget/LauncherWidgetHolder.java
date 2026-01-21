@@ -31,7 +31,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Looper;
-import android.util.Log;
 import android.util.SparseArray;
 import android.widget.Toast;
 
@@ -67,8 +66,6 @@ import java.util.function.IntConsumer;
  * background.
  */
 public class LauncherWidgetHolder {
-
-    private static final String TAG = "LauncherWidgetHolder";
 
     public static final int APPWIDGET_HOST_ID = 1024;
 
@@ -200,14 +197,10 @@ public class LauncherWidgetHolder {
      * Called when the launcher is destroyed
      */
     public void destroy() {
-        try {
-            MAIN_EXECUTOR.submit(() -> {
-                clearViews();
-                mWidgetHost.getHolders().remove(this);
-            }).get();
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to remove self from holder list", e);
-        }
+        MAIN_EXECUTOR.execute(() -> {
+            clearViews();
+            mWidgetHost.getHolders().remove(this);
+        });
     }
 
     /**
