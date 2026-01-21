@@ -1614,10 +1614,15 @@ public class BubbleBarView extends FrameLayout {
         // accessibility
         if (isExpanded() && !isExpanding()) {
             float iconAndPadding = mIconSize + mExpandedBarIconsSpacing;
-            int bubbleIndex = (int) (ev.getX() / iconAndPadding);
-            if (bubbleIndex < getChildCount()) {
-                return getChildAt(bubbleIndex).dispatchTouchEvent(ev);
-            }
+            // split the bubble bar into horizontal segments where each segment corresponds to a
+            // bubble. segments are 0-indexed from left to right.
+            int segmentIndex = (int) (ev.getX() / iconAndPadding);
+            segmentIndex = Math.max(0, Math.min(getChildCount() - 1, segmentIndex));
+            // if the bubble bar is on the right, the segment index is the same as the bubble index.
+            // if the bubble bar is on the left we need to reverse the index.
+            final boolean onLeft = mBubbleBarLocation.isOnLeft(isLayoutRtl());
+            int bubbleIndex = onLeft ? getChildCount() - 1 - segmentIndex : segmentIndex;
+            return getChildAt(bubbleIndex).dispatchTouchEvent(ev);
         }
         return super.onTouchEvent(ev);
     }
