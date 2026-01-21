@@ -29,14 +29,17 @@ import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.DropTarget
 import com.android.launcher3.DropTarget.DragObject
+import com.android.launcher3.dragndrop.DragController
 import com.android.launcher3.dragndrop.DragOptions
 import com.android.launcher3.model.data.AppInfo
+import com.android.launcher3.taskbar.TaskbarActivityContext
 import com.android.launcher3.taskbar.bubbles.BubbleBarController.BubbleBarLocationListener
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation
 import com.android.wm.shell.shared.bubbles.DeviceConfig
 import com.android.wm.shell.shared.bubbles.DragZoneFactory
 import com.android.wm.shell.shared.bubbles.DragZoneFactory.BubbleBarPropertiesProvider
 import com.android.wm.shell.shared.bubbles.DragZoneFactory.SplitScreenModeChecker.SplitScreenMode
+import com.android.wm.shell.shared.bubbles.DropTargetManager
 import com.android.wm.shell.shared.bubbles.DropTargetView
 import com.android.wm.shell.shared.bubbles.logging.EntryPoint
 import com.google.common.truth.Truth.assertThat
@@ -52,8 +55,11 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
+import org.mockito.kotlin.spy
 import org.mockito.kotlin.stub
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 /** Unit tests for [DragToBubbleControllerTest]. */
 @SmallTest
@@ -68,6 +74,8 @@ class DragToBubbleControllerTest {
     private val bubbleActivityStarter: BubbleActivityStarter = mock()
     private val bubbleBarLocationListener: BubbleBarLocationListener = mock()
     private val bubbleBarPropertiesProvider = FakeBubbleBarPropertiesProvider()
+    private val taskbarActivityContext: TaskbarActivityContext = mock()
+    private val dragController: DragController = mock()
     private val testDragZonesFactory = createTestDragZoneFactory()
     private val dragObject = DragObject(context)
     private val packageName = "test.package"
@@ -100,11 +108,14 @@ class DragToBubbleControllerTest {
     private val rightDropTargetRect: Rect
         get() = testDragZonesFactory.getBubbleBarDropRect(isLeftSide = false)
 
+    private lateinit var shellDropTargetSpy: DropTargetManager
+
     @Before
     fun setUp() {
         prepareBubbleBarViewController()
         setAppInfo()
-        dragToBubbleController = DragToBubbleController(context, container)
+        whenever(taskbarActivityContext.areAppBubblesSupported()).doReturn(true)
+        dragToBubbleController = DragToBubbleController(context, container, taskbarActivityContext)
         dragToBubbleController.init(
             bubbleBarViewController,
             bubbleBarPropertiesProvider,
@@ -112,6 +123,64 @@ class DragToBubbleControllerTest {
             bubbleActivityStarter,
         )
         dragToBubbleController.dragZoneFactory = testDragZonesFactory
+        shellDropTargetSpy = spy(dragToBubbleController.shellDropTargetManager)
+        dragToBubbleController.shellDropTargetManager = shellDropTargetSpy
+    }
+
+    @Test
+    fun addBubbleBarDropTargets_noAppBubbles_noTargets_noListener() {
+        whenever(taskbarActivityContext.areAppBubblesSupported()).doReturn(false)
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            dragToBubbleController.addBubbleBarDropTargets(dragController)
+        }
+
+        verify(dragController, never()).addDropTarget(any())
+        verify(dragController, never()).addDragListener(any())
+    }
+
+    @Test
+    fun onShellDragStateChanged_noAppBubbles_noEvents() {
+        whenever(taskbarActivityContext.areAppBubblesSupported()).doReturn(false)
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            dragToBubbleController.onShellDragStateChanged(true)
+        }
+        verify(shellDropTargetSpy, never()).onDragStarted(any(), any())
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            dragToBubbleController.onShellDragStateChanged(false)
+        }
+        verify(shellDropTargetSpy, never()).onDragEnded()
+    }
+
+    @Test
+    fun addBubbleBarDropTargets_setsTargetsAndListener() {
+        whenever(taskbarActivityContext.areAppBubblesSupported()).doReturn(true)
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            dragToBubbleController.addBubbleBarDropTargets(dragController)
+        }
+
+        verify(dragController, times(2)).addDropTarget(any())
+        verify(dragController, times(1)).addDragListener(eq(dragToBubbleController))
+    }
+
+    @Test
+    fun onShellDragStateChanged_sendsEvents() {
+        whenever(taskbarActivityContext.areAppBubblesSupported()).doReturn(true)
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            dragToBubbleController.onShellDragStateChanged(true)
+        }
+        assertThat(dragToBubbleController.isDragInProgress).isTrue()
+        assertThat(dragToBubbleController.shellDropTargetManager).isEqualTo(shellDropTargetSpy)
+        verify(shellDropTargetSpy).onDragStarted(any(), any())
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            dragToBubbleController.onShellDragStateChanged(false)
+        }
+        assertThat(dragToBubbleController.isDragInProgress).isFalse()
+        verify(shellDropTargetSpy).onDragEnded()
     }
 
     @Test

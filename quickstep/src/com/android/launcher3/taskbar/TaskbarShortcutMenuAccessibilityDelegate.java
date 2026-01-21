@@ -45,7 +45,6 @@ import com.android.launcher3.views.BubbleTextHolder;
 import com.android.quickstep.SystemUiProxy;
 import com.android.quickstep.util.GroupTask;
 import com.android.quickstep.util.LogUtils;
-import com.android.wm.shell.shared.bubbles.BubbleFlagHelper;
 import com.android.wm.shell.shared.bubbles.logging.EntryPoint;
 
 import java.util.List;
@@ -89,7 +88,7 @@ public class TaskbarShortcutMenuAccessibilityDelegate
         }
         out.add(mActions.get(MOVE_TO_TOP_OR_LEFT));
         out.add(mActions.get(MOVE_TO_BOTTOM_OR_RIGHT));
-        if (BubbleFlagHelper.enableCreateAnyBubble()) {
+        if (mContext.areAppBubblesSupported()) {
             out.add(mActions.get(CREATE_APPLICATION_BUBBLE));
         }
     }

@@ -25,9 +25,9 @@ import com.android.launcher3.dragndrop.DragController
 import com.android.launcher3.dragndrop.DragOptions
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
+import com.android.launcher3.taskbar.TaskbarActivityContext
 import com.android.launcher3.taskbar.bubbles.BubbleBarController.BubbleBarLocationListener
 import com.android.launcher3.taskbar.bubbles.BubbleBarLocationDropTarget.BubbleBarDropTargetController
-import com.android.wm.shell.shared.bubbles.BubbleFlagHelper
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation
 import com.android.wm.shell.shared.bubbles.ContextUtils.isRtl
 import com.android.wm.shell.shared.bubbles.DeviceConfig
@@ -46,9 +46,17 @@ import com.android.wm.shell.shared.bubbles.logging.EntryPoint
 import com.google.common.annotations.VisibleForTesting
 import kotlin.math.min
 
+/**
+ * Supports dragging launcher content to bubble for drag events that originate within the launcher
+ * process, e.g. dragging from taskbar when in overview.
+ *
+ * This also displays a secondary drop target for the bubble bar (couldn't do this in shell due to
+ * window layering of taskbar) when drags originate from shell.
+ */
 class DragToBubbleController(
     private val context: Context,
     private val bubbleBarContainer: FrameLayout,
+    private val taskbarActivityContext: TaskbarActivityContext,
 ) : DragController.DragListener {
 
     // Two DropTargetManagers are needed because the drag call chain has
@@ -92,7 +100,7 @@ class DragToBubbleController(
 
     /** Adds bubble bar locations drop zones to the drag controller. */
     fun addBubbleBarDropTargets(dragController: DragController) {
-        if (!BubbleFlagHelper.enableCreateAnyBubble()) {
+        if (!taskbarActivityContext.areAppBubblesSupported()) {
             return
         }
         dragController.addDragListener(this)
@@ -130,7 +138,7 @@ class DragToBubbleController(
     }
 
     fun onShellDragStateChanged(started: Boolean) {
-        if (!BubbleFlagHelper.enableCreateAnyBubble()) {
+        if (!taskbarActivityContext.areAppBubblesSupported()) {
             return
         }
         isShellDragInProgress = started

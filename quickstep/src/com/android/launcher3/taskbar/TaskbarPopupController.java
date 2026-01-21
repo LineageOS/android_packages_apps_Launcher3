@@ -69,7 +69,6 @@ import com.android.quickstep.SystemUiProxy;
 import com.android.quickstep.util.LogUtils;
 import com.android.quickstep.util.SingleTask;
 import com.android.systemui.shared.recents.model.Task;
-import com.android.wm.shell.shared.bubbles.BubbleFlagHelper;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 
 import java.io.PrintWriter;
@@ -134,7 +133,8 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
     }
 
     // Create a Stream of all applicable system shortcuts
-    private Stream<SystemShortcut.Factory<BaseTaskbarContext>> getSystemShortcuts() {
+    @VisibleForTesting
+    Stream<SystemShortcut.Factory<BaseTaskbarContext>> getSystemShortcuts() {
         // append split options to APP_INFO shortcut if not in Desktop Windowing mode, the order
         // here will reflect in the popup
         ArrayList<SystemShortcut.Factory<BaseTaskbarContext>> shortcuts = new ArrayList<>();
@@ -144,7 +144,7 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
                 .shouldShowDesktopTasksInTaskbar(mContext.getDisplayId())) {
             shortcuts.addAll(mControllers.uiController.getSplitMenuOptions().toList());
         }
-        if (BubbleFlagHelper.enableCreateAnyBubble()) {
+        if (mControllers.taskbarActivityContext.areAppBubblesSupported()) {
             shortcuts.add(BUBBLE);
         }
 
