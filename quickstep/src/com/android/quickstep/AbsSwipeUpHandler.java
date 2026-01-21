@@ -31,7 +31,6 @@ import static com.android.launcher3.BaseActivity.EVENT_DESTROYED;
 import static com.android.launcher3.BaseActivity.EVENT_STARTED;
 import static com.android.launcher3.BaseActivity.INVISIBLE_BY_STATE_HANDLER;
 import static com.android.launcher3.BaseActivity.STATE_HANDLER_INVISIBILITY_FLAGS;
-import static com.android.launcher3.Flags.disableObsoleteSwipeHandlerLogic;
 import static com.android.launcher3.Flags.enableSwipeUpMagneticDetach;
 import static com.android.launcher3.Flags.msdlFeedback;
 import static com.android.launcher3.Flags.refactorTaskbarUiState;
@@ -1921,15 +1920,6 @@ public abstract class AbsSwipeUpHandler<
         }
 
 
-        AnimatorListenerAdapter shiftAnimationListener = new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-                super.onAnimationStart(animation);
-                // This is likely unnecessary, however adding this to prevent reintroducing any
-                // forgotten bugs fixed by the previous implementation.
-                mAnimationCanceled = false;
-            }
-        };
         if (mGestureState.getEndTarget() == HOME) {
             getOrientationHandler().adjustFloatingIconStartVelocity(velocityPxPerMs);
             // Take first task ID, if there are multiple we don't have any special home
@@ -2098,18 +2088,12 @@ public abstract class AbsSwipeUpHandler<
                 animatorSet.play(goingUpAnim);
                 animatorSet.play(goingDownAnim).after(goingUpAnim);
             }
-            if (!disableObsoleteSwipeHandlerLogic()) {
-                animatorSet.addListener(shiftAnimationListener);
-            }
             animatorSet.setInterpolator(interpolator);
             animatorSet.start();
             mRunningWindowAnim = new RunningWindowAnim[]{RunningWindowAnim.wrap(animatorSet)};
         } else {
             AnimatorSet animatorSet = new AnimatorSet();
             ValueAnimator windowAnim = mCurrentShift.animateToValue(start, end);
-            if (!disableObsoleteSwipeHandlerLogic()) {
-                windowAnim.addListener(shiftAnimationListener);
-            }
             windowAnim.addUpdateListener(valueAnimator -> {
                 computeRecentsScrollIfInvisible();
             });
