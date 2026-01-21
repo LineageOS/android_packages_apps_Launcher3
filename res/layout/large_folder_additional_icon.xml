@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.android.launcher3.folder.largefolder.LargeFolderAdditionalView xmlns:launcher="http://schemas.android.com/apk/res-auto"
+    style="@style/BaseIcon.Workspace.LargeFolderIcon"
+    launcher:centerVertically="true" />

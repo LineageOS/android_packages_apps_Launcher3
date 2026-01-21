@@ -602,4 +602,7 @@
     <!-- App Title Pill -->
     <dimen name="app_title_pill_horizontal_padding">4dp</dimen>
     <dimen name="app_title_pill_round_rect_padding">2dp</dimen>
+
+    <!-- Large folder -->
+    <dimen name="large_folder_content_bg_corner">20dp</dimen>
 </resources>

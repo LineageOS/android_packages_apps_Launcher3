@@ -56,6 +56,9 @@ import com.android.launcher3.util.Themes;
 import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.views.BaseDragLayer;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 /**
  * A container for shortcuts to deep links and notifications associated with an app.
  *
@@ -211,6 +214,9 @@ public abstract class ArrowPopup<T extends Context & ActivityContext>
         return (R) view;
     }
 
+    protected void onInflationComplete(boolean isReversed) {
+    }
+
     /**
      * Set the margins and radius of backgrounds after views are properly ordered.
      */
@@ -315,6 +321,20 @@ public abstract class ArrowPopup<T extends Context & ActivityContext>
         }
     }
 
+    protected void reorderAndShow(int viewsToFlip) {
+        setupForDisplay();
+        boolean reverseOrder = this.mIsAboveIcon;
+        if (reverseOrder) {
+            reverseOrder(viewsToFlip);
+        }
+        onInflationComplete(reverseOrder);
+        assignMarginsAndBackgrounds(this);
+        if (shouldAddArrow()) {
+            addArrow();
+        }
+        animateOpen();
+    }
+
     /**
      * Shows the popup at the desired location.
      */
@@ -332,6 +352,22 @@ public abstract class ArrowPopup<T extends Context & ActivityContext>
         mIsOpen = true;
         getPopupContainer().addView(this);
         orientAboutObject();
+    }
+
+    private void reverseOrder(int viewsToFlip) {
+        int count = getChildCount();
+        ArrayList<View> allViews = new ArrayList<>(count);
+        for (int i = 0; i < count; i++) {
+            if (i == viewsToFlip) {
+                Collections.reverse(allViews);
+            }
+            allViews.add(getChildAt(i));
+        }
+        Collections.reverse(allViews);
+        removeAllViews();
+        for (int i2 = 0; i2 < count; i2++) {
+            addView(allViews.get(i2));
+        }
     }
 
     private int getArrowLeft() {

@@ -17,6 +17,8 @@ package com.android.launcher3.views;
 
 import android.view.View;
 
+import com.android.launcher3.folder.largefolder.LargeFolderIcon;
+
 /**
  * A view that can be drawn (in some capacity) via) {@link FloatingIconView}.
  * This interface allows us to hide certain properties of the view that the FloatingIconView
@@ -32,7 +34,9 @@ public interface FloatingIconViewCompanion {
      * Sets the visibility of icon and dot of the view
      */
     static void setPropertiesVisible(View view, boolean visible) {
-        if (view instanceof FloatingIconViewCompanion) {
+        if (view instanceof LargeFolderIcon) {
+            return;
+        } else if (view instanceof FloatingIconViewCompanion) {
             ((FloatingIconViewCompanion) view).setIconVisible(visible);
             ((FloatingIconViewCompanion) view).setForceHideDot(!visible);
             ((FloatingIconViewCompanion) view).setForceHideRing(!visible);

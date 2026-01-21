@@ -89,10 +89,14 @@ public class FolderInfo extends CollectionInfo {
     /**
      * The apps and shortcuts
      */
-    private final ArrayList<ItemInfo> contents = new ArrayList<>();
+    public final ArrayList<ItemInfo> contents = new ArrayList<>();
 
     public FolderInfo() {
         itemType = LauncherSettings.Favorites.ITEM_TYPE_FOLDER;
+    }
+
+    public FolderInfo(Integer itemType) {
+        this.itemType = itemType == null ? LauncherSettings.Favorites.ITEM_TYPE_FOLDER : itemType;
     }
 
     @Override
@@ -322,5 +326,12 @@ public class FolderInfo extends CollectionInfo {
         return itemType == ITEM_TYPE_APPLICATION
                 || itemType == ITEM_TYPE_DEEP_SHORTCUT
                 || itemType == ITEM_TYPE_APP_PAIR;
+    }
+
+    public String getTitle() {
+        if (title == null) {
+            return "";
+        }
+        return title.toString();
     }
 }

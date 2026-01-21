@@ -16,6 +16,7 @@
 package com.android.launcher3.folder;
 
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FOLDER;
+import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_LARGE_FOLDER;
 
 import android.annotation.SuppressLint;
 import android.app.admin.DevicePolicyManager;
@@ -177,7 +178,7 @@ public class FolderNameProvider {
             BgDataModel dataModel) {
         IntSparseArrayMap<CollectionInfo> result = new IntSparseArrayMap<>();
         dataModel.itemsIdMap.stream()
-                .filter(item -> item.itemType == ITEM_TYPE_FOLDER)
+                .filter(item -> item.itemType == ITEM_TYPE_FOLDER || item.itemType == ITEM_TYPE_LARGE_FOLDER)
                 .forEach(item -> result.put(item.id, (FolderInfo) item));
         return result;
     }

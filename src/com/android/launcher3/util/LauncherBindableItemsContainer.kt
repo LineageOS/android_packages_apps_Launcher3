@@ -22,6 +22,7 @@ import com.android.launcher3.apppairs.AppPairIcon
 import com.android.launcher3.celllayout.CellInfo
 import com.android.launcher3.folder.Folder
 import com.android.launcher3.folder.FolderIcon
+import com.android.launcher3.folder.largefolder.LargeFolderIcon
 import com.android.launcher3.model.data.AppPairInfo
 import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.ItemInfo
@@ -53,6 +54,9 @@ fun interface LauncherBindableItemsContainer {
                             if (isOpen()) close(false)
                         }
                     }
+                }
+                v is LargeFolderIcon && info is FolderInfo -> {
+                    v.updateChildItems()
                 }
                 v is AppPairIcon && info is AppPairInfo ->
                     v.maybeRedrawForWorkspaceUpdate(updates::contains)

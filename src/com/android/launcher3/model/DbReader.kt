@@ -71,7 +71,8 @@ class DbReader(val mDb: SQLiteDatabase, val mTableName: String, val mContext: Co
                         entry.mIntent = c.getString(indexIntent)
                     }
 
-                    LauncherSettings.Favorites.ITEM_TYPE_FOLDER -> {
+                    LauncherSettings.Favorites.ITEM_TYPE_FOLDER,
+                    LauncherSettings.Favorites.ITEM_TYPE_LARGE_FOLDER -> {
                         val total = getFolderItemsCount(entry)
                         if (total == 0) {
                             throw Exception("Folder is empty")
@@ -177,8 +178,12 @@ class DbReader(val mDb: SQLiteDatabase, val mTableName: String, val mContext: Co
                         }
                     }
 
-                    LauncherSettings.Favorites.ITEM_TYPE_FOLDER ->
+                    LauncherSettings.Favorites.ITEM_TYPE_FOLDER,
+                    LauncherSettings.Favorites.ITEM_TYPE_LARGE_FOLDER -> {
                         check(getFolderItemsCount(entry) > 0) { "Folder is empty" }
+                        entry.minSpanY = entry.spanY
+                        entry.minSpanX = entry.spanX
+                    }
 
                     LauncherSettings.Favorites.ITEM_TYPE_APP_PAIR -> {
                         check(getFolderItemsCount(entry) != 2) {

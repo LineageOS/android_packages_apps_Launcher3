@@ -454,6 +454,33 @@ public class ModelDbController {
         }
     }
 
+    @WorkerThread
+    public IntArray deleteEmptyLargeFolders() {
+        createDbIfNotExists();
+
+        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        try (SQLiteTransaction t = new SQLiteTransaction(db)) {
+            // Select folders whose id do not match any container value.
+            String selection = LauncherSettings.Favorites.ITEM_TYPE + " = "
+                    + Favorites.ITEM_TYPE_LARGE_FOLDER + " AND "
+                    + LauncherSettings.Favorites._ID + " NOT IN (SELECT "
+                    + LauncherSettings.Favorites.CONTAINER + " FROM "
+                    + Favorites.TABLE_NAME + ")";
+
+            IntArray folderIds = LauncherDbUtils.queryIntArray(false, db, Favorites.TABLE_NAME,
+                    Favorites._ID, selection, null, null);
+            if (!folderIds.isEmpty()) {
+                db.delete(Favorites.TABLE_NAME, Utilities.createDbSelectionQuery(
+                        LauncherSettings.Favorites._ID, folderIds), null);
+            }
+            t.commit();
+            return folderIds;
+        } catch (SQLException ex) {
+            Log.e(TAG, ex.getMessage(), ex);
+            return new IntArray();
+        }
+    }
+
     /**
      * Deletes any app pair that doesn't contain 2 member apps from the DB.
      * @return Ids of deleted app pairs.

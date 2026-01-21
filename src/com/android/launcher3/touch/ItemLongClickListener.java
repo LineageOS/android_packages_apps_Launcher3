@@ -60,7 +60,7 @@ public class ItemLongClickListener {
     public static final OnLongClickListener INSTANCE_ALL_APPS =
             ItemLongClickListener::onAllAppsItemLongClick;
 
-    private static boolean onWorkspaceItemLongClick(View v) {
+    public static boolean onWorkspaceItemLongClick(View v) {
         if (v instanceof LauncherAppWidgetHostView) {
             TestLogging.recordEvent(TestProtocol.SEQUENCE_MAIN, "Widgets.onLongClick");
         } else {

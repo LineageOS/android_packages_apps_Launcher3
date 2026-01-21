@@ -25,6 +25,7 @@ import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_PAIR
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FOLDER
+import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_LARGE_FOLDER
 import com.android.launcher3.LauncherSettings.Favorites.SCREEN
 import com.android.launcher3.LauncherSettings.Favorites.SPANX
 import com.android.launcher3.LauncherSettings.Favorites.SPANY
@@ -90,6 +91,7 @@ class DbEntry : ItemInfo(), Comparable<DbEntry> {
     private fun getEntryMigrationId(): String? {
         when (itemType) {
             ITEM_TYPE_FOLDER,
+            ITEM_TYPE_LARGE_FOLDER,
             ITEM_TYPE_APP_PAIR -> return getFolderMigrationId()
             ITEM_TYPE_APPWIDGET ->
                 // mProvider is the app the widget belongs to and appWidgetId it's the unique

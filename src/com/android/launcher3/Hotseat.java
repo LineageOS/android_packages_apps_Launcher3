@@ -410,4 +410,12 @@ public class Hotseat extends CellLayout implements Insettable {
         );
     }
 
+    @Override
+    public void setGridSize(int x, int y) {
+        super.setGridSize(x, y);
+        DeviceProfile deviceProfile = mActivity.getDeviceProfile();
+        if (deviceProfile != null) {
+            deviceProfile.setHotseatNumColumns(x);
+        }
+    }
 }

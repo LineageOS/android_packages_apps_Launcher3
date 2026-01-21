@@ -70,6 +70,7 @@ constructor(context: Context, attrs: AttributeSet? = null) :
     private lateinit var parentIcon: AppPairIcon
     private lateinit var drawParams: AppPairIconDrawingParams
     lateinit var drawable: AppPairIconDrawable
+        set
 
     fun init(icon: AppPairIcon, container: Int) {
         parentIcon = icon
@@ -147,5 +148,24 @@ constructor(context: Context, attrs: AttributeSet? = null) :
     /** Gets the scale of the icon background while hovered. */
     fun getHoverScale(): Float {
         return drawParams.hoverScale
+    }
+
+    fun setIconSize(size: Int) {
+        val appPairIconDrawingParams = drawParams ?: error("drawParams not initialized")
+        appPairIconDrawingParams.updateIconSize(size)
+
+        val icon = parentIcon ?: error("parentIcon not initialized")
+        val info = icon.info
+        drawable = composeDrawable(info, appPairIconDrawingParams)
+
+
+        val lp = layoutParams as? LayoutParams
+            ?: error("LayoutParams must be FrameLayout.LayoutParams")
+        lp.gravity = Gravity.CENTER
+        lp.width = appPairIconDrawingParams.iconSize
+        lp.height = appPairIconDrawingParams.iconSize
+        layoutParams = lp
+
+        invalidate()
     }
 }

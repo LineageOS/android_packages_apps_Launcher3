@@ -28,6 +28,7 @@ constructor(@ApplicationContext private val context: Context) : LauncherRestoreE
         // Specific workspace item types, based off of Favorites Table.
         @BackupRestoreDataType private const val DATA_TYPE_APPLICATION = "application"
         @BackupRestoreDataType private const val DATA_TYPE_FOLDER = "folder"
+        @BackupRestoreDataType private const val DATA_TYPE_LARGE_FOLDER = "large_folder"
         @BackupRestoreDataType private const val DATA_TYPE_APPWIDGET = "widget"
         @BackupRestoreDataType private const val DATA_TYPE_CUSTOM_APPWIDGET = "custom_widget"
         @BackupRestoreDataType private const val DATA_TYPE_DEEP_SHORTCUT = "deep_shortcut"
@@ -144,6 +145,7 @@ constructor(@ApplicationContext private val context: Context) : LauncherRestoreE
         when (favoritesId) {
             Favorites.ITEM_TYPE_APPLICATION -> DATA_TYPE_APPLICATION
             Favorites.ITEM_TYPE_FOLDER -> DATA_TYPE_FOLDER
+            Favorites.ITEM_TYPE_LARGE_FOLDER -> DATA_TYPE_LARGE_FOLDER
             Favorites.ITEM_TYPE_APPWIDGET -> DATA_TYPE_APPWIDGET
             Favorites.ITEM_TYPE_CUSTOM_APPWIDGET -> DATA_TYPE_CUSTOM_APPWIDGET
             Favorites.ITEM_TYPE_DEEP_SHORTCUT -> DATA_TYPE_DEEP_SHORTCUT

@@ -22,7 +22,7 @@ import com.android.launcher3.model.data.ItemInfo;
 /**
  * Manages the parameters used to draw a Folder preview item.
  */
-class PreviewItemDrawingParams {
+public class PreviewItemDrawingParams {
     float index;
     float transX;
     float transY;
@@ -32,7 +32,7 @@ class PreviewItemDrawingParams {
     public Drawable drawable;
     public ItemInfo item;
 
-    PreviewItemDrawingParams(float transX, float transY, float scale) {
+    public PreviewItemDrawingParams(float transX, float transY, float scale) {
         this.transX = transX;
         this.transY = transY;
         this.scale = scale;
@@ -52,5 +52,13 @@ class PreviewItemDrawingParams {
         this.transX = transX;
         this.transY = transY;
         this.scale = scale;
+    }
+
+    public float getTransX() {
+        return this.transX;
+    }
+
+    public float getTransY() {
+        return this.transY;
     }
 }

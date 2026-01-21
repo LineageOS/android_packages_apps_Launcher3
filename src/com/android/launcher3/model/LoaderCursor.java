@@ -553,6 +553,28 @@ public class LoaderCursor extends CursorWrapper {
     }
 
     /**
+     * Return an existing FolderInfo object if we have encountered this ID previously,
+     * or make a new one.
+     */
+    public CollectionInfo findOrMakeLargeFolder(int id, IntSparseArrayMap<ItemInfo> loadedItems) {
+        // See if a placeholder was created for us already
+        ItemInfo info = loadedItems.get(id);
+        if (info instanceof CollectionInfo c) return c;
+
+        CollectionInfo pending = mPendingCollectionInfo.get(id);
+        if (pending != null) return pending;
+
+        // No placeholder -- create a new blank folder instance. At this point, we don't know
+        // if the desired container is supposed to be a folder or an app pair. In the case that
+        // it is an app pair, the blank folder will be replaced by a blank app pair when the app
+        // pair is getting processed, in WorkspaceItemProcessor.processFolderOrAppPair().
+        pending = new FolderInfo(Favorites.ITEM_TYPE_LARGE_FOLDER);
+        pending.id = id;
+        mPendingCollectionInfo.put(id, pending);
+        return pending;
+    }
+
+    /**
      * Adds the {@param info} to {@param dataModel} if it does not overlap with any other item,
      * otherwise marks it for deletion.
      */

@@ -30,10 +30,10 @@ import androidx.annotation.Nullable;
 public class CellLayoutLayoutParams extends ViewGroup.MarginLayoutParams {
 
     @ViewDebug.ExportedProperty
-    private int mCellX;
+    public int mCellX;
 
     @ViewDebug.ExportedProperty
-    private int mCellY;
+    public int mCellY;
 
     private int mTmpCellX;
 

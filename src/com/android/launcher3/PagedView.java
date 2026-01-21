@@ -556,6 +556,14 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
         super.scrollTo(x, y);
     }
 
+    public boolean scrollTo(int screenId) {
+        if (screenId <= getChildCount() - 1) {
+            snapToPage(screenId);
+            return true;
+        }
+        return mAllowOverScroll;
+    }
+
     private void sendScrollAccessibilityEvent() {
         if (isObservedEventType(getContext(), AccessibilityEvent.TYPE_VIEW_SCROLLED)) {
             if (mCurrentPage != getNextPage()) {

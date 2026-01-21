@@ -40,6 +40,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -132,6 +133,9 @@ public class DeviceProfile {
 
     public WorkspaceProfile mWorkspaceProfile;
 
+    // FROM ICON_VISIBLE_AREA_FACTOR
+    public float iconloaderlibScale = 0.92f;
+
     private final FolderProfile mFolderProfile;
     public int folderIconSizePx;
     public int folderIconOffsetYPx;
@@ -142,6 +146,8 @@ public class DeviceProfile {
     public int hotseatCellHeightPx;
     private int mHotseatColumnSpan;
     private int mHotseatWidthPx; // not used in vertical bar layout
+    // add by ocd: cal padding
+    private int mHotseatNumColumns;
     // In portrait: size = height, in landscape: size = width
     public int hotseatBarSizePx;
     public int hotseatBarBottomSpacePx;
@@ -1008,6 +1014,55 @@ public class DeviceProfile {
      */
     public Rect getInsets() {
         return mInsets;
+    }
+
+    public Point getCellSize() {
+        return getCellSize(null);
+    }
+
+    public Point getCellSize(Point result) {
+        if (result == null) {
+            result = new Point();
+        }
+
+        int shortcutAndWidgetContainerWidth =
+                getCellLayoutWidth() - (mWorkspaceProfile.getCellLayoutPaddingPx().left + mWorkspaceProfile.getCellLayoutPaddingPx().right);
+        result.x = calculateCellWidth(shortcutAndWidgetContainerWidth, mWorkspaceProfile.getCellLayoutBorderSpacePx().x,
+                inv.numColumns);
+        int shortcutAndWidgetContainerHeight =
+                getCellLayoutHeight() - (mWorkspaceProfile.getCellLayoutPaddingPx().top + mWorkspaceProfile.getCellLayoutPaddingPx().bottom);
+        result.y = calculateCellHeight(shortcutAndWidgetContainerHeight, mWorkspaceProfile.getCellLayoutBorderSpacePx().y,
+                inv.numRows);
+        return result;
+    }
+
+    public Rect getIconPadding() {
+        Point cellSize = getCellSize();
+
+        // 计算 icon 左右居中 padding
+        int horizontalPadding = (cellSize.x - mWorkspaceProfile.getIconSizePx()) / 2;
+
+        // 计算文字高度
+        Paint paint = new Paint();
+        paint.setTextSize(mWorkspaceProfile.getIconTextSizePx());
+        Paint.FontMetricsInt fontMetrics = paint.getFontMetricsInt();
+        int textHeight = fontMetrics.bottom - fontMetrics.top;
+
+        // 图标和文字区域总高度
+        int contentHeight = mWorkspaceProfile.getIconSizePx() + mWorkspaceProfile.getIconDrawablePaddingPx() + textHeight;
+
+        // 图标顶部 padding，确保居中
+        int verticalSpace = cellSize.y - contentHeight;
+        int topPadding = verticalSpace / 2;
+
+        // Dot（角标）需要的最小顶部空间
+//        int dotPadding = DotRenderer.getDotOccupiedSize(mWorkspaceProfile.getIconSizePx());
+
+        // 最终顶部 padding 为最大值
+        int top = /*Math.max(topPadding, dotPadding)*/ topPadding;
+        int bottom = cellSize.y - top - mWorkspaceProfile.getIconSizePx();
+
+        return new Rect(horizontalPadding, top, horizontalPadding, bottom);
     }
 
     /**
@@ -1989,5 +2044,41 @@ public class DeviceProfile {
             boolean isLandscape = windowBounds.isLandscape();
             return new DisplayOptionSpec(inv, isTwoPanels, isLandscape);
         }
+    }
+
+    public Point getHotseatCellLayoutSize(Context context) {
+        int width = isVerticalBarLayout() ? hotseatBarSizePx : mDeviceProperties.getWidthPx();
+        int height = isVerticalBarLayout() ? mDeviceProperties.getHeightPx() : hotseatBarSizePx;
+        Rect padding = getHotseatLayoutPadding(context);
+        return new Point((width - padding.left) - padding.right,
+                (height - padding.top) - padding.bottom);
+    }
+
+    public int getHotseatNumColumns() {
+        if (mHotseatNumColumns < 1) {
+            mHotseatNumColumns = 1;
+        }
+        return mHotseatNumColumns;
+    }
+
+    public void setHotseatNumColumns(int count) {
+        mHotseatNumColumns = count;
+    }
+
+    public Point getHotseatCellSize(Context context) {
+        Point result = new Point();
+        Point shortcutAndWidgetContainerSize = getHotseatCellLayoutSize(context);
+        result.x = calculateCellWidth(shortcutAndWidgetContainerSize.x, hotseatBorderSpace,
+                getHotseatNumColumns());
+        result.y = calculateCellHeight(shortcutAndWidgetContainerSize.y, hotseatBorderSpace, 1);
+        return result;
+    }
+
+    public Rect getHotseatIconPadding(Context context) {
+        Point cellSize = getHotseatCellSize(context);
+        int left = (cellSize.x - mWorkspaceProfile.getIconSizePx()) / 2;
+        int top = (cellSize.y - mWorkspaceProfile.getIconSizePx()) / 2;
+        int bottom = (cellSize.y - top) - mWorkspaceProfile.getIconSizePx();
+        return new Rect(left, top, left, bottom);
     }
 }

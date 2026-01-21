@@ -579,4 +579,10 @@
     <string name="seven_sided_cookie_shape_title">7-sided cookie</string>
     <!-- label for arch shape option in customization picker -->
     <string name="arch_shape_title">Arch</string>
+
+    <!-- Large folder -->
+    <string name="folder_switch_small">Small folder</string>
+    <string name="folder_switch_large">Large folder</string>
+    <string name="folder_dismiss">Dismiss folder</string>
+    <string name="dismiss_folder_error">Not enough space to place all icons</string>
 </resources>

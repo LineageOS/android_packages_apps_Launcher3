@@ -17,6 +17,8 @@
 package com.android.launcher3.apppairs;
 
 import static com.android.launcher3.BubbleTextView.DISPLAY_FOLDER;
+import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT;
+import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_LARGE_FOLDER;
 
 import android.animation.ObjectAnimator;
 import android.content.Context;
@@ -26,6 +28,7 @@ import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
@@ -45,6 +48,7 @@ import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.popup.Poppable;
 import com.android.launcher3.popup.PoppableType;
 import com.android.launcher3.popup.PopupController;
+import com.android.launcher3.taskbar.TaskbarView;
 import com.android.launcher3.util.MultiTranslateDelegate;
 import com.android.launcher3.views.ActivityContext;
 
@@ -284,6 +288,16 @@ public class AppPairIcon extends FrameLayout implements DraggableView, Reorderab
             setPadding(getPaddingLeft(), (height - cellHeightPx) / 2, getPaddingRight(),
                     getPaddingBottom());
         }
+        if (mContainer == BubbleTextView.DISPLAY_LARGE_FOLDER_ICON) {
+//            int height = MeasureSpec.getSize(heightMeasureSpec);
+//            int cellHeightPx = mIconGraphic.getIconSize();
+//            setPadding(0, (height - cellHeightPx) / 2, 0, 0);
+            setPadding(0, 0, 0, 0);
+        }
+        if (mContainer == BubbleTextView.DISPLAY_WORKSPACE) {
+            Rect iconPadding = getIconPadding();
+            super.setPadding(0, iconPadding.top, 0, 0);
+        }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
@@ -301,5 +315,29 @@ public class AppPairIcon extends FrameLayout implements DraggableView, Reorderab
     @Override
     public PoppableType getPoppableType() {
         return PoppableType.APP_PAIR;
+    }
+
+    public Rect getIconPadding() {
+        ViewParent parent = getParent();
+        if (parent instanceof TaskbarView) {
+            return new Rect();
+        }
+        ActivityContext activity = ActivityContext.lookupContext(getContext());
+        if (mInfo.container == CONTAINER_HOTSEAT) {
+            return activity.getDeviceProfile().getHotseatIconPadding(getContext());
+        }
+        return activity.getDeviceProfile().getIconPadding();
+    }
+
+    public void setIconSize(int iconSize) {
+        mIconGraphic.setIconSize(iconSize);
+    }
+
+    public boolean showInHotseat() {
+        return mInfo.container == CONTAINER_HOTSEAT;
+    }
+
+    public boolean showInLargeFolder() {
+        return mContainer == ITEM_TYPE_LARGE_FOLDER;
     }
 }

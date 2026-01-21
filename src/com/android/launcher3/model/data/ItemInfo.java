@@ -103,6 +103,7 @@ public class ItemInfo {
      * {@link Favorites#ITEM_TYPE_PRIVATE_SPACE_INSTALL_APP_BUTTON}.
      * {@link Favorites#ITEM_TYPE_FILE_SYSTEM_FILE}.
      * {@link Favorites#ITEM_TYPE_FILE_SYSTEM_FOLDER}.
+     * {@link Favorites#ITEM_TYPE_LARGE_FOLDER}.
      */
     public int itemType;
 

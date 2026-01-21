@@ -78,7 +78,8 @@ object GridSizeMigrationDBController {
         val id = copyEntryAndUpdate(helper, entry, srcTableName, destTableName, idsInUse)
         if (
             entry.itemType == LauncherSettings.Favorites.ITEM_TYPE_FOLDER ||
-                entry.itemType == LauncherSettings.Favorites.ITEM_TYPE_APP_PAIR
+                entry.itemType == LauncherSettings.Favorites.ITEM_TYPE_APP_PAIR ||
+                    entry.itemType == LauncherSettings.Favorites.ITEM_TYPE_LARGE_FOLDER
         ) {
             for (itemIds in entry.mFolderItems.values) {
                 for (itemId in itemIds) {

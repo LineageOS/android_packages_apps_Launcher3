@@ -30,6 +30,8 @@ import static com.android.launcher3.LauncherPrefs.SHOW_DRAWER_LABELS;
 import static com.android.launcher3.graphics.PreloadIconDelegate.extractPreloadDelegate;
 import static com.android.launcher3.graphics.PreloadIconDelegate.hasPendingAnimationCompleted;
 import static com.android.launcher3.graphics.PreloadIconDelegate.newPendingIcon;
+import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT;
+import static com.android.launcher3.allapps.AlphabeticalAppsList.PRIVATE_SPACE_PACKAGE;
 import static com.android.launcher3.icons.BitmapInfo.FLAG_NO_BADGE;
 import static com.android.launcher3.icons.BitmapInfo.FLAG_SKIP_USER_BADGE;
 import static com.android.launcher3.icons.BitmapInfo.FLAG_THEMED;
@@ -104,6 +106,8 @@ import com.android.launcher3.popup.PoppableType;
 import com.android.launcher3.popup.Popup;
 import com.android.launcher3.popup.PopupController;
 import com.android.launcher3.search.StringMatcherUtility;
+import com.android.launcher3.taskbar.customization.TaskbarAllAppsButtonContainer;
+import com.android.launcher3.taskbar.customization.TaskbarDividerContainer;
 import com.android.launcher3.util.CancellableTask;
 import com.android.launcher3.util.IntArray;
 import com.android.launcher3.util.MultiTranslateDelegate;
@@ -135,6 +139,10 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     public static final int DISPLAY_SEARCH_RESULT_SMALL = 7;
     public static final int DISPLAY_PREDICTION_ROW = 8;
     public static final int DISPLAY_SEARCH_RESULT_APP_ROW = 9;
+
+    // add by ocd: large folder
+    public static final int DISPLAY_LARGE_FOLDER_ICON = 100;
+    public static final int DISPLAY_COLLECTION_ICON = 101;
 
     private static final float MIN_LETTER_SPACING = -0.05f;
     private static final int MAX_SEARCH_LOOP_COUNT = 20;
@@ -181,7 +189,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
 
     private final MultiTranslateDelegate mTranslateDelegate = new MultiTranslateDelegate(this);
     protected final ActivityContext mActivity;
-    private FastBitmapDrawable mIcon;
+    protected FastBitmapDrawable mIcon;
     private DeviceProfile mDeviceProfile;
     private boolean mCenterVertically;
 
@@ -191,7 +199,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
 
     private boolean mLayoutHorizontal;
     private final boolean mIsRtl;
-    private final int mIconSize;
+    private int mIconSize;
 
     @ViewDebug.ExportedProperty(category = "launcher")
     private boolean mHideBadge = false;
@@ -208,7 +216,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
 
     @ViewDebug.ExportedProperty(category = "launcher")
     private DotInfo mDotInfo;
-    private final DotRenderer mDotRenderer;
+    protected DotRenderer mDotRenderer;
     @ViewDebug.ExportedProperty(category = "launcher", deepExport = true)
     protected final DotRenderer.DrawParams mDotParams;
     private Animator mDotScaleAnim;
@@ -325,6 +333,10 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             mShouldShowLabel = SHOW_DESKTOP_LABELS.get(context);
         }
 
+        // add by ch.hu: large folder: normal folder name
+        if (mDisplay == DISPLAY_COLLECTION_ICON) {
+            setTextSize(0, mDeviceProfile.mWorkspaceProfile.getIconTextSizePx());
+        }
 
         mIconSize = a.getDimensionPixelSize(R.styleable.BubbleTextView_iconSizeOverride,
                 defaultIconSize);
@@ -401,7 +413,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         setVisibility(VISIBLE);
     }
 
-    private void cancelDotScaleAnim() {
+    protected void cancelDotScaleAnim() {
         if (mDotScaleAnim != null) {
             mDotScaleAnim.cancel();
         }
@@ -593,6 +605,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     protected boolean shouldUseTheme() {
         return mDisplay == DISPLAY_WORKSPACE || mDisplay == DISPLAY_FOLDER
                 || mDisplay == DISPLAY_TASKBAR
+                || mDisplay == DISPLAY_LARGE_FOLDER_ICON
                 || (mThemeAllAppsIcons && mDisplay == DISPLAY_ALL_APPS);
     }
 
@@ -999,6 +1012,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
         if (mCenterVertically) {
             Paint.FontMetrics fm = getPaint().getFontMetrics();
@@ -1006,6 +1020,14 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
                     (int) Math.ceil(fm.bottom - fm.top) * getCellSpecMaxTextLineCount();
             setPadding(getPaddingLeft(), (height - cellHeightPx) / 2, getPaddingRight(),
                     getPaddingBottom());
+            int contentHeight = getContentHeight(height);
+            int paddingLeftRight = Math.max(0, Math.min((width - getContentWidth()) / 2, 16));
+            if (needHideText()) {
+                paddingLeftRight = 0;
+            }
+
+            int paddingTop = calculationPaddingTop((height - contentHeight) / 2);
+            setPadding(paddingLeftRight, paddingTop, paddingLeftRight, getPaddingBottom());
         }
         if (shouldDrawAppContrastTile()) {
             int mAppTitleHorizontalPadding = getResources().getDimensionPixelSize(
@@ -1022,8 +1044,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             int allowedVerticalSpace = height - getPaddingTop() - getPaddingBottom()
                     - (mIcon != null ? mIconSize + getCompoundDrawablePadding() : 0);
             CharSequence modifiedString = modifyTitleToSupportMultiLine(
-                    MeasureSpec.getSize(widthMeasureSpec) - getCompoundPaddingLeft()
-                            - getCompoundPaddingRight(),
+                    width - getCompoundPaddingLeft() - getCompoundPaddingRight(),
                     allowedVerticalSpace,
                     mLastOriginalText,
                     getPaint(),
@@ -1440,6 +1461,10 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         return mIconSize;
     }
 
+    public void setIconSize(int iconSize) {
+        mIconSize = iconSize;
+    }
+
     public boolean isDisplaySearchResult() {
         return mDisplay == DISPLAY_SEARCH_RESULT
                 || mDisplay == DISPLAY_SEARCH_RESULT_SMALL
@@ -1526,5 +1551,66 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
      */
     public boolean canShowLongPressPopup() {
         return getTag() instanceof ItemInfo && ShortcutUtil.supportsShortcuts((ItemInfo) getTag());
+    }
+
+    public int getContentWidth() {
+        return mIconSize;
+    }
+
+    public int getContentHeight(int height) {
+        int contentHeight = mIconSize;
+        if (needHideText()) {
+            return contentHeight;
+        }
+        if (getTextSize() > 0.0f) {
+            int lines = Math.max(getMaxLines(), 1);
+            return contentHeight + getCompoundDrawablePadding() + (getLineHeight() * lines);
+        }
+        return contentHeight;
+    }
+
+    private boolean needHideText() {
+        if (mDisplay == DISPLAY_TASKBAR) {
+            return true;
+        }
+        Object tag = getTag();
+        if (tag instanceof WorkspaceItemInfo info) {
+            return info.container == CONTAINER_HOTSEAT;
+        }
+        return false;
+    }
+
+    private int calculationPaddingTop(int topPadding) {
+        if (this instanceof TaskbarDividerContainer
+                || this instanceof TaskbarAllAppsButtonContainer) {
+//            return topPadding / 2;
+            return getPaddingTop();
+        }
+        if (mDisplay != DISPLAY_WORKSPACE) {
+            return topPadding;
+        }
+        Object tag = getTag();
+        if (tag instanceof WorkspaceItemInfo) {
+            WorkspaceItemInfo info = (WorkspaceItemInfo) tag;
+            if (info.container == CONTAINER_HOTSEAT) {
+                return topPadding;
+            }
+        }
+        if (mActivity == null || mActivity.getDeviceProfile() == null) {
+            return topPadding;
+        }
+        return mActivity.getDeviceProfile().getIconPadding().top;
+    }
+
+    public void updateHighRes() {
+        if (this.mIconLoadRequest != null) {
+            this.mIconLoadRequest.cancel();
+            this.mIconLoadRequest = null;
+        }
+        if (getTag() instanceof ItemInfoWithIcon info) {
+            CacheLookupFlag expectedFlag = DEFAULT_LOOKUP_FLAG.withThemeIcon(shouldUseTheme());
+            this.mIconLoadRequest = LauncherAppState.getInstance(
+                    getContext()).getIconCache().updateIconInBackground(BubbleTextView.this, info, expectedFlag);
+        }
     }
 }

@@ -327,14 +327,17 @@ object LauncherDbUtils {
      * which places file system items ([ITEM_TYPE_FILE_SYSTEM_FILE] and
      * [ITEM_TYPE_FILE_SYSTEM_FOLDER]) at the end, allowing more time for the IPC call while still
      * processing regular items.
+     *
+     * support large folder icon. ([ITEM_TYPE_LARGE_FOLDER]) at the begin
      */
     @JvmStatic
     fun getLoaderCursorQuerySortOrder(): String? {
         if (HomeScreenFilesUtils.isFeatureEnabled) {
             val inClause =
                 intArrayOf(ITEM_TYPE_FILE_SYSTEM_FILE, ITEM_TYPE_FILE_SYSTEM_FOLDER).joinToString()
-            return "CASE WHEN $ITEM_TYPE IN ($inClause) THEN 1 ELSE 0 END, $_ID"
+            return "CASE WHEN $ITEM_TYPE IN ($inClause) THEN 1 ELSE 0 END DESC, " +
+                    "(${ITEM_TYPE} = ${Favorites.ITEM_TYPE_LARGE_FOLDER}) DESC, $_ID"
         }
-        return null
+        return "(${ITEM_TYPE} = ${Favorites.ITEM_TYPE_LARGE_FOLDER}) DESC"
     }
 }

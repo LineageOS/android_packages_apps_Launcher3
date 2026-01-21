@@ -58,6 +58,7 @@ import com.android.launcher3.Flags;
 import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.LauncherModel;
 import com.android.launcher3.LauncherPrefs;
+import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.backuprestore.LauncherRestoreEventLogger;
 import com.android.launcher3.dagger.ApplicationContext;
@@ -547,6 +548,7 @@ public class LoaderTask implements Runnable {
             }
             unlockedUsers.put(serialNo, userUnlocked);
         }
+
     }
 
     private void tryLoadWorkspaceIconsInBulk(

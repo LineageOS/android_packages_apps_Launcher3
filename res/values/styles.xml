@@ -604,4 +604,9 @@
         <item name="widgetsTheme">@style/WidgetContainerTheme</item>
         <item name="pageIndicatorDotColor">@color/page_indicator_dot_color_light</item>
     </style>
+
+    <style name="BaseIcon.Workspace.LargeFolderIcon" parent="@style/BaseIcon.Workspace">
+        <item name="centerVertically">true</item>
+        <item name="iconDisplay">large_folder_icon</item>
+    </style>
 </resources>

@@ -185,6 +185,7 @@ import com.android.launcher3.dragndrop.LauncherDragController;
 import com.android.launcher3.dragndrop.SystemDragController;
 import com.android.launcher3.folder.Folder;
 import com.android.launcher3.folder.FolderIcon;
+import com.android.launcher3.folder.largefolder.LargeFolderIcon;
 import com.android.launcher3.keyboard.ViewGroupFocusHelper;
 import com.android.launcher3.lineage.LineageUtils;
 import com.android.launcher3.logger.LauncherAtom;
@@ -2046,6 +2047,11 @@ public class Launcher extends StatefulActivity<LauncherState>
         if (collectionIcon instanceof FolderIcon folderIcon) {
             // Remove the shortcut from the folder before removing it from launcher
             Folder folder = folderIcon.getFolder();
+            folder.removeFolderContent(true, itemInfo);
+            return true;
+        } else if (collectionIcon instanceof LargeFolderIcon largeFolderIcon) {
+            // Remove the shortcut from the folder before removing it from launcher
+            Folder folder = largeFolderIcon.getFolder();
             folder.removeFolderContent(true, itemInfo);
             return true;
         } else if (collectionIcon instanceof AppPairIcon appPairIcon) {

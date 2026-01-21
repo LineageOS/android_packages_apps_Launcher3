@@ -29,6 +29,7 @@ import com.android.launcher3.LauncherSettings.Favorites
 import com.android.launcher3.R
 import com.android.launcher3.apppairs.AppPairIcon
 import com.android.launcher3.folder.FolderIcon
+import com.android.launcher3.folder.largefolder.LargeFolderIcon
 import com.android.launcher3.model.ModelWriter
 import com.android.launcher3.model.data.AppPairInfo
 import com.android.launcher3.model.data.FolderInfo
@@ -97,6 +98,13 @@ class ItemInflater<T>(
                     BubbleTextView.DISPLAY_WORKSPACE,
                 )
 
+            Favorites.ITEM_TYPE_LARGE_FOLDER ->
+                LargeFolderIcon.inflateFolderAndIcon(
+                    R.layout.large_folder_icon,
+                    context,
+                    parent,
+                    item as FolderInfo
+                )
             Favorites.ITEM_TYPE_APPWIDGET,
             Favorites.ITEM_TYPE_CUSTOM_APPWIDGET ->
                 inflateAppWidget(item as LauncherAppWidgetInfo, context.modelWriter)

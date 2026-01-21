@@ -271,7 +271,7 @@ object WorkspaceProfileNonResponsiveFactory {
             desiredWorkspaceHorizontalMarginPx = desiredWorkspaceHorizontalMarginPx,
             cellYPaddingPx = -1,
             maxIconTextLineCount = 1,
-            iconCenterVertically = false,
+            iconCenterVertically = /*false*/ true, // Due to the difficulty in calculating margins for large folders, text, and top margins at this time, all elements will be centered for now
             gridVisualizationPaddingX =
                 res.getDimensionPixelSize(R.dimen.grid_visualization_horizontal_cell_spacing),
             gridVisualizationPaddingY =
@@ -468,7 +468,7 @@ object WorkspaceProfileNonResponsiveFactory {
             desiredWorkspaceHorizontalMarginPx = desiredWorkspaceHorizontalMarginPx,
             cellYPaddingPx = max(0, (cellHeightPx - cellContentHeight)) / 2,
             maxIconTextLineCount = 1,
-            iconCenterVertically = isVerticalLayout,
+            iconCenterVertically = /*isVerticalLayout*/ true, // Due to the difficulty in calculating margins for large folders, text, and top margins at this time, all elements will be centered for now.
             gridVisualizationPaddingX =
                 res.getDimensionPixelSize(R.dimen.grid_visualization_horizontal_cell_spacing),
             gridVisualizationPaddingY =

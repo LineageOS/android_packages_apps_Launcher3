@@ -258,7 +258,7 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
         return mFolder;
     }
 
-    private void setFolder(Folder folder) {
+    public void setFolder(Folder folder) {
         mFolder = folder;
     }
 
@@ -658,7 +658,7 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
      * Returns the list of items which should be visible in the preview
      */
     public List<ItemInfo> getPreviewItemsOnPage(int page) {
-        return mPreviewVerifier.setFolderInfo(mInfo).previewItemsForPage(page, mInfo.getContents());
+        return mPreviewVerifier.setFolderInfo(mInfo).previewItemsForPage(page, mInfo.getContents(), false);
     }
 
     @Override
@@ -817,5 +817,13 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
          * Tells the FolderIconParent to stop drawing the "leave-behind" as the Folder is closed.
          */
         void clearFolderLeaveBehind(FolderIcon child);
+    }
+
+    public Rect getPreviewBoundsOnScreen(Rect outPos) {
+        getPreviewBounds(outPos);
+        int[] loc = new int[2];
+        this.getLocationOnScreen(loc);
+        outPos.offset(loc[0], loc[1]);
+        return outPos;
     }
 }

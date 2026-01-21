@@ -33,6 +33,7 @@ import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_PAIR
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FOLDER
+import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_LARGE_FOLDER
 import com.android.launcher3.LauncherSettings.Settings.LAYOUT_DIGEST_LABEL
 import com.android.launcher3.LauncherSettings.Settings.LAYOUT_DIGEST_TAG
 import com.android.launcher3.LauncherSettings.Settings.LAYOUT_PROVIDER_KEY
@@ -160,7 +161,7 @@ constructor(
                 ShortcutKey.fromItemInfo(info).let { key ->
                     putShortcut(key.packageName, key.id, userType)
                 }
-            ITEM_TYPE_FOLDER ->
+            ITEM_TYPE_LARGE_FOLDER, ITEM_TYPE_FOLDER ->
                 (info as FolderInfo).let { folderInfo ->
                     putFolder(folderInfo.title?.toString() ?: "").also { folderBuilder ->
                         folderInfo.getContents().forEach { folderContent ->

@@ -14,8 +14,8 @@
      limitations under the License.
 -->
 
-<com.android.launcher3.apppairs.AppPairIcon
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.launcher3.apppairs.AppPairIcon xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -31,5 +31,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:focusable="false"
-        android:layout_gravity="top" />
+        android:layout_gravity="top"
+        app:iconDisplay="collection_icon" />
 </com.android.launcher3.apppairs.AppPairIcon>

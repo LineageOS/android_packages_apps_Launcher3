@@ -21,6 +21,7 @@ import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -112,7 +113,23 @@ public class ModelWriter {
             addItemToDatabase(item, container, screenId, cellX, cellY);
         } else {
             // From somewhere else
-            moveItemInDatabase(item, container, screenId, cellX, cellY);
+            if (itemExistsInDatabase(item.id)) {
+                // 数据存在，直接移动
+                moveItemInDatabase(item, container, screenId, cellX, cellY);
+            } else {
+                // 数据丢失，重新插入
+                addItemToDatabase(item, container, screenId, cellX, cellY);
+            }
+        }
+    }
+
+    private boolean itemExistsInDatabase(long id) {
+        try (Cursor c = mModel.getModelDbController().query(
+                new String[]{Favorites._ID},
+                Favorites._ID + "=?",
+                new String[]{String.valueOf(id)},
+                null)) {
+            return c != null && c.moveToFirst();
         }
     }
 
@@ -166,8 +183,12 @@ public class ModelWriter {
                         .put(Favorites.CONTAINER, item.container)
                         .put(Favorites.CELLX, item.cellX)
                         .put(Favorites.CELLY, item.cellY)
+                        .put(Favorites.SPANX, item.spanX)
+                        .put(Favorites.SPANY, item.spanY)
                         .put(Favorites.RANK, item.rank)
-                        .put(Favorites.SCREEN, item.screenId)));
+                        .put(Favorites.SCREEN, item.screenId)
+                        .put(Favorites.ITEM_TYPE, item.itemType)
+        ));
     }
 
     /**
@@ -188,6 +209,7 @@ public class ModelWriter {
             values.put(Favorites.CELLX, item.cellX);
             values.put(Favorites.CELLY, item.cellY);
             values.put(Favorites.RANK, item.rank);
+            values.put(Favorites.ITEM_TYPE, item.itemType);
             values.put(Favorites.SCREEN, item.screenId);
 
             contentValues.add(values);
@@ -274,23 +296,24 @@ public class ModelWriter {
     /**
      * Removes the specified item from the database
      */
-    public void deleteItemFromDatabase(ItemInfo item, @Nullable final String reason) {
-        deleteItemsFromDatabase(Arrays.asList(item), reason);
+    public List<Integer> deleteItemFromDatabase(ItemInfo item, @Nullable final String reason) {
+        return deleteItemsFromDatabase(Arrays.asList(item), reason);
     }
 
     /**
      * Removes all the items from the database matching {@param matcher}.
      */
-    public void deleteItemsFromDatabase(@NonNull final Predicate<ItemInfo> matcher,
+    public List<Integer> deleteItemsFromDatabase(@NonNull final Predicate<ItemInfo> matcher,
             @Nullable final String reason) {
-        deleteItemsFromDatabase(StreamSupport.stream(mBgDataModel.itemsIdMap.spliterator(), false)
+        return deleteItemsFromDatabase(StreamSupport.stream(mBgDataModel.itemsIdMap.spliterator(),
+                        false)
                 .filter(matcher).collect(Collectors.toList()), reason);
     }
 
     /**
      * Removes the specified items from the database
      */
-    public void deleteItemsFromDatabase(final Collection<? extends ItemInfo> items,
+    public List<Integer> deleteItemsFromDatabase(final Collection<? extends ItemInfo> items,
             @Nullable final String reason) {
         ModelVerifier verifier = new ModelVerifier();
         FileLog.d(TAG, "removing items from db " + items.stream().map(
@@ -299,13 +322,19 @@ public class ModelWriter {
                 Collectors.joining(","))
                 + ". Reason: [" + (TextUtils.isEmpty(reason) ? "unknown" : reason) + "]");
         notifyDelete(items);
+        List<Integer> cellIndexs = new ArrayList<>();
         enqueueDeleteRunnable(newModelTask(() -> {
             for (ItemInfo item : items) {
                 mModel.getModelDbController().delete(itemIdMatch(item.id), null);
+                if (item.container == Favorites.CONTAINER_DESKTOP
+                        && item.itemType == Favorites.ITEM_TYPE_APPLICATION) {
+                    cellIndexs.add(item.screenId);
+                }
             }
             mBgDataModel.removeItem(mContext, items, mOwner);
             verifier.verifyModel();
         }));
+        return cellIndexs;
     }
 
     /**

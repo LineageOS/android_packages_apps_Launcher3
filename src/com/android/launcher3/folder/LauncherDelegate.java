@@ -26,6 +26,8 @@ import com.android.launcher3.CellLayout;
 import com.android.launcher3.DragSource;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.dragndrop.DragOptions;
+import com.android.launcher3.folder.largefolder.LargeFolderIcon;
+import com.android.launcher3.logging.InstanceId;
 import com.android.launcher3.logging.StatsLogManager.StatsLogger;
 import com.android.launcher3.model.data.FolderInfo;
 import com.android.launcher3.model.data.ItemInfo;

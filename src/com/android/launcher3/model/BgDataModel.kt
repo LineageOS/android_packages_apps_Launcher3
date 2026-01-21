@@ -28,6 +28,7 @@ import com.android.launcher3.Flags
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_PAIR
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FOLDER
+import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_LARGE_FOLDER
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.logging.DumpManager
 import com.android.launcher3.logging.DumpManager.LauncherDumpable
@@ -136,7 +137,9 @@ constructor(
         if (BuildConfig.IS_STUDIO_BUILD) {
             items
                 .asSequence()
-                .filter { it.itemType == ITEM_TYPE_FOLDER || it.itemType == ITEM_TYPE_APP_PAIR }
+                .filter { it.itemType == ITEM_TYPE_FOLDER ||
+                        it.itemType == ITEM_TYPE_APP_PAIR ||
+                        it.itemType == ITEM_TYPE_LARGE_FOLDER }
                 .forEach { item: ItemInfo ->
 
                     // We are deleting a collection which still contains items that think they are

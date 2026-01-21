@@ -50,6 +50,7 @@ import com.android.launcher3.R;
 import com.android.launcher3.apppairs.AppPairIcon;
 import com.android.launcher3.folder.Folder;
 import com.android.launcher3.folder.FolderIcon;
+import com.android.launcher3.folder.largefolder.LargeFolderIcon;
 import com.android.launcher3.lineage.trust.db.TrustDatabaseHelper;
 import com.android.launcher3.logging.InstanceId;
 import com.android.launcher3.logging.InstanceIdSequence;
@@ -134,12 +135,25 @@ public class ItemClickHandler {
      * @param v The view that was clicked. Must be an instance of {@link FolderIcon}.
      */
     private static void onClickFolderIcon(View v) {
+        if (v instanceof LargeFolderIcon) {
+            onClickLargeFolderIcon(v);
+            return;
+        }
         Folder folder = ((FolderIcon) v).getFolder();
         if (!folder.isOpen() && !folder.isDestroyed()) {
             // Open the requested folder
             folder.animateOpen();
             StatsLogManager.newInstance(v.getContext()).logger().withItemInfo(folder.mInfo)
                     .log(LAUNCHER_FOLDER_OPEN);
+        }
+    }
+
+    private static void onClickLargeFolderIcon(View v) {
+        Folder folder = ((LargeFolderIcon) v).getFolder();
+        if (!folder.isOpen() && !folder.isDestroyed()) {
+            folder.animateOpen();
+            StatsLogManager.newInstance(v.getContext()).logger().withItemInfo(folder.mInfo).log(
+                    StatsLogManager.LauncherEvent.LAUNCHER_FOLDER_OPEN);
         }
     }
 

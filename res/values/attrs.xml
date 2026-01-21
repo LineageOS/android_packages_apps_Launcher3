@@ -120,6 +120,9 @@
             <enum name="search_result_small" value="7" />
             <enum name="prediction_row" value="8" />
             <enum name="search_result_app_row" value="9" />
+
+            <enum name="large_folder_icon" value="100" />
+            <enum name="collection_icon" value="101" />
         </attr>
         <attr name="centerVertically" format="boolean" />
     </declare-styleable>

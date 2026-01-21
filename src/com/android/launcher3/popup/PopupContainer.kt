@@ -23,14 +23,19 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.CallSuper
 import com.android.launcher3.AbstractFloatingView
+import com.android.launcher3.BubbleTextView
 import com.android.launcher3.DragSource
 import com.android.launcher3.DropTarget.DragObject
 import com.android.launcher3.R
+import com.android.launcher3.apppairs.AppPairIcon
 import com.android.launcher3.dragndrop.DragController
 import com.android.launcher3.dragndrop.DragOptions
+import com.android.launcher3.folder.FolderIcon
+import com.android.launcher3.folder.largefolder.LargeFolderIcon
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.util.ShortcutUtil
 import com.android.launcher3.views.ActivityContext
+
 
 /**
  * Base popup container for shortcuts associated with the item {@code originalView}
@@ -70,6 +75,44 @@ open class PopupContainer<T>(context: Context?, val originalView: View, val item
 
     @CallSuper
     override fun getTargetObjectLocation(outPos: Rect) {
+        popupContainer.getDescendantRectRelativeToSelf(originalView, outPos)
+        outPos.top += originalView.paddingTop
+        outPos.left += originalView.paddingLeft
+        outPos.right -= originalView.paddingRight
+        outPos.bottom = outPos.top + originalView.height
+    }
+
+    private fun getOriginalLocation(outPos: Rect) {
+        popupContainer.getDescendantRectRelativeToSelf(originalView, outPos)
+        outPos.top += originalView.paddingTop
+        outPos.left += originalView.paddingLeft
+        outPos.right -= originalView.paddingRight
+        val i = outPos.top
+        val height: Int = if (originalView is BubbleTextView && originalView.icon != null) {
+            originalView.icon.bounds.height()
+        } else {
+            originalView.height
+        }
+        outPos.bottom = i + height
+    }
+
+    fun getFolderLocation(outPos: Rect) {
+        popupContainer.getDescendantRectRelativeToSelf(originalView, outPos)
+        outPos.left += originalView.getPaddingLeft()
+        outPos.right -= originalView.getPaddingRight()
+
+        if (originalView is LargeFolderIcon) {
+            originalView.getContentBoundsOnScreen(outPos)
+        } else if (originalView is FolderIcon) {
+            originalView.getPreviewBoundsOnScreen(outPos)
+        } else {
+            outPos.top += originalView.paddingTop
+            val height: Int = originalView.height
+            outPos.bottom = outPos.top + height
+        }
+    }
+
+    fun getAppPairIconLocation(outPos: Rect) {
         popupContainer.getDescendantRectRelativeToSelf(originalView, outPos)
         outPos.top += originalView.paddingTop
         outPos.left += originalView.paddingLeft

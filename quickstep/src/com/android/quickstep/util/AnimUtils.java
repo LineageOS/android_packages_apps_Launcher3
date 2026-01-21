@@ -23,10 +23,12 @@ import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
+import android.graphics.Rect;
 import android.os.BinderUtils;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
+import android.util.Property;
 import android.view.animation.Interpolator;
 
 import androidx.annotation.NonNull;
@@ -38,6 +40,7 @@ import com.android.launcher3.logging.StatsLogManager;
 import com.android.launcher3.statemanager.BaseState;
 import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.states.StateAnimationConfig;
+import com.android.launcher3.util.RectProperty;
 import com.android.launcher3.util.RunnableList;
 import com.android.launcher3.views.ActivityContext;
 import com.android.quickstep.views.RecentsViewContainer;
@@ -150,4 +153,17 @@ public class AnimUtils {
         return clampToProgress(interpolator, startDelay / totalDuration,
                 (startDelay + duration) / totalDuration);
     }
+
+    public static final Property<RectProperty, Rect> RECT_PROPERTY =
+            new Property<RectProperty, Rect>(Rect.class, "shape") {
+                @Override
+                public Rect get(RectProperty view) {
+                    return view.getRect();
+                }
+
+                @Override
+                public void set(RectProperty view, Rect v) {
+                    view.setRect(v);
+                }
+            };
 }

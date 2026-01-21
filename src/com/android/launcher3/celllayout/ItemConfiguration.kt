@@ -58,4 +58,15 @@ class ItemConfiguration : CellAndSpan() {
                 else outRect.union(c.cellX, c.cellY, c.cellX + c.spanX, c.cellY + c.spanY)
             }
     }
+
+    fun getChangedMap(): ArrayMap<View, CellAndSpan> {
+        val changedMap = ArrayMap<View, CellAndSpan>()
+        map.forEach { (view, cellAndSpan) ->
+            val lp = view.layoutParams as? CellLayoutLayoutParams ?: return@forEach
+            if (lp.cellX != cellAndSpan.cellX || lp.cellY != cellAndSpan.cellY) {
+                changedMap[view] = cellAndSpan
+            }
+        }
+        return changedMap
+    }
 }

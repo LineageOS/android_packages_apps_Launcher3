@@ -39,6 +39,7 @@ public class DefaultLayoutParser extends AutoInstallsLayout {
     protected static final String TAG_SHORTCUT = "shortcut";
     private static final String TAG_FOLDER = "folder";
     private static final String TAG_PARTNER_FOLDER = "partner-folder";
+    private static final String TAG_LARGE_FOLDER = "large-folder";
 
     protected static final String ATTR_URI = "uri";
     private static final String ATTR_CONTAINER = "container";
@@ -82,6 +83,7 @@ public class DefaultLayoutParser extends AutoInstallsLayout {
         parsers.put(TAG_SEARCH_WIDGET, new SearchWidgetParser());
         parsers.put(TAG_SHORTCUT, new ShortcutParser());
         parsers.put(TAG_RESOLVE, new ResolveParser());
+        parsers.put(TAG_LARGE_FOLDER, new OKFolderParser());
         parsers.put(TAG_FOLDER, new MyFolderParser());
         parsers.put(TAG_PARTNER_FOLDER, new PartnerFolderParser());
         parsers.put(TAG_APP_PAIR, new AppPairParser());

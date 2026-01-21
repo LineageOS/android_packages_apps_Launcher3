@@ -17,6 +17,7 @@
 package com.android.launcher3.folder;
 
 import static com.android.launcher3.folder.ClippedFolderIconLayoutRule.MAX_NUM_ITEMS_IN_PREVIEW;
+import static com.android.launcher3.folder.ClippedFolderIconLayoutRule.MAX_NUM_ITEMS_IN_PREVIEW_LARGE_FOLDER;
 
 import android.graphics.Point;
 import android.util.Log;
@@ -44,6 +45,8 @@ public class FolderGridOrganizer {
     private boolean mDisplayingUpperLeftQuadrant = false;
     private static final int PREVIEW_MAX_ROWS = 2;
     private static final int PREVIEW_MAX_COLUMNS = 2;
+    private static final int PREVIEW_MAX_ROWS_LARGE = 3;
+    private static final int PREVIEW_MAX_COLUMNS_LARGE = 3;
 
     /**
      * Note: must call {@link #setFolderInfo(FolderInfo)} manually for verifier to work.
@@ -169,14 +172,18 @@ public class FolderGridOrganizer {
     /**
      * Returns the preview items for the provided pageNo using the full list of contents
      */
-    public <T, R extends T> ArrayList<R> previewItemsForPage(int page, List<T> contents) {
+    public <T, R extends T> ArrayList<R> previewItemsForPage(int page, List<T> contents, Boolean isLargeFolder) {
         ArrayList<R> result = new ArrayList<>();
         int itemsPerPage = mCountX * mCountY;
         int start = itemsPerPage * page;
         int end = Math.min(start + itemsPerPage, contents.size());
 
         for (int i = start, rank = 0; i < end; i++, rank++) {
-            if (isItemInPreview(page, rank)) {
+            if (!isLargeFolder && isItemInPreview(page, rank)) {
+                result.add((R) contents.get(i));
+            }
+
+            if (isLargeFolder && isItemInLargePreview(page, rank)) {
                 result.add((R) contents.get(i));
             }
 
@@ -217,5 +224,45 @@ public class FolderGridOrganizer {
         }
         // If we have less than 4 items do this
         return rank < MAX_NUM_ITEMS_IN_PREVIEW;
+    }
+
+    /**
+     * Returns whether the item with rank is in the default Large Folder icon preview.
+     */
+    public boolean isItemInLargePreview(int rank) {
+        return isItemInLargePreview(0, rank);
+    }
+
+    /**
+     * @param page The page the item is on.
+     * @param rank The rank of the item.
+     * @return True iff the icon is in the 3x3 upper left quadrant of the Large Folder.
+     */
+    public boolean isItemInLargePreview(int page, int rank) {
+        // First page items are laid out such that the first 4 items are always in the upper
+        // left quadrant. For all other pages, we need to check the row and col.
+        if (page > 0 || mDisplayingUpperLeftQuadrant) {
+            int col = rank % mCountX;
+            int row = rank / mCountX;
+            return col < PREVIEW_MAX_COLUMNS_LARGE && row < PREVIEW_MAX_ROWS_LARGE;
+        }
+        // If we have less than 4 items do this
+        return rank < MAX_NUM_ITEMS_IN_PREVIEW_LARGE_FOLDER;
+    }
+
+    public <T, R extends T> ArrayList<R> itemsForPage(int page, List<T> contents) {
+        ArrayList<R> result = new ArrayList<>();
+        int itemsPerPage = mCountX * mCountY;
+        int start = itemsPerPage * page;
+        int end = Math.min(start + itemsPerPage, contents.size());
+
+        for (int i = start, rank = 0; i < end; i++, rank++) {
+            result.add((R) contents.get(i));
+
+            if (result.size() == mMaxItemsPerPage) {
+                break;
+            }
+        }
+        return result;
     }
 }

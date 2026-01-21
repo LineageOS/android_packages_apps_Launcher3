@@ -5,6 +5,7 @@ import com.android.launcher3.Flags;
 public class ClippedFolderIconLayoutRule {
 
     public static final int MAX_NUM_ITEMS_IN_PREVIEW = 4;
+    public static final int MAX_NUM_ITEMS_IN_PREVIEW_LARGE_FOLDER = 9;
     private static final int MIN_NUM_ITEMS_IN_PREVIEW = 2;
 
     public static final float MIN_SCALE = 0.44f;
@@ -29,6 +30,8 @@ public class ClippedFolderIconLayoutRule {
     private float mBaselineIconScale;
     private int mNumFolderColumns;
 
+    private float mPreviewGap;
+
     /**
      * initialize the layout rule
      */
@@ -43,6 +46,7 @@ public class ClippedFolderIconLayoutRule {
         mIsRtl = rtl;
         mBaselineIconScale = availableSpace / intrinsicIconSize;
         mNumFolderColumns = numFolderColumns;
+        mPreviewGap = (mAvailableSpace - mAvailableSpace * MIN_SCALE * 3) / 4f;
     }
 
     /**
@@ -71,6 +75,36 @@ public class ClippedFolderIconLayoutRule {
             mTmpPoint[0] = mTmpPoint[1] = mAvailableSpace / 2 - (mIconSize * totalScale) / 2;
         } else {
             getPosition(index, curNumItems, mTmpPoint);
+        }
+
+        transX = mTmpPoint[0];
+        transY = mTmpPoint[1];
+
+        if (params == null) {
+            params = new PreviewItemDrawingParams(transX, transY, totalScale);
+        } else {
+            params.update(transX, transY, totalScale);
+        }
+        return params;
+    }
+
+    /**
+     * 计算每个应用图标预览项的位置和大小的
+     *
+     * @param index       用图标在文件夹内的下标
+     * @param params      应用图标的相关参数
+     */
+    public PreviewItemDrawingParams computePreviewItemDrawingParams(int index,
+            PreviewItemDrawingParams params) {
+        float totalScale = MIN_SCALE;
+        float transX;
+        float transY;
+
+        if (index >= MAX_NUM_ITEMS_IN_PREVIEW) {
+            // Items beyond those displayed in the preview are animated to the center
+            mTmpPoint[0] = mTmpPoint[1] = mAvailableSpace / 2 - (mIconSize * totalScale) / 2;
+        } else {
+            getLargeFolderPosition(index, mTmpPoint);
         }
 
         transX = mTmpPoint[0];
@@ -135,6 +169,23 @@ public class ClippedFolderIconLayoutRule {
 
         result[0] = left + (col * dx);
         result[1] = top + (row * dy);
+    }
+
+    /**
+     * 计算九宫格中每个icon偏移量
+     */
+    private void getLargeFolderPosition(int index, float[] result) {
+        int x = index % 3;
+        int y = index / 3;
+        float iconSize = mAvailableSpace * MIN_SCALE;
+
+        if (mIsRtl) {
+            result[0] = mPreviewGap + (iconSize + mPreviewGap) * (2 - x);
+        } else {
+            result[0] = mPreviewGap + (iconSize + mPreviewGap) * x;
+        }
+
+        result[1] = mPreviewGap + (iconSize + mPreviewGap) * y;
     }
 
     private void getPosition(int index, int curNumItems, float[] result) {
@@ -207,6 +258,10 @@ public class ClippedFolderIconLayoutRule {
         return scale * mBaselineIconScale;
     }
 
+    public float scaleForItemLargeFolder(int numItems) {
+        return MIN_SCALE * mBaselineIconScale;
+    }
+
     private float radiusDilationForItems(int numItems) {
         if (numItems == 3) {
             return 0.15f;
@@ -219,5 +274,9 @@ public class ClippedFolderIconLayoutRule {
 
     public float getIconSize() {
         return mIconSize;
+    }
+
+    public float getBaselineIconScale() {
+        return mBaselineIconScale;
     }
 }

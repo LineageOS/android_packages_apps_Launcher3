@@ -53,6 +53,7 @@ import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.LauncherAppWidgetInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.pm.UserCache;
+import com.android.launcher3.provider.LauncherDbUtils;
 import com.android.launcher3.qsb.QsbContainerView;
 import com.android.launcher3.shortcuts.ShortcutKey;
 import com.android.launcher3.util.ApiWrapper;
@@ -133,6 +134,7 @@ public class AutoInstallsLayout {
     public static final String TAG_AUTO_INSTALL = "autoinstall";
     public static final String TAG_FOLDER = "folder";
     public static final String TAG_APP_PAIR = "apppair";
+    private static final String TAG_LARGE_FOLDER = "large-folder";
     public static final String TAG_APPWIDGET = "appwidget";
     protected static final String TAG_SEARCH_WIDGET = "searchwidget";
     public static final String TAG_SHORTCUT = "shortcut";
@@ -371,6 +373,7 @@ public class AutoInstallsLayout {
         ArrayMap<String, TagParser> parsers = new ArrayMap<>();
         parsers.put(TAG_APP_ICON, new AppShortcutParser());
         parsers.put(TAG_AUTO_INSTALL, new AutoInstallParser());
+        parsers.put(TAG_LARGE_FOLDER, new OKFolderParser());
         parsers.put(TAG_FOLDER, new FolderParser());
         parsers.put(TAG_APP_PAIR, new AppPairParser());
         parsers.put(TAG_APPWIDGET, new PendingWidgetParser());
@@ -687,6 +690,85 @@ public class AutoInstallsLayout {
         @Override
         public boolean isInvalidSize(int size) {
             return size != 2;
+        }
+    }
+
+    public class OKFolderParser implements TagParser {
+        private final ArrayMap<String, TagParser> mLargeFolderElements;
+
+        public OKFolderParser() {
+            this(getFolderElementsMap());
+        }
+
+        public OKFolderParser(ArrayMap<String, TagParser> elements) {
+            mLargeFolderElements = elements;
+        }
+
+        @Override
+        public int parseAndAdd(XmlPullParser parser) throws XmlPullParserException, IOException {
+            final String title;
+            final int titleResId = getAttributeResourceValue(parser, ATTR_TITLE, 0);
+            if (titleResId != 0) {
+                title = mSourceRes.getString(titleResId);
+            } else {
+                String titleText = getAttributeValue(parser, ATTR_TITLE_TEXT);
+                title = TextUtils.isEmpty(titleText) ? "" : titleText;
+            }
+
+            mValues.put(Favorites.TITLE, title);
+            String itemTypeValue = AutoInstallsLayout.getAttributeValue(parser,
+                    Favorites.ITEM_TYPE);
+            mValues.put(Favorites.ITEM_TYPE, Favorites.ITEM_TYPE_LARGE_FOLDER);
+            mValues.put(Favorites.SPANX,  2);
+            mValues.put(Favorites.SPANY, 2);
+            mValues.put(Favorites._ID, AutoInstallsLayout.this.mCallback.generateNewItemId());
+            int folderId = mCallback.insertAndCheck(mDb, AutoInstallsLayout.this.mValues);
+            if (folderId < 0) {
+                return -1;
+            }
+            ContentValues myValues = new ContentValues(AutoInstallsLayout.this.mValues);
+            IntArray folderItems = new IntArray();
+            int folderDepth = parser.getDepth();
+            int rank = 0;
+            while (true) {
+                int type = parser.next();
+                if (type == XmlPullParser.END_TAG && parser.getDepth() <= folderDepth) {
+                    if (folderItems.size() >= XmlPullParser.START_TAG) {
+                        return folderId;
+                    }
+                    mDb.delete(LauncherSettings.Favorites.TABLE_NAME,
+                            LauncherDbUtils.itemIdMatch(folderId), null);
+                    if (folderItems.size() != 1) {
+                        return -1;
+                    }
+                    ContentValues childValues = new ContentValues();
+                    AutoInstallsLayout.copyInteger(myValues, childValues, Favorites.CONTAINER);
+                    AutoInstallsLayout.copyInteger(myValues, childValues, Favorites.SCREEN);
+                    AutoInstallsLayout.copyInteger(myValues, childValues,
+                            LauncherSettings.Favorites.CELLX);
+                    AutoInstallsLayout.copyInteger(myValues, childValues,
+                            LauncherSettings.Favorites.CELLY);
+                    int addedId = folderItems.get(0);
+                    mDb.update(LauncherSettings.Favorites.TABLE_NAME,
+                            childValues, "_id=" + addedId, null);
+                    return addedId;
+                }
+                if (type == XmlPullParser.START_TAG) {
+                    mValues.clear();
+                    mValues.put(Favorites.CONTAINER, folderId);
+                    mValues.put(Favorites.RANK, rank);
+                    TagParser tagParser = mLargeFolderElements.get(parser.getName());
+                    if (tagParser != null) {
+                        int id = tagParser.parseAndAdd(parser);
+                        if (id >= 0) {
+                            folderItems.add(id);
+                            rank++;
+                        }
+                    } else {
+                        throw new RuntimeException("Invalid folder item " + parser.getName());
+                    }
+                }
+            }
         }
     }
 

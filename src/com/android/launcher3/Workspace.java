@@ -109,6 +109,7 @@ import com.android.launcher3.dragndrop.SystemDragItemInfo;
 import com.android.launcher3.folder.Folder;
 import com.android.launcher3.folder.FolderIcon;
 import com.android.launcher3.folder.PreviewBackground;
+import com.android.launcher3.folder.largefolder.LargeFolderIcon;
 import com.android.launcher3.graphics.DragPreviewProvider;
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider;
 import com.android.launcher3.icons.BitmapRenderer;
@@ -125,6 +126,7 @@ import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.pageindicators.PageIndicator;
 import com.android.launcher3.popup.Poppable;
 import com.android.launcher3.popup.Popup;
+import com.android.launcher3.popup.ShortcutsProxy;
 import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.statemanager.StateManager.StateHandler;
 import com.android.launcher3.statemanager.StateManager.StateListener;
@@ -158,6 +160,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * The workspace is a wide area with a wallpaper and a finite number of pages.
@@ -269,6 +272,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     /** The underlying view that we are dragging something over. */
     private View mDragOverView = null;
     private FolderIcon mDragOverFolderIcon = null;
+    private LargeFolderIcon mDragOverLargeFolderIcon;
     private boolean mCreateUserFolderOnDrop = false;
     private boolean mAddToExistingFolderOnDrop = false;
 
@@ -1747,95 +1751,94 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             if (icon instanceof FastBitmapDrawable) {
                 iconScale = ((FastBitmapDrawable) icon).getAnimatedScale();
             }
+            ((BubbleTextView) child).clearPressedBackground();
         }
 
         // Clear the pressed state if necessary
         child.clearFocus();
         child.setPressed(false);
-        if (child instanceof BubbleTextView) {
-            BubbleTextView icon = (BubbleTextView) child;
-            icon.clearPressedBackground();
-        }
 
-        if (draggableView == null && child instanceof DraggableView) {
-            draggableView = (DraggableView) child;
-        }
+        // 获取实际用于拖拽的视图
+        DraggableView dragView = (draggableView != null) ? draggableView :
+                (child instanceof DraggableView ? (DraggableView) child : null);
 
-        final View contentView = previewProvider.getContentView();
-        final float scale;
-        // The draggable drawable follows the touch point around on the screen
-        final Drawable drawable;
-        if (contentView == null) {
-            drawable = previewProvider.createDrawable();
-            scale = previewProvider.getScaleAndPosition(drawable, mTempXY);
-        } else {
-            drawable = null;
-            scale = previewProvider.getScaleAndPosition(contentView, mTempXY);
-        }
+        View contentView = previewProvider.getContentView();
+        Drawable drawable = (contentView == null) ? previewProvider.createDrawable() : null;
+
+        float scale = (drawable != null) ? previewProvider.getScaleAndPosition(
+                drawable, mTempXY) : previewProvider.getScaleAndPosition(contentView, mTempXY);
 
         int dragLayerX = mTempXY[0];
         int dragLayerY = mTempXY[1];
 
+        // 获取拖拽区域范围
         Rect dragRect = new Rect();
-
-        if (draggableView != null) {
-            draggableView.getSourceVisualDragBounds(dragRect);
+        if (dragView != null) {
+            dragView.getSourceVisualDragBounds(dragRect);
             dragLayerY += dragRect.top;
         }
 
-
+        // 保存 dragSource 内部引用（如果是桌面 icon）
         if (child.getParent() instanceof ShortcutAndWidgetContainer) {
             mDragSourceInternal = (ShortcutAndWidgetContainer) child.getParent();
         }
 
-        if (child instanceof BubbleTextView) {
-            BubbleTextView btv = (BubbleTextView) child;
-            if (!dragOptions.isAccessibleDrag) {
-                dragOptions.preDragCondition =
-                        btv.startLongPressAction(mLauncher.getPopupControllerForAppIcons());
+        // 特殊处理 BubbleTextView、AppPair、Widget、Folder 等类型长按行为
+        if (!mLauncher.isInState(LauncherState.EDIT_MODE)) {
+            if ((child instanceof BubbleTextView bubbleTextView)
+                    && bubbleTextView.getIconDisplay()
+                    == BubbleTextView.DISPLAY_LARGE_FOLDER_ICON) {
+                bubbleTextView.setVisibility(VISIBLE);
+                dragOptions.preDragCondition = ((BubbleTextView) child).startLongPressAction(mLauncher.getPopupControllerForAppIcons());
+                return null;
+            } else if (child instanceof BubbleTextView && !dragOptions.isAccessibleDrag) {
+                dragOptions.preDragCondition = ((BubbleTextView) child).startLongPressAction(mLauncher.getPopupControllerForAppIcons());
+                ItemInfo tag = (ItemInfo) child.getTag();
+            } else if (child instanceof AppPairIcon appPairIcon) {
+                dragOptions.preDragCondition = ShortcutsProxy.startLongPressActionAppPairIcon(appPairIcon);
+                if (appPairIcon.showInLargeFolder()) {
+                    appPairIcon.setVisibility(VISIBLE);
+                    return null;
+                }
+            } else if (child instanceof LargeFolderIcon || child instanceof FolderIcon) {
+                ItemInfo tag = (ItemInfo) child.getTag();
+                if (!tag.isInHotseat()) {
+                    dragOptions.preDragCondition = ShortcutsProxy.startLongPressActionFolder(child);
+                }
+            } else if (Flags.homeScreenEditImprovements() && child instanceof Poppable
+                    && !dragOptions.isAccessibleDrag) {
+                Popup popup = mLauncher.getPopupControllerForHomeScreenItems()
+                        .show(child);
+                if (popup != null) {
+                    dragOptions.preDragCondition = popup.createPreDragCondition();
+                }
             }
-            if (btv.isDisplaySearchResult()) {
-                dragOptions.preDragEndScale = (float) mAllAppsIconSize / btv.getIconSize();
-            }
-        } else if (Flags.homeScreenEditImprovements() && child instanceof Poppable
-                && !dragOptions.isAccessibleDrag) {
-            Popup popup = mLauncher.getPopupControllerForHomeScreenItems()
-                    .show(child);
-            if (popup != null) {
-                dragOptions.preDragCondition = popup.createPreDragCondition();
+        } else {
+            if (child instanceof BubbleTextView bubbleTextView
+                    && bubbleTextView.getIconDisplay()
+                    == BubbleTextView.DISPLAY_LARGE_FOLDER_ICON) {
+                bubbleTextView.setVisibility(VISIBLE);
+                return null;
             }
         }
 
+        // 偏移处理（如果有 PreDragCondition）
         if (dragOptions.preDragCondition != null) {
-            int xDragOffSet = dragOptions.preDragCondition.getDragOffset().x;
-            int yDragOffSet = dragOptions.preDragCondition.getDragOffset().y;
-            if (xDragOffSet != 0 || yDragOffSet != 0) {
-                dragLayerX += xDragOffSet;
-                dragLayerY += yDragOffSet;
-            }
+            Point offset = dragOptions.preDragCondition.getDragOffset();
+            dragLayerX += offset.x;
+            dragLayerY += offset.y;
         }
 
-        final DragView dv;
+        // 开始拖拽
         if (contentView != null) {
             if (Flags.homeScreenEditImprovements()
                     && ((ItemInfo) child.getTag()).itemType == ITEM_TYPE_APPWIDGET
                     && mDragController instanceof LauncherDragController launcherDragController) {
                 dragOptions.preDragEndScale = (contentView.getMeasuredWidth()
                         + launcherDragController.getWidgetDragScalePx(
-                                null, contentView, dragObject))
+                        null, contentView, dragObject))
                         / contentView.getMeasuredWidth();
             }
-            dv = mDragController.startDrag(
-                    contentView,
-                    draggableView,
-                    dragLayerX,
-                    dragLayerY,
-                    source,
-                    dragObject,
-                    dragRect,
-                    scale * iconScale,
-                    scale,
-                    dragOptions);
         } else {
             if (Flags.homeScreenEditImprovements()
                     && child.getTag() instanceof ItemInfo childItemInfo
@@ -1845,19 +1848,14 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                         + launcherDragController.getWidgetDragScalePx(drawable, null, dragObject))
                         / drawable.getIntrinsicWidth();
             }
-            dv = mDragController.startDrag(
-                    drawable,
-                    draggableView,
-                    dragLayerX,
-                    dragLayerY,
-                    source,
-                    dragObject,
-                    dragRect,
-                    scale * iconScale,
-                    scale,
-                    dragOptions);
         }
-        return dv;
+        DragView dragViewResult = (contentView instanceof View)
+                ? mDragController.startDrag(contentView, dragView, dragLayerX, dragLayerY, source,
+                dragObject, dragRect, scale * iconScale, scale, dragOptions)
+                : mDragController.startDrag(drawable, dragView, dragLayerX, dragLayerY, source,
+                        dragObject, dragRect, scale * iconScale, scale, dragOptions);
+
+        return dragViewResult;
     }
 
     private boolean transitionStateShouldAllowDrop() {
@@ -1995,9 +1993,14 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             }
         }
 
-        if (dropOverView instanceof FolderIcon) {
-            FolderIcon fi = (FolderIcon) dropOverView;
-            if (fi.acceptDrop(dragInfo)) {
+        if (dropOverView instanceof FolderIcon folderIcon) {
+            if (folderIcon.acceptDrop(dragInfo)) {
+                return true;
+            }
+        }
+
+        if (dropOverView instanceof LargeFolderIcon largeFolderIcon) {
+            if (largeFolderIcon.acceptDrop(dragInfo)) {
                 return true;
             }
         }
@@ -2079,6 +2082,21 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                 if (!external) {
                     getParentCellLayoutForView(mDragInfo.cell).removeView(mDragInfo.cell);
                 }
+                return true;
+            }
+        }
+
+        if (dropOverView instanceof LargeFolderIcon) {
+            LargeFolderIcon largeFolderIcon = (LargeFolderIcon) dropOverView;
+            if (largeFolderIcon.acceptDrop(d.dragInfo)) {
+                mStatsLogManager.logger().withItemInfo(largeFolderIcon.mInfo).withInstanceId(
+                        d.logInstanceId).log(
+                        StatsLogManager.LauncherEvent.LAUNCHER_ITEM_DROP_COMPLETED_ON_FOLDER_ICON);
+                largeFolderIcon.onDrop(d, false);
+                if (!external && mDragInfo.cell.getParent() != null) {
+                    getParentCellLayoutForView(mDragInfo.cell).removeView(mDragInfo.cell);
+                }
+                mLauncher.getDropTargetBar().setVisibility(View.GONE);
                 return true;
             }
         }
@@ -2682,7 +2700,9 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     private boolean shouldUseHotseatAsDropLayout(DragObject dragObject) {
         if (mLauncher.getHotseat() == null
                 || mLauncher.getHotseat().getShortcutsAndWidgets() == null
-                || isDragWidget(dragObject)) {
+                || isDragWidget(dragObject)
+                || dragObject.dragInfo.itemType
+                == LauncherSettings.Favorites.ITEM_TYPE_LARGE_FOLDER) {
             return false;
         }
         View hotseatShortcuts = mLauncher.getHotseat().getShortcutsAndWidgets();
@@ -2758,17 +2778,26 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     }
 
     private void manageFolderFeedback(float distance, DragObject dragObject) {
+        // 超出 folder 创建范围，尝试是否能加入已有 folder
         if (distance > mDragTargetLayout.getFolderCreationRadius(mTargetCell)) {
-            if ((mDragMode == DRAG_MODE_ADD_TO_FOLDER
-                    || mDragMode == DRAG_MODE_CREATE_FOLDER)) {
-                setDragMode(DRAG_MODE_NONE);
+            View targetView = mDragTargetLayout.getChildAt(mTargetCell[0], mTargetCell[1]);
+            ItemInfo itemInfo = dragObject.dragInfo;
+
+            boolean userFolderPending = willCreateUserFolder(itemInfo, targetView, false);
+            boolean addedToExisting = tryAddToExistingFolder(itemInfo, targetView, dragObject);
+
+            if (!userFolderPending && !addedToExisting) {
+                resetDragModeIfNeeded(userFolderPending, false);
             }
+
             return;
         }
 
+        // 拖动目标控件
         mDragOverView = mDragTargetLayout.getChildAt(mTargetCell[0], mTargetCell[1]);
         ItemInfo info = dragObject.dragInfo;
         boolean userFolderPending = willCreateUserFolder(info, mDragOverView, false);
+
         if (mDragMode == DRAG_MODE_NONE && userFolderPending) {
             if (Flags.msdlFeedback()) {
                 mMSDLPlayerWrapper.playToken(MSDLToken.DRAG_INDICATOR_DISCRETE);
@@ -2776,12 +2805,10 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             mFolderCreateBg = new PreviewBackground(getContext());
             mFolderCreateBg.setup(mLauncher, mLauncher, null,
                     mDragOverView.getMeasuredWidth(), mDragOverView.getPaddingTop());
-
-            // The full preview background should appear behind the icon
             mFolderCreateBg.isClipping = false;
 
-            if (mDragOverView instanceof AppPairIcon api) {
-                api.getIconDrawableArea().onTemporaryContainerChange(DISPLAY_FOLDER);
+            if (mDragOverView instanceof AppPairIcon appPairIcon) {
+                appPairIcon.getIconDrawableArea().onTemporaryContainerChange(DISPLAY_FOLDER);
             }
 
             mFolderCreateBg.animateToAccept(mDragTargetLayout, mTargetCell[0], mTargetCell[1]);
@@ -2789,28 +2816,49 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             setDragMode(DRAG_MODE_CREATE_FOLDER);
 
             if (dragObject.stateAnnouncer != null) {
-                dragObject.stateAnnouncer.announce(WorkspaceAccessibilityHelper
-                        .getDescriptionForDropOver(mDragOverView, getContext()));
+                dragObject.stateAnnouncer.announce(
+                        WorkspaceAccessibilityHelper.getDescriptionForDropOver(mDragOverView,
+                                getContext()));
             }
-            return;
+        } else {
+            // 不满足创建条件时，判断是否可以添加到已有 folder
+            boolean addedToExisting = tryAddToExistingFolder(info, mDragOverView, dragObject);
+            if (!addedToExisting) {
+                resetDragModeIfNeeded(userFolderPending, false);
+            }
+        }
+    }
+
+    private boolean tryAddToExistingFolder(ItemInfo info, View targetView, DragObject dragObject) {
+        if (targetView instanceof FolderIcon folderIcon) {
+            mDragOverFolderIcon = folderIcon;
+            folderIcon.onDragEnter(info);
+        } else if (targetView instanceof LargeFolderIcon largeFolderIcon) {
+            mDragOverLargeFolderIcon = largeFolderIcon;
+            largeFolderIcon.onDragEnter(info);
+        } else {
+            return false;
         }
 
-        boolean willAddToFolder = willAddToExistingUserFolder(info, mDragOverView);
-        if (willAddToFolder && mDragMode == DRAG_MODE_NONE) {
-            mDragOverFolderIcon = ((FolderIcon) mDragOverView);
-            mDragOverFolderIcon.onDragEnter(info);
-            if (mDragTargetLayout != null) {
-                mDragTargetLayout.clearDragOutlines();
-            }
-            setDragMode(DRAG_MODE_ADD_TO_FOLDER);
-
-            if (dragObject.stateAnnouncer != null) {
-                dragObject.stateAnnouncer.announce(WorkspaceAccessibilityHelper
-                        .getDescriptionForDropOver(mDragOverView, getContext()));
-            }
-            return;
+        if (mDragTargetLayout != null) {
+            mDragTargetLayout.clearDragOutlines();
         }
 
+        setDragMode(DRAG_MODE_ADD_TO_FOLDER);
+
+        if (dragObject.stateAnnouncer != null) {
+            dragObject.stateAnnouncer.announce(
+                    WorkspaceAccessibilityHelper.getDescriptionForDropOver(targetView,
+                            getContext()));
+        }
+
+        return true;
+    }
+
+    private void resetDragModeIfNeeded(boolean userFolderPending, boolean willAddToFolder) {
+        if (mDragMode == DRAG_MODE_CREATE_FOLDER && !userFolderPending) {
+            setDragMode(DRAG_MODE_NONE);
+        }
         if (mDragMode == DRAG_MODE_ADD_TO_FOLDER && !willAddToFolder) {
             setDragMode(DRAG_MODE_NONE);
         }
@@ -3368,10 +3416,23 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         return result;
     }
 
+    @Override
+    public boolean scrollTo(int screenId) {
+        boolean result = false;
+        if (!mIsSwitchingState && workspaceInScrollableState()) {
+            result = super.scrollTo(screenId);
+        }
+        Folder openFolder = Folder.getOpen(mLauncher);
+        if (openFolder != null) {
+            openFolder.completeDragExit();
+        }
+        return result;
+    }
+
     /**
      * Returns a specific CellLayout
      */
-    CellLayout getParentCellLayoutForView(View v) {
+    public CellLayout getParentCellLayoutForView(View v) {
         for (CellLayout layout : getWorkspaceAndHotseatCellLayouts()) {
             if (layout.getShortcutsAndWidgets().indexOfChild(v) > -1) {
                 return layout;
@@ -3451,6 +3512,17 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                     // If an app pair's member apps are being removed, delete the whole app pair.
                     if (api.anyMatch(matcher)) {
                         mLauncher.removeItem(child, info, persistChanges);
+                    }
+                } else if (child instanceof LargeFolderIcon largeFolderIcon) {
+                    FolderInfo folderInfo = (FolderInfo) info;
+                    List<ItemInfo> matches = folderInfo.getContents().stream()
+                            .filter(matcher)
+                            .collect(Collectors.toList());
+                    if (!matches.isEmpty()) {
+                        largeFolderIcon.getFolder().removeFolderContent(false, matches);
+                        if (largeFolderIcon.getFolder().isOpen()) {
+                            largeFolderIcon.getFolder().close(false);
+                        }
                     }
                 }
             }
@@ -3671,5 +3743,14 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     private Void runOnUiThread(Runnable runnable) {
         mLauncher.runOnUiThread(runnable);
         return null;
+    }
+
+    public int getNewScreenId() {
+        int newScreenId = LauncherAppState.getInstance(
+                getContext()).getModel().getModelDbController().getNewScreenId();
+        while (this.mWorkspaceScreens.containsKey(newScreenId)) {
+            newScreenId++;
+        }
+        return newScreenId;
     }
 }

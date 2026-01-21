@@ -83,14 +83,15 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> implements Cli
 
     private final ViewGroupFocusHelper mFocusIndicatorHelper;
 
-    @Thunk final ArrayMap<View, Runnable> mPendingAnimations = new ArrayMap<>();
+    @Thunk
+    final ArrayMap<View, Runnable> mPendingAnimations = new ArrayMap<>();
 
     private final FolderGridOrganizer mOrganizer;
     private final ViewCache mViewCache;
 
     private int mAllocatedContentSize;
     @ViewDebug.ExportedProperty(category = "launcher")
-    private int mGridCountX;
+    public int mGridCountX;
     @ViewDebug.ExportedProperty(category = "launcher")
     private int mGridCountY;
 
@@ -217,6 +218,7 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> implements Cli
 
     /**
      * Creates and adds an icon corresponding to the provided rank
+     *
      * @return the created icon
      */
     public View createAndAddViewForRank(ItemInfo item, int rank) {
@@ -252,7 +254,7 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> implements Cli
         if (item instanceof AppPairInfo api) {
             // TODO (b/332607759): Make view cache work with app pair icons
             icon = AppPairIcon.inflateIcon(R.layout.folder_app_pair, ActivityContext.lookupContext(
-                    getContext()), null , api, BubbleTextView.DISPLAY_FOLDER);
+                    getContext()), null, api, BubbleTextView.DISPLAY_FOLDER);
         } else {
             icon = mViewCache.getView(R.layout.folder_application, getContext(), null);
             ((BubbleTextView) icon).applyFromWorkspaceItem((WorkspaceItemInfo) item);
@@ -306,13 +308,13 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> implements Cli
     public void setFixedSize(int width, int height) {
         width -= (getPaddingLeft() + getPaddingRight());
         height -= (getPaddingTop() + getPaddingBottom());
-        for (int i = getChildCount() - 1; i >= 0; i --) {
+        for (int i = getChildCount() - 1; i >= 0; i--) {
             ((CellLayout) getChildAt(i)).setFixedSize(width, height);
         }
     }
 
     public void removeItem(View v) {
-        for (int i = getChildCount() - 1; i >= 0; i --) {
+        for (int i = getChildCount() - 1; i >= 0; i--) {
             getPageAt(i).removeView(v);
         }
     }
@@ -366,8 +368,14 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> implements Cli
                 lp.setCellXY(mOrganizer.getPosForRank(rank));
                 currentPage.addViewToCellLayout(v, -1, info.getViewId(), lp, true);
 
-                if (mOrganizer.isItemInPreview(rank) && v instanceof BubbleTextView) {
-                    ((BubbleTextView) v).verifyHighRes();
+                if (mFolder.mLargeFolderIcon != null) {
+                    if (mOrganizer.isItemInLargePreview(rank) && v instanceof BubbleTextView) {
+                        ((BubbleTextView) v).verifyHighRes();
+                    }
+                } else {
+                    if (mOrganizer.isItemInPreview(rank) && v instanceof BubbleTextView) {
+                        ((BubbleTextView) v).verifyHighRes();
+                    }
                 }
             }
 
@@ -403,8 +411,8 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> implements Cli
                 (getPageAt(0).getDesiredWidth() + getPaddingLeft() + getPaddingRight()) : 0;
     }
 
-    public int getDesiredHeight()  {
-        return  getPageCount() > 0 ?
+    public int getDesiredHeight() {
+        return getPageCount() > 0 ?
                 (getPageAt(0).getDesiredHeight() + getPaddingTop() + getPaddingBottom()) : 0;
     }
 
@@ -446,10 +454,11 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> implements Cli
 
     /**
      * Iterates over all its items in a reading order.
+     *
      * @return the view for which the operator returned true.
      */
     public View iterateOverItems(ItemOperator op) {
-        for (int k = 0 ; k < getChildCount(); k++) {
+        for (int k = 0; k < getChildCount(); k++) {
             CellLayout page = getPageAt(k);
             for (int j = 0; j < page.getCountY(); j++) {
                 for (int i = 0; i < page.getCountX(); i++) {
@@ -669,10 +678,10 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> implements Cli
                         }
                     };
                     v.animate()
-                        .translationXBy((direction > 0 ^ mIsRtl) ? -v.getWidth() : v.getWidth())
-                        .setDuration(REORDER_ANIMATION_DURATION)
-                        .setStartDelay(0)
-                        .withEndAction(endAction);
+                            .translationXBy((direction > 0 ^ mIsRtl) ? -v.getWidth() : v.getWidth())
+                            .setDuration(REORDER_ANIMATION_DURATION)
+                            .setStartDelay(0)
+                            .withEndAction(endAction);
                     mPendingAnimations.put(v, endAction);
                 }
             }

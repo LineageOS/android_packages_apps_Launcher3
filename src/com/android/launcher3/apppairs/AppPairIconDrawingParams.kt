@@ -43,24 +43,24 @@ class AppPairIconDrawingParams(val context: Context, container: Int) {
     }
 
     // The size at which this graphic will be drawn.
-    val iconSize: Int
+    var iconSize: Int
     // Standard app icons are padded by this amount on each side.
-    val standardIconPadding: Float
+    var standardIconPadding: Float
     // App pair icons are slightly smaller than regular icons, so we pad the icon by this much on
     // each side.
-    val outerPadding: Float
+    var outerPadding: Float
     // The colored background (two rectangles in a square area) is this big.
-    val backgroundSize: Float
+    var backgroundSize: Float
     // The size of the channel between the two halves of the app pair icon.
-    val centerChannelSize: Float
+    var centerChannelSize: Float
     // The corner radius of the outside corners.
-    val bigRadius: Float
+    var bigRadius: Float
     // The corner radius of the inside corners, touching the center channel.
-    val smallRadius: Float
+    var smallRadius: Float
     // Inside of the icon, the two member apps are padded by this much.
-    val innerPadding: Float
+    var innerPadding: Float
     // The two member apps have icons that are this big (in diameter).
-    val memberIconSize: Float
+    var memberIconSize: Float
     // The app pair icon appears differently in portrait and landscape.
     var isLeftRightSplit: Boolean = true
     // The background paint color (based on container).
@@ -99,5 +99,17 @@ class AppPairIconDrawingParams(val context: Context, container: Int) {
             bgColor = ta.getColor(R.styleable.FolderIconPreview_folderPreviewColor, 0)
             ta.recycle()
         }
+    }
+
+    fun updateIconSize(size: Int) {
+        iconSize = size
+        standardIconPadding = iconSize * STANDARD_ICON_PADDING
+        outerPadding = iconSize * OUTER_PADDING_SCALE
+        backgroundSize = (iconSize * STANDARD_ICON_SHRINK) - (outerPadding * 2)
+        centerChannelSize = iconSize * CENTER_CHANNEL_SCALE
+        bigRadius = iconSize * BIG_RADIUS_SCALE
+        smallRadius = iconSize * SMALL_RADIUS_SCALE
+        innerPadding = iconSize * INNER_PADDING_SCALE
+        memberIconSize = iconSize * MEMBER_ICON_SCALE
     }
 }

@@ -441,7 +441,9 @@ constructor(
                     entryCountDiff[entry]?.let { entryDiff ->
                         if (entryDiff < 0) {
                             add(entry.id)
-                            if (entry.itemType == LauncherSettings.Favorites.ITEM_TYPE_FOLDER) {
+                            if (entry.itemType == LauncherSettings.Favorites.ITEM_TYPE_FOLDER
+                                || entry.itemType == LauncherSettings.Favorites.ITEM_TYPE_LARGE_FOLDER
+                            ) {
                                 entry.mFolderItems.values.forEach { ids ->
                                     ids.forEach { value -> add(value) }
                                 }

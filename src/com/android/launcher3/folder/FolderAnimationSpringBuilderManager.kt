@@ -76,7 +76,7 @@ class FolderAnimationSpringBuilderManager(
         fun getPreviewIconsOnPage(folder: Folder, page: Int): List<View> {
             return createFolderGridOrganizer(folder.mActivityContext.deviceProfile)
                 .setFolderInfo(folder.mInfo)
-                .previewItemsForPage(page, folder.iconsInReadingOrder)
+                .previewItemsForPage(page, folder.iconsInReadingOrder, folder.mLargeFolderIcon != null)
         }
 
         /**

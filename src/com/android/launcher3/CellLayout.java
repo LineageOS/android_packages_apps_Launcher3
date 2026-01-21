@@ -68,6 +68,7 @@ import com.android.launcher3.celllayout.ReorderPreviewAnimation;
 import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.dragndrop.DraggableView;
 import com.android.launcher3.folder.PreviewBackground;
+import com.android.launcher3.folder.largefolder.LargeFolderIcon;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.LauncherAppWidgetInfo;
 import com.android.launcher3.util.CellAndSpan;
@@ -920,8 +921,19 @@ public class CellLayout extends ViewGroup {
      * Returns the distance between the given coordinate and the visual center of the given cell.
      */
     public float getDistanceFromWorkspaceCellVisualCenter(float x, float y, int[] cell) {
-        getWorkspaceCellVisualCenter(cell[0], cell[1], mTmpPoint);
-        return (float) Math.hypot(x - mTmpPoint[0], y - mTmpPoint[1]);
+        View child = getChildAt(cell[0], cell[1]);
+        if (child instanceof LargeFolderIcon largeFolderIcon) {
+            Rect dragBounds = new Rect();
+            int[] outPoint = new int[2];
+            cellToPoint(largeFolderIcon.mInfo.cellX, largeFolderIcon.mInfo.cellY, outPoint);
+            largeFolderIcon.getWorkspaceVisualDragBounds(dragBounds);
+            dragBounds.offset(outPoint[0], outPoint[1]);
+            if (new RectF(dragBounds).contains(x, y)) {
+                return 0.0f;
+            }
+        }
+        getWorkspaceCellVisualCenter(cell[0], cell[1], this.mTmpPoint);
+        return (float) Math.hypot(x - this.mTmpPoint[0], y - this.mTmpPoint[1]);
     }
 
     private void getWorkspaceCellVisualCenter(int cellX, int cellY, int[] outPoint) {
@@ -1595,7 +1607,7 @@ public class CellLayout extends ViewGroup {
         return new ReorderAlgorithm(this);
     }
 
-    protected ItemConfiguration findReorderSolution(int pixelX, int pixelY, int minSpanX,
+    public ItemConfiguration findReorderSolution(int pixelX, int pixelY, int minSpanX,
             int minSpanY, int spanX, int spanY, int[] direction, View dragView, boolean decX) {
         ItemConfiguration configuration = new ItemConfiguration();
         copyCurrentStateToSolution(configuration);
@@ -1989,5 +2001,9 @@ public class CellLayout extends ViewGroup {
             }
         }
         return null;
+    }
+
+    public void markCell(int cellX, int cellY, boolean value) {
+        mOccupied.markCells(cellX, cellY, 1, 1, value);
     }
 }

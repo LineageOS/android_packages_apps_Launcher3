@@ -127,6 +127,7 @@ class WorkspaceItemProcessor(
                 Favorites.ITEM_TYPE_CUSTOM_APPWIDGET -> processWidget()
                 Favorites.ITEM_TYPE_FILE_SYSTEM_FILE,
                 Favorites.ITEM_TYPE_FILE_SYSTEM_FOLDER -> processFileSystemItem()
+                Favorites.ITEM_TYPE_LARGE_FOLDER -> processLargeFolder()
             }
         } catch (e: Exception) {
             Log.e(TAG, "Desktop items loading interrupted", e)
@@ -487,6 +488,34 @@ class WorkspaceItemProcessor(
         c.checkAndAddItem(collection, loadedItems, memoryLogger)
     }
 
+    private fun processLargeFolder() {
+        Log.d(TAG, "processLargeFolder")
+        var collection = c.findOrMakeLargeFolder(c.id, loadedItems)
+        // If we generated a placeholder Folder before this point, it may need to be replaced with
+        // an app pair.
+        if (c.itemType == Favorites.ITEM_TYPE_APP_PAIR && collection is FolderInfo) {
+            val newAppPair = AppPairInfo()
+            // Move the placeholder's contents over to the new app pair.
+            collection.getContents().forEach(newAppPair::add)
+            collection = newAppPair
+        }
+
+        c.applyCommonProperties(collection)
+        // Do not trim the folder label, as is was set by the user.
+        collection.title = c.getString(c.mTitleIndex)
+        collection.spanX = 2
+        collection.spanY = 2
+        if (collection is FolderInfo) {
+            collection.options = c.options
+        } else {
+            // An app pair may be inside another folder, so it needs to preserve rank information.
+            collection.rank = c.rank
+        }
+
+        c.markRestored()
+        c.checkAndAddItem(collection, loadedItems, memoryLogger)
+    }
+
     /**
      * This method, similar to processAppShortcut above, verifies that a widget should be shown on
      * the home screen, updates the database accordingly, formats the data in such a way that it is
@@ -723,9 +752,14 @@ class WorkspaceItemProcessor(
                 info.rank = rank
                 if (
                     info is WorkspaceItemInfo &&
-                        info.matchingLookupFlag.isVisuallyLessThan(Favorites.DESKTOP_ICON_FLAG) &&
-                        info.itemType == Favorites.ITEM_TYPE_APPLICATION &&
-                        verifiers.any { it.isItemInPreview(info.rank) }
+                    info.matchingLookupFlag.isVisuallyLessThan(Favorites.DESKTOP_ICON_FLAG) &&
+                    info.itemType == Favorites.ITEM_TYPE_APPLICATION &&
+                    verifiers.any {
+                        if (itemInfo.itemType == Favorites.ITEM_TYPE_LARGE_FOLDER)
+                            it.isItemInLargePreview(info.rank)
+                        else
+                            it.isItemInPreview(info.rank)
+                    }
                 ) {
                     iconCache.getTitleAndIcon(info, Favorites.DESKTOP_ICON_FLAG)
                 }

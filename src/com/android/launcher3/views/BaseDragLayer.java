@@ -45,6 +45,7 @@ import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.InsettableFrameLayout;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.dragndrop.DragController;
+import com.android.launcher3.folder.largefolder.LargeFolderIcon;
 import com.android.launcher3.testing.shared.ResourceUtils;
 import com.android.launcher3.util.MultiPropertyFactory.MultiProperty;
 import com.android.launcher3.util.MultiValueAlpha;
