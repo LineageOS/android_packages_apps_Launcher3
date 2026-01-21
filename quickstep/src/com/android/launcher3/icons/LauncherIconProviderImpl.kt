@@ -63,8 +63,11 @@ constructor(
 
     private var processor: IconProcessorPlugin? = null
 
-    override fun getApplicationInfoHash(appInfo: ApplicationInfo): String =
-        (appInfo.sourceDir?.hashCode() ?: 0).toString() + " " + appInfo.longVersionCode
+    override fun getApplicationInfoHash(appInfo: ApplicationInfo) =
+        mSystemState.withAdditionalValues(
+            (appInfo.sourceDir?.hashCode() ?: 0).toString(),
+            appInfo.longVersionCode.toString(),
+        )
 
     override fun loadPackageIcon(
         info: PackageItemInfo,
