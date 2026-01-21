@@ -18,7 +18,6 @@ package com.android.launcher3.model;
 
 import static android.content.ContentResolver.SCHEME_CONTENT;
 
-import static com.android.launcher3.Utilities.isRunningInTestHarness;
 import static com.android.launcher3.util.SimpleBroadcastReceiver.packageFilter;
 
 import android.app.RemoteAction;
@@ -71,8 +70,7 @@ import javax.inject.Inject;
 public final class WellbeingModel implements SafeCloseable {
     private static final String TAG = "WellbeingModel";
     private static final int[] RETRY_TIMES_MS = {5000, 15000, 30000};
-    // TODO(b/473048003): Turn off DEBUG flag.
-    private static final boolean DEBUG = isRunningInTestHarness();
+    private static final boolean DEBUG = false;
 
     // Welbeing contract
     private static final String PATH_ACTIONS = "actions";
