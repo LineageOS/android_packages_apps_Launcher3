@@ -106,14 +106,18 @@ constructor(
 
     private fun verifyIconState() {
         val newState = parseIconState(iconState)
-        if (newState == iconState) return
-        val hasThemedChanged = newState.toUniqueId() != iconState.toUniqueId()
+        val oldState = iconState
+        if (newState == oldState) return
+        val hasThemedChanged =
+            newState.themeCode != oldState.themeCode || newState.isCircle != oldState.isCircle
         iconState = newState
         if (hasThemedChanged) {
             // trigger listeners only for theme change, not shape change
             listeners.forEach { it.onThemeChanged() }
         }
-        _iconShapeData.dispatchValue(iconShape.createIconShape(iconShapeData.value.pathSize))
+        if (newState.iconShape != oldState.iconShape) {
+            _iconShapeData.dispatchValue(iconShape.createIconShape(iconShapeData.value.pathSize))
+        }
     }
 
     @AnyThread fun addChangeListener(listener: ThemeChangeListener) = listeners.add(listener)
@@ -191,10 +195,7 @@ constructor(
         val folderShape: ShapeDelegate,
         val shapeRadius: Float,
     ) {
-        fun toUniqueId() = "$themeCode,$isCircle"
-
         val iconShapeInfo = IconShapeInfo.fromPath(iconShape.getPath(), DEFAULT_PATH_SIZE_INT)
-        val folderShapeInfo = IconShapeInfo.fromPath(folderShape.getPath(), DEFAULT_PATH_SIZE_INT)
     }
 
     private fun IconState.closeController() {

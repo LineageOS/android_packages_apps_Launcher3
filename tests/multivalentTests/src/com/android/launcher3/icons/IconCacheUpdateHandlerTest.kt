@@ -131,11 +131,12 @@ class IconCacheUpdateHandlerTest {
     @Test
     fun `keeps valid app infos`() {
         val appInfo = ApplicationInfo()
-        doReturn("app-fresh").whenever(iconProvider).getStateForApp(eq(appInfo))
+        val state = PersistedItemState().withAdditionalValues("app-fresh")
+        doReturn(state).whenever(iconProvider).getStateForApp(eq(appInfo))
 
         TestCachedObject(1).addToCursor(cursor)
         TestCachedObject(2).addToCursor(cursor)
-        cursor.addRow(arrayOf(33, TestCachedObject(1).getPackageKey(), "app-fresh"))
+        cursor.addRow(arrayOf(33, TestCachedObject(1).getPackageKey(), state.toString()))
 
         updateHandlerUnderTest.updateIcons(
             TestCachedObject(1, appInfo = appInfo),
@@ -149,15 +150,18 @@ class IconCacheUpdateHandlerTest {
     @Test
     fun `deletes stale app infos`() {
         val appInfo1 = ApplicationInfo()
-        doReturn("app1-fresh").whenever(iconProvider).getStateForApp(eq(appInfo1))
+        val state1 = PersistedItemState().withAdditionalValues("app1-fresh")
+        doReturn(state1).whenever(iconProvider).getStateForApp(eq(appInfo1))
 
         val appInfo2 = ApplicationInfo()
-        doReturn("app2-fresh").whenever(iconProvider).getStateForApp(eq(appInfo2))
+        val state2 = PersistedItemState().withAdditionalValues("app2-fresh")
+
+        doReturn(state2).whenever(iconProvider).getStateForApp(eq(appInfo2))
 
         TestCachedObject(1).addToCursor(cursor)
         TestCachedObject(2).addToCursor(cursor)
         cursor.addRow(arrayOf(33, TestCachedObject(1).getPackageKey(), "app1-not-fresh"))
-        cursor.addRow(arrayOf(34, TestCachedObject(2).getPackageKey(), "app2-fresh"))
+        cursor.addRow(arrayOf(34, TestCachedObject(2).getPackageKey(), state2.toString()))
 
         updateHandlerUnderTest.updateIcons(
             TestCachedObject(1, appInfo = appInfo1),
@@ -238,9 +242,11 @@ class TestCachedObject(
     val rowId: Long,
     val cn: ComponentName =
         ComponentName.unflattenFromString("com.android.fake$rowId/.FakeActivity")!!,
-    val freshnessId: String = "fresh-$rowId",
+    freshnessId: String = "fresh-$rowId",
     val appInfo: ApplicationInfo? = null,
 ) : CachedObject {
+
+    val freshnessState = PersistedItemState().withAdditionalValues(freshnessId)
 
     override fun getComponent() = cn
 
@@ -250,10 +256,10 @@ class TestCachedObject(
 
     override fun getApplicationInfo(): ApplicationInfo? = appInfo
 
-    override fun getFreshnessIdentifier(iconProvider: IconProvider): String? = freshnessId
+    override fun getFreshnessIdentifier(iconProvider: IconProvider) = freshnessState
 
     fun addToCursor(cursor: MatrixCursor) =
-        cursor.addRow(arrayOf(rowId, cn.flattenToString(), freshnessId))
+        cursor.addRow(arrayOf(rowId, cn.flattenToString(), freshnessState.toString()))
 
     fun getPackageKey() =
         BaseIconCache.getPackageKey(cn.packageName, user).componentName.flattenToString()

@@ -283,6 +283,7 @@ public class LoaderTask implements Runnable {
     private void loadAllSurfacesOrdered(
             LoaderMemoryLogger memoryLogger, LauncherRestoreEventLogger restoreEventLogger) {
 
+        IconCacheUpdateHandler updateHandler = mIconCache.getUpdateHandler();
         List<CacheableShortcutInfo> allShortcuts = new ArrayList<>();
         Trace.beginSection("LoadWorkspace");
         try {
@@ -350,7 +351,6 @@ public class LoaderTask implements Runnable {
         logASplit("bindAllApps finished");
 
         verifyNotStopped();
-        IconCacheUpdateHandler updateHandler = mIconCache.getUpdateHandler();
         setIgnorePackages(updateHandler);
         updateHandler.updateIcons(allActivityList,
                 LauncherActivityCachingLogic.INSTANCE,
