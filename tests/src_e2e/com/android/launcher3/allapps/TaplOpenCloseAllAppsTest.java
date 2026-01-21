@@ -16,6 +16,8 @@
 package com.android.launcher3.allapps;
 
 import static com.android.launcher3.util.TestUtil.expectFail;
+import static com.android.launcher3.util.ui.ActivityStartUtils.resolveSystemApp;
+import static com.android.launcher3.util.ui.ActivityStartUtils.startAppFast;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

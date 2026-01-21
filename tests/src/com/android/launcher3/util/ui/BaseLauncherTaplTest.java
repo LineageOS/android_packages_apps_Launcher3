@@ -28,11 +28,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
@@ -45,10 +43,8 @@ import android.platform.test.rule.ExtendedLongPressTimeoutRule;
 import android.platform.test.rule.LimitDevicesRule;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.uiautomator.By;
-import androidx.test.uiautomator.BySelector;
 import androidx.test.uiautomator.UiDevice;
 import androidx.test.uiautomator.Until;
 
@@ -132,10 +128,6 @@ public abstract class BaseLauncherTaplTest {
                     return MAIN_EXECUTOR.submit(
                             () -> launcher.noLeakedUiSurfaces()).get();
                 });
-    }
-
-    public static String getAppPackageName() {
-        return getInstrumentation().getContext().getPackageName();
     }
 
     private static String getUiSurfaceLeakErrorMessage(LauncherInstrumentation launcher) {
@@ -422,81 +414,6 @@ public abstract class BaseLauncherTaplTest {
             mLauncher.reinitializeLauncherData();
         }
         mLauncher.waitForLauncherInitialized();
-    }
-
-    public static void startAppFast(String packageName) {
-        startIntent(
-                getInstrumentation().getContext().getPackageManager().getLaunchIntentForPackage(
-                        packageName),
-                By.pkg(packageName).depth(0),
-                true /* newTask */);
-    }
-
-    public static void startTestActivity(String activityName, String activityLabel) {
-        final String packageName = getAppPackageName();
-        final Intent intent = getInstrumentation().getContext().getPackageManager()
-                        .getLaunchIntentForPackage(packageName);
-        intent.setComponent(new ComponentName(packageName,
-                "com.android.launcher3.tests." + activityName));
-        startIntent(intent, By.pkg(packageName).text(activityLabel),
-                false /* newTask */);
-    }
-
-    public static void startTestActivity(int activityNumber) {
-        startTestActivity("Activity" + activityNumber, "TestActivity" + activityNumber);
-    }
-
-    public static void startImeTestActivity() {
-        final String packageName = getAppPackageName();
-        final Intent intent = getInstrumentation().getContext().getPackageManager()
-                        .getLaunchIntentForPackage(packageName);
-        intent.setComponent(new ComponentName(packageName,
-                "com.android.launcher3.testcomponent.ImeTestActivity"));
-        startIntent(intent, By.pkg(packageName).text("ImeTestActivity"),
-                false /* newTask */);
-    }
-
-    /** Starts ExcludeFromRecentsTestActivity, which has excludeFromRecents="true". */
-    public static void startExcludeFromRecentsTestActivity() {
-        final String packageName = getAppPackageName();
-        final Intent intent = getInstrumentation().getContext().getPackageManager()
-                .getLaunchIntentForPackage(packageName);
-        intent.setComponent(new ComponentName(packageName,
-                "com.android.launcher3.testcomponent.ExcludeFromRecentsTestActivity"));
-        startIntent(intent, By.pkg(packageName).text("ExcludeFromRecentsTestActivity"),
-                false /* newTask */);
-    }
-
-    private static void startIntent(Intent intent, BySelector selector, boolean newTask) {
-        intent.addCategory(Intent.CATEGORY_LAUNCHER);
-        if (newTask) {
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        } else {
-            intent.addFlags(
-                    Intent.FLAG_ACTIVITY_MULTIPLE_TASK | Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
-        }
-        getInstrumentation().getTargetContext().startActivity(intent);
-        assertTrue("App didn't start: " + selector,
-                TestHelpers.wait(Until.hasObject(selector), DEFAULT_UI_TIMEOUT));
-
-        // Wait for the Launcher to stop.
-        final LauncherInstrumentation launcherInstrumentation = new LauncherInstrumentation(true);
-        launcherInstrumentation.waitForCondition(
-                "Launcher activity didn't stop",
-                DEFAULT_ACTIVITY_TIMEOUT,
-                () -> !launcherInstrumentation.isLauncherActivityStarted());
-    }
-
-    public static ActivityInfo resolveSystemAppInfo(String category) {
-        return getInstrumentation().getContext().getPackageManager().resolveActivity(
-                new Intent(Intent.ACTION_MAIN).addCategory(category),
-                PackageManager.MATCH_SYSTEM_ONLY)
-                .activityInfo;
-    }
-
-
-    public static String resolveSystemApp(String category) {
-        return resolveSystemAppInfo(category).packageName;
     }
 
     protected HomeAppIcon createShortcutInCenterIfNotExist(String name) {

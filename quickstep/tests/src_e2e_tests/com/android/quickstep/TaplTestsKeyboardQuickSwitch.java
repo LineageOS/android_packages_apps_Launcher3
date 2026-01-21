@@ -15,6 +15,10 @@
  */
 package com.android.quickstep;
 
+import static com.android.launcher3.util.ui.ActivityStartUtils.resolveSystemApp;
+import static com.android.launcher3.util.ui.ActivityStartUtils.startAppFast;
+import static com.android.launcher3.util.ui.ActivityStartUtils.startTestActivity;
+
 import android.content.Intent;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
@@ -26,6 +30,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.launcher3.Flags;
 import com.android.launcher3.tapl.KeyboardQuickSwitch;
 import com.android.launcher3.taskbar.KeyboardQuickSwitchController;
+import com.android.launcher3.util.ui.ActivityStartUtils;
 import com.android.launcher3.util.ui.BaseLauncherTaplTest.AllowInRecentsWindowTests;
 
 import org.junit.Assume;
@@ -215,7 +220,7 @@ public class TaplTestsKeyboardQuickSwitch extends AbstractQuickStepTest {
                 break;
             case LAUNCH_LAST_APP:
                 kqs.launchFocusedAppTask(testSurface.mInitialFocusAtZero
-                        ? getAppPackageName() : CALCULATOR_APP_PACKAGE);
+                        ? ActivityStartUtils.getAppPackageName() : CALCULATOR_APP_PACKAGE);
                 break;
             case LAUNCH_SELECTED_APP:
                 kqs.moveFocusForward();
