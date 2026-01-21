@@ -79,7 +79,7 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidJUnit4::class)
 class FolderTest {
 
-    @get:Rule val app = SandboxApplication()
+    @get:Rule val app = SandboxApplication().withModelDependency()
     @get:Rule val context = TestActivityContext(app)
 
     private lateinit var folder: Folder
