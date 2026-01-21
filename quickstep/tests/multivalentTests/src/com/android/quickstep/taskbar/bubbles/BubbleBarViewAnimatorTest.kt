@@ -1625,6 +1625,7 @@ class BubbleBarViewAnimatorTest {
                     false,
                     null,
                     false,
+                    false,
                     UserType.MAIN,
                 )
             bubbleView =
