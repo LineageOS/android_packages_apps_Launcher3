@@ -2101,8 +2101,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         final Task nonDesktopTask = enableDesktopFirstSplitscreenRefocusBugfix()
                 ? mControllers.taskbarRecentAppsController.getNonDesktopTask(info)
                 : (singleTask == null ? null : singleTask.getTask());
-        if (DesktopExperienceFlags.ENABLE_DESKTOP_FIRST_FULLSCREEN_REFOCUS_BUGFIX.isTrue()
-                && DisplayController.getInfo(this).isInDesktopFirstMode && nonDesktopTask != null) {
+        if (DisplayController.getInfo(this).isInDesktopFirstMode && nonDesktopTask != null) {
             if (!DesktopExperienceFlags.ENABLE_DESKTOP_FIRST_POLICY_IN_LPM.isTrue()) {
                 // Keep the fullscreen mode in desktop-first mode.
                 return false;
