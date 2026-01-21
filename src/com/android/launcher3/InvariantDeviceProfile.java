@@ -342,6 +342,15 @@ public class InvariantDeviceProfile {
                 mPrefs.get(FIXED_LANDSCAPE_MODE)
         );
 
+        FileLog.d(
+                "b/475447538",
+                "Fixed Landscape pref = " + mPrefs.get(FIXED_LANDSCAPE_MODE)
+                        + " all grids = " + allOptions
+                        .stream()
+                        .map(opt -> opt.grid)
+                        .collect(Collectors.toList())
+        );
+
         // Filter out options that don't have the same number of columns as the grid
         DeviceGridState deviceGridState = new DeviceGridState(mPrefs);
         List<DisplayOption> allOptionsFilteredByColCount =
@@ -1312,6 +1321,19 @@ public class InvariantDeviceProfile {
                             == INLINE_QSB_FOR_TWO_PANEL_LANDSCAPE;
 
             a.recycle();
+        }
+
+        @Override
+        public String toString() {
+            return "GridConfig{"
+                    + "name='" + name + '\''
+                    + ", gridTitle='" + gridTitle + '\''
+                    + ", gridIconId=" + gridIconId
+                    + ", numRows=" + numRows
+                    + ", numColumns=" + numColumns
+                    + ", gridType=" + gridType
+                    + ", mIsFixedLandscape=" + mIsFixedLandscape
+                    + '}';
         }
 
         public boolean isEnabled(@DeviceType int deviceType) {

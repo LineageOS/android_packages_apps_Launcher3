@@ -25,6 +25,7 @@ import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -212,6 +213,7 @@ public class RotationHelper implements DeviceProfile.OnDeviceProfileChangeListen
             mLastActivityFlags = activityFlags;
             mRequestOrientationHandler.sendEmptyMessage(activityFlags);
         }
+        Log.d("b/475447538", "Rotation Helper = " + this);
     }
 
     @WorkerThread
