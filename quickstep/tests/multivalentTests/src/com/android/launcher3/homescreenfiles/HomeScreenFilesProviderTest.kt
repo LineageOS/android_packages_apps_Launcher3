@@ -310,6 +310,7 @@ class HomeScreenFilesProviderTest {
         val espUri = createExternalStorageProviderUri("externalRelativePath", "externalDisplayName")
         val mediaStoreUri = createExternalPrimaryMediaStoreUri(1L)
         val mediaStoreUriResolvedFromEsp = createExternalPrimaryMediaStoreUri(2L)
+        val mediaStoreFolderUri = createExternalPrimaryMediaStoreUri(3L)
         val testUri = createTestUri("testId")
 
         // Mock attempts to resolve media store URIs.
@@ -326,6 +327,7 @@ class HomeScreenFilesProviderTest {
                             espUri -> mediaStoreUriResolvedFromEsp
                             mediaStoreUri -> mediaStoreUri
                             mediaStoreUriResolvedFromEsp -> mediaStoreUriResolvedFromEsp
+                            mediaStoreFolderUri -> mediaStoreFolderUri
                             else -> null
                         },
                     )
@@ -335,6 +337,29 @@ class HomeScreenFilesProviderTest {
         // Associate media store content provider client with content resolver.
         whenever(contentResolver.acquireContentProviderClient(MediaStore.AUTHORITY))
             .thenReturn(contentProviderClient)
+
+        // Mock attempts to resolve a single media store URI in its original location.
+        whenever(contentResolver.query(any(), any(), isNull(), isNull(), isNull(), isNull()))
+            .thenAnswer { invocation ->
+                val answer = MatrixCursor(arrayOf(DISPLAY_NAME, MIME_TYPE, DATA))
+                if (invocation.getArgument<Uri>(0) == mediaStoreFolderUri) {
+                    answer.addRow(arrayOf("folder_a", null, "/storage/emulated/0/Desktop/folder_a"))
+                } else {
+                    answer.addRow(
+                        arrayOf("test.png", "image/png", "/storage/emulated/0/Desktop/test.png")
+                    )
+                }
+                return@thenAnswer answer
+            }
+        whenever(fileFactory.invoke(any())).thenAnswer { invocation ->
+            val file = mock<File>()
+            whenever(file.exists()).thenReturn(true)
+            whenever(file.isDirectory)
+                .thenReturn(
+                    invocation.getArgument<String>(0) == "/storage/emulated/0/Desktop/folder_a"
+                )
+            file
+        }
 
         // Mock attempts to update media store.
         whenever(
@@ -354,6 +379,20 @@ class HomeScreenFilesProviderTest {
                     else -> throw RuntimeException()
                 }
             }
+        whenever(
+                contentResolver.update(
+                    /*uri=*/ eq(mediaStoreFolderUri),
+                    /*contentValues=*/ eq(
+                        ContentValues().apply {
+                            put(RELATIVE_PATH, relativePath)
+                            put(MIME_TYPE, DocumentsContract.Document.MIME_TYPE_DIR)
+                        }
+                    ),
+                    /*where=*/ eq("$RELATIVE_PATH != ?"),
+                    /*selectionArgs=*/ eq(arrayOf(relativePath)),
+                )
+            )
+            .thenReturn(1)
 
         // Attempt to move URIs to home screen.
         // NOTE: Overlapping move attempts for a given URI are disallowed.
@@ -363,10 +402,11 @@ class HomeScreenFilesProviderTest {
                 /*expectedMediaStoreUriResult=*/ true,
                 /*expectedMediaStoreUriResult=*/ false,
                 /*expectedTestUriResult=*/ false,
+                /*expectedMediaStoreFolderUriResult=*/ true,
             ),
             provider
                 .moveToHomeScreen(
-                    listOf(espUri, mediaStoreUri, mediaStoreUri, testUri),
+                    listOf(espUri, mediaStoreUri, mediaStoreUri, testUri, mediaStoreFolderUri),
                     relativeFolderPath,
                 )
                 .map(CompletableFuture<Boolean>::get),

@@ -213,6 +213,14 @@ class HomeScreenFilesMediaStoreProvider(
             return false
         }
 
+        val originalFile =
+            runCatching { query(mediaUri, selection = null, selectionArgs = null).get() }
+                .getOrNull()
+        if (originalFile == null) {
+            Log.e(TAG, "Failed to query the media store item in its original location")
+            return false
+        }
+
         var success = false
         try {
             // NOTE: The selection criteria below prevents moving a URI to a path it already
@@ -221,7 +229,12 @@ class HomeScreenFilesMediaStoreProvider(
             success =
                 (context.contentResolver.update(
                     /*uri=*/ mediaUri,
-                    /*contentValues=*/ ContentValues().apply { put(RELATIVE_PATH, relativePath) },
+                    /*contentValues=*/ ContentValues().apply {
+                        put(RELATIVE_PATH, relativePath)
+                        if (originalFile.isDirectory) {
+                            put(MIME_TYPE, MIME_TYPE_DIR)
+                        }
+                    },
                     /*where=*/ "$RELATIVE_PATH != ?",
                     /*selectionArgs=*/ arrayOf(relativePath),
                 ) == 1)
@@ -347,7 +360,11 @@ class HomeScreenFilesMediaStoreProvider(
     }
 
     /** Queries a single file from MediaStore by its URI. */
-    private fun query(uri: Uri): CompletableFuture<HomeScreenFile?> {
+    private fun query(
+        uri: Uri,
+        selection: String? = QUERY_DEFAULT_SELECTION,
+        selectionArgs: Array<String>? = QUERY_DEFAULT_SELECTION_ARGS,
+    ): CompletableFuture<HomeScreenFile?> {
         if (!isExternalPrimaryMediaStoreUri(uri)) {
             return CompletableFuture.completedFuture(null)
         }
@@ -356,8 +373,8 @@ class HomeScreenFilesMediaStoreProvider(
                     context.contentResolver.query(
                         uri,
                         QUERY_DEFAULT_PROJECTION,
-                        QUERY_DEFAULT_SELECTION,
-                        QUERY_DEFAULT_SELECTION_ARGS,
+                        selection,
+                        selectionArgs,
                         null,
                         null,
                     )
