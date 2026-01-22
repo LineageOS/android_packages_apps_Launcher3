@@ -737,3 +737,10 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+    name: "kondo_planner"
+    namespace: "launcher"
+    description: "Enables the kondo planner experience."
+    bug: "450695990"
+}
