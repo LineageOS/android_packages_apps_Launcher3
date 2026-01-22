@@ -795,8 +795,10 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
      */
     public WindowManager.LayoutParams createDefaultWindowLayoutParams(int type, String title) {
         int windowFlags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-        if (!isTransientTaskbar()) {
+        if (!isTransientTaskbar() && !isTaskbarShowingDesktopTasks()) {
             // Allow apps to receive swipe events from non-transient taskbar (e.g. 3 button nav).
+            // Desktop taskbar should not allow other apps to receive touch events so that
+            // drag-and-drop gestures on taskbar icons are not interrupted.
             windowFlags |= WindowManager.LayoutParams.FLAG_SLIPPERY;
         }
         boolean watchOutside = isTransientTaskbar() || isThreeButtonNav();
