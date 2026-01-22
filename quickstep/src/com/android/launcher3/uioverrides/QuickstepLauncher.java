@@ -992,12 +992,11 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
                             DEFAULT_DISPLAY);
             if (defaultDisplayContainerInterface != null
                     && defaultDisplayContainerInterface.getCreatedContainer()
-                    instanceof RecentsWindowManager recentsWindowManager
-                    && !recentsWindowManager.isInState(RecentsState.HIDDEN)) {
+                    instanceof RecentsWindowManager recentsWindowManager) {
                 // Forcibly reset state so the recents surface doesn't get stuck in background app
                 // state
-                recentsWindowManager.getStateManager().goToState(
-                        RecentsState.HIDDEN, /* animated= */ true);
+                recentsWindowManager.getStateManager().moveToRestState(
+                        /* isAnimated= */ recentsWindowManager.isStarted());
             }
         }
     }

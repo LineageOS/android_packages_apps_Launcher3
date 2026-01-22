@@ -97,7 +97,6 @@ import com.android.launcher3.views.BaseDragLayer
 import com.android.launcher3.views.ScrimView
 import com.android.quickstep.BaseContainerInterface
 import com.android.quickstep.FallbackWindowInterface
-import com.android.quickstep.HomeVisibilityState
 import com.android.quickstep.OverviewComponentObserver
 import com.android.quickstep.RecentsAnimationCallbacks
 import com.android.quickstep.RecentsAnimationCallbacks.RecentsAnimationListener
@@ -258,24 +257,6 @@ constructor(
             }
         }
 
-    private val homeVisibilityState = systemUiProxy.homeVisibilityState
-    private val homeVisibilityListener =
-        object : HomeVisibilityState.VisibilityChangeListener {
-
-            override fun onHomeVisibilityChanged(
-                isHomeVisible: Boolean,
-                keyguardGoingAwayOrWaking: Boolean,
-            ) {
-                if (fallbackWindowInterface.isInLiveTileMode || isHomeVisible) {
-                    return
-                }
-                // If there is a running recents animation (i.e. live tile mode) when the home
-                // task disappears, we should let recents animation callbacks
-                // (i.e. onTasksAppeared) reset the state manager.
-                stateManager.moveToRestState(/* isAnimated= */ true)
-            }
-        }
-
     private val recentsAnimationListener =
         object : RecentsAnimationListener {
 
@@ -331,10 +312,6 @@ constructor(
 
     init {
         fallbackWindowInterface.setRecentsWindowManager(this)
-        if (displayId == DEFAULT_DISPLAY) {
-            homeVisibilityState.addListener(homeVisibilityListener)
-        }
-
         if (
             DesktopExperienceFlags.ENABLE_NON_DEFAULT_DISPLAY_SPLIT_BUGFIX.isTrue &&
                 displayId != DEFAULT_DISPLAY &&
@@ -432,9 +409,6 @@ constructor(
                 .findOnBackInvokedDispatcher()
                 ?.unregisterOnBackInvokedCallback(onBackInvokedCallback)
             callbacks?.removeListener(recentsAnimationListener)
-            if (displayId == DEFAULT_DISPLAY) {
-                homeVisibilityState.removeListener(homeVisibilityListener)
-            }
             unregisterComponentCallbacks(this)
             recentsWindowTracker.onContextDestroyed(this)
             recentsView?.destroy()
