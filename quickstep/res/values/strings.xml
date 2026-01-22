@@ -28,6 +28,7 @@
     <string name="recent_task_option_freeform">Freeform</string>
     <!-- Title and content description for an option to enter desktop windowing mode for a given app -->
     <string name="recent_task_option_desktop">Desktop</string>
+    <string name="recent_split_task_option_desktop">Desktop for %1$s</string>
     <!-- Title and content description for an option to move app to external display. -->
     <string name="recent_task_option_external_display">Move to external display</string>
     <!-- Title and content description for an option to remove the task [CHAR LIMIT=30] -->

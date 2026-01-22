@@ -16,13 +16,16 @@
 
 package com.android.quickstep
 
+import android.content.Context
 import android.view.View
+import android.view.accessibility.AccessibilityNodeInfo
 import com.android.internal.jank.Cuj
 import com.android.internal.policy.DesktopModeCompatPolicy
 import com.android.launcher3.AbstractFloatingViewHelper
 import com.android.launcher3.R
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent
 import com.android.launcher3.popup.SystemShortcut
+import com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_BOTTOM_OR_RIGHT
 import com.android.quickstep.views.RecentsView
 import com.android.quickstep.views.RecentsViewContainer
 import com.android.quickstep.views.TaskContainer
@@ -37,6 +40,7 @@ private constructor(
     container: RecentsViewContainer,
     private val taskContainer: TaskContainer,
     abstractFloatingViewHelper: AbstractFloatingViewHelper,
+    private val taskUtils: TaskUtils,
 ) :
     SystemShortcut<RecentsViewContainer>(
         R.drawable.ic_desktop,
@@ -46,6 +50,15 @@ private constructor(
         taskContainer.taskView,
         abstractFloatingViewHelper,
     ) {
+    init {
+        mAccessibilityActionId =
+            if (taskContainer.stagePosition == STAGE_POSITION_BOTTOM_OR_RIGHT) {
+                R.id.action_desktop_bottom_right
+            } else {
+                R.id.action_desktop_top_left
+            }
+    }
+
     override fun onClick(view: View) {
         InteractionJankMonitorWrapper.begin(view, Cuj.CUJ_DESKTOP_MODE_ENTER_FROM_OVERVIEW_MENU)
         dismissTaskMenuView()
@@ -62,12 +75,28 @@ private constructor(
         }
     }
 
+    override fun createAccessibilityAction(
+        context: Context
+    ): AccessibilityNodeInfo.AccessibilityAction =
+        if (taskContainer.taskView.containsMultipleTasks()) {
+            AccessibilityNodeInfo.AccessibilityAction(
+                mAccessibilityActionId,
+                context.getString(
+                    R.string.recent_split_task_option_desktop,
+                    taskUtils.getTitle(context, taskContainer.task),
+                ),
+            )
+        } else {
+            super.createAccessibilityAction(context)
+        }
+
     class Factory
     @Inject
     constructor(
         private val abstractFloatingViewHelper: AbstractFloatingViewHelper,
         private val desktopState: DesktopState,
         private val desktopModeCompatPolicy: DesktopModeCompatPolicy,
+        private val taskUtils: TaskUtils,
     ) : TaskShortcutFactory {
         override fun getShortcuts(
             container: RecentsViewContainer,
@@ -87,7 +116,14 @@ private constructor(
                 ) -> null
                 !taskContainer.task.isDockable -> null
                 else ->
-                    listOf(DesktopShortcut(container, taskContainer, abstractFloatingViewHelper))
+                    listOf(
+                        DesktopShortcut(
+                            container,
+                            taskContainer,
+                            abstractFloatingViewHelper,
+                            taskUtils,
+                        )
+                    )
             }
         }
 
