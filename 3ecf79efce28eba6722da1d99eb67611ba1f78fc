@@ -36,6 +36,23 @@
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "2b00d1c6_082050f9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 16185
+      },
+      "writtenOn": "2026-01-22T20:18:40Z",
+      "side": 1,
+      "message": "I\u0027d like to stack onto this - there are venues you can reach out to us, Gerrit being one of them, devrel@ if you see wider spread problems.\n\nBut there are nicer ways to do this IMO.\n\nWe /cannot possibly/ be expected to check 50 other ROMs Github\u0027s for similar commits - that\u0027s just not a reasonable ask.\n\nYou catch a case of kanging? Call it out, or just upload a patch with the corrected author-string - we ABSOLUTELY want to attribute authorship where applicable.\n\nAlso tho, the contributor/author of this commit has a number of other valid contributions, so there was no reason to think this was anything other than that - noted for next time.",
+      "revId": "3ecf79efce28eba6722da1d99eb67611ba1f78fc",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b7ec5f38_6bd7687a",
