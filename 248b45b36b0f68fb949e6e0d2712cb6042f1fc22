@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5f553d89_821d9c0f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 4550
+      },
+      "writtenOn": "2026-01-22T10:42:00Z",
+      "side": 1,
+      "message": "The logic is correct and after this commit is reversed, am I missing something here?",
+      "revId": "248b45b36b0f68fb949e6e0d2712cb6042f1fc22",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
