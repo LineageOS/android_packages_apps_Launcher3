@@ -16,6 +16,24 @@
       "message": "I didn\u0027t find the other kangs serious enough. But here I have to intervene. Is it now becoming standard practice to steal our work? https://github.com/DerpFest-AOSP/packages_apps_DerpLauncher/commit/6d0cac1268039c01268718d781ab4db1397761d1",
       "revId": "e404209eab389ef4f6c6119d7d4875d37a5f12a7",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5c9462bf_ad1d9605",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 10067
+      },
+      "writtenOn": "2026-01-22T17:20:45Z",
+      "side": 1,
+      "message": "\u003eIs it now becoming standard practice to steal our work?\n\nmight be more standard than checking 50 AOSP forks for similar changes. I\u0027ll restore your original --author and add neobuddy as co-authored-by since it looks like he might have amended / updated the change to newer codebase on his own.",
+      "parentUuid": "a33052c4_063ec3f7",
+      "revId": "e404209eab389ef4f6c6119d7d4875d37a5f12a7",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
