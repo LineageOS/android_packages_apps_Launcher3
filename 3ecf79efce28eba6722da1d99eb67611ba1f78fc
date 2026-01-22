@@ -112,6 +112,30 @@
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "52c73470_00c8682c",
+        "filename": "src/com/android/launcher3/model/AllAppsList.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 28223
+      },
+      "writtenOn": "2026-01-22T22:08:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b7ec5f38_6bd7687a",
+      "range": {
+        "startLine": 165,
+        "startChar": 12,
+        "endLine": 165,
+        "endChar": 34
+      },
+      "revId": "3ecf79efce28eba6722da1d99eb67611ba1f78fc",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b25084c4_f3c9beb1",
@@ -125,6 +149,30 @@
       "writtenOn": "2026-01-22T20:00:35Z",
       "side": 1,
       "message": "zap",
+      "range": {
+        "startLine": 316,
+        "startChar": 16,
+        "endLine": 316,
+        "endChar": 34
+      },
+      "revId": "3ecf79efce28eba6722da1d99eb67611ba1f78fc",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "40b1e14d_6e9910e6",
+        "filename": "src/com/android/launcher3/model/WidgetsModel.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 316,
+      "author": {
+        "id": 28223
+      },
+      "writtenOn": "2026-01-22T22:08:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b25084c4_f3c9beb1",
       "range": {
         "startLine": 316,
         "startChar": 16,
