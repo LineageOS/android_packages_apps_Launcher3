@@ -24,6 +24,30 @@
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "fcaa5a7e_0e54f7ce",
+        "filename": "quickstep/src/com/android/launcher3/model/QuickstepModelDelegate.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 4550
+      },
+      "writtenOn": "2026-01-22T11:02:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "903eab51_3ef7f0ae",
+      "range": {
+        "startLine": 375,
+        "startChar": 0,
+        "endLine": 376,
+        "endChar": 91
+      },
+      "revId": "59df78e4b67da684d8dca501f9cd63f555c63610",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "6f88aab8_efaea9c0",
@@ -37,6 +61,30 @@
       "writtenOn": "2026-01-09T19:02:21Z",
       "side": 1,
       "message": "Then remove from here.",
+      "range": {
+        "startLine": 410,
+        "startChar": 0,
+        "endLine": 411,
+        "endChar": 91
+      },
+      "revId": "59df78e4b67da684d8dca501f9cd63f555c63610",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f9368f63_6b4ac4d2",
+        "filename": "quickstep/src/com/android/launcher3/model/QuickstepModelDelegate.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 411,
+      "author": {
+        "id": 4550
+      },
+      "writtenOn": "2026-01-22T11:02:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6f88aab8_efaea9c0",
       "range": {
         "startLine": 410,
         "startChar": 0,
