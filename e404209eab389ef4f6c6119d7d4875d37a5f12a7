@@ -34,6 +34,24 @@
       "parentUuid": "a33052c4_063ec3f7",
       "revId": "e404209eab389ef4f6c6119d7d4875d37a5f12a7",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "99bd1ffc_f416c512",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 33704
+      },
+      "writtenOn": "2026-01-22T17:40:12Z",
+      "side": 1,
+      "message": "The alleged author should be clue enough. We also have this in all other branches/Android versions in this repo. However, I would not like to be listed as the author for such obvious changes.",
+      "parentUuid": "5c9462bf_ad1d9605",
+      "revId": "e404209eab389ef4f6c6119d7d4875d37a5f12a7",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
