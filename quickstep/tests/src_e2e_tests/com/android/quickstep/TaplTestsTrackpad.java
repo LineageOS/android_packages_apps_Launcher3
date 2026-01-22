@@ -23,8 +23,9 @@ import static org.junit.Assume.assumeTrue;
 
 import android.app.Instrumentation;
 import android.platform.systemui_tapl.ui.Root;
-import android.platform.test.annotations.DisableFlags;
-import android.platform.test.flag.junit.SetFlagsRule;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
@@ -55,7 +56,7 @@ public class TaplTestsTrackpad extends AbstractQuickStepTest {
             "settings put system touchpad_natural_scrolling 1",
             "settings put system touchpad_natural_scrolling 0");
 
-    @Rule public SetFlagsRule setFlagsRule = new SetFlagsRule();
+    @Rule public CheckFlagsRule checkFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Before
     public void setup() {
@@ -70,7 +71,7 @@ public class TaplTestsTrackpad extends AbstractQuickStepTest {
 
     @Test
     @NavigationModeSwitch
-    @DisableFlags(Flags.FLAG_ENABLE_NEW_TOUCHPAD_GESTURES)
+    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_NEW_TOUCHPAD_GESTURES)
     public void goHome() throws Exception {
         assumeTrue("Ignoring test because device is not a tablet",
             mLauncher.isTablet());
@@ -105,7 +106,7 @@ public class TaplTestsTrackpad extends AbstractQuickStepTest {
     @Test
     @FlakyTest(bugId = 460204501)
     @NavigationModeSwitch
-    @DisableFlags(Flags.FLAG_ENABLE_NEW_TOUCHPAD_GESTURES)
+    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_NEW_TOUCHPAD_GESTURES)
     @ScreenRecordRule.ScreenRecord  // b/460204501
     public void switchToOverview() throws Exception {
         assumeTrue("Ignoring test because device is not a tablet",
@@ -118,7 +119,7 @@ public class TaplTestsTrackpad extends AbstractQuickStepTest {
 
     @Test
     @NavigationModeSwitch
-    @DisableFlags(Flags.FLAG_ENABLE_NEW_TOUCHPAD_GESTURES)
+    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_NEW_TOUCHPAD_GESTURES)
     public void testAllAppsFromHome() throws Exception {
         assumeTrue("Ignoring test because device is not a tablet",
             mLauncher.isTablet());
@@ -145,7 +146,7 @@ public class TaplTestsTrackpad extends AbstractQuickStepTest {
 
     @Test
     @NavigationModeSwitch
-    @DisableFlags(Flags.FLAG_ENABLE_NEW_TOUCHPAD_GESTURES)
+    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_NEW_TOUCHPAD_GESTURES)
     public void testQuickSwitchFromHome() throws Exception {
         assumeTrue("Ignoring test because device is not a tablet",
                 mLauncher.isTablet());
