@@ -53,6 +53,42 @@
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4df596cd_aac822fe",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 33704
+      },
+      "writtenOn": "2026-01-22T21:04:51Z",
+      "side": 1,
+      "message": "I already mentioned that we have it in every Android version. I don\u0027t know what Pranav has to do with the commit. It is also so perfidious to name one\u0027s tormentor as co-author for literally no level of creation again. But well, your house, your rules I guess.",
+      "parentUuid": "f3b2a977_82f8e32b",
+      "revId": "3ecf79efce28eba6722da1d99eb67611ba1f78fc",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "15813533_18fe2f40",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 33704
+      },
+      "writtenOn": "2026-01-22T21:04:51Z",
+      "side": 1,
+      "message": "I don\u0027t want to deny that there are valid contributions. But unfortunately, there is also a strong history of copying other people\u0027s work. I\u0027m really pissed off about this ongoing behavior because it just won\u0027t stop. Not only the stealing, but also the personal attacks and slander.",
+      "parentUuid": "2b00d1c6_082050f9",
+      "revId": "3ecf79efce28eba6722da1d99eb67611ba1f78fc",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b7ec5f38_6bd7687a",
