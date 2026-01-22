@@ -163,6 +163,9 @@ public class LauncherAccessibilityDelegate extends BaseAccessibilityDelegate<Lau
     }
 
     private boolean supportAddToWorkSpace(ItemInfo item) {
+        if (item.container == LauncherSettings.Favorites.CONTAINER_DESKTOP) {
+            return false;
+        }
         return ((item instanceof AppInfo)
                     && (((AppInfo) item).runtimeStatusFlags & FLAG_NOT_PINNABLE) == 0)
                 || ((item instanceof WorkspaceItemInfo)
