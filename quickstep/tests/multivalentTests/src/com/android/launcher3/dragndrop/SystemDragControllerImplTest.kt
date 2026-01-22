@@ -16,6 +16,7 @@
 
 package com.android.launcher3.dragndrop
 
+import android.content.ClipDescription
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.view.DragEvent
@@ -138,6 +139,38 @@ class SystemDragControllerImplTest {
     fun testDragStartWhenAlreadyDragging() {
         whenever(mockDragEvent.action).thenReturn(DragEvent.ACTION_DRAG_STARTED)
         whenever(mockContext.dragController.isDragging).thenReturn(true)
+
+        // NOTE: Fulfillment is *not* delegated to the system drag listener.
+        assertFalse(controller.onDrag(mockDragEvent))
+        verifyNoInteractions(mockSystemDragListener)
+    }
+
+    @Test
+    fun testDragStartWhenMimeTypeIsTextIntent() {
+        testDragStartWhenMimeTypeIsUnsupported(ClipDescription.MIMETYPE_TEXT_INTENT)
+    }
+
+    @Test
+    fun testDragStartWhenMimeTypeIsApplicationActivity() {
+        testDragStartWhenMimeTypeIsUnsupported(ClipDescription.MIMETYPE_APPLICATION_ACTIVITY)
+    }
+
+    @Test
+    fun testDragStartWhenMimeTypeIsApplicationShortcut() {
+        testDragStartWhenMimeTypeIsUnsupported(ClipDescription.MIMETYPE_APPLICATION_SHORTCUT)
+    }
+
+    @Test
+    fun testDragStartWhenMimeTypeIsApplicationTask() {
+        testDragStartWhenMimeTypeIsUnsupported(ClipDescription.MIMETYPE_APPLICATION_TASK)
+    }
+
+    private fun testDragStartWhenMimeTypeIsUnsupported(mimeType: String) {
+        val clipDescription = ClipDescription("", arrayOf(mimeType))
+
+        whenever(mockDragEvent.action).thenReturn(DragEvent.ACTION_DRAG_STARTED)
+        whenever(mockDragEvent.clipDescription).thenReturn(clipDescription)
+        whenever(mockContext.dragController.isDragging).thenReturn(false)
 
         // NOTE: Fulfillment is *not* delegated to the system drag listener.
         assertFalse(controller.onDrag(mockDragEvent))

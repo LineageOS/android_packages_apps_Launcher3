@@ -327,11 +327,29 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
     }
 
     /**
+     * Listener for changes in the overflow items.
+     */
+    public interface OnChangeListener {
+        /** Called when the items in the overflow have changed. */
+        void onItemsChanged();
+    }
+
+    private OnChangeListener mOnChangeListener;
+
+    /** Sets the listener for changes in the overflow items. */
+    public void setOnChangeListener(OnChangeListener listener) {
+        mOnChangeListener = listener;
+    }
+
+    /**
      * Clears the list of tasks tracked by the view.
      */
     public void clearItems() {
         mItems.clear();
         invalidate();
+        if (mOnChangeListener != null) {
+            mOnChangeListener.onItemsChanged();
+        }
     }
 
     /**
@@ -342,6 +360,9 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
         mItems.clear();
         mItems.addAll(items);
         invalidate();
+        if (mOnChangeListener != null) {
+            mOnChangeListener.onItemsChanged();
+        }
     }
 
     @VisibleForTesting

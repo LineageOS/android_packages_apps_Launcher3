@@ -36,6 +36,7 @@ import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.pm.UserCache
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
+import com.android.launcher3.util.Executors.getTaskbarUiThread
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -55,17 +56,14 @@ object ModelTestExtensions {
             }
         }
         // Reload model
-        TestUtil.runOnExecutorSync(Executors.MAIN_EXECUTOR) { forceReload() }
         loadModelSync()
     }
 
     /** Loads the model in memory synchronously */
     fun LauncherModel.loadModelSync() {
-        val mockCb: BgDataModel.Callbacks = object : BgDataModel.Callbacks {}
-        TestUtil.runOnExecutorSync(Executors.MAIN_EXECUTOR) { addCallbacksAndLoad(mockCb) }
-        TestUtil.runOnExecutorSync(Executors.MODEL_EXECUTOR) {}
-        TestUtil.runOnExecutorSync(Executors.MAIN_EXECUTOR) {}
-        TestUtil.runOnExecutorSync(Executors.MAIN_EXECUTOR) { removeCallbacks(mockCb) }
+        forceReload().toCompletableFuture().get()
+        TestUtil.runOnExecutorSync(MAIN_EXECUTOR) {}
+        TestUtil.runOnExecutorSync(getTaskbarUiThread()) {}
     }
 
     /** Adds and commits a new item to Launcher.db */

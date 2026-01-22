@@ -99,7 +99,7 @@ class TaskbarWindowSandboxContext private constructor(private val params: Sandbo
                         virtualDisplayRule.add(it.widthPixels, it.heightPixels, it.densityDpi)]
                 }
             )
-        SandboxApplication(app.createDisplayContext(defaultDisplay.display))
+        SandboxApplication(app.createDisplayContext(defaultDisplay.display)).withModelDependency()
     }
 
     val settingsCacheSandbox = SettingsCacheSandbox()
@@ -248,7 +248,7 @@ object TaskbarTestOverridesModule {
         windowManagerProxy: WindowManagerProxy,
         launcherPrefs: LauncherPrefs,
     ): TaskbarModeUtil {
-        return spy(TaskbarModeUtil(context, displayController, windowManagerProxy, launcherPrefs))
+        return spy(TaskbarModeUtil(windowManagerProxy, launcherPrefs))
     }
 
     @JvmStatic

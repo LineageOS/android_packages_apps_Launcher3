@@ -585,7 +585,6 @@ class OverviewCommandHelperTest {
         }
 
     @Test
-    @EnableFlags(WindowFlags.FLAG_ENABLE_REJECT_HOME_TRANSITION)
     fun whenHomeCommandIsAdded_executeRejectHomeActionOnExternalDisplay() =
         testScope.runTest {
             whenever(containerInterface.getVisibleRecentsView<RecentsView<*, *>>()).thenReturn(null)
@@ -625,7 +624,6 @@ class OverviewCommandHelperTest {
         }
 
     @Test
-    @EnableFlags(WindowFlags.FLAG_ENABLE_REJECT_HOME_TRANSITION)
     fun whenHomeCommandIsAddedAndRecentsIsVisible_dontExecuteHomeActionOnExternalDisplay() =
         testScope.runTest {
             whenever(containerInterface.getVisibleRecentsView<RecentsView<*, *>>())
