@@ -67,9 +67,9 @@ class PopupControllerForAppIcon<T> : PopupController<T> where T : Context, T : A
                     originalView = icon,
                     itemInfo = item,
                 )
-            if (activityContext is Launcher) {
-                container.configureForLauncher(activityContext, item)
-            }
+            container.deepShortcutDragHandler =
+                LauncherDeepShortcutDragHandler(activityContext as Launcher, container)
+            container.configureForLauncher(activityContext, item)
             if (Flags.expandableLongPressMenu()) {
                 val systemShortcutRedesign =
                     systemShortcuts.map { shortcut ->
