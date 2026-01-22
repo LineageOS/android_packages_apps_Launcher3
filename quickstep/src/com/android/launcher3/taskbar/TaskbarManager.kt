@@ -70,8 +70,6 @@ interface TaskbarManager {
 
     fun onNavigationBarLumaSamplingEnabled(displayId: Int, enable: Boolean)
 
-    fun destroy()
-
     fun toggleTaskbarStash()
 
     fun getStashedHandleViewController(): StashedHandleViewControllerProxy?

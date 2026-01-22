@@ -33,6 +33,7 @@ import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 import static com.android.launcher3.util.Executors.getTaskbarUiThread;
 import static com.android.launcher3.util.FlagDebugUtils.formatFlagChange;
 import static com.android.launcher3.util.SimpleBroadcastReceiver.actionsFilter;
+import static com.android.quickstep.dagger.SysUIConnectionComponentKt.CONNECTION_CLEANER;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAVIGATION_BAR_DISABLED;
 
 import static java.util.Objects.requireNonNull;
@@ -85,10 +86,10 @@ import com.android.launcher3.util.LockedUserState;
 import com.android.launcher3.util.MutableListenableStream;
 import com.android.launcher3.util.PostUnlockObject;
 import com.android.launcher3.util.Preconditions;
-import com.android.launcher3.util.RunnableList;
 import com.android.launcher3.util.SafeCloseable;
 import com.android.launcher3.util.SettingsCache;
 import com.android.launcher3.util.SimpleBroadcastReceiver;
+import com.android.launcher3.util.ThreadSafeRunnableList;
 import com.android.launcher3.util.window.WindowManagerProxy;
 import com.android.quickstep.AllAppsActionManager;
 import com.android.quickstep.BaseContainerInterface;
@@ -116,6 +117,7 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * Class to manage taskbar lifecycle
@@ -134,8 +136,6 @@ public class TaskbarManagerImpl {
 
     private static final Uri NAV_BAR_KIDS_MODE = Settings.Secure.getUriFor(
             Settings.Secure.NAV_BAR_KIDS_MODE);
-
-    private final RunnableList mCleanupTasks = new RunnableList();
 
     private final Context mBaseContext;
     private final int mPrimaryDisplayId;
@@ -303,10 +303,7 @@ public class TaskbarManagerImpl {
                     mDebugActivityDeviceProfileChangedSafeCloseable = null;
                 }
                 debugTaskbarManager("onActivityDestroyed: unregistering callbacks", displayId);
-                if (mActivityOnDestroySafeCloseable != null) {
-                    mActivityOnDestroySafeCloseable.close();
-                    mActivityOnDestroySafeCloseable = null;
-                }
+                removeActivityCallbacksAndListeners();
                 if (mActivityInteractor.isActivitySameObj(mRecentsViewContainerInteractor)) {
                     mRecentsViewContainerInteractor = null;
                 }
@@ -340,7 +337,8 @@ public class TaskbarManagerImpl {
             LockedUserState lockedUserState,
             LauncherPrefs launcherPrefs,
             SystemUiProxy systemUiProxy,
-            PostUnlockObject<InvariantDeviceProfile> unlockedIdp) {
+            PostUnlockObject<InvariantDeviceProfile> unlockedIdp,
+            @Named(CONNECTION_CLEANER) ThreadSafeRunnableList cleanupTasks) {
         Preconditions.assertTaskbarUiThread();
         mBaseContext = context;
         mPrimaryDisplayId = mBaseContext.getDisplayId();
@@ -362,7 +360,8 @@ public class TaskbarManagerImpl {
 
         mResources = displayModelFactory.newModel(dispatcher, this::initPerDisplayResource);
         mResources.storeDisplayResource(mPrimaryDisplayId);
-        mCleanupTasks.add(mResources::destroy);
+        cleanupTasks.addCloseable(getTaskbarUiThread(), mResources);
+
         mPrimaryResource = requireNonNull(mResources.getDisplayResource(mPrimaryDisplayId));
 
         LauncherPrefChangeListener prefChangeListener = key -> {
@@ -374,14 +373,15 @@ public class TaskbarManagerImpl {
                 prefChangeListener,
                 TASKBAR_PINNING,
                 TASKBAR_PINNING_IN_DESKTOP_MODE);
-        mCleanupTasks.add(() -> launcherPrefs.removeListener(
+
+        cleanupTasks.addCloseable(getTaskbarUiThread(), () -> launcherPrefs.removeListener(
                 prefChangeListener,
                 TASKBAR_PINNING, TASKBAR_PINNING_IN_DESKTOP_MODE));
 
         desktopVisibilityController.registerDesktopVisibilityListener(mDesktopVisibilityListener);
         desktopVisibilityController.registerTaskbarDesktopModeListener(mTaskbarDesktopModeListener);
 
-        mCleanupTasks.add(() -> {
+        cleanupTasks.addTask(getTaskbarUiThread(), () -> {
             desktopVisibilityController
                     .unregisterDesktopVisibilityListener(mDesktopVisibilityListener);
             desktopVisibilityController
@@ -391,12 +391,12 @@ public class TaskbarManagerImpl {
         var userSetupCompleteSafeCloseable = settingsCache.getListenableRef(USER_SETUP_COMPLETE_URI)
                 .forEach(getTaskbarUiThread(),
                         v -> onSettingChanged(v, TaskbarActivityContext::isUserSetupComplete));
-        mCleanupTasks.add(userSetupCompleteSafeCloseable::close);
+        cleanupTasks.addCloseable(getTaskbarUiThread(), userSetupCompleteSafeCloseable);
 
         var navBarKidsModeSafeCloseable = settingsCache.getListenableRef(NAV_BAR_KIDS_MODE).forEach(
                 getTaskbarUiThread(),
                 v -> onSettingChanged(v, TaskbarActivityContext::isInKidsMode));
-        mCleanupTasks.add(navBarKidsModeSafeCloseable::close);
+        cleanupTasks.addCloseable(getTaskbarUiThread(), navBarKidsModeSafeCloseable);
 
         SimpleBroadcastReceiver shutdownReceiver = new SimpleBroadcastReceiver(
                 mBaseContext,
@@ -404,7 +404,7 @@ public class TaskbarManagerImpl {
                 getTaskbarUiThread(),
                 i -> destroyAllTaskbars());
         shutdownReceiver.register(actionsFilter(Intent.ACTION_SHUTDOWN));
-        mCleanupTasks.add(shutdownReceiver::close);
+        cleanupTasks.addCloseable(getTaskbarUiThread(), shutdownReceiver);
 
         if (enableGrowthNudge()) {
             // TODO: b/397739323 - Add permission to limit access to Growth Framework.
@@ -417,7 +417,7 @@ public class TaskbarManagerImpl {
                     actionsFilter(BROADCAST_SHOW_NUDGE),
                     RECEIVER_EXPORTED,
                     GROWTH_NUDGE_PERMISSION);
-            mCleanupTasks.add(growthBroadcastReceiver::close);
+            cleanupTasks.addCloseable(getTaskbarUiThread(), growthBroadcastReceiver);
         }
 
         mResources.initializeDisplays();
@@ -425,7 +425,8 @@ public class TaskbarManagerImpl {
         if (!mUserUnlocked) {
             Runnable unlockTask = this::onUserUnlocked;
             lockedUserState.runOnUserUnlocked(getTaskbarUiThread(), unlockTask);
-            mCleanupTasks.add(() -> lockedUserState.removeOnUserUnlockedRunnable(unlockTask));
+            cleanupTasks.addTask(getTaskbarUiThread(),
+                    () -> lockedUserState.removeOnUserUnlockedRunnable(unlockTask));
         }
 
         mUnlockedIDP.whenAvailable(getTaskbarUiThread(), idp -> {
@@ -444,8 +445,18 @@ public class TaskbarManagerImpl {
 
             return () -> idp.removeOnChangeListener(changeListener);
         });
-        mCleanupTasks.add(mUnlockedIDP::close);
+        cleanupTasks.addCloseable(getTaskbarUiThread(), mUnlockedIDP);
         mPrimaryResource.debugMsg("TaskbarManager created");
+
+        cleanupTasks.addTask(getTaskbarUiThread(), () -> {
+            mPrimaryResource.debugMsg("TaskbarManager#destroy()");
+            mRecentsViewContainerInteractor = null;
+            if (mBootAppContext != null) {
+                mBootAppContext.onDestroy();
+            }
+            mBootAppContext = null;
+            removeActivityCallbacksAndListeners();
+        });
     }
 
     @VisibleForTesting
@@ -1016,29 +1027,10 @@ public class TaskbarManagerImpl {
     }
 
     private void removeActivityCallbacksAndListeners() {
-        mPrimaryResource.debugMsg("unregistering activity lifecycle callbacks");
         if (mActivityOnDestroySafeCloseable != null) {
             mActivityOnDestroySafeCloseable.close();
             mActivityOnDestroySafeCloseable = null;
         }
-    }
-
-    /**
-     * Called when the manager is no longer needed
-     */
-    public void destroy() {
-        mPrimaryResource.debugMsg("TaskbarManager#destroy()");
-        mRecentsViewContainerInteractor = null;
-        if (mBootAppContext != null) {
-            mBootAppContext.onDestroy();
-        }
-        mBootAppContext = null;
-
-        mCleanupTasks.executeAllAndDestroy();
-        mPrimaryResource.debugMsg("destroy: removing activity callbacks");
-        removeActivityCallbacksAndListeners();
-
-        mPrimaryResource.debugMsg("destroy: destroying all taskbars!");
     }
 
     @AnyThread

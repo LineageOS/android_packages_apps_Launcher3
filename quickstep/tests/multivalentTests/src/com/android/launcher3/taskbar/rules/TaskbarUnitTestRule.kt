@@ -150,8 +150,8 @@ class TaskbarUnitTestRule(
                 try {
                     base.evaluate()
                 } finally {
-                    runOnTaskbarUiThreadSync { taskbarManager.destroy() }
                     cleanup.complete()
+                    runOnTaskbarUiThreadSync {}
                 }
             }
         }
