@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a33052c4_063ec3f7",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 33704
+      },
+      "writtenOn": "2026-01-22T16:26:20Z",
+      "side": 1,
+      "message": "I didn\u0027t find the other kangs serious enough. But here I have to intervene. Is it now becoming standard practice to steal our work? https://github.com/DerpFest-AOSP/packages_apps_DerpLauncher/commit/6d0cac1268039c01268718d781ab4db1397761d1",
+      "revId": "e404209eab389ef4f6c6119d7d4875d37a5f12a7",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
