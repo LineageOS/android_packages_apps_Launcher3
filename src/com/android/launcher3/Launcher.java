@@ -2903,12 +2903,5 @@ public class Launcher extends StatefulActivity<LauncherState>
         mLauncherUiState.setIsTopResumedActivity(isTopResumed);
     }
 
-    /**
-     * Only for use in tests, this API is only visible for LauncherQuickstep.
-     */
-    @VisibleForTesting
-    public boolean isOnBackInvokedCallbackEnabled() {
-        return false;
-    }
     // End of Getters and Setters
 }

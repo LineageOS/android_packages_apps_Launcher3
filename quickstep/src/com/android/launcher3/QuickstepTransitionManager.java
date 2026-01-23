@@ -803,7 +803,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
 
     private boolean shouldCropToInset(RemoteAnimationTarget target) {
         return mDeviceProfile.getDeviceProperties().getTaskbarConfiguration().isTaskbarPresent()
-                && mDeviceProfile.getTaskbarProfile().isTaskbarPresentInApps()
+                && mDeviceProfile.isTaskbarPresentInApps
                 && target != null && !target.willShowImeOnTarget
                 && !isTransientTaskbar();
     }

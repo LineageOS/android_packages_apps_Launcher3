@@ -356,7 +356,7 @@ public interface TaskShortcutFactory {
                 return null;
             }
 
-            int iconResId = deviceProfile.getSysuiProfile().isLeftRightSplit()
+            int iconResId = deviceProfile.isLeftRightSplit
                     ? R.drawable.ic_save_app_pair_left_right
                     : R.drawable.ic_save_app_pair_up_down;
 

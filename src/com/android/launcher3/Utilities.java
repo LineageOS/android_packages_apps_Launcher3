@@ -886,12 +886,12 @@ public final class Utilities {
     public static List<SplitPositionOption> getSplitPositionOptions(
             DeviceProfile dp) {
         int splitIconRes;
-        if (dp.getSysuiProfile().isLeftRightSplit()) {
+        if (dp.isLeftRightSplit) {
             splitIconRes = R.drawable.ic_split_horizontal;
         } else {
             splitIconRes = R.drawable.ic_split_vertical;
         }
-        int stagePosition = dp.getSysuiProfile().isLeftRightSplit()
+        int stagePosition = dp.isLeftRightSplit
                 ? STAGE_POSITION_BOTTOM_OR_RIGHT
                 : STAGE_POSITION_TOP_OR_LEFT;
         return Collections.singletonList(new SplitPositionOption(

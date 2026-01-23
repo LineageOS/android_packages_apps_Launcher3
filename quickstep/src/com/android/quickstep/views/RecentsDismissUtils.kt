@@ -876,7 +876,7 @@ constructor(
                 }
             }
             val isLeftRightSplit =
-                (mContainer as ActivityContext).getDeviceProfile().sysuiProfile.isLeftRightSplit &&
+                (mContainer as ActivityContext).getDeviceProfile().isLeftRightSplit &&
                     isSplitSelectionActive
             if (isLeftRightSplit) {
                 // LastTask's scroll is the minimum scroll in split select, if current scroll is

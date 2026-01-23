@@ -546,8 +546,10 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                     false,
                     mDeviceProfile.getDeviceProperties().getTaskbarConfiguration()
                             .isTaskbarPresent(),
-                    mDeviceProfile.getDisplayOptionSpec()
-            );
+                    getResources().getDisplayMetrics(),
+                    mDeviceProfile.getDisplayOptionSpec(),
+                    mDeviceProfile.getDisplayOptionSpec().typeIndex,
+                    mDeviceProfile.inv);
         } else {
             mPersistentTaskbarProfile = mDeviceProfile.getTaskbarProfile();
             mTransientTaskbarProfile = TaskbarProfile.Factory.createTaskbarProfile(
@@ -555,8 +557,10 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                     true,
                     mDeviceProfile.getDeviceProperties().getTaskbarConfiguration()
                             .isTaskbarPresent(),
-                    mDeviceProfile.getDisplayOptionSpec()
-            );
+                    getResources().getDisplayMetrics(),
+                    mDeviceProfile.getDisplayOptionSpec(),
+                    mDeviceProfile.getDisplayOptionSpec().typeIndex,
+                    mDeviceProfile.inv);
         }
         mNavMode = getNavigationMode();
         mTaskbarUiState.setNavigationMode(mNavMode);
@@ -1542,8 +1546,10 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                     true,
                     mDeviceProfile.getDeviceProperties().getTaskbarConfiguration()
                             .isTaskbarPresent(),
-                    mDeviceProfile.getDisplayOptionSpec()
-            );
+                    getResources().getDisplayMetrics(),
+                    mDeviceProfile.getDisplayOptionSpec(),
+                    mDeviceProfile.getDisplayOptionSpec().typeIndex,
+                    mDeviceProfile.inv);
 
             taskbarWindowSize = transientTaskbarProfile.getHeight()
                     + (2 * transientTaskbarProfile.getBottomMargin())

@@ -232,9 +232,10 @@ public class TestInformationHandler {
                         mPrimaryDeviceProfile.getDeviceProperties().isLargeScreen());
                 return response;
             case TestProtocol.REQUEST_IS_PREDICTIVE_BACK_SWIPE_ENABLED:
-                return getLauncherUIProperty(
-                        Bundle::putBoolean, l -> l.isOnBackInvokedCallbackEnabled()
-                );
+                response.putBoolean(TestProtocol.TEST_INFO_RESPONSE_FIELD,
+                        mPrimaryDeviceProfile.isPredictiveBackSwipe);
+                return response;
+
             case TestProtocol.REQUEST_TASKBAR_SHOWN_ON_HOME: {
                 LauncherDisplayInfo displayInfo = DisplayController.INSTANCE.get(
                         mContext).getInfoForDisplay(Integer.parseInt(arg));

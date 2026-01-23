@@ -17,39 +17,21 @@ package com.android.launcher3.deviceprofile
 
 import android.content.res.Resources
 import com.android.launcher3.R
-import com.android.launcher3.Utilities
 
 data class SysuiProfile(
     // Space required for the bubble bar between the hotseat and the edge of the screen. If there's
     // not enough space, the hotseat will adjust itself for the bubble bar.
-    @JvmField val mBubbleBarSpaceThresholdPx: Int,
+    @JvmField val mBubbleBarSpaceThresholdPx: Int = 0,
 
     // Split staging
-    @JvmField val splitPlaceholderInset: Int,
-    val isLeftRightSplit: Boolean,
+    @JvmField var splitPlaceholderInset: Int = 0,
 ) {
-
     companion object Factory {
-        fun createSysuiProfile(res: Resources, deviceProperties: DeviceProperties): SysuiProfile {
-            // We need to use the full window bounds for split determination because on near-square
-            // devices, the available bounds (bounds minus insets) may actually be in landscape
-            // while
-            // actually portrait
-            val leftRightSplitPortraitResId =
-                Resources.getSystem()
-                    .getIdentifier("config_leftRightSplitInPortrait", "bool", "android")
+        fun createSysuiProfile(res: Resources): SysuiProfile {
             return SysuiProfile(
                 mBubbleBarSpaceThresholdPx =
                     res.getDimensionPixelSize(R.dimen.bubblebar_hotseat_adjustment_threshold),
                 splitPlaceholderInset = res.getDimensionPixelSize(R.dimen.split_placeholder_inset),
-                isLeftRightSplit =
-                    Utilities.calculateIsLeftRightSplit(
-                        /* allowLeftRightSplitInPortrait = */ leftRightSplitPortraitResId > 0 &&
-                            res.getBoolean(leftRightSplitPortraitResId),
-                        /* deviceProperties = */ deviceProperties,
-                        /* isExternalDisplay = */ deviceProperties.deviceConfiguration
-                            .isExternalDisplay,
-                    ),
             )
         }
     }
