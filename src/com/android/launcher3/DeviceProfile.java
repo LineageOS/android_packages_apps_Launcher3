@@ -95,21 +95,24 @@ public class DeviceProfile {
     public static final DeviceProfile DEFAULT_DEVICE_PROFILE = new DeviceProfile();
 
     private final DisplayOptionSpec mDisplayOptionSpec;
-    private final LauncherDisplayInfo mInfo;
-    private final DisplayMetrics mMetrics;
     private final IconSizeSteps mIconSizeSteps;
 
     // Device properties
 
     private final DeviceProperties mDeviceProperties;
 
-    public boolean isPredictiveBackSwipe;
     public final boolean isQsbInline;
+
+    // Variables used only when creating the DeviceProfile.
     private final boolean mIsScalableGrid;
     private final int mTypeIndex;
+    private final DisplayMetrics mMetrics;
+
+    private final LauncherDisplayInfo mInfo;
+
+    private final boolean mIsResponsiveGrid;
 
     // Responsive grid
-    private final boolean mIsResponsiveGrid;
     private CalculatedResponsiveSpec mResponsiveWorkspaceWidthSpec;
     private CalculatedResponsiveSpec mResponsiveWorkspaceHeightSpec;
     private CalculatedResponsiveSpec mResponsiveAllAppsWidthSpec;
@@ -130,9 +133,7 @@ public class DeviceProfile {
     // Hotseat
     public HotseatProfile hotseatProfile;
 
-    public final SysuiProfile mSysuiProfile;
-    // Device properties in current orientation
-    public final boolean isLeftRightSplit;
+    public SysuiProfile mSysuiProfile;
 
     // Widgets
     private final ViewScaleProvider mViewScaleProvider;
@@ -141,8 +142,6 @@ public class DeviceProfile {
 
     // Taskbar
     public TaskbarProfile mTaskbarProfile;
-    // Whether Taskbar will inset the bottom of apps by taskbarSize.
-    public boolean isTaskbarPresentInApps;
 
     /** Used only as an alternative to mocking when null values cannot be used. */
     @VisibleForTesting
@@ -184,7 +183,7 @@ public class DeviceProfile {
         );
         hotseatProfile = new HotseatProfile(false, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0);
-        mTaskbarProfile = new TaskbarProfile(0, 0, 0, 0, 0, false, false);
+        mTaskbarProfile = new TaskbarProfile(0, 0, 0, 0, 0, false, false, false);
         mFolderProfile = new FolderProfile(0, 0, 0, 0, 0, new Point(), 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 0);
         inv = null;
@@ -192,9 +191,7 @@ public class DeviceProfile {
         mInfo = null;
         mMetrics = null;
         mIconSizeSteps = null;
-        isPredictiveBackSwipe = false;
         isQsbInline = false;
-        isLeftRightSplit = false;
         mIsScalableGrid = false;
         mTypeIndex = 0;
         mIsResponsiveGrid = false;
@@ -202,7 +199,7 @@ public class DeviceProfile {
         mViewScaleProvider = null;
         mAllAppsProfile = new AllAppsProfile(new Point(0, 0), 0, 0, 0f, 0, 0, 0, 0, 0, 0,
                 new Rect(), 0, 0);
-        mSysuiProfile = new SysuiProfile(0, 0);
+        mSysuiProfile = new SysuiProfile(0, 0, false);
     }
 
     DeviceProfile(
@@ -254,10 +251,7 @@ public class DeviceProfile {
                 res,
                 inv.taskbarModeUtil.isTransient(info),
                 mDeviceProperties.getTaskbarConfiguration().isTaskbarPresent(),
-                mMetrics,
-                displayOptionSpec,
-                mTypeIndex,
-                inv
+                displayOptionSpec
         );
 
         // Some foldable portrait modes are too wide in terms of aspect ratio so we need to tweak
@@ -380,20 +374,6 @@ public class DeviceProfile {
                     mResponsiveWorkspaceCellSpec);
         }
 
-        // We need to use the full window bounds for split determination because on near-square
-        // devices, the available bounds (bounds minus insets) may actually be in landscape while
-        // actually portrait
-        int leftRightSplitPortraitResId = Resources.getSystem().getIdentifier(
-                "config_leftRightSplitInPortrait", "bool", "android");
-        boolean allowLeftRightSplitInPortrait =
-                leftRightSplitPortraitResId > 0
-                        && res.getBoolean(leftRightSplitPortraitResId);
-        isLeftRightSplit = Utilities.calculateIsLeftRightSplit(
-                allowLeftRightSplitInPortrait,
-                mDeviceProperties,
-                mDeviceProperties.getDeviceConfiguration().isExternalDisplay()
-        );
-
         mWorkspaceProfile = WorkspaceProfile.Factory.createWorkspaceProfile(
                 /*context*/ context,
                 /*res*/ context.getResources(),
@@ -485,11 +465,22 @@ public class DeviceProfile {
                 .Factory
                 .createDropTargetProfile(res, shouldApplyWidePortraitDimens);
 
-        mSysuiProfile = SysuiProfile.Factory.createSysuiProfile(res);
+        mSysuiProfile = SysuiProfile.Factory.createSysuiProfile(res, deviceProperties);
 
         mViewScaleProvider = viewScaleProvider;
 
         dimensionOverrideProvider.accept(this);
+    }
+
+    /**
+     * @deprecated TODO(B/477295763) Properties of an immutable object shouldn't be updated, this
+     * change doesn't ensure that the update values get propagated through the system. This
+     * functionality has been here since 2021, this function was created as part of a refactor and
+     * is kept to prevent altering the behaviour.
+     */
+    @Deprecated
+    public void updateIsTaskbarPresentInApps(boolean value) {
+        mTaskbarProfile = mTaskbarProfile.updateIsTaskbarPresentInApps(value);
     }
 
     private boolean isLandscapeOrientation()  {
@@ -644,10 +635,7 @@ public class DeviceProfile {
                 res,
                 inv.taskbarModeUtil.isTransient(mInfo),
                 mDeviceProperties.getTaskbarConfiguration().isTaskbarPresent(),
-                mMetrics,
-                mDisplayOptionSpec,
-                mTypeIndex,
-                inv
+                mDisplayOptionSpec
         );
     }
 
@@ -1260,7 +1248,7 @@ public class DeviceProfile {
                         + mDeviceProperties.getDeviceConfiguration().isExternalDisplay()
         );
         writer.println(prefix + "\tisTwoPanels:" + mDeviceProperties.isTwoPanels());
-        writer.println(prefix + "\tisLeftRightSplit:" + isLeftRightSplit);
+        writer.println(prefix + "\tisLeftRightSplit:" + mSysuiProfile.isLeftRightSplit());
 
         writer.println(prefix + pxToDpStr("windowX", mDeviceProperties.getWindowX()));
         writer.println(prefix + pxToDpStr("windowY", mDeviceProperties.getWindowY()));
@@ -1447,7 +1435,9 @@ public class DeviceProfile {
                 prefix + "\tisTaskbarPresent:"
                         + mDeviceProperties.getTaskbarConfiguration().isTaskbarPresent()
         );
-        writer.println(prefix + "\tisTaskbarPresentInApps:" + isTaskbarPresentInApps);
+        writer.println(
+                prefix + "\tisTaskbarPresentInApps:" + mTaskbarProfile.isTaskbarPresentInApps()
+        );
         writer.println(prefix + pxToDpStr("taskbarHeight", getTaskbarProfile().getHeight()));
         writer.println(prefix + pxToDpStr("stashedTaskbarHeight",
                 getTaskbarProfile().getStashedTaskbarHeight()));
@@ -1600,6 +1590,10 @@ public class DeviceProfile {
 
     public FolderProfile getFolderProfile() {
         return mFolderProfile;
+    }
+
+    public SysuiProfile getSysuiProfile() {
+        return mSysuiProfile;
     }
 
     /**

@@ -37,7 +37,7 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
         initializeVarsForTablet(isGestureMode = false)
         windowBounds = WindowBounds(Rect(0, 0, 1800, 2560), Rect(0, 104, 0, 0))
         val dp = newDP()
-        dp.isTaskbarPresentInApps = true
+        dp.updateIsTaskbarPresentInApps(true)
 
         assertThat(dp.hotseatProfile.barEndOffset).isEqualTo(510)
         assertThat(dp.hotseatProfile.numShownIcons).isEqualTo(6)
@@ -61,7 +61,7 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
         initializeVarsForTablet(isGestureMode = false)
         windowBounds = WindowBounds(Rect(0, 0, 1300, 2560), Rect(0, 104, 0, 0))
         val dp = newDP()
-        dp.isTaskbarPresentInApps = true
+        dp.updateIsTaskbarPresentInApps(true)
 
         assertThat(dp.hotseatProfile.barEndOffset).isEqualTo(510)
         assertThat(dp.hotseatProfile.numShownIcons).isEqualTo(4)
@@ -84,7 +84,7 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
     fun distribute_border_space_when_space_is_enough_landscape() {
         initializeVarsForTwoPanel(isGestureMode = false, isLandscape = true)
         val dp = newDP()
-        dp.isTaskbarPresentInApps = true
+        dp.updateIsTaskbarPresentInApps(true)
 
         assertThat(dp.hotseatProfile.barEndOffset).isEqualTo(705)
         assertThat(dp.hotseatProfile.numShownIcons).isEqualTo(6)
@@ -108,7 +108,7 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
         initializeVarsForTablet(isGestureMode = false, isLandscape = true)
         inv?.apply { inlineQsb = BooleanArray(4) { false } }
         val dp = newDP()
-        dp.isTaskbarPresentInApps = true
+        dp.updateIsTaskbarPresentInApps(true)
 
         assertThat(dp.hotseatProfile.barEndOffset).isEqualTo(660)
         assertThat(dp.hotseatProfile.numShownIcons).isEqualTo(6)
@@ -129,7 +129,7 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
         initializeVarsForTablet(isGestureMode = false, isLandscape = true)
         windowBounds = WindowBounds(Rect(0, 0, 2460, 1600), Rect(0, 104, 0, 0))
         val dp = newDP()
-        dp.isTaskbarPresentInApps = true
+        dp.updateIsTaskbarPresentInApps(true)
 
         assertThat(dp.hotseatProfile.barEndOffset).isEqualTo(660)
         assertThat(dp.hotseatProfile.numShownIcons).isEqualTo(6)
@@ -153,7 +153,7 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
         initializeVarsForTablet(isGestureMode = false, isLandscape = true)
         windowBounds = WindowBounds(Rect(0, 0, 2260, 1600), Rect(0, 104, 0, 0))
         val dp = newDP()
-        dp.isTaskbarPresentInApps = true
+        dp.updateIsTaskbarPresentInApps(true)
 
         assertThat(dp.hotseatProfile.barEndOffset).isEqualTo(660)
         assertThat(dp.hotseatProfile.numShownIcons).isEqualTo(5)
@@ -172,7 +172,7 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
     fun increase_span_when_space_between_icons_is_less_than_minimum() {
         initializeVarsForTwoPanel(isGestureMode = false, isLandscape = false, rows = 5, cols = 5)
         val dp = newDP()
-        dp.isTaskbarPresentInApps = true
+        dp.updateIsTaskbarPresentInApps(true)
 
         assertThat(dp.hotseatProfile.barEndOffset).isEqualTo(600)
         assertThat(dp.hotseatProfile.numShownIcons).isEqualTo(6)
