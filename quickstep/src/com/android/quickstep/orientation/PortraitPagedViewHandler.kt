@@ -125,7 +125,7 @@ class PortraitPagedViewHandler : DefaultPagedViewHandler(), RecentsPagedOrientat
         deviceProfile: DeviceProfile,
     ): Int =
         if (
-            deviceProfile.isLeftRightSplit &&
+            deviceProfile.sysuiProfile.isLeftRightSplit &&
                 stagePosition == SplitConfigurationOptions.STAGE_POSITION_BOTTOM_OR_RIGHT
         ) {
             -1
@@ -192,7 +192,7 @@ class PortraitPagedViewHandler : DefaultPagedViewHandler(), RecentsPagedOrientat
             if (isGroupedTaskView) {
                 gravity =
                     Gravity.BOTTOM or
-                        (if (deviceProfile.isLeftRightSplit) Gravity.START
+                        (if (deviceProfile.sysuiProfile.isLeftRightSplit) Gravity.START
                         else Gravity.CENTER_HORIZONTAL)
                 width = snapshotViewWidth
             } else {
@@ -244,11 +244,17 @@ class PortraitPagedViewHandler : DefaultPagedViewHandler(), RecentsPagedOrientat
         if (splitBounds == null) return Pair(0f, 0f)
 
         val translationX =
-            if (deviceProfile.isLeftRightSplit && desiredTaskId == splitBounds.rightBottomTaskId) {
+            if (
+                deviceProfile.sysuiProfile.isLeftRightSplit &&
+                    desiredTaskId == splitBounds.rightBottomTaskId
+            ) {
                 taskViewWidth * (splitBounds.leftTopTaskPercent + splitBounds.dividerPercent)
             } else 0f
         val translationY =
-            if (!deviceProfile.isLeftRightSplit && desiredTaskId == splitBounds.leftTopTaskId) {
+            if (
+                !deviceProfile.sysuiProfile.isLeftRightSplit &&
+                    desiredTaskId == splitBounds.leftTopTaskId
+            ) {
                 -taskViewHeight * (splitBounds.rightBottomTaskPercent + splitBounds.dividerPercent)
             } else 0f
         return Pair(translationX, translationY)
@@ -317,7 +323,7 @@ class PortraitPagedViewHandler : DefaultPagedViewHandler(), RecentsPagedOrientat
                 )
             }
 
-            dp.isLeftRightSplit -> {
+            dp.sysuiProfile.isLeftRightSplit -> {
                 listOf(
                     SplitPositionOption(
                         R.drawable.ic_split_horizontal,
@@ -354,7 +360,7 @@ class PortraitPagedViewHandler : DefaultPagedViewHandler(), RecentsPagedOrientat
         val insetSizeAdjustment = getPlaceholderSizeAdjustment(dp, pinToRight)
 
         out.set(0, 0, screenWidth, placeholderHeight + insetSizeAdjustment)
-        if (!dp.isLeftRightSplit) {
+        if (!dp.sysuiProfile.isLeftRightSplit) {
             // portrait, phone or tablet - spans width of screen, nothing else to do
             out.inset(placeholderInset, 0)
 
@@ -408,7 +414,7 @@ class PortraitPagedViewHandler : DefaultPagedViewHandler(), RecentsPagedOrientat
     ) {
         val pinToRight = stagePosition == SplitConfigurationOptions.STAGE_POSITION_BOTTOM_OR_RIGHT
         val insetAdjustment = getPlaceholderSizeAdjustment(dp, pinToRight) / 2f
-        if (!dp.isLeftRightSplit) {
+        if (!dp.sysuiProfile.isLeftRightSplit) {
             out.x = (onScreenRectCenterX / fullscreenScaleX - 1.0f * drawableWidth / 2)
             out.y =
                 ((onScreenRectCenterY + insetAdjustment) / fullscreenScaleY -
@@ -488,7 +494,7 @@ class PortraitPagedViewHandler : DefaultPagedViewHandler(), RecentsPagedOrientat
         val screenWidth = dp.deviceProperties.widthPx
         out1.set(0, 0, screenWidth, screenHeight / 2 - splitDividerSize)
         out2.set(0, screenHeight / 2 + splitDividerSize, screenWidth, screenHeight)
-        if (!dp.isLeftRightSplit) {
+        if (!dp.sysuiProfile.isLeftRightSplit) {
             // Portrait - the window bounds are always top and bottom half
             return
         }
@@ -533,13 +539,13 @@ class PortraitPagedViewHandler : DefaultPagedViewHandler(), RecentsPagedOrientat
         val scaledDividerHeight = dividerHeight * scale
 
         if (desiredStagePosition == SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT) {
-            if (dp.isLeftRightSplit) {
+            if (dp.sysuiProfile.isLeftRightSplit) {
                 outRect.right = outRect.left + Math.round(outRect.width() * topLeftTaskPercent)
             } else {
                 outRect.bottom = Math.round(outRect.top + scaledTopTaskHeight)
             }
         } else {
-            if (dp.isLeftRightSplit) {
+            if (dp.sysuiProfile.isLeftRightSplit) {
                 outRect.left +=
                     Math.round(outRect.width() * (topLeftTaskPercent + dividerBarPercent))
             } else {
@@ -571,7 +577,7 @@ class PortraitPagedViewHandler : DefaultPagedViewHandler(), RecentsPagedOrientat
             // `RecentsPagedOrientationHandler` variants.
             primarySnapshot.translationY = 0f
 
-            if (dp.isLeftRightSplit) {
+            if (dp.sysuiProfile.isLeftRightSplit) {
                 val scaledDividerBar = Math.round(parentWidth * dividerScale)
                 if (isRtl) {
                     val translationX = taskViewSizes.second.x + scaledDividerBar
@@ -616,7 +622,7 @@ class PortraitPagedViewHandler : DefaultPagedViewHandler(), RecentsPagedOrientat
         val firstTaskViewSize = Point()
         val secondTaskViewSize = Point()
 
-        if (dp.isLeftRightSplit) {
+        if (dp.sysuiProfile.isLeftRightSplit) {
             val scaledDividerBar = Math.round(parentWidth * dividerScale)
             firstTaskViewSize.x = Math.round(parentWidth * taskPercent)
             firstTaskViewSize.y = parentHeight
@@ -708,7 +714,7 @@ class PortraitPagedViewHandler : DefaultPagedViewHandler(), RecentsPagedOrientat
         secondaryIconParams.topMargin = primaryIconParams.topMargin
         secondaryIconParams.marginStart = primaryIconParams.marginStart
         if (!inSplitSelection) {
-            if (deviceProfile.isLeftRightSplit) {
+            if (deviceProfile.sysuiProfile.isLeftRightSplit) {
                 if (isRtl) {
                     val secondarySnapshotWidth = groupedTaskViewWidth - primarySnapshotWidth
                     primaryAppChipView.setSplitTranslationX(-secondarySnapshotWidth.toFloat())
@@ -744,7 +750,7 @@ class PortraitPagedViewHandler : DefaultPagedViewHandler(), RecentsPagedOrientat
         check(deviceProfile.deviceProperties.isLargeScreen) {
             "Default position available only for large screens"
         }
-        return if (deviceProfile.isLeftRightSplit) {
+        return if (deviceProfile.sysuiProfile.isLeftRightSplit) {
             SplitConfigurationOptions.STAGE_POSITION_BOTTOM_OR_RIGHT
         } else {
             SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT
@@ -756,7 +762,7 @@ class PortraitPagedViewHandler : DefaultPagedViewHandler(), RecentsPagedOrientat
         secondary: FloatProperty<T>,
         deviceProfile: DeviceProfile,
     ): Pair<FloatProperty<T>, FloatProperty<T>> =
-        if (deviceProfile.isLeftRightSplit) { // or seascape
+        if (deviceProfile.sysuiProfile.isLeftRightSplit) { // or seascape
             Pair(primary, secondary)
         } else {
             Pair(secondary, primary)
@@ -768,7 +774,7 @@ class PortraitPagedViewHandler : DefaultPagedViewHandler(), RecentsPagedOrientat
         @StagePosition stagePosition: Int,
         dp: DeviceProfile,
     ): Float {
-        if (dp.isLeftRightSplit) {
+        if (dp.sysuiProfile.isLeftRightSplit) {
             val currentTranslationX = floatingTask.translationX
             return if (stagePosition == SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT)
                 currentTranslationX - onScreenRect.width()
@@ -784,7 +790,7 @@ class PortraitPagedViewHandler : DefaultPagedViewHandler(), RecentsPagedOrientat
         translation: Float,
         dp: DeviceProfile,
     ) {
-        if (dp.isLeftRightSplit) {
+        if (dp.sysuiProfile.isLeftRightSplit) {
             floatingTask.translationX = translation
         } else {
             floatingTask.translationY = translation
@@ -792,7 +798,8 @@ class PortraitPagedViewHandler : DefaultPagedViewHandler(), RecentsPagedOrientat
     }
 
     override fun getFloatingTaskPrimaryTranslation(floatingTask: View, dp: DeviceProfile): Float =
-        if (dp.isLeftRightSplit) floatingTask.translationX else floatingTask.translationY
+        if (dp.sysuiProfile.isLeftRightSplit) floatingTask.translationX
+        else floatingTask.translationY
 
     override fun getHandlerTypeForLogging(): LauncherAtom.TaskSwitcherContainer.OrientationHandler =
         LauncherAtom.TaskSwitcherContainer.OrientationHandler.PORTRAIT

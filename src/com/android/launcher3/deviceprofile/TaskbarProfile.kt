@@ -17,7 +17,6 @@
 package com.android.launcher3.deviceprofile
 
 import android.content.res.Resources
-import android.util.DisplayMetrics
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.R
 import com.android.launcher3.icons.IconNormalizer.ICON_VISIBLE_AREA_FACTOR
@@ -31,16 +30,25 @@ data class TaskbarProfile(
     // If true, used to layout taskbar in 3 button navigation mode.
     val isStartAlignTaskbar: Boolean,
     val isTransientTaskbar: Boolean,
+    val isTaskbarPresentInApps: Boolean,
 ) {
+
+    @Deprecated(
+        " TODO(B/477295763) Properties of an immutable object shouldn't be updated, " +
+            "this change doesn't ensure that the update values get propagated through the " +
+            "system. This functionality has been here since 2021 this function was created as " +
+            "part of a refactor and is kept to prevent altering the behaviour."
+    )
+    fun updateIsTaskbarPresentInApps(value: Boolean): TaskbarProfile {
+        return copy(isTaskbarPresentInApps = value)
+    }
+
     companion object Factory {
         fun createTaskbarProfile(
             res: Resources,
             isTransientTaskbar: Boolean,
             isTaskbarPresent: Boolean,
-            metrics: DisplayMetrics,
             displayOptionSpec: InvariantDeviceProfile.DisplayOptionSpec,
-            typeIndex: Int,
-            inv: InvariantDeviceProfile,
         ): TaskbarProfile {
             val transientTaskbarIconSize =
                 res.getDimension(R.dimen.transient_taskbar_icon_size).toInt()
@@ -64,6 +72,7 @@ data class TaskbarProfile(
                         isStartAlignTaskbar = false,
                         transientTaskbarClaimedSpace = transientTaskbarClaimedSpace,
                         isTransientTaskbar = isTransientTaskbar,
+                        isTaskbarPresentInApps = false,
                     )
                 isTransientTaskbar ->
                     TaskbarProfile(
@@ -75,6 +84,7 @@ data class TaskbarProfile(
                         isStartAlignTaskbar = false,
                         transientTaskbarClaimedSpace = transientTaskbarClaimedSpace,
                         isTransientTaskbar = isTransientTaskbar,
+                        isTaskbarPresentInApps = false,
                     )
                 else ->
                     TaskbarProfile(
@@ -86,6 +96,7 @@ data class TaskbarProfile(
                         isStartAlignTaskbar = displayOptionSpec.startAlignTaskbar,
                         isTransientTaskbar = isTransientTaskbar,
                         transientTaskbarClaimedSpace = transientTaskbarClaimedSpace,
+                        isTaskbarPresentInApps = false,
                     )
             }
         }

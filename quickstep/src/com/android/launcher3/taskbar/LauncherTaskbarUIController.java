@@ -422,7 +422,7 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
 
     private void onStashedInAppChanged(DeviceProfile deviceProfile) {
         boolean taskbarStashedInApps = mControllers.taskbarStashController.isStashedInApp();
-        deviceProfile.isTaskbarPresentInApps = !taskbarStashedInApps;
+        deviceProfile.updateIsTaskbarPresentInApps(!taskbarStashedInApps);
     }
 
     /**
