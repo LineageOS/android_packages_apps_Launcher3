@@ -35,8 +35,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.R;
 import com.android.launcher3.util.Preconditions;
+import com.android.launcher3.views.ActivityContext;
 import com.android.quickstep.util.BorderAnimator;
 import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.recents.model.ThumbnailData;
@@ -251,8 +253,9 @@ public class KeyboardQuickSwitchTaskView extends ConstraintLayout {
             return;
         }
 
+        DeviceProfile dp = ActivityContext.lookupContext(getContext()).getDeviceProfile();
+        final boolean isLeftRightSplit = dp.isLeftRightSplit;
 
-        final boolean isLeftRightSplit = !splitBounds.appsStackedVertically;
         final float leftOrTopTaskPercent = splitBounds.getLeftTopTaskPercent();
 
         ConstraintLayout.LayoutParams leftTopParams = (ConstraintLayout.LayoutParams)
@@ -267,6 +270,8 @@ public class KeyboardQuickSwitchTaskView extends ConstraintLayout {
             leftTopParams.matchConstraintPercentWidth = leftOrTopTaskPercent;
             leftTopParams.leftToLeft = ConstraintLayout.LayoutParams.PARENT_ID;
             leftTopParams.rightToLeft = R.id.thumbnail_2;
+            leftTopParams.topToTop = ConstraintLayout.LayoutParams.UNSET;
+            leftTopParams.bottomToTop = ConstraintLayout.LayoutParams.UNSET;
             mThumbnailView1.setLayoutParams(leftTopParams);
 
             rightBottomParams.width = 0;
@@ -274,6 +279,8 @@ public class KeyboardQuickSwitchTaskView extends ConstraintLayout {
             rightBottomParams.matchConstraintPercentWidth = 1 - leftOrTopTaskPercent;
             rightBottomParams.leftToRight = R.id.thumbnail_1;
             rightBottomParams.rightToRight = ConstraintLayout.LayoutParams.PARENT_ID;
+            rightBottomParams.topToBottom = ConstraintLayout.LayoutParams.UNSET;
+            rightBottomParams.bottomToBottom = ConstraintLayout.LayoutParams.UNSET;
             mThumbnailView2.setLayoutParams(rightBottomParams);
         } else {
             // Set thumbnail view ratio in top bottom split mode.
@@ -282,6 +289,8 @@ public class KeyboardQuickSwitchTaskView extends ConstraintLayout {
             leftTopParams.matchConstraintPercentHeight = leftOrTopTaskPercent;
             leftTopParams.topToTop = ConstraintLayout.LayoutParams.PARENT_ID;
             leftTopParams.bottomToTop = R.id.thumbnail_2;
+            leftTopParams.leftToLeft = ConstraintLayout.LayoutParams.UNSET;
+            leftTopParams.rightToLeft = ConstraintLayout.LayoutParams.UNSET;
             mThumbnailView1.setLayoutParams(leftTopParams);
 
             rightBottomParams.height = 0;
@@ -289,6 +298,8 @@ public class KeyboardQuickSwitchTaskView extends ConstraintLayout {
             rightBottomParams.matchConstraintPercentHeight = 1 - leftOrTopTaskPercent;
             rightBottomParams.topToBottom = R.id.thumbnail_1;
             rightBottomParams.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID;
+            rightBottomParams.leftToRight = ConstraintLayout.LayoutParams.UNSET;
+            rightBottomParams.rightToRight = ConstraintLayout.LayoutParams.UNSET;
             mThumbnailView2.setLayoutParams(rightBottomParams);
         }
     }
