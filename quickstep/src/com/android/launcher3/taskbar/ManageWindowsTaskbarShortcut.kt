@@ -157,6 +157,11 @@ class ManageWindowsTaskbarShortcut<T>(
         )
     }
 
+    fun isMultiInstanceMenuOpen(): Boolean {
+        return ::taskbarShortcutAllWindowsView.isInitialized &&
+            taskbarShortcutAllWindowsView.menuView.scrollableMenuView.isAttachedToWindow
+    }
+
     /** Closes the multi-instance menu if it has been initialized. */
     fun closeMultiInstanceMenu() {
         if (::taskbarShortcutAllWindowsView.isInitialized) {

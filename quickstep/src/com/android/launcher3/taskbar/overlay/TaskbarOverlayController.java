@@ -444,8 +444,11 @@ public final class TaskbarOverlayController
         final boolean cueBarVisible = cueBarAceMigration()
                 && mControllers.getSharedState().cueBarVisible;
         final boolean hasOpenFloatingViews = mOverlayContext != null
-                && (AbstractFloatingView.hasOpenView(mOverlayContext, TYPE_ALL)
-                || mControllers.keyboardQuickSwitchController.isShown());
+                && AbstractFloatingView.hasOpenView(mOverlayContext, TYPE_ALL);
+        final boolean isKeyboardQuickSwitchOpen =
+                mControllers.keyboardQuickSwitchController.isShown();
+        final boolean isManageWindowsPopupOpen =
+                mControllers.taskbarPopupController.isManageWindowsViewOpen();
         if (isAnySystemDragInProgress()) {
             touchableInsets = TOUCHABLE_INSETS_REGION;
             reason = "System drag in progress (empty region)";
@@ -454,6 +457,16 @@ public final class TaskbarOverlayController
             // the frame).
             touchableInsets = TOUCHABLE_INSETS_FRAME;
             reason = "Floating view open (modal FRAME)";
+        } else if (isKeyboardQuickSwitchOpen) {
+            // If keyboard quick switch is open, be modal (intercept all touches within
+            // the frame).
+            touchableInsets = TOUCHABLE_INSETS_FRAME;
+            reason = "Keyboard Quick Switch view open (modal FRAME)";
+        } else if (isManageWindowsPopupOpen) {
+            // If taskbar manage (multi-instance) app windows view is open, be modal (intercept all
+            // touches within the frame).
+            touchableInsets = TOUCHABLE_INSETS_FRAME;
+            reason = "Manage multi-instance app windows view open (modal FRAME)";
         } else if (cueBarVisible) {
             mControllers.cueBarController.addTouchableRegion(insetsInfo.touchableRegion);
             if (mControllers.cueBarController.isExpanded()) {
