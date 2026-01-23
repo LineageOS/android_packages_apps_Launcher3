@@ -4524,8 +4524,7 @@ public abstract class RecentsView<
         int direction = orientationHandler.getSplitTranslationDirectionFactor(
                 splitPosition, deviceProfile);
 
-        if (deviceProfile.getDeviceProperties().isLargeScreen()
-                && deviceProfile.getSysuiProfile().isLeftRightSplit()) {
+        if (deviceProfile.getDeviceProperties().isLargeScreen() && deviceProfile.isLeftRightSplit) {
             // Only shift TaskViews if there is not enough space on the side of
             // mLastComputedTaskSize to minimize motion.
             int sideSpace = mIsRtl
