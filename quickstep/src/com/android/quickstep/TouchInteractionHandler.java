@@ -298,7 +298,7 @@ public class TouchInteractionHandler extends ContextWrapper {
         Log.d(TAG, "disposeEventHandlers: Reason: " + reason
                 + " instance=" + System.identityHashCode(this));
         if (mInputResourceDisplayModel != null) {
-            mInputResourceDisplayModel.destroy();
+            mInputResourceDisplayModel.close();
             mInputResourceDisplayModel = null;
         }
     }
@@ -443,7 +443,6 @@ public class TouchInteractionHandler extends ContextWrapper {
 
         mAllAppsActionManager.onDestroy();
 
-        mTaskbarManager.destroy();
         if (mDesktopAppLaunchTransitionManager != null) {
             mDesktopAppLaunchTransitionManager.unregisterTransitions();
         }

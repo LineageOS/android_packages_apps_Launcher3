@@ -57,15 +57,9 @@ class PerDisplayTaskbarResource(
     private val configChangeCallback: (PerDisplayTaskbarResource, configDiff: Int) -> Unit,
 ) : DisplayModel.DisplayResource {
 
-    private val windowManager =
-        requireNotNull(windowContext.getSystemService(WindowManager::class.java)) {
-            "WindowManager not found for $displayId"
-        }
-
     var taskbar: TaskbarActivityContext? = null
         private set
 
-    private var rootLayoutAdded = false
     private var oldConfig = windowContext.resources.configuration
     private var displayChangeSafeClosable: SafeCloseable? = null
 
@@ -81,6 +75,15 @@ class PerDisplayTaskbarResource(
                 return super.dispatchTouchEvent(ev)
             }
         }
+
+    private val viewManager =
+        SafeViewManager(
+            windowManager =
+                requireNotNull(windowContext.getSystemService(WindowManager::class.java)) {
+                    "WindowManager not found for $displayId"
+                },
+            rootLayout = rootLayout,
+        )
 
     private val showTaskbarReceiver =
         SimpleBroadcastReceiver(windowContext, UI_HELPER_EXECUTOR, getTaskbarUiThread()) {
@@ -188,13 +191,7 @@ class PerDisplayTaskbarResource(
     fun setCurrentTaskbar(activity: TaskbarActivityContext) {
         removeExistingTaskbar()
         taskbar = activity
-
-        if (!rootLayoutAdded) {
-            windowManager.addView(rootLayout, activity.windowLayoutParams)
-            rootLayoutAdded = true
-        } else {
-            debugMsg("addTaskbarRootViewToWindow: rootLayout already added!")
-        }
+        viewManager.addView(activity.windowLayoutParams)
     }
 
     fun destroyTaskbarForDisplay() {
@@ -215,10 +212,7 @@ class PerDisplayTaskbarResource(
     fun removeTaskbarRootViewFromWindow() {
         removeExistingTaskbar()
         debugMsg("removeTaskbarRootViewFromWindow")
-        if (rootLayoutAdded) {
-            windowManager.removeViewImmediate(rootLayout)
-            rootLayoutAdded = false
-        }
+        viewManager.removeView()
     }
 
     override fun cleanup() {
