@@ -96,9 +96,7 @@ object HomeScreenFilesCachingLogic : CachingLogic<HomeScreenFile> {
         }
     }
 
-    override fun getFreshnessIdentifier(item: HomeScreenFile, iconProvider: IconProvider): String? {
-        return null
-    }
+    override fun getFreshnessIdentifier(item: HomeScreenFile, iconProvider: IconProvider) = null
 
     private fun Bitmap.cropToSquare(): Bitmap {
         val w = this.width

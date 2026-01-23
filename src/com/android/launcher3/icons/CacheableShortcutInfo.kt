@@ -140,14 +140,14 @@ object CacheableShortcutCachingLogic : CachingLogic<CacheableShortcutInfo> {
                 } ?: info.fallbackIconProvider.invoke(li) ?: BitmapInfo.LOW_RES_INFO
         }
 
-    override fun getFreshnessIdentifier(
-        item: CacheableShortcutInfo,
-        provider: IconProvider,
-    ): String? =
-        // Manifest shortcuts get updated on every reboot. Don't include their change timestamp as
-        // it gets covered by the app's version
-        (if (item.shortcutInfo.isDeclaredInManifest) ""
-        else item.shortcutInfo.lastChangedTimestamp.toString()) +
-            "-" +
-            provider.getStateForApp(getApplicationInfo(item))
+    override fun getFreshnessIdentifier(item: CacheableShortcutInfo, provider: IconProvider) =
+        provider
+            .getStateForApp(getApplicationInfo(item))
+            .withAdditionalValues(
+                // Manifest shortcuts get updated on every reboot. Don't include their change
+                // timestamp as
+                // it gets covered by the app's version
+                (if (item.shortcutInfo.isDeclaredInManifest) ""
+                else item.shortcutInfo.lastChangedTimestamp.toString())
+            )
 }

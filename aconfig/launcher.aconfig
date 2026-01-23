@@ -601,16 +601,6 @@ flag {
 }
 
 flag {
-  name: "disable_obsolete_swipe_handler_logic"
-  namespace: "launcher"
-  description: "Disables a potentially-obsolete codepath in AbsSwipeUpHandler, helping keep its eventual clean up safe."
-  bug: "449855328"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
     name: "fix_widget_single_ptr_resize"
     namespace: "launcher"
     description: "Fixes a11y issue that widgets can't be resized with single pointer"

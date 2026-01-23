@@ -915,8 +915,6 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
 
     @Override
     protected void handleClose(boolean animate) {
-        mIsOpen = false;
-
         if (!animate && mCurrentAnimator != null && mCurrentAnimator.isRunning()) {
             mCurrentAnimator.cancel();
         }
@@ -950,6 +948,7 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
 
     private void animateClosed() {
         if (mIsAnimatingClosed) {
+            cancelRunningAnimations();
             return;
         }
 
@@ -1008,6 +1007,8 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
     }
 
     private void closeComplete(boolean wasAnimated) {
+        mIsOpen = false;
+
         // TODO: Clear all active animations.
         BaseDragLayer parent = (BaseDragLayer) getParent();
         if (parent != null) {
