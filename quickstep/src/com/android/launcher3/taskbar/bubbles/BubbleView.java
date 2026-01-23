@@ -236,12 +236,14 @@ public class BubbleView extends ConstraintLayout {
                 mController.updateBubbleBarLocation(BubbleBarLocation.LEFT,
                         BubbleBarLocation.UpdateSource.A11Y_ACTION_BUBBLE);
             }
+            return true;
         }
         if (action == R.id.action_move_right) {
             if (mController != null) {
                 mController.updateBubbleBarLocation(BubbleBarLocation.RIGHT,
                         BubbleBarLocation.UpdateSource.A11Y_ACTION_BUBBLE);
             }
+            return true;
         }
         return false;
     }
