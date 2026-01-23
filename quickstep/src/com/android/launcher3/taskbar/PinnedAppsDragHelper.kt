@@ -65,7 +65,7 @@ abstract class PinnedAppsDragHelper(
 
     open fun hasHiddenChild(): Boolean = indexOfChildHiddenForDrag >= 0
 
-    override fun getPinIndex(): Int = dropSpotIndex
+    override fun getPinIndex(startingIndex: Int): Int = startingIndex + dropSpotIndex
 
     override fun releaseDropSlot() {
         dropSpotIndex = -1
