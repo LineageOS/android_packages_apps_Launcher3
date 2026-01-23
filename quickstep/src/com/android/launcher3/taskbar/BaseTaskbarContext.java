@@ -27,11 +27,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.view.LayoutInflater;
+import android.view.View;
 
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
 
-import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.LifecycleTracker;
 import com.android.launcher3.dagger.LauncherComponentProvider;
 import com.android.launcher3.popup.SystemShortcut;
@@ -192,7 +192,7 @@ public abstract class BaseTaskbarContext extends BaseContext
     public abstract void onPopupVisibilityChanged(boolean isVisible);
 
     /** Displays the shortcut popup menu for the specified icon. */
-    public abstract void showPopupMenuForIcon(BubbleTextView btv);
+    public abstract void showPopupMenuForIcon(View icon);
 
     /**
      * Callback invoked when user attempts to split the screen through a long-press menu in Taskbar

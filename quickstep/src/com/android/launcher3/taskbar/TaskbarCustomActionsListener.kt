@@ -18,6 +18,7 @@ package com.android.launcher3.taskbar
 
 import android.view.View
 import com.android.launcher3.BubbleTextView
+import com.android.launcher3.folder.FolderIcon
 import com.android.launcher3.touch.CustomActionsListener
 import com.android.launcher3.touch.CustomActionsListener.Companion.ACTION_LAUNCH
 import com.android.launcher3.touch.CustomActionsListener.Companion.ACTION_POPUP_MENU
@@ -42,7 +43,7 @@ class TaskbarCustomActionsListener(private val taskbarContext: BaseTaskbarContex
                 view.performClick()
             }
             hasFlags(actionMask, ACTION_POPUP_MENU) -> {
-                if (view is BubbleTextView) {
+                if (view is BubbleTextView || view is FolderIcon) {
                     taskbarContext.showPopupMenuForIcon(view)
                 }
             }

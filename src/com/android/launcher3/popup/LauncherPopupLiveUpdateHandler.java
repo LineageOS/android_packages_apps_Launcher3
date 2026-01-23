@@ -50,9 +50,13 @@ public class LauncherPopupLiveUpdateHandler extends PopupLiveUpdateHandler<Launc
             return;
         }
 
-        BubbleTextView originalIcon = mPopupContainerWithArrow.getOriginalIcon();
-        SystemShortcut widgetInfo = SystemShortcut.WIDGETS.getShortcut(mContext,
-                (ItemInfo) originalIcon.getTag(), originalIcon);
+        View originalIcon = mPopupContainerWithArrow.getOriginalIcon();
+        if (!(originalIcon instanceof BubbleTextView
+                && originalIcon.getTag() instanceof ItemInfo info)) {
+            return;
+        }
+        SystemShortcut widgetInfo = SystemShortcut.WIDGETS.getShortcut(mContext, info,
+                originalIcon);
         View widgetsView = getWidgetsView(mPopupContainerWithArrow);
         if (widgetsView == null && mPopupContainerWithArrow.getWidgetContainer() != null) {
             widgetsView = getWidgetsView(mPopupContainerWithArrow.getWidgetContainer());

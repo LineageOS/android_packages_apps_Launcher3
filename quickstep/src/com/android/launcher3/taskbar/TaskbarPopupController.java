@@ -46,6 +46,7 @@ import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.Flags;
 import com.android.launcher3.LauncherModel;
 import com.android.launcher3.LauncherSettings;
+import com.android.launcher3.folder.FolderIcon;
 import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
@@ -166,7 +167,7 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
     @Nullable
     @VisibleForTesting
     SystemShortcut<BaseTaskbarContext> createPinShortcut(BaseTaskbarContext target,
-            ItemInfo itemInfo, BubbleTextView originalView) {
+            ItemInfo itemInfo, View originalView) {
         // Predicted items use {@code HotseatPredictionController.PinPrediction} shortcut to pin.
         if (itemInfo.container == CONTAINER_HOTSEAT_PREDICTION) {
             return null;
@@ -223,6 +224,10 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
     @Nullable
     @Override
     public Popup show(@NonNull View view) {
+        if (view instanceof FolderIcon folder) {
+            return showPopupContainerForFolder(folder);
+        }
+
         BubbleTextView icon = (BubbleTextView) view;
         BaseTaskbarContext context = ActivityContext.lookupContext(icon.getContext());
         if (PopupContainer.getOpen(context) != null) {
@@ -293,6 +298,38 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
         }
         container.setPopupItemDragHandler(new TaskbarPopupItemDragHandler());
         context.getDragController().addDragListener(container);
+        container.requestFocus();
+
+        // Make focusable to receive back events
+        context.onPopupVisibilityChanged(true);
+        container.addOnCloseCallback(() -> {
+            context.getDragLayer().post(() -> context.onPopupVisibilityChanged(false));
+        });
+
+        logEvent(context.getStatsLogManager(), itemInfo.itemType, PopupEvent.OPEN);
+
+        return container;
+    }
+
+    private PopupContainerWithArrow<BaseTaskbarContext> showPopupContainerForFolder(
+            FolderIcon folder) {
+        if (!(folder.getTag() instanceof ItemInfo itemInfo)
+                || itemInfo.container != CONTAINER_HOTSEAT) {
+            return null;
+        }
+        BaseTaskbarContext context = ActivityContext.lookupContext(folder.getContext());
+        PopupContainerWithArrow<BaseTaskbarContext> container = PopupContainerWithArrow.create(
+                context, /* originalView */ folder,
+                /*itemInfo */ itemInfo,
+                /* updateIconUi */ false);
+        // TODO (b/198438631): configure for taskbar/context
+        SystemShortcut<BaseTaskbarContext> pinShortcut = createPinShortcut(context, itemInfo,
+                folder);
+        if (pinShortcut == null) {
+            return null;
+
+        }
+        container.showSystemShortcuts(List.of(pinShortcut));
         container.requestFocus();
 
         // Make focusable to receive back events

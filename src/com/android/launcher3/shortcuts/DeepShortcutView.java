@@ -174,7 +174,9 @@ public class DeepShortcutView extends FrameLayout implements BubbleTextHolder {
     }
 
     private boolean isPinnable(PopupContainerWithArrow container) {
-        BubbleTextView bbtv = container.getOriginalIcon();
+        if (!(container.getOriginalIcon() instanceof BubbleTextView bbtv)) {
+            return false;
+        }
         boolean isPinnable = false;
         if (bbtv.getTag() instanceof ItemInfoWithIcon infoWithIcon) {
             isPinnable = (infoWithIcon.runtimeStatusFlags & FLAG_NOT_PINNABLE) == 0;
