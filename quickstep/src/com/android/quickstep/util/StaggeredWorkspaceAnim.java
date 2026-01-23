@@ -114,7 +114,7 @@ public class StaggeredWorkspaceAnim {
             boolean staggerQsb = !grid.isVerticalBarLayout()
                     && !(
                     grid.getDeviceProperties().getTaskbarConfiguration().isTaskbarPresent()
-                            && grid.isQsbInline
+                            && grid.getHotseatProfile().isQsbInline()
             );
             int totalRows = grid.inv.numRows + (staggerHotseat ? 1 : 0) + (staggerQsb ? 1 : 0);
 
@@ -144,7 +144,7 @@ public class StaggeredWorkspaceAnim {
             } else {
                 final int hotseatRow, qsbRow;
                 if (grid.getDeviceProperties().getTaskbarConfiguration().isTaskbarPresent()) {
-                    if (grid.isQsbInline) {
+                    if (grid.getHotseatProfile().isQsbInline()) {
                         qsbRow = grid.inv.numRows + 1;
                         hotseatRow = grid.inv.numRows + 1;
                     } else {

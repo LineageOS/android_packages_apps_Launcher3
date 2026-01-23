@@ -207,12 +207,12 @@ public class TaskbarLauncherStateController {
             new DeviceProfile.OnDeviceProfileChangeListener() {
                 @Override
                 public void onDeviceProfileChanged(DeviceProfile dp) {
-                    if (mIsQsbInline && !dp.isQsbInline) {
+                    if (mIsQsbInline && !dp.getHotseatProfile().isQsbInline()) {
                         // We only modify QSB alpha if isQsbInline = true. If we switch to a DP
                         // where isQsbInline = false, then we need to reset the alpha.
                         mLauncher.setHotseatQsbAlpha(1f, ALPHA_CHANNEL_TASKBAR_ALIGNMENT);
                     }
-                    mIsQsbInline = dp.isQsbInline;
+                    mIsQsbInline = dp.getHotseatProfile().isQsbInline();
                     TaskbarLauncherStateController.this.updateIconAlphaForHome(
                             mTaskbarAlphaForHome.getValue(), ALPHA_CHANNEL_TASKBAR_ALIGNMENT);
                     TaskbarLauncherStateController.this.onBubbleBarLocationChanged(
@@ -311,7 +311,7 @@ public class TaskbarLauncherStateController {
         mLauncher = launcher;
         mLauncherUiState = launcherUiState;
 
-        mIsQsbInline = getDeviceProfile().isQsbInline;
+        mIsQsbInline = getDeviceProfile().getHotseatProfile().isQsbInline();
 
         mTaskbarBackgroundAlpha = mControllers.taskbarDragLayerController
                 .getTaskbarBackgroundAlpha();
