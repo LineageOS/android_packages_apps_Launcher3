@@ -20,7 +20,7 @@
     android:layout_height="match_parent">
 
     <!--  Inner ConstraintLayout ensures height/width of background scales uniformly.  -->
-    <FrameLayout
+    <com.android.quickstep.views.EmptyRecentsMessageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/overview_empty_recents_12_sided_cookie_background"
@@ -35,7 +35,7 @@
             android:id="@+id/empty_recents_content"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:drawablePadding="@dimen/recents_empty_message_text_padding"
+            android:drawablePadding="@dimen/recents_empty_message_drawable_padding"
             android:drawableTop="@drawable/overview_empty_recents_icon"
             android:focusable="false"
             android:gravity="center"
@@ -46,6 +46,6 @@
             android:textSize="@dimen/recents_empty_message_text_size"
             android:layout_gravity="center" />
 
-    </FrameLayout>
+    </com.android.quickstep.views.EmptyRecentsMessageView>
 
 </FrameLayout>
