@@ -20,7 +20,8 @@ import android.content.ComponentName
 import android.content.Intent
 import android.graphics.Rect
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.quickstep.recents.domain.model.FullscreenPosition
+import com.android.quickstep.recents.domain.model.TaskPosition.Hidden
+import com.android.quickstep.recents.domain.model.TaskPosition.Rendered
 import com.android.systemui.shared.recents.model.Task
 import com.android.systemui.shared.recents.model.Task.TaskKey
 import com.google.common.truth.Truth.assertThat
@@ -44,20 +45,17 @@ class GetDesktopTaskFullscreenPositionUseCaseTest {
     }
 
     @Test
-    fun test_singleTask_returnsNotObscured() {
+    fun test_singleTask_returnsRendered() {
         val singleTask = createTask(id = 1, appBounds = Rect(0, 0, 10, 10))
         val tasks = listOf(singleTask)
 
         val result = useCase.invoke(tasks)
 
-        assertThat(result)
-            .containsExactly(
-                FullscreenPosition(taskId = 1, bounds = Rect(0, 0, 10, 10), isObscured = false)
-            )
+        assertThat(result).containsExactly(Rendered(taskId = 1, bounds = Rect(0, 0, 10, 10)))
     }
 
     @Test
-    fun test_smallerTaskAboveLargerTask_returnsNoneObscured() {
+    fun test_smallerTaskAboveLargerTask_returnsBothRendered() {
         val task1 = createTask(id = 1, appBounds = Rect(50, 50, 150, 150))
         val task2 = createTask(id = 2, appBounds = Rect(0, 0, 200, 200))
         // Tasks at the front of the list are higher in the z-order.
@@ -67,14 +65,14 @@ class GetDesktopTaskFullscreenPositionUseCaseTest {
 
         assertThat(result)
             .containsExactly(
-                FullscreenPosition(taskId = 1, bounds = Rect(50, 50, 150, 150), isObscured = false),
-                FullscreenPosition(taskId = 2, bounds = Rect(0, 0, 200, 200), isObscured = false),
+                Rendered(taskId = 1, bounds = Rect(50, 50, 150, 150)),
+                Rendered(taskId = 2, bounds = Rect(0, 0, 200, 200)),
             )
             .inOrder()
     }
 
     @Test
-    fun test_largerTaskAboveSmallerTask_returnsSmallerObscured() {
+    fun test_largerTaskAboveSmallerTask_returnsSmallerHidden() {
         val task1 = createTask(id = 1, appBounds = Rect(0, 0, 200, 200))
         val task2 = createTask(id = 2, appBounds = Rect(50, 50, 150, 150))
         // Tasks at the front of the list are higher in the z-order.
@@ -84,14 +82,14 @@ class GetDesktopTaskFullscreenPositionUseCaseTest {
 
         assertThat(result)
             .containsExactly(
-                FullscreenPosition(taskId = 1, bounds = Rect(0, 0, 200, 200), isObscured = false),
-                FullscreenPosition(taskId = 2, bounds = Rect(50, 50, 150, 150), isObscured = true),
+                Rendered(taskId = 1, bounds = Rect(0, 0, 200, 200)),
+                Hidden(taskId = 2),
             )
             .inOrder()
     }
 
     @Test
-    fun test_minimizedTask_returnsObscured() {
+    fun test_minimizedTask_returnsHidden() {
         // Task 1 completely envelops Task 2, but is minimized.
         val task1 = createTask(id = 1, appBounds = Rect(0, 0, 200, 200), isMinimized = true)
         val task2 = createTask(id = 2, appBounds = Rect(50, 50, 150, 150))
@@ -102,14 +100,14 @@ class GetDesktopTaskFullscreenPositionUseCaseTest {
 
         assertThat(result)
             .containsExactly(
-                FullscreenPosition(taskId = 1, bounds = Rect(0, 0, 200, 200), isObscured = true),
-                FullscreenPosition(taskId = 2, bounds = Rect(50, 50, 150, 150), isObscured = false),
+                Hidden(taskId = 1),
+                Rendered(taskId = 2, bounds = Rect(50, 50, 150, 150)),
             )
             .inOrder()
     }
 
     @Test
-    fun test_successiveOverlappingTasks_returnsMultipleObscured() {
+    fun test_successiveOverlappingTasks_returnsHiddenForObscured() {
         val task1 = createTask(id = 1, appBounds = Rect(0, 0, 300, 300))
         val task2 = createTask(id = 2, appBounds = Rect(0, 0, 200, 200))
         val task3 = createTask(id = 3, appBounds = Rect(0, 0, 100, 100))
@@ -120,15 +118,15 @@ class GetDesktopTaskFullscreenPositionUseCaseTest {
 
         assertThat(result)
             .containsExactly(
-                FullscreenPosition(taskId = 1, bounds = Rect(0, 0, 300, 300), isObscured = false),
-                FullscreenPosition(taskId = 2, bounds = Rect(0, 0, 200, 200), isObscured = true),
-                FullscreenPosition(taskId = 3, bounds = Rect(0, 0, 100, 100), isObscured = true),
+                Rendered(taskId = 1, bounds = Rect(0, 0, 300, 300)),
+                Hidden(taskId = 2),
+                Hidden(taskId = 3),
             )
             .inOrder()
     }
 
     @Test
-    fun test_partiallyOverlappingTasks_returnsNoneObscured() {
+    fun test_partiallyOverlappingTasks_returnsBothRendered() {
         val task1 = createTask(id = 1, appBounds = Rect(0, 0, 100, 100))
         val task2 = createTask(id = 2, appBounds = Rect(50, 0, 150, 100))
         // Tasks at the front of the list are higher in the z-order.
@@ -138,14 +136,14 @@ class GetDesktopTaskFullscreenPositionUseCaseTest {
 
         assertThat(result)
             .containsExactly(
-                FullscreenPosition(taskId = 1, bounds = Rect(0, 0, 100, 100), isObscured = false),
-                FullscreenPosition(taskId = 2, bounds = Rect(50, 0, 150, 100), isObscured = false),
+                Rendered(taskId = 1, bounds = Rect(0, 0, 100, 100)),
+                Rendered(taskId = 2, bounds = Rect(50, 0, 150, 100)),
             )
             .inOrder()
     }
 
     @Test
-    fun test_complexOverlappingRegionObscuresTask_returnsObscured() {
+    fun test_complexOverlappingRegionObscuresTask_returnsHidden() {
         val obscuredTask = createTask(id = 0, appBounds = Rect(100, 100, 200, 200))
 
         // Construct a complex region that completely overlaps the obscuredTask.
@@ -158,14 +156,11 @@ class GetDesktopTaskFullscreenPositionUseCaseTest {
 
         val result = useCase.invoke(tasks)
 
-        assertThat(result)
-            .contains(
-                FullscreenPosition(taskId = 0, bounds = Rect(100, 100, 200, 200), isObscured = true)
-            )
+        assertThat(result).contains(Hidden(taskId = 0))
     }
 
     @Test
-    fun test_cornersObscuredButCenterNotObscured_returnsNoneObscured() {
+    fun test_cornersObscuredButCenterNotObscured_returnsRendered() {
         // Construct a layout where all four corners of a window (task5) are covered, but the center
         // is not.
         val task1 = createTask(id = 1, appBounds = Rect(0, 0, 50, 50))
@@ -179,10 +174,7 @@ class GetDesktopTaskFullscreenPositionUseCaseTest {
 
         val result = useCase.invoke(tasks)
 
-        assertThat(result.last())
-            .isEqualTo(
-                FullscreenPosition(taskId = 5, bounds = Rect(25, 25, 175, 175), isObscured = false)
-            )
+        assertThat(result.last()).isEqualTo(Rendered(taskId = 5, bounds = Rect(25, 25, 175, 175)))
     }
 
     private fun createTask(id: Int, appBounds: Rect, isMinimized: Boolean = false) =

@@ -17,7 +17,9 @@
 package com.android.quickstep.recents.domain.usecase
 
 import android.graphics.Region
-import com.android.quickstep.recents.domain.model.FullscreenPosition
+import com.android.quickstep.recents.domain.model.TaskPosition
+import com.android.quickstep.recents.domain.model.TaskPosition.Hidden
+import com.android.quickstep.recents.domain.model.TaskPosition.Rendered
 import com.android.systemui.shared.recents.model.Task
 import javax.inject.Inject
 
@@ -26,7 +28,7 @@ import javax.inject.Inject
  * they are completely obscured (completely overlapped by windows above them in the z-order).
  */
 class GetDesktopTaskFullscreenPositionUseCase @Inject constructor() {
-    operator fun invoke(desktopTasks: List<Task>): List<FullscreenPosition> {
+    operator fun invoke(desktopTasks: List<Task>): List<TaskPosition> {
         val totalOccludedRegion = Region()
 
         // From top to bottom in the z-order, keep adding the area of each visible window to
@@ -34,29 +36,27 @@ class GetDesktopTaskFullscreenPositionUseCase @Inject constructor() {
         return desktopTasks.mapNotNull { task ->
             val bounds = task.appBounds ?: return@mapNotNull null
 
-            val isObscured =
-                if (task.isMinimized) {
-                    // If window is minimized, it won't occlude our window or be occluded.
-                    true
+            if (task.isMinimized) {
+                // If window is minimized, it won't occlude our window or be occluded.
+                Hidden(task.key.id)
+            } else {
+                // To see if the occluded region completely obscures the current window, check
+                // if the intersection of the region and the task bounds is the same as the task
+                // bounds itself. If the window is completely obscured, the intersection should
+                // also be a single rectangle (not complex) and we can use
+                // Region.quickContains() to verify they are the same.
+                val currentOccludedRegion = Region(totalOccludedRegion)
+                currentOccludedRegion.op(bounds, Region.Op.INTERSECT)
+                if (currentOccludedRegion.quickContains(bounds)) {
+                    Hidden(task.key.id)
                 } else {
-                    // To see if the occluded region completely obscures the current window, check
-                    // if the intersection of the region and the task bounds is the same as the task
-                    // bounds itself. If the window is completely obscured, the intersection should
-                    // also be a single rectangle (not complex) and we can use
-                    // Region.quickContains() to verify they are the same.
-                    val currentOccludedRegion = Region(totalOccludedRegion)
-                    currentOccludedRegion.op(bounds, Region.Op.INTERSECT)
-                    if (currentOccludedRegion.quickContains(bounds)) {
-                        true
-                    } else {
-                        // Add the window's bounds to the total occluded region for the next
-                        // iteration. This only needs to be done if the current window isn't
-                        // occluded,as otherwise its bounds are already part of the total.
-                        totalOccludedRegion.op(bounds, Region.Op.UNION)
-                        false
-                    }
+                    // Add the window's bounds to the total occluded region for the next
+                    // iteration. This only needs to be done if the current window isn't
+                    // occluded,as otherwise its bounds are already part of the total.
+                    totalOccludedRegion.op(bounds, Region.Op.UNION)
+                    Rendered(task.key.id, bounds)
                 }
-            FullscreenPosition(task.key.id, bounds, isObscured)
+            }
         }
     }
 }

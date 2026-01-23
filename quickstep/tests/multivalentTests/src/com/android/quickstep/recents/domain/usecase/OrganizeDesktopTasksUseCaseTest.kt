@@ -19,8 +19,8 @@ package com.android.quickstep.recents.domain.usecase
 import android.graphics.Rect
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.quickstep.recents.domain.model.DesktopLayoutConfig
-import com.android.quickstep.recents.domain.model.OverviewPosition.Hidden
-import com.android.quickstep.recents.domain.model.OverviewPosition.Rendered
+import com.android.quickstep.recents.domain.model.TaskPosition.Hidden
+import com.android.quickstep.recents.domain.model.TaskPosition.Rendered
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -438,9 +438,8 @@ class OrganizeDesktopTasksUseCaseTest {
 
     @Test
     fun dismissTask_whenPreviousLayoutIsEmpty_performsFullOrganizationOnRemaining() {
-        val task1Orig = createRenderedData(1, 0, 0, 100, 100)
         val task2Orig = createRenderedData(2, 100, 0, 200, 100)
-        val allOriginalTasks = listOf(task1Orig, task2Orig)
+        val allOriginalTasks = listOf(task2Orig)
         val dismissedTaskId = 1
 
         val remainingOriginalTaskBounds = listOf(task2Orig)
@@ -467,9 +466,8 @@ class OrganizeDesktopTasksUseCaseTest {
     @Test
     fun dismissHiddenTask_returnsRemainingPreviousLayoutWithoutRelayout() {
         val task1Orig = createRenderedData(1, 0, 0, 200, 200) // Will be rendered
-        val task2Orig = createRenderedData(2, 0, 0, 100, 100) // Will be hidden in previousLayout
 
-        val allOriginalTasks = listOf(task1Orig, task2Orig)
+        val allOriginalTasks = listOf(task1Orig)
         // Assume task2 was hidden in the previous layout
         val previousLayout = listOf(createRenderedData(1, 10, 10, 510, 510), createHiddenData(2))
         val dismissedTaskId = 2 // Dismissing the hidden task
@@ -491,11 +489,10 @@ class OrganizeDesktopTasksUseCaseTest {
         // T1 (small), T2 (small), T3 (large enough to be hidden with T1, T2 present)
         // Previous: R_T1, R_T2, H_T3. Dismiss T1.
         // Remaining original: T2, T3. Full org on (T2, T3) should render both.
-        val task1Orig = createRenderedData(1, 0, 0, 100, 100)
         val task2Orig = createRenderedData(2, 100, 0, 200, 100)
         val task3Orig = createRenderedData(3, 0, 100, 300, 400) // Large task
 
-        val allOriginalTasks = listOf(task1Orig, task2Orig, task3Orig)
+        val allOriginalTasks = listOf(task2Orig, task3Orig)
 
         // Setup previousLayout: T1, T2 are rendered, T3 is hidden.
         // This requires a desktopBound that would actually hide T3 if T1,T2 are present.
@@ -507,7 +504,6 @@ class OrganizeDesktopTasksUseCaseTest {
         val previousLayout = listOf(prevRenderedT1, prevRenderedT2, prevHiddenT3)
 
         val dismissedTaskId = 1
-        val remainingOriginalTasks = listOf(task2Orig, task3Orig)
 
         // Mocking the behavior of performFullOrganization for this specific scenario:
         // Assume that when only T2 and T3 are present, they can both be rendered.
@@ -527,7 +523,7 @@ class OrganizeDesktopTasksUseCaseTest {
         // task3Orig])
         val expectedResultByFullOrganization =
             useCase.invoke(
-                allCurrentOriginalTaskBounds = remainingOriginalTasks,
+                allCurrentOriginalTaskBounds = allOriginalTasks,
                 layoutConfig = DEFAULT_LAYOUT_CONFIG,
                 taskPositionsHint = null, // Not used for this call path
                 dismissedTaskId = null,
