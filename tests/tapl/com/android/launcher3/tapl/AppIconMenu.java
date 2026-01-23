@@ -68,18 +68,9 @@ public abstract class AppIconMenu {
      * Returns a menu item with the given text. Fails if it doesn't exist.
      */
     public AppIconMenuItem getMenuItem(String shortcutText) {
-        if (Flags.expandableLongPressMenu()) {
-            for (UiObject2 menuItem : mDeepShortcutsContainer.getChildren()) {
-                if (menuItem.hasObject(By.text(shortcutText))) {
-                    return createMenuItem(menuItem);
-                }
-            }
-            throw new AssertionError("Menu item with text '" + shortcutText + "' not found.");
-        } else {
-            final UiObject2 menuItem = mLauncher.waitForObjectInContainer(mDeepShortcutsContainer,
-                    AppIcon.getMenuItemSelector(shortcutText, mLauncher));
-            return createMenuItem(menuItem);
-        }
+        final UiObject2 menuItem = mLauncher.waitForObjectInContainer(mDeepShortcutsContainer,
+                AppIcon.getMenuItemSelector(shortcutText, mLauncher));
+        return createMenuItem(menuItem);
     }
 
     /**
