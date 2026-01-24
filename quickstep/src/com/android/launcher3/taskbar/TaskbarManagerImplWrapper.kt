@@ -131,10 +131,6 @@ class TaskbarManagerImplWrapper @Inject constructor(implProvider: Provider<Taskb
         getTaskbarUiThread().execute { impl.onNavigationBarLumaSamplingEnabled(displayId, enable) }
     }
 
-    override fun destroy() {
-        getTaskbarUiThread().execute { impl.destroy() }
-    }
-
     override fun createLauncherStartFromSuwAnim(duration: Int): AsyncAnimatorPlaybackController? {
         return impl.createLauncherStartFromSuwAnim(duration)
     }

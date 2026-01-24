@@ -54,7 +54,6 @@ import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.views.Snackbar;
 import com.android.launcher3.widget.WidgetsBottomSheet;
 import com.android.launcher3.widget.picker.model.data.WidgetPickerData;
-import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper;
 import com.android.wm.shell.shared.bubbles.logging.EntryPoint;
 
 import java.util.Arrays;
@@ -529,8 +528,7 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
                         final boolean isSmallScreen =
                                 activity.getDeviceProfile().getDeviceProperties().isPhone();
                         final boolean supportsBubbleNonResizeable =
-                                BubbleAnythingFlagHelper.allowMultiWindowNonResizableActivities()
-                                        && systemSupportsNonResizableMultiWindow(
+                                systemSupportsNonResizableMultiWindow(
                                         (Context) activity, isSmallScreen);
                         if (!supportsBubbleNonResizeable) {
                             return null;

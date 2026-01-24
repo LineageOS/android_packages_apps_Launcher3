@@ -297,7 +297,6 @@ public class DragController implements DragDriver.EventListener, TouchController
                 drawable, view, originalView, dragInfo, dragLayerX, dragLayerY, dragRegion,
                 initialDragViewScale, dragViewScaleOnDrop,
                 /*allowSpringDrawable=*/ !options.isSystemDrag);
-        updateDescendantsAccessibility(dragView, /*accessible=*/ false);
 
         if (dragInfo != null) {
             dragView.setItemInfo(dragInfo);
@@ -476,9 +475,6 @@ public class DragController implements DragDriver.EventListener, TouchController
     }
 
     protected void endDrag() {
-        if (mDragObject != null && mDragObject.dragView != null) {
-            updateDescendantsAccessibility(mDragObject.dragView, /*accessible=*/ true);
-        }
         if (isDragging()) {
             mDragDriver = null;
             boolean isDeferred = false;
@@ -860,23 +856,6 @@ public class DragController implements DragDriver.EventListener, TouchController
             if (isDragging()) {
                 cancelDrag();
             }
-        }
-    }
-
-    /**
-     * During a drag, we don't want to expose the descendants of drag view to a11y users,
-     * since those descendants are not a valid position in the workspace.
-     * We need to go through the children because the view itself is important for
-     * accessibility, basically we are implementing:
-     * IMPORTANT_FOR_ACCESSIBILITY_YES_HIDE_DESCENDANTS when {@code accessible} is true and
-     * reversing it when false.
-     */
-    private void updateDescendantsAccessibility(DragView dragView, boolean accessible) {
-        for (int i = 0; i < dragView.getChildCount(); i++) {
-            dragView.getChildAt(i).setImportantForAccessibility(
-                    accessible ? View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
-                            : View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
-            );
         }
     }
 }

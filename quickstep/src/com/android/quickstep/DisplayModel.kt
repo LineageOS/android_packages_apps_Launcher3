@@ -25,6 +25,7 @@ import androidx.core.util.valueIterator
 import com.android.app.displaylib.DisplayDecorationListener
 import com.android.app.displaylib.DisplaysWithDecorationsRepositoryCompat
 import com.android.launcher3.dagger.ApplicationContext
+import com.android.launcher3.util.SafeCloseable
 import com.android.quickstep.DisplayModel.DisplayResource
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -43,7 +44,7 @@ constructor(
     private val displaysWithDecorationsRepositoryCompat: DisplaysWithDecorationsRepositoryCompat,
     @Assisted private val dispatcher: CoroutineDispatcher,
     @Assisted private val resourceFactory: IntFunction<RESOURCE_TYPE?>,
-) : DisplayDecorationListener {
+) : DisplayDecorationListener, SafeCloseable {
 
     private val displayManager = context.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
     private val displayResourceArray = SparseArray<RESOURCE_TYPE>()
@@ -87,7 +88,7 @@ constructor(
         displayResourceArray.valueIterator().forEach { callback.accept(it) }
     }
 
-    fun destroy() {
+    override fun close() {
         if (useDisplayDecorationListener) {
             displaysWithDecorationsRepositoryCompat.unregisterDisplayDecorationListener(this)
         } else {

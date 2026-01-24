@@ -24,7 +24,6 @@ import android.os.RemoteException
 import android.util.Log
 import android.view.Display
 import androidx.annotation.BinderThread
-import androidx.annotation.UiThread
 import com.android.app.displaylib.PerDisplayRepository
 import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.dagger.ApplicationContext
@@ -32,6 +31,7 @@ import com.android.launcher3.taskbar.TaskbarDesktopExperienceFlags.enableAltTabK
 import com.android.launcher3.taskbar.TaskbarManager
 import com.android.launcher3.testing.TestLogging
 import com.android.launcher3.testing.shared.TestProtocol
+import com.android.launcher3.util.Executors.getTaskbarUiThread
 import com.android.launcher3.util.LockedUserState
 import com.android.launcher3.util.PostUnlockObject
 import com.android.launcher3.util.ThreadSafeRunnableList
@@ -71,7 +71,8 @@ class TISBinder
 internal constructor(
     bindData: BindData,
     @Ui private val uiExecutor: Executor,
-    @Named(CONNECTION_CLEANER) cleanupTasks: ThreadSafeRunnableList,
+    quickstepKeyGestureEventsHandler: QuickstepKeyGestureEventsManager,
+    @Named(CONNECTION_CLEANER) private val cleanupTasks: ThreadSafeRunnableList,
 ) : Stub() {
     private var state: BindData? = bindData
 
@@ -80,12 +81,8 @@ internal constructor(
     }
 
     init {
-        cleanupTasks.addTask(uiExecutor) {
-            // Perform unbind first as the remote-call for unbind is async and may not come before
-            // destroy()
-            performUnbindOnUIThread()
-            state = null
-        }
+        cleanupTasks.addTask(uiExecutor, quickstepKeyGestureEventsHandler::onDestroy)
+        cleanupTasks.addTask(uiExecutor) { state = null }
     }
 
     @BinderThread
@@ -314,23 +311,17 @@ internal constructor(
         taskbarManager.onNavigationBarLumaSamplingEnabled(displayId, enable)
     }
 
-    override fun onUnbind(reply: IRemoteCallback) =
+    override fun onUnbind(reply: IRemoteCallback) {
+        cleanupTasks.complete()
+        // Wait for both executors to complete before sending a reply
         uiExecutor.execute {
-            performUnbindOnUIThread()
-            try {
-                reply.sendResult(null)
-            } catch (e: RemoteException) {
-                Log.w(TAG, "onUnbind: Failed to reply to LauncherProxyService", e)
+            getTaskbarUiThread().execute {
+                try {
+                    reply.sendResult(null)
+                } catch (e: RemoteException) {
+                    Log.w(TAG, "onUnbind: Failed to reply to LauncherProxyService", e)
+                }
             }
-        }
-
-    @UiThread
-    private fun performUnbindOnUIThread() {
-        // Run everything in the same main thread block to ensure the cleanup happens before
-        // sending the reply.
-        withState {
-            taskbarManager.destroy()
-            quickstepKeyGestureEventsHandler.onDestroy()
         }
     }
 
@@ -352,7 +343,6 @@ internal constructor(
         val sysUIProxy: SystemUiProxy,
         val contextualSearchInvoker: Provider<ContextualSearchInvoker>,
         val systemDecorationChangeObserver: SystemDecorationChangeObserver,
-        val quickstepKeyGestureEventsHandler: QuickstepKeyGestureEventsManager,
         val taskAnimationManagerRepository: PerDisplayRepository<TaskAnimationManager>,
         val lockedUserState: LockedUserState,
         overviewCommandHelper: PostUnlockObject<OverviewCommandHelper>,
