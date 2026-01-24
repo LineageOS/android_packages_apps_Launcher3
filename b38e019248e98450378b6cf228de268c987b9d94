@@ -16,6 +16,24 @@
       "message": "Converting to platform app -- may require some sepolicy denial fixes. Watch out for that.",
       "revId": "b38e019248e98450378b6cf228de268c987b9d94",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d2d84fee_842193fa",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 9
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 13648
+      },
+      "writtenOn": "2026-01-24T11:32:44Z",
+      "side": 1,
+      "message": "It doesn\u0027t work otherwise.",
+      "parentUuid": "d7f2ef5b_2626ac34",
+      "revId": "b38e019248e98450378b6cf228de268c987b9d94",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
