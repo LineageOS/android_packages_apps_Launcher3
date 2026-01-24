@@ -33,6 +33,23 @@
       "message": "Alright - Gerrit is not the place for drama.\n\nDevrel@ email if there\u0027s serious issues or infractions.\n\nFurther argument/drama on their change will result in moderation.",
       "revId": "2a6de8343fcb8dd5466b3d7fff2d4adce6f70277",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9e5f5d46_b9549054",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 6360
+      },
+      "writtenOn": "2026-01-24T17:26:16Z",
+      "side": 1,
+      "message": "Changes in AllAppsList.java should be dropped since AppFilter there is already doing that.",
+      "revId": "2a6de8343fcb8dd5466b3d7fff2d4adce6f70277",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
