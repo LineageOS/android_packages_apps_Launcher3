@@ -34,6 +34,24 @@
       "parentUuid": "d7f2ef5b_2626ac34",
       "revId": "b38e019248e98450378b6cf228de268c987b9d94",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3c2bf720_c4cef18a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 9
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 6360
+      },
+      "writtenOn": "2026-01-24T12:37:46Z",
+      "side": 1,
+      "message": "e.g. https://github.com/crdroidandroid/android_device_crdroid_sepolicy/commit/a0becec2fd675cd6256cc356d904410063d2fd59 and https://github.com/crdroidandroid/android_device_crdroid_sepolicy/commit/2ac782213c86ce1277122d9654ad7efd1d5bba3d",
+      "parentUuid": "d2d84fee_842193fa",
+      "revId": "b38e019248e98450378b6cf228de268c987b9d94",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
