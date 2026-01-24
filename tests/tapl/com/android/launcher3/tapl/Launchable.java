@@ -45,6 +45,11 @@ public abstract class Launchable {
         return mObject;
     }
 
+    /* Returns the visible text of the object. */
+    public String getText() {
+        return mObject.getText();
+    }
+
     protected boolean launcherStopsAfterLaunch() {
         return true;
     }

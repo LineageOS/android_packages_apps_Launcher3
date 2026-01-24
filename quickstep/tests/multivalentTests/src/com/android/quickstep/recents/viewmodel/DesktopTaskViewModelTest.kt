@@ -23,13 +23,12 @@ import android.graphics.Rect
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.internal.policy.DesktopModeCompatPolicy
 import com.android.quickstep.recents.domain.model.DesktopLayoutConfig
-import com.android.quickstep.recents.domain.model.FullscreenPosition
-import com.android.quickstep.recents.domain.model.OverviewPosition.Hidden
-import com.android.quickstep.recents.domain.model.OverviewPosition.Rendered
+import com.android.quickstep.recents.domain.model.DesktopTaskPosition
+import com.android.quickstep.recents.domain.model.TaskPosition.Hidden
+import com.android.quickstep.recents.domain.model.TaskPosition.Rendered
 import com.android.quickstep.recents.domain.usecase.GetDesktopTaskFullscreenPositionUseCase
 import com.android.quickstep.recents.domain.usecase.OrganizeDesktopTasksUseCase
 import com.android.quickstep.recents.ui.viewmodel.DesktopTaskViewModel
-import com.android.quickstep.util.DesktopTask
 import com.android.systemui.shared.recents.model.Task
 import com.android.systemui.shared.recents.model.Task.TaskKey
 import com.google.common.truth.Truth.assertThat
@@ -69,10 +68,29 @@ class DesktopTaskViewModelTest {
         whenever(organizeDesktopTasksUseCase.invoke(any(), any(), any(), isNull()))
             .thenReturn(emptyList())
 
-        systemUnderTest.bind(createDesktopTask(emptyList()))
-        systemUnderTest.organizeDesktopTasks(layoutConfig = TEST_LAYOUT_CONFIG)
+        systemUnderTest.organizeDesktopTasks(tasks = emptyList(), layoutConfig = TEST_LAYOUT_CONFIG)
 
-        val result = systemUnderTest.overviewTaskPositions
+        val result = systemUnderTest.desktopTaskPositions
+        assertThat(result).isEmpty()
+
+        verify(getDesktopTaskFullscreenPositionUseCase).invoke(emptyList())
+        verify(organizeDesktopTasksUseCase)
+            .invoke(eq(emptyList()), any(), eq(emptyList()), isNull())
+    }
+
+    @Test
+    fun taskWithNullBounds() {
+        whenever(getDesktopTaskFullscreenPositionUseCase.invoke(any())).thenReturn(emptyList())
+        whenever(organizeDesktopTasksUseCase.invoke(any(), any(), any(), isNull()))
+            .thenReturn(emptyList())
+
+        val task = createTask(NEW_TASK_ID_1, appBounds = null)
+        systemUnderTest.organizeDesktopTasks(
+            tasks = listOf(task),
+            layoutConfig = TEST_LAYOUT_CONFIG,
+        )
+
+        val result = systemUnderTest.desktopTaskPositions
         assertThat(result).isEmpty()
 
         verify(getDesktopTaskFullscreenPositionUseCase).invoke(emptyList())
@@ -83,53 +101,30 @@ class DesktopTaskViewModelTest {
     @Test
     fun singleRenderedAndObscuredTaskPosition() {
         whenever(getDesktopTaskFullscreenPositionUseCase.invoke(any()))
-            .thenReturn(
-                listOf(FullscreenPosition(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1, isObscured = true))
-            )
+            .thenReturn(listOf(Hidden(NEW_TASK_ID_1)))
         whenever(organizeDesktopTasksUseCase.invoke(any(), any(), any(), isNull()))
             .thenReturn(listOf(ORGANIZED_RENDERED_TASK_BOUNDS_DATA))
 
         val task = createTask(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1)
-        systemUnderTest.bind(createDesktopTask(listOf(task)))
-        systemUnderTest.organizeDesktopTasks(layoutConfig = TEST_LAYOUT_CONFIG)
+        systemUnderTest.organizeDesktopTasks(
+            tasks = listOf(task),
+            layoutConfig = TEST_LAYOUT_CONFIG,
+        )
 
-        val result = systemUnderTest.overviewTaskPositions
+        val result = systemUnderTest.desktopTaskPositions
         assertThat(result)
             .containsExactly(
                 NEW_TASK_ID_1,
-                Rendered(taskId = NEW_TASK_ID_1, bounds = ORGANIZED_RENDERED_TASK_BOUNDS),
+                DesktopTaskPosition(
+                    fullscreenPosition = Hidden(NEW_TASK_ID_1),
+                    overviewPosition = ORGANIZED_RENDERED_TASK_BOUNDS_DATA,
+                ),
             )
 
         verify(getDesktopTaskFullscreenPositionUseCase).invoke(listOf(task))
-        assertThat(systemUnderTest.fullscreenTaskPositions[NEW_TASK_ID_1]?.isObscured).isTrue()
 
         val allCurrentOriginalTaskBounds =
             listOf(Rendered(taskId = NEW_TASK_ID_1, bounds = NEW_TASK_BOUNDS_1))
-        verify(organizeDesktopTasksUseCase)
-            .invoke(eq(allCurrentOriginalTaskBounds), any(), eq(emptyList()), isNull())
-    }
-
-    @Test
-    fun singleHiddenAndObscuredTaskPosition() {
-        whenever(getDesktopTaskFullscreenPositionUseCase.invoke(any()))
-            .thenReturn(
-                listOf(FullscreenPosition(NEW_TASK_ID_2, NEW_TASK_BOUNDS_2, isObscured = true))
-            )
-        whenever(organizeDesktopTasksUseCase.invoke(any(), any(), any(), isNull()))
-            .thenReturn(listOf(ORGANIZED_HIDDEN_TASK_BOUNDS_DATA))
-
-        val task2 = createTask(NEW_TASK_ID_2, NEW_TASK_BOUNDS_2)
-        systemUnderTest.bind(createDesktopTask(listOf(task2)))
-        systemUnderTest.organizeDesktopTasks(layoutConfig = TEST_LAYOUT_CONFIG)
-
-        val result = systemUnderTest.overviewTaskPositions
-        assertThat(result).containsExactly(NEW_TASK_ID_2, Hidden(NEW_TASK_ID_2))
-
-        assertThat(systemUnderTest.fullscreenTaskPositions[NEW_TASK_ID_2]?.isObscured).isTrue()
-        verify(getDesktopTaskFullscreenPositionUseCase).invoke(listOf(task2))
-
-        val allCurrentOriginalTaskBounds =
-            listOf(Rendered(taskId = NEW_TASK_ID_2, bounds = NEW_TASK_BOUNDS_2))
         verify(organizeDesktopTasksUseCase)
             .invoke(eq(allCurrentOriginalTaskBounds), any(), eq(emptyList()), isNull())
     }
@@ -139,8 +134,8 @@ class DesktopTaskViewModelTest {
         whenever(getDesktopTaskFullscreenPositionUseCase.invoke(any()))
             .thenReturn(
                 listOf(
-                    FullscreenPosition(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1, isObscured = false),
-                    FullscreenPosition(NEW_TASK_ID_2, NEW_TASK_BOUNDS_2, isObscured = false),
+                    Rendered(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1),
+                    Rendered(NEW_TASK_ID_2, NEW_TASK_BOUNDS_2),
                 )
             )
         whenever(organizeDesktopTasksUseCase.invoke(any(), any(), any(), isNull()))
@@ -151,16 +146,24 @@ class DesktopTaskViewModelTest {
         val task1 = createTask(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1)
         val task2 = createTask(NEW_TASK_ID_2, NEW_TASK_BOUNDS_2)
 
-        systemUnderTest.bind(createDesktopTask(listOf(task1, task2)))
-        systemUnderTest.organizeDesktopTasks(layoutConfig = TEST_LAYOUT_CONFIG)
+        systemUnderTest.organizeDesktopTasks(
+            tasks = listOf(task1, task2),
+            layoutConfig = TEST_LAYOUT_CONFIG,
+        )
 
-        val result = systemUnderTest.overviewTaskPositions
+        val result = systemUnderTest.desktopTaskPositions
         assertThat(result)
             .containsExactly(
                 NEW_TASK_ID_1,
-                Rendered(NEW_TASK_ID_1, bounds = ORGANIZED_RENDERED_TASK_BOUNDS),
+                DesktopTaskPosition(
+                    fullscreenPosition = Rendered(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1),
+                    overviewPosition = ORGANIZED_RENDERED_TASK_BOUNDS_DATA,
+                ),
                 NEW_TASK_ID_2,
-                Hidden(NEW_TASK_ID_2),
+                DesktopTaskPosition(
+                    fullscreenPosition = Rendered(NEW_TASK_ID_2, NEW_TASK_BOUNDS_2),
+                    overviewPosition = ORGANIZED_HIDDEN_TASK_BOUNDS_DATA,
+                ),
             )
 
         verify(getDesktopTaskFullscreenPositionUseCase).invoke(listOf(task1, task2))
@@ -177,26 +180,41 @@ class DesktopTaskViewModelTest {
     @Test
     fun oldOrganizedVisibilityData() {
         whenever(getDesktopTaskFullscreenPositionUseCase.invoke(any()))
-            .thenReturn(
-                listOf(FullscreenPosition(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1, isObscured = false))
-            )
+            .thenReturn(listOf(Rendered(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1)))
         whenever(organizeDesktopTasksUseCase.invoke(any(), any(), any(), isNull()))
             .thenReturn(listOf(ORGANIZED_RENDERED_TASK_BOUNDS_DATA))
 
         // Store data in the system before asking it to organize tasks to see if the data is
         // converted properly.
-        systemUnderTest.overviewTaskPositions =
-            mapOf(OLD_RENDERED_TASK_VISIBILITY_DATA_PAIR, OLD_HIDDEN_TASK_VISIBILITY_DATA_PAIR)
+        systemUnderTest.desktopTaskPositions =
+            mapOf(
+                OLD_RENDERED_TASK_ID to
+                    DesktopTaskPosition(
+                        fullscreenPosition = Hidden(OLD_RENDERED_TASK_ID),
+                        overviewPosition =
+                            Rendered(OLD_RENDERED_TASK_ID, bounds = OLD_RENDERED_TASK_BOUNDS),
+                    ),
+                OLD_HIDDEN_TASK_ID to
+                    DesktopTaskPosition(
+                        fullscreenPosition = Hidden(OLD_HIDDEN_TASK_ID),
+                        overviewPosition = Hidden(OLD_HIDDEN_TASK_ID),
+                    ),
+            )
 
         val task1 = createTask(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1)
-        systemUnderTest.bind(createDesktopTask(listOf(task1)))
-        systemUnderTest.organizeDesktopTasks(layoutConfig = TEST_LAYOUT_CONFIG)
+        systemUnderTest.organizeDesktopTasks(
+            tasks = listOf(task1),
+            layoutConfig = TEST_LAYOUT_CONFIG,
+        )
 
-        val result = systemUnderTest.overviewTaskPositions
+        val result = systemUnderTest.desktopTaskPositions
         assertThat(result)
             .containsExactly(
                 NEW_TASK_ID_1,
-                Rendered(NEW_TASK_ID_1, bounds = ORGANIZED_RENDERED_TASK_BOUNDS),
+                DesktopTaskPosition(
+                    fullscreenPosition = Rendered(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1),
+                    overviewPosition = ORGANIZED_RENDERED_TASK_BOUNDS_DATA,
+                ),
             )
 
         verify(getDesktopTaskFullscreenPositionUseCase).invoke(listOf(task1))
@@ -214,38 +232,33 @@ class DesktopTaskViewModelTest {
 
     @Test
     fun validDismissTaskId() {
-        // NEW_TASK_ID_2 will be used as the dismissed ID, so the GetObscuredDesktopTaskIdsUseCase
-        // should only be invoked on the first task.
         whenever(getDesktopTaskFullscreenPositionUseCase.invoke(any()))
-            .thenReturn(
-                listOf(FullscreenPosition(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1, isObscured = true))
-            )
+            .thenReturn(listOf(Rendered(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1)))
         whenever(organizeDesktopTasksUseCase.invoke(any(), any(), any(), any()))
             .thenReturn(listOf(ORGANIZED_RENDERED_TASK_BOUNDS_DATA))
 
         val task1 = createTask(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1)
-        val task2 = createTask(NEW_TASK_ID_2, NEW_TASK_BOUNDS_2)
 
-        systemUnderTest.bind(createDesktopTask(listOf(task1, task2)))
         systemUnderTest.organizeDesktopTasks(
+            tasks = listOf(task1),
             layoutConfig = TEST_LAYOUT_CONFIG,
             dismissedTaskId = NEW_TASK_ID_2,
         )
 
-        val result = systemUnderTest.overviewTaskPositions
+        val result = systemUnderTest.desktopTaskPositions
         assertThat(result)
             .containsExactly(
                 NEW_TASK_ID_1,
-                Rendered(NEW_TASK_ID_1, bounds = ORGANIZED_RENDERED_TASK_BOUNDS),
+                DesktopTaskPosition(
+                    fullscreenPosition = Rendered(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1),
+                    overviewPosition = ORGANIZED_RENDERED_TASK_BOUNDS_DATA,
+                ),
             )
 
         verify(getDesktopTaskFullscreenPositionUseCase).invoke(listOf(task1))
 
         val allCurrentOriginalTaskBounds =
-            listOf(
-                Rendered(taskId = NEW_TASK_ID_1, bounds = NEW_TASK_BOUNDS_1),
-                Rendered(taskId = NEW_TASK_ID_2, bounds = NEW_TASK_BOUNDS_2),
-            )
+            listOf(Rendered(taskId = NEW_TASK_ID_1, bounds = NEW_TASK_BOUNDS_1))
         verify(organizeDesktopTasksUseCase)
             .invoke(eq(allCurrentOriginalTaskBounds), any(), eq(emptyList()), eq(NEW_TASK_ID_2))
     }
@@ -253,19 +266,27 @@ class DesktopTaskViewModelTest {
     @Test
     fun organizeDesktopTasks_minimizedTask_taskPositionMinimized() {
         whenever(getDesktopTaskFullscreenPositionUseCase.invoke(any()))
-            .thenReturn(
-                listOf(FullscreenPosition(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1, isObscured = true))
-            )
+            .thenReturn(listOf(Hidden(NEW_TASK_ID_1)))
         whenever(organizeDesktopTasksUseCase.invoke(any(), any(), any(), isNull()))
             .thenReturn(emptyList())
 
         val minimizedTask = createTask(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1, isMinimized = true)
-        systemUnderTest.bind(createDesktopTask(listOf(minimizedTask)))
-        systemUnderTest.organizeDesktopTasks(layoutConfig = TEST_LAYOUT_CONFIG)
+        systemUnderTest.organizeDesktopTasks(
+            tasks = listOf(minimizedTask),
+            layoutConfig = TEST_LAYOUT_CONFIG,
+        )
 
         verify(getDesktopTaskFullscreenPositionUseCase).invoke(listOf(minimizedTask))
 
-        assertThat(systemUnderTest.fullscreenTaskPositions[NEW_TASK_ID_1]?.isObscured).isTrue()
+        val result = systemUnderTest.desktopTaskPositions
+        assertThat(result)
+            .containsExactly(
+                NEW_TASK_ID_1,
+                DesktopTaskPosition(
+                    fullscreenPosition = Hidden(NEW_TASK_ID_1),
+                    overviewPosition = Hidden(NEW_TASK_ID_1),
+                ),
+            )
     }
 
     @Test
@@ -289,20 +310,28 @@ class DesktopTaskViewModelTest {
             .thenReturn(true)
         whenever(getDesktopTaskFullscreenPositionUseCase.invoke(any())).thenAnswer { invocation ->
             val tasks = invocation.getArgument<List<Task>>(0)
-            tasks.map { FullscreenPosition(it.key.id, it.appBounds, isObscured = false) }
+            tasks.map { Rendered(it.key.id, it.appBounds!!) }
         }
         val task1 = createTask(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1)
 
-        systemUnderTest.bind(createDesktopTask(listOf(task1, transparentTask)))
-        systemUnderTest.organizeDesktopTasks(layoutConfig = TEST_LAYOUT_CONFIG)
+        systemUnderTest.organizeDesktopTasks(
+            tasks = listOf(task1, transparentTask),
+            layoutConfig = TEST_LAYOUT_CONFIG,
+        )
 
-        val result = systemUnderTest.overviewTaskPositions
+        val result = systemUnderTest.desktopTaskPositions
         assertThat(result)
             .containsExactly(
                 NEW_TASK_ID_1,
-                Rendered(NEW_TASK_ID_1, bounds = ORGANIZED_RENDERED_TASK_BOUNDS),
+                DesktopTaskPosition(
+                    fullscreenPosition = Rendered(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1),
+                    overviewPosition = ORGANIZED_RENDERED_TASK_BOUNDS_DATA,
+                ),
                 TRANSPARENT_TASK_ID,
-                Hidden(TRANSPARENT_TASK_ID),
+                DesktopTaskPosition(
+                    fullscreenPosition = Rendered(TRANSPARENT_TASK_ID, TRANSPARENT_TASK_BOUNDS),
+                    overviewPosition = Hidden(TRANSPARENT_TASK_ID),
+                ),
             )
 
         val allCurrentOriginalTaskBounds =
@@ -322,7 +351,7 @@ class DesktopTaskViewModelTest {
             )
         whenever(getDesktopTaskFullscreenPositionUseCase.invoke(any())).thenAnswer { invocation ->
             val tasks = invocation.getArgument<List<Task>>(0)
-            tasks.map { FullscreenPosition(it.key.id, it.appBounds, false) }
+            tasks.map { Rendered(it.key.id, it.appBounds!!) }
         }
 
         val task1 = createTask(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1)
@@ -330,18 +359,27 @@ class DesktopTaskViewModelTest {
             createTask(
                 SEMI_TRANSPARENT_TASK_ID,
                 SEMI_TRANSPARENT_TASK_BOUNDS,
-                windowingMode = WINDOWING_MODE_FULLSCREEN,
+                windowingMode = 1, // WINDOWING_MODE_FULLSCREEN
             )
-        systemUnderTest.bind(createDesktopTask(listOf(task1, transparentTask)))
-        systemUnderTest.organizeDesktopTasks(layoutConfig = TEST_LAYOUT_CONFIG)
+        systemUnderTest.organizeDesktopTasks(
+            tasks = listOf(task1, transparentTask),
+            layoutConfig = TEST_LAYOUT_CONFIG,
+        )
 
-        val result = systemUnderTest.overviewTaskPositions
+        val result = systemUnderTest.desktopTaskPositions
         assertThat(result)
             .containsExactly(
                 NEW_TASK_ID_1,
-                Rendered(NEW_TASK_ID_1, bounds = ORGANIZED_RENDERED_TASK_BOUNDS),
+                DesktopTaskPosition(
+                    fullscreenPosition = Rendered(NEW_TASK_ID_1, NEW_TASK_BOUNDS_1),
+                    overviewPosition = ORGANIZED_RENDERED_TASK_BOUNDS_DATA,
+                ),
                 SEMI_TRANSPARENT_TASK_ID,
-                Rendered(SEMI_TRANSPARENT_TASK_ID, bounds = ORGANIZED_RENDERED_TASK_BOUNDS),
+                DesktopTaskPosition(
+                    fullscreenPosition =
+                        Rendered(SEMI_TRANSPARENT_TASK_ID, SEMI_TRANSPARENT_TASK_BOUNDS),
+                    overviewPosition = ORGANIZED_RENDERED_TASK_BOUNDS_DATA_FOR_SEMITRANSPARENT_TASK,
+                ),
             )
 
         verify(getDesktopTaskFullscreenPositionUseCase).invoke(any())
@@ -358,7 +396,7 @@ class DesktopTaskViewModelTest {
 
     private fun createTask(
         id: Int,
-        appBounds: Rect,
+        appBounds: Rect?,
         isMinimized: Boolean = false,
         isActivityStackTransparent: Boolean = false,
         windowingMode: Int = 0,
@@ -378,9 +416,6 @@ class DesktopTaskViewModelTest {
             this.key.isActivityStackTransparent = isActivityStackTransparent
             this.isMinimized = isMinimized
         }
-
-    private fun createDesktopTask(tasks: List<Task>) =
-        DesktopTask(deskId = 0, desktopDisplayId = 0, tasks = tasks)
 
     companion object {
         private val TEST_LAYOUT_CONFIG =

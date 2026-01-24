@@ -49,6 +49,7 @@ import com.android.app.tracing.traceSection
 import com.android.internal.policy.GestureNavigationSettingsObserver
 import com.android.launcher3.DeviceProfile
 import com.android.launcher3.anim.AlphaUpdateListener
+import com.android.launcher3.folder.Folder
 import com.android.launcher3.taskbar.TaskbarControllers.LoggableTaskbarController
 import com.android.launcher3.taskbar.TaskbarInsetsController.DebugTouchableRegion.Companion.DEFAULT_TOUCH_REGION
 import com.android.launcher3.taskbar.TaskbarInsetsController.DebugTouchableRegion.Companion.DRAG_LAYER_INVISIBLE
@@ -56,6 +57,9 @@ import com.android.launcher3.taskbar.TaskbarInsetsController.DebugTouchableRegio
 import com.android.launcher3.taskbar.TaskbarInsetsController.DebugTouchableRegion.Companion.ICONS_INVISIBLE
 import com.android.launcher3.taskbar.TaskbarInsetsController.DebugTouchableRegion.Companion.PHONE_MODE
 import com.android.launcher3.taskbar.TaskbarInsetsController.DebugTouchableRegion.Companion.SYSTEM_DRAG_IN_PROGRESS
+import com.android.launcher3.taskbar.TaskbarInsetsController.DebugTouchableRegion.Companion.SYSTEM_DRAG_TO_TASKBAR_IN_PROGRESS
+import com.android.launcher3.taskbar.TaskbarInsetsController.DebugTouchableRegion.Companion.SYSTEM_DRAG_TO_TASKBAR_WITH_FOLDER_IN_PROGRESS
+import com.android.launcher3.taskbar.TaskbarInsetsController.DebugTouchableRegion.Companion.SYSTEM_DRAG_TO_TASKBAR_WITH_OVERFLOW_IN_PROGRESS
 import com.android.launcher3.taskbar.TaskbarInsetsController.DebugTouchableRegion.Companion.TRANSIENT_IN_OVERVIEW
 import com.android.launcher3.taskbar.TaskbarInsetsController.DebugTouchableRegion.Companion.UI_CONTROLLER_UNTOUCHABLE
 import com.android.launcher3.testing.shared.ResourceUtils
@@ -364,9 +368,39 @@ class TaskbarInsetsController(val context: TaskbarActivityContext) : LoggableTas
             touchableInsets = TOUCHABLE_INSETS_REGION
             debugTouchableRegion.lastSetTouchableReason = UI_CONTROLLER_UNTOUCHABLE
         } else if (controllers.taskbarOverlayController.isAnySystemDragInProgress) {
-            // Let touches pass through us.
-            touchableInsets = TOUCHABLE_INSETS_REGION
-            debugTouchableRegion.lastSetTouchableReason = SYSTEM_DRAG_IN_PROGRESS
+            if (!controllers.taskbarOverlayController.taskbarIsViableTargetForSystemDrag()) {
+                // Let touches pass through us.
+                touchableInsets = TOUCHABLE_INSETS_REGION
+                debugTouchableRegion.lastSetTouchableReason = SYSTEM_DRAG_IN_PROGRESS
+            } else if (
+                controllers.taskbarViewController.overflownAppsContainerController.isOpen()
+            ) {
+                // If overflow is shown, let taskbar (expected to be fullscreen) handle all touches
+                // until overflow bubble gets closed.
+                touchableInsets = TOUCHABLE_INSETS_FRAME
+                context.dragLayer.getBoundsInWindow(
+                    debugTouchableRegion.lastSetTouchableBounds,
+                    false,
+                )
+                debugTouchableRegion.lastSetTouchableReason =
+                    SYSTEM_DRAG_TO_TASKBAR_WITH_OVERFLOW_IN_PROGRESS
+            } else if (Folder.getOpen(context) != null) {
+                // If a folder is open, let taskbar (expected to be fullscreen) handle all touches
+                // until overflow bubble gets closed.
+                touchableInsets = TOUCHABLE_INSETS_FRAME
+                context.dragLayer.getBoundsInWindow(
+                    debugTouchableRegion.lastSetTouchableBounds,
+                    false,
+                )
+                debugTouchableRegion.lastSetTouchableReason =
+                    SYSTEM_DRAG_TO_TASKBAR_WITH_FOLDER_IN_PROGRESS
+            } else {
+                // Allow drag to enter taskbar.
+                touchableInsets = TOUCHABLE_INSETS_REGION
+                insetsInfo.touchableRegion.set(defaultTouchableRegion)
+                debugTouchableRegion.lastSetTouchableBounds.set(defaultTouchableRegion.bounds)
+                debugTouchableRegion.lastSetTouchableReason = SYSTEM_DRAG_TO_TASKBAR_IN_PROGRESS
+            }
         } else if (context.isTaskbarWindowFullscreen) {
             // Intercept entire fullscreen window.
             touchableInsets = TOUCHABLE_INSETS_FRAME
@@ -459,6 +493,12 @@ class TaskbarInsetsController(val context: TaskbarActivityContext) : LoggableTas
             const val DRAG_LAYER_INVISIBLE = "Taskbar is invisible"
             const val UI_CONTROLLER_UNTOUCHABLE = "Taskbar is not touchable"
             const val SYSTEM_DRAG_IN_PROGRESS = "System drag is in progress"
+            const val SYSTEM_DRAG_TO_TASKBAR_IN_PROGRESS =
+                "System drag handleble by taskbar in progress"
+            const val SYSTEM_DRAG_TO_TASKBAR_WITH_FOLDER_IN_PROGRESS =
+                "System drag handleble by taskbar in progress, folder open"
+            const val SYSTEM_DRAG_TO_TASKBAR_WITH_OVERFLOW_IN_PROGRESS =
+                "System drag handleble by taskbar in progress, overflow open"
             const val FULLSCREEN_TASKBAR_WINDOW = "Taskbar is fullscreen"
             const val TRANSIENT_IN_OVERVIEW = "Transient Taskbar is in Overview"
             const val DEFAULT_TOUCH_REGION = "Using default touchable region"

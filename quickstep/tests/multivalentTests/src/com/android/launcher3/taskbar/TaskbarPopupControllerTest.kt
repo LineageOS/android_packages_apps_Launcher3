@@ -31,12 +31,14 @@ import com.android.launcher3.Flags.FLAG_ENABLE_TASKBAR_UI_THREAD
 import com.android.launcher3.LauncherSettings
 import com.android.launcher3.R
 import com.android.launcher3.dragndrop.DragView
+import com.android.launcher3.folder.FolderIcon
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.popup.PinToTaskbarShortcut
 import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
+import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatFolderItem
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatWorkspaceItem
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createRecents
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createTestWorkspaceItem
@@ -74,6 +76,7 @@ class TaskbarPopupControllerTest {
     private lateinit var taskbarView: TaskbarView
     private lateinit var hotseatIcon: BubbleTextView
     private lateinit var recentTaskIcon: BubbleTextView
+    private lateinit var folderIcon: FolderIcon
 
     @Before
     fun setup() {
@@ -82,9 +85,16 @@ class TaskbarPopupControllerTest {
             taskbarView = taskbarContext.dragLayer.findViewById(R.id.taskbar_view)
         }
 
-        val hotseatItems = arrayOf(createHotseatWorkspaceItem())
+        val hotseatItems =
+            arrayOf(
+                createHotseatWorkspaceItem(),
+                createHotseatFolderItem().apply {
+                    container = LauncherSettings.Favorites.CONTAINER_HOTSEAT
+                },
+            )
         popupController.setApps(
             hotseatItems
+                .filterIsInstance<WorkspaceItemInfo>()
                 .map { item -> AppInfo(item.targetComponent, item.title, item.user, item.intent) }
                 .toTypedArray()
         )
@@ -100,6 +110,7 @@ class TaskbarPopupControllerTest {
                 taskbarView.iconViews.filterIsInstance<BubbleTextView>().first {
                     it.tag is SingleTask
                 }
+            folderIcon = taskbarView.iconViews.filterIsInstance<FolderIcon>().first()
         }
     }
 
@@ -116,6 +127,14 @@ class TaskbarPopupControllerTest {
         whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
         assertThat(hasPopupMenu()).isFalse()
         runOnTaskbarUiThreadSync { popupController.show(recentTaskIcon) }
+        assertThat(hasPopupMenu()).isTrue()
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_PINNING_APP_WITH_CONTEXT_MENU)
+    fun showForIcon_folderItem() {
+        assertThat(hasPopupMenu()).isFalse()
+        runOnTaskbarUiThreadSync { popupController.show(folderIcon) }
         assertThat(hasPopupMenu()).isTrue()
     }
 
@@ -176,7 +195,7 @@ class TaskbarPopupControllerTest {
     }
 
     @Test
-    fun createPinShortcut_itemAlreadyPinned_returnsUnpinShortcut() {
+    fun createPinShortcut_appAlreadyPinned_returnsUnpinShortcut() {
         val hotseatItems = SparseArray<ItemInfo>()
         val appUser = android.os.Process.myUserHandle()
         val appAIntent = Intent().setComponent(ComponentName("com.example.app", "AppAActivity"))
@@ -215,7 +234,7 @@ class TaskbarPopupControllerTest {
 
     @Test
     @EnableFlags(FLAG_ENABLE_TASKBAR_UI_THREAD)
-    fun createPinShortcut_itemAlreadyPinned_withUiThreadEnabled_returnsUnpinShortcut() {
+    fun createPinShortcut_appAlreadyPinned_withUiThreadEnabled_returnsUnpinShortcut() {
         val hotseatItems = SparseArray<ItemInfo>()
         val appUser = android.os.Process.myUserHandle()
         val appAIntent = Intent().setComponent(ComponentName("com.example.app", "AppAActivity"))
@@ -244,6 +263,27 @@ class TaskbarPopupControllerTest {
 
         val shortcut =
             popupController.createPinShortcut(taskbarContext, itemFromAllApps, allAppsAppIcon)
+        Assert.assertNotNull("Shortcut should not be null", shortcut)
+        Assert.assertTrue(
+            "Shortcut should be PinToTaskbarShortcut",
+            shortcut is PinToTaskbarShortcut<*>,
+        )
+        Assert.assertFalse((shortcut as PinToTaskbarShortcut<*>).isPin)
+    }
+
+    @Test
+    fun createPinShortcut_folderAlreadyPinned_returnsUnpinShortcut() {
+        val hotseatItems = SparseArray<ItemInfo>()
+        val pinnedFolder =
+            createHotseatFolderItem().apply {
+                container = LauncherSettings.Favorites.CONTAINER_HOTSEAT
+            }
+
+        hotseatItems.put(0, pinnedFolder)
+        popupController.taskbarInfoList = hotseatItems
+        val folderIcon = Mockito.mock(FolderIcon::class.java)
+
+        val shortcut = popupController.createPinShortcut(taskbarContext, pinnedFolder, folderIcon)
         Assert.assertNotNull("Shortcut should not be null", shortcut)
         Assert.assertTrue(
             "Shortcut should be PinToTaskbarShortcut",

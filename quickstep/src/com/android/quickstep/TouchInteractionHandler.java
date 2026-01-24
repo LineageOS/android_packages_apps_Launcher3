@@ -68,6 +68,7 @@ import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.desktop.DesktopAppLaunchTransitionManager;
 import com.android.launcher3.display.DisplayController;
 import com.android.launcher3.statehandlers.DesktopVisibilityController;
+import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.statemanager.StatefulActivity;
 import com.android.launcher3.taskbar.TaskbarActivityContext;
 import com.android.launcher3.taskbar.TaskbarManager;
@@ -148,7 +149,7 @@ public class TouchInteractionHandler extends ContextWrapper {
                     if (task.configuration.windowConfiguration.getActivityType()
                             != ACTIVITY_TYPE_HOME
                             || task.displayId != DEFAULT_DISPLAY) {
-                        // We only want to handle home intent starts, and only on the primary
+                        // We only want to handle home intent starts on the primary
                         // display.
                         return;
                     }
@@ -161,26 +162,15 @@ public class TouchInteractionHandler extends ContextWrapper {
                             instanceof RecentsWindowManager recentsWindowManager)) {
                         return;
                     }
-                    TaskAnimationManager taskAnimationManager =
-                            mTaskAnimationManagerRepository.get(DEFAULT_DISPLAY);
-                    if (taskAnimationManager == null) {
+                    StateManager<RecentsState, RecentsWindowManager> stateManager =
+                            recentsWindowManager.getStateManager();
+                    if (!stateManager.getState().isInOverview()) {
+                        // Only hide the recents surface if we receive the home intent while in
+                        // overview, otherwise gestures will appear to stop responding when the home
+                        // intent is received while in BACKGROUND_APP state.
                         return;
                     }
-                    if (taskAnimationManager.hasOngoingGesture()
-                            && !defaultContainerInterface.isInLiveTileMode()) {
-                        // We start the home intent for gestures, so we shouldn't hide the recents
-                        // surface prematurely. Otherwise, the gesture will appear to stop
-                        // responding. However, taskAnimationManager.hasOngoingGesture() will still
-                        // return true if the home intent is started through KEYCODE_HOME in
-                        // live-tile mode.
-                        return;
-                    }
-                    if (!recentsWindowManager.isInState(RecentsState.HIDDEN)) {
-                        // Forcibly reset state so the recents surface doesn't get stuck in
-                        // background app state (see StateManager.moveToRestState())
-                        recentsWindowManager.getStateManager().goToState(
-                                RecentsState.HIDDEN, /* animated= */ true);
-                    }
+                    stateManager.moveToRestState(/* animated=*/ true);
                 }
             };
 

@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.quickstep.recents.domain.model
+package com.android.quickstep.views
 
-import android.graphics.Rect
+import android.content.Context
+import android.util.AttributeSet
+import android.widget.FrameLayout
+import kotlin.math.max
 
-/**
- * Represents the layout data for a desktop task.
- *
- * @property taskId The ID of the task.
- * @property bounds The bounds of the task in fullscreen.
- * @property isObscured Whether the task is completely obscured by other tasks in fullscreen.
- */
-data class FullscreenPosition(val taskId: TaskId, val bounds: Rect, val isObscured: Boolean)
+class EmptyRecentsMessageView
+@JvmOverloads
+constructor(context: Context, attrs: AttributeSet? = null) : FrameLayout(context, attrs) {
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        val squareSize = max(measuredWidth, measuredHeight)
+        setMeasuredDimension(squareSize, squareSize)
+    }
+}

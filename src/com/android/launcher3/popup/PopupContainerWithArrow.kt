@@ -54,11 +54,11 @@ import kotlin.math.max
 class PopupContainerWithArrow<T>
 private constructor(
     context: Context,
-    originalView: View,
+    val originalIcon: View,
     itemInfo: ItemInfo,
     updateIconUi: Boolean,
 ) :
-    PopupContainer<T>(context, originalView, itemInfo, updateIconUi),
+    PopupContainer<T>(context, originalIcon, itemInfo, updateIconUi),
     DragSource,
     DragController.DragListener,
     Popup where T : Context, T : ActivityContext {
@@ -76,8 +76,6 @@ private constructor(
     private var containerWidth: Int = resources.getDimensionPixelSize(R.dimen.bg_popup_item_width)
     private var deepShortcutContainer: ViewGroup? = null
     private var currentHeight = 0f
-
-    val originalIcon = originalView as BubbleTextView
 
     var itemDragHandler: PopupItemDragHandler? = null
         private set
@@ -103,7 +101,7 @@ private constructor(
         )
         if (
             (itemInfo !is ItemInfoWithIcon) ||
-            (itemInfo.runtimeStatusFlags and ItemInfoWithIcon.FLAG_NOT_PINNABLE) == 0
+                (itemInfo.runtimeStatusFlags and ItemInfoWithIcon.FLAG_NOT_PINNABLE) == 0
         ) {
             itemDragHandler = LauncherPopupItemDragHandler(launcher, this)
         }
@@ -117,6 +115,24 @@ private constructor(
         if (ShortcutUtil.supportsDeepShortcuts(itemInfo)) {
             loadAppShortcuts(itemInfo)
         }
+    }
+
+    /**
+     * Populates and shows the popup container with only the provided system shortcuts.
+     *
+     * @param systemShortcuts List of system shortcuts to be displayed in the popup.
+     */
+    fun showSystemShortcuts(systemShortcuts: List<SystemShortcut<*>>) {
+        if (systemShortcuts.isEmpty()) {
+            return
+        }
+        containerWidth = resources.getDimensionPixelSize(R.dimen.bg_popup_item_width)
+        addSystemShortcuts(
+            systemShortcuts,
+            R.layout.system_shortcut_rows_container,
+            R.layout.system_shortcut,
+        )
+        show()
     }
 
     /**

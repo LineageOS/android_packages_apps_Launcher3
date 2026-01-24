@@ -20,9 +20,9 @@ import android.graphics.Rect
 import android.graphics.RectF
 import androidx.core.graphics.toRect
 import com.android.quickstep.recents.domain.model.DesktopLayoutConfig
-import com.android.quickstep.recents.domain.model.OverviewPosition
-import com.android.quickstep.recents.domain.model.OverviewPosition.Hidden
-import com.android.quickstep.recents.domain.model.OverviewPosition.Rendered
+import com.android.quickstep.recents.domain.model.TaskPosition
+import com.android.quickstep.recents.domain.model.TaskPosition.Hidden
+import com.android.quickstep.recents.domain.model.TaskPosition.Rendered
 import javax.inject.Inject
 
 /**
@@ -35,62 +35,50 @@ class OrganizeDesktopTasksUseCase @Inject constructor() {
      * Arranges desktop tasks or rebalances layout after a task dismissal.
      *
      * @param allCurrentOriginalTaskBounds List of all tasks currently considered for layout, with
-     *   their original, unorganized bounds. If a task is being dismissed, it should be included in
-     *   this list.
+     *   their original, unorganized bounds.
      * @param layoutConfig Configuration for layout (margins, padding, etc.).
      * @param taskPositionsHint A hint of the previous task positions, used to decide whether to
      *   reflow.
      * @param dismissedTaskId Optional ID of a task to be dismissed. If provided, the logic may
      *   choose to reflow the existing layout or perform a full reorganization.
-     * @return A list of [OverviewPosition] representing the new layout. Tasks that are laid out are
+     * @return A list of [TaskPosition] representing the new layout. Tasks that are laid out are
      *   [Rendered]; tasks that are hidden (due to empty original bounds or inability to fit) are
      *   [Hidden].
      */
     operator fun invoke(
         allCurrentOriginalTaskBounds: List<Rendered>,
         layoutConfig: DesktopLayoutConfig,
-        taskPositionsHint: List<OverviewPosition>? = null,
+        taskPositionsHint: List<TaskPosition>? = null,
         dismissedTaskId: Int? = null,
-    ): List<OverviewPosition> {
+    ): List<TaskPosition> {
         if (dismissedTaskId == null) {
             // No task dismissed, perform full organization on all current tasks.
             return performFullOrganization(allCurrentOriginalTaskBounds, layoutConfig)
         }
 
-        // A task is being dismissed.
-        val remainingOriginalTaskBounds =
-            allCurrentOriginalTaskBounds.filterNot { it.taskId == dismissedTaskId }
-
-        if (remainingOriginalTaskBounds.isEmpty() || taskPositionsHint == null) {
+        if (allCurrentOriginalTaskBounds.isEmpty() || taskPositionsHint == null) {
             // Last task was dismissed or we don't have any previous layout position data,
             // performFullOrganization will be performed.
-            return performFullOrganization(remainingOriginalTaskBounds, layoutConfig)
+            return performFullOrganization(allCurrentOriginalTaskBounds, layoutConfig)
         }
 
-        val remainingPreviousOrganizedTaskPosition =
-            taskPositionsHint.filterNot { it.taskId == dismissedTaskId }
         val dismissedTaskData = taskPositionsHint.find { it.taskId == dismissedTaskId }
         // If the dismissed task window was a hidden task window, we can still use the previous
         // layout.
         if (dismissedTaskData is Hidden) {
-            return remainingPreviousOrganizedTaskPosition
+            return taskPositionsHint.filterNot { it.taskId == dismissedTaskId }
         }
 
-        val hadHiddenTasksInPreviousLayout =
-            remainingPreviousOrganizedTaskPosition.any { it is Hidden }
+        val hadHiddenTasksInPreviousLayout = taskPositionsHint.any { it is Hidden }
         if (hadHiddenTasksInPreviousLayout) {
             // Now, check whether the new full layout can show/hide different set of task
             // windows, if so, use the full layout, otherwise, use the reflow layout.
             val tentativeLayoutForRemaining =
-                performFullOrganization(remainingOriginalTaskBounds, layoutConfig)
+                performFullOrganization(allCurrentOriginalTaskBounds, layoutConfig)
 
             val taskIds1 =
                 tentativeLayoutForRemaining.filterIsInstance<Rendered>().map { it.taskId }.toSet()
-            val taskIds2 =
-                remainingPreviousOrganizedTaskPosition
-                    .filterIsInstance<Rendered>()
-                    .map { it.taskId }
-                    .toSet()
+            val taskIds2 = taskPositionsHint.filterIsInstance<Rendered>().map { it.taskId }.toSet()
             if (taskIds1 != taskIds2) {
                 return tentativeLayoutForRemaining
             }
@@ -105,8 +93,7 @@ class OrganizeDesktopTasksUseCase @Inject constructor() {
             )
 
         // Preserve hidden tasks from the previous layout (that were not the dismissed task).
-        val hiddenTasksToPreserve =
-            remainingPreviousOrganizedTaskPosition.filterIsInstance<Hidden>()
+        val hiddenTasksToPreserve = taskPositionsHint.filterIsInstance<Hidden>()
 
         return reflowedRenderedTasks + hiddenTasksToPreserve
     }
@@ -143,14 +130,14 @@ class OrganizeDesktopTasksUseCase @Inject constructor() {
      *   includes the task's ID and its original bounds.
      * @param layoutConfig Configuration parameters for the layout, including margins, padding,
      *   minimum task dimensions, and maximum row count.
-     * @return A list of [OverviewPosition], with each element corresponding to an input task.
-     *   Elements will be [Rendered] with new, calculated bounds if the task is laid out, or
-     *   [Hidden] if the task was initially empty-bounded or could not fit into the layout.
+     * @return A list of [TaskPosition], with each element corresponding to an input task. Elements
+     *   will be [Rendered] with new, calculated bounds if the task is laid out, or [Hidden] if the
+     *   task was initially empty-bounded or could not fit into the layout.
      */
     private fun performFullOrganization(
         taskBounds: List<Rendered>,
         layoutConfig: DesktopLayoutConfig,
-    ): List<OverviewPosition> {
+    ): List<TaskPosition> {
         if (taskBounds.isEmpty()) {
             return emptyList()
         }

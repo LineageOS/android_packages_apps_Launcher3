@@ -47,10 +47,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -85,7 +88,7 @@ fun ComposePopup(
     viewModel: PopupViewModel,
     onClickListener: (PopupClickEvent) -> Unit,
     onAddIconClick: (ItemInfoWithIcon) -> Unit,
-    onDeepShortcutLongPress: (ItemInfoWithIcon) -> Unit,
+    onDeepShortcutLongPress: (ItemInfoWithIcon, Offset) -> Unit,
     onMaxHeightMeasured: ((Int) -> Unit)?,
 ) {
     val state = viewModel.state
@@ -145,7 +148,7 @@ private fun ComposePopupContent(
     targetState: PopupUiState,
     onClickListener: (PopupClickEvent) -> Unit,
     onAddIconClick: (ItemInfoWithIcon) -> Unit,
-    onDeepShortcutLongPress: (ItemInfoWithIcon) -> Unit,
+    onDeepShortcutLongPress: (ItemInfoWithIcon, Offset) -> Unit,
     onMaxHeightMeasured: ((Int) -> Unit)?,
 ) {
     val density = LocalDensity.current
@@ -361,7 +364,7 @@ fun ExpandableHybridPopup(
     onToggle: (ExpandedSection) -> Unit,
     onClickListener: (PopupClickEvent) -> Unit,
     onAddButtonClick: (ItemInfoWithIcon) -> Unit,
-    onDeepShortcutLongPress: (ItemInfoWithIcon) -> Unit,
+    onDeepShortcutLongPress: (ItemInfoWithIcon, Offset) -> Unit,
 ) {
     val systemTransitionState = remember { MutableTransitionState(isSystemShortcutsExpanded) }
     LaunchedEffect(isSystemShortcutsExpanded) {
@@ -435,7 +438,7 @@ private fun SystemShortcutsSection(
     standardShortcuts: List<PopupItem>,
     onClick: (PopupClickEvent) -> Unit,
 ) {
-    Column {
+    Column(modifier = Modifier.semantics { contentDescription = "system_shortcuts_container" }) {
         if (compactShortcuts.isNotEmpty()) {
             Row(
                 modifier =
@@ -501,15 +504,15 @@ private fun DeepShortcutsContent(
     deepShortcuts: List<ItemInfoWithIcon?>,
     onClick: (PopupClickEvent) -> Unit,
     onAddButtonClick: (ItemInfoWithIcon) -> Unit,
-    onDeepShortcutLongPress: (ItemInfoWithIcon) -> Unit,
+    onDeepShortcutLongPress: (ItemInfoWithIcon, Offset) -> Unit,
 ) {
-    Column {
+    Column(modifier = Modifier.semantics { contentDescription = "deep_shortcuts_container" }) {
         deepShortcuts.forEach { shortcut ->
             DeepShortcutMenuItem(
                 shortcut = shortcut,
                 onClick = onClick,
                 onAddButtonClick = onAddButtonClick,
-                onLongClick = onDeepShortcutLongPress,
+                onLongClick = { item, offset -> onDeepShortcutLongPress(item, offset) },
             )
         }
     }

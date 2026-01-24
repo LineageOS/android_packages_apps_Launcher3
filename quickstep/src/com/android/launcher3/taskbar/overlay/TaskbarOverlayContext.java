@@ -24,7 +24,6 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
 
-import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.InsettableFrameLayout.LayoutParams;
 import com.android.launcher3.R;
@@ -229,8 +228,8 @@ public class TaskbarOverlayContext extends BaseTaskbarContext {
     public void onPopupVisibilityChanged(boolean isVisible) {}
 
     @Override
-    public void showPopupMenuForIcon(BubbleTextView btv) {
-        mPopupController.show(btv);
+    public void showPopupMenuForIcon(View icon) {
+        mPopupController.show(icon);
     }
 
     @Override

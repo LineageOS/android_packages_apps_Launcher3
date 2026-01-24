@@ -201,8 +201,8 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         dragDelegate.releaseDropSlot()
     }
 
-    override fun getPinIndex(): Int {
-        return dragDelegate.getPinIndex()
+    override fun getPinIndex(startingIndex: Int): Int {
+        return dragDelegate.getPinIndex(startingIndex)
     }
 
     override fun updateItemViewVisibilityForDragState(itemView: View, isDragged: Boolean) {

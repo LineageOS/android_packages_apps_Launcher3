@@ -31,6 +31,7 @@ import static com.android.quickstep.OverviewComponentObserver.startHomeIntentSaf
 import static com.android.quickstep.fallback.RecentsState.HIDDEN;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityOptions;
 import android.content.Context;
@@ -350,6 +351,11 @@ public class RecentsWindowSwipeHandler extends AbsSwipeUpHandler<RecentsWindowMa
             PendingAnimation pa = new PendingAnimation(mDuration);
             pa.setFloat(mRecentsAlpha, AnimatedFloat.VALUE, 0, ACCELERATE);
             pa.setFloat(mHomeAlpha, AnimatedFloat.VALUE, 1, ACCELERATE);
+            pa.addStartListener(() -> {
+                // Cancel any ongoing state manager animations since this is a non-user
+                // controlled animation to home.
+                mRecentsWindowManager.getStateManager().cancelAnimation();
+            });
             pa.addListener(new AnimationSuccessListener() {
                 @Override
                 public void onAnimationSuccess(Animator animator) {

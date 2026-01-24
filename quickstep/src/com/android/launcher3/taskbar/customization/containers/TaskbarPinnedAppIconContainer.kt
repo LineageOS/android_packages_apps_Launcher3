@@ -260,7 +260,7 @@ class TaskbarPinnedAppIconContainer(context: Context) :
                 if (
                     event.isFromSource(InputDevice.SOURCE_MOUSE) &&
                         (event.buttonState and MotionEvent.BUTTON_SECONDARY) != 0 &&
-                        v is BubbleTextView
+                        (v is BubbleTextView || v is FolderIcon)
                 ) {
                     activityContext.showPopupMenuForIcon(v)
                     true

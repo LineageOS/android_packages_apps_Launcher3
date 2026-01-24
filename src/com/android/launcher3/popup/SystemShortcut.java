@@ -78,7 +78,7 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
     protected final T mTarget;
     protected final ItemInfo mItemInfo;
     protected final View mOriginalView;
-    protected final boolean mIsCollapsible;
+    public final boolean mIsCollapsible;
 
     private final AbstractFloatingViewHelper mAbstractFloatingViewHelper;
 

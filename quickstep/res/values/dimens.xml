@@ -176,7 +176,8 @@
     <dimen name="quick_switch_scaling_scroll_threshold">100dp</dimen>
 
     <dimen name="recents_empty_message_text_size">14sp</dimen>
-    <dimen name="recents_empty_message_text_padding">16dp</dimen>
+    <dimen name="recents_empty_message_text_padding">32dp</dimen>
+    <dimen name="recents_empty_message_drawable_padding">16dp</dimen>
     <dimen name="recents_empty_message_icon_size">60dp</dimen>
     <dimen name="recents_empty_message_background_size">190dp</dimen>
     <dimen name="recents_empty_message_background_size_large">288dp</dimen>

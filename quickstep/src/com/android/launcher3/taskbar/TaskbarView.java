@@ -1365,8 +1365,8 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
             icon.setOnTouchListener((v, event) -> {
                 if (event.isFromSource(InputDevice.SOURCE_MOUSE)
                         && (event.getButtonState() & MotionEvent.BUTTON_SECONDARY) != 0
-                        && v instanceof BubbleTextView) {
-                    mActivityContext.showPopupMenuForIcon((BubbleTextView) v);
+                        && (v instanceof BubbleTextView || v instanceof FolderIcon)) {
+                    mActivityContext.showPopupMenuForIcon(v);
                     return true;
                 }
                 return false;
@@ -1697,7 +1697,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         return icons;
     }
 
-    private int getNumOfVisibleIconsInPinnedSection() {
+    protected int getNumOfVisibleIconsInPinnedSection() {
         ViewGroup parent = this;
         if (mHotseatIconsContainer != null) {
             parent = mHotseatIconsContainer;
@@ -1898,13 +1898,15 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
     }
 
     @Override
-    public int getPinIndex() {
+    public int getPinIndex(int startingIndex) {
         // RTL in HotseatIconsContainer has different logic so the index starts from right to left.
-        if (mIsRtl && mHotseatIconsContainer != null && mDragDelegate.getPinIndex() != -1) {
-            return mHotseatIconsContainer.getVisibleChildCount() - mDragDelegate.getPinIndex() - 1;
+        if (mIsRtl && mHotseatIconsContainer != null
+                && mDragDelegate.getPinIndex(startingIndex) != -1) {
+            return mHotseatIconsContainer.getVisibleChildCount()
+                    - mDragDelegate.getPinIndex(startingIndex) - 1;
         }
 
-        return mDragDelegate.getPinIndex();
+        return mDragDelegate.getPinIndex(startingIndex);
     }
 
     @Override

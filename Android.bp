@@ -218,6 +218,7 @@ android_library {
         "//frameworks/libs/systemui:animationlib",
         "//frameworks/libs/systemui:contextualeducationlib",
         "launcher-testing-shared",
+        "com_android_launcher3_flags_lib",
     ],
     srcs: [
         "tests/tapl/**/*.java",
