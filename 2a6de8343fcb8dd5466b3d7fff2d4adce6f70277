@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e4d49c82_11ab120e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 6360
+      },
+      "writtenOn": "2026-01-24T05:16:27Z",
+      "side": 1,
+      "message": "Hi, this is crdroid commit as Derp was closed source back then. Please check original commited date here: https://github.com/crdroidandroid/android_packages_apps_Launcher3/commit/4cebf4a965fb20965d0cf4617128ea27ec739217 and then pushed by derpies here: https://github.com/DerpFest-AOSP/packages_apps_DerpLauncher/commit/6d0cac1268039c01268718d781ab4db1397761d1",
+      "revId": "2a6de8343fcb8dd5466b3d7fff2d4adce6f70277",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
