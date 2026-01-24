@@ -16,6 +16,23 @@
       "message": "Hi, this is crdroid commit as Derp was closed source back then. Please check original commited date here: https://github.com/crdroidandroid/android_packages_apps_Launcher3/commit/4cebf4a965fb20965d0cf4617128ea27ec739217 and then pushed by derpies here: https://github.com/DerpFest-AOSP/packages_apps_DerpLauncher/commit/6d0cac1268039c01268718d781ab4db1397761d1",
       "revId": "2a6de8343fcb8dd5466b3d7fff2d4adce6f70277",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "53e023f9_4a5a357c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 16185
+      },
+      "writtenOn": "2026-01-24T07:41:53Z",
+      "side": 1,
+      "message": "Alright - Gerrit is not the place for drama.\n\nDevrel@ email if there\u0027s serious issues or infractions.\n\nFurther argument/drama on their change will result in moderation.",
+      "revId": "2a6de8343fcb8dd5466b3d7fff2d4adce6f70277",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
