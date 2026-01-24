@@ -48,6 +48,7 @@ import static com.android.launcher3.util.Executors.getTaskbarUiThread;
 import static com.android.quickstep.RecentsFilterState.EMPTY_FILTER;
 import static com.android.quickstep.util.AnimUtils.completeRunnableListCallback;
 import static com.android.quickstep.util.ExternalDisplaysKt.isExternalDisplay;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DUAL_SHADE_ENABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING;
 import static com.android.window.flags.Flags.enableDesktopFirstSplitscreenRefocusBugfix;
@@ -513,6 +514,11 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     @Override
     public int getDisplayHeight() {
         return DisplayController.INSTANCE.get(this).getInfo().currentSize.y;
+    }
+
+    public boolean isDesktopFormFactor() {
+        return mWindowContext.getResources().getBoolean(
+                R.bool.desktop_form_factor);
     }
 
     /**
@@ -1216,8 +1222,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             boolean fromInit) {
         mControllers.navbarButtonsViewController.updateStateForSysuiFlags(systemUiStateFlags,
                 fromInit);
-        boolean isShadeVisible = (systemUiStateFlags & SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE) != 0;
-        onNotificationShadeExpandChanged(isShadeVisible, fromInit || isPhoneMode());
+        onNotificationShadeExpandChanged(systemUiStateFlags, fromInit || isPhoneMode());
         mControllers.taskbarViewController.setRecentsButtonDisabled(
                 mControllers.navbarButtonsViewController.isRecentsDisabled()
                         || isNavBarKidsModeActive());
@@ -1246,13 +1251,22 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     /**
      * Hides the taskbar icons and background when the notification shade is expanded.
      */
-    private void onNotificationShadeExpandChanged(boolean isExpanded, boolean skipAnim) {
+    private void onNotificationShadeExpandChanged(long systemUiStateFlags,
+            boolean skipAnim) {
+        boolean isExpanded = (systemUiStateFlags & SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE) != 0;
+        boolean isDualShadeEnabled = (systemUiStateFlags & SYSUI_STATE_DUAL_SHADE_ENABLED) != 0;
         boolean isExpandedUpdated = isExpanded != mIsNotificationShadeExpanded;
         mIsNotificationShadeExpanded = isExpanded;
         // Close all floating views within the Taskbar window to make sure nothing is shown over
         // the notification shade.
         if (isExpanded) {
             AbstractFloatingView.closeAllOpenViewsExcept(this, TYPE_TASKBAR_OVERLAY_PROXY);
+        }
+
+        // Avoid hiding the taskbar when shade is shown with dual shade enabled on desktop form
+        // factor.
+        if (isDualShadeEnabled && isDesktopFormFactor()) {
+            return;
         }
 
         float alpha = isExpanded ? 0 : 1;
