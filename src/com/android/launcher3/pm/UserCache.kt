@@ -31,11 +31,8 @@ import com.android.launcher3.concurrent.annotations.LightweightBackground
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.LauncherAppSingleton
-import com.android.launcher3.icons.BitmapInfo
-import com.android.launcher3.icons.UserBadgeDrawable
 import com.android.launcher3.util.DaggerSingletonObject
 import com.android.launcher3.util.DaggerSingletonTracker
-import com.android.launcher3.util.FlagOp
 import com.android.launcher3.util.LooperExecutor
 import com.android.launcher3.util.MutableListenableStream
 import com.android.launcher3.util.SimpleBroadcastReceiver
@@ -217,15 +214,6 @@ constructor(
         @JvmStatic
         fun getInstance(context: Context): UserCache {
             return INSTANCE[context]
-        }
-
-        /** Get a non-themed [UserBadgeDrawable] based on the provided [UserHandle]. */
-        @JvmStatic
-        fun getBadgeDrawable(context: Context, userHandle: UserHandle): UserBadgeDrawable? {
-            return BitmapInfo.LOW_RES_INFO.withFlags(
-                    getInstance(context).getUserInfo(userHandle).applyBitmapInfoFlags(FlagOp.NO_OP)
-                )
-                .getBadgeDrawable(context, false /* isThemed */) as UserBadgeDrawable?
         }
     }
 }

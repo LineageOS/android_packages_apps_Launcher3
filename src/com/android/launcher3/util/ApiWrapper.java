@@ -179,13 +179,6 @@ public class ApiWrapper {
         return null;
     }
 
-    /**
-     * Checks if the shortcut is using an icon with file or URI source
-     */
-    public boolean isFileDrawable(@NonNull ShortcutInfo shortcutInfo) {
-        return false;
-    }
-
     /** Captures a snapshot of the host content as a bitmap */
     public Bitmap captureSnapshot(SurfaceControlViewHost host, int width, int height) {
         return BitmapRenderer.createHardwareBitmap(width, height, host.getView()::draw);

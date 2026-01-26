@@ -173,9 +173,6 @@ open class SystemApiWrapper @Inject constructor(@ApplicationContext context: Con
         return StatusBarTouchController(launcher, isEnabledCheck)
     }
 
-    override fun isFileDrawable(shortcutInfo: ShortcutInfo) =
-        shortcutInfo.hasIconFile() || shortcutInfo.hasIconUri()
-
     override fun captureSnapshot(host: SurfaceControlViewHost, width: Int, height: Int): Bitmap =
         ScreenCaptureInternal.captureLayers(
                 ScreenCaptureInternal.LayerCaptureArgs.Builder(host.surfacePackage!!.surfaceControl)
