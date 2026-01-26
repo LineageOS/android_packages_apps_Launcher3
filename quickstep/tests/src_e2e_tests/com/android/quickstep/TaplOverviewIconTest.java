@@ -15,6 +15,11 @@
  */
 package com.android.quickstep;
 
+import static com.android.launcher3.util.ui.ActivityStartUtils.getAppPackageName;
+import static com.android.launcher3.util.ui.ActivityStartUtils.resolveSystemApp;
+import static com.android.launcher3.util.ui.ActivityStartUtils.startAppFast;
+import static com.android.launcher3.util.ui.ActivityStartUtils.startTestActivity;
+
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 

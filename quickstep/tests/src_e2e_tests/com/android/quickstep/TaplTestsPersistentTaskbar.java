@@ -15,6 +15,9 @@
  */
 package com.android.quickstep;
 
+import static com.android.launcher3.util.ui.ActivityStartUtils.startImeTestActivity;
+import static com.android.launcher3.util.ui.ActivityStartUtils.startTestActivity;
+
 import android.graphics.Rect;
 
 import androidx.test.filters.LargeTest;

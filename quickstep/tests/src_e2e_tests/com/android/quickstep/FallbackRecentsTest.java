@@ -27,9 +27,10 @@ import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.rule.ShellCommandRule.disableHeadsUpNotification;
 import static com.android.launcher3.util.rule.ShellCommandRule.getLauncherCommand;
 import static com.android.launcher3.util.ui.AbstractLauncherUiTest.DEFAULT_BROADCAST_TIMEOUT_SECS;
-import static com.android.launcher3.util.ui.AbstractLauncherUiTest.resolveSystemApp;
-import static com.android.launcher3.util.ui.AbstractLauncherUiTest.startAppFast;
-import static com.android.launcher3.util.ui.AbstractLauncherUiTest.startTestActivity;
+import static com.android.launcher3.util.ui.ActivityStartUtils.getAppPackageName;
+import static com.android.launcher3.util.ui.ActivityStartUtils.resolveSystemApp;
+import static com.android.launcher3.util.ui.ActivityStartUtils.startAppFast;
+import static com.android.launcher3.util.ui.ActivityStartUtils.startTestActivity;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -45,7 +46,6 @@ import android.platform.test.rule.ExtendedLongPressTimeoutRule;
 
 import androidx.annotation.Nullable;
 import androidx.test.filters.LargeTest;
-import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 import androidx.test.uiautomator.By;
 import androidx.test.uiautomator.UiDevice;
@@ -347,10 +347,6 @@ public class FallbackRecentsTest {
 
     private int getTaskCount(RecentsViewContainer recentsViewContainer) {
         return recentsViewContainer.<RecentsView>getOverviewPanel().getTaskViewCount();
-    }
-
-    public static String getAppPackageName() {
-        return InstrumentationRegistry.getInstrumentation().getContext().getPackageName();
     }
 
     private class OverviewUpdateHandler implements OverviewChangeListener {

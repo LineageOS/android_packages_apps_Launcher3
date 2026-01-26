@@ -19,6 +19,7 @@ package com.android.quickstep;
 import static com.android.launcher3.util.rule.TestStabilityRule.LOCAL;
 import static com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT;
 import static com.android.launcher3.util.rule.TestStabilityRule.Stability;
+import static com.android.launcher3.util.ui.ActivityStartUtils.startTestActivity;
 
 import android.util.Log;
 

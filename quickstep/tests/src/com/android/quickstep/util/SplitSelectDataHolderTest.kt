@@ -29,7 +29,7 @@ import com.android.launcher3.SplitScreenUiState
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.shortcuts.ShortcutKey
 import com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT
-import com.android.launcher3.util.ui.AbstractLauncherUiTest
+import com.android.launcher3.util.ui.ActivityStartUtils.resolveSystemApp
 import com.android.quickstep.split.SplitSelectDataHolder
 import com.android.quickstep.split.SplitSelectDataHolder.Companion.SPLIT_PENDINGINTENT_PENDINGINTENT
 import com.android.quickstep.split.SplitSelectDataHolder.Companion.SPLIT_PENDINGINTENT_TASK
@@ -64,8 +64,7 @@ class SplitSelectDataHolderTest {
     private val sampleShortcut2 = Intent()
     private val sampleItemInfo = ItemInfo()
     private val sampleItemInfo2 = ItemInfo()
-    private val samplePackage =
-        AbstractLauncherUiTest.resolveSystemApp(Intent.CATEGORY_APP_CALCULATOR)
+    private val samplePackage = resolveSystemApp(Intent.CATEGORY_APP_CALCULATOR)
     private val splitScreenUiState = SplitScreenUiState()
 
     @Before

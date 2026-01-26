@@ -16,6 +16,12 @@
 
 package com.android.quickstep;
 
+import static com.android.launcher3.util.ui.ActivityStartUtils.getAppPackageName;
+import static com.android.launcher3.util.ui.ActivityStartUtils.resolveSystemApp;
+import static com.android.launcher3.util.ui.ActivityStartUtils.startAppFast;
+import static com.android.launcher3.util.ui.ActivityStartUtils.startExcludeFromRecentsTestActivity;
+import static com.android.launcher3.util.ui.ActivityStartUtils.startImeTestActivity;
+import static com.android.launcher3.util.ui.ActivityStartUtils.startTestActivity;
 import static com.android.quickstep.TaskbarModeSwitchRule.Mode.TRANSIENT;
 
 import static org.junit.Assert.assertEquals;
