@@ -47,6 +47,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Pair;
@@ -108,6 +109,9 @@ public class TaskbarDragController extends DragController implements
         TaskbarControllers.LoggableTaskbarController {
     private static final String TAG = "TaskbarDragController";
 
+    private static final int INTERNAL_DRAG_COOKIE = 447444838;
+    private static final int EXTERNAL_DRAG_COOKIE = 444050202;
+
     private static final boolean DEBUG_DRAG_SHADOW_SURFACE = false;
     private static final int ANIM_DURATION_RETURN_ICON_TO_TASKBAR = 300;
 
@@ -123,6 +127,7 @@ public class TaskbarDragController extends DragController implements
     private int mRegistrationY;
 
     private boolean mIsSystemDragInProgress;
+    private boolean mIsDragExternal = false;
     private boolean mTaskbarIsViableTargetForSystemDrag;
     private boolean mIsDropHandledByDropTarget;
 
@@ -241,6 +246,7 @@ public class TaskbarDragController extends DragController implements
             @Nullable DragPreviewProvider dragPreviewProvider,
             @Nullable Point iconShift,
             DragOptions dragOptions) {
+        Trace.beginAsyncSection("TaskbarDragController.dragStartToDragEnd", INTERNAL_DRAG_COOKIE);
         mActivity.onDragStart();
         btv.post(() -> {
             DragView dragView = startInternalDrag(btv, dragPreviewProvider, dragOptions);
@@ -765,6 +771,9 @@ public class TaskbarDragController extends DragController implements
         }
         super.endDrag();
         updateIsDragging();
+        Trace.endAsyncSection("TaskbarDragController.dragStartToDragEnd",
+                mIsDragExternal ? EXTERNAL_DRAG_COOKIE : INTERNAL_DRAG_COOKIE);
+        mIsDragExternal = false;
     }
 
     @Override
@@ -971,6 +980,9 @@ public class TaskbarDragController extends DragController implements
                     if (isDragging()) {
                         return true;
                     }
+                    mIsDragExternal = true;
+                    Trace.beginAsyncSection("TaskbarDragController.dragStartToDragEnd",
+                            EXTERNAL_DRAG_COOKIE);
                     Point downPos = new Point((int) event.getX(), (int) event.getY());
                     DragOptions options = new DragOptions();
                     options.simulatedDndStartPoint = downPos;
