@@ -340,6 +340,7 @@ class ResizeManager(
         val shouldShowCellLayoutBorder = springLoadedProgress > SPRING_LOADED_PROGRESS_MIN
         cellLayout.isDragOverlapping = shouldShowCellLayoutBorder
         pairedCellLayout.isDragOverlapping = shouldShowCellLayoutBorder
+        cellLayout.revertTempState()
     }
 
     /** To be called before destroying the resize manager. */
