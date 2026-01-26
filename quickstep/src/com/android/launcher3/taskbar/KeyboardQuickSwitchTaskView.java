@@ -254,7 +254,7 @@ public class KeyboardQuickSwitchTaskView extends ConstraintLayout {
         }
 
         DeviceProfile dp = ActivityContext.lookupContext(getContext()).getDeviceProfile();
-        final boolean isLeftRightSplit = dp.isLeftRightSplit;
+        final boolean isLeftRightSplit = dp.mSysuiProfile.isLeftRightSplit();
 
         final float leftOrTopTaskPercent = splitBounds.getLeftTopTaskPercent();
 

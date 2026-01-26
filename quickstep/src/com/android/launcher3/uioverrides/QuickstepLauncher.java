@@ -839,8 +839,6 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     @Override
     protected boolean initDeviceProfile(InvariantDeviceProfile idp) {
         final boolean ret = super.initDeviceProfile(idp);
-        mDeviceProfile.isPredictiveBackSwipe =
-                getApplicationInfo().isOnBackInvokedCallbackEnabled();
         if (ret) {
             SystemUiProxy.INSTANCE.get(this).setLauncherAppIconSize(
                     mDeviceProfile.getWorkspaceIconProfile().getIconSizePx());
@@ -1751,5 +1749,10 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         return super.shouldDisableBackGesture()
                 && (defaultDisplayContainerInterface == null
                 || !defaultDisplayContainerInterface.shouldHandleBackGesture());
+    }
+
+    @Override
+    public boolean isOnBackInvokedCallbackEnabled() {
+        return getApplicationInfo().isOnBackInvokedCallbackEnabled();
     }
 }
