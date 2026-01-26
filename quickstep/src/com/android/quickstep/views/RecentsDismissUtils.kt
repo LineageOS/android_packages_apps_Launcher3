@@ -122,7 +122,8 @@ constructor(
         shouldRemoveTaskView: Boolean,
         isSplitSelection: Boolean,
     ): SpringSet? {
-        val gridEndData = getGridEndData(dismissedTaskView)
+        val isDismissingHomeTask = recentsView.homeTaskView === dismissedTaskView
+        val gridEndData = getGridEndData(dismissedTaskView, isDismissingHomeTask)
         val dismissedTaskSecondaryDimension =
             if (dismissedTaskView == null)
                 recentsView.pagedOrientationHandler.getSecondarySize(
@@ -815,7 +816,7 @@ constructor(
     /** Returns the distance between the end of the grid and clear all button after dismissal. */
     fun getGridEndData(
         dismissedTaskView: TaskView?,
-        isExpressiveDismiss: Boolean = true,
+        isDismissingHomeTask: Boolean = false,
     ): GridEndData {
         var gridEndOffset = 0f
         var snapToLastTask = false
@@ -845,10 +846,13 @@ constructor(
                 getNewClearAllShortTotalWidthTranslation(topGridRowCount, bottomGridRowCount)
             val isLastGridTaskViewVisibleForDismiss =
                 when {
+                    // Do not snap to the last task if we're dismissing the home task, otherwise
+                    // recents will scroll oddly when entering overview from home when the last task
+                    // is visible to the user (see b/408216459)
+                    isDismissingHomeTask -> false
                     lastGridTaskView == null -> false
-                    isExpressiveDismiss ->
+                    else ->
                         isTaskViewVisible(lastGridTaskView) || lastGridTaskView == dismissedTaskView
-                    else -> lastGridTaskView.isVisibleToUser
                 }
             if (!isLastGridTaskViewVisibleForDismiss) {
                 return GridEndData(
