@@ -259,7 +259,7 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
                     /*dragRegion=*/ eq(Rect()),
                     /*initialDragViewScale=*/ eq(1.0f),
                     /*dragViewScaleOnDrop=*/ eq(1.0f),
-                    /*options=*/ argThat { simulatedDndStartPoint == screenPos },
+                    /*options=*/ argThat { isSystemDrag && simulatedDndStartPoint == screenPos },
                 )
 
             with(dragImageCaptor.firstValue) {
@@ -352,6 +352,7 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
     fun testStartDrag() {
         val dragImageCaptor = argumentCaptor<ImageView>()
         val dragView = mock<DragView>()
+        val screenPos = params?.dragOptions?.simulatedDndStartPoint ?: mock<Point>()
 
         whenever(
                 mockContext.dragController.startDrag(
@@ -364,14 +365,18 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
                     if (params != null) eq(params.dragRegion) else any(),
                     if (params != null) eq(params.initialDragViewScale) else any(),
                     if (params != null) eq(params.dragViewScaleOnDrop) else any(),
-                    if (params != null) eq(params.dragOptions) else any(),
+                    argThat {
+                        isSystemDrag &&
+                            simulatedDndStartPoint == screenPos &&
+                            (params == null || this == params.dragOptions)
+                    },
                 )
             )
             .thenReturn(dragView)
 
         val expectedResult = if (params != null) dragView else null
 
-        assertEquals(expectedResult, listener.startDrag())
+        assertEquals(expectedResult, listener.startDrag(screenPos))
 
         if (params != null) {
             with(dragImageCaptor.firstValue) {

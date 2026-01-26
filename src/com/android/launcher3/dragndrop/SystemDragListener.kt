@@ -95,15 +95,16 @@ class SystemDragListener(
     /**
      * Starts a system-level drag-and-drop sequence.
      *
+     * @param screenPos The start position for the sequence.
      * @return The drag view for the sequence if started successfully.
      */
-    fun startDrag(): DragView? =
+    fun startDrag(screenPos: Point): DragView? =
         params?.run {
             startDrag(
                 /*previewRect=*/ Rect(),
                 /*previewBitmapWidth=*/ 0,
                 /*previewViewWidth=*/ 0,
-                /*screenPos=*/ Point(),
+                screenPos,
                 dragOptions,
             )
             dragView
@@ -183,6 +184,11 @@ class SystemDragListener(
                         }
                         .also { params -> this@SystemDragListener.params = params }
 
+            params.dragOptions.apply {
+                isSystemDrag = true
+                simulatedDndStartPoint = screenPos
+            }
+
             // NOTE: The launcher-provided drag image is initially transparent so as not to clash
             // with the system-provided drag image, the latter being preferred since it paints at a
             // higher z-index than other application windows. The launcher-provided drag image will
@@ -209,7 +215,7 @@ class SystemDragListener(
                     params.dragRegion,
                     params.initialDragViewScale,
                     params.dragViewScaleOnDrop,
-                    params.dragOptions.also { it.isSystemDrag = true },
+                    params.dragOptions,
                 )
         }
     }
