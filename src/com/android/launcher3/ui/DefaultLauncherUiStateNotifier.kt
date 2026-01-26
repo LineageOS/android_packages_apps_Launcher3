@@ -57,17 +57,18 @@ class DefaultLauncherUiStateNotifier(
     override fun notifyModelChanged(changeLog: IModelWriter.ChangeLog, owner: Callbacks?) {
         val startId = bgDataModel.lastBindId
         uiExecutor.execute {
+            val allCallbacks = callbacks + model.callbacks
             if (changeLog.itemsAdded.isNotEmpty()) {
-                callbacks.filter { it != owner }.forEach { it.bindItemsAdded(changeLog.itemsAdded) }
+                allCallbacks.filter { it != owner }.forEach { it.bindItemsAdded(changeLog.itemsAdded) }
             }
             if (changeLog.itemsModified.isNotEmpty()) {
-                callbacks
+                allCallbacks
                     .filter { it != owner }
                     .forEach { it.bindItemsUpdated(changeLog.itemsModified) }
             }
             if (changeLog.itemsRemoved.isNotEmpty()) {
                 val matcher = ItemInfoMatcher.ofItems(changeLog.itemsRemoved)
-                callbacks
+                allCallbacks
                     .filter { it != owner }
                     .forEach { it.bindWorkspaceComponentsRemoved(matcher) }
             }

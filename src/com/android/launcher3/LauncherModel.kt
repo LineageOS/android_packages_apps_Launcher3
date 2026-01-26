@@ -36,11 +36,13 @@ import com.android.launcher3.model.ModelDelegate
 import com.android.launcher3.model.ModelInitializer
 import com.android.launcher3.model.ModelLauncherCallbacks
 import com.android.launcher3.model.ModelTaskController
+import com.android.launcher3.model.IModelWriter
 import com.android.launcher3.model.ModelWriter
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.model.tasks.CacheDataUpdatedTask
 import com.android.launcher3.pm.UserCache
 import com.android.launcher3.util.DaggerSingletonTracker
+import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import com.android.launcher3.util.PackageUserKey
 import com.android.launcher3.views.ActivityContext
@@ -123,15 +125,18 @@ constructor(
         verifyChanges: Boolean,
         activity: ActivityContext,
         owner: BgDataModel.Callbacks?,
-    ) =
-        ModelWriter(
+    ): IModelWriter =
+        ModelWriter.create(
             context,
             this,
             mBgDataModel,
             verifyChanges,
             activity.cellPosMapper,
             UISurface(activity),
+            // TODO: (b/455016031) - Remove owner from ModelWriter
             owner,
+            MODEL_EXECUTOR,
+            MAIN_EXECUTOR
         )
 
     /** Called when the workspace items have drastically changed */

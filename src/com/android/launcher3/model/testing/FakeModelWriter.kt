@@ -20,6 +20,8 @@ import com.android.launcher3.model.TransactionContext
 import com.android.launcher3.model.data.CollectionInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.LauncherAppWidgetInfo
+import com.android.launcher3.ui.LauncherUiStateNotifier
+import com.android.launcher3.ui.testing.FakeLauncherUiStateNotifier
 import com.android.launcher3.widget.LauncherWidgetHolder
 import java.util.function.Consumer
 import java.util.function.Predicate
@@ -32,133 +34,126 @@ import java.util.function.Predicate
  */
 class FakeModelWriter : IModelWriter {
 
+    /** A fake notifier that records UI state changes. */
+    val notifier = FakeLauncherUiStateNotifier()
+
     /** A mutable list to store the [WriterAction] objects recorded during a transaction. */
     val actions = mutableListOf<WriterAction>()
     private var preparingToUndo = false
     private val pendingActions = mutableListOf<WriterAction>()
 
-    private val fakeTransactionContext = object : TransactionContext {
-        override fun addItemToDatabase(
-            item: ItemInfo,
-            container: Int,
-            screenId: Int,
-            cellX: Int,
-            cellY: Int
-        ) {
-            actions.add(WriterAction.AddItem(item, container))
-        }
-
-        override fun addItemsToDatabase(items: List<ItemInfo>) {
-            items.forEach { actions.add(WriterAction.AddItem(it, it.container)) }
-        }
-
-        override fun moveItemInDatabase(
-            item: ItemInfo,
-            container: Int,
-            screenId: Int,
-            cellX: Int,
-            cellY: Int
-        ) {
-            actions.add(
-                WriterAction.ModifyItem(
-                    item,
-                    container,
-                    screenId,
-                    cellX,
-                    cellY,
-                    item.spanX,
-                    item.spanY
-                )
-            )
-        }
-
-        override fun moveItemsInDatabase(items: List<ItemInfo>, container: Int, screen: Int) {
-            actions.add(WriterAction.MoveItems(items, container, screen))
-        }
-
-        override fun modifyItemInDatabase(
-            item: ItemInfo,
-            container: Int,
-            screenId: Int,
-            cellX: Int,
-            cellY: Int,
-            spanX: Int,
-            spanY: Int
-        ) {
-            actions.add(
-                WriterAction.ModifyItem(item, container, screenId, cellX, cellY, spanX, spanY)
-            )
-        }
-
-        override fun updateItemInDatabase(item: ItemInfo) {
-            actions.add(WriterAction.UpdateItem(item))
-        }
-
-        override fun deleteItemFromDatabase(item: ItemInfo, reason: String?) {
-            val action = WriterAction.DeleteItem(item)
-            if (preparingToUndo) {
-                pendingActions.add(action)
-            } else {
-                actions.add(action)
+    private val fakeTransactionContext =
+        object : TransactionContext {
+            override fun addItemToDatabase(
+                item: ItemInfo,
+            ) {
+                actions.add(WriterAction.AddItem(item, item.container))
             }
-        }
 
-        override fun deleteItemsFromDatabase(matcher: Predicate<ItemInfo?>, reason: String?) {
-            actions.add(WriterAction.DeleteItemsByPredicate(matcher))
-        }
+            override fun addItemsToDatabase(items: List<ItemInfo>) {
+                items.forEach { actions.add(WriterAction.AddItem(it, it.container)) }
+            }
 
-        override fun deleteItemsFromDatabase(items: List<ItemInfo>, reason: String?) {
-            items.forEach {
-                val action = WriterAction.DeleteItem(it)
+            override fun moveItemInDatabase(
+                item: ItemInfo,
+                container: Int,
+                screenId: Int,
+                cellX: Int,
+                cellY: Int,
+            ) {
+                actions.add(
+                    WriterAction.ModifyItem(
+                        item,
+                        container,
+                        screenId,
+                        cellX,
+                        cellY,
+                        item.spanX,
+                        item.spanY,
+                    )
+                )
+            }
+
+            override fun moveItemsInDatabase(items: List<ItemInfo>, container: Int, screen: Int) {
+                actions.add(WriterAction.MoveItems(items, container, screen))
+            }
+
+            override fun modifyItemInDatabase(
+                item: ItemInfo,
+                container: Int,
+                screenId: Int,
+                cellX: Int,
+                cellY: Int,
+                spanX: Int,
+                spanY: Int,
+            ) {
+                actions.add(
+                    WriterAction.ModifyItem(item, container, screenId, cellX, cellY, spanX, spanY)
+                )
+            }
+
+            override fun updateItemInDatabase(item: ItemInfo) {
+                actions.add(WriterAction.UpdateItem(item))
+            }
+
+            override fun deleteItemsFromDatabase(matcher: Predicate<ItemInfo?>, reason: String?) {
+                actions.add(WriterAction.DeleteItemsByPredicate(matcher))
+            }
+
+            override fun deleteItemsFromDatabase(items: List<ItemInfo>, reason: String?) {
+                items.forEach {
+                    val action = WriterAction.DeleteItem(it)
+                    if (preparingToUndo) {
+                        pendingActions.add(action)
+                    } else {
+                        actions.add(action)
+                    }
+                }
+            }
+
+            override fun deleteCollectionAndContentsFromDatabase(info: CollectionInfo) {
+                val action = WriterAction.DeleteItem(info)
                 if (preparingToUndo) {
                     pendingActions.add(action)
                 } else {
                     actions.add(action)
                 }
             }
-        }
 
-        override fun deleteCollectionAndContentsFromDatabase(info: CollectionInfo) {
-            val action = WriterAction.DeleteItem(info)
-            if (preparingToUndo) {
-                pendingActions.add(action)
-            } else {
-                actions.add(action)
+            override fun deleteWidgetInfo(
+                info: LauncherAppWidgetInfo,
+                holder: LauncherWidgetHolder?,
+                reason: String?,
+            ) {
+                val action = WriterAction.DeleteItem(info)
+                if (preparingToUndo) {
+                    pendingActions.add(action)
+                } else {
+                    actions.add(action)
+                }
+            }
+
+            override fun deleteAllItems() {
+                actions.add(WriterAction.DeleteAllItems)
             }
         }
-
-        override fun deleteWidgetInfo(
-            info: LauncherAppWidgetInfo,
-            holder: LauncherWidgetHolder?,
-            reason: String?
-        ) {
-            val action = WriterAction.DeleteItem(info)
-            if (preparingToUndo) {
-                pendingActions.add(action)
-            } else {
-                actions.add(action)
-            }
-        }
-
-        override fun deleteAllItems() {
-            actions.add(WriterAction.DeleteAllItems)
-        }
-    }
 
     /**
-     * Overrides the [ModelWriter.scheduleTransaction] method to execute the block immediately
-     * and invoke the [onComplete] callback with `true`.
+     * Overrides the [ModelWriter.scheduleTransaction] method to execute the block immediately and
+     * invoke the [onComplete] callback with `true`.
      *
-     * This allows tests to directly inspect the [actions] list after calling a client method
-     * that uses [scheduleTransaction].
+     * This allows tests to directly inspect the [actions] list after calling a client method that
+     * uses [scheduleTransaction].
      */
     override fun scheduleTransaction(
         onComplete: ((success: Boolean) -> Unit)?,
-        block: Consumer<TransactionContext>
+        block: Consumer<TransactionContext>,
     ) {
         block.accept(fakeTransactionContext)
         onComplete?.invoke(true)
     }
+
+    override fun getNotifier(): LauncherUiStateNotifier = notifier
 
     override fun prepareToUndoDelete() {
         preparingToUndo = true
@@ -181,17 +176,17 @@ class FakeModelWriter : IModelWriter {
         container: Int,
         screenId: Int,
         cellX: Int,
-        cellY: Int
+        cellY: Int,
     ) {
-        execute {
-            it.addItemToDatabase(item, container, screenId, cellX, cellY)
-        }
+        item.container = container
+        item.screenId = screenId
+        item.cellX = cellX
+        item.cellY = cellY
+        execute { it.addItemToDatabase(item) }
     }
 
     override fun addItemsToDatabase(items: List<ItemInfo>) {
-        execute {
-            it.addItemsToDatabase(items)
-        }
+        execute { it.addItemsToDatabase(items) }
     }
 
     override fun moveItemInDatabase(
@@ -199,17 +194,21 @@ class FakeModelWriter : IModelWriter {
         container: Int,
         screenId: Int,
         cellX: Int,
-        cellY: Int
+        cellY: Int,
     ) {
-        execute {
-            it.moveItemInDatabase(item, container, screenId, cellX, cellY)
-        }
+        item.container = container
+        item.screenId = screenId
+        item.cellX = cellX
+        item.cellY = cellY
+        execute { it.moveItemInDatabase(item, container, screenId, cellX, cellY) }
     }
 
     override fun moveItemsInDatabase(items: List<ItemInfo>, container: Int, screen: Int) {
-        execute {
-            it.moveItemsInDatabase(items, container, screen)
+        items.forEach {
+            it.container = container
+            it.screenId = screen
         }
+        execute { it.moveItemsInDatabase(items, container, screen) }
     }
 
     override fun modifyItemInDatabase(
@@ -219,17 +218,19 @@ class FakeModelWriter : IModelWriter {
         cellX: Int,
         cellY: Int,
         spanX: Int,
-        spanY: Int
+        spanY: Int,
     ) {
-        execute {
-            it.modifyItemInDatabase(item, container, screenId, cellX, cellY, spanX, spanY)
-        }
+        item.container = container
+        item.screenId = screenId
+        item.cellX = cellX
+        item.cellY = cellY
+        item.spanX = spanX
+        item.spanY = spanY
+        execute { it.modifyItemInDatabase(item, container, screenId, cellX, cellY, spanX, spanY) }
     }
 
     override fun updateItemInDatabase(item: ItemInfo) {
-        execute {
-            it.updateItemInDatabase(item)
-        }
+        execute { it.updateItemInDatabase(item) }
     }
 
     override fun deleteItemFromDatabase(item: ItemInfo, reason: String?) {
@@ -237,9 +238,7 @@ class FakeModelWriter : IModelWriter {
             pendingActions.add(WriterAction.DeleteItem(item))
             return
         }
-        execute {
-            it.deleteItemFromDatabase(item, reason)
-        }
+        execute { it.deleteItemFromDatabase(item, reason) }
     }
 
     override fun deleteItemsFromDatabase(matcher: Predicate<ItemInfo?>, reason: String?) {
@@ -247,9 +246,7 @@ class FakeModelWriter : IModelWriter {
             // Not implemented for fake
             return
         }
-        execute {
-            it.deleteItemsFromDatabase(matcher, reason)
-        }
+        execute { it.deleteItemsFromDatabase(matcher, reason) }
     }
 
     override fun deleteItemsFromDatabase(items: List<ItemInfo>, reason: String?) {
@@ -257,9 +254,7 @@ class FakeModelWriter : IModelWriter {
             items.forEach { pendingActions.add(WriterAction.DeleteItem(it)) }
             return
         }
-        execute {
-            it.deleteItemsFromDatabase(items, reason)
-        }
+        execute { it.deleteItemsFromDatabase(items, reason) }
     }
 
     override fun deleteCollectionAndContentsFromDatabase(info: CollectionInfo) {
@@ -267,23 +262,19 @@ class FakeModelWriter : IModelWriter {
             pendingActions.add(WriterAction.DeleteItem(info))
             return
         }
-        execute {
-            it.deleteCollectionAndContentsFromDatabase(info)
-        }
+        execute { it.deleteCollectionAndContentsFromDatabase(info) }
     }
 
     override fun deleteWidgetInfo(
         info: LauncherAppWidgetInfo,
         holder: LauncherWidgetHolder?,
-        reason: String?
+        reason: String?,
     ) {
         if (preparingToUndo) {
             pendingActions.add(WriterAction.DeleteItem(info))
             return
         }
-        execute {
-            it.deleteWidgetInfo(info, holder, reason)
-        }
+        execute { it.deleteWidgetInfo(info, holder, reason) }
     }
 
     override fun addOrMoveItemInDatabase(
@@ -291,20 +282,21 @@ class FakeModelWriter : IModelWriter {
         container: Int,
         screenId: Int,
         cellX: Int,
-        cellY: Int
+        cellY: Int,
     ) {
+        item.container = container
+        item.screenId = screenId
+        item.cellX = cellX
+        item.cellY = cellY
         if (item.id == ItemInfo.NO_ID) {
-            execute {
-                it.addItemToDatabase(item, container, screenId, cellX, cellY)
-            }
+            execute { it.addItemToDatabase(item) }
         } else {
-            execute {
-                it.moveItemInDatabase(item, container, screenId, cellX, cellY)
-            }
+            execute { it.moveItemInDatabase(item, container, screenId, cellX, cellY) }
         }
     }
 
     private fun execute(block: (TransactionContext) -> Unit) {
         scheduleTransaction(block = Consumer { block(it) })
     }
+
 }

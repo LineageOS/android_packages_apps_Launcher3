@@ -79,7 +79,7 @@ import com.android.launcher3.anim.RoundedRectRevealOutlineProvider;
 import com.android.launcher3.apppairs.AppPairIcon;
 import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.deviceprofile.TaskbarProfile;
-import com.android.launcher3.model.ModelWriter;
+import com.android.launcher3.model.IModelWriter;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.TaskItemInfo;
 import com.android.launcher3.taskbar.bubbles.BubbleBarController;
@@ -470,7 +470,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
     }
 
     /** Creates a ModelWriter for updating model properties */
-    public ModelWriter getModelWriter() {
+    public IModelWriter getModelWriter() {
         return LauncherAppState.getInstance(mActivity).getModel()
                 .getWriter(false, mActivity, mModelCallbacks);
     }
