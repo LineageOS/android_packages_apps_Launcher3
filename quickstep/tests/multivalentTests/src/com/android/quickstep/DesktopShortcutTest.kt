@@ -28,10 +28,13 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.android.internal.policy.DesktopModeCompatPolicy
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.AbstractFloatingViewHelper
+import com.android.launcher3.R
 import com.android.launcher3.logging.StatsLogManager
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent
 import com.android.launcher3.model.data.TaskViewItemInfo
-import com.android.launcher3.util.SplitConfigurationOptions
+import com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_BOTTOM_OR_RIGHT
+import com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT
+import com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_UNDEFINED
 import com.android.launcher3.util.TransformingTouchDelegate
 import com.android.quickstep.TaskOverlayFactory.TaskOverlay
 import com.android.quickstep.task.thumbnail.TaskContentView
@@ -76,8 +79,14 @@ class DesktopShortcutTest {
     private val overlayFactory: TaskOverlayFactory = mock()
     private val desktopState = FakeDesktopState()
     private val desktopModeCompatPolicy: DesktopModeCompatPolicy = mock()
+    private val taskUtils: TaskUtils = mock()
     private val factory =
-        DesktopShortcut.Factory(abstractFloatingViewHelper, desktopState, desktopModeCompatPolicy)
+        DesktopShortcut.Factory(
+            abstractFloatingViewHelper,
+            desktopState,
+            desktopModeCompatPolicy,
+            taskUtils,
+        )
     private val context: Context = spy(InstrumentationRegistry.getInstrumentation().targetContext)
     private val taskView: TaskView = createTaskViewMock()
 
@@ -158,10 +167,9 @@ class DesktopShortcutTest {
         verifyShouldDisableDesktopEntryPoints(unDockableTask)
     }
 
-    @Test
-    fun desktopSystemShortcutClickedWithDesktopModeOnDisplay() {
+    private fun createTaskContainer(stagePosition: Int = STAGE_POSITION_UNDEFINED): TaskContainer {
         val task = createTask()
-        val taskContainer = spy(createTaskContainer(task))
+        val taskContainer = spy(createTaskContainer(task, stagePosition))
 
         whenever(launcher.getOverviewPanel<LauncherRecentsView>()).thenReturn(recentsView)
         whenever(launcher.statsLogManager).thenReturn(statsLogManager)
@@ -174,6 +182,12 @@ class DesktopShortcutTest {
         }
         val taskViewItemInfo = mock<TaskViewItemInfo>()
         doReturn(taskViewItemInfo).whenever(taskContainer).itemInfo
+        return taskContainer
+    }
+
+    @Test
+    fun desktopSystemShortcutClickedWithDesktopModeOnDisplay() {
+        val taskContainer = createTaskContainer()
 
         val singleShortcut = factory.getShortcuts(launcher, taskContainer)!!.single()
         singleShortcut.onClick(taskView)
@@ -187,9 +201,46 @@ class DesktopShortcutTest {
                 eq(DesktopModeTransitionSource.OVERVIEW_TASK_MENU),
                 any(),
             )
-        verify(statsLogger).withItemInfo(taskViewItemInfo)
+        verify(statsLogger).withItemInfo(taskContainer.itemInfo)
         verify(statsLogger).log(LauncherEvent.LAUNCHER_SYSTEM_SHORTCUT_DESKTOP_TAP)
-        verifyShouldDisableDesktopEntryPoints(task)
+        verifyShouldDisableDesktopEntryPoints(taskContainer.task)
+    }
+
+    @Test
+    fun desktopSystemShortcutCreateAccessibilityActionForSingleTask() {
+        val taskContainer = createTaskContainer()
+
+        val singleShortcut = factory.getShortcuts(launcher, taskContainer)!!.single()
+
+        val accessibilityAction = singleShortcut.createAccessibilityAction(context)
+        assertThat(accessibilityAction.id).isEqualTo(R.id.action_desktop_top_left)
+        assertThat(accessibilityAction.label).isEqualTo("Desktop")
+    }
+
+    @Test
+    fun desktopSystemShortcutCreateAccessibilityActionForLeftTopTask() {
+        val taskContainer = createTaskContainer(STAGE_POSITION_TOP_OR_LEFT)
+        whenever(taskView.containsMultipleTasks()).thenReturn(true)
+        whenever(taskUtils.getTitle(any<Context>(), any<Task>())).thenReturn("left-top")
+
+        val singleShortcut = factory.getShortcuts(launcher, taskContainer)!!.single()
+
+        val accessibilityAction = singleShortcut.createAccessibilityAction(context)
+        assertThat(accessibilityAction.id).isEqualTo(R.id.action_desktop_top_left)
+        assertThat(accessibilityAction.label).isEqualTo("Desktop for left-top")
+    }
+
+    @Test
+    fun desktopSystemShortcutCreateAccessibilityActionForBottomRightTask() {
+        val taskContainer = createTaskContainer(STAGE_POSITION_BOTTOM_OR_RIGHT)
+        whenever(taskView.containsMultipleTasks()).thenReturn(true)
+        whenever(taskUtils.getTitle(any<Context>(), any<Task>())).thenReturn("bottom-right")
+
+        val singleShortcut = factory.getShortcuts(launcher, taskContainer)!!.single()
+
+        val accessibilityAction = singleShortcut.createAccessibilityAction(context)
+        assertThat(accessibilityAction.id).isEqualTo(R.id.action_desktop_bottom_right)
+        assertThat(accessibilityAction.label).isEqualTo("Desktop for bottom-right")
     }
 
     private fun createTask(displayId: Int = DEFAULT_DISPLAY) =
@@ -210,9 +261,12 @@ class DesktopShortcutTest {
                     /* isTopActivityTransparent */ false,
                 )
             )
-            .apply { isDockable = true }
+            .apply {
+                isDockable = true
+                topActivity = ComponentName("", "")
+            }
 
-    private fun createTaskContainer(task: Task) =
+    private fun createTaskContainer(task: Task, stagePosition: Int = STAGE_POSITION_UNDEFINED) =
         TaskContainer(
             taskView,
             task,
@@ -220,7 +274,7 @@ class DesktopShortcutTest {
             mock<TaskThumbnailView>(),
             mock<IconAppChipView>(),
             mock<TransformingTouchDelegate>(),
-            SplitConfigurationOptions.STAGE_POSITION_UNDEFINED,
+            stagePosition,
             digitalWellBeingToast = null,
             overlayFactory,
         )

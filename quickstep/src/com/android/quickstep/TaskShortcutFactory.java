@@ -112,7 +112,8 @@ public interface TaskShortcutFactory {
 
             AppInfo.SplitAccessibilityInfo accessibilityInfo =
                     new AppInfo.SplitAccessibilityInfo(taskView.containsMultipleTasks(),
-                            TaskUtils.getTitle(taskView.getContext(), taskContainer.getTask()),
+                            TaskUtils.INSTANCE.getTitle(taskView.getContext(),
+                                    taskContainer.getTask()),
                             actionId
                     );
             return Collections.singletonList(new AppInfo(container, taskContainer.getItemInfo(),
