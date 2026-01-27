@@ -198,6 +198,7 @@ object DisplayLibModule {
         val displayManager = context.getSystemService(DisplayManager::class.java)!!
         val windowManager = WindowManagerGlobal.getWindowManagerService()!!
         return createDisplayLibComponent(
+            context,
             displayManager,
             windowManager,
             Handler(looperExecutor.looper),
