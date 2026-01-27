@@ -163,6 +163,36 @@ class BubbleViewTest {
         assertThat(actions.any { it.id == R.id.action_move_right }).isFalse()
     }
 
+    @Test
+    fun performAccessibilityAction_moveLeft_callsControllerAndReturnsTrue() {
+        // Perform the move left action
+        val handled = bubbleView.performAccessibilityAction(R.id.action_move_left, null)
+
+        // Verify that the controller's updateBubbleBarLocation method was called
+        verify(mockController)
+            .updateBubbleBarLocation(
+                BubbleBarLocation.LEFT,
+                BubbleBarLocation.UpdateSource.A11Y_ACTION_BUBBLE
+            )
+        // Verify that the action is marked as handled
+        assertThat(handled).isTrue()
+    }
+
+    @Test
+    fun performAccessibilityAction_moveRight_callsControllerAndReturnsTrue() {
+        // Perform the move right action
+        val handled = bubbleView.performAccessibilityAction(R.id.action_move_right, null)
+
+        // Verify that the controller's updateBubbleBarLocation method was called
+        verify(mockController)
+            .updateBubbleBarLocation(
+                BubbleBarLocation.RIGHT,
+                BubbleBarLocation.UpdateSource.A11Y_ACTION_BUBBLE
+            )
+        // Verify that the action is marked as handled
+        assertThat(handled).isTrue()
+    }
+
     private fun setupBubbleViews() {
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             val inflater = LayoutInflater.from(context)
