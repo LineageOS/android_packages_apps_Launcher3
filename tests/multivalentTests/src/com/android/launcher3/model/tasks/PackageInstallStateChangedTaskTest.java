@@ -44,9 +44,9 @@ import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.LauncherAppWidgetInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.pm.PackageInstallInfo;
-import com.android.launcher3.testutil.rule.LayoutResource;
 import com.android.launcher3.util.IntSet;
 import com.android.launcher3.util.LauncherLayoutBuilder;
+import com.android.launcher3.util.ModelTestExtensions;
 import com.android.launcher3.util.SandboxApplication;
 import com.android.launcher3.util.rule.InstallerSessionRule;
 
@@ -70,7 +70,6 @@ public class PackageInstallStateChangedTaskTest {
 
     @Rule public SandboxApplication mContext = new SandboxApplication().withModelDependency();
     @Rule public SetFlagsRule mSetFlagsRule = new SetFlagsRule();
-    @Rule public LayoutResource mLayout = new LayoutResource(mContext);
     @Rule public InstallerSessionRule mInstallerSessionRule = new InstallerSessionRule();
 
     private final List<AppInfo> mIncrementalUpdates = new ArrayList<>();
@@ -99,7 +98,7 @@ public class PackageInstallStateChangedTaskTest {
                 .atWorkspace(0, 0, 10).putApp(PENDING_APP_2, TEST_ACTIVITY3);           // 10
 
         mDownloadingApps = IntSet.wrap(4, 5, 6, 7, 8, 9, 10);
-        mLayout.set(builder);
+        ModelTestExtensions.setModelLayout(mContext, builder);
         assertTrue(mModelState.model.isModelLoaded());
         assertEquals(10, countPersistedModelItems(mModelState.dataModel.itemsIdMap));
 

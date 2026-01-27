@@ -24,14 +24,12 @@ import androidx.test.filters.SmallTest
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_ALL_APPS
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
-import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_PIN_WIDGETS
 import com.android.launcher3.WorkspaceLayoutManager.FIRST_SCREEN_ID
 import com.android.launcher3.model.PredictionHelper.BUNDLE_KEY_ADDED_APP_WIDGETS
 import com.android.launcher3.model.PredictionHelper.BUNDLE_KEY_PIN_EVENTS
 import com.android.launcher3.model.PredictionHelper.getBundleForHotseatPredictions
 import com.android.launcher3.model.PredictionHelper.getBundleForWidgetPredictions
 import com.android.launcher3.model.PredictionHelper.isTrackedForHotseatPrediction
-import com.android.launcher3.model.PredictionHelper.isTrackedForWidgetPrediction
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.LauncherAppWidgetInfo
 import com.android.launcher3.util.ModelTestExtensions.initItems
@@ -78,27 +76,6 @@ class PredictionHelperTest {
         createAppInfo("test", CONTAINER_ALL_APPS).let {
             assertFalse(it.isTrackedForHotseatPrediction())
             assertFalse(it.buildProto(context).isTrackedForHotseatPrediction())
-        }
-    }
-
-    @Test
-    fun isTrackedForWidgetPrediction_true_for_valid_items() {
-        createWidgetInfoInfo("test").let {
-            assertTrue(it.isTrackedForWidgetPrediction())
-            assertTrue(it.buildProto(context).isTrackedForWidgetPrediction())
-        }
-    }
-
-    @Test
-    fun isTrackedForWidgetPrediction_false_for_invalid_items() {
-        createAppInfo("test").let {
-            assertFalse(it.isTrackedForWidgetPrediction())
-            assertFalse(it.buildProto(context).isTrackedForWidgetPrediction())
-        }
-
-        createWidgetInfoInfo("test", CONTAINER_PIN_WIDGETS).let {
-            assertFalse(it.isTrackedForWidgetPrediction())
-            assertFalse(it.buildProto(context).isTrackedForWidgetPrediction())
         }
     }
 

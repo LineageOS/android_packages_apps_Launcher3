@@ -32,14 +32,13 @@ import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.UtilitiesKt;
 import com.android.launcher3.model.data.ItemInfo;
-import com.android.launcher3.testutil.rule.LayoutResource;
 import com.android.launcher3.util.BaseLauncherActivityTest;
 import com.android.launcher3.util.LauncherLayoutBuilder;
 import com.android.launcher3.util.LauncherModelHelper;
+import com.android.launcher3.util.ModelTestExtensions;
 import com.android.launcher3.util.WorkspaceDragHelper;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -55,8 +54,6 @@ import java.util.stream.Collectors;
 @LargeTest
 @RunWith(AndroidJUnit4.class)
 public class TwoPanelWorkspaceTest extends BaseLauncherActivityTest<Launcher> {
-
-    @Rule public LayoutResource layoutRule = new LayoutResource(targetContext());
 
     private static final String CHROME_APP_NAME = LauncherModelHelper.TEST_ACTIVITY;
     private static final String MAPS_APP_NAME = LauncherModelHelper.TEST_ACTIVITY2;
@@ -75,7 +72,7 @@ public class TwoPanelWorkspaceTest extends BaseLauncherActivityTest<Launcher> {
                 .atHotseat(1).putApp(TEST_PACKAGE, CHROME_APP_NAME)
                 .atWorkspace(0, -1, 0).putApp(TEST_PACKAGE, MAPS_APP_NAME)
                 .atWorkspace(3, -1, 0).putApp(TEST_PACKAGE, STORE_APP_NAME);
-        layoutRule.set(builder);
+        ModelTestExtensions.setModelLayout(targetContext(), builder);
         loadLauncherSync();
 
         // Pre verifying the screens

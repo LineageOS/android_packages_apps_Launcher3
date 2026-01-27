@@ -28,6 +28,7 @@ import com.android.launcher3.model.AllAppsList
 import com.android.launcher3.model.BaseLauncherBinder.BaseLauncherBinderFactory
 import com.android.launcher3.model.BgDataModel
 import com.android.launcher3.model.BgDataModel.ModificationSource.UISurface
+import com.android.launcher3.model.IModelWriter
 import com.android.launcher3.model.ItemInstallQueue
 import com.android.launcher3.model.LoaderTask
 import com.android.launcher3.model.LoaderTask.LoaderTaskFactory
@@ -36,7 +37,6 @@ import com.android.launcher3.model.ModelDelegate
 import com.android.launcher3.model.ModelInitializer
 import com.android.launcher3.model.ModelLauncherCallbacks
 import com.android.launcher3.model.ModelTaskController
-import com.android.launcher3.model.IModelWriter
 import com.android.launcher3.model.ModelWriter
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.model.tasks.CacheDataUpdatedTask
@@ -136,7 +136,7 @@ constructor(
             // TODO: (b/455016031) - Remove owner from ModelWriter
             owner,
             MODEL_EXECUTOR,
-            MAIN_EXECUTOR
+            MAIN_EXECUTOR,
         )
 
     /** Called when the workspace items have drastically changed */
@@ -191,14 +191,9 @@ constructor(
      */
     fun addCallbacksAndLoad(callbacks: BgDataModel.Callbacks): Boolean {
         synchronized(mLock) {
-            addCallbacks(callbacks)
+            synchronized(mCallbacksList) { mCallbacksList.add(callbacks) }
             return startLoader(arrayOf(callbacks)).isDone
         }
-    }
-
-    /** Adds a callbacks to receive model updates */
-    fun addCallbacks(callbacks: BgDataModel.Callbacks) {
-        synchronized(mCallbacksList) { mCallbacksList.add(callbacks) }
     }
 
     /** Starts the loader, and returns a completion stage indicating when the loading is complete */
