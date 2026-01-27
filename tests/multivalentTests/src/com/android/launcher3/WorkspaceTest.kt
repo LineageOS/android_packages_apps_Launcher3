@@ -29,13 +29,17 @@ import androidx.core.net.toUri
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.android.launcher3.DropTarget.DragObject
+import com.android.launcher3.Flags.FLAG_ENABLE_CURSOR_DRIVEN_WORKFLOWS
 import com.android.launcher3.Flags.FLAG_ENABLE_FILE_SYSTEM_FOLDERS_AS_DROP_TARGETS
 import com.android.launcher3.Flags.enableFileSystemFoldersAsDropTargets
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FILE
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FOLDER
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_SYSTEM_DRAG
+import com.android.launcher3.LauncherState.DESKTOP_DRAG_MODE
+import com.android.launcher3.LauncherState.SPRING_LOADED
 import com.android.launcher3.celllayout.CellLayoutLayoutParams
+import com.android.launcher3.dragndrop.DragOptions
 import com.android.launcher3.dragndrop.SystemDragItemInfo
 import com.android.launcher3.homescreenfiles.HomeScreenFile
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider
@@ -52,6 +56,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.junit.MockitoJUnit
+import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.reset
@@ -71,6 +76,66 @@ class WorkspaceTest {
     @get:Rule val launcherActivity = LauncherActivityScenarioRule<Launcher>()
 
     private val nextUniqueId = AtomicInteger(1)
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_CURSOR_DRIVEN_WORKFLOWS)
+    fun testTouchDrag_RemainsInSpringLoaded() {
+        val dragObject = createDragObject(ITEM_TYPE_APPLICATION, createUniqueMediaStoreUri())
+        val options = DragOptions().apply { isMouseDrag = false }
+        launcherActivity.executeOnLauncher { launcher ->
+            launcher.dragController.mOptions = options
+            launcher.workspace.onDragStart(dragObject, options)
+        }
+        // Ensure launcher enters SPRING_LOADED after starting touch drag.
+        launcherActivity.waitUntil("Launcher didn't switch to SPRING_LOADED") {
+            it.stateManager.state == SPRING_LOADED
+        }
+
+        launcherActivity.executeOnLauncher { launcher ->
+            dragObject.x = 10 // near left edge
+            launcher.workspace.onDragOver(dragObject)
+        }
+        // Ensure launcher remains in SPRING_LOADED after touch drag over screen edge.
+        launcherActivity.waitUntil("Launcher didn't switch to SPRING_LOADED") {
+            it.stateManager.state == SPRING_LOADED
+        }
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_CURSOR_DRIVEN_WORKFLOWS)
+    fun testMouseDrag_TransitionsToDesktopDragMode() {
+        val dragObject = createDragObject(ITEM_TYPE_APPLICATION, createUniqueMediaStoreUri())
+        val options = DragOptions().apply { isMouseDrag = true }
+
+        launcherActivity.executeOnLauncher { launcher ->
+            launcher.dragController.mOptions = options
+            launcher.workspace.onDragStart(dragObject, options)
+        }
+        // Ensure launcher enters DESKTOP_DRAG_MODE after starting mouse drag.
+        launcherActivity.waitUntil("Launcher didn't switch to DESKTOP_DRAG_MODE") {
+            it.stateManager.state == DESKTOP_DRAG_MODE
+        }
+
+        launcherActivity.executeOnLauncher { launcher ->
+            dragObject.x = 10 // near left edge
+            launcher.workspace.onDragOver(dragObject)
+        }
+        // Ensure launcher changes to SPRING_LOADED after dragging to screen edge.
+        launcherActivity.waitUntil("Launcher didn't switch to SPRING_LOADED") {
+            it.stateManager.state == SPRING_LOADED
+        }
+
+        launcherActivity.executeOnLauncher { launcher ->
+            dragObject.x = launcher.workspace.width / 2 // center of workspace
+            launcher.workspace.onDragOver(dragObject)
+        }
+
+        // Ensure launcher changes back to DESKTOP_DRAG_MODE when dragging away from the screen
+        // edge.
+        launcherActivity.waitUntil("Launcher didn't switch to SPRING_LOADED") {
+            it.stateManager.state == DESKTOP_DRAG_MODE
+        }
+    }
 
     @Test
     @DisableFlags(FLAG_ENABLE_FILE_SYSTEM_FOLDERS_AS_DROP_TARGETS)
@@ -201,6 +266,13 @@ class WorkspaceTest {
         mock<DragObject>().apply {
             dragInfo = createWorkspaceItemInfo(itemType, uri)
             originalDragInfo = dragInfo
+            whenever(getVisualCenter(any())).thenAnswer {
+                val args = it.arguments
+                val res = (args[0] as? FloatArray) ?: FloatArray(2)
+                res[0] = x.toFloat()
+                res[1] = y.toFloat()
+                res
+            }
         }
 
     private fun createDropOverView(folder: HomeScreenFile) =

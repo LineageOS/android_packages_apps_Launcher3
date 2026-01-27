@@ -692,6 +692,13 @@ public class DragController implements DragDriver.EventListener, TouchController
         return mMotionDown;
     }
 
+    /**
+     * Returns true if the current drag operation is controlled by a mouse.
+     */
+    public boolean isMouseDrag() {
+        return mOptions != null && mOptions.isMouseDrag;
+    }
+
     public void forceTouchMove() {
         checkTouchMove(mLastTouch.x, mLastTouch.y);
     }
