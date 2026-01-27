@@ -1485,7 +1485,7 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
 
             if (!mIsTaskbarSystemActionRegistered) {
                 RemoteAction taskbarRemoteAction = new RemoteAction(
-                        Icon.createWithResource(mActivity, R.drawable.ic_info_no_shadow),
+                        Icon.createWithResource(mActivity, R.drawable.ic_unstash_no_shadow),
                         mActivity.getString(R.string.taskbar_a11y_title),
                         mActivity.getString(R.string.taskbar_a11y_title),
                         mTaskbarSharedState.taskbarSystemActionPendingIntent);
