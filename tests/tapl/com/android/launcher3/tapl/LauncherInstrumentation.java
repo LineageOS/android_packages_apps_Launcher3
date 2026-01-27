@@ -1447,7 +1447,11 @@ public final class LauncherInstrumentation {
                 // CLose floating views before going back to home.
                 swipeUpToCloseFloatingView();
 
-                if (hasLauncherObject(WORKSPACE_RES_ID)) {
+                if (hasLauncherObject(WORKSPACE_RES_ID)
+                        && !(isRecentsWindowEnabled()
+                        && hasSystemLauncherObject(OVERVIEW_RES_ID))) {
+                    // The workspace is visible on the accessibility hierarchy under the recents
+                    // window
                     log(action = "already at home");
                 } else {
                     action = "swiping up to home";
