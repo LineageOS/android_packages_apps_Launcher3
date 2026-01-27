@@ -36,9 +36,9 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -48,14 +48,14 @@ class BubbleViewTest {
     private lateinit var bubbleView: BubbleView
     private lateinit var overflowView: BubbleView
     private lateinit var bubble: BubbleBarBubble
-    private val mockController = mock(BubbleView.Controller::class.java)
+    private val mockController = mock<BubbleView.Controller>()
 
     @Before
     fun setUp() {
         setupBubbleViews()
         bubbleView.setController(mockController)
         overflowView.setController(mockController)
-        `when`(mockController.bubbleBarLocation).thenReturn(BubbleBarLocation.RIGHT)
+        whenever(mockController.bubbleBarLocation).thenReturn(BubbleBarLocation.RIGHT)
     }
 
     @Test
@@ -122,7 +122,7 @@ class BubbleViewTest {
     @Test
     fun onInitializeAccessibilityNodeInfo_forBubbleOnRight_hasMoveLeftAction() {
         // Set bubble bar location to the right
-        `when`(mockController.bubbleBarLocation).thenReturn(BubbleBarLocation.RIGHT)
+        whenever(mockController.bubbleBarLocation).thenReturn(BubbleBarLocation.RIGHT)
         val info = AccessibilityNodeInfo()
 
         // Check the accessibility node info
@@ -137,7 +137,7 @@ class BubbleViewTest {
     @Test
     fun onInitializeAccessibilityNodeInfo_forBubbleOnLeft_hasMoveRightAction() {
         // Set bubble bar location to the left
-        `when`(mockController.bubbleBarLocation).thenReturn(BubbleBarLocation.LEFT)
+        whenever(mockController.bubbleBarLocation).thenReturn(BubbleBarLocation.LEFT)
         val info = AccessibilityNodeInfo()
 
         // Check the accessibility node info
