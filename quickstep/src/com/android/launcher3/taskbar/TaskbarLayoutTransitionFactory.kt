@@ -34,12 +34,14 @@ import androidx.core.view.get
 import com.android.app.animation.Interpolators
 import com.android.app.animation.Interpolators.EMPHASIZED
 import com.android.app.animation.Interpolators.LINEAR
+import com.android.internal.jank.Cuj
 import com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY
 import com.android.launcher3.Reorderable
 import com.android.launcher3.Utilities
 import com.android.launcher3.taskbar.customization.containers.TaskbarPinnedAppIconContainer
 import com.android.launcher3.util.MultiPropertyFactory
 import com.android.launcher3.util.MultiTranslateDelegate.INDEX_TASKBAR_PINNING_ANIM
+import com.android.systemui.shared.system.InteractionJankMonitorWrapper
 
 /**
  * Creates a [LayoutTransition] for [TaskbarView] or its icon containers.
@@ -166,10 +168,36 @@ class TaskbarLayoutTransitionFactory(private vararg val transitionListeners: Tra
             ) = Unit
         }
 
+    private val iconAppearDisappearJankCujListener =
+        object : TransitionListener {
+            override fun startTransition(
+                transition: LayoutTransition,
+                container: ViewGroup,
+                view: View,
+                type: Int,
+            ) {
+                if (type == APPEARING || type == DISAPPEARING) {
+                    InteractionJankMonitorWrapper.begin(container, Cuj.CUJ_TASKBAR_ICON_APPEAR)
+                }
+            }
+
+            override fun endTransition(
+                transition: LayoutTransition,
+                container: ViewGroup,
+                view: View,
+                type: Int,
+            ) {
+                if (type == APPEARING || type == DISAPPEARING) {
+                    InteractionJankMonitorWrapper.end(Cuj.CUJ_TASKBAR_ICON_APPEAR)
+                }
+            }
+        }
+
     private fun create(isRootView: Boolean): LayoutTransition {
         return LayoutTransition().apply {
             setDuration(TRANSITION_DEFAULT_DURATION)
             addTransitionListener(setUpViewOnAppearingStart)
+            addTransitionListener(iconAppearDisappearJankCujListener)
             for (l in this@TaskbarLayoutTransitionFactory.transitionListeners) {
                 addTransitionListener(l)
             }

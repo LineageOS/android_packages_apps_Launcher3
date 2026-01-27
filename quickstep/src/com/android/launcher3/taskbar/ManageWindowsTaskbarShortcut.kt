@@ -20,6 +20,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.view.MotionEvent
 import android.view.View
+import com.android.internal.jank.Cuj
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
@@ -34,6 +35,7 @@ import com.android.quickstep.SystemUiProxy
 import com.android.quickstep.util.DesktopTask
 import com.android.systemui.shared.recents.model.Task
 import com.android.systemui.shared.recents.model.ThumbnailData
+import com.android.systemui.shared.system.InteractionJankMonitorWrapper
 import com.android.wm.shell.shared.desktopmode.DesktopTaskToFrontReason
 import com.android.wm.shell.shared.multiinstance.ManageWindowsViewContainer
 
@@ -188,7 +190,15 @@ class ManageWindowsTaskbarShortcut<T>(
         init {
             createAndShowMenuView(snapshotList, onIconClickListener, onOutsideClickListener)
             taskbarOverlayContext.dragLayer.addTouchController(this)
-            animateOpen()
+            InteractionJankMonitorWrapper.begin(
+                originalView,
+                Cuj.CUJ_DESKTOP_MODE_TASKBAR_MULTI_INSTANCE_MENU_OPEN,
+            )
+            animateOpen {
+                InteractionJankMonitorWrapper.end(
+                    Cuj.CUJ_DESKTOP_MODE_TASKBAR_MULTI_INSTANCE_MENU_OPEN
+                )
+            }
         }
 
         /** Adds the carousel menu to the taskbar overlay drag layer */
