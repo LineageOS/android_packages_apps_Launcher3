@@ -20,10 +20,12 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Environment
 import android.provider.DocumentsContract.Document.MIME_TYPE_DIR
+import com.android.launcher3.Flags.enableHomeScreenFilesTrashing
 import com.android.launcher3.Flags.showFilesOnHomeScreen
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FILE
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FOLDER
 import com.android.launcher3.model.data.ItemInfo
+import com.android.providers.media.flags.Flags.enableTrashAndRestoreByFilePathApi
 
 /** Other utility methods related to managing files on the home screen. */
 class HomeScreenFilesUtils {
@@ -37,6 +39,10 @@ class HomeScreenFilesUtils {
         val isFeatureEnabled: Boolean by lazy {
             showFilesOnHomeScreen() && Environment.isExternalStorageManager()
         }
+
+        /** Returns `true` if the "Move to trash" feature is enabled. */
+        fun isTrashingEnabled() =
+            enableHomeScreenFilesTrashing() && enableTrashAndRestoreByFilePathApi()
 
         /** Returns the appropriate item type for the given [homeScreenFile]. */
         fun buildItemType(homeScreenFile: HomeScreenFile) =
