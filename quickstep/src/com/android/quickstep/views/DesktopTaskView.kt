@@ -53,19 +53,17 @@ import com.android.quickstep.RemoteTargetGluer.RemoteTargetHandle
 import com.android.quickstep.TaskOverlayFactory
 import com.android.quickstep.ViewUtils.addAccessibleChildToList
 import com.android.quickstep.recents.di.RecentsComponent
-import com.android.quickstep.recents.domain.model.DesktopLayoutConfig
-import com.android.quickstep.recents.domain.model.DesktopTaskPosition
+import com.android.quickstep.recents.domain.model.TaskLayoutConfig.DesktopLayoutConfig
+import com.android.quickstep.recents.domain.model.TaskLayoutState.DesktopTaskLayoutState
 import com.android.quickstep.recents.domain.model.TaskPosition.Hidden
 import com.android.quickstep.recents.domain.model.TaskPosition.Rendered
 import com.android.quickstep.recents.domain.usecase.DesktopLayoutUtils
-import com.android.quickstep.recents.ui.viewmodel.DesktopTaskViewModel
 import com.android.quickstep.recents.ui.viewmodel.TaskData
 import com.android.quickstep.task.thumbnail.TaskContentView
 import com.android.quickstep.task.thumbnail.TaskThumbnailView
 import com.android.quickstep.util.DesktopTask
 import com.android.quickstep.util.RecentsOrientedState
 import com.android.quickstep.util.getRemoteTargetHandle
-import javax.inject.Inject
 import kotlin.math.roundToInt
 
 /** TaskView that contains all tasks that are part of the desktop. */
@@ -107,13 +105,6 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
     private lateinit var iconTouchDelegate: TransformingTouchDelegate
     private lateinit var contentView: DesktopTaskContentView
     private lateinit var backgroundView: View
-    @Inject lateinit var desktopTaskViewModel: DesktopTaskViewModel
-
-    /**
-     * Map from task IDs to previous organized task positions. This is used to animate between two
-     * sets of organized task positions when a task is being dismissed.
-     */
-    private var previousTaskPositions: Map<Int, DesktopTaskPosition>? = null
 
     /**
      * Controls the gradual transition from the default positions to the organized non-overlapping
@@ -176,10 +167,12 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
         taskContainers.forEach { taskContainer ->
             val taskId = taskContainer.task.key.id
             val taskContentView = taskContainer.taskContentView
-            val taskPosition = desktopTaskViewModel.desktopTaskPositions[taskId] ?: return@forEach
+            val desktopTaskLayoutState =
+                viewModel.getTaskLayoutState<DesktopTaskLayoutState>(taskId) ?: return@forEach
 
-            val fullscreenPosition = taskPosition.fullscreenPosition
-            val overviewTaskPosition = taskPosition.overviewPosition
+            val fullscreenPosition = desktopTaskLayoutState.fullscreenPosition
+            val overviewTaskPosition = desktopTaskLayoutState.overviewPosition
+            val oldOverviewTaskPosition = desktopTaskLayoutState.oldOverviewPosition
 
             val renderedInOverview: Boolean = overviewTaskPosition is Rendered
             val renderedInFullscreen: Boolean = fullscreenPosition is Rendered
@@ -202,8 +195,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
                 TEMP_OVERVIEW_TASK_POSITION.apply {
                     // When removing a task, interpolate between its old organized bounds and
                     // [overviewTaskBounds].
-                    val prevOverviewTaskBounds =
-                        (previousTaskPositions?.get(taskId)?.overviewPosition as? Rendered)?.bounds
+                    val prevOverviewTaskBounds = (oldOverviewTaskPosition as? Rendered)?.bounds
 
                     if (prevOverviewTaskBounds != null) {
                         lerpRect(prevOverviewTaskBounds, overviewTaskBounds, taskRemoveProgress)
@@ -403,7 +395,6 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
         super.onRecycle()
         explodeProgress = 0.0f
         taskRemoveProgress = 0.0f
-        previousTaskPositions = null
         visibility = VISIBLE
         taskContainers.forEach { removeAndRecycleThumbnailView(it) }
         remoteTargetHandles = null
@@ -560,7 +551,6 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
                 addListener(
                     object : AnimatorListenerAdapter() {
                         override fun onAnimationEnd(animator: Animator) {
-                            previousTaskPositions = null
                             taskRemoveAnimator = null
                         }
                     }
@@ -568,9 +558,6 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
                 start()
             }
 
-        // Store the current organized positions before computing new ones. This allows us to
-        // animate from the current layout to the new.
-        previousTaskPositions = desktopTaskViewModel.desktopTaskPositions
         updateTaskPositions(taskId)
     }
 
@@ -581,11 +568,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     private fun updateTaskPositions(dismissedTaskId: Int? = null) {
         val layoutConfig = getDesktopLayoutConfig()
-        desktopTaskViewModel.organizeDesktopTasks(
-            taskContainers.map { it.task },
-            layoutConfig,
-            dismissedTaskId,
-        )
+        viewModel.updateTasksLayouts(taskContainers.map { it.task }, layoutConfig, dismissedTaskId)
         positionTaskWindows(updateLayout = true)
     }
 

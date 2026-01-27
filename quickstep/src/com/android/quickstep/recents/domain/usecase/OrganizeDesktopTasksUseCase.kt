@@ -19,7 +19,7 @@ package com.android.quickstep.recents.domain.usecase
 import android.graphics.Rect
 import android.graphics.RectF
 import androidx.core.graphics.toRect
-import com.android.quickstep.recents.domain.model.DesktopLayoutConfig
+import com.android.quickstep.recents.domain.model.TaskLayoutConfig.DesktopLayoutConfig
 import com.android.quickstep.recents.domain.model.TaskPosition
 import com.android.quickstep.recents.domain.model.TaskPosition.Hidden
 import com.android.quickstep.recents.domain.model.TaskPosition.Rendered
