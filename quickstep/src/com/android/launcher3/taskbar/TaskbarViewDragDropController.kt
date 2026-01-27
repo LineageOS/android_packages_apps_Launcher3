@@ -17,7 +17,6 @@
 package com.android.launcher3.taskbar
 
 import android.graphics.Rect
-import android.os.Looper
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import androidx.core.util.size
@@ -57,7 +56,7 @@ class TaskbarViewDragDropController(
     @VisibleForTesting var overflowPinningDropTarget: PinningDropTarget? = null
     private var modelCallbacks: TaskbarModelCallbacks? = null
     @VisibleForTesting val tooltipController = TaskbarDragViewTooltip(activityContext)
-    @VisibleForTesting val overflowContainerAlarm = Alarm(Looper.getMainLooper())
+    @VisibleForTesting val overflowContainerAlarm = Alarm(activityContext.mainLooper)
 
     private enum class AlarmState {
         RUNNING_OPEN,
