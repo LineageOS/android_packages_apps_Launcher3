@@ -22,7 +22,6 @@ import androidx.compose.runtime.setValue
 import com.android.launcher3.model.data.ItemInfoWithIcon
 import com.android.launcher3.popup.PopupCategory
 import com.android.launcher3.popup.PopupPopulator
-import com.android.launcher3.popup.ui.PopupDisplayMode.*
 import kotlin.math.min
 
 /** Represents the currently expanded section within the collapsible popup menu. */
@@ -31,33 +30,6 @@ enum class ExpandedSection {
     SYSTEM,
     /** Indicates that the deep shortcuts section is expanded. */
     DEEP,
-}
-
-/**
- * Defines the different visual display modes for the popup menu based on the number and type of
- * shortcuts.
- */
-private enum class PopupDisplayMode {
-    /** Only system shortcuts are present, and there are fewer than 6, shown as a simple list. */
-    SYSTEM_LIST_ONLY,
-    /**
-     * System shortcuts are present (6 or more) with a compact top bar. Deep shortcuts are absent.
-     */
-    SYSTEM_LIST_WITH_TOP_BAR,
-    /**
-     * Combined system and deep shortcuts, with a total count of 7 or fewer, shown as a single list.
-     */
-    COMBINED_LIST,
-    /**
-     * Combined system and deep shortcuts, where the total count minus compact system shortcuts is 6
-     * or fewer, using a top bar.
-     */
-    COMBINED_LIST_WITH_TOP_BAR,
-    /**
-     * Too many shortcuts to display in a simple list, requiring an accordion-style layout with the
-     * System section initially expanded.
-     */
-    ACCORDION_SYSTEM_EXPANDED,
 }
 
 /**
@@ -99,75 +71,56 @@ class PopupViewModel {
      * @param deepShortcutCount The number of deep shortcuts to consider for the current state.
      */
     private fun updateState(systemShortcuts: List<PopupItem>, deepShortcutCount: Int) {
-        val compactSystemShortcuts =
-            systemShortcuts.filter { it.category == PopupCategory.SYSTEM_SHORTCUT }
-        val standardSystemShortcuts =
-            systemShortcuts.filter { it.category == PopupCategory.SYSTEM_SHORTCUT_FIXED }
-
+        val numDeep = min(deepShortcutCount, PopupPopulator.MAX_SHORTCUTS)
+        val deepPlaceholder = List(numDeep) { null }
         expandedSection = null
 
-        val deepShortcuts = List(min(deepShortcutCount, PopupPopulator.MAX_SHORTCUTS)) { null }
-        val displayMode = determineDisplayMode(systemShortcuts, deepShortcuts.size)
+        // Scenario where we don't surpass the max amount of rows with the items we have.
+        if (systemShortcuts.size + numDeep <= MAX_ROWS) {
+            state =
+                PopupUiState(
+                    standardSystemShortcuts = systemShortcuts,
+                    deepShortcuts = deepPlaceholder,
+                )
+            return
+        }
+
+        // Here we determine if we should show the accordion, which should only show up if
+        // there are at least DEEP_SHORTCUTS_ACCORDION_THRESHOLD deep shortcuts. We also determine
+        // how many system shortcuts should be compact, and we try to minimize the amount as much
+        // as possible.
+        val (fixed, compactEligible) =
+            systemShortcuts.partition { it.category == PopupCategory.SYSTEM_SHORTCUT_FIXED }
+        val isAccordion = numDeep >= DEEP_SHORTCUTS_ACCORDION_THRESHOLD
+        val totalSystemItems = fixed.size + compactEligible.size
+
+        // Calculate how many compactEligible items should be promoted to the standard list.
+        val numToPromote =
+            if (totalSystemItems <= MAX_STANDARD_ITEMS_ACCORDION) {
+                // If totalSystemItems does not exceed MAX_STANDARD_ITEMS, promote all
+                // compactEligible items. This ensures compactSystemShortcuts will be empty.
+                compactEligible.size
+            } else {
+                // totalSystemItems > MAX_STANDARD_ITEMS, so compact items are allowed.
+                val targetSize =
+                    if (isAccordion) MAX_STANDARD_ITEMS_WITH_ACCORDION_WITH_TOP_BAR
+                    else MAX_STANDARD_ITEMS_WITH_TOP_BAR - numDeep
+                val availableSlots = maxOf(0, targetSize - fixed.size)
+                min(compactEligible.size, availableSlots)
+            }
+
+        if (isAccordion) {
+            expandedSection = ExpandedSection.SYSTEM
+        }
 
         state =
-            when (displayMode) {
-                SYSTEM_LIST_ONLY -> PopupUiState(standardSystemShortcuts = systemShortcuts)
-
-                SYSTEM_LIST_WITH_TOP_BAR ->
-                    PopupUiState(
-                        compactSystemShortcuts = compactSystemShortcuts,
-                        standardSystemShortcuts = standardSystemShortcuts,
-                    )
-
-                COMBINED_LIST ->
-                    PopupUiState(
-                        standardSystemShortcuts = systemShortcuts,
-                        deepShortcuts = deepShortcuts,
-                    )
-
-                COMBINED_LIST_WITH_TOP_BAR ->
-                    PopupUiState(
-                        compactSystemShortcuts = compactSystemShortcuts,
-                        standardSystemShortcuts = standardSystemShortcuts,
-                        deepShortcuts = deepShortcuts,
-                    )
-
-                ACCORDION_SYSTEM_EXPANDED -> {
-                    expandedSection = ExpandedSection.SYSTEM
-                    PopupUiState(
-                        compactSystemShortcuts = compactSystemShortcuts,
-                        standardSystemShortcuts = standardSystemShortcuts,
-                        deepShortcuts = deepShortcuts,
-                        mainSegmentsStyle = MainSegmentsStyle.ACCORDION,
-                    )
-                }
-            }
-    }
-
-    /**
-     * Determines the appropriate [PopupDisplayMode] based on the number of system and deep
-     * shortcuts.
-     */
-    private fun determineDisplayMode(
-        systemShortcuts: List<PopupItem>,
-        deepShortcutCount: Int,
-    ): PopupDisplayMode {
-        val compactSystemShortcutSize =
-            systemShortcuts.count { it.category == PopupCategory.SYSTEM_SHORTCUT }
-        val totalShortcutCount = systemShortcuts.size + deepShortcutCount
-
-        return when {
-            // System shortcuts only.
-            deepShortcutCount == 0 && systemShortcuts.size < 6 -> SYSTEM_LIST_ONLY
-            // System shortcuts with top bar.
-            deepShortcutCount == 0 -> SYSTEM_LIST_WITH_TOP_BAR
-            // System shortcuts and deep shortcuts, total count <= 7.
-            totalShortcutCount <= 7 -> COMBINED_LIST
-            // System shortcuts, deep shortcuts, and top bar, with standard/deep count <= 6.
-            totalShortcutCount - compactSystemShortcutSize <= 6 -> COMBINED_LIST_WITH_TOP_BAR
-            // Accordion-style is needed.
-            else -> ACCORDION_SYSTEM_EXPANDED
-        }
+            PopupUiState(
+                compactSystemShortcuts = compactEligible.drop(numToPromote),
+                standardSystemShortcuts = fixed + compactEligible.take(numToPromote),
+                deepShortcuts = deepPlaceholder,
+                mainSegmentsStyle =
+                    if (isAccordion) MainSegmentsStyle.ACCORDION else MainSegmentsStyle.LIST,
+            )
     }
 
     /**
@@ -198,5 +151,31 @@ class PopupViewModel {
                     sectionToToggle
                 }
         }
+    }
+
+    companion object {
+        /** The maximum number of rows that can be displayed */
+        private const val MAX_ROWS = 7
+
+        /**
+         * The maximum number of full-size (standard) shortcuts that can be displayed with an
+         * accordion menu.
+         */
+        private const val MAX_STANDARD_ITEMS_ACCORDION = 6
+
+        /**
+         * The maximum number of full-size (standard) shortcuts that can be displayed when a top bar
+         * is present.
+         */
+        private const val MAX_STANDARD_ITEMS_WITH_TOP_BAR = 6
+
+        /**
+         * The maximum number of full-size (standard) shortcuts that can be displayed when a top bar
+         * is present with an accordion menu.
+         */
+        private const val MAX_STANDARD_ITEMS_WITH_ACCORDION_WITH_TOP_BAR = 5
+
+        /** The minimum number of deep shortcuts that can trigger the accordion layout. */
+        private const val DEEP_SHORTCUTS_ACCORDION_THRESHOLD = 2
     }
 }

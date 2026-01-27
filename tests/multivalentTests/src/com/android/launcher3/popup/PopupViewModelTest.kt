@@ -76,7 +76,7 @@ class PopupViewModelTest {
     }
 
     @Test
-    fun init_noDeepShortcuts_manySystemShortcuts_showsListWithCompact() {
+    fun init_noDeepShortcuts_manySystemShortcuts_showsListWithNoCompact() {
         val systemShortcuts = mutableListOf<PopupItem>()
         systemShortcuts.addAll(List(4) { popupDataUi })
         systemShortcuts.addAll(List(3) { popupDataUiFixed })
@@ -85,8 +85,8 @@ class PopupViewModelTest {
 
         val state = viewModel.state
         assertThat(state.mainSegmentsStyle).isEqualTo(MainSegmentsStyle.LIST)
-        assertThat(state.compactSystemShortcuts.size).isEqualTo(4)
-        assertThat(state.standardSystemShortcuts.size).isEqualTo(3)
+        assertThat(state.compactSystemShortcuts.size).isEqualTo(0)
+        assertThat(state.standardSystemShortcuts.size).isEqualTo(7)
         assertThat(state.deepShortcuts.size).isEqualTo(0)
         assertThat(viewModel.expandedSection).isNull()
     }
@@ -106,7 +106,7 @@ class PopupViewModelTest {
     }
 
     @Test
-    fun init_withDeepShortcuts_totalMoreThan7_compactFits_showsListWithCompact() {
+    fun init_withDeepShortcuts_totalMoreThan7_showsAccordion_noCompact() {
         val systemShortcuts = mutableListOf<PopupItem>()
         systemShortcuts.addAll(List(4) { popupDataUi })
         systemShortcuts.addAll(List(2) { popupDataUiFixed })
@@ -114,15 +114,15 @@ class PopupViewModelTest {
         viewModel.init(systemShortcuts, deepShortcutCount = 2)
 
         val state = viewModel.state
-        assertThat(state.mainSegmentsStyle).isEqualTo(MainSegmentsStyle.LIST)
-        assertThat(state.compactSystemShortcuts.size).isEqualTo(4)
-        assertThat(state.standardSystemShortcuts.size).isEqualTo(2)
+        assertThat(state.mainSegmentsStyle).isEqualTo(MainSegmentsStyle.ACCORDION)
+        assertThat(state.compactSystemShortcuts.size).isEqualTo(0)
+        assertThat(state.standardSystemShortcuts.size).isEqualTo(6)
         assertThat(state.deepShortcuts.size).isEqualTo(2)
-        assertThat(viewModel.expandedSection).isNull()
+        assertThat(viewModel.expandedSection).isEqualTo(ExpandedSection.SYSTEM)
     }
 
     @Test
-    fun init_withDeepShortcuts_totalLarge_showsAccordion() {
+    fun init_withDeepShortcuts_totalMoreThan7_showsAccordion_someCompact() {
         val systemShortcuts = mutableListOf<PopupItem>()
         systemShortcuts.addAll(List(4) { popupDataUi })
         systemShortcuts.addAll(List(5) { popupDataUiFixed })
