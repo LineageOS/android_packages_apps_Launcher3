@@ -246,7 +246,7 @@ class TaskbarViewDragDropController(
         // Check if the dragged item already exists in the model.
         // If it does, use the one from the Model's instance, to avoid failing the ModelWriter
         // itemInfo check.
-        if (draggedItem.id != NO_ID && draggedItem.container == CONTAINER_HOTSEAT) {
+        if (isDraggedInfoFromHotseat(draggedItem)) {
             for (i in 0 until hotseatItems.size) {
                 val item = hotseatItems.valueAt(i) ?: continue
                 if (item.id != NO_ID && item.id == draggedItem.id) {
@@ -290,6 +290,10 @@ class TaskbarViewDragDropController(
         }
     }
 
+    private fun isDraggedInfoFromHotseat(draggedInfo: ItemInfo): Boolean {
+        return draggedInfo.id != ItemInfo.NO_ID && draggedInfo.container == CONTAINER_HOTSEAT
+    }
+
     /**
      * Implementation of the [DropTarget] that handles drag and drop events over the recent apps
      * area.
@@ -320,7 +324,7 @@ class TaskbarViewDragDropController(
         override fun onDragEnter(dragObject: DropTarget.DragObject?) {
             dragObject ?: return
             val draggedInfo = extractItemInfoFromDragObject(dragObject) ?: return
-            if (draggedInfo.id != ItemInfo.NO_ID && draggedInfo.container == CONTAINER_HOTSEAT) {
+            if (isDraggedInfoFromHotseat(draggedInfo)) {
                 if (tooltipController.isActive()) {
                     tooltipController.hide()
                 }
@@ -387,14 +391,12 @@ class TaskbarViewDragDropController(
         private val canPinMoreItems: Boolean
             get() {
                 val hotseatItems = modelCallbacks?.hotseatItems ?: return false
+                if (draggedInfo !== null && isDraggedInfoFromHotseat(draggedInfo!!)) return true
                 return hotseatItems.size < activityContext.taskbarSpecsEvaluator.maxPinnableCount
             }
 
         override fun isDropEnabled(): Boolean {
-            // TODO(b/447444838): For now, only accept drops when the number of pinned items has
-            // not reached limit. This will probably be modified after dropping to hotseat overflow
-            // folder UX finalized.
-            return canPinMoreItems
+            return true
         }
 
         override fun getDropView(): View? {
@@ -415,6 +417,8 @@ class TaskbarViewDragDropController(
 
             dragObject ?: return
             draggedInfo = extractItemInfoFromDragObject(dragObject)
+            if (!canPinMoreItems) return
+
             dragObject.getVisualCenter(dragObjectVisualCenter)
 
             delegate.reserveDropSlotForDragLocation(dragObjectVisualCenter[0].toInt())
@@ -423,6 +427,7 @@ class TaskbarViewDragDropController(
         override fun onDragOver(dragObject: DropTarget.DragObject?) {
             dragObject ?: return
             dragObject.getVisualCenter(dragObjectVisualCenter)
+            if (!canPinMoreItems) return
 
             if (isOverflowDropTarget) {
                 delegate.reserveDropSlotForDragLocation(dragObjectVisualCenter[0].toInt())
