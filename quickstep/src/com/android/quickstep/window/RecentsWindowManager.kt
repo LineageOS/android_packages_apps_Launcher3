@@ -183,15 +183,15 @@ constructor(
     private val recentsComponent = recentsComponentFactory.build(this)
     private var recentsView: FallbackWindowRecentsView? = null
     private var surfaceControlViewHost: SurfaceControlViewHost? = null
-    private var layoutInflater: LayoutInflater = LayoutInflater.from(this).cloneInContext(this)
-    private var stateManager: StateManager<RecentsState, RecentsWindowManager> =
+    private val layoutInflater: LayoutInflater = LayoutInflater.from(this).cloneInContext(this)
+    private val stateManager: StateManager<RecentsState, RecentsWindowManager> =
         StateManager<RecentsState, RecentsWindowManager>(this, HIDDEN)
     private var systemUiController: SystemUiController? = null
 
     private var overviewOverlay: SurfaceControl? = null
     private var homeOverlay: SurfaceControl? = null
     private var dragLayer: RecentsDragLayer<RecentsWindowManager>? = null
-    private var windowRootView = RecentsWindowRootView(this)
+    private val windowRootView = RecentsWindowRootView(this)
     private var windowView: LauncherRootView? = null
     private var actionsView: OverviewActionsView<*>? = null
     private var scrimView: ScrimView? = null
