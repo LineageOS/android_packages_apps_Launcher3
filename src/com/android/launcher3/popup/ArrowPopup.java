@@ -37,6 +37,8 @@ import android.util.Pair;
 import android.util.Property;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.PointerIcon;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Interpolator;
@@ -721,6 +723,14 @@ public abstract class ArrowPopup<T extends Context & ActivityContext>
      * Called when creating the close transition allowing subclass can add additional animations.
      */
     protected void onCreateCloseAnimation(AnimatorSet anim) { }
+
+    @Override
+    public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
+        if (getPointerIcon() == null) {
+            return PointerIcon.getSystemIcon(getContext(), PointerIcon.TYPE_DEFAULT);
+        }
+        return super.onResolvePointerIcon(event, pointerIndex);
+    }
 
     /**
      * Closes the popup without animation.
