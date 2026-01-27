@@ -39,7 +39,7 @@ import com.android.launcher3.logger.LauncherAtom.Attribute;
 import com.android.launcher3.logger.LauncherAtom.FolderIcon;
 import com.android.launcher3.logger.LauncherAtom.FromState;
 import com.android.launcher3.logger.LauncherAtom.ToState;
-import com.android.launcher3.model.ModelWriter;
+import com.android.launcher3.model.IModelWriter;
 import com.android.launcher3.util.ContentWriter;
 
 import java.util.ArrayList;
@@ -146,7 +146,7 @@ public class FolderInfo extends CollectionInfo {
      * @param isEnabled whether to set or clear the flag
      * @param writer if not null, save changes to the db.
      */
-    public void setOption(int option, boolean isEnabled, ModelWriter writer) {
+    public void setOption(int option, boolean isEnabled, IModelWriter writer) {
         int oldOptions = options;
         if (isEnabled) {
             options |= option;
@@ -179,7 +179,7 @@ public class FolderInfo extends CollectionInfo {
                 .build();
     }
 
-    public void setTitle(@Nullable CharSequence title, ModelWriter modelWriter) {
+    public void setTitle(@Nullable CharSequence title, IModelWriter modelWriter) {
         // Updating label from null to empty is considered as false touch.
         // Retaining null title(ie., UNLABELED state) allows auto-labeling when new items added.
         if (isEmpty(title) && this.title == null) {

@@ -15,16 +15,17 @@
  */
 package com.android.launcher3.model
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.model.testing.FakeModelWriter
 import com.android.launcher3.model.testing.WriterAction
+import com.android.launcher3.ui.testing.FakeLauncherUiStateNotifier
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
 /** Unit tests for [FakeModelWriter]. */
-@RunWith(RobolectricTestRunner::class)
+@RunWith(AndroidJUnit4::class)
 class FakeModelWriterTest {
 
     @Test
@@ -37,7 +38,7 @@ class FakeModelWriterTest {
             }
 
         fakeModelWriter.scheduleTransaction { context ->
-            context.addItemToDatabase(item, 0, 0, 0, 0)
+            context.addItemToDatabase(item)
         }
 
         assertThat(fakeModelWriter.actions).hasSize(1)
@@ -97,7 +98,7 @@ class FakeModelWriterTest {
             }
 
         fakeModelWriter.scheduleTransaction { context ->
-            context.addItemToDatabase(item1, 0, 0, 0, 0)
+            context.addItemToDatabase(item1)
             context.updateItemInDatabase(item1)
             context.deleteItemFromDatabase(item2, "reason")
         }
@@ -147,5 +148,13 @@ class FakeModelWriterTest {
         assertThat(fakeModelWriter.actions).hasSize(1)
         val action = fakeModelWriter.actions[0] as WriterAction.UpdateItem
         assertThat(action.item).isEqualTo(item)
+    }
+
+    @Test
+    fun getNotifier_returnsFakeNotifier() {
+        val fakeModelWriter = FakeModelWriter()
+        val notifier = fakeModelWriter.getNotifier()
+        assertThat(notifier).isInstanceOf(FakeLauncherUiStateNotifier::class.java)
+        assertThat(notifier).isSameInstanceAs(fakeModelWriter.notifier)
     }
 }

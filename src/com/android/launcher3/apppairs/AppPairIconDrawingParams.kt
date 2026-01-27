@@ -88,7 +88,7 @@ class AppPairIconDrawingParams(val context: Context, container: Int) {
 
     /** Checks the device orientation and updates isLeftRightSplit accordingly. */
     fun updateOrientation(dp: DeviceProfile) {
-        isLeftRightSplit = dp.isLeftRightSplit
+        isLeftRightSplit = dp.sysuiProfile.isLeftRightSplit
     }
 
     fun updateBgColor(container: Int) {

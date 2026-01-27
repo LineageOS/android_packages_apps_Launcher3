@@ -25,6 +25,8 @@ import com.android.launcher3.tapl.BaseOverview
 import com.android.launcher3.tapl.LaunchedAppState
 import com.android.launcher3.tapl.OverviewTask
 import com.android.launcher3.util.TestUtil
+import com.android.launcher3.util.ui.ActivityStartUtils.getAppPackageName
+import com.android.launcher3.util.ui.ActivityStartUtils.startTestActivity
 import com.android.launcher3.util.ui.PortraitLandscapeRunner.PortraitLandscape
 import com.android.quickstep.AbstractTaplTestsTaskbar.CALCULATOR_APP_NAME
 import com.android.quickstep.AbstractTaplTestsTaskbar.CALCULATOR_APP_PACKAGE

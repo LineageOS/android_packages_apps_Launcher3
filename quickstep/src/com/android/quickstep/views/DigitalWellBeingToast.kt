@@ -182,7 +182,7 @@ constructor(
                 taskView.isLargeTile -> SplitBannerConfig.SPLIT_BANNER_FULLSCREEN
             // For portrait grid only height of task changes, not width. So we keep the text the
             // same
-            !recentsViewContainer.deviceProfile.isLeftRightSplit ->
+            !recentsViewContainer.deviceProfile.sysuiProfile.isLeftRightSplit ->
                 SplitBannerConfig.SPLIT_GRID_BANNER_LARGE
             // For landscape grid, for 30% width we only show icon, otherwise show icon and time
             task.key.id == splitBounds.leftTopTaskId ->

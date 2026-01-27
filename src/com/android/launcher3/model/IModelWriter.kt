@@ -18,6 +18,7 @@ package com.android.launcher3.model
 import com.android.launcher3.model.data.CollectionInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.LauncherAppWidgetInfo
+import com.android.launcher3.ui.LauncherUiStateNotifier
 import com.android.launcher3.widget.LauncherWidgetHolder
 import java.util.function.Consumer
 import java.util.function.Predicate
@@ -64,6 +65,15 @@ interface IModelWriter {
         onComplete: ((success: Boolean) -> Unit)? = null,
         block: Consumer<TransactionContext>,
     )
+
+    /**
+     * Returns the [LauncherUiStateNotifier] used by the model to notify the UI of changes.
+     *
+     * This is used to notify the UI of changes that do not require a database transaction, such as
+     * optimistic updates or UI state synchronization.
+     */
+    @Deprecated("Temporary interface for ui notification")
+    fun getNotifier(): LauncherUiStateNotifier
 
     // The following methods are deprecated and will be removed once all clients are migrated
     // to the new transactional API. They are kept for now to ensure a safe, incremental rollout.
@@ -130,12 +140,8 @@ interface TransactionContext {
      * Adds an item to the database.
      *
      * @param item The [ItemInfo] to add.
-     * @param container The container ID where the item will be placed.
-     * @param screenId The screen ID where the item will be placed.
-     * @param cellX The X-coordinate of the cell where the item will be placed.
-     * @param cellY The Y-coordinate of the cell where the item will be placed.
      */
-    fun addItemToDatabase(item: ItemInfo, container: Int, screenId: Int, cellX: Int, cellY: Int)
+    fun addItemToDatabase(item: ItemInfo)
 
     /**
      * Adds multiple items to the database.
@@ -198,7 +204,8 @@ interface TransactionContext {
      * @param item The [ItemInfo] to delete.
      * @param reason An optional string indicating the reason for deletion.
      */
-    fun deleteItemFromDatabase(item: ItemInfo, reason: String?)
+    fun deleteItemFromDatabase(item: ItemInfo, reason: String?) =
+        deleteItemsFromDatabase(listOf(item), reason)
 
     /**
      * Deletes items from the database that match a given predicate.

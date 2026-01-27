@@ -75,7 +75,7 @@ import com.android.launcher3.logger.LauncherAtom;
 import com.android.launcher3.logging.InstanceId;
 import com.android.launcher3.logging.InstanceIdSequence;
 import com.android.launcher3.logging.StatsLogManager;
-import com.android.launcher3.model.ModelWriter;
+import com.android.launcher3.model.IModelWriter;
 import com.android.launcher3.model.StringCache;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
@@ -543,7 +543,7 @@ public interface ActivityContext extends SavedStateRegistryOwner {
     }
 
     /** Returns a writer for updating model properties */
-    default ModelWriter getModelWriter() {
+    default IModelWriter getModelWriter() {
         return LauncherAppState.getInstance(asContext()).getModel().getWriter(
                 false, this, null);
     }

@@ -29,7 +29,7 @@ import com.android.launcher3.logging.FileLog;
 import com.android.launcher3.model.AllAppsList;
 import com.android.launcher3.model.BgDataModel;
 import com.android.launcher3.model.ModelTaskController;
-import com.android.launcher3.model.ModelWriter;
+import com.android.launcher3.model.IModelWriter;
 import com.android.launcher3.model.WorkspaceItemSpaceFinder;
 import com.android.launcher3.model.data.CollectionInfo;
 import com.android.launcher3.model.data.ItemInfo;
@@ -82,7 +82,7 @@ public class AddWorkspaceItemsTask implements ModelUpdateTask {
         final Context context = taskController.getContext();
 
         synchronized (dataModel) {
-            ModelWriter writer = taskController.getModelWriter();
+            IModelWriter writer = taskController.getModelWriter();
             for (Supplier<ItemInfo> itemProvider : mItemList) {
                 ItemInfo item = itemProvider.get();
                 if (item instanceof WorkspaceItemFactory factory) {

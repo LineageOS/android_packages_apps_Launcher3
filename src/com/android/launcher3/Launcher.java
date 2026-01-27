@@ -187,7 +187,7 @@ import com.android.launcher3.logging.InstanceIdSequence;
 import com.android.launcher3.logging.StartupLatencyLogger;
 import com.android.launcher3.logging.StatsLogManager;
 import com.android.launcher3.model.ItemInstallQueue;
-import com.android.launcher3.model.ModelWriter;
+import com.android.launcher3.model.IModelWriter;
 import com.android.launcher3.model.StringCache;
 import com.android.launcher3.model.data.CollectionInfo;
 import com.android.launcher3.model.data.FolderInfo;
@@ -351,7 +351,7 @@ public class Launcher extends StatefulActivity<LauncherState>
     private OnPreDrawListener mOnInitialBindListener;
 
     private LauncherModel mModel;
-    private ModelWriter mModelWriter;
+    private IModelWriter mModelWriter;
     private LauncherAccessibilityDelegate mAccessibilityDelegate;
 
     private PopupController<Launcher> mPopupControllerForHomeScreenItems;
@@ -2743,7 +2743,7 @@ public class Launcher extends StatefulActivity<LauncherState>
     }
 
     @Override
-    public ModelWriter getModelWriter() {
+    public IModelWriter getModelWriter() {
         return mModelWriter;
     }
 
@@ -2903,5 +2903,12 @@ public class Launcher extends StatefulActivity<LauncherState>
         mLauncherUiState.setIsTopResumedActivity(isTopResumed);
     }
 
+    /**
+     * Only for use in tests, this API is only visible for LauncherQuickstep.
+     */
+    @VisibleForTesting
+    public boolean isOnBackInvokedCallbackEnabled() {
+        return false;
+    }
     // End of Getters and Setters
 }

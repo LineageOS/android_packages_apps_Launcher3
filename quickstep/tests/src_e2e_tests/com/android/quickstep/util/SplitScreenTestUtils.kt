@@ -20,15 +20,16 @@ import androidx.test.uiautomator.By
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.launcher3.tapl.Overview
 import com.android.launcher3.tapl.OverviewTask
-import com.android.launcher3.util.ui.AbstractLauncherUiTest
+import com.android.launcher3.util.ui.ActivityStartUtils.getAppPackageName
+import com.android.launcher3.util.ui.ActivityStartUtils.startTestActivity
 
 object SplitScreenTestUtils {
 
     /** Creates 2 tasks and makes a split mode pair. Also asserts the accessibility labels. */
     @JvmStatic
     fun createAndLaunchASplitPairInOverview(launcher: LauncherInstrumentation): Overview {
-        AbstractLauncherUiTest.startTestActivity(2)
-        AbstractLauncherUiTest.startTestActivity(3)
+        startTestActivity(2)
+        startTestActivity(3)
 
         val overView = launcher.goHome().switchToOverview()
         overView.currentTask.tapMenu().tapSplitMenuItem().currentTask.open()
@@ -36,11 +37,11 @@ object SplitScreenTestUtils {
         val overviewWithSplitPair = launcher.goHome().switchToOverview()
         val currentTask = overviewWithSplitPair.currentTask
         currentTask.containsContentDescription(
-            By.pkg(AbstractLauncherUiTest.getAppPackageName()).text("TestActivity3").toString(),
+            By.pkg(getAppPackageName()).text("TestActivity3").toString(),
             OverviewTask.OverviewTaskContainer.SPLIT_TOP_OR_LEFT,
         )
         currentTask.containsContentDescription(
-            By.pkg(AbstractLauncherUiTest.getAppPackageName()).text("TestActivity2").toString(),
+            By.pkg(getAppPackageName()).text("TestActivity2").toString(),
             OverviewTask.OverviewTaskContainer.SPLIT_BOTTOM_OR_RIGHT,
         )
         return overviewWithSplitPair

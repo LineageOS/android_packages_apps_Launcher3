@@ -17,6 +17,7 @@
 package com.android.launcher3.taskbar
 
 import android.graphics.Rect
+import android.os.Looper
 import android.view.View
 import android.view.View.MeasureSpec
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -25,9 +26,11 @@ import com.android.launcher3.DropTarget
 import com.android.launcher3.LauncherModel
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.R
+import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.dragndrop.DragView
-import com.android.launcher3.model.ModelWriter
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.model.testing.FakeModelWriter
+import com.android.launcher3.model.testing.WriterAction
 import com.android.launcher3.popup.ArrowPopup.CLOSE_DURATION_U
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatItems
@@ -36,22 +39,22 @@ import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext_ModifiedComponent
+import com.android.launcher3.util.Executors
 import com.android.launcher3.util.IntSparseArrayMap
+import com.android.launcher3.util.RoboApiWrapper
+import com.android.launcher3.util.TestUtil
 import com.android.launcher3.util.TestUtil.getOnTaskbarUiThread
 import com.android.tools.dagger.mutation.annotations.BindValue
 import com.android.tools.dagger.mutation.annotations.MutatedComponent
 import com.google.common.truth.Truth.assertThat
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
@@ -61,7 +64,7 @@ class TaskbarViewDragDropControllerTest {
     private val TEST_WORKSPACE_ITEM = TaskbarViewTestUtil.createHotseatWorkspaceItem(1)
     private val TEST_OPEN_ANIMATION_DURATION = 15L
 
-    private val modelWriter: ModelWriter = mock()
+    private val modelWriter = FakeModelWriter()
     @BindValue
     val launcherModel: LauncherModel = mock {
         on { getWriter(any(), any(), any()) } doReturn modelWriter
@@ -86,8 +89,6 @@ class TaskbarViewDragDropControllerTest {
     private val taskbarViewDragDropController by
         taskbarUnitTestRule.delegate { it.taskbarViewDragDropController }
 
-    private val itemInfoCaptor = argumentCaptor<ItemInfo>()
-
     private val overflowIconRect = Rect(0, 0, 20, 20)
 
     @Before
@@ -101,7 +102,7 @@ class TaskbarViewDragDropControllerTest {
 
         taskbarViewDragDropController.unpinDropTarget.onDrop(dragObject, null)
 
-        verify(modelWriter).deleteItemFromDatabase(eq(TEST_WORKSPACE_ITEM), any())
+        assertThat(modelWriter.actions).contains(WriterAction.DeleteItem(TEST_WORKSPACE_ITEM))
     }
 
     @Test
@@ -109,16 +110,10 @@ class TaskbarViewDragDropControllerTest {
         val dragObject = createDragObject(TEST_APP)
         taskbarViewDragDropController.taskbarPinningDropTarget.onDrop(dragObject, null)
 
-        verify(modelWriter)
-            .addOrMoveItemInDatabase(
-                itemInfoCaptor.capture(),
-                eq(CONTAINER_HOTSEAT),
-                any(),
-                any(),
-                any(),
-            )
-        assertThat(itemInfoCaptor.lastValue.targetComponent).isEqualTo(TEST_APP.componentName)
-        assertThat(itemInfoCaptor.lastValue.user).isEqualTo(TEST_APP.user)
+        val action = modelWriter.actions.last() as WriterAction.AddItem
+        assertThat(action.item.targetComponent).isEqualTo(TEST_APP.componentName)
+        assertThat(action.item.user).isEqualTo(TEST_APP.user)
+        assertThat(action.container).isEqualTo(CONTAINER_HOTSEAT)
     }
 
     @Test
@@ -131,17 +126,10 @@ class TaskbarViewDragDropControllerTest {
 
         taskbarViewDragDropController.taskbarPinningDropTarget.onDrop(dragObject, null)
 
-        verify(modelWriter)
-            .addOrMoveItemInDatabase(
-                itemInfoCaptor.capture(),
-                eq(CONTAINER_HOTSEAT),
-                any(),
-                any(),
-                any(),
-            )
-        assertThat(itemInfoCaptor.lastValue.targetComponent)
+        val action = modelWriter.actions.last() as WriterAction.ModifyItem
+        assertThat(action.item.targetComponent)
             .isEqualTo(TEST_WORKSPACE_ITEM.targetComponent)
-        assertThat(itemInfoCaptor.lastValue.user).isEqualTo(TEST_WORKSPACE_ITEM.user)
+        assertThat(action.item.user).isEqualTo(TEST_WORKSPACE_ITEM.user)
     }
 
     @Test
@@ -165,12 +153,10 @@ class TaskbarViewDragDropControllerTest {
 
         taskbarViewDragDropController.taskbarPinningDropTarget.onDrop(dragObject, null)
 
-        verify(modelWriter)
-            .addOrMoveItemInDatabase(eq(itemB), eq(CONTAINER_HOTSEAT), eq(0), eq(0), any())
-        verify(modelWriter)
-            .addOrMoveItemInDatabase(eq(itemC), eq(CONTAINER_HOTSEAT), eq(1), eq(1), any())
-        verify(modelWriter)
-            .addOrMoveItemInDatabase(eq(itemA), eq(CONTAINER_HOTSEAT), eq(2), eq(2), any())
+        assertThat(modelWriter.actions).hasSize(3)
+        assertThat((modelWriter.actions[0] as WriterAction.ModifyItem).item).isEqualTo(itemC)
+        assertThat((modelWriter.actions[1] as WriterAction.ModifyItem).item).isEqualTo(itemB)
+        assertThat((modelWriter.actions[2] as WriterAction.ModifyItem).item).isEqualTo(itemA)
     }
 
     @Test
@@ -196,14 +182,11 @@ class TaskbarViewDragDropControllerTest {
 
         taskbarViewDragDropController.taskbarPinningDropTarget.onDrop(dragObject, null)
 
-        verify(modelWriter)
-            .addOrMoveItemInDatabase(eq(itemC), eq(CONTAINER_HOTSEAT), eq(2), eq(2), any())
-        verify(modelWriter)
-            .addOrMoveItemInDatabase(eq(itemD), eq(CONTAINER_HOTSEAT), eq(3), eq(3), any())
-        verify(modelWriter)
-            .addOrMoveItemInDatabase(eq(itemA), eq(CONTAINER_HOTSEAT), eq(4), eq(4), any())
-        verify(modelWriter, never())
-            .addOrMoveItemInDatabase(eq(itemB), eq(CONTAINER_HOTSEAT), any(), any(), any())
+        assertThat(modelWriter.actions).hasSize(3)
+        assertThat((modelWriter.actions[0] as WriterAction.ModifyItem).item).isEqualTo(itemD)
+        assertThat((modelWriter.actions[1] as WriterAction.ModifyItem).item).isEqualTo(itemC)
+        assertThat((modelWriter.actions[2] as WriterAction.ModifyItem).item).isEqualTo(itemA)
+        assertThat(modelWriter.actions.map { (it as WriterAction.ModifyItem).item }).doesNotContain(itemB)
     }
 
     @Test
@@ -227,12 +210,10 @@ class TaskbarViewDragDropControllerTest {
 
         taskbarViewDragDropController.taskbarPinningDropTarget.onDrop(dragObject, null)
 
-        verify(modelWriter)
-            .addOrMoveItemInDatabase(eq(itemA), eq(CONTAINER_HOTSEAT), eq(1), eq(1), any())
-        verify(modelWriter)
-            .addOrMoveItemInDatabase(eq(itemB), eq(CONTAINER_HOTSEAT), eq(2), eq(2), any())
-        verify(modelWriter)
-            .addOrMoveItemInDatabase(eq(itemC), eq(CONTAINER_HOTSEAT), eq(0), eq(0), any())
+        assertThat(modelWriter.actions).hasSize(3)
+        assertThat((modelWriter.actions[0] as WriterAction.ModifyItem).item).isEqualTo(itemA)
+        assertThat((modelWriter.actions[1] as WriterAction.ModifyItem).item).isEqualTo(itemB)
+        assertThat((modelWriter.actions[2] as WriterAction.ModifyItem).item).isEqualTo(itemC)
     }
 
     @Test
@@ -258,14 +239,11 @@ class TaskbarViewDragDropControllerTest {
 
         taskbarViewDragDropController.taskbarPinningDropTarget.onDrop(dragObject, null)
 
-        verify(modelWriter)
-            .addOrMoveItemInDatabase(eq(itemA), eq(CONTAINER_HOTSEAT), eq(1), eq(1), any())
-        verify(modelWriter)
-            .addOrMoveItemInDatabase(eq(itemB), eq(CONTAINER_HOTSEAT), eq(2), eq(2), any())
-        verify(modelWriter)
-            .addOrMoveItemInDatabase(eq(itemD), eq(CONTAINER_HOTSEAT), eq(0), eq(0), any())
-        verify(modelWriter, never())
-            .addOrMoveItemInDatabase(eq(itemC), eq(CONTAINER_HOTSEAT), any(), any(), any())
+        assertThat(modelWriter.actions).hasSize(3)
+        assertThat((modelWriter.actions[0] as WriterAction.ModifyItem).item).isEqualTo(itemA)
+        assertThat((modelWriter.actions[1] as WriterAction.ModifyItem).item).isEqualTo(itemB)
+        assertThat((modelWriter.actions[2] as WriterAction.ModifyItem).item).isEqualTo(itemD)
+        assertThat(modelWriter.actions.map { (it as WriterAction.ModifyItem).item }).doesNotContain(itemC)
     }
 
     @Test
@@ -286,21 +264,13 @@ class TaskbarViewDragDropControllerTest {
         taskbarViewDragDropController.targetPinIndex = 0
         taskbarViewDragDropController.taskbarPinningDropTarget.onDrop(dragObject, null)
 
-        verify(modelWriter)
-            .addOrMoveItemInDatabase(eq(itemA), eq(CONTAINER_HOTSEAT), eq(1), eq(1), any())
-        verify(modelWriter)
-            .addOrMoveItemInDatabase(eq(itemB), eq(CONTAINER_HOTSEAT), eq(2), eq(2), any())
+        assertThat(modelWriter.actions).hasSize(3)
+        assertThat((modelWriter.actions[0] as WriterAction.ModifyItem).item).isEqualTo(itemA)
+        assertThat((modelWriter.actions[1] as WriterAction.ModifyItem).item).isEqualTo(itemB)
 
-        // Verify New App inserted
-        verify(modelWriter)
-            .addOrMoveItemInDatabase(
-                itemInfoCaptor.capture(),
-                eq(CONTAINER_HOTSEAT),
-                eq(0),
-                eq(0),
-                any(),
-            )
-        assertThat(itemInfoCaptor.lastValue.targetComponent).isEqualTo(TEST_APP.componentName)
+        val action = modelWriter.actions[2] as WriterAction.AddItem
+        assertThat(action.item.targetComponent).isEqualTo(TEST_APP.componentName)
+        assertThat(action.container).isEqualTo(CONTAINER_HOTSEAT)
     }
 
     @Test
@@ -321,53 +291,46 @@ class TaskbarViewDragDropControllerTest {
         taskbarViewDragDropController.targetPinIndex = 2
         taskbarViewDragDropController.taskbarPinningDropTarget.onDrop(dragObject, null)
 
-        verify(modelWriter)
-            .addOrMoveItemInDatabase(eq(itemA), eq(CONTAINER_HOTSEAT), eq(0), eq(0), any())
-        verify(modelWriter)
-            .addOrMoveItemInDatabase(eq(itemB), eq(CONTAINER_HOTSEAT), eq(1), eq(1), any())
+        val modifiedItems = modelWriter.actions.take(2).map { (it as WriterAction.ModifyItem).item }
+        assertThat(modifiedItems).containsExactly(itemA, itemB)
 
-        // Verify New App inserted
-        verify(modelWriter)
-            .addOrMoveItemInDatabase(
-                itemInfoCaptor.capture(),
-                eq(CONTAINER_HOTSEAT),
-                eq(2),
-                eq(2),
-                any(),
-            )
-        assertThat(itemInfoCaptor.lastValue.targetComponent).isEqualTo(TEST_APP.componentName)
+        val action = modelWriter.actions[2] as WriterAction.AddItem
+        assertThat(action.item.targetComponent).isEqualTo(TEST_APP.componentName)
+        assertThat(action.container).isEqualTo(CONTAINER_HOTSEAT)
     }
 
+    @Test
     fun pinned_onDrop_reorderRightToLeft_shiftItemsLeftIfBlankAvailable() {
-        // Setup: Items [A(1), B(2), C(4), D(5)]
-        val itemA = createHotseatItem(0)
-        val itemB = createHotseatItem(1)
-        val itemC = createHotseatItem(4)
-        val itemD = createHotseatItem(5)
+        // Setup: Items [A(0), B(1), C(4), D(5)]
+        val itemA = createHotseatItem(0, 0)
+        val itemB = createHotseatItem(1, 1)
+        val itemC = createHotseatItem(4, 2)
+        val itemD = createHotseatItem(5, 3)
 
         val hotseatInfos = IntSparseArrayMap<ItemInfo>()
         hotseatInfos.append(0, itemA)
         hotseatInfos.append(1, itemB)
-        hotseatInfos.append(2, itemC)
-        hotseatInfos.append(3, itemD)
+        hotseatInfos.append(4, itemC)
+        hotseatInfos.append(5, itemD)
 
         doReturn(hotseatInfos).whenever(modelCallbacks).hotseatItems
         taskbarViewDragDropController.setUpCallbacks(modelCallbacks)
 
-        // Action: Drag D (Index 3) to Index 1 (Where B is)
+        // Action: Drag D (Index 5) to Index 2 (Empty)
         val dragObject = createDragObject(itemD)
         taskbarViewDragDropController.targetPinIndex = 2
-
         taskbarViewDragDropController.taskbarPinningDropTarget.onDrop(dragObject, null)
 
-        verify(modelWriter)
-            .addOrMoveItemInDatabase(eq(itemA), eq(CONTAINER_HOTSEAT), eq(0), eq(0), any())
-        verify(modelWriter)
-            .addOrMoveItemInDatabase(eq(itemB), eq(CONTAINER_HOTSEAT), eq(1), eq(1), any())
-        verify(modelWriter)
-            .addOrMoveItemInDatabase(eq(itemD), eq(CONTAINER_HOTSEAT), eq(2), eq(2), any())
-        verify(modelWriter, never())
-            .addOrMoveItemInDatabase(eq(itemC), eq(CONTAINER_HOTSEAT), any(), any(), any())
+        assertThat(modelWriter.actions).hasSize(1)
+        val action = modelWriter.actions[0] as WriterAction.ModifyItem
+        assertThat(action.item).isEqualTo(itemD)
+        assertThat(action.container).isEqualTo(CONTAINER_HOTSEAT)
+        assertThat(action.screenId).isEqualTo(3)
+
+        val modifiedItems = modelWriter.actions.map { (it as WriterAction.ModifyItem).item }
+        assertThat(modifiedItems).doesNotContain(itemC)
+        assertThat(modifiedItems).doesNotContain(itemA)
+        assertThat(modifiedItems).doesNotContain(itemB)
     }
 
     @Test

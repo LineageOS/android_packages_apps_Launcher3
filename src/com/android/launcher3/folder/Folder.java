@@ -1616,7 +1616,9 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
             updateTextViewFocus();
         }
 
-        mActivityContext.getModelWriter().notifyItemModified(mInfo);
+        // Optimistically update the UI that the folder has changed.
+        mActivityContext.getModelWriter().getNotifier()
+            .notifyItemModifiedOptimistically(mInfo);
         mFolderIcon.onItemsChanged(animate);
     }
 
@@ -1624,7 +1626,8 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
     public void removeFolderContent(boolean animate, ItemInfo... items) {
         List<ItemInfo> itemArray = Arrays.asList(items);
         if (mInfo.getContents().removeAll(itemArray)) {
-            mActivityContext.getModelWriter().notifyItemModified(mInfo);
+            mActivityContext.getModelWriter().getNotifier()
+                .notifyItemModifiedOptimistically(mInfo);
         }
 
         if (!mSuppressContentUpdate) {

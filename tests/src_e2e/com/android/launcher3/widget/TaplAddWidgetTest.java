@@ -15,6 +15,8 @@
  */
 package com.android.launcher3.widget;
 
+import static com.android.launcher3.util.ui.ActivityStartUtils.getAppPackageName;
+
 import static org.junit.Assert.assertNotNull;
 
 import android.platform.test.annotations.EnableFlags;

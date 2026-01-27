@@ -15,29 +15,18 @@
  */
 package com.android.launcher3.util.ui;
 
-import static androidx.test.InstrumentationRegistry.getInstrumentation;
-
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 
-import static org.junit.Assert.assertTrue;
-
-import android.content.ComponentName;
-import android.content.Intent;
 import android.os.Process;
 import android.system.OsConstants;
 import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.Nullable;
-import androidx.test.uiautomator.By;
-import androidx.test.uiautomator.BySelector;
-import androidx.test.uiautomator.Until;
 
-import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherState;
 import com.android.launcher3.Utilities;
-import com.android.launcher3.tapl.LauncherInstrumentation;
 import com.android.launcher3.tapl.TestHelpers;
 import com.android.launcher3.testcomponent.TestCommandReceiver;
 import com.android.launcher3.util.LooperExecutor;
@@ -246,85 +235,6 @@ public abstract class AbstractLauncherUiTest<LAUNCHER_TYPE extends Launcher,
             testThreadAction.run();
             return getFromLauncher(condition);
         });
-    }
-
-    public static void startAppFast(String packageName) {
-        startIntent(
-                getInstrumentation().getContext().getPackageManager().getLaunchIntentForPackage(
-                        packageName),
-                By.pkg(packageName).depth(0),
-                true /* newTask */);
-    }
-
-    public static void startTestActivity(String activityName, String activityLabel) {
-        final String packageName = getAppPackageName();
-        final Intent intent = getInstrumentation().getContext().getPackageManager().
-                getLaunchIntentForPackage(packageName);
-        intent.setComponent(new ComponentName(packageName,
-                "com.android.launcher3.tests." + activityName));
-        startIntent(intent, By.pkg(packageName).text(activityLabel),
-                false /* newTask */);
-    }
-
-    public static void startTestActivity(int activityNumber) {
-        startTestActivity("Activity" + activityNumber, "TestActivity" + activityNumber);
-    }
-
-    public static void startImeTestActivity() {
-        final String packageName = getAppPackageName();
-        final Intent intent = getInstrumentation().getContext().getPackageManager().
-                getLaunchIntentForPackage(packageName);
-        intent.setComponent(new ComponentName(packageName,
-                "com.android.launcher3.testcomponent.ImeTestActivity"));
-        startIntent(intent, By.pkg(packageName).text("ImeTestActivity"),
-                false /* newTask */);
-    }
-
-    /** Starts ExcludeFromRecentsTestActivity, which has excludeFromRecents="true". */
-    public static void startExcludeFromRecentsTestActivity() {
-        final String packageName = getAppPackageName();
-        final Intent intent = getInstrumentation().getContext().getPackageManager()
-                .getLaunchIntentForPackage(packageName);
-        intent.setComponent(new ComponentName(packageName,
-                "com.android.launcher3.testcomponent.ExcludeFromRecentsTestActivity"));
-        startIntent(intent, By.pkg(packageName).text("ExcludeFromRecentsTestActivity"),
-                false /* newTask */);
-    }
-
-    private static void startIntent(Intent intent, BySelector selector, boolean newTask) {
-        intent.addCategory(Intent.CATEGORY_LAUNCHER);
-        if (newTask) {
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        } else {
-            intent.addFlags(
-                    Intent.FLAG_ACTIVITY_MULTIPLE_TASK | Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
-        }
-        getInstrumentation().getTargetContext().startActivity(intent);
-        assertTrue("App didn't start: " + selector,
-                TestHelpers.wait(Until.hasObject(selector), TestUtil.DEFAULT_UI_TIMEOUT));
-
-        final LauncherInstrumentation launcherInstrumentation = new LauncherInstrumentation(true);
-        if (!launcherInstrumentation.shouldShowHomeBehindDesktop()) {
-            // Wait for the Launcher to stop.
-            launcherInstrumentation.waitForCondition(
-                    "Launcher activity didn't stop",
-                    TestUtil.DEFAULT_UI_TIMEOUT,
-                    () -> !launcherInstrumentation.isLauncherActivityStarted());
-        } else {
-            // On desktop, the launcher activity might still be considered "started"
-            // even if another app is on top. We skip this check for desktop devices.
-            InvariantDeviceProfile idp = InvariantDeviceProfile.INSTANCE.get(
-                    getInstrumentation().getTargetContext());
-            if (idp.deviceType != InvariantDeviceProfile.TYPE_DESKTOP) {
-                assertTrue("Launcher activity not started when it should be",
-                        launcherInstrumentation.isLauncherActivityStarted());
-            }
-        }
-    }
-
-
-    public static String resolveSystemApp(String category) {
-        return resolveSystemAppInfo(category).packageName;
     }
 
     protected void closeLauncherActivity() {

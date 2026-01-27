@@ -32,7 +32,7 @@ import com.android.launcher3.LauncherAppState
 import com.android.launcher3.LauncherSettings.Favorites
 import com.android.launcher3.R
 import com.android.launcher3.model.BgDataModel
-import com.android.launcher3.model.ModelWriter
+import com.android.launcher3.model.IModelWriter
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.popup.SystemShortcut.Factory
@@ -170,7 +170,7 @@ constructor(
      * at the end of the taskbar. This can ensure that the newly pinned app will be appended to the
      * end of the taskbar.
      */
-    private fun compactTaskbarItems(writer: ModelWriter) {
+    private fun compactTaskbarItems(writer: IModelWriter) {
         if (!isPin || pinnedInfoList.isEmpty()) return
 
         // Collect existing non-null items in their current order (based on SparseArray keys)
@@ -214,7 +214,7 @@ constructor(
 
     @VisibleForTesting
     fun pinItem(
-        writer: ModelWriter,
+        writer: IModelWriter,
         info: WorkspaceItemInfo,
         screenId: Int,
         cellX: Int,
@@ -224,7 +224,7 @@ constructor(
     }
 
     @VisibleForTesting
-    fun unpinItem(writer: ModelWriter, info: ItemInfo) {
+    fun unpinItem(writer: IModelWriter, info: ItemInfo) {
         writer.deleteItemFromDatabase(info, "item unpinned through long-press menu")
     }
 

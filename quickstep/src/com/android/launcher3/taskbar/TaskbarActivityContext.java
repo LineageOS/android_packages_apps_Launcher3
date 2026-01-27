@@ -127,7 +127,7 @@ import com.android.launcher3.icons.BitmapRenderer;
 import com.android.launcher3.icons.FastBitmapDrawable;
 import com.android.launcher3.logger.LauncherAtom;
 import com.android.launcher3.logging.StatsLogManager;
-import com.android.launcher3.model.ModelWriter;
+import com.android.launcher3.model.IModelWriter;
 import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.AppPairInfo;
 import com.android.launcher3.model.data.FolderInfo;
@@ -546,10 +546,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                     false,
                     mDeviceProfile.getDeviceProperties().getTaskbarConfiguration()
                             .isTaskbarPresent(),
-                    getResources().getDisplayMetrics(),
-                    mDeviceProfile.getDisplayOptionSpec(),
-                    mDeviceProfile.getDisplayOptionSpec().typeIndex,
-                    mDeviceProfile.inv);
+                    mDeviceProfile.getDisplayOptionSpec()
+            );
         } else {
             mPersistentTaskbarProfile = mDeviceProfile.getTaskbarProfile();
             mTransientTaskbarProfile = TaskbarProfile.Factory.createTaskbarProfile(
@@ -557,10 +555,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                     true,
                     mDeviceProfile.getDeviceProperties().getTaskbarConfiguration()
                             .isTaskbarPresent(),
-                    getResources().getDisplayMetrics(),
-                    mDeviceProfile.getDisplayOptionSpec(),
-                    mDeviceProfile.getDisplayOptionSpec().typeIndex,
-                    mDeviceProfile.inv);
+                    mDeviceProfile.getDisplayOptionSpec()
+            );
         }
         mNavMode = getNavigationMode();
         mTaskbarUiState.setNavigationMode(mNavMode);
@@ -955,7 +951,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     }
 
     @Override
-    public ModelWriter getModelWriter() {
+    public IModelWriter getModelWriter() {
         return mControllers.taskbarViewController.getModelWriter();
     }
 
@@ -1546,10 +1542,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                     true,
                     mDeviceProfile.getDeviceProperties().getTaskbarConfiguration()
                             .isTaskbarPresent(),
-                    getResources().getDisplayMetrics(),
-                    mDeviceProfile.getDisplayOptionSpec(),
-                    mDeviceProfile.getDisplayOptionSpec().typeIndex,
-                    mDeviceProfile.inv);
+                    mDeviceProfile.getDisplayOptionSpec()
+            );
 
             taskbarWindowSize = transientTaskbarProfile.getHeight()
                     + (2 * transientTaskbarProfile.getBottomMargin())

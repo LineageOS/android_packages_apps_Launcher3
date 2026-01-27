@@ -19,6 +19,7 @@ package com.android.launcher3.taskbar
 import android.app.WindowConfiguration
 import android.content.ComponentName
 import android.content.Intent
+import android.os.Looper
 import android.os.Process
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
@@ -40,9 +41,11 @@ import com.android.launcher3.model.data.WorkspaceData
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.popup.SystemShortcut
 import com.android.launcher3.statehandlers.DesktopVisibilityController
-import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.waitForIdleSync
+import com.android.launcher3.util.Executors
+import com.android.launcher3.util.RoboApiWrapper
+import com.android.launcher3.util.TestUtil
 import com.android.launcher3.taskbar.TaskbarIconType.ALL_APPS
 import com.android.launcher3.taskbar.TaskbarIconType.HOTSEAT
 import com.android.launcher3.taskbar.TaskbarIconType.OVERFLOW
@@ -185,7 +188,10 @@ class TaskbarOverflowTest {
 
     @After
     fun resetForcedMaxIconCount() {
-        runOnTaskbarUiThreadSync { taskbarViewController.limitMaxTaskbarIconsNum(-1) }
+        runOnTaskbarUiThreadSync {
+            taskbarViewController.limitMaxTaskbarIconsNum(-1)
+        }
+        RoboApiWrapper.waitForLooperSync(Looper.getMainLooper())
     }
 
     @Test
@@ -652,14 +658,18 @@ class TaskbarOverflowTest {
         assertNotNull(shortcut)
         runOnTaskbarUiThreadSync { shortcut?.onClick(hotseatIcon) }
 
-        runOnMainSync {
-            // After unpinning the first item, only the second app is left.
-            assertThat(modelCallback.hotseatItems.map { info -> info.title })
-                .isEqualTo(listOf("Test App 1"))
-            // The unpinned app doesn't have a task so the shown tasks won't change.
-            assertThat(recentAppsController.shownTasks.map { it.tasks[0].key.id })
-                .isEqualTo(listOf(0, 1))
-        }
+        // Wait for the background model thread to finish, then the main thread to update.
+        TestUtil.runOnExecutorSync(Executors.MODEL_EXECUTOR) {}
+        RoboApiWrapper.waitForLooperSync(Looper.getMainLooper())
+        RoboApiWrapper.waitForLooperSync(Executors.getTaskbarUiThread().looper)
+        RoboApiWrapper.waitForLooperSync(Looper.getMainLooper())
+
+        // After unpinning the first item, only the second app is left.
+        assertThat(modelCallback.hotseatItems.map { info -> info.title })
+            .isEqualTo(listOf("Test App 1"))
+        // The unpinned app doesn't have a task so the shown tasks won't change.
+        assertThat(recentAppsController.shownTasks.map { it.tasks[0].key.id })
+            .isEqualTo(listOf(0, 1))
     }
 
     @Test
@@ -692,13 +702,17 @@ class TaskbarOverflowTest {
             .isEqualTo(emptyList<Int>())
         assertNotNull(shortcut)
         runOnTaskbarUiThreadSync { shortcut?.onClick(hotseatIcon) }
+
+        // Wait for the background model thread to finish, then the main thread to update.
+        TestUtil.runOnExecutorSync(Executors.MODEL_EXECUTOR) {}
+        RoboApiWrapper.waitForLooperSync(Looper.getMainLooper())
+        RoboApiWrapper.waitForLooperSync(Executors.getTaskbarUiThread().looper)
+        RoboApiWrapper.waitForLooperSync(Looper.getMainLooper())
+
         // After unpinning the app, app 0 is removed and its task is shown as a recent task.
-        runOnMainSync {
-            assertThat(modelCallback.hotseatItems.map { info -> info.title })
-                .isEqualTo(listOf("Test App 1"))
-            assertThat(recentAppsController.shownTasks.map { it.tasks[0].key.id })
-                .isEqualTo(listOf(0))
-        }
+        assertThat(modelCallback.hotseatItems.map { info -> info.title })
+            .isEqualTo(listOf("Test App 1"))
+        assertThat(recentAppsController.shownTasks.map { it.tasks[0].key.id }).isEqualTo(listOf(0))
     }
 
     @Test
@@ -736,14 +750,17 @@ class TaskbarOverflowTest {
         assertNotNull(shortcut)
         runOnTaskbarUiThreadSync { shortcut?.onClick(recentTaskIcon) }
 
-        runOnMainSync {
-            // After pinning the recent task, it should be included in the hotseat items.
-            assertThat(modelCallback.hotseatItems.map { info -> info.title })
-                .isEqualTo(listOf("Test App 0", "Test App 1", "Test App 2"))
-            // As the task is pinned, the shown tasks should remove it from the list
-            assertThat(recentAppsController.shownTasks.map { it.tasks[0].key.id })
-                .isEqualTo(listOf(1))
-        }
+        // Wait for the background model thread to finish, then the main thread to update.
+        TestUtil.runOnExecutorSync(Executors.MODEL_EXECUTOR) {}
+        RoboApiWrapper.waitForLooperSync(Looper.getMainLooper())
+        RoboApiWrapper.waitForLooperSync(Executors.getTaskbarUiThread().looper)
+        RoboApiWrapper.waitForLooperSync(Looper.getMainLooper())
+
+        // After pinning the recent task, it should be included in the hotseat items.
+        assertThat(modelCallback.hotseatItems.map { info -> info.title })
+            .isEqualTo(listOf("Test App 0", "Test App 1", "Test App 2"))
+        // As the task is pinned, the shown tasks should remove it from the list
+        assertThat(recentAppsController.shownTasks.map { it.tasks[0].key.id }).isEqualTo(listOf(1))
     }
 
     @Test

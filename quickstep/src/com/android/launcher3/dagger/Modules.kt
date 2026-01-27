@@ -74,6 +74,7 @@ import com.android.quickstep.InstantAppResolverImpl
 import com.android.quickstep.LauncherRestoreEventLoggerImpl
 import com.android.quickstep.QuickstepTestInformationHandler
 import com.android.quickstep.TaskShortcutFactory
+import com.android.quickstep.TaskUtils
 import com.android.quickstep.logging.StatsLogCompatManager.StatsLogCompatManagerFactory
 import com.android.quickstep.util.ChoreographerFrameRateTracker
 import com.android.quickstep.util.ContextualSearchStateManager
@@ -221,6 +222,8 @@ object StaticObjectModule {
     }
 
     @Provides fun provideAbstractFloatingViewHelper() = AbstractFloatingViewHelper
+
+    @Provides fun provideTaskUtils() = TaskUtils
 
     @Provides
     @JvmStatic
