@@ -395,7 +395,7 @@
     <!-- Default app title for a task view in Overview. [CHAR LIMIT=NONE] -->
     <string name="header_default_app_title">App title</string>
     <!-- Content description for the header close button. [CHAR LIMIT=NONE] -->
-    <string name="header_close_icon_description">Close button</string>
+    <string name="header_close_icon_description">Close</string>
 
     <!-- ******* Growth Framework Nudge ******* -->
     <!-- Accessibility title for the nudge window. [CHAR_LIMIT=NONE] -->
