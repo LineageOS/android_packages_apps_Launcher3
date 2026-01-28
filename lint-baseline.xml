@@ -131,17 +131,6 @@
 
     <issue
         id="NewApi"
-        message="Call requires API level 34 (current min is 31): `java.util.stream.Stream#toList`"
-        errorLine1="                                Collection::stream).toList());"
-        errorLine2="                                                    ~~~~~~">
-        <location
-            file="packages/apps/Launcher3/src/com/android/launcher3/widget/picker/WidgetRecommendationsView.java"
-            line="202"
-            column="53"/>
-    </issue>
-
-    <issue
-        id="NewApi"
         message="Call requires API level 36.1 (current min is 31): `android.appwidget.AppWidgetHostView#startVisibilityTracking`"
         errorLine1="                view.startVisibilityTracking()"
         errorLine2="                     ~~~~~~~~~~~~~~~~~~~~~~~">

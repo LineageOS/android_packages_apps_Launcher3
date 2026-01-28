@@ -67,7 +67,6 @@ import com.android.launcher3.icons.ClockDrawableWrapper;
 import com.android.launcher3.testing.shared.TestProtocol;
 import com.android.launcher3.util.ActivityLifecycleCallbacksAdapter;
 import com.android.launcher3.util.TaskbarModeUtil;
-import com.android.launcher3.widget.picker.WidgetsFullSheet;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -179,11 +178,6 @@ public class TestInformationHandler {
             case TestProtocol.REQUEST_APPS_LIST_SCROLL_Y: {
                 return getLauncherUIProperty(Bundle::putInt,
                         l -> l.getAppsView().getActiveRecyclerView().computeVerticalScrollOffset());
-            }
-
-            case TestProtocol.REQUEST_WIDGETS_SCROLL_Y: {
-                return getLauncherUIProperty(Bundle::putInt,
-                        l -> WidgetsFullSheet.getWidgetsView(l).computeVerticalScrollOffset());
             }
 
             case TestProtocol.REQUEST_TARGET_INSETS: {

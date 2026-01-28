@@ -21,7 +21,6 @@ import static android.view.HapticFeedbackConstants.CLOCK_TICK;
 import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE;
 
 import static com.android.launcher3.views.RecyclerViewFastScroller.FastScrollerLocation.ALL_APPS_SCROLLER;
-import static com.android.launcher3.views.RecyclerViewFastScroller.FastScrollerLocation.WIDGET_SCROLLER;
 
 import android.animation.ObjectAnimator;
 import android.content.Context;
@@ -66,9 +65,7 @@ public class RecyclerViewFastScroller extends View {
     /** FastScrollerLocation describes what RecyclerView the fast scroller is dedicated to. */
     public enum FastScrollerLocation {
         UNKNOWN_SCROLLER(0),
-        ALL_APPS_SCROLLER(1),
-        WIDGET_SCROLLER(2);
-
+        ALL_APPS_SCROLLER(1);
         public final int location;
 
         FastScrollerLocation(int location) {
