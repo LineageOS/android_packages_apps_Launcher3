@@ -178,25 +178,51 @@ class SystemDragControllerImplTest {
     }
 
     @Test
+    fun testStartDragWithAccessibleDrag() {
+        testStartDrag(
+            withDragOptions = mock<DragOptions>().apply { isAccessibleDrag = true },
+            withStartSystemDragSuccess = false,
+        )
+    }
+
+    @Test
+    fun testStartDragWithKeyboardDrag() {
+        testStartDrag(
+            withDragOptions = mock<DragOptions>().apply { isKeyboardDrag = true },
+            withStartSystemDragSuccess = false,
+        )
+    }
+
+    @Test
+    fun testStartDragWithSimulatedDndStartPoint() {
+        testStartDrag(
+            withDragOptions = mock<DragOptions>().apply { simulatedDndStartPoint = mock() },
+            withStartSystemDragSuccess = true,
+        )
+    }
+
+    @Test
     fun testStartDragWithStartSystemDragFailure() {
-        testStartDrag(withStartSystemDragSuccess = false)
+        testStartDrag(withDragOptions = mock<DragOptions>(), withStartSystemDragSuccess = false)
     }
 
     @Test
     fun testStartDragWithStartSystemDragSuccess() {
-        testStartDrag(withStartSystemDragSuccess = true)
+        testStartDrag(withDragOptions = mock<DragOptions>(), withStartSystemDragSuccess = true)
     }
 
-    private fun testStartDrag(withStartSystemDragSuccess: Boolean) {
+    private fun testStartDrag(withDragOptions: DragOptions, withStartSystemDragSuccess: Boolean) {
         val dragShadowBuilder = argumentCaptor<DragShadowBuilder>()
         val dragView = mock<DragView>()
         val onAlphaChangeListener = argumentCaptor<Consumer<Float>>()
+        val screenPos =
+            withDragOptions.simulatedDndStartPoint ?: mockContext.dragController.downPoint
         val systemDragListener = mock<SystemDragListener>()
         val params =
             mock<SystemDragParams>().apply {
                 whenever(clipData).thenReturn(mock())
                 whenever(dragImage).thenReturn(mock())
-                whenever(dragOptions).thenReturn(mock())
+                whenever(dragOptions).thenReturn(withDragOptions)
                 whenever(extraDragFlags)
                     .thenReturn(
                         DRAG_FLAG_GLOBAL or DRAG_FLAG_GLOBAL_URI_READ or DRAG_FLAG_GLOBAL_URI_WRITE
@@ -221,19 +247,22 @@ class SystemDragControllerImplTest {
 
         whenever(mockSystemDragListenerFactory.get(mockContext, params))
             .thenReturn(systemDragListener)
-        whenever(systemDragListener.startDrag()).thenReturn(dragView)
+        whenever(systemDragListener.startDrag(screenPos)).thenReturn(dragView)
 
         // NOTE: Drag view is returned when the sequence starts successfully.
-        val expectedResult = dragView
+        val expectedResult =
+            if (withDragOptions.isAccessibleDrag || withDragOptions.isKeyboardDrag) null
+            else dragView
         assertEquals(expectedResult, controller.startDrag(params))
 
         // NOTE: Drag is cancelled when the system-level sequence fails to start successfully.
-        val expectedCancellation = times(if (!withStartSystemDragSuccess) 1 else 0)
+        val expectedCancellation =
+            times(if (expectedResult != null && !withStartSystemDragSuccess) 1 else 0)
         verify(mockContext.dragController, expectedCancellation).cancelDrag()
 
         // NOTE: System-level drag shadow opacity is synchronized with the launcher's internal drag
         // view when the sequence starts successfully.
-        if (withStartSystemDragSuccess) {
+        if (expectedResult != null && withStartSystemDragSuccess) {
             verify(dragView).addOnAlphaChangeListener(onAlphaChangeListener.capture())
             onAlphaChangeListener.firstValue.accept(0.5f)
             verify(mockContext.dragLayer).updateDragShadow(dragShadowBuilder.firstValue)
@@ -245,6 +274,7 @@ class SystemDragControllerImplTest {
 
     private fun initMock(mockContext: ActivityContext) {
         whenever(mockContext.dragController).thenReturn(mock())
+        whenever(mockContext.dragController.downPoint).thenReturn(mock())
         whenever(mockContext.dragLayer).thenReturn(mock())
     }
 

@@ -20,6 +20,7 @@ import android.content.ClipDescription
 import android.graphics.Canvas
 import android.graphics.Point
 import android.graphics.Rect
+import android.util.Log
 import android.view.DragEvent
 import android.view.View
 import android.view.View.DRAG_FLAG_DISABLE_DEFAULT_POINTER_ICON
@@ -46,10 +47,15 @@ class SystemDragControllerImpl(
         continueDrag(event) ?: (acceptDrag(event) && startDrag(event))
 
     override fun startDrag(params: SystemDragParams): DragView? {
+        if (params.dragOptions.isAccessibleDrag || params.dragOptions.isKeyboardDrag) {
+            Log.i(TAG, "System drag not supported for accessible/keyboard drags")
+            return null
+        }
         val dragController = context.dragController ?: return null
-        params.dragOptions.simulatedDndStartPoint = dragController.downPoint
-        return createSystemDragListener(params).startDrag()?.also { dragView ->
+        val screenPos = params.dragOptions.simulatedDndStartPoint ?: dragController.downPoint
+        return createSystemDragListener(params).startDrag(screenPos)?.also { dragView ->
             if (!startSystemDrag(dragView, params)) {
+                Log.e(TAG, "System drag failed to start")
                 dragController.cancelDrag()
             }
         }
@@ -135,4 +141,8 @@ class SystemDragControllerImpl(
                     }
                 }
         } == true
+
+    companion object {
+        private const val TAG = "SystemDragControllerImpl"
+    }
 }
