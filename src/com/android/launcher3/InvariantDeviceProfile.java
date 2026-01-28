@@ -29,6 +29,7 @@ import static com.android.launcher3.LauncherPrefs.WORKSPACE_ITEMS_LABEL_HIDDEN;
 import static com.android.launcher3.Utilities.dpiFromPx;
 import static com.android.launcher3.display.LauncherDisplayInfo.CHANGE_DENSITY;
 import static com.android.launcher3.display.LauncherDisplayInfo.CHANGE_NAVIGATION_MODE;
+import static com.android.launcher3.display.LauncherDisplayInfo.CHANGE_SHOW_DESKTOP_FIRST_TASKBAR;
 import static com.android.launcher3.display.LauncherDisplayInfo.CHANGE_SUPPORTED_BOUNDS;
 import static com.android.launcher3.testing.shared.ResourceUtils.INVALID_RESOURCE_HANDLE;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
@@ -297,7 +298,7 @@ public class InvariantDeviceProfile {
         if (listenable != null) {
             lifeCycle.addCloseable(listenable.getChanges().forEach(MAIN_EXECUTOR, (flags) -> {
                 if ((flags & (CHANGE_DENSITY | CHANGE_SUPPORTED_BOUNDS
-                        | CHANGE_NAVIGATION_MODE)) != 0) {
+                        | CHANGE_NAVIGATION_MODE | CHANGE_SHOW_DESKTOP_FIRST_TASKBAR)) != 0) {
                     onConfigChanged();
                 }
                 return null;

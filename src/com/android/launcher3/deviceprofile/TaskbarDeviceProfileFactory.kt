@@ -21,7 +21,11 @@ import com.android.launcher3.DeviceProfile
 
 object TaskbarDeviceProfileFactory {
     // TODO(b/430382569) Keep DeviceProfile immutable.
-    fun createDeviceProfile(originDeviceProfile: DeviceProfile, context: Context): DeviceProfile {
+    fun createDeviceProfile(
+        originDeviceProfile: DeviceProfile,
+        context: Context,
+        isTransient: Boolean,
+    ): DeviceProfile {
         val deviceProfile = originDeviceProfile
         deviceProfile.hotseatProfile =
             deviceProfile.hotseatProfile.copy(
@@ -31,7 +35,8 @@ object TaskbarDeviceProfileFactory {
                 qsbWidth = originDeviceProfile.hotseatProfile.qsbWidth,
             )
 
-        deviceProfile.mTaskbarProfile = deviceProfile.updateTaskbarProfile(context.resources)
+        deviceProfile.mTaskbarProfile =
+            deviceProfile.updateTaskbarProfile(context.resources, isTransient)
 
         deviceProfile.mWorkspaceProfile =
             deviceProfile.mWorkspaceProfile.changeIconSize(deviceProfile.taskbarProfile.iconSize)
