@@ -56,7 +56,6 @@ import com.android.launcher3.Hotseat.HotseatQsbAlphaId;
 import com.android.launcher3.LauncherInteractor;
 import com.android.launcher3.LauncherState;
 import com.android.launcher3.LauncherUiState;
-import com.android.launcher3.LauncherUiStateUtil;
 import com.android.launcher3.QuickstepTransitionManager;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.anim.AnimatedFloat;
@@ -328,7 +327,7 @@ public class TaskbarLauncherStateController {
             runForRecentsWindowManager(recentsWindowManager ->
                     recentsWindowManager.getStateManager().addStateListener(mRecentsStateListener));
         }
-        mLauncherState = LauncherUiStateUtil.getLauncherState(mLauncher, mLauncherUiState);
+        mLauncherState = mLauncherUiState.getLauncherState();
         updateStateForSysuiFlags(sysuiStateFlags, /*applyState*/ false);
 
         applyState(0);
@@ -995,9 +994,7 @@ public class TaskbarLauncherStateController {
 
                 @Override
                 public void onAnimationStart(Animator animation) {
-                    float hotseatIconsAlpha =
-                            LauncherUiStateUtil.getTaskbarAlignmentChannelAlpha(
-                                    mLauncher, mLauncherUiState);
+                    float hotseatIconsAlpha = mLauncherUiState.getTaskbarAlignmentChannelAlpha();
                     if (hotseatIconsAlpha > 0) {
                         updateIconAlphaForHome(hotseatIconsAlpha, ALPHA_CHANNEL_TASKBAR_ALIGNMENT);
                     }
@@ -1156,13 +1153,6 @@ public class TaskbarLauncherStateController {
         mLauncher.updateHotseatAndQsbTranslationX(targetX, animate, mIsQsbInline);
     }
 
-    private boolean isStateManagerInState(@NonNull LauncherState state) {
-        return LauncherUiStateUtil.getLauncherState(mLauncher, mLauncherUiState) == state
-                || state == getFromRecentsWindowManager(
-                recentsWindowManager ->
-                        toLauncherState(recentsWindowManager.getStateManager().getState()));
-    }
-
     public boolean isStateTransitionToAllAppsInProgress() {
         return hasAnyFlag(FLAG_LAUNCHER_IN_STATE_TRANSITION) && mLauncherState == ALL_APPS;
     }
@@ -1262,7 +1252,7 @@ public class TaskbarLauncherStateController {
     }
 
     private DeviceProfile getDeviceProfile() {
-        return LauncherUiStateUtil.getDeviceProfile(mLauncher, mLauncherUiState);
+        return mLauncherUiState.getDeviceProfileRef().getValue();
     }
 
     private boolean isOverlayShown() {

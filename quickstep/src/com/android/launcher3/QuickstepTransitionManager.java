@@ -47,7 +47,6 @@ import static com.android.launcher3.BaseActivity.INVISIBLE_BY_APP_TRANSITIONS;
 import static com.android.launcher3.BaseActivity.INVISIBLE_BY_PENDING_FLAGS;
 import static com.android.launcher3.BaseActivity.PENDING_INVISIBLE_BY_WALLPAPER_ANIMATION;
 import static com.android.launcher3.Flags.appLaunchBlur;
-import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET;
 import static com.android.launcher3.LauncherState.ALL_APPS;
@@ -904,23 +903,6 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             }
 
             private boolean shouldShowEduOnAppLaunch() {
-                if (refactorTaskbarUiState()) {
-                    final boolean ret = newShouldShowEduOnAppLaunch();
-                    if (BuildConfig.IS_STUDIO_BUILD && ret != legacyShouldShowEduOnAppLaunch()) {
-                        throw new IllegalStateException("shouldShowEduOnAppLaunch() doesn't match");
-                    }
-                    return ret;
-                } else {
-                    return legacyShouldShowEduOnAppLaunch();
-                }
-            }
-
-            private boolean legacyShouldShowEduOnAppLaunch() {
-                return mLauncher.getTaskbarInteractor() != null
-                        && mLauncher.getTaskbarInteractor().shouldShowEduOnAppLaunch();
-            }
-
-            private boolean newShouldShowEduOnAppLaunch() {
                 return mLauncher.getTaskbarUiState().getShowTaskbarEduOnAppLaunch();
             }
         });

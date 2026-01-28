@@ -26,7 +26,6 @@ import static com.android.launcher3.AbstractFloatingView.TYPE_ICON_SURFACE;
 import static com.android.launcher3.AbstractFloatingView.TYPE_REBIND_SAFE;
 import static com.android.launcher3.AbstractFloatingView.TYPE_WIDGETS_FULL_SHEET;
 import static com.android.launcher3.AbstractFloatingView.getTopOpenViewWithType;
-import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.LauncherAnimUtils.HOTSEAT_SCALE_PROPERTY_FACTORY;
 import static com.android.launcher3.LauncherAnimUtils.SCALE_INDEX_WIDGET_TRANSITION;
 import static com.android.launcher3.LauncherAnimUtils.SPRING_LOADED_EXIT_DELAY;
@@ -186,8 +185,8 @@ import com.android.launcher3.logging.InstanceId;
 import com.android.launcher3.logging.InstanceIdSequence;
 import com.android.launcher3.logging.StartupLatencyLogger;
 import com.android.launcher3.logging.StatsLogManager;
-import com.android.launcher3.model.ItemInstallQueue;
 import com.android.launcher3.model.IModelWriter;
+import com.android.launcher3.model.ItemInstallQueue;
 import com.android.launcher3.model.StringCache;
 import com.android.launcher3.model.data.CollectionInfo;
 import com.android.launcher3.model.data.FolderInfo;
@@ -433,9 +432,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         initDragController();
         mAllAppsController = new AllAppsTransitionController(this);
         mStateManager = new StateManager<>(this, NORMAL);
-        if (refactorTaskbarUiState()) {
-            mStateManager.setLauncherUiState(mLauncherUiState);
-        }
+        mStateManager.setLauncherUiState(mLauncherUiState);
 
         mAppWidgetManager = new WidgetManagerHelper(this);
         mAppWidgetHolder = LauncherWidgetHolder.newInstance(this);
@@ -684,9 +681,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         }
 
         mDeviceProfile = deviceProfile;
-        if (refactorTaskbarUiState()) {
-            mLauncherUiState.setDeviceProfile(deviceProfile);
-        }
+        mLauncherUiState.setDeviceProfile(deviceProfile);
 
         if (FOLDABLE_SINGLE_PAGE.get() && mDeviceProfile.getDeviceProperties().isTwoPanels()) {
             mCellPosMapper = new TwoPanelCellPosMapper(mDeviceProfile.inv.numColumns);

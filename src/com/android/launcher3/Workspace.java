@@ -23,7 +23,6 @@ import static com.android.launcher3.Flags.enableFileSystemFoldersAsDropTargets;
 import static com.android.launcher3.Flags.enableSystemDragToOtherApps;
 import static com.android.launcher3.Flags.enableTaskbarDragAndDrop;
 import static com.android.launcher3.Flags.injectableModelItems;
-import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.LauncherAnimUtils.SPRING_LOADED_EXIT_DELAY;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_ALL_APPS_PREDICTION;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP;
@@ -1418,9 +1417,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                 mLauncher.onOverlayVisibilityChanged(false);
             }
         }
-        if (refactorTaskbarUiState()) {
-            mLauncherUiState.setOverlayShown(mOverlayShown);
-        }
+        mLauncherUiState.setOverlayShown(mOverlayShown);
         int count = mOverlayCallbacks.size();
         for (int i = 0; i < count; i++) {
             mOverlayCallbacks.get(i).onOverlayScrollChanged(mOverlayProgress);

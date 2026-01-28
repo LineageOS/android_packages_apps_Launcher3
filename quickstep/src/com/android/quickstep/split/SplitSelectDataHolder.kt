@@ -28,8 +28,6 @@ import android.os.UserHandle
 import android.util.Log
 import androidx.annotation.AnyThread
 import com.android.internal.annotations.VisibleForTesting
-import com.android.launcher3.BuildConfig
-import com.android.launcher3.Flags.refactorTaskbarUiState
 import com.android.launcher3.SplitScreenUiState
 import com.android.launcher3.SplitSelectTask
 import com.android.launcher3.logging.StatsLogManager.EventEnum
@@ -100,17 +98,13 @@ class SplitSelectDataHolder(var context: Context?, val splitScreenUiState: Split
     private var initialTask = SplitSelectTask()
         set(value) {
             field = value
-            if (refactorTaskbarUiState()) {
-                splitScreenUiState.setSplitSelectInitialTask(value)
-            }
+            splitScreenUiState.setSplitSelectInitialTask(value)
         }
 
     private var secondTask = SplitSelectTask()
         set(value) {
             field = value
-            if (refactorTaskbarUiState()) {
-                splitScreenUiState.setSplitSelectSecondTask(value)
-            }
+            splitScreenUiState.setSplitSelectSecondTask(value)
         }
 
     private var widgetSecondIntent: Intent? = null
@@ -413,19 +407,8 @@ class SplitSelectDataHolder(var context: Context?, val splitScreenUiState: Split
      */
     @AnyThread
     fun isSplitSelectActive(): Boolean {
-        return if (refactorTaskbarUiState()) {
-            val ret = splitScreenUiState.isSplitSelectActive
-            if (BuildConfig.IS_STUDIO_BUILD && ret != legacyIsSplitSelectActive()) {
-                throw IllegalStateException("isSplitSelectActive doesn't match")
-            }
-            ret
-        } else {
-            legacyIsSplitSelectActive()
-        }
+        return splitScreenUiState.isSplitSelectActive
     }
-
-    @Deprecated("To be removed after turning on refactorTaskbarUiState()")
-    private fun legacyIsSplitSelectActive() = initialTask.isIntentSet && !secondTask.isIntentSet
 
     /**
      * @return `true` if the first and second task have been chosen and split is waiting to be
