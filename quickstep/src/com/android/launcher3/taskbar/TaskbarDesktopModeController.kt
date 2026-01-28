@@ -16,7 +16,6 @@
 
 package com.android.launcher3.taskbar
 
-import com.android.launcher3.Flags.refactorTaskbarUiState
 import com.android.launcher3.display.DisplayController
 import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.statehandlers.DesktopVisibilityController.TaskbarDesktopModeListener
@@ -48,14 +47,12 @@ class TaskbarDesktopModeController(
         taskbarSharedState = sharedState
         taskbarUiState = uiState
         desktopVisibilityController.registerTaskbarDesktopModeListener(this)
-        if (refactorTaskbarUiState()) {
-            displayInfoChangeSafeCloseable =
-                DisplayController.INSTANCE.get(taskbarActivityContext).listenable?.forEach(
-                    getTaskbarUiThread()
-                ) { _ ->
-                    updateTaskbarUiState()
-                }
-        }
+        displayInfoChangeSafeCloseable =
+            DisplayController.INSTANCE.get(taskbarActivityContext).listenable?.forEach(
+                getTaskbarUiThread()
+            ) { _ ->
+                updateTaskbarUiState()
+            }
     }
 
     fun isInDesktopMode(displayId: Int) = desktopVisibilityController.isInDesktopMode(displayId)

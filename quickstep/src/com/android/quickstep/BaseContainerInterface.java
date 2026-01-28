@@ -18,7 +18,6 @@ package com.android.quickstep;
 import static com.android.app.animation.Interpolators.ACCELERATE_2;
 import static com.android.app.animation.Interpolators.INSTANT;
 import static com.android.app.animation.Interpolators.LINEAR;
-import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.LauncherAnimUtils.SCRIM_COLORS;
 import static com.android.launcher3.MotionEventsUtils.isTrackpadMultiFingerSwipe;
 import static com.android.quickstep.AbsSwipeUpHandler.RECENTS_ATTACH_DURATION;
@@ -49,7 +48,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 
-import com.android.launcher3.BuildConfig;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.R;
 import com.android.launcher3.display.DisplayController;
@@ -122,16 +120,15 @@ public abstract class BaseContainerInterface<STATE_TYPE extends BaseState<STATE_
     public abstract boolean isStarted();
     public boolean deferStartingActivity(
             @NonNull RecentsAnimationDeviceState deviceState, MotionEvent ev) {
-        final TaskbarInteractor interactor = getTaskbarInteractor();
         final CONTAINER_TYPE container = getCreatedContainer();
         final TaskbarUiState taskbarUiState = container != null
                 ? TaskbarUiStateMonitor.INSTANCE.get(container.asContext())
                 .getTaskbarUiState(ev.getDisplayId())
                 : null;
         boolean isEventOverBubbleBarStashHandle =
-                isEventOverBubbleBarView(interactor, taskbarUiState, ev);
+                isEventOverBubbleBarView(taskbarUiState, ev);
         boolean isEventOverAnyTaskbarItem =
-                isEventOverAnyTaskbarView(interactor, taskbarUiState, ev);
+                isEventOverAnyTaskbarView(taskbarUiState, ev);
         return deviceState.isInDeferredGestureRegion(ev)
                 || deviceState.isImeRenderingNavButtons()
                 || isTrackpadMultiFingerSwipe(ev)
@@ -283,23 +280,6 @@ public abstract class BaseContainerInterface<STATE_TYPE extends BaseState<STATE_
      * @return Whether the gesture in progress should be cancelled.
      */
     public boolean shouldCancelCurrentGesture(int displayId) {
-        if (refactorTaskbarUiState()) {
-            final boolean ret = newIsDraggingItem(displayId);
-            if (BuildConfig.IS_STUDIO_BUILD && ret != legacyIsDraggingItem()) {
-                throw new IllegalStateException("isDraggingItem() doesn't match");
-            }
-            return ret;
-        } else {
-            return legacyIsDraggingItem();
-        }
-    }
-
-    private boolean legacyIsDraggingItem() {
-        TaskbarInteractor taskbarInteractor = getTaskbarInteractor();
-        return taskbarInteractor != null && taskbarInteractor.isDraggingItem();
-    }
-
-    private boolean newIsDraggingItem(int displayId) {
         CONTAINER_TYPE container = getCreatedContainer();
         return container != null
                 && TaskbarUiStateMonitor.INSTANCE.get(container.asContext())
@@ -570,34 +550,13 @@ public abstract class BaseContainerInterface<STATE_TYPE extends BaseState<STATE_
     }
 
     private boolean isEventOverBubbleBarView(
-            @Nullable TaskbarInteractor interactor,
             @Nullable TaskbarUiState taskbarUiState, MotionEvent ev) {
-        if (refactorTaskbarUiState()) {
-            final boolean ret = taskbarUiState != null
-                    && taskbarUiState.isEventOverBubbleBarViews(ev);
-            if (BuildConfig.IS_STUDIO_BUILD && ret
-                    != (interactor != null && interactor.isEventOverBubbleBarViews(ev))) {
-                throw new IllegalStateException("isEventOverBubbleBarView doesn't match");
-            }
-            return ret;
-        } else {
-            return interactor != null && interactor.isEventOverBubbleBarViews(ev);
-        }
+        return taskbarUiState != null && taskbarUiState.isEventOverBubbleBarViews(ev);
     }
 
-    private boolean isEventOverAnyTaskbarView(@Nullable TaskbarInteractor interactor,
+    private boolean isEventOverAnyTaskbarView(
             @Nullable TaskbarUiState taskbarUiState, MotionEvent ev) {
-        if (refactorTaskbarUiState()) {
-            final boolean ret = taskbarUiState != null
-                    && taskbarUiState.isEventOverAnyTaskbarItem(ev);
-            if (BuildConfig.IS_STUDIO_BUILD && ret
-                    != (interactor != null && interactor.isEventOverAnyTaskbarItem(ev))) {
-                throw new IllegalStateException("isEventOverAnyTaskbarView doesn't match");
-            }
-            return ret;
-        } else {
-            return interactor != null && interactor.isEventOverAnyTaskbarItem(ev);
-        }
+        return taskbarUiState != null && taskbarUiState.isEventOverAnyTaskbarItem(ev);
     }
 
     private static int getModalClaimedSpaceBelow(DeviceProfile dp, Rect outRect,

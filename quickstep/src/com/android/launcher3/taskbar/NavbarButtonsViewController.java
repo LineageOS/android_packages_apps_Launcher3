@@ -19,7 +19,6 @@ import static android.view.View.AccessibilityDelegate;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 
-import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.LauncherAnimUtils.ROTATION_DRAWABLE_PERCENT;
 import static com.android.launcher3.LauncherAnimUtils.VIEW_TRANSLATE_X;
 import static com.android.launcher3.Utilities.getDescendantCoordRelativeToAncestor;
@@ -1429,10 +1428,8 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
             } else {
                 mFloatingRotationButtonBounds.setEmpty();
             }
-            if (refactorTaskbarUiState()) {
-                mTaskbarUiState.setNavbarFloatingRotationButtonsBounds(
-                        mFloatingRotationButtonBounds);
-            }
+            mTaskbarUiState.setNavbarFloatingRotationButtonsBounds(
+                    mFloatingRotationButtonBounds);
         }
     }
 

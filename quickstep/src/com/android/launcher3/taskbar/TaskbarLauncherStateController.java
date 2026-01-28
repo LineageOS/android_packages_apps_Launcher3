@@ -49,7 +49,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.AbstractFloatingView;
-import com.android.launcher3.BuildConfig;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.Flags;
 import com.android.launcher3.Hotseat.HotseatQsbAlphaId;
@@ -289,15 +288,7 @@ public class TaskbarLauncherStateController {
     }
 
     private boolean hasLauncherBeenResumed() {
-        if (Flags.refactorTaskbarUiState()) {
-            final boolean ret = mLauncherUiState.isResumed();
-            if (BuildConfig.IS_STUDIO_BUILD && ret != mLauncher.hasBeenResumed()) {
-                throw new IllegalStateException("hasBeenResumed doesn't match");
-            }
-            return ret;
-        } else {
-            return mLauncher.hasBeenResumed();
-        }
+        return mLauncherUiState.isResumed();
     }
 
     /** Initializes the controller instance, and applies the initial state immediately. */
@@ -1256,19 +1247,7 @@ public class TaskbarLauncherStateController {
     }
 
     private boolean isOverlayShown() {
-        if (Flags.refactorTaskbarUiState()) {
-            final boolean ret = mLauncherUiState.isOverlayShown();
-            if (BuildConfig.IS_STUDIO_BUILD && ret != legacyIsOverlayShown()) {
-                throw new IllegalStateException("isOverlayShown doesn't match");
-            }
-            return ret;
-        } else {
-            return legacyIsOverlayShown();
-        }
-    }
-
-    private boolean legacyIsOverlayShown() {
-        return mLauncher.isOverlayShown();
+        return mLauncherUiState.isOverlayShown();
     }
 
     private static String getStateString(int flags) {
