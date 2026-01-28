@@ -24,7 +24,6 @@ import static android.view.accessibility.AccessibilityEvent.TYPE_VIEW_FOCUSED;
 import static com.android.app.animation.Interpolators.EMPHASIZED;
 import static com.android.internal.jank.Cuj.CUJ_LAUNCHER_LAUNCH_APP_PAIR_FROM_WORKSPACE;
 import static com.android.launcher3.Flags.enableUnfoldStateAnimation;
-import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.LauncherConstants.SavedInstanceKeys.PENDING_SPLIT_SELECT_INFO;
 import static com.android.launcher3.LauncherConstants.SavedInstanceKeys.RUNTIME_STATE;
 import static com.android.launcher3.LauncherSettings.Animation.DEFAULT_NO_ICON;
@@ -119,7 +118,6 @@ import androidx.annotation.RequiresApi;
 
 import com.android.app.viewcapture.ViewCaptureFactory;
 import com.android.launcher3.AbstractFloatingView;
-import com.android.launcher3.BuildConfig;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.Flags;
 import com.android.launcher3.GestureNavContract;
@@ -388,10 +386,8 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         getWorkspace().addOverlayCallback(progress ->
                 onTaskbarInAppDisplayProgressUpdate(progress, MINUS_ONE_PAGE_PROGRESS_INDEX));
         addBackAnimationCallback(mSplitSelectStateController.getSplitBackHandler());
-        if (refactorTaskbarUiState()) {
-            mTaskbarUiState = TaskbarUiStateMonitor.INSTANCE.get(this)
-                    .getTaskbarUiState(getDisplayId());
-        }
+        mTaskbarUiState = TaskbarUiStateMonitor.INSTANCE.get(this)
+                .getTaskbarUiState(getDisplayId());
     }
 
     @Override
@@ -507,9 +503,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
                 | ACTIVITY_STATE_USER_ACTIVE | ACTIVITY_STATE_TRANSITION_ACTIVE)) != 0) {
             onStateOrResumeChanging((getActivityFlags() & ACTIVITY_STATE_TRANSITION_ACTIVE) == 0);
         }
-        if (refactorTaskbarUiState()) {
-            mLauncherUiState.setActivityFlag(getActivityFlags());
-        }
+        mLauncherUiState.setActivityFlag(getActivityFlags());
     }
 
     @Override
@@ -580,24 +574,6 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     }
 
     private boolean canPinAppWithContextMenu() {
-        if (refactorTaskbarUiState()) {
-            final boolean ret = newCanPinAppWithContextMenu();
-            if (BuildConfig.IS_STUDIO_BUILD && ret != legacyCanPinAppWithContextMenu()) {
-                throw new IllegalStateException("canPinAppWithContextMenu() doesn't match");
-            }
-            return ret;
-        } else {
-            return legacyCanPinAppWithContextMenu();
-        }
-    }
-
-    private boolean legacyCanPinAppWithContextMenu() {
-        return mTaskbarInteractor != null
-                && mTaskbarInteractor.canPinAppWithContextMenu();
-    }
-
-    /** Mimic the impl of {@link TaskbarPopupController#canPinAppWithContextMenu}. */
-    private boolean newCanPinAppWithContextMenu() {
         if (!DesktopExperienceFlags.ENABLE_PINNING_APP_WITH_CONTEXT_MENU.isTrue()) {
             return false;
         }
@@ -1574,23 +1550,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
 
     @Override
     public boolean hasBubbles() {
-        if (refactorTaskbarUiState()) {
-            final boolean ret = newHasBubbles();
-            if (BuildConfig.IS_STUDIO_BUILD && ret != legacyHasBubbles()) {
-                throw new IllegalStateException("hasBubbles() doesn't match");
-            }
-            return ret;
-        } else {
-            return legacyHasBubbles();
-        }
-    }
-
-    private boolean newHasBubbles() {
         return mTaskbarUiState.getHasBubbles();
-    }
-
-    private boolean legacyHasBubbles() {
-        return mTaskbarInteractor != null && mTaskbarInteractor.hasBubbles();
     }
 
     @Override
