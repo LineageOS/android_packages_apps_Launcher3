@@ -26,23 +26,19 @@ import static org.junit.Assert.assertTrue;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherState;
-import com.android.launcher3.testutil.rule.LayoutResource;
 import com.android.launcher3.util.BaseLauncherActivityTest;
 import com.android.launcher3.util.LauncherLayoutBuilder;
 import com.android.launcher3.util.LauncherModelHelper;
+import com.android.launcher3.util.ModelTestExtensions;
 import com.android.launcher3.util.WorkspaceDragHelper;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 
 /**
  * Test the basic interactions of the Workspace, adding pages, moving the pages and removing pages.
  */
 public class WorkspaceIntegrationTest extends BaseLauncherActivityTest<Launcher> {
-
-    @Rule
-    public LayoutResource layoutRule = new LayoutResource(targetContext());
 
     private static final String TEST_ACTIVITY = LauncherModelHelper.TEST_ACTIVITY;
     private static final String TEST_PACKAGE = LauncherModelHelper.TEST_PACKAGE;
@@ -68,7 +64,7 @@ public class WorkspaceIntegrationTest extends BaseLauncherActivityTest<Launcher>
         // Set layout that includes Maps/Play on workspace, and Messaging/Chrome on hotseat.
         LauncherLayoutBuilder builder = new LauncherLayoutBuilder()
                 .atHotseat(0).putApp(TEST_PACKAGE, TEST_ACTIVITY);
-        layoutRule.set(builder);
+        ModelTestExtensions.setModelLayout(targetContext(), builder);
         loadLauncherSync();
 
         // Pre verifying the screens

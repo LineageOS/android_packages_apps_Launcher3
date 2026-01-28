@@ -21,9 +21,8 @@ import static android.app.prediction.AppTargetEvent.ACTION_PIN;
 import static android.app.prediction.AppTargetEvent.ACTION_UNDISMISS;
 import static android.app.prediction.AppTargetEvent.ACTION_UNPIN;
 
-import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_ALL_APPS_PREDICTION;
-import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_WIDGETS_PREDICTION;
+import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_APP_LAUNCH_DRAGDROP;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_APP_LAUNCH_TAP;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_DISMISS_PREDICTION_UNDO;
@@ -40,10 +39,8 @@ import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCH
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_SYSTEM_SHORTCUT_DONT_SUGGEST_APP_TAP;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_TASK_LAUNCH_SWIPE_DOWN;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_TASK_LAUNCH_TAP;
-import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_WIDGET_ADD_BUTTON_TAP;
 import static com.android.launcher3.model.PredictionHelper.getLocationString;
 import static com.android.launcher3.model.PredictionHelper.isTrackedForHotseatPrediction;
-import static com.android.launcher3.model.PredictionHelper.isTrackedForWidgetPrediction;
 import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
 
 import android.app.prediction.AppTarget;
@@ -96,11 +93,9 @@ public class AppEventProducer implements StatsLogConsumer {
 
     @WorkerThread
     private boolean handleMessage(Message msg) {
-        switch (msg.what) {
-            case MSG_LAUNCH: {
-                mCallback.accept((AppTargetEvent) msg.obj, msg.arg1);
-                return true;
-            }
+        if (msg.what == MSG_LAUNCH) {
+            mCallback.accept((AppTargetEvent) msg.obj, msg.arg1);
+            return true;
         }
         return false;
     }
@@ -149,9 +144,6 @@ public class AppEventProducer implements StatsLogConsumer {
             if (isTrackedForHotseatPrediction(atomInfo)) {
                 sendEvent(atomInfo, ACTION_PIN, CONTAINER_HOTSEAT_PREDICTION);
             }
-            if (isTrackedForWidgetPrediction(atomInfo)) {
-                sendEvent(atomInfo, ACTION_PIN, CONTAINER_WIDGETS_PREDICTION);
-            }
             mLastDragItem = null;
         } else if (event == LAUNCHER_ITEM_DROP_FOLDER_CREATED) {
             if (isTrackedForHotseatPrediction(atomInfo)) {
@@ -169,9 +161,6 @@ public class AppEventProducer implements StatsLogConsumer {
             if (mLastDragItem != null && isTrackedForHotseatPrediction(mLastDragItem)) {
                 sendEvent(mLastDragItem, ACTION_UNPIN, CONTAINER_HOTSEAT_PREDICTION);
             }
-            if (mLastDragItem != null && isTrackedForWidgetPrediction(mLastDragItem)) {
-                sendEvent(mLastDragItem, ACTION_UNPIN, CONTAINER_WIDGETS_PREDICTION);
-            }
         } else if (event == LAUNCHER_HOTSEAT_PREDICTION_PINNED) {
             if (isTrackedForHotseatPrediction(atomInfo)) {
                 sendEvent(atomInfo, ACTION_PIN, CONTAINER_HOTSEAT_PREDICTION);
@@ -183,10 +172,6 @@ public class AppEventProducer implements StatsLogConsumer {
             sendEvent(target, atomInfo, ACTION_LAUNCH, CONTAINER_ALL_APPS_PREDICTION);
         } else if (event == LAUNCHER_DISMISS_PREDICTION_UNDO) {
             sendEvent(atomInfo, ACTION_UNDISMISS, CONTAINER_HOTSEAT_PREDICTION);
-        } else if (event == LAUNCHER_WIDGET_ADD_BUTTON_TAP) {
-            if (isTrackedForWidgetPrediction(atomInfo)) {
-                sendEvent(atomInfo, ACTION_PIN, CONTAINER_WIDGETS_PREDICTION);
-            }
         }
     }
 

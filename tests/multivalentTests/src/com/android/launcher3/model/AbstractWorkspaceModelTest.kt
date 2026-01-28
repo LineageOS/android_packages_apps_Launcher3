@@ -20,13 +20,13 @@ import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherAppState
 import com.android.launcher3.LauncherModel
 import com.android.launcher3.model.data.ItemInfo
-import com.android.launcher3.testutil.rule.LayoutResource
 import com.android.launcher3.util.GridOccupancy
 import com.android.launcher3.util.IntArray
 import com.android.launcher3.util.IntSparseArrayMap
 import com.android.launcher3.util.LauncherLayoutBuilder
 import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY
 import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
+import com.android.launcher3.util.ModelTestExtensions.setModelLayout
 import com.android.launcher3.util.SandboxApplication
 import org.junit.Rule
 
@@ -38,7 +38,6 @@ abstract class AbstractWorkspaceModelTest {
     }
 
     @get:Rule val mTargetContext: SandboxApplication = SandboxApplication().withModelDependency()
-    @get:Rule var mLayout: LayoutResource = LayoutResource(mTargetContext)
 
     protected lateinit var mLayoutBuilder: LauncherLayoutBuilder
     protected lateinit var mIdp: InvariantDeviceProfile
@@ -73,7 +72,7 @@ abstract class AbstractWorkspaceModelTest {
         listOf(screen0, screen1, screen2, screen3).let(this::setupWithSpaces)
         mIdp.numRows = 5
         mIdp.numColumns = mIdp.numRows
-        mLayout.set(mLayoutBuilder)
+        mTargetContext.setModelLayout(mLayoutBuilder)
     }
 
     private fun setupWithSpaces(workspaceSpaces: List<List<Rect>?>) {

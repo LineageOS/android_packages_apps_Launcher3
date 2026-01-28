@@ -34,13 +34,13 @@ import com.android.launcher3.icons.BitmapRenderer.createSoftwareBitmap
 import com.android.launcher3.icons.cache.CacheLookupFlag.Companion.DEFAULT_LOOKUP_FLAG
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.shortcuts.ShortcutKey
-import com.android.launcher3.testutil.rule.LayoutResource
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.LauncherLayoutBuilder
 import com.android.launcher3.util.LauncherModelHelper.SHORTCUT_ID
 import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
 import com.android.launcher3.util.ModelTestExtensions.loadModelSync
+import com.android.launcher3.util.ModelTestExtensions.setModelLayout
 import com.android.launcher3.util.RoboApiWrapper
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestUtil
@@ -66,7 +66,6 @@ class ShortcutIconTest {
     @get:Rule val mockitoRule = MockitoJUnit.rule()
     @get:Rule val setFlagsRule: SetFlagsRule = SetFlagsRule()
     @get:Rule val app = SandboxApplication().withModelDependency()
-    @get:Rule val layoutResource = LayoutResource(app)
     @get:Rule val shortcutAccessRule = RoboApiWrapper.grantShortcutsPermissionRule()
     @get:Rule val mockUsers = MockUsersRule(app)
 
@@ -97,7 +96,7 @@ class ShortcutIconTest {
             .whenever(la)
             .getShortcuts(any(), any())
 
-        layoutResource.set(
+        app.setModelLayout(
             LauncherLayoutBuilder().atHotseat(0).putShortcut(TEST_PACKAGE, SHORTCUT_ID)
         )
         state.model.loadModelSync()

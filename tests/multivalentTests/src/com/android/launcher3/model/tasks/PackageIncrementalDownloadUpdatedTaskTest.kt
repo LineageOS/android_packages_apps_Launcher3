@@ -26,7 +26,6 @@ import com.android.launcher3.model.TestableModelState
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.WorkspaceChangeEvent
 import com.android.launcher3.model.data.WorkspaceChangeEvent.UpdateEvent
-import com.android.launcher3.testutil.rule.LayoutResource
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import com.android.launcher3.util.LauncherLayoutBuilder
 import com.android.launcher3.util.LauncherModelHelper.SETTINGS_COMPONENT
@@ -35,6 +34,7 @@ import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY
 import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY2
 import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
 import com.android.launcher3.util.ModelTestExtensions.countPersistedModelItems
+import com.android.launcher3.util.ModelTestExtensions.setModelLayout
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestUtil
 import com.google.common.truth.Truth.assertThat
@@ -51,7 +51,6 @@ class PackageIncrementalDownloadUpdatedTaskTest {
 
     @get:Rule val setFlagsRule = SetFlagsRule()
     @get:Rule val context = SandboxApplication().withModelDependency()
-    @get:Rule val layout = LayoutResource(context)
 
     private val modelState: TestableModelState
         get() = context.appComponent.testableModelState
@@ -59,7 +58,7 @@ class PackageIncrementalDownloadUpdatedTaskTest {
     @Before
     @Throws(Exception::class)
     fun setup() {
-        layout.set(
+        context.setModelLayout(
             LauncherLayoutBuilder()
                 .atWorkspace(0, 0, 1)
                 .putApp(TEST_PACKAGE, TEST_ACTIVITY) // 1

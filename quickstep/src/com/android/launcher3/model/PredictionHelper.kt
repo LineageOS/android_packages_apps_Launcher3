@@ -41,7 +41,6 @@ import com.android.launcher3.logger.LauncherAtom.ContainerInfo.ContainerCase.TAS
 import com.android.launcher3.logger.LauncherAtom.ContainerInfo.ContainerCase.WORKSPACE
 import com.android.launcher3.logger.LauncherAtom.FolderContainer.ParentContainerCase
 import com.android.launcher3.logger.LauncherAtom.HotseatContainer
-import com.android.launcher3.logger.LauncherAtom.ItemInfo.ItemCase.WIDGET
 import com.android.launcher3.logger.LauncherAtom.WorkspaceContainer
 import com.android.launcher3.logger.LauncherAtomExtensions.ExtendedContainers.ContainerCase.DEVICE_SEARCH_RESULT_CONTAINER
 import com.android.launcher3.model.data.ItemInfo
@@ -83,14 +82,6 @@ object PredictionHelper {
     @JvmStatic
     fun ItemInfo.isTrackedForWidgetPrediction(): Boolean =
         itemType == ITEM_TYPE_APPWIDGET && container == CONTAINER_DESKTOP
-
-    /**
-     * Helper method to determine if [LauncherAtom.ItemInfo] should be tracked and reported to
-     * widget predictors
-     */
-    @JvmStatic
-    fun LauncherAtom.ItemInfo.isTrackedForWidgetPrediction(): Boolean =
-        itemCase == WIDGET && containerInfo.containerCase == WORKSPACE
 
     /** Creates and returns bundle using workspace items for hotseat predictions */
     @JvmStatic

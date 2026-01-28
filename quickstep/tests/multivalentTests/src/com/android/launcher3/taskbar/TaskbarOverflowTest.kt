@@ -24,6 +24,7 @@ import android.os.Process
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
+import android.util.SparseArray
 import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_HOVER_ENTER
 import android.view.MotionEvent.ACTION_HOVER_EXIT
@@ -33,20 +34,16 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.BubbleTextView
 import com.android.launcher3.Flags.FLAG_ENABLE_MULTI_INSTANCE_MENU_TASKBAR
+import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.R
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
-import com.android.launcher3.model.BgDataModel
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.TaskItemInfo
-import com.android.launcher3.model.data.WorkspaceData
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.popup.SystemShortcut
 import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.waitForIdleSync
-import com.android.launcher3.util.Executors
-import com.android.launcher3.util.RoboApiWrapper
-import com.android.launcher3.util.TestUtil
 import com.android.launcher3.taskbar.TaskbarIconType.ALL_APPS
 import com.android.launcher3.taskbar.TaskbarIconType.HOTSEAT
 import com.android.launcher3.taskbar.TaskbarIconType.OVERFLOW
@@ -61,8 +58,15 @@ import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext_ModifiedComponent
+import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
+import com.android.launcher3.util.Executors.getTaskbarUiThread
+import com.android.launcher3.util.LauncherLayoutBuilder
+import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
+import com.android.launcher3.util.ModelTestExtensions.setModelLayout
 import com.android.launcher3.util.Preconditions.assertNotNull
+import com.android.launcher3.util.RoboApiWrapper
+import com.android.launcher3.util.TestUtil
 import com.android.launcher3.util.TestUtil.getOnTaskbarUiThread
 import com.android.quickstep.RecentsModel
 import com.android.quickstep.SystemUiProxy
@@ -82,7 +86,6 @@ import com.android.wm.shell.Flags.FLAG_ENABLE_BUBBLE_BAR
 import com.android.wm.shell.desktopmode.IDesktopTaskListener
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource
 import com.google.common.truth.Truth.assertThat
-import java.util.function.Predicate
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -156,7 +159,6 @@ class TaskbarOverflowTest {
         get() = DesktopVisibilityController.INSTANCE[context]
 
     private var desktopTaskListener: IDesktopTaskListener? = null
-    private val modelCallback = ModelCallbacks()
 
     private val taskbarContext: TaskbarActivityContext
         get() = taskbarUnitTestRule.activityContext
@@ -189,9 +191,7 @@ class TaskbarOverflowTest {
 
     @After
     fun resetForcedMaxIconCount() {
-        runOnTaskbarUiThreadSync {
-            taskbarViewController.limitMaxTaskbarIconsNum(-1)
-        }
+        runOnTaskbarUiThreadSync { taskbarViewController.limitMaxTaskbarIconsNum(-1) }
         RoboApiWrapper.waitForLooperSync(Looper.getMainLooper())
     }
 
@@ -665,15 +665,11 @@ class TaskbarOverflowTest {
         assertNotNull(shortcut)
         runOnTaskbarUiThreadSync { shortcut?.onClick(hotseatIcon) }
 
-        // Wait for the background model thread to finish, then the main thread to update.
-        TestUtil.runOnExecutorSync(Executors.MODEL_EXECUTOR) {}
-        RoboApiWrapper.waitForLooperSync(Looper.getMainLooper())
-        RoboApiWrapper.waitForLooperSync(Executors.getTaskbarUiThread().looper)
-        RoboApiWrapper.waitForLooperSync(Looper.getMainLooper())
+        TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {}
+        runOnTaskbarUiThreadSync {}
 
         // After unpinning the first item, only the second app is left.
-        assertThat(modelCallback.hotseatItems.map { info -> info.title })
-            .isEqualTo(listOf("Test App 1"))
+        assertThat(getHotseatItems().map { info -> info.title }).isEqualTo(listOf("Test App 1"))
         // The unpinned app doesn't have a task so the shown tasks won't change.
         assertThat(recentAppsController.shownTasks.map { it.tasks[0].key.id })
             .isEqualTo(listOf(0, 1))
@@ -703,22 +699,18 @@ class TaskbarOverflowTest {
                 ) as SystemShortcut<*>
         }
         // Before unpinning the app, both of the apps should be pinned and no shown task available.
-        assertThat(modelCallback.hotseatItems.map { info -> info.title })
+        assertThat(getHotseatItems().map { info -> info.title })
             .isEqualTo(listOf("Test App 0", "Test App 1"))
         assertThat(recentAppsController.shownTasks.map { it.tasks[0].key.id })
             .isEqualTo(emptyList<Int>())
         assertNotNull(shortcut)
         runOnTaskbarUiThreadSync { shortcut?.onClick(hotseatIcon) }
 
-        // Wait for the background model thread to finish, then the main thread to update.
-        TestUtil.runOnExecutorSync(Executors.MODEL_EXECUTOR) {}
-        RoboApiWrapper.waitForLooperSync(Looper.getMainLooper())
-        RoboApiWrapper.waitForLooperSync(Executors.getTaskbarUiThread().looper)
-        RoboApiWrapper.waitForLooperSync(Looper.getMainLooper())
+        TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {}
+        runOnTaskbarUiThreadSync {}
 
         // After unpinning the app, app 0 is removed and its task is shown as a recent task.
-        assertThat(modelCallback.hotseatItems.map { info -> info.title })
-            .isEqualTo(listOf("Test App 1"))
+        assertThat(getHotseatItems().map { info -> info.title }).isEqualTo(listOf("Test App 1"))
         assertThat(recentAppsController.shownTasks.map { it.tasks[0].key.id }).isEqualTo(listOf(0))
     }
 
@@ -726,6 +718,19 @@ class TaskbarOverflowTest {
     @TaskbarMode(PINNED)
     @EnableFlags(FLAG_ENABLE_PINNING_APP_WITH_CONTEXT_MENU)
     fun pinToTaskbarShortcut_pinRecentTask() {
+        // Set up placeholder items so that any newly generated item has a non-confclicting itemID
+        context.setModelLayout(
+            LauncherLayoutBuilder()
+                .atHotseat(0)
+                .putApp(TEST_PACKAGE, null)
+                .atHotseat(1)
+                .putApp(TEST_PACKAGE, null)
+                .atHotseat(2)
+                .putApp(TEST_PACKAGE, null)
+                .atHotseat(3)
+                .putApp(TEST_PACKAGE, null)
+        )
+
         // Create two tasks and two pinned items.
         createDesktopTask(2)
         val hotseatItems = createHotseatItems(2)
@@ -757,14 +762,11 @@ class TaskbarOverflowTest {
         assertNotNull(shortcut)
         runOnTaskbarUiThreadSync { shortcut?.onClick(recentTaskIcon) }
 
-        // Wait for the background model thread to finish, then the main thread to update.
-        TestUtil.runOnExecutorSync(Executors.MODEL_EXECUTOR) {}
-        RoboApiWrapper.waitForLooperSync(Looper.getMainLooper())
-        RoboApiWrapper.waitForLooperSync(Executors.getTaskbarUiThread().looper)
-        RoboApiWrapper.waitForLooperSync(Looper.getMainLooper())
+        TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {}
+        runOnTaskbarUiThreadSync {}
 
         // After pinning the recent task, it should be included in the hotseat items.
-        assertThat(modelCallback.hotseatItems.map { info -> info.title })
+        assertThat(getHotseatItems().map { info -> info.title })
             .isEqualTo(listOf("Test App 0", "Test App 1", "Test App 2"))
         // As the task is pinned, the shown tasks should remove it from the list
         assertThat(recentAppsController.shownTasks.map { it.tasks[0].key.id }).isEqualTo(listOf(1))
@@ -877,12 +879,18 @@ class TaskbarOverflowTest {
     }
 
     private fun setUpTaskbarAndModelCallback(hotseatItems: Array<WorkspaceItemInfo>): TaskbarView {
+        context.appComponent.testableModelState.dataModel.dataLoadComplete(
+            SparseArray<ItemInfo>().apply { hotseatItems.forEach { this[it.id] = it } }
+        )
         val taskbarView: TaskbarView =
             taskbarUnitTestRule.activityContext.dragLayer.findViewById(R.id.taskbar_view)
         taskbarView.updateItems(hotseatItems, recentAppsController.shownTasks, emptyList())
-        modelCallback.recentAppsController = recentAppsController
-        context.baseContext.appComponent.launcherAppState.model.addCallbacks(modelCallback)
-        modelCallback.bindItemsAdded(hotseatItems.toList())
+
+        context.appComponent.testableModelState.homeRepo.workspaceState.forEach(
+            getTaskbarUiThread()
+        ) {
+            recentAppsController?.updateHotseatItemInfos(getHotseatItems().toTypedArray())
+        }
         return taskbarView
     }
 
@@ -1086,34 +1094,8 @@ class TaskbarOverflowTest {
         return maxNumIconViews
     }
 
-    private class ModelCallbacks : BgDataModel.Callbacks {
-        var hotseatItems = mutableListOf<WorkspaceItemInfo>()
-        var recentAppsController: TaskbarRecentAppsController? = null
-
-        override fun bindCompleteModel(itemIdMap: WorkspaceData, isBindingSync: Boolean) =
-            bindItemsAdded(itemIdMap.toList())
-
-        override fun bindItemsAdded(items: List<ItemInfo>) {
-            runOnTaskbarUiThreadSync {
-                items
-                    .filter { item ->
-                        item is WorkspaceItemInfo &&
-                            !hotseatItems.any { it.targetPackage == item.targetPackage }
-                    }
-                    .forEach { item -> hotseatItems.add(item as WorkspaceItemInfo) }
-                recentAppsController?.updateHotseatItemInfos(hotseatItems.toTypedArray())
-            }
-        }
-
-        override fun bindWorkspaceComponentsRemoved(matcher: Predicate<ItemInfo?>) {
-            runOnTaskbarUiThreadSync {
-                for (i in hotseatItems.size - 1 downTo 0) {
-                    if (matcher.test(hotseatItems[i])) {
-                        hotseatItems.removeAt(i)
-                    }
-                }
-                recentAppsController?.updateHotseatItemInfos(hotseatItems.toTypedArray())
-            }
-        }
-    }
+    private fun getHotseatItems() =
+        context.appComponent.testableModelState.homeRepo.workspaceState.value
+            .filter { it.container == CONTAINER_HOTSEAT }
+            .filterIsInstance<WorkspaceItemInfo>()
 }

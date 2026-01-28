@@ -36,11 +36,11 @@ import com.android.launcher3.taskbar.TaskbarManager
 import com.android.launcher3.taskbar.TaskbarView
 import com.android.launcher3.testutil.LauncherTestInteractions
 import com.android.launcher3.testutil.Wait.atMost
-import com.android.launcher3.testutil.rule.LayoutResource
 import com.android.launcher3.util.IntegrationLandscapeRule
 import com.android.launcher3.util.LauncherLayoutBuilder
 import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
 import com.android.launcher3.util.ModelTestExtensions.loadModelSync
+import com.android.launcher3.util.ModelTestExtensions.setModelLayout
 import com.android.launcher3.util.TestUtil
 import com.android.launcher3.views.DoubleShadowBubbleTextView
 import com.android.quickstep.taskbar.util.IntegrationNavigationModeSwitchRule
@@ -64,8 +64,6 @@ open class BaseTaskbarIntegrationTest {
     val targetContext: Context = getInstrumentation().targetContext
 
     @get:Rule val navigationModeSwitch = IntegrationNavigationModeSwitchRule()
-
-    @get:Rule val layoutResource = LayoutResource(targetContext)
 
     @get:Rule val launcherActivity = LauncherActivityScenarioRule<Launcher>()
 
@@ -93,7 +91,7 @@ open class BaseTaskbarIntegrationTest {
             "Ignoring test because device is not a tablet",
             deviceProfile.deviceProperties.isLargeScreen,
         )
-        layoutResource.set(
+        targetContext.setModelLayout(
             LauncherLayoutBuilder()
                 .atHotseat(0)
                 .putApp(CALCULATOR_APP_PACKAGE, CALCULATOR_APP_CLASS)

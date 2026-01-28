@@ -22,7 +22,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_ALL_APPS_PREDICTION
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_WALLPAPERS
-import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_WIDGETS_PREDICTION
 import com.android.launcher3.util.SandboxApplication
 import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertSame
@@ -49,7 +48,6 @@ class QuickstepModelDelegateTest {
     @Mock private lateinit var mockedAppTargetEvent: AppTargetEvent
     @Mock private lateinit var allAppsPredictor: AppPredictor
     @Mock private lateinit var hotseatPredictor: AppPredictor
-    @Mock private lateinit var widgetRecommendationPredictor: AppPredictor
     @Mock private lateinit var itemParserFactory: PredictedItemFactory.Factory
 
     @Before
@@ -64,7 +62,6 @@ class QuickstepModelDelegateTest {
             )
         underTest.mAllPredictionAppsState.predictor = allAppsPredictor
         underTest.mHotseatPredictionState.predictor = hotseatPredictor
-        underTest.mWidgetsRecommendationState.predictor = widgetRecommendationPredictor
         underTest.mModel = context.appComponent.testableModelState.model
         underTest.mDataModel = context.appComponent.testableModelState.dataModel
     }
@@ -75,16 +72,6 @@ class QuickstepModelDelegateTest {
 
         verify(allAppsPredictor).notifyAppTargetEvent(mockedAppTargetEvent)
         verifyNoMoreInteractions(hotseatPredictor)
-        verifyNoMoreInteractions(widgetRecommendationPredictor)
-    }
-
-    @Test
-    fun onWidgetPrediction_notifyWidgetRecommendationPredictor() {
-        underTest.onAppTargetEvent(mockedAppTargetEvent, CONTAINER_WIDGETS_PREDICTION)
-
-        verifyNoMoreInteractions(allAppsPredictor)
-        verify(widgetRecommendationPredictor).notifyAppTargetEvent(mockedAppTargetEvent)
-        verifyNoMoreInteractions(hotseatPredictor)
     }
 
     @Test
@@ -92,7 +79,6 @@ class QuickstepModelDelegateTest {
         underTest.onAppTargetEvent(mockedAppTargetEvent, CONTAINER_HOTSEAT_PREDICTION)
 
         verifyNoMoreInteractions(allAppsPredictor)
-        verifyNoMoreInteractions(widgetRecommendationPredictor)
         verify(hotseatPredictor).notifyAppTargetEvent(mockedAppTargetEvent)
     }
 
@@ -101,7 +87,6 @@ class QuickstepModelDelegateTest {
         underTest.onAppTargetEvent(mockedAppTargetEvent, CONTAINER_WALLPAPERS)
 
         verifyNoMoreInteractions(allAppsPredictor)
-        verifyNoMoreInteractions(widgetRecommendationPredictor)
         verify(hotseatPredictor).notifyAppTargetEvent(mockedAppTargetEvent)
     }
 
