@@ -55,9 +55,10 @@ import com.android.launcher3.graphics.GridCustomizationsProxy;
 import com.android.launcher3.preview.PreviewContext.PreviewAppComponent;
 import com.android.launcher3.util.RunnableList;
 import com.android.launcher3.util.Themes;
-import com.android.launcher3.util.WallpaperColorHints;
+import com.android.launcher3.widget.ColorsOverride;
 import com.android.launcher3.widget.LocalColorExtractor;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
@@ -76,6 +77,8 @@ public class PreviewSurfaceRenderer {
     public static final String KEY_COLORS = "wallpaper_colors";
     public static final String KEY_COLOR_RESOURCE_IDS = "color_resource_ids";
     public static final String KEY_COLOR_VALUES = "color_values";
+    public static final String KEY_SEED_COLOR_LIST = "seed_color_list";
+    public static final String KEY_THEME_STYLE = "theme_style";
     public static final String KEY_DARK_MODE = "use_dark_mode";
     public static final String KEY_LAYOUT_XML = "layout_xml";
     public static final String KEY_BITMAP_GENERATION_DELAY_MS = "bitmap_delay_ms";
@@ -114,6 +117,10 @@ public class PreviewSurfaceRenderer {
     private LauncherPreviewRenderer mCurrentRenderer;
 
     @Nullable private SurfaceControlViewHost.SurfacePackage mSurfacePackage;
+
+    private int[] mSeedColorList;
+    private int mThemeStyle = -1;
+    private ColorsOverride mColorsOverride;
 
     public PreviewSurfaceRenderer(Context context, RunnableList lifecycleTracker, Bundle bundle,
             int callingPid, boolean skipAnimations) throws Exception {
@@ -267,8 +274,15 @@ public class PreviewSurfaceRenderer {
     private boolean updateColorOverrides(Bundle bundle) {
         Boolean oldDarkMode = mDarkMode;
         SparseIntArray oldColorsOverride = mPreviewColorOverride;
+        int[] oldSeedColorList = mSeedColorList;
+        int oldThemeStyle = mThemeStyle;
+
         mDarkMode =
                 bundle.containsKey(KEY_DARK_MODE) ? bundle.getBoolean(KEY_DARK_MODE) : null;
+
+        mSeedColorList = bundle.getIntArray(KEY_SEED_COLOR_LIST);
+        mThemeStyle = bundle.getInt(KEY_THEME_STYLE, -1);
+
         int[] ids = bundle.getIntArray(KEY_COLOR_RESOURCE_IDS);
         int[] colors = bundle.getIntArray(KEY_COLOR_VALUES);
         if (ids != null && colors != null) {
@@ -280,8 +294,9 @@ public class PreviewSurfaceRenderer {
             mPreviewColorOverride = null;
         }
         return  !Objects.equals(oldDarkMode, mDarkMode)
-                || mPreviewColorOverride != null
-                || oldColorsOverride != null;
+                || !Arrays.equals(oldSeedColorList, mSeedColorList)
+                || oldThemeStyle != mThemeStyle
+                || mPreviewColorOverride != oldColorsOverride;
     }
 
     /***
@@ -310,29 +325,25 @@ public class PreviewSurfaceRenderer {
                 ? Themes.getActivityThemeRes(context)
                 : Themes.getActivityThemeRes(context, mWallpaperColors.getColorHints());
 
-        final SparseIntArray wallpaperColorResources;
-
         LocalColorExtractor localColorExtractor = mAppComponent.getLocalColorExtractor();
-        if (mPreviewColorOverride != null) {
-            localColorExtractor
+
+        if (mSeedColorList != null) {
+            mColorsOverride = localColorExtractor
+                    .applyColorOverlay(context, mSeedColorList, mThemeStyle);
+        } else if (mPreviewColorOverride != null) {
+            mColorsOverride = localColorExtractor
                     .applyColorsOverride(context, mPreviewColorOverride);
-            wallpaperColorResources = mPreviewColorOverride;
         } else if (mWallpaperColors != null) {
-            localColorExtractor
+            mColorsOverride = localColorExtractor
                     .applyColorsOverride(context, mWallpaperColors);
-            wallpaperColorResources = localColorExtractor
-                    .generateColorsOverride(mWallpaperColors);
         } else {
-            WallpaperColors wallpaperColors = WallpaperColorHints.get(context).getColors();
-            wallpaperColorResources = wallpaperColors == null ? null
-                    : localColorExtractor
-                            .generateColorsOverride(wallpaperColors);
+            mColorsOverride = null;
         }
 
         final LauncherPreviewRenderer oldRenderer = mCurrentRenderer;
         LauncherPreviewRenderer renderer = new LauncherPreviewRenderer(
                 context, mWorkspacePageId,
-                wallpaperColorResources, mAppComponent.getModel(), themeRes);
+                mColorsOverride, mAppComponent.getModel(), themeRes);
         renderer.hideBottomRow(mHideQsb);
 
         CompletableFuture<Void> renderTask = renderer.initialRender
