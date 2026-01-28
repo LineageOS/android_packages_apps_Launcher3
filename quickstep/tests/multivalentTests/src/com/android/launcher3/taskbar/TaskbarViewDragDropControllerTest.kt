@@ -17,16 +17,15 @@
 package com.android.launcher3.taskbar
 
 import android.graphics.Rect
-import android.os.Looper
 import android.view.View
 import android.view.View.MeasureSpec
+import android.widget.TextView
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.DropTarget
 import com.android.launcher3.LauncherModel
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.R
-import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.dragndrop.DragView
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.testing.FakeModelWriter
@@ -34,20 +33,18 @@ import com.android.launcher3.model.testing.WriterAction
 import com.android.launcher3.popup.ArrowPopup.CLOSE_DURATION_U
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatItems
+import com.android.launcher3.taskbar.overlay.TaskbarOverlayContext
 import com.android.launcher3.taskbar.rules.SandboxParams
 import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext_ModifiedComponent
-import com.android.launcher3.util.Executors
 import com.android.launcher3.util.IntSparseArrayMap
-import com.android.launcher3.util.RoboApiWrapper
-import com.android.launcher3.util.TestUtil
 import com.android.launcher3.util.TestUtil.getOnTaskbarUiThread
+import com.android.launcher3.views.Snackbar
 import com.android.tools.dagger.mutation.annotations.BindValue
 import com.android.tools.dagger.mutation.annotations.MutatedComponent
 import com.google.common.truth.Truth.assertThat
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -84,6 +81,15 @@ class TaskbarViewDragDropControllerTest {
     private val activityContext
         get() = taskbarUnitTestRule.activityContext
 
+    private val overlayContext: TaskbarOverlayContext
+        get() = activityContext.controllers.taskbarOverlayController.requestWindow()
+
+    private val TaskbarOverlayContext.snackbar
+        get() = AbstractFloatingView.getOpenView<Snackbar>(this, AbstractFloatingView.TYPE_SNACKBAR)
+
+    private val Snackbar.actionView
+        get() = findViewById<TextView>(R.id.action)
+
     private val taskbarViewController by taskbarUnitTestRule.delegate { it.taskbarViewController }
     private val taskbarDragController by taskbarUnitTestRule.delegate { it.taskbarDragController }
     private val taskbarViewDragDropController by
@@ -94,15 +100,6 @@ class TaskbarViewDragDropControllerTest {
     @Before
     fun setup() {
         taskbarViewDragDropController.setUpCallbacks(modelCallbacks)
-    }
-
-    @Test
-    fun unpinned_onDrop_deletesItemFromDatabase() {
-        val dragObject = createDragObject(TEST_WORKSPACE_ITEM)
-
-        taskbarViewDragDropController.unpinDropTarget.onDrop(dragObject, null)
-
-        assertThat(modelWriter.actions).contains(WriterAction.DeleteItem(TEST_WORKSPACE_ITEM))
     }
 
     @Test
@@ -127,8 +124,7 @@ class TaskbarViewDragDropControllerTest {
         taskbarViewDragDropController.taskbarPinningDropTarget.onDrop(dragObject, null)
 
         val action = modelWriter.actions.last() as WriterAction.ModifyItem
-        assertThat(action.item.targetComponent)
-            .isEqualTo(TEST_WORKSPACE_ITEM.targetComponent)
+        assertThat(action.item.targetComponent).isEqualTo(TEST_WORKSPACE_ITEM.targetComponent)
         assertThat(action.item.user).isEqualTo(TEST_WORKSPACE_ITEM.user)
     }
 
@@ -186,7 +182,8 @@ class TaskbarViewDragDropControllerTest {
         assertThat((modelWriter.actions[0] as WriterAction.ModifyItem).item).isEqualTo(itemD)
         assertThat((modelWriter.actions[1] as WriterAction.ModifyItem).item).isEqualTo(itemC)
         assertThat((modelWriter.actions[2] as WriterAction.ModifyItem).item).isEqualTo(itemA)
-        assertThat(modelWriter.actions.map { (it as WriterAction.ModifyItem).item }).doesNotContain(itemB)
+        assertThat(modelWriter.actions.map { (it as WriterAction.ModifyItem).item })
+            .doesNotContain(itemB)
     }
 
     @Test
@@ -243,7 +240,8 @@ class TaskbarViewDragDropControllerTest {
         assertThat((modelWriter.actions[0] as WriterAction.ModifyItem).item).isEqualTo(itemA)
         assertThat((modelWriter.actions[1] as WriterAction.ModifyItem).item).isEqualTo(itemB)
         assertThat((modelWriter.actions[2] as WriterAction.ModifyItem).item).isEqualTo(itemD)
-        assertThat(modelWriter.actions.map { (it as WriterAction.ModifyItem).item }).doesNotContain(itemC)
+        assertThat(modelWriter.actions.map { (it as WriterAction.ModifyItem).item })
+            .doesNotContain(itemC)
     }
 
     @Test
@@ -451,6 +449,49 @@ class TaskbarViewDragDropControllerTest {
 
         // Verify the close alarm is run and the overflow container is closed.
         assertThat(taskbarViewController.isOverflowContainerShowing).isFalse()
+    }
+
+    @Test
+    fun unpinned_onDrop_undoClicked_abortsDelete() {
+        val dragObject = createDragObject(TEST_WORKSPACE_ITEM)
+
+        runOnTaskbarUiThreadSync {
+            taskbarViewDragDropController.unpinDropTarget.onDrop(dragObject, null)
+        }
+
+        assertThat(modelWriter.actions).hasSize(0)
+
+        val snackbar = getOnTaskbarUiThread { overlayContext.snackbar }
+
+        assertThat(snackbar).isNotNull()
+
+        runOnTaskbarUiThreadSync { snackbar!!.actionView.performClick() }
+
+        assertThat(modelWriter.actions).hasSize(0)
+    }
+
+    @Test
+    fun unpinned_onDrop_onDismiss_commitsDelete() {
+        val dragObject = createDragObject(TEST_WORKSPACE_ITEM)
+
+        runOnTaskbarUiThreadSync {
+            taskbarViewDragDropController.unpinDropTarget.onDrop(dragObject, null)
+        }
+
+        assertThat(modelWriter.actions).hasSize(0)
+
+        val snackbar = getOnTaskbarUiThread { overlayContext.snackbar }
+
+        assertThat(snackbar).isNotNull()
+
+        runOnTaskbarUiThreadSync { snackbar!!.close(false) }
+
+        assertThat(modelWriter.actions).hasSize(1)
+
+        assertThat(modelWriter.actions).contains(WriterAction.DeleteItem(TEST_WORKSPACE_ITEM))
+
+        val closedSnackbar = getOnTaskbarUiThread { overlayContext.snackbar }
+        assertThat(closedSnackbar).isNull()
     }
 
     private fun createDragObject(info: ItemInfo): DropTarget.DragObject {
