@@ -24,7 +24,6 @@ import android.os.Process
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
-import android.util.SparseArray
 import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_HOVER_ENTER
 import android.view.MotionEvent.ACTION_HOVER_EXIT
@@ -61,9 +60,7 @@ import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext_ModifiedC
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
 import com.android.launcher3.util.Executors.getTaskbarUiThread
-import com.android.launcher3.util.LauncherLayoutBuilder
-import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
-import com.android.launcher3.util.ModelTestExtensions.setModelLayout
+import com.android.launcher3.util.ModelTestExtensions.preloadModelData
 import com.android.launcher3.util.Preconditions.assertNotNull
 import com.android.launcher3.util.RoboApiWrapper
 import com.android.launcher3.util.TestUtil
@@ -718,19 +715,6 @@ class TaskbarOverflowTest {
     @TaskbarMode(PINNED)
     @EnableFlags(FLAG_ENABLE_PINNING_APP_WITH_CONTEXT_MENU)
     fun pinToTaskbarShortcut_pinRecentTask() {
-        // Set up placeholder items so that any newly generated item has a non-confclicting itemID
-        context.setModelLayout(
-            LauncherLayoutBuilder()
-                .atHotseat(0)
-                .putApp(TEST_PACKAGE, null)
-                .atHotseat(1)
-                .putApp(TEST_PACKAGE, null)
-                .atHotseat(2)
-                .putApp(TEST_PACKAGE, null)
-                .atHotseat(3)
-                .putApp(TEST_PACKAGE, null)
-        )
-
         // Create two tasks and two pinned items.
         createDesktopTask(2)
         val hotseatItems = createHotseatItems(2)
@@ -879,9 +863,7 @@ class TaskbarOverflowTest {
     }
 
     private fun setUpTaskbarAndModelCallback(hotseatItems: Array<WorkspaceItemInfo>): TaskbarView {
-        context.appComponent.testableModelState.dataModel.dataLoadComplete(
-            SparseArray<ItemInfo>().apply { hotseatItems.forEach { this[it.id] = it } }
-        )
+        context.preloadModelData(*hotseatItems)
         val taskbarView: TaskbarView =
             taskbarUnitTestRule.activityContext.dragLayer.findViewById(R.id.taskbar_view)
         taskbarView.updateItems(hotseatItems, recentAppsController.shownTasks, emptyList())

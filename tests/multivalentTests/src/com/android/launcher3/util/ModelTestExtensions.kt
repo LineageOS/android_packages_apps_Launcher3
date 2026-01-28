@@ -32,7 +32,10 @@ import com.android.launcher3.UtilitiesKt.isPersistedModelItem
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.model.BgDataModel
 import com.android.launcher3.model.ModelDbController
+import com.android.launcher3.model.data.AppInfo
+import com.android.launcher3.model.data.AppsListData
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.pm.UserCache
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
@@ -185,4 +188,23 @@ object ModelTestExtensions {
             model.loadModelSync()
         }
     }
+
+    /** Preloads the provided data in model repository */
+    fun Context.preloadModelData(vararg items: ItemInfo) {
+        val state = appComponent.testableModelState
+        state.dataModel.dataLoadComplete(
+            SparseArray<ItemInfo>().apply { items.forEach { this[it.id] = it } }
+        )
+        state.dbController.updateMaxIdForTest(items.maxOf { it.id })
+        preloadAppList(
+            items
+                .filterIsInstance<WorkspaceItemInfo>()
+                .map { item -> AppInfo(item.targetComponent, item.title, item.user, item.intent) }
+                .toTypedArray()
+        )
+    }
+
+    /** Preloads the provided data in model repository */
+    fun Context.preloadAppList(apps: Array<AppInfo>) =
+        appComponent.testableModelState.appsRepo.dispatchChange(AppsListData(apps, flags = 0))
 }
