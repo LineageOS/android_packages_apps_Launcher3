@@ -21,7 +21,6 @@ import static com.android.launcher3.util.Executors.getTaskbarUiThread;
 
 import android.os.Looper;
 
-import com.android.launcher3.BuildConfig;
 import com.android.launcher3.config.FeatureFlags;
 
 /**
@@ -54,11 +53,10 @@ public class Preconditions {
     }
 
     public static void assertTaskbarUiThread() {
-        if (!BuildConfig.IS_STUDIO_BUILD) {
-            return;
-        }
-        if (!isSameLooper(getTaskbarUiThread().getLooper())) {
-            throw new IllegalStateException();
+        final Looper taskbarUiThreadLooper = getTaskbarUiThread().getLooper();
+        if (!isSameLooper(taskbarUiThreadLooper)) {
+            throw new IllegalStateException("Called from wrong thread. Expected thread: "
+                    + taskbarUiThreadLooper + " calling thread: " + Looper.myLooper());
         }
     }
 
