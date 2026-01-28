@@ -22,7 +22,6 @@ import static com.android.launcher3.EncryptionType.ENCRYPTED;
 import static com.android.launcher3.LauncherPrefs.nonRestorableItem;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_ALL_APPS_PREDICTION;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION;
-import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_WIDGETS_PREDICTION;
 import static com.android.launcher3.LauncherSettings.Favorites.DESKTOP_ICON_FLAG;
 import static com.android.launcher3.icons.cache.CacheLookupFlag.DEFAULT_LOOKUP_FLAG;
 import static com.android.launcher3.model.PredictionHelper.getBundleForHotseatPredictions;
@@ -79,10 +78,6 @@ public class QuickstepModelDelegate extends ModelDelegate {
     @VisibleForTesting
     final PredictorState mHotseatPredictionState = new PredictorState(
             CONTAINER_HOTSEAT_PREDICTION, "hotseat_predictions", DESKTOP_ICON_FLAG);
-    @VisibleForTesting
-    @Deprecated // unused with the Flag.enableWidgetPickerRefactor enabled
-    final PredictorState mWidgetsRecommendationState = new PredictorState(
-            CONTAINER_WIDGETS_PREDICTION, "widgets_prediction", DESKTOP_ICON_FLAG);
 
     private final InvariantDeviceProfile mIDP;
     private final PredictedItemFactory.Factory mItemParserFactory;
