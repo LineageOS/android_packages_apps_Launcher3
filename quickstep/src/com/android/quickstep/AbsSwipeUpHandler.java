@@ -33,7 +33,6 @@ import static com.android.launcher3.BaseActivity.INVISIBLE_BY_STATE_HANDLER;
 import static com.android.launcher3.BaseActivity.STATE_HANDLER_INVISIBILITY_FLAGS;
 import static com.android.launcher3.Flags.enableSwipeUpMagneticDetach;
 import static com.android.launcher3.Flags.msdlFeedback;
-import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.PagedView.INVALID_PAGE;
 import static com.android.launcher3.logging.StatsLogManager.LAUNCHER_STATE_BACKGROUND;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.IGNORE;
@@ -115,7 +114,6 @@ import androidx.annotation.VisibleForTesting;
 import com.android.internal.jank.Cuj;
 import com.android.internal.util.LatencyTracker;
 import com.android.launcher3.AbstractFloatingView;
-import com.android.launcher3.BuildConfig;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.Flags;
 import com.android.launcher3.LifecycleTracker;
@@ -490,47 +488,15 @@ public abstract class AbsSwipeUpHandler<
     }
 
     private boolean isTaskbarStashed(Context context) {
-        if (refactorTaskbarUiState()) {
-            // TODO(b/449780151): investigate mismatch on external display
-            return newIsTaskbarStashed(context);
-        } else {
-            return legacyIsTaskbarStashed();
-        }
-    }
-
-    private boolean newIsTaskbarStashed(Context context) {
         TaskbarUiState taskbarUiState = TaskbarUiStateMonitor.INSTANCE.get(context)
                 .getTaskbarUiState(context.getDisplayId());
         return taskbarUiState.isTaskbarStashed();
     }
 
-    private boolean legacyIsTaskbarStashed() {
-        TaskbarInteractor controller = mContainerInterface.getTaskbarInteractor();
-        return controller != null && controller.isTaskbarStashed();
-    }
-
-
     private boolean isTaskbarAllAppsOpen(Context context) {
-        if (refactorTaskbarUiState()) {
-            final boolean ret = newIsTaskbarAllAppsOpen(context);
-            if (BuildConfig.IS_STUDIO_BUILD && ret != legacyIsTaskbarAllAppsOpen()) {
-                throw new IllegalStateException("isTaskbarAllAppsOpen() doesn't match");
-            }
-            return ret;
-        } else {
-            return legacyIsTaskbarAllAppsOpen();
-        }
-    }
-
-    private boolean newIsTaskbarAllAppsOpen(Context context) {
         TaskbarUiState taskbarUiState = TaskbarUiStateMonitor.INSTANCE.get(context)
                 .getTaskbarUiState(context.getDisplayId());
         return taskbarUiState.isTaskbarAllAppsOpen();
-    }
-
-    private boolean legacyIsTaskbarAllAppsOpen() {
-        TaskbarInteractor interactor = mContainerInterface.getTaskbarInteractor();
-        return interactor != null && interactor.isTaskbarAllAppsOpen();
     }
 
     @Nullable
