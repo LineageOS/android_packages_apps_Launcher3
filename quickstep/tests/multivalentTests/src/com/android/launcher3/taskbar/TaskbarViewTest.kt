@@ -724,7 +724,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     fun testUpdateItems_qsbInline_removesDividerWhenOnlyStaticViewsRemain() {
         // This test runs only on devices with an inline QSB, like tablets.
-        assume().that(activityContext.deviceProfile.isQsbInline).isTrue()
+        assume().that(activityContext.deviceProfile.hotseatProfile.isQsbInline).isTrue()
 
         runOnTaskbarUiThreadSync {
             taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList())

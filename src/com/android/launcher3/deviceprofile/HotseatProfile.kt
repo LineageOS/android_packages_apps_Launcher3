@@ -57,6 +57,7 @@ data class HotseatProfile(
     val columnSpan: Int,
     val qsbWidth: Int, // only used when isQsbInline
     val borderSpace: Int,
+    val isQsbInline: Boolean,
 ) {
 
     fun recalculateHotseatWidthAndBorderSpace(
@@ -83,6 +84,7 @@ data class HotseatProfile(
                 barBottomSpacePx = barBottomSpacePx,
                 qsbSpace = qsbSpace,
                 barSizePx = barSizePx,
+                isQsbInline = isQsbInline,
             )
 
         val hotseatWithBorderAndSpace =
@@ -91,7 +93,6 @@ data class HotseatProfile(
                 hotseatProfileInitialValues = hotseatProfileInitialValues,
                 workspaceProfile = deviceProfile.mWorkspaceProfile,
                 deviceProperties = deviceProfile.deviceProperties,
-                isQsbInline = deviceProfile.isQsbInline,
                 panelCount = deviceProfile.panelCount,
                 isScalableGrid = false,
                 isVerticalBarLayout = deviceProfile.isVerticalBarLayout,
@@ -139,7 +140,6 @@ data class HotseatProfile(
             hotseatProfileInitialValues: HotseatProfileInitialValues,
             workspaceProfile: WorkspaceProfile,
             deviceProperties: DeviceProperties,
-            isQsbInline: Boolean,
             panelCount: Int,
             isScalableGrid: Boolean,
             isVerticalBarLayout: Boolean,
@@ -187,7 +187,7 @@ data class HotseatProfile(
                         )
                 }
             }
-            if (isQsbInline) {
+            if (hotseatProfileInitialValues.isQsbInline) {
                 // If QSB is inline, reduce column span until it fits.
                 val maxHotseatWidthAllowedPx: Int =
                     workspaceProfile.getIconToIconWidthForColumns(numWorkspaceColumns)
@@ -219,7 +219,7 @@ data class HotseatProfile(
                     inv = inv,
                     panelCount = panelCount,
                     numShownHotseatIcons = numShownHotseatIcons,
-                    isQsbInline = isQsbInline,
+                    isQsbInline = hotseatProfileInitialValues.isQsbInline,
                 )
 
             // Spaces should be correct when the nav buttons are not inline
@@ -241,11 +241,13 @@ data class HotseatProfile(
                     sideSpacePx -
                     hotseatProfileInitialValues.barEndOffset)
             var maxHotseatIconsWidthPx: Int =
-                maxHotseatWidthPx - (if (isQsbInline) hotseatQsbWidth else 0)
+                maxHotseatWidthPx -
+                    (if (hotseatProfileInitialValues.isQsbInline) hotseatQsbWidth else 0)
             borderAndSpace.borderSpace =
                 calculateHotseatBorderSpace(
                     maxHotseatIconsWidthPx,
-                    (if (isQsbInline) 1 else 0) + /* border between nav buttons and first icon */ 1,
+                    (if (hotseatProfileInitialValues.isQsbInline) 1
+                    else 0) + /* border between nav buttons and first icon */ 1,
                     numShownHotseatIcons = numShownHotseatIcons,
                     workspaceProfile = workspaceProfile,
                     maxIconSpacePx = hotseatProfileInitialValues.maxIconSpacePx,
@@ -266,7 +268,9 @@ data class HotseatProfile(
 
             // additionalQsbSpace
             val additionalQsbSpace =
-                if (isQsbInline) (hotseatQsbWidth + borderAndSpace.borderSpace) else 0
+                if (hotseatProfileInitialValues.isQsbInline)
+                    (hotseatQsbWidth + borderAndSpace.borderSpace)
+                else 0
             val requiredWidth =
                 (workspaceProfile.iconSizePx * numShownHotseatIcons +
                     borderAndSpace.borderSpace *
@@ -275,7 +279,7 @@ data class HotseatProfile(
                     additionalQsbSpace)
 
             // If there is an inline qsb, change its size
-            if (isQsbInline) {
+            if (hotseatProfileInitialValues.isQsbInline) {
                 hotseatQsbWidth -= requiredWidth - maxHotseatWidthPx
                 if (hotseatQsbWidth >= hotseatProfileInitialValues.minQsbWidthPx) {
                     return HotseatWithBorderAndSpace(
@@ -291,7 +295,9 @@ data class HotseatProfile(
                 hotseatQsbWidth = hotseatProfileInitialValues.minQsbWidthPx
             }
 
-            maxHotseatIconsWidthPx = maxHotseatWidthPx - (if (isQsbInline) hotseatQsbWidth else 0)
+            maxHotseatIconsWidthPx =
+                maxHotseatWidthPx -
+                    (if (hotseatProfileInitialValues.isQsbInline) hotseatQsbWidth else 0)
 
             // If it still doesn't fit, start removing icons
             do {
@@ -299,7 +305,7 @@ data class HotseatProfile(
                 borderAndSpace.borderSpace =
                     calculateHotseatBorderSpace(
                         maxHotseatIconsWidthPx,
-                        (if (isQsbInline) 1
+                        (if (hotseatProfileInitialValues.isQsbInline) 1
                         else 0) + /* border between nav buttons and first icon */ 1,
                         numShownHotseatIcons = numShownHotseatIcons,
                         workspaceProfile = workspaceProfile,
@@ -364,7 +370,6 @@ data class HotseatProfile(
             hotseatProfileInitialValues: HotseatProfileInitialValues,
             workspaceProfile: WorkspaceProfile,
             isVerticalBarLayout: Boolean,
-            isQsbInline: Boolean,
             inv: InvariantDeviceProfile,
             displayOptionSpec: InvariantDeviceProfile.DisplayOptionSpec,
             deviceProperties: DeviceProperties,
@@ -378,7 +383,6 @@ data class HotseatProfile(
                     hotseatProfileInitialValues = hotseatProfileInitialValues,
                     workspaceProfile = workspaceProfile,
                     deviceProperties = deviceProperties,
-                    isQsbInline = isQsbInline,
                     panelCount = panelCount,
                     isScalableGrid = mIsScalableGrid,
                     isVerticalBarLayout = isVerticalBarLayout,
@@ -412,13 +416,14 @@ data class HotseatProfile(
                         qsbVisualHeight = hotseatProfileInitialValues.qsbVisualHeight,
                         barBottomSpacePx = hotseatProfileInitialValues.barBottomSpacePx,
                         qsbSpace = hotseatProfileInitialValues.qsbSpace,
-                        isQsbInline = isQsbInline,
+                        isQsbInline = hotseatProfileInitialValues.isQsbInline,
                     ),
                 widthPx = hotseatWithBorderAndSpace.widthPx,
                 numShownIcons = hotseatWithBorderAndSpace.numShownIcons,
                 columnSpan = hotseatWithBorderAndSpace.columnSpan,
                 qsbWidth = hotseatWithBorderAndSpace.qsbWidth,
                 borderSpace = hotseatWithBorderAndSpace.borderSpace,
+                isQsbInline = hotseatProfileInitialValues.isQsbInline,
             )
         }
     }

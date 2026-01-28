@@ -1203,7 +1203,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
                         + launcherDp.getHotseatProfile().getQsbWidth() / 2f
                         : hotseatPadding.left - borderSpacing
                                 - launcherDp.getHotseatProfile().getQsbWidth() / 2f;
-                if (taskbarDp.isQsbInline) {
+                if (taskbarDp.getHotseatProfile().isQsbInline()) {
                     hotseatIconCenter += hotseatNavBarTranslationX;
                 }
                 float childCenter = (child.getLeft() + child.getRight()) / 2f;
@@ -1237,7 +1237,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
                     setter.addFloat(child, VIEW_ALPHA, 0f, 1f,
                             isToHome
                                     ? Interpolators.clampToProgress(LINEAR, 0f, 0.35f)
-                                    : mActivity.getDeviceProfile().isQsbInline
+                                    : mActivity.getDeviceProfile().getHotseatProfile().isQsbInline()
                                             ? Interpolators.clampToProgress(LINEAR, 0f, 1f)
                                             : Interpolators.clampToProgress(LINEAR, 0.84f, 1f));
                 }

@@ -315,7 +315,7 @@ public class LauncherPreviewRenderer extends BaseContext
         if (mDp.getDeviceProperties().getTaskbarConfiguration().isTaskbarPresent()) {
             // hotseat icons on bottom
             mHotseat.setIconsAlpha(hide ? 0 : 1, ALPHA_CHANNEL_PREVIEW_RENDERER);
-            if (mDp.isQsbInline) {
+            if (mDp.getHotseatProfile().isQsbInline()) {
                 mHotseat.setQsbAlpha(hide ? 0 : 1, ALPHA_CHANNEL_PREVIEW_RENDERER);
             }
         } else {

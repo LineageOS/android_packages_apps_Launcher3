@@ -262,7 +262,7 @@ public abstract class LauncherState implements BaseState<LauncherState> {
      */
     public int getFloatingSearchBarRestingMarginEnd(Launcher launcher) {
         DeviceProfile dp = launcher.getDeviceProfile();
-        if (dp.isQsbInline) {
+        if (dp.getHotseatProfile().isQsbInline()) {
             int marginStart = getFloatingSearchBarRestingMarginStart(launcher);
             return dp.getDeviceProperties().getWidthPx()
                     - marginStart

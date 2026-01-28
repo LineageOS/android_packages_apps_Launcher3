@@ -16,10 +16,6 @@
 
 package com.android.launcher3;
 
-import static com.android.launcher3.InvariantDeviceProfile.INDEX_DEFAULT;
-import static com.android.launcher3.InvariantDeviceProfile.INDEX_LANDSCAPE;
-import static com.android.launcher3.InvariantDeviceProfile.INDEX_TWO_PANEL_LANDSCAPE;
-import static com.android.launcher3.InvariantDeviceProfile.INDEX_TWO_PANEL_PORTRAIT;
 import static com.android.launcher3.InvariantDeviceProfile.createDisplayOptionSpec;
 import static com.android.launcher3.Utilities.dpiFromPx;
 import static com.android.launcher3.icons.IconNormalizer.ICON_VISIBLE_AREA_FACTOR;
@@ -37,7 +33,6 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.DisplayMetrics;
-import android.util.SparseArray;
 import android.view.Surface;
 
 import androidx.annotation.NonNull;
@@ -61,7 +56,6 @@ import com.android.launcher3.deviceprofile.TaskbarProfile;
 import com.android.launcher3.deviceprofile.WorkspaceProfile;
 import com.android.launcher3.display.DisplayController;
 import com.android.launcher3.display.LauncherDisplayInfo;
-import com.android.launcher3.icons.DotRenderer;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.responsive.CalculatedCellSpec;
 import com.android.launcher3.responsive.CalculatedHotseatSpec;
@@ -100,9 +94,6 @@ public class DeviceProfile {
     // Device properties
 
     private final DeviceProperties mDeviceProperties;
-
-    public final boolean isQsbInline;
-
     // Variables used only when creating the DeviceProfile.
     private final boolean mIsScalableGrid;
     private final int mTypeIndex;
@@ -182,7 +173,7 @@ public class DeviceProfile {
                 0
         );
         hotseatProfile = new HotseatProfile(false, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0);
+                0, 0, 0, 0, 0, false);
         mTaskbarProfile = new TaskbarProfile(0, 0, 0, 0, 0, false, false, false);
         mFolderProfile = new FolderProfile(0, 0, 0, 0, 0, new Point(), 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 0);
@@ -191,7 +182,6 @@ public class DeviceProfile {
         mInfo = null;
         mMetrics = null;
         mIconSizeSteps = null;
-        isQsbInline = false;
         mIsScalableGrid = false;
         mTypeIndex = 0;
         mIsResponsiveGrid = false;
@@ -282,14 +272,6 @@ public class DeviceProfile {
 
         int qsbHeight = res.getDimensionPixelSize(R.dimen.qsb_widget_height);
 
-        // Whether QSB might be inline in appropriate orientation (e.g. landscape).
-        isQsbInline = isQsbInline(
-                inv,
-                qsbHeight,
-                mDeviceProperties,
-                mIsScalableGrid
-        );
-
         HotseatProfileInitialValues hotseatProfileInitialValues =
                 HotseatProfileInitialValues.Factory.createHotseatProfileInitialValues(
                         /*deviceProperties*/ getDeviceProperties(),
@@ -304,7 +286,7 @@ public class DeviceProfile {
                                 R.dimen.workspace_page_indicator_height
                         ),
                         /*responsiveWorkspaceCellSpec*/ mResponsiveWorkspaceCellSpec,
-                        /*isQsbInline*/ isQsbInline
+                        qsbHeight
                 );
 
         int allAppsTopPadding = mDeviceProperties.getInsets().top;
@@ -384,7 +366,7 @@ public class DeviceProfile {
                 /*isVerticalLayout*/ isVerticalBarLayout(),
                 /*isResponsiveGrid*/ mIsResponsiveGrid,
                 /*isScalableGrid*/ mIsScalableGrid,
-                /*isQsbInline*/ isQsbInline,
+                /*isQsbInline*/ hotseatProfileInitialValues.isQsbInline(),
                 /*mResponsiveWorkspaceWidthSpec*/ mResponsiveWorkspaceWidthSpec,
                 /*mResponsiveWorkspaceHeightSpec*/ mResponsiveWorkspaceHeightSpec,
                 /*mResponsiveWorkspaceCellSpec*/ mResponsiveWorkspaceCellSpec,
@@ -453,7 +435,6 @@ public class DeviceProfile {
                 hotseatProfileInitialValues,
                 mWorkspaceProfile,
                 isVerticalLayout,
-                isQsbInline,
                 /*inv*/ inv ,
                 /*displayOptionSpec*/ displayOptionSpec,
                 /*deviceProperties*/ mDeviceProperties,
@@ -511,39 +492,6 @@ public class DeviceProfile {
 
     public void setWorkspaceIconProfile(WorkspaceProfile workspaceProfile) {
         mWorkspaceProfile = workspaceProfile;
-    }
-
-    /**
-     * Takes care of the logic that determines if we show a the QSB inline or not.
-     */
-    private boolean isQsbInline(
-            InvariantDeviceProfile inv,
-            int qsbHeight,
-            DeviceProperties deviceProperties,
-            boolean isScalableGrid
-    ) {
-        // For foldable (two panel), we inline the qsb if we have the screen open and we are in
-        // either Landscape or Portrait. This cal also be disabled in the device_profile.xml
-        boolean twoPanelCanInline = inv.inlineQsb[INDEX_TWO_PANEL_PORTRAIT]
-                || inv.inlineQsb[INDEX_TWO_PANEL_LANDSCAPE];
-
-        // In tablets we inline in both orientations but only if we have enough space in the QSB
-        boolean tabletInlineQsb = inv.inlineQsb[INDEX_DEFAULT] || inv.inlineQsb[INDEX_LANDSCAPE];
-        boolean canQsbInline = deviceProperties.isTwoPanels() ? twoPanelCanInline : tabletInlineQsb;
-        canQsbInline = canQsbInline && qsbHeight > 0;
-
-        return (isScalableGrid && inv.inlineQsb[mTypeIndex] && canQsbInline)
-                || inv.isFixedLandscape;
-    }
-
-    private static DotRenderer createDotRenderer(
-            int size, @NonNull SparseArray<DotRenderer> cache) {
-        DotRenderer renderer = cache.get(size);
-        if (renderer == null) {
-            renderer = new DotRenderer(size);
-            cache.put(size, renderer);
-        }
-        return renderer;
     }
 
     /**
@@ -614,20 +562,6 @@ public class DeviceProfile {
             // TODO(420933882) Group all modifications of AllAppsProfile in one place
             mAllAppsProfile = AllAppsProfile.Factory.autoResizeAllAppsCells(getAllAppsProfile());
         }
-    }
-
-    /**
-     * This method calculates the space between the icons to achieve a certain width.
-     */
-    private int calculateHotseatBorderSpace(float hotseatWidthPx, int numExtraBorder) {
-        int numBorders = (hotseatProfile.getNumShownIcons() - 1 + numExtraBorder);
-        if (numBorders <= 0) return 0;
-
-        float hotseatIconsTotalPx =
-                getWorkspaceIconProfile().getIconSizePx()
-                        * hotseatProfile.getNumShownIcons();
-        int hotseatBorderSpacePx = (int) (hotseatWidthPx - hotseatIconsTotalPx) / numBorders;
-        return Math.min(hotseatBorderSpacePx, getHotseatProfile().getMaxIconSpacePx());
     }
 
     public TaskbarProfile updateTaskbarProfile(Resources res) {
@@ -854,7 +788,7 @@ public class DeviceProfile {
     public boolean shouldAdjustHotseatOrQsbForBubbleBar(Context context) {
         // only need to adjust if QSB is on top of the hotseat and there's not enough space for the
         // bubble bar to either side of the hotseat.
-        if (isQsbInline) return false;
+        if (hotseatProfile.isQsbInline()) return false;
         Rect hotseatPadding = getHotseatLayoutPadding(context);
         int hotseatMinHorizontalPadding = Math.min(hotseatPadding.left, hotseatPadding.right);
         return hotseatMinHorizontalPadding <= mSysuiProfile.mBubbleBarSpaceThresholdPx;
@@ -1026,7 +960,7 @@ public class DeviceProfile {
     }
 
     private int getAdditionalQsbSpace() {
-        return isQsbInline ? hotseatProfile.getQsbWidth()
+        return hotseatProfile.isQsbInline() ? hotseatProfile.getQsbWidth()
                 + hotseatProfile.getBorderSpace() : 0;
     }
 
@@ -1046,7 +980,7 @@ public class DeviceProfile {
      * Returns the number of pixels the QSB is translated from the bottom of the screen.
      */
     public int getQsbOffsetY() {
-        if (isQsbInline) {
+        if (hotseatProfile.isQsbInline()) {
             return getHotseatBarBottomPadding()
                     - ((getHotseatProfile().getQsbHeight()
                     - hotseatProfile.getCellHeightPx()) / 2);
@@ -1063,7 +997,8 @@ public class DeviceProfile {
      */
     private int getHotseatBarBottomPadding() {
         // QSB on top or inline
-        if (mDeviceProperties.getTaskbarConfiguration().isTaskbarPresent() || isQsbInline) {
+        if (mDeviceProperties.getTaskbarConfiguration().isTaskbarPresent()
+                || hotseatProfile.isQsbInline()) {
             return hotseatProfile.getBarBottomSpacePx() - (Math.abs(
                     hotseatProfile.getCellHeightPx()
                             - getWorkspaceIconProfile().getIconSizePx()) / 2);
@@ -1079,7 +1014,7 @@ public class DeviceProfile {
     public int getBubbleBarVerticalCenterForHome() {
         if (shouldAlignBubbleBarWithHotseat()) {
             return hotseatProfile.getBarSizePx()
-                    - (isQsbInline ? 0 : getHotseatProfile().getQsbVisualHeight())
+                    - (hotseatProfile.isQsbInline() ? 0 : getHotseatProfile().getQsbVisualHeight())
                     - hotseatProfile.getQsbSpace()
                     - (hotseatProfile.getCellHeightPx() / 2)
                     + ((hotseatProfile.getCellHeightPx()
@@ -1097,7 +1032,8 @@ public class DeviceProfile {
 
     /** Returns whether bubble bar should be aligned with the hotseat. */
     public boolean shouldAlignBubbleBarWithHotseat() {
-        return isQsbInline || mDeviceProperties.getDeviceConfiguration().isGestureMode();
+        return hotseatProfile.isQsbInline()
+                || mDeviceProperties.getDeviceConfiguration().isGestureMode();
     }
 
     /**
@@ -1426,7 +1362,7 @@ public class DeviceProfile {
         );
         writer.println(prefix + pxToDpStr("hotseatBorderSpace",
                 hotseatProfile.getBorderSpace()));
-        writer.println(prefix + "\tisQsbInline: " + isQsbInline);
+        writer.println(prefix + "\tisQsbInline: " + hotseatProfile.isQsbInline());
         writer.println(
                 prefix + pxToDpStr("hotseatQsbWidth", hotseatProfile.getQsbWidth())
         );

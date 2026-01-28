@@ -718,7 +718,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             // Do not scale hotseat as a whole when taskbar is present, and scale QSB only if it's
             // not inline.
             if (mDeviceProfile.getDeviceProperties().getTaskbarConfiguration().isTaskbarPresent()) {
-                if (!mDeviceProfile.isQsbInline) {
+                if (!mDeviceProfile.getHotseatProfile().isQsbInline()) {
                     viewsToAnimate.add(hotseat.getQsb());
                 }
             } else {

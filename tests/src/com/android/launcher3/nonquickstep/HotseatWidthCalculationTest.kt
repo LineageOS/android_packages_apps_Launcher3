@@ -48,7 +48,7 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
         assertThat(dp.getHotseatLayoutPadding(context).left).isEqualTo(177)
         assertThat(dp.getHotseatLayoutPadding(context).right).isEqualTo(177)
 
-        assertThat(dp.isQsbInline).isFalse()
+        assertThat(dp.hotseatProfile.isQsbInline).isFalse()
         assertThat(dp.hotseatProfile.qsbWidth).isEqualTo(1435)
     }
 
@@ -72,7 +72,7 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
         assertThat(dp.getHotseatLayoutPadding(context).left).isEqualTo(110)
         assertThat(dp.getHotseatLayoutPadding(context).right).isEqualTo(110)
 
-        assertThat(dp.isQsbInline).isFalse()
+        assertThat(dp.hotseatProfile.isQsbInline).isFalse()
         assertThat(dp.hotseatProfile.qsbWidth).isEqualTo(1070)
     }
 
@@ -95,7 +95,7 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
         assertThat(dp.getHotseatLayoutPadding(context).left).isEqualTo(370)
         assertThat(dp.getHotseatLayoutPadding(context).right).isEqualTo(370)
 
-        assertThat(dp.isQsbInline).isFalse()
+        assertThat(dp.hotseatProfile.isQsbInline).isFalse()
         assertThat(dp.hotseatProfile.qsbWidth).isEqualTo(1455)
     }
 
@@ -119,7 +119,7 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
         assertThat(dp.getHotseatLayoutPadding(context).left).isEqualTo(300)
         assertThat(dp.getHotseatLayoutPadding(context).right).isEqualTo(300)
 
-        assertThat(dp.isQsbInline).isFalse()
+        assertThat(dp.hotseatProfile.isQsbInline).isFalse()
         assertThat(dp.hotseatProfile.qsbWidth).isEqualTo(1950)
     }
 
@@ -140,7 +140,7 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
         assertThat(dp.getHotseatLayoutPadding(context).left).isEqualTo(287)
         assertThat(dp.getHotseatLayoutPadding(context).right).isEqualTo(287)
 
-        assertThat(dp.isQsbInline).isFalse()
+        assertThat(dp.hotseatProfile.isQsbInline).isFalse()
         assertThat(dp.hotseatProfile.qsbWidth).isEqualTo(1875)
     }
 
@@ -164,7 +164,7 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
         assertThat(dp.getHotseatLayoutPadding(context).left).isEqualTo(257)
         assertThat(dp.getHotseatLayoutPadding(context).right).isEqualTo(257)
 
-        assertThat(dp.isQsbInline).isFalse()
+        assertThat(dp.hotseatProfile.isQsbInline).isFalse()
         assertThat(dp.hotseatProfile.qsbWidth).isEqualTo(1735)
     }
 
@@ -204,7 +204,7 @@ class HotseatWidthCalculationTest : FakeInvariantDeviceProfileTest() {
         assertThat(dp.getHotseatLayoutPadding(context).left).isEqualTo(228)
         assertThat(dp.getHotseatLayoutPadding(context).right).isEqualTo(228)
 
-        assertThat(dp.isQsbInline).isFalse()
+        assertThat(dp.hotseatProfile.isQsbInline).isFalse()
         assertThat(dp.hotseatProfile.qsbWidth).isEqualTo(1372)
     }
 }

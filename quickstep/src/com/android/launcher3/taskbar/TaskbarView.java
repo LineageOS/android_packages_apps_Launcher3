@@ -373,7 +373,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
             numStaticViews++;
         }
 
-        if (mActivityContext.getDeviceProfile().isQsbInline) {
+        if (mActivityContext.getDeviceProfile().getHotseatProfile().isQsbInline()) {
             addView(mQsb, mIsRtl ? numStaticViews : 0);
             mQsb.setVisibility(View.INVISIBLE);
             numStaticViews++;
@@ -478,7 +478,9 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
 
             @Override
             public int calculateDropIndexInContainer(int dropIndex, int hiddenChildIndex) {
-                int dropSpotOffset = mActivityContext.getDeviceProfile().isQsbInline ? 2 : 1;
+                int dropSpotOffset =
+                        mActivityContext.getDeviceProfile().getHotseatProfile().isQsbInline()
+                                ? 2 : 1;
                 int targetIndex = Math.min(dropIndex, indexOfChild(mTaskbarPinnedOverflowView) - 1)
                         + dropSpotOffset;
                 if (hiddenChildIndex > -1 && hiddenChildIndex < targetIndex) {
@@ -1617,7 +1619,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         int count = getChildCount()
                 - numContainers
                 + numIconsInContainers;
-        if (mActivityContext.getDeviceProfile().isQsbInline) {
+        if (mActivityContext.getDeviceProfile().getHotseatProfile().isQsbInline()) {
             count--; // Exclude QSB
         }
         // count can be negative if views aren't added
