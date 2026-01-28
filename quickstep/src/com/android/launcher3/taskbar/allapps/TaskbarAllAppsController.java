@@ -242,7 +242,9 @@ public final class TaskbarAllAppsController {
 
         viewController.show(animate);
         mAppsView = mOverlayContext.getAppsView();
-        mAppsView.getAppsStore().setApps(mApps, mAppsModelFlags, mPackageUserKeytoUidMap);
+        if (!LauncherModel.useModelRepositoryBinding()) {
+            mAppsView.getAppsStore().setApps(mApps, mAppsModelFlags, mPackageUserKeytoUidMap);
+        }
         mAppsView.getFloatingHeaderView()
                 .findFixedRowByType(PredictionRowView.class)
                 .setPredictedApps(mPredictedApps);
