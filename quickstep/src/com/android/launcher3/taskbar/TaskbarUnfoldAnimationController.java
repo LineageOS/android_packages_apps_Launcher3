@@ -15,6 +15,8 @@
  */
 package com.android.launcher3.taskbar;
 
+import static com.android.launcher3.util.Executors.getTaskbarUiThread;
+
 import android.view.View;
 import android.view.WindowManager;
 
@@ -88,29 +90,35 @@ public class TaskbarUnfoldAnimationController implements
 
         @Override
         public void onTransitionStarted() {
-            mMoveFromCenterAnimator.updateDisplayProperties();
-            View[] icons = mTaskbarViewController.getIconViews();
-            for (View icon : icons) {
-                // TODO(b/193794563) we should re-register views if they are re-bound/re-inflated
-                //                   during the animation
-                mMoveFromCenterAnimator.registerViewForAnimation(icon);
-            }
+            getTaskbarUiThread().post(() -> {
+                mMoveFromCenterAnimator.updateDisplayProperties();
+                View[] icons = mTaskbarViewController.getIconViews();
+                for (View icon : icons) {
+                    // TODO(b/193794563) we should re-register views if they are
+                    //  re-bound/re-inflated during the animation
+                    mMoveFromCenterAnimator.registerViewForAnimation(icon);
+                }
 
-            mMoveFromCenterAnimator.onTransitionStarted();
+                mMoveFromCenterAnimator.onTransitionStarted();
+            });
         }
 
         @Override
         public void onTransitionFinished() {
-            mMoveFromCenterAnimator.onTransitionFinished();
-            mMoveFromCenterAnimator.clearRegisteredViews();
-            mTaskbarDragLayerController.setBackgroundHorizontalInsets(0f);
+            getTaskbarUiThread().post(() -> {
+                mMoveFromCenterAnimator.onTransitionFinished();
+                mMoveFromCenterAnimator.clearRegisteredViews();
+                mTaskbarDragLayerController.setBackgroundHorizontalInsets(0f);
+            });
         }
 
         @Override
         public void onTransitionProgress(float progress) {
-            mMoveFromCenterAnimator.onTransitionProgress(progress);
-            float insetPercentage = (1 - progress) * MAX_WIDTH_INSET_FRACTION;
-            mTaskbarDragLayerController.setBackgroundHorizontalInsets(insetPercentage);
+            getTaskbarUiThread().post(() -> {
+                mMoveFromCenterAnimator.onTransitionProgress(progress);
+                float insetPercentage = (1 - progress) * MAX_WIDTH_INSET_FRACTION;
+                mTaskbarDragLayerController.setBackgroundHorizontalInsets(insetPercentage);
+            });
         }
     }
 }
