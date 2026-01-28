@@ -496,6 +496,11 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
         };
     }
 
+    public boolean isManageWindowsViewOpen() {
+        return mManageWindowsTaskbarShortcut != null
+                && mManageWindowsTaskbarShortcut.isMultiInstanceMenuOpen();
+    }
+
     /**
      * Creates a factory function representing a "Close" menu item only if the calling app
      * is in Desktop Mode.

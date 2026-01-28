@@ -27,6 +27,7 @@ import android.platform.test.flag.junit.SetFlagsRule
 import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_HOVER_ENTER
 import android.view.MotionEvent.ACTION_HOVER_EXIT
+import android.view.ViewTreeObserver
 import android.window.RemoteTransition
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.AbstractFloatingView
@@ -448,10 +449,16 @@ class TaskbarOverflowTest {
         assertThat(getOnTaskbarUiThread { keyboardQuickSwitchController.shownTaskIds() })
             .containsExactlyElementsIn(0..targetOverflowSize)
         verifyOverflowIconTooltip(null)
+        verifyTaskbarOverlayInsetsTouchability(
+            ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME
+        )
 
         tapOverflowIcon()
         assertThat(keyboardQuickSwitchController.isShown).isFalse()
         verifyOverflowIconTooltip("Other recent apps")
+        verifyTaskbarOverlayInsetsTouchability(
+            ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION
+        )
     }
 
     @Test
@@ -1037,6 +1044,18 @@ class TaskbarOverflowTest {
                 MotionEvent.obtain(0, 0, ACTION_HOVER_EXIT, 0f, 0f, 0)
             )
         }
+    }
+
+    fun verifyTaskbarOverlayInsetsTouchability(expectedTouchableInsets: Int) {
+        val overlayController by taskbarUnitTestRule.delegate { it.taskbarOverlayController }
+        val insetsInfo = ViewTreeObserver.InternalInsetsInfo()
+        runOnTaskbarUiThreadSync { overlayController.updateInsetsTouchability(insetsInfo) }
+        assertThat(insetsInfo)
+            .isEqualTo(
+                ViewTreeObserver.InternalInsetsInfo().also {
+                    it.setTouchableInsets(expectedTouchableInsets)
+                }
+            )
     }
 
     /**
