@@ -19,6 +19,7 @@ package com.android.launcher3.dragndrop
 import android.net.Uri
 import android.view.DragAndDropPermissions
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_SYSTEM_DRAG
+import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
 
 /**
@@ -27,12 +28,43 @@ import com.android.launcher3.model.data.WorkspaceItemInfo
  */
 class SystemDragItemInfo : WorkspaceItemInfo() {
 
-    /** The payload that was dropped in a system-level drag-and-drop sequence. */
-    var payload: Payload = EmptyPayload
+    /**
+     * The payload that was dropped in a system-level drag-and-drop sequence. Note that state is
+     * shared across shallowly copied instances.
+     */
+    var payload: Payload
+        get() = payloadBackingField.value
+        set(value) {
+            payloadBackingField.value = value
+        }
+
+    /**
+     * The backing field for the payload that was dropped in a system-level drag-and-drop sequence.
+     * Note that a backing field is used to allow for shared state across shallowly copied
+     * instances. This is important because payload is not populated until drop but the drag
+     * controller caches a shallow copy of drag info during drag start.
+     */
+    private var payloadBackingField = Reference<Payload>(EmptyPayload)
 
     init {
         itemType = ITEM_TYPE_SYSTEM_DRAG
     }
+
+    override fun clone(): WorkspaceItemInfo =
+        SystemDragItemInfo().apply { copyFrom(this@SystemDragItemInfo) }
+
+    override fun copyFrom(itemInfo: ItemInfo): Unit =
+        super.copyFrom(itemInfo).apply {
+            payloadBackingField =
+                (itemInfo as? SystemDragItemInfo)?.payloadBackingField?.copy()
+                    ?: Reference(EmptyPayload)
+        }
+
+    override fun makeShallowCopy(): ItemInfo =
+        SystemDragItemInfo().apply {
+            copyFrom(this@SystemDragItemInfo)
+            payloadBackingField = this@SystemDragItemInfo.payloadBackingField
+        }
 
     /** Represents a payload that was dropped in a system-level drag-and-drop sequence. */
     sealed class Payload {
@@ -58,4 +90,7 @@ class SystemDragItemInfo : WorkspaceItemInfo() {
         // Launcher already has.
         override fun isAcceptable(): Boolean = permissions != null && uriList?.isNotEmpty() == true
     }
+
+    /** Similar to [java.util.concurrent.atomic.AtomicReference] but w/o concurrency guarantees. */
+    private data class Reference<T>(var value: T)
 }

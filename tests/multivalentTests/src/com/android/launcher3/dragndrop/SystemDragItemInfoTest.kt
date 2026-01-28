@@ -18,7 +18,9 @@ package com.android.launcher3.dragndrop
 
 import androidx.test.filters.SmallTest
 import com.android.launcher3.util.LauncherMultivalentJUnit
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -30,8 +32,71 @@ import org.mockito.kotlin.mock
 class SystemDragItemInfoTest {
 
     @Test
+    fun testClone() {
+        val original = SystemDragItemInfo()
+        original.payload = mock<SystemDragItemInfo.UriListPayload>()
+        original.title = "Title"
+
+        // Verify [original] can be cloned.
+        val clone = original.clone() as SystemDragItemInfo
+        assertEquals(original.itemType, clone.itemType)
+        assertEquals(original.payload, clone.payload)
+        assertEquals(original.title, clone.title)
+
+        // Verify modifying [original] payload does not modify [clone] payload.
+        original.payload = mock<SystemDragItemInfo.UriListPayload>()
+        assertNotEquals(original.payload, clone.payload)
+
+        // Verify modifying [clone] payload does not modify [original] payload.
+        clone.payload = mock<SystemDragItemInfo.UriListPayload>()
+        assertNotEquals(clone.payload, original.payload)
+    }
+
+    @Test
+    fun testCopyFrom() {
+        val original = SystemDragItemInfo()
+        original.payload = mock<SystemDragItemInfo.UriListPayload>()
+        original.title = "Title"
+
+        // Verify [original] can be copied.
+        val copy = SystemDragItemInfo().apply { copyFrom(original) }
+        assertEquals(original.itemType, copy.itemType)
+        assertEquals(original.payload, copy.payload)
+        assertEquals(original.title, copy.title)
+
+        // Verify modifying [original] payload does not modify [copy] payload.
+        original.payload = mock<SystemDragItemInfo.UriListPayload>()
+        assertNotEquals(original.payload, copy.payload)
+
+        // Verify modifying [copy] payload does not modify [original] payload.
+        copy.payload = mock<SystemDragItemInfo.UriListPayload>()
+        assertNotEquals(copy.payload, original.payload)
+    }
+
+    @Test
     fun testEmptyPayloadIsNotAcceptable() {
         assertFalse(SystemDragItemInfo.EmptyPayload.isAcceptable())
+    }
+
+    @Test
+    fun testMakeShallowCopy() {
+        val original = SystemDragItemInfo()
+        original.payload = mock<SystemDragItemInfo.UriListPayload>()
+        original.title = "Title"
+
+        // Verify [original] can be shallow copied.
+        val shallowCopy = original.makeShallowCopy() as SystemDragItemInfo
+        assertEquals(original.itemType, shallowCopy.itemType)
+        assertEquals(original.payload, shallowCopy.payload)
+        assertEquals(original.title, shallowCopy.title)
+
+        // Verify modifying [original] payload modifies [shallowCopy] payload.
+        original.payload = mock<SystemDragItemInfo.UriListPayload>()
+        assertEquals(original.payload, shallowCopy.payload)
+
+        // Verify modifying [shallowCopy] payload modifies [original] payload.
+        shallowCopy.payload = mock<SystemDragItemInfo.UriListPayload>()
+        assertEquals(shallowCopy.payload, original.payload)
     }
 
     @Test
