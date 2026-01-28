@@ -52,8 +52,10 @@ import com.android.wm.shell.Flags.enableShellTopTaskTracking
 import com.android.wm.shell.recents.IRecentTasksListener
 import com.android.wm.shell.shared.GroupedTaskInfo
 import com.android.wm.shell.shared.GroupedTaskInfo.TYPE_DESK
+import com.android.wm.shell.shared.GroupedTaskInfo.TYPE_FULLSCREEN
 import com.android.wm.shell.shared.GroupedTaskInfo.TYPE_SPLIT
 import com.android.wm.shell.shared.desktopmode.DesktopState
+import com.android.wm.shell.shared.split.SplitBounds
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import java.util.function.BiConsumer
@@ -309,96 +311,73 @@ constructor(
                 return@forEach
             }
 
-            // [getTaskInfo1] will not be null for types below beside [TYPE_DESK].
-            if (enableShellTopTaskTracking()) {
-                val taskInfo1 = rawTask.baseGroupedTask.taskInfo1!!
-                val task1Key = createTaskKey(taskInfo1)
-                val task1 =
-                    Task.from(task1Key, taskInfo1, /* isLocked= */ tmpLockedUsers[task1Key.userId])
-                val isTask1Automated = isTaskAutomated(task1)
+            val keyOnly = loadKeysOnly && !enableShellTopTaskTracking()
 
-                if (rawTask.isBaseType(TYPE_SPLIT)) {
-                    val taskInfo2 = rawTask.baseGroupedTask.taskInfo2!!
-                    val task2Key = createTaskKey(taskInfo2)
-                    val task2 =
-                        Task.from(
-                            task2Key,
-                            taskInfo2,
-                            /* isLocked= */ tmpLockedUsers[task2Key.userId],
-                        )
-                    val isTask2Automated = isTaskAutomated(task2)
-                    if (!isTask1Automated && !isTask2Automated) {
-                        allTasks.add(SplitTask(task1, task2, rawTask.baseGroupedTask.splitBounds))
-                    } else if (!isTask1Automated) {
-                        allTasks.add(SingleTask(task1))
-                    } else if (!isTask2Automated) {
-                        allTasks.add(SingleTask(task2))
-                    }
-                } else if (!isTask1Automated) {
-                    allTasks.add(SingleTask(task1))
-                }
+            // [getTaskInfo1] will not be null for types below beside [TYPE_DESK]
+            val taskInfo1 =
+                if (enableShellTopTaskTracking()) rawTask.baseGroupedTask.taskInfo1!!
+                else rawTask.taskInfo1!!
+            val task1 = createTask(taskInfo1, keyOnly, tmpLockedUsers)
+
+            val task2: Task?
+            val splitBounds: SplitBounds?
+
+            if (rawTask.isBaseType(TYPE_SPLIT)) {
+                val taskInfo2 =
+                    if (enableShellTopTaskTracking()) rawTask.baseGroupedTask.taskInfo2!!
+                    else rawTask.taskInfo2!!
+                task2 = createTask(taskInfo2, loadKeysOnly, tmpLockedUsers)
+                splitBounds =
+                    if (enableShellTopTaskTracking()) rawTask.baseGroupedTask.splitBounds
+                    else rawTask.splitBounds
             } else {
-                val taskInfo1 = rawTask.taskInfo1!!
-                val taskInfo2 = rawTask.taskInfo2
-                val task1Key = createTaskKey(taskInfo1)
-                val task1 =
-                    if (loadKeysOnly) Task(task1Key)
-                    else
-                        Task.from(
-                            task1Key,
-                            taskInfo1,
-                            /* isLocked= */ tmpLockedUsers[task1Key.userId],
-                        )
-                val isTask1Automated = isTaskAutomated(task1)
-                var task2: Task? = null
-                if (taskInfo2 != null) {
-                    // Is split task
-                    val task2Key = createTaskKey(taskInfo2)
-                    task2 =
-                        if (loadKeysOnly) Task(task2Key)
-                        else
-                            Task.from(
-                                task2Key,
-                                taskInfo2,
-                                /* isLocked= */ tmpLockedUsers[task2Key.userId],
-                            )
-                } else if (isFirstVisibleTaskFound) {
-                    // Is fullscreen task
-                    val isExcluded =
-                        (taskInfo1.baseIntent.flags and FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) != 0
-                    if (taskInfo1.isTopActivityTransparent && isExcluded) {
+                task2 = null
+                splitBounds = null
+            }
+
+            if (!enableShellTopTaskTracking()) {
+                if (isFirstVisibleTaskFound) {
+                    if (
+                        rawTask.isBaseType(TYPE_FULLSCREEN) &&
+                            taskInfo1.isTopActivityTransparent &&
+                            (taskInfo1.baseIntent.flags and FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) != 0
+                    ) {
                         // If there are already visible tasks, then ignore the excluded tasks
                         // and don't add them to the returned list
                         return@forEach
                     }
-                }
-                if (taskInfo1.isVisible && !isTask1Automated) {
+                } else if (taskInfo1.isVisible && task1 != null) {
                     isFirstVisibleTaskFound = true
                 }
-                if (task2 != null) {
-                    val splitBounds = rawTask.splitBounds!!
-                    val isTask2Automated = isTaskAutomated(task2)
-                    if (!isTask1Automated && !isTask2Automated) {
-                        allTasks.add(SplitTask(task1, task2, splitBounds))
-                    } else if (!isTask1Automated) {
-                        allTasks.add(SingleTask(task1))
-                    } else if (!isTask2Automated) {
-                        allTasks.add(SingleTask(task2))
-                    }
-                } else if (!isTask1Automated) {
-                    allTasks.add(SingleTask(task1))
-                }
+            }
+
+            when {
+                task1 != null && task2 != null -> allTasks.add(SplitTask(task1, task2, splitBounds))
+                task1 != null -> allTasks.add(SingleTask(task1))
+                task2 != null -> allTasks.add(SingleTask(task2))
             }
         }
 
         return allTasks
     }
 
-    private fun isTaskAutomated(task: Task): Boolean {
+    private fun createTask(
+        taskInfo: TaskInfo,
+        keyOnly: Boolean,
+        lockedUsers: SparseBooleanArray,
+    ): Task? {
+        val taskKey = createTaskKey(taskInfo)
+        if (isTaskAutomated(taskKey)) return null
+
+        return if (keyOnly) Task(taskKey)
+        else Task.from(taskKey, taskInfo, /* isLocked= */ lockedUsers[taskKey.userId])
+    }
+
+    private fun isTaskAutomated(taskKey: TaskKey): Boolean {
         if (!hideAutomatedTasksInOverview()) {
             return false
         }
-        return automationRepository.isPackageAutomated(task.key.userId, task.key.packageName)
+        return automationRepository.isPackageAutomated(taskKey.userId, taskKey.packageName)
     }
 
     private fun createTask(taskInfo: TaskInfo, minimizedTaskIds: Set<Int>): Task =
@@ -431,7 +410,7 @@ constructor(
         val tasks =
             recentTaskInfo.taskInfoList
                 .map { createTask(it, minimizedTaskIds) }
-                .filterNot(::isTaskAutomated)
+                .filterNot { isTaskAutomated(it.key) }
         return listOf(DesktopTask(deskId, displayId, tasks))
     }
 
