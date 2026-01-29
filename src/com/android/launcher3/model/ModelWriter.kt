@@ -67,9 +67,7 @@ open class ModelWriter(
         private val bgDataModel: BgDataModel,
     ) : TransactionContext {
 
-        override fun addItemToDatabase(
-            item: ItemInfo,
-        ) {
+        override fun addItemToDatabase(item: ItemInfo) {
             this.addItemsToDatabase(listOf(item))
         }
 
@@ -493,7 +491,7 @@ open class ModelWriter(
     override fun abortDelete() {
         preparingToUndo = false
         pendingDeletes.clear()
-        model.forceReload()
+        model.reloadIfActive()
     }
 
     private abstract inner class ModelTask : Runnable {

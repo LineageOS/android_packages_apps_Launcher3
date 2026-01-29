@@ -203,7 +203,7 @@ constructor(
         try {
             return Executors.MODEL_EXECUTOR.submit<T> {
                     task.invoke(parsedWhere, parsedArgs).also {
-                        if (it is Int && it > 0) uiExecutor.execute { model.forceReload() }
+                        if (it is Int && it > 0) uiExecutor.execute { model.reloadIfActive() }
                     }
                 }
                 .get()
