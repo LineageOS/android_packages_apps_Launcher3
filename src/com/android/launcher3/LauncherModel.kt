@@ -19,6 +19,7 @@ import android.content.Context
 import android.content.pm.ShortcutInfo
 import android.os.UserHandle
 import androidx.annotation.GuardedBy
+import androidx.annotation.VisibleForTesting
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.icons.IconCache
@@ -154,6 +155,7 @@ constructor(
      * Reloads the workspace items from the DB and re-binds the workspace. This should generally not
      * be called as DB updates are automatically followed by UI update
      */
+    @VisibleForTesting
     fun forceReload(): CompletionStage<Unit> {
         synchronized(mLock) {
             mModelLoaded = false

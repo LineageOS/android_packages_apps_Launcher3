@@ -126,7 +126,7 @@ constructor(
         // Development helper
         if (BuildConfig.IS_STUDIO_BUILD) {
             val reloadReceiver =
-                SimpleBroadcastReceiver(context, UI_HELPER_EXECUTOR) { model.forceReload() }
+                SimpleBroadcastReceiver(context, UI_HELPER_EXECUTOR) { model.reloadIfActive() }
             reloadReceiver.register(actionsFilter(ACTION_FORCE_RELOAD), Context.RECEIVER_EXPORTED)
             lifeCycle.addCloseable(reloadReceiver)
         }
@@ -174,7 +174,7 @@ constructor(
         fun refreshAndReloadLauncher() {
             iconPool.clear()
             iconCache.updateIconParams(idp.fillResIconDpi, idp.iconBitmapSize)
-            model.forceReload()
+            model.reloadIfActive()
         }
 
         // IDP changes
@@ -236,11 +236,11 @@ constructor(
             // User removed
             oldUser != null && newUser == null -> {
                 if (oldUser.iconInfo.isWork) prefs.put(LauncherPrefs.WORK_EDU_STEP, 0)
-                model.forceReload()
+                model.reloadIfActive()
             }
 
             // User added
-            oldUser == null && newUser != null -> model.forceReload()
+            oldUser == null && newUser != null -> model.reloadIfActive()
 
             // User changed
             oldUser != null && newUser != null -> {
@@ -266,7 +266,7 @@ constructor(
                 }
 
                 // We don't know what changed, just reload to be safe
-                if (!handled) model.forceReload()
+                if (!handled) model.reloadIfActive()
             }
         }
     }
