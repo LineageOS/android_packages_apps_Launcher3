@@ -43,6 +43,7 @@ import androidx.annotation.VisibleForTesting
 import com.android.launcher3.R
 import com.android.launcher3.concurrent.annotations.Background
 import com.android.launcher3.concurrent.annotations.Ui
+import com.android.launcher3.dagger.LauncherComponentProvider
 import com.android.launcher3.taskbar.CueBarInsightRendererService
 import com.android.launcher3.taskbar.TaskbarActivityContext
 import com.android.launcher3.util.ListenableRef
@@ -126,6 +127,8 @@ constructor(
     // Repository should not hold strong ref to TaskbarActivityContext to avoid leak.
     private val appContext = taskbarActivityContext.applicationContext
     private val weakTaskbarActivityContext = WeakReference(taskbarActivityContext)
+    private val insightHandler: InsightHandler =
+        LauncherComponentProvider.get(taskbarActivityContext).getInsightHandler()
 
     private val backgroundScope = CoroutineScope(bgExecutor.asCoroutineDispatcher())
     private val autofillManager: AutofillManager? =
@@ -326,8 +329,12 @@ constructor(
                         // 2. Start Activity Intent
                         action.hasActionType(InsightActionDetails.ACTION_TYPE_INTENT) -> {
                             actionIntent?.let { intent ->
-                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                appContext.startActivity(intent)
+                                if (extras?.getBoolean(NEEDS_DATA_EGRESS) == true) {
+                                    insightHandler.egress(insight)
+                                } else {
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    appContext.startActivity(intent)
+                                }
                             }
                         }
                     }
@@ -455,6 +462,7 @@ constructor(
         private const val EXTRA_ONE_TAP_DELAY_MS = "oneTapDelayMs"
         private const val DEFAULT_ONE_TAP_DELAY_MS = 200L
         const val RENDER_IN_CUE_BAR = "renderInCueBar"
+        const val NEEDS_DATA_EGRESS = "needsDataEgress"
 
         // Timeout to hide cuebar if it wasn't interacted with
         private const val TAG = "AmbientCueRepository"
