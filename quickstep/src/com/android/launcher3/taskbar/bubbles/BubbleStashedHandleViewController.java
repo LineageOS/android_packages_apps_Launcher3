@@ -18,8 +18,6 @@ package com.android.launcher3.taskbar.bubbles;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
-import static com.android.launcher3.Flags.refactorTaskbarUiState;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -117,11 +115,9 @@ public class BubbleStashedHandleViewController {
 
         mStashedBubbleBarHeight = resources.getDimensionPixelSize(
                 R.dimen.bubblebar_stashed_size);
-        if (refactorTaskbarUiState()) {
-            mTaskbarUiState.setIsBubbleBarStashedHandlerViewVisible(
-                    mStashedHandleView.getVisibility() == VISIBLE);
-            mTaskbarUiState.setStashedBubbleBarHeightPx(mStashedBubbleBarHeight);
-        }
+        mTaskbarUiState.setIsBubbleBarStashedHandlerViewVisible(
+                mStashedHandleView.getVisibility() == VISIBLE);
+        mTaskbarUiState.setStashedBubbleBarHeightPx(mStashedBubbleBarHeight);
 
         mStashedHandleView.setOutlineProvider(new ViewOutlineProvider() {
             @Override
@@ -146,10 +142,8 @@ public class BubbleStashedHandleViewController {
 
         mStashedHandleView.addOnLayoutChangeListener((view, i, i1, i2, i3, i4, i5, i6, i7) -> {
             updateBounds(mBarViewController.getBubbleBarLocation());
-            if (refactorTaskbarUiState()) {
-                mTaskbarUiState.setIsBubbleBarStashedHandlerViewVisible(
-                        view.getVisibility() == VISIBLE);
-            }
+            mTaskbarUiState.setIsBubbleBarStashedHandlerViewVisible(
+                    view.getVisibility() == VISIBLE);
         });
     }
 
@@ -177,7 +171,7 @@ public class BubbleStashedHandleViewController {
                 stashedCenterX + mStashedHandleWidth / 2,
                 stashedCenterY + mStashedHandleHeight / 2
         );
-        if (refactorTaskbarUiState() && mTaskbarUiState != null) {
+        if (mTaskbarUiState != null) {
             mTaskbarUiState.setBubbleBarStashedHandleViewRect(mStashedHandleBounds);
         }
         mStashedHandleView.updateSampledRegion(mStashedHandleBounds);

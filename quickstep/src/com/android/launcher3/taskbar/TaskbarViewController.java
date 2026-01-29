@@ -22,7 +22,6 @@ import static com.android.app.animation.Interpolators.EMPHASIZED;
 import static com.android.app.animation.Interpolators.FINAL_FRAME;
 import static com.android.app.animation.Interpolators.LINEAR;
 import static com.android.launcher3.Flags.enableTaskbarDragAndDrop;
-import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
 import static com.android.launcher3.LauncherAnimUtils.VIEW_ALPHA;
 import static com.android.launcher3.LauncherAnimUtils.VIEW_TRANSLATE_X;
@@ -345,9 +344,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         // may be incorrect since it's state gets destroyed on taskbar recreate, so reset here
         mTaskbarIconAlpha.get(ALPHA_INDEX_SMALL_SCREEN).setValue(mActivity.isPhoneMode() ? 0 : 1);
 
-        if (enableTaskbarPinning() || refactorTaskbarUiState()) {
-            mTaskbarView.addOnLayoutChangeListener(mTaskbarViewLayoutChangeListener);
-        }
+        mTaskbarView.addOnLayoutChangeListener(mTaskbarViewLayoutChangeListener);
     }
 
     /**
@@ -443,9 +440,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
     }
 
     public void onDestroy() {
-        if (enableTaskbarPinning() || refactorTaskbarUiState()) {
-            mTaskbarView.removeOnLayoutChangeListener(mTaskbarViewLayoutChangeListener);
-        }
+        mTaskbarView.removeOnLayoutChangeListener(mTaskbarViewLayoutChangeListener);
         // Removing callback from LauncherModel is synchronized and we should move it to main thread
         // to avoid blocking taskbar ui thread.
         MAIN_EXECUTOR.execute(() -> LauncherAppState.getInstance(mActivity).getModel()
@@ -717,10 +712,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
     }
 
     private void updateTaskbarIconsActualBounds() {
-        if (refactorTaskbarUiState()) {
-            mTaskbarUiState.setTaskbarIconsActualBounds(
-                    mTaskbarView.getTaskbarIconsActualBounds());
-        }
+        mTaskbarUiState.setTaskbarIconsActualBounds(mTaskbarView.getTaskbarIconsActualBounds());
     }
 
     private void updateTranslationXForNavBar() {

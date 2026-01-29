@@ -16,7 +16,6 @@
 
 package com.android.launcher3.taskbar
 
-import android.content.res.Resources
 import androidx.annotation.AnyThread
 import com.android.launcher3.taskbar.TaskbarAutohideSuspendController.AutohideSuspendFlag
 import com.android.launcher3.util.Executors.getTaskbarUiThread
@@ -91,13 +90,4 @@ class TaskbarApiProxy(private val taskbarActivityContext: TaskbarActivityContext
         if (transitionCallback == null) return
         getTaskbarUiThread().execute { transitionCallback.onActionEnd() }
     }
-
-    @Deprecated("Should be removed once we turned on [refactorTaskbarUiState()] flag")
-    fun isTaskbarAllAppsOpen() = taskbarActivityContext.isTaskbarAllAppsOpen
-
-    @Deprecated("Should be removed once we turned on [refactorTaskbarUiState()] flag")
-    fun isTaskbarStashed() = taskbarActivityContext.isTaskbarStashed
-
-    @Deprecated("Should be removed once we turned on [refactorTaskbarUiState()] flag")
-    fun getResources(): Resources = taskbarActivityContext.resources
 }

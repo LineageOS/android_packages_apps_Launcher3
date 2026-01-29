@@ -209,46 +209,4 @@ class LauncherInteractor(private val launcher: QuickstepLauncher) : ActivityInte
     }
 
     @AnyThread fun isSplitSelectActive() = launcher.isSplitSelectionActive
-
-    @Deprecated(
-        "Should be removed once we turned on [refactorTaskbarUiState()] flag",
-        ReplaceWith("LauncherUiState.isResumed()"),
-    )
-    @MainThread
-    fun isResumed() = launcher.isResumed
-
-    @Deprecated(
-        "Should be removed once we turned on [refactorTaskbarUiState()] flag",
-        ReplaceWith("LauncherUiState.isResumed()"),
-    )
-    @MainThread
-    fun hasBeenResumed() = launcher.hasBeenResumed()
-
-    @Deprecated(
-        "Should be removed once we turned on [refactorTaskbarUiState()] flag",
-        ReplaceWith("LauncherUiState.isTopResumedActivityRef.value()"),
-    )
-    @MainThread
-    fun isTopResumedActivity() = launcher.isTopResumedActivity
-
-    @Deprecated(
-        "Should be removed once we turned on [refactorTaskbarUiState()] flag",
-        ReplaceWith("LauncherUiState.isOverlayShownRef.value()"),
-    )
-    @MainThread
-    fun isOverlayShown() = launcher.workspace.isOverlayShown
-
-    @Deprecated(
-        "Should be removed once we turned on [refactorTaskbarUiState()] flag",
-        ReplaceWith("LauncherUiState.launcherStateRef.value()"),
-    )
-    @MainThread
-    fun getState(): LauncherState = launcher.stateManager.state
-
-    @Deprecated(
-        "Should be removed once we turned on [refactorTaskbarUiState()] flag",
-        ReplaceWith("LauncherUiState.taskbarAlignmentChannelAlphaRef.value()"),
-    )
-    fun getTaskbarAlignmentChannelAlpha() =
-        launcher.hotseat.getIconsAlpha(ALPHA_CHANNEL_TASKBAR_ALIGNMENT).value
 }

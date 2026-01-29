@@ -41,7 +41,6 @@ import androidx.core.text.HtmlCompat
 import androidx.core.view.updateLayoutParams
 import com.airbnb.lottie.LottieAnimationView
 import com.android.launcher3.Flags
-import com.android.launcher3.Flags.refactorTaskbarUiState
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.R
 import com.android.launcher3.RemoveAnimationSettingsTracker
@@ -187,9 +186,6 @@ constructor(
      * "taskbar_edu_tooltip_step" counter is changed.
      */
     fun updateShouldShowEduOnAppLaunch() {
-        if (!refactorTaskbarUiState()) {
-            return
-        }
         val uiController = controllers.uiController
         if (uiController is LauncherTaskbarUIController) {
             taskbarUIState.showTaskbarEduOnAppLaunch = uiController.shouldShowEduOnAppLaunch()

@@ -31,7 +31,6 @@ import static androidx.annotation.VisibleForTesting.PACKAGE_PRIVATE;
 import static com.android.app.animation.Interpolators.LINEAR;
 import static com.android.launcher3.AbstractFloatingView.TYPE_ON_BOARD_POPUP;
 import static com.android.launcher3.AbstractFloatingView.TYPE_TASKBAR_OVERLAY_PROXY;
-import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.Utilities.calculateTextHeight;
 import static com.android.launcher3.Utilities.isRunningInTestHarness;
 import static com.android.launcher3.config.FeatureFlags.enableTaskbarPinning;
@@ -540,10 +539,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                         );
         mDeviceProfile = originDeviceProfile.toBuilder()
                 .withDimensionsOverride(overrideProvider).build();
-        if (refactorTaskbarUiState()) {
-            mTaskbarUiState.setDeviceProfile(mDeviceProfile);
-            resetResourceValueInTaskbarUiState();
-        }
+        mTaskbarUiState.setDeviceProfile(mDeviceProfile);
+        resetResourceValueInTaskbarUiState();
 
         if (isTransientTaskbar()) {
             mTransientTaskbarProfile = mDeviceProfile.getTaskbarProfile();
@@ -896,9 +893,6 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
 
     /** Should be called after init, config changed or DeviceProfile change. */
     private void resetResourceValueInTaskbarUiState() {
-        if (!refactorTaskbarUiState()) {
-            return;
-        }
         final Resources res = getResources();
         mTaskbarUiState.setTaskbarUnstashAreaSizePx(
                 res.getDimensionPixelSize(R.dimen.taskbar_unstash_input_area));

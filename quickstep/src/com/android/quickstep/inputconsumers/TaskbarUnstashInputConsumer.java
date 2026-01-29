@@ -20,7 +20,6 @@ import static android.view.MotionEvent.INVALID_POINTER_ID;
 import static android.view.RoundedCorner.POSITION_BOTTOM_LEFT;
 import static android.view.RoundedCorner.POSITION_BOTTOM_RIGHT;
 
-import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.MotionEventsUtils.isTrackpadMotionEvent;
 import static com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLAG_AUTOHIDE_SUSPEND_TOUCHING;
 import static com.android.launcher3.util.Executors.getTaskbarUiThread;
@@ -38,11 +37,8 @@ import android.view.VelocityTracker;
 
 import androidx.annotation.Px;
 
-import com.android.launcher3.BuildConfig;
 import com.android.launcher3.DeviceProfile;
-import com.android.launcher3.R;
 import com.android.launcher3.taskbar.TaskbarApiProxy;
-import com.android.launcher3.taskbar.TaskbarThresholdUtils;
 import com.android.launcher3.taskbar.TaskbarUiState;
 import com.android.launcher3.touch.OverScroll;
 import com.android.quickstep.GestureState;
@@ -360,75 +356,21 @@ public class TaskbarUnstashInputConsumer extends DelegateInputConsumer {
     }
 
     private boolean isTaskbarStashed() {
-        if (refactorTaskbarUiState()) {
-            boolean ret = mTaskbarUiState.isTaskbarStashed();
-            if (BuildConfig.IS_STUDIO_BUILD && ret != legacyIsTaskbarStashed()) {
-                throw new IllegalStateException("isTaskbarStashed doesn't match!");
-            }
-            return ret;
-        } else {
-            return legacyIsTaskbarStashed();
-        }
-    }
-
-    @Deprecated
-    private boolean legacyIsTaskbarStashed() {
-        return mTaskbarApiProxy.isTaskbarStashed();
+        return mTaskbarUiState.isTaskbarStashed();
     }
 
     private boolean isTaskbarAllAppsOpen() {
-        if (refactorTaskbarUiState()) {
-            boolean ret = mTaskbarUiState.isTaskbarAllAppsOpen();
-            if (BuildConfig.IS_STUDIO_BUILD && ret != legacyIsTaskbarAllAppsOpen()) {
-                throw new IllegalStateException("isTaskbarAllAppsOpen doesn't match!");
-            }
-            return ret;
-        } else {
-            return legacyIsTaskbarAllAppsOpen();
-        }
-    }
-
-    @Deprecated
-    private boolean legacyIsTaskbarAllAppsOpen() {
-        return mTaskbarApiProxy.isTaskbarAllAppsOpen();
+        return mTaskbarUiState.isTaskbarAllAppsOpen();
     }
 
     @Px
     private int getUnstashAreaSizePx() {
-        if (refactorTaskbarUiState()) {
-            int ret = mTaskbarUiState.getTaskbarUnstashAreaSizePx();
-            if (BuildConfig.IS_STUDIO_BUILD && ret != legacyGetUnstashAreaSizePx()) {
-                throw new IllegalStateException("getUnstashAreaSizePx doesn't match!");
-            }
-            return ret;
-        } else {
-            return legacyGetUnstashAreaSizePx();
-        }
-    }
-
-    @Deprecated
-    private int legacyGetUnstashAreaSizePx() {
-        return mTaskbarApiProxy.getResources()
-                .getDimensionPixelSize(R.dimen.taskbar_unstash_input_area);
+        return mTaskbarUiState.getTaskbarUnstashAreaSizePx();
     }
 
     @Px
     private int getActionCornerPaddingPx() {
-        if (refactorTaskbarUiState()) {
-            int ret = mTaskbarUiState.getTaskbarActionCornerPaddingPx();
-            if (BuildConfig.IS_STUDIO_BUILD && ret != legacyGetActionCornerPaddingPx()) {
-                throw new IllegalStateException("getActionCornerPaddingPx doesn't match!");
-            }
-            return ret;
-        } else {
-            return legacyGetActionCornerPaddingPx();
-        }
-    }
-
-    @Deprecated
-    private int legacyGetActionCornerPaddingPx() {
-        return mTaskbarApiProxy.getResources()
-                .getDimensionPixelSize(R.dimen.transient_taskbar_action_corner_padding);
+        return mTaskbarUiState.getTaskbarActionCornerPaddingPx();
     }
 
     private boolean isMouseEvent(MotionEvent event) {
@@ -436,79 +378,19 @@ public class TaskbarUnstashInputConsumer extends DelegateInputConsumer {
     }
 
     private int getTaskbarNavThreshold() {
-        if (refactorTaskbarUiState()) {
-            int ret = mTaskbarUiState.getTaskbarNavThreshold();
-            if (BuildConfig.IS_STUDIO_BUILD && ret != legacyGetTaskbarNavThreshold()) {
-                throw new IllegalStateException("getTaskbarNavThreshold doesn't match!");
-            }
-            return ret;
-        } else {
-            return legacyGetTaskbarNavThreshold();
-        }
-    }
-
-    @Deprecated
-    private int legacyGetTaskbarNavThreshold() {
-        return TaskbarThresholdUtils.getFromNavThreshold(
-                mTaskbarApiProxy.getResources(), mTaskbarUiState.getDeviceProfile());
+        return mTaskbarUiState.getTaskbarNavThreshold();
     }
 
     private int getTaskbarSlowVelocityYThreshold() {
-        if (refactorTaskbarUiState()) {
-            int ret = mTaskbarUiState.getTaskbarSlowVelocityYThreshold();
-            if (BuildConfig.IS_STUDIO_BUILD && ret != legacyGetTaskbarSlowVelocityYThreshold()) {
-                throw new IllegalStateException("getTaskbarSlowVelocityYThreshold doesn't match!");
-            }
-            return ret;
-        } else {
-            return legacyGetTaskbarSlowVelocityYThreshold();
-        }
-    }
-
-    @Deprecated
-    private int legacyGetTaskbarSlowVelocityYThreshold() {
-        return mTaskbarApiProxy.getResources().getDimensionPixelSize(
-                R.dimen.taskbar_slow_velocity_y_threshold);
+        return mTaskbarUiState.getTaskbarSlowVelocityYThreshold();
     }
 
     private int getTaskbarStashedScreenEdgeHoverDeadzoneHeightPx() {
-        if (refactorTaskbarUiState()) {
-            int ret = mTaskbarUiState.getTaskbarStashedScreenEdgeHoverDeadzoneHeightPx();
-            if (BuildConfig.IS_STUDIO_BUILD
-                    && ret != legacyGetTaskbarStashedScreenEdgeHoverDeadzoneHeightPx()) {
-                throw new IllegalStateException(
-                        "getTaskbarStashedScreenEdgeHoverDeadzoneHeightPx doesn't match!");
-            }
-            return ret;
-        } else {
-            return legacyGetTaskbarStashedScreenEdgeHoverDeadzoneHeightPx();
-        }
-    }
-
-    @Deprecated
-    private int legacyGetTaskbarStashedScreenEdgeHoverDeadzoneHeightPx() {
-        return mTaskbarApiProxy.getResources().getDimensionPixelSize(
-                R.dimen.taskbar_stashed_screen_edge_hover_deadzone_height);
+        return mTaskbarUiState.getTaskbarStashedScreenEdgeHoverDeadzoneHeightPx();
     }
 
     private int getTaskbarStashedBelowHoverDeadzoneHeightPx() {
-        if (refactorTaskbarUiState()) {
-            int ret = mTaskbarUiState.getTaskbarStashedBelowHoverDeadzoneHeightPx();
-            if (BuildConfig.IS_STUDIO_BUILD
-                    && ret != legacyGetTaskbarStashedBelowHoverDeadzoneHeightPx()) {
-                throw new IllegalStateException(
-                        "getTaskbarStashedBelowHoverDeadzoneHeight doesn't match!");
-            }
-            return ret;
-        } else {
-            return legacyGetTaskbarStashedBelowHoverDeadzoneHeightPx();
-        }
-    }
-
-    @Deprecated
-    private int legacyGetTaskbarStashedBelowHoverDeadzoneHeightPx() {
-        return mTaskbarApiProxy.getResources().getDimensionPixelSize(
-                R.dimen.taskbar_stashed_below_hover_deadzone_height);
+        return mTaskbarUiState.getTaskbarStashedBelowHoverDeadzoneHeightPx();
     }
 
     @Override

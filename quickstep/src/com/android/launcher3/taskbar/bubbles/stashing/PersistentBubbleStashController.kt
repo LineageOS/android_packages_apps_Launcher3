@@ -23,7 +23,6 @@ import android.graphics.Rect
 import android.view.MotionEvent
 import android.view.View
 import com.android.app.animation.Interpolators
-import com.android.launcher3.Flags.refactorTaskbarUiState
 import com.android.launcher3.Utilities
 import com.android.launcher3.anim.AnimatedFloat
 import com.android.launcher3.taskbar.TaskbarInsetsController
@@ -99,9 +98,7 @@ class PersistentBubbleStashController(
         set(value) {
             // TODO(b/404636836): after launching refactorTaskbarUiState(), rely only on
             //  taskbarUiState to track isStashed state.
-            if (refactorTaskbarUiState()) {
-                taskbarUiState.isBubbleStashed = value
-            }
+            taskbarUiState.isBubbleStashed = value
             field = value
         }
 
