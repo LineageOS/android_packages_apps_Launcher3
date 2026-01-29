@@ -21,6 +21,7 @@ import com.android.app.displaylib.DisplaysWithDecorationsRepositoryCompat;
 import com.android.app.displaylib.PerDisplayRepository;
 import com.android.internal.policy.DesktopModeCompatPolicy;
 import com.android.launcher3.LifecycleTracker;
+import com.android.quickstep.cuebar.data.repository.InsightHandler;
 import com.android.launcher3.dagger.LauncherAppComponent;
 import com.android.launcher3.dagger.LauncherBaseAppComponent;
 import com.android.launcher3.dagger.PerDisplayComponent;
@@ -114,8 +115,9 @@ public interface QuickstepBaseAppComponent extends LauncherBaseAppComponent {
 
     TaskOverlayFactory getTaskOverlayFactory();
 
-    TaskbarUiStateMonitor getTaskbarUiStateMonitor();
+    InsightHandler getInsightHandler();
 
+    TaskbarUiStateMonitor getTaskbarUiStateMonitor();
 
     Set<LifecycleTracker> getLifecycleTrackers();
 
