@@ -369,7 +369,6 @@ public class TaskbarModelCallbacks implements
 
     protected void dumpLogs(String prefix, PrintWriter pw) {
         // This API is only exposed to taskbar
-        Preconditions.assertTaskbarUiThread();
         pw.println(prefix + "TaskbarModelCallbacks:");
 
         pw.println(String.format("%s\thotseat items count=%s", prefix, mHotseatItems.size()));
