@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2026 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.quickstep;
+package com.android.quickstep.recents;
 
 import static com.android.launcher3.util.ui.ActivityStartUtils.getAppPackageName;
 import static com.android.launcher3.util.ui.ActivityStartUtils.resolveSystemApp;
@@ -29,6 +29,7 @@ import android.platform.test.annotations.PlatinumTest;
 import com.android.launcher3.tapl.Overview;
 import com.android.launcher3.tapl.OverviewTask.OverviewTaskContainer;
 import com.android.launcher3.tapl.OverviewTaskMenu;
+import com.android.quickstep.AbstractQuickStepTest;
 import com.android.quickstep.util.SplitScreenTestUtils;
 
 import org.junit.Test;

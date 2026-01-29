@@ -7,10 +7,10 @@ filegroup {
         "com/android/quickstep/TaplStartLauncherViaGestureTests.java",
         "com/android/quickstep/TaplTaskbarPinningTest.kt",
         "com/android/quickstep/TaplTestsKeyboardQuickSwitch.java",
-        "com/android/quickstep/TaplTestsOverviewDesktop.kt",
         "com/android/quickstep/TaplTestsPersistentTaskbar.java",
         "com/android/quickstep/TaplTestsTaskbar.java",
-        "com/android/quickstep/FallbackRecentsTest.java",
+        "com/android/quickstep/recents/TaplOverviewDesktopTest.kt",
+        "com/android/quickstep/recents/TaplOverviewFallbackTest.java",
     ],
 }
 
@@ -39,13 +39,16 @@ filegroup {
     name: "launcher3-quickstep-oop-tests-only",
     srcs: [
         "com/android/quickstep/TaplTaskbarDragging.kt",
-        "com/android/quickstep/TaplOverviewIconTest.java",
         "com/android/quickstep/TaplTestsQuickstep.java",
         "com/android/quickstep/TaplTestsSplitscreen.java",
         "com/android/quickstep/TaplTestsTrackpad.java",
         "com/android/quickstep/TaplTestTaskbarIconDrag.kt",
         "com/android/quickstep/TaplTestsDesktopTaskbarAllAppsDragTest.java",
         "com/android/quickstep/TaplTestsTransientTaskbar.java",
+        "com/android/quickstep/recents/TaplOverviewDismissTest.java",
+        "com/android/quickstep/recents/TaplOverviewIconTest.java",
+        "com/android/quickstep/recents/TaplOverviewKeyboardTest.java",
+        "com/android/quickstep/recents/TaplOverviewTest.java",
     ],
 }
 
