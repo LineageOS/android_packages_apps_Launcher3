@@ -1542,7 +1542,10 @@ public class CellLayout extends ViewGroup {
         ) != null;
     }
 
-    void revertTempState() {
+    /**
+     * Clear state variables to be ready for a new reorder.
+     */
+    public void revertTempState() {
         completeAndClearReorderPreviewAnimations();
         if (isItemPlacementDirty() && !DESTRUCTIVE_REORDER) {
             final int count = mShortcutsAndWidgets.getChildCount();
@@ -1586,8 +1589,8 @@ public class CellLayout extends ViewGroup {
         final ItemConfiguration swapSolution = checkAreaForResize(cellX, cellY, spanX, spanY,
                 dragView, direction);
 
-        setUseTempCoords(true);
         if (swapSolution != null && swapSolution.isSolution) {
+            setUseTempCoords(true);
             // If we're just testing for a possible location (MODE_ACCEPT_DROP), we don't bother
             // committing anything or animating anything as we just want to determine if a solution
             // exists

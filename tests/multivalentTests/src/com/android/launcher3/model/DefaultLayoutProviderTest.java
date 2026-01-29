@@ -38,8 +38,8 @@ import com.android.launcher3.UtilitiesKt;
 import com.android.launcher3.icons.BitmapInfo;
 import com.android.launcher3.model.data.FolderInfo;
 import com.android.launcher3.model.data.ItemInfo;
-import com.android.launcher3.testutil.rule.LayoutResource;
 import com.android.launcher3.util.LauncherLayoutBuilder;
+import com.android.launcher3.util.ModelTestExtensions;
 import com.android.launcher3.util.SandboxApplication;
 
 import org.junit.Rule;
@@ -56,7 +56,6 @@ import java.util.List;
 public class DefaultLayoutProviderTest {
 
     @Rule public SandboxApplication mTargetContext = new SandboxApplication().withModelDependency();
-    @Rule public LayoutResource mLayout = new LayoutResource(mTargetContext);
 
     private List<ItemInfo> getWorkspaceItems() {
         return getBgDataModel(mTargetContext)
@@ -69,7 +68,7 @@ public class DefaultLayoutProviderTest {
 
     @Test
     public void testCustomProfileLoaded_with_icon_on_hotseat() {
-        mLayout.set(new LauncherLayoutBuilder().atHotseat(0)
+        ModelTestExtensions.setModelLayout(mTargetContext, new LauncherLayoutBuilder().atHotseat(0)
                 .putApp(TEST_PACKAGE, TEST_ACTIVITY));
 
         // Verify one item in hotseat
@@ -81,7 +80,8 @@ public class DefaultLayoutProviderTest {
 
     @Test
     public void testCustomProfileLoaded_with_folder() {
-        mLayout.set(new LauncherLayoutBuilder().atHotseat(0).putFolder(android.R.string.copy)
+        ModelTestExtensions.setModelLayout(mTargetContext, new LauncherLayoutBuilder().atHotseat(0)
+                .putFolder(android.R.string.copy)
                 .addApp(TEST_PACKAGE, TEST_ACTIVITY)
                 .addApp(TEST_PACKAGE, TEST_ACTIVITY)
                 .addApp(TEST_PACKAGE, TEST_ACTIVITY)
@@ -96,7 +96,8 @@ public class DefaultLayoutProviderTest {
 
     @Test
     public void testCustomProfileLoaded_with_folder_custom_title() {
-        mLayout.set(new LauncherLayoutBuilder().atHotseat(0).putFolder("CustomFolder")
+        ModelTestExtensions.setModelLayout(mTargetContext, new LauncherLayoutBuilder().atHotseat(0)
+                .putFolder("CustomFolder")
                 .addApp(TEST_PACKAGE, TEST_ACTIVITY)
                 .addApp(TEST_PACKAGE, TEST_ACTIVITY)
                 .addApp(TEST_PACKAGE, TEST_ACTIVITY)
@@ -124,7 +125,8 @@ public class DefaultLayoutProviderTest {
                 .getPackageInstaller();
         installer.createSession(params);
 
-        mLayout.set(new LauncherLayoutBuilder().atWorkspace(0, 1, 0)
+        ModelTestExtensions.setModelLayout(mTargetContext, new LauncherLayoutBuilder()
+                .atWorkspace(0, 1, 0)
                 .putWidget(pendingAppPkg, "PlaceholderWidget", 2, 2));
 
         // Verify widget
@@ -138,7 +140,7 @@ public class DefaultLayoutProviderTest {
     @Test
     public void testCustomProfileLoaded_with_shortcut_on_hotseat() {
         assumeTrue(mTargetContext.getSystemService(LauncherApps.class).hasShortcutHostPermission());
-        mLayout.set(new LauncherLayoutBuilder().atHotseat(0)
+        ModelTestExtensions.setModelLayout(mTargetContext, new LauncherLayoutBuilder().atHotseat(0)
                 .putShortcut(TEST_PACKAGE, "shortcut2"));
 
         // Verify one item in hotseat
@@ -151,7 +153,8 @@ public class DefaultLayoutProviderTest {
     @Test
     public void testCustomProfileLoaded_with_shortcut_in_folder() {
         assumeTrue(mTargetContext.getSystemService(LauncherApps.class).hasShortcutHostPermission());
-        mLayout.set(new LauncherLayoutBuilder().atHotseat(0).putFolder(android.R.string.copy)
+        ModelTestExtensions.setModelLayout(mTargetContext, new LauncherLayoutBuilder().atHotseat(0)
+                .putFolder(android.R.string.copy)
                 .addApp(TEST_PACKAGE, TEST_ACTIVITY)
                 .addApp(TEST_PACKAGE, TEST_ACTIVITY)
                 .addShortcut(TEST_PACKAGE, "shortcut2")

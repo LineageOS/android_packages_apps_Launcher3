@@ -18,7 +18,7 @@ package com.android.quickstep.recents.domain.usecase
 
 import android.graphics.Rect
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.quickstep.recents.domain.model.DesktopLayoutConfig
+import com.android.quickstep.recents.domain.model.TaskLayoutConfig.DesktopLayoutConfig
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith

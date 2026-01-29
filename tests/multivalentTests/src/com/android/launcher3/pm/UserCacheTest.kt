@@ -17,9 +17,7 @@
 package com.android.launcher3.pm
 
 import android.os.Process.myUserHandle
-import android.os.UserHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.UserIconInfo
 import com.android.launcher3.util.rule.MockUsersRule
@@ -36,18 +34,6 @@ class UserCacheTest {
     @get:Rule val mockUsersRule = MockUsersRule(sandboxContext)
 
     private val userCache: UserCache by lazy { UserCache.getInstance(sandboxContext) }
-
-    @MockUser(userType = UserIconInfo.TYPE_WORK)
-    @Test
-    fun `getBadgeDrawable only returns a UserBadgeDrawable given a user in the cache`() {
-        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
-        // When
-        val actualDrawable = UserCache.getBadgeDrawable(sandboxContext, myUserHandle())
-        val unexpectedDrawable = UserCache.getBadgeDrawable(sandboxContext, UserHandle(66))
-        // Then
-        assertThat(actualDrawable).isNotNull()
-        assertThat(unexpectedDrawable).isNull()
-    }
 
     @MockUser(userType = UserIconInfo.TYPE_WORK, preinstalledApps = ["Google"])
     @Test

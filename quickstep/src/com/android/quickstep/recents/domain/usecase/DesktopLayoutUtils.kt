@@ -18,7 +18,7 @@ package com.android.quickstep.recents.domain.usecase
 
 import android.graphics.Rect
 import android.view.Gravity
-import com.android.quickstep.recents.domain.model.DesktopLayoutConfig
+import com.android.quickstep.recents.domain.model.TaskLayoutConfig.DesktopLayoutConfig
 
 /** Utility functions for desktop layout calculations. */
 object DesktopLayoutUtils {

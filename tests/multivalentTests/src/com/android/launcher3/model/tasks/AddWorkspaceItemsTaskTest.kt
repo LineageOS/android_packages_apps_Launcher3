@@ -23,7 +23,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.launcher3.Flags
 import com.android.launcher3.WorkspaceLayoutManager.FIRST_SCREEN_ID
-import com.android.launcher3.model.BgDataModel.Callbacks
 import com.android.launcher3.model.TestableModelState
 import com.android.launcher3.model.WorkspaceItemSpaceFinder
 import com.android.launcher3.model.data.AppInfo
@@ -32,19 +31,17 @@ import com.android.launcher3.model.data.WorkspaceChangeEvent
 import com.android.launcher3.model.data.WorkspaceChangeEvent.AddEvent
 import com.android.launcher3.model.data.WorkspaceItemCoordinates
 import com.android.launcher3.model.data.WorkspaceItemInfo
-import com.android.launcher3.testutil.rule.LayoutResource
-import com.android.launcher3.util.Executors
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import com.android.launcher3.util.IntSet
 import com.android.launcher3.util.LauncherLayoutBuilder
 import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY
 import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
+import com.android.launcher3.util.ModelTestExtensions.setModelLayout
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestUtil.runOnExecutorSync
 import com.google.common.truth.Truth.assertThat
 import java.util.UUID
 import java.util.function.Supplier
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -65,21 +62,11 @@ class AddWorkspaceItemsTaskTest {
     @get:Rule val setFlagsRule = SetFlagsRule()
     @get:Rule val targetContext = SandboxApplication().withModelDependency()
     @get:Rule val mockito = MockitoJUnit.rule()
-    @get:Rule var layout = LayoutResource(targetContext)
-
-    private var mDataModelCallbacks = MyCallbacks()
 
     @Mock lateinit var workspaceItemSpaceFinder: WorkspaceItemSpaceFinder
 
     private val modelState: TestableModelState
         get() = targetContext.appComponent.testableModelState
-
-    @Before
-    fun setup() {
-        runOnExecutorSync(Executors.MAIN_EXECUTOR) {
-            modelState.model.addCallbacks(mDataModelCallbacks)
-        }
-    }
 
     @Test
     @EnableFlags(Flags.FLAG_MODEL_REPOSITORY)
@@ -200,7 +187,7 @@ class AddWorkspaceItemsTaskTest {
                 }
             }
         }
-        layout.set(layoutBuilder)
+        targetContext.setModelLayout(layoutBuilder)
         val task = newTask(*itemsToAdd)
 
         runOnExecutorSync(MODEL_EXECUTOR) {
@@ -208,18 +195,12 @@ class AddWorkspaceItemsTaskTest {
             modelState.homeRepo.workspaceState.changes.forEach(MODEL_EXECUTOR) {
                 workspaceUpdates.add(it)
             }
-
-            mDataModelCallbacks.addedItems.clear()
             modelState.model.enqueueModelUpdateTask(task)
 
             // Verify that only one workspace update was pushed
             assertThat(workspaceUpdates).hasSize(1)
             val addEvent = workspaceUpdates[0] as AddEvent
             verification.invoke(addEvent.items)
-
-            // Verify the legacy callback behavior
-            runOnExecutorSync(Executors.MAIN_EXECUTOR) {}
-            verification.invoke(mDataModelCallbacks.addedItems.toList())
         }
     }
 
@@ -240,14 +221,5 @@ class AddWorkspaceItemsTaskTest {
         return WorkspaceItemInfo().apply {
             intent = AppInfo.makeLaunchIntent(ComponentName(itemPackage, itemPackage))
         }
-    }
-}
-
-private class MyCallbacks : Callbacks {
-
-    val addedItems = mutableListOf<ItemInfo>()
-
-    override fun bindItemsAdded(items: List<ItemInfo>) {
-        addedItems.addAll(items)
     }
 }

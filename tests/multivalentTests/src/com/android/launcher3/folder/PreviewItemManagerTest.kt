@@ -32,7 +32,6 @@ import com.android.launcher3.icons.FastBitmapDrawable
 import com.android.launcher3.icons.IconCache
 import com.android.launcher3.icons.IconCache.ItemInfoUpdateReceiver
 import com.android.launcher3.icons.PlaceHolderDrawableDelegate
-import com.android.launcher3.icons.UserBadgeDrawable
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_ARCHIVED
@@ -180,9 +179,6 @@ class PreviewItemManagerTest {
         previewItemManager.setDrawable(drawingParams, folderItems[2])
 
         assert((drawingParams.drawable as FastBitmapDrawable).isThemed())
-        assert(
-            ((drawingParams.drawable as FastBitmapDrawable).badge as UserBadgeDrawable).mIsThemed
-        )
     }
 
     @Test
@@ -193,9 +189,6 @@ class PreviewItemManagerTest {
         previewItemManager.setDrawable(drawingParams, folderItems[3])
 
         assert(!(drawingParams.drawable as FastBitmapDrawable).isThemed())
-        assert(
-            ((drawingParams.drawable as FastBitmapDrawable).badge as UserBadgeDrawable).mIsThemed
-        )
     }
 
     @Test
@@ -206,9 +199,6 @@ class PreviewItemManagerTest {
         previewItemManager.setDrawable(drawingParams, folderItems[3])
 
         assert(!(drawingParams.drawable as FastBitmapDrawable).isThemed())
-        assert(
-            !((drawingParams.drawable as FastBitmapDrawable).badge as UserBadgeDrawable).mIsThemed
-        )
     }
 
     @Test

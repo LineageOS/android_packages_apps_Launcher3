@@ -101,8 +101,14 @@ public abstract class AppIcon extends Launchable {
             try (LauncherInstrumentation.Closable e = mLauncher.eventsCheck()) {
                 final UiObject2 popupContainer = mLauncher
                         .clickAndGet(mObject, "popup_container", getLongClickEvent());
-                return createMenu(popupContainer
-                        .findObject(By.desc("deep_shortcuts_container")));
+                final UiObject2 expandAppShortcuts = popupContainer.findObject(
+                        By.text("Shortcuts"));
+                if (expandAppShortcuts != null) {
+                    expandAppShortcuts.click();
+                }
+
+                return createMenu(mLauncher.waitForLauncherObject(
+                  By.desc("deep_shortcuts_container")));
             }
         } else {
             return createMenu(mLauncher.clickAndGet(

@@ -72,7 +72,7 @@ class WidgetAppIconsRepositoryImpl @Inject constructor(private val iconCache: Ic
                                                 BitmapInfo.FLAG_FULL_BLEED,
                                     ),
                                 badge =
-                                    itemInfoWithIcon.bitmap.getBadgeDrawableInfo()?.let {
+                                    itemInfoWithIcon.bitmap.getBadgeType()?.let {
                                         AppIconBadge.DrawableBadge(it.drawableRes, it.colorRes)
                                     } ?: AppIconBadge.NoBadge,
                             )

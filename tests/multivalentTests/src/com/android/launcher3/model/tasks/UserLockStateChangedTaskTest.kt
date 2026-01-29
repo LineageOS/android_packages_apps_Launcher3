@@ -29,13 +29,13 @@ import com.android.launcher3.model.TestableModelState
 import com.android.launcher3.model.tasks.ModelRepoTestEx.trackUpdateAndChanges
 import com.android.launcher3.model.tasks.ModelRepoTestEx.verifyAndGetItemsUpdated
 import com.android.launcher3.model.tasks.ModelRepoTestEx.verifyDelete
-import com.android.launcher3.testutil.rule.LayoutResource
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import com.android.launcher3.util.LauncherLayoutBuilder
 import com.android.launcher3.util.LauncherModelHelper.SHORTCUT_ID
 import com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY
 import com.android.launcher3.util.LauncherModelHelper.TEST_PACKAGE
 import com.android.launcher3.util.ModelTestExtensions.countPersistedModelItems
+import com.android.launcher3.util.ModelTestExtensions.setModelLayout
 import com.android.launcher3.util.RoboApiWrapper
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestUtil
@@ -57,7 +57,6 @@ class UserLockStateChangedTaskTest {
 
     @get:Rule val setFlagsRule: SetFlagsRule = SetFlagsRule()
     @get:Rule val context = SandboxApplication().withModelDependency()
-    @get:Rule var layout = LayoutResource(context)
     @get:Rule val mockito = MockitoJUnit.rule()
     @get:Rule val shortcutAccessRule = RoboApiWrapper.grantShortcutsPermissionRule()
 
@@ -78,7 +77,7 @@ class UserLockStateChangedTaskTest {
         whenever(mockShortcut.activity).thenReturn(ComponentName(TEST_PACKAGE, TEST_ACTIVITY))
         doReturn(listOf(mockShortcut)).whenever(launcherApps).getShortcuts(any(), eq(user))
 
-        layout.set(
+        context.setModelLayout(
             LauncherLayoutBuilder()
                 .atHotseat(1)
                 .putShortcut(TEST_PACKAGE, SHORTCUT_ID)

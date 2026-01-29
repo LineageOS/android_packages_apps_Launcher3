@@ -24,8 +24,6 @@ import static android.app.role.RoleManager.ROLE_HOME;
 import static android.provider.Settings.Secure.LAUNCHER_TASKBAR_EDUCATION_SHOWING;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
-import static android.view.Surface.ROTATION_0;
-import static android.view.Surface.ROTATION_180;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
@@ -34,7 +32,6 @@ import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SPLASH_SCREEN;
 
-import static com.android.app.animation.Interpolators.ACCELERATE_1_5;
 import static com.android.app.animation.Interpolators.AGGRESSIVE_EASE;
 import static com.android.app.animation.Interpolators.DECELERATE_1_5;
 import static com.android.app.animation.Interpolators.DECELERATE_1_7;
@@ -83,7 +80,6 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
@@ -129,13 +125,13 @@ import com.android.launcher3.anim.AnimationSuccessListener;
 import com.android.launcher3.anim.AnimatorListeners;
 import com.android.launcher3.compat.AccessibilityManagerCompat;
 import com.android.launcher3.dragndrop.DragLayer;
-import com.android.launcher3.icons.FastBitmapDrawable;
 import com.android.launcher3.model.data.ItemInfo;
+import com.android.launcher3.remoteanimations.AnimOpenProperties;
 import com.android.launcher3.remoteanimations.ContainerAnimationRunner;
+import com.android.launcher3.remoteanimations.RemoteAnimationCoordinateTransfer;
+import com.android.launcher3.remoteanimations.SpringAnimRunner;
 import com.android.launcher3.remoteanimations.StartingWindowListener;
-import com.android.launcher3.shortcuts.DeepShortcutView;
 import com.android.launcher3.taskbar.TaskbarInteractor;
-import com.android.launcher3.testing.shared.ResourceUtils;
 import com.android.launcher3.touch.PagedOrientationHandler;
 import com.android.launcher3.uioverrides.QuickstepLauncher;
 import com.android.launcher3.util.ActivityOptionsWrapper;
@@ -262,7 +258,6 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
     private RemoteTransition mLauncherOpenTransition;
     private RemoteTransition mMoveDisplayTransition;
 
-    private final RemoteAnimationCoordinateTransfer mCoordinateTransfer;
     private final LatencyTracker mLatencyTracker;
 
     // Preemptive animation run whenever Launcher reappears and its mode is NORMAL (unless coming
@@ -345,7 +340,6 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                 launcher, R.interpolator.app_open_x);
         mOpeningInterpolator = AnimationUtils.loadInterpolator(
                 launcher, R.interpolator.emphasized_interpolator);
-        mCoordinateTransfer = new RemoteAnimationCoordinateTransfer(mLauncher);
         mLatencyTracker = LatencyTracker.getInstance(launcher);
 
         mMaxBlurRadius = res.getDimensionPixelSize(
@@ -724,7 +718,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             // Do not scale hotseat as a whole when taskbar is present, and scale QSB only if it's
             // not inline.
             if (mDeviceProfile.getDeviceProperties().getTaskbarConfiguration().isTaskbarPresent()) {
-                if (!mDeviceProfile.isQsbInline) {
+                if (!mDeviceProfile.getHotseatProfile().isQsbInline()) {
                     viewsToAnimate.add(hotseat.getQsb());
                 }
             } else {
@@ -854,7 +848,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                         openingTargets.getFirstAppTargetTaskId()).windowType
                             == STARTING_WINDOW_TYPE_SPLASH_SCREEN;
 
-        AnimOpenProperties prop = new AnimOpenProperties(mLauncher.getResources(), mDeviceProfile,
+        AnimOpenProperties prop = new AnimOpenProperties(mLauncher.getResources(),
                 windowTargetBounds, launcherIconBounds, v, dragLayerBounds[0], dragLayerBounds[1],
                 hasSplashScreen, floatingView.isDifferentFromAppIcon());
         int left = prop.cropCenterXStart - prop.cropWidthStart / 2;
@@ -970,7 +964,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                     windowTargetBounds.bottom = bottomLevel;
 
                     AnimOpenProperties prop = new AnimOpenProperties(mLauncher.getResources(),
-                            mDeviceProfile, windowTargetBounds, launcherIconBounds, v,
+                            windowTargetBounds, launcherIconBounds, v,
                             dragLayerBounds[0], dragLayerBounds[1], hasSplashScreen,
                             floatingView.isDifferentFromAppIcon());
                     mCropRectCenterY = new FloatProp(prop.cropCenterYStart, prop.cropCenterYEnd);
@@ -1706,10 +1700,6 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
 
         // Hook up floating views to the closing window animators.
         // note the coordinate of closingWindowStartRect is based on launcher
-        Rect closingWindowStartRect = new Rect();
-        closingWindowStartRectF.round(closingWindowStartRect);
-        Rect closingWindowOriginalRect =
-                new Rect(0, 0, mDeviceProfile.getDeviceProperties().getWidthPx(), mDeviceProfile.getDeviceProperties().getHeightPx());
         if (floatingIconView != null) {
             anim.addAnimatorListener(floatingIconView);
             floatingIconView.setOnTargetChangeListener(anim::onTargetPositionChanged);
@@ -1721,7 +1711,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             final float windowAlphaThreshold = 1f - SHAPE_PROGRESS_DURATION;
 
             RectFSpringAnim.OnUpdateListener runner = new SpringAnimRunner(targets, targetRect,
-                    closingWindowStartRect, closingWindowOriginalRect, startWindowCornerRadius) {
+                    closingWindowStartRectF, mLauncher, startWindowCornerRadius) {
                 @Override
                 public void onUpdate(RectF currentRectF, float progress) {
                     // We want the icon alpha to be 1 once this threshold is met, so that it can be
@@ -1744,7 +1734,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             final float floatingWidgetAlpha = isTransluscent ? 0 : 1;
             FloatingWidgetView finalFloatingWidget = floatingWidget;
             RectFSpringAnim.OnUpdateListener runner = new SpringAnimRunner(targets, targetRect,
-                    closingWindowStartRect, closingWindowOriginalRect, startWindowCornerRadius) {
+                    closingWindowStartRectF, mLauncher, startWindowCornerRadius) {
                 @Override
                 public void onUpdate(RectF currentRectF, float progress) {
                     final float fallbackBackgroundAlpha =
@@ -1762,7 +1752,8 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             // If no floating icon or widget is present, animate the to the default window
             // target rect.
             anim.addOnUpdateListener(new SpringAnimRunner(
-                    targets, targetRect, closingWindowStartRect, closingWindowOriginalRect,
+                    targets, targetRect, closingWindowStartRectF,
+                    mLauncher,
                     startWindowCornerRadius));
         }
 
@@ -2108,8 +2099,8 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             final RectF resolveRectF = new RectF(windowTargetBounds);
             for (RemoteAnimationTarget t : appTargets) {
                 if (t.mode == MODE_CLOSING) {
-                    transferRectToTargetCoordinate(
-                            t, windowTargetBounds, true, resolveRectF);
+                    new RemoteAnimationCoordinateTransfer(mLauncher)
+                            .transferRectToOwnerSurface(t, windowTargetBounds, resolveRectF);
                     break;
                 }
             }
@@ -2207,250 +2198,4 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         }
     }
 
-    /**
-     * Class that holds all the variables for the app open animation.
-     */
-    static class AnimOpenProperties {
-
-        public final int cropCenterXStart;
-        public final int cropCenterYStart;
-        public final int cropWidthStart;
-        public final int cropHeightStart;
-
-        public final int cropCenterXEnd;
-        public final int cropCenterYEnd;
-        public final int cropWidthEnd;
-        public final int cropHeightEnd;
-
-        public final float dX;
-        public final float dY;
-
-        public final float initialAppIconScale;
-        public final float finalAppIconScale;
-
-        public final float iconAlphaStart;
-
-        AnimOpenProperties(Resources r, DeviceProfile dp, Rect windowTargetBounds,
-                RectF launcherIconBounds, View view, int dragLayerLeft, int dragLayerTop,
-                boolean hasSplashScreen, boolean hasDifferentAppIcon) {
-            // Scale the app icon to take up the entire screen. This simplifies the math when
-            // animating the app window position / scale.
-            float smallestSize = Math.min(windowTargetBounds.height(), windowTargetBounds.width());
-            float maxScaleX = smallestSize / launcherIconBounds.width();
-            float maxScaleY = smallestSize / launcherIconBounds.height();
-            float iconStartScale = 1f;
-            if (view instanceof BubbleTextView && !(view.getParent() instanceof DeepShortcutView)) {
-                Drawable dr = ((BubbleTextView) view).getIcon();
-                if (dr instanceof FastBitmapDrawable) {
-                    iconStartScale = ((FastBitmapDrawable) dr).getAnimatedScale();
-                }
-            }
-
-            initialAppIconScale = iconStartScale;
-            finalAppIconScale = Math.max(maxScaleX, maxScaleY);
-
-            // Animate the app icon to the center of the window bounds in screen coordinates.
-            float centerX = windowTargetBounds.centerX() - dragLayerLeft;
-            float centerY = windowTargetBounds.centerY() - dragLayerTop;
-
-            dX = centerX - launcherIconBounds.centerX();
-            dY = centerY - launcherIconBounds.centerY();
-
-            iconAlphaStart = hasSplashScreen && !hasDifferentAppIcon ? 0 : 1f;
-
-            final int windowIconSize = ResourceUtils.getDimenByName("starting_surface_icon_size",
-                    r, 108);
-
-            cropCenterXStart = windowTargetBounds.centerX();
-            cropCenterYStart = windowTargetBounds.centerY();
-
-            cropWidthStart = windowIconSize;
-            cropHeightStart = windowIconSize;
-
-            cropWidthEnd = windowTargetBounds.width();
-            cropHeightEnd = windowTargetBounds.height();
-
-            cropCenterXEnd = windowTargetBounds.centerX();
-            cropCenterYEnd = windowTargetBounds.centerY();
-        }
-    }
-
-    /**
-     * Transfer the rectangle to another coordinate if needed.
-     *
-     * @param toLauncher which one is the anchor of this transfer, if true then transfer from
-     *                   animation target to launcher, false transfer from launcher to animation
-     *                   target.
-     */
-    public void transferRectToTargetCoordinate(RemoteAnimationTarget target, RectF currentRect,
-            boolean toLauncher, RectF resultRect) {
-        mCoordinateTransfer.transferRectToTargetCoordinate(
-                target, currentRect, toLauncher, resultRect);
-    }
-
-    private static class RemoteAnimationCoordinateTransfer {
-        private final QuickstepLauncher mLauncher;
-        private final Rect mDisplayRect = new Rect();
-        private final Rect mTmpResult = new Rect();
-
-        RemoteAnimationCoordinateTransfer(QuickstepLauncher launcher) {
-            mLauncher = launcher;
-        }
-
-        void transferRectToTargetCoordinate(RemoteAnimationTarget target, RectF currentRect,
-                boolean toLauncher, RectF resultRect) {
-            final int taskRotation = target.windowConfiguration.getRotation();
-            final DeviceProfile profile = mLauncher.getDeviceProfile();
-            final int rotation = profile.getDeviceProperties().getRotationHint();
-            final int widthPx = profile.getDeviceProperties().getWidthPx();
-            final int heightPx = profile.getDeviceProperties().getWidthPx();
-
-            final int rotationDelta = toLauncher
-                    ? android.util.RotationUtils.deltaRotation(taskRotation, rotation)
-                    : android.util.RotationUtils.deltaRotation(rotation, taskRotation);
-            if (rotationDelta != ROTATION_0) {
-                // Get original display size when task is on top but with different rotation
-                if (rotationDelta % 2 != 0 && toLauncher && (rotation == ROTATION_0
-                        || rotation == ROTATION_180)) {
-                    mDisplayRect.set(0, 0, heightPx, widthPx);
-                } else {
-                    mDisplayRect.set(0, 0, widthPx, heightPx);
-                }
-                currentRect.round(mTmpResult);
-                android.util.RotationUtils.rotateBounds(mTmpResult, mDisplayRect, rotationDelta);
-                resultRect.set(mTmpResult);
-            } else {
-                resultRect.set(currentRect);
-            }
-        }
-    }
-
-    /**
-     * RectFSpringAnim update listener to be used for app to home animation.
-     */
-    private class SpringAnimRunner implements RectFSpringAnim.OnUpdateListener {
-        private final RemoteAnimationTarget[] mAppTargets;
-        private final Matrix mMatrix = new Matrix();
-        private final Point mTmpPos = new Point();
-        private final RectF mCurrentRectF = new RectF();
-        private final float mStartRadius;
-        private final float mEndRadius;
-        private final SurfaceTransactionApplier mSurfaceApplier;
-        private final Rect mWindowStartBounds = new Rect();
-        private final Rect mWindowOriginalBounds = new Rect();
-
-        private final Rect mTmpRect = new Rect();
-
-        /**
-         * Constructor for SpringAnimRunner
-         *
-         * @param appTargets                the list of opening/closing apps
-         * @param targetRect                target rectangle
-         * @param closingWindowStartRect    start position of the window when the spring animation
-         *                                  is started. In the predictive back to home case this
-         *                                  will be smaller than closingWindowOriginalRect because
-         *                                  the window is already scaled by the user gesture
-         * @param closingWindowOriginalRect Original unscaled window rect
-         * @param startWindowCornerRadius   corner radius of window at the start position
-         */
-        SpringAnimRunner(RemoteAnimationTarget[] appTargets, RectF targetRect,
-                Rect closingWindowStartRect, Rect closingWindowOriginalRect,
-                float startWindowCornerRadius) {
-            mAppTargets = appTargets;
-            mStartRadius = startWindowCornerRadius;
-            mEndRadius = Math.max(1, targetRect.width()) / 2f;
-            mSurfaceApplier = new SurfaceTransactionApplier(mDragLayer);
-            mWindowStartBounds.set(closingWindowStartRect);
-            mWindowOriginalBounds.set(closingWindowOriginalRect);
-
-            // transfer the coordinate based on animation target.
-            if (mAppTargets != null) {
-                for (RemoteAnimationTarget t : mAppTargets) {
-                    if (t.mode == MODE_CLOSING) {
-                        final RectF transferRect = new RectF(mWindowStartBounds);
-                        final RectF result = new RectF();
-                        transferRectToTargetCoordinate(t, transferRect, false, result);
-                        result.round(mWindowStartBounds);
-
-                        transferRect.set(closingWindowOriginalRect);
-                        transferRectToTargetCoordinate(t, transferRect, false, result);
-                        result.round(mWindowOriginalBounds);
-                        break;
-                    }
-                }
-            }
-        }
-
-        public float getCornerRadius(float progress) {
-            return Utilities.mapRange(progress, mStartRadius, mEndRadius);
-        }
-
-        @Override
-        public void onUpdate(RectF currentRectF, float progress) {
-            SurfaceTransaction transaction = new SurfaceTransaction();
-            for (int i = mAppTargets.length - 1; i >= 0; i--) {
-                RemoteAnimationTarget target = mAppTargets[i];
-                SurfaceProperties builder = transaction.forSurface(target.leash);
-
-                if (target.localBounds != null) {
-                    mTmpPos.set(target.localBounds.left, target.localBounds.top);
-                } else {
-                    mTmpPos.set(target.position.x, target.position.y);
-                }
-
-                if (target.mode == MODE_CLOSING) {
-                    transferRectToTargetCoordinate(target, currentRectF, false, mCurrentRectF);
-
-                    // Scale the target window to match the currentRectF.
-                    final float scale;
-
-                    // We need to infer the crop (we crop the window to match the currentRectF).
-                    if (mWindowStartBounds.height() > mWindowStartBounds.width()) {
-                        scale = Math.min(1f, mCurrentRectF.width() / mWindowOriginalBounds.width());
-
-                        int unscaledHeight = (int) (mCurrentRectF.height() * (1f / scale));
-                        int croppedHeight = mWindowStartBounds.height() - unscaledHeight;
-                        mTmpRect.set(0, 0, mWindowOriginalBounds.width(),
-                                mWindowStartBounds.height() - croppedHeight);
-                    } else {
-                        scale = Math.min(1f, mCurrentRectF.height()
-                                / mWindowOriginalBounds.height());
-
-                        int unscaledWidth = (int) (mCurrentRectF.width() * (1f / scale));
-                        int croppedWidth = mWindowStartBounds.width() - unscaledWidth;
-                        mTmpRect.set(0, 0, mWindowStartBounds.width() - croppedWidth,
-                                mWindowOriginalBounds.height());
-                    }
-
-                    // Match size and position of currentRect.
-                    mMatrix.setScale(scale, scale);
-                    mMatrix.postTranslate(mCurrentRectF.left, mCurrentRectF.top);
-
-                    builder.setMatrix(mMatrix)
-                            .setWindowCrop(mTmpRect)
-                            .setAlpha(getWindowAlpha(progress))
-                            .setCornerRadius(getCornerRadius(progress) / scale);
-                } else if (target.mode == MODE_OPENING) {
-                    mMatrix.setTranslate(mTmpPos.x, mTmpPos.y);
-                    builder.setMatrix(mMatrix)
-                            .setAlpha(1f);
-                }
-            }
-            mSurfaceApplier.scheduleApply(transaction);
-        }
-
-        protected float getWindowAlpha(float progress) {
-            // Alpha interpolates between [1, 0] between progress values [start, end]
-            final float start = 0f;
-            final float end = 0.85f;
-
-            if (progress <= start) {
-                return 1f;
-            }
-            if (progress >= end) {
-                return 0f;
-            }
-            return Utilities.mapToRange(progress, start, end, 1, 0, ACCELERATE_1_5);
-        }
-    }
 }

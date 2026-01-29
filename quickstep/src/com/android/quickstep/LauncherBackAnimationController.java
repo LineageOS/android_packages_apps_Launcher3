@@ -65,6 +65,7 @@ import com.android.launcher3.QuickstepTransitionManager;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.display.DisplayController;
+import com.android.launcher3.remoteanimations.RemoteAnimationCoordinateTransfer;
 import com.android.launcher3.taskbar.TaskbarInteractor;
 import com.android.launcher3.uioverrides.QuickstepLauncher;
 import com.android.launcher3.util.NavigationMode;
@@ -515,8 +516,8 @@ public class LauncherBackAnimationController {
         float cornerRadius = Utilities.mapRange(
                 mBackProgress, mWindowScaleStartCornerRadius, mWindowScaleEndCornerRadius);
         final RectF resolveRectF = new RectF();
-        mQuickstepTransitionManager.transferRectToTargetCoordinate(
-                mBackTarget, mCurrentRect, true, resolveRectF);
+        new RemoteAnimationCoordinateTransfer(mLauncher)
+                .transferRectToOwnerSurface(mBackTarget, mCurrentRect, resolveRectF);
 
         BackAnimState backAnim =
                 mQuickstepTransitionManager.createWallpaperOpenAnimations(

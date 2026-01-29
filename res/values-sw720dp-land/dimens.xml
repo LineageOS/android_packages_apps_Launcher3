@@ -31,5 +31,4 @@
 
 <!-- Widget picker-->
     <dimen name="widget_list_horizontal_margin">49dp</dimen>
-    <dimen name="widget_list_horizontal_margin_two_pane">24dp</dimen>
 </resources>

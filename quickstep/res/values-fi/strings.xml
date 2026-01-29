@@ -53,13 +53,13 @@
     <string name="back_gesture_tutorial_confirm_subtitle" msgid="5181305411668713250">"Voit muuttaa Takaisin-eleen herkkyyttä asetuksista"</string>
     <string name="back_gesture_intro_title" msgid="19551256430224428">"Siirry takaisin pyyhkäisemällä"</string>
     <string name="back_gesture_intro_subtitle" msgid="7912576483031802797">"Voit palata edelliseen näkymään pyyhkäisemällä näytön vasemmasta tai oikeasta reunasta keskelle."</string>
-    <string name="back_gesture_tutorial_title" msgid="1944737946101059789">"Edelliseen siirtyminen"</string>
+    <string name="back_gesture_tutorial_title" msgid="1944737946101059789">"Takaisin siirtyminen"</string>
     <string name="back_gesture_tutorial_subtitle" msgid="6639993416000920142">"Pyyhkäise vasemmasta tai oikeasta reunasta näytön keskelle"</string>
     <string name="home_gesture_feedback_swipe_too_far_from_edge" msgid="4816365433160895458">"Pyyhkäise ylös näytön alareunasta"</string>
     <string name="home_gesture_feedback_overview_detected" msgid="5177627157303895077">"Varo pysähtymästä ennen kuin päästät irti"</string>
     <string name="home_gesture_feedback_wrong_swipe_direction" msgid="8328465201424027148">"Pyyhkäise suoraan ylöspäin"</string>
     <string name="home_gesture_feedback_complete_with_follow_up" msgid="8766981412895888417">"Olet oppinut aloitusnäytölle palaamiseleen. Opettele seuraavaksi siirtymään takaisin."</string>
-    <string name="home_gesture_feedback_complete_without_follow_up" msgid="2978063221383413443">"Olet oppinut aloitusnäytölle palaamiseleen"</string>
+    <string name="home_gesture_feedback_complete_without_follow_up" msgid="2978063221383413443">"Olet oppinut siirry aloitusnäytölle -eleen"</string>
     <string name="home_gesture_intro_title" msgid="836590312858441830">"Siirry aloitusnäytölle pyyhkäisemällä"</string>
     <string name="home_gesture_intro_subtitle" msgid="2632238748497975326">"Pyyhkäise ylös näytön alareunasta. Tämä ele vie sinut aina aloitusnäytölle."</string>
     <string name="home_gesture_tutorial_title" msgid="3126834347496917376">"Aloitusnäytölle siirtyminen"</string>
@@ -69,7 +69,7 @@
     <string name="overview_gesture_feedback_home_detected" msgid="663432226180397138">"Kokeile pitää ikkunaa painettuna pidempään ennen kuin päästät irti"</string>
     <string name="overview_gesture_feedback_wrong_swipe_direction" msgid="1191055451018584958">"Pyyhkäise suoraan ylöspäin ja pysähdy sitten"</string>
     <string name="overview_gesture_feedback_complete_with_follow_up" msgid="3544611727467765026">"Olet oppinut käyttämään eleitä. Jos haluat laittaa eleet pois päältä, avaa Asetukset."</string>
-    <string name="overview_gesture_feedback_complete_without_follow_up" msgid="2903050864432331629">"Olet oppinut sovellusten vaihtamiseleen"</string>
+    <string name="overview_gesture_feedback_complete_without_follow_up" msgid="2903050864432331629">"Olet oppinut sovelluksen vaihtaminen -eleen"</string>
     <string name="overview_gesture_intro_title" msgid="2902054412868489378">"Vaihda sovellusta pyyhkäisemällä"</string>
     <string name="overview_gesture_intro_subtitle" msgid="4968091015637850859">"Voit vaihtaa sovelluksesta toiseen pyyhkäisemällä ylöspäin näytön alareunasta ja päästämällä sitten irti."</string>
     <string name="overview_gesture_tutorial_title" msgid="4125835002668708720">"Sovelluksen vaihtaminen"</string>

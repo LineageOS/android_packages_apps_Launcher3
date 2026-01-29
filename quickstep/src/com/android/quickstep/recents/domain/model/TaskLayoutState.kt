@@ -18,17 +18,23 @@ package com.android.quickstep.recents.domain.model
 
 import android.graphics.Rect
 
-/**
- * Represents the unified layout data for a desktop task, containing its calculated positions for
- * both Fullscreen and Overview states.
- *
- * @property fullscreenPosition The position of the task in the default Fullscreen (desktop) state.
- * @property overviewPosition The position of the task in the organized Overview grid.
- */
-data class DesktopTaskPosition(
-    val fullscreenPosition: TaskPosition,
-    val overviewPosition: TaskPosition,
-)
+// TODO(b/456480920) Expand to support unified layout states for both standalone Tasks and
+// GroupTasks (split-screen pairs).
+sealed interface TaskLayoutState {
+    /**
+     * Represents the unified layout data for a desktop task, containing its calculated positions
+     * for both Fullscreen and Overview states.
+     *
+     * @property fullscreenPosition The position of the task in the default Fullscreen (desktop)
+     *   state.
+     * @property overviewPosition The position of the task in the organized Overview grid.
+     */
+    data class DesktopTaskLayoutState(
+        val fullscreenPosition: TaskPosition,
+        val overviewPosition: TaskPosition,
+        val oldOverviewPosition: TaskPosition? = null,
+    ) : TaskLayoutState
+}
 
 /**
  * Represents the layout data for a desktop task. It can either be a task that is rendered with

@@ -349,7 +349,7 @@ public class Hotseat extends CellLayout implements Insettable {
         int qsbMeasuredWidth = mQsb.getMeasuredWidth();
         int left;
         DeviceProfile dp = mActivity.getDeviceProfile();
-        if (dp.isQsbInline) {
+        if (dp.getHotseatProfile().isQsbInline()) {
             int qsbSpace = dp.getHotseatProfile().getBorderSpace();
             left = Utilities.isRtl(getResources()) ? r - getPaddingRight() + qsbSpace
                     : l + getPaddingLeft() - qsbMeasuredWidth - qsbSpace;

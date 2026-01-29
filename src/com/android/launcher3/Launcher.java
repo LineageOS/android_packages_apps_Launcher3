@@ -44,7 +44,6 @@ import static com.android.launcher3.LauncherConstants.SavedInstanceKeys.RUNTIME_
 import static com.android.launcher3.LauncherConstants.SavedInstanceKeys.RUNTIME_STATE_PENDING_REQUEST_ARGS;
 import static com.android.launcher3.LauncherConstants.SavedInstanceKeys.RUNTIME_STATE_PENDING_REQUEST_CODE;
 import static com.android.launcher3.LauncherConstants.SavedInstanceKeys.RUNTIME_STATE_RECREATE_TO_UPDATE_THEME;
-import static com.android.launcher3.LauncherConstants.SavedInstanceKeys.RUNTIME_STATE_WIDGET_PANEL;
 import static com.android.launcher3.LauncherConstants.TraceEvents.DISPLAY_ALL_APPS_TRACE_METHOD_NAME;
 import static com.android.launcher3.LauncherConstants.TraceEvents.DISPLAY_WORKSPACE_TRACE_METHOD_NAME;
 import static com.android.launcher3.LauncherConstants.TraceEvents.ON_CREATE_EVT;
@@ -123,7 +122,6 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -250,7 +248,6 @@ import com.android.launcher3.widget.WidgetAddFlowHandler;
 import com.android.launcher3.widget.WidgetManagerHelper;
 import com.android.launcher3.widget.WidgetVisibilityTracker;
 import com.android.launcher3.widget.custom.CustomWidgetManager;
-import com.android.launcher3.widget.picker.WidgetsFullSheet;
 import com.android.launcher3.widget.picker.model.WidgetPickerDataProvider;
 import com.android.launcher3.widget.util.WidgetSizeHandler;
 import com.android.systemui.plugins.shared.LauncherOverlayManager;
@@ -1170,12 +1167,6 @@ public class Launcher extends StatefulActivity<LauncherState>
                 RUNTIME_STATE_PENDING_REQUEST_CODE, mPendingActivityRequestCode);
 
         mPendingActivityResult = savedState.getParcelable(RUNTIME_STATE_PENDING_ACTIVITY_RESULT);
-
-        SparseArray<Parcelable> widgetsState =
-                savedState.getSparseParcelableArray(RUNTIME_STATE_WIDGET_PANEL);
-        if (widgetsState != null) {
-            WidgetsFullSheet.show(this, false).restoreHierarchyState(widgetsState);
-        }
     }
 
     /**
@@ -1573,16 +1564,6 @@ public class Launcher extends StatefulActivity<LauncherState>
         outState.putIntArray(RUNTIME_STATE_CURRENT_SCREEN_IDS,
                 mWorkspace.getCurrentPageScreenIds().getArray().toArray());
         outState.putInt(RUNTIME_STATE, mStateManager.getState().ordinal);
-
-        AbstractFloatingView widgets = AbstractFloatingView
-                .getOpenView(this, AbstractFloatingView.TYPE_WIDGETS_FULL_SHEET);
-        if (widgets != null) {
-            SparseArray<Parcelable> widgetsState = new SparseArray<>();
-            widgets.saveHierarchyState(widgetsState);
-            outState.putSparseParcelableArray(RUNTIME_STATE_WIDGET_PANEL, widgetsState);
-        } else {
-            outState.remove(RUNTIME_STATE_WIDGET_PANEL);
-        }
 
         // We close any open folders and shortcut containers that are not safe for rebind,
         // and we need to make sure this state is reflected.
@@ -2827,33 +2808,11 @@ public class Launcher extends StatefulActivity<LauncherState>
             Toast.makeText(this, R.string.safemode_widget_error, Toast.LENGTH_SHORT).show();
             return false;
         } else {
-            if (com.android.launcher3.Flags.enableWidgetPickerRefactor()) {
-                Intent intent = new Intent(Intent.ACTION_PICK);
-                intent.setPackage(asContext().getPackageName());
-                asContext().startActivity(intent);
-                return true;
-            }
-            openWidgetsFullSheet();
+            Intent intent = new Intent(Intent.ACTION_PICK);
+            intent.setPackage(asContext().getPackageName());
+            asContext().startActivity(intent);
             return true;
         }
-    }
-
-    /** Returns WidgetsFullSheet that was opened, or null if nothing was opened. */
-    @VisibleForTesting
-    public WidgetsFullSheet openWidgetsFullSheet() {
-        AbstractFloatingView floatingView = AbstractFloatingView.getTopOpenViewWithType(
-                this, TYPE_WIDGETS_FULL_SHEET);
-        if (floatingView != null) {
-            return (WidgetsFullSheet) floatingView;
-        }
-        if (shouldShowHomeBehindDesktop() && !isTopResumedActivity()) {
-            Intent intent = new Intent(Intent.ACTION_MAIN)
-                    .addCategory(Intent.CATEGORY_HOME)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    .putExtra(EXCLUDE_CLOSE_WIDGET_PICKER, true);
-            startActivity(intent);
-        }
-        return WidgetsFullSheet.show(this, true /* animated */);
     }
 
     /**

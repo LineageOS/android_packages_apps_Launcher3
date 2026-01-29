@@ -31,7 +31,8 @@
         android:color="@color/materialColorOnSecondaryContainer"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:importantForAccessibility="no" />
     <TextView
         android:id="@+id/header_app_title"
         android:layout_width="0dp"
@@ -49,7 +50,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@id/header_app_icon"
         app:layout_constraintEnd_toStartOf="@id/header_close_button"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:importantForAccessibility="no" />
     <ImageButton
         android:id="@+id/header_close_button"
         android:layout_width="@dimen/task_header_close_button_size"
