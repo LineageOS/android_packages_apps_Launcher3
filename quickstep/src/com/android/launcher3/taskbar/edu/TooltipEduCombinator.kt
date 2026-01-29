@@ -47,6 +47,7 @@ import java.io.PrintWriter
 class TooltipEduCombinator(
     activityContext: ActivityContext,
     private val taskbarStashController: TaskbarStashController,
+    private val blockedBySysUiState: () -> Boolean,
     private val shouldShowSearchEduResolver: () -> Boolean,
 ) {
 
@@ -58,6 +59,7 @@ class TooltipEduCombinator(
             return !Utilities.isRunningInTestHarness() &&
                 !context.isPhoneMode &&
                 !context.isTinyTaskbar &&
+                !blockedBySysUiState() &&
                 !UserManager.isDeviceInDemoMode(context)
         }
 
@@ -318,6 +320,11 @@ class TooltipEduCombinator(
         updateFlags: Boolean = true
     ): MutableCollection<TooltipInfo> {
         val tooltipsToShow = mutableListOf<TooltipInfo>()
+
+        if (blockedBySysUiState()) {
+            return tooltipsToShow
+        }
+
         var bubblesTooltipIndex = -1
         var pinningTooltipIndex = -1
         if (
@@ -382,7 +389,7 @@ class TooltipEduCombinator(
         flag: Int,
         updateFlag: Boolean = true,
     ): Boolean {
-        val result = !getFlag(flag) && (optionalCondition?.invoke() ?: true)
+        val result = (optionalCondition?.invoke() ?: true) && !getFlag(flag)
         if (result && updateFlag) {
             setFlag(flag)
         }

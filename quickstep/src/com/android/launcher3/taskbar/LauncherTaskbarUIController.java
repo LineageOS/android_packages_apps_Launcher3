@@ -455,6 +455,9 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
             return false;
         }
         TaskbarEduTooltipController eduController = mControllers.taskbarEduTooltipController;
+        if (eduController.getBlockedBySysuiState()) {
+            return false;
+        }
         if (Flags.tooltipEduCombinator()) {
             return eduController.getHasFeaturesEduToShow();
         }
