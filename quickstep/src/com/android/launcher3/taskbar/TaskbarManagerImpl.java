@@ -118,6 +118,7 @@ import java.lang.ref.WeakReference;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Provider;
 
 /**
  * Class to manage taskbar lifecycle
@@ -1219,20 +1220,26 @@ public class TaskbarManagerImpl {
     /** Use weak reference to avoid leaking TIS via {@link TaskbarManagerImpl} */
     @SysUIConnectionSingleton
     public static class AllAppsIntentSender extends IIntentSender.Stub {
-        private WeakReference<TaskbarManagerImpl> mWeakTaskbarManager;
+        private @Nullable Provider<TaskbarManagerImpl> mTaskbarManagerProvider;
+        private @Nullable WeakReference<TaskbarManagerImpl> mWeakTaskbarManager;
 
         @Inject
-        AllAppsIntentSender(TaskbarManagerImpl taskbarManager) {
-            getTaskbarUiThread().execute(() -> {
-                mWeakTaskbarManager = new WeakReference<>(taskbarManager);
-            });
+        AllAppsIntentSender(Provider<TaskbarManagerImpl> taskbarManagerProvider) {
+            mTaskbarManagerProvider = taskbarManagerProvider;
         }
 
         @Override
         public void send(int i, Intent intent, String s, IBinder iBinder,
                 IIntentReceiver iIntentReceiver, String s1, Bundle bundle) {
             getTaskbarUiThread().execute(() -> {
-                TaskbarManagerImpl taskbarManager = mWeakTaskbarManager.get();
+                TaskbarManagerImpl taskbarManager = null;
+                if (mWeakTaskbarManager != null) {
+                    taskbarManager = mWeakTaskbarManager.get();
+                } else if (mTaskbarManagerProvider != null) {
+                    taskbarManager = mTaskbarManagerProvider.get();
+                    mWeakTaskbarManager = new WeakReference<>(taskbarManager);
+                    mTaskbarManagerProvider = null;
+                }
                 if (taskbarManager == null) {
                     return;
                 }
