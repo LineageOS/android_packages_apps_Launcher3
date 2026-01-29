@@ -198,8 +198,8 @@ constructor(
             Settings.Secure.getInt(appContext.contentResolver, AMBIENT_CUE_SETTING) ==
                 OPTED_IN
         } catch (e: Settings.SettingNotFoundException) {
-            Log.w(TAG, "$AMBIENT_CUE_SETTING not found, feature disabled", e)
-            false
+            Log.w(TAG, "$AMBIENT_CUE_SETTING not found, default to enabled", e)
+            true
         }
     }
 
