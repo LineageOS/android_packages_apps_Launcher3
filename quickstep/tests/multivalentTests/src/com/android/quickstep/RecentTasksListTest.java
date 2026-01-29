@@ -16,6 +16,7 @@
 
 package com.android.quickstep;
 
+import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.launcher3.Flags.FLAG_ENABLE_LATER_IS_LOCKED_CHECK;
@@ -329,14 +330,18 @@ public class RecentTasksListTest {
     @EnableFlags(FLAG_HIDE_AUTOMATED_TASKS_IN_OVERVIEW)
     public void loadTasksInBackground_desktopTask_filterOutAutomatedTasks() throws Exception {
         List<TaskInfo> tasksInDefaultDesk1 = Arrays.asList(
-                createRecentTaskInfo(/* taskId = */ 1, DEFAULT_DISPLAY, /* isAutomated= */false),
-                createRecentTaskInfo(/* taskId = */ 2, DEFAULT_DISPLAY, /* isAutomated= */true));
-        GroupedTaskInfo recentTaskInfo1 = GroupedTaskInfo.forDeskTasks(/* deskId = */1,
-                DEFAULT_DISPLAY, tasksInDefaultDesk1, /* minimizedTaskIds = */
-                Collections.emptySet());
+                createRecentTaskInfo(/* taskId = */ 1, DEFAULT_DISPLAY,
+                        /* isAutomated= */ false, /* isVisible= */ false),
+                createRecentTaskInfo(/* taskId = */ 2, DEFAULT_DISPLAY,
+                        /* isAutomated= */ true, /* isVisible= */ false));
+        GroupedTaskInfo recentTaskInfo1 = GroupedTaskInfo.forDeskTasks(
+                /* deskId = */1, DEFAULT_DISPLAY, tasksInDefaultDesk1,
+                /* minimizedTaskIds = */ Collections.emptySet());
         List<TaskInfo> tasksInDefaultDesk2 = Arrays.asList(
-                createRecentTaskInfo(/* taskId = */ 3, DEFAULT_DISPLAY, /* isAutomated= */true),
-                createRecentTaskInfo(/* taskId = */ 4, DEFAULT_DISPLAY, /* isAutomated= */true));
+                createRecentTaskInfo(/* taskId = */ 3, DEFAULT_DISPLAY,
+                        /* isAutomated= */ true, /* isVisible= */ false),
+                createRecentTaskInfo(/* taskId = */ 4, DEFAULT_DISPLAY,
+                        /* isAutomated= */ true, /* isVisible= */ false));
         GroupedTaskInfo recentTaskInfo2 = GroupedTaskInfo.forDeskTasks(/* deskId = */2,
                 DEFAULT_DISPLAY, tasksInDefaultDesk2, /* minimizedTaskIds = */
                 Collections.emptySet());
@@ -365,8 +370,10 @@ public class RecentTasksListTest {
     @EnableFlags(FLAG_HIDE_AUTOMATED_TASKS_IN_OVERVIEW)
     public void loadTasksInBackground_splitTask_filterOutAutomatedTasks() throws Exception {
         GroupedTaskInfo recentTaskInfo1 = GroupedTaskInfo.forSplitTasks(
-                createRecentTaskInfo(/* taskId = */ 1, DEFAULT_DISPLAY, /* isAutomated= */false),
-                createRecentTaskInfo(/* taskId = */ 2, DEFAULT_DISPLAY, /* isAutomated= */false),
+                createRecentTaskInfo(/* taskId = */ 1, DEFAULT_DISPLAY,
+                        /* isAutomated= */ false, /* isVisible= */ false),
+                createRecentTaskInfo(/* taskId = */ 2, DEFAULT_DISPLAY,
+                        /* isAutomated= */ false, /* isVisible= */ false),
                 new SplitBounds(
                         /* leftTopBounds = */ new Rect(),
                         /* rightBottomBounds = */ new Rect(),
@@ -374,8 +381,10 @@ public class RecentTasksListTest {
                         /* rightBottomTaskId = */ 2,
                         /* snapPosition = */ SplitScreenConstants.SNAP_TO_2_50_50));
         GroupedTaskInfo recentTaskInfo2 = GroupedTaskInfo.forSplitTasks(
-                createRecentTaskInfo(/* taskId = */ 3, DEFAULT_DISPLAY, /* isAutomated= */false),
-                createRecentTaskInfo(/* taskId = */ 4, DEFAULT_DISPLAY, /* isAutomated= */true),
+                createRecentTaskInfo(/* taskId = */ 3, DEFAULT_DISPLAY,
+                        /* isAutomated= */ false, /* isVisible= */ false),
+                createRecentTaskInfo(/* taskId = */ 4, DEFAULT_DISPLAY,
+                        /* isAutomated= */ true, /* isVisible= */ false),
                 new SplitBounds(
                         /* leftTopBounds = */ new Rect(),
                         /* rightBottomBounds = */ new Rect(),
@@ -383,8 +392,10 @@ public class RecentTasksListTest {
                         /* rightBottomTaskId = */ 4,
                         /* snapPosition = */ SplitScreenConstants.SNAP_TO_2_50_50));
         GroupedTaskInfo recentTaskInfo3 = GroupedTaskInfo.forSplitTasks(
-                createRecentTaskInfo(/* taskId = */ 5, DEFAULT_DISPLAY, /* isAutomated= */true),
-                createRecentTaskInfo(/* taskId = */ 6, DEFAULT_DISPLAY, /* isAutomated= */false),
+                createRecentTaskInfo(/* taskId = */ 5, DEFAULT_DISPLAY,
+                        /* isAutomated= */ true, /* isVisible= */ false),
+                createRecentTaskInfo(/* taskId = */ 6, DEFAULT_DISPLAY,
+                        /* isAutomated= */ false, /* isVisible= */ false),
                 new SplitBounds(
                         /* leftTopBounds = */ new Rect(),
                         /* rightBottomBounds = */ new Rect(),
@@ -392,8 +403,10 @@ public class RecentTasksListTest {
                         /* rightBottomTaskId = */ 6,
                         /* snapPosition = */ SplitScreenConstants.SNAP_TO_2_50_50));
         GroupedTaskInfo recentTaskInfo4 = GroupedTaskInfo.forSplitTasks(
-                createRecentTaskInfo(/* taskId = */ 7, DEFAULT_DISPLAY, /* isAutomated= */true),
-                createRecentTaskInfo(/* taskId = */ 8, DEFAULT_DISPLAY, /* isAutomated= */true),
+                createRecentTaskInfo(/* taskId = */ 7, DEFAULT_DISPLAY,
+                        /* isAutomated= */ true, /* isVisible= */ false),
+                createRecentTaskInfo(/* taskId = */ 8, DEFAULT_DISPLAY,
+                        /* isAutomated= */ true, /* isVisible= */ false),
                 new SplitBounds(
                         /* leftTopBounds = */ new Rect(),
                         /* rightBottomBounds = */ new Rect(),
@@ -427,11 +440,13 @@ public class RecentTasksListTest {
 
     @Test
     @EnableFlags(FLAG_HIDE_AUTOMATED_TASKS_IN_OVERVIEW)
-    public void loadTasksInBackground_singleTask_filterOutAutomatedTasks() throws Exception {
+    public void loadTasksInBackground_singleTask_filterOutOnlyAutomatedTasks() throws Exception {
         GroupedTaskInfo recentTaskInfo1 = GroupedTaskInfo.forFullscreenTasks(
-                createRecentTaskInfo(/* taskId = */ 1, DEFAULT_DISPLAY, /* isAutomated= */false));
+                createRecentTaskInfo(/* taskId = */ 1, DEFAULT_DISPLAY,
+                        /* isAutomated= */ false, /* isVisible= */ false));
         GroupedTaskInfo recentTaskInfo2 = GroupedTaskInfo.forFullscreenTasks(
-                createRecentTaskInfo(/* taskId = */ 2, DEFAULT_DISPLAY, /* isAutomated= */true));
+                createRecentTaskInfo(/* taskId = */ 2, DEFAULT_DISPLAY,
+                        /* isAutomated= */ true, /* isVisible= */ false));
 
         when(mSystemUiProxy.getRecentTasks(anyInt(), anyInt())).thenReturn(
                 new ArrayList<>(Arrays.asList(recentTaskInfo1, recentTaskInfo2)));
@@ -446,20 +461,164 @@ public class RecentTasksListTest {
         assertThat(((SingleTask) groupTask6).getTask().key.id).isEqualTo(1);
     }
 
+    @Test
+    public void loadTasksInBackground_launchExcludedTaskFromHome_excludedTaskIsShown()
+            throws Exception {
+        // Task 1: NOT visible (from home), NOT Automated -> this should be SHOWN
+        GroupedTaskInfo otherRecentTaskInfo = GroupedTaskInfo.forFullscreenTasks(
+                createRecentTaskInfo(/* taskId = */ 1, DEFAULT_DISPLAY,
+                        /* isAutomated= */ false, /* isVisible= */ false));
+        // Task 2: Excluded -> but since there's no visible task yet, this should NOT BE IGNORED
+        GroupedTaskInfo excludedRecentTaskInfo = GroupedTaskInfo.forFullscreenTasks(
+                createExcludedRecentTaskInfo(/* taskId = */ 2));
+
+        // From the least recent to the most recent
+        setupRecentTasks(Arrays.asList(otherRecentTaskInfo, excludedRecentTaskInfo));
+
+        List<GroupTask> taskList =
+                mRecentTasksList.loadTasksInBackground(Integer.MAX_VALUE, -1, false);
+
+        // Task 1 and Task 2
+        assertThat(taskList).hasSize(2);
+
+        GroupTask groupTask1 = taskList.get(0);
+        assertThat(groupTask1).isInstanceOf(SingleTask.class);
+        assertThat(((SingleTask) groupTask1).getTask().key.id).isEqualTo(1);
+        GroupTask groupTask2 = taskList.get(1);
+        assertThat(groupTask2).isInstanceOf(SingleTask.class);
+        assertThat(((SingleTask) groupTask2).getTask().key.id).isEqualTo(2);
+    }
+
+    @Test
+    public void loadTasksInBackground_launchExcludedTaskFromAnotherTask_excludedTaskIsNotShown()
+            throws Exception {
+        // Task 1: NOT visible, NOT Automated -> this should be SHOWN
+        GroupedTaskInfo otherRecentTaskInfo = GroupedTaskInfo.forFullscreenTasks(
+                createRecentTaskInfo(/* taskId = */ 1, DEFAULT_DISPLAY,
+                        /* isAutomated= */ false, /* isVisible= */ false));
+        // Task 2: Visible, NOT Automated -> this should be SHOWN
+        GroupedTaskInfo firstVisibleRecentTaskInfo = GroupedTaskInfo.forFullscreenTasks(
+                createRecentTaskInfo(/* taskId = */ 2, DEFAULT_DISPLAY,
+                        /* isAutomated= */ false, /* isVisible= */ true));
+        // Task 3: Excluded -> should be IGNORED because the first visible task is found
+        GroupedTaskInfo excludedRecentTaskInfo = GroupedTaskInfo.forFullscreenTasks(
+                createExcludedRecentTaskInfo(/* taskId = */ 3));
+
+        setupRecentTasks(Arrays.asList(
+                otherRecentTaskInfo, firstVisibleRecentTaskInfo, excludedRecentTaskInfo));
+
+        List<GroupTask> taskList = mRecentTasksList.loadTasksInBackground(Integer.MAX_VALUE, -1,
+                false);
+
+        // Task 1 and Task 2
+        assertThat(taskList).hasSize(2);
+
+        GroupTask groupTask = taskList.get(0);
+        assertThat(groupTask).isInstanceOf(SingleTask.class);
+        assertThat(((SingleTask) groupTask).getTask().key.id).isEqualTo(1);
+        GroupTask groupTask2 = taskList.get(1);
+        assertThat(groupTask2).isInstanceOf(SingleTask.class);
+        assertThat(((SingleTask) groupTask2).getTask().key.id).isEqualTo(2);
+    }
+
+    @Test
+    @EnableFlags(FLAG_HIDE_AUTOMATED_TASKS_IN_OVERVIEW)
+    public void loadTasksInBackground_launchExcludedTaskFromHome_ExcludedTaskLaunchesAutomatedTask()
+            throws Exception {
+        // Task 1: NOT visible (from home), NOT Automated -> this should be SHOWN
+        GroupedTaskInfo otherRecentTaskInfo = GroupedTaskInfo.forFullscreenTasks(
+                createRecentTaskInfo(/* taskId = */ 1, DEFAULT_DISPLAY,
+                        /* isAutomated= */ false, /* isVisible= */ false));
+        // Task 2: Excluded -> But since Task 1 is not visible, this should NOT BE IGNORED
+        GroupedTaskInfo excludedRecentTaskInfo = GroupedTaskInfo.forFullscreenTasks(
+                createExcludedRecentTaskInfo(/* taskId = */ 2));
+        // Task 3: Visible, Automated -> Should be GONE
+        GroupedTaskInfo automatedRecentTaskInfo = GroupedTaskInfo.forFullscreenTasks(
+                createRecentTaskInfo(/* taskId = */ 3, DEFAULT_DISPLAY,
+                        /* isAutomated= */ true, /* isVisible= */ true));
+
+        setupRecentTasks(Arrays.asList(
+                otherRecentTaskInfo, excludedRecentTaskInfo, automatedRecentTaskInfo));
+
+        List<GroupTask> taskList = mRecentTasksList.loadTasksInBackground(Integer.MAX_VALUE, -1,
+                false);
+
+        // Task 1 and Task 2
+        assertThat(taskList).hasSize(2);
+
+        GroupTask groupTask1 = taskList.get(0);
+        assertThat(groupTask1).isInstanceOf(SingleTask.class);
+        assertThat(((SingleTask) groupTask1).getTask().key.id).isEqualTo(1);
+        GroupTask groupTask2 = taskList.get(1);
+        assertThat(groupTask2).isInstanceOf(SingleTask.class);
+        assertThat(((SingleTask) groupTask2).getTask().key.id).isEqualTo(2);
+    }
+
+    @Test
+    @EnableFlags(FLAG_HIDE_AUTOMATED_TASKS_IN_OVERVIEW)
+    public void loadTasksInBackground_launchExcludedTaskFromAutomatedTask_excludedTaskIsShown()
+            throws Exception {
+        // Task 1: NOT visible, NOT Automated -> should be SHOWN
+        GroupedTaskInfo otherRecentTaskInfo = GroupedTaskInfo.forFullscreenTasks(
+                createRecentTaskInfo(/* taskId = */ 1, DEFAULT_DISPLAY,
+                        /* isAutomated= */ false, /* isVisible= */ false));
+        // Task 2: Visible, Automated -> should be GONE
+        GroupedTaskInfo automatedRecentTaskInfo = GroupedTaskInfo.forFullscreenTasks(
+                createRecentTaskInfo(/* taskId = */ 2, DEFAULT_DISPLAY,
+                        /* isAutomated= */ true, /* isVisible= */ true));
+        // Task 3: Excluded -> Task 1 is not visible and Task 2 is gone, this should NOT BE IGNORED
+        GroupedTaskInfo excludedRecentTaskInfo = GroupedTaskInfo.forFullscreenTasks(
+                createExcludedRecentTaskInfo(/* taskId = */ 3));
+
+        setupRecentTasks(Arrays.asList(
+                otherRecentTaskInfo, automatedRecentTaskInfo, excludedRecentTaskInfo));
+
+        List<GroupTask> taskList = mRecentTasksList.loadTasksInBackground(Integer.MAX_VALUE, -1,
+                false);
+
+        // Task 1 and Task 3
+        assertThat(taskList).hasSize(2);
+
+        GroupTask groupTask1 = taskList.get(0);
+        assertThat(groupTask1).isInstanceOf(SingleTask.class);
+        assertThat(((SingleTask) groupTask1).getTask().key.id).isEqualTo(1);
+        GroupTask groupTask2 = taskList.get(1);
+        assertThat(groupTask2).isInstanceOf(SingleTask.class);
+        assertThat(((SingleTask) groupTask2).getTask().key.id).isEqualTo(3);
+    }
+
+    private void setupRecentTasks(List<GroupedTaskInfo> list)
+            throws SystemUiProxy.GetRecentTasksException {
+        // Reverse order as it will be reversed back in loadTasksInBackground
+        when(mSystemUiProxy.getRecentTasks(anyInt(), anyInt())).thenReturn(
+                new ArrayList<>(list.reversed()));
+    }
+
+    private RecentTaskInfo createExcludedRecentTaskInfo(int taskId) {
+        RecentTaskInfo info = createRecentTaskInfo(
+                taskId, DEFAULT_DISPLAY, /* isAutomated= */ false, /* isVisible= */ true);
+        info.isTopActivityTransparent = true;
+        info.baseIntent.addFlags(FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        return info;
+    }
+
     private RecentTaskInfo createRecentTaskInfo(int taskId) {
-        return (RecentTaskInfo) createRecentTaskInfo(
-                taskId, DEFAULT_DISPLAY, /* isAutomated= */false);
+        return createRecentTaskInfo(
+                taskId, DEFAULT_DISPLAY, /* isAutomated= */ false, /* isVisible= */ false);
     }
 
-    private TaskInfo createRecentTaskInfo(int taskId, int displayId) {
-        return createRecentTaskInfo(taskId, displayId, /* isAutomated= */false);
+    private RecentTaskInfo createRecentTaskInfo(int taskId, int displayId) {
+        return createRecentTaskInfo(
+                taskId, displayId, /* isAutomated= */ false, /* isVisible= */ false);
     }
 
-    private TaskInfo createRecentTaskInfo(int taskId, int displayId, boolean isAutomated) {
+    private RecentTaskInfo createRecentTaskInfo(
+            int taskId, int displayId, boolean isAutomated, boolean isVisible) {
         RecentTaskInfo recentTaskInfo = new RecentTaskInfo();
         recentTaskInfo.taskId = taskId;
         recentTaskInfo.displayId = displayId;
         recentTaskInfo.userId = 10;
+        recentTaskInfo.isVisible = isVisible;
         String packageName = String.format("com.test.%d", taskId);
         recentTaskInfo.baseIntent = new Intent().setPackage(packageName);
         when(mAutomationRepository.isPackageAutomated(recentTaskInfo.userId, packageName))
