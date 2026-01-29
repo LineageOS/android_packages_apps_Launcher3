@@ -17,6 +17,7 @@ package com.android.launcher3.widget;
 
 import static android.appwidget.AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN;
 
+import static com.android.launcher3.icons.cache.CachedObjectCachingLogic.loadFullResIcon;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.widget.LauncherAppWidgetProviderInfo.fromProviderInfo;
 
@@ -267,7 +268,7 @@ public class DatabaseWidgetPreviewLoader {
 
                 // Draw icon in the center.
                 try {
-                    Drawable icon = info.getFullResIcon(mIconCache);
+                    Drawable icon = loadFullResIcon(mIconCache, info);
                     if (icon != null) {
                         int appIconSize = mDeviceProfile.getWorkspaceIconProfile().getIconSizePx();
                         int iconSize = (int) Math.min(appIconSize * scale,
@@ -296,9 +297,9 @@ public class DatabaseWidgetPreviewLoader {
             throw new RuntimeException("Max size is too small for preview");
         }
         return BitmapRenderer.createHardwareBitmap(size, size, c -> {
+            Drawable originalIcon = Objects.requireNonNull(loadFullResIcon(mIconCache, info));
             LauncherIcons li = LauncherIcons.obtain(mContext);
-            Drawable icon = li.createBadgedIconBitmap(
-                    mutateOnMainThread(Objects.requireNonNull(info.getFullResIcon(mIconCache))))
+            Drawable icon = li.createBadgedIconBitmap(mutateOnMainThread(originalIcon))
                     .newIcon(mContext);
             li.recycle();
 
