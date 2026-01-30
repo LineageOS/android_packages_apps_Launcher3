@@ -24,7 +24,6 @@ import static com.android.app.animation.Interpolators.EMPHASIZED;
 import static com.android.launcher3.AbstractFloatingView.TYPE_FOLDER;
 import static com.android.launcher3.AbstractFloatingView.TYPE_ICON_SURFACE;
 import static com.android.launcher3.AbstractFloatingView.TYPE_REBIND_SAFE;
-import static com.android.launcher3.AbstractFloatingView.TYPE_WIDGETS_FULL_SHEET;
 import static com.android.launcher3.AbstractFloatingView.getTopOpenViewWithType;
 import static com.android.launcher3.LauncherAnimUtils.HOTSEAT_SCALE_PROPERTY_FACTORY;
 import static com.android.launcher3.LauncherAnimUtils.SCALE_INDEX_WIDGET_TRANSITION;
@@ -1438,9 +1437,6 @@ public class Launcher extends StatefulActivity<LauncherState>
             if (!internalStateHandled) {
                 // In all these cases, only animate if we're already on home
                 int excludedViews = AbstractFloatingView.TYPE_LISTENER;
-                if (intent.getBooleanExtra(EXCLUDE_CLOSE_WIDGET_PICKER, false)) {
-                    excludedViews |= TYPE_WIDGETS_FULL_SHEET;
-                }
                 AbstractFloatingView.closeAllOpenViewsExcept(this, isStarted(), excludedViews);
 
 

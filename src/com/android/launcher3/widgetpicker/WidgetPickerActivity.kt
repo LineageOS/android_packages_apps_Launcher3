@@ -36,10 +36,7 @@ import com.android.launcher3.util.ScreenOnTracker
 import com.android.launcher3.util.SystemUiController
 import com.android.launcher3.util.Themes
 
-/**
- * Activity that shows widget picker UI; shows content only if `enableWidgetPickerRefactor` flag is
- * on and compose is available.
- */
+/** Activity that shows widget picker UI; shows content only if compose is available. */
 open class WidgetPickerActivity :
     BaseActivity(), OnBackPressedDispatcherOwner, OnBackAnimationCallback, LifecycleOwner {
     private var _dragLayer: SimpleDragLayer<WidgetPickerActivity>? = null
