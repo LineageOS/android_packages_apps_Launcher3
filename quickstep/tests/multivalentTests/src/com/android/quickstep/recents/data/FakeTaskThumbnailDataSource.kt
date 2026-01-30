@@ -31,7 +31,7 @@ class FakeTaskThumbnailDataSource : TaskThumbnailDataSource {
     val taskIdToBitmap: MutableMap<Int, Bitmap?> =
         (0..10).associateWith { mock<Bitmap>() }.toMutableMap()
     private val completionPrevented: MutableSet<Int> = mutableSetOf()
-    private val getThumbnailCalls = mutableMapOf<Int, List<RequestResolution>>()
+    private val getThumbnailCalls = mutableMapOf<Int, List<GetThumbnailRequest>>()
 
     var highResEnabled = true
     private var cacheSize = taskIdToBitmap.size
@@ -43,9 +43,11 @@ class FakeTaskThumbnailDataSource : TaskThumbnailDataSource {
     override suspend fun getThumbnail(
         task: Task,
         requestResolution: RequestResolution,
+        shouldMakeRequestIfNeeded: Boolean,
     ): ThumbnailData? {
         getThumbnailCalls[task.key.id] =
-            (getThumbnailCalls[task.key.id] ?: emptyList()) + requestResolution
+            (getThumbnailCalls[task.key.id] ?: emptyList()) +
+                GetThumbnailRequest(requestResolution, shouldMakeRequestIfNeeded)
 
         while (task.key.id in completionPrevented) {
             // yield doesn't work here with an UnconfinedTestDispatcher
@@ -77,6 +79,8 @@ class FakeTaskThumbnailDataSource : TaskThumbnailDataSource {
 
     fun getNumberOfGetThumbnailCalls(taskId: Int): Int = getThumbnailCalls(taskId).size
 
+    fun getThumbnailCallsRes(taskId: Int) = getThumbnailCalls(taskId).map { it.requestResolution }
+
     fun getThumbnailCalls(taskId: Int) = getThumbnailCalls[taskId] ?: emptyList()
 
     fun preventThumbnailLoad(taskId: Int) {
@@ -90,4 +94,9 @@ class FakeTaskThumbnailDataSource : TaskThumbnailDataSource {
     fun completeLoading() {
         completionPrevented.clear()
     }
+
+    data class GetThumbnailRequest(
+        val requestResolution: RequestResolution,
+        val shouldMakeRequestIfNeeded: Boolean,
+    )
 }

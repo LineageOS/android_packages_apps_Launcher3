@@ -161,6 +161,7 @@ constructor(
     override suspend fun getThumbnail(
         task: Task,
         requestResolution: RequestResolution,
+        shouldMakeRequestIfNeeded: Boolean,
     ): ThumbnailData? {
         if (!enableLowResThumbnailPreloading()) {
             throw IllegalArgumentException(
@@ -188,6 +189,10 @@ constructor(
         val cachedThumbnail: ThumbnailData? = cache.getAndInvalidateIfModified(task.key)
         if (cachedThumbnail?.thumbnail != null && isCorrectResolution(cachedThumbnail)) {
             return cachedThumbnail
+        }
+
+        if (!shouldMakeRequestIfNeeded) {
+            return null
         }
 
         return withContext(backgroundDispatcher) {

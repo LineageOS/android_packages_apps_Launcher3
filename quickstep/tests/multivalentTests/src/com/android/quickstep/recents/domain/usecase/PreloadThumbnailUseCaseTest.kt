@@ -113,7 +113,7 @@ class PreloadThumbnailUseCaseTest {
             thumbnailDataSource.setCacheSize(1)
             systemUnderTest.preloadThumbnails()
 
-            assertThat(thumbnailDataSource.getThumbnailCalls(0)).containsExactly(LOW_RES)
+            assertThat(thumbnailDataSource.getThumbnailCallsRes(0)).containsExactly(LOW_RES)
             (1..5).forEach { taskId ->
                 assertThat(thumbnailDataSource.getNumberOfGetThumbnailCalls(taskId)).isEqualTo(0)
             }
@@ -128,7 +128,8 @@ class PreloadThumbnailUseCaseTest {
             systemUnderTest.preloadThumbnails()
 
             (0..5).forEach { taskId ->
-                assertThat(thumbnailDataSource.getThumbnailCalls(taskId)).containsExactly(LOW_RES)
+                assertThat(thumbnailDataSource.getThumbnailCallsRes(taskId))
+                    .containsExactly(LOW_RES)
             }
         }
 
