@@ -27,10 +27,10 @@ import android.graphics.Rect
 import android.os.Bundle
 import android.provider.Settings
 import android.service.personalcontext.hint.BundleHint
+import android.service.personalcontext.hint.ContentCaptureConversationEvent.ConversationUpdateEvent
+import android.service.personalcontext.hint.ContentCaptureConversationHint
 import android.service.personalcontext.hint.ContextHint
 import android.service.personalcontext.hint.ContextHintWithSignature
-import android.service.personalcontext.hint.ConversationEvent.ConversationUpdateEvent
-import android.service.personalcontext.hint.ConversationHint
 import android.service.personalcontext.insight.ActionableInsight
 import android.service.personalcontext.insight.ContextInsight
 import android.service.personalcontext.insight.DisplayInsight
@@ -274,7 +274,8 @@ constructor(
             insight.originHints.firstOrNull { hint ->
                 when (val contextHint = hint.contextHint) {
                     is BundleHint -> contextHint.dataBundle.getBoolean(RENDER_IN_CUE_BAR, false)
-                    is ConversationHint -> true // ConversationHint always renders
+                    is ContentCaptureConversationHint ->
+                        true // ContentCaptureConversationHint always renders
                     else -> false
                 }
             } ?: return emptyList()
@@ -300,7 +301,7 @@ constructor(
             }
         val actionType: String
         var activityId =
-            if (contextHint is ConversationHint) {
+            if (contextHint is ContentCaptureConversationHint) {
                 val conversationEvent = contextHint.conversationEvent
                 (conversationEvent as? ConversationUpdateEvent)?.conversationData?.activityId
             } else if (contextHint is BundleHint) {
@@ -345,7 +346,7 @@ constructor(
                 actionType = MR_ACTION_TYPE_NAME
                 extras = null // Display insights have no action extras
                 val autofillId =
-                    if (contextHint is ConversationHint) {
+                    if (contextHint is ContentCaptureConversationHint) {
                         val conversationEvent = contextHint.conversationEvent
                         (conversationEvent as? ConversationUpdateEvent)
                             ?.conversationData
