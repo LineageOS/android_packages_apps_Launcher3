@@ -24,7 +24,6 @@ import android.platform.test.rule.LimitDevicesRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherAppState
-import com.android.launcher3.LauncherSettings
 import com.android.launcher3.icons.IconCache
 import com.android.launcher3.icons.cache.CachedObject
 import com.android.launcher3.model.WidgetItem
@@ -32,7 +31,6 @@ import com.android.launcher3.model.data.PackageItemInfo
 import com.android.launcher3.util.TestActivityContext
 import com.android.launcher3.util.WidgetUtils
 import com.android.launcher3.widget.LauncherAppWidgetProviderInfo
-import com.android.launcher3.widget.PendingAddWidgetInfo
 import com.android.launcher3.widget.model.WidgetsListBaseEntry
 import com.android.launcher3.widget.model.WidgetsListContentEntry
 import com.android.launcher3.widget.model.WidgetsListHeaderEntry
@@ -127,44 +125,6 @@ class WidgetPickerDataProviderTest {
         }
 
         verify(changeListener, times(1)).onWidgetsBound()
-        verifyNoMoreInteractions(changeListener)
-    }
-
-    @Test
-    fun setWidgetRecommendations_callsBackTheListener_andUpdatedRecommendationsAvailable() {
-        underTest.setWidgets(allWidgets = appWidgetListBaseEntries())
-        assertThat(underTest.get().recommendations).isEmpty()
-
-        underTest.setChangeListener(changeListener)
-        val recommendations =
-            listOf(
-                PendingAddWidgetInfo(
-                    appWidgetItem.widgetInfo,
-                    LauncherSettings.Favorites.CONTAINER_WIDGETS_PREDICTION,
-                )
-            )
-        underTest.setWidgetRecommendations(recommendations)
-
-        assertThat(underTest.get().recommendations).hasSize(1)
-        verify(changeListener, times(1)).onRecommendedWidgetsBound()
-        verifyNoMoreInteractions(changeListener)
-    }
-
-    @Test
-    fun setChangeListener_null_noCallback() {
-        underTest.setChangeListener(changeListener)
-        underTest.setChangeListener(null) // reset
-
-        underTest.setWidgets(allWidgets = appWidgetListBaseEntries())
-        val recommendations =
-            listOf(
-                PendingAddWidgetInfo(
-                    appWidgetItem.widgetInfo,
-                    LauncherSettings.Favorites.CONTAINER_WIDGETS_PREDICTION,
-                )
-            )
-        underTest.setWidgetRecommendations(recommendations)
-
         verifyNoMoreInteractions(changeListener)
     }
 

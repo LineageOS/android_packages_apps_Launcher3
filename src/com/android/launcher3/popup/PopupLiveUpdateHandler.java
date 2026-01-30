@@ -61,6 +61,4 @@ public abstract class PopupLiveUpdateHandler<T extends Context & ActivityContext
     @Override
     public void onWidgetsBound() {} // NO_OP
 
-    @Override
-    public void onRecommendedWidgetsBound() {} // NO_OP
 }
