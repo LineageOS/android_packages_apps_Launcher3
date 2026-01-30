@@ -19,6 +19,7 @@ package com.android.launcher3;
 import static com.android.launcher3.AbstractFloatingView.TYPE_FOLDER;
 import static com.android.launcher3.AbstractFloatingView.TYPE_WIDGET_RESIZE_FRAME;
 import static com.android.launcher3.BubbleTextView.DISPLAY_FOLDER;
+import static com.android.launcher3.Flags.enableCursorDrivenWorkflows;
 import static com.android.launcher3.Flags.enableFileSystemFoldersAsDropTargets;
 import static com.android.launcher3.Flags.enableSystemDragToOtherApps;
 import static com.android.launcher3.Flags.enableTaskbarDragAndDrop;
@@ -44,7 +45,6 @@ import static com.android.launcher3.LauncherState.NORMAL;
 import static com.android.launcher3.LauncherState.SPRING_LOADED;
 import static com.android.launcher3.MotionEventsUtils.isTrackpadMultiFingerSwipe;
 import static com.android.launcher3.Utilities.qsbOnFirstScreen;
-import static com.android.launcher3.Utilities.shouldEnableCursorDrivenWorkflows;
 import static com.android.launcher3.anim.AnimatorListeners.forSuccessCallback;
 import static com.android.launcher3.config.FeatureFlags.FOLDABLE_SINGLE_PAGE;
 import static com.android.launcher3.logging.StatsLogManager.LAUNCHER_STATE_HOME;
@@ -561,8 +561,9 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             mAccessibilityDragListener.onDragStart(dragObject, options);
         }
         if (!mLauncher.isInState(EDIT_MODE)) {
-            mLauncher.getStateManager().goToState(shouldEnableCursorDrivenWorkflows(getContext())
-                    ? DESKTOP_DRAG_MODE : SPRING_LOADED);
+            mLauncher.getStateManager().goToState(
+                    (enableCursorDrivenWorkflows() && options.isMouseDrag)
+                            ? DESKTOP_DRAG_MODE : SPRING_LOADED);
         }
         mStatsLogManager.logger().withItemInfo(dragObject.dragInfo)
                 .withInstanceId(dragObject.logInstanceId)
@@ -2775,7 +2776,9 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     }
 
     private void handleLauncherStateForDrag(DragObject d) {
-        if (!shouldEnableCursorDrivenWorkflows(getContext())) {
+        // Only mouse drag should transition between SPRING_LOADED and DESKTOP_DRAG_MODE when
+        // dragging near the screen edge.
+        if (!enableCursorDrivenWorkflows() || !mDragController.isMouseDrag()) {
             return;
         }
         if (!mLauncher.isInState(SPRING_LOADED) && !mLauncher.isInState(DESKTOP_DRAG_MODE)) {
