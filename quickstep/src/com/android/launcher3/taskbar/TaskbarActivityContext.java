@@ -473,7 +473,11 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
 
     @Override
     public boolean isTransientTaskbar() {
-        return mIsTransient && isPrimaryDisplay() && !isPhoneMode();
+        return isTransienTaskbarForDeviceProfile(mDeviceProfile);
+    }
+
+    private boolean isTransienTaskbarForDeviceProfile(DeviceProfile deviceProfile) {
+        return mIsTransient && isPrimaryDisplay() && !isDeviceProfileForPhoneMode(deviceProfile);
     }
 
     @Override
@@ -535,7 +539,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         Consumer<DeviceProfile> overrideProvider =
                 deviceProfile -> TaskbarDeviceProfileFactory.INSTANCE
                         .createDeviceProfile(
-                                deviceProfile, this
+                                deviceProfile, this,
+                                isTransienTaskbarForDeviceProfile(deviceProfile)
                         );
         mDeviceProfile = originDeviceProfile.toBuilder()
                 .withDimensionsOverride(overrideProvider).build();
@@ -646,8 +651,12 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
      * single window for taskbar and navbar.
      */
     public boolean isPhoneMode() {
-        return mDeviceProfile.getDeviceProperties().isPhone()
-                && !mDeviceProfile.getDeviceProperties().getTaskbarConfiguration()
+        return isDeviceProfileForPhoneMode(mDeviceProfile);
+    }
+
+    private boolean isDeviceProfileForPhoneMode(DeviceProfile deviceProfile) {
+        return deviceProfile.getDeviceProperties().isPhone()
+                && !deviceProfile.getDeviceProperties().getTaskbarConfiguration()
                 .isTaskbarPresent();
     }
 
