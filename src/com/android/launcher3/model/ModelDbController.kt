@@ -81,7 +81,7 @@ internal constructor(
             // Initialize the restore task before opening the DB
             val restoreTask = RestoreDbTask.createRestoreTask(context)
             val dbFile = prefs.get(LauncherPrefs.DB_FILE).ifEmpty { idp.dbFile }
-            openHelper = createDatabaseHelper(false, /* forMigration */ dbFile)
+            openHelper = createDatabaseHelper(forMigration = false, dbFile)
             restoreTask.accept(this)
         }
     }
@@ -260,7 +260,7 @@ internal constructor(
                         isAfterRestore,
                     )
             ) {
-                openHelper = createDatabaseHelper(true, DeviceGridState(idp).dbFile)
+                openHelper = createDatabaseHelper(forMigration = true, destDeviceState.dbFile)
                 gridSizeMigrationLogic.migrateGrid(
                     srcDeviceState,
                     destDeviceState,
