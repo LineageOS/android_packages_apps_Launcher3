@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.ComposeView
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.DragSource
 import com.android.launcher3.DropTarget.DragObject
+import com.android.launcher3.Launcher
 import com.android.launcher3.R
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate
 import com.android.launcher3.dragndrop.DragController
@@ -37,6 +38,7 @@ import com.android.launcher3.dragndrop.DragOptions
 import com.android.launcher3.folder.Folder
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.model.data.ItemInfoWithIcon
 import com.android.launcher3.popup.ui.ComposePopup
 import com.android.launcher3.popup.ui.DeepShortcutClickEvent
 import com.android.launcher3.popup.ui.PopupItem
@@ -74,6 +76,14 @@ open class PopupContainer<T>(
 
     val viewModel = PopupViewModel()
 
+    private fun canAddShortcut(): Boolean {
+        val isPinnable =
+            (originalView.tag as? ItemInfoWithIcon)?.let {
+                (it.runtimeStatusFlags and ItemInfoWithIcon.FLAG_NOT_PINNABLE) == 0
+            } == true
+        return mActivityContext is Launcher && isPinnable
+    }
+
     open fun showComposePopup(systemShortcuts: List<PopupItem>, deepShortcutCount: Int = 0) {
         mIsOpen = true
         popupContainer.addView(this)
@@ -102,27 +112,33 @@ open class PopupContainer<T>(
                             }
                             close(true)
                         },
-                        onAddIconClick = { clickedItem ->
-                            val accessibilityDelegate = mActivityContext?.accessibilityDelegate
-                            if (accessibilityDelegate is LauncherAccessibilityDelegate) {
-                                accessibilityDelegate.addToWorkspace(
-                                    /* itemInfo */ clickedItem,
-                                    /* accessibility= */ false,
-                                )
-                                /*finishCallback=*/ {
-                                    mActivityContext.statsLogManager
-                                        .logger()
-                                        .withItemInfo(clickedItem)
-                                        .log(LauncherEvent.LAUNCHER_TAP_TO_ADD_DEEP_SHORTCUT)
-                                }
-                                Unit
-                            }
+                        onAddIconClick =
+                            if (canAddShortcut())
+                                { clickedItem ->
+                                    val accessibilityDelegate =
+                                        mActivityContext?.accessibilityDelegate
+                                    if (accessibilityDelegate is LauncherAccessibilityDelegate) {
+                                        accessibilityDelegate.addToWorkspace(
+                                            /* itemInfo */ clickedItem,
+                                            /* accessibility= */ false,
+                                        )
+                                        /*finishCallback=*/ {
+                                            mActivityContext.statsLogManager
+                                                .logger()
+                                                .withItemInfo(clickedItem)
+                                                .log(
+                                                    LauncherEvent.LAUNCHER_TAP_TO_ADD_DEEP_SHORTCUT
+                                                )
+                                        }
+                                        Unit
+                                    }
 
-                            // If we have an open folder, don't animate the popup closing.
-                            val folder = getOpenView<Folder>(mActivityContext, TYPE_FOLDER)
-                            close(folder == null)
-                            folder?.close(true)
-                        },
+                                    // If we have an open folder, don't animate the popup closing.
+                                    val folder = getOpenView<Folder>(mActivityContext, TYPE_FOLDER)
+                                    close(folder == null)
+                                    folder?.close(true)
+                                }
+                            else null,
                         onDeepShortcutLongPress = { itemInfoWithIcon, offset ->
                             val touchPoint = PointF(offset.x, offset.y)
                             deepShortcutDragHandler?.onDeepShortcutLongPress(
