@@ -19,6 +19,9 @@ import android.graphics.PointF
 import android.view.View
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.graphics.toPoint
+import com.android.launcher3.AbstractFloatingView.TYPE_FOLDER
+import com.android.launcher3.AbstractFloatingView.closeOpenContainer
+import com.android.launcher3.BubbleTextView
 import com.android.launcher3.Launcher
 import com.android.launcher3.dragndrop.DragOptions
 import com.android.launcher3.dragndrop.DraggableView
@@ -43,7 +46,9 @@ class LauncherDeepShortcutDragHandler(
         val iconSize = launcher.deviceProfile.workspaceIconProfile.iconSizePx
         val iconShift = PointF(touchPoint.x - iconSize / 2, touchPoint.y)
 
-        val dummyIconView = View(launcher)
+        val dummyIconView = BubbleTextView(launcher)
+        dummyIconView.visibility = View.INVISIBLE
+        dummyIconView.applyFromItemInfoWithIcon(itemInfo)
         dummyIconView.background = itemInfo.bitmap.icon.toDrawable(launcher.resources)
 
         val previewProvider = ShortcutDragPreviewProvider(dummyIconView, iconShift.toPoint())
@@ -56,5 +61,8 @@ class LauncherDeepShortcutDragHandler(
             previewProvider,
             DragOptions(),
         )
+
+        // TODO: support dragging from within folder without having to close it
+        closeOpenContainer(launcher, TYPE_FOLDER)
     }
 }
