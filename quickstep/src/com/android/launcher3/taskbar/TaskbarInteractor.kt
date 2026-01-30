@@ -18,7 +18,6 @@ package com.android.launcher3.taskbar
 
 import android.animation.AnimatorSet
 import android.util.SparseArray
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewRootImpl
 import androidx.annotation.AnyThread
@@ -246,60 +245,4 @@ class TaskbarInteractor(private val taskbarUIController: TaskbarUIController) {
 
     @AnyThread
     fun shouldAllowTaskbarToAutoStash() = taskbarUIController.shouldAllowTaskbarToAutoStash()
-
-    @Deprecated(
-        "Should be removed once we turned on [refactorTaskbarUiState()] flag",
-        ReplaceWith("TaskbarUiState.isEventOverBubbleBarViews()"),
-    )
-    fun isEventOverBubbleBarViews(ev: MotionEvent) =
-        taskbarUIController.isEventOverBubbleBarViews(ev)
-
-    @Deprecated(
-        "Should be removed once we turned on [refactorTaskbarUiState()] flag",
-        ReplaceWith("TaskbarUiState.isEventOverAnyTaskbarView()"),
-    )
-    fun isEventOverAnyTaskbarItem(ev: MotionEvent) =
-        taskbarUIController.isEventOverAnyTaskbarItem(ev)
-
-    @Deprecated(
-        "Should be removed once we turned on [refactorTaskbarUiState()] flag",
-        ReplaceWith("TaskbarUiState.getShowDesktopTaskbarForFreeformDisplayRef.value()"),
-    )
-    fun canPinAppWithContextMenu() = taskbarUIController.canPinAppWithContextMenu()
-
-    @Deprecated(
-        "Should be removed once we turned on [refactorTaskbarUiState()] flag",
-        ReplaceWith("TaskbarUiState.getHasBubblesRef().value()"),
-    )
-    fun hasBubbles() =
-        if (taskbarUIController is LauncherTaskbarUIController) {
-            taskbarUIController.hasBubbles()
-        } else null
-
-    @Deprecated(
-        "Should be removed once we turned on [refactorTaskbarUiState()] flag",
-        ReplaceWith("TaskbarUiState.getShouldShowEduOnAppLaunchRef().value()"),
-    )
-    fun shouldShowEduOnAppLaunch() =
-        if (taskbarUIController is LauncherTaskbarUIController) {
-            taskbarUIController.shouldShowEduOnAppLaunch()
-        } else null
-
-    @Deprecated(
-        "Should be removed once we turned on [refactorTaskbarUiState()] flag",
-        ReplaceWith("TaskbarUiState.isDraggingItemRef().value()"),
-    )
-    fun isDraggingItem() = taskbarUIController.isDraggingItem
-
-    @Deprecated(
-        "Should be removed once we turned on [refactorTaskbarUiState()] flag",
-        ReplaceWith("TaskbarUiState.isTaskbarStashedRef().value()"),
-    )
-    fun isTaskbarStashed() = taskbarUIController.isTaskbarStashed
-
-    @Deprecated(
-        "Should be removed once we turned on [refactorTaskbarUiState()] flag",
-        ReplaceWith("TaskbarUiState.isTaskbarAllAppsOpenRef().value()"),
-    )
-    fun isTaskbarAllAppsOpen() = taskbarUIController.isTaskbarAllAppsOpen
 }

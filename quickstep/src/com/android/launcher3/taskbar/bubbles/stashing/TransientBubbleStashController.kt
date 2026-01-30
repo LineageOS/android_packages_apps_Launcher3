@@ -29,7 +29,6 @@ import androidx.core.animation.doOnStart
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.app.animation.Interpolators.EMPHASIZED
 import com.android.app.animation.Interpolators.LINEAR
-import com.android.launcher3.Flags.refactorTaskbarUiState
 import com.android.launcher3.R
 import com.android.launcher3.anim.AnimatedFloat
 import com.android.launcher3.anim.SpringAnimationBuilder
@@ -103,9 +102,7 @@ class TransientBubbleStashController(
         set(value) {
             // TODO(b/404636836): after launching refactorTaskbarUiState(), rely only on
             //  taskbarUiState to track isStashed state.
-            if (refactorTaskbarUiState()) {
-                taskbarUiState.isBubbleStashed = value
-            }
+            taskbarUiState.isBubbleStashed = value
             field = value
         }
 

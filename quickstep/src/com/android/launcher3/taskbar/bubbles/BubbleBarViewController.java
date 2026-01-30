@@ -18,7 +18,6 @@ package com.android.launcher3.taskbar.bubbles;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
-import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.Utilities.mapRange;
 import static com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLAG_AUTOHIDE_SUSPEND_BUBBLES;
 import static com.android.launcher3.taskbar.TaskbarPinningController.PINNING_PERSISTENT;
@@ -180,28 +179,26 @@ public class BubbleBarViewController {
         mActivity = activity;
         mTaskbarUiState = taskbarUiState;
         mBarView = barView;
-        if (refactorTaskbarUiState()) {
-            mBarView.setTaskbarUiState(taskbarUiState);
-            mBarView.setOnHierarchyChangeListener(new ViewGroup.OnHierarchyChangeListener() {
-                @Override
-                public void onChildViewAdded(View view, View view1) {
-                    onChildViewCountChanged();
-                }
+        mBarView.setTaskbarUiState(taskbarUiState);
+        mBarView.setOnHierarchyChangeListener(new ViewGroup.OnHierarchyChangeListener() {
+            @Override
+            public void onChildViewAdded(View view, View view1) {
+                onChildViewCountChanged();
+            }
 
-                @Override
-                public void onChildViewRemoved(View view, View view1) {
-                    onChildViewCountChanged();
-                }
+            @Override
+            public void onChildViewRemoved(View view, View view1) {
+                onChildViewCountChanged();
+            }
 
-                private void onChildViewCountChanged() {
-                    taskbarUiState.setHasBubbles(mBarView.getBubbleChildCount() > 0);
-                }
-            });
-            mBarView.addOnLayoutChangeListener(mBubbleBarViewOnLayoutChangeListener);
-            mBarView.getBoundsOnScreen(mTempRect);
-            mTaskbarUiState.setBubbleBarRect(mTempRect);
-            mTaskbarUiState.setIsBubbleBarViewVisible(mBarView.getVisibility() == VISIBLE);
-        }
+            private void onChildViewCountChanged() {
+                taskbarUiState.setHasBubbles(mBarView.getBubbleChildCount() > 0);
+            }
+        });
+        mBarView.addOnLayoutChangeListener(mBubbleBarViewOnLayoutChangeListener);
+        mBarView.getBoundsOnScreen(mTempRect);
+        mTaskbarUiState.setBubbleBarRect(mTempRect);
+        mTaskbarUiState.setIsBubbleBarViewVisible(mBarView.getVisibility() == VISIBLE);
         mBubbleBarContainer = bubbleBarContainer;
         mSystemUiProxy = SystemUiProxy.INSTANCE.get(mActivity);
         mBubbleBarAlpha = new MultiValueAlpha(mBarView, 1 /* num alpha channels */);
@@ -1496,9 +1493,7 @@ public class BubbleBarViewController {
     /** Called when the controller is destroyed. */
     public void onDestroy() {
         adjustTaskbarToBubbleBarState(/*isBubbleBarExpanded = */false);
-        if (refactorTaskbarUiState()) {
-            mBarView.removeOnLayoutChangeListener(mBubbleBarViewOnLayoutChangeListener);
-        }
+        mBarView.removeOnLayoutChangeListener(mBubbleBarViewOnLayoutChangeListener);
     }
 
     /**

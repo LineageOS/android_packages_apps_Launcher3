@@ -22,7 +22,6 @@ import static com.android.app.animation.Interpolators.FINAL_FRAME;
 import static com.android.app.animation.Interpolators.INSTANT;
 import static com.android.app.animation.Interpolators.LINEAR;
 import static com.android.internal.jank.InteractionJankMonitor.Configuration;
-import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.QuickstepTransitionManager.PINNED_TASKBAR_TRANSITION_DURATION;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_TRANSIENT_TASKBAR_HIDE;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_TRANSIENT_TASKBAR_SHOW;
@@ -37,6 +36,7 @@ import static com.android.quickstep.util.SystemUiFlagUtils.isTaskbarHidden;
 import static com.android.systemui.shared.Flags.cueBarAceMigration;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DIALOG_SHOWING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DUAL_SHADE_ENABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_VISIBLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
@@ -63,7 +63,6 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.launcher3.Alarm;
-import com.android.launcher3.BuildConfig;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.R;
@@ -733,22 +732,9 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
                 /* shouldBubblesFollow= */ !bubbleBarExpanded);
     }
 
-    @AnyThread
-    public boolean shouldAllowTaskbarToAutoStash() {
-        if (refactorTaskbarUiState()) {
-            final boolean ret = newShouldAllowTaskbarToAutoStash();
-            if (BuildConfig.IS_STUDIO_BUILD && ret != legacyShouldAllowTaskbarToAutoStash()) {
-                throw new IllegalStateException("shouldAllowTaskbarToAutoStash doesn't match");
-            }
-            return ret;
-        } else {
-            return legacyShouldAllowTaskbarToAutoStash();
-        }
-    }
-
     /** @return if we should allow taskbar to auto stash. */
     @AnyThread
-    private boolean newShouldAllowTaskbarToAutoStash() {
+    public boolean shouldAllowTaskbarToAutoStash() {
         final boolean isPrimaryDisplay = mTaskbarUiState.isPrimaryDisplay();
         if (mTaskbarUiState.isThreeButtonNav() && isPrimaryDisplay) {
             return false;
@@ -765,35 +751,8 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
                 LauncherPrefs.TASKBAR_PINNING_IN_DESKTOP_MODE.get(mActivity);
         final boolean isTaskbarShowingDesktopTasks = DesktopVisibilityController.INSTANCE
                 .get(mActivity).isInDesktopMode(mActivity.getDisplayId())
-                        || mTaskbarUiState.getShowDesktopTaskbarForFreeformDisplay();
+                || mTaskbarUiState.getShowDesktopTaskbarForFreeformDisplay();
         return !isTaskbarPinningOnInDesktopMode && isTaskbarShowingDesktopTasks;
-    }
-
-    /**
-     * This is the legacy pull model to query is we should allow taskbar to auto stash, we will be
-     * moving to {@link #newShouldAllowTaskbarToAutoStash()} after turning on flag
-     * {@link refactorTaskbarUiState()}
-     *
-     * @return if we should allow taskbar to auto stash
-     */
-    @Deprecated
-    private boolean legacyShouldAllowTaskbarToAutoStash() {
-        if (mActivity.isThreeButtonNav() && mActivity.isPrimaryDisplay()) {
-            return false;
-        }
-
-        if (mActivity.isTransientTaskbar()) {
-            return true;
-        }
-        if (!mActivity.isPrimaryDisplay()) {
-            // On connected display, only allow to auto stash if the feature flag is ON.
-            return enableAutoStashConnectedDisplayTaskbar.isTrue();
-        }
-
-        // In desktop mode on primary displays, allow taskbar to stash based on user pref.
-        boolean isTaskbarPinningOnInDesktopMode = LauncherPrefs.TASKBAR_PINNING_IN_DESKTOP_MODE.get(
-                mActivity);
-        return !isTaskbarPinningOnInDesktopMode && mActivity.isTaskbarShowingDesktopTasks();
     }
 
     /**
@@ -1260,9 +1219,7 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
     }
 
     private void updateIsTaskbarStashed(boolean isStashed) {
-        if (refactorTaskbarUiState()) {
-            mActivity.getTaskbarUiState().setTaskbarStashed(isStashed);
-        }
+        mActivity.getTaskbarUiState().setTaskbarStashed(isStashed);
     }
 
     public void applyState() {
@@ -1349,11 +1306,19 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
         long animDuration = TASKBAR_STASH_DURATION;
         long startDelay = 0;
 
-        updateStateForFlag(FLAG_STASHED_IN_APP_SYSUI, hasAnyFlag(systemUiStateFlags,
-                SYSUI_STATE_DIALOG_SHOWING | (ENABLE_TASKBAR_BEHIND_SHADE.isTrue()
-                        ? 0
-                        : SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE)
-        ));
+        final boolean isDualShadeDesktop =
+                ((systemUiStateFlags & SYSUI_STATE_DUAL_SHADE_ENABLED) != 0)
+                        && mActivity.isDesktopFormFactor();
+
+        long stashMask = SYSUI_STATE_DIALOG_SHOWING;
+        if (!ENABLE_TASKBAR_BEHIND_SHADE.isTrue() && !isDualShadeDesktop) {
+            // Stash when the notification panel is visible, UNLESS:
+            // 1. The "Taskbar behind shade" flag is enabled.
+            // 2. It is a dual-shade desktop environment.
+            stashMask |= SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE;
+        }
+
+        updateStateForFlag(FLAG_STASHED_IN_APP_SYSUI, hasAnyFlag(systemUiStateFlags, stashMask));
 
         boolean stashForBubbles = hasAnyFlag(FLAG_IN_OVERVIEW)
                 && hasAnyFlag(systemUiStateFlags, SYSUI_STATE_BUBBLES_EXPANDED)

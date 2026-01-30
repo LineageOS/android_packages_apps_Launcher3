@@ -372,7 +372,7 @@ constructor(
                         return@forEach
                     }
                 }
-                if (taskInfo1.isVisible) {
+                if (taskInfo1.isVisible && !isTask1Automated) {
                     isFirstVisibleTaskFound = true
                 }
                 if (task2 != null) {

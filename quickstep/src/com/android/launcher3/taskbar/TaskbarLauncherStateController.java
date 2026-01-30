@@ -49,14 +49,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.AbstractFloatingView;
-import com.android.launcher3.BuildConfig;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.Flags;
 import com.android.launcher3.Hotseat.HotseatQsbAlphaId;
 import com.android.launcher3.LauncherInteractor;
 import com.android.launcher3.LauncherState;
 import com.android.launcher3.LauncherUiState;
-import com.android.launcher3.LauncherUiStateUtil;
 import com.android.launcher3.QuickstepTransitionManager;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.anim.AnimatedFloat;
@@ -290,15 +288,7 @@ public class TaskbarLauncherStateController {
     }
 
     private boolean hasLauncherBeenResumed() {
-        if (Flags.refactorTaskbarUiState()) {
-            final boolean ret = mLauncherUiState.isResumed();
-            if (BuildConfig.IS_STUDIO_BUILD && ret != mLauncher.hasBeenResumed()) {
-                throw new IllegalStateException("hasBeenResumed doesn't match");
-            }
-            return ret;
-        } else {
-            return mLauncher.hasBeenResumed();
-        }
+        return mLauncherUiState.isResumed();
     }
 
     /** Initializes the controller instance, and applies the initial state immediately. */
@@ -328,7 +318,7 @@ public class TaskbarLauncherStateController {
             runForRecentsWindowManager(recentsWindowManager ->
                     recentsWindowManager.getStateManager().addStateListener(mRecentsStateListener));
         }
-        mLauncherState = LauncherUiStateUtil.getLauncherState(mLauncher, mLauncherUiState);
+        mLauncherState = mLauncherUiState.getLauncherState();
         updateStateForSysuiFlags(sysuiStateFlags, /*applyState*/ false);
 
         applyState(0);
@@ -995,9 +985,7 @@ public class TaskbarLauncherStateController {
 
                 @Override
                 public void onAnimationStart(Animator animation) {
-                    float hotseatIconsAlpha =
-                            LauncherUiStateUtil.getTaskbarAlignmentChannelAlpha(
-                                    mLauncher, mLauncherUiState);
+                    float hotseatIconsAlpha = mLauncherUiState.getTaskbarAlignmentChannelAlpha();
                     if (hotseatIconsAlpha > 0) {
                         updateIconAlphaForHome(hotseatIconsAlpha, ALPHA_CHANNEL_TASKBAR_ALIGNMENT);
                     }
@@ -1156,13 +1144,6 @@ public class TaskbarLauncherStateController {
         mLauncher.updateHotseatAndQsbTranslationX(targetX, animate, mIsQsbInline);
     }
 
-    private boolean isStateManagerInState(@NonNull LauncherState state) {
-        return LauncherUiStateUtil.getLauncherState(mLauncher, mLauncherUiState) == state
-                || state == getFromRecentsWindowManager(
-                recentsWindowManager ->
-                        toLauncherState(recentsWindowManager.getStateManager().getState()));
-    }
-
     public boolean isStateTransitionToAllAppsInProgress() {
         return hasAnyFlag(FLAG_LAUNCHER_IN_STATE_TRANSITION) && mLauncherState == ALL_APPS;
     }
@@ -1262,23 +1243,11 @@ public class TaskbarLauncherStateController {
     }
 
     private DeviceProfile getDeviceProfile() {
-        return LauncherUiStateUtil.getDeviceProfile(mLauncher, mLauncherUiState);
+        return mLauncherUiState.getDeviceProfileRef().getValue();
     }
 
     private boolean isOverlayShown() {
-        if (Flags.refactorTaskbarUiState()) {
-            final boolean ret = mLauncherUiState.isOverlayShown();
-            if (BuildConfig.IS_STUDIO_BUILD && ret != legacyIsOverlayShown()) {
-                throw new IllegalStateException("isOverlayShown doesn't match");
-            }
-            return ret;
-        } else {
-            return legacyIsOverlayShown();
-        }
-    }
-
-    private boolean legacyIsOverlayShown() {
-        return mLauncher.isOverlayShown();
+        return mLauncherUiState.isOverlayShown();
     }
 
     private static String getStateString(int flags) {

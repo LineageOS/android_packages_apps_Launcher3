@@ -23,7 +23,6 @@ import static android.window.DesktopModeFlags.ENABLE_TASKBAR_OVERFLOW;
 import static com.android.launcher3.BubbleTextView.DISPLAY_TASKBAR;
 import static com.android.launcher3.Flags.enableCursorDrivenWorkflows;
 import static com.android.launcher3.Flags.enableLauncherIconShapes;
-import static com.android.launcher3.Flags.refactorTaskbarUiState;
 import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_GROUP;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FOLDER;
@@ -232,9 +231,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         mPinnedHitRectBuffer = resources.getDimensionPixelSize(
             R.dimen.taskbar_pinned_hit_rect_buffer);
 
-        if (refactorTaskbarUiState()) {
-            mTaskbarUiState.setIsTaskbarViewShown(isShown());
-        }
+        mTaskbarUiState.setIsTaskbarViewShown(isShown());
         mTransientTaskbarMinWidth = resources.getDimension(R.dimen.transient_taskbar_min_width);
 
         // TODO: Disable touch events on QSB otherwise it can crash.
@@ -1584,9 +1581,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
     @Override
     public void onVisibilityAggregated(boolean isVisible) {
         super.onVisibilityAggregated(isVisible);
-        if (refactorTaskbarUiState()) {
-            mTaskbarUiState.setIsTaskbarViewShown(isShown());
-        }
+        mTaskbarUiState.setIsTaskbarViewShown(isShown());
     }
 
     /**

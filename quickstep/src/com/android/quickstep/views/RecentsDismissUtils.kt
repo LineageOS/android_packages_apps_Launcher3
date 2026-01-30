@@ -233,6 +233,7 @@ constructor(
                     shouldRemoveTaskView,
                     isSplitSelection,
                     gridEndData,
+                    isDismissingHomeTask,
                 )
             } else {
                 dismissedTaskView?.isBeingDismissed = false
@@ -962,6 +963,7 @@ constructor(
         shouldRemoveTask: Boolean,
         dismissingForSplitSelection: Boolean,
         gridEndData: GridEndData,
+        isDismissingHomeTask: Boolean,
     ) {
         with(recentsView) {
             if (pageCount == 0) {
@@ -1003,7 +1005,7 @@ constructor(
                 mTopRowIdSet.remove(dismissedTaskViewId)
 
                 // Update the UI after removal and snap to page.
-                updateUiAfterTaskRemoval(dismissedTaskView, pageToSnapTo)
+                updateUiAfterTaskRemoval(dismissedTaskView, pageToSnapTo, isDismissingHomeTask)
 
                 if (!dismissingForSplitSelection) {
                     InteractionJankMonitorWrapper.end(Cuj.CUJ_LAUNCHER_OVERVIEW_TASK_DISMISS)
@@ -1011,7 +1013,7 @@ constructor(
             }
 
             // Run the final page snapping and relayout
-            if (dismissedTaskView?.isRunningTask == true && dismissedTaskView !== homeTaskView) {
+            if (dismissedTaskView?.isRunningTask == true && !isDismissingHomeTask) {
                 finishRecentsAnimation(/* toHome */ true, /* shouldPip */ false, onFinishComplete)
             } else {
                 onFinishComplete()
@@ -1142,13 +1144,17 @@ constructor(
         }
     }
 
-    private fun updateUiAfterTaskRemoval(dismissedTaskView: TaskView?, pageToSnapTo: Int) {
+    private fun updateUiAfterTaskRemoval(
+        dismissedTaskView: TaskView?,
+        pageToSnapTo: Int,
+        isDismissingHomeTask: Boolean,
+    ) {
         with(recentsView) {
             if (taskViewCount == 0) {
                 if (!isSplitSelectionActive) {
                     removeViewInLayout(clearAllButton)
                     removeViewInLayout(addDeskButton)
-                    if (dismissedTaskView === homeTaskView) {
+                    if (isDismissingHomeTask) {
                         updateEmptyMessage()
                     } else {
                         if (!mUtils.isInDesktopFirstMode()) {
