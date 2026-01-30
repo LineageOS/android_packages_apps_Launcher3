@@ -36,6 +36,7 @@ import android.content.pm.ShortcutInfo;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.os.UserHandle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -52,6 +53,7 @@ import com.android.launcher3.shortcuts.ShortcutRequest;
 import com.android.launcher3.taskbar.bubbles.flyout.BubbleBarFlyoutMessage;
 import com.android.launcher3.taskbar.bubbles.model.BubbleIcon;
 import com.android.launcher3.util.UserIconInfo;
+import com.android.wm.shell.Flags;
 import com.android.wm.shell.shared.bubbles.BubbleInfo;
 import com.android.wm.shell.shared.bubbles.ParcelableFlyoutMessage;
 
@@ -106,11 +108,21 @@ public class BubbleCreator {
             Log.w(TAG, "Unable to find appInfo: " + info.getPackageName());
             return null;
         }
-        // TODO: Can use BubbleInfo to get icon and label
         PackageManager pm = context.getPackageManager();
         String appName = info.getAppName();
-        Drawable appIcon = appInfo.loadUnbadgedIcon(pm);
-
+        Drawable appIcon = null;
+        // Prioritize the icon provided in BubbleInfo. This icon is resolved by WMShell
+        // (BubbleData) to be the activity-specific icon.
+        if (Flags.useBubbleIconFromActivityInfo()) {
+            Icon iconFromBubbleInfo = info.getIcon();
+            if (iconFromBubbleInfo != null) {
+                appIcon = iconFromBubbleInfo.loadDrawable(context);
+            }
+        }
+        // Fallback to loading the application's unbadged icon
+        if (appIcon == null) {
+            appIcon = appInfo.loadUnbadgedIcon(pm);
+        }
         return populateBubble(context, info, appIcon, appName, barView, existingBubble);
     }
 
