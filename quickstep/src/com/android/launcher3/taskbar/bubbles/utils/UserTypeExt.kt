@@ -19,7 +19,7 @@
 package com.android.launcher3.taskbar.bubbles.utils
 
 import com.android.launcher3.util.UserIconInfo
-import com.android.wm.shell.shared.bubbles.UserType
+import com.android.users.UserType
 
 /** Converts a [UserType] to a [UserIconInfo.UserType]. */
 fun UserType.toUserIconInfoType(): Int =
