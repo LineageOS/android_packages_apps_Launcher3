@@ -26,7 +26,11 @@ interface TaskThumbnailDataSource {
     )
     suspend fun getThumbnail(task: Task): ThumbnailData?
 
-    suspend fun getThumbnail(task: Task, requestResolution: RequestResolution): ThumbnailData?
+    suspend fun getThumbnail(
+        task: Task,
+        requestResolution: RequestResolution,
+        shouldMakeRequestIfNeeded: Boolean = true,
+    ): ThumbnailData?
 
     fun getCacheSize(): Int
 

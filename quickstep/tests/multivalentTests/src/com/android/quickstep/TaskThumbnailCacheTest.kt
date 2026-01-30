@@ -218,6 +218,26 @@ class TaskThumbnailCacheTest {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_LOW_RES_THUMBNAIL_PRELOADING)
+    fun getThumbnailWithLowRes_doesNotRequest_whenNoRequestSettingOnNoCachedValueAvailable() =
+        testScope.runTest {
+            val task = Task(createTaskKey(TASK_ID))
+            val thumbnailData = ThumbnailData()
+
+            whenever(activityManagerWrapper.getTaskThumbnail(TASK_ID, true))
+                .thenReturn(thumbnailData)
+
+            assertThat(
+                    systemUnderTest.getThumbnail(
+                        task,
+                        RequestResolution.LOW_RES,
+                        shouldMakeRequestIfNeeded = false,
+                    )
+                )
+                .isNull()
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_LOW_RES_THUMBNAIL_PRELOADING)
     fun getThumbnailWithLowRes_requestsLowRes_whenNoCachedValueAvailable() =
         testScope.runTest {
             val task = Task(createTaskKey(TASK_ID))
