@@ -564,10 +564,11 @@ public class DeviceProfile {
         }
     }
 
-    public TaskbarProfile updateTaskbarProfile(Resources res) {
+    /** Creates a taskbar profile based on this device profiles. */
+    public TaskbarProfile updateTaskbarProfile(Resources res, Boolean isTransient) {
         return TaskbarProfile.Factory.createTaskbarProfile(
                 res,
-                inv.taskbarModeUtil.isTransient(mInfo),
+                isTransient,
                 mDeviceProperties.getTaskbarConfiguration().isTaskbarPresent(),
                 mDisplayOptionSpec
         );

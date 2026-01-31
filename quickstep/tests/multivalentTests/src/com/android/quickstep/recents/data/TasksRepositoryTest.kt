@@ -28,6 +28,7 @@ import android.view.Display.DEFAULT_DISPLAY
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.Flags
 import com.android.launcher3.Flags.enableLowResThumbnailPreloading
+import com.android.quickstep.recents.data.FakeTaskThumbnailDataSource.GetThumbnailRequest
 import com.android.quickstep.task.thumbnail.data.TaskThumbnailDataSource.RequestResolution.ANY_RES
 import com.android.quickstep.task.thumbnail.data.TaskThumbnailDataSource.RequestResolution.HIGH_RES
 import com.android.quickstep.util.DesktopTask
@@ -217,7 +218,7 @@ class TasksRepositoryTest {
             assertThat(systemUnderTest.getThumbnailById(0).first()?.thumbnail)
                 .isEqualTo(taskThumbnailDataSource.taskIdToBitmap[0])
             if (enableLowResThumbnailPreloading()) {
-                assertThat(taskThumbnailDataSource.getThumbnailCalls(0))
+                assertThat(taskThumbnailDataSource.getThumbnailCallsRes(0))
                     .containsExactly(ANY_RES, HIGH_RES)
                     .inOrder()
             } else {
@@ -533,7 +534,7 @@ class TasksRepositoryTest {
             setHighResEnabled(false)
             setHighResEnabled(true)
 
-            assertThat(taskThumbnailDataSource.getThumbnailCalls(1)).apply {
+            assertThat(taskThumbnailDataSource.getThumbnailCallsRes(1)).apply {
                 if (enableLowResThumbnailPreloading()) {
                     containsExactly(ANY_RES, HIGH_RES).inOrder()
                 } else {
@@ -567,7 +568,7 @@ class TasksRepositoryTest {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_LOW_RES_THUMBNAIL_PRELOADING)
-    fun setVisibleTasks_getsAnyThumbnailThenHighRes() =
+    fun setVisibleTasks_getsAnyThumbnailWithoutRequestingThenHighRes() =
         testScope.runTest {
             recentsModel.seedTasks(defaultTaskList)
             systemUnderTest.getAllTaskData(DEFAULT_DISPLAY, forceRefresh = true)
@@ -580,7 +581,10 @@ class TasksRepositoryTest {
             }
 
             assertThat(taskThumbnailDataSource.getThumbnailCalls(1))
-                .containsExactly(ANY_RES, HIGH_RES)
+                .containsExactly(
+                    GetThumbnailRequest(ANY_RES, shouldMakeRequestIfNeeded = false),
+                    GetThumbnailRequest(HIGH_RES, shouldMakeRequestIfNeeded = true),
+                )
                 .inOrder()
             assertThat(task1ThumbnailValues.map { it?.reducedResolution }.last()).isEqualTo(false)
         }
@@ -600,10 +604,34 @@ class TasksRepositoryTest {
             }
 
             systemUnderTest.setVisibleTasks(DEFAULT_DISPLAY, setOf(1))
-            assertThat(taskThumbnailDataSource.getThumbnailCalls(1).single()).isEqualTo(ANY_RES)
+            assertThat(taskThumbnailDataSource.getThumbnailCallsRes(1).single()).isEqualTo(ANY_RES)
 
             setHighResEnabled(true)
-            assertThat(taskThumbnailDataSource.getThumbnailCalls(1))
+            assertThat(taskThumbnailDataSource.getThumbnailCallsRes(1))
+                .containsExactly(ANY_RES, HIGH_RES)
+                .inOrder()
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_LOW_RES_THUMBNAIL_PRELOADING)
+    fun setHighResThumbnailsRequiredRepeatedly_doesNotMakeAdditionalHighResCalls() =
+        testScope.runTest {
+            recentsModel.seedTasks(defaultTaskList)
+            systemUnderTest.getAllTaskData(DEFAULT_DISPLAY, forceRefresh = true)
+            setHighResEnabled(false)
+
+            val taskDataFlow = systemUnderTest.getTaskDataById(1)
+            val task1ThumbnailValues = mutableListOf<ThumbnailData?>()
+            testScope.backgroundScope.launch {
+                taskDataFlow.map { it?.thumbnail }.toList(task1ThumbnailValues)
+            }
+            systemUnderTest.setVisibleTasks(DEFAULT_DISPLAY, setOf(1))
+            taskThumbnailDataSource.preventThumbnailLoad(1)
+
+            setHighResEnabled(true)
+            setHighResEnabled(true)
+            setHighResEnabled(true)
+            assertThat(taskThumbnailDataSource.getThumbnailCallsRes(1))
                 .containsExactly(ANY_RES, HIGH_RES)
                 .inOrder()
         }
@@ -625,7 +653,7 @@ class TasksRepositoryTest {
             systemUnderTest.setVisibleTasks(DEFAULT_DISPLAY, setOf(1, 2))
             systemUnderTest.setVisibleTasks(DEFAULT_DISPLAY, setOf(1))
             setHighResEnabled(true)
-            assertThat(taskThumbnailDataSource.getThumbnailCalls(2)).containsExactly(ANY_RES)
+            assertThat(taskThumbnailDataSource.getThumbnailCallsRes(2)).containsExactly(ANY_RES)
         }
 
     @Test
@@ -642,9 +670,9 @@ class TasksRepositoryTest {
             }
 
             systemUnderTest.setVisibleTasks(DEFAULT_DISPLAY, setOf(1))
-            val task1Calls = taskThumbnailDataSource.getThumbnailCalls(1).size
+            val task1Calls = taskThumbnailDataSource.getThumbnailCallsRes(1).size
             setHighResEnabled(false)
-            assertThat(taskThumbnailDataSource.getThumbnailCalls(1).size).isEqualTo(task1Calls)
+            assertThat(taskThumbnailDataSource.getThumbnailCallsRes(1).size).isEqualTo(task1Calls)
         }
 
     @Test
@@ -661,7 +689,7 @@ class TasksRepositoryTest {
 
             systemUnderTest.setVisibleTasks(DEFAULT_DISPLAY, setOf(1))
             if (enableLowResThumbnailPreloading()) {
-                assertThat(taskThumbnailDataSource.getThumbnailCalls(1))
+                assertThat(taskThumbnailDataSource.getThumbnailCallsRes(1))
                     .containsExactly(ANY_RES, HIGH_RES)
                     .inOrder()
             } else {
@@ -670,7 +698,7 @@ class TasksRepositoryTest {
 
             systemUnderTest.setVisibleTasks(DEFAULT_DISPLAY, setOf(1, 2))
             if (enableLowResThumbnailPreloading()) {
-                assertThat(taskThumbnailDataSource.getThumbnailCalls(1))
+                assertThat(taskThumbnailDataSource.getThumbnailCallsRes(1))
                     .containsExactly(ANY_RES, HIGH_RES)
                     .inOrder()
             } else {

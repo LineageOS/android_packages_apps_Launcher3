@@ -64,7 +64,7 @@ constructor(
     private var visibleTaskIdsPerDisplay = SparseArray<Set<Int>>()
     private val taskRequests = HashMap<Int, Pair<TaskKey, Job>>()
     private var highResThumbnailsRequired: Boolean = true
-    private val highResThumbnailListeners = ConcurrentHashMap<TaskKey, () -> Unit>()
+    private val highResThumbnailListeners = ConcurrentHashMap<Int, () -> Unit>()
 
     override fun getAllTaskData(displayId: Int, forceRefresh: Boolean): Flow<List<Task>> {
         if (!visibleTaskIdsPerDisplay.contains(displayId)) {
@@ -115,8 +115,9 @@ constructor(
     }
 
     override fun setHighResThumbnailsRequired(highResThumbnailsRequired: Boolean) {
+        val prevHighResThumbnailsRequired = this.highResThumbnailsRequired
         this.highResThumbnailsRequired = highResThumbnailsRequired
-        if (highResThumbnailsRequired) {
+        if (!prevHighResThumbnailsRequired && highResThumbnailsRequired) {
             highResThumbnailListeners.values.forEach { it.invoke() }
         }
     }
@@ -172,7 +173,7 @@ constructor(
                 taskVisualsChangedDelegate.unregisterTaskIconChangedCallback(taskKey)
                 taskVisualsChangedDelegate.unregisterTaskThumbnailChangedCallback(taskKey)
                 if (enableLowResThumbnailPreloading()) {
-                    highResThumbnailListeners.remove(taskKey)
+                    highResThumbnailListeners.remove(taskKey.id)
                 }
 
                 // Clearing Task to reduce memory footprint
@@ -203,14 +204,18 @@ constructor(
 
     private suspend fun fetchThumbnail(task: Task) {
         if (enableLowResThumbnailPreloading()) {
-            val thumbnailFromDataSource = getThumbnailFromDataSource(task, ANY_RES)
-            updateThumbnail(task.key.id, thumbnailFromDataSource)
+            if (highResThumbnailsRequired) {
+                val thumbnailFromDataSource =
+                    getThumbnailFromDataSource(task, ANY_RES, shouldMakeRequestIfNeeded = false)
+                        ?.also { updateThumbnail(task.key.id, it) }
 
-            val thumbnailIsHighRes = thumbnailFromDataSource?.reducedResolution == false
-            if (highResThumbnailsRequired && !thumbnailIsHighRes) {
-                updateThumbnail(task.key.id, getThumbnailFromDataSource(task, HIGH_RES))
-            } else if (!thumbnailIsHighRes) {
-                highResThumbnailListeners[task.key] =
+                val thumbnailIsHighRes = thumbnailFromDataSource?.reducedResolution == false
+                if (!thumbnailIsHighRes) {
+                    updateThumbnail(task.key.id, getThumbnailFromDataSource(task, HIGH_RES))
+                }
+            } else {
+                updateThumbnail(task.key.id, getThumbnailFromDataSource(task, ANY_RES))
+                highResThumbnailListeners[task.key.id] =
                     fun() {
                         val isTaskVisible = taskRequests.containsKey(task.key.id)
                         if (!isTaskVisible) return
@@ -290,9 +295,10 @@ constructor(
     private suspend fun getThumbnailFromDataSource(
         task: Task,
         requestResolution: RequestResolution,
+        shouldMakeRequestIfNeeded: Boolean = true,
     ) =
         withContext(lightweightBackgroundDispatcher) {
-            taskThumbnailDataSource.getThumbnail(task, requestResolution)
+            taskThumbnailDataSource.getThumbnail(task, requestResolution, shouldMakeRequestIfNeeded)
         }
 
     private suspend fun getIconFromDataSource(task: Task) =
