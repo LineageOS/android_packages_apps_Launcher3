@@ -20,10 +20,10 @@ import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.service.personalcontext.hint.BundleHint
+import android.service.personalcontext.hint.ContentCaptureConversationEvent
+import android.service.personalcontext.hint.ContentCaptureConversationHint
 import android.service.personalcontext.hint.ContextHint
 import android.service.personalcontext.hint.ContextHintWithSignature
-import android.service.personalcontext.hint.ConversationEvent
-import android.service.personalcontext.hint.ConversationHint
 import android.service.personalcontext.insight.ActionableInsight
 import android.service.personalcontext.insight.ContextInsight
 import android.service.personalcontext.insight.DisplayInsight
@@ -196,8 +196,9 @@ class AmbientCueRepositoryTest {
     @Test
     fun mapInsightToActions_conversationHint_callsMapContextInsightToAction() {
         val conversationHint =
-            mock(ConversationHint::class.java).apply {
-                `when`(conversationEvent).thenReturn(mock(ConversationEvent::class.java))
+            mock(ContentCaptureConversationHint::class.java).apply {
+                `when`(conversationEvent)
+                    .thenReturn(mock(ContentCaptureConversationEvent::class.java))
             }
         val insight = mockInsight(conversationHint)
         doReturn(listOf(mock(ActionModel::class.java)))
@@ -214,8 +215,9 @@ class AmbientCueRepositoryTest {
     fun mapContextInsightToAction_actionableInsight_remoteAction_createsMAModel() {
         val insight = mockActionableInsight()
         val conversationHint =
-            mock(ConversationHint::class.java).apply {
-                `when`(conversationEvent).thenReturn(mock(ConversationEvent::class.java))
+            mock(ContentCaptureConversationHint::class.java).apply {
+                `when`(conversationEvent)
+                    .thenReturn(mock(ContentCaptureConversationEvent::class.java))
             }
         val result = repository.mapContextInsightToAction(insight, conversationHint)
         val actionModel = getSingleActionModel(result, MA_ACTION_TYPE_NAME)
@@ -231,8 +233,9 @@ class AmbientCueRepositoryTest {
     fun mapContextInsightToAction_displayInsight_conversationHint_createsMRModel() {
         val insight = mockDisplayInsight()
         val conversationHint =
-            mock(ConversationHint::class.java).apply {
-                `when`(conversationEvent).thenReturn(mock(ConversationEvent::class.java))
+            mock(ContentCaptureConversationHint::class.java).apply {
+                `when`(conversationEvent)
+                    .thenReturn(mock(ContentCaptureConversationEvent::class.java))
             }
         val result = repository.mapContextInsightToAction(insight, conversationHint)
         val actionModel = getSingleActionModel(result, MR_ACTION_TYPE_NAME)
@@ -268,8 +271,9 @@ class AmbientCueRepositoryTest {
                 .addInsight(nestedCollection)
                 .build()
         val conversationHint =
-            mock(ConversationHint::class.java).apply {
-                `when`(conversationEvent).thenReturn(mock(ConversationEvent::class.java))
+            mock(ContentCaptureConversationHint::class.java).apply {
+                `when`(conversationEvent)
+                    .thenReturn(mock(ContentCaptureConversationEvent::class.java))
             }
 
         val result = repository.mapContextInsightToAction(rootCollection, conversationHint)

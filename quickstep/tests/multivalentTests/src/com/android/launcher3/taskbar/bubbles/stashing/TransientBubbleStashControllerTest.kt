@@ -18,7 +18,9 @@ package com.android.launcher3.taskbar.bubbles.stashing
 
 import android.animation.AnimatorSet
 import android.content.Context
+import android.content.Intent
 import android.view.View
+import android.view.accessibility.AccessibilityManager
 import android.widget.FrameLayout
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.test.core.app.ApplicationProvider
@@ -38,6 +40,7 @@ import com.android.launcher3.taskbar.bubbles.BubbleView
 import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController.BubbleLauncherState
 import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.util.MultiValueAlpha
+import com.android.quickstep.util.SystemActionConstants.SYSTEM_ACTION_ID_BUBBLE_BAR
 import com.android.wm.shell.shared.animation.PhysicsAnimator
 import com.android.wm.shell.shared.animation.PhysicsAnimatorTestUtils
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation
@@ -52,6 +55,7 @@ import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 import org.mockito.kotlin.any
 import org.mockito.kotlin.atLeastOnce
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -85,6 +89,8 @@ class TransientBubbleStashControllerTest {
 
     @Mock lateinit var taskbarInsetsController: TaskbarInsetsController
 
+    @Mock lateinit var mockA11yManager: AccessibilityManager
+
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private lateinit var bubbleBarView: BubbleBarView
     private lateinit var stashedHandleView: StashedHandleView
@@ -112,6 +118,7 @@ class TransientBubbleStashControllerTest {
                 taskbarHotseatDimensionsProvider,
                 context,
                 taskbarUiState,
+                mockA11yManager,
             )
         setUpBubbleBarView()
         setUpBubbleBarController()
@@ -654,6 +661,69 @@ class TransientBubbleStashControllerTest {
 
         // Then the bubble bar does not animate
         assertThat(barTranslationY.isAnimating).isFalse()
+    }
+
+    @Test
+    fun updateStashedState_stashTrue_registersSystemAction() {
+        // Given
+        whenever(bubbleBarViewController.isHiddenForNoBubbles).thenReturn(false)
+
+        // When
+        getInstrumentation().runOnMainSync {
+            mTransientBubbleStashController.updateStashedAndExpandedState(
+                stash = true,
+                expand = false,
+            )
+        }
+
+        // Then
+        verify(mockA11yManager).registerSystemAction(any(), eq(SYSTEM_ACTION_ID_BUBBLE_BAR))
+    }
+
+    @Test
+    fun updateStashedState_stashFalse_unregistersSystemAction() {
+        // Given the a11y system action item is added
+        whenever(bubbleBarViewController.isHiddenForNoBubbles).thenReturn(false)
+        getInstrumentation().runOnMainSync {
+            mTransientBubbleStashController.updateStashedAndExpandedState(
+                stash = true,
+                expand = false,
+            )
+            verify(mockA11yManager).registerSystemAction(any(), eq(SYSTEM_ACTION_ID_BUBBLE_BAR))
+        }
+
+        // When
+        getInstrumentation().runOnMainSync {
+            mTransientBubbleStashController.updateStashedAndExpandedState(
+                stash = false,
+                expand = false,
+            )
+        }
+
+        // Then
+        verify(mockA11yManager).unregisterSystemAction(SYSTEM_ACTION_ID_BUBBLE_BAR)
+    }
+
+    @Test
+    fun triggerShowTaskbarReceiver_unstashesBubbleBar() {
+        // Given bubble bar is stashed
+        whenever(bubbleBarViewController.isHiddenForNoBubbles).thenReturn(false)
+        getInstrumentation().runOnMainSync {
+            mTransientBubbleStashController.updateStashedAndExpandedState(
+                stash = true,
+                expand = false,
+            )
+        }
+        assertThat(mTransientBubbleStashController.isStashed).isTrue()
+
+        // When the receiver is triggered (simulating the Accessibility Action)
+        getInstrumentation().runOnMainSync {
+            mTransientBubbleStashController.showBubbleBarReceiver.onReceive(context, Intent())
+        }
+
+        // Then it should unstash
+        assertThat(mTransientBubbleStashController.isStashed).isFalse()
+        verify(bubbleBarViewController, atLeastOnce()).onStashStateChanging()
     }
 
     private fun advanceTimeBy(advanceMs: Long) {

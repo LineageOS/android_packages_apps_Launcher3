@@ -220,6 +220,9 @@ interface BubbleStashController {
     fun isInAppDisplayAnimationInProgress() =
         inAppDisplayOverrideProgress > 0 && inAppDisplayOverrideProgress < 1
 
+    /** Cleans up the controller. */
+    fun onDestroy() {}
+
     /** Dumps the state of BubbleStashController. */
     fun dump(pw: PrintWriter) {
         pw.println("Bubble stash controller state:")

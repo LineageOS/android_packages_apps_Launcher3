@@ -518,9 +518,6 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
                 }
                 if (itemInfo instanceof ItemInfoWithIcon itemInfoWithIcon) {
                     // Don't show bubble shortcut if the item is non-resizeable but not supported.
-                    // TODO(b/419379112): Double check with UX that the launcher shortcut should be
-                    // hidden if not supported. If the shortcut is still shown, the flow for launch
-                    // needs to be fixed first before re-enabling here.
                     if (itemInfoWithIcon.isNonResizeable()) {
                         // TODO(b/411558731): isPhone just checks for smallest width < 600dp, so it
                         // basically is a check for small screens including Foldables when folded.
