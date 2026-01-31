@@ -33,7 +33,6 @@ import android.util.Pair;
 import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.View;
-import android.window.DesktopExperienceFlags;
 
 import androidx.annotation.AnyThread;
 import androidx.annotation.NonNull;
@@ -529,8 +528,7 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
     }
 
     protected static boolean canPinAppWithContextMenu(TaskbarActivityContext context) {
-        return DesktopExperienceFlags.ENABLE_PINNING_APP_WITH_CONTEXT_MENU.isTrue()
-                && context.isTaskbarShowingDesktopTasks();
+        return context.isTaskbarShowingDesktopTasks();
     }
 
     /**

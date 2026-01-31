@@ -574,9 +574,6 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     }
 
     private boolean canPinAppWithContextMenu() {
-        if (!DesktopExperienceFlags.ENABLE_PINNING_APP_WITH_CONTEXT_MENU.isTrue()) {
-            return false;
-        }
         return DesktopVisibilityController.INSTANCE.get(this).isInDesktopMode(getDisplayId())
                 || mTaskbarUiState.getShowDesktopTaskbarForFreeformDisplay();
     }
