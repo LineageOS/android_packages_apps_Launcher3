@@ -322,6 +322,8 @@
     <string name="taskbar_button_quick_settings">Quick Settings</string>
     <!-- Accessibility title for the Taskbar window. [CHAR_LIMIT=NONE] -->
     <string name="taskbar_a11y_title">Taskbar</string>
+    <!-- Accessibility title for the Bubble Bar. [CHAR_LIMIT=NONE] -->
+    <string name="bubble_bar_a11y_title">Bubble bar</string>
     <!-- Accessibility title for the Taskbar window on phones. [CHAR_LIMIT=NONE] -->
     <string name="taskbar_phone_a11y_title">Navigation bar</string>
     <!-- Text in popup dialog for user to switch between always showing Taskbar or not. [CHAR LIMIT=30] -->
