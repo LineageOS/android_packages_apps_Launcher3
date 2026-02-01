@@ -25,6 +25,8 @@
     <string name="pref_themed_icons_summary">გაფორმების შესაბამისი ხატულები მთავარ ეკრანზე</string>
     <string name="desktop_show_labels">ხატულებზე წარწერების ჩვენება ეკრანზე</string>
     <string name="drawer_show_labels">ხატულებზე წარწერების ჩვენება მენიუში</string>
+    <string name="drawer_open_keyboard_title">გაუსვით ძიების დასაწყებად</string>
+    <string name="drawer_open_keyboard_summary">კლავიატურის გამოჩენა მაშივე, როცა პროგრამების სია ხილული იქნება</string>
     <string name="trust_apps_manager_name">დამალული და დაცული აპები</string>
     <string name="trust_apps_auth_manager">დამალული და დაცული აპების გახსნა სამართავად</string>
     <string name="trust_apps_auth_open_app">დამოწმება, რომ გაიხსნას %1$s</string>
