@@ -640,9 +640,6 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
             case Favorites.CONTAINER_HOTSEAT_PREDICTION:
                 mHotseatPredictionController.setPredictedItems(info);
                 break;
-            case Favorites.CONTAINER_WIDGETS_PREDICTION:
-                getWidgetPickerDataProvider().setWidgetRecommendations(info.getContents());
-                break;
         }
     }
 

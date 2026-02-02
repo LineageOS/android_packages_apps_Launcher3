@@ -17,10 +17,8 @@
 package com.android.launcher3.widget.picker.model
 
 import com.android.launcher3.model.WidgetItem
-import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.widget.model.WidgetsListBaseEntry
 import com.android.launcher3.widget.picker.model.data.WidgetPickerData
-import com.android.launcher3.widget.picker.model.data.WidgetPickerDataUtils.withRecommendedWidgets
 import com.android.launcher3.widget.picker.model.data.WidgetPickerDataUtils.withWidgets
 import java.io.PrintWriter
 import java.util.function.Predicate
@@ -70,16 +68,6 @@ class WidgetPickerDataProvider {
         changeListener?.onWidgetsBound()
     }
 
-    /**
-     * Makes the widget recommendations available to the widget picker
-     *
-     * Generally called when new widget predictions are available.
-     */
-    fun setWidgetRecommendations(recommendations: List<ItemInfo>) {
-        mWidgetPickerData = mWidgetPickerData.withRecommendedWidgets(recommendations)
-        changeListener?.onRecommendedWidgetsBound()
-    }
-
     /** Writes the current state to the provided writer. */
     fun dump(prefix: String, writer: PrintWriter) {
         writer.println(prefix + "WidgetPickerDataProvider:")
@@ -93,8 +81,5 @@ class WidgetPickerDataProvider {
     interface WidgetPickerDataChangeListener {
         /** A callback to get notified when widgets are bound. */
         fun onWidgetsBound()
-
-        /** A callback to get notified when recommended widgets are bound. */
-        fun onRecommendedWidgetsBound()
     }
 }

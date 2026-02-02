@@ -24,25 +24,19 @@ import android.platform.test.rule.LimitDevicesRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherAppState
-import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_WIDGETS_PREDICTION
 import com.android.launcher3.icons.IconCache
 import com.android.launcher3.icons.cache.CachedObject
 import com.android.launcher3.model.WidgetItem
-import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.PackageItemInfo
 import com.android.launcher3.util.PackageUserKey
 import com.android.launcher3.util.TestActivityContext
 import com.android.launcher3.util.WidgetUtils
 import com.android.launcher3.widget.LauncherAppWidgetProviderInfo
-import com.android.launcher3.widget.PendingAddWidgetInfo
 import com.android.launcher3.widget.model.WidgetsListBaseEntry
 import com.android.launcher3.widget.model.WidgetsListContentEntry
 import com.android.launcher3.widget.model.WidgetsListHeaderEntry
-import com.android.launcher3.widget.picker.WidgetRecommendationCategory
-import com.android.launcher3.widget.picker.WidgetRecommendationCategory.DEFAULT_WIDGET_RECOMMENDATION_CATEGORY
 import com.android.launcher3.widget.picker.model.data.WidgetPickerDataUtils.findAllWidgetsForPackageUser
 import com.android.launcher3.widget.picker.model.data.WidgetPickerDataUtils.findContentEntryForPackageUser
-import com.android.launcher3.widget.picker.model.data.WidgetPickerDataUtils.withRecommendedWidgets
 import com.android.launcher3.widget.picker.model.data.WidgetPickerDataUtils.withWidgets
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -129,105 +123,6 @@ class WidgetPickerDataTest {
         assertThat(newWidgetData.allWidgets)
             .containsExactlyElementsIn(appOneWidgetsListBaseEntries())
         assertThat(newWidgetData.defaultWidgets).isEmpty() // previous values cleared.
-    }
-
-    @Test
-    fun withRecommendedWidgets_returnsACopyWithProvidedRecommendedWidgets() {
-        val widgetPickerData =
-            WidgetPickerData(
-                allWidgets =
-                    buildList {
-                        addAll(appOneWidgetsListBaseEntries())
-                        addAll(appTwoWidgetsListBaseEntries())
-                    },
-                defaultWidgets = buildList { appTwoWidgetsListBaseEntries() },
-            )
-        val recommendations: List<ItemInfo> =
-            listOf(
-                PendingAddWidgetInfo(
-                    app1WidgetItem1.widgetInfo,
-                    CONTAINER_WIDGETS_PREDICTION,
-                    CATEGORY_1,
-                ),
-                PendingAddWidgetInfo(
-                    app2WidgetItem1.widgetInfo,
-                    CONTAINER_WIDGETS_PREDICTION,
-                    CATEGORY_2,
-                ),
-            )
-
-        val updatedData = widgetPickerData.withRecommendedWidgets(recommendations)
-
-        assertThat(updatedData.recommendations.keys).containsExactly(CATEGORY_1, CATEGORY_2)
-        assertThat(updatedData.recommendations[CATEGORY_1]).containsExactly(app1WidgetItem1)
-        assertThat(updatedData.recommendations[CATEGORY_2]).containsExactly(app2WidgetItem1)
-    }
-
-    @Test
-    fun withRecommendedWidgets_noCategory_usesDefault() {
-        val widgetPickerData =
-            WidgetPickerData(
-                allWidgets =
-                    buildList {
-                        addAll(appOneWidgetsListBaseEntries())
-                        addAll(appTwoWidgetsListBaseEntries())
-                    },
-                defaultWidgets = buildList { appTwoWidgetsListBaseEntries() },
-            )
-        val recommendations: List<ItemInfo> =
-            listOf(
-                PendingAddWidgetInfo(app1WidgetItem1.widgetInfo, CONTAINER_WIDGETS_PREDICTION),
-                PendingAddWidgetInfo(app2WidgetItem1.widgetInfo, CONTAINER_WIDGETS_PREDICTION),
-            )
-
-        val updatedData = widgetPickerData.withRecommendedWidgets(recommendations)
-
-        assertThat(updatedData.recommendations.keys)
-            .containsExactly(DEFAULT_WIDGET_RECOMMENDATION_CATEGORY)
-        assertThat(updatedData.recommendations[DEFAULT_WIDGET_RECOMMENDATION_CATEGORY])
-            .containsExactly(app1WidgetItem1, app2WidgetItem1)
-    }
-
-    @Test
-    fun withRecommendedWidgets_emptyRecommendations_clearsOld() {
-        val widgetPickerData =
-            WidgetPickerData(
-                allWidgets =
-                    buildList {
-                        addAll(appOneWidgetsListBaseEntries())
-                        addAll(appTwoWidgetsListBaseEntries())
-                    },
-                defaultWidgets = buildList { appTwoWidgetsListBaseEntries() },
-                recommendations = mapOf(CATEGORY_1 to listOf(app1WidgetItem1)),
-            )
-
-        val updatedData = widgetPickerData.withRecommendedWidgets(listOf())
-
-        assertThat(updatedData.recommendations).isEmpty()
-    }
-
-    @Test
-    fun withRecommendedWidgets_widgetNotInAllWidgets_filteredOut() {
-        val widgetPickerData =
-            WidgetPickerData(
-                allWidgets =
-                    buildList {
-                        addAll(appOneWidgetsListBaseEntries(includeWidgetTwo = false))
-                        addAll(appTwoWidgetsListBaseEntries())
-                    },
-                defaultWidgets = buildList { appTwoWidgetsListBaseEntries() },
-            )
-
-        val recommendations: List<ItemInfo> =
-            listOf(
-                PendingAddWidgetInfo(app1WidgetItem2.widgetInfo, CONTAINER_WIDGETS_PREDICTION),
-                PendingAddWidgetInfo(app2WidgetItem1.widgetInfo, CONTAINER_WIDGETS_PREDICTION),
-            )
-        val updatedData = widgetPickerData.withRecommendedWidgets(recommendations)
-
-        assertThat(updatedData.recommendations).hasSize(1)
-        // no app1widget2
-        assertThat(updatedData.recommendations.values.first()).containsExactly(app2WidgetItem1)
     }
 
     @Test
@@ -365,10 +260,5 @@ class WidgetPickerDataTest {
         private const val APP_2_PACKAGE_TITLE = "SomeApp2"
         private const val APP_2_SECTION_NAME = "S" // for fast popup
         private const val APP_2_PROVIDER_1_CLASS_NAME = "app2Provider1"
-
-        private val CATEGORY_1 =
-            WidgetRecommendationCategory(/* categoryTitleRes= */ 0, /* order= */ 0)
-        private val CATEGORY_2 =
-            WidgetRecommendationCategory(/* categoryTitleRes= */ 1, /* order= */ 1)
     }
 }
