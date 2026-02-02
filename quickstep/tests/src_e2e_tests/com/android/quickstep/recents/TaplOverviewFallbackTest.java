@@ -1,19 +1,19 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2026 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-package com.android.quickstep;
+package com.android.quickstep.recents;
 
 import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -65,7 +65,11 @@ import com.android.launcher3.util.rule.SkipAfterTimeOutRule;
 import com.android.launcher3.util.rule.TestIsolationRule;
 import com.android.launcher3.util.rule.TestStabilityRule;
 import com.android.launcher3.util.ui.AbstractLauncherUiTest;
+import com.android.quickstep.AbstractQuickStepTest;
+import com.android.quickstep.NavigationModeSwitchRule;
+import com.android.quickstep.OverviewComponentObserver;
 import com.android.quickstep.OverviewComponentObserver.OverviewChangeListener;
+import com.android.quickstep.RecentsActivity;
 import com.android.quickstep.views.RecentsView;
 import com.android.quickstep.views.RecentsViewContainer;
 import com.android.quickstep.window.RecentsWindowFlags;
@@ -91,7 +95,7 @@ import java.util.regex.Pattern;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
-public class FallbackRecentsTest {
+public class TaplOverviewFallbackTest {
 
     private static final String FALLBACK_LAUNCHER_TITLE = "Test launcher";
     private static final Pattern COMPONENT_INFO_REGEX = Pattern.compile("ComponentInfo\\{(.*)\\}");
@@ -117,7 +121,7 @@ public class FallbackRecentsTest {
 
     private int mDisplayId = DEFAULT_DISPLAY;
 
-    public FallbackRecentsTest() throws RemoteException {
+    public TaplOverviewFallbackTest() throws RemoteException {
         Instrumentation instrumentation = getInstrumentation();
         Context context = instrumentation.getContext();
         mDevice = UiDevice.getInstance(instrumentation);
@@ -167,8 +171,8 @@ public class FallbackRecentsTest {
 
         if (TestHelpers.isInLauncherProcess()) {
             mLauncher.setSystemHealthSupplier(startTime -> TestCommandReceiver.callCommand(
-                    TestCommandReceiver.GET_SYSTEM_HEALTH_MESSAGE, startTime.toString()).
-                    getString("result"));
+                    TestCommandReceiver.GET_SYSTEM_HEALTH_MESSAGE, startTime.toString()).getString(
+                    "result"));
         }
     }
 

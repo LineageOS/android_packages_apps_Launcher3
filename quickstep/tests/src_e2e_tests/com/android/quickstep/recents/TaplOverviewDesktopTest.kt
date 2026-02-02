@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2026 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.quickstep
+package com.android.quickstep.recents
 
+import android.content.Intent
 import android.platform.test.rule.AllowedDevices
 import android.platform.test.rule.DeviceProduct
 import android.platform.test.rule.IgnoreLimit
@@ -26,10 +27,10 @@ import com.android.launcher3.tapl.LaunchedAppState
 import com.android.launcher3.tapl.OverviewTask
 import com.android.launcher3.util.TestUtil
 import com.android.launcher3.util.ui.ActivityStartUtils.getAppPackageName
+import com.android.launcher3.util.ui.ActivityStartUtils.resolveSystemApp
 import com.android.launcher3.util.ui.ActivityStartUtils.startTestActivity
 import com.android.launcher3.util.ui.PortraitLandscapeRunner.PortraitLandscape
-import com.android.quickstep.AbstractTaplTestsTaskbar.CALCULATOR_APP_NAME
-import com.android.quickstep.AbstractTaplTestsTaskbar.CALCULATOR_APP_PACKAGE
+import com.android.quickstep.AbstractQuickStepTest
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import org.junit.Assert.assertEquals
@@ -42,7 +43,7 @@ import org.junit.Test
     allowed = [DeviceProduct.CF_TABLET, DeviceProduct.TANGORPRO, DeviceProduct.CF_DESKTOP]
 )
 @IgnoreLimit(ignoreLimit = BuildConfig.IS_STUDIO_BUILD)
-class TaplTestsOverviewDesktop : AbstractQuickStepTest() {
+class TaplOverviewDesktopTest : AbstractQuickStepTest() {
     @Before
     fun setup() {
         clearAllRecentTasks()
@@ -425,5 +426,7 @@ class TaplTestsOverviewDesktop : AbstractQuickStepTest() {
         const val TEST_ACTIVITY_2 = 3
         const val TEST_ACTIVITY_EXTRA = 4
         val TEST_ACTIVITIES = listOf(TEST_ACTIVITY_1, TEST_ACTIVITY_2)
+        const val CALCULATOR_APP_NAME = "Calculator"
+        val CALCULATOR_APP_PACKAGE: String = resolveSystemApp(Intent.CATEGORY_APP_CALCULATOR)
     }
 }
