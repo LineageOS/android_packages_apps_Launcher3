@@ -226,9 +226,8 @@ fun SystemShortcutMenuItem(
 @Composable
 fun DeepShortcutMenuItem(
     shortcut: ItemInfoWithIcon?,
-    onClick: (PopupClickEvent) -> Unit, // onClick for the whole item
-    onAddButtonClick:
-        (ItemInfoWithIcon) -> Unit, // New parameter for the right-aligned icon's click
+    onClick: (PopupClickEvent) -> Unit,
+    onAddButtonClick: ((ItemInfoWithIcon) -> Unit)?,
     onLongClick: (ItemInfoWithIcon, Offset) -> Unit,
 ) {
     val iconComposable: @Composable () -> Unit
@@ -250,22 +249,28 @@ fun DeepShortcutMenuItem(
         }
         itemOnClick = { onClick(DeepShortcutClickEvent(shortcut)) }
         itemOnLongClick = { screenOffset -> onLongClick(shortcut, screenOffset) }
-        itemTrailingContent = {
-            Box(
-                modifier =
-                    Modifier.size(deepShortcutAddButtonSize).clickable {
-                        onAddButtonClick(shortcut)
-                    },
-                contentAlignment = Alignment.Center,
-            ) {
-                Image(
-                    modifier = Modifier.size(deepShortcutAddIconSize),
-                    painter = painterResource(id = R.drawable.ic_add_circle_filled),
-                    colorFilter = ColorFilter.tint(colorResource(R.color.materialColorSecondary)),
-                    contentDescription = stringResource(R.string.action_add_to_workspace),
-                )
+        itemTrailingContent =
+            if (onAddButtonClick != null) {
+                {
+                    Box(
+                        modifier =
+                            Modifier.size(deepShortcutAddButtonSize).clickable {
+                                onAddButtonClick(shortcut)
+                            },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Image(
+                            modifier = Modifier.size(deepShortcutAddIconSize),
+                            painter = painterResource(id = R.drawable.ic_add_circle_filled),
+                            colorFilter =
+                                ColorFilter.tint(colorResource(R.color.materialColorSecondary)),
+                            contentDescription = stringResource(R.string.action_add_to_workspace),
+                        )
+                    }
+                }
+            } else {
+                null
             }
-        }
     } else {
         // When shortcut is null, render a generic item without title or drawable
         itemTitle = ""
