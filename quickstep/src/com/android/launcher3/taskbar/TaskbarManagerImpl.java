@@ -361,9 +361,9 @@ public class TaskbarManagerImpl {
 
         mResources = displayModelFactory.newModel(dispatcher, this::initPerDisplayResource);
         mResources.storeDisplayResource(mPrimaryDisplayId);
-        cleanupTasks.addCloseable(getTaskbarUiThread(), mResources);
 
         mPrimaryResource = requireNonNull(mResources.getDisplayResource(mPrimaryDisplayId));
+        cleanupTasks.addCloseable(getTaskbarUiThread(), mResources);
 
         LauncherPrefChangeListener prefChangeListener = key -> {
             if (TASKBAR_PINNING_KEY.equals(key)) {
