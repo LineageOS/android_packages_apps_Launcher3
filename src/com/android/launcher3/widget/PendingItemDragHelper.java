@@ -47,6 +47,7 @@ import com.android.launcher3.icons.BaseIconFactory;
 import com.android.launcher3.icons.FastBitmapDrawable;
 import com.android.launcher3.icons.LauncherIcons;
 import com.android.launcher3.icons.RoundDrawableWrapper;
+import com.android.launcher3.icons.cache.CachedObjectCachingLogic;
 import com.android.launcher3.widget.DatabaseWidgetPreviewLoader.WidgetPreviewInfo;
 
 import java.util.Objects;
@@ -208,8 +209,8 @@ public class PendingItemDragHelper extends DragPreviewProvider {
             draggableView = DraggableView.ofType(DraggableView.DRAGGABLE_WIDGET);
         } else {
             PendingAddShortcutInfo createShortcutInfo = (PendingAddShortcutInfo) mAddInfo;
-            Drawable icon = createShortcutInfo.getActivityInfo(launcher)
-                    .getFullResIcon(app.getIconCache());
+            Drawable icon = CachedObjectCachingLogic.loadFullResIcon(
+                    app.getIconCache(), createShortcutInfo.getActivityInfo(launcher));
             LauncherIcons li = LauncherIcons.obtain(launcher);
             preview = new FastBitmapDrawable(
                     li.createScaledBitmap(icon, BaseIconFactory.MODE_DEFAULT));

@@ -275,15 +275,16 @@ constructor(
             PackageManagerWrapper.getInstance().getActivityInfo(key.component, key.userId)
                 ?: return ic.getDefaultIcon(user)
         val appInfo = activityInfo.applicationInfo
+        val request = ic.getIconLoadRequest(appInfo, appInfoCachingLogic)
         return ic.iconFactory.use {
             it.createBadgedIconBitmap(
-                ic.getFullResIcon(activityInfo),
+                request.getIcon(activityInfo),
                 IconOptions()
                     .setUser(userInfo)
                     .setInstantApp(appInfo.isInstantApp)
                     .setExtractedColor(0)
                     .setWrapperBackgroundColor(desc.primaryColor)
-                    .setSourceHint(appInfoCachingLogic.getSourceHint(appInfo, ic)),
+                    .setSourceHint(request.sourceHint),
             )
         }
     }
