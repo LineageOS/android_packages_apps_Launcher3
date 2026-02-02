@@ -23,6 +23,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.app.displaylib.DisplaysWithDecorationsRepositoryCompat
 import java.io.PrintWriter
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.test.StandardTestDispatcher
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -72,6 +73,42 @@ class DisplayModelTest {
         assertNotNull(resource)
         testableDisplayModel.deleteDisplayResource(displayId)
         assert(resource.isCleanupCalled)
+        assertNull(testableDisplayModel.getDisplayResource(displayId))
+    }
+
+    @Test
+    fun testDebug_setDisplayResourceAfterClose_noop() {
+        testableDisplayModel.storeDisplayResource(displayId)
+        dispatcher.dispatch(EmptyCoroutineContext) {
+            testableDisplayModel.onDisplayAddSystemDecorations(displayId)
+        }
+        testableDisplayModel.close()
+        dispatcher.scheduler.runCurrent()
+
+        assertNull(testableDisplayModel.getDisplayResource(displayId))
+    }
+
+    @Test
+    fun testDebug_removeDisplayResourceAfterClose_noop() {
+        testableDisplayModel.storeDisplayResource(displayId)
+        dispatcher.dispatch(EmptyCoroutineContext) {
+            testableDisplayModel.onDisplayRemoveSystemDecorations(displayId)
+        }
+        testableDisplayModel.close()
+        dispatcher.scheduler.runCurrent()
+
+        assertNull(testableDisplayModel.getDisplayResource(displayId))
+    }
+
+    @Test
+    fun testDebug_removeDisplayAfterClose_noop() {
+        testableDisplayModel.storeDisplayResource(displayId)
+        dispatcher.dispatch(EmptyCoroutineContext) {
+            testableDisplayModel.onDisplayRemoved(displayId)
+        }
+        testableDisplayModel.close()
+        dispatcher.scheduler.runCurrent()
+
         assertNull(testableDisplayModel.getDisplayResource(displayId))
     }
 
