@@ -18,22 +18,34 @@ package com.android.quickstep.inputconsumers;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_MOVE;
 
+import static com.android.launcher3.MotionEventsUtils.isTrackpadThreeFingerSwipe;
+
 import android.content.Context;
 import android.graphics.PointF;
 import android.view.MotionEvent;
 
+import androidx.annotation.VisibleForTesting;
+
+import com.android.launcher3.Flags;
+import com.android.quickstep.BaseContainerInterface;
 import com.android.quickstep.InputConsumer;
+import com.android.quickstep.OverviewComponentObserver;
 import com.android.quickstep.RecentsAnimationDeviceState;
 import com.android.quickstep.SystemUiProxy;
+import com.android.quickstep.views.RecentsView;
+import com.android.quickstep.views.RecentsViewContainer;
+import com.android.quickstep.views.TaskView;
 import com.android.systemui.shared.system.InputMonitorCompat;
 
 /** Allows the status bar to be pull down for notification shade using the trackpad. */
 public class TrackpadStatusBarInputConsumer extends DelegateInputConsumer {
 
+    private final Context mContext;
     private final SystemUiProxy mSystemUiProxy;
     private final float mTouchSlop;
     private final PointF mDown = new PointF();
     private boolean mHasPassedTouchSlop;
+    private boolean mIsLaunchingTask;
 
     public TrackpadStatusBarInputConsumer(
             Context context,
@@ -43,6 +55,7 @@ public class TrackpadStatusBarInputConsumer extends DelegateInputConsumer {
             RecentsAnimationDeviceState deviceState) {
         super(displayId, delegate, inputMonitor);
 
+        mContext = context;
         mSystemUiProxy = SystemUiProxy.INSTANCE.get(context);
         mTouchSlop = deviceState.getTouchSlop();
     }
@@ -59,6 +72,7 @@ public class TrackpadStatusBarInputConsumer extends DelegateInputConsumer {
                 case ACTION_DOWN -> {
                     mDown.set(ev.getX(), ev.getY());
                     mHasPassedTouchSlop = false;
+                    mIsLaunchingTask = false;
                 }
                 case ACTION_MOVE -> {
                     if (!mHasPassedTouchSlop) {
@@ -66,9 +80,15 @@ public class TrackpadStatusBarInputConsumer extends DelegateInputConsumer {
                         if (Math.abs(displacementY) > mTouchSlop) {
                             mHasPassedTouchSlop = true;
                             if (displacementY > 0) {
-                                setActive(ev);
-                                ev.setAction(ACTION_DOWN);
-                                dispatchTouchEvent(ev);
+                                if (Flags.enableNewTouchpadGestures()
+                                        && isThreeFingerTrackpadSwipe(ev)) {
+                                    tryLaunchCurrentTaskIfInOverview();
+                                }
+                                if (!mIsLaunchingTask) {
+                                    setActive(ev);
+                                    ev.setAction(ACTION_DOWN);
+                                    dispatchTouchEvent(ev);
+                                }
                             }
                         }
                     }
@@ -84,10 +104,40 @@ public class TrackpadStatusBarInputConsumer extends DelegateInputConsumer {
         }
     }
 
+    @VisibleForTesting
+    protected boolean isThreeFingerTrackpadSwipe(MotionEvent ev) {
+        return isTrackpadThreeFingerSwipe(ev);
+    }
+
     private void dispatchTouchEvent(MotionEvent ev) {
         if (mSystemUiProxy.isActive()) {
             mSystemUiProxy.onStatusBarTrackpadEvent(ev);
         }
+    }
+
+    private void tryLaunchCurrentTaskIfInOverview() {
+        BaseContainerInterface<?, ?> containerInterface =
+                OverviewComponentObserver.INSTANCE.get(mContext)
+                        .getContainerInterface(getDisplayId());
+        if (containerInterface == null) {
+            return;
+        }
+        RecentsViewContainer container = containerInterface.getCreatedContainer();
+        if (container == null || !container.isRecentsViewVisible()) {
+            return;
+        }
+        RecentsView<?, ?> recentsView = container.getOverviewPanel();
+        if (recentsView == null) {
+            return;
+        }
+        TaskView taskView = recentsView.getCurrentPageTaskView();
+        if (taskView == null) {
+            return;
+        }
+
+        taskView.launchWithAnimation();
+        mIsLaunchingTask = true;
+
     }
 
     @Override
