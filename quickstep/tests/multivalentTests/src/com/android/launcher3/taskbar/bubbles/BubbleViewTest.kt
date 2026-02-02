@@ -29,9 +29,9 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.R
 import com.android.launcher3.icons.BitmapInfo
 import com.android.launcher3.taskbar.bubbles.model.BubbleIcon
+import com.android.users.UserType
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation
 import com.android.wm.shell.shared.bubbles.BubbleInfo
-import com.android.wm.shell.shared.bubbles.UserType
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -98,7 +98,8 @@ class BubbleViewTest {
 
         // Verify that it has the expand action and not the collapse action
         assertThat(actions).contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_EXPAND)
-        assertThat(actions).doesNotContain(AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE)
+        assertThat(actions)
+            .doesNotContain(AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE)
     }
 
     @Test
@@ -172,7 +173,7 @@ class BubbleViewTest {
         verify(mockController)
             .updateBubbleBarLocation(
                 BubbleBarLocation.LEFT,
-                BubbleBarLocation.UpdateSource.A11Y_ACTION_BUBBLE
+                BubbleBarLocation.UpdateSource.A11Y_ACTION_BUBBLE,
             )
         // Verify that the action is marked as handled
         assertThat(handled).isTrue()
@@ -187,7 +188,7 @@ class BubbleViewTest {
         verify(mockController)
             .updateBubbleBarLocation(
                 BubbleBarLocation.RIGHT,
-                BubbleBarLocation.UpdateSource.A11Y_ACTION_BUBBLE
+                BubbleBarLocation.UpdateSource.A11Y_ACTION_BUBBLE,
             )
         // Verify that the action is marked as handled
         assertThat(handled).isTrue()
