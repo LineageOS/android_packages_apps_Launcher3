@@ -45,6 +45,7 @@ import com.android.launcher3.util.Executors
 import com.android.launcher3.util.TestUtil
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.views.BaseDragLayer
+import com.android.providers.media.flags.Flags.FLAG_ENABLE_TRASH_AND_RESTORE_BY_FILE_PATH_API
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -196,13 +197,19 @@ class PopupDataRepositoryImplUnitTest {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING)
+    @DisableFlags(
+        Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING,
+        FLAG_ENABLE_TRASH_AND_RESTORE_BY_FILE_PATH_API,
+    )
     fun getPopupDataForFileSystemItemsWhenTrashingDisabled() {
         testPopupDataForFileSystemItems(supportsTrashing = false)
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING)
+    @EnableFlags(
+        Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING,
+        FLAG_ENABLE_TRASH_AND_RESTORE_BY_FILE_PATH_API,
+    )
     fun getPopupDataForFileSystemItemsWhenTrashingEnabled() {
         testPopupDataForFileSystemItems(supportsTrashing = true)
     }

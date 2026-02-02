@@ -31,6 +31,7 @@ import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils
 import com.android.launcher3.integration.util.LauncherActivityScenarioRule
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.views.Snackbar
+import com.android.providers.media.flags.Flags.FLAG_ENABLE_TRASH_AND_RESTORE_BY_FILE_PATH_API
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executor
@@ -75,7 +76,10 @@ class DropTargetHandlerTest {
         }
 
     @Test
-    @DisableFlags(Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING)
+    @DisableFlags(
+        Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING,
+        FLAG_ENABLE_TRASH_AND_RESTORE_BY_FILE_PATH_API,
+    )
     fun onDeletePermanentlyCompleteForHomeScreenFile() {
         launcherActivity.executeOnLauncher { launcher ->
             val dropTargetHandler =
@@ -93,7 +97,10 @@ class DropTargetHandlerTest {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING)
+    @EnableFlags(
+        Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING,
+        FLAG_ENABLE_TRASH_AND_RESTORE_BY_FILE_PATH_API,
+    )
     fun onDeleteCompleteForHomeScreenFile() {
         whenever(homeScreenFilesProvider.moveToTrash(any()))
             .thenReturn(CompletableFuture.completedFuture("/new/path/in/trash"))
@@ -121,7 +128,10 @@ class DropTargetHandlerTest {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING)
+    @EnableFlags(
+        Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING,
+        FLAG_ENABLE_TRASH_AND_RESTORE_BY_FILE_PATH_API,
+    )
     fun onDeleteCompleteForHomeScreenFileOnError() {
         whenever(homeScreenFilesProvider.moveToTrash(any()))
             .thenReturn(CompletableFuture.completedFuture(null))
@@ -138,7 +148,10 @@ class DropTargetHandlerTest {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING)
+    @EnableFlags(
+        Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING,
+        FLAG_ENABLE_TRASH_AND_RESTORE_BY_FILE_PATH_API,
+    )
     fun onDeleteCompleteForHomeScreenFileOnUndoError() {
         whenever(homeScreenFilesProvider.moveToTrash(any()))
             .thenReturn(CompletableFuture.completedFuture("/new/path/in/trash"))

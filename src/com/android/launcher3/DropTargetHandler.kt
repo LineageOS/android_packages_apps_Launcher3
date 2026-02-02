@@ -5,11 +5,11 @@ import android.util.Log
 import android.view.View
 import com.android.launcher3.BaseActivity.EVENT_RESUMED
 import com.android.launcher3.DropTarget.DragObject
-import com.android.launcher3.Flags.enableHomeScreenFilesTrashing
 import com.android.launcher3.LauncherConstants.ActivityCodes
 import com.android.launcher3.SecondaryDropTarget.DeferredOnComplete
 import com.android.launcher3.dragndrop.DragLayer
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider
+import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils
 import com.android.launcher3.homescreenfiles.isFileSystemItem
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent
 import com.android.launcher3.model.data.ItemInfo
@@ -66,7 +66,7 @@ class DropTargetHandler(
     }
 
     fun prepareToUndoDelete(item: ItemInfo) {
-        if (item.isFileSystemItem() && enableHomeScreenFilesTrashing()) {
+        if (item.isFileSystemItem() && HomeScreenFilesUtils.isTrashingEnabled()) {
             // Home screen file items rely on their own unidirectional data flow
             // (`HomeScreenFilesProvider` -> `HomeScreenFilesUpdateTask`), so there is no need
             // to manually call `mLauncher.modelWriter` from here.
@@ -76,7 +76,7 @@ class DropTargetHandler(
     }
 
     fun onDeleteComplete(item: ItemInfo, view: View?) {
-        if (item.isFileSystemItem() && enableHomeScreenFilesTrashing()) {
+        if (item.isFileSystemItem() && HomeScreenFilesUtils.isTrashingEnabled()) {
             onDeleteCompleteForHomeScreenFile(item)
             return
         }
