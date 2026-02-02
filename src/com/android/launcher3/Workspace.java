@@ -98,6 +98,7 @@ import com.android.launcher3.accessibility.AccessibleDragListenerAdapter;
 import com.android.launcher3.accessibility.WorkspaceAccessibilityHelper;
 import com.android.launcher3.anim.PendingAnimation;
 import com.android.launcher3.apppairs.AppPairIcon;
+import com.android.launcher3.automation.AutomationRepository;
 import com.android.launcher3.celllayout.CellInfo;
 import com.android.launcher3.celllayout.CellLayoutLayoutParams;
 import com.android.launcher3.celllayout.CellPosMapper;
@@ -129,6 +130,7 @@ import com.android.launcher3.logging.StatsLogManager.LauncherEvent;
 import com.android.launcher3.model.data.AppPairInfo;
 import com.android.launcher3.model.data.FolderInfo;
 import com.android.launcher3.model.data.ItemInfo;
+import com.android.launcher3.model.data.ItemInfoWithIcon;
 import com.android.launcher3.model.data.LauncherAppWidgetInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.pageindicators.PageIndicator;
@@ -3097,6 +3099,9 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         }
 
         ItemInfo info = d.dragInfo;
+        if (info instanceof ItemInfoWithIcon iiwi) {
+            iiwi.checkAndApplyAutomationFlag(AutomationRepository.INSTANCE.get(getContext()));
+        }
         int spanX = info.spanX;
         int spanY = info.spanY;
         if (mDragInfo != null) {

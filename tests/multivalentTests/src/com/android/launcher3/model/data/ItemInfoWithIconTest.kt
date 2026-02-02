@@ -16,8 +16,11 @@
 
 package com.android.launcher3.model.data
 
+import android.os.Process
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.launcher3.automation.AutomationRepository
+import com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_AUTOMATED
 import com.android.launcher3.pm.PackageInstallInfo
 import com.android.launcher3.util.SandboxApplication
 import com.google.common.truth.Truth
@@ -25,22 +28,19 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class ItemInfoWithIconTest {
 
     @get:Rule var context = SandboxApplication()
-    private lateinit var itemInfoWithIcon: ItemInfoWithIcon
+    private lateinit var itemInfoWithIcon: TestItemInfoWithIcon
 
     @Before
     fun setup() {
-        itemInfoWithIcon =
-            object : ItemInfoWithIcon() {
-                override fun clone(): ItemInfoWithIcon? {
-                    return null
-                }
-            }
+        itemInfoWithIcon = TestItemInfoWithIcon()
     }
 
     @Test
@@ -81,5 +81,46 @@ class ItemInfoWithIconTest {
         itemInfoWithIcon.runtimeStatusFlags =
             itemInfoWithIcon.runtimeStatusFlags and ItemInfoWithIcon.FLAG_APP_LOCK_ENABLED.inv()
         Truth.assertThat(itemInfoWithIcon.isAppLockEnabled).isFalse()
+    }
+
+    @Test
+    fun checkAndApplyAutomationFlag_setsFlagWhenPackageIsAutomated() {
+        val mockRepository = mock<AutomationRepository>()
+        val testPackage = "com.android.test"
+        itemInfoWithIcon.testPackage = testPackage
+        itemInfoWithIcon.user = Process.myUserHandle()
+        itemInfoWithIcon.runtimeStatusFlags =
+            itemInfoWithIcon.runtimeStatusFlags and FLAG_AUTOMATED.inv()
+        whenever(mockRepository.isPackageAutomated(itemInfoWithIcon.user, testPackage))
+            .thenReturn(true)
+
+        itemInfoWithIcon.checkAndApplyAutomationFlag(mockRepository)
+
+        Truth.assertThat(itemInfoWithIcon.runtimeStatusFlags and FLAG_AUTOMATED)
+            .isEqualTo(FLAG_AUTOMATED)
+    }
+
+    @Test
+    fun checkAndApplyAutomationFlag_unsetsFlagWhenPackageIsNotAutomated() {
+        val mockRepository = mock<AutomationRepository>()
+        val testPackage = "com.android.test"
+        itemInfoWithIcon.testPackage = testPackage
+        itemInfoWithIcon.runtimeStatusFlags = itemInfoWithIcon.runtimeStatusFlags or FLAG_AUTOMATED
+        itemInfoWithIcon.user = Process.myUserHandle()
+        whenever(mockRepository.isPackageAutomated(itemInfoWithIcon.user, testPackage))
+            .thenReturn(false)
+
+        itemInfoWithIcon.checkAndApplyAutomationFlag(mockRepository)
+
+        Truth.assertThat(itemInfoWithIcon.runtimeStatusFlags and FLAG_AUTOMATED)
+            .isEqualTo(0)
+    }
+
+    private class TestItemInfoWithIcon : ItemInfoWithIcon() {
+        var testPackage: String? = null
+
+        override fun getTargetPackage(): String? = testPackage
+
+        override fun clone(): ItemInfoWithIcon? = null
     }
 }

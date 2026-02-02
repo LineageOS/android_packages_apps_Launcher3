@@ -39,6 +39,7 @@ import com.android.launcher3.R;
 import com.android.launcher3.ShortcutAndWidgetContainer;
 import com.android.launcher3.Workspace;
 import com.android.launcher3.apppairs.AppPairIcon;
+import com.android.launcher3.automation.AutomationRepository;
 import com.android.launcher3.celllayout.CellLayoutLayoutParams;
 import com.android.launcher3.dragndrop.DragOptions;
 import com.android.launcher3.dragndrop.DragView;
@@ -51,6 +52,7 @@ import com.android.launcher3.model.data.AppPairInfo;
 import com.android.launcher3.model.data.CollectionInfo;
 import com.android.launcher3.model.data.FolderInfo;
 import com.android.launcher3.model.data.ItemInfo;
+import com.android.launcher3.model.data.ItemInfoWithIcon;
 import com.android.launcher3.model.data.LauncherAppWidgetInfo;
 import com.android.launcher3.model.data.WorkspaceItemFactory;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
@@ -485,6 +487,7 @@ public class LauncherAccessibilityDelegate extends BaseAccessibilityDelegate<Lau
             switch (item) {
                 case WorkspaceItemFactory workspaceItemFactory -> {
                     WorkspaceItemInfo info = workspaceItemFactory.makeWorkspaceItem(mContext);
+                    info.checkAndApplyAutomationFlag(AutomationRepository.INSTANCE.get(mContext));
                     mContext.getModelWriter().addItemToDatabase(info,
                             LauncherSettings.Favorites.CONTAINER_DESKTOP,
                             screenId, coordinates[0], coordinates[1]);
@@ -503,6 +506,7 @@ public class LauncherAccessibilityDelegate extends BaseAccessibilityDelegate<Lau
                 }
                 case WorkspaceItemInfo workspaceItemInfo -> {
                     WorkspaceItemInfo info = workspaceItemInfo.clone();
+                    info.checkAndApplyAutomationFlag(AutomationRepository.INSTANCE.get(mContext));
                     mContext.getModelWriter().addItemToDatabase(info,
                             LauncherSettings.Favorites.CONTAINER_DESKTOP,
                             screenId, coordinates[0], coordinates[1]);
@@ -512,8 +516,14 @@ public class LauncherAccessibilityDelegate extends BaseAccessibilityDelegate<Lau
                     mContext.getModelWriter().addItemToDatabase(ci,
                             LauncherSettings.Favorites.CONTAINER_DESKTOP, screenId, coordinates[0],
                             coordinates[1]);
-                    ci.getContents().forEach(member ->
-                            mContext.getModelWriter().addItemToDatabase(member, ci.id, -1, -1, -1));
+                    AutomationRepository automationRepo =
+                            AutomationRepository.INSTANCE.get(mContext);
+                    ci.getContents().forEach(member -> {
+                        if (member instanceof ItemInfoWithIcon iiwi) {
+                            iiwi.checkAndApplyAutomationFlag(automationRepo);
+                        }
+                        mContext.getModelWriter().addItemToDatabase(member, ci.id, -1, -1, -1);
+                    });
                     bindItem(ci, accessibility, wrappedDropCallback);
                 }
                 default -> {

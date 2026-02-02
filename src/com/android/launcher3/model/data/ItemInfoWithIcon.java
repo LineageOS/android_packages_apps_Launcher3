@@ -26,6 +26,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.Flags;
+import com.android.launcher3.automation.AutomationRepository;
 import com.android.launcher3.graphics.ThemeManager;
 import com.android.launcher3.icons.BitmapInfo;
 import com.android.launcher3.icons.BitmapInfo.DrawableCreationFlags;
@@ -387,6 +388,19 @@ public abstract class ItemInfoWithIcon extends ItemInfo {
         return (((this instanceof WorkspaceItemInfo wii) && wii.hasPromiseIconUi())
                 || (runtimeStatusFlags & FLAG_SHOW_DOWNLOAD_PROGRESS_MASK) != 0)
                 && !(Flags.useNewIconForArchivedApps() && isInactiveArchive());
+    }
+
+    /**
+     * Checks if the package is currently automated and sets the FLAG_AUTOMATED flag.
+     */
+    public void checkAndApplyAutomationFlag(AutomationRepository repository) {
+        if (Flags.enableAppAutomationIndicator() && getTargetPackage() != null) {
+            if (repository.isPackageAutomated(user, getTargetPackage())) {
+                runtimeStatusFlags |= FLAG_AUTOMATED;
+            } else {
+                runtimeStatusFlags &= ~FLAG_AUTOMATED;
+            }
+        }
     }
 
     @Override
