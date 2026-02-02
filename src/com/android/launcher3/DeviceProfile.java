@@ -1221,7 +1221,17 @@ public class DeviceProfile {
     }
 
     private String pxToDpStr(String name, float value) {
-        return "\t" + name + ": " + value + "px (" + dpiFromPx(value, mMetrics.densityDpi) + "dp)";
+        return "\t" + name + ": " + value + "px (" + pxToDp(value) + "dp)";
+    }
+
+    /**
+     * Converts from px to dp.
+     *
+     * @param value is the px value that we want to convert.
+     * @return the dp of value based on the current density.
+     */
+    public float pxToDp(float value) {
+        return dpiFromPx(value, mMetrics.densityDpi);
     }
 
     private String dpPointFToString(String name, PointF value) {
