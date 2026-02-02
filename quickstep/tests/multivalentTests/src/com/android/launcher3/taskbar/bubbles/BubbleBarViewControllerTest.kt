@@ -44,8 +44,10 @@ class BubbleBarViewControllerTest {
 
     @Test
     fun setHiddenForSysui_true_hidesContainer() {
-        controller.setHiddenForBubbles(false)
-        controller.setHiddenForSysui(true)
+        runOnTaskbarUiThreadSync {
+            controller.setHiddenForBubbles(false)
+            controller.setHiddenForSysui(true)
+        }
 
         assertThat(controller.isBubbleBarVisible).isFalse()
         assertThat(controller.isBubbleBarContainerVisible).isFalse()
@@ -53,10 +55,12 @@ class BubbleBarViewControllerTest {
 
     @Test
     fun setHiddenForSysui_false_showsContainer() {
-        controller.setHiddenForBubbles(false)
-        controller.setHiddenForSysui(true)
+        runOnTaskbarUiThreadSync {
+            controller.setHiddenForBubbles(false)
+            controller.setHiddenForSysui(true)
 
-        controller.setHiddenForSysui(false)
+            controller.setHiddenForSysui(false)
+        }
 
         assertThat(controller.isBubbleBarVisible).isTrue()
         assertThat(controller.isBubbleBarContainerVisible).isTrue()
