@@ -758,7 +758,11 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             mControllers.taskbarEduTooltipController.hide();
             mControllers.taskbarEduTooltipController.maybeShowFeaturesEdu();
         }
-        mControllers.taskbarStashController.updateAndAnimateTransientTaskbar(false);
+        if (!isInDesktopMode()) {
+            mControllers.taskbarStashController.updateAndAnimateTransientTaskbar(false);
+        } else {
+            mControllers.taskbarStashController.updateAndAnimatePinnedTaskbar(false);
+        }
     }
 
     @Override
