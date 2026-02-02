@@ -96,7 +96,6 @@ open class PopupContainer<T>(
                                     clickedItem.item.popupAction()
                                 }
                                 is DeepShortcutClickEvent -> {
-                                    originalView.tag = clickedItem.item
                                     mActivityContext.itemOnClickListener.onClick(originalView)
                                 }
                             }
