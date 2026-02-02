@@ -103,7 +103,6 @@ constructor(
         }
     }
 
-    // TODO(b/387496731): Add ensureActive() calls if they show performance benefit
     override suspend fun getIcon(task: Task): TaskCacheEntry {
         task.icon?.let { icon ->
             // Nothing to load, the icon is already loaded
