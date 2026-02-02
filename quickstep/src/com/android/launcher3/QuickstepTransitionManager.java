@@ -312,26 +312,34 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         if (Flags.fallbackRevealAnimation()) {
             // Make sure that we know whenever Launcher becomes visible AND is in its NORMAL state,
             // so we can run the reveal animation.
-            mHomeVisibilityChangeListener =
-                    (isVisible, keyguardGoingAwayOrWaking) -> {
-                        if (isVisible && mLauncher.isInState(NORMAL) && !mIsLauncherAnimating
-                                && !keyguardGoingAwayOrWaking) {
-                            mIsLauncherAnimating = true;
-                            mFallbackRevealAnimation =
-                                    new ScalingWorkspaceRevealAnim(
-                                            mLauncher, null /* siblingAnimation */,
-                                            null /* windowTargetRect */, true /* playAlphaReveal */,
-                                            true /* playBlur */);
-                            mFallbackRevealAnimation.getAnimators().addListener(
-                                    new AnimatorListenerAdapter() {
-                                        @Override
-                                        public void onAnimationEnd(Animator animation) {
-                                            mIsLauncherAnimating = false;
-                                        }
-                                    });
-                            mFallbackRevealAnimation.start();
-                        }
-                    };
+            mHomeVisibilityChangeListener = new HomeVisibilityState.VisibilityChangeListener() {
+                @Override
+                public boolean handleDesktopVisibilityOnlyChanges() {
+                    return false;
+                }
+
+                @Override
+                public void onHomeVisibilityChanged(boolean isVisible,
+                        boolean keyguardGoingAwayOrWaking, boolean behindDesktop) {
+                    if (isVisible && mLauncher.isInState(NORMAL) && !mIsLauncherAnimating
+                            && !keyguardGoingAwayOrWaking) {
+                        mIsLauncherAnimating = true;
+                        mFallbackRevealAnimation =
+                                new ScalingWorkspaceRevealAnim(
+                                        mLauncher, null /* siblingAnimation */,
+                                        null /* windowTargetRect */, true /* playAlphaReveal */,
+                                        true /* playBlur */);
+                        mFallbackRevealAnimation.getAnimators().addListener(
+                                new AnimatorListenerAdapter() {
+                                    @Override
+                                    public void onAnimationEnd(Animator animation) {
+                                        mIsLauncherAnimating = false;
+                                    }
+                                });
+                        mFallbackRevealAnimation.start();
+                    }
+                }
+            };
             mSystemUiProxy.getHomeVisibilityState().addListener(mHomeVisibilityChangeListener);
         }
 

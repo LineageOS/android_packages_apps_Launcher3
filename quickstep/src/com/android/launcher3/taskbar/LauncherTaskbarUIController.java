@@ -111,8 +111,19 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
     private SafeCloseable mOnDeviceProfileChangeListenerClosable;
     private SafeCloseable mIsOnTopResumeActivityListenerClosable;
     private final HomeVisibilityState.VisibilityChangeListener mVisibilityChangeListener =
-            (isVisible, keyguardGoingAwayOrWaking) -> {
-                getTaskbarUiThread().execute(() -> onLauncherVisibilityChanged(isVisible));
+            new HomeVisibilityState.VisibilityChangeListener() {
+                @Override
+                public boolean handleDesktopVisibilityOnlyChanges() {
+                    return true;
+                }
+
+                @Override
+                public void onHomeVisibilityChanged(boolean isVisible,
+                        boolean keyguardGoingAwayOrWaking,
+                        boolean behindDesktop) {
+                    getTaskbarUiThread().execute(
+                            () -> onLauncherVisibilityChanged(isVisible && !behindDesktop));
+                }
             };
 
     // Initialized in init.
@@ -151,7 +162,9 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
         mLauncher.setTaskbarInteractor(new TaskbarInteractor(this));
 
         mHomeState.addListener(mVisibilityChangeListener);
-        onLauncherVisibilityChanged(mHomeState.isHomeVisible(), true /* fromInit */);
+        onLauncherVisibilityChanged(mHomeState.isHomeVisible() && !mHomeState.isHomeBehindDesktop(),
+                                    true /* fromInit */);
+
 
         onStashedInAppChanged(getDeviceProfile());
         mOnDeviceProfileChangeListenerClosable =
@@ -344,7 +357,8 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
 
     @Override
     public void refreshResumedState() {
-        onLauncherVisibilityChanged(mHomeState.isHomeVisible());
+        onLauncherVisibilityChanged(
+                mHomeState.isHomeVisible() && !mHomeState.isHomeBehindDesktop());
     }
 
     @Override
