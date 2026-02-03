@@ -93,7 +93,10 @@ open class PopupContainer<T>(
         lp.height = LayoutParams.WRAP_CONTENT
         layoutParams = lp
 
-        viewModel.init(systemShortcuts, deepShortcutCount)
+        val deviceProfile = mActivityContext.deviceProfile
+        val availableHeightDp =
+            deviceProfile.pxToDp(deviceProfile.deviceProperties.availableHeightPx.toFloat())
+        viewModel.init(systemShortcuts, deepShortcutCount, availableHeightDp)
 
         val composePopup =
             ComposeView(context).apply {

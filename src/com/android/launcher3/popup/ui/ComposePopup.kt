@@ -155,54 +155,56 @@ private fun ComposePopupContent(
 
     // Calculate the maximum possible height of the popup based on the current state and style.
     // This value is remembered and only recalculated when 'state' or 'density' changes.
-    val maxHeight = remember {
-        with(density) {
-            val spacerHeight = ComposePopupDimens.popupContentSpacerHeight.toPx()
+    val maxHeight =
+        remember(targetState, density) {
+            with(density) {
+                val spacerHeight = ComposePopupDimens.popupContentSpacerHeight.toPx()
 
-            if (targetState.mainSegmentsStyle == MainSegmentsStyle.ACCORDION) {
-                val expandPopupMenuButtonHeight = popupMenuItemHeight.toPx()
-                val systemShortcutsHeight: Float =
-                    if (targetState.compactSystemShortcuts.isEmpty()) {
+                if (targetState.mainSegmentsStyle == MainSegmentsStyle.ACCORDION) {
+                    val expandPopupMenuButtonHeight = popupMenuItemHeight.toPx()
+                    val systemShortcutsHeight: Float =
+                        if (targetState.compactSystemShortcuts.isEmpty()) {
+                            targetState.standardSystemShortcuts.size * popupMenuItemHeight.toPx()
+                        } else {
+                            ((targetState.standardSystemShortcuts.size + 1) *
+                                popupMenuItemHeight.toPx()) +
+                                ComposePopupDimens.systemShortcutsDividerHeight.toPx()
+                        }
+
+                    val deepShortcutsHeight =
+                        (targetState.deepShortcuts.size * popupMenuItemHeight.toPx())
+
+                    val heightDeepExpanded =
+                        expandPopupMenuButtonHeight + deepShortcutsHeight + spacerHeight
+                    val heightSystemExpanded =
+                        expandPopupMenuButtonHeight + systemShortcutsHeight + spacerHeight
+                    max(heightDeepExpanded, heightSystemExpanded).toInt()
+                } else { // MainSegmentsStyle.LIST
+                    var systemShortcutsHeight = 0f
+                    if (targetState.compactSystemShortcuts.isNotEmpty()) {
+                        systemShortcutsHeight += popupMenuItemHeight.toPx()
+                    }
+                    if (
+                        targetState.compactSystemShortcuts.isNotEmpty() &&
+                            targetState.standardSystemShortcuts.isNotEmpty()
+                    ) {
+                        systemShortcutsHeight += ComposePopupDimens.popupContentSpacerHeight.toPx()
+                    }
+                    systemShortcutsHeight +=
                         targetState.standardSystemShortcuts.size * popupMenuItemHeight.toPx()
-                    } else {
-                        ((targetState.standardSystemShortcuts.size + 1) *
-                            popupMenuItemHeight.toPx()) +
+
+                    val deepShortcutsHeight =
+                        targetState.deepShortcuts.size * popupMenuItemHeight.toPx()
+
+                    if (deepShortcutsHeight > 0) {
+                        systemShortcutsHeight +=
                             ComposePopupDimens.systemShortcutsDividerHeight.toPx()
                     }
 
-                val deepShortcutsHeight =
-                    (targetState.deepShortcuts.size * popupMenuItemHeight.toPx())
-
-                val heightDeepExpanded =
-                    expandPopupMenuButtonHeight + deepShortcutsHeight + spacerHeight
-                val heightSystemExpanded =
-                    expandPopupMenuButtonHeight + systemShortcutsHeight + spacerHeight
-                max(heightDeepExpanded, heightSystemExpanded).toInt()
-            } else { // MainSegmentsStyle.LIST
-                var systemShortcutsHeight = 0f
-                if (targetState.compactSystemShortcuts.isNotEmpty()) {
-                    systemShortcutsHeight += popupMenuItemHeight.toPx()
+                    (systemShortcutsHeight + deepShortcutsHeight + spacerHeight).toInt()
                 }
-                if (
-                    targetState.compactSystemShortcuts.isNotEmpty() &&
-                        targetState.standardSystemShortcuts.isNotEmpty()
-                ) {
-                    systemShortcutsHeight += ComposePopupDimens.popupContentSpacerHeight.toPx()
-                }
-                systemShortcutsHeight +=
-                    targetState.standardSystemShortcuts.size * popupMenuItemHeight.toPx()
-
-                val deepShortcutsHeight =
-                    targetState.deepShortcuts.size * popupMenuItemHeight.toPx()
-
-                if (deepShortcutsHeight > 0) {
-                    systemShortcutsHeight += ComposePopupDimens.systemShortcutsDividerHeight.toPx()
-                }
-
-                (systemShortcutsHeight + deepShortcutsHeight + spacerHeight).toInt()
             }
         }
-    }
 
     val lastReportedMaxHeight = remember { mutableIntStateOf(-1) }
 
