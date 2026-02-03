@@ -60,6 +60,8 @@ class PerDisplayTaskbarResource(
     var taskbar: TaskbarActivityContext? = null
         private set
 
+    private var isDestroyed = false
+
     private var oldConfig = windowContext.resources.configuration
     private var displayChangeSafeClosable: SafeCloseable? = null
 
@@ -191,7 +193,9 @@ class PerDisplayTaskbarResource(
     fun setCurrentTaskbar(activity: TaskbarActivityContext) {
         removeExistingTaskbar()
         taskbar = activity
-        viewManager.addView(activity.windowLayoutParams)
+        if (!isDestroyed) {
+            viewManager.addView(activity.windowLayoutParams)
+        }
     }
 
     fun destroyTaskbarForDisplay() {
@@ -216,6 +220,7 @@ class PerDisplayTaskbarResource(
     }
 
     override fun cleanup() {
+        isDestroyed = true
         debugMsg("destroy removeTaskbarRootViewFromWindow")
         removeTaskbarRootViewFromWindow()
 
