@@ -3040,6 +3040,12 @@ public final class LauncherInstrumentation {
                 TestProtocol.TEST_INFO_RESPONSE_FIELD);
     }
 
+    /** Mark tool tip of Overview action buttons as seen. */
+    public void markOverviewSelectTipSeen() {
+        getTestInfo(TestProtocol.REQUEST_MARK_OVERVIEW_SELECT_TIP_SEEN);
+    }
+
+
     /**
      * Waits for the provided condition to be true, otherwise fails with the provided message
      */
