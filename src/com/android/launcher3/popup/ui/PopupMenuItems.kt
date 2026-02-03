@@ -51,6 +51,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.onLongClick
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.android.launcher3.R
@@ -146,6 +147,8 @@ fun PopupMenuItem(
                     text = title,
                     color = colorResource(R.color.materialColorOnSurfaceVariant),
                     fontSize = popupMenuItemTextSize,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
 
