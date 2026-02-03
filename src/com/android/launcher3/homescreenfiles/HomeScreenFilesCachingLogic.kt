@@ -17,7 +17,6 @@
 package com.android.launcher3.homescreenfiles
 
 import android.content.ComponentName
-import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.graphics.Bitmap
 import android.os.UserHandle
@@ -25,8 +24,8 @@ import android.util.Log
 import android.util.Size
 import com.android.launcher3.icons.BitmapInfo
 import com.android.launcher3.icons.IconProvider
-import com.android.launcher3.icons.cache.BaseIconCache
 import com.android.launcher3.icons.cache.CachingLogic
+import com.android.launcher3.icons.cache.IconLoadRequest
 import com.android.launcher3.model.data.WorkspaceItemInfo
 
 /**
@@ -54,47 +53,45 @@ object HomeScreenFilesCachingLogic : CachingLogic<HomeScreenFile> {
         return null
     }
 
-    override fun loadIcon(
-        context: Context,
-        cache: BaseIconCache,
-        item: HomeScreenFile,
-    ): BitmapInfo {
-        cache.iconFactory.use { iconFactory ->
-            if (item.mimeType.isNullOrEmpty()) {
-                return iconFactory.createBadgedIconBitmap(null)
-            }
+    override fun loadIcon(request: IconLoadRequest<HomeScreenFile>): BitmapInfo =
+        request.run {
+            iconFactory.use { iconFactory ->
+                val mimeType = item.mimeType
+                if (mimeType.isNullOrEmpty()) {
+                    return iconFactory.createBadgedIconBitmap(null)
+                }
 
-            // Load thumbnail for images and videos.
-            if (supportsThumbnails(item.mimeType)) {
-                try {
-                    val thumbnail =
-                        context.contentResolver.loadThumbnail(
-                            item.uri,
-                            Size(iconFactory.iconBitmapSize, iconFactory.iconBitmapSize),
-                            null,
+                // Load thumbnail for images and videos.
+                if (supportsThumbnails(mimeType)) {
+                    try {
+                        val thumbnail =
+                            context.contentResolver.loadThumbnail(
+                                item.uri,
+                                Size(iconFactory.iconBitmapSize, iconFactory.iconBitmapSize),
+                                null,
+                            )
+                        return iconFactory.createIconBitmap(
+                            thumbnail.cropToSquare(),
+                            isFullBleed = true,
                         )
-                    return iconFactory.createIconBitmap(
-                        thumbnail.cropToSquare(),
-                        isFullBleed = true,
-                    )
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to load thumbnail icon", e)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to load thumbnail icon", e)
+                    }
                 }
-            }
 
-            // Load generic MIME type icon for other MIME types or as a fallback when loading a
-            // thumbnail has failed.
-            return kotlin
-                .runCatching {
-                    context.contentResolver.getTypeInfo(item.mimeType).icon.loadDrawable(context)
-                }
-                .map { iconFactory.createBadgedIconBitmap(it) }
-                .getOrElse {
-                    Log.e(TAG, "Failed to load generic icon", it)
-                    iconFactory.createBadgedIconBitmap(null)
-                }
+                // Load generic MIME type icon for other MIME types or as a fallback when loading a
+                // thumbnail has failed.
+                kotlin
+                    .runCatching {
+                        context.contentResolver.getTypeInfo(mimeType).icon.loadDrawable(context)
+                    }
+                    .map { iconFactory.createBadgedIconBitmap(it) }
+                    .getOrElse {
+                        Log.e(TAG, "Failed to load generic icon", it)
+                        iconFactory.createBadgedIconBitmap(null)
+                    }
+            }
         }
-    }
 
     override fun getFreshnessIdentifier(item: HomeScreenFile, iconProvider: IconProvider) = null
 

@@ -153,7 +153,8 @@ constructor(
 
     /**
      * Reloads the workspace items from the DB and re-binds the workspace. This should generally not
-     * be called as DB updates are automatically followed by UI update
+     * be called as DB updates are automatically followed by UI update. Calling this too early may
+     * cause missing icons or widgets during restore process.
      */
     @VisibleForTesting
     fun forceReload(): CompletionStage<Unit> {

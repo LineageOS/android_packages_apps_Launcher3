@@ -18,7 +18,6 @@ package com.android.launcher3.views;
 import static android.view.Gravity.LEFT;
 
 import static com.android.app.animation.Interpolators.LINEAR;
-import static com.android.launcher3.Utilities.getFullDrawable;
 import static com.android.launcher3.Utilities.mapToRange;
 import static com.android.launcher3.graphics.PreloadIconDelegate.newPendingIcon;
 import static com.android.launcher3.icons.BitmapInfo.FLAG_CUSTOM_SHAPE;
@@ -35,7 +34,6 @@ import android.graphics.drawable.Drawable;
 import android.os.CancellationSignal;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
@@ -54,6 +52,7 @@ import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.dragndrop.DragLayer;
 import com.android.launcher3.folder.FolderIcon;
+import com.android.launcher3.graphics.IconLoader;
 import com.android.launcher3.graphics.PreloadIconDelegate;
 import com.android.launcher3.icons.FastBitmapDrawable;
 import com.android.launcher3.icons.IconNormalizer;
@@ -320,18 +319,20 @@ public class FloatingIconView extends FrameLayout implements
         } else {
             int width = (int) pos.width();
             int height = (int) pos.height();
-            Pair<AdaptiveIconDrawable, Drawable> fullIcon = null;
+            IconLoader.Result fullIcon = null;
             if (supportsAdaptiveIcons) {
                 boolean shouldThemeIcon = (btvIcon instanceof FastBitmapDrawable fbd)
                         && fbd.isCreatedForTheme();
-                fullIcon = getFullDrawable(l, info, width, height, shouldThemeIcon);
+                fullIcon = l.getActivityComponent().getIconLoader().getFullDrawable(
+                        info, width, height, shouldThemeIcon);
             } else if (!(originalView instanceof BubbleTextView)) {
-                fullIcon = getFullDrawable(l, info, width, height, true /* shouldThemeIcon */);
+                fullIcon = l.getActivityComponent().getIconLoader().getFullDrawable(
+                        info, width, height, true /* shouldThemeIcon */);
             }
 
             if (fullIcon != null) {
-                drawable = fullIcon.first;
-                badge = fullIcon.second;
+                drawable = fullIcon.icon;
+                badge = fullIcon.badge;
             } else {
                 drawable = btvIcon;
             }

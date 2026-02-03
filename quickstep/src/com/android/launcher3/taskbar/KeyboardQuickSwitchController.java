@@ -171,6 +171,8 @@ public final class KeyboardQuickSwitchController implements
                 if (!mModel.isTaskListValid(mTaskListChangeId) || !taskIdsToExclude.equals(
                         mExcludedTaskIds)) {
                     mExcludedTaskIds = taskIdsToExclude;
+                    final KeyboardQuickSwitchViewController viewController =
+                            mQuickSwitchViewController;
                     mTaskListChangeId = mModel.getTasks(RecentsFilterState.EMPTY_FILTER,
                             (tasks) -> getTaskbarUiThread().execute(() -> {
                                 processLoadedTasks(
@@ -178,7 +180,7 @@ public final class KeyboardQuickSwitchController implements
                                         shouldShowDesktopTasks,
                                         tasks,
                                         taskIdsToExclude);
-                                mQuickSwitchViewController.updateQuickSwitchView(
+                                viewController.updateQuickSwitchView(
                                         mTasks,
                                         wasOpenedFromTaskbar ? 0 : mNumHiddenTasks,
                                         currentFocusIndexOverride,
@@ -228,6 +230,7 @@ public final class KeyboardQuickSwitchController implements
             return;
         }
 
+        final KeyboardQuickSwitchViewController viewController = mQuickSwitchViewController;
         mExcludedTaskIds = taskIdsToExclude;
         mTaskListChangeId = mModel.getTasks(RecentsFilterState.EMPTY_FILTER,
                 (tasks) -> getTaskbarUiThread().execute(() -> {
@@ -235,19 +238,17 @@ public final class KeyboardQuickSwitchController implements
                             wasOpenedFromTaskbar, shouldShowDesktopTasks, tasks, taskIdsToExclude);
                     // Check if the first task is running after the recents model has updated so
                     // that we use the correct index.
-                    if (mQuickSwitchViewController != null) {
-                        mQuickSwitchViewController.openQuickSwitchView(
-                                mTasks,
-                                wasOpenedFromTaskbar ? 0 : mNumHiddenTasks,
-                                /* updateTasks= */ true,
-                                currentFocusedIndex == -1
-                                        && !mControllerCallbacks.isFirstTaskRunning()
-                                        ? 0 : currentFocusedIndex,
-                                shouldShowDesktopTasks,
-                                mHasDesktopTask,
-                                mWasDesktopTaskFilteredOut,
-                                wasOpenedFromTaskbar);
-                    }
+                    viewController.openQuickSwitchView(
+                            mTasks,
+                            wasOpenedFromTaskbar ? 0 : mNumHiddenTasks,
+                            /* updateTasks= */ true,
+                            currentFocusedIndex == -1
+                                    && !mControllerCallbacks.isFirstTaskRunning()
+                                    ? 0 : currentFocusedIndex,
+                            shouldShowDesktopTasks,
+                            mHasDesktopTask,
+                            mWasDesktopTaskFilteredOut,
+                            wasOpenedFromTaskbar);
                 }));
     }
 

@@ -21,10 +21,12 @@ import android.content.Context
 import android.graphics.drawable.Icon
 import android.net.Uri
 import android.os.Process
+import android.util.DisplayMetrics
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.icons.BitmapInfo
 import com.android.launcher3.icons.LauncherIcons
 import com.android.launcher3.icons.cache.BaseIconCache
+import com.android.launcher3.icons.cache.IconLoadRequest
 import com.google.common.truth.Truth.assertThat
 import java.io.IOException
 import org.junit.Before
@@ -93,7 +95,7 @@ class HomeScreenFilesCachingLogicTest {
         whenever(launcherIcons.createIconBitmap(any(), eq(true)))
             .thenReturn(BitmapInfo.LOW_RES_INFO)
 
-        val icon = HomeScreenFilesCachingLogic.loadIcon(context, baseIconCache, hsf)
+        val icon = hsf.loadIcon()
         assertThat(icon).isEqualTo(BitmapInfo.LOW_RES_INFO)
     }
 
@@ -112,7 +114,7 @@ class HomeScreenFilesCachingLogicTest {
         whenever(launcherIcons.createBadgedIconBitmap(anyOrNull(), any()))
             .thenReturn(BitmapInfo.LOW_RES_INFO)
 
-        val icon = HomeScreenFilesCachingLogic.loadIcon(context, baseIconCache, hsf)
+        val icon = hsf.loadIcon()
         assertThat(icon).isEqualTo(BitmapInfo.LOW_RES_INFO)
     }
 
@@ -133,7 +135,17 @@ class HomeScreenFilesCachingLogicTest {
         whenever(launcherIcons.createBadgedIconBitmap(anyOrNull(), any()))
             .thenReturn(BitmapInfo.LOW_RES_INFO)
 
-        val icon = HomeScreenFilesCachingLogic.loadIcon(context, baseIconCache, hsf)
+        val icon = hsf.loadIcon()
         assertThat(icon).isEqualTo(BitmapInfo.LOW_RES_INFO)
     }
+
+    private fun HomeScreenFile.loadIcon() =
+        IconLoadRequest(
+                context = context,
+                item = this,
+                logic = HomeScreenFilesCachingLogic,
+                cache = baseIconCache,
+                iconDpi = DisplayMetrics.DENSITY_DEFAULT,
+            )
+            .evaluate()
 }

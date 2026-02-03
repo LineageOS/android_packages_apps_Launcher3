@@ -87,7 +87,7 @@ import kotlin.math.max
 fun ComposePopup(
     viewModel: PopupViewModel,
     onClickListener: (PopupClickEvent) -> Unit,
-    onAddIconClick: (ItemInfoWithIcon) -> Unit,
+    onAddIconClick: ((ItemInfoWithIcon) -> Unit)?,
     onDeepShortcutLongPress: (ItemInfoWithIcon, Offset) -> Unit,
     onMaxHeightMeasured: ((Int) -> Unit)?,
 ) {
@@ -147,7 +147,7 @@ private fun ComposePopupContent(
     viewModel: PopupViewModel,
     targetState: PopupUiState,
     onClickListener: (PopupClickEvent) -> Unit,
-    onAddIconClick: (ItemInfoWithIcon) -> Unit,
+    onAddIconClick: ((ItemInfoWithIcon) -> Unit)?,
     onDeepShortcutLongPress: (ItemInfoWithIcon, Offset) -> Unit,
     onMaxHeightMeasured: ((Int) -> Unit)?,
 ) {
@@ -363,7 +363,7 @@ fun ExpandableHybridPopup(
     isDeepShortcutsExpanded: Boolean,
     onToggle: (ExpandedSection) -> Unit,
     onClickListener: (PopupClickEvent) -> Unit,
-    onAddButtonClick: (ItemInfoWithIcon) -> Unit,
+    onAddButtonClick: ((ItemInfoWithIcon) -> Unit)?,
     onDeepShortcutLongPress: (ItemInfoWithIcon, Offset) -> Unit,
 ) {
     val systemTransitionState = remember { MutableTransitionState(isSystemShortcutsExpanded) }
@@ -503,7 +503,7 @@ private fun SystemShortcutsSection(
 private fun DeepShortcutsContent(
     deepShortcuts: List<ItemInfoWithIcon?>,
     onClick: (PopupClickEvent) -> Unit,
-    onAddButtonClick: (ItemInfoWithIcon) -> Unit,
+    onAddButtonClick: ((ItemInfoWithIcon) -> Unit)?,
     onDeepShortcutLongPress: (ItemInfoWithIcon, Offset) -> Unit,
 ) {
     Column(modifier = Modifier.semantics { contentDescription = "deep_shortcuts_container" }) {

@@ -11,13 +11,14 @@ import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.UserHandle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.LauncherAppState;
-import com.android.launcher3.icons.cache.BaseIconCache;
 import com.android.launcher3.icons.cache.CachedObject;
+import com.android.launcher3.icons.cache.IconLoadRequest;
 import com.android.launcher3.model.data.LauncherAppWidgetInfo;
 
 /**
@@ -239,8 +240,8 @@ public class LauncherAppWidgetProviderInfo extends AppWidgetProviderInfo impleme
     }
 
     @Override
-    public Drawable getFullResIcon(BaseIconCache cache) {
-        return cache.getFullResIcon(getActivityInfo());
+    public Drawable getFullResIcon(@NonNull IconLoadRequest<CachedObject> request) {
+        return request.getIcon(getActivityInfo());
     }
 
     @Nullable

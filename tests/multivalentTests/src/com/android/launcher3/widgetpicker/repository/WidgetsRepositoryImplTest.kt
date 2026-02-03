@@ -23,6 +23,7 @@ import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
+import android.content.pm.ComponentInfo
 import android.content.pm.LauncherActivityInfo
 import android.content.pm.LauncherApps
 import android.content.pm.LauncherApps.PinItemRequest
@@ -47,6 +48,7 @@ import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.R
 import com.android.launcher3.icons.IconCache
 import com.android.launcher3.icons.cache.CachedObject
+import com.android.launcher3.icons.cache.IconLoadRequest
 import com.android.launcher3.model.WidgetsModel
 import com.android.launcher3.model.data.PackageItemInfo
 import com.android.launcher3.pm.ShortcutConfigActivityInfo
@@ -103,43 +105,31 @@ import org.mockito.kotlin.whenever
 @EnableFlags(Flags.FLAG_SHOW_CREATE_WIDGET_BTN_IN_PICKER)
 @SkipOnDeviceless // Can't mock PinItemRequest in robolectric.
 class WidgetsRepositoryImplTest {
-    @get:Rule
-    val limitDevicesRule = LimitDevicesRule()
-    @get:Rule
-    val setFlagsRule = SetFlagsRule()
-    @get:Rule
-    val mockitoRule: MockitoRule = MockitoJUnit.rule()
+    @get:Rule val limitDevicesRule = LimitDevicesRule()
+    @get:Rule val setFlagsRule = SetFlagsRule()
+    @get:Rule val mockitoRule: MockitoRule = MockitoJUnit.rule()
 
-    @get:Rule
-    val context = SandboxApplication()
+    @get:Rule val context = SandboxApplication()
 
-    @get:Rule
-    val uiContext = TestActivityContext(context, R.style.WidgetContainerTheme)
+    @get:Rule val uiContext = TestActivityContext(context, R.style.WidgetContainerTheme)
 
-    @get:Rule
-    var mMockUsersRule: MockUsersRule = MockUsersRule(context)
+    @get:Rule var mMockUsersRule: MockUsersRule = MockUsersRule(context)
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
-    @Mock
-    private lateinit var iconCacheMock: IconCache
+    @Mock private lateinit var iconCacheMock: IconCache
+    @Mock private lateinit var iconLoadRequest: IconLoadRequest<Any>
 
-    @Mock
-    private lateinit var appFilterMock: AppFilter
+    @Mock private lateinit var appFilterMock: AppFilter
 
-    @Mock
-    lateinit var mockShortcutLauncherActivityInfo: LauncherActivityInfo
-    @Mock
-    lateinit var mockPinRequest: PinItemRequest
-    @Mock
-    lateinit var mockShortcutInfo: ShortcutInfo
+    @Mock lateinit var mockShortcutLauncherActivityInfo: LauncherActivityInfo
+    @Mock lateinit var mockPinRequest: PinItemRequest
+    @Mock lateinit var mockShortcutInfo: ShortcutInfo
 
-    @Mock
-    lateinit var mockActivityInfo: ActivityInfo
+    @Mock lateinit var mockActivityInfo: ActivityInfo
 
-    @Mock
-    lateinit var mockApplicationInfo: ApplicationInfo
+    @Mock lateinit var mockApplicationInfo: ApplicationInfo
 
     private lateinit var user: UserHandle
     private lateinit var idp: InvariantDeviceProfile
@@ -220,12 +210,12 @@ class WidgetsRepositoryImplTest {
             .thenReturn(listOf(App2Widget1ProviderInfo))
 
         doAnswer { i ->
-            generatedPreview.takeIf {
-                i.arguments[0] == App2Widget1ProviderName &&
+                generatedPreview.takeIf {
+                    i.arguments[0] == App2Widget1ProviderName &&
                         i.arguments[1] == user &&
                         i.arguments[2] == WIDGET_CATEGORY_HOME_SCREEN
+                }
             }
-        }
             .whenever(appWidgetManager)
             .getWidgetPreview(any(), any(), any())
     }
@@ -248,7 +238,9 @@ class WidgetsRepositoryImplTest {
         whenever(launcherApps.getShortcutConfigActivityList(eq(APP_2_PACKAGE_NAME), eq(user)))
             .thenReturn(listOf())
 
-        doReturn(ShortcutPreviewDrawable).whenever(iconCacheMock).getFullResIcon(any())
+        doReturn(iconLoadRequest).whenever(iconCacheMock).getIconLoadRequest(any<Any>(), any())
+        doReturn(ShortcutPreviewDrawable).whenever(iconLoadRequest).getIcon(any<ComponentInfo>())
+        doReturn(ShortcutPreviewDrawable).whenever(iconLoadRequest).getIcon(any<ApplicationInfo>())
     }
 
     @Test
@@ -489,8 +481,8 @@ class WidgetsRepositoryImplTest {
             assertThat(preview).isInstanceOf(WidgetPreview.ProviderInfoWidgetPreview::class.java)
             // Initial layout set as the preview layout.
             assertThat(
-                (preview as WidgetPreview.ProviderInfoWidgetPreview).providerInfo.initialLayout
-            )
+                    (preview as WidgetPreview.ProviderInfoWidgetPreview).providerInfo.initialLayout
+                )
                 .isEqualTo(PREVIEW_LAYOUT_ID)
         }
 
@@ -585,7 +577,7 @@ class WidgetsRepositoryImplTest {
                 configure = ComponentName.createRelative(APP_1_PACKAGE_NAME, "ConfigActivity")
                 widgetFeatures =
                     AppWidgetProviderInfo.WIDGET_FEATURE_RECONFIGURABLE or
-                            AppWidgetProviderInfo.WIDGET_FEATURE_HIDE_FROM_PICKER
+                        AppWidgetProviderInfo.WIDGET_FEATURE_HIDE_FROM_PICKER
             }
 
         val App1Shortcut1Name = ComponentName(APP_1_PACKAGE_NAME, SHORTCUT_1B_NAME)

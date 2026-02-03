@@ -52,17 +52,22 @@ constructor(
         DesktopExperienceFlags.ENABLE_SYS_DECORS_CALLBACKS_VIA_WM.isTrue() &&
             DesktopExperienceFlags.ENABLE_DISPLAY_CONTENT_MODE_MANAGEMENT.isTrue()
 
+    private var closed = false
+
     override fun onDisplayAddSystemDecorations(displayId: Int) {
+        if (closed) return
         if (DEBUG) Log.d(TAG, "onDisplayAdded: displayId=$displayId")
         storeDisplayResource(displayId)
     }
 
     override fun onDisplayRemoved(displayId: Int) {
+        if (closed) return
         if (DEBUG) Log.d(TAG, "onDisplayRemoved: displayId=$displayId")
         deleteDisplayResource(displayId)
     }
 
     override fun onDisplayRemoveSystemDecorations(displayId: Int) {
+        if (closed) return
         if (DEBUG) Log.d(TAG, "onDisplayRemoveSystemDecorations: displayId=$displayId")
         deleteDisplayResource(displayId)
     }
@@ -89,6 +94,8 @@ constructor(
     }
 
     override fun close() {
+        closed = true
+
         if (useDisplayDecorationListener) {
             displaysWithDecorationsRepositoryCompat.unregisterDisplayDecorationListener(this)
         } else {
