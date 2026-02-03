@@ -2,6 +2,7 @@ package com.android.quickstep;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.launcher3.LauncherPrefs.SELECT_TIP_SEEN;
 import static com.android.launcher3.taskbar.TaskbarThresholdUtils.getFromNavThreshold;
 import static com.android.launcher3.testing.shared.TestProtocol.REQUEST_INFO_DISPLAY_ID;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
@@ -324,6 +325,9 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
                             return recentsView.getDesktopTaskViewCount();
                         },
                         this::getRecentsViewContainer);
+            case TestProtocol.REQUEST_MARK_OVERVIEW_SELECT_TIP_SEEN:
+                LauncherPrefs.get(mContext).put(SELECT_TIP_SEEN, true);
+                return response;
         }
 
         return super.call(method, arg, extras);

@@ -224,6 +224,9 @@ public final class TestProtocol {
 
     public static final String REQUEST_INFO_DISPLAY_ID = "display_id";
 
+    public static final String REQUEST_MARK_OVERVIEW_SELECT_TIP_SEEN =
+            "mark_overview_select_tip_seen";
+
     /** Logs {@link Log#d(String, String)} if {@link #sDebugTracing} is true. */
     public static void testLogD(String tag, String message) {
         if (!sDebugTracing) {

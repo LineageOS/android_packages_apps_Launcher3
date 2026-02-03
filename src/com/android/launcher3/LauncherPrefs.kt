@@ -335,6 +335,8 @@ constructor(@ApplicationContext private val encryptedContext: Context) {
 
         @JvmField val INITIAL_TIMESTAMP = backedUpItem("launcher.initial_timestamp", 0L)
 
+        @JvmField val SELECT_TIP_SEEN = backedUpItem("launcher.select_tip_seen", false)
+
         @JvmStatic
         fun <T> backedUpItem(
             sharedPrefKey: String,
