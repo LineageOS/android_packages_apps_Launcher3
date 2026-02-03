@@ -1876,12 +1876,11 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
     }
 
     @Override
-    public void updateItemViewVisibilityForDragState(View itemView, boolean isDragged) {
+    public boolean updateItemViewVisibilityForDragState(View itemView, boolean isDragged) {
         if (mHotseatIconsContainer != null) {
-            mHotseatIconsContainer.updateItemViewVisibilityForDragState(itemView, isDragged);
-            return;
+            return mHotseatIconsContainer.updateItemViewVisibilityForDragState(itemView, isDragged);
         }
-        mDragDelegate.updateItemViewVisibilityForDragState(itemView, isDragged);
+        return mDragDelegate.updateItemViewVisibilityForDragState(itemView, isDragged);
     }
 
     @Override
@@ -1961,6 +1960,19 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         mActivityContext.getDragLayer().getDescendantRectRelativeToSelf(overflowIcon,
                 overflowIconRect);
         return overflowIconRect.contains(Math.round(point[0]), Math.round(point[1]));
+    }
+
+    /**
+     * Cleans up the cached drag state in the overflow view.
+     *
+     * @param itemDropped True if the dragged object was successfully dropped.
+     */
+    public void cleanUpOverflowDragState(boolean itemDropped) {
+        TaskbarOverflowView overflowIcon = getTaskbarPinnedOverflowView();
+        if (overflowIcon == null) {
+            return;
+        }
+        overflowIcon.onItemDragEnded(itemDropped);
     }
 
     public static class TaskbarLayoutParams extends FrameLayout.LayoutParams {
