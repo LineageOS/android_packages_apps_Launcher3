@@ -591,15 +591,23 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     @UiThread
     public void applyIconAndLabel(ItemInfoWithIcon info) {
         FastBitmapDrawable oldIcon = mIcon;
-        // Check if we can reuse icon so that any animation is preserved
-        if (info.shouldShowPendingIcon() || !hasPendingAnimationCompleted(mIcon)) {
-            maybeApplyProgressLevel(info, oldIcon);
-        } else if (Flags.enableAppAutomationIndicator()
-                && (info.runtimeStatusFlags & FLAG_AUTOMATED) != 0)  {
-            setIcon(newAutomatedIcon(getContext(), info, getIconCreationFlagsForInfo(info)));
-        } else {
+        boolean isOldIconAutomated = oldIcon != null
+                && oldIcon.getDelegate() instanceof AutomatedIconDelegate;
+        boolean isItemAutomated = Flags.enableAppAutomationIndicator()
+                && (info.runtimeStatusFlags & FLAG_AUTOMATED) != 0;
+
+        if (isItemAutomated)  {
+            // If icon is not already animated or underlying bitmap changed then replace it.
+            if (!isOldIconAutomated || !mIcon.isSameInfo(info.bitmap)) {
+                setIcon(newAutomatedIcon(getContext(), info, getIconCreationFlagsForInfo(info)));
+            }
+        } else if (hasPendingAnimationCompleted(mIcon) || !mIcon.isSameInfo(info.bitmap)
+                || isOldIconAutomated) {
+            // Set new, regular icon if loading completed, no longer automating, or bitmap changed
             setStandardIcon(info);
         }
+        // Always check if we should update loading progress
+        maybeApplyProgressLevel(info, oldIcon);
         applyLabel(info);
     }
 
