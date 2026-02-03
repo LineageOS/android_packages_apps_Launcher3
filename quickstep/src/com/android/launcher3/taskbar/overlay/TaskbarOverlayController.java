@@ -42,6 +42,7 @@ import android.view.CrossWindowBlurListeners;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
+import android.view.View;
 import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
@@ -51,6 +52,7 @@ import androidx.annotation.Nullable;
 
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.Flags;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.taskbar.TaskbarActivityContext;
@@ -162,6 +164,12 @@ public final class TaskbarOverlayController
     /** Initialize the controller. */
     public void init(TaskbarControllers controllers) {
         mControllers = controllers;
+
+        if (Flags.enableTaskbarBehindShade()) {
+            // To avoid jank caused by creating the window, we request it early but keep it hidden.
+            requestWindow();
+            mOverlayContext.getDragLayer().setVisibility(View.GONE);
+        }
     }
 
     /**
@@ -198,7 +206,7 @@ public final class TaskbarOverlayController
         WindowManager wm = mOverlayContext.getSystemService(WindowManager.class);
         if (!mProxyView.isOpen()) {
             mProxyView.show();
-            if (wm != null) {
+            if (wm != null && mOverlayContext.getDragLayer().getParent() == null) {
                 wm.addView(mOverlayContext.getDragLayer(), layoutParams);
             }
             TaskStackChangeListeners.getInstance().registerTaskStackListener(mTaskStackListener);
@@ -206,6 +214,7 @@ public final class TaskbarOverlayController
             wm.updateViewLayout(mOverlayContext.getDragLayer(), layoutParams);
         }
 
+        mOverlayContext.getDragLayer().setVisibility(View.VISIBLE);
         return mOverlayContext;
     }
 
@@ -223,7 +232,23 @@ public final class TaskbarOverlayController
     void maybeCloseWindow() {
         if (!canCloseWindow()) return;
         mProxyView.close(false);
-        onDestroy();
+        if (Flags.enableTaskbarBehindShade()) {
+            reset();
+        } else {
+            onDestroy();
+        }
+    }
+
+    private void reset() {
+        if (cueBarAceMigration()) {
+            mControllers.cueBarController.cleanUpOverlay();
+        }
+        TaskStackChangeListeners.getInstance().unregisterTaskStackListener(mTaskStackListener);
+        if (mOverlayContext != null) {
+            mOverlayContext.getDragLayer().setVisibility(View.GONE);
+        }
+        mBubbleBarActivityStarter.removeListener(mBubbleShowListener);
+        mBubbleShowRequested = false;
     }
 
     @SuppressLint("WrongConstant")
@@ -239,10 +264,7 @@ public final class TaskbarOverlayController
             Log.d(TAG, "onDestroy: " + Utilities.getTrimmedStackTrace("onDestroy"));
             Log.d(TAG, "onDestroy: Was window already present? " + (mOverlayContext != null));
         }
-        if (cueBarAceMigration()) {
-            mControllers.cueBarController.cleanUpOverlay();
-        }
-        TaskStackChangeListeners.getInstance().unregisterTaskStackListener(mTaskStackListener);
+        reset();
         Optional.ofNullable(mOverlayContext).ifPresent(c -> {
             c.onDestroy();
             WindowManager wm = c.getSystemService(WindowManager.class);
@@ -251,8 +273,6 @@ public final class TaskbarOverlayController
             }
         });
         mOverlayContext = null;
-        mBubbleBarActivityStarter.removeListener(mBubbleShowListener);
-        mBubbleShowRequested = false;
     }
 
     /** The current device profile for the overlay window. */
@@ -419,7 +439,11 @@ public final class TaskbarOverlayController
             mTaskbarContext.getDragLayer().removeView(this);
             Optional.ofNullable(mOverlayContext).ifPresent(c -> {
                 if (canCloseWindow()) {
-                    onDestroy(); // Window is already ready to be destroyed.
+                    if (Flags.enableTaskbarBehindShade()) {
+                        reset(); // Window is already ready to be reset.
+                    } else {
+                        onDestroy(); // Window is already ready to be destroyed.
+                    }
                 } else {
                     // Close window's AFVs before destroying it. Its drag layer will attempt to
                     // close the proxy view again once its children are removed.
