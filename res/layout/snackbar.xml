@@ -31,7 +31,7 @@
         android:textColor="@color/materialColorOnSurface"
         android:accessibilityLiveRegion="polite"
         style="@style/TextTitle"/>
-    <TextView
+    <Button
         android:id="@+id/action"
         android:layout_height="@dimen/snackbar_content_height"
         android:layout_width="wrap_content"
