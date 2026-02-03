@@ -207,7 +207,8 @@ public abstract class ButtonDropTarget extends TextView
 
     @Override
     public void onDragStart(DropTarget.DragObject dragObject, DragOptions options) {
-        if (options.isKeyboardDrag) {
+        if (options.isKeyboardDrag
+                || (options.isMouseDrag && Flags.enableCursorDrivenWorkflows())) {
             mActive = false;
         } else {
             setupItemInfo(dragObject.dragInfo);
