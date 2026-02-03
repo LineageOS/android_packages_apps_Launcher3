@@ -633,6 +633,12 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
             updateButtonLayoutSpacing();
         }
 
+        if (mRecentsButton != null) {
+            boolean screenPinned = (sysUiStateFlags & SYSUI_STATE_SCREEN_PINNING) != 0;
+            // Recents button is only long clickable to exit screen pinning.
+            mRecentsButton.setLongClickable(screenPinned);
+        }
+
         if (mNavButtonContainer.getChildCount() > 0) {
             for (int i = 0; i < mNavButtonContainer.getChildCount(); i++) {
                 mNavButtonContainer.getChildAt(i).setEnabled(!splitAnimationRunning);
