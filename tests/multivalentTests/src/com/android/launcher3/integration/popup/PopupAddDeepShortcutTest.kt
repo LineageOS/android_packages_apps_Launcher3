@@ -24,7 +24,7 @@ import android.platform.test.rule.LimitDevicesRule
 import android.platform.test.rule.SkipOnDeviceless
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
-import android.widget.FrameLayout
+import android.widget.ImageView
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -127,7 +127,7 @@ class PopupAddDeepShortcutTest {
                     as DeepShortcutView
             deepShortcutView.applyShortcutInfo(shortcutItemInfo, shortcutInfo, popup, l)
 
-            deepShortcutView.findViewById<FrameLayout>(R.id.deep_shortcut_add_button).callOnClick()
+            deepShortcutView.findViewById<ImageView>(R.id.deep_shortcut_add_button).callOnClick()
         }
 
         val itemInfo =
