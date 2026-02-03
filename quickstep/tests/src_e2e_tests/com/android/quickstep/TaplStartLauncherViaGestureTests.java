@@ -60,7 +60,7 @@ public class TaplStartLauncherViaGestureTests extends AbstractQuickStepTest {
 
     @Test
     @NavigationModeSwitch(mode = NavigationModeSwitchRule.Mode.THREE_BUTTON)
-    @Stability(flavors = LOCAL | PLATFORM_POSTSUBMIT) // b/435425092
+    @Stability(flavors = LOCAL | PLATFORM_POSTSUBMIT) // b/481414987
     public void testStressPressHome() {
         runTest(TestCase.TO_HOME);
     }
