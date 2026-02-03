@@ -22,6 +22,7 @@
     <string name="recent_task_option_pin" msgid="7929860679018978258">"Épingler"</string>
     <string name="recent_task_option_freeform" msgid="48863056265284071">"Forme libre"</string>
     <string name="recent_task_option_desktop" msgid="8280879717125435668">"Bureau"</string>
+    <string name="recent_split_task_option_desktop" msgid="7272418191932478598">"Bureau pour %1$s"</string>
     <string name="recent_task_option_external_display" msgid="4533840664313389484">"Passer à un écran externe"</string>
     <string name="recent_task_option_remove_task" msgid="803559928027541555">"Effacer"</string>
     <string name="recent_task_desktop" msgid="8081113562549637334">"Bureau"</string>
@@ -72,8 +73,8 @@
     <string name="overview_gesture_feedback_complete_without_follow_up" msgid="2903050864432331629">"Vous avez appris le geste de changement d\'appli"</string>
     <string name="overview_gesture_intro_title" msgid="2902054412868489378">"Balayez pour basculer entre les applis"</string>
     <string name="overview_gesture_intro_subtitle" msgid="4968091015637850859">"Pour changer d\'appli, balayez l\'écran de bas en haut, maintenez le doigt dessus, puis relâchez-le."</string>
-    <string name="overview_gesture_tutorial_title" msgid="4125835002668708720">"Changer d\'appli"</string>
-    <string name="overview_gesture_tutorial_subtitle" msgid="5253549754058973071">"Balayez l\'écran de bas en haut, maintenez le doigt en place, puis relâchez-le."</string>
+    <string name="overview_gesture_tutorial_title" msgid="4125835002668708720">"Changement d\'appli"</string>
+    <string name="overview_gesture_tutorial_subtitle" msgid="5253549754058973071">"Balayez l\'écran de bas en haut, maintenez le doigt en place, puis relâchez-le"</string>
     <string name="overview_gesture_tutorial_success" msgid="1910267697807973076">"Bien joué!"</string>
     <string name="gesture_tutorial_confirm_title" msgid="6201516182040074092">"Terminé"</string>
     <string name="gesture_tutorial_action_button_label" msgid="6249846312991332122">"OK"</string>
@@ -140,6 +141,8 @@
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"Notifications"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"Paramètres rapides"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"Barre des tâches"</string>
+    <!-- no translation found for bubble_bar_a11y_title (7743340801055597168) -->
+    <skip />
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"Barre de navigation"</string>
     <string name="always_show_taskbar" msgid="3608801276107751229">"Tjrs afficher barre des tâches"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"Changer de mode de navigation"</string>
@@ -168,7 +171,7 @@
     <string name="search_gesture_feature_title" msgid="1294044108313175306">"Encercler et rechercher"</string>
     <string name="header_app_icon_description" msgid="2184625881433608027">"Icône de l\'appli"</string>
     <string name="header_default_app_title" msgid="8308052350689531566">"Nom de l\'appli"</string>
-    <string name="header_close_icon_description" msgid="5400033616675911319">"Bouton Fermer"</string>
+    <string name="header_close_icon_description" msgid="9216416109255777643">"Fermer"</string>
     <string name="nudge_a11y_title" msgid="2126529303123687912">"Coup de coude"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"Fermer"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"Coup de coude sur l\'image"</string>

@@ -22,6 +22,7 @@
     <string name="recent_task_option_pin" msgid="7929860679018978258">"ሰካ"</string>
     <string name="recent_task_option_freeform" msgid="48863056265284071">"ነፃ ቅጽ"</string>
     <string name="recent_task_option_desktop" msgid="8280879717125435668">"ዴስክቶፕ"</string>
+    <string name="recent_split_task_option_desktop" msgid="7272418191932478598">"የ%1$s ዴስክቶፕ"</string>
     <string name="recent_task_option_external_display" msgid="4533840664313389484">"ወደ ውጫዊ ማሳያ አንቀሳቅስ"</string>
     <string name="recent_task_option_remove_task" msgid="803559928027541555">"አጽዳ"</string>
     <string name="recent_task_desktop" msgid="8081113562549637334">"ዴስክቶፕ"</string>
@@ -140,6 +141,8 @@
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"ማሳወቂያዎች"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"ፈጣን ቅንብሮች"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"የተግባር አሞሌ"</string>
+    <!-- no translation found for bubble_bar_a11y_title (7743340801055597168) -->
+    <skip />
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"የአሰሳ አሞሌ"</string>
     <string name="always_show_taskbar" msgid="3608801276107751229">"ሁልጊዜ የተግባር አሞሌ ያሳዩ"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"የአሰሳ ሁነታን ይለውጡ"</string>
@@ -168,7 +171,7 @@
     <string name="search_gesture_feature_title" msgid="1294044108313175306">"ለመፈለግ ክበብ"</string>
     <string name="header_app_icon_description" msgid="2184625881433608027">"የመተግበሪያ አዶ"</string>
     <string name="header_default_app_title" msgid="8308052350689531566">"የመተግበሪያ ርዕስ"</string>
-    <string name="header_close_icon_description" msgid="5400033616675911319">"የዝጋ አዝራር"</string>
+    <string name="header_close_icon_description" msgid="9216416109255777643">"ዝጋ"</string>
     <string name="nudge_a11y_title" msgid="2126529303123687912">"ገፋ አድርግ"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"ዝጋ"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"ምስልን ገፋ ማድረግ"</string>

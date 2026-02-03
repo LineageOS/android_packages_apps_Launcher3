@@ -22,6 +22,7 @@
     <string name="recent_task_option_pin" msgid="7929860679018978258">"பின் செய்"</string>
     <string name="recent_task_option_freeform" msgid="48863056265284071">"குறிப்பிட்ட வடிவமில்லாத பயன்முறை"</string>
     <string name="recent_task_option_desktop" msgid="8280879717125435668">"டெஸ்க்டாப்"</string>
+    <string name="recent_split_task_option_desktop" msgid="7272418191932478598">"%1$sக்கான டெஸ்க்டாப்"</string>
     <string name="recent_task_option_external_display" msgid="4533840664313389484">"வெளிப்புற டிஸ்ப்ளேவிற்கு நகர்த்துதல்"</string>
     <string name="recent_task_option_remove_task" msgid="803559928027541555">"அழி"</string>
     <string name="recent_task_desktop" msgid="8081113562549637334">"டெஸ்க்டாப்"</string>
@@ -140,6 +141,8 @@
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"அறிவிப்புகள்"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"விரைவு அமைப்புகள்"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"செயல் பட்டி"</string>
+    <!-- no translation found for bubble_bar_a11y_title (7743340801055597168) -->
+    <skip />
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"வழிசெலுத்தல் பட்டி"</string>
     <string name="always_show_taskbar" msgid="3608801276107751229">"செயல் பட்டியை எப்போதும் காட்டு"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"வழிசெலுத்தல் பயன்முறையை மாற்று"</string>
@@ -168,7 +171,7 @@
     <string name="search_gesture_feature_title" msgid="1294044108313175306">"வட்டமிட்டுத் தேடல்"</string>
     <string name="header_app_icon_description" msgid="2184625881433608027">"ஆப்ஸ் ஐகான்"</string>
     <string name="header_default_app_title" msgid="8308052350689531566">"ஆப்ஸ் தலைப்பு"</string>
-    <string name="header_close_icon_description" msgid="5400033616675911319">"மூடுவதற்கான பட்டன்"</string>
+    <string name="header_close_icon_description" msgid="9216416109255777643">"மூடும்"</string>
     <string name="nudge_a11y_title" msgid="2126529303123687912">"நினைவூட்டல்"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"மூடும்"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"படம் குறித்து நினைவூட்டும்"</string>

@@ -22,6 +22,7 @@
     <string name="recent_task_option_pin" msgid="7929860679018978258">"Pin"</string>
     <string name="recent_task_option_freeform" msgid="48863056265284071">"Freeform"</string>
     <string name="recent_task_option_desktop" msgid="8280879717125435668">"Desktop"</string>
+    <string name="recent_split_task_option_desktop" msgid="7272418191932478598">"Desktop for %1$s"</string>
     <string name="recent_task_option_external_display" msgid="4533840664313389484">"Move to external display"</string>
     <string name="recent_task_option_remove_task" msgid="803559928027541555">"Clear"</string>
     <string name="recent_task_desktop" msgid="8081113562549637334">"Desktop"</string>
@@ -140,6 +141,7 @@
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"Notifications"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"Quick Settings"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"Taskbar"</string>
+    <string name="bubble_bar_a11y_title" msgid="7743340801055597168">"Bubble bar"</string>
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"Navigation bar"</string>
     <string name="always_show_taskbar" msgid="3608801276107751229">"Always show Taskbar"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"Change navigation mode"</string>
@@ -168,7 +170,7 @@
     <string name="search_gesture_feature_title" msgid="1294044108313175306">"Circle to Search"</string>
     <string name="header_app_icon_description" msgid="2184625881433608027">"App icon"</string>
     <string name="header_default_app_title" msgid="8308052350689531566">"App title"</string>
-    <string name="header_close_icon_description" msgid="5400033616675911319">"Close button"</string>
+    <string name="header_close_icon_description" msgid="9216416109255777643">"Close"</string>
     <string name="nudge_a11y_title" msgid="2126529303123687912">"Nudge"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"Close"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"Nudge image"</string>

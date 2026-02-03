@@ -22,6 +22,7 @@
     <string name="recent_task_option_pin" msgid="7929860679018978258">"Fijar"</string>
     <string name="recent_task_option_freeform" msgid="48863056265284071">"Formato libre"</string>
     <string name="recent_task_option_desktop" msgid="8280879717125435668">"Escritorio"</string>
+    <string name="recent_split_task_option_desktop" msgid="7272418191932478598">"Ordenador para %1$s"</string>
     <string name="recent_task_option_external_display" msgid="4533840664313389484">"Mover a pantalla externa"</string>
     <string name="recent_task_option_remove_task" msgid="803559928027541555">"Borrar"</string>
     <string name="recent_task_desktop" msgid="8081113562549637334">"Ordenador"</string>
@@ -72,7 +73,7 @@
     <string name="overview_gesture_feedback_complete_without_follow_up" msgid="2903050864432331629">"Has completado el gesto para cambiar de aplicación"</string>
     <string name="overview_gesture_intro_title" msgid="2902054412868489378">"Desliza el dedo para cambiar de aplicación"</string>
     <string name="overview_gesture_intro_subtitle" msgid="4968091015637850859">"Para cambiar de aplicación, desliza el dedo hacia arriba desde el borde inferior, mantenlo pulsado y suéltalo."</string>
-    <string name="overview_gesture_tutorial_title" msgid="4125835002668708720">"Cambiar de app"</string>
+    <string name="overview_gesture_tutorial_title" msgid="4125835002668708720">"Cambiar de aplicación"</string>
     <string name="overview_gesture_tutorial_subtitle" msgid="5253549754058973071">"Desliza hacia arriba desde la parte inferior de la pantalla, mantenla pulsada y suelta el dedo."</string>
     <string name="overview_gesture_tutorial_success" msgid="1910267697807973076">"¡Muy bien!"</string>
     <string name="gesture_tutorial_confirm_title" msgid="6201516182040074092">"Todo listo"</string>
@@ -140,6 +141,8 @@
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"Notificaciones"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"Ajustes rápidos"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"Barra de tareas"</string>
+    <!-- no translation found for bubble_bar_a11y_title (7743340801055597168) -->
+    <skip />
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"Barra de navegación"</string>
     <string name="always_show_taskbar" msgid="3608801276107751229">"Barra de tareas visible"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"Cambiar el modo de navegación"</string>
@@ -168,7 +171,7 @@
     <string name="search_gesture_feature_title" msgid="1294044108313175306">"Rodea para buscar"</string>
     <string name="header_app_icon_description" msgid="2184625881433608027">"Icono de la aplicación"</string>
     <string name="header_default_app_title" msgid="8308052350689531566">"Título de la aplicación"</string>
-    <string name="header_close_icon_description" msgid="5400033616675911319">"Botón de cerrar"</string>
+    <string name="header_close_icon_description" msgid="9216416109255777643">"Cerrar"</string>
     <string name="nudge_a11y_title" msgid="2126529303123687912">"Aviso"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"Cerrar"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"Imagen de aviso"</string>

@@ -22,6 +22,7 @@
     <string name="recent_task_option_pin" msgid="7929860679018978258">"পিন করুন"</string>
     <string name="recent_task_option_freeform" msgid="48863056265284071">"ফ্রি-ফর্ম"</string>
     <string name="recent_task_option_desktop" msgid="8280879717125435668">"ডেস্কটপ"</string>
+    <string name="recent_split_task_option_desktop" msgid="7272418191932478598">"%1$s-এর জন্য ডেস্কটপ"</string>
     <string name="recent_task_option_external_display" msgid="4533840664313389484">"এক্সটার্নাল ডিসপ্লেতে সরিয়ে নিয়ে যান"</string>
     <string name="recent_task_option_remove_task" msgid="803559928027541555">"মুছুন"</string>
     <string name="recent_task_desktop" msgid="8081113562549637334">"ডেস্কটপ"</string>
@@ -74,7 +75,7 @@
     <string name="overview_gesture_intro_subtitle" msgid="4968091015637850859">"একটি অ্যাপ থেকে অন্যটিতে পাল্টাতে, স্ক্রিনের নিচ থেকে উপরে সোয়াইপ করে ধরে রাখুন, তারপরে ছেড়ে দিন।"</string>
     <string name="overview_gesture_tutorial_title" msgid="4125835002668708720">"অ্যাপ পরিবর্তন করুন"</string>
     <string name="overview_gesture_tutorial_subtitle" msgid="5253549754058973071">"স্ক্রিনের নিচের থেকে উপরের দিকে সোয়াইপ করে ধরে থাকুন, তারপরে ছেড়ে দিন"</string>
-    <string name="overview_gesture_tutorial_success" msgid="1910267697807973076">"শাবাশ!"</string>
+    <string name="overview_gesture_tutorial_success" msgid="1910267697807973076">"সাবাস!"</string>
     <string name="gesture_tutorial_confirm_title" msgid="6201516182040074092">"সব প্রস্তুত"</string>
     <string name="gesture_tutorial_action_button_label" msgid="6249846312991332122">"হয়ে গেছে"</string>
     <string name="gesture_tutorial_action_button_label_settings" msgid="2923621047916486604">"সেটিংস"</string>
@@ -140,6 +141,8 @@
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"বিজ্ঞপ্তি"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"দ্রুত সেটিংস"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"টাস্কবার"</string>
+    <!-- no translation found for bubble_bar_a11y_title (7743340801055597168) -->
+    <skip />
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"নেভিগেশন বার"</string>
     <string name="always_show_taskbar" msgid="3608801276107751229">"সবসময় টাস্কবার দেখুন"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"\'নেভিগেশন\' মোড পরিবর্তন করুন"</string>
@@ -168,7 +171,7 @@
     <string name="search_gesture_feature_title" msgid="1294044108313175306">"খোঁজার জন্য সার্কেল বানান"</string>
     <string name="header_app_icon_description" msgid="2184625881433608027">"অ্যাপ আইকন"</string>
     <string name="header_default_app_title" msgid="8308052350689531566">"অ্যাপের শিরোনাম"</string>
-    <string name="header_close_icon_description" msgid="5400033616675911319">"বন্ধ করার বোতাম"</string>
+    <string name="header_close_icon_description" msgid="9216416109255777643">"বন্ধ করুন"</string>
     <string name="nudge_a11y_title" msgid="2126529303123687912">"নাজ"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"বন্ধ করুন"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"ছবিটি নাজ করুন"</string>
