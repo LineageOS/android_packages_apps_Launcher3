@@ -663,8 +663,8 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                 : new float[]{0, 1};
 
         float[] scales = isAppOpening
-                ? new float[]{1, mDeviceProfile.mWorkspaceProfile.getWorkspaceContentScale()}
-                : new float[]{mDeviceProfile.mWorkspaceProfile.getWorkspaceContentScale(), 1};
+                ? new float[]{1, mDeviceProfile.getWorkspaceProfile().getWorkspaceContentScale()}
+                : new float[]{mDeviceProfile.getWorkspaceProfile().getWorkspaceContentScale(), 1};
 
         // Pause expensive view updates as they can lead to layer thrashing and skipped frames.
         mLauncher.pauseExpensiveViewUpdates();
@@ -1638,7 +1638,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         RecentsView recentsView = mLauncher.getOverviewPanel();
         PagedOrientationHandler orientationHandler = recentsView.getPagedOrientationHandler();
         DeviceProfile dp = mLauncher.getDeviceProfile();
-        final int halfIconSize = dp.getWorkspaceIconProfile().getIconSizePx() / 2;
+        final int halfIconSize = dp.getWorkspaceProfile().getIconSizePx() / 2;
         float primaryDimension = orientationHandler
                 .getPrimaryValue(dp.getDeviceProperties().getAvailableWidthPx(), dp.getDeviceProperties().getAvailableHeightPx());
         float secondaryDimension = orientationHandler

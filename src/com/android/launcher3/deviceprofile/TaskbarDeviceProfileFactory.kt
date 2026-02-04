@@ -33,8 +33,8 @@ object TaskbarDeviceProfileFactory {
 
         deviceProfile.mTaskbarProfile = deviceProfile.updateTaskbarProfile(context.resources)
 
-        deviceProfile.mWorkspaceProfile =
-            deviceProfile.mWorkspaceProfile.changeIconSize(deviceProfile.taskbarProfile.iconSize)
+        deviceProfile.workspaceProfile =
+            deviceProfile.workspaceProfile.changeIconSize(deviceProfile.taskbarProfile.iconSize)
 
         deviceProfile.mFolderProfile =
             deviceProfile.updateAvailableFolderCellDimensions(context.resources, context)

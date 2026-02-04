@@ -472,7 +472,7 @@ public class RectFSpringAnim extends ReleaseCheck {
                         : TRACKING_TOP;
             } else {
                 int heightPx = deviceProfile.getDeviceProperties().getHeightPx();
-                Rect padding = deviceProfile.mWorkspaceProfile.getWorkspacePadding();
+                Rect padding = deviceProfile.getWorkspaceProfile().getWorkspacePadding();
 
                 final float topThreshold = heightPx / 3f;
                 final float bottomThreshold = deviceProfile.getDeviceProperties().getHeightPx() - padding.bottom;

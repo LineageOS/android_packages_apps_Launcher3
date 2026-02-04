@@ -64,7 +64,7 @@ internal constructor(
         // Move the icon to align with the center-top of the touch point
         val iconShift = Point()
         iconShift.x = mIconLastTouchPos.x - sv.iconCenter.x
-        iconShift.y = mIconLastTouchPos.y - mLauncher.deviceProfile.workspaceIconProfile.iconSizePx
+        iconShift.y = mIconLastTouchPos.y - mLauncher.deviceProfile.workspaceProfile.iconSizePx
 
         val draggableView = DraggableView.ofType(DraggableView.DRAGGABLE_ICON)
         val itemInfo = sv.finalInfo

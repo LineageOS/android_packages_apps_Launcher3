@@ -732,18 +732,8 @@ class SplitAnimationController(val splitSelectStateController: SplitSelectStateC
         val drawableArea = launchingIconView.iconDrawableArea
         val appIcon1 = launchingIconView.info.getFirstApp().newIcon(launchingIconView.context)
         val appIcon2 = launchingIconView.info.getSecondApp().newIcon(launchingIconView.context)
-        appIcon1.setBounds(
-            0,
-            0,
-            dp.workspaceIconProfile.iconSizePx,
-            dp.workspaceIconProfile.iconSizePx,
-        )
-        appIcon2.setBounds(
-            0,
-            0,
-            dp.workspaceIconProfile.iconSizePx,
-            dp.workspaceIconProfile.iconSizePx,
-        )
+        appIcon1.setBounds(0, 0, dp.workspaceProfile.iconSizePx, dp.workspaceProfile.iconSizePx)
+        appIcon2.setBounds(0, 0, dp.workspaceProfile.iconSizePx, dp.workspaceProfile.iconSizePx)
 
         val floatingView =
             FloatingAppPairView.getFloatingAppPairView(
@@ -841,12 +831,7 @@ class SplitAnimationController(val splitSelectStateController: SplitSelectStateC
         // Create a new floating view in Launcher, positioned above the launching icon
         val drawableArea = launchingIconView.iconDrawableArea
         val appIcon = appInfo.newIcon(launchingIconView.context)
-        appIcon.setBounds(
-            0,
-            0,
-            dp.workspaceIconProfile.iconSizePx,
-            dp.workspaceIconProfile.iconSizePx,
-        )
+        appIcon.setBounds(0, 0, dp.workspaceProfile.iconSizePx, dp.workspaceProfile.iconSizePx)
 
         val floatingView =
             FloatingAppPairView.getFloatingAppPairView(

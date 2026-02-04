@@ -195,7 +195,7 @@ public class TestInformationHandler {
                 response.putInt(
                         TestProtocol.TEST_INFO_RESPONSE_FIELD,
                         mPrimaryDeviceProfile
-                                .getWorkspaceIconProfile()
+                                .getWorkspaceProfile()
                                 .getCellLayoutBorderSpacePx()
                                 .y);
                 return response;

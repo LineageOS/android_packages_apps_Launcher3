@@ -40,7 +40,7 @@ class LauncherDeepShortcutDragHandler(
             return
         }
 
-        val iconSize = launcher.deviceProfile.workspaceIconProfile.iconSizePx
+        val iconSize = launcher.deviceProfile.workspaceProfile.iconSizePx
         val iconShift = PointF(touchPoint.x - iconSize / 2, touchPoint.y)
 
         val dummyIconView = View(launcher)

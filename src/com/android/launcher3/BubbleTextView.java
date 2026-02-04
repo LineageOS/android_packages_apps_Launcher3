@@ -333,11 +333,11 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         final int defaultIconSize;
         if (mDisplay == DISPLAY_WORKSPACE) {
             setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                    mDeviceProfile.getWorkspaceIconProfile().getIconTextSizePx());
+                    mDeviceProfile.getWorkspaceProfile().getIconTextSizePx());
             setCompoundDrawablePadding(
-                    mDeviceProfile.getWorkspaceIconProfile().getIconDrawablePaddingPx());
-            defaultIconSize = mDeviceProfile.getWorkspaceIconProfile().getIconSizePx();
-            setCenterVertically(mDeviceProfile.getWorkspaceIconProfile().getIconCenterVertically());
+                    mDeviceProfile.getWorkspaceProfile().getIconDrawablePaddingPx());
+            defaultIconSize = mDeviceProfile.getWorkspaceProfile().getIconSizePx();
+            setCenterVertically(mDeviceProfile.getWorkspaceProfile().getIconCenterVertically());
         } else if (mDisplay == DISPLAY_ALL_APPS || mDisplay == DISPLAY_PREDICTION_ROW
                 || mDisplay == DISPLAY_SEARCH_RESULT_APP_ROW) {
             setTextSize(TypedValue.COMPLEX_UNIT_PX,
@@ -368,7 +368,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             defaultIconSize = (int) iconSize;
         } else {
             // widget_selection or shortcut_popup
-            defaultIconSize = mDeviceProfile.getWorkspaceIconProfile().getIconSizePx();
+            defaultIconSize = mDeviceProfile.getWorkspaceProfile().getIconSizePx();
         }
 
 
@@ -412,7 +412,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             mDotParams.shapeInfo = IconShapeInfo.DEFAULT;
         } else {
             mDotRenderer = new DotRenderer(
-                    mActivity.getDeviceProfile().getWorkspaceIconProfile().getIconSizePx()
+                    mActivity.getDeviceProfile().getWorkspaceProfile().getIconSizePx()
             );
             mDotParams.shapeInfo = ThemeManager.INSTANCE.get(context)
                     .getIconState().getIconShapeInfo();
@@ -705,7 +705,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
                 return mDeviceProfile.getAllAppsProfile().getMaxAllAppsTextLineCount();
             }
             case DISPLAY_WORKSPACE -> {
-                return mDeviceProfile.getWorkspaceIconProfile().getMaxIconTextLineCount();
+                return mDeviceProfile.getWorkspaceProfile().getMaxIconTextLineCount();
             }
             case DISPLAY_FOLDER -> {
                 return mDeviceProfile.getFolderProfile().getMaxChildTextLineCount();

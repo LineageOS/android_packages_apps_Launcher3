@@ -91,7 +91,7 @@ data class HotseatProfile(
             Factory.recalculateHotseatWidthAndBorderSpace(
                 inv = inv,
                 hotseatProfileInitialValues = hotseatProfileInitialValues,
-                workspaceProfile = deviceProfile.mWorkspaceProfile,
+                workspaceProfile = deviceProfile.workspaceProfile,
                 deviceProperties = deviceProfile.deviceProperties,
                 panelCount = deviceProfile.panelCount,
                 isScalableGrid = false,

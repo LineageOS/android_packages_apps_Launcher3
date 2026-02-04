@@ -30,12 +30,12 @@ public final class WidgetSizes {
     /** Returns the size, in pixels, a widget of given spans & {@code profile}. */
     public static Size getWidgetSizePx(DeviceProfile profile, int spanX, int spanY) {
         final int hBorderSpacing = (spanX - 1)
-                * profile.getWorkspaceIconProfile().getCellLayoutBorderSpacePx().x;
+                * profile.getWorkspaceProfile().getCellLayoutBorderSpacePx().x;
         final int vBorderSpacing = (spanY - 1)
-                * profile.getWorkspaceIconProfile().getCellLayoutBorderSpacePx().y;
+                * profile.getWorkspaceProfile().getCellLayoutBorderSpacePx().y;
 
-        Point cellSize = profile.getWorkspaceIconProfile().getCellSize();
-        Rect padding = profile.getWorkspaceIconProfile().getWidgetPadding();
+        Point cellSize = profile.getWorkspaceProfile().getCellSize();
+        Rect padding = profile.getWorkspaceProfile().getWidgetPadding();
 
         return new Size(
                 (spanX * cellSize.x) + hBorderSpacing - padding.left - padding.right,
