@@ -1617,6 +1617,7 @@ public class Launcher extends StatefulActivity<LauncherState>
     }
 
     @NonNull
+    @Override
     public UndoDeleteController getUndoDeleteController() {
         return mUndoDeleteController;
     }
