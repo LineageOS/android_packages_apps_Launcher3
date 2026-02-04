@@ -309,7 +309,7 @@ public abstract class AbstractFloatingView extends LinearLayout implements Touch
 
     public static AbstractFloatingView getTopOpenViewWithType(ActivityContext activity,
             @FloatingViewType int type) {
-        return getOpenView(activity, type);
+        return AbstractFloatingViewHelper.INSTANCE.getTopOpenViewWithType(activity, type);
     }
 
     public boolean canInterceptEventsInSystemGestureRegion() {

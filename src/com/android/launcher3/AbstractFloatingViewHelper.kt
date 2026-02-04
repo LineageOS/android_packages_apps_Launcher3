@@ -36,4 +36,9 @@ object AbstractFloatingViewHelper {
             }
         }
     }
+
+    fun getTopOpenViewWithType(
+        activity: ActivityContext,
+        @FloatingViewType type: Int,
+    ): AbstractFloatingView? = AbstractFloatingView.getOpenView(activity, type)
 }

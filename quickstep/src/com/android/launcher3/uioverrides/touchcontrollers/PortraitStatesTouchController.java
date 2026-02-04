@@ -24,7 +24,6 @@ import static com.android.window.flags.Flags.betterDeskDeactivationInRecentsTran
 
 import android.view.MotionEvent;
 
-import com.android.app.animation.Interpolators;
 import com.android.internal.jank.Cuj;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.Launcher;
@@ -38,8 +37,6 @@ import com.android.launcher3.uioverrides.QuickstepLauncher;
 import com.android.launcher3.uioverrides.states.OverviewState;
 import com.android.launcher3.util.WindowBlurState;
 import com.android.quickstep.SystemUiProxy;
-import com.android.quickstep.util.LayoutUtils;
-import com.android.quickstep.views.RecentsView;
 import com.android.systemui.contextualeducation.GestureType;
 import com.android.systemui.shared.system.InteractionJankMonitorWrapper;
 
@@ -136,25 +133,8 @@ public class PortraitStatesTouchController extends AbstractStateChangeTouchContr
         }
 
         mGoingBetweenStates = true;
-        if (mFromState == OVERVIEW && mToState == NORMAL
-                && mOverviewPortraitStateTouchHelper.shouldSwipeDownReturnToApp()) {
-            // Reset the state manager, when changing the interaction mode
-            mLauncher.getStateManager().goToState(OVERVIEW, false /* animate */);
-            mGoingBetweenStates = false;
-            mCurrentAnimation = mOverviewPortraitStateTouchHelper
-                    .createSwipeDownToTaskAppAnimation(maxAccuracy, Interpolators.LINEAR)
-                    .createPlaybackController();
-            mLauncher.getStateManager().setCurrentUserControlledAnimation(mCurrentAnimation);
-            RecentsView recentsView = mLauncher.getOverviewPanel();
-            totalShift = LayoutUtils.getShelfTrackingDistance(
-                    mLauncher,
-                    mLauncher.getDeviceProfile(),
-                    recentsView.getPagedOrientationHandler(),
-                    recentsView.getContainerInterface());
-        } else {
-            mCurrentAnimation = mLauncher.getStateManager()
-                    .createAnimationToNewWorkspace(mToState, config);
-        }
+        mCurrentAnimation = mLauncher.getStateManager()
+                .createAnimationToNewWorkspace(mToState, config);
         mCurrentAnimation.getTarget().addListener(mClearStateOnCancelListener);
 
         if (totalShift == 0) {

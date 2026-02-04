@@ -22,9 +22,14 @@ import android.content.Intent
 import android.os.Process
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
+import android.widget.OverScroller
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.launcher3.AbstractFloatingView
+import com.android.launcher3.AbstractFloatingView.TYPE_TOUCH_CONTROLLER_NO_INTERCEPT
+import com.android.launcher3.AbstractFloatingViewHelper
 import com.android.launcher3.automation.AutomationRepository
 import com.android.launcher3.display.DisplayController
+import com.android.launcher3.statemanager.StateManager
 import com.android.launcher3.util.MutableListenableStream
 import com.android.launcher3.util.SplitConfigurationOptions
 import com.android.launcher3.util.TransformingTouchDelegate
@@ -32,10 +37,13 @@ import com.android.quickstep.RotationTouchHelper
 import com.android.quickstep.SystemUiProxy
 import com.android.quickstep.TaskAnimationManager
 import com.android.quickstep.TaskOverlayFactory
+import com.android.quickstep.fallback.RecentsState
 import com.android.quickstep.fallback.RecentsState.Companion.BACKGROUND_APP
 import com.android.quickstep.fallback.RecentsState.Companion.DEFAULT
+import com.android.quickstep.fallback.RecentsState.Companion.HIDDEN
 import com.android.quickstep.task.thumbnail.TaskContentView
 import com.android.quickstep.task.thumbnail.TaskThumbnailView
+import com.android.quickstep.window.RecentsWindowManager
 import com.android.systemui.shared.recents.model.Task
 import com.android.systemui.shared.recents.model.Task.TaskKey
 import com.android.window.flags.Flags
@@ -46,7 +54,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito
+import org.mockito.kotlin.any
 import org.mockito.kotlin.clearInvocations
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -66,12 +76,15 @@ class RecentsViewUtilsTest {
     private val uiExecutor = mock<Executor>()
     private val taskOverlayFactory: TaskOverlayFactory =
         mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
+    private val abstractFloatingViewHelper = mock<AbstractFloatingViewHelper>()
+    private val recentsViewContainer = mock<RecentsViewContainer>()
 
     private lateinit var utils: RecentsViewUtils
 
     @Before
     fun setUp() {
         whenever(automationRepository.automationChanges).thenReturn(MutableListenableStream())
+        whenever(recentsView.container).thenReturn(recentsViewContainer)
         utils =
             RecentsViewUtils(
                 recentsView,
@@ -82,6 +95,7 @@ class RecentsViewUtilsTest {
                 systemUiProxy,
                 automationRepository,
                 uiExecutor,
+                abstractFloatingViewHelper,
             )
     }
 
@@ -139,6 +153,129 @@ class RecentsViewUtilsTest {
             )
 
         assertThat(ids).containsExactly(TASK_ID_1, TASK_ID_2)
+    }
+
+    @Test
+    fun swipeDownDisallowedWhenFloatingViewIsOpened() {
+        val taskView =
+            createTaskView(TASK_ID_1, MY_PACKAGE_NAME_1, Process.myUserHandle().identifier)
+        whenever(
+                abstractFloatingViewHelper.getTopOpenViewWithType(
+                    any(),
+                    eq(TYPE_TOUCH_CONTROLLER_NO_INTERCEPT),
+                )
+            )
+            .thenReturn(mock<AbstractFloatingView>())
+
+        assertThat(utils.shouldSwipeDownLaunchTaskView(taskView)).isFalse()
+    }
+
+    @Test
+    fun swipeDownDisallowedWhenScrolling() {
+        val taskView =
+            createTaskView(TASK_ID_1, MY_PACKAGE_NAME_1, Process.myUserHandle().identifier)
+        val scroller = mock<OverScroller>().apply { whenever(isFinished).thenReturn(false) }
+        whenever(recentsView.scroller).thenReturn(scroller)
+
+        assertThat(utils.shouldSwipeDownLaunchTaskView(taskView)).isFalse()
+    }
+
+    @Test
+    fun swipeDownDisallowedWhenTaskViewNotInteractive() {
+        val taskView =
+            createTaskView(TASK_ID_1, MY_PACKAGE_NAME_1, Process.myUserHandle().identifier)
+        val scroller = mock<OverScroller>().apply { whenever(isFinished).thenReturn(true) }
+        whenever(recentsView.scroller).thenReturn(scroller)
+        val stateManager =
+            mock<StateManager<RecentsState, RecentsWindowManager>>().apply {
+                whenever(state).thenReturn(HIDDEN)
+            }
+        whenever(recentsView.getStateManager()).thenReturn(stateManager)
+
+        assertThat(utils.shouldSwipeDownLaunchTaskView(taskView)).isFalse()
+    }
+
+    @Test
+    fun swipeDownDisallowedWhenTaskViewIsNull() {
+        val scroller = mock<OverScroller>().apply { whenever(isFinished).thenReturn(true) }
+        whenever(recentsView.scroller).thenReturn(scroller)
+        val stateManager =
+            mock<StateManager<RecentsState, RecentsWindowManager>>().apply {
+                whenever(state).thenReturn(DEFAULT)
+            }
+        whenever(recentsView.getStateManager()).thenReturn(stateManager)
+
+        assertThat(utils.shouldSwipeDownLaunchTaskView(taskView = null)).isFalse()
+    }
+
+    @Test
+    fun swipeDownDisallowedWhenTaskViewNotCurrentPage() {
+        val taskView =
+            createTaskView(TASK_ID_1, MY_PACKAGE_NAME_1, Process.myUserHandle().identifier)
+        val currentPageTaskView =
+            createTaskView(TASK_ID_2, MY_PACKAGE_NAME_2, Process.myUserHandle().identifier)
+        val scroller = mock<OverScroller>().apply { whenever(isFinished).thenReturn(true) }
+        whenever(recentsView.scroller).thenReturn(scroller)
+        val stateManager =
+            mock<StateManager<RecentsState, RecentsWindowManager>>().apply {
+                whenever(state).thenReturn(DEFAULT)
+            }
+        whenever(recentsView.getStateManager()).thenReturn(stateManager)
+        whenever(recentsView.currentPageTaskView).thenReturn(currentPageTaskView)
+
+        assertThat(utils.shouldSwipeDownLaunchTaskView(taskView)).isFalse()
+    }
+
+    @Test
+    fun swipeDownDisallowedForGridTask() {
+        val taskView =
+            createTaskView(TASK_ID_1, MY_PACKAGE_NAME_1, Process.myUserHandle().identifier).apply {
+                whenever(isGridTask).thenReturn(true)
+            }
+        val scroller = mock<OverScroller>().apply { whenever(isFinished).thenReturn(true) }
+        whenever(recentsView.scroller).thenReturn(scroller)
+        val stateManager =
+            mock<StateManager<RecentsState, RecentsWindowManager>>().apply {
+                whenever(state).thenReturn(DEFAULT)
+            }
+        whenever(recentsView.getStateManager()).thenReturn(stateManager)
+        whenever(recentsView.currentPageTaskView).thenReturn(taskView)
+
+        assertThat(utils.shouldSwipeDownLaunchTaskView(taskView)).isFalse()
+    }
+
+    @Test
+    fun swipeDownDisallowedWhenNotInExpectedScrollPosition() {
+        val taskView =
+            createTaskView(TASK_ID_1, MY_PACKAGE_NAME_1, Process.myUserHandle().identifier)
+        val scroller = mock<OverScroller>().apply { whenever(isFinished).thenReturn(true) }
+        whenever(recentsView.scroller).thenReturn(scroller)
+        val stateManager =
+            mock<StateManager<RecentsState, RecentsWindowManager>>().apply {
+                whenever(state).thenReturn(DEFAULT)
+            }
+        whenever(recentsView.getStateManager()).thenReturn(stateManager)
+        whenever(recentsView.currentPageTaskView).thenReturn(taskView)
+        whenever(recentsView.isTaskInExpectedScrollPosition(taskView)).thenReturn(false)
+
+        assertThat(utils.shouldSwipeDownLaunchTaskView(taskView)).isFalse()
+    }
+
+    @Test
+    fun swipeDownAllowed() {
+        val taskView =
+            createTaskView(TASK_ID_1, MY_PACKAGE_NAME_1, Process.myUserHandle().identifier)
+        val scroller = mock<OverScroller>().apply { whenever(isFinished).thenReturn(true) }
+        whenever(recentsView.scroller).thenReturn(scroller)
+        val stateManager =
+            mock<StateManager<RecentsState, RecentsWindowManager>>().apply {
+                whenever(state).thenReturn(DEFAULT)
+            }
+        whenever(recentsView.getStateManager()).thenReturn(stateManager)
+        whenever(recentsView.currentPageTaskView).thenReturn(taskView)
+        whenever(recentsView.isTaskInExpectedScrollPosition(taskView)).thenReturn(true)
+
+        assertThat(utils.shouldSwipeDownLaunchTaskView(taskView)).isTrue()
     }
 
     private fun createTaskView(id: Int, packageName: String, @UserIdInt userId: Int): TaskView {
