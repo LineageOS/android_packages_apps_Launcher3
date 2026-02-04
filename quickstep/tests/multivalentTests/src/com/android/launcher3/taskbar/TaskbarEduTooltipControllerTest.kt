@@ -40,6 +40,7 @@ import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.util.OnboardingPrefs
 import com.android.systemui.shared.Flags.FLAG_ENABLE_RECENTS_IN_TASKBAR
+import com.android.systemui.shared.system.QuickStepContract
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
@@ -79,6 +80,7 @@ class TaskbarEduTooltipControllerTest {
     fun setUp() {
         Utilities.disableRunningInTestHarnessForTests()
         taskbarEduTooltipController.shouldShowSearchEduResolver = { true }
+        taskbarEduTooltipController.updateStateForSysuiFlags(QuickStepContract.SYSUI_STATE_AWAKE)
     }
 
     @After
@@ -128,6 +130,69 @@ class TaskbarEduTooltipControllerTest {
         runOnTaskbarUiThreadSync { taskbarEduTooltipController.maybeShowSwipeEdu() }
         assertThat(tooltipEduCombinator.getFlag(TASKBAR_SWIPE_EDU_SEEN_FLAG)).isTrue()
         assertThat(taskbarEduTooltipController.isTooltipOpen).isTrue()
+    }
+
+    @Test
+    @TaskbarMode(TRANSIENT)
+    @EnableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
+    fun testMaybeShowSwipeEdu_whenSysuiLocked_doesNotShowSwipeEdu_eduCombinator() {
+        setKeyguardShowingSysuiFlag()
+
+        tooltipStep = TOOLTIP_STEP_SWIPE
+        assertThat(taskbarEduTooltipController.tooltipStep).isEqualTo(TOOLTIP_STEP_SWIPE)
+        runOnTaskbarUiThreadSync { taskbarEduTooltipController.maybeShowSwipeEdu() }
+        assertThat(taskbarEduTooltipController.tooltipStep).isEqualTo(TOOLTIP_STEP_SWIPE)
+        assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
+    }
+
+    @Test
+    @TaskbarMode(TRANSIENT)
+    @DisableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
+    fun testMaybeShowSwipeEdu_whenSysuiLocked_doesNotShowSwipeEdu() {
+        setKeyguardShowingSysuiFlag()
+
+        tooltipStep = TOOLTIP_STEP_SWIPE
+        assertThat(taskbarEduTooltipController.tooltipStep).isEqualTo(TOOLTIP_STEP_SWIPE)
+        runOnTaskbarUiThreadSync { taskbarEduTooltipController.maybeShowSwipeEdu() }
+        assertThat(taskbarEduTooltipController.tooltipStep).isEqualTo(TOOLTIP_STEP_SWIPE)
+        assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
+    }
+
+    @Test
+    @TaskbarMode(TRANSIENT)
+    fun testMaybeShowSwipeEdu_hideSwipeEduOnLock() {
+        tooltipStep = TOOLTIP_STEP_SWIPE
+        assertThat(taskbarEduTooltipController.tooltipStep).isEqualTo(TOOLTIP_STEP_SWIPE)
+        runOnTaskbarUiThreadSync { taskbarEduTooltipController.maybeShowSwipeEdu() }
+        assertThat(taskbarEduTooltipController.isTooltipOpen).isTrue()
+        setKeyguardShowingSysuiFlag()
+        assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
+    }
+
+    @Test
+    @TaskbarMode(TRANSIENT)
+    @EnableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
+    fun testMaybeShowSwipeEdu_whenNotAwake_doesNotShowSwipeEdu_eduCombinator() {
+        clearAwakeSysuiFlag()
+
+        tooltipStep = TOOLTIP_STEP_SWIPE
+        assertThat(taskbarEduTooltipController.tooltipStep).isEqualTo(TOOLTIP_STEP_SWIPE)
+        runOnTaskbarUiThreadSync { taskbarEduTooltipController.maybeShowSwipeEdu() }
+        assertThat(taskbarEduTooltipController.tooltipStep).isEqualTo(TOOLTIP_STEP_SWIPE)
+        assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
+    }
+
+    @Test
+    @TaskbarMode(TRANSIENT)
+    @DisableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
+    fun testMaybeShowSwipeEdu_whenNotAwake_doesNotShowSwipeEdu() {
+        clearAwakeSysuiFlag()
+
+        tooltipStep = TOOLTIP_STEP_SWIPE
+        assertThat(taskbarEduTooltipController.tooltipStep).isEqualTo(TOOLTIP_STEP_SWIPE)
+        runOnTaskbarUiThreadSync { taskbarEduTooltipController.maybeShowSwipeEdu() }
+        assertThat(taskbarEduTooltipController.tooltipStep).isEqualTo(TOOLTIP_STEP_SWIPE)
+        assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
     }
 
     @Test
@@ -239,6 +304,52 @@ class TaskbarEduTooltipControllerTest {
 
     @Test
     @TaskbarMode(TRANSIENT)
+    @DisableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
+    fun testMaybeShowFeaturesEdu_sysuiLocked_doesNotShowFeatureEdu() {
+        setKeyguardShowingSysuiFlag()
+
+        tooltipStep = TOOLTIP_STEP_FEATURES
+        assertThat(taskbarEduTooltipController.tooltipStep).isEqualTo(TOOLTIP_STEP_FEATURES)
+        runOnTaskbarUiThreadSync { taskbarEduTooltipController.maybeShowFeaturesEdu() }
+        assertThat(taskbarEduTooltipController.tooltipStep).isEqualTo(TOOLTIP_STEP_FEATURES)
+        assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
+    }
+
+    @Test
+    @TaskbarMode(TRANSIENT)
+    @EnableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
+    fun testMaybeShowFeaturesEdu_sysuiLocked_doesNotShowFeatureEdu_eduCombinator() {
+        setKeyguardShowingSysuiFlag()
+
+        runOnTaskbarUiThreadSync { taskbarEduTooltipController.maybeShowFeaturesEdu() }
+        assertThat(tooltipEduCombinator.getFlag(TASKBAR_SWIPE_EDU_SEEN_FLAG)).isFalse()
+        assertThat(tooltipEduCombinator.getFlag(TASKBAR_SPLIT_EDU_SEEN_FLAG)).isFalse()
+        assertThat(tooltipEduCombinator.getFlag(TASKBAR_BUBBLES_EDU_SEEN_FLAG)).isFalse()
+        assertThat(tooltipEduCombinator.getFlag(TASKBAR_SUGGESTIONS_EDU_SEEN_FLAG)).isFalse()
+        assertThat(tooltipEduCombinator.getFlag(TASKBAR_PINNING_EDU_SEEN_FLAG)).isFalse()
+        assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
+    }
+
+    @Test
+    @TaskbarMode(TRANSIENT)
+    fun testMaybeShowFeaturesEdu_hideFeatureEduOnLock() {
+        runOnTaskbarUiThreadSync { taskbarEduTooltipController.maybeShowFeaturesEdu() }
+        assertThat(taskbarEduTooltipController.isTooltipOpen).isTrue()
+        setKeyguardShowingSysuiFlag()
+        assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
+    }
+
+    @Test
+    @TaskbarMode(TRANSIENT)
+    @EnableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
+    fun testMaybeShowFeaturesEdu_notAwake_doesNotShow_eduCombinator() {
+        clearAwakeSysuiFlag()
+        runOnTaskbarUiThreadSync { taskbarEduTooltipController.maybeShowFeaturesEdu() }
+        assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
+    }
+
+    @Test
+    @TaskbarMode(TRANSIENT)
     fun testHide_whenTooltipIsOpen_shouldCloseTooltip() {
         tooltipStep = TOOLTIP_STEP_SWIPE
         assertThat(taskbarEduTooltipController.tooltipStep).isEqualTo(TOOLTIP_STEP_SWIPE)
@@ -315,6 +426,95 @@ class TaskbarEduTooltipControllerTest {
     @Test
     @DisableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
     @TaskbarMode(PINNED)
+    fun testMaybeShowSearchEdu_whenSysuiIsLocked_shouldNotShowSearchEdu() {
+        setKeyguardShowingSysuiFlag()
+        searchEduSeen = false
+
+        // Updating items will ensure that all apps button gets shown - in response toolltip should
+        // show as well.
+        runOnTaskbarUiThreadSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
+        runOnTaskbarUiThreadSync {
+            assertThat(taskbarView.allAppsButtonContainer.isAttachedToWindow).isTrue()
+        }
+
+        runOnTaskbarUiThreadSync { taskbarEduTooltipController.maybeShowSearchEdu() }
+        assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
+    @TaskbarMode(PINNED)
+    fun testMaybeShowSearchEdu_whenSysuiIsLocked_shouldNotShowSearchEdu_eduCombinator() {
+        setKeyguardShowingSysuiFlag()
+        searchEduSeen = false
+
+        // Updating items will ensure that all apps button gets shown - in response toolltip should
+        // show as well.
+        runOnTaskbarUiThreadSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
+        runOnTaskbarUiThreadSync {
+            assertThat(taskbarView.allAppsButtonContainer.isAttachedToWindow).isTrue()
+        }
+
+        runOnTaskbarUiThreadSync { taskbarEduTooltipController.maybeShowSearchEdu() }
+        assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
+    @TaskbarMode(PINNED)
+    fun testMaybeShowSearchEdu_whenNotAwake_shouldNotShowSearchEdu() {
+        clearAwakeSysuiFlag()
+        searchEduSeen = false
+
+        // Updating items will ensure that all apps button gets shown - in response toolltip should
+        // show as well.
+        runOnTaskbarUiThreadSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
+        runOnTaskbarUiThreadSync {
+            assertThat(taskbarView.allAppsButtonContainer.isAttachedToWindow).isTrue()
+        }
+
+        runOnTaskbarUiThreadSync { taskbarEduTooltipController.maybeShowSearchEdu() }
+        assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
+    @TaskbarMode(PINNED)
+    fun testMaybeShowSearchEdu_whenNotAwake_shouldNotShowSearchEdu_eduCombinator() {
+        clearAwakeSysuiFlag()
+        searchEduSeen = false
+
+        // Updating items will ensure that all apps button gets shown - in response toolltip should
+        // show as well.
+        runOnTaskbarUiThreadSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
+        runOnTaskbarUiThreadSync {
+            assertThat(taskbarView.allAppsButtonContainer.isAttachedToWindow).isTrue()
+        }
+
+        runOnTaskbarUiThreadSync { taskbarEduTooltipController.maybeShowSearchEdu() }
+        assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
+    }
+
+    @Test
+    @TaskbarMode(PINNED)
+    fun testMaybeShowSearchEdu_hideSearchTooltipOnLock() {
+        // Updating items will ensure that all apps button gets shown - in response toolltip should
+        // show as well.
+        runOnTaskbarUiThreadSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
+        runOnTaskbarUiThreadSync {
+            assertThat(taskbarView.allAppsButtonContainer.isAttachedToWindow).isTrue()
+        }
+
+        runOnTaskbarUiThreadSync { taskbarEduTooltipController.maybeShowSearchEdu() }
+        assertThat(taskbarEduTooltipController.isTooltipOpen).isTrue()
+
+        setKeyguardShowingSysuiFlag()
+        assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
+    @TaskbarMode(PINNED)
     fun testMaybeShowSearchEdu_whenTaskbarIsPinnedUserSeenSearch_noEduShown() {
         searchEduSeen = true
         runOnTaskbarUiThreadSync { taskbarEduTooltipController.maybeShowSearchEdu() }
@@ -341,5 +541,18 @@ class TaskbarEduTooltipControllerTest {
         }
 
         assertThat(tooltipEduCombinator.getFlag(TASKBAR_SEARCH_EDU_SEEN_FLAG)).isTrue()
+    }
+
+    private fun setKeyguardShowingSysuiFlag() {
+        runOnTaskbarUiThreadSync {
+            taskbarEduTooltipController.updateStateForSysuiFlags(
+                QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING or
+                    QuickStepContract.SYSUI_STATE_AWAKE
+            )
+        }
+    }
+
+    private fun clearAwakeSysuiFlag() {
+        runOnTaskbarUiThreadSync { taskbarEduTooltipController.updateStateForSysuiFlags(0) }
     }
 }

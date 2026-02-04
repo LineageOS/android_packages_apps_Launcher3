@@ -22,18 +22,37 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.PatternMatcher.PATTERN_LITERAL
 import androidx.annotation.AnyThread
+import com.android.launcher3.dagger.ApplicationContext
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import java.util.function.Consumer
 
+/**
+ * Broadcast Receiver with some utility methods for async execution
+ *
+ * @param executor executor on which the registration will be done
+ * @param callbackExecutor executor on with the callback should be executed
+ */
 class SimpleBroadcastReceiver
-@JvmOverloads
+@AssistedInject
 constructor(
-    private val context: Context,
-    // Executor on which the registration will be done
-    private val executor: LooperExecutor,
-    // Executor on with the callback should be executed
-    private val callbackExecutor: LooperExecutor = executor,
-    private val intentConsumer: Consumer<Intent>,
+    @ApplicationContext private val context: Context,
+    @Assisted("executor") private val executor: LooperExecutor,
+    @Assisted("callbackExecutor") private val callbackExecutor: LooperExecutor,
+    @Assisted private val intentConsumer: Consumer<Intent>,
 ) : BroadcastReceiver(), SafeCloseable {
+
+    constructor(
+        context: Context,
+        executor: LooperExecutor,
+        intentConsumer: Consumer<Intent>,
+    ) : this(
+        context = context,
+        executor = executor,
+        callbackExecutor = executor,
+        intentConsumer = intentConsumer,
+    )
 
     override fun onReceive(context: Context, intent: Intent) {
         Preconditions.assertThreadOnExecutor(callbackExecutor)
@@ -74,6 +93,16 @@ constructor(
                 // It was probably never registered or already unregistered. Ignore.
             }
         }
+    }
+
+    @AssistedFactory
+    interface Factory {
+
+        fun create(
+            @Assisted("executor") executor: LooperExecutor,
+            @Assisted("callbackExecutor") callbackExecutor: LooperExecutor = executor,
+            @Assisted intentConsumer: Consumer<Intent>,
+        ): SimpleBroadcastReceiver
     }
 
     companion object {

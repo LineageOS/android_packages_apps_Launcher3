@@ -22,6 +22,7 @@ import androidx.compose.runtime.setValue
 import com.android.launcher3.model.data.ItemInfoWithIcon
 import com.android.launcher3.popup.PopupCategory
 import com.android.launcher3.popup.PopupPopulator
+import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemHeight
 import kotlin.math.min
 
 /** Represents the currently expanded section within the collapsible popup menu. */
@@ -49,6 +50,9 @@ class PopupViewModel {
     var expandedSection: ExpandedSection? by mutableStateOf(null)
         private set
 
+    /** The maximum number of rows that can be displayed */
+    private var maxRows = DEFAULT_MAX_ROWS
+
     /**
      * Initializes the ViewModel with the initial set of system shortcuts and a placeholder count
      * for deep shortcuts. This method determines the initial [PopupUiState].
@@ -56,9 +60,20 @@ class PopupViewModel {
      * @param systemShortcuts The list of available system shortcuts.
      * @param deepShortcutCount The initial count of deep shortcuts. Actual deep shortcuts are
      *   loaded asynchronously later.
+     * @param availableHeightDp The available height of the display in dp.
      */
-    fun init(systemShortcuts: List<PopupItem>, deepShortcutCount: Int) {
+    fun init(systemShortcuts: List<PopupItem>, deepShortcutCount: Int, availableHeightDp: Float) {
+        maxRows = calculateMaxRows(availableHeightDp)
         updateState(systemShortcuts, deepShortcutCount)
+    }
+
+    /**
+     * Determine how many rows we can fit given the available height of the device.
+     *
+     * @param availableHeightDp The height available to display the popup menu on the screen.
+     */
+    private fun calculateMaxRows(availableHeightDp: Float): Int {
+        return min(DEFAULT_MAX_ROWS, (availableHeightDp / popupMenuItemHeight.value).toInt())
     }
 
     /**
@@ -76,7 +91,7 @@ class PopupViewModel {
         expandedSection = null
 
         // Scenario where we don't surpass the max amount of rows with the items we have.
-        if (systemShortcuts.size + numDeep <= MAX_ROWS) {
+        if (systemShortcuts.size + numDeep <= maxRows) {
             state =
                 PopupUiState(
                     standardSystemShortcuts = systemShortcuts,
@@ -84,6 +99,10 @@ class PopupViewModel {
                 )
             return
         }
+
+        val maxStandardItemsAccordion = maxRows - 1
+        val maxStandardItemsWithTopBar = maxRows - 1
+        val maxStandardItemsWithAccordionWithTopBar = maxRows - 2
 
         // Here we determine if we should show the accordion, which should only show up if
         // there are at least DEEP_SHORTCUTS_ACCORDION_THRESHOLD deep shortcuts. We also determine
@@ -96,15 +115,15 @@ class PopupViewModel {
 
         // Calculate how many compactEligible items should be promoted to the standard list.
         val numToPromote =
-            if (totalSystemItems <= MAX_STANDARD_ITEMS_ACCORDION) {
+            if (totalSystemItems <= maxStandardItemsAccordion) {
                 // If totalSystemItems does not exceed MAX_STANDARD_ITEMS, promote all
                 // compactEligible items. This ensures compactSystemShortcuts will be empty.
                 compactEligible.size
             } else {
                 // totalSystemItems > MAX_STANDARD_ITEMS, so compact items are allowed.
                 val targetSize =
-                    if (isAccordion) MAX_STANDARD_ITEMS_WITH_ACCORDION_WITH_TOP_BAR
-                    else MAX_STANDARD_ITEMS_WITH_TOP_BAR - numDeep
+                    if (isAccordion) maxStandardItemsWithAccordionWithTopBar
+                    else maxStandardItemsWithTopBar - numDeep
                 val availableSlots = maxOf(0, targetSize - fixed.size)
                 min(compactEligible.size, availableSlots)
             }
@@ -154,26 +173,8 @@ class PopupViewModel {
     }
 
     companion object {
-        /** The maximum number of rows that can be displayed */
-        private const val MAX_ROWS = 7
-
-        /**
-         * The maximum number of full-size (standard) shortcuts that can be displayed with an
-         * accordion menu.
-         */
-        private const val MAX_STANDARD_ITEMS_ACCORDION = 6
-
-        /**
-         * The maximum number of full-size (standard) shortcuts that can be displayed when a top bar
-         * is present.
-         */
-        private const val MAX_STANDARD_ITEMS_WITH_TOP_BAR = 6
-
-        /**
-         * The maximum number of full-size (standard) shortcuts that can be displayed when a top bar
-         * is present with an accordion menu.
-         */
-        private const val MAX_STANDARD_ITEMS_WITH_ACCORDION_WITH_TOP_BAR = 5
+        /** The default maximum number of rows that can be displayed */
+        private const val DEFAULT_MAX_ROWS = 7
 
         /** The minimum number of deep shortcuts that can trigger the accordion layout. */
         private const val DEEP_SHORTCUTS_ACCORDION_THRESHOLD = 2

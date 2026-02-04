@@ -12,6 +12,7 @@ import com.android.launcher3.dragndrop.DragView
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.util.MSDLPlayerWrapper
 import com.android.launcher3.util.TestActivityContext
+import com.android.providers.media.flags.Flags.FLAG_ENABLE_TRASH_AND_RESTORE_BY_FILE_PATH_API
 import com.google.android.msdl.data.model.MSDLToken
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -80,7 +81,10 @@ class DeleteDropTargetTest {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING)
+    @DisableFlags(
+        Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING,
+        FLAG_ENABLE_TRASH_AND_RESTORE_BY_FILE_PATH_API,
+    )
     fun setsTextForFileSystemItemsWhenTrashingDisabled() {
         verifyTextForItemInfo(
             ItemInfo().apply {
@@ -99,7 +103,10 @@ class DeleteDropTargetTest {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING)
+    @EnableFlags(
+        Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING,
+        FLAG_ENABLE_TRASH_AND_RESTORE_BY_FILE_PATH_API,
+    )
     fun setsTextForFileSystemItemsWhenTrashingEnabled() {
         verifyTextForItemInfo(
             ItemInfo().apply {

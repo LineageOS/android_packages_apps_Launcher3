@@ -76,8 +76,7 @@ class AddWorkspaceItemsTaskTest {
         givenNewItemSpaces(WorkspaceItemCoordinates(1, 2, 2))
 
         testAddItems(nonEmptyScreenIds, itemToAdd) { addedItems ->
-            assertThat(addedItems.size).isEqualTo(1)
-            assertThat(addedItems.first().screenId).isEqualTo(1)
+            assertThat(addedItems.single().screenId).isEqualTo(1)
             verifyItemSpaceFinderCall(numberOfExpectedCall = 1, addedItems)
         }
     }
@@ -90,8 +89,7 @@ class AddWorkspaceItemsTaskTest {
         val nonEmptyScreenIds = listOf(0)
 
         testAddItems(nonEmptyScreenIds, *itemsToAdd) { addedItems ->
-            assertThat(addedItems.size).isEqualTo(1)
-            assertThat(addedItems.first().screenId).isEqualTo(1)
+            assertThat(addedItems.single().screenId).isEqualTo(1)
             verifyItemSpaceFinderCall(numberOfExpectedCall = 1, addedItems)
         }
     }
@@ -118,8 +116,7 @@ class AddWorkspaceItemsTaskTest {
         val nonEmptyScreenIds = listOf(0, 2, 3)
 
         testAddItems(nonEmptyScreenIds, itemToAdd) { addedItems ->
-            assertThat(addedItems.size).isEqualTo(1)
-            assertThat(addedItems.first().screenId).isEqualTo(2)
+            assertThat(addedItems.single().screenId).isEqualTo(2)
             verifyItemSpaceFinderCall(numberOfExpectedCall = 1, addedItems)
         }
     }
@@ -149,6 +146,21 @@ class AddWorkspaceItemsTaskTest {
             val itemsAddedToSecondScreen = addedItems.filter { it.screenId == 2 }
             assertThat(itemsAddedToSecondScreen.size).isEqualTo(2)
             verifyItemSpaceFinderCall(numberOfExpectedCall = 3, addedItems)
+        }
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODEL_REPOSITORY)
+    fun givenPromiseItem_whenExecuteTask_thenDoNotAddDuplicateItem() {
+        val existingItem = getNewItem().apply { status = WorkspaceItemInfo.FLAG_RESTORED_ICON }
+        val newItem = existingItem.apply { status = WorkspaceItemInfo.DEFAULT }
+        val itemsToAdd = arrayOf(existingItem, newItem)
+        givenNewItemSpaces(WorkspaceItemCoordinates(1, 0, 0))
+        val nonEmptyScreenIds = listOf(0)
+
+        testAddItems(nonEmptyScreenIds, *itemsToAdd) { addedItems ->
+            assertThat(addedItems.single().screenId).isEqualTo(1)
+            verifyItemSpaceFinderCall(numberOfExpectedCall = 1, addedItems)
         }
     }
 

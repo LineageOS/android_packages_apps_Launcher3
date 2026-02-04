@@ -717,7 +717,7 @@ class TransientBubbleStashControllerTest {
         assertThat(mTransientBubbleStashController.isStashed).isTrue()
 
         // When the receiver is triggered (simulating the Accessibility Action)
-        getInstrumentation().runOnMainSync {
+        runOnTaskbarUiThreadSync {
             mTransientBubbleStashController.showBubbleBarReceiver.onReceive(context, Intent())
         }
 

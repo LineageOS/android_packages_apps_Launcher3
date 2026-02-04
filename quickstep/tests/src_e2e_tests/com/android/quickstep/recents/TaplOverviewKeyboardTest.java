@@ -16,8 +16,6 @@
 
 package com.android.quickstep.recents;
 
-import static com.android.launcher3.util.rule.TestStabilityRule.LOCAL;
-import static com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT;
 import static com.android.launcher3.util.ui.ActivityStartUtils.getAppPackageName;
 import static com.android.launcher3.util.ui.ActivityStartUtils.resolveSystemApp;
 import static com.android.launcher3.util.ui.ActivityStartUtils.startAppFast;
@@ -35,7 +33,6 @@ import com.android.launcher3.LauncherState;
 import com.android.launcher3.tapl.Overview;
 import com.android.launcher3.tapl.SelectModeButtons;
 import com.android.launcher3.tapl.Workspace;
-import com.android.launcher3.util.rule.TestStabilityRule;
 import com.android.launcher3.util.ui.BaseLauncherTaplTest.AllowInRecentsWindowTests;
 import com.android.quickstep.AbstractQuickStepTest;
 
@@ -58,6 +55,7 @@ public class TaplOverviewKeyboardTest extends AbstractQuickStepTest {
         executeOnOverview(recentsView ->
                 recentsView.getPagedViewOrientedState().forceAllowRotationForTesting(true));
         clearAllRecentTasks();
+        mLauncher.markOverviewSelectTipSeen();
     }
 
     @After
@@ -99,7 +97,6 @@ public class TaplOverviewKeyboardTest extends AbstractQuickStepTest {
     }
 
     @Test
-    @TestStabilityRule.Stability(flavors = LOCAL | PLATFORM_POSTSUBMIT) // b/479807937
     public void testDismissOverviewWithEscKey() throws Exception {
         startTestAppsWithCheck();
         final Overview overview =

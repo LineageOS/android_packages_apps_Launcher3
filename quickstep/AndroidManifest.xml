@@ -59,6 +59,14 @@
     <permission android:name="${applicationId}.permission.START_WIDGET_PICKER_ACTIVITY"
         android:protectionLevel="signature|privileged" />
 
+    <!--
+        Permission required to send an intent to the file manager when attempting to click on a zip
+        file on the launcher home screen.
+    -->
+    <uses-permission
+        android:name="com.android.documentsui.LAUNCH_FILE_MANAGER"
+        android:featureFlag="com.android.launcher3.show_files_on_home_screen" />
+
     <application android:backupAgent="com.android.launcher3.LauncherBackupAgent"
          android:enableOnBackInvokedCallback="true"
          android:fullBackupOnly="true"

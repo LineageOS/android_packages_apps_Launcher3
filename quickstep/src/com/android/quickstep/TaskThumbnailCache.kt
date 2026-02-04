@@ -94,7 +94,6 @@ constructor(
         cache.updateIfAlreadyInCache(taskId, thumbnail)
     }
 
-    // TODO(b/387496731): Add ensureActive() calls if they show performance benefit
     /**
      * Retrieves a thumbnail for the provided `task` on the current thread. This should not be
      * called from the main thread.
@@ -149,7 +148,6 @@ constructor(
         }
     }
 
-    // TODO(b/387496731): Add ensureActive() calls if they show performance benefit
     /**
      * Retrieves a thumbnail for the provided `task` on the current thread. This should not be
      * called from the main thread.

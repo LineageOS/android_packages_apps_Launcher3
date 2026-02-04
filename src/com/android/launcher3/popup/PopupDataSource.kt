@@ -23,7 +23,6 @@ import android.view.View
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.AbstractFloatingViewHelper
 import com.android.launcher3.DropTargetHandler
-import com.android.launcher3.Flags.enableHomeScreenFilesTrashing
 import com.android.launcher3.LauncherConstants
 import com.android.launcher3.R
 import com.android.launcher3.SecondaryDropTarget
@@ -31,6 +30,7 @@ import com.android.launcher3.Utilities
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate
 import com.android.launcher3.allapps.PrivateProfileManager
 import com.android.launcher3.dagger.LauncherAppSingleton
+import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
@@ -338,7 +338,7 @@ class PopupDataSource @Inject constructor() {
         PopupData(
             iconResId = R.drawable.ic_home_screen_files_context_menu_move_to_trash,
             labelResId =
-                if (enableHomeScreenFilesTrashing())
+                if (HomeScreenFilesUtils.isTrashingEnabled())
                     R.string.home_screen_files_context_menu_move_to_trash_label
                 else R.string.home_screen_files_context_menu_delete_permanently_label,
             popupAction = handleRemove,

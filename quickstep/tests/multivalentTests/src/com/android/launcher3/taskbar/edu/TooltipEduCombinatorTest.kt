@@ -67,6 +67,8 @@ class TooltipEduCombinatorTest {
 
     private val wasInTestHarness = Utilities.isRunningInTestHarness()
 
+    private var sysuiLocked = false
+
     private var tooltipStep by OnboardingPrefs.TASKBAR_EDU_TOOLTIP_STEP.prefItem.asProperty(context)
     private var taskbarSeenEduFlags by OnboardingPrefs.TASKBAR_SEEN_EDU_FLAGS.asProperty(context)
 
@@ -96,7 +98,8 @@ class TooltipEduCombinatorTest {
 
     @Before
     fun setUp() {
-        tooltipEduCombinator = TooltipEduCombinator(taskbarContext, taskbarStashController) { true }
+        tooltipEduCombinator =
+            TooltipEduCombinator(taskbarContext, taskbarStashController, { sysuiLocked }, { true })
         Utilities.disableRunningInTestHarnessForTests()
     }
 
@@ -125,6 +128,13 @@ class TooltipEduCombinatorTest {
                 },
             location = DisplayLocation.TASKBAR_HANDLE,
         )
+    }
+
+    @Test
+    @TaskbarMode(TRANSIENT)
+    fun testGetSwipeEdu_whenSysuiLocked_returnNull() {
+        sysuiLocked = true
+        assertThat(tooltipEduCombinator.getSwipeEdu()).isNull()
     }
 
     @Test
@@ -245,6 +255,12 @@ class TooltipEduCombinatorTest {
     }
 
     @Test
+    fun getFeaturesTooltipsEduPages_whenSysuiLocked_returnsNull() {
+        sysuiLocked = true
+        assertThat(tooltipEduCombinator.getFeaturesTooltipsEduPages()).isNull()
+    }
+
+    @Test
     @TaskbarMode(TRANSIENT)
     fun getFeaturesTooltipsEduPages_allFeaturesExceptPinningEduSeenBefore_returnsPinningEdu() {
         tooltipStep = 1
@@ -325,6 +341,13 @@ class TooltipEduCombinatorTest {
     }
 
     @Test
+    @TaskbarMode(PINNED)
+    fun getSearchEdu_whenSysuiLocked_returnsNull() {
+        sysuiLocked = true
+        assertThat(tooltipEduCombinator.getSearchEdu()).isNull()
+    }
+
+    @Test
     @TaskbarMode(TRANSIENT)
     fun getSearchEdu_whenTransientTaskbar_returnsNull() {
         assertThat(tooltipEduCombinator.getSearchEdu()).isNull()
@@ -341,7 +364,7 @@ class TooltipEduCombinatorTest {
     @TaskbarMode(PINNED)
     fun getSearchEdu_whenPinnedTaskbarShouldNotShowSearchEdu_returnsNull() {
         tooltipEduCombinator =
-            TooltipEduCombinator(taskbarContext, taskbarStashController) { false }
+            TooltipEduCombinator(taskbarContext, taskbarStashController, { sysuiLocked }, { false })
         assertThat(tooltipEduCombinator.getSearchEdu()).isNull()
     }
 

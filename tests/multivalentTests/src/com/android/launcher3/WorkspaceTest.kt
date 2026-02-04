@@ -265,7 +265,7 @@ class WorkspaceTest {
     private fun createDragObject(itemType: Int, uri: Uri) =
         mock<DragObject>().apply {
             dragInfo = createWorkspaceItemInfo(itemType, uri)
-            originalDragInfo = dragInfo
+            originalDragInfo = dragInfo.makeShallowCopy()
             whenever(getVisualCenter(any())).thenAnswer {
                 val args = it.arguments
                 val res = (args[0] as? FloatArray) ?: FloatArray(2)
