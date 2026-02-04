@@ -33,6 +33,7 @@ import static com.android.quickstep.fallback.RecentsState.HIDDEN;
 import android.animation.Animator;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityOptions;
+import android.app.TaskInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Matrix;
@@ -84,6 +85,7 @@ import com.android.quickstep.util.RectFSpringAnim;
 import com.android.quickstep.util.SurfaceTransaction.SurfaceProperties;
 import com.android.quickstep.util.TransformParams;
 import com.android.quickstep.views.TaskView;
+import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.recents.model.Task.TaskKey;
 import com.android.systemui.shared.system.InputConsumerController;
 
@@ -221,20 +223,36 @@ public class RecentsWindowSwipeHandler extends AbsSwipeUpHandler<RecentsWindowMa
         if (appCanEnterPip) {
             return new FallbackPipToHomeAnimationFactory();
         }
-        mActiveAnimationFactory = new FallbackHomeAnimationFactory(duration);
+        mActiveAnimationFactory = new FallbackHomeAnimationFactory(duration, targetTaskView);
         startHomeIntent(
-                mActiveAnimationFactory, runningTaskTarget, "RecentsWindowSwipeHandler-home");
+                mActiveAnimationFactory,
+                runningTaskTarget,
+                targetTaskView,
+                "RecentsWindowSwipeHandler-home");
         return mActiveAnimationFactory;
     }
 
     private void startHomeIntent(
             @Nullable FallbackHomeAnimationFactory gestureContractAnimationFactory,
             @Nullable RemoteAnimationTarget runningTaskTarget,
+            @Nullable TaskView targetTaskView,
             @NonNull String reason) {
         ActivityOptions options = ActivityOptions.makeCustomAnimation(mContext, 0, 0);
         Intent intent = new Intent(mGestureState.getHomeIntent());
-        if (gestureContractAnimationFactory != null && runningTaskTarget != null) {
-            gestureContractAnimationFactory.addGestureContract(intent, runningTaskTarget.taskInfo);
+        if (gestureContractAnimationFactory != null) {
+            TaskKey taskKey = null;
+            if (targetTaskView != null) {
+                Task firstTask = targetTaskView.getFirstTask();
+
+                taskKey = firstTask == null ? null : firstTask.key;
+            } else if (runningTaskTarget != null) {
+                TaskInfo taskInfo = runningTaskTarget.taskInfo;
+
+                taskKey = taskInfo == null ? null : new TaskKey(taskInfo);
+            }
+            if (taskKey != null) {
+                gestureContractAnimationFactory.addGestureContract(intent, taskKey);
+            }
         }
         startHomeIntentSafely(mContext, intent, options.toBundle(), reason);
     }
@@ -320,10 +338,12 @@ public class RecentsWindowSwipeHandler extends AbsSwipeUpHandler<RecentsWindowMa
         private Message mOnFinishCallback;
 
         private final long mDuration;
+        @Nullable private final TaskView mTargetTaskView;
 
         private RectFSpringAnim mSpringAnim;
-        FallbackHomeAnimationFactory(long duration) {
+        FallbackHomeAnimationFactory(long duration, @Nullable TaskView targetTaskView) {
             mDuration = duration;
+            mTargetTaskView = targetTaskView;
 
             if (mRunningOverHome) {
                 mVerticalShiftForScale.value = getCurrentShiftValue();
@@ -332,6 +352,12 @@ public class RecentsWindowSwipeHandler extends AbsSwipeUpHandler<RecentsWindowMa
             mHomeAlpha.value = 0;
 
             initTransformParams();
+        }
+
+        @Nullable
+        @Override
+        public TaskView getTargetTaskView() {
+            return mTargetTaskView;
         }
 
         @NonNull
@@ -468,26 +494,26 @@ public class RecentsWindowSwipeHandler extends AbsSwipeUpHandler<RecentsWindowMa
             }
         }
 
-        private void addGestureContract(Intent intent, RunningTaskInfo runningTaskInfo) {
-            if (mRunningOverHome || runningTaskInfo == null) {
+        private void addGestureContract(@NonNull Intent intent, @NonNull TaskKey key) {
+            if (mRunningOverHome) {
                 return;
             }
-
-            TaskKey key = new TaskKey(runningTaskInfo);
-            if (key.getComponent() != null) {
-                if (sMessageReceiver == null) {
-                    sMessageReceiver = new StaticMessageReceiver();
-                }
-
-                Bundle gestureNavContract = new Bundle();
-                gestureNavContract.putBoolean(
-                        EXTRA_ENABLE_GESTURE_CONTRACT, mRemoteTargetHandles.length <= 1);
-                gestureNavContract.putParcelable(EXTRA_COMPONENT_NAME, key.getComponent());
-                gestureNavContract.putParcelable(EXTRA_USER, UserHandle.of(key.userId));
-                gestureNavContract.putParcelable(
-                        EXTRA_REMOTE_CALLBACK, sMessageReceiver.newCallback(this));
-                intent.putExtra(EXTRA_GESTURE_CONTRACT, gestureNavContract);
+            if (key.getComponent() == null) {
+                return;
             }
+            if (sMessageReceiver == null) {
+                sMessageReceiver = new StaticMessageReceiver();
+            }
+            Bundle gestureNavContract = new Bundle();
+
+            gestureNavContract.putBoolean(
+                    EXTRA_ENABLE_GESTURE_CONTRACT, mRemoteTargetHandles.length <= 1);
+            gestureNavContract.putParcelable(EXTRA_COMPONENT_NAME, key.getComponent());
+            gestureNavContract.putParcelable(EXTRA_USER, UserHandle.of(key.userId));
+            gestureNavContract.putParcelable(
+                    EXTRA_REMOTE_CALLBACK, sMessageReceiver.newCallback(this));
+
+            intent.putExtra(EXTRA_GESTURE_CONTRACT, gestureNavContract);
         }
     }
 
