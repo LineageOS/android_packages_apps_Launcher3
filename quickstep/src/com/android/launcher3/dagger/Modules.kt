@@ -47,6 +47,7 @@ import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils
 import com.android.launcher3.icons.LauncherIconProvider
 import com.android.launcher3.icons.LauncherIconProviderImpl
 import com.android.launcher3.logging.StatsLogManager.StatsLogManagerFactory
+import com.android.launcher3.model.WellbeingModel
 import com.android.launcher3.secondarydisplay.SecondaryDisplayDelegate
 import com.android.launcher3.LauncherModel
 import com.android.launcher3.ModelReloader
@@ -77,6 +78,7 @@ import com.android.quickstep.LauncherRestoreEventLoggerImpl
 import com.android.quickstep.QuickstepTestInformationHandler
 import com.android.quickstep.TaskShortcutFactory
 import com.android.quickstep.TaskUtils
+import com.android.quickstep.WellbeingShortcut
 import com.android.quickstep.logging.StatsLogCompatManager.StatsLogCompatManagerFactory
 import com.android.quickstep.util.ChoreographerFrameRateTracker
 import com.android.quickstep.util.ContextualSearchStateManager
@@ -292,12 +294,20 @@ object DesktopModule {
 
 @Module
 object TaskOverlayModule {
+
+    @Provides
+    @LauncherAppSingleton
+    fun provideWellbeingShortcutFactory(): WellbeingShortcut.Factory {
+        return WellbeingShortcut.Factory(WellbeingModel.SHORTCUT_FACTORY)
+    }
+
     @Provides
     @LauncherAppSingleton
     fun providePerTaskShortcutFactories(
         desktopShortcutFactory: DesktopShortcut.Factory,
         externalDisplayShortcutFactory: ExternalDisplayShortcut.Factory,
         aspectRatioSystemShortcutFactory: AspectRatioSystemShortcut.Factory,
+        wellbeingShortcutFactory: WellbeingShortcut.Factory,
     ): List<TaskShortcutFactory> =
         listOf(
             TaskShortcutFactory.APP_INFO,
@@ -308,7 +318,7 @@ object TaskOverlayModule {
             desktopShortcutFactory,
             externalDisplayShortcutFactory,
             aspectRatioSystemShortcutFactory,
-            TaskShortcutFactory.WELLBEING,
+            wellbeingShortcutFactory,
             TaskShortcutFactory.SAVE_APP_PAIR,
             TaskShortcutFactory.SCREENSHOT,
             TaskShortcutFactory.MODAL,

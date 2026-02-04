@@ -42,13 +42,11 @@ import androidx.annotation.Nullable;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.R;
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent;
-import com.android.launcher3.model.WellbeingModel;
 import com.android.launcher3.popup.SystemShortcut;
 import com.android.launcher3.popup.SystemShortcut.AppInfo;
 import com.android.launcher3.util.InstantAppResolver;
 import com.android.launcher3.util.SplitConfigurationOptions;
 import com.android.launcher3.util.SplitConfigurationOptions.SplitPositionOption;
-import com.android.launcher3.views.ActivityContext;
 import com.android.quickstep.orientation.RecentsPagedOrientationHandler;
 import com.android.quickstep.views.GroupedTaskView;
 import com.android.quickstep.views.RecentsView;
@@ -451,17 +449,6 @@ public interface TaskShortcutFactory {
                     ? Collections.singletonList(new SystemShortcut.Install(container,
                     taskContainer.getItemInfo(), taskContainer.getTaskView()))
                     : null;
-        }
-    };
-
-    TaskShortcutFactory WELLBEING = new TaskShortcutFactory() {
-        @Override
-        public List<SystemShortcut> getShortcuts(RecentsViewContainer container,
-                TaskContainer taskContainer) {
-            SystemShortcut<ActivityContext> wellbeingShortcut =
-                    WellbeingModel.SHORTCUT_FACTORY.getShortcut(container,
-                            taskContainer.getItemInfo(), taskContainer.getTaskView());
-            return createSingletonShortcutList(wellbeingShortcut);
         }
     };
 
