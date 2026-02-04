@@ -29,7 +29,7 @@
     <string name="home_screen" msgid="5629429142036709174">"Bosh ekran"</string>
     <string name="set_default_home_app" msgid="5808906607627586381">"Sozlamalar orqali <xliff:g id="LAUNCHER_NAME">%1$s</xliff:g> ilovasini birlamchi bosh ekran ilovasi sifatida belgilash"</string>
     <string name="recent_task_option_split_screen" msgid="6690461455618725183">"Ekranni ikkiga ajratish"</string>
-    <string name="recent_task_option_aspect_ratio" msgid="7008605516391096989">"Tomonlar nisbatini oʻzgartirish"</string>
+    <string name="recent_task_option_aspect_ratio" msgid="7008605516391096989">"Tomonlar nisbati"</string>
     <string name="split_app_info_accessibility" msgid="5475288491241414932">"%1$s ilovasi axboroti"</string>
     <string name="split_app_usage_settings" msgid="7214375263347964093">"%1$s uchun sarf sozlamalari"</string>
     <string name="close_task_accessibility" msgid="4765872229211282647">"Yopiladi: %1$s"</string>
