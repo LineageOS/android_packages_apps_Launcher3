@@ -67,6 +67,27 @@ interface IModelWriter {
     )
 
     /**
+     * Suspends any new database writes.
+     *
+     * While suspended, any calls to [scheduleTransaction] will be queued and executed only after
+     * [resumeWrites] is called.
+     */
+    fun suspendWrites()
+
+    /**
+     * Resumes database writes.
+     *
+     * @param pendingTransaction An optional transaction to execute immediately before processing
+     *   the queued transactions. This is typically the "commit" operation of an undoable action.
+     * @param discardPending If true, any transactions that were queued while suspended will be
+     *   discarded instead of executed.
+     */
+    fun resumeWrites(
+        pendingTransaction: Consumer<TransactionContext>? = null,
+        discardPending: Boolean = false,
+    )
+
+    /**
      * Returns the [LauncherUiStateNotifier] used by the model to notify the UI of changes.
      *
      * This is used to notify the UI of changes that do not require a database transaction, such as

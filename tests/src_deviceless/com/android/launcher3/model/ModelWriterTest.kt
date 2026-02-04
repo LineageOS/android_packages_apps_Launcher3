@@ -421,4 +421,20 @@ class ModelWriterTest : AbstractWorkspaceModelTest() {
         verify(mockNotifier).notifyModelChanged(changeLogCaptor.capture(), any())
         assertThat(changeLogCaptor.firstValue.itemsModified).containsExactly(item1)
     }
+
+    @Test
+    fun resumeWrites_discardPending_clearsQueue() {
+        modelWriter.suspendWrites()
+
+        var transactionExecuted = false
+        modelWriter.scheduleTransaction { transactionExecuted = true }
+
+        modelWriter.resumeWrites(discardPending = true)
+
+        assertThat(transactionExecuted).isFalse()
+
+        var nextTransactionExecuted = false
+        modelWriter.scheduleTransaction { nextTransactionExecuted = true }
+        assertThat(nextTransactionExecuted).isTrue()
+    }
 }

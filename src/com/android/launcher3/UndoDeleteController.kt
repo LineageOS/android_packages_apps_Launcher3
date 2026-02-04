@@ -15,6 +15,7 @@
  */
 package com.android.launcher3
 
+import android.util.Log
 import com.android.launcher3.model.IModelWriter
 import com.android.launcher3.model.TransactionContext
 import com.android.launcher3.model.data.CollectionInfo
@@ -31,7 +32,7 @@ import java.util.function.Consumer
  */
 class UndoDeleteController(
     private val modelWriter: IModelWriter,
-    private val model: LauncherModel,
+    private val onAbort: Runnable,
 ) {
     private val pendingDeletes = mutableListOf<Consumer<TransactionContext>>()
 
@@ -41,6 +42,7 @@ class UndoDeleteController(
      */
     fun prepareToUndoDelete() {
         pendingDeletes.clear()
+        modelWriter.suspendWrites()
     }
 
     /** Enqueues a raw transaction operation to be executed upon commit. */
@@ -54,15 +56,18 @@ class UndoDeleteController(
      */
     fun commit() {
         if (pendingDeletes.isEmpty()) {
+            modelWriter.resumeWrites(null)
             return
         }
 
         val deletesToCommit = pendingDeletes.toList()
         pendingDeletes.clear()
 
-        modelWriter.scheduleTransaction(null) { context ->
-            deletesToCommit.forEach { it.accept(context) }
-        }
+        modelWriter.resumeWrites(Consumer { context ->
+            deletesToCommit.forEach {
+                it.accept(context)
+            }
+        })
     }
 
     /**
@@ -71,7 +76,8 @@ class UndoDeleteController(
      */
     fun abort() {
         pendingDeletes.clear()
-        model.forceReload()
+        modelWriter.resumeWrites(null, discardPending = true)
+        onAbort.run()
     }
 
     // Type-safe helper methods matching IModelWriter interfaces
@@ -90,5 +96,9 @@ class UndoDeleteController(
 
     fun deleteWidget(info: LauncherAppWidgetInfo, holder: LauncherWidgetHolder?, reason: String?) {
         enqueueTransaction { it.deleteWidgetInfo(info, holder, reason) }
+    }
+
+    private companion object {
+        const val TAG = "UndoDeleteController"
     }
 }

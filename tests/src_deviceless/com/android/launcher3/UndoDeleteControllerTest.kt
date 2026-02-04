@@ -34,14 +34,14 @@ class UndoDeleteControllerTest : AbstractWorkspaceModelTest() {
 
     private lateinit var modelWriter: FakeModelWriter
     private lateinit var undoDeleteController: UndoDeleteController
-    private lateinit var spiedModel: LauncherModel
+    private lateinit var mockAbortAction: Runnable
 
     @Before
     override fun setup() {
         super.setup()
         modelWriter = FakeModelWriter()
-        spiedModel = spy(model)
-        undoDeleteController = UndoDeleteController(modelWriter, spiedModel)
+        mockAbortAction = spy(Runnable { })
+        undoDeleteController = UndoDeleteController(modelWriter, mockAbortAction)
     }
 
     @Test
@@ -75,7 +75,7 @@ class UndoDeleteControllerTest : AbstractWorkspaceModelTest() {
 
         undoDeleteController.abort()
 
-        verify(spiedModel).forceReload()
+        verify(mockAbortAction).run()
 
         assertThat(modelWriter.actions).isEmpty()
 
@@ -144,5 +144,60 @@ class UndoDeleteControllerTest : AbstractWorkspaceModelTest() {
         undoDeleteController.commit()
 
         assertThat(modelWriter.actions).containsExactly(WriterAction.DeleteItem(widget))
+    }
+
+    @Test
+    fun prepareToUndoDelete_suspendsWrites() {
+        // 1. Prepare to undo (should suspend writes)
+        undoDeleteController.prepareToUndoDelete()
+
+        // 2. Perform a separate model write (e.g. background install)
+        val backgroundItem = WorkspaceItemInfo().apply { id = 999 }
+        modelWriter.addItemToDatabase(backgroundItem, 0, 0, 0, 0)
+
+        // 3. Verify it is NOT yet executed (blocked)
+        assertThat(modelWriter.actions).isEmpty()
+    }
+
+    @Test
+    fun commit_resumesWrites_executingBlockedTransactions() {
+        undoDeleteController.prepareToUndoDelete()
+
+        // 1. Queue a user action
+        val userItem = WorkspaceItemInfo().apply { id = 1 }
+        undoDeleteController.deleteItem(userItem, "user action")
+
+        // 2. Queue a background action
+        val backgroundItem = WorkspaceItemInfo().apply { id = 999 }
+        modelWriter.addItemToDatabase(backgroundItem, 0, 0, 0, 0)
+
+        // Verify nothing executed yet
+        assertThat(modelWriter.actions).isEmpty()
+
+        // 3. Commit
+        undoDeleteController.commit()
+
+        // 4. Verify order: Pending Transaction (Delete) -> Queued Transaction (Add)
+        assertThat(modelWriter.actions).hasSize(2)
+        assertThat(modelWriter.actions[0]).isEqualTo(WriterAction.DeleteItem(userItem))
+        val action1 = modelWriter.actions[1] as WriterAction.AddItem
+        assertThat(action1.item).isEqualTo(backgroundItem)
+    }
+
+    @Test
+    fun abort_discardsBlockedTransactions() {
+        undoDeleteController.prepareToUndoDelete()
+
+        val userItem = WorkspaceItemInfo().apply { id = 1 }
+        undoDeleteController.deleteItem(userItem, "user action")
+
+        val backgroundItem = WorkspaceItemInfo().apply { id = 999 }
+        modelWriter.addItemToDatabase(backgroundItem, 0, 0, 0, 0)
+
+        assertThat(modelWriter.actions).isEmpty()
+
+        undoDeleteController.abort()
+
+        assertThat(modelWriter.actions).isEmpty()
     }
 }

@@ -56,6 +56,10 @@ open class ModelWriter(
     private var preparingToUndo = false
     private val pendingDeletes = mutableListOf<(TransactionContext) -> Unit>()
 
+    private var isSuspended = false
+    private val transactionQueue =
+        mutableListOf<Pair<((Boolean) -> Unit)?, Consumer<TransactionContext>>>()
+
     open fun createTransactionContext(outChangeLog: ChangeLog): TransactionContext =
         TransactionContextImpl(outChangeLog, model, modificationSource, context, bgDataModel)
 
@@ -192,6 +196,11 @@ open class ModelWriter(
         onComplete: ((success: Boolean) -> Unit)?,
         block: Consumer<TransactionContext>,
     ) {
+        if (isSuspended) {
+            transactionQueue.add(onComplete to block)
+            return
+        }
+
         // TODO(b/457449059): Should this be a submit() instead?
         modelExecutor.execute {
             var success = false
@@ -210,6 +219,28 @@ open class ModelWriter(
                 launcherStateNotifier.notifyModelChanged(outChangeLog, this.owner)
             }
             onComplete?.invoke(success)
+        }
+    }
+
+    override fun suspendWrites() {
+        isSuspended = true
+    }
+
+    override fun resumeWrites(
+        pendingTransaction: Consumer<TransactionContext>?,
+        discardPending: Boolean,
+    ) {
+        isSuspended = false
+
+        if (pendingTransaction != null) {
+            scheduleTransaction(null, pendingTransaction)
+        }
+
+        val queue = transactionQueue.toList()
+        transactionQueue.clear()
+
+        if (!discardPending) {
+            queue.forEach { (onComplete, block) -> scheduleTransaction(onComplete, block) }
         }
     }
 
@@ -244,7 +275,7 @@ open class ModelWriter(
     }
 
     private fun execute(block: (TransactionContext) -> Unit) {
-        if (Flags.enableTransactionalModelWriter()) {
+        if (Flags.enableTransactionalModelWriter() || isSuspended) {
             scheduleTransaction(block = Consumer { block(it) })
         } else {
             modelExecutor.execute {

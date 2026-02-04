@@ -687,7 +687,8 @@ public class Launcher extends StatefulActivity<LauncherState>
                     mDeviceProfile.getHotseatProfile().getNumShownIcons());
         }
         mModelWriter = mModel.getWriter(true, this, modelCallbacks);
-        mUndoDeleteController = new UndoDeleteController(mModelWriter, mModel);
+        mUndoDeleteController = new UndoDeleteController(
+                mModelWriter, () -> mModel.reloadIfActive());
         updateFixedLandscape();
         return true;
     }
@@ -1623,6 +1624,7 @@ public class Launcher extends StatefulActivity<LauncherState>
     @Override
     public DropTargetHandler getDropTargetHandler() {
         return new DropTargetHandler(this,
+                mUndoDeleteController,
                 LauncherComponentProvider.get(this).getHomeScreenFilesProvider(),
                 this.getMainExecutor());
     }

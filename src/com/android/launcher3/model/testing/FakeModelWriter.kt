@@ -42,6 +42,10 @@ class FakeModelWriter : IModelWriter {
     private var preparingToUndo = false
     private val pendingActions = mutableListOf<WriterAction>()
 
+    private var isSuspended = false
+    private val transactionQueue =
+        mutableListOf<Pair<((Boolean) -> Unit)?, Consumer<TransactionContext>>>()
+
     private val fakeTransactionContext =
         object : TransactionContext {
             override fun addItemToDatabase(
@@ -149,8 +153,32 @@ class FakeModelWriter : IModelWriter {
         onComplete: ((success: Boolean) -> Unit)?,
         block: Consumer<TransactionContext>,
     ) {
+        if (isSuspended) {
+            transactionQueue.add(onComplete to block)
+            return
+        }
         block.accept(fakeTransactionContext)
         onComplete?.invoke(true)
+    }
+
+    override fun suspendWrites() {
+        isSuspended = true
+    }
+
+    override fun resumeWrites(
+        pendingTransaction: Consumer<TransactionContext>?,
+        discardPending: Boolean,
+    ) {
+        isSuspended = false
+        if (pendingTransaction != null) {
+            scheduleTransaction(null, pendingTransaction)
+        }
+        val queue = transactionQueue.toList()
+        transactionQueue.clear()
+
+        if (!discardPending) {
+            queue.forEach { (onComplete, block) -> scheduleTransaction(onComplete, block) }
+        }
     }
 
     override fun getNotifier(): LauncherUiStateNotifier = notifier
