@@ -22,6 +22,7 @@
     <string name="recent_task_option_pin" msgid="7929860679018978258">"Kitűzés"</string>
     <string name="recent_task_option_freeform" msgid="48863056265284071">"Szabad forma"</string>
     <string name="recent_task_option_desktop" msgid="8280879717125435668">"Asztali"</string>
+    <string name="recent_split_task_option_desktop" msgid="7272418191932478598">"Asztal a következőhöz: %1$s"</string>
     <string name="recent_task_option_external_display" msgid="4533840664313389484">"Áthelyezés külső kijelzőre"</string>
     <string name="recent_task_option_remove_task" msgid="803559928027541555">"Törlés"</string>
     <string name="recent_task_desktop" msgid="8081113562549637334">"Asztali"</string>
@@ -65,9 +66,9 @@
     <string name="home_gesture_tutorial_title" msgid="3126834347496917376">"Ugrás a kezdőképernyőre"</string>
     <string name="home_gesture_tutorial_subtitle" msgid="7245995490408668778">"Csúsztasson felfelé a képernyő aljától."</string>
     <string name="home_gesture_tutorial_success" msgid="1736295017642244751">"Kiváló!"</string>
-    <string name="overview_gesture_feedback_swipe_too_far_from_edge" msgid="6402349235265407385">"Csúsztasson felfelé a képernyő alsó szélétől."</string>
+    <string name="overview_gesture_feedback_swipe_too_far_from_edge" msgid="6402349235265407385">"A képernyő alsó szélétől kell felfelé csúsztatnia."</string>
     <string name="overview_gesture_feedback_home_detected" msgid="663432226180397138">"Próbálja tovább lenyomva tartani az ablakot, mielőtt elengedi a képernyőt."</string>
-    <string name="overview_gesture_feedback_wrong_swipe_direction" msgid="1191055451018584958">"Csúsztasson egyenesen felfelé, majd várjon egy kicsit"</string>
+    <string name="overview_gesture_feedback_wrong_swipe_direction" msgid="1191055451018584958">"Csúsztasson egyenesen felfelé, majd várjon egy kicsit."</string>
     <string name="overview_gesture_feedback_complete_with_follow_up" msgid="3544611727467765026">"Eddig megismerhette a kézmozdulatok használatát. A kézmozdulatokat a Beállításokban kapcsolhatja ki."</string>
     <string name="overview_gesture_feedback_complete_without_follow_up" msgid="2903050864432331629">"Megtanulta az alkalmazásváltás kézmozdulatát."</string>
     <string name="overview_gesture_intro_title" msgid="2902054412868489378">"Alkalmazásváltás csúsztatással"</string>
@@ -140,6 +141,8 @@
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"Értesítések"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"Gyorsbeállítások"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"Tálca"</string>
+    <!-- no translation found for bubble_bar_a11y_title (7743340801055597168) -->
+    <skip />
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"Navigációs sáv"</string>
     <string name="always_show_taskbar" msgid="3608801276107751229">"Mindig megjelenő Feladatsáv"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"Navigációs mód módosítása"</string>
@@ -168,7 +171,7 @@
     <string name="search_gesture_feature_title" msgid="1294044108313175306">"Bekarikázással keresés"</string>
     <string name="header_app_icon_description" msgid="2184625881433608027">"Alkalmazásikon"</string>
     <string name="header_default_app_title" msgid="8308052350689531566">"Alkalmazás neve"</string>
-    <string name="header_close_icon_description" msgid="5400033616675911319">"Bezárás gomb"</string>
+    <string name="header_close_icon_description" msgid="9216416109255777643">"Bezárás"</string>
     <string name="nudge_a11y_title" msgid="2126529303123687912">"Bökés"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"Bezárás"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"Kép megbökése"</string>

@@ -22,6 +22,7 @@
     <string name="recent_task_option_pin" msgid="7929860679018978258">"Piespraust"</string>
     <string name="recent_task_option_freeform" msgid="48863056265284071">"Brīva forma"</string>
     <string name="recent_task_option_desktop" msgid="8280879717125435668">"Dators"</string>
+    <string name="recent_split_task_option_desktop" msgid="7272418191932478598">"Darbvirsma: %1$s"</string>
     <string name="recent_task_option_external_display" msgid="4533840664313389484">"Pārvietošana uz ārējo displeju"</string>
     <string name="recent_task_option_remove_task" msgid="803559928027541555">"Notīrīt"</string>
     <string name="recent_task_desktop" msgid="8081113562549637334">"Darbvirsma"</string>
@@ -62,7 +63,7 @@
     <string name="home_gesture_feedback_complete_without_follow_up" msgid="2978063221383413443">"Jūs sekmīgi veicāt sākuma ekrāna atvēršanas žestu."</string>
     <string name="home_gesture_intro_title" msgid="836590312858441830">"Vilkšana, lai pārietu uz sākumu"</string>
     <string name="home_gesture_intro_subtitle" msgid="2632238748497975326">"Velciet augšup no ekrāna apakšdaļas. Ar šo žestu vienmēr varat atvērt sākuma ekrānu."</string>
-    <string name="home_gesture_tutorial_title" msgid="3126834347496917376">"Došanās uz sākuma ekrānu"</string>
+    <string name="home_gesture_tutorial_title" msgid="3126834347496917376">"Doties uz sākuma ekrānu"</string>
     <string name="home_gesture_tutorial_subtitle" msgid="7245995490408668778">"Velciet augšup no ekrāna apakšdaļas."</string>
     <string name="home_gesture_tutorial_success" msgid="1736295017642244751">"Lieliski!"</string>
     <string name="overview_gesture_feedback_swipe_too_far_from_edge" msgid="6402349235265407385">"Jāvelk augšup no ekrāna apakšmalas."</string>
@@ -78,7 +79,7 @@
     <string name="gesture_tutorial_confirm_title" msgid="6201516182040074092">"Gatavs"</string>
     <string name="gesture_tutorial_action_button_label" msgid="6249846312991332122">"Gatavs"</string>
     <string name="gesture_tutorial_action_button_label_settings" msgid="2923621047916486604">"Iestatījumi"</string>
-    <string name="gesture_tutorial_try_again" msgid="65962545858556697">"Mēģināt vēlreiz"</string>
+    <string name="gesture_tutorial_try_again" msgid="65962545858556697">"Mēģiniet vēlreiz"</string>
     <string name="gesture_tutorial_nice" msgid="2936275692616928280">"Lieliski!"</string>
     <string name="gesture_tutorial_step" msgid="1279786122817620968">"<xliff:g id="CURRENT">%1$d</xliff:g>. mācību darbība no <xliff:g id="TOTAL">%2$d</xliff:g>"</string>
     <string name="allset_title" msgid="5021126669778966707">"Gatavs!"</string>
@@ -140,6 +141,8 @@
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"Paziņojumi"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"Ātrie iestatīj."</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"Uzdevumu josla"</string>
+    <!-- no translation found for bubble_bar_a11y_title (7743340801055597168) -->
+    <skip />
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"Navigācijas josla"</string>
     <string name="always_show_taskbar" msgid="3608801276107751229">"Vienmēr rādīt uzdevumu joslu"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"Mainīt navigācijas režīmu"</string>
@@ -168,7 +171,7 @@
     <string name="search_gesture_feature_title" msgid="1294044108313175306">"Apvilkt un meklēt"</string>
     <string name="header_app_icon_description" msgid="2184625881433608027">"Lietotnes ikona"</string>
     <string name="header_default_app_title" msgid="8308052350689531566">"Lietotnes nosaukums"</string>
-    <string name="header_close_icon_description" msgid="5400033616675911319">"Poga Aizvērt"</string>
+    <string name="header_close_icon_description" msgid="9216416109255777643">"Aizvērt"</string>
     <string name="nudge_a11y_title" msgid="2126529303123687912">"Pavirzīšana"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"Aizvērt"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"Pavirzīt attēlu"</string>

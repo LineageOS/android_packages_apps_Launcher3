@@ -22,6 +22,7 @@
     <string name="recent_task_option_pin" msgid="7929860679018978258">"Бекіту"</string>
     <string name="recent_task_option_freeform" msgid="48863056265284071">"Еркін форма"</string>
     <string name="recent_task_option_desktop" msgid="8280879717125435668">"Компьютер"</string>
+    <string name="recent_split_task_option_desktop" msgid="7272418191932478598">"%1$s жұмыс үстелі"</string>
     <string name="recent_task_option_external_display" msgid="4533840664313389484">"Сыртқы дисплейге ауыстыру"</string>
     <string name="recent_task_option_remove_task" msgid="803559928027541555">"Өшіру"</string>
     <string name="recent_task_desktop" msgid="8081113562549637334">"Жұмыс үстелі"</string>
@@ -140,6 +141,8 @@
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"Хабарландырулар"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"Жылдам параметрлер"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"Тапсырмалар жолағы"</string>
+    <!-- no translation found for bubble_bar_a11y_title (7743340801055597168) -->
+    <skip />
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"Навигация жолағы"</string>
     <string name="always_show_taskbar" msgid="3608801276107751229">"Тапсырма жолағын үнемі көрсету"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"Навигация режимін өзгерту"</string>
@@ -168,7 +171,7 @@
     <string name="search_gesture_feature_title" msgid="1294044108313175306">"Қоршау арқылы іздеу"</string>
     <string name="header_app_icon_description" msgid="2184625881433608027">"Қолданба белгішесі"</string>
     <string name="header_default_app_title" msgid="8308052350689531566">"Қолданба атауы"</string>
-    <string name="header_close_icon_description" msgid="5400033616675911319">"\"Жабу\" түймесі"</string>
+    <string name="header_close_icon_description" msgid="9216416109255777643">"Жабу"</string>
     <string name="nudge_a11y_title" msgid="2126529303123687912">"Еске салғыш"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"Жабу"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"Еске салғыш суреті"</string>

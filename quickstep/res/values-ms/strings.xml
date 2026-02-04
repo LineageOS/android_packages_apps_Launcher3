@@ -22,6 +22,7 @@
     <string name="recent_task_option_pin" msgid="7929860679018978258">"Semat"</string>
     <string name="recent_task_option_freeform" msgid="48863056265284071">"Bentuk bebas"</string>
     <string name="recent_task_option_desktop" msgid="8280879717125435668">"Desktop"</string>
+    <string name="recent_split_task_option_desktop" msgid="7272418191932478598">"Desktop untuk %1$s"</string>
     <string name="recent_task_option_external_display" msgid="4533840664313389484">"Alihkan kepada paparan luaran"</string>
     <string name="recent_task_option_remove_task" msgid="803559928027541555">"Kosongkan"</string>
     <string name="recent_task_desktop" msgid="8081113562549637334">"Desktop"</string>
@@ -48,7 +49,7 @@
     <string name="back_gesture_feedback_cancelled" msgid="762621530959111290">"Pastikan anda meleret dari tepi sebelah kanan atau kiri ke bahagian tengah skrin dan lepaskan"</string>
     <string name="back_gesture_feedback_complete_with_overview_follow_up" msgid="9176400654037014471">"Anda sudah belajar cara meleret dari kanan untuk kembali. Seterusnya, ketahui cara menukar apl."</string>
     <string name="back_gesture_feedback_complete_with_follow_up" msgid="8653374779579748392">"Anda telah melengkapkan gerak isyarat undur. Seterusnya, ketahui cara menukar apl."</string>
-    <string name="back_gesture_feedback_complete_without_follow_up" msgid="197189945858268342">"Anda telah melengkapkan gerak isyarat untuk kembali"</string>
+    <string name="back_gesture_feedback_complete_without_follow_up" msgid="197189945858268342">"Anda telah melengkapkan gerak isyarat kembali"</string>
     <string name="back_gesture_feedback_swipe_in_nav_bar" msgid="9157480023651452969">"Jangan leret terlalu dekat dengan bahagian bawah skrin"</string>
     <string name="back_gesture_tutorial_confirm_subtitle" msgid="5181305411668713250">"Utk mengubah kepekaan gerak isyarat undur, pergi ke Tetapan"</string>
     <string name="back_gesture_intro_title" msgid="19551256430224428">"Leret untuk kembali"</string>
@@ -140,6 +141,8 @@
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"Pemberitahuan"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"Tetapan Pantas"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"Bar Tugas"</string>
+    <!-- no translation found for bubble_bar_a11y_title (7743340801055597168) -->
+    <skip />
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"Bar navigasi"</string>
     <string name="always_show_taskbar" msgid="3608801276107751229">"Papar Bar Tugas selalu"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"Tukar mod navigasi"</string>
@@ -168,7 +171,7 @@
     <string name="search_gesture_feature_title" msgid="1294044108313175306">"Bulatkan untuk Membuat Carian"</string>
     <string name="header_app_icon_description" msgid="2184625881433608027">"Ikon apl"</string>
     <string name="header_default_app_title" msgid="8308052350689531566">"Tajuk apl"</string>
-    <string name="header_close_icon_description" msgid="5400033616675911319">"Butang tutup"</string>
+    <string name="header_close_icon_description" msgid="9216416109255777643">"Tutup"</string>
     <string name="nudge_a11y_title" msgid="2126529303123687912">"Sigung"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"Tutup"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"Imej sigung"</string>

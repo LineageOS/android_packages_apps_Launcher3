@@ -22,6 +22,7 @@
     <string name="recent_task_option_pin" msgid="7929860679018978258">"Zakači"</string>
     <string name="recent_task_option_freeform" msgid="48863056265284071">"Slobodni oblik"</string>
     <string name="recent_task_option_desktop" msgid="8280879717125435668">"Računar"</string>
+    <string name="recent_split_task_option_desktop" msgid="7272418191932478598">"Radna površina za: %1$s"</string>
     <string name="recent_task_option_external_display" msgid="4533840664313389484">"Premestite na spoljni ekran"</string>
     <string name="recent_task_option_remove_task" msgid="803559928027541555">"Obriši"</string>
     <string name="recent_task_desktop" msgid="8081113562549637334">"Računari"</string>
@@ -74,14 +75,14 @@
     <string name="overview_gesture_intro_subtitle" msgid="4968091015637850859">"Za prelazak sa jedne aplikacije na drugu prevucite nagore od dna ekrana, zadržite, pa pustite."</string>
     <string name="overview_gesture_tutorial_title" msgid="4125835002668708720">"Na drugu aplikaciju"</string>
     <string name="overview_gesture_tutorial_subtitle" msgid="5253549754058973071">"Prevucite nagore od dna ekrana, zadržite, pa pustite"</string>
-    <string name="overview_gesture_tutorial_success" msgid="1910267697807973076">"Super!"</string>
+    <string name="overview_gesture_tutorial_success" msgid="1910267697807973076">"Bravo!"</string>
     <string name="gesture_tutorial_confirm_title" msgid="6201516182040074092">"To je to"</string>
     <string name="gesture_tutorial_action_button_label" msgid="6249846312991332122">"Gotovo"</string>
     <string name="gesture_tutorial_action_button_label_settings" msgid="2923621047916486604">"Podešavanja"</string>
     <string name="gesture_tutorial_try_again" msgid="65962545858556697">"Probajte ponovo"</string>
-    <string name="gesture_tutorial_nice" msgid="2936275692616928280">"Svaka čast!"</string>
+    <string name="gesture_tutorial_nice" msgid="2936275692616928280">"Super!"</string>
     <string name="gesture_tutorial_step" msgid="1279786122817620968">"Vodič <xliff:g id="CURRENT">%1$d</xliff:g>/<xliff:g id="TOTAL">%2$d</xliff:g>"</string>
-    <string name="allset_title" msgid="5021126669778966707">"Gotovo!"</string>
+    <string name="allset_title" msgid="5021126669778966707">"To je to!"</string>
     <string name="allset_hint" msgid="459504134589971527">"Prevucite nagore da biste otvorili početni ekran"</string>
     <string name="allset_button_hint" msgid="2395219947744706291">"Dodirnite dugme Početak da biste otišli na početni ekran"</string>
     <string name="allset_description_generic" msgid="5385500062202019855">"Spremni ste da počnete da koristite <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
@@ -140,6 +141,7 @@
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"Obaveštenja"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"Brza podešavanja"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"Traka zadataka"</string>
+    <string name="bubble_bar_a11y_title" msgid="7743340801055597168">"Traka sa oblačićima"</string>
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"Traka za navigaciju"</string>
     <string name="always_show_taskbar" msgid="3608801276107751229">"Uvek prikazuj traku zadataka"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"Promeni režim navigacije"</string>
@@ -168,7 +170,7 @@
     <string name="search_gesture_feature_title" msgid="1294044108313175306">"Pretraga zaokruživanjem"</string>
     <string name="header_app_icon_description" msgid="2184625881433608027">"Ikona aplikacije"</string>
     <string name="header_default_app_title" msgid="8308052350689531566">"Naziv aplikacije"</string>
-    <string name="header_close_icon_description" msgid="5400033616675911319">"Dugme Zatvori"</string>
+    <string name="header_close_icon_description" msgid="9216416109255777643">"Zatvori"</string>
     <string name="nudge_a11y_title" msgid="2126529303123687912">"Automatski podsetnik"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"Zatvorite"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"Slika automatskog podsetnika"</string>
