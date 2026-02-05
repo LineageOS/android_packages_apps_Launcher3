@@ -27,6 +27,7 @@ import java.util.concurrent.Executor
  */
 class DropTargetHandler(
     private val launcher: Launcher,
+    private val undoDeleteController: UndoDeleteController,
     private val homeScreenFilesProvider: HomeScreenFilesProvider,
     private val mainExecutor: Executor,
 ) {
@@ -72,7 +73,7 @@ class DropTargetHandler(
             // to manually call `mLauncher.modelWriter` from here.
             return
         }
-        launcher.modelWriter.prepareToUndoDelete()
+        undoDeleteController.prepareToUndoDelete()
     }
 
     fun onDeleteComplete(item: ItemInfo, view: View?) {
@@ -105,11 +106,11 @@ class DropTargetHandler(
                     requireNotNull(requireNotNull(item.intent).data)
                 )
             }
-            launcher.modelWriter.commitDelete()
+            undoDeleteController.commit()
         }
         val onUndoClicked = Runnable {
             launcher.setPagesToBindSynchronously(pageIds)
-            launcher.modelWriter.abortDelete()
+            undoDeleteController.abort()
             launcher.statsLogManager.logger().log(LauncherEvent.LAUNCHER_UNDO)
         }
 
@@ -167,10 +168,9 @@ class DropTargetHandler(
     }
 
     private fun removeItemAndStripEmptyScreens(view: View?, item: ItemInfo) {
-        // Remove the item from launcher and the db, we can ignore the containerInfo in this call
-        // because we already remove the drag view from the folder (if the drag originated from
-        // a folder) in Folder.beginDrag()
-        launcher.removeItem(view, item, true /* deleteFromDb */, "removed by accessibility drop")
+        // Remove the item from launcher ONLY (not the db). The DB deletion is handled by
+        // UndoDeleteController.
+        launcher.removeItem(view, item, false /* deleteFromDb */, "removed by accessibility drop")
         launcher.workspace.stripEmptyScreens()
     }
 

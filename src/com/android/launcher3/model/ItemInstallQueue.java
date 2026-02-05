@@ -29,6 +29,7 @@ import androidx.annotation.WorkerThread;
 
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.LauncherModel;
+import com.android.launcher3.UndoDeleteController;
 import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.dagger.LauncherAppSingleton;
 import com.android.launcher3.dagger.LauncherBaseAppComponent;
@@ -140,7 +141,10 @@ public class ItemInstallQueue {
 
             // If there's an undo snack bar, force it to complete to ensure empty screens are
             // removed before trying to add new items.
-            uiSurface.getModelWriter().commitDelete();
+            UndoDeleteController undoDeleteController = uiSurface.getUndoDeleteController();
+            if (undoDeleteController != null) {
+                undoDeleteController.commit();
+            }
             AbstractFloatingView.closeOpenViews(uiSurface, true, TYPE_SNACKBAR);
 
             MODEL_EXECUTOR.execute(() -> {
