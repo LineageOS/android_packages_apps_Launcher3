@@ -737,3 +737,13 @@ flag {
     description: "Enables the kondo planner experience."
     bug: "450695990"
 }
+
+flag {
+  name: "reduce_workspace_blur_usage"
+  namespace: "launcher"
+  description: "Disables the full workspace blur and zoom effects behind surfaces like the \"All apps\" panel or the widget picker"
+  bug: "455987559"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

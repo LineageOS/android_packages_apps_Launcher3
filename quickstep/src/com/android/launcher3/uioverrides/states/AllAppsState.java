@@ -15,6 +15,7 @@
  */
 package com.android.launcher3.uioverrides.states;
 
+import static com.android.launcher3.Utilities.shouldReduceWorkspaceBlurUsage;
 import static com.android.launcher3.logging.StatsLogManager.LAUNCHER_STATE_ALLAPPS;
 
 import android.graphics.Color;
@@ -115,21 +116,23 @@ public class AllAppsState extends LauncherState {
 
     @Override
     public ScaleAndTranslation getWorkspaceScaleAndTranslation(Launcher launcher) {
-        return new ScaleAndTranslation(
-                launcher.getDeviceProfile().getWorkspaceProfile().getWorkspaceContentScale(),
-                NO_OFFSET,
-                NO_OFFSET
-        );
+        final float scale = shouldReduceWorkspaceBlurUsage(launcher)
+                ? NO_SCALE
+                : launcher.getDeviceProfile().getWorkspaceProfile().getWorkspaceContentScale();
+        return new ScaleAndTranslation(scale, NO_OFFSET, NO_OFFSET);
     }
 
     @Override
     protected float getDepthUnchecked(ActivityContext context) {
-        return context.getDeviceProfile().getBottomSheetProfile().getBottomSheetDepth();
+        return shouldReduceWorkspaceBlurUsage(context.asContext())
+                ? 0f
+                : context.getDeviceProfile().getBottomSheetProfile().getBottomSheetDepth();
     }
 
     @Override
-    public boolean shouldBlurWorkspace(LauncherState targetState) {
-        return targetState == ALL_APPS || targetState == NORMAL;
+    public boolean shouldBlurWorkspace(Launcher launcher, LauncherState targetState) {
+        return !shouldReduceWorkspaceBlurUsage(launcher) && (targetState == ALL_APPS
+                || targetState == NORMAL);
     }
 
     @Override

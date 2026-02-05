@@ -212,4 +212,8 @@
     <string-array name="supported_overlay_apps" translatable="false"/>
 
     <bool name="config_widgetPickerSupportsBlurTokens">false</bool>
+
+    <!-- Disables the full workspace blur and zoom effects behind surfaces like the "All apps" panel
+         or the widget picker. -->
+    <bool name="reduce_workspace_blur_usage">false</bool>
 </resources>
