@@ -65,7 +65,9 @@ object ModelTestExtensions {
 
     /** Loads the model in memory synchronously */
     fun LauncherModel.loadModelSync() {
-        forceReload().toCompletableFuture().get()
+        // Prevent taskbar recreation from canceling loader task scheduled from test.
+        forceReload(unstoppable = true).toCompletableFuture().get()
+        TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {}
         TestUtil.runOnExecutorSync(MAIN_EXECUTOR) {}
         TestUtil.runOnExecutorSync(getTaskbarUiThread()) {}
     }
