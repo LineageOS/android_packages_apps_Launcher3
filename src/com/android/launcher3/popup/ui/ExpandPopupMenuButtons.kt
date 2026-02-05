@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.android.launcher3.R
 import com.android.launcher3.popup.ui.ComposePopupDimens.popupCornerRadius
@@ -76,6 +77,8 @@ fun ExpandPopupMenuButton(text: String, onClick: () -> Unit) {
                 text = text,
                 color = colorResource(R.color.materialColorOnSurfaceVariant),
                 fontSize = popupMenuItemTextSize,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
             Spacer(modifier = Modifier.weight(1f))
             Box(

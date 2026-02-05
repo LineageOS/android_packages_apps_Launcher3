@@ -1423,7 +1423,7 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
 
     private void notifyStashChange(boolean visible, boolean stashed) {
         mSystemUiProxy.notifyTaskbarStatus(visible, stashed);
-        setUpTaskbarSystemAction(visible);
+        setUpTaskbarSystemAction(visible, stashed);
         mControllers.rotationButtonController.onTaskbarStateChange(visible, stashed);
         if (cueBarAceMigration()) {
             mControllers.cueBarController.onTaskbarStatusUpdated(visible, stashed);
@@ -1439,9 +1439,16 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
     /**
      * Setup system action for showing Taskbar depending on its visibility.
      */
-    public void setUpTaskbarSystemAction(boolean visible) {
+    public void setUpTaskbarSystemAction(boolean visible, boolean stashed) {
         UI_HELPER_EXECUTOR.execute(() -> {
-            if (!visible || !mActivity.isTransientTaskbar()
+            if (mActivity.isInDesktopMode()) {
+                if (!shouldAllowTaskbarToAutoStash()
+                        || (shouldAllowTaskbarToAutoStash() && !stashed)) {
+                    mAccessibilityManager.unregisterSystemAction(SYSTEM_ACTION_ID_TASKBAR);
+                    mIsTaskbarSystemActionRegistered = false;
+                    return;
+                }
+            } else if (!visible || !mActivity.isTransientTaskbar()
                     || mActivity.isPhoneMode()) {
                 mAccessibilityManager.unregisterSystemAction(SYSTEM_ACTION_ID_TASKBAR);
                 mIsTaskbarSystemActionRegistered = false;
