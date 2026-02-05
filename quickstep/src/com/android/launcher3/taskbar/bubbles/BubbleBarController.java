@@ -39,6 +39,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.view.View;
 
+import com.android.launcher3.taskbar.TaskbarActivityContext;
 import com.android.launcher3.taskbar.TaskbarSharedState;
 import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController;
 import com.android.launcher3.util.Executors.SimpleThreadFactory;
@@ -96,15 +97,13 @@ public class BubbleBarController {
     private static final long MASK_HIDE_BUBBLE_BAR = SYSUI_STATE_BOUNCER_SHOWING
             | SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING
             | SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED
-            | SYSUI_STATE_IME_VISIBLE
             | SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED
             | SYSUI_STATE_QUICK_SETTINGS_EXPANDED
             | SYSUI_STATE_DIALOG_SHOWING;
 
     private static final long MASK_HIDE_HANDLE_VIEW = SYSUI_STATE_BOUNCER_SHOWING
             | SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING
-            | SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED
-            | SYSUI_STATE_IME_VISIBLE;
+            | SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED;
 
     private static final long MASK_SYSUI_LOCKED = SYSUI_STATE_BOUNCER_SHOWING
             | SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING
@@ -242,10 +241,12 @@ public class BubbleBarController {
      * Updates the bubble bar, handle bar, and stash controllers based on sysui state flags.
      */
     public void updateStateForSysuiFlags(@SystemUiStateFlags long flags) {
-        boolean hideBubbleBar = (flags & MASK_HIDE_BUBBLE_BAR) != 0;
+        mIsImeVisible = (flags & SYSUI_STATE_IME_VISIBLE) != 0 && isImeDocked();
+
+        boolean hideBubbleBar = (flags & MASK_HIDE_BUBBLE_BAR) != 0 || mIsImeVisible;
         mBubbleBarViewController.setHiddenForSysui(hideBubbleBar);
 
-        boolean hideHandleView = (flags & MASK_HIDE_HANDLE_VIEW) != 0;
+        boolean hideHandleView = (flags & MASK_HIDE_HANDLE_VIEW) != 0 || mIsImeVisible;
         mBubbleStashedHandleViewController.ifPresent(controller -> {
             controller.setHiddenForSysui(hideHandleView);
             MultiPropertyFactory<View>.MultiProperty handleViewAlpha =
@@ -263,10 +264,16 @@ public class BubbleBarController {
         boolean sysuiLocked = (flags & MASK_SYSUI_LOCKED) != 0;
         mBubbleStashController.setSysuiLocked(sysuiLocked);
         mBubbleBarViewController.setSysuiLocked(sysuiLocked);
-        mIsImeVisible = (flags & SYSUI_STATE_IME_VISIBLE) != 0;
         if (mIsImeVisible) {
             mBubbleBarViewController.onImeVisible();
         }
+    }
+
+    private boolean isImeDocked() {
+        if (mContext instanceof TaskbarActivityContext) {
+            return ((TaskbarActivityContext) mContext).isImeDocked();
+        }
+        return true;
     }
 
     //
