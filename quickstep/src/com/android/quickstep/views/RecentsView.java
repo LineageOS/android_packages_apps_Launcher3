@@ -1345,7 +1345,7 @@ public abstract class RecentsView<
                 public void onAnimationEnd(Animator animation) {
                     finishRecentsAnimation(false /* toRecents */, true /*shouldPip*/, () -> {
                         if (mContainer instanceof RecentsWindowManager recentsWindowManager) {
-                            recentsWindowManager.hideRecentsWindow();
+                            recentsWindowManager.getStateManager().moveToRestState();
                         }
                     });
                 }
@@ -4501,7 +4501,7 @@ public abstract class RecentsView<
 
         // Recents doesn't receive activity callback, so we cleanup manually
         if (mContainer instanceof RecentsWindowManager manager) {
-            manager.hideRecentsWindow();
+            manager.getStateManager().moveToRestState();
         }
     }
 
@@ -5881,7 +5881,7 @@ public abstract class RecentsView<
         mDesktopRecentsTransitionController.moveToDesktop(taskContainer, transitionSource, () -> {
             successCallback.run();
             if (mContainer instanceof RecentsWindowManager recentsWindowManager) {
-                post(recentsWindowManager::hideRecentsWindow);
+                post(() -> recentsWindowManager.getStateManager().moveToRestState());
             }
         });
     }
