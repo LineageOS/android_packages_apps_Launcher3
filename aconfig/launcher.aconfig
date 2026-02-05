@@ -707,3 +707,10 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+    name: "enable_cue_bar_desktop_form_factor"
+    namespace: "launcher"
+    description: "Enables a desktop specific layout for the cue bar."
+    bug: "481800795"
+}
