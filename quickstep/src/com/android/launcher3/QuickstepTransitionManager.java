@@ -518,14 +518,14 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
      * may not always be correct as we may resolve the opening app to a task when the animation
      * starts.
      *
-     * @param v       the view to launch from
-     * @param targets apps that are opening/closing
+     * @param v         the view to launch from
+     * @param surfaces  apps that are opening/closing
      * @return true if the app is launching from recents, false if it most likely is not
      */
     protected boolean isLaunchingFromRecents(@NonNull View v,
-            @Nullable RemoteAnimationTarget[] targets) {
+            @Nullable AnimatedSurface[] surfaces) {
         return mLauncher.getStateManager().getState().isRecentsViewVisible
-                && findTaskViewToLaunch(mLauncher.getOverviewPanel(), v, targets) != null;
+                && findTaskViewToLaunch(mLauncher.getOverviewPanel(), v, surfaces) != null;
     }
 
     /**
@@ -2122,13 +2122,13 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                 RemoteAnimationTarget[] wallpaperTargets,
                 RemoteAnimationTarget[] nonAppTargets,
                 LauncherAnimationRunner.AnimationResult result) {
+            AnimatedSurface[] appSurfaces = AnimatedSurface.from(appTargets);
+
             AnimatorSet anim = new AnimatorSet();
             boolean launcherClosing =
-                    launcherIsASurfaceWithMode(AnimatedSurface.from(appTargets),
-                            AnimatedSurface.Mode.CLOSING);
-
+                    launcherIsASurfaceWithMode(appSurfaces, AnimatedSurface.Mode.CLOSING);
             final boolean launchingFromWidget = mV instanceof LauncherAppWidgetHostView;
-            final boolean launchingFromRecents = isLaunchingFromRecents(mV, appTargets);
+            final boolean launchingFromRecents = isLaunchingFromRecents(mV, appSurfaces);
             final boolean skipFirstFrame;
             if (launchingFromWidget) {
                 composeWidgetLaunchAnimator(anim, (LauncherAppWidgetHostView) mV, appTargets,
