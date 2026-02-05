@@ -612,22 +612,22 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
      * In multiwindow mode, we need to get the final size of the opening app window target to help
      * figure out where the floating view should animate to.
      */
-    private Rect getWindowTargetBounds(@NonNull RemoteAnimationTarget[] appTargets,
+    private Rect getWindowTargetBounds(@NonNull AnimatedSurface[] appSurfaces,
             int rotationChange) {
-        RemoteAnimationTarget target = null;
-        for (RemoteAnimationTarget t : appTargets) {
-            if (t.mode != MODE_OPENING) continue;
-            target = t;
+        AnimatedSurface surface = null;
+        for (AnimatedSurface s : appSurfaces) {
+            if (!s.isOpening()) continue;
+            surface = s;
             break;
         }
         final int widthPx = mDeviceProfile.getDeviceProperties().getWidthPx();
         final int heightPx = mDeviceProfile.getDeviceProperties().getHeightPx();
-        if (target == null) return new Rect(0, 0, widthPx, heightPx);
-        final Rect bounds = new Rect(target.screenSpaceBounds);
-        if (target.localBounds != null) {
-            bounds.set(target.localBounds);
+        if (surface == null) return new Rect(0, 0, widthPx, heightPx);
+        final Rect bounds = new Rect(surface.screenSpaceBounds);
+        if (surface.localBounds != null) {
+            bounds.set(surface.localBounds);
         } else {
-            bounds.offsetTo(target.position.x, target.position.y);
+            bounds.offsetTo(surface.position.x, surface.position.y);
         }
         if (rotationChange != 0) {
             if ((rotationChange % 2) == 1) {
@@ -812,8 +812,9 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             boolean launcherClosing) {
         RemoteAnimationTargets openingTargets = new RemoteAnimationTargets(appTargets,
                 wallpaperTargets, nonAppTargets, MODE_OPENING);
-        int rotationChange = getRotationChange(AnimatedSurface.from(appTargets));
-        Rect windowTargetBounds = getWindowTargetBounds(appTargets, rotationChange);
+        AnimatedSurface[] appSurfaces = AnimatedSurface.from(appTargets);
+        int rotationChange = getRotationChange(appSurfaces);
+        Rect windowTargetBounds = getWindowTargetBounds(appSurfaces, rotationChange);
         final int[] bottomInsetPos = new int[]{
                 mSystemUiProxy.getHomeVisibilityState().getNavbarInsetPosition()};
         final RemoteAnimationTarget target = openingTargets.getFirstAppTarget();
@@ -1116,7 +1117,8 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             RemoteAnimationTarget[] wallpaperTargets,
             RemoteAnimationTarget[] nonAppTargets, boolean launcherClosing) {
         AnimatedSurface[] appSurfaces = AnimatedSurface.from(appTargets);
-        Rect windowTargetBounds = getWindowTargetBounds(appTargets, getRotationChange(appSurfaces));
+        Rect windowTargetBounds = getWindowTargetBounds(appSurfaces,
+                getRotationChange(appSurfaces));
         boolean appTargetsAreTranslucent = areAllTargetsTranslucent(appTargets);
 
         final RectF widgetBackgroundBounds = new RectF();
@@ -2079,9 +2081,10 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                 mLauncher.getStateManager().moveToRestState();
             }
 
+            AnimatedSurface[] appSurfaces = AnimatedSurface.from(appTargets);
+
             RectF windowTargetBounds =
-                    new RectF(getWindowTargetBounds(appTargets,
-                            getRotationChange(AnimatedSurface.from(appTargets))));
+                    new RectF(getWindowTargetBounds(appSurfaces, getRotationChange(appSurfaces)));
 
             final RectF resolveRectF = new RectF(windowTargetBounds);
             for (RemoteAnimationTarget t : appTargets) {
