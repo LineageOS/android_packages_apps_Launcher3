@@ -433,13 +433,6 @@ flag {
 }
 
 flag {
-  name: "enable_widget_picker_refactor"
-  namespace: "launcher"
-  description: "Enables the refactored code for widget picker using separate activity and module"
-  bug: "370950552"
-}
-
-flag {
     name: "enable_reversible_home_action_corner"
     namespace: "launcher"
     description: "Enables home action corner to be reversible"
