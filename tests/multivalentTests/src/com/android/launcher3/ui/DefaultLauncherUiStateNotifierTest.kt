@@ -22,6 +22,7 @@ import com.android.launcher3.model.BgDataModel
 import com.android.launcher3.model.IModelWriter
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.util.Executors
+import com.android.launcher3.util.RoboApiWrapper
 import java.util.Collections
 import org.junit.Before
 import org.junit.Test
@@ -31,7 +32,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
-import org.robolectric.shadows.ShadowLooper
 
 @RunWith(AndroidJUnit4::class)
 class DefaultLauncherUiStateNotifierTest : AbstractWorkspaceModelTest() {
@@ -56,7 +56,7 @@ class DefaultLauncherUiStateNotifierTest : AbstractWorkspaceModelTest() {
         notifier.addCallback(callback)
         val item = ItemInfo()
         notifier.notifyItemModifiedOptimistically(item)
-        ShadowLooper.runUiThreadTasks()
+        RoboApiWrapper.waitForLooperSync(Executors.MAIN_EXECUTOR.looper)
         verify(callback).bindItemsUpdated(Collections.singleton(item))
     }
 
@@ -67,7 +67,7 @@ class DefaultLauncherUiStateNotifierTest : AbstractWorkspaceModelTest() {
         notifier.removeCallback(callback)
         val item = ItemInfo()
         notifier.notifyItemModifiedOptimistically(item)
-        ShadowLooper.runUiThreadTasks()
+        RoboApiWrapper.waitForLooperSync(Executors.MAIN_EXECUTOR.looper)
         verify(callback, never()).bindItemsUpdated(any())
     }
 
@@ -79,7 +79,7 @@ class DefaultLauncherUiStateNotifierTest : AbstractWorkspaceModelTest() {
         notifier.addCallback(callback2)
         val item = ItemInfo()
         notifier.notifyItemModifiedOptimistically(item)
-        ShadowLooper.runUiThreadTasks()
+        RoboApiWrapper.waitForLooperSync(Executors.MAIN_EXECUTOR.looper)
         verify(callback1).bindItemsUpdated(Collections.singleton(item))
         verify(callback2).bindItemsUpdated(Collections.singleton(item))
     }
@@ -91,7 +91,7 @@ class DefaultLauncherUiStateNotifierTest : AbstractWorkspaceModelTest() {
         val item = ItemInfo()
         val changeLog = IModelWriter.ChangeLog(itemsModified = mutableSetOf(item))
         notifier.notifyModelChanged(changeLog, null)
-        ShadowLooper.runUiThreadTasks()
+        RoboApiWrapper.waitForLooperSync(Executors.MAIN_EXECUTOR.looper)
         verify(callback).bindItemsUpdated(setOf(item))
     }
 
@@ -104,7 +104,7 @@ class DefaultLauncherUiStateNotifierTest : AbstractWorkspaceModelTest() {
         val item = ItemInfo()
         val changeLog = IModelWriter.ChangeLog(itemsModified = mutableSetOf(item))
         notifier.notifyModelChanged(changeLog, owner)
-        ShadowLooper.runUiThreadTasks()
+        RoboApiWrapper.waitForLooperSync(Executors.MAIN_EXECUTOR.looper)
         verify(owner, never()).bindItemsUpdated(any())
         verify(other).bindItemsUpdated(setOf(item))
     }
@@ -116,7 +116,7 @@ class DefaultLauncherUiStateNotifierTest : AbstractWorkspaceModelTest() {
         bgDataModel.lastBindId = 5
         notifier.notifyModelChanged(changeLog, null)
         bgDataModel.lastBindId = 4
-        ShadowLooper.runUiThreadTasks()
+        RoboApiWrapper.waitForLooperSync(Executors.MAIN_EXECUTOR.looper)
         verify(spiedModel).rebindCallbacks()
     }
 
@@ -126,7 +126,7 @@ class DefaultLauncherUiStateNotifierTest : AbstractWorkspaceModelTest() {
         val changeLog = IModelWriter.ChangeLog()
         bgDataModel.lastBindId = 5
         notifier.notifyModelChanged(changeLog, null)
-        ShadowLooper.runUiThreadTasks()
+        RoboApiWrapper.waitForLooperSync(Executors.MAIN_EXECUTOR.looper)
         verify(spiedModel, never()).rebindCallbacks()
     }
 
@@ -137,7 +137,7 @@ class DefaultLauncherUiStateNotifierTest : AbstractWorkspaceModelTest() {
         bgDataModel.lastBindId = 5
         notifier.notifyModelChanged(changeLog, null)
         bgDataModel.lastBindId = 6
-        ShadowLooper.runUiThreadTasks()
+        RoboApiWrapper.waitForLooperSync(Executors.MAIN_EXECUTOR.looper)
         verify(spiedModel, never()).rebindCallbacks()
     }
 }
