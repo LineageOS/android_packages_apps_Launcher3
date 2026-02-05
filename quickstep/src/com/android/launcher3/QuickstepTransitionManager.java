@@ -546,12 +546,12 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                 /* transitionInfo= */ null, /* appearedTaskId= */ INVALID_TASK_ID);
     }
 
-    private boolean areAllTargetsTranslucent(@NonNull RemoteAnimationTarget[] targets) {
+    private boolean areAllSurfacesTranslucent(@NonNull AnimatedSurface[] surfaces) {
         boolean isAllOpeningTargetTrs = true;
-        for (int i = 0; i < targets.length; i++) {
-            RemoteAnimationTarget target = targets[i];
-            if (target.mode == MODE_OPENING) {
-                isAllOpeningTargetTrs &= target.isTranslucent;
+        for (int i = 0; i < surfaces.length; i++) {
+            AnimatedSurface surface = surfaces[i];
+            if (surface.isOpening()) {
+                isAllOpeningTargetTrs &= surface.isTranslucent;
             }
             if (!isAllOpeningTargetTrs) break;
         }
@@ -824,7 +824,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             windowTargetBounds.bottom = Math.min(bottomInsetPos[0],
                     windowTargetBounds.bottom);
         }
-        boolean appTargetsAreTranslucent = areAllTargetsTranslucent(appTargets);
+        boolean appTargetsAreTranslucent = areAllSurfacesTranslucent(appSurfaces);
 
         RectF launcherIconBounds = new RectF();
         FloatingIconView floatingView = getFloatingIconView(mLauncher, v,
@@ -1119,7 +1119,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         AnimatedSurface[] appSurfaces = AnimatedSurface.from(appTargets);
         Rect windowTargetBounds = getWindowTargetBounds(appSurfaces,
                 getRotationChange(appSurfaces));
-        boolean appTargetsAreTranslucent = areAllTargetsTranslucent(appTargets);
+        boolean appTargetsAreTranslucent = areAllSurfacesTranslucent(appSurfaces);
 
         final RectF widgetBackgroundBounds = new RectF();
         final Rect appWindowCrop = new Rect();
@@ -1758,7 +1758,8 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
      * Closing window animator that moves the window down and offscreen.
      */
     private Animator getFallbackClosingWindowAnimators(RemoteAnimationTarget[] appTargets) {
-        final int rotationChange = getRotationChange(AnimatedSurface.from(appTargets));
+        AnimatedSurface[] appSurfaces = AnimatedSurface.from(appTargets);
+        final int rotationChange = getRotationChange(appSurfaces);
         SurfaceTransactionApplier surfaceApplier = new SurfaceTransactionApplier(mDragLayer);
         Matrix matrix = new Matrix();
         Point tmpPos = new Point();
@@ -1766,7 +1767,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         ValueAnimator closingAnimator = ValueAnimator.ofFloat(0, 1);
         int duration = CLOSING_TRANSITION_DURATION_MS;
         float windowCornerRadius = getWindowCornerRadius(mLauncher);
-        float startShadowRadius = areAllTargetsTranslucent(appTargets) ? 0 : mMaxShadowRadius;
+        float startShadowRadius = areAllSurfacesTranslucent(appSurfaces) ? 0 : mMaxShadowRadius;
         closingAnimator.setDuration(duration);
         boolean isFreeform = isFreeformAnimation(appTargets);
         float translateY = isFreeform ? mClosingFreeformWindowTransY : mClosingWindowTransY;
