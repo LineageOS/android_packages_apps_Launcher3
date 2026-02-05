@@ -52,3 +52,14 @@
 # platform version.  We know about them, and they are safe.
 -dontwarn android.support.**
 -dontwarn org.apache.http.**
+
+# Explicitly keep these for Shark Heap Analysis in tests
+-keep class com.android.launcher3.util.BaseContext {
+  *;
+}
+-keep class com.android.launcher3.util.LifecycleRegistryWrapper {
+  *;
+}
+-keep class androidx.lifecycle.LifecycleRegistry {
+  *;
+}
