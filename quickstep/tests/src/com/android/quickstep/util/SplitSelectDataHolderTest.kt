@@ -24,12 +24,12 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.os.Process
 import android.os.UserHandle
-import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.launcher3.SplitScreenUiState
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.shortcuts.ShortcutKey
 import com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT
-import com.android.launcher3.util.ui.ActivityStartUtils.resolveSystemApp
 import com.android.quickstep.split.SplitSelectDataHolder
 import com.android.quickstep.split.SplitSelectDataHolder.Companion.SPLIT_PENDINGINTENT_PENDINGINTENT
 import com.android.quickstep.split.SplitSelectDataHolder.Companion.SPLIT_PENDINGINTENT_TASK
@@ -48,12 +48,13 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 class SplitSelectDataHolderTest {
     private lateinit var splitSelectDataHolder: SplitSelectDataHolder
 
-    private val context: Context =
-        ContextWrapper(InstrumentationRegistry.getInstrumentation().targetContext)
+    private val context: Context = ContextWrapper(getInstrumentation().targetContext)
     private val sampleTaskInfo = RunningTaskInfo()
     private val sampleTaskId = 10
     private val sampleTaskId2 = 11
@@ -64,7 +65,7 @@ class SplitSelectDataHolderTest {
     private val sampleShortcut2 = Intent()
     private val sampleItemInfo = ItemInfo()
     private val sampleItemInfo2 = ItemInfo()
-    private val samplePackage = resolveSystemApp(Intent.CATEGORY_APP_CALCULATOR)
+    private val samplePackage = getInstrumentation().targetContext.packageName
     private val splitScreenUiState = SplitScreenUiState()
 
     @Before
