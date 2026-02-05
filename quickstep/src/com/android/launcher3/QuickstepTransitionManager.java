@@ -139,6 +139,7 @@ import com.android.launcher3.util.StableViewInfo;
 import com.android.launcher3.util.TaskbarAsyncAnimator;
 import com.android.launcher3.views.FloatingIconView;
 import com.android.launcher3.widget.LauncherAppWidgetHostView;
+import com.android.quickstep.AnimatedSurfaces;
 import com.android.quickstep.HomeVisibilityState;
 import com.android.quickstep.LauncherBackAnimationController;
 import com.android.quickstep.RemoteAnimationTargets;
@@ -1117,6 +1118,8 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             RemoteAnimationTarget[] wallpaperTargets,
             RemoteAnimationTarget[] nonAppTargets, boolean launcherClosing) {
         AnimatedSurface[] appSurfaces = AnimatedSurface.from(appTargets);
+        AnimatedSurface[] wallpaperSurfaces = AnimatedSurface.from(wallpaperTargets);
+        AnimatedSurface[] nonAppSurfaces = AnimatedSurface.from(nonAppTargets);
         Rect windowTargetBounds = getWindowTargetBounds(appSurfaces,
                 getRotationChange(appSurfaces));
         boolean appTargetsAreTranslucent = areAllSurfacesTranslucent(appSurfaces);
@@ -1124,19 +1127,18 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         final RectF widgetBackgroundBounds = new RectF();
         final Rect appWindowCrop = new Rect();
         final Matrix matrix = new Matrix();
-        RemoteAnimationTargets openingTargets = new RemoteAnimationTargets(appTargets,
-                wallpaperTargets, nonAppTargets, MODE_OPENING);
+        AnimatedSurfaces openingSurfaces = AnimatedSurfaces.from(appSurfaces,
+                wallpaperSurfaces, nonAppSurfaces, AnimatedSurface.Mode.OPENING);
 
-        RemoteAnimationTarget openingTarget = openingTargets.getFirstAppTarget();
+        AnimatedSurface openingSurface = openingSurfaces.getFirstAppSurface();
         int fallbackBackgroundColor = 0;
-        if (openingTarget != null && ENABLE_SHELL_STARTING_SURFACE) {
+        if (openingSurface != null && ENABLE_SHELL_STARTING_SURFACE) {
             fallbackBackgroundColor = mStartingWindowListener
-                    .consumeTaskLaunchInfo(openingTarget.taskId).backgroundColor;
+                    .consumeTaskLaunchInfo(openingSurface.taskId).backgroundColor;
         }
         if (fallbackBackgroundColor == 0) {
             fallbackBackgroundColor =
-                    FloatingWidgetView.getDefaultBackgroundColor(mLauncher,
-                            AnimatedSurface.from(openingTarget));
+                    FloatingWidgetView.getDefaultBackgroundColor(mLauncher, openingSurface);
         }
 
         final float finalWindowRadius = getWindowCornerRadius(mLauncher);
@@ -1148,10 +1150,10 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                 ? floatingView.getInitialCornerRadius() : 0;
 
         SurfaceTransactionApplier surfaceApplier = new SurfaceTransactionApplier(floatingView);
-        openingTargets.addReleaseCheck(surfaceApplier);
+        openingSurfaces.addReleaseCheck(surfaceApplier);
 
-        RemoteAnimationTarget navBarTarget = openingTargets.getNavBarRemoteAnimationTarget();
-        final SurfaceControl scrimLayer = addScrimLayer(surfaceApplier, openingTargets);
+        AnimatedSurface navBarSurface = openingSurfaces.getNavBarAnimatedSurface();
+        final SurfaceControl scrimLayer = addScrimLayer(surfaceApplier, openingSurfaces);
         final float scrimAlpha = getScrimAlpha();
 
         AnimatorSet animatorSet = new AnimatorSet();
@@ -1165,7 +1167,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                 if (mIsAppLaunchBlurEnabled) {
                     resetScrim(surfaceApplier, scrimLayer);
                 }
-                openingTargets.release();
+                openingSurfaces.release();
             }
         });
         floatingView.setFastFinishRunnable(animatorSet::end);
@@ -1233,8 +1235,8 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                     }
                 }
 
-                if (navBarTarget != null) {
-                    SurfaceProperties navBuilder = transaction.forSurface(navBarTarget.leash);
+                if (navBarSurface != null) {
+                    SurfaceProperties navBuilder = transaction.forSurface(navBarSurface.leash);
                     if (mNavFadeIn.value > mNavFadeIn.getStartValue()) {
                         navBuilder.setMatrix(matrix)
                                 .setWindowCrop(appWindowCrop)
@@ -1265,20 +1267,23 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
     }
 
     private SurfaceControl addScrimLayer(SurfaceTransactionApplier applier,
-            RemoteAnimationTargets targets) {
+            AnimatedSurfaces surfaces) {
         if (!mIsAppLaunchBlurEnabled) {
             return null;
         }
 
-        RemoteAnimationTarget launcherTarget = null;
-        for (final RemoteAnimationTarget target : targets.unfilteredApps) {
-            if (MODE_CLOSING == target.mode) {
-                launcherTarget = target;
-                break;
+        AnimatedSurface launcherSurface = null;
+        if (surfaces.unfilteredApps != null) {
+            for (final AnimatedSurface surface : surfaces.unfilteredApps) {
+                if (surface.isClosing()) {
+                    launcherSurface = surface;
+                    break;
+                }
             }
         }
 
-        SurfaceControl parent = launcherTarget != null ? launcherTarget.leash : null;
+
+        SurfaceControl parent = launcherSurface != null ? launcherSurface.leash : null;
         if (parent == null || !parent.isValid()) {
             // Parent surface is not ready at the moment. Retry later.
             return null;
@@ -1297,7 +1302,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         builder
                 .setColor(colorComponents)
                 .setAlpha(0)
-                .reparent(launcherTarget.leash)
+                .reparent(launcherSurface.leash)
                 .setShow()
                 // Ensure the scrim layer occludes wallpaper
                 .setLayer(1000);
