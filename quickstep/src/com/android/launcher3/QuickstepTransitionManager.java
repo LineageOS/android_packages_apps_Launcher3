@@ -599,13 +599,13 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
     private void composeWidgetLaunchAnimator(
             @NonNull AnimatorSet anim,
             @NonNull LauncherAppWidgetHostView v,
-            @NonNull RemoteAnimationTarget[] appTargets,
-            @NonNull RemoteAnimationTarget[] wallpaperTargets,
-            @NonNull RemoteAnimationTarget[] nonAppTargets,
+            @NonNull AnimatedSurface[] appSurfaces,
+            @NonNull AnimatedSurface[] wallpaperSurfaces,
+            @NonNull AnimatedSurface[] nonAppSurfaces,
             boolean launcherClosing) {
         mLauncher.getStateManager().setCurrentAnimation(anim);
         anim.play(getOpeningWindowAnimatorsForWidget(
-                v, appTargets, wallpaperTargets, nonAppTargets, launcherClosing));
+                v, appSurfaces, wallpaperSurfaces, nonAppSurfaces, launcherClosing));
     }
 
     /**
@@ -1114,12 +1114,9 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
     }
 
     private Animator getOpeningWindowAnimatorsForWidget(LauncherAppWidgetHostView v,
-            RemoteAnimationTarget[] appTargets,
-            RemoteAnimationTarget[] wallpaperTargets,
-            RemoteAnimationTarget[] nonAppTargets, boolean launcherClosing) {
-        AnimatedSurface[] appSurfaces = AnimatedSurface.from(appTargets);
-        AnimatedSurface[] wallpaperSurfaces = AnimatedSurface.from(wallpaperTargets);
-        AnimatedSurface[] nonAppSurfaces = AnimatedSurface.from(nonAppTargets);
+            AnimatedSurface[] appSurfaces,
+            AnimatedSurface[] wallpaperSurfaces,
+            AnimatedSurface[] nonAppSurfaces, boolean launcherClosing) {
         Rect windowTargetBounds = getWindowTargetBounds(appSurfaces,
                 getRotationChange(appSurfaces));
         boolean appTargetsAreTranslucent = areAllSurfacesTranslucent(appSurfaces);
@@ -2136,6 +2133,8 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                 RemoteAnimationTarget[] nonAppTargets,
                 LauncherAnimationRunner.AnimationResult result) {
             AnimatedSurface[] appSurfaces = AnimatedSurface.from(appTargets);
+            AnimatedSurface[] wallpaperSurfaces = AnimatedSurface.from(wallpaperTargets);
+            AnimatedSurface[] nonAppSurfaces = AnimatedSurface.from(nonAppTargets);
 
             AnimatorSet anim = new AnimatorSet();
             boolean launcherClosing =
@@ -2144,8 +2143,8 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             final boolean launchingFromRecents = isLaunchingFromRecents(mV, appSurfaces);
             final boolean skipFirstFrame;
             if (launchingFromWidget) {
-                composeWidgetLaunchAnimator(anim, (LauncherAppWidgetHostView) mV, appTargets,
-                        wallpaperTargets, nonAppTargets, launcherClosing);
+                composeWidgetLaunchAnimator(anim, (LauncherAppWidgetHostView) mV, appSurfaces,
+                        wallpaperSurfaces, nonAppSurfaces, launcherClosing);
                 addCujInstrumentation(anim, Cuj.CUJ_LAUNCHER_APP_LAUNCH_FROM_WIDGET);
                 skipFirstFrame = true;
             } else if (launchingFromRecents) {
