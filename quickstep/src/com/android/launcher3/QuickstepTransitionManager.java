@@ -812,7 +812,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             boolean launcherClosing) {
         RemoteAnimationTargets openingTargets = new RemoteAnimationTargets(appTargets,
                 wallpaperTargets, nonAppTargets, MODE_OPENING);
-        int rotationChange = getRotationChange(appTargets);
+        int rotationChange = getRotationChange(AnimatedSurface.from(appTargets));
         Rect windowTargetBounds = getWindowTargetBounds(appTargets, rotationChange);
         final int[] bottomInsetPos = new int[]{
                 mSystemUiProxy.getHomeVisibilityState().getNavbarInsetPosition()};
@@ -1115,7 +1115,8 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             RemoteAnimationTarget[] appTargets,
             RemoteAnimationTarget[] wallpaperTargets,
             RemoteAnimationTarget[] nonAppTargets, boolean launcherClosing) {
-        Rect windowTargetBounds = getWindowTargetBounds(appTargets, getRotationChange(appTargets));
+        AnimatedSurface[] appSurfaces = AnimatedSurface.from(appTargets);
+        Rect windowTargetBounds = getWindowTargetBounds(appTargets, getRotationChange(appSurfaces));
         boolean appTargetsAreTranslucent = areAllTargetsTranslucent(appTargets);
 
         final RectF widgetBackgroundBounds = new RectF();
@@ -1556,11 +1557,11 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         return false;
     }
 
-    private static int getRotationChange(RemoteAnimationTarget[] appTargets) {
+    private static int getRotationChange(AnimatedSurface[] appSurfaces) {
         int rotationChange = 0;
-        for (RemoteAnimationTarget target : appTargets) {
-            if (Math.abs(target.rotationChange) > Math.abs(rotationChange)) {
-                rotationChange = target.rotationChange;
+        for (AnimatedSurface surface : appSurfaces) {
+            if (Math.abs(surface.rotationChange) > Math.abs(rotationChange)) {
+                rotationChange = surface.rotationChange;
             }
         }
         return rotationChange;
@@ -1755,7 +1756,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
      * Closing window animator that moves the window down and offscreen.
      */
     private Animator getFallbackClosingWindowAnimators(RemoteAnimationTarget[] appTargets) {
-        final int rotationChange = getRotationChange(appTargets);
+        final int rotationChange = getRotationChange(AnimatedSurface.from(appTargets));
         SurfaceTransactionApplier surfaceApplier = new SurfaceTransactionApplier(mDragLayer);
         Matrix matrix = new Matrix();
         Point tmpPos = new Point();
@@ -2079,7 +2080,8 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             }
 
             RectF windowTargetBounds =
-                    new RectF(getWindowTargetBounds(appTargets, getRotationChange(appTargets)));
+                    new RectF(getWindowTargetBounds(appTargets,
+                            getRotationChange(AnimatedSurface.from(appTargets))));
 
             final RectF resolveRectF = new RectF(windowTargetBounds);
             for (RemoteAnimationTarget t : appTargets) {
