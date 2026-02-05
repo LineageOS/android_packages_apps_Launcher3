@@ -35,7 +35,7 @@ import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.util.DynamicResource;
-import com.android.quickstep.RemoteAnimationTargets.ReleaseCheck;
+import com.android.quickstep.SurfaceReleaseCheck;
 import com.android.systemui.plugins.ResourceProvider;
 
 import java.lang.annotation.Retention;
@@ -47,7 +47,7 @@ import java.util.List;
  * Applies spring forces to animate from a starting rect to a target rect,
  * while providing update callbacks to the caller.
  */
-public class RectFSpringAnim extends ReleaseCheck {
+public class RectFSpringAnim extends SurfaceReleaseCheck {
 
     private static final FloatPropertyCompat<RectFSpringAnim> RECT_CENTER_X =
             new FloatPropertyCompat<RectFSpringAnim>("rectCenterXSpring") {
