@@ -32,6 +32,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.BubbleTextView;
@@ -61,7 +62,7 @@ public class DeepShortcutView extends FrameLayout implements BubbleTextHolder {
 
     private BubbleTextView mBubbleText;
     private View mIconView;
-    private FrameLayout mAddButton;
+    private ImageView mAddButton;
 
     private WorkspaceItemInfo mInfo;
     private ShortcutInfo mDetail;
