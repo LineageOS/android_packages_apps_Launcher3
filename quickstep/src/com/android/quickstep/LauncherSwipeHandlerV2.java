@@ -57,6 +57,7 @@ import com.android.quickstep.views.RecentsView;
 import com.android.quickstep.views.TaskView;
 import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.system.InputConsumerController;
+import com.android.wm.shell.shared.compat.AnimatedSurface;
 
 import java.util.Collections;
 import java.util.List;
@@ -235,7 +236,8 @@ public class LauncherSwipeHandlerV2 extends AbsSwipeUpHandler<
         tvs.getCurrentCropRect().roundOut(crop);
         Size windowSize = new Size(crop.width(), crop.height());
         int fallbackBackgroundColor =
-                FloatingWidgetView.getDefaultBackgroundColor(mContext, runningTaskTarget);
+                FloatingWidgetView.getDefaultBackgroundColor(mContext,
+                        AnimatedSurface.from(runningTaskTarget));
         FloatingWidgetView floatingWidgetView = FloatingWidgetView.getFloatingWidgetView(mContainer,
                 hostView, backgroundLocation, windowSize, tvs.getCurrentCornerRadius(),
                 isTargetTranslucent, fallbackBackgroundColor);

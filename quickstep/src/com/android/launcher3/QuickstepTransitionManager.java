@@ -1135,7 +1135,8 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         }
         if (fallbackBackgroundColor == 0) {
             fallbackBackgroundColor =
-                    FloatingWidgetView.getDefaultBackgroundColor(mLauncher, openingTarget);
+                    FloatingWidgetView.getDefaultBackgroundColor(mLauncher,
+                            AnimatedSurface.from(openingTarget));
         }
 
         final float finalWindowRadius = getWindowCornerRadius(mLauncher);
@@ -1662,7 +1663,8 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             Size windowSize = new Size(mDeviceProfile.getDeviceProperties().getWidthPx(),
                     mDeviceProfile.getDeviceProperties().getHeightPx());
             int fallbackBackgroundColor =
-                    FloatingWidgetView.getDefaultBackgroundColor(mLauncher, runningTaskTarget);
+                    FloatingWidgetView.getDefaultBackgroundColor(mLauncher,
+                            AnimatedSurface.from(runningTaskTarget));
             floatingWidget = FloatingWidgetView.getFloatingWidgetView(mLauncher,
                     (LauncherAppWidgetHostView) launcherView, targetRect, windowSize,
                     getWindowCornerRadius(mLauncher), isTransluscent, fallbackBackgroundColor);
