@@ -139,12 +139,6 @@ interface IModelWriter {
         holder: LauncherWidgetHolder?,
         reason: String?,
     )
-
-    fun prepareToUndoDelete()
-
-    fun commitDelete()
-
-    fun abortDelete()
 }
 
 /**

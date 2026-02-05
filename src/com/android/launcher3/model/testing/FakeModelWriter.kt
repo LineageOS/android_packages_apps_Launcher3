@@ -39,8 +39,6 @@ class FakeModelWriter : IModelWriter {
 
     /** A mutable list to store the [WriterAction] objects recorded during a transaction. */
     val actions = mutableListOf<WriterAction>()
-    private var preparingToUndo = false
-    private val pendingActions = mutableListOf<WriterAction>()
 
     private var isSuspended = false
     private val transactionQueue =
@@ -105,23 +103,11 @@ class FakeModelWriter : IModelWriter {
             }
 
             override fun deleteItemsFromDatabase(items: List<ItemInfo>, reason: String?) {
-                items.forEach {
-                    val action = WriterAction.DeleteItem(it)
-                    if (preparingToUndo) {
-                        pendingActions.add(action)
-                    } else {
-                        actions.add(action)
-                    }
-                }
+                items.forEach { actions.add(WriterAction.DeleteItem(it)) }
             }
 
             override fun deleteCollectionAndContentsFromDatabase(info: CollectionInfo) {
-                val action = WriterAction.DeleteItem(info)
-                if (preparingToUndo) {
-                    pendingActions.add(action)
-                } else {
-                    actions.add(action)
-                }
+                actions.add(WriterAction.DeleteItem(info))
             }
 
             override fun deleteWidgetInfo(
@@ -129,12 +115,7 @@ class FakeModelWriter : IModelWriter {
                 holder: LauncherWidgetHolder?,
                 reason: String?,
             ) {
-                val action = WriterAction.DeleteItem(info)
-                if (preparingToUndo) {
-                    pendingActions.add(action)
-                } else {
-                    actions.add(action)
-                }
+                actions.add(WriterAction.DeleteItem(info))
             }
 
             override fun deleteAllItems() {
@@ -182,22 +163,6 @@ class FakeModelWriter : IModelWriter {
     }
 
     override fun getNotifier(): LauncherUiStateNotifier = notifier
-
-    override fun prepareToUndoDelete() {
-        preparingToUndo = true
-        pendingActions.clear()
-    }
-
-    override fun commitDelete() {
-        actions.addAll(pendingActions)
-        pendingActions.clear()
-        preparingToUndo = false
-    }
-
-    override fun abortDelete() {
-        pendingActions.clear()
-        preparingToUndo = false
-    }
 
     override fun addItemToDatabase(
         item: ItemInfo,
@@ -262,34 +227,18 @@ class FakeModelWriter : IModelWriter {
     }
 
     override fun deleteItemFromDatabase(item: ItemInfo, reason: String?) {
-        if (preparingToUndo) {
-            pendingActions.add(WriterAction.DeleteItem(item))
-            return
-        }
         execute { it.deleteItemFromDatabase(item, reason) }
     }
 
     override fun deleteItemsFromDatabase(matcher: Predicate<ItemInfo?>, reason: String?) {
-        if (preparingToUndo) {
-            // Not implemented for fake
-            return
-        }
         execute { it.deleteItemsFromDatabase(matcher, reason) }
     }
 
     override fun deleteItemsFromDatabase(items: List<ItemInfo>, reason: String?) {
-        if (preparingToUndo) {
-            items.forEach { pendingActions.add(WriterAction.DeleteItem(it)) }
-            return
-        }
         execute { it.deleteItemsFromDatabase(items, reason) }
     }
 
     override fun deleteCollectionAndContentsFromDatabase(info: CollectionInfo) {
-        if (preparingToUndo) {
-            pendingActions.add(WriterAction.DeleteItem(info))
-            return
-        }
         execute { it.deleteCollectionAndContentsFromDatabase(info) }
     }
 
@@ -298,10 +247,6 @@ class FakeModelWriter : IModelWriter {
         holder: LauncherWidgetHolder?,
         reason: String?,
     ) {
-        if (preparingToUndo) {
-            pendingActions.add(WriterAction.DeleteItem(info))
-            return
-        }
         execute { it.deleteWidgetInfo(info, holder, reason) }
     }
 

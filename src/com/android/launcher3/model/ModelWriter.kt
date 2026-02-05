@@ -52,10 +52,6 @@ open class ModelWriter(
     protected val modelExecutor: Executor = Executors.MODEL_EXECUTOR,
 ) : IModelWriter {
 
-    // Keep track of delete operations that occur when an Undo option is present; we may not commit.
-    private var preparingToUndo = false
-    private val pendingDeletes = mutableListOf<(TransactionContext) -> Unit>()
-
     private var isSuspended = false
     private val transactionQueue =
         mutableListOf<Pair<((Boolean) -> Unit)?, Consumer<TransactionContext>>>()
@@ -412,21 +408,13 @@ open class ModelWriter(
         execute { it.addItemsToDatabase(items) }
     }
 
-    private fun enqueueDeleteOperation(deleteOperation: (TransactionContext) -> Unit) {
-        if (preparingToUndo) {
-            pendingDeletes.add(deleteOperation)
-        } else {
-            execute(deleteOperation)
-        }
-    }
-
     /**
      * Removes the specified item from the database
      *
      * TODO(b/457449059): Remove this method.
      */
     override fun deleteItemFromDatabase(item: ItemInfo, reason: String?) {
-        enqueueDeleteOperation { it.deleteItemFromDatabase(item, reason) }
+        execute { it.deleteItemFromDatabase(item, reason) }
     }
 
     /**
@@ -435,7 +423,7 @@ open class ModelWriter(
      * TODO(b/457449059): Remove this method.
      */
     override fun deleteItemsFromDatabase(matcher: Predicate<ItemInfo?>, reason: String?) {
-        enqueueDeleteOperation { it.deleteItemsFromDatabase(matcher, reason) }
+        execute { it.deleteItemsFromDatabase(matcher, reason) }
     }
 
     /**
@@ -444,7 +432,7 @@ open class ModelWriter(
      * TODO(b/457449059): Remove this method.
      */
     override fun deleteItemsFromDatabase(items: List<ItemInfo>, reason: String?) {
-        enqueueDeleteOperation { it.deleteItemsFromDatabase(items, reason) }
+        execute { it.deleteItemsFromDatabase(items, reason) }
     }
 
     /**
@@ -453,7 +441,7 @@ open class ModelWriter(
      * TODO(b/457449059): Remove this method.
      */
     override fun deleteCollectionAndContentsFromDatabase(info: CollectionInfo) {
-        enqueueDeleteOperation { it.deleteCollectionAndContentsFromDatabase(info) }
+        execute { it.deleteCollectionAndContentsFromDatabase(info) }
     }
 
     /**
@@ -466,63 +454,7 @@ open class ModelWriter(
         holder: LauncherWidgetHolder?,
         reason: String?,
     ) {
-        enqueueDeleteOperation { it.deleteWidgetInfo(info, holder, reason) }
-    }
-
-    /**
-     * Delete operations tracked using [.enqueueDeleteRunnable] will only be called if
-     * [.commitDelete] is called. Note that one of [.commitDelete] or [.abortDelete] MUST be called
-     * after this method, or else all delete operations will remain uncommitted indefinitely.
-     *
-     * TODO(b/457449059): Remove this method after migrating all clients to the new transactional
-     *   API and handling undo state on the client side.
-     */
-    override fun prepareToUndoDelete() {
-        preparingToUndo = true
-        pendingDeletes.clear()
-    }
-
-    /**
-     * If [.prepareToUndoDelete] has been called, we store the Runnable to be run when
-     * [.commitDelete] is called (or abandoned if [.abortDelete] is called). Otherwise, we run the
-     * Runnable immediately.
-     */
-    private fun enqueueDeleteRunnable(r: ModelTask) {
-        if (preparingToUndo) {
-            pendingDeletes.add { _ -> r.runImpl() }
-        } else {
-            r.executeOnModelThread()
-        }
-    }
-
-    /**
-     * Commits a previous delete operation.
-     *
-     * TODO(b/457449059): Remove this method after migrating all clients to the new transactional
-     *   API and handling undo state on the client side.
-     */
-    override fun commitDelete() {
-        preparingToUndo = false
-        if (pendingDeletes.isEmpty()) {
-            return
-        }
-
-        val deletesToCommit = pendingDeletes.toList()
-        pendingDeletes.clear()
-
-        scheduleTransaction(null, Consumer { context -> deletesToCommit.forEach { it(context) } })
-    }
-
-    /**
-     * Aborts a previous delete operation pending commit
-     *
-     * TODO(b/457449059): Remove this method after migrating all clients to the new transactional
-     *   API and handling undo state on the client side.
-     */
-    override fun abortDelete() {
-        preparingToUndo = false
-        pendingDeletes.clear()
-        model.reloadIfActive()
+        execute { it.deleteWidgetInfo(info, holder, reason) }
     }
 
     private abstract inner class ModelTask : Runnable {

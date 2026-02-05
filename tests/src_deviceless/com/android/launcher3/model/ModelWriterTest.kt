@@ -120,43 +120,6 @@ class ModelWriterTest : AbstractWorkspaceModelTest() {
     }
 
     @Test
-    fun deprecatedUndoFlow_commit_executesInOneTransaction() {
-        addToModel(item1, item2)
-        reset(mockNotifier)
-
-        modelWriter.prepareToUndoDelete()
-        modelWriter.deleteItemFromDatabase(item1, "test")
-        modelWriter.deleteItemFromDatabase(item2, "test")
-
-        // Should not happen yet
-        verify(mockNotifier, never()).notifyModelChanged(any(), any())
-        assertThat(bgDataModel.itemsIdMap[item1.id]).isNotNull()
-
-        modelWriter.commitDelete()
-
-        // Should happen now
-        val changeLogCaptor = argumentCaptor<ChangeLog>()
-        verify(mockNotifier).notifyModelChanged(changeLogCaptor.capture(), any())
-        assertThat(changeLogCaptor.firstValue.itemsRemoved).containsExactly(item1, item2)
-        assertThat(bgDataModel.itemsIdMap[item1.id]).isNull()
-        assertThat(bgDataModel.itemsIdMap[item2.id]).isNull()
-    }
-
-    @Test
-    fun deprecatedUndoFlow_abort_executesNoTransactions() {
-        addToModel(item1)
-        reset(mockNotifier)
-
-        modelWriter.prepareToUndoDelete()
-        modelWriter.deleteItemFromDatabase(item1, "test")
-
-        modelWriter.abortDelete()
-
-        verify(mockNotifier, never()).notifyModelChanged(any(), any())
-        assertThat(bgDataModel.itemsIdMap[item1.id]).isNotNull()
-    }
-
-    @Test
     @EnableFlags(Flags.FLAG_ENABLE_TRANSACTIONAL_MODEL_WRITER)
     fun addOrMoveItemInDatabase_newItem_usesAddItemToDatabase() {
         val newItem = WorkspaceItemInfo().apply { id = ItemInfo.NO_ID }
