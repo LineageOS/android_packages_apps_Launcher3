@@ -22,6 +22,7 @@ import androidx.annotation.WorkerThread
 import com.android.launcher3.concurrent.annotations.LightweightBackground
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority
 import com.android.launcher3.dagger.ApplicationContext
+import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.model.StringCache
 import com.android.launcher3.pm.UserCache
@@ -33,6 +34,7 @@ import com.android.launcher3.util.SimpleBroadcastReceiver.Companion.actionsFilte
 import javax.inject.Inject
 
 /** Repository for [StringCache] */
+@LauncherAppSingleton
 class StringCacheRepository
 @Inject
 constructor(
