@@ -166,6 +166,7 @@ import com.android.systemui.animation.RemoteTransitionPickerDelegate;
 import com.android.systemui.shared.system.BlurUtils;
 import com.android.systemui.shared.system.InteractionJankMonitorWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
+import com.android.wm.shell.shared.compat.AnimatedSurface;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 
 import java.io.PrintWriter;
@@ -1527,13 +1528,14 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         }
     }
 
-    private boolean launcherIsATargetWithMode(RemoteAnimationTarget[] targets, int mode) {
-        for (RemoteAnimationTarget target : targets) {
-            if (target.mode == mode && target.taskInfo != null
+    private boolean launcherIsASurfaceWithMode(AnimatedSurface[] surfaces,
+            AnimatedSurface.Mode mode) {
+        for (final AnimatedSurface surface : surfaces) {
+            if (surface.mode == mode && surface.taskInfo != null
                     // Compare component name instead of task-id because transitions will promote
                     // the target up to the root task while getTaskId returns the leaf.
-                    && target.taskInfo.topActivity != null
-                    && target.taskInfo.topActivity.equals(mLauncher.getComponentName())) {
+                    && surface.taskInfo.topActivity != null
+                    && surface.taskInfo.topActivity.equals(mLauncher.getComponentName())) {
                 return true;
             }
         }
@@ -1925,7 +1927,8 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         RectFSpringAnim rectFSpringAnim = null;
 
         final boolean launcherIsForceInvisibleOrOpening = mLauncher.isForceInvisible()
-                || launcherIsATargetWithMode(appTargets, MODE_OPENING);
+                || launcherIsASurfaceWithMode(AnimatedSurface.from(appTargets),
+                AnimatedSurface.Mode.OPENING);
 
         boolean playFallBackAnimation = (launcherView == null
                 && launcherIsForceInvisibleOrOpening)
@@ -2121,7 +2124,8 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                 LauncherAnimationRunner.AnimationResult result) {
             AnimatorSet anim = new AnimatorSet();
             boolean launcherClosing =
-                    launcherIsATargetWithMode(appTargets, MODE_CLOSING);
+                    launcherIsASurfaceWithMode(AnimatedSurface.from(appTargets),
+                            AnimatedSurface.Mode.CLOSING);
 
             final boolean launchingFromWidget = mV instanceof LauncherAppWidgetHostView;
             final boolean launchingFromRecents = isLaunchingFromRecents(mV, appTargets);
