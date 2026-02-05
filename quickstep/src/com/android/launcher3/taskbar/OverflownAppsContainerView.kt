@@ -27,12 +27,14 @@ import androidx.core.view.children
 import androidx.core.view.setPadding
 import androidx.core.view.updatePadding
 import com.android.launcher3.BubbleTextView
+import com.android.launcher3.Flags.enableCursorDrivenWorkflows
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.popup.ArrowPopup
 import com.android.launcher3.popup.RoundedArrowDrawable
+import com.android.launcher3.touch.CustomTouchDelegate
 import com.android.launcher3.util.ViewCache
 
 /** A container view for overflown apps in the taskbar. */
@@ -108,6 +110,10 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
                 icon.setOnClickListener(viewCallbacks.iconOnClickListener)
                 icon.setOnLongClickListener(viewCallbacks.iconOnLongClickListener)
                 icon.setOnHoverListener(TaskbarHoverToolTipController(mActivityContext, this, icon))
+                if (enableCursorDrivenWorkflows()) {
+                    (icon as? CustomTouchDelegate)?.customActionsListener =
+                        viewCallbacks.iconCustomActionsListener
+                }
 
                 val lp =
                     LayoutParams(iconViewSize, iconViewSize).apply {
