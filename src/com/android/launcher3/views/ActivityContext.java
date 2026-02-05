@@ -552,9 +552,9 @@ public interface ActivityContext extends SavedStateRegistryOwner {
     /**
      * Returns the controller for managing undo delete operations.
      */
-    @Nullable
+    @NonNull
     default UndoDeleteController getUndoDeleteController() {
-        return null;
+        return getActivityComponent().getUndoDeleteController();
     }
 
     /** Set to manage objects that can be cleaned up along with the context */

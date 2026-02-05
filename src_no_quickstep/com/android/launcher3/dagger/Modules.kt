@@ -25,6 +25,8 @@ import com.android.launcher3.display.DisplayControllerImpl
 import com.android.launcher3.dragndrop.SystemDragController
 import com.android.launcher3.dragndrop.SystemDragControllerStub
 import com.android.launcher3.homescreenfiles.HomeScreenFilesNoOpProvider
+import com.android.launcher3.LauncherModel
+import com.android.launcher3.ModelReloader
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider
 import com.android.launcher3.util.MutableListenableRef
 import com.android.launcher3.util.WindowBlurState.WINDOW_BLUR_STATE

@@ -16,6 +16,7 @@
 
 package com.android.launcher3.dagger
 
+import com.android.launcher3.UndoDeleteController
 import com.android.launcher3.WorkspaceSelectionManager
 import com.android.launcher3.allapps.AllAppsStore
 import com.android.launcher3.dragndrop.SystemDragController
@@ -36,6 +37,8 @@ interface BaseActivityContextComponent {
     fun getSecondaryDisplayDelegate(): SecondaryDisplayDelegate
 
     fun getOseWidgetOptionsProvider(): OseWidgetOptionsProvider
+
+    fun getUndoDeleteController(): UndoDeleteController
 
     @DisplayId fun getDisplayId(): Int
 

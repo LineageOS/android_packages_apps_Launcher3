@@ -347,7 +347,6 @@ public class Launcher extends StatefulActivity<LauncherState>
 
     private LauncherModel mModel;
     private IModelWriter mModelWriter;
-    private UndoDeleteController mUndoDeleteController;
     private LauncherAccessibilityDelegate mAccessibilityDelegate;
 
     private PopupController<Launcher> mPopupControllerForHomeScreenItems;
@@ -687,8 +686,6 @@ public class Launcher extends StatefulActivity<LauncherState>
                     mDeviceProfile.getHotseatProfile().getNumShownIcons());
         }
         mModelWriter = mModel.getWriter(true, this, modelCallbacks);
-        mUndoDeleteController = new UndoDeleteController(
-                mModelWriter, () -> mModel.reloadIfActive());
         updateFixedLandscape();
         return true;
     }
@@ -1616,16 +1613,10 @@ public class Launcher extends StatefulActivity<LauncherState>
         return mDragController;
     }
 
-    @NonNull
-    @Override
-    public UndoDeleteController getUndoDeleteController() {
-        return mUndoDeleteController;
-    }
-
     @Override
     public DropTargetHandler getDropTargetHandler() {
         return new DropTargetHandler(this,
-                mUndoDeleteController,
+                getUndoDeleteController(),
                 LauncherComponentProvider.get(this).getHomeScreenFilesProvider(),
                 this.getMainExecutor());
     }

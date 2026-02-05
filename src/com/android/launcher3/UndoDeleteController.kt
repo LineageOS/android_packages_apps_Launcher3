@@ -15,14 +15,15 @@
  */
 package com.android.launcher3
 
-import android.util.Log
-import com.android.launcher3.model.IModelWriter
+import com.android.launcher3.dagger.ActivityContextSingleton
 import com.android.launcher3.model.TransactionContext
 import com.android.launcher3.model.data.CollectionInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.LauncherAppWidgetInfo
+import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.widget.LauncherWidgetHolder
 import java.util.function.Consumer
+import javax.inject.Inject
 
 /**
  * Controller class to manage "Undo" delete operations.
@@ -30,9 +31,12 @@ import java.util.function.Consumer
  * buffers delete operations locally until they are either committed (executed against the database)
  * or aborted (reverting the UI state).
  */
-class UndoDeleteController(
-    private val modelWriter: IModelWriter,
-    private val onAbort: Runnable,
+@ActivityContextSingleton
+class UndoDeleteController
+@Inject
+constructor(
+    private val activityContext: ActivityContext,
+    private val modelReloader: ModelReloader,
 ) {
     private val pendingDeletes = mutableListOf<Consumer<TransactionContext>>()
 
@@ -42,7 +46,7 @@ class UndoDeleteController(
      */
     fun prepareToUndoDelete() {
         pendingDeletes.clear()
-        modelWriter.suspendWrites()
+        activityContext.modelWriter.suspendWrites()
     }
 
     /** Enqueues a raw transaction operation to be executed upon commit. */
@@ -56,18 +60,16 @@ class UndoDeleteController(
      */
     fun commit() {
         if (pendingDeletes.isEmpty()) {
-            modelWriter.resumeWrites(null)
+            activityContext.modelWriter.resumeWrites(null)
             return
         }
 
         val deletesToCommit = pendingDeletes.toList()
         pendingDeletes.clear()
 
-        modelWriter.resumeWrites(Consumer { context ->
-            deletesToCommit.forEach {
-                it.accept(context)
-            }
-        })
+        activityContext.modelWriter.resumeWrites(
+            Consumer { context -> deletesToCommit.forEach { it.accept(context) } }
+        )
     }
 
     /**
@@ -76,8 +78,8 @@ class UndoDeleteController(
      */
     fun abort() {
         pendingDeletes.clear()
-        modelWriter.resumeWrites(null, discardPending = true)
-        onAbort.run()
+        activityContext.modelWriter.resumeWrites(null, discardPending = true)
+        modelReloader.reloadIfActive()
     }
 
     // Type-safe helper methods matching IModelWriter interfaces

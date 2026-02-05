@@ -22,26 +22,30 @@ import com.android.launcher3.model.data.LauncherAppWidgetInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.model.testing.FakeModelWriter
 import com.android.launcher3.model.testing.WriterAction
+import com.android.launcher3.views.ActivityContext
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.spy
-import org.mockito.Mockito.verify
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class UndoDeleteControllerTest : AbstractWorkspaceModelTest() {
 
     private lateinit var modelWriter: FakeModelWriter
     private lateinit var undoDeleteController: UndoDeleteController
-    private lateinit var mockAbortAction: Runnable
+    private lateinit var mockAbortAction: ModelReloader
 
     @Before
     override fun setup() {
         super.setup()
         modelWriter = FakeModelWriter()
-        mockAbortAction = spy(Runnable { })
-        undoDeleteController = UndoDeleteController(modelWriter, mockAbortAction)
+        val activityContext = mock<ActivityContext>()
+        whenever(activityContext.getModelWriter()).thenReturn(modelWriter)
+        mockAbortAction = mock<ModelReloader>()
+        undoDeleteController = UndoDeleteController(activityContext, mockAbortAction)
     }
 
     @Test
@@ -75,7 +79,7 @@ class UndoDeleteControllerTest : AbstractWorkspaceModelTest() {
 
         undoDeleteController.abort()
 
-        verify(mockAbortAction).run()
+        verify(mockAbortAction).reloadIfActive()
 
         assertThat(modelWriter.actions).isEmpty()
 
