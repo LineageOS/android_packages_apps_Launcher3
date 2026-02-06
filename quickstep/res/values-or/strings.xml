@@ -22,6 +22,7 @@
     <string name="recent_task_option_pin" msgid="7929860679018978258">"ପିନ୍‍"</string>
     <string name="recent_task_option_freeform" msgid="48863056265284071">"ଫ୍ରିଫର୍ମ"</string>
     <string name="recent_task_option_desktop" msgid="8280879717125435668">"ଡେସ୍କଟପ"</string>
+    <string name="recent_split_task_option_desktop" msgid="7272418191932478598">"%1$s ପାଇଁ ଡେସ୍କଟପ"</string>
     <string name="recent_task_option_external_display" msgid="4533840664313389484">"ଏକ୍ସଟର୍ନଲ ଡିସପ୍ଲେକୁ ମୁଭ କରନ୍ତୁ"</string>
     <string name="recent_task_option_remove_task" msgid="803559928027541555">"ଖାଲି କରନ୍ତୁ"</string>
     <string name="recent_task_desktop" msgid="8081113562549637334">"ଡେସ୍କଟପ"</string>
@@ -67,7 +68,7 @@
     <string name="home_gesture_tutorial_success" msgid="1736295017642244751">"ବଢ଼ିଆ କାମ!"</string>
     <string name="overview_gesture_feedback_swipe_too_far_from_edge" msgid="6402349235265407385">"ଆପଣ ସ୍କ୍ରିନର ତଳ ଧାରରୁ ଉପରକୁ ସ୍ୱାଇପ କରୁଥିବା ସୁନିଶ୍ଚିତ କରନ୍ତୁ"</string>
     <string name="overview_gesture_feedback_home_detected" msgid="663432226180397138">"ୱିଣ୍ଡୋକୁ ରିଲିଜ କରିବା ପୂର୍ବରୁ ଅଧିକ ସମୟ ଧରି ରଖିବାକୁ ଚେଷ୍ଟା କରନ୍ତୁ"</string>
-    <string name="overview_gesture_feedback_wrong_swipe_direction" msgid="1191055451018584958">"ଆପଣ ସିଧା ଉପରକୁ ସ୍ୱାଇପ କରି ତା\'ପରେ ବିରତ କରୁଥିବା ସୁନିଶ୍ଚିତ କରନ୍ତୁ।"</string>
+    <string name="overview_gesture_feedback_wrong_swipe_direction" msgid="1191055451018584958">"ସୁନିଶ୍ଚିତ କରନ୍ତୁ ଯେ ଆପଣ ସିଧା ଉପରକୁ ସ୍ୱାଇପ କରୁଛନ୍ତି, ତା\'ପରେ ବିରତ କରନ୍ତୁ"</string>
     <string name="overview_gesture_feedback_complete_with_follow_up" msgid="3544611727467765026">"ଜେଶ୍ଚରଗୁଡ଼ିକୁ କିପରି ବ୍ୟବହାର କରାଯିବ ଆପଣ ତାହା ଶିଖିଛନ୍ତି। ଜେଶ୍ଚରଗୁଡ଼ିକୁ ବନ୍ଦ କରିବାକୁ, ସେଟିଂସକୁ ଯାଆନ୍ତୁ।"</string>
     <string name="overview_gesture_feedback_complete_without_follow_up" msgid="2903050864432331629">"ଆପଣ ଆପ୍ସ ସୁଇଚ କରନ୍ତୁ ଜେଶ୍ଚର ସମ୍ପୂର୍ଣ୍ଣ କରିଛନ୍ତି"</string>
     <string name="overview_gesture_intro_title" msgid="2902054412868489378">"ଆପଗୁଡ଼ିକୁ ସ୍ୱିଚ୍ କରିବା ପାଇଁ ସ୍ୱାଇପ୍ କରନ୍ତୁ"</string>
@@ -140,6 +141,8 @@
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"କୁଇକ ସେଟିଂସ"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"ଟାସ୍କବାର"</string>
+    <!-- no translation found for bubble_bar_a11y_title (7743340801055597168) -->
+    <skip />
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"ନାଭିଗେସନ ବାର"</string>
     <string name="always_show_taskbar" msgid="3608801276107751229">"ସର୍ବଦା ଟାସ୍କବାର ଦେଖାନ୍ତୁ"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"ନାଭିଗେସନ ମୋଡ ପରିବର୍ତ୍ତନ କରନ୍ତୁ"</string>
@@ -168,7 +171,7 @@
     <string name="search_gesture_feature_title" msgid="1294044108313175306">"ସର୍ଚ୍ଚ କରିବାକୁ ସର୍କଲ କରନ୍ତୁ"</string>
     <string name="header_app_icon_description" msgid="2184625881433608027">"ଆପ ଆଇକନ"</string>
     <string name="header_default_app_title" msgid="8308052350689531566">"ଆପ ଟାଇଟେଲ"</string>
-    <string name="header_close_icon_description" msgid="5400033616675911319">"\"ବନ୍ଦ କରନ୍ତୁ\" ବଟନ"</string>
+    <string name="header_close_icon_description" msgid="9216416109255777643">"ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="nudge_a11y_title" msgid="2126529303123687912">"ନଜ"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"ନଜ ଇମେଜ"</string>

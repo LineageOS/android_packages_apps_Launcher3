@@ -21,6 +21,7 @@ import com.android.launcher3.model.testing.FakeModelWriter
 import com.android.launcher3.model.testing.WriterAction
 import com.android.launcher3.ui.testing.FakeLauncherUiStateNotifier
 import com.google.common.truth.Truth.assertThat
+import java.util.function.Consumer
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -37,9 +38,7 @@ class FakeModelWriterTest {
                 container = 0
             }
 
-        fakeModelWriter.scheduleTransaction { context ->
-            context.addItemToDatabase(item)
-        }
+        fakeModelWriter.scheduleTransaction { context -> context.addItemToDatabase(item) }
 
         assertThat(fakeModelWriter.actions).hasSize(1)
         val action = fakeModelWriter.actions[0] as WriterAction.AddItem
@@ -156,5 +155,42 @@ class FakeModelWriterTest {
         val notifier = fakeModelWriter.getNotifier()
         assertThat(notifier).isInstanceOf(FakeLauncherUiStateNotifier::class.java)
         assertThat(notifier).isSameInstanceAs(fakeModelWriter.notifier)
+    }
+
+    @Test
+    fun suspendWrites_queuesTransactions() {
+        val fakeModelWriter = FakeModelWriter()
+        fakeModelWriter.suspendWrites()
+
+        var completed = false
+        fakeModelWriter.scheduleTransaction({ completed = it }) { context ->
+            context.addItemToDatabase(WorkspaceItemInfo())
+        }
+
+        assertThat(fakeModelWriter.actions).isEmpty()
+        assertThat(completed).isFalse()
+    }
+
+    @Test
+    fun resumeWrites_executesPendingAndQueuedTransactions() {
+        val fakeModelWriter = FakeModelWriter()
+        fakeModelWriter.suspendWrites()
+
+        val item1 = WorkspaceItemInfo().apply { id = 1 }
+        val item2 = WorkspaceItemInfo().apply { id = 2 }
+
+        fakeModelWriter.scheduleTransaction { context -> context.addItemToDatabase(item1) }
+
+        val pending = Consumer<TransactionContext> { context -> context.addItemToDatabase(item2) }
+
+        fakeModelWriter.resumeWrites(pending)
+
+        assertThat(fakeModelWriter.actions).hasSize(2)
+        // Pending first
+        val action0 = fakeModelWriter.actions[0] as WriterAction.AddItem
+        assertThat(action0.item).isEqualTo(item2)
+        // Queued second
+        val action1 = fakeModelWriter.actions[1] as WriterAction.AddItem
+        assertThat(action1.item).isEqualTo(item1)
     }
 }

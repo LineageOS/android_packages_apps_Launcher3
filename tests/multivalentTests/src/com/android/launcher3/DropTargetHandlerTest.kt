@@ -25,16 +25,21 @@ import android.widget.TextView
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.launcher3.LauncherSettings.Favorites
+import com.android.launcher3.celllayout.CellLayoutLayoutParams
+import com.android.launcher3.folder.FolderIcon
 import com.android.launcher3.homescreenfiles.HomeScreenFile
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils
 import com.android.launcher3.integration.util.LauncherActivityScenarioRule
+import com.android.launcher3.model.TransactionContext
+import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.views.Snackbar
 import com.android.providers.media.flags.Flags.FLAG_ENABLE_TRASH_AND_RESTORE_BY_FILE_PATH_API
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executor
+import java.util.function.Consumer
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -42,7 +47,11 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
@@ -58,6 +67,7 @@ class DropTargetHandlerTest {
     @get:Rule val launcherActivity = LauncherActivityScenarioRule<Launcher>()
 
     @Mock private lateinit var homeScreenFilesProvider: HomeScreenFilesProvider
+    @Mock private lateinit var undoDeleteController: UndoDeleteController
 
     private val immediateExecutor = Executor { it.run() }
     private val file =
@@ -83,7 +93,7 @@ class DropTargetHandlerTest {
     fun onDeletePermanentlyCompleteForHomeScreenFile() {
         launcherActivity.executeOnLauncher { launcher ->
             val dropTargetHandler =
-                DropTargetHandler(launcher, homeScreenFilesProvider, immediateExecutor)
+                DropTargetHandler(launcher, undoDeleteController, homeScreenFilesProvider, immediateExecutor)
             dropTargetHandler.onDeleteComplete(item, null)
 
             val snackbar = launcher.snackbar
@@ -109,7 +119,7 @@ class DropTargetHandlerTest {
 
         launcherActivity.executeOnLauncher { launcher ->
             val dropTargetHandler =
-                DropTargetHandler(launcher, homeScreenFilesProvider, immediateExecutor)
+                DropTargetHandler(launcher, undoDeleteController, homeScreenFilesProvider, immediateExecutor)
             dropTargetHandler.onDeleteComplete(item, null)
 
             val snackbar = launcher.snackbar
@@ -138,7 +148,7 @@ class DropTargetHandlerTest {
 
         launcherActivity.executeOnLauncher { launcher ->
             val dropTargetHandler =
-                DropTargetHandler(launcher, homeScreenFilesProvider, immediateExecutor)
+                DropTargetHandler(launcher, undoDeleteController, homeScreenFilesProvider, immediateExecutor)
             dropTargetHandler.onDeleteComplete(item, null)
 
             // Error toast for failed move to trash.
@@ -160,7 +170,7 @@ class DropTargetHandlerTest {
 
         launcherActivity.executeOnLauncher { launcher ->
             val dropTargetHandler =
-                DropTargetHandler(launcher, homeScreenFilesProvider, immediateExecutor)
+                DropTargetHandler(launcher, undoDeleteController, homeScreenFilesProvider, immediateExecutor)
             dropTargetHandler.onDeleteComplete(item, null)
 
             // Click "Undo".
@@ -169,6 +179,53 @@ class DropTargetHandlerTest {
             // Error toast for failed undo.
             assertThat(launcher.snackbar.labelView.text.toString())
                 .isEqualTo("Can't undo. Go to Files app to restore.")
+        }
+    }
+
+    @Test
+    fun onDeleteComplete_standardItem_commitsOnDismiss() {
+        launcherActivity.executeOnLauncher { launcher ->
+            val item =
+                WorkspaceItemInfo().apply {
+                    itemType = Favorites.ITEM_TYPE_APPLICATION
+                    title = "Test App"
+                    container = Favorites.CONTAINER_DESKTOP
+                    screenId = 0
+                }
+
+            val dropTargetHandler =
+                DropTargetHandler(launcher, undoDeleteController, homeScreenFilesProvider, immediateExecutor)
+            dropTargetHandler.onDeleteComplete(item, null)
+
+            launcher.snackbar.close(false)
+            verify(undoDeleteController).commit()
+            verifyNoMoreInteractions(undoDeleteController)
+        }
+    }
+
+    @Test
+    fun onDeleteComplete_standardItem_abortsOnUndo() {
+        launcherActivity.executeOnLauncher { launcher ->
+            val item =
+                WorkspaceItemInfo().apply {
+                    itemType = Favorites.ITEM_TYPE_APPLICATION
+                    title = "Test App"
+                    container = Favorites.CONTAINER_DESKTOP
+                    screenId = 0
+                }
+
+            val dropTargetHandler =
+                DropTargetHandler(
+                    launcher,
+                    undoDeleteController,
+                    homeScreenFilesProvider,
+                    immediateExecutor,
+                )
+            dropTargetHandler.onDeleteComplete(item, null)
+
+            launcher.snackbar.actionView.performClick()
+            verify(undoDeleteController).abort()
+            verifyNoMoreInteractions(undoDeleteController)
         }
     }
 

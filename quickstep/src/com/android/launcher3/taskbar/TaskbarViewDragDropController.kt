@@ -25,9 +25,9 @@ import com.android.launcher3.DropTarget
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.OnAlarmListener
 import com.android.launcher3.R
+import com.android.launcher3.UndoDeleteController
 import com.android.launcher3.dragndrop.DragController
 import com.android.launcher3.dragndrop.DragOptions
-import com.android.launcher3.model.IModelWriter
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.ItemInfo.NO_ID
 import com.android.launcher3.model.data.TaskItemInfo.Companion.isSameItem
@@ -314,14 +314,14 @@ class TaskbarViewDragDropController(
             if (dragObject == null) return
 
             val itemToUnpin = extractItemInfoFromDragObject(dragObject) ?: return
-            val modelWriter = activityContext.modelWriter
-            modelWriter.prepareToUndoDelete()
-            modelWriter.deleteItemFromDatabase(itemToUnpin, "Unpin by taskbar drag and drop")
+            val undoDeleteController = activityContext.undoDeleteController
+            undoDeleteController.prepareToUndoDelete()
+            undoDeleteController.deleteItem(itemToUnpin, "Unpin by taskbar drag and drop")
 
             modelCallbacks?.bindWorkspaceComponentsRemoved(
                 ItemInfoMatcher.ofItems(Collections.singleton(itemToUnpin))
             )
-            showDeleteItemSnackbar(modelWriter)
+            showDeleteItemSnackbar(undoDeleteController)
         }
 
         override fun onDragEnter(dragObject: DropTarget.DragObject?) {
@@ -371,10 +371,10 @@ class TaskbarViewDragDropController(
         }
 
         /** Shows the snackbar after removing a pinned item from hotseat with undo action. */
-        private fun showDeleteItemSnackbar(modelWriter: IModelWriter) {
-            val onUndoClicked = Runnable { modelWriter.abortDelete() }
+        private fun showDeleteItemSnackbar(undoDeleteController: UndoDeleteController) {
+            val onUndoClicked = Runnable { undoDeleteController.abort() }
 
-            val onDismissed = Runnable { modelWriter.commitDelete() }
+            val onDismissed = Runnable { undoDeleteController.commit() }
 
             val overlayContext =
                 activityContext.controllers.taskbarOverlayController.requestWindow()

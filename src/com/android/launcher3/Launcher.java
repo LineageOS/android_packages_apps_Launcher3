@@ -1616,6 +1616,7 @@ public class Launcher extends StatefulActivity<LauncherState>
     @Override
     public DropTargetHandler getDropTargetHandler() {
         return new DropTargetHandler(this,
+                getUndoDeleteController(),
                 LauncherComponentProvider.get(this).getHomeScreenFilesProvider(),
                 this.getMainExecutor());
     }

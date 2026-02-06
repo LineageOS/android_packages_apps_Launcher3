@@ -48,6 +48,8 @@ import com.android.launcher3.icons.LauncherIconProvider
 import com.android.launcher3.icons.LauncherIconProviderImpl
 import com.android.launcher3.logging.StatsLogManager.StatsLogManagerFactory
 import com.android.launcher3.secondarydisplay.SecondaryDisplayDelegate
+import com.android.launcher3.LauncherModel
+import com.android.launcher3.ModelReloader
 import com.android.launcher3.secondarydisplay.SecondaryDisplayQuickstepDelegateImpl
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator
 import com.android.launcher3.testing.TestInformationHandler

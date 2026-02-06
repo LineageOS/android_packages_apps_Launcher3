@@ -22,6 +22,7 @@
     <string name="recent_task_option_pin" msgid="7929860679018978258">"固定"</string>
     <string name="recent_task_option_freeform" msgid="48863056265284071">"自由窗口"</string>
     <string name="recent_task_option_desktop" msgid="8280879717125435668">"桌面"</string>
+    <string name="recent_split_task_option_desktop" msgid="7272418191932478598">"%1$s 的桌面模式"</string>
     <string name="recent_task_option_external_display" msgid="4533840664313389484">"移至外接显示屏"</string>
     <string name="recent_task_option_remove_task" msgid="803559928027541555">"清除"</string>
     <string name="recent_task_desktop" msgid="8081113562549637334">"桌面设备"</string>
@@ -54,7 +55,7 @@
     <string name="back_gesture_intro_title" msgid="19551256430224428">"滑动即可返回"</string>
     <string name="back_gesture_intro_subtitle" msgid="7912576483031802797">"如要返回上一个屏幕，请从屏幕左侧或右侧边缘往屏幕中间滑动。"</string>
     <string name="back_gesture_tutorial_title" msgid="1944737946101059789">"返回"</string>
-    <string name="back_gesture_tutorial_subtitle" msgid="6639993416000920142">"从屏幕左侧或右侧边缘滑动到中间"</string>
+    <string name="back_gesture_tutorial_subtitle" msgid="6639993416000920142">"从屏幕左侧或右侧边缘往屏幕中间滑动"</string>
     <string name="home_gesture_feedback_swipe_too_far_from_edge" msgid="4816365433160895458">"确保从屏幕底部边缘向上滑动"</string>
     <string name="home_gesture_feedback_overview_detected" msgid="5177627157303895077">"松开手指前，请勿中途停顿"</string>
     <string name="home_gesture_feedback_wrong_swipe_direction" msgid="8328465201424027148">"确保笔直向上滑动"</string>
@@ -140,6 +141,8 @@
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"通知"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"快捷设置"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"任务栏"</string>
+    <!-- no translation found for bubble_bar_a11y_title (7743340801055597168) -->
+    <skip />
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"导航栏"</string>
     <string name="always_show_taskbar" msgid="3608801276107751229">"始终显示任务栏"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"更改导航模式"</string>
@@ -168,7 +171,7 @@
     <string name="search_gesture_feature_title" msgid="1294044108313175306">"圈定即搜"</string>
     <string name="header_app_icon_description" msgid="2184625881433608027">"应用图标"</string>
     <string name="header_default_app_title" msgid="8308052350689531566">"应用名称"</string>
-    <string name="header_close_icon_description" msgid="5400033616675911319">"“关闭”按钮"</string>
+    <string name="header_close_icon_description" msgid="9216416109255777643">"关闭"</string>
     <string name="nudge_a11y_title" msgid="2126529303123687912">"智能推送"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"关闭"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"智能推送图片"</string>

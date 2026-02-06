@@ -17,6 +17,9 @@
 package com.android.launcher3.taskbar.overlay
 
 import android.app.ActivityManager.RunningTaskInfo
+import android.platform.test.annotations.RequiresFlagsDisabled
+import android.platform.test.annotations.RequiresFlagsEnabled
+import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import android.view.MotionEvent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.AbstractFloatingView
@@ -24,6 +27,7 @@ import com.android.launcher3.AbstractFloatingView.TYPE_OPTIONS_POPUP
 import com.android.launcher3.AbstractFloatingView.TYPE_TASKBAR_ALL_APPS
 import com.android.launcher3.AbstractFloatingView.TYPE_TASKBAR_OVERLAY_PROXY
 import com.android.launcher3.AbstractFloatingView.hasOpenView
+import com.android.launcher3.Flags
 import com.android.launcher3.taskbar.TaskbarActivityContext
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
@@ -45,9 +49,10 @@ import org.mockito.kotlin.mock
 @RunWith(AndroidJUnit4::class)
 class TaskbarOverlayControllerTest {
 
-    @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()
-    @get:Rule(order = 1) val taskbarModeRule = TaskbarModeRule(context)
-    @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
+    @get:Rule(order = 0) val checkFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
+    @get:Rule(order = 1) val context = TaskbarWindowSandboxContext.create()
+    @get:Rule(order = 2) val taskbarModeRule = TaskbarModeRule(context)
+    @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
     private val overlayController by taskbarUnitTestRule.delegate { it.taskbarOverlayController }
 
@@ -64,6 +69,7 @@ class TaskbarOverlayControllerTest {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_TASKBAR_BEHIND_SHADE)
     fun testRequestWindow_afterHidingExistingWindow_createsNewWindow() {
         val context1 = getOnTaskbarUiThread { overlayController.requestWindow() }
         runOnTaskbarUiThreadSync { overlayController.hideWindow() }
@@ -73,6 +79,17 @@ class TaskbarOverlayControllerTest {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_TASKBAR_BEHIND_SHADE)
+    fun testRequestWindow_afterHidingExistingWindow_reusesWindow() {
+        val context1 = getOnTaskbarUiThread { overlayController.requestWindow() }
+        runOnTaskbarUiThreadSync { overlayController.hideWindow() }
+
+        val context2 = getOnTaskbarUiThread { overlayController.requestWindow() }
+        assertThat(context1).isSameInstanceAs(context2)
+    }
+
+    @Test
+    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_TASKBAR_BEHIND_SHADE)
     fun testRequestWindow_afterHidingOverlay_createsNewWindow() {
         val context1 = getOnTaskbarUiThread { overlayController.requestWindow() }
         runOnTaskbarUiThreadSync {
@@ -85,9 +102,32 @@ class TaskbarOverlayControllerTest {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_TASKBAR_BEHIND_SHADE)
+    fun testRequestWindow_afterHidingOverlay_reusesWindow() {
+        val context1 = getOnTaskbarUiThread { overlayController.requestWindow() }
+        runOnTaskbarUiThreadSync {
+            TestOverlayView.show(context1)
+            overlayController.hideWindow()
+        }
+
+        val context2 = getOnTaskbarUiThread { overlayController.requestWindow() }
+        assertThat(context1).isSameInstanceAs(context2)
+    }
+
+    @Test
     fun testRequestWindow_addsProxyView() {
         runOnTaskbarUiThreadSync { TestOverlayView.show(overlayController.requestWindow()) }
         assertThat(hasOpenView(taskbarContext, TYPE_TASKBAR_OVERLAY_PROXY)).isTrue()
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_TASKBAR_BEHIND_SHADE)
+    fun testWindowExistsAtStart() {
+        // When the flag is enabled, the window is requested during init.
+        runOnTaskbarUiThreadSync {
+            val dragLayer = overlayController.requestWindow().dragLayer
+            assertThat(dragLayer.isAttachedToWindow).isTrue()
+        }
     }
 
     @Test
@@ -118,6 +158,7 @@ class TaskbarOverlayControllerTest {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_TASKBAR_BEHIND_SHADE)
     fun testHideWindow_detachesDragLayer() {
         val dragLayer = getOnTaskbarUiThread { overlayController.requestWindow().dragLayer }
 
@@ -125,6 +166,18 @@ class TaskbarOverlayControllerTest {
         runOnTaskbarUiThreadSync {
             overlayController.hideWindow()
             assertThat(dragLayer.isAttachedToWindow).isFalse()
+        }
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_TASKBAR_BEHIND_SHADE)
+    fun testHideWindow_keepsDragLayer() {
+        val dragLayer = getOnTaskbarUiThread { overlayController.requestWindow().dragLayer }
+
+        // Wait for drag layer to be attached to window before hiding.
+        runOnTaskbarUiThreadSync {
+            overlayController.hideWindow()
+            assertThat(dragLayer.isAttachedToWindow).isTrue()
         }
     }
 
@@ -157,6 +210,7 @@ class TaskbarOverlayControllerTest {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_TASKBAR_BEHIND_SHADE)
     fun testRecreateTaskbar_closesWindow() {
         runOnTaskbarUiThreadSync { TestOverlayView.show(overlayController.requestWindow()) }
         taskbarUnitTestRule.recreateTaskbar()

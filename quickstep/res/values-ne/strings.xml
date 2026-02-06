@@ -22,6 +22,7 @@
     <string name="recent_task_option_pin" msgid="7929860679018978258">"पिन गर्नुहोस्"</string>
     <string name="recent_task_option_freeform" msgid="48863056265284071">"फ्रिफर्म"</string>
     <string name="recent_task_option_desktop" msgid="8280879717125435668">"डेस्कटप"</string>
+    <string name="recent_split_task_option_desktop" msgid="7272418191932478598">"%1$s को डेस्कटप"</string>
     <string name="recent_task_option_external_display" msgid="4533840664313389484">"सारेर बाह्य डिस्प्लेमा लैजानुहोस्"</string>
     <string name="recent_task_option_remove_task" msgid="803559928027541555">"हटाउनुहोस्"</string>
     <string name="recent_task_desktop" msgid="8081113562549637334">"डेस्कटप"</string>
@@ -59,7 +60,7 @@
     <string name="home_gesture_feedback_overview_detected" msgid="5177627157303895077">"औँला उठाउनुअघि नरोकिनुहोस्"</string>
     <string name="home_gesture_feedback_wrong_swipe_direction" msgid="8328465201424027148">"सीधै माथितिर स्वाइप गर्नुहोस्"</string>
     <string name="home_gesture_feedback_complete_with_follow_up" msgid="8766981412895888417">"तपाईंले जेस्चर प्रयोग गरी होम स्क्रिनमा जाने तरिका सिक्नुभएको छ। अब पछाडि जाने तरिका सिक्नुहोस्।"</string>
-    <string name="home_gesture_feedback_complete_without_follow_up" msgid="2978063221383413443">"तपाईंले \"होम स्क्रिनमा जानुहोस्\" नामक इसारा प्रयोग गर्ने तरिका सिक्नुभयो"</string>
+    <string name="home_gesture_feedback_complete_without_follow_up" msgid="2978063221383413443">"तपाईंले होम स्क्रिनमा जाने तरिका सिक्नुभयो"</string>
     <string name="home_gesture_intro_title" msgid="836590312858441830">"होम स्क्रिनमा जान स्वाइप गर्नुहोस्"</string>
     <string name="home_gesture_intro_subtitle" msgid="2632238748497975326">"स्क्रिनको फेदबाट माथितिर स्वाइप गर्नुहोस्। यो इसारा प्रयोग गर्दा सधैँ होम स्क्रिन खुल्छ।"</string>
     <string name="home_gesture_tutorial_title" msgid="3126834347496917376">"होम स्क्रिनमा जाने तरिका"</string>
@@ -69,7 +70,7 @@
     <string name="overview_gesture_feedback_home_detected" msgid="663432226180397138">"स्क्रिनबाट औँला उठाउनुअघि एपको विन्डोमा केही बेर छोइराख्नुहोस्"</string>
     <string name="overview_gesture_feedback_wrong_swipe_direction" msgid="1191055451018584958">"सीधै माथितिर स्वाइप गर्नुहोस् अनि रोकिनुहोस्"</string>
     <string name="overview_gesture_feedback_complete_with_follow_up" msgid="3544611727467765026">"तपाईंले जेस्चरहरू प्रयोग गर्ने तरिका सिक्नुभयो। इसारा अफ गर्न सेटिङमा जानुहोस्।"</string>
-    <string name="overview_gesture_feedback_complete_without_follow_up" msgid="2903050864432331629">"तपाईंले \"एउटा एपबाट अर्को एपमा जानुहोस्\" नामक इसारा प्रयोग गर्ने तरिका सिक्नुभयो"</string>
+    <string name="overview_gesture_feedback_complete_without_follow_up" msgid="2903050864432331629">"तपाईंले एउटा एपबाट अर्को एपमा जाने तरिका सिक्नुभयो"</string>
     <string name="overview_gesture_intro_title" msgid="2902054412868489378">"एउटा एपबाट अर्को एपमा जान स्वाइप गर्नुहोस्"</string>
     <string name="overview_gesture_intro_subtitle" msgid="4968091015637850859">"एउटा एपबाट अर्कोमा जान स्क्रिनको फेदबाट माथितिर स्वाइप गर्नुहोस्, छोइराख्नुहोस् अनि औँला उठाउनुहोस्।"</string>
     <string name="overview_gesture_tutorial_title" msgid="4125835002668708720">"एउटा एपबाट अर्को एपमा जाने तरिका"</string>
@@ -140,6 +141,8 @@
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"नोटिफिकेसनहरू"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"द्रुत सेटिङ"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"टास्कबार"</string>
+    <!-- no translation found for bubble_bar_a11y_title (7743340801055597168) -->
+    <skip />
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"नेभिगेसन बार"</string>
     <string name="always_show_taskbar" msgid="3608801276107751229">"टास्कबार सधैँ देखाउनुहोस्"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"नेभिगेसन मोड बदल्नुहोस्"</string>
@@ -168,7 +171,7 @@
     <string name="search_gesture_feature_title" msgid="1294044108313175306">"खोज्न सर्कल बनाउनुहोस्"</string>
     <string name="header_app_icon_description" msgid="2184625881433608027">"एप जनाउने आइकन"</string>
     <string name="header_default_app_title" msgid="8308052350689531566">"एपको शीर्षक"</string>
-    <string name="header_close_icon_description" msgid="5400033616675911319">"\"बन्द गर्नुहोस्\" बटन"</string>
+    <string name="header_close_icon_description" msgid="9216416109255777643">"बन्द गर्नुहोस्"</string>
     <string name="nudge_a11y_title" msgid="2126529303123687912">"हल्का सार्नुहोस्"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"बन्द गर्नुहोस्"</string>
     <string name="nudge_a11y_image" msgid="117910310515857252">"फोटो हल्का सार्नुहोस्"</string>

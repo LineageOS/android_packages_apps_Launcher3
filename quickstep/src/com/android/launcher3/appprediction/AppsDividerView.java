@@ -160,6 +160,7 @@ public class AppsDividerView extends View implements FloatingHeaderRow {
                     bottomPadding = getResources()
                             .getDimensionPixelSize(R.dimen.all_apps_prediction_row_divider_height);
                     mPaint.setColor(mStrokeColor);
+                    setAccessibilityHeading(false);
                     break;
                 case ALL_APPS_LABEL:
                     topPadding = getAllAppsLabelLayout().getHeight() + getResources()
@@ -168,6 +169,7 @@ public class AppsDividerView extends View implements FloatingHeaderRow {
                             .getDimensionPixelSize(R.dimen.all_apps_label_bottom_padding);
                     mPaint.setColor(mAllAppsLabelTextColor);
                     setContentDescription(mAllAppsLabelLayout.getText());
+                    setAccessibilityHeading(true);
                     break;
                 case NONE:
                 default:

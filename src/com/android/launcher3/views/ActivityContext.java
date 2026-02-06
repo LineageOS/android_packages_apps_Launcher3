@@ -59,6 +59,7 @@ import com.android.launcher3.BaseActivity;
 import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.CellLayout;
 import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.UndoDeleteController;
 import com.android.launcher3.DeviceProfile.OnDeviceProfileChangeListener;
 import com.android.launcher3.DropTargetHandler;
 import com.android.launcher3.LauncherAppState;
@@ -546,6 +547,14 @@ public interface ActivityContext extends SavedStateRegistryOwner {
     default IModelWriter getModelWriter() {
         return LauncherAppState.getInstance(asContext()).getModel().getWriter(
                 false, this, null);
+    }
+
+    /**
+     * Returns the controller for managing undo delete operations.
+     */
+    @NonNull
+    default UndoDeleteController getUndoDeleteController() {
+        return getActivityComponent().getUndoDeleteController();
     }
 
     /** Set to manage objects that can be cleaned up along with the context */

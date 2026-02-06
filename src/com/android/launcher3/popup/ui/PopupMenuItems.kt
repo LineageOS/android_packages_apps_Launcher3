@@ -47,9 +47,11 @@ import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.onLongClick
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -255,11 +257,15 @@ fun DeepShortcutMenuItem(
         itemTrailingContent =
             if (onAddButtonClick != null) {
                 {
+                    val contentDesc = stringResource(R.string.action_add_to_workspace)
                     Box(
                         modifier =
-                            Modifier.size(deepShortcutAddButtonSize).clickable {
-                                onAddButtonClick(shortcut)
-                            },
+                            Modifier.size(deepShortcutAddButtonSize)
+                                .clickable { onAddButtonClick(shortcut) }
+                                .semantics {
+                                    contentDescription = contentDesc
+                                    role = Role.Button
+                                },
                         contentAlignment = Alignment.Center,
                     ) {
                         Image(
@@ -267,7 +273,7 @@ fun DeepShortcutMenuItem(
                             painter = painterResource(id = R.drawable.ic_add_circle_filled),
                             colorFilter =
                                 ColorFilter.tint(colorResource(R.color.materialColorSecondary)),
-                            contentDescription = stringResource(R.string.action_add_to_workspace),
+                            contentDescription = null,
                         )
                     }
                 }

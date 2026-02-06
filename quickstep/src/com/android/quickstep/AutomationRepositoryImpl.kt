@@ -18,6 +18,7 @@ package com.android.quickstep
 
 import android.content.Context
 import android.os.UserHandle
+import android.util.Log
 import com.android.extensions.computercontrol.AutomatedPackageListener
 import com.android.extensions.computercontrol.ComputerControlExtensions
 import com.android.launcher3.automation.AutomationChange
@@ -94,6 +95,9 @@ constructor(
         automatedPackages: List<String>,
         user: UserHandle,
     ) {
+        Log.d(TAG, "onAutomationChange: automator:$automator," +
+            " automatedPackages:$automatedPackages," +
+            " user:$user")
         val key = AutomationKey(user, automator)
         val updatedPackagesSet = automatedPackages.toSet()
 
@@ -128,7 +132,9 @@ constructor(
 
         // If there is a net change to automated packages, dispatch update.
         if (addedPackages.isNotEmpty() || removedPackages.isNotEmpty()) {
-            _automationChanges.dispatchValue(AutomationChange(user, addedPackages, removedPackages))
+            val change = AutomationChange(user, addedPackages, removedPackages)
+            Log.d(TAG, "onAutomationChange: dispatching AutomationChange:$change")
+            _automationChanges.dispatchValue(change)
             // Atomically replace the old set with the new one.
             allAutomatedPackages = newAllAutomatedPackages
         }
@@ -136,4 +142,8 @@ constructor(
 
     /* Key for storing automated packages in [automationCache] **/
     private data class AutomationKey(val userHandle: UserHandle, val automatingPackage: String)
+
+    companion object {
+        const val TAG = "AutomationRepository"
+    }
 }
