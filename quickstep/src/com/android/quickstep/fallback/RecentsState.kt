@@ -17,6 +17,7 @@ package com.android.quickstep.fallback
 
 import android.content.Context
 import android.graphics.Color
+import android.os.SystemProperties
 import androidx.annotation.FloatRange
 import com.android.app.animation.Interpolators
 import com.android.launcher3.DeviceProfile
@@ -25,6 +26,9 @@ import com.android.launcher3.LauncherState.FLAG_CLOSE_POPUPS
 import com.android.launcher3.R
 import com.android.launcher3.anim.AnimatorPlaybackController
 import com.android.launcher3.anim.PendingAnimation
+import com.android.launcher3.statehandlers.DepthController.DEPTH_0_PERCENT
+import com.android.launcher3.statehandlers.DepthController.DEPTH_70_PERCENT
+import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.statemanager.BaseState
 import com.android.launcher3.statemanager.BaseState.FLAG_DISABLE_RESTORE_ABSOLUTE
 import com.android.launcher3.statemanager.BaseState.FLAG_DISABLE_RESTORE_EXCEPT_UI_MODE_CHANGE
@@ -85,10 +89,10 @@ open class RecentsState(@JvmField val ordinal: Int, private val mFlags: Int) :
     /** For this state, what color scrim should be drawn behind overview. */
     fun getScrimColor(context: Context) =
         ScrimColors(
-            /* backgroundColor= */ if (hasFlag(FLAG_SCRIM))
-                Themes.getAttrColor(context, R.attr.overviewScrimColor)
-            else Color.TRANSPARENT,
-            /* foregroundColor= */ Color.TRANSPARENT,
+            backgroundColor =
+                if (hasFlag(FLAG_SCRIM)) Themes.getAttrColor(context, R.attr.overviewScrimColor)
+                else Color.TRANSPARENT,
+            foregroundColor = Color.TRANSPARENT,
         )
 
     open fun getOverviewScaleAndOffset(container: RecentsViewContainer) =
@@ -178,7 +182,8 @@ open class RecentsState(@JvmField val ordinal: Int, private val mFlags: Int) :
         backAnimationController?.setPlayFraction(backProgress)
     }
 
-    override fun getDepth(context: ActivityContext) = 0f
+    override fun getDepth(context: ActivityContext) =
+        if (SYSTEM_OVERVIEW_BLUR_ENABLED) DEPTH_70_PERCENT else DEPTH_0_PERCENT
 
     private class ModalState(id: Int, flags: Int) : RecentsState(id, flags) {
         override fun onBackInvoked(container: RecentsViewContainer) {
@@ -208,6 +213,14 @@ open class RecentsState(@JvmField val ordinal: Int, private val mFlags: Int) :
                 container.getOverviewPanel<RecentsView<*, *>>().maxScaleForFullScreen,
                 LauncherState.NO_OFFSET,
             )
+
+        override fun getDepth(context: ActivityContext) =
+            if (
+                DesktopVisibilityController.INSTANCE.get(context.asContext())
+                    .isInDesktopMode(context.asContext().displayId)
+            )
+                DEPTH_0_PERCENT
+            else DEPTH_70_PERCENT
     }
 
     private class BgLauncherState(id: Int, flags: Int) : RecentsState(id, flags) {
@@ -313,6 +326,9 @@ open class RecentsState(@JvmField val ordinal: Int, private val mFlags: Int) :
                     FLAG_IS_IN_OVERVIEW),
             )
         @JvmField val HIDDEN: RecentsState = HiddenState(HIDDEN_ORDINAL, flags = 0)
+
+        private val SYSTEM_OVERVIEW_BLUR_ENABLED =
+            SystemProperties.getBoolean("ro.launcher.depth.overview", true)
 
         /** Returns the corresponding RecentsState from ordinal provided */
         @JvmStatic fun stateFromOrdinal(ordinal: Int) = sAllStates[ordinal]!!

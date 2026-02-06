@@ -22,7 +22,10 @@ import android.os.IBinder
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
+import android.platform.test.rule.LimitDevicesRule
+import android.platform.test.rule.SkipOnDeviceless
 import android.view.ViewTreeObserver
+import androidx.lifecycle.Lifecycle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.launcher3.Flags.FLAG_ENABLE_EXPRESSIVE_FOLDER_EXPANSION
@@ -32,7 +35,9 @@ import com.android.launcher3.LauncherState
 import com.android.launcher3.dragndrop.DragLayer
 import com.android.launcher3.statemanager.StateManager
 import com.android.launcher3.uioverrides.QuickstepLauncher
+import com.android.launcher3.util.MutableListenableRef
 import com.android.launcher3.views.ScrimView
+import java.util.Collections
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
@@ -50,12 +55,20 @@ import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.any
-import java.util.Collections
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@SkipOnDeviceless
 class DepthControllerTest {
     @get:Rule(order = 0) val setFlagsRule = SetFlagsRule()
+
+    /**
+     * This test needs to be skipped in Robolectric because Mockito in Kotlin doesn't work well with
+     * java interfaces with default methods. Outside of Robolectric, these methods cannot be mocked
+     * and will call the default implementation; inside Robolectric, these methods must be mocked.
+     * As a result, there is no way to write a test that work both inside and outside Robolectric.
+     */
+    @get:Rule var mlimitDevicesRule: LimitDevicesRule = LimitDevicesRule()
 
     private lateinit var underTest: LauncherDepthController
     @get:Rule val mockito = MockitoJUnit.rule()
@@ -68,6 +81,7 @@ class DepthControllerTest {
     @Mock private lateinit var rootView: LauncherRootView
     @Mock private lateinit var windowToken: IBinder
     @Mock private lateinit var scrimView: ScrimView
+    @Mock private lateinit var lifeCycle: Lifecycle
 
     @Before
     fun setUp() {
@@ -77,14 +91,15 @@ class DepthControllerTest {
         `when`(launcher.stateManager).thenReturn(stateManager)
         `when`(launcher.depthBlurTargets).thenReturn(Collections.emptyList())
         `when`(launcher.getSystemService(WallpaperManager::class.java)).thenReturn(wallpaperManager)
-        `when`(wallpaperManager.setWallpaperZoomOut(any(), anyFloat())).then {
-            // do nothing
-        }
+        `when`(wallpaperManager.setWallpaperZoomOut(any(), anyFloat())).then { /* Do nothing */ }
         `when`(launcher.rootView).thenReturn(rootView)
         `when`(rootView.windowToken).thenReturn(windowToken)
         `when`(launcher.scrimView).thenReturn(scrimView)
+        `when`(launcher.lifecycle).thenReturn(lifeCycle)
+        `when`(lifeCycle.addObserver(any())).then { /* Do nothing */ }
 
-        underTest = LauncherDepthController(launcher, true)
+        val blurState = MutableListenableRef(true)
+        underTest = LauncherDepthController(launcher, blurState)
     }
 
     @Test

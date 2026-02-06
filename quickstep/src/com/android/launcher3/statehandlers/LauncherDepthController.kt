@@ -23,10 +23,13 @@ import androidx.annotation.VisibleForTesting
 import com.android.launcher3.Flags
 import com.android.launcher3.LauncherState
 import com.android.launcher3.uioverrides.QuickstepLauncher
+import com.android.launcher3.util.ListenableRef
 
 /** Controls blur and wallpaper zoom, for the Launcher surface only. */
-class LauncherDepthController(private val launcher: QuickstepLauncher, blurEnabled: Boolean) :
-    DepthController<LauncherState, QuickstepLauncher>(launcher, blurEnabled) {
+class LauncherDepthController(
+    private val launcher: QuickstepLauncher,
+    blurState: ListenableRef<Boolean>,
+) : DepthController<LauncherState, QuickstepLauncher>(launcher, blurState) {
 
     override fun shouldBlur(): Boolean {
         return super.shouldBlur() && !Flags.allAppsSurface()

@@ -15,6 +15,8 @@
  */
 package com.android.quickstep;
 
+import static com.android.app.animation.Interpolators.LINEAR;
+import static com.android.launcher3.util.MultiPropertyFactory.MULTI_PROPERTY_VALUE;
 import static com.android.launcher3.util.NavigationMode.NO_BUTTON;
 import static com.android.quickstep.fallback.RecentsState.BACKGROUND_APP;
 import static com.android.quickstep.fallback.RecentsState.DEFAULT;
@@ -30,6 +32,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.LauncherAnimUtils;
+import com.android.launcher3.anim.PendingAnimation;
 import com.android.launcher3.dagger.PerDisplaySingleton;
 import com.android.launcher3.display.DisplayController;
 import com.android.launcher3.statemanager.StateManager;
@@ -98,11 +102,28 @@ public final class FallbackWindowInterface extends BaseWindowInterface {
 
     /** 6 */
     @Override
-    public BaseWindowInterface.AnimationFactory prepareRecentsUI(boolean activityVisible,
-            Consumer<AnimatorControllerWithResistance> callback) {
+    public AnimationFactory<RecentsState, RecentsWindowManager> prepareRecentsUI(
+            boolean activityVisible, Consumer<AnimatorControllerWithResistance> callback) {
         notifyRecentsOfOrientation();
-        BaseWindowInterface.DefaultAnimationFactory factory =
-                new BaseWindowInterface.DefaultAnimationFactory(callback);
+        DefaultAnimationFactory factory =
+                new DefaultAnimationFactory(callback) {
+                    @Override
+                    protected void createBackgroundToOverviewAnim(RecentsWindowManager container,
+                            PendingAnimation pa) {
+                        super.createBackgroundToOverviewAnim(container, pa);
+                        if (container.getDepthController() == null) {
+                            return;
+                        }
+
+                        // Animate the blur and wallpaper zoom
+                        float fromDepthRatio = BACKGROUND_APP.getDepth(container);
+                        float toDepthRatio = DEFAULT.getDepth(container);
+                        pa.addFloat(container.getDepthController().stateDepth,
+                                new LauncherAnimUtils.ClampedProperty<>(
+                                        MULTI_PROPERTY_VALUE, fromDepthRatio, toDepthRatio),
+                                fromDepthRatio, toDepthRatio, LINEAR);
+                    }
+                };
         factory.initBackgroundStateUI();
         return factory;
     }

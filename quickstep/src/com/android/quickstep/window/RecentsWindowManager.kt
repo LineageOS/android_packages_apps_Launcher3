@@ -56,6 +56,7 @@ import com.android.app.displaylib.PerDisplayRepository
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.BaseActivity
 import com.android.launcher3.Flags.enablePredictiveBackInOverview
+import com.android.launcher3.Flags.enableRecentsWindowBlur
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherAnimationRunner
 import com.android.launcher3.LauncherAnimationRunner.RemoteAnimationFactory
@@ -75,6 +76,7 @@ import com.android.launcher3.dagger.WindowContext
 import com.android.launcher3.desktop.DesktopRecentsTransitionController
 import com.android.launcher3.display.DisplayController
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.statehandlers.DepthController
 import com.android.launcher3.statemanager.StateManager
 import com.android.launcher3.statemanager.StateManager.AtomicAnimationFactory
 import com.android.launcher3.statemanager.StatefulContainer
@@ -85,6 +87,7 @@ import com.android.launcher3.testing.shared.TestProtocol.LAUNCHER_ACTIVITY_STOPP
 import com.android.launcher3.testing.shared.TestProtocol.SEQUENCE_MAIN
 import com.android.launcher3.util.ActivityOptionsWrapper
 import com.android.launcher3.util.DaggerSingletonObject
+import com.android.launcher3.util.ListenableRef
 import com.android.launcher3.util.LooperExecutor
 import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.SafeCloseable
@@ -92,6 +95,7 @@ import com.android.launcher3.util.ScreenOnTracker
 import com.android.launcher3.util.ScreenOnTracker.ScreenOnListener
 import com.android.launcher3.util.SystemUiController
 import com.android.launcher3.util.WallpaperColorHints
+import com.android.launcher3.util.WindowBlurState.WINDOW_BLUR_STATE
 import com.android.launcher3.util.window.WindowManagerProxy
 import com.android.launcher3.views.BaseDragLayer
 import com.android.launcher3.views.ScrimView
@@ -135,6 +139,7 @@ import com.android.window.flags.Flags.useInputReportedFocusForAccessibility
 import com.android.wm.shell.shared.IOverviewOverlayLeashInvalidationCallback
 import com.android.wm.shell.shared.desktopmode.DesktopState
 import javax.inject.Inject
+import javax.inject.Named
 
 /**
  * Class that will manage RecentsView lifecycle within a window and interface correctly where
@@ -163,6 +168,7 @@ constructor(
     recentsComponentFactory: RecentsComponent.Factory,
     propertyHolder: PerDisplayHolder<RecentsWindowManager>,
     lifeCycle: PerDisplayCleanupTask,
+    @Named(WINDOW_BLUR_STATE) private val blurState: ListenableRef<Boolean>,
 ) :
     RecentsWindowContext(windowContext, wallpaperColorHints.hints, invariantDeviceProfile),
     RecentsViewContainer,
@@ -203,11 +209,14 @@ constructor(
     private var oldConfiguration: Configuration? = null
     private var oldRotation: Int = -1
 
+    private val depthController =
+        if (enableRecentsWindowBlur()) DepthController(this, blurState) else null
+
     private val splitSelectStateController: SplitSelectStateController =
         SplitSelectStateController(
             /* container= */ this,
             stateManager,
-            /* depthController= */ null,
+            depthController,
             statsLogManager,
             systemUiProxy,
             recentsModel,
@@ -338,7 +347,20 @@ constructor(
         }
         surfaceControlViewHost?.let { cleanUpSurfaceControlViewHostInternal() }
 
-        theme.applyStyle(R.style.OverviewBlurFallbackStyle, true)
+        val applyStyle = { blurEnabled: Boolean ->
+            Log.d(TAG, "applyStyle - blurEnabled: ${blurState.value}")
+            theme.applyStyle(
+                if (blurEnabled) R.style.OverviewBlurStyle else R.style.OverviewBlurFallbackStyle,
+                /* force= */ true,
+            )
+        }
+        if (enableRecentsWindowBlur()) {
+            applyStyle(blurState.value)
+            closeOnDestroy(blurState.forEach(uiExecutor) { blurEnabled -> applyStyle(blurEnabled) })
+        } else {
+            applyStyle(false)
+        }
+
         windowView =
             layoutInflater.inflate(R.layout.fallback_recents_activity, null) as LauncherRootView
         windowView?.let {
@@ -357,7 +379,7 @@ constructor(
                                 stateManager,
                                 systemUiProxy,
                                 iApplicationThread,
-                                /* depthController= */ null,
+                                depthController,
                             ),
                             SurfaceTransactionApplier(rootView),
                             emptyRecentsMessageView,
@@ -709,7 +731,7 @@ constructor(
             appTargets,
             wallpaperTargets,
             nonAppTargets,
-            /* depthController= */ null,
+            depthController,
             /* transitionInfo= */ null,
             /* appearedTaskId= */ ActivityTaskManager.INVALID_TASK_ID,
             pendingAnimation,
@@ -796,6 +818,9 @@ constructor(
 
     override fun collectStateHandlers(out: MutableList<StateManager.StateHandler<RecentsState?>>?) {
         out!!.add(FallbackRecentsStateController(this))
+        if (depthController != null) {
+            out.add(depthController)
+        }
     }
 
     override fun getStateManager() = stateManager
@@ -925,4 +950,7 @@ constructor(
 
     override fun createAtomicAnimationFactory(): AtomicAnimationFactory<RecentsState> =
         RecentsAtomicAnimationFactory(this)
+
+    override fun getDepthController(): DepthController<RecentsState, RecentsWindowManager>? =
+        depthController
 }

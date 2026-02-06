@@ -20,6 +20,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.view.isVisible
+import com.android.launcher3.statehandlers.DepthController
 import com.android.quickstep.recents.di.RecentsComponent
 import com.android.quickstep.window.RecentsWindowManager
 
@@ -37,4 +38,7 @@ constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int = 0) :
             mContainer.requestInputFocus(focused = isVisible)
         }
     }
+
+    override fun getDepthController(): DepthController<RecentsState, RecentsWindowManager>? =
+        mContainer.depthController
 }

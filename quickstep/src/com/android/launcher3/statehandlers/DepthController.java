@@ -33,6 +33,7 @@ import com.android.launcher3.statemanager.BaseState;
 import com.android.launcher3.statemanager.StateManager.StateHandler;
 import com.android.launcher3.statemanager.StatefulContainer;
 import com.android.launcher3.states.StateAnimationConfig;
+import com.android.launcher3.util.ListenableRef;
 import com.android.quickstep.util.BaseDepthControllerImpl;
 
 import java.io.PrintWriter;
@@ -62,8 +63,8 @@ public class DepthController<
     private boolean mIsOnDrawListenerAdded = false;
     private boolean mRemoveOnDrawListenerCancelled = false;
 
-    public DepthController(CONTAINER container, boolean blurEnabled) {
-        super(container, blurEnabled);
+    public DepthController(CONTAINER container, ListenableRef<Boolean> blurState) {
+        super(container, blurState);
     }
 
     private void onContainerDraw() {
