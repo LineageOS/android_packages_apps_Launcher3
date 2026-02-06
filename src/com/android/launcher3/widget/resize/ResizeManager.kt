@@ -641,10 +641,10 @@ class ResizeManager(
         private const val CELL_LAYOUT_INVALID_RESIZE_MAX_ALPHA = 0.5f
 
         private fun CellLayout.cellWidthWithBorderSpace(deviceProfile: DeviceProfile) =
-            cellWidth + deviceProfile.workspaceIconProfile.cellLayoutBorderSpacePx.x
+            cellWidth + deviceProfile.workspaceProfile.cellLayoutBorderSpacePx.x
 
         private fun CellLayout.cellHeightWithBorderSpace(deviceProfile: DeviceProfile) =
-            cellHeight + deviceProfile.workspaceIconProfile.cellLayoutBorderSpacePx.y
+            cellHeight + deviceProfile.workspaceProfile.cellLayoutBorderSpacePx.y
     }
 
     /** Listener for either in-progress or committed resize events. */

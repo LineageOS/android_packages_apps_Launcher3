@@ -190,7 +190,7 @@ public abstract class SwipeUpAnimationLogic implements
         public @NonNull RectF getWindowTargetRect() {
             PagedOrientationHandler orientationHandler = getOrientationHandler();
             DeviceProfile dp = mDp;
-            final int halfIconSize = dp.getWorkspaceIconProfile().getIconSizePx() / 2;
+            final int halfIconSize = dp.getWorkspaceProfile().getIconSizePx() / 2;
             float primaryDimension = orientationHandler.getPrimaryValue(
                     dp.getDeviceProperties().getAvailableWidthPx(),
                     dp.getDeviceProperties().getAvailableHeightPx()

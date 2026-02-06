@@ -149,8 +149,8 @@ public final class LauncherAppWidgetProviderInfoTest {
         AppWidgetHostView.getDefaultPaddingForWidget(mContext, null, padding);
         int maxPadding = Math.max(Math.max(padding.left, padding.right),
                 Math.max(padding.top, padding.bottom));
-        dp.getWorkspaceIconProfile().getCellLayoutBorderSpacePx().x =
-                dp.getWorkspaceIconProfile().getCellLayoutBorderSpacePx().y = maxPadding + 1;
+        dp.getWorkspaceProfile().getCellLayoutBorderSpacePx().x =
+                dp.getWorkspaceProfile().getCellLayoutBorderSpacePx().y = maxPadding + 1;
 
         LauncherAppWidgetProviderInfo info = new LauncherAppWidgetProviderInfo();
         info.minWidth = CELL_SIZE * 3;
@@ -172,8 +172,8 @@ public final class LauncherAppWidgetProviderInfoTest {
         AppWidgetHostView.getDefaultPaddingForWidget(mContext, null, padding);
         int maxPadding = Math.max(Math.max(padding.left, padding.right),
                 Math.max(padding.top, padding.bottom));
-        dp.getWorkspaceIconProfile().getCellLayoutBorderSpacePx().x =
-                dp.getWorkspaceIconProfile().getCellLayoutBorderSpacePx().y = maxPadding - 1;
+        dp.getWorkspaceProfile().getCellLayoutBorderSpacePx().x =
+                dp.getWorkspaceProfile().getCellLayoutBorderSpacePx().y = maxPadding - 1;
         LauncherAppWidgetProviderInfo info = new LauncherAppWidgetProviderInfo();
         info.minWidth = CELL_SIZE * 3;
         info.minHeight = CELL_SIZE * 3;
@@ -250,11 +250,11 @@ public final class LauncherAppWidgetProviderInfoTest {
 
         DeviceProfile dp = idp.getDeviceProfile(mContext).copy();
         DeviceProfile profile = Mockito.spy(dp);
-        WorkspaceProfile workspaceProfile = Mockito.spy(dp.mWorkspaceProfile);
-        Mockito.when(profile.getWorkspaceIconProfile()).thenReturn(workspaceProfile);
+        WorkspaceProfile workspaceProfile = Mockito.spy(dp.getWorkspaceProfile());
+        Mockito.when(profile.getWorkspaceProfile()).thenReturn(workspaceProfile);
         Mockito.when(workspaceProfile.getCellSize()).thenReturn(new Point(CELL_SIZE, CELL_SIZE));
-        profile.getWorkspaceIconProfile().getCellLayoutBorderSpacePx().set(SPACE_SIZE, SPACE_SIZE);
-        profile.getWorkspaceIconProfile().getWidgetPadding().setEmpty();
+        profile.getWorkspaceProfile().getCellLayoutBorderSpacePx().set(SPACE_SIZE, SPACE_SIZE);
+        profile.getWorkspaceProfile().getWidgetPadding().setEmpty();
 
         idp.supportedProfiles = Collections.singletonList(profile);
         idp.numColumns = NUM_OF_COLS;

@@ -1139,7 +1139,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
             DeviceProfile launcherDp, DeviceProfile taskbarDp, int hotseatNavBarTranslationX,
             Interpolator interpolator) {
         boolean isToHome = mControllers.uiController.isIconAlignedWithHotseat();
-        float scaleUp = ((float) launcherDp.getWorkspaceIconProfile().getIconSizePx())
+        float scaleUp = ((float) launcherDp.getWorkspaceProfile().getIconSizePx())
                 / mTransientIconSize;
         int borderSpacing = launcherDp.getHotseatProfile().getBorderSpace();
         Rect hotseatPadding = launcherDp.getHotseatLayoutPadding(mActivity);

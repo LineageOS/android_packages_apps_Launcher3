@@ -104,8 +104,7 @@ constructor(
         // modify the device profile.
         dp.inv.numColumns = if (isMulti) columns / 2 else columns
         dp.inv.numRows = rows
-        dp.workspaceIconProfile =
-            dp.workspaceIconProfile.copy(cellLayoutBorderSpacePx = Point(0, 0))
+        dp.workspaceProfile = dp.workspaceProfile.copy(cellLayoutBorderSpacePx = Point(0, 0))
         val cl =
             if (isMulti) MultipageCellLayout(this)
             else

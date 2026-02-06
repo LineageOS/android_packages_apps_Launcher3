@@ -51,11 +51,11 @@ class WidgetDragScaleUtilsTest {
             Mockito.spy(LauncherAppState.getIDP(context).getDeviceProfile(context).copy())
 
         doReturn(0.8f).whenever(deviceProfile).getWorkspaceSpringLoadScale(any(Context::class.java))
-        deviceProfile.workspaceIconProfile =
-            deviceProfile.workspaceIconProfile.copy(
+        deviceProfile.workspaceProfile =
+            deviceProfile.workspaceProfile.copy(
                 cellLayoutBorderSpacePx = Point(CELL_SPACING, CELL_SPACING)
             )
-        deviceProfile.workspaceIconProfile.widgetPadding.setEmpty()
+        deviceProfile.workspaceProfile.widgetPadding.setEmpty()
     }
 
     @Test
@@ -63,7 +63,7 @@ class WidgetDragScaleUtilsTest {
         val minSize =
             context.resources.getDimensionPixelSize(R.dimen.widget_drag_view_min_scale_down_size)
 
-        val workspaceProfile = spy(deviceProfile.mWorkspaceProfile)
+        val workspaceProfile = spy(deviceProfile.workspaceProfile)
         whenever(workspaceProfile.cellSize).thenReturn(Point(minSize * 2, minSize * 2))
 
         itemInfo.spanX = 2
@@ -90,7 +90,7 @@ class WidgetDragScaleUtilsTest {
     fun getWidgetDragScalePx_draggedViewSameAsWidgetSize_downScaled() {
         val minSize =
             context.resources.getDimensionPixelSize(R.dimen.widget_drag_view_min_scale_down_size)
-        val workspaceProfile = spy(deviceProfile.mWorkspaceProfile)
+        val workspaceProfile = spy(deviceProfile.workspaceProfile)
         whenever(workspaceProfile.cellSize).thenReturn(Point(minSize * 2, minSize * 2))
         itemInfo.spanX = 4
         itemInfo.spanY = 2
@@ -121,7 +121,7 @@ class WidgetDragScaleUtilsTest {
             context.resources.getDimensionPixelSize(R.dimen.widget_drag_view_min_scale_down_size)
         // Assume min size is greater than cell size, so that, we know the upscale of dragged view
         // is due to min size enforcement.
-        val workspaceProfile = spy(deviceProfile.mWorkspaceProfile)
+        val workspaceProfile = spy(deviceProfile.workspaceProfile)
         whenever(workspaceProfile.cellSize).thenReturn(Point(minSizePx / 2, minSizePx / 2))
         itemInfo.spanX = 1
         itemInfo.spanY = 1

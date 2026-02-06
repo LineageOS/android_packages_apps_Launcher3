@@ -177,7 +177,7 @@ public class Hotseat extends CellLayout implements Insettable {
                 if (mQsb instanceof HorizontalInsettableView) {
                     HorizontalInsettableView insettableQsb = (HorizontalInsettableView) mQsb;
                     final float insetFraction =
-                            (float) dp.getWorkspaceIconProfile().getIconSizePx()
+                            (float) dp.getWorkspaceProfile().getIconSizePx()
                                     / dp.getHotseatProfile().getQsbWidth();
                     // post this to the looper so that QSB has a chance to redraw itself, e.g.
                     // after device rotation
@@ -243,7 +243,7 @@ public class Hotseat extends CellLayout implements Insettable {
         if (mQsb instanceof HorizontalInsettableView horizontalInsettableQsb) {
             final float currentInsetFraction = horizontalInsettableQsb.getHorizontalInsets();
             final float targetInsetFraction = shouldAdjustQsb
-                    ? (float) dp.getWorkspaceIconProfile().getIconSizePx() / dp.getHotseatProfile()
+                    ? (float) dp.getWorkspaceProfile().getIconSizePx() / dp.getHotseatProfile()
                     .getQsbWidth()
                     : 0;
             ValueAnimator qsbAnimator =

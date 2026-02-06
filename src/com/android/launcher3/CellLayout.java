@@ -277,7 +277,7 @@ public class CellLayout extends ViewGroup {
         mGridVisualizationRoundingRadius =
                 res.getDimensionPixelSize(R.dimen.grid_visualization_rounding_radius);
         mReorderPreviewAnimationMagnitude = (REORDER_PREVIEW_MAGNITUDE
-                * deviceProfile.getWorkspaceIconProfile().getIconSizePx());
+                * deviceProfile.getWorkspaceProfile().getIconSizePx());
 
         // Initialize the data structures used for the drag visualization.
         mEaseOutInterpolator = Interpolators.DECELERATE_QUINT; // Quint ease out
@@ -406,7 +406,7 @@ public class CellLayout extends ViewGroup {
             case WORKSPACE:
             default:
                 mBorderSpace = new Point(
-                        deviceProfile.getWorkspaceIconProfile().getCellLayoutBorderSpacePx());
+                        deviceProfile.getWorkspaceProfile().getCellLayoutBorderSpacePx());
                 break;
         }
 
@@ -614,10 +614,10 @@ public class CellLayout extends ViewGroup {
 
     protected void visualizeGrid(Canvas canvas) {
         DeviceProfile dp = mActivity.getDeviceProfile();
-        int paddingX = Math.min((mCellWidth - dp.getWorkspaceIconProfile().getIconSizePx()) / 2,
-                dp.mWorkspaceProfile.getGridVisualizationPaddingX());
-        int paddingY = Math.min((mCellHeight - dp.getWorkspaceIconProfile().getIconSizePx()) / 2,
-                dp.mWorkspaceProfile.getGridVisualizationPaddingY());
+        int paddingX = Math.min((mCellWidth - dp.getWorkspaceProfile().getIconSizePx()) / 2,
+                dp.getWorkspaceProfile().getGridVisualizationPaddingX());
+        int paddingY = Math.min((mCellHeight - dp.getWorkspaceProfile().getIconSizePx()) / 2,
+                dp.getWorkspaceProfile().getGridVisualizationPaddingY());
 
         mVisualizeGridPaint.setStrokeWidth(8);
 
@@ -947,7 +947,7 @@ public class CellLayout extends ViewGroup {
     public float getFolderCreationRadius(int[] targetCell) {
         DeviceProfile grid = mActivity.getDeviceProfile();
         float iconVisibleRadius = ICON_VISIBLE_AREA_FACTOR
-                * grid.getWorkspaceIconProfile().getIconSizePx() / 2;
+                * grid.getWorkspaceProfile().getIconSizePx() / 2;
         // Halfway between reorder radius and icon.
         return (getReorderRadius(targetCell, 1, 1) + iconVisibleRadius) / 2;
     }

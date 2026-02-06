@@ -319,8 +319,7 @@ class AppPairIcon :
                 if (container == BubbleTextView.DISPLAY_FOLDER) {
                     (grid.folderProfile.childIconSizePx + grid.folderProfile.childDrawablePaddingPx)
                 } else {
-                    (grid.workspaceIconProfile.iconSizePx +
-                        grid.workspaceIconProfile.iconDrawablePaddingPx)
+                    (grid.workspaceProfile.iconSizePx + grid.workspaceProfile.iconDrawablePaddingPx)
                 }
             // For some reason, app icons have setIncludeFontPadding(false) inside folders, so we
             // set it here to match that.

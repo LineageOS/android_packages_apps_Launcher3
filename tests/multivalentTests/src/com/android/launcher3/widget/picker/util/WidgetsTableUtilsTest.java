@@ -247,13 +247,13 @@ public final class WidgetsTableUtilsTest {
         AllAppsProfile testAllAppsProfile = Mockito.spy(mTestDeviceProfile.getAllAppsProfile());
         Mockito.doReturn(0).when(testAllAppsProfile).getIconSizePx();
 
-        WorkspaceProfile workspaceProfile = Mockito.spy(dp.mWorkspaceProfile);
+        WorkspaceProfile workspaceProfile = Mockito.spy(dp.getWorkspaceProfile());
         when(workspaceProfile.getCellSize()).thenReturn(new Point(CELL_SIZE, CELL_SIZE));
-        when(mTestDeviceProfile.getWorkspaceIconProfile()).thenReturn(workspaceProfile);
+        when(mTestDeviceProfile.getWorkspaceProfile()).thenReturn(workspaceProfile);
 
-        mTestDeviceProfile.getWorkspaceIconProfile().getCellLayoutBorderSpacePx()
+        mTestDeviceProfile.getWorkspaceProfile().getCellLayoutBorderSpacePx()
                 .set(SPACE_SIZE, SPACE_SIZE);
-        mTestDeviceProfile.getWorkspaceIconProfile().getWidgetPadding().setEmpty();
+        mTestDeviceProfile.getWorkspaceProfile().getWidgetPadding().setEmpty();
     }
 
     private void initTestWidgets() {

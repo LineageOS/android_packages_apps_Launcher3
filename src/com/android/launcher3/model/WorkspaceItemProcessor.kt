@@ -789,15 +789,14 @@ class WorkspaceItemProcessor(
             widgetProviderInfo: LauncherAppWidgetProviderInfo,
         ) {
             for (deviceProfile in idp.supportedProfiles) {
-                val cellLayoutBorderSpacePx =
-                    deviceProfile.workspaceIconProfile.cellLayoutBorderSpacePx
+                val cellLayoutBorderSpacePx = deviceProfile.workspaceProfile.cellLayoutBorderSpacePx
                 FileLog.d(
                     TAG,
                     "DeviceProfile available width: ${deviceProfile.deviceProperties.availableWidthPx}," +
                         " available height: ${deviceProfile.deviceProperties.availableHeightPx}," +
                         " cellLayoutBorderSpacePx Horizontal: ${cellLayoutBorderSpacePx.x}," +
                         " cellLayoutBorderSpacePx Vertical: ${cellLayoutBorderSpacePx.y}," +
-                        " cellSize: ${deviceProfile.mWorkspaceProfile.cellSize}",
+                        " cellSize: ${deviceProfile.workspaceProfile.cellSize}",
                 )
             }
             val widgetDimension = StringBuilder()

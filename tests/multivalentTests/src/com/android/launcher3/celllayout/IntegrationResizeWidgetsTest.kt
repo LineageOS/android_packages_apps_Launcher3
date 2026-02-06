@@ -179,9 +179,9 @@ class IntegrationResizeWidgetsTest {
         // Identify how much is one cell's size
         val dp = getIDP(cl.context).getDeviceProfile(cl.context)
         val paddedCellWidth =
-            (cl.cellWidth + dp.workspaceIconProfile.cellLayoutBorderSpacePx.x).toFloat()
+            (cl.cellWidth + dp.workspaceProfile.cellLayoutBorderSpacePx.x).toFloat()
         val paddedCellHeight =
-            (cl.cellHeight + dp.workspaceIconProfile.cellLayoutBorderSpacePx.y).toFloat()
+            (cl.cellHeight + dp.workspaceProfile.cellLayoutBorderSpacePx.y).toFloat()
 
         // We want to drag as much as the request number of cells
         val dragX = (paddedCellWidth * cellsToDrag * handleEdge.expandDirX)
