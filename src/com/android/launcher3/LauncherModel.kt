@@ -156,11 +156,17 @@ constructor(
      * be called as DB updates are automatically followed by UI update. Calling this too early may
      * cause missing icons or widgets during restore process.
      */
+    @VisibleForTesting fun forceReload() = forceReload(false)
+
+    @Deprecated(
+        "Use [forceReload] instead, the 'unstoppable' param is only a temporary fix" +
+            "for image test flakiness, and will be removed soon"
+    )
     @VisibleForTesting
-    fun forceReload(): CompletionStage<Unit> {
+    fun forceReload(unstoppable: Boolean): CompletionStage<Unit> {
         synchronized(mLock) {
             mModelLoaded = false
-            return startLoader()
+            return startLoader(unstoppable)
         }
     }
 
@@ -202,7 +208,15 @@ constructor(
     /** Starts the loader, and returns a completion stage indicating when the loading is complete */
     fun startLoader(): CompletionStage<Unit> = startLoader(arrayOf())
 
-    private fun startLoader(newCallbacks: Array<BgDataModel.Callbacks>): CompletableFuture<Unit> {
+    @Deprecated("Use [startLoader] instead, param `unstoppable` is about to be removed")
+    @VisibleForTesting
+    private fun startLoader(unstoppable: Boolean): CompletionStage<Unit> =
+        startLoader(arrayOf(), unstoppable)
+
+    private fun startLoader(
+        newCallbacks: Array<BgDataModel.Callbacks>,
+        unstoppable: Boolean = false,
+    ): CompletableFuture<Unit> {
         // Enable queue before starting loader. It will get disabled in Launcher#finishBindingItems
         installQueue.pauseModelPush(ItemInstallQueue.FLAG_LOADER_RUNNING)
         synchronized(mLock) {
@@ -230,6 +244,7 @@ constructor(
                 return CompletableFuture.completedFuture(Unit)
             } else {
                 val task = loaderFactory.newLoaderTask(launcherBinder)
+                task.setUnstoppable(unstoppable)
                 mLoaderTask = task
 
                 val lastFuture = mLoadCompleteFuture
