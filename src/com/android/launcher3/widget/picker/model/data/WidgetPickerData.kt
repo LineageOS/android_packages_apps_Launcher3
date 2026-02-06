@@ -21,60 +21,15 @@ import com.android.launcher3.util.PackageUserKey
 import com.android.launcher3.widget.model.WidgetsListBaseEntry
 import com.android.launcher3.widget.model.WidgetsListContentEntry
 
-// This file contains WidgetPickerData and utility functions to operate on it.
-
 /** Widget data for display in the widget picker. */
-data class WidgetPickerData(
-    val allWidgets: List<WidgetsListBaseEntry> = listOf(),
-    val defaultWidgets: List<WidgetsListBaseEntry> = listOf(),
-)
-
-/** Provides utility methods to work with a [WidgetPickerData] object. */
-object WidgetPickerDataUtils {
-    /**
-     * Returns a [WidgetPickerData] with the provided widgets.
-     *
-     * When [defaultWidgets] is not passed, defaults from previous object are not copied over.
-     * Defaults (if supported) should be updated when all widgets are updated.
-     */
-    fun WidgetPickerData.withWidgets(
-        allWidgets: List<WidgetsListBaseEntry>,
-        defaultWidgets: List<WidgetsListBaseEntry> = listOf(),
-    ): WidgetPickerData {
-        return copy(allWidgets = allWidgets, defaultWidgets = defaultWidgets)
-    }
+data class WidgetPickerData(val allWidgets: List<WidgetsListBaseEntry> = listOf()) {
 
     /** Finds all [WidgetItem]s available for the provided package user. */
-    @JvmStatic
-    fun findAllWidgetsForPackageUser(
-        widgetPickerData: WidgetPickerData,
-        packageUserKey: PackageUserKey,
-    ): List<WidgetItem> {
-        return findContentEntryForPackageUser(widgetPickerData, packageUserKey)?.mWidgets
-            ?: emptyList()
-    }
+    fun findAllWidgetsForPackageUser(packageUserKey: PackageUserKey): List<WidgetItem> =
+        findContentEntryForPackageUser(packageUserKey)?.mWidgets ?: emptyList()
 
-    /**
-     * Finds and returns the [WidgetsListContentEntry] for the given package user.
-     *
-     * Set [fromDefaultWidgets] to true to limit the content entry to default widgets.
-     */
-    @JvmOverloads
-    @JvmStatic
-    fun findContentEntryForPackageUser(
-        widgetPickerData: WidgetPickerData,
-        packageUserKey: PackageUserKey,
-        fromDefaultWidgets: Boolean = false,
-    ): WidgetsListContentEntry? {
-        val widgetsListBaseEntries =
-            if (fromDefaultWidgets) {
-                widgetPickerData.defaultWidgets
-            } else {
-                widgetPickerData.allWidgets
-            }
-
-        return widgetsListBaseEntries.filterIsInstance<WidgetsListContentEntry>().firstOrNull {
+    fun findContentEntryForPackageUser(packageUserKey: PackageUserKey): WidgetsListContentEntry? =
+        allWidgets.filterIsInstance<WidgetsListContentEntry>().firstOrNull {
             PackageUserKey.fromPackageItemInfo(it.mPkgItem) == packageUserKey
         }
-    }
 }

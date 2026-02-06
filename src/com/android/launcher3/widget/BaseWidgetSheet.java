@@ -41,16 +41,21 @@ import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.DeviceProfile.OnDeviceProfileChangeListener;
 import com.android.launcher3.Insettable;
 import com.android.launcher3.Launcher;
+import com.android.launcher3.LauncherModel;
 import com.android.launcher3.PendingAddItemInfo;
 import com.android.launcher3.R;
+import com.android.launcher3.dagger.LauncherComponentProvider;
 import com.android.launcher3.model.WidgetItem;
 import com.android.launcher3.testing.TestLogging;
 import com.android.launcher3.testing.shared.TestProtocol;
+import com.android.launcher3.util.SafeCloseable;
 import com.android.launcher3.util.SystemUiController;
 import com.android.launcher3.util.Themes;
 import com.android.launcher3.util.window.WindowManagerProxy;
 import com.android.launcher3.views.AbstractSlideInView;
 import com.android.launcher3.widget.picker.model.WidgetPickerDataProvider.WidgetPickerDataChangeListener;
+
+import kotlin.Unit;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -77,6 +82,7 @@ public abstract class BaseWidgetSheet extends AbstractSlideInView<BaseActivity>
 
     @Nullable private WidgetCell mWidgetCellWithAddButton = null;
     @Nullable private WidgetItem mLastSelectedWidgetItem = null;
+    private SafeCloseable mCleanupTask;
 
     public BaseWidgetSheet(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
@@ -99,21 +105,37 @@ public abstract class BaseWidgetSheet extends AbstractSlideInView<BaseActivity>
         return context.getResources().getColor(R.color.widgets_picker_scrim);
     }
 
+    private void completeCleanupTask() {
+        if (mCleanupTask != null) {
+            mCleanupTask.close();
+            mCleanupTask = null;
+        }
+    }
+
+
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         WindowInsets windowInsets = WindowManagerProxy.INSTANCE.get(getContext())
                 .normalizeWindowInsets(getContext(), getRootWindowInsets(), new Rect());
         mNavBarScrimHeight = getNavBarScrimHeight(windowInsets);
-        mActivityContext.getWidgetPickerDataProvider().setChangeListener(this);
-        mActivityContext.addOnDeviceProfileChangeListener(this);
+        completeCleanupTask();
+
+        if (LauncherModel.useModelRepositoryBinding()) {
+            mCleanupTask = LauncherComponentProvider.get(getContext()).getHomeScreenRepository()
+                    .getAllWidgets().forEach(mActivityContext.getUiExecutor(), d -> {
+                        onWidgetsBound();
+                        return Unit.INSTANCE;
+                    });
+        } else {
+            mCleanupTask = mActivityContext.getWidgetPickerDataProvider().setChangeListener(this);
+        }
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        mActivityContext.getWidgetPickerDataProvider().setChangeListener(null);
-        mActivityContext.removeOnDeviceProfileChangeListener(this);
+        completeCleanupTask();
     }
 
     @Override

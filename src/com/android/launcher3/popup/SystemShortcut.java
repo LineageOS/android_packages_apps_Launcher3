@@ -10,7 +10,6 @@ import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCH
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_SYSTEM_SHORTCUT_DONT_SUGGEST_APP_TAP;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_SYSTEM_SHORTCUT_WIDGETS_TAP;
 import static com.android.launcher3.testing.shared.ResourceUtils.INVALID_RESOURCE_HANDLE;
-import static com.android.launcher3.widget.picker.model.data.WidgetPickerDataUtils.findAllWidgetsForPackageUser;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -32,12 +31,14 @@ import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.AbstractFloatingViewHelper;
 import com.android.launcher3.DropTargetHandler;
 import com.android.launcher3.Flags;
+import com.android.launcher3.LauncherModel;
 import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.R;
 import com.android.launcher3.SecondaryDropTarget;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate;
 import com.android.launcher3.allapps.PrivateProfileManager;
+import com.android.launcher3.dagger.LauncherComponentProvider;
 import com.android.launcher3.logging.StatsLogManager;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.ItemInfoWithIcon;
@@ -150,8 +151,11 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
         final PackageUserKey packageUserKey = PackageUserKey.fromItemInfo(itemInfo);
         if (packageUserKey == null) return null;
 
-        final WidgetPickerData data = context.getWidgetPickerDataProvider().get();
-        if (findAllWidgetsForPackageUser(data, packageUserKey).isEmpty()) {
+        final WidgetPickerData data = LauncherModel.useModelRepositoryBinding()
+                ? LauncherComponentProvider.get(context.asContext())
+                        .getHomeScreenRepository().getAllWidgets().getValue()
+                : context.getWidgetPickerDataProvider().get();
+        if (data.findAllWidgetsForPackageUser(packageUserKey).isEmpty()) {
             // hides widget picker shortcut if there are no widgets for the package.
             return null;
         }
