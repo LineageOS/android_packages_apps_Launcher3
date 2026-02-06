@@ -462,7 +462,7 @@ public interface ActivityContext extends SavedStateRegistryOwner {
             intent.setSourceBounds(Utilities.getViewBounds(v));
         }
         try {
-            if (isShortcut) {
+            if (isShortcut && intent.getPackage() != null) {
                 String id = ((WorkspaceItemInfo) item).getDeepShortcutId();
                 String packageName = intent.getPackage();
                 ((Context) this).getSystemService(LauncherApps.class).startShortcut(
