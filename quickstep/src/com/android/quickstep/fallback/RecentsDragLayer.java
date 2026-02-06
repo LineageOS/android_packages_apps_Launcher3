@@ -21,7 +21,6 @@ import android.util.AttributeSet;
 import com.android.launcher3.statemanager.StatefulContainer;
 import com.android.launcher3.uioverrides.touchcontrollers.TaskViewDismissTouchController;
 import com.android.launcher3.uioverrides.touchcontrollers.TaskViewLaunchTouchController;
-import com.android.launcher3.uioverrides.touchcontrollers.TaskViewRecentsTouchContext;
 import com.android.launcher3.util.TouchController;
 import com.android.launcher3.views.BaseDragLayer;
 import com.android.quickstep.views.RecentsViewContainer;
@@ -32,14 +31,6 @@ import com.android.quickstep.views.RecentsViewContainer;
 public class RecentsDragLayer<T extends Context & RecentsViewContainer
         & StatefulContainer<RecentsState>> extends BaseDragLayer<T> {
 
-    private final TaskViewRecentsTouchContext mTaskViewRecentsTouchContext =
-            new TaskViewRecentsTouchContext() {
-                @Override
-                public RecentsState getContainerState() {
-                    return mContainer.getStateManager().getState();
-                }
-            };
-
     public RecentsDragLayer(Context context, AttributeSet attrs) {
         super(context, attrs, 1 /* alphaChannelCount */);
     }
@@ -48,8 +39,8 @@ public class RecentsDragLayer<T extends Context & RecentsViewContainer
     public void recreateControllers() {
         super.recreateControllers();
         mControllers = new TouchController[]{
-                new TaskViewLaunchTouchController<>(mContainer, mTaskViewRecentsTouchContext),
-                new TaskViewDismissTouchController<>(mContainer, mTaskViewRecentsTouchContext),
+                new TaskViewLaunchTouchController<>(mContainer),
+                new TaskViewDismissTouchController<>(mContainer),
                 new FallbackNavBarTouchController(mContainer)
         };
     }

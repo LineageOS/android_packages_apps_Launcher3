@@ -132,7 +132,6 @@ import com.android.launcher3.Utilities;
 import com.android.launcher3.Workspace;
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate;
 import com.android.launcher3.allapps.AllAppsRecyclerView;
-import com.android.launcher3.anim.AnimatorPlaybackController;
 import com.android.launcher3.anim.PendingAnimation;
 import com.android.launcher3.apppairs.AppPairIcon;
 import com.android.launcher3.appprediction.PredictionRowView;
@@ -174,7 +173,6 @@ import com.android.launcher3.uioverrides.touchcontrollers.QuickSwitchTouchContro
 import com.android.launcher3.uioverrides.touchcontrollers.StatusBarTouchController;
 import com.android.launcher3.uioverrides.touchcontrollers.TaskViewDismissTouchController;
 import com.android.launcher3.uioverrides.touchcontrollers.TaskViewLaunchTouchController;
-import com.android.launcher3.uioverrides.touchcontrollers.TaskViewRecentsTouchContext;
 import com.android.launcher3.uioverrides.touchcontrollers.TransposedQuickSwitchTouchController;
 import com.android.launcher3.uioverrides.touchcontrollers.TwoButtonNavbarTouchController;
 import com.android.launcher3.util.ActivityOptionsWrapper;
@@ -304,21 +302,6 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     private final OverviewChangeListener mOverviewChangeListener = this::onOverviewTargetChanged;
 
     private RecentsComponent mRecentsComponent;
-
-    private final TaskViewRecentsTouchContext mTaskViewRecentsTouchContext =
-            new TaskViewRecentsTouchContext() {
-
-                @Override
-                public LauncherState getContainerState() {
-                    return getStateManager().getState();
-                }
-
-                @Override
-                public void onUserControlledAnimationCreated(
-                        AnimatorPlaybackController animController) {
-                    getStateManager().setCurrentUserControlledAnimation(animController);
-                }
-            };
 
     private void setupBlurState() {
         ListenableRef<Boolean> blurState = WindowBlurState.getInstance(this);
@@ -614,9 +597,6 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         SystemUiProxy.INSTANCE.get(this)
                 .setLauncherKeepClearAreaHeight(visible,
                         profile.getHotseatProfile().getBarSizePx());
-        if (state == NORMAL && !inTransition) {
-            ((RecentsView) getOverviewPanel()).setSwipeDownShouldLaunchApp(false);
-        }
     }
 
     @Override
@@ -775,8 +755,10 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
                 break;
         }
         list.add(new StatusBarTouchController(this, () -> this.isInState(LauncherState.NORMAL)));
-        list.add(new TaskViewLaunchTouchController<>(this, mTaskViewRecentsTouchContext));
-        list.add(new TaskViewDismissTouchController<>(this, mTaskViewRecentsTouchContext));
+        list.add(new TaskViewLaunchTouchController<>(this,
+                animController -> getStateManager().setCurrentUserControlledAnimation(
+                        animController)));
+        list.add(new TaskViewDismissTouchController<>(this));
         return list.toArray(new TouchController[list.size()]);
     }
 

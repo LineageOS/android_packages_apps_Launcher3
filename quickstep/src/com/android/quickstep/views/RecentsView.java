@@ -706,7 +706,6 @@ public abstract class RecentsView<
 
     private boolean mOverviewStateEnabled;
     private boolean mHandleTaskStackChanges;
-    private boolean mSwipeDownShouldLaunchApp;
     private boolean mTouchDownToStartHome;
     private final float mSquaredTouchSlop;
     private int mDownX;
@@ -1573,9 +1572,6 @@ public abstract class RecentsView<
         ActiveGestureProtoLogProxy.logOnPageEndTransition(getNextPage());
         if (!mContainer.getDeviceProfile().getDeviceProperties().isLargeScreen()) {
             mActionsView.updateDisabledFlags(OverviewActionsView.DISABLED_SCROLLING, false);
-        }
-        if (getNextPage() > 0) {
-            setSwipeDownShouldLaunchApp(true);
         }
         InteractionJankMonitorWrapper.end(Cuj.CUJ_RECENTS_SCROLLING);
     }
@@ -2683,7 +2679,6 @@ public abstract class RecentsView<
      */
     public void onSwipeUpAnimationSuccess() {
         startIconFadeInOnGestureComplete();
-        setSwipeDownShouldLaunchApp(true);
     }
 
     private void animateRecentsRotationInPlace(int newRotation) {
@@ -3267,12 +3262,11 @@ public abstract class RecentsView<
         }
     }
 
-    public void setSwipeDownShouldLaunchApp(boolean swipeDownShouldLaunchApp) {
-        mSwipeDownShouldLaunchApp = swipeDownShouldLaunchApp;
-    }
-
-    public boolean shouldSwipeDownLaunchApp() {
-        return mSwipeDownShouldLaunchApp;
+    /**
+     * Returns true if the task can be launched via swipe down gesture.
+     */
+    public boolean shouldSwipeDownLaunchTaskView(@Nullable TaskView taskView) {
+        return mUtils.shouldSwipeDownLaunchTaskView(taskView);
     }
 
     public void setIgnoreResetTask(int taskId) {
@@ -5557,6 +5551,10 @@ public abstract class RecentsView<
 
     public BaseContainerInterface<STATE_TYPE, ?> getContainerInterface() {
         return mContainerInterface;
+    }
+
+    public RecentsViewContainer getContainer() {
+        return mContainer;
     }
 
     /**

@@ -40,10 +40,12 @@ import androidx.dynamicanimation.animation.SpringForce
 import com.android.app.animation.Interpolators.LINEAR
 import com.android.internal.annotations.VisibleForTesting
 import com.android.launcher3.AbstractFloatingView.TYPE_TASK_MENU
-import com.android.launcher3.AbstractFloatingView.getTopOpenViewWithType
+import com.android.launcher3.AbstractFloatingView.TYPE_TOUCH_CONTROLLER_NO_INTERCEPT
+import com.android.launcher3.AbstractFloatingViewHelper
 import com.android.launcher3.Flags.hideAutomatedTasksInOverview
 import com.android.launcher3.PagedView.INVALID_PAGE
 import com.android.launcher3.R
+import com.android.launcher3.Utilities.debugLog
 import com.android.launcher3.Utilities.getPivotsForScalingRectToRect
 import com.android.launcher3.automation.AutomationChange
 import com.android.launcher3.automation.AutomationRepository
@@ -95,8 +97,9 @@ constructor(
     private val taskAnimationManager: TaskAnimationManager,
     private val rotationTouchHelper: RotationTouchHelper,
     private val systemUiProxy: SystemUiProxy,
-    private val automationRepository: AutomationRepository,
+    automationRepository: AutomationRepository,
     @Ui uiExecutor: Executor,
+    private val abstractFloatingViewHelper: AbstractFloatingViewHelper,
 ) : DesktopVisibilityListener {
     val taskViews = TaskViewsIterable(recentsView)
 
@@ -353,7 +356,7 @@ constructor(
     fun View.getVisibleFocusables(direction: Int): List<View> =
         getFocusables(direction)?.filter { it.isVisibleToUser } ?: emptyList()
 
-    private fun getDeviceProfile() = (recentsView.mContainer as RecentsViewContainer).deviceProfile
+    private fun getDeviceProfile() = recentsView.container.deviceProfile
 
     fun getRunningTaskExpectedIndex(runningTaskView: TaskView): Int {
         if (runningTaskView is DesktopTaskView) {
@@ -702,7 +705,8 @@ constructor(
     }
 
     private fun getTaskMenu(): TaskMenuView? =
-        getTopOpenViewWithType(recentsView.mContainer, TYPE_TASK_MENU) as? TaskMenuView
+        abstractFloatingViewHelper.getTopOpenViewWithType(recentsView.container, TYPE_TASK_MENU)
+            as? TaskMenuView
 
     fun taskMenuIsOpen() = getTaskMenu()?.isOpen == true
 
@@ -993,6 +997,53 @@ constructor(
         }
         isInOverview = finalState.isInOverview
     }
+
+    fun shouldSwipeDownLaunchTaskView(taskView: TaskView?) =
+        with(recentsView) {
+            when {
+                // Floating views that a TouchController should not try to intercept touches from.
+                abstractFloatingViewHelper.getTopOpenViewWithType(
+                    container,
+                    TYPE_TOUCH_CONTROLLER_NO_INTERCEPT,
+                ) != null -> {
+                    debugLog(TAG, "Not swiping down, open floating view blocking touch.")
+                    false
+                }
+
+                // Do not allow launch while recents is scrolling.
+                !recentsView.scroller.isFinished -> {
+                    debugLog(TAG, "Not swiping down, Recents scrolling.")
+                    false
+                }
+
+                !stateManager.state.isTaskViewInteractive -> {
+                    debugLog(TAG, "Not swiping down, Recents not interactive.")
+                    false
+                }
+
+                taskView == null -> {
+                    debugLog(TAG, "Not swiping down, taskView not found.")
+                    false
+                }
+
+                taskView !== currentPageTaskView -> {
+                    debugLog(TAG, "Not swiping down, not current page.")
+                    false
+                }
+
+                taskView.isGridTask -> {
+                    debugLog(TAG, "Not swiping down on grid taskView.")
+                    false
+                }
+
+                !isTaskInExpectedScrollPosition(taskView) -> {
+                    debugLog(TAG, "Not swiping down, taskView not in middle")
+                    false
+                }
+
+                else -> true
+            }
+        }
 
     companion object {
         class RecentsViewFloatProperty(
