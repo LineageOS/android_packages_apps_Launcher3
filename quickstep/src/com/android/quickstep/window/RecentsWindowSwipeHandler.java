@@ -31,7 +31,6 @@ import static com.android.quickstep.OverviewComponentObserver.startHomeIntentSaf
 import static com.android.quickstep.fallback.RecentsState.HIDDEN;
 
 import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityOptions;
 import android.content.Context;
@@ -403,7 +402,8 @@ public class RecentsWindowSwipeHandler extends AbsSwipeUpHandler<RecentsWindowMa
 
         private void updateRecentsActivityTransformDuringHomeAnim(SurfaceProperties builder,
                 RemoteAnimationTarget app, TransformParams params) {
-            if (app.mode != mRecentsAnimationTargets.targetMode) {
+            if (mRecentsAnimationTargets != null
+                    && app.mode != mRecentsAnimationTargets.targetMode) {
                 return;
             }
             builder.setAlpha(mRecentsAlpha.value);
