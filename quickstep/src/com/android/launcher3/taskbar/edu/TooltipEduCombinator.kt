@@ -36,7 +36,7 @@ import com.android.launcher3.util.OnboardingPrefs.TASKBAR_EDU_TOOLTIP_STEP
 import com.android.launcher3.util.OnboardingPrefs.TASKBAR_SEEN_EDU_FLAGS
 import com.android.launcher3.views.ActivityContext
 import com.android.systemui.shared.Flags.enableRecentsInTaskbar
-import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper
+import com.android.wm.shell.shared.bubbles.BubbleFlagHelper
 import java.io.PrintWriter
 
 /**
@@ -77,7 +77,7 @@ class TooltipEduCombinator(
 
     /** Indicates whether the createAnyBubbleEnabled is enabled. */
     @VisibleForTesting
-    var createAnyBubbleEnabled: Boolean = BubbleAnythingFlagHelper.enableCreateAnyBubble()
+    var createAnyBubbleEnabled: Boolean = BubbleFlagHelper.enableCreateAnyBubble()
 
     /** Creates the [TooltipInfo] for the split-screen educational tooltip. */
     private val splitTooltipInfo: TooltipInfo
