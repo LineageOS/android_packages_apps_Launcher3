@@ -54,6 +54,7 @@ import static com.android.launcher3.Utilities.mapBoundToRange;
 import static com.android.launcher3.config.FeatureFlags.SEPARATE_RECENTS_ACTIVITY;
 import static com.android.launcher3.desktop.DesktopAppLaunchTransitionManager.createDesktopAppLaunchRemoteTransition;
 import static com.android.launcher3.desktop.DesktopAppLaunchTransitionManager.isDesktopAppLaunch;
+import static com.android.launcher3.taskbar.TaskbarStashController.TASKBAR_STASH_DURATION_WITHOUT_ICON_ALIGNMENT;
 import static com.android.launcher3.testing.shared.TestProtocol.WALLPAPER_OPEN_ANIMATION_FINISHED_MESSAGE;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.MultiPropertyFactory.MULTI_PROPERTY_VALUE;
@@ -63,6 +64,7 @@ import static com.android.quickstep.TaskViewUtils.findTaskViewToLaunch;
 import static com.android.quickstep.util.AnimUtils.clampToDuration;
 import static com.android.quickstep.util.AnimUtils.completeRunnableListCallback;
 import static com.android.quickstep.util.FloatingIconViewHelper.getFloatingIconView;
+import static com.android.systemui.shared.Flags.enableRecentsInTaskbar;
 import static com.android.systemui.shared.system.QuickStepContract.getWindowCornerRadius;
 import static com.android.systemui.shared.system.QuickStepContract.supportsRoundedCornersOnWindows;
 
@@ -2057,6 +2059,8 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             boolean isPersistentTaskbarAndNotInDesktopMode) {
         if (isPersistentTaskbarAndNotInDesktopMode) {
             return PINNED_TASKBAR_TRANSITION_DURATION;
+        } else if (enableRecentsInTaskbar()) {
+            return TASKBAR_STASH_DURATION_WITHOUT_ICON_ALIGNMENT;
         } else if (!shouldOverrideToFastAnimation) {
             return TASKBAR_TO_HOME_DURATION_SLOW;
         } else {
