@@ -73,7 +73,7 @@ import com.android.quickstep.util.SystemUiFlagUtils;
 import com.android.quickstep.window.RecentsWindowManager;
 import com.android.systemui.shared.recents.model.ThumbnailData;
 import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
-import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper;
+import com.android.wm.shell.shared.bubbles.BubbleFlagHelper;
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
 
 import kotlin.Unit;
@@ -662,7 +662,7 @@ public class TaskbarLauncherStateController {
                     public void onAnimationEnd(Animator animation) {
                         // If we're awake when the animation ends (e.g. quick power button double
                         // tap), then we should no longer stash the taskbar.
-                        if (BubbleAnythingFlagHelper.enableCreateAnyBubble()
+                        if (BubbleFlagHelper.enableCreateAnyBubble()
                                 && hasAnyFlag(FLAG_AWAKE)) {
                             if (DEBUG) {
                                 Log.d(TAG, "Skip stashing taskbar, it's visible again.");
