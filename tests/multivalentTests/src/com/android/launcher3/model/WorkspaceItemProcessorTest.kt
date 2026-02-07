@@ -313,16 +313,16 @@ class WorkspaceItemProcessorTest {
 
     @Test
     fun `When fallback Activity found for app then mark restored`() {
-
         // Given
         mLauncherApps.apply {
             whenever(isPackageEnabled("package", mUserHandle)).thenReturn(true)
             whenever(isActivityEnabled(mComponentName, mUserHandle)).thenReturn(false)
         }
+        val fallbackIntent = Intent("fallback.action").setPackage("package")
         mockPmHelper =
             mock<PackageManagerHelper>().apply {
                 whenever(getAppLaunchIntent(mComponentName.packageName, mUserHandle))
-                    .thenReturn(mIntent)
+                    .thenReturn(fallbackIntent)
             }
 
         // When
@@ -333,8 +333,9 @@ class WorkspaceItemProcessorTest {
         assertWithMessage("item restoreFlag should be set to 0")
             .that(mockCursor.restoreFlag)
             .isEqualTo(0)
-        verify(mockCursor.updater().put(Favorites.INTENT, mIntent.toUri(0))).commit()
+        verify(mockCursor.updater()).put(Favorites.INTENT, fallbackIntent.toUri(0))
         assertThat(mIconRequestInfos).containsExactly(mockIconRequestInfo)
+        assertThat(workspaceInfo.intent).isEqualTo(fallbackIntent)
         verify(mockCursor).checkAndAddItem(eq(workspaceInfo), any(), anyOrNull())
     }
 
@@ -362,10 +363,34 @@ class WorkspaceItemProcessorTest {
             .isEqualTo(1)
         verify(mockCursor)
             .markDeleted(
-                "No Activities found for id=1, targetPkg=package, component=ComponentInfo{package/class}. Unable to create launch Intent.",
+                "No Activities or install sessions found for id=1, targetPkg=package, component=ComponentInfo{package/class}. Unable to create launch Intent.",
                 RestoreError.APP_NO_LAUNCH_INTENT,
             )
         verify(mockCursor, times(0)).checkAndAddItem(any(), any(), anyOrNull())
+    }
+
+    @Test
+    fun whenActivityDisabled_andPackageInstalling_forRestore_thenKeepItemForRestore() {
+        // Given
+        mLauncherApps.apply {
+            whenever(isPackageEnabled("package", mUserHandle)).thenReturn(true)
+            whenever(isActivityEnabled(mComponentName, mUserHandle)).thenReturn(false)
+        }
+        mockPmHelper = mock<PackageManagerHelper>().apply {
+            whenever(getAppLaunchIntent(mComponentName.packageName, mUserHandle)).thenReturn(null)
+        }
+        val packageUserKey = PackageUserKey("package", mUserHandle)
+        mInstallingPkgs[packageUserKey] = mock<PackageInstaller.SessionInfo>()
+
+        // When
+        itemProcessorUnderTest = createWorkspaceItemProcessorUnderTest()
+        itemProcessorUnderTest.processItem()
+
+        val expectedRestoreFlag = FLAG_RESTORED_ICON or FLAG_RESTORE_STARTED
+        assertThat(mockCursor.restoreFlag).isEqualTo(expectedRestoreFlag)
+        verify(mockCursor.updater()).put(eq(RESTORED), eq(expectedRestoreFlag))
+        verify(mockCursor, times(0)).markRestored()
+        verify(mockCursor).checkAndAddItem(any(), any(), anyOrNull())
     }
 
     @Test

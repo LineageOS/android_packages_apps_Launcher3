@@ -199,14 +199,21 @@ class WorkspaceItemProcessor(
                     "Activity not enabled for id=${c.id}, component=$cn, user=${c.user}." +
                         " Will attempt to find fallback Activity for targetPkg=$targetPkg.",
                 )
-                intent = pmHelper.getAppLaunchIntent(targetPkg, c.user)
-                if (intent != null) {
+                tempPackageKey.update(targetPkg, c.user)
+                val newIntent = pmHelper.getAppLaunchIntent(targetPkg, c.user)
+                if (newIntent != null) {
+                    intent = newIntent
                     c.restoreFlag = 0
                     c.updater().put(Favorites.INTENT, intent.toUri(0)).commit()
+                } else if (c.restoreFlag != 0 && installingPkgs.contains(tempPackageKey))  {
+                    FileLog.d(TAG, "Activity not enabled for id=${c.id}, but package is installing."
+                        + " Keeping as promise icon for component $cn.")
+                    validTarget = false
                 } else {
                     c.markDeleted(
-                        "No Activities found for id=${c.id}, targetPkg=$targetPkg, component=$cn." +
-                            " Unable to create launch Intent.",
+                        "No Activities or install sessions found for id=${c.id},"
+                            + " targetPkg=$targetPkg, component=$cn."
+                            + " Unable to create launch Intent.",
                         RestoreError.APP_NO_LAUNCH_INTENT,
                     )
                     return
@@ -337,8 +344,8 @@ class WorkspaceItemProcessor(
                             appInfo = appInfoWrapper,
                             fallbackIconProvider = {
                                 runCatching {
-                                        c.createIconRequestInfo(info, false).parseIconBlob(it)
-                                    }
+                                    c.createIconRequestInfo(info, false).parseIconBlob(it)
+                                }
                                     .getOrNull()
                             },
                         )
@@ -369,9 +376,9 @@ class WorkspaceItemProcessor(
                 // didn't always have the correct intent flags set, so do that here
                 if (
                     intent.action != null &&
-                        intent.categories != null &&
-                        intent.action == Intent.ACTION_MAIN &&
-                        intent.categories.contains(Intent.CATEGORY_LAUNCHER)
+                    intent.categories != null &&
+                    intent.action == Intent.ACTION_MAIN &&
+                    intent.categories.contains(Intent.CATEGORY_LAUNCHER)
                 ) {
                     intent.addFlags(
                         Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
@@ -397,7 +404,7 @@ class WorkspaceItemProcessor(
             }
             if (
                 Flags.enableAppAutomationIndicator() &&
-                    automationRepo.isPackageAutomated(info.user, targetPkg)
+                automationRepo.isPackageAutomated(info.user, targetPkg)
             ) {
                 info.runtimeStatusFlags = info.runtimeStatusFlags or FLAG_AUTOMATED
             } else {
@@ -417,8 +424,8 @@ class WorkspaceItemProcessor(
             if (
                 (c.restoreFlag != 0 ||
                     Flags.enableSupportForArchiving() &&
-                        activityInfo != null &&
-                        activityInfo.applicationInfo.isArchived) && !TextUtils.isEmpty(targetPkg)
+                    activityInfo != null &&
+                    activityInfo.applicationInfo.isArchived) && !TextUtils.isEmpty(targetPkg)
             ) {
                 tempPackageKey.update(targetPkg, c.user)
                 val si = installingPkgs[tempPackageKey]
@@ -428,8 +435,8 @@ class WorkspaceItemProcessor(
                             ItemInfoWithIcon.FLAG_INSTALL_SESSION_ACTIVE.inv()
                 } else if (
                     activityInfo == null ||
-                        (Flags.enableSupportForArchiving() &&
-                            activityInfo.applicationInfo.isArchived)
+                    (Flags.enableSupportForArchiving() &&
+                        activityInfo.applicationInfo.isArchived)
                 ) {
                     // For archived apps, include progress info in case there is
                     // a pending install session post restart of device.
@@ -567,10 +574,10 @@ class WorkspaceItemProcessor(
                     ApplicationInfoWrapper(context, component.packageName, c.user).isArchived()
                 if (
                     !c.hasRestoreFlag(LauncherAppWidgetInfo.FLAG_RESTORE_STARTED) &&
-                        !isSafeMode &&
-                        (si == null) &&
-                        (lapi == null) &&
-                        !isArchived
+                    !isSafeMode &&
+                    (si == null) &&
+                    (lapi == null) &&
+                    !isArchived
                 ) {
                     // Restore never started
                     c.markDeleted(
@@ -702,9 +709,9 @@ class WorkspaceItemProcessor(
                 info.rank = rank
                 if (
                     info is WorkspaceItemInfo &&
-                        info.matchingLookupFlag.isVisuallyLessThan(Favorites.DESKTOP_ICON_FLAG) &&
-                        info.itemType == Favorites.ITEM_TYPE_APPLICATION &&
-                        verifiers.any { it.isItemInPreview(info.rank) }
+                    info.matchingLookupFlag.isVisuallyLessThan(Favorites.DESKTOP_ICON_FLAG) &&
+                    info.itemType == Favorites.ITEM_TYPE_APPLICATION &&
+                    verifiers.any { it.isItemInPreview(info.rank) }
                 ) {
                     iconCache.getTitleAndIcon(info, Favorites.DESKTOP_ICON_FLAG)
                 }
