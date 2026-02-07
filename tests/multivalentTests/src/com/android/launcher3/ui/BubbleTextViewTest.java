@@ -30,6 +30,8 @@ import static com.android.launcher3.Flags.FLAG_ENABLE_SUPPORT_FOR_ARCHIVING;
 import static com.android.launcher3.Flags.FLAG_USE_NEW_ICON_FOR_ARCHIVED_APPS;
 import static com.android.launcher3.LauncherPrefs.ENABLE_TWOLINE_ALLAPPS_TOGGLE;
 import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_ARCHIVED;
+import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_AUTOMATED;
+import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_INSTALL_SESSION_ACTIVE;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -68,6 +70,7 @@ import com.android.launcher3.Flags;
 import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
+import com.android.launcher3.graphics.AutomatedIconDelegate;
 import com.android.launcher3.graphics.PreloadIconDelegate;
 import com.android.launcher3.icons.BitmapInfo;
 import com.android.launcher3.icons.FastBitmapDrawable;
@@ -607,5 +610,85 @@ public class BubbleTextViewTest {
                 "The text view is expected to be visible when displayed in workspace, but the "
                         + "actual alpha was "
                         + actualAlpha, 1f, actualAlpha, 1e-5);
+    }
+
+    @Test
+    public void applyIconAndLabel_setsAutomation_forItemInfoWithIcon() {
+        mItemInfoWithIcon.runtimeStatusFlags &= ~FLAG_AUTOMATED;
+        TestUtil.runOnExecutorSync(MAIN_EXECUTOR,
+                () -> mBubbleTextView.applyIconAndLabel(mItemInfoWithIcon));
+
+        mItemInfoWithIcon.runtimeStatusFlags |= FLAG_AUTOMATED;
+        TestUtil.runOnExecutorSync(MAIN_EXECUTOR,
+                () -> mBubbleTextView.applyIconAndLabel(mItemInfoWithIcon));
+
+        assertThat(mBubbleTextView.getIcon().getDelegate())
+                .isInstanceOf(AutomatedIconDelegate.class);
+    }
+
+    @Test
+    public void applyIconAndLabel_unsetsAutomation_forItemInfoWithIcon() {
+        mItemInfoWithIcon.runtimeStatusFlags |= FLAG_AUTOMATED;
+        TestUtil.runOnExecutorSync(MAIN_EXECUTOR,
+                () -> mBubbleTextView.applyIconAndLabel(mItemInfoWithIcon));
+
+        mItemInfoWithIcon.runtimeStatusFlags &= ~FLAG_AUTOMATED;
+        TestUtil.runOnExecutorSync(MAIN_EXECUTOR,
+                () -> mBubbleTextView.applyIconAndLabel(mItemInfoWithIcon));
+
+        assertThat(mBubbleTextView.getIcon().getDelegate())
+                .isNotInstanceOf(AutomatedIconDelegate.class);
+    }
+
+    @Test
+    public void applyIconAndLabel_updatesAutomatedIcon_onBitmapChange() {
+        mGmailAppInfo.runtimeStatusFlags |= FLAG_AUTOMATED;
+        TestUtil.runOnExecutorSync(MAIN_EXECUTOR,
+                () -> mBubbleTextView.applyIconAndLabel(mGmailAppInfo));
+        FastBitmapDrawable firstIcon = mBubbleTextView.getIcon();
+        assertThat(firstIcon.getDelegate()).isInstanceOf(AutomatedIconDelegate.class);
+
+        mGmailAppInfo.bitmap = BitmapInfo.fromBitmap(Bitmap.createBitmap(1, 1, Config.ARGB_8888));
+        TestUtil.runOnExecutorSync(MAIN_EXECUTOR,
+                () -> mBubbleTextView.applyIconAndLabel(mGmailAppInfo));
+
+        assertThat(mBubbleTextView.getIcon()).isNotSameInstanceAs(firstIcon);
+        assertThat(mBubbleTextView.getIcon().getDelegate())
+                .isInstanceOf(AutomatedIconDelegate.class);
+    }
+
+    @Test
+    public void applyIconAndLabel_updatesInstallingIcon_onBitmapChange() {
+        mGmailAppInfo.runtimeStatusFlags |= FLAG_INSTALL_SESSION_ACTIVE;
+        TestUtil.runOnExecutorSync(MAIN_EXECUTOR,
+                () -> mBubbleTextView.applyIconAndLabel(mGmailAppInfo));
+        FastBitmapDrawable firstIcon = mBubbleTextView.getIcon();
+        assertThat(firstIcon.getDelegate()).isInstanceOf(PreloadIconDelegate.class);
+
+        mGmailAppInfo.bitmap = BitmapInfo.fromBitmap(Bitmap.createBitmap(1, 1, Config.ARGB_8888));
+        TestUtil.runOnExecutorSync(MAIN_EXECUTOR,
+                () -> mBubbleTextView.applyIconAndLabel(mGmailAppInfo));
+
+        assertThat(mBubbleTextView.getIcon()).isNotSameInstanceAs(firstIcon);
+        assertThat(mBubbleTextView.getIcon().getDelegate())
+                .isInstanceOf(PreloadIconDelegate.class);
+    }
+
+    @Test
+    public void applyIconAndLabel_updatesUnarchivingIcon_onBitmapChange() {
+        mGmailAppInfo.runtimeStatusFlags |= FLAG_INSTALL_SESSION_ACTIVE;
+        mGmailAppInfo.runtimeStatusFlags |= FLAG_ARCHIVED;
+        TestUtil.runOnExecutorSync(MAIN_EXECUTOR,
+                () -> mBubbleTextView.applyIconAndLabel(mGmailAppInfo));
+        FastBitmapDrawable firstIcon = mBubbleTextView.getIcon();
+        assertThat(firstIcon.getDelegate()).isInstanceOf(PreloadIconDelegate.class);
+
+        mGmailAppInfo.bitmap = BitmapInfo.fromBitmap(Bitmap.createBitmap(1, 1, Config.ARGB_8888));
+        TestUtil.runOnExecutorSync(MAIN_EXECUTOR,
+                () -> mBubbleTextView.applyIconAndLabel(mGmailAppInfo));
+
+        assertThat(mBubbleTextView.getIcon()).isNotSameInstanceAs(firstIcon);
+        assertThat(mBubbleTextView.getIcon().getDelegate())
+                .isInstanceOf(PreloadIconDelegate.class);
     }
 }
