@@ -24,6 +24,7 @@ import com.android.launcher3.model.data.WorkspaceData.ImmutableWorkspaceData
 import com.android.launcher3.util.MutableDiffAwareRef
 import com.android.launcher3.util.MutableListenableRef
 import com.android.launcher3.widget.model.WidgetsListBaseEntry
+import com.android.launcher3.widget.picker.model.data.WidgetPickerData
 import javax.inject.Inject
 
 /**
@@ -42,8 +43,7 @@ class HomeScreenRepository @Inject constructor() {
     val workspaceState = _workspaceState.asListenable()
 
     /** TODO Change this to a map of counts once widget picker migration is complete */
-    private val _allWidgets =
-        MutableListenableRef(listOf<@JvmSuppressWildcards WidgetsListBaseEntry>())
+    private val _allWidgets = MutableListenableRef(WidgetPickerData())
     /** List of all widgets on device */
     val allWidgets = _allWidgets.asListenable()
 
@@ -53,6 +53,6 @@ class HomeScreenRepository @Inject constructor() {
     }
 
     fun dispatchWidgetsChange(widgets: List<WidgetsListBaseEntry>) {
-        _allWidgets.dispatchValue(widgets)
+        _allWidgets.dispatchValue(WidgetPickerData(widgets))
     }
 }

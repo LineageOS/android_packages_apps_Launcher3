@@ -35,9 +35,6 @@ import com.android.launcher3.widget.LauncherAppWidgetProviderInfo
 import com.android.launcher3.widget.model.WidgetsListBaseEntry
 import com.android.launcher3.widget.model.WidgetsListContentEntry
 import com.android.launcher3.widget.model.WidgetsListHeaderEntry
-import com.android.launcher3.widget.picker.model.data.WidgetPickerDataUtils.findAllWidgetsForPackageUser
-import com.android.launcher3.widget.picker.model.data.WidgetPickerDataUtils.findContentEntryForPackageUser
-import com.android.launcher3.widget.picker.model.data.WidgetPickerDataUtils.withWidgets
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
@@ -92,40 +89,6 @@ class WidgetPickerDataTest {
     }
 
     @Test
-    fun withWidgets_returnsACopyWithProvidedWidgets() {
-        // only app two
-        val widgetPickerData = WidgetPickerData(allWidgets = appTwoWidgetsListBaseEntries())
-
-        // update: only app 1 and default list set
-        val newAllWidgets: List<WidgetsListBaseEntry> =
-            appOneWidgetsListBaseEntries(includeWidgetTwo = true)
-        val newDefaultWidgets: List<WidgetsListBaseEntry> =
-            appOneWidgetsListBaseEntries(includeWidgetTwo = false)
-
-        val newWidgetData = widgetPickerData.withWidgets(newAllWidgets, newDefaultWidgets)
-
-        assertThat(newWidgetData.allWidgets).containsExactlyElementsIn(newAllWidgets)
-        assertThat(newWidgetData.defaultWidgets).containsExactlyElementsIn(newDefaultWidgets)
-    }
-
-    @Test
-    fun withWidgets_noExplicitDefaults_unsetsOld() {
-        // only app two
-        val widgetPickerData =
-            WidgetPickerData(
-                allWidgets = appTwoWidgetsListBaseEntries(),
-                defaultWidgets = appTwoWidgetsListBaseEntries(),
-            )
-
-        val newWidgetData =
-            widgetPickerData.withWidgets(allWidgets = appOneWidgetsListBaseEntries())
-
-        assertThat(newWidgetData.allWidgets)
-            .containsExactlyElementsIn(appOneWidgetsListBaseEntries())
-        assertThat(newWidgetData.defaultWidgets).isEmpty() // previous values cleared.
-    }
-
-    @Test
     fun findContentEntryForPackageUser_returnsCorrectEntry() {
         val widgetPickerData =
             WidgetPickerData(
@@ -133,43 +96,15 @@ class WidgetPickerDataTest {
                     buildList {
                         addAll(appOneWidgetsListBaseEntries())
                         addAll(appTwoWidgetsListBaseEntries())
-                    },
-                defaultWidgets = buildList { addAll(appTwoWidgetsListBaseEntries()) },
+                    }
             )
         val app1PackageUserKey = PackageUserKey.fromPackageItemInfo(app1PackageItemInfo)
 
-        val contentEntry = findContentEntryForPackageUser(widgetPickerData, app1PackageUserKey)
+        val contentEntry = widgetPickerData.findContentEntryForPackageUser(app1PackageUserKey)
 
         assertThat(contentEntry).isNotNull()
         assertThat(contentEntry?.mPkgItem).isEqualTo(app1PackageItemInfo)
         assertThat(contentEntry?.mWidgets).hasSize(2)
-    }
-
-    @Test
-    fun findContentEntryForPackageUser_fromDefaults_returnsEntryFromDefaultWidgets() {
-        val widgetPickerData =
-            WidgetPickerData(
-                allWidgets =
-                    buildList {
-                        addAll(appOneWidgetsListBaseEntries())
-                        addAll(appTwoWidgetsListBaseEntries())
-                    },
-                defaultWidgets =
-                    buildList { addAll(appOneWidgetsListBaseEntries(includeWidgetTwo = false)) },
-            )
-        val app1PackageUserKey = PackageUserKey.fromPackageItemInfo(app1PackageItemInfo)
-
-        val contentEntry =
-            findContentEntryForPackageUser(
-                widgetPickerData = widgetPickerData,
-                packageUserKey = app1PackageUserKey,
-                fromDefaultWidgets = true,
-            )
-
-        assertThat(contentEntry).isNotNull()
-        assertThat(contentEntry?.mPkgItem).isEqualTo(app1PackageItemInfo)
-        // only one widget (since default widgets had only one widget for app A
-        assertThat(contentEntry?.mWidgets).hasSize(1)
     }
 
     @Test
@@ -178,7 +113,7 @@ class WidgetPickerDataTest {
         val widgetPickerData =
             WidgetPickerData(allWidgets = buildList { addAll(appOneWidgetsListBaseEntries()) })
 
-        val contentEntry = findContentEntryForPackageUser(widgetPickerData, app2PackageUserKey)
+        val contentEntry = widgetPickerData.findContentEntryForPackageUser(app2PackageUserKey)
 
         assertThat(contentEntry).isNull()
     }
@@ -192,12 +127,10 @@ class WidgetPickerDataTest {
                     buildList {
                         addAll(appOneWidgetsListBaseEntries())
                         addAll(appTwoWidgetsListBaseEntries())
-                    },
-                defaultWidgets =
-                    buildList { addAll(appOneWidgetsListBaseEntries(includeWidgetTwo = false)) },
+                    }
             )
 
-        val widgets = findAllWidgetsForPackageUser(widgetPickerData, app1PackageUserKey)
+        val widgets = widgetPickerData.findAllWidgetsForPackageUser(app1PackageUserKey)
 
         // both widgets returned irrespective of default widgets list
         assertThat(widgets).hasSize(2)
@@ -209,7 +142,7 @@ class WidgetPickerDataTest {
             WidgetPickerData(allWidgets = buildList { addAll(appTwoWidgetsListBaseEntries()) })
         val app1PackageUserKey = PackageUserKey.fromPackageItemInfo(app1PackageItemInfo)
 
-        val widgets = findAllWidgetsForPackageUser(widgetPickerData, app1PackageUserKey)
+        val widgets = widgetPickerData.findAllWidgetsForPackageUser(app1PackageUserKey)
 
         assertThat(widgets).isEmpty()
     }
