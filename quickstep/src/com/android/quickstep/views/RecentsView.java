@@ -706,7 +706,6 @@ public abstract class RecentsView<
 
     private boolean mOverviewStateEnabled;
     private boolean mHandleTaskStackChanges;
-    private boolean mSwipeDownShouldLaunchApp;
     private boolean mTouchDownToStartHome;
     private final float mSquaredTouchSlop;
     private int mDownX;
@@ -1345,7 +1344,7 @@ public abstract class RecentsView<
                 public void onAnimationEnd(Animator animation) {
                     finishRecentsAnimation(false /* toRecents */, true /*shouldPip*/, () -> {
                         if (mContainer instanceof RecentsWindowManager recentsWindowManager) {
-                            recentsWindowManager.hideRecentsWindow();
+                            recentsWindowManager.getStateManager().moveToRestState();
                         }
                     });
                 }
@@ -1573,9 +1572,6 @@ public abstract class RecentsView<
         ActiveGestureProtoLogProxy.logOnPageEndTransition(getNextPage());
         if (!mContainer.getDeviceProfile().getDeviceProperties().isLargeScreen()) {
             mActionsView.updateDisabledFlags(OverviewActionsView.DISABLED_SCROLLING, false);
-        }
-        if (getNextPage() > 0) {
-            setSwipeDownShouldLaunchApp(true);
         }
         InteractionJankMonitorWrapper.end(Cuj.CUJ_RECENTS_SCROLLING);
     }
@@ -2683,7 +2679,6 @@ public abstract class RecentsView<
      */
     public void onSwipeUpAnimationSuccess() {
         startIconFadeInOnGestureComplete();
-        setSwipeDownShouldLaunchApp(true);
     }
 
     private void animateRecentsRotationInPlace(int newRotation) {
@@ -3267,12 +3262,11 @@ public abstract class RecentsView<
         }
     }
 
-    public void setSwipeDownShouldLaunchApp(boolean swipeDownShouldLaunchApp) {
-        mSwipeDownShouldLaunchApp = swipeDownShouldLaunchApp;
-    }
-
-    public boolean shouldSwipeDownLaunchApp() {
-        return mSwipeDownShouldLaunchApp;
+    /**
+     * Returns true if the task can be launched via swipe down gesture.
+     */
+    public boolean shouldSwipeDownLaunchTaskView(@Nullable TaskView taskView) {
+        return mUtils.shouldSwipeDownLaunchTaskView(taskView);
     }
 
     public void setIgnoreResetTask(int taskId) {
@@ -4501,7 +4495,7 @@ public abstract class RecentsView<
 
         // Recents doesn't receive activity callback, so we cleanup manually
         if (mContainer instanceof RecentsWindowManager manager) {
-            manager.hideRecentsWindow();
+            manager.getStateManager().moveToRestState();
         }
     }
 
@@ -5559,6 +5553,10 @@ public abstract class RecentsView<
         return mContainerInterface;
     }
 
+    public RecentsViewContainer getContainer() {
+        return mContainer;
+    }
+
     /**
      * Set all the task views to color tint scrim mode, dimming or tinting them all. Allows the
      * tasks to be dimmed while other elements in the recents view are left alone.
@@ -5881,7 +5879,7 @@ public abstract class RecentsView<
         mDesktopRecentsTransitionController.moveToDesktop(taskContainer, transitionSource, () -> {
             successCallback.run();
             if (mContainer instanceof RecentsWindowManager recentsWindowManager) {
-                post(recentsWindowManager::hideRecentsWindow);
+                post(() -> recentsWindowManager.getStateManager().moveToRestState());
             }
         });
     }

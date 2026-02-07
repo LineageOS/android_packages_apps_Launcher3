@@ -114,7 +114,7 @@ public class DeviceProfile {
     private CalculatedCellSpec mResponsiveWorkspaceCellSpec;
     private CalculatedCellSpec mResponsiveAllAppsCellSpec;
 
-    public WorkspaceProfile mWorkspaceProfile;
+    private WorkspaceProfile mWorkspaceProfile;
     public final InvariantDeviceProfile inv;
     private final BottomSheetProfile mBottomSheetProfile;
     public FolderProfile mFolderProfile;
@@ -486,11 +486,11 @@ public class DeviceProfile {
         return hotseatProfile;
     }
 
-    public WorkspaceProfile getWorkspaceIconProfile() {
+    public WorkspaceProfile getWorkspaceProfile() {
         return mWorkspaceProfile;
     }
 
-    public void setWorkspaceIconProfile(WorkspaceProfile workspaceProfile) {
+    public void setWorkspaceProfile(WorkspaceProfile workspaceProfile) {
         mWorkspaceProfile = workspaceProfile;
     }
 
@@ -558,7 +558,7 @@ public class DeviceProfile {
      */
     private void hideWorkspaceLabelsIfNotEnoughSpace() {
         // We want enough space so that the text is closer to its corresponding icon.
-        if (getWorkspaceIconProfile().isItemsLabelHidden()) {
+        if (getWorkspaceProfile().isItemsLabelHidden()) {
             // TODO(420933882) Group all modifications of AllAppsProfile in one place
             mAllAppsProfile = AllAppsProfile.Factory.autoResizeAllAppsCells(getAllAppsProfile());
         }
@@ -655,7 +655,7 @@ public class DeviceProfile {
                         - hotseatBarPadding.bottom,
                 hotseatProfile.getBorderSpace(),
                 hotseatProfile.getNumShownIcons());
-        int extraIconEndSpacing = (cellHeight - getWorkspaceIconProfile().getIconSizePx()) / 2;
+        int extraIconEndSpacing = (cellHeight - getWorkspaceProfile().getIconSizePx()) / 2;
         return extraIconEndSpacing + hotseatBarPadding.bottom;
     }
 
@@ -747,12 +747,12 @@ public class DeviceProfile {
         }
         // The adjustment is shrinking the hotseat's width by 1 icon on either side.
         int iconsWidth =
-                getWorkspaceIconProfile().getIconSizePx() * hotseatProfile.getNumShownIcons()
+                getWorkspaceProfile().getIconSizePx() * hotseatProfile.getNumShownIcons()
                         + hotseatProfile.getBorderSpace() * (
                         hotseatProfile.getNumShownIcons() - 1);
-        int newWidth = iconsWidth - 2 * getWorkspaceIconProfile().getIconSizePx();
+        int newWidth = iconsWidth - 2 * getWorkspaceProfile().getIconSizePx();
         // Evenly space the icons within the boundaries of the new width.
-        return (float) (newWidth - getWorkspaceIconProfile().getIconSizePx()
+        return (float) (newWidth - getWorkspaceProfile().getIconSizePx()
                 * hotseatProfile.getNumShownIcons())
                 / (hotseatProfile.getNumShownIcons() - 1);
     }
@@ -771,7 +771,7 @@ public class DeviceProfile {
         float borderSpace = getHotseatAdjustedBorderSpaceForBubbleBar(context);
         if (borderSpace == 0) return borderSpace;
         float borderSpaceDelta = borderSpace - hotseatProfile.getBorderSpace();
-        return getWorkspaceIconProfile().getIconSizePx() + cellX * borderSpaceDelta;
+        return getWorkspaceProfile().getIconSizePx() + cellX * borderSpaceDelta;
     }
 
     /** Returns whether hotseat or QSB should be adjusted for the bubble bar. */
@@ -831,8 +831,8 @@ public class DeviceProfile {
                     .getIconToIconWidthForColumns(inv.numColumns);
 
             // This is needed because of b/235886078 since QSB needs to span to the icon borders
-            int iconExtraSpacePx = getWorkspaceIconProfile().getIconSizePx() - getIconVisibleSizePx(
-                    getWorkspaceIconProfile().getIconSizePx());
+            int iconExtraSpacePx = getWorkspaceProfile().getIconSizePx() - getIconVisibleSizePx(
+                    getWorkspaceProfile().getIconSizePx());
             int qsbWidth = getAdditionalQsbSpace() + iconExtraSpacePx / 2;
 
             int availableWidthPxForHotseat = mDeviceProperties.getAvailableWidthPx() - Math.abs(
@@ -891,8 +891,8 @@ public class DeviceProfile {
             }
 
         } else if (mIsScalableGrid) {
-            int iconExtraSpacePx = getWorkspaceIconProfile().getIconSizePx() - getIconVisibleSizePx(
-                    getWorkspaceIconProfile().getIconSizePx());
+            int iconExtraSpacePx = getWorkspaceProfile().getIconSizePx() - getIconVisibleSizePx(
+                    getWorkspaceProfile().getIconSizePx());
             int sideSpacing =
                     (mDeviceProperties.getAvailableWidthPx() - (
                             hotseatProfile.getQsbWidth() + iconExtraSpacePx))
@@ -970,7 +970,7 @@ public class DeviceProfile {
      */
     private int getHotseatRequiredWidth() {
         int additionalQsbSpace = getAdditionalQsbSpace();
-        return getWorkspaceIconProfile().getIconSizePx() * hotseatProfile.getNumShownIcons()
+        return getWorkspaceProfile().getIconSizePx() * hotseatProfile.getNumShownIcons()
                 + hotseatProfile.getBorderSpace() * (
                 hotseatProfile.getNumShownIcons()
                 - (getHotseatProfile().getAreNavButtonsInline() ? 0 : 1))
@@ -1002,7 +1002,7 @@ public class DeviceProfile {
                 || hotseatProfile.isQsbInline()) {
             return hotseatProfile.getBarBottomSpacePx() - (Math.abs(
                     hotseatProfile.getCellHeightPx()
-                            - getWorkspaceIconProfile().getIconSizePx()) / 2);
+                            - getWorkspaceProfile().getIconSizePx()) / 2);
         } else {
             return hotseatProfile.getBarSizePx() - hotseatProfile.getCellHeightPx();
         }
@@ -1019,7 +1019,7 @@ public class DeviceProfile {
                     - hotseatProfile.getQsbSpace()
                     - (hotseatProfile.getCellHeightPx() / 2)
                     + ((hotseatProfile.getCellHeightPx()
-                    - getWorkspaceIconProfile().getIconSizePx()) / 2);
+                    - getWorkspaceProfile().getIconSizePx()) / 2);
         } else {
             return hotseatProfile.getBarSizePx()
                     - (getHotseatProfile().getQsbVisualHeight() / 2);
@@ -1042,9 +1042,9 @@ public class DeviceProfile {
      */
     public int getTaskbarOffsetY() {
         int taskbarIconBottomSpace =
-                (getTaskbarProfile().getHeight() - getWorkspaceIconProfile().getIconSizePx()) / 2;
+                (getTaskbarProfile().getHeight() - getWorkspaceProfile().getIconSizePx()) / 2;
         int launcherIconBottomSpace = Math.min(
-                (hotseatProfile.getCellHeightPx() - getWorkspaceIconProfile().getIconSizePx()
+                (hotseatProfile.getCellHeightPx() - getWorkspaceProfile().getIconSizePx()
                 ) / 2, mWorkspaceProfile.getGridVisualizationPaddingY());
         return getHotseatBarBottomPadding() + launcherIconBottomSpace - taskbarIconBottomSpace;
     }
@@ -1144,13 +1144,13 @@ public class DeviceProfile {
     public int getCellContentHeight(@ContainerType int containerType) {
         switch (containerType) {
             case CellLayout.WORKSPACE:
-                return getWorkspaceIconProfile().getCellHeightPx();
+                return getWorkspaceProfile().getCellHeightPx();
             case CellLayout.FOLDER:
                 return mFolderProfile.getCellHeightPx();
             case CellLayout.HOTSEAT:
                 // The hotseat is the only container where the cell height is going to be
                 // different from the content within that cell.
-                return getWorkspaceIconProfile().getIconSizePx();
+                return getWorkspaceProfile().getIconSizePx();
             default:
                 // ??
                 return 0;
@@ -1233,10 +1233,10 @@ public class DeviceProfile {
         writer.println(prefix + dpPointFToString("minCellSize", inv.minCellSize[mTypeIndex]));
 
         writer.println(
-                prefix + pxToDpStr("cellWidthPx", getWorkspaceIconProfile().getCellWidthPx())
+                prefix + pxToDpStr("cellWidthPx", getWorkspaceProfile().getCellWidthPx())
         );
         writer.println(
-                prefix + pxToDpStr("cellHeightPx", getWorkspaceIconProfile().getCellHeightPx())
+                prefix + pxToDpStr("cellHeightPx", getWorkspaceProfile().getCellHeightPx())
         );
 
         writer.println(
@@ -1247,9 +1247,9 @@ public class DeviceProfile {
         );
 
         writer.println(prefix + pxToDpStr("cellLayoutBorderSpacePx Horizontal",
-                getWorkspaceIconProfile().getCellLayoutBorderSpacePx().x));
+                getWorkspaceProfile().getCellLayoutBorderSpacePx().x));
         writer.println(prefix + pxToDpStr("cellLayoutBorderSpacePx Vertical",
-                getWorkspaceIconProfile().getCellLayoutBorderSpacePx().y));
+                getWorkspaceProfile().getCellLayoutBorderSpacePx().y));
         writer.println(
                 prefix + pxToDpStr("cellLayoutPaddingPx.left",
                         mWorkspaceProfile.getCellLayoutPaddingPx().left));
@@ -1263,11 +1263,11 @@ public class DeviceProfile {
                 prefix + pxToDpStr("cellLayoutPaddingPx.bottom",
                         mWorkspaceProfile.getCellLayoutPaddingPx().bottom));
 
-        writer.println(prefix + pxToDpStr("iconSizePx", getWorkspaceIconProfile().getIconSizePx()));
+        writer.println(prefix + pxToDpStr("iconSizePx", getWorkspaceProfile().getIconSizePx()));
         writer.println(prefix + pxToDpStr("iconTextSizePx",
-                getWorkspaceIconProfile().getIconTextSizePx()));
+                getWorkspaceProfile().getIconTextSizePx()));
         writer.println(prefix + pxToDpStr("iconDrawablePaddingPx",
-                getWorkspaceIconProfile().getIconDrawablePaddingPx()));
+                getWorkspaceProfile().getIconDrawablePaddingPx()));
 
         writer.println(prefix + "\tnumFolderRows: " + mFolderProfile.getNumRows());
         writer.println(prefix + "\tnumFolderColumns: " + mFolderProfile.getNumColumns());
@@ -1393,7 +1393,7 @@ public class DeviceProfile {
         writer.println(prefix + pxToDpStr("taskbarIconSize", getTaskbarProfile().getIconSize()));
 
         writer.println(prefix + pxToDpStr("desiredWorkspaceHorizontalMarginPx",
-                getWorkspaceIconProfile().getDesiredWorkspaceHorizontalMarginPx()));
+                getWorkspaceProfile().getDesiredWorkspaceHorizontalMarginPx()));
         writer.println(prefix + pxToDpStr("workspacePadding.left",
                 mWorkspaceProfile.getWorkspacePadding().left));
         writer.println(prefix + pxToDpStr("workspacePadding.top",
@@ -1403,12 +1403,12 @@ public class DeviceProfile {
         writer.println(prefix + pxToDpStr("workspacePadding.bottom",
                 mWorkspaceProfile.getWorkspacePadding().bottom));
 
-        writer.println(prefix + pxToDpStr("iconScale", getWorkspaceIconProfile().getIconScale()));
+        writer.println(prefix + pxToDpStr("iconScale", getWorkspaceProfile().getIconScale()));
         writer.println(prefix + pxToDpStr("cellScaleToFit ",
-                getWorkspaceIconProfile().getCellScaleToFit()));
+                getWorkspaceProfile().getCellScaleToFit()));
         writer.println(prefix + pxToDpStr("extraSpace", mWorkspaceProfile.getExtraSpace()));
         writer.println(prefix + pxToDpStr("unscaled extraSpace",
-                mWorkspaceProfile.getExtraSpace() / getWorkspaceIconProfile().getIconScale()));
+                mWorkspaceProfile.getExtraSpace() / getWorkspaceProfile().getIconScale()));
 
         writer.println(prefix + pxToDpStr("maxEmptySpace", mWorkspaceProfile.getMaxEmptySpace()));
         writer.println(prefix + pxToDpStr("workspaceTopPadding",

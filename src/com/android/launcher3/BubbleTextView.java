@@ -333,11 +333,11 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         final int defaultIconSize;
         if (mDisplay == DISPLAY_WORKSPACE) {
             setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                    mDeviceProfile.getWorkspaceIconProfile().getIconTextSizePx());
+                    mDeviceProfile.getWorkspaceProfile().getIconTextSizePx());
             setCompoundDrawablePadding(
-                    mDeviceProfile.getWorkspaceIconProfile().getIconDrawablePaddingPx());
-            defaultIconSize = mDeviceProfile.getWorkspaceIconProfile().getIconSizePx();
-            setCenterVertically(mDeviceProfile.getWorkspaceIconProfile().getIconCenterVertically());
+                    mDeviceProfile.getWorkspaceProfile().getIconDrawablePaddingPx());
+            defaultIconSize = mDeviceProfile.getWorkspaceProfile().getIconSizePx();
+            setCenterVertically(mDeviceProfile.getWorkspaceProfile().getIconCenterVertically());
         } else if (mDisplay == DISPLAY_ALL_APPS || mDisplay == DISPLAY_PREDICTION_ROW
                 || mDisplay == DISPLAY_SEARCH_RESULT_APP_ROW) {
             setTextSize(TypedValue.COMPLEX_UNIT_PX,
@@ -368,7 +368,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             defaultIconSize = (int) iconSize;
         } else {
             // widget_selection or shortcut_popup
-            defaultIconSize = mDeviceProfile.getWorkspaceIconProfile().getIconSizePx();
+            defaultIconSize = mDeviceProfile.getWorkspaceProfile().getIconSizePx();
         }
 
 
@@ -412,7 +412,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             mDotParams.shapeInfo = IconShapeInfo.DEFAULT;
         } else {
             mDotRenderer = new DotRenderer(
-                    mActivity.getDeviceProfile().getWorkspaceIconProfile().getIconSizePx()
+                    mActivity.getDeviceProfile().getWorkspaceProfile().getIconSizePx()
             );
             mDotParams.shapeInfo = ThemeManager.INSTANCE.get(context)
                     .getIconState().getIconShapeInfo();
@@ -591,15 +591,23 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     @UiThread
     public void applyIconAndLabel(ItemInfoWithIcon info) {
         FastBitmapDrawable oldIcon = mIcon;
-        // Check if we can reuse icon so that any animation is preserved
-        if (info.shouldShowPendingIcon() || !hasPendingAnimationCompleted(mIcon)) {
-            maybeApplyProgressLevel(info, oldIcon);
-        } else if (Flags.enableAppAutomationIndicator()
-                && (info.runtimeStatusFlags & FLAG_AUTOMATED) != 0)  {
-            setIcon(newAutomatedIcon(getContext(), info, getIconCreationFlagsForInfo(info)));
-        } else {
+        boolean isOldIconAutomated = oldIcon != null
+                && oldIcon.getDelegate() instanceof AutomatedIconDelegate;
+        boolean isItemAutomated = Flags.enableAppAutomationIndicator()
+                && (info.runtimeStatusFlags & FLAG_AUTOMATED) != 0;
+
+        if (isItemAutomated)  {
+            // If icon is not already animated or underlying bitmap changed then replace it.
+            if (!isOldIconAutomated || !mIcon.isSameInfo(info.bitmap)) {
+                setIcon(newAutomatedIcon(getContext(), info, getIconCreationFlagsForInfo(info)));
+            }
+        } else if (hasPendingAnimationCompleted(mIcon) || !mIcon.isSameInfo(info.bitmap)
+                || isOldIconAutomated) {
+            // Set new, regular icon if loading completed, no longer automating, or bitmap changed
             setStandardIcon(info);
         }
+        // Always check if we should update loading progress
+        maybeApplyProgressLevel(info, oldIcon);
         applyLabel(info);
     }
 
@@ -705,7 +713,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
                 return mDeviceProfile.getAllAppsProfile().getMaxAllAppsTextLineCount();
             }
             case DISPLAY_WORKSPACE -> {
-                return mDeviceProfile.getWorkspaceIconProfile().getMaxIconTextLineCount();
+                return mDeviceProfile.getWorkspaceProfile().getMaxIconTextLineCount();
             }
             case DISPLAY_FOLDER -> {
                 return mDeviceProfile.getFolderProfile().getMaxChildTextLineCount();

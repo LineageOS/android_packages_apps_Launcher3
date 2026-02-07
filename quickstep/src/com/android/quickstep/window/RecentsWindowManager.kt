@@ -481,7 +481,7 @@ constructor(
         screenOnTracker.addListener(screenChangedListener)
     }
 
-    fun hideRecentsWindow() {
+    private fun hideRecentsWindow() {
         RecentsWindowProtoLogProxy.logCleanup(isShowing())
         if (isShowing()) {
             AbstractFloatingView.closeAllOpenViews(this, /* animate= */ false)
@@ -496,7 +496,6 @@ constructor(
                 LAUNCHER_ACTIVITY_STOPPED_MESSAGE,
             )
         }
-        stateManager.moveToRestState()
         callbacks?.removeListener(recentsAnimationListener)
         callbacks = null
         screenOnTracker.removeListener(screenChangedListener)
@@ -773,7 +772,7 @@ constructor(
 
     private fun onRecentAnimationStopped() {
         if (isInState(BACKGROUND_APP)) {
-            hideRecentsWindow()
+            stateManager.moveToRestState()
         }
     }
 

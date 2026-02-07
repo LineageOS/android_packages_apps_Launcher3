@@ -58,8 +58,7 @@ import kotlin.math.ceil
 
 /** Touch controller for handling task view card dismiss swipes */
 class TaskViewDismissTouchController<CONTAINER, T : BaseState<T>>(
-    private val container: CONTAINER,
-    private val taskViewRecentsTouchContext: TaskViewRecentsTouchContext,
+    private val container: CONTAINER
 ) : TouchController, SingleAxisSwipeDetector.Listener
     where CONTAINER : Context, CONTAINER : RecentsViewContainer, CONTAINER : StatefulContainer<T> {
     private val recentsView: RecentsView<*, *> = container.getOverviewPanel()
@@ -130,12 +129,12 @@ class TaskViewDismissTouchController<CONTAINER, T : BaseState<T>>(
                 false
             }
 
-            else ->
-                taskViewRecentsTouchContext.isTaskViewInteractive.also { isRecentsInteractive ->
-                    if (!isRecentsInteractive) {
-                        debugLog(TAG, "Not intercepting touch, recents not interactive.")
-                    }
-                }
+            !recentsView.stateManager.state.isTaskViewInteractive -> {
+                debugLog(TAG, "Not intercepting touch, recents not interactive.")
+                false
+            }
+
+            else -> true
         }
 
     override fun onControllerInterceptTouchEvent(ev: MotionEvent): Boolean {

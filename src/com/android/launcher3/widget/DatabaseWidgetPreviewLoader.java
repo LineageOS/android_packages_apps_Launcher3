@@ -270,7 +270,7 @@ public class DatabaseWidgetPreviewLoader {
                 try {
                     Drawable icon = loadFullResIcon(mIconCache, info);
                     if (icon != null) {
-                        int appIconSize = mDeviceProfile.getWorkspaceIconProfile().getIconSizePx();
+                        int appIconSize = mDeviceProfile.getWorkspaceProfile().getIconSizePx();
                         int iconSize = (int) Math.min(appIconSize * scale,
                                 Math.min(boxRect.width(), boxRect.height()));
 

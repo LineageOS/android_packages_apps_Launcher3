@@ -226,7 +226,7 @@ public abstract class AbsSwipeUpHandler<
 
     // Null if the recents animation hasn't started yet or has been canceled or finished.
     protected @Nullable RecentsAnimationController mRecentsAnimationController;
-    protected RecentsAnimationTargets mRecentsAnimationTargets;
+    protected @Nullable RecentsAnimationTargets mRecentsAnimationTargets;
     protected @Nullable RECENTS_CONTAINER mContainer;
     protected @Nullable RECENTS_VIEW mRecentsView;
     protected Runnable mGestureEndCallback;
@@ -2187,7 +2187,7 @@ public abstract class AbsSwipeUpHandler<
                 .setContext(mContext)
                 .setTaskId(runningTaskTarget.taskId)
                 .setActivityInfo(taskInfo.topActivityInfo)
-                .setAppIconSizePx(mDp.getWorkspaceIconProfile().getIconSizePx())
+                .setAppIconSizePx(mDp.getWorkspaceProfile().getIconSizePx())
                 .setLeash(fadeOutTarget != null ? fadeOutTarget.leash : runningTaskTarget.leash)
                 .setSourceRectHint(
                         runningTaskTarget.taskInfo.pictureInPictureParams.getSourceRectHint())

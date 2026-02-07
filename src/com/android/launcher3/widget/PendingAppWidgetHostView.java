@@ -170,7 +170,7 @@ public class PendingAppWidgetHostView extends LauncherAppWidgetHostView
         mPaint.setColor(Themes.getAttrColor(getContext(), android.R.attr.textColorPrimary));
         mPaint.setTextSize(TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_PX,
-                mActivityContext.getDeviceProfile().getWorkspaceIconProfile().getIconTextSizePx(),
+                mActivityContext.getDeviceProfile().getWorkspaceProfile().getIconTextSizePx(),
                 getResources().getDisplayMetrics()));
 
         setWillNotDraw(false);
@@ -392,7 +392,7 @@ public class PendingAppWidgetHostView extends LauncherAppWidgetHostView
 
         int actualIconSize = (int) Math.min(
                 iconSize,
-                grid.getWorkspaceIconProfile().getIconSizePx()
+                grid.getWorkspaceProfile().getIconSizePx()
         );
 
         // Icon top when we do not draw the text
@@ -408,13 +408,13 @@ public class PendingAppWidgetHostView extends LauncherAppWidgetHostView
 
             // Extra icon size due to the setting icon
             float minHeightWithText = textHeight + actualIconSize * settingIconScaleFactor
-                    + grid.getWorkspaceIconProfile().getIconDrawablePaddingPx();
+                    + grid.getWorkspaceProfile().getIconDrawablePaddingPx();
 
             if (minHeightWithText < availableHeight) {
                 // We can draw the text as well
                 iconTop = (getHeight()
                         - textHeight
-                        - grid.getWorkspaceIconProfile().getIconDrawablePaddingPx()
+                        - grid.getWorkspaceProfile().getIconDrawablePaddingPx()
                         - actualIconSize) / 2;
 
             } else {
@@ -439,7 +439,7 @@ public class PendingAppWidgetHostView extends LauncherAppWidgetHostView
             // Set up position for dragging the text
             mRect.left = paddingLeft + minPadding;
             mRect.top = mCenterDrawable.getBounds().bottom
-                    + grid.getWorkspaceIconProfile().getIconDrawablePaddingPx();
+                    + grid.getWorkspaceProfile().getIconDrawablePaddingPx();
         }
     }
 

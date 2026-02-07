@@ -291,7 +291,7 @@ class PreloadIconDelegate(
     }
 
     /** Runs the finish animation if it is has not been run after last call to [.onLevelChange] */
-    fun maybePerformFinishedAnimation(oldIcon: FastBitmapDrawable, onFinishCallback: Runnable?) {
+    fun maybePerformFinishedAnimation(oldIcon: FastBitmapDrawable?, onFinishCallback: Runnable?) {
         val oldDelegate = extractPreloadDelegate(oldIcon) ?: this
         progressColor = oldDelegate.progressColor
         trackColor = oldDelegate.trackColor
