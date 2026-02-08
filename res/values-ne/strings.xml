@@ -104,8 +104,10 @@
     <string name="dismiss_prediction_label" msgid="3357562989568808658">"एप सिफारिस नगर्नुहोस्"</string>
     <string name="pin_prediction" msgid="4196423321649756498">"सिफारिस गरिएको एप पिन गर्नुहोस्"</string>
     <string name="bubble" msgid="3072951361014076670">"बबल"</string>
-    <string name="enable_app_lock" msgid="9190316880781005775">"एप लक गर्नुहोस्"</string>
-    <string name="disable_app_lock" msgid="9071912028491244470">"लक हटाउनुहोस्"</string>
+    <!-- no translation found for enable_app_lock (5606772593969266718) -->
+    <skip />
+    <!-- no translation found for disable_app_lock (2252606435270354961) -->
+    <skip />
     <string name="widget_settings" msgid="5280157748464495511">"सेटिङ"</string>
     <string name="add_to_taskbar" msgid="1442306985857150792">"टास्कबारमा हाल्नुहोस्"</string>
     <string name="remove_from_taskbar" msgid="5817026706030273018">"टास्कबारबाट हटाउनुहोस्"</string>
@@ -158,7 +160,7 @@
     <string name="styles_wallpaper_button_text" msgid="8216961355289236794">"वालपेपर तथा शैली"</string>
     <string name="edit_home_screen" msgid="8947858375782098427">"होम स्क्रिन बदल्नुहोस्"</string>
     <string name="settings_button_text" msgid="8873672322605444408">"होम पेजका सेटिङहरू"</string>
-    <string name="msg_disabled_by_admin" msgid="6898038085516271325">"तपाईँको प्रशासकद्वारा असक्षम गरिएको"</string>
+    <string name="msg_disabled_by_admin" msgid="6898038085516271325">"तपाईँको एडमिनद्वारा असक्षम गरिएको"</string>
     <string name="allow_rotation_desc" msgid="8662546029078692509">"फोन घुमाउँदा"</string>
     <string name="compose_developer_options_section" msgid="8211460486549952595">"Jetpack कम्पोज"</string>
     <string name="enable_composition_tracing_title" msgid="8989606591739368424">"कम्पोजिसन ट्रेसिङ अन गर्नुहोस्"</string>

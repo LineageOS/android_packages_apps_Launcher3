@@ -104,8 +104,10 @@
     <string name="dismiss_prediction_label" msgid="3357562989568808658">"앱 제안 받지 않음"</string>
     <string name="pin_prediction" msgid="4196423321649756498">"예상 앱 고정"</string>
     <string name="bubble" msgid="3072951361014076670">"대화창"</string>
-    <string name="enable_app_lock" msgid="9190316880781005775">"앱 잠금"</string>
-    <string name="disable_app_lock" msgid="9071912028491244470">"잠금 해제"</string>
+    <!-- no translation found for enable_app_lock (5606772593969266718) -->
+    <skip />
+    <!-- no translation found for disable_app_lock (2252606435270354961) -->
+    <skip />
     <string name="widget_settings" msgid="5280157748464495511">"설정"</string>
     <string name="add_to_taskbar" msgid="1442306985857150792">"태스크 바에 추가"</string>
     <string name="remove_from_taskbar" msgid="5817026706030273018">"태스크 바에서 삭제"</string>

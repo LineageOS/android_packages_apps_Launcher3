@@ -104,8 +104,10 @@
     <string name="dismiss_prediction_label" msgid="3357562989568808658">"不要推荐此应用"</string>
     <string name="pin_prediction" msgid="4196423321649756498">"固定预测的应用"</string>
     <string name="bubble" msgid="3072951361014076670">"消息气泡"</string>
-    <string name="enable_app_lock" msgid="9190316880781005775">"锁定应用"</string>
-    <string name="disable_app_lock" msgid="9071912028491244470">"解除锁定"</string>
+    <!-- no translation found for enable_app_lock (5606772593969266718) -->
+    <skip />
+    <!-- no translation found for disable_app_lock (2252606435270354961) -->
+    <skip />
     <string name="widget_settings" msgid="5280157748464495511">"设置"</string>
     <string name="add_to_taskbar" msgid="1442306985857150792">"添加到任务栏"</string>
     <string name="remove_from_taskbar" msgid="5817026706030273018">"从任务栏中移除"</string>
