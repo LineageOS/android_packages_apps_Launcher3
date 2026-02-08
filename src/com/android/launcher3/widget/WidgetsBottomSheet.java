@@ -17,7 +17,6 @@
 package com.android.launcher3.widget;
 
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_BOTTOM_WIDGETS_TRAY;
-import static com.android.launcher3.widget.picker.model.data.WidgetPickerDataUtils.findAllWidgetsForPackageUser;
 
 import android.content.Context;
 import android.graphics.Rect;
@@ -36,8 +35,10 @@ import android.widget.TextView;
 
 import androidx.annotation.Px;
 
+import com.android.launcher3.LauncherModel;
 import com.android.launcher3.R;
 import com.android.launcher3.anim.PendingAnimation;
+import com.android.launcher3.dagger.LauncherComponentProvider;
 import com.android.launcher3.model.WidgetItem;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.util.PackageUserKey;
@@ -126,10 +127,13 @@ public class WidgetsBottomSheet extends BaseWidgetSheet {
 
     @Override
     public void onWidgetsBound() {
-        final WidgetPickerData data = mActivityContext.getWidgetPickerDataProvider().get();
+        final WidgetPickerData data = LauncherModel.useModelRepositoryBinding()
+                ? LauncherComponentProvider.get(mActivityContext)
+                        .getHomeScreenRepository().getAllWidgets().getValue()
+                : mActivityContext.getWidgetPickerDataProvider().get();
         final PackageUserKey packageUserKey = PackageUserKey.fromItemInfo(mOriginalItemInfo);
-        List<WidgetItem> widgets = packageUserKey != null ? findAllWidgetsForPackageUser(data,
-                packageUserKey) : List.of();
+        List<WidgetItem> widgets = packageUserKey != null
+                ? data.findAllWidgetsForPackageUser(packageUserKey) : List.of();
 
         TableLayout widgetsTable = findViewById(R.id.widgets_table);
         widgetsTable.removeAllViews();

@@ -287,6 +287,7 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
     }
 
     override fun bindAllWidgets(widgets: List<WidgetsListBaseEntry>) {
+        if (useModelRepositoryBinding()) return
         launcher.widgetPickerDataProvider.setWidgets(widgets)
     }
 
