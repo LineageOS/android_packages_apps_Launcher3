@@ -56,7 +56,7 @@
     <string name="back_gesture_intro_subtitle" msgid="7912576483031802797">"Untuk kembali ke layar yang sebelumnya dibuka, geser dari tepi kiri atau kanan ke tengah layar."</string>
     <string name="back_gesture_tutorial_title" msgid="1944737946101059789">"Kembali"</string>
     <string name="back_gesture_tutorial_subtitle" msgid="6639993416000920142">"Geser dari tepi kiri atau kanan ke tengah layar"</string>
-    <string name="home_gesture_feedback_swipe_too_far_from_edge" msgid="4816365433160895458">"Pastikan Anda menggeser ke atas dari tepi bawah layar"</string>
+    <string name="home_gesture_feedback_swipe_too_far_from_edge" msgid="4816365433160895458">"Pastikan Anda menggeser layar dari ujung bawah ke atas"</string>
     <string name="home_gesture_feedback_overview_detected" msgid="5177627157303895077">"Pastikan Anda tidak berhenti sebelum melepaskan sentuhan"</string>
     <string name="home_gesture_feedback_wrong_swipe_direction" msgid="8328465201424027148">"Geser lurus ke atas"</string>
     <string name="home_gesture_feedback_complete_with_follow_up" msgid="8766981412895888417">"Anda telah menyelesaikan gestur buka layar utama. Berikutnya, pelajari cara melakukan gestur kembali."</string>
@@ -66,7 +66,7 @@
     <string name="home_gesture_tutorial_title" msgid="3126834347496917376">"Buka layar utama"</string>
     <string name="home_gesture_tutorial_subtitle" msgid="7245995490408668778">"Geser ke atas dari bagian bawah layar"</string>
     <string name="home_gesture_tutorial_success" msgid="1736295017642244751">"Bagus!"</string>
-    <string name="overview_gesture_feedback_swipe_too_far_from_edge" msgid="6402349235265407385">"Pastikan Anda menggeser ke atas dari tepi bawah layar"</string>
+    <string name="overview_gesture_feedback_swipe_too_far_from_edge" msgid="6402349235265407385">"Pastikan Anda menggeser layar dari ujung bawah ke atas"</string>
     <string name="overview_gesture_feedback_home_detected" msgid="663432226180397138">"Coba tahan jendela lebih lama sebelum melepasnya"</string>
     <string name="overview_gesture_feedback_wrong_swipe_direction" msgid="1191055451018584958">"Pastikan Anda menggeser lurus ke atas, lalu berhenti sejenak"</string>
     <string name="overview_gesture_feedback_complete_with_follow_up" msgid="3544611727467765026">"Anda telah mempelajari cara menggunakan gestur. Untuk menonaktifkan gestur, buka Setelan."</string>
@@ -141,8 +141,7 @@
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"Notifikasi"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"Setelan Cepat"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"Taskbar"</string>
-    <!-- no translation found for bubble_bar_a11y_title (7743340801055597168) -->
-    <skip />
+    <string name="bubble_bar_a11y_title" msgid="7743340801055597168">"Bilah balon"</string>
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"Menu navigasi"</string>
     <string name="always_show_taskbar" msgid="3608801276107751229">"Selalu tampilkan Taskbar"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"Ubah mode navigasi"</string>

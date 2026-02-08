@@ -141,8 +141,7 @@
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"Njoftimet"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"Cilësimet shpejt"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"Shiriti i detyrave"</string>
-    <!-- no translation found for bubble_bar_a11y_title (7743340801055597168) -->
-    <skip />
+    <string name="bubble_bar_a11y_title" msgid="7743340801055597168">"Shirit i flluskave"</string>
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"Shiriti i navigimit"</string>
     <string name="always_show_taskbar" msgid="3608801276107751229">"Shfaq gjithmonë shiritin e detyrave"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"Ndrysho modalitetin e navigimit"</string>
