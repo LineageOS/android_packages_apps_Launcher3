@@ -136,7 +136,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.view.WindowInsets;
 import android.view.WindowInsetsAnimation;
 import android.view.WindowManager.LayoutParams;
@@ -343,7 +342,6 @@ public class Launcher extends StatefulActivity<LauncherState>
     // Used to notify when an activity launch has been deferred because launcher is not yet resumed
     // TODO: See if we can remove this later
     private Runnable mOnDeferredActivityLaunchCallback;
-    private OnPreDrawListener mOnInitialBindListener;
 
     private LauncherModel mModel;
     private IModelWriter mModelWriter;
@@ -473,23 +471,13 @@ public class Launcher extends StatefulActivity<LauncherState>
         }
 
         mStartupLatencyLogger.logWorkspaceLoadStartTime();
-        if (!mModel.addCallbacksAndLoad(modelCallbacks)) {
-            if (!internalStateHandled) {
-                // If we are not binding synchronously, pause drawing until initial bind complete,
-                // so that the system could continue to show the device loading prompt
-                mOnInitialBindListener = Boolean.FALSE::booleanValue;
-            }
-        }
+        mModel.addCallbacksAndLoad(modelCallbacks);
         modelCallbacks.bindWorkspaceDataModel();
 
         // For handling default keys
         setDefaultKeyMode(DEFAULT_KEYS_SEARCH_LOCAL);
 
         setContentView(getRootView());
-
-        if (mOnInitialBindListener != null) {
-            getRootView().getViewTreeObserver().addOnPreDrawListener(mOnInitialBindListener);
-        }
         getRootView().dispatchInsets();
 
         final SettingsCache settingsCache = SettingsCache.INSTANCE.get(this);
@@ -1596,11 +1584,6 @@ public class Launcher extends StatefulActivity<LauncherState>
         TextKeyListener.getInstance().release();
         modelCallbacks.clearPendingBinds();
         LauncherAppState.getIDP(this).removeOnChangeListener(this);
-        // if Launcher activity is recreated, {@link Window} including {@link ViewTreeObserver}
-        // could be preserved in {@link ActivityThread#scheduleRelaunchActivity(IBinder)} if the
-        // previous activity has not stopped, which could happen when wallpaper detects a color
-        // changes while launcher is still loading.
-        getRootView().getViewTreeObserver().removeOnPreDrawListener(mOnInitialBindListener);
         mOverlayManager.onActivityDestroyed();
         PillColorProvider.getInstance(mWorkspace.getContext()).unregisterObserver();
     }
@@ -2152,14 +2135,7 @@ public class Launcher extends StatefulActivity<LauncherState>
      */
     @TargetApi(Build.VERSION_CODES.S)
     public void bindComplete(int workspaceItemCount, boolean isBindSync) {
-        if (mOnInitialBindListener != null) {
-            getRootView().getViewTreeObserver().removeOnPreDrawListener(mOnInitialBindListener);
-            mOnInitialBindListener = null;
-        }
-
         mStartupLatencyLogger = mStartupLatencyLogger.finishLogs(workspaceItemCount, isBindSync);
-
-
     }
 
     /**
