@@ -159,16 +159,6 @@ flag {
 }
 
 flag {
-    name: "use_new_icon_for_archived_apps"
-    namespace: "launcher"
-    description: "Archived apps will use new cloud icon in app title instead of overlay"
-    bug: "350758155"
-    metadata {
-      purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "letter_fast_scroller"
     namespace: "launcher"
     description: "Change fast scroller to a lettered list"
