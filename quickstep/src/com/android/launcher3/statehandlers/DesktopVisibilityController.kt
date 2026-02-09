@@ -358,8 +358,8 @@ constructor(
             )
         } else {
             getDisplayDeskConfig(displayId)!!.also {
-                check(it.deskIds.add(deskId)) {
-                    "Found a duplicate desk Id: $deskId on display: $displayId"
+                if (!it.deskIds.add(deskId)) {
+                    Log.e(TAG, "Found a duplicate desk Id: $deskId on display: $displayId")
                 }
             }
         }
@@ -369,8 +369,8 @@ constructor(
 
     private fun onDeskRemoved(displayId: Int, deskId: Int) {
         getDisplayDeskConfig(displayId)?.also {
-            check(it.deskIds.remove(deskId)) {
-                "Removing non-existing desk Id: $deskId on display: $displayId"
+            if (!it.deskIds.remove(deskId)) {
+                Log.e(TAG, "Removing non-existing desk Id: $deskId on display: $displayId")
             }
             if (it.activeDeskId == deskId) {
                 it.activeDeskId = INACTIVE_DESK_ID
@@ -382,11 +382,15 @@ constructor(
 
     private fun onActiveDeskChanged(displayId: Int, newActiveDesk: Int, oldActiveDesk: Int) {
         getDisplayDeskConfig(displayId)?.also {
-            check(oldActiveDesk == it.activeDeskId) {
-                "Mismatch between the Shell's oldActiveDesk: $oldActiveDesk, and Launcher's: ${it.activeDeskId}"
+            if (oldActiveDesk != it.activeDeskId) {
+                Log.e(
+                    TAG,
+                    "Mismatch between the Shell's oldActiveDesk: $oldActiveDesk, " +
+                        "and Launcher's: ${it.activeDeskId}",
+                )
             }
-            check(newActiveDesk == INACTIVE_DESK_ID || it.deskIds.contains(newActiveDesk)) {
-                "newActiveDesk: $newActiveDesk was never added to display: $displayId"
+            if (newActiveDesk != INACTIVE_DESK_ID && !it.deskIds.contains(newActiveDesk)) {
+                Log.e(TAG, "newActiveDesk: $newActiveDesk was never added to display: $displayId")
             }
             it.activeDeskId = newActiveDesk
         }
