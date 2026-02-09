@@ -16,7 +16,6 @@
 
 package com.android.launcher3.model;
 
-import static com.android.launcher3.Flags.enableLauncherBrMetricsFixed;
 import static com.android.launcher3.LauncherPrefs.IS_FIRST_LOAD_AFTER_RESTORE;
 import static com.android.launcher3.icons.CacheableShortcutInfo.convertShortcutsToCacheableShortcuts;
 import static com.android.launcher3.icons.cache.CacheLookupFlag.DEFAULT_LOOKUP_FLAG;
@@ -416,10 +415,8 @@ public class LoaderTask implements Runnable {
         TraceHelper.INSTANCE.beginSection(TAG);
         MODEL_EXECUTOR.elevatePriority(CALLER_LOADER_TASK);
         LoaderMemoryLogger memoryLogger = new LoaderMemoryLogger();
-        LauncherRestoreEventLogger restoreEventLogger = null;
-        if (enableLauncherBrMetricsFixed()) {
-            restoreEventLogger = mRestoreEventLoggerProvider.get();
-        }
+        LauncherRestoreEventLogger restoreEventLogger = mRestoreEventLoggerProvider.get();
+
         try (LauncherModel.LoaderTransaction transaction = mModel.beginLoader(this)) {
             loadAllSurfacesOrdered(memoryLogger, restoreEventLogger);
 
