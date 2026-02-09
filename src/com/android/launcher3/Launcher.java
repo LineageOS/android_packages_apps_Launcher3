@@ -471,7 +471,11 @@ public class Launcher extends StatefulActivity<LauncherState>
         }
 
         mStartupLatencyLogger.logWorkspaceLoadStartTime();
-        mModel.addCallbacksAndLoad(modelCallbacks);
+        if (useModelRepositoryBinding()) {
+            mModel.activate();
+        } else {
+            mModel.addCallbacksAndLoad(modelCallbacks);
+        }
         modelCallbacks.bindWorkspaceDataModel();
 
         // For handling default keys

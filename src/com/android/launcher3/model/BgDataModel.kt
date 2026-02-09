@@ -211,6 +211,11 @@ constructor(
     @Synchronized
     fun dataLoadComplete(allItems: SparseArray<ItemInfo>) {
         mutableWorkspaceData.replaceDataMap(allItems)
+        dispatchRebind()
+    }
+
+    @Synchronized
+    fun dispatchRebind() {
         if (Flags.modelRepository()) {
             repo.get().dispatchWorkspaceDataChange(mutableWorkspaceData.copy(), null)
         }

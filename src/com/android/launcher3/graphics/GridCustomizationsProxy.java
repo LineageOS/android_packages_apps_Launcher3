@@ -54,7 +54,6 @@ import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.dagger.LauncherAppSingleton;
 import com.android.launcher3.graphics.theme.ThemePreference;
-import com.android.launcher3.model.BgDataModel;
 import com.android.launcher3.preview.PreviewLifecycleObserver;
 import com.android.launcher3.preview.PreviewSurfaceRenderer;
 import com.android.launcher3.shapes.IconShapeModel;
@@ -62,8 +61,6 @@ import com.android.launcher3.shapes.ShapesProvider;
 import com.android.launcher3.util.ApiWrapper;
 import com.android.launcher3.util.ContentProviderProxy.ProxyProvider;
 import com.android.launcher3.util.DaggerSingletonTracker;
-import com.android.launcher3.util.Executors;
-import com.android.launcher3.util.Preconditions;
 import com.android.launcher3.util.RunnableList;
 
 import java.lang.ref.WeakReference;
@@ -309,13 +306,11 @@ public class GridCustomizationsProxy implements ProxyProvider {
                 mIdp.setCurrentGrid(gridName);
 
                 LauncherModel launcherModel = LauncherAppState.getInstance(mContext).getModel();
-                if (launcherModel.isActive()) {
-                    try {
-                        // Wait for device profile to be fully reloaded and applied to the launcher
-                        loadModelSync(launcherModel);
-                    } catch (ExecutionException | InterruptedException e) {
-                        Log.e(TAG, "Fail to load model", e);
-                    }
+                try {
+                    // Wait for device profile to be fully reloaded and applied to the launcher
+                    launcherModel.reloadIfActive().toCompletableFuture().get();
+                } catch (ExecutionException | InterruptedException e) {
+                    Log.e(TAG, "Fail to load model", e);
                 }
                 return 1;
             }
@@ -342,23 +337,6 @@ public class GridCustomizationsProxy implements ProxyProvider {
             default:
                 return UPDATE_SETTING_FAILURE;
         }
-    }
-
-    /**
-     * Loads the model in memory synchronously
-     */
-    private void loadModelSync(LauncherModel launcherModel) throws ExecutionException,
-            InterruptedException {
-        Preconditions.assertNonUiThread();
-        BgDataModel.Callbacks emptyCallbacks = new BgDataModel.Callbacks() { };
-        MAIN_EXECUTOR.submit(
-                () -> launcherModel.addCallbacksAndLoad(emptyCallbacks)
-        ).get();
-
-        Executors.MODEL_EXECUTOR.submit(() -> { }).get();
-        MAIN_EXECUTOR.submit(
-                () -> launcherModel.removeCallbacks(emptyCallbacks)
-        ).get();
     }
 
     @Override
