@@ -118,13 +118,6 @@ flag {
 }
 
 flag {
-  name: "enable_categorized_widget_suggestions"
-  namespace: "launcher"
-  description: "Enables widget suggestions in widget picker to be displayed in categories"
-  bug: "318410881"
-}
-
-flag {
   name: "force_monochrome_app_icons"
   namespace: "launcher"
   description: "Enable the ability to generate monochromatic icons, if it is not provided by the app"
