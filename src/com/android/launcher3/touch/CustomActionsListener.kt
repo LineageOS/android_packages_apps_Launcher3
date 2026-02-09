@@ -23,11 +23,13 @@ import com.android.launcher3.Launcher
 import com.android.launcher3.dragndrop.DragController
 import com.android.launcher3.dragndrop.DragOptions
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.model.data.ItemInfoWithIcon
 import com.android.launcher3.touch.CustomActionsListener.Companion.ACTION_LAUNCH
 import com.android.launcher3.touch.CustomActionsListener.Companion.ACTION_POPUP_MENU
 import com.android.launcher3.touch.CustomActionsListener.Companion.ACTION_START_DRAG
 import com.android.launcher3.touch.CustomActionsListener.Companion.hasFlags
 import com.android.launcher3.util.ShortcutUtil
+import com.android.launcher3.views.BubbleTextHolder
 
 /**
  * Interface for listening to custom actions performed on a view.
@@ -58,80 +60,121 @@ interface CustomActionsListener {
     }
 }
 
-/**
- * Implementation of [CustomActionsListener] for workspace items (icons, folders, app pairs, etc).
- */
-object WorkspaceItemCustomActionsListener : CustomActionsListener {
-    override fun performActions(view: View, actionMask: Int) {
+private val View.logicalTarget: View
+    get() = (parent as? BubbleTextHolder)?.let { it as? View } ?: this
+
+private val View.asBubbleTextView: BubbleTextView?
+    get() = this as? BubbleTextView ?: (this as? BubbleTextHolder)?.bubbleText
+
+internal val ItemInfoWithIcon.isNotPinnable: Boolean
+    get() = (runtimeStatusFlags and ItemInfoWithIcon.FLAG_NOT_PINNABLE) != 0
+
+/** Base class for listeners that act on specific items (Icons, Folders, App Pairs). */
+abstract class BaseItemCustomActionsListener : CustomActionsListener {
+
+    final override fun performActions(view: View, actionMask: Int) {
+        val target = view.logicalTarget
+        val btv = target.asBubbleTextView
+
         when {
-            hasFlags(actionMask, ACTION_POPUP_MENU or ACTION_START_DRAG) -> {
-                view.performLongClick()
-            }
-            hasFlags(actionMask, ACTION_LAUNCH) -> {
-                view.performClick()
-            }
-            hasFlags(actionMask, ACTION_POPUP_MENU) -> {
-                val launcher = Launcher.getLauncher(view.context)
-                if (ShortcutUtil.supportsShortcuts(view.tag as ItemInfo)) {
-                    launcher.popupControllerForAppIcons.show(view)
-                } else {
-                    launcher.popupControllerForHomeScreenItems.show(view)
-                }
-            }
-            hasFlags(actionMask, ACTION_START_DRAG) -> {
-                val launcher = Launcher.getLauncher(view.context)
-                if (ItemLongClickListener.canStartDrag(launcher)) {
-                    val options = DragOptions().apply { isMouseDrag = true }
-                    // TODO: To trigger a drag and not show a popup at the same time, we currently
-                    // rely on setting isMouseDrag to true. Refactor beginDrag code not to rely on
-                    // ItemLongClickListener path.
-                    ItemLongClickListener.beginDrag(view, launcher, view.tag as ItemInfo, options)
-                }
-            }
+            hasFlags(actionMask, ACTION_POPUP_MENU or ACTION_START_DRAG) ->
+                target.performLongClick()
+            hasFlags(actionMask, ACTION_LAUNCH) -> target.performClick()
+            hasFlags(actionMask, ACTION_POPUP_MENU) -> onOpenPopupMenu(target, btv)
+            hasFlags(actionMask, ACTION_START_DRAG) -> onStartDrag(target, btv)
+        }
+    }
+
+    /**
+     * Called to open a popup menu for the given target.
+     *
+     * @param target The logical target view for the action. This could be a [BubbleTextHolder] or
+     *   the view itself.
+     * @param btv The [BubbleTextView] associated with the target, if it exists. Implementers should
+     *   generally prefer using this view for operations that require a [BubbleTextView] or its
+     *   [ItemInfo].
+     */
+    abstract fun onOpenPopupMenu(target: View, btv: BubbleTextView?)
+
+    /**
+     * Called to start a drag operation for the given target.
+     *
+     * @param target The logical target view for the action. This could be a [BubbleTextHolder] or
+     *   the view itself.
+     * @param btv The [BubbleTextView] associated with the target, if it exists. Implementers should
+     *   generally prefer using this view for operations that require a [BubbleTextView] or its
+     *   [ItemInfo].
+     */
+    abstract fun onStartDrag(target: View, btv: BubbleTextView?)
+}
+
+/**
+ * Implementation of [BaseItemCustomActionsListener] for workspace items (icons, folders, app
+ * pairs).
+ */
+object WorkspaceItemCustomActionsListener : BaseItemCustomActionsListener() {
+    override fun onOpenPopupMenu(target: View, btv: BubbleTextView?) {
+        val viewForPopup = btv ?: target
+        val tag = viewForPopup.tag as? ItemInfo ?: return
+
+        val launcher = Launcher.getLauncher(viewForPopup.context)
+        if (ShortcutUtil.supportsShortcuts(tag)) {
+            launcher.popupControllerForAppIcons.show(viewForPopup)
+        } else {
+            launcher.popupControllerForHomeScreenItems.show(viewForPopup)
+        }
+    }
+
+    override fun onStartDrag(target: View, btv: BubbleTextView?) {
+        val viewForDrag = btv ?: target
+        val tag = viewForDrag.tag as? ItemInfo ?: return
+
+        val launcher = Launcher.getLauncher(viewForDrag.context)
+        if (ItemLongClickListener.canStartDrag(launcher)) {
+            val options = DragOptions().apply { isMouseDrag = true }
+            // TODO: To trigger a drag and not show a popup at the same time, we currently
+            // rely on setting isMouseDrag to true. Refactor beginDrag code not to rely on
+            // ItemLongClickListener path.
+            ItemLongClickListener.beginDrag(viewForDrag, launcher, tag, options)
         }
     }
 }
 
-/** Implementation of [CustomActionsListener] for AllApps items. */
-object AllAppsItemCustomActionsListener : CustomActionsListener {
-    override fun performActions(view: View, actionMask: Int) {
-        when {
-            hasFlags(actionMask, ACTION_POPUP_MENU or ACTION_START_DRAG) -> {
-                view.performLongClick()
-            }
+/** Implementation of [BaseItemCustomActionsListener] for AllApps items. */
+object AllAppsItemCustomActionsListener : BaseItemCustomActionsListener() {
+    override fun onOpenPopupMenu(target: View, btv: BubbleTextView?) {
+        if (btv == null) return
 
-            hasFlags(actionMask, ACTION_LAUNCH) -> {
-                view.performClick()
-            }
+        // Allow the view to handle its own popup menu if it has a custom implementation.
+        if (btv.showPopup() != null) return
 
-            hasFlags(actionMask, ACTION_POPUP_MENU) -> {
-                val launcher = Launcher.getLauncher(view.context)
-                if (view is BubbleTextView) {
-                    launcher.popupControllerForAppIcons.show(view)
+        Launcher.getLauncher(btv.context).popupControllerForAppIcons.show(btv)
+    }
+
+    override fun onStartDrag(target: View, btv: BubbleTextView?) {
+        if (btv == null) return
+
+        val info = btv.tag as? ItemInfoWithIcon
+        if (info?.isNotPinnable == true) return
+
+        val launcher = Launcher.getLauncher(btv.context)
+        if (!ItemLongClickListener.canStartAllAppsItemDrag(launcher)) return
+
+        val dragController: DragController = launcher.dragController
+        dragController.addDragListener(
+            object : DragController.DragListener {
+                override fun onDragStart(dragObject: DragObject, options: DragOptions) {
+                    btv.visibility = View.INVISIBLE
+                }
+
+                override fun onDragEnd() {
+                    btv.visibility = View.VISIBLE
+                    dragController.removeDragListener(this)
                 }
             }
+        )
 
-            hasFlags(actionMask, ACTION_START_DRAG) -> {
-                val launcher = Launcher.getLauncher(view.context)
-                if (!ItemLongClickListener.canStartAllAppsItemDrag(launcher)) return
-
-                val dragController: DragController = launcher.dragController
-                dragController.addDragListener(
-                    object : DragController.DragListener {
-                        override fun onDragStart(dragObject: DragObject, options: DragOptions) {
-                            view.visibility = View.INVISIBLE
-                        }
-
-                        override fun onDragEnd() {
-                            view.visibility = View.VISIBLE
-                            dragController.removeDragListener(this)
-                        }
-                    }
-                )
-
-                val dragOptions = DragOptions().apply { isMouseDrag = true }
-                launcher.workspace.beginDragShared(view, launcher.appsView, dragOptions)
-            }
-        }
+        val dragOptions = DragOptions().apply { isMouseDrag = true }
+        launcher.workspace.beginDragShared(btv, launcher.appsView, dragOptions)
     }
 }

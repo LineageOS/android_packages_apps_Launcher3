@@ -20,15 +20,21 @@ import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.launcher3.BubbleTextView
+import com.android.launcher3.model.data.ItemInfoWithIcon
+import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.taskbar.TaskbarBaseTestCase
 import com.android.launcher3.taskbar.TaskbarCustomActionsListener
 import com.android.launcher3.touch.CustomActionsListener.Companion.ACTION_LAUNCH
 import com.android.launcher3.touch.CustomActionsListener.Companion.ACTION_POPUP_MENU
 import com.android.launcher3.touch.CustomActionsListener.Companion.ACTION_START_DRAG
+import com.android.launcher3.views.BubbleTextHolder
+import com.android.launcher3.views.OptionsPopupView
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
@@ -55,9 +61,27 @@ class TaskbarCustomActionsListenerTest : TaskbarBaseTestCase() {
     }
 
     @Test
+    fun performActions_actionLaunch_withBubbleTextHolderParent_performsClickOnParent() {
+        val parent = mock(TestBubbleTextHolderView::class.java)
+        whenever(view.parent).thenReturn(parent)
+
+        listener.performActions(view, ACTION_LAUNCH)
+        verify(parent).performClick()
+    }
+
+    @Test
     fun performActions_actionPopupAndDrag_performsLongClick() {
         listener.performActions(view, ACTION_POPUP_MENU or ACTION_START_DRAG)
         verify(view).performLongClick()
+    }
+
+    @Test
+    fun performActions_actionPopupAndDrag_withBubbleTextHolderParent_performsLongClickOnParent() {
+        val parent = mock(TestBubbleTextHolderView::class.java)
+        whenever(view.parent).thenReturn(parent)
+
+        listener.performActions(view, ACTION_POPUP_MENU or ACTION_START_DRAG)
+        verify(parent).performLongClick()
     }
 
     @Test
@@ -67,8 +91,29 @@ class TaskbarCustomActionsListenerTest : TaskbarBaseTestCase() {
     }
 
     @Test
+    fun performActions_actionPopupMenu_bubbleTextViewShowsPopup_doesNotShowTaskbarPopup() {
+        whenever(bubbleTextView.showPopup()).thenReturn(mock(OptionsPopupView::class.java))
+
+        listener.performActions(bubbleTextView, ACTION_POPUP_MENU)
+        verify(taskbarActivityContext, never()).showPopupMenuForIcon(bubbleTextView)
+    }
+
+    @Test
     fun performActions_actionStartDrag_startsDrag() {
         listener.performActions(bubbleTextView, ACTION_START_DRAG)
         verify(taskbarDragController).startDragWithMouse(bubbleTextView)
     }
+
+    @Test
+    fun performActions_actionStartDrag_notPinnable_doesNotStartDrag() {
+        val info = WorkspaceItemInfo()
+        info.runtimeStatusFlags = ItemInfoWithIcon.FLAG_NOT_PINNABLE
+        whenever(bubbleTextView.tag).thenReturn(info)
+
+        listener.performActions(bubbleTextView, ACTION_START_DRAG)
+        verify(taskbarDragController, never()).startDragWithMouse(bubbleTextView)
+    }
+
+    abstract class TestBubbleTextHolderView(context: android.content.Context) :
+        android.view.ViewGroup(context), BubbleTextHolder
 }
