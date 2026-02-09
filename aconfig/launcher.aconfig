@@ -567,16 +567,6 @@ flag {
 }
 
 flag {
-  name: "fix_widget_drag_radius_loss"
-  namespace: "launcher"
-  description: "Fixes issue that during drag and drop, radius clips were lost"
-  bug: "326128683"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "enable_new_touchpad_gestures"
   namespace: "launcher"
   description: "Update touchpad gestures to match 26Q2 spec."
