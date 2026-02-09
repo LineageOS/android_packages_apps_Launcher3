@@ -164,16 +164,18 @@ class TaskbarPinnedAppIconContainer(context: Context) :
             val itemView = itemViewFactory.getView(item, index)
             itemView.setPadding(taskbarIconViewPadding)
 
+            val lp = getLayoutParams(index, itemCount)
             if (!forceUpdate && item.isSameItem(itemView.tag) && itemView in this) {
                 // Might have been wrapped in TaskItemInfo by recents update.
                 itemView.tag = item
+                itemView.layoutParams = lp
                 return@forEachIcon
             }
 
             if (itemView !in this) {
-                addView(itemView, getLayoutParams(index, itemCount))
+                addView(itemView, lp)
             } else {
-                itemView.layoutParams = getLayoutParams(index, itemCount)
+                itemView.layoutParams = lp
             }
 
             if (itemView is FolderIcon) {
