@@ -579,11 +579,6 @@ public class BubbleBarViewController {
         return mBarView.getVisibility() == VISIBLE;
     }
 
-    /** Returns whether the bubble bar container is visible. */
-    public boolean isBubbleBarContainerVisible() {
-        return mBubbleBarContainer.getVisibility() == VISIBLE;
-    }
-
     /** Whether the bubble bar has bubbles. */
     public boolean hasBubbles() {
         return mBarView.getBubbleChildCount() > 0;
@@ -857,10 +852,8 @@ public class BubbleBarViewController {
         if (mHiddenForSysui || mHiddenForNoBubbles || hiddenForStashedAndNotAnimating) {
             //TODO(b/404870188) this visibility change cause search view drag misbehavior
             mBarView.setVisibility(INVISIBLE);
-            mBubbleBarContainer.setVisibility(INVISIBLE);
         } else {
             mBarView.setVisibility(VISIBLE);
-            mBubbleBarContainer.setVisibility(VISIBLE);
         }
     }
 
