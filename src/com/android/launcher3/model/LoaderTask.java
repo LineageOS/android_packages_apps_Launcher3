@@ -322,7 +322,9 @@ public class LoaderTask implements Runnable {
                                     new HomeScreenFilesUpdate(
                                             mHomeScreenFilesQueryResult,
                                             Process.myUserHandle(),
-                                            /*isDelayedInit=*/true))),
+                                            HomeScreenFilesUpdate.Extras.builder()
+                                                    .isDelayedInit(true)
+                                                    .build()))),
                     THREAD_POOL_EXECUTOR);
 
         if (!mParams.getLoadNonWorkspaceItems()) {

@@ -18,6 +18,7 @@ package com.android.launcher3.homescreenfiles
 
 import android.content.ContentProviderClient
 import android.content.ContentResolver
+import android.content.ContentResolver.NOTIFY_INSERT
 import android.content.ContentValues
 import android.database.ContentObserver
 import android.database.MatrixCursor
@@ -113,18 +114,12 @@ class HomeScreenFilesProviderTest {
         whenever(environmentWrapper.isExternalStorageDirectoryMounted()).thenReturn(true)
 
         // Notify external storage directory mounted.
-        val observerCaptor = argumentCaptor<ContentObserver>()
-        verify(contentResolver)
-            .registerContentObserver(
-                eq(Uri.parse("content://media/external_primary/file")),
-                eq(true),
-                observerCaptor.capture(),
+        captureContentObserver()
+            .dispatchChange(
+                /*selfChange=*/ false,
+                Uri.parse("content://media/external_primary"),
+                ContentResolver.NOTIFY_SYNC_TO_NETWORK,
             )
-        observerCaptor.firstValue.dispatchChange(
-            /*selfChange=*/ false,
-            Uri.parse("content://media/external_primary"),
-            ContentResolver.NOTIFY_SYNC_TO_NETWORK,
-        )
 
         // Wait.
         assertNull(onReady.get())
@@ -144,18 +139,12 @@ class HomeScreenFilesProviderTest {
         whenever(environmentWrapper.isExternalStorageDirectoryMounted()).thenReturn(true)
 
         // Notify external storage directory mounted.
-        val observerCaptor = argumentCaptor<ContentObserver>()
-        verify(contentResolver)
-            .registerContentObserver(
-                eq(Uri.parse("content://media/external_primary/file")),
-                eq(true),
-                observerCaptor.capture(),
+        captureContentObserver()
+            .dispatchChange(
+                /*selfChange=*/ false,
+                Uri.parse("content://media/external_primary"),
+                ContentResolver.NOTIFY_SYNC_TO_NETWORK,
             )
-        observerCaptor.firstValue.dispatchChange(
-            /*selfChange=*/ false,
-            Uri.parse("content://media/external_primary"),
-            ContentResolver.NOTIFY_SYNC_TO_NETWORK,
-        )
 
         // Invoke [#onReady()].
         assertNull(provider.onReady().get())
@@ -242,7 +231,7 @@ class HomeScreenFilesProviderTest {
         val defaultNewFolderName = context.getString(R.string.default_new_folder_name)
         val data = "$HOME_SCREEN_FOLDER_RELATIVE_PATH/$defaultNewFolderName"
         val folder = mock<File>()
-        val uri = mock<Uri>()
+        val uri = createExternalPrimaryMediaStoreUri(1L)
 
         // Mock external storage directory state.
         whenever(environmentWrapper.isExternalStorageDirectoryMounted())
@@ -277,8 +266,20 @@ class HomeScreenFilesProviderTest {
         clearInvocations(contentResolver)
         provider = createProvider()
 
+        // Cache updates.
+        val updates = mutableListOf<HomeScreenFilesUpdate>()
+        val updatesStream = provider.updates.forEach(Runnable::run, updates::add)
+
         // Invoke [#createNewFolder()].
-        assertEquals(expectSuccess, provider.createNewFolder().get())
+        val extras = HomeScreenFilesUpdate.Extras.builder().findSpaceStartingFromScreenId(1).build()
+        assertEquals(expectSuccess, provider.createNewFolder(extras).get())
+
+        // Verify [extras] propagation.
+        if (expectSuccess) {
+            captureContentObserver().dispatchChange(false, uri, NOTIFY_INSERT)
+            assertEquals(1, updates.size)
+            assertEquals(extras, updates[0].extras)
+        }
     }
 
     @Test
@@ -573,20 +574,9 @@ class HomeScreenFilesProviderTest {
         val callback = mock<(HomeScreenFilesUpdate) -> Unit>()
         val immediateExecutor = Executor { r -> r.run() }
         val unregisterCallback = provider.updates.forEach(immediateExecutor) { callback(it) }
-        val underlyingContentObserverCaptor = argumentCaptor<ContentObserver>()
+        val underlyingContentObserver = captureContentObserver()
 
-        verify(contentResolver, times(1))
-            .registerContentObserver(
-                eq(Uri.parse("content://media/external_primary/file")),
-                /* notifyForDescendants= */ eq(true),
-                underlyingContentObserverCaptor.capture(),
-            )
-
-        underlyingContentObserverCaptor.firstValue.dispatchChange(
-            /* selfChange= */ false,
-            expectedUri,
-            ContentResolver.NOTIFY_INSERT,
-        )
+        underlyingContentObserver.dispatchChange(false, expectedUri, NOTIFY_INSERT)
 
         val expectedIsDirectory = false
         val expectedUser = Process.myUserHandle()
@@ -603,18 +593,28 @@ class HomeScreenFilesProviderTest {
             .invoke(
                 argThat {
                     filesByUri.get() == mapOf(expectedUri to expectedFile) &&
-                        !isDelayedInit &&
+                        !extras.isDelayedInit &&
                         user == expectedUser
                 }
             )
 
         context.appComponent.daggerSingletonTracker.close()
         TestUtil.runOnExecutorSync(MAIN_EXECUTOR) {}
-        verify(contentResolver, times(1))
-            .unregisterContentObserver(eq(underlyingContentObserverCaptor.firstValue))
+        verify(contentResolver, times(1)).unregisterContentObserver(underlyingContentObserver)
 
         unregisterCallback.close()
     }
+
+    private fun captureContentObserver() =
+        argumentCaptor<ContentObserver>().let { contentObserver ->
+            verify(contentResolver, times(1))
+                .registerContentObserver(
+                    eq(Uri.parse("content://media/external_primary/file")),
+                    eq(true),
+                    contentObserver.capture(),
+                )
+            contentObserver.firstValue
+        }
 
     private fun createExternalPrimaryMediaStoreUri(id: Long) =
         MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY, id)

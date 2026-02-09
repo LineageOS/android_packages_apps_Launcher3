@@ -51,15 +51,37 @@ public class WorkspaceItemSpaceFinder {
     /**
      * Find a position on the screen for the given size or adds a new screen.
      *
+     * @param addItemsFinal Added items that are due to be added to the database.
+     * @param spanX Item size along the x-axis.
+     * @param spanY Item size along the y-axis.
+     * @param excludedScreens Screens to exclude from the search.
      * @return screenId and the coordinates for the item wrapped in
      * {@link WorkspaceItemCoordinates}.
      */
     public WorkspaceItemCoordinates findSpaceForItem(ArrayList<ItemInfo> addItemsFinal, int spanX,
             int spanY, IntSet excludedScreens) {
+        return findSpaceForItem(
+                addItemsFinal, spanX, spanY, excludedScreens,
+                /* startingFromScreen= */ FIRST_SCREEN_ID);
+    }
+
+    /**
+     * Find a position on the screen for the given size or adds a new screen.
+     *
+     * @param addItemsFinal Added items that are due to be added to the database.
+     * @param spanX Item size along the x-axis.
+     * @param spanY Item size along the y-axis.
+     * @param excludedScreens Screens to exclude from the search.
+     * @param startingFromScreen Screen at which to begin the search.
+     * @return screenId and the coordinates for the item wrapped in
+     * {@link WorkspaceItemCoordinate}.
+     */
+    public WorkspaceItemCoordinates findSpaceForItem(ArrayList<ItemInfo> addItemsFinal, int spanX,
+            int spanY, IntSet excludedScreens, int startingFromScreen) {
         SparseArray<ArrayList<ItemInfo>> screenItems = new SparseArray<>();
         screenItems.put(FIRST_SCREEN_ID, new ArrayList<>());
 
-        // Use sBgItemsIdMap as all the items are already loaded.
+        // Use `itemsIdMap` as all the items are already loaded.
         synchronized (mDataModel) {
             for (ItemInfo info : mDataModel.itemsIdMap) {
                 if (info.container == LauncherSettings.Favorites.CONTAINER_DESKTOP) {
@@ -73,7 +95,7 @@ public class WorkspaceItemSpaceFinder {
             }
         }
 
-        // Add items that are due to be added to the database from AddWorkspaceItemsTask#execute.
+        // Add items that are due to be added to the database.
         for (ItemInfo info : addItemsFinal) {
             if (info.container == LauncherSettings.Favorites.CONTAINER_DESKTOP) {
                 ArrayList<ItemInfo> items = screenItems.get(info.screenId);
@@ -86,12 +108,17 @@ public class WorkspaceItemSpaceFinder {
         }
 
         // Find appropriate space for the item.
-        int screenId = 0;
+        int screenId = -1;
         int[] coordinates = new int[2];
         boolean found = false;
 
-        for (int screen = 0; screen < screenItems.size(); screen++) {
-            screenId = screenItems.keyAt(screen);
+        // Fall back to the first screen if `startingFromScreen` does not exist.
+        final int startingFromScreenIndex = Math.max(screenItems.indexOfKey(startingFromScreen), 0);
+
+        for (int screenIndex = startingFromScreenIndex;
+                screenId == -1 || screenIndex != startingFromScreenIndex;
+                screenIndex = (screenIndex + 1) % screenItems.size()) {
+            screenId = screenItems.keyAt(screenIndex);
             if (!excludedScreens.contains(screenId) && findNextAvailableIconSpaceInScreen(
                     screenItems.get(screenId), coordinates, spanX, spanY)) {
                 // We found a space for it
