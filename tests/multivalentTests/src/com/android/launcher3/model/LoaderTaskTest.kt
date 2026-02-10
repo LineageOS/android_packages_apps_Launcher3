@@ -365,7 +365,6 @@ class LoaderTaskTest {
         }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_FIRST_SCREEN_BROADCAST_ARCHIVING_EXTRAS)
     fun `When broadcast flag on and is restore and secure setting off then send new broadcast`() {
         // Given
         doReturn(listOf(expectedBroadcastModel))
