@@ -44,9 +44,9 @@ import com.android.launcher3.util.ModelTestExtensions.setModelLayout
 import com.android.launcher3.util.RoboApiWrapper
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestUtil
-import com.android.launcher3.util.UserIconInfo
 import com.android.launcher3.util.rule.MockUsersRule
 import com.android.launcher3.util.rule.MockUsersRule.MockUser
+import com.android.users.UserType
 import java.util.concurrent.CountDownLatch
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -72,7 +72,7 @@ class ShortcutIconTest {
     val state: TestableModelState by lazy { app.appComponent.testableModelState }
 
     @Test
-    @MockUser(userType = UserIconInfo.TYPE_MAIN)
+    @MockUser(userType = UserType.MAIN)
     fun shortcut_icon_retained_even_after_system_error() {
         // Setup mock LauncherApps to return a valid drawable
         val iconBitmap = createSoftwareBitmap(200, 200) { it.drawColor(Color.GREEN) }

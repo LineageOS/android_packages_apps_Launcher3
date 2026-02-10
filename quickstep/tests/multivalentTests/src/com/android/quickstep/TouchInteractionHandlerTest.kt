@@ -27,9 +27,9 @@ import com.android.launcher3.util.LockedUserState
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestUtil
 import com.android.launcher3.util.ThreadSafeRunnableList
-import com.android.launcher3.util.UserIconInfo.Companion.TYPE_MAIN
 import com.android.launcher3.util.rule.MockUsersRule
 import com.android.launcher3.util.rule.MockUsersRule.MockUser
+import com.android.users.UserType
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
@@ -79,7 +79,7 @@ class TouchInteractionHandlerTest {
     }
 
     @Test
-    @MockUser(userType = TYPE_MAIN, isUserUnlocked = false)
+    @MockUser(userType = UserType.MAIN, isUserUnlocked = false)
     fun handler_created_when_device_locked() {
         // Verify that the create and destroy happens without any crash.
         // An invalid shared-pref access will be caught by SandboxApplication

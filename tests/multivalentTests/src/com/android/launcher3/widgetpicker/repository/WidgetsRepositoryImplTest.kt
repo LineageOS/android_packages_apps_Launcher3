@@ -56,7 +56,6 @@ import com.android.launcher3.util.Executors
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestActivityContext
 import com.android.launcher3.util.TestUtil
-import com.android.launcher3.util.UserIconInfo
 import com.android.launcher3.util.WidgetUtils
 import com.android.launcher3.util.rule.MockUsersRule
 import com.android.launcher3.util.rule.MockUsersRule.MockUser
@@ -76,6 +75,7 @@ import com.android.launcher3.widgetpicker.shared.model.WidgetId
 import com.android.launcher3.widgetpicker.shared.model.WidgetPreview
 import com.android.launcher3.widgetpicker.shared.model.isAppWidget
 import com.android.launcher3.widgetpicker.shared.model.isShortcut
+import com.android.users.UserType
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -100,7 +100,7 @@ import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@MockUser(userType = UserIconInfo.TYPE_MAIN)
+@MockUser(userType = UserType.MAIN)
 @OptIn(ExperimentalCoroutinesApi::class)
 @EnableFlags(Flags.FLAG_SHOW_CREATE_WIDGET_BTN_IN_PICKER)
 @SkipOnDeviceless // Can't mock PinItemRequest in robolectric.
@@ -244,7 +244,7 @@ class WidgetsRepositoryImplTest {
     }
 
     @Test
-    @MockUser(userType = UserIconInfo.TYPE_MAIN)
+    @MockUser(userType = UserType.MAIN)
     fun initializeAndObserveWidgets_widgetsAndShortcutsMappedCorrectly() =
         testScope.runTest {
             underTest.initialize()

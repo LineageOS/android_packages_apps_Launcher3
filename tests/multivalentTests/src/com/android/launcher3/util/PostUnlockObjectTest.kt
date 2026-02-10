@@ -19,9 +19,9 @@ package com.android.launcher3.util
 import android.content.Intent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.launcher3.util.UserIconInfo.Companion.TYPE_MAIN
 import com.android.launcher3.util.rule.MockUsersRule
 import com.android.launcher3.util.rule.MockUsersRule.MockUser
+import com.android.users.UserType
 import com.google.common.truth.Truth.assertThat
 import dagger.Lazy
 import java.util.concurrent.Executor
@@ -44,19 +44,19 @@ class PostUnlockObjectTest {
     }
 
     @Test
-    @MockUser(userType = TYPE_MAIN, isUserUnlocked = false)
+    @MockUser(userType = UserType.MAIN, isUserUnlocked = false)
     fun getIfReady_is_null_when_locked() {
         assertThat(target.getIfReady()).isNull()
     }
 
     @Test
-    @MockUser(userType = TYPE_MAIN, isUserUnlocked = true)
+    @MockUser(userType = UserType.MAIN, isUserUnlocked = true)
     fun getIfReady_is_non_null_when_unlocked() {
         assertThat(target.getIfReady()).isNotNull()
     }
 
     @Test
-    @MockUser(userType = TYPE_MAIN, isUserUnlocked = true)
+    @MockUser(userType = UserType.MAIN, isUserUnlocked = true)
     fun whenAvailable_called_immediately_if_unlocked() {
         val cleanup = mock<Runnable>()
         val executor = ListExecutor()
@@ -80,7 +80,7 @@ class PostUnlockObjectTest {
     }
 
     @Test
-    @MockUser(userType = TYPE_MAIN, isUserUnlocked = false)
+    @MockUser(userType = UserType.MAIN, isUserUnlocked = false)
     fun whenAvailable_called_after_user_is_unlocked() {
         val cleanup = mock<Runnable>()
         val executor = ListExecutor()
@@ -109,7 +109,7 @@ class PostUnlockObjectTest {
     }
 
     @Test
-    @MockUser(userType = TYPE_MAIN, isUserUnlocked = false)
+    @MockUser(userType = UserType.MAIN, isUserUnlocked = false)
     fun whenAvailable_not_called_if_closed_before_unlock() {
         val cleanup = mock<Runnable>()
         val executor = ListExecutor()

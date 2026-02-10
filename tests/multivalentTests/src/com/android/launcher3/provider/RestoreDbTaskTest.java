@@ -22,8 +22,6 @@ import static com.android.launcher3.LauncherPrefs.OLD_APP_WIDGET_IDS;
 import static com.android.launcher3.LauncherPrefs.RESTORE_DEVICE;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION;
-import static com.android.launcher3.util.UserIconInfo.TYPE_MAIN;
-import static com.android.launcher3.util.UserIconInfo.TYPE_WORK;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -62,6 +60,7 @@ import com.android.launcher3.util.SandboxApplication;
 import com.android.launcher3.util.UserIconInfo;
 import com.android.launcher3.util.rule.MockUsersRule;
 import com.android.launcher3.util.rule.MockUsersRule.MockUser;
+import com.android.users.UserType;
 
 import org.junit.After;
 import org.junit.Before;
@@ -123,14 +122,14 @@ public class RestoreDbTaskTest {
     }
 
     @Test
-    @MockUser(userType = TYPE_MAIN, userSerial = 23)
+    @MockUser(userType = UserType.MAIN, userSerial = 23)
     public void testGetProfileId() throws Exception {
         mDb = getModelDbController().getDb();
         assertEquals(23, new RestoreDbTask().getDefaultProfileId(mDb));
     }
 
     @Test
-    @MockUser(userType = TYPE_MAIN, userSerial = 42)
+    @MockUser(userType = UserType.MAIN, userSerial = 42)
     public void testMigrateProfileId() throws Exception {
         mDb = getModelDbController().getDb();
         // Add some mock data
@@ -151,7 +150,7 @@ public class RestoreDbTaskTest {
     }
 
     @Test
-    @MockUser(userType = TYPE_MAIN, userSerial = 42)
+    @MockUser(userType = UserType.MAIN, userSerial = 42)
     public void testChangeDefaultColumn() throws Exception {
         mDb = getModelDbController().getDb();
         // Add some mock data
@@ -175,8 +174,8 @@ public class RestoreDbTaskTest {
     }
 
     @Test
-    @MockUser(userType = TYPE_MAIN, userSerial = 100)
-    @MockUser(userType = TYPE_WORK, userSerial = 200)
+    @MockUser(userType = UserType.MAIN, userSerial = 100)
+    @MockUser(userType = UserType.WORK, userSerial = 200)
     public void testSanitizeDB_bothProfiles() throws Exception {
         UserHandle myUser = mMockUsers.findUser(UserIconInfo::isMain);
         UserHandle workUser = mMockUsers.findUser(UserIconInfo::isWork);
@@ -207,8 +206,8 @@ public class RestoreDbTaskTest {
     }
 
     @Test
-    @MockUser(userType = TYPE_MAIN, userSerial = 100)
-    @MockUser(userType = TYPE_WORK, userSerial = 200)
+    @MockUser(userType = UserType.MAIN, userSerial = 100)
+    @MockUser(userType = UserType.WORK, userSerial = 200)
     public void testSanitizeDB_workItemsRemoved() throws Exception {
         UserHandle myUser = mMockUsers.findUser(UserIconInfo::isMain);
 
@@ -344,7 +343,7 @@ public class RestoreDbTaskTest {
     }
 
     @Test
-    @MockUser(userType = TYPE_MAIN, userSerial = 42)
+    @MockUser(userType = UserType.MAIN, userSerial = 42)
     public void testRemoveScreenIdGaps_firstScreenEmpty() {
         runRemoveScreenIdGapsTest(
                 new int[]{1, 2, 5, 6, 6, 7, 9, 9},
@@ -352,7 +351,7 @@ public class RestoreDbTaskTest {
     }
 
     @Test
-    @MockUser(userType = TYPE_MAIN, userSerial = 42)
+    @MockUser(userType = UserType.MAIN, userSerial = 42)
     public void testRemoveScreenIdGaps_firstScreenOccupied() {
         runRemoveScreenIdGapsTest(
                 new int[]{0, 2, 5, 6, 6, 7, 9, 9},
@@ -360,7 +359,7 @@ public class RestoreDbTaskTest {
     }
 
     @Test
-    @MockUser(userType = TYPE_MAIN, userSerial = 42)
+    @MockUser(userType = UserType.MAIN, userSerial = 42)
     public void testRemoveScreenIdGaps_noGap() {
         runRemoveScreenIdGapsTest(
                 new int[]{0, 1, 1, 2, 3, 3, 4, 5},

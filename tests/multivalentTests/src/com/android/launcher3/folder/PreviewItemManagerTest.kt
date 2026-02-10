@@ -52,6 +52,7 @@ import com.android.launcher3.util.TestActivityContext
 import com.android.launcher3.util.TestUtil
 import com.android.launcher3.util.UserIconInfo
 import com.android.tools.dagger.mutation.annotations.MutatedComponent
+import com.android.users.UserType
 import com.google.common.truth.Truth.assertThat
 import kotlin.annotation.AnnotationRetention.RUNTIME
 import kotlin.annotation.AnnotationTarget.FUNCTION
@@ -120,15 +121,11 @@ class PreviewItemManagerTest {
         folderItems[1].bitmap = folderItems[1].bitmap.copy(themedBitmap = null)
 
         // Set third icon to be themed with badge.
-        folderItems[2].bitmap =
-            folderItems[2].bitmap.withFlags(profileFlagOp(UserIconInfo.TYPE_WORK))
+        folderItems[2].bitmap = folderItems[2].bitmap.withFlags(profileFlagOp(UserType.WORK))
 
         // Set fourth icon to be non-themed with badge.
         folderItems[3].bitmap =
-            folderItems[3]
-                .bitmap
-                .withFlags(profileFlagOp(UserIconInfo.TYPE_WORK))
-                .copy(themedBitmap = null)
+            folderItems[3].bitmap.withFlags(profileFlagOp(UserType.WORK)).copy(themedBitmap = null)
     }
 
     @Test
@@ -291,7 +288,7 @@ class PreviewItemManagerTest {
         verify(iconCache, never()).updateIconInBackground(any(), any(), any(), any())
     }
 
-    private fun profileFlagOp(type: Int) =
+    private fun profileFlagOp(type: UserType) =
         UserIconInfo(Process.myUserHandle(), type).applyBitmapInfoFlags(FlagOp.NO_OP)
 
     private fun buildWorkspaceItemInfo(targetClass: String) =

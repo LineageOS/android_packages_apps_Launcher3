@@ -38,6 +38,7 @@ import com.android.launcher3.util.MutableListenableStream
 import com.android.launcher3.util.SimpleBroadcastReceiver
 import com.android.launcher3.util.SimpleBroadcastReceiver.Companion.actionsFilter
 import com.android.launcher3.util.UserIconInfo
+import com.android.users.UserType
 import javax.inject.Inject
 
 /** Class which manages a local cache of user handles to avoid system rpc */
@@ -123,7 +124,7 @@ constructor(
                 CachedUserInfo(
                     UserIconInfo(
                         user = user,
-                        type = if (isWork) UserIconInfo.TYPE_WORK else UserIconInfo.TYPE_MAIN,
+                        type = if (isWork) UserType.WORK else UserType.MAIN,
                         userSerial = getSerialNumberForUser(user),
                     ),
                     isUnlocked = isUserUnlocked(user),
@@ -141,11 +142,11 @@ constructor(
                         user = user,
                         type =
                             when (userType) {
-                                null -> UserIconInfo.TYPE_MAIN
-                                USER_TYPE_PROFILE_MANAGED -> UserIconInfo.TYPE_WORK
-                                USER_TYPE_PROFILE_CLONE -> UserIconInfo.TYPE_CLONED
-                                USER_TYPE_PROFILE_PRIVATE -> UserIconInfo.TYPE_PRIVATE
-                                else -> UserIconInfo.TYPE_MAIN
+                                null -> UserType.MAIN
+                                USER_TYPE_PROFILE_MANAGED -> UserType.WORK
+                                USER_TYPE_PROFILE_CLONE -> UserType.CLONED
+                                USER_TYPE_PROFILE_PRIVATE -> UserType.PRIVATE
+                                else -> UserType.MAIN
                             },
                         userSerial = it.userSerialNumber.toLong(),
                     ),

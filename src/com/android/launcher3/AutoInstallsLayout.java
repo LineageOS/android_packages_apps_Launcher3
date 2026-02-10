@@ -19,8 +19,6 @@ package com.android.launcher3;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION;
 import static com.android.launcher3.LauncherSettings.Favorites.TABLE_NAME;
 import static com.android.launcher3.provider.LauncherDbUtils.itemIdMatch;
-import static com.android.launcher3.util.UserIconInfo.TYPE_CLONED;
-import static com.android.launcher3.util.UserIconInfo.TYPE_WORK;
 import static com.android.launcher3.util.XmlElement.getRootElement;
 
 import android.content.ComponentName;
@@ -220,8 +218,9 @@ public class AutoInstallsLayout {
         for (UserHandle user : cache.getUserProfiles()) {
             UserIconInfo uii = cache.getUserInfo(user);
             switch (uii.type) {
-                case TYPE_WORK -> mUserTypeToSerial.put(USER_TYPE_WORK, uii.userSerial);
-                case TYPE_CLONED -> mUserTypeToSerial.put(USER_TYPE_CLONED, uii.userSerial);
+                case WORK -> mUserTypeToSerial.put(USER_TYPE_WORK, uii.userSerial);
+                case CLONED -> mUserTypeToSerial.put(USER_TYPE_CLONED, uii.userSerial);
+                default -> { }
             }
         }
     }

@@ -48,6 +48,7 @@ import com.android.launcher3.model.data.LauncherAppWidgetInfo
 import com.android.launcher3.pm.UserCache
 import com.android.launcher3.shortcuts.ShortcutKey
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
+import com.android.users.UserType
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.util.concurrent.CompletableFuture
@@ -149,8 +150,8 @@ constructor(
     private fun LauncherLayoutBuilder.ItemTarget.addItem(context: Context, info: ItemInfo) {
         val userType: String? =
             when (UserCache.INSTANCE.get(context).getUserInfo(info.user).type) {
-                UserIconInfo.TYPE_WORK -> AutoInstallsLayout.USER_TYPE_WORK
-                UserIconInfo.TYPE_CLONED -> AutoInstallsLayout.USER_TYPE_CLONED
+                UserType.WORK -> AutoInstallsLayout.USER_TYPE_WORK
+                UserType.CLONED -> AutoInstallsLayout.USER_TYPE_CLONED
                 else -> null
             }
         when (info.itemType) {

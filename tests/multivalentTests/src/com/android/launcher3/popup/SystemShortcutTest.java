@@ -95,6 +95,7 @@ import com.android.launcher3.util.rule.MockUsersRule.MockUser;
 import com.android.launcher3.views.Snackbar;
 import com.android.launcher3.widget.picker.model.WidgetPickerDataProvider;
 import com.android.launcher3.widget.picker.model.data.WidgetPickerData;
+import com.android.users.UserType;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -300,8 +301,8 @@ public class SystemShortcutTest {
     }
 
     @Test
-    @MockUser(userType = UserIconInfo.TYPE_MAIN)
-    @MockUser(userType = UserIconInfo.TYPE_PRIVATE)
+    @MockUser(userType = UserType.MAIN)
+    @MockUser(userType = UserType.PRIVATE)
     public void testPrivateProfileInstallNonNullPrivateProfileUser() {
         mAppInfo = new AppInfo();
         mAppInfo.componentName = new ComponentName(mTestContext, getClass());
@@ -371,8 +372,8 @@ public class SystemShortcutTest {
 
     @Test
     @EnableFlags(FLAG_ENABLE_PRIVATE_SPACE)
-    @MockUser(userType = UserIconInfo.TYPE_MAIN)
-    @MockUser(userType = UserIconInfo.TYPE_PRIVATE)
+    @MockUser(userType = UserType.MAIN)
+    @MockUser(userType = UserType.PRIVATE)
     public void testUninstallGetShortcutWithSystemItemInfo() {
         mAppInfo = new AppInfo();
         mAppInfo.user = mMockUsers.findUser(UserIconInfo::isPrivate);
@@ -391,8 +392,8 @@ public class SystemShortcutTest {
 
     @Test
     @EnableFlags(FLAG_ENABLE_PRIVATE_SPACE)
-    @MockUser(userType = UserIconInfo.TYPE_MAIN)
-    @MockUser(userType = UserIconInfo.TYPE_PRIVATE)
+    @MockUser(userType = UserType.MAIN)
+    @MockUser(userType = UserType.PRIVATE)
     public void testUninstallGetShortcutWithPrivateItemInfo() {
         mAppInfo = new AppInfo();
         mAppInfo.user = mMockUsers.findUser(UserIconInfo::isPrivate);

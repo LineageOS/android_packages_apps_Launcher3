@@ -22,6 +22,7 @@ import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.UserIconInfo
 import com.android.launcher3.util.rule.MockUsersRule
 import com.android.launcher3.util.rule.MockUsersRule.MockUser
+import com.android.users.UserType
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -35,7 +36,7 @@ class UserCacheTest {
 
     private val userCache: UserCache by lazy { UserCache.getInstance(sandboxContext) }
 
-    @MockUser(userType = UserIconInfo.TYPE_WORK, preinstalledApps = ["Google"])
+    @MockUser(userType = UserType.WORK, preinstalledApps = ["Google"])
     @Test
     fun `getPreInstallApps returns list of pre installed apps given a user`() {
         // When
@@ -45,7 +46,7 @@ class UserCacheTest {
     }
 
     @Test
-    @MockUser(userType = UserIconInfo.TYPE_MAIN, userSerial = 42)
+    @MockUser(userType = UserType.MAIN, userSerial = 42)
     fun `getUserForSerialNumber returns user key matching given entry serial number`() {
         // When
         val actualProfile = userCache.getUserForSerialNumber(42L)
@@ -54,16 +55,16 @@ class UserCacheTest {
     }
 
     @Test
-    @MockUser(userType = UserIconInfo.TYPE_WORK)
+    @MockUser(userType = UserType.WORK)
     fun `getUserInfo returns cached UserIconInfo given user key`() {
         // When
         val actualIconInfo = userCache.getUserInfo(myUserHandle())
         // Then
-        assertThat(actualIconInfo).isEqualTo(UserIconInfo(myUserHandle(), UserIconInfo.TYPE_WORK))
+        assertThat(actualIconInfo).isEqualTo(UserIconInfo(myUserHandle(), UserType.WORK))
     }
 
     @Test
-    @MockUser(userType = UserIconInfo.TYPE_WORK, userSerial = 42)
+    @MockUser(userType = UserType.WORK, userSerial = 42)
     fun `getSerialNumberForUser returns cached UserIconInfo serial number given user key`() {
         // Given
         val expectedSerial = 42L
