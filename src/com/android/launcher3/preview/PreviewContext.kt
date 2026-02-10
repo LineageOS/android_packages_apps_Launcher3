@@ -44,7 +44,7 @@ import com.android.launcher3.graphics.theme.ThemePreference
 import com.android.launcher3.model.ModelInitializer
 import com.android.launcher3.model.data.LoaderParams
 import com.android.launcher3.provider.LauncherDbUtils.selectionForWorkspaceScreen
-import com.android.launcher3.qsb.QsbAppWidgetHost
+import com.android.launcher3.qsb.OseWidgetManager
 import com.android.launcher3.util.SandboxContext
 import com.android.launcher3.util.dagger.LauncherExecutorsModule
 import com.android.launcher3.widget.LauncherWidgetHolder
@@ -107,12 +107,11 @@ constructor(
             )
         )
 
-        // Bind the LauncherApp's single QsbAppWidgetHost to PreviewComponent. This way same
-        // AppWidgetHost is shared between the Preview and Launcher.
-        // If the AppWidgetHost's are different, they will compete with each other for the same
-        // AppWidgetHost Id and this will cause either launcher appcomponent or preview to app
-        // component to go out of sync.
-        builder.bindQsbAppWidgetHost(base.appComponent.qsbAppWidgetHost)
+        // Bind the LauncherApp's single OseWidgetManager to PreviewComponent. This way same
+        // OseWidgetManager is shared between the Preview and Launcher.
+        // If the OseWidgetManager's are different, QsbAppWidgetHost will be different and this will
+        // cause either launcher appcomponent or preview to app component to go out of sync.
+        builder.bindOseWidgetManager(base.appComponent.oseWidgetManager)
 
         if (layoutXml.isNullOrEmpty() || !Flags.extendibleThemeManager()) {
             mDbDir = null
@@ -225,7 +224,7 @@ constructor(
 
             @BindsInstance fun bindLoaderParams(params: LoaderParams): Builder
 
-            @BindsInstance fun bindQsbAppWidgetHost(host: QsbAppWidgetHost): Builder
+            @BindsInstance fun bindOseWidgetManager(oseWidgetManager: OseWidgetManager): Builder
 
             override fun build(): PreviewAppComponent
         }
