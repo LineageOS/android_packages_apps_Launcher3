@@ -24,6 +24,7 @@ import static com.android.launcher3.GestureNavContract.EXTRA_ENABLE_GESTURE_CONT
 import static com.android.launcher3.GestureNavContract.EXTRA_GESTURE_CONTRACT;
 import static com.android.launcher3.GestureNavContract.EXTRA_ICON_POSITION;
 import static com.android.launcher3.GestureNavContract.EXTRA_ICON_SURFACE;
+import static com.android.launcher3.GestureNavContract.EXTRA_LAUNCH_COOKIE;
 import static com.android.launcher3.GestureNavContract.EXTRA_ON_FINISH_CALLBACK;
 import static com.android.launcher3.GestureNavContract.EXTRA_REMOTE_CALLBACK;
 import static com.android.launcher3.anim.AnimatorListeners.forEndCallback;
@@ -31,7 +32,6 @@ import static com.android.quickstep.OverviewComponentObserver.startHomeIntentSaf
 import static com.android.quickstep.fallback.RecentsState.HIDDEN;
 
 import android.animation.Animator;
-import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityOptions;
 import android.app.TaskInfo;
 import android.content.Context;
@@ -71,6 +71,8 @@ import com.android.launcher3.anim.SpringAnimationBuilder;
 import com.android.launcher3.display.DisplayController;
 import com.android.launcher3.states.StateAnimationConfig;
 import com.android.launcher3.util.MSDLPlayerWrapper;
+import com.android.launcher3.util.ObjectWrapper;
+import com.android.launcher3.util.StableViewInfo;
 import com.android.quickstep.AbsSwipeUpHandler;
 import com.android.quickstep.GestureState;
 import com.android.quickstep.RecentsAnimationController;
@@ -228,6 +230,13 @@ public class RecentsWindowSwipeHandler extends AbsSwipeUpHandler<RecentsWindowMa
                 mActiveAnimationFactory,
                 runningTaskTarget,
                 targetTaskView,
+                targetTaskView != null
+                        ? null
+                        : launchCookies.stream()
+                                .filter(launchCookie ->
+                                        ObjectWrapper.<StableViewInfo>unwrap(launchCookie) != null)
+                                .findFirst()
+                                .orElse(null),
                 "RecentsWindowSwipeHandler-home");
         return mActiveAnimationFactory;
     }
@@ -236,6 +245,7 @@ public class RecentsWindowSwipeHandler extends AbsSwipeUpHandler<RecentsWindowMa
             @Nullable FallbackHomeAnimationFactory gestureContractAnimationFactory,
             @Nullable RemoteAnimationTarget runningTaskTarget,
             @Nullable TaskView targetTaskView,
+            @Nullable IBinder launchCookie,
             @NonNull String reason) {
         ActivityOptions options = ActivityOptions.makeCustomAnimation(mContext, 0, 0);
         Intent intent = new Intent(mGestureState.getHomeIntent());
@@ -251,7 +261,7 @@ public class RecentsWindowSwipeHandler extends AbsSwipeUpHandler<RecentsWindowMa
                 taskKey = taskInfo == null ? null : new TaskKey(taskInfo);
             }
             if (taskKey != null) {
-                gestureContractAnimationFactory.addGestureContract(intent, taskKey);
+                gestureContractAnimationFactory.addGestureContract(intent, taskKey, launchCookie);
             }
         }
         startHomeIntentSafely(mContext, intent, options.toBundle(), reason);
@@ -494,7 +504,10 @@ public class RecentsWindowSwipeHandler extends AbsSwipeUpHandler<RecentsWindowMa
             }
         }
 
-        private void addGestureContract(@NonNull Intent intent, @NonNull TaskKey key) {
+        private void addGestureContract(
+                @NonNull Intent intent,
+                @NonNull TaskKey key,
+                @Nullable IBinder launchCookie) {
             if (mRunningOverHome) {
                 return;
             }
@@ -508,6 +521,7 @@ public class RecentsWindowSwipeHandler extends AbsSwipeUpHandler<RecentsWindowMa
 
             gestureNavContract.putBoolean(
                     EXTRA_ENABLE_GESTURE_CONTRACT, mRemoteTargetHandles.length <= 1);
+            gestureNavContract.putBinder(EXTRA_LAUNCH_COOKIE, launchCookie);
             gestureNavContract.putParcelable(EXTRA_COMPONENT_NAME, key.getComponent());
             gestureNavContract.putParcelable(EXTRA_USER, UserHandle.of(key.userId));
             gestureNavContract.putParcelable(

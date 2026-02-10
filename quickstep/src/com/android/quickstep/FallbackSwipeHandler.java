@@ -24,6 +24,7 @@ import static com.android.launcher3.GestureNavContract.EXTRA_ENABLE_GESTURE_CONT
 import static com.android.launcher3.GestureNavContract.EXTRA_GESTURE_CONTRACT;
 import static com.android.launcher3.GestureNavContract.EXTRA_ICON_POSITION;
 import static com.android.launcher3.GestureNavContract.EXTRA_ICON_SURFACE;
+import static com.android.launcher3.GestureNavContract.EXTRA_LAUNCH_COOKIE;
 import static com.android.launcher3.GestureNavContract.EXTRA_ON_FINISH_CALLBACK;
 import static com.android.launcher3.GestureNavContract.EXTRA_REMOTE_CALLBACK;
 import static com.android.launcher3.anim.AnimatorListeners.forEndCallback;
@@ -65,6 +66,8 @@ import com.android.launcher3.anim.SpringAnimationBuilder;
 import com.android.launcher3.display.DisplayController;
 import com.android.launcher3.states.StateAnimationConfig;
 import com.android.launcher3.util.MSDLPlayerWrapper;
+import com.android.launcher3.util.ObjectWrapper;
+import com.android.launcher3.util.StableViewInfo;
 import com.android.quickstep.fallback.FallbackActivityRecentsView;
 import com.android.quickstep.fallback.RecentsState;
 import com.android.quickstep.util.ActiveGestureLog;
@@ -164,7 +167,15 @@ public class FallbackSwipeHandler extends
         startHomeIntent(
                 mActiveAnimationFactory,
                 runningTaskTarget,
-                targetTaskView, "FallbackSwipeHandler-home");
+                targetTaskView,
+                targetTaskView != null
+                        ? null
+                        : launchCookies.stream()
+                                .filter(launchCookie ->
+                                        ObjectWrapper.<StableViewInfo>unwrap(launchCookie) != null)
+                                .findFirst()
+                                .orElse(null),
+                "FallbackSwipeHandler-home");
         return mActiveAnimationFactory;
     }
 
@@ -172,6 +183,7 @@ public class FallbackSwipeHandler extends
             @Nullable FallbackHomeAnimationFactory gestureContractAnimationFactory,
             @Nullable RemoteAnimationTarget runningTaskTarget,
             @Nullable TaskView targetTaskView,
+            @Nullable IBinder launchCookie,
             @NonNull String reason) {
         ActivityOptions options = ActivityOptions.makeCustomAnimation(mContext, 0, 0);
         Intent intent = new Intent(mGestureState.getHomeIntent());
@@ -187,7 +199,7 @@ public class FallbackSwipeHandler extends
                 taskKey = taskInfo == null ? null : new TaskKey(taskInfo);
             }
             if (taskKey != null) {
-                gestureContractAnimationFactory.addGestureContract(intent, taskKey);
+                gestureContractAnimationFactory.addGestureContract(intent, taskKey, launchCookie);
             }
         }
         startHomeIntentSafely(mContext, intent, options.toBundle(), reason);
@@ -217,6 +229,7 @@ public class FallbackSwipeHandler extends
                         /* gestureContractAnimationFactory= */ null,
                         /* runningTaskTarget= */ null,
                         /* targetTaskView= */ null,
+                        /* launchCookie= */ null,
                         /* reason= */ "FallbackSwipeHandler-resumeLauncher");
             };
         } else {
@@ -443,7 +456,10 @@ public class FallbackSwipeHandler extends
             }
         }
 
-        private void addGestureContract(@NonNull Intent intent, @NonNull TaskKey key) {
+        private void addGestureContract(
+                @NonNull Intent intent,
+                @NonNull TaskKey key,
+                @Nullable IBinder launchCookie) {
             if (mRunningOverHome) {
                 return;
             }
@@ -453,10 +469,11 @@ public class FallbackSwipeHandler extends
             if (sMessageReceiver == null) {
                 sMessageReceiver = new StaticMessageReceiver();
             }
-
             Bundle gestureNavContract = new Bundle();
+
             gestureNavContract.putBoolean(
                     EXTRA_ENABLE_GESTURE_CONTRACT, mRemoteTargetHandles.length <= 1);
+            gestureNavContract.putBinder(EXTRA_LAUNCH_COOKIE, launchCookie);
             gestureNavContract.putParcelable(EXTRA_COMPONENT_NAME, key.getComponent());
             gestureNavContract.putParcelable(EXTRA_USER, UserHandle.of(key.userId));
             gestureNavContract.putParcelable(
