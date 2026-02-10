@@ -46,7 +46,7 @@ interface HomeScreenFilesProvider {
     fun canCreateNewFolder(): Boolean
 
     /** Attempts to asynchronously create a new folder. */
-    fun createNewFolder(): CompletableFuture<Boolean>
+    fun createNewFolder(extras: HomeScreenFilesUpdate.Extras): CompletableFuture<Boolean>
 
     /**
      * Returns whether all URIs in the specified list can be moved to the home screen.
@@ -60,6 +60,7 @@ interface HomeScreenFilesProvider {
     fun moveToHomeScreen(uriList: List<Uri>): List<CompletableFuture<Boolean>> =
         moveToHomeScreen(uriList = uriList, relativeFolderPath = null)
 
+    // TODO(b/474521109): Add parameter to accept [HomeScreenFilesUpdate#Extras].
     /**
      * Attempts to asynchronously move all URIs in the specified list to the home screen.
      *

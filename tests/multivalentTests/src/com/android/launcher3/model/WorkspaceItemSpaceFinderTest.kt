@@ -39,13 +39,24 @@ class WorkspaceItemSpaceFinderTest : AbstractWorkspaceModelTest() {
         super.setup()
     }
 
-    private fun findSpace(spanX: Int, spanY: Int): WorkspaceItemCoordinates =
+    private fun findSpace(
+        spanX: Int,
+        spanY: Int,
+        excludedScreens: IntSet = IntSet.wrap(FIRST_SCREEN_ID),
+        startingFromScreen: Int = FIRST_SCREEN_ID,
+    ): WorkspaceItemCoordinates =
         WorkspaceItemSpaceFinder(
                 mTargetContext.bgDataModel,
                 mAppState.invariantDeviceProfile,
                 model,
             )
-            .findSpaceForItem(mAddedWorkspaceItems, spanX, spanY, IntSet.wrap(FIRST_SCREEN_ID))
+            .findSpaceForItem(
+                mAddedWorkspaceItems,
+                spanX,
+                spanY,
+                excludedScreens,
+                startingFromScreen,
+            )
 
     private fun assertRegionVacant(newItemSpace: WorkspaceItemCoordinates, spanX: Int, spanY: Int) {
         assertThat(
@@ -205,5 +216,61 @@ class WorkspaceItemSpaceFinderTest : AbstractWorkspaceModelTest() {
         assertThat(spaceFound.screenId).isEqualTo(3)
         assertThat(mExistingScreens.contains(spaceFound.screenId)).isTrue()
         assertRegionVacant(spaceFound, 3, 1)
+    }
+
+    @Test
+    fun firstPageHasSpace_findSpaceStartingFromSecondPage_returnFirstPage() {
+        setupWorkspacesWithSpaces(screen0 = emptyScreenSpaces, screen1 = fullScreenSpaces)
+
+        val spaceFound = findSpace(1, 1, excludedScreens = IntSet(), startingFromScreen = 1)
+
+        assertThat(spaceFound.screenId).isEqualTo(0)
+        assertThat(mExistingScreens.contains(spaceFound.screenId)).isTrue()
+        assertRegionVacant(spaceFound, 1, 1)
+    }
+
+    @Test
+    fun firstTwoPagesAreFull_findSpaceStartingFromSecondPage_returnNewPage() {
+        setupWorkspacesWithSpaces(screen0 = fullScreenSpaces, screen1 = fullScreenSpaces)
+
+        val spaceFound = findSpace(1, 1, excludedScreens = IntSet(), startingFromScreen = 1)
+
+        assertThat(spaceFound.screenId).isEqualTo(2)
+        assertThat(mExistingScreens.contains(spaceFound.screenId)).isFalse()
+    }
+
+    @Test
+    fun firstTwoPagesHaveSpace_findSpaceStartingFromPageAboveBounds_returnFirstPage() {
+        setupWorkspacesWithSpaces(screen0 = emptyScreenSpaces, screen1 = listOf(Rect(0, 0, 1, 1)))
+
+        val spaceFound =
+            findSpace(1, 1, excludedScreens = IntSet(), startingFromScreen = Int.MAX_VALUE)
+
+        assertThat(spaceFound.screenId).isEqualTo(0)
+        assertThat(mExistingScreens.contains(spaceFound.screenId)).isTrue()
+        assertRegionVacant(spaceFound, 1, 1)
+    }
+
+    @Test
+    fun firstTwoPagesHaveSpace_findSpaceStartingFromPageBelowBounds_returnFirstPage() {
+        setupWorkspacesWithSpaces(screen0 = emptyScreenSpaces, screen1 = listOf(Rect(0, 0, 1, 1)))
+
+        val spaceFound =
+            findSpace(1, 1, excludedScreens = IntSet(), startingFromScreen = Int.MIN_VALUE)
+
+        assertThat(spaceFound.screenId).isEqualTo(0)
+        assertThat(mExistingScreens.contains(spaceFound.screenId)).isTrue()
+        assertRegionVacant(spaceFound, 1, 1)
+    }
+
+    @Test
+    fun firstTwoPagesHaveSpace_findSpaceStartingFromSecondPage_returnSecondPage() {
+        setupWorkspacesWithSpaces(screen0 = emptyScreenSpaces, screen1 = listOf(Rect(0, 0, 1, 1)))
+
+        val spaceFound = findSpace(1, 1, excludedScreens = IntSet(), startingFromScreen = 1)
+
+        assertThat(spaceFound.screenId).isEqualTo(1)
+        assertThat(mExistingScreens.contains(spaceFound.screenId)).isTrue()
+        assertRegionVacant(spaceFound, 1, 1)
     }
 }

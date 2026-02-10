@@ -176,6 +176,7 @@ class HomeScreenFilesUpdateTaskTest {
                     eq(itemToAdd.spanX),
                     eq(itemToAdd.spanY),
                     eq(IntSet()),
+                    eq(itemToAdd.screenId),
                 )
             )
             .thenReturn(
@@ -262,16 +263,25 @@ class HomeScreenFilesUpdateTaskTest {
                     eq(itemToAdd.spanX),
                     eq(itemToAdd.spanY),
                     eq(IntSet()),
+                    eq(itemToAdd.screenId),
                 )
             )
-            .thenReturn(WorkspaceItemCoordinates(FIRST_SCREEN_ID, itemToAdd.cellX, itemToAdd.cellY))
+            .thenReturn(
+                WorkspaceItemCoordinates(itemToAdd.screenId, itemToAdd.cellX, itemToAdd.cellY)
+            )
 
         // Mock data model.
         items.add(itemToIgnore)
 
         // Execute update.
         val filesByUri = listOf(fileToAdd).associateByUri()
-        val update = createUpdate(filesByUri)
+        val update =
+            createUpdate(
+                filesByUri,
+                HomeScreenFilesUpdate.Extras.builder()
+                    .findSpaceStartingFromScreenId(itemToAdd.screenId)
+                    .build(),
+            )
         createTask(update).execute()
 
         // Verify expected data model modifications.
@@ -355,7 +365,7 @@ class HomeScreenFilesUpdateTaskTest {
     }
 
     private fun createDelayedInit(filesByUri: Map<Uri, HomeScreenFile>) =
-        createUpdate(filesByUri, /* isDelayedInit= */ true)
+        createUpdate(filesByUri, HomeScreenFilesUpdate.Extras.builder().isDelayedInit(true).build())
 
     private fun createItem(file: HomeScreenFile, isInitialized: Boolean = true) =
         WorkspaceItemInfo().apply {
@@ -386,8 +396,8 @@ class HomeScreenFilesUpdateTaskTest {
 
     private fun createUpdate(
         filesByUri: Map<Uri, HomeScreenFile?>,
-        isDelayedInit: Boolean = false,
-    ) = HomeScreenFilesUpdate(supplyAsync { filesByUri }, user, isDelayedInit)
+        extras: HomeScreenFilesUpdate.Extras = HomeScreenFilesUpdate.Extras.builder().build(),
+    ) = HomeScreenFilesUpdate(supplyAsync { filesByUri }, user, extras)
 
     private fun HomeScreenFilesUpdateTask.execute() = execute(taskController, dataModel, apps)
 

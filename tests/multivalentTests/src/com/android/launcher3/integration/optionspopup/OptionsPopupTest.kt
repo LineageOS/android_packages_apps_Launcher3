@@ -73,23 +73,25 @@ class OptionsPopupTest {
             isHomeScreenFilesEnabled() && isExternalStorageDirectoryMounted()
 
         // Verify option (in-)existence and long press if applicable.
-        launcherActivity.executeOnLauncher { launcher ->
-            val createNewFolderOption = findOption(launcher, CREATE_NEW_FOLDER_OPTION_LABEL)
-            when (expectCreateNewFolderOption) {
-                false -> {
-                    assertWithMessage("Option for create new folder found")
-                        .that(createNewFolderOption)
-                        .isNull()
-                }
-                true -> {
-                    assertWithMessage("No option for create new folder found")
-                        .that(createNewFolderOption)
-                        .isNotNull()
+        val currentScreenId =
+            launcherActivity.getFromLauncher { launcher ->
+                val createNewFolderOption = findOption(launcher, CREATE_NEW_FOLDER_OPTION_LABEL)
+                when (expectCreateNewFolderOption) {
+                    false -> {
+                        assertWithMessage("Option for create new folder found")
+                            .that(createNewFolderOption)
+                            .isNull()
+                    }
+                    true -> {
+                        assertWithMessage("No option for create new folder found")
+                            .that(createNewFolderOption)
+                            .isNotNull()
 
-                    createNewFolderOption!!.clickListener.onLongClick(launcher.rootView)
+                        createNewFolderOption!!.clickListener.onLongClick(launcher.rootView)
+                    }
                 }
+                launcher.workspace.run { getScreenIdForPageIndex(currentPage) }
             }
-        }
 
         // If the option does not exist, there's nothing left to verify.
         if (!expectCreateNewFolderOption) {
@@ -101,6 +103,7 @@ class OptionsPopupTest {
             launcherActivity.getOnceNotNull("No new folder created") { launcher ->
                 launcher.workspace.mapOverItems { itemInfo, _ ->
                     itemInfo?.itemType == ITEM_TYPE_FILE_SYSTEM_FOLDER &&
+                        itemInfo.screenId == currentScreenId &&
                         itemInfo.title?.matches(Regex("^(New folder)( \\(\\d+\\))?$")) == true
                 }
             }!!
