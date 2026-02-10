@@ -28,6 +28,7 @@ import com.android.launcher3.graphics.ThemeManager.ThemeChangeListener
 import com.android.launcher3.model.data.AppPairInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.TaskItemInfo
+import com.android.launcher3.model.data.TaskItemInfo.Companion.isSameItem
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.taskbar.TaskbarControllers.LoggableTaskbarController
 import com.android.launcher3.taskbar.TaskbarPopupController.canPinAppWithContextMenu
@@ -112,6 +113,21 @@ class TaskbarRecentAppsController(
 
     val shownTaskIds: List<Int>
         get() = shownTasks.flatMap { shownTask -> shownTask.tasks }.map { it.key.id }
+
+    private var itemMarkedForDeletion: ItemInfo? = null
+
+    fun setItemMarkedForDeletion(item: ItemInfo, deleted: Boolean): Boolean {
+        var changed = false
+        if (deleted && itemMarkedForDeletion?.isSameItem(item) != true) {
+            itemMarkedForDeletion = item
+            changed = true
+        } else if (!deleted && itemMarkedForDeletion?.isSameItem(item) == true) {
+            itemMarkedForDeletion = null
+            changed = true
+        }
+
+        return changed
+    }
 
     /**
      * The task-state of an app, i.e. whether the app has a task and what state that task is in.
@@ -333,10 +349,15 @@ class TaskbarRecentAppsController(
             onRecentsOrHotseatChanged()
             return hotseatItems
         }
+        if (hotseatItems.none { itemInfo -> itemInfo?.isSameItem(itemMarkedForDeletion) == true }) {
+            itemMarkedForDeletion = null
+        }
+
         shownHotseatItems =
             hotseatItems
                 .filterNotNull()
                 .filter { itemInfo -> !itemInfo.isPredictedItem }
+                .filter { itemInfo -> itemMarkedForDeletion?.isSameItem(itemInfo) != true }
                 .toMutableList()
 
         val showDesktopTasks =
@@ -430,7 +451,7 @@ class TaskbarRecentAppsController(
                 computeShownRecentTasks()
             }
         if (oldShownTasks == shownTasks) return false
-        fetchIcons()
+        getTaskbarUiThread().execute { fetchIcons() }
         return true
     }
 

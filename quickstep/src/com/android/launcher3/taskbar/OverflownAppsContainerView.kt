@@ -207,6 +207,10 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         dragDelegate.releaseDropSlot()
     }
 
+    override fun removeDraggedView() {
+        dragDelegate.removeDraggedView()
+    }
+
     override fun getPinIndex(startingIndex: Int): Int {
         return dragDelegate.getPinIndex(startingIndex)
     }
