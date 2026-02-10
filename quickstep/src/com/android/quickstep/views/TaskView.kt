@@ -388,6 +388,12 @@ constructor(
             applyScale()
         }
 
+    var animateToIconScale = 1f
+        set(value) {
+            field = value
+            applyScale()
+        }
+
     private var dismissTranslationX = 0f
         set(value) {
             field = value
@@ -472,11 +478,24 @@ constructor(
             applyTranslationX()
         }
 
+    var animateToIconTranslationX = 0f
+        set(value) {
+            field = value
+            applyTranslationX()
+        }
+
+    var animateToIconTranslationY = 0f
+        set(value) {
+            field = value
+            applyTranslationY()
+        }
+
     private val taskViewAlpha = MultiValueAlpha(this, Alpha.entries.size)
     protected var stableAlpha by MultiPropertyDelegate(taskViewAlpha, Alpha.Stable)
     var attachAlpha by MultiPropertyDelegate(taskViewAlpha, Alpha.Attach)
     var splitAlpha by MultiPropertyDelegate(taskViewAlpha, Alpha.Split)
     private var modalAlpha by MultiPropertyDelegate(taskViewAlpha, Alpha.Modal)
+    var animateToIconAlpha by MultiPropertyDelegate(taskViewAlpha, Alpha.AnimateToIcon)
 
     var shouldShowScreenshot = false
         get() = !isRunningTask || field
@@ -1747,7 +1766,11 @@ constructor(
     fun getSizeAdjustment(fullscreenEnabled: Boolean) = if (fullscreenEnabled) nonGridScale else 1f
 
     private fun applyScale() {
-        val scale = persistentScale * dismissScale * Utilities.mapRange(modalness, 1f, modalScale)
+        val scale =
+            persistentScale *
+                dismissScale *
+                animateToIconScale *
+                Utilities.mapRange(modalness, 1f, modalScale)
         scaleX = scale
         scaleY = scale
         updateFullscreenParams()
@@ -1760,7 +1783,8 @@ constructor(
                 taskResistanceTranslationX +
                 splitSelectTranslationX +
                 gridEndTranslationX +
-                persistentTranslationX
+                persistentTranslationX +
+                animateToIconTranslationX
     }
 
     private fun applyTranslationY() {
@@ -1769,7 +1793,8 @@ constructor(
                 taskOffsetTranslationY +
                 taskResistanceTranslationY +
                 splitSelectTranslationY +
-                persistentTranslationY
+                persistentTranslationY +
+                animateToIconTranslationY
     }
 
     private fun onGridProgressChanged() {
@@ -1849,6 +1874,10 @@ constructor(
         setIconVisibleForGesture(true)
         settledProgressDismiss = 1f
         setColorTint(0f, 0)
+        animateToIconAlpha = 1f
+        animateToIconScale = 1f
+        animateToIconTranslationX = 0f
+        animateToIconTranslationY = 0f
     }
 
     private fun getGridTrans(endTranslation: Float) =
@@ -1883,6 +1912,7 @@ constructor(
             Attach,
             Split,
             Modal,
+            AnimateToIcon,
         }
 
         private enum class SettledProgress {

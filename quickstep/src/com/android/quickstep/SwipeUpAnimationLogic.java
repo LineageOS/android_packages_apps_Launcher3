@@ -423,13 +423,9 @@ public abstract class SwipeUpAnimationLogic implements
         final boolean mIsPortrait;
         final Rect mThumbnailStartBounds = new Rect();
 
-        // Store the mTargetTaskView view properties onAnimationStart so that we can reset them
-        // when cleaning up.
-        float mTaskViewAlpha;
-        float mTaskViewTranslationX;
-        float mTaskViewTranslationY;
-        float mTaskViewScaleX;
-        float mTaskViewScaleY;
+        float mTaskViewPivotFractionX;
+        float mTaskViewPivotFractionY;
+        float mInitialScroll;
 
         SpringAnimationRunner(
                 HomeAnimationFactory factory,
@@ -495,10 +491,11 @@ public abstract class SwipeUpAnimationLogic implements
                 return;
             }
             if (mAnimationFactory.isAnimatingIntoIcon() && mAnimationFactory.isAnimationReady()) {
-                mTargetTaskView.setAlpha(0f);
+                mTargetTaskView.setAnimateToIconAlpha(0f);
                 return;
             }
-            mTargetTaskView.setAlpha(mAnimationFactory.isAnimatingIntoIcon() ? 1f : alpha);
+            mTargetTaskView.setAnimateToIconAlpha(
+                    mAnimationFactory.isAnimatingIntoIcon() ? 1f : alpha);
             float startWidth = mThumbnailStartBounds.width();
             float startHeight =  mThumbnailStartBounds.height();
             float currentWidth = currentRect.width();
@@ -525,13 +522,35 @@ public abstract class SwipeUpAnimationLogic implements
                         + startHeight + "], current dimensions=[" + currentWidth + ", "
                         + currentHeight + "]");
             }
+            RecentsView recentsView = mTargetTaskView.getRecentsView();
+            float scrollDelta = recentsView == null
+                    ? 0 : (mInitialScroll - recentsView.getScroller().getCurrX());
+            float translationX =
+                    getScaledPivotPoint(
+                            currentRect.left,
+                            currentRect.width(),
+                            mTaskViewPivotFractionX)
+                    - getScaledPivotPoint(
+                            mThumbnailStartBounds.left,
+                            mThumbnailStartBounds.width(),
+                            mTaskViewPivotFractionX);
+            float translationY =
+                    getScaledPivotPoint(
+                            currentRect.top,
+                            currentRect.height(),
+                            mTaskViewPivotFractionY)
+                    - getScaledPivotPoint(
+                            mThumbnailStartBounds.top,
+                            mThumbnailStartBounds.height(),
+                            mTaskViewPivotFractionY);
 
-            mTargetTaskView.setScaleX(scale);
-            mTargetTaskView.setScaleY(scale);
-            mTargetTaskView.setTranslationX(
-                    currentRect.centerX() - mThumbnailStartBounds.centerX());
-            mTargetTaskView.setTranslationY(
-                    currentRect.centerY() - mThumbnailStartBounds.centerY());
+            mTargetTaskView.setAnimateToIconScale(scale);
+            mTargetTaskView.setAnimateToIconTranslationX(translationX - scrollDelta);
+            mTargetTaskView.setAnimateToIconTranslationY(translationY);
+        }
+
+        private static float getScaledPivotPoint(float start, float length, float pivotFraction) {
+            return start + (length * pivotFraction);
         }
 
         @Override
@@ -577,14 +596,12 @@ public abstract class SwipeUpAnimationLogic implements
             }
             mTargetTaskView.getThumbnailBounds(
                     mThumbnailStartBounds, /* relativeToDragLayer= */ true);
-            mTaskViewAlpha = mTargetTaskView.getAlpha();
             if (mAnimationFactory.isAnimatingIntoIcon()) {
                 return;
             }
-            mTaskViewTranslationX = mTargetTaskView.getTranslationX();
-            mTaskViewTranslationY = mTargetTaskView.getTranslationY();
-            mTaskViewScaleX = mTargetTaskView.getScaleX();
-            mTaskViewScaleY = mTargetTaskView.getScaleY();
+            mTaskViewPivotFractionX = mTargetTaskView.getPivotX() / mTaskViewWidth;
+            mTaskViewPivotFractionY = mTargetTaskView.getPivotY() / mTaskViewHeight;
+            mInitialScroll = recentsView == null ? 0f : recentsView.getScroller().getCurrX();
         }
 
         private void cleanUp() {
@@ -595,14 +612,10 @@ public abstract class SwipeUpAnimationLogic implements
             if (recentsView != null) {
                 recentsView.setOffsetMidpointIndexOverride(INVALID_PAGE);
             }
-            mTargetTaskView.setAlpha(mTaskViewAlpha);
-            if (!mAnimationFactory.isAnimatingIntoIcon()) {
-                mTargetTaskView.setTranslationX(mTaskViewTranslationX);
-                mTargetTaskView.setTranslationY(mTaskViewTranslationY);
-                mTargetTaskView.setScaleX(mTaskViewScaleX);
-                mTargetTaskView.setScaleY(mTaskViewScaleY);
-                return;
-            }
+            mTargetTaskView.setAnimateToIconAlpha(1f);
+            mTargetTaskView.setAnimateToIconScale(1f);
+            mTargetTaskView.setAnimateToIconTranslationX(0f);
+            mTargetTaskView.setAnimateToIconTranslationY(0f);
             mAnimationFactory.setTaskViewArtist(null);
         }
 
