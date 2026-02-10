@@ -70,6 +70,7 @@ import com.android.launcher3.dragndrop.DragLayer;
 import com.android.launcher3.dragndrop.DragView;
 import com.android.launcher3.dragndrop.DraggableView;
 import com.android.launcher3.graphics.ThemeManager;
+import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils;
 import com.android.launcher3.icons.DotRenderer;
 import com.android.launcher3.logger.LauncherAtom.FromState;
 import com.android.launcher3.logger.LauncherAtom.ToState;
@@ -801,16 +802,19 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
             title = getContext().getString(R.string.unnamed_folder);
         }
         int size = mInfo.getContents().size();
+        String folder_type = getContext().getString(
+                HomeScreenFilesUtils.isFeatureEnabled() ? R.string.app_folder_type_name
+                        : R.string.folder_type_name);
         if (size < MAX_NUM_ITEMS_IN_PREVIEW) {
             return getContext().getString(hasDot()
-                    ? R.string.folder_name_format_exact_with_dot
-                    : R.string.folder_name_format_exact,
-                    title, size);
+                            ? R.string.folder_name_format_exact_with_dot
+                            : R.string.folder_name_format_exact,
+                    folder_type, title, size);
         } else {
             return getContext().getString(hasDot()
-                    ? R.string.folder_name_format_overflow_with_dot
-                    : R.string.folder_name_format_overflow,
-                    title, MAX_NUM_ITEMS_IN_PREVIEW);
+                            ? R.string.folder_name_format_overflow_with_dot
+                            : R.string.folder_name_format_overflow,
+                    folder_type, title, MAX_NUM_ITEMS_IN_PREVIEW);
         }
     }
 
