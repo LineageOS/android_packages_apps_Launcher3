@@ -17,6 +17,7 @@
 package com.android.launcher3.dragndrop
 
 import android.view.DragEvent
+import androidx.annotation.VisibleForTesting
 import com.android.launcher3.dragndrop.DragController.SystemDragHandler
 
 /** Controller for system-level drag-and-drop. */
@@ -32,6 +33,14 @@ sealed class SystemDragController : SystemDragHandler {
      * @return The drag view for the sequence if started successfully.
      */
     open fun startDrag(params: SystemDragParams): DragView? = null
+
+    companion object {
+        // Used as part of an imperfect proxy to restrict drags from other apps to only those
+        // originating from DocsUI. This should NOT be used to establish trust and any usages should
+        // degrade gracefully if extras matching this prefix are provided from another app.
+        @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+        const val DOCS_UI_EXTRA_PREFIX = "clipper:"
+    }
 }
 
 /**

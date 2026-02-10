@@ -27,6 +27,7 @@ import android.graphics.PointF
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Environment
+import android.os.PersistableBundle
 import android.os.SystemClock
 import android.provider.MediaStore
 import android.provider.MediaStore.Files.FileColumns.DISPLAY_NAME
@@ -54,6 +55,7 @@ import com.android.launcher3.CellLayout
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FILE
 import com.android.launcher3.dragndrop.SystemDragController
+import com.android.launcher3.dragndrop.SystemDragController.Companion.DOCS_UI_EXTRA_PREFIX
 import com.android.launcher3.dragndrop.SystemDragControllerStub
 import com.android.launcher3.homescreenfiles.HomeScreenFilesNoOpProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider
@@ -114,7 +116,9 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
     @Test
     fun testDragAndDropWhenPayloadContainsImmovableUri() {
         testDragAndDrop(
-            ClipDescription(/* label= */ "", /* mimeTypes= */ arrayOf(MIMETYPE_TEXT_PLAIN)),
+            ClipDescription(/* label= */ "", /* mimeTypes= */ arrayOf(MIMETYPE_TEXT_PLAIN)).apply {
+                extras = PersistableBundle().apply { putString("$DOCS_UI_EXTRA_PREFIX...", null) }
+            },
             listOf(ClipData.Item("content://test/path/id".toUri())),
         )
     }
@@ -144,7 +148,9 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
         assertTrue(mediaStoreUris.all(this::isExternalPrimaryMediaStoreUri))
 
         testDragAndDrop(
-            ClipDescription(/* label= */ "", /* mimeTypes= */ arrayOf(MIMETYPE_TEXT_PLAIN)),
+            ClipDescription(/* label= */ "", /* mimeTypes= */ arrayOf(MIMETYPE_TEXT_PLAIN)).apply {
+                extras = PersistableBundle().apply { putString("$DOCS_UI_EXTRA_PREFIX...", null) }
+            },
             mediaStoreUris.map(ClipData::Item),
         )
     }
@@ -152,7 +158,9 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
     @Test
     fun testDragAndDropWhenPayloadContainsText() {
         testDragAndDrop(
-            ClipDescription(/* label= */ "", /* mimeTypes= */ arrayOf(MIMETYPE_TEXT_PLAIN)),
+            ClipDescription(/* label= */ "", /* mimeTypes= */ arrayOf(MIMETYPE_TEXT_PLAIN)).apply {
+                extras = PersistableBundle().apply { putString("$DOCS_UI_EXTRA_PREFIX...", null) }
+            },
             listOf(ClipData.Item("text")),
         )
     }
