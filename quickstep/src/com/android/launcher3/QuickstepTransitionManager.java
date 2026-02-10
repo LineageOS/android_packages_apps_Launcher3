@@ -2134,8 +2134,6 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             } else if (launchingFromRecents) {
                 composeRecentsLaunchAnimator(anim, mV, appTargets, wallpaperTargets, nonAppTargets,
                         launcherClosing);
-                addCujInstrumentation(
-                        anim, Cuj.CUJ_LAUNCHER_APP_LAUNCH_FROM_RECENTS);
                 skipFirstFrame = true;
             } else {
                 composeIconLaunchAnimator(anim, mV, appTargets, wallpaperTargets, nonAppTargets,
