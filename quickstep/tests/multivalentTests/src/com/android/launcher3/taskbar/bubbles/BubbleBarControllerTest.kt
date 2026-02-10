@@ -13,72 +13,65 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.android.launcher3.taskbar.bubbles
 
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.filters.SmallTest
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
-import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
+import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_VISIBLE
 import com.android.wm.shell.Flags.FLAG_ENABLE_BUBBLE_BAR
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@SmallTest
 @RunWith(AndroidJUnit4::class)
 @EnableFlags(FLAG_ENABLE_BUBBLE_BAR)
-class BubbleBarViewControllerTest {
+class BubbleBarControllerTest {
 
     @get:Rule(order = 0) val setFlagsRule = SetFlagsRule()
     @get:Rule(order = 1) val context = TaskbarWindowSandboxContext.create()
-    @get:Rule(order = 4) val animatorTestRule = TaskbarAnimatorTestRule(this)
-    @get:Rule(order = 5) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
+    @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
-    private val controller by
+    private val bubbleBarController by
+        taskbarUnitTestRule.delegate { it.bubbleControllers.orElseThrow().bubbleBarController }
+    private val bubbleBarViewController by
         taskbarUnitTestRule.delegate { it.bubbleControllers.orElseThrow().bubbleBarViewController }
 
+    private val activityContext by taskbarUnitTestRule::activityContext
+
     @Test
-    fun setHiddenForSysui_true_hidesContainer() {
+    fun testUpdateStateForSysuiFlags_imeVisibleAndDocked_doesStash() {
+        activityContext.setImeDockedOverrideForTest(true)
+
         runOnTaskbarUiThreadSync {
-            controller.setHiddenForBubbles(false)
-            controller.setHiddenForSysui(true)
+            bubbleBarController.updateStateForSysuiFlags(SYSUI_STATE_IME_VISIBLE)
         }
 
-        assertThat(controller.isBubbleBarVisible).isFalse()
-        assertThat(controller.isBubbleBarContainerVisible).isFalse()
+        assertThat(bubbleBarViewController.isHiddenForSysui).isTrue()
     }
 
     @Test
-    fun setHiddenForSysui_false_showsContainer() {
-        runOnTaskbarUiThreadSync {
-            controller.setHiddenForBubbles(false)
-            controller.setHiddenForSysui(true)
+    fun testUpdateStateForSysuiFlags_imeVisibleAndNotDocked_doesNotStash() {
+        activityContext.setImeDockedOverrideForTest(false)
 
-            controller.setHiddenForSysui(false)
+        runOnTaskbarUiThreadSync {
+            bubbleBarController.updateStateForSysuiFlags(SYSUI_STATE_IME_VISIBLE)
         }
 
-        assertThat(controller.isBubbleBarVisible).isTrue()
-        assertThat(controller.isBubbleBarContainerVisible).isTrue()
+        assertThat(bubbleBarViewController.isHiddenForSysui).isFalse()
     }
 
     @Test
-    fun setHiddenForBubbles_true_hidesContainer() {
-        runOnTaskbarUiThreadSync {
-            controller.setHiddenForBubbles(false)
-            controller.setHiddenForBubbles(true)
+    fun testUpdateStateForSysuiFlags_imeHidden_doesNotStash() {
+        activityContext.setImeDockedOverrideForTest(false)
 
-            // Advance time to allow the dismiss animation to complete
-            animatorTestRule.advanceTimeBy(
-                BubbleBarViewController.TASKBAR_FADE_OUT_DURATION_MS + 100L
-            )
-        }
+        runOnTaskbarUiThreadSync { bubbleBarController.updateStateForSysuiFlags(0) }
 
-        assertThat(controller.isBubbleBarVisible).isFalse()
-        assertThat(controller.isBubbleBarContainerVisible).isFalse()
+        assertThat(bubbleBarViewController.isHiddenForSysui).isFalse()
     }
 }

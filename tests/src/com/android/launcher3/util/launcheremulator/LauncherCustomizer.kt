@@ -33,6 +33,7 @@ import android.view.IWindowManager
 import android.view.Surface
 import android.view.WindowManagerGlobal
 import com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn
+import com.android.launcher3.Flags.enableTaskbarUiThread
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.InvariantDeviceProfile.OnIDPChangeListener
 import com.android.launcher3.LauncherAppState
@@ -40,8 +41,10 @@ import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.get
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.display.DisplayController
-import com.android.launcher3.util.Executors
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
+import com.android.launcher3.util.Executors.MODEL_EXECUTOR
+import com.android.launcher3.util.Executors.THREAD_POOL_EXECUTOR
+import com.android.launcher3.util.Executors.getTaskbarUiThread
 import com.android.launcher3.util.ModelTestExtensions.clearModelDb
 import com.android.launcher3.util.NavigationMode
 import com.android.launcher3.util.SafeCloseable
@@ -102,8 +105,8 @@ object LauncherCustomizer {
 
         applyIsThemed(context, params.isUsingThemeIcons)
 
-        // Flush the main thread so that all the settings are applied
-        TestUtil.runOnExecutorSync(Executors.MAIN_EXECUTOR) {}
+        // Flush the main thread and taskbar ui thread so that all the settings are applied
+        syncUiState()
 
         if (!isOrientationCorrect(params.orientation) && !params.isFixedLandscape) {
             Log.d(TAG, "retry orientation: ${params.orientation}")
@@ -189,14 +192,20 @@ object LauncherCustomizer {
     ) {
         val densities = DensityPicker.getDisplayEntries(device)
 
-        // Set up emulation
-        // Override WindowManagerProxy
+        // Force ui state to settle before touching the mocks
+        syncUiState()
+
         TestUtil.runOnExecutorSync(MAIN_EXECUTOR) {
             val wmp = WindowManagerProxy.INSTANCE[context]
+
+            // Avoid aggressive resets if possible, or wrap them tightly
             if (mockingDetails(wmp).isSpy) reset(wmp)
 
             spyOn(wmp)
+
             val wmpOverride = TestWindowManagerProxy(device)
+            wmpOverride.setNavigationMode(navigationMode ?: wmp.getNavigationMode(context))
+
             val answer = Answer {
                 wmpOverride::class
                     .java
@@ -204,17 +213,18 @@ object LauncherCustomizer {
                     .invoke(wmpOverride, *it.arguments)
             }
 
-            wmpOverride.setNavigationMode(navigationMode ?: wmp.getNavigationMode(context))
-
+            // ensure getDisplayInfo is stubbed earlier
+            doAnswer(answer).whenever(wmp).getDisplayInfo(any())
             doAnswer(answer).whenever(wmp).isTaskbarDrawnInProcess
+            doAnswer(answer).whenever(wmp).getRealBounds(any(), any())
+            doAnswer(answer).whenever(wmp).getNavigationMode(any())
+            doAnswer(answer).whenever(wmp).getRotation(any())
+
+            // Stub remaining methods...
             doAnswer(answer).whenever(wmp).estimateInternalDisplayBounds(any())
             doAnswer(answer).whenever(wmp).isInDesktopMode(any())
-            doAnswer(answer).whenever(wmp).getRealBounds(any(), any())
             doAnswer(answer).whenever(wmp).normalizeWindowInsets(any(), any(), any())
-            doAnswer(answer).whenever(wmp).getDisplayInfo(any())
             doAnswer(answer).whenever(wmp).getCurrentBounds(any())
-            doAnswer(answer).whenever(wmp).getRotation(any())
-            doAnswer(answer).whenever(wmp).getNavigationMode(any())
         }
 
         WindowManagerGlobal.getWindowManagerService()!!.apply {
@@ -266,6 +276,11 @@ object LauncherCustomizer {
         Global.putInt(context.contentResolver, Global.DEVELOPMENT_FORCE_RTL, RTL_OFF)
         applyFixedLandscape(false)
 
+        // IMPORTANT: Wait for the main thread and taskbar ui thread to settle after those settings
+        // changes. This ensures the Taskbar thread has finished reacting to the new config
+        // BEFORE we pull the rug out by resetting the mocks.
+        syncUiState()
+
         TestUtil.runOnExecutorSync(MAIN_EXECUTOR) {
             WindowManagerProxy.INSTANCE[context].let { wmp ->
                 if (mockingDetails(wmp).isSpy) reset(wmp)
@@ -277,5 +292,17 @@ object LauncherCustomizer {
             clearForcedDisplayDensityForUser(Display.DEFAULT_DISPLAY, UserHandle.myUserId())
         }
         uiDevice.setOrientationNatural()
+        syncUiState()
+    }
+
+    private fun syncUiState() {
+        TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {}
+        TestUtil.runOnExecutorSync(THREAD_POOL_EXECUTOR) {}
+        if (enableTaskbarUiThread()) {
+            TestUtil.runOnExecutorSync(getTaskbarUiThread()) {}
+        }
+        // Sleep 500ms to let theme to be applied and icon alpha animation to finish
+        Thread.sleep(500)
+        uiDevice.waitForIdle()
     }
 }

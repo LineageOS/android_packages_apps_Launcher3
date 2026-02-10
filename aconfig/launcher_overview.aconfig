@@ -81,3 +81,11 @@ flag {
     description: "Creates views for selected texts to enable accessible traversal."
     bug: "447292419"
 }
+
+
+flag {
+    name: "enable_recents_window_blur"
+    namespace: "launcher_overview"
+    description: "Enable wallpaper blur for RecentsWindowManager"
+    bug: "402685067"
+}
