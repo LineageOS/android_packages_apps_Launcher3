@@ -141,8 +141,7 @@
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"Arifa"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"Mipangilio ya Haraka"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"Upauzana"</string>
-    <!-- no translation found for bubble_bar_a11y_title (7743340801055597168) -->
-    <skip />
+    <string name="bubble_bar_a11y_title" msgid="7743340801055597168">"Upau wa viputo"</string>
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"Sehemu ya viungo muhimu"</string>
     <string name="always_show_taskbar" msgid="3608801276107751229">"Onyesha Zana kila wakati"</string>
     <string name="change_navigation_mode" msgid="9088393078736808968">"Badilisha hali ya usogezaji"</string>
