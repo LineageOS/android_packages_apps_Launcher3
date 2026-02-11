@@ -51,6 +51,7 @@ constructor(
     @Cuj.CujType private val cujType: Int,
     private val uiExecutor: Executor,
     transactionSupplier: Supplier<Transaction> = Supplier { Transaction() },
+    private val onEndCallback: Runnable? = null,
 ) : RemoteTransitionStub() {
 
     private val animatorHelper: DesktopAppLaunchAnimatorHelper =
@@ -79,10 +80,11 @@ constructor(
     ) {
         Log.v(TAG, "startAnimation: launchType=$launchType, cujType=$cujType")
         val safeTransitionFinishedCallback = RemoteRunnable {
+            onEndCallback?.run()
             transitionFinishedCallback.onTransitionFinished(/* wct= */ null, /* sct= */ null)
         }
         uiExecutor.execute {
-            getLaunchChange(info)?.let { launchChange ->
+            getDesktopLaunchChange(info)?.let { launchChange ->
                 transaction.reparent(launchChange.leash, info.rootLeash)
             }
             transaction.apply()
@@ -106,13 +108,14 @@ constructor(
         animators.forEach { it.start() }
     }
 
-    private fun getLaunchChange(info: TransitionInfo): TransitionInfo.Change? =
-        info.changes.firstOrNull { change ->
-            change.mode in LAUNCH_CHANGE_MODES && change.taskInfo?.isFreeform == true
-        }
-
     companion object {
         const val TAG = "DesktopAppLaunchTransition"
+
+        fun getDesktopLaunchChange(info: TransitionInfo): TransitionInfo.Change? =
+            info.changes.firstOrNull { change ->
+                change.mode in LAUNCH_CHANGE_MODES && change.taskInfo?.isFreeform == true
+            }
+
         /** Change modes that represent a task becoming visible / launching in Desktop mode. */
         val LAUNCH_CHANGE_MODES = intArrayOf(TRANSIT_OPEN, TRANSIT_TO_FRONT)
 

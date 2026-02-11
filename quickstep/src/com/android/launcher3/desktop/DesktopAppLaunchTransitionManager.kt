@@ -19,13 +19,16 @@ package com.android.launcher3.desktop
 import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.content.Context
+import android.window.IRemoteTransition
 import android.window.RemoteTransition
 import android.window.TransitionFilter
+import android.window.TransitionInfo
 import com.android.internal.jank.Cuj
 import com.android.launcher3.desktop.DesktopAppLaunchTransition.AppLaunchType
 import com.android.launcher3.display.DisplayController
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.quickstep.SystemUiProxy
+import com.android.window.flags.Flags
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 
 /** Manages transitions related to app launches in Desktop Mode. */
@@ -55,10 +58,9 @@ class DesktopAppLaunchTransitionManager(
                 ),
                 null /* appThread */,
                 "DesktopWindowLimitUnminimize",
-                buildAppLaunchFilter()
+                buildAppLaunchFilter(),
             )
-        systemUiProxy.registerRemoteTransition(
-            remoteWindowLimitUnminimizeTransition)
+        systemUiProxy.registerRemoteTransition(remoteWindowLimitUnminimizeTransition)
     }
 
     /**
@@ -77,6 +79,30 @@ class DesktopAppLaunchTransitionManager(
         DesktopModeStatus.canEnterDesktopMode(context)
 
     companion object {
+        /** Returns whether the given transition is a Desktop app launch. */
+        @JvmStatic
+        fun isDesktopAppLaunch(context: Context, info: TransitionInfo): Boolean =
+            DesktopModeStatus.canEnterDesktopMode(context) &&
+                Flags.desktopHomescreenIconsApplaunchTransitions() &&
+                (DesktopAppLaunchTransition.getDesktopLaunchChange(info) != null)
+
+        /** Returns an [IRemoteTransition] to animate a Desktop app launch. */
+        @JvmStatic
+        fun createDesktopAppLaunchRemoteTransition(
+            context: Context,
+            launchType: AppLaunchType,
+            cujType: Int,
+            onEndCallback: Runnable? = null,
+        ): IRemoteTransition =
+            DesktopAppLaunchTransition(
+                context,
+                DisplayController.INSTANCE.get(context),
+                launchType,
+                cujType,
+                MAIN_EXECUTOR,
+                onEndCallback = onEndCallback,
+            )
+
         private fun buildAppLaunchFilter(): TransitionFilter {
             val openRequirement =
                 TransitionFilter.Requirement().apply {
