@@ -47,7 +47,8 @@ class LauncherDepthController(private val launcher: QuickstepLauncher, blurEnabl
         val stateManager = launcher.stateManager
         val targetState = stateManager.targetState ?: stateManager.state
         // Only blur workspace if the current state wants to blur based on the target state.
-        val shouldBlurWorkspace = stateManager.currentStableState.shouldBlurWorkspace(targetState)
+        val shouldBlurWorkspace =
+            stateManager.currentStableState.shouldBlurWorkspace(launcher, targetState)
 
         val blurEffect =
             if (shouldBlurWorkspace && mCurrentBlur > 0)

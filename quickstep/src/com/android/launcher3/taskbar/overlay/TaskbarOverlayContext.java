@@ -17,6 +17,8 @@ package com.android.launcher3.taskbar.overlay;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
+import static com.android.launcher3.Utilities.shouldReduceWorkspaceBlurUsage;
+
 import android.content.Context;
 import android.graphics.Point;
 import android.view.View;
@@ -147,7 +149,8 @@ public class TaskbarOverlayContext extends BaseTaskbarContext {
 
     @Override
     public boolean isAllAppsBackgroundBlurEnabled() {
-        return BlurUtils.supportsBlursOnWindows() && WindowBlurState.getInstance(this).getValue();
+        return !shouldReduceWorkspaceBlurUsage(this) && BlurUtils.supportsBlursOnWindows()
+                && WindowBlurState.getInstance(this).getValue();
     }
 
     @Override

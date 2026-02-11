@@ -18,6 +18,7 @@ package com.android.launcher3.taskbar.allapps;
 import static android.os.Trace.TRACE_TAG_APP;
 
 import static com.android.app.animation.Interpolators.EMPHASIZED;
+import static com.android.launcher3.Utilities.shouldReduceWorkspaceBlurUsage;
 import static com.android.launcher3.util.Executors.getTaskbarUiThread;
 
 import android.animation.Animator;
@@ -77,8 +78,9 @@ public class TaskbarAllAppsSlideInView extends AbstractSlideInView<TaskbarOverla
             int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         mHandler = new Handler(Looper.myLooper());
-        mMaxBlurRadius = getResources().getDimensionPixelSize(
-                R.dimen.max_depth_blur_radius_enhanced);
+        mMaxBlurRadius = shouldReduceWorkspaceBlurUsage(context)
+                ? 0
+                : getResources().getDimensionPixelSize(R.dimen.max_depth_blur_radius_enhanced);
     }
 
     void init(TaskbarAllAppsCallbacks callbacks, TaskbarUiState taskbarUiState) {
