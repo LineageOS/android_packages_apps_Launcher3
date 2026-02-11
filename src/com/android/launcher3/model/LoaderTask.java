@@ -442,6 +442,7 @@ public class LoaderTask implements Runnable {
     }
 
     public synchronized void stopLocked() {
+        mStopped = true;
         FileLog.w(TAG, "stopLocked: Loader stopping");
         this.notify();
     }
