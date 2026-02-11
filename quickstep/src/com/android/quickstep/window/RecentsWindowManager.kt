@@ -129,6 +129,7 @@ import com.android.quickstep.util.QuickstepProtoLogGroup
 import com.android.quickstep.util.RecentsAtomicAnimationFactory
 import com.android.quickstep.util.RecentsWindowProtoLogProxy
 import com.android.quickstep.util.SurfaceTransactionApplier
+import com.android.quickstep.util.TraceStateLoggerHelper
 import com.android.quickstep.views.OverviewActionsView
 import com.android.quickstep.views.RecentsView
 import com.android.quickstep.views.RecentsViewContainer
@@ -336,6 +337,8 @@ constructor(
 
         lifeCycle.addTask { destroy() }
         propertyHolder.value = this
+
+        TraceStateLoggerHelper(displayId).startTraceStateLogger(this)
     }
 
     @SuppressLint("InflateParams")
