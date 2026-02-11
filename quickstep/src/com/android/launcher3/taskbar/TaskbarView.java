@@ -691,14 +691,9 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
             updateHandoffSuggestions(handoffSuggestions);
         }
 
-        // Recents divider takes priority.
+        // Recents divider always takes priority.
         if (!mAddedDividerForRecents) {
-            boolean allAppsDividerAllowed = !mActivityContext.isTaskbarShowingDesktopTasks();
-            if (allAppsDividerAllowed) {
-                updateAllAppsDivider();
-            } else if (getChildAt(getExpectedAllAppsDividerIndex()) == mTaskbarDividerContainer) {
-                removeView(mTaskbarDividerContainer);
-            }
+            updateAllAppsDivider();
         }
 
         mAllAppsButtonContainer.updateTaskbarMinimalState(isTaskbarInMinimalState());
