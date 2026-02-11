@@ -865,6 +865,7 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
                 emptyList(),
             )
         }
+
         assertThat(taskbarView)
             .hasIconTypes(
                 *RECENT * getExpectedNumRecentsWithOverflow(maxShownHotseat),
