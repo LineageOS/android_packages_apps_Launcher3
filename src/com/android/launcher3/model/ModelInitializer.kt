@@ -157,7 +157,7 @@ constructor(
         )
 
         // Custom widgets
-        lifeCycle.addCloseable(customWidgetManager.addWidgetRefreshCallback(model::rebindCallbacks))
+        lifeCycle.addCloseable(customWidgetManager.addWidgetRefreshCallback(model::reloadIfActive))
 
         // Install session changes
         lifeCycle.addCloseable(installSessionHelper.registerInstallTracker(modelCallbacks))
@@ -249,7 +249,7 @@ constructor(
                     val isWork = newUser.iconInfo.isWork
                     if (isWork && mShouldReloadWorkProfile && !newUser.isQuietModeEnabled) {
                         // Force reload the first time work profile's quiet mode is disabled
-                        model.forceReload()
+                        model.reloadIfActive()
                     } else {
                         if (isWork) mShouldReloadWorkProfile = false
                         model.enqueueModelUpdateTask(

@@ -26,6 +26,7 @@ import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
 import static com.android.launcher3.LauncherAnimUtils.VIEW_ALPHA;
 import static com.android.launcher3.LauncherAnimUtils.VIEW_TRANSLATE_X;
 import static com.android.launcher3.LauncherAnimUtils.VIEW_TRANSLATE_Y;
+import static com.android.launcher3.LauncherModel.useModelRepositoryBinding;
 import static com.android.launcher3.Utilities.dpToPx;
 import static com.android.launcher3.Utilities.mapRange;
 import static com.android.launcher3.anim.AnimatedFloat.VALUE;
@@ -326,11 +327,16 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         if (mActivity.isUserSetupComplete()
                 && !(mActivity.getApplicationContext() instanceof SandboxContext)) {
             // Only load the callbacks if user setup is completed
-            // Adding callbacks to LauncherModel is synchronized and we should move it to main
-            // thread to avoid jank on taskbar ui thread.
-            controllers.runAfterInit(() -> MAIN_EXECUTOR.execute(
-                    () -> LauncherAppState.getInstance(mActivity).getModel()
-                            .addCallbacksAndLoad(mModelCallbacks)));
+            if (useModelRepositoryBinding()) {
+                controllers.runAfterInit(
+                        () -> LauncherAppState.getInstance(mActivity).getModel().activate());
+            } else {
+                // Adding callbacks to LauncherModel is synchronized and we should move it to main
+                // thread to avoid jank on taskbar ui thread.
+                controllers.runAfterInit(() -> MAIN_EXECUTOR.execute(
+                        () -> LauncherAppState.getInstance(mActivity).getModel()
+                                .addCallbacksAndLoad(mModelCallbacks)));
+            }
             controllers.runAfterInit(mModelCallbacks::bindWorkspaceRepository);
         }
         mTaskbarNavButtonTranslationY =

@@ -185,8 +185,6 @@ public class LoaderTask implements Runnable {
     private final LauncherPrefs mPrefs;
     private final AutomationRepository mAutomationRepo;
 
-    private boolean mUnstoppable = false;
-
     @AssistedInject
     protected LoaderTask(
             @ApplicationContext Context context,
@@ -250,15 +248,6 @@ public class LoaderTask implements Runnable {
                     .thenCompose((unused) -> mStopped
                             ? CompletableFuture.completedFuture(Collections.emptyMap())
                             : homeScreenFilesProvider.query());
-    }
-
-    /**
-     * @deprecated This method is about to be removed and it's only a temporary fix for image test
-     * to prevent loader task getting cancelled by taskbar recreation.
-     */
-    @Deprecated
-    public void setUnstoppable(boolean unstoppable) {
-        mUnstoppable = unstoppable;
     }
 
     private synchronized void verifyNotStopped() throws CancellationException {
@@ -453,9 +442,6 @@ public class LoaderTask implements Runnable {
     }
 
     public synchronized void stopLocked() {
-        if (mUnstoppable) {
-            return;
-        }
         FileLog.w(TAG, "stopLocked: Loader stopping");
         this.notify();
     }

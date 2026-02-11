@@ -129,9 +129,8 @@ public class SecondaryDisplayLauncher extends BaseActivity
 
         mDragController.addDragListener(this);
 
-        mModel.addCallbacksAndLoad(this);
-
         if (LauncherModel.useModelRepositoryBinding()) {
+            mModel.activate();
             closeOnDestroy(LauncherComponentProvider.get(this)
                     .getHomeScreenRepository()
                     .getWorkspaceState()
@@ -142,6 +141,8 @@ public class SecondaryDisplayLauncher extends BaseActivity
                         }
                         return null;
                     }));
+        } else {
+            mModel.addCallbacksAndLoad(this);
         }
 
         // Update status bar icon color on wallpaper changes.
