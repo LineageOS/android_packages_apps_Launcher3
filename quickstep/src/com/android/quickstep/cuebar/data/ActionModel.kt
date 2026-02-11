@@ -32,9 +32,10 @@ data class ActionModel(
     val actionType: String? = null,
     val oneTapEnabled: Boolean = false,
     val oneTapDelayMs: Long = 0L,
+    val isEnabledWithImeVisible: Boolean = false,
 ) {
     companion object {
-        const val VERSION = 1
+        const val VERSION = 2
     }
 }
 

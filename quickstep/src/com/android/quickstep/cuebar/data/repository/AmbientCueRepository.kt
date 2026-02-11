@@ -309,6 +309,12 @@ constructor(
             } else {
                 null
             }
+        val isEnabledWithImeVisible =
+            insight.originHints
+                .mapNotNull { it.contextHint as? BundleHint }
+                .firstOrNull { it.hintTypeName == IME_VISIBILITY_HINT_TYPE }
+                ?.dataBundle
+                ?.getBoolean(EXTRA_ENABLED_WITH_IME_VISIBLE, false) ?: false
         val onPerformAction: () -> Unit
         val extras: Bundle? // Only ActionableInsight has action/extras
         val title = display.title.toString()
@@ -410,6 +416,7 @@ constructor(
                 actionType = actionType,
                 oneTapEnabled = oneTapEnabled == true,
                 oneTapDelayMs = oneTapDelayMs ?: DEFAULT_ONE_TAP_DELAY_MS,
+                isEnabledWithImeVisible = isEnabledWithImeVisible,
             )
         )
     }
@@ -462,8 +469,12 @@ constructor(
         private const val EXTRA_ONE_TAP_ENABLED = "oneTapEnabled"
         private const val EXTRA_ONE_TAP_DELAY_MS = "oneTapDelayMs"
         private const val DEFAULT_ONE_TAP_DELAY_MS = 200L
+        @VisibleForTesting const val EXTRA_ENABLED_WITH_IME_VISIBLE = "enabledWithImeVisible"
         const val RENDER_IN_CUE_BAR = "renderInCueBar"
         const val NEEDS_DATA_EGRESS = "needsDataEgress"
+
+        // Key to identify the specific BundleHint for IME visibility
+        @VisibleForTesting const val IME_VISIBILITY_HINT_TYPE = "imeVisibilityHint"
 
         // Timeout to hide cuebar if it wasn't interacted with
         private const val TAG = "AmbientCueRepository"

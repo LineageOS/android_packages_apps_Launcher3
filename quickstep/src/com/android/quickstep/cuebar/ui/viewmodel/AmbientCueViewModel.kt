@@ -19,6 +19,7 @@ package com.android.quickstep.cuebar.ui.viewmodel
 import android.app.ActivityTaskManager
 import android.os.SystemClock
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -37,16 +38,16 @@ import com.android.quickstep.cuebar.logger.AmbientCueLogger
 import com.android.systemui.shared.Flags.cueBarAceMigration
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import java.io.PrintWriter
+import java.util.concurrent.Executor
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.PrintWriter
-import java.util.concurrent.Executor
-import kotlin.time.Duration.Companion.days
-import kotlin.time.Duration.Companion.milliseconds
 
 class AmbientCueViewModel
 @AssistedInject
@@ -72,8 +73,12 @@ constructor(
     var pillStyle: PillStyleViewModel by mutableStateOf(PillStyleViewModel.Uninitialized)
         private set
 
+    // Hold the IME-filtered actions for the UI
     var actions: List<ActionViewModel> by mutableStateOf(emptyList())
         private set
+
+    // Internally hold the latest incoming actions
+    private var currentUnfilteredActions: List<ActionModel> = emptyList()
 
     var targetTaskId: Int by mutableIntStateOf(INVALID_TASK_ID)
         private set
@@ -147,8 +152,8 @@ constructor(
         listeners.add(
             ambientCueInteractor.globallyFocusedTaskId.forEach(uiExecutor) { recalculateStates() }
         )
-        // Handle actions separately for debouncing
-        listeners.add(ambientCueInteractor.actions.forEach(uiExecutor, ::onActionsChange))
+        // Handles actions separately for debouncing empty lists and updating the internal state.
+        listeners.add(ambientCueInteractor.actions.forEach(uiExecutor, ::onUnfilteredActionsChange))
         launcherPrefs.addListener(prefListener, AMBIENT_CUE_FIRST_TIME_SHOWN_AT)
         launcherPrefs.addListener(prefListener, AMBIENT_CUE_LONG_PRESS_SEEN)
     }
@@ -159,17 +164,18 @@ constructor(
         }
         val oldVisibility = isVisible
         val globallyFocusedTaskId = ambientCueInteractor.globallyFocusedTaskId.value
-        val isRootAttached = ambientCueInteractor.isTestMode.value
-                || ambientCueInteractor.actions.value.isNotEmpty()
-                && ambientCueInteractor.isAmbientCueEnabled.value
-                && !ambientCueInteractor.isDeactivated.value
-                && globallyFocusedTaskId == targetTaskId
+        val isRootAttached =
+            ambientCueInteractor.isTestMode.value ||
+                currentUnfilteredActions.isNotEmpty() &&
+                    ambientCueInteractor.isAmbientCueEnabled.value &&
+                    !ambientCueInteractor.isDeactivated.value &&
+                    globallyFocusedTaskId == targetTaskId
         if (isRootAttached && !isSessionStarted) {
             isSessionStarted = true
             var maCount = 0
             var mrCount = 0
             val packageName = ambientCueInteractor.frontTaskPackageName.value
-            ambientCueInteractor.actions.value.forEach { action ->
+            currentUnfilteredActions.forEach { action ->
                 when (action.actionType) {
                     "ma" -> maCount++
                     "mr" -> mrCount++
@@ -186,10 +192,6 @@ constructor(
             ambientCueLogger.clear()
             isSessionStarted = false
         }
-        isVisible =
-            isRootAttached &&
-                !ambientCueInteractor.isImeVisible.value &&
-                !ambientCueInteractor.isOccludedBySystemUi.value
         val isGestureNav = ambientCueInteractor.isGestureNav.value
         val isTaskBarVisible = ambientCueInteractor.isTaskBarVisible.value
         pillStyle =
@@ -217,13 +219,43 @@ constructor(
         showLongPressEducation =
             firstTimeSeenAtMs + ONBOARDING_DELAY < System.currentTimeMillis().milliseconds &&
                 shouldShowLongPress
+
+        updateActionViewModelList()
+
+        isVisible =
+            isRootAttached &&
+                !ambientCueInteractor.isOccludedBySystemUi.value &&
+                actions.isNotEmpty()
+
         if (oldVisibility != isVisible) {
             onVisibilityChanged(isVisible)
         }
     }
 
-    fun onActionsChange(newActions: List<ActionModel>) {
-        Log.d(TAG, "onActionsChange: onActionsChange: $newActions")
+    /**
+     * Callback function invoked when the list of unfiltered [ActionModel] changes in the
+     * [AmbientCueInteractor].
+     *
+     * This function updates the internal [currentUnfilteredActions] state. To prevent UI
+     * flickering, it debounces updates if the [newActions] list is empty. Non-empty lists trigger
+     * an immediate state update and recalculation.
+     *
+     * @param newActions The new list of unfiltered [ActionModel]s.
+     */
+    fun onUnfilteredActionsChange(newActions: List<ActionModel>) {
+        Log.d(TAG, "onUnfilteredActionsChange: $newActions")
+
+        val updateState = {
+            currentUnfilteredActions = newActions
+            targetTaskId =
+                if (currentUnfilteredActions.isNotEmpty()) {
+                    currentUnfilteredActions[0].taskId
+                } else {
+                    INVALID_TASK_ID
+                }
+            recalculateStates()
+        }
+
         // Cancel any pending debounced (empty) action job
         actionUpdateJob?.cancel()
         if (newActions.isEmpty()) {
@@ -234,27 +266,36 @@ constructor(
                     delay(ACTIONS_DEBOUNCE_MS)
                     withContext(uiExecutor.asCoroutineDispatcher()) {
                         Log.d(TAG, "Debounced empty action: updating state")
-                        updateActionsState(newActions)
-                        recalculateStates()
+                        updateState()
                     }
                 }
         } else {
             // If the list is NOT empty, update state IMMEDIATELY.
             // No coroutine needed, we are already on the main thread.
-            updateActionsState(newActions)
-            recalculateStates()
+            updateState()
         }
     }
 
-    private fun updateActionsState(modelActions: List<ActionModel>) {
-        targetTaskId =
-            if (modelActions.isNotEmpty()) {
-                modelActions[0].taskId
+    /**
+     * Updates the [actions] list, which is used by the UI.
+     *
+     * This method filters the [currentUnfilteredActions] based on IME visibility (Input Method
+     * Editor, i.e., the on-screen keyboard). Actions not enabled with IME visible are removed when
+     * the IME is shown.
+     */
+    private fun updateActionViewModelList() {
+        val isImeVisible = ambientCueInteractor.isImeVisible.value
+        val filteredActions =
+            if (isImeVisible) {
+                currentUnfilteredActions.filter { it.isEnabledWithImeVisible }
             } else {
-                INVALID_TASK_ID
+                currentUnfilteredActions
             }
+
+        Log.d(TAG, "updateActionViewModelList: isImeVisible=$isImeVisible actions=$filteredActions")
+
         actions =
-            modelActions
+            filteredActions
                 .map { action ->
                     ActionViewModel(
                         icon =
@@ -359,7 +400,7 @@ constructor(
     companion object {
         private const val TAG = "LauncherAmbientCueVM"
         private val ONBOARDING_DELAY = 7.days
-        private const val ACTIONS_DEBOUNCE_MS = 300L
+        @VisibleForTesting const val ACTIONS_DEBOUNCE_MS = 300L
         private const val INVALID_TASK_ID = ActivityTaskManager.INVALID_TASK_ID
     }
 }
