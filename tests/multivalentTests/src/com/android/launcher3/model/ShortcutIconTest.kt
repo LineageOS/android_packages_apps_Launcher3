@@ -100,7 +100,6 @@ class ShortcutIconTest {
             LauncherLayoutBuilder().atHotseat(0).putShortcut(TEST_PACKAGE, SHORTCUT_ID)
         )
         state.model.loadModelSync()
-        state.model.forceReload()
         state.model.loadModelSync()
         verifyIconHasIcon()
 
@@ -119,7 +118,6 @@ class ShortcutIconTest {
             state.iconCache.getUpdateHandler()
             state.iconCache.removeIconsForPkg(TEST_PACKAGE, Process.myUserHandle())
         }
-        state.model.forceReload()
         state.model.loadModelSync()
         verifyIconHasIcon()
 

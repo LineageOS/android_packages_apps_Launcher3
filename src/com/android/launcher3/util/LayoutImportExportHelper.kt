@@ -127,8 +127,8 @@ constructor(
                 GridSizeUtil(context).parseAndSetGridSize(xmlString)
                 FileLog.i(TAG, "Importing XML as Home Screen Layout:\n$xmlString")
                 MODEL_EXECUTOR.submit { createEmptyDbSafe() }.get()
-                uiExecutor.submit { model.forceReload() }.get()
-                MODEL_EXECUTOR.submit {}.get()
+                model.forceReload("importModelFromXml").toCompletableFuture().get()
+                uiExecutor.submit {}.get()
                 syncLatch.countDown()
             }
         }

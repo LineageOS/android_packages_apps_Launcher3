@@ -27,7 +27,6 @@ import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
 import com.android.launcher3.BuildConfig
-import com.android.launcher3.Flags
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherAppState
 import com.android.launcher3.LauncherFiles
@@ -416,7 +415,7 @@ class RestoreDbTask {
         }
 
         logFavoritesTable(controller.db, "launcher db after remap widget ids")
-        LauncherAppState.INSTANCE[context].model.reloadIfActive()
+        LauncherAppState.INSTANCE[context].model.reloadIfActive("restoreAppWidgetIds")
     }
 
     companion object {

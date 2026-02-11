@@ -66,7 +66,7 @@ object ModelTestExtensions {
     /** Loads the model in memory synchronously */
     fun LauncherModel.loadModelSync() {
         // Prevent taskbar recreation from canceling loader task scheduled from test.
-        forceReload().toCompletableFuture().get()
+        forceReload("loadModelSync").toCompletableFuture().get()
         TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {}
         TestUtil.runOnExecutorSync(MAIN_EXECUTOR) {}
         TestUtil.runOnExecutorSync(getTaskbarUiThread()) {}
@@ -187,7 +187,7 @@ object ModelTestExtensions {
                     Log.w(TAG, "Failed to clear Launcher DB. It was already deleted.", e)
                 }
             }
-            TestUtil.runOnExecutorSync(MAIN_EXECUTOR) { model.forceReload() }
+            TestUtil.runOnExecutorSync(MAIN_EXECUTOR) { model.forceReload("setModelLayout") }
             model.loadModelSync()
         }
     }

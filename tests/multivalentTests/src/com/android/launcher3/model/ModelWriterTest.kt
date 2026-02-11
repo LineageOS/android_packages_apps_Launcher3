@@ -31,17 +31,14 @@ import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import com.google.common.util.concurrent.MoreExecutors
 import java.util.concurrent.CompletableFuture
-import java.util.function.Consumer
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
 import org.mockito.kotlin.reset
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
@@ -79,9 +76,7 @@ class ModelWriterTest : AbstractWorkspaceModelTest() {
     override fun setup() {
         super.setup()
         val spiedModel = spy(model)
-        doReturn(CompletableFuture.completedFuture(Unit))
-            .whenever(spiedModel)
-            .forceReload()
+        doReturn(CompletableFuture.completedFuture(Unit)).whenever(spiedModel).forceReload(any())
         modelWriter =
             ModelWriter(
                 context = mTargetContext,

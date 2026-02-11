@@ -291,7 +291,7 @@ class LoaderTaskTest {
         with(bgDataModel) {
             testComponent
                 .getLoaderTaskFactory()
-                .newLoaderTask(launcherBinder)
+                .newLoaderTask("test", launcherBinder)
                 .runSyncOnBackgroundThread()
             assertThat(
                     itemsIdMap
@@ -318,7 +318,7 @@ class LoaderTaskTest {
     fun bindsLoadedDataCorrectly() {
         testComponent
             .getLoaderTaskFactory()
-            .newLoaderTask(launcherBinder)
+            .newLoaderTask("test", launcherBinder)
             .runSyncOnBackgroundThread()
 
         verify(launcherBinder).bindWorkspace(true, false)
@@ -340,7 +340,7 @@ class LoaderTaskTest {
 
             testComponent
                 .getLoaderTaskFactory()
-                .newLoaderTask(launcherBinder)
+                .newLoaderTask("test", launcherBinder)
                 .runSyncOnBackgroundThread()
 
             verify(bgAllAppsList).setFlags(FLAG_WORK_PROFILE_QUIET_MODE_ENABLED, true)
@@ -356,7 +356,7 @@ class LoaderTaskTest {
 
             testComponent
                 .getLoaderTaskFactory()
-                .newLoaderTask(launcherBinder)
+                .newLoaderTask("test", launcherBinder)
                 .runSyncOnBackgroundThread()
 
             verify(bgAllAppsList).setFlags(FLAG_WORK_PROFILE_QUIET_MODE_ENABLED, false)
@@ -376,7 +376,7 @@ class LoaderTaskTest {
         // When
         testComponent
             .getLoaderTaskFactory()
-            .newLoaderTask(launcherBinder)
+            .newLoaderTask("test", launcherBinder)
             .runSyncOnBackgroundThread()
 
         // Then
@@ -424,7 +424,7 @@ class LoaderTaskTest {
         // When
         testComponent
             .getLoaderTaskFactory()
-            .newLoaderTask(launcherBinder)
+            .newLoaderTask("test", launcherBinder)
             .runSyncOnBackgroundThread()
 
         // Then
@@ -443,7 +443,7 @@ class LoaderTaskTest {
         // When
         testComponent
             .getLoaderTaskFactory()
-            .newLoaderTask(launcherBinder)
+            .newLoaderTask("test", launcherBinder)
             .runSyncOnBackgroundThread()
 
         // Then
@@ -473,7 +473,7 @@ class LoaderTaskTest {
             )
         val expectedAppInfo = AppInfo().apply { componentName = expectedComponent }
         // When
-        val loader = testComponent.getLoaderTaskFactory().newLoaderTask(launcherBinder)
+        val loader = testComponent.getLoaderTaskFactory().newLoaderTask("test", launcherBinder)
         val actualIconRequest =
             loader.getAppInfoIconRequestInfo(
                 expectedAppInfo,
@@ -509,7 +509,7 @@ class LoaderTaskTest {
             )
         val expectedAppInfo = AppInfo().apply { componentName = expectedComponent }
         // When
-        val loader = testComponent.getLoaderTaskFactory().newLoaderTask(launcherBinder)
+        val loader = testComponent.getLoaderTaskFactory().newLoaderTask("test", launcherBinder)
         val actualIconRequest =
             loader.getAppInfoIconRequestInfo(
                 expectedAppInfo,
@@ -545,7 +545,7 @@ class LoaderTaskTest {
             )
         val expectedAppInfo = AppInfo().apply { componentName = expectedComponent }
         // When
-        val loader = testComponent.getLoaderTaskFactory().newLoaderTask(launcherBinder)
+        val loader = testComponent.getLoaderTaskFactory().newLoaderTask("test", launcherBinder)
         val actualIconRequest =
             loader.getAppInfoIconRequestInfo(
                 expectedAppInfo,
@@ -582,7 +582,7 @@ class LoaderTaskTest {
         val expectedAppInfo =
             AppInfo().apply { componentName = ComponentName("differentPkg", "differentClass") }
         // When
-        val loader = testComponent.getLoaderTaskFactory().newLoaderTask(launcherBinder)
+        val loader = testComponent.getLoaderTaskFactory().newLoaderTask("test", launcherBinder)
         val actualIconRequest =
             loader.getAppInfoIconRequestInfo(
                 expectedAppInfo,
@@ -615,7 +615,7 @@ class LoaderTaskTest {
             )
         val expectedAppInfo = AppInfo()
         // When
-        val loader = testComponent.getLoaderTaskFactory().newLoaderTask(launcherBinder)
+        val loader = testComponent.getLoaderTaskFactory().newLoaderTask("test", launcherBinder)
         val actualIconRequest =
             loader.getAppInfoIconRequestInfo(
                 expectedAppInfo,
@@ -633,7 +633,7 @@ class LoaderTaskTest {
         // When.
         testComponent
             .getLoaderTaskFactory()
-            .newLoaderTask(launcherBinder)
+            .newLoaderTask("test", launcherBinder)
             .runSyncOnBackgroundThread()
 
         // NOTE: The update task would be enqueued only after home screen files become available.

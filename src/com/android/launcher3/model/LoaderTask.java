@@ -140,6 +140,7 @@ public class LoaderTask implements Runnable {
 
     private static final boolean DEBUG = true;
 
+    public final String name;
     private final Context mContext;
     private final LauncherModel mModel;
     private final InvariantDeviceProfile mIDP;
@@ -199,6 +200,7 @@ public class LoaderTask implements Runnable {
             LoaderCursorFactory loaderCursorFactory,
             Provider<FolderNameProvider> folderNameProviderFactory,
             @Named("SAFE_MODE") boolean isSafeModeEnabled,
+            @Assisted @NonNull String callerName,
             @Assisted @NonNull BaseLauncherBinder launcherBinder,
             Provider<LauncherRestoreEventLogger> restoreEventLoggerFactory,
             @Named("MODEL_ITEMS") Provider<Set<ItemInfo>> extraItemsProvider,
@@ -212,6 +214,7 @@ public class LoaderTask implements Runnable {
             BrowserIconMigratorFactory browserIconMigratorFactory,
             LauncherPrefs prefs,
             AutomationRepository automationRepo) {
+        name = callerName;
         mContext = context;
         mIDP = idp;
         mModel = model;
@@ -441,9 +444,9 @@ public class LoaderTask implements Runnable {
         TraceHelper.INSTANCE.endSection();
     }
 
-    public synchronized void stopLocked() {
+    public synchronized void stopLocked(String callerName) {
         mStopped = true;
-        FileLog.w(TAG, "stopLocked: Loader stopping");
+        FileLog.w(TAG, "stopLocked: Loader [" + name + "] stopping be caller: " + callerName);
         this.notify();
     }
 
@@ -823,6 +826,6 @@ public class LoaderTask implements Runnable {
     public interface LoaderTaskFactory {
 
         /** Creates a new LoaderTask */
-        LoaderTask newLoaderTask(BaseLauncherBinder binder);
+        LoaderTask newLoaderTask(String callerName, BaseLauncherBinder binder);
     }
 }
