@@ -53,6 +53,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_V
 import static com.android.wm.shell.Flags.enableBubbleBar;
 import static com.android.wm.shell.Flags.enableBubbleBarOnPhones;
 import static com.android.wm.shell.Flags.enableTinyTaskbar;
+import static com.android.wm.shell.Flags.fixSwipeUpNotificationShadeWithBubbleBar;
 
 import static java.lang.invoke.MethodHandles.Lookup.PROTECTED;
 
@@ -1264,6 +1265,11 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         });
     }
 
+    /** Whether the notification shade is currently expanded */
+    public boolean isNotificationShadeExpanded() {
+        return mIsNotificationShadeExpanded;
+    }
+
     /**
      * Hides the taskbar icons and background when the notification shade is expanded.
      */
@@ -1296,6 +1302,13 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             mControllers.bubbleControllers.ifPresent(controllers -> {
                 BubbleBarViewController bubbleBarViewController =
                         controllers.bubbleBarViewController;
+                if (fixSwipeUpNotificationShadeWithBubbleBar()
+                        && bubbleBarViewController.isExpanded()) {
+                    // If bubbles are expanded when the shade expansion changes, then the touchable
+                    // insets need to be updated.
+                    mControllers.taskbarInsetsController
+                            .onTaskbarOrBubblebarWindowHeightOrInsetsChanged();
+                }
                 anim.play(bubbleBarViewController.getBubbleBarAlpha().get(0).animateToValue(alpha));
                 MultiPropertyFactory<View>.MultiProperty handleAlpha =
                         controllers.bubbleStashController.getHandleViewAlpha();

@@ -64,6 +64,7 @@ import com.android.launcher3.taskbar.TaskbarInsetsController.DebugTouchableRegio
 import com.android.launcher3.taskbar.TaskbarInsetsController.DebugTouchableRegion.Companion.UI_CONTROLLER_UNTOUCHABLE
 import com.android.launcher3.testing.shared.ResourceUtils
 import com.android.launcher3.util.Executors
+import com.android.wm.shell.Flags
 import java.io.PrintWriter
 import kotlin.jvm.optionals.getOrNull
 
@@ -144,11 +145,14 @@ class TaskbarInsetsController(val context: TaskbarActivityContext) : LoggableTas
 
             val bubbleControllers = controllers.bubbleControllers.getOrNull()
             val taskbarTouchableHeight = taskbarStashController.touchableHeight
-            val bubblesTouchableHeight =
-                bubbleControllers?.bubbleStashController?.getTouchableHeight() ?: 0
             // reset touch bounds
             defaultTouchableRegion.setEmpty()
-            if (bubbleControllers != null) {
+            // when the shade is expanded, it takes the touches
+            val validShadeState =
+                if (Flags.fixSwipeUpNotificationShadeWithBubbleBar())
+                    !controllers.taskbarActivityContext.isNotificationShadeExpanded()
+                else true
+            if (bubbleControllers != null && validShadeState) {
                 val bubbleBarViewController = bubbleControllers.bubbleBarViewController
                 val isBubbleBarVisible =
                     bubbleControllers.bubbleStashController.isBubbleBarVisible()
@@ -163,9 +167,10 @@ class TaskbarInsetsController(val context: TaskbarActivityContext) : LoggableTas
                 }
             }
             if (
-                taskbarStashController.isInApp ||
-                    controllers.uiController.isInOverviewUi ||
-                    context.showDesktopTaskbarForFreeformDisplay()
+                validShadeState &&
+                    (taskbarStashController.isInApp ||
+                        controllers.uiController.isInOverviewUi ||
+                        context.showDesktopTaskbarForFreeformDisplay())
             ) {
                 // only add the taskbar touch region if not on home, and when taskbar is not shown
                 // on home

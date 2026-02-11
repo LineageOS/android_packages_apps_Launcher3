@@ -32,6 +32,7 @@ import android.widget.ImageView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.launcher3.R;
 import com.android.launcher3.icons.DotRenderer;
 import com.android.launcher3.icons.DotRenderer.IconShapeInfo;
@@ -248,7 +249,8 @@ public class BubbleView extends ConstraintLayout {
         return false;
     }
 
-    void setController(@Nullable Controller controller) {
+    @VisibleForTesting
+    public void setController(@Nullable Controller controller) {
         mController = controller;
     }
 
