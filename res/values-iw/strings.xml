@@ -91,7 +91,7 @@
     <string name="long_accessible_way_to_add_shortcut" msgid="2199537273817090740">"כדי להעביר קיצור דרך למקום אחר או להשתמש בפעולות מותאמות אישית\' יש ללחוץ פעמיים ולא להרפות."</string>
     <string name="out_of_space" msgid="6455557115204099579">"אין מקום במסך הבית הזה"</string>
     <string name="hotseat_out_of_space" msgid="7448809638125333693">"אין עוד מקום במגש המועדפים"</string>
-    <string name="all_apps_button_label" msgid="8130441508702294465">"רשימת אפליקציות"</string>
+    <string name="all_apps_button_label" msgid="8130441508702294465">"רשימת האפליקציות"</string>
     <string name="all_apps_search_results" msgid="5889367432531296759">"תוצאות חיפוש"</string>
     <string name="all_apps_button_personal_label" msgid="1315764287305224468">"רשימת אפליקציות אישיות"</string>
     <string name="all_apps_button_work_label" msgid="7270707118948892488">"רשימת אפליקציות עבודה"</string>
@@ -104,8 +104,10 @@
     <string name="dismiss_prediction_label" msgid="3357562989568808658">"בלי להציע את האפליקציה"</string>
     <string name="pin_prediction" msgid="4196423321649756498">"הצמדת החיזוי"</string>
     <string name="bubble" msgid="3072951361014076670">"בועה"</string>
-    <string name="enable_app_lock" msgid="9190316880781005775">"נעילת האפליקציה"</string>
-    <string name="disable_app_lock" msgid="9071912028491244470">"הסרת הנעילה"</string>
+    <!-- no translation found for enable_app_lock (5606772593969266718) -->
+    <skip />
+    <!-- no translation found for disable_app_lock (2252606435270354961) -->
+    <skip />
     <string name="widget_settings" msgid="5280157748464495511">"הגדרות"</string>
     <string name="add_to_taskbar" msgid="1442306985857150792">"הוספה לסרגל האפליקציות"</string>
     <string name="remove_from_taskbar" msgid="5817026706030273018">"הסרה מסרגל האפליקציות"</string>
@@ -157,7 +159,7 @@
     <string name="app_pair_name_format" msgid="8134106404716224054">"צמד אפליקציות: <xliff:g id="APP1">%1$s</xliff:g> ו-<xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="styles_wallpaper_button_text" msgid="8216961355289236794">"טפט וסגנון"</string>
     <string name="edit_home_screen" msgid="8947858375782098427">"עריכה של מסך הבית"</string>
-    <string name="settings_button_text" msgid="8873672322605444408">"הגדרות של מסך הבית"</string>
+    <string name="settings_button_text" msgid="8873672322605444408">"ההגדרות של מסך הבית"</string>
     <string name="msg_disabled_by_admin" msgid="6898038085516271325">"הושבת על ידי מנהל המערכת שלך"</string>
     <string name="allow_rotation_desc" msgid="8662546029078692509">"כאשר מסובבים את הטלפון"</string>
     <string name="compose_developer_options_section" msgid="8211460486549952595">"‏‫Jetpack פיתוח נייטיב"</string>

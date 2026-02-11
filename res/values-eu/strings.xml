@@ -104,8 +104,10 @@
     <string name="dismiss_prediction_label" msgid="3357562989568808658">"Ez iradoki aplikazioa"</string>
     <string name="pin_prediction" msgid="4196423321649756498">"Ainguratu iragarpena"</string>
     <string name="bubble" msgid="3072951361014076670">"Burbuila"</string>
-    <string name="enable_app_lock" msgid="9190316880781005775">"Blokeatu aplikazioa"</string>
-    <string name="disable_app_lock" msgid="9071912028491244470">"Kendu blokeoa"</string>
+    <!-- no translation found for enable_app_lock (5606772593969266718) -->
+    <skip />
+    <!-- no translation found for disable_app_lock (2252606435270354961) -->
+    <skip />
     <string name="widget_settings" msgid="5280157748464495511">"Ezarpenak"</string>
     <string name="add_to_taskbar" msgid="1442306985857150792">"Gehitu zereginen barran"</string>
     <string name="remove_from_taskbar" msgid="5817026706030273018">"Kendu zereginen barratik"</string>
@@ -125,10 +127,10 @@
     <string name="pause_app_label" msgid="6796255881727695791">"Pausatu aplikazioa"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"Instalatu lasterbideak"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"Erabiltzaileak ezer egin gabe lasterbideak gehitzeko baimena ematen die aplikazioei."</string>
-    <string name="permlab_read_settings" msgid="5136500343007704955">"irakurri hasierako pantailako ezarpenak eta lasterbideak"</string>
-    <string name="permdesc_read_settings" msgid="4208061150510996676">"Hasierako pantailako ezarpenak eta lasterbideak irakurtzeko baimena ematen dio aplikazioari."</string>
-    <string name="permlab_write_settings" msgid="4820028712156303762">"idatzi hasierako pantailako ezarpenak eta lasterbideak"</string>
-    <string name="permdesc_write_settings" msgid="726859348127868466">"Hasierako pantailako ezarpenak eta lasterbideak aldatzeko baimena ematen dio aplikazioari."</string>
+    <string name="permlab_read_settings" msgid="5136500343007704955">"irakurri orri nagusiaren ezarpenak eta lasterbideak"</string>
+    <string name="permdesc_read_settings" msgid="4208061150510996676">"Orri nagusiaren ezarpenak eta lasterbideak irakurtzeko baimena ematen die aplikazioei."</string>
+    <string name="permlab_write_settings" msgid="4820028712156303762">"idatzi orri nagusiaren ezarpenak eta lasterbideak"</string>
+    <string name="permdesc_write_settings" msgid="726859348127868466">"Orri nagusiaren ezarpenak eta lasterbideak aldatzeko baimena ematen die aplikazioei."</string>
     <string name="gadget_error_text" msgid="740356548025791839">"Ezin da kargatu widgeta"</string>
     <string name="gadget_setup_text" msgid="8348374825537681407">"Widgetaren ezarpenak"</string>
     <string name="gadget_complete_setup_text" msgid="309040266978007925">"Sakatu konfiguratzen amaitzeko"</string>

@@ -104,8 +104,10 @@
     <string name="dismiss_prediction_label" msgid="3357562989568808658">"Không gợi ý ứng dụng"</string>
     <string name="pin_prediction" msgid="4196423321649756498">"Ghim ứng dụng dự đoán"</string>
     <string name="bubble" msgid="3072951361014076670">"Bong bóng"</string>
-    <string name="enable_app_lock" msgid="9190316880781005775">"Khoá ứng dụng"</string>
-    <string name="disable_app_lock" msgid="9071912028491244470">"Mở khoá"</string>
+    <!-- no translation found for enable_app_lock (5606772593969266718) -->
+    <skip />
+    <!-- no translation found for disable_app_lock (2252606435270354961) -->
+    <skip />
     <string name="widget_settings" msgid="5280157748464495511">"Cài đặt"</string>
     <string name="add_to_taskbar" msgid="1442306985857150792">"Thêm vào Thanh tác vụ"</string>
     <string name="remove_from_taskbar" msgid="5817026706030273018">"Xoá khỏi Thanh tác vụ"</string>

@@ -104,8 +104,10 @@
     <string name="dismiss_prediction_label" msgid="3357562989568808658">"পৰামৰ্শ নিদিব"</string>
     <string name="pin_prediction" msgid="4196423321649756498">"পূৰ্বানুমান কৰা এপ্‌টো পিন কৰক"</string>
     <string name="bubble" msgid="3072951361014076670">"বাবল"</string>
-    <string name="enable_app_lock" msgid="9190316880781005775">"এপ্‌ লক কৰক"</string>
-    <string name="disable_app_lock" msgid="9071912028491244470">"লক আঁতৰাওক"</string>
+    <!-- no translation found for enable_app_lock (5606772593969266718) -->
+    <skip />
+    <!-- no translation found for disable_app_lock (2252606435270354961) -->
+    <skip />
     <string name="widget_settings" msgid="5280157748464495511">"ছেটিং"</string>
     <string name="add_to_taskbar" msgid="1442306985857150792">"টাস্কবাৰত যোগ দিয়ক"</string>
     <string name="remove_from_taskbar" msgid="5817026706030273018">"টাস্কবাৰৰ পৰা আঁতৰাওক"</string>

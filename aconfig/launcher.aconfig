@@ -118,13 +118,6 @@ flag {
 }
 
 flag {
-  name: "enable_categorized_widget_suggestions"
-  namespace: "launcher"
-  description: "Enables widget suggestions in widget picker to be displayed in categories"
-  bug: "318410881"
-}
-
-flag {
   name: "force_monochrome_app_icons"
   namespace: "launcher"
   description: "Enable the ability to generate monochromatic icons, if it is not provided by the app"
@@ -564,16 +557,6 @@ flag {
   namespace: "launcher"
   description: "Enable blur in more Launcher surfaces"
   bug: "444141641"
-}
-
-flag {
-  name: "fix_widget_drag_radius_loss"
-  namespace: "launcher"
-  description: "Fixes issue that during drag and drop, radius clips were lost"
-  bug: "326128683"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
 }
 
 flag {
