@@ -16,6 +16,7 @@
 
 package com.android.launcher3.popup.ui
 
+import android.graphics.Rect
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -241,6 +242,7 @@ fun DeepShortcutMenuItem(
     val itemOnClick: () -> Unit
     val itemOnLongClick: ((Offset) -> Unit)?
     val itemTrailingContent: @Composable (() -> Unit)?
+    var iconWindowBounds by remember { mutableStateOf(Rect()) }
 
     if (shortcut != null) {
         itemTitle = shortcut.title.toString()
@@ -249,10 +251,22 @@ fun DeepShortcutMenuItem(
             Image(
                 bitmap = shortcut.bitmap.icon.asImageBitmap(),
                 contentDescription = itemTitle,
-                modifier = Modifier.size(deepShortcutIconSize).clip(CircleShape),
+                modifier =
+                    Modifier.size(deepShortcutIconSize).clip(CircleShape).onGloballyPositioned {
+                        coordinates ->
+                        val position = coordinates.positionInWindow()
+                        val size = coordinates.size
+                        iconWindowBounds =
+                            Rect(
+                                position.x.toInt(),
+                                position.y.toInt(),
+                                (position.x + size.width).toInt(),
+                                (position.y + size.height).toInt(),
+                            )
+                    },
             )
         }
-        itemOnClick = { onClick(DeepShortcutClickEvent(shortcut)) }
+        itemOnClick = { onClick(DeepShortcutClickEvent(shortcut, iconWindowBounds)) }
         itemOnLongClick = { screenOffset -> onLongClick(shortcut, screenOffset) }
         itemTrailingContent =
             if (onAddButtonClick != null) {
