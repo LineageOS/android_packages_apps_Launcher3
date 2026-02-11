@@ -52,8 +52,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -63,6 +61,8 @@ import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemHeight
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemHorizontalPadding
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemVerticalPadding
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemWidth
+import com.android.launcher3.util.compose.testTag
+import com.android.launcher3.util.compose.testTagContainer
 import kotlin.math.max
 
 /**
@@ -94,7 +94,7 @@ fun ComposePopup(
     val state = viewModel.state
 
     Box(
-        modifier = Modifier.bottomAlignAndAllowOverflow(),
+        modifier = Modifier.bottomAlignAndAllowOverflow().testTagContainer(),
         contentAlignment = Alignment.BottomCenter,
     ) {
         ComposePopupContent(
@@ -440,7 +440,7 @@ private fun SystemShortcutsSection(
     standardShortcuts: List<PopupItem>,
     onClick: (PopupClickEvent) -> Unit,
 ) {
-    Column(modifier = Modifier.semantics { contentDescription = "system_shortcuts_container" }) {
+    Column {
         if (compactShortcuts.isNotEmpty()) {
             Row(
                 modifier =
@@ -508,7 +508,7 @@ private fun DeepShortcutsContent(
     onAddButtonClick: ((ItemInfoWithIcon) -> Unit)?,
     onDeepShortcutLongPress: (ItemInfoWithIcon, Offset) -> Unit,
 ) {
-    Column(modifier = Modifier.semantics { contentDescription = "deep_shortcuts_container" }) {
+    Column(modifier = Modifier.testTag("deep_shortcuts_container")) {
         deepShortcuts.forEach { shortcut ->
             DeepShortcutMenuItem(
                 shortcut = shortcut,

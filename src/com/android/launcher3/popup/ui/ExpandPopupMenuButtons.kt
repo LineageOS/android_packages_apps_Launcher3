@@ -16,20 +16,23 @@
 
 package com.android.launcher3.popup.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +41,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.android.launcher3.R
@@ -57,20 +61,33 @@ import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemWidth
  */
 @Composable
 fun ExpandPopupMenuButton(text: String, onClick: () -> Unit) {
-    Box(modifier = Modifier.height(popupMenuItemHeight), contentAlignment = Alignment.CenterStart) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    Surface(
+        onClick = onClick,
+        modifier = Modifier.size(popupMenuItemWidth, popupMenuItemHeight),
+        shape = RoundedCornerShape(popupCornerRadius),
+        color =
+            colorResource(
+                if (isHovered) R.color.materialColorSurfaceVariant
+                else R.color.materialColorSurfaceContainer
+            ),
+        border =
+            if (isFocused) {
+                BorderStroke(3.dp, colorResource(R.color.materialColorSecondary))
+            } else {
+                null
+            },
+        interactionSource = interactionSource,
+    ) {
         Row(
             modifier =
-                Modifier.clip(RoundedCornerShape(popupCornerRadius))
-                    .size(popupMenuItemWidth, popupMenuItemHeight)
-                    .clickable(
-                        onClick = onClick,
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null, // Disable ripple effect
-                    )
-                    .padding(
-                        vertical = expandPopupMenuItemVerticalPadding,
-                        horizontal = expandPopupMenuItemHorizontalPadding,
-                    ),
+                Modifier.padding(
+                    vertical = expandPopupMenuItemVerticalPadding,
+                    horizontal = expandPopupMenuItemHorizontalPadding,
+                ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
@@ -90,7 +107,7 @@ fun ExpandPopupMenuButton(text: String, onClick: () -> Unit) {
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_expand_arrows),
-                    contentDescription = text,
+                    contentDescription = null,
                     colorFilter = ColorFilter.tint(colorResource(R.color.materialColorOnTertiary)),
                     modifier = Modifier.size(expandPopupMenuItemImageSize),
                 )
