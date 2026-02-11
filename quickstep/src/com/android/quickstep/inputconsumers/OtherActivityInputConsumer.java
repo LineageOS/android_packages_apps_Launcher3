@@ -318,13 +318,6 @@ public class OtherActivityInputConsumer extends ContextWrapper implements InputC
                 boolean passedSlop = isTrackpadGesture
                         || (squaredHypot >= mSquaredTouchSlop
                         && !isInExtendedSlopRegion);
-                if (DEBUG) {
-                    Log.d(TAG, "ACTION_MOVE: passedSlop=" + passedSlop
-                            + " ( " + isTrackpadGesture
-                            + " || (" + squaredHypot + " >= " + mSquaredTouchSlop
-                            + " && " + !isInExtendedSlopRegion + " ))");
-                }
-
                 if (!mPassedSlopOnThisGesture && passedSlop) {
                     mPassedSlopOnThisGesture = true;
                 }
@@ -338,10 +331,6 @@ public class OtherActivityInputConsumer extends ContextWrapper implements InputC
                 boolean swipeWithinQuickSwitchRange = degrees <= OVERVIEW_MIN_DEGREES;
                 boolean isLikelyToStartNewTask =
                         haveNotPassedSlopOnContinuedGesture || swipeWithinQuickSwitchRange;
-
-                if (DEBUG) {
-                    Log.d(TAG, "ACTION_MOVE: mPassedPilferInputSlop=" + mPassedPilferInputSlop);
-                }
 
                 // Downwards three finger swipe gesture on trackpad will have degrees == -90.
                 boolean isDownwardsThreeFingerTrackpadGesture =
