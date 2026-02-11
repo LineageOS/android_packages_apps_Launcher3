@@ -17,6 +17,7 @@
 package com.android.launcher3.dragndrop
 
 import android.content.ClipDescription
+import android.os.PersistableBundle
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.view.DragEvent
@@ -28,6 +29,7 @@ import android.view.View.DRAG_FLAG_OPAQUE
 import android.view.View.DragShadowBuilder
 import androidx.test.filters.SmallTest
 import com.android.launcher3.Flags.FLAG_ENABLE_SYSTEM_DRAG
+import com.android.launcher3.dragndrop.SystemDragController.Companion.DOCS_UI_EXTRA_PREFIX
 import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.views.ActivityContext
@@ -102,7 +104,12 @@ class SystemDragControllerImplTest {
 
     @Test
     fun testDragStart() {
+        val clipDescription = ClipDescription("", arrayOf("mimeType"))
+        clipDescription.extras =
+            PersistableBundle().apply { putString("$DOCS_UI_EXTRA_PREFIX...", null) }
+
         whenever(mockDragEvent.action).thenReturn(DragEvent.ACTION_DRAG_STARTED)
+        whenever(mockDragEvent.clipDescription).thenReturn(clipDescription)
         whenever(mockContext.dragController.isDragging).thenReturn(false)
 
         // NOTE: Fulfillment is delegated to the system drag listener.
@@ -146,6 +153,16 @@ class SystemDragControllerImplTest {
     }
 
     @Test
+    fun testDragStartWhenClipperExtraIsMissing() {
+        whenever(mockDragEvent.action).thenReturn(DragEvent.ACTION_DRAG_STARTED)
+        whenever(mockContext.dragController.isDragging).thenReturn(false)
+
+        // NOTE: Fulfillment is *not* delegated to the system drag listener.
+        assertFalse(controller.onDrag(mockDragEvent))
+        verifyNoInteractions(mockSystemDragListener)
+    }
+
+    @Test
     fun testDragStartWhenMimeTypeIsTextIntent() {
         testDragStartWhenMimeTypeIsUnsupported(ClipDescription.MIMETYPE_TEXT_INTENT)
     }
@@ -167,6 +184,8 @@ class SystemDragControllerImplTest {
 
     private fun testDragStartWhenMimeTypeIsUnsupported(mimeType: String) {
         val clipDescription = ClipDescription("", arrayOf(mimeType))
+        clipDescription.extras =
+            PersistableBundle().apply { putString("$DOCS_UI_EXTRA_PREFIX...", null) }
 
         whenever(mockDragEvent.action).thenReturn(DragEvent.ACTION_DRAG_STARTED)
         whenever(mockDragEvent.clipDescription).thenReturn(clipDescription)

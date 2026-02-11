@@ -61,10 +61,21 @@ class SystemDragControllerImpl(
         }
     }
 
-    // NOTE: Drops for these mime types are not currently supported so ignore related drag events to
-    // avoid giving the user the impression that they are.
-    private fun acceptDrag(event: DragEvent): Boolean =
-        !(event.clipDescription?.hasMimeType(
+    private fun acceptDrag(event: DragEvent): Boolean {
+        // NOTE: This is an imperfect proxy to restrict drags from other apps to only those
+        // originating from DocsUI. This does NOT establish trust and nothing breaks if this proxy
+        // fails or is spoofed by another app; it exists solely to polish the user experience if we
+        // know we likely can't handle the drag payload on drop.
+        // TODO(b/468079600): Remove this check once file copy operations are supported.
+        if (
+            event.clipDescription?.extras?.keySet()?.any { it.startsWith(DOCS_UI_EXTRA_PREFIX) } !=
+                true
+        ) {
+            return false
+        }
+        // NOTE: Drops for these mime types are not currently supported so ignore related drag
+        // events to avoid giving the user the impression that they are.
+        return !(event.clipDescription?.hasMimeType(
             arrayOf(
                 ClipDescription.MIMETYPE_APPLICATION_ACTIVITY,
                 ClipDescription.MIMETYPE_APPLICATION_SHORTCUT,
@@ -72,6 +83,7 @@ class SystemDragControllerImpl(
                 ClipDescription.MIMETYPE_TEXT_INTENT,
             )
         ) ?: false)
+    }
 
     private fun continueDrag(event: DragEvent): Boolean? = systemDragListener?.onDrag(event)
 
