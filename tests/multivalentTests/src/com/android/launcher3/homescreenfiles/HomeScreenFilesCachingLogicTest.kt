@@ -17,10 +17,12 @@
 package com.android.launcher3.homescreenfiles
 
 import android.content.ContentResolver
+import android.content.ContentResolver.MimeTypeInfo
 import android.content.Context
 import android.database.MatrixCursor
 import android.graphics.Bitmap
 import android.graphics.Bitmap.Config.ARGB_8888
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.net.Uri
 import android.os.Process
@@ -43,7 +45,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.clearInvocations
 import org.mockito.kotlin.eq
@@ -59,6 +60,10 @@ class HomeScreenFilesCachingLogicTest {
     @Mock private lateinit var context: Context
     @Mock private lateinit var contentResolver: ContentResolver
     @Mock private lateinit var baseIconCache: BaseIconCache
+    @Mock private lateinit var bitmap: Bitmap
+    @Mock private lateinit var bitmapInfo: BitmapInfo
+    @Mock private lateinit var drawable: Drawable
+    @Mock private lateinit var icon: Icon
 
     private lateinit var baseIconFactory: BaseIconFactory
 
@@ -103,13 +108,12 @@ class HomeScreenFilesCachingLogicTest {
                 isDirectory = false,
                 user = Process.myUserHandle(),
             )
-        whenever(contentResolver.loadThumbnail(eq(hsf.uri), any(), isNull()))
-            .thenReturn(BitmapInfo.LOW_RES_ICON)
-        whenever(baseIconFactory.createIconBitmap(any(), eq(true)))
-            .thenReturn(BitmapInfo.LOW_RES_INFO)
+
+        whenever(contentResolver.loadThumbnail(eq(hsf.uri), any(), isNull())).thenReturn(bitmap)
+        whenever(baseIconFactory.createIconBitmap(any(), eq(true))).thenReturn(bitmapInfo)
 
         val icon = hsf.loadIcon()
-        assertThat(icon).isEqualTo(BitmapInfo.LOW_RES_INFO)
+        assertThat(icon).isEqualTo(bitmapInfo)
     }
 
     @Test
@@ -122,13 +126,14 @@ class HomeScreenFilesCachingLogicTest {
                 isDirectory = false,
                 user = Process.myUserHandle(),
             )
+
         whenever(contentResolver.getTypeInfo(eq("application/pdf")))
-            .thenReturn(ContentResolver.MimeTypeInfo(mock<Icon>(), "label", "contentDescription"))
-        whenever(baseIconFactory.createBadgedIconBitmap(anyOrNull(), any()))
-            .thenReturn(BitmapInfo.LOW_RES_INFO)
+            .thenReturn(MimeTypeInfo(icon, "label", "contentDescription"))
+        whenever(icon.loadDrawable(any())).thenReturn(drawable)
+        whenever(baseIconFactory.createBadgedIconBitmap(eq(drawable), any())).thenReturn(bitmapInfo)
 
         val icon = hsf.loadIcon()
-        assertThat(icon).isEqualTo(BitmapInfo.LOW_RES_INFO)
+        assertThat(icon).isEqualTo(bitmapInfo)
     }
 
     @Test
@@ -141,15 +146,16 @@ class HomeScreenFilesCachingLogicTest {
                 isDirectory = false,
                 user = Process.myUserHandle(),
             )
+
         whenever(contentResolver.loadThumbnail(eq(hsf.uri), any(), isNull()))
             .thenThrow(IOException("test"))
         whenever(contentResolver.getTypeInfo(eq("image/png")))
-            .thenReturn(ContentResolver.MimeTypeInfo(mock<Icon>(), "label", "contentDescription"))
-        whenever(baseIconFactory.createBadgedIconBitmap(anyOrNull(), any()))
-            .thenReturn(BitmapInfo.LOW_RES_INFO)
+            .thenReturn(MimeTypeInfo(icon, "label", "contentDescription"))
+        whenever(icon.loadDrawable(any())).thenReturn(drawable)
+        whenever(baseIconFactory.createBadgedIconBitmap(eq(drawable), any())).thenReturn(bitmapInfo)
 
         val icon = hsf.loadIcon()
-        assertThat(icon).isEqualTo(BitmapInfo.LOW_RES_INFO)
+        assertThat(icon).isEqualTo(bitmapInfo)
     }
 
     @Test
@@ -227,6 +233,38 @@ class HomeScreenFilesCachingLogicTest {
 
         // Reset.
         clearInvocations(baseIconFactory)
+    }
+
+    @Test
+    fun testGetPlaceholderIconWhenLoadMimeTypeDrawableFails() {
+        val hsf = mock<HomeScreenFile>()
+        val mimeType = "application/foo"
+
+        whenever(hsf.mimeType).thenReturn(mimeType)
+        whenever(contentResolver.getTypeInfo(mimeType))
+            .thenReturn(MimeTypeInfo(icon, "label", "description"))
+        whenever(icon.loadDrawable(any())).thenReturn(null)
+
+        val icon = hsf.loadIcon()
+        assertThat(icon).isEqualTo(BitmapInfo.LOW_RES_INFO)
+    }
+
+    @Test
+    fun testGetPlaceholderIconWhenMimeTypeIsEmpty() {
+        val hsf = mock<HomeScreenFile>()
+        whenever(hsf.mimeType).thenReturn("")
+
+        val icon = hsf.loadIcon()
+        assertThat(icon).isEqualTo(BitmapInfo.LOW_RES_INFO)
+    }
+
+    @Test
+    fun testGetPlaceholderIconWhenMimeTypeIsNull() {
+        val hsf = mock<HomeScreenFile>()
+        whenever(hsf.mimeType).thenReturn(null)
+
+        val icon = hsf.loadIcon()
+        assertThat(icon).isEqualTo(BitmapInfo.LOW_RES_INFO)
     }
 
     private fun HomeScreenFile.loadIcon() =

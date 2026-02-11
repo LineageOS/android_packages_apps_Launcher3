@@ -66,7 +66,7 @@ object HomeScreenFilesCachingLogic : CachingLogic<HomeScreenFile> {
             iconFactory.use { iconFactory ->
                 val mimeType = item.mimeType
                 if (mimeType.isNullOrEmpty()) {
-                    return iconFactory.createBadgedIconBitmap(null)
+                    return BitmapInfo.LOW_RES_INFO
                 }
 
                 // Load thumbnail for images and videos.
@@ -94,12 +94,12 @@ object HomeScreenFilesCachingLogic : CachingLogic<HomeScreenFile> {
                 // thumbnail has failed.
                 kotlin
                     .runCatching {
-                        context.contentResolver.getTypeInfo(mimeType).icon.loadDrawable(context)
+                        context.contentResolver.getTypeInfo(mimeType).icon.loadDrawable(context)!!
                     }
                     .map { iconFactory.createBadgedIconBitmap(it) }
                     .getOrElse {
                         Log.e(TAG, "Failed to load generic icon", it)
-                        iconFactory.createBadgedIconBitmap(null)
+                        BitmapInfo.LOW_RES_INFO
                     }
             }
         }
