@@ -871,7 +871,7 @@ public class BubbleBarViewController {
     public int getTransientTaskbarTranslationXForBubbleBar(BubbleBarLocation location) {
         int taskbarShift = 0;
         if (!isBubbleBarVisible() || mTaskbarViewPropertiesProvider == null) return taskbarShift;
-        Rect taskbarViewBounds = mTaskbarViewPropertiesProvider.getTaskbarViewBounds();
+        Rect taskbarViewBounds = mTaskbarViewPropertiesProvider.getTaskbarIconsBounds();
         if (taskbarViewBounds.isEmpty()) return taskbarShift;
         int actualDistance =
                 getDistanceBetweenTransientTaskbarAndBubbleBar(location, taskbarViewBounds);
@@ -1332,7 +1332,9 @@ public class BubbleBarViewController {
         if (!mBubbleStashController.isBubblesShowingOnHome()
                 && !mBubbleStashController.isTransientTaskBar()) {
             cancelTaskbarAlphaAnimationIfRunning();
-            boolean hideTaskbar = isBubbleBarExpanded && isIntersectingTaskbar();
+            boolean isIntersectingTaskbar = Flags.updateBubbleBarTaskbarIntersection()
+                    ? isIntersectingPersistentTaskbar() : isIntersectingTaskbar();
+            boolean hideTaskbar = isBubbleBarExpanded && isIntersectingTaskbar;
             Animator taskbarAlphaAnimator = mTaskbarViewPropertiesProvider.getIconsAlpha()
                     .animateToValue(hideTaskbar ? 0 : 1);
             taskbarAlphaAnimator.setDuration(hideTaskbar
@@ -1353,10 +1355,23 @@ public class BubbleBarViewController {
         mTaskbarAlphaAnimator = null;
     }
 
+    /** Return {@code true} if expanded bubble bar would intersect the persistent taskbar. */
+    public boolean isIntersectingPersistentTaskbar() {
+        if (mBubbleStashController.isTransientTaskBar()) {
+            return false;
+        }
+        Rect taskbarViewBounds = mTaskbarViewPropertiesProvider.getTaskbarIconsBounds();
+        Rect expandedBubbleBarBounds = new Rect(taskbarViewBounds);
+        int[] leftRight = mBarView.computeBubbleBarExpandedLeftRight();
+        expandedBubbleBarBounds.left = leftRight[0];
+        expandedBubbleBarBounds.right = leftRight[1];
+        return expandedBubbleBarBounds.intersect(taskbarViewBounds);
+    }
+
     /** Return {@code true} if expanded bubble bar would intersect the taskbar. */
     public boolean isIntersectingTaskbar() {
         if (mBarView.isExpanding() || mBarView.isExpanded()) {
-            Rect taskbarViewBounds = mTaskbarViewPropertiesProvider.getTaskbarViewBounds();
+            Rect taskbarViewBounds = mTaskbarViewPropertiesProvider.getTaskbarIconsBounds();
             return mBarView.getBubbleBarExpandedBounds().intersect(taskbarViewBounds);
         } else {
             return false;
@@ -1562,10 +1577,15 @@ public class BubbleBarViewController {
     public void setSysuiLocked(boolean sysUiLocked) {
         if (mIsSysUiLocked != sysUiLocked) {
             mIsSysUiLocked = sysUiLocked;
-            if (!sysUiLocked) {
-                // update taskbar icons alpha immediately on device is unlocked
+            if (!sysUiLocked
+                    && (!Flags.updateBubbleBarTaskbarIntersection()
+                    || !mBubbleStashController.isTransientTaskBar())) {
+                // update persistent taskbar icons alpha immediately on device is unlocked
                 cancelTaskbarAlphaAnimationIfRunning();
-                float targetAlpha = isExpanded() && isIntersectingTaskbar() ? 0 : 1;
+                boolean isIntersectingPersistentTaskbar =
+                        Flags.updateBubbleBarTaskbarIntersection()
+                                ? isIntersectingPersistentTaskbar() : isIntersectingTaskbar();
+                float targetAlpha = isExpanded() && isIntersectingPersistentTaskbar ? 0 : 1;
                 mTaskbarViewPropertiesProvider.getIconsAlpha().setValue(targetAlpha);
             }
         }
@@ -1605,7 +1625,7 @@ public class BubbleBarViewController {
     public interface TaskbarViewPropertiesProvider {
 
         /** Returns the bounds of the taskbar. */
-        Rect getTaskbarViewBounds();
+        Rect getTaskbarIconsBounds();
 
         /** Returns taskbar icons alpha */
         MultiPropertyFactory<View>.MultiProperty getIconsAlpha();
