@@ -80,7 +80,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -91,13 +90,8 @@ import shark.FilteringLeakingObjectFinder;
 import shark.HeapAnalysis;
 import shark.HeapAnalyzer;
 import shark.HeapField;
-import shark.HeapObject;
 import shark.HeapObject.HeapInstance;
-import shark.HeapValue;
-import shark.IgnoredReferenceMatcher;
 import shark.OnAnalysisProgressListener;
-import shark.ReferenceMatcher;
-import shark.ReferencePattern;
 
 /**
  * Base class for all TAPL tests in Launcher providing various utility methods.
@@ -306,7 +300,12 @@ public abstract class BaseLauncherTaplTest {
 
     protected void performInitialization() {
         reinitializeLauncherData();
-        mDevice.pressHome();
+        // Replace mDevice.pressHome() with TAPL's more robust version
+        mLauncher.goHome();
+
+        // Wait for all apps view to be gone.
+        mDevice.wait(Until.gone(By.res(mTargetPackage, "apps_view")), DEFAULT_UI_TIMEOUT);
+
         // Check that we switched to home.
         mLauncher.getWorkspace();
         checkDetectedLeaks(mLauncher);

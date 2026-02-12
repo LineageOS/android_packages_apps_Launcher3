@@ -19,6 +19,7 @@ import static androidx.lifecycle.Lifecycle.State.DESTROYED;
 
 import static com.android.launcher3.Flags.enableFallbackOverviewInWindow;
 import static com.android.launcher3.Flags.enableLauncherOverviewInWindow;
+import static com.android.launcher3.Flags.enableTaskbarUiThread;
 import static com.android.launcher3.InvariantDeviceProfile.TYPE_PHONE;
 import static com.android.launcher3.LauncherPrefs.FIXED_LANDSCAPE_MODE;
 import static com.android.launcher3.allapps.AllAppsStore.DEFER_UPDATES_TEST;
@@ -26,6 +27,7 @@ import static com.android.launcher3.config.FeatureFlags.FOLDABLE_SINGLE_PAGE;
 import static com.android.launcher3.testing.shared.TestProtocol.TEST_INFO_RESPONSE_FIELD;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
+import static com.android.launcher3.util.Executors.getTaskbarUiThread;
 
 import android.app.Activity;
 import android.app.Application;
@@ -152,6 +154,9 @@ public class TestInformationHandler {
             }
 
             case TestProtocol.REQUEST_IS_LAUNCHER_INITIALIZED: {
+                if (enableTaskbarUiThread()) {
+                    getFromExecutorSync(getTaskbarUiThread(),  Bundle::new);
+                }
                 return getUIProperty(Bundle::putBoolean, t -> isLauncherInitialized(), () -> true);
             }
 

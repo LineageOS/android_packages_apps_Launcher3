@@ -23,6 +23,8 @@ import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.Nullable;
+import androidx.test.uiautomator.By;
+import androidx.test.uiautomator.Until;
 
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherState;
@@ -77,7 +79,12 @@ public abstract class AbstractLauncherUiTest<LAUNCHER_TYPE extends Launcher,
     @Override
     protected void performInitialization() {
         reinitializeLauncherData();
-        mDevice.pressHome();
+        // Replace mDevice.pressHome() with TAPL's more robust version
+        mLauncher.goHome();
+
+        // Wait for all apps view to be gone.
+        mDevice.wait(Until.gone(By.res(mTargetPackage, "apps_view")), DEFAULT_UI_TIMEOUT);
+
         // Check that we switched to home.
         mLauncher.getWorkspace();
 
