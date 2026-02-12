@@ -47,7 +47,9 @@ import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
+import com.android.launcher3.Workspace;
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider;
+import com.android.launcher3.homescreenfiles.HomeScreenFilesUpdate;
 import com.android.launcher3.logging.StatsLogManager.EventEnum;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.popup.ArrowPopup;
@@ -264,11 +266,17 @@ public class OptionsPopupView<T extends Context & ActivityContext> extends Arrow
         return true;
     }
 
+    // TODO(b/449912243): Force page change animation.
     private static boolean createNewFolder(View view) {
         final Launcher launcher = Launcher.getLauncher(view.getContext());
+        final Workspace<?> workspace = launcher.getWorkspace();
+        final int currentScreenId = workspace.getScreenIdForPageIndex(workspace.getCurrentPage());
 
         HomeScreenFilesProvider.INSTANCE.get(launcher)
-                .createNewFolder()
+                .createNewFolder(
+                        HomeScreenFilesUpdate.Extras.builder()
+                            .findSpaceStartingFromScreenId(currentScreenId)
+                            .build())
                 .whenComplete((result, throwable) -> {
                     if (throwable != null || !result) {
                         launcher.runOnUiThread(() ->

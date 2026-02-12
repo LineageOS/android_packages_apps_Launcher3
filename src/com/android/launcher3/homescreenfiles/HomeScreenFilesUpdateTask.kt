@@ -19,10 +19,12 @@ package com.android.launcher3.homescreenfiles
 import android.content.Context
 import android.net.Uri
 import android.os.UserHandle
+import androidx.annotation.VisibleForTesting
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherModel
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
 import com.android.launcher3.Utilities.qsbOnFirstScreen
+import com.android.launcher3.Workspace
 import com.android.launcher3.WorkspaceLayoutManager
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.icons.IconCache
@@ -50,22 +52,59 @@ import java.util.concurrent.CompletableFuture
  * status flag are ignored.
  *
  * @param filesByUri The collection of file items that were updated.
- * @param isDelayedInit Whether this update is a delayed initialization of all file items.
  * @param user The user for which file items were updated.
+ * @param extras Used to apply special behaviors/properties when updating the launcher model.
  */
 data class HomeScreenFilesUpdate(
     val filesByUri: CompletableFuture<Map<Uri, HomeScreenFile?>>,
     val user: UserHandle,
-    val isDelayedInit: Boolean = false,
-)
+    val extras: Extras,
+) {
+    /**
+     * Used to apply special behaviors/properties when updating the launcher model.
+     *
+     * @param findSpaceStartingFromScreenId Passed to [WorkspaceItemSpaceFinder] when adding items.
+     * @param isDelayedInit Whether this update is a delayed initialization of all file items.
+     */
+    data class Extras
+    private constructor(val findSpaceStartingFromScreenId: Int, val isDelayedInit: Boolean) {
+        companion object {
+            @JvmStatic fun builder() = Builder()
+        }
+
+        private constructor(
+            builder: Builder
+        ) : this(builder.findSpaceStartingFromScreenId, builder.isDelayedInit)
+
+        // NOTE: We use the builder pattern because [Extras] are predominantly created from Java
+        // which does not benefit from kotlin's support for default arguments. Using @JvmOverloads
+        // would be onerous as the number of possible extras continues to grow.
+        // TODO(b/449912243): Create extra for forcing page change animation when adding new items.
+        class Builder {
+            var findSpaceStartingFromScreenId: Int = Workspace.FIRST_SCREEN_ID
+                private set
+
+            var isDelayedInit: Boolean = false
+                private set
+
+            fun build() = Extras(this)
+
+            fun isDelayedInit(v: Boolean) = apply { isDelayedInit = v }
+
+            fun findSpaceStartingFromScreenId(v: Int) = apply { findSpaceStartingFromScreenId = v }
+        }
+    }
+}
 
 /**
  * A task which processes updates to file items shown on the home screen.
  *
+ * @param context The application context used for stats logging.
  * @param iconCache The cache used to resolve file item icons.
  * @param idp The device profile used to conditionally reserve space for the search container.
  * @param update The update to file items to be processed.
  * @param workspaceItemSpaceFinder The finder used to place any newly created file items.
+ * @param statsLogManagerFactory The manager factory used for stats logging.
  */
 class HomeScreenFilesUpdateTask
 @AssistedInject
@@ -73,7 +112,7 @@ constructor(
     @ApplicationContext private val context: Context,
     private val iconCache: IconCache,
     private val idp: InvariantDeviceProfile,
-    @Assisted private val update: HomeScreenFilesUpdate,
+    @Assisted @get:VisibleForTesting val update: HomeScreenFilesUpdate,
     private val workspaceItemSpaceFinder: WorkspaceItemSpaceFinder,
     private val statsLogManagerFactory: StatsLogManager.StatsLogManagerFactory,
 ) : LauncherModel.ModelUpdateTask {
@@ -85,6 +124,7 @@ constructor(
         val filesByUri = update.filesByUri.get()
         val addedItems = filesByUri.values.filterNotNull().distinct().toMutableList()
         val deletedItems = mutableSetOf<Int>()
+        val isDelayedInit = update.extras.isDelayedInit
 
         dataModel
             .updateAndCollectWorkspaceItemInfos(
@@ -102,7 +142,7 @@ constructor(
                         // NOTE: File items which are absent from an update should only result in
                         // removal from the workspace if: (a) this is a delayed initialization of
                         // all file system items, or (b) we are processing a file item deletion.
-                        if (update.isDelayedInit || filesByUri.containsKey(uri)) {
+                        if (isDelayedInit || filesByUri.containsKey(uri)) {
                             deletedItems.add(itemInfo.id)
                         }
                         return@updateAndCollectWorkspaceItemInfos false
@@ -113,7 +153,7 @@ constructor(
                     // NOTE: If a file item is not disabled due to file system readiness, it has
                     // already been initialized and can be ignored during delayed initialization.
                     // This avoids unnecessary rework and interruption of any scheduled animations.
-                    if (update.isDelayedInit && !itemInfo.hasDisabledFileSystemNotReadyFlag()) {
+                    if (isDelayedInit && !itemInfo.hasDisabledFileSystemNotReadyFlag()) {
                         return@updateAndCollectWorkspaceItemInfos false
                     }
 
@@ -128,10 +168,10 @@ constructor(
             .also { updatedItems ->
                 processUpdatedItems(updatedItems, taskController)
                 processDeletedItems(deletedItems, taskController)
-                processAddedItems(addedItems, taskController)
+                processAddedItems(addedItems, update.extras, taskController)
             }
 
-        if (update.isDelayedInit) {
+        if (isDelayedInit) {
             filesByUri.values
                 .count { it != null }
                 .takeIf { it > 0 }
@@ -147,6 +187,7 @@ constructor(
 
     private fun processAddedItems(
         addedItems: List<HomeScreenFile>,
+        extras: HomeScreenFilesUpdate.Extras,
         taskController: ModelTaskController,
     ) {
         if (addedItems.isEmpty()) {
@@ -178,7 +219,13 @@ constructor(
                     .apply { applyCommonProperties(file) }
                     .also { itemInfo ->
                         workspaceItemSpaceFinder
-                            .findSpaceForItem(knownItems, itemInfo.spanX, itemInfo.spanY, IntSet())
+                            .findSpaceForItem(
+                                knownItems,
+                                itemInfo.spanX,
+                                itemInfo.spanY,
+                                /* excludedScreens= */ IntSet(),
+                                extras.findSpaceStartingFromScreenId,
+                            )
                             .also { coords ->
                                 itemInfo.screenId = coords.screenId
                                 itemInfo.cellX = coords.cellX

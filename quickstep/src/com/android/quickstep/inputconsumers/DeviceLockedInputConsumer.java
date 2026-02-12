@@ -223,7 +223,8 @@ public class DeviceLockedInputConsumer implements InputConsumer,
                         // This will come back and cancel the interaction.
                         startHomeIntentSafely(mContext, mGestureState.getHomeIntent(), null, TAG);
                         mHomeLaunched = true;
-                    } else if (mTaskAnimationManager.getCurrentCallbacks() != null) {
+                    }
+                    if (mTaskAnimationManager.getCurrentCallbacks() != null) {
                         if (mRecentsAnimationController != null) {
                             finishRecentsAnimationForShell(dismissTask);
                         } else {

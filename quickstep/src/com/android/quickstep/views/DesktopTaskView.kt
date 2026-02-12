@@ -35,6 +35,7 @@ import android.view.View
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
+import com.android.internal.jank.Cuj.CUJ_LAUNCHER_APP_LAUNCH_FROM_RECENTS
 import com.android.launcher3.R
 import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.testing.TestLogging
@@ -64,6 +65,7 @@ import com.android.quickstep.task.thumbnail.TaskThumbnailView
 import com.android.quickstep.util.DesktopTask
 import com.android.quickstep.util.RecentsOrientedState
 import com.android.quickstep.util.getRemoteTargetHandle
+import com.android.systemui.shared.system.InteractionJankMonitorWrapper
 import kotlin.math.roundToInt
 
 /** TaskView that contains all tasks that are part of the desktop. */
@@ -447,7 +449,11 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
             taskIdReorderToFront = taskIdToReorderToFront
         }
         val launchDesktopFromRecents = {
+            InteractionJankMonitorWrapper.begin(/* v= */ this, CUJ_LAUNCHER_APP_LAUNCH_FROM_RECENTS)
             desktopController.launchDesktopFromRecents(this, animated, taskIdToReorderToFront) {
+                endCallback.add {
+                    InteractionJankMonitorWrapper.end(CUJ_LAUNCHER_APP_LAUNCH_FROM_RECENTS)
+                }
                 endCallback.executeAllAndDestroy()
             }
         }

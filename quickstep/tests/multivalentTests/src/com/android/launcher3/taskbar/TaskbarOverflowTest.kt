@@ -44,6 +44,7 @@ import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.waitForIdleSync
 import com.android.launcher3.taskbar.TaskbarIconType.ALL_APPS
+import com.android.launcher3.taskbar.TaskbarIconType.DIVIDER
 import com.android.launcher3.taskbar.TaskbarIconType.HOTSEAT
 import com.android.launcher3.taskbar.TaskbarIconType.OVERFLOW
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatItems
@@ -322,8 +323,9 @@ class TaskbarOverflowTest {
         }
 
         TaskbarViewTestUtil.assertThat(taskbarView)
-            .hasIconTypes(ALL_APPS, *HOTSEAT * (numHotseatIcons - 1), OVERFLOW)
-        assertThat(taskbarOverflowIconIndex).isEqualTo(numHotseatIcons)
+            .hasIconTypes(ALL_APPS, DIVIDER, *HOTSEAT * (numHotseatIcons - 1), OVERFLOW)
+        // Add one to the index to account for the divider.
+        assertThat(taskbarOverflowIconIndex).isEqualTo(numHotseatIcons + 1)
         verifyOverflowIconTooltip("Other apps")
         assertThat(overflowItems)
             .containsExactlyElementsIn(numHotseatIcons - 1..numHotseatIcons + 1)

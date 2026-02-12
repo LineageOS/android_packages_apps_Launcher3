@@ -17,6 +17,7 @@ package com.android.launcher3;
 
 import static com.android.app.animation.Interpolators.ACCELERATE_2;
 import static com.android.app.animation.Interpolators.DECELERATE_2;
+import static com.android.launcher3.Utilities.shouldReduceWorkspaceBlurUsage;
 import static com.android.launcher3.anim.AnimatorListeners.forEndCallback;
 import static com.android.launcher3.logging.StatsLogManager.LAUNCHER_STATE_HOME;
 import static com.android.launcher3.logging.StatsLogManager.LAUNCHER_STATE_OVERVIEW;
@@ -377,11 +378,12 @@ public abstract class LauncherState implements BaseState<LauncherState> {
     /**
      * Returns whether the workspace should be blurred alongside wallpaper depth.
      *
+     * @param launcher - The launcher activity
      * @param targetState - The target state if a transition is in progress, or current state
      * @return {@code true} if the workspace should be blurred alongside wallpaper depth.
      */
-    public boolean shouldBlurWorkspace(LauncherState targetState) {
-        return targetState == ALL_APPS;
+    public boolean shouldBlurWorkspace(Launcher launcher, LauncherState targetState) {
+        return !shouldReduceWorkspaceBlurUsage(launcher) && targetState == ALL_APPS;
     }
 
     public String getDescription(Launcher launcher) {

@@ -18,6 +18,7 @@ package com.android.launcher3.folder;
 
 import static com.android.launcher3.AbstractFloatingView.TYPE_ALL;
 import static com.android.launcher3.AbstractFloatingView.TYPE_FOLDER;
+import static com.android.launcher3.Flags.enableCursorDrivenWorkflows;
 import static com.android.launcher3.folder.FolderGridOrganizer.createFolderGridOrganizer;
 
 import android.annotation.SuppressLint;
@@ -49,6 +50,8 @@ import com.android.launcher3.model.data.AppPairInfo;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.pageindicators.PageIndicatorDots;
+import com.android.launcher3.touch.CustomTouchDelegate;
+import com.android.launcher3.touch.WorkspaceItemCustomActionsListener;
 import com.android.launcher3.util.LauncherBindableItemsContainer.ItemOperator;
 import com.android.launcher3.util.Thunk;
 import com.android.launcher3.util.ViewCache;
@@ -255,6 +258,10 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> implements Cli
 
         icon.setOnClickListener(mFolder.mActivityContext.getItemOnClickListener());
         icon.setOnLongClickListener(mFolder);
+        if (enableCursorDrivenWorkflows()) {
+            ((CustomTouchDelegate) icon).setCustomActionsListener(
+                    WorkspaceItemCustomActionsListener.INSTANCE);
+        }
         icon.setOnFocusChangeListener(mFocusIndicatorHelper);
 
         CellLayoutLayoutParams lp = (CellLayoutLayoutParams) icon.getLayoutParams();

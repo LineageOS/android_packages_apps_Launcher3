@@ -48,6 +48,7 @@ import androidx.core.view.isInvisible
 import androidx.core.view.updateLayoutParams
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.traceSection
+import com.android.internal.jank.Cuj.CUJ_LAUNCHER_APP_LAUNCH_FROM_RECENTS
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.Flags.enableRefactorDigitalWellbeingToast
 import com.android.launcher3.R
@@ -108,6 +109,7 @@ import com.android.quickstep.views.OverviewActionsView.DISABLED_ROTATED
 import com.android.quickstep.views.RecentsView.UNBOUND_TASK_VIEW_ID
 import com.android.systemui.shared.recents.model.Task
 import com.android.systemui.shared.system.ActivityManagerWrapper
+import com.android.systemui.shared.system.InteractionJankMonitorWrapper
 import com.android.wm.shell.shared.split.SplitScreenConstants
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -1314,7 +1316,12 @@ constructor(
                 launchAsStaticTile()
             }
             ?.also {
+                InteractionJankMonitorWrapper.begin(
+                    /* v = */ this,
+                    CUJ_LAUNCHER_APP_LAUNCH_FROM_RECENTS,
+                )
                 it.add {
+                    InteractionJankMonitorWrapper.end(CUJ_LAUNCHER_APP_LAUNCH_FROM_RECENTS)
                     Log.d(
                         TAG,
                         "${taskIds.contentToString()} - launchWithAnimation - launchCompleted",

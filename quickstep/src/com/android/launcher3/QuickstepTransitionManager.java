@@ -52,6 +52,8 @@ import static com.android.launcher3.LauncherState.NORMAL;
 import static com.android.launcher3.LauncherState.OVERVIEW;
 import static com.android.launcher3.Utilities.mapBoundToRange;
 import static com.android.launcher3.config.FeatureFlags.SEPARATE_RECENTS_ACTIVITY;
+import static com.android.launcher3.desktop.DesktopAppLaunchTransitionManager.createDesktopAppLaunchRemoteTransition;
+import static com.android.launcher3.desktop.DesktopAppLaunchTransitionManager.isDesktopAppLaunch;
 import static com.android.launcher3.testing.shared.TestProtocol.WALLPAPER_OPEN_ANIMATION_FINISHED_MESSAGE;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.MultiPropertyFactory.MULTI_PROPERTY_VALUE;
@@ -123,6 +125,7 @@ import com.android.launcher3.LauncherAnimationRunner.RemoteAnimationFactory;
 import com.android.launcher3.anim.AnimationSuccessListener;
 import com.android.launcher3.anim.AnimatorListeners;
 import com.android.launcher3.compat.AccessibilityManagerCompat;
+import com.android.launcher3.desktop.DesktopAppLaunchTransition.AppLaunchType;
 import com.android.launcher3.dragndrop.DragLayer;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.remoteanimations.AnimOpenProperties;
@@ -416,10 +419,10 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             }
         });
 
-        RemoteAnimationRunnerCompat appLaunchRunner = createAppLaunchRunner(
-                v, onEndCallback);
-        IRemoteTransition appLaunchRemoteTransition = createAppLaunchRemoteTransition(
-                appLaunchRunner);
+        RemoteAnimationRunnerCompat appLaunchRunner = createAppLaunchRunner(v, onEndCallback);
+        IRemoteTransition appLaunchRemoteTransition =
+                createAppLaunchRemoteTransition(
+                        appLaunchRunner, onEndCallback::executeAllAndDestroy);
 
         // Note that this duration is a guess as we do not know if the animation will be a
         // recents launch or not for sure until we know the opening app targets.
@@ -493,8 +496,10 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
      * If the flag is disabled, this will always return the default app launch animation.
      */
     private IRemoteTransition createAppLaunchRemoteTransition(
-            RemoteAnimationRunnerCompat appLaunchRunner) {
-        IRemoteTransition defaultAppLaunchTransition = appLaunchRunner.toRemoteTransition();
+            RemoteAnimationRunnerCompat defaultAppLaunchRunner,
+            Runnable onEndCallback
+    ) {
+        IRemoteTransition defaultAppLaunchTransition = defaultAppLaunchRunner.toRemoteTransition();
         if (!com.android.window.flags.Flags.enableCrossDisplaysAppLaunchTransition()) {
             return defaultAppLaunchTransition;
         }
@@ -505,6 +510,13 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                     if (CrossDisplayMoveTransition.isCrossDisplayMove(info)) {
                         Log.d(TAG, "Handling launch as a cross display move transition");
                         return crossDisplayMoveTransition;
+                    } else if (isDesktopAppLaunch(mLauncher.getApplicationContext(), info)) {
+                        Log.d(TAG, "Handling launch as a Desktop app launch transition");
+                        return createDesktopAppLaunchRemoteTransition(
+                                mLauncher.getApplicationContext(),
+                                AppLaunchType.LAUNCH,
+                                Cuj.CUJ_DESKTOP_MODE_APP_LAUNCH_FROM_INTENT,
+                                onEndCallback);
                     } else {
                         return defaultAppLaunchTransition;
                     }
@@ -2134,8 +2146,6 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             } else if (launchingFromRecents) {
                 composeRecentsLaunchAnimator(anim, mV, appTargets, wallpaperTargets, nonAppTargets,
                         launcherClosing);
-                addCujInstrumentation(
-                        anim, Cuj.CUJ_LAUNCHER_APP_LAUNCH_FROM_RECENTS);
                 skipFirstFrame = true;
             } else {
                 composeIconLaunchAnimator(anim, mV, appTargets, wallpaperTargets, nonAppTargets,

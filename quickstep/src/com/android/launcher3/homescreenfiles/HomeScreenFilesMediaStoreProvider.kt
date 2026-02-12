@@ -60,6 +60,10 @@ class HomeScreenFilesMediaStoreProvider(
     // Future that completes when the external storage directory mounts.
     private val externalStorageDirectoryMountedFuture = CompletableFuture<Void>()
 
+    // Cache of extras to be applied during the next scheduled update task for a given URI. Extras
+    // inform the task of special behaviors/properties to apply when updating the launcher model.
+    private val inProgressChangeExtras = ConcurrentHashMap<Uri, HomeScreenFilesUpdate.Extras>()
+
     // Tracks URI movements originating from calls to [#moveToHomeScreen()]. This allows us to:
     // (1) Disallow overlapping attempts to move a given URI, and
     // (2) Reconcile media store URIs with URI aliases from other content provider authorities.
@@ -99,6 +103,9 @@ class HomeScreenFilesMediaStoreProvider(
                                 }
                             },
                             Process.myUserHandle(),
+                            inProgressChangeExtras.remove(uri)
+                                ?: uriAlias?.run(inProgressChangeExtras::remove)
+                                ?: HomeScreenFilesUpdate.Extras.builder().build(),
                         )
                     )
                 }
@@ -117,7 +124,7 @@ class HomeScreenFilesMediaStoreProvider(
             !externalStorageDirectoryMountedFuture.isCancelled &&
             !externalStorageDirectoryMountedFuture.isCompletedExceptionally
 
-    override fun createNewFolder(): CompletableFuture<Boolean> {
+    override fun createNewFolder(extras: HomeScreenFilesUpdate.Extras): CompletableFuture<Boolean> {
         return supplyAsync(
             {
                 if (!canCreateNewFolder()) {
@@ -148,6 +155,10 @@ class HomeScreenFilesMediaStoreProvider(
                         )
                         return@supplyAsync false
                     }
+
+                    // Cache extras to be applied during the next scheduled update task for [uri].
+                    // These will be used when adding the new folder to the launcher model.
+                    inProgressChangeExtras[uri] = extras
 
                     context.contentResolver.query(uri, arrayOf(DATA), null, null).use { c ->
                         if (c == null || !c.moveToFirst()) {

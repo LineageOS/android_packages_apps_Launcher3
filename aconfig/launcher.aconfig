@@ -96,14 +96,6 @@ flag {
 }
 
 flag {
-    name: "enable_launcher_br_metrics_fixed"
-    namespace: "launcher"
-    description: "Enables logging of Launcher restore metrics to the Backup & Restore team"
-    bug: "307527314"
-    is_fixed_read_only: true
-}
-
-flag {
     name: "enable_reboot_unlock_animation"
     namespace: "launcher"
     description: "Enables unlock animation after device reboot"
@@ -147,17 +139,6 @@ flag {
     namespace: "launcher"
     description: "Enables folders in all apps"
     bug: "341582436"
-}
-
-flag {
-  name: "enable_first_screen_broadcast_archiving_extras"
-  namespace: "launcher"
-  description: "adds Extras to first screen broadcast for archived apps"
-  bug: "322314760"
-  is_fixed_read_only: true
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
 }
 
 flag {
@@ -719,4 +700,14 @@ flag {
     namespace: "launcher"
     description: "Enables the kondo planner experience."
     bug: "450695990"
+}
+
+flag {
+  name: "reduce_workspace_blur_usage"
+  namespace: "launcher"
+  description: "Disables the full workspace blur and zoom effects behind surfaces like the \"All apps\" panel or the widget picker"
+  bug: "455987559"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }

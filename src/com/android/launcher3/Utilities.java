@@ -19,6 +19,7 @@ package com.android.launcher3;
 import static com.android.launcher3.Flags.enableCursorDrivenWorkflows;
 import static com.android.launcher3.Flags.enableMouseInteractionChanges;
 import static com.android.launcher3.Flags.injectableModelItems;
+import static com.android.launcher3.Flags.reduceWorkspaceBlurUsage;
 import static com.android.launcher3.folder.ClippedFolderIconLayoutRule.ICON_OVERLAP_FACTOR;
 import static com.android.launcher3.graphics.ShapeDelegate.DEFAULT_PATH_SIZE;
 import static com.android.launcher3.icons.IconNormalizer.ICON_VISIBLE_AREA_FACTOR;
@@ -936,5 +937,14 @@ public final class Utilities {
         } else {
             return deviceProperties.isLandscape();
         }
+    }
+
+    /**
+     * Checks whether the full workspace blur and zoom effects are disabled behind surfaces like the
+     * "All apps" panel or the widget picker.
+     */
+    public static boolean shouldReduceWorkspaceBlurUsage(Context context) {
+        return reduceWorkspaceBlurUsage() && context.getResources().getBoolean(
+                R.bool.reduce_workspace_blur_usage);
     }
 }

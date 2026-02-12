@@ -71,6 +71,7 @@ import dagger.BindsInstance
 import dagger.Component
 import java.util.concurrent.CountDownLatch
 import junit.framework.Assert.assertEquals
+import junit.framework.Assert.assertTrue
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -86,6 +87,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
@@ -363,7 +365,6 @@ class LoaderTaskTest {
         }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_FIRST_SCREEN_BROADCAST_ARCHIVING_EXTRAS)
     fun `When broadcast flag on and is restore and secure setting off then send new broadcast`() {
         // Given
         doReturn(listOf(expectedBroadcastModel))
@@ -640,7 +641,9 @@ class LoaderTaskTest {
         homeScreenFilesProvider.onReady().thenCompose { homeScreenFilesProvider.query() }.get()
 
         // Then.
-        verify(launcherModel).enqueueModelUpdateTask(any<HomeScreenFilesUpdateTask>())
+        val task = argumentCaptor<HomeScreenFilesUpdateTask>()
+        verify(launcherModel).enqueueModelUpdateTask(task.capture())
+        assertTrue(task.firstValue.update.extras.isDelayedInit)
     }
 
     @LauncherAppSingleton

@@ -28,7 +28,7 @@ class HomeScreenFilesNoOpProvider : HomeScreenFilesProvider {
 
     override fun canCreateNewFolder(): Boolean = false
 
-    override fun createNewFolder(): CompletableFuture<Boolean> =
+    override fun createNewFolder(extras: HomeScreenFilesUpdate.Extras): CompletableFuture<Boolean> =
         CompletableFuture.completedFuture(false)
 
     override fun canMoveToHomeScreen(uriList: List<Uri>?) = false

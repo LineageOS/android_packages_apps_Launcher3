@@ -513,16 +513,25 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     }
 
     @Test
-    fun testUpdateItems_desktopMode_hotseatItem_noDivider() {
+    fun testUpdateItems_desktopMode_hotseatItem_noRecents_hasAllAppsDivider() {
         whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
         runOnTaskbarUiThreadSync {
             taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList())
         }
-        assertThat(taskbarView).hasIconTypes(ALL_APPS, HOTSEAT)
+        assertThat(taskbarView).hasIconTypes(ALL_APPS, DIVIDER, HOTSEAT)
     }
 
     @Test
-    fun testUpdateItems_desktopMode_hotseatItem_noDividerAfterDesktopModeChange() {
+    fun testUpdateItems_desktopMode_hotseatItem_hasRecents_hasDividerForRecents() {
+        whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
+        runOnTaskbarUiThreadSync {
+            taskbarView.updateItems(createHotseatItems(1), createRecents(1), emptyList())
+        }
+        assertThat(taskbarView).hasIconTypes(ALL_APPS, HOTSEAT, DIVIDER, RECENT)
+    }
+
+    @Test
+    fun testUpdateItems_desktopMode_hotseatItem_noRecents_hasAllAppsDividerAfterDesktopModeChange() {
         whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(false)
         runOnTaskbarUiThreadSync {
             taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList())
@@ -533,17 +542,42 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
             taskbarView.updateItems(createHotseatItems(2), emptyList(), emptyList())
         }
 
-        assertThat(taskbarView).hasIconTypes(ALL_APPS, HOTSEAT, HOTSEAT)
+        assertThat(taskbarView).hasIconTypes(ALL_APPS, DIVIDER, HOTSEAT, HOTSEAT)
+    }
+
+    @Test
+    fun testUpdateItems_desktopMode_hotseatItem_hasRecents_hasDividerForRecentsAfterDesktopModeChange() {
+        whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(false)
+        runOnTaskbarUiThreadSync {
+            taskbarView.updateItems(createHotseatItems(1), createRecents(1), emptyList())
+        }
+
+        whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
+        runOnTaskbarUiThreadSync {
+            taskbarView.updateItems(createHotseatItems(2), createRecents(1), emptyList())
+        }
+
+        assertThat(taskbarView).hasIconTypes(ALL_APPS, HOTSEAT, HOTSEAT, DIVIDER, RECENT)
     }
 
     @Test
     @ForceRtl
-    fun testUpdateItems_rtlAndDesktopMode_hotseatItem_noDivider() {
+    fun testUpdateItems_rtlAndDesktopMode_hotseatItem_noRecents_hasAllAppsDivider() {
         whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
         runOnTaskbarUiThreadSync {
             taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList())
         }
-        assertThat(taskbarView).hasIconTypes(HOTSEAT, ALL_APPS)
+        assertThat(taskbarView).hasIconTypes(HOTSEAT, DIVIDER, ALL_APPS)
+    }
+
+    @Test
+    @ForceRtl
+    fun testUpdateItems_rtlAndDesktopMode_hotseatItem_hasRecents_hasDividerForRecents() {
+        whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(true)
+        runOnTaskbarUiThreadSync {
+            taskbarView.updateItems(createHotseatItems(1), createRecents(1), emptyList())
+        }
+        assertThat(taskbarView).hasIconTypes(RECENT, DIVIDER, HOTSEAT, ALL_APPS)
     }
 
     @Test
