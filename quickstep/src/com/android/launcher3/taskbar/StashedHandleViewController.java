@@ -56,6 +56,8 @@ import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.wm.shell.shared.handles.RegionSamplingHelper;
 
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
+import java.util.Objects;
 
 /**
  * Handles properties/data collection, then passes the results to our stashed handle View to render.
@@ -85,7 +87,7 @@ public class StashedHandleViewController implements TaskbarControllers.LoggableT
     private static final ConstantItem<Boolean> STASHED_HANDLE_REGION_IS_DARK =
             nonRestorableItem(SHARED_PREFS_STASHED_HANDLE_REGION_DARK_KEY, false, ENCRYPTED);
 
-    private final TaskbarActivityContext mActivity;
+    private final WeakReference<TaskbarActivityContext> mActivityRef;
     private final LauncherPrefs mPrefs;
     private final StashedHandleView mStashedHandleView;
     private int mStashedHandleWidth;
@@ -121,24 +123,25 @@ public class StashedHandleViewController implements TaskbarControllers.LoggableT
 
     public StashedHandleViewController(TaskbarActivityContext activity,
             StashedHandleView stashedHandleView) {
-        mActivity = activity;
-        mPrefs = LauncherPrefs.get(mActivity);
+        mActivityRef = new WeakReference<>(activity);
+        mPrefs = LauncherPrefs.get(activity);
         mStashedHandleView = stashedHandleView;
         mTaskbarStashedHandleAlpha = new MultiValueAlpha(mStashedHandleView, NUM_ALPHA_CHANNELS);
         mTaskbarStashedHandleAlpha.setUpdateVisibility(true);
         mStashedHandleView.updateHandleColor(
                 mPrefs.get(STASHED_HANDLE_REGION_IS_DARK), false /* animate */);
-        final Resources resources = mActivity.getResources();
+        final Resources resources = activity.getResources();
         mStashedHandleHeight = resources.getDimensionPixelSize(
                 R.dimen.taskbar_stashed_handle_height);
     }
 
     public void init(TaskbarControllers controllers) {
         mControllers = controllers;
-        DeviceProfile deviceProfile = mActivity.getDeviceProfile();
-        Resources resources = mActivity.getResources();
-        if (mActivity.isPhoneGestureNavMode() || mActivity.isTinyTaskbar()
-                || mActivity.isBubbleBarOnPhone()) {
+        TaskbarActivityContext activity = Objects.requireNonNull(mActivityRef.get());
+        DeviceProfile deviceProfile = activity.getDeviceProfile();
+        Resources resources = activity.getResources();
+        if (activity.isPhoneGestureNavMode() || activity.isTinyTaskbar()
+                || activity.isBubbleBarOnPhone()) {
             mTaskbarSize = resources.getDimensionPixelSize(R.dimen.taskbar_phone_size);
             mStashedHandleWidth =
                     resources.getDimensionPixelSize(R.dimen.taskbar_stashed_small_screen);
@@ -151,13 +154,17 @@ public class StashedHandleViewController implements TaskbarControllers.LoggableT
         mStashedHandleView.getLayoutParams().height = mTaskbarSize + taskbarBottomMargin;
 
         mTaskbarStashedHandleAlpha.get(ALPHA_INDEX_STASHED).setValue(
-                mActivity.isPhoneGestureNavMode() ? 1 : 0);
+                activity.isPhoneGestureNavMode() ? 1 : 0);
         mTaskbarStashedHandleHintScale.updateValue(1f);
 
         final int stashedTaskbarHeight = mControllers.taskbarStashController.getStashedHeight();
         mStashedHandleView.setOutlineProvider(new ViewOutlineProvider() {
             @Override
             public void getOutline(View view, Outline outline) {
+                TaskbarActivityContext activity = mActivityRef.get();
+                if (activity == null) {
+                    return;
+                }
                 final int stashedCenterX = view.getWidth() / 2;
                 final int stashedCenterY = view.getHeight() - stashedTaskbarHeight / 2;
                 mStashedHandleBounds.set(
@@ -167,7 +174,7 @@ public class StashedHandleViewController implements TaskbarControllers.LoggableT
                         stashedCenterY + mStashedHandleHeight / 2);
                 mStashedHandleView.updateSampledRegion(mStashedHandleBounds);
                 mStashedHandleRadius = Flags.enableLauncherIconShapes()
-                        ? getShapedTaskbarRadius(mActivity)
+                        ? getShapedTaskbarRadius(activity)
                         : view.getHeight() / 2f;
                 outline.setRoundRect(mStashedHandleBounds, mStashedHandleRadius);
             }
@@ -180,13 +187,13 @@ public class StashedHandleViewController implements TaskbarControllers.LoggableT
             view.setPivotX(stashedCenterX);
             view.setPivotY(stashedCenterY);
         });
-        if (mActivity.isPrimaryDisplay()) {
+        if (activity.isPrimaryDisplay()) {
             initRegionSampler();
         }
-        if (mActivity.isPhoneGestureNavMode()) {
+        if (activity.isPhoneGestureNavMode()) {
             onIsStashedChanged(true);
         }
-        if (!mActivity.isPrimaryDisplay() && enableAutoStashConnectedDisplayTaskbar.isTrue()) {
+        if (!activity.isPrimaryDisplay() && enableAutoStashConnectedDisplayTaskbar.isTrue()) {
             mTaskStackChangeListener = new TaskStackChangeListener() {
                 @Override
                 public void onTaskStackChanged() {
@@ -254,13 +261,14 @@ public class StashedHandleViewController implements TaskbarControllers.LoggableT
                 .getTransientTaskbarIconLayoutBounds();
         float startRadius = mStashedHandleRadius;
 
-        if (mActivity.isTransientTaskbar()) {
+        TaskbarActivityContext activity = mActivityRef.get();
+        if (activity != null && activity.isTransientTaskbar()) {
             // Account for the full visual height of the transient taskbar.
             int heightDiff = (mTaskbarSize - visualBounds.height()) / 2;
             visualBounds.top -= heightDiff;
             visualBounds.bottom += heightDiff;
             startRadius = Flags.enableLauncherIconShapes()
-                    ? getShapedTaskbarRadius(mActivity)
+                    ? getShapedTaskbarRadius(activity)
                     : visualBounds.height() / 2f;
         }
 
@@ -376,14 +384,16 @@ public class StashedHandleViewController implements TaskbarControllers.LoggableT
      * TODO: b/441128583 - Remove this when framework limitation of luma sampling is fixed.
      **/
     void updateHandleColorOnConnectedDisplay() {
-        if (mActivity.isPrimaryDisplay() || !enableAutoStashConnectedDisplayTaskbar.isTrue()) {
+        TaskbarActivityContext activity = mActivityRef.get();
+        if (activity == null || activity.isPrimaryDisplay()
+                || !enableAutoStashConnectedDisplayTaskbar.isTrue()) {
             return;
         }
 
         boolean isRegionDark = mPrefs.get(STASHED_HANDLE_REGION_IS_DARK);
         TopTaskTracker.CachedTaskInfo cachedTopTaskInfo =
-                TopTaskTracker.INSTANCE.get(mActivity).getCachedTopTask(
-                        /* filterOnlyVisibleRecents= */ true, mActivity.getDisplayId());
+                TopTaskTracker.INSTANCE.get(activity).getCachedTopTask(
+                        /* filterOnlyVisibleRecents= */ true, activity.getDisplayId());
         TaskInfo topTaskInfo = cachedTopTaskInfo.getLegacyBaseTask();
         if (topTaskInfo != null && topTaskInfo.taskDescription != null) {
             int appearance = topTaskInfo.taskDescription.getSystemBarsAppearance();
