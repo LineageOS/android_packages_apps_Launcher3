@@ -234,8 +234,8 @@ import com.android.systemui.unfold.config.UnfoldTransitionConfig;
 import com.android.systemui.unfold.dagger.UnfoldMain;
 import com.android.systemui.unfold.progress.RemoteUnfoldTransitionReceiver;
 import com.android.systemui.unfold.updates.RotationChangeProvider;
-import com.android.wm.shell.shared.bubbles.BubbleFlagHelper;
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
+import com.android.wm.shell.shared.bubbles.BubbleFlagHelper;
 import com.android.wm.shell.shared.bubbles.logging.EntryPoint;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.shared.desktopmode.DesktopState;
@@ -312,7 +312,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
             if (v != blurEnabled) mWallpaperThemeManager.recreateToUpdateTheme();
             return null;
         }));
-        mDepthController = new LauncherDepthController(this, blurEnabled);
+        mDepthController = new LauncherDepthController(this, blurState);
         getTheme().applyStyle(blurEnabled ? R.style.OverviewBlurStyle
                 : R.style.OverviewBlurFallbackStyle, true);
     }

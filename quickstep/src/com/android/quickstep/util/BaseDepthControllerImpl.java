@@ -38,6 +38,7 @@ import com.android.launcher3.anim.AnimatedFloat;
 import com.android.launcher3.statehandlers.BaseDepthController;
 import com.android.launcher3.statemanager.BaseState;
 import com.android.launcher3.statemanager.StatefulContainer;
+import com.android.launcher3.util.ListenableRef;
 import com.android.launcher3.util.MultiPropertyFactory;
 import com.android.launcher3.util.MultiPropertyFactory.MultiProperty;
 import com.android.systemui.shared.system.BlurUtils;
@@ -89,7 +90,7 @@ public class BaseDepthControllerImpl<
      */
     protected final int mMaxBlurRadius;
     protected final WallpaperManager mWallpaperManager;
-    protected final boolean mCrossWindowBlursEnabled;
+    protected boolean mCrossWindowBlursEnabled;
 
     /**
      * Ratio from 0 to 1, where 0 is fully zoomed out, and 1 is zoomed in.
@@ -131,9 +132,9 @@ public class BaseDepthControllerImpl<
      */
     private final EarlyWakeupInfo mEarlyWakeupInfo = new EarlyWakeupInfo();
 
-    public BaseDepthControllerImpl(CONTAINER container, boolean blurEnabled) {
+    public BaseDepthControllerImpl(CONTAINER container, ListenableRef<Boolean> blurState) {
         mContainer = container;
-        mCrossWindowBlursEnabled = blurEnabled;
+        mCrossWindowBlursEnabled = blurState.getValue();
         mMaxBlurRadius = container.getResources().getDimensionPixelSize(
                 R.dimen.max_depth_blur_radius_enhanced);
         mWallpaperManager = container.getSystemService(WallpaperManager.class);
@@ -154,6 +155,16 @@ public class BaseDepthControllerImpl<
 
         mEarlyWakeupInfo.token = new Binder();
         mEarlyWakeupInfo.trace = BaseDepthControllerImpl.class.getName();
+
+        mContainer.closeOnDestroy(blurState.forEach(mContainer.getUiExecutor(), blurEnabled -> {
+            if (mCrossWindowBlursEnabled == blurEnabled) {
+                return null;
+            }
+            Log.d(TAG, "onBlurStateChanged - blurEnabled: " + blurEnabled);
+            mCrossWindowBlursEnabled = blurEnabled;
+            applyDepthAndBlur();
+            return null;
+        }));
     }
 
     @Override
