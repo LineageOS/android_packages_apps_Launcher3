@@ -651,4 +651,16 @@
     <!-- Strings for errors -->
     <!-- Displayed when an error occurs but exact causality cannot be determined/communicated. -->
     <string name="something_went_wrong">Something went wrong</string>
+
+    <!-- Categories for home screen topics -->
+    <string name="topic_category_games" translatable="false">Games</string>
+    <string name="topic_category_audio" translatable="false">Audio</string>
+    <string name="topic_category_video" translatable="false">Video</string>
+    <string name="topic_category_image" translatable="false">Image</string>
+    <string name="topic_category_social" translatable="false">Social</string>
+    <string name="topic_category_news" translatable="false">News</string>
+    <string name="topic_category_maps" translatable="false">Maps</string>
+    <string name="topic_category_productivity" translatable="false">Productivity</string>
+    <string name="topic_category_accessibility" translatable="false">Accessibility</string>
+
 </resources>
