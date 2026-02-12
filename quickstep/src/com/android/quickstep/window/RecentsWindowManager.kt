@@ -55,8 +55,6 @@ import androidx.core.view.isVisible
 import com.android.app.displaylib.PerDisplayRepository
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.BaseActivity
-import com.android.launcher3.Flags.enablePredictiveBackInOverview
-import com.android.launcher3.Flags.enableRecentsWindowBlur
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherAnimationRunner
 import com.android.launcher3.LauncherAnimationRunner.RemoteAnimationFactory
@@ -89,6 +87,8 @@ import com.android.launcher3.util.ActivityOptionsWrapper
 import com.android.launcher3.util.DaggerSingletonObject
 import com.android.launcher3.util.ListenableRef
 import com.android.launcher3.util.LooperExecutor
+import com.android.launcher3.util.OverviewReleaseFlags.enablePredictiveBackInOverview
+import com.android.launcher3.util.OverviewReleaseFlags.enableRecentsWindowBlur
 import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.SafeCloseable
 import com.android.launcher3.util.ScreenOnTracker
