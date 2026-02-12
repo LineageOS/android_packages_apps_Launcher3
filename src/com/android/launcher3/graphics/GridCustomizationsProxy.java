@@ -308,7 +308,7 @@ public class GridCustomizationsProxy implements ProxyProvider {
                 LauncherModel launcherModel = LauncherAppState.getInstance(mContext).getModel();
                 try {
                     // Wait for device profile to be fully reloaded and applied to the launcher
-                    launcherModel.reloadIfActive().toCompletableFuture().get();
+                    launcherModel.reloadIfActive("KEY_DEFAULT_GRID").toCompletableFuture().get();
                 } catch (ExecutionException | InterruptedException e) {
                     Log.e(TAG, "Fail to load model", e);
                 }

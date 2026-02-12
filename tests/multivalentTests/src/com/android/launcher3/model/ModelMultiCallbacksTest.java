@@ -113,7 +113,7 @@ public class ModelMultiCallbacksTest {
         assertNull(cb2.mItems);
 
         // Reloading only loads registered callbacks
-        getModel().startLoader();
+        getModel().startLoader("testTwoCallbacks_loadedTogether");
         waitForLoaderAndTempMainThread();
         cb1.verifyItemsBound(3);
         assertNull(cb2.mItems);

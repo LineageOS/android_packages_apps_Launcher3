@@ -114,14 +114,14 @@ constructor(
         pluginContext: Context,
         manager: PluginLifecycleManager<IconProcessorPlugin>,
     ) {
-        plugin?.setIconChangeNotifier { pkg, userHandle ->
+        plugin.setIconChangeNotifier { pkg, userHandle ->
             iconChangeTracker.notifyIconChanged(pkg, userHandle)
         }
         processor = plugin
         Log.d(TAG, "Plugin connected $plugin")
         MODEL_EXECUTOR.execute {
             iconCacheProvider.get().clearMemoryCache()
-            modelProvider.get().reloadIfActive()
+            modelProvider.get().reloadIfActive("LauncherIconPlugin-load")
         }
     }
 

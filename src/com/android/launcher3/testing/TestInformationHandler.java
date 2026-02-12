@@ -451,7 +451,7 @@ public class TestInformationHandler {
                     MODEL_EXECUTOR.execute(() -> {
                         LauncherModel model = LauncherAppState.getInstance(mContext).getModel();
                         model.getModelDbController().createEmptyDB();
-                        MAIN_EXECUTOR.execute(model::forceReload);
+                        MAIN_EXECUTOR.execute(() -> model.forceReload("REQUEST_REINITIALIZE_DATA"));
                     });
                     return response;
                 } finally {
@@ -466,7 +466,7 @@ public class TestInformationHandler {
                         LauncherModel model = LauncherAppState.getInstance(mContext).getModel();
                         model.getModelDbController().createEmptyDB();
                         model.getModelDbController().clearEmptyDbFlag();
-                        MAIN_EXECUTOR.execute(model::forceReload);
+                        MAIN_EXECUTOR.execute(() -> model.forceReload("REQUEST_CLEAR_DATA"));
                     });
                     return response;
                 } finally {

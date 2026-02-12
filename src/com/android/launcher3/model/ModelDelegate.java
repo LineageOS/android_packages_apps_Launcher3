@@ -57,7 +57,7 @@ public class ModelDelegate {
     @WorkerThread
     public void validateData() {
         if (hasShortcutsPermission(mContext) != mAppsList.hasShortcutHostPermission()) {
-            mModel.reloadIfActive();
+            mModel.reloadIfActive("validateData");
         }
     }
 

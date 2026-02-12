@@ -126,7 +126,9 @@ constructor(
         // Development helper
         if (BuildConfig.IS_STUDIO_BUILD) {
             val reloadReceiver =
-                SimpleBroadcastReceiver(context, UI_HELPER_EXECUTOR) { model.reloadIfActive() }
+                SimpleBroadcastReceiver(context, UI_HELPER_EXECUTOR) {
+                    model.reloadIfActive("force-reload-broadcast")
+                }
             reloadReceiver.register(actionsFilter(ACTION_FORCE_RELOAD), Context.RECEIVER_EXPORTED)
             lifeCycle.addCloseable(reloadReceiver)
         }
@@ -157,7 +159,11 @@ constructor(
         )
 
         // Custom widgets
-        lifeCycle.addCloseable(customWidgetManager.addWidgetRefreshCallback(model::reloadIfActive))
+        lifeCycle.addCloseable(
+            customWidgetManager.addWidgetRefreshCallback {
+                model.reloadIfActive("custom-widgets-refresh")
+            }
+        )
 
         // Install session changes
         lifeCycle.addCloseable(installSessionHelper.registerInstallTracker(modelCallbacks))
@@ -171,15 +177,15 @@ constructor(
     }
 
     fun initializeDisplayEvents(model: LauncherModel) {
-        fun refreshAndReloadLauncher() {
+        fun refreshAndReloadLauncher(eventName: String) {
             iconPool.clear()
             iconCache.updateIconParams(idp.fillResIconDpi, idp.iconBitmapSize)
-            model.reloadIfActive()
+            model.reloadIfActive(eventName)
         }
 
         // IDP changes
         val idpChangeListener = OnIDPChangeListener { modelChanged ->
-            if (modelChanged) refreshAndReloadLauncher()
+            if (modelChanged) refreshAndReloadLauncher("idb-changed")
         }
         idp.addOnChangeListener(idpChangeListener)
         lifeCycle.addCloseable { idp.removeOnChangeListener(idpChangeListener) }
@@ -198,7 +204,7 @@ constructor(
         }
 
         // Theme changes
-        val themeChangeListener = ThemeChangeListener { refreshAndReloadLauncher() }
+        val themeChangeListener = ThemeChangeListener { refreshAndReloadLauncher("theme-changed") }
         themeManager.addChangeListener(themeChangeListener)
         lifeCycle.addCloseable { themeManager.removeChangeListener(themeChangeListener) }
 
@@ -236,11 +242,11 @@ constructor(
             // User removed
             oldUser != null && newUser == null -> {
                 if (oldUser.iconInfo.isWork) prefs.put(LauncherPrefs.WORK_EDU_STEP, 0)
-                model.reloadIfActive()
+                model.reloadIfActive("user-removed")
             }
 
             // User added
-            oldUser == null && newUser != null -> model.reloadIfActive()
+            oldUser == null && newUser != null -> model.reloadIfActive("user-added")
 
             // User changed
             oldUser != null && newUser != null -> {
@@ -249,7 +255,7 @@ constructor(
                     val isWork = newUser.iconInfo.isWork
                     if (isWork && mShouldReloadWorkProfile && !newUser.isQuietModeEnabled) {
                         // Force reload the first time work profile's quiet mode is disabled
-                        model.reloadIfActive()
+                        model.reloadIfActive("first-time-work-profile")
                     } else {
                         if (isWork) mShouldReloadWorkProfile = false
                         model.enqueueModelUpdateTask(
@@ -266,7 +272,7 @@ constructor(
                 }
 
                 // We don't know what changed, just reload to be safe
-                if (!handled) model.reloadIfActive()
+                if (!handled) model.reloadIfActive("unknown-user-event")
             }
         }
     }
