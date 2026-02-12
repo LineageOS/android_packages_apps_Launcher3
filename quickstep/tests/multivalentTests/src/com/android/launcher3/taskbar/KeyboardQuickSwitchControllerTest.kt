@@ -27,7 +27,9 @@ import android.view.Display.DEFAULT_DISPLAY
 import android.window.RemoteTransition
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.Flags.FLAG_ENABLE_ALT_TAB_KQS_FLATENNING
+import com.android.launcher3.Flags.FLAG_ENABLE_KQS_FORCE_TAKE_RUNNING_TASK_THUMBNAIL
 import com.android.launcher3.statehandlers.DesktopVisibilityController
+import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnMainSync
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.waitForIdleSync
 import com.android.launcher3.taskbar.rules.MockedRecentsModelHelper
@@ -59,12 +61,15 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.times
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
@@ -334,6 +339,55 @@ class KeyboardQuickSwitchControllerTest {
 
         // 4. Assert that the view remains closed and no crash occurred.
         assertThat(isKqsShown).isFalse()
+    }
+
+    @Test
+    @DisableFlags(FLAG_ENABLE_KQS_FORCE_TAKE_RUNNING_TASK_THUMBNAIL)
+    fun openQuickSwitchView_withFlagOff_getsRunningTaskCachedThumbnail() {
+        val task = createTask(RUNNING_TASK_ID)
+        updateThumbnailInBackground(task)
+
+        verify(recentsModel.thumbnailCache, times(1)).getThumbnailInBackground(eq(task), any())
+        verifyNoMoreInteractions(recentsModel.thumbnailCache)
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_KQS_FORCE_TAKE_RUNNING_TASK_THUMBNAIL)
+    fun openQuickSwitchView_withFlagOn_updatesRunningTaskThumbnail() {
+        updateThumbnailInBackground(createTask(RUNNING_TASK_ID))
+
+        verify(recentsModel.thumbnailCache, times(1)).updateTaskSnapShot(eq(RUNNING_TASK_ID), any())
+        verifyNoMoreInteractions(recentsModel.thumbnailCache)
+    }
+
+    @Test
+    @DisableFlags(FLAG_ENABLE_KQS_FORCE_TAKE_RUNNING_TASK_THUMBNAIL)
+    fun openQuickSwitchView_withFlagOff_getsPreviousTaskCachedThumbnail() {
+        val task = createTask(PREVIOUS_TASK_ID)
+        updateThumbnailInBackground(task)
+
+        verify(recentsModel.thumbnailCache, times(1)).getThumbnailInBackground(eq(task), any())
+        verifyNoMoreInteractions(recentsModel.thumbnailCache)
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_KQS_FORCE_TAKE_RUNNING_TASK_THUMBNAIL)
+    fun openQuickSwitchView_withFlagOn_getsPreviousTaskCachedThumbnail() {
+        val task = createTask(PREVIOUS_TASK_ID)
+        updateThumbnailInBackground(task)
+
+        verify(recentsModel.thumbnailCache, times(1)).getThumbnailInBackground(eq(task), any())
+        verifyNoMoreInteractions(recentsModel.thumbnailCache)
+    }
+
+    private fun updateThumbnailInBackground(task: Task) {
+        runOnMainSync {
+            keyboardQuickSwitchController.mControllerCallbacks.updateThumbnailInBackground(
+                task,
+                /* isTaskRunning= */ task.key.id == RUNNING_TASK_ID,
+                /* callback= */ mock(),
+            )
+        }
     }
 
     private fun createSingleTask(taskId: Int) = SingleTask(createTask(taskId))

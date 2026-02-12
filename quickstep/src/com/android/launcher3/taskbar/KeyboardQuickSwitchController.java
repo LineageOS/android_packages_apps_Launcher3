@@ -17,6 +17,7 @@ package com.android.launcher3.taskbar;
 
 import static android.window.DesktopModeFlags.ENABLE_TASKBAR_OVERFLOW;
 
+import static com.android.launcher3.Flags.enableKqsForceTakeRunningTaskThumbnail;
 import static com.android.launcher3.taskbar.TaskbarDesktopExperienceFlags.enableAltTabKqsFlatenning;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.getTaskbarUiThread;
@@ -65,7 +66,8 @@ public final class KeyboardQuickSwitchController implements
     @VisibleForTesting
     public static final int MAX_TASKS = 6;
 
-    @NonNull private final ControllerCallbacks mControllerCallbacks = new ControllerCallbacks();
+    @VisibleForTesting
+    @NonNull final ControllerCallbacks mControllerCallbacks = new ControllerCallbacks();
     // Callback used to notify when the KQS view is closed.
     @Nullable private Runnable mOnClosed;
 
@@ -492,12 +494,25 @@ public final class KeyboardQuickSwitchController implements
             return index < 0 || index >= mTasks.size() ? null : mTasks.get(index);
         }
 
-        void updateThumbnailInBackground(Task task, Consumer<ThumbnailData> callback) {
-            MAIN_EXECUTOR.execute(() -> mModel.getThumbnailCache().getThumbnailInBackground(task,
-                    thumbnailData -> getTaskbarUiThread().execute(() -> {
+        void updateThumbnailInBackground(
+                Task task, boolean isTaskRunning, Consumer<ThumbnailData> callback) {
+            Consumer<ThumbnailData> wrappedCallback = thumbnailData ->
+                    getTaskbarUiThread().execute(() -> {
                         task.thumbnail = thumbnailData;
                         callback.accept(thumbnailData);
-                    })));
+                    });
+            MAIN_EXECUTOR.execute(() -> {
+                if (!enableKqsForceTakeRunningTaskThumbnail() || !isTaskRunning) {
+                    mModel.getThumbnailCache().getThumbnailInBackground(task, wrappedCallback);
+                    return;
+                }
+                ThumbnailData thumbnailData =
+                        ActivityManagerWrapper.getInstance().takeTaskThumbnail(task.key.id);
+
+                mModel.getThumbnailCache().updateTaskSnapShot(task.key.id, thumbnailData);
+
+                wrappedCallback.accept(thumbnailData);
+            });
         }
 
         void updateIconInBackground(Task task, Consumer<Task> callback) {
