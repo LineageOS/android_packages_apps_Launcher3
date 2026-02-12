@@ -396,7 +396,7 @@ public abstract class AbsSwipeUpHandler<
     protected boolean mHandOffAnimationToHome = false;
 
     @Nullable
-    private RemoteAnimationTargets.ReleaseCheck mSwipePipToHomeReleaseCheck = null;
+    private SurfaceReleaseCheck mSwipePipToHomeReleaseCheck = null;
 
     private final MSDLPlayerWrapper mMSDLPlayerWrapper;
 
@@ -1124,7 +1124,7 @@ public abstract class AbsSwipeUpHandler<
         }
         mRecentsAnimationController = controller;
         mRecentsAnimationTargets = targets;
-        mSwipePipToHomeReleaseCheck = new RemoteAnimationTargets.ReleaseCheck();
+        mSwipePipToHomeReleaseCheck = new SurfaceReleaseCheck();
         mSwipePipToHomeReleaseCheck.setCanRelease(true);
         mRecentsAnimationTargets.addReleaseCheck(mSwipePipToHomeReleaseCheck);
         mHandOffAnimationToHome =
