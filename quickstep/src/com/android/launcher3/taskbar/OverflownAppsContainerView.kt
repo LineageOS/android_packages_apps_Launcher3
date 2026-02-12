@@ -216,12 +216,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     }
 
     private val dragDelegate by lazy {
-        object :
-            PinnedAppsDragHelper(
-                context,
-                content,
-                mActivityContext.taskbarSpecsEvaluator.taskbarIconTouchSize.toInt(),
-            ) {
+        object : PinnedAppsDragHelper(context, content, iconViewSize) {
             override fun calculateGhostViewIndex(onScreenLocationX: Int): Int {
                 val tempRect = Rect()
                 mActivityContext.dragLayer.getDescendantRectRelativeToSelf(content, tempRect)
