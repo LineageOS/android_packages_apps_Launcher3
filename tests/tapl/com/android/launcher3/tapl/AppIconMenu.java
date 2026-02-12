@@ -98,9 +98,6 @@ public abstract class AppIconMenu {
      * @return the {@link UiObject2} represents the menu item.
      */
     private UiObject2 getMenuItemOrShortcut(@NonNull String name) {
-        if (Flags.expandableLongPressMenu()) {
-            return mDeepShortcutsContainer.getParent().findObject(By.desc(name));
-        }
         return mLauncher.waitForAnyObjectsInContainer(mDeepShortcutsContainer, List.of(
                 AppIcon.getMenuItemSelector(name, mLauncher),
                 AppIcon.getMenuShortcutSelector(name, mLauncher)
