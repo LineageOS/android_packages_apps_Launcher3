@@ -27,8 +27,8 @@ import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.taskbar.bubbles.BubbleBarController.BubbleBarLocationListener
 import com.android.launcher3.taskbar.bubbles.BubbleBarLocationDropTarget.BubbleBarDropTargetController
-import com.android.wm.shell.shared.bubbles.BubbleFlagHelper
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation
+import com.android.wm.shell.shared.bubbles.BubbleFlagHelper
 import com.android.wm.shell.shared.bubbles.ContextUtils.isRtl
 import com.android.wm.shell.shared.bubbles.DeviceConfig
 import com.android.wm.shell.shared.bubbles.DragToBubblesZoneChangeListener
@@ -166,6 +166,14 @@ class DragToBubbleController(
         if (isDropCanBeAccepted) {
             onDragStarted(showDropTarget = true, launcherDropTargetManager)
         }
+    }
+
+    override fun onDragEnterWindow(dragObject: DragObject, options: DragOptions) {
+        // No-op
+    }
+
+    override fun onDragExitWindow(dragObject: DragObject, options: DragOptions) {
+        // No-op
     }
 
     override fun onDragEnd() {

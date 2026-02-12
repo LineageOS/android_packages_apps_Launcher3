@@ -889,6 +889,14 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         close(true)
     }
 
+    override fun onDragEnterWindow(dragObject: DragObject, options: DragOptions) {
+        // No-op
+    }
+
+    override fun onDragExitWindow(dragObject: DragObject, options: DragOptions) {
+        // No-op
+    }
+
     override fun onDragEnd() {
         // No-op
     }
