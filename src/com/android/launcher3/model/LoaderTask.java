@@ -140,6 +140,7 @@ public class LoaderTask implements Runnable {
 
     private static final boolean DEBUG = true;
 
+    public final String name;
     private final Context mContext;
     private final LauncherModel mModel;
     private final InvariantDeviceProfile mIDP;
@@ -185,8 +186,6 @@ public class LoaderTask implements Runnable {
     private final LauncherPrefs mPrefs;
     private final AutomationRepository mAutomationRepo;
 
-    private boolean mUnstoppable = false;
-
     @AssistedInject
     protected LoaderTask(
             @ApplicationContext Context context,
@@ -201,6 +200,7 @@ public class LoaderTask implements Runnable {
             LoaderCursorFactory loaderCursorFactory,
             Provider<FolderNameProvider> folderNameProviderFactory,
             @Named("SAFE_MODE") boolean isSafeModeEnabled,
+            @Assisted @NonNull String callerName,
             @Assisted @NonNull BaseLauncherBinder launcherBinder,
             Provider<LauncherRestoreEventLogger> restoreEventLoggerFactory,
             @Named("MODEL_ITEMS") Provider<Set<ItemInfo>> extraItemsProvider,
@@ -214,6 +214,7 @@ public class LoaderTask implements Runnable {
             BrowserIconMigratorFactory browserIconMigratorFactory,
             LauncherPrefs prefs,
             AutomationRepository automationRepo) {
+        name = callerName;
         mContext = context;
         mIDP = idp;
         mModel = model;
@@ -250,15 +251,6 @@ public class LoaderTask implements Runnable {
                     .thenCompose((unused) -> mStopped
                             ? CompletableFuture.completedFuture(Collections.emptyMap())
                             : homeScreenFilesProvider.query());
-    }
-
-    /**
-     * @deprecated This method is about to be removed and it's only a temporary fix for image test
-     * to prevent loader task getting cancelled by taskbar recreation.
-     */
-    @Deprecated
-    public void setUnstoppable(boolean unstoppable) {
-        mUnstoppable = unstoppable;
     }
 
     private synchronized void verifyNotStopped() throws CancellationException {
@@ -452,11 +444,9 @@ public class LoaderTask implements Runnable {
         TraceHelper.INSTANCE.endSection();
     }
 
-    public synchronized void stopLocked() {
-        if (mUnstoppable) {
-            return;
-        }
-        FileLog.w(TAG, "stopLocked: Loader stopping");
+    public synchronized void stopLocked(String callerName) {
+        mStopped = true;
+        FileLog.w(TAG, "stopLocked: Loader [" + name + "] stopping be caller: " + callerName);
         this.notify();
     }
 
@@ -836,6 +826,6 @@ public class LoaderTask implements Runnable {
     public interface LoaderTaskFactory {
 
         /** Creates a new LoaderTask */
-        LoaderTask newLoaderTask(BaseLauncherBinder binder);
+        LoaderTask newLoaderTask(String callerName, BaseLauncherBinder binder);
     }
 }

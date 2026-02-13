@@ -27,13 +27,16 @@ import androidx.test.filters.SmallTest
 import com.android.launcher3.DragSource
 import com.android.launcher3.DropTarget
 import com.android.launcher3.DropTarget.DragObject
+import com.android.launcher3.Flags.FLAG_ENABLE_DRAG_ENTER_EXIT_SUPPORT
 import com.android.launcher3.Flags.FLAG_ENABLE_SYSTEM_DRAG
+import com.android.launcher3.Flags.enableDragEnterExitSupport
 import com.android.launcher3.Flags.enableSystemDrag
 import com.android.launcher3.dragndrop.DragController.DragListener
 import com.android.launcher3.dragndrop.DragController.SystemDragHandler
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.TestActivityContext
+import java.util.function.Function
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -42,13 +45,14 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.any
+import org.mockito.kotlin.clearInvocations
 import org.mockito.kotlin.inOrder
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 
@@ -81,6 +85,96 @@ class DragControllerTest {
             else emptyList(),
             controller.mSystemDragHandlers,
         )
+    }
+
+    @Test
+    @DisableFlags(FLAG_ENABLE_DRAG_ENTER_EXIT_SUPPORT)
+    fun testDragEnterExitSupportWithFlagDisabled() {
+        testDragEnterExitSupport(useDragStartsWithinLauncherWindow = true, usePreDrag = true)
+        testDragEnterExitSupport(useDragStartsWithinLauncherWindow = true, usePreDrag = false)
+        testDragEnterExitSupport(useDragStartsWithinLauncherWindow = false, usePreDrag = true)
+        testDragEnterExitSupport(useDragStartsWithinLauncherWindow = false, usePreDrag = false)
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_DRAG_ENTER_EXIT_SUPPORT)
+    fun testDragEnterExitSupportWithFlagEnabled() {
+        testDragEnterExitSupport(useDragStartsWithinLauncherWindow = true, usePreDrag = true)
+        testDragEnterExitSupport(useDragStartsWithinLauncherWindow = true, usePreDrag = false)
+        testDragEnterExitSupport(useDragStartsWithinLauncherWindow = false, usePreDrag = true)
+        testDragEnterExitSupport(useDragStartsWithinLauncherWindow = false, usePreDrag = false)
+    }
+
+    private fun testDragEnterExitSupport(
+        useDragStartsWithinLauncherWindow: Boolean,
+        usePreDrag: Boolean,
+    ) {
+        controller = TestDragController(context)
+
+        val dragDriver = mock<DragDriver>()
+        val dragOptions = mock<DragOptions>().apply { if (usePreDrag) preDragCondition = mock() }
+        val eventX = 1.0f
+        val eventY = 2.0f
+        val listener = mock<DragListener>().also(controller::addDragListener)
+        val target = controller.defaultDropTarget
+
+        whenever(dragDriver.isDragWithinLauncherWindow)
+            .thenReturn(useDragStartsWithinLauncherWindow)
+
+        // Step 1: Drag start.
+        controller.startDrag(dragDriver, dragOptions)
+        if (!usePreDrag) {
+            verify(listener).onDragStart(controller.mDragObject, dragOptions)
+            if (enableDragEnterExitSupport() && useDragStartsWithinLauncherWindow) {
+                verify(listener).onDragEnterWindow(controller.mDragObject, dragOptions)
+            }
+            if (!enableDragEnterExitSupport() || useDragStartsWithinLauncherWindow) {
+                verify(target).onDragEnter(controller.mDragObject)
+                verify(target).onDragOver(controller.mDragObject)
+            }
+        }
+        verifyNoMoreInteractions(listener, target)
+        clearInvocations(listener, target)
+
+        // Step 2: Drag move.
+        controller.onDriverDragMove(eventX, eventY)
+        if (!usePreDrag && (!enableDragEnterExitSupport() || useDragStartsWithinLauncherWindow)) {
+            verify(target).onDragOver(controller.mDragObject)
+        }
+        verifyNoMoreInteractions(listener, target)
+        clearInvocations(listener, target)
+
+        // Step 3: Drag enter.
+        whenever(dragDriver.isDragWithinLauncherWindow).thenReturn(true)
+        controller.onDriverDragEnterWindow()
+        if (!usePreDrag && enableDragEnterExitSupport()) {
+            verify(listener).onDragEnterWindow(controller.mDragObject, dragOptions)
+        }
+        verifyNoMoreInteractions(listener, target)
+        clearInvocations(listener, target)
+
+        // Step 4: Drag move.
+        controller.onDriverDragMove(eventX, eventY)
+        if (!usePreDrag) {
+            if (enableDragEnterExitSupport() && !useDragStartsWithinLauncherWindow) {
+                verify(target).onDragEnter(controller.mDragObject)
+            }
+            verify(target).onDragOver(controller.mDragObject)
+        }
+        verifyNoMoreInteractions(listener, target)
+        clearInvocations(listener, target)
+
+        // Step 5: Drag exit.
+        whenever(dragDriver.isDragWithinLauncherWindow).thenReturn(false)
+        controller.onDriverDragExitWindow()
+        if (!usePreDrag) {
+            if (enableDragEnterExitSupport()) {
+                verify(listener).onDragExitWindow(controller.mDragObject, dragOptions)
+            }
+            verify(target).onDragExit(controller.mDragObject)
+        }
+        verifyNoMoreInteractions(listener, target)
+        clearInvocations(listener, target)
     }
 
     @Test
@@ -287,24 +381,38 @@ class DragControllerTest {
     }
 
     private class TestDragController(context: TestActivityContext) : DragController(context) {
+        val defaultDropTarget: DropTarget = mock()
+
+        val dragDriverFactory =
+            mock<Function<DragOptions?, DragDriver>>().apply {
+                whenever(apply(any())).thenAnswer {
+                    DragDriver.create(this@TestDragController, it.getArgument(0)) {}
+                }
+            }
+
         override fun exitDrag() {}
 
         override fun getDefaultDropTarget(dropCoordinates: IntArray?): DropTarget =
-            mock(DropTarget::class.java)
+            defaultDropTarget
 
-        fun startDrag() =
-            startDrag(
-                mock(Drawable::class.java),
-                mock(DraggableView::class.java),
+        fun startDrag(driver: DragDriver? = null, options: DragOptions? = null): DragView {
+            val options = options ?: mock()
+            if (driver != null) {
+                whenever(dragDriverFactory.apply(options)).thenReturn(driver)
+            }
+            return startDrag(
+                mock<Drawable>(),
+                /*originalView=*/ mock(),
                 /*dragLayerX=*/ 0,
                 /*dragLayerY=*/ 0,
-                mock(DragSource::class.java),
-                mock(ItemInfo::class.java),
+                /*source=*/ mock(),
+                /*dragInfo=*/ mock(),
                 /*dragRegion=*/ Rect(),
                 /*initialDragViewScale=*/ 1.0f,
                 /*dragViewScaleOnDrop=*/ 1.0f,
-                mock(DragOptions::class.java),
+                options,
             )
+        }
 
         override fun startDrag(
             drawable: Drawable?,
@@ -319,15 +427,24 @@ class DragControllerTest {
             dragViewScaleOnDrop: Float,
             options: DragOptions?,
         ): DragView =
-            mock(DragView::class.java).also { dv ->
-                mDragDriver = DragDriver.create(this, options) {}
+            mock<DragView>().also { dv ->
+                mOptions = options
+                mDragDriver = dragDriverFactory.apply(mOptions)
                 mDragObject =
-                    mock(DragObject::class.java).apply {
+                    mock<DragObject>().apply {
                         dragSource = source
                         dragView = dv
                     }
-                mOptions = options
-                callOnDragStart()
+
+                mIsInPreDrag =
+                    mOptions?.preDragCondition != null &&
+                        !mOptions.preDragCondition.shouldStartDrag(0.0)
+
+                if (!mIsInPreDrag) {
+                    callOnDragStart()
+                }
+
+                handleMoveEvent(mLastTouch.x, mLastTouch.y)
             }
     }
 }

@@ -279,6 +279,14 @@ class HybridHotseatOrganizer(
         hotseat.invalidate()
     }
 
+    override fun onDragEnterWindow(dragObject: DragObject, options: DragOptions) {
+        // No-op
+    }
+
+    override fun onDragExitWindow(dragObject: DragObject, options: DragOptions) {
+        // No-op
+    }
+
     override fun onDragEnd() {
         if (
             enableHotseatDropTargetValidityChecks() && (pauseFlags and FLAG_DRAG_IN_PROGRESS) == 0

@@ -164,6 +164,16 @@ public class ItemLongClickListener {
             }
 
             @Override
+            public void onDragEnterWindow(DropTarget.DragObject dragObject, DragOptions options) {
+                // No-op
+            }
+
+            @Override
+            public void onDragExitWindow(DropTarget.DragObject dragObject, DragOptions options) {
+                // No-op
+            }
+
+            @Override
             public void onDragEnd() {
                 v.setVisibility(VISIBLE);
                 dragController.removeDragListener(this);

@@ -20,6 +20,7 @@ import static android.view.View.MeasureSpec.makeMeasureSpec;
 import static android.view.View.VISIBLE;
 
 import static com.android.launcher3.Hotseat.ALPHA_CHANNEL_PREVIEW_RENDERER;
+import static com.android.launcher3.LauncherModel.useModelRepositoryBinding;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION;
 import static com.android.launcher3.Utilities.qsbOnFirstScreen;
 import static com.android.launcher3.model.ModelUtils.currentScreenContentFilter;
@@ -196,7 +197,11 @@ public class LauncherPreviewRenderer extends BaseContext
                 mHotseat
         );
         onViewCreated();
-        model.addCallbacksAndLoad(this);
+        if (useModelRepositoryBinding()) {
+            model.activate();
+        } else {
+            model.addCallbacksAndLoad(this);
+        }
         getLifecycle().addObserver(new DefaultLifecycleObserver() {
             @Override
             public void onDestroy(@NonNull LifecycleOwner owner) {

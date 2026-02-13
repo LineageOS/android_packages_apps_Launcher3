@@ -98,7 +98,6 @@ public class TaplOverviewDismissTest extends AbstractQuickStepTest {
 
     @Test
     @PortraitLandscape
-    @ScreenRecordRule.ScreenRecord // TODO(b/415092715)
     public void testDismissBottomRow() throws Exception {
         assumeTrue("Ignoring test because device is not a tablet", mLauncher.isTablet());
         startTestAppsWithCheck();

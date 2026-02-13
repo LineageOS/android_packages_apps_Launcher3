@@ -336,6 +336,16 @@ public class DropTargetBar extends FrameLayout
         animateToVisibility(true);
     }
 
+    @Override
+    public void onDragEnterWindow(DropTarget.DragObject dragObject, DragOptions options) {
+        // No-op
+    }
+
+    @Override
+    public void onDragExitWindow(DropTarget.DragObject dragObject, DragOptions options) {
+        // No-op
+    }
+
     /**
      * This is called to defer hiding the delete drop target until the drop animation has completed,
      * instead of hiding immediately when the drag has ended.

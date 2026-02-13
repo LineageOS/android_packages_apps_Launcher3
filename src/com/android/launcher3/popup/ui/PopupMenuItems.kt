@@ -16,18 +16,26 @@
 
 package com.android.launcher3.popup.ui
 
+import android.graphics.Rect
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,22 +46,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.onLongClick
 import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.android.launcher3.R
@@ -62,6 +72,7 @@ import com.android.launcher3.popup.SystemShortcut
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.deepShortcutAddButtonSize
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.deepShortcutAddIconSize
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.deepShortcutIconSize
+import com.android.launcher3.popup.ui.PopupMenuItemDimens.iconOnlyButtonSize
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemHeight
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemHorizontalPadding
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemIconSpacerWidth
@@ -94,67 +105,80 @@ fun PopupMenuItem(
     onLongClick: ((Offset) -> Unit)? = null,
     trailingContent: @Composable (() -> Unit)? = null,
 ) {
-    var rowGlobalOffset by remember { mutableStateOf(Offset.Unspecified) }
+    val rowInteractionSource = remember { MutableInteractionSource() }
+    val isRowHovered by rowInteractionSource.collectIsHoveredAsState()
+    val isRowFocused by rowInteractionSource.collectIsFocusedAsState()
 
-    Box(modifier = modifier.height(popupMenuItemHeight), contentAlignment = Alignment.CenterStart) {
-        Row(
-            modifier =
-                Modifier.size(popupMenuItemWidth, popupMenuItemHeight)
-                    .onGloballyPositioned { coordinates ->
-                        rowGlobalOffset = coordinates.positionInWindow()
-                    }
-                    .pointerInput(onClick, onLongClick, rowGlobalOffset) {
-                        detectTapGestures(
-                            onTap = { onClick() },
-                            onLongPress = { localOffset ->
-                                onLongClick?.let { callback ->
-                                    if (rowGlobalOffset != Offset.Unspecified) {
-                                        val screenOffset = rowGlobalOffset + localOffset
-                                        callback(screenOffset)
-                                    } else {
-                                        callback(localOffset)
+    var layoutCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
+
+    Surface(
+        modifier = modifier.size(popupMenuItemWidth, popupMenuItemHeight),
+        shape = RoundedCornerShape(ComposePopupDimens.popupCornerRadius),
+        color =
+            colorResource(
+                if (isRowHovered) R.color.materialColorSurfaceVariant
+                else R.color.materialColorSurfaceContainer
+            ),
+        border =
+            if (isRowFocused) {
+                BorderStroke(3.dp, colorResource(R.color.materialColorSecondary))
+            } else {
+                null
+            },
+    ) {
+        Row(modifier = Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier =
+                    Modifier.weight(1f)
+                        .fillMaxHeight()
+                        .onGloballyPositioned { layoutCoordinates = it }
+                        .hoverable(rowInteractionSource)
+                        .combinedClickable(
+                            interactionSource = rowInteractionSource,
+                            indication = null,
+                            onClick = onClick,
+                            onLongClick =
+                                onLongClick?.let {
+                                    {
+                                        val position =
+                                            layoutCoordinates?.positionInWindow() ?: Offset.Zero
+                                        val size = layoutCoordinates?.size ?: IntSize.Zero
+                                        onLongClick.invoke(
+                                            position + Offset(size.width / 2f, size.height / 2f)
+                                        )
                                     }
-                                }
-                            },
+                                },
                         )
-                    }
-                    // Add semantics for accessibility
-                    .semantics {
-                        contentDescription = itemContentDescription
-                        onClick(label = itemContentDescription) {
-                            onClick()
-                            true
-                        }
-                        if (onLongClick != null) {
-                            onLongClick(label = "Open context menu") {
-                                onLongClick(Offset.Unspecified)
-                                true
-                            }
-                        }
-                    }
-                    .padding(
-                        horizontal = popupMenuItemHorizontalPadding,
-                        vertical = popupMenuItemVerticalPadding,
-                    ),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Row(
-                modifier = Modifier.weight(1f),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start,
             ) {
-                icon()
-                Spacer(modifier = Modifier.width(popupMenuItemIconSpacerWidth))
-                Text(
-                    text = title,
-                    color = colorResource(R.color.materialColorOnSurfaceVariant),
-                    fontSize = popupMenuItemTextSize,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                Row(
+                    modifier =
+                        Modifier.fillMaxSize()
+                            .padding(
+                                horizontal = popupMenuItemHorizontalPadding,
+                                vertical = popupMenuItemVerticalPadding,
+                            ),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    icon()
+                    Spacer(modifier = Modifier.width(popupMenuItemIconSpacerWidth))
+                    Text(
+                        text = title,
+                        color = colorResource(R.color.materialColorOnSurfaceVariant),
+                        fontSize = popupMenuItemTextSize,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
 
-            trailingContent?.let { it() }
+            trailingContent?.let {
+                Box(
+                    modifier = Modifier.fillMaxHeight().wrapContentWidth(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    it()
+                }
+            }
         }
     }
 }
@@ -175,29 +199,55 @@ fun SystemShortcutMenuItem(
 ) {
     val title = stringResource(id = shortcut.labelResId)
     val painter: Painter = painterResource(id = shortcut.iconResId)
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    val isFocused by interactionSource.collectIsFocusedAsState()
 
     if (isIconOnly) {
-        Box(
+        Surface(
+            onClick = { onClick(SystemShortcutClickEvent(shortcut)) },
             modifier =
-                Modifier.clickable(onClickLabel = title) {
+                Modifier.size(iconOnlyButtonSize).clearAndSetSemantics {
+                    contentDescription = title
+                    role = Role.Button
+                    onClick {
                         onClick(SystemShortcutClickEvent(shortcut))
+                        true
                     }
-                    .padding(systemShortcutIconPadding),
-            contentAlignment = Alignment.Center,
+                },
+            shape = CircleShape,
+            color =
+                colorResource(
+                    if (isHovered) R.color.materialColorSurfaceVariant
+                    else R.color.materialColorSurfaceContainer
+                ),
+            border =
+                if (isFocused) {
+                    BorderStroke(3.dp, colorResource(R.color.materialColorSecondary))
+                } else {
+                    null
+                },
+            interactionSource = interactionSource,
         ) {
-            Image(
-                painter = painter,
-                contentDescription = title,
-                modifier = Modifier.size(systemShortcutIconSize),
-                colorFilter = ColorFilter.tint(colorResource(R.color.materialColorOnSurfaceVariant)),
-            )
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.padding(systemShortcutIconPadding),
+            ) {
+                Image(
+                    painter = painter,
+                    contentDescription = null,
+                    modifier = Modifier.size(systemShortcutIconSize),
+                    colorFilter =
+                        ColorFilter.tint(colorResource(R.color.materialColorOnSurfaceVariant)),
+                )
+            }
         }
     } else {
         val iconComposable: @Composable () -> Unit = {
             Spacer(modifier = Modifier.width(systemShortcutIconPadding))
             Image(
                 painter = painter,
-                contentDescription = title,
+                contentDescription = null,
                 modifier = Modifier.size(systemShortcutIconSize),
                 colorFilter = ColorFilter.tint(colorResource(R.color.materialColorOnSurfaceVariant)),
             )
@@ -241,6 +291,10 @@ fun DeepShortcutMenuItem(
     val itemOnClick: () -> Unit
     val itemOnLongClick: ((Offset) -> Unit)?
     val itemTrailingContent: @Composable (() -> Unit)?
+    var iconWindowBounds by remember { mutableStateOf(Rect()) }
+
+    val addInteractionSource =
+        if (onAddButtonClick != null) remember { MutableInteractionSource() } else null
 
     if (shortcut != null) {
         itemTitle = shortcut.title.toString()
@@ -248,33 +302,54 @@ fun DeepShortcutMenuItem(
         iconComposable = {
             Image(
                 bitmap = shortcut.bitmap.icon.asImageBitmap(),
-                contentDescription = itemTitle,
-                modifier = Modifier.size(deepShortcutIconSize).clip(CircleShape),
+                contentDescription = null,
+                modifier =
+                    Modifier.size(deepShortcutIconSize).clip(CircleShape).onGloballyPositioned {
+                        coordinates ->
+                        val position = coordinates.positionInWindow()
+                        val size = coordinates.size
+                        iconWindowBounds =
+                            Rect(
+                                position.x.toInt(),
+                                position.y.toInt(),
+                                (position.x + size.width).toInt(),
+                                (position.y + size.height).toInt(),
+                            )
+                    },
             )
         }
-        itemOnClick = { onClick(DeepShortcutClickEvent(shortcut)) }
+        itemOnClick = { onClick(DeepShortcutClickEvent(shortcut, iconWindowBounds)) }
         itemOnLongClick = { screenOffset -> onLongClick(shortcut, screenOffset) }
         itemTrailingContent =
-            if (onAddButtonClick != null) {
+            if (onAddButtonClick != null && addInteractionSource != null) {
                 {
-                    val contentDesc = stringResource(R.string.action_add_to_workspace)
-                    Box(
-                        modifier =
-                            Modifier.size(deepShortcutAddButtonSize)
-                                .clickable { onAddButtonClick(shortcut) }
-                                .semantics {
-                                    contentDescription = contentDesc
-                                    role = Role.Button
-                                },
-                        contentAlignment = Alignment.Center,
+                    val isAddHovered by addInteractionSource.collectIsHoveredAsState()
+                    val isAddFocused by addInteractionSource.collectIsFocusedAsState()
+                    Surface(
+                        onClick = { onAddButtonClick(shortcut) },
+                        modifier = Modifier.size(deepShortcutAddButtonSize),
+                        shape = CircleShape,
+                        color =
+                            if (isAddHovered) colorResource(R.color.materialColorSurfaceVariant)
+                            else Color.Transparent,
+                        border =
+                            if (isAddFocused) {
+                                BorderStroke(3.dp, colorResource(R.color.materialColorSecondary))
+                            } else {
+                                null
+                            },
+                        interactionSource = addInteractionSource,
                     ) {
-                        Image(
-                            modifier = Modifier.size(deepShortcutAddIconSize),
-                            painter = painterResource(id = R.drawable.ic_add_circle_filled),
-                            colorFilter =
-                                ColorFilter.tint(colorResource(R.color.materialColorSecondary)),
-                            contentDescription = null,
-                        )
+                        Box(contentAlignment = Alignment.Center) {
+                            Image(
+                                modifier = Modifier.size(deepShortcutAddIconSize),
+                                painter = painterResource(id = R.drawable.ic_add_circle_filled),
+                                colorFilter =
+                                    ColorFilter.tint(colorResource(R.color.materialColorSecondary)),
+                                contentDescription =
+                                    stringResource(R.string.action_add_to_workspace),
+                            )
+                        }
                     }
                 }
             } else {
@@ -283,10 +358,8 @@ fun DeepShortcutMenuItem(
     } else {
         // When shortcut is null, render a generic item without title or drawable
         itemTitle = ""
-        itemContentDescription = stringResource(id = R.string.loading_shortcut)
-        iconComposable = {
-            Spacer(modifier = Modifier.size(deepShortcutIconSize))
-        } // Empty space for icon
+        itemContentDescription = ""
+        iconComposable = { Spacer(modifier = Modifier.size(deepShortcutIconSize)) }
         itemOnClick = { /* Do nothing */ }
         itemOnLongClick = null
         itemTrailingContent = null
@@ -314,4 +387,5 @@ object PopupMenuItemDimens {
     val deepShortcutIconSize = 32.dp
     val deepShortcutAddIconSize = 20.dp
     val deepShortcutAddButtonSize = 48.dp
+    val iconOnlyButtonSize = 48.dp
 }

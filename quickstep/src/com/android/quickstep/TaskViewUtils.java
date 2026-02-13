@@ -96,6 +96,7 @@ import com.android.quickstep.views.TaskView;
 import com.android.systemui.animation.RemoteAnimationTargetCompat;
 import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.system.InteractionJankMonitorWrapper;
+import com.android.wm.shell.shared.compat.AnimatedSurface;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -122,7 +123,7 @@ public final class TaskViewUtils {
      * opening remote target (which we don't get until onAnimationStart) will resolve to a TaskView.
      */
     public static TaskView findTaskViewToLaunch(
-            RecentsView<?, ?> recentsView, View v, RemoteAnimationTarget[] targets) {
+            RecentsView<?, ?> recentsView, View v, AnimatedSurface[] surfaces) {
         if (v instanceof TaskView taskView) {
             return recentsView.isTaskViewVisible(taskView) ? taskView : null;
         }
@@ -145,14 +146,14 @@ public final class TaskViewUtils {
             }
         }
 
-        if (targets == null) {
+        if (surfaces == null) {
             return null;
         }
         // Resolve the opening task id
         int openingTaskId = -1;
-        for (RemoteAnimationTarget target : targets) {
-            if (target.mode == MODE_OPENING) {
-                openingTaskId = target.taskId;
+        for (AnimatedSurface surface : surfaces) {
+            if (surface.isOpening()) {
+                openingTaskId = surface.taskId;
                 break;
             }
         }
@@ -654,7 +655,7 @@ public final class TaskViewUtils {
 
         boolean skipLauncherChanges = !launcherClosing;
 
-        TaskView taskView = findTaskViewToLaunch(recentsView, v, appTargets);
+        TaskView taskView = findTaskViewToLaunch(recentsView, v, AnimatedSurface.from(appTargets));
         if (taskView == null) {
             Log.w(TAG, "composeRecentsLaunchAnimator - no TaskView to launch");
             return;

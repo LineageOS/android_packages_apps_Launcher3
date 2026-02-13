@@ -20,7 +20,6 @@ import static com.android.launcher3.model.data.LauncherAppWidgetInfo.FLAG_ID_NOT
 import static com.android.launcher3.model.data.LauncherAppWidgetInfo.FLAG_PROVIDER_NOT_READY;
 import static com.android.launcher3.model.data.LauncherAppWidgetInfo.FLAG_RESTORE_STARTED;
 import static com.android.launcher3.provider.LauncherDbUtils.itemIdMatch;
-import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
 import static com.android.launcher3.util.TestUtil.getOnMainThread;
 import static com.android.launcher3.util.WidgetUtils.createWidgetInfo;
@@ -312,7 +311,6 @@ public class BindWidgetTest extends BaseLauncherActivityTest<Launcher> {
                     taskController.getModelWriter().addItemsToDatabase(singletonList(info))));
             addedId.set(info.id);
         });
-        TestUtil.runOnExecutorSync(MAIN_EXECUTOR, mModel::forceReload);
         loadLauncherSync();
         return addedId.get();
     }

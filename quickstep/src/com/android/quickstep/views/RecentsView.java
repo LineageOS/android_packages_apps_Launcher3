@@ -35,7 +35,6 @@ import static com.android.launcher3.Flags.enableLowResThumbnailPreloading;
 import static com.android.launcher3.Flags.enableOverviewPagination;
 import static com.android.launcher3.LauncherAnimUtils.SUCCESS_TRANSITION_PROGRESS;
 import static com.android.launcher3.LauncherAnimUtils.VIEW_BACKGROUND_COLOR;
-import static com.android.launcher3.LauncherState.BACKGROUND_APP;
 import static com.android.launcher3.QuickstepTransitionManager.RECENTS_LAUNCH_DURATION;
 import static com.android.launcher3.Utilities.EDGE_NAV_BAR;
 import static com.android.launcher3.Utilities.debugLog;
@@ -4718,8 +4717,8 @@ public abstract class RecentsView<
         }
         DepthController<?, ?> depthController = getDepthController();
         if (depthController != null) {
-            float targetDepth = taskView instanceof DesktopTaskView ? 0 : BACKGROUND_APP.getDepth(
-                    mContainer);
+            float targetDepth = taskView instanceof DesktopTaskView ? 0
+                    : mContainer.getBackgroundAppState().getDepth(mContainer);
             anim.play(ObjectAnimator.ofFloat(depthController.stateDepth, MULTI_PROPERTY_VALUE,
                     targetDepth));
         }

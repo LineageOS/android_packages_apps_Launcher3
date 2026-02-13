@@ -17,8 +17,8 @@
 package com.android.launcher3.dagger
 
 import com.android.launcher3.ConstantItem
-import com.android.launcher3.LifecycleTracker
 import com.android.launcher3.LauncherModel
+import com.android.launcher3.LifecycleTracker
 import com.android.launcher3.ModelReloader
 import com.android.launcher3.graphics.ThemeManager.Companion.ICON_FACTORY_DAGGER_KEY
 import com.android.launcher3.graphics.theme.IconThemeFactory
@@ -60,7 +60,7 @@ abstract class LauncherModelModule {
         @Provides
         @JvmStatic
         fun provideModelReloader(model: LauncherModel): ModelReloader {
-            return ModelReloader { model.reloadIfActive() }
+            return ModelReloader { model.reloadIfActive("ModelReloader") }
         }
     }
 }

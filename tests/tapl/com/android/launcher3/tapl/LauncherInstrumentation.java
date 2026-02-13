@@ -30,6 +30,7 @@ import static android.view.MotionEvent.AXIS_GESTURE_SWIPE_FINGER_COUNT;
 import static android.view.RoundedCorner.POSITION_BOTTOM_LEFT;
 import static android.view.Surface.ROTATION_90;
 
+import static com.android.launcher3.Flags.enableTaskbarUiThread;
 import static com.android.launcher3.tapl.Folder.FOLDER_CONTENT_RES_ID;
 import static com.android.launcher3.tapl.TestHelpers.getOverviewPackageName;
 import static com.android.launcher3.testing.shared.TestProtocol.NORMAL_STATE_ORDINAL;
@@ -1448,8 +1449,8 @@ public final class LauncherInstrumentation {
                 swipeUpToCloseFloatingView();
 
                 if (hasLauncherObject(WORKSPACE_RES_ID)
-                        && !(isRecentsWindowEnabled()
-                        && hasSystemLauncherObject(OVERVIEW_RES_ID))) {
+                        && !(isRecentsWindowEnabled() && hasSystemLauncherObject(OVERVIEW_RES_ID))
+                        && !enableTaskbarUiThread()) {
                     // The workspace is visible on the accessibility hierarchy under the recents
                     // window
                     log(action = "already at home");

@@ -25,14 +25,14 @@ import android.view.ViewRootImpl;
 
 import androidx.annotation.NonNull;
 
-import com.android.quickstep.RemoteAnimationTargets.ReleaseCheck;
+import com.android.quickstep.SurfaceReleaseCheck;
 
 /**
  * Helper class to apply surface transactions in sync with RenderThread similar to
  *   android.view.SyncRtSurfaceTransactionApplier
  * with some Launcher specific utility methods
  */
-public class SurfaceTransactionApplier extends ReleaseCheck {
+public class SurfaceTransactionApplier extends SurfaceReleaseCheck {
 
     private static final int MSG_UPDATE_SEQUENCE_NUMBER = 0;
 

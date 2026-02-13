@@ -574,6 +574,16 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                 .log(LauncherEvent.LAUNCHER_ITEM_DRAG_STARTED);
     }
 
+    @Override
+    public void onDragEnterWindow(DropTarget.DragObject dragObject, DragOptions options) {
+        // No-op
+    }
+
+    @Override
+    public void onDragExitWindow(DropTarget.DragObject dragObject, DragOptions options) {
+        // No-op
+    }
+
     private boolean isTwoPanelEnabled() {
         return !FOLDABLE_SINGLE_PAGE.get() && mLauncher.mDeviceProfile.getDeviceProperties().isTwoPanels();
     }

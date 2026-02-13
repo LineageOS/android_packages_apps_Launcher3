@@ -148,7 +148,6 @@ class FolderIconLoadTest {
 
         TestUtil.runOnExecutorSync(Executors.MODEL_EXECUTOR) { app.iconCache.clearMemoryCache() }
         // Reload again with correct icon state
-        app.model.forceReload()
         app.model.loadModelSync()
         val collections =
             context.bgDataModel.itemsIdMap

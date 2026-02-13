@@ -65,7 +65,11 @@ public abstract class BaseWindowInterface extends
 
     @Nullable
     public DepthController<RecentsState, RecentsWindowManager> getDepthController() {
-        return null;
+        RecentsWindowManager recentsWindowManager = getCreatedContainer();
+        if (recentsWindowManager == null) {
+            return null;
+        }
+        return recentsWindowManager.getDepthController();
     }
 
     public final boolean isResumed() {

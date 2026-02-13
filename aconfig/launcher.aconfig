@@ -75,13 +75,6 @@ flag {
 }
 
 flag {
-    name: "enable_tablet_two_pane_picker_v2"
-    namespace: "launcher"
-    description: "Enables full width two pane widget picker for tablets in landscape and portrait"
-    bug: "315055849"
-}
-
-flag {
     name: "enable_two_pane_launcher_settings"
     namespace: "launcher"
     description: "Enables two panel settings when on large enough displays"
@@ -242,13 +235,6 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Enables tracking state manager logs in ProtoLog"
     bug: "292269949"
-}
-
-flag {
-    name: "enable_tiered_widgets_by_default_in_picker"
-    namespace: "launcher"
-    description: "Shows filtered set of widgets by default and an option to show all widgets in the widget picker"
-    bug: "356127021"
 }
 
 flag {
@@ -707,6 +693,16 @@ flag {
   namespace: "launcher"
   description: "Disables the full workspace blur and zoom effects behind surfaces like the \"All apps\" panel or the widget picker"
   bug: "455987559"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "enable_drag_enter_exit_support"
+  namespace: "launcher"
+  description: "Enables support for drag enter/exit."
+  bug: "456191832"
   metadata {
     purpose: PURPOSE_BUGFIX
   }
