@@ -51,6 +51,7 @@ import com.android.launcher3.Workspace;
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider;
 import com.android.launcher3.homescreenfiles.HomeScreenFilesUpdate;
 import com.android.launcher3.logging.StatsLogManager.EventEnum;
+import com.android.launcher3.model.data.WorkspaceItemCoordinates;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.popup.ArrowPopup;
 import com.android.launcher3.shortcuts.DeepShortcutView;
@@ -278,7 +279,8 @@ public class OptionsPopupView<T extends Context & ActivityContext> extends Arrow
         HomeScreenFilesProvider.INSTANCE.get(launcher)
                 .createNewFolder(
                         HomeScreenFilesUpdate.Extras.builder()
-                            .findSpaceStartingFromScreenId(currentScreenId)
+                            .findSpaceStartingFrom(new WorkspaceItemCoordinates(
+                                    currentScreenId, /* cellX= */ 0, /* cellY= */ 0))
                             .build())
                 .whenComplete((result, throwable) -> {
                     if (throwable != null || !result) {
