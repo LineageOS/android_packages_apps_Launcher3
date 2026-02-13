@@ -697,3 +697,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "enable_drag_enter_exit_support"
+  namespace: "launcher"
+  description: "Enables support for drag enter/exit."
+  bug: "456191832"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

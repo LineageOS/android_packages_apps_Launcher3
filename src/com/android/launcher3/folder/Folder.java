@@ -466,6 +466,16 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
     }
 
     @Override
+    public void onDragEnterWindow(DropTarget.DragObject dragObject, DragOptions options) {
+        // No-op
+    }
+
+    @Override
+    public void onDragExitWindow(DropTarget.DragObject dragObject, DragOptions options) {
+        // No-op
+    }
+
+    @Override
     public void onDragEnd() {
         if (mIsExternalDrag && mIsDragInProgress) {
             completeDragExit();

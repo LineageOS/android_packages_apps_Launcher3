@@ -475,10 +475,24 @@ public class SecondaryDisplayLauncher extends BaseActivity
     }
 
     @Override
-    public void onDragStart(DropTarget.DragObject dragObject, DragOptions options) { }
+    public void onDragStart(DropTarget.DragObject dragObject, DragOptions options) {
+        // No-op
+    }
 
     @Override
-    public void onDragEnd() { }
+    public void onDragEnterWindow(DropTarget.DragObject dragObject, DragOptions options) {
+        // No-op
+    }
+
+    @Override
+    public void onDragExitWindow(DropTarget.DragObject dragObject, DragOptions options) {
+        // No-op
+    }
+
+    @Override
+    public void onDragEnd() {
+        // No-op
+    }
 
     @Override
     protected void onActivityFlagsChanged(int changeBits) {
