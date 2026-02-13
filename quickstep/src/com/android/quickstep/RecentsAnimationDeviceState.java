@@ -177,7 +177,7 @@ public class RecentsAnimationDeviceState implements ExclusionListener {
 
         // Register for display changes changes
         ListenableDiffAwareRef<LauncherDisplayInfo, Integer> listenable =
-                mDisplayController.getListenable();
+                mDisplayController.getListenable(mDisplayId);
         if (listenable != null) {
             lifeCycle.addCloseable(
                     listenable.forEachChange(MAIN_EXECUTOR, this::onDisplayInfoChanged));
