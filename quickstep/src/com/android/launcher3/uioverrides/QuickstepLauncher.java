@@ -235,7 +235,8 @@ import com.android.systemui.unfold.dagger.UnfoldMain;
 import com.android.systemui.unfold.progress.RemoteUnfoldTransitionReceiver;
 import com.android.systemui.unfold.updates.RotationChangeProvider;
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
-import com.android.wm.shell.shared.bubbles.BubbleFlagHelper;
+import com.android.wm.shell.shared.bubbles.BubbleFeatureConfig;
+import com.android.wm.shell.shared.bubbles.BubbleFeatureConfigImpl;
 import com.android.wm.shell.shared.bubbles.logging.EntryPoint;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.shared.desktopmode.DesktopState;
@@ -302,6 +303,8 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     private final OverviewChangeListener mOverviewChangeListener = this::onOverviewTargetChanged;
 
     private RecentsComponent mRecentsComponent;
+
+    private BubbleFeatureConfig mBubbleFeatureConfig = new BubbleFeatureConfigImpl(asContext());
 
     private void setupBlurState() {
         ListenableRef<Boolean> blurState = WindowBlurState.getInstance(this);
@@ -547,7 +550,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         if (Flags.enablePrivateSpace()) {
             shortcuts.add(UNINSTALL_APP);
         }
-        if (BubbleFlagHelper.enableCreateAnyBubble()) {
+        if (mBubbleFeatureConfig.areAppBubblesSupported()) {
             shortcuts.add(BUBBLE_SHORTCUT);
         }
         if (android.security.Flags.appLockApis() && Flags.enableAppLockShortcut()) {
