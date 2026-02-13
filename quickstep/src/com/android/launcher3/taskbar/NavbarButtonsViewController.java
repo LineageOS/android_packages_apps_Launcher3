@@ -303,6 +303,14 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
     }
 
     /**
+     * Called after assistant long press enabled state changes. We assume that this new value is
+     * in {@link TaskbarSharedState#assistantLongPressEnabled} before calling this method.
+     */
+    public void onLongPressHomeEnabledChanged() {
+        applyState();
+    }
+
+    /**
      * Initializes the controller
      */
     public void init(TaskbarControllers controllers) {
@@ -633,12 +641,6 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
             updateButtonLayoutSpacing();
         }
 
-        if (mRecentsButton != null) {
-            boolean screenPinned = (sysUiStateFlags & SYSUI_STATE_SCREEN_PINNING) != 0;
-            // Recents button is only long clickable to exit screen pinning.
-            mRecentsButton.setLongClickable(screenPinned);
-        }
-
         if (mNavButtonContainer.getChildCount() > 0) {
             for (int i = 0; i < mNavButtonContainer.getChildCount(); i++) {
                 mNavButtonContainer.getChildAt(i).setEnabled(!splitAnimationRunning);
@@ -858,6 +860,20 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
         int count = mPropertyHolders.size();
         for (int i = 0; i < count; i++) {
             mPropertyHolders.get(i).setState(mState, mContext.isGestureNav());
+        }
+
+        boolean isScreenPinningActive = (mState & FLAG_SCREEN_PINNING_ACTIVE) != 0;
+        if (mHomeButton != null) {
+            boolean isHomeLongClickable = (mControllers.getSharedState() == null
+                    || mControllers.getSharedState().assistantLongPressEnabled)
+                    && !isScreenPinningActive;
+            mHomeButton.setLongClickable(isHomeLongClickable);
+        }
+        if (mBackButton != null) {
+            mBackButton.setLongClickable(isScreenPinningActive);
+        }
+        if (mRecentsButton != null) {
+            mRecentsButton.setLongClickable(isScreenPinningActive);
         }
     }
 

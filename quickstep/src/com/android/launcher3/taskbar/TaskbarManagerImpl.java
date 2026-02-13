@@ -883,8 +883,13 @@ public class TaskbarManagerImpl {
     }
 
     public void onLongPressHomeEnabled(boolean assistantLongPressEnabled) {
-        mResources.forEach(res ->
-                res.getSharedState().assistantLongPressEnabled = assistantLongPressEnabled);
+        mResources.forEach(res -> {
+            res.getSharedState().assistantLongPressEnabled = assistantLongPressEnabled;
+            TaskbarActivityContext taskbar = res.getTaskbar();
+            if (taskbar != null) {
+                taskbar.onLongPressHomeEnabledChanged();
+            }
+        });
     }
 
     /**

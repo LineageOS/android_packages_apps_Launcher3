@@ -1381,6 +1381,13 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                 darkIntensity);
     }
 
+    /**
+     * Called when assistant long press enabled state changes.
+     */
+    public void onLongPressHomeEnabledChanged() {
+        mControllers.navbarButtonsViewController.onLongPressHomeEnabledChanged();
+    }
+
     public void onNavigationBarLumaSamplingEnabled(int displayId, boolean enable) {
         mControllers.stashedHandleViewController.onNavigationBarLumaSamplingEnabled(displayId,
                 enable);
